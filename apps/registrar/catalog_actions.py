@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
@@ -136,8 +137,10 @@ def _save_program(request, organization):
         instance.save()
     except IntegrityError:
         return _error(pgettext(_CTX, "Bu kodla ixtisas artıq mövcuddur."), code="duplicate", field="official_code")
-    except Exception as exc:  # noqa: BLE001 — ValidationError mesajı istifadəçiyə qaytarılır
-        return _error(str(exc), code="validation")
+    except ValidationError as exc:
+        # CodeQL py/stack-trace-exposure: geniş `Exception`+`str(exc)` deyil — yalnız
+        # model doğrulamasının ÖZ mesajları (`.messages`) müştəriyə qaytarılır.
+        return _error(" ".join(str(item) for item in exc.messages), code="validation")
 
     log_action(
         action=AuditAction.CREATE if is_create else AuditAction.UPDATE,

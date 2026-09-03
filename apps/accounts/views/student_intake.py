@@ -189,10 +189,11 @@ def student_admission_create_group(request):
             "group_name_taken": pgettext(_CTX, "Bu adla qrup artıq var."),
             "specialty_outside_tenant": pgettext(_CTX, "İxtisas tapılmadı."),
         }
-        code = str(exc)
-        return JsonResponse(
-            {"ok": False, "error": code, "field": "name", "message": messages.get(code, code)}, status=400
-        )
+        # CodeQL py/stack-trace-exposure: istisna mətni müştəriyə OLDUĞU KİMİ
+        # qaytarılmır — yalnız bilinən kod siyahısından keçir, qalanı generik.
+        code = str(exc) if str(exc) in messages else "invalid"
+        message = messages.get(code) or pgettext(_CTX, "Qrup yaradıla bilmədi.")
+        return JsonResponse({"ok": False, "error": code, "field": "name", "message": message}, status=400)
 
     log_action(
         AuditAction.CREATE,
