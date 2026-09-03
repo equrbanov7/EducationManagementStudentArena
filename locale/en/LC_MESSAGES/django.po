@@ -59414,3 +59414,919 @@ msgstr "Student"
 msgctxt "roles.org_display_name"
 msgid "Üzv"
 msgstr "Member"
+
+msgctxt "ui.status"
+msgid "Naməlum"
+msgstr "Unknown"
+
+msgctxt "ui.status"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "ui.status"
+msgid "Təsdiq gözləyir"
+msgstr "Awaiting approval"
+
+msgctxt "ui.status"
+msgid "Təsdiqlənib"
+msgstr "Approved"
+
+msgctxt "ui.status"
+msgid "Düzəliş gözləyir"
+msgstr "Awaiting revision"
+
+msgctxt "ui.status"
+msgid "Rədd edilib"
+msgstr "Rejected"
+
+msgctxt "ui.status"
+msgid "Kilidlənib"
+msgstr "Locked"
+
+msgctxt "ui.status"
+msgid "Düzəliş tələb olunur"
+msgstr "Revision required"
+
+msgctxt "ui.status"
+msgid "Təqdim edilib"
+msgstr "Submitted"
+
+msgctxt "ui.status"
+msgid "Baxışdadır"
+msgstr "Under review"
+
+msgctxt "ui.status"
+msgid "Arxivlənib"
+msgstr "Archived"
+
+msgctxt "ui.status"
+msgid "Kafedra qeydlərini nəzərə alıb yenidən göndər"
+msgstr "Address the department’s notes and resubmit"
+
+msgctxt "ui.status"
+msgid "Rədd səbəbini oxuyub yeni versiya yarat"
+msgstr "Read the rejection reason and create a new version"
+
+msgctxt "ui.status"
+msgid "Qaralamanı tamamlayıb təsdiqə göndər"
+msgstr "Finish the draft and send it for approval"
+
+msgctxt "ui.status"
+msgid "Kafedra müdirinin baxışı gözlənilir"
+msgstr "Awaiting the department head’s review"
+
+msgctxt "ui.status"
+msgid "Baxış nəticəsi gözlənilir"
+msgstr "Awaiting the review outcome"
+
+msgctxt "ui.status"
+msgid "Əməl tələb olunmur — versiya kilidlidir"
+msgstr "No action required — the version is locked"
+
+msgctxt "ui.status"
+msgid "Arxiv qeydi — yalnız baxış"
+msgstr "Archive record — view only"
+
+msgctxt "ui.status"
+msgid "Göndərilib"
+msgstr "Sent"
+
+msgctxt "ui.status"
+msgid "Qaytarılıb"
+msgstr "Returned"
+
+msgctxt "ui.status"
+msgid "Gözləyir"
+msgstr "Pending"
+
+msgctxt "ui.status"
+msgid "Baxılıb"
+msgstr "Reviewed"
+
+msgctxt "ui.status"
+msgid "İradlı"
+msgstr "With remarks"
+
+msgctxt "ui.status"
+msgid "Normadan az (< 90%)"
+msgstr "Below norm (< 90%)"
+
+msgctxt "ui.status"
+msgid "Normada (90–105%)"
+msgstr "Within norm (90–105%)"
+
+msgctxt "ui.status"
+msgid "Norma üstü (105–125%)"
+msgstr "Above norm (105–125%)"
+
+msgctxt "ui.status"
+msgid "Kritik yüklü (> 125%)"
+msgstr "Critically loaded (> 125%)"
+
+msgctxt "ui.status"
+msgid "normadan az"
+msgstr "below norm"
+
+msgctxt "ui.status"
+msgid "normada"
+msgstr "within norm"
+
+msgctxt "ui.status"
+msgid "normadan artıq"
+msgstr "above norm"
+
+msgctxt "ui.status"
+msgid "boş tutum"
+msgstr "spare capacity"
+
+msgctxt "ui.status"
+msgid "yüklü"
+msgstr "loaded"
+
+msgctxt "ui.status"
+msgid "risk"
+msgstr "at risk"
+
+msgctxt "ui.status"
+msgid "Saat sayı düz deyil"
+msgstr "The hour count is wrong"
+
+msgctxt "ui.status"
+msgid "Qrup/tələbə sayı səhvdir"
+msgstr "The group/student count is wrong"
+
+msgctxt "ui.status"
+msgid "Fənn ixtisasım deyil"
+msgstr "The course is outside my specialisation"
+
+msgctxt "ui.status"
+msgid "Norma həddindən artıqdır"
+msgstr "The norm is exceeded"
+
+msgctxt "ui.status"
+msgid "Kafedra baxışı"
+msgstr "Department review"
+
+msgctxt "ui.status"
+msgid "Fakültə şurası"
+msgstr "Faculty council"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi"
+msgstr "Teaching office"
+
+msgctxt "ui.status"
+msgid "Müəllim gözləyir"
+msgstr "Awaiting a teacher"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olunub"
+msgstr "Teacher assigned"
+
+msgctxt "ui.status"
+msgid "Jurnalı açılıb"
+msgstr "Journal opened"
+
+msgctxt "ui.status"
+msgid "Plandan açılış yaradıldı"
+msgstr "Offerings created from the plan"
+
+msgctxt "ui.status"
+msgid "Kafedraya göndərildi"
+msgstr "Sent to the department"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olundu"
+msgstr "Teachers assigned"
+
+msgctxt "ui.status"
+msgid "Jurnal açıldı"
+msgstr "Journal opened"
+
+msgctxt "ui.status"
+msgid "Semestr kilidləndi"
+msgstr "Semester locked"
+
+msgctxt "ui.status"
+msgid "Uyğundur"
+msgstr "Valid"
+
+msgctxt "ui.status"
+msgid "FİN təkrarlanır — eyni şəxs iki sətirdə"
+msgstr "Duplicate personal ID — the same person appears twice"
+
+msgctxt "ui.status"
+msgid "İxtisas kodu universitetdə tapılmadı"
+msgstr "The programme code was not found at the university"
+
+msgctxt "ui.status"
+msgid "Attestatın surəti yüklənməyib"
+msgstr "The certificate copy has not been uploaded"
+
+msgctxt "ui.status"
+msgid "ATİS siyahısı yükləndi"
+msgstr "Admission list uploaded"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi yoxladı"
+msgstr "The teaching office checked it"
+
+msgctxt "ui.status"
+msgid "Fakültələrə paylandı"
+msgstr "Distributed to the faculties"
+
+msgctxt "ui.status"
+msgid "Qruplara təyin edildi"
+msgstr "Assigned to groups"
+
+msgctxt "ui.status"
+msgid "Qrupdan qrupa köçürmə"
+msgstr "Transfer between groups"
+
+msgctxt "ui.status"
+msgid "İxtisasdan ixtisasa köçürmə"
+msgstr "Transfer between programmes"
+
+msgctxt "ui.status"
+msgid "Əyanidən qiyabiyə (və ya tərsi)"
+msgstr "Full-time ↔ part-time change"
+
+msgctxt "ui.status"
+msgid "Akademik məzuniyyət"
+msgstr "Academic leave"
+
+msgctxt "ui.status"
+msgid "Bərpa"
+msgstr "Reinstatement"
+
+msgctxt "ui.status"
+msgid "Xaric etmə"
+msgstr "Expulsion"
+
+msgctxt "ui.status"
+msgid "Vaxtında yazılıb"
+msgstr "Recorded on time"
+
+msgctxt "ui.status"
+msgid "Gec yazılıb"
+msgstr "Recorded late"
+
+msgctxt "ui.status"
+msgid "Jurnal boşdur"
+msgstr "The journal is empty"
+
+msgctxt "ui.status"
+msgid "Saxlanıldı"
+msgstr "Saved"
+
+msgctxt "ui.status"
+msgid "Saxlanılır…"
+msgstr "Saving…"
+
+msgctxt "ui.status"
+msgid "Son dəyişiklik saxlanılmadı"
+msgstr "The last change was not saved"
+
+msgctxt "ui.status"
+msgid "İnternet bağlantısı yoxdur"
+msgstr "No internet connection"
+
+msgctxt "ui.status"
+msgid "Başqa versiya ilə konflikt yarandı"
+msgstr "A conflict with another version occurred"
+
+msgctxt "ui.status"
+msgid "Səhifədəki məlumat köhnəlmişdir"
+msgstr "The data on this page is out of date"
+
+msgctxt "ui.status"
+msgid "mərhələ açıqdır"
+msgstr "the stage is open"
+
+msgctxt "ui.status"
+msgid "arxiv — yalnız oxunuş"
+msgstr "archive — read only"
+
+msgctxt "ui.filters"
+msgid "Tətbiq et"
+msgstr "Apply"
+
+msgctxt "ui.filters"
+msgid "Sıfırla"
+msgstr "Reset"
+
+msgctxt "ui.filters"
+msgid "Tətbiq olunmuş filtrlər"
+msgstr "Applied filters"
+
+msgctxt "ui.filters"
+msgid "%(name)s filtrini götür"
+msgstr "Remove the %(name)s filter"
+
+msgctxt "ui.filters"
+msgid "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın."
+msgstr "The change has not been applied — press “Apply”."
+
+msgctxt "ui.dialog"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "ui.dialog"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "ui.dialog"
+msgid "Göndər"
+msgstr "Send"
+
+msgctxt "ui.dialog"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "ui.dialog"
+msgid "Səbəb audit jurnalına yazılır və qərar zəncirində görünür."
+msgstr "The reason is written to the audit log and shown in the decision chain."
+
+msgctxt "ui.dialog"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "The reason must be at least 20 characters — a short note is not enough for the audit."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bax və qərar ver"
+msgstr "View and decide"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Search by title, subject, group, or teacher…"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bu şərtlərə uyğun sual dəsti tapılmadı."
+msgstr "No question set matches these filters."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün imtahan növləri"
+msgstr "All exam types"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün müəllimlər"
+msgstr "All teachers"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilib"
+msgstr "Revision requested"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtri təmizlə"
+msgstr "Clear filters"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtrlə"
+msgstr "Filter"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib"
+msgstr "No chair head is assigned — routed to the dean's office"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimdə"
+msgstr "With the teacher"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimlərinizin imtahan sual dəstlərini təsdiqləyin — yalnız təsdiqdən sonra İmtahan Mərkəzinə gedir."
+msgstr "Approve your teachers' exam question sets — they reach the Exam Centre only after approval."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz baxır"
+msgstr "Centre is reviewing"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz qəbul etdi"
+msgstr "Centre accepted"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Rədd edilib"
+msgstr "Rejected"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Status filtri"
+msgstr "Status filter"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Sual dəstlərində axtar"
+msgstr "Search question sets"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təmizlə"
+msgstr "Clear"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyir"
+msgstr "Awaiting approval"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyən sual dəsti yoxdur."
+msgstr "There are no question sets awaiting approval."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlənib — mərkəzdə"
+msgstr "Approved — at the centre"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "«%(title)s» dəstinə bax"
+msgstr "View the “%(title)s” set"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "İmtahan növü"
+msgstr "Exam type"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlədiyim"
+msgstr "Approved by me"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilən"
+msgstr "Awaiting revision"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Ümumi"
+msgstr "Total"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra düzəliş istəyib"
+msgstr "Chair head requested revision"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra müdirinə göndərilib"
+msgstr "Sent to the chair head"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra qeydi"
+msgstr "Chair note"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra təsdiqləyib — İmtahan Mərkəzində"
+msgstr "Approved by the chair head — at the Exam Centre"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilib — düzəldib yenidən göndərə bilərsiniz"
+msgstr "Rejected — you may revise and resubmit"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yolu izlə"
+msgstr "Track the path"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi baxır"
+msgstr "Exam Centre is reviewing"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi düzəliş istəyib"
+msgstr "Exam Centre requested revision"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi: {reason}"
+msgstr "Your question submission \"{title}\" was rejected: {reason}"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz İmtahan Mərkəzi tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "Your question submission \"{title}\" was returned by the Exam Centre for revision: {reason}"
+
+msgctxt "exams.service.question_submission.error"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "The reason must be at least {count} characters — the teacher needs to know what to fix."
+
+msgctxt "exams.template.question_chain"
+msgid "Dekanlıq təsdiqi"
+msgstr "Dean's office approval"
+
+msgctxt "exams.template.question_chain"
+msgid "Düzəldilib kafedraya yenidən göndərildi"
+msgstr "Revised and resubmitted to the chair head"
+
+msgctxt "exams.template.question_chain"
+msgid "Göndərişin yolu"
+msgstr "Submission path"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra düzəliş istədi"
+msgstr "Chair head requested revision"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra müdirinə göndərildi"
+msgstr "Sent to the chair head"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra rədd etdi"
+msgstr "Chair head rejected"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra tarixçəsi"
+msgstr "Chair history"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqi"
+msgstr "Chair approval"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqlədi — İmtahan Mərkəzinə göndərildi"
+msgstr "Chair head approved — sent to the Exam Centre"
+
+msgctxt "exams.template.question_chain"
+msgid "Müəllim göndərdi"
+msgstr "Teacher submitted"
+
+msgctxt "exams.template.question_chain"
+msgid "Qəbul edildi"
+msgstr "Accepted"
+
+msgctxt "exams.template.question_chain"
+msgid "Rədd edildi"
+msgstr "Rejected"
+
+msgctxt "exams.template.question_chain"
+msgid "Yekun qərar"
+msgstr "Final decision"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi"
+msgstr "Exam Centre"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi baxışa götürdü"
+msgstr "Exam Centre took it under review"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi düzəliş istədi"
+msgstr "Exam Centre requested revision"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi qəbul etdi"
+msgstr "Exam Centre accepted"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi rədd etdi"
+msgstr "Exam Centre rejected"
+
+msgctxt "exams.template.question_chair"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar dəyişdirilə bilməz."
+msgstr "This submission is no longer at the chair stage — the decision cannot be changed."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu kafedraya müdir təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirilib."
+msgstr "No head is assigned to this chair, so approval has been routed to the DEAN'S OFFICE."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu şərtlərə uyğun sual tapılmadı."
+msgstr "No question matches these filters."
+
+msgctxt "exams.template.question_chair"
+msgid "Daha çox yüklənir…"
+msgstr "Loading more…"
+
+msgctxt "exams.template.question_chair"
+msgid "Düzəliş istə"
+msgstr "Request revision"
+
+msgctxt "exams.template.question_chair"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra qərarı"
+msgstr "Chair decision"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra təsdiqi"
+msgstr "Chair approval"
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllim nəyi düzəltməlidir? Səbəb ona bildiriş kimi gedəcək."
+msgstr "What should the teacher fix? The reason will be sent to them as a notification."
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllimin qeydi"
+msgstr "Teacher's note"
+
+msgctxt "exams.template.question_chair"
+msgid "Növbəyə qayıt"
+msgstr "Back to the queue"
+
+msgctxt "exams.template.question_chair"
+msgid "Rədd et"
+msgstr "Reject"
+
+msgctxt "exams.template.question_chair"
+msgid "Rəddin səbəbini yazın — göndəriş İmtahan Mərkəzinə çatmayacaq."
+msgstr "Write the reason for rejection — the submission will not reach the Exam Centre."
+
+msgctxt "exams.template.question_chair"
+msgid "Sual filtri"
+msgstr "Question filter"
+
+msgctxt "exams.template.question_chair"
+msgid "Sual və ya variant mətnində axtar…"
+msgstr "Search question or option text…"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Questions and warnings"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallarda axtar"
+msgstr "Search questions"
+
+msgctxt "exams.template.question_chair"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "exams.template.question_chair"
+msgid "Təmiz"
+msgstr "Clean"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiq et"
+msgstr "Approve"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqdən sonra dəst İmtahan Mərkəzinə göndəriləcək. Düzəliş və rədd üçün səbəb məcburidir."
+msgstr "After approval the set will be sent to the Exam Centre. A reason is required for revision or rejection."
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqlə"
+msgstr "Approve"
+
+msgctxt "exams.template.question_chair"
+msgid "Xəbərdarlıq"
+msgstr "Warning"
+
+msgctxt "exams.template.question_chair"
+msgid "Xətalı"
+msgstr "With errors"
+
+msgctxt "exams.template.question_chair"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib, 7-ci sual mövzudan kənardır…"
+msgstr "e.g. the correct answer is not marked in question 3, question 7 is off-topic…"
+
+msgctxt "exams.template.question_chair"
+msgid "Ümumi sual sayı"
+msgstr "Total number of questions"
+
+msgctxt "exams.template.question_chair"
+msgid "İmtina"
+msgstr "Cancel"
+
+msgctxt "exams.template.question_chair"
+msgid "Ən azı {min} simvol — hazırda {n}."
+msgstr "At least {min} characters — currently {n}."
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş istə"
+msgstr "Request revision"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş üçün geri qaytar"
+msgstr "Return for revision"
+
+msgctxt "exams.template.question_submission"
+msgid "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər."
+msgstr "The set will be rejected — the teacher may revise and resubmit it for chair approval if they wish."
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra müdirinə göndər"
+msgstr "Send to the chair head"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra qeydi"
+msgstr "Chair note"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra təsdiqinə sual göndər"
+msgstr "Send questions for chair approval"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir."
+msgstr "The teacher will revise and resubmit — after the fix the set goes through chair approval AGAIN."
+
+msgctxt "exams.template.question_submission"
+msgid "Rədd et"
+msgstr "Reject"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra kafedra müdirinə göndərin; təsdiqdən sonra İmtahan Mərkəzinə çatacaq."
+msgstr "Write the questions or upload a file, preview them — check the warnings, then send them to the chair head; after approval they will reach the Exam Centre."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Düzəliş tələbi müəllimə göndərildi — düzəlişdən sonra yenidən kafedradan keçəcək."
+msgstr "The revision request was sent to the teacher — after the fix it will go through the chair again."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş kafedra müdirinin təsdiqinə göndərildi ({count} sual, {groups} qrup)."
+msgstr "The submission was sent for the chair head's approval ({count} questions, {groups} groups)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və kafedra müdirinin təsdiqinə təkrar göndərildi."
+msgstr "The submission was updated and resent for the chair head's approval."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd/düzəliş üçün müəllimə ən azı {count} simvolluq qeyd yazın — nəyi düzəltməlidir."
+msgstr "For a rejection or revision, write the teacher a note of at least {count} characters — what needs to be fixed."
+
+msgctxt "profile.sidebar"
+msgid "Sual təsdiqi"
+msgstr "Question approval"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "The reason must be at least {count} characters — the teacher needs to know what to fix."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra təsdiqli sual göndərişi"
+msgstr "Chair-approved question submission"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} — \"{title}\" ({subject} · {group}, {count} sual) kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "{teacher} — \"{title}\" ({subject} · {group}, {count} questions) was approved by the chair and sent to the Exam Centre."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Sual dəsti kafedra təsdiqini gözləyir"
+msgstr "Question set awaiting chair approval"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini təsdiqə göndərdi. Kafedra müdiri təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirildi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} sent the question set \"{title}\" for approval. Since no chair head is assigned, approval was routed to the DEAN'S OFFICE ({subject} · {group}, {count} questions)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini kafedra təsdiqinə göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} sent the question set \"{title}\" for chair approval ({subject} · {group}, {count} questions)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar verilə bilməz."
+msgstr "This submission is no longer at the chair stage — a decision cannot be made."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstinizi təsdiqlədi"
+msgstr "The chair approved your question set"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "Your question set \"{title}\" was approved by the chair and sent to the Exam Centre."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra düzəliş istədi"
+msgstr "The chair requested revision"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "Your question set \"{title}\" was returned by the chair for revision: {reason}"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstini rədd etdi"
+msgstr "The chair rejected the question set"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən rədd edildi: {reason}"
+msgstr "Your question set \"{title}\" was rejected by the chair: {reason}"
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "The question set was approved and sent to the Exam Centre."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Düzəliş tələbi müəllimə göndərildi."
+msgstr "The revision request was sent to the teacher."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti rədd edildi və müəllimə bildirildi."
+msgstr "The question set was rejected and the teacher was notified."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Yanlış əməliyyat."
+msgstr "Invalid action."
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_unit"
+msgstr "Chair unit"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_reviewer"
+msgstr "Chair reviewer"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_decision"
+msgstr "Chair decision"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_note"
+msgstr "Chair note"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "draft"
+msgstr "Draft"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "submitted_to_chair"
+msgstr "Submitted to the chair head"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_revision"
+msgstr "Chair head requested revision"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_approved"
+msgstr "Approved by the chair head"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_review"
+msgstr "Under Exam Centre review"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_revision"
+msgstr "Exam Centre requested revision"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "approved"
+msgstr "Approved"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "rejected"
+msgstr "Rejected"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "revision"
+msgstr "Revision requested"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "submitted"
+msgstr "Submitted"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "resubmitted"
+msgstr "Resubmitted"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_approved"
+msgstr "Chair approved"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_revision"
+msgstr "Chair requested revision"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_rejected"
+msgstr "Chair rejected"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_opened"
+msgstr "Centre opened for review"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_accepted"
+msgstr "Centre accepted"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_revision"
+msgstr "Centre requested revision"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_rejected"
+msgstr "Centre rejected"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "submission"
+msgstr "Submission"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "organization"
+msgstr "Organization"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "actor"
+msgstr "Actor"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "singular"
+msgstr "Question submission event"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "plural"
+msgstr "Question submission events"
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_chair_review_denied"
+msgstr "You do not have permission to review this question submission as the chair head."
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_requires_chair_approval"
+msgstr "This question submission must be approved by the chair head before it can reach the Exam Centre."

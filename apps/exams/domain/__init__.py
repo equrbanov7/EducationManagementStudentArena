@@ -20,6 +20,7 @@ from .question_bank import (
     validate_video_size,
 )
 from .student_access import ExamStudentPin, StudentExamAttemptGrant
+from .submission_events import QuestionSubmissionEvent
 from .submission_inbox import QuestionSubmission
 
 __all__ = [
@@ -41,6 +42,7 @@ __all__ = [
     "QuestionBank",
     "QuestionBlock",
     "QuestionSubmission",
+    "QuestionSubmissionEvent",
     "StudentGroup",
     "bank_option_media_path",
     "bank_question_media_path",

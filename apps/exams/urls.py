@@ -200,6 +200,17 @@ urlpatterns = [
         views.question_submission_decide,
         name="question_submission_decide",
     ),
+    # Kafedra müdiri mərhələsi — mərkəzdən ƏVVƏLKİ təsdiq halqası.
+    path(
+        "question-submissions/<int:submission_id>/chair-review/",
+        views.question_submission_chair_review,
+        name="question_submission_chair_review",
+    ),
+    path(
+        "question-submissions/<int:submission_id>/chair-decide/",
+        views.question_submission_chair_decide,
+        name="question_submission_chair_decide",
+    ),
     path("question-bank/", views.question_bank_list, name="question_bank_list"),
     path("question-bank/<int:bank_id>/", views.question_bank_detail, name="question_bank_detail"),
     path("question-bank/<int:bank_id>/update/", views.question_bank_update, name="question_bank_update"),

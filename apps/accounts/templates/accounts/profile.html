@@ -175,7 +175,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -270,6 +270,8 @@
                 {% include "accounts/profile/sections/_syllabus_editor.html" %}
             {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
                 {% include "accounts/profile/sections/_syllabus_review.html" %}
+            {% elif active_section == "question-chair-review" and 'question-chair-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_question_chair_review.html" %}
             {% elif active_section == "workload-distribution" and 'workload-distribution' in allowed_sections %}
                 {% include "accounts/profile/sections/_workload_distribution.html" %}
             {% elif active_section == "my-workload" and 'my-workload' in allowed_sections %}

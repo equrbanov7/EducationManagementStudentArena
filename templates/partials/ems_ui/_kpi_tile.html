@@ -1,0 +1,35 @@
+{% comment %}
+KPI kartı — handoff §4 komponent 1.
+
+KONTEKST MÜQAVİLƏSİ (`tile` obyekti / dict)
+  label     — CAPS etiket (məcburi)
+  value     — böyük rəqəm (məcburi)
+  unit      — opsional vahid («saat», «%»)
+  note      — opsional alt qeyd
+  tone      — opsional: primary|success|warning|danger|dark
+  filter    — opsional: verilibsə kart KLİK EDİLƏ BİLƏN filtr olur
+  pressed   — filtr seçilibmi
+  has_bar   — True olduqda `pct` (0–100) progress zolağı kimi göstərilir
+{% endcomment %}
+{% load ems_ui %}
+{% if tile.filter %}
+    <button type="button"
+            class="ems-kpi{% if tile.tone %} ems-kpi--{{ tile.tone }}{% endif %}"
+            data-ems-kpi-filter="{{ tile.filter }}"
+            aria-pressed="{% if tile.pressed %}true{% else %}false{% endif %}">
+        <span class="ems-kpi__label">{{ tile.label }}</span>
+        <span class="ems-kpi__value">{{ tile.value }}{% if tile.unit %}<span class="ems-kpi__unit">{{ tile.unit }}</span>{% endif %}</span>
+        {% if tile.note %}<span class="ems-kpi__note">{{ tile.note }}</span>{% endif %}
+    </button>
+{% else %}
+    <div class="ems-kpi{% if tile.tone %} ems-kpi--{{ tile.tone }}{% endif %}">
+        <div class="ems-kpi__label">{{ tile.label }}</div>
+        <div class="ems-kpi__value">{{ tile.value }}{% if tile.unit %}<span class="ems-kpi__unit">{{ tile.unit }}</span>{% endif %}</div>
+        {% if tile.has_bar %}
+            <div class="ems-bar ems-kpi__bar">
+                <div class="ems-bar__fill" style="{% ems_pct_style tile.pct %}"></div>
+            </div>
+        {% endif %}
+        {% if tile.note %}<div class="ems-kpi__note">{{ tile.note }}</div>{% endif %}
+    </div>
+{% endif %}

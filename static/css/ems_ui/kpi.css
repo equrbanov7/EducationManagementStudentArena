@@ -1,0 +1,165 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/kpi.css — KPI kartı sırası (handoff §4 komponent 1)
+
+   3 variant: statik · KLİK EDİLƏ BİLƏN FİLTR (`aria-pressed`, seçildə 2px
+   kontur) · rəngli semantik. Grid `repeat(auto-fit, minmax(190px,1fr))` —
+   fixed-width blok yoxdur (handoff §3 «Canvas ölçüləri»).
+
+   MÖVCUD `.syl-kpi*` / `.apx-kpi*` ailələri OLDUĞU KİMİ QALIR; bu, onların
+   birləşdiyi ortaq qatdır — yeni ekranlar bunu işlədir, köhnələr mərhələ-
+   mərhələ köçürülür (bax HANDOFF_FULL_PLAN.md §Mərhələ 0).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: var(--ems-sp-6);
+    margin-bottom: var(--ems-sp-6);
+}
+
+/* Handoff §5-də bəzi ekranlar sərt 4/5 sütun deyir — auto-fit ilə birlikdə. */
+.ems-kpis--4 {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.ems-kpis--5 {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.ems-kpi {
+    display: block;
+    width: 100%;
+    padding: 17px 19px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    text-align: left;
+}
+
+/* Klik edilə bilən variant — düymədir, ona görə fokus/kursor lazımdır. */
+button.ems-kpi {
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+}
+
+/* Seçili filtr: 2px kontur (handoff §4). Rəng tondan gəlir. */
+.ems-kpi[aria-pressed="true"] {
+    border-width: 2px;
+    padding: 16px 18px; /* 2px kontur layout-u sürüşdürməsin */
+}
+
+.ems-kpi__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /* AA düzəlişi: dizayn #94a3b8 deyir (2.56) → neutral-500 (4.76). */
+    color: var(--ems-neutral-500);
+}
+
+.ems-kpi__value {
+    margin-top: 7px;
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+}
+
+.ems-kpi__unit {
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.ems-kpi__note {
+    margin-top: 6px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-kpi__bar {
+    margin-top: 8px;
+}
+
+/* ── Semantik variantlar ────────────────────────────────────────────────── */
+.ems-kpi--primary {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-kpi--primary .ems-kpi__label,
+.ems-kpi--primary .ems-kpi__value {
+    color: var(--ems-primary-800);
+}
+
+.ems-kpi--success {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+}
+
+.ems-kpi--success .ems-kpi__label,
+.ems-kpi--success .ems-kpi__value {
+    color: var(--ems-success-700);
+}
+
+.ems-kpi--warning {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+}
+
+.ems-kpi--warning .ems-kpi__label,
+.ems-kpi--warning .ems-kpi__value {
+    color: var(--ems-warning-800);
+}
+
+.ems-kpi--danger {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger-bd);
+}
+
+.ems-kpi--danger .ems-kpi__label,
+.ems-kpi--danger .ems-kpi__value {
+    color: var(--ems-danger-strong);
+}
+
+/* Tünd «cəm» kartı (ekran 17 — universitet yekunu). */
+.ems-kpi--dark {
+    background: var(--ems-neutral-900);
+    border-color: var(--ems-neutral-900);
+    color: var(--ems-neutral-0);
+}
+
+.ems-kpi--dark .ems-kpi__label {
+    color: var(--ems-neutral-300);
+}
+
+.ems-kpi--dark .ems-kpi__value {
+    color: var(--ems-neutral-0);
+}
+
+.ems-kpi--dark .ems-kpi__note,
+.ems-kpi--dark .ems-kpi__unit {
+    color: var(--ems-neutral-300);
+}
+
+/* ── Skeleton (yüklənmə) ────────────────────────────────────────────────── */
+.ems-kpi--skeleton .ems-kpi__label,
+.ems-kpi--skeleton .ems-kpi__value,
+.ems-kpi--skeleton .ems-kpi__note {
+    color: transparent;
+}
+
+@media (max-width: 768px) {
+    .ems-kpis,
+    .ems-kpis--4,
+    .ems-kpis--5 {
+        grid-template-columns: 1fr;
+        gap: var(--ems-sp-4);
+    }
+}

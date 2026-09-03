@@ -144,6 +144,8 @@ SECTION_PARTIALS: dict[str, str] = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    # «Sual təsdiqi» (kafedra müdiri) — OXU-ONLY növbə; qərar ayrıca səhifədə.
+    "question-chair-review": "accounts/profile/sections/_question_chair_review.html",
     # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
     "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
     "my-workload": "accounts/profile/sections/_my_workload.html",
@@ -209,6 +211,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "syllabus-list",
         "syllabus-editor",
         "syllabus-review",
+        # Kafedra sual təsdiqi növbəsi OXU-ONLY render olunur (qərar ayrıca
+        # səhifədə, POST-la) → AJAX swap təhlükəsizdir.
+        "question-chair-review",
         # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
         # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
         "teaching-handover",
@@ -419,6 +424,10 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     # mutasiyaları keşi `applications.services.notify` içindən invalidasiya edir.
     if "applications" in capabilities.get("allowed_sections", set()):
         payload["applications_pending_count"] = shared_badges.get("applications_pending", 0)
+    # «Sual təsdiqi» — kafedra növbəsi; yazılar keşi servis qatından
+    # (``question_chair_review._invalidate_badges``) invalidasiya edir.
+    if "question-chair-review" in capabilities.get("allowed_sections", set()):
+        payload["question_chair_pending_count"] = shared_badges.get("question_chair_pending", 0)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

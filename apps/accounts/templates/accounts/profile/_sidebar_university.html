@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "teaching-handover" in allowed_sections or "schedule-manage" in allowed_sections or "workload-distribution" in allowed_sections or "my-workload" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "question-chair-review" in allowed_sections or "teaching-handover" in allowed_sections or "schedule-manage" in allowed_sections or "workload-distribution" in allowed_sections or "my-workload" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -170,6 +170,21 @@ müdiri, dekan, RİM. Müəllim bu sətri görmür.{% endcomment %}
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-review' %}active{% endif %}">
         <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Sillabus təsdiqi" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Sual təsdiqi — kafedra müdirinin sual dəsti növbəsi
+(`question.chair_review`). Müəllim və imtahan mərkəzi bu sətri GÖRMÜR.{% endcomment %}
+{% if "question-chair-review" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=question-chair-review"
+       data-section="question-chair-review"
+       data-title="{% trans 'Sual təsdiqi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-chair-review' %}active{% endif %}">
+        <i class="fas fa-file-circle-check sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Sual təsdiqi" context "profile.sidebar" %}</span>
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="question_chair_pending_count">{% if question_chair_pending_count %}{{ question_chair_pending_count }}{% endif %}</span>
     </a>
 </li>
 {% endif %}
