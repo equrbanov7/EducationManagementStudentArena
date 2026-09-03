@@ -1,4 +1,9 @@
 {% load static i18n %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 {% comment %}Elektron jurnal — Addım 1: Qrup seçimi (mockup ilə birə-bir).
 Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏLLİM (öz adı)
 · dərs tipi pilləri (?kind= — cədvəl slotlarından).{% endcomment %}
@@ -6,7 +11,7 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
     <div class="jd2-pagehead">
         <div class="jd2-mark">EU</div>
         <div>
-            <h1 class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</h1>
+            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
             <div class="jd2-pagesub">{% if journal_selected_year or journal_selected_season %}{{ journal_selected_year }}{% if journal_selected_year and journal_selected_season %} — {% endif %}{{ journal_selected_season }}{% else %}{% trans "Bütün semestrlər" context "registrar.journal" %}{% endif %}</div>
         </div>
         {% comment %}Ayrı "Jurnal düzəlişi" səhifəsi ləğv edildi — korrektor (İKT rəhbəri/admin)

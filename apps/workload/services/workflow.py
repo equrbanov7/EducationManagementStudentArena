@@ -193,6 +193,25 @@ def submit_task(*, task: TeachingTask, actor, request=None) -> dict:
     return {"status": locked.status, "revision": locked.revision, "slices": created}
 
 
+def _ensure_current_revision(locked: TaskFacultySlice, task) -> None:
+    """Köhnəlmiş revision-un dilimi üzərində qərar verilməsini bloklayır.
+
+    QA dalğa 2 (2026-09-03) tapıntısı: dilim qaytarılıb tapşırıq YENİDƏN
+    göndəriləndə (`submit_task`) cari revision üçün YENİ dilim yaranır, köhnəsi
+    isə bazada qalır.  `approve_slice` / `return_slice` revision yoxlamadığı
+    üçün dekan köhnə (superseded) dilimi təsdiqləyə bilirdi: cavab `ok: true`
+    gəlirdi, audit «təsdiqləndi» yazırdı, LAKİN `slice_progress` yalnız
+    `revision=task.revision` sayır → sənəd irəliləmirdi.  Yəni sükutla itən
+    qərar.  Layihənin «final entry session versioning» qaydası ilə eyni
+    məntiq: köhnə versiya 409 ilə rədd edilir.
+    """
+    if locked.revision != task.revision:
+        raise WorkloadDenied(
+            "workload.stale_revision",
+            "Bu dilim köhnəlmiş revision-a aiddir — səhifəni yeniləyin.",
+        )
+
+
 @transaction.atomic
 def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", request=None) -> dict:
     """Dekan fakültə dilimini bütöv təsdiqləyir."""
@@ -201,6 +220,7 @@ def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", requ
     task = TeachingTask.objects.get(pk=locked.task_id)
     if task.status not in sm.REVIEWABLE:
         raise WorkloadDenied("workload.slice_not_open", "Tapşırıq təsdiq mərhələsində deyil.")
+    _ensure_current_revision(locked, task)
     if locked.status == SliceStatus.APPROVED:
         raise WorkloadDenied("workload.slice_already_approved", "Dilim artıq təsdiqlənib.")
 
@@ -235,6 +255,7 @@ def return_slice(*, slice_obj: TaskFacultySlice, actor, reason: str, row_ids=Non
     task = TeachingTask.objects.select_for_update(of=("self",)).get(pk=locked.task_id)
     if task.status not in sm.REVIEWABLE:
         raise WorkloadDenied("workload.slice_not_open", "Tapşırıq təsdiq mərhələsində deyil.")
+    _ensure_current_revision(locked, task)
 
     locked.status = SliceStatus.RETURNED
     locked.decided_by = getattr(actor, "user", None)

@@ -10,6 +10,6 @@ Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin �
     {% if journal_student_section %}
     {% include "registrar/partials/_journal_student_content.html" %}
     {% else %}
-    {% include "registrar/partials/_journal_list_content.html" %}
+    {% include "registrar/partials/_journal_list_content.html" with embedded_in_shell=True %}
     {% endif %}
 </section>
