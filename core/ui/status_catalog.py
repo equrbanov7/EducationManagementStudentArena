@@ -223,6 +223,17 @@ SEMESTER_STEPS: tuple[Status, ...] = (
     _s("locked", _t("Semestr kilidləndi"), "primary", order=4),
 )
 
+#: Ekran 03/04 — kataloq yazısının (ixtisas / fənn) vəziyyəti.
+#: «Plan yoxdur» və «Ad dublikatı» SAXLANILMIR — hər sorğuda hesablanır
+#: (handoff §8/13); burada yalnız onların ETİKET və TONU var.
+CATALOG_ENTRY: tuple[Status, ...] = (
+    _s("active", _t("Aktiv"), "success", order=0),
+    _s("no_plan", _t("Plan yoxdur"), "warning", strong=True, order=1),
+    _s("duplicate", _t("Ad dublikatı"), "warning", order=2),
+    _s("unused", _t("Planda istifadə olunmur"), "neutral", order=3),
+    _s("archived", _t("Arxivdə"), "muted", order=4),
+)
+
 # --------------------------------------------------------------------------- #
 # 5. Tələbə qəbulu və reyestr
 # --------------------------------------------------------------------------- #
@@ -295,6 +306,7 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "load_objection": LOAD_OBJECTION_REASONS,
     "plan": PLAN,
     "offering": OFFERING,
+    "catalog_entry": CATALOG_ENTRY,
     "semester_steps": SEMESTER_STEPS,
     "intake_row": INTAKE_ROW,
     "intake_steps": INTAKE_STEPS,

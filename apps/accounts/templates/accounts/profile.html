@@ -4,170 +4,8 @@
 {% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
-    {% comment %}
-        Bölmə CSS-i İCAZƏLİ bölmələrə bağlanıb (aktiv bölməyə YOX): SPA panel
-        səhifə yeniləmədən istənilən icazəli bölməyə keçə bilər, ona görə şərt
-        `allowed_sections` üzərindədir. Əvvəllər bu blokdakı 31 faylın hamısı
-        rolundan asılı olmayaraq HƏR istifadəçiyə göndərilirdi — tələbə
-        superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
-        yükləyirdi (2026-07-31 auditi).
-    {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260902-badge-empty">
-    {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260902-1">
-    <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
-    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    {% if 'statistics' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
-    {% endif %}
-    {% if 'superadmin-users' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
-    {% endif %}
-    {% if 'rim-center' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part1.css' %}?v=20260826-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part2.css' %}?v=20260826-1">
-    {% endif %}
-    {% if 'superadmin-ai' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
-    {% endif %}
-    {% if 'assigned-exams' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
-    {% endif %}
-    {% if 'my-courses' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
-    <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
-    {% endif %}
-    {% if 'groups' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
-    {% endif %}
-    {% if 'my-exams' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
-    <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260707-wizard2">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
-    {% endif %}
-    {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}">
-    {% endif %}
-    {% if 'my-results' in allowed_sections %}
-    {% comment %}
-      «Nəticələrim»in akademik kartı.  ⚠️ Bu fayl yarandığı gündən (5086a02e)
-      HEÇ BİR şablondan linklənməmişdi — yəni `.result-academic-*` /
-      `.result-legacy-*` markup-ı canlıda tamamilə ÜSLUBSUZ render olunurdu
-      (40 selektorun heç biri başqa CSS-də təkrarlanmır, brauzerdə yoxlanılıb:
-      panelin fonu şəffaf, `--ems-danger-strong` xəbərdarlığı isə qara idi).
-      Bölmə ilə şərtlənir — qonşu bölmə CSS-ləri ilə eyni konvensiya.
-    {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260901-notice">
-    {% endif %}
-    {% if 'my-subjects' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
-    {% endif %}
-    {% if 'my-transcript' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260704-1">
-    {% endif %}
-    {% if 'overall-academic' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
-    {% endif %}
-    {% if 'academic-records' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260720-2">
-    {% endif %}
-    {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
-    {% endif %}
-    {% if 'people-students' in allowed_sections %}
-    {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ tələbə kataloqunda mənalıdır
-    (müəllimin akademik qeydi yoxdur). Markup-ın özü əlavə olaraq
-    `people_section.can_manage_academic` qapısındandır; burada isə üslub
-    icazəsiz istifadəçiyə boş yerə göndərilməsin deyə bölmə ilə şərtlənir.
-
-    ⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: `people_academic.css`
-    (çərçivə) ƏVVƏL, `people_academic_actions.css` (ön baxış/status/düymələr)
-    SONRA — ikinci fayl birincinin mobil qaydalarını qəsdən tamamlayır.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic.css' %}?v=20260831-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic_actions.css' %}?v=20260831-1">
-    {% endif %}
-    {% if 'teaching-handover' in allowed_sections %}
-    {% comment %}Fənn təhvili — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
-    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
-    əvvəl səth (addım kartları, süzgəclər, cədvəl), sonra üst qatlar (düymələr,
-    modallar, mobil override-lar).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260831-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover_dialog.css' %}?v=20260831-1">
-    {% endif %}
-    {% if 'workload-distribution' in allowed_sections or 'my-workload' in allowed_sections %}
-    {% comment %}Dərs yükü — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
-    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
-    əvvəl səth (kartlar, cədvəl, qalıq zolaqları), sonra üst qat (modallar,
-    mobil override).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20260902-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_dialog.css' %}?v=20260902-1">
-    {% endif %}
-    {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
-    {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
-    bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl ORTAQ
-    komponentlər (base → dialog → list → drawer), sonra ekran-xüsusi qatlar.
-    ⚠️ `syllabus_list.css` ortaq primitivləri (KPI kartı, filtr paneli, cədvəl,
-    səhifələmə) da daşıyır — təsdiq ekranı onları TƏKRAR TƏRİF ETMİR, ona görə
-    kafedra müdiri «Sillabuslar» bölməsini görməsə də bu fayl yüklənir.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_dialog.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
-    {% endif %}
-    {% if 'syllabus-list' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
-    {% comment %}Köçürülmüş məzmunun səthi (kataloqdankənar metod çipləri, plandan
-    artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
-    panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_carryover.css' %}?v=20260831-carry">
-    {% endif %}
-    {% if 'syllabus-review' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review_panel.css' %}?v=20260830-3">
-    {% endif %}
-    {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
-    {% endif %}
-    {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
-    {% if 'my-journal' in allowed_sections or 'journal-close' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
-    <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
-    {% comment %}Tələbənin «Sillabusa bax» paneli — jurnalın tam səhifə variantı
-    ilə EYNİ stil faylı (apps/registrar/static/registrar/css/syllabus_view.css).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
-    {% endif %}
-    {% if 'my-schedule' in allowed_sections or 'schedule-manage' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
-    {% endif %}
-    {% if 'schedule-manage' in allowed_sections %}
-    {% comment %}Cədvəl idarəetməsi paneli — `registrar/css/schedule.css` (grid)
-    ÜZƏRİNƏ qurulur, ona görə ondan SONRA yüklənməlidir (kaskad).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/schedule_manage.css' %}?v=20260902-1">
-    {% endif %}
-    {% if 'student-intake' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260902-1">
-    {% endif %}
-    {% if 'academic-calendar' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
-    {% endif %}
-    {% if 'applications' in allowed_sections %}
-    {% comment %}«Müraciətlərim» — panelin öz stili; detal/dialoq faylı əsas
-    fayldan SONRA gəlir (eyni `--apx-*` custom property-lərini işlədir).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260902-2">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260902-2">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260902-2">
-    {% endif %}
-    {% if 'analytics' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
-    {% endif %}
+    {% include "accounts/profile/_section_assets.html" %}
+    {% include "partials/ems_ui/_assets.html" %}
 {% endblock %}
 
 {% block content %}
@@ -175,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -192,161 +30,7 @@
             {% include direct_profile_section_template %}
             {% else %}
            
-            {% if active_section == "dashboard" %}
-                {% include "accounts/profile/sections/_dashboard.html" %}
-            {% elif active_section == "profile-info" %}
-                {% include "accounts/profile/sections/_profile_info.html" %}
-            {% elif active_section == "notifications" %}
-                {% include "accounts/profile/sections/_notifications.html" %}
-            {% elif active_section == "publish-notification" %}
-                {% include "accounts/profile/sections/_publish_notification.html" %}
-            {% elif active_section == "create-post" %}
-                {% include "accounts/profile/sections/_create_post.html" %}
-            {% elif active_section == "posts" %}
-                {% include "accounts/profile/sections/_posts.html" %}
-            {% elif active_section == "my-exams" %}
-                {% include "accounts/profile/sections/_my_exams.html" %}
-            {% elif active_section == "question-bank" %}
-                {% include "accounts/profile/sections/_question_bank.html" %}
-            {% elif active_section == "question-submissions" %}
-                {% include "accounts/profile/sections/_question_submissions.html" %}
-            {% elif active_section == "unit-exams" %}
-                {% include "accounts/profile/sections/_unit_exams.html" %}
-            {% elif active_section == "org-structure" %}
-                {% include "accounts/profile/sections/_org_structure.html" %}
-            {% elif active_section == "org-faculties" %}
-                {% include "accounts/profile/sections/_org_faculties.html" %}
-            {% elif active_section == "org-kafedras" %}
-                {% include "accounts/profile/sections/_org_kafedras.html" %}
-            {% elif active_section == "org-members" %}
-                {% include "accounts/profile/sections/_org_members.html" %}
-            {% elif active_section == "org-roles" %}
-                {% include "accounts/profile/sections/_org_roles.html" %}
-            {% elif active_section == "audit-log" %}
-                {% include "accounts/profile/sections/_audit_log.html" %}
-            {% elif active_section == "my-courses" %}
-                {% include "accounts/profile/sections/_my_courses.html" %}
-            {% elif active_section == "courses" %}
-                {% include "accounts/profile/sections/_courses.html" %}
-            {% elif active_section == "assigned-exams" %}
-                {% include "accounts/profile/sections/_assigned_exams.html" %}
-            {% elif active_section == "assigned-courses" %}
-                {% include "accounts/profile/sections/_assigned_courses.html" %}
-            {% elif active_section == "my-results" %}
-                {% include "accounts/profile/sections/_my_results.html" %}
-            {% elif active_section == "my-subjects" %}
-                {% include "accounts/profile/sections/_my_subjects.html" %}
-            {% elif active_section == "my-transcript" %}
-                {% include "accounts/profile/sections/_my_transcript.html" %}
-            {% elif active_section == "overall-academic" %}
-                {% include "accounts/profile/sections/_overall_academic.html" %}
-            {% elif active_section == "my-schedule" %}
-                {% include "accounts/profile/sections/_my_schedule.html" %}
-            {% elif active_section == "schedule-manage" and 'schedule-manage' in allowed_sections %}
-                {% include "accounts/profile/sections/_schedule_manage.html" %}
-            {% elif active_section == "student-intake" and 'student-intake' in allowed_sections %}
-                {% include "accounts/profile/sections/_student_intake.html" %}
-            {% elif active_section == "applications" and 'applications' in allowed_sections %}
-                {% include "accounts/profile/sections/_applications.html" %}
-            {% elif active_section == "academic-calendar" %}
-                {% include "accounts/profile/sections/_academic_calendar.html" %}
-            {% elif active_section == "my-journal" %}
-                {% include "accounts/profile/sections/_my_journal.html" %}
-            {% elif active_section == "journal-close" and 'journal-close' in allowed_sections %}
-                {% include "accounts/profile/sections/_journal_close.html" %}
-            {% elif active_section == "analytics" %}
-                {% include "accounts/profile/sections/_analytics.html" %}
-            {% elif active_section == "academic-records" and 'academic-records' in allowed_sections %}
-                {% include "accounts/profile/sections/_academic_records.html" %}
-            {% elif active_section == "people-teachers" and 'people-teachers' in allowed_sections %}
-                {% include "accounts/profile/sections/_people_teachers.html" %}
-            {% elif active_section == "people-students" and 'people-students' in allowed_sections %}
-                {% include "accounts/profile/sections/_people_students.html" %}
-            {% elif active_section == "teaching-handover" and 'teaching-handover' in allowed_sections %}
-                {% include "accounts/profile/sections/_teaching_handover.html" %}
-            {% elif active_section == "syllabus-list" and 'syllabus-list' in allowed_sections %}
-                {% include "accounts/profile/sections/_syllabus_list.html" %}
-            {% elif active_section == "syllabus-editor" and 'syllabus-editor' in allowed_sections %}
-                {% include "accounts/profile/sections/_syllabus_editor.html" %}
-            {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
-                {% include "accounts/profile/sections/_syllabus_review.html" %}
-            {% elif active_section == "question-chair-review" and 'question-chair-review' in allowed_sections %}
-                {% include "accounts/profile/sections/_question_chair_review.html" %}
-            {% elif active_section == "workload-distribution" and 'workload-distribution' in allowed_sections %}
-                {% include "accounts/profile/sections/_workload_distribution.html" %}
-            {% elif active_section == "my-workload" and 'my-workload' in allowed_sections %}
-                {% include "accounts/profile/sections/_my_workload.html" %}
-            {% elif active_section == "my-appeals" %}
-                {% include "accounts/profile/sections/_my_appeals.html" %}
-            {% elif active_section == "manage-appeals" %}
-                {% include "accounts/profile/sections/_manage_appeals.html" %}
-            {% elif active_section == "pending-answers" %}
-                {% include "accounts/profile/sections/_pending_answers.html" %}
-            {% elif active_section == "groups" %}
-                {% include "accounts/profile/sections/_groups.html" %}
-            {% elif active_section == "pending-post-approvals" %}
-                {% include "accounts/profile/sections/_pending_post_approvals.html" %}
-            {% elif active_section == "pending-review" %}
-                {% include "accounts/profile/sections/_pending_review.html" %}
-            {% elif active_section == "review-results" %}
-                {% include "accounts/profile/sections/_review_results.html" %}
-            {% elif active_section == "role-assignment" %}
-                {% include "accounts/profile/sections/_role_assignment.html" %}
-            {% elif active_section == "student-organization-request" %}
-                {% include "accounts/profile/sections/_student_org_request.html" %}
-            {% elif active_section == "student-organization-management" %}
-                {% include "accounts/profile/sections/_student_org_management.html" %}
-            {% elif active_section == "permission-editor" %}
-                {% include "accounts/profile/sections/_permission_editor.html" %}
-            {% elif active_section == "manage-roles" %}
-                {% include "accounts/profile/sections/_manage_roles.html" %}
-            {% elif active_section == "create-category" %}
-                {% include "accounts/profile/sections/_create_category.html" %}
-            {% elif active_section == "category-management" %}
-                {% include "accounts/profile/sections/_category_management.html" %}
-            {% elif active_section == "superadmin-org-features" %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_org_features.html" %}
-            {% elif active_section == "superadmin-org-inspector" %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_org_inspector.html" %}
-            {% elif active_section == "superadmin-organizations" %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_organizations.html" %}
-            {% elif active_section == "superadmin-users" %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_user_management.html" %}
-            {% elif active_section == "rim-center" and 'rim-center' in allowed_sections %}
-                {% include "accounts/profile/sections/_rim_center.html" %}
-            {% elif active_section == "superadmin-ai" %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_ai_settings.html" %}
-            {% elif active_section == "superadmin-exam-rooms" and 'superadmin-exam-rooms' in allowed_sections %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html" %}
-            {% elif active_section == "exam-center-pins" and 'exam-center-pins' in allowed_sections %}
-                {% include "accounts/profile/sections/_exam_center_pins.html" %}
-            {% elif active_section == "exam-center-stats" and 'exam-center-stats' in allowed_sections %}
-                {% include "accounts/profile/sections/_exam_center_stats.html" %}
-            {% elif active_section == "appeal-stats" and 'appeal-stats' in allowed_sections %}
-                {% include "accounts/profile/sections/_appeal_stats.html" %}
-            {% elif active_section == "kollokvium-windows" and 'kollokvium-windows' in allowed_sections %}
-                {% include "accounts/profile/sections/_kollokvium_windows.html" %}
-            {% elif active_section == "exam-score-entry" and 'exam-score-entry' in allowed_sections %}
-                {% include "accounts/profile/sections/_exam_score_entry.html" %}
-            {% elif active_section == "legacy-grade-review" and 'legacy-grade-review' in allowed_sections %}
-                {% include "accounts/profile/sections/_legacy_grade_review.html" %}
-            {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
-                {% include "accounts/profile/sections/_exam_chance.html" %}
-            {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
-                {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
-            {% elif active_section == "system-monitoring" and 'system-monitoring' in allowed_sections %}
-                {% include "accounts/profile/sections/superadmin/_system_monitoring.html" %}
-            {% elif active_section == "statistics" %}
-                {% include "accounts/profile/sections/_statistics.html" %}
-            {% elif active_section == "edit-profile" %}
-                {% include "accounts/profile/sections/_edit_profile.html" %}
-            {% elif active_section == "change-password" %}
-                {% include "accounts/profile/sections/_change_password.html" %}
-            {% else %}
-                {# Naməlum və ya shortcut section: profile-info-ya fallback. #}
-                {% include "accounts/profile/sections/_profile_info.html" %}
-                {% include "accounts/profile/sections/_shortcut_sections.html" %}
-            {% endif %}
+            {% include "accounts/profile/_section_dispatch.html" %}
 
             {% if 'my-courses' in allowed_sections %}
                 {% include "courses/partials/_create_course_modal.html" %}
@@ -595,5 +279,11 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% endif %}
 {% if 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
 <script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
+{% endif %}
+{% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
+seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
+`[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
+{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260903-1"></script>
 {% endif %}
 {% endblock %}

@@ -11,6 +11,7 @@ from .default_roles_shared import (
     PEOPLE_DIRECTORY_READ,
     RIM_ACCOUNT_PERMISSIONS,
 )
+from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 
 UNIVERSITY_ROLES = [
     {
@@ -563,4 +564,14 @@ def _grant_application_permissions(roles):
     return roles
 
 
+_grant_application_permissions(UNIVERSITY_ROLES)
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# Tədris şöbəsi (dizayn handoff, Mərhələ 1) — iki yeni rol + mövcud rollara
+# `structure.*` / `catalog.*` açarları. Ayrı modulda saxlanılır (fayl ölçüsü);
+# siyahı burada BİRLƏŞİR ki, seed/migration/testlər tək mənbədən oxusun.
+# ────────────────────────────────────────────────────────────────────────────
+UNIVERSITY_ROLES.extend(TEACHING_OFFICE_ROLES)
+apply_teaching_office_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)

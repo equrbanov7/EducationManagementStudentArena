@@ -168,6 +168,7 @@
         </li>
         {% endif %}
 
+        {% include "accounts/profile/sidebar/_teaching_office_group.html" %}
         {% include "accounts/profile/_sidebar_university.html" %}
         {% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'groups' in allowed_sections or 'pending-review' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_teaching" context "profile.sidebar" %}</span></li>

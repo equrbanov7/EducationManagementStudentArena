@@ -103,6 +103,13 @@
         gap: var(--ems-sp-4);
     }
 
+    /* ⚠️ `flex: 1 1 320px` sətir düzümündə ENİ verir; sütuna keçəndə isə
+       flex-basis HÜNDÜRLÜYƏ çevrilir və başlıq bloku 320px boşluq açır
+       (375-də ölçülüb — Mərhələ 1). Mobil override-da basis sıfırlanır. */
+    .ems-header__main {
+        flex: 1 1 auto;
+    }
+
     .ems-header__actions {
         width: 100%;
     }

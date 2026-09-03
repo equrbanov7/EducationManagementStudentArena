@@ -50,6 +50,10 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "question-chair-review": "accounts/profile/sections/_question_chair_review.html",
     "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
     "my-workload": "accounts/profile/sections/_my_workload.html",
+    "org-structure-tree": "accounts/profile/sections/_org_structure_tree.html",
+    "chair-profile": "accounts/profile/sections/_chair_profile.html",
+    "programs-registry": "accounts/profile/sections/_programs_registry.html",
+    "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
 }
 
 
@@ -131,4 +135,8 @@ def build_section_titles() -> dict:
         "question-chair-review": pgettext_lazy("profile.sidebar", "Sual təsdiqi"),
         "workload-distribution": pgettext_lazy("profile.sidebar", "Yük bölgüsü"),
         "my-workload": pgettext_lazy("profile.sidebar", "Dərs yüküm"),
+        "org-structure-tree": pgettext_lazy("profile.sidebar", "Universitet strukturu"),
+        "chair-profile": pgettext_lazy("profile.sidebar", "Kafedra profili"),
+        "programs-registry": pgettext_lazy("profile.sidebar", "İxtisaslar"),
+        "subject-catalog": pgettext_lazy("profile.sidebar", "Fənn kataloqu"),
     }

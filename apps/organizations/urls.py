@@ -4,7 +4,7 @@ URL configuration for organizations app.
 
 from django.urls import path
 
-from . import structure_views, views
+from . import structure_actions, structure_views, views
 
 app_name = "organizations"
 
@@ -22,6 +22,12 @@ urlpatterns = [
         "<slug:slug>/structure/units/<uuid:unit_id>/",
         structure_views.organization_unit_detail,
         name="structure_unit_detail",
+    ),
+    # Ekran 01 «Universitet strukturu» — ağac əməlləri (JSON POST, səbəb + audit).
+    path(
+        "<slug:slug>/structure/tree/action/",
+        structure_actions.structure_tree_action,
+        name="structure_tree_action",
     ),
     path("<slug:slug>/members/", views.organization_members, name="members"),
     path("<slug:slug>/roles/", views.organization_roles, name="roles"),

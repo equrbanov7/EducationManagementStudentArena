@@ -22,6 +22,7 @@ from .._sections.role_assignment import build_role_assignment_section
 from .._sections.statistics import build_statistics_section
 from .._sections.superadmin_orgs import build_superadmin_orgs_sections
 from ._helpers import _get_publish_notification_targets
+from ._teaching_office import dispatch_teaching_office_sections
 
 
 class _Stage3Mixin:
@@ -396,6 +397,9 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        # Tədris şöbəsi bölmələri (ekran 01–04) — dispatch AYRI moduldadır
+        # (`_stage3` modul ölçüsü büdcəsi 600 sətir).
+        dispatch_teaching_office_sections(self)
         if "dashboard" in self.allowed_sections and self.active_section == "dashboard":
             from .._sections.dashboard import build_dashboard_section
 

@@ -38,6 +38,21 @@ PERMISSION_CATEGORIES = {
         "unit.create",
         "unit.edit",
         "unit.delete",
+        # Tədris şöbəsi səthi (dizayn handoff ekran 01/02). `unit.create/edit`
+        # mövcud fakültə-kafedra CRUD-udur; aşağıdakı iki açar isə AĞAC əməlləri
+        # (alt bölmə/ad dəyişikliyi/arxivləmə) və RƏHBƏR TƏYİNATIDIR — ayrı
+        # saxlanılır ki, «kafedra yarada bilən» rol avtomatik «rəhbər təyin
+        # edən» olmasın. (Handoff-dakı `structure.*` adları legacy prefiksdir —
+        # kanonik ailə `unit.*`, bax `DefaultRolesCanonicalPermissionTest`.)
+        "unit.tree_manage",
+        "unit.assign_head",
+    ],
+    # Akademik kataloq — ixtisas (Program) və fənn (Subject) reyestrləri
+    # (dizayn handoff ekran 03/04). `course.*` DƏRS/açılış ailəsidir; kataloq
+    # ayrıca səlahiyyətdir, ona görə öz prefiksi var.
+    "catalog": [
+        "catalog.view",
+        "catalog.manage",
     ],
     "members": [
         "member.view",
@@ -271,6 +286,7 @@ PERMISSION_CATEGORIES = {
 PERMISSION_CATEGORY_LABELS = {
     "organization": "Təşkilat",
     "structure": "Struktur",
+    "catalog": "Akademik kataloq",
     "members": "Üzvlər",
     "roles": "Rollar",
     "courses": "Kurslar",
@@ -314,6 +330,11 @@ PERMISSION_LABELS = {
     "unit.create": pgettext_lazy(_PERM_CTX, "Struktur vahidi yaratmaq"),
     "unit.edit": pgettext_lazy(_PERM_CTX, "Struktur vahidini redaktə etmək"),
     "unit.delete": pgettext_lazy(_PERM_CTX, "Struktur vahidini silmək"),
+    "unit.tree_manage": pgettext_lazy(_PERM_CTX, "Struktur ağacını idarə etmək (yaratmaq/adını dəyişmək/arxivləmək)"),
+    "unit.assign_head": pgettext_lazy(_PERM_CTX, "Bölməyə rəhbər təyin etmək"),
+    # catalog
+    "catalog.view": pgettext_lazy(_PERM_CTX, "İxtisas və fənn kataloquna baxış"),
+    "catalog.manage": pgettext_lazy(_PERM_CTX, "İxtisas və fənn kataloqunu idarə etmək"),
     # members
     "member.view": pgettext_lazy(_PERM_CTX, "Üzvlərə baxış"),
     "member.invite": pgettext_lazy(_PERM_CTX, "Üzv dəvət etmək"),

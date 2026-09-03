@@ -47,7 +47,8 @@ def apply_permission_section_gates(
     ``can_manage_schedule``, ``can_import_students``, ``can_use_applications``,
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``, ``can_view_workload``,
-    ``can_manage_workload``, ``can_distribute_workload``.
+    ``can_manage_workload``, ``can_distribute_workload``, ``can_view_structure_tree``,
+    ``can_view_catalog``, ``can_manage_catalog``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
@@ -159,6 +160,23 @@ def apply_permission_section_gates(
     can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
     can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
 
+    # «Universitet strukturu» (ağac) + «Kafedra profili» — Tədris şöbəsi səthi.
+    # Qapı `unit.view` açarıdır: müəllim və tələbədə bu açar QƏSDƏN YOXDUR,
+    # dekan/kafedra müdiri/RİM-də isə var. KONKRET bölmənin görünməsi
+    # `organizations.scoping`-də struktur əhatəsi ilə fail-closed yenidən
+    # süzülür — kafedra müdiri yalnız öz kafedrasını görür, əhatəsiz aktor boş
+    # vəziyyət alır (handoff §8/8: «əhatə yoxdur ≠ bütün universitet»).
+    # AĞAC ƏMƏLLƏRİ ayrıca açarlardadır (`unit.tree_manage` / `unit.assign_head`)
+    # və POST endpoint-ində yenidən yoxlanılır — görünürlük yazma hüququ vermir.
+    can_view_structure_tree = privileged or has_permission(permissions, "unit.view")
+
+    # «İxtisaslar» + «Fənn kataloqu» — `catalog.view`. `course.*` ailəsindən
+    # QƏSDƏN AYRIDIR: dərs/açılış idarə edən müəllim avtomatik universitet
+    # kataloqunu redaktə edə bilməməlidir. Yazı açarı `catalog.manage`-dir və
+    # `registrar.catalog_actions`-da fail-closed yoxlanılır.
+    can_view_catalog = privileged or has_permission(permissions, "catalog.view")
+    can_manage_catalog = privileged or has_permission(permissions, "catalog.manage")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -175,6 +193,10 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         (can_manage_workload, "workload-distribution"),
         (can_view_workload, "my-workload"),
+        (can_view_structure_tree, "org-structure-tree"),
+        (can_view_structure_tree, "chair-profile"),
+        (can_view_catalog, "programs-registry"),
+        (can_view_catalog, "subject-catalog"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -197,6 +219,9 @@ def apply_permission_section_gates(
         "can_view_workload": can_view_workload,
         "can_manage_workload": can_manage_workload,
         "can_distribute_workload": can_distribute_workload,
+        "can_view_structure_tree": can_view_structure_tree,
+        "can_view_catalog": can_view_catalog,
+        "can_manage_catalog": can_manage_catalog,
     }
 
 

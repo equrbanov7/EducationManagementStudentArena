@@ -162,7 +162,10 @@
         var url = buildUrl(form);
         if (window.EMSProfileLoadSection && form.dataset.section) {
             // Kabinet SPA yolu — sidebar yerində qalır, yalnız panel yenilənir.
-            window.EMSProfileLoadSection(form.dataset.section, { sourceUrl: url });
+            // İMZA: (section, sourceUrl, options) — ikinci arqument SƏTİRDİR.
+            // Obyekt ötürülsəydi loader onu `options.sourceUrl` kimi saxlayır və
+            // URL «[object Object]» olurdu (Mərhələ 1-də tapılıb düzəldilib).
+            window.EMSProfileLoadSection(form.dataset.section, url);
         } else {
             window.location.assign(url);
         }

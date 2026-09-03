@@ -4,6 +4,7 @@ from django.urls import path
 
 from . import (
     analytics_views,
+    catalog_actions,
     console_views,
     correction_views,
     guest_roster_views,
@@ -24,6 +25,8 @@ urlpatterns = [
     path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
+    # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
+    path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", schedule_views.calendar_view, name="calendar"),

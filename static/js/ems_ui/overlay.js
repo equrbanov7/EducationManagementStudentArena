@@ -146,7 +146,12 @@
         box.classList.toggle("is-invalid", !ok && length > 0);
         field.setAttribute("aria-invalid", ok ? "false" : "true");
 
-        var counter = box.querySelector(".ems-reason__counter");
+        // ⚠️ Sayğac dialoqun FOOTER-indədir, `.ems-reason` gövdəsinin İÇİNDƏ
+        // DEYİL — ona görə axtarış overlay səviyyəsində aparılır. (Əvvəl
+        // `box.querySelector` idi və sayğac heç vaxt yenilənmirdi; canlı
+        // yoxlamada «0 / 20» donub qalırdı — Mərhələ 1-də tapılıb düzəldilib.)
+        var counterScope = box.closest(".ems-overlay") || box;
+        var counter = counterScope.querySelector(".ems-reason__counter");
         if (counter) {
             counter.textContent = length + " / " + min;
         }

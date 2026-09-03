@@ -368,6 +368,13 @@ class _Stage2Mixin:
         # gəlir, yəni profil kontekstində AĞIR SORĞU YOXDUR.
         self.workload_distribution_section = {"has_access": False, "chairs": [], "task": None}
         self.my_workload_section = {"has_access": False, "rows": [], "summary": {}, "years": []}
+        # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra
+        # profili, ixtisas reyestri, fənn kataloqu. Default BOŞDUR: aktiv bölmə
+        # olmayanda heç bir sorğu işləmir (bax `_stage3` şərtli çağırışlar).
+        self.structure_tree_section = {"has_access": False, "tree_nodes": []}
+        self.chair_profile_section = {"has_access": False, "chairs": [], "staff_rows": []}
+        self.programs_registry_section = {"has_access": False, "rows": []}
+        self.subject_catalog_section = {"has_access": False, "rows": []}
         # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində

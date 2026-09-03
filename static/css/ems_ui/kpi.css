@@ -71,6 +71,9 @@ button.ems-kpi {
 }
 
 .ems-kpi__unit {
+    /* Vahid rəqəmə YAPIŞMASIN: şablon boşluqsuz `{{ value }}<span>{{ unit }}</span>`
+       verir (təsadüfi boşluq render fərqi yaratmasın deyə) — ayrılığı CSS qoyur. */
+    margin-inline-start: 0.25rem;
     font-size: var(--ems-fs-base);
     font-weight: 600;
     color: var(--ems-text-muted);

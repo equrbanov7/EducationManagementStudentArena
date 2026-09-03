@@ -10,6 +10,7 @@ from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
 from .rbac_sections import apply_permission_section_gates
+from .rbac_university_sections import university_role_sections
 from .tenant import _bind_active_role_context
 
 
@@ -454,26 +455,23 @@ def _role_capabilities(user, profile):
     if can_approve_posts:
         allowed_sections.add("pending-post-approvals")
 
-    # Universitet kabineti (U12): registrar səhifələri profil shell-inin İÇİNDƏ
-    # bölmə kimi açılır (sidebar itmir — SPA panel). Faktiki data-icazə yenə də
-    # registrar servis qatındadır; bunlar görünürlük + fragment gating üçündür.
-    from django.conf import settings as _u12_settings
-
-    if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
-        allowed_sections.update({"my-schedule", "academic-calendar"})
-        # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
-        # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
-        if is_teacher or is_org_admin or is_superadmin or is_student or can_manage_journal_roster:
-            allowed_sections.add("my-journal")
-        if can_close_journals:
-            allowed_sections.add("journal-close")
-        if can_enter_exam_scores:
-            allowed_sections.add("exam-score-entry")
-        if can_view_unit_analytics:
-            allowed_sections.add("analytics")
-        if is_superadmin or is_org_admin or is_unit_manager:
-            allowed_sections.add("academic-records")
-
+    # Rol-əsaslı universitet bölmələri (U12 kabineti + struktur menyusu) —
+    # saf hesablama, bax `rbac_university_sections.university_role_sections`.
+    allowed_sections |= university_role_sections(
+        is_superadmin=is_superadmin,
+        is_org_admin=is_org_admin,
+        is_unit_manager=is_unit_manager,
+        is_hr=is_hr,
+        is_tutor=is_tutor,
+        is_exam_center=is_exam_center,
+        is_teacher=is_teacher,
+        is_student=is_student,
+        has_active_org_context=has_active_org_context,
+        can_manage_journal_roster=can_manage_journal_roster,
+        can_close_journals=can_close_journals,
+        can_enter_exam_scores=can_enter_exam_scores,
+        can_view_unit_analytics=can_view_unit_analytics,
+    )
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
     # eyni yerdən bağlanır).
@@ -496,29 +494,6 @@ def _role_capabilities(user, profile):
     can_use_question_bank = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_manage_appeals = is_superadmin or is_exam_center
     can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
-
-    # Universitet strukturu (fakültə/kafedra) idarəetmə linkləri:
-    # - rektor/prorektor/org admin → bütün təşkilat
-    # - dekan/kafedra müdürü → yalnız öz alt-ağacı (data scoping organizations.scoping-də)
-    # - HR → üzv siyahısı (vəzifə/unit təyinatları üçün)
-    if is_superadmin or is_org_admin or is_unit_manager:
-        allowed_sections.update({"org-structure", "org-faculties", "org-kafedras", "org-members"})
-    elif is_hr:
-        # HR struktur səhifələrini görür: `member.edit` icazəsi ilə müəllimin
-        # kafedra təyinatını idarə edir; unit CRUD düymələri icazə flag-ları
-        # ilə gizlənir (unit.create/edit/delete HR-da yoxdur).
-        allowed_sections.update({"org-faculties", "org-kafedras", "org-members"})
-    elif is_tutor or is_exam_center:
-        # İmtahan mərkəzi org-wide, tyutor isə yalnız öz alt-ağacı üzrə
-        # üzv siyahısı görür (data scoping organizations.scoping-də tətbiq olunur).
-        allowed_sections.add("org-members")
-
-    if is_superadmin or is_org_admin:
-        allowed_sections.add("org-roles")
-
-    # Dekan/kafedra müdürü: öz alt-ağacının imtahanlarına oxu-only baxış.
-    if is_unit_manager:
-        allowed_sections.add("unit-exams")
 
     # İcazə-qapılı bölmələr (audit / RİM / müəllim-tələbə kataloqu) TƏK yerdən:
     # bax `rbac_sections.apply_permission_section_gates` (yalnız GÖRÜNÜRLÜK).
