@@ -299,6 +299,41 @@ def check_application_attachment_access(user, path: str) -> bool:
     return bool(can_view(user, attachment.application))
 
 
+# ---------------------------------------------------------------------------
+# Tələbə hərəkəti əmrinin sənədi (ərizə / arayış / protokol)
+# ---------------------------------------------------------------------------
+
+#: Rəsmi reyestrə baxış açarı (``apps.accounts.services.people.permissions``
+#: ilə eyni sətir; ``core`` app modullarını import etmir).
+REGISTRY_VIEW_PERMISSION = "student.registry_view"
+
+
+def check_student_movement_access(user, path: str) -> bool:
+    """``student_movements/`` — köçürmə/məzuniyyət/xaric əmrinin əsas sənədi.
+
+    2026-09-03 auditinin P0 tapıntısı: prefiks nə ``PRIVATE_PREFIXES``-də, nə
+    də reyestrdə yox idi, yəni ``/media/student_movements/<org>/<fayl>``
+    AUTENTİFİKASİYASIZ verilirdi.  Fayl adı təsadüfiləşdirilmir (``ərizə.pdf``
+    kimi ola bilir), ona görə yol praktikada təxmin edilə bilən idi; məzmun
+    isə tibbi arayış / intizam əmri ola bilər.
+
+    İcazəlilər: əmrin aid olduğu TƏLƏBƏ, yaxud əmri yazan təşkilatda
+    ``student.registry_view`` açarını daşıyan aktor.  Struktur əhatəsi ilə
+    daralmış tam yoxlama ``accounts.views.student_registry
+    .student_registry_document``-dədir — bu, sonuncu qapıdır (default DENY).
+    """
+    StudentMovement = django_apps.get_model("registrar", "StudentMovement")
+    movement = _get_single(
+        StudentMovement.objects.select_related("organization", "record"),
+        document=path,
+    )
+    if movement is None:
+        return False
+    if getattr(movement.record, "student_id", None) == getattr(user, "id", None):
+        return True
+    return user_has_org_permission(user, movement.organization, REGISTRY_VIEW_PERMISSION)
+
+
 #: ``media_views._PRIVATE_PREFIXES``-ə qatılan prefikslər.
 PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_corrections/",
@@ -308,11 +343,13 @@ PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_component_corrections/",
     "exam_score_entries/",
     "legacy_excuse_documents/",
+    "student_movements/",
     "applications/",
 )
 
 #: ``media_views._ACCESS_CHECKERS``-ə qatılan checker-lər (eyni açarlarla).
 ACCESS_CHECKERS: dict[str, object] = {
+    "student_movements/": check_student_movement_access,
     "journal_corrections/": check_journal_correction_access,
     "journal_lesson_corrections/": check_lesson_correction_access,
     "journal_selfwork_corrections/": check_selfwork_correction_access,

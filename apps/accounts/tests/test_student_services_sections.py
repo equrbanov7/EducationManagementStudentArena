@@ -436,6 +436,39 @@ class MovementSideEffectsTest(StudentServicesBase):
         self.assertEqual(self._client("student_services").get(download).status_code, 200)
         self.assertEqual(self._client("teacher").get(download).status_code, 404)
 
+    def test_raw_media_path_is_private_and_not_guessable(self):
+        """P0 (audit 2026-09-03): `/media/student_movements/...` AÇIQ idi.
+
+        İki qat: (1) prefiks `core.media_policies`-də private-dır — anonim
+        sorğu login-ə yönləndirilir, icazəsiz aktor 404 alır; (2) fayl adı
+        istifadəçidən GƏLMİR (UUID) — yol təxmin edilmir.
+        """
+        from core import media_policies, media_views
+
+        upload = SimpleUploadedFile("emr.pdf", b"%PDF-1.4 qa-ds3-raw", content_type="application/pdf")
+        response = self._client("student_services").post(
+            reverse("accounts:student_registry_action"),
+            self._movement_payload(document=upload),
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        movement = StudentMovement.objects.get()
+        path = movement.document.name
+
+        self.assertTrue(path.startswith("student_movements/"))
+        self.assertNotIn("emr.pdf", path)  # ad təsadüfiləşib
+        self.assertIn("student_movements/", media_policies.PRIVATE_PREFIXES)
+        self.assertTrue(media_views._is_private(path))
+
+        # Anonim: login-ə yönləndirilir (fayl bayt-baytına verilmir).
+        anonymous = Client()
+        self.assertIn(anonymous.get(f"/media/{path}").status_code, (302, 401, 403, 404))
+
+        # `student.registry_view` daşımayan aktor: 404 (mövcudluq da sızmır).
+        self.assertFalse(media_policies.check_student_movement_access(self.users["teacher"], path))
+        # Reyestr aktoru və əmrin aid olduğu tələbə: icazəli.
+        self.assertTrue(media_policies.check_student_movement_access(self.users["student_services"], path))
+        self.assertTrue(media_policies.check_student_movement_access(movement.record.student, path))
+
 
 class RegistryReadTest(StudentServicesBase):
     def test_registry_rows_carry_admission_columns(self):

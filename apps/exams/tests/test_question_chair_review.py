@@ -340,3 +340,36 @@ class ChairQueueAndSectionTests(_ChairBase):
     def test_teacher_section_denied_for_chair_queue(self):
         response = self._client_for(self.teacher).get(f"{reverse('accounts:profile')}?section=question-chair-review")
         self.assertNotContains(response, 'data-profile-section-panel="question-chair-review"', status_code=200)
+
+
+class ChairEventLedgerImmutabilityTests(_ChairBase):
+    """Hadisə lentı ƏLAVƏ-ONLY-dir — UPDATE DB səviyyəsində bloklanır.
+
+    Audit 2026-09-03 (Wave 2): model docstring-i «redaktə/silmə YOXDUR» deyirdi,
+    amma qayda yalnız servis qatının nizamı idi. Trigger
+    ``exams/migrations/0065`` ilə gəldi.
+    """
+
+    def test_raw_update_on_the_event_ledger_is_rejected(self):
+        from django.db import connection, transaction
+        from django.db.utils import InternalError, ProgrammingError
+
+        if connection.vendor != "postgresql":
+            self.skipTest("Append-only trigger yalnız PostgreSQL-dədir.")
+
+        submission = self._submit()
+        chair_approve(submission, actor=self.chair_head)
+        event = QuestionSubmissionEvent.objects.filter(
+            submission=submission, action=QuestionSubmissionEvent.ACTION_CHAIR_APPROVED
+        ).first()
+        self.assertIsNotNone(event)
+
+        with self.assertRaises((InternalError, ProgrammingError)):
+            with transaction.atomic(), connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE exams_questionsubmissionevent SET reason = %s WHERE id = %s",
+                    ["silinmiş iz", event.pk],
+                )
+
+        event.refresh_from_db()
+        self.assertNotEqual(event.reason, "silinmiş iz")

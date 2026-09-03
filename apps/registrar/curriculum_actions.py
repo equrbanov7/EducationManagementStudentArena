@@ -32,9 +32,18 @@ from django.views.decorators.http import require_POST
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.permissions import has_permission
 
-from .curriculum_registry import actor_permissions, can_edit_plans, can_view_plans, plan_balance
-from .curriculum_state import PlanTransitionError, assert_editable, resolve
+from .curriculum_registry import (
+    PERM_EDIT,
+    actor_permissions,
+    can_edit_plans,
+    can_view_plans,
+    plan_balance,
+    plan_in_scope,
+    program_in_scope,
+)
+from .curriculum_state import PlanTransitionError, assert_editable, permission_for, resolve
 from .models import Curriculum, CurriculumSubject, Program, Subject
 from .models.curriculum_meta import AssessmentForm, PlanStatus, expected_total_hours, row_hour_errors
 
@@ -65,8 +74,31 @@ def _chair_unit(organization, unit_id):
     ).first()
 
 
-def _plan(organization, plan_id):
-    return Curriculum.objects.filter(organization=organization, pk=(plan_id or "").strip()).first()
+def _plan(request, organization, plan_id, permission: str = PERM_EDIT):
+    """Planı TENANT + STRUKTUR ƏHATƏSİ ilə açır — kənar plan ``None`` (404).
+
+    ⚠️ TƏHLÜKƏSİZLİK (audit 2026-09-03, P1): əvvəl yalnız ``organization``
+    filtri vardı, yəni `plan.edit` / `plan.approve_chair` daşıyan İSTƏNİLƏN
+    kafedra müdiri başqa fakültənin planına sətir yaza və zənciri irəli apara
+    bilirdi. Əhatə HƏMİN əməlin öz açarından çıxarılır (``permission``), ona
+    görə «baxan» ilə «təsdiqləyən» ayrı-ayrı alt-ağaclar ala bilir.
+    """
+    plan = (
+        Curriculum.objects.filter(organization=organization, pk=(plan_id or "").strip())
+        .select_related("program")
+        .first()
+    )
+    if plan is None:
+        return None
+    if not has_permission(actor_permissions(request), permission):
+        # Açar ÜMUMİYYƏTLƏ yoxdursa əhatə sualı qalxmır: aktor «səlahiyyətiniz
+        # yoxdur» (403) görməlidir, «tapılmadı» (404) yox — o, planı onsuz da
+        # görür. 404 YALNIZ açarı OLAN, amma əhatəsi olmayan aktor üçündür.
+        return plan
+    if not plan_in_scope(request, organization, plan, permission):
+        # 403 DEYİL, 404: kənar aktora planın MÖVCUDLUĞU da bildirilmir.
+        return None
+    return plan
 
 
 def _row_dicts(plan) -> list:
@@ -104,7 +136,8 @@ def _row_dicts(plan) -> list:
 
 def _create_plan(request, organization):
     program = Program.objects.filter(organization=organization, pk=(request.POST.get("program") or "").strip()).first()
-    if program is None:
+    if program is None or not program_in_scope(request, organization, program, PERM_EDIT):
+        # Əhatədən kənar ixtisas «tapılmadı»dır (mövcudluq sızmır).
         return _error(pgettext(_CTX, "İxtisas tapılmadı."), status=404, code="not_found", field="program")
 
     year = _int_or(request.POST.get("admission_year"), 0, low=1990, high=2100)
@@ -153,7 +186,7 @@ def _create_plan(request, organization):
 
 
 def _save_row(request, organization):
-    plan = _plan(organization, request.POST.get("plan"))
+    plan = _plan(request, organization, request.POST.get("plan"))
     if plan is None:
         return _error(pgettext(_CTX, "Plan tapılmadı."), status=404, code="not_found")
     try:
@@ -242,7 +275,7 @@ def _save_row(request, organization):
 
 
 def _delete_row(request, organization):
-    plan = _plan(organization, request.POST.get("plan"))
+    plan = _plan(request, organization, request.POST.get("plan"))
     if plan is None:
         return _error(pgettext(_CTX, "Plan tapılmadı."), status=404, code="not_found")
     try:
@@ -274,7 +307,18 @@ def _delete_row(request, organization):
 
 
 def _transition(request, organization, action):
-    plan = _plan(organization, request.POST.get("plan"))
+    # Əhatə MƏHZ bu keçidin öz açarından çıxarılır (`permission_for`): kafedra
+    # müdiri öz kafedrasının, dekan öz fakültəsinin planını irəli aparır.
+    probe = (
+        Curriculum.objects.filter(organization=organization, pk=(request.POST.get("plan") or "").strip())
+        .only("status")
+        .first()
+    )
+    try:
+        required = permission_for(action, probe.status if probe is not None else "")
+    except PlanTransitionError as exc:
+        return _error(exc.message, status=exc.http_status, code=exc.code)
+    plan = _plan(request, organization, request.POST.get("plan"), required)
     if plan is None:
         return _error(pgettext(_CTX, "Plan tapılmadı."), status=404, code="not_found")
 
@@ -324,7 +368,7 @@ def _transition(request, organization, action):
 @transaction.atomic
 def _new_version(request, organization):
     """Təsdiqlənmiş plandan YENİ QARALAMA versiya — köhnə plan SİLİNMİR."""
-    plan = _plan(organization, request.POST.get("plan"))
+    plan = _plan(request, organization, request.POST.get("plan"))
     if plan is None:
         return _error(pgettext(_CTX, "Plan tapılmadı."), status=404, code="not_found")
     if plan.status != PlanStatus.APPROVED:

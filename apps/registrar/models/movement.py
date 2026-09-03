@@ -24,8 +24,11 @@ Müqavilələr
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 from django.conf import settings
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import pgettext_lazy
 
 from core.ui import status_catalog
@@ -44,8 +47,19 @@ MOVEMENT_REASON_MIN_LENGTH = 20
 
 
 def movement_document_path(instance, filename: str) -> str:
-    """Qorunan media altında org-scoped saxlama yolu."""
-    return f"student_movements/{instance.organization_id}/{filename}"
+    """Qorunan media altında org-scoped saxlama yolu — ad TƏSADÜFİLƏŞİR.
+
+    ⚠️ Ad qəsdən istifadəçidən GƏLMİR (audit 2026-09-03): «ərizə.pdf» kimi
+    təxmin edilə bilən ad yolu praktikada açıq açara çevirirdi.  Prefiks
+    ``core.media_policies``-də private-dır (icazə yoxlanılır), amma müdafiə
+    ikiqat olmalıdır — Django ``upload_to``-nun qaytardığı adı olduğu kimi
+    işlədir, ona görə random UUID burada verilir.
+    """
+    extension = ""
+    _, _, tail = str(filename or "").rpartition(".")
+    if tail and tail != str(filename or ""):
+        extension = "." + slugify(tail)[:10]
+    return f"student_movements/{instance.organization_id}/{uuid4().hex}{extension}"
 
 
 class MovementKind(models.TextChoices):

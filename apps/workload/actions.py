@@ -25,6 +25,7 @@ from .services import (
     build_mapping,
     confirm_own_load,
     create_objection,
+    ensure_can_manage,
     generate_rows_from_plan,
     get_or_create_task,
     normalize_academic_year,
@@ -122,6 +123,10 @@ def _submit(request, organization, actor):
 
 def _import_upload(request, organization, actor):
     task = _resolve_task(organization, request.POST.get("task"))
+    # ⚠️ QAPI ADDIM 1-DƏDİR (audit 2026-09-03): əvvəl yalnız `import_apply`
+    # yoxlanılırdı, yəni İSTƏNİLƏN autentifikasiya olunmuş üzv 10 MB-lıq xlsx
+    # göndərib parser-i (openpyxl) və uyğunlaşdırma sorğularını işlədə bilirdi.
+    ensure_can_manage(actor, task.chair_id)
     _ensure_writable(organization, task.academic_year)
     upload = request.FILES.get("file")
     if upload is None:
