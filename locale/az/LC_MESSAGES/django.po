@@ -60145,3 +60145,744 @@ msgstr "Bu sual göndərişini kafedra müdiri kimi nəzərdən keçirməyə sə
 msgctxt "exams.service.access.permission"
 msgid "question_submission_requires_chair_approval"
 msgstr "Bu sual göndərişi İmtahan Mərkəzinə çatmazdan əvvəl kafedra müdirinin təsdiqindən keçməlidir."
+
+msgctxt "accounts.catalog"
+msgid "AD DUBLİKATI"
+msgstr "AD DUBLİKATI"
+
+msgctxt "accounts.catalog"
+msgid "ARXİVDƏ"
+msgstr "ARXİVDƏ"
+
+msgctxt "accounts.catalog"
+msgid "Ad və ya rəsmi şifr"
+msgstr "Ad və ya rəsmi şifr"
+
+msgctxt "accounts.catalog"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "accounts.catalog"
+msgid "Aktivlər"
+msgstr "Aktivlər"
+
+msgctxt "accounts.catalog"
+msgid "Arxiv"
+msgstr "Arxiv"
+
+msgctxt "accounts.catalog"
+msgid "Arxivdəkilər"
+msgstr "Arxivdəkilər"
+
+msgctxt "accounts.catalog"
+msgid "Arxivdən qaytar"
+msgstr "Arxivdən qaytar"
+
+msgctxt "accounts.catalog"
+msgid "Arxivlə"
+msgstr "Arxivlə"
+
+msgctxt "accounts.catalog"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "accounts.catalog"
+msgid "Bu kodla fənn artıq mövcuddur."
+msgstr "Bu kodla fənn artıq mövcuddur."
+
+msgctxt "accounts.catalog"
+msgid "Bu kodla ixtisas artıq mövcuddur."
+msgstr "Bu kodla ixtisas artıq mövcuddur."
+
+msgctxt "accounts.catalog"
+msgid "Bəli"
+msgstr "Bəli"
+
+msgctxt "accounts.catalog"
+msgid "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır."
+msgstr "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır."
+
+msgctxt "accounts.catalog"
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər aşkarlandı"
+msgstr "Eyni adlı fənlər aşkarlandı"
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər birləşdirilmir — birləşdirmə (merge) destruktiv əməldir və plan sətirləri ilə sillabusların köçürülməsini tələb edir (növbəti mərhələ)."
+msgstr "Eyni adlı fənlər birləşdirilmir — birləşdirmə (merge) destruktiv əməldir və plan sətirləri ilə sillabusların köçürülməsini tələb edir (növbəti mərhələ)."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı yazılar"
+msgstr "Eyni adlı yazılar"
+
+msgctxt "accounts.catalog"
+msgid "FƏNN"
+msgstr "FƏNN"
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu boş ola bilməz."
+msgstr "Fənn kodu boş ola bilməz."
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu tenant daxilində unikaldır; saat bölgüsü tədris planı sətrində saxlanılır."
+msgstr "Fənn kodu tenant daxilində unikaldır; saat bölgüsü tədris planı sətrində saxlanılır."
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu və ya adı"
+msgstr "Fənn kodu və ya adı"
+
+msgctxt "accounts.catalog"
+msgid "Fənn növü"
+msgstr "Fənn növü"
+
+msgctxt "accounts.catalog"
+msgid "Fənn növü seçilməyib."
+msgstr "Fənn növü seçilməyib."
+
+msgctxt "accounts.catalog"
+msgid "Fənn tapılmadı"
+msgstr "Fənn tapılmadı"
+
+msgctxt "accounts.catalog"
+msgid "Fənn tapılmadı."
+msgstr "Fənn tapılmadı."
+
+msgctxt "accounts.catalog"
+msgid "Fənnin adı"
+msgstr "Fənnin adı"
+
+msgctxt "accounts.catalog"
+msgid "Fənnin adı boş ola bilməz."
+msgstr "Fənnin adı boş ola bilməz."
+
+msgctxt "accounts.catalog"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "accounts.catalog"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.catalog"
+msgid "Kafedra / fakültə"
+msgstr "Kafedra / fakültə"
+
+msgctxt "accounts.catalog"
+msgid "Kataloq yazısını arxivlə"
+msgstr "Kataloq yazısını arxivlə"
+
+msgctxt "accounts.catalog"
+msgid "Kataloqa baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+msgstr "Kataloqa baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+
+msgctxt "accounts.catalog"
+msgid "Kataloqu idarə etmək səlahiyyətiniz yoxdur."
+msgstr "Kataloqu idarə etmək səlahiyyətiniz yoxdur."
+
+msgctxt "accounts.catalog"
+msgid "Kredit (ECTS)"
+msgstr "Kredit (ECTS)"
+
+msgctxt "accounts.catalog"
+msgid "Məzuniyyət üçün ECTS"
+msgstr "Məzuniyyət üçün ECTS"
+
+msgctxt "accounts.catalog"
+msgid "Naməlum kataloq növü."
+msgstr "Naməlum kataloq növü."
+
+msgctxt "accounts.catalog"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "accounts.catalog"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "accounts.catalog"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Nəticə: %(count)d sətir"
+
+msgctxt "accounts.catalog"
+msgid "PLAN YOXDUR"
+msgstr "PLAN YOXDUR"
+
+msgctxt "accounts.catalog"
+msgid "PLANDA İSTİFADƏDƏ"
+msgstr "PLANDA İSTİFADƏDƏ"
+
+msgctxt "accounts.catalog"
+msgid "Planlarda istifadə"
+msgstr "Planlarda istifadə"
+
+
+msgctxt "accounts.catalog"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.catalog"
+msgid "REYESTRDƏ CƏMİ"
+msgstr "REYESTRDƏ CƏMİ"
+
+msgctxt "accounts.catalog"
+msgid "Redaktə"
+msgstr "Redaktə"
+
+msgctxt "accounts.catalog"
+msgid "Reyestr kodu"
+msgstr "Reyestr kodu"
+
+msgctxt "accounts.catalog"
+msgid "Rəsmi şifr (NK 503)"
+msgstr "Rəsmi şifr (NK 503)"
+
+msgctxt "accounts.catalog"
+msgid "Rəsmi şifr NK 503/2024 kataloqundan götürülür; daxili kod avtomatik yaranır."
+msgstr "Rəsmi şifr NK 503/2024 kataloqundan götürülür; daxili kod avtomatik yaranır."
+
+msgctxt "accounts.catalog"
+msgid "Sahibi kafedra"
+msgstr "Sahibi kafedra"
+
+msgctxt "accounts.catalog"
+msgid "Süzgəcləri dəyişin və ya yeni fənn əlavə edin."
+msgstr "Süzgəcləri dəyişin və ya yeni fənn əlavə edin."
+
+msgctxt "accounts.catalog"
+msgid "Süzgəcləri dəyişin və ya yeni ixtisas əlavə edin."
+msgstr "Süzgəcləri dəyişin və ya yeni ixtisas əlavə edin."
+
+msgctxt "accounts.catalog"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+
+msgctxt "accounts.catalog"
+msgid "Tabe olduğu kafedra"
+msgstr "Tabe olduğu kafedra"
+
+msgctxt "accounts.catalog"
+msgid "Tam ad"
+msgstr "Tam ad"
+
+msgctxt "accounts.catalog"
+msgid "Tədris planı təsdiqlənməyib"
+msgstr "Tədris planı təsdiqlənməyib"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil forması"
+msgstr "Təhsil forması"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil forması seçilməyib."
+msgstr "Təhsil forması seçilməyib."
+
+msgctxt "accounts.catalog"
+msgid "Təhsil pilləsi"
+msgstr "Təhsil pilləsi"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil pilləsi seçilməyib."
+msgstr "Təhsil pilləsi seçilməyib."
+
+msgctxt "accounts.catalog"
+msgid "Təyin edilməyib"
+msgstr "Təyin edilməyib"
+
+msgctxt "accounts.catalog"
+msgid "Universitetin təhsil proqramları: rəsmi şifr, pillə, forma, tabe olduğu kafedra və tədris planının vəziyyəti."
+msgstr "Universitetin təhsil proqramları: rəsmi şifr, pillə, forma, tabe olduğu kafedra və tədris planının vəziyyəti."
+
+msgctxt "accounts.catalog"
+msgid "Universitetin vahid fənn reyestri: kod, kredit, növ, sahibi kafedra və planlarda istifadə."
+msgstr "Universitetin vahid fənn reyestri: kod, kredit, növ, sahibi kafedra və planlarda istifadə."
+
+msgctxt "accounts.catalog"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.catalog"
+msgid "Yalnız dublikatlar"
+msgstr "Yalnız dublikatlar"
+
+msgctxt "accounts.catalog"
+msgid "Yalnız «Plan yoxdur»"
+msgstr "Yalnız «Plan yoxdur»"
+
+msgctxt "accounts.catalog"
+msgid "Yazı SİLİNMİR — arxivlənir; plan sətirləri, jurnal və qiymət tarixçəsi qalır."
+msgstr "Yazı SİLİNMİR — arxivlənir; plan sətirləri, jurnal və qiymət tarixçəsi qalır."
+
+msgctxt "accounts.catalog"
+msgid "Yazı tapılmadı."
+msgstr "Yazı tapılmadı."
+
+msgctxt "accounts.catalog"
+msgid "Yeni fənn"
+msgstr "Yeni fənn"
+
+msgctxt "accounts.catalog"
+msgid "Yeni ixtisas"
+msgstr "Yeni ixtisas"
+
+msgctxt "accounts.catalog"
+msgid "İXTİSAS"
+msgstr "İXTİSAS"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas kodu"
+msgstr "İxtisas kodu"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas tapılmadı"
+msgstr "İxtisas tapılmadı"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas tapılmadı."
+msgstr "İxtisas tapılmadı."
+
+msgctxt "accounts.catalog"
+msgid "İxtisasın adı boş ola bilməz."
+msgstr "İxtisasın adı boş ola bilməz."
+
+msgctxt "accounts.catalog"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "accounts.chair_profile"
+msgid "Aktiv təşkilat konteksti yoxdur"
+msgstr "Aktiv təşkilat konteksti yoxdur"
+
+msgctxt "accounts.chair_profile"
+msgid "Bu kafedraya hələ müəllim təyin edilməyib və ya süzgəc nəticəni boşaldıb."
+msgstr "Bu kafedraya hələ müəllim təyin edilməyib və ya süzgəc nəticəni boşaldıb."
+
+msgctxt "accounts.chair_profile"
+msgid "Bəli"
+msgstr "Bəli"
+
+msgctxt "accounts.chair_profile"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma dəyərləri müəllim yük profilindən oxunur."
+msgstr "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma dəyərləri müəllim yük profilindən oxunur."
+
+msgctxt "accounts.chair_profile"
+msgid "MÜƏLLİM"
+msgstr "MÜƏLLİM"
+
+msgctxt "accounts.chair_profile"
+msgid "Müdir"
+msgstr "Müdir"
+
+msgctxt "accounts.chair_profile"
+msgid "Müdir təyin edilməyib"
+msgstr "Müdir təyin edilməyib"
+
+msgctxt "accounts.chair_profile"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.chair_profile"
+msgid "Müəllim tapılmadı"
+msgstr "Müəllim tapılmadı"
+
+msgctxt "accounts.chair_profile"
+msgid "Norma"
+msgstr "Norma"
+
+msgctxt "accounts.chair_profile"
+msgid "Norma dəyərləri müəllim yük profilindən oxunur (NK №215 default: 500 saat). Nazirlik/Universitet norma dəstlərinin ayrılması sahib qərarını gözləyir."
+msgstr "Norma dəyərləri müəllim yük profilindən oxunur (NK №215 default: 500 saat). Nazirlik/Universitet norma dəstlərinin ayrılması sahib qərarını gözləyir."
+
+msgctxt "accounts.chair_profile"
+msgid "Normaya nisbətdə"
+msgstr "Normaya nisbətdə"
+
+msgctxt "accounts.chair_profile"
+msgid "Nəticə: %(count)d müəllim"
+msgstr "Nəticə: %(count)d müəllim"
+
+msgctxt "accounts.chair_profile"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.chair_profile"
+msgid "Saathesabı"
+msgstr "Saathesabı"
+
+msgctxt "accounts.chair_profile"
+msgid "Sillabus"
+msgstr "Sillabus"
+
+msgctxt "accounts.chair_profile"
+msgid "Struktur əhatəniz təyin edilməyib. Kafedra təyinatı üçün Tədris şöbəsinə və ya administratora müraciət edin."
+msgstr "Struktur əhatəniz təyin edilməyib. Kafedra təyinatı üçün Tədris şöbəsinə və ya administratora müraciət edin."
+
+msgctxt "accounts.chair_profile"
+msgid "SİLLABUS ƏHATƏSİ"
+msgstr "SİLLABUS ƏHATƏSİ"
+
+msgctxt "accounts.chair_profile"
+msgid "Tədris ili"
+msgstr "Tədris ili"
+
+msgctxt "accounts.chair_profile"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "accounts.chair_profile"
+msgid "Təşkilat seçin və ya administratora müraciət edin."
+msgstr "Təşkilat seçin və ya administratora müraciət edin."
+
+msgctxt "accounts.chair_profile"
+msgid "Vəzifə"
+msgstr "Vəzifə"
+
+msgctxt "accounts.chair_profile"
+msgid "Yalnız yüklü / risk"
+msgstr "Yalnız yüklü / risk"
+
+msgctxt "accounts.chair_profile"
+msgid "Yük vəziyyəti"
+msgstr "Yük vəziyyəti"
+
+msgctxt "accounts.chair_profile"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "accounts.chair_profile"
+msgid "İLLİK SAAT"
+msgstr "İLLİK SAAT"
+
+msgctxt "accounts.chair_profile"
+msgid "İllik saat"
+msgstr "İllik saat"
+
+msgctxt "accounts.chair_profile"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "accounts.chair_profile"
+msgid "ŞTAT VAHİDİ CƏMİ"
+msgstr "ŞTAT VAHİDİ CƏMİ"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat"
+msgstr "Ştat"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat növü"
+msgstr "Ştat növü"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat payı"
+msgstr "Ştat payı"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat payının cəmi"
+msgstr "Ştat payının cəmi"
+
+msgctxt "accounts.chair_profile"
+msgid "Əhatənizdə kafedra yoxdur"
+msgstr "Əhatənizdə kafedra yoxdur"
+
+msgctxt "accounts.chair_profile"
+msgid "Əvəzçilik"
+msgstr "Əvəzçilik"
+
+msgctxt "accounts.structure_tree"
+msgid "Adını dəyiş"
+msgstr "Adını dəyiş"
+
+msgctxt "accounts.structure_tree"
+msgid "Aktiv alt bölməsi olan vahid arxivlənə bilməz — əvvəlcə alt bölmələri arxivləyin."
+msgstr "Aktiv alt bölməsi olan vahid arxivlənə bilməz — əvvəlcə alt bölmələri arxivləyin."
+
+msgctxt "accounts.structure_tree"
+msgid "Alt bölmə əlavə et"
+msgstr "Alt bölmə əlavə et"
+
+msgctxt "accounts.structure_tree"
+msgid "Arxivlə"
+msgstr "Arxivlə"
+
+msgctxt "accounts.structure_tree"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "accounts.structure_tree"
+msgid "Ağacdan bölmə seçin — heyət, qrup və tələbə göstəriciləri burada açılır."
+msgstr "Ağacdan bölmə seçin — heyət, qrup və tələbə göstəriciləri burada açılır."
+
+msgctxt "accounts.structure_tree"
+msgid "Bu bölməyə baxış üçün struktur əhatəniz yoxdur. Administratora müraciət edin."
+msgstr "Bu bölməyə baxış üçün struktur əhatəniz yoxdur. Administratora müraciət edin."
+
+msgctxt "accounts.structure_tree"
+msgid "BÖLMƏ"
+msgstr "BÖLMƏ"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə SİLİNMİR — arxivlənir. Əlaqəli tələbə, jurnal və qiymət tarixçəsi olduğu kimi qalır."
+msgstr "Bölmə SİLİNMİR — arxivlənir. Əlaqəli tələbə, jurnal və qiymət tarixçəsi olduğu kimi qalır."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə SİLİNMİR — arxivlənir; tələbə, jurnal və qiymət tarixçəsi qalır."
+msgstr "Bölmə SİLİNMİR — arxivlənir; tələbə, jurnal və qiymət tarixçəsi qalır."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə adı və ya kodu"
+msgstr "Bölmə adı və ya kodu"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə seçilmiş vahidin altında yaradılır."
+msgstr "Bölmə seçilmiş vahidin altında yaradılır."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə seçilməyib"
+msgstr "Bölmə seçilməyib"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tapılmadı"
+msgstr "Bölmə tapılmadı"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tapılmadı."
+msgstr "Bölmə tapılmadı."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tipi"
+msgstr "Bölmə tipi"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "Bölmə tipi bu təşkilat üçün keçərli deyil."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölməni arxivlə"
+msgstr "Bölməni arxivlə"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmənin adı"
+msgstr "Bölmənin adı"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "Bölmənin adı boş ola bilməz."
+
+msgctxt "accounts.structure_tree"
+msgid "Bütün tiplər"
+msgstr "Bütün tiplər"
+
+msgctxt "accounts.structure_tree"
+msgid "FAKÜLTƏ"
+msgstr "FAKÜLTƏ"
+
+msgctxt "accounts.structure_tree"
+msgid "KAFEDRA"
+msgstr "KAFEDRA"
+
+msgctxt "accounts.structure_tree"
+msgid "Kod"
+msgstr "Kod"
+
+msgctxt "accounts.structure_tree"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.structure_tree"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "accounts.structure_tree"
+msgid "Nəticə: %(count)d bölmə"
+msgstr "Nəticə: %(count)d bölmə"
+
+msgctxt "accounts.structure_tree"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.structure_tree"
+msgid "Rektorat → fakültə → dekanlıq → kafedra → ixtisas → qrup iyerarxiyası. Bölmə silinmir — arxivlənir."
+msgstr "Rektorat → fakültə → dekanlıq → kafedra → ixtisas → qrup iyerarxiyası. Bölmə silinmir — arxivlənir."
+
+msgctxt "accounts.structure_tree"
+msgid "RƏHBƏRİ YOXDUR"
+msgstr "RƏHBƏRİ YOXDUR"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər"
+msgstr "Rəhbər"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər təyin et"
+msgstr "Rəhbər təyin et"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər təyini üçün səlahiyyətiniz yoxdur."
+msgstr "Rəhbər təyini üçün səlahiyyətiniz yoxdur."
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbəri götür (boş)"
+msgstr "Rəhbəri götür (boş)"
+
+msgctxt "accounts.structure_tree"
+msgid "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."
+msgstr "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."
+
+msgctxt "accounts.structure_tree"
+msgid "Seçin…"
+msgstr "Seçin…"
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur ağacı"
+msgstr "Struktur ağacı"
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur ağacını idarə etmək səlahiyyətiniz yoxdur."
+msgstr "Struktur ağacını idarə etmək səlahiyyətiniz yoxdur."
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur əhatəniz yoxdur."
+msgstr "Struktur əhatəniz yoxdur."
+
+msgctxt "accounts.structure_tree"
+msgid "Süzgəcləri dəyişin və ya yeni bölmə əlavə edin."
+msgstr "Süzgəcləri dəyişin və ya yeni bölmə əlavə edin."
+
+msgctxt "accounts.structure_tree"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+
+msgctxt "accounts.structure_tree"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyin edilməyib"
+msgstr "Təyin edilməyib"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyin et"
+msgstr "Təyin et"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyinat gözləyir"
+msgstr "Təyinat gözləyir"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyinat səbəbi audit jurnalına aktor və vaxtla yazılır."
+msgstr "Təyinat səbəbi audit jurnalına aktor və vaxtla yazılır."
+
+msgctxt "accounts.structure_tree"
+msgid "Universitetin struktur ağacı"
+msgstr "Universitetin struktur ağacı"
+
+msgctxt "accounts.structure_tree"
+msgid "Valideyn bölmə tapılmadı."
+msgstr "Valideyn bölmə tapılmadı."
+
+msgctxt "accounts.structure_tree"
+msgid "Yeni alt bölmə"
+msgstr "Yeni alt bölmə"
+
+msgctxt "accounts.structure_tree"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "organizations.permission.label"
+msgid "Bölməyə rəhbər təyin etmək"
+msgstr "Bölməyə rəhbər təyin etmək"
+
+msgctxt "organizations.permission.label"
+msgid "Struktur ağacını idarə etmək (yaratmaq/adını dəyişmək/arxivləmək)"
+msgstr "Struktur ağacını idarə etmək (yaratmaq/adını dəyişmək/arxivləmək)"
+
+msgctxt "organizations.permission.label"
+msgid "İxtisas və fənn kataloquna baxış"
+msgstr "İxtisas və fənn kataloquna baxış"
+
+msgctxt "organizations.permission.label"
+msgid "İxtisas və fənn kataloqunu idarə etmək"
+msgstr "İxtisas və fənn kataloqunu idarə etmək"
+
+msgctxt "profile.sidebar"
+msgid "Fənn kataloqu"
+msgstr "Fənn kataloqu"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra profili"
+msgstr "Kafedra profili"
+
+msgctxt "profile.sidebar"
+msgid "Tədris şöbəsi"
+msgstr "Tədris şöbəsi"
+
+msgctxt "profile.sidebar"
+msgid "Universitet strukturu"
+msgstr "Universitet strukturu"
+
+msgctxt "profile.sidebar"
+msgid "İxtisaslar"
+msgstr "İxtisaslar"
+
+msgctxt "registrar.education_form"
+msgid "Distant"
+msgstr "Distant"
+
+msgctxt "registrar.education_form"
+msgid "Qiyabi"
+msgstr "Qiyabi"
+
+msgctxt "registrar.education_form"
+msgid "Əyani"
+msgstr "Əyani"
+
+msgctxt "registrar.subject_kind"
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"
+
+msgctxt "registrar.subject_kind"
+msgid "Təcrübə"
+msgstr "Təcrübə"
+
+msgctxt "registrar.subject_kind"
+msgid "Ümumi fənn"
+msgstr "Ümumi fənn"
+
+msgctxt "registrar.subject_kind"
+msgid "İxtisas fənni"
+msgstr "İxtisas fənni"
+
+msgctxt "ui.status"
+msgid "Ad dublikatı"
+msgstr "Ad dublikatı"
+
+msgctxt "ui.status"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "ui.status"
+msgid "Arxivdə"
+msgstr "Arxivdə"
+
+msgctxt "ui.status"
+msgid "Plan yoxdur"
+msgstr "Plan yoxdur"
+
+msgctxt "ui.status"
+msgid "Planda istifadə olunmur"
+msgstr "Planda istifadə olunmur"
+
+msgctxt "accounts.catalog"
+msgid "Qayıb limiti (%%)"
+msgstr "Qayıb limiti (%%)"
