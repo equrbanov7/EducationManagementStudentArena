@@ -1,5 +1,6 @@
 """PostgreSQL defense-in-depth checks for scalable batch accounting."""
 
+import os
 from contextlib import contextmanager
 
 from django.db import DatabaseError, connection, transaction
@@ -123,7 +124,10 @@ def _rejects(write):
             write()
 
 
-_PROBE_ROLE = "ems_guard_probe"
+# PostgreSQL rolları KLASTER səviyyəsindədir (DB-yə bağlı deyil): pytest-xdist
+# worker-ləri paralel işləyəndə eyni adlı rol yarat/sil toqquşur (başqa
+# worker-in DB-sindəki GRANT DROP ROLE-u bloklayır). Ad worker-ə görə ayrılır.
+_PROBE_ROLE = "ems_guard_probe" + os.environ.get("PYTEST_XDIST_WORKER", "")
 
 
 def _drop_probe_role(cursor):

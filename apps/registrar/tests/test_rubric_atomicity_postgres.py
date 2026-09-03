@@ -1,5 +1,6 @@
 """PostgreSQL database guards for component-scoped rubric evidence."""
 
+import os
 from contextlib import contextmanager
 
 from django.db import IntegrityError, connection, transaction
@@ -28,7 +29,10 @@ class RubricDatabaseGuardTest(RubricBaseTest):
         with connection.cursor() as cursor:
             cursor.execute("SET CONSTRAINTS ALL DEFERRED")
 
-    _PROBE_ROLE = "ems_guard_probe"
+    # PostgreSQL rolları KLASTER səviyyəsindədir (DB-yə bağlı deyil): pytest-xdist
+    # worker-ləri paralel işləyəndə eyni adlı rol yarat/sil toqquşur (başqa
+    # worker-in DB-sindəki GRANT DROP ROLE-u bloklayır). Ad worker-ə görə ayrılır.
+    _PROBE_ROLE = "ems_guard_probe" + os.environ.get("PYTEST_XDIST_WORKER", "")
     # TRUNCATE ... CASCADE needs the TRUNCATE privilege on every table the
     # cascade reaches; criterion scores FK-reference the rubric criteria.
     _PROBE_TABLES = ("registrar_rubriccriterion", "registrar_criterionscore")
