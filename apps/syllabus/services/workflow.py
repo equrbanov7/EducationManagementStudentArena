@@ -49,12 +49,26 @@ _SCOPE_PERMISSION = {
     Transition.ARCHIVE: PERM_MANAGE,
 }
 
+#: SAHİBİN QƏRARI (2026-09-03): təsdiq/düzəliş/rədd üçün əhatə KAFEDRA
+#: SƏVİYYƏSİNDƏ olmalıdır — dekanın fakültə alt-ağacı bəs etmir.  Baxışın
+#: AÇILMASI (``START_REVIEW``) və arxivləmə bu siyahıda QƏSDƏN yoxdur: dekan
+#: növbəni açıb oxuya və şərh yaza bilir, sadəcə qərar verə bilmir.
+_CHAIR_LEVEL_TRANSITIONS = frozenset(
+    {
+        Transition.APPROVE,
+        Transition.REQUEST_REVISION,
+        Transition.REJECT,
+    }
+)
+
 
 def _in_scope(actor, syllabus, name: str) -> bool:
     """Müəllif öz sillabusunda həmişə «əhatədədir»; kafedra tərəfi scope ilə."""
     permission = _SCOPE_PERMISSION.get(name)
     if permission is None:
         return is_author(actor, syllabus)
+    if name in _CHAIR_LEVEL_TRANSITIONS:
+        return actor.covers_chair_unit(syllabus.chair_unit_id, permission)
     return actor.covers_unit(syllabus.chair_unit_id, permission)
 
 

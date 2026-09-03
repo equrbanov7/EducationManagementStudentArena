@@ -39,6 +39,9 @@ _CTX = "accounts.syllabus"
 #: Bir bölmə şərhinin maksimum uzunluğu — JSON sahəsi hədsiz şişməsin.
 MAX_SECTION_COMMENT = 2000
 
+#: 403 (səlahiyyət) ilə qaytarılan domen kodları — qalanı 409 (vəziyyət).
+_FORBIDDEN_CODES = frozenset({"transition.permission_denied", "transition.out_of_scope", "transition.author_only"})
+
 _NO_ORG = pgettext_lazy(_CTX, "Aktiv təşkilat seçilməyib.")
 _NOT_FOUND = pgettext_lazy(_CTX, "Sillabus versiyası tapılmadı və ya əhatənizdə deyil.")
 _BAD_REQUEST = pgettext_lazy(_CTX, "Sorğu düzgün deyil.")
@@ -131,9 +134,7 @@ def syllabus_review_open(request, version_id):
         try:
             version = services.start_review(version=version, actor=actor, request=request)
         except TransitionDenied as denied:
-            if denied.code == "transition.permission_denied":
-                return _fail(transition_text(denied.code, denied.params), status=403, code=denied.code)
-            if denied.code == "transition.out_of_scope":
+            if denied.code in _FORBIDDEN_CODES:
                 return _fail(transition_text(denied.code, denied.params), status=403, code=denied.code)
         version = _scoped_version(organization, actor, version_id)
         if version is None:
@@ -183,7 +184,11 @@ def syllabus_decision(request, version_id):
     try:
         updated = service(**kwargs)
     except TransitionDenied as denied:
-        return _fail(transition_text(denied.code, denied.params), status=409, code=denied.code)
+        # SƏLAHİYYƏT ≠ VƏZİYYƏT: icazə/əhatə pozuntusu 403-dür (sahibin qərarı
+        # 2026-09-03 — dekanın qərar açarı yoxdur), status toqquşması isə 409.
+        # İkisi eyni kodla qayıtsaydı, kliyent «yenidən cəhd et» deyərdi.
+        status = 403 if denied.code in _FORBIDDEN_CODES else 409
+        return _fail(transition_text(denied.code, denied.params), status=status, code=denied.code)
 
     name = version.syllabus.subject.name
     return JsonResponse(

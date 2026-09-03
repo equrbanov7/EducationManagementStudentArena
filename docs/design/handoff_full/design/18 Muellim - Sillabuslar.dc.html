@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible,a:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  @keyframes ems-sk{0%{opacity:.55}50%{opacity:1}100%{opacity:.55}}
+</style>
+</helmet>
+<div style="max-width:1440px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><polyline points="14 2 14 7 19 7"></polyline><line x1="9" y1="13" x2="15" y2="13"></line></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">Müəllim kabineti</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">b/m Nigar Həsənli · Proqramlaşdırma və İT kafedrası</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 tədris ili</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">Müəllim</span>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em">Sillabuslar</h1>
+      <p style="margin:6px 0 0;max-width:760px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və qiymətlər olduğu kimi qalır.</p>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      <a href="./Müəllim - Keçilmiş dərslər.dc.html" style="display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700">Keçilmiş dərslər</a>
+      <a href="./Müəllim - Sillabus redaktoru.dc.html" style="display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.83rem;font-weight:700">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Yeni sillabus
+      </a>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:11px;margin-bottom:14px">
+    <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+      <button type="button" onClick="{{ m.pick }}" aria-pressed="{{ m.on }}" style="text-align:left;padding:12px 14px;border:{{ m.bw }} solid {{ m.bd }};background:{{ m.bg }};border-radius:13px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+        <div style="font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }};text-wrap:pretty">{{ m.label }}</div>
+        <div style="margin-top:5px;font-size:1.26rem;font-weight:800;color:{{ m.valFg }}">{{ m.value }}</div>
+        <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="padding:12px 13px;margin-bottom:12px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:9px">
+      <div style="flex:1;min-width:210px">
+        <label for="sy-q" style="display:block;margin-bottom:5px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Axtarış</label>
+        <div style="position:relative">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" aria-hidden="true" style="position:absolute;left:11px;top:12px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+          <input id="sy-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Fənn adı, kodu və ya qrup" style="width:100%;height:38px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:9px;background:var(--ems-neutral-50);font-size:.83rem">
+        </div>
+      </div>
+      <sc-for list="{{ selects }}" as="s" hint-placeholder-count="4">
+        <div style="min-width:150px">
+          <label for="{{ s.id }}" style="display:block;margin-bottom:5px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ s.label }}</label>
+          <select id="{{ s.id }}" defaultValue="{{ s.value }}" onChange="{{ s.set }}" style="width:100%;height:38px;padding:0 9px;border:1px solid var(--ems-neutral-300);border-radius:9px;background:var(--ems-neutral-0);font-size:.82rem;color:var(--ems-neutral-700)">
+            <sc-for list="{{ s.opts }}" as="o" hint-placeholder-count="3">
+              <option value="{{ o.v }}">{{ o.t }}</option>
+            </sc-for>
+          </select>
+        </div>
+      </sc-for>
+      <button type="button" onClick="{{ reset }}" style="min-height:38px;padding:0 13px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.81rem;font-weight:700;cursor:pointer">Axtarışı sıfırla</button>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:11px;padding-top:11px;border-top:1px solid var(--ems-neutral-100)">
+      <span style="font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ems-neutral-400)">Status</span>
+      <sc-for list="{{ chips }}" as="c" hint-placeholder-count="8">
+        <button type="button" onClick="{{ c.pick }}" aria-pressed="{{ c.on }}" style="display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 11px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.78rem;font-weight:700;cursor:pointer">
+          {{ c.label }}
+          <span style="padding:0 6px;border-radius:999px;background:{{ c.nBg }};color:{{ c.nFg }};font-size:.7rem;font-weight:800">{{ c.n }}</span>
+        </button>
+      </sc-for>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <label for="sy-sort" style="font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ems-neutral-400)">Sıralama</label>
+        <select id="sy-sort" defaultValue="{{ sort }}" onChange="{{ setSort }}" style="height:34px;padding:0 9px;border:1px solid var(--ems-neutral-300);border-radius:9px;background:var(--ems-neutral-0);font-size:.81rem;color:var(--ems-neutral-700)">
+          <option value="date">Son dəyişikliyə görə</option>
+          <option value="name">Fənn adına görə</option>
+          <option value="prog">Tamamlanma faizinə görə</option>
+          <option value="status">Statusa görə</option>
+        </select>
+        <span style="display:inline-flex;padding:2px;border-radius:9px;background:var(--ems-neutral-100)">
+          <button type="button" onClick="{{ viewTable }}" aria-pressed="{{ isTable }}" style="min-height:30px;padding:0 11px;border:none;border-radius:7px;background:{{ tBg }};color:{{ tFg }};font-size:.78rem;font-weight:700;cursor:pointer">Cədvəl</button>
+          <button type="button" onClick="{{ viewCard }}" aria-pressed="{{ isCard }}" style="min-height:30px;padding:0 11px;border:none;border-radius:7px;background:{{ cBg }};color:{{ cFg }};font-size:.78rem;font-weight:700;cursor:pointer">Kart</button>
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:56px 24px;text-align:center;background:var(--ems-neutral-0);border:1px dashed var(--ems-neutral-300);border-radius:16px">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><polyline points="14 2 14 7 19 7"></polyline></svg>
+      <div style="font-size:.92rem;font-weight:800">Filtrə uyğun sillabus yoxdur</div>
+      <p style="margin:0;max-width:420px;font-size:.83rem;color:var(--ems-neutral-500);text-wrap:pretty">Seçilmiş akademik il, semestr və status kombinasiyasında qeyd tapılmadı.</p>
+      <button type="button" onClick="{{ reset }}" style="min-height:40px;padding:0 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.82rem;font-weight:700;cursor:pointer">Axtarış və status filtrini sıfırla</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+    <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table style="width:100%;min-width:1080px;border-collapse:collapse;font-size:.82rem">
+          <thead>
+            <tr style="background:var(--ems-neutral-50)">
+              <sc-for list="{{ cols }}" as="h" hint-placeholder-count="7">
+                <th scope="col" style="padding:10px 12px;text-align:{{ h.al }};font-size:.67rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-200);white-space:nowrap">{{ h.t }}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+              <tr style="border-bottom:1px solid var(--ems-neutral-100)" style-hover="background:var(--ems-neutral-50)">
+                <th scope="row" style="padding:11px 12px;text-align:left;vertical-align:top">
+                  <div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;font-weight:700;color:var(--ems-neutral-400)">{{ r.code }}</div>
+                  <div style="margin-top:2px;font-size:.85rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ r.name }}</div>
+                  <div style="margin-top:2px;font-size:.74rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ r.prog }}</div>
+                </th>
+                <td style="padding:11px 12px;vertical-align:top;color:var(--ems-neutral-500);white-space:nowrap">
+                  <div style="font-weight:700;color:var(--ems-neutral-700)">{{ r.year }}</div>
+                  <div style="margin-top:2px;font-size:.75rem">{{ r.sem }}</div>
+                </td>
+                <td style="padding:11px 12px;vertical-align:top;white-space:nowrap">
+                  <span style="padding:2px 8px;border-radius:6px;background:var(--ems-neutral-100);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.74rem;font-weight:700;color:var(--ems-neutral-700)">{{ r.ver }}</span>
+                </td>
+                <td style="padding:11px 12px;vertical-align:top;min-width:120px">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="flex:1;min-width:54px;height:6px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+                      <span style="display:block;height:100%;width:{{ r.pw }};background:{{ r.pc }};border-radius:999px"></span>
+                    </span>
+                    <span style="font-size:.77rem;font-weight:800;color:{{ r.pc }}">{{ r.pct }}</span>
+                  </div>
+                </td>
+                <td style="padding:11px 12px;vertical-align:top">
+                  <span style="display:inline-block;padding:2px 9px;border-radius:999px;background:{{ r.sBg }};color:{{ r.sFg }};font-size:.71rem;font-weight:800;white-space:nowrap">{{ r.status }}</span>
+                  <div style="margin-top:4px;font-size:.73rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ r.approver }}</div>
+                </td>
+                <td style="padding:11px 12px;vertical-align:top;min-width:180px">
+                  <div style="font-size:.79rem;font-weight:700;color:{{ r.nextFg }};text-wrap:pretty">{{ r.next }}</div>
+                  <div style="margin-top:2px;font-size:.73rem;color:var(--ems-neutral-500)">{{ r.touched }}</div>
+                </td>
+                <td style="padding:11px 12px;vertical-align:top;text-align:right;white-space:nowrap">
+                  <div style="display:inline-flex;flex-wrap:wrap;justify-content:flex-end;gap:6px">
+                    <sc-for list="{{ r.acts }}" as="a" hint-placeholder-count="2">
+                      <button type="button" onClick="{{ a.run }}" title="{{ a.label }}" style="min-height:34px;padding:0 11px;border-radius:8px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:{{ a.fg }};font-size:.78rem;font-weight:700;cursor:pointer">{{ a.label }}</button>
+                    </sc-for>
+                    <sc-if value="{{ r.more }}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{ r.openMore }}" aria-label="{{ r.moreAria }}" style="width:34px;height:34px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="19" cy="12" r="1.7"></circle></svg>
+                      </button>
+                    </sc-if>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:var(--ems-neutral-50);border-top:1px solid var(--ems-neutral-200)">
+        <span style="font-size:.78rem;color:var(--ems-neutral-500)">{{ pg.text }}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button type="button" onClick="{{ pg.prev }}" disabled="{{ pg.prevDis }}" style="min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.79rem;font-weight:700;cursor:pointer">Əvvəlki</button>
+          <sc-for list="{{ pg.pages }}" as="p" hint-placeholder-count="2">
+            <button type="button" onClick="{{ p.go }}" aria-current="{{ p.cur }}" style="min-width:34px;min-height:34px;padding:0 8px;border-radius:8px;border:1px solid {{ p.bd }};background:{{ p.bg }};color:{{ p.fg }};font-size:.79rem;font-weight:800;cursor:pointer">{{ p.n }}</button>
+          </sc-for>
+          <button type="button" onClick="{{ pg.next }}" disabled="{{ pg.nextDis }}" style="min-height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.79rem;font-weight:700;cursor:pointer">Növbəti</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCard }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+        <div style="display:flex;flex-direction:column;padding:15px 16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-left:3px solid {{ r.accent }};border-radius:14px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;font-weight:700;color:var(--ems-neutral-400)">{{ r.code }}</span>
+            <span style="margin-left:auto;padding:2px 9px;border-radius:999px;background:{{ r.sBg }};color:{{ r.sFg }};font-size:.71rem;font-weight:800;white-space:nowrap">{{ r.status }}</span>
+          </div>
+          <div style="font-size:.93rem;font-weight:800;line-height:1.3;text-wrap:pretty">{{ r.name }}</div>
+          <div style="margin-top:4px;font-size:.76rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ r.prog }}</div>
+          <div style="margin-top:4px;font-size:.75rem;color:var(--ems-neutral-500)">{{ r.year }} · {{ r.sem }} · {{ r.ver }}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:11px">
+            <span style="flex:1;height:6px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+              <span style="display:block;height:100%;width:{{ r.pw }};background:{{ r.pc }};border-radius:999px"></span>
+            </span>
+            <span style="font-size:.77rem;font-weight:800;color:{{ r.pc }}">{{ r.pct }}</span>
+          </div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--ems-neutral-100);font-size:.77rem;font-weight:700;color:{{ r.nextFg }};text-wrap:pretty">{{ r.next }}</div>
+          <div style="margin-top:3px;font-size:.73rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ r.touched }} · {{ r.approver }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">
+            <sc-for list="{{ r.acts }}" as="a" hint-placeholder-count="2">
+              <button type="button" onClick="{{ a.run }}" style="min-height:38px;padding:0 13px;border-radius:9px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:{{ a.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ a.label }}</button>
+            </sc-for>
+            <sc-if value="{{ r.more }}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{ r.openMore }}" style="min-height:38px;padding:0 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Daha çox</button>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+
+<sc-if value="{{ dr.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end;background:rgba(15,23,42,.42)" onClick="{{ dr.close }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="sy-dr-t" tabindex="-1" ref="{{ dr.ref }}" onClick="{{ stop }}" style="width:100%;max-width:720px;height:100%;display:flex;flex-direction:column;background:var(--ems-neutral-0);box-shadow:-18px 0 50px rgba(15,23,42,.22)">
+      <div style="flex:none;padding:16px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px">
+          <div style="min-width:0">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+              <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;font-weight:700;color:var(--ems-neutral-400)">{{ dr.code }}</span>
+              <span style="padding:2px 9px;border-radius:999px;background:{{ dr.sBg }};color:{{ dr.sFg }};font-size:.71rem;font-weight:800">{{ dr.status }}</span>
+              <span style="padding:2px 9px;border-radius:999px;background:var(--ems-neutral-100);color:var(--ems-neutral-700);font-size:.71rem;font-weight:800">{{ dr.ver }}</span>
+            </div>
+            <h3 id="sy-dr-t" style="margin:6px 0 0;font-size:1.06rem;font-weight:800;text-wrap:pretty">{{ dr.name }}</h3>
+            <div style="margin-top:3px;font-size:.78rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ dr.meta }}</div>
+          </div>
+          <button type="button" onClick="{{ dr.close }}" aria-label="Paneli bağla" style="width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+          </button>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;margin-top:12px;padding:10px 13px;background:{{ dr.banBg }};border:1px solid {{ dr.banBd }};border-radius:10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ dr.banFg }}" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="flex:none;margin-top:1px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7.5a4 4 0 0 1 8 0V11"></path></svg>
+          <span style="flex:1;font-size:.79rem;color:{{ dr.banFg }};line-height:1.55;text-wrap:pretty">{{ dr.banText }}</span>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow:auto;padding:18px 22px">
+        <sc-for list="{{ dr.blocks }}" as="b" hint-placeholder-count="6">
+          <div style="padding:12px 0;border-bottom:1px solid var(--ems-neutral-100)">
+            <div style="font-size:.69rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ b.h }}</div>
+            <div style="margin-top:6px;font-size:.84rem;color:var(--ems-neutral-700);line-height:1.65;white-space:pre-line;text-wrap:pretty">{{ b.body }}</div>
+          </div>
+        </sc-for>
+        <div style="margin-top:16px">
+          <div style="font-size:.69rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:9px">Versiya tarixçəsi</div>
+          <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--ems-neutral-200);border-radius:11px;overflow:hidden;background:var(--ems-neutral-100)">
+            <sc-for list="{{ dr.hist }}" as="h" hint-placeholder-count="3">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 13px;background:var(--ems-neutral-0)">
+                <span style="width:56px;flex:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.76rem;font-weight:800;color:var(--ems-neutral-900)">{{ h.v }}</span>
+                <span style="flex:1;min-width:150px;font-size:.79rem;color:var(--ems-neutral-700);text-wrap:pretty">{{ h.what }}</span>
+                <span style="font-size:.74rem;color:var(--ems-neutral-500);white-space:nowrap">{{ h.who }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="flex:none;display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50)">
+        <sc-for list="{{ dr.acts }}" as="a" hint-placeholder-count="4">
+          <button type="button" onClick="{{ a.run }}" style="min-height:42px;padding:0 15px;border-radius:9px;border:1px solid {{ a.bd }};background:{{ a.bg }};color:{{ a.fg }};font-size:.83rem;font-weight:700;cursor:pointer">{{ a.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ dlg.show }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.45)" onClick="{{ dlg.close }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="sy-dl-t" tabindex="-1" ref="{{ dlg.ref }}" onClick="{{ stop }}" style="width:100%;max-width:540px;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.3);overflow:hidden">
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:18px 20px 14px">
+        <span style="width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:999px;background:{{ dlg.iBg }};color:{{ dlg.iFg }};font-size:1rem;font-weight:900">{{ dlg.icon }}</span>
+        <div style="flex:1;min-width:0">
+          <h3 id="sy-dl-t" style="margin:0;font-size:1.02rem;font-weight:800;text-wrap:pretty">{{ dlg.title }}</h3>
+          <p style="margin:6px 0 0;font-size:.83rem;color:var(--ems-neutral-500);line-height:1.6;text-wrap:pretty">{{ dlg.body }}</p>
+        </div>
+      </div>
+      <sc-if value="{{ dlg.hasPick }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:0 20px 14px">
+          <sc-for list="{{ dlg.picks }}" as="o" hint-placeholder-count="2">
+            <button type="button" onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" style="display:flex;align-items:flex-start;gap:10px;padding:12px 13px;text-align:left;border:{{ o.bw }} solid {{ o.bd }};background:{{ o.bg }};border-radius:11px;cursor:pointer">
+              <span style="width:16px;height:16px;flex:none;margin-top:2px;display:grid;place-items:center;border-radius:999px;border:1.5px solid {{ o.rBd }}">
+                <span style="width:7px;height:7px;border-radius:999px;background:{{ o.rDot }}"></span>
+              </span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:.86rem;font-weight:800;color:{{ o.fg }}">{{ o.title }}</span>
+                <span style="display:block;margin-top:3px;font-size:.78rem;color:var(--ems-neutral-500);line-height:1.55;text-wrap:pretty">{{ o.note }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ dlg.hasText }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:0 20px 14px">
+          <label for="sy-dl-x" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ dlg.textLabel }} <span style="color:var(--ems-danger)">*</span></label>
+          <textarea id="sy-dl-x" rows="3" value="{{ dlg.text }}" onChange="{{ dlg.setText }}" placeholder="{{ dlg.textPh }}" style="width:100%;padding:11px 12px;border:1px solid {{ dlg.textBd }};border-radius:9px;font-size:.84rem;line-height:1.6;resize:vertical"></textarea>
+          <div style="margin-top:5px;font-size:.74rem;color:{{ dlg.textFg }}">{{ dlg.textNote }}</div>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;justify-content:flex-end;gap:9px;padding:14px 20px;background:var(--ems-neutral-50);border-top:1px solid var(--ems-neutral-200)">
+        <button type="button" onClick="{{ dlg.close }}" style="min-height:44px;padding:0 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.84rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ dlg.confirm }}" disabled="{{ dlg.dis }}" style="min-height:44px;padding:0 18px;border-radius:9px;border:1px solid {{ dlg.okBd }};background:{{ dlg.okBg }};color:{{ dlg.okFg }};font-size:.84rem;font-weight:800;cursor:{{ dlg.cur }}">{{ dlg.ok }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600;max-width:min(92vw,600px)">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    <span style="text-wrap:pretty">{{ toastText }}</span>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1120}}">
+const ST = {
+  draft:     { label:'Qaralama',            bg:'var(--ems-neutral-100)',  fg:'var(--ems-neutral-700)',  accent:'var(--ems-neutral-300)' },
+  submitted: { label:'Təqdim edilib',       bg:'var(--ems-primary-100)',  fg:'var(--ems-primary-800)',  accent:'var(--ems-primary-600)' },
+  review:    { label:'Baxışdadır',          bg:'var(--ems-primary-50)',   fg:'var(--ems-primary-800)',  accent:'var(--ems-primary-600)' },
+  revision:  { label:'Düzəliş tələb olunur',bg:'var(--ems-warning-bg)',   fg:'#92400e',                 accent:'var(--ems-warning)' },
+  approved:  { label:'Təsdiqlənib',         bg:'var(--ems-success-bg)',   fg:'#15803d',                 accent:'var(--ems-success)' },
+  rejected:  { label:'Rədd edilib',         bg:'var(--ems-danger-bg)',    fg:'#b91c1c',                 accent:'var(--ems-danger)' },
+  archived:  { label:'Arxivlənib',          bg:'var(--ems-neutral-100)',  fg:'var(--ems-neutral-500)',  accent:'var(--ems-neutral-200)' }
+};
+const ORDER = ['revision','rejected','draft','submitted','review','approved','archived'];
+const S = (o) => o;
+const DATA = [
+  S({ code:'MİF-B04.12', name:'Alqoritmlər və verilənlər strukturu', prog:'Kompüter elmləri (bakalavr) · 235 KE, 235 İT', dep:'Proqramlaşdırma və İT', year:'2026/2027', sem:'Payız', ver:'v2.0', st:'draft', pct:62, touched:'22.08.2026, 11:42', appr:'v1.1 aktivdir · dos. R. Əliyev, 14.02.2026' }),
+  S({ code:'MİF-B04.01', name:'Proqramlaşdırmanın əsasları', prog:'Kompüter elmləri (bakalavr) · 236 KE, 236 KE ing', dep:'Proqramlaşdırma və İT', year:'2026/2027', sem:'Payız', ver:'v1.0', st:'revision', pct:88, touched:'20.08.2026, 16:05', appr:'Düzəliş: dos. R. Əliyev, 20.08.2026' }),
+  S({ code:'MİF-B02.11', name:'Veb texnologiyalar', prog:'İnformasiya texnologiyaları (bakalavr) · 234 İT', dep:'Proqramlaşdırma və İT', year:'2026/2027', sem:'Payız', ver:'v1.0', st:'review', pct:100, touched:'18.08.2026, 09:20', appr:'Baxır: dos. R. Əliyev · 4 gündür' }),
+  S({ code:'MİF-B04.09', name:'Diskret strukturlar', prog:'Kompüter elmləri (bakalavr) · 235 KE', dep:'Proqramlaşdırma və İT', year:'2026/2027', sem:'Payız', ver:'v1.0', st:'submitted', pct:100, touched:'21.08.2026, 14:31', appr:'Növbədə · 1 gündür' }),
+  S({ code:'MİF-B09.14', name:'Şəbəkə administrasiyası', prog:'İnformasiya texnologiyaları (bakalavr) · 234 İT', dep:'Kompüter mühəndisliyi', year:'2026/2027', sem:'Yaz', ver:'v1.0', st:'draft', pct:24, touched:'12.08.2026, 10:02', appr:'—' }),
+  S({ code:'MİF-B05.11', name:'Kompüter qrafikası', prog:'Kompüter elmləri (bakalavr) · 236 KE', dep:'Proqramlaşdırma və İT', year:'2026/2027', sem:'Yaz', ver:'—', st:'draft', pct:0, touched:'yaradılmayıb', appr:'—' }),
+  S({ code:'MİF-B04.12', name:'Alqoritmlər və verilənlər strukturu', prog:'Kompüter elmləri (bakalavr) · 234 KE', dep:'Proqramlaşdırma və İT', year:'2025/2026', sem:'Payız', ver:'v1.1', st:'approved', pct:100, touched:'14.02.2026, 12:10', appr:'dos. R. Əliyev, 14.02.2026' }),
+  S({ code:'MİF-B04.01', name:'Proqramlaşdırmanın əsasları', prog:'Kompüter elmləri (bakalavr) · 235 KE', dep:'Proqramlaşdırma və İT', year:'2025/2026', sem:'Payız', ver:'v1.0', st:'approved', pct:100, touched:'02.09.2025, 15:44', appr:'dos. R. Əliyev, 02.09.2025' }),
+  S({ code:'MİF-B02.11', name:'Veb texnologiyalar', prog:'İnformasiya texnologiyaları (bakalavr) · 233 İT', dep:'Proqramlaşdırma və İT', year:'2025/2026', sem:'Yaz', ver:'v1.0', st:'rejected', pct:71, touched:'11.03.2026, 17:12', appr:'Rədd: dos. R. Əliyev, 11.03.2026' }),
+  S({ code:'MİF-B07.03', name:'Verilənlər bazasının əsasları', prog:'Kompüter elmləri (bakalavr) · 234 KE', dep:'Proqramlaşdırma və İT', year:'2024/2025', sem:'Payız', ver:'v2.0', st:'archived', pct:100, touched:'08.09.2024, 11:00', appr:'dos. R. Əliyev, 08.09.2024' }),
+  S({ code:'MİF-B04.09', name:'Diskret strukturlar', prog:'Kompüter elmləri (bakalavr) · 233 KE', dep:'Proqramlaşdırma və İT', year:'2024/2025', sem:'Payız', ver:'v1.0', st:'archived', pct:100, touched:'05.09.2024, 09:35', appr:'dos. R. Əliyev, 05.09.2024' })
+];
+const NEXT = {
+  draft:'Qaralamanı tamamlayıb təsdiqə göndər',
+  submitted:'Kafedra müdirinin baxışı gözlənilir',
+  review:'Baxış nəticəsi gözlənilir',
+  revision:'Kafedra qeydlərini nəzərə alıb yenidən göndər',
+  approved:'Əməl tələb olunmur — versiya kilidlidir',
+  rejected:'Rədd səbəbini oxuyub yeni versiya yarat',
+  archived:'Arxiv qeydi — yalnız baxış'
+};
+const BLOCKS = [
+  { h:'Fənnin təsviri', body:'Fənn siyahı, yığın, növbə, ağac, heş cədvəl və qraf strukturlarını, onların üzərində işləyən axtarış, sıralama və optimallaşdırma alqoritmlərini əhatə edir. Praktik hissə C++ və Python dillərində aparılır.' },
+  { h:'Təlim nəticələri', body:'TN1. Əsas verilənlər strukturlarını seçib konkret məsələyə tətbiq edir\nTN2. Axtarış və sıralama alqoritmlərini mürəkkəbliyinə görə müqayisə edir\nTN3. Alqoritmin vaxt və yaddaş mürəkkəbliyini O notasiyası ilə qiymətləndirir' },
+  { h:'Həftəlik mövzular', body:'1. Verilənlər strukturlarına giriş · Mühazirə · 4 saat\n2. Bağlı siyahılar · Mühazirə · 4 saat\n3. Yığın və növbə · Seminar · 4 saat\n…\n16. Yekun imtahan · İmtahan sessiyası' },
+  { h:'Qiymətləndirmə strukturu', body:'Davamiyyət 10 · Sərbəst iş 10 (2 × 5 bal) · Aralıq imtahan 20 · Semestr layihəsi 10 · Yekun imtahan 50 = 100 bal' },
+  { h:'Sərbəst iş', body:'Struktur: 2 × 5 bal\n1. Sıralama alqoritmlərinin empirik müqayisəsi — hesabat (5 bal)\n2. Qraf məsələsinin modelləşdirilməsi (5 bal)' },
+  { h:'Ədəbiyyat', body:'T. Cormen və b. Introduction to Algorithms. 4-cü nəşr, 2022\nR. Sedgewick, K. Wayne. Algorithms. 4-cü nəşr, 2011\nMİT OpenCourseWare 6.006 — mühazirə qeydləri' }
+];
+const HIST = [
+  { v:'v1.1', what:'Ədəbiyyat yeniləndi, 9. həftənin mövzusu dəyişdi (kiçik dəyişiklik)', who:'dos. R. Əliyev · 14.02.2026' },
+  { v:'v1.0', what:'İlk təsdiqlənmiş versiya', who:'dos. R. Əliyev · 02.09.2025' },
+  { v:'v0.3', what:'Düzəliş tələbi: təlim nəticələri həftələrlə əlaqələndirilməmişdi', who:'dos. R. Əliyev · 28.08.2025' }
+];
+const PAGE = 6;
+
+class Component extends DCLogic {
+  state = { q:'', qRaw:'', year:'2026/2027', sem:'Hamısı', dep:'Hamısı', st:'Hamısı', sort:'date', view:'table', page:1, drawer:null, dlg:null, verKind:'minor', text:'', toast:'' };
+
+  componentDidMount() {
+    this.onKey = (e) => { if (e.key !== 'Escape') return; if (this.state.dlg) this.setState({ dlg:null }); else if (this.state.drawer) this.setState({ drawer:null }); };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { clearTimeout(this.tq); clearTimeout(this.tt); document.removeEventListener('keydown', this.onKey); }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast:m }); this.tt = setTimeout(() => this.setState({ toast:'' }), 3800); }
+
+  filtered() {
+    const s = this.state, q = s.q.trim().toLowerCase();
+    return DATA.filter(r =>
+      (s.year === 'Hamısı' || r.year === s.year) &&
+      (s.sem === 'Hamısı' || r.sem === s.sem) &&
+      (s.dep === 'Hamısı' || r.dep === s.dep) &&
+      (s.st === 'Hamısı' || r.st === s.st) &&
+      (!q || r.name.toLowerCase().indexOf(q) >= 0 || r.code.toLowerCase().indexOf(q) >= 0 || r.prog.toLowerCase().indexOf(q) >= 0)
+    ).sort((a, b) => {
+      if (s.sort === 'name') return a.name.localeCompare(b.name, 'az');
+      if (s.sort === 'prog') return b.pct - a.pct;
+      if (s.sort === 'status') return ORDER.indexOf(a.st) - ORDER.indexOf(b.st);
+      return b.touched.localeCompare(a.touched);
+    });
+  }
+
+  acts(r) {
+    const btn = (label, kind, run) => ({
+      label,
+      bd: kind === 'p' ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)',
+      bg: kind === 'p' ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+      fg: kind === 'p' ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-700)',
+      run
+    });
+    const view = () => this.setState({ drawer:r });
+    const edit = () => { window.location.href = './Müəllim - Sillabus redaktoru.dc.html'; };
+    if (r.st === 'approved') return [btn('Bax','s',view), btn('PDF','s',() => this.flash(r.name + ' — sillabus PDF-i universitet blankında hazırlanır.')), btn('Yeni versiya','p',() => this.setState({ dlg:{ kind:'newver', r } }))];
+    if (r.st === 'archived') return [btn('Bax','s',view), btn('PDF','s',() => this.flash('Arxiv nüsxəsi PDF kimi yüklənir — dəyişdirilə bilməz.'))];
+    if (r.st === 'draft') return [btn(r.pct === 0 ? 'Sillabus yarat' : 'Davam et','p',edit), btn('Keçən ildən köçür','s',() => this.setState({ dlg:{ kind:'copy', r } }))];
+    if (r.st === 'revision') return [btn('Qeydlərə bax','s',view), btn('Düzəlişə davam et','p',edit)];
+    if (r.st === 'rejected') return [btn('Səbəbə bax','s',view), btn('Yeni versiya','p',() => this.setState({ dlg:{ kind:'newver', r } }))];
+    return [btn('Göndərilmiş variantı gör','s',view), btn('Geri çağır','s',() => this.setState({ dlg:{ kind:'withdraw', r } }))];
+  }
+
+  renderVals() {
+    const s = this.state;
+    const all = this.filtered();
+    const pages = Math.max(1, Math.ceil(all.length / PAGE));
+    const page = Math.min(s.page, pages);
+    const rows = s.view === 'table' ? all.slice((page - 1) * PAGE, page * PAGE) : all;
+
+    const cnt = (k) => DATA.filter(r => (s.year === 'Hamısı' || r.year === s.year) && r.st === k).length;
+    const cur = DATA.filter(r => r.year === '2026/2027');
+    const chipOn = (v) => s.st === v;
+
+    const dlg = s.dlg;
+    const dlgMap = {
+      newver: {
+        icon:'+', iBg:'var(--ems-primary-50)', iFg:'var(--ems-primary-700)',
+        title:'Yeni versiya yaradılsın?',
+        body:'Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur.',
+        hasPick:true, ok:'Qaralama yarat', okBg:'var(--ems-primary-600)', okBd:'var(--ems-primary-600)', okFg:'var(--ems-neutral-0)',
+        picks:[
+          { k:'minor', title:'Kiçik dəyişiklik — v1.2', note:'Ədəbiyyat, məsləhət saatı, mövzu adının redaktəsi. Jurnal strukturu dəyişmir, cari semestrə tətbiq olunur.' },
+          { k:'major', title:'Böyük dəyişiklik — v2.0', note:'Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir.' }
+        ]
+      },
+      copy: {
+        icon:'⧉', iBg:'var(--ems-primary-50)', iFg:'var(--ems-primary-700)',
+        title:'Keçən ilin sillabusundan köçürülsün?',
+        body:'2025/2026 payız semestrinin təsdiqlənmiş v1.1 versiyası mənbə kimi istifadə olunacaq. Nəticə yalnız QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür.',
+        hasPick:false, ok:'Köçür və qaralama aç', okBg:'var(--ems-primary-600)', okBd:'var(--ems-primary-600)', okFg:'var(--ems-neutral-0)'
+      },
+      withdraw: {
+        icon:'←', iBg:'var(--ems-warning-bg)', iFg:'#92400e',
+        title:'Təqdimat geri çağırılsın?',
+        body:'Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna qayıdır. Kafedra müdirinə bildiriş göndərilir. Səbəb məcburidir.',
+        hasText:true, textLabel:'Geri çağırma səbəbi', textPh:'Məsələn: aralıq imtahan tarixi dəyişdi, mövzu planını yeniləyirəm.',
+        ok:'Geri çağır', okBg:'var(--ems-warning)', okBd:'var(--ems-warning)', okFg:'var(--ems-neutral-0)'
+      }
+    };
+    const dm = dlg ? dlgMap[dlg.kind] : null;
+    const textOk = s.text.trim().length >= 15;
+
+    const dr = s.drawer;
+
+    return {
+      kpis: [
+        { label:'Cari il üzrə fənn', value: cur.length, note:'2026/2027 tədris ili', on: s.st === 'Hamısı' ? 'true' : 'false',
+          bw:'1px', bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ st:'Hamısı', page:1 }) },
+        { label:'Təsdiqlənib', value: cur.filter(r => r.st === 'approved').length, note:'jurnal açıla bilər', on: chipOn('approved') ? 'true' : 'false',
+          bw:'1px', bd:'#bbf7d0', bg:'var(--ems-success-bg)', labFg:'#15803d', valFg:'#15803d', noteFg:'#15803d',
+          pick: () => this.setState({ st:'approved', page:1 }) },
+        { label:'Təsdiq gözləyir', value: cur.filter(r => r.st === 'submitted' || r.st === 'review').length, note:'kafedra növbəsində', on: chipOn('review') ? 'true' : 'false',
+          bw:'1px', bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)',
+          pick: () => this.setState({ st:'review', page:1 }) },
+        { label:'Düzəliş tələb olunur', value: cur.filter(r => r.st === 'revision').length, note:'sizdən əməl gözlənilir', on: chipOn('revision') ? 'true' : 'false',
+          bw:'2px', bd:'#fde68a', bg:'var(--ems-warning-bg)', labFg:'#92400e', valFg:'#92400e', noteFg:'#92400e',
+          pick: () => this.setState({ st:'revision', page:1 }) },
+        { label:'Sillabussuz fənn', value: cur.filter(r => r.pct === 0).length, note:'semestr başına qədər tələb olunur', on:'false',
+          bw:'1px', bd:'#fecaca', bg:'var(--ems-danger-bg)', labFg:'#b91c1c', valFg:'#b91c1c', noteFg:'#b91c1c',
+          pick: () => this.setState({ st:'draft', page:1 }) }
+      ],
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw:v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q:v, page:1 }), 240); },
+      selects: [
+        { id:'sy-year', label:'Akademik il', value:s.year, opts:[{v:'Hamısı',t:'Bütün illər'},{v:'2026/2027',t:'2026/2027'},{v:'2025/2026',t:'2025/2026'},{v:'2024/2025',t:'2024/2025'}], set:(e) => this.setState({ year:e.target.value, page:1 }) },
+        { id:'sy-sem', label:'Semestr', value:s.sem, opts:[{v:'Hamısı',t:'İki semestr'},{v:'Payız',t:'Payız semestri'},{v:'Yaz',t:'Yaz semestri'}], set:(e) => this.setState({ sem:e.target.value, page:1 }) },
+        { id:'sy-dep', label:'Kafedra', value:s.dep, opts:[{v:'Hamısı',t:'Bütün kafedralar'},{v:'Proqramlaşdırma və İT',t:'Proqramlaşdırma və İT'},{v:'Kompüter mühəndisliyi',t:'Kompüter mühəndisliyi'}], set:(e) => this.setState({ dep:e.target.value, page:1 }) }
+      ],
+      chips: ['Hamısı'].concat(ORDER).map(v => {
+        const on = s.st === v;
+        return {
+          label: v === 'Hamısı' ? 'Hamısı' : ST[v].label, on: on ? 'true' : 'false',
+          n: v === 'Hamısı' ? DATA.filter(r => s.year === 'Hamısı' || r.year === s.year).length : cnt(v),
+          bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)',
+          bg: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+          fg: on ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-700)',
+          nBg: on ? 'rgba(255,255,255,.22)' : 'var(--ems-neutral-100)',
+          nFg: on ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ st:v, page:1 })
+        };
+      }),
+      sort: s.sort, setSort: (e) => this.setState({ sort:e.target.value }),
+      reset: () => this.setState({ q:'', qRaw:'', st:'Hamısı', page:1 }),
+      isTable: s.view === 'table', isCard: s.view === 'card',
+      viewTable: () => this.setState({ view:'table' }), viewCard: () => this.setState({ view:'card' }),
+      tBg: s.view === 'table' ? 'var(--ems-neutral-0)' : 'transparent', tFg: s.view === 'table' ? 'var(--ems-neutral-900)' : 'var(--ems-neutral-500)',
+      cBg: s.view === 'card' ? 'var(--ems-neutral-0)' : 'transparent', cFg: s.view === 'card' ? 'var(--ems-neutral-900)' : 'var(--ems-neutral-500)',
+      empty: all.length === 0,
+      cols: [{t:'Fənn və proqram',al:'left'},{t:'İl / semestr',al:'left'},{t:'Versiya',al:'left'},{t:'Tamamlanma',al:'left'},{t:'Status və təsdiqləyən',al:'left'},{t:'Növbəti əməl',al:'left'},{t:'',al:'right'}],
+      rows: rows.map(r => {
+        const i = ST[r.st];
+        return {
+          code:r.code, name:r.name, prog:r.prog, year:r.year, sem:r.sem + ' semestri', ver:r.ver,
+          pct:r.pct + '%', pw:r.pct + '%', pc: r.pct === 100 ? 'var(--ems-success)' : (r.pct >= 50 ? 'var(--ems-primary-600)' : 'var(--ems-warning)'),
+          status:i.label, sBg:i.bg, sFg:i.fg, accent:i.accent,
+          approver:r.appr, next:NEXT[r.st], nextFg: r.st === 'revision' || r.st === 'rejected' ? '#92400e' : (r.st === 'approved' || r.st === 'archived' ? 'var(--ems-neutral-500)' : 'var(--ems-neutral-900)'),
+          touched:'Son dəyişiklik: ' + r.touched,
+          acts: this.acts(r),
+          more: r.st === 'approved' || r.st === 'rejected', moreAria: r.name + ' — digər əməllər',
+          openMore: () => this.setState({ drawer:r })
+        };
+      }),
+      pg: {
+        text: all.length + ' qeyddən ' + ((page - 1) * PAGE + 1) + '–' + Math.min(page * PAGE, all.length) + ' göstərilir',
+        prev: () => this.setState({ page: Math.max(1, page - 1) }), prevDis: page === 1,
+        next: () => this.setState({ page: Math.min(pages, page + 1) }), nextDis: page === pages,
+        pages: Array.apply(null, { length: pages }).map((x, i) => ({
+          n:i + 1, cur: i + 1 === page ? 'page' : 'false',
+          bd: i + 1 === page ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)',
+          bg: i + 1 === page ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+          fg: i + 1 === page ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-700)',
+          go: () => this.setState({ page:i + 1 })
+        }))
+      },
+      toast: !!s.toast, toastText: s.toast,
+      stop: (ev) => { if (ev && ev.stopPropagation) ev.stopPropagation(); },
+
+      dr: dr ? {
+        show:true, code:dr.code, name:dr.name, ver:dr.ver, status:ST[dr.st].label, sBg:ST[dr.st].bg, sFg:ST[dr.st].fg,
+        meta: dr.prog + ' · ' + dr.year + ' ' + dr.sem + ' semestri · 5 kredit',
+        banBg: dr.st === 'approved' ? 'var(--ems-success-bg)' : (dr.st === 'revision' || dr.st === 'rejected' ? 'var(--ems-warning-bg)' : 'var(--ems-neutral-100)'),
+        banBd: dr.st === 'approved' ? '#bbf7d0' : (dr.st === 'revision' || dr.st === 'rejected' ? '#fde68a' : 'var(--ems-neutral-200)'),
+        banFg: dr.st === 'approved' ? '#15803d' : (dr.st === 'revision' || dr.st === 'rejected' ? '#92400e' : 'var(--ems-neutral-700)'),
+        banText: dr.st === 'approved'
+          ? 'Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu siyahısı, qiymətləndirmə strukturu və sərbəst iş konfiqurasiyası bu sənəddən götürülür.'
+          : (dr.st === 'revision' ? 'Kafedra müdiri düzəliş tələb edib: «Təlim nəticələri 11–13-cü həftələrlə əlaqələndirilməyib, sərbəst işin ikinci mövzusu yazılmayıb.» Düzəlişdən sonra yenidən göndərin.'
+          : (dr.st === 'rejected' ? 'Versiya rədd edilib: «Qiymətləndirmə strukturu universitet siyasətinə uyğun deyil — sərbəst iş 15 bal göstərilmişdi.» Yeni versiya yaradıb düzəliş edin.'
+          : 'Göndərilmiş versiya baxış müddətində kilidlidir. Dəyişiklik lazımsa təqdimatı geri çağırın.')),
+        blocks: BLOCKS, hist: HIST,
+        acts: [
+          { label:'PDF yüklə', bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', run: () => this.flash('PDF hazırlanır — universitet blankı, imza sahəsi ilə.') },
+          { label:'Versiyaları müqayisə et', bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', run: () => { window.location.href = './Kafedra müdiri - Sillabus təsdiqi.dc.html'; } },
+          { label:'Dəyişiklik təklifi yarat', bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', run: () => this.flash('Dəyişiklik təklifi kafedra müdirinə göndərildi — təsdiqlənmiş versiya dəyişmir.') },
+          { label:'Yeni versiya yarat', bd:'var(--ems-primary-600)', bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', run: () => this.setState({ dlg:{ kind:'newver', r:dr } }) }
+        ],
+        close: () => this.setState({ drawer:null }),
+        ref: (el) => { if (el && this._dr !== el) { this._dr = el; try { el.focus(); } catch (x) {} } }
+      } : { show:false, blocks:[], hist:[], acts:[], code:'', name:'', ver:'', status:'', sBg:'', sFg:'', meta:'', banBg:'', banBd:'', banFg:'', banText:'', close: () => {}, ref: () => {} },
+
+      dlg: dm ? Object.assign({}, dm, {
+        show:true, hasPick:!!dm.hasPick, hasText:!!dm.hasText,
+        picks: (dm.picks || []).map(o => {
+          const on = s.verKind === o.k;
+          return { title:o.title, note:o.note, on: on ? 'true' : 'false',
+            bw: on ? '2px' : '1px', bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+            bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)', fg: on ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+            rBd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)', rDot: on ? 'var(--ems-primary-600)' : 'transparent',
+            pick: () => this.setState({ verKind:o.k }) };
+        }),
+        text: s.text, setText: (e) => this.setState({ text:e.target.value }),
+        textBd: textOk || !s.text ? 'var(--ems-neutral-300)' : 'var(--ems-danger)',
+        textNote: textOk ? 'Səbəb audit izinə yazılır' : 'Ən azı 15 simvol — səbəb məcburidir',
+        textFg: textOk ? 'var(--ems-neutral-400)' : '#b91c1c',
+        dis: !!dm.hasText && !textOk,
+        cur: !!dm.hasText && !textOk ? 'not-allowed' : 'pointer',
+        close: () => this.setState({ dlg:null, text:'' }),
+        confirm: () => {
+          if (dm.hasText && !textOk) return;
+          const nm = dlg.r.name;
+          this.setState({ dlg:null, drawer:null, text:'' });
+          if (dlg.kind === 'newver') this.flash(nm + ' — ' + (s.verKind === 'minor' ? 'v1.2 (kiçik dəyişiklik)' : 'v2.0 (böyük dəyişiklik)') + ' qaralaması yaradıldı. Təsdiqlənmiş versiya aktiv qalır.');
+          else if (dlg.kind === 'copy') this.flash(nm + ' — keçən ilin v1.1 məzmunu köçürüldü, yeni QARALAMA açıldı. Tarixləri və ədəbiyyatı yoxlayın.');
+          else this.flash(nm + ' — təqdimat geri çağırıldı, status qaralamaya qaytarıldı. Kafedra müdirinə bildiriş göndərildi.');
+        }
+      }) : { show:false, hasPick:false, hasText:false, picks:[], icon:'', iBg:'', iFg:'', title:'', body:'', ok:'', okBg:'', okBd:'', okFg:'', dis:false, cur:'pointer', text:'', textLabel:'', textPh:'', textBd:'', textNote:'', textFg:'', setText: () => {}, close: () => {}, confirm: () => {} }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

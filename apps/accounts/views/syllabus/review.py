@@ -52,6 +52,7 @@ from .review_text import (
     NOSCOPE,
     POLICY_ROWS,
     QUEUE_SORT_LABELS,
+    READ_ONLY,
     SCOPE_COUNT,
     STATUS_FILTER_ALL,
     UNIT_FILTER_ALL,
@@ -75,6 +76,7 @@ _EMPTY_SECTION = {
     "scope_mode": "noscope",
     "rows": [],
     "kpis": [],
+    "can_decide": False,
     "coverage": {"rows": [], "kpis": [], "trend": [], "policy": []},
 }
 
@@ -311,6 +313,11 @@ def build_syllabus_review_section(request, *, organization) -> dict:
             "can_approve": context["can_approve"],
             "can_revise": context["can_revise"],
             "can_reject": context["can_reject"],
+            # Sahibin qərarı (2026-09-03): qərar KAFEDRA MÜDİRİNİNDİR. Qərar
+            # əhatəsi olmayan aktor (dekan) növbəni oxuyur — düymə əvəzinə
+            # AÇIQ QEYD görür, düymə səssizcə yox olmur.
+            "can_decide": context["can_decide"],
+            "read_only": None if context["can_decide"] else READ_ONLY,
             "urls": {
                 # Şablon URL-i: JS «0…0» UUID-ini konkret versiya id-si ilə əvəzləyir.
                 "open": reverse("accounts:syllabus_review_open", kwargs={"version_id": _URL_PLACEHOLDER_UUID}),

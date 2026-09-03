@@ -22,7 +22,7 @@ CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
     rules        dict  — min_subject_length / min_body_length / min_note_length
     who          str   — kontekst zolağının sol adı (kabinet və ya şöbə adları)
     scope        str   — kontekst zolağının izahı
-    role_label   str   — sağdakı rol pill-i (Role.display_name)
+    role_label   str   — sağdakı rol pill-i (AZ-a çevrilmiş Role.display_name)
     i18n         dict  — JS mətn kataloqu (`json_script` ilə DOM-a düşür)
 """
 
@@ -55,7 +55,9 @@ def _role_label(user, organization) -> str:
     )
     if membership is None:
         return ""
-    return str(getattr(membership.role, "display_name", "") or "")
+    from core.roles import resolve_seeded_role_label
+
+    return str(resolve_seeded_role_label(membership.role.name, membership.role.display_name) or "")
 
 
 def build_applications_section(

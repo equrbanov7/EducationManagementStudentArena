@@ -49,7 +49,7 @@ from .queries import (  # noqa: F401
     version_diff,
     version_timeline,
 )
-from .scoping import SyllabusActor, can_view, is_author, resolve_actor  # noqa: F401
+from .scoping import SyllabusActor, can_view, has_decision_scope, is_author, resolve_actor  # noqa: F401
 from .workflow import (  # noqa: F401
     approve,
     archive,
@@ -89,6 +89,7 @@ __all__ = [
     "coverage_trend",
     "create_draft",
     "create_next_version",
+    "has_decision_scope",
     "has_review_scope",
     "import_migrated_version",
     "is_author",

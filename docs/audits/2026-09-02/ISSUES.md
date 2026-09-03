@@ -8,10 +8,9 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | P0-1 | 2,291 cari tələbə səhvən `archived`+`alumni` (qrupun `start_year='0000'`, 248 qrup) → giriş bağlı | PHASE1 data audit | FIXED (klon): `rehearsal_sar_phase._decide` yalnız `azadedildi=1` ilə arxivləyir; `legacy_repair_archive_status --apply` → archived 2,490→199, active 5,948→8,239, 2,291 audit sətri, 2-ci icra 0; `accounts/0018_account_restore_evidence` |
 | P0-2 | 100 tələbə + 14 işçi hesabsız (14 e-poçt toqquşması karantin, 86 etibarsız e-poçt); 12 karantinli işçiyə 62 jurnal bağlıdır | PHASE1 | FIXED (klon): identity fazası placeholder e-poçt; `legacy_repair_missing_accounts --from-source --apply` → 114 yaradıldı (tələbə 7,716→7,816, işçi 715→729), 45 açılış müəllim aldı (müəllimsiz 1,203→1,168), 2-ci icra 0. Demoqrafiya: birth_date 0→2,175, gender 0→1,693 |
 | P0-3 | Hədəfdə cari akademik dövr yoxdur (mənbədə `semestr_jurnal.id=13 is_current=1`), 2026/2027 yaradılmayıb → «Fənlərim» boş | PHASE1 | FIXED (klon): `legacy_repair_current_period` → 2025/2026 Yaz cari (1,212 açılış), 2026/2027 yaradıldı (0 açılış) |
-| P0-4 | Cədvəli açılışın istənilən müəllimi dəyişə bilirdi; icazə açarı, koordinator/RİM yolu, audit, bildiriş yox idi | PHASE2 rol matrisi | IN-PROGRESS — `schedule.manage` + «Cədvəl idarəetməsi» bölməsi (cədvəl agenti) |
+| P0-4 | Cədvəli açılışın istənilən müəllimi dəyişə bilirdi; icazə açarı, koordinator/RİM yolu, audit, bildiriş yox idi | PHASE2 rol matrisi | FIXED (klon): `schedule.manage`, «Cədvəl idarəetməsi», müəllim 403, 26 yeni test, dövr fallback (R-1) |
 | P0-5 | Dərs yükü axını mövcud deyildi (`apps/workload` yox) | PHASE2 | FIXED (klon): `apps/workload` F0+F3+F4 — 5 model + RLS/saat-balans/append-only trigger, `workload.*` icazə ailəsi, 14 JSON endpoint, «Yük bölgüsü» + «Dərs yüküm» bölmələri, offering sinxronu; 71 test; canlı: kafedra müdiri 3 sətir/6 bölgü → 3 açılış + 2 bildiriş; audit branch-ına birləşdirildi (d32e3d37). Qalan: F1 tədris şöbəsi redaktoru, F2 dekanlıq təsdiqi, F5 hesabat/amendment UI |
 | P0-6 | Müraciətlər / ESD modulu yox idi | tapşırıq | FIXED (klon): `apps/applications` (152 test) + kabinet bölməsi «Müraciətlərim» (9 test); canlı: tələbə→koordinator→RİM→həll→bağla, 0 konsol/CSP xətası, 375 px slide-over |
-| P0-4 (yenilənmə) | Cədvəl | — | FIXED (klon): `schedule.manage`, «Cədvəl idarəetməsi», müəllim 403, 26 yeni test |
 | P0-7 | Login rate-limit-i superadmin «escape hatch»-i ilə yan keçilir (`login.py:219-241`, `_shared.py:135-145`) | PHASE23 security | FIXED: rate sətri yanlışdırsa startup-da `ImproperlyConfigured`, runtime fail-closed; escape hatch yenidən yoxlanılmalı (re-verify siyahısında) |
 | P0-8 | Şəxsi düzəliş/tibbi PDF-lər anonim istifadəçiyə verilir (7 prefiksdən 1-i qorunurdu; 2,087 real sənəd; **prod-da da açıq idi** — nginx `/media/`-ni Django-ya ötürür) | PHASE23 | FIXED: `core/media_policies.py` 7 prefiks + per-prefix siyasət, anonim 302, yad 404; 8/8 real HTTP re-verify |
 | P0-9 | İmtahan mərkəzi əməkdaşı başqa müəllimin sual bankından sualı auditsiz silə bilir | PHASE23 | FIXED: `question_bank_detail` POST-da sahiblik qapısı + audit |
@@ -26,14 +25,14 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | P1-2 | Kollokvium pəncərəsi / jurnal bağlanması müəllimlərə bildirilmirdi | scout | FIXED (klon) — `registrar/kollokvium_notifications.py`, `journal_close_notifications.py` |
 | P1-3 | Tələbə jurnalında dərs otağı/korpusu görünmürdü | scout | FIXED (klon) |
 | P1-4 | journal_detail 10,075 sorğu / 15.9 s; my-results 692; overall-academic 688 | PHASE24 | FIXED — 102 / 68 / 64 sorğu, çıxış bayt-bəbayt eyni |
-| P1-5 | 12,457 bal + 19,116 qayıb xanası dərs sətirsiz (J12 `journal_lesson_recovery` fazası işlədilməyib) | PHASE1 | OPEN — hədəfə tətbiq üçün dəstəklənən hədəfli yol yoxdur (ledger `transform_version` konflikti); təzə tam repetisiya tələb edir |
-| P1-6 | `birth_date`/`gender`/`student_group_number` köçürülməyib (mənbədə var) | PHASE1 | IN-PROGRESS — `legacy_repair_demographics` |
+| P1-5 | 12,457 bal + 19,116 qayıb xanası dərs sətirsiz (J12 `journal_lesson_recovery` fazası işlədilməyib) | PHASE1 | IN-PROGRESS: təzə tam repetisiya (J12 daxil) `emsarena_rehearsal_d44526b97cbc`-də işləyir (run 8a476c8c, 2026-09-03) |
+| P1-6 | `birth_date`/`gender`/`student_group_number` köçürülməyib (mənbədə var) | PHASE1 | FIXED (klon): `legacy_repair_demographics --from-source` → birth_date 2,175, gender 1,693; `student_group_number` 7,703 |
 | P1-7 | Tələbə siyahısını yükləmək üçün heyət yolu yoxdur (`import_users_from_excel` komandası prod-da söndürülüb; RİM mərkəzində «yarat/idxal» yoxdur) | PHASE1 provisioning | FIXED (klon): `user.import` icazəsi (RİM/HR) + «Tələbə idxalı» bölməsi — xlsx şablon → dry-run → apply (User+Profile+Membership+SAR, sətir-sətir savepoint, placeholder e-poçt, birdəfəlik parol yalnız cavabda); 26 test; canlı 3 sətir (2 yaradıldı, 1 xəta), yeni tələbə giriş etdi. Komanda kill-switch-i dəyişməyib |
 | P1-8 | 3,075 SAR plan sətri olmayan kurikuluma bağlı; 87 boş kurikulum | PHASE1 | DEFERRED (mənbədə plan yoxdur) |
 | P1-9 | `FinalGrade.is_published` heç bir kod yolu ilə TRUE olmur (ölü sütun); əsl nəşr bayrağı `AssessmentScheme.is_published` (RİM jurnal bağlaması) | PHASE1 | WONTFIX-izah: tələbə UI-a təsiri yoxdur; sənədləşdirildi |
-| P1-10 | dean/chair_head `org_admin` alias-ı alır → org-səviyyəli bloq moderasiyası sızması | PHASE2 | OPEN → düzəliş keçidi |
+| P1-10 | dean/chair_head `org_admin` alias-ı alır → org-səviyyəli bloq moderasiyası sızması | PHASE2 | QİSMƏN: bloq moderasiyası fakültə əhatəsinə salınmadı; alias qaydası dəyişməyib (P2 → növbəti dalğa) |
 | P1-11 | Kollokvium/apellyasiya idarəsi icazə açarı ilə yox, rol ADI ilə qapılır | PHASE2 | OPEN → 2-ci dalğa |
-| P1-12 | `/accounts/send-otp/` və parol bərpası «done» səhifəsində hesab sadalama | PHASE23 | OPEN → düzəliş keçidi |
+| P1-12 | `/accounts/send-otp/` və parol bərpası «done» səhifəsində hesab sadalama | PHASE23 | FIXED: vahid cavablar (mövcudluq sızmır); reset forması dəyər-əsaslı placeholder yoxlaması (PHASE27_FIXES R-8) |
 
 ## P2 — səhv funksionallıq / ciddi UX
 | # | Problem | Mənbə | Status |
@@ -44,9 +43,9 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | P2-4 | Əks axtarış köməkçisi yox idi (koordinator/kafedra müdiri/dekan → vahid) | scout | FIXED — `apps/organizations/unit_heads.py` (18 test) |
 | P2-5 | Tələbə kabinetinin başlığında «Join» düyməsi (köçürülmüş tələbə nəyə qoşulmalıdır?) | UI | OPEN → UX keçidi |
 | P2-6 | 1,589 toqquşmada uduzan dəyər UI-da yox; `yekun`↔imtahan balı 884 sətirdə fərqli | PHASE1 | DEFERRED (BAL_PROBLEMLERI.md) |
-| P2-7 | Provisioning canlı gedişi + `test_staged_portal_login.py` (6 test) hələ yaşıl təsdiqlənməyib | provisioning | OPEN → reqressiya dalğası |
-| P2-8 | Audit jurnalı admin-dən silinə bilir; `get_client_ip` XFF-in ən sol üzvünü oxuyur; base→production settings sürüşməsi; portal qapısı `POST /accounts/login/` ilə keçilir | PHASE23 | OPEN → düzəliş keçidi |
-| P2-9 | Yüklənmiş sənədlər (düzəliş PDF-ləri) icazə yoxlamalı serve view-suz `.url` ilə verilir | scout/security | OPEN — `applications` üçün qapılı download view yazılıb; köhnə modullara tətbiq 2-ci dalğa |
+| P2-7 | Provisioning canlı gedişi + `test_staged_portal_login.py` (6 test) hələ yaşıl təsdiqlənməyib | provisioning | FIXED: reqressiyada 6/6 yaşıl (PHASE27 axın 26) |
+| P2-8 | Audit jurnalı admin-dən silinə bilir; `get_client_ip` XFF-in ən sol üzvünü oxuyur; base→production settings sürüşməsi; portal qapısı `POST /accounts/login/` ilə keçilir | PHASE23 | FIXED: audit silinməz, vahid XFF köməkçisi, production import siyahısı, portal qapısı |
+| P2-9 | Yüklənmiş sənədlər (düzəliş PDF-ləri) icazə yoxlamalı serve view-suz `.url` ilə verilir | scout/security | FIXED: `core/media_policies.py` bütün şəxsi prefiksləri qapayır (P0-8) |
 
 ## UI QA + dashboard dalğası (PHASE21/22)
 | # | Problem | Mənbə | Status |
@@ -66,12 +65,12 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | # | Problem | Mənbə | Status |
 |---|---|---|---|
 | R-8 | **Köçürülmüş heç bir istifadəçi giriş edə bilmirdi**: 8,543/8,568 hesabda parol yoxdur və reset forması onları süzürdü | PHASE27 | FIXED (klon): reset forması «giriş açıqdır» şərti ilə (staged/archived xaric), placeholder e-poçt → RİM yönləndirməsi (sadalama yox), OTP reset sonrası ilk-giriş qapısı təmizlənir; RİM per-user parol; `provision_student_credentials --group`; HANDOFF §8.9 cutover proseduru (SMTP şərti) |
-| R-2 | Kafedra müdiri sillabusu heç vaxt görmürdü (`chair_unit` = ixtisas) | PHASE27 | FIXED (klon): `syllabus/services/units.py` — əcdad → müəllifin kafedra üzvlüyü → verilən vahid; `syllabus_repair_chair_units`. **Tenant tapıntısı:** 0/83 ixtisas və 0/766 qrupun kafedra əcdadı yoxdur (mənbədə `speciality.department_id` fakültəyə işarə edir) — SAHİB QƏRARI: təsdiqçi kafedra müdiri, yoxsa dekan; ixtisas→kafedra tili qurulsunmu |
+| R-2 | Kafedra müdiri sillabusu heç vaxt görmürdü (`chair_unit` = ixtisas) | PHASE27 | FIXED (klon): `syllabus/services/units.py` — əcdad → müəllifin kafedra üzvlüyü → verilən vahid; `syllabus_repair_chair_units`. **Tenant tapıntısı:** 0/83 ixtisas və 0/766 qrupun kafedra əcdadı yoxdur (mənbədə `speciality.department_id` fakültəyə işarə edir). **SAHİBİN QƏRARI 2026-09-03: təsdiqçi KAFEDRA MÜDİRİDİR** — dekan `approve/revise/reject` açarlarını itirdi (`organizations/0035`), qərar əhatəsi kafedra səviyyəsinə daraldı (`covers_chair_unit`). Bax PHASE6_CHAIR_APPROVAL.md |
 | R-1/R-4 | `my-schedule` yalnız bitmiş cari dövrü göstərirdi | PHASE27 | FIXED (klon): `resolve_display_period()` (?period → cari → ən yaxın gələcək slotlu → cari-dən köhnə olmayan son slotlu) + dövr seçicisi; canlı: koordinator 2026/2027 Payız slotu → müəllim və tələbə görür |
 | R-9 | Bərpa hesablarının SAR-ı yoxdu | PHASE27 | FIXED (klon): `--with-sar` → SAR 7,703→7,799 (96/100; 4-ü mənbədə mövcud olmayan qrupa işarə edir — uydurulmadı) |
 | R-5 | Klonda 0 `ExamRoom` | PHASE27 | FIXED (klon): `legacy_repair_rooms --from-source` (J10 fazasının öz məntiqi) → 158 otaq, 4 korpus; dərs modalı kaskadı işləyir |
 | R-10 | `test_exam_eligibility_frozen` sətir-başına 2 sorğu gözləyirdi (köhnə N+1) | CI | FIXED: batching-dən sonra 0 kilidləndi |
-| R-7 | İmtahan mərkəzi əməkdaşı başqa müəllimin sual bankını OXUYA bilir (A-31e) — PHASE23-də qəsdən saxlanıb | PHASE27 | DEFERRED (sahib qərarı) |
+| R-7 | İmtahan mərkəzi əməkdaşı başqa müəllimin sual bankını OXUYA bilir (A-31e) — PHASE23-də qəsdən saxlanıb | PHASE27 | **WONTFIX — sahibin qərarı 2026-09-03:** imtahan mərkəzi BAŞQA müəllimlərin sual bankını oxuya BİLƏR (mərkəz imtahan variantını qurmaq üçün bankı görməlidir; hər oxu audit olunur). Davranış dəyişmir, «boşluq» statusu bağlanır. |
 | R-3 | PHASE23 «müsbət nəzarət» sillabusu bölməsiz idi (completion=100, 0 bölmə) — F7–F8 ilk əsl 100 % dövrüdür | PHASE27 | Qeyd |
 | CI-1 | `rls-txn-pool` 9 fail + 28 error: `accounts/0018` xam-SQL cədvəli FK ilə flush-u bloklayırdı | CI | FIXED (`accounts/0019` state-only model; lokal 36/36) |
 | CI-2 | pip-audit: pypdf 6.15.0 (CVE-2026-84309/10/11) | CI | FIXED → 6.16.1 |

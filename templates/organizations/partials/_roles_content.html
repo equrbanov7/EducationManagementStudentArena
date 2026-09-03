@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n org_tags %}
 {% with s=org_roles_section %}
 <div class="org-management org-management--roles">
     {% if not s.organization %}
@@ -17,7 +17,7 @@
             <article class="org-management__role-card">
                 <div class="org-management__role-head">
                     <div>
-                        <h2>{{ role.display_name }}</h2>
+                        <h2>{{ role|localized_role_label }}</h2>
                         {% if role.description %}<p>{{ role.description }}</p>{% endif %}
                     </div>
                     <span class="org-management__level">{% trans "level_prefix" context "organizations.roles" %} {{ role.level }}</span>

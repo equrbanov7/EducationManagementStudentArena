@@ -172,6 +172,14 @@ PERMISSION_CATEGORIES = {
         "exam.host",
         "exam.delete",
         "final_score.entry",
+        # `question.chair_review` (2026-09): müəllimin İmtahan Mərkəzinə
+        # göndərdiyi sual dəstini ƏVVƏLCƏ kafedra müdiri təsdiqləyir.
+        # ⚠️ PREFİKS QƏSDƏN `exam.` DEYİL: `exam.*` wildcard-ı dekan, imtahan
+        # mərkəzi və müəllimdə də var — kafedra təsdiqi onlara AVTOMATİK
+        # keçməməlidir. Açar açıq verilir (kafedra müdiri; dekan yalnız
+        # kafedra müdiri təyin edilməyəndə fallback təsdiqçi kimi işləyir —
+        # əhatə apps/exams/services/question_chair_units.py-da fail-closed).
+        "question.chair_review",
     ],
     "appeal": [
         "appeal.create",
@@ -365,6 +373,7 @@ PERMISSION_LABELS = {
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
     # exams
+    "question.chair_review": pgettext_lazy(_PERM_CTX, "Sual dəstini kafedra adından təsdiqləmək"),
     "exam.view": pgettext_lazy(_PERM_CTX, "İmtahanlara baxış"),
     "exam.create": pgettext_lazy(_PERM_CTX, "İmtahan yaratmaq"),
     "exam.edit": pgettext_lazy(_PERM_CTX, "İmtahanı redaktə etmək"),
