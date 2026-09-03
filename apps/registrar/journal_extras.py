@@ -451,33 +451,15 @@ def locked_lesson_kind(offering):
     return kinds[0] if len(kinds) == 1 else None
 
 
-def lesson_topic_choices(offering):
-    """Yeni dərs modalındakı mövzu SİYAHISI — LMS kursunun mövzularından
-    (əllə yazılmır; kurs/mövzu yoxdursa template sərbəst mətn göstərir)."""
-    if not offering.course_id:
-        return []
-    from django.apps import apps as django_apps
-
-    CourseTopic = django_apps.get_model("courses", "CourseTopic")
-    return list(
-        CourseTopic.objects.filter(course_id=offering.course_id).order_by("order").values_list("title", flat=True)
-    )
-
-
-def lesson_topic_meta(offering, lessons):
-    """Yeni dərs modalındakı mövzu dropdown-u üçün: hər mövzu + KEÇİRİLİB statusu
-    (+ tarix). ``lesson_topic_choices`` düz başlıqları başqa yerlərdə istifadə
-    olunur; burada müəllim artıq keçirilmiş mövzuları bir baxışda görsün deyə
-    keçirilmə məlumatı da qaytarılır."""
-    covered = {}
-    for lesson in lessons:
-        if lesson.topic and lesson.topic not in covered:
-            covered[lesson.topic] = lesson.date
-    return [
-        {"title": title, "covered": title in covered, "date": covered.get(title)}
-        for title in lesson_topic_choices(offering)
-    ]
-
+# Mövzu mənbəyi (təsdiqlənmiş sillabus → LMS kursu) ayrıca modula köçürülüb ki,
+# bu fayl modul-ölçü büdcəsində (600 sətir) qalsın; adlar geriyə uyğunluq üçün
+# buradan da import oluna bilər.
+from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yoxdur)
+    SYLLABUS_HOUR_KINDS,
+    lesson_topic_choices,
+    lesson_topic_meta,
+    syllabus_topic_rows,
+)
 
 # Qeyd: dərs saatı artıq STANDARD_LESSON_TIMES-dan seçilir (schedule.py) —
 # köhnə slot-əsaslı seçici silinib.

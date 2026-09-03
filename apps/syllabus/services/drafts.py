@@ -26,9 +26,10 @@ from ..constants import (
     SyllabusStatus,
 )
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
+from ..policy import assessment_weights
 from ..state_machine import TransitionDenied
 from .scoping import is_author
-from .units import resolve_syllabus_chair_unit
+from .units import ensure_chair_unit, resolve_syllabus_chair_unit
 
 #: Bölmələrin BOŞ məzmun sxemi — autosave müqaviləsinin (public.py) əsasıdır.
 BLANK_SECTION_DATA = {
@@ -45,7 +46,30 @@ BLANK_SECTION_DATA = {
 }
 
 
-def blank_section_data(section_id: str) -> dict:
+def default_assess_data(organization=None) -> dict:
+    """Qiymətləndirmənin BAŞLANĞIC bölgüsü — ``flex`` balı bərabər bölür.
+
+    README §8/4 bölünməmiş bal qoymağa icazə vermir (cəm 100 olmalıdır), ona görə
+    boş sxem 0/0 DEYİL: yeni qaralama dərhal etibarlı bölgü ilə açılır, müəllim
+    isə sürüşdürücü ilə nisbəti dəyişir.
+    """
+    flex = assessment_weights(organization)["flex"]
+    midterm = flex // 2
+    return {"midterm": midterm, "project": flex - midterm, "note": ""}
+
+
+def assess_split_is_valid(data, organization=None) -> bool:
+    """``midterm + project == flex`` və hər ikisi mənfi deyil."""
+    flex = assessment_weights(organization)["flex"]
+    try:
+        midterm = int((data or {}).get("midterm") or 0)
+        project = int((data or {}).get("project") or 0)
+    except (TypeError, ValueError):
+        return False
+    return midterm >= 0 and project >= 0 and midterm + project == flex
+
+
+def blank_section_data(section_id: str, organization=None) -> dict:
     """Bölmənin boş sxemi (dərin kopya)."""
     import copy
 
@@ -53,7 +77,29 @@ def blank_section_data(section_id: str) -> dict:
         return {
             "rows": [{"topic": "", **{kind: 0 for kind in LESSON_HOUR_KINDS}, "outcome": ""} for _ in range(WEEK_ROWS)]
         }
+    if section_id == SectionKey.ASSESS.value:
+        return default_assess_data(organization)
     return copy.deepcopy(BLANK_SECTION_DATA.get(section_id, {}))
+
+
+def _inherited_data(section_id: str, source_map: dict, organization):
+    """Köçürülən bölmə məzmunu — ``assess`` üçün siyasət yoxlaması ilə.
+
+    Köçürülmüş (legacy) sillabusların ``assess`` bölməsi ``{midterm: 0,
+    project: 0}`` daşıyır — cəmi 100-ə çatmayan, yəni bugünkü siyasətə görə
+    ETİBARSIZ bölgü.  Onu olduğu kimi irs almaq yeni qaralamanı ilk andan
+    «tamamlanmamış» edərdi, halbuki müəllim heç nə etməyib; ona görə etibarsız
+    bölgü BAŞLANĞIC bölgüsü ilə əvəzlənir (məzmunun qalanı toxunulmur).
+    """
+    data = source_map.get(section_id)
+    if not data:
+        return blank_section_data(section_id, organization)
+    if section_id == SectionKey.ASSESS.value and not assess_split_is_valid(data, organization):
+        # YALNIZ bölgü açarları əvəzlənir — `note` və köçürmədən gələn digər
+        # sahələr (`exam_questions`, …) TOXUNULMUR (R-1 data itkisi dərsi).
+        split = default_assess_data(organization)
+        return {**data, "midterm": split["midterm"], "project": split["project"]}
+    return data
 
 
 def _create_sections(version, *, source=None, actor_user=None):
@@ -61,12 +107,13 @@ def _create_sections(version, *, source=None, actor_user=None):
     source_map = {}
     if source is not None:
         source_map = {row.section_id: row.data for row in source.sections.all()}
+    organization = version.organization
     rows = [
         SyllabusSection(
             organization_id=version.organization_id,
             version=version,
             section_id=section_id,
-            data=source_map.get(section_id) or blank_section_data(section_id),
+            data=_inherited_data(section_id, source_map, organization),
             updated_by=actor_user,
         )
         for section_id in SECTION_ORDER
@@ -87,7 +134,11 @@ def recompute_completion(version, *, persist: bool = True):
     ``completion_percent`` sahəsi KEŞDİR — həqiqət mənbəyi
     :mod:`apps.syllabus.completion`-dır.
     """
-    report = completion_rules.evaluate(section_data_map(version), version.plan_hours or {})
+    report = completion_rules.evaluate(
+        section_data_map(version),
+        version.plan_hours or {},
+        assessment_weights(version.organization),
+    )
     if persist:
         for row in version.sections.all():
             expected = bool(report.sections.get(row.section_id, False))
@@ -214,6 +265,11 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
     if kind not in {ChangeKind.MINOR.value, ChangeKind.MAJOR.value}:
         raise TransitionDenied("version.kind_unknown", params={"kind": kind})
 
+    # Struktur bağının SELF-HEALING-i (R-2): köçürmə vaxtı ixtisasa bağlanmış
+    # köhnə dosye yeni versiya açılanda özü kafedraya çəkilir — əks halda
+    # kafedra müdiri yenə qərar verə bilməzdi (`covers_chair_unit`).
+    ensure_chair_unit(syllabus)
+
     open_version = syllabus.versions.filter(status__in=sorted(OPEN_STATUSES)).first()
     if open_version is not None:
         raise TransitionDenied("version.open_version_exists", params={"version": open_version.label})
@@ -274,6 +330,7 @@ def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, 
     if not is_author(actor, source_syllabus) and not actor.covers_unit(source_syllabus.chair_unit_id, PERM_EDIT):
         raise TransitionDenied("transition.out_of_scope", params={"transition": "copy"})
 
+    ensure_chair_unit(source_syllabus)
     base = source_syllabus.approved_version or source_syllabus.versions.order_by("-major", "-minor").first()
     if base is None:
         raise TransitionDenied("version.base_missing")
@@ -354,14 +411,23 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         option = (data or {}).get("option") or ""
         if option and option not in SELFWORK_OPTIONS:
             raise TransitionDenied("self.option_not_allowed", params={"option": option})
-
     row = SyllabusSection.objects.select_for_update().get(version=version, section_id=section_id)
     if expected_revision is not None and int(expected_revision) != row.revision:
         raise SectionConflict(row.revision)
 
     old_data = row.data
     # Merge, PUT deyil: göndərilməyən açar saxlanılır (bax docstring).
-    row.data = {**(old_data or {}), **(data or {})}
+    merged = {**(old_data or {}), **(data or {})}
+    if section_id == SectionKey.ASSESS.value and ("midterm" in (data or {}) or "project" in (data or {})):
+        # SERVER kilidi: kilidli çəkilər (10/10/50) müəllimə açıq deyil, qalan
+        # `flex` isə TAM bölünməlidir.  Redaktor sürüşdürücüsü bunu onsuz da
+        # təmin edir, amma HTTP səthi ixtiyari JSON qəbul etdiyi üçün invariant
+        # BURADA da qorunur (README §8/4).  Yoxlama BİRLƏŞMİŞ nəticə üzərindədir:
+        # kliyent yalnız bir açarı göndərəndə digəri sətirdən gəlir.
+        if not assess_split_is_valid(merged, version.organization):
+            flex = assessment_weights(version.organization)["flex"]
+            raise TransitionDenied("assess.split_mismatch", params={"need": flex})
+    row.data = merged
     row.revision += 1
     row.updated_by = actor.user
     row.save(update_fields=["data", "revision", "updated_by", "updated_at"])
@@ -381,6 +447,37 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         changes={"section": section_id, "changed": old_data != row.data},
     )
     return row, report
+
+
+@transaction.atomic
+def set_plan_hours(version, hours: dict | None):
+    """Tədris planından gələn auditoriya saatı bölgüsünü versiyaya yazır.
+
+    README §8/11: «Auditoriya saatlarının cəmi tədris planındakı saatla üst-üstə
+    düşməlidir; uyğunsuzluq təsdiqə göndərməni bloklayır.»  Bölgünün MƏNBƏYİ
+    ``registrar.CurriculumSubject``-in TƏSDİQLƏNMİŞ plan sətridir; onu bu modula
+    gətirən glue accounts/registrar qatındadır (sillabus registrar-ı import
+    etmir).
+
+    Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır — təsdiqlənmiş versiya immutable-dır
+    (README §8/1), plan sonradan dəyişsə belə tarixi qeyd toxunulmaz qalır.
+    """
+    if version.status not in EDITABLE_STATUSES:
+        return version
+    cleaned = {}
+    for kind in LESSON_HOUR_KINDS:
+        try:
+            value = int((hours or {}).get(kind) or 0)
+        except (TypeError, ValueError):
+            value = 0
+        if value > 0:
+            cleaned[kind] = value
+    if (version.plan_hours or {}) == cleaned:
+        return version
+    SyllabusVersion.objects.filter(pk=version.pk).update(plan_hours=cleaned)
+    version.plan_hours = cleaned
+    recompute_completion(version)
+    return version
 
 
 #: Köçürmə borusunun yaza bildiyi YEGANƏ statuslar (bax migrasiya spesifikasiyası:
@@ -472,14 +569,17 @@ def import_migrated_version(
 __all__ = [
     "BLANK_SECTION_DATA",
     "SectionConflict",
+    "assess_split_is_valid",
     "blank_section_data",
     "copy_from_previous",
     "create_draft",
     "create_next_version",
+    "default_assess_data",
     "import_migrated_version",
     "recompute_completion",
     "refresh_pointers",
     "resolve_pointer_versions",
     "save_section",
     "section_data_map",
+    "set_plan_hours",
 ]

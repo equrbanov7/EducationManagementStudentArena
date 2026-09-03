@@ -22,6 +22,8 @@ import pytest
 
 from apps.organizations.models import OrgUnit
 from apps.syllabus import services
+from apps.syllabus.constants import SyllabusStatus
+from apps.syllabus.models import SyllabusVersion
 from apps.syllabus.services.units import resolve_chair_unit, resolve_syllabus_chair_unit
 from apps.syllabus.tests.factories import (
     PLAN_HOURS,
@@ -185,6 +187,32 @@ def test_repair_command_is_dry_by_default_and_idempotent(world):
     syllabus.refresh_from_db()
     assert syllabus.chair_unit_id == world["tree"]["chair"].pk
     assert "0" in again.getvalue()
+
+
+def test_new_version_heals_a_stale_specialty_binding(world):
+    """Yeni versiya açılışı bağı ÖZÜ kafedraya çəkir (əmr gözləmədən).
+
+    Sahibin qərarı ilə (2026-09-03) qərar əhatəsi KAFEDRA səviyyəsindədir —
+    ixtisasa bağlı qalmış köhnə dosyedə kafedra müdiri qərar verə bilməzdi.
+    """
+    syllabus, version = _draft_from_offering(world)
+    type(syllabus).objects.filter(pk=syllabus.pk).update(chair_unit=world["tree"]["specialty"])
+    syllabus.refresh_from_db()
+    # Versiyanı «açıq» olmayan vəziyyətə gətiririk (keçid axını burada
+    # yoxlanılmır — `test_state_machine` onu ayrıca kilidləyir).
+    SyllabusVersion.objects.filter(pk=version.pk).update(
+        status=SyllabusStatus.REJECTED.value,
+        decision_reason="Struktur bağı yoxlanılır.",  # DB check: rədd səbəbi məcburidir
+    )
+
+    services.create_next_version(
+        syllabus=syllabus,
+        actor=services.resolve_actor(world["teacher"], world["org"]),
+        kind="major",
+    )
+
+    syllabus.refresh_from_db()
+    assert syllabus.chair_unit_id == world["tree"]["chair"].pk
 
 
 # ── 4. Struktur bağı OLMAYAN tenant (köçürülmüş real forma) ────────────────

@@ -1,0 +1,72 @@
+{% load i18n %}
+{% comment %}
+Ekran 04 «Fənn kataloqu» — universitet üzrə vahid fənn reyestri.
+
+İcazə: `catalog.view` / `catalog.manage`. Sıralama, səhifələmə və filtr SERVER
+tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivləmə (səbəb ≥20 + audit).
+
+TƏXİRƏ SALINANLAR (hesabatda sənədləşdirilib):
+* prerekvizit — model YOXDUR (Mərhələ 2, tədris planı ilə birlikdə gəlir);
+* saat bölgüsü (mühazirə/seminar/laboratoriya) — plan SƏTRİNDƏDİR, fənnin
+  özündə deyil (kredit ixtisasa görə dəyişir);
+* `merge` (dublikat birləşdirmə) — destruktivdir, plan sətirləri və
+  sillabusların köçürülməsini tələb edir.
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'subject-catalog' in allowed_sections %}
+{% trans "Universitetin vahid fənn reyestri: kod, kredit, növ, sahibi kafedra və planlarda istifadə." context "accounts.catalog" as sb_subtitle %}
+{% trans "Yeni fənn" context "accounts.catalog" as sb_new_title %}
+{% trans "Fənn kodu tenant daxilində unikaldır; saat bölgüsü tədris planı sətrində saxlanılır." context "accounts.catalog" as sb_new_sub %}
+{% trans "Kataloq yazısını arxivlə" context "accounts.catalog" as cat_archive_title %}
+{% trans "Yazı SİLİNMİR — arxivlənir; plan sətirləri, jurnal və qiymət tarixçəsi qalır." context "accounts.catalog" as cat_archive_sub %}
+{% trans "Arxivlə" context "accounts.catalog" as cat_archive_btn %}
+{% trans "Arxivdən qaytar" context "accounts.catalog" as cat_restore_title %}
+{% trans "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır." context "accounts.catalog" as cat_restore_sub %}
+{% trans "Eyni adlı fənlər aşkarlandı" context "accounts.catalog" as sb_dup_title %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'subject-catalog' %}is-active{% endif %}"
+         data-profile-section-panel="subject-catalog"
+         data-source-url="{{ profile_base_url }}?section=subject-catalog">
+
+{% if not subject_catalog_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=subject_catalog_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="subject-catalog"
+     data-tof-action-url="{{ subject_catalog_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sb_subtitle %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=subject_catalog_section.kpi_tiles kpi_variant="4" %}
+
+    {% if subject_catalog_section.duplicate_name_total %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=sb_dup_title banner_body=subject_catalog_section.duplicate_note %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-catalog" filter_prefix="sb_" filter_fields=subject_catalog_section.filter_fields filter_count_label=subject_catalog_section.filter_count_label %}
+
+    {% if subject_catalog_section.can_manage %}
+    <div class="tof__toolbar">
+        <span class="tof__toolbar-spacer"></span>
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-open="tofSubjectDialog"
+                data-tof-prefill='{"action": "save_subject", "id": "", "code": "", "name": "", "ects": "5", "kind": "core", "chair_unit": ""}'>
+            {% trans "Yeni fənn" context "accounts.catalog" %}
+        </button>
+    </div>
+    {% endif %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=subject_catalog_section.columns table_rows=subject_catalog_section.table_rows table_state=subject_catalog_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-book" state_title=subject_catalog_section.state_title state_body=subject_catalog_section.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=subject_catalog_section.page_obj page_param="sb_page" extra_query=subject_catalog_section.pagination_query %}
+
+    {% if subject_catalog_section.can_manage %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofSubjectDialog" form_dialog_title=sb_new_title form_dialog_subtitle=sb_new_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_subject_fields.html" form_dialog_action=subject_catalog_section.action_url form_dialog_hidden=subject_catalog_section.dialog_hidden form_dialog_data=subject_catalog_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogArchiveDialog" reason_title=cat_archive_title reason_subtitle=cat_archive_sub reason_submit_label=cat_archive_btn reason_submit_tone="danger" reason_action=subject_catalog_section.action_url reason_hidden=subject_catalog_section.archive_hidden reason_form_data=subject_catalog_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogRestoreDialog" reason_title=cat_restore_title reason_subtitle=cat_restore_sub reason_action=subject_catalog_section.action_url reason_hidden=subject_catalog_section.archive_hidden reason_form_data=subject_catalog_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

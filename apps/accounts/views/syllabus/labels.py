@@ -61,6 +61,11 @@ ISSUE_MESSAGES = {
     "week.hours_without_topic": pgettext_lazy(_CTX, "%(count)s həftədə saat yazılıb, mövzu boşdur"),
     "week.topic_without_hours": pgettext_lazy(_CTX, "%(count)s mövzuya heç bir dərs növü üzrə saat verilməyib"),
     "week.outcome_not_linked": pgettext_lazy(_CTX, "%(count)s həftədə təlim nəticəsi seçilməyib"),
+    "assess.split_mismatch": pgettext_lazy(
+        _CTX,
+        "Sərbəst bölünən %(need)s bal tam paylanmayıb (hazırda %(have)s) — cəm 100 olmalıdır",
+    ),
+    "assess.negative_weight": pgettext_lazy(_CTX, "Qiymətləndirmə çəkisi mənfi ola bilməz"),
     "method.too_few": pgettext_lazy(_CTX, "Ən azı %(min)s tədris metodu seçilməlidir (hazırda %(have)s)"),
     "self.option_not_allowed": pgettext_lazy(_CTX, "Sərbəst iş strukturu seçilməyib"),
     "self.topic_count_mismatch": pgettext_lazy(
@@ -91,6 +96,15 @@ TRANSITION_MESSAGES = {
     "section.unknown": pgettext_lazy(_CTX, "Bölmə tanınmır."),
     "section.conflict": pgettext_lazy(_CTX, "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."),
     "self.option_not_allowed": pgettext_lazy(_CTX, "Seçilmiş sərbəst iş strukturu universitet siyasətinə uyğun deyil."),
+    "assess.split_mismatch": pgettext_lazy(
+        _CTX,
+        "Qiymətləndirmə bölgüsü siyasətə uyğun deyil: sərbəst bölünən %(need)s bal tam paylanmalıdır.",
+    ),
+    "version.structural_change_requires_major": pgettext_lazy(
+        _CTX,
+        "Mövzu, çəki və ya struktur dəyişdiyi üçün versiya avtomatik BÖYÜK versiyaya qaldırıldı — "
+        "dəyişiklik növbəti semestrdən qüvvəyə minir.",
+    ),
     "import.status_not_allowed": pgettext_lazy(_CTX, "Bu status köçürmə borusu üçün icazəli deyil."),
 }
 

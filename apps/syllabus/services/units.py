@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.organizations.unit_heads import resolve_ancestor
+from apps.organizations.unit_heads import ancestor_unit_ids, resolve_ancestor
 from core.constants import OrgUnitType
 
 #: Kafedra rolunu daşıyan bölmə tipləri.  ``department`` tarixi sinonimdir —
@@ -89,9 +89,77 @@ def resolve_syllabus_chair_unit(*, unit=None, author=None, organization=None):
     return author_chair_unit(author, organization) or resolved
 
 
+def is_chair_unit(unit) -> bool:
+    """Bölmə KAFEDRA səviyyəsindədirmi (kanonik tip və ya tarixi sinonim)."""
+    return unit is not None and getattr(unit, "unit_type", "") in CHAIR_UNIT_TYPES
+
+
+def ensure_chair_unit(syllabus, *, save: bool = True):
+    """Dosyenin ``chair_unit``-i kafedra deyilsə YENİDƏN həll edir (self-healing).
+
+    Yeni versiya açılışı kimi səthlərdə çağırılır: köçürmə vaxtı ixtisasa
+    bağlanmış köhnə dosye yeni versiyada özü kafedraya çəkilir, ayrıca əmr
+    gözləmədən.  Kafedra tapılmasa dəyər OLDUĞU KİMİ qalır (fail-soft —
+    heç bir dosye «sahibsiz» edilmir).
+    """
+    current = syllabus.chair_unit
+    if is_chair_unit(current):
+        return current
+    target = resolve_syllabus_chair_unit(
+        unit=current,
+        author=syllabus.author,
+        organization=syllabus.organization,
+    )
+    if target is None or (current is not None and target.pk == current.pk):
+        return current
+    syllabus.chair_unit = target
+    if save:
+        type(syllabus).objects.filter(pk=syllabus.pk).update(chair_unit=target)
+    return target
+
+
+def chair_level_scope_covers(scope_unit_ids, chair_unit_id) -> bool:
+    """Aktorun KAFEDRA səviyyəli scope bölməsi verilmiş kafedranı tuturmu.
+
+    Adi ``user_scope_covers_unit`` alt-ağac yoxlamasıdır — fakültə scope-u
+    altındakı bütün kafedraları örtür, ona görə DEKAN de-fakto təsdiqçi olurdu.
+    Sahibin qərarı (2026-09-03) ilə QƏRAR üçün əhatə KAFEDRA SƏVİYYƏSİNDƏ
+    olmalıdır: aktoru sillabusa bağlayan ``Membership.scope_unit`` ya
+    kafedranın ÖZÜ, ya da kafedra tipli bir əcdadı olmalıdır.  Fakültə/
+    universitet tipli scope bölməsi bu yoxlamadan KEÇMİR (fail-closed);
+    org-wide override çağıran tərəfdə ayrıca həll olunur.
+    """
+    if not scope_unit_ids or chair_unit_id is None:
+        return False
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    target = OrgUnit.objects.filter(pk=chair_unit_id).first()
+    if target is None:
+        return False
+    covering = set(ancestor_unit_ids(target))
+    candidates = [unit_id for unit_id in scope_unit_ids if str(unit_id) in covering]
+    if not candidates:
+        return False
+    return OrgUnit.objects.filter(pk__in=candidates, unit_type__in=CHAIR_UNIT_TYPES, is_active=True).exists()
+
+
+def has_chair_level_unit(organization, scope_unit_ids) -> bool:
+    """Scope dəstində ÜMUMİYYƏTLƏ kafedra səviyyəli bölmə varmı (UI üçün)."""
+    if not scope_unit_ids:
+        return False
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    queryset = OrgUnit.objects.filter(pk__in=list(scope_unit_ids), unit_type__in=CHAIR_UNIT_TYPES, is_active=True)
+    if organization is not None:
+        queryset = queryset.filter(organization=organization)
+    return queryset.exists()
+
+
 __all__ = [
     "CHAIR_UNIT_TYPES",
     "author_chair_unit",
+    "chair_level_scope_covers",
+    "ensure_chair_unit",
+    "has_chair_level_unit",
+    "is_chair_unit",
     "resolve_chair_unit",
     "resolve_syllabus_chair_unit",
 ]

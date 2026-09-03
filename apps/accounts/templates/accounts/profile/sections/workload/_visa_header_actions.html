@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}Ekran 13 başlıq əməli — «Hamısına viza ver» İRADI OLMAYAN bütün
+GÖZLƏYƏN sətirləri vizalayır (dizayn `reviewAll()`).{% endcomment %}
+{% if workload_visa_section.can_write and workload_visa_section.counts.pending %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-submit='{"action": "review_all", "academic_year": "{{ workload_visa_section.year }}"}'
+        data-tof-confirm="{% trans 'Gözləyən bütün sətirlərə viza verilsin? İradlı sətirlərə toxunulmayacaq.' context 'accounts.workload_visa' %}">
+    {% trans "Hamısına viza ver" context "accounts.workload_visa" %}
+</button>
+{% endif %}

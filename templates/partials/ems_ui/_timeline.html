@@ -1,0 +1,23 @@
+{% comment %}
+Audit timeline — handoff §4 komponent 13. Nöqtə rəngi statusa uyğun gəlir.
+Kontekst: `timeline` = [{who, when, what, reason, tone, current}], `timeline_label`.
+`tone` — status kataloqundakı ton adı (primary|info|success|warning|danger|neutral|muted).
+{% endcomment %}
+<ol class="ems-tl" aria-label="{{ timeline_label }}">
+    {% for entry in timeline %}
+        <li class="ems-tl__item{% if entry.current %} ems-tl__item--current{% endif %}">
+            <div class="ems-tl__gutter" aria-hidden="true">
+                <span class="ems-tl__dot ems-tl__dot--{{ entry.tone|default:'neutral' }}"></span>
+                <span class="ems-tl__line"></span>
+            </div>
+            <div class="ems-tl__main">
+                <div class="ems-tl__head">
+                    <span class="ems-tl__who">{{ entry.who }}</span>
+                    <span class="ems-tl__when">{{ entry.when }}</span>
+                </div>
+                <div class="ems-tl__what">{{ entry.what }}</div>
+                {% if entry.reason %}<div class="ems-tl__reason">{{ entry.reason }}</div>{% endif %}
+            </div>
+        </li>
+    {% endfor %}
+</ol>

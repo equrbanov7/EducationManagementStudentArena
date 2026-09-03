@@ -1,0 +1,148 @@
+{% load i18n %}
+{% comment %}
+Ekran 01 «Universitet strukturu» — OrgUnit ağacı (dizayn handoff Mərhələ 1).
+
+İcazə: `unit.view` (görünürlük, bax `rbac_sections.py`); ağac əməlləri
+`unit.tree_manage`, rəhbər təyini `unit.assign_head` — hər ikisi POST
+endpoint-ində (`organizations.structure_actions`) fail-closed yenidən yoxlanılır.
+
+⚠️ BAŞLIQ (`<h1>`) BURADA YAZILMIR: kabinet qabığı bölmə adını
+`#profileSectionTitle` kimi artıq verir (əks halda səhifədə iki h1 olar).
+
+CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
+`teaching_office.js`, ikisi də `profile.html`-dən yüklənir. Dinamik dəyərlər
+`data-*` atributları ilə ötürülür.
+
+⚠️ Dialoqlar `[data-profile-section-panel]` İÇİNDƏDİR (AJAX swap-da itməsin).
+{% endcomment %}
+{% if 'org-structure-tree' in allowed_sections %}
+{% trans "Rektorat → fakültə → dekanlıq → kafedra → ixtisas → qrup iyerarxiyası. Bölmə silinmir — arxivlənir." context "accounts.structure_tree" as tof_subtitle %}
+{% trans "Bölmə tapılmadı" context "accounts.structure_tree" as tof_empty_title %}
+{% trans "Süzgəcləri dəyişin və ya yeni bölmə əlavə edin." context "accounts.structure_tree" as tof_empty_body %}
+{% trans "Bölmə seçilməyib" context "accounts.structure_tree" as tof_pick_title %}
+{% trans "Ağacdan bölmə seçin — heyət, qrup və tələbə göstəriciləri burada açılır." context "accounts.structure_tree" as tof_pick_body %}
+{% trans "Yeni alt bölmə" context "accounts.structure_tree" as tof_new_title %}
+{% trans "Bölmə seçilmiş vahidin altında yaradılır." context "accounts.structure_tree" as tof_new_sub %}
+{% trans "Bölmənin adı" context "accounts.structure_tree" as tof_rename_title %}
+{% trans "Bölməni arxivlə" context "accounts.structure_tree" as tof_archive_title %}
+{% trans "Bölmə SİLİNMİR — arxivlənir; tələbə, jurnal və qiymət tarixçəsi qalır." context "accounts.structure_tree" as tof_archive_sub %}
+{% trans "Arxivlə" context "accounts.structure_tree" as tof_archive_btn %}
+{% trans "Rəhbər təyin et" context "accounts.structure_tree" as tof_head_title %}
+{% trans "Təyinat səbəbi audit jurnalına aktor və vaxtla yazılır." context "accounts.structure_tree" as tof_head_sub %}
+{% trans "Təyin et" context "accounts.structure_tree" as tof_head_btn %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'org-structure-tree' %}is-active{% endif %}"
+         data-profile-section-panel="org-structure-tree"
+         data-source-url="{{ profile_base_url }}?section=org-structure-tree">
+
+{% if not structure_tree_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=structure_tree_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="org-structure-tree"
+     data-tof-action-url="{{ structure_tree_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=tof_subtitle header_note=structure_tree_section.archive_hint %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=structure_tree_section.kpi_tiles kpi_variant="4" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-structure-tree" filter_prefix="st_" filter_fields=structure_tree_section.filter_fields filter_count_label=structure_tree_section.filter_count_label %}
+
+    <div class="tof-split">
+        <div class="tof-pane tof-pane--tree">
+            <h2 class="tof-pane__title">{% trans "Struktur ağacı" context "accounts.structure_tree" %}</h2>
+            {% if structure_tree_section.tree_state == "empty" %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-sitemap" state_title=tof_empty_title state_body=tof_empty_body %}
+            {% else %}
+                {% include "partials/ems_ui/_tree.html" with tree_nodes=structure_tree_section.tree_nodes tree_label=structure_tree_section.tree_label %}
+            {% endif %}
+        </div>
+
+        <div class="tof-pane tof-pane--detail">
+            {% if not structure_tree_section.detail %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-hand-pointer" state_title=tof_pick_title state_body=tof_pick_body %}
+            {% else %}
+            {% with detail=structure_tree_section.detail unit=structure_tree_section.detail.unit %}
+            <div class="tof-detail">
+                <div class="tof-detail__head">
+                    <h2 class="tof-detail__name">{{ unit.name }}</h2>
+                    <span class="ems-badge ems-badge--info">{{ detail.unit_type_label }}</span>
+                </div>
+
+                <div class="tof-facts">
+                    <div class="tof-fact">
+                        <span class="tof-fact__label">{% trans "Rəhbər" context "accounts.structure_tree" %}</span>
+                        {% if unit.head %}
+                            <span class="tof-fact__value tof-fact__value--muted">{{ unit.head.get_full_name|default:unit.head.username }}</span>
+                        {% else %}
+                            <span class="tof-fact__value tof-fact__value--muted">{% trans "Təyin edilməyib" context "accounts.structure_tree" %}</span>
+                        {% endif %}
+                    </div>
+                    {% if not detail.is_light %}
+                    <div class="tof-fact">
+                        <span class="tof-fact__label">{% trans "Müəllim" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__value">{{ detail.total_teacher_count }}</span>
+                    </div>
+                    <div class="tof-fact">
+                        <span class="tof-fact__label">{% trans "Tələbə" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__value">{{ detail.student_count }}</span>
+                    </div>
+                    <div class="tof-fact">
+                        <span class="tof-fact__label">{% trans "Qrup" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__value">{{ detail.group_count }}</span>
+                    </div>
+                    <div class="tof-fact">
+                        <span class="tof-fact__label">{% trans "İxtisas" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__value">{{ detail.program_count }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="tof__toolbar">
+                    {% if structure_tree_section.can_manage_tree %}
+                    <button type="button" class="ems-btn ems-btn--primary"
+                            data-tof-open="tofUnitDialog"
+                            data-tof-prefill='{"action": "create_child", "parent": "{{ unit.id }}", "name": "", "code": "", "unit_type": ""}'>
+                        {% trans "Alt bölmə əlavə et" context "accounts.structure_tree" %}
+                    </button>
+                    <button type="button" class="ems-btn"
+                            data-tof-open="tofRenameDialog"
+                            data-tof-prefill='{"action": "rename", "unit": "{{ unit.id }}", "name": "{{ unit.name|escapejs }}", "code": "{{ unit.code|escapejs }}"}'>
+                        {% trans "Adını dəyiş" context "accounts.structure_tree" %}
+                    </button>
+                    {% endif %}
+                    {% if structure_tree_section.can_assign_head %}
+                    <button type="button" class="ems-btn"
+                            data-tof-open="tofHeadDialog"
+                            data-tof-prefill='{"action": "assign_head", "unit": "{{ unit.id }}", "head": "{{ unit.head_id|default_if_none:'' }}"}'>
+                        {% trans "Rəhbər təyin et" context "accounts.structure_tree" %}
+                    </button>
+                    {% endif %}
+                    <span class="tof__toolbar-spacer"></span>
+                    {% if structure_tree_section.can_manage_tree %}
+                    <button type="button" class="ems-btn ems-btn--danger"
+                            data-tof-open="tofArchiveDialog"
+                            data-tof-prefill='{"action": "archive", "unit": "{{ unit.id }}"}'>
+                        {% trans "Arxivlə" context "accounts.structure_tree" %}
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endwith %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% comment %}Dialoqlar — hamısı panelin İÇİNDƏ (AJAX swap-da itməsin).{% endcomment %}
+    {% if structure_tree_section.can_manage_tree %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofUnitDialog" form_dialog_title=tof_new_title form_dialog_subtitle=tof_new_sub form_dialog_body_include="accounts/profile/sections/teaching_office/_unit_fields.html" form_dialog_action=structure_tree_section.action_url form_dialog_hidden=structure_tree_section.unit_dialog_hidden form_dialog_data=structure_tree_section.form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofRenameDialog" form_dialog_title=tof_rename_title form_dialog_body_include="accounts/profile/sections/teaching_office/_rename_fields.html" form_dialog_action=structure_tree_section.action_url form_dialog_hidden=structure_tree_section.rename_dialog_hidden form_dialog_data=structure_tree_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofArchiveDialog" reason_title=tof_archive_title reason_subtitle=tof_archive_sub reason_submit_label=tof_archive_btn reason_submit_tone="danger" reason_action=structure_tree_section.action_url reason_hidden=structure_tree_section.archive_dialog_hidden reason_form_data=structure_tree_section.form_data %}
+    {% endif %}
+    {% if structure_tree_section.can_assign_head %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofHeadDialog" reason_title=tof_head_title reason_subtitle=tof_head_sub reason_submit_label=tof_head_btn reason_action=structure_tree_section.action_url reason_hidden=structure_tree_section.head_dialog_hidden reason_form_data=structure_tree_section.form_data reason_extra_include="accounts/profile/sections/teaching_office/_head_field.html" %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

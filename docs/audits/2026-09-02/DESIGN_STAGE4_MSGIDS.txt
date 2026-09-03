@@ -1,0 +1,312 @@
+# Dizayn Mərhələ 4 — YENİ msgid-lər (ekran 12/13/15/16/17)
+# .po fayllarına TOXUNULMAYIB; kataloqları i18n keçidi dolduracaq.
+# Mənbə: apps/workload + apps/accounts (workload_center / workload_chain / workload/*.html)
+
+## accounts.workload  (19)
+Bölgü yalnız fakültə dilimlərinin hamısı təsdiqləndikdən sonra açılır.
+Etiraz bildir
+Etiraz bölgünü dayandırmır — sətri yenidən bölün və ya etirazı qərarla bağlayın (qərar audit jurnalına yazılır).
+Etiraz kafedra müdirinə və dekanlığa göndərilir. Mətn sonradan dəyişdirilmir.
+Etirazlarım
+Excel yüklə
+Fənn / iş
+Göndər
+Kafedra müdiri 3 iş günü ərzində cavab verir.
+Müəllim etirazları
+Qəbul et
+Rədd et
+Seçin
+Səbəb
+Tapşırıq dekanlıq təsdiqini gözləyir
+Yük üzrə etiraz bildir
+Yükü təsdiqlə
+Yükü təsdiqləmisiniz
+İzah
+
+## accounts.workload_approval  (44)
+Arxiv rejimi
+Baxılıb
+Bu fakültə üçün göndərilmiş tapşırıq sətri tapılmadı.
+Bu fakültə üçün sətir yoxdur.
+CƏMİ KREDİT
+Dilim qərarlarının tarixçəsi
+Dilimdə sətir yoxdur
+Dilimi TƏSDİQLƏ
+DİLİMİN CƏMİ SAATI
+Fakültə
+Fakültə yükü
+Fənn
+Gözləyir
+Hamısı
+Hələ qərar verilməyib
+Hərəkət jurnalı
+Kafedra
+Kafedralar üzrə yekun
+Kafedraların yük paketlərini fakültə dilimi üzrə təsdiqləyin və ya səbəblə qaytarın.
+Keçmiş tədris ili yalnız oxunuş üçün açıqdır.
+Koordinator vizası
+Kredit
+Nəticə: %(count)d sətir
+Qaytar
+Qaytarma səbəbi
+Qaytarma səbəbi tədris şöbəsinə və kafedra rəhbərinə bildiriş kimi gedir və audit jurnalına yazılır.
+Qruplar
+Saat
+Semestr
+Seç
+Seçilmiş sətirləri qaytar
+Seçilmişləri qaytar
+Status
+Sətir
+Sətir seçilməyib
+Tarixçə
+Tədris ili
+Təsdiq görünüşləri
+Təsdiq növbəsi
+Viza
+İRADLI SƏTİR
+İXTİSAS SAYI
+İradlı
+İxtisas
+
+## accounts.workload_center  (113)
+.xlsx və ya .xlsm · maksimum 10 MB · sütun adları dəyişdirilməməlidir.
+Arxiv rejimi
+Bax
+Birl.
+Boş buraxsanız kafedranın bütün ixtisasları götürülür.
+Bu bölmədə hələ məlumat yoxdur
+Bu sətirlərdə ixtisas göstərilməyib — dekanlıq dilimi yaranmır və sənəd göndərilmir.
+Buraxılış
+Bölüşdürülüb
+CƏMİ KAFEDRA
+CƏMİ KREDİT
+CƏMİ SAAT
+Cəmi
+Dekan qərarı
+Dekanlıqlara göndər
+Doktorant
+Dərs yükü mərkəzinin görünüşləri
+Excel faylı
+Excel faylı yüklə
+Excel idxalının mərhələləri
+Excel import
+FAKÜLTƏ DİLİMİ
+Fakültə
+Fakültə dilimləri
+Fayl yüklə
+Fayldakı ad
+Faylı oxu
+Forma
+Fənn
+GÖNDƏRİLMİŞ
+GÖZLƏYİR
+Göndərilib
+Göndərmədən əvvəl yoxlama
+Hamısı
+Hesabatlar
+Kafedra
+Kafedra tapılmadı
+Kafedra tapşırıqları
+Kafedra üçün seçilmiş tədris ilinin sənədi yaradılır (kafedraya ildə bir sənəd).
+Kataloq uyğunluğu
+Keçmiş tədris ili yalnız oxunuş üçün açıqdır — yazma əməlləri bağlıdır.
+Koordinator vizası
+Kredit
+Laboratoriya (plan/cəmi)
+Ləğv et
+Marşrutsuz sətirlər
+Mühazirə (plan/cəmi)
+MƏTN KİMİ QALAN
+Məsləhət
+Mətn kimi qalacaq
+Növ
+Nəticə
+Nəticə: %(count)d kafedra
+Nəticə: %(count)d sətir
+PAYIZ CƏMİ
+Parametrlər
+Payız
+QAYTARILIB
+QAYTARILMIŞ
+Qaralama
+Qaytarılan sətirlər
+Qaytarılıb
+Qruplar
+Rəsmi TAPŞIRIQ şablonu (.xlsx / .xlsm, ≤10 MB). Kataloqda tapılmayan fənn və qruplar MƏTN kimi saxlanılır və sonradan bağlana bilər.
+Semestr
+Seminar (plan/cəmi)
+Seçilmiş filtrlərə uyğun kafedra yoxdur — «Sıfırla» ilə filtrləri təmizləyin.
+Seçilmiş filtrlərə uyğun sətir tapılmadı
+Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından sətirlər yaradılır. Əməl idempotentdir — mövcud sətir təkrarlanmır və heç nə əzilmir.
+Seçilmiş kafedra və tədris ili üçün sənəd yaradılmayıb — «Yeni tapşırıq».
+Seçin
+Status
+SƏTİR
+Sənəd hələ göndərilməyib — dilim yoxdur.
+Sətirləri gətir
+Səviyyə
+Tapşırıq dövriyyəsi başlayandan sonra buradakı hesabatlar avtomatik dolacaq.
+Tapşırıq görünüşləri
+Tapşırıq redaktoru
+Tapşırıq yarat
+Tapşırıq yoxdur
+Tapşırıqlar
+TƏSDİQLƏNMİŞ
+TƏSDİQLƏNİB
+Təcrübə
+Tədris ili
+Tədris planından gətir
+Tələbə
+Təsdiqlənib
+UYĞUNLAŞDI
+Uyğunlaşdı
+Uyğunlaşdırma
+Viza
+YAZ CƏMİ
+Yarımq.
+Yaz
+Yeni tapşırıq
+kr
+plan yoxdur
+saat
+sətir
+«Sıfırla» ilə filtrləri təmizləyin və ya plandan sətir gətirin.
+ÜMUMİ SAAT
+İdarə paneli
+İdxal et
+İdxal sətirləri mövcud QARALAMA sənədə əlavə olunur — «Tapşırıqlar» görünüşündən kafedra seçin.
+İlin tapşırıq sətirlərini yaradın, kafedralara paylayın, plandan və ya Excel-dən gətirin, dekanlıq təsdiqini izləyin.
+İmtahan
+İxtisas
+İxtisaslar
+İzləmə
+Şərh
+Əvvəlcə tapşırıq seçin
+
+## accounts.workload_overview  (35)
+%(fac)d fakültə · %(chair)d kafedra · %(teacher)d müəllim
+%(pct)d%% bölünüb
+Bu bölmədə hələ məlumat yoxdur
+Bu tədris ili üçün tapşırıq yoxdur
+BÖLÜNMÜŞ YÜK
+Bölgü
+Bölünmüş
+Diqqət tələb edən kafedralar
+Elmi Şura və nazirlik formatında hazır hesabatlar növbəti mərhələdə əlavə olunacaq.
+Fakültə
+Fakültələr
+Fakültələr üzrə bölgü
+Fakültələr üzrə yük mənzərəsi
+Gediş
+Hamısı
+Hesabatlar
+Kafedra
+Kafedra bölgüsünün vəziyyəti
+Kafedralar
+Müəllim
+NORMA AŞIMI
+Norma üstü
+Nəticə: %(count)d kafedra
+Risk siqnalı yoxdur.
+Status
+Tapşırıq
+Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin universitet üzrə vəziyyəti.
+Tədris ili
+Təsdiq axını
+VAKANT SAAT
+Vakant
+müəllim sayı
+ÜMUMİ TƏDRİS YÜKÜ
+Ümumi baxış
+Ümumi baxışın görünüşləri
+
+## accounts.workload_visa  (40)
+%(pct)d%% baxılıb
+Arxiv rejimi
+Axtarış
+BAXILIB
+Baxdım
+Baxılıb
+Fənn
+Fənn və ya qrup
+GÖZLƏYİR
+Gözləyir
+Hamısı
+Hamısına viza ver
+Hələ heç bir viza verməmisiniz.
+Kafedra müdirinə çatmazdan əvvəl öz ixtisasınızın hər yük sətrini yoxlayın: viza verin və ya irad yazın.
+Keçmiş tədris ili yalnız oxunuş üçün açıqdır — viza mərhələsi bağlıdır.
+Kredit
+Mənim hərəkətlərim
+Nəticə: %(count)d sətir
+Qruplar
+Qərar
+Saat
+Semestr
+Seçilmiş filtrlərə uyğun sətir tapılmadı
+Sizin ixtisasınıza aid göndərilmiş tapşırıq sətri yoxdur.
+SƏTİR
+Səviyyə
+Tarix
+Tədris ili
+Viza
+Viza görünüşləri
+Viza növbəsi
+İRADLI
+İrad
+İrad bildir
+İradlı
+İradı göndər
+Şərh
+Şərh kafedraya və dekana görünəcək. İrad yazılan sətir «vizalanmış» sayılmır.
+Şərh yazılmadan irad göndərilə bilməz.
+Əməllər
+
+## workload  (10)
+Baxılır
+Fənn ixtisasım deyil
+Göndərilib
+Norma həddindən artıqdır
+Qaytarılıb
+Qrup/tələbə sayı səhvdir
+Qəbul edildi
+Rədd edildi
+Saat sayı düz deyil
+Təsdiqlənib
+
+## workload.model  (6)
+fakültə təsdiq dilimi
+fakültə təsdiq dilimləri
+sətir vizaları
+sətir vizası
+yük etirazları
+yük etirazı
+
+# ARA CƏMİ (yeni fayllar): 267 msgid, 7 kontekst
+
+## profile.sidebar  (4)
+Dərs yükü mərkəzi
+Yük vizası
+Yük təsdiqi
+Yük — ümumi baxış
+
+## organizations.permission.label  (1)
+Öz dərs yükünə etiraz bildirmək
+
+## ui.status  (10)
+# `core/ui/status_catalog.py` → YENİ ailə `workload_task` (ekran 12/17).
+# Qeyd: «Göndərilib», «Qaytarılıb», «Təsdiqlənib» msgid-ləri BAŞQA ailələrdə
+# artıq mövcuddur — kataloqda təkrarlanmır.
+Qaralama
+Göndərilib
+Qaytarılıb
+Yekun təsdiq gözləyir
+Təsdiqlənib
+Bölüşdürülür
+Bölüşdürülüb
+Düzəliş edilib
+Ləğv edilib
+Tapşırıq yoxdur
+
+# YEKUN: 267 + 15 = 282 msgid, 10 kontekst

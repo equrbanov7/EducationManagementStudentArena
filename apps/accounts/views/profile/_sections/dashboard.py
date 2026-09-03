@@ -224,6 +224,11 @@ def build_dashboard_section(
         staff.student_intake(allowed_sections=allowed_sections),
         staff.org_kpis(request=request, organization=active_organization, allowed_sections=allowed_sections),
     ]
+    # Dizayn dalğasının (22 ekran) keçid kartları — idarəetmə blokunun sonunda,
+    # KPI-dan əvvəl; hər biri rol qapısından keçir (bax staff.design_link_cards).
+    kpi = widgets.pop()
+    widgets.extend(staff.design_link_cards(allowed_sections=allowed_sections))
+    widgets.append(kpi)
     section["widgets"] = [item for item in widgets if item is not None]
     _finalise_links(section["widgets"], allowed_sections)
     return section

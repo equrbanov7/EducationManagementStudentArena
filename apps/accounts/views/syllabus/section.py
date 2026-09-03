@@ -31,7 +31,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import STATUS_SORT_INDEX, SyllabusStatus
+from apps.syllabus.constants import QUEUE_STATUSES, STATUS_SORT_INDEX, SyllabusStatus
+from apps.syllabus.policy import sla_days
 from apps.syllabus.public import build_syllabus_list_context
 
 from .labels import STATUS_TONES
@@ -61,7 +62,12 @@ _KPI_LABELS = {
     "pending": (pgettext_lazy(_CTX, "Təsdiq gözləyir"), pgettext_lazy(_CTX, "kafedra növbəsində")),
     "revision": (pgettext_lazy(_CTX, "Düzəliş tələb olunur"), pgettext_lazy(_CTX, "sizdən əməl gözlənilir")),
     "missing": (pgettext_lazy(_CTX, "Sillabussuz fənn"), pgettext_lazy(_CTX, "semestr başına qədər tələb olunur")),
+    "sla": (pgettext_lazy(_CTX, "SLA-nı keçib"), pgettext_lazy(_CTX, "%(days)s gündən çox kafedra növbəsindədir")),
 }
+
+#: Domen sorğusuna ÖTÜRÜLMƏYƏN, siyahı qatında hesablanan filtr açarları.
+#: («missing» — sillabusu olmayan açılış; «sla» — SLA-nı keçmiş təqdimat.)
+VIRTUAL_STATUS_KEYS = ("missing", "sla")
 
 ALL_CHIP = pgettext_lazy(_CTX, "Hamısı")
 
@@ -163,9 +169,26 @@ def _chips(counts, missing_count: int, active: str):
     return chips
 
 
-def _kpis(counts, missing_count: int, active: str):
+def overdue_syllabus_ids(syllabi, *, now, sla: int) -> set:
+    """Kafedra növbəsində SLA həddini aşmış dosyelərin id-ləri (README §10.4).
+
+    Hədd SİYASƏTDƏN gəlir — kodda gün rəqəmi yoxdur.
+    """
+    overdue = set()
+    for row in syllabi:
+        version = row.current_version
+        if version is None or version.status not in QUEUE_STATUSES or version.submitted_at is None:
+            continue
+        if (now - version.submitted_at).days > sla:
+            overdue.add(row.pk)
+    return overdue
+
+
+def _kpis(counts, missing_count: int, active: str, *, overdue_count: int = 0, sla: int = 0):
     def card(key, value, tone, chip):
         label, note = _KPI_LABELS[key]
+        if key == "sla":
+            note = str(note) % {"days": sla}
         return {
             "key": key,
             "label": label,
@@ -183,6 +206,7 @@ def _kpis(counts, missing_count: int, active: str):
         card("pending", pending, "primary", SyllabusStatus.SUBMITTED.value),
         card("revision", counts.get(SyllabusStatus.REVISION.value, 0), "warning", SyllabusStatus.REVISION.value),
         card("missing", missing_count, "danger", "missing"),
+        card("sla", overdue_count, "warning", "sla"),
     ]
 
 
@@ -211,7 +235,9 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         request,
         organization=organization,
         academic_year=academic_year or None,
-        statuses=[status] if status else None,
+        # «sla» REAL status deyil — sorğuya ötürülsə heç nə uyğun gəlməzdi;
+        # süzgəc aşağıda, gözləmə müddəti hesablandıqdan sonra tətbiq olunur.
+        statuses=[status] if status and status != "sla" else None,
         search=search,
         sort=sort if sort in SORT_LABELS else "recent",
     )
@@ -227,6 +253,10 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         syllabi = [row for row in syllabi if str(row.chair_unit_id) == unit]
 
     now = timezone.now()
+    sla = sla_days(organization)
+    overdue = overdue_syllabus_ids(syllabi, now=now, sla=sla)
+    if status == "sla":
+        syllabi = [row for row in syllabi if row.pk in overdue]
     copyable = _copyable_subjects(syllabi)
     rows = [build_row(row, now=now, can_copy=row.subject_id in copyable) for row in syllabi]
 
@@ -257,7 +287,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
             "has_access": True,
             "access_denied_message": "",
             "can_create": context["can_create"],
-            "kpis": _kpis(context["counts"], len(missing), status),
+            "kpis": _kpis(context["counts"], len(missing), status, overdue_count=len(overdue), sla=sla),
             "chips": _chips(context["counts"], len(missing), status),
             "rows": list(page.object_list),
             "filters": {
@@ -295,4 +325,12 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     }
 
 
-__all__ = ["ACCESS_DENIED", "PAGE_SIZE", "SORT_LABELS", "academic_filter_options", "build_syllabus_list_section"]
+__all__ = [
+    "ACCESS_DENIED",
+    "PAGE_SIZE",
+    "SORT_LABELS",
+    "VIRTUAL_STATUS_KEYS",
+    "academic_filter_options",
+    "build_syllabus_list_section",
+    "overdue_syllabus_ids",
+]

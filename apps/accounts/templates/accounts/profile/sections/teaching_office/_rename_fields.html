@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}«Adını dəyiş» dialoqunun sahələri.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-rename-name">{% trans "Bölmənin adı" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-rename-name" name="name" maxlength="255" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-rename-code">{% trans "Kod" context "accounts.structure_tree" %}</label>
+        <input class="ems-input" type="text" id="tof-rename-code" name="code" maxlength="50">
+    </div>
+</div>

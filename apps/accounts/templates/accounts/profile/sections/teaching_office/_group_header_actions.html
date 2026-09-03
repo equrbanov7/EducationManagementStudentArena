@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Ekran 06 başlıq keçidləri — həftəlik cədvəl və imtahan kohortları
+AYRI bölmələrdədir; qrup reyestri onlara ÇARPAZ KEÇİD verir (təkrar qurulmur).{% endcomment %}
+<a class="ems-btn js-profile-section-link" href="{{ groups_registry_section.schedule_url }}"
+   data-section="schedule-manage" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Cədvəl idarəetməsi' context 'profile.sidebar' %}">{% trans "Dərs cədvəli" context "accounts.groups" %}</a>
+<a class="ems-btn" href="{{ groups_registry_section.exam_groups_url }}">{% trans "İmtahan kohortları" context "accounts.groups" %}</a>

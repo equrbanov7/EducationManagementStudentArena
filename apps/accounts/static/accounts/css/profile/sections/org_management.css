@@ -19,7 +19,10 @@
     text-transform: uppercase;
 }
 
-.org-management__header h1 {
+/* QA dalğa 2: embed-də başlıq `<h2>`-dir (dublikat `<h1>` aradan qaldırıldı). */
+.org-management__header h1,
+.org-management__header h2,
+.org-management__title {
     margin: 0;
     color: #172033;
     font-size: 1.6rem;

@@ -1,0 +1,80 @@
+{% load i18n %}
+{% comment %}
+Ekran 06 «Qruplar» — AKADEMİK qrup reyestri (`OrgUnit(unit_type=group)`).
+
+⚠️ Kabinetdəki mövcud «Qruplar» (`groups`) bölməsi BAŞQA anlayışdır —
+`exams.StudentGroup` (imtahan kohortu). İkisi qəsdən yan-yana yaşayır və
+bir-birinə çarpaz keçid verir.
+
+İcazə: `unit.view` (oxu) / `unit.group_manage` (yazı). Filtr, sıralama və
+səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivləmə
+(səbəb ≥20 + audit); toplu «kursa keçir» də səbəb + audit tələb edir.
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'groups-registry' in allowed_sections %}
+{% trans "Tələbə qrupları: ixtisas, kurs, dil sektoru, kurator və tələbə tərkibi. Cədvəl və imtahan kohortları ayrı bölmələrdədir." context "accounts.groups" as gr_subtitle %}
+{% trans "Qrup" context "accounts.groups" as gr_dialog_title %}
+{% trans "Qrupun kursu və dil sektoru bölmə metadatasında saxlanılır — sxem tenantdan asılı deyil." context "accounts.groups" as gr_dialog_sub %}
+{% trans "Qrupu arxivlə" context "accounts.groups" as gr_arch_title %}
+{% trans "Qrup SİLİNMİR — arxivlənir; tələbə qeydiyyatı, jurnal və qiymət tarixçəsi qalır." context "accounts.groups" as gr_arch_sub %}
+{% trans "Arxivlə" context "accounts.groups" as gr_arch_btn %}
+{% trans "Arxivdən qaytar" context "accounts.groups" as gr_restore_title %}
+{% trans "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır." context "accounts.groups" as gr_restore_sub %}
+{% trans "Seçilmiş qrupları növbəti kursa keçir" context "accounts.groups" as gr_promote_title %}
+{% trans "Hər qrup üçün ayrıca audit yazısı düşür (köhnə kurs → yeni kurs). Son kursdakı qruplar toxunulmur — məzunluq ayrı əməldir." context "accounts.groups" as gr_promote_sub %}
+{% trans "Kursa keçir" context "accounts.groups" as gr_promote_btn %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'groups-registry' %}is-active{% endif %}"
+         data-profile-section-panel="groups-registry"
+         data-source-url="{{ profile_base_url }}?section=groups-registry">
+
+{% if not groups_registry_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=groups_registry_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="groups-registry"
+     data-tof-bulk="groups"
+     data-tof-action-url="{{ groups_registry_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=gr_subtitle header_actions_include="accounts/profile/sections/teaching_office/_group_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=groups_registry_section.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="groups-registry" filter_prefix="gr_" filter_fields=groups_registry_section.filter_fields filter_count_label=groups_registry_section.filter_count_label %}
+
+    {% if groups_registry_section.can_manage %}
+    <div class="tof__toolbar">
+        <span class="tof-bulk__count" data-tof-bulk-count aria-live="polite"
+              data-tof-bulk-empty="{% trans 'Qrup seçilməyib' context 'accounts.groups' %}"
+              data-tof-bulk-selected="{% trans '%d qrup seçilib' context 'accounts.groups' %}">{% trans "Qrup seçilməyib" context "accounts.groups" %}</span>
+        <span class="tof__toolbar-spacer"></span>
+        <button type="button" class="ems-btn"
+                data-tof-open="tofGroupPromoteDialog"
+                data-tof-bulk-action
+                data-tof-prefill='{"action": "promote"}'
+                disabled aria-disabled="true">
+            {% trans "Kursa keçir" context "accounts.groups" %}
+        </button>
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-open="tofGroupDialog"
+                data-tof-prefill='{"action": "save_group", "id": "", "name": "", "code": "", "specialty": "", "course_year": "1", "language_sector": "", "admission_year": "", "capacity": "", "tutor": ""}'>
+            {% trans "Yeni qrup" context "accounts.groups" %}
+        </button>
+    </div>
+    {% endif %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=groups_registry_section.columns table_rows=groups_registry_section.table_rows table_state=groups_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-users-rectangle" state_title=groups_registry_section.state_title state_body=groups_registry_section.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=groups_registry_section.page_obj page_param="gr_page" extra_query=groups_registry_section.pagination_query %}
+
+    {% if groups_registry_section.can_manage %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupDialog" form_dialog_title=gr_dialog_title form_dialog_subtitle=gr_dialog_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_group_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.dialog_hidden form_dialog_data=groups_registry_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupArchiveDialog" reason_title=gr_arch_title reason_subtitle=gr_arch_sub reason_submit_label=gr_arch_btn reason_submit_tone="danger" reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.reason_hidden reason_form_data=groups_registry_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupRestoreDialog" reason_title=gr_restore_title reason_subtitle=gr_restore_sub reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.reason_hidden reason_form_data=groups_registry_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupPromoteDialog" reason_title=gr_promote_title reason_subtitle=gr_promote_sub reason_submit_label=gr_promote_btn reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.dialog_hidden reason_form_data=groups_registry_section.bulk_form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

@@ -23,6 +23,8 @@ from apps.organizations.review_visibility import (  # noqa: F401
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
+from .semester_meta import SemesterLockMixin  # noqa: F401  (ekran 07 kilid qatı)
+
 
 class Country(models.Model):
     """
@@ -361,7 +363,7 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         return get_permission_scope(user, organization, permission)
 
 
-class AcademicPeriod(UUIDModel, TimeStampedModel):
+class AcademicPeriod(SemesterLockMixin, UUIDModel, TimeStampedModel):
     """
     Represents an academic period (semester, trimester, quarter, year).
     """

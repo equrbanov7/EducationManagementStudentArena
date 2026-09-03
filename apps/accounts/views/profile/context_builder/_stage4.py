@@ -12,6 +12,20 @@ from ..contact_inbox import build_contact_inbox_context
 from ..password_otp import mask_email
 
 
+def _transcript_request_cta() -> dict:
+    """«Transkript sorğusu» CTA-sı — yalnız `request` siyasətində göstərilir.
+
+    Bayraq açılanda (`download`) CTA SÖNÜR: tələbə transkripti «Transkript»
+    bölməsindən birbaşa alır və sorğuya ehtiyac qalmır.
+    """
+    from apps.registrar.cabinet_policy import transcript_policy
+    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE
+
+    policy = transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE)
+    policy["show"] = not policy["self_service"]
+    return policy
+
+
 class _Stage4Mixin:
 
     def _stage_4_context(self):
@@ -41,6 +55,7 @@ class _Stage4Mixin:
             "primary_user_role_label": self.primary_user_role_label,
             "active_section": self.active_section,
             "active_section_title": self.active_section_title,
+            "section_denied": self.section_denied,
             "direct_profile_section": self.direct_profile_section,
             "direct_profile_section_template": self.direct_profile_section_templates.get(
                 self.direct_profile_section, ""
@@ -83,6 +98,7 @@ class _Stage4Mixin:
             "question_bank_kind_pills": self.question_bank_kind_pills,
             "question_bank_can_create": self.question_bank_can_create,
             **self._qsub_ctx,
+            **self._qchair_ctx,
             "unit_exams_page_obj": self.unit_exams_page_obj,
             "unit_exams_search_query": self.unit_exams_search_query,
             "unit_exams_total_count": self.unit_exams_total_count,
@@ -103,6 +119,10 @@ class _Stage4Mixin:
             "my_results_page_obj": self.my_results_page_obj,
             "my_result_counts": self.my_result_counts,
             "my_results_active_filter": self.my_results_active_filter,
+            # Transkript siyasəti (README §10.1 — default `request`). «Nəticələrim»
+            # RƏSMİ SƏNƏD DEYİL və sənəd linki VERMİR; burada yalnız SORĞU
+            # kanalına (Müraciətlər → «Transkript sorğusu») keçid göstərilir.
+            "transcript_request": _transcript_request_cta(),
             "my_results_search_query": self.my_results_search_query,
             "my_results_year": self.my_results_year,
             "my_results_season": self.my_results_season,
@@ -117,6 +137,7 @@ class _Stage4Mixin:
             "pending_answers_search_query": self.pending_answers_search_query,
             "pending_appeals_count": self.pending_appeals_count,
             "applications_pending_count": self.applications_pending_count,
+            "question_chair_pending_count": self.question_chair_pending_count,
             "pending_review_count": self.pending_review_count,
             "evaluated_review_count": self.evaluated_review_count,
             "teacher_groups": self.teacher_groups,
@@ -240,6 +261,20 @@ class _Stage4Mixin:
             "applications_section": self.applications_section,
             "workload_distribution_section": self.workload_distribution_section,
             "my_workload_section": self.my_workload_section,
+            "workload_center_section": self.workload_center_section,
+            "workload_visa_section": self.workload_visa_section,
+            "workload_approval_section": self.workload_approval_section,
+            "workload_overview_section": self.workload_overview_section,
+            "lessons_log_section": self.lessons_log_section,
+            "structure_tree_section": self.structure_tree_section,
+            "chair_profile_section": self.chair_profile_section,
+            "programs_registry_section": self.programs_registry_section,
+            "subject_catalog_section": self.subject_catalog_section,
+            "curriculum_editor_section": self.curriculum_editor_section,
+            "groups_registry_section": self.groups_registry_section,
+            "semester_opening_section": self.semester_opening_section,
+            "student_admission_section": self.student_admission_section,
+            "student_registry_section": self.student_registry_section,
             "exam_score_entry_section": self.exam_score_entry_section,
             "legacy_grade_review_section": self.legacy_grade_review_section,
             "exam_chance_section": self.exam_chance_section,

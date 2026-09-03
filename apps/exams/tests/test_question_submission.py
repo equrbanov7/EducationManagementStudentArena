@@ -1,7 +1,7 @@
 """
-Müəllim → İmtahan mərkəzi sual göndərişi axını testləri.
+Müəllim → KAFEDRA MÜDİRİ → İmtahan Mərkəzi sual göndərişi axını testləri.
 
-* Göndərmə: snapshot + xəbərdarlıq sayları, mərkəzə bildiriş.
+* Göndərmə: snapshot + xəbərdarlıq sayları, KAFEDRAYA marşrut və bildiriş.
 * Preview: müəllim xəbərdarlıqları görür.
 * Qəbul: suallar banka yazılır (yeni/mövcud), müəllimə bildiriş.
 * Rədd + düzəliş + yenidən göndərmə dövrü.
@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import BankQuestion, QuestionBank, QuestionSubmission
@@ -24,7 +25,7 @@ from apps.exams.services.question_submission import (
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
 from apps.notifications.models import InAppNotification
 from apps.organizations.models import Organization
-from core.constants import OrganizationType
+from core.constants import OrganizationType, OrgUnitType
 
 User = get_user_model()
 
@@ -66,6 +67,28 @@ class _Base(TestCase):
         cls.exam_center = User.objects.create_user("qs_center", "qs_center@test.az", PASSWORD)
         _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center")
 
+        # ── Kafedra strukturu: müəllim kafedraya bağlıdır, kafedranın müdiri var ──
+        from apps.organizations.models import Membership, OrgUnit
+
+        cls.faculty = OrgUnit.objects.create(
+            organization=cls.org, name="Mühəndislik fakültəsi", unit_type=OrgUnitType.FACULTY
+        )
+        cls.chair = OrgUnit.objects.create(
+            organization=cls.org, name="İnformatika kafedrası", unit_type=OrgUnitType.CHAIR, parent=cls.faculty
+        )
+        cls.other_chair = OrgUnit.objects.create(
+            organization=cls.org, name="Fizika kafedrası", unit_type=OrgUnitType.CHAIR, parent=cls.faculty
+        )
+        Membership.objects.filter(user=cls.teacher, organization=cls.org).update(scope_unit=cls.chair)
+
+        cls.chair_head = User.objects.create_user("qs_chair", "qs_chair@test.az", PASSWORD)
+        _assign_user_to_org(cls.chair_head, cls.org, ProfileRole.MEMBER, "chair_head")
+        Membership.objects.filter(user=cls.chair_head, organization=cls.org).update(scope_unit=cls.chair)
+
+        cls.other_chair_head = User.objects.create_user("qs_chair2", "qs_chair2@test.az", PASSWORD)
+        _assign_user_to_org(cls.other_chair_head, cls.org, ProfileRole.MEMBER, "chair_head")
+        Membership.objects.filter(user=cls.other_chair_head, organization=cls.org).update(scope_unit=cls.other_chair)
+
     def _client_for(self, user):
         client = Client()
         client.force_login(user)
@@ -87,6 +110,18 @@ class _Base(TestCase):
         kwargs.update(overrides)
         return submit_question_set(**kwargs)
 
+    def _to_center(self, submission):
+        """Kafedra təsdiqini simulyasiya edir — MƏRKƏZ mərhələsi testləri üçün."""
+        QuestionSubmission.objects.filter(pk=submission.pk).update(
+            status=QuestionSubmission.STATUS_CHAIR_APPROVED,
+            chair_decision=QuestionSubmission.CHAIR_DECISION_APPROVED,
+            chair_reviewer=self.chair_head,
+            chair_reviewed_at=timezone.now(),
+            reached_center_at=timezone.now(),
+        )
+        submission.refresh_from_db()
+        return submission
+
     def _subject(self, name="İnformatika", code="INF101", group=None):
         """Registrar fənni yaradır; verilərsə qrupa bağlayır (müəllim fənləri
         qrup fənlərinin birləşməsindən gəlir)."""
@@ -101,7 +136,10 @@ class _Base(TestCase):
 class SubmissionServiceTests(_Base):
     def test_submit_builds_snapshot_and_counts(self):
         submission = self._submission()
-        self.assertEqual(submission.status, QuestionSubmission.STATUS_PENDING)
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_SUBMITTED_TO_CHAIR)
+        self.assertEqual(submission.chair_unit, self.chair)
+        self.assertFalse(submission.routed_to_dean)
+        self.assertIsNone(submission.reached_center_at)
         self.assertEqual(submission.question_count, 2)
         self.assertEqual(submission.error_count, 0)
         self.assertEqual(len(submission.parsed_snapshot), 2)
@@ -113,9 +151,11 @@ class SubmissionServiceTests(_Base):
         warning_types = {w["type"] for q in submission.parsed_snapshot for w in q.get("warnings", [])}
         self.assertIn("correct_defaulted", warning_types)
 
-    def test_submit_notifies_exam_center_members(self):
+    def test_submit_notifies_chair_head_not_exam_center(self):
         self._submission()
-        self.assertTrue(InAppNotification.objects.filter(recipient=self.exam_center).exists())
+        self.assertTrue(InAppNotification.objects.filter(recipient=self.chair_head).exists())
+        # Mərkəz kafedra təsdiqindən ƏVVƏL heç nə görmür/bilmir.
+        self.assertFalse(InAppNotification.objects.filter(recipient=self.exam_center).exists())
 
     def test_submit_rejects_empty_text(self):
         with self.assertRaises(ValidationError):
@@ -138,7 +178,7 @@ class SubmissionServiceTests(_Base):
         self.assertEqual(submission.group_label, "875i-qrup")
 
     def test_accept_creates_new_bank_with_questions(self):
-        submission = self._submission()
+        submission = self._to_center(self._submission())
         bank, created = accept_submission(submission, reviewer=self.exam_center, new_bank_name="Final bankı 2026")
         submission.refresh_from_db()
         self.assertEqual(submission.status, QuestionSubmission.STATUS_ACCEPTED)
@@ -155,8 +195,8 @@ class SubmissionServiceTests(_Base):
     def test_accept_carries_submission_meta_to_new_bank(self):
         # Fənn (kataloq bağlantısı), imtahan növü və mənbə müəllim yeni banka köçür.
         subject = self._subject(name="Riyazi analiz", code="RIY201")
-        submission = self._submission(
-            title="Meta daşıma", subject=subject.name, subject_ref=subject, exam_kind="midterm"
+        submission = self._to_center(
+            self._submission(title="Meta daşıma", subject=subject.name, subject_ref=subject, exam_kind="midterm")
         )
         bank, _created = accept_submission(submission, reviewer=self.exam_center)
         self.assertEqual(bank.subject_ref, subject)
@@ -173,34 +213,36 @@ class SubmissionServiceTests(_Base):
             created_by=self.exam_center,
             default_question_type="test",
         )
-        submission = self._submission()
+        submission = self._to_center(self._submission())
         bank, created = accept_submission(submission, reviewer=self.exam_center, bank=existing)
         self.assertEqual(bank, existing)
         self.assertEqual(created, 2)
 
     def test_accept_twice_blocked(self):
-        submission = self._submission()
+        submission = self._to_center(self._submission())
         accept_submission(submission, reviewer=self.exam_center)
         with self.assertRaises(ValidationError):
             accept_submission(submission, reviewer=self.exam_center)
 
     def test_reject_then_resubmit_cycle(self):
-        submission = self._submission(raw_text=TEXT_WITH_PROBLEM, title="Dövr testi")
-        reject_submission(submission, reviewer=self.exam_center, note="Düzgün cavabları işarələyin.")
+        submission = self._to_center(self._submission(raw_text=TEXT_WITH_PROBLEM, title="Dövr testi"))
+        reject_submission(submission, reviewer=self.exam_center, note="Düzgün cavabları işarələyin — hamısında.")
         submission.refresh_from_db()
         self.assertEqual(submission.status, QuestionSubmission.STATUS_REJECTED)
-        self.assertEqual(submission.reviewer_note, "Düzgün cavabları işarələyin.")
+        self.assertEqual(submission.reviewer_note, "Düzgün cavabları işarələyin — hamısında.")
 
         resubmit_question_set(submission, raw_text=VALID_TEXT)
         submission.refresh_from_db()
-        self.assertEqual(submission.status, QuestionSubmission.STATUS_PENDING)
+        # Düzəlişdən sonra dəst YENİDƏN kafedradan keçir — mərkəzə birbaşa qayıtmır.
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_SUBMITTED_TO_CHAIR)
+        self.assertIsNone(submission.reached_center_at)
         self.assertEqual(submission.resubmission_count, 1)
         self.assertEqual(submission.error_count, 0)
         self.assertEqual(submission.reviewer_note, "")
         self.assertIsNone(submission.reviewer)
 
     def test_accepted_submission_cannot_be_resubmitted(self):
-        submission = self._submission()
+        submission = self._to_center(self._submission())
         accept_submission(submission, reviewer=self.exam_center)
         submission.refresh_from_db()
         with self.assertRaises(ValidationError):
@@ -256,7 +298,7 @@ class SubmissionViewTests(_Base):
             self.assertIn("section=question-submissions", response["Location"])
 
     def test_review_decide_accept_flow(self):
-        submission = self._submission(title="Qərar axını")
+        submission = self._to_center(self._submission(title="Qərar axını"))
         client = self._client_for(self.exam_center)
 
         review_url = reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
@@ -272,18 +314,26 @@ class SubmissionViewTests(_Base):
         self.assertEqual(BankQuestion.objects.filter(bank=submission.accepted_bank).count(), 2)
 
     def test_reject_requires_note(self):
-        submission = self._submission(title="Qeydsiz rədd")
+        submission = self._to_center(self._submission(title="Qeydsiz rədd"))
         client = self._client_for(self.exam_center)
         client.post(
             reverse("exams:question_submission_decide", kwargs={"submission_id": submission.id}),
             {"decision": "reject", "note": ""},
         )
         submission.refresh_from_db()
-        self.assertEqual(submission.status, QuestionSubmission.STATUS_PENDING)
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_CHAIR_APPROVED)
+
+        # Qısa qeyd də KİFAYƏT ETMİR (≥20 simvol).
+        client.post(
+            reverse("exams:question_submission_decide", kwargs={"submission_id": submission.id}),
+            {"decision": "reject", "note": "səhvdir"},
+        )
+        submission.refresh_from_db()
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_CHAIR_APPROVED)
 
         client.post(
             reverse("exams:question_submission_decide", kwargs={"submission_id": submission.id}),
-            {"decision": "reject", "note": "3-cü sual səhvdir."},
+            {"decision": "reject", "note": "3-cü sualda düzgün cavab işarələnməyib."},
         )
         submission.refresh_from_db()
         self.assertEqual(submission.status, QuestionSubmission.STATUS_REJECTED)
@@ -299,7 +349,7 @@ class SubmissionViewTests(_Base):
         self.assertEqual(response.status_code, 404)
 
     def test_exam_center_can_open_detail(self):
-        submission = self._submission(title="Mərkəz baxışı")
+        submission = self._to_center(self._submission(title="Mərkəz baxışı"))
         response = self._client_for(self.exam_center).get(
             reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id})
         )
@@ -464,7 +514,8 @@ class SubmissionViewTests(_Base):
         )
         submission = QuestionSubmission.objects.get(title="Qeydli göndəriş")
         self.assertEqual(submission.teacher_note, "5-8-ci suallar mühazirə 3-ə aiddir.")
-        # Mərkəz baxış səhifəsində qeydi görür.
+        # Mərkəz baxış səhifəsində qeydi görür (kafedra təsdiqindən SONRA).
+        self._to_center(submission)
         response = self._client_for(self.exam_center).get(
             reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
         )
@@ -477,8 +528,8 @@ class SubmissionViewTests(_Base):
 
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org, name="875i-resubmit")
         subject = self._subject(group=group)
-        submission = self._submission(title="Workbench redaktə", raw_text=TEXT_WITH_PROBLEM)
-        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin.")
+        submission = self._to_center(self._submission(title="Workbench redaktə", raw_text=TEXT_WITH_PROBLEM))
+        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin — cavablar işarəsizdir.")
 
         client = self._client_for(self.teacher)
         url = reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id})
@@ -500,7 +551,7 @@ class SubmissionViewTests(_Base):
         )
         self.assertEqual(response.status_code, 302)
         submission.refresh_from_db()
-        self.assertEqual(submission.status, QuestionSubmission.STATUS_PENDING)
+        self.assertEqual(submission.status, QuestionSubmission.STATUS_SUBMITTED_TO_CHAIR)
         self.assertEqual(submission.title, "Workbench redaktə 2")
         self.assertEqual(submission.resubmission_count, 1)
         self.assertEqual(submission.error_count, 0)
@@ -539,7 +590,7 @@ class ProfileSectionTests(_Base):
 
     def test_exam_center_sees_inline_filters(self):
         # "Qutunu aç" düyməsi ləğv edilib — filtr paneli bölmənin özündədir.
-        self._submission(title="Bölmə testi")
+        self._to_center(self._submission(title="Bölmə testi"))
         client = self._client_for(self.exam_center)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
         self.assertEqual(response.status_code, 200)
@@ -558,7 +609,7 @@ class ProfileSectionTests(_Base):
         self.assertNotContains(response, "Riyaziyyat toplusu")
 
     def test_section_status_filter(self):
-        accepted = self._submission(title="Qəbul olunan toplu")
+        accepted = self._to_center(self._submission(title="Qəbul olunan toplu"))
         accept_submission(accepted, reviewer=self.exam_center)
         self._submission(title="Gözləyən toplu")
         client = self._client_for(self.teacher)
@@ -577,8 +628,8 @@ class ProfileSectionTests(_Base):
         self.assertContains(response, "qsub_page=2")
 
     def test_section_language_filter_for_reviewer(self):
-        self._submission(title="AZ toplusu")
-        self._submission(title="EN toplusu", language="en")
+        self._to_center(self._submission(title="AZ toplusu"))
+        self._to_center(self._submission(title="EN toplusu", language="en"))
         client = self._client_for(self.exam_center)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_lang=en")
         self.assertContains(response, "EN toplusu")
@@ -586,21 +637,14 @@ class ProfileSectionTests(_Base):
 
     def test_section_faculty_filter_for_reviewer(self):
         from apps.exams.models import StudentGroup
-        from apps.organizations.models import OrgUnit
-        from core.constants import OrgUnitType
 
-        faculty = OrgUnit.objects.create(
-            organization=self.org, unit_type=OrgUnitType.FACULTY, name="Mühəndislik fakültəsi"
-        )
-        kafedra = OrgUnit.objects.create(
-            organization=self.org, unit_type=OrgUnitType.CHAIR, name="İnformatika kafedrası", parent=faculty
-        )
+        # Struktur `_Base`-də qurulub (fakültə → kafedra) — təkrar yaradılmır.
+        faculty, kafedra = self.faculty, self.chair
         group = StudentGroup.objects.create(
             teacher=self.teacher, organization=self.org, name="875i-fak", org_unit=kafedra
         )
-        inside = self._submission(title="Fakültə daxili toplu", student_group=group)
-        inside.student_groups.set([group])
-        self._submission(title="Fakültə xarici toplu")
+        self._to_center(self._submission(title="Fakültə daxili toplu", student_group=group, groups=[group]))
+        self._to_center(self._submission(title="Fakültə xarici toplu"))
 
         client = self._client_for(self.exam_center)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions&qsub_faculty={faculty.pk}")
@@ -622,22 +666,22 @@ class ProfileSectionTests(_Base):
         self.assertFalse(QuestionSubmission.objects.filter(id=submission.id).exists())
 
     def test_teacher_cannot_delete_accepted_submission(self):
-        submission = self._submission(title="Silinməz toplu")
+        submission = self._to_center(self._submission(title="Silinməz toplu"))
         accept_submission(submission, reviewer=self.exam_center)
         client = self._client_for(self.teacher)
         client.post(reverse("exams:question_submission_delete", kwargs={"submission_id": submission.id}))
         self.assertTrue(QuestionSubmission.objects.filter(id=submission.id).exists())
 
     def test_rejected_detail_shows_verdict_banner(self):
-        submission = self._submission(title="Bannerli toplu")
-        reject_submission(submission, reviewer=self.exam_center, note="2-ci sualı düzəldin.")
+        submission = self._to_center(self._submission(title="Bannerli toplu"))
+        reject_submission(submission, reviewer=self.exam_center, note="2-ci sualı mütləq düzəldin.")
         client = self._client_for(self.teacher)
         response = client.get(reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id}))
         self.assertContains(response, "qsubd-verdict--rejected")
-        self.assertContains(response, "2-ci sualı düzəldin.")
+        self.assertContains(response, "2-ci sualı mütləq düzəldin.")
 
     def test_review_page_renders_decision_choices(self):
-        submission = self._submission(title="Qərar UI toplusu")
+        submission = self._to_center(self._submission(title="Qərar UI toplusu"))
         response = self._client_for(self.exam_center).get(
             reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
         )
@@ -646,12 +690,12 @@ class ProfileSectionTests(_Base):
         self.assertContains(response, 'name="decision"')
 
     def test_teacher_sees_rejected_alert(self):
-        submission = self._submission(title="Geri qaytarılan")
-        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin.")
+        submission = self._to_center(self._submission(title="Geri qaytarılan"))
+        reject_submission(submission, reviewer=self.exam_center, note="Düzəldin — cavablar işarəsizdir.")
         client = self._client_for(self.teacher)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
         self.assertContains(response, "göndərişi geri qaytarıb")
-        self.assertContains(response, "Geri qaytarılıb — düzəliş gözlənilir")
+        self.assertContains(response, "Rədd edilib — düzəldib yenidən göndərə bilərsiniz")
 
     def test_student_does_not_get_section(self):
         student = User.objects.create_user("qs_student", "qs_student@test.az", PASSWORD)
@@ -663,7 +707,7 @@ class ProfileSectionTests(_Base):
 
     def test_teacher_sees_accepted_bank_name_in_list(self):
         # Qəbul edilən göndərişdə mərkəzin yazdığı bankın adı müəllimə görünür.
-        submission = self._submission(title="Bank izi toplusu")
+        submission = self._to_center(self._submission(title="Bank izi toplusu"))
         accept_submission(submission, reviewer=self.exam_center, new_bank_name="İz bankı 2026")
         client = self._client_for(self.teacher)
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
@@ -800,7 +844,7 @@ class SubmissionQuestionsEndpointTests(_Base):
         return response.json()
 
     def test_endpoint_paginates_with_stable_numbers(self):
-        submission = self._submission(title="Lazy səhifələmə")
+        submission = self._to_center(self._submission(title="Lazy səhifələmə"))
         client = self._client_for(self.exam_center)
         first = self._payload(client, submission, offset=0, limit=1)
         self.assertEqual(first["returned"], 1)
@@ -814,7 +858,7 @@ class SubmissionQuestionsEndpointTests(_Base):
         self.assertEqual(second["counts"]["all"], 2)
 
     def test_endpoint_filters_and_search(self):
-        submission = self._submission(raw_text=TEXT_WITH_PROBLEM, title="Lazy filtr")
+        submission = self._to_center(self._submission(raw_text=TEXT_WITH_PROBLEM, title="Lazy filtr"))
         client = self._client_for(self.exam_center)
         self.assertEqual(self._payload(client, submission, flag="error")["filtered_total"], 1)
         self.assertEqual(self._payload(client, submission, flag="clean")["filtered_total"], 0)
@@ -824,19 +868,20 @@ class SubmissionQuestionsEndpointTests(_Base):
         self.assertEqual(self._payload(client, submission, q="tapılmayan-söz")["filtered_total"], 0)
 
     def test_endpoint_permission(self):
-        submission = self._submission(title="Lazy icazə")
+        submission = self._to_center(self._submission(title="Lazy icazə"))
         other_teacher = User.objects.create_user("qs_lazy_other", "qs_lazy_other@test.az", PASSWORD)
         _assign_user_to_org(other_teacher, self.org, ProfileRole.TEACHER, "teacher")
         response = self._client_for(other_teacher).get(
             reverse("exams:question_submission_questions", kwargs={"submission_id": submission.id})
         )
         self.assertEqual(response.status_code, 404)
-        # Sahib müəllim və mərkəz görə bilir.
+        # Sahib müəllim, KAFEDRA MÜDİRİ və mərkəz görə bilir.
         self._payload(self._client_for(self.teacher), submission)
+        self._payload(self._client_for(self.chair_head), submission)
         self._payload(self._client_for(self.exam_center), submission)
 
     def test_review_page_renders_lazy_shell(self):
-        submission = self._submission(title="Lazy shell")
+        submission = self._to_center(self._submission(title="Lazy shell"))
         response = self._client_for(self.exam_center).get(
             reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
         )

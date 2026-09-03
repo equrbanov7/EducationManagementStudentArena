@@ -42,6 +42,7 @@ qeydiyyatı 4 yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "has_scope": bool,                    # False → «əhatə yoxdur» boş vəziyyəti
     "scope_mode": "chair" | "wide" | "noscope",   # yalnız GÖSTƏRİŞ rejimi
     "can_review": bool, "can_approve": bool, "can_revise": bool, "can_reject": bool,
+    "can_decide": bool,                   # kafedra səviyyəli əhatə (qərar düymələri)
     "coverage": {"group_by", "rows": […], "totals": {…}},
     "trend": [{"key","label","total","approved",…,"percent"}…],
 }``
@@ -99,6 +100,7 @@ from .services import (
     available_actions,
     can_view,
     coverage_report,
+    has_decision_scope,
     has_review_scope,
     import_migrated_version,
     list_syllabi,
@@ -241,12 +243,18 @@ def build_review_queue_context(
             "can_approve": False,
             "can_revise": False,
             "can_reject": False,
+            "can_decide": False,
             "coverage": {"group_by": GROUP_PROGRAM, "rows": [], "totals": {}},
             "trend": [],
             "statuses": STATUS_CATALOG,
         }
     report = coverage_report(organization=organization, actor=actor, academic_year=academic_year)
     mode = _scope_mode(actor, report)
+    # SAHİBİN QƏRARI (2026-09-03): qərar düymələri YALNIZ kafedra səviyyəli
+    # (və ya org-wide override) əhatəsi olan aktora göstərilir.  Dekan növbəni
+    # görür və oxuyur, amma düymə görmür — servis qatı onu onsuz da 403 ilə
+    # dayandırardı, UI-nın yalan düymə göstərməsinin mənası yoxdur.
+    can_decide = has_decision_scope(actor)
     return {
         "queue": review_queue(
             organization=organization,
@@ -260,9 +268,10 @@ def build_review_queue_context(
         "has_scope": True,
         "scope_mode": mode,
         "can_review": actor.has(PERM_REVIEW),
-        "can_approve": actor.has(PERM_APPROVE),
-        "can_revise": actor.has(PERM_REVISE),
-        "can_reject": actor.has(PERM_REJECT),
+        "can_approve": can_decide and actor.has(PERM_APPROVE),
+        "can_revise": can_decide and actor.has(PERM_REVISE),
+        "can_reject": can_decide and actor.has(PERM_REJECT),
+        "can_decide": can_decide,
         **_coverage_slice(report, group_by=(GROUP_CHAIR if mode == "wide" else GROUP_PROGRAM)),
         "statuses": STATUS_CATALOG,
     }

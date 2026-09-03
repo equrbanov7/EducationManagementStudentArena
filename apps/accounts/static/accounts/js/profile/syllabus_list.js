@@ -19,7 +19,7 @@
     var SECTION = "syllabus-list";
     var EDITOR_SECTION = "syllabus-editor";
     var SEARCH_DEBOUNCE = 240;
-    var MIN_REASON = 15;
+    var MIN_REASON = 20;
     var VIEW_STORAGE_KEY = "ems.syllabus.view";
 
     var searchTimer = null;

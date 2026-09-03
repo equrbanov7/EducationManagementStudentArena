@@ -16,7 +16,26 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
 <section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
     <div class="section-card">
 
-
+        {% comment %}Rəsmi transkript SORĞU kanalı (dizayn README §10.1 —
+        `transcriptPolicy = request`). Burada SƏNƏD LİNKİ YOXDUR: yalnız
+        Müraciətlər panelindəki «Transkript sorğusu» növünə keçid. Sahib
+        `download` siyasətinə keçsə bu blok özü SÖNÜR (`transcript_request.show`).{% endcomment %}
+        {% if transcript_request.show and 'applications' in allowed_sections %}
+        <div class="results-transcript-cta">
+            <i class="fas fa-scroll" aria-hidden="true"></i>
+            <div class="results-transcript-cta__text">
+                <b>{% trans "Rəsmi transkript" context "profile.results" %}</b>
+                <span>{% trans "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü." context "profile.results" %}</span>
+            </div>
+            <a class="results-transcript-cta__btn js-profile-section-link"
+               href="{{ transcript_request.request_url }}"
+               data-section="applications"
+               data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}">
+                {% trans "Transkript sorğusu göndər" context "profile.results" %}
+            </a>
+        </div>
+        {% endif %}
 
         <div class="modern-results-tabs">
             <a href="{{ profile_base_url }}?section=my-results&results_type=all{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"

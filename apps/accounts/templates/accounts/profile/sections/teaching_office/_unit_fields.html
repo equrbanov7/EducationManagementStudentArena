@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}«Yeni alt bölmə» dialoqunun sahələri — `_form_dialog.html` gövdəsi.
+Gizli `action` və `parent` sahələri dialoqun özündədir; dəyərləri JS-in
+`data-tof-prefill` JSON-undan gəlir.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-unit-name">{% trans "Bölmənin adı" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-unit-name" name="name" maxlength="255" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-unit-type">{% trans "Bölmə tipi" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-unit-type" name="unit_type" required>
+            <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
+            {% for option in structure_tree_section.unit_kind_choices %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-unit-code">{% trans "Kod" context "accounts.structure_tree" %}</label>
+        <input class="ems-input" type="text" id="tof-unit-code" name="code" maxlength="50">
+    </div>
+</div>

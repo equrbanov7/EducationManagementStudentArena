@@ -1,0 +1,36 @@
+{% comment %}
+Dialoq — handoff §4 komponent 8 · §7 (role=dialog, aria-modal, fokus tələsi,
+Escape, fokusun qayıtması → `ems_ui/overlay.js`).
+
+KONTEKST MÜQAVİLƏSİ
+  dialog_id        — məcburi, `data-ems-overlay-open="<id>"` ilə açılır
+  dialog_title     — məcburi
+  dialog_subtitle  — opsional
+  dialog_body_include — məcburi şablon yolu (məzmun)
+  dialog_foot_include — opsional; verilməsə «Ləğv et» düyməsi göstərilir
+  dialog_wide      — 720px variant
+  dialog_static    — scrim-ə klik bağlamasın
+{% endcomment %}
+{% load i18n %}
+<div class="ems-overlay ems-overlay--dialog" id="{{ dialog_id }}" hidden
+     {% if dialog_static %}data-ems-static="true"{% endif %}>
+    <div class="ems-dialog{% if dialog_wide %} ems-dialog--wide{% endif %}"
+         role="dialog" aria-modal="true" aria-labelledby="{{ dialog_id }}-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="{{ dialog_id }}-title">{{ dialog_title }}</h2>
+                {% if dialog_subtitle %}<p class="ems-dialog__sub">{{ dialog_subtitle }}</p>{% endif %}
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                    aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">{% include dialog_body_include %}</div>
+        <div class="ems-dialog__foot">
+            {% if dialog_foot_include %}
+                {% include dialog_foot_include %}
+            {% else %}
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
+            {% endif %}
+        </div>
+    </div>
+</div>

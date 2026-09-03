@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Müraciətlər paneli — rol üzrə baxış</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 24px 60px;background:#f8fafc;color:#0f172a;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1300px;margin:0 auto}
+  h1{margin:0;font-size:1.7rem;font-weight:800;letter-spacing:-.02em}
+  .lead{margin:8px 0 0;max-width:760px;font-size:.9rem;line-height:1.6;color:#64748b;text-wrap:pretty}
+  .lead a{color:#2563eb}
+  .toc{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 28px}
+  .toc a{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid #e2e8f0;border-radius:999px;
+    background:#fff;color:#334155;font-size:.82rem;font-weight:700;text-decoration:none}
+  .toc a:hover{border-color:#2563eb;color:#1e40af}
+  .toc a span{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;color:#94a3b8}
+  .row{margin-bottom:30px;background:#fff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden}
+  .row header{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid #e2e8f0}
+  .num{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#eff6ff;
+    color:#1e40af;font-size:.82rem;font-weight:800}
+  .row h2{margin:0;font-size:1.02rem;font-weight:800}
+  .row p{margin:3px 0 0;font-size:.8rem;color:#64748b}
+  .open{margin-left:auto;flex:none;font-size:.8rem;font-weight:700;color:#2563eb;text-decoration:none}
+  .open:hover{color:#1d4ed8}
+  .frame{height:700px;overflow:hidden;background:#f8fafc}
+  .frame iframe{width:1400px;height:1272px;border:0;transform:scale(.55);transform-origin:0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Müraciətlər paneli — rol üzrə baxış</h1>
+  <p class="lead">Eyni ekran altı rol üçün. Fərq yalnız məzmundadır: kim göndərə bilir, kim cavab verə bilir,
+  hansı müraciətləri görür. Hər blok həmin rolun canlı prototipidir — düymələr, filtrlər və modal pəncərələr işləkdir.
+  Tam spesifikasiya: <a href="README.md">README.md</a>.</p>
+  <nav class="toc"><a href="#rol-01"><span>01</span>Tələbə</a><a href="#rol-02"><span>02</span>Müəllim</a><a href="#rol-03"><span>03</span>Tələbə Xidmətləri Mərkəzi</a><a href="#rol-04"><span>04</span>Dekanlıq</a><a href="#rol-05"><span>05</span>Kafedra müdirliyi</a><a href="#rol-06"><span>06</span>Tədris Şöbəsi</a></nav>
+
+    <section class="row" id="rol-01">
+      <header>
+        <span class="num">01</span>
+        <div>
+          <h2>Tələbə</h2>
+          <p>Müraciət göndərən — öz müraciətlərini izləyir</p>
+        </div>
+        <a class="open" href="design/01%20Rol%20-%20Telebe.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/01%20Rol%20-%20Telebe.dc.html" loading="lazy" title="Tələbə"></iframe></div>
+    </section>
+    <section class="row" id="rol-02">
+      <header>
+        <span class="num">02</span>
+        <div>
+          <h2>Müəllim</h2>
+          <p>Müraciət göndərən — kafedra və İKT yönümlü növlər</p>
+        </div>
+        <a class="open" href="design/02%20Rol%20-%20Muellim.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/02%20Rol%20-%20Muellim.dc.html" loading="lazy" title="Müəllim"></iframe></div>
+    </section>
+    <section class="row" id="rol-03">
+      <header>
+        <span class="num">03</span>
+        <div>
+          <h2>Tələbə Xidmətləri Mərkəzi</h2>
+          <p>Cavab verən şöbə — sənəd, arayış, transkript</p>
+        </div>
+        <a class="open" href="design/03%20Rol%20-%20Telebe%20Merkezi.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/03%20Rol%20-%20Telebe%20Merkezi.dc.html" loading="lazy" title="Tələbə Xidmətləri Mərkəzi"></iframe></div>
+    </section>
+    <section class="row" id="rol-04">
+      <header>
+        <span class="num">04</span>
+        <div>
+          <h2>Dekanlıq</h2>
+          <p>Cavab verən şöbə — tələbə hərəkəti, apellyasiya, şikayət</p>
+        </div>
+        <a class="open" href="design/04%20Rol%20-%20Dekanliq.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/04%20Rol%20-%20Dekanliq.dc.html" loading="lazy" title="Dekanlıq"></iframe></div>
+    </section>
+    <section class="row" id="rol-05">
+      <header>
+        <span class="num">05</span>
+        <div>
+          <h2>Kafedra müdirliyi</h2>
+          <p>Cavab verən şöbə — təqdimat, fənn tədrisi</p>
+        </div>
+        <a class="open" href="design/05%20Rol%20-%20Kafedra%20mudiri.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/05%20Rol%20-%20Kafedra%20mudiri.dc.html" loading="lazy" title="Kafedra müdirliyi"></iframe></div>
+    </section>
+    <section class="row" id="rol-06">
+      <header>
+        <span class="num">06</span>
+        <div>
+          <h2>Tədris Şöbəsi</h2>
+          <p>Cavab verən şöbə — plan, cədvəl, semestr</p>
+        </div>
+        <a class="open" href="design/06%20Rol%20-%20Tedris%20Shobesi.dc.html" target="_blank" rel="noopener">Tam ölçüdə aç →</a>
+      </header>
+      <div class="frame"><iframe src="design/06%20Rol%20-%20Tedris%20Shobesi.dc.html" loading="lazy" title="Tədris Şöbəsi"></iframe></div>
+    </section>
+</div>
+</body>
+</html>

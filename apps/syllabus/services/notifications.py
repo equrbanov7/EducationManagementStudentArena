@@ -18,7 +18,7 @@ import logging
 
 from django.db import transaction
 from django.urls import reverse
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +31,14 @@ EVENT_APPROVE = "syllabus_approve"
 EVENT_REVISION = "syllabus_request_revision"
 EVENT_REJECT = "syllabus_reject"
 EVENT_WITHDRAW = "syllabus_withdraw"
+
+#: Kafedra müdiri təyin edilməyəndə dekana gedən bildirişin İZAH QEYDİ.
+#: Səssiz düşmə OLMUR — amma dekan da bilir ki, qərar açarı onda deyil.
+FALLBACK_NOTE = pgettext_lazy(
+    _CTX,
+    "Bu kafedra üçün kafedra müdiri təyin edilməyib, ona görə bildiriş dekanlığa göndərildi. "
+    "Təsdiq kafedra müdirinin səlahiyyətindədir — zəhmət olmasa müdir təyin edin.",
+)
 
 
 def _detail_link(syllabus_id) -> str:
@@ -86,13 +94,28 @@ def _dean_recipients(syllabus) -> list:
 
 
 def notify_submitted(version) -> None:
-    """SUBMIT → kafedra müdirləri (yoxdursa dekanlar) xəbərdar olunur."""
+    """SUBMIT → kafedra müdirləri; MÜDİR YOXDURSA dekanlar QEYDLƏ xəbərdar olunur.
+
+    Sahibin qərarı ilə (2026-09-03) təsdiq kafedra müdirinindir, ona görə dekana
+    gedən bildiriş «sizin qərarınızı gözləyir» kimi oxunmamalıdır — mesaja
+    dekanın NİYƏ xəbər aldığı və nə etməli olduğu yazılır.  Alıcı siyahısı BOŞ
+    QALMIR: heç kim tapılmasa belə hadisə səssizcə itmir, jurnala düşür.
+    """
     syllabus = version.syllabus
     recipients = _chair_head_recipients(syllabus)
+    message = version.label
     if not recipients:
         recipients = _dean_recipients(syllabus)
+        if recipients:
+            message = "%s — %s" % (version.label, str(FALLBACK_NOTE))
+        else:
+            logger.warning(
+                "syllabus submitted but no chair head or dean covers chair_unit=%s (syllabus=%s)",
+                syllabus.chair_unit_id,
+                syllabus.pk,
+            )
     title = pgettext(_CTX, "Sillabus təsdiqə göndərildi: %(subject)s") % {"subject": syllabus.subject.name}
-    _dispatch(EVENT_SUBMIT, recipients=recipients, title=title, message=version.label, syllabus=syllabus)
+    _dispatch(EVENT_SUBMIT, recipients=recipients, title=title, message=message, syllabus=syllabus)
 
 
 def notify_review_opened(version) -> None:
@@ -168,6 +191,7 @@ __all__ = [
     "EVENT_START_REVIEW",
     "EVENT_SUBMIT",
     "EVENT_WITHDRAW",
+    "FALLBACK_NOTE",
     "notify_approved",
     "notify_rejected",
     "notify_review_opened",

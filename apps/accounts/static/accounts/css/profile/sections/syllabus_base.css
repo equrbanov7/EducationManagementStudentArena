@@ -76,6 +76,26 @@
     color: var(--ems-neutral-400);
 }
 
+/* Qərar səlahiyyəti olmayan aktorun (dekan) «yalnız oxunur» qeydi — sahibin
+   qərarı 2026-09-03. Xəbərdarlıq deyil, İZAHDIR: neytral-mavi info tonu. */
+.syl-note--readonly {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-primary-100);
+    border-radius: 8px;
+    background: var(--ems-primary-50);
+    font-size: 0.79rem;
+    color: var(--ems-primary-800);
+}
+
+.syl-note--readonly strong {
+    font-weight: 700;
+}
+
 .syl-code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.7rem;

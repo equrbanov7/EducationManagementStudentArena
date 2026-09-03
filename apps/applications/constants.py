@@ -171,7 +171,11 @@ DEFAULT_UNIT_SEED = (
         "code": "telebe",
         "name": "Tələbə Xidmətləri Mərkəzi",
         "note": "sənəd, arayış, transkript, qeydiyyat",
-        "handler_role_names": ["hr"],
+        # 2026-09 (handoff Mərhələ 3): şöbənin ÖZ rolu yarandı —
+        # `student_services` (bax `organizations/default_roles_student_services.py`).
+        # `hr` FALLBACK kimi SAXLANILIR: mövcud tenantlarda əməkdaşlar hələ
+        # kadr rolu ilə işləyir, siyahıdan çıxarılsa növbə birdən sahibsiz qalardı.
+        "handler_role_names": ["student_services", "hr"],
         "resolve_by": ResolveBy.ORGANIZATION.value,
         "default_sla_days": 3,
     },

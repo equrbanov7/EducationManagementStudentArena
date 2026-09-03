@@ -1,0 +1,39 @@
+<?xml version="1.0"?><svg width="290" height="52" viewBox="0 0 290 52" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Western Caspian University">
+  <defs>
+    <clipPath id="wcuSquare"><rect x="2" y="4" width="44" height="44" rx="3"></rect></clipPath>
+  </defs>
+
+  
+  <g clip-path="url(#wcuSquare)">
+    <rect x="2" y="4" width="44" height="44" fill="#ffffff"></rect>
+    
+    <polygon points="2,4 46,4 46,20 2,30" fill="#3f9cd6"></polygon>
+    <polygon points="2,30 46,20 46,34 2,44" fill="#e2231a"></polygon>
+    <polygon points="2,44 46,34 46,48 2,48" fill="#3aa935"></polygon>
+    
+    <path d="M10 20 V15 H16 V12 H22 V9 H28 V7 H46 V4 H2 V22 Z" fill="#ffffff" opacity="0.0"></path>
+    <g fill="#3f9cd6">
+      <rect x="30" y="6" width="4" height="10"></rect>
+      <rect x="35" y="5" width="4" height="10"></rect>
+      <rect x="40" y="4" width="4" height="10"></rect>
+    </g>
+    
+    <g stroke="#ffffff" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round">
+      
+      <path d="M9 18 L13 34 L18 24 L23 34 L27 18"></path>
+      <path d="M11 18 L15 31 L18 26 L21 31 L25 18"></path>
+      
+      <path d="M30 14 L30 30 Q30 36 36 36 Q42 36 42 30 L42 14"></path>
+      <path d="M32.5 14 L32.5 30 Q32.5 33.5 36 33.5 Q39.5 33.5 39.5 30 L39.5 14"></path>
+    </g>
+    
+    <text x="14" y="40" font-family="'Times New Roman', serif" font-size="4.2" fill="#ffffff" letter-spacing="0.6">CASPIAN</text>
+    <text x="30" y="45" font-family="'Times New Roman', serif" font-size="3.6" fill="#ffffff">1990</text>
+  </g>
+  <rect x="2" y="4" width="44" height="44" rx="3" fill="none" stroke="#d9dee6" stroke-width="1"></rect>
+
+  
+  <text x="56" y="24" font-family="'Times New Roman', Georgia, serif" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.2">WESTERN</text>
+  <text x="163" y="24" font-family="'Times New Roman', Georgia, serif" font-size="16" font-weight="700" fill="#0f172a" letter-spacing="0.2">UNIVERSITY</text>
+  <text x="56" y="38" font-family="'Times New Roman', Georgia, serif" font-size="10.5" font-style="italic" fill="#475569" letter-spacing="2.2">caspian</text>
+</svg>

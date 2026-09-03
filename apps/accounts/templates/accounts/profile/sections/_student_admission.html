@@ -1,0 +1,141 @@
+{% load i18n %}
+{% comment %}
+Ekran 08 «Tələbə qəbulu — ATİS və qrup təyinatı» (dizayn handoff Mərhələ 3).
+
+İcazə: `user.import` (fayl + hesab yaratma) · `student.assign_group` (yeni qrup).
+Backend MÖVCUDDUR və TOXUNULMUR (`services/intake/*`, 26 test) — bu şablon
+onun ems_ui görünüşüdür: 4 addımlı stepper, KPI zolağı, ATİS sütunları və
+qrup təyinatı addımı.
+
+Köhnə `student-intake` bölməsi OLDUĞU KİMİ QALIR (link/test qırılmır).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP: SELF+NONCE);
+dinamik dəyərlər `data-*` atributları ilə ötürülür.
+{% endcomment %}
+{% if 'student-admission' in allowed_sections %}
+{% trans "Yeni qrup yarat" context "accounts.student_admission" as sa_group_title %}
+{% trans "Qrup ixtisasın altında yaranır; tutum və dil bölməsi sonradan struktur ağacından dəyişdirilə bilər." context "accounts.student_admission" as sa_group_sub %}
+{% trans "Qrupu yarat" context "accounts.student_admission" as sa_group_btn %}
+<section class="profile-section-panel profile-section--stsvc {% if active_section == 'student-admission' %}is-active{% endif %}"
+         data-profile-section-panel="student-admission"
+         data-source-url="{{ profile_base_url }}?section=student-admission">
+
+{% if not student_admission_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=student_admission_section.access_denied_message %}
+{% else %}
+<div class="stsvc six"
+     data-six-root
+     data-six-atis="1"
+     data-template-url="{{ student_admission_section.template_url }}"
+     data-preview-url="{{ student_admission_section.preview_url }}"
+     data-apply-url="{{ student_admission_section.apply_url }}"
+     data-create-group-url="{{ student_admission_section.create_group_url }}"
+     data-can-create-group="{% if student_admission_section.can_assign_groups %}1{% else %}0{% endif %}"
+     data-max-rows="{{ student_admission_section.max_rows }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=student_admission_section.intro %}
+
+    {% include "partials/ems_ui/_stepper.html" with steps=student_admission_section.steps steps_label=student_admission_section.steps_label %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_admission_section.kpi_tiles kpi_variant="4" %}
+
+    {# ── 1. Şablon ────────────────────────────────────────────────────── #}
+    <div class="stsvc__panel">
+        <h3 class="stsvc__panel-title">{% trans "1 · ATİS şablonunu endirin" context "accounts.student_admission" %}</h3>
+        <p class="stsvc__step-note">
+            {% blocktrans context "accounts.student_admission" with limit=student_admission_section.max_rows size=student_admission_section.max_upload_mb %}Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox {{ limit }} sətir, ölçü limiti {{ size }} MB.{% endblocktrans %}
+        </p>
+        <a class="ems-btn" href="{{ student_admission_section.template_url }}" download>
+            <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
+            {% trans "Boş şablonu endir" context "accounts.student_admission" %}
+        </a>
+        <details class="stsvc__columns">
+            <summary>{% trans "ATİS sütunları" context "accounts.student_admission" %}</summary>
+            <ul class="stsvc__grouplist">
+                {% for column in student_admission_section.atis_columns %}
+                    <li class="stsvc__grouprow">
+                        <span>{{ column.header }}</span>
+                        <span class="stsvc__groupmeta">{{ column.hint }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </div>
+
+    {# ── 2. Yükləmə + validasiya ──────────────────────────────────────── #}
+    <div class="stsvc__panel">
+        <h3 class="stsvc__panel-title">{% trans "2 · Faylı yükləyin və yoxlayın" context "accounts.student_admission" %}</h3>
+        <form class="stsvc__toolbar" data-six-form novalidate>
+            <label class="ems-field">
+                <span class="ems-field__label">{% trans "ATİS qəbul faylı" context "accounts.student_admission" %}</span>
+                <input class="ems-input" type="file" name="file" accept=".xlsx,.xlsm,.csv" data-six-file>
+            </label>
+            <span class="stsvc__toolbar-spacer" data-six-file-label>{% trans "Fayl seçilməyib" context "accounts.student_admission" %}</span>
+            <button type="button" class="ems-btn ems-btn--primary" data-six-preview>
+                {% trans "Yoxla (quru icra)" context "accounts.student_admission" %}
+            </button>
+        </form>
+        <p class="ems-msg ems-msg--error" role="alert" data-six-error hidden></p>
+    </div>
+
+    {# ── 3. Nəticə + qrup təyinatı ────────────────────────────────────── #}
+    <div class="stsvc__panel" data-six-result hidden>
+        <h3 class="stsvc__panel-title"><span data-six-result-title></span></h3>
+        <div class="stsvc__toolbar" data-six-counts></div>
+        <div class="ems-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra ems-table--wide">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Sətir" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Yoxlamanın nəticəsi" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Tələbə" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Qəbul olduğu ixtisas" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Qəbul balı" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Təhsil haqqı" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Forma / dil" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "Qrup təyinatı" context "accounts.student_admission" %}</th>
+                            <th scope="col">{% trans "İzah" context "accounts.student_admission" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody data-six-rows></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="stsvc__toolbar">
+            <button type="button" class="ems-btn ems-btn--primary" data-six-apply hidden>
+                {% trans "Tətbiq et" context "accounts.student_admission" %}
+            </button>
+            <button type="button" class="ems-btn" data-six-download hidden>
+                {% trans "Parolları CSV kimi endir" context "accounts.student_admission" %}
+            </button>
+        </div>
+        <p class="stsvc__step-note" data-six-note hidden>
+            {% trans "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib qrup üzrə tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq." context "accounts.student_admission" %}
+        </p>
+    </div>
+
+    {% if student_admission_section.can_assign_groups %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="saGroupDialog" form_dialog_title=sa_group_title form_dialog_subtitle=sa_group_sub form_dialog_submit_label=sa_group_btn form_dialog_body_include="accounts/profile/sections/student_services/_new_group_fields.html" form_dialog_action=student_admission_section.create_group_url form_dialog_data=student_admission_section.group_form_data %}
+    {% endif %}
+
+    {# ── JS mətnləri (inline JS yoxdur — data-atributlar) ─────────────── #}
+    <span data-six-i18n hidden
+          data-t-nofile="{% trans 'Əvvəlcə fayl seçin.' context 'accounts.student_admission' %}"
+          data-t-failed="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'accounts.student_admission' %}"
+          data-t-preview="{% trans 'Quru icra nəticəsi (heç nə yazılmadı)' context 'accounts.student_admission' %}"
+          data-t-applied="{% trans 'Tətbiq nəticəsi' context 'accounts.student_admission' %}"
+          data-t-confirm="{% trans 'Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?' context 'accounts.student_admission' %}"
+          data-t-create="{% trans 'Yaradılacaq' context 'accounts.student_admission' %}"
+          data-t-created="{% trans 'Yaradıldı' context 'accounts.student_admission' %}"
+          data-t-skip="{% trans 'Ötürüldü' context 'accounts.student_admission' %}"
+          data-t-error="{% trans 'Xəta' context 'accounts.student_admission' %}"
+          data-t-total="{% trans 'Cəmi' context 'accounts.student_admission' %}"
+          data-t-busy="{% trans 'Emal olunur…' context 'accounts.student_admission' %}"
+          data-t-nogroup="{% trans 'Qrup seçilməyib' context 'accounts.student_admission' %}"
+          data-t-newgroup="{% trans 'Yeni qrup' context 'accounts.student_admission' %}"
+          data-t-full="{% trans 'dolu' context 'accounts.student_admission' %}"></span>
+</div>
+{% endif %}
+</section>
+{% endif %}

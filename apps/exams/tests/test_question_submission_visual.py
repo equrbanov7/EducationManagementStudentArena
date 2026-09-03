@@ -183,6 +183,8 @@ class QuestionSubmissionVisualViewTests(_Base):
         )
         other_teacher = User.objects.create_user("visual-other", "visual-other@example.com", "pw")
         _assign_user_to_org(other_teacher, self.org, ProfileRole.TEACHER, "teacher")
+        # Mərkəz vizualı yalnız KAFEDRA TƏSDİQİNDƏN sonra görür.
+        self._to_center(submission)
         url = reverse(
             "exams:question_submission_visual_preview",
             kwargs={"submission_id": submission.pk, "source_index": 3},
@@ -265,7 +267,7 @@ class QuestionSubmissionVisualServiceTests(_Base):
         )
 
     def test_accept_forwards_teacher_scope_and_cleans_token(self):
-        submission = self._submission()
+        submission = self._to_center(self._submission())
         with (
             patch(
                 "apps.exams.views.teacher.question_library._shared._save_bank_questions",
@@ -307,6 +309,7 @@ class QuestionSubmissionVisualServiceTests(_Base):
         resubmit_question_set(submission, raw_text=submission.raw_text)
         submission.refresh_from_db()
         self.assertEqual(submission.parsed_snapshot[0]["source_index"], 7)
+        self._to_center(submission)
 
         with (
             patch(

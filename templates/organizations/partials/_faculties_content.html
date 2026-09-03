@@ -1,4 +1,9 @@
 {% load i18n %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 {% with s=org_faculties_section %}
 <div class="org-management org-management--faculties">
     {% if not s.organization %}
@@ -7,7 +12,7 @@
     <div class="org-management__header">
         <div>
             <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
-            <h1>{% trans 'Fakültələr' %}</h1>
+            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="org-management__title">{% trans 'Fakültələr' %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
             <p class="org-management__subtitle">
                 {% trans 'Fakültələri yaradın, redaktə edin, rəhbər (dekan) təyin edin. Kafedralar ayrıca səhifədə idarə olunur.' %}
             </p>

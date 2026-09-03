@@ -1,0 +1,159 @@
+{% load static i18n %}
+{% comment %}
+Profil bölməsi: «Sual təsdiqi» (kafedra müdiri / fallback halında dekanlıq).
+
+Növbə = öz kafedrasının müəllimlərindən gələn sual dəstləri.  Sətir «Bax»
+düyməsi ilə kafedra qərar səhifəsinə keçir (profil örtüyünün İÇİNDƏ açılır,
+sol sidebar qalır).
+
+QEYD: kök element mütləq profile-section-panel + data-profile-section-panel
+olmalıdır — SPA keçidində JS bölmələri məhz bu atributla gizlədir/göstərir.
+Bölmə OXU-ONLY render olunur (qərar ayrıca səhifədədir) → AJAX swap təhlükəsiz.
+{% endcomment %}
+
+{% if 'question-chair-review' in allowed_sections %}
+<section class="profile-section-panel profile-section--question-chair-review {% if active_section == 'question-chair-review' %}is-active{% endif %}"
+         data-profile-section-panel="question-chair-review"
+         data-source-url="{{ profile_base_url }}?section=question-chair-review">
+{% comment %}Bölmə mövcud «Sual göndərişləri» üslub dəstini TƏKRAR İSTİFADƏ edir
+(qsubs-* kartlar/sətirlər, qsubf-* filtr çubuğu) — kafedra müdiri həmin bölməni
+görməsə də bu fayllar lazımdır.{% endcomment %}
+<link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
+<link rel="stylesheet" href="{% static 'exams/css/question_submission_chain.css' %}?v=20260903-chair">
+<div class="qsub-section">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <p class="text-muted mb-0">
+            {% trans "Müəllimlərinizin imtahan sual dəstlərini təsdiqləyin — yalnız təsdiqdən sonra İmtahan Mərkəzinə gedir." context "accounts.profile.question_chair_review" %}
+        </p>
+    </div>
+
+    {# ── Statistika kartları = status filtrləri ── #}
+    <div class="qsubs-stats" role="group" aria-label="{% trans 'Status filtri' context 'accounts.profile.question_chair_review' %}">
+        {% for card in question_chair_review_status_cards %}
+        <a href="?{{ card.query }}"
+           class="qsubs-stat qsubs-stat--link {% if card.is_active %}qsubs-stat--active{% endif %}"
+           aria-pressed="{% if card.is_active %}true{% else %}false{% endif %}">
+            <div class="qsubs-stat__icon qsubs-stat__icon--{{ card.tone }}"><i class="fas {{ card.icon }}"></i></div>
+            <div>
+                <span class="qsubs-stat__label">{{ card.label }}</span>
+                <span class="qsubs-stat__value">{{ card.value }}</span>
+            </div>
+            <span class="qsubs-stat__check"><i class="fas fa-check"></i></span>
+        </a>
+        {% endfor %}
+    </div>
+
+    {# ── Axtarış + filtrlər ── #}
+    <form method="get" class="qsubf-bar js-profile-debounce-search" data-debounce-ms="600" role="search">
+        <input type="hidden" name="section" value="question-chair-review">
+        <input type="hidden" name="qchair_status" value="{{ question_chair_review_filters.status }}">
+        <div class="qsubf-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" name="qchair_q" value="{{ question_chair_review_filters.q }}"
+                   placeholder="{% trans 'Başlıq, fənn, qrup və ya müəllim üzrə axtar…' context 'accounts.profile.question_chair_review' %}"
+                   aria-label="{% trans 'Sual dəstlərində axtar' context 'accounts.profile.question_chair_review' %}"
+                   autocomplete="off">
+        </div>
+        <div class="qsubf-selects">
+            <div class="bootstrap-single-select qsubf-select qsubf-select--sm">
+                <select class="form-select bootstrap-single-select__native" name="qchair_kind" data-bootstrap-select
+                        aria-label="{% trans 'İmtahan növü' context 'accounts.profile.question_chair_review' %}">
+                    <option value="">{% trans "Bütün imtahan növləri" context "accounts.profile.question_chair_review" %}</option>
+                    {% for code, label in question_chair_review_exam_kinds %}
+                    <option value="{{ code }}" {% if question_chair_review_filters.kind == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="bootstrap-single-select qsubf-select">
+                <select class="form-select bootstrap-single-select__native" name="qchair_teacher" data-bootstrap-select
+                        aria-label="{% trans 'Müəllim' context 'accounts.profile.question_chair_review' %}">
+                    <option value="">{% trans "Bütün müəllimlər" context "accounts.profile.question_chair_review" %}</option>
+                    {% for t in question_chair_review_teachers %}
+                    <option value="{{ t.id }}" {% if question_chair_review_filters.teacher == t.id|stringformat:"s" %}selected{% endif %}>{{ t.get_full_name|default:t.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="qsubf-clear">
+            <i class="fas fa-filter"></i> {% trans "Filtrlə" context "accounts.profile.question_chair_review" %}
+        </button>
+        {% if question_chair_review_has_filters %}
+        <a href="{{ question_chair_review_clear_url }}" class="qsubf-clear">
+            <i class="fas fa-xmark"></i> {% trans "Təmizlə" context "accounts.profile.question_chair_review" %}
+        </a>
+        {% endif %}
+    </form>
+
+    {% if question_chair_review_items %}
+    <div class="qsubs-list">
+        {% for s in question_chair_review_items %}
+        <div class="qsubs-item">
+            <div class="qsubs-item__main">
+                <a class="qsubs-item__title js-profile-section-link-skip"
+                   href="{% url 'exams:question_submission_chair_review' s.id %}">{{ s.title }}</a>
+                <div class="qsubs-item__meta">
+                    <span><i class="fas fa-user"></i>{{ s.teacher.get_full_name|default:s.teacher.username }}</span>
+                    <span><i class="fas fa-book"></i>{{ s.subject }}</span>
+                    {% if s.exam_kind %}<span><i class="fas fa-flag-checkered"></i>{{ s.get_exam_kind_display }}</span>{% endif %}
+                    <span><i class="fas fa-users"></i>{{ s.group_label }}</span>
+                    {% if s.chair_unit %}<span><i class="fas fa-sitemap"></i>{{ s.chair_unit.name }}</span>{% endif %}
+                    <span><i class="far fa-clock"></i>{{ s.created_at|date:"d.m.Y H:i" }}</span>
+                    {% if s.resubmission_count %}<span><i class="fas fa-rotate-right"></i>×{{ s.resubmission_count }}</span>{% endif %}
+                </div>
+                {% if s.routed_to_dean %}
+                <div class="qsubs-item__bank">
+                    <span class="qsubs-bank-link qsubs-bank-link--static">
+                        <i class="fas fa-circle-exclamation"></i>
+                        {% trans "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib" context "accounts.profile.question_chair_review" %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="qsubs-item__badges">
+                <span class="qsubs-pill qsubs-pill--count"><i class="fas fa-list-check"></i>{{ s.question_count }}</span>
+                {% if s.error_count %}<span class="qsubs-pill qsubs-pill--error"><i class="fas fa-circle-xmark"></i>{{ s.error_count }}</span>{% endif %}
+                {% if s.status == "submitted_to_chair" %}
+                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-hourglass-half"></i>{% trans "Təsdiq gözləyir" context "accounts.profile.question_chair_review" %}</span>
+                {% elif s.status == "chair_revision" %}
+                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-rotate-left"></i>{% trans "Düzəliş istənilib" context "accounts.profile.question_chair_review" %}</span>
+                {% elif s.status == "chair_approved" %}
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-check"></i>{% trans "Təsdiqlənib — mərkəzdə" context "accounts.profile.question_chair_review" %}</span>
+                {% elif s.status == "center_review" %}
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-building-columns"></i>{% trans "Mərkəz baxır" context "accounts.profile.question_chair_review" %}</span>
+                {% elif s.status == "accepted" %}
+                    <span class="qsubs-pill qsubs-pill--accepted"><i class="fas fa-circle-check"></i>{% trans "Mərkəz qəbul etdi" context "accounts.profile.question_chair_review" %}</span>
+                {% elif s.status == "rejected" %}
+                    <span class="qsubs-pill qsubs-pill--rejected"><i class="fas fa-ban"></i>{% trans "Rədd edilib" context "accounts.profile.question_chair_review" %}</span>
+                {% else %}
+                    <span class="qsubs-pill qsubs-pill--pending"><i class="fas fa-pen"></i>{% trans "Müəllimdə" context "accounts.profile.question_chair_review" %}</span>
+                {% endif %}
+            </div>
+            <div class="qsubs-item__actions">
+                <a href="{% url 'exams:question_submission_chair_review' s.id %}"
+                   class="qsubs-iconbtn js-profile-section-link-skip"
+                   title="{% trans 'Bax və qərar ver' context 'accounts.profile.question_chair_review' %}"
+                   aria-label="{% blocktrans with title=s.title context "accounts.profile.question_chair_review" %}«{{ title }}» dəstinə bax{% endblocktrans %}">
+                    <i class="fas fa-gavel"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% include "partials/_pagination.html" with page_obj=question_chair_review_page extra_query=question_chair_review_pagination_query page_param="qchair_page" %}
+    {% elif question_chair_review_total_count %}
+    <div class="qsubs-empty">
+        <i class="fas fa-filter-circle-xmark"></i>
+        {% trans "Bu şərtlərə uyğun sual dəsti tapılmadı." context "accounts.profile.question_chair_review" %}
+        <a href="{{ question_chair_review_clear_url }}" class="qsubs-empty__link">{% trans "Filtri təmizlə" context "accounts.profile.question_chair_review" %}</a>
+    </div>
+    {% else %}
+    <div class="qsubs-empty">
+        <i class="far fa-circle-check"></i>
+        {% trans "Təsdiq gözləyən sual dəsti yoxdur." context "accounts.profile.question_chair_review" %}
+    </div>
+    {% endif %}
+</div>
+</section>
+{% endif %}

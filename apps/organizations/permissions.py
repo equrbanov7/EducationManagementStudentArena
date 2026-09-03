@@ -22,6 +22,9 @@ from core.permissions import (  # noqa: F401
     has_permission,
 )
 
+from .permissions_stage2 import merge_stage2
+from .permissions_stage3 import merge_stage3
+
 # Permission definitions by category
 PERMISSION_CATEGORIES = {
     "organization": [
@@ -38,6 +41,21 @@ PERMISSION_CATEGORIES = {
         "unit.create",
         "unit.edit",
         "unit.delete",
+        # Tədris şöbəsi səthi (dizayn handoff ekran 01/02). `unit.create/edit`
+        # mövcud fakültə-kafedra CRUD-udur; aşağıdakı iki açar isə AĞAC əməlləri
+        # (alt bölmə/ad dəyişikliyi/arxivləmə) və RƏHBƏR TƏYİNATIDIR — ayrı
+        # saxlanılır ki, «kafedra yarada bilən» rol avtomatik «rəhbər təyin
+        # edən» olmasın. (Handoff-dakı `structure.*` adları legacy prefiksdir —
+        # kanonik ailə `unit.*`, bax `DefaultRolesCanonicalPermissionTest`.)
+        "unit.tree_manage",
+        "unit.assign_head",
+    ],
+    # Akademik kataloq — ixtisas (Program) və fənn (Subject) reyestrləri
+    # (dizayn handoff ekran 03/04). `course.*` DƏRS/açılış ailəsidir; kataloq
+    # ayrıca səlahiyyətdir, ona görə öz prefiksi var.
+    "catalog": [
+        "catalog.view",
+        "catalog.manage",
     ],
     "members": [
         "member.view",
@@ -136,6 +154,7 @@ PERMISSION_CATEGORIES = {
         "workload.approve",
         "workload.distribute",
         "workload.report",
+        "workload.object",
     ],
     # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
     # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
@@ -172,6 +191,14 @@ PERMISSION_CATEGORIES = {
         "exam.host",
         "exam.delete",
         "final_score.entry",
+        # `question.chair_review` (2026-09): müəllimin İmtahan Mərkəzinə
+        # göndərdiyi sual dəstini ƏVVƏLCƏ kafedra müdiri təsdiqləyir.
+        # ⚠️ PREFİKS QƏSDƏN `exam.` DEYİL: `exam.*` wildcard-ı dekan, imtahan
+        # mərkəzi və müəllimdə də var — kafedra təsdiqi onlara AVTOMATİK
+        # keçməməlidir. Açar açıq verilir (kafedra müdiri; dekan yalnız
+        # kafedra müdiri təyin edilməyəndə fallback təsdiqçi kimi işləyir —
+        # əhatə apps/exams/services/question_chair_units.py-da fail-closed).
+        "question.chair_review",
     ],
     "appeal": [
         "appeal.create",
@@ -263,6 +290,7 @@ PERMISSION_CATEGORIES = {
 PERMISSION_CATEGORY_LABELS = {
     "organization": "Təşkilat",
     "structure": "Struktur",
+    "catalog": "Akademik kataloq",
     "members": "Üzvlər",
     "roles": "Rollar",
     "courses": "Kurslar",
@@ -306,6 +334,11 @@ PERMISSION_LABELS = {
     "unit.create": pgettext_lazy(_PERM_CTX, "Struktur vahidi yaratmaq"),
     "unit.edit": pgettext_lazy(_PERM_CTX, "Struktur vahidini redaktə etmək"),
     "unit.delete": pgettext_lazy(_PERM_CTX, "Struktur vahidini silmək"),
+    "unit.tree_manage": pgettext_lazy(_PERM_CTX, "Struktur ağacını idarə etmək (yaratmaq/adını dəyişmək/arxivləmək)"),
+    "unit.assign_head": pgettext_lazy(_PERM_CTX, "Bölməyə rəhbər təyin etmək"),
+    # catalog
+    "catalog.view": pgettext_lazy(_PERM_CTX, "İxtisas və fənn kataloquna baxış"),
+    "catalog.manage": pgettext_lazy(_PERM_CTX, "İxtisas və fənn kataloqunu idarə etmək"),
     # members
     "member.view": pgettext_lazy(_PERM_CTX, "Üzvlərə baxış"),
     "member.invite": pgettext_lazy(_PERM_CTX, "Üzv dəvət etmək"),
@@ -361,10 +394,12 @@ PERMISSION_LABELS = {
     "workload.approve": pgettext_lazy(_PERM_CTX, "Tapşırığı təsdiqləmək"),
     "workload.distribute": pgettext_lazy(_PERM_CTX, "Dərs yükünü müəllimlərə bölmək"),
     "workload.report": pgettext_lazy(_PERM_CTX, "Dərs yükü hesabatları və ixracı"),
+    "workload.object": pgettext_lazy(_PERM_CTX, "Öz dərs yükünə etiraz bildirmək"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),
     # exams
+    "question.chair_review": pgettext_lazy(_PERM_CTX, "Sual dəstini kafedra adından təsdiqləmək"),
     "exam.view": pgettext_lazy(_PERM_CTX, "İmtahanlara baxış"),
     "exam.create": pgettext_lazy(_PERM_CTX, "İmtahan yaratmaq"),
     "exam.edit": pgettext_lazy(_PERM_CTX, "İmtahanı redaktə etmək"),
@@ -404,6 +439,14 @@ PERMISSION_LABELS = {
     "people.manage_teacher_role": pgettext_lazy(_PERM_CTX, "Müəllim statusunu vermək / çıxarmaq"),
     "people.manage_academic": pgettext_lazy(_PERM_CTX, "Tələbənin qrupunu köçürmək və akademik statusunu dəyişmək"),
 }
+
+# Dizayn Mərhələ 2 (ekran 05/06/07) — `plan.*`, `semester.*`, `unit.group_manage`
+# kateqoriya və etiketləri AYRI modulda saxlanılır (fayl ölçü büdcəsi), amma
+# BURADA birləşdirilir: kataloq tək dəst olaraq qalır və `test_permissions.py`
+# «kataloq ↔ etiket tam üst-üstə» yoxlaması pozulmur.
+merge_stage2(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# Dizayn Mərhələ 3 (ekran 08/09) — `student.*` kateqoriyası eyni naxışla.
+merge_stage3(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

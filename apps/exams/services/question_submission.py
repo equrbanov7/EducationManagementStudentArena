@@ -1,8 +1,13 @@
 """
-Müəllim → İmtahan mərkəzi sual göndərişi servisi.
+Müəllim → KAFEDRA MÜDİRİ → İmtahan Mərkəzi sual göndərişi servisi.
 
-Bütün axın burada mərkəzləşir: parse + xəbərdarlıq snapshot-u, göndərmə,
-yenidən göndərmə, mərkəzin qəbul/rədd qərarları və hər iki tərəfə bildirişlər.
+Sahibin qərarı (2026-09): göndəriş mərkəzə BİRBAŞA getmir — əvvəlcə kafedra
+müdiri təsdiqləyir.  Kafedra mərhələsi (marşrut, qərarlar, hadisə lentı)
+``question_chair_review.py``-dadır; bu modul müəllim tərəfini (parse +
+snapshot, göndərmə/yenidən göndərmə) və MƏRKƏZ mərhələsini daşıyır.
+
+Mərkəz qapısı FAIL-CLOSED-dur: kafedra təsdiqindən keçməmiş göndərişə mərkəz
+nə baxa, nə də qərar verə bilər (``ensure_can_review_submission``).
 Qəbul zamanı suallar mövcud ``_save_bank_questions`` köməkçisi ilə banka
 yazılır — sual bankı importu ilə eyni kod yolu (fingerprint, variantlar).
 """
@@ -15,8 +20,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.exams.models import QuestionBank, QuestionSubmission
+from apps.exams.models import QuestionBank, QuestionSubmission, QuestionSubmissionEvent
 from apps.exams.services.access_policy import is_exam_center_user
+from apps.exams.services.question_chair_review import (
+    MIN_REASON_LENGTH,
+    record_event,
+    route_submission_to_chair,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -118,11 +128,12 @@ def submit_question_set(
     student_group=None,
     subject_ref=None,
     exam_kind="",
+    groups=None,
     parsed=None,
     teacher_note="",
     import_token="",
 ):
-    """Yeni göndəriş yaradır (pending) və mərkəz üzvlərinə bildiriş göndərir."""
+    """Yeni göndəriş yaradır və KAFEDRA MÜDİRİNƏ yönləndirir (mərkəzə yox)."""
     title = (title or "").strip()
     if not title:
         raise ValidationError(pgettext("exams.service.question_submission.error", "Mövzu/başlıq boş ola bilməz."))
@@ -150,9 +161,17 @@ def submit_question_set(
         teacher_note=(teacher_note or "").strip(),
         import_token=(import_token or "").strip(),
     )
+    submission.status = QuestionSubmission.STATUS_DRAFT
     _apply_snapshot(submission, raw_text, parsed=parsed)
     submission.save()
-    _notify_exam_center_new_submission(submission, resubmitted=False)
+    if groups:
+        submission.student_groups.set(groups)
+    route_submission_to_chair(
+        submission,
+        actor=teacher,
+        resubmitted=False,
+        groups=list(groups) if groups else ([student_group] if student_group else []),
+    )
     return submission
 
 
@@ -168,20 +187,28 @@ def resubmit_question_set(
     language=None,
     raw_text=None,
     student_group=...,
+    groups=None,
     parsed=None,
     teacher_note=None,
     import_token=None,
 ):
     """
-    Müəllim pending/rejected göndərişi düzəldib yenidən göndərir: snapshot
-    yenilənir, status yenidən ``pending`` olur, köhnə qərar sahələri təmizlənir.
+    Müəllim düzəldib YENİDƏN göndərir — həmişə KAFEDRAYA (mərkəzə deyil).
+
+    Snapshot yenilənir, köhnə kafedra/mərkəz qərar sahələri təmizlənir, status
+    yenidən ``submitted_to_chair`` olur.  Müəllim kafedra mərhələsini ATLAYA
+    BİLMİR: ``route_submission_to_chair`` yeganə yoldur.
     """
     if not submission.can_be_edited_by_teacher:
         raise ValidationError(
             pgettext("exams.service.question_submission.error", "Bu göndəriş artıq yekunlaşıb — dəyişdirilə bilməz.")
         )
 
-    was_rejected = submission.status == QuestionSubmission.STATUS_REJECTED
+    was_returned = submission.status in (
+        QuestionSubmission.STATUS_REJECTED,
+        QuestionSubmission.STATUS_CHAIR_REVISION,
+        QuestionSubmission.STATUS_CENTER_REVISION,
+    )
     previous_token = submission.import_token
     raw_text_changed = raw_text is not None and raw_text != submission.raw_text
     if title is not None and title.strip():
@@ -217,21 +244,23 @@ def resubmit_question_set(
         parsed=snapshot_parsed,
     )
 
-    submission.status = QuestionSubmission.STATUS_PENDING
-    if was_rejected:
+    if was_returned:
         submission.resubmission_count += 1
     submission.reviewer = None
     submission.reviewed_at = None
     # Rəyçi qeydini saxlamırıq — yeni versiya köhnə qərardan asılı deyil;
-    # tarixçə lazım olsa audit log-dadır.
+    # tam tarixçə ``QuestionSubmissionEvent`` lentındədir.
     submission.reviewer_note = ""
     submission.accepted_bank = None
+    submission.reached_center_at = None
     submission.save()
+    if groups:
+        submission.student_groups.set(groups)
     if previous_token and previous_token != submission.import_token:
         from apps.exams.services.import_media import clear_stash
 
         transaction.on_commit(lambda token=previous_token: clear_stash(token))
-    _notify_exam_center_new_submission(submission, resubmitted=was_rejected)
+    route_submission_to_chair(submission, actor=submission.teacher, resubmitted=True, groups=groups)
     return submission
 
 
@@ -239,10 +268,46 @@ def resubmit_question_set(
 # İmtahan mərkəzi tərəfi
 # ---------------------------------------------------------------------------
 def ensure_can_review_submission(user, submission):
+    """Mərkəz qapısı — İKİ şərt, hər ikisi fail-closed.
+
+    1. Aktor imtahan mərkəzi üzvü olmalıdır;
+    2. Göndəriş KAFEDRA TƏSDİQİNDƏN keçmiş olmalıdır (``reached_center_at``).
+       Kafedrada gözləyən/qaytarılan göndəriş mərkəz üçün MÖVCUD DEYİL —
+       mövcudluq sızmasın deyə burada da 403 verilir.
+    """
     if not is_exam_center_user(user):
         raise PermissionDenied(
             pgettext("exams.service.access.permission", "question_submission_review_exam_center_only")
         )
+    if not submission.has_reached_center:
+        raise PermissionDenied(
+            pgettext("exams.service.access.permission", "question_submission_requires_chair_approval")
+        )
+
+
+def ensure_can_decide_as_center(submission):
+    """Mərkəz YALNIZ kafedra təsdiqli və hələ qərar verilməmiş göndərişə qərar verir."""
+    if not submission.is_at_center:
+        raise ValidationError(pgettext("exams.service.question_submission.error", "Bu göndərişə artıq baxılıb."))
+
+
+@transaction.atomic
+def open_center_review(submission, *, reviewer):
+    """``chair_approved`` → ``center_review``: mərkəz göndərişi açdı (izli, idempotent)."""
+    if submission.status != QuestionSubmission.STATUS_CHAIR_APPROVED:
+        return submission
+    from_status = submission.status
+    submission.status = QuestionSubmission.STATUS_CENTER_REVIEW
+    submission.save(update_fields=["status", "updated_at"])
+    record_event(
+        submission,
+        actor=reviewer,
+        actor_role="exam_center",
+        action=QuestionSubmissionEvent.ACTION_CENTER_OPENED,
+        from_status=from_status,
+        to_status=submission.status,
+    )
+    return submission
 
 
 @transaction.atomic
@@ -253,9 +318,8 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
     ``bank`` verilməyibsə ``new_bank_name`` ilə (təşkilat daxilində, paylaşılan)
     yeni bank yaradılır. Qaytarır: (bank, yazılmış sual sayı).
     """
-    submission = QuestionSubmission.objects.select_for_update().get(pk=submission.pk)
-    if not submission.is_pending:
-        raise ValidationError(pgettext("exams.service.question_submission.error", "Bu göndərişə artıq baxılıb."))
+    submission = QuestionSubmission.objects.select_for_update(of=("self",)).get(pk=submission.pk)
+    ensure_can_decide_as_center(submission)
 
     if bank is None:
         bank_name = (new_bank_name or "").strip() or submission.title
@@ -311,6 +375,7 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
             )
         )
 
+    from_status = submission.status
     submission.status = QuestionSubmission.STATUS_ACCEPTED
     submission.reviewer = reviewer
     submission.reviewed_at = timezone.now()
@@ -333,78 +398,77 @@ def accept_submission(submission, *, reviewer, bank=None, new_bank_name="", note
         from apps.exams.services.import_media import clear_stash
 
         transaction.on_commit(lambda token=import_token: clear_stash(token))
+    record_event(
+        submission,
+        actor=reviewer,
+        actor_role="exam_center",
+        action=QuestionSubmissionEvent.ACTION_CENTER_ACCEPTED,
+        from_status=from_status,
+        to_status=submission.status,
+        reason=submission.reviewer_note,
+        metadata={"bank_id": str(bank.pk), "question_count": created_count},
+    )
     _notify_teacher_decision(submission)
     return bank, created_count
 
 
-@transaction.atomic
-def reject_submission(submission, *, reviewer, note=""):
-    submission = QuestionSubmission.objects.select_for_update().get(pk=submission.pk)
-    if not submission.is_pending:
-        raise ValidationError(pgettext("exams.service.question_submission.error", "Bu göndərişə artıq baxılıb."))
-    submission.status = QuestionSubmission.STATUS_REJECTED
+def _center_return(submission, *, reviewer, note, status, action):
+    """Mərkəzin «geri qaytar» ailəsi: rədd və düzəliş eyni kod yolundadır."""
+    submission = QuestionSubmission.objects.select_for_update(of=("self",)).get(pk=submission.pk)
+    ensure_can_decide_as_center(submission)
+    note = (note or "").strip()
+    if len(note) < MIN_REASON_LENGTH:
+        raise ValidationError(
+            pgettext(
+                "exams.service.question_submission.error",
+                "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir.",
+            ).format(count=MIN_REASON_LENGTH)
+        )
+    from_status = submission.status
+    submission.status = status
     submission.reviewer = reviewer
     submission.reviewed_at = timezone.now()
-    submission.reviewer_note = (note or "").strip()
+    submission.reviewer_note = note
     submission.save(update_fields=["status", "reviewer", "reviewed_at", "reviewer_note", "updated_at"])
+    record_event(
+        submission,
+        actor=reviewer,
+        actor_role="exam_center",
+        action=action,
+        from_status=from_status,
+        to_status=status,
+        reason=note,
+    )
     _notify_teacher_decision(submission)
     return submission
+
+
+@transaction.atomic
+def reject_submission(submission, *, reviewer, note=""):
+    return _center_return(
+        submission,
+        reviewer=reviewer,
+        note=note,
+        status=QuestionSubmission.STATUS_REJECTED,
+        action=QuestionSubmissionEvent.ACTION_CENTER_REJECTED,
+    )
+
+
+@transaction.atomic
+def request_center_revision(submission, *, reviewer, note=""):
+    """Mərkəz düzəliş istəyir — müəllim düzəldib YENİDƏN kafedradan keçir."""
+    return _center_return(
+        submission,
+        reviewer=reviewer,
+        note=note,
+        status=QuestionSubmission.STATUS_CENTER_REVISION,
+        action=QuestionSubmissionEvent.ACTION_CENTER_REVISION,
+    )
 
 
 # ---------------------------------------------------------------------------
 # Bildirişlər (xəta axını pozmur)
 # ---------------------------------------------------------------------------
-def _exam_center_members(organization):
-    from apps.organizations.models import Membership
-
-    return [
-        membership.user
-        for membership in Membership.objects.filter(
-            organization=organization,
-            role__name="exam_center",
-            is_active=True,
-        ).select_related("user")
-    ]
-
-
-def _notify_exam_center_new_submission(submission, *, resubmitted):
-    try:
-        from apps.notifications.public import create_notification
-
-        teacher_display = submission.teacher.get_full_name() or submission.teacher.username
-        if resubmitted:
-            message = pgettext(
-                "exams.notification.question_submission",
-                '{teacher} "{title}" sual göndərişini düzəldib yenidən göndərdi ({subject} · {group}, {count} sual).',
-            )
-        else:
-            message = pgettext(
-                "exams.notification.question_submission",
-                '{teacher} "{title}" adlı yeni sual göndərişi etdi ({subject} · {group}, {count} sual).',
-            )
-        link = reverse("exams:question_submission_review", kwargs={"submission_id": submission.id})
-        for member in _exam_center_members(submission.organization):
-            if member.pk == submission.teacher_id:
-                continue
-            create_notification(
-                recipient=member,
-                title=pgettext("exams.notification.question_submission", "Yeni sual göndərişi"),
-                message=message.format(
-                    teacher=teacher_display,
-                    title=submission.title,
-                    subject=submission.subject,
-                    group=submission.group_label,
-                    count=submission.question_count,
-                ),
-                link=link,
-                notification_type="exam",
-                metadata={"question_submission_id": submission.id},
-                organization=submission.organization,
-            )
-    except Exception:
-        logger.warning("Question submission notification (exam center) failed.", exc_info=True)
-
-
 def _notify_teacher_decision(submission):
     try:
         from apps.notifications.public import create_notification
@@ -414,15 +478,20 @@ def _notify_teacher_decision(submission):
                 "exams.notification.question_submission",
                 '"{title}" sual göndərişiniz qəbul edildi və sual bankına əlavə olundu.',
             )
+        elif submission.status == QuestionSubmission.STATUS_CENTER_REVISION:
+            message = pgettext(
+                "exams.notification.question_submission",
+                '"{title}" sual göndərişiniz İmtahan Mərkəzi tərəfindən düzəliş üçün qaytarıldı: {reason}',
+            )
         else:
             message = pgettext(
                 "exams.notification.question_submission",
-                '"{title}" sual göndərişiniz rədd edildi. Qeydə baxıb düzəldərək yenidən göndərə bilərsiniz.',
+                '"{title}" sual göndərişiniz rədd edildi: {reason}',
             )
         create_notification(
             recipient=submission.teacher,
             title=pgettext("exams.notification.question_submission", "Sual göndərişinə baxıldı"),
-            message=message.format(title=submission.title),
+            message=message.format(title=submission.title, reason=submission.reviewer_note),
             link=reverse("exams:question_submission_detail", kwargs={"submission_id": submission.id}),
             notification_type="exam",
             metadata={"question_submission_id": submission.id},
@@ -436,8 +505,11 @@ __all__ = [
     "accept_submission",
     "analyze_submission_text",
     "clean_snapshot_entries",
+    "ensure_can_decide_as_center",
     "ensure_can_review_submission",
+    "open_center_review",
     "reject_submission",
+    "request_center_revision",
     "resubmit_question_set",
     "submit_question_set",
 ]

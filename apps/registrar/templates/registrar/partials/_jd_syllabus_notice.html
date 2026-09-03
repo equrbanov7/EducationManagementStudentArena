@@ -32,3 +32,19 @@ Rəng birbaşa yazılmır: ton adı (`is-danger`/`is-warning`/`is-info`) CSS-də
     </a>
 </div>
 {% endif %}
+
+{% comment %}README §8/2 KİLİDİ — org siyasəti (`journal.require_approved_syllabus`)
+açıq və təsdiqlənmiş sillabus yoxdursa jurnal YALNIZ-OXU olur. Siyasət default
+SÖNDÜRÜLÜDÜR (köçürülmüş data qorunur), ona görə adi halda bu blok görünmür.{% endcomment %}
+{% if syllabus_gate.locked %}
+<div class="jd2-sylbar jd2-sylbar--danger" role="status" aria-live="polite" data-jd-syllabus-lock>
+    <i class="fas fa-lock jd2-sylbar__icon" aria-hidden="true"></i>
+    <div class="jd2-sylbar__text">
+        <b class="jd2-sylbar__title">{{ syllabus_gate.title }}</b>
+        <span class="jd2-sylbar__msg">{{ syllabus_gate.message }}</span>
+    </div>
+    <a class="jd2-sylbar__cta" href="{{ syllabus_gate.action_url }}">
+        {{ syllabus_gate.action_label }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+</div>
+{% endif %}

@@ -63,3 +63,13 @@ Qapılar: black / isort / flake8 / `check_module_size.py --check` / `module_deps
 `apps/registrar/tests/test_corrections_bridge.py::CorrectionMediaAccessTest::test_pdf_denied_to_unrelated_user_allowed_to_owner`
 bu düzəlişlərdən ƏVVƏL də qırıqdır (`core.media_views._check_journal_correction_access`
 mövcud deyil) — CodeQL işi ilə əlaqəsi yoxdur.
+
+## Əlavə — PR #120 (dalğa 2, 2026-09-03)
+
+CodeQL PR yoxlaması 22 «yeni» xəbərdarlıq göstərdi; Develop ref-i ilə müqayisədə **yalnız 2-si həqiqətən yenidir** (qalan 20-si diff böyük olduğu üçün köhnə alertlərin yenidən sayılmasıdır — Develop-da da açıqdır, ayrıca dilim).
+
+| Alert | Qayda | Yer | Düzəliş |
+|---|---|---|---|
+| 1138 | `py/stack-trace-exposure` | `apps/registrar/catalog_actions.py:139` | geniş `except Exception` + `str(exc)` əvəzinə `except ValidationError` + `.messages` (yalnız öz doğrulama mətnimiz). |
+| 1139 | `py/stack-trace-exposure` | `apps/accounts/views/student_intake.py:194` | `ValueError` kodu yalnız bilinən siyahıdan keçir, qalanı `invalid` + generik mesaj. |
+

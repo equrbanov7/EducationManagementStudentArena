@@ -22,8 +22,14 @@ class RoleBadgeLabelTest(SimpleTestCase):
     def test_placeholder_member_role_renders_nothing(self):
         self.assertEqual(role_badge_label(_FakeRole("member", "Member")), "")
 
-    def test_real_role_renders_its_display_name(self):
-        self.assertEqual(role_badge_label(_FakeRole("dean", "Dean")), "Dean")
+    def test_real_role_renders_localized_label(self):
+        # PHASE21 U-2 (2026-09-03): seed-dəki İngiliscə "Dean" AZ-a çevrilir —
+        # bax `core.roles.resolve_seeded_role_label`.
+        self.assertEqual(role_badge_label(_FakeRole("dean", "Dean")), "Dekan")
+
+    def test_customized_display_name_is_untouched(self):
+        # Admin display_name-i fərqli bir mətnə dəyişibsə TOXUNULMUR.
+        self.assertEqual(role_badge_label(_FakeRole("dean", "Baş Dekan")), "Baş Dekan")
 
     def test_missing_role_is_safe(self):
         self.assertEqual(role_badge_label(None), "")
@@ -36,4 +42,4 @@ class RoleBadgeLabelTest(SimpleTestCase):
         placeholder = template.render(Context({"role": _FakeRole("member", "Member")}))
         real = template.render(Context({"role": _FakeRole("teacher", "Teacher")}))
         self.assertEqual(placeholder, "")
-        self.assertEqual(real, "<span>Teacher</span>")
+        self.assertEqual(real, "<span>Müəllim</span>")

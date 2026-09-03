@@ -11,6 +11,10 @@ from .default_roles_shared import (
     PEOPLE_DIRECTORY_READ,
     RIM_ACCOUNT_PERMISSIONS,
 )
+from .default_roles_stage2 import apply_stage2_grants
+from .default_roles_stage4 import apply_stage4_grants
+from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
+from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 
 UNIVERSITY_ROLES = [
     {
@@ -252,13 +256,19 @@ UNIVERSITY_ROLES = [
             "group.view",
             "group.manage",
             "exam.*",
-            # Sillabus: dekan fakültə üzrə baxır və qərar verir, amma müəllimin
-            # qaralamasını REDAKTƏ ETMİR (`syllabus.edit` QƏSDƏN yoxdur).
+            # Sillabus: SAHİBİN QƏRARI (2026-09-03) — təsdiq YALNIZ kafedra
+            # müdirinindir. Dekan fakültə üzrə BAXIR və şərh yazır, amma qərar
+            # açarları (`approve`/`revise`/`reject`) QƏSDƏN YOXDUR; `syllabus.edit`
+            # də yoxdur (müəllimin mətnini heç kim onun yerinə yazmır).
+            # Override yalnız org-wide rollardadır (rektor/prorektor/RİM) və
+            # audit izinə düşür.
             "syllabus.view",
             "syllabus.review",
-            "syllabus.approve",
-            "syllabus.revise",
-            "syllabus.reject",
+            # Sual dəsti təsdiqi — dekan YALNIZ FALLBACK təsdiqçidir: kafedra
+            # müdiri təyin edilməyibsə göndəriş dekanlığa yönləndirilir
+            # (`routed_to_dean`). Kafedra müdiri olan göndərişə dekan qərar
+            # VERMİR (apps/exams/services/question_chair_units.py, fail-closed).
+            "question.chair_review",
             # Kataloq: dekan YALNIZ öz fakültəsinin alt-ağacını görür və orada
             # hesab dayandıra bilir (UNIT scope → `get_permission_scope`;
             # `scope_unit` təyin edilməyibsə siyahı BOŞ qalır, fail-closed).
@@ -310,6 +320,9 @@ UNIVERSITY_ROLES = [
             "syllabus.approve",
             "syllabus.revise",
             "syllabus.reject",
+            # Sual dəsti təsdiqi (2026-09): müəllimin imtahan sualları mərkəzə
+            # getməzdən ƏVVƏL kafedra müdirindən keçir (yalnız öz kafedrası).
+            "question.chair_review",
             # Fənn təhvili: kafedra müdiri ÖZ KAFEDRASININ fənnini başqa müəllimə
             # verə bilər (UNIT scope → yalnız öz alt-ağacı; `scope_unit` təyin
             # edilməyibsə siyahı BOŞ qalır, fail-closed).
@@ -529,6 +542,9 @@ _APPLICATION_HANDLER_ROLES = {
     "exam_center_head",
     "exam_center_staff",
     "ikt_rehber",
+    # «Tələbə Xidmətləri Mərkəzi» şöbəsinin (`telebe`) emalçısı — transkript /
+    # arayış / tələbə hərəkəti sorğuları məhz ona düşür.
+    "student_services",
 }
 
 #: Kataloq konfiqurasiyası + bütün müraciətlərə oxu (rektor `*` ilə əhatəlidir).
@@ -555,3 +571,24 @@ def _grant_application_permissions(roles):
 
 
 _grant_application_permissions(UNIVERSITY_ROLES)
+
+
+# Tədris şöbəsi (Mərhələ 1) — iki yeni rol + `structure.*`/`catalog.*` açarları.
+# Ayrı modulda (fayl ölçüsü); siyahı burada BİRLƏŞİR — seed/migration/test tək mənbə.
+UNIVERSITY_ROLES.extend(TEACHING_OFFICE_ROLES)
+apply_teaching_office_grants(UNIVERSITY_ROLES)
+_grant_application_permissions(UNIVERSITY_ROLES)
+
+
+# Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
+UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
+apply_student_services_grants(UNIVERSITY_ROLES)
+_grant_application_permissions(UNIVERSITY_ROLES)
+
+# Mərhələ 2 (ekran 05/06/07): yeni rol YOX — mövcud rollara `plan.*`,
+# `semester.*`, `unit.group_manage`. Xəritə ayrı moduldadır ki, Mərhələ 1
+# migrasiyasının geri dönüşü Mərhələ 2 açarlarını silməsin.
+apply_stage2_grants(UNIVERSITY_ROLES)
+
+# Mərhələ 4: mövcud rollara `workload.*` zəncirinin qalan halqaları (ayrı xəritə).
+apply_stage4_grants(UNIVERSITY_ROLES)

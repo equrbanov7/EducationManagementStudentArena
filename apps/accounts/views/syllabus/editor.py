@@ -131,7 +131,8 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Təsdiqə göndərmə"),
         pgettext_lazy(
             _CTX,
-            "Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin növbəsinə düşür. Göndərildikdən "
+            "Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin növbəsinə düşür. Təsdiq "
+            "kafedra müdirinin səlahiyyətindədir — dekanlıq baxa bilir, qərarı isə müdir verir. Göndərildikdən "
             "sonra versiya kilidlənir.",
         ),
     ),

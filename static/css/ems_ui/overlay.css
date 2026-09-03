@@ -1,0 +1,274 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/overlay.css — Drawer + dialoq + səbəb dialoqu
+   (handoff §4 komponentləri 7, 8 · §7 a11y · §8 qayda 6)
+
+   Hər ikisi `role="dialog" aria-modal="true"` + `aria-labelledby` daşıyır;
+   fokus tələsi, Escape və fokusun qayıtması `ems_ui/overlay.js`-dədir.
+   Səbəb dialoqu: ≥20 simvol (§8 qayda 6) — boşdursa OK disabled.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.ems-overlay[hidden] {
+    display: none;
+}
+
+/* ── Dialoq (mərkəzdə) ──────────────────────────────────────────────────── */
+.ems-overlay--dialog {
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.ems-dialog {
+    width: 100%;
+    max-width: var(--ems-w-dialog);
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: var(--ems-bg);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-dialog);
+    overflow: hidden;
+}
+
+.ems-dialog--wide {
+    max-width: 720px;
+}
+
+/* ── Drawer (sağdan, 720–940px) ─────────────────────────────────────────── */
+.ems-overlay--drawer {
+    align-items: stretch;
+    justify-content: flex-end;
+}
+
+.ems-drawer {
+    width: 100%;
+    max-width: var(--ems-w-drawer);
+    display: flex;
+    flex-direction: column;
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-dialog);
+    overflow: hidden;
+}
+
+.ems-drawer--xl {
+    max-width: 940px;
+}
+
+/* ── Ortaq başlıq / gövdə / altlıq ──────────────────────────────────────── */
+.ems-dialog__head,
+.ems-drawer__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex: none;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.ems-dialog__title,
+.ems-drawer__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+    text-wrap: pretty;
+}
+
+.ems-dialog__sub,
+.ems-drawer__sub {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-dialog__x,
+.ems-drawer__x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: var(--ems-r-lg);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.ems-dialog__x:hover,
+.ems-drawer__x:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.ems-dialog__body,
+.ems-drawer__body {
+    flex: 1 1 auto;
+    padding: var(--ems-sp-7) 22px;
+    overflow-y: auto;
+}
+
+.ems-dialog__foot,
+.ems-drawer__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-4);
+    flex: none;
+    padding: 14px 22px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+/* Sol tərəfdəki köməkçi mətn (məs. simvol sayğacı) altlığı doldurur. */
+.ems-dialog__foot-note {
+    margin-right: auto;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Səbəb dialoqu (audit-ready, ≥20 simvol) ────────────────────────────── */
+.ems-reason__hint {
+    margin-top: 7px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* Qısa/boş olduqda ipucu qırmızıya keçir (handoff ekran 13 copy-si). */
+.ems-reason.is-invalid .ems-reason__hint {
+    color: var(--ems-danger);
+}
+
+.ems-reason.is-invalid .ems-textarea {
+    border-color: var(--ems-danger-bd);
+}
+
+.ems-reason__counter {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Radio kartlar (seçimli dialoq — məs. «Kiçik / Böyük versiya») ──────── */
+.ems-picks {
+    display: grid;
+    gap: var(--ems-sp-4);
+}
+
+.ems-pick {
+    display: block;
+    padding: 13px 15px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    cursor: pointer;
+}
+
+.ems-pick:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-pick.is-selected {
+    border-color: var(--ems-primary-600);
+    border-width: 2px;
+    padding: 12px 14px;
+    background: var(--ems-primary-50);
+}
+
+/* Siyasətə zidd variant gizlədilmir — izah edilir (handoff ekran 19). */
+.ems-pick.is-disabled {
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.ems-pick__title {
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ems-pick.is-disabled .ems-pick__title {
+    color: var(--ems-neutral-400);
+}
+
+.ems-pick__note {
+    margin-top: 3px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-pick__warn {
+    margin-top: 4px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-danger);
+}
+
+/* ── Diff kartı (handoff §4 komponent 12) ───────────────────────────────── */
+.ems-diff {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.ems-diff__col {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+}
+
+.ems-diff__col--old {
+    background: var(--ems-danger-100);
+    border-color: var(--ems-danger-bd);
+}
+
+.ems-diff__col--new {
+    background: var(--ems-success-100);
+    border-color: var(--ems-success-bd);
+}
+
+.ems-diff__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.ems-diff__text {
+    margin-top: 5px;
+    font-size: var(--ems-fs-base);
+    line-height: 1.55;
+    color: var(--ems-neutral-800);
+    text-wrap: pretty;
+}
+
+@media (max-width: 768px) {
+    .ems-overlay--dialog {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .ems-dialog {
+        max-width: none;
+        max-height: 92vh;
+        border-radius: var(--ems-r-2xl) var(--ems-r-2xl) 0 0;
+    }
+
+    .ems-drawer {
+        max-width: none;
+    }
+}

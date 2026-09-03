@@ -97,6 +97,35 @@ def todays_slots(slots, week_context) -> list:
     return sorted(picked, key=lambda item: item.start_time)
 
 
+def upcoming_slots(slots, week_context):
+    """Bu gündən SONRAKI ilk dərsli gün → ``(gün adı, slotlar)``.
+
+    Cari həftənin qalan günlərinə baxır (pariteti nəzərə alır); tapılmasa boş
+    qaytarır.  ƏLAVƏ SORĞU ETMİR — çağıran onsuz da yüklədiyi slot siyahısını
+    ötürür (ana səhifə sorğu büdcəsi).
+    """
+    from apps.registrar.models import WeekType
+
+    if not slots or not week_context:
+        return "", []
+    weekday = week_context["today"].isoweekday()
+    parity = week_context.get("parity")
+    ahead = {}
+    for slot in slots:
+        if slot.weekday <= weekday:
+            continue
+        if slot.week_type in (WeekType.ODD, WeekType.EVEN) and slot.week_type != parity:
+            continue
+        ahead.setdefault(slot.weekday, []).append(slot)
+    if not ahead:
+        return "", []
+    day = min(ahead)
+    from apps.registrar import schedule as schedule_service
+
+    labels = {index: label for index, label in schedule_service.WEEKDAYS}
+    return str(labels.get(day, "")), sorted(ahead[day], key=lambda item: item.start_time)
+
+
 def _slot_rows(slots) -> list:
     rows = []
     for slot in slots[:ROW_LIMIT]:
@@ -140,17 +169,28 @@ def student_today(*, organization, record, period, allowed_sections) -> dict | N
     slots = schedule_service.get_group_schedule(organization=organization, group=group, period=period)
     week_context = schedule_service.build_week_context(period)
     today = todays_slots(slots, week_context)
-    next_label = _time_label(today[0]) if today else pgettext(_CTX, "yoxdur")
+    # Ekran 10: kart «bu gün / növbəti dərslər»dir.  Bu gün dərs yoxdursa
+    # bomboş qalmır — həftənin NÖVBƏTİ dərsli günü göstərilir (eyni slot
+    # siyahısından, ƏLAVƏ SORĞU YOXDUR).
+    upcoming_day, upcoming = ("", [])
+    if not today:
+        upcoming_day, upcoming = upcoming_slots(slots, week_context)
+    shown = today or upcoming
+    next_label = _time_label(shown[0]) if shown else pgettext(_CTX, "yoxdur")
     return widget(
         "student-today",
-        pgettext(_CTX, "Bu gün dərslər"),
+        pgettext(_CTX, "Bu gün / növbəti dərslər"),
         "fa-calendar-day",
         tone="primary",
         stats=[
             stat(pgettext(_CTX, "Bu gün"), len(today), pgettext(_CTX, "dərs")),
-            stat(pgettext(_CTX, "Növbəti"), next_label),
+            stat(
+                pgettext(_CTX, "Növbəti"),
+                next_label,
+                upcoming_day if not today else "",
+            ),
         ],
-        rows=_slot_rows(today),
+        rows=_slot_rows(shown),
         link=section_link("my-schedule", pgettext(_CTX, "Cədvələ keç")),
         empty=pgettext(_CTX, "Bu gün üçün cədvəldə dərs yoxdur."),
     )
@@ -349,5 +389,6 @@ __all__ = [
     "teacher_syllabus",
     "teacher_today",
     "todays_slots",
+    "upcoming_slots",
     "widget",
 ]

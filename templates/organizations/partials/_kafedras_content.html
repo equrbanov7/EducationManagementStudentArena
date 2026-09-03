@@ -1,4 +1,9 @@
-{% load i18n %}
+{% load i18n org_tags %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 {% with s=org_kafedras_section %}
 <div class="org-management org-management--kafedras">
     {% if not s.organization %}
@@ -7,7 +12,7 @@
     <div class="org-management__header">
         <div>
             <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
-            <h1>{% trans 'Kafedralar' %}</h1>
+            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="org-management__title">{% trans 'Kafedralar' %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
             <p class="org-management__subtitle">
                 {% trans 'Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər.' %}
                 {% trans 'Kafedraya müdir və müəllimlər təyin edin.' %}
@@ -203,7 +208,7 @@
                                                 <span class="org-management__avatar org-management__avatar--small {% if membership.is_active_teacher %}org-management__avatar--green{% endif %}">{{ membership.user.username|first|upper }}</span>
                                                 <span>
                                                     <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
-                                                    <small>{{ membership.role.display_name }}</small>
+                                                    <small>{{ membership.role|localized_role_label }}</small>
                                                 </span>
                                             </div>
                                             {% if s.can_assign_teachers %}
@@ -415,7 +420,7 @@
                                     {% for membership in s.teacher_options %}
                                         <option value="{{ membership.id }}">
                                             {{ membership.user.get_full_name|default:membership.user.username }}
-                                            ({{ membership.role.display_name }}{% if membership.scope_unit %} — {% trans 'hazırda:' %} {{ membership.scope_unit.name }}{% else %} — {% trans 'təyinatsız' %}{% endif %})
+                                            ({{ membership.role|localized_role_label }}{% if membership.scope_unit %} — {% trans 'hazırda:' %} {{ membership.scope_unit.name }}{% else %} — {% trans 'təyinatsız' %}{% endif %})
                                         </option>
                                     {% endfor %}
                                 </select>

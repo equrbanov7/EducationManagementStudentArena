@@ -342,6 +342,17 @@
     color: var(--ems-text-muted);
 }
 
+/* Qərar düyməsi olmayan aktor üçün panelin altındakı izah çipi. */
+.syl-decide__readonly {
+    padding: 6px 10px;
+    border: 1px solid var(--ems-primary-100);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    font-size: 0.77rem;
+    font-weight: 600;
+    color: var(--ems-primary-800);
+}
+
 /* «Təsdiqlə» — dizaynın YEGANƏ dolu-yaşıl düyməsi. Mətn ağ olduğu üçün fon
    `--ems-success-600`-dur (AA), `--ems-success` isə accent kimi qalır. */
 .syl-btn--approve {

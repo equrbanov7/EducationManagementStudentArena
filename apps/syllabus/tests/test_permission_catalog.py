@@ -71,10 +71,18 @@ def test_chair_head_decides_but_does_not_edit_the_draft():
     assert not has_permission(permissions, PERM_SUBMIT)
 
 
-def test_dean_mirrors_the_chair_decision_set():
+def test_dean_reads_and_reviews_but_never_decides():
+    """SAHİBİN QƏRARI (2026-09-03): təsdiq YALNIZ kafedra müdirinindir.
+
+    Əvvəl dekan kafedra müdirinin dəstini GÜZGÜLƏYİRDİ və fakültə scope-u
+    alt-ağacdakı bütün kafedraları örtdüyü üçün de-fakto təsdiqçi o idi.
+    İndi dekan növbəni açır, oxuyur və şərh yazır — qərar açarı yoxdur.
+    """
     permissions = _role("dean")["permissions"]
-    assert has_permission(permissions, PERM_APPROVE)
-    assert not has_permission(permissions, PERM_EDIT)
+    assert has_permission(permissions, PERM_VIEW)
+    assert has_permission(permissions, PERM_REVIEW)
+    for decision in (PERM_APPROVE, PERM_REVISE, PERM_REJECT, PERM_EDIT):
+        assert not has_permission(permissions, decision), decision
 
 
 def test_rim_and_vice_rector_hold_the_whole_family():

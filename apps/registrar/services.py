@@ -174,7 +174,14 @@ def get_student_semester_plan(*, record, period, semester_number):
     enrollments = list(
         Enrollment.objects.filter(organization=record.organization, student=record.student, offering__period=period)
         .exclude(status=Enrollment.Status.DROPPED)
-        .select_related("offering__subject", "offering__course", "offering__assessment_scheme")
+        .select_related(
+            "offering__subject",
+            "offering__course",
+            "offering__assessment_scheme",
+            # Ekran 10 — fənn kartında MÜƏLLİM adı göstərilir; `instructor`
+            # olmadan hər sətir ayrıca sorğu edərdi (N+1).
+            "offering__instructor",
+        )
     )
 
     elective_rows = CurriculumSubject.objects.filter(
@@ -299,6 +306,8 @@ def get_student_cabinet_data(*, record, period, semester_number):
                 "ects": subject.ects,
                 "kind": enrollment.kind,
                 "course": enrollment.offering.course,
+                "offering": enrollment.offering,
+                "teacher": enrollment.offering.instructor,
                 "eligibility": eligibility,
             }
         )

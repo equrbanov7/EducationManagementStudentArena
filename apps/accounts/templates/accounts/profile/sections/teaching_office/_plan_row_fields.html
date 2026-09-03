@@ -1,0 +1,75 @@
+{% load i18n %}
+{% comment %}Plan sətrinin sahələri — `_form_dialog.html` gövdəsi.
+
+SAAT DÜSTURU (TEDRIS_PLANI_SPEC §3): ümumi = kredit × 30 · auditoriya = ümumi −
+sərbəst iş · həftəlik = auditoriya ÷ 15. Boş buraxılan «ümumi saat» və «sərbəst
+iş» SERVERDƏ düsturla doldurulur; uyğunsuzluq sətir xətası kimi görünür və
+təsdiqə göndərməni bloklayır (§8 qayda 11).{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-pr-subject">{% trans "Fənn" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-pr-subject" name="subject" required data-live-search="true">
+            <option value="">{% trans "Kataloqdan seçin" context "accounts.curriculum" %}</option>
+            {% for option in curriculum_editor_section.subject_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-code">{% trans "Plan şifri" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="text" id="tof-pr-code" name="row_code" maxlength="32">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-sem">{% trans "Semestr" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="tof-pr-sem" name="semester_number" min="1" max="16" step="1" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-credits">{% trans "Kredit" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="tof-pr-credits" name="credits" min="0" max="60" step="1" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-total">{% trans "Ümumi saat" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-total" name="total_hours" min="0" max="2000" step="1"
+               aria-describedby="tof-pr-total-hint">
+        <p class="ems-field__hint" id="tof-pr-total-hint">{% trans "Boş buraxılsa kredit × 30 yazılır." context "accounts.curriculum" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-lecture">{% trans "Mühazirə" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-lecture" name="lecture_hours" min="0" max="600" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-seminar">{% trans "Seminar" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-seminar" name="seminar_hours" min="0" max="600" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-lab">{% trans "Laboratoriya" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-lab" name="lab_hours" min="0" max="600" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-self">{% trans "Sərbəst iş" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="number" id="tof-pr-self" name="selfwork_hours" min="0" max="2000" step="1"
+               aria-describedby="tof-pr-self-hint">
+        <p class="ems-field__hint" id="tof-pr-self-hint">{% trans "Boş buraxılsa ümumi − auditoriya yazılır." context "accounts.curriculum" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-assess">{% trans "Qiymətləndirmə forması" context "accounts.curriculum" %}</label>
+        <select class="ems-select" id="tof-pr-assess" name="assessment_form">
+            {% for option in curriculum_editor_section.assessment_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-lang">{% trans "Tədris dili" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="text" id="tof-pr-lang" name="language" maxlength="8">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pr-chair">{% trans "Tədris edən kafedra" context "accounts.curriculum" %}</label>
+        <select class="ems-select" id="tof-pr-chair" name="teaching_chair">
+            <option value="">{% trans "Təyin edilməyib" context "accounts.curriculum" %}</option>
+            {% for option in curriculum_editor_section.chair_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>

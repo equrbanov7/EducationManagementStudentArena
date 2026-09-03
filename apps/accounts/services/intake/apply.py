@@ -166,6 +166,14 @@ def _create_user(plan, *, organization, role, actor, request):
             "admission_year": admission_year,
             "status": "enrolled",
             "is_active": True,
+            # ATİS qəbul atributları (ekran 08). Sütun faylda yoxdursa
+            # `validate.admission.enrich` default qoyur — sahə heç vaxt NULL
+            # qalmır, ona görə reyestrin (ekran 09) sütunları həmişə doludur.
+            "atis_id": values.get("atis_id", ""),
+            "admission_score": values.get("admission_score"),
+            "admission_exam_type": values.get("admission_exam_type", ""),
+            "education_form": values.get("education_form", "full_time"),
+            "funding_type": values.get("funding_type", "paid"),
         },
     )
 
@@ -182,6 +190,8 @@ def _create_user(plan, *, organization, role, actor, request):
             "group": plan.group_name,
             "program": str(program.pk),
             "admission_year": admission_year,
+            "funding": values.get("funding_type", ""),
+            "education_form": values.get("education_form", ""),
             "email_placeholder": values["email"].endswith(".invalid"),
         },
         request=request,

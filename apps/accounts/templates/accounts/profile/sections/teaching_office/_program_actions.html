@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}İxtisas sətrinin əməlləri — `_data_table.html` `row.actions_include`.
+Kontekst valideyndən gəlir: `row.data` (sətir sözlüyü) + `programs_registry_section`.
+Silmə YOXDUR — arxivləmə (səbəb ≥20 simvol, audit).{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofProgramDialog"
+        data-tof-prefill='{"action": "save_program", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "official_code": "{{ row.data.official_code|escapejs }}", "degree_level": "{{ row.data.degree_level }}", "education_form": "{{ row.data.education_form }}", "specialty_unit": "{{ row.data.specialty_unit_id }}", "ects_total": "{{ row.data.ects_total }}", "absence_limit_percent": "{{ row.data.absence_limit_percent }}"}'>
+    {% trans "Redaktə" context "accounts.catalog" %}
+</button>
+{% if row.data.is_archived %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofCatalogRestoreDialog"
+        data-tof-prefill='{"action": "restore", "kind": "program", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivdən qaytar" context "accounts.catalog" %}
+</button>
+{% else %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-tof-open="tofCatalogArchiveDialog"
+        data-tof-prefill='{"action": "archive", "kind": "program", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivlə" context "accounts.catalog" %}
+</button>
+{% endif %}

@@ -47,6 +47,19 @@ WIDGET_SECTION = {
     "upcoming-exams": "exam-center-stats",
     "journal-close": "journal-close",
     "student-intake": "student-intake",
+    # Dizayn dalğası keçid kartları — açar = bölmə (staff.design_link_cards).
+    "workload-center": "workload-center",
+    "workload-visa": "workload-visa",
+    "workload-approval": "workload-approval",
+    "workload-overview": "workload-overview",
+    "question-chair-review": "question-chair-review",
+    "curriculum-editor": "curriculum-editor",
+    "semester-opening": "semester-opening",
+    "groups-registry": "groups-registry",
+    "student-admission": "student-admission",
+    "student-registry": "student-registry",
+    "lessons-log": "lessons-log",
+    "org-structure-tree": "org-structure-tree",
 }
 
 #: Yalnız İDARƏETMƏ vidjetləri — tələbədə heç biri görünməməlidir.
@@ -126,6 +139,8 @@ class DashboardSectionBase(TestCase):
                 "exam_center",
                 "rector",
                 "dean",
+                "teaching_office_head",
+                "student_services",
             ):
                 user = User.objects.create_user("dash_%s" % role_name, "dash_%s@qku.edu.az" % role_name, "pw")
                 Membership.objects.create(
@@ -258,6 +273,41 @@ class DashboardWidgetVisibilityTest(DashboardSectionBase):
     def test_rector_sees_org_kpis(self):
         keys = self.widget_keys(self.open_dashboard("rector"))
         self.assertIn("org-kpis", keys)
+
+    # ── Dizayn dalğası (22 ekran) keçid kartları — QA dalğa-2 P2-1 ──────────
+    def test_teaching_office_head_sees_its_own_centre(self):
+        keys = self.widget_keys(self.open_dashboard("teaching_office_head"))
+        self.assertIn("workload-center", keys)
+        self.assertIn("semester-opening", keys)
+        self.assertNotIn("student-admission", keys)
+
+    def test_student_services_sees_admission_and_registry(self):
+        keys = self.widget_keys(self.open_dashboard("student_services"))
+        self.assertIn("student-admission", keys)
+        self.assertIn("student-registry", keys)
+        self.assertNotIn("workload-center", keys)
+
+    def test_rector_sees_load_overview_card(self):
+        keys = self.widget_keys(self.open_dashboard("rector"))
+        self.assertIn("workload-overview", keys)
+
+    def test_forbidden_full_page_section_shows_notice(self):
+        """QA dalğa-2 W2-8: icazəsiz bölmə səssiz fallback etmir — xəbərdarlıq var."""
+        client = self.client_for(self.actors["student"])
+        response = client.get(reverse("accounts:profile"), {"section": "workload-center"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["section_denied"])
+        self.assertNotEqual(response.context["active_section"], "workload-center")
+        self.assertContains(response, 'data-section-denied="1"')
+        ok = client.get(reverse("accounts:profile"), {"section": "dashboard"})
+        self.assertFalse(ok.context["section_denied"])
+        self.assertNotContains(ok, 'data-section-denied="1"')
+
+    def test_student_sees_no_design_cards(self):
+        from apps.accounts.views.profile._sections.dashboard_staff_widgets import _DESIGN_LINK_CARDS
+
+        keys = self.widget_keys(self.open_dashboard("student"))
+        self.assertEqual(keys & {card[0] for card in _DESIGN_LINK_CARDS}, set())
 
 
 class DashboardQueryBudgetTest(DashboardSectionBase):

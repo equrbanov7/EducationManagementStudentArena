@@ -25,7 +25,7 @@
                     <option value="">{% trans "all_roles" context "organizations.members" %}</option>
                     {% for role in s.roles %}
                         <option value="{{ role.name }}" {% if s.current_role == role.name %}selected{% endif %}>
-                            {{ role.display_name }}
+                            {{ role|localized_role_label }}
                         </option>
                     {% endfor %}
                 </select>
