@@ -60330,3 +60330,744 @@ msgstr "You do not have permission to review this question submission as the cha
 msgctxt "exams.service.access.permission"
 msgid "question_submission_requires_chair_approval"
 msgstr "This question submission must be approved by the chair head before it can reach the Exam Centre."
+
+msgctxt "accounts.catalog"
+msgid "AD DUBLİKATI"
+msgstr "NAME DUPLICATE"
+
+msgctxt "accounts.catalog"
+msgid "ARXİVDƏ"
+msgstr "ARCHIVED"
+
+msgctxt "accounts.catalog"
+msgid "Ad və ya rəsmi şifr"
+msgstr "Name or official code"
+
+msgctxt "accounts.catalog"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "There is no active organization context."
+
+msgctxt "accounts.catalog"
+msgid "Aktivlər"
+msgstr "Active"
+
+msgctxt "accounts.catalog"
+msgid "Arxiv"
+msgstr "Archive"
+
+msgctxt "accounts.catalog"
+msgid "Arxivdəkilər"
+msgstr "Archived"
+
+msgctxt "accounts.catalog"
+msgid "Arxivdən qaytar"
+msgstr "Restore from archive"
+
+msgctxt "accounts.catalog"
+msgid "Arxivlə"
+msgstr "Archive"
+
+msgctxt "accounts.catalog"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "accounts.catalog"
+msgid "Bu kodla fənn artıq mövcuddur."
+msgstr "A subject with this code already exists."
+
+msgctxt "accounts.catalog"
+msgid "Bu kodla ixtisas artıq mövcuddur."
+msgstr "A programme with this code already exists."
+
+msgctxt "accounts.catalog"
+msgid "Bəli"
+msgstr "Yes"
+
+msgctxt "accounts.catalog"
+msgid "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır."
+msgstr "The restore reason is recorded in the audit log with the actor and timestamp."
+
+msgctxt "accounts.catalog"
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər aşkarlandı"
+msgstr "Subjects with the same name were detected"
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı fənlər birləşdirilmir — birləşdirmə (merge) destruktiv əməldir və plan sətirləri ilə sillabusların köçürülməsini tələb edir (növbəti mərhələ)."
+msgstr "Subjects with the same name are not merged — merging is a destructive operation and requires migrating curriculum lines and syllabi (a future phase)."
+
+msgctxt "accounts.catalog"
+msgid "Eyni adlı yazılar"
+msgstr "Records with the same name"
+
+msgctxt "accounts.catalog"
+msgid "FƏNN"
+msgstr "SUBJECT"
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu boş ola bilməz."
+msgstr "The subject code cannot be empty."
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu tenant daxilində unikaldır; saat bölgüsü tədris planı sətrində saxlanılır."
+msgstr "The subject code is unique within the tenant; the hour breakdown is stored on the curriculum line."
+
+msgctxt "accounts.catalog"
+msgid "Fənn kodu və ya adı"
+msgstr "Subject code or name"
+
+msgctxt "accounts.catalog"
+msgid "Fənn növü"
+msgstr "Subject type"
+
+msgctxt "accounts.catalog"
+msgid "Fənn növü seçilməyib."
+msgstr "The subject type has not been selected."
+
+msgctxt "accounts.catalog"
+msgid "Fənn tapılmadı"
+msgstr "Subject not found"
+
+msgctxt "accounts.catalog"
+msgid "Fənn tapılmadı."
+msgstr "Subject not found."
+
+msgctxt "accounts.catalog"
+msgid "Fənnin adı"
+msgstr "Subject name"
+
+msgctxt "accounts.catalog"
+msgid "Fənnin adı boş ola bilməz."
+msgstr "The subject name cannot be empty."
+
+msgctxt "accounts.catalog"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.catalog"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.catalog"
+msgid "Kafedra / fakültə"
+msgstr "Department / faculty"
+
+msgctxt "accounts.catalog"
+msgid "Kataloq yazısını arxivlə"
+msgstr "Archive the catalog entry"
+
+msgctxt "accounts.catalog"
+msgid "Kataloqa baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+msgstr "You do not have permission to view the catalog. Contact your administrator."
+
+msgctxt "accounts.catalog"
+msgid "Kataloqu idarə etmək səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to manage the catalog."
+
+msgctxt "accounts.catalog"
+msgid "Kredit (ECTS)"
+msgstr "Credits (ECTS)"
+
+msgctxt "accounts.catalog"
+msgid "Məzuniyyət üçün ECTS"
+msgstr "ECTS required for graduation"
+
+msgctxt "accounts.catalog"
+msgid "Naməlum kataloq növü."
+msgstr "Unknown catalog type."
+
+msgctxt "accounts.catalog"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "accounts.catalog"
+msgid "Növ"
+msgstr "Type"
+
+msgctxt "accounts.catalog"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Result: %(count)d rows"
+
+msgctxt "accounts.catalog"
+msgid "PLAN YOXDUR"
+msgstr "NO PLAN"
+
+msgctxt "accounts.catalog"
+msgid "PLANDA İSTİFADƏDƏ"
+msgstr "IN USE IN PLANS"
+
+msgctxt "accounts.catalog"
+msgid "Planlarda istifadə"
+msgstr "Used in curricula"
+
+
+msgctxt "accounts.catalog"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.catalog"
+msgid "REYESTRDƏ CƏMİ"
+msgstr "TOTAL IN THE REGISTRY"
+
+msgctxt "accounts.catalog"
+msgid "Redaktə"
+msgstr "Edit"
+
+msgctxt "accounts.catalog"
+msgid "Reyestr kodu"
+msgstr "Registry code"
+
+msgctxt "accounts.catalog"
+msgid "Rəsmi şifr (NK 503)"
+msgstr "Official code (NK 503)"
+
+msgctxt "accounts.catalog"
+msgid "Rəsmi şifr NK 503/2024 kataloqundan götürülür; daxili kod avtomatik yaranır."
+msgstr "The official code is taken from the NK 503/2024 catalog; the internal code is generated automatically."
+
+msgctxt "accounts.catalog"
+msgid "Sahibi kafedra"
+msgstr "Owning department"
+
+msgctxt "accounts.catalog"
+msgid "Süzgəcləri dəyişin və ya yeni fənn əlavə edin."
+msgstr "Change the filters or add a new subject."
+
+msgctxt "accounts.catalog"
+msgid "Süzgəcləri dəyişin və ya yeni ixtisas əlavə edin."
+msgstr "Change the filters or add a new programme."
+
+msgctxt "accounts.catalog"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "The reason must be at least 20 characters — a short note is not enough for the audit."
+
+msgctxt "accounts.catalog"
+msgid "Tabe olduğu kafedra"
+msgstr "Reporting department"
+
+msgctxt "accounts.catalog"
+msgid "Tam ad"
+msgstr "Full name"
+
+msgctxt "accounts.catalog"
+msgid "Tədris planı təsdiqlənməyib"
+msgstr "The curriculum has not been approved"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil forması"
+msgstr "Mode of study"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil forması seçilməyib."
+msgstr "The mode of study has not been selected."
+
+msgctxt "accounts.catalog"
+msgid "Təhsil pilləsi"
+msgstr "Degree level"
+
+msgctxt "accounts.catalog"
+msgid "Təhsil pilləsi seçilməyib."
+msgstr "The degree level has not been selected."
+
+msgctxt "accounts.catalog"
+msgid "Təyin edilməyib"
+msgstr "Not assigned"
+
+msgctxt "accounts.catalog"
+msgid "Universitetin təhsil proqramları: rəsmi şifr, pillə, forma, tabe olduğu kafedra və tədris planının vəziyyəti."
+msgstr "The university's degree programmes: official code, level, mode, reporting department, and curriculum status."
+
+msgctxt "accounts.catalog"
+msgid "Universitetin vahid fənn reyestri: kod, kredit, növ, sahibi kafedra və planlarda istifadə."
+msgstr "The university's unified subject registry: code, credits, type, owning department, and use in curricula."
+
+msgctxt "accounts.catalog"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "accounts.catalog"
+msgid "Yalnız dublikatlar"
+msgstr "Duplicates only"
+
+msgctxt "accounts.catalog"
+msgid "Yalnız «Plan yoxdur»"
+msgstr "Only \"No plan\""
+
+msgctxt "accounts.catalog"
+msgid "Yazı SİLİNMİR — arxivlənir; plan sətirləri, jurnal və qiymət tarixçəsi qalır."
+msgstr "The record is NOT DELETED — it is archived; curriculum lines, the journal, and the grade history are preserved."
+
+msgctxt "accounts.catalog"
+msgid "Yazı tapılmadı."
+msgstr "Record not found."
+
+msgctxt "accounts.catalog"
+msgid "Yeni fənn"
+msgstr "New subject"
+
+msgctxt "accounts.catalog"
+msgid "Yeni ixtisas"
+msgstr "New programme"
+
+msgctxt "accounts.catalog"
+msgid "İXTİSAS"
+msgstr "PROGRAMME"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas kodu"
+msgstr "Programme code"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas tapılmadı"
+msgstr "Programme not found"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas tapılmadı."
+msgstr "Programme not found."
+
+msgctxt "accounts.catalog"
+msgid "İxtisasın adı boş ola bilməz."
+msgstr "The programme name cannot be empty."
+
+msgctxt "accounts.catalog"
+msgid "Əməllər"
+msgstr "Actions"
+
+msgctxt "accounts.chair_profile"
+msgid "Aktiv təşkilat konteksti yoxdur"
+msgstr "There is no active organization context"
+
+msgctxt "accounts.chair_profile"
+msgid "Bu kafedraya hələ müəllim təyin edilməyib və ya süzgəc nəticəni boşaldıb."
+msgstr "No teacher has been assigned to this department yet, or the filter has emptied the result."
+
+msgctxt "accounts.chair_profile"
+msgid "Bəli"
+msgstr "Yes"
+
+msgctxt "accounts.chair_profile"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.chair_profile"
+msgid "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma dəyərləri müəllim yük profilindən oxunur."
+msgstr "The department's staffing table, teaching staff, and annual workload risk. Norm values are read from the teacher workload profile."
+
+msgctxt "accounts.chair_profile"
+msgid "MÜƏLLİM"
+msgstr "TEACHER"
+
+msgctxt "accounts.chair_profile"
+msgid "Müdir"
+msgstr "Head"
+
+msgctxt "accounts.chair_profile"
+msgid "Müdir təyin edilməyib"
+msgstr "No head assigned"
+
+msgctxt "accounts.chair_profile"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.chair_profile"
+msgid "Müəllim tapılmadı"
+msgstr "Teacher not found"
+
+msgctxt "accounts.chair_profile"
+msgid "Norma"
+msgstr "Norm"
+
+msgctxt "accounts.chair_profile"
+msgid "Norma dəyərləri müəllim yük profilindən oxunur (NK №215 default: 500 saat). Nazirlik/Universitet norma dəstlərinin ayrılması sahib qərarını gözləyir."
+msgstr "Norm values are read from the teacher workload profile (NK No. 215 default: 500 hours). Separating Ministry/University norm sets is pending an owner decision."
+
+msgctxt "accounts.chair_profile"
+msgid "Normaya nisbətdə"
+msgstr "Relative to the norm"
+
+msgctxt "accounts.chair_profile"
+msgid "Nəticə: %(count)d müəllim"
+msgstr "Result: %(count)d teachers"
+
+msgctxt "accounts.chair_profile"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.chair_profile"
+msgid "Saathesabı"
+msgstr "Hourly paid"
+
+msgctxt "accounts.chair_profile"
+msgid "Sillabus"
+msgstr "Syllabus"
+
+msgctxt "accounts.chair_profile"
+msgid "Struktur əhatəniz təyin edilməyib. Kafedra təyinatı üçün Tədris şöbəsinə və ya administratora müraciət edin."
+msgstr "Your structural scope has not been assigned. Contact the Teaching Office or the administrator for department assignment."
+
+msgctxt "accounts.chair_profile"
+msgid "SİLLABUS ƏHATƏSİ"
+msgstr "SYLLABUS COVERAGE"
+
+msgctxt "accounts.chair_profile"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "accounts.chair_profile"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.chair_profile"
+msgid "Təşkilat seçin və ya administratora müraciət edin."
+msgstr "Select an organization or contact the administrator."
+
+msgctxt "accounts.chair_profile"
+msgid "Vəzifə"
+msgstr "Position"
+
+msgctxt "accounts.chair_profile"
+msgid "Yalnız yüklü / risk"
+msgstr "Overloaded / at risk only"
+
+msgctxt "accounts.chair_profile"
+msgid "Yük vəziyyəti"
+msgstr "Workload status"
+
+msgctxt "accounts.chair_profile"
+msgid "saat"
+msgstr "hours"
+
+msgctxt "accounts.chair_profile"
+msgid "İLLİK SAAT"
+msgstr "ANNUAL HOURS"
+
+msgctxt "accounts.chair_profile"
+msgid "İllik saat"
+msgstr "Annual hours"
+
+msgctxt "accounts.chair_profile"
+msgid "İxtisas"
+msgstr "Programme"
+
+msgctxt "accounts.chair_profile"
+msgid "ŞTAT VAHİDİ CƏMİ"
+msgstr "TOTAL STAFF UNITS"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat"
+msgstr "Staff"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat növü"
+msgstr "Staff type"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat payı"
+msgstr "Staff share"
+
+msgctxt "accounts.chair_profile"
+msgid "Ştat payının cəmi"
+msgstr "Total staff share"
+
+msgctxt "accounts.chair_profile"
+msgid "Əhatənizdə kafedra yoxdur"
+msgstr "There is no department in your scope"
+
+msgctxt "accounts.chair_profile"
+msgid "Əvəzçilik"
+msgstr "Concurrent position"
+
+msgctxt "accounts.structure_tree"
+msgid "Adını dəyiş"
+msgstr "Rename"
+
+msgctxt "accounts.structure_tree"
+msgid "Aktiv alt bölməsi olan vahid arxivlənə bilməz — əvvəlcə alt bölmələri arxivləyin."
+msgstr "A unit with active sub-units cannot be archived — archive its sub-units first."
+
+msgctxt "accounts.structure_tree"
+msgid "Alt bölmə əlavə et"
+msgstr "Add sub-unit"
+
+msgctxt "accounts.structure_tree"
+msgid "Arxivlə"
+msgstr "Archive"
+
+msgctxt "accounts.structure_tree"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "accounts.structure_tree"
+msgid "Ağacdan bölmə seçin — heyət, qrup və tələbə göstəriciləri burada açılır."
+msgstr "Select a unit from the tree — staff, group, and student indicators open here."
+
+msgctxt "accounts.structure_tree"
+msgid "Bu bölməyə baxış üçün struktur əhatəniz yoxdur. Administratora müraciət edin."
+msgstr "Your structural scope does not include viewing this unit. Contact the administrator."
+
+msgctxt "accounts.structure_tree"
+msgid "BÖLMƏ"
+msgstr "UNIT"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə SİLİNMİR — arxivlənir. Əlaqəli tələbə, jurnal və qiymət tarixçəsi olduğu kimi qalır."
+msgstr "The unit is NOT DELETED — it is archived. Related students, the journal, and the grade history remain as is."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə SİLİNMİR — arxivlənir; tələbə, jurnal və qiymət tarixçəsi qalır."
+msgstr "The unit is NOT DELETED — it is archived; students, the journal, and the grade history are preserved."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə adı və ya kodu"
+msgstr "Unit name or code"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə seçilmiş vahidin altında yaradılır."
+msgstr "The unit is created under the selected entity."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə seçilməyib"
+msgstr "No unit selected"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tapılmadı"
+msgstr "Unit not found"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tapılmadı."
+msgstr "Unit not found."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tipi"
+msgstr "Unit type"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "The unit type is not valid for this organization."
+
+msgctxt "accounts.structure_tree"
+msgid "Bölməni arxivlə"
+msgstr "Archive the unit"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmənin adı"
+msgstr "Unit name"
+
+msgctxt "accounts.structure_tree"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "The unit name cannot be empty."
+
+msgctxt "accounts.structure_tree"
+msgid "Bütün tiplər"
+msgstr "All types"
+
+msgctxt "accounts.structure_tree"
+msgid "FAKÜLTƏ"
+msgstr "FACULTY"
+
+msgctxt "accounts.structure_tree"
+msgid "KAFEDRA"
+msgstr "DEPARTMENT"
+
+msgctxt "accounts.structure_tree"
+msgid "Kod"
+msgstr "Code"
+
+msgctxt "accounts.structure_tree"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.structure_tree"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "accounts.structure_tree"
+msgid "Nəticə: %(count)d bölmə"
+msgstr "Result: %(count)d units"
+
+msgctxt "accounts.structure_tree"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.structure_tree"
+msgid "Rektorat → fakültə → dekanlıq → kafedra → ixtisas → qrup iyerarxiyası. Bölmə silinmir — arxivlənir."
+msgstr "The rectorate → faculty → dean's office → department → programme → group hierarchy. Units are not deleted — they are archived."
+
+msgctxt "accounts.structure_tree"
+msgid "RƏHBƏRİ YOXDUR"
+msgstr "NO HEAD"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər"
+msgstr "Head"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər təyin et"
+msgstr "Assign head"
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbər təyini üçün səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to assign a head."
+
+msgctxt "accounts.structure_tree"
+msgid "Rəhbəri götür (boş)"
+msgstr "Remove the head (leave empty)"
+
+msgctxt "accounts.structure_tree"
+msgid "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."
+msgstr "The selected person is not an active member of this organization."
+
+msgctxt "accounts.structure_tree"
+msgid "Seçin…"
+msgstr "Select…"
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur ağacı"
+msgstr "Structure tree"
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur ağacını idarə etmək səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to manage the structure tree."
+
+msgctxt "accounts.structure_tree"
+msgid "Struktur əhatəniz yoxdur."
+msgstr "You have no structural scope."
+
+msgctxt "accounts.structure_tree"
+msgid "Süzgəcləri dəyişin və ya yeni bölmə əlavə edin."
+msgstr "Change the filters or add a new unit."
+
+msgctxt "accounts.structure_tree"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "The reason must be at least 20 characters — a short note is not enough for the audit."
+
+msgctxt "accounts.structure_tree"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyin edilməyib"
+msgstr "Not assigned"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyin et"
+msgstr "Assign"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyinat gözləyir"
+msgstr "Awaiting assignment"
+
+msgctxt "accounts.structure_tree"
+msgid "Təyinat səbəbi audit jurnalına aktor və vaxtla yazılır."
+msgstr "The assignment reason is recorded in the audit log with the actor and timestamp."
+
+msgctxt "accounts.structure_tree"
+msgid "Universitetin struktur ağacı"
+msgstr "The university's structure tree"
+
+msgctxt "accounts.structure_tree"
+msgid "Valideyn bölmə tapılmadı."
+msgstr "Parent unit not found."
+
+msgctxt "accounts.structure_tree"
+msgid "Yeni alt bölmə"
+msgstr "New sub-unit"
+
+msgctxt "accounts.structure_tree"
+msgid "İxtisas"
+msgstr "Programme"
+
+msgctxt "organizations.permission.label"
+msgid "Bölməyə rəhbər təyin etmək"
+msgstr "Assign a head to a unit"
+
+msgctxt "organizations.permission.label"
+msgid "Struktur ağacını idarə etmək (yaratmaq/adını dəyişmək/arxivləmək)"
+msgstr "Manage the structure tree (create/rename/archive)"
+
+msgctxt "organizations.permission.label"
+msgid "İxtisas və fənn kataloquna baxış"
+msgstr "View the programme and subject catalog"
+
+msgctxt "organizations.permission.label"
+msgid "İxtisas və fənn kataloqunu idarə etmək"
+msgstr "Manage the programme and subject catalog"
+
+msgctxt "profile.sidebar"
+msgid "Fənn kataloqu"
+msgstr "Subject catalog"
+
+msgctxt "profile.sidebar"
+msgid "Kafedra profili"
+msgstr "Department profile"
+
+msgctxt "profile.sidebar"
+msgid "Tədris şöbəsi"
+msgstr "Teaching Office"
+
+msgctxt "profile.sidebar"
+msgid "Universitet strukturu"
+msgstr "University structure"
+
+msgctxt "profile.sidebar"
+msgid "İxtisaslar"
+msgstr "Programmes"
+
+msgctxt "registrar.education_form"
+msgid "Distant"
+msgstr "Distance"
+
+msgctxt "registrar.education_form"
+msgid "Qiyabi"
+msgstr "Part-time"
+
+msgctxt "registrar.education_form"
+msgid "Əyani"
+msgstr "Full-time"
+
+msgctxt "registrar.subject_kind"
+msgid "Seçmə fənn"
+msgstr "Elective subject"
+
+msgctxt "registrar.subject_kind"
+msgid "Təcrübə"
+msgstr "Practice"
+
+msgctxt "registrar.subject_kind"
+msgid "Ümumi fənn"
+msgstr "General subject"
+
+msgctxt "registrar.subject_kind"
+msgid "İxtisas fənni"
+msgstr "Core subject"
+
+msgctxt "ui.status"
+msgid "Ad dublikatı"
+msgstr "Duplicate name"
+
+msgctxt "ui.status"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "ui.status"
+msgid "Arxivdə"
+msgstr "Archived"
+
+msgctxt "ui.status"
+msgid "Plan yoxdur"
+msgstr "No plan"
+
+msgctxt "ui.status"
+msgid "Planda istifadə olunmur"
+msgstr "Not used in a plan"
+
+msgctxt "accounts.catalog"
+msgid "Qayıb limiti (%%)"
+msgstr "Absence limit (%%)"
