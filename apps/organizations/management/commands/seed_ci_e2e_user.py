@@ -12,6 +12,7 @@ from django.db import transaction
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -19,7 +20,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_ci_e2e_user"
     help = "Seed the CI E2E university user with all default university roles."
 
     def add_arguments(self, parser):

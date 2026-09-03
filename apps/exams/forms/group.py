@@ -137,6 +137,11 @@ class StudentGroupForm(forms.ModelForm):
         organization = kwargs.pop("organization", None)
         can_multi_assign_teachers = kwargs.pop("can_multi_assign_teachers", False)
         is_superadmin = kwargs.pop("is_superadmin", False)
+        # ``defer_choices`` — variantlar (7 700+ tələbə) səhifə yüklənəndə YOX,
+        # modal AÇILANDA ayrıca endpoint-dən gəlir (``teacher_group_candidates``).
+        # Sahə queryset-i TOXUNULMUR → POST validasiyası eynidir; yalnız RENDER
+        # boş qalır (2026-09-02 performans auditi, F4).
+        defer_choices = kwargs.pop("defer_choices", False)
         super().__init__(*args, **kwargs)
 
         self.actor = actor or teacher
@@ -192,6 +197,12 @@ class StudentGroupForm(forms.ModelForm):
         self.fields["students"].queryset = students_qs
         self.fields["primary_teacher"].queryset = teachers_qs
         self.fields["assigned_teachers"].queryset = teachers_qs
+        if defer_choices and not self.is_bound:
+            # Yalnız WIDGET variantları boşaldılır (``field.queryset`` qalır —
+            # ``clean``/``to_python`` onu oxuyur, yəni göndərilən id-lər eyni
+            # şəkildə yoxlanılır).
+            for field_name in ("students", "primary_teacher", "assigned_teachers"):
+                self.fields[field_name].widget.choices = []
 
         # Fənlər (registrar master-data) — aktiv təşkilatın fənlərinə skoplanır.
         # `organization.subjects` tərs-relasiyası ilə (import lazım deyil).

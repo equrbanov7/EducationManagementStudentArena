@@ -26,6 +26,7 @@ from apps.exams.models import StudentGroup
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -33,7 +34,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_stress_test"
     help = "Seed an isolated university + groups + students for load/stress testing (shared password, no OTP)."
 
     def add_arguments(self, parser):
@@ -255,7 +257,7 @@ class Command(BaseCommand):
         self.stdout.write(
             f"    Tələbələr                         : {prefix}_student_001 … {prefix}_student_{n_students:03d}"
         )
-        self.stdout.write(f"    Parol (HAMISI)                    : {password}")
+        self.stdout.write("    Ortaq parol command inputundan götürülüb; dəyəri loglanmır.")
         self.stdout.write("")
         self.stdout.write(
             f"  Təmizləmək: python manage.py seed_stress_test --purge --prefix {prefix} --org-slug {org_slug}"

@@ -15,21 +15,7 @@
 /* Filtrlərdəki Bootstrap select-lər — kompakt (nəhəng default toggle yox) */
 .ecs-filters .bootstrap-single-select__toggle { min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; padding:.5rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
 .ecs-filters .bootstrap-single-select__toggle:hover { border-color:var(--ems-primary-300); }
-/* Multi-select (chips + search) — ağ, göy çiplər */
-.ecs-ms { border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; padding:.35rem .5rem; position:relative; min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; }
-.ecs-ms__chips { flex:1; min-width:0; }
-.ecs-ms:focus-within { border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
-.ecs-ms__chips { display:flex; flex-wrap:wrap; gap:.35rem; align-items:center; }
-.ecs-chip { display:inline-flex; align-items:center; gap:.35rem; background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-100); border-radius:999px; padding:.18rem .3rem .18rem .6rem; font-size:.78rem; font-weight:700; max-width:100%; }
-.ecs-chip span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:14rem; }
-.ecs-chip__x { cursor:pointer; border:0; background:transparent; color:var(--ems-primary-600); font-size:1rem; line-height:1; padding:0 .1rem; }
-.ecs-ms__search { border:0; outline:none; background:transparent; color:var(--ems-neutral-900); padding:.28rem; font-size:.88rem; min-width:100px; flex:1; }
-.ecs-ms__search::placeholder { color:var(--ems-neutral-400); }
-.ecs-ms__menu { position:absolute; left:0; right:0; top:100%; margin-top:4px; background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; box-shadow:0 12px 30px rgba(15,23,42,.14); max-height:300px; overflow-y:auto; z-index:1050; display:none; }
-.ecs-ms.is-open .ecs-ms__menu { display:block; }
-.ecs-ms__opt { padding:.55rem .8rem; cursor:pointer; font-size:.86rem; color:var(--ems-neutral-800); }
-.ecs-ms__opt:hover { background:var(--ems-primary-50); color:var(--ems-primary-700); }
-.ecs-ms__more { padding:.5rem .8rem; text-align:center; color:var(--ems-neutral-400); font-size:1rem; letter-spacing:.2em; }
+
 /* Skeleton yükləmə sətirləri */
 .ecs-skel { height:.95rem; border-radius:6px; background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%); background-size:400% 100%; animation:ecs-shimmer 1.3s ease infinite; }
 @keyframes ecs-shimmer { 0%{background-position:100% 0;} 100%{background-position:0 0;} }

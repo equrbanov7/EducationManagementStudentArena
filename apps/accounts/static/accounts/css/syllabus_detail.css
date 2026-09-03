@@ -1,0 +1,318 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — AYRICA TAM SƏHİFƏ (`_blank` ilə açılan sənəd görünüşü)
+   ───────────────────────────────────────────────────────────────────────────
+   Ortaq komponentlər (`.syl-badge`, `.syl-btn`, `.syl-bar`, `.syl-code`)
+   `profile/sections/syllabus_base.css`-dən gəlir — burada YALNIZ səhifə
+   qabığı, sənəd tipoqrafiyası və ÇAP qaydaları var.
+
+   ⚠️ Tətbiq YALNIZ İŞIQLI temadır — `prefers-color-scheme: dark` YOXDUR.
+   Rənglər `static/css/design-tokens.css` tokenləridir (hardcode hex yoxdur).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.syl-doc {
+    /* `syllabus_base.css` bu dəyişənləri `.profile-section--syllabus`-da təyin
+       edir; tam səhifə profil qabığında olmadığı üçün burada təkrarlanır. */
+    --syl-radius-card: 12px;
+    --syl-radius-ctl: 9px;
+    --syl-gap: 12px;
+
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 28px 18px 64px;
+    gap: 18px;
+}
+
+/* ── Şapka ────────────────────────────────────────────────────────────── */
+.syl-doc__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ems-primary-600);
+}
+
+.syl-doc__headline {
+    min-width: 0;
+    flex: 1 1 380px;
+}
+
+.syl-doc__kicker {
+    margin: 0 0 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ems-primary-600);
+}
+
+.syl-doc__title {
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+}
+
+.syl-doc__code {
+    margin: 6px 0 0;
+}
+
+.syl-doc__headside {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.syl-doc__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.syl-doc__tools .syl-btn {
+    text-decoration: none;
+}
+
+/* ── Banner (statusa görə izah + qərar səbəbi) ────────────────────────── */
+.syl-doc__banner {
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: var(--syl-radius-card);
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--ems-text);
+}
+
+.syl-doc__banner--success {
+    border-color: var(--ems-success);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.syl-doc__banner--warning {
+    border-color: var(--ems-warning);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-doc__banner--danger {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.syl-doc__banner--submitted,
+.syl-doc__banner--review {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+/* ── Şəxsiyyət şapkası (proqram / kafedra / versiya / təsdiqləyən) ─────── */
+.syl-doc__identity {
+    padding: 16px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--syl-radius-card);
+    background: var(--ems-bg-subtle);
+}
+
+.syl-doc__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px 18px;
+    margin: 0;
+}
+
+.syl-doc__pair {
+    min-width: 0;
+}
+
+.syl-doc__pair dt {
+    margin: 0 0 2px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-text-muted);
+}
+
+.syl-doc__pair dd {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.syl-doc__pair--progress dd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Məzmun bölmələri ─────────────────────────────────────────────────── */
+.syl-doc__body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.syl-doc__section {
+    padding: 16px 18px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--syl-radius-card);
+    background: var(--ems-bg);
+    break-inside: avoid;
+}
+
+.syl-doc__section-title {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ems-primary-800);
+}
+
+.syl-doc__lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.syl-doc__lines li {
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.syl-doc__empty {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ems-text-muted);
+}
+
+/* ── Audit xronologiyası ──────────────────────────────────────────────── */
+.syl-doc__history {
+    padding: 16px 18px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--syl-radius-card);
+    background: var(--ems-bg);
+}
+
+.syl-doc__timeline {
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: none;
+    border-left: 2px solid var(--ems-neutral-200);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.syl-doc__event {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.syl-doc__event::before {
+    content: "";
+    position: absolute;
+    left: -25px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ems-neutral-300);
+}
+
+.syl-doc__event--success::before {
+    background: var(--ems-success);
+}
+
+.syl-doc__event--warning::before {
+    background: var(--ems-warning);
+}
+
+.syl-doc__event--danger::before {
+    background: var(--ems-danger);
+}
+
+.syl-doc__event--submitted::before,
+.syl-doc__event--review::before {
+    background: var(--ems-primary-600);
+}
+
+.syl-doc__event-what {
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.syl-doc__event-body {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+}
+
+/* ── ÇAP ──────────────────────────────────────────────────────────────── */
+/* ⚠️ Selektorlar `base.html`-in REAL qabığına baxılaraq yazılıb (naviqasiya
+   `header.blog-header`, altlıq `footer.ems-footer`, köməkçi vidjetlər isə
+   `#ai-bot-btn` / `.gsearch`) — «.navbar» kimi mövcud OLMAYAN ada güvənmək
+   çap nüsxəsində bütöv menyunu kağıza salırdı. */
+@media print {
+    .skip-link,
+    .route-progress,
+    .blog-header,
+    .mobile-nav-overlay,
+    .mobile-nav-panel,
+    .ems-footer,
+    .gsearch,
+    .toast-container,
+    #ai-bot-btn,
+    #ai-bot-tooltip,
+    #ai-chat-panel,
+    .syl-doc__tools {
+        display: none !important;
+    }
+
+    .syl-doc {
+        max-width: none;
+        padding: 0;
+    }
+
+    .syl-doc__section,
+    .syl-doc__identity,
+    .syl-doc__history {
+        border-color: var(--ems-neutral-300);
+        background: transparent;
+        break-inside: avoid;
+    }
+}
+
+@media (max-width: 640px) {
+    .syl-doc {
+        padding: 18px 12px 48px;
+    }
+
+    .syl-doc__headside {
+        align-items: flex-start;
+    }
+
+    .syl-doc__title {
+        font-size: 1.3rem;
+    }
+}

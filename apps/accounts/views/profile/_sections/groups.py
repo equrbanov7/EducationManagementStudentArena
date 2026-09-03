@@ -40,6 +40,10 @@ def build_groups_context(
             can_multi_assign_teachers=can_multi_assign,
             is_superadmin=capabilities["is_superadmin"],
             auto_id="group_%s",
+            # Variantlar (bu tenantda ~7 700 tələbə) səhifə ilə RENDER OLUNMUR —
+            # modal açılanda ``exams:teacher_group_candidates``-dən gəlir.
+            # POST müqaviləsi dəyişmir: sahə queryset-i (validasiya) eynidir.
+            defer_choices=True,
         )
 
     teacher_groups_qs = (

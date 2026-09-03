@@ -46,12 +46,11 @@ def _mark_attempt_graded(attempt, *, grader, total_score, checked, now):
         update_fields.append("graded_by")
     attempt.save(update_fields=update_fields)
     # Yazılı imtahan yoxlanıb bitəndə nəticəni elektron jurnala yaz (best-effort).
+    # Aktor YOXLAYAN MÜƏLLİMdir — tələbə deyil (2026-08 auditi, G7).
     if checked:
-        from django.db import transaction as _tx
+        from apps.exams.services.journal_sync import schedule_journal_sync
 
-        from apps.exams.services.journal_sync import sync_attempt_to_journal
-
-        _tx.on_commit(lambda: sync_attempt_to_journal(attempt))
+        schedule_journal_sync(attempt, actor=grader)
 
 
 @transaction.atomic
@@ -211,15 +210,16 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
         ExamGradeEvent.objects.bulk_create(grade_events)
 
     if grading_changed:
-        attempt.teacher_score = total_score if any_score else None
-        attempt.checked_by_teacher = True
-        if not attempt.teacher_checked_at:
-            attempt.teacher_checked_at = now
-        update_fields = ["teacher_score", "checked_by_teacher", "teacher_checked_at"]
-        if attempt.graded_by_id is None:
-            attempt.graded_by = grader
-            update_fields.append("graded_by")
-        attempt.save(update_fields=update_fields)
+        # 2026-08 auditi (G8): əsas müəllim yoxlama UI-ı cəhdin xülasəsini
+        # ƏL İLƏ yazırdı və `_mark_attempt_graded`-i keçirdi → verilən bal
+        # jurnala heç vaxt sync olmurdu. İndi eyni ortaq yoldan keçir.
+        _mark_attempt_graded(
+            attempt,
+            grader=grader,
+            total_score=total_score if any_score else None,
+            checked=True,
+            now=now,
+        )
 
     return attempt, grading_changed
 

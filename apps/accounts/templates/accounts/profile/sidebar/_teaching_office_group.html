@@ -1,0 +1,98 @@
+{% load i18n %}
+{% comment %}
+«Tədris şöbəsi» sidebar qrupu — dizayn handoff Mərhələ 1 (ekran 01–04).
+
+Qrup başlığı YALNIZ dörd bölmədən ən azı biri icazəlidirsə göstərilir (boş
+başlıq qalmasın). Bölmə açarları icazə-əsaslıdır (`unit.view` / `catalog.view`,
+bax `rbac_sections.py`) — rol adı yoxlanılmır.
+
+Hamısı AJAX-safe SPA bölmələridir (`js-profile-section-link`): panel sağda
+açılır, SOL SIDEBAR QALIR (sahibin tələbi).
+{% endcomment %}
+{% if "org-structure-tree" in allowed_sections or "chair-profile" in allowed_sections or "programs-registry" in allowed_sections or "subject-catalog" in allowed_sections or "curriculum-editor" in allowed_sections or "groups-registry" in allowed_sections or "semester-opening" in allowed_sections %}
+<li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Tədris şöbəsi" context "profile.sidebar" %}</span></li>
+{% endif %}
+{% if "org-structure-tree" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=org-structure-tree"
+       data-section="org-structure-tree"
+       data-title="{% trans 'Universitet strukturu' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-structure-tree' %}active{% endif %}">
+        <i class="fas fa-sitemap sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Universitet strukturu" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "chair-profile" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=chair-profile"
+       data-section="chair-profile"
+       data-title="{% trans 'Kafedra profili' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'chair-profile' %}active{% endif %}">
+        <i class="fas fa-building-columns sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Kafedra profili" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "programs-registry" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=programs-registry"
+       data-section="programs-registry"
+       data-title="{% trans 'İxtisaslar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'programs-registry' %}active{% endif %}">
+        <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "İxtisaslar" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "subject-catalog" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=subject-catalog"
+       data-section="subject-catalog"
+       data-title="{% trans 'Fənn kataloqu' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'subject-catalog' %}active{% endif %}">
+        <i class="fas fa-book sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Fənn kataloqu" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "curriculum-editor" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=curriculum-editor"
+       data-section="curriculum-editor"
+       data-title="{% trans 'Tədris planı' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'curriculum-editor' %}active{% endif %}">
+        <i class="fas fa-diagram-project sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Tədris planı" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "groups-registry" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=groups-registry"
+       data-section="groups-registry"
+       data-title="{% trans 'Qruplar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'groups-registry' %}active{% endif %}">
+        <i class="fas fa-users-rectangle sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Qruplar" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "semester-opening" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=semester-opening"
+       data-section="semester-opening"
+       data-title="{% trans 'Semestr açılışı' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'semester-opening' %}active{% endif %}">
+        <i class="fas fa-calendar-check sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Semestr açılışı" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

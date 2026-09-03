@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<title>EMS Arena — dizayn indeksi (22 ekran)</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f8fafc;color:#0f172a;font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  h1{margin:0;font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+  .sub{font-size:.78rem;color:#64748b}
+  .ctrl{display:flex;gap:8px;align-items:center;font-size:.8rem}
+  select,button{padding:8px 11px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font:inherit;font-size:.8rem;min-height:36px}
+  main{padding:22px;display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(520px,1fr))}
+  figure{margin:0;background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+  figcaption{padding:12px 14px;border-bottom:1px solid #e2e8f0;display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+  .name{font-size:.86rem;font-weight:800}
+  .mod{font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;white-space:nowrap}
+  .frame{position:relative;height:420px;overflow:hidden;background:#f1f5f9}
+  iframe{position:absolute;top:0;left:0;width:1440px;height:1400px;border:0;transform-origin:0 0}
+  .open{padding:9px 14px;border-top:1px solid #e2e8f0;font-size:.76rem;display:flex;justify-content:space-between;color:#64748b}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>EMS Arena — dizayn indeksi</h1>
+    <div class="sub">22 ekran · Qərbi Kaspi Universiteti · dizayn referansı, production kod deyil</div>
+  </div>
+  <div class="ctrl">
+    <label for="z">Miqyas</label>
+    <select id="z">
+      <option value="0.36">36%</option>
+      <option value="0.5" selected>50%</option>
+      <option value="0.7">70%</option>
+      <option value="1">100%</option>
+    </select>
+    <button id="load">Hamısını yüklə</button>
+  </div>
+</header>
+<main id="grid"></main>
+<script>
+const SCREENS = [
+  ["00 Dizayn konstantlari","Baza","Token və komponent kataloqu"],
+  ["01 Tedris shobesi - Universitet strukturu","Struktur","Rektorat → fakültə → kafedra ağacı"],
+  ["02 Tedris shobesi - Kafedra profili","Struktur","Kafedra, ştat, müəllim heyəti"],
+  ["03 Tedris shobesi - Ixtisaslar","Struktur","İxtisas/proqram reyestri"],
+  ["04 Tedris shobesi - Fenn kataloqu","Struktur","Fənn reyestri, prerekvizit"],
+  ["05 Tedris plani redaktoru","Struktur","Tədris planı, kredit balansı"],
+  ["06 Tedris shobesi - Qruplar","Struktur","Qrup, cədvəl, tələbə hərəkəti"],
+  ["07 Tedris shobesi - Semestr acilishi","Struktur","Plandan açılış, jurnal yaratma"],
+  ["08 Telebe qebulu - ATIS ve qrup teyinati","Tələbə","ATİS import, validasiya, qrup"],
+  ["09 Telebe reyestri ve hereketi","Tələbə","Reyestr, 6 hərəkət növü"],
+  ["10 Telebe kabineti","Tələbə","Tələbə kabineti"],
+  ["11 Muracietler paneli","Tələbə","Müraciət/ticket paneli"],
+  ["12 Ders yuku - Tedris shobesi","Dərs yükü","Yük mərkəzi"],
+  ["13 Koordinator - Yuk vizasi","Dərs yükü","Koordinator vizası"],
+  ["14 Kafedra mudiri - Yuk bolgusu","Dərs yükü","Müəllimlərə bölgü"],
+  ["15 Dekanliq - Yuk tesdiqi","Dərs yükü","Dekanlıq təsdiqi"],
+  ["16 Muellim - Shexsi yuk","Dərs yükü","Şəxsi yük, fərdi plan"],
+  ["17 Rektor - Umumi baxish","Dərs yükü","Rektor analitikası"],
+  ["18 Muellim - Sillabuslar","Sillabus","Sillabus siyahısı, 7 status"],
+  ["19 Muellim - Sillabus redaktoru","Sillabus","10 bölməli redaktor"],
+  ["20 Kafedra mudiri - Sillabus tesdiqi","Sillabus","Təsdiq növbəsi, diff, audit"],
+  ["21 Muellim - Kecilmish dersler","Sillabus","Keçilmiş dərslər / jurnal izi"]
+];
+const grid = document.getElementById('grid');
+const zSel = document.getElementById('z');
+SCREENS.forEach(([file, mod, desc], i) => {
+  const url = 'design/' + file + '.dc.html';
+  const fig = document.createElement('figure');
+  fig.innerHTML =
+    '<figcaption><span class="name">' + file + '</span><span class="mod">' + mod + '</span></figcaption>' +
+    '<div class="frame"><iframe loading="lazy" src="' + url + '"></iframe></div>' +
+    '<div class="open"><span>' + desc + '</span><a target="_blank" href="' + url + '">Tam ölçüdə aç →</a></div>';
+  grid.appendChild(fig);
+});
+function applyZoom(){
+  const z = parseFloat(zSel.value);
+  document.querySelectorAll('iframe').forEach(f => { f.style.transform = 'scale(' + z + ')'; });
+  document.querySelectorAll('.frame').forEach(f => { f.style.height = Math.round(1400 * z) + 'px'; });
+}
+zSel.addEventListener('change', applyZoom);
+document.getElementById('load').addEventListener('click', () => {
+  document.querySelectorAll('iframe').forEach(f => f.setAttribute('loading','eager'));
+});
+applyZoom();
+</script>
+</body>
+</html>

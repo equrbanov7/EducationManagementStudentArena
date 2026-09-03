@@ -7,7 +7,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import SESSION_KEY, logout
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -38,7 +38,18 @@ class SessionTimeoutMiddleware:
         self.write_interval = getattr(settings, "SESSION_ACTIVITY_WRITE_INTERVAL", 300)
 
     def __call__(self, request):
+        # Backend siyahısından çıxarılmış köhnə/bypass backend sessiyası Django
+        # tərəfindən anonymous kimi yüklənir, amma auth açarları sessiyada qala
+        # bilər. Onları request view-a çatmamış tam sil.
+        if not request.user.is_authenticated and SESSION_KEY in request.session:
+            logout(request)
+            return self.get_response(request)
         if request.user.is_authenticated:
+            from .identity import user_access_is_login_blocked
+
+            if user_access_is_login_blocked(request.user):
+                logout(request)
+                return self.get_response(request)
             now = timezone.now()
             last_activity = request.session.get("last_activity")
 
@@ -191,6 +202,10 @@ class FirstLoginPasswordMiddleware:
             user is not None
             and user.is_authenticated
             and not user.is_superuser
+            # View-as sessiyası hədəfin ilk-giriş axınına DÜŞMÜR: axının özü
+            # (set_initial_password + OTP) ViewAsMiddleware-in BLOCKED_URL_NAMES
+            # siyahısındadır, yönləndirmə isə baxışı sonsuz 403 dövrəsinə salardı.
+            and not getattr(request, "is_view_as", False)
             and self._requires_first_login(user)
             and not self._is_exempt(request)
         ):

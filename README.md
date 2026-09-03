@@ -2,7 +2,7 @@
 
 **EMS Arena** is a comprehensive Django-based Learning Management System (LMS) designed for universities and educational institutions. It provides tools for course management, exam administration, assignments, lab work, blog content, and real-time live quizzes.
 
----
+----
 
 ## 🏫 Branding & white-labeling
 

@@ -1,0 +1,223 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus redaktoru — SAĞ kontekst sütunu + aşağı sabit əməl paneli
+   ───────────────────────────────────────────────────────────────────────────
+   `syllabus_editor.css`-dən ayrıldı (modul ölçüsü SOFT_CAP=600).
+   Xülasə, «çatışmayan tələblər» siyahısı, versiya jurnalı və
+   tamamlanma zolağı olan sticky bottom bar.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Sağ kontekst sütunu ──────────────────────────────────────────────── */
+.syl-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.syl-card--plain {
+    display: block;
+    padding: 15px 16px;
+    border-left-width: 1px;
+    border-left-color: var(--ems-border);
+    border-radius: 14px;
+}
+
+.syl-aside__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+    margin: 0 0 11px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-summary {
+    margin: 0;
+}
+
+.syl-summary__row {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.syl-summary__row dt {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.77rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-summary__row dd {
+    margin: 0;
+    font-size: 0.79rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.syl-summary__value--success {
+    color: var(--ems-success-700);
+}
+
+.syl-summary__value--warning {
+    color: var(--ems-warning-800);
+}
+
+.syl-allok {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.81rem;
+    font-weight: 700;
+    color: var(--ems-success-700);
+}
+
+.syl-issues {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.syl-issue {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-ctl);
+    background: var(--ems-bg-subtle);
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.syl-issue:hover {
+    border-color: var(--ems-primary-600);
+}
+
+.syl-issue__dot {
+    width: 6px;
+    height: 6px;
+    flex: none;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: var(--ems-warning);
+}
+
+.syl-issue__text {
+    display: block;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.syl-issue__sec {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.syl-timeline__row {
+    display: flex;
+    gap: 9px;
+}
+
+.syl-timeline__dot {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    margin-top: 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-300);
+}
+
+.syl-timeline__row--success .syl-timeline__dot {
+    background: var(--ems-success);
+}
+
+.syl-timeline__row--submitted .syl-timeline__dot,
+.syl-timeline__row--review .syl-timeline__dot {
+    background: var(--ems-primary-600);
+}
+
+.syl-timeline__row--warning .syl-timeline__dot {
+    background: var(--ems-warning);
+}
+
+.syl-timeline__row--danger .syl-timeline__dot {
+    background: var(--ems-danger);
+}
+
+.syl-timeline__title {
+    display: block;
+    font-size: 0.79rem;
+    font-weight: 700;
+}
+
+.syl-timeline__meta,
+.syl-timeline__reason {
+    display: block;
+    margin-top: 1px;
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+/* ── Aşağıdakı sabit əməl paneli ──────────────────────────────────────── */
+.syl-bottombar {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin-top: 4px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+    box-shadow: 0 -6px 22px rgba(15, 23, 42, 0.06);
+}
+
+.syl-bottombar__progress {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.syl-bottombar__progress .syl-bar {
+    max-width: 240px;
+    height: 7px;
+}
+
+.syl-bottombar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.syl-bottombar__actions .syl-btn {
+    min-height: 44px;
+}

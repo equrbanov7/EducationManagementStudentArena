@@ -1,10 +1,15 @@
 {% load static i18n %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 <div class="journal-page">
     <div class="journal-head analytics-head">
         <div>
-            <h1 class="journal-title">
+            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="journal-title">
                 <i class="fas fa-chart-line"></i> {% trans "Akademik analitika" context "registrar.analytics" %}
-            </h1>
+            </{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
             <p class="journal-subtitle">{% trans "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət." context "registrar.analytics" %}</p>
         </div>
         {% if periods %}
@@ -47,7 +52,7 @@
             <span class="analytics-card-hint">{{ t.passed }} / {{ t.definite }} {% trans "yekunlaşmış" context "registrar.analytics" %}</span>
         </div>
         <div class="analytics-card analytics-card--gpa">
-            <span class="analytics-card-value">{{ t.avg_gpa }}</span>
+            <span class="analytics-card-value{% if not t.avg_gpa_available %} analytics-card-value--na{% endif %}">{% if t.avg_gpa_available %}{{ t.avg_gpa }}{% else %}{{ t.avg_gpa_unavailable_label }}{% endif %}</span>
             <span class="analytics-card-label"><i class="fas fa-award"></i> {% trans "Orta GPA (kredit-çəkili)" context "registrar.analytics" %}</span>
         </div>
         <div class="analytics-card {% if t.absence_rate > 15 %}analytics-card--warn{% endif %}">
@@ -76,11 +81,11 @@
             <tbody>
                 {% for row in analytics.programs %}
                 <tr>
-                    <td class="ta-left"><span class="analytics-code">{{ row.sublabel }}</span> {{ row.label }}</td>
+                    <td class="ta-left">{% if row.sublabel %}<span class="analytics-code">{{ row.sublabel }}</span> {% endif %}{{ row.label }}</td>
                     <td>{{ row.students }}</td>
                     <td>{{ row.enrollments }}</td>
                     <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{% if row.gpa_credits %}{{ row.avg_gpa }}{% else %}{{ row.avg_gpa }}{% endif %}</td>
+                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
                     <td>{% if row.graded %}{{ row.avg_total }}{% else %}—{% endif %}</td>
                     <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
                 </tr>
@@ -111,7 +116,7 @@
                     <td class="ta-left">{{ row.label }}</td>
                     <td>{{ row.students }}</td>
                     <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{{ row.avg_gpa }}</td>
+                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
                     <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
                     <td>{% if row.barred %}<span class="journal-badge journal-badge--barred">{{ row.barred }}</span>{% else %}<span class="journal-badge journal-badge--ok">0</span>{% endif %}</td>
                 </tr>

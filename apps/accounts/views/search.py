@@ -21,6 +21,8 @@ from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from core.program_codes import program_code_search_q
+
 from ._helpers import _role_capabilities
 
 MAX_PER_GROUP = 6
@@ -47,7 +49,13 @@ def _nav_targets(caps):
         ("my-journal", _("Elektron jurnal"), "fa-book-open", "jurnal journal qiymət davamiyyət"),
         ("my-schedule", _("Dərs cədvəli"), "fa-calendar-week", "cədvəl schedule dərs vaxt"),
         ("academic-calendar", _("Akademik təqvim"), "fa-calendar-days", "təqvim calendar sessiya qeydiyyat"),
-        ("grade-approvals", _("Qiymət təsdiqləri"), "fa-clipboard-check", "təsdiq approval"),
+        ("journal-close", _("Jurnal bağlama"), "fa-lock", "jurnal bağla semestr rim"),
+        (
+            "exam-score-entry",
+            _("İmtahan balının daxil edilməsi"),
+            "fa-pen-to-square",
+            "imtahan bal yazılı praktiki kağız daxil",
+        ),
         ("analytics", _("Akademik analitika"), "fa-chart-line", "analitika statistika gpa keçid"),
         ("my-exams", _("İmtahanlarım"), "fa-clipboard-check", "imtahan exam test"),
         ("assigned-exams", _("İmtahanlar"), "fa-clipboard-check", "imtahan exam test"),
@@ -110,6 +118,18 @@ def _subject_group(organization, query):
 
 
 def _student_group(organization, query):
+    """Tələbə nəticələri — alt sətirdə GÖSTƏRİLƏN hər şey axtarıla bilər.
+
+    AXTARIŞ İNVARİANTI: alt sətir ``program.display_label`` çap edir («Dünya
+    iqtisadiyyatı · 050401»), ona görə süzgəc yalnız ad/username üzrə qala
+    bilməz — istifadəçi eyni qutuda GÖRDÜYÜ şifri yazanda sıfır nəticə alırdı.
+    ``program_code_search_q`` HƏR İKİ nəsil şifri əhatə edir; ``display_code``
+    köhnə şifrə geri çəkildiyi üçün tək ``official_code`` kifayət etmir.
+
+    Performans: ``program``/``group`` onsuz da ``select_related``-dədir, ona
+    görə ``program__*`` süzgəci ƏLAVƏ JOIN açmır (Django eyni forward-FK
+    join-unu təkrar istifadə edir) və sətir sayı ``MAX_PER_GROUP`` ilə kəsilir.
+    """
     Record = django_apps.get_model("registrar", "StudentAcademicRecord")
     qs = (
         Record.objects.filter(organization=organization)
@@ -118,13 +138,15 @@ def _student_group(organization, query):
             | Q(student__last_name__icontains=query)
             | Q(student__username__icontains=query)
             | Q(student__email__icontains=query)
+            | Q(program__name__icontains=query)
+            | program_code_search_q(query, prefix="program__")
         )
         .select_related("student", "program", "group")[:MAX_PER_GROUP]
     )
     items = []
     for r in qs:
         name = r.student.get_full_name() or r.student.username
-        parts = [p for p in (r.program.code if r.program_id else "", r.group.name if r.group_id else "") if p]
+        parts = [p for p in (r.program.display_label if r.program_id else "", r.group.name if r.group_id else "") if p]
         items.append(
             {
                 "title": name,
@@ -155,9 +177,13 @@ def global_search(request):
         if journals:
             groups.append({"key": "journals", "label": _("Jurnallarım"), "items": journals})
 
-        can_manage = caps.get("can_manage_registrar") or caps.get("teacher_can_manage_students")
-        if organization is not None and can_manage:
-            if caps.get("can_manage_registrar"):
+        can_search_people = (
+            caps.get("can_search_directory")
+            or caps.get("can_manage_registrar")
+            or caps.get("teacher_can_manage_students")
+        )
+        if organization is not None and can_search_people:
+            if caps.get("can_search_directory") or caps.get("can_manage_registrar"):
                 subjects = _subject_group(organization, query)
                 if subjects:
                     groups.append({"key": "subjects", "label": _("Fənlər"), "items": subjects})

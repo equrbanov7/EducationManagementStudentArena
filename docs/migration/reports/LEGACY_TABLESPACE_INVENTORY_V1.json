@@ -1,0 +1,500 @@
+{
+  "snapshot_type": "legacy_mariadb_tablespace_inventory_v1",
+  "generated_at": "2026-08-25",
+  "source_snapshot_sha256": "177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0",
+  "interpretation": "InnoDB file-per-table physical size after disposable restore; includes data, indexes, and free pages, so it is not equal to SQL dump payload size.",
+  "totals": {
+    "tables": 81,
+    "exact_rows": 9044531,
+    "file_bytes": 3029467136,
+    "allocated_bytes": 3029782528
+  },
+  "tables": [
+    {
+      "table": "alerts_workers",
+      "file_bytes": 147456,
+      "allocated_bytes": 151552,
+      "exact_rows": 629
+    },
+    {
+      "table": "allowed_qb",
+      "file_bytes": 720896,
+      "allocated_bytes": 724992,
+      "exact_rows": 2964
+    },
+    {
+      "table": "balvereqi_logs",
+      "file_bytes": 1371537408,
+      "allocated_bytes": 1371607040,
+      "exact_rows": 52386
+    },
+    {
+      "table": "books",
+      "file_bytes": 65536,
+      "allocated_bytes": 65536,
+      "exact_rows": 0
+    },
+    {
+      "table": "books_order",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 0
+    },
+    {
+      "table": "curricula",
+      "file_bytes": 147456,
+      "allocated_bytes": 151552,
+      "exact_rows": 126
+    },
+    {
+      "table": "curricula_plan",
+      "file_bytes": 2097152,
+      "allocated_bytes": 2101248,
+      "exact_rows": 3424
+    },
+    {
+      "table": "curricula_plan_patok",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 1
+    },
+    {
+      "table": "curricula_tam",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 170
+    },
+    {
+      "table": "curricula_tasks",
+      "file_bytes": 131072,
+      "allocated_bytes": 131072,
+      "exact_rows": 1
+    },
+    {
+      "table": "curricula_tasks_content",
+      "file_bytes": 163840,
+      "allocated_bytes": 163840,
+      "exact_rows": 5
+    },
+    {
+      "table": "curricula_tasks_content_teachers",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 0
+    },
+    {
+      "table": "departments",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 31
+    },
+    {
+      "table": "ders_cedveli",
+      "file_bytes": 131072,
+      "allocated_bytes": 131072,
+      "exact_rows": 433
+    },
+    {
+      "table": "exam_answers",
+      "file_bytes": 125829120,
+      "allocated_bytes": 125837312,
+      "exact_rows": 1306373
+    },
+    {
+      "table": "exam_list",
+      "file_bytes": 475136,
+      "allocated_bytes": 479232,
+      "exact_rows": 5848
+    },
+    {
+      "table": "exam_questions",
+      "file_bytes": 130023424,
+      "allocated_bytes": 130039808,
+      "exact_rows": 294702
+    },
+    {
+      "table": "exam_question_topics",
+      "file_bytes": 147456,
+      "allocated_bytes": 151552,
+      "exact_rows": 853
+    },
+    {
+      "table": "exam_students_start",
+      "file_bytes": 23068672,
+      "allocated_bytes": 23072768,
+      "exact_rows": 29263
+    },
+    {
+      "table": "ferdi_plan",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 0
+    },
+    {
+      "table": "groups",
+      "file_bytes": 212992,
+      "allocated_bytes": 217088,
+      "exact_rows": 766
+    },
+    {
+      "table": "holidays",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 18
+    },
+    {
+      "table": "imthngrscxsblr",
+      "file_bytes": 2097152,
+      "allocated_bytes": 2101248,
+      "exact_rows": 12544
+    },
+    {
+      "table": "journals",
+      "file_bytes": 7340032,
+      "allocated_bytes": 7344128,
+      "exact_rows": 13875
+    },
+    {
+      "table": "journals_dates",
+      "file_bytes": 13631488,
+      "allocated_bytes": 13635584,
+      "exact_rows": 44268
+    },
+    {
+      "table": "journals_dates_added_by_teacher",
+      "file_bytes": 58720256,
+      "allocated_bytes": 58728448,
+      "exact_rows": 379215
+    },
+    {
+      "table": "journals_dates_parsed",
+      "file_bytes": 8388608,
+      "allocated_bytes": 8392704,
+      "exact_rows": 34178
+    },
+    {
+      "table": "journals_dates_points",
+      "file_bytes": 914358272,
+      "allocated_bytes": 914391040,
+      "exact_rows": 5135289
+    },
+    {
+      "table": "journals_dates_points_archive",
+      "file_bytes": 159383552,
+      "allocated_bytes": 159408128,
+      "exact_rows": 776033
+    },
+    {
+      "table": "journals_dates_rooms",
+      "file_bytes": 46137344,
+      "allocated_bytes": 46145536,
+      "exact_rows": 291509
+    },
+    {
+      "table": "journals_files",
+      "file_bytes": 4194304,
+      "allocated_bytes": 4198400,
+      "exact_rows": 23837
+    },
+    {
+      "table": "journal_exam_joint",
+      "file_bytes": 278528,
+      "allocated_bytes": 282624,
+      "exact_rows": 5041
+    },
+    {
+      "table": "lessons",
+      "file_bytes": 393216,
+      "allocated_bytes": 397312,
+      "exact_rows": 2521
+    },
+    {
+      "table": "level_exams",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 12
+    },
+    {
+      "table": "level_exams_questions",
+      "file_bytes": 196608,
+      "allocated_bytes": 200704,
+      "exact_rows": 496
+    },
+    {
+      "table": "level_exams_topics",
+      "file_bytes": 196608,
+      "allocated_bytes": 200704,
+      "exact_rows": 113
+    },
+    {
+      "table": "level_results",
+      "file_bytes": 3145728,
+      "allocated_bytes": 3149824,
+      "exact_rows": 1598
+    },
+    {
+      "table": "niq",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 1
+    },
+    {
+      "table": "notifications",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 15
+    },
+    {
+      "table": "notifications_groups",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 1
+    },
+    {
+      "table": "notifications_logs",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 11
+    },
+    {
+      "table": "ntg",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 41
+    },
+    {
+      "table": "rooms",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 158
+    },
+    {
+      "table": "room_types",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 4
+    },
+    {
+      "table": "semestr_jurnal",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 13
+    },
+    {
+      "table": "sillabus",
+      "file_bytes": 3145728,
+      "allocated_bytes": 3149824,
+      "exact_rows": 8248
+    },
+    {
+      "table": "sillabus_certificates",
+      "file_bytes": 2097152,
+      "allocated_bytes": 2101248,
+      "exact_rows": 9846
+    },
+    {
+      "table": "sillabus_dersin_islenme_formasi",
+      "file_bytes": 4194304,
+      "allocated_bytes": 4198400,
+      "exact_rows": 8261
+    },
+    {
+      "table": "sillabus_derslikler",
+      "file_bytes": 13631488,
+      "allocated_bytes": 13635584,
+      "exact_rows": 16476
+    },
+    {
+      "table": "sillabus_eldeolunacaq_tecrubeler",
+      "file_bytes": 8388608,
+      "allocated_bytes": 8396800,
+      "exact_rows": 8261
+    },
+    {
+      "table": "sillabus_elmi_maraq",
+      "file_bytes": 5242880,
+      "allocated_bytes": 5246976,
+      "exact_rows": 10739
+    },
+    {
+      "table": "sillabus_imtahan_suallari",
+      "file_bytes": 7340032,
+      "allocated_bytes": 7344128,
+      "exact_rows": 20835
+    },
+    {
+      "table": "sillabus_qarsilama_mesaji",
+      "file_bytes": 6291456,
+      "allocated_bytes": 6295552,
+      "exact_rows": 4676
+    },
+    {
+      "table": "sillabus_sem_muh",
+      "file_bytes": 29360128,
+      "allocated_bytes": 29364224,
+      "exact_rows": 131056
+    },
+    {
+      "table": "sillabus_serbest_is",
+      "file_bytes": 14680064,
+      "allocated_bytes": 14684160,
+      "exact_rows": 60878
+    },
+    {
+      "table": "sillabus_tesviri_ve_meqsedi",
+      "file_bytes": 12582912,
+      "allocated_bytes": 12587008,
+      "exact_rows": 6491
+    },
+    {
+      "table": "sillabus_yoxlama_formasi",
+      "file_bytes": 9437184,
+      "allocated_bytes": 9441280,
+      "exact_rows": 8261
+    },
+    {
+      "table": "smestr",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 9
+    },
+    {
+      "table": "speciality",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 83
+    },
+    {
+      "table": "students",
+      "file_bytes": 4194304,
+      "allocated_bytes": 4198400,
+      "exact_rows": 7816
+    },
+    {
+      "table": "students_login_logs",
+      "file_bytes": 65536,
+      "allocated_bytes": 65536,
+      "exact_rows": 0
+    },
+    {
+      "table": "students_telegram",
+      "file_bytes": 9437184,
+      "allocated_bytes": 9441280,
+      "exact_rows": 48974
+    },
+    {
+      "table": "students_tg_reply",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 106
+    },
+    {
+      "table": "track_student",
+      "file_bytes": 229376,
+      "allocated_bytes": 233472,
+      "exact_rows": 1003
+    },
+    {
+      "table": "turnirs",
+      "file_bytes": 81920,
+      "allocated_bytes": 81920,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnirs_joined_students",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnirs_questions",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnirs_starts",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnir_results",
+      "file_bytes": 98304,
+      "allocated_bytes": 98304,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnir_schedule",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 0
+    },
+    {
+      "table": "turnir_students_answers",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 0
+    },
+    {
+      "table": "umumi_orta_bal",
+      "file_bytes": 196608,
+      "allocated_bytes": 196608,
+      "exact_rows": 1570
+    },
+    {
+      "table": "update_log",
+      "file_bytes": 18874368,
+      "allocated_bytes": 18878464,
+      "exact_rows": 253334
+    },
+    {
+      "table": "workers",
+      "file_bytes": 229376,
+      "allocated_bytes": 229376,
+      "exact_rows": 729
+    },
+    {
+      "table": "workers_login_logs",
+      "file_bytes": 65536,
+      "allocated_bytes": 65536,
+      "exact_rows": 0
+    },
+    {
+      "table": "workers_permits",
+      "file_bytes": 245760,
+      "allocated_bytes": 245760,
+      "exact_rows": 914
+    },
+    {
+      "table": "xidmeti_muraciet",
+      "file_bytes": 131072,
+      "allocated_bytes": 131072,
+      "exact_rows": 2
+    },
+    {
+      "table": "xidmeti_muraciet_files",
+      "file_bytes": 114688,
+      "allocated_bytes": 114688,
+      "exact_rows": 3
+    },
+    {
+      "table": "yekun",
+      "file_bytes": 3145728,
+      "allocated_bytes": 3145728,
+      "exact_rows": 17194
+    },
+    {
+      "table": "yekun_24_02_2023",
+      "file_bytes": 131072,
+      "allocated_bytes": 135168,
+      "exact_rows": 0
+    },
+    {
+      "table": "yekun_old",
+      "file_bytes": 131072,
+      "allocated_bytes": 131072,
+      "exact_rows": 0
+    }
+  ]
+}

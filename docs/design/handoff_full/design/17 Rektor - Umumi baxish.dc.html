@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f8fafc">
+
+  <div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="brand/wcu-logo-horizontal.svg" alt="Qərbi Kaspi Universiteti" style="height:34px;width:auto;max-width:180px;display:block">
+      <span style="width:1px;height:22px;background:#e2e8f0"></span>
+      <span style="font-size:1.02rem;font-weight:800;color:#2563eb;letter-spacing:-.02em">EMS Arena</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.25">
+        <span style="font-size:.83rem;font-weight:600;color:#0f172a">prof. C. Məmmədov</span>
+        <span style="font-size:.72rem;color:#64748b">Rektor · Qərbi Kaspi Universiteti</span>
+      </div>
+      <button type="button" title="Çıxış" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#fee2e2;border-color:#fecaca;color:#dc2626">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start">
+
+    <aside style="flex:0 0 300px;width:300px;align-self:stretch;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1.5rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff">
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#0f172a;white-space:nowrap">Rektorluq</h2>
+        <button type="button" title="Menyunu yığ" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;background:#eff6ff;color:#3b82f6;cursor:pointer" style-hover="background:#3b82f6;color:#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;gap:.6rem;padding:1rem .75rem">
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Dərs yükü</div>
+        <button type="button" onClick="{{ goOverview }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navOBg }};color:{{ navOFg }};box-shadow:{{ navOSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"></rect><rect x="14" y="3" width="7" height="5"></rect><rect x="14" y="12" width="7" height="9"></rect><rect x="3" y="16" width="7" height="5"></rect></svg>
+          Ümumi baxış
+        </button>
+        <button type="button" onClick="{{ goFac }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navFBg }};color:{{ navFFg }};box-shadow:{{ navFSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V9l7-5 7 5v12"></path><path d="M10 21v-6h4v6"></path></svg>
+          Fakültələr
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:.75rem;font-weight:700">5</span>
+        </button>
+        <button type="button" onClick="{{ goDep }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navDBg }};color:{{ navDFg }};box-shadow:{{ navDSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M7 12h14"></path><path d="M11 18h10"></path></svg>
+          Kafedralar
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.75rem;font-weight:700">{{ riskCount }}</span>
+        </button>
+        <button type="button" onClick="{{ goRep }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navRBg }};color:{{ navRFg }};box-shadow:{{ navRSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Hesabatlar
+        </button>
+
+        <div style="margin:.5rem .25rem 0;padding:14px;border-radius:16px;background:#f9fbff;border:1px solid #e2e8f0">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Bölgü tamamlanma</div>
+            <div style="font-size:.72rem;font-weight:800;color:#1d4ed8">{{ totalPct }}</div>
+          </div>
+          <div style="margin-top:4px;font-size:1.05rem;font-weight:800;color:#1e40af">{{ totalDistText }}</div>
+          <div style="margin-top:8px;height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+            <div style="height:100%;width:{{ totalPct }};background:#2563eb;border-radius:999px"></div>
+          </div>
+          <div style="margin-top:6px;font-size:.72rem;color:#64748b">2026 / 2027 · {{ vacantText }} vakant saat</div>
+        </div>
+
+        <div style="margin-top:auto;padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Hesab</div>
+        <button type="button" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:transparent;color:#ef4444;font-size:.95rem;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#fef2f2;color:#dc2626">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Çıxış
+        </button>
+      </nav>
+    </aside>
+
+    <main style="flex:1;min-width:0;padding:24px 28px 40px">
+      <div style="max-width:1500px;margin:0 auto">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#94a3b8;margin-bottom:7px">
+              <span>Ana səhifə</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Rektorluq</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span style="color:#334155;font-weight:600">{{ crumb }}</span>
+            </div>
+            <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ pageTitle }}</h1>
+            <p style="margin:6px 0 0;font-size:.86rem;color:#64748b;text-wrap:pretty">{{ pageSub }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <select defaultValue="{{ fYear }}" onChange="{{ onFYear }}" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.84rem;font-weight:600;color:#0f172a;background:#fff;cursor:pointer"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+            <select defaultValue="{{ fSem }}" onChange="{{ onFSem }}" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.84rem;color:#0f172a;background:#fff;cursor:pointer"><option>Bütün il</option><option>Payız</option><option>Yaz</option></select>
+            <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Hesabat yüklə
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px">
+              <div style="padding:17px 19px;background:#0f172a;border-radius:16px;color:#fff">
+                <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8">Ümumi tədris yükü</div>
+                <div style="margin-top:7px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.75rem;font-weight:800;letter-spacing:-.02em">{{ totalHours }}</span><span style="font-size:.8rem;color:#94a3b8">saat</span></div>
+                <div style="margin-top:7px;font-size:.76rem;color:#cbd5e1">5 fakültə · 16 kafedra · 252 müəllim</div>
+              </div>
+              <div style="padding:17px 19px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Bölünmüş yük</div>
+                <div style="margin-top:7px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.75rem;font-weight:800;color:#0f172a;letter-spacing:-.02em">{{ totalPct }}</span></div>
+                <div style="margin-top:8px;height:6px;border-radius:999px;background:#e2e8f0;overflow:hidden"><div style="height:100%;width:{{ totalPct }};background:#2563eb"></div></div>
+                <div style="margin-top:6px;font-size:.76rem;color:#64748b">{{ totalDistText }}</div>
+              </div>
+              <div style="padding:17px 19px;background:#fff;border:1px solid #fecaca;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#b91c1c">Vakant saat</div>
+                <div style="margin-top:7px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.75rem;font-weight:800;color:#dc2626;letter-spacing:-.02em">{{ vacantText }}</span><span style="font-size:.8rem;color:#f87171">saat</span></div>
+                <div style="margin-top:7px;font-size:.76rem;color:#991b1b">14 vakant ştat · ən çox Humanitar fakültəsində</div>
+              </div>
+              <div style="padding:17px 19px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Saathesabı büdcə</div>
+                <div style="margin-top:7px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.75rem;font-weight:800;color:#0f172a;letter-spacing:-.02em">148 250</span><span style="font-size:.8rem;color:#94a3b8">₼</span></div>
+                <div style="margin-top:7px;font-size:.76rem;color:#64748b">11 860 saat · illik büdcənin 82%-i</div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:16px;margin-bottom:16px;align-items:start">
+              <div style="padding:18px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px">
+                  <div>
+                    <div style="font-size:.98rem;font-weight:700;color:#0f172a">Fakültələr üzrə bölgü</div>
+                    <div style="margin-top:2px;font-size:.78rem;color:#64748b">Tapşırıq saatı və bölünmüş hissə</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;font-size:.74rem;color:#64748b">
+                    <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#2563eb"></span>Bölünmüş</span>
+                    <span style="display:inline-flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:#e2e8f0"></span>Qalıq</span>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <sc-for list="{{ facBars }}" as="f" hint-placeholder-count="5">
+                    <div>
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px">
+                        <span style="font-size:.85rem;font-weight:600;color:#0f172a">{{ f.name }}</span>
+                        <span style="font-size:.78rem;color:#64748b">{{ f.text }} · <span style="font-weight:700;color:{{ f.fg }}">{{ f.pct }}</span></span>
+                      </div>
+                      <div style="height:11px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+                        <div style="height:100%;width:{{ f.pct }};background:{{ f.bar }};border-radius:999px"></div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="padding:18px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.98rem;font-weight:700;color:#0f172a">Təsdiq axını</div>
+                <div style="margin-top:2px;font-size:.78rem;color:#64748b">2026 / 2027 tədris ili</div>
+                <div style="margin-top:16px;display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ funnel }}" as="s" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid {{ s.bd }};background:{{ s.bg }};border-radius:12px">
+                      <span style="flex:0 0 26px;display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:{{ s.dotBg }};color:{{ s.dotFg }};font-size:.74rem;font-weight:800">{{ s.mark }}</span>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:.85rem;font-weight:700;color:#0f172a">{{ s.step }}</div>
+                        <div style="margin-top:1px;font-size:.74rem;color:#64748b">{{ s.note }}</div>
+                      </div>
+                      <span style="padding:4px 10px;border-radius:999px;background:{{ s.tagBg }};color:{{ s.tagFg }};font-size:.72rem;font-weight:800;white-space:nowrap">{{ s.tag }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #e2e8f0">
+                  <div>
+                    <div style="font-size:.96rem;font-weight:700;color:#0f172a">Diqqət tələb edən kafedralar</div>
+                    <div style="margin-top:2px;font-size:.77rem;color:#64748b">Bölgü gecikməsi, vakant saat və norma aşımı</div>
+                  </div>
+                  <button type="button" onClick="{{ goDep }}" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#1d4ed8;font-size:.78rem;font-weight:700;cursor:pointer" style-hover="background:#eff6ff">Hamısı</button>
+                </div>
+                <div style="display:flex;flex-direction:column">
+                  <sc-for list="{{ risks }}" as="r" hint-placeholder-count="4">
+                    <div onClick="{{ r.onOpen }}" style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #f1f5f9;background:{{ r.bg }};cursor:pointer" style-hover="background:#eff6ff">
+                      <span style="flex:0 0 32px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:{{ r.iconBg }};color:{{ r.iconFg }}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+                      </span>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:.86rem;font-weight:700;color:#0f172a">{{ r.name }}</div>
+                        <div style="margin-top:2px;font-size:.76rem;color:#64748b">{{ r.issue }}</div>
+                      </div>
+                      <span style="padding:4px 10px;border-radius:999px;background:{{ r.tagBg }};color:{{ r.tagFg }};font-size:.72rem;font-weight:800;white-space:nowrap">{{ r.tag }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div style="padding:18px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                  <div style="font-size:.96rem;font-weight:700;color:#0f172a">Müəllim norması</div>
+                  <div style="margin-top:2px;font-size:.77rem;color:#64748b">252 müəllimin illik yükünün normaya nisbəti</div>
+                  <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+                    <sc-for list="{{ normBands }}" as="n" hint-placeholder-count="4">
+                      <div>
+                        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
+                          <span style="font-size:.83rem;color:#334155">{{ n.label }}</span>
+                          <span style="font-size:.8rem;font-weight:700;color:{{ n.fg }}">{{ n.count }} müəllim</span>
+                        </div>
+                        <div style="height:9px;border-radius:999px;background:#f1f5f9;overflow:hidden"><div style="height:100%;width:{{ n.pct }};background:{{ n.bar }};border-radius:999px"></div></div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="padding:18px 20px;background:#f9fbff;border:1px solid #dbeafe;border-radius:16px">
+                  <div style="font-size:.96rem;font-weight:700;color:#0f172a">Rektor qərarı gözləyən</div>
+                  <div style="margin-top:10px;display:flex;flex-direction:column;gap:9px">
+                    <sc-for list="{{ decisions }}" as="d" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:11px;padding:11px 13px;background:#fff;border:1px solid #e2e8f0;border-radius:12px">
+                        <div style="flex:1;min-width:0">
+                          <div style="font-size:.84rem;font-weight:600;color:#0f172a">{{ d.title }}</div>
+                          <div style="margin-top:2px;font-size:.74rem;color:#94a3b8">{{ d.meta }}</div>
+                        </div>
+                        <button type="button" style="padding:8px 13px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:#1d4ed8">Bax</button>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isFac }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+            <div style="padding:15px 18px;border-bottom:1px solid #e2e8f0">
+              <div style="font-size:.98rem;font-weight:700;color:#0f172a">Fakültələr üzrə yük mənzərəsi</div>
+              <div style="margin-top:2px;font-size:.78rem;color:#64748b">Sətrə klikləyin — fakültənin kafedra bölgüsü açılır.</div>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:11px 18px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Fakültə</th>
+                    <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Kafedra</th>
+                    <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Müəllim</th>
+                    <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Tapşırıq</th>
+                    <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Bölünmüş</th>
+                    <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Gediş</th>
+                    <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Vakant</th>
+                    <th style="padding:11px 18px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ facRows }}" as="f" hint-placeholder-count="5">
+                    <tr onClick="{{ f.onOpen }}" style="background:{{ f.bg }};cursor:pointer;border-bottom:1px solid #f1f5f9" style-hover="background:#eff6ff">
+                      <td style="padding:13px 18px">
+                        <div style="font-weight:600;color:#0f172a">{{ f.name }}</div>
+                        <div style="margin-top:2px;font-size:.75rem;color:#94a3b8">{{ f.dean }}</div>
+                      </td>
+                      <td style="padding:13px 10px;text-align:center;color:#334155">{{ f.deps }}</td>
+                      <td style="padding:13px 10px;text-align:center;color:#334155">{{ f.teachers }}</td>
+                      <td style="padding:13px 12px;text-align:right;font-weight:700;color:#0f172a">{{ f.hours }}</td>
+                      <td style="padding:13px 12px;text-align:right;color:#334155">{{ f.dist }}</td>
+                      <td style="padding:13px 14px;min-width:150px">
+                        <div style="height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden"><div style="height:100%;width:{{ f.pct }};background:{{ f.bar }};border-radius:999px"></div></div>
+                        <div style="margin-top:4px;font-size:.72rem;color:#64748b">{{ f.pct }}</div>
+                      </td>
+                      <td style="padding:13px 12px;text-align:right;font-weight:700;color:{{ f.vacFg }}">{{ f.vacant }}</td>
+                      <td style="padding:13px 18px"><span style="padding:4px 10px;border-radius:999px;background:{{ f.stBg }};color:{{ f.stFg }};font-size:.72rem;font-weight:700;white-space:nowrap">{{ f.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+                <tfoot>
+                  <tr style="background:#f8fafc;border-top:2px solid #e2e8f0">
+                    <td style="padding:14px 18px;font-weight:800;color:#0f172a">Universitet üzrə</td>
+                    <td style="padding:14px 10px;text-align:center;font-weight:700;color:#334155">16</td>
+                    <td style="padding:14px 10px;text-align:center;font-weight:700;color:#334155">252</td>
+                    <td style="padding:14px 12px;text-align:right;font-weight:800;color:#0f172a">{{ totalHours }}</td>
+                    <td style="padding:14px 12px;text-align:right;font-weight:700;color:#334155">{{ totalDist }}</td>
+                    <td style="padding:14px 14px;font-weight:800;color:#1d4ed8">{{ totalPct }}</td>
+                    <td style="padding:14px 12px;text-align:right;font-weight:800;color:#dc2626">{{ vacantText }}</td>
+                    <td style="padding:14px 18px"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDep }}">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+              <sc-for list="{{ facChips }}" as="c" hint-placeholder-count="6">
+                <button type="button" onClick="{{ c.onPick }}" style="padding:8px 14px;border-radius:999px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.81rem;font-weight:600;cursor:pointer">{{ c.label }}</button>
+              </sc-for>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid #e2e8f0">
+                <div>
+                  <div style="font-size:.98rem;font-weight:700;color:#0f172a">Kafedra bölgüsünün vəziyyəti</div>
+                  <div style="margin-top:2px;font-size:.78rem;color:#64748b">{{ depCount }} kafedra göstərilir</div>
+                </div>
+                <span style="padding:5px 11px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:.74rem;font-weight:700">{{ depFilterLabel }}</span>
+              </div>
+              <div style="overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+                  <thead>
+                    <tr style="background:#f8fafc">
+                      <th style="padding:11px 18px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Kafedra</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Müəllim</th>
+                      <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Tapşırıq</th>
+                      <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Bölgü</th>
+                      <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Vakant</th>
+                      <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Norma üstü</th>
+                      <th style="padding:11px 18px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ depRows }}" as="d" hint-placeholder-count="8">
+                      <tr style="background:{{ d.bg }};border-bottom:1px solid #f1f5f9">
+                        <td style="padding:13px 18px">
+                          <div style="font-weight:600;color:#0f172a">{{ d.name }}</div>
+                          <div style="margin-top:2px;font-size:.75rem;color:#94a3b8">{{ d.head }} · {{ d.fac }}</div>
+                        </td>
+                        <td style="padding:13px 10px;text-align:center;color:#334155">{{ d.teachers }}</td>
+                        <td style="padding:13px 12px;text-align:right;font-weight:700;color:#0f172a">{{ d.hours }}</td>
+                        <td style="padding:13px 14px;min-width:150px">
+                          <div style="height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden"><div style="height:100%;width:{{ d.pct }};background:{{ d.bar }};border-radius:999px"></div></div>
+                          <div style="margin-top:4px;font-size:.72rem;color:#64748b">{{ d.pct }}</div>
+                        </td>
+                        <td style="padding:13px 12px;text-align:right;font-weight:700;color:{{ d.vacFg }}">{{ d.vacant }}</td>
+                        <td style="padding:13px 12px;text-align:right;color:#334155">{{ d.over }}</td>
+                        <td style="padding:13px 18px"><span style="padding:4px 10px;border-radius:999px;background:{{ d.stBg }};color:{{ d.stFg }};font-size:.72rem;font-weight:700;white-space:nowrap">{{ d.status }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isRep }}">
+          <div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px">
+              <sc-for list="{{ reports }}" as="r" hint-placeholder-count="6">
+                <div style="display:flex;flex-direction:column;padding:18px 19px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                  <span style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:{{ r.iconBg }};color:{{ r.iconFg }}">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  </span>
+                  <div style="margin-top:12px;font-size:.95rem;font-weight:700;color:#0f172a">{{ r.title }}</div>
+                  <div style="margin-top:5px;font-size:.8rem;color:#64748b;text-wrap:pretty;flex:1">{{ r.note }}</div>
+                  <div style="margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+                    <span style="font-size:.74rem;color:#94a3b8">{{ r.meta }}</span>
+                    <div style="display:flex;gap:7px">
+                      <button type="button" style="padding:8px 12px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#334155;font-size:.78rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">PDF</button>
+                      <button type="button" style="padding:8px 12px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">Excel</button>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:18px 20px;background:#0f172a;border-radius:16px;color:#e2e8f0">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:.98rem;font-weight:700;color:#fff">İllik yük hesabatı — Elmi Şuraya təqdimat</div>
+                  <div style="margin-top:3px;font-size:.8rem;color:#94a3b8">Bütün fakültə və kafedra göstəriciləri, norma statistikası və saathesabı büdcəsi bir sənəddə.</div>
+                </div>
+                <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;border:1px solid #fff;background:#fff;color:#0f172a;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#e2e8f0">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Toplu hesabat
+                </button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showFac }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:28px">
+      <div onClick="{{ stop }}" style="width:100%;max-width:760px;max-height:88vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Fakültə detalı</div>
+            <div style="margin-top:4px;font-size:1.15rem;font-weight:800;color:#0f172a">{{ mName }}</div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">{{ mDean }} · {{ mMeta }}</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:18px">
+            <div style="padding:12px 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Tapşırıq</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#0f172a">{{ mHours }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#1d4ed8">Bölünmüş</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#1d4ed8">{{ mDist }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#fef2f2;border:1px solid #fecaca;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#b91c1c">Vakant</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#dc2626">{{ mVacant }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Müəllim</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#0f172a">{{ mTeachers }}</div>
+            </div>
+          </div>
+          <div style="font-size:.8rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Kafedralar</div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <sc-for list="{{ mDeps }}" as="d" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #f1f5f9;background:{{ d.bg }}">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:.86rem;font-weight:600;color:#0f172a">{{ d.name }}</div>
+                  <div style="margin-top:2px;font-size:.75rem;color:#94a3b8">{{ d.head }} · {{ d.teachers }} müəllim</div>
+                </div>
+                <div style="width:120px">
+                  <div style="height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden"><div style="height:100%;width:{{ d.pct }};background:{{ d.bar }};border-radius:999px"></div></div>
+                  <div style="margin-top:4px;font-size:.72rem;text-align:right;color:#64748b">{{ d.pct }}</div>
+                </div>
+                <div style="width:96px;text-align:right;font-size:.85rem;font-weight:700;color:#0f172a">{{ d.hours }}</div>
+                <span style="min-width:104px;text-align:center;padding:4px 10px;border-radius:999px;background:{{ d.stBg }};color:{{ d.stFg }};font-size:.72rem;font-weight:700">{{ d.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const DEPS = [
+  { fac: 'Mühəndislik və Tətbiqi Elmlər', name: 'Proqramlaşdırma və İT', head: 'prof. İ. Səmədov', teachers: 22, hours: 8965, pct: 96, vacant: 120, over: 640 },
+  { fac: 'Mühəndislik və Tətbiqi Elmlər', name: 'Kompüter mühəndisliyi', head: 'dos. A. Quliyev', teachers: 18, hours: 8240, pct: 100, vacant: 0, over: 410 },
+  { fac: 'Mühəndislik və Tətbiqi Elmlər', name: 'Riyaziyyat və statistika', head: 'prof. S. Bağırova', teachers: 15, hours: 7850, pct: 94, vacant: 190, over: 220 },
+  { fac: 'Mühəndislik və Tətbiqi Elmlər', name: 'Fizika və elektronika', head: 'dos. T. Nəbiyev', teachers: 13, hours: 7395, pct: 92, vacant: 100, over: 150 },
+  { fac: 'İqtisadiyyat və İdarəetmə', name: 'Maliyyə və mühasibatlıq', head: 'prof. E. Rəhimli', teachers: 20, hours: 9640, pct: 93, vacant: 210, over: 380 },
+  { fac: 'İqtisadiyyat və İdarəetmə', name: 'Biznesin idarə edilməsi', head: 'dos. K. Əhmədova', teachers: 18, hours: 9120, pct: 88, vacant: 260, over: 300 },
+  { fac: 'İqtisadiyyat və İdarəetmə', name: 'Marketinq və turizm', head: 'dos. F. Süleymanov', teachers: 14, hours: 8040, pct: 82, vacant: 250, over: 90 },
+  { fac: 'Humanitar və Sosial Elmlər', name: 'Xarici dillər', head: 'dos. L. Məmmədli', teachers: 24, hours: 8420, pct: 71, vacant: 480, over: 60 },
+  { fac: 'Humanitar və Sosial Elmlər', name: 'Filologiya', head: 'prof. N. Vəliyev', teachers: 15, hours: 6180, pct: 78, vacant: 320, over: 40 },
+  { fac: 'Humanitar və Sosial Elmlər', name: 'Psixologiya', head: 'dos. G. Həsənova', teachers: 12, hours: 5210, pct: 68, vacant: 290, over: 0 },
+  { fac: 'Humanitar və Sosial Elmlər', name: 'Tarix və sosiologiya', head: 'dos. R. Ələkbərov', teachers: 10, hours: 4340, pct: 84, vacant: 150, over: 30 },
+  { fac: 'Tibb və Biologiya', name: 'Ümumi tibb fənləri', head: 'prof. Z. Cəfərov', teachers: 19, hours: 8460, pct: 92, vacant: 160, over: 520 },
+  { fac: 'Tibb və Biologiya', name: 'Stomatologiya', head: 'dos. V. Nərimanlı', teachers: 14, hours: 6180, pct: 90, vacant: 130, over: 240 },
+  { fac: 'Tibb və Biologiya', name: 'Biologiya və ekologiya', head: 'dos. M. Kərimova', teachers: 11, hours: 4960, pct: 91, vacant: 90, over: 110 },
+  { fac: 'Hüquq', name: 'Dövlət-hüquq fənləri', head: 'prof. H. Orucov', teachers: 15, hours: 6540, pct: 100, vacant: 0, over: 280 },
+  { fac: 'Hüquq', name: 'Beynəlxalq hüquq', head: 'dos. S. Abbaslı', teachers: 12, hours: 5360, pct: 100, vacant: 0, over: 160 }
+];
+
+const FACS = [
+  { name: 'Mühəndislik və Tətbiqi Elmlər', dean: 'dos. R. Hüseynov' },
+  { name: 'İqtisadiyyat və İdarəetmə', dean: 'prof. G. Salmanova' },
+  { name: 'Humanitar və Sosial Elmlər', dean: 'dos. E. Qasımov' },
+  { name: 'Tibb və Biologiya', dean: 'prof. Ş. Mustafayeva' },
+  { name: 'Hüquq', dean: 'dos. C. Tağıyev' }
+];
+
+const REPORTS = [
+  { title: 'Fakültə üzrə yük hesabatı', note: 'Tapşırıq, bölünmüş yük, vakant saat və norma icrası fakültələr kəsiyində.', meta: 'Son yenilənmə: 06.08.2026', kind: 0 },
+  { title: 'Kafedra tapşırıq cədvəli', note: 'Hər kafedra üçün fənn-qrup-saat tapşırığı və bölgü vəziyyəti.', meta: '16 kafedra · 2 480 sətir', kind: 1 },
+  { title: 'Müəllim yükü reyestri', note: 'Bütün müəllimlərin illik yükü, norması, saathesabı hissəsi.', meta: '252 müəllim', kind: 2 },
+  { title: 'Saathesabı büdcə hesabatı', note: 'Aylıq saathesabı saat və məbləğlər, fakültə üzrə bölgü.', meta: '11 860 saat · 148 250 ₼', kind: 3 },
+  { title: 'Vakant ştat analizi', note: 'Vakant saatlar, açılması təklif olunan ştatlar və dəyəri.', meta: '2 750 saat · 14 ştat', kind: 4 },
+  { title: 'Norma icra statistikası', note: 'Normadan az və çox yüklənmiş müəllimlərin fakültə üzrə paylanması.', meta: 'Elmi Şura formatı', kind: 5 }
+];
+
+class Component extends DCLogic {
+  state = { view: 'overview', fYear: '2026 / 2027', fSem: 'Bütün il', facFilter: 'Hamısı', modal: null, facIdx: null };
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+    const fmt = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const stOf = (pct) => pct >= 100 ? ['Tamamlandı', '#f0fdf4', '#166534']
+      : (pct >= 90 ? ['Bölgü davam edir', '#eff6ff', '#1d4ed8']
+      : (pct >= 80 ? ['Gecikmə riski', '#fffbeb', '#92400e'] : ['Kritik gecikmə', '#fef2f2', '#b91c1c']));
+    const barOf = (pct) => pct >= 100 ? '#16a34a' : (pct >= 90 ? '#2563eb' : (pct >= 80 ? '#f59e0b' : '#dc2626'));
+
+    const facAgg = FACS.map((f) => {
+      const list = DEPS.filter((d) => d.fac === f.name);
+      const hours = list.reduce((n, d) => n + d.hours, 0);
+      const dist = list.reduce((n, d) => n + d.hours * d.pct / 100, 0);
+      const vacant = list.reduce((n, d) => n + d.vacant, 0);
+      const teachers = list.reduce((n, d) => n + d.teachers, 0);
+      const pct = Math.round((dist / hours) * 100);
+      return { name: f.name, dean: f.dean, deps: list.length, teachers, hours, dist, vacant, pct, list };
+    });
+
+    const totalHours = facAgg.reduce((n, f) => n + f.hours, 0);
+    const totalDist = facAgg.reduce((n, f) => n + f.dist, 0);
+    const vacantTotal = facAgg.reduce((n, f) => n + f.vacant, 0);
+    const totalPct = Math.round((totalDist / totalHours) * 100);
+
+    const facBars = facAgg.map((f) => ({
+      name: f.name, text: fmt(f.dist) + ' / ' + fmt(f.hours) + ' saat',
+      pct: f.pct + '%', bar: barOf(f.pct), fg: barOf(f.pct)
+    }));
+
+    const facRows = facAgg.map((f, i) => {
+      const st = stOf(f.pct);
+      return {
+        name: f.name, dean: f.dean, deps: f.deps, teachers: f.teachers,
+        hours: fmt(f.hours), dist: fmt(f.dist), pct: f.pct + '%', bar: barOf(f.pct),
+        vacant: f.vacant === 0 ? '—' : fmt(f.vacant),
+        vacFg: f.vacant === 0 ? '#94a3b8' : '#dc2626',
+        status: st[0], stBg: st[1], stFg: st[2],
+        bg: i % 2 ? '#f8fafc' : '#ffffff',
+        onOpen: () => set({ modal: 'fac', facIdx: i })
+      };
+    });
+
+    const depList = DEPS.map((d, i) => ({ d, i })).filter((o) => s.facFilter === 'Hamısı' || o.d.fac === s.facFilter);
+    const depRows = depList.map((o, k) => {
+      const d = o.d, st = stOf(d.pct);
+      return {
+        name: d.name, head: d.head, fac: d.fac, teachers: d.teachers,
+        hours: fmt(d.hours), pct: d.pct + '%', bar: barOf(d.pct),
+        vacant: d.vacant === 0 ? '—' : fmt(d.vacant),
+        vacFg: d.vacant === 0 ? '#94a3b8' : '#dc2626',
+        over: d.over === 0 ? '—' : fmt(d.over),
+        status: st[0], stBg: st[1], stFg: st[2],
+        bg: k % 2 ? '#f8fafc' : '#ffffff'
+      };
+    });
+
+    const chips = ['Hamısı'].concat(FACS.map((f) => f.name)).map((label) => ({
+      label,
+      bd: s.facFilter === label ? '#2563eb' : '#e2e8f0',
+      bg: s.facFilter === label ? '#eff6ff' : '#ffffff',
+      fg: s.facFilter === label ? '#1d4ed8' : '#475569',
+      onPick: () => set({ facFilter: label })
+    }));
+
+    const risky = DEPS.map((d, i) => ({ d, i })).filter((o) => o.d.pct < 90 || o.d.vacant >= 250);
+    const risks = risky.slice(0, 5).map((o, k) => {
+      const d = o.d;
+      const crit = d.pct < 75;
+      return {
+        name: d.name,
+        issue: d.fac + ' · ' + d.pct + '% bölünüb · ' + fmt(d.vacant) + ' saat vakant',
+        tag: crit ? 'KRİTİK' : 'RİSK',
+        tagBg: crit ? '#fef2f2' : '#fffbeb',
+        tagFg: crit ? '#b91c1c' : '#92400e',
+        iconBg: crit ? '#fef2f2' : '#fffbeb',
+        iconFg: crit ? '#dc2626' : '#d97706',
+        bg: k % 2 ? '#f8fafc' : '#ffffff',
+        onOpen: () => set({ view: 'dep', facFilter: d.fac })
+      };
+    });
+
+    const funnel = [
+      { step: 'Tədris şöbəsi — tapşırıq', note: '16 kafedra üçün tapşırıq hazırlandı', tag: 'BİTDİ', done: 2 },
+      { step: 'Koordinator vizası', note: '16 / 16 kafedra vizalanıb', tag: 'BİTDİ', done: 2 },
+      { step: 'Dekanlıq təsdiqi', note: '5 / 5 fakültə təsdiqləyib', tag: 'BİTDİ', done: 2 },
+      { step: 'Kafedra bölgüsü', note: '11 kafedra tamamlayıb, 5 davam edir', tag: 'DAVAM EDİR', done: 1 },
+      { step: 'Rektor təsdiqi', note: 'Bölgü bitdikdən sonra imzaya düşür', tag: 'GÖZLƏYİR', done: 0 }
+    ].map((f) => ({
+      step: f.step, note: f.note, tag: f.tag,
+      mark: f.done === 2 ? '✓' : (f.done === 1 ? '•' : '·'),
+      dotBg: f.done === 2 ? '#16a34a' : (f.done === 1 ? '#2563eb' : '#e2e8f0'),
+      dotFg: f.done === 0 ? '#94a3b8' : '#ffffff',
+      bd: f.done === 1 ? '#bfdbfe' : '#e2e8f0',
+      bg: f.done === 1 ? '#f9fbff' : '#ffffff',
+      tagBg: f.done === 2 ? '#f0fdf4' : (f.done === 1 ? '#eff6ff' : '#f1f5f9'),
+      tagFg: f.done === 2 ? '#166534' : (f.done === 1 ? '#1d4ed8' : '#64748b')
+    }));
+
+    const normBands = [
+      { label: 'Normadan az (< 90%)', count: 34, bar: '#f59e0b', fg: '#b45309' },
+      { label: 'Normada (90–105%)', count: 148, bar: '#16a34a', fg: '#166534' },
+      { label: 'Norma üstü (105–125%)', count: 58, bar: '#2563eb', fg: '#1d4ed8' },
+      { label: 'Kritik yüklü (> 125%)', count: 12, bar: '#dc2626', fg: '#b91c1c' }
+    ].map((n) => ({ label: n.label, count: n.count, bar: n.bar, fg: n.fg, pct: Math.round((n.count / 252) * 100) + '%' }));
+
+    const decisions = [
+      { title: '14 vakant ştatın açılması təklifi', meta: 'Kadrlar şöbəsi · 2 750 saat · 34 400 ₼' },
+      { title: 'Xarici dillər kafedrasında bölgü gecikməsi', meta: 'Humanitar fakültəsi · 480 saat açıq' },
+      { title: 'Saathesabı büdcə artımı (+8%)', meta: 'Maliyyə şöbəsi · 148 250 ₼ → 160 100 ₼' }
+    ];
+
+    const fi = s.facIdx;
+    const mf = fi === null ? null : facAgg[fi];
+    const mDeps = mf === null ? [] : mf.list.map((d, i) => {
+      const st = stOf(d.pct);
+      return {
+        name: d.name, head: d.head, teachers: d.teachers,
+        hours: fmt(d.hours) + ' saat', pct: d.pct + '%', bar: barOf(d.pct),
+        status: st[0], stBg: st[1], stFg: st[2],
+        bg: i % 2 ? '#f8fafc' : '#ffffff'
+      };
+    });
+
+    return {
+      crumb: { overview: 'Ümumi baxış', fac: 'Fakültələr', dep: 'Kafedralar', rep: 'Hesabatlar' }[s.view],
+      pageTitle: { overview: 'Universitet üzrə dərs yükü', fac: 'Fakültələr üzrə yük', dep: 'Kafedralar üzrə bölgü', rep: 'Hesabatlar' }[s.view],
+      pageSub: {
+        overview: '2026 / 2027 tədris ili — tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin vəziyyəti.',
+        fac: 'Hər fakültənin tapşırıq saatı, bölgü faizi, vakant saatı və dekanlıq statusu.',
+        dep: 'Kafedraların bölgü tamamlanması, vakant saatları və norma üstü yükü.',
+        rep: 'Elmi Şura və nazirlik formatında hazır hesabatlar.'
+      }[s.view],
+      isOverview: s.view === 'overview', isFac: s.view === 'fac', isDep: s.view === 'dep', isRep: s.view === 'rep',
+
+      navOBg: s.view === 'overview' ? '#3b82f6' : 'transparent', navOFg: s.view === 'overview' ? '#ffffff' : '#64748b', navOSh: s.view === 'overview' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navFBg: s.view === 'fac' ? '#3b82f6' : 'transparent', navFFg: s.view === 'fac' ? '#ffffff' : '#64748b', navFSh: s.view === 'fac' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navDBg: s.view === 'dep' ? '#3b82f6' : 'transparent', navDFg: s.view === 'dep' ? '#ffffff' : '#64748b', navDSh: s.view === 'dep' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navRBg: s.view === 'rep' ? '#3b82f6' : 'transparent', navRFg: s.view === 'rep' ? '#ffffff' : '#64748b', navRSh: s.view === 'rep' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+
+      fYear: s.fYear, fSem: s.fSem,
+      onFYear: (e) => set({ fYear: e.target.value }),
+      onFSem: (e) => set({ fSem: e.target.value }),
+
+      totalHours: fmt(totalHours), totalDist: fmt(totalDist),
+      totalDistText: fmt(totalDist) + ' / ' + fmt(totalHours) + ' saat',
+      totalPct: totalPct + '%', vacantText: fmt(vacantTotal),
+      riskCount: risky.length,
+
+      facBars, facRows, depRows, facChips: chips,
+      depCount: depRows.length,
+      depFilterLabel: s.fYear + ' · ' + s.facFilter,
+      risks, funnel, normBands, decisions,
+      reports: REPORTS.map((r) => ({
+        title: r.title, note: r.note, meta: r.meta,
+        iconBg: ['#eff6ff', '#f5f3ff', '#ecfdf5', '#fff7ed', '#fef2f2', '#f1f5f9'][r.kind],
+        iconFg: ['#1d4ed8', '#6d28d9', '#047857', '#c2410c', '#b91c1c', '#475569'][r.kind]
+      })),
+
+      showFac: s.modal === 'fac',
+      mName: mf ? mf.name : '', mDean: mf ? mf.dean : '',
+      mMeta: mf ? (mf.deps + ' kafedra · ' + mf.pct + '% bölünüb') : '',
+      mHours: mf ? fmt(mf.hours) : '', mDist: mf ? fmt(mf.dist) : '',
+      mVacant: mf ? (mf.vacant === 0 ? '—' : fmt(mf.vacant)) : '',
+      mTeachers: mf ? mf.teachers : '', mDeps,
+
+      goOverview: () => set({ view: 'overview' }),
+      goFac: () => set({ view: 'fac' }),
+      goDep: () => set({ view: 'dep' }),
+      goRep: () => set({ view: 'rep' }),
+      stop: (e) => e.stopPropagation(),
+      closeModal: () => set({ modal: null, facIdx: null })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -188,6 +188,35 @@ class _Stage2Mixin:
             "deleted_count": 0,
             "embedded_in_profile": True,
         }
+        # «Müəllimlər» / «Tələbələr» kataloqu — RİM ilə eyni naxış: panel SPA-dır,
+        # server yalnız çərçivəni verir (bax views/people/section.py müqaviləsi).
+        # Bölmə aktiv deyilsə boş qalır; şablon `has_access` yoxlayır.
+        self.people_section = {"kind": "", "has_access": False}
+        # Sillabus — müəllim səthi. Bölmə aktiv deyilsə AĞIR sorğu getmir; şablon
+        # `has_access` / `view_state` yoxlayır (bax views/syllabus/ müqaviləsi).
+        self.syllabus_list_section = {"has_access": False, "rows": []}
+        self.syllabus_editor_section = {"view_state": "missing", "nav": [], "panels": []}
+        # Sillabus — KAFEDRA təsdiq səthi (ayrı icazə açarı: `syllabus.review`).
+        self.syllabus_review_section = {"has_access": False, "has_scope": False, "rows": []}
+        # «RİM mərkəzi» — panel SPA-dır, server yalnız icazə xəritəsini verir.
+        self.rim_center_section = {
+            "can_search": False,
+            "can_set_password": False,
+            "can_block": False,
+            "can_soft_delete": False,
+            "can_edit": False,
+            "is_superadmin": False,
+            "organization": None,
+            "granted_permissions": [],
+            "search_url": "",
+            "action_url": "",
+            "detail_url_template": "",
+            "role_assignment_url": "",
+            "editable_field_labels": {},
+            "min_reason_length": 3,
+            "max_reason_length": 300,
+            "access_denied_message": "",
+        }
         self.superadmin_ai_settings_section = {
             "config": None,
             "model_choices": [],
@@ -230,6 +259,177 @@ class _Stage2Mixin:
             "k_rows": [],
             "faculties": [],
             "departments": [],
+            "post_next_url": "",
+        }
+        # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı.
+        self.journal_close_section = {
+            "is_superadmin": False,
+            "org_options": [],
+            "selected_org": None,
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "faculties": [],
+            "departments": [],
+            "selected_scope": "organization",
+            "selected_unit_id": "",
+            "preview": None,
+            "notices": [],
+            "post_next_url": "",
+        }
+        # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — SPA çərçivəsi.
+        self.handover_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "scope_label": "",
+            "teachers_url": "",
+            "offerings_url": "",
+            "options_url": "",
+            "history_url": "",
+            "action_url": "",
+            "default_page_size": 25,
+            "min_reason_length": 3,
+            "max_reason_length": 1000,
+            "max_bulk_rows": 100,
+        }
+        # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel çərçivəsi.
+        self.schedule_manage_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "scope_label": "",
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "groups": [],
+            "group": None,
+            "view_mode": "group",
+            "teachers": [],
+            "teacher": None,
+            "offerings": [],
+            "slots": [],
+            "rooms": [],
+            "weekdays": (),
+            "standard_times": (),
+            "week_types": (),
+            "slot_kinds": (),
+            "owner_label": "",
+            "week": None,
+            "time_grid": None,
+            "check_url": "",
+            "action_url": "",
+            "reload_url": "",
+            "week_nav_prefix": "",
+        }
+        # «Ana səhifə» (FAZA 22) — kabinetin default bölməsi.  Vidjetlər YALNIZ
+        # aktiv bölmə `dashboard` olanda yığılır (lazy), yəni digər bölmələri
+        # açanda bir dənə də əlavə sorğu getmir.
+        self.dashboard_section = {
+            "has_access": False,
+            "greeting": "",
+            "role_label": "",
+            "period_label": "",
+            "widgets": [],
+            "empty_text": "",
+        }
+        # Tələbə idxalı (`user.import`) — server yalnız ÇƏRÇİVƏNİ verir: icazə
+        # bayrağı, endpoint URL-ləri, sütun kataloqu və hədd rəqəmləri. Fayl
+        # heç vaxt serverdə saxlanılmır, ona görə burada sətir/nəticə YOXDUR.
+        self.student_intake_section = {
+            "has_access": False,
+            "access_denied_message": "",
+            "template_url": "",
+            "preview_url": "",
+            "apply_url": "",
+            "columns": (),
+            "max_rows": 0,
+            "max_upload_mb": 0,
+            "scope_label": "",
+        }
+        # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
+        # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
+        # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.
+        self.applications_section = {
+            "has_access": False,
+            "family": "",
+            "can_create": False,
+            "is_handler": False,
+            "can_manage": False,
+            "endpoints": {},
+            "rules": {},
+            "who": "",
+            "scope": "",
+            "role_label": "",
+            "i18n": {},
+        }
+        # Dərs yükü (apps.workload) — SPA çərçivələri. Server yalnız icazə
+        # bayraqlarını, endpoint URL-lərini və kataloqları verir; sətirlər JSON-la
+        # gəlir, yəni profil kontekstində AĞIR SORĞU YOXDUR.
+        self.workload_distribution_section = {"has_access": False, "chairs": [], "task": None}
+        self.my_workload_section = {"has_access": False, "rows": [], "summary": {}, "years": []}
+        # Mərhələ 4 — dərs yükü zənciri (12/13/15/17). Default BOŞDUR: aktiv
+        # bölmə olmayanda heç bir aqreqat sorğu işləmir (bax `_stage3`).
+        self.workload_center_section = {"has_access": False, "cards": [], "rows": []}
+        self.workload_visa_section = {"has_access": False, "rows": [], "counts": {}}
+        self.workload_approval_section = {"has_access": False, "rows": [], "slice": None}
+        self.workload_overview_section = {"has_access": False, "chairs": [], "faculties": []}
+        # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra
+        # profili, ixtisas reyestri, fənn kataloqu. Default BOŞDUR: aktiv bölmə
+        # olmayanda heç bir sorğu işləmir (bax `_stage3` şərtli çağırışlar).
+        self.lessons_log_section = {"has_access": False, "rows": [], "days": [], "coverage": []}
+        self.structure_tree_section = {"has_access": False, "tree_nodes": []}
+        self.chair_profile_section = {"has_access": False, "chairs": [], "staff_rows": []}
+        self.programs_registry_section = {"has_access": False, "rows": []}
+        self.subject_catalog_section = {"has_access": False, "rows": []}
+        # Mərhələ 2 — tədris planı redaktoru, akademik qrup reyestri, semestr açılışı.
+        self.curriculum_editor_section = {"has_access": False, "rows": [], "plan": None}
+        self.groups_registry_section = {"has_access": False, "rows": []}
+        self.semester_opening_section = {"has_access": False, "rows": [], "period": None}
+        # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi (qəbul + reyestr). Default
+        # BOŞDUR: aktiv bölmə olmayanda heç bir sorğu işləmir.
+        self.student_admission_section = {"has_access": False, "columns": (), "steps": []}
+        self.student_registry_section = {"has_access": False, "rows": [], "table_rows": []}
+        # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
+        # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
+        # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində
+        # HEÇ VAXT hesablanmır.
+        self.legacy_grade_review_section = {
+            "has_access": False,
+            "can_review": False,
+            "access_denied_message": "",
+            "observer_notice": "",
+            "queue_url": "",
+            "options_url": "",
+            "faculty_url": "",
+            "kafedra_url": "",
+            "specialty_url": "",
+            "group_url": "",
+            "subject_url": "",
+            "teacher_url": "",
+            "action_url": "",
+            "reasons": [],
+            "default_page_size": 25,
+            "min_note_length": 3,
+            "max_note_length": 1000,
+        }
+        # İmtahan Mərkəzi — kağız imtahan balının əl ilə daxil edilməsi.
+        self.exam_score_entry_section = {
+            "is_superadmin": False,
+            "org_options": [],
+            "selected_org": None,
+            "years": [],
+            "selected_year": None,
+            "periods": [],
+            "period": None,
+            "subjects": [],
+            "selected_subject_id": "",
+            "offerings": [],
+            "offering": None,
+            "rows": [],
+            "reasons": [],
+            "exam_score_max": 0,
+            "journal_locked": False,
             "post_next_url": "",
         }
         # «İmtahan şansı ver» (ikinci şans) bölməsi (İmtahan Mərkəzi).

@@ -1,0 +1,160 @@
+{% load i18n %}
+{% comment %}«Müraciətlərim» dialoqları — YALNIZ `_applications.html` daxilindən
+include olunur (panelin İÇİNDƏ olmalıdır ki, AJAX swap-dan sonra da qalsın).
+
+Dörd dialoq: yeni müraciət (§4.8), yönləndirmə (§4.9), səbəb istəyən əməllər
+(rədd / düzəliş üçün qaytar / əlavə məlumat istə / ləğv et) və məsul təyini.
+Hamısı `role="dialog" aria-modal="true"`, Esc + overlay ilə bağlanır, açılanda
+panel fokuslanır (§7).{% endcomment %}
+
+{# ── §4.8 «Yeni müraciət» ─────────────────────────────────────────────────── #}
+<div class="apx-dlg" data-apx-dialog="create" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-create-title" tabindex="-1">
+    <div class="apx-dlg__head">
+      <h3 class="apx-dlg__title" id="apx-create-title">{% trans "Yeni müraciət" context "applications" %}</h3>
+      <div class="apx-dlg__sub">{% trans "Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək." context "applications" %}</div>
+    </div>
+    <div class="apx-dlg__body">
+      <ul class="apx-errors" data-apx-errors hidden></ul>
+      <div>
+        <span class="apx-field__label">{% trans "Müraciətin növü" context "applications" %} <span class="apx-req">*</span></span>
+        <div class="apx-options" data-apx-kind-list></div>
+      </div>
+      <div>
+        <label class="apx-field__label" for="apx-subject">{% trans "Mövzu" context "applications" %} <span class="apx-req">*</span></label>
+        <input id="apx-subject" type="text" class="apx-input" data-apx-subject
+               placeholder="{% trans 'Bir cümlə ilə nə istədiyiniz' context 'applications' %}">
+      </div>
+      <div>
+        <label class="apx-field__label" for="apx-body">{% trans "Müraciətin mətni" context "applications" %} <span class="apx-req">*</span></label>
+        <textarea id="apx-body" rows="4" class="apx-textarea" data-apx-body
+                  placeholder="{% trans 'Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək.' context 'applications' %}"></textarea>
+        <div class="apx-counter" data-apx-counter></div>
+      </div>
+      <div>
+        <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
+        <button type="button" class="apx-drop" data-apx-pick-files>
+          <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
+          {% trans "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB" context "applications" %}
+        </button>
+        <input type="file" class="apx__sr" data-apx-files multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+        <div class="apx-picked" data-apx-picked></div>
+      </div>
+      <div class="apx-info" data-apx-route>
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <span data-apx-route-text>{% trans "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək." context "applications" %}</span>
+      </div>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-create-send>{% trans "Müraciəti göndər" context "applications" %}</button>
+    </div>
+  </div>
+</div>
+
+{# ── §4.9 «Müraciəti yönləndir» ───────────────────────────────────────────── #}
+<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="forward" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-forward-title" tabindex="-1">
+    <div class="apx-dlg__head">
+      <h3 class="apx-dlg__title" id="apx-forward-title">{% trans "Müraciəti yönləndir" context "applications" %}</h3>
+      <div class="apx-dlg__sub" data-apx-forward-sub></div>
+    </div>
+    <div class="apx-dlg__body">
+      <ul class="apx-errors" data-apx-errors hidden></ul>
+      <div>
+        <span class="apx-field__label">{% trans "Hansı şöbəyə?" context "applications" %} <span class="apx-req">*</span></span>
+        <div class="apx-options" data-apx-unit-list></div>
+      </div>
+      <div>
+        <label class="apx-field__label" for="apx-forward-note">{% trans "Yönləndirmə qeydi" context "applications" %} <span class="apx-req">*</span></label>
+        <textarea id="apx-forward-note" rows="3" class="apx-textarea" data-apx-note
+                  placeholder="{% trans 'Niyə bu şöbəyə göndərilir və nə gözlənilir' context 'applications' %}"></textarea>
+      </div>
+      <label class="apx-check">
+        <input type="checkbox" data-apx-keep checked>
+        <span>{% trans "Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin." context "applications" %}</span>
+      </label>
+      <div class="apx-info">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <span>{% trans "Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə məsul şöbə dəyişir." context "applications" %}</span>
+      </div>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-forward-send>{% trans "Yönləndir" context "applications" %}</button>
+    </div>
+  </div>
+</div>
+
+{# ── Səbəb istəyən əməllər: rədd / qaytar / məlumat istə / ləğv / cavab ──── #}
+<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="reason" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-reason-title" tabindex="-1">
+    <div class="apx-dlg__head">
+      <h3 class="apx-dlg__title" id="apx-reason-title" data-apx-reason-title></h3>
+      <div class="apx-dlg__sub" data-apx-reason-sub></div>
+    </div>
+    <div class="apx-dlg__body">
+      <ul class="apx-errors" data-apx-errors hidden></ul>
+      <div>
+        <label class="apx-field__label" for="apx-reason-text" data-apx-reason-label></label>
+        <textarea id="apx-reason-text" rows="4" class="apx-textarea" data-apx-note></textarea>
+        <div class="apx-counter" data-apx-counter></div>
+      </div>
+      <div data-apx-reason-files>
+        <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
+        <button type="button" class="apx-drop" data-apx-pick-files>
+          <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
+          {% trans "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB" context "applications" %}
+        </button>
+        <input type="file" class="apx__sr" data-apx-files multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+        <div class="apx-picked" data-apx-picked></div>
+      </div>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-reason-send></button>
+    </div>
+  </div>
+</div>
+
+{# ── «Təyin et» — məsul şəxs seçimi ───────────────────────────────────────── #}
+<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="assign" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-assign-title" tabindex="-1">
+    <div class="apx-dlg__head">
+      <h3 class="apx-dlg__title" id="apx-assign-title">{% trans "Məsul şəxsə təyin et" context "applications" %}</h3>
+      <div class="apx-dlg__sub" data-apx-assign-sub></div>
+    </div>
+    <div class="apx-dlg__body">
+      <ul class="apx-errors" data-apx-errors hidden></ul>
+      <div>
+        <label class="apx-field__label" for="apx-assignee">{% trans "Məsul şəxs" context "applications" %} <span class="apx-req">*</span></label>
+        <select id="apx-assignee" class="apx-select" data-apx-assignee></select>
+      </div>
+      <div>
+        <label class="apx-field__label" for="apx-assign-note">{% trans "Qeyd" context "applications" %}</label>
+        <textarea id="apx-assign-note" rows="3" class="apx-textarea" data-apx-note
+                  placeholder="{% trans 'Məsul şəxs üçün qısa izah' context 'applications' %}"></textarea>
+      </div>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-assign-send>{% trans "Təyin et" context "applications" %}</button>
+    </div>
+  </div>
+</div>
+
+{# ── Yekun əməllər üçün təsdiq ────────────────────────────────────────────── #}
+<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="confirm" hidden>
+  <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-confirm-title" tabindex="-1">
+    <div class="apx-dlg__head">
+      <h3 class="apx-dlg__title" id="apx-confirm-title" data-apx-confirm-title></h3>
+    </div>
+    <div class="apx-dlg__body">
+      <p class="apx-note__text" data-apx-confirm-text></p>
+    </div>
+    <div class="apx-dlg__foot">
+      <button type="button" class="apx-btn" data-apx-dialog-close>{% trans "Ləğv et" context "applications" %}</button>
+      <button type="button" class="apx-btn apx-btn--primary" data-apx-confirm-yes>{% trans "Təsdiqlə" context "applications" %}</button>
+    </div>
+  </div>
+</div>

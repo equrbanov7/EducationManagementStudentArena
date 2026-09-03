@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_chain.css' %}?v=20260903-chair">
 {% endblock %}
 
 {% block embed_content %}
@@ -41,36 +42,8 @@
             </div>
         </header>
 
-        {# ---- Status yolu: göndərildi → baxılır → qərar ---- #}
-        <div class="qsubd-timeline" aria-label="{% trans 'Göndərişin statusu' context 'exams.template.question_submission' %}">
-            <div class="qsubd-timeline__step is-done">
-                <span class="qsubd-timeline__dot"><i class="fas fa-paper-plane"></i></span>
-                <span class="qsubd-timeline__label">{% trans "Göndərildi" context "exams.template.question_submission" %}</span>
-                <span class="qsubd-timeline__date">{{ submission.created_at|date:"d.m.Y H:i" }}{% if submission.resubmission_count %} · ×{{ submission.resubmission_count }}{% endif %}</span>
-            </div>
-            <div class="qsubd-timeline__step {% if submission.is_pending %}is-current{% else %}is-done{% endif %}">
-                <span class="qsubd-timeline__dot"><i class="fas fa-hourglass-half"></i></span>
-                <span class="qsubd-timeline__label">{% trans "Baxılır" context "exams.template.question_submission" %}</span>
-                {% if submission.is_pending %}
-                <span class="qsubd-timeline__date">{% trans "İmtahan mərkəzindədir" context "exams.template.question_submission" %}</span>
-                {% endif %}
-            </div>
-            <div class="qsubd-timeline__step {% if submission.status == 'accepted' %}is-accepted{% elif submission.status == 'rejected' %}is-rejected{% endif %}">
-                <span class="qsubd-timeline__dot">
-                    {% if submission.status == "accepted" %}<i class="fas fa-check"></i>
-                    {% elif submission.status == "rejected" %}<i class="fas fa-rotate-left"></i>
-                    {% else %}<i class="fas fa-gavel"></i>{% endif %}
-                </span>
-                <span class="qsubd-timeline__label">
-                    {% if submission.status == "accepted" %}{% trans "Qəbul edildi" context "exams.template.question_submission" %}
-                    {% elif submission.status == "rejected" %}{% trans "Geri qaytarılıb" context "exams.template.question_submission" %}
-                    {% else %}{% trans "Qərar" context "exams.template.question_submission" %}{% endif %}
-                </span>
-                {% if submission.reviewed_at %}
-                <span class="qsubd-timeline__date">{{ submission.reviewed_at|date:"d.m.Y H:i" }}</span>
-                {% endif %}
-            </div>
-        </div>
+        {# ---- Tam zəncir: müəllim → kafedra müdiri → İmtahan Mərkəzi ---- #}
+        {% include "exams/teacher/partials/_question_submission_chain.html" %}
 
         {# ---- Stat kartlar ---- #}
         <section class="qb-stats">

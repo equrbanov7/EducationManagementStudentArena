@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Ekran 05 başlıq əməlləri — `_content_header.html` `header_actions_include`.
+
+Düymələr GİZLƏNMİR, `disabled` olur (handoff §4): istifadəçi əməlin MÖVCUD
+olduğunu, sadəcə şərtin ödənmədiyini görməlidir. «Təsdiqə göndər» açıq
+xəbərdarlıq varsa bağlıdır (§8 qayda 11).{% endcomment %}
+{% with plan=curriculum_editor_section.plan %}
+{% if curriculum_editor_section.can_edit %}
+<button type="button" class="ems-btn"
+        data-tof-open="tofPlanDialog"
+        data-tof-prefill='{"action": "create_plan", "program": "", "admission_year": "", "name": ""}'>
+    {% trans "Yeni plan" context "accounts.curriculum" %}
+</button>
+{% endif %}
+{% if plan %}
+    {% if plan.is_approved %}
+        {% if curriculum_editor_section.can_edit %}
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-submit='{"action": "new_version", "plan": "{{ plan.id }}"}'
+                data-tof-confirm="{% trans 'Təsdiqlənmiş plandan yeni qaralama versiya yaradılsın? Köhnə versiya toxunulmaz qalır.' context 'accounts.curriculum' %}">
+            {% trans "Yeni versiya" context "accounts.curriculum" %}
+        </button>
+        {% endif %}
+    {% else %}
+        {% if plan.next_action %}
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-submit='{"action": "{{ plan.next_action }}", "plan": "{{ plan.id }}"}'
+                {% if not plan.can_advance %}disabled aria-disabled="true" title="{% trans 'Bu mərhələnin təsdiqi başqa səlahiyyətdədir.' context 'accounts.curriculum' %}"{% elif plan.next_action == "submit" and curriculum_editor_section.balance.warnings %}disabled aria-disabled="true" title="{% trans 'Açıq xəbərdarlıq var — əvvəlcə kredit/saat balansını bağlayın.' context 'accounts.curriculum' %}"{% endif %}>
+            {{ plan.next_label }}
+        </button>
+        {% endif %}
+        {% if plan.status != "draft" and plan.status != "returned" %}
+        <button type="button" class="ems-btn ems-btn--danger"
+                data-tof-open="tofPlanReturnDialog"
+                data-tof-prefill='{"action": "return", "plan": "{{ plan.id }}"}'
+                {% if not plan.can_return %}disabled aria-disabled="true" title="{% trans 'Qaytarma cari mərhələnin təsdiqçisinə aiddir.' context 'accounts.curriculum' %}"{% endif %}>
+            {% trans "Geri qaytar" context "accounts.curriculum" %}
+        </button>
+        {% endif %}
+    {% endif %}
+{% endif %}
+{% endwith %}

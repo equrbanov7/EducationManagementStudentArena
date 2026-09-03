@@ -1,0 +1,511 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — BAXIŞ PANELİ və QƏRAR dialoqu (dizayn təhvili §3.3)
+   ───────────────────────────────────────────────────────────────────────────
+   Drawer/dialoq çərçivəsi `syllabus_drawer.css` + `syllabus_dialog.css`-dədir;
+   burada YALNIZ təsdiq panelinin özəl qatı var: bölmə kartları, bölmə şərhi,
+   yanaşı fərq kartı, audit xronologiyası, qərar altlığı.
+
+   Dizayn §2: kölgə YALNIZ drawer/dialog/toast-dadır — kartlarda yoxdur.
+   ⚠️ Rəng hardcode YOXDUR; «təsdiqlənib» mətni `--ems-success-700`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.syl-drawer--review .syl-drawer__panel {
+    max-width: 940px;
+}
+
+.syl-drawer--review .syl-wait {
+    display: inline;
+    margin: 0;
+}
+
+.syl-drawer__banner--info {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-800);
+}
+
+/* ── Panel tabları ────────────────────────────────────────────────────── */
+.syl-drawer__tabs {
+    flex: none;
+    display: flex;
+    gap: 2px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--ems-border);
+    overflow-x: auto;
+}
+
+.syl-drawer__tab {
+    min-height: 44px;
+    padding: 0 13px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--ems-text-muted);
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.syl-drawer__tab.is-on {
+    border-bottom-color: var(--ems-primary-600);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+}
+
+/* ── Bölmə kartları + bölmə üzrə şərh ─────────────────────────────────── */
+.syl-rvsec {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-card);
+    overflow: hidden;
+    margin-bottom: 11px;
+}
+
+.syl-rvsec.has-note {
+    border-color: var(--ems-primary-200);
+}
+
+.syl-rvsec__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 13px;
+    background: var(--ems-bg-subtle);
+}
+
+.syl-rvsec.is-changed .syl-rvsec__head {
+    background: var(--ems-warning-bg);
+}
+
+.syl-rvsec__title {
+    flex: 1;
+    min-width: 150px;
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.syl-rvsec__body {
+    padding: 12px 13px;
+    font-size: 0.84rem;
+    line-height: 1.65;
+    white-space: pre-line;
+    color: var(--ems-neutral-700);
+}
+
+.syl-rvsec__note {
+    padding: 0 13px 13px;
+}
+
+.syl-rvsec__note label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-rvsec__note textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--syl-radius-ctl);
+    font-family: inherit;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+/* ── Yanaşı fərq kartı (köhnə solda, yeni sağda) ──────────────────────── */
+.syl-diff__lead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 11px 13px;
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-border);
+    border-radius: 11px;
+    font-size: 0.81rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-diff {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-card);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.syl-diff__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 13px;
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.syl-diff__field {
+    flex: 1;
+    min-width: 140px;
+    font-size: 0.83rem;
+    font-weight: 800;
+}
+
+.syl-diff__kind {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.69rem;
+    font-weight: 800;
+}
+
+.syl-diff.is-changed .syl-diff__kind {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-diff__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.syl-diff__col {
+    padding: 11px 13px;
+}
+
+.syl-diff__col--old {
+    border-right: 1px solid var(--ems-neutral-100);
+    background: var(--ems-danger-bg);
+}
+
+.syl-diff__col--new {
+    background: var(--ems-success-bg);
+}
+
+.syl-diff.is-same .syl-diff__col--old,
+.syl-diff.is-same .syl-diff__col--new {
+    background: transparent;
+}
+
+.syl-diff__label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-diff__text {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    white-space: pre-line;
+    color: var(--ems-neutral-700);
+}
+
+.syl-diff__col--new .syl-diff__text {
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+.syl-diff__warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 13px;
+    background: var(--ems-warning-bg);
+    border-top: 1px solid var(--ems-warning-bd);
+    font-size: 0.79rem;
+    line-height: 1.55;
+    color: var(--ems-warning-800);
+}
+
+/* ── Audit xronologiyası ──────────────────────────────────────────────── */
+.syl-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.syl-timeline__row {
+    display: flex;
+    gap: 12px;
+}
+
+.syl-timeline__rail {
+    width: 22px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.syl-timeline__dot {
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 999px;
+    background: var(--ems-neutral-300);
+}
+
+.syl-timeline__dot--primary,
+.syl-timeline__dot--submitted,
+.syl-timeline__dot--review {
+    background: var(--ems-primary-600);
+}
+
+.syl-timeline__dot--success {
+    background: var(--ems-success);
+}
+
+.syl-timeline__dot--warning {
+    background: var(--ems-warning);
+}
+
+.syl-timeline__dot--danger {
+    background: var(--ems-danger);
+}
+
+.syl-timeline__line {
+    flex: 1;
+    width: 2px;
+    background: var(--ems-neutral-200);
+}
+
+.syl-timeline__main {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 15px;
+}
+
+.syl-timeline__what {
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.syl-timeline__when {
+    margin-left: 8px;
+    font-size: 0.74rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-timeline__who {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.79rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-timeline__body {
+    margin-top: 7px;
+    padding: 9px 12px;
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-border);
+    border-radius: 9px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--ems-neutral-700);
+}
+
+/* ── Qərar altlığı ────────────────────────────────────────────────────── */
+.syl-drawer__foot--decide {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.syl-field--wide {
+    width: 100%;
+}
+
+.syl-decide {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+}
+
+.syl-decide__hint {
+    flex: 1;
+    min-width: 180px;
+    font-size: 0.77rem;
+    color: var(--ems-text-muted);
+}
+
+/* Qərar düyməsi olmayan aktor üçün panelin altındakı izah çipi. */
+.syl-decide__readonly {
+    padding: 6px 10px;
+    border: 1px solid var(--ems-primary-100);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    font-size: 0.77rem;
+    font-weight: 600;
+    color: var(--ems-primary-800);
+}
+
+/* «Təsdiqlə» — dizaynın YEGANƏ dolu-yaşıl düyməsi. Mətn ağ olduğu üçün fon
+   `--ems-success-600`-dur (AA), `--ems-success` isə accent kimi qalır. */
+.syl-btn--approve {
+    border-color: var(--ems-success-600);
+    background: var(--ems-success-600);
+    color: var(--ems-neutral-0);
+    font-weight: 800;
+}
+
+.syl-btn--approve:hover:not(:disabled) {
+    border-color: var(--ems-success-strong);
+    background: var(--ems-success-strong);
+}
+
+/* ── Qərar dialoqunun əlavələri ───────────────────────────────────────── */
+.syl-modal__headrow {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.syl-modal__icon {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.syl-modal__icon--success {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.syl-modal__icon--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-modal__icon--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.syl-modal__secs {
+    padding: 0 20px 14px;
+}
+
+.syl-modal__secs[hidden] {
+    display: none;
+}
+
+.syl-modal__legend {
+    margin: 0 0 7px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-secchips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.syl-secchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-family: inherit;
+    font-size: 0.79rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.syl-secchip.is-on {
+    border-color: var(--ems-warning);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-secchip__box {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    border: 1.5px solid var(--ems-neutral-300);
+    color: var(--ems-neutral-0);
+    font-size: 0.58rem;
+    font-weight: 900;
+}
+
+.syl-secchip.is-on .syl-secchip__box {
+    border-color: var(--ems-warning);
+    background: var(--ems-warning);
+}
+
+.syl-modal__lines {
+    list-style: none;
+}
+
+.syl-modal__lines li {
+    position: relative;
+    padding: 3px 0;
+}
+
+.syl-modal__lines li::before {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 11px;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--ems-neutral-400);
+}
+
+/* Qərar düyməsinin tonu dialoqa görə dəyişir (JS class qoyur). */
+.syl-modal__foot .syl-btn--tone-success {
+    border-color: var(--ems-success-600);
+    background: var(--ems-success-600);
+    color: var(--ems-neutral-0);
+}
+
+.syl-modal__foot .syl-btn--tone-warning {
+    border-color: var(--ems-warning-600);
+    background: var(--ems-warning-600);
+    color: var(--ems-neutral-0);
+}
+
+.syl-modal__foot .syl-btn--tone-danger {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+.syl-modal__foot .syl-btn:disabled {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-400);
+}

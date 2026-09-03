@@ -1,0 +1,291 @@
+/* «Müəllimlər» / «Tələbələr» kataloqunun analitika bloku (`.pan`).
+ *
+ * Qaydalar (CLAUDE.md + MEMORY):
+ *   • YALNIZ işıqlı tema — `prefers-color-scheme: dark` İŞLƏDİLMİR;
+ *   • bütün rənglər mövcud `--ems-*` tokenlərindən gəlir;
+ *   • `--ems-primary-300/400` MÖVCUD DEYİL — istinad edilmir.
+ *
+ * Qrafik palitrası burada `--pan-c1…c8` kimi elan olunur ki, JS rəngi
+ * `getComputedStyle` ilə oxusun və Chart.js-ə versin — yəni JS-də sabit rəng
+ * icad edilmir, palitra tək yerdən (bu fayldan) idarə olunur.
+ */
+
+.pan {
+    --pan-c1: var(--ems-primary-600, #2563eb);
+    --pan-c2: var(--ems-success-600, #059669);
+    --pan-c3: var(--ems-warning-500, #f59e0b);
+    --pan-c4: var(--ems-danger-500, #ef4444);
+    --pan-c5: var(--ems-sky-500, #0ea5e9);
+    --pan-c6: var(--ems-teal-500, #14b8a6);
+    --pan-c7: var(--ems-primary-800, #1e40af);
+    --pan-c8: var(--ems-neutral-500, #64748b);
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--ems-border, #e2e8f0);
+}
+
+.pan[hidden] {
+    display: none;
+}
+
+.pan__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pan__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.pan__hint {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* ── Göstərici kartları ──────────────────────────────────────────────────── */
+
+.pan__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.pan__card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle, #f8fafc);
+}
+
+.pan__card-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.pan__card-label {
+    font-size: 0.78rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* ── Qrafik qutuları ─────────────────────────────────────────────────────── */
+
+.pan__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 14px;
+}
+
+.pan__box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg, #ffffff);
+    min-width: 0;
+}
+
+.pan__box-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ems-text, #0f172a);
+}
+
+.pan__canvas-wrap {
+    position: relative;
+    height: 240px;
+    min-width: 0;
+}
+
+.pan__empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* ── a11y: qrafikin cədvəl qarşılığı ─────────────────────────────────────── */
+
+.pan__table-wrap {
+    font-size: 0.82rem;
+    overflow-x: auto;
+}
+
+.pan__table-toggle {
+    cursor: pointer;
+    color: var(--ems-link, #2563eb);
+    font-weight: 600;
+    padding: 2px 0;
+}
+
+.pan__table-toggle:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.pan__table {
+    width: 100%;
+    margin-top: 8px;
+    border-collapse: collapse;
+}
+
+.pan__table th,
+.pan__table td {
+    padding: 5px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
+    color: var(--ems-text, #0f172a);
+    font-weight: 400;
+}
+
+.pan__table thead th {
+    font-weight: 600;
+    color: var(--ems-text-muted, #64748b);
+}
+
+.pan__table td {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Dərs yükü blokunun faktları ─────────────────────────────────────────── */
+
+.pan__facts {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.pan__facts dt {
+    color: var(--ems-text-muted, #64748b);
+}
+
+.pan__facts dd {
+    margin: 0;
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-text, #0f172a);
+}
+
+/* ── AI analizi ──────────────────────────────────────────────────────────── */
+
+.pan__ai {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--ems-primary-100, #dbeafe);
+    border-radius: 12px;
+    background: var(--ems-primary-50, #eff6ff);
+}
+
+.pan__ai[hidden] {
+    display: none;
+}
+
+.pan__ai-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.pan__ai-title {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.pan__ai-btn {
+    flex: 0 0 auto;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.pan__ai-btn:hover {
+    background: var(--ems-primary-700, #1d4ed8);
+}
+
+.pan__ai-btn:disabled {
+    background: var(--ems-neutral-400, #94a3b8);
+    cursor: progress;
+}
+
+.pan__ai-btn:focus-visible {
+    outline: 2px solid var(--ems-primary-800, #1e40af);
+    outline-offset: 2px;
+}
+
+.pan__ai-out {
+    background: var(--ems-neutral-0, #ffffff);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.pan__ai-text {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ems-text, #0f172a);
+}
+
+.pan__ai-h {
+    margin: 12px 0 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.pan__ai-text > p:first-child,
+.pan__ai-h:first-child {
+    margin-top: 0;
+}
+
+.pan__ai-list {
+    margin: 0 0 8px;
+    padding-left: 20px;
+}
+
+.pan__ai-quota {
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    color: var(--ems-text-muted, #64748b);
+}
+
+@media (max-width: 640px) {
+    .pan__canvas-wrap {
+        height: 220px;
+    }
+
+    .pan__ai-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

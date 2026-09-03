@@ -22,7 +22,19 @@ def build_audit_log_context(request):
     if organization is not None and not is_superadmin:
         audit_logs = audit_logs.filter(organization=organization)
 
-    audit_logs_page = Paginator(audit_logs, 25).get_page(request.GET.get("audit_page"))
+    if is_superadmin:
+        # ``audit_auditlog`` 2026-09-02 auditindən sonra RLS altındadır
+        # (``audit.0003_rls_auditlog``).  Superadmin platforma səviyyəsində
+        # BÜTÜN tenantların izini görməlidir, ona görə səhifə açıq
+        # ``bypass_rls()`` daxilində MATERİALLAŞDIRILIR — şablon render-i
+        # kontekstdən kənarda baş verdiyi üçün lazy queryset kifayət etmir.
+        from core.rls import bypass_rls
+
+        with bypass_rls():
+            audit_logs_page = Paginator(audit_logs, 25).get_page(request.GET.get("audit_page"))
+            audit_logs_page.object_list = list(audit_logs_page.object_list)
+    else:
+        audit_logs_page = Paginator(audit_logs, 25).get_page(request.GET.get("audit_page"))
     pagination_query = "section=audit-log" if request.GET.get("section") == "audit-log" else ""
 
     return {

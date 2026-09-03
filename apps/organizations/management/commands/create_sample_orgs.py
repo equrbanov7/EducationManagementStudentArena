@@ -7,13 +7,15 @@ from django.core.management.base import BaseCommand
 
 from apps.organizations.models import Membership, Organization, OrgUnit
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "create_sample_orgs"
     help = "Create sample organizations for testing"
 
     def add_arguments(self, parser):
@@ -42,7 +44,7 @@ class Command(BaseCommand):
         if created:
             user.set_password("admin123")
             user.save()
-            self.stdout.write(self.style.SUCCESS(f"Created user: {username} (password: admin123)"))
+            self.stdout.write(self.style.SUCCESS(f"Created user: {username} (credential value is not logged)"))
         else:
             self.stdout.write(self.style.WARNING(f"Using existing user: {username}"))
 

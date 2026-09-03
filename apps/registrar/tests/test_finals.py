@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, gradebook, services
 from apps.registrar.models import (
     Curriculum,
@@ -61,6 +61,20 @@ class FinalsTest(TestCase):
             )
             self.teacher = User.objects.create_user("fn_teacher", "fn_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("fn_student", "fn_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
@@ -174,14 +188,41 @@ class FinalsTest(TestCase):
             self.assertFalse(ResitRecord.objects.filter(enrollment=self.enrollment).exists())
 
     # ── publish lock ──────────────────────────────────────────────────────────
-    def test_publish_locks_exam_entry(self):
-        from apps.registrar.models import AssessmentScheme
+    def _close_journal(self):
+        """Jurnalı semestr sonu vəziyyətinə gətir (RİM bağlaması)."""
+        from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
+        scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+        scheme.approval_status = ApprovalStatus.APPROVED
+        scheme.is_published = True
+        scheme.save(update_fields=["approval_status", "is_published"])
+        assert AssessmentScheme.objects.get(offering=self.offering).is_published
+        return scheme
+
+    def test_closed_journal_does_not_block_exam_score(self):
+        """ƏSAS REGRESİYA (sahibin qərarı E5): jurnal semestr sonunda BAĞLANIR,
+        imtahan ondan SONRA keçir → çıxış balı kilidli jurnalda da YAZILMALIDIR.
+        Əvvəl bu yol sükutla ``None`` qaytarırdı və bal İTİRDİ."""
         with bypass_rls():
             self._set_entry(40)
-            finals.publish_offering(offering=self.offering, by_user=self.teacher)
-            self.assertTrue(AssessmentScheme.objects.get(offering=self.offering).is_published)
-            self.assertIsNone(finals.set_exam_score(enrollment=self.enrollment, score=40))
+            self._close_journal()
+
+            final_grade = finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+
+            self.assertIsNotNone(final_grade)
+            self.assertEqual(final_grade.exam_score, Decimal("40"))
+            res = finals.compute_final_result(enrollment=self.enrollment)
+            self.assertEqual(res["total"], Decimal("80"))  # giriş 40 + çıxış 40
+            self.assertTrue(res["passed"])
+
+    def test_closed_journal_still_locks_resit_and_extras(self):
+        """Giriş balı tərəfi kilidli QALIR — yalnız imtahan (çıxış) balı azaddır."""
+        with bypass_rls():
+            self._set_entry(40)
+            finals.set_exam_score(enrollment=self.enrollment, score=10, by_user=self.teacher)  # kəsilir → resit
+            self._close_journal()
+            self.assertIsNone(finals.set_resit_score(enrollment=self.enrollment, score=40))
+            self.assertIsNone(finals.set_final_extras(enrollment=self.enrollment, bonus=5))
 
     def test_offering_results_shape(self):
         with bypass_rls():
@@ -190,3 +231,67 @@ class FinalsTest(TestCase):
             data = finals.get_offering_results(offering=self.offering)
             self.assertEqual(len(data["rows"]), 1)
             self.assertEqual(data["rows"][0]["result"]["total"], Decimal("60"))
+
+    # ── tam-ədəd yuvarlaqlaşdırması (sahibin qaydası, 2026-08-30) ─────────────
+    def _add_archive_component(self, score):
+        """Legacy köçürmənin GENERIC arxiv qalığını təqlid et (kəsirli ola bilər)."""
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        component = AssessmentComponent.objects.create(
+            organization=self.org,
+            offering=self.offering,
+            name="Davamiyyət və sərbəst iş (arxiv)",
+            kind="generic",
+            max_score=50,
+            order=0,
+        )
+        ComponentScore.objects.create(
+            organization=self.org, component=component, enrollment=self.enrollment, score=Decimal(score)
+        )
+
+    def test_a_fractional_entry_rounds_half_up(self):
+        """Giriş 32.5 + imtahan 40 → 73 (yarım YUXARI; Python round() 72 verərdi)."""
+        with bypass_rls():
+            self._add_archive_component("32.5")
+            finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["entry_score"], Decimal("33"))
+        self.assertEqual(res["total"], Decimal("73"))
+        self.assertEqual(res["total"], res["total"].to_integral_value())
+
+    def test_a_fractional_entry_below_half_rounds_down(self):
+        """Giriş 32.4 + imtahan 40 → 72."""
+        with bypass_rls():
+            self._add_archive_component("32.4")
+            finals.set_exam_score(enrollment=self.enrollment, score=40, by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["entry_score"], Decimal("32"))
+        self.assertEqual(res["total"], Decimal("72"))
+
+    def test_entry_score_for_is_always_a_whole_number(self):
+        with bypass_rls():
+            self._add_archive_component("14.5")
+            entry = gradebook.entry_score_for(self.enrollment, 50)
+        self.assertEqual(entry, Decimal("15"))
+        self.assertEqual(entry, entry.to_integral_value())
+
+    def test_the_rounded_total_decides_passing(self):
+        """50.5 → 51 KEÇİR: hərf və keçid qərarı yuvarlaqlaşdırılMIŞ total üzərindəndir."""
+        with bypass_rls():
+            self._set_entry(20)
+            finals.set_exam_score(enrollment=self.enrollment, score=30, by_user=self.teacher)
+            finals.set_final_extras(enrollment=self.enrollment, bonus="0.5", by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["total"], Decimal("51"))  # 20 + 30 + 0.5 → 51
+        self.assertTrue(res["passed"])
+
+    def test_a_total_below_the_half_still_fails(self):
+        """50.4 → 50 < 51 → keçmir (yuvarlaqlaşdırma yalnız yarımdan yuxarı qaldırır)."""
+        with bypass_rls():
+            self._set_entry(20)
+            finals.set_exam_score(enrollment=self.enrollment, score=30, by_user=self.teacher)
+            finals.set_final_extras(enrollment=self.enrollment, bonus="0.4", by_user=self.teacher)
+            res = finals.compute_final_result(enrollment=self.enrollment)
+        self.assertEqual(res["total"], Decimal("50"))
+        self.assertFalse(res["passed"])
+        self.assertTrue(res["failed"])

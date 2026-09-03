@@ -100,7 +100,7 @@
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                     {% for membership in user_memberships %}
                     <span class="dashboard-2">
-                        {{ membership.role.display_name }}
+                        {{ membership.role|role_badge_label }}
                         {% if membership.scope_unit %}
                         ({{ membership.scope_unit.name }})
                         {% endif %}

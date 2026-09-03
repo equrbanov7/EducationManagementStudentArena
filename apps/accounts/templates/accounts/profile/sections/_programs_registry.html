@@ -1,0 +1,64 @@
+{% load i18n %}
+{% comment %}
+Ekran 03 «İxtisaslar» — təhsil proqramlarının reyestri (dizayn handoff Mərhələ 1).
+
+İcazə: `catalog.view` (oxu) / `catalog.manage` (yazı). Sıralama, səhifələmə və
+filtr SERVER tərəfdədir (handoff §8/14): sütun başlığı adi linkdir, filtr paneli
+yalnız «Tətbiq et» ilə sorğu göndərir.
+
+SİLMƏ YOXDUR — arxivləmə (səbəb ≥20 simvol + audit). «Plan yoxdur» bayrağı
+saxlanılmır, hər sorğuda hesablanır.
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'programs-registry' in allowed_sections %}
+{% trans "Universitetin təhsil proqramları: rəsmi şifr, pillə, forma, tabe olduğu kafedra və tədris planının vəziyyəti." context "accounts.catalog" as pg_subtitle %}
+{% trans "Yeni ixtisas" context "accounts.catalog" as pg_new_title %}
+{% trans "Rəsmi şifr NK 503/2024 kataloqundan götürülür; daxili kod avtomatik yaranır." context "accounts.catalog" as pg_new_sub %}
+{% trans "Kataloq yazısını arxivlə" context "accounts.catalog" as cat_archive_title %}
+{% trans "Yazı SİLİNMİR — arxivlənir; plan sətirləri, jurnal və qiymət tarixçəsi qalır." context "accounts.catalog" as cat_archive_sub %}
+{% trans "Arxivlə" context "accounts.catalog" as cat_archive_btn %}
+{% trans "Arxivdən qaytar" context "accounts.catalog" as cat_restore_title %}
+{% trans "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır." context "accounts.catalog" as cat_restore_sub %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'programs-registry' %}is-active{% endif %}"
+         data-profile-section-panel="programs-registry"
+         data-source-url="{{ profile_base_url }}?section=programs-registry">
+
+{% if not programs_registry_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=programs_registry_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="programs-registry"
+     data-tof-action-url="{{ programs_registry_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=pg_subtitle %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=programs_registry_section.kpi_tiles kpi_variant="4" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="programs-registry" filter_prefix="pg_" filter_fields=programs_registry_section.filter_fields filter_count_label=programs_registry_section.filter_count_label %}
+
+    {% if programs_registry_section.can_manage %}
+    <div class="tof__toolbar">
+        <span class="tof__toolbar-spacer"></span>
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-open="tofProgramDialog"
+                data-tof-prefill='{"action": "save_program", "id": "", "name": "", "official_code": "", "degree_level": "bachelor", "education_form": "full_time", "specialty_unit": "", "ects_total": "240", "absence_limit_percent": "25"}'>
+            {% trans "Yeni ixtisas" context "accounts.catalog" %}
+        </button>
+    </div>
+    {% endif %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=programs_registry_section.columns table_rows=programs_registry_section.table_rows table_state=programs_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-graduation-cap" state_title=programs_registry_section.state_title state_body=programs_registry_section.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=programs_registry_section.page_obj page_param="pg_page" extra_query=programs_registry_section.pagination_query %}
+
+    {% if programs_registry_section.can_manage %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofProgramDialog" form_dialog_title=pg_new_title form_dialog_subtitle=pg_new_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_program_fields.html" form_dialog_action=programs_registry_section.action_url form_dialog_hidden=programs_registry_section.dialog_hidden form_dialog_data=programs_registry_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogArchiveDialog" reason_title=cat_archive_title reason_subtitle=cat_archive_sub reason_submit_label=cat_archive_btn reason_submit_tone="danger" reason_action=programs_registry_section.action_url reason_hidden=programs_registry_section.archive_hidden reason_form_data=programs_registry_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofCatalogRestoreDialog" reason_title=cat_restore_title reason_subtitle=cat_restore_sub reason_action=programs_registry_section.action_url reason_hidden=programs_registry_section.archive_hidden reason_form_data=programs_registry_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

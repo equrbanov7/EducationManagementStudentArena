@@ -1,0 +1,119 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/timeline.css — Audit timeline (handoff §4 komponent 13)
+   Nöqtəli xronologiya; nöqtə rəngi statusa uyğun gəlir (`ems-tl__dot--<ton>`).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-tl {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ems-tl__item {
+    display: flex;
+    gap: var(--ems-sp-5);
+}
+
+.ems-tl__gutter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: none;
+    width: 14px;
+}
+
+.ems-tl__dot {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--ems-neutral-300);
+}
+
+.ems-tl__line {
+    flex: 1 1 auto;
+    width: 2px;
+    margin: 4px 0;
+    background: var(--ems-neutral-200);
+}
+
+.ems-tl__item:last-child .ems-tl__line {
+    display: none;
+}
+
+.ems-tl__main {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-bottom: 18px;
+}
+
+.ems-tl__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ems-sp-3);
+}
+
+.ems-tl__who {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.ems-tl__when {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+}
+
+.ems-tl__what {
+    margin-top: 3px;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+    text-wrap: pretty;
+}
+
+/* Səbəb mətni — audit qeydinin ayrılmaz hissəsi (§8 qayda 6). */
+.ems-tl__reason {
+    margin-top: 6px;
+    padding: 8px 11px;
+    border-left: 3px solid var(--ems-border);
+    border-radius: 0 var(--ems-r-md) var(--ems-r-md) 0;
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-base);
+    line-height: 1.55;
+    color: var(--ems-neutral-700);
+    text-wrap: pretty;
+}
+
+/* ── Nöqtə tonları ──────────────────────────────────────────────────────── */
+.ems-tl__dot--primary {
+    background: var(--ems-primary-600);
+}
+
+.ems-tl__dot--info {
+    background: var(--ems-primary-200);
+}
+
+.ems-tl__dot--success {
+    background: var(--ems-success);
+}
+
+.ems-tl__dot--warning {
+    background: var(--ems-warning-500);
+}
+
+.ems-tl__dot--danger {
+    background: var(--ems-danger);
+}
+
+.ems-tl__dot--neutral,
+.ems-tl__dot--muted {
+    background: var(--ems-neutral-300);
+}
+
+/* Cari (sonuncu, davam edən) qeyd halqa ilə vurğulanır. */
+.ems-tl__item--current .ems-tl__dot {
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}

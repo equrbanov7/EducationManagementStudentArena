@@ -1,0 +1,85 @@
+{% load i18n %}
+{% comment %}
+«Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+
+Panel TAM SERVER-RENDER-lidir və JS TƏLƏB ETMİR: keçidlər sidebar linkləri ilə
+eyni `js-profile-section-link` müqaviləsini daşıyır, ona görə SPA deleqasiyası
+onları özü tutur (səhifə yenilənmir).  Vidjet siyahısı
+`apps/accounts/views/profile/_sections/dashboard.py`-dan gəlir; şablon YALNIZ
+`widget()` müqaviləsinin açarlarını oxuyur — yeni vidjet üçün BU FAYL
+DƏYİŞMİR.
+
+CSS xarici fayldadır (`accounts/css/profile/dashboard.css`, `profile.html`-dən
+yüklənir) — inline üslub YOXDUR (CLAUDE.md / CSP).
+{% endcomment %}
+{% if 'dashboard' in allowed_sections %}
+<section class="profile-section-panel profile-section--dashboard {% if active_section == 'dashboard' %}is-active{% endif %}"
+         data-profile-section-panel="dashboard"
+         data-source-url="{{ profile_base_url }}?section=dashboard">
+
+  <header class="dash__head">
+    <div class="dash__head-text">
+      <p class="dash__greeting">{{ dashboard_section.greeting }}</p>
+      <p class="dash__meta">
+        {% if dashboard_section.role_label %}<span class="dash__pill">{{ dashboard_section.role_label }}</span>{% endif %}
+        {% if dashboard_section.period_label %}<span class="dash__period">{{ dashboard_section.period_label }}</span>{% endif %}
+      </p>
+    </div>
+  </header>
+
+  {% if dashboard_section.widgets %}
+  <div class="dash-grid">
+    {% for w in dashboard_section.widgets %}
+    <article class="dash-card {% if w.tone %}dash-card--{{ w.tone }}{% endif %}" data-dash-widget="{{ w.key }}">
+      <h3 class="dash-card__title">
+        <i class="fas {{ w.icon }} dash-card__icon" aria-hidden="true"></i>
+        <span>{{ w.title }}</span>
+      </h3>
+
+      {% if w.stats %}
+      <div class="dash-card__stats">
+        {% for s in w.stats %}
+        <div class="dash-stat">
+          <span class="dash-stat__label">{{ s.label }}</span>
+          <span class="dash-stat__value">{{ s.value }}</span>
+          {% if s.note %}<span class="dash-stat__note">{{ s.note }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if w.rows %}
+      <ul class="dash-card__rows">
+        {% for row in w.rows %}
+        <li class="dash-row">
+          <span class="dash-row__title">{{ row.title }}</span>
+          {% if row.meta %}<span class="dash-row__meta">{{ row.meta }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% elif w.is_empty and w.empty %}
+      <p class="dash-card__empty">{{ w.empty }}</p>
+      {% endif %}
+
+      {% if w.link %}
+      <a class="dash-card__link js-profile-section-link"
+         href="{{ w.link.url }}"
+         data-section="{{ w.link.section }}"
+         data-title="{{ w.link.title }}"
+         data-source-url="{{ profile_base_url }}">
+        <span>{{ w.link.label }}</span>
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="ems-empty dash__empty">
+    <i class="fas fa-house ems-empty-icon" aria-hidden="true"></i>
+    <p class="ems-empty-title">{% trans "Xülasə hazır deyil" context "accounts.dashboard" %}</p>
+    <p class="ems-empty-hint">{{ dashboard_section.empty_text }}</p>
+  </div>
+  {% endif %}
+</section>
+{% endif %}

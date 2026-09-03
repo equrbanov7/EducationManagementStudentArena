@@ -1,0 +1,21 @@
+{% load i18n %}
+{% comment %}Yeni tədris planı sahələri — `_form_dialog.html` gövdəsi.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-cu-program">{% trans "İxtisas" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-cu-program" name="program" required>
+            <option value="">{% trans "Seçin" context "accounts.curriculum" %}</option>
+            {% for option in curriculum_editor_section.program_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-cu-year">{% trans "Qəbul ili" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="tof-cu-year" name="admission_year" min="1990" max="2100" step="1" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-cu-name">{% trans "Planın adı" context "accounts.curriculum" %}</label>
+        <input class="ems-input" type="text" id="tof-cu-name" name="name" maxlength="255">
+    </div>
+</div>

@@ -1,0 +1,120 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 07 «Semestr açılışı» — təsdiqlənmiş plandan açılış + 5 addımlı stepper.
+
+İcazə: `semester.view` (oxu), `semester.open` (dövr + açılış), `semester.lock`
+(kilid), `semester.unlock` (kilidin açılması — AYRI açar, səbəb ≥20).
+
+QAPILAR (handoff ekran 07): «plan təsdiqlənib» · «bütün açılışlara müəllim
+təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi GİZLƏNMİR —
+`disabled` olur və səbəb siyahıda MƏTNLƏ göstərilir.
+
+«Plan yoxdur» ixtisaslar BLOKLAYICIDIR: onlar üçün açılış yaradılmır.
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'semester-opening' in allowed_sections %}
+{% trans "Təsdiqlənmiş tədris planından hər qrup üçün fənn açılışı yaradılır, kafedra müəllim təyin edir, sonra jurnal açılır. Dərs yükü məhz bu açılışlardan hesablanır." context "accounts.semester" as sm_subtitle %}
+{% trans "Tədris dövrü" context "accounts.semester" as sm_period_title %}
+{% trans "Semestrin adı və tarixləri; «cari dövr» ayrıca əməldir." context "accounts.semester" as sm_period_sub %}
+{% trans "Tədris planından açılış yarat" context "accounts.semester" as sm_gen_title %}
+{% trans "Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından hər qrup üçün açılış sətirləri yaradılır. Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir." context "accounts.semester" as sm_gen_sub %}
+{% trans "Açılışları yarat" context "accounts.semester" as sm_gen_btn %}
+{% trans "Semestrin kilidini aç" context "accounts.semester" as sm_unlock_title %}
+{% trans "Səbəb audit jurnalına aktor və vaxtla yazılır." context "accounts.semester" as sm_unlock_sub %}
+{% trans "Kilidi aç" context "accounts.semester" as sm_unlock_btn %}
+{% trans "Açılışı ləğv et" context "accounts.semester" as sm_cancel_title %}
+{% trans "Açılış SİLİNMİR — ləğv olunur; jurnal, qeydiyyat və qiymət tarixçəsi qalır." context "accounts.semester" as sm_cancel_sub %}
+{% trans "Ləğv et" context "accounts.semester" as sm_cancel_btn %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'semester-opening' %}is-active{% endif %}"
+         data-profile-section-panel="semester-opening"
+         data-source-url="{{ profile_base_url }}?section=semester-opening">
+
+{% if not semester_opening_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=semester_opening_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="semester-opening"
+     data-tof-action-url="{{ semester_opening_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sm_subtitle header_actions_include="accounts/profile/sections/teaching_office/_semester_header_actions.html" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="semester-opening" filter_prefix="sm_" filter_fields=semester_opening_section.filter_fields filter_count_label=semester_opening_section.filter_count_label %}
+
+    {% if not semester_opening_section.period %}
+        {% trans "Tədris dövrü yoxdur" context "accounts.semester" as sm_none_title %}
+        {% trans "Əvvəlcə semestr dövrü yaradın (ad, tədris ili, başlama və bitmə tarixi)." context "accounts.semester" as sm_none_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-calendar-check" state_title=sm_none_title state_body=sm_none_body %}
+    {% else %}
+
+    {% if semester_opening_section.period.is_locked %}
+        {% trans "Semestr kilidlidir" context "accounts.semester" as sm_locked_title %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=sm_locked_title banner_body=semester_opening_section.period.lock_reason %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=semester_opening_section.kpi_tiles kpi_variant="5" %}
+
+    {% trans "Semestr açılışının mərhələləri" context "accounts.semester" as sm_steps_label %}
+    {% include "partials/ems_ui/_stepper.html" with steps=semester_opening_section.steps steps_label=sm_steps_label %}
+
+    {% if semester_opening_section.blockers %}
+        {% trans "«Plan yoxdur» — bu ixtisaslar üçün semestr açıla bilməz" context "accounts.semester" as sm_block_title %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=sm_block_title banner_action_include="accounts/profile/sections/teaching_office/_semester_blockers.html" %}
+    {% endif %}
+
+    <div class="tof-split">
+        <div class="tof-pane">
+            <h3 class="tof-pane__title">{% trans "Kilid şərtləri" context "accounts.semester" %}</h3>
+            <ul class="tof-gates">
+                {% for gate in semester_opening_section.lock_gates %}
+                <li class="tof-gates__item tof-gates__item--{% if gate.ok %}ok{% else %}pending{% endif %}">
+                    <span class="tof-gates__mark" aria-hidden="true">{% if gate.ok %}✓{% else %}○{% endif %}</span>
+                    <span>{{ gate.label }}</span>
+                    <span class="tof-gates__state">{% if gate.ok %}{% trans "ödənilib" context "accounts.semester" %}{% else %}{% trans "gözləyir" context "accounts.semester" %}{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="tof-pane">
+            <h3 class="tof-pane__title">{% trans "Kafedralar üzrə açılış" context "accounts.semester" %}</h3>
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Kafedra" context "accounts.semester" %}</th>
+                        <th scope="col">{% trans "Açılış" context "accounts.semester" %}</th>
+                        <th scope="col">{% trans "Müəllim təyin olunub" context "accounts.semester" %}</th>
+                        <th scope="col">{% trans "Saat" context "accounts.semester" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chair in semester_opening_section.chair_rows %}
+                    <tr>
+                        <th scope="row">{{ chair.name }}</th>
+                        <td class="ems-table__num">{{ chair.total }}</td>
+                        <td class="ems-table__num">{{ chair.assigned }} ({{ chair.pct }}%)</td>
+                        <td class="ems-table__num">{{ chair.hours }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">{% trans "Açılış yoxdur." context "accounts.semester" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=semester_opening_section.columns table_rows=semester_opening_section.table_rows table_state=semester_opening_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-calendar-check" state_title=semester_opening_section.state_title state_body=semester_opening_section.state_body %}
+    {% endif %}
+
+    {% if semester_opening_section.can_open %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofPeriodDialog" form_dialog_title=sm_period_title form_dialog_subtitle=sm_period_sub form_dialog_body_include="accounts/profile/sections/teaching_office/_period_fields.html" form_dialog_action=semester_opening_section.action_url form_dialog_hidden=semester_opening_section.dialog_hidden form_dialog_data=semester_opening_section.form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGenerateDialog" form_dialog_title=sm_gen_title form_dialog_subtitle=sm_gen_sub form_dialog_wide=True form_dialog_submit_label=sm_gen_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_generate_fields.html" form_dialog_action=semester_opening_section.action_url form_dialog_hidden=semester_opening_section.dialog_hidden form_dialog_data=semester_opening_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofOfferingCancelDialog" reason_title=sm_cancel_title reason_subtitle=sm_cancel_sub reason_submit_label=sm_cancel_btn reason_submit_tone="danger" reason_action=semester_opening_section.action_url reason_hidden=semester_opening_section.reason_hidden reason_form_data=semester_opening_section.form_data %}
+    {% endif %}
+    {% if semester_opening_section.can_unlock %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofSemesterUnlockDialog" reason_title=sm_unlock_title reason_subtitle=sm_unlock_sub reason_submit_label=sm_unlock_btn reason_submit_tone="danger" reason_action=semester_opening_section.action_url reason_hidden=semester_opening_section.reason_hidden reason_form_data=semester_opening_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

@@ -16,6 +16,9 @@ Nə edir:
     python manage.py provision_student_credentials --org <slug> --password Tel2026!
     python manage.py provision_student_credentials --org <slug> --generate --csv /tmp/creds.csv
     python manage.py provision_student_credentials --org <slug> --password X --dry-run
+    # QRUP-QRUP çap (kurator siyahını qrupa paylayır):
+    python manage.py provision_student_credentials --org <slug> --group "634 Qrafik" \
+        --generate --csv /tmp/634-qrafik.csv
 
 Default qorunma: artıq setup-u tamamlamış (email təsdiqli, parolunu özü
 qoymuş) tələbələrə TOXUNMUR — onları da sıfırlamaq üçün ``--force`` verin.
@@ -28,13 +31,16 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.crypto import get_random_string
 
+from core.management.command_safety import ProductionCommandSafetyMixin
+
 User = get_user_model()
 
 # Oxunaqlı, oxşar simvolsuz (0/O, 1/l/I yox) generasiya əlifbası.
 _PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "provision_student_credentials"
     help = "Təşkilatın tələbələrinə default parol verir və ilk-giriş (email OTP + yeni parol) axınına salır."
 
     def add_arguments(self, parser):
@@ -47,6 +53,11 @@ class Command(BaseCommand):
             help="Hər tələbəyə ayrıca təsadüfi parol generasiya et (--csv ilə birlikdə istifadə edin)",
         )
         parser.add_argument("--csv", dest="csv_path", help="username,parol siyahısını bu fayla yaz")
+        parser.add_argument(
+            "--group",
+            dest="group",
+            help="Yalnız bu qrupun tələbələri (OrgUnit adı və ya kodu) — siyahını qrup-qrup çap etmək üçün",
+        )
         parser.add_argument(
             "--force",
             action="store_true",
@@ -65,7 +76,10 @@ class Command(BaseCommand):
             self._provision(*args, **options)
 
     def _provision(self, *args, **options):
-        from apps.organizations.models import Membership, Organization
+        from django.db.models import Q
+
+        from apps.organizations.models import Membership, Organization, OrgUnit
+        from core.constants import OrgUnitType
 
         try:
             organization = Organization.objects.get(slug=options["org"])
@@ -86,6 +100,23 @@ class Command(BaseCommand):
             .values_list("user_id", flat=True)
             .distinct()
         )
+        # Qrup filtri — parol siyahısı praktikada QRUP-QRUP çap olunur (kurator
+        # öz qrupuna paylayır), ona görə hədəf dəsti akademik qeyddən daraldılır.
+        group_name = (options.get("group") or "").strip()
+        if group_name:
+            from apps.registrar.models import StudentAcademicRecord
+
+            group_unit = (
+                OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
+                .filter(Q(name__iexact=group_name) | Q(code__iexact=group_name))
+                .first()
+            )
+            if group_unit is None:
+                raise CommandError(f"Qrup tapılmadı: {group_name!r}")
+            in_group = StudentAcademicRecord.objects.filter(organization=organization, group=group_unit).values_list(
+                "student_id", flat=True
+            )
+            student_user_ids = set(student_user_ids) & set(in_group)
         users = (
             User.objects.filter(id__in=list(student_user_ids), is_active=True)
             .filter(is_superuser=False, is_staff=False)

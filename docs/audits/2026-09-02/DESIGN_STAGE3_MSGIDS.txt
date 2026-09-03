@@ -1,0 +1,155 @@
+# Dizayn Mərhələ 3 (ekran 08 «Tələbə qəbulu», 09 «Tələbə reyestri») — YENİ msgid-lər
+#
+# .po/.mo fayllarına TOXUNULMAYIB (paralel işləyən i18n agenti doldurur).
+# Bütün mətnlər `pgettext` / `{% trans … context %}` ilədir.
+# Kontekst: 8 · msgid: 134
+
+## accounts.student_admission  (39)
+1 · ATİS şablonunu endirin
+2 · Faylı yükləyin və yoxlayın
+ATİS qəbul faylı
+ATİS sütunları
+ATİS-dən gələn qəbul siyahısı yüklənir, sistem sətirləri yoxlayır (FİN təkrarı, ixtisas kodunun uyğunluğu, sənəd tamlığı), sonra tələbələr ixtisasın qruplarına təyin edilir. Qrup təklifi avtomatikdir — dil bölməsi və boş yerə görə; operator onu dəyişə bilər.
+Avtomatik təklif — əl ilə dəyişilə bilər
+BLOKLAYAN XƏTA
+Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib qrup üzrə tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq.
+Bloklayan xəta olan sətir qrupa təyin edilə bilmir
+Boş şablonu endir
+CƏMİ SƏTİR
+Fayl seçilməyib
+Forma / dil
+Parolları CSV kimi endir
+Qrup adı
+Qrup ixtisasın altında yaranır; tutum və dil bölməsi sonradan struktur ağacından dəyişdirilə bilər.
+Qrup kodu
+Qrup təyinatı
+Qrupu yarat
+Qəbul axınının addımları
+Qəbul balı
+Qəbul olduğu ixtisas
+Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox {{ limit }} sətir, ölçü limiti {{ size }} MB.
+Sətir
+Tədris dili
+Təhsil haqqı
+Tələbə
+Tələbə Xidmətləri Mərkəzi
+Tələbə qəbulu üçün icazəniz yoxdur — `user.import` açarı tələb olunur.
+Tətbiq et
+Universitetin öz adlandırma qaydası tətbiq olunur — təklif yalnız ilkin dəyərdir.
+XƏBƏRDARLIQ
+YOXLAMADAN KEÇDİ
+Yeni qrup yarat
+Yer limiti
+Yoxla (quru icra)
+Yoxlamanın nəticəsi
+İxtisas kodu ilə fakültəyə düşür
+İzah
+
+## accounts.student_registry  (62)
+ATİS nömrəsi
+Ad Soyad
+Ad, FİN və ya tələbə kodu
+Axtarış
+Bu tələbə üzrə hərəkət əmri yoxdur.
+CSV ixracı
+CƏMİ TƏLƏBƏ
+Dil bölməsi
+DÖVLƏT SİFARİŞİ
+Fakültə
+Filtrə uyğun tələbə yoxdur
+Forma
+FİN
+Hamısı
+Hərəkət tarixçəsi
+Hərəkət əmri
+Kart
+Kurs
+Məzuniyyət / xaric / məzun
+Məzuniyyətin bitmə tarixi
+Nəticə: %(count)d sətir
+Qrup
+QİYABİ
+Qəbul balı
+Qəbul ili
+Rolunuzda struktur əhatəsi (fakültə/ixtisas) təyin edilməyib — administratorla əlaqə saxlayın. Əhatəsiz rol bütün universiteti görmür.
+Seçin
+Sizə təyin olunmuş əhatə yoxdur
+Status
+Statusu
+Süzgəcləri dəyişin və ya axtarış sözünü qısaldın.
+Toplanmış kredit
+Təhsil forması
+Təhsil haqqı
+Tələbə
+Tələbə hərəkəti — əmr
+Tələbə kartı
+Tələbə kodu
+Tələbə reyestrinə baxış üçün icazəniz yoxdur — administratorla əlaqə saxlayın.
+Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət yalnız əmr nömrəsi, tarix və əsaslandırma ilə yazılır.
+XÜSUSİ STATUSLU
+Yalnız sizin əhatənizdəki, boş yeri olan qruplar.
+Yeni ixtisas
+Yeni ixtisasın həmin qəbul ili üçün tədris planı olmalıdır.
+Yeni qrup
+Yeni təhsil forması
+ÜOMG (GPA)
+İmtahan növü
+İxrac üçün icazəniz yoxdur.
+İxtisas
+İxtisas və qrup
+ƏYANİ
+Əmr
+Əmr nömrəsi
+Əmr yazıldıqdan sonra silinmir və dəyişdirilmir; tələbənin statusu dərhal dəyişir və tarixçəyə bir sətir əlavə olunur.
+Əmri yaz
+Əmrin tarixi
+Əməliyyatın növü
+Əməllər
+Ərizə, arayış və ya protokol — opsional (ən çox 10 MB).
+Əsas sənəd
+Əsas və əsaslandırma
+
+## organizations.permission.label  (3)
+Qəbulda tələbəni qrupa təyin etmək və qrup yaratmaq
+Tələbə hərəkəti əmri yazmaq (köçürmə, məzuniyyət, bərpa, xaric)
+Tələbə reyestrinə baxış (hərəkət tarixçəsi və ixrac)
+
+## profile.sidebar  (3)
+Tələbə Xidmətləri
+Tələbə qəbulu
+Tələbə reyestri
+
+## registrar.funding_type  (2)
+Dövlət sifarişi
+Ödənişli
+
+## registrar.model.student_movement.meta  (2)
+student movement
+student movements
+
+## student_intake  (19)
+ATİS nömrəsi
+ATİS siyahısındakı sətir nömrəsi
+Bu şifrlə birdən çox ixtisas var — dəqiqləşdirin: %s
+Məsələn 543,5
+Məsələn «I qrup»
+Qrup avtomatik təklif olundu: %s — tətbiqdən əvvəl dəyişə bilərsiniz.
+Qəbul balı
+Qəbul balı tanınmadı — boş saxlanılır.
+Rəsmi şifr (NK 503) — qrup verilməyibsə MƏCBURİ
+Təhsil forması
+Təhsil forması tanınmadı — «əyani» tətbiq olunur.
+Təhsil haqqı
+Təhsil haqqı sütunu tanınmadı — «ödənişli» tətbiq olunur.
+Uyğun boş qrup tapılmadı — tətbiqdən əvvəl qrup seçin və ya yeni qrup yaradın.
+dövlət sifarişi / ödənişli
+İmtahan növü
+İxtisas kodu
+İxtisas kodu universitetdə tapılmadı
+əyani / qiyabi / distant
+
+## ui.status  (4)
+Akademik məzuniyyət
+Aktiv
+Məzun
+Xaric edilib

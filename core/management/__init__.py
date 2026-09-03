@@ -1,0 +1,1 @@
+"""Shared management-command infrastructure."""

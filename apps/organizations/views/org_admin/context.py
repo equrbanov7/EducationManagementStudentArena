@@ -177,6 +177,24 @@ def _structure_ajax_response(request, context, *, status=200):
     )
 
 
+def _has_org_wide_membership(user, organization) -> bool:
+    """İstifadəçinin bu təşkilatda ORGANIZATION scope-lu aktiv rolu varmı?
+
+    Belə rol (HR, org_admin, imtahan mərkəzi…) bütün təşkilatı görməkdə
+    haqlıdır; UNIT scope-lu rol isə yalnız öz alt-ağacını görməlidir və
+    ``scope_unit`` boşdursa sahəsi müəyyən deyil → heç nə (QA B-2).
+    """
+
+    from core.constants import RoleScopeType
+
+    from ...services import get_active_memberships
+
+    return any(
+        membership.role.scope_type == RoleScopeType.ORGANIZATION
+        for membership in get_active_memberships(user, organization)
+    )
+
+
 def build_organization_members_context(request, organization):
     from ...scoping import get_unit_scope, scope_memberships_by_unit
     from ...services import get_user_org_role_level
@@ -190,6 +208,12 @@ def build_organization_members_context(request, organization):
     members = organization.memberships.filter(is_active=True).select_related("user", "role", "scope_unit")
     if scope.is_unit_scoped:
         members = scope_memberships_by_unit(members, scope, organization)
+    elif not scope.is_org_wide and not _has_org_wide_membership(request.user, organization):
+        # QA 2026-08-28 (B-2): scope_unit-i TƏYİN EDİLMƏMİŞ unit-rolu (dekan,
+        # kafedra müdiri) əvvəllər filtrsiz keçib BÜTÜN təşkilatın üzv siyahısını
+        # görürdü — sahəsi müəyyən olmayan rol heç nə görməməlidir (fail-closed).
+        # Org-səviyyəli rollar (HR, org_admin və s.) bu qoldan təsirlənmir.
+        members = members.none()
 
     role_filter = (request.GET.get("role") or "").strip()
     if role_filter:

@@ -18,6 +18,7 @@ from django.utils import timezone
 from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -25,7 +26,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_ci_e2e_scenario"
     help = "Seed a deterministic multi-role E2E scenario for Playwright role and regression tests."
 
     ACTIVE_ORG_NAME = "CI Role Matrix University"

@@ -8,12 +8,13 @@ from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import corrections, exam_bridge, gradebook, services
 from apps.registrar.models import (
     AttendanceStatus,
     CorrectionField,
     CorrectionReason,
+    CorrectionReversal,
     Curriculum,
     CurriculumSubject,
     JournalCorrection,
@@ -75,6 +76,26 @@ class _BaseJournalSetup(TestCase):
             )
             self.teacher = User.objects.create_user("cx_teacher", "cx_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("cx_student", "cx_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.owner,
+                organization=self.org,
+                role=self.org.roles.get(name="rector"),
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
@@ -194,7 +215,7 @@ class CorrectionServiceTest(_BaseJournalSetup):
 
     def test_revert_last_grade_correction_restores_previous_value(self):
         # Səhvən edilmiş düzəlişi geri al → xana köhnə (müəllim) dəyərinə qayıdır,
-        # sarı işarə (JournalCorrection) itir.
+        # aktiv sarı işarə itir, amma JournalCorrection sübutu qalır.
         _lesson, mark = self._seminar_mark(11, 3)
         with bypass_rls():
             corrections.apply_correction(
@@ -212,7 +233,10 @@ class CorrectionServiceTest(_BaseJournalSetup):
             self.assertTrue(ok)
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal("3"))  # köhnə dəyər qayıtdı
-        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())  # sarı getdi
+        correction = JournalCorrection.objects.get(lesson_mark=mark)
+        self.assertTrue(CorrectionReversal.objects.filter(journal_correction=correction).exists())
+        with bypass_rls():
+            self.assertNotIn(str(mark.id), corrections.corrections_map_for_offering(self.offering))
 
     def test_revert_empty_cell_correction_deletes_the_fabricated_mark(self):
         # Boş xanaya (əvvəl mark yox) edilən düzəliş geri alınanda saxta LessonMark
@@ -241,7 +265,12 @@ class CorrectionServiceTest(_BaseJournalSetup):
             # Geri al → saxta mark tam gedir, xana boş.
             self.assertTrue(corrections.revert_last_grade_correction(mark=mark, by_user=self.admin))
         self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
-        self.assertFalse(JournalCorrection.objects.filter(id=corr.id).exists())
+        corr.refresh_from_db()
+        self.assertIsNone(corr.lesson_mark_id)
+        self.assertEqual(corr.lesson_mark_ref, mark.id)
+        self.assertEqual(corr.lesson_ref, lesson.id)
+        self.assertEqual(corr.enrollment_ref, self.enrollment.id)
+        self.assertTrue(CorrectionReversal.objects.filter(journal_correction=corr).exists())
 
     def test_float_score_rejected(self):
         _lesson, mark = self._seminar_mark(4, 3)
@@ -603,7 +632,7 @@ class CorrectionViewTest(_BaseJournalSetup):
     def test_delete_endpoint_reverts_correction(self):
         _lesson, mark = self._seminar_mark(9, 4)
         with bypass_rls():
-            corrections.apply_correction(
+            correction = corrections.apply_correction(
                 mark=mark,
                 field=CorrectionField.SCORE,
                 new_score=10,
@@ -615,14 +644,14 @@ class CorrectionViewTest(_BaseJournalSetup):
         self._login_corrector()
         resp = self.client.post(
             f"/jurnal/duzelis/{self.offering.id}/sil/",
-            data={"type": "grade", "mark_id": str(mark.id)},
+            data={"type": "grade", "mark_id": str(mark.id), "correction_id": str(correction.id)},
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.json().get("ok"))
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal("4"))
-        self.assertFalse(JournalCorrection.objects.filter(lesson_mark=mark).exists())
+        self.assertTrue(CorrectionReversal.objects.filter(journal_correction=correction).exists())
 
 
 class LessonCorrectionServiceTest(_BaseJournalSetup):
@@ -734,7 +763,7 @@ class ItemCorrectionTest(_BaseJournalSetup):
 
     def test_selfwork_correction_applies_reverts_and_requires_doc(self):
         from apps.registrar import item_corrections, journal_extras
-        from apps.registrar.models import SelfWorkCorrection, SelfWorkMark
+        from apps.registrar.models import SelfWorkMark
 
         with bypass_rls():
             topic = journal_extras.add_selfwork_topic(offering=self.offering, title="SW1")
@@ -772,13 +801,16 @@ class ItemCorrectionTest(_BaseJournalSetup):
                 )
             )
             self.assertFalse(SelfWorkMark.objects.get(topic=topic, enrollment=self.enrollment).done)
-            self.assertFalse(SelfWorkCorrection.objects.filter(topic=topic, enrollment=self.enrollment).exists())
+            self.assertTrue(CorrectionReversal.objects.filter(selfwork_correction=corr).exists())
+            self.assertNotIn(
+                f"{topic.id}:{self.enrollment.id}", item_corrections.selfwork_corrections_map(self.offering)
+            )
 
     def test_coursework_correction_applies_and_reverts(self):
         from decimal import Decimal as D
 
         from apps.registrar import item_corrections, journal_extras
-        from apps.registrar.models import CourseWork, CourseWorkCorrection
+        from apps.registrar.models import CourseWork
 
         with bypass_rls():
             journal_extras.save_course_work(
@@ -805,13 +837,13 @@ class ItemCorrectionTest(_BaseJournalSetup):
                 item_corrections.revert_last_coursework_correction(enrollment=self.enrollment, by_user=self.admin)
             )
             self.assertEqual(CourseWork.objects.get(enrollment=self.enrollment).score, D("50"))
-            self.assertFalse(CourseWorkCorrection.objects.filter(enrollment=self.enrollment).exists())
+            self.assertTrue(CorrectionReversal.objects.filter(coursework_correction=corr).exists())
 
     def test_component_kollokvium_correction_applies_and_reverts(self):
         from decimal import Decimal as D
 
         from apps.registrar import item_corrections, journal_extras
-        from apps.registrar.models import ComponentScore, ComponentScoreCorrection
+        from apps.registrar.models import ComponentScore
 
         with bypass_rls():
             comp = list(journal_extras.ensure_kollokviums(self.offering))[0]
@@ -846,9 +878,7 @@ class ItemCorrectionTest(_BaseJournalSetup):
                 )
             )
             self.assertFalse(ComponentScore.objects.filter(component=comp, enrollment=self.enrollment).exists())
-            self.assertFalse(
-                ComponentScoreCorrection.objects.filter(component=comp, enrollment=self.enrollment).exists()
-            )
+            self.assertTrue(CorrectionReversal.objects.filter(component_correction=corr).exists())
 
 
 class JournalAccessTest(_BaseJournalSetup):

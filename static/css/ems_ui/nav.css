@@ -1,0 +1,291 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/nav.css — Ağac naviqasiyası · tab-lar · stepper · addım naviqasiyası
+   (handoff §4 komponentləri 10, 11 + ağac (ekran 01) + tab `aria-current`)
+
+   ⚠ Bunlar SOL SIDEBAR-a aid DEYİL. Kabinetin sol sidebar-ı olduğu kimi
+   qalır və HƏMİŞƏ görünür; bu naviqasiyalar panelin İÇİNDƏKİ ikinci
+   səviyyəli naviqasiyalardır.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tab-lar ────────────────────────────────────────────────────────────── */
+.ems-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-6);
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.ems-tabs__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-tab);
+    padding: 0 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ems-tabs__btn:hover {
+    color: var(--ems-text);
+}
+
+/* Aktiv tab `aria-current="page"` daşıyır (handoff §7). */
+.ems-tabs__btn[aria-current] {
+    color: var(--ems-primary-800);
+    border-bottom-color: var(--ems-primary-600);
+}
+
+.ems-tabs__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.ems-tabs__btn[aria-current] .ems-tabs__count {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+/* ── Stepper / mərhələ zolağı ───────────────────────────────────────────── */
+.ems-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-6);
+    padding: 0;
+    list-style: none;
+}
+
+.ems-step {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.ems-step__top {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.ems-step__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 50%;
+    border: 1.5px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+}
+
+.ems-step__label {
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    color: var(--ems-text);
+    text-wrap: pretty;
+}
+
+.ems-step__note {
+    margin-top: 5px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-step__bar {
+    margin-top: 8px;
+}
+
+/* Tamamlanıb — yaşıl tik. */
+.ems-step--done {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.ems-step--done .ems-step__mark {
+    border-color: var(--ems-success-700);
+    background: var(--ems-success-700);
+    color: var(--ems-neutral-0);
+}
+
+/* Cari — primary. */
+.ems-step--current {
+    border-color: var(--ems-primary-600);
+    border-width: 2px;
+    padding: 11px 13px;
+    background: var(--ems-primary-50);
+}
+
+.ems-step--current .ems-step__mark {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+/* Gözləyir — boz (default). Xəta — qırmızı. */
+.ems-step--error {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+}
+
+.ems-step--error .ems-step__mark {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+/* ── Addım naviqasiyası (sol sütun — sillabus redaktoru üslubu) ─────────── */
+.ems-stepnav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ems-stepnav__btn {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    width: 100%;
+    min-height: var(--ems-h-field);
+    padding: 8px 12px;
+    border: 0;
+    border-left: 3px solid transparent;
+    border-radius: 0 var(--ems-r-md) var(--ems-r-md) 0;
+    background: none;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ems-stepnav__btn:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-stepnav__btn[aria-current] {
+    border-left-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+}
+
+.ems-stepnav__mark--done {
+    color: var(--ems-success-700);
+}
+
+.ems-stepnav__mark--error {
+    color: var(--ems-danger);
+}
+
+.ems-stepnav__mark--todo {
+    color: var(--ems-neutral-300);
+}
+
+/* ── Ağac naviqasiyası (ekran 01 — klaviatura ilə tam keçid) ────────────── */
+.ems-tree,
+.ems-tree__group {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ems-tree__group {
+    /* Səviyyə dərinliyi DİNAMİKDİR → şablon `--ems-tree-depth` verir. */
+    padding-left: 18px;
+    border-left: 1px solid var(--ems-neutral-100);
+    margin-left: 12px;
+}
+
+.ems-tree__row {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    width: 100%;
+    min-height: var(--ems-h-xs);
+    padding: 6px 10px;
+    border: 0;
+    border-radius: var(--ems-r-md);
+    background: none;
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.ems-tree__row:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-tree__row[aria-selected="true"] {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.ems-tree__twisty {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    flex: none;
+    color: var(--ems-neutral-400);
+    transition: transform 0.12s ease;
+}
+
+.ems-tree__row[aria-expanded="true"] .ems-tree__twisty {
+    transform: rotate(90deg);
+}
+
+/* Yarpaq qovşaqda twisty yeri saxlanılır ki, mətnlər düzülsün. */
+.ems-tree__twisty--leaf {
+    visibility: hidden;
+}
+
+.ems-tree__type {
+    margin-left: auto;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+}
+
+/* «Rəhbəri olmayan bölmə» — vurğulanır (ekran 01 xüsusi vəziyyəti). */
+.ems-tree__row--flagged {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+@media (max-width: 768px) {
+    .ems-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .ems-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+}

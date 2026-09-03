@@ -1,0 +1,302 @@
+"""İCAZƏ-ƏSASLI profil bölmə qapıları (rol adına baxmayan menyu görünürlüyü).
+
+Niyə ayrı modul? ``rbac.py`` modul ölçü büdcəsinə (SOFT_CAP=600) yaxınlaşmışdı və
+bu üç qapı eyni naxışı təkrarlayır: «aktorun effektiv icazələrini topla → açar
+varsa bölməni ``allowed_sections``-a əlavə et». Bir yerə yığmaqla həm fayl kiçilir,
+həm də yeni icazə-qapılı bölmə əlavə etmək bir sətrə düşür.
+
+ORTAQ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
+
+* Bunlar YALNIZ GÖRÜNÜRLÜKDÜR. Faktiki data qapısı hər modulun öz servis
+  qatındadır (``services/rim/policy.py``, ``services/people/permissions.py``,
+  ``apps/audit/views.py``) və orada FAIL-CLOSED yenidən yoxlanılır.
+* Rol ADI ilə qapılmır — açar icazə redaktorundan istənilən rola verilib
+  yığışdırıla bilir; kodda rol siyahısı saxlasaydıq hər yeni rol üçün deploy
+  lazım olardı (sahibin «tənzimlənən olsun» tələbi).
+"""
+
+from __future__ import annotations
+
+
+def _effective_permissions(user, organization) -> list:
+    """Aktorun aktiv təşkilatdakı effektiv icazələri (per-request memoizasiyalı).
+
+    ``rbac`` modulundan LOKAL import olunur: ``rbac`` bu modulu yuxarıda import
+    edir, yəni modul səviyyəsində əks-import dövr yaradardı.
+    """
+    from .rbac import _collect_actor_permissions
+
+    permissions, _grantable = _collect_actor_permissions(user, organization)
+    return list(permissions)
+
+
+def apply_permission_section_gates(
+    user,
+    organization,
+    allowed_sections: set,
+    *,
+    is_superadmin: bool,
+    is_owner: bool,
+) -> dict:
+    """İcazə-qapılı bölmələri ``allowed_sections``-a əlavə edir və bayraqları qaytarır.
+
+    Qaytarılan bayraqlar ``_role_capabilities`` cavabına düşür (şablonlar və
+    testlər onlara söykənir): ``can_view_audit``, ``can_use_rim_center``,
+    ``can_view_people_teachers``, ``can_view_people_students``, ``can_view_syllabus``,
+    ``can_edit_syllabus``, ``can_review_syllabus``, ``can_reassign_teaching``,
+    ``can_manage_schedule``, ``can_import_students``, ``can_use_applications``,
+    ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
+    ``can_review_legacy_grades``, ``can_watch_legacy_grades``, ``can_view_workload``,
+    ``can_manage_workload``, ``can_distribute_workload``, ``can_view_structure_tree``,
+    ``can_view_catalog``, ``can_manage_catalog``.
+    """
+    from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
+    from apps.accounts.services.rim.policy import RIM_PERMISSIONS
+    from core.permissions import has_permission
+
+    privileged = bool(is_superadmin or is_owner)
+
+    # Təşkilat konteksti yoxdursa icazə həll oluna bilmir — yalnız superadmin/sahib.
+    permissions: list = []
+    if organization is not None and not privileged:
+        permissions = _effective_permissions(user, organization)
+
+    # Audit jurnalı: `audit.view` (rektor/prorektor "*", imtahan mərkəzi, HR).
+    can_view_audit = privileged or has_permission(permissions, "audit.view")
+
+    # «RİM mərkəzi»: `user.*` açarlarından HƏR HANSI BİRİ bölməni açır; konkret
+    # düymələr (parol/blok/silmə/redaktə) öz icazəsi ilə AYRICA qapılıdır. Yəni
+    # yalnız `user.search` daşıyan operator bölməni görür, dağıdıcı düyməsi olmur.
+    # Bölmə superadmin-only DEYİL: köhnə sistemdən idxal olunmuş 8000+ hesabın
+    # parol bərpası cutover-da gündəlik əməliyyatdır.
+    can_use_rim_center = privileged or any(has_permission(permissions, perm) for perm in RIM_PERMISSIONS)
+
+    # «Müəllimlər» / «Tələbələr» kataloqu — iki AYRI açar: «yalnız tələbələri
+    # görən» tyutor kimi rollar qurula bilsin.
+    can_view_people_teachers = privileged or has_permission(permissions, PERM_VIEW_TEACHERS)
+    can_view_people_students = privileged or has_permission(permissions, PERM_VIEW_STUDENTS)
+
+    # «Sillabuslar» + «Sillabus redaktoru» — iki AYRI açar: `syllabus.view` yalnız
+    # oxu (kafedra müdiri, dekan), `syllabus.edit` isə redaktə (müəllim). Redaktor
+    # AYRICA tam səhifə DEYİL — profil shell-inin içində açılır (sol sidebar qalır),
+    # ona görə eyni qapıdan keçir. Konkret sillabusun görünməsi/redaktəsi
+    # `apps/syllabus/services/scoping.py`-da fail-closed yenidən yoxlanılır.
+    can_edit_syllabus = privileged or has_permission(permissions, "syllabus.edit")
+    can_view_syllabus = can_edit_syllabus or has_permission(permissions, "syllabus.view")
+
+    # «Sillabus təsdiqi» AYRICA açardır: `syllabus.review`. Müəllim (`edit`) bu
+    # bölməni GÖRMÜR — qərar səthi ilə redaktə səthi bir-birinə açılmır. Menyu
+    # görünürlüyü icazə açarına baxır, KONKRET sillabusun görünməsi isə
+    # `apps/syllabus/services/coverage.py`-da struktur əhatəsi ilə fail-closed
+    # yenidən süzülür (əhatəsiz istifadəçi boş vəziyyət görür).
+    can_review_syllabus = privileged or has_permission(permissions, "syllabus.review")
+
+    # «Sual təsdiqi» — `question.chair_review`. Müəllimin İmtahan Mərkəzinə
+    # göndərdiyi sual dəsti ƏVVƏLCƏ kafedra müdirindən keçir. Açar QƏSDƏN
+    # `exam.*` ailəsindən KƏNARDADIR: `exam.*` daşıyan dekan/mərkəz/müəllim
+    # bu səlahiyyəti avtomatik almamalıdır. Menyu görünürlüyü yalnız açara
+    # baxır; KONKRET göndərişin qərarı `apps/exams/services/
+    # question_chair_units.py`-da struktur əhatəsi ilə fail-closed yoxlanılır
+    # (əhatəsiz aktor boş növbə görür).
+    can_review_question_chair = privileged or has_permission(permissions, "question.chair_review")
+
+    # «Fənn təhvili» — `journal.reassign`. Menyu görünürlüyü YALNIZ açara baxır;
+    # KONKRET fənnin təhvil oluna bilməsi (öz fakültəsindədirmi, jurnal bağlıdırmı,
+    # semestr keçmişdirmi) `apps/registrar/handover.py`-da fail-closed yenidən
+    # yoxlanılır. Açarı olan, amma `scope_unit`-i təyin edilməmiş UNIT rolu
+    # bölməni görür və BOŞ siyahı alır — səssiz 403 əvəzinə anlaşılan boşluq.
+    can_reassign_teaching = privileged or has_permission(permissions, "journal.reassign")
+
+    # «Cədvəl idarəetməsi» — `schedule.manage` (proqram koordinatoru, RİM, dekan,
+    # kafedra müdiri). Qapı ROL ADINA baxmır: açar permission-editordan istənilən
+    # rola verilə bilər. ADİ MÜƏLLİMDƏ açar QƏSDƏN YOXDUR — o, «Dərs cədvəli»
+    # bölməsində öz həftəsini yalnız GÖRÜR. Konkret qrupun/açılışın idarə oluna
+    # bilməsi `apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə
+    # fail-closed yenidən yoxlanılır (əhatəsiz aktor boş siyahı görür).
+    can_manage_schedule = privileged or has_permission(permissions, "schedule.manage")
+
+    # «Tələbə idxalı» — `user.import`. QƏSDƏN RİM mərkəzinin (`user.search` və s.)
+    # açarlarından AYRIDIR: mövcud hesabı idarə etmək hüququ heç bir rola
+    # avtomatik olaraq «minlərlə yeni hesab yarat» səlahiyyəti verməməlidir
+    # (əsasnamə 5.5). Menyu görünürlüyü yalnız açara baxır; faktiki əməl
+    # `apps/accounts/services/intake/policy.py`-da fail-closed yenidən yoxlanılır.
+    can_import_students = privileged or has_permission(permissions, "user.import")
+
+    # «Müraciətlərim» — ÜÇ açardan hər hansı biri bölməni açır: göndərən
+    # (`application.create`), emalçı (`application.handle`) və ya nəzarətçi
+    # (`application.manage`). Praktikada bu, AKTİV ÜZVLÜYÜ olan hər rol deməkdir
+    # (`alumni` / `member` istisna) — panelin özü ailəyə/emalçı bayrağına görə
+    # daxildən budaqlanır, ona görə bölmə açarı BİRDİR. Aktiv üzvlüyü olmayan
+    # istifadəçidə `permissions` boşdur → bölmə görünmür (fail-closed).
+    can_use_applications = privileged or any(
+        has_permission(permissions, key) for key in ("application.create", "application.handle", "application.manage")
+    )
+
+    # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — İKİ AÇAR, QƏSDƏN FƏRQLİ ROLDA:
+    #
+    #   `final_score.entry`  → növbəni görür VƏ qərar/düzəliş yaza bilir. Bu,
+    #     ``LegacyGradeReview`` modelinin ÖZ qapısıdır (LEGACY_GRADE_REVIEW_PERMISSION)
+    #     və ``exam_score_entry``-nin də qapısıdır. Başqa açar seçsəydik düymə
+    #     görünər, əməl isə modeldə səssizcə 403 alardı.
+    #   `journal.correct`    → yalnız OXU. İKT rəhbəri düzəliş mədəniyyətinin
+    #     sahibidir və növbəni izləməlidir, amma köhnə RƏSMİ balın qərarını
+    #     imtahan mərkəzi verir. Səth ona «oxu rejimi» qeydini AÇIQ göstərir.
+    #
+    # Yazı qapısı burada DEYİL — `views/legacy_review/actions.py` ayrıca
+    # `can_review`-a baxır və model qatı üçüncü dəfə fail-closed yoxlayır.
+    can_review_legacy_grades = privileged or has_permission(permissions, "final_score.entry")
+    can_watch_legacy_grades = can_review_legacy_grades or has_permission(permissions, "journal.correct")
+
+    # «Yük bölgüsü» + «Dərs yüküm» — İKİ AYRI SƏTH, iki fərqli qapı:
+    #
+    #   `workload.distribute` / `workload.manage` → kafedra müdiri (öz kafedrası)
+    #     və RİM/prorektor; bölgü ekranını AÇIR. Konkret kafedranın əhatəyə
+    #     düşməsi `apps/workload/services/scoping.py`-da fail-closed yenidən
+    #     yoxlanılır (əhatəsi olmayan aktor boş kafedra siyahısı görür).
+    #   `workload.view` → HƏR müəllim; yalnız ÖZ bölgü sətirlərini göstərən
+    #     «Dərs yüküm» bölməsini açır (sorğu `teacher=request.user` ilə daralıb,
+    #     yəni açar başqasının yükünü GÖSTƏRMİR).
+    can_distribute_workload = privileged or has_permission(permissions, "workload.distribute")
+    can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
+    can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
+
+    # Mərhələ 4 — zəncirin üç yeni səthi. Hər biri ÖZ açarındadır (səlahiyyət
+    # ayrılığı): tədris şöbəsi göndərir, koordinator viza verir, dekan
+    # təsdiqləyir. Görünürlük yazma hüququ VERMİR — `apps/workload/actions.py`
+    # hər əməldə əhatəni fail-closed yenidən yoxlayır.
+    can_review_workload = privileged or has_permission(permissions, "workload.review")
+    can_approve_workload = privileged or has_permission(permissions, "workload.approve")
+    can_report_workload = privileged or has_permission(permissions, "workload.report")
+
+    # «Universitet strukturu» (ağac) + «Kafedra profili» — Tədris şöbəsi səthi.
+    # Qapı `unit.view` açarıdır: müəllim və tələbədə bu açar QƏSDƏN YOXDUR,
+    # dekan/kafedra müdiri/RİM-də isə var. KONKRET bölmənin görünməsi
+    # `organizations.scoping`-də struktur əhatəsi ilə fail-closed yenidən
+    # süzülür — kafedra müdiri yalnız öz kafedrasını görür, əhatəsiz aktor boş
+    # vəziyyət alır (handoff §8/8: «əhatə yoxdur ≠ bütün universitet»).
+    # AĞAC ƏMƏLLƏRİ ayrıca açarlardadır (`unit.tree_manage` / `unit.assign_head`)
+    # və POST endpoint-ində yenidən yoxlanılır — görünürlük yazma hüququ vermir.
+    can_view_structure_tree = privileged or has_permission(permissions, "unit.view")
+
+    # «İxtisaslar» + «Fənn kataloqu» — `catalog.view`. `course.*` ailəsindən
+    # QƏSDƏN AYRIDIR: dərs/açılış idarə edən müəllim avtomatik universitet
+    # kataloqunu redaktə edə bilməməlidir. Yazı açarı `catalog.manage`-dir və
+    # `registrar.catalog_actions`-da fail-closed yoxlanılır.
+    can_view_catalog = privileged or has_permission(permissions, "catalog.view")
+
+    # «Tələbə qəbulu» (08) + «Tələbə reyestri» (09) — Tələbə Xidmətləri Mərkəzi.
+    #
+    #   `user.import`           → qəbul bölməsi (fayl + hesab yaratma). QƏSDƏN
+    #     köhnə `student-intake` ilə EYNİ açardır: 08 həmin maşının genişlənmiş
+    #     görünüşüdür, yeni səlahiyyət gətirmir.
+    #   `student.registry_view` → reyestr bölməsi (əmr izi + CSV ixracı).
+    #   `student.movement`      → sətir əməlləri (əmr yazmaq); menyunu AÇMIR.
+    #   `student.assign_group`  → qəbulda qrup təyinatı / yeni qrup; menyunu AÇMIR.
+    #
+    # Yazı açarları menyu görünürlüyünə TƏSİR ETMİR — düymələr panelin içində
+    # ayrıca qapılıdır və endpoint fail-closed yenidən yoxlayır.
+    can_view_student_registry = privileged or has_permission(permissions, "student.registry_view")
+    can_move_students = privileged or has_permission(permissions, "student.movement")
+    can_assign_student_groups = privileged or has_permission(permissions, "student.assign_group")
+    can_manage_catalog = privileged or has_permission(permissions, "catalog.manage")
+
+    # «Tədris planı redaktoru» — `plan.view`. Zəncirin HƏR halqası (kafedra
+    # müdiri, dekan, Tədris şöbəsi) bölməni GÖRÜR; qərar açarları isə ayrıdır
+    # (`plan.approve_*`) və `registrar.curriculum_state`-də statusa görə
+    # fail-closed yoxlanılır — görünürlük təsdiq hüququ VERMİR.
+    can_view_plan = privileged or has_permission(permissions, "plan.view")
+    can_edit_plan = privileged or has_permission(permissions, "plan.edit")
+
+    # «Qruplar» — AKADEMİK qrup reyestri (`OrgUnit`), `unit.view` ilə açılır.
+    # ⚠️ Mövcud `groups` bölməsi BAŞQA anlayışdır (`exams.StudentGroup` — imtahan
+    # kohortu) və toxunulmur; iki səth bir-birinə çarpaz keçid verir.
+    can_manage_groups = privileged or has_permission(permissions, "unit.group_manage")
+
+    # «Semestr açılışı» — `semester.view`. Açmaq (`semester.open`), kilidləmək
+    # (`semester.lock`) və kilidi açmaq (`semester.unlock`) AYRI açarlardır:
+    # kilid geri qaytarılmır, ona görə onu açan səlahiyyət ayrıca verilir.
+    can_view_semester = privileged or has_permission(permissions, "semester.view")
+    can_open_semester = privileged or has_permission(permissions, "semester.open")
+
+    # «Keçilmiş dərslər» (ekran 21) — OXU-ONLY dərs izi. İki qapıdan biri açır:
+    #
+    #   MÜƏLLİM   → bölmə HƏR müəllimə açıqdır; sorğu `instructor=request.user`
+    #     ilə daralır, yəni açar başqasının dərsini GÖSTƏRMİR. Bayraq
+    #     `rbac_university_sections`-dəki `is_teacher`-dən gəlir (aşağıda).
+    #   `journal.roster` → NƏZARƏT görünüşü (kafedra müdiri / dekanlıq / RİM):
+    #     öz struktur alt-ağacı + «Müəllim» filtri. Konkret dərsin əhatəyə
+    #     düşməsi `apps/registrar/lessons_log.py`-da fail-closed yenidən
+    #     yoxlanılır (əhatəsiz aktor boş nəticə alır — §8/8).
+    can_supervise_lessons = privileged or has_permission(permissions, "journal.roster")
+
+    for enabled, section in (
+        (can_view_audit, "audit-log"),
+        (can_use_rim_center, "rim-center"),
+        (can_view_people_teachers, "people-teachers"),
+        (can_view_people_students, "people-students"),
+        (can_view_syllabus, "syllabus-list"),
+        (can_view_syllabus, "syllabus-editor"),
+        (can_review_syllabus, "syllabus-review"),
+        (can_review_question_chair, "question-chair-review"),
+        (can_reassign_teaching, "teaching-handover"),
+        (can_manage_schedule, "schedule-manage"),
+        (can_import_students, "student-intake"),
+        (can_use_applications, "applications"),
+        (can_watch_legacy_grades, "legacy-grade-review"),
+        (can_manage_workload, "workload-distribution"),
+        (can_view_workload, "my-workload"),
+        (can_manage_workload, "workload-center"),
+        (can_review_workload, "workload-visa"),
+        (can_approve_workload, "workload-approval"),
+        (can_report_workload, "workload-overview"),
+        (can_view_structure_tree, "org-structure-tree"),
+        (can_view_structure_tree, "chair-profile"),
+        (can_view_catalog, "programs-registry"),
+        (can_view_catalog, "subject-catalog"),
+        (can_view_plan, "curriculum-editor"),
+        (can_view_structure_tree, "groups-registry"),
+        (can_view_semester, "semester-opening"),
+        (can_import_students, "student-admission"),
+        (can_view_student_registry, "student-registry"),
+        (can_supervise_lessons, "lessons-log"),
+    ):
+        if enabled:
+            allowed_sections.add(section)
+
+    return {
+        "can_view_audit": can_view_audit,
+        "can_use_rim_center": can_use_rim_center,
+        "can_view_people_teachers": can_view_people_teachers,
+        "can_view_people_students": can_view_people_students,
+        "can_view_syllabus": can_view_syllabus,
+        "can_edit_syllabus": can_edit_syllabus,
+        "can_review_syllabus": can_review_syllabus,
+        "can_review_question_chair": can_review_question_chair,
+        "can_reassign_teaching": can_reassign_teaching,
+        "can_manage_schedule": can_manage_schedule,
+        "can_import_students": can_import_students,
+        "can_view_student_registry": can_view_student_registry,
+        "can_move_students": can_move_students,
+        "can_assign_student_groups": can_assign_student_groups,
+        "can_use_applications": can_use_applications,
+        "can_review_legacy_grades": can_review_legacy_grades,
+        "can_watch_legacy_grades": can_watch_legacy_grades,
+        "can_view_workload": can_view_workload,
+        "can_review_workload": can_review_workload,
+        "can_approve_workload": can_approve_workload,
+        "can_report_workload": can_report_workload,
+        "can_manage_workload": can_manage_workload,
+        "can_distribute_workload": can_distribute_workload,
+        "can_view_structure_tree": can_view_structure_tree,
+        "can_view_catalog": can_view_catalog,
+        "can_manage_catalog": can_manage_catalog,
+        "can_view_plan": can_view_plan,
+        "can_edit_plan": can_edit_plan,
+        "can_manage_groups": can_manage_groups,
+        "can_view_semester": can_view_semester,
+        "can_open_semester": can_open_semester,
+        "can_supervise_lessons": can_supervise_lessons,
+    }
+
+
+__all__ = ["apply_permission_section_gates"]

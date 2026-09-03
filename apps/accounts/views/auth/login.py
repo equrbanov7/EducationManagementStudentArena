@@ -36,8 +36,46 @@ LOGIN_AUDIENCE_STAFF = "staff"
 # Portal siniflənməsi: tələbə rolları vs əməkdaş (level >= moderator).
 # Tələbə (10) / lead_student (aşağı) yalnız TƏLƏBƏ portalına; müəllim (50),
 # imtahan mərkəzi (85), admin, owner və s. ƏMƏKDAŞ portalına düşür.
-STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student"}
+# ``alumni`` (arxiv, level 5) burada QAPI kimi deyil, yalnız TƏSNİFAT üçün var:
+# siyahıda olmasaydı, son fallback onu ƏMƏKDAŞ portalına yazardı. Arxiv hesabın
+# GİRİŞİ ``UserProfile.access_state='archived'`` ilə bağlanır (identity.py) —
+# portal təsnifatı heç vaxt təhlükəsizlik qapısı deyil.
+STUDENT_PORTAL_ROLE_NAMES = {"student", "lead_student", "alumni"}
 STAFF_PORTAL_MIN_LEVEL = 40
+
+
+def _membership_role_pairs(memberships):
+    """``(normalizə olunmuş rol adı, level)`` cütləri — rolsuz sətirlər atılır."""
+    pairs = []
+    for membership in memberships:
+        role = getattr(membership, "role", None)
+        if role is None:
+            continue
+        name = ProfileRole.normalize_membership_role_name(role.name)
+        pairs.append((name, getattr(role, "level", 0) or 0))
+    return pairs
+
+
+def _portal_role_pairs(user):
+    """Portal təsnifatı üçün rol cütləri: əvvəlcə AKTİV, sonra bütün üzvlüklər.
+
+    Deaktiv üzvlük GİRİŞ HÜQUQU vermir (o, ayrıca qapılarla yoxlanılır) — burada
+    yalnız hesabın KİMLİYİ soruşulur: «bu, tələbədir, yoxsa əməkdaş?». Aktiv
+    üzvlük yoxdursa deaktiv iz oxunur, çünki əks halda soft-delete/bərpa dövrü
+    keçmiş TƏLƏBƏ rolsuz görünür və köhnə fallback onu ƏMƏKDAŞ portalına
+    buraxırdı (QA Y-1, «Əlavə 2»).
+    """
+    from apps.organizations.models import Membership
+    from apps.organizations.services import get_active_memberships
+    from core.rls import bypass_rls
+
+    with bypass_rls():
+        pairs = _membership_role_pairs(get_active_memberships(user))
+        if pairs:
+            return pairs
+        return _membership_role_pairs(
+            Membership.objects.filter(user=user).select_related("role").order_by("-is_primary", "-role__level", "id")
+        )
 
 
 def classify_user_portal(user):
@@ -56,18 +94,8 @@ def classify_user_portal(user):
     if getattr(profile, "role", None) == ProfileRole.SUPERADMIN:
         return LOGIN_AUDIENCE_STAFF
 
-    role_pairs = []
     try:
-        from apps.organizations.services import get_active_memberships
-        from core.rls import bypass_rls
-
-        with bypass_rls():
-            for membership in get_active_memberships(user):
-                role = getattr(membership, "role", None)
-                if role is None:
-                    continue
-                name = ProfileRole.normalize_membership_role_name(role.name)
-                role_pairs.append((name, getattr(role, "level", 0) or 0))
+        role_pairs = _portal_role_pairs(user)
     except Exception:  # noqa: BLE001 — siniflənmə heç vaxt login-i sındırmamalıdır.
         role_pairs = []
 
@@ -222,7 +250,7 @@ class CustomLoginView(LoginView):
         return self.form_invalid(form)
 
     def _wrong_portal_message(self):
-        if self.audience == LOGIN_AUDIENCE_STUDENT:
+        if self.effective_audience() == LOGIN_AUDIENCE_STUDENT:
             return pgettext(
                 "accounts.login.gate",
                 "Bu giriş yalnız tələbələr üçündür. Müəllim və əməkdaşlar müəllim giriş "
@@ -233,14 +261,29 @@ class CustomLoginView(LoginView):
             "Bu giriş müəllim və əməkdaşlar üçündür. Tələbələr tələbə giriş səhifəsindən " "istifadə etməlidir.",
         )
 
+    def effective_audience(self):
+        """Qapının müqayisə edəcəyi portal — HEÇ VAXT ``None`` deyil.
+
+        2026-09-02 audit (P1-1): qapı əvvəllər yalnız ``self.audience`` təyin
+        olunanda işləyirdi.  Neytral ``POST /accounts/login/`` (``login_portal``
+        → ``audience=None``) isə hər hesabı — TƏLƏBƏ də daxil — buraxırdı, yəni
+        tələbə/əməkdaş ayrımı server tərəfdə DEYİL, sadəcə UI konvensiyası idi.
+
+        İndi neytral endpoint FAIL-CLOSED-dur: portal təyin olunmayıbsa
+        ƏMƏKDAŞ portalı fərz edilir, ona görə tələbə hesabı bu yoldan GİRƏ
+        BİLMİR və düzgün portala yönləndirilir.  Legacy əməkdaş klientləri
+        işləməyə davam edir.
+        """
+        return self.audience or LOGIN_AUDIENCE_STAFF
+
     def form_valid(self, form):
         # Portal qapısı: doğru parol yazılsa da, yanlış portala düşən istifadəçi
         # LOGIN OLUNMADAN geri qaytarılır (form_invalid) — səhv + düzgün portal ipucu ilə.
-        if self.audience:
-            portal = classify_user_portal(form.get_user())
-            if portal and portal != self.audience:
-                form.add_error(None, self._wrong_portal_message())
-                return self.form_invalid(form)
+        audience = self.effective_audience()
+        portal = classify_user_portal(form.get_user())
+        if portal and portal != audience:
+            form.add_error(None, self._wrong_portal_message())
+            return self.form_invalid(form)
         response = super().form_valid(form)
         self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
         return response
@@ -249,9 +292,11 @@ class CustomLoginView(LoginView):
 def login_portal(request):
     """Generic ``/accounts/login/`` — GET portal SEÇİMİ (tələbə vs müəllim/əməkdaş).
 
-    Artıq birbaşa login forması göstərmir; iki ayrı portala yönləndirir. POST isə
-    köhnə uyğunluq üçün neytral (portalsız) autentifikasiyanı saxlayır (legacy
-    linklər/klientlər). ``next`` hər iki portala ötürülür.
+    Artıq birbaşa login forması göstərmir; iki ayrı portala yönləndirir. POST
+    (legacy klientlər) hələ qəbul olunur, amma ARTIQ ROL QAPILIDIR: audience
+    təyin olunmadığından ``CustomLoginView.effective_audience()`` əməkdaş
+    portalını fərz edir, yəni TƏLƏBƏ hesabı bu yoldan girə bilmir
+    (2026-09-02 audit, P1-1). ``next`` hər iki portala ötürülür.
     """
     if request.method == "POST":
         return CustomLoginView.as_view()(request)

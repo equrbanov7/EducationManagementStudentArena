@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Ekran 15 başlıq əməlləri — «Seçilmişləri qaytar» (≥1 sətir) və
+«Dilimi TƏSDİQLƏ». Hər ikisi modal ilə təsdiqlənir; qaytarma ≥20 simvol səbəb
+tələb edir (§8/6). Düymələr GİZLƏNMİR — şərt ödənməyəndə disabled olur.{% endcomment %}
+{% with slice=workload_approval_section.slice %}
+{% if slice and slice.is_open and workload_approval_section.can_write %}
+<button type="button" class="ems-btn ems-btn--danger"
+        data-tof-bulk-action
+        data-tof-open="wlReturnDialog"
+        data-tof-prefill='{"action": "return_slice", "slice": "{{ slice.id }}"}'
+        disabled aria-disabled="true">
+    {% trans "Seçilmişləri qaytar" context "accounts.workload_approval" %}
+</button>
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-submit='{"action": "approve_slice", "slice": "{{ slice.id }}"}'
+        data-tof-confirm="{% trans 'Dilim təsdiqlənsin? Təsdiqdən sonra dilim yalnız oxunuş rejimində qalır və kafedra bölgüsü açılır.' context 'accounts.workload_approval' %}">
+    {% trans "Dilimi TƏSDİQLƏ" context "accounts.workload_approval" %}
+</button>
+{% endif %}
+{% endwith %}

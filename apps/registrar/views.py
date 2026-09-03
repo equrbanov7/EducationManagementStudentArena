@@ -12,22 +12,13 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import approval, finals, grade_audit, gradebook, schedule
-from .models import (
-    ApprovalStatus,
-    AttendanceStatus,
-    CorrectionReason,
-    CourseOffering,
-    LessonKind,
-    ScheduleSlot,
-    SlotKind,
-    WeekType,
-)
+from . import finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
+from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
 def _current_period(organization):
@@ -45,6 +36,7 @@ def _current_period(organization):
 # `_can_edit_journal` / `_is_direct_editor` adları geriyə-uyğunluq üçün saxlanılır
 # (journal_actions + pdf_views bunları views-dan idxal edir).
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
+from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
 from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
 
@@ -66,40 +58,39 @@ def journal_list(request):
 def journal_detail(request, offering_id):
     """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
 
-    Access: the offering instructor / org owner / superuser may edit; a chair
-    (kafedra müdiri) or dean (dekan) may *review* a submitted journal (read-only)
-    to approve or return it via the grade-approval chain (U7.2)."""
+    Access: the offering instructor / org owner / superuser may edit; the
+    corrector (İKT/RİM rəhbəri) may open it for a documented correction.
+
+    TƏSDİQ ZƏNCİRİ YOXDUR (sahibin qərarı, 2026-08): müəllim balı yazır və bitir.
+    Jurnalı semestr sonunda RİM toplu BAĞLAYIR — bax
+    :mod:`apps.registrar.journal_close`."""
     offering = _offering_or_404(request, offering_id)
     from apps.registrar import corrections as corrections_service
+    from apps.registrar import guest_roster
 
-    appr = approval.approval_context(offering=offering, user=request.user)
+    journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
     # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    can_review = approval.can_chair_approve(
-        request.user, offering.organization, offering=offering
-    ) or approval.can_dean_approve(request.user, offering.organization, offering=offering)
-    # Do not leak existence: only editors, correctors (İKT rəhbəri/admin), or
-    # reviewers of an already-submitted journal, may open the page.
-    if not can_edit_perm and not can_correct and not (can_review and appr["status"] != ApprovalStatus.DRAFT):
+    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/
+    # dekanlıq. Onlar müəllim deyil: jurnalı OXU rejimində açırlar, xanaya
+    # toxuna bilmirlər (POST aşağıda `is_direct_editor` ilə kəsilir).
+    # İCAZƏ (səhifəni aça bilirmi) ilə ƏMƏL (siyahını dəyişə bilirmi) AYRIDIR:
+    # bağlanmış jurnal / keçmiş dövr koordinatoru səhifədən qovmur (tarixçəni
+    # oxuya bilir), amma «alt qrupdan əlavə et» səthini tamamilə gizlədir.
+    roster_scope = guest_roster.can_manage_offering_roster(request.user, offering)
+    can_manage_roster = roster_scope and guest_roster.roster_is_open(offering)
+    # Təhvil verən köhnə müəllim: AÇIR, yazmır (bax journal_access şərhi).
+    handover_observer = _can_observe_journal(request.user, offering)
+    # Səhifəni yalnız redaktor / korrektor / siyahı idarəçisi / köhnə müəllim açır.
+    if not can_edit_perm and not can_correct and not roster_scope and not handover_observer:
         raise Http404
     # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
     correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
 
     if request.method == "POST":
         action = request.POST.get("action")
-        # Grade-approval chain actions (services enforce their own RBAC).
-        if action == "submit_approval":
-            return _handle_approval(request, offering, approval.submit_for_approval, _("Jurnal təsdiqə göndərildi."))
-        if action == "chair_approve":
-            return _handle_approval(request, offering, approval.chair_approve, _("Kafedra təsdiqi verildi."))
-        if action == "dean_approve":
-            return _handle_approval(
-                request, offering, approval.dean_approve, _("Dekan təsdiqi verildi — qiymətlər rəsmiləşdi.")
-            )
-        if action == "return_revision":
-            return _handle_return(request, offering)
         # Birbaşa redaktə əməliyyatları YALNIZ müəllim/sahib/superuser üçün. Korrektor
         # (İKT) buradan keçə bilməz — dəyişikliyi düzəliş rejimi (correction_apply,
         # sənədli) ilə edir. Beləcə düzəliş rejimi aktiv olmadan heç nə dəyişmir.
@@ -114,40 +105,66 @@ def journal_detail(request, offering_id):
         if action == "save_component_scores":
             return _handle_save_component_scores(request, offering)
         if action == "publish":
-            finals.publish_offering(offering=offering, by_user=request.user)
-            messages.success(request, _("Jurnal yekunlaşdırıldı."))
-            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+            raise Http404
         return _handle_save_marks(request, offering)
 
     import datetime as _dt
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_extras
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
+    legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     coursework_rows = journal_extras.get_course_work_rows(offering)
     finals_data = finals.get_offering_results(offering=offering)
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
+    # Çox cəhd (sahibin qərarı M2): rəsmi SONUNCU cəhddir, əvvəlkilərin balı
+    # itmir — müəllim görünüşündə «Yekun» tabının QEYD sütununda açıq göstərilir.
+    from apps.registrar import exam_attempt_history
+
+    # Toplu oxu (tək sorğu) — sətir-sətir ``attempt_rows_for_enrollment``
+    # 555 tələbəli açılışda 555 sorğu edirdi (2026-09-02 performans ölçməsi).
+    attempts_by_student = exam_attempt_history.attempt_rows_by_student(
+        student_ids=[row["enrollment"].student_id for row in finals_data["rows"]],
+        subject_id=offering.subject_id,
+        organization=offering.organization,
+    )
+    attempts_map = {
+        row["enrollment"].id: attempts_by_student.get(row["enrollment"].student_id, []) for row in finals_data["rows"]
+    }
     for row in finals_data["rows"]:
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
+        row["attempts"] = attempts_map.get(row["enrollment"].id, [])
 
     today = _tz.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
+    rooms = lesson_rooms.lesson_room_choices(offering)
+    syllabus_gate = journal_policy.syllabus_gate(offering)
 
     context = {
         "offering": offering,
         "journal": journal,
         "corrections_map": corrections_map,
         "finals": finals_data,
-        "final_breakdown": journal_extras.get_final_breakdown(offering),
+        "final_breakdown": _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map),
         "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
         "selfwork_board": journal_extras.get_selfwork_board(offering),
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
-        "can_edit": is_direct_editor and not appr["is_locked"],
-        "approval": appr,
+        "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
+        "handover_observer": handover_observer,
+        "journal_locked": journal_locked,
+        # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
+        "journal_close_notice": journal_close_notices.journal_banner(offering, today),
+        # Sillabus vəziyyəti: xəbərdarlıq zolağı + «Sillabusa bax» keçidi.
+        # ⚠️ Jurnalı KİLİDLƏMİR — yalnız məlumat verir (bax syllabus_notice.py).
+        "syllabus_notice": syllabus_notice.journal_syllabus_notice(offering),
+        # README §8/2 qapısı — ORG SİYASƏTİ (default söndürülü).  Açıq olduqda
+        # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
+        # yuxarıda söndürülür) və panel kilid + CTA göstərir.
+        "syllabus_gate": syllabus_gate,
         "grade_history": grade_audit.get_grade_history(offering=offering),
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
@@ -161,6 +178,12 @@ def journal_detail(request, offering_id):
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
         "can_correct_journal": can_correct,
+        # «Alt qrupdan tələbə əlavə et» düyməsi + sətir çipindəki geri götürmə.
+        # Kilidli/keçmiş dövrdə False → düymə, modal və JS yüklənmir; «alt qrup»
+        # çipi isə oxu-rejimində qalır (bax _jd_grid.html).
+        "can_manage_roster": can_manage_roster,
+        # Əhatəsi var, amma jurnal dondurulub — səbəbi göstərmək üçün.
+        "roster_frozen_reason": guest_roster.roster_block_reason(offering) if roster_scope else "",
         "can_override_lessons": bool(
             getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
         ),
@@ -170,6 +193,10 @@ def journal_detail(request, offering_id):
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
         "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),
+        # Dərs otağı: korpus (bina) → otaq kaskadı. Korpus ayrıca model deyil,
+        # otağın öz sahəsidir; siyahı kiçik olduğu üçün modala JSON kimi düşür.
+        "lesson_rooms": rooms,
+        "lesson_buildings": lesson_rooms.lesson_building_choices(rooms),
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
@@ -183,6 +210,16 @@ def journal_detail(request, offering_id):
 
         context.update(item_corrections.annotate_normal_view(offering, context))
     return render(request, "registrar/journal_detail.html", context)
+
+
+def _with_attempts(breakdown, attempts_map):
+    """«Yekun» tabının sətirlərinə rəqəmsal cəhd tarixçəsini qoş (M2).
+
+    ``journal_extras.get_final_breakdown`` modul-ölçü budcəsinin tam həddindədir,
+    ona görə qoşma burada — view qatında — edilir (hesablama dəyişmir)."""
+    for row in breakdown.get("rows", []):
+        row["attempts"] = attempts_map.get(row["enrollment"].id, [])
+    return breakdown
 
 
 def _org_rubrics(organization):
@@ -202,10 +239,7 @@ def rubric_grade_view(request, offering_id, component_id):
     from apps.registrar import rubrics as rubrics_service
     from apps.registrar.models import AssessmentComponent
 
-    offering = get_object_or_404(
-        CourseOffering.objects.select_related("subject", "period", "group", "organization"),
-        pk=offering_id,
-    )
+    offering = _offering_or_404(request, offering_id)
     # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
     if not _is_direct_editor(request.user, offering):
         raise Http404
@@ -216,6 +250,8 @@ def rubric_grade_view(request, offering_id, component_id):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "#tab-components")
 
     if request.method == "POST":
+        from django.core.exceptions import ValidationError
+
         entries = []
         for key, raw in request.POST.items():
             if not key.startswith("rpoints__"):
@@ -225,12 +261,15 @@ def rubric_grade_view(request, offering_id, component_id):
                 continue
             _prefix, criterion_id, enrollment_id = parts
             entries.append({"criterion_id": criterion_id, "enrollment_id": enrollment_id, "points": raw})
-        written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
+        try:
+            written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
+            return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
         if written or entries:
             messages.success(request, _("Rubrik balları yadda saxlanıldı."))
         return redirect(reverse("registrar:rubric_grade", args=[offering.pk, component.pk]))
 
-    appr = approval.approval_context(offering=offering, user=request.user)
     return render(
         request,
         "registrar/rubric_grade.html",
@@ -238,51 +277,10 @@ def rubric_grade_view(request, offering_id, component_id):
             "offering": offering,
             "component": component,
             "grid": grid,
-            "can_edit": not appr["is_locked"],
+            "can_edit": not gradebook.journal_is_locked(offering),
             "active_main_nav": "journal",
         },
     )
-
-
-def _handle_approval(request, offering, action_fn, success_msg):
-    """Run an approval-chain transition; surface a permission error as a message."""
-    from django.core.exceptions import PermissionDenied
-
-    try:
-        action_fn(offering=offering, by_user=request.user)
-        messages.success(request, success_msg)
-    except PermissionDenied as exc:
-        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-def _handle_return(request, offering):
-    """Chair/dean returns the journal to the teacher with an optional reason."""
-    from django.core.exceptions import PermissionDenied
-
-    reason = (request.POST.get("return_reason") or "").strip()
-    try:
-        approval.return_for_revision(offering=offering, by_user=request.user, reason=reason)
-        messages.success(request, _("Jurnal düzəliş üçün geri qaytarıldı."))
-    except PermissionDenied as exc:
-        messages.error(request, str(exc) or _("Bu əməliyyat üçün icazəniz yoxdur."))
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-
-@login_required
-def approvals_inbox(request):
-    """Chair/dean inbox: journals awaiting the current user's approval step."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/approvals_inbox.html", {"has_context": False, "active_main_nav": "approvals"})
-
-    context = page_contexts.approvals_context(request.user, organization)
-    if not context["is_approver"]:
-        raise Http404  # not an approver in this org
-    context["active_main_nav"] = "approvals"
-    return render(request, "registrar/approvals_inbox.html", context)
 
 
 def _handle_save_components(request, offering):
@@ -364,6 +362,13 @@ def _handle_save_finals(request, offering):
 
 def _handle_add_lesson(request, offering):
     """Create a new lesson column (date + type + topic + standart dərs saatı)."""
+    # README §8/2 — siyasət açıqdırsa təsdiqlənmiş sillabussuz dərs açılmır:
+    # 403 + SƏBƏB KODU (mesaj/redirect deyil, çünki qayda acceptance şərtidir).
+    from apps.registrar import journal_policy
+
+    gate = journal_policy.syllabus_gate(offering)
+    if gate["locked"]:
+        return HttpResponseForbidden(gate["reason_code"], content_type="text/plain; charset=utf-8")
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
@@ -405,8 +410,14 @@ def _handle_add_lesson(request, offering):
 
         instructor = get_user_model().objects.filter(pk=_inst_id).first()
 
+    # Dərsin otağı (opsional) — korpus yalnız UI süzgəcidir, saxlanan dəyər otaqdır.
+    # Otaq təşkilat daxilində həll olunur: başqa tenant-ın otağı keçmir.
+    room = lesson_rooms.resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
+
+    # İKT/RİM Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
+    allow_past = bool(getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False))
     try:
-        gradebook.create_lesson(
+        lesson = gradebook.create_lesson(
             offering=offering,
             date=date,
             kind=kind,
@@ -416,11 +427,11 @@ def _handle_add_lesson(request, offering):
             end_time=end_time,
             created_by=request.user,
             instructor=instructor,
-            # İKT Rəhbəri / superuser keçmiş tarixə də dərs aça bilər (tam override).
-            allow_past=bool(
-                getattr(request.user, "is_superuser", False) or getattr(request.user, "is_ikt_rehber", False)
-            ),
+            room=room,
+            allow_past=allow_past,
         )
+        if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)
+            grade_audit.log_backdated_lesson(offering=offering, lesson=lesson, by_user=request.user)
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:
         messages.error(request, str(exc))
@@ -474,125 +485,7 @@ def _handle_save_marks(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
-# ── Dərs cədvəli (timetable, U4) ─────────────────────────────────────────────
-
-
-@login_required
-def schedule_view(request):
-    """Role-aware weekly timetable: student → group schedule, teacher → own slots.
-
-    Teachers/org-owners may add slots for the offerings they teach (conflicts are
-    rejected in the service). Tenant scoping comes from the active-org RLS context.
-    Context building is shared with the profile cabinet section (page_contexts)."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/schedule.html", {"has_context": False, "active_main_nav": "schedule"})
-
-    if request.method == "POST":
-        return _handle_add_slot(request, organization, _current_period(organization))
-
-    context = page_contexts.schedule_context(request, organization)
-    context["active_main_nav"] = "schedule"
-    return render(request, "registrar/schedule.html", context)
-
-
-def _redirect_after_schedule(request):
-    """Redirect back to the caller: the profile shell (`next`, same-host only)
-    or the standalone schedule page. Keeps the sidebar context after slot POSTs."""
-    from django.utils.http import url_has_allowed_host_and_scheme
-
-    nxt = request.POST.get("next") or ""
-    if nxt and url_has_allowed_host_and_scheme(
-        nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()
-    ):
-        return redirect(nxt)
-    return redirect(reverse("registrar:schedule"))
-
-
-def _handle_add_slot(request, organization, period):
-    offering = (
-        CourseOffering.objects.filter(pk=request.POST.get("offering_id"), organization=organization)
-        .select_related("organization")
-        .first()
-    )
-    if offering is None or not _is_direct_editor(request.user, offering):
-        raise Http404  # only the teaching instructor / org owner may schedule (NOT the corrector)
-
-    from django.utils.dateparse import parse_time
-
-    try:
-        weekday = int(request.POST.get("weekday") or 0)
-    except (TypeError, ValueError):
-        weekday = 0
-    # Standart dərs saatı seçimi (üstünlük); köhnə sərbəst vaxt sahələri fallback.
-    start_time, end_time = schedule.parse_time_slot(request.POST.get("time_slot"))
-    if start_time is None:
-        start_time = parse_time(request.POST.get("start_time") or "")
-        end_time = parse_time(request.POST.get("end_time") or "")
-    week_type = request.POST.get("week_type")
-    if week_type not in dict(WeekType.choices):
-        week_type = WeekType.ALL
-    slot_kind = request.POST.get("slot_kind")
-    if slot_kind not in dict(SlotKind.choices):
-        slot_kind = SlotKind.LECTURE
-    if not (1 <= weekday <= 7) or start_time is None or end_time is None or start_time >= end_time:
-        messages.error(request, _("Gün və düzgün başlama/bitmə vaxtı tələb olunur."))
-        return _redirect_after_schedule(request)
-
-    try:
-        schedule.create_slot(
-            offering=offering,
-            weekday=weekday,
-            start_time=start_time,
-            end_time=end_time,
-            room=(request.POST.get("room") or "").strip(),
-            week_type=week_type,
-            kind=slot_kind,
-            created_by=request.user,
-        )
-        messages.success(request, _("Dərs cədvəlinə slot əlavə edildi."))
-    except schedule.ScheduleConflict as exc:
-        clash = exc.conflict
-        messages.error(
-            request,
-            _("Konflikt: bu vaxt %(subject)s ilə üst-üstə düşür (qrup/müəllim/otaq).")
-            % {"subject": clash.offering.subject.code},
-        )
-    return _redirect_after_schedule(request)
-
-
-@login_required
-def schedule_slot_delete(request, slot_id):
-    """Delete a slot (only the teaching instructor / org owner / superuser)."""
-    slot = get_object_or_404(ScheduleSlot.objects.select_related("offering", "offering__organization"), pk=slot_id)
-    if request.method == "POST" and _is_direct_editor(request.user, slot.offering):
-        slot.delete()
-        messages.success(request, _("Slot silindi."))
-    return _redirect_after_schedule(request)
-
-
-# ── Akademik təqvim (U11) ────────────────────────────────────────────────────
-
-
-@login_required
-def calendar_view(request):
-    """Academic calendar: semesters with their registration + exam-session windows.
-
-    Read-only and open to every authenticated member of the active organization
-    (students plan around these dates as much as staff). Window editing lives in
-    the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
-    from apps.registrar import page_contexts
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
-
-    context = page_contexts.calendar_context(organization)
-    context["active_main_nav"] = "calendar"
-    return render(request, "registrar/calendar.html", context)
-
-
 # The registrar console (K3) views live in ``apps.registrar.console_views`` to
-# keep this module focused (journal + timetable) and under the size budget.
+# keep this module focused (journal + gradebook) and under the size budget;
+# the weekly timetable (U4) and the academic calendar (U11) live in
+# ``apps.registrar.schedule_views`` for the same reason.

@@ -1,0 +1,43 @@
+{% load i18n ems_ui %}
+{% comment %}Ekran 12 «Tapşırıq redaktoru» — sətir cədvəli + yekun zolağı.
+
+Cədvəl OXU-ONLYdir: sətir redaktəsi kafedra bölgüsü ekranındakı (14) mövcud
+modal axını ilə eynidir və burada təkrarlanmır; tədris şöbəsi sətirləri
+PLANDAN və ya EXCEL-dən gətirir (handoff §6.1/2–3).{% endcomment %}
+{% with task=workload_center_section.task totals=workload_center_section.totals summary=workload_center_section.submit_summary %}
+<div class="wl-taskbar">
+    <div>
+        <span class="wl-taskbar__chair">{{ task.chair_name }}</span>
+        {% ems_status_badge "workload_task" task.status %}
+        {% if task.revision %}<span class="wl-taskbar__rev">{% blocktrans context "accounts.workload_center" with n=task.revision %}redaktə dövrü {{ n }}{% endblocktrans %}</span>{% endif %}
+    </div>
+    <div class="wl-taskbar__count">{{ workload_center_section.row_count_label }}</div>
+</div>
+
+{% if summary and summary.warnings %}
+    {% trans "Göndərmədən əvvəl yoxlama" context "accounts.workload_center" as wc_warn_title %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wc_warn_title banner_action_include="accounts/profile/sections/workload/_center_warnings.html" %}
+{% endif %}
+{% if summary and summary.unrouted %}
+    {% trans "Marşrutsuz sətirlər" context "accounts.workload_center" as wc_unrouted %}
+    {% trans "Bu sətirlərdə ixtisas göstərilməyib — dekanlıq dilimi yaranmır və sənəd göndərilmir." context "accounts.workload_center" as wc_unrouted_body %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=wc_unrouted banner_body=wc_unrouted_body %}
+{% endif %}
+
+{% include "partials/ems_ui/_data_table.html" with table_columns=workload_center_section.columns table_rows=workload_center_section.table_rows table_state=workload_center_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-table-list" state_title=workload_center_section.state_title state_body=workload_center_section.state_body %}
+
+<div class="wl-totals">
+    <div class="wl-totals__item"><span>{% trans "PAYIZ CƏMİ" context "accounts.workload_center" %}</span><b>{{ totals.fall }}</b></div>
+    <div class="wl-totals__item"><span>{% trans "YAZ CƏMİ" context "accounts.workload_center" %}</span><b>{{ totals.spring }}</b></div>
+    <div class="wl-totals__item"><span>{% trans "ÜMUMİ SAAT" context "accounts.workload_center" %}</span><b>{{ totals.total }}</b></div>
+    <div class="wl-totals__item"><span>{% trans "CƏMİ KREDİT" context "accounts.workload_center" %}</span><b>{{ totals.credits }}</b></div>
+</div>
+
+{% if workload_center_section.page_urls %}
+<nav class="wl-pager" aria-label="{% trans 'Səhifələmə' context 'accounts.workload_center' %}">
+    {% for page in workload_center_section.page_urls %}
+    <a class="wl-pager__link {% if page.current %}is-current{% endif %}" href="{{ page.url }}"{% if page.current %} aria-current="page"{% endif %}>{{ page.number }}</a>
+    {% endfor %}
+</nav>
+{% endif %}
+{% endwith %}

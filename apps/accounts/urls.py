@@ -78,6 +78,11 @@ urlpatterns = [
     # endpoint-ləri accounts-dadır (modul-sərhəd dövrünü önləmək üçün).
     path("profile/academic-records/data/", academic_records_views.records_overview_data, name="records_overview_data"),
     path(
+        "profile/academic-records/summary/",
+        academic_records_views.records_overview_summary,
+        name="records_overview_summary",
+    ),
+    path(
         "profile/academic-records/student/",
         academic_records_views.records_student_detail,
         name="records_student_detail",
@@ -114,6 +119,17 @@ urlpatterns = [
         "profile/api/badges/",
         views.profile_badges_api,
         name="profile_badges_api",
+    ),
+    # «Akademik fəaliyyət» qeydləri (profil redaktəsi) + şifrə-dəyişmə OTP.
+    path(
+        "profile/api/academic-items/",
+        views.academic_items_api,
+        name="academic_items_api",
+    ),
+    path(
+        "profile/api/password-otp/",
+        views.change_password_otp_request,
+        name="change_password_otp_request",
     ),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
     # "View as" — səlahiyyətli rolların başqa istifadəçinin profilinə baxışı
@@ -173,9 +189,117 @@ urlpatterns = [
     path("superadmin/exam-rooms/", views.superadmin_exam_rooms, name="superadmin_exam_rooms"),
     path("kollokvium-windows/", views.kollokvium_windows, name="kollokvium_windows"),
     path("exam-chance/", views.exam_chance, name="exam_chance"),
+    # İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi
+    path("imtahan-bali/", views.exam_score_entry, name="exam_score_entry"),
+    # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
+    path("jurnal-baglama/", views.journal_close, name="journal_close"),
     # Account management
     path("delete-account/", views.delete_account, name="delete_account"),
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),
+    # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı: `user.*`, bax
+    # apps/organizations/permissions.py «users» kateqoriyası). Superadmin
+    # bölməsindən FƏRQLİ: burada rol icazəsi olan istənilən əməkdaş işləyir.
+    path("rim/search/", views.rim_user_search, name="rim_user_search"),
+    path("rim/user/<int:user_id>/", views.rim_user_detail, name="rim_user_detail"),
+    path("rim/action/", views.rim_action, name="rim_action"),
+    # «Müəllimlər» / «Tələbələr» kataloqu — icazə-qapılı (`people.*`) VƏ struktur
+    # scope-una tabe. RİM-dən FƏRQİ: burada dekan/kafedra müdiri yalnız öz
+    # alt-ağacını görür (bax apps/accounts/services/people/permissions.py).
+    path("people/<str:kind>/list/", views.people_list, name="people_list"),
+    path("people/<str:kind>/options/", views.people_options, name="people_options"),
+    path("people/person/<int:user_id>/", views.people_detail, name="people_detail"),
+    path("people/action/", views.people_action, name="people_action"),
+    # Tələbə idarəetməsi (`people.manage_academic`) — kataloqun ÜSTÜNDƏ oturur,
+    # paralel ikinci siyahı yaratmır. Hədəf: kart → user id, ön baxış → akademik
+    # QEYD id-si (bir tələbənin bir neçə proqram qeydi ola bilər).
+    path("people/student/<int:user_id>/card/", views.people_student_card, name="people_student_card"),
+    path("people/academic/groups/", views.people_academic_groups, name="people_academic_groups"),
+    path(
+        "people/academic/<uuid:record_id>/transfer-preview/",
+        views.people_transfer_preview,
+        name="people_transfer_preview",
+    ),
+    # Analitika — cədvəldən AYRI endpoint (qrafik + göstəricilər eyni filtrlə).
+    path("people/<str:kind>/analytics/", views.people_analytics, name="people_analytics"),
+    path("people/<str:kind>/analytics/ai/", views.people_analytics_ai, name="people_analytics_ai"),
+    # «Fənn təhvili» (`journal.reassign`) — dərs açılışının başqa müəllimə
+    # verilməsi. Domen məntiqi registrar-dadır (apps/registrar/handover*.py);
+    # burada yalnız profil bölməsinin JSON səthi var. Hamısı fail-closed:
+    # icazəsiz aktor `has_access: false` alır, POST isə 403.
+    path("handover/teachers/", views.handover_teachers, name="handover_teachers"),
+    path("handover/offerings/", views.handover_offerings, name="handover_offerings"),
+    path("handover/options/", views.handover_options, name="handover_options"),
+    path("handover/history/", views.handover_history, name="handover_history"),
+    path("handover/action/", views.handover_action, name="handover_action"),
+    # «Cədvəl idarəetməsi» (`schedule.manage`) — proqram koordinatoru / RİM /
+    # dekanlıq həftəlik cədvəl slotlarını qurur. Domen məntiqi registrar-dadır
+    # (apps/registrar/schedule_manage*.py); burada yalnız JSON səthi var:
+    # `check` saxlamadan əvvəl konflikti göstərir, `action` yazır/silir.
+    # «Müraciətlərim» — YALNIZ «Təyin et» dialoqunun namizəd siyahısı; qalan
+    # bütün əməllər apps.applications-ın öz JSON səthinə (/muracietler/api/) gedir.
+    path("applications/assignees/", views.applications_assignees, name="applications_assignees"),
+    path("schedule-manage/check/", views.schedule_manage_check, name="schedule_manage_check"),
+    path("schedule-manage/action/", views.schedule_manage_action, name="schedule_manage_action"),
+    # «Tələbə idxalı» (`user.import`) — şablon + quru icra + tətbiq. Panel
+    # server-render-lidir; bu üç marşrut yalnız fayl/JSON səthidir.
+    path("student-intake/template/", views.student_intake_template, name="student_intake_template"),
+    path("student-intake/preview/", views.student_intake_preview, name="student_intake_preview"),
+    path("student-intake/apply/", views.student_intake_apply, name="student_intake_apply"),
+    # «Tələbə qəbulu» (ekran 08) — idxal endpoint-lərini TƏKRAR İSTİFADƏ edir;
+    # yalnız qrup yaratma ayrıca açardır (`student.assign_group`).
+    path(
+        "student-admission/groups/create/",
+        views.student_admission_create_group,
+        name="student_admission_create_group",
+    ),
+    # «Tələbə reyestri» (ekran 09) — kart/çekmecə, hədəf seçiciləri, hərəkət
+    # əmri, CSV ixracı və əmr sənədinin icazə-qapılı endirilməsi.
+    path("student-registry/card/<uuid:record_id>/", views.student_registry_card, name="student_registry_card"),
+    path("student-registry/programs/", views.student_registry_programs, name="student_registry_programs"),
+    path("student-registry/action/", views.student_registry_action, name="student_registry_action"),
+    path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
+    path(
+        "student-registry/document/<uuid:movement_id>/",
+        views.student_registry_document,
+        name="student_registry_document",
+    ),
+    # «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» (İmtahan Mərkəzi).
+    # Növbə bazadakı sübut qatından (LegacyGradeFact + canlı FinalGrade güzgüsü)
+    # hesablanır — domen məntiqi registrar-dadır (legacy_grade_review*.py).
+    # Qərar/düzəliş qapısı `final_score.entry`; `journal.correct` yalnız OXU verir.
+    path("legacy-review/queue/", views.legacy_review_queue, name="legacy_review_queue"),
+    path("legacy-review/options/", views.legacy_review_options, name="legacy_review_options"),
+    path("legacy-review/units/<str:kind>/", views.legacy_review_units, name="legacy_review_units"),
+    path("legacy-review/groups/", views.legacy_review_groups, name="legacy_review_groups"),
+    path("legacy-review/subjects/", views.legacy_review_subjects, name="legacy_review_subjects"),
+    path("legacy-review/teachers/", views.legacy_review_teachers, name="legacy_review_teachers"),
+    path("legacy-review/action/", views.legacy_review_action, name="legacy_review_action"),
+    # Sillabus (müəllim səthi) — profil bölməsinin JSON endpoint-ləri.
+    # Cross-domain glue accounts-dadır: `apps.syllabus` registrar/organizations
+    # modullarını import etmir (modul-sərhəd dövrü yaranmır).
+    path("profile/syllabus/action/", views.syllabus_action, name="syllabus_action"),
+    path(
+        "profile/syllabus/version/<uuid:version_id>/section/",
+        views.syllabus_section_save,
+        name="syllabus_section_save",
+    ),
+    path("profile/syllabus/<uuid:syllabus_id>/preview/", views.syllabus_preview, name="syllabus_preview"),
+    # Sillabusun AYRICA TAM SƏHİFƏSİ — siyahıdan/təsdiq növbəsindən
+    # `target="_blank"` ilə yeni tabda açılır. Profil bölməsi DEYİL, ona görə
+    # `profile/` prefiksi yoxdur və `SECTION_PARTIALS`-a qeyd olunmur.
+    path("syllabus/<uuid:syllabus_id>/", views.syllabus_detail, name="syllabus_detail"),
+    path("syllabus/<uuid:syllabus_id>/pdf/", views.syllabus_detail_pdf, name="syllabus_detail_pdf"),
+    # Kafedra təsdiq səthi: baxışı açmaq (SUBMITTED → REVIEW) və qərar yazmaq.
+    path(
+        "profile/syllabus/version/<uuid:version_id>/review/",
+        views.syllabus_review_open,
+        name="syllabus_review_open",
+    ),
+    path(
+        "profile/syllabus/version/<uuid:version_id>/decision/",
+        views.syllabus_decision,
+        name="syllabus_decision",
+    ),
     # Post management
     path("superadmin/post-management/", views.superadmin_post_management, name="superadmin_post_management"),
     path(

@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from core.admin_security import AcademicScoreReadOnlyAdminMixin
+
 from .models import (
     CodingExamQuestion,
     CodingFile,
@@ -82,7 +84,17 @@ class ExamQuestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(ExamAttempt)
-class ExamAttemptAdmin(admin.ModelAdmin):
+class ExamAttemptAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    # Nəticə sahələri yalnız qiymətləndirmə servislərindən (ExamGradeEvent
+    # ledger-i + 5 dəqiqəlik pəncərə) dəyişir — admin formasından yox.
+    protected_score_fields = (
+        "teacher_score",
+        "correct_count",
+        "wrong_count",
+        "checked_by_teacher",
+        "supervision_status",
+        "status",
+    )
     list_display = (
         "user",
         "exam",
@@ -98,7 +110,8 @@ class ExamAttemptAdmin(admin.ModelAdmin):
 
 
 @admin.register(ExamAnswer)
-class ExamAnswerAdmin(admin.ModelAdmin):
+class ExamAnswerAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("teacher_score", "is_correct")
     list_display = ("attempt", "question", "is_correct", "updated_at")
     list_filter = ("question__exam", "is_correct")
     search_fields = ("attempt__user__username", "question__text")
@@ -119,7 +132,8 @@ class CodingExamQuestionAdmin(admin.ModelAdmin):
 
 
 @admin.register(CodingSubmission)
-class CodingSubmissionAdmin(admin.ModelAdmin):
+class CodingSubmissionAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("score", "execution_status")
     list_display = ("student", "exam", "question", "execution_status", "score", "is_final", "submitted_at")
     list_filter = ("execution_status", "is_final", "selected_language", "submitted_at")
     search_fields = ("student__username", "exam__title", "question__title", "submitted_code")

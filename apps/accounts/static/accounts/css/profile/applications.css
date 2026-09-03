@@ -1,0 +1,585 @@
+/* «Müraciətlərim» kabinet bölməsi — dizayn handoff §4/§5.
+ *
+ * Rənglər `--ems-*` token-lərindən gəlir (static/css/design-tokens.css).
+ * Tinted fonlarda MƏTN üçün token işlədilmir (kontrast azdır) — dizayn §5-in
+ * «not tokens» siyahısı burada CSS custom property kimi verilir.
+ * Nişan/pill fonu payload-dan gəlir (inline `style` DEYİL: JS `el.style`-a yazır).
+ */
+
+.apx {
+    --apx-warn-fg: #92400e;
+    --apx-warn-bd: #fde68a;
+    --apx-danger-fg: #b91c1c;
+    --apx-danger-bd: #fecaca;
+    --apx-success-fg: #15803d;
+    --apx-mark-success-fg: #166534;
+    --apx-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--ems-neutral-900);
+    font-size: 0.86rem;
+}
+
+.apx *,
+.apx *::before,
+.apx *::after {
+    box-sizing: border-box;
+}
+
+.apx button:focus-visible,
+.apx [tabindex]:focus-visible,
+.apx a:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.apx input:focus,
+.apx textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.apx__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ── Kontekst zolağı (§4.1) ──────────────────────────────────────────────── */
+.apx-ctx {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 9px 14px;
+    margin-bottom: 16px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    font-size: 0.79rem;
+}
+
+.apx-ctx__who {
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.apx-ctx__dot {
+    color: var(--ems-neutral-300);
+}
+
+.apx-ctx__scope {
+    color: var(--ems-neutral-500);
+}
+
+.apx-ctx__role {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+/* ── Başlıq sətri (§4.2) ─────────────────────────────────────────────────── */
+.apx-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.apx-head__title {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ems-neutral-900);
+}
+
+.apx-head__intro {
+    margin: 6px 0 0;
+    max-width: 700px;
+    font-size: 0.86rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.apx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 9px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.apx-btn:hover {
+    border-color: var(--ems-primary-600);
+}
+
+.apx-btn--primary {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: 0.85rem;
+}
+
+.apx-btn--primary:hover {
+    background: var(--ems-primary-700);
+    border-color: var(--ems-primary-700);
+}
+
+.apx-btn--outline {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-800);
+}
+
+.apx-btn--danger {
+    border-color: var(--apx-danger-bd);
+    color: var(--apx-danger-fg);
+}
+
+.apx-btn[disabled],
+.apx-btn[aria-disabled="true"] {
+    background: var(--ems-neutral-200);
+    border-color: var(--ems-neutral-300);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.apx-btn--ghost {
+    border-color: var(--ems-neutral-200);
+    background: transparent;
+    color: var(--ems-neutral-500);
+}
+
+/* ── KPI kartları (§4.3) ─────────────────────────────────────────────────── */
+.apx-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+    gap: 11px;
+    margin-bottom: 14px;
+}
+
+.apx-kpi {
+    text-align: left;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    border-radius: 13px;
+    cursor: pointer;
+}
+
+.apx-kpi:hover {
+    border-color: var(--ems-primary-600);
+}
+
+.apx-kpi__label {
+    display: block;
+    font-size: 0.67rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.apx-kpi__value {
+    display: block;
+    margin-top: 5px;
+    font-size: 1.26rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.apx-kpi__note {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.72rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.apx-kpi--primary {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.apx-kpi--primary .apx-kpi__label {
+    color: var(--ems-primary-700);
+}
+
+.apx-kpi--primary .apx-kpi__value,
+.apx-kpi--primary .apx-kpi__note {
+    color: var(--ems-primary-800);
+}
+
+.apx-kpi--warning {
+    border-color: var(--apx-warn-bd);
+    background: var(--ems-warning-bg);
+}
+
+.apx-kpi--warning .apx-kpi__label,
+.apx-kpi--warning .apx-kpi__value,
+.apx-kpi--warning .apx-kpi__note {
+    color: var(--apx-warn-fg);
+}
+
+.apx-kpi--danger {
+    border-color: var(--apx-danger-bd);
+    background: var(--ems-danger-bg);
+}
+
+.apx-kpi--danger .apx-kpi__label,
+.apx-kpi--danger .apx-kpi__value,
+.apx-kpi--danger .apx-kpi__note {
+    color: var(--apx-danger-fg);
+}
+
+/* ── Tablar (§4.4) ───────────────────────────────────────────────────────── */
+.apx-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.apx-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--ems-neutral-500);
+    font-size: 0.86rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.apx-tab[aria-current="true"] {
+    border-bottom-color: var(--ems-primary-600);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+}
+
+.apx-tab__count {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.apx-tab[aria-current="true"] .apx-tab__count {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+/* ── Filtr paneli (§4.5) ─────────────────────────────────────────────────── */
+.apx-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 13px;
+    margin-bottom: 14px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 13px;
+}
+
+.apx-search {
+    position: relative;
+    flex: 1;
+    min-width: 190px;
+}
+
+.apx-search__icon {
+    position: absolute;
+    left: 11px;
+    top: 11px;
+    pointer-events: none;
+}
+
+.apx-search__input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px 0 32px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    font-size: 0.82rem;
+}
+
+.apx-chip {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.apx-chip[aria-pressed="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.apx-kind {
+    position: relative;
+}
+
+.apx-kind__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 9px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.81rem;
+    font-weight: 700;
+    cursor: pointer;
+    max-width: 230px;
+}
+
+.apx-kind__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.apx-kind__panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 40;
+    width: 250px;
+    margin-top: 6px;
+    padding: 8px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.16);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.apx-kind__option {
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.81rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    background: transparent;
+    cursor: pointer;
+}
+
+.apx-kind__option:hover {
+    background: var(--ems-primary-50);
+}
+
+.apx-kind__option[aria-selected="true"] {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+}
+
+/* ── İki sütunlu gövdə (§4.6) ────────────────────────────────────────────── */
+.apx-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    gap: 16px;
+    align-items: start;
+}
+
+.apx-list {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.apx-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 13px 15px;
+    border-radius: 13px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+
+.apx-row:hover,
+.apx-row[aria-current="true"] {
+    border-color: var(--ems-primary-600);
+}
+
+.apx-row[aria-current="true"] {
+    background: var(--ems-primary-50);
+}
+
+.apx-row__top,
+.apx-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    width: 100%;
+}
+
+.apx-row__top {
+    gap: 8px;
+}
+
+.apx-no {
+    font-family: var(--apx-mono);
+    font-size: 0.71rem;
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+}
+
+.apx-badge {
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.apx-badge--overdue {
+    background: var(--ems-danger-bg);
+    color: var(--apx-danger-fg);
+}
+
+.apx-pill {
+    margin-left: auto;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.apx-row__subject {
+    display: block;
+    font-size: 0.89rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    line-height: 1.35;
+    text-wrap: pretty;
+}
+
+.apx-row--new .apx-row__subject {
+    font-weight: 800;
+}
+
+.apx-row__meta {
+    font-size: 0.75rem;
+    color: var(--ems-neutral-500);
+}
+
+.apx-row__files {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--ems-neutral-400);
+}
+
+.apx-row__owner {
+    margin-left: auto;
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+    text-wrap: pretty;
+}
+
+.apx-row--overdue .apx-row__owner {
+    color: var(--apx-danger-fg);
+}
+
+.apx-more {
+    align-self: center;
+    margin-top: 4px;
+}
+
+/* Boş vəziyyət + skelet */
+.apx-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 11px;
+    padding: 56px 24px;
+    text-align: center;
+    background: var(--ems-neutral-0);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 16px;
+}
+
+.apx-empty__title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.apx-empty__note {
+    font-size: 0.82rem;
+    color: var(--ems-neutral-500);
+    max-width: 360px;
+    text-wrap: pretty;
+}
+
+.apx-skeleton__row {
+    height: 84px;
+    border-radius: 13px;
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-50) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: apx-shimmer 1.3s ease-in-out infinite;
+    margin-bottom: 8px;
+}
+
+@keyframes apx-shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .apx-skeleton__row {
+        animation: none;
+    }
+}

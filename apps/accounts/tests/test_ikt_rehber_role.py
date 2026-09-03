@@ -87,15 +87,7 @@ class IktRehberExamRoomPermissionTests(SimpleTestCase):
 class IktRehberRegistrarConsoleTests(SimpleTestCase):
     """Sidebar linki ilə view icazəsi uyğunlaşmalıdır (əks halda link 404 verir)."""
 
-    def test_ikt_rehber_is_in_registrar_admin_roles(self):
-        from apps.registrar.console_views import _REGISTRAR_ADMIN_ROLES
+    def test_console_uses_canonical_course_permission(self):
+        from apps.registrar.console_views import REGISTRAR_MANAGE_PERMISSION
 
-        self.assertIn("ikt_rehber", _REGISTRAR_ADMIN_ROLES)
-
-    def test_registrar_admin_roles_do_not_include_plain_teacher_or_student(self):
-        """İcazə genişlənməsi olmasın."""
-        from apps.registrar.console_views import _REGISTRAR_ADMIN_ROLES
-
-        self.assertNotIn("teacher", _REGISTRAR_ADMIN_ROLES)
-        self.assertNotIn("student", _REGISTRAR_ADMIN_ROLES)
-        self.assertNotIn("exam_center_staff", _REGISTRAR_ADMIN_ROLES)
+        self.assertEqual(REGISTRAR_MANAGE_PERMISSION, "course.edit")

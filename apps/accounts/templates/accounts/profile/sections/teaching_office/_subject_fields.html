@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Fənn yaratma/redaktə sahələri — `_form_dialog.html` gövdəsi.
+Saat bölgüsü (mühazirə/seminar/laboratoriya) BURADA YOXDUR: o, tədris planı
+sətrindədir, çünki kredit ixtisasa görə dəyişir (Mərhələ 2).{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sb-code">{% trans "Reyestr kodu" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-sb-code" name="code" maxlength="32" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sb-ects">{% trans "Kredit (ECTS)" context "accounts.catalog" %}</label>
+        <input class="ems-input" type="number" id="tof-sb-ects" name="ects" min="1" max="60" step="1">
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-sb-name">{% trans "Fənnin adı" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-sb-name" name="name" maxlength="255" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sb-kind">{% trans "Fənn növü" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-sb-kind" name="kind" required>
+            {% for option in subject_catalog_section.kind_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sb-chair">{% trans "Sahibi kafedra" context "accounts.catalog" %}</label>
+        <select class="ems-select" id="tof-sb-chair" name="chair_unit">
+            <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
+            {% for option in subject_catalog_section.chair_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>

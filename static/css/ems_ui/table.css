@@ -1,0 +1,265 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/table.css — Data cədvəli (handoff §4 komponent 5 + §7 a11y)
+
+   * `th scope="col"` / sıra başlığı `th scope="row"`
+   * sıralanan sütun başlığı `aria-sort` daşıyır (server tərəf sıralama)
+   * zebra: cüt `--ems-bg`, tək `--ems-bg-subtle`
+   * birinci sütun sticky (geniş cədvəllər `overflow-x` içində sürüşür)
+   * boş / skeleton / xəta vəziyyəti hər siyahıda var (§4 komponent 14)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-tablewrap {
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+    box-shadow: var(--ems-sh-card);
+    overflow: hidden;
+}
+
+/* Yalnız cədvəl üfüqi sürüşür — səhifə gövdəsi HEÇ VAXT. */
+.ems-tablescroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ems-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: var(--ems-fs-base);
+}
+
+.ems-table--wide {
+    min-width: 1080px;
+}
+
+.ems-table thead tr {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-table th[scope="col"] {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    /* AA: dizayn neutral-400 deyir (2.45) → neutral-600 (bg-subtle üzərində). */
+    color: var(--ems-neutral-600);
+    border-bottom: 1px solid var(--ems-border);
+    white-space: nowrap;
+}
+
+.ems-table th[scope="row"] {
+    padding: 11px 14px;
+    text-align: left;
+    vertical-align: top;
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.ems-table td {
+    padding: 11px 14px;
+    vertical-align: top;
+    color: var(--ems-neutral-700);
+}
+
+.ems-table tbody tr {
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.ems-table tbody tr:hover {
+    background: var(--ems-bg-subtle);
+}
+
+/* Zebra — cüt ağ, tək subtle (handoff §5 ekran 17). */
+.ems-table--zebra tbody tr:nth-child(odd) {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-table--zebra tbody tr:nth-child(odd):hover {
+    background: var(--ems-neutral-100);
+}
+
+.ems-table__num {
+    text-align: right;
+    font-weight: 800;
+    color: var(--ems-text);
+    white-space: nowrap;
+}
+
+.ems-table__nowrap {
+    white-space: nowrap;
+}
+
+/* Birinci sütunu sticky et — geniş cədvəldə kontekst itmir. */
+.ems-table--sticky th[scope="row"],
+.ems-table--sticky thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--ems-bg);
+}
+
+.ems-table--sticky thead th:first-child {
+    z-index: 2;
+    background: var(--ems-bg-subtle);
+}
+
+.ems-table--zebra.ems-table--sticky tbody tr:nth-child(odd) th[scope="row"] {
+    background: var(--ems-bg-subtle);
+}
+
+/* ── Sıralanan başlıq ───────────────────────────────────────────────────── */
+.ems-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+}
+
+.ems-sort__arrow {
+    color: var(--ems-neutral-300);
+}
+
+th[aria-sort="ascending"] .ems-sort__arrow,
+th[aria-sort="descending"] .ems-sort__arrow {
+    color: var(--ems-primary-600);
+}
+
+th[aria-sort="ascending"],
+th[aria-sort="descending"] {
+    color: var(--ems-primary-800);
+}
+
+/* ── Sıra əməlləri ──────────────────────────────────────────────────────── */
+.ems-rowactions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+}
+
+.ems-rowactions .ems-btn--sm {
+    min-height: var(--ems-h-cell);
+}
+
+/* ── Alt zolaq: sayğac + səhifələmə ─────────────────────────────────────── */
+.ems-tablefoot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: 12px 16px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Vəziyyətlər: boş / xəta / skeleton ─────────────────────────────────── */
+.ems-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    padding: 46px 24px;
+    text-align: center;
+}
+
+.ems-state__icon {
+    font-size: 26px;
+    color: var(--ems-neutral-300);
+}
+
+.ems-state--error .ems-state__icon {
+    color: var(--ems-danger);
+}
+
+.ems-state__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ems-state__body {
+    margin: 0;
+    max-width: 46ch;
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* Skeleton sətirləri — qlobal `skeleton.css` animasiyasını təkrar yazmırıq. */
+.ems-skelrow {
+    display: flex;
+    gap: var(--ems-sp-5);
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.ems-skelrow > .skeleton-line {
+    flex: 1 1 0;
+}
+
+.ems-skelrow > .skeleton-line--sm {
+    flex: 0 0 80px;
+}
+
+/* ── Cədvəl ⇄ Kart açarı (handoff §4 komponent 6) ───────────────────────── */
+.ems-viewtoggle {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: var(--ems-r-lg);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.ems-viewtoggle__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-cell);
+    padding: 0 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ems-viewtoggle__btn[aria-pressed="true"] {
+    background: var(--ems-bg);
+    color: var(--ems-primary-800);
+    box-shadow: var(--ems-sh-card);
+}
+
+/* Kart grid-i — cədvəlin alternativ görünüşü. */
+.ems-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+@media (max-width: 768px) {
+    .ems-tablefoot {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ems-cards {
+        grid-template-columns: 1fr;
+    }
+}

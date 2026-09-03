@@ -127,6 +127,30 @@ SECRET_KEY = os.getenv("SECRET_KEY") or get_random_secret_key()
 
 # Debug should be False for tests to catch issues
 DEBUG = False
+MANAGEMENT_COMMAND_ENVIRONMENT = "test"
+# Source connection details are materialized only after explicit attestation opt-in.
+LEGACY_MARIADB_SOURCE_ATTEST_ENABLED = os.getenv("LEGACY_MARIADB_SOURCE_ATTEST_ENABLED", "") == "1"
+LEGACY_MARIADB_SOURCE_LOCAL_DISPOSABLE = (
+    os.getenv("LEGACY_MARIADB_SOURCE_LOCAL_DISPOSABLE", "") == "local-container-only"
+)
+if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
+    LEGACY_MARIADB_SOURCE_SNAPSHOT_SHA256 = os.getenv("LEGACY_MARIADB_SOURCE_SNAPSHOT_SHA256", "")
+    LEGACY_MARIADB_SOURCE_HOST = os.getenv("LEGACY_MARIADB_SOURCE_HOST", "")
+    LEGACY_MARIADB_SOURCE_PORT = os.getenv("LEGACY_MARIADB_SOURCE_PORT", "")
+    LEGACY_MARIADB_SOURCE_USER = os.getenv("LEGACY_MARIADB_SOURCE_USER", "")
+    LEGACY_MARIADB_SOURCE_PASSWORD = os.getenv("LEGACY_MARIADB_SOURCE_PASSWORD", "")
+    LEGACY_MARIADB_SOURCE_DATABASE = os.getenv("LEGACY_MARIADB_SOURCE_DATABASE", "")
+    LEGACY_MARIADB_SOURCE_CA_PATH = os.getenv("LEGACY_MARIADB_SOURCE_CA_PATH", "")
+    LEGACY_MARIADB_SOURCE_CONNECT_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_CONNECT_TIMEOUT", "5")
+    LEGACY_MARIADB_SOURCE_READ_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_READ_TIMEOUT", "60")
+    LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT", "10")
+
+# The rehearsal orchestrator refuses to touch a target database without this
+# explicit opt-in; the sentinel string mirrors the MariaDB disposable flag.
+# Provision the target with:
+#   CREATE DATABASE emsarena_rehearsal_<12hex>;
+#   ALTER DATABASE emsarena_rehearsal_<12hex> SET emsarena.rehearsal_target = 'disposable';
+LEGACY_REHEARSAL_TARGET_DISPOSABLE = os.getenv("LEGACY_REHEARSAL_TARGET_DISPOSABLE", "") == "disposable-local-only"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 

@@ -3,6 +3,7 @@ Permission tests for organizations app.
 """
 
 from django.test import TestCase
+from django.utils import translation
 
 from ..permissions import expand_wildcard_permissions, get_all_permissions, has_permission, validate_permissions
 
@@ -128,3 +129,52 @@ class LegacyPermissionMigrationTest(TestCase):
         # Already-canonical names are untouched.
         self.assertEqual(canonical("grade.input"), "grade.input")
         self.assertEqual(canonical("*"), "*")
+
+
+class GroupPermissionCatalogTest(TestCase):
+    """«Qruplar» kateqoriyası + insan-oxunaqlı etiket lüğəti (2026-08)."""
+
+    def test_group_permissions_are_in_catalog(self):
+        from ..permissions import PERMISSION_CATEGORIES
+
+        self.assertIn("groups", PERMISSION_CATEGORIES)
+        self.assertEqual(PERMISSION_CATEGORIES["groups"], ["group.view", "group.manage"])
+
+        all_perms = get_all_permissions()
+        self.assertIn("group.view", all_perms)
+        self.assertIn("group.manage", all_perms)
+
+    def test_group_permissions_validate_and_expand(self):
+        self.assertTrue(validate_permissions(["group.view", "group.manage"]))
+        self.assertTrue(validate_permissions(["group.*"]))
+        expanded = expand_wildcard_permissions(["group.*"])
+        self.assertIn("group.view", expanded)
+        self.assertIn("group.manage", expanded)
+        self.assertTrue(has_permission(["group.manage"], "group.manage"))
+        self.assertTrue(has_permission(["group.*"], "group.manage"))
+        self.assertFalse(has_permission(["group.view"], "group.manage"))
+
+    def test_every_catalog_permission_has_human_label(self):
+        """Editor AYDINLIĞI: hər kataloq açarının boş olmayan AZ etiketi olmalıdır.
+
+        Yeni açar əlavə edib etiket yazmamaq bu testlə tutulur.
+        """
+        from ..permissions import PERMISSION_LABELS, get_permission_label
+
+        catalog = set(get_all_permissions())
+        labelled = set(PERMISSION_LABELS)
+        self.assertEqual(catalog - labelled, set(), f"Etiketi olmayan açarlar: {sorted(catalog - labelled)}")
+        self.assertEqual(labelled - catalog, set(), f"Kataloqda olmayan etiketlər: {sorted(labelled - catalog)}")
+        for perm in catalog:
+            self.assertTrue(str(PERMISSION_LABELS[perm]).strip(), perm)
+
+        # Helper: kataloqdakı açar üçün etiket, tanınmayan açar üçün boş sətir.
+        #
+        # ⚠️ Dil AÇIQ şəkildə sabitlənir.  `get_permission_label` tərcümə olunan
+        # (lazy) sətir qaytarır və aktiv dil dəstin içində sürüşə bilir; bu
+        # iddia isə MƏNBƏ (AZ) mətnini yoxlayır.  Türkcə tərcümə kataloqa
+        # əlavə olunana qədər test təsadüfən keçirdi, çünki tərcümə olmayanda
+        # Django mənbə mətninə düşür — yəni qoruma deyil, təsadüf idi.
+        with translation.override("az"):
+            self.assertEqual(get_permission_label("group.manage"), "Qrup yaratmaq/idarə etmək")
+            self.assertEqual(get_permission_label("no.such_permission"), "")

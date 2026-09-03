@@ -139,6 +139,13 @@ class GradingScalePipelineTest(TestCase):
                 is_primary=True,
                 is_active=True,
             )
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             cls.record = StudentAcademicRecord.objects.create(
                 organization=cls.org,
                 student=cls.student,

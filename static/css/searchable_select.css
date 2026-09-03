@@ -1,0 +1,251 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Axtarışlı seçici (EMSSearchableSelect) — VAHİD komponent üslubu.
+
+   DOM: accounts/profile/sections/_searchable_picker.html
+   JS : static/js/searchable_select.js
+
+   NİYƏ BU FAYL VAR (2026-08 düzəlişi).
+   Komponentin CSS-i əvvəllər ALTI ayrı fayla kopyalanmışdı (prefikslər: acr,
+   ecs, aps, jl, qbk, qsf). Kopyalar bir-birindən sürüşmüşdü (min-width 80/90/
+   100px, max-width 11rem/14rem, min-height 38px/2.7rem, z-index 1050/1060) və
+   düzəliş etmək üçün altı yeri eyni vaxtda dəyişmək lazım gəlirdi. İndi üslub
+   BURADA — prefiksdən asılı olmayan `.ems-ss*` sinifləri üzərində. Prefiksli
+   siniflər (`{prefix}-ms`, `{prefix}-chip`, …) DOM-da qalır, çünki JS prefiksi
+   məhz `{prefix}-ms__search` sinif adından oxuyur; onlar artıq yalnız
+   səhifəyə-məxsus NADİR override üçündür.
+
+   DÜZƏLDİLƏN QÜSUR: tək-seçim (single) rejimdə seçim edildikdə çip öz «həb»
+   (pill) borderi ilə çıxırdı, axtarış input-u isə `min-width` tələb etdiyi üçün
+   İKİNCİ SƏTRƏ düşürdü; çərçivə isə sabit `height: 38px` idi. Nəticədə
+   «input içində input borderi» görüntüsü və daşma yaranırdı. İndi:
+     • tək-seçimdə çip DƏYƏR kimi görünür (border/fon yoxdur) və sətir sınmır;
+     • seçim varkən input `min-width` tələb etmir (`.ems-ss.has-value`);
+     • çərçivə sabit `height` yox, `min-height` ilə ölçülür — çox-seçimdə
+       çiplər artdıqca səliqəli böyüyür, daşmır.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Çərçivə (kontrol) ──────────────────────────────────────────────────── */
+.ems-ss {
+    position: relative;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    /* SABİT height QOYULMUR — çox-seçimdə çiplər sətrə sığmayanda çərçivə
+       böyüməlidir, daşmamalıdır. Sıra hündürlüyünü səhifə `min-height` ilə
+       tənzimləyir (bax "Bərabər hündürlük" qeydi aşağıda). */
+    min-height: 38px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    background: #fff;
+    padding: 0.25rem 0.5rem;
+}
+.ems-ss:focus-within {
+    border-color: var(--ems-primary-500);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+/* ── Çip zolağı ─────────────────────────────────────────────────────────── */
+.ems-ss__chips {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 0;
+}
+/* Çox-seçim: çiplər sətrə sığmayanda aşağı keçir (çərçivə min-height ilə böyüyür). */
+.ems-ss--multi .ems-ss__chips {
+    flex-wrap: wrap;
+}
+/* Tək-seçim: yalnız BİR dəyər var — heç vaxt sətir sınmamalıdır. */
+.ems-ss--single .ems-ss__chips {
+    flex-wrap: nowrap;
+}
+
+/* ── Çip ────────────────────────────────────────────────────────────────── */
+.ems-ss__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 100%;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.ems-ss__chip > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ems-ss__chip-x {
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+    color: var(--ems-primary-600);
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 0.1rem;
+}
+.ems-ss__chip-x:hover {
+    color: var(--ems-danger-strong, #dc2626);
+}
+
+/* Çox-seçimdə çip TOKEN-dir → həb formasında, fonlu (bir neçəsi yan-yana durur). */
+.ems-ss--multi .ems-ss__chip {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-100);
+    border-radius: 999px;
+    padding: 0.16rem 0.3rem 0.16rem 0.6rem;
+}
+.ems-ss--multi .ems-ss__chip > span {
+    max-width: 14rem;
+}
+
+/* Tək-seçimdə çip DƏYƏR-dir → nə border, nə fon: yoxsa çərçivənin içində
+   ikinci bir «input» varmış kimi görünür (məhz bildirilən qüsur). */
+.ems-ss--single .ems-ss__chip {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0 0 0 0.1rem;
+    color: var(--ems-neutral-900);
+    font-weight: 600;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+.ems-ss--single .ems-ss__chip > span {
+    max-width: 100%;
+}
+
+/* ── Axtarış input-u ────────────────────────────────────────────────────── */
+.ems-ss__search {
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--ems-neutral-900);
+    padding: 0.28rem;
+    font-size: 0.86rem;
+    min-width: 90px;
+    flex: 1 1 auto;
+    width: 100%;
+}
+.ems-ss__search::placeholder {
+    color: var(--ems-neutral-400);
+}
+/* Seçim EDİLİB: input artıq yer tələb etmir — əks halda çip + 90px input
+   çərçivəyə sığmayıb sətri sındırırdı. Fokusda yenidən genişlənir ki,
+   istifadəçi yazıb başqa dəyər axtara bilsin. */
+.ems-ss.has-value .ems-ss__search {
+    min-width: 0;
+    flex: 1 1 0;
+    width: auto;
+}
+.ems-ss--single.has-value .ems-ss__search {
+    /* Tək-seçimdə seçim varkən input görünmür (dəyər çip kimi göstərilir),
+       amma fokus alına bilən qalır — klaviatura ilə işləmə pozulmur. */
+    flex: 0 1 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
+}
+.ems-ss--single.has-value:focus-within .ems-ss__search {
+    flex: 1 1 4rem;
+    padding-left: 0.28rem;
+}
+
+/* ── Açılan menyu ───────────────────────────────────────────────────────── */
+/* KRİTİK: menyu default GİZLİDİR, yalnız .is-open olduqda görünür — yoxsa
+   bütün dropdown-lar inline açıq qalır (dağınıq görünüş). */
+.ems-ss__menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1060;
+    display: none;
+}
+.ems-ss.is-open .ems-ss__menu {
+    display: block;
+}
+.ems-ss__opt {
+    padding: 0.55rem 0.8rem;
+    cursor: pointer;
+    font-size: 0.86rem;
+    color: var(--ems-neutral-800);
+}
+.ems-ss__opt:hover,
+/* Klaviatura vurğusu (ArrowUp/ArrowDown) — `aria-activedescendant` ilə eyni
+   element. Görünüşü hover ilə EYNİ saxlanılır ki, siçan və klaviatura
+   istifadəçisi eyni «hazırdakı variant» hissini alsın; solda rəngli zolaq
+   isə vurğunun yalnız fonla (rənglə) bildirilməməsini təmin edir. */
+.ems-ss__opt--active {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
+}
+.ems-ss__more {
+    padding: 0.5rem 0.8rem;
+    text-align: center;
+    color: var(--ems-neutral-400);
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+}
+
+/* ── Seçilə bilməyən variant + boş vəziyyət + skeleton ──────────────────────
+   Hər üçü OPT-IN-dir (server `disabled`/`hint` göndərir, JS `emptyText`/
+   `skeleton` opsiyası verir) — bu bayraqları işlətməyən mövcud səthlərdə
+   görünüş dəyişmir. Yeni rəng icad edilmir, hamısı `--ems-*` tokenidir. */
+.ems-ss__opt--disabled {
+    cursor: not-allowed;
+    color: var(--ems-neutral-400);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ems-ss__opt--disabled:hover {
+    background: transparent;
+    color: var(--ems-neutral-400);
+}
+.ems-ss__opt-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Səbəb MƏTNLƏ bildirilir (yalnız rənglə deyil) — a11y. */
+.ems-ss__opt-hint {
+    flex-shrink: 0;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border: 1px solid var(--ems-neutral-200);
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.ems-ss__empty {
+    padding: 0.75rem 0.8rem;
+    text-align: center;
+    color: var(--ems-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.ems-ss__skeleton {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+}
+.ems-ss__skeleton-line {
+    height: 13px;
+    width: 100%;
+}
+.ems-ss__skeleton-line:nth-child(2) { width: 78%; }
+.ems-ss__skeleton-line:nth-child(3) { width: 60%; }

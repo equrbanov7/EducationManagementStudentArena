@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}
+Ekran 09 başlıq əməlləri — CSV ixracı (server tərəfdə, `student.registry_view`
+ilə qapılı; link CARİ filtr dəstini daşıyır).
+{% endcomment %}
+<a class="ems-btn" href="{{ student_registry_section.export_url }}" download>
+    <i class="fas fa-file-csv" aria-hidden="true"></i>
+    {% trans "CSV ixracı" context "accounts.student_registry" %}
+</a>

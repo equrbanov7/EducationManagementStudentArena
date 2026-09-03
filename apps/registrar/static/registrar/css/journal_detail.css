@@ -360,3 +360,10 @@
     .jd-selfwork-layout { grid-template-columns: 1fr; }
     .jd-modal-grid { grid-template-columns: 1fr; }
 }
+
+/* Çox cəhd (M2) — «Yekun» tabının QEYD sütununda cəhd zolağı.
+   Rəsmi SONUNCU cəhddir; əvvəlkilər üstüxətli/solğun göstərilir. */
+.jd2-attempts { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.jd2-attempt { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
+.jd2-attempt.is-official { background: #dcfce7; color: #15803d; }
+.jd2-attempt.is-superseded { background: #f1f5f9; color: #64748b; text-decoration: line-through; }

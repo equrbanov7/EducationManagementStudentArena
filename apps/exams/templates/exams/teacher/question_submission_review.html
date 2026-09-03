@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
     <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_chain.css' %}?v=20260903-chair">
 {% endblock %}
 
 {% block content %}
@@ -46,6 +47,19 @@
             {% endif %}
         </div>
     </header>
+
+    {% include "exams/teacher/partials/_question_submission_chain.html" %}
+
+    {% if submission.chair_note %}
+    <div class="qsubd-note qsubd-note--reviewer">
+        <div class="qsubd-note__icon"><i class="fas fa-user-tie"></i></div>
+        <div>
+            <div class="qsubd-note__label">{% trans "Kafedra qeydi" context "exams.template.question_submission" %}
+                {% if submission.chair_reviewer %} — {{ submission.chair_reviewer.get_full_name|default:submission.chair_reviewer.username }}{% endif %}</div>
+            <div class="qsubd-note__text">{{ submission.chair_note|linebreaksbr }}</div>
+        </div>
+    </div>
+    {% endif %}
 
     <section class="qb-stats">
         <article class="qb-stat-card">
@@ -140,12 +154,23 @@
                 </span>
             </label>
             <label class="qsubr-choice qsubr-choice--reject">
+                <input type="radio" name="decision" value="revision" required>
+                <span class="qsubr-choice__card">
+                    <span class="qsubr-choice__icon"><i class="fas fa-pen"></i></span>
+                    <span>
+                        <span class="qsubr-choice__title">{% trans "Düzəliş istə" context "exams.template.question_submission" %}</span>
+                        <p class="qsubr-choice__hint">{% trans "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir." context "exams.template.question_submission" %}</p>
+                    </span>
+                    <span class="qsubr-choice__check"><i class="fas fa-check"></i></span>
+                </span>
+            </label>
+            <label class="qsubr-choice qsubr-choice--reject">
                 <input type="radio" name="decision" value="reject" required>
                 <span class="qsubr-choice__card">
                     <span class="qsubr-choice__icon"><i class="fas fa-rotate-left"></i></span>
                     <span>
-                        <span class="qsubr-choice__title">{% trans "Geri qaytar" context "exams.template.question_submission" %}</span>
-                        <p class="qsubr-choice__hint">{% trans "Göndəriş qeydlə müəllimə qaytarılacaq — düzəldib yenidən göndərə bilər." context "exams.template.question_submission" %}</p>
+                        <span class="qsubr-choice__title">{% trans "Rədd et" context "exams.template.question_submission" %}</span>
+                        <p class="qsubr-choice__hint">{% trans "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər." context "exams.template.question_submission" %}</p>
                     </span>
                     <span class="qsubr-choice__check"><i class="fas fa-check"></i></span>
                 </span>
@@ -185,7 +210,7 @@
             </div>
         </div>
 
-        <div class="qsubr-panel js-qsubr-panel" data-decision="reject">
+        <div class="qsubr-panel js-qsubr-panel" data-decision="reject revision">
             <div class="qsubm-field qsubm-field--note">
                 <label for="qsubRejectNote">{% trans "Müəllim nəyi düzəltməlidir?" context "exams.template.question_submission" %} <span class="qsubm-req">*</span></label>
                 <div class="qsubm-input-wrap qsubm-input-wrap--textarea">
@@ -201,7 +226,8 @@
             <button type="submit" class="qb-btn qsubr-submit js-qsubr-submit" disabled
                     data-idle-label="{% trans 'Əvvəlcə qərar seçin' context 'exams.template.question_submission' %}"
                     data-accept-label="{% trans 'Qəbul et və banka əlavə et' context 'exams.template.question_submission' %}"
-                    data-reject-label="{% trans 'Geri qaytar' context 'exams.template.question_submission' %}">
+                    data-revision-label="{% trans 'Düzəliş üçün geri qaytar' context 'exams.template.question_submission' %}"
+                    data-reject-label="{% trans 'Rədd et' context 'exams.template.question_submission' %}">
                 <i class="fas fa-gavel js-qsubr-submit-icon"></i>
                 <span class="js-qsubr-submit-label">{% trans "Əvvəlcə qərar seçin" context "exams.template.question_submission" %}</span>
             </button>

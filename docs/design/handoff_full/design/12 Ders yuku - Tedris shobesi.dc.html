@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f8fafc">
+
+  <div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="brand/wcu-logo-horizontal.svg" alt="Qərbi Kaspi Universiteti" style="height:34px;width:auto;max-width:180px;display:block">
+      <span style="width:1px;height:22px;background:#e2e8f0"></span>
+      <span style="font-size:1.02rem;font-weight:800;color:#2563eb;letter-spacing:-.02em">EMS Arena</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.25">
+        <span style="font-size:.83rem;font-weight:600;color:#0f172a">E. Qurbanov</span>
+        <span style="font-size:.72rem;color:#64748b">Tədris şöbəsi</span>
+      </div>
+      <button type="button" title="Çıxış" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#fee2e2;border-color:#fecaca;color:#dc2626">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start">
+
+    <aside style="flex:0 0 300px;width:300px;align-self:stretch;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1.5rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff">
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#0f172a;white-space:nowrap">Dərs yükü</h2>
+        <button type="button" title="Menyunu yığ" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;background:#eff6ff;color:#3b82f6;cursor:pointer" style-hover="background:#3b82f6;color:#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;gap:.6rem;padding:1rem .75rem">
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Tədris şöbəsi</div>
+        <button type="button" onClick="{{ goDashboard }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navDashBg }};color:{{ navDashFg }};box-shadow:{{ navDashSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></svg>
+          İdarə paneli
+        </button>
+        <button type="button" onClick="{{ goTasks }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navTaskBg }};color:{{ navTaskFg }};box-shadow:{{ navTaskSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M3 6h.01"></path><path d="M3 12h.01"></path><path d="M3 18h.01"></path></svg>
+          Tapşırıqlar
+        </button>
+        <button type="button" onClick="{{ goImport }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navImpBg }};color:{{ navImpFg }};box-shadow:{{ navImpSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Excel import
+        </button>
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Sistem</div>
+        <button type="button" onClick="{{ goReports }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navRepBg }};color:{{ navRepFg }};box-shadow:{{ navRepSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Hesabatlar
+        </button>
+        <button type="button" onClick="{{ goSettings }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navSetBg }};color:{{ navSetFg }};box-shadow:{{ navSetSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.4.65.74.85.24.14.51.22.78.24H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.01z"></path></svg>
+          Parametrlər
+        </button>
+        <div style="margin:.5rem .25rem 0;padding:14px;border-radius:16px;background:#f9fbff;border:1px solid #e2e8f0">
+          <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Tədris ili</div>
+          <div style="margin-top:4px;font-size:1.05rem;font-weight:800;color:#1e40af">{{ year }}</div>
+          <div style="margin-top:2px;font-size:.74rem;color:{{ yearNoteFg }}">{{ yearNote }}</div>
+        </div>
+        <div style="margin-top:auto;padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Hesab</div>
+        <button type="button" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:transparent;color:#ef4444;font-size:.95rem;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#fef2f2;color:#dc2626">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Çıxış
+        </button>
+      </nav>
+    </aside>
+
+    <main style="flex:1;min-width:0;padding:24px 28px 40px">
+      <div style="max-width:1400px;margin:0 auto">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#94a3b8;margin-bottom:7px">
+              <span>Ana səhifə</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Dərs yükü</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span style="color:#334155;font-weight:600">{{ crumb }}</span>
+            </div>
+            <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ pageTitle }}</h1>
+            <p style="margin:6px 0 0;font-size:.86rem;color:#64748b;text-wrap:pretty">{{ pageSub }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:10px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              <select style="border:0;background:transparent;font-size:.85rem;font-weight:600;color:#0f172a;cursor:pointer">
+                <option>2026 / 2027</option>
+                <option>2025 / 2026</option>
+                <option>2024 / 2025</option>
+              </select>
+            </div>
+            <button type="button" onClick="{{ openAdd }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.86rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Yeni tapşırıq
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ isArchive }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;margin-bottom:16px;border:1px solid #fde68a;background:#fef3c7;border-radius:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <div style="font-size:.83rem;color:#92400e"><strong>Arxiv rejimi</strong> — {{ appliedYear }} tədris ili yalnız oxunuş üçün açıqdır.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">TƏDRİS İLİ</label>
+                <select value="{{ fYear }}" onChange="{{ onFYear }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">FAKÜLTƏ</label>
+                <select value="{{ fFaculty }}" onChange="{{ onFFaculty }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:230px"><option>Hamısı</option><option>Təbiət elmləri və İT fakültəsi</option><option>Humanitar fakültə</option><option>İqtisadiyyat və idarəetmə fakültəsi</option><option>Tibb fakültəsi</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">STATUS</label>
+                <select value="{{ fStatus }}" onChange="{{ onFStatus }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>Hamısı</option><option>Qaralama</option><option>Göndərilib</option><option>Təsdiqlənib</option><option>Qaytarılıb</option></select>
+              </div>
+              <button type="button" onClick="{{ applyFilters }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Bax
+              </button>
+              <button type="button" onClick="{{ resetFilters }}" style="padding:10px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Sıfırla</button>
+              <div style="margin-left:auto;font-size:.83rem;color:#64748b">Nəticə: <strong style="color:#0f172a">{{ kafCount }}</strong> kafedra</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1.1">12</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">CƏMİ KAFEDRA</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#1d4ed8;line-height:1.1">4</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">GÖNDƏRİLMİŞ</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #16a34a;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#16a34a;line-height:1.1">3</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">TƏSDİQLƏNMİŞ</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #dc2626;border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#dc2626;line-height:1.1">1</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">QAYTARILMIŞ</div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <h2 style="margin:0;font-size:1rem;font-weight:700;color:#0f172a">Kafedra tapşırıqları</h2>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="position:relative;display:flex;align-items:center">
+                  <svg style="position:absolute;left:11px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.7" y2="16.7"></line></svg>
+                  <input type="text" placeholder="Kafedra axtar…" style="padding:8px 12px 8px 33px;border:1px solid #cbd5e1;border-radius:10px;font-size:.83rem;color:#0f172a;min-width:220px;background:#fff">
+                </div>
+                <select style="padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.83rem;color:#334155;background:#fff;cursor:pointer">
+                  <option>Bütün statuslar</option>
+                  <option>Qaralama</option>
+                  <option>Göndərilib</option>
+                  <option>Təsdiqlənib</option>
+                  <option>Qaytarılıb</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
+              <sc-for list="{{ kafedras }}" as="k" hint-placeholder-count="6">
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.04);display:flex;flex-direction:column;gap:14px" style-hover="border-color:#bfdbfe;box-shadow:0 6px 18px -10px rgba(15,23,42,.22)">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                    <div style="font-size:.94rem;font-weight:700;line-height:1.35;color:#0f172a;text-wrap:pretty">{{ k.name }}</div>
+                    <span style="flex:0 0 auto;padding:4px 10px;border-radius:999px;font-size:.7rem;font-weight:700;white-space:nowrap;background:{{ k.stBg }};color:{{ k.stFg }};border:1px solid {{ k.stBd }}">{{ k.status }}</span>
+                  </div>
+                  <div style="display:flex;align-items:flex-end;gap:10px">
+                    <div style="font-size:1.7rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1">{{ k.hours }}</div>
+                    <div style="font-size:.74rem;color:#64748b;padding-bottom:4px">saat</div>
+                    <div style="margin-left:auto;display:inline-flex;align-items:baseline;gap:4px;padding:4px 9px;border:1.5px solid #bfdbfe;border-radius:8px;background:#eff6ff">
+                      <span style="font-size:.92rem;font-weight:800;color:#1d4ed8">{{ k.credit }}</span>
+                      <span style="font-size:.66rem;font-weight:700;color:#2563eb">kr</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="display:flex;height:7px;border-radius:999px;overflow:hidden;background:#f1f5f9">
+                      <div style="width:{{ k.fallPct }};background:#2563eb"></div>
+                      <div style="width:{{ k.springPct }};background:#93c5fd"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.74rem;color:#64748b">
+                      <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#2563eb;margin-right:5px"></span>Payız {{ k.fall }}</span>
+                      <span><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#93c5fd;margin-right:5px"></span>Yaz {{ k.spring }}</span>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #f1f5f9">
+                    <span style="font-size:.73rem;color:#94a3b8">Son hərəkət: {{ k.date }}</span>
+                    <button type="button" onClick="{{ k.onOpen }}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.8rem;font-weight:600;cursor:pointer" style-hover="background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8">
+                      Bax
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isTasks }}">
+          <div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">TƏDRİS İLİ</label>
+                <select value="{{ fYear }}" onChange="{{ onFYear }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">SEMESTR</label>
+                <select value="{{ fSem }}" onChange="{{ onFSem }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:120px"><option>Hamısı</option><option>PAYIZ</option><option>YAZ</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">İXTİSAS</label>
+                <select value="{{ fSpec }}" onChange="{{ onFSpec }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:210px"><option>Hamısı</option><option>Kompüter elmləri</option><option>İnformasiya texnologiyaları</option><option>Kibertəhlükəsizlik</option><option>Filologiya (xidməti)</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">QRUP</label>
+                <select value="{{ fGroup }}" onChange="{{ onFGroup }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:130px"><option>Hamısı</option><option>236 KE</option><option>236 KE ing</option><option>235 İT</option><option>235 K</option><option>236 İ</option><option>036 / 336 F</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">FORMA</label>
+                <select value="{{ fForma }}" onChange="{{ onFForma }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:130px"><option>Hamısı</option><option>Əyani</option><option>Qiyabi</option><option>İntensiv</option></select>
+              </div>
+              <button type="button" onClick="{{ applyFilters }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Bax
+              </button>
+              <button type="button" onClick="{{ resetFilters }}" style="padding:10px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Sıfırla</button>
+              <div style="margin-left:auto;font-size:.83rem;color:#64748b">Nəticə: <strong style="color:#0f172a">{{ rowCount }}</strong> sətir</div>
+            </div>
+            <div style="display:flex;gap:4px;padding:4px;background:#f1f5f9;border-radius:11px;width:fit-content;margin-bottom:18px">
+              <button type="button" onClick="{{ tabEditor }}" style="padding:8px 18px;border:0;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:{{ tabEdBg }};color:{{ tabEdFg }};box-shadow:{{ tabEdSh }}">Tapşırıq redaktoru</button>
+              <button type="button" onClick="{{ tabTracking }}" style="padding:8px 18px;border:0;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;background:{{ tabTrBg }};color:{{ tabTrFg }};box-shadow:{{ tabTrSh }}">İzləmə</button>
+            </div>
+
+            <sc-if value="{{ isEditor }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid #e2e8f0;background:#fff">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                    <button type="button" onClick="{{ openAdd }}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.83rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      Sətir əlavə et
+                    </button>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div style="position:relative;display:flex;align-items:center">
+                      <svg style="position:absolute;left:11px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.7" y2="16.7"></line></svg>
+                      <input type="text" placeholder="Fənn və ya qrup axtar…" style="padding:8px 12px 8px 33px;border:1px solid #cbd5e1;border-radius:9px;font-size:.82rem;min-width:230px;background:#fff;color:#0f172a">
+                    </div>
+                    <button type="button" style="display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.82rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:.8rem;color:#64748b">
+                  <span style="font-weight:700;color:#0f172a">Proqramlaşdırma və informasiya təhlükəsizliyi</span>
+                  <span style="padding:3px 9px;border-radius:999px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;font-size:.7rem;font-weight:700">QARALAMA</span>
+                  <span style="margin-left:auto">1–8 / 64 sətir</span>
+                </div>
+
+                <div style="overflow:auto;max-height:60vh">
+                  <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:1750px;font-size:.79rem">
+                    <thead>
+                      <tr>
+                        <th rowspan="2" style="position:sticky;top:0;left:0;z-index:5;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe;white-space:nowrap">SEMESTR</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;white-space:nowrap">QRUPLAR</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:230px">FƏNN</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;white-space:nowrap">İXTİSAS</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;white-space:nowrap">FORMA</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;white-space:nowrap">SƏVİYYƏ</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">TƏLƏBƏ</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">BİRL.</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">YARIMQ.</th>
+                        <th colspan="2" style="position:sticky;top:0;z-index:4;background:#dbeafe;padding:7px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">MÜHAZİRƏ</th>
+                        <th colspan="2" style="position:sticky;top:0;z-index:4;background:#dbeafe;padding:7px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">SEMİNAR</th>
+                        <th colspan="2" style="position:sticky;top:0;z-index:4;background:#dbeafe;padding:7px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">LABORATORİYA</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">MƏSLƏHƏT</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">İMTAHAN</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">BURAXILIŞ</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">DOKTORANT</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 8px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">TƏCRÜBƏ</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.05em;color:#0f172a;border-bottom:1px solid #bfdbfe">CƏMİ</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe">KREDİT</th>
+                        <th rowspan="2" style="position:sticky;top:0;z-index:4;background:#eff6ff;padding:9px 10px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.05em;color:#1e40af;border-bottom:1px solid #bfdbfe"></th>
+                      </tr>
+                      <tr>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe">plan</th>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">cəmi</th>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe">plan</th>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">cəmi</th>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe">plan</th>
+                        <th style="position:sticky;top:30px;z-index:4;background:#eff6ff;padding:7px 8px;text-align:center;font-size:.63rem;font-weight:600;color:#2563eb;border-bottom:1px solid #bfdbfe;border-right:1px solid #bfdbfe">cəmi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+                        <tr style="background:{{ r.bg }}">
+                          <td style="position:sticky;left:0;z-index:2;background:{{ r.bg }};padding:9px 10px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;white-space:nowrap">
+                            <span style="padding:3px 8px;border-radius:6px;font-size:.66rem;font-weight:800;letter-spacing:.04em;background:{{ r.semBg }};color:{{ r.semFg }}">{{ r.sem }}</span>
+                          </td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;color:#334155;white-space:nowrap;font-weight:600">{{ r.groups }}</td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;color:#0f172a;font-weight:600;line-height:1.35">
+                            {{ r.subject }}
+                            <sc-if value="{{ r.note }}">
+                              <div style="display:flex;align-items:flex-start;gap:5px;margin-top:4px;font-size:.71rem;font-weight:500;color:#dc2626">
+                                <svg style="flex:0 0 auto;margin-top:1px" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.6"></line></svg>
+                                <span>{{ r.note }}</span>
+                              </div>
+                            </sc-if>
+                          </td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;color:#64748b;white-space:nowrap">{{ r.spec }}</td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;color:#64748b;white-space:nowrap">{{ r.forma }}</td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;color:#64748b;white-space:nowrap">{{ r.level }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.students }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.birl }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.yarim }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#94a3b8">{{ r.mp }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;text-align:center;color:#0f172a;font-weight:700">{{ r.mc }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#94a3b8">{{ r.sp }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;text-align:center;color:#0f172a;font-weight:700">{{ r.st }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#94a3b8">{{ r.lp }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;text-align:center;color:#0f172a;font-weight:700">{{ r.lc }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.mesl }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.imt }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.burax }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.dokt }}</td>
+                          <td style="padding:9px 8px;border-bottom:1px solid #e2e8f0;border-right:1px solid #e2e8f0;text-align:center;color:#334155">{{ r.tecr }}</td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;text-align:center;font-weight:800;color:#0f172a;font-size:.85rem">{{ r.total }}</td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0;text-align:center">
+                            <span style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff;white-space:nowrap">
+                              <span style="font-size:.82rem;font-weight:800;color:#1d4ed8">{{ r.credit }}</span>
+                              <span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span>
+                            </span>
+                          </td>
+                          <td style="padding:9px 10px;border-bottom:1px solid #e2e8f0">
+                            <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+                              <button type="button" title="Redaktə et" style="display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#2563eb;border-color:#bfdbfe;background:#eff6ff">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+                              </button>
+                              <button type="button" title="Kopyala" style="display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#2563eb;border-color:#bfdbfe;background:#eff6ff">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                              </button>
+                              <button type="button" title="Sil" onClick="{{ r.onDelete }}" style="display:flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#dc2626;border-color:#fecaca;background:#fee2e2">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                      <sc-if value="{{ noRows }}">
+                        <tr><td colspan="22" style="padding:38px;text-align:center;color:#64748b;font-size:.86rem">Seçilmiş filtrlərə uyğun sətir tapılmadı — <strong>Sıfırla</strong> ilə filtrləri təmizləyin.</td></tr>
+                      </sc-if>
+                      <tr style="background:#f1f5f9">
+                        <td colspan="9" style="position:sticky;left:0;z-index:2;background:#f1f5f9;padding:11px;border-right:1px solid #e2e8f0;font-size:.74rem;font-weight:800;letter-spacing:.05em;color:#0f172a">SƏHİFƏ CƏMİ</td>
+                        <td style="padding:11px 8px;text-align:center;color:#94a3b8">—</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:800;color:#0f172a">220</td>
+                        <td style="padding:11px 8px;text-align:center;color:#94a3b8">—</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:800;color:#0f172a">280</td>
+                        <td style="padding:11px 8px;text-align:center;color:#94a3b8">—</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:800;color:#0f172a">255</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:700;color:#334155">50</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:700;color:#334155">78</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:700;color:#334155">40</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:700;color:#334155">30</td>
+                        <td style="padding:11px 8px;text-align:center;font-weight:700;color:#334155">120</td>
+                        <td style="padding:11px 10px;text-align:center;font-weight:800;color:#0f172a;font-size:.9rem">1 073</td>
+                        <td style="padding:11px 10px;text-align:center">
+                          <span style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 8px;border:1.5px solid #93c5fd;border-radius:7px;background:#dbeafe">
+                            <span style="font-size:.82rem;font-weight:800;color:#1e40af">35</span>
+                            <span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span>
+                          </span>
+                        </td>
+                        <td style="padding:11px"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div style="position:sticky;bottom:0;display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:13px 18px;background:#fff;border-top:2px solid #e2e8f0;box-shadow:0 -6px 18px -12px rgba(15,23,42,.3)">
+                  <div>
+                    <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">PAYIZ CƏMİ</div>
+                    <div style="font-size:1.02rem;font-weight:800;color:#334155">4 665 <span style="font-size:.72rem;font-weight:600;color:#94a3b8">saat</span></div>
+                  </div>
+                  <div>
+                    <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">YAZ CƏMİ</div>
+                    <div style="font-size:1.02rem;font-weight:800;color:#334155">4 300 <span style="font-size:.72rem;font-weight:600;color:#94a3b8">saat</span></div>
+                  </div>
+                  <div style="padding-left:26px;border-left:1px solid #e2e8f0">
+                    <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#2563eb">ÜMUMİ SAAT</div>
+                    <div style="font-size:1.32rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">8 965</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div style="font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">CƏMİ KREDİT</div>
+                    <span style="display:inline-flex;align-items:baseline;gap:4px;padding:5px 11px;border:1.5px solid #2563eb;border-radius:9px;background:#eff6ff">
+                      <span style="font-size:1.05rem;font-weight:800;color:#1d4ed8">142</span>
+                      <span style="font-size:.68rem;font-weight:700;color:#2563eb">kr</span>
+                    </span>
+                  </div>
+                  <button type="button" onClick="{{ openValidate }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.87rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    Dekanlıqlara göndər
+                  </button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isTracking }}">
+              <div>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px">
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1.1">3</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">FAKÜLTƏ DİLİMİ</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #16a34a;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#16a34a;line-height:1.1">1</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">TƏSDİQLƏNİB</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #f59e0b;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#b45309;line-height:1.1">1</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">GÖZLƏYİR</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #dc2626;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#dc2626;line-height:1.1">1</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">QAYTARILIB</div>
+                  </div>
+                </div>
+
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+                  <div style="padding:14px 18px;border-bottom:1px solid #e2e8f0">
+                    <div style="font-size:.95rem;font-weight:700;color:#0f172a">Fakültə dilimləri</div>
+                    <div style="margin-top:3px;font-size:.8rem;color:#64748b">Sənəd 04.08.2026 tarixində dekanlıqlara göndərilib</div>
+                  </div>
+                  <div style="overflow:auto">
+                    <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:900px;font-size:.82rem">
+                      <thead>
+                        <tr>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">FAKÜLTƏ</th>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">STATUS</th>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:190px">KOORDİNATOR VİZASI</th>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">DEKAN QƏRARI</th>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">TARİX</th>
+                          <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:240px">ŞƏRH</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ slices }}" as="s" hint-placeholder-count="3">
+                          <tr style="background:{{ s.bg }}">
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;color:#0f172a">{{ s.name }}</td>
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0">
+                              <span style="padding:4px 10px;border-radius:999px;font-size:.7rem;font-weight:700;white-space:nowrap;background:{{ s.stBg }};color:{{ s.stFg }};border:1px solid {{ s.stBd }}">{{ s.status }}</span>
+                            </td>
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0">
+                              <div style="display:flex;align-items:center;gap:9px">
+                                <div style="flex:1;height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+                                  <div style="height:100%;width:{{ s.pct }};background:{{ s.barColor }}"></div>
+                                </div>
+                                <span style="font-size:.76rem;font-weight:700;color:#334155;white-space:nowrap">{{ s.visa }}</span>
+                              </div>
+                            </td>
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;color:{{ s.decisionFg }}">{{ s.decision }}</td>
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;color:#64748b">{{ s.date }}</td>
+                            <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;color:#64748b;line-height:1.4">{{ s.note }}</td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div style="margin-top:18px;background:#fff;border:1px solid #fecaca;border-radius:14px;overflow:hidden">
+                  <div style="display:flex;align-items:center;gap:9px;padding:13px 18px;background:#fee2e2;border-bottom:1px solid #fecaca">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.6"></line></svg>
+                    <span style="font-size:.88rem;font-weight:700;color:#991b1b">Qaytarılan sətirlər (1)</span>
+                  </div>
+                  <div style="padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+                    <div style="min-width:280px">
+                      <div style="display:flex;align-items:center;gap:9px">
+                        <span style="font-size:.9rem;font-weight:700;color:#0f172a">Veb texnologiyalar</span>
+                        <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.8rem;font-weight:800;color:#1d4ed8">4</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                      </div>
+                      <div style="margin-top:4px;font-size:.79rem;color:#64748b">236 İ · Kibertəhlükəsizlik · Payız · İntensiv</div>
+                      <div style="margin-top:8px;padding:9px 12px;border-left:3px solid #dc2626;background:#fef2f2;border-radius:0 8px 8px 0;font-size:.8rem;color:#7f1d1d;line-height:1.45;max-width:520px;text-wrap:pretty">«Qrup sayı ixtisas planı ilə uyğun gəlmir — birləşmə yenidən yoxlanılsın.» — dekan A. Rəhimova, 05.08.2026</div>
+                    </div>
+                    <button type="button" onClick="{{ tabEditor }}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.82rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Redaktora keç</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isImport }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+            <div style="display:flex;align-items:center;gap:0;padding:20px 24px;border-bottom:1px solid #e2e8f0;background:#f8fafc">
+              <button type="button" onClick="{{ step1 }}" style="display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0">
+                <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;font-size:.83rem;font-weight:800;background:{{ s1Bg }};color:{{ s1Fg }};border:2px solid {{ s1Bd }}">1</span>
+                <span style="font-size:.86rem;font-weight:{{ s1W }};color:{{ s1Tx }}">Fayl yüklə</span>
+              </button>
+              <span style="flex:1;height:2px;margin:0 16px;background:{{ line1 }}"></span>
+              <button type="button" onClick="{{ step2 }}" style="display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0">
+                <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;font-size:.83rem;font-weight:800;background:{{ s2Bg }};color:{{ s2Fg }};border:2px solid {{ s2Bd }}">2</span>
+                <span style="font-size:.86rem;font-weight:{{ s2W }};color:{{ s2Tx }}">Uyğunlaşdırma</span>
+              </button>
+              <span style="flex:1;height:2px;margin:0 16px;background:{{ line2 }}"></span>
+              <button type="button" onClick="{{ step3 }}" style="display:flex;align-items:center;gap:11px;border:0;background:transparent;cursor:pointer;padding:0">
+                <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;font-size:.83rem;font-weight:800;background:{{ s3Bg }};color:{{ s3Fg }};border:2px solid {{ s3Bd }}">3</span>
+                <span style="font-size:.86rem;font-weight:{{ s3W }};color:{{ s3Tx }}">Nəticə</span>
+              </button>
+            </div>
+
+            <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:34px 24px 30px">
+                <div style="max-width:640px;margin:0 auto;border:2px dashed #bfdbfe;border-radius:16px;background:#f8fafc;padding:44px 24px;text-align:center">
+                  <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#eff6ff;color:#2563eb;margin-bottom:14px">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  </div>
+                  <div style="font-size:1rem;font-weight:700;color:#0f172a">Excel faylını buraya sürüşdürün</div>
+                  <div style="margin-top:6px;font-size:.84rem;color:#64748b">.xlsx və ya .xls · maksimum 10 MB</div>
+                  <button type="button" onClick="{{ step2 }}" style="margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.86rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8">Fayl seç</button>
+                  <div style="margin-top:20px;padding-top:18px;border-top:1px solid #e2e8f0;font-size:.8rem;color:#64748b">Nümunə şablonu <a href="#">buradan yükləyin</a> — sütun adları dəyişdirilməməlidir.</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isStep2 }}">
+              <div>
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  <div>
+                    <div style="font-size:.87rem;font-weight:700;color:#0f172a">PIT_kafedra_2026-2027.xlsx</div>
+                    <div style="font-size:.77rem;color:#64748b">42 sətir oxundu · 6 fənn, 9 qrup tapıldı</div>
+                  </div>
+                  <div style="margin-left:auto;display:flex;gap:8px">
+                    <span style="padding:5px 11px;border-radius:999px;background:#dcfce7;color:#166534;border:1px solid #bbf7d0;font-size:.73rem;font-weight:700">7 uyğunlaşdı</span>
+                    <span style="padding:5px 11px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:.73rem;font-weight:700">2 tapılmadı</span>
+                  </div>
+                </div>
+                <div style="overflow:auto;max-height:52vh">
+                  <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:860px;font-size:.82rem">
+                    <thead>
+                      <tr>
+                        <th style="position:sticky;top:0;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">FAYLDAKI AD</th>
+                        <th style="position:sticky;top:0;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">NÖV</th>
+                        <th style="position:sticky;top:0;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:260px">KATALOQ UYĞUNLUĞU</th>
+                        <th style="position:sticky;top:0;background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">KREDİT</th>
+                        <th style="position:sticky;top:0;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ mappings }}" as="m" hint-placeholder-count="9">
+                        <tr style="background:{{ m.bg }}">
+                          <td style="padding:11px 14px;border-bottom:1px solid #e2e8f0;color:#0f172a;font-weight:600">{{ m.source }}</td>
+                          <td style="padding:11px 14px;border-bottom:1px solid #e2e8f0;color:#64748b">{{ m.kind }}</td>
+                          <td style="padding:11px 14px;border-bottom:1px solid #e2e8f0;color:#334155">{{ m.target }}</td>
+                          <td style="padding:11px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                            <span style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 8px;border:1.5px solid {{ m.crBd }};border-radius:7px;background:{{ m.crBg }}"><span style="font-size:.8rem;font-weight:800;color:{{ m.crFg }}">{{ m.credit }}</span><span style="font-size:.62rem;font-weight:700;color:{{ m.crFg }}">kr</span></span>
+                          </td>
+                          <td style="padding:11px 14px;border-bottom:1px solid #e2e8f0">
+                            <span style="padding:4px 10px;border-radius:999px;font-size:.71rem;font-weight:700;background:{{ m.stBg }};color:{{ m.stFg }};border:1px solid {{ m.stBd }}">{{ m.status }}</span>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid #e2e8f0;background:#fff">
+                  <button type="button" onClick="{{ step1 }}" style="padding:9px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Geri</button>
+                  <button type="button" onClick="{{ step3 }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8">Davam et</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isStep3 }}">
+              <div style="padding:26px 24px">
+                <div style="display:flex;align-items:center;gap:11px;margin-bottom:20px">
+                  <span style="display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:999px;background:#dcfce7;color:#16a34a">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </span>
+                  <div>
+                    <div style="font-size:1rem;font-weight:700;color:#0f172a">Fayl idxala hazırdır</div>
+                    <div style="font-size:.83rem;color:#64748b">Təsdiqləyəndən sonra sətirlər qaralama sənədə əlavə olunacaq.</div>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px">
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1.1">42</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">SƏTİR</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#0f172a;line-height:1.1">3 480</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">CƏMİ SAAT</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#1d4ed8;line-height:1.1">58</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">CƏMİ KREDİT</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #f59e0b;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.7rem;font-weight:800;color:#b45309;line-height:1.1">2</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">MƏTN KİMİ QALAN</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:11px;padding:14px 16px;border:1px solid #fde68a;background:#fef3c7;border-radius:12px;margin-bottom:22px">
+                  <svg style="flex:0 0 auto;margin-top:1px" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+                  <div style="font-size:.83rem;color:#92400e;line-height:1.5;text-wrap:pretty">«Kompüter şəbəkələri (seçmə)» və «237 KE» kataloqda tapılmadı — mətn kimi saxlanılacaq və sonradan kataloqa bağlana bilər.</div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <button type="button" onClick="{{ step2 }}" style="padding:9px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Geri</button>
+                  <button type="button" onClick="{{ goTasks }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.86rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">İdxal et</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:56px 24px;text-align:center">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#f1f5f9;color:#94a3b8;margin-bottom:14px">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="3" y1="10" x2="21" y2="10"></line><line x1="9" y1="10" x2="9" y2="20"></line></svg>
+            </div>
+            <div style="font-size:.98rem;font-weight:700;color:#334155">Bu bölmədə hələ məlumat yoxdur</div>
+            <div style="margin-top:6px;font-size:.85rem;color:#64748b">Tapşırıq dövriyyəsi başlayandan sonra buradakı hesabatlar avtomatik dolacaq.</div>
+            <button type="button" onClick="{{ goDashboard }}" style="margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8">İdarə panelinə qayıt</button>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showAdd }}">
+    <div style="position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:36px 20px;overflow:auto">
+      <div style="width:100%;max-width:900px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0f172a">Sətir əlavə et</div>
+            <div style="margin-top:2px;font-size:.8rem;color:#64748b">Proqramlaşdırma və informasiya təhlükəsizliyi · 2026/2027</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div style="padding:20px 22px;max-height:64vh;overflow:auto">
+          <div style="display:flex;gap:8px;margin-bottom:18px">
+            <button type="button" onClick="{{ setTypeNormal }}" style="padding:7px 14px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;border:1px solid {{ t1Bd }};background:{{ t1Bg }};color:{{ t1Fg }}">Adi dərs</button>
+            <button type="button" onClick="{{ setTypePractice }}" style="padding:7px 14px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;border:1px solid {{ t2Bd }};background:{{ t2Bg }};color:{{ t2Fg }}">Təcrübə</button>
+            <button type="button" onClick="{{ setTypeThesis }}" style="padding:7px 14px;border-radius:999px;font-size:.8rem;font-weight:600;cursor:pointer;border:1px solid {{ t3Bd }};background:{{ t3Bg }};color:{{ t3Fg }}">Buraxılış işi</button>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 150px;gap:14px;align-items:start;margin-bottom:16px">
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Fənn <span style="color:#dc2626">*</span></label>
+              <div style="position:relative">
+                <svg style="position:absolute;left:12px;top:12px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.7" y2="16.7"></line></svg>
+                <input type="text" placeholder="Kataloqdan fənn axtar…" value="{{ subjQuery }}" onChange="{{ onSubjQuery }}" onFocus="{{ openSubj }}" style="width:100%;padding:10px 12px 10px 35px;border:1px solid #cbd5e1;border-radius:10px;font-size:.86rem;color:#0f172a;background:#fff">
+                <sc-if value="{{ subjOpen }}">
+                  <div style="position:absolute;top:46px;left:0;right:0;z-index:10;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 18px 40px -16px rgba(15,23,42,.4);max-height:230px;overflow:auto">
+                    <sc-for list="{{ catalog }}" as="c" hint-placeholder-count="4">
+                      <button type="button" onClick="{{ c.onPick }}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 13px;border:0;border-bottom:1px solid #f1f5f9;background:#fff;text-align:left;cursor:pointer" style-hover="background:#eff6ff">
+                        <span style="font-size:.83rem;color:#0f172a;line-height:1.35">{{ c.name }}</span>
+                        <span style="flex:0 0 auto;display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.78rem;font-weight:800;color:#1d4ed8">{{ c.credit }}</span><span style="font-size:.6rem;font-weight:700;color:#2563eb">kr</span></span>
+                      </button>
+                    </sc-for>
+                    <button type="button" onClick="{{ enableFree }}" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 13px;border:0;background:#f8fafc;color:#2563eb;font-size:.81rem;font-weight:600;text-align:left;cursor:pointer" style-hover="background:#eff6ff">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      Kataloqda yoxdur — sərbəst ad yaz
+                    </button>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ freeMode }}">
+                <div style="margin-top:8px;padding:10px 12px;border:1px solid #fde68a;background:#fef3c7;border-radius:10px">
+                  <div style="font-size:.75rem;font-weight:700;color:#92400e;margin-bottom:6px">Sərbəst fənn adı (kataloqa bağlanmayıb)</div>
+                  <input type="text" placeholder="Fənnin tam adını yazın" style="width:100%;padding:9px 11px;border:1px solid #fcd34d;border-radius:8px;font-size:.84rem;background:#fff;color:#0f172a">
+                </div>
+              </sc-if>
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#1d4ed8;margin-bottom:6px">Kredit <span style="color:#dc2626">*</span></label>
+              <div style="display:flex;align-items:center;gap:7px;padding:6px 10px;border:2px solid #2563eb;border-radius:10px;background:#eff6ff">
+                <input type="number" value="{{ credit }}" onChange="{{ onCredit }}" style="width:100%;border:0;background:transparent;font-size:1.15rem;font-weight:800;color:#1d4ed8;padding:4px 0">
+                <span style="font-size:.72rem;font-weight:700;color:#2563eb">kr</span>
+              </div>
+              <div style="margin-top:5px;font-size:.7rem;color:#64748b">Kataloqdan avto-dolur, dəyişdirilə bilər</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px">
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">İxtisas</label>
+              <select value="{{ spec }}" onChange="{{ onSpec }}" style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff;cursor:pointer">
+                <option>Kompüter elmləri</option>
+                <option>İnformasiya texnologiyaları</option>
+                <option>Kibertəhlükəsizlik</option>
+                <option>Filologiya (xidməti)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Semestr</label>
+              <select value="{{ sem }}" onChange="{{ onSem }}" style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff;cursor:pointer">
+                <option>PAYIZ</option>
+                <option>YAZ</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Tədris forması</label>
+              <select style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff;cursor:pointer">
+                <option>Əyani</option>
+                <option>Qiyabi</option>
+                <option>İntensiv</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px">
+            <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Qruplar (çoxseçimli)</label>
+            <div style="border:1px solid #cbd5e1;border-radius:10px;padding:9px 10px;background:#fff">
+              <div style="display:flex;flex-wrap:wrap;gap:6px;min-height:30px;align-items:center">
+                <sc-for list="{{ chosenGroups }}" as="g" hint-placeholder-count="2">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;background:#dbeafe;border:1px solid #bfdbfe;color:#1d4ed8;font-size:.78rem;font-weight:600">
+                    {{ g.name }}
+                    <button type="button" onClick="{{ g.onRemove }}" style="display:flex;border:0;background:transparent;color:#2563eb;cursor:pointer;padding:0">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </span>
+                </sc-for>
+                <sc-if value="{{ noGroups }}">
+                  <span style="font-size:.82rem;color:#94a3b8">Aşağıdan qrup seçin</span>
+                </sc-if>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid #f1f5f9">
+                <sc-for list="{{ availGroups }}" as="g" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ g.onAdd }}" style="padding:5px 11px;border-radius:999px;border:1px dashed #cbd5e1;background:#fff;color:#475569;font-size:.78rem;font-weight:600;cursor:pointer" style-hover="border-color:#2563eb;color:#2563eb;background:#eff6ff">+ {{ g.name }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:20px">
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Səviyyə</label>
+              <select style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff;cursor:pointer"><option>Bakalavr</option><option>Magistr</option></select>
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Tələbə sayı</label>
+              <input type="number" value="{{ students }}" onChange="{{ onStudents }}" style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff">
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Birləşmə sayı</label>
+              <input type="number" value="{{ birl }}" onChange="{{ onBirl }}" style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff">
+            </div>
+            <div>
+              <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Yarımqrup sayı</label>
+              <input type="number" value="{{ yarim }}" onChange="{{ onYarim }}" style="width:100%;padding:10px 11px;border:1px solid #cbd5e1;border-radius:10px;font-size:.85rem;color:#0f172a;background:#fff">
+            </div>
+          </div>
+
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+              <span style="font-size:.8rem;font-weight:700;color:#334155">Saat strukturu</span>
+              <span style="font-size:.73rem;color:#64748b">«Cəmi» plan × qrup sayına görə avtomatik hesablanır — əl ilə dəyişə bilərsiniz</span>
+            </div>
+            <div style="padding:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+              <div style="border:1px solid #e2e8f0;border-radius:10px;padding:11px;background:#fff">
+                <div style="font-size:.75rem;font-weight:700;color:#1e40af;margin-bottom:8px">Mühazirə</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">plan</div>
+                    <input type="number" value="{{ mp }}" onChange="{{ onMp }}" style="width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.84rem;color:#0f172a">
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">cəmi</div>
+                    <input type="number" value="{{ mc }}" onChange="{{ onMc }}" style="width:100%;padding:7px 9px;border:1px solid #bfdbfe;border-radius:8px;font-size:.84rem;font-weight:700;color:#1d4ed8;background:#eff6ff">
+                  </div>
+                </div>
+              </div>
+              <div style="border:1px solid #e2e8f0;border-radius:10px;padding:11px;background:#fff">
+                <div style="font-size:.75rem;font-weight:700;color:#1e40af;margin-bottom:8px">Təcrübi-seminar</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">plan</div>
+                    <input type="number" value="{{ sp }}" onChange="{{ onSp }}" style="width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.84rem;color:#0f172a">
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">cəmi</div>
+                    <input type="number" value="{{ st }}" onChange="{{ onSt }}" style="width:100%;padding:7px 9px;border:1px solid #bfdbfe;border-radius:8px;font-size:.84rem;font-weight:700;color:#1d4ed8;background:#eff6ff">
+                  </div>
+                </div>
+              </div>
+              <div style="border:1px solid #e2e8f0;border-radius:10px;padding:11px;background:#fff">
+                <div style="font-size:.75rem;font-weight:700;color:#1e40af;margin-bottom:8px">Laboratoriya</div>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">plan</div>
+                    <input type="number" value="{{ lp }}" onChange="{{ onLp }}" style="width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.84rem;color:#0f172a">
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-size:.66rem;color:#94a3b8;margin-bottom:3px">cəmi</div>
+                    <input type="number" value="{{ lc }}" onChange="{{ onLc }}" style="width:100%;padding:7px 9px;border:1px solid #bfdbfe;border-radius:8px;font-size:.84rem;font-weight:700;color:#1d4ed8;background:#eff6ff">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:0 14px 14px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px">
+              <div>
+                <div style="font-size:.7rem;color:#64748b;margin-bottom:4px">Məsləhət</div>
+                <input type="number" value="{{ mesl }}" onChange="{{ onMesl }}" style="width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.83rem;color:#0f172a">
+              </div>
+              <div>
+                <div style="font-size:.7rem;color:#64748b;margin-bottom:4px">İmtahan</div>
+                <input type="number" value="{{ imt }}" onChange="{{ onImt }}" style="width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.83rem;color:#0f172a">
+              </div>
+              <div>
+                <div style="font-size:.7rem;color:#64748b;margin-bottom:4px">Buraxılış işi</div>
+                <input type="number" value="{{ burax }}" onChange="{{ onBurax }}" style="width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.83rem;color:#0f172a">
+              </div>
+              <div>
+                <div style="font-size:.7rem;color:#64748b;margin-bottom:4px">Doktorant</div>
+                <input type="number" value="{{ dokt }}" onChange="{{ onDokt }}" style="width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.83rem;color:#0f172a">
+              </div>
+              <div>
+                <div style="font-size:.7rem;color:#64748b;margin-bottom:4px">Təcrübə</div>
+                <input type="number" value="{{ tecr }}" onChange="{{ onTecr }}" style="width:100%;padding:8px 9px;border:1px solid #cbd5e1;border-radius:8px;font-size:.83rem;color:#0f172a">
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe">
+            <div style="font-size:.82rem;font-weight:700;color:#1e40af">Sətir CƏMİ (canlı hesablama)</div>
+            <div style="display:flex;align-items:center;gap:14px">
+              <div style="font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ formTotal }} <span style="font-size:.78rem;font-weight:600;color:#64748b">saat</span></div>
+              <span style="display:inline-flex;align-items:baseline;gap:4px;padding:5px 11px;border:1.5px solid #2563eb;border-radius:9px;background:#fff"><span style="font-size:1rem;font-weight:800;color:#1d4ed8">{{ credit }}</span><span style="font-size:.66rem;font-weight:700;color:#2563eb">kr</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 20px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">Sətri əlavə et</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showDelete }}">
+    <div style="position:fixed;inset:0;z-index:210;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;max-width:460px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div style="font-size:1rem;font-weight:700;color:#0f172a">Sətri silmək</div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:22px;display:flex;gap:14px">
+          <span style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:#fee2e2;color:#dc2626">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>
+          </span>
+          <div>
+            <div style="font-size:.9rem;font-weight:700;color:#0f172a;line-height:1.4">{{ delName }}</div>
+            <div style="margin-top:6px;font-size:.84rem;color:#64748b;line-height:1.5;text-wrap:pretty">Bu sətir sənəddən silinəcək və yekun saat/kredit yenidən hesablanacaq. Əməliyyat geri qaytarılmır.</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 20px;border-radius:9px;border:1px solid #dc2626;background:#dc2626;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#b91c1c">Sil</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showValidate }}">
+    <div style="position:fixed;inset:0;z-index:210;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:36px 20px;overflow:auto">
+      <div style="width:100%;max-width:660px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0f172a">Göndərmədən əvvəl yoxlama</div>
+            <div style="margin-top:2px;font-size:.8rem;color:#64748b">64 sətir · 8 965 saat · 142 kredit</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;max-height:62vh;overflow:auto">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;color:#94a3b8;margin-bottom:9px">XƏBƏRDARLIQLAR (2)</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:22px">
+            <div style="display:flex;gap:11px;padding:12px 14px;border:1px solid #fde68a;background:#fef3c7;border-radius:11px">
+              <svg style="flex:0 0 auto;margin-top:1px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+              <div style="font-size:.83rem;color:#92400e;line-height:1.5">3 sətirdə <strong>cəmi</strong> düsturla (plan × qrup sayı) uyğun gəlmir — əl ilə dəyişdirilib.</div>
+            </div>
+            <div style="display:flex;gap:11px;padding:12px 14px;border:1px solid #fde68a;background:#fef3c7;border-radius:11px">
+              <svg style="flex:0 0 auto;margin-top:1px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+              <div style="font-size:.83rem;color:#92400e;line-height:1.5">2 fənn kataloqla uyğunlaşmayıb — mətn kimi göndəriləcək.</div>
+            </div>
+          </div>
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.06em;color:#94a3b8;margin-bottom:9px">TƏSDİQ DİLİMLƏRİ (3)</div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <sc-for list="{{ dispatch }}" as="d" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 15px;border-bottom:1px solid #f1f5f9;background:#fff">
+                <div>
+                  <div style="font-size:.86rem;font-weight:600;color:#0f172a">{{ d.name }}</div>
+                  <div style="margin-top:2px;font-size:.77rem;color:#64748b">{{ d.meta }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px">
+                  <span style="font-size:.83rem;font-weight:700;color:#334155">{{ d.hours }} saat</span>
+                  <span style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.8rem;font-weight:800;color:#1d4ed8">{{ d.credit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <span style="font-size:.78rem;color:#64748b">Göndərildikdən sonra sənəd yalnız oxunuş rejiminə keçir.</span>
+          <div style="display:flex;gap:10px">
+            <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+            <button type="button" onClick="{{ confirmSend }}" style="padding:10px 20px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">Təsdiq et, göndər</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = {
+    view: 'dashboard',
+    tab: 'editor',
+    step: 1,
+    fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fGroup: 'Hamısı', fForma: 'Hamısı',
+    fFaculty: 'Hamısı', fStatus: 'Hamısı',
+    applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', group: 'Hamısı', forma: 'Hamısı', faculty: 'Hamısı', status: 'Hamısı' },
+    modal: null,
+    subjQuery: '',
+    subjOpen: false,
+    freeMode: false,
+    rowType: 'Adi dərs',
+    delName: '',
+    spec: 'Kompüter elmləri',
+    groups: ['236 KE'],
+    sem: 'PAYIZ',
+    credit: 5,
+    students: 52,
+    birl: 1,
+    yarim: 3,
+    mp: 30, mc: 30,
+    sp: 15, st: 45,
+    lp: 15, lc: 45,
+    mesl: 8, imt: 12, burax: 0, dokt: 0, tecr: 0
+  };
+
+  n(v) { const x = parseInt(v, 10); return isNaN(x) ? 0 : x; }
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+    const num = (k) => (e) => set({ [k]: this.n(e.target.value) });
+
+    const CAT = [
+      { name: 'Proqramlaşdırmanın əsasları – 1', credit: 5 },
+      { name: 'Proqramlaşdırmanın əsasları – 3', credit: 4 },
+      { name: 'Veb texnologiyalar', credit: 4 },
+      { name: 'İnformasiya təhlükəsizliyinin əsasları', credit: 6 },
+      { name: 'Şəbəkələrin təhlükəsizliyi', credit: 5 },
+      { name: 'Müasir informasiya-kommunikasiya texnologiyaları və informasiya təhlükəsizliyi', credit: 3 }
+    ];
+    const GROUPS = {
+      'Kompüter elmləri': ['236 KE', '236 KE ing', '036 / 336 F'],
+      'İnformasiya texnologiyaları': ['235 İT', '236 İT'],
+      'Kibertəhlükəsizlik': ['235 K', '236 İ'],
+      'Filologiya (xidməti)': ['235 FL', '236 JU']
+    };
+
+    const ST = {
+      'Qaralama':    { stBg: '#f1f5f9', stFg: '#475569', stBd: '#e2e8f0' },
+      'Göndərilib':  { stBg: '#dbeafe', stFg: '#1d4ed8', stBd: '#bfdbfe' },
+      'Təsdiqlənib': { stBg: '#dcfce7', stFg: '#166534', stBd: '#bbf7d0' },
+      'Qaytarılıb':  { stBg: '#fee2e2', stFg: '#b91c1c', stBd: '#fecaca' },
+      'Gözləyir':    { stBg: '#fef3c7', stFg: '#92400e', stBd: '#fde68a' }
+    };
+    const chip = (st) => Object.assign({ status: st }, ST[st]);
+
+    const K = [
+      ['Proqramlaşdırma və informasiya təhlükəsizliyi', 'Qaralama', '8 965', 4665, 4300, 142, '05.08.2026'],
+      ['Kompüter mühəndisliyi', 'Qaytarılıb', '7 180', 3640, 3540, 126, '03.08.2026'],
+      ['Riyaziyyat və statistika', 'Təsdiqlənib', '6 420', 3300, 3120, 118, '02.08.2026'],
+      ['İqtisadiyyat və menecment', 'Təsdiqlənib', '6 890', 3500, 3390, 130, '30.07.2026'],
+      ['Filologiya və jurnalistika', 'Göndərilib', '5 010', 2560, 2450, 104, '04.08.2026'],
+      ['Psixologiya', 'Qaralama', '4 250', 2200, 2050, 96, '01.08.2026'],
+      ['Dizayn və memarlıq', 'Göndərilib', '3 940', 2020, 1920, 78, '05.08.2026'],
+      ['Tibb bacısı işi', 'Qaralama', '2 860', 1460, 1400, 60, '27.07.2026']
+    ];
+    const fmt = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const FAC = {
+      'Proqramlaşdırma və informasiya təhlükəsizliyi': 'Təbiət elmləri və İT fakültəsi',
+      'Kompüter mühəndisliyi': 'Təbiət elmləri və İT fakültəsi',
+      'Riyaziyyat və statistika': 'Təbiət elmləri və İT fakültəsi',
+      'İqtisadiyyat və menecment': 'İqtisadiyyat və idarəetmə fakültəsi',
+      'Filologiya və jurnalistika': 'Humanitar fakültə',
+      'Psixologiya': 'Humanitar fakültə',
+      'Dizayn və memarlıq': 'Humanitar fakültə',
+      'Tibb bacısı işi': 'Tibb fakültəsi'
+    };
+    const a = s.applied;
+    const arch = a.year !== '2026 / 2027';
+    const kafedras = K.filter((k) => (a.faculty === 'Hamısı' || FAC[k[0]] === a.faculty) && (a.status === 'Hamısı' || k[1] === a.status)).map((k) => {
+      const tot = k[3] + k[4];
+      return Object.assign({
+        name: k[0], hours: k[2], fall: fmt(k[3]), spring: fmt(k[4]), credit: k[5], date: k[6],
+        fallPct: Math.round((k[3] / tot) * 100) + '%',
+        springPct: Math.round((k[4] / tot) * 100) + '%',
+        onOpen: () => set({ view: 'tasks', tab: 'editor' })
+      }, chip(k[1]));
+    });
+
+    const R = [
+      ['PAYIZ', '236 KE, 236 KE ing', 'Proqramlaşdırmanın əsasları – 1', 'Kompüter elmləri', 'Əyani', 'Bakalavr', 52, 1, 3, 30, 30, 15, 45, 15, 45, 8, 12, '–', '–', '–', 140, 5, ''],
+      ['PAYIZ', '235 İT', 'Veb texnologiyalar', 'İnformasiya texnologiyaları', 'Əyani', 'Bakalavr', 26, 1, 2, 30, 30, 15, 30, 30, 60, 6, 10, '–', '–', '–', 136, 4, ''],
+      ['PAYIZ', '235 K, 236 İ', 'İnformasiya təhlükəsizliyinin əsasları', 'Kibertəhlükəsizlik', 'Əyani', 'Bakalavr', 48, 1, 2, 30, 30, 30, 60, 15, 30, 10, 14, '–', '–', '–', 144, 6, ''],
+      ['PAYIZ', '236 İ', 'Veb texnologiyalar', 'Kibertəhlükəsizlik', 'İntensiv', 'Bakalavr', 22, 1, 2, 30, 30, 15, 30, 30, 60, 6, 10, '–', '–', '–', 136, 4, 'Dekan qaytardı: qrup sayı ixtisas planı ilə uyğun gəlmir — birləşmə yenidən yoxlanılsın.'],
+      ['YAZ', '236 KE', 'Proqramlaşdırmanın əsasları – 3', 'Kompüter elmləri', 'Əyani', 'Bakalavr', 30, 1, 2, 30, 30, 15, 30, 30, 60, 6, 10, '–', '–', '–', 136, 4, ''],
+      ['YAZ', '036 / 336 F', 'Müasir informasiya-kommunikasiya texnologiyaları və informasiya təhlükəsizliyi', 'Filologiya (xidməti)', 'Qiyabi', 'Bakalavr', 80, 2, 4, 10, 20, 10, 40, '–', '–', 6, 8, '–', '–', '–', 74, 3, ''],
+      ['YAZ', '235 K', 'Şəbəkələrin təhlükəsizliyi', 'Kibertəhlükəsizlik', 'Əyani', 'Magistr', 18, 1, 1, 30, 30, 15, 15, 30, 30, 8, 12, 40, 30, '–', 165, 5, ''],
+      ['YAZ', '236 KE, 235 İT', 'İstehsalat təcrübəsi', 'Kompüter elmləri', 'Əyani', 'Bakalavr', 52, '–', '–', '–', '–', '–', '–', '–', '–', '–', '–', '–', '–', 120, 120, 4, '']
+    ];
+    const rows = R.filter((r) => (a.sem === 'Hamısı' || r[0] === a.sem) && (a.spec === 'Hamısı' || r[3] === a.spec) && (a.forma === 'Hamısı' || r[4] === a.forma) && (a.group === 'Hamısı' || r[1].indexOf(a.group) >= 0)).map((r, i) => ({
+      sem: r[0], groups: r[1], subject: r[2], spec: r[3], forma: r[4], level: r[5],
+      students: r[6], birl: r[7], yarim: r[8],
+      mp: r[9], mc: r[10], sp: r[11], st: r[12], lp: r[13], lc: r[14],
+      mesl: r[15], imt: r[16], burax: r[17], dokt: r[18], tecr: r[19],
+      total: r[20], credit: r[21], note: r[22],
+      bg: r[22] ? '#fef2f2' : (i % 2 ? '#f8fafc' : '#ffffff'),
+      semBg: r[0] === 'PAYIZ' ? '#dbeafe' : '#e0e7ff',
+      semFg: r[0] === 'PAYIZ' ? '#1d4ed8' : '#4338ca',
+      onDelete: () => set({ modal: 'delete', delName: r[2] + ' · ' + r[1] })
+    }));
+
+    const slices = [
+      Object.assign({
+        name: 'Təbiət elmləri və İT fakültəsi', visa: '21 / 28', pct: '75%', barColor: '#2563eb',
+        decision: 'Gözləyir', decisionFg: '#b45309', date: '04.08.2026',
+        note: 'Koordinator baxışı davam edir.', bg: '#ffffff'
+      }, chip('Göndərilib')),
+      Object.assign({
+        name: 'Humanitar fakültə', visa: '12 / 12', pct: '100%', barColor: '#dc2626',
+        decision: 'Qaytarıldı', decisionFg: '#b91c1c', date: '05.08.2026',
+        note: '1 sətirdə birləşmə düzəlişi tələb olunur.', bg: '#fef2f2'
+      }, chip('Qaytarılıb')),
+      Object.assign({
+        name: 'İqtisadiyyat və idarəetmə fakültəsi', visa: '9 / 9', pct: '100%', barColor: '#16a34a',
+        decision: 'Təsdiqləndi', decisionFg: '#166534', date: '03.08.2026',
+        note: '—', bg: '#ffffff'
+      }, chip('Təsdiqlənib'))
+    ];
+
+    const M = [
+      ['Proqramlaşdırmanın əsasları 1', 'Fənn', 'Proqramlaşdırmanın əsasları – 1', 5, 1],
+      ['Veb texnologiyaları', 'Fənn', 'Veb texnologiyalar', 4, 1],
+      ['İnf. təhl. əsasları', 'Fənn', 'İnformasiya təhlükəsizliyinin əsasları', 6, 1],
+      ['Şəbəkə təhlükəsizliyi', 'Fənn', 'Şəbəkələrin təhlükəsizliyi', 5, 1],
+      ['Kompüter şəbəkələri (seçmə)', 'Fənn', 'Kataloqda tapılmadı', '—', 0],
+      ['236KE', 'Qrup', '236 KE', '—', 1],
+      ['236 KE (ing)', 'Qrup', '236 KE ing', '—', 1],
+      ['235İT', 'Qrup', '235 İT', '—', 1],
+      ['237 KE', 'Qrup', 'Kataloqda tapılmadı', '—', 0]
+    ];
+    const mappings = M.map((m, i) => ({
+      source: m[0], kind: m[1], target: m[2], credit: m[3],
+      bg: m[4] ? (i % 2 ? '#f8fafc' : '#ffffff') : '#fffbeb',
+      crBd: m[4] && m[3] !== '—' ? '#bfdbfe' : '#e2e8f0',
+      crBg: m[4] && m[3] !== '—' ? '#eff6ff' : '#f8fafc',
+      crFg: m[4] && m[3] !== '—' ? '#1d4ed8' : '#94a3b8',
+      status: m[4] ? 'Uyğunlaşdı' : 'Mətn kimi qalacaq',
+      stBg: m[4] ? '#dcfce7' : '#fef3c7',
+      stFg: m[4] ? '#166534' : '#92400e',
+      stBd: m[4] ? '#bbf7d0' : '#fde68a'
+    }));
+
+    const dispatch = [
+      { name: 'Təbiət elmləri və İT fakültəsi', meta: '3 ixtisas · 41 sətir · dekan A. Rəhimova', hours: '6 120', credit: 98 },
+      { name: 'Humanitar fakültə', meta: '2 ixtisas · 14 sətir · dekan M. Səfərova', hours: '1 845', credit: 28 },
+      { name: 'İqtisadiyyat və idarəetmə fakültəsi', meta: '1 ixtisas · 9 sətir · dekan T. Vəliyev', hours: '1 000', credit: 16 }
+    ];
+
+    const on = (v) => s.view === v;
+    const navc = (v) => ({
+      bg: on(v) ? '#3b82f6' : 'transparent',
+      fg: on(v) ? '#ffffff' : '#64748b',
+      sh: on(v) ? '0 4px 12px rgba(59,130,246,.25)' : 'none'
+    });
+    const nd = navc('dashboard'), nt = navc('tasks'), ni = navc('import'), nr = navc('reports'), ns = navc('settings');
+
+    const titles = {
+      dashboard: ['İdarə paneli', 'Dərs yükü mərkəzi', '2026/2027 tədris ili üzrə kafedra tapşırıqlarının vəziyyəti.'],
+      tasks: ['Tapşırıqlar', 'Tapşırıq redaktoru', 'Proqramlaşdırma və informasiya təhlükəsizliyi kafedrası · qaralama sənəd.'],
+      import: ['Excel import', 'Excel import sehrbazı', 'Hazır cədvəli yükləyin, kataloqla uyğunlaşdırın və sənədə əlavə edin.'],
+      reports: ['Hesabatlar', 'Hesabatlar', 'Kafedra və fakültə kəsimində yük hesabatları.'],
+      settings: ['Parametrlər', 'Parametrlər', 'Tapşırıq dövriyyəsinin qaydaları və norma ayarları.']
+    };
+    const t = titles[s.view];
+
+    const stepc = (i) => {
+      const done = s.step > i, act = s.step === i;
+      return {
+        bg: done ? '#2563eb' : (act ? '#eff6ff' : '#fff'),
+        fg: done ? '#fff' : (act ? '#1d4ed8' : '#94a3b8'),
+        bd: done || act ? '#2563eb' : '#e2e8f0',
+        w: act ? '700' : '500',
+        tx: act ? '#0f172a' : (done ? '#334155' : '#94a3b8')
+      };
+    };
+    const c1 = stepc(1), c2 = stepc(2), c3 = stepc(3);
+
+    const typec = (v) => ({
+      bd: s.rowType === v ? '#2563eb' : '#cbd5e1',
+      bg: s.rowType === v ? '#eff6ff' : '#fff',
+      fg: s.rowType === v ? '#1d4ed8' : '#475569'
+    });
+    const y1 = typec('Adi dərs'), y2 = typec('Təcrübə'), y3 = typec('Buraxılış işi');
+
+    const q = s.subjQuery.toLowerCase();
+    const catalog = CAT.filter((c) => !q || c.name.toLowerCase().indexOf(q) >= 0).map((c) => ({
+      name: c.name, credit: c.credit,
+      onPick: () => set({ subjQuery: c.name, credit: c.credit, subjOpen: false, freeMode: false })
+    }));
+
+    const avail = (GROUPS[s.spec] || []).filter((g) => s.groups.indexOf(g) < 0);
+
+    const nn = (v) => (typeof v === 'number' ? v : 0);
+    const formTotal = nn(s.mc) + nn(s.st) + nn(s.lc) + nn(s.mesl) + nn(s.imt) + nn(s.burax) + nn(s.dokt) + nn(s.tecr);
+
+    return {
+      crumb: t[0], pageTitle: t[1], pageSub: t[2],
+      isDash: on('dashboard'), isTasks: on('tasks'), isImport: on('import'),
+      isEmpty: on('reports') || on('settings'),
+      isEditor: s.tab === 'editor', isTracking: s.tab === 'tracking',
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3,
+      kafedras, rows, slices, mappings, dispatch, catalog,
+
+      navDashBg: nd.bg, navDashFg: nd.fg, navDashSh: nd.sh,
+      navTaskBg: nt.bg, navTaskFg: nt.fg, navTaskSh: nt.sh,
+      navImpBg: ni.bg, navImpFg: ni.fg, navImpSh: ni.sh,
+      navRepBg: nr.bg, navRepFg: nr.fg, navRepSh: nr.sh,
+      navSetBg: ns.bg, navSetFg: ns.fg, navSetSh: ns.sh,
+
+      tabEdBg: s.tab === 'editor' ? '#fff' : 'transparent',
+      tabEdFg: s.tab === 'editor' ? '#1d4ed8' : '#64748b',
+      tabEdSh: s.tab === 'editor' ? '0 1px 3px rgba(15,23,42,.12)' : 'none',
+      tabTrBg: s.tab === 'tracking' ? '#fff' : 'transparent',
+      tabTrFg: s.tab === 'tracking' ? '#1d4ed8' : '#64748b',
+      tabTrSh: s.tab === 'tracking' ? '0 1px 3px rgba(15,23,42,.12)' : 'none',
+
+      s1Bg: c1.bg, s1Fg: c1.fg, s1Bd: c1.bd, s1W: c1.w, s1Tx: c1.tx,
+      s2Bg: c2.bg, s2Fg: c2.fg, s2Bd: c2.bd, s2W: c2.w, s2Tx: c2.tx,
+      s3Bg: c3.bg, s3Fg: c3.fg, s3Bd: c3.bd, s3W: c3.w, s3Tx: c3.tx,
+      line1: s.step > 1 ? '#2563eb' : '#e2e8f0',
+      line2: s.step > 2 ? '#2563eb' : '#e2e8f0',
+
+      t1Bd: y1.bd, t1Bg: y1.bg, t1Fg: y1.fg,
+      t2Bd: y2.bd, t2Bg: y2.bg, t2Fg: y2.fg,
+      t3Bd: y3.bd, t3Bg: y3.bg, t3Fg: y3.fg,
+
+      showAdd: s.modal === 'add', showDelete: s.modal === 'delete', showValidate: s.modal === 'validate',
+      delName: s.delName,
+      subjQuery: s.subjQuery, subjOpen: s.subjOpen, freeMode: s.freeMode,
+      spec: s.spec, sem: s.sem, credit: s.credit, students: s.students, birl: s.birl, yarim: s.yarim,
+      mp: s.mp, mc: s.mc, sp: s.sp, st: s.st, lp: s.lp, lc: s.lc,
+      mesl: s.mesl, imt: s.imt, burax: s.burax, dokt: s.dokt, tecr: s.tecr,
+      formTotal,
+      noGroups: s.groups.length === 0,
+      chosenGroups: s.groups.map((g) => ({ name: g, onRemove: () => set({ groups: s.groups.filter((x) => x !== g) }) })),
+      availGroups: avail.map((g) => ({ name: g, onAdd: () => set({ groups: s.groups.concat([g]) }) })),
+
+      fYear: s.fYear, fSem: s.fSem, fSpec: s.fSpec, fGroup: s.fGroup, fForma: s.fForma,
+      fFaculty: s.fFaculty, fStatus: s.fStatus,
+      isArchive: arch, appliedYear: a.year, year: a.year,
+      yearNote: arch ? 'Arxiv — yalnız oxunuş' : 'Tapşırıq mərhələsi açıqdır',
+      yearNoteFg: arch ? '#b45309' : '#2563eb',
+      rowCount: rows.length, kafCount: kafedras.length, noRows: rows.length === 0,
+      onFYear: (e) => set({ fYear: e.target.value }),
+      onFSem: (e) => set({ fSem: e.target.value }),
+      onFSpec: (e) => set({ fSpec: e.target.value }),
+      onFGroup: (e) => set({ fGroup: e.target.value }),
+      onFForma: (e) => set({ fForma: e.target.value }),
+      onFFaculty: (e) => set({ fFaculty: e.target.value }),
+      onFStatus: (e) => set({ fStatus: e.target.value }),
+      applyFilters: () => set({ applied: { year: s.fYear, sem: s.fSem, spec: s.fSpec, group: s.fGroup, forma: s.fForma, faculty: s.fFaculty, status: s.fStatus } }),
+      resetFilters: () => set({ fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fGroup: 'Hamısı', fForma: 'Hamısı', fFaculty: 'Hamısı', fStatus: 'Hamısı', applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', group: 'Hamısı', forma: 'Hamısı', faculty: 'Hamısı', status: 'Hamısı' } }),
+      goDashboard: () => set({ view: 'dashboard' }),
+      goTasks: () => set({ view: 'tasks' }),
+      goImport: () => set({ view: 'import', step: 1 }),
+      goReports: () => set({ view: 'reports' }),
+      goSettings: () => set({ view: 'settings' }),
+      tabEditor: () => set({ tab: 'editor', view: 'tasks' }),
+      tabTracking: () => set({ tab: 'tracking' }),
+      step1: () => set({ step: 1 }),
+      step2: () => set({ step: 2 }),
+      step3: () => set({ step: 3 }),
+      openAdd: () => set({ modal: 'add', view: 'tasks', tab: 'editor' }),
+      openValidate: () => set({ modal: 'validate' }),
+      closeModal: () => set({ modal: null, subjOpen: false }),
+      confirmSend: () => set({ modal: null, tab: 'tracking' }),
+      openSubj: () => set({ subjOpen: true }),
+      onSubjQuery: (e) => set({ subjQuery: e.target.value, subjOpen: true }),
+      enableFree: () => set({ freeMode: true, subjOpen: false }),
+      setTypeNormal: () => set({ rowType: 'Adi dərs' }),
+      setTypePractice: () => set({ rowType: 'Təcrübə' }),
+      setTypeThesis: () => set({ rowType: 'Buraxılış işi' }),
+      onSpec: (e) => set({ spec: e.target.value, groups: [] }),
+      onSem: (e) => set({ sem: e.target.value }),
+      onCredit: num('credit'),
+      onStudents: num('students'),
+      onBirl: (e) => { const v = this.n(e.target.value); set({ birl: v, mc: this.n(s.mp) * v }); },
+      onYarim: (e) => { const v = this.n(e.target.value); set({ yarim: v, st: this.n(s.sp) * v, lc: this.n(s.lp) * v }); },
+      onMp: (e) => { const v = this.n(e.target.value); set({ mp: v, mc: v * this.n(s.birl) }); },
+      onMc: num('mc'),
+      onSp: (e) => { const v = this.n(e.target.value); set({ sp: v, st: v * this.n(s.yarim) }); },
+      onSt: num('st'),
+      onLp: (e) => { const v = this.n(e.target.value); set({ lp: v, lc: v * this.n(s.yarim) }); },
+      onLc: num('lc'),
+      onMesl: num('mesl'), onImt: num('imt'), onBurax: num('burax'), onDokt: num('dokt'), onTecr: num('tecr')
+    };
+  }
+}
+</script>
+</body>
+</html>

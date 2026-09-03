@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.helpers import _safe_same_origin_redirect_path
+from core.staff_position import visible_role_label
 
 from ...models import Organization
 from ..shared._helpers import _can_access_organization
@@ -63,7 +64,15 @@ def select_organization(request):
 
     next_url = request.GET.get("next", "")
     for org_data in organizations.values():
-        role_labels = [membership.role.display_name for membership in org_data["memberships"]]
+        # ⚠️ Doldurucu «Üzv» rolu nişan kimi göstərilmir (core/staff_position.py).
+        role_labels = [
+            label
+            for label in (
+                visible_role_label(membership.role.name, membership.role.display_name)
+                for membership in org_data["memberships"]
+            )
+            if label
+        ]
         if org_data["organization"].owner_id == request.user.id and "Təşkilat Sahibi" not in role_labels:
             role_labels.insert(0, "Təşkilat Sahibi")
         if is_superadmin and not role_labels:

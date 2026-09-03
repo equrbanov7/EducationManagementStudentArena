@@ -1,0 +1,510 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — ORTAQ komponentlər (dizayn təhvili §2 «Fidelity» ölçüləri)
+   ───────────────────────────────────────────────────────────────────────────
+   Ölçülər dizayndan olduğu kimi götürülüb: kart radiusu 12px, düymə/input 9px,
+   badge/chip 999px; kartlarda KÖLGƏ YOXDUR (yalnız drawer/dialog/toast-da),
+   ayrım kontur + `--ems-bg-subtle` fonla verilir.
+
+   Rəng HARDCODE EDİLMİR — hamısı `static/css/design-tokens.css` tokenləridir.
+   ⚠️ «təsdiqlənib» MƏTNİ `--ems-success-700` (#15803d, AA); `--ems-success`
+   (#10b981) yalnız ikon/accent kimi işlədilir.
+   ⚠️ Tətbiq YALNIZ İŞIQLI temadır — `prefers-color-scheme: dark` YOXDUR.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.profile-section--syllabus {
+    --syl-radius-card: 12px;
+    --syl-radius-ctl: 9px;
+    --syl-gap: 12px;
+}
+
+.syl {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-size: 0.83rem;
+    color: var(--ems-text);
+}
+
+/* ⚠️ `hidden` ATRIBUTU class-dan ZƏİFDİR.
+   Brauzerin öz stili `[hidden]{display:none}`-dur, amma `.syl-btn{display:flex}`
+   ondan spesifikdir — nəticədə JS `node.hidden = true` yazsa da element EKRANDA
+   QALIR. Məhz belə olmuşdu: autosave «saxlanıldı» olduğu halda başlıqdakı
+   «Yenidən cəhd et» düyməsi görünürdü.
+   Ona görə bölmə daxilində `hidden` QƏTİ gizlədir; hər komponent üçün ayrıca
+   `.x[hidden]` qaydası yazmağa ehtiyac qalmır. */
+.syl [hidden] {
+    display: none !important;
+}
+
+.syl .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Tipoqrafiya ──────────────────────────────────────────────────────── */
+.syl-head__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.syl-head__lead {
+    margin: 6px 0 0;
+    max-width: 760px;
+    font-size: 0.86rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-meta {
+    display: block;
+    margin: 2px 0 0;
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-note {
+    margin: 4px 0 0;
+    font-size: 0.76rem;
+    color: var(--ems-neutral-400);
+}
+
+/* Qərar səlahiyyəti olmayan aktorun (dekan) «yalnız oxunur» qeydi — sahibin
+   qərarı 2026-09-03. Xəbərdarlıq deyil, İZAHDIR: neytral-mavi info tonu. */
+.syl-note--readonly {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-primary-100);
+    border-radius: 8px;
+    background: var(--ems-primary-50);
+    font-size: 0.79rem;
+    color: var(--ems-primary-800);
+}
+
+.syl-note--readonly strong {
+    font-weight: 700;
+}
+
+.syl-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+}
+
+.syl-version {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--ems-neutral-100);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.syl-req {
+    color: var(--ems-danger);
+}
+
+/* ── Status badge (7 status × ton) ────────────────────────────────────── */
+.syl-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    white-space: nowrap;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-badge--neutral {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-badge--submitted {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.syl-badge--review {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.syl-badge--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-badge--success {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.syl-badge--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.syl-badge--archived {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+}
+
+/* ── Tamamlanma zolağı ────────────────────────────────────────────────── */
+.syl-bar {
+    display: inline-block;
+    flex: 1;
+    min-width: 54px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+}
+
+.syl-bar__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+}
+
+.syl-bar--success .syl-bar__fill {
+    background: var(--ems-success);
+}
+
+.syl-bar--warning .syl-bar__fill {
+    background: var(--ems-warning);
+}
+
+.syl-bar__value {
+    font-size: 0.77rem;
+    font-weight: 800;
+    color: var(--ems-primary-600);
+    white-space: nowrap;
+}
+
+.syl-bar__value--success {
+    color: var(--ems-success-700);
+}
+
+.syl-bar__value--warning {
+    color: var(--ems-warning-800);
+}
+
+/* ── «Növbəti əməl» mətni ─────────────────────────────────────────────── */
+.syl-next {
+    display: block;
+    font-size: 0.79rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.syl-next--warning {
+    color: var(--ems-warning-800);
+}
+
+.syl-next--muted {
+    color: var(--ems-text-muted);
+    font-weight: 600;
+}
+
+/* ── Düymələr (toxunma hədəfi 34–44px) ────────────────────────────────── */
+.syl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: var(--syl-radius-ctl);
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.syl-btn--sm {
+    min-height: 34px;
+    padding: 0 11px;
+    font-size: 0.78rem;
+}
+
+.syl-btn--lg {
+    min-height: 44px;
+    padding: 0 20px;
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.syl-btn--primary {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.syl-btn--primary:hover:not(:disabled) {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+}
+
+.syl-btn--secondary:hover:not(:disabled) {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.syl-btn--warning {
+    border-color: var(--ems-warning);
+    background: var(--ems-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-btn--danger {
+    border-color: var(--ems-danger);
+    background: var(--ems-bg);
+    color: var(--ems-danger);
+}
+
+.syl-btn--ghost {
+    border-color: var(--ems-border);
+    background: transparent;
+    color: var(--ems-text-muted);
+    min-height: 38px;
+}
+
+.syl-btn--dashed {
+    align-self: flex-start;
+    border-style: dashed;
+}
+
+.syl-btn--dashed:hover {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.syl-btn:disabled {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.syl-iconbtn {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: var(--syl-radius-ctl);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-400);
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+
+.syl-iconbtn:hover:not(:disabled) {
+    border-color: var(--ems-danger);
+    color: var(--ems-danger);
+}
+
+.syl :focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ── Sahələr ──────────────────────────────────────────────────────────── */
+.syl-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.syl-field > label {
+    margin-bottom: 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-input,
+.syl-select,
+.syl-textarea {
+    width: 100%;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--syl-radius-ctl);
+    background: var(--ems-bg);
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--ems-text);
+}
+
+.syl-input,
+.syl-select {
+    height: 40px;
+}
+
+.syl-input--sm,
+.syl-select--sm {
+    height: 34px;
+    font-size: 0.81rem;
+}
+
+.syl-select--xs {
+    width: 70px;
+    height: 34px;
+    padding: 0 6px;
+    font-size: 0.78rem;
+}
+
+.syl-textarea {
+    padding: 11px 12px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+/* Çox sətirli dəyər daşıyan, amma sətir hündürlüyündə görünməli sahələr.
+   Bunlar əvvəllər `<input type="text">` idi — HTML-in «value sanitization»
+   addımı input-un dəyərindən CR/LF-i SİLDİYİ üçün köçürülmüş mətnin sətir
+   strukturu ilk avtosaxlamada itirdi.  Görünüş input ilə eyni qalsın deyə
+   hündürlük burada bərabərləşdirilir. */
+.syl-textarea--outcome {
+    min-height: 40px;
+    padding: 9px 12px;
+}
+
+.syl-textarea--slim {
+    min-height: 34px;
+    padding: 6px 12px;
+    font-size: 0.81rem;
+}
+
+.syl-input:disabled,
+.syl-select:disabled,
+.syl-textarea:disabled {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-500);
+    cursor: not-allowed;
+}
+
+.syl-input:focus,
+.syl-select:focus,
+.syl-textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.syl-input.is-bad,
+.syl-textarea.is-bad {
+    border-color: var(--ems-warning);
+}
+
+.syl-counter {
+    margin: 5px 0 0;
+    font-size: 0.74rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-counter.is-bad {
+    color: var(--ems-warning-800);
+}
+
+/* ── İzah qutuları ────────────────────────────────────────────────────── */
+.syl-hintbox {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 11px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    font-size: 0.79rem;
+    line-height: 1.55;
+    color: var(--ems-primary-800);
+}
+
+.syl-hintbox--ok {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+    color: var(--ems-success-700);
+}
+
+/* ── Boş vəziyyət ─────────────────────────────────────────────────────── */
+.syl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 11px;
+    padding: 56px 24px;
+    text-align: center;
+    background: var(--ems-bg);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 16px;
+}
+
+.syl-empty__icon {
+    font-size: 1.6rem;
+    color: var(--ems-neutral-300);
+}
+
+.syl-empty__title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.syl-empty__body {
+    margin: 0;
+    max-width: 420px;
+    font-size: 0.83rem;
+    color: var(--ems-text-muted);
+}
+
+/* ── Toast (kölgə İCAZƏLİDİR) ─────────────────────────────────────────── */
+.syl-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 95;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    max-width: min(92vw, 600px);
+    padding: 11px 17px;
+    border-radius: 11px;
+    background: var(--ems-navy-900);
+    color: var(--ems-neutral-0);
+    font-size: 0.83rem;
+    font-weight: 600;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.3);
+}
+
+.syl-toast[hidden] {
+    display: none;
+}
+
+.syl-toast__icon {
+    color: var(--ems-success);
+}

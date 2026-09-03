@@ -1,0 +1,16 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA - LINT TOOLCHAIN (CI ilə eyni, pinlənmiş)
+# ═══════════════════════════════════════════════════════════════════════════
+# Bu fayl CI-nin lint job-u (.github/workflows/_lint.yml) tərəfindən istifadə
+# olunur. Pin OLMASA yuxarı axında yeni versiya çıxan kimi DƏYİŞMƏYƏN kod
+# qırmızıya düşür — 2026-08-26-də məhz belə oldu: isort 9.0.0 çıxdı, CI
+# pinsiz quraşdırdığı üçün üç ardıcıl run uğursuz oldu.
+#
+# Yerli mühiti CI ilə eyniləşdirmək üçün:
+#   pip install -r requirements/lint.txt
+# ═══════════════════════════════════════════════════════════════════════════
+black==26.5.1
+isort==9.0.0
+flake8==7.3.0
+flake8-bugbear==25.11.29
+polib==1.2.0

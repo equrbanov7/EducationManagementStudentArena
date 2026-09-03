@@ -1,0 +1,48 @@
+{% load i18n %}
+{% comment %}İxtisas yaratma/redaktə sahələri — `_form_dialog.html` gövdəsi.
+Gizli `action` və `id` dialoqun özündədir; dəyərləri `data-tof-prefill`-dən gəlir
+(boş `id` = yeni yazı).{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-pg-name">{% trans "Tam ad" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-pg-name" name="name" maxlength="255" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-code">{% trans "Rəsmi şifr (NK 503)" context "accounts.catalog" %}</label>
+        <input class="ems-input" type="text" id="tof-pg-code" name="official_code" maxlength="16"
+               inputmode="numeric" placeholder="6XXXXXX / 7XXXXXX">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-degree">{% trans "Təhsil pilləsi" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-pg-degree" name="degree_level" required>
+            {% for option in programs_registry_section.degree_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-form">{% trans "Təhsil forması" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-pg-form" name="education_form" required>
+            {% for option in programs_registry_section.form_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-chair">{% trans "Tabe olduğu kafedra" context "accounts.catalog" %}</label>
+        <select class="ems-select" id="tof-pg-chair" name="specialty_unit">
+            <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
+            {% for option in programs_registry_section.chair_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-ects">{% trans "Məzuniyyət üçün ECTS" context "accounts.catalog" %}</label>
+        <input class="ems-input" type="number" id="tof-pg-ects" name="ects_total" min="30" max="600" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-pg-absence">{% trans "Qayıb limiti (%)" context "accounts.catalog" %}</label>
+        <input class="ems-input" type="number" id="tof-pg-absence" name="absence_limit_percent" min="0" max="100" step="1">
+    </div>
+</div>

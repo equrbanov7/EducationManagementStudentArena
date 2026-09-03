@@ -1,0 +1,170 @@
+{% load i18n %}
+{% comment %}«Alt qrupdan tələbə əlavə et» modalı — koordinator/dekanlıq səthi.
+
+Fənn və hədəf qrup KONTEKSTDƏN gəlir (jurnal açılışı) — yenidən soruşulmur,
+yalnız oxu-rejimli çip kimi göstərilir ki, istifadəçi nəyə əlavə etdiyini görsün.
+Qrup → tələbə KASKADı server-backed axtarışlıdır (EMSSearchableSelect: 250ms
+debounce + lazy/infinite səhifələmə), ona görə burada heç bir tam siyahı
+render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yoxdur).
+{% endcomment %}
+<div class="jd-modal jgs-modal" data-jgs-modal hidden
+     data-group-url="{% url 'registrar:journal_guest_group_search' offering.id %}"
+     data-student-url="{% url 'registrar:journal_guest_student_search' offering.id %}"
+     data-add-url="{% url 'registrar:journal_guest_add' offering.id %}"
+     data-remove-url="{% url 'registrar:journal_guest_remove' offering.id %}"
+     data-generic-error="{% trans 'Əməliyyat alınmadı — yenidən cəhd edin.' context 'registrar.guest_roster' %}"
+     data-confirm-label="{% trans 'Təsdiq üçün yenidən klikləyin' context 'registrar.guest_roster' %}"
+     data-group-empty="{% trans 'Bu ada uyğun qrup tapılmadı.' context 'registrar.guest_roster' %}"
+     data-student-empty="{% trans 'Bu qrupda uyğun tələbə tapılmadı.' context 'registrar.guest_roster' %}"
+     data-subject-name="{{ offering.subject.name }}"
+     data-target-group="{% if offering.group %}{{ offering.group.name }}{% else %}{% trans 'Bütün ixtisas' context 'registrar.guest_roster' %}{% endif %}"
+     data-removed-message="{% trans 'Tələbə jurnaldan çıxarıldı.' context 'registrar.guest_roster' %}"
+     data-student-placeholder-idle="{% trans 'Əvvəlcə qrup seçin…' context 'registrar.guest_roster' %}"
+     data-student-placeholder-ready="{% trans 'Tələbə axtarın…' context 'registrar.guest_roster' %}"
+     data-preview-url="{% url 'registrar:journal_guest_add_preview' offering.id %}"
+     data-merge-label-source="{% trans 'Mənbə jurnal' context 'registrar.guest_roster' %}"
+     data-merge-label-marks="{% trans 'Yazılmış işarə / bal' context 'registrar.guest_roster' %}"
+     data-merge-label-absence="{% trans 'Qayıb' context 'registrar.guest_roster' %}"
+     data-merge-label-entry="{% trans 'Giriş balı' context 'registrar.guest_roster' %}"
+     data-merge-unit-hours="{% trans 'saat' context 'registrar.guest_roster' %}"
+     data-merge-reason-required="{% trans 'Birləşmə üçün səbəb yazılmalıdır (məs.: dekanlıq sərəncamı nömrəsi).' context 'registrar.guest_roster' %}"
+     data-refresh-failed="{% trans 'Əməliyyat alındı, amma cədvəl yenilənmədi — səhifəni yeniləyin.' context 'registrar.guest_roster' %}">
+    <div class="jd-modal-backdrop" data-jgs-close></div>
+    <div class="jd-modal-card jgs-card" role="dialog" aria-modal="true" aria-labelledby="jgs-title">
+        <div class="jd-modal-head jd2-modal-head jgs-head">
+            <div class="jgs-head-main">
+                <h3 id="jgs-title">{% trans "Alt qrupdan tələbə əlavə et" context "registrar.guest_roster" %}</h3>
+                <p class="jgs-head-sub">
+                    {% trans "Seçilən tələbə YALNIZ bu jurnalda görünəcək — öz qrupunun jurnalları dəyişmir." context "registrar.guest_roster" %}
+                </p>
+            </div>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jgs-close
+                    aria-label="{% trans 'Bağla' context 'registrar.guest_roster' %}">✕</button>
+        </div>
+
+        <div class="jd-modal-body jgs-body">
+            {% comment %}Kontekst zolağı — fənn + hədəf jurnal (dəyişdirilə bilməz).{% endcomment %}
+            <div class="jgs-context">
+                <span class="jgs-ctx-chip jgs-ctx-chip--subject">
+                    <i class="fas fa-book" aria-hidden="true"></i>
+                    <b>{{ offering.subject.name }}</b>
+                    {% if offering.subject.code %}<span class="jgs-ctx-code">{{ offering.subject.code }}</span>{% endif %}
+                </span>
+                <i class="fas fa-arrow-right jgs-ctx-arrow" aria-hidden="true"></i>
+                <span class="jgs-ctx-chip">
+                    <i class="fas fa-users" aria-hidden="true"></i>
+                    {% if offering.group %}{{ offering.group.name }}{% else %}{% trans "Bütün ixtisas" context "registrar.guest_roster" %}{% endif %}
+                </span>
+                {% if offering.period %}
+                <span class="jgs-ctx-chip jgs-ctx-chip--muted">{{ offering.period.year_display }} · {{ offering.period.name }}</span>
+                {% endif %}
+            </div>
+
+            <div class="jgs-fields">
+                <div class="jd2-field jgs-field">
+                    <span class="jd2-field-label">
+                        <span class="jgs-step-dot">1</span>
+                        {% trans "QRUP (MƏNBƏ)" context "registrar.guest_roster" %}
+                    </span>
+                    {% trans "Qrup axtarın…" context "registrar.guest_roster" as jgs_group_ph %}
+                    {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jgs" hook="jgs-group" placeholder=jgs_group_ph %}
+                    <small class="jd-field-hint">{% trans "Yalnız sizin əhatənizdəki qruplar göstərilir." context "registrar.guest_roster" %}</small>
+                </div>
+
+                <div class="jd2-field jgs-field jgs-field--student is-disabled" data-jgs-student-field>
+                    <span class="jd2-field-label">
+                        <span class="jgs-step-dot">2</span>
+                        {% trans "TƏLƏBƏ" context "registrar.guest_roster" %}
+                    </span>
+                    {% trans "Əvvəlcə qrup seçin…" context "registrar.guest_roster" as jgs_student_ph %}
+                    {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jgs" hook="jgs-student" placeholder=jgs_student_ph %}
+                    <small class="jd-field-hint">{% trans "Bu jurnalda artıq olan tələbələr göstərilir, amma seçilə bilmir." context "registrar.guest_roster" %}</small>
+                </div>
+            </div>
+
+            {% comment %}Qrup seçilməmiş vəziyyət — modal «boş» açılmasın, nə etmək lazım
+            olduğu yazılsın. Seçim başlayan kimi JS bunu gizlədir.{% endcomment %}
+            <div class="jgs-hintbox" data-jgs-hintbox>
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{% trans "Başlamaq üçün mənbə qrupu seçin — sonra həmin qrupun tələbələri siyahıda görünəcək." context "registrar.guest_roster" %}</span>
+            </div>
+
+            {% comment %}Təsdiqdən ƏVVƏL xülasə: kim, haradan, hara. Yalnız hər iki
+            seçim edildikdə görünür (JS doldurur — dinamik dəyər şablonda yoxdur).{% endcomment %}
+            <div class="jgs-summary" data-jgs-summary hidden>
+                <div class="jgs-summary-head">{% trans "Təsdiq ediləcək" context "registrar.guest_roster" %}</div>
+                <dl class="jgs-summary-grid">
+                    <dt>{% trans "Tələbə" context "registrar.guest_roster" %}</dt>
+                    <dd data-jgs-sum-student></dd>
+                    <dt>{% trans "Mənbə qrup" context "registrar.guest_roster" %}</dt>
+                    <dd data-jgs-sum-group></dd>
+                    <dt>{% trans "Əlavə olunur" context "registrar.guest_roster" %}</dt>
+                    <dd data-jgs-sum-target></dd>
+                </dl>
+            </div>
+
+            {% comment %}BİRLƏŞMƏ paneli — tələbənin öz qrupunda bu fənn üzrə aktiv jurnalı
+            varsa (mandat fənlərdə bu NORMAL haldır) server önbaxışı burada göstərilir:
+            hansı jurnaldan, neçə işarə/qayıb, nəyin nə olacağı. Təsdiq düyməsi yalnız
+            «azad et» işarələnəndən sonra açılır. Rəqəmləri JS doldurur.{% endcomment %}
+            <div class="jgs-merge" data-jgs-merge hidden>
+                <div class="jgs-merge-head">
+                    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                    <span>{% trans "Bu tələbənin öz qrupunda bu fənn üzrə aktiv jurnalı var" context "registrar.guest_roster" %}</span>
+                </div>
+                <dl class="jgs-merge-grid" data-jgs-merge-stats></dl>
+                <p class="jgs-merge-fate">
+                    {% trans "Birləşmə təsdiqlənsə: əvvəlki qeydiyyat tarixçəyə keçir (silinmir), yığılmış bal və davamiyyət olduğu kimi saxlanılır, qayıb saatı bu jurnalın buraxılış həddinə köçürülür və sətirdə «əvvəlki jurnal» xülasəsi görünür. Geri götürəndə əvvəlki qeydiyyat bərpa olunur." context "registrar.guest_roster" %}
+                </p>
+                <label class="jgs-merge-check">
+                    <input type="checkbox" data-jgs-release>
+                    <span>{% trans "Öz jurnalından azad et və bu jurnala köçür" context "registrar.guest_roster" %}</span>
+                </label>
+                <p class="jgs-merge-blocked" data-jgs-merge-blocked hidden></p>
+            </div>
+
+            <div class="jd2-field jgs-field">
+                <span class="jd2-field-label">{% trans "SƏBƏB (AUDİT ÜÇÜN)" context "registrar.guest_roster" %}</span>
+                <input type="text" maxlength="255" data-jgs-reason
+                       placeholder="{% trans 'Məs.: alt qrup birləşməsi — dekanlıq sərəncamı №…' context 'registrar.guest_roster' %}">
+            </div>
+
+            {% comment %}Skeleton — əlavə sorğusu gedərkən (yükləmə hissi).{% endcomment %}
+            <div class="jgs-skeleton" data-jgs-skeleton hidden aria-hidden="true">
+                <div class="skeleton skeleton-line skeleton-line--lg"></div>
+                <div class="skeleton skeleton-line skeleton-line--sm"></div>
+            </div>
+
+            <p class="jgs-error" data-jgs-error role="alert" hidden></p>
+
+            {% comment %}Cari «alt qrup» sətirləri — geri götürmə burada da mümkündür.{% endcomment %}
+            <div class="jgs-current" data-jgs-current{% if not journal.guest_rows %} hidden{% endif %}>
+                <div class="jgs-current-head">
+                    {% trans "Bu jurnala alt qrupdan əlavə olunanlar" context "registrar.guest_roster" %}
+                    <span class="jgs-current-count" data-jgs-count>{{ journal.guest_rows|length }}</span>
+                </div>
+                <ul class="jgs-current-list">
+                    {% for row in journal.guest_rows %}
+                    <li class="jgs-current-item" data-jgs-item="{{ row.enrollment.id }}">
+                        <span class="jgs-current-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                        {% if row.source_group %}<span class="jgs-current-group">{{ row.source_group.name }}</span>{% endif %}
+                        <button type="button" class="jgs-remove-btn" data-jgs-remove="{{ row.enrollment.id }}"
+                                title="{% trans 'Jurnaldan çıxar' context 'registrar.guest_roster' %}">
+                            <i class="fas fa-user-minus" aria-hidden="true"></i>
+                            {% trans "Çıxar" context "registrar.guest_roster" %}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="jd-modal-foot jgs-foot">
+            <button type="button" class="jd2-cancel-btn" data-jgs-close>{% trans "Ləğv et" context "registrar.guest_roster" %}</button>
+            <button type="button" class="jd2-apply-btn jgs-submit" data-jgs-submit disabled>
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                {% trans "Jurnala əlavə et" context "registrar.guest_roster" %}
+            </button>
+        </div>
+    </div>
+</div>

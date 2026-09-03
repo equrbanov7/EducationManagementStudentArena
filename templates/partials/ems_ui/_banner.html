@@ -1,0 +1,12 @@
+{% comment %}
+Bölmə üstü lent — arxiv rejimi, bloklayıcı şərt, «plan yoxdur» xəbərdarlığı.
+Kontekst: `banner_kind` (info|success|warning|danger), `banner_title`,
+`banner_body`, `banner_action_include`.
+{% endcomment %}
+<div class="ems-banner ems-banner--{{ banner_kind|default:'info' }}" role="status">
+    <div>
+        {% if banner_title %}<div class="ems-banner__title">{{ banner_title }}</div>{% endif %}
+        {% if banner_body %}<div class="ems-banner__body">{{ banner_body }}</div>{% endif %}
+    </div>
+    {% if banner_action_include %}<div class="ems-banner__actions">{% include banner_action_include %}</div>{% endif %}
+</div>

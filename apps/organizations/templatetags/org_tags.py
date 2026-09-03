@@ -5,6 +5,8 @@ Template tags for organization permissions.
 from django import template
 
 from apps.organizations.permissions import has_permission
+from core.roles import resolve_seeded_role_label
+from core.staff_position import visible_role_label
 
 register = template.Library()
 
@@ -75,3 +77,25 @@ def user_level(context):
         return 0
 
     return max([m.role.level for m in memberships], default=0)
+
+
+@register.filter
+def role_badge_label(role):
+    """Rol nişanının mətni — doldurucu ``member`` rolunda BOŞ sətir.
+
+    Vəzifəsiz istifadəçinin adının yanında «Üzv»/«Member» yazmaq məzmunsuzdur;
+    şablon boş dəyəri ``{% if %}`` ilə gizlədir (bax `core/staff_position.py`).
+    """
+
+    return visible_role_label(getattr(role, "name", ""), getattr(role, "display_name", ""))
+
+
+@register.filter
+def localized_role_label(role):
+    """``Role.display_name`` — seed zamanı qalmış İngiliscə dəyər AZ-a çevrilir.
+
+    PHASE21 U-2 (2026-09-03): admin fərqli bir ad yazıbsa TOXUNULMUR — bax
+    `core.roles.resolve_seeded_role_label`.
+    """
+
+    return resolve_seeded_role_label(getattr(role, "name", ""), getattr(role, "display_name", ""))

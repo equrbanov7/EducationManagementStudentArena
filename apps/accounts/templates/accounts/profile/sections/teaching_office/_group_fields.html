@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Qrup yaratma/redaktə sahələri — `_form_dialog.html` gövdəsi.
+
+Dil sektoru SƏRBƏST MƏTNDİR (seçici deyil): layihə qərarına görə sektor
+tenant-konfiqurasiya olunandır və hardcode edilmir; süzgəcdəki siyahı mövcud
+datadan yığılır.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-name">{% trans "Qrupun adı" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-gr-name" name="name" maxlength="255" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-code">{% trans "Qrup kodu" context "accounts.groups" %}</label>
+        <input class="ems-input" type="text" id="tof-gr-code" name="code" maxlength="50">
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-gr-specialty">{% trans "İxtisas / kafedra" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <select class="ems-select" id="tof-gr-specialty" name="specialty" data-live-search="true">
+            <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+            {% for option in groups_registry_section.specialty_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-course">{% trans "Kurs" context "accounts.groups" %}</label>
+        <input class="ems-input" type="number" id="tof-gr-course" name="course_year" min="1" max="6" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-lang">{% trans "Dil sektoru" context "accounts.groups" %}</label>
+        <input class="ems-input" type="text" id="tof-gr-lang" name="language_sector" maxlength="16">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-admission">{% trans "Qəbul ili" context "accounts.groups" %}</label>
+        <input class="ems-input" type="number" id="tof-gr-admission" name="admission_year" min="0" max="2100" step="1">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-capacity">{% trans "Plan üzrə yer sayı" context "accounts.groups" %}</label>
+        <input class="ems-input" type="number" id="tof-gr-capacity" name="capacity" min="0" max="500" step="1">
+    </div>
+</div>

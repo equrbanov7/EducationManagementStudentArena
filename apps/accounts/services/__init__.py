@@ -26,6 +26,7 @@ from ..queries import (
 )
 from .account_deletion import (
     AccountDeletionError,
+    AccountRestoreResult,
     hard_delete_account,
     restore_account,
     soft_delete_account,
@@ -41,6 +42,21 @@ from .auth import (
     send_verification_otp,
     verify_email_otp,
     verify_otp_code,
+)
+from .identity_access import (
+    AccountActivationResult,
+    IdentityAccessError,
+    IdentityCollisionError,
+    StagedAccountResult,
+    activate_staged_account,
+    stage_imported_account,
+)
+from .identity_archive import (
+    ARCHIVE_ROLE_NAME,
+    AccountArchiveResult,
+    ArchiveRestoreResult,
+    archive_staged_account,
+    restore_archived_account,
 )
 from .organization_requests import (
     activate_verified_membership,
@@ -62,8 +78,19 @@ from .profile import update_user_profile, update_user_role
 from .registration import create_user_with_organization, purge_stale_pending_registration
 
 __all__ = [
+    "ARCHIVE_ROLE_NAME",
+    "ArchiveRestoreResult",
+    "restore_archived_account",
+    "AccountArchiveResult",
     "AccountDeletionError",
+    "AccountRestoreResult",
+    "AccountActivationResult",
+    "IdentityAccessError",
+    "IdentityCollisionError",
+    "StagedAccountResult",
+    "activate_staged_account",
     "activate_user_account",
+    "archive_staged_account",
     "OTPRateLimitError",
     "OTPResendCooldownError",
     "activate_verified_membership",
@@ -100,6 +127,7 @@ __all__ = [
     "set_student_org_request_status",
     "soft_delete_account",
     "store_pending_registration",
+    "stage_imported_account",
     "sync_profile_pending_request_snapshot",
     "update_user_profile",
     "update_user_role",

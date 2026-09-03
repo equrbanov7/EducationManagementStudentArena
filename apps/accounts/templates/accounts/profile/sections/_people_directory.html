@@ -1,0 +1,288 @@
+{% load i18n %}
+{% comment %}
+«Müəllimlər» / «Tələbələr» kataloqunun PAYLAŞILAN iskeleti.
+
+Bu fayl birbaşa bölmə deyil — `_people_teachers.html` və `_people_students.html`
+onu `include ... with kind=...` ilə çağırır. İki kataloqun filtr/cədvəl/modal
+quruluşu eynidir; ayrı-ayrı yazsaydıq ikisi zamanla bir-birindən ayrılardı.
+
+Bölmə SPA panelidir: server yalnız çərçivəni verir (icazə xəritəsi + endpoint
+URL-ləri), data JSON-la gəlir. CSS/JS XARİCİ fayllardadır (CSP: unsafe-inline
+yoxdur) və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları
+ilə ötürülür — bax CLAUDE.md.
+
+⚠️ UI agenti üçün: context müqaviləsi `apps/accounts/views/people/section.py`
+başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykənir.
+{% endcomment %}
+<div class="people"
+     data-people-root
+     data-kind="{{ people_section.kind }}"
+     data-list-url="{{ people_section.list_url }}"
+     data-charts-url="{{ people_section.analytics_url }}"
+     data-ai-url="{{ people_section.analytics_ai_url }}"
+     data-options-url="{{ people_section.options_url }}"
+     data-action-url="{{ people_section.action_url }}"
+     data-detail-url-template="{{ people_section.detail_url_template }}"
+     data-page-size="{{ people_section.default_page_size }}"
+     data-min-reason-length="{{ people_section.min_reason_length }}"
+     data-max-reason-length="{{ people_section.max_reason_length }}"
+     data-age-unknown-key="{{ people_section.age_unknown_key }}"
+     data-can-view-contacts="{% if people_section.can_view_contacts %}1{% else %}0{% endif %}"
+     data-can-view-demographics="{% if people_section.can_view_demographics %}1{% else %}0{% endif %}"
+     data-can-manage-status="{% if people_section.can_manage_status %}1{% else %}0{% endif %}"
+     data-can-manage-teacher-role="{% if people_section.can_manage_teacher_role %}1{% else %}0{% endif %}"
+     data-can-manage-academic="{% if people_section.can_manage_academic %}1{% else %}0{% endif %}"
+     data-i18n-manage="{% trans 'İdarə et' context 'accounts.people' %}">
+
+  <div class="people__head">
+    <p class="people__intro">
+      {% if people_section.kind == 'teachers' %}
+        {% trans "Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
+      {% else %}
+        {% trans "Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
+      {% endif %}
+    </p>
+    {% if people_section.granted_permissions %}
+    <ul class="people__perms" aria-label="{% trans 'Bu bölmədəki səlahiyyətləriniz' context 'accounts.people' %}">
+      {% for perm in people_section.granted_permissions %}
+        <li class="people__perm-chip" title="{{ perm.key }}">{{ perm.label }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <form class="people__filters" data-people-filters novalidate>
+    <div class="people__field people__field--search">
+      <label for="people-q-{{ people_section.kind }}">{% trans "Axtarış" context "accounts.people" %}</label>
+      <input type="search"
+             id="people-q-{{ people_section.kind }}"
+             name="q"
+             autocomplete="off"
+             placeholder="{% trans 'ad, soyad, ata adı, istifadəçi adı və ya FİN' context 'accounts.people' %}">
+    </div>
+
+    <div class="people__field">
+      <label for="people-faculty-{{ people_section.kind }}">{% trans "Fakültə" context "accounts.people" %}</label>
+      <select id="people-faculty-{{ people_section.kind }}" name="faculty" data-people-option="faculties">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+
+    <div class="people__field">
+      <label for="people-kafedra-{{ people_section.kind }}">{% trans "Kafedra" context "accounts.people" %}</label>
+      <select id="people-kafedra-{{ people_section.kind }}" name="kafedra" data-people-option="kafedras">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+
+    {% if people_section.kind == 'students' %}
+    <div class="people__field">
+      <label for="people-group-{{ people_section.kind }}">{% trans "Qrup" context "accounts.people" %}</label>
+      <select id="people-group-{{ people_section.kind }}" name="group" data-people-option="groups">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+    <div class="people__field">
+      <label for="people-program-{{ people_section.kind }}">{% trans "İxtisas" context "accounts.people" %}</label>
+      <select id="people-program-{{ people_section.kind }}" name="program" data-people-option="programs">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+    {% endif %}
+
+    <div class="people__field">
+      <label for="people-subject-{{ people_section.kind }}">
+        {% if people_section.kind == 'teachers' %}
+          {% trans "Dərs dediyi fənn" context "accounts.people" %}
+        {% else %}
+          {% trans "Keçdiyi fənn" context "accounts.people" %}
+        {% endif %}
+      </label>
+      <select id="people-subject-{{ people_section.kind }}" name="subject" data-people-option="subjects">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+
+    <div class="people__field">
+      <label for="people-year-{{ people_section.kind }}">{% trans "Tədris ili" context "accounts.people" %}</label>
+      <select id="people-year-{{ people_section.kind }}" name="year" data-people-option="years">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+
+    <div class="people__field">
+      <label for="people-season-{{ people_section.kind }}">{% trans "Semestr" context "accounts.people" %}</label>
+      <select id="people-season-{{ people_section.kind }}" name="season" data-people-option="seasons">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+      </select>
+    </div>
+
+    <div class="people__field">
+      <label for="people-status-{{ people_section.kind }}">{% trans "Status" context "accounts.people" %}</label>
+      <select id="people-status-{{ people_section.kind }}" name="status">
+        {% for option in people_section.status_options %}
+          <option value="{{ option.key }}">{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {% if people_section.can_view_demographics %}
+    <div class="people__field">
+      <label for="people-gender-{{ people_section.kind }}">{% trans "Cins" context "accounts.people" %}</label>
+      <select id="people-gender-{{ people_section.kind }}" name="gender">
+        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+        {% for option in people_section.gender_options %}
+          <option value="{{ option.key }}" data-people-facet="gender:{{ option.key }}">{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="people__field people__field--age">
+      <span class="people__field-label" id="people-age-label-{{ people_section.kind }}">{% trans "Yaş" context "accounts.people" %}</span>
+      <div class="people__age-inputs" role="group" aria-labelledby="people-age-label-{{ people_section.kind }}">
+        <input type="number" name="age_min" min="0" max="120" inputmode="numeric"
+               aria-label="{% trans 'Minimum yaş' context 'accounts.people' %}"
+               placeholder="{% trans 'min' context 'accounts.people' %}">
+        <span aria-hidden="true">–</span>
+        <input type="number" name="age_max" min="0" max="120" inputmode="numeric"
+               aria-label="{% trans 'Maksimum yaş' context 'accounts.people' %}"
+               placeholder="{% trans 'maks' context 'accounts.people' %}">
+      </div>
+      <label class="people__checkbox">
+        <input type="checkbox" name="age" value="{{ people_section.age_unknown_key }}">
+        <span>{{ people_section.age_unknown_label }}</span>
+      </label>
+    </div>
+    {% endif %}
+
+    <div class="people__field">
+      <label for="people-sort-{{ people_section.kind }}">{% trans "Sıralama" context "accounts.people" %}</label>
+      <select id="people-sort-{{ people_section.kind }}" name="sort">
+        {% for option in people_section.sort_options %}
+          <option value="{{ option.key }}">{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="people__field people__field--actions">
+      <button type="reset" class="people__reset">{% trans "Filtrləri sıfırla" context "accounts.people" %}</button>
+    </div>
+  </form>
+
+  <p class="people__coverage" data-people-coverage aria-live="polite"></p>
+
+  <div class="people__table-wrap">
+    <table class="people__table" data-people-table>
+      <caption class="sr-only">
+        {% if people_section.kind == 'teachers' %}
+          {% trans "Müəllim kataloqu" context "accounts.people" %}
+        {% else %}
+          {% trans "Tələbə kataloqu" context "accounts.people" %}
+        {% endif %}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Şəxs" context "accounts.people" %}</th>
+          {% if people_section.kind == 'teachers' %}
+            <th scope="col">{% trans "Vəzifə / rol" context "accounts.people" %}</th>
+            <th scope="col">{% trans "Kafedra" context "accounts.people" %}</th>
+          {% else %}
+            <th scope="col">{% trans "Qrup" context "accounts.people" %}</th>
+            <th scope="col">{% trans "İxtisas" context "accounts.people" %}</th>
+          {% endif %}
+          <th scope="col">{% trans "Fakültə" context "accounts.people" %}</th>
+          {% if people_section.can_view_contacts %}
+            <th scope="col">{% trans "Əlaqə" context "accounts.people" %}</th>
+          {% endif %}
+          {% if people_section.can_view_demographics %}
+            <th scope="col">{% trans "Cins / yaş" context "accounts.people" %}</th>
+          {% endif %}
+          <th scope="col">{% trans "Status" context "accounts.people" %}</th>
+          {% if people_section.can_manage_status or people_section.can_manage_teacher_role or people_section.can_manage_academic %}
+            <th scope="col">{% trans "Əməllər" context "accounts.people" %}</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody data-people-rows></tbody>
+    </table>
+  </div>
+
+  <p class="people__empty" data-people-empty hidden>{% trans "Nəticə tapılmadı." context "accounts.people" %}</p>
+
+  <nav class="people__pager" data-people-pager aria-label="{% trans 'Səhifələmə' context 'accounts.people' %}">
+    <button type="button" data-people-prev>{% trans "Əvvəlki" context "accounts.people" %}</button>
+    <span data-people-page-info aria-live="polite"></span>
+    <button type="button" data-people-next>{% trans "Sonrakı" context "accounts.people" %}</button>
+  </nav>
+
+  {% comment %}
+  ── ANALİTİKA ────────────────────────────────────────────────────────────────
+  Göstəricilər, qrafiklər və AI analizi CARİ FİLTR dəstinə görə hesablanır
+  (bax `apps/accounts/services/people/analytics.py`). Qrafiklər `_appeal_stats`
+  naxşı ilə eynidir: AYRICA `data-charts-url` endpoint-i + `<canvas>` + Chart.js.
+
+  ⚠️ a11y: hər qrafikin altında AÇILAN cədvəl qarşılığı var — məlumat yalnız
+  rənglə verilmir. Qrafik boş olanda mətn qarşılığı yenə görünür.
+  {% endcomment %}
+  <section class="pan" data-people-analytics
+           aria-labelledby="people-analytics-title-{{ people_section.kind }}"
+           data-i18n-total="{% trans 'Ümumi' context 'accounts.people.analytics' %}"
+           data-i18n-table="{% trans 'Cədvəl şəklində' context 'accounts.people.analytics' %}"
+           data-i18n-indicator="{% trans 'Göstərici' context 'accounts.people.analytics' %}"
+           data-i18n-count="{% trans 'Say' context 'accounts.people.analytics' %}"
+           data-i18n-percent="{% trans 'Faiz' context 'accounts.people.analytics' %}"
+           data-i18n-empty="{% trans 'Bu filtr üçün göstəriləcək məlumat yoxdur.' context 'accounts.people.analytics' %}"
+           data-i18n-coverage="{% trans 'Doğum tarixi doldurulub' context 'accounts.people.analytics' %}"
+           data-i18n-workload="{% trans 'Dərs yükü göstəriciləri' context 'accounts.people.analytics' %}"
+           data-i18n-status="{% trans 'Hesab statusu üzrə' context 'accounts.people.analytics' %}"
+           data-i18n-gender="{% trans 'Cins üzrə bölgü' context 'accounts.people.analytics' %}"
+           data-i18n-age="{% trans 'Yaş qrupları üzrə bölgü' context 'accounts.people.analytics' %}"
+           data-i18n-ai-loading="{% trans 'AI analizi hazırlanır…' context 'accounts.people.analytics' %}"
+           data-i18n-ai-error="{% trans 'AI analizi alınmadı. Bir az sonra yenidən cəhd edin.' context 'accounts.people.analytics' %}"
+           data-i18n-ai-quota="{% trans 'Qalan AI limiti' context 'accounts.people.analytics' %}"
+           data-i18n-ai-cached="{% trans 'keşdən' context 'accounts.people.analytics' %}">
+    <header class="pan__head">
+      <h3 class="pan__title" id="people-analytics-title-{{ people_section.kind }}">
+        {% trans "Statistika və analiz" context "accounts.people.analytics" %}
+      </h3>
+      <p class="pan__hint">
+        {% trans "Bütün göstəricilər və qrafiklər yuxarıdakı filtrə görə yenilənir — nə süzürsünüzsə, rəqəmlər onu göstərir." context "accounts.people.analytics" %}
+      </p>
+    </header>
+
+    <div class="pan__cards" data-pan-cards aria-live="polite"></div>
+    <div class="pan__grid" data-pan-charts></div>
+
+    <div class="pan__ai" data-pan-ai>
+      <div class="pan__ai-head">
+        <div>
+          <h4 class="pan__ai-title">{% trans "AI analizi" context "accounts.people.analytics" %}</h4>
+          <p class="pan__hint">
+            {% trans "Süni intellekt yuxarıdakı AQREQAT rəqəmləri şərh edir. AI-a yalnız saylar və faizlər göndərilir — ad, e-poçt, telefon və FİN GÖNDƏRİLMİR. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur." context "accounts.people.analytics" %}
+          </p>
+        </div>
+        <button type="button" class="pan__ai-btn" data-pan-ai-btn>
+          {% trans "AI ilə analiz et" context "accounts.people.analytics" %}
+        </button>
+      </div>
+      <div class="pan__ai-out" data-pan-ai-out aria-live="polite">
+        <p class="pan__hint">
+          {% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." context "accounts.people.analytics" %}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="people__modal" data-people-detail-modal hidden role="dialog" aria-modal="true"
+       aria-label="{% trans 'Şəxs kartı' context 'accounts.people' %}">
+    <div class="people__modal-body" data-people-detail-body tabindex="-1"></div>
+    <button type="button" class="people__modal-close" data-people-detail-close>
+      {% trans "Bağla" context "accounts.people" %}
+    </button>
+  </div>
+
+  {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ `people.manage_academic`
+  daşıyan aktor üçün. Kataloqun ÜSTÜNDƏ oturur, ikinci siyahı yaratmır.{% endcomment %}
+  {% if people_section.can_manage_academic %}
+    {% include "accounts/profile/sections/_people_student_manager.html" %}
+  {% endif %}
+</div>
