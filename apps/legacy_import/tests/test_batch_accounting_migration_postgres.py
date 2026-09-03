@@ -17,7 +17,10 @@ from apps.legacy_import.services.ledger import LegacyLedgerBusyError, create_run
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
-pytestmark = pytest.mark.postgres
+# Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
+# paralel miqrasiyası altında 300 s qlobal limiti keçə bilir (Develop run
+# 33778014237 flake-i); modul üçün limit ayrıca qaldırılır.
+pytestmark = [pytest.mark.postgres, pytest.mark.timeout(1200)]
 User = get_user_model()
 
 
