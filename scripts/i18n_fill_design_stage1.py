@@ -219,12 +219,10 @@ ACCOUNTS_CATALOG = {
         "curriculum status.",
         "Образовательные программы университета: официальный код, уровень, форма, подведомственная "
         "кафедра и статус учебного плана.",
-        "Üniversitenin eğitim programları: resmi kod, derece, öğretim şekli, bağlı olduğu bölüm ve "
-        "müfredat durumu.",
+        "Üniversitenin eğitim programları: resmi kod, derece, öğretim şekli, bağlı olduğu bölüm ve " "müfredat durumu.",
     ),
     "Universitetin vahid fənn reyestri: kod, kredit, növ, sahibi kafedra və planlarda istifadə.": _e(
-        "The university's unified subject registry: code, credits, type, owning department, and use in "
-        "curricula.",
+        "The university's unified subject registry: code, credits, type, owning department, and use in " "curricula.",
         "Единый реестр дисциплин университета: код, кредиты, тип, кафедра-владелец и использование в планах.",
         "Üniversitenin birleşik ders sicili: kod, kredi, tür, sahip bölüm ve planlarda kullanım.",
     ),
@@ -304,10 +302,8 @@ ACCOUNTS_CHAIR_PROFILE = {
     "müraciət edin.": _e(
         "Your structural scope has not been assigned. Contact the Teaching Office or the administrator "
         "for department assignment.",
-        "Ваш структурный охват не назначен. Для назначения кафедры обратитесь в Учебный отдел или к "
-        "администратору.",
-        "Yapısal kapsamınız atanmamış. Bölüm ataması için Öğretim İşleri Dairesine veya yöneticinize "
-        "başvurun.",
+        "Ваш структурный охват не назначен. Для назначения кафедры обратитесь в Учебный отдел или к " "администратору.",
+        "Yapısal kapsamınız atanmamış. Bölüm ataması için Öğretim İşleri Dairesine veya yöneticinize " "başvurun.",
     ),
     "SİLLABUS ƏHATƏSİ": _e("SYLLABUS COVERAGE", "ОХВАТ СИЛЛАБУСОМ", "SİLABUS KAPSAMI"),
     "Tədris ili": _e("Academic year", "Учебный год", "Öğretim yılı"),
@@ -342,8 +338,7 @@ ACCOUNTS_STRUCTURE_TREE = {
     "Adını dəyiş": _e("Rename", "Переименовать", "Adını değiştir"),
     "Aktiv alt bölməsi olan vahid arxivlənə bilməz — əvvəlcə alt bölmələri arxivləyin.": _e(
         "A unit with active sub-units cannot be archived — archive its sub-units first.",
-        "Единица с активными подразделениями не может быть архивирована — сначала архивируйте "
-        "подразделения.",
+        "Единица с активными подразделениями не может быть архивирована — сначала архивируйте " "подразделения.",
         "Aktif alt birimi olan birim arşivlenemez — önce alt birimleri arşivleyin.",
     ),
     "Alt bölmə əlavə et": _e("Add sub-unit", "Добавить подразделение", "Alt birim ekle"),
@@ -368,8 +363,7 @@ ACCOUNTS_STRUCTURE_TREE = {
         "Birim SİLİNMEZ — arşivlenir. İlgili öğrenciler, jurnal ve not geçmişi olduğu gibi kalır.",
     ),
     "Bölmə SİLİNMİR — arxivlənir; tələbə, jurnal və qiymət tarixçəsi qalır.": _e(
-        "The unit is NOT DELETED — it is archived; students, the journal, and the grade history are "
-        "preserved.",
+        "The unit is NOT DELETED — it is archived; students, the journal, and the grade history are " "preserved.",
         "Подразделение НЕ УДАЛЯЕТСЯ — оно архивируется; студенты, журнал и история оценок сохраняются.",
         "Birim SİLİNMEZ — arşivlenir; öğrenciler, jurnal ve not geçmişi korunur.",
     ),

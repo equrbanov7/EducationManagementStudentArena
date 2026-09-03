@@ -312,9 +312,7 @@ ACCOUNTS_CURRICULUM = {
 # ─────────────────────────────────────────────────────────────────────────────
 ACCOUNTS_GROUPS = {
     "%%d qrup seçilib": _e("%%d groups selected", "Выбрано групп: %%d", "%%d grup seçildi"),
-    "%(name)s qrupunu seç": _e(
-        "Select the %(name)s group", "Выбрать группу %(name)s", "%(name)s grubunu seç"
-    ),
+    "%(name)s qrupunu seç": _e("Select the %(name)s group", "Выбрать группу %(name)s", "%(name)s grubunu seç"),
     "Arxivdən qaytar": _e("Restore from archive", "Восстановить из архива", "Arşivden geri getir"),
     "Arxivlə": _e("Archive", "Архивировать", "Arşivle"),
     "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır.": _e(
@@ -341,8 +339,7 @@ ACCOUNTS_GROUPS = {
     "Qrup SİLİNMİR — arxivlənir; tələbə qeydiyyatı, jurnal və qiymət tarixçəsi qalır.": _e(
         "The group is NOT DELETED — it is archived; student enrollment, the journal, and the grade "
         "history are preserved.",
-        "Группа НЕ УДАЛЯЕТСЯ — она архивируется; регистрация студентов, журнал и история оценок "
-        "сохраняются.",
+        "Группа НЕ УДАЛЯЕТСЯ — она архивируется; регистрация студентов, журнал и история оценок " "сохраняются.",
         "Grup SİLİNMEZ — arşivlenir; öğrenci kaydı, jurnal ve not geçmişi korunur.",
     ),
     "Qrup kodu": _e("Group code", "Код группы", "Grup kodu"),
@@ -372,8 +369,7 @@ ACCOUNTS_GROUPS = {
     "Qrupun kursu və dil sektoru bölmə metadatasında saxlanılır — sxem tenantdan asılı deyil.": _e(
         "The group's year and language sector are stored in unit metadata — the schema does not depend "
         "on the tenant.",
-        "Курс и языковой сектор группы хранятся в метаданных подразделения — схема не зависит от "
-        "арендатора.",
+        "Курс и языковой сектор группы хранятся в метаданных подразделения — схема не зависит от " "арендатора.",
         "Grubun sınıfı ve dil sektörü birim meta verisinde saklanır — şema kiracıya (tenant) bağlı değildir.",
     ),
     "Qəbul ili": _e("Year of admission", "Год поступления", "Kabul yılı"),
@@ -446,8 +442,7 @@ ACCOUNTS_SEMESTER = {
     ),
     "Açılış": _e("Opening", "Открытие", "Açılış"),
     "Açılış SİLİNMİR — ləğv olunur; jurnal, qeydiyyat və qiymət tarixçəsi qalır.": _e(
-        "The opening is NOT DELETED — it is cancelled; the journal, enrollment, and grade history are "
-        "preserved.",
+        "The opening is NOT DELETED — it is cancelled; the journal, enrollment, and grade history are " "preserved.",
         "Открытие НЕ УДАЛЯЕТСЯ — оно отменяется; журнал, регистрация и история оценок сохраняются.",
         "Açılış SİLİNMEZ — iptal edilir; jurnal, kayıt ve not geçmişi korunur.",
     ),
@@ -559,16 +554,16 @@ ACCOUNTS_SEMESTER = {
         "Openings created from the plan", "Открытия созданы из плана", "Plandan açılış oluşturuldu"
     ),
     "Plandan açılış yarat": _e("Create openings from the plan", "Создать открытия из плана", "Plandan açılış oluştur"),
-    "Planın neçənci semestri?": _e(
-        "Which semester of the plan?", "Какой семестр плана?", "Planın kaçıncı dönemi?"
-    ),
+    "Planın neçənci semestri?": _e("Which semester of the plan?", "Какой семестр плана?", "Planın kaçıncı dönemi?"),
     "Saat": _e("Hour", "Час", "Saat"),
     "Semestr 1–16 aralığında olmalıdır.": _e(
         "The semester must be between 1 and 16.",
         "Семестр должен быть в диапазоне 1–16.",
         "Dönem 1–16 aralığında olmalıdır.",
     ),
-    "Semestr artıq kilidlidir.": _e("The semester is already locked.", "Семестр уже заблокирован.", "Dönem zaten kilitli."),
+    "Semestr artıq kilidlidir.": _e(
+        "The semester is already locked.", "Семестр уже заблокирован.", "Dönem zaten kilitli."
+    ),
     "Semestr açmaq üçün səlahiyyətiniz yoxdur.": _e(
         "You do not have permission to open the semester.",
         "У вас нет прав для открытия семестра.",
@@ -597,8 +592,7 @@ ACCOUNTS_SEMESTER = {
     "Semestr kilidlidir.": _e("The semester is locked.", "Семестр заблокирован.", "Dönem kilitli."),
     "Semestr kilidləndi": _e("The semester has been locked", "Семестр заблокирован", "Dönem kilitlendi"),
     "Semestr kilidlənsin? Kilid geri qaytarılmır — açmaq ayrıca səlahiyyət və səbəb tələb edir.": _e(
-        "Lock the semester? The lock is not reversible — unlocking requires a separate permission and "
-        "a reason.",
+        "Lock the semester? The lock is not reversible — unlocking requires a separate permission and " "a reason.",
         "Заблокировать семестр? Блокировка необратима — снятие требует отдельного полномочия и причины.",
         "Dönem kilitlensin mi? Kilit geri alınamaz — açmak ayrı bir yetki ve gerekçe gerektirir.",
     ),
@@ -736,22 +730,25 @@ ACCOUNTS_STUDENT_ADMISSION = {
     "Emal olunur…": _e("Processing…", "Обработка…", "İşleniyor…"),
     "Fayl seçilməyib": _e("No file selected", "Файл не выбран", "Dosya seçilmedi"),
     "Forma / dil": _e("Mode / language", "Форма / язык", "Şekil / dil"),
-    "Parolları CSV kimi endir": _e("Download passwords as CSV", "Скачать пароли в формате CSV", "Parolaları CSV olarak indir"),
+    "Parolları CSV kimi endir": _e(
+        "Download passwords as CSV", "Скачать пароли в формате CSV", "Parolaları CSV olarak indir"
+    ),
     "Qrup adı": _e("Group name", "Название группы", "Grup adı"),
     "Qrup ixtisasın altında yaranır; tutum və dil bölməsi sonradan struktur ağacından dəyişdirilə bilər.": _e(
         "The group is created under the programme; the capacity and language section can be changed "
         "later from the structure tree.",
         "Группа создаётся в рамках специальности; вместимость и языковой сектор можно изменить позже "
         "из дерева структуры.",
-        "Grup, programın altında oluşturulur; kapasite ve dil sektörü daha sonra yapı ağacından "
-        "değiştirilebilir.",
+        "Grup, programın altında oluşturulur; kapasite ve dil sektörü daha sonra yapı ağacından " "değiştirilebilir.",
     ),
     "Qrup kodu": _e("Group code", "Код группы", "Grup kodu"),
     "Qrup seçilməyib": _e("No group selected", "Группа не выбрана", "Grup seçilmedi"),
     "Qrup təyinatı": _e("Group assignment", "Назначение в группу", "Grup ataması"),
     "Qrupu yarat": _e("Create the group", "Создать группу", "Grubu oluştur"),
     "Quru icra nəticəsi (heç nə yazılmadı)": _e(
-        "Dry-run result (nothing was written)", "Результат сухого прогона (ничего не записано)", "Deneme sonucu (hiçbir şey yazılmadı)"
+        "Dry-run result (nothing was written)",
+        "Результат сухого прогона (ничего не записано)",
+        "Deneme sonucu (hiçbir şey yazılmadı)",
     ),
     "Qəbul axınının addımları": _e("Admission flow steps", "Этапы процесса приёма", "Kabul akışının adımları"),
     "Qəbul balı": _e("Admission score", "Балл приёма", "Kabul puanı"),
@@ -786,8 +783,7 @@ ACCOUNTS_STUDENT_ADMISSION = {
     "Tətbiq nəticəsi": _e("Application result", "Результат применения", "Uygulama sonucu"),
     "Universitetin öz adlandırma qaydası tətbiq olunur — təklif yalnız ilkin dəyərdir.": _e(
         "The university's own naming convention is applied — the suggestion is only a starting value.",
-        "Применяется собственное правило именования университета — предложение является лишь начальным "
-        "значением.",
+        "Применяется собственное правило именования университета — предложение является лишь начальным " "значением.",
         "Üniversitenin kendi adlandırma kuralı uygulanır — öneri yalnızca bir başlangıç değeridir.",
     ),
     "XƏBƏRDARLIQ": _e("WARNING", "ПРЕДУПРЕЖДЕНИЕ", "UYARI"),
@@ -809,7 +805,9 @@ ACCOUNTS_STUDENT_ADMISSION = {
     ),
     "İzah": _e("Explanation", "Пояснение", "Açıklama"),
     "Əməliyyat alınmadı. Yenidən cəhd edin.": _e(
-        "The operation failed. Please try again.", "Операция не выполнена. Попробуйте снова.", "İşlem başarısız oldu. Tekrar deneyin."
+        "The operation failed. Please try again.",
+        "Операция не выполнена. Попробуйте снова.",
+        "İşlem başarısız oldu. Tekrar deneyin.",
     ),
     "Əvvəlcə fayl seçin.": _e("Select a file first.", "Сначала выберите файл.", "Önce bir dosya seçin."),
 }
@@ -835,7 +833,9 @@ ACCOUNTS_STUDENT_REGISTRY = {
     "DÖVLƏT SİFARİŞİ": _e("STATE-FUNDED", "ГОСУДАРСТВЕННЫЙ ЗАКАЗ", "DEVLET KONTENJANI"),
     "Fakültə": _e("Faculty", "Факультет", "Fakülte"),
     "Filtrə uyğun tələbə yoxdur": _e(
-        "There are no students matching the filter", "Нет студентов, соответствующих фильтру", "Filtreye uygun öğrenci yok"
+        "There are no students matching the filter",
+        "Нет студентов, соответствующих фильтру",
+        "Filtreye uygun öğrenci yok",
     ),
     "Forma": _e("Mode", "Форма", "Şekil"),
     "FİN": _e("PIN", "ПИН", "Kimlik No"),
@@ -849,9 +849,7 @@ ACCOUNTS_STUDENT_REGISTRY = {
         "Академический отпуск / отчисление / выпуск",
         "Akademik izin / ilişik kesme / mezuniyet",
     ),
-    "Məzuniyyətin bitmə tarixi": _e(
-        "End date of the leave", "Дата окончания отпуска", "İznin bitiş tarihi"
-    ),
+    "Məzuniyyətin bitmə tarixi": _e("End date of the leave", "Дата окончания отпуска", "İznin bitiş tarihi"),
     "Nəticə: %(count)d sətir": _e("Result: %(count)d rows", "Результат: %(count)d строк", "Sonuç: %(count)d satır"),
     "Qrup": _e("Group", "Группа", "Grup"),
     "QİYABİ": _e("PART-TIME", "ЗАОЧНАЯ", "İKİNCİ ÖĞRETİM"),
@@ -881,9 +879,7 @@ ACCOUNTS_STUDENT_REGISTRY = {
     "Təhsil forması": _e("Mode of study", "Форма обучения", "Öğretim şekli"),
     "Təhsil haqqı": _e("Tuition fee", "Плата за обучение", "Öğrenim ücreti"),
     "Tələbə": _e("Student", "Студент", "Öğrenci"),
-    "Tələbə hərəkəti — əmr": _e(
-        "Student movement — order", "Движение студента — приказ", "Öğrenci hareketi — emir"
-    ),
+    "Tələbə hərəkəti — əmr": _e("Student movement — order", "Движение студента — приказ", "Öğrenci hareketi — emir"),
     "Tələbə kartı": _e("Student card", "Карта студента", "Öğrenci kartı"),
     "Tələbə kodu": _e("Student code", "Код студента", "Öğrenci kodu"),
     "Tələbə reyestrinə baxış üçün icazəniz yoxdur — administratorla əlaqə saxlayın.": _e(
@@ -951,7 +947,9 @@ ACCOUNTS_STUDENT_REGISTRY = {
 # ─────────────────────────────────────────────────────────────────────────────
 ORGANIZATIONS_PERMISSION_LABEL = {
     "Akademik qrup yaratmaq/idarə etmək": _e(
-        "Create/manage academic groups", "Создавать/управлять академическими группами", "Akademik grup oluşturmak/yönetmek"
+        "Create/manage academic groups",
+        "Создавать/управлять академическими группами",
+        "Akademik grup oluşturmak/yönetmek",
     ),
     "Plandan semestr açılışı yaratmaq": _e(
         "Create semester opening from the plan",
@@ -963,9 +961,7 @@ ORGANIZATIONS_PERMISSION_LABEL = {
         "Назначать студента в группу и создавать группы при приёме",
         "Kabulde öğrenciyi gruba atamak ve grup oluşturmak",
     ),
-    "Semestr açılışına baxış": _e(
-        "View semester opening", "Просмотр открытия семестра", "Dönem açılışını görüntüleme"
-    ),
+    "Semestr açılışına baxış": _e("View semester opening", "Просмотр открытия семестра", "Dönem açılışını görüntüleme"),
     "Semestri kilidləmək": _e("Lock the semester", "Блокировать семестр", "Dönemi kilitlemek"),
     "Semestrin kilidini açmaq (səbəblə)": _e(
         "Unlock the semester (with a reason)",
@@ -998,8 +994,7 @@ ORGANIZATIONS_PERMISSION_LABEL = {
     ),
     "Tələbə hərəkəti əmri yazmaq (köçürmə, məzuniyyət, bərpa, xaric)": _e(
         "Write a student movement order (transfer, academic leave, reinstatement, expulsion)",
-        "Оформлять приказ о движении студента (перевод, академический отпуск, восстановление, "
-        "отчисление)",
+        "Оформлять приказ о движении студента (перевод, академический отпуск, восстановление, " "отчисление)",
         "Öğrenci hareketi emri yazmak (nakil, akademik izin, kayıt yenileme, ilişik kesme)",
     ),
     "Tələbə reyestrinə baxış (hərəkət tarixçəsi və ixrac)": _e(
@@ -1073,7 +1068,9 @@ STUDENT_INTAKE = {
         "Row number in the ATİS list", "Номер строки в списке АТИС", "ATİS listesindeki satır numarası"
     ),
     "Bu adla qrup artıq var.": _e(
-        "A group with this name already exists.", "Группа с таким названием уже существует.", "Bu adla bir grup zaten var."
+        "A group with this name already exists.",
+        "Группа с таким названием уже существует.",
+        "Bu adla bir grup zaten var.",
     ),
     "Bu şifrlə birdən çox ixtisas var — dəqiqləşdirin: %s": _e(
         "There is more than one programme with this code — clarify: %s",
