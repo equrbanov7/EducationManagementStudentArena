@@ -12,6 +12,7 @@ from .default_roles_shared import (
     RIM_ACCOUNT_PERMISSIONS,
 )
 from .default_roles_stage2 import apply_stage2_grants
+from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 
@@ -572,20 +573,14 @@ def _grant_application_permissions(roles):
 _grant_application_permissions(UNIVERSITY_ROLES)
 
 
-# ────────────────────────────────────────────────────────────────────────────
-# Tədris şöbəsi (dizayn handoff, Mərhələ 1) — iki yeni rol + mövcud rollara
-# `structure.*` / `catalog.*` açarları. Ayrı modulda saxlanılır (fayl ölçüsü);
-# siyahı burada BİRLƏŞİR ki, seed/migration/testlər tək mənbədən oxusun.
-# ────────────────────────────────────────────────────────────────────────────
+# Tədris şöbəsi (Mərhələ 1) — iki yeni rol + `structure.*`/`catalog.*` açarları.
+# Ayrı modulda (fayl ölçüsü); siyahı burada BİRLƏŞİR — seed/migration/test tək mənbə.
 UNIVERSITY_ROLES.extend(TEACHING_OFFICE_ROLES)
 apply_teaching_office_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 
 
-# ────────────────────────────────────────────────────────────────────────────
-# Tələbə Xidmətləri Mərkəzi (dizayn handoff, Mərhələ 3) — bir yeni rol +
-# mövcud rollara `student.*` açarları. Eyni səbəbdən ayrı moduldadır.
-# ────────────────────────────────────────────────────────────────────────────
+# Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
@@ -594,3 +589,6 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 # `semester.*`, `unit.group_manage`. Xəritə ayrı moduldadır ki, Mərhələ 1
 # migrasiyasının geri dönüşü Mərhələ 2 açarlarını silməsin.
 apply_stage2_grants(UNIVERSITY_ROLES)
+
+# Mərhələ 4: mövcud rollara `workload.*` zəncirinin qalan halqaları (ayrı xəritə).
+apply_stage4_grants(UNIVERSITY_ROLES)

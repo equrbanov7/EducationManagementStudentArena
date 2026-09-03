@@ -23,6 +23,13 @@ _SECTIONS = (
     # qalsın (modul adı tarixi səbəbdən `_teaching_office`-dur).
     ("student-admission", "student_admission_section", "student_admission", "build_student_admission_section"),
     ("student-registry", "student_registry_section", "student_registry", "build_student_registry_section"),
+    # Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri.
+    ("workload-center", "workload_center_section", "workload_center", "build_workload_center_section"),
+    ("workload-visa", "workload_visa_section", "workload_chain", "build_workload_visa_section"),
+    ("workload-approval", "workload_approval_section", "workload_chain", "build_workload_approval_section"),
+    ("workload-overview", "workload_overview_section", "workload_chain", "build_workload_overview_section"),
+    # Mərhələ 6 (ekran 21) — «Keçilmiş dərslər» (müəllim + nəzarətçi).
+    ("lessons-log", "lessons_log_section", "lessons_log", "build_lessons_log_section"),
 )
 
 

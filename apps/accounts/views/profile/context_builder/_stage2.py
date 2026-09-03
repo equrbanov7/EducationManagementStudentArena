@@ -368,9 +368,16 @@ class _Stage2Mixin:
         # gəlir, yəni profil kontekstində AĞIR SORĞU YOXDUR.
         self.workload_distribution_section = {"has_access": False, "chairs": [], "task": None}
         self.my_workload_section = {"has_access": False, "rows": [], "summary": {}, "years": []}
+        # Mərhələ 4 — dərs yükü zənciri (12/13/15/17). Default BOŞDUR: aktiv
+        # bölmə olmayanda heç bir aqreqat sorğu işləmir (bax `_stage3`).
+        self.workload_center_section = {"has_access": False, "cards": [], "rows": []}
+        self.workload_visa_section = {"has_access": False, "rows": [], "counts": {}}
+        self.workload_approval_section = {"has_access": False, "rows": [], "slice": None}
+        self.workload_overview_section = {"has_access": False, "chairs": [], "faculties": []}
         # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra
         # profili, ixtisas reyestri, fənn kataloqu. Default BOŞDUR: aktiv bölmə
         # olmayanda heç bir sorğu işləmir (bax `_stage3` şərtli çağırışlar).
+        self.lessons_log_section = {"has_access": False, "rows": [], "days": [], "coverage": []}
         self.structure_tree_section = {"has_access": False, "tree_nodes": []}
         self.chair_profile_section = {"has_access": False, "chairs": [], "staff_rows": []}
         self.programs_registry_section = {"has_access": False, "rows": []}

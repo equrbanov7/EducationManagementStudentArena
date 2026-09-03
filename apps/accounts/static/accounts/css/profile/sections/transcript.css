@@ -503,3 +503,19 @@
 .profile-section--registrar-embed .journal-subtitle {
     display: none;
 }
+
+/* Transkript siyasəti qeydi (README §10.1 — `transcriptPolicy = request`).
+   Kabinetdəki nüsxə qeyri-rəsmidir; rəsmi sənəd müraciətlə verilir. */
+.transcript-policy-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 10px 13px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-md, 12px);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xs, 0.8rem);
+    line-height: 1.45;
+}

@@ -68,6 +68,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_applications.html" %}
             {% elif active_section == "academic-calendar" %}
                 {% include "accounts/profile/sections/_academic_calendar.html" %}
+            {% elif active_section == "lessons-log" %}
+                {% include "accounts/profile/sections/_lessons_log.html" %}
             {% elif active_section == "my-journal" %}
                 {% include "accounts/profile/sections/_my_journal.html" %}
             {% elif active_section == "journal-close" and 'journal-close' in allowed_sections %}
@@ -108,6 +110,14 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_groups_registry.html" %}
             {% elif active_section == "semester-opening" and 'semester-opening' in allowed_sections %}
                 {% include "accounts/profile/sections/_semester_opening.html" %}
+            {% elif active_section == "workload-center" and 'workload-center' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_center.html" %}
+            {% elif active_section == "workload-visa" and 'workload-visa' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_visa.html" %}
+            {% elif active_section == "workload-approval" and 'workload-approval' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_approval.html" %}
+            {% elif active_section == "workload-overview" and 'workload-overview' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_overview.html" %}
             {% elif active_section == "student-admission" and 'student-admission' in allowed_sections %}
                 {% include "accounts/profile/sections/_student_admission.html" %}
             {% elif active_section == "student-registry" and 'student-registry' in allowed_sections %}

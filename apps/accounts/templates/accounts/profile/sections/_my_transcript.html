@@ -11,11 +11,24 @@
                     <span>{% trans "Transkript" context "profile.transcript" %}</span>
                 </div>
             </div>
+            {% comment %}Transkript siyasəti (dizayn README §10.1): DEFAULT `request`.
+            Öz-özünə xidmət bağlıdırsa «PDF yüklə» GÖSTƏRİLMİR (endpoint 404 verir) —
+            əvəzinə «Transkript sorğusu» müraciəti öncədən seçilmiş halda açılır.{% endcomment %}
             {% if sec.has_record %}
-            <a class="transcript-pdf-link" href="{% url 'registrar:my_transcript_pdf' %}"
-               title="{% trans 'Rəsmi transkripti PDF olaraq yüklə' context 'profile.transcript' %}">
-                <i class="fas fa-file-pdf"></i> {% trans "PDF yüklə" context "profile.transcript" %}
-            </a>
+              {% if sec.self_service %}
+              <a class="transcript-pdf-link" href="{% url 'registrar:my_transcript_pdf' %}"
+                 title="{% trans 'Rəsmi transkripti PDF olaraq yüklə' context 'profile.transcript' %}">
+                  <i class="fas fa-file-pdf"></i> {% trans "PDF yüklə" context "profile.transcript" %}
+              </a>
+              {% elif 'applications' in allowed_sections %}
+              <a class="transcript-pdf-link js-profile-section-link" href="{{ sec.request_url }}"
+                 data-section="applications"
+                 data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
+                 data-source-url="{{ profile_base_url }}"
+                 title="{% trans 'Rəsmi transkript Tələbə Xidmətləri Mərkəzindən sorğu ilə verilir (3 iş günü).' context 'profile.transcript' %}">
+                  <i class="fas fa-file-signature"></i> {% trans "Transkript sorğusu göndər" context "profile.transcript" %}
+              </a>
+              {% endif %}
             {% endif %}
             {% if sec.record %}
             <div class="transcript-meta">
@@ -24,6 +37,13 @@
             </div>
             {% endif %}
         </div>
+
+        {% if sec.has_record and not sec.self_service %}
+        <p class="transcript-policy-note" role="status">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            {% trans "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü/imzalı rəsmi transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü." context "profile.transcript" %}
+        </p>
+        {% endif %}
 
         {% if not sec.has_record %}
         <div class="transcript-empty">

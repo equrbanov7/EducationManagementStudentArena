@@ -160,6 +160,14 @@ def apply_permission_section_gates(
     can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
     can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
 
+    # Mərhələ 4 — zəncirin üç yeni səthi. Hər biri ÖZ açarındadır (səlahiyyət
+    # ayrılığı): tədris şöbəsi göndərir, koordinator viza verir, dekan
+    # təsdiqləyir. Görünürlük yazma hüququ VERMİR — `apps/workload/actions.py`
+    # hər əməldə əhatəni fail-closed yenidən yoxlayır.
+    can_review_workload = privileged or has_permission(permissions, "workload.review")
+    can_approve_workload = privileged or has_permission(permissions, "workload.approve")
+    can_report_workload = privileged or has_permission(permissions, "workload.report")
+
     # «Universitet strukturu» (ağac) + «Kafedra profili» — Tədris şöbəsi səthi.
     # Qapı `unit.view` açarıdır: müəllim və tələbədə bu açar QƏSDƏN YOXDUR,
     # dekan/kafedra müdiri/RİM-də isə var. KONKRET bölmənin görünməsi
@@ -210,6 +218,17 @@ def apply_permission_section_gates(
     can_view_semester = privileged or has_permission(permissions, "semester.view")
     can_open_semester = privileged or has_permission(permissions, "semester.open")
 
+    # «Keçilmiş dərslər» (ekran 21) — OXU-ONLY dərs izi. İki qapıdan biri açır:
+    #
+    #   MÜƏLLİM   → bölmə HƏR müəllimə açıqdır; sorğu `instructor=request.user`
+    #     ilə daralır, yəni açar başqasının dərsini GÖSTƏRMİR. Bayraq
+    #     `rbac_university_sections`-dəki `is_teacher`-dən gəlir (aşağıda).
+    #   `journal.roster` → NƏZARƏT görünüşü (kafedra müdiri / dekanlıq / RİM):
+    #     öz struktur alt-ağacı + «Müəllim» filtri. Konkret dərsin əhatəyə
+    #     düşməsi `apps/registrar/lessons_log.py`-da fail-closed yenidən
+    #     yoxlanılır (əhatəsiz aktor boş nəticə alır — §8/8).
+    can_supervise_lessons = privileged or has_permission(permissions, "journal.roster")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -226,6 +245,10 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         (can_manage_workload, "workload-distribution"),
         (can_view_workload, "my-workload"),
+        (can_manage_workload, "workload-center"),
+        (can_review_workload, "workload-visa"),
+        (can_approve_workload, "workload-approval"),
+        (can_report_workload, "workload-overview"),
         (can_view_structure_tree, "org-structure-tree"),
         (can_view_structure_tree, "chair-profile"),
         (can_view_catalog, "programs-registry"),
@@ -235,6 +258,7 @@ def apply_permission_section_gates(
         (can_view_semester, "semester-opening"),
         (can_import_students, "student-admission"),
         (can_view_student_registry, "student-registry"),
+        (can_supervise_lessons, "lessons-log"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -258,6 +282,9 @@ def apply_permission_section_gates(
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,
         "can_view_workload": can_view_workload,
+        "can_review_workload": can_review_workload,
+        "can_approve_workload": can_approve_workload,
+        "can_report_workload": can_report_workload,
         "can_manage_workload": can_manage_workload,
         "can_distribute_workload": can_distribute_workload,
         "can_view_structure_tree": can_view_structure_tree,
@@ -268,6 +295,7 @@ def apply_permission_section_gates(
         "can_manage_groups": can_manage_groups,
         "can_view_semester": can_view_semester,
         "can_open_semester": can_open_semester,
+        "can_supervise_lessons": can_supervise_lessons,
     }
 
 

@@ -58,6 +58,22 @@
         {% endif %}
         {% endwith %}
 
+        {% if sec.assessment_weights %}
+        {% comment %}Qiymətləndirmə strukturu — universitet siyasəti ilə KİLİDLİ
+        (README §8/4). Dəyərlər `apps.syllabus.policy`-dən gəlir, şablonda
+        hardcode edilmir.{% endcomment %}
+        <div class="assess-weights">
+            <span class="assess-weights__title">{% trans "Qiymətləndirmə strukturu" context "profile.subjects" %}</span>
+            {% with w=sec.assessment_weights %}
+            <span class="assess-weight">{% trans "Davamiyyət" context "profile.subjects" %} <b>{{ w.attendance }}</b></span>
+            <span class="assess-weight">{% trans "Sərbəst iş" context "profile.subjects" %} <b>{{ w.selfwork }}</b></span>
+            <span class="assess-weight">{% trans "Cari qiymətləndirmə" context "profile.subjects" %} <b>{{ w.current }}</b></span>
+            <span class="assess-weight">{% trans "Yekun imtahan" context "profile.subjects" %} <b>{{ w.final }}</b></span>
+            <span class="assess-weights__total">{% trans "Cəmi" context "profile.subjects" %} {{ w.total }}</span>
+            {% endwith %}
+        </div>
+        {% endif %}
+
         {% if sec.subjects %}
         <div class="my-subjects-grid">
             {% for row in sec.subjects %}
@@ -75,6 +91,9 @@
                 <h4 class="subject-name">{{ row.subject.name }}</h4>
                 <div class="subject-card-meta">
                     <span class="subject-ects"><i class="fas fa-coins"></i> {{ row.ects }} {% trans "ECTS" context "profile.subjects" %}</span>
+                    {% if row.teacher %}
+                    <span class="subject-teacher"><i class="fas fa-chalkboard-user"></i> {{ row.teacher.get_full_name|default:row.teacher.username }}</span>
+                    {% endif %}
                     {% with elig=row.eligibility %}
                     {% if elig.lesson_hours %}
                     <span class="subject-absence {% if elig.barred %}is-barred{% endif %}"
@@ -157,6 +176,14 @@
                     <span class="exam-status exam-status--barred"><i class="fas fa-ban"></i> {% trans "İmtahana buraxılmır (qayıb həddi keçilib)" context "profile.subjects" %}</span>
                     {% else %}
                     <span class="exam-status exam-status--ok"><i class="fas fa-check"></i> {% trans "İmtahana buraxılır" context "profile.subjects" %}</span>
+                    {% endif %}
+                    {% comment %}«Sillabusa bax» — YALNIZ təsdiqlənmiş versiya (README §8/9).
+                    Baxışdakı yeni versiya tələbəyə göstərilmir; endpoint eyni qaydanı
+                    fail-closed təkrar yoxlayır.{% endcomment %}
+                    {% if row.syllabus_available %}
+                    <a class="subject-syllabus-link" href="{{ row.syllabus_pdf_url }}" target="_blank" rel="noopener">
+                        <i class="fas fa-file-lines"></i> {% trans "Sillabus (təsdiqlənmiş)" context "profile.subjects" %}
+                    </a>
                     {% endif %}
                     {% if row.course %}
                     <a class="subject-content-link" href="{% url 'courses:course_dashboard' row.course.id %}">

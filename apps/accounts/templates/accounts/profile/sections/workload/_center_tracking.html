@@ -1,0 +1,45 @@
+{% load i18n ems_ui %}
+{% comment %}Ekran 12 «İzləmə» — fakültə dilimlərinin vəziyyəti + qaytarılan sətirlər.{% endcomment %}
+{% with progress=workload_center_section.slice_progress %}
+<div class="ems-kpis ems-kpis--4">
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "FAKÜLTƏ DİLİMİ" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ progress.total }}</div></div>
+    <div class="ems-kpi ems-kpi--success"><div class="ems-kpi__label">{% trans "TƏSDİQLƏNİB" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ progress.approved }}</div></div>
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "GÖZLƏYİR" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ progress.pending }}</div></div>
+    <div class="ems-kpi ems-kpi--danger"><div class="ems-kpi__label">{% trans "QAYTARILIB" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ progress.returned }}</div></div>
+</div>
+{% endwith %}
+
+<h3 class="tof-pane__title">{% trans "Fakültə dilimləri" context "accounts.workload_center" %}</h3>
+<table class="ems-table ems-table--zebra">
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Fakültə" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Status" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Koordinator vizası" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Dekan qərarı" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Şərh" context "accounts.workload_center" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in workload_center_section.slices %}
+        <tr>
+            <th scope="row">{{ item.faculty }}</th>
+            <td>{% ems_status_badge "workload_line" item.status_key %}</td>
+            <td class="ems-table__num">{{ item.visa.reviewed }} / {{ item.visa.total }}</td>
+            <td>{{ item.decided_by|default:"—" }}</td>
+            <td>{{ item.comment|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">{% trans "Sənəd hələ göndərilməyib — dilim yoxdur." context "accounts.workload_center" %}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if workload_center_section.returned_rows %}
+<h3 class="tof-pane__title">{% trans "Qaytarılan sətirlər" context "accounts.workload_center" %}</h3>
+<ul class="wl-warnlist wl-warnlist--danger">
+    {% for row in workload_center_section.returned_rows %}
+    <li>{{ row.subject }} — {{ row.specialty|default:"—" }} · {{ row.season_label }}</li>
+    {% endfor %}
+</ul>
+{% endif %}

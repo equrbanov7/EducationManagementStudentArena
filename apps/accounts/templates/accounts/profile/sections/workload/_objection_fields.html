@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}Ekran 16 «Etiraz» dialoqunun əlavə sahələri — hədəf sətir + 4 səbəb.
+
+Səbəblər dizaynın HƏRFİ copy-sidir (`constants.ObjectionReason`); mətn
+kataloqdan gəlir, şablonda təkrar yazılmır. Səbəb məcburiyyəti (≥20 simvol)
+ORTAQ `_reason_dialog.html` qatındadır.{% endcomment %}
+<div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="wlm-obj-assignment">{% trans "Fənn / iş" context "accounts.workload" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <select class="ems-select" id="wlm-obj-assignment" name="assignment" required>
+        <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
+        {% for target in my_workload_section.objection_targets %}
+        <option value="{{ target.id }}">{{ target.label }}</option>
+        {% endfor %}
+    </select>
+</div>
+<div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="wlm-obj-reason">{% trans "Səbəb" context "accounts.workload" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <select class="ems-select" id="wlm-obj-reason" name="reason_key" required>
+        <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
+        {% for reason in my_workload_section.objection_reasons %}
+        <option value="{{ reason.key }}">{{ reason.label }}</option>
+        {% endfor %}
+    </select>
+</div>

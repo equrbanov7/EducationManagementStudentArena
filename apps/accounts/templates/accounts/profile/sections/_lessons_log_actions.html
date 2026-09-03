@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}Ekran 21 başlıq əməlləri — «Hesabatı yüklə» (CSV) + jurnal keçidi.
+`_content_header.html` bunu `{% include %}` ilə gətirir (blok deyil).{% endcomment %}
+<a class="ems-btn" href="{{ lessons_log_section.journal_list_url }}" target="_blank" rel="noopener">
+    <i class="fas fa-book-open" aria-hidden="true"></i>
+    {% trans "Elektron jurnal" context "accounts.lessons_log" %}
+</a>
+<a class="ems-btn ems-btn--primary" href="{{ lessons_log_section.export_url }}">
+    <i class="fas fa-download" aria-hidden="true"></i>
+    {% trans "Hesabatı yüklə" context "accounts.lessons_log" %}
+</a>

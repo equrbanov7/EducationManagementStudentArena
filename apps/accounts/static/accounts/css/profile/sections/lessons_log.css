@@ -1,0 +1,188 @@
+/* =========================================================================
+   Ekran 21 «Keçilmiş dərslər» — YALNIZ bölmə-xüsusi düzüm.
+
+   Kart / cədvəl / badge / KPI / filtr TƏKRAR TƏRİF OLUNMUR: onlar
+   `static/css/ems_ui/*.css` komponent qatındadır və qabıqdan yüklənir.
+   Burada yalnız gün qruplaşdırması, əhatə zolağı və sətir vurğusu var.
+
+   Rəng birbaşa YAZILMIR — hamısı `--ems-*` tokenlərindən (light-only tema).
+   ========================================================================= */
+
+.profile-section--lessons-log .llog-coverage {
+    margin: var(--ems-sp-4, 14px) 0;
+    padding: var(--ems-pad-card, 15px 17px);
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg, 14px);
+}
+
+.llog-coverage__title {
+    margin: 0 0 10px;
+    font-size: var(--ems-fs-sm, 0.93rem);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.llog-coverage__list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.llog-cov__head,
+.llog-cov__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+}
+
+.llog-cov__name {
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.llog-cov__group,
+.llog-cov__meta {
+    font-size: var(--ems-fs-xs, 0.75rem);
+    color: var(--ems-neutral-600);
+}
+
+.llog-cov__figures {
+    margin-inline-start: auto;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.llog-cov__bar {
+    margin: 8px 0;
+}
+
+.llog-cov__foot {
+    margin-top: 6px;
+}
+
+.llog-cov__lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--ems-r-sm, 8px);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800, #92400e);
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 700;
+}
+
+.llog-cov__lockcta {
+    color: var(--ems-primary-700);
+    text-decoration: underline;
+}
+
+/* ── Gün qruplaşdırması ───────────────────────────────────────────────── */
+
+.llog-days {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.llog-day {
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg, 14px);
+    overflow: hidden;
+}
+
+.llog-day__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 15px;
+    background: var(--ems-neutral-50);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.llog-day__date {
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.llog-day__weekday,
+.llog-day__total {
+    font-size: var(--ems-fs-xs, 0.77rem);
+    color: var(--ems-neutral-600);
+}
+
+.llog-day__total {
+    margin-inline-start: auto;
+    font-weight: 700;
+}
+
+.llog-table {
+    min-width: 900px;
+}
+
+.llog-subject {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.llog-submeta {
+    display: block;
+    margin-top: 1px;
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    color: var(--ems-neutral-600);
+}
+
+.llog-time__main {
+    display: block;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.llog-notopic {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800, #92400e);
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 700;
+}
+
+.llog-excused {
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+}
+
+.llog-row--empty > th,
+.llog-row--empty > td {
+    background: var(--ems-danger-bg);
+}
+
+.llog-more {
+    margin: 12px 0 0;
+    padding: 12px;
+    text-align: center;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-600);
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 12px);
+}
+
+@media (max-width: 640px) {
+    .llog-cov__figures,
+    .llog-day__total {
+        margin-inline-start: 0;
+        width: 100%;
+    }
+}

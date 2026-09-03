@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}Ekran 15 sətir seçimi — toplu «Qaytar» üçün.
+
+Seçim xanası sətir əməlləri xanasındadır ki, ortaq `_data_table.html`-ə sütun
+əlavə edilməsin (komponent bütün ekranlarda paylaşılır).{% endcomment %}
+<label class="tof-bulk__check">
+    <input type="checkbox" data-tof-bulk-item="{{ row.data.id }}"
+           aria-label="{% blocktrans context 'accounts.workload_approval' with name=row.data.subject %}{{ name }} sətrini seç{% endblocktrans %}">
+</label>
