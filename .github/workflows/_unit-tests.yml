@@ -115,7 +115,16 @@ jobs:
           # (scripts/ birdəfəlik alətləri faizi süni aşağı salırdı) və gate
           # 60→68-ə qaldırıldı (yerli sqlite dövrəsi 71% verir; CI postgres
           # testləri ilə bir qədər yuxarıdır). Aşağı düşmə = reqressiya.
+          #
+          # Paralelləşdirmə (2026-09-03): pytest-xdist `-n 4` (ubuntu-latest =
+          # 4 vCPU), `--dist loadfile` — eyni modulun testləri eyni worker-də
+          # ardıcıl qalır (TestCase sinifləri / modul-səviyyə fixture-lar
+          # bölünmür). pytest-django hər worker üçün ayrıca DB yaradır
+          # (test_test_db_gw0..gw3; `test_user` POSTGRES_USER = superuser →
+          # CREATEDB var). pytest-cov worker məlumatını özü birləşdirir —
+          # `--cov-fail-under` birləşmiş nəticəyə tətbiq olunur.
           pytest \
+            -n 4 --dist loadfile \
             --ds=config.settings.test \
             --ignore=tests/e2e \
             --cov=apps \

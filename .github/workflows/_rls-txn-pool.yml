@@ -112,7 +112,10 @@ jobs:
           # Transaction-pooling yolunun izolyasiya regressiyalarını tutmaq üçün
           # yalnız postgres markerli test paketini işlədirik. Failure = flaqın
           # production-a keçirilməsi BLOKLANIR.
+          # pytest-xdist: _unit-tests.yml ilə eyni naxış (hər worker öz DB-si,
+          # probe rolları worker-suffiksli — bax apps/*/tests/*_postgres.py).
           pytest \
+            -n 4 --dist loadfile \
             --ds=config.settings.test \
             --ignore=tests/e2e \
             -m postgres \
