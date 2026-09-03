@@ -38,9 +38,8 @@ from apps.exams.services.access_policy import (  # noqa: F401
     is_teacher_user,
 )
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
-from apps.exams.services.ai_summary import (  # noqa: F401
-    generate_exam_statistics_summary,
-)
+from apps.exams.services.ai_summary import generate_exam_statistics_summary  # noqa: F401
+from apps.exams.services.ai_summary import generate_people_analytics_summary  # noqa: F401
 from apps.exams.services.final_center import (  # noqa: F401
     RoomAdminError,
     add_computer,
@@ -52,6 +51,10 @@ from apps.exams.services.final_center import (  # noqa: F401
 )
 from apps.exams.services.grading import (  # noqa: F401
     calculate_attempt_score,
+)
+from apps.exams.services.journal_sync import (  # noqa: F401
+    schedule_journal_sync,
+    sync_attempt_to_journal,
 )
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,
@@ -113,11 +116,14 @@ __all__ = [
     "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",
+    "generate_people_analytics_summary",
     "get_ai_config",
     "get_live_active_states",
     "get_live_session_model",
     "is_teacher_user",
     "resolve_exam_attempt_name_visibility",
+    "schedule_journal_sync",
+    "sync_attempt_to_journal",
     "resolve_exam_attempt_review_window_seconds",
     "student_final_exam_context",
     "tenant_scoped_exams",

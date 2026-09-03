@@ -1,29 +1,40 @@
 {% load i18n static %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
+{% comment %}
+2026-08-15 redesign: rol-yönlü profil redaktəsi.
+ * Təşkilat üzvündə akademik struktur (təşkilat/fakültə/kafedra/ixtisas/qrup)
+   YALNIZ-OXU göstərilir — mənbə Membership.scope_unit / academic_records-dur;
+   köhnə «Təhsil müəssisəsi / Məktəb kodu / Qrup-Sinif / Təşkilata qoşul»
+   sahələri buradan çıxarılıb.
+ * Elmi ad / dərəcə (assistent→professor, PhD/elmlər doktoru) tələbə olmayan
+   rollar üçün bootstrap-single-select ilə seçilir.
+ * «Akademik fəaliyyət» (fənn/sertifikat/məqalə/konfrans) ayrıca AJAX
+   idarəetməsidir — bax _academic_items_manage.html + academic_items.js.
+{% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_c3.css' %}">
-    <div class="section-card">
-        <div class="section-title">
-            <i class="fas fa-user-edit"></i>
-            {% trans "edit_profile" context "profile.section" %}
-        </div>
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260827-1">
 
-        <form method="post" enctype="multipart/form-data" id="editProfileForm">
-            {% csrf_token %}
-            <input type="hidden" name="profile_form" value="edit-profile">
-            <input type="hidden" name="section" value="edit-profile">
+    <form method="post" enctype="multipart/form-data" id="editProfileForm" class="edit-profile-form">
+        {% csrf_token %}
+        <input type="hidden" name="profile_form" value="edit-profile">
+        <input type="hidden" name="section" value="edit-profile">
+
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-id-card"></i>
+                {% trans 'Şəxsi məlumatlar' context 'profile.edit_v2' %}
+            </div>
 
             <div class="info-grid profile-form-grid">
                 <div class="info-item">
                     <label class="info-label" for="first_name">{% trans "first_name" context "profile.edit" %} *</label>
                     <input type="text" class="form-control" id="first_name" name="first_name"
-                           value="{{ user.first_name }}" required>
+                           value="{{ user.first_name }}" maxlength="150" required>
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="last_name">{% trans "last_name" context "profile.edit" %} *</label>
                     <input type="text" class="form-control" id="last_name" name="last_name"
-                           value="{{ user.last_name }}" required>
+                           value="{{ user.last_name }}" maxlength="150" required>
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="email">{% trans "email" context "profile.edit" %} *</label>
@@ -33,92 +44,288 @@
                 <div class="info-item">
                     <label class="info-label" for="phone">{% trans "phone" context "profile.edit" %}</label>
                     <input type="tel" class="form-control" id="phone" name="phone"
-                           value="{{ profile.phone|default:'' }}" placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
+                           value="{{ profile.phone|default:'' }}" maxlength="20"
+                           placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
+                    <div class="edit-profile-field-hint">
+                        <i class="fas fa-lock"></i>
+                        {% trans 'Nömrələr yalnız əməkdaş səviyyəli baxanlara görünür, tələbələrə yox.' context 'profile.edit_v2' %}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label class="info-label" for="phone_secondary">{% trans 'Əlavə telefon' context 'profile.edit_v2' %}</label>
+                    <input type="tel" class="form-control" id="phone_secondary" name="phone_secondary"
+                           value="{{ profile.phone_secondary|default:'' }}" maxlength="20"
+                           placeholder="{% trans 'placeholder_phone' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="location">{% trans "location" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="location" name="location"
-                           value="{{ profile.location|default:'' }}" placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
+                           value="{{ profile.location|default:'' }}" maxlength="100"
+                           placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="avatar">{% trans "avatar" context "profile.edit" %}</label>
                     <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
                 </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-graduation-cap"></i>
+                {% trans 'Akademik məlumat' context 'profile.edit_v2' %}
+            </div>
+
+            {% if profile.is_academics_locked %}
+            <p class="edit-profile-locked-note">
+                <i class="fas fa-lock"></i>
+                {% trans 'Bu məlumatlar universitet tərəfindən idarə olunur və buradan dəyişdirilə bilməz.' context 'profile.edit_v2' %}
+            </p>
+            <div class="info-grid">
+                <div class="info-item info-item--locked">
+                    <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>
+                    <div class="info-value info-value--readonly">{{ profile.organization.name }}</div>
+                </div>
+                {% for entry in academic_units %}
+                {% if entry.faculty %}
+                <div class="info-item info-item--locked">
+                    <div class="info-label"><i class="fas fa-building-columns"></i> {% trans 'Fakültə' %}</div>
+                    <div class="info-value info-value--readonly">{{ entry.faculty.name }}</div>
+                </div>
+                {% endif %}
+                {% if entry.department %}
+                <div class="info-item info-item--locked">
+                    <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Kafedra' %}</div>
+                    <div class="info-value info-value--readonly">{{ entry.department.name }}</div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% for record in student_records %}
+                <div class="info-item info-item--locked">
+                    <div class="info-label"><i class="fas fa-user-graduate"></i> {% trans 'İxtisas' %}</div>
+                    <div class="info-value info-value--readonly">{{ record.program.display_label_full }}</div>
+                </div>
+                {% if record.group %}
+                <div class="info-item info-item--locked">
+                    <div class="info-label"><i class="fas fa-users"></i> {% trans 'Qrup' %}</div>
+                    <div class="info-value info-value--readonly">{{ record.group.name }}</div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="info-grid profile-form-grid">
                 <div class="info-item">
                     <label class="info-label" for="student_university_name">{% trans "institution_name" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="student_university_name" name="student_university_name"
-                           value="{{ profile.student_university_name|default:'' }}" placeholder="{% trans 'placeholder_institution' context 'profile.edit' %}">
-                </div>
-                <div class="info-item">
-                    <label class="info-label" for="student_school_identifier">{% trans "school_code" context "profile.edit" %}</label>
-                    <input type="text" class="form-control" id="student_school_identifier" name="student_school_identifier"
-                           value="{{ profile.student_school_identifier|default:'' }}" placeholder="{% trans 'placeholder_school_code' context 'profile.edit' %}">
-                </div>
-            </div>
-
-            <div class="info-grid profile-form-grid mt-3">
-                <div class="info-item">
-                    <label class="info-label" for="organization_type">{% trans "organization_type" context "profile.edit" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="organization_type" name="organization_type" disabled aria-disabled="true" data-bootstrap-select>
-                            <option value="individual" {% if profile.organization_type == 'individual' %}selected{% endif %}>
-                                {% trans "org_type_individual" context "profile.edit" %}
-                            </option>
-                            <option value="school" {% if profile.organization_type == 'school' %}selected{% endif %}>
-                                {% trans "org_type_school" context "profile.edit" %}
-                            </option>
-                            <option value="university" {% if profile.organization_type == 'university' %}selected{% endif %}>
-                                {% trans "org_type_university" context "profile.edit" %}
-                            </option>
-                            <option value="course_center" {% if profile.organization_type == 'course_center' %}selected{% endif %}>
-                                {% trans "org_type_course_center" context "profile.edit" %}
-                            </option>
-                        </select>
-                    </div>
+                           value="{{ profile.student_university_name|default:'' }}" maxlength="255"
+                           placeholder="{% trans 'placeholder_institution' context 'profile.edit' %}">
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="student_specialization">{% trans "specialization" context "profile.edit" %}</label>
                     <input type="text" class="form-control" id="student_specialization" name="student_specialization"
-                           value="{{ profile.student_specialization|default:'' }}"
+                           value="{{ profile.student_specialization|default:'' }}" maxlength="255"
                            placeholder="{% trans 'placeholder_specialization' context 'profile.edit' %}">
                 </div>
+            </div>
+            {% endif %}
+
+            {% if not role_capabilities.is_student %}
+            <div class="info-grid profile-form-grid edit-profile-title-grid">
                 <div class="info-item">
-                    <label class="info-label" for="student_group_number">{% trans "group_number" context "profile.edit" %}</label>
-                    <input type="text" class="form-control" id="student_group_number" name="student_group_number"
-                           value="{{ profile.student_group_number|default:'' }}"
-                           placeholder="{% trans 'placeholder_group_number' context 'profile.edit' %}">
+                    <label class="info-label" for="academic_title">{% trans 'Elmi ad / vəzifə' context 'profile.edit_v2' %}</label>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                id="academic_title" name="academic_title" data-bootstrap-select>
+                            <option value="">{% trans 'Seçilməyib' context 'profile.edit_v2' %}</option>
+                            {% for value, label in academic_title_choices %}
+                            <option value="{{ value }}" {% if profile.academic_title == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label class="info-label" for="academic_degree">{% trans 'Elmi dərəcə' context 'profile.edit_v2' %}</label>
+                    <div class="bootstrap-single-select">
+                        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                id="academic_degree" name="academic_degree" data-bootstrap-select>
+                            <option value="">{% trans 'Seçilməyib' context 'profile.edit_v2' %}</option>
+                            {% for value, label in academic_degree_choices %}
+                            <option value="{{ value }}" {% if profile.academic_degree == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
             </div>
+            {% endif %}
+        </div>
 
-            <div id="editProfileTypeWarning" class="alert alert-warning mt-3 edit-profile-c3-1">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                {% trans "edit_profile_type_change_warning" context "profile.edit" %}
-                {% if 'student-organization-request' in allowed_sections %}
-                <a href="{{ profile_base_url }}?section=student-organization-request"
-                   class="alert-link ms-2 js-profile-section-link"
-                   data-section="student-organization-request"
-                   data-title="{% trans 'join_organization' context 'profile.section' %}">
-                    {% trans "join_organization" context "profile.section" %}
-                </a>
-                {% endif %}
+        <div class="section-card">
+            <div class="section-title">
+                <i class="fas fa-align-left"></i>
+                {% trans "about" context "profile.edit" %}
             </div>
-
-            <div class="info-item profile-form-grid">
-                <label class="info-label" for="bio">{% trans "about" context "profile.edit" %}</label>
-                <textarea class="form-control" id="bio" name="bio" rows="4"
+            <div class="info-item info-item--borderless">
+                <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="2000"
                           placeholder="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
             </div>
+        </div>
 
-            <div class="profile-form-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
-                </button>
-                <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
-                   data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
-                    <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
-                </a>
-            </div>
-        </form>
+    </form>
+
+    <div class="section-card" id="academicItemsManager"
+         data-api-url="{% url 'accounts:academic_items_api' %}">
+        <div class="section-title">
+            <i class="fas fa-award"></i>
+            {% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}
+        </div>
+        <p class="settings-note">
+            <i class="fas fa-circle-info"></i>
+            {% trans 'Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək.' context 'profile.edit_v2' %}
+        </p>
+        <div class="academic-items-search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" class="form-control" id="academicItemsSearch"
+                   placeholder="{% trans 'Qeydlərdə axtar...' context 'profile.academic_items' %}"
+                   aria-label="{% trans 'Qeydlərdə axtar' context 'profile.academic_items' %}">
+        </div>
+        <div id="academicItemsManagerList" aria-live="polite"
+             data-collapse-limit="5"
+             data-label-show-more="{% trans 'Daha çox göstər' context 'profile.academic_items' %}"
+             data-label-show-less="{% trans 'Daha az göstər' context 'profile.academic_items' %}"
+             data-label-no-match="{% trans 'Axtarışa uyğun qeyd tapılmadı.' context 'profile.academic_items' %}">
+            {% include "accounts/profile/sections/_academic_items_manage.html" %}
+        </div>
     </div>
+
+    <div class="edit-profile-savebar" id="editProfileSavebar">
+        <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
+            <i class="fas fa-circle-exclamation"></i>
+            {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
+        </span>
+        <div class="edit-profile-savebar__actions">
+            <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
+               class="btn btn-outline-primary" target="_blank" rel="noopener">
+                <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
+            </a>
+            <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
+               data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
+                <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
+            </a>
+            <button type="submit" form="editProfileForm" class="btn btn-primary">
+                <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
+            </button>
+        </div>
+    </div>
+
+    {# ── Qeyd əlavə et / redaktə et modalı (overlay + fon scroll kilidi Bootstrap-dadır) ── #}
+    <div class="modal fade" id="academicItemModal" tabindex="-1" aria-hidden="true"
+         data-label-create="{% trans 'Yeni qeyd' context 'profile.academic_items' %}"
+         data-label-edit="{% trans 'Qeydi redaktə et' context 'profile.academic_items' %}"
+         data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="academicItemForm" novalidate>
+                    <input type="hidden" name="action" value="create">
+                    <input type="hidden" name="item_id" value="">
+                    <input type="hidden" name="kind" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="academicItemModalTitle">{% trans 'Yeni qeyd' context 'profile.academic_items' %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.academic_items' %}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-danger d-none" id="academicItemFormError" role="alert"></div>
+                        <div class="academic-item-form-grid">
+                            <div class="academic-item-field academic-item-field--full">
+                                <label class="info-label" for="academicItemTitle">{% trans 'Başlıq' context 'profile.academic_items' %} *</label>
+                                <input type="text" class="form-control" id="academicItemTitle" name="title" maxlength="200" required
+                                       placeholder="{% trans 'Məs.: Verilənlər bazası sistemləri' context 'profile.academic_items' %}">
+                            </div>
+                            <div class="academic-item-field academic-item-field--full">
+                                <label class="info-label" for="academicItemDetail">{% trans 'Ətraflı' context 'profile.academic_items' %}</label>
+                                <input type="text" class="form-control" id="academicItemDetail" name="detail" maxlength="255"
+                                       placeholder="{% trans 'Jurnal / konfrans / qurum adı və s.' context 'profile.academic_items' %}">
+                            </div>
+                            <div class="academic-item-field">
+                                <label class="info-label" for="academicItemYear">{% trans 'İl' context 'profile.academic_items' %}</label>
+                                {% now "Y" as current_year %}
+                                <input type="number" class="form-control" id="academicItemYear" name="year" min="1950" max="{{ current_year|add:1 }}"
+                                       inputmode="numeric" placeholder="{{ current_year }}">
+                            </div>
+                            <div class="academic-item-field">
+                                <label class="info-label" for="academicItemLink">{% trans 'Keçid (URL)' context 'profile.academic_items' %}</label>
+                                <input type="url" class="form-control" id="academicItemLink" name="link" maxlength="300"
+                                       placeholder="https://...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                        <button type="submit" class="btn btn-primary" id="academicItemSubmitBtn">
+                            <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
+                            <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.academic_items' %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# ── Silmə təsdiqi modalı ── #}
+    <div class="modal fade" id="academicItemDeleteModal" tabindex="-1" aria-hidden="true"
+         data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{% trans 'Qeydi sil' context 'profile.academic_items' %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.academic_items' %}"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger d-none" id="academicItemDeleteError" role="alert"></div>
+                    <p class="mb-0">{% trans 'Bu qeyd silinsin?' context 'profile.academic_items' %}</p>
+                    <p class="fw-semibold mb-0" id="academicItemDeleteTitle"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                    <button type="button" class="btn btn-danger" id="academicItemDeleteConfirmBtn" data-item-id="">
+                        <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
+                        <i class="fas fa-trash"></i> {% trans 'Sil' context 'profile.academic_items' %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Saxlanmamış dəyişikliklə çıxış xəbərdarlığı ── #}
+    <div class="modal fade" id="editProfileLeaveModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-circle-exclamation me-2"></i>{% trans 'Dəyişikliklər yadda saxlanmayıb' context 'profile.edit_v2' %}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.academic_items' %}"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">{% trans 'Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?' context 'profile.edit_v2' %}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        {% trans 'Ləğv et' %}
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="editProfileLeaveWithoutSaving">
+                        {% trans 'Saxlamadan çıx' context 'profile.edit_v2' %}
+                    </button>
+                    <button type="button" class="btn btn-primary" id="editProfileSaveAndLeave">
+                        <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.edit_v2' %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
+    <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260827-1" defer></script>
+    <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260815-1" defer></script>
 </section>
 {% endif %}

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import gradebook, journal_extras, services
 from apps.registrar.models import (
     AttendanceStatus,
@@ -68,6 +68,20 @@ def _setup_offering(cls, prefix):
     )
     cls.teacher = User.objects.create_user(f"{prefix}_teacher", f"{prefix}_teacher@qku.edu.az", "pw")
     cls.student = User.objects.create_user(f"{prefix}_student", f"{prefix}_student@qku.edu.az", "pw")
+    Membership.objects.create(
+        user=cls.teacher,
+        organization=cls.org,
+        role=cls.org.roles.get(name="teacher"),
+        is_primary=True,
+        is_active=True,
+    )
+    Membership.objects.create(
+        user=cls.student,
+        organization=cls.org,
+        role=cls.org.roles.get(name="student"),
+        is_primary=True,
+        is_active=True,
+    )
     cls.record = StudentAcademicRecord.objects.create(
         organization=cls.org,
         student=cls.student,

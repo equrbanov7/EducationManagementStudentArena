@@ -56,6 +56,13 @@ class FinalExtrasTest(TestCase):
                 is_primary=True,
                 is_active=True,
             )
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             cls.record = StudentAcademicRecord.objects.create(
                 organization=cls.org,
                 student=cls.student,
@@ -129,8 +136,13 @@ class FinalExtrasTest(TestCase):
         self.assertEqual(result["comment"], "Əla fəallıq!")
 
     def test_locked_journal_blocks_extras(self):
+        from apps.registrar.models import ApprovalStatus
+
         with bypass_rls():
-            finals.publish_offering(offering=self.offering, by_user=self.teacher)
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            scheme.approval_status = ApprovalStatus.APPROVED
+            scheme.is_published = True
+            scheme.save(update_fields=["approval_status", "is_published"])
             outcome = finals.set_final_extras(enrollment=self.enrollment, bonus="5", by_user=self.teacher)
             result = finals.compute_final_result(enrollment=self.enrollment)
         self.assertIsNone(outcome)

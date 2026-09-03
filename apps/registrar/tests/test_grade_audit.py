@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.audit.models import AuditLog
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals, grade_audit, gradebook, services
 from apps.registrar.models import (
     Curriculum,
@@ -56,6 +56,20 @@ class GradeAuditTest(TestCase):
             )
             self.teacher = User.objects.create_user("ga_teacher", "ga_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("ga_student", "ga_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,

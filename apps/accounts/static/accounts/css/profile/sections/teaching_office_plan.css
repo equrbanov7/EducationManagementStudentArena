@@ -1,0 +1,180 @@
+/* =========================================================================
+   Mərhələ 2 bölmələri — ekran 05 «Tədris planı», 06 «Qruplar»,
+   07 «Semestr açılışı» (dizayn handoff).
+
+   BU FAYL YALNIZ DÜZÜMDÜR. Kart, cədvəl, badge, KPI, filtr paneli, dialoq,
+   stepper və timeline ORTAQ komponent qatındadır (`static/css/ems_ui/*.css`) —
+   burada TƏKRAR TƏRİF OLUNMUR. Ümumi `.tof*` düzümü isə Mərhələ 1-in
+   `teaching_office.css`-indədir (qabıqda ondan SONRA yüklənir).
+
+   Rənglər `--ems-*` tokenlərindəndir (light-only; `prefers-color-scheme: dark`
+   QƏSDƏN yoxdur — layihə yalnız açıq temadır).
+   ========================================================================= */
+
+/* ---- Ekran 05: plan meta çipləri --------------------------------------- */
+
+.tof-plan__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Semestr tabında hədəfdən kənar kredit — RƏNGDƏN BAŞQA mətnlə də verilir
+   (badge sayğacı kredit rəqəmini göstərir), handoff §7. */
+.ems-tabs__btn.is-warning {
+    border-color: var(--ems-warning-bd, #fde68a);
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+}
+
+/* ---- Xəbərdarlıq / bloklayıcı siyahısı (lentin içində) ----------------- */
+
+.tof-warnings {
+    margin: 0;
+    padding-inline-start: 1.1rem;
+    display: grid;
+    gap: 4px;
+    max-height: 180px;
+    overflow: auto;
+}
+
+.tof-warnings__item {
+    font-size: 0.82rem;
+    color: var(--ems-neutral-700, #334155);
+}
+
+/* ---- Ekran 05: versiya diff-i ----------------------------------------- */
+
+.tof-diff {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+    font-size: 0.82rem;
+}
+
+.tof-diff__add {
+    color: var(--ems-success-700, #15803d);
+    font-weight: 700;
+}
+
+.tof-diff__del {
+    color: var(--ems-danger-strong, #b91c1c);
+    font-weight: 700;
+}
+
+.tof-diff__chg {
+    color: var(--ems-neutral-700, #334155);
+}
+
+.tof-diff__old {
+    background: var(--ems-danger-bg, #fee2e2);
+    border-radius: var(--ems-r-sm, 6px);
+    padding: 0 4px;
+}
+
+.tof-diff__new {
+    background: var(--ems-success-bg, #dcfce7);
+    border-radius: var(--ems-r-sm, 6px);
+    padding: 0 4px;
+}
+
+/* Balans cədvəlində hədəfdən kənar semestr xanası. */
+.ems-table__num.is-warning {
+    color: var(--ems-warning-800, #92400e);
+    font-weight: 800;
+}
+
+/* ---- Ekran 06: toplu seçim -------------------------------------------- */
+
+.tof-bulk__count {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ems-neutral-600, #475569);
+}
+
+.tof-bulk__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--ems-tap, 44px);
+    min-height: var(--ems-tap, 44px);
+    cursor: pointer;
+}
+
+/* ---- Ekran 07: kilid şərtləri ----------------------------------------- */
+
+.tof-gates {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.tof-gates__item {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md, 12px);
+    background: var(--ems-bg-subtle);
+    font-size: 0.84rem;
+}
+
+.tof-gates__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--ems-r-pill, 999px);
+    font-weight: 800;
+}
+
+.tof-gates__item--ok .tof-gates__mark {
+    background: var(--ems-success-bg, #dcfce7);
+    color: var(--ems-success-700, #15803d);
+}
+
+.tof-gates__item--pending .tof-gates__mark {
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+}
+
+/* Vəziyyət YALNIZ rənglə deyil, MƏTNLƏ də verilir (handoff §7). */
+.tof-gates__state {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ems-neutral-600, #475569);
+}
+
+.tof-gates__item--ok .tof-gates__state {
+    color: var(--ems-success-700, #15803d);
+}
+
+.tof-gates__item--pending .tof-gates__state {
+    color: var(--ems-warning-800, #92400e);
+}
+
+/* ---- Mobil (375) ------------------------------------------------------- */
+
+@media (max-width: 560px) {
+    .tof-gates__item {
+        grid-template-columns: 22px minmax(0, 1fr);
+    }
+
+    .tof-gates__state {
+        grid-column: 2;
+    }
+
+    .tof-plan__meta > .tof-chip {
+        flex: 1 1 auto;
+    }
+}

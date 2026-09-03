@@ -1,0 +1,357 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — REDAKTOR ekranı (dizayn təhvili §3.2)
+   ───────────────────────────────────────────────────────────────────────────
+   Üç sütunlu düzülüş: sol = addım naviqasiyası (sticky), mərkəz = aktiv bölmə,
+   sağ = kontekst (xülasə, çatışmayan tələblər, versiya jurnalı).
+
+   ⚠️ Sol PROFİL SIDEBAR-ı qalır — bu grid yalnız bölmə panelinin İÇİNDƏDİR.
+   Rənglər `--ems-*` tokenləridir; işıqlı tema.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.syl-editor {
+    padding-bottom: 88px; /* aşağıdakı sabit panelin altında məzmun qalmasın */
+
+}
+
+.syl-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-card);
+    font-size: 0.79rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-crumbs a {
+    font-weight: 700;
+    color: var(--ems-link);
+    text-decoration: none;
+}
+
+.syl-editor__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+}
+
+.syl-editor__ident {
+    flex: 1;
+    min-width: 260px;
+}
+
+.syl-editor__badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.syl-editor__title {
+    margin: 6px 0 0;
+    font-size: 1.42rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* ── Autosave çipi (6 vəziyyət) ───────────────────────────────────────── */
+.syl-savebox {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.syl-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-border);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.syl-save__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.syl-save--saved {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+    color: var(--ems-success-700);
+}
+
+.syl-save--saving {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-800);
+}
+
+.syl-save--saving .syl-save__dot {
+    border: 2px solid var(--ems-primary-200);
+    border-top-color: var(--ems-primary-600);
+    background: transparent;
+    width: 11px;
+    height: 11px;
+    animation: syl-spin 0.7s linear infinite;
+}
+
+.syl-save--failed,
+.syl-save--conflict {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
+}
+
+.syl-save--offline,
+.syl-save--stale {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+@keyframes syl-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .syl-save--saving .syl-save__dot {
+        animation: none;
+    }
+}
+
+/* ── Vəziyyət bannerləri ──────────────────────────────────────────────── */
+.syl-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px 15px;
+    border-radius: var(--syl-radius-card);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-banner[hidden] {
+    display: none;
+}
+
+.syl-banner > div {
+    flex: 1;
+    min-width: 220px;
+}
+
+.syl-banner__title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+.syl-banner__body {
+    margin: 4px 0 0;
+    font-size: 0.81rem;
+    line-height: 1.55;
+}
+
+.syl-banner--warning {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+.syl-banner--danger {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Üç sütunlu düzülüş ───────────────────────────────────────────────── */
+.syl-editor__grid {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr) 300px;
+    gap: 14px;
+    align-items: start;
+}
+
+@media (max-width: 1280px) {
+    .syl-editor__grid {
+        grid-template-columns: 220px minmax(0, 1fr);
+    }
+
+    .syl-aside {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 820px) {
+    .syl-editor__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ── Sol addım naviqasiyası ───────────────────────────────────────────── */
+.syl-steps {
+    position: sticky;
+    top: 12px;
+    padding: 9px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+}
+
+.syl-step {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    margin-bottom: 2px;
+    border: none;
+    border-left: 3px solid transparent;
+    border-radius: var(--syl-radius-ctl);
+    background: transparent;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.syl-step:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.syl-step.is-on {
+    background: var(--ems-primary-50);
+    border-left-color: var(--ems-primary-600);
+}
+
+.syl-step__mark {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-500);
+    font-size: 0.63rem;
+    font-weight: 800;
+}
+
+.syl-step--done .syl-step__mark {
+    background: var(--ems-success);
+    color: var(--ems-neutral-0);
+}
+
+.syl-step--error .syl-step__mark,
+.syl-step--todo .syl-step__mark {
+    background: var(--ems-warning);
+    color: var(--ems-neutral-0);
+}
+
+.syl-step.is-on .syl-step__mark {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.syl-step__label {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.syl-step.is-on .syl-step__label {
+    font-weight: 800;
+    color: var(--ems-primary-800);
+}
+
+.syl-step__warn {
+    flex: none;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: var(--ems-warning-800);
+}
+
+/* ── Bölmə panelləri ──────────────────────────────────────────────────── */
+.syl-panels {
+    min-width: 0;
+}
+
+.syl-panel {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px 20px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+}
+
+.syl-panel.is-on {
+    display: flex;
+}
+
+.syl-panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.syl-panel__head h3 {
+    margin: 0;
+    font-size: 1.04rem;
+    font-weight: 800;
+}
+
+.syl-panel__state {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.syl-panel__state--done {
+    color: var(--ems-success-700);
+}
+
+.syl-panel__state--todo {
+    color: var(--ems-warning-800);
+}
+
+.syl-panel__state--check {
+    color: var(--ems-neutral-400);
+}
+
+.syl-panel__hint {
+    margin: 0;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--ems-text-muted);
+}
+
+.syl-grid3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 13px;
+}

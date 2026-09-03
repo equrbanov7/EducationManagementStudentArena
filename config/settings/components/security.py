@@ -147,7 +147,6 @@ SECURITY_RESPONSE_HEADERS = {
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     "apps.accounts.backends.EmailOrUsernameBackend",
-    "django.contrib.auth.backends.ModelBackend",
 ]
 
 # Password reset token expiry defaults to the same short-lived OTP window.

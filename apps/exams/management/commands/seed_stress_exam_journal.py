@@ -45,6 +45,7 @@ from django.utils.text import slugify
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption, QuestionBlock, StudentGroup
 from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
 from core.constants import AcademicPeriodType, OrgUnitType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -68,7 +69,8 @@ def _correction_document(name: str) -> SimpleUploadedFile:
     return SimpleUploadedFile(name, _MIN_PDF_BYTES, content_type="application/pdf")
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_stress_exam_journal"
     help = "Seed a stress exam + electronic-journal data into the stress-test organization."
 
     def add_arguments(self, parser):

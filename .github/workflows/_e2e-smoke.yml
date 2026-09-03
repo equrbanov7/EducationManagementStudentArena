@@ -131,7 +131,8 @@ jobs:
           E2E_USERNAME: ${{ env.E2E_USERNAME }}
           E2E_PASSWORD: ${{ env.E2E_PASSWORD }}
         run: |
-          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T \
+            -e DJANGO_SETTINGS_MODULE=config.settings.ci_e2e app \
             python manage.py seed_ci_e2e_user \
             --username "$E2E_USERNAME" \
             --password "$E2E_PASSWORD"
@@ -140,7 +141,8 @@ jobs:
         env:
           E2E_ROLE_PASSWORD: ${{ env.E2E_ROLE_PASSWORD }}
         run: |
-          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T app \
+          docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml exec -T \
+            -e DJANGO_SETTINGS_MODULE=config.settings.ci_e2e app \
             python manage.py seed_ci_e2e_scenario \
             --password "$E2E_ROLE_PASSWORD"
 

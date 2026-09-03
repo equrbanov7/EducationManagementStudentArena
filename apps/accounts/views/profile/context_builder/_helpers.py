@@ -2,6 +2,8 @@
 
 from django.utils.translation import gettext as _
 
+from core.constants import OrgUnitType
+from core.staff_position import is_placeholder_role_name
 from core.tenancy import restore_request_organization_from_profile
 
 from ....models import ProfileRole
@@ -10,6 +12,12 @@ from ..constants import PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK, PR
 
 
 def _build_effective_user_roles(user, profile):
+    """Profil başlığında göstəriləcək rol nişanları.
+
+    ⚠️ Doldurucu ``member`` rolu BURAYA DÜŞMÜR — vəzifəsiz istifadəçinin adının
+    yanında «Üzv» yazılmır, sahə boş qalır (bax `core.staff_position`).
+    """
+
     role_names = []
 
     if getattr(user, "is_superuser", False):
@@ -25,6 +33,7 @@ def _build_effective_user_roles(user, profile):
     if fallback_role_name in PROFILE_ROLE_LABELS and fallback_role_name not in role_names:
         role_names.append(fallback_role_name)
 
+    role_names = [role_name for role_name in role_names if not is_placeholder_role_name(role_name)]
     role_names.sort(key=lambda role_name: (ProfileRole.LEVELS.get(role_name, 0), role_name), reverse=True)
     return [
         {
@@ -33,6 +42,21 @@ def _build_effective_user_roles(user, profile):
         }
         for role_name in role_names
     ]
+
+
+def _build_primary_position_label(profile, user_roles):
+    """Profil kartındakı «Vəzifə» sətri.
+
+    Zəncir: ``UserProfile.staff_position`` → ən yüksək real rol → "".
+    Doldurucu rol (``member``) `user_roles`-a onsuz da düşmür, ona görə burada
+    əlavə süzgəc lazım deyil.  Heç nə yoxdursa BOŞ sətir qayıdır — səthdə
+    «Üzv»/«İstifadəçi» kimi doldurucu YAZILMIR.
+    """
+
+    staff_position = (getattr(profile, "staff_position", "") or "").strip()
+    if staff_position:
+        return staff_position
+    return str(user_roles[0]["label"]) if user_roles else ""
 
 
 def _restore_profile_org_context(request, profile, active_section):
@@ -120,3 +144,186 @@ def _get_publish_notification_targets(user, capabilities):
                 }
             )
     return targets
+
+
+#: Çipin `title` tooltip-ində göstərilən qrup adlarının tavanı — bir fənn 40+
+#: qrupa oxuna bilər, tooltip-i sonsuz uzatmağın mənası yoxdur.
+TEACHER_SUBJECT_TOOLTIP_GROUPS = 12
+
+
+def build_teacher_subject_rows(user, organization):
+    """«Tədris etdiyi fənlər» — FƏNN üzrə TƏKRARSIZ siyahı.
+
+    PROBLEM (2026-08 sahib bildirişi: «eyni fənlər təkrarda düşüb»): siyahı
+    ``CourseOffering`` sətirlərindən qurulurdu və dedup açarı
+    ``(subject_id, group_id)`` idi. Bir fənn neçə qrupa/semestrə oxunursa, o
+    qədər çip çıxırdı — istifadəçi üçün bu, eyni fənnin təkrar düşməsidir.
+
+    ÖLÇÜ (rehearsal bazası; 8 515 instruktorlu offering, 543 müəllim×org):
+      * köhnə açarla render olunan çip:  8 341
+      * fənn (subject_id) üzrə təkrarsız: 4 082  → 4 259 ARTIQ çip (51%)
+      * müəllimlərin 383/543-ü (70%) təsirlənirdi
+      * ən pis hal: 152 çip → cəmi 5 fənn
+
+    HƏLL: qruplaşdırma açarı ``subject_id``-dir. AD üzrə birləşdirmək qəsdən
+    SEÇİLMƏYİB — ölçü göstərdi ki, eyni adı fərqli ``subject_id`` ilə daşıyan
+    yalnız 2 müəllim×org var (4 082 → 4 080): qazanc yox dərəcədə azdır, risk
+    isə real (fərqli kataloq fənlərini birləşdirmək).
+
+    MƏLUMAT İTMİR: qrup/semestr sayı çipin özündə, qrup adları isə ``title``
+    tooltip-ində qalır; tək qrup halında ad olduğu kimi göstərilir.
+
+    Əlavə fayda: ``values_list`` ilə yalnız lazım olan sütunlar çəkilir —
+    əvvəlki ``select_related`` ilə tam ORM obyektləri (ən pis halda 160 ədəd)
+    yüklənirdi.
+    """
+    rows = {}
+    offerings = user.taught_offerings.filter(organization=organization).values_list(
+        "subject_id", "subject__name", "subject__code", "group_id", "group__name", "period_id"
+    )
+    for subject_id, subject_name, subject_code, group_id, group_name, period_id in offerings:
+        row = rows.get(subject_id)
+        if row is None:
+            row = rows[subject_id] = {
+                "name": (subject_name or subject_code or "").strip(),
+                "code": (subject_code or "").strip(),
+                "groups": {},
+                "periods": set(),
+            }
+        if group_id is not None and group_id not in row["groups"]:
+            row["groups"][group_id] = (group_name or "").strip()
+        if period_id is not None:
+            row["periods"].add(period_id)
+
+    result = []
+    for row in sorted(rows.values(), key=lambda r: (r["name"].casefold(), r["code"])):
+        group_names = sorted(name for name in row["groups"].values() if name)
+        tooltip = ", ".join(group_names[:TEACHER_SUBJECT_TOOLTIP_GROUPS])
+        if len(group_names) > TEACHER_SUBJECT_TOOLTIP_GROUPS:
+            tooltip = f"{tooltip}…"
+        result.append(
+            {
+                "name": row["name"],
+                "code": row["code"],
+                "group_count": len(row["groups"]),
+                "period_count": len(row["periods"]),
+                # Tək qrupda köhnə görünüş qorunur: «Fənn · QRUP-101».
+                "single_group_name": group_names[0] if len(group_names) == 1 else "",
+                "groups_tooltip": tooltip,
+            }
+        )
+    return result
+
+
+#: Səviyyə (unit_type) → kart ikonu. Fakültə/kafedra ikonları teacher-tərəfli
+#: kartlarla (yuxarıdakı ``academic_units`` loop, template) eyni saxlanılıb ki,
+#: eyni "Akademik məlumatlar" grid-i daxilində rol fərqi ilə ikon uyğunsuzluğu
+#: olmasın.
+_STRUCTURE_LEVEL_ICON_DEFAULT = "fa-layer-group"
+_STRUCTURE_LEVEL_ICONS = {
+    OrgUnitType.RECTORATE: "fa-landmark",
+    OrgUnitType.VICE_RECTORATE: "fa-landmark",
+    OrgUnitType.FACULTY: "fa-building-columns",
+    OrgUnitType.DEANERY: "fa-building-columns",
+    OrgUnitType.INSTITUTE: "fa-building-columns",
+    OrgUnitType.DIRECTORATE: "fa-building-columns",
+    OrgUnitType.CHAIR: "fa-sitemap",
+    OrgUnitType.DEPARTMENT: "fa-sitemap",
+    OrgUnitType.SECTION: "fa-sitemap",
+    OrgUnitType.DIVISION: "fa-sitemap",
+    OrgUnitType.SPECIALTY: "fa-user-graduate",
+    OrgUnitType.GROUP: "fa-people-group",
+    OrgUnitType.PARALLEL: "fa-people-group",
+    OrgUnitType.CLASS: "fa-people-group",
+    OrgUnitType.GRADE_LEVEL: "fa-people-group",
+    OrgUnitType.LAB: "fa-flask",
+    OrgUnitType.CENTER: "fa-building",
+    OrgUnitType.BRANCH: "fa-building",
+    OrgUnitType.CLASSROOM: "fa-door-open",
+    OrgUnitType.UNIT: "fa-layer-group",
+}
+
+#: ``OrgUnitType.ALL_CHOICES``-in lookup forması — ``get_unit_type_display()``
+#: ilə EYNİ pgettext_lazy tərcümələrini yenidən istifadə edir (yeni mətn YOX).
+_UNIT_TYPE_LABELS = dict(OrgUnitType.ALL_CHOICES)
+
+
+def _structure_level(*, unit_type, label, value, code=""):
+    return {
+        "unit_type": unit_type,
+        "icon": _STRUCTURE_LEVEL_ICONS.get(unit_type, _STRUCTURE_LEVEL_ICON_DEFAULT),
+        "label": label,
+        "value": value,
+        "code": code,
+    }
+
+
+def build_student_structure_levels(record):
+    """Tələbənin akademik struktur kartları — Fakültə/Kafedra/İxtisas/Qrup
+    (və ya tenant-a görə mövcud olan digər səviyyələr), hər biri AYRICA kart
+    kimi göstərilmək üçün sıralı siyahı.
+
+    SAHİB ŞİKAYƏTİ (2026-08): əvvəllər bu, ``OrgUnit.get_full_path()`` ilə tək
+    sətir "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi — çirkin
+    görünürdü. İndi hər səviyyə öz kartındadır.
+
+    İXTİSAS AYRICA ``record.program``-dan qurulur (ad + ``official_code_pair``
+    — HƏR İKİ nəslin RƏSMİ dövlət şifri: cari NK 503 şifri VƏ köhnə 050/060
+    şifri, hansı varsa; daxili ``Program.code`` köçürmənin ``MYEDU-*``
+    açarıdır və istifadəçiyə HEÇ VAXT göstərilmir),
+    ``record.group``-un əcdad zəncirindəki specialty node-a ETİBAR EDİLMİR:
+    ``Program.specialty_unit`` hər tenant-da təyin olunmaya bilər və bəzi
+    tenant-larda qrup birbaşa kafedra altında ola bilər (bax
+    [[project_group_sector_variability]] — akademik struktur tenant-a görə
+    dəyişir, sərt 4-səviyyəli fərziyyə YOXDUR). Zəncirdə specialty node
+    rast gəlinsə, təkrarlanmasın deyə İXTİSAS kartı ilə əvəz olunur (adı və
+    şifri proqramdan gəlir), YOX YERİNƏ isə Qrup-dan əvvəl əlavə olunur.
+
+    Mövcud olmayan səviyyə üçün BOŞ KART göstərilmir (gizlədilir) — çünki bu
+    səviyyə THIS tələbənin strukturunda sadəcə YOXDUR (unset deyil, mövcud
+    deyil); "—" ilə göstərmək "səviyyə var amma dəyəri boşdur" mənasını verib
+    yanlış təsəvvür yaradardı. Şifr yoxdursa (hər iki sütun hələ
+    doldurulmayıbsa) yalnız şifr nişanı gizlədilir, kart özü qalır.
+    """
+    chain = []
+    if record.group_id:
+        chain = [*reversed(record.group.get_ancestors()), record.group]
+
+    levels = []
+    specialty_shown = False
+    for node in chain:
+        if node.unit_type == OrgUnitType.SPECIALTY:
+            specialty_shown = True
+            levels.append(
+                _structure_level(
+                    unit_type=OrgUnitType.SPECIALTY,
+                    label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
+                    value=record.program.name,
+                    code=record.program.official_code_pair,
+                )
+            )
+            continue
+        levels.append(
+            _structure_level(
+                unit_type=node.unit_type,
+                label=node.get_unit_type_display(),
+                value=node.name,
+            )
+        )
+
+    if record.program_id and not specialty_shown:
+        # Zəncirdə specialty node yoxdur (tenant-a görə) — İxtisas kartı
+        # Qrup-dan (siyahının sonuncu üzvü) əvvəl əlavə olunur; qrup da
+        # yoxdursa (``chain`` boşdur) təkcə İxtisas kartı qalır.
+        insert_at = max(len(levels) - 1, 0)
+        levels.insert(
+            insert_at,
+            _structure_level(
+                unit_type=OrgUnitType.SPECIALTY,
+                label=_UNIT_TYPE_LABELS.get(OrgUnitType.SPECIALTY),
+                value=record.program.name,
+                code=record.program.official_code_pair,
+            ),
+        )
+
+    return levels

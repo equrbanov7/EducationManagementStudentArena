@@ -1,6 +1,6 @@
 """Registrar qiymətləndirmə/jurnal modelləri (U3/U7).
 
-Elektron jurnal (Lesson/LessonMark), qiymətləndirmə sxemi + təsdiq zənciri
+Elektron jurnal (Lesson/LessonMark), qiymətləndirmə sxemi + kilid vəziyyəti
 (AssessmentScheme/ApprovalStatus), çəkili komponentlər, yekun qiymət və təkrar
 imtahan. Akademik-struktur modelləri :mod:`apps.registrar.models.academic`-dədir.
 """
@@ -13,7 +13,16 @@ from django.utils.translation import pgettext_lazy
 
 from core.models import OrderedModel, TimeStampedModel, UUIDModel
 
+from ..reference_identity import ReferenceIdentityValidationMixin
 from .academic import CourseOffering, Enrollment
+from .grading_choices import (  # noqa: F401  (geriyə uyğunluq üçün re-export)
+    ApprovalStatus,
+    AttendanceStatus,
+    ComponentKind,
+    LessonKind,
+    ResitReason,
+    ResitStatus,
+)
 
 # ── Elektron jurnal (davamiyyət/qiymət jurnalı, U3 — UNEC modeli) ─────────────
 #
@@ -26,39 +35,17 @@ from .academic import CourseOffering, Enrollment
 # yaranışdan sonra qısa müddət, iştirak/bal isə 1 gün sonra dəyişilə bilməz.
 
 
-class LessonKind(models.TextChoices):
-    LECTURE = "lecture", pgettext_lazy("registrar.lesson_kind", "Lecture")  # yalnız iə/qb
-    SEMINAR = "seminar", pgettext_lazy("registrar.lesson_kind", "Seminar")  # iə/qb + bal
-    LAB = "lab", pgettext_lazy("registrar.lesson_kind", "Laboratory")  # iə/qb + bal
-
-
-class AttendanceStatus(models.TextChoices):
-    PRESENT = "present", pgettext_lazy("registrar.attendance", "Present")  # iştirak (iə)
-    ABSENT = "absent", pgettext_lazy("registrar.attendance", "Absent")  # qayıb (qb)
-    # Üzrlü qayıb (ü/q): YALNIZ rəsmi sənədli jurnal-düzəliş axını ilə qoyulur
-    # (apps/registrar/corrections.py) — müəllim UI-ında seçim kimi YOXDUR.
-    # Qayıb-limit hesabına DAXİL DEYİL (absence_hours bunu saymır).
-    EXCUSED = "excused", pgettext_lazy("registrar.attendance", "Excused absence")
-
-
-class ApprovalStatus(models.TextChoices):
-    """Journal grade-approval chain (U7.2): teacher → chair → dean → official."""
-
-    DRAFT = "draft", pgettext_lazy("registrar.approval", "Draft")
-    SUBMITTED = "submitted", pgettext_lazy("registrar.approval", "Submitted (awaiting chair)")
-    CHAIR_APPROVED = "chair_approved", pgettext_lazy("registrar.approval", "Chair approved (awaiting dean)")
-    APPROVED = "approved", pgettext_lazy("registrar.approval", "Approved (official)")
-    RETURNED = "returned", pgettext_lazy("registrar.approval", "Returned for revision")
-
-
-class AssessmentScheme(UUIDModel, TimeStampedModel):
-    """Per-offering journal config + grade-approval state (tenant-configurable).
+class AssessmentScheme(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
+    """Per-offering journal config + kilid vəziyyəti (tenant-configurable).
 
     The electronic journal accumulates the semester "entry score" (giriş balı,
     max ``entry_score_max`` ≈ 50) from seminar/lab lesson scores; the final exam
-    is entered elsewhere. The grade-approval chain (``approval_status``) locks the
-    journal while under review and, on final dean approval, sets ``is_published``
-    (official / transcript-ready)."""
+    is entered elsewhere.
+
+    KİLİD: ``approval_status=APPROVED`` + ``is_published=True`` = jurnal bağlıdır
+    (RİM semestr sonunda toplu bağlayır — :mod:`apps.registrar.journal_close`).
+    Bağlı jurnalda tək-tək dəyişiklik YALNIZ sənədli düzəliş axını ilə mümkündür
+    (``journal.correct`` + PDF)."""
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="assessment_schemes"
@@ -77,6 +64,9 @@ class AssessmentScheme(UUIDModel, TimeStampedModel):
     approval_status = models.CharField(
         max_length=20, choices=ApprovalStatus.choices, default=ApprovalStatus.DRAFT, db_index=True
     )
+    # LEGACY aktor sahələri — təsdiq zənciri ləğv edilib, yeni kod onları YAZMIR.
+    # Sxemdən çıxarılmır: köhnə sətirlərdəki iz + legacy import J7 fazası (jurnal
+    # kilidi) bu cədvələ bağlıdır, sütun silmək geri dönüşü çətinləşdirir.
     submitted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -86,19 +76,28 @@ class AssessmentScheme(UUIDModel, TimeStampedModel):
     dean_approved_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
-    returned_reason = models.TextField(blank=True, help_text="Geri qaytarılma səbəbi (varsa).")
+    returned_reason = models.TextField(blank=True, help_text="LEGACY: geri qaytarılma səbəbi (köhnə təsdiq zənciri).")
 
     objects = models.Manager()
 
     class Meta:
         verbose_name = pgettext_lazy("registrar.model.scheme.meta", "assessment scheme")
         verbose_name_plural = pgettext_lazy("registrar.model.scheme.meta", "assessment schemes")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(is_published=True, approval_status=ApprovalStatus.APPROVED)
+                    | (models.Q(is_published=False) & ~models.Q(approval_status=ApprovalStatus.APPROVED))
+                ),
+                name="registrar_scheme_publish_state_valid",
+            )
+        ]
 
     def __str__(self):
         return f"scheme<{self.offering_id}>"
 
 
-class Lesson(UUIDModel, TimeStampedModel):
+class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """One held session (dərs) on a date — a journal column.
 
     ``kind`` decides what the teacher records: LECTURE → attendance only;
@@ -127,6 +126,45 @@ class Lesson(UUIDModel, TimeStampedModel):
         help_text="Bu dərsi keçən müəllim — fənn 2 müəllim arasında bölünübsə (məs. mühazirə "
         "bir müəllim, seminar başqa). Boşdursa açılışın (CourseOffering) müəllimi götürülür.",
     )
+    #: Dərsin keçirildiyi otaq — korpus (bina) otağın ÖZ sahəsindən gəlir
+    #: (``ExamRoom.building``), ona görə ayrıca "korpus" sütunu saxlanmır: UI-da
+    #: korpus yalnız otaq siyahısını daraldan süzgəcdir.
+    #:
+    #: Niyə ``exams.ExamRoom``: təşkilatın YEGANƏ otaq reyestri odur (org-scoped,
+    #: ``building``/``floor``/``capacity`` sahələri və hazır CRUD ekranı ilə) —
+    #: yeni model yaratmaq əvəzinə mövcud olan təkrar istifadə olunur. Sətir-ref
+    #: ("exams.ExamRoom") işlədilir ki, registrar → exams Python idxal asılılığı
+    #: YARANMASIN (modul-sərhəd gate-i).
+    #:
+    #: MƏCBURİ DEYİL: köhnə dərslərdə otaq yoxdur və boş qala bilər. Otaq
+    #: reyestrdən silinsə dərs qalır, sahə NULL olur (SET_NULL).
+    room = models.ForeignKey(
+        "exams.ExamRoom",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="lessons",
+        help_text="Dərsin keçirildiyi otaq (opsional). Korpus otağın öz 'building' sahəsindədir.",
+    )
+    #: Köçürmə nişanı — UYDURMA DƏRS DEYİL, mövcud balın daşıyıcısıdır.
+    #:
+    #: Köhnə sistemdə 570 jurnalın dərs cədvəli (``journals_dates_added_by_teacher``)
+    #: boş və ya qismən boşdur, halbuki həmin jurnalların bal/davamiyyət xanaları
+    #: doludur.  Xananın özü hansı (ay, gün, saat) slotuna aid olduğunu daşıyır,
+    #: ona görə köçürmə həmin slotdan dərs sətrini BƏRPA edir — əks halda 164,747
+    #: mövcud xana (12,424 real qiymət daxil) hədəfə heç cür bağlana bilməzdi.
+    #:
+    #: ``True`` = bu dərs sətrini müəllim köhnə sistemdə YAZMAYIB; o, mövcud bal
+    #: xanalarının açarından bərpa olunub.  Xanaların DƏYƏRİ mənbədəndir və
+    #: dəyişdirilməyib.  Ledger izi: ``legacy_lesson_synthesised``.
+    is_legacy_synthesised = models.BooleanField(
+        default=False,
+        editable=False,
+        help_text=(
+            "Bu dərs köhnə sistemin dərs cədvəlində yoxdur — mövcud bal/davamiyyət "
+            "xanalarının (ay, gün, saat) açarından bərpa olunub. Xananın dəyəri mənbədəndir."
+        ),
+    )
 
     objects = models.Manager()
 
@@ -140,7 +178,7 @@ class Lesson(UUIDModel, TimeStampedModel):
         return f"{self.offering_id} · {self.date} ({self.kind})"
 
 
-class LessonMark(UUIDModel, TimeStampedModel):
+class LessonMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """One student's record for one lesson (the journal cell): attendance + score.
 
     ``status`` is the attendance (present/absent = iə/qb); ``score`` is filled
@@ -210,7 +248,7 @@ class Rubric(UUIDModel, TimeStampedModel):
         return self.name
 
 
-class RubricCriterion(UUIDModel, TimeStampedModel):
+class RubricCriterion(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """Rubrikin bir meyarı: ad + maksimum bal (sıralı)."""
 
     organization = models.ForeignKey(
@@ -236,18 +274,7 @@ class RubricCriterion(UUIDModel, TimeStampedModel):
         return f"{self.name} ({self.max_points})"
 
 
-class ComponentKind(models.TextChoices):
-    """Komponentin tipi — UI hansı tabda göstərəcəyini və xüsusi davranışı seçir.
-
-    KOLLOKVIUM: 3 kollokvium (K1-K3) + keçirilmə tarixi (``held_on``).
-    SELF_WORK: sərbəst iş — balı mövzu-çeklist cəmindən avtomatik yazılır."""
-
-    GENERIC = "generic", pgettext_lazy("registrar.component_kind", "Generic")
-    KOLLOKVIUM = "kollokvium", pgettext_lazy("registrar.component_kind", "Kollokvium")
-    SELF_WORK = "self_work", pgettext_lazy("registrar.component_kind", "Independent work")
-
-
-class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
+class AssessmentComponent(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel, OrderedModel):
     """One weighted entry-score component of an offering (seminar / kollokvium /
     SDF / layihə). ``max_score`` is its contribution ceiling; the components'
     ``max_score`` values normally sum to the scheme's ``entry_score_max`` (≈50)."""
@@ -286,7 +313,7 @@ class AssessmentComponent(UUIDModel, TimeStampedModel, OrderedModel):
         return f"{self.offering_id} · {self.name} (≤{self.max_score})"
 
 
-class ComponentScore(UUIDModel, TimeStampedModel):
+class ComponentScore(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """One student's score for one assessment component (manual, capped at max)."""
 
     organization = models.ForeignKey(
@@ -313,13 +340,18 @@ class ComponentScore(UUIDModel, TimeStampedModel):
         return f"{self.component_id} · {self.enrollment_id} = {self.score}"
 
 
-class CriterionScore(UUIDModel, TimeStampedModel):
+class CriterionScore(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """Bir tələbənin bir rubrik meyarı üzrə balı (U22)."""
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="criterion_scores"
     )
-    criterion = models.ForeignKey(RubricCriterion, on_delete=models.CASCADE, related_name="scores")
+    component = models.ForeignKey(
+        AssessmentComponent,
+        on_delete=models.PROTECT,
+        related_name="criterion_scores",
+    )
+    criterion = models.ForeignKey(RubricCriterion, on_delete=models.PROTECT, related_name="scores")
     enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="criterion_scores")
     points = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     entered_by = models.ForeignKey(
@@ -332,12 +364,18 @@ class CriterionScore(UUIDModel, TimeStampedModel):
         verbose_name = pgettext_lazy("registrar.model.criterion_score.meta", "criterion score")
         verbose_name_plural = pgettext_lazy("registrar.model.criterion_score.meta", "criterion scores")
         constraints = [
-            models.UniqueConstraint(fields=["criterion", "enrollment"], name="uniq_criterion_enrollment_score"),
+            models.UniqueConstraint(
+                fields=["component", "criterion", "enrollment"],
+                name="uniq_component_criterion_enrollment_score",
+            ),
         ]
-        indexes = [models.Index(fields=["organization", "enrollment"])]
+        indexes = [
+            models.Index(fields=["organization", "enrollment"]),
+            models.Index(fields=["component", "enrollment"], name="reg_crit_comp_enroll_idx"),
+        ]
 
     def __str__(self):
-        return f"{self.criterion_id} · {self.enrollment_id} = {self.points}"
+        return f"{self.component_id} · {self.criterion_id} · {self.enrollment_id} = {self.points}"
 
 
 # ── Sərbəst iş (çeklist) + Kurs işi ──────────────────────────────────────────
@@ -348,7 +386,7 @@ class CriterionScore(UUIDModel, TimeStampedModel):
 # qiymətdir (yekun cədvəldə öz sütunu).
 
 
-class SelfWorkTopic(UUIDModel, TimeStampedModel, OrderedModel):
+class SelfWorkTopic(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel, OrderedModel):
     """Sərbəst iş mövzusu (offering üzrə sıralı siyahı, adətən 10 ədəd)."""
 
     organization = models.ForeignKey(
@@ -369,7 +407,7 @@ class SelfWorkTopic(UUIDModel, TimeStampedModel, OrderedModel):
         return f"{self.offering_id} · {self.title[:40]}"
 
 
-class SelfWorkMark(UUIDModel, TimeStampedModel):
+class SelfWorkMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """Bir tələbənin bir sərbəst iş mövzusu üzrə təhvil işarəsi (1/0)."""
 
     organization = models.ForeignKey(
@@ -390,13 +428,21 @@ class SelfWorkMark(UUIDModel, TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["topic", "enrollment"], name="uniq_selfwork_topic_enrollment"),
         ]
-        indexes = [models.Index(fields=["organization", "enrollment"])]
+        indexes = [
+            models.Index(fields=["organization", "enrollment"]),
+            # «Təhvil verilmiş sərbəst iş sayı» aqreqatı (akademik-qeyd icmalı,
+            # ``accounts.academic_records``) ``WHERE done AND enrollment_id IN (…)
+            # GROUP BY enrollment_id`` şəklindədir — org-səviyyəli çağırışda
+            # (7 700 tələbə) mövcud indekslərin heç biri onu ÖRTMÜRDÜ
+            # (2026-09-02 performans auditi, F3).
+            models.Index(fields=["enrollment", "done"], name="selfwork_enrollment_done"),
+        ]
 
     def __str__(self):
         return f"{self.topic_id} · {self.enrollment_id} = {int(self.done)}"
 
 
-class CourseWork(UUIDModel, TimeStampedModel):
+class CourseWork(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """Kurs işi — giriş balından KƏNAR ayrıca 0-100 qiymət (mövzu + təhvil tarixi).
 
     Hər qeydiyyata ən çox bir kurs işi; redaktə pəncərəsi servis qatında
@@ -431,7 +477,7 @@ class CourseWork(UUIDModel, TimeStampedModel):
 # hüququ). Hesablama servis qatındadır (``apps/registrar/finals.py``).
 
 
-class FinalGrade(UUIDModel, TimeStampedModel):
+class FinalGrade(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """The final-exam score for one enrollment (the other half of the total)."""
 
     organization = models.ForeignKey(
@@ -468,18 +514,7 @@ class FinalGrade(UUIDModel, TimeStampedModel):
         return f"final<{self.enrollment_id}> exam={self.exam_score}"
 
 
-class ResitReason(models.TextChoices):
-    ABSENCE = "absence", pgettext_lazy("registrar.resit_reason", "Barred by absence")
-    TOTAL = "total", pgettext_lazy("registrar.resit_reason", "Total below pass mark")
-    EXAM = "exam", pgettext_lazy("registrar.resit_reason", "Exam below minimum")
-
-
-class ResitStatus(models.TextChoices):
-    ELIGIBLE = "eligible", pgettext_lazy("registrar.resit_status", "Eligible")
-    COMPLETED = "completed", pgettext_lazy("registrar.resit_status", "Completed")
-
-
-class ResitRecord(UUIDModel, TimeStampedModel):
+class ResitRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     """A student's resit (təkrar imtahan) right for one enrollment.
 
     Created when the student fails; once a ``resit_score`` is entered the final

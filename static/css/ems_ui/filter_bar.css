@@ -1,0 +1,142 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/filter_bar.css — Filtr paneli (handoff §4 komponent 2, §8 qayda 14)
+
+   ƏSAS QAYDA: DRAFT state ayrı, APPLIED state ayrı. Cədvəl yalnız applied-i
+   oxuyur; `Tətbiq et` basılana qədər SERVER SORĞUSU GETMİR. Sıralama və
+   səhifələmə server tərəfdədir. URL applied vəziyyətlə sinxrondur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-filters {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-5);
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+    box-shadow: var(--ems-sh-card);
+}
+
+/* Filtr sahəsi — `.ems-field` bazasını miras alır, eni məhdudlaşır. */
+.ems-filters .ems-field {
+    flex: 0 1 auto;
+    min-width: 150px;
+}
+
+.ems-filters .ems-field--wide {
+    min-width: 240px;
+    flex: 1 1 240px;
+}
+
+.ems-filters .ems-input,
+.ems-filters .ems-select {
+    min-height: var(--ems-h-xs);
+    padding: 8px 11px;
+    font-size: var(--ems-fs-base);
+}
+
+/* Əməllər — sahə sırasının sonunda, baseline-a düzülür. */
+.ems-filters__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+/* Nəticə sayğacı sağa itələnir. */
+.ems-filters__count {
+    margin-left: auto;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+    white-space: nowrap;
+}
+
+.ems-filters__count strong {
+    color: var(--ems-text);
+}
+
+/* ── Dəyişiklik göstəricisi ─────────────────────────────────────────────────
+   Draft applied-dən fərqlənəndə `Tətbiq et` vurğulanır və mətn xəbər verir —
+   istifadəçi «niyə cədvəl dəyişmədi?» sualını verməsin.                     */
+.ems-filters.is-dirty .ems-filters__apply {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.ems-filters__dirty-note {
+    flex-basis: 100%;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-warning-800);
+}
+
+.ems-filters:not(.is-dirty) .ems-filters__dirty-note {
+    display: none;
+}
+
+/* ── Tətbiq olunmuş filtrlərin çipləri ──────────────────────────────────── */
+.ems-applied {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.ems-applied__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 2px 6px 2px 10px;
+    border-radius: var(--ems-r-pill);
+    border: 1px solid var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.ems-applied__x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.ems-applied__x:hover {
+    background: var(--ems-primary-100);
+}
+
+@media (max-width: 768px) {
+    .ems-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ems-filters .ems-field,
+    .ems-filters .ems-field--wide {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .ems-filters__actions {
+        justify-content: stretch;
+    }
+
+    .ems-filters__actions > .ems-btn {
+        flex: 1 1 auto;
+    }
+
+    .ems-filters__count {
+        margin-left: 0;
+    }
+}

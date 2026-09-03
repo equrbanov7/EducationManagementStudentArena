@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}
+«Tələbə Xidmətləri» sidebar qrupu — dizayn handoff Mərhələ 3 (ekran 08–09).
+
+Qrup başlığı YALNIZ iki bölmədən ən azı biri icazəlidirsə göstərilir (boş
+başlıq qalmasın). Bölmə açarları icazə-əsaslıdır (`user.import` /
+`student.registry_view`, bax `rbac_sections.py`) — rol adı yoxlanılmır.
+
+⚠️ Köhnə «Tələbə idxalı» girişi (`student-intake`) RİM qrupunda OLDUĞU KİMİ
+qalır (`sidebar/_org_menu_group.html`) — link və testlər qırılmasın deyə.
+Bu qrup onun genişlənmiş görünüşünü (`student-admission`) göstərir.
+
+Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALIR.
+{% endcomment %}
+{% if "student-admission" in allowed_sections or "student-registry" in allowed_sections %}
+<li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Tələbə Xidmətləri" context "profile.sidebar" %}</span></li>
+{% endif %}
+{% if "student-admission" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=student-admission"
+       data-section="student-admission"
+       data-title="{% trans 'Tələbə qəbulu' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-admission' %}active{% endif %}">
+        <i class="fas fa-user-plus sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Tələbə qəbulu" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "student-registry" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=student-registry"
+       data-section="student-registry"
+       data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-registry' %}active{% endif %}">
+        <i class="fas fa-address-book sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Tələbə reyestri" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

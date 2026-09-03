@@ -92,6 +92,9 @@ class RegistrarModelTest(TestCase):
         curriculum = self._make_plan()
         with bypass_rls():
             program = curriculum.program
-            self.assertIn("CS", str(program))
+            # `__str__` = `display_label`: rəsmi kod yoxdursa yalnız ad; daxili
+            # `code` ("CS") heç bir halda görünmür.
+            self.assertEqual(str(program), "Kompüter elmləri")
+            self.assertNotIn("CS", str(program))
             row = CurriculumSubject.objects.filter(curriculum=curriculum, is_elective=True).first()
             self.assertIn("seçmə", str(row))

@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}
+Fakültə/kafedra "ətraflı görünüş" modal skeleti — məzmun AJAX ilə doldurulur
+(bax static/js/org_structure.js: .js-org-unit-detail click → fetch →
+[data-org-unit-detail-content] swap). Həm _faculties_content.html, həm
+_kafedras_content.html bunu include edir (id təkrarlanmasın deyə cəmi BİR
+dəfə render olunmalıdır — hər ikisi eyni profil bölməsində eyni anda DOM-da
+olmadığı üçün təhlükəsizdir).
+{% endcomment %}
+<div class="modal fade org-unit-detail-modal" id="orgUnitDetailModal" tabindex="-1" aria-hidden="true" aria-labelledby="orgUnitDetailModalLabel">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content org-management__modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orgUnitDetailModalLabel">{% trans 'Ətraflı bax' %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
+            </div>
+            <div class="modal-body org-unit-detail-modal__body">
+                <div class="org-unit-detail-modal__loading" data-org-unit-detail-loading>
+                    <span class="spinner-border" role="status" aria-hidden="true"></span>
+                </div>
+                <div class="org-unit-detail-modal__error org-management__notice org-management__notice--error"
+                     data-org-unit-detail-error
+                     data-label-error="{% trans 'Yüklənə bilmədi. Yenidən cəhd edin.' context 'organizations.unit_detail' %}"
+                     hidden></div>
+                <div data-org-unit-detail-content></div>
+            </div>
+        </div>
+    </div>
+</div>

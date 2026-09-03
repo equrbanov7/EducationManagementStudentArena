@@ -1,0 +1,122 @@
+{% load i18n %}
+{% comment %}
+Redaktorun 1–3-cü bölmələri: `info`, `desc`, `out`.
+Bölmə `id`-ləri dizayn paketi ilə EYNİDİR — `data-syl-panel` dəyəri həm sol
+naviqasiya, həm də autosave üçün açardır.
+{% endcomment %}
+
+{% with p=se.panels.info %}
+<article class="syl-panel{% if se.active_id == 'info' %} is-on{% endif %}" data-syl-panel="info" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <dl class="syl-locked">
+    {% for row in se.locked %}
+    <div class="syl-locked__row">
+      <dt>{{ row.label }}</dt>
+      <dd>{{ row.value }}</dd>
+      <span class="syl-locked__src"><i class="fas fa-lock" aria-hidden="true"></i> {{ row.source }}</span>
+    </div>
+    {% endfor %}
+  </dl>
+
+  <div class="syl-grid3">
+    <div class="syl-field">
+      <label for="syl-teacher">{% trans "Dərsi aparan müəllim" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+      <input id="syl-teacher" type="text" class="syl-input" data-field="teacher"
+             value="{{ p.data.teacher|default:'' }}" {% if se.readonly %}disabled{% endif %}
+             placeholder="{% trans 'Ad, soyad və vəzifə' context 'accounts.syllabus' %}">
+    </div>
+    <div class="syl-field">
+      <label for="syl-office">{% trans "Məsləhət saatı" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+      <input id="syl-office" type="text" class="syl-input" data-field="office_hours"
+             value="{{ p.data.office_hours|default:'' }}" {% if se.readonly %}disabled{% endif %}
+             placeholder="{% trans 'Çərşənbə 14:00–16:00, otaq A-312' context 'accounts.syllabus' %}">
+    </div>
+    <div class="syl-field">
+      <label for="syl-pre">{% trans "Prerekvizit" context "accounts.syllabus" %}</label>
+      <input id="syl-pre" type="text" class="syl-input" data-field="prerequisites"
+             value="{{ p.data.prerequisites|default:'' }}" {% if se.readonly %}disabled{% endif %}
+             placeholder="{% trans 'Yoxdursa boş buraxın' context 'accounts.syllabus' %}">
+    </div>
+  </div>
+  <p class="syl-note">{% trans "Kilidli sətirlər tədris planı və yük bölgüsündən gəlir. Dəyişiklik lazımdırsa kafedra müdirinə müraciət göndərin — sillabusdan redaktə edilə bilmir." context "accounts.syllabus" %}</p>
+</article>
+{% endwith %}
+
+{% with p=se.panels.desc %}
+<article class="syl-panel{% if se.active_id == 'desc' %} is-on{% endif %}" data-syl-panel="desc" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <div class="syl-field">
+    <label for="syl-desc">{% trans "Fənnin təsviri" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+    <textarea id="syl-desc" rows="5" class="syl-textarea" data-field="description"
+              data-min="{{ se.limits.description }}" {% if se.readonly %}disabled{% endif %}
+              aria-describedby="syl-desc-count"
+              placeholder="{% trans 'Fənnin əhatə etdiyi mövzular və tələbənin qazanacağı ümumi bacarıqlar.' context 'accounts.syllabus' %}">{{ p.data.description|default:'' }}</textarea>
+    <p id="syl-desc-count" class="syl-counter" data-syl-counter="syl-desc"></p>
+  </div>
+  <div class="syl-field">
+    <label for="syl-goal">{% trans "Fənnin məqsədi" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
+    <textarea id="syl-goal" rows="3" class="syl-textarea" data-field="goal"
+              data-min="{{ se.limits.goal }}" {% if se.readonly %}disabled{% endif %}
+              aria-describedby="syl-goal-count"
+              placeholder="{% trans 'Bir-iki cümlə ilə fənnin əsas məqsədi.' context 'accounts.syllabus' %}">{{ p.data.goal|default:'' }}</textarea>
+    <p id="syl-goal-count" class="syl-counter" data-syl-counter="syl-goal"></p>
+  </div>
+</article>
+{% endwith %}
+
+{% with p=se.panels.out %}
+<article class="syl-panel{% if se.active_id == 'out' %} is-on{% endif %}" data-syl-panel="out" data-revision="{{ p.revision }}">
+  <header class="syl-panel__head">
+    <h3>{{ p.title }}</h3>
+    <span class="syl-panel__state syl-panel__state--{% if p.is_complete %}done{% else %}todo{% endif %}">
+      {% if p.is_complete %}{% trans "tamamlanıb" context "accounts.syllabus" %}{% else %}{% trans "çatışan tələblər var" context "accounts.syllabus" %}{% endif %}
+    </span>
+  </header>
+  <p class="syl-panel__hint">{{ p.hint }}</p>
+
+  <div class="syl-outcomes" data-syl-outcomes
+       data-t-label="{% trans 'təlim nəticəsi' context 'accounts.syllabus' %}"
+       data-t-remove="{% trans 'nəticəni sil' context 'accounts.syllabus' %}"
+       data-t-placeholder="{% trans 'Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir' context 'accounts.syllabus' %}"
+       data-min="{{ se.limits.outcomes }}">
+    {% comment %}⚠️ `forloop.counter` DEYİL: boş nəticə sətri TN nömrəsi tutmamalıdır,
+    yoxsa panel həftə cədvəlinin açılış siyahısı ilə (`outcome_tags`) və tamamlanma
+    yoxlaması ilə fərqli nömrələmə göstərir.  Etiket serverdə hazırlanır —
+    `editor_panels.outcome_rows`; göndərilən JS-in `retagOutcomes`-u canlı yazı
+    zamanı EYNİ qaydanı tətbiq edir.{% endcomment %}
+    {% for row in p.rows %}
+    <div class="syl-outcome" data-syl-outcome>
+      <span class="syl-outcome__tag" data-syl-outcome-tag>{{ row.tag }}</span>
+      {% comment %}⚠️ `<textarea>`, `<input type="text">` DEYİL.  HTML-in «value
+      sanitization algorithm»-i input-un dəyərindən CR/LF-i SİLİR; köçürülmüş
+      4,790 sillabusun təlim nəticəsi isə çox sətirlidir («TN1. …\n2. …»), yəni
+      müəllimin ilk avtosaxlaması sətir sonlarını silib sözləri yapışdırırdı.
+      Nəticələrin SAYI dəyişmir — həftə sətrinin TN istinadları qorunur.{% endcomment %}
+      <textarea rows="2" class="syl-textarea syl-textarea--outcome" data-outcome {% if se.readonly %}disabled{% endif %}
+                aria-label="{{ row.tag }} — {% trans 'təlim nəticəsi' context 'accounts.syllabus' %}"
+                placeholder="{% trans 'Məsələn: alqoritmin mürəkkəbliyini O notasiyası ilə qiymətləndirir' context 'accounts.syllabus' %}">{{ row.text }}</textarea>
+      <button type="button" class="syl-iconbtn" data-syl-outcome-remove {% if se.readonly %}disabled{% endif %}
+              aria-label="{{ row.tag }} {% trans 'nəticəni sil' context 'accounts.syllabus' %}">&times;</button>
+    </div>
+    {% endfor %}
+  </div>
+  <button type="button" class="syl-btn syl-btn--dashed" data-syl-outcome-add {% if se.readonly %}disabled{% endif %}>
+    + {% trans "Təlim nəticəsi əlavə et" context "accounts.syllabus" %}
+  </button>
+  <p class="syl-hintbox">{% trans "Hər həftəlik mövzu ən azı bir təlim nəticəsi ilə əlaqələndirilməlidir. Heç bir həftədə istifadə olunmayan nəticə plana daxil edilməyib sayılır." context "accounts.syllabus" %}</p>
+</article>
+{% endwith %}

@@ -9,6 +9,8 @@ effective/grantable permissions. Keep tenant and permission checks strict.
 from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
+from .rbac_sections import apply_permission_section_gates
+from .rbac_university_sections import university_role_sections
 from .tenant import _bind_active_role_context
 
 
@@ -203,11 +205,46 @@ def _role_capabilities(user, profile):
     from apps.exams.public import can_manage_exam_rooms as _can_manage_exam_rooms
 
     can_manage_exam_rooms = _can_manage_exam_rooms(user)
-    # Registrar console (K3): who may manage the academic catalogue (programs /
-    # subjects). Org-admin (rector/vice-rector/owner) + dekan/kafedra müdürü.
-    # The actual authorisation is re-checked in registrar.views (defence in depth);
-    # this flag only drives nav visibility.
-    can_manage_registrar = is_superadmin or is_org_admin or is_unit_manager
+    # View qapısı ilə eyni permission-specific, fail-closed scope semantikası.
+    if active_organization is not None:
+        from apps.organizations.public import get_permission_scope
+
+        can_manage_registrar = get_permission_scope(user, active_organization, "course.edit").is_org_wide
+        # Semestr sonu TOPLU jurnal bağlama (RİM). Köhnə `grade.approve_chair` /
+        # `grade.approve_final` cütünü əvəz edir — təsdiq zənciri ləğv olunub.
+        can_close_journals = get_permission_scope(user, active_organization, "journal.close").has_structure_access
+        # Jurnal siyahısının idarəsi (alt qrupdan tələbə əlavə/geri götürmə) —
+        # koordinator/dekanlıq. Bu açarı daşıyan aktor jurnal iş sahəsinə çata
+        # bilməlidir (əks halda düymə heç vaxt görünmür).
+        can_manage_journal_roster = get_permission_scope(
+            user, active_organization, "journal.roster"
+        ).has_structure_access
+        # Kağız (yazılı/praktiki) imtahan balının əl ilə daxil edilməsi — İmtahan
+        # Mərkəzi səthi. Rol ADINDAN deyil, `final_score.entry` açarından gəlir.
+        can_enter_exam_scores = get_permission_scope(
+            user, active_organization, "final_score.entry"
+        ).has_structure_access
+        analytics_all_scope = get_permission_scope(user, active_organization, "analytics.view_all")
+        analytics_unit_scope = get_permission_scope(user, active_organization, "analytics.view_unit")
+        can_view_unit_analytics = analytics_all_scope.has_structure_access or analytics_unit_scope.has_structure_access
+        # Kataloq axtarışı (⌘K, U8): struktur heyəti imzası — member.view + unit.view.
+        # Burada QƏSDƏN scope (`get_permission_scope`) yox, rol icazəsi yoxlanır:
+        # axtarış naviqasiya rahatlığıdır və scope_unit hələ təyin edilməmiş
+        # dekan/kafedra müdiri onu itirməməlidir (təsdiq əməliyyatlarından fərqli).
+        # Tək `member.view` kifayət etmir — lead_student/tutor da daşıyır; `unit.view`
+        # cütlüyü auditoriyanı köhnə is_unit_manager dairəsinə yaxın saxlayır.
+        from core.permissions import has_permission as _has_search_perm
+
+        _actor_perms_all, _ = _collect_actor_permissions(user, active_organization)
+        _actor_perm_list = list(_actor_perms_all)
+        can_search_directory = is_superadmin or (
+            _has_search_perm(_actor_perm_list, "member.view") and _has_search_perm(_actor_perm_list, "unit.view")
+        )
+    else:
+        can_manage_registrar = can_close_journals = can_view_unit_analytics = False
+        can_enter_exam_scores = False
+        can_manage_journal_roster = False
+        can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
@@ -229,6 +266,10 @@ def _role_capabilities(user, profile):
 
     if is_superadmin:
         allowed_sections = {
+            # «Ana səhifə» — kabinetin default açılış bölməsi (FAZA 22).  Rol
+            # qapısı YOXDUR: panel özü yalnız icazəli bölmələrin vidjetlərini
+            # yığır, ona görə görünürlük hər üzv üçün eynidir.
+            "dashboard",
             "profile-info",
             "notifications",
             "posts",
@@ -257,6 +298,8 @@ def _role_capabilities(user, profile):
             "exam-center-stats",  # imtahan statistikaları / nəticələr
             "appeal-stats",  # apellyasiya statistikası (imtahan mərkəzi)
             "kollokvium-windows",  # kollokvium bal-yazma pəncərələri (imtahan mərkəzi)
+            "exam-score-entry",  # kağız imtahan balının daxil edilməsi (imtahan mərkəzi)
+            "journal-close",  # semestr sonu toplu jurnal bağlaması (RİM)
             "exam-chance",  # imtahan şansı ver (ikinci şans — imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
             "system-monitoring",  # Sistem Monitorinqi (yalnız superadmin; server-side qorunur)
@@ -270,6 +313,8 @@ def _role_capabilities(user, profile):
         }
     else:
         allowed_sections = {
+            # bax yuxarıdakı şərh — «Ana səhifə» hər kəsdə var.
+            "dashboard",
             "profile-info",
             "notifications",
             "posts",
@@ -340,10 +385,19 @@ def _role_capabilities(user, profile):
             # (kredit tərəqqisi + qayıb/imtahan statusu + qrup-seçmə blokları).
             from django.conf import settings as _dj_settings
 
+            from apps.registrar import public as _registrar_public
+
             if getattr(_dj_settings, "UNIVERSITY_MODE", True):
                 allowed_sections.add("my-subjects")
-                allowed_sections.add("my-transcript")
                 allowed_sections.add("overall-academic")
+                # Transkript rəsmi sənəddir — tələbə onu kabinetdən birbaşa
+                # ALMIR, müraciət (ərizə) pəncərəsindən keçməlidir. Bayraq
+                # bağlı ikən bölmə siyahıya DÜŞMÜR, ona görə həm sidebar,
+                # həm də birbaşa `?section=my-transcript` / bölmə API-si
+                # bağlanır (hər ikisi bu siyahıya baxır). PDF endpoint-i
+                # eyni bayrağı ayrıca yoxlayır. Bax: registrar/public.py.
+                if _registrar_public.STUDENT_TRANSCRIPT_SELF_SERVICE:
+                    allowed_sections.add("my-transcript")
 
         # ADİ ÜZV səthləri: «Kurslarım», «Təyin edilmiş tapşırıqlar», qruplar.
         #
@@ -362,6 +416,20 @@ def _role_capabilities(user, profile):
         # Matris: ``apps/accounts/tests/test_sidebar_role_matrix.py``.
         if _user_has_any_role(user, {ProfileRole.MEMBER}):
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
+
+    # «Qruplar» bölməsi — permission-əsaslı görünürlük (rol bayraqlarına ƏLAVƏ,
+    # mövcud is_org_admin/is_teacher qolları qalır). Permission-editordan hər
+    # hansı rola verilmiş `group.view` / `group.manage` bölməni açır; faktiki
+    # icazə view qatında (`exams.views.teacher.groups`) yenidən yoxlanılır.
+    if "groups" not in allowed_sections and active_organization is not None:
+        from core.permissions import has_permission as _groups_has_permission
+
+        _groups_actor_perms, _ = _collect_actor_permissions(user, active_organization)
+        _groups_perm_list = list(_groups_actor_perms)
+        if _groups_has_permission(_groups_perm_list, "group.view") or _groups_has_permission(
+            _groups_perm_list, "group.manage"
+        ):
+            allowed_sections.add("groups")
 
     has_admin_control_role = (
         _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
@@ -387,20 +455,23 @@ def _role_capabilities(user, profile):
     if can_approve_posts:
         allowed_sections.add("pending-post-approvals")
 
-    # Universitet kabineti (U12): registrar səhifələri profil shell-inin İÇİNDƏ
-    # bölmə kimi açılır (sidebar itmir — SPA panel). Faktiki data-icazə yenə də
-    # registrar servis qatındadır; bunlar görünürlük + fragment gating üçündür.
-    from django.conf import settings as _u12_settings
-
-    if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
-        allowed_sections.update({"my-schedule", "academic-calendar"})
-        # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
-        # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
-        if is_teacher or is_org_admin or is_superadmin or is_student:
-            allowed_sections.add("my-journal")
-        if is_superadmin or is_org_admin or is_unit_manager:
-            allowed_sections.update({"grade-approvals", "analytics", "academic-records"})
-
+    # Rol-əsaslı universitet bölmələri (U12 kabineti + struktur menyusu) —
+    # saf hesablama, bax `rbac_university_sections.university_role_sections`.
+    allowed_sections |= university_role_sections(
+        is_superadmin=is_superadmin,
+        is_org_admin=is_org_admin,
+        is_unit_manager=is_unit_manager,
+        is_hr=is_hr,
+        is_tutor=is_tutor,
+        is_exam_center=is_exam_center,
+        is_teacher=is_teacher,
+        is_student=is_student,
+        has_active_org_context=has_active_org_context,
+        can_manage_journal_roster=can_manage_journal_roster,
+        can_close_journals=can_close_journals,
+        can_enter_exam_scores=can_enter_exam_scores,
+        can_view_unit_analytics=can_view_unit_analytics,
+    )
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
     # eyni yerdən bağlanır).
@@ -424,39 +495,15 @@ def _role_capabilities(user, profile):
     can_manage_appeals = is_superadmin or is_exam_center
     can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
 
-    # Universitet strukturu (fakültə/kafedra) idarəetmə linkləri:
-    # - rektor/prorektor/org admin → bütün təşkilat
-    # - dekan/kafedra müdürü → yalnız öz alt-ağacı (data scoping organizations.scoping-də)
-    # - HR → üzv siyahısı (vəzifə/unit təyinatları üçün)
-    if is_superadmin or is_org_admin or is_unit_manager:
-        allowed_sections.update({"org-structure", "org-faculties", "org-kafedras", "org-members"})
-    elif is_hr:
-        # HR struktur səhifələrini görür: `member.edit` icazəsi ilə müəllimin
-        # kafedra təyinatını idarə edir; unit CRUD düymələri icazə flag-ları
-        # ilə gizlənir (unit.create/edit/delete HR-da yoxdur).
-        allowed_sections.update({"org-faculties", "org-kafedras", "org-members"})
-    elif is_tutor or is_exam_center:
-        # İmtahan mərkəzi org-wide, tyutor isə yalnız öz alt-ağacı üzrə
-        # üzv siyahısı görür (data scoping organizations.scoping-də tətbiq olunur).
-        allowed_sections.add("org-members")
-
-    if is_superadmin or is_org_admin:
-        allowed_sections.add("org-roles")
-
-    # Dekan/kafedra müdürü: öz alt-ağacının imtahanlarına oxu-only baxış.
-    if is_unit_manager:
-        allowed_sections.add("unit-exams")
-
-    # Audit jurnalı (Faza 3): `audit.view` icazəli rollar (rektor/prorektor "*",
-    # imtahan mərkəzi, HR) üçün link. Faktiki icazə audit.views-də yenidən yoxlanılır.
-    can_view_audit = is_superadmin or is_owner_of_active_org
-    if not can_view_audit and active_organization is not None:
-        from core.permissions import has_permission as _audit_has_permission
-
-        _audit_actor_perms, _ = _collect_actor_permissions(user, active_organization)
-        can_view_audit = _audit_has_permission(list(_audit_actor_perms), "audit.view")
-    if can_view_audit:
-        allowed_sections.add("audit-log")
+    # İcazə-qapılı bölmələr (audit / RİM / müəllim-tələbə kataloqu) TƏK yerdən:
+    # bax `rbac_sections.apply_permission_section_gates` (yalnız GÖRÜNÜRLÜK).
+    _permission_gates = apply_permission_section_gates(
+        user,
+        active_organization,
+        allowed_sections,
+        is_superadmin=is_superadmin,
+        is_owner=is_owner_of_active_org,
+    )
 
     # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
     if can_use_question_bank:
@@ -491,7 +538,8 @@ def _role_capabilities(user, profile):
         "is_dean": is_dean,
         "is_department_head": is_department_head,
         "is_unit_manager": is_unit_manager,
-        "can_view_audit": can_view_audit,
+        # audit-log / rim-center / people-* bayraqları (bax rbac_sections).
+        **_permission_gates,
         "can_use_question_bank": can_use_question_bank,
         "can_manage_appeals": can_manage_appeals,
         "can_view_my_appeals": can_view_my_appeals,
@@ -499,8 +547,12 @@ def _role_capabilities(user, profile):
         "can_manage_registrar": can_manage_registrar,
         "can_access_final_center": can_access_final_center,
         "can_manage_exam_rooms": can_manage_exam_rooms,
-        # Grade-approval chain (U7.2): chairs/deans/admins review submitted journals.
-        "can_approve_grades": is_superadmin or is_org_admin or is_unit_manager,
+        # Grade-approval chain (U7.2): permission-scope əsaslı (yuxarıda hesablanır);
+        # köhnə rol-əsaslı ifadə nav↔view uyğunsuzluğu yaradırdı.
+        "can_close_journals": can_close_journals,
+        "can_manage_journal_roster": can_manage_journal_roster,
+        "can_enter_exam_scores": can_enter_exam_scores,
+        "can_search_directory": can_search_directory,
         "can_view_owned_learning": can_view_owned_learning,
         "can_review_submissions": can_review_submissions,
         "can_view_student_assignments": can_view_student_assignments,

@@ -1,0 +1,14 @@
+{% comment %}
+Ağac naviqasiyası — handoff ekran 01 · §7 «klaviatura ilə tam keçid».
+Ox düymələri, Home/End, Enter `ems_ui/nav.js`-dədir; server yalnız markup verir.
+
+KONTEKST MÜQAVİLƏSİ
+  tree_nodes — rekursiv [{id, label, type_label, children, expanded, selected,
+               flagged}]  (`flagged` = «Rəhbəri olmayan bölmə»)
+  tree_label — `aria-label` mətni
+{% endcomment %}
+<ul class="ems-tree" role="tree" aria-label="{{ tree_label }}">
+    {% for node in tree_nodes %}
+        {% include "partials/ems_ui/_tree_node.html" %}
+    {% endfor %}
+</ul>

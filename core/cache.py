@@ -48,6 +48,8 @@ from typing import Any
 
 from django.core.cache import cache
 
+from core.logging_utils import safe_log_value
+
 logger = logging.getLogger(__name__)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -61,7 +63,9 @@ def _safe_cache_get(key: str):
     try:
         return cache.get(key)
     except Exception:
-        logger.warning("Redis unavailable; cache lookup failed for key %s", key)
+        # Açar istifadəçi filtrindən (məs. dil seçimi) hissə daşıya bilir —
+        # log sətrinə xam getməməlidir (CodeQL py/log-injection).
+        logger.warning("Redis unavailable; cache lookup failed for key %s", safe_log_value(key))
         return None
 
 
@@ -324,5 +328,5 @@ def get_or_set_cached_bank_analysis(*, bank_id, language: str, fingerprint: str,
     try:
         cache.set(key, payload, timeout=BANK_ANALYSIS_TTL)
     except Exception:
-        logger.warning("Redis unavailable; bank analysis cache not populated for %s", key)
+        logger.warning("Redis unavailable; bank analysis cache not populated for %s", safe_log_value(key))
     return payload

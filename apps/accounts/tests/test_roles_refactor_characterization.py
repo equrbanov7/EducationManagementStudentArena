@@ -182,3 +182,33 @@ class PermissionEditorViewTest(TestCase):
             {"role_id": str(role.id), "action": "nonsense-action"},
         )
         self.assertEqual(resp.status_code, 302)
+
+    def test_group_permission_keys_are_selectable_in_editor(self):
+        """Yeni «Qruplar» açarları editor-da görünür, AZ etiketlidir və rola əlavə oluna bilir."""
+        _login_with_org(self.client, self.owner, self.org)
+        resp = self.client.get(reverse("accounts:permission_editor"))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "group.manage")
+        self.assertContains(resp, "group.view")
+        # Server tərəfdən render olunan insan-oxunaqlı AZ etiketlər.
+        self.assertContains(resp, "Qrup yaratmaq/idarə etmək")
+        self.assertContains(resp, "Qruplara baxış")
+
+        role = self.org.roles.filter(is_active=True).order_by("level").first()
+        self.assertNotIn("group.manage", role.permissions or [])
+        resp = self.client.post(
+            reverse("accounts:permission_editor"),
+            {"role_id": str(role.id), "action": "add", "permission": "group.manage"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        role.refresh_from_db()
+        self.assertIn("group.manage", role.permissions)
+
+        # Silmək də işləyir (açar kataloq validasiyasından keçir).
+        resp = self.client.post(
+            reverse("accounts:permission_editor"),
+            {"role_id": str(role.id), "action": "remove", "permission": "group.manage"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        role.refresh_from_db()
+        self.assertNotIn("group.manage", role.permissions)

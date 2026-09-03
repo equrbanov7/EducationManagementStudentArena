@@ -1,0 +1,274 @@
+/* ═══ «Alt qrupdan tələbə əlavə et» (jgs-*) ════════════════════════════════
+   Jurnal siyahısının idarəsi — koordinator/dekanlıq səthi.
+
+   Dizayn dili jd2.css-dən GƏLİR (navy başlıq + göy aksent + yumşaq kart):
+   yeni rəng İCAD EDİLMİR, hamısı mövcud `--ems-*` tokenlərindəndir. Tətbiq
+   yalnız-işıqlıdır — `prefers-color-scheme` bloku QƏSDƏN yoxdur. */
+
+/* ── Tabsbar düyməsi ──────────────────────────────────────────────────────── */
+.jd2-guest-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    border: 1px solid var(--ems-primary-200); cursor: pointer; font-family: inherit;
+    background: var(--ems-primary-50); color: var(--ems-primary-700);
+    border-radius: 10px; padding: 9px 14px; font-size: 12.5px; font-weight: 700;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.jd2-guest-btn:hover {
+    background: var(--ems-primary-100); border-color: var(--ems-primary-500);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.16);
+}
+.jd2-guest-btn:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 2px; }
+.jd2-guest-btn__count {
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    font-size: 11px; font-weight: 800;
+}
+.jgs-empty-action { display: flex; justify-content: center; margin-top: 14px; }
+
+/* ── Jurnal sətrindəki «alt qrup» çipi ────────────────────────────────────── */
+.jgs-chip {
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+    background: var(--ems-primary-50); color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-200);
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.2px;
+    white-space: nowrap; font-family: inherit;
+}
+.jgs-chip .fas { font-size: 9.5px; }
+.jgs-chip__src {
+    padding-left: 6px; margin-left: 2px;
+    border-left: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-800); font-weight: 700;
+}
+.jgs-chip--action { cursor: pointer; }
+.jgs-chip--action:hover {
+    background: var(--ems-danger-100); border-color: var(--ems-danger-200); color: var(--ems-danger-strong);
+}
+.jgs-chip--action:hover .jgs-chip__src { border-left-color: var(--ems-danger-200); color: var(--ems-danger-strong); }
+.jgs-chip--action:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 2px; }
+/* Dondurulmuş siyahı (bağlı jurnal / keçmiş dövr) — düymənin yerində neytral izah. */
+.jgs-chip--frozen {
+    margin-left: 0; padding: 5px 12px; cursor: default;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-600);
+    border-color: var(--ems-neutral-200); font-size: 11.5px;
+}
+.jd2-row.is-guest .jd2-td-student { box-shadow: inset 3px 0 0 var(--ems-primary-500); }
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+.jgs-card { width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+.jgs-head { display: flex; align-items: flex-start; gap: 12px; }
+.jgs-head-main { flex: 1; min-width: 0; }
+/* Başlıq navy fondadır (`jd2-modal-head`) — alt mətn AĞ tokenlə + şəffaflıqla
+   yazılır ki, kontrast AA-dan aşağı düşməsin (yeni rəng icad EDİLMİR). */
+.jgs-head-sub {
+    margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.45;
+    color: var(--ems-neutral-0); opacity: 0.82;
+}
+.jgs-head .jd-modal-close { color: var(--ems-neutral-0); }
+.jgs-body { overflow-y: auto; }
+.jgs-foot { display: flex; gap: 10px; }
+.jgs-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.jgs-submit[disabled] { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* Kontekst zolağı (fənn → qrup) */
+.jgs-context {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    padding: 12px 14px; margin-bottom: 16px; border-radius: 12px;
+    background: var(--ems-bg-subtle); border: 1px solid var(--ems-border);
+}
+.jgs-ctx-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12.5px; font-weight: 700; color: var(--ems-neutral-800);
+}
+.jgs-ctx-chip .fas { color: var(--ems-primary-600); font-size: 11px; }
+.jgs-ctx-chip--subject b { font-weight: 800; }
+.jgs-ctx-chip--muted { color: var(--ems-text-muted); font-weight: 600; }
+.jgs-ctx-code {
+    padding: 1px 7px; border-radius: 6px; font-size: 11px; font-weight: 800;
+    background: var(--ems-primary-100); color: var(--ems-primary-700);
+}
+.jgs-ctx-arrow { color: var(--ems-neutral-400); font-size: 10px; }
+
+/* Sahələr + kaskad addımları */
+.jgs-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.jgs-field .jd2-field-label { display: inline-flex; align-items: center; gap: 7px; }
+.jgs-step-dot {
+    width: 17px; height: 17px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    font-size: 10px; font-weight: 800;
+}
+.jgs-field--student.is-disabled { opacity: 0.55; pointer-events: none; }
+.jgs-field--student.is-disabled .jgs-step-dot { background: var(--ems-neutral-400); }
+.jgs-field .jd-field-hint { font-size: 11px; color: var(--ems-text-muted); font-weight: 600; }
+
+/* Qrup seçilməmiş vəziyyət — modal «boş» açılmasın (nə etmək lazımdır). */
+.jgs-hintbox {
+    display: flex; align-items: flex-start; gap: 9px;
+    margin: 14px 0 0; padding: 11px 13px; border-radius: 10px;
+    background: var(--ems-primary-50); border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-800); font-size: 12px; font-weight: 600; line-height: 1.45;
+}
+.jgs-hintbox[hidden] { display: none; }
+.jgs-hintbox .fas { color: var(--ems-primary-600); font-size: 12px; margin-top: 1px; }
+
+/* Təsdiqdən ƏVVƏL xülasə: kim, haradan, hara. */
+.jgs-summary {
+    margin: 14px 0 0; padding: 12px 14px; border-radius: 12px;
+    background: var(--ems-bg-subtle); border: 1px solid var(--ems-primary-200);
+    box-shadow: inset 3px 0 0 var(--ems-primary-500);
+}
+.jgs-summary[hidden] { display: none; }
+.jgs-summary-head {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+    color: var(--ems-primary-700); margin-bottom: 9px;
+}
+.jgs-summary-grid {
+    margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: baseline;
+}
+.jgs-summary-grid dt {
+    font-size: 11px; font-weight: 700; color: var(--ems-text-muted); white-space: nowrap;
+}
+.jgs-summary-grid dd {
+    margin: 0; font-size: 13px; font-weight: 700; color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+/* Skeleton + xəta */
+.jgs-skeleton { display: grid; gap: 8px; margin: 4px 0 12px; }
+.jgs-skeleton[hidden] { display: none; }
+.jgs-error {
+    margin: 0 0 12px; padding: 10px 12px; border-radius: 10px;
+    background: var(--ems-danger-100); border: 1px solid var(--ems-danger-200);
+    color: var(--ems-danger-strong); font-size: 12.5px; font-weight: 700;
+}
+.jgs-error[hidden] { display: none; }
+
+/* Cari «alt qrup» siyahısı */
+.jgs-current { margin-top: 6px; border-top: 1px solid var(--ems-border); padding-top: 14px; }
+.jgs-current[hidden] { display: none; }
+.jgs-current-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.4px;
+    color: var(--ems-text-muted); text-transform: uppercase;
+}
+.jgs-current-count {
+    min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-primary-100); color: var(--ems-primary-700);
+    font-size: 11px; font-weight: 800;
+}
+.jgs-current-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.jgs-current-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 10px;
+    background: var(--ems-neutral-0); border: 1px solid var(--ems-border);
+}
+.jgs-current-item.is-busy { opacity: 0.5; }
+/* Sətir çipindən gəlmiş fokus — hansı tələbədən danışıldığı dərhal görünsün. */
+.jgs-current-item.is-focused {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+/* İki addımlı təsdiq: birinci klik xəbərdarlıq, ikincisi silir. */
+.jgs-remove-btn.is-confirm {
+    background: var(--ems-danger-strong); border-color: var(--ems-danger-strong);
+    color: var(--ems-neutral-0);
+}
+/* Uzun/boşluqsuz ad modalı ÜFÜQİ sürüşdürməsin (mobil 375px-də görünürdü). */
+.jgs-current-name {
+    flex: 1; min-width: 0; font-size: 13px; font-weight: 700;
+    color: var(--ems-neutral-800); overflow-wrap: anywhere;
+}
+.jgs-body { overflow-x: hidden; }
+.jgs-current-group {
+    padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 800;
+    background: var(--ems-primary-50); color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-200);
+}
+.jgs-remove-btn {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    border: 1px solid var(--ems-danger-200); background: var(--ems-neutral-0);
+    color: var(--ems-danger-strong); border-radius: 9px; padding: 6px 11px;
+    font-family: inherit; font-size: 11.5px; font-weight: 700;
+}
+.jgs-remove-btn:hover { background: var(--ems-danger-100); }
+.jgs-remove-btn:focus-visible { outline: 2px solid var(--ems-danger); outline-offset: 2px; }
+
+/* Yeni sətrin qısa vurğusu — əməldən sonra harada dəyişiklik olduğu görünsün.
+   `prefers-reduced-motion` seçimi olan istifadəçidə animasiya yoxdur, vurğu
+   rəngi isə qalır (məlumat yalnız hərəkətlə ötürülmür). */
+@keyframes jgsFlash {
+    0%   { background: var(--ems-primary-100); }
+    100% { background: transparent; }
+}
+.jd2-row.jgs-flash > td { animation: jgsFlash 2.4s ease-out 1; }
+.jd2-row.jgs-flash .jd2-td-student { box-shadow: inset 3px 0 0 var(--ems-primary-600); }
+@media (prefers-reduced-motion: reduce) {
+    .jd2-row.jgs-flash > td { animation: none; background: var(--ems-primary-50); }
+}
+
+@media (max-width: 640px) {
+    .jgs-fields { grid-template-columns: 1fr; }
+    .jgs-context { gap: 6px; }
+    /* 375px: kart tam enə yayılsın, sətirlər sıxılmasın. */
+    .jgs-card { width: 100%; max-height: 92vh; }
+    .jgs-summary-grid { grid-template-columns: 1fr; gap: 2px 0; }
+    .jgs-summary-grid dd { margin-bottom: 6px; }
+    .jgs-current-item { flex-wrap: wrap; }
+    .jgs-current-name { flex: 1 1 100%; }
+    .jgs-foot { flex-direction: column-reverse; }
+    .jgs-foot > * { width: 100%; justify-content: center; }
+}
+
+/* ── Birləşmə paneli (öz jurnalından azad et) ─────────────────────────────── */
+/* Sarı «diqqət» kartı — mövcud xəbərdarlıq tokenləri, yeni rəng icad edilmir. */
+.jgs-merge {
+    margin: 14px 0 4px; padding: 12px 14px; border-radius: 12px;
+    background: var(--ems-warning-bg); border: 1px solid var(--ems-warning-bd);
+}
+.jgs-merge-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 800; color: var(--ems-warning-800);
+}
+.jgs-merge-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px; margin: 10px 0 0;
+}
+.jgs-merge-grid dt { font-size: 11.5px; font-weight: 600; color: var(--ems-warning-700); }
+.jgs-merge-grid dd { margin: 0; font-size: 12px; font-weight: 800; color: var(--ems-warning-800); text-align: right; }
+.jgs-merge-fate {
+    margin: 10px 0 0; font-size: 11.5px; line-height: 1.5; font-weight: 600;
+    color: var(--ems-warning-800);
+}
+.jgs-merge-check {
+    display: flex; align-items: flex-start; gap: 8px; margin-top: 10px;
+    font-size: 12.5px; font-weight: 800; color: var(--ems-warning-800); cursor: pointer;
+}
+.jgs-merge-check input { margin-top: 2px; accent-color: var(--ems-warning-600); }
+.jgs-merge-check input:disabled { cursor: not-allowed; }
+.jgs-merge-blocked {
+    margin: 10px 0 0; padding: 8px 10px; border-radius: 8px;
+    background: var(--ems-danger-100); color: var(--ems-danger-strong);
+    font-size: 11.5px; font-weight: 700; line-height: 1.45;
+}
+
+/* ── Jurnal sətrindəki «əvvəlki jurnal» (köçürülən iş) nişanı ─────────────── */
+.jgs-carry {
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+    margin-left: 6px; padding: 2px 8px; border-radius: 999px;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    border: 1px solid var(--ems-neutral-200);
+    font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+.jgs-carry .fas { font-size: 9.5px; }
+.jgs-carry__num {
+    padding-left: 6px; margin-left: 2px;
+    border-left: 1px solid var(--ems-neutral-200);
+    font-weight: 800; color: var(--ems-neutral-800);
+}
+/* Əvvəlki jurnalda QAZANILMIŞ giriş balı — q/b sayğacından rənglə ayrılır ki,
+   müəllim bir baxışda ziyanı (qayıb) və xeyri (bal) qarışdırmasın. */
+.jgs-carry__num--score { color: var(--ems-primary-700); }

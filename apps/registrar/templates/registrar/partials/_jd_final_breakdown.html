@@ -43,6 +43,19 @@ Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qəd�
                     {% if row.barred %}<span class="jd2-qeyd jd2-qeyd--barred">{% trans "Qayıb limiti keçib — imtahana buraxılmır" context "registrar.journal" %}</span>
                     {% elif row.warning %}<span class="jd2-qeyd jd2-qeyd--warn">{% trans "Qayıb limitinə yaxın" context "registrar.journal" %} ({{ row.absence_hours }}/{{ final_breakdown.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %})</span>
                     {% else %}<span class="jd2-qeyd">—</span>{% endif %}
+                    {% if row.attempts %}
+                    {% comment %}Çox cəhd (M2): rəsmi SONUNCU cəhddir, əvvəlkilər ləğv olunub —
+                    balı isə itmir, müəllim burada görür.{% endcomment %}
+                    <span class="jd2-attempts">
+                        {% for attempt in row.attempts %}
+                        <span class="jd2-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
+                            {{ attempt.label }} {% trans "cəhd" context "registrar.journal" %}:
+                            <b>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</b>
+                            · {% if attempt.is_official %}{% trans "rəsmi" context "registrar.journal" %}{% else %}{% trans "ləğv olundu" context "registrar.journal" %}{% endif %}
+                        </span>
+                        {% endfor %}
+                    </span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

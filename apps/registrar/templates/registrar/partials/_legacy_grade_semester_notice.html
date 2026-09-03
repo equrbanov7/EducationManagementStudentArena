@@ -1,0 +1,38 @@
+{% comment %}
+  Köçürülmüş nəticənin OXUNAN qeydi — SEMESTR (cədvəl bloku) miqyasında.
+
+  Çağırış:
+      {% include "registrar/partials/_legacy_grade_semester_notice.html" with sem=sem %}
+
+  Niyə sətir səviyyəsində DEYİL — brauzerdə A/B ölçülüb
+  (1280 px, AZ, real köçürülmüş tələbə myedu.student.3373: 49 sətir, 8 semestr, 46-sı nişanlı;
+  hər iki variant EYNİ kod bazasından render olunub)
+  ---------------------------------------------------------------------------
+      A — semestr qeydi + sətir qlifi (cari):  sətir median  96.7 px
+          cədvəl 4,768 px · səhifə 6,452 px · cümlə  8 dəfə
+      B — sətir-səviyyəli qeyd (rədd edilən):  sətir median 152.2 px
+          cədvəl 7,376 px · səhifə 8,716 px · cümlə 44 dəfə
+
+  * B tipik sətri +57 %, cədvəli +55 %, səhifəni +35 % şişirdir;
+  * səbəb: 1280 px-də fənn sütunu cəmi 205 px-dir — qeyd orada 91 px-lik
+    bloka qırılır və EYNİ cümlə səhifədə 44 dəfə təkrarlanır (banner korluğu);
+  * blok başına BİR qeyd cümləni 44 dəfədən 8 dəfəyə (semestr sayı) endirir,
+    tələbə isə mətni yenə EKRANDA oxuyur (tooltip-də yox — sahibin tələbi).
+    Hansı sətirlərin nəzərdə tutulduğunu sətirdəki qlif göstərir
+    (``_legacy_grade_mark.html``, «nişanlı» sözü ilə eyni məna).
+
+  İki cümlə AYRIDIR və müstəqil çıxır: ikisini birləşdirsək kor nöqtəsi olmayan
+  semestrdə yalan məlumat verilərdi (bax ``legacy_grade_read.semester_notice_flags``).
+{% endcomment %}
+{% if sem.legacy_check_notice %}
+<p class="legacy-notice legacy-notice--semester">
+    <i class="fas fa-circle-info legacy-notice__icon" aria-hidden="true"></i>
+    <span class="legacy-notice__text">{{ sem.legacy_check_notice }}</span>
+</p>
+{% endif %}
+{% if sem.legacy_missing_notice %}
+<p class="legacy-notice legacy-notice--semester">
+    <i class="fas fa-circle-info legacy-notice__icon" aria-hidden="true"></i>
+    <span class="legacy-notice__text">{{ sem.legacy_missing_notice }}</span>
+</p>
+{% endif %}

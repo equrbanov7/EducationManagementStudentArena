@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+  @keyframes emsShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+</style>
+</helmet>
+<div style="max-width:1360px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="5" rx="1"></rect><path d="M12 7v4"></path><path d="M5 21v-4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"></path><path d="M12 11v4"></path></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxRole }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 tədris ili</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">{{ ctxPerm }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Universitetin strukturu</h1>
+      <p style="margin:6px 0 0;max-width:720px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Bütün bölmələrin rəsmi iyerarxiyası: Rektorat → Fakültə → Dekanlıq → Kafedra → İxtisas → Qrup. Sistemdə hər tələbə, müəllim və fənn bu ağacın bir düyününə bağlanır — icazələr də buradan gəlir.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <button type="button" onClick="{{ exportTree }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-neutral-50)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Struktur cədvəlini yüklə
+      </button>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ openCreate }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Yeni bölmə
+        </button>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:11px;margin-bottom:14px">
+    <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+      <div style="padding:12px 14px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px">
+        <div style="font-size:.67rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+        <div style="margin-top:5px;font-size:1.26rem;font-weight:800;letter-spacing:-.02em;color:{{ m.valFg }}">{{ m.value }}</div>
+        <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <div style="position:relative;flex:1;min-width:200px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+      <label for="ems-s-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Bölmə axtar</label>
+      <input id="ems-s-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Bölmə adı və ya rəhbər axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+    </div>
+    <sc-for list="{{ typeChips }}" as="c" hint-placeholder-count="5">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <span style="width:1px;height:22px;background:var(--ems-neutral-200);margin:0 3px"></span>
+    <button type="button" onClick="{{ expandAll }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.8rem;font-weight:700;cursor:pointer">{{ expandLabel }}</button>
+    <button type="button" onClick="{{ resetFilters }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Sıfırla</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:{{ colTpl }};gap:16px;align-items:start">
+
+    <div style="min-width:0;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px;overflow:hidden">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50)">
+        <span style="font-size:.88rem;font-weight:800;color:var(--ems-neutral-900)">Struktur ağacı</span>
+        <span style="font-size:.76rem;color:var(--ems-neutral-500)">{{ treeNote }}</span>
+        <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:10px">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:.72rem;color:var(--ems-neutral-500)">
+              <span style="width:9px;height:9px;border-radius:3px;background:{{ l.color }}"></span>{{ l.label }}
+            </span>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div aria-busy="true" aria-live="polite" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ skel }}" as="k" hint-placeholder-count="8">
+            <div style="height:44px;border-radius:11px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ treeEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:52px 20px;text-align:center">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="5" rx="1"></rect><path d="M5 21v-4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"></path></svg>
+          <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">Axtarışa uyğun bölmə tapılmadı</div>
+          <button type="button" onClick="{{ resetFilters }}" style="padding:8px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ treeShown }}" hint-placeholder-val="{{ true }}">
+        <div role="tree" aria-label="Universitetin struktur ağacı" style="padding:8px">
+          <sc-for list="{{ tree }}" as="n" hint-placeholder-count="12">
+            <div role="treeitem" aria-level="{{ n.level }}" aria-expanded="{{ n.aria }}" aria-selected="{{ n.selAria }}" tabindex="0" onClick="{{ n.select }}" onKeyDown="{{ n.key }}" style="display:flex;align-items:center;gap:9px;padding:8px 10px 8px {{ n.pad }};margin-bottom:2px;border-radius:10px;border:1px solid {{ n.bd }};background:{{ n.bg }};cursor:pointer" style-hover="background:{{ n.hover }}">
+              <button type="button" onClick="{{ n.toggle }}" aria-label="{{ n.toggleAria }}" style="width:20px;height:20px;flex:none;display:grid;place-items:center;border-radius:6px;border:none;background:transparent;color:var(--ems-neutral-400);cursor:{{ n.togCur }};opacity:{{ n.togOp }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:{{ n.rot }};transition:transform .14s ease"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+              <span style="width:9px;height:9px;flex:none;border-radius:3px;background:{{ n.dot }}"></span>
+              <span style="min-width:0;flex:1;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 9px">
+                <span style="font-size:{{ n.size }};font-weight:{{ n.fw }};color:{{ n.fg }};text-wrap:pretty">{{ n.name }}</span>
+                <span style="font-size:.72rem;color:{{ n.typeFg }}">{{ n.typeLabel }}</span>
+              </span>
+              <span style="flex:none;display:flex;align-items:center;gap:12px">
+                <span style="font-size:.75rem;color:{{ n.metaFg }};white-space:nowrap">{{ n.meta }}</span>
+                <sc-if value="{{ n.flag }}" hint-placeholder-val="{{ false }}">
+                  <span style="padding:2px 8px;border-radius:6px;background:{{ n.flagBg }};color:{{ n.flagFg }};font-size:.7rem;font-weight:800;white-space:nowrap">{{ n.flagText }}</span>
+                </sc-if>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ showPanel }}" hint-placeholder-val="{{ true }}">
+      <aside style="position:sticky;top:16px;min-width:0;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px;overflow:hidden">
+        <div style="padding:16px 17px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:.73rem;color:var(--ems-neutral-400);margin-bottom:8px">
+            <sc-for list="{{ d.crumbs }}" as="c" hint-placeholder-count="3">
+              <span style="display:inline-flex;align-items:center;gap:6px">
+                <span style="color:{{ c.fg }};font-weight:{{ c.fw }};text-wrap:pretty">{{ c.label }}</span>
+                <sc-if value="{{ c.sep }}" hint-placeholder-val="{{ false }}">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </sc-if>
+              </span>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:11px">
+            <span style="width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:11px;background:{{ d.iconBg }};color:{{ d.iconFg }};font-size:.78rem;font-weight:800">{{ d.abbr }}</span>
+            <span style="min-width:0;flex:1">
+              <span style="display:block;font-size:1.02rem;font-weight:800;letter-spacing:-.01em;color:var(--ems-neutral-900);text-wrap:pretty">{{ d.name }}</span>
+              <span style="display:block;margin-top:3px;font-size:.77rem;color:var(--ems-neutral-500)">{{ d.typeLabel }}</span>
+            </span>
+          </div>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">
+              <button type="button" onClick="{{ openRename }}" style="padding:7px 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.79rem;font-weight:700;cursor:pointer">Adını dəyiş</button>
+              <button type="button" onClick="{{ openHead }}" style="padding:7px 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.79rem;font-weight:700;cursor:pointer">{{ d.headCta }}</button>
+              <button type="button" onClick="{{ openMove }}" disabled="{{ d.moveOff }}" style="padding:7px 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:{{ d.moveFg }};font-size:.79rem;font-weight:700;cursor:{{ d.moveCur }}">Başqa bölməyə keçir</button>
+              <button type="button" onClick="{{ openArchive }}" disabled="{{ d.archOff }}" style="padding:7px 12px;border-radius:9px;border:1px solid {{ d.archBd }};background:var(--ems-neutral-0);color:{{ d.archFg }};font-size:.79rem;font-weight:700;cursor:{{ d.archCur }}">Arxivə göndər</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="padding:16px 17px;display:flex;flex-direction:column;gap:15px">
+          <div style="display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid {{ d.headBd }};background:{{ d.headBg }};border-radius:12px">
+            <span style="width:36px;height:36px;flex:none;display:grid;place-items:center;border-radius:10px;background:{{ d.headAvBg }};color:{{ d.headAvFg }};font-size:.8rem;font-weight:800">{{ d.headIni }}</span>
+            <span style="min-width:0;flex:1">
+              <span style="display:block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ d.headLabFg }}">{{ d.headRole }}</span>
+              <span style="display:block;margin-top:2px;font-size:.87rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ d.headName }}</span>
+              <span style="display:block;margin-top:1px;font-size:.74rem;color:{{ d.headMetaFg }};text-wrap:pretty">{{ d.headMeta }}</span>
+            </span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;border:1px solid var(--ems-neutral-200);border-radius:12px;overflow:hidden;background:var(--ems-neutral-200)">
+            <sc-for list="{{ d.stats }}" as="s" hint-placeholder-count="4">
+              <div style="padding:11px 13px;background:var(--ems-neutral-0)">
+                <div style="font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);text-wrap:pretty">{{ s.label }}</div>
+                <div style="margin-top:4px;font-size:.92rem;font-weight:800;color:{{ s.fg }}">{{ s.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div>
+            <div style="font-size:.86rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Bölmənin pasportu</div>
+            <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--ems-neutral-200);border-radius:11px;overflow:hidden;background:var(--ems-neutral-100)">
+              <sc-for list="{{ d.fields }}" as="f" hint-placeholder-count="5">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 13px;background:var(--ems-neutral-0)">
+                  <span style="width:118px;flex:none;font-size:.76rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ f.label }}</span>
+                  <span style="flex:1;font-size:.81rem;font-weight:{{ f.fw }};color:{{ f.fg }};text-wrap:pretty">{{ f.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ d.hasChildren }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px">
+                <span style="font-size:.86rem;font-weight:800;color:var(--ems-neutral-900)">{{ d.childTitle }}</span>
+                <span style="font-size:.73rem;color:var(--ems-neutral-400)">{{ d.childCount }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <sc-for list="{{ d.children }}" as="c" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ c.go }}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);cursor:pointer;text-align:left" style-hover="background:var(--ems-neutral-50)">
+                    <span style="width:7px;height:7px;flex:none;border-radius:999px;background:{{ c.dot }}"></span>
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font-size:.81rem;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ c.name }}</span>
+                      <span style="display:block;margin-top:1px;font-size:.72rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ c.meta }}</span>
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ d.hasIssues }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:.86rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Bu bölmədə açıq məsələlər</div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <sc-for list="{{ d.issues }}" as="i" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:flex-start;gap:9px;padding:10px 12px;background:{{ i.bg }};border:1px solid {{ i.bd }};border-radius:10px">
+                    <span style="width:6px;height:6px;flex:none;margin-top:6px;border-radius:999px;background:{{ i.fg }}"></span>
+                    <span style="flex:1;font-size:.79rem;color:{{ i.fg }};line-height:1.45;text-wrap:pretty">{{ i.text }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div>
+            <div style="font-size:.86rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Struktur dəyişikliyi tarixçəsi</div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              <sc-for list="{{ d.history }}" as="h" hint-placeholder-count="3">
+                <div style="display:flex;gap:11px">
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:20px">
+                    <span style="width:9px;height:9px;border-radius:999px;background:{{ h.dot }}"></span>
+                    <span style="flex:1;width:2px;background:var(--ems-neutral-200);margin:3px 0"></span>
+                  </div>
+                  <div style="flex:1;min-width:0;padding-bottom:13px">
+                    <div style="font-size:.8rem;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ h.title }}</div>
+                    <div style="margin-top:2px;font-size:.73rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ h.meta }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </sc-if>
+  </div>
+</div>
+
+<sc-if value="{{ mEdit }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeEdit }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-et" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:580px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-et" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ ev.title }}</h3>
+        <div style="margin-top:4px;font-size:.78rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ ev.sub }}</div>
+      </div>
+
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:13px">
+
+        <sc-if value="{{ ev.showType }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Bölmənin növü</span>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <sc-for list="{{ ev.types }}" as="o" hint-placeholder-count="4">
+                <button type="button" onClick="{{ o.pick }}" style="padding:9px 13px;border-radius:9px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:.79rem;font-weight:700;cursor:pointer">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Hansı bölmənin tabeliyində?</span>
+            <div style="height:38px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--ems-neutral-200);border-radius:9px;background:var(--ems-neutral-50);font-size:.84rem;font-weight:600;color:var(--ems-neutral-700)">{{ ev.parent }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ev.showName }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <label for="ems-e-n" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Bölmənin tam adı <span style="color:var(--ems-danger)">*</span></label>
+            <input id="ems-e-n" type="text" value="{{ ev.name }}" onChange="{{ ev.setName }}" placeholder="Məsələn: Süni intellekt kafedrası" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ ev.nameBd }};border-radius:9px;font-size:.85rem">
+            <sc-if value="{{ ev.nameErr }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:5px;font-size:.74rem;font-weight:700;color:var(--ems-danger)">{{ ev.nameMsg }}</div>
+            </sc-if>
+          </div>
+          <div>
+            <label for="ems-e-a" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Qısaltma — cədvəl və hesabatlarda görünür</label>
+            <input id="ems-e-a" type="text" value="{{ ev.abbr }}" onChange="{{ ev.setAbbr }}" placeholder="SİK" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem;text-transform:uppercase">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ev.showHead }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <input type="text" value="{{ ev.q }}" onChange="{{ ev.setQ }}" placeholder="Ad üzrə axtar" aria-label="Rəhbər axtar" style="width:100%;height:38px;padding:0 12px;margin-bottom:8px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:7px">{{ ev.headLabel }}</div>
+            <div style="display:flex;flex-direction:column;gap:5px;max-height:250px;overflow:auto">
+              <sc-for list="{{ ev.people }}" as="p" hint-placeholder-count="4">
+                <div role="option" tabindex="0" aria-selected="{{ p.sel }}" onClick="{{ p.pick }}" onKeyDown="{{ p.key }}" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid {{ p.bd }};background:{{ p.bg }};border-radius:10px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+                  <span style="width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:8px;background:{{ p.avBg }};color:{{ p.avFg }};font-size:.7rem;font-weight:800">{{ p.ini }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:.83rem;font-weight:700;color:var(--ems-neutral-900)">{{ p.name }}</span>
+                    <span style="display:block;margin-top:1px;font-size:.72rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ p.meta }}</span>
+                  </span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ ev.noPeople }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:14px;text-align:center;font-size:.8rem;color:var(--ems-neutral-400)">Uyğun namizəd tapılmadı</div>
+              </sc-if>
+            </div>
+          </div>
+          <div>
+            <label for="ems-e-o" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Təyinat əmrinin nömrəsi <span style="color:var(--ems-danger)">*</span></label>
+            <input id="ems-e-o" type="text" value="{{ ev.order }}" onChange="{{ ev.setOrder }}" placeholder="R-214 / 12.08.2026" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ ev.orderBd }};border-radius:9px;font-size:.85rem">
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ev.showMove }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Yeni tabelik <span style="color:var(--ems-danger)">*</span></span>
+            <div style="display:flex;flex-direction:column;gap:5px;max-height:230px;overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:11px;padding:7px">
+              <sc-for list="{{ ev.targets }}" as="t" hint-placeholder-count="4">
+                <div role="option" tabindex="0" aria-selected="{{ t.sel }}" onClick="{{ t.pick }}" onKeyDown="{{ t.key }}" style="display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;background:{{ t.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">
+                  <span style="width:7px;height:7px;flex:none;border-radius:999px;background:{{ t.dot }}"></span>
+                  <span style="flex:1;min-width:0;font-size:.82rem;font-weight:{{ t.fw }};color:{{ t.fg }};text-wrap:pretty">{{ t.name }}</span>
+                  <span style="font-size:.72rem;color:var(--ems-neutral-400);white-space:nowrap">{{ t.type }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ ev.showArchive }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <label for="ems-e-r" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Arxivləşdirmənin əsası <span style="color:var(--ems-danger)">*</span></label>
+            <textarea id="ems-e-r" rows="3" value="{{ ev.why }}" onChange="{{ ev.setWhy }}" placeholder="Elmi şuranın qərarı, əmr nömrəsi və qısa əsaslandırma" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.84rem;resize:vertical"></textarea>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:{{ ev.tipBg }};border:1px solid {{ ev.tipBd }};border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ ev.tipFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:{{ ev.tipFg }};line-height:1.5;text-wrap:pretty">{{ ev.tip }}</span>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeEdit }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ ev.save }}" disabled="{{ ev.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ ev.bd }};background:{{ ev.bg }};color:{{ ev.fg }};font-size:.83rem;font-weight:700;cursor:{{ ev.cur }}">{{ ev.cta }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:1150},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tədris Şöbəsi müdiri&quot;,&quot;Tədris Şöbəsi əməkdaşı&quot;,&quot;Rektorat&quot;,&quot;Dekanlıq&quot;],&quot;default&quot;:&quot;Tədris Şöbəsi müdiri&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İcazə qatı&quot;}}">
+const TYPE = {
+  rektorat: { label:'Rektorat', short:'Rektorat', color:'var(--ems-neutral-900)', head:'Rektor' },
+  fakulte:  { label:'Fakültə', short:'Fakültə', color:'var(--ems-primary-700)', head:'Dekan' },
+  dekanliq: { label:'Dekanlıq — fakültənin inzibati aparatı', short:'Dekanlıq', color:'var(--ems-primary-600)', head:'Dekan müavini' },
+  kafedra:  { label:'Kafedra', short:'Kafedra', color:'var(--ems-primary-600)', head:'Kafedra müdiri' },
+  ixtisas:  { label:'İxtisas — akademik proqram', short:'İxtisas', color:'var(--ems-neutral-400)', head:'Proqram rəhbəri' },
+  qrup:     { label:'Tələbə qrupu', short:'Qrup', color:'var(--ems-neutral-300)', head:'Kurator' },
+  merkez:   { label:'Mərkəz — fakültədən kənar struktur', short:'Mərkəz', color:'var(--ems-warning)', head:'Mərkəz rəhbəri' },
+  lab:      { label:'Tədris laboratoriyası', short:'Laboratoriya', color:'var(--ems-warning)', head:'Laboratoriya müdiri' }
+};
+
+// id, ad, növ, valideyn, qısaltma, rəhbər, təyinat əmri, yaranma ili
+const U = (id, name, type, parent, abbr, head, order, since, extra) =>
+  Object.assign({ id, name, type, parent, abbr, head, order, since }, extra || {});
+
+const UNITS = [
+  U('root','Qərbi Kaspi Universiteti','rektorat',null,'QKU','prof. Nadir Səfərov','R-01 / 01.09.2019',1991),
+
+  U('f-eng','Mühəndislik və Tətbiqi Elmlər fakültəsi','fakulte','root','MTE','prof. Elçin Bayramov','R-118 / 02.09.2024',2004),
+  U('d-eng','Mühəndislik fakültəsinin dekanlığı','dekanliq','f-eng','DEK','dos. Nərmin Əliyeva','R-121 / 02.09.2024',2004),
+  U('k-pit','Proqramlaşdırma və informasiya təhlükəsizliyi kafedrası','kafedra','f-eng','PİT','dos. Rəşad Əliyev','R-142 / 15.09.2016',2004),
+  U('i-kmuh','Kompüter mühəndisliyi','ixtisas','k-pit','KE',null,null,2004,{ code:'050632', deg:'Bakalavr', groups:4, students:128 }),
+  U('i-itah','İnformasiya təhlükəsizliyi','ixtisas','k-pit','İT',null,null,2018,{ code:'050656', deg:'Bakalavr', groups:3, students:86 }),
+  U('i-kelm','Kompüter elmləri','ixtisas','k-pit','KEL',null,null,2021,{ code:'060509', deg:'Magistr', groups:2, students:31, planIssue:true }),
+  U('k-mex','Mexatronika və robototexnika kafedrası','kafedra','f-eng','MEX','dos. Fərid Nəsirov','R-155 / 01.09.2019',2011),
+  U('i-mex','Mexatronika mühəndisliyi','ixtisas','k-mex','MX',null,null,2011,{ code:'050638', deg:'Bakalavr', groups:3, students:74 }),
+  U('i-rob','Robototexnika mühəndisliyi','ixtisas','k-mex','RB',null,null,2023,{ code:'050641', deg:'Bakalavr', groups:2, students:48, planIssue:true }),
+  U('k-riy','Riyaziyyat kafedrası','kafedra','f-eng','RİY','prof. Vaqif Məmmədov','R-098 / 01.09.2014',1998),
+  U('i-riym','Riyaziyyat və informatika müəllimliyi','ixtisas','k-riy','RİY',null,null,1998,{ code:'050112', deg:'Bakalavr', groups:2, students:42 }),
+  U('l-rob','Robototexnika tədris laboratoriyası','lab','k-mex','LAB','b/m Ramin Əhmədov','R-201 / 10.02.2025',2025),
+
+  U('f-eco','İqtisadiyyat və İdarəetmə fakültəsi','fakulte','root','İİF','prof. Xəyalə Rüstəmova','R-119 / 02.09.2024',2001),
+  U('d-eco','İqtisadiyyat fakültəsinin dekanlığı','dekanliq','f-eco','DEK','dos. Emin Cabbarov','R-122 / 02.09.2024',2001),
+  U('k-iqt','İqtisadiyyat kafedrası','kafedra','f-eco','İQT','dos. Nicat Əsgərov','R-160 / 01.09.2021',2001),
+  U('i-iqt','İqtisadiyyat','ixtisas','k-iqt','İQT',null,null,2001,{ code:'050405', deg:'Bakalavr', groups:4, students:112 }),
+  U('i-mal','Maliyyə','ixtisas','k-iqt','ML',null,null,2009,{ code:'050408', deg:'Bakalavr', groups:3, students:88 }),
+  U('k-men','Menecment kafedrası','kafedra','f-eco','MEN','dos. Kamil Əliyev','R-163 / 01.09.2021',2006),
+  U('i-bid','Biznesin idarə edilməsi','ixtisas','k-men','BİD',null,null,2006,{ code:'050409', deg:'Bakalavr', groups:4, students:104 }),
+
+  U('f-hum','Humanitar elmlər fakültəsi','fakulte','root','HEF','prof. Solmaz Xəlilova','R-120 / 02.09.2024',1995),
+  U('d-hum','Humanitar fakültənin dekanlığı','dekanliq','f-hum','DEK',null,null,1995,{ vacant:true }),
+  U('k-fil','Filologiya kafedrası','kafedra','f-hum','FİL','dos. Mətanət İbrahimova','R-171 / 01.09.2022',1996),
+  U('i-fil','Azərbaycan dili və ədəbiyyatı müəllimliyi','ixtisas','k-fil','FİL',null,null,1996,{ code:'050106', deg:'Bakalavr', groups:3, students:64 }),
+  U('k-psi','Psixologiya kafedrası','kafedra','f-hum','PSİ','dos. Günay Məmmədova','R-174 / 01.09.2022',2009),
+  U('i-psi','Psixologiya','ixtisas','k-psi','PSİ',null,null,2009,{ code:'050303', deg:'Bakalavr', groups:3, students:70 }),
+  U('k-sos','Sosial elmlər və humanitar fənlər kafedrası','kafedra','f-hum','SOS','prof. Ceyhun Məhərrəmov','R-090 / 01.09.2013',1995),
+  U('i-sos','Sosial iş','ixtisas','k-sos','SOS',null,null,2020,{ code:'050308', deg:'Bakalavr', groups:2, students:46, planIssue:true }),
+  U('k-xdil','Xarici dillər kafedrası','kafedra','f-hum','XDL','dos. Nərmin Əliyeva','R-177 / 01.09.2022',1997),
+  U('i-trc','Tərcümə (ingilis dili)','ixtisas','k-xdil','TRC',null,null,2015,{ code:'050206', deg:'Bakalavr', groups:3, students:58 }),
+
+  U('m-dil','Dil Hazırlığı Mərkəzi','merkez','root','DHM','dos. Sevda Quliyeva','R-188 / 01.02.2024',2024),
+  U('m-karyera','Karyera və Məzunlarla İş Mərkəzi','merkez','root','KMM',null,null,2022,{ vacant:true })
+];
+
+// kafedra üzrə müəllim sayı və illik yük göstəriciləri
+const KAF_STATS = {
+  'k-pit':  { staff:10, load:104, un:270 },
+  'k-mex':  { staff:6,  load:96,  un:90 },
+  'k-riy':  { staff:7,  load:99,  un:0 },
+  'k-iqt':  { staff:7,  load:97,  un:0 },
+  'k-men':  { staff:5,  load:108, un:60 },
+  'k-fil':  { staff:5,  load:94,  un:0 },
+  'k-psi':  { staff:4,  load:92,  un:0 },
+  'k-sos':  { staff:6,  load:112, un:120 },
+  'k-xdil': { staff:8,  load:118, un:300 }
+};
+
+const PEOPLE = [
+  { n:'prof. Səlim Quliyev', m:'Professor · Proqramlaşdırma və İT · elmlər doktoru' },
+  { n:'dos. Elvin Məmmədov', m:'Dosent · Proqramlaşdırma və İT · fəlsəfə doktoru' },
+  { n:'dos. Günel Rzayeva', m:'Dosent · Proqramlaşdırma və İT · fəlsəfə doktoru' },
+  { n:'dos. Aynur Salmanova', m:'Dosent · Mexatronika · fəlsəfə doktoru' },
+  { n:'prof. Elçin Bayramov', m:'Professor · Mexatronika · elmlər doktoru' },
+  { n:'dos. Sevinc Əliyeva', m:'Dosent · Riyaziyyat · fəlsəfə doktoru' },
+  { n:'dos. Rauf Bağırov', m:'Dosent · Riyaziyyat · fəlsəfə doktoru' },
+  { n:'dos. Lalə Hüseynova', m:'Dosent · İqtisadiyyat · fəlsəfə doktoru' },
+  { n:'dos. Ülviyyə Məmmədli', m:'Dosent · Menecment · fəlsəfə doktoru' },
+  { n:'dos. Rəna Vəliyeva', m:'Dosent · Psixologiya · fəlsəfə doktoru' },
+  { n:'dos. Nazrin Ağayeva', m:'Dosent · Sosial elmlər · fəlsəfə doktoru' },
+  { n:'dos. Sevda Quliyeva', m:'Dosent · Xarici dillər · fəlsəfə doktoru' }
+];
+
+const childrenOf = (id) => UNITS.filter(u => u.parent === id);
+const byId = (id) => UNITS.find(u => u.id === id);
+const ini = (n) => n.replace(/^(dos\.|prof\.|b\/m|m\.)\s*/, '').split(' ').map(x => x[0]).slice(0, 2).join('');
+const nf = (n) => Math.round(n).toLocaleString('az-AZ').replace(/,/g, ' ');
+
+function descendants(id) {
+  const out = [];
+  const walk = (pid) => childrenOf(pid).forEach(c => { out.push(c); walk(c.id); });
+  walk(id);
+  return out;
+}
+function rollup(id) {
+  const self = byId(id);
+  const kids = descendants(id).concat(self.type === 'ixtisas' ? [self] : []);
+  const ix = kids.filter(u => u.type === 'ixtisas');
+  const kaf = kids.filter(u => u.type === 'kafedra').concat(self.type === 'kafedra' ? [self] : []);
+  return {
+    fakulte: kids.filter(u => u.type === 'fakulte').length,
+    kafedra: kaf.length,
+    ixtisas: ix.length,
+    groups: ix.reduce((a, u) => a + (u.groups || 0), 0),
+    students: ix.reduce((a, u) => a + (u.students || 0), 0),
+    staff: kaf.reduce((a, u) => a + ((KAF_STATS[u.id] || {}).staff || 0), 0),
+    un: kaf.reduce((a, u) => a + ((KAF_STATS[u.id] || {}).un || 0), 0),
+    vacant: kids.concat([self]).filter(u => u.vacant).length,
+    planIssue: ix.filter(u => u.planIssue).length
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    loading: true, w: 1360,
+    open: { root:true, 'f-eng':true, 'k-pit':true, 'f-eco':false, 'f-hum':false },
+    sel: 'k-pit', q: '', qRaw: '', typeF: 'Hamısı',
+    edit: null, heads: {}, names: {}, toast: ''
+  };
+
+  componentDidMount() {
+    this.t1 = setTimeout(() => this.setState({ loading: false }), 620);
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = (e) => { if (e.key === 'Escape' && this.state.edit) this.setState({ edit: null }); };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t1); clearTimeout(this.tq); clearTimeout(this.tt);
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.onKey);
+  }
+
+  role() { return this.props.role || 'Tədris Şöbəsi müdiri'; }
+  canEdit() { const r = this.role(); return r === 'Tədris Şöbəsi müdiri' || r === 'Rektorat'; }
+  nameOf(u) { return this.state.names[u.id] || u.name; }
+  headOf(u) { const h = this.state.heads[u.id]; return h ? h.name : u.head; }
+  orderOf(u) { const h = this.state.heads[u.id]; return h ? h.order : u.order; }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast: m }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2800); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+  pathOf(id) {
+    const out = [];
+    let cur = byId(id);
+    while (cur) { out.unshift(cur); cur = cur.parent ? byId(cur.parent) : null; }
+    return out;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const narrow = s.w < 1180;
+    const q = s.q.trim().toLowerCase();
+    const filtering = !!q || s.typeF !== 'Hamısı';
+
+    const matches = (u) => {
+      const okQ = !q || this.nameOf(u).toLowerCase().includes(q) || (this.headOf(u) || '').toLowerCase().includes(q) || (u.abbr || '').toLowerCase().includes(q);
+      const okT = s.typeF === 'Hamısı' || TYPE[u.type].short === s.typeF;
+      return okQ && okT;
+    };
+    const keep = {};
+    if (filtering) {
+      UNITS.filter(matches).forEach(u => { this.pathOf(u.id).forEach(p => { keep[p.id] = true; }); });
+    }
+
+    const flat = [];
+    const walk = (pid, level) => {
+      childrenOf(pid).forEach(u => {
+        if (filtering && !keep[u.id]) return;
+        flat.push({ u, level });
+        const isOpen = filtering ? true : !!s.open[u.id];
+        if (isOpen) walk(u.id, level + 1);
+      });
+    };
+    const rootU = byId('root');
+    if (!filtering || keep.root) {
+      flat.push({ u: rootU, level: 1 });
+      if (filtering || s.open.root) walk('root', 2);
+    }
+
+    const total = rollup('root');
+    const allVacant = UNITS.filter(u => u.vacant);
+    const kafCount = UNITS.filter(u => u.type === 'kafedra').length;
+
+    const selU = byId(s.sel) || rootU;
+    const R = rollup(selU.id);
+    const T = TYPE[selU.type];
+    const kidUnits = childrenOf(selU.id);
+    const headName = this.headOf(selU);
+    const kstat = KAF_STATS[selU.id];
+
+    const out = {
+      ctxRole:'Tədris Şöbəsi',
+      ctxScope: this.role() === 'Dekanlıq' ? 'yalnız öz fakültəm' : 'bütün universitet',
+      ctxPerm: this.role(), canEdit: this.canEdit(),
+      colTpl: narrow ? '1fr' : 'minmax(0,1fr) 400px',
+      showPanel: true,
+      isLoading: s.loading, skel:[1,2,3,4,5,6,7,8],
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw: v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q: v }), 260); },
+      typeChips: ['Hamısı','Fakültə','Kafedra','İxtisas','Mərkəz'].map(v => {
+        const x = this.chip(v === s.typeF);
+        return { label: v === 'Hamısı' ? 'Bütün bölmələr' : v, bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ typeF: v }) };
+      }),
+      resetFilters: () => this.setState({ q:'', qRaw:'', typeF:'Hamısı' }),
+      expandLabel: Object.keys(s.open).filter(k => s.open[k]).length > 3 ? 'Hamısını yığ' : 'Hamısını aç',
+      expandAll: () => {
+        const opened = Object.keys(s.open).filter(k => s.open[k]).length > 3;
+        if (opened) { this.setState({ open: { root:true } }); return; }
+        const n = {};
+        UNITS.forEach(u => { if (childrenOf(u.id).length) n[u.id] = true; });
+        this.setState({ open: n });
+      },
+      exportTree: () => this.flash('Struktur cədvəli XLSX formatında hazırlanır.'),
+      toast: !!s.toast, toastText: s.toast,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgRef: (el) => { if (el && this._last !== el) { this._last = el; try { el.focus(); } catch (e) {} } },
+
+      kpis: [
+        { label:'Fakültə', value: total.fakulte, note:'rektorata birbaşa tabe',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Kafedra', value: kafCount, note:'fənlərin və müəllimlərin sahibi',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'İxtisas', value: total.ixtisas, note: total.groups + ' qrup · ' + nf(total.students) + ' tələbə',
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)' },
+        { label:'Müəllim heyəti', value: total.staff, note:'kafedralara bağlı ştat',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Rəhbəri olmayan bölmə', value: allVacant.length, note: allVacant.length ? 'təyinat əmri gözlənilir' : 'hamısında rəhbər var',
+          bd: allVacant.length ? '#fde68a' : 'var(--ems-neutral-200)', bg: allVacant.length ? 'var(--ems-warning-bg)' : 'var(--ems-neutral-0)',
+          labFg: allVacant.length ? '#92400e' : 'var(--ems-neutral-400)', valFg: allVacant.length ? '#92400e' : 'var(--ems-neutral-900)', noteFg: allVacant.length ? '#92400e' : 'var(--ems-neutral-500)' }
+      ],
+
+      treeNote: filtering ? flat.length + ' bölmə axtarışa uyğun gəlir' : 'düyünə klik et — sağ paneldə açılır',
+      legend: [
+        { label:'Fakültə', color:'var(--ems-primary-700)' },
+        { label:'Kafedra', color:'var(--ems-primary-600)' },
+        { label:'İxtisas', color:'var(--ems-neutral-400)' },
+        { label:'Mərkəz / laboratoriya', color:'var(--ems-warning)' }
+      ],
+      treeShown: !s.loading && flat.length > 0, treeEmpty: !s.loading && flat.length === 0,
+      tree: flat.map(row => {
+        const u = row.u;
+        const kids = childrenOf(u.id);
+        const sel = u.id === selU.id;
+        const isOpen = filtering ? kids.length > 0 : !!s.open[u.id];
+        const rr = u.type === 'ixtisas' ? null : rollup(u.id);
+        const ks = KAF_STATS[u.id];
+        let meta = '';
+        if (u.type === 'ixtisas') meta = u.groups + ' qrup · ' + u.students + ' tələbə';
+        else if (u.type === 'kafedra') meta = (ks ? ks.staff + ' müəllim · ' : '') + rr.ixtisas + ' ixtisas';
+        else if (u.type === 'fakulte') meta = rr.kafedra + ' kafedra · ' + nf(rr.students) + ' tələbə';
+        else if (u.type === 'rektorat') meta = rr.fakulte + ' fakültə · ' + nf(rr.students) + ' tələbə';
+        else meta = this.headOf(u) ? '1 rəhbər' : '';
+        const vacant = !!u.vacant && !this.headOf(u);
+        const planIssue = !!u.planIssue;
+        return {
+          level: row.level, pad: (8 + (row.level - 1) * 20) + 'px',
+          aria: kids.length ? (isOpen ? 'true' : 'false') : undefined,
+          selAria: sel ? 'true' : 'false',
+          name: this.nameOf(u), typeLabel: TYPE[u.type].short,
+          size: u.type === 'rektorat' ? '.92rem' : (u.type === 'fakulte' ? '.88rem' : '.84rem'),
+          fw: u.type === 'ixtisas' || u.type === 'qrup' ? 600 : 800,
+          fg: sel ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+          typeFg: sel ? 'var(--ems-primary-700)' : 'var(--ems-neutral-400)',
+          metaFg: sel ? 'var(--ems-primary-700)' : 'var(--ems-neutral-400)',
+          meta,
+          dot: TYPE[u.type].color,
+          bg: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          bd: sel ? 'var(--ems-primary-200)' : 'transparent',
+          hover: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-50)',
+          rot: isOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+          togCur: kids.length ? 'pointer' : 'default',
+          togOp: kids.length ? 1 : 0,
+          toggleAria: (isOpen ? 'Yığ: ' : 'Aç: ') + this.nameOf(u),
+          flag: vacant || planIssue,
+          flagText: vacant ? 'rəhbər yoxdur' : 'plan bağlanmayıb',
+          flagBg: vacant ? 'var(--ems-warning-bg)' : 'var(--ems-danger-bg)',
+          flagFg: vacant ? '#92400e' : '#b91c1c',
+          select: () => this.setState({ sel: u.id }),
+          key: this.keyActivate(() => this.setState({ sel: u.id })),
+          toggle: (e) => {
+            if (e && e.stopPropagation) e.stopPropagation();
+            if (!kids.length) return;
+            this.setState({ open: Object.assign({}, s.open, { [u.id]: !s.open[u.id] }) });
+          }
+        };
+      }),
+
+      openCreate: () => this.setState({ edit: { mode:'create', name:'', abbr:'', type:'kafedra', touched:false } }),
+      openRename: () => this.setState({ edit: { mode:'rename', name: this.nameOf(selU), abbr: selU.abbr, touched:false } }),
+      openHead: () => this.setState({ edit: { mode:'head', q:'', pick:null, order:'', touched:false } }),
+      openMove: () => this.setState({ edit: { mode:'move', target:null } }),
+      openArchive: () => this.setState({ edit: { mode:'archive', why:'', touched:false } }),
+      closeEdit: () => this.setState({ edit: null }), mEdit: !!s.edit
+    };
+
+    // ---- sağ panel
+    const crumbs = this.pathOf(selU.id);
+    const stats = [];
+    if (selU.type === 'ixtisas') {
+      stats.push({ label:'Qrup sayı', value: selU.groups, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Tələbə sayı', value: selU.students, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Təhsil pilləsi', value: selU.deg, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Tədris planı', value: selU.planIssue ? 'bağlanmayıb' : 'təsdiqlidir', fg: selU.planIssue ? 'var(--ems-danger)' : '#15803d' });
+    } else if (selU.type === 'kafedra') {
+      stats.push({ label:'Müəllim heyəti', value: (kstat ? kstat.staff : 0) + ' nəfər', fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Öz ixtisasları', value: R.ixtisas, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Normanın doldurulması', value: (kstat ? kstat.load : 0) + '%', fg: kstat && kstat.load > 105 ? 'var(--ems-warning)' : '#15803d' });
+      stats.push({ label:'Təyin olunmamış saat', value: kstat && kstat.un ? nf(kstat.un) + ' s' : 'yoxdur', fg: kstat && kstat.un ? 'var(--ems-danger)' : '#15803d' });
+    } else {
+      stats.push({ label:'Kafedra sayı', value: R.kafedra, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'İxtisas sayı', value: R.ixtisas, fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Tələbə sayı', value: nf(R.students), fg:'var(--ems-neutral-900)' });
+      stats.push({ label:'Müəllim heyəti', value: R.staff + ' nəfər', fg:'var(--ems-neutral-900)' });
+    }
+
+    const fields = [];
+    fields.push({ label:'Bölmənin növü', value: T.label, fw:700, fg:'var(--ems-neutral-900)' });
+    fields.push({ label:'Tabeliyində olduğu', value: selU.parent ? this.nameOf(byId(selU.parent)) : 'Ən yuxarı bölmədir', fw:600, fg:'var(--ems-neutral-700)' });
+    fields.push({ label:'Qısaltma', value: selU.abbr, fw:600, fg:'var(--ems-neutral-700)' });
+    fields.push({ label:'Yaranma ili', value: selU.since, fw:600, fg:'var(--ems-neutral-700)' });
+    if (selU.type === 'ixtisas') {
+      fields.push({ label:'Dövlət kodu', value: selU.code, fw:600, fg:'var(--ems-neutral-700)' });
+      fields.push({ label:'Təhsil pilləsi', value: selU.deg + ' · Əyani', fw:600, fg:'var(--ems-neutral-700)' });
+    }
+    fields.push({ label:'Sistemdəki rolu', value: selU.type === 'kafedra' ? 'Fənlərin və müəllimlərin sahibi — dərs yükü buradan hesablanır'
+      : (selU.type === 'ixtisas' ? 'Tədris planının sahibi — qruplar buna bağlanır'
+      : (selU.type === 'fakulte' ? 'Kafedraların birləşdiyi səviyyə — dekanlıq təsdiqi burada verilir'
+      : (selU.type === 'dekanliq' ? 'Fakültənin inzibati aparatı — tələbə hərəkəti sənədləri buradan keçir'
+      : 'Fakültədən kənar bölmə — öz tədris fəaliyyəti var'))), fw:600, fg:'var(--ems-neutral-700)' });
+
+    const issues = [];
+    if (!headName) issues.push({ text:'Bölmənin rəhbəri təyin olunmayıb — təsdiq zəncirində bu addım boş qalır və sənədlər yuxarı səviyyəyə keçmir.', sev:'warn' });
+    if (selU.planIssue) issues.push({ text:'İxtisasın cari tədris planı bağlanmayıb — plan olmadan fənn açılışı yaradılmır və dərs yükü hesablanmır.', sev:'danger' });
+    if (kstat && kstat.un) issues.push({ text: nf(kstat.un) + ' saat hələ heç bir müəllimə təyin edilməyib — semestr başlayana qədər bağlanmalıdır.', sev:'danger' });
+    if (kstat && kstat.load > 110) issues.push({ text:'Kafedranın yükü ştat tutumunu ' + (kstat.load - 100) + '% aşır — saathesabı müqavilə və ya yeni ştat vahidi lazımdır.', sev:'warn' });
+    if (R.vacant && selU.type !== 'kafedra' && selU.type !== 'ixtisas') issues.push({ text: R.vacant + ' tabe bölmədə rəhbər təyin olunmayıb.', sev:'warn' });
+    const sevS = { danger:{ bg:'var(--ems-danger-bg)', bd:'#fecaca', fg:'#b91c1c' }, warn:{ bg:'var(--ems-warning-bg)', bd:'#fde68a', fg:'#92400e' } };
+
+    const childTitleMap = { rektorat:'Tabe bölmələr', fakulte:'Fakültənin kafedraları və bölmələri', kafedra:'Kafedranın ixtisasları və laboratoriyaları', dekanliq:'Tabe bölmələr', merkez:'Tabe bölmələr', lab:'Tabe bölmələr' };
+
+    out.d = {
+      crumbs: crumbs.map((c, i) => ({
+        label: c.abbr && i < crumbs.length - 1 ? this.nameOf(c) : this.nameOf(c),
+        fg: i === crumbs.length - 1 ? 'var(--ems-neutral-700)' : 'var(--ems-primary-600)',
+        fw: i === crumbs.length - 1 ? 700 : 500,
+        sep: i < crumbs.length - 1
+      })),
+      name: this.nameOf(selU), typeLabel: T.label, abbr: selU.abbr,
+      iconBg: selU.type === 'ixtisas' ? 'var(--ems-neutral-100)' : 'var(--ems-primary-600)',
+      iconFg: selU.type === 'ixtisas' ? 'var(--ems-neutral-500)' : 'var(--ems-neutral-0)',
+      headRole: T.head,
+      headName: headName || 'Təyin olunmayıb',
+      headIni: headName ? ini(headName) : '—',
+      headMeta: headName ? 'təyinat əmri: ' + (this.orderOf(selU) || '—') : 'təyinat əmri gözlənilir',
+      headCta: headName ? 'Rəhbəri dəyiş' : 'Rəhbər təyin et',
+      headBd: headName ? 'var(--ems-primary-200)' : '#fde68a',
+      headBg: headName ? 'var(--ems-primary-50)' : 'var(--ems-warning-bg)',
+      headAvBg: headName ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+      headAvFg: headName ? 'var(--ems-neutral-0)' : '#92400e',
+      headLabFg: headName ? 'var(--ems-primary-700)' : '#92400e',
+      headMetaFg: headName ? 'var(--ems-primary-800)' : '#92400e',
+      moveOff: !selU.parent, moveFg: selU.parent ? 'var(--ems-neutral-700)' : 'var(--ems-neutral-300)', moveCur: selU.parent ? 'pointer' : 'not-allowed',
+      archOff: !selU.parent || kidUnits.length > 0,
+      archBd: !selU.parent || kidUnits.length ? 'var(--ems-neutral-200)' : '#fecaca',
+      archFg: !selU.parent || kidUnits.length ? 'var(--ems-neutral-300)' : '#b91c1c',
+      archCur: !selU.parent || kidUnits.length ? 'not-allowed' : 'pointer',
+      stats, fields,
+      hasChildren: kidUnits.length > 0,
+      childTitle: childTitleMap[selU.type] || 'Tabe bölmələr',
+      childCount: kidUnits.length + ' bölmə',
+      children: kidUnits.map(c => {
+        const cr = c.type === 'ixtisas' ? null : rollup(c.id);
+        const cks = KAF_STATS[c.id];
+        return {
+          name: this.nameOf(c), dot: TYPE[c.type].color,
+          meta: c.type === 'ixtisas' ? (c.deg + ' · ' + c.groups + ' qrup · ' + c.students + ' tələbə')
+            : (c.type === 'kafedra' ? ((cks ? cks.staff + ' müəllim · ' : '') + cr.ixtisas + ' ixtisas')
+            : TYPE[c.type].short + ' · ' + (this.headOf(c) || 'rəhbər yoxdur')),
+          go: () => this.setState({ sel: c.id, open: Object.assign({}, s.open, { [selU.id]: true }) })
+        };
+      }),
+      issues: issues.map(i => Object.assign({}, sevS[i.sev], { text: i.text })),
+      hasIssues: issues.length > 0,
+      history: [
+        { title: headName ? T.head + ' təyin edildi — ' + headName : T.head + ' vəzifəsi vakantdır',
+          meta: headName ? 'əmr ' + (this.orderOf(selU) || '—') : 'son təyinat müddəti bitib', dot: headName ? 'var(--ems-success)' : 'var(--ems-warning)' },
+        { title:'Bölmə strukturda yerləşdirildi', meta: (selU.parent ? this.nameOf(byId(selU.parent)) + ' tərkibinə daxil edilib' : 'Universitetin kök bölməsidir') + ' · ' + selU.since, dot:'var(--ems-primary-600)' },
+        { title:'Reyestrə salındı', meta: selU.since + ' tədris ilindən sistemdə qeydiyyatdadır', dot:'var(--ems-neutral-300)' }
+      ]
+    };
+
+    // ---- modal
+    const e = s.edit;
+    if (e) {
+      const setE = (patch) => this.setState({ edit: Object.assign({}, e, patch) });
+      const base = { showType:false, showName:false, showHead:false, showMove:false, showArchive:false,
+        tipBg:'var(--ems-primary-50)', tipBd:'var(--ems-primary-200)', tipFg:'var(--ems-primary-800)',
+        name:'', abbr:'', q:'', order:'', why:'', people:[], targets:[], types:[], noPeople:false,
+        nameBd:'var(--ems-neutral-300)', nameErr:false, nameMsg:'', orderBd:'var(--ems-neutral-300)', parent:'' };
+
+      if (e.mode === 'create' || e.mode === 'rename') {
+        const create = e.mode === 'create';
+        const dupe = UNITS.some(u => this.nameOf(u).toLowerCase() === e.name.trim().toLowerCase() && !(e.mode === 'rename' && u.id === selU.id));
+        const bad = e.name.trim().length < 4 || dupe;
+        out.ev = Object.assign({}, base, {
+          title: create ? 'Yeni bölmə yarat' : 'Bölmənin adını dəyiş',
+          sub: create ? '«' + this.nameOf(selU) + '» bölməsinin tərkibinə yeni struktur vahidi əlavə olunur.' : 'Ad dəyişikliyi bütün sənəd, cədvəl və hesabatlara dərhal əks olunur.',
+          showType: create, showName: true,
+          parent: this.nameOf(selU) + ' — ' + TYPE[selU.type].short,
+          types: ['fakulte','kafedra','ixtisas','merkez','lab'].map(t => {
+            const x = this.chip(t === e.type);
+            return { label: TYPE[t].short, bg:x.bg, fg:x.fg, bd:x.bd, pick: () => setE({ type: t }) };
+          }),
+          name: e.name, abbr: e.abbr,
+          setName: (ev2) => setE({ name: ev2.target.value, touched:true }),
+          setAbbr: (ev2) => setE({ abbr: ev2.target.value }),
+          nameErr: e.touched && bad,
+          nameMsg: dupe ? 'Bu adla bölmə artıq var' : 'Ad ən azı 4 simvol olmalıdır',
+          nameBd: e.touched && bad ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+          tip: create ? 'Yeni bölmə rektorun əmri ilə rəsmiləşir. Kafedra yaradılandan sonra ona müdir təyin edilməyincə fənn və müəllim bağlana bilməz.'
+            : 'Köhnə ad audit izində saxlanılır — keçmiş semestrlərin sənədləri dəyişmir.',
+          invalid: bad,
+          cta: create ? 'Bölməni yarat' : 'Yadda saxla',
+          save: () => { if (bad) { setE({ touched:true }); return; }
+            if (create) { this.setState({ edit:null }); this.flash('«' + e.name.trim() + '» bölməsi yaradıldı — rəhbər təyinatı gözlənilir.'); }
+            else { this.setState({ edit:null, names: Object.assign({}, s.names, { [selU.id]: e.name.trim() }) }); this.flash('Bölmənin adı yeniləndi.'); } }
+        });
+      } else if (e.mode === 'head') {
+        const eq = (e.q || '').trim().toLowerCase();
+        const pool = PEOPLE.filter(p => !eq || p.n.toLowerCase().includes(eq));
+        const bad = !e.pick || !e.order.trim();
+        out.ev = Object.assign({}, base, {
+          title: T.head + ' təyinatı',
+          sub: this.nameOf(selU),
+          showHead: true, q: e.q, order: e.order,
+          setQ: (ev2) => setE({ q: ev2.target.value }),
+          setOrder: (ev2) => setE({ order: ev2.target.value, touched:true }),
+          orderBd: e.touched && !e.order.trim() ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+          headLabel:'Vəzifə tutmaq hüququ olan müəllimlər',
+          people: pool.map(p => {
+            const on = e.pick === p.n;
+            return { ini: ini(p.n), name: p.n, meta: p.m, sel: on ? 'true' : 'false',
+              bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+              bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+              avBg: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+              avFg: on ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+              pick: () => setE({ pick: p.n }), key: this.keyActivate(() => setE({ pick: p.n })) };
+          }),
+          noPeople: pool.length === 0,
+          tip:'Təyinat rektorun əmri ilə rəsmiləşir. Təsdiqdən sonra bu şəxs bölmənin bütün təsdiq addımlarını görəcək və imzalaya biləcək.',
+          invalid: bad, cta:'Təyinatı təsdiqlə',
+          save: () => { if (bad) { setE({ touched:true }); return; }
+            this.setState({ edit:null, heads: Object.assign({}, s.heads, { [selU.id]: { name: e.pick, order: e.order.trim() } }) });
+            this.flash(e.pick + ' — ' + this.nameOf(selU) + ' üzrə ' + T.head.toLowerCase() + ' təyin olundu.'); }
+        });
+      } else if (e.mode === 'move') {
+        const legal = selU.type === 'kafedra' ? UNITS.filter(u => u.type === 'fakulte')
+          : (selU.type === 'ixtisas' ? UNITS.filter(u => u.type === 'kafedra')
+          : UNITS.filter(u => u.type === 'fakulte' || u.type === 'rektorat'));
+        const pool = legal.filter(u => u.id !== selU.parent);
+        out.ev = Object.assign({}, base, {
+          title:'Bölməni başqa tabeliyə keçir', sub: this.nameOf(selU) + ' — hazırda «' + this.nameOf(byId(selU.parent)) + '» tərkibindədir',
+          showMove: true,
+          targets: pool.map(u => {
+            const on = e.target === u.id;
+            return { name: this.nameOf(u), type: TYPE[u.type].short, dot: TYPE[u.type].color, sel: on ? 'true' : 'false',
+              bg: on ? 'var(--ems-primary-50)' : 'transparent', fw: on ? 800 : 600,
+              fg: on ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+              pick: () => setE({ target: u.id }), key: this.keyActivate(() => setE({ target: u.id })) };
+          }),
+          tip:'Keçid bütün tabe bölmələri, müəllimləri və qrupları özü ilə aparır. Keçmiş semestrlərin hesabatları köhnə tabelikdə qalır.',
+          invalid: !e.target, cta:'Keçidi təsdiqlə',
+          save: () => { if (!e.target) return; this.setState({ edit:null }); this.flash(this.nameOf(selU) + ' → ' + this.nameOf(byId(e.target)) + ' tərkibinə keçirildi.'); }
+        });
+      } else {
+        const bad = e.why.trim().length < 10;
+        out.ev = Object.assign({}, base, {
+          title:'Bölməni arxivə göndər', sub: this.nameOf(selU),
+          showArchive: true, why: e.why,
+          setWhy: (ev2) => setE({ why: ev2.target.value, touched:true }),
+          tipBg:'var(--ems-warning-bg)', tipBd:'#fde68a', tipFg:'#92400e',
+          tip:'Arxivə göndərilən bölmə yeni sənədlərdə seçilə bilmir, amma keçmiş semestrlərin cədvəl, jurnal və hesabatlarında görünməyə davam edir. Bölmə silinmir.',
+          invalid: bad, cta:'Arxivə göndər',
+          save: () => { if (bad) { setE({ touched:true }); return; } this.setState({ edit:null }); this.flash(this.nameOf(selU) + ' arxivə göndərildi.'); }
+        });
+      }
+      out.ev.bd = out.ev.invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)';
+      out.ev.bg = out.ev.invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)';
+      out.ev.fg = out.ev.invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)';
+      out.ev.cur = out.ev.invalid ? 'not-allowed' : 'pointer';
+    } else {
+      out.ev = { title:'', sub:'', showType:false, showName:false, showHead:false, showMove:false, showArchive:false,
+        types:[], people:[], targets:[], noPeople:false, name:'', abbr:'', q:'', order:'', why:'', parent:'',
+        nameBd:'var(--ems-neutral-300)', nameErr:false, nameMsg:'', orderBd:'var(--ems-neutral-300)',
+        tip:'', tipBg:'var(--ems-primary-50)', tipBd:'var(--ems-primary-200)', tipFg:'var(--ems-primary-800)',
+        invalid:true, cta:'', bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed' };
+    }
+
+    return out;
+  }
+}
+
+</script>
+</body>
+</html>

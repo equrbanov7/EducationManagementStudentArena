@@ -340,3 +340,87 @@ def build_week_view(slots, *, week_context, exams_by_day=None, weekdays=_TEACHIN
             }
         )
     return days
+
+
+# ── Göstərilən dövrün seçimi (R-1/R-4) ─────────────────────────────────────
+#
+# Blokator belə idi: `my-schedule` YALNIZ `AcademicPeriod.is_current`-a baxırdı,
+# `schedule_manage` isə BİTMİŞ dövrə slot yazmağı rədd edir.  Cari dövr bitəndə
+# (tədris ili hələ açılmayıbsa bu normal haldır) yazıla bilən hər dövr görünməz,
+# görünən dövrə isə yazmaq olmurdu.  Aşağıdakı həll ikisini barışdırır:
+# göstəriş üçün dövr TARİXƏ görə seçilir, yazı qaydası isə toxunulmur.
+
+
+def season_label(period) -> str:
+    """Yarımilin fəsil adı — `page_contexts._season_label` bunu çağırır."""
+    month = period.start_date.month if getattr(period, "start_date", None) else 9
+    if month >= 8 or month == 12:
+        return "Payız semestri"
+    if month <= 5:
+        return "Yaz semestri"
+    return "Yay semestri"
+
+
+def _period_ids_with_slots(organization) -> set:
+    """Ən azı bir cədvəl slotu olan dövrlərin id-ləri (mətn formasında)."""
+    return {
+        str(period_id)
+        for period_id in ScheduleSlot.objects.filter(organization=organization)
+        .values_list("offering__period_id", flat=True)
+        .distinct()
+        if period_id
+    }
+
+
+def _pick_display_period(periods, *, current, with_slots, today):
+    """Tarixə əsaslanan seçim — `is_current` bayrağı TƏK meyar deyil.
+
+    ⚠️ Geriyə zaman səyahəti YOXDUR: klonda 2022/2023 semestrindən qalma tək
+    slot «ən son slotlu dövr» kimi seçilib istifadəçiyə 4 il köhnə cədvəl
+    göstərirdi.  Ona görə keçmişə yalnız CARİ dövrdən geri getməmək şərti ilə
+    baxılır; heç nə uyğun gəlmirsə davranış köhnə kimi qalır (cari / ən son).
+    """
+    if current is not None and current.start_date <= today <= current.end_date:
+        return current
+    upcoming = sorted((p for p in with_slots if p.start_date >= today), key=lambda p: p.start_date)
+    if upcoming:
+        return upcoming[0]
+    # `periods` -start_date sırasındadır → `with_slots`-un ilk elementi ən sonuncudur.
+    recent = [p for p in with_slots if current is None or p.start_date >= current.start_date]
+    if recent:
+        return recent[0]
+    return current or periods[0]
+
+
+def resolve_display_period(organization, *, requested="", today=None) -> dict:
+    """Cədvəldə göstəriləcək dövr + dövr seçicisinin seçimləri.
+
+    Sıra: açıq `?period=` → tarixə düşən cari dövr → slotu olan ən yaxın
+    GƏLƏCƏK dövr → slotu olan ƏN SON dövr → köhnə davranış (cari/ən son).
+    Seçici yalnız MƏNALI dövrləri göstərir: slotu olanlar + cari + seçilmiş.
+    """
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    periods = list(AcademicPeriod.objects.filter(organization=organization).order_by("-start_date"))
+    if not periods:
+        return {"period": None, "choices": [], "years": [], "selected_id": ""}
+
+    today = today or timezone.localdate()
+    slot_period_ids = _period_ids_with_slots(organization)
+    with_slots = [p for p in periods if str(p.id) in slot_period_ids]
+    current = next((p for p in periods if p.is_current), None)
+
+    selected = next((p for p in periods if str(p.id) == str(requested or "").strip()), None)
+    if selected is None:
+        selected = _pick_display_period(periods, current=current, with_slots=with_slots, today=today)
+
+    visible = [p for p in periods if str(p.id) in slot_period_ids or p is current or p is selected]
+    year_labels = {p.academic_year: p.year_display for p in visible}
+    return {
+        "period": selected,
+        "choices": [
+            {"id": str(p.id), "year": p.academic_year, "year_label": p.year_display, "label": season_label(p)}
+            for p in visible
+        ],
+        "years": [{"value": year, "label": year_labels[year]} for year in sorted(year_labels, reverse=True)],
+        "selected_id": str(selected.id) if selected else "",
+    }

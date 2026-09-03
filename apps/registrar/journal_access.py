@@ -4,6 +4,9 @@
 
 * :func:`can_edit_journal` — GİRİŞ + korrektor səlahiyyəti. Müəllim / org sahibi /
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
+* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim.
+  Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
+  is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
 * :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: YALNIZ müəllim,
   org sahibi, superuser. Korrektor (İKT) buraya DAXİL DEYİL — o, dəyişikliyi yalnız
   «Jurnal düzəlişi» rejimində sənədli (audited, PDF) yolla edir; normal görünüşdə
@@ -25,16 +28,14 @@ def offering_or_404(request, offering_id, *, select_related=True):
     daşıyırsa mühərrik səviyyəsində keçilir; hər iki halda başqa təşkilatın
     jurnalı pk təxmini ilə açıla bilərdi.
 
-    Filtr aktiv org konteksti VARSA tətbiq olunur — bu, real hücum yolunu
-    (öz org-una girmiş istifadəçi başqa org-un pk-sını sınayır) bağlayır.
-    Kontekst yoxdursa (məs. üzvlüyü olmayan, amma offering-in instructor-u olan
-    müəllim) obyekt qaytarılır və giriş qərarı çağırana — ``can_edit_journal``
-    sahiblik yoxlamasına — qalır. Yəni bu qat mövcud yoxlamanı ƏVƏZ ETMİR,
-    onun ÜSTÜNƏ əlavə olunur (defence-in-depth); RLS üçüncü xətt kimi qalır.
+    Aktiv və etibarlı org konteksti yoxdursa fail-closed 404 qaytarılır. Beləliklə
+    multi-tenant müəllimin başqa təşkilatdakı offering PK-sı ilə cari tenantdan
+    çıxması və SQLite/owner DB rolunda RLS-dən yan keçməsi mümkün deyil.
     """
+    from django.http import Http404
     from django.shortcuts import get_object_or_404
 
-    from core.tenancy import get_request_organization
+    from core.tenancy import get_request_organization, request_has_active_organization_context
 
     from .models import CourseOffering
 
@@ -43,9 +44,40 @@ def offering_or_404(request, offering_id, *, select_related=True):
         queryset = queryset.select_related("subject", "period", "group", "organization")
 
     organization = get_request_organization(request)
-    if organization is not None:
-        queryset = queryset.filter(organization=organization)
-    return get_object_or_404(queryset, pk=offering_id)
+    if organization is None or not request_has_active_organization_context(request):
+        raise Http404
+    return get_object_or_404(queryset, pk=offering_id, organization=organization)
+
+
+def schedule_slot_or_404(request, slot_id):
+    """Load a schedule slot only inside a verified active tenant context."""
+    from django.http import Http404
+    from django.shortcuts import get_object_or_404
+
+    from core.tenancy import get_request_organization, request_has_active_organization_context
+
+    from .models import ScheduleSlot
+
+    organization = get_request_organization(request)
+    if organization is None or not request_has_active_organization_context(request):
+        raise Http404
+    return get_object_or_404(
+        ScheduleSlot.objects.select_related("offering", "offering__organization"),
+        pk=slot_id,
+        offering__organization=organization,
+    )
+
+
+def _is_live_assigned_instructor(user, offering) -> bool:
+    if not offering.instructor_id or offering.instructor_id != getattr(user, "id", None):
+        return False
+
+    from .integrity import is_authorized_instructor
+
+    return is_authorized_instructor(
+        organization=offering.organization,
+        instructor=user,
+    )
 
 
 def can_edit_journal(user, offering) -> bool:
@@ -61,9 +93,25 @@ def can_edit_journal(user, offering) -> bool:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
-    if offering.instructor_id and offering.instructor_id == user.id:
+    if _is_live_assigned_instructor(user, offering):
         return True
     return offering.organization.owner_id == user.id
+
+
+def can_observe_journal(user, offering) -> bool:
+    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim.
+
+    QƏSDƏN ``can_edit_journal``-dan AYRIDIR. Onu genişləndirsəydik köhnə müəllim
+    ``is_direct_editor`` olmadan da POST səthlərinə (dərs əlavəsi, bal yazma)
+    çata bilərdi — jurnalın iki sahibi yaranardı. Ayrı funksiya çağıran tərəfi
+    «görmək» ilə «yazmaq» arasında seçim etməyə MƏCBUR edir.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+
+    from .handover import is_handover_observer
+
+    return is_handover_observer(user, offering)
 
 
 def is_direct_editor(user, offering) -> bool:
@@ -75,6 +123,6 @@ def is_direct_editor(user, offering) -> bool:
         return False
     if getattr(user, "is_superuser", False):
         return True
-    if offering.instructor_id and offering.instructor_id == user.id:
+    if _is_live_assigned_instructor(user, offering):
         return True
     return offering.organization.owner_id == user.id

@@ -1,0 +1,93 @@
+{% load i18n %}
+{% comment %}
+Sual göndərişinin TAM ZƏNCİRİ: müəllim → kafedra müdiri → İmtahan Mərkəzi.
+
+İki hissə:
+1. Mərhələ zolağı (4 addım) — göndərişin harada olduğunu bir baxışda göstərir;
+2. Hadisə lentı (`submission_events`, əlavə-only) — kim, nə vaxt, hansı
+   səbəblə hansı addımı atdı.
+
+Kontekst müqaviləsi: `submission` (QuestionSubmission) + `submission_events`
+(QuestionSubmissionEvent siyahısı). Üslub: exams/css/question_submission_chain.css
+(+ mövcud `qsubd-timeline` primitivləri). Inline stil YOXDUR — CSP.
+{% endcomment %}
+
+<div class="qsubd-timeline" aria-label="{% trans 'Göndərişin yolu' context 'exams.template.question_chain' %}">
+    <div class="qsubd-timeline__step is-done">
+        <span class="qsubd-timeline__dot"><i class="fas fa-paper-plane"></i></span>
+        <span class="qsubd-timeline__label">{% trans "Müəllim göndərdi" context "exams.template.question_chain" %}</span>
+        <span class="qsubd-timeline__date">{{ submission.created_at|date:"d.m.Y H:i" }}{% if submission.resubmission_count %} · ×{{ submission.resubmission_count }}{% endif %}</span>
+    </div>
+    <div class="qsubd-timeline__step {% if submission.is_at_chair %}is-current{% elif submission.status == 'chair_revision' %}is-rejected{% elif submission.chair_decision == 'rejected' %}is-rejected{% elif submission.chair_decision == 'approved' %}is-done{% endif %}">
+        <span class="qsubd-timeline__dot"><i class="fas fa-user-tie"></i></span>
+        <span class="qsubd-timeline__label">
+            {% if submission.routed_to_dean %}{% trans "Dekanlıq təsdiqi" context "exams.template.question_chain" %}
+            {% else %}{% trans "Kafedra təsdiqi" context "exams.template.question_chain" %}{% endif %}
+        </span>
+        <span class="qsubd-timeline__date">
+            {% if submission.chair_unit %}{{ submission.chair_unit.name }}{% endif %}
+            {% if submission.chair_reviewed_at %} · {{ submission.chair_reviewed_at|date:"d.m.Y H:i" }}{% endif %}
+        </span>
+    </div>
+    <div class="qsubd-timeline__step {% if submission.is_at_center %}is-current{% elif submission.status == 'accepted' or submission.status == 'rejected' and submission.reviewed_at %}is-done{% endif %}">
+        <span class="qsubd-timeline__dot"><i class="fas fa-building-columns"></i></span>
+        <span class="qsubd-timeline__label">{% trans "İmtahan Mərkəzi" context "exams.template.question_chain" %}</span>
+        {% if submission.reached_center_at %}
+        <span class="qsubd-timeline__date">{{ submission.reached_center_at|date:"d.m.Y H:i" }}</span>
+        {% endif %}
+    </div>
+    <div class="qsubd-timeline__step {% if submission.status == 'accepted' %}is-accepted{% elif submission.status == 'rejected' %}is-rejected{% endif %}">
+        <span class="qsubd-timeline__dot">
+            {% if submission.status == "accepted" %}<i class="fas fa-check"></i>
+            {% elif submission.status == "rejected" %}<i class="fas fa-ban"></i>
+            {% else %}<i class="fas fa-gavel"></i>{% endif %}
+        </span>
+        <span class="qsubd-timeline__label">
+            {% if submission.status == "accepted" %}{% trans "Qəbul edildi" context "exams.template.question_chain" %}
+            {% elif submission.status == "rejected" %}{% trans "Rədd edildi" context "exams.template.question_chain" %}
+            {% else %}{% trans "Yekun qərar" context "exams.template.question_chain" %}{% endif %}
+        </span>
+        {% if submission.reviewed_at %}
+        <span class="qsubd-timeline__date">{{ submission.reviewed_at|date:"d.m.Y H:i" }}</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if submission_events %}
+<details class="qsube-log" open>
+    <summary class="qsube-log__summary">
+        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+        {% trans "Kafedra tarixçəsi" context "exams.template.question_chain" %}
+        <span class="qsube-log__count">{{ submission_events|length }}</span>
+    </summary>
+    <ol class="qsube-log__list">
+        {% for ev in submission_events %}
+        <li class="qsube-log__item qsube-log__item--{{ ev.action }}">
+            <span class="qsube-log__dot" aria-hidden="true"></span>
+            <div class="qsube-log__body">
+                <span class="qsube-log__action">
+                    {% if ev.action == "submitted_to_chair" %}{% trans "Kafedra müdirinə göndərildi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "resubmitted_to_chair" %}{% trans "Düzəldilib kafedraya yenidən göndərildi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "chair_approved" %}{% trans "Kafedra təsdiqlədi — İmtahan Mərkəzinə göndərildi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "chair_revision" %}{% trans "Kafedra düzəliş istədi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "chair_rejected" %}{% trans "Kafedra rədd etdi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "center_opened" %}{% trans "İmtahan Mərkəzi baxışa götürdü" context "exams.template.question_chain" %}
+                    {% elif ev.action == "center_accepted" %}{% trans "İmtahan Mərkəzi qəbul etdi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "center_revision" %}{% trans "İmtahan Mərkəzi düzəliş istədi" context "exams.template.question_chain" %}
+                    {% elif ev.action == "center_rejected" %}{% trans "İmtahan Mərkəzi rədd etdi" context "exams.template.question_chain" %}
+                    {% else %}{{ ev.get_action_display }}{% endif %}
+                </span>
+                <span class="qsube-log__meta">
+                    {{ ev.actor_label|default:"—" }}
+                    {% if ev.actor_role %} · {{ ev.actor_role }}{% endif %}
+                    · {{ ev.created_at|date:"d.m.Y H:i" }}
+                </span>
+                {% if ev.reason %}
+                <p class="qsube-log__reason">{{ ev.reason|linebreaksbr }}</p>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+</details>
+{% endif %}

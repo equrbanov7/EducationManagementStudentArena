@@ -98,9 +98,26 @@ class RegistrarConsoleTest(TestCase):
         self.assertContains(resp, "CS101")
         self.assertContains(resp, "Kompüter elmləri")
 
-    def test_dean_can_access(self):
+    def test_unscoped_dean_is_denied(self):
         resp = self._client(self.dean).get(reverse("registrar:console"))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_scoped_dean_is_denied_until_console_crud_is_scope_aware(self):
+        with bypass_rls():
+            self.dean.memberships.filter(organization=self.org).update(scope_unit=self.group)
+        resp = self._client(self.dean).get(reverse("registrar:console"))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_unscoped_chair_is_denied(self):
+        with bypass_rls():
+            chair = User.objects.create_user("rc_chair", "rc_chair@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=chair,
+                organization=self.org,
+                role=self.org.roles.get(name="chair_head"),
+                is_active=True,
+            )
+        self.assertEqual(self._client(chair).get(reverse("registrar:console")).status_code, 404)
 
     # ── create / edit ──────────────────────────────────────────────────────
     def test_create_subject(self):

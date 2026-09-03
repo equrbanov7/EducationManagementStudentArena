@@ -35,12 +35,18 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20260709-profile-menu">
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260720-wrap">
+    {% comment %}Axtarışlı seçici (EMSSearchableSelect) — VAHİD komponent üslubu;
+    əvvəllər altı ayrı fayla kopyalanmışdı. Bax: static/css/searchable_select.css.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/searchable_select.css' %}?v=20260827-1">
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260618-1">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20260618-1">
+    {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
+    <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260815-1">
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
+    <link rel="stylesheet" href="{% static 'css/legacy_mark.css' %}?v=20260901-notice">
     <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260705-1">
     {% if request.user.is_authenticated %}
     <link rel="stylesheet" href="{% static 'css/global_search.css' %}?v=20260705-1">
@@ -62,11 +68,19 @@
       (imtahan/apellyasiya statistikası) SERVER-render olunanda onun inline skripti
       body-də parse zamanı window.EMSSearchableSelect-i SİNXRON çağırır — ona görə
       body-sonundan yox, body-dən əvvəl təyin olunmalıdır.
+
+      `searchable_select_keys.js` (klaviatura + ARIA qatı) ƏVVƏL gəlir: nüvə
+      fayl `create()` içində `window.EMSSearchableSelectKeys`-i axtarır, tapmasa
+      komponent səssizcə yalnız-siçan rejiminə düşərdi.
     {% endcomment %}
-    <script src="{% static 'js/searchable_select.js' %}?v=20260720-2"></script>
+    <script src="{% static 'js/searchable_select_keys.js' %}?v=20260831-1"></script>
+    <script src="{% static 'js/searchable_select.js' %}?v=20260831-2"></script>
 </head>
 
-<body>
+{% comment %}`data-toast-close-label` — proqram yolu ilə yaradılan toast-ların
+bağlama düyməsi üçün tərcümə olunmuş etiket (static/js/toast.js oxuyur; xarici
+JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endcomment %}
+<body data-toast-close-label="{% trans 'Bağla' %}">
 
     {# A11y (U18): klaviatura istifadəçisi üçün ilk fokuslana bilən element #}
     <a href="#main-content" class="skip-link">{% trans "Əsas məzmuna keç" context "a11y" %}</a>
@@ -140,6 +154,7 @@
     <script src="{% static 'js/core/csrf.js' %}?v=20260702-1"></script>
     <script src="{% static 'js/core/http.js' %}?v=20260702-1"></script>
     <script src="{% static 'js/ems_ajax_init.js' %}?v=20260604-ajaxinit"></script>
+    <script src="{% static 'js/modal_scroll_lock.js' %}?v=20260815-1"></script>
     <script src="{% static 'js/burgerMenu.js' %}?v=20260617-1"></script>
     <script src="{% static 'js/pagination.js' %}"></script>
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20260604-ajaxhook"></script>

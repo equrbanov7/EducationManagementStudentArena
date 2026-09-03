@@ -1,0 +1,81 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 13 «Koordinator — Yük vizası».
+
+İcazə: `workload.review` (proqram koordinatoru). Koordinator YALNIZ öz
+ixtisasının sətirlərini görür; əhatəsiz aktora data QAYTARILMIR (§8/4).
+
+⚠️ QAYDA: irad yazılan sətrin «baxılıb» bayrağı SİLİNİR — sətir eyni anda həm
+vizalanmış, həm iradlı ola bilməz (servis qatı atomik edir).
+
+Arxiv: keçmiş tədris ili yalnız oxunuş — sətir əməlləri render OLUNMUR.
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'workload-visa' in allowed_sections %}
+{% trans "Kafedra müdirinə çatmazdan əvvəl öz ixtisasınızın hər yük sətrini yoxlayın: viza verin və ya irad yazın." context "accounts.workload_visa" as wv_subtitle %}
+{% trans "İrad bildir" context "accounts.workload_visa" as wv_remark_title %}
+{% trans "Şərh kafedraya və dekana görünəcək. İrad yazılan sətir «vizalanmış» sayılmır." context "accounts.workload_visa" as wv_remark_sub %}
+{% trans "İradı göndər" context "accounts.workload_visa" as wv_remark_btn %}
+{% trans "Şərh" context "accounts.workload_visa" as wv_remark_label %}
+{% trans "Şərh yazılmadan irad göndərilə bilməz." context "accounts.workload_visa" as wv_remark_hint_invalid %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'workload-visa' %}is-active{% endif %}"
+         data-profile-section-panel="workload-visa"
+         data-source-url="{{ profile_base_url }}?section=workload-visa">
+
+{% if not workload_visa_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=workload_visa_section.access_denied_message %}
+{% else %}
+<div class="tof wl-chain"
+     data-tof-root
+     data-tof-section="workload-visa"
+     data-tof-action-url="{{ workload_visa_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=wv_subtitle header_actions_include="accounts/profile/sections/workload/_visa_header_actions.html" %}
+
+    {% trans "Viza görünüşləri" context "accounts.workload_visa" as wv_tabs_label %}
+    {% include "partials/ems_ui/_tabs.html" with tabs=workload_visa_section.view_tabs tabs_label=wv_tabs_label %}
+
+    {% if workload_visa_section.is_archive %}
+        {% trans "Arxiv rejimi" context "accounts.workload_visa" as wv_arch %}
+        {% trans "Keçmiş tədris ili yalnız oxunuş üçün açıqdır — viza mərhələsi bağlıdır." context "accounts.workload_visa" as wv_arch_body %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wv_arch banner_body=wv_arch_body %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_visa_section.kpi_tiles %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-visa" filter_prefix="wv_" filter_fields=workload_visa_section.filter_fields filter_count_label=workload_visa_section.filter_count_label %}
+
+    {% if workload_visa_section.view == "history" %}
+        <h3 class="tof-pane__title">{% trans "Mənim hərəkətlərim" context "accounts.workload_visa" %}</h3>
+        <table class="ems-table ems-table--zebra">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Fənn" context "accounts.workload_visa" %}</th>
+                    <th scope="col">{% trans "Qərar" context "accounts.workload_visa" %}</th>
+                    <th scope="col">{% trans "Şərh" context "accounts.workload_visa" %}</th>
+                    <th scope="col">{% trans "Tarix" context "accounts.workload_visa" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in workload_visa_section.history %}
+                <tr>
+                    <th scope="row">{{ item.subject }}</th>
+                    <td>{% if item.status == "flagged" %}{% trans "İrad" context "accounts.workload_visa" %}{% else %}{% trans "Viza" context "accounts.workload_visa" %}{% endif %}</td>
+                    <td>{{ item.comment|default:"—" }}</td>
+                    <td>{{ item.when|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">{% trans "Hələ heç bir viza verməmisiniz." context "accounts.workload_visa" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        {% include "partials/ems_ui/_data_table.html" with table_columns=workload_visa_section.columns table_rows=workload_visa_section.table_rows table_state=workload_visa_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-clipboard-check" state_title=workload_visa_section.state_title state_body=workload_visa_section.state_body %}
+    {% endif %}
+
+    {% if workload_visa_section.can_write %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="wlRemarkDialog" reason_title=wv_remark_title reason_subtitle=wv_remark_sub reason_label=wv_remark_label reason_submit_label=wv_remark_btn reason_submit_tone="warning" reason_hint_invalid=wv_remark_hint_invalid reason_action=workload_visa_section.action_url reason_hidden=workload_visa_section.reason_hidden reason_form_data=workload_visa_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

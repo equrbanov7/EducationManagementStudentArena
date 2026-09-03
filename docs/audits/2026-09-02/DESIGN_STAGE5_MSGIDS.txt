@@ -1,0 +1,46 @@
+# Design Stage 5 (18–20 Sillabus) — YENİ / DƏYİŞMİŞ msgid-lər
+# i18n keçidi bu işdən SONRA gedir. `.po` faylları BU İŞDƏ REDAKTƏ EDİLMƏYİB.
+# Format:  <kontekst> | <msgid>            (# qeyd)
+# Kataloqlar: locale/{az,en,ru,tr}/LC_MESSAGES/django.po
+
+## YENİ — apps/accounts/views/syllabus/labels.py (ISSUE_MESSAGES)
+accounts.syllabus | Sərbəst bölünən %(need)s bal tam paylanmayıb (hazırda %(have)s) — cəm 100 olmalıdır
+accounts.syllabus | Qiymətləndirmə çəkisi mənfi ola bilməz
+
+## YENİ — apps/accounts/views/syllabus/labels.py (TRANSITION_MESSAGES)
+accounts.syllabus | Qiymətləndirmə bölgüsü siyasətə uyğun deyil: sərbəst bölünən %(need)s bal tam paylanmalıdır.
+accounts.syllabus | Mövzu, çəki və ya struktur dəyişdiyi üçün versiya avtomatik BÖYÜK versiyaya qaldırıldı — dəyişiklik növbəti semestrdən qüvvəyə minir.
+
+## YENİ — apps/accounts/views/syllabus/section.py (18-ci ekran, SLA KPI kartı)
+accounts.syllabus | SLA-nı keçib
+accounts.syllabus | %(days)s gündən çox kafedra növbəsindədir
+
+## YENİ — apps/accounts/views/syllabus/review_rows.py (20-ci ekran, SLA badge)
+accounts.syllabus | %(days)s gündür gözləyir — SLA %(sla)s gün
+
+## YENİ — apps/accounts/views/syllabus/review_text.py
+accounts.syllabus | %(days)s gündən çox gözləyir        # LATE_KPI_NOTE — hədd siyasətdən gəlir
+
+## YENİ — apps/registrar/templates/registrar/partials/_jd_lesson_modal.html
+registrar.journal | mühazirə                            # mövzu seçimində dərs növü nişanı
+registrar.journal | seminar
+registrar.journal | laboratoriya
+registrar.journal | Təsdiqlənmiş sillabus və kurs mövzu planı yoxdur — mövzunu əl ilə yazın.
+
+## DƏYİŞMİŞ msgid — köhnəsi kataloqdan ÇIXARILMALIDIR
+# Səbəb: hədd artıq hardcode 10 gün deyil, siyasətdən (`syllabus.sla_days` /
+# `escalation_days`) gəlir; etiket rəqəmsiz oldu.
+accounts.syllabus | 10 gündən çox gözləyir        →  Eskalasiya həddini keçib
+    # iki yerdə: review_rows.RISK_LABELS["late"] və review_text.KPI_LABELS["late"]
+accounts.syllabus | hədəf: 5 gündən az            →  hədəf: SLA çərçivəsində
+    # review_text.KPI_LABELS["average"]
+
+## DƏYİŞMİŞ mətn (eyni kontekst, yeni msgid) — şablon
+# apps/accounts/templates/.../syllabus/_list_dialogs.html: «Geri çağır» səbəbi
+# 15 → 20 simvol (README §8/6 ümumi qaydası ilə uzlaşdırıldı).
+accounts.syllabus | Ən azı 15 simvol — səbəb audit izinə yazılır.   →  Ən azı 20 simvol — səbəb audit izinə yazılır.
+accounts.syllabus | Ən azı 15 simvol — səbəb məcburidir.            →  Ən azı 20 simvol — səbəb məcburidir.
+
+## DƏYİŞMİŞ msgid — registrar (mövzu mənbəyi sillabusa keçdi)
+registrar.journal | Kursun mövzu siyahısı yoxdur — mövzunu əl ilə yazın.
+    →  Təsdiqlənmiş sillabus və kurs mövzu planı yoxdur — mövzunu əl ilə yazın.

@@ -218,6 +218,22 @@
     word-break: break-word;
 }
 
+/* --- Akademik struktur kartları (Fakültə/Kafedra/İxtisas/Qrup) --- */
+.profile-structure-card__code {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-200);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+}
+
 .profile-group-chip-list {
     display: flex;
     flex-wrap: wrap;

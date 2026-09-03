@@ -1,0 +1,10 @@
+{% if 'exam-score-entry' in allowed_sections %}
+{% comment %}İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi.
+Panel sarğısı (journal-close pattern-i): məzmun ayrıca partial-dadır,
+stil/skript XARİCİ fayllardadır (CSP: inline yoxdur).{% endcomment %}
+<section class="profile-section-panel profile-section--exam-score-entry {% if active_section == 'exam-score-entry' %}is-active{% endif %}"
+         data-profile-section-panel="exam-score-entry"
+         data-source-url="{{ profile_base_url }}?section=exam-score-entry">
+    {% include "accounts/partials/_exam_score_entry_content.html" with s=exam_score_entry_section %}
+</section>
+{% endif %}

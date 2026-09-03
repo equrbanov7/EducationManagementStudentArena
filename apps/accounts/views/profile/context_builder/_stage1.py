@@ -10,10 +10,15 @@ from apps.exams.models import Exam, StudentGroup
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 
-from ....forms import CustomPasswordChangeForm
+from ....forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
 from ....models import UserProfile
 from ....services.profile_actions import validate_profile_avatar_upload
-from ..._dashboard_helpers import _collect_assigned_tasks, _collect_my_results, _collect_pending_answer_items
+from ..._dashboard_helpers import (
+    _collect_assigned_tasks,
+    _collect_my_results,
+    _collect_pending_answer_items,
+    academic_filter_options,
+)
 from ..._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from ..._helpers import (
     STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT,
@@ -30,11 +35,19 @@ from ..._helpers import (
 from .._sections.exams import build_my_exams_context
 from .._sections.groups import build_groups_context
 from .._sections.question_bank import build_question_bank_context
+from .._sections.question_chair_review import build_question_chair_review_context
 from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
+from ..constants import DEFAULT_PROFILE_SECTION, FALLBACK_PROFILE_SECTION
 from ..contact_inbox import handle_contact_reply_post
 from ..post_handler import handle_profile_post
-from ._helpers import _build_effective_user_roles, _restore_profile_org_context
+from ._helpers import (
+    _build_effective_user_roles,
+    _build_primary_position_label,
+    _restore_profile_org_context,
+    build_student_structure_levels,
+    build_teacher_subject_rows,
+)
 
 
 class _Stage1Mixin:
@@ -71,7 +84,8 @@ class _Stage1Mixin:
         Now accessible to ALL users (not just teachers).
         """
         self.profile, self._created = UserProfile.objects.get_or_create(user=self.request.user)
-        self.requested_section = self.request.GET.get("section", "profile-info")
+        # FAZA 22 — parametrsiz açılış «Ana səhifə»yə gedir (əvvəl `profile-info`).
+        self.requested_section = self.request.GET.get("section") or DEFAULT_PROFILE_SECTION
         _restore_profile_org_context(self.request, self.profile, self.requested_section)
         self.capabilities = _role_capabilities(self.request.user, self.profile)
         self.notification_state = build_profile_notification_state(user=self.request.user, profile=self.profile)
@@ -86,11 +100,18 @@ class _Stage1Mixin:
         self._validate_avatar_upload = validate_profile_avatar_upload
         self.allowed_sections = self.capabilities["allowed_sections"]
         self.active_section = (
-            self.requested_section if self.requested_section in self.allowed_sections else "profile-info"
+            self.requested_section if self.requested_section in self.allowed_sections else FALLBACK_PROFILE_SECTION
         )
         if self.active_section == "delete-account":
-            self.active_section = "profile-info"
+            self.active_section = FALLBACK_PROFILE_SECTION
+        # Tam səhifə ilə icazəsiz/naməlum bölmə istənəndə SƏSSİZ fallback etmirik —
+        # qabıq «icazəniz yoxdur» xəbərdarlığı göstərir (QA dalğa-2, W2-8). AJAX ucu
+        # onsuz da 403 verir; burada yalnız UX siqnalıdır, məzmun sızması yoxdur.
+        self.section_denied = self.request.GET.get("section", "") not in ("", *self.allowed_sections)
         self.password_change_form = CustomPasswordChangeForm(self.request.user)
+        # OTP ilə şifrə dəyişmə (mövcud şifrə unudulub) — unbound default;
+        # POST xətasında post_handler bağlanmış formanı geri qaytarır.
+        self.password_otp_form = OTPPasswordResetConfirmForm(self.request.user)
         self.category_management_create_form = None
         self.category_management_edit_form = None
         self.category_management_edit_item = None
@@ -111,11 +132,12 @@ class _Stage1Mixin:
                 return self.post_result["response"]
             self.active_section = self.post_result["active_section"]
             self.password_change_form = self.post_result["password_change_form"]
+            self.password_otp_form = self.post_result.get("password_otp_form") or self.password_otp_form
             self.category_management_create_form = self.post_result["category_management_create_form"]
             self.category_management_edit_form = self.post_result["category_management_edit_form"]
             self.category_management_edit_item = self.post_result["category_management_edit_item"]
         self.user_roles = _build_effective_user_roles(self.request.user, self.profile)
-        self.primary_user_role_label = self.user_roles[0]["label"] if self.user_roles else ""
+        self.primary_user_role_label = _build_primary_position_label(self.profile, self.user_roles)
         self.active_organization = _get_active_organization(self.request)
         self.organization_access_rows = _build_user_organization_access_rows(
             self.request.user,
@@ -207,6 +229,9 @@ class _Stage1Mixin:
         self._qsub_ctx = build_question_submissions_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
+        self._qchair_ctx = build_question_chair_review_context(
+            self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
+        )
         self.question_bank_banks = self._qb_ctx["question_bank_banks"]
         self.question_bank_page_obj = self._qb_ctx["question_bank_page_obj"]
         self.question_bank_search_query = self._qb_ctx["question_bank_search_query"]
@@ -244,8 +269,14 @@ class _Stage1Mixin:
         self.my_results_search_query = ""
         self.my_results_pagination_query = ""
         self.my_results_page_param = "results_page"
-        self.my_result_counts = {"all": 0, "exams": 0, "courses": 0, "labs": 0, "independent": 0}
+        self.my_result_counts = {"all": 0, "exams": 0, "courses": 0, "labs": 0, "independent": 0, "academic": 0}
         self.my_results_active_filter = "all"
+        # Akademik (jurnal) nəticələrinin il/semestr süzgəci — açılış siyahıları
+        # registrar qurucusundan (`year_options`/`season_options`) gəlir.
+        self.my_results_year = ""
+        self.my_results_season = ""
+        self.my_results_year_options = []
+        self.my_results_season_options = []
         self.pending_answer_items = []
         self.pending_answer_counts = {
             "all": 0,
@@ -287,11 +318,21 @@ class _Stage1Mixin:
                     )
                 self.assigned_courses = list(self.assigned_courses_qs[:20])
             if self.active_section == "my-results":
+                self.my_results_year = (self.request.GET.get("results_year", "") or "").strip()
+                self.my_results_season = (self.request.GET.get("results_season", "") or "").strip()
                 self.my_result_items, self.my_result_counts, self.my_results_active_filter = _collect_my_results(
                     self.request,
                     filter_type=self.request.GET.get("results_type"),
                     search=self.request.GET.get("results_search"),
+                    year=self.my_results_year,
+                    season=self.my_results_season,
                 )
+                # Açılış siyahıları qurucunun ÖZ verdiyi (il, semestr) dəyərləridir —
+                # burada yenidən çıxarılmır (drift olmasın). Yalnız süzgəcin GÖRÜNDÜYÜ
+                # tablarda oxunur: başqa tabda ağır qurucunu boş yerə işə salmasın
+                # (orada `_collect_my_results` akademik qolu ümumiyyətlə qurmur).
+                if self.my_results_active_filter in {"all", "academic"}:
+                    self.my_results_year_options, self.my_results_season_options = academic_filter_options(self.request)
                 self.my_results_search_query = (self.request.GET.get("results_search", "") or "").strip()
                 self.my_results_page_obj = Paginator(self.my_result_items, 6).get_page(
                     self.request.GET.get(self.my_results_page_param)
@@ -301,6 +342,8 @@ class _Stage1Mixin:
                     section="my-results",
                     results_type=self.my_results_active_filter,
                     results_search=self.my_results_search_query,
+                    results_year=self.my_results_year,
+                    results_season=self.my_results_season,
                 )
                 self.my_results_count = self.my_result_counts.get("all", 0)
             else:
@@ -324,6 +367,11 @@ class _Stage1Mixin:
             from apps.appeals.public import count_pending_manage_appeals
 
             self.pending_appeals_count = count_pending_manage_appeals(self.request)
+        # «Müraciətlərim» badge-i PAYLAŞILAN (keşlənən) dəstdən gəlir — səhifə,
+        # fraqment və `profile_badges_api` eyni rəqəmi göstərsin deyə.
+        self.applications_pending_count = self.profile_badge_counts.get("applications_pending", 0)
+        # «Sual təsdiqi» badge-i — eyni paylaşılan (keşlənən) dəstdən.
+        self.question_chair_pending_count = self.profile_badge_counts.get("question_chair_pending", 0)
         self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
         self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
         self.teacher_groups = []
@@ -359,7 +407,17 @@ class _Stage1Mixin:
         self.academic_units = []
         self.teacher_subjects = []
         self.student_records = []
-        if self.active_organization is not None and self.active_section == "profile-info":
+        # «Akademik fəaliyyət» qeydləri (özü idarə edir) — profil məlumatı və
+        # redaktə bölmələrində göstərilir; digər bölmələrdə əlavə sorğu olmasın.
+        self.academic_item_groups = []
+        self.academic_item_display_groups = []
+        if self.active_section in {"profile-info", "edit-profile"}:
+            from ....services import academic_profile
+
+            self.academic_item_groups = academic_profile.items_grouped_for(self.request.user, self.capabilities)
+            # Görünüş (profil məlumatı) üçün boş qruplar gizlədilir.
+            self.academic_item_display_groups = [group for group in self.academic_item_groups if group["items"]]
+        if self.active_organization is not None and self.active_section in {"profile-info", "edit-profile"}:
             caps = self.capabilities
             if caps.get("is_teacher") or caps.get("is_unit_manager"):
                 from apps.organizations.models import Membership
@@ -402,22 +460,20 @@ class _Stage1Mixin:
                         }
                     )
             if caps.get("is_teacher"):
-                seen_subjects = set()
-                for offering in (
-                    self.request.user.taught_offerings.filter(organization=self.active_organization)
-                    .select_related("subject", "group")
-                    .order_by("subject__name")
-                ):
-                    key = (offering.subject_id, offering.group_id)
-                    if key not in seen_subjects:
-                        seen_subjects.add(key)
-                        self.teacher_subjects.append(offering)
+                # FƏNN üzrə təkrarsız (qrup/semestr sayı ilə) — bax
+                # ``build_teacher_subject_rows`` doc-string-indəki ölçü.
+                self.teacher_subjects = build_teacher_subject_rows(self.request.user, self.active_organization)
             if caps.get("is_student"):
                 self.student_records = list(
                     self.request.user.academic_records.filter(
                         is_active=True, organization=self.active_organization
                     ).select_related("program", "group")
                 )
+                # Fakültə/Kafedra/İxtisas/Qrup — hər səviyyə ayrıca kart kimi
+                # (bax ``build_student_structure_levels`` doc-string-i: köhnə
+                # "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ının yerinə).
+                for student_record in self.student_records:
+                    student_record.structure_levels = build_student_structure_levels(student_record)
 
         self.group_form = None
         self.can_multi_assign_group_teachers = False

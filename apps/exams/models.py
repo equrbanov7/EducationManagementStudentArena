@@ -27,6 +27,7 @@ from apps.exams.domain.question_bank import (
     validate_video_size,
 )
 from apps.exams.domain.student_access import ExamStudentPin, StudentExamAttemptGrant
+from apps.exams.domain.submission_events import QuestionSubmissionEvent
 from apps.exams.domain.submission_inbox import QuestionSubmission
 from apps.exams.domain.supervision import ExamSupervisionConfig, SupervisionIncident
 
@@ -58,6 +59,7 @@ __all__ = [
     "QuestionBank",
     "QuestionBlock",
     "QuestionSubmission",
+    "QuestionSubmissionEvent",
     "StudentExamAttemptGrant",
     "StudentGroup",
     "SupervisionIncident",

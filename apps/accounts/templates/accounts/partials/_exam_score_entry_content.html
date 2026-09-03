@@ -1,0 +1,235 @@
+{% load i18n static %}
+{% comment %}İmtahan Mərkəzi — kağız imtahan balının sistemə daxil edilməsi (kabinet).
+Full-page-nav bölmə (journal_close pattern-i) → stil/skript XARİCİ fayllara
+köçürülüb (CSP: no inline). Seçicilər GET ilə (autosubmit) səhifəni yeniləyir;
+bal forması accounts:exam_score_entry-ə multipart POST edir (şəkil/PDF sübutu).
+Səhifə açıq-mənbəli (light-only) — --ems-* token. Select-lər bootstrap-single-select.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}">
+
+<div class="ese"
+     data-org="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
+     data-superadmin="{% if s.is_superadmin %}1{% else %}0{% endif %}">
+  <p class="ese-sub ese-sub--lead">{% trans "Yazılı və praktiki imtahan kağız üzərində (praktikidə kodda) keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu seçin, hər tələbənin balını formada yazın; istəsəniz imtahan vərəqinin şəklini/PDF-ini və qeydini əlavə edin." context "registrar.exam_score_entry" %}</p>
+
+  {# ── Alət paneli: (superadmin) təşkilat + tədris ili + semestr + fənn + qrup ── #}
+  <div class="ese-toolbar">
+    {% if s.is_superadmin %}
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="exam-score-entry">
+      <div class="ese-field">
+        <label for="ese-org-select">{% trans "Təşkilat" context "registrar.exam_score_entry" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="ese-org-select" name="ese_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for o in s.org_options %}
+            <option value="{{ o.id }}" {% if s.selected_org and s.selected_org.id == o.id %}selected{% endif %}>{{ o.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+
+    {% if s.selected_org %}
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="exam-score-entry">
+      {% if s.is_superadmin %}<input type="hidden" name="ese_org" value="{{ s.selected_org.id }}">{% endif %}
+      <div class="ese-field">
+        <label for="ese-year-select">{% trans "Tədris ili" context "registrar.exam_score_entry" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="ese-year-select" name="ese_year" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for y in s.years %}
+            <option value="{{ y }}" {% if s.selected_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="exam-score-entry">
+      {% if s.is_superadmin %}<input type="hidden" name="ese_org" value="{{ s.selected_org.id }}">{% endif %}
+      {% if s.selected_year %}<input type="hidden" name="ese_year" value="{{ s.selected_year }}">{% endif %}
+      <div class="ese-field">
+        <label for="ese-period-select">{% trans "Semestr" context "registrar.exam_score_entry" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="ese-period-select" name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for p in s.periods %}
+            <option value="{{ p.id }}" {% if s.period and s.period.id == p.id %}selected{% endif %}>{{ p.season_label }} — {{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    {% if s.period %}
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="exam-score-entry">
+      {% if s.is_superadmin %}<input type="hidden" name="ese_org" value="{{ s.selected_org.id }}">{% endif %}
+      {% if s.selected_year %}<input type="hidden" name="ese_year" value="{{ s.selected_year }}">{% endif %}
+      <input type="hidden" name="period" value="{{ s.period.id }}">
+      <div class="ese-field ese-field--wide">
+        <label for="ese-subject-select">{% trans "Fənn" context "registrar.exam_score_entry" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="ese-subject-select" name="ese_subject" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit data-live-search="true">
+            {% for subject in s.subjects %}
+            <option value="{{ subject.id }}" {% if s.selected_subject_id == subject.id %}selected{% endif %}>{{ subject.code }} — {{ subject.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="exam-score-entry">
+      {% if s.is_superadmin %}<input type="hidden" name="ese_org" value="{{ s.selected_org.id }}">{% endif %}
+      {% if s.selected_year %}<input type="hidden" name="ese_year" value="{{ s.selected_year }}">{% endif %}
+      <input type="hidden" name="period" value="{{ s.period.id }}">
+      <input type="hidden" name="ese_subject" value="{{ s.selected_subject_id }}">
+      <div class="ese-field">
+        <label for="ese-offering-select">{% trans "Qrup" context "registrar.exam_score_entry" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="ese-offering-select" name="ese_offering" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for o in s.offerings %}
+            <option value="{{ o.id }}" {% if s.offering and s.offering.id == o.id %}selected{% endif %}>{{ o.group_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+    {% endif %}
+  </div>
+
+  {% if not s.selected_org %}
+  <div class="ese-empty">{% trans "Təşkilat tapılmadı." context "registrar.exam_score_entry" %}</div>
+  {% elif not s.period %}
+  <div class="ese-empty">{% trans "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın." context "registrar.exam_score_entry" %}</div>
+  {% elif not s.subjects %}
+  <div class="ese-empty">{% trans "Bu semestrdə fənn açılışı yoxdur." context "registrar.exam_score_entry" %}</div>
+  {% elif not s.offering %}
+  <div class="ese-empty">{% trans "Bu fənn üçün qrup açılışı tapılmadı." context "registrar.exam_score_entry" %}</div>
+  {% else %}
+
+  <div class="ese-card">
+    <div class="ese-card__head">
+      <h3 class="ese-card__title"><i class="fas fa-pen-to-square"></i> {% trans "Tələbə balları" context "registrar.exam_score_entry" %}</h3>
+      <span class="ese-card__meta">{{ s.offering.subject.code }} · {{ s.offering.group_label }} · {% trans "maksimum" context "registrar.exam_score_entry" %} {{ s.exam_score_max }}</span>
+    </div>
+
+    {% if s.journal_locked %}
+    <p class="ese-note ese-note--ok"><i class="fas fa-circle-check"></i> {% trans "Jurnal bağlıdır — bu normaldır: imtahan jurnal bağlandıqdan sonra keçir. Giriş balı kilidli qalır, imtahan (çıxış) balı isə buradan yazıla bilir." context "registrar.exam_score_entry" %}</p>
+    {% endif %}
+
+    {% if not s.rows %}
+    <div class="ese-empty ese-empty--soft">{% trans "Bu qrupda qeydiyyatlı tələbə yoxdur." context "registrar.exam_score_entry" %}</div>
+    {% else %}
+    <form method="post" action="{% url 'accounts:exam_score_entry' %}" enctype="multipart/form-data" class="ese-form" data-ese-form>
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_scores">
+      <input type="hidden" name="next" value="{{ s.post_next_url }}">
+      {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+      <input type="hidden" name="offering_id" value="{{ s.offering.id }}">
+
+      <div class="ese-tablewrap">
+      <table class="ese-table">
+        <thead>
+          <tr>
+            <th class="ese-th--num">#</th>
+            <th>{% trans "Tələbə" context "registrar.exam_score_entry" %}</th>
+            <th class="ese-th--num">{% trans "Giriş balı" context "registrar.exam_score_entry" %}</th>
+            <th class="ese-th--num">{% trans "İmtahan balı" context "registrar.exam_score_entry" %}</th>
+            <th class="ese-th--num">{% trans "Yekun" context "registrar.exam_score_entry" %}</th>
+            <th>{% trans "Sübut və qeyd" context "registrar.exam_score_entry" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in s.rows %}
+          <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}" data-ese-row data-has-score="{% if row.has_score %}1{% else %}0{% endif %}">
+            <td class="ese-td--num">{{ forloop.counter }}</td>
+            <td>
+              <span class="ese-student">{{ row.student.get_full_name|default:row.student.username }}</span>
+              {% if row.attempts %}
+              <span class="ese-attempts">
+                {% for attempt in row.attempts %}
+                <span class="ese-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
+                  {{ attempt.label }} {% trans "cəhd" context "registrar.exam_score_entry" %}:
+                  <b>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</b>
+                  · {% if attempt.is_official %}{% trans "rəsmi" context "registrar.exam_score_entry" %}{% else %}{% trans "ləğv olundu" context "registrar.exam_score_entry" %}{% endif %}
+                </span>
+                {% endfor %}
+              </span>
+              {% endif %}
+            </td>
+            <td class="ese-td--num">{{ row.entry_score }}</td>
+            <td class="ese-td--num">
+              <input type="number" class="ese-score" name="score__{{ row.enrollment.id }}"
+                     min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric"
+                     value="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}"
+                     data-ese-score data-initial="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}">
+            </td>
+            <td class="ese-td--num">
+              {% if row.graded %}<b>{{ row.total|floatformat:0 }}</b> <span class="ese-letter">{{ row.letter }}</span>{% else %}—{% endif %}
+            </td>
+            <td>
+              <div class="ese-just" data-ese-just>
+                <div class="ese-just__field ese-just__field--reason" data-ese-reason-wrap>
+                  <label for="ese-reason-{{ row.enrollment.id }}">{% trans "Səbəb" context "registrar.exam_score_entry" %}</label>
+                  <select id="ese-reason-{{ row.enrollment.id }}" name="reason__{{ row.enrollment.id }}" class="ese-select">
+                    <option value="">—</option>
+                    {% for reason in s.reasons %}
+                    <option value="{{ reason.value }}">{{ reason.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="ese-just__field">
+                  <label for="ese-note-{{ row.enrollment.id }}">{% trans "Qeyd" context "registrar.exam_score_entry" %}</label>
+                  <input type="text" id="ese-note-{{ row.enrollment.id }}" name="note__{{ row.enrollment.id }}"
+                         maxlength="500" class="ese-text">
+                </div>
+                <div class="ese-just__field">
+                  <label for="ese-evidence-{{ row.enrollment.id }}">{% trans "Şəkil / PDF" context "registrar.exam_score_entry" %}</label>
+                  <input type="file" id="ese-evidence-{{ row.enrollment.id }}" name="evidence__{{ row.enrollment.id }}"
+                         accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" class="ese-file">
+                </div>
+              </div>
+              {% if row.entries %}
+              <details class="ese-history">
+                <summary>{% trans "Daxiletmə tarixçəsi" context "registrar.exam_score_entry" %} ({{ row.entries|length }})</summary>
+                <ul class="ese-history__list">
+                  {% for entry in row.entries %}
+                  <li class="ese-history__item {% if entry.is_correction %}is-correction{% endif %}">
+                    <span class="ese-history__date">{{ entry.date }}</span>
+                    <span class="ese-history__delta">{{ entry.old }} → <b>{{ entry.new }}</b></span>
+                    {% if entry.reason %}<span class="ese-history__reason">{{ entry.reason }}</span>{% endif %}
+                    {% if entry.note %}<span class="ese-history__note">{{ entry.note }}</span>{% endif %}
+                    <span class="ese-history__by">{{ entry.by }}</span>
+                    {% if entry.evidence_url %}<a class="ese-history__doc" href="{{ entry.evidence_url }}" target="_blank" rel="noopener">{% trans "sənəd" context "registrar.exam_score_entry" %}</a>{% endif %}
+                  </li>
+                  {% endfor %}
+                </ul>
+              </details>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+
+      <p class="ese-note"><i class="fas fa-circle-info"></i> {% trans "İlk daxiletmə sərbəstdir — sübut məcburi deyil. ARTIQ yazılmış balı dəyişmək isə təqdimatlıdır: səbəb, qeyd və sənəd üçü də tələb olunur. Boş buraxılan sahə toxunulmur." context "registrar.exam_score_entry" %}</p>
+
+      <div class="ese-actions">
+        <button type="submit" class="ese-btn ese-btn--primary"><i class="fas fa-floppy-disk"></i> {% trans "Balları yadda saxla" context "registrar.exam_score_entry" %}</button>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+
+  {% endif %}
+</div>
+
+<div id="eseI18n" class="d-none"
+     data-confirm-change="{% trans 'Bu tələbənin balı ARTIQ yazılıb. Dəyişiklik təqdimatlıdır — səbəb, qeyd və sənəd tələb olunur. Davam edilsin?' context 'registrar.exam_score_entry' %}"
+     data-need-justification="{% trans 'Dəyişdirilən bal üçün səbəb, qeyd və sənəd doldurulmalıdır.' context 'registrar.exam_score_entry' %}"></div>
+<script src="{% static 'accounts/js/exam_score_entry.js' %}"></script>

@@ -1,14 +1,50 @@
-{% load i18n %}
+{% load i18n static %}
+{% comment %}
+"Nəticələrim" — yeni sistemin cəhd/təhvil nəticələri (imtahan, sərbəst iş, lab,
+kurs işi) İLƏ BİRLİKDƏ registrar/jurnal fənn nəticələri ("Akademik" tabı).
+
+Akademik sətirlər `_collect_my_results` → `academic_results.collect_academic_items`
+→ `registrar.public.student_academic_record_rows` zəncirindən gəlir, yəni
+"Ümumi tədris məlumatı" bölməsi ilə EYNİ qurucudan — keçmə/kəsr/hərf məntiqi
+burada təkrarlanmır. Bu bölmə RƏSMİ SƏNƏD DEYİL: PDF/yükləmə düyməsi və
+transkriptə keçid QƏSDƏN yoxdur.
+
+İl/semestr süzgəcləri yalnız akademik sətirlərə aiddir (imtahan cəhdinin semestr
+mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında göstərilir.
+{% endcomment %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--my-results {% if active_section == 'my-results' %}is-active{% endif %}" data-profile-section-panel="my-results" data-source-url="{% url 'accounts:my_results' %}">
     <div class="section-card">
 
-
+        {% comment %}Rəsmi transkript SORĞU kanalı (dizayn README §10.1 —
+        `transcriptPolicy = request`). Burada SƏNƏD LİNKİ YOXDUR: yalnız
+        Müraciətlər panelindəki «Transkript sorğusu» növünə keçid. Sahib
+        `download` siyasətinə keçsə bu blok özü SÖNÜR (`transcript_request.show`).{% endcomment %}
+        {% if transcript_request.show and 'applications' in allowed_sections %}
+        <div class="results-transcript-cta">
+            <i class="fas fa-scroll" aria-hidden="true"></i>
+            <div class="results-transcript-cta__text">
+                <b>{% trans "Rəsmi transkript" context "profile.results" %}</b>
+                <span>{% trans "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü." context "profile.results" %}</span>
+            </div>
+            <a class="results-transcript-cta__btn js-profile-section-link"
+               href="{{ transcript_request.request_url }}"
+               data-section="applications"
+               data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
+               data-source-url="{{ profile_base_url }}">
+                {% trans "Transkript sorğusu göndər" context "profile.results" %}
+            </a>
+        </div>
+        {% endif %}
 
         <div class="modern-results-tabs">
             <a href="{{ profile_base_url }}?section=my-results&results_type=all{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'all' %}active{% endif %}">
                 {% trans "tab_all" context "profile.results" %} <span class="tab-count">{{ my_result_counts.all|default:0 }}</span>
+            </a>
+            <a href="{{ profile_base_url }}?section=my-results&results_type=academic{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
+               class="modern-tab {% if my_results_active_filter == 'academic' %}active{% endif %}">
+                {% trans "Akademik" context "profile.results.academic" %} <span class="tab-count">{{ my_result_counts.academic|default:0 }}</span>
             </a>
             <a href="{{ profile_base_url }}?section=my-results&results_type=exams{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
@@ -28,7 +64,7 @@
             </a>
         </div>
 
-        <form method="get" class="results-section-search-form js-profile-debounce-search" data-debounce-ms="700">
+        <form method="get" class="results-section-search-form js-profile-debounce-search" data-debounce-ms="700" data-my-results-filter-form>
             <input type="hidden" name="section" value="my-results">
             <input type="hidden" name="results_type" value="{{ my_results_active_filter }}">
             <div class="results-section-search-input-wrap">
@@ -46,13 +82,62 @@
                 </a>
                 {% endif %}
             </div>
+
+            {% if my_results_active_filter == 'all' or my_results_active_filter == 'academic' %}
+            {% if my_results_year_options %}
+            <div class="results-academic-filters">
+                <div class="results-academic-filter">
+                    <label class="results-academic-filter__label" for="myResultsYear">{% trans "Tədris ili" context "profile.results.academic" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="myResultsYear"
+                                name="results_year"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select
+                                data-my-results-filter>
+                            <option value="">{% trans "Bütün illər" context "profile.results.academic" %}</option>
+                            {% for year in my_results_year_options %}
+                            <option value="{{ year }}" {% if year == my_results_year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="results-academic-filter">
+                    <label class="results-academic-filter__label" for="myResultsSeason">{% trans "Semestr" context "profile.results.academic" %}</label>
+                    <div class="bootstrap-single-select">
+                        <select id="myResultsSeason"
+                                name="results_season"
+                                class="form-select bootstrap-single-select__native js-bootstrap-single-select"
+                                data-bootstrap-select
+                                data-my-results-filter>
+                            <option value="">{% trans "Bütün semestrlər" context "profile.results.academic" %}</option>
+                            {% for season in my_results_season_options %}
+                            <option value="{{ season }}" {% if season == my_results_season %}selected{% endif %}>{{ season }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {% if my_results_year or my_results_season %}
+                <a class="results-academic-filter__reset"
+                   href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" context "profile.results.academic" %}
+                </a>
+                {% endif %}
+
+                <p class="results-academic-filters__hint">
+                    {% trans "İl və semestr süzgəci yalnız akademik (jurnal) fənn nəticələrinə aiddir." context "profile.results.academic" %}
+                </p>
+            </div>
+            {% endif %}
+            {% endif %}
         </form>
 
         {% if my_result_items %}
         <div class="results-cards-grid">
             {% for item in my_result_items %}
-            <div class="modern-result-card">
-                
+            <div class="modern-result-card {% if item.category == 'academic' %}modern-result-card--academic is-outcome-{{ item.academic.outcome }}{% endif %}">
+
                 <div class="result-card-header">
                     <div class="result-icon-wrapper assigned-task-icon assigned-task-icon--{{ item.category }}">
                         <i class="{{ item.icon }}"></i>
@@ -61,15 +146,26 @@
                         <h4 class="result-title">{{ item.title }}</h4>
                         <div class="result-meta-info">
                             <span class="kind-badge">{{ item.type_label }}</span>
-                            <span class="kind-badge">{{ item.kind }}</span>
-                            {% if item.submitted_at %}
+                            {% if item.kind %}<span class="kind-badge">{{ item.kind }}</span>{% endif %}
+                            {% comment %}
+                            Akademik sətirdə "kind" özü artıq "kod · müəllim" ayırıcısını
+                            daşıyır — ikinci `meta-divider` sətir sarınanda başıboş nöqtə
+                            kimi görünürdü, ona görə burada təqvim ikonu kifayətdir.
+                            {% endcomment %}
+                            {% if item.category == 'academic' %}
+                                {% if item.academic.period_label %}
+                                <span class="result-period-chip"><i class="far fa-calendar-alt"></i> {{ item.academic.period_label }}</span>
+                                {% endif %}
+                            {% elif item.submitted_at %}
                             <span class="meta-divider">•</span>
                             <span><i class="far fa-clock"></i> {{ item.submitted_at|date:"d M Y H:i" }}</span>
                             {% endif %}
                         </div>
                     </div>
                     <div class="result-status-wrap">
-                        {% if item.removed_from_exam %}
+                        {% if item.category == 'academic' %}
+                        <span class="result-outcome-badge result-outcome-badge--{{ item.academic.outcome }}">{{ item.academic.outcome_label }}</span>
+                        {% elif item.removed_from_exam %}
                         <span class="status-badge status-expired">{% trans "İmtahandan çıxarılıb" %}</span>
                         {% else %}
                         <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
@@ -78,6 +174,104 @@
                 </div>
 
                 <div class="result-card-body">
+                    {% if item.category == 'academic' %}
+                    <div class="result-academic-current" role="group" aria-label="{% trans 'Cari sistem üzrə hesablanmış nəticə' context 'profile.results.academic' %}">
+                    <h5 class="result-score-section-title">
+                        <i class="fas fa-calculator" aria-hidden="true"></i>
+                        {% trans "Cari sistem üzrə hesablanmış nəticə" context "profile.results.academic" %}
+                    </h5>
+                    <dl class="result-academic-grid">
+                        <div class="result-academic-cell">
+                            <dt>{% trans "Kredit" context "profile.results.academic" %}</dt>
+                            <dd>{{ item.academic.credit }}</dd>
+                        </div>
+                        <div class="result-academic-cell">
+                            <dt>{% trans "Giriş balı" context "profile.results.academic" %}</dt>
+                            <dd>{% if item.academic.entry_score != None %}{{ item.academic.entry_score|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                        </div>
+                        <div class="result-academic-cell">
+                            <dt>{% trans "Çıxış balı" context "profile.results.academic" %}</dt>
+                            <dd>{% if item.academic.exit_score != None %}{{ item.academic.exit_score|floatformat:"-2" }}{% else %}—{% endif %}</dd>
+                        </div>
+                        <div class="result-academic-cell">
+                            <dt>{% trans "Yekun" context "profile.results.academic" %}</dt>
+                            <dd>{% if item.academic.total != None %}<strong>{{ item.academic.total|floatformat:"-2" }}</strong>{% else %}—{% endif %}</dd>
+                        </div>
+                        <div class="result-academic-cell">
+                            <dt>{% trans "Dərəcə" context "profile.results.academic" %}</dt>
+                            <dd>{% if item.academic.letter %}<span class="result-letter result-letter--{{ item.academic.letter }}">{{ item.academic.letter }}</span>{% else %}—{% endif %}</dd>
+                        </div>
+                    </dl>
+                    {% comment %}
+                      Köçürülmüş nəticənin qeydi BALLARIN ALTINDA, açılan «xam mənbə»
+                      panelinin ÜSTÜNDƏDİR: tələbə rəqəmi görən kimi onun necə
+                      oxunacağını bilsin, panel açmağa məcbur qalmasın.
+                    {% endcomment %}
+                    {% include "registrar/partials/_legacy_grade_notice.html" with legacy=item.academic.legacy variant="block" %}
+                    </div>
+                    {% if item.academic.legacy_grade_facts %}
+                    <details class="result-legacy-grade">
+                        <summary class="result-legacy-grade__summary">
+                            <span>
+                                <i class="fas fa-box-archive" aria-hidden="true"></i>
+                                {% trans "Köhnə sistemdən köçürülmüş xam mənbə balları" context "profile.results.academic" %}
+                            </span>
+                            <span class="result-legacy-grade__count" aria-label="{% trans 'Mənbə qeydlərinin sayı' context 'profile.results.academic' %}">{{ item.academic.legacy_grade_facts|length }}</span>
+                        </summary>
+                        <div class="result-legacy-grade__body">
+                            <p class="result-legacy-grade__explanation">
+                                {% trans "Aşağıdakı dəyərlər köhnə bazadakı mənbə sətirlərindən dəyişdirilmədən göstərilir; yuxarıdakı cari hesabla eyniləşdirilmir." context "profile.results.academic" %}
+                            </p>
+                            <ol class="result-legacy-fact-list">
+                                {% for fact in item.academic.legacy_grade_facts %}
+                                <li class="result-legacy-fact">
+                                    <div class="result-legacy-fact__header">
+                                        <strong>{{ fact.kind_label }}</strong>
+                                        <span>{{ fact.source_reference }}{% if fact.is_archive %} · {% trans "arxiv" context "profile.results.academic" %}{% endif %}</span>
+                                    </div>
+                                    <dl class="result-legacy-fact__scores">
+                                        {% if fact.entry_score %}
+                                        <div><dt>{% trans "Giriş" context "profile.results.academic" %}</dt><dd>{{ fact.entry_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                                        {% endif %}
+                                        {% if fact.exam_score %}
+                                        <div><dt>{% trans "Çıxış (imtahan)" context "profile.results.academic" %}</dt><dd>{{ fact.exam_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                                        {% endif %}
+                                        {% if fact.final_score %}
+                                        <div><dt>{% trans "Yekun" context "profile.results.academic" %}</dt><dd>{{ fact.final_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                                        {% endif %}
+                                        {% if fact.resit_score %}
+                                        <div><dt>{% trans "Təkrar imtahan" context "profile.results.academic" %}</dt><dd>{{ fact.resit_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                                        {% endif %}
+                                        {% if fact.kind == "other" and fact.raw_score %}
+                                        <div><dt>{{ fact.score_code }}</dt><dd>{{ fact.raw_score }}</dd><span class="result-legacy-fact__score-warning">{{ fact.warning }}</span></div>
+                                        {% endif %}
+                                    </dl>
+                                    {% if fact.kind == "exam_entry_exit" %}
+                                    <p class="result-legacy-fact__attempt">
+                                        {% trans "Cəhd tipi" context "profile.results.academic" %}: {{ fact.legacy_attempt_type }}
+                                        {% if fact.legacy_recorded_at %} · {% trans "Köhnə qeyd vaxtı" context "profile.results.academic" %}: {{ fact.legacy_recorded_at }}{% endif %}
+                                    </p>
+                                    {% endif %}
+                                    <div class="result-legacy-fact__meta">
+                                        <span>{{ fact.mapping_label }}</span>
+                                        <span class="result-legacy-fact__review result-legacy-fact__review--{{ fact.review_status }}">
+                                            {% if fact.review_required %}<i class="fas fa-circle-exclamation" aria-hidden="true"></i>{% else %}<i class="fas fa-circle-check" aria-hidden="true"></i>{% endif %}
+                                            {{ fact.review_label }}
+                                        </span>
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                    </details>
+                    {% endif %}
+                    {% if item.academic.fail_reason_label %}
+                    <div class="result-feedback-box result-feedback-box--fail">
+                        <div class="feedback-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                        <p>{{ item.academic.fail_reason_label }}</p>
+                    </div>
+                    {% endif %}
+                    {% else %}
                     {% if item.removed_from_exam and item.removal_reason %}
                     <div class="result-feedback-box">
                         <div class="feedback-icon"><i class="fas fa-user-slash"></i></div>
@@ -94,7 +288,8 @@
                         {% endif %}
                     </div>
                     {% endif %}
-                    
+                    {% endif %}
+
                     {% if item.feedback %}
                     <div class="result-feedback-box">
                         <div class="feedback-icon"><i class="fas fa-comment-dots"></i></div>
@@ -102,7 +297,7 @@
                     </div>
                     {% endif %}
 
-                    {% if item.score == None and not item.feedback %}
+                    {% if item.category != 'academic' and item.score == None and not item.feedback %}
                     <div class="result-pending-box result-pending-box--{{ item.status|lower }}">
                         <div class="pending-icon"><i class="fas fa-hourglass-half"></i></div>
                         <p>
@@ -118,12 +313,14 @@
                     {% endif %}
                 </div>
 
+                {% if item.detail_url %}
                 <div class="result-card-footer">
                     <a href="{{ item.detail_url }}" class="btn-action btn-teal">
                         <i class="fas fa-eye"></i> {% trans "view_result" context "profile.results" %}
                     </a>
                 </div>
-                
+                {% endif %}
+
             </div>
             {% endfor %}
         </div>
@@ -131,22 +328,34 @@
         {% if my_results_page_obj.has_other_pages %}
             {% include "partials/_pagination.html" with page_obj=my_results_page_obj extra_query=my_results_pagination_query page_param=my_results_page_param %}
         {% endif %}
-        
+
         {% else %}
         <div class="modern-empty-state">
             <div class="empty-icon-wrapper icon-teal-light">
                 <i class="fas fa-clipboard-list"></i>
             </div>
-            <h3>{% trans "empty_title" context "profile.results" %}</h3>
-            <p>{% trans "empty_description" context "profile.results" %}</p>
-            {% if my_results_search_query %}
+            {% if my_results_search_query or my_results_year or my_results_season %}
+                <h3>{% trans "Süzgəcə uyğun nəticə tapılmadı" context "profile.results.academic" %}</h3>
+                <p>{% trans "Axtarış sözünü və ya il/semestr seçimini dəyişib yenidən yoxla." context "profile.results.academic" %}</p>
                 <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}" class="btn-teal results-section-empty-clear">
                     <i class="fas fa-times" aria-hidden="true"></i> {% trans 'Filtri təmizlə' %}
                 </a>
+            {% else %}
+                <h3>{% trans "empty_title" context "profile.results" %}</h3>
+                <p>{% trans "empty_description" context "profile.results" %}</p>
+                <p class="modern-empty-state__hint">
+                    {% trans "İmtahan və tapşırıq nəticələri sən onları təhvil verdikdən, akademik fənn nəticələri isə müəllim jurnalı yekunlaşdırıldıqdan sonra burada görünür. Fənlərin var, amma siyahı boşdursa — tədris hissəsi ilə əlaqə saxla." context "profile.results.academic" %}
+                </p>
             {% endif %}
         </div>
         {% endif %}
-        
+
     </div>
+    {% comment %}
+    `defer` MƏCBURİDİR: bu partial base.html-in məzmun blokunda (sətir ~113) render
+    olunur, `ems_ajax_init.js` isə ondan SONRA (sətir ~142) yüklənir — defer olmasa
+    script EMSReady/EMSDelegate mövcud olmadan icra olunardı.
+    {% endcomment %}
+    <script src="{% static 'accounts/js/profile/my_results_filters.js' %}?v=20260827-academic" defer></script>
 </section>
 {% endif %}

@@ -1,0 +1,336 @@
+/* «Cədvəl idarəetməsi» (schedule-manage) paneli.
+   ───────────────────────────────────────────────────────────────────────────
+   Həftə grid-inin üslubu `registrar/css/schedule.css`-dədir (sgx-*) və burada
+   TƏKRAR TƏRİF EDİLMİR — bu fayl yalnız panelin öz qatını (başlıq, seçicilər,
+   slot cədvəli, əlavə forması, təsdiq dialoqu) verir.
+   Rənglər `static/css/design-tokens.css` token-lərindəndir; tətbiq LIGHT-ONLY
+   (prefers-color-scheme qaydası QƏSDƏN yoxdur). */
+
+.profile-section--schedule-manage {
+    padding: 0;
+}
+
+.smx {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.smx__denied {
+    margin: 0;
+    padding: 18px 20px;
+    border: 1px solid var(--ems-warning-100);
+    border-radius: 12px;
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+    font-weight: 600;
+}
+
+/* ── Başlıq ─────────────────────────────────────────────────────────────── */
+
+.smx__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.smx__title {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.smx__intro {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--ems-neutral-600);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.smx__scope {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ── Seçicilər ──────────────────────────────────────────────────────────── */
+
+.smx-filters,
+.smx-add__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.smx-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.smx-field--wide {
+    grid-column: span 2;
+}
+
+.smx-field > label {
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Bütün giriş sahələri EYNİ hündürlükdə olmalıdır (select ↔ input ↔ time). */
+.smx-field input,
+.smx-field .bootstrap-single-select,
+.smx-field select {
+    width: 100%;
+    min-height: 40px;
+}
+
+.smx-field input {
+    padding: 8px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 10px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+    font-size: 0.9rem;
+}
+
+.smx-field input:focus {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+    border-color: var(--ems-primary-500);
+}
+
+/* ── Bölmə başlıqları + boş vəziyyət ────────────────────────────────────── */
+
+.smx-subtitle {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+}
+
+.smx-empty {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
+    font-size: 0.88rem;
+}
+
+.smx-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Slot cədvəli ───────────────────────────────────────────────────────── */
+
+.smx-table__wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+
+.smx-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.smx-table th,
+.smx-table td {
+    padding: 10px 12px;
+    text-align: start;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    white-space: nowrap;
+}
+
+.smx-table thead th {
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.smx-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.smx-table tbody tr:hover {
+    background: var(--ems-primary-50);
+}
+
+.smx-col-act {
+    width: 1%;
+    text-align: end;
+}
+
+/* ── Düymələr ───────────────────────────────────────────────────────────── */
+
+.smx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.smx-btn:hover {
+    filter: brightness(0.97);
+}
+
+.smx-btn--primary {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.smx-btn--ghost {
+    background: var(--ems-neutral-0);
+    border-color: var(--ems-neutral-300);
+}
+
+.smx-btn--danger {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Əlavə forması: xəta + konflikt ─────────────────────────────────────── */
+
+.smx-add__form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+}
+
+.smx-add__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.smx-error {
+    margin: 0;
+    color: var(--ems-danger-strong);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.smx-conflict {
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.smx-conflict.is-clean {
+    background: var(--ems-emerald-50);
+    color: var(--ems-success-strong);
+}
+
+.smx-conflict.is-clash {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Təsdiq dialoqu ─────────────────────────────────────────────────────── */
+
+.smx-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.smx-dialog__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.smx-dialog__panel {
+    position: relative;
+    width: min(440px, 100%);
+    padding: 22px;
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+}
+
+.smx-dialog__title {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.smx-dialog__body {
+    margin: 0 0 8px;
+    color: var(--ems-neutral-700);
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.smx-dialog__note {
+    margin: 0 0 16px;
+    color: var(--ems-neutral-500);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.smx-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 640px) {
+    .smx-field--wide {
+        grid-column: span 1;
+    }
+
+    .smx__scope {
+        align-self: flex-start;
+    }
+}

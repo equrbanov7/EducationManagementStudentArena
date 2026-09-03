@@ -9,6 +9,8 @@ təsdiq. Bütün dəyişikliklər :func:`corrections.apply_correction` üzərind
 
 from __future__ import annotations
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -26,10 +28,25 @@ from .models import (
     CorrectionReason,
     CourseOffering,
     Enrollment,
+    JournalCorrection,
     Lesson,
     LessonMark,
     SelfWorkTopic,
 )
+
+logger = logging.getLogger(__name__)
+
+
+def _user_facing_validation_message(exc: ValidationError) -> str:
+    """`ValidationError`-un İSTİFADƏÇİ-ÜZLÜ mətnləri (xam `str(exc)` DEYİL).
+
+    ``exc.messages`` bizim servis qatının qəsdən tərcümə etdiyi sətirlərdir.
+    ``str(exc)`` isə `repr`-vari daxili təfərrüat (siyahı/dict quruluşu, sahə
+    adları) sızdırır — CodeQL `py/stack-trace-exposure` onu haqlı olaraq
+    işarələyir. `ValidationError` HƏMİŞƏ `.messages` daşıyır, ona görə köhnə
+    `hasattr(...) else str(exc)` budağı onsuz da ölü kod idi.
+    """
+    return "; ".join(exc.messages)
 
 
 def _require_corrector(request):
@@ -59,14 +76,19 @@ def build_correction_context(offering, request) -> dict:
     ``correction_journal`` səhifəsi, HƏM DƏ ``journal_detail``-in yerində düzəliş
     rejimi (``?correct=1``) eyni audited editoru göstərsin deyə. Bütün yazma
     ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
-    from . import item_corrections, journal_extras
+    from . import item_corrections, journal_extras, legacy_excuse
 
     sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True)
     cw_map = item_corrections.coursework_corrections_map(offering, include_document=True)
     cm_map = item_corrections.component_corrections_map(offering, include_document=True)
+    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    corrections_map = corrections.corrections_map_for_offering(offering, include_document=True)
+    # Düzəliş rejimində də köhnə üzrlü-qayıb sənədi görünür (normal görünüşlə
+    # eyni payload) — korrektor nəyin əsasında üq yazıldığını görsün deyə.
+    legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)
     return {
-        "journal": gradebook.get_offering_journal(offering=offering, newest_first=True),
-        "corrections_map": corrections.corrections_map_for_offering(offering, include_document=True),
+        "journal": journal,
+        "corrections_map": corrections_map,
         # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
         "selfwork_board": item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map),
         "coursework_rows": item_corrections.annotate_coursework_rows(
@@ -192,7 +214,8 @@ def correction_apply(request, offering_id):
                 was_empty=was_empty,
             )
     except ValidationError as exc:
-        message = "; ".join(exc.messages) if hasattr(exc, "messages") else str(exc)
+        logger.warning("journal correction rejected for offering %s", offering.pk, exc_info=True)
+        message = _user_facing_validation_message(exc)
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "error": message}, status=400)
         messages.error(request, message)
@@ -207,40 +230,19 @@ def correction_apply(request, offering_id):
 @login_required
 @require_POST
 def correction_delete(request, offering_id):
-    """Səhvən edilmiş SON düzəlişi geri al (revert): dəyər köhnəyə qayıdır, sarı itir."""
+    """Append-only ledger ilə seçilmiş son düzəlişi geri al."""
     _require_corrector(request)
     org = _active_org(request)
     offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
-    ctype = (request.POST.get("type") or "grade").strip()
-
-    if ctype == "lesson":
-        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
-        ok = corrections.revert_last_lesson_correction(lesson=lesson, by_user=request.user, request=request)
-    elif ctype in ("selfwork", "coursework", "component"):
-        from . import item_corrections
-
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
-        if ctype == "selfwork":
-            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
-            ok = item_corrections.revert_last_selfwork_correction(
-                topic=topic, enrollment=enrollment, by_user=request.user, request=request
-            )
-        elif ctype == "component":
-            component = get_object_or_404(AssessmentComponent, pk=request.POST.get("component_id"), offering=offering)
-            ok = item_corrections.revert_last_component_correction(
-                component=component, enrollment=enrollment, by_user=request.user, request=request
-            )
-        else:
-            ok = item_corrections.revert_last_coursework_correction(
-                enrollment=enrollment, by_user=request.user, request=request
-            )
-    else:  # grade (davamiyyət/bal xanası)
-        mark = get_object_or_404(
-            LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-            pk=request.POST.get("mark_id"),
-            lesson__offering=offering,
-        )
-        ok = corrections.revert_last_grade_correction(mark=mark, by_user=request.user, request=request)
+    try:
+        ok = _revert_requested_correction(request, offering)
+    except ValidationError as exc:
+        logger.warning("journal correction rejected for offering %s", offering.pk, exc_info=True)
+        message = _user_facing_validation_message(exc)
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"ok": False, "error": message}, status=409)
+        messages.error(request, message)
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": ok})
@@ -249,3 +251,61 @@ def correction_delete(request, offering_id):
     else:
         messages.error(request, pgettext("registrar.correction", "Geri alınacaq düzəliş tapılmadı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
+
+
+def _revert_requested_correction(request, offering):
+    ctype = (request.POST.get("type") or "grade").strip()
+    correction_id = (request.POST.get("correction_id") or "").strip() or None
+    if correction_id is None:
+        raise ValidationError(
+            pgettext(
+                "registrar.correction",
+                "Select the exact correction to reverse and reload the journal if it changed.",
+            )
+        )
+    common = {"by_user": request.user, "request": request, "correction_id": correction_id}
+    if ctype == "lesson":
+        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
+        return corrections.revert_last_lesson_correction(lesson=lesson, **common)
+    if ctype in ("selfwork", "coursework", "component"):
+        from . import item_corrections
+
+        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        if ctype == "selfwork":
+            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+            return item_corrections.revert_last_selfwork_correction(
+                topic=topic,
+                enrollment=enrollment,
+                **common,
+            )
+        if ctype == "component":
+            component = get_object_or_404(
+                AssessmentComponent,
+                pk=request.POST.get("component_id"),
+                offering=offering,
+            )
+            return item_corrections.revert_last_component_correction(
+                component=component,
+                enrollment=enrollment,
+                **common,
+            )
+        return item_corrections.revert_last_coursework_correction(enrollment=enrollment, **common)
+
+    if correction_id:
+        expected = get_object_or_404(
+            JournalCorrection.objects.select_related("lesson_mark", "lesson_mark__lesson", "lesson_mark__enrollment"),
+            pk=correction_id,
+            organization=offering.organization,
+        )
+        get_object_or_404(Lesson, pk=expected.lesson_ref, offering=offering)
+        return corrections.revert_last_grade_correction(
+            mark=expected.lesson_mark,
+            offering=offering,
+            **common,
+        )
+    mark = get_object_or_404(
+        LessonMark.objects.select_related("lesson", "enrollment", "organization"),
+        pk=request.POST.get("mark_id"),
+        lesson__offering=offering,
+    )
+    return corrections.revert_last_grade_correction(mark=mark, offering=offering, **common)

@@ -1,0 +1,253 @@
+{% load static i18n %}
+{% comment %}
+«RİM mərkəzi» — hesab idarəetməsi (axtarış / parol bərpası / blok / soft-delete /
+şəxsi məlumat redaktəsi).
+
+Bölmə SPA panelidir: server yalnız icazə xəritəsini və endpoint URL-lərini verir,
+siyahı və detal JSON-la gəlir. CSS/JS XARİCİ fayllardadır (CSP: unsafe-inline yox);
+dinamik dəyərlər `data-*` atributları ilə ötürülür — bax CLAUDE.md.
+
+İcazələr: `user.search` / `user.credentials` / `user.block` / `user.soft_delete` /
+`user.edit` (apps/organizations/permissions.py «users»). Düymələrin görünməsi
+UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
+{% endcomment %}
+{% if 'rim-center' in allowed_sections %}
+<section class="profile-section-panel profile-section--rim-center {% if active_section == 'rim-center' %}is-active{% endif %}"
+         data-profile-section-panel="rim-center"
+         data-source-url="{{ profile_base_url }}?section=rim-center">
+
+  <div class="rim"
+       data-rim-root
+       data-search-url="{{ rim_center_section.search_url }}"
+       data-action-url="{{ rim_center_section.action_url }}"
+       data-detail-url-template="{{ rim_center_section.detail_url_template }}"
+       data-can-set-password="{% if rim_center_section.can_set_password %}1{% else %}0{% endif %}"
+       data-can-block="{% if rim_center_section.can_block %}1{% else %}0{% endif %}"
+       data-can-soft-delete="{% if rim_center_section.can_soft_delete %}1{% else %}0{% endif %}"
+       data-can-edit="{% if rim_center_section.can_edit %}1{% else %}0{% endif %}"
+       data-min-reason-length="{{ rim_center_section.min_reason_length }}"
+       data-max-reason-length="{{ rim_center_section.max_reason_length }}"
+       data-role-assignment-url="{{ rim_center_section.role_assignment_url }}">
+
+    {% if rim_center_section.access_denied_message %}
+      <div class="rim-denied">
+        <i class="fas fa-lock"></i> {{ rim_center_section.access_denied_message }}
+      </div>
+    {% else %}
+
+    <div class="rim-head">
+      <h2 class="rim-title">
+        <i class="fas fa-id-card-alt"></i>
+        {% trans "RİM mərkəzi" context "profile.rim" %}
+      </h2>
+      <p class="rim-lead">
+        {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" %}
+      </p>
+
+      {% if rim_center_section.granted_permissions %}
+      <div class="rim-perms" aria-label="{% trans 'Sizin səlahiyyətləriniz' context 'profile.rim' %}">
+        <span class="rim-perms-label">{% trans "Səlahiyyətləriniz:" context "profile.rim" %}</span>
+        {% for perm in rim_center_section.granted_permissions %}
+        <span class="rim-perm-chip" title="{{ perm.key }}">{{ perm.label }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="rim-search">
+      <div class="rim-search-field">
+        <i class="fas fa-search rim-search-icon" aria-hidden="true"></i>
+        <label class="rim-visually-hidden" for="rim-search-input">
+          {% trans "Axtarış" context "profile.rim" %}
+        </label>
+        <input type="search"
+               id="rim-search-input"
+               class="rim-search-input"
+               data-rim-search
+               autocomplete="off"
+               placeholder="{% trans 'məs: Əliyev Elvin Səməd — və ya email / FİN / istifadəçi adı' context 'profile.rim' %}">
+        <button type="button" class="rim-search-clear" data-rim-search-clear hidden
+                aria-label="{% trans 'Təmizlə' context 'profile.rim' %}">&times;</button>
+      </div>
+
+      <div class="rim-status-tabs" role="tablist" data-rim-status-tabs>
+        <button type="button" class="rim-status-tab is-active" role="tab" data-rim-status="all">
+          {% trans "Hamısı" context "profile.rim" %}
+        </button>
+        <button type="button" class="rim-status-tab" role="tab" data-rim-status="active">
+          {% trans "Aktiv" context "profile.rim" %}
+        </button>
+        <button type="button" class="rim-status-tab" role="tab" data-rim-status="blocked">
+          {% trans "Bloklanmış" context "profile.rim" %}
+        </button>
+        <button type="button" class="rim-status-tab" role="tab" data-rim-status="archived">
+          {% trans "Arxiv" context "profile.rim" %}
+        </button>
+        <button type="button" class="rim-status-tab" role="tab" data-rim-status="deleted">
+          {% trans "Silinmiş" context "profile.rim" %}
+        </button>
+      </div>
+    </div>
+
+    <div class="rim-results" data-rim-results aria-live="polite">
+      <div class="rim-state">
+        <i class="fas fa-keyboard"></i>
+        {% trans "Axtarışa başlamaq üçün ad, soyad və ya ata adı yazın." context "profile.rim" %}
+      </div>
+    </div>
+
+    <div class="rim-pager" data-rim-pager></div>
+
+    {% comment %}
+    Detal + təsdiq modalları PANEL İÇİNDƏDİR — AJAX swap yalnız
+    [data-profile-section-panel] elementini götürür; kənarda qalan modal
+    swap-dan sonra itərdi (bax docs/frontend/AJAX_SAFE_JS_PATTERN.md).
+    {% endcomment %}
+    <div class="rim-modal" data-rim-detail-modal hidden>
+      <div class="rim-modal__backdrop" data-rim-modal-close></div>
+      <div class="rim-modal__box" role="dialog" aria-modal="true" aria-labelledby="rim-detail-title">
+        <div class="rim-modal__head">
+          <h3 id="rim-detail-title" data-rim-detail-title></h3>
+          <button type="button" class="rim-modal__x" data-rim-modal-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+        <div class="rim-modal__body" data-rim-detail-body></div>
+      </div>
+    </div>
+
+    <div class="rim-modal" data-rim-confirm-modal hidden>
+      <div class="rim-modal__backdrop" data-rim-confirm-close></div>
+      <div class="rim-modal__box rim-modal__box--sm" role="dialog" aria-modal="true"
+           aria-labelledby="rim-confirm-title">
+        <div class="rim-modal__head">
+          <h3 id="rim-confirm-title" data-rim-confirm-title></h3>
+          <button type="button" class="rim-modal__x" data-rim-confirm-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+        <div class="rim-modal__body">
+          <p class="rim-confirm-text" data-rim-confirm-text></p>
+          <label class="rim-field-label" for="rim-confirm-reason">
+            {% trans "Səbəb" context "profile.rim" %}
+          </label>
+          <textarea id="rim-confirm-reason" class="rim-textarea" data-rim-confirm-reason rows="3"
+                    placeholder="{% trans 'Bu əməliyyatın səbəbini yazın (audit jurnalına düşür)' context 'profile.rim' %}"></textarea>
+          <p class="rim-error" data-rim-confirm-error hidden></p>
+        </div>
+        <div class="rim-modal__foot">
+          <button type="button" class="rim-btn rim-btn--ghost" data-rim-confirm-close>
+            {% trans "İmtina" context "profile.rim" %}
+          </button>
+          <button type="button" class="rim-btn rim-btn--danger" data-rim-confirm-submit>
+            {% trans "Təsdiqlə" context "profile.rim" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rim-modal" data-rim-password-modal hidden>
+      <div class="rim-modal__backdrop" data-rim-password-close></div>
+      <div class="rim-modal__box rim-modal__box--sm" role="dialog" aria-modal="true"
+           aria-labelledby="rim-password-title">
+        <div class="rim-modal__head">
+          <h3 id="rim-password-title">{% trans "Müvəqqəti parol" context "profile.rim" %}</h3>
+          <button type="button" class="rim-modal__x" data-rim-password-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+        <div class="rim-modal__body">
+          <p class="rim-warning">
+            <i class="fas fa-triangle-exclamation"></i>
+            {% trans "Bu parol YALNIZ BİR DƏFƏ göstərilir və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın." context "profile.rim" %}
+          </p>
+          <div class="rim-password-box">
+            <code class="rim-password-value" data-rim-password-value></code>
+            <button type="button" class="rim-btn rim-btn--ghost rim-btn--sm" data-rim-password-copy>
+              <i class="fas fa-copy"></i> {% trans "Kopyala" context "profile.rim" %}
+            </button>
+          </div>
+          <p class="rim-note">
+            {% trans "İstifadəçi bu parolla girəndən sonra email təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək." context "profile.rim" %}
+          </p>
+        </div>
+        <div class="rim-modal__foot">
+          <button type="button" class="rim-btn rim-btn--primary" data-rim-password-close>
+            {% trans "Bağla" context "profile.rim" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {% comment %}
+      Bərpa qeydləri: əməliyyat «uğurlu» olsa da əl müdaxiləsi tələb edən
+      hissələr ola bilər (məs. qrup üzvlüyü). Operator bunu görməlidir.
+    {% endcomment %}
+    <div class="rim-modal" data-rim-notice-modal hidden>
+      <div class="rim-modal__backdrop" data-rim-notice-close></div>
+      <div class="rim-modal__box rim-modal__box--sm" role="dialog" aria-modal="true"
+           aria-labelledby="rim-notice-title">
+        <div class="rim-modal__head">
+          <h3 id="rim-notice-title">{% trans "Əl ilə yoxlanmalı" context "profile.rim" %}</h3>
+          <button type="button" class="rim-modal__x" data-rim-notice-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+        <div class="rim-modal__body">
+          <p class="rim-warning">
+            <i class="fas fa-triangle-exclamation"></i>
+            {% trans "Əməliyyat tamamlandı, lakin aşağıdakılar avtomatik bərpa olunmur." context "profile.rim" %}
+          </p>
+          <ul class="rim-note" data-rim-notice-list></ul>
+        </div>
+        <div class="rim-modal__foot">
+          <button type="button" class="rim-btn rim-btn--primary" data-rim-notice-close>
+            {% trans "Bağla" context "profile.rim" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script type="application/json" data-rim-i18n>{
+      "loading": "{% trans 'Yüklənir…'|escapejs context 'profile.rim' %}",
+      "empty": "{% trans 'Nəticə tapılmadı.'|escapejs context 'profile.rim' %}",
+      "type_to_search": "{% trans 'Axtarışa başlamaq üçün ad, soyad və ya ata adı yazın.'|escapejs context 'profile.rim' %}",
+      "error": "{% trans 'Xəta baş verdi. Yenidən cəhd edin.'|escapejs context 'profile.rim' %}",
+      "username": "{% trans 'İstifadəçi adı'|escapejs context 'profile.rim' %}",
+      "full_name": "{% trans 'Ad, soyad, ata adı'|escapejs context 'profile.rim' %}",
+      "email": "{% trans 'Email'|escapejs context 'profile.rim' %}",
+      "fin": "{% trans 'FİN'|escapejs context 'profile.rim' %}",
+      "phone": "{% trans 'Telefon'|escapejs context 'profile.rim' %}",
+      "first_name": "{% trans 'Ad'|escapejs context 'profile.rim' %}",
+      "last_name": "{% trans 'Soyad'|escapejs context 'profile.rim' %}",
+      "patronymic": "{% trans 'Ata adı'|escapejs context 'profile.rim' %}",
+      "roles": "{% trans 'Rollar'|escapejs context 'profile.rim' %}",
+      "no_roles": "{% trans 'Aktiv rol yoxdur'|escapejs context 'profile.rim' %}",
+      "status_active": "{% trans 'Aktiv'|escapejs context 'profile.rim' %}",
+      "status_blocked": "{% trans 'Bloklanıb'|escapejs context 'profile.rim' %}",
+      "status_deleted": "{% trans 'Silinib'|escapejs context 'profile.rim' %}",
+      "status_archived": "{% trans 'Arxiv (məzun/xaric)'|escapejs context 'profile.rim' %}",
+      "open": "{% trans 'Aç'|escapejs context 'profile.rim' %}",
+      "set_password": "{% trans 'Parol təyin et'|escapejs context 'profile.rim' %}",
+      "block": "{% trans 'Blokla'|escapejs context 'profile.rim' %}",
+      "unblock": "{% trans 'Blokdan çıxar'|escapejs context 'profile.rim' %}",
+      "soft_delete": "{% trans 'Sil'|escapejs context 'profile.rim' %}",
+      "restore": "{% trans 'Bərpa et'|escapejs context 'profile.rim' %}",
+      "edit": "{% trans 'Məlumatları redaktə et'|escapejs context 'profile.rim' %}",
+      "save": "{% trans 'Yadda saxla'|escapejs context 'profile.rim' %}",
+      "manage_roles": "{% trans 'Rol təyinatı bölməsində idarə et'|escapejs context 'profile.rim' %}",
+      "confirm_set_password": "{% trans 'Bu hesab üçün yeni birdəfəlik parol yaradılacaq və köhnə parol etibarsız olacaq. Davam edilsin?'|escapejs context 'profile.rim' %}",
+      "confirm_block": "{% trans 'Hesab bloklanacaq — istifadəçi sistemə girə bilməyəcək. Məlumatlar saxlanılır.'|escapejs context 'profile.rim' %}",
+      "confirm_unblock": "{% trans 'Hesabın bloku açılacaq və istifadəçi yenidən girə biləcək.'|escapejs context 'profile.rim' %}",
+      "confirm_soft_delete": "{% trans 'Hesab silinəcək (yumşaq silmə): giriş bağlanacaq, amma qiymət və jurnal yazıları OLDUĞU KİMİ qalacaq. Sonradan bərpa etmək mümkündür.'|escapejs context 'profile.rim' %}",
+      "confirm_restore": "{% trans 'Silinmiş hesab bərpa ediləcək və giriş yenidən açılacaq.'|escapejs context 'profile.rim' %}",
+      "reason_required": "{% trans 'Səbəb yazılmalıdır (ən azı 3 simvol).'|escapejs context 'profile.rim' %}",
+      "copied": "{% trans 'Kopyalandı'|escapejs context 'profile.rim' %}",
+      "password_change_required": "{% trans 'İlk giriş gözlənilir (öz parolunu qurmalıdır)'|escapejs context 'profile.rim' %}",
+      "email_unverified": "{% trans 'Email təsdiqlənməyib'|escapejs context 'profile.rim' %}",
+      "prev": "{% trans 'Əvvəlki'|escapejs context 'profile.rim' %}",
+      "next": "{% trans 'Sonrakı'|escapejs context 'profile.rim' %}",
+      "page_of": "{% trans 'səhifə'|escapejs context 'profile.rim' %}",
+      "total_found": "{% trans 'tapıldı'|escapejs context 'profile.rim' %}"
+    }</script>
+
+    {% endif %}
+  </div>
+</section>
+{% endif %}

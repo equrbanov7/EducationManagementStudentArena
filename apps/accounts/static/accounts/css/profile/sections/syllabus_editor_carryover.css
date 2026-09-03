@@ -1,0 +1,179 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus redaktoru — KÖÇÜRÜLMÜŞ MƏZMUNUN səthi
+   ───────────────────────────────────────────────────────────────────────────
+   Redaktor artıq mənbəni OLDUĞU KİMİ render edir: kataloqda olmayan tədris
+   metodları, struktura sığmayan sərbəst iş mövzuları və tədris planının 16
+   həftəsindən uzun cədvəl sətirləri.  Əvvəllər bu üç şey ekranda YOX idi və
+   toplayıcı onları ilk avtosaxlamada silirdi.
+
+   Bu qat həmin elementləri «əlavə/diqqət tələb edən» kimi işarələyir — silmə
+   niyyəti isə hər zaman AÇIQ əməldir (mövzunu boşaltmaq, çipi «Çıxar»-la
+   söndürmək), təsadüfi klik deyil.
+
+   Yalnız işıqlı tema — `prefers-color-scheme` YOXDUR (layihə qaydası).
+   Rənglər `--ems-*` tokenlərindəndir (static/css/design-tokens.css).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Xəbərdarlıq tonlu izah qutusu ────────────────────────────────────── */
+.syl-hintbox--warn {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+/* ── «əlavə» damğası (həftə sətri / sərbəst iş yuvası) ────────────────── */
+.syl-tagx {
+    display: inline-block;
+    margin-inline-start: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* ── Plandan artıq həftə sətirləri ────────────────────────────────────── */
+.syl-weeks__row--extra > th[scope="row"],
+.syl-weeks__row--extra > td {
+    background: var(--ems-warning-bg);
+}
+
+.syl-weeks__row--extra > th[scope="row"] {
+    color: var(--ems-warning-800);
+}
+
+/* ── Strukturdan artıq sərbəst iş yuvası ──────────────────────────────── */
+.syl-swtopic--extra {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+/* ── Kataloqda olmayan tədris metodları ───────────────────────────────── */
+.syl-methods__custom {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-top: 14px;
+    padding: 12px 13px;
+    border-radius: 11px;
+    border: 1px dashed var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.syl-methods__customhead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 9px;
+    margin: 0;
+    font-size: 0.79rem;
+    color: var(--ems-warning-800);
+}
+
+/* Çipin GÖVDƏSİ `button` deyil (`span`) — mətn bir kliklə söndürülməsin deyə.
+   Kursor da bunu deyir: yalnız «Çıxar» düyməsi işarə edir. */
+.syl-method--custom {
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 100%;
+    padding: 8px 10px 8px 14px;
+    border-radius: 14px;
+    border-style: dashed;
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-bg);
+    cursor: default;
+    text-align: start;
+}
+
+.syl-method--custom.is-on {
+    border-style: solid;
+    border-color: var(--ems-warning);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-800);
+}
+
+/* Söndürülmüş = «saxlanılmayacaq»: üstüxətli və solğun, amma HƏLƏ ekrandadır —
+   müəllim «Geri qaytar» ilə fikrini dəyişə bilir. */
+.syl-method--custom:not(.is-on) .syl-method__text {
+    text-decoration: line-through;
+    color: var(--ems-neutral-400);
+}
+
+/* Köçürülmüş mətn çox sətirli ola bilər («1. mühazirə\A 2. …»). */
+.syl-method__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.syl-method__drop {
+    flex: none;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.syl-method__drop:hover:not(:disabled) {
+    border-color: var(--ems-warning);
+    color: var(--ems-warning-800);
+}
+
+.syl-method__drop:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+/* ── GİZLİ, amma SAXLANILAN açarların səthi ───────────────────────────── */
+/* `data-extra` dəyəri (praktiki saat, mənbə qeydi, sxemə sonra əlavə olunan
+   sahələr) redaktorda REDAKTƏ OLUNMUR, lakin geri yazılır.  Əvvəllər o,
+   tamamilə görünməz idi: müəllim sətri boşaldıb «sildim» sanırdı.  Bu qat
+   dəyəri OXUNAN, amma müdaxilə tələb etməyən qeydə çevirir. */
+.syl-carrynote {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin: 4px 0 0;
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: var(--ems-neutral-500);
+}
+
+.syl-carrynote > i {
+    flex: none;
+    font-size: 0.62rem;
+    color: var(--ems-neutral-400);
+}
+
+.syl-carrynote > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.syl-carry {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    max-width: 100%;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 0.68rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}

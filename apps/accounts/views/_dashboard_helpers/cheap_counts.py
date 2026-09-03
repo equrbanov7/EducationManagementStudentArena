@@ -34,6 +34,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .academic_results import count_academic_items
 
 User = get_user_model()
 
@@ -186,11 +187,15 @@ def count_my_results(request, user) -> int:
     """
     Cheap aggregate matching `_collect_my_results` *all* filter:
     counts submitted/expired exam attempts (with results not hidden) plus
-    graded/in-review-window assignment/lab/project submissions.
+    graded/in-review-window assignment/lab/project submissions **plus** the
+    registrar's academic (journal) subject results.
 
     Mirrors the logic in `_collect_my_results` for `filter_type != "all"`
     which already used pure count() queries — we apply it for the badge
-    even when no specific filter is active.
+    even when no specific filter is active. The academic term is a single
+    `COUNT(*)` over the same enrollment set the heavy builder walks
+    (`transcript.student_record_enrollments`), so the badge can never drift
+    from the tab.
     """
     now = timezone.now()
     review_cutoff = now - REVIEW_EDIT_WINDOW
@@ -232,7 +237,9 @@ def count_my_results(request, user) -> int:
         .count()
     )
 
-    return exams + courses + labs + independent
+    academic = count_academic_items(request)
+
+    return exams + courses + labs + independent + academic
 
 
 def count_pending_answers(request, user) -> int:
@@ -277,6 +284,38 @@ def count_pending_answers(request, user) -> int:
     )
 
     return exams + courses + labs + independent
+
+
+def count_applications_pending(request, user) -> int:
+    """«Müraciətlərim» badge-i — emalçıya gələn açıqlar / göndərənə məlumat sorğusu.
+
+    Məntiq ``apps.applications.public.pending_badge_count``-dadır (iki COUNT
+    sorğusu); burada yalnız aktiv təşkilat konteksti həll olunur. Modul
+    sərhədi: yalnız public fasad çağırılır.
+    """
+    from apps.accounts.views._helpers.tenant import _get_active_organization
+    from apps.applications.public import pending_badge_count
+
+    organization = _get_active_organization(request)
+    if organization is None:
+        return 0
+    return pending_badge_count(user, organization)
+
+
+def count_question_chair_pending(request, user) -> int:
+    """«Sual təsdiqi» badge-i — kafedra müdirinin gözləyən sual dəstləri.
+
+    Sayğac SERVİS QATININ əhatə filtrini işlədir (``chair_queue_queryset``),
+    yəni badge heç vaxt siyahıdan çox göstərə bilməz; əhatəsi olmayan aktorda
+    0 qaytarır (fail-closed).
+    """
+    from apps.accounts.views._helpers.tenant import _get_active_organization
+    from apps.exams.services.question_chair_review import pending_chair_review_count
+
+    organization = _get_active_organization(request)
+    if organization is None:
+        return 0
+    return pending_chair_review_count(user, organization)
 
 
 def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, int]:
@@ -367,6 +406,10 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
     computed once per (user, org) and reused across loads / section swaps.
     """
     badges: dict[str, int] = {}
+    if "applications" in capabilities.get("allowed_sections", set()):
+        badges["applications_pending"] = count_applications_pending(request, user)
+    if "question-chair-review" in capabilities.get("allowed_sections", set()):
+        badges["question_chair_pending"] = count_question_chair_pending(request, user)
     if capabilities.get("can_view_student_assignments"):
         badges["assigned_tasks"] = count_assigned_tasks(request, user)
         badges["my_results"] = count_my_results(request, user)
@@ -383,8 +426,10 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
 
 __all__ = [
     "compute_profile_badge_counts",
+    "count_applications_pending",
     "compute_review_badge_counts",
     "count_assigned_tasks",
     "count_my_results",
     "count_pending_answers",
+    "count_question_chair_pending",
 ]

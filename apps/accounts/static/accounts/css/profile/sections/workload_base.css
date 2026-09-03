@@ -1,0 +1,535 @@
+/* Dərs yükü — səth qatı (kartlar, süzgəclər, sətir cədvəli, qalıq zolaqları).
+ *
+ * Light-only: rəng yalnız `--ems-*` tokenlərindən gəlir (design-tokens.css),
+ * `prefers-color-scheme: dark` bloku QƏSDƏN YOXDUR (tətbiq açıq rejimlidir).
+ * Modallar və mobil override-lar `workload_dialog.css`-dədir (SOFT_CAP=600). */
+
+.profile-section--workload,
+.profile-section--my-workload {
+  display: block;
+}
+
+.wl__denied {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border: 1px solid var(--ems-warning-bd, #f0c36d);
+  background: var(--ems-warning-bg, #fdf6e3);
+  border-radius: 10px;
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+/* ── Başlıq ────────────────────────────────────────────────────────────── */
+.wl__head,
+.wlm__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.wl__title,
+.wlm__title {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl__intro,
+.wlm__intro {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl__status {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--ems-primary-50, #eef4ff);
+  color: var(--ems-primary-700, #1b4fa0);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+}
+
+.wl__status[data-state="distributed"] {
+  background: var(--ems-success-bg, #e8f7ee);
+  color: var(--ems-success, #1c7a41);
+  border-color: var(--ems-success-bd, #b7e2c6);
+}
+
+.wl__status[data-state="amended"] {
+  background: var(--ems-warning-bg, #fdf6e3);
+  color: #8a5a00;
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+/* ── Süzgəclər ─────────────────────────────────────────────────────────── */
+.wl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 12px;
+}
+
+.wl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 170px;
+}
+
+.wl-field--search {
+  flex: 1 1 220px;
+}
+
+.wl-field > label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+/* Bütün girişlər EYNİ hündürlükdə (bootstrap-select ilə də). */
+.wl-field input,
+.wl-field select,
+.wlm-field select,
+.wl-form__field input,
+.wl-form__field select,
+.wl-form__field textarea {
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: #fff;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-form__field textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.wl-filters__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ── Düymələr ──────────────────────────────────────────────────────────── */
+.wl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+  background: #fff;
+  color: var(--ems-neutral-800, #2c3e50);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.wl-btn:hover {
+  background: var(--ems-neutral-50, #f7f9fc);
+}
+
+.wl-btn--primary {
+  background: var(--ems-primary, #2563eb);
+  border-color: var(--ems-primary, #2563eb);
+  color: #fff;
+}
+
+.wl-btn--primary:hover {
+  background: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl-btn--danger {
+  border-color: var(--ems-danger-bd, #f2b8b5);
+  color: var(--ems-danger, #b3261e);
+}
+
+.wl-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── İki panelli düzüm ─────────────────────────────────────────────────── */
+.wl__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.wl__aside {
+  position: sticky;
+  top: 12px;
+  padding: 14px 16px;
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 12px;
+}
+
+.wl-aside__title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.wl-aside__hint {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+/* ── Sətir kartı ───────────────────────────────────────────────────────── */
+.wl-row {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 12px;
+}
+
+.wl-row.is-complete {
+  border-color: var(--ems-success-bd, #b7e2c6);
+}
+
+.wl-row__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.wl-row__subject {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 10px;
+  font-size: 0.78rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-row__meta span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--ems-neutral-100, #eef2f7);
+}
+
+/* Fəaliyyət qalıq zolağı */
+.wl-act {
+  display: grid;
+  grid-template-columns: 130px minmax(80px, 1fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 7px 0;
+  border-top: 1px dashed var(--ems-neutral-200, #e2e8f0);
+  font-size: 0.82rem;
+}
+
+.wl-act__label {
+  font-weight: 600;
+  color: var(--ems-neutral-700, #3f5063);
+}
+
+.wl-act__bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--ems-neutral-200, #e2e8f0);
+  overflow: hidden;
+}
+
+.wl-act__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--wl-fill, 0%);
+  background: var(--ems-warning, #d68a00);
+  border-radius: 999px;
+}
+
+.wl-act.is-complete .wl-act__fill {
+  background: var(--ems-success, #1c7a41);
+}
+
+.wl-act__numbers {
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-700, #3f5063);
+}
+
+/* Bölgü siyahısı */
+.wl-assign-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wl-assign-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  background: var(--ems-primary-50, #eef4ff);
+  color: var(--ems-primary-700, #1b4fa0);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-assign-chip.is-vacant {
+  background: var(--ems-warning-bg, #fdf6e3);
+  color: #8a5a00;
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+.wl-assign-chip__remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+/* ── Müəllim kartı ─────────────────────────────────────────────────────── */
+.wl-teacher {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 10px;
+}
+
+.wl-teacher__name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-teacher__numbers {
+  font-size: 0.75rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-teacher__bar {
+  position: relative;
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--ems-neutral-200, #e2e8f0);
+  overflow: hidden;
+}
+
+.wl-teacher__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--wl-fill, 0%);
+  background: var(--ems-primary, #2563eb);
+  border-radius: 999px;
+}
+
+.wl-teacher.is-over .wl-teacher__fill {
+  background: var(--ems-danger, #b3261e);
+}
+
+.wl-teacher.is-vacant {
+  border-style: dashed;
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+/* ── Skeleton yükləmə ──────────────────────────────────────────────────── */
+.wl-skeleton,
+.wlm-skeleton {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.wl-skeleton__bar {
+  display: block;
+  height: 54px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--ems-neutral-100, #eef2f7) 25%,
+    var(--ems-neutral-200, #e2e8f0) 37%,
+    var(--ems-neutral-100, #eef2f7) 63%
+  );
+  background-size: 400% 100%;
+  animation: wl-shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes wl-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-skeleton__bar {
+    animation: none;
+  }
+}
+
+/* ── «Dərs yüküm» ──────────────────────────────────────────────────────── */
+.wlm-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.wlm-kpi {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-left: 3px solid var(--ems-neutral-300, #cbd5e1);
+  border-radius: 10px;
+}
+
+.wlm-kpi--primary {
+  border-left-color: var(--ems-primary, #2563eb);
+}
+
+.wlm-kpi--success {
+  border-left-color: var(--ems-success, #1c7a41);
+}
+
+.wlm-kpi--warning {
+  border-left-color: var(--ems-warning, #d68a00);
+}
+
+.wlm-kpi__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wlm-kpi__value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wlm-kpi__note {
+  font-size: 0.72rem;
+  color: var(--ems-neutral-500, #7b8794);
+}
+
+.wlm-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.wlm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 170px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wlm-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.wlm-tab {
+  min-height: 38px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ems-neutral-700, #3f5063);
+  cursor: pointer;
+}
+
+.wlm-tab.is-active {
+  background: var(--ems-primary, #2563eb);
+  border-color: var(--ems-primary, #2563eb);
+  color: #fff;
+}
+
+.wlm-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.wlm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.wlm-table th,
+.wlm-table td {
+  padding: 9px 12px;
+  text-align: start;
+  border-bottom: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wlm-table thead th {
+  background: var(--ems-neutral-50, #f7f9fc);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wlm-table__num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.wlm-table tfoot th,
+.wlm-table tfoot td {
+  font-weight: 700;
+  background: var(--ems-neutral-50, #f7f9fc);
+  border-bottom: 0;
+}

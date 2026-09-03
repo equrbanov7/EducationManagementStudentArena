@@ -1,0 +1,54 @@
+{% load i18n %}
+{% comment %}«Sillabusa bax» — sağdan açılan OXU-REJİMLİ panel.
+
+İki səth bu partial-ı PAYLAŞIR: müəllim jurnalı (journal_detail.html) və
+tələbə kabinetinin fənn detalı (_journal_student_content.html). Məzmun
+`registrar:offering_syllabus_json` endpoint-indən gəlir — server hansı versiyanı
+göstərməli olduğunu ÖZÜ qərar verir (tələbə → yalnız təsdiqlənmiş nüsxə).
+
+Niyə drawer, ayrıca səhifə deyil: sillabusa baxış jurnalın/kabinetin İŞ AXINI
+içindədir — müəllim bal yazarkən mövzuya baxır, tələbə isə öz cədvəlindən
+ayrılmadan oxuyur. Ayrıca səhifə hər ikisini kontekstdən qoparardı, profil
+bölməsi isə jurnal tam səhifə olduğu üçün sidebar-lı shell-ə keçid tələb edərdi.
+Sillabusun TAM redaktə səthi onsuz da profil bölməsidir (sol sidebar qalır) —
+bu panel yalnız oxu üçündür.
+
+A11y (dizayn §6): role="dialog" aria-modal, aria-labelledby, Escape bağlayır,
+fokus içəri girib bağlananda geri qayıdır (syllabus_view.js).
+{% endcomment %}
+{% comment %}Panelin özü URL saxlamır — hansı açılışın sillabusunu göstərəcəyi
+açan düymənin `data-sylv-open` atributundan gəlir (bir panel, çox düymə).
+{% endcomment %}
+<div class="sylv" data-sylv hidden>
+    <div class="sylv__backdrop" data-sylv-close></div>
+    <div class="sylv__panel" role="dialog" aria-modal="true" aria-labelledby="sylv-title" tabindex="-1">
+        <header class="sylv__head">
+            <div class="sylv__ident">
+                <span class="sylv__code" data-sylv-code></span>
+                <span class="sylv__badge" data-sylv-status></span>
+                <span class="sylv__version" data-sylv-version></span>
+            </div>
+            <h3 class="sylv__title" id="sylv-title" data-sylv-name>{% trans "Sillabus" context "registrar.syllabus" %}</h3>
+            <p class="sylv__meta" data-sylv-meta></p>
+            <button type="button" class="sylv__x" data-sylv-close
+                    aria-label="{% trans 'Paneli bağla' context 'registrar.syllabus' %}">&times;</button>
+        </header>
+        <p class="sylv__note" data-sylv-note hidden></p>
+        <div class="sylv__body" data-sylv-body>
+            <p class="sylv__loading" data-sylv-loading>{% trans "Yüklənir…" context "registrar.syllabus" %}</p>
+            <p class="sylv__error" data-sylv-error hidden>
+                {% trans "Sillabus açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin." context "registrar.syllabus" %}
+            </p>
+            <div data-sylv-blocks></div>
+        </div>
+        <footer class="sylv__foot">
+            <a class="sylv__pdf" data-sylv-pdf href="#" hidden>
+                <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                {% trans "PDF yüklə" context "registrar.syllabus" %}
+            </a>
+            <button type="button" class="sylv__close-btn" data-sylv-close>
+                {% trans "Bağla" context "registrar.syllabus" %}
+            </button>
+        </footer>
+    </div>
+</div>

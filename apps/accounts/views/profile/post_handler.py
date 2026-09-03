@@ -29,6 +29,21 @@ from .._helpers import _user_has_any_role
 User = get_user_model()
 
 
+def _log_password_change(request, *, method):
+    """Şifrə dəyişməsini audit jurnalına yazır (təhlükəsizlik izi)."""
+    from core.constants import AuditAction
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        reason=f"Password changed via {method}",
+        request=request,
+        resource_type="UserPassword",
+        resource_id=str(request.user.pk),
+        resource_repr=request.user.username,
+    )
+
+
 def handle_profile_post(
     request,
     *,
@@ -50,17 +65,19 @@ def handle_profile_post(
       * ``category_management_edit_form``: bound edit form or ``None``.
       * ``category_management_edit_item``: the category being edited or ``None``.
     """
-    from ...forms import CustomPasswordChangeForm
+    from ...forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
 
     category_management_create_form = None
     category_management_edit_form = None
     category_management_edit_item = None
+    password_otp_form = None
 
     def _result(response=None):
         return {
             "response": response,
             "active_section": active_section,
             "password_change_form": password_change_form,
+            "password_otp_form": password_otp_form,
             "category_management_create_form": category_management_create_form,
             "category_management_edit_form": category_management_edit_form,
             "category_management_edit_item": category_management_edit_item,
@@ -86,6 +103,20 @@ def handle_profile_post(
         if password_change_form.is_valid():
             user = password_change_form.save()
             update_session_auth_hash(request, user)
+            _log_password_change(request, method="current-password")
+            messages.success(request, _("Şifrə uğurla yeniləndi."))
+            return _result(redirect(f"{reverse('accounts:profile')}?section=change-password"))
+
+        messages.error(request, _("Şifrə yenilənmədi. Zəhmət olmasa formadakı xətaları düzəldin."))
+        active_section = "change-password"
+    elif submitted_form == "change-password-otp":
+        # «Mövcud şifrəni unutdum» axını: emailə göndərilən OTP + yeni şifrə.
+        # Kod PASSWORD_RESET məqsədli EmailOTP ilə yoxlanılır (bax password_otp.py).
+        password_otp_form = OTPPasswordResetConfirmForm(request.user, request.POST)
+        if password_otp_form.is_valid():
+            user = password_otp_form.save()
+            update_session_auth_hash(request, user)
+            _log_password_change(request, method="email-otp")
             messages.success(request, _("Şifrə uğurla yeniləndi."))
             return _result(redirect(f"{reverse('accounts:profile')}?section=change-password"))
 
@@ -132,12 +163,6 @@ def handle_profile_post(
         first_name = user_update_payload["first_name"]
         last_name = user_update_payload["last_name"]
         new_email = user_update_payload["email"]
-        student_university_name = (
-            request.POST.get("student_university_name", profile.student_university_name) or ""
-        ).strip()
-        student_school_identifier = (
-            request.POST.get("student_school_identifier", profile.student_school_identifier) or ""
-        ).strip()
 
         if not first_name or not last_name or not new_email:
             messages.error(request, pgettext_lazy("accounts.profile_edit.message", "required_fields_missing"))
@@ -152,20 +177,36 @@ def handle_profile_post(
             setattr(request.user, field_name, field_value)
         request.user.save(update_fields=allowed_user_fields)
 
-        # Update profile
-        profile.phone = (request.POST.get("phone", profile.phone) or "").strip()
+        # Update profile. Uzunluqlar model max_length-ə server tərəfdə kəsilir —
+        # maxlength yalnız client atributudur, birbaşa POST DataError verərdi.
+        profile.phone = (request.POST.get("phone", profile.phone) or "").strip()[:20]
+        profile.phone_secondary = (request.POST.get("phone_secondary", profile.phone_secondary) or "").strip()[:20]
         profile.bio = (request.POST.get("bio", profile.bio) or "").strip()
-        profile.location = (request.POST.get("location", profile.location) or "").strip()
-        profile.student_university_name = student_university_name
-        profile.student_school_identifier = student_school_identifier
+        profile.location = (request.POST.get("location", profile.location) or "").strip()[:100]
 
-        # Update enhanced profile fields
-        profile.student_specialization = (
-            request.POST.get("student_specialization", profile.student_specialization) or ""
-        ).strip()
-        profile.student_group_number = (
-            request.POST.get("student_group_number", profile.student_group_number) or ""
-        ).strip()
+        # Qurum üzvünün akademik strukturu (təşkilat/fakültə/ixtisas/qrup)
+        # universitet tərəfindən idarə olunur — formdan gələn dəyərlər qəbul
+        # edilmir. Fərdi istifadəçi (təşkilatsız və ya şəxsi INDIVIDUAL org)
+        # öz təhsil müəssisəsi və ixtisas mətnini redaktə edə bilər.
+        has_org = profile.is_academics_locked
+        if not has_org:
+            profile.student_university_name = (
+                request.POST.get("student_university_name", profile.student_university_name) or ""
+            ).strip()
+            profile.student_specialization = (
+                request.POST.get("student_specialization", profile.student_specialization) or ""
+            ).strip()
+
+        # Elmi ad / dərəcə — tələbə olmayan rollar üçün, yalnız etibarlı seçimlər.
+        if not capabilities.get("is_student"):
+            title_value = (request.POST.get("academic_title") or "").strip()
+            degree_value = (request.POST.get("academic_degree") or "").strip()
+            valid_titles = {choice[0] for choice in profile.AcademicTitle.choices}
+            valid_degrees = {choice[0] for choice in profile.AcademicDegree.choices}
+            if title_value in valid_titles or title_value == "":
+                profile.academic_title = title_value
+            if degree_value in valid_degrees or degree_value == "":
+                profile.academic_degree = degree_value
 
         # Handle avatar upload
         uploaded_avatar = request.FILES.get("avatar")
@@ -181,8 +222,10 @@ def handle_profile_post(
         if getattr(request.user, "is_admin_level", False):
             profile.supervisor_code = request.POST.get("supervisor_code", "")
 
-        if _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT}) and not (
-            profile.student_university_name or profile.student_school_identifier
+        if (
+            not has_org
+            and _user_has_any_role(request.user, {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT})
+            and not (profile.student_university_name or profile.student_school_identifier)
         ):
             messages.error(
                 request,

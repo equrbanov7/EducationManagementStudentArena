@@ -23,6 +23,8 @@ from apps.organizations.review_visibility import (  # noqa: F401
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
+from .semester_meta import SemesterLockMixin  # noqa: F401  (ekran 07 kilid qatı)
+
 
 class Country(models.Model):
     """
@@ -341,28 +343,27 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         return self.level
 
     @classmethod
-    def user_scope_subtree_q(cls, user, organization, *, path_field, id_field):
-        """Bax :func:`apps.organizations.scoping.user_scope_subtree_q`.
-
-        Modul sərhədi: `registrar` `organizations`-u import edə bilməz (dövr
-        yaranır), ona görə app registry vasitəsilə bu classmethod çağırılır.
-        """
+    def user_scope_subtree_q(cls, user, organization, *, path_field, id_field, permission=None):
+        """App-registry-safe scope query facade for cross-module consumers."""
         from apps.organizations.scoping import user_scope_subtree_q
 
-        return user_scope_subtree_q(user, organization, path_field=path_field, id_field=id_field)
+        return user_scope_subtree_q(user, organization, path_field=path_field, id_field=id_field, permission=permission)
 
     @classmethod
-    def user_scope_covers(cls, user, organization, unit_id) -> bool:
-        """Model üzərindən çağırış nöqtəsi — məntiq ``scoping.user_scope_covers_unit``-dədir.
-
-        Registrar bunu app registry ilə (statik import olmadan) çağırır ki,
-        ``organizations ↔ registrar`` dövrü yaranmasın."""
+    def user_scope_covers(cls, user, organization, unit_id, permission=None) -> bool:
+        """App-registry-safe single-unit scope facade."""
         from .scoping import user_scope_covers_unit
 
-        return user_scope_covers_unit(user, organization, unit_id)
+        return user_scope_covers_unit(user, organization, unit_id, permission=permission)
+
+    @classmethod
+    def user_permission_scope(cls, user, organization, permission):
+        from .scoping import get_permission_scope
+
+        return get_permission_scope(user, organization, permission)
 
 
-class AcademicPeriod(UUIDModel, TimeStampedModel):
+class AcademicPeriod(SemesterLockMixin, UUIDModel, TimeStampedModel):
     """
     Represents an academic period (semester, trimester, quarter, year).
     """

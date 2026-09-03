@@ -538,27 +538,23 @@ class ProfileViewTest(TestCase):
         self.assertTrue(owner.is_active)
         self.assertFalse(owner.profile.is_deleted)
 
-    def test_edit_profile_organization_type_uses_translated_bootstrap_select(self):
+    def test_edit_profile_drops_org_type_and_school_code_fields(self):
+        """2026-08-15 redesign: org-tipi seçimi, məktəb kodu və qrup/sinif
+        sahələri redaktə formasından çıxarılıb."""
         self.client.login(username="testuser", password="testpass123")
-        self.client.cookies["django_language"] = "en"
 
-        response = self.client.get(
-            reverse("accounts:profile") + "?section=edit-profile",
-            HTTP_ACCEPT_LANGUAGE="en",
-        )
+        response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
 
         self.assertEqual(response.status_code, 200)
-        # Bootstrap-single-select komponentinə çevrilib (data-bootstrap-select +
-        # native select saxlanılır); yenə də disabled, tərcümə olunmuş etiket/dəyər.
-        self.assertContains(response, 'id="organization_type"', html=False)
-        self.assertContains(response, "bootstrap-single-select__native", html=False)
-        self.assertContains(response, "data-bootstrap-select", html=False)
-        self.assertContains(response, 'disabled aria-disabled="true"', html=False)
-        self.assertContains(response, "Organization Type")
-        self.assertContains(response, "University")
-        self.assertNotContains(response, "org_type_university")
+        self.assertNotContains(response, 'id="organization_type"', html=False)
+        self.assertNotContains(response, 'name="student_school_identifier"', html=False)
+        self.assertNotContains(response, 'name="student_group_number"', html=False)
+        # «Akademik fəaliyyət» idarəetməsi görünür (AJAX endpoint data-atributu).
+        self.assertContains(response, 'id="academicItemsManager"', html=False)
 
-    def test_edit_profile_organization_type_links_to_join_flow_for_teacher_without_org(self):
+    def test_edit_profile_teacher_without_org_gets_free_text_institution_no_join_link(self):
+        """Fərdi (təşkilatsız) müəllim: sərbəst müəssisə/ixtisas mətni + elmi ad
+        bootstrap-select-i var; «Təşkilata qoşul» linki redaktə formasında yoxdur."""
         teacher_user = User.objects.create_user(
             username="teacher_edit_profile",
             email="teacher_edit_profile@example.com",
@@ -574,7 +570,12 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=edit-profile")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "?section=student-organization-request")
+        self.assertNotContains(response, "?section=student-organization-request")
+        self.assertContains(response, 'name="student_university_name"', html=False)
+        self.assertContains(response, 'name="student_specialization"', html=False)
+        self.assertContains(response, 'id="academic_title"', html=False)
+        self.assertContains(response, "bootstrap-single-select__native", html=False)
+        self.assertContains(response, "data-bootstrap-select", html=False)
 
     def test_profile_change_password_section_renders(self):
         self.client.login(username="testuser", password="testpass123")
@@ -847,9 +848,11 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'value="elvin@example.com"')
         self.assertContains(response, 'value="+994501112233"')
         self.assertContains(response, 'value="Baku"')
-        self.assertContains(response, 'value="ADA University"')
-        self.assertContains(response, 'value="AZ-123"')
         self.assertContains(response, "Bio test text")
+        # 2026-08-15 redesign: təşkilat üzvündə müəssisə sahəsi sərbəst mətn
+        # deyil — təşkilat adı yalnız-oxu göstərilir.
+        self.assertNotContains(response, 'name="student_university_name"', html=False)
+        self.assertContains(response, "Profile Edit Test Org")
 
     def test_non_profile_post_does_not_overwrite_profile_fields(self):
         from apps.accounts.models import UserProfile
@@ -1319,7 +1322,10 @@ class ProfileViewTest(TestCase):
         )
 
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile"))
+        # FAZA 22: parametrsiz açılış artıq «Ana səhifə»dir — bu yoxlama
+        # `profile-info` panelinin məzmununa aiddir, ona görə bölmə AÇIQ
+        # şəkildə istənilir (davranış dəyişməyib, yalnız default hədəf).
+        response = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat təsdiqi gözlənilir")
@@ -1434,6 +1440,87 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Qrup üzvlüyü")
         self.assertContains(response, "Qrup 101")
         self.assertContains(response, "Group Test University")
+
+    def test_profile_info_shows_academic_structure_as_separate_cards(self):
+        """Sahib şikayəti (2026-08): "Fakültə > Kafedra > İxtisas > Qrup"
+        breadcrumb-ı çirkin görünürdü. İndi hər səviyyə öz kartındadır və
+        İxtisas kartında proqram kodu da göstərilir."""
+        from apps.organizations.models import OrgUnit
+        from apps.registrar.models import Curriculum, Program, StudentAcademicRecord
+        from core.constants import OrgUnitType
+
+        organization = Organization.objects.create(
+            name="Structure Test University",
+            slug="structure-test-university",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.user,
+            is_active=True,
+            status="active",
+        )
+        faculty = OrgUnit.objects.create(
+            organization=organization, name="Struktur Fakültəsi", slug="struct-faculty", unit_type=OrgUnitType.FACULTY
+        )
+        chair = OrgUnit.objects.create(
+            organization=organization,
+            name="Struktur Kafedrası",
+            slug="struct-chair",
+            unit_type=OrgUnitType.CHAIR,
+            parent=faculty,
+        )
+        specialty = OrgUnit.objects.create(
+            organization=organization,
+            name="Struktur İxtisası",
+            slug="struct-specialty",
+            unit_type=OrgUnitType.SPECIALTY,
+            parent=chair,
+        )
+        group = OrgUnit.objects.create(
+            organization=organization,
+            name="STR-101",
+            slug="struct-group",
+            unit_type=OrgUnitType.GROUP,
+            parent=specialty,
+        )
+        program = Program.objects.create(
+            organization=organization,
+            code="MYEDU-STR",
+            official_code="STR-047",
+            name="Struktur İxtisası",
+            specialty_unit=specialty,
+        )
+        curriculum = Curriculum.objects.create(organization=organization, program=program, admission_year=2024)
+
+        # AKTİV membership ƏVVƏL: PG trigger-i (registrar_guard_active_member)
+        # StudentAcademicRecord.student referansını əks halda rədd edir.
+        _assign_user_to_org(self.user, organization, ProfileRole.STUDENT)
+
+        StudentAcademicRecord.objects.create(
+            organization=organization,
+            student=self.user,
+            program=program,
+            curriculum=curriculum,
+            group=group,
+            admission_year=2024,
+        )
+
+        _login_with_org(self.client, self.user, organization)
+
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+
+        # Hər səviyyə öz kartında — köhnə tək-sətirli breadcrumb yoxdur.
+        self.assertNotIn("Struktur Fakültəsi &gt; Struktur Kafedrası", content)
+        self.assertContains(response, "Struktur Fakültəsi")
+        self.assertContains(response, "Struktur Kafedrası")
+        self.assertContains(response, "STR-101")
+        # İxtisas kartı proqramdan (ad + RƏSMİ kod) qurulur, specialty node-dan yox.
+        self.assertContains(response, "Struktur İxtisası")
+        self.assertContains(response, "STR-047")
+        # Daxili köçürmə açarı ("MYEDU-*") istifadəçi səthinə sızmır.
+        self.assertNotContains(response, "MYEDU-STR")
+        self.assertContains(response, "profile-structure-card")
 
     def test_profile_info_handles_many_student_groups_without_breaking(self):
         from apps.accounts.models import ProfileRole
@@ -2487,7 +2574,9 @@ class ProfileViewTest(TestCase):
         )
 
         _login_with_org(self.client, superuser, member_org)
-        response = self.client.get(reverse("accounts:profile"))
+        # FAZA 22 — bax yuxarıdakı şərh: «Təşkilat girişləri» `profile-info`
+        # panelindədir, default bölmə isə artıq «Ana səhifə»dir.
+        response = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Təşkilat girişləri")

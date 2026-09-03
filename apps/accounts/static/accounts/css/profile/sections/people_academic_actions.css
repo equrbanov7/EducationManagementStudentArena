@@ -1,0 +1,254 @@
+/* Tələbə idarəetməsi — ƏMƏL qatının üslubu: köçürmə ön baxışı, status seçimi
+ * və əməl düymələri (`people_academic.css` çekməcənin ÇƏRÇİVƏSİNİ verir).
+ *
+ * NİYƏ AYRI FAYL: tək fayl 667 sətrə çatmışdı və `check_module_size.py`
+ * SOFT_CAP=600 həddini keçirdi. Bölgü təsadüfi deyil — çərçivə (çekməcə, kart,
+ * faktlar) ilə əməl qatı (ön baxış, status, düymələr) müstəqil dəyişir.
+ *
+ * ⚠️ Kiçik-ekran bloku da BÖLÜNÜB: `.psm__actions` / `.psm__btn` qaydaları məhz
+ * BURADADIR. Onlar çərçivə faylında qalsaydı, bu fayl SONRA yükləndiyi üçün
+ * eyni spesifikliyə malik baza qaydaları media-query-ni üstələyər və mobil
+ * görünüş səssizcə pozulardı (`@media` spesifiklik ƏLAVƏ ETMİR).
+ */
+
+/* ── Ön baxış ────────────────────────────────────────────────────────────── */
+.psm__preview {
+    border: 1px dashed var(--ems-primary-200, #bfd4fe);
+    border-radius: 12px;
+    padding: 11px 12px;
+    background: var(--ems-primary-50, #eef4ff);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+/* Blokun MƏZMUNU (başlıqdan ayrı): qrup seçilənə qədər gizlidir. */
+.psm__preview-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+/* Boş vəziyyət — 2-ci addımın nə göstərəcəyini əvvəlcədən izah edir. */
+.psm__preview-idle {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--ems-text-muted, #64748b);
+}
+.psm__preview-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--ems-primary-800, #1e40af);
+}
+.psm__totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+    gap: 8px;
+}
+.psm__total {
+    background: var(--ems-surface, #ffffff);
+    border: 1px solid var(--ems-primary-200, #bfd4fe);
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.psm__total-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--ems-navy-900, #0f172a);
+    line-height: 1.1;
+}
+.psm__total-label {
+    font-size: 0.72rem;
+    color: var(--ems-text-muted, #5b6472);
+}
+.psm__total--from .psm__total-value,
+.psm__total--to .psm__total-value {
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+}
+.psm__total--to {
+    border-color: var(--ems-primary-600, #2563eb);
+}
+
+.psm__warnings {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.psm__warning {
+    display: flex;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 9px;
+    background: var(--ems-warning-bg, #fffbeb);
+    border: 1px solid var(--ems-warning-bd, #fde68a);
+    color: var(--ems-warning-800, #92400e);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+.psm__warning::before {
+    content: "!";
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-warning-600, #d97706);
+    color: var(--ems-neutral-0, #ffffff);
+    font-size: 0.68rem;
+    font-weight: 900;
+}
+.psm__warning--block {
+    background: var(--ems-danger-bg, #fef2f2);
+    border-color: var(--ems-danger-200, #fecaca);
+    color: var(--ems-danger-strong, #b91c1c);
+}
+.psm__warning--block::before {
+    background: var(--ems-danger-500, #ef4444);
+}
+
+/* Geniş cədvəl SƏHİFƏNİ deyil, ÖZ konteynerini sürüşdürür. */
+.psm__table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--ems-primary-200, #bfd4fe);
+    background: var(--ems-surface, #ffffff);
+}
+.psm__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    min-width: 340px;
+}
+.psm__table th,
+.psm__table td {
+    padding: 6px 9px;
+    text-align: left;
+    border-bottom: 1px solid var(--ems-neutral-200, #e2e8f0);
+    white-space: nowrap;
+}
+.psm__table th {
+    background: var(--ems-neutral-50, #f8fafc);
+    color: var(--ems-neutral-600, #475569);
+    font-weight: 700;
+}
+.psm__table tr:last-child td {
+    border-bottom: none;
+}
+.psm__table td:first-child {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.psm__tag--new {
+    color: var(--ems-warning-800, #92400e);
+    font-weight: 700;
+}
+.psm__tag--ok {
+    color: var(--ems-success-strong, #047857);
+}
+
+/* ── Status seçimi ───────────────────────────────────────────────────────── */
+.psm__statuses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+.psm__status-opt {
+    border: 1px solid var(--ems-border, #d5dbe5);
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 0.81rem;
+    cursor: pointer;
+    min-height: 40px;
+}
+.psm__status-opt:hover {
+    border-color: var(--ems-primary-500, #3b82f6);
+}
+.psm__status-opt[aria-checked="true"] {
+    background: var(--ems-primary-600, #2563eb);
+    border-color: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+    font-weight: 700;
+}
+.psm__status-opt[aria-checked="true"][data-psm-status="expelled"] {
+    background: var(--ems-danger-strong, #b91c1c);
+    border-color: var(--ems-danger-strong, #b91c1c);
+}
+.psm__status-opt[aria-checked="true"][data-psm-status="academic_leave"] {
+    background: var(--ems-warning-700, #b45309);
+    border-color: var(--ems-warning-700, #b45309);
+}
+.psm__status-opt:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+.psm__status-opt[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Əməl düymələri ──────────────────────────────────────────────────────── */
+.psm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.psm__btn {
+    border: 1px solid var(--ems-border, #d5dbe5);
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    border-radius: 10px;
+    padding: 10px 16px;
+    min-height: 44px;
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.psm__btn--primary {
+    background: var(--ems-primary-600, #2563eb);
+    border-color: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+}
+.psm__btn--primary:hover:not([disabled]) {
+    background: var(--ems-primary-700, #1d4ed8);
+}
+.psm__btn:hover:not([disabled]) {
+    border-color: var(--ems-primary-500, #3b82f6);
+}
+.psm__btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+.psm__btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.psm__btn.is-busy {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* ── Kiçik ekran: düymələr tam enə yayılır ───────────────────────────────── */
+@media (max-width: 600px) {
+    .psm__actions {
+        justify-content: stretch;
+    }
+    .psm__btn {
+        flex: 1 1 auto;
+    }
+}

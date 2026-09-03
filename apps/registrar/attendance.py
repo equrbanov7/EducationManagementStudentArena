@@ -21,9 +21,22 @@ Real sistem əsl buraxılmış saatı saxlayır (``Enrollment.absence_hours`` �
 əsaslıdır: standart 2-saatlıq dərslər üçün cədvəli eynən yaradır, qeyri-standart
 dərs saatları (məs. 1 və ya 4 saatlıq laboratoriya) üçün isə düzgün ümumiləşdirir.
 
-QEYD (cədvəldəki qeyd): milli yığma komandalarının üzvü olan idmançı-tələbələr
-üçün 25% istisnası var — bu, buraxılış qaydasında (üzrlü qayıb) idarə olunur, bal
-hesablaması burada dəyişmir.
+QEYD (cədvəldəki qeyd): Gənclər və İdman Nazirliyinin Kollegiyası tərəfindən
+təsdiq edilmiş milli yığma komandaların üzvü olan idmançı-tələbələr üçün 25%
+istisnası var. Bu, üzrlü qayıbdan FƏRQLİ mexanizmdir: üzrlü qayıb saatı
+``absence_hours``-a heç vaxt daxil olmur (yəni HƏM balı, HƏM həddi dəyişir),
+istisna isə saatları olduğu kimi saxlayıb yalnız BURAXILIŞ qərarını ləğv edir —
+tələbənin davamiyyət balı yenə də real qayıba görə aşağı düşür.  Ona görə
+:func:`attendance_score` ``exempt=`` açarını qəbul edir; mənbəyi
+``StudentAcademicRecord.national_athlete_exemption`` sahəsidir və o sahə
+köçürmə ilə AVTOMATİK DOLDURULMUR (bax aşağıdakı «TARİXİ DATA» qeydi).
+
+⚠️ TARİXİ DATA (sahib qərarı, 2026-08-31).  Bu düstur **gələcək semestrlər**
+üçün kanonikdir.  Köçürülmüş tarixi semestrlərdə köhnə sistemin yazdığı
+davamiyyət balı və buraxılış statusu **olduğu kimi qalır** — bu modul tarixi
+data üzərində yalnız YOXLAMA (köçürmənin sadiqliyini ölçmək) üçün işlədilir,
+dəyər yazmaq üçün YOX.  Tarixi yazılışlara geriyə dönük blok qoyan miqrasiya,
+skript və ya komanda yazılmır.
 """
 
 from __future__ import annotations
@@ -45,12 +58,16 @@ def _as_decimal(value) -> Decimal:
     return Decimal(str(value or 0))
 
 
-def attendance_score(lesson_hours, absence_hours, *, limit_percent=DEFAULT_ABSENCE_LIMIT_PERCENT):
+def attendance_score(lesson_hours, absence_hours, *, limit_percent=DEFAULT_ABSENCE_LIMIT_PERCENT, exempt=False):
     """Davamiyyət balını (10-luq) rəsmi cədvələ görə hesablayır.
 
     :param lesson_hours: fənnin ümumi auditoriya saatı (``CourseOffering.lesson_hours``).
     :param absence_hours: buraxılmış (üzrsüz) saat (``Enrollment.absence_hours``).
     :param limit_percent: buraxılış həddi faizlə (default 25).
+    :param exempt: rəsmi idmançı-tələbə istisnası (milli yığma).  ``True`` olduqda
+        25% həddi BURAXILIŞ qərarını ləğv etmir — bal yenə real qayıba görə
+        hesablanır, sadəcə ``barred`` heç vaxt ``True`` olmur.  Default ``False``:
+        heç bir mövcud çağırış bu davranışı görmür.
     :returns: ``(score, barred)`` — ``score`` :class:`~decimal.Decimal` (0..10, 2 onluğa
         aşağı yuvarlanmış) tələbə imtahana buraxılırsa; buraxılmırsa ``score`` ``None``
         və ``barred`` ``True``. Dərs saatı 0/naməlum olduqda tam 10.00 (barred deyil).
@@ -62,7 +79,7 @@ def attendance_score(lesson_hours, absence_hours, *, limit_percent=DEFAULT_ABSEN
         return (MAX_SCORE.quantize(_TWO_PLACES), False)
 
     allowed = hours * _as_decimal(limit_percent) / Decimal(100)
-    if absent > allowed:
+    if absent > allowed and not exempt:
         # 25% həddi keçilib → imtahana buraxılmır (cədvəldə qırmızı xana).
         return (None, True)
 
@@ -73,10 +90,12 @@ def attendance_score(lesson_hours, absence_hours, *, limit_percent=DEFAULT_ABSEN
     return (score, False)
 
 
-def attendance_score_from_count(lesson_hours, absence_count, *, limit_percent=DEFAULT_ABSENCE_LIMIT_PERCENT):
+def attendance_score_from_count(
+    lesson_hours, absence_count, *, limit_percent=DEFAULT_ABSENCE_LIMIT_PERCENT, exempt=False
+):
     """Cədvəlin sütunu (q/b **sayı**) əsaslı rahatlıq üçün — hər q/b = 2 saat sayır.
 
     Yalnız əsl buraxılmış saat əlçatan olmayanda istifadə edin; mümkünsə həmişə
     :func:`attendance_score` (real ``absence_hours``) üstündür."""
     absent_hours = _as_decimal(absence_count) * HOURS_PER_ABSENCE
-    return attendance_score(lesson_hours, absent_hours, limit_percent=limit_percent)
+    return attendance_score(lesson_hours, absent_hours, limit_percent=limit_percent, exempt=exempt)

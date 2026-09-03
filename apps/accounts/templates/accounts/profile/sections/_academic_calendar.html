@@ -5,5 +5,5 @@ build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy)
 <section class="profile-section-panel profile-section--academic-calendar profile-section--registrar-embed {% if active_section == 'academic-calendar' %}is-active{% endif %}"
          data-profile-section-panel="academic-calendar"
          data-source-url="{{ profile_base_url }}?section=academic-calendar">
-    {% include "registrar/partials/_calendar_content.html" %}
+    {% include "registrar/partials/_calendar_content.html" with embedded_in_shell=True %}
 </section>

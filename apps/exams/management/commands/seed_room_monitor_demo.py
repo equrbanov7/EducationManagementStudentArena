@@ -29,6 +29,7 @@ from apps.exams.domain.final_center import (
 )
 from apps.exams.models import Exam, ExamAttempt, ExamQuestion, ExamQuestionOption, ExamRoom, FinalExamTicket
 from apps.exams.services.final_center import open_entry, start_room
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -44,7 +45,8 @@ _DEMO_EXAMS = (
 )
 
 
-class Command(UsersSeedMixin, BaseCommand):
+class Command(ProductionCommandSafetyMixin, UsersSeedMixin, BaseCommand):
+    safety_command_name = "seed_room_monitor_demo"
     help = "Zal monitoru üçün qarışıq statuslu demo tələbələr (imtahanda/gözləyir/bitirib/çıxarılıb)."
 
     def add_arguments(self, parser):

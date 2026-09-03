@@ -17,12 +17,19 @@ decoration over the same enrollment aggregation the "Transkript" section uses
             <p class="oa-subtitle">
                 {% trans "Bütün semestrlər üzrə keçdiyin fənlər — kredit, müəllim, giriş+çıxış balı və nəticə. Kəsilən fənlər qırmızı, səbəbi ilə göstərilir." context "profile.overall_academic" %}
             </p>
+            {% comment %}
+            Transkript keçidi YALNIZ bölmə icazəlidirsə göstərilir. 2026-08-dən
+            tələbədə «my-transcript» yoxdur (müraciət axını gələcək), ona görə
+            şərtsiz link ÖLÜ keçid olardı — istifadəçini profile-info-ya atardı.
+            {% endcomment %}
+            {% if 'my-transcript' in allowed_sections %}
             <a class="oa-transcript-link"
                href="{{ profile_base_url }}?section=my-transcript"
                data-section="my-transcript"
                title="{% trans 'Rəsmi kredit-çəkili transkriptə bax' context 'profile.overall_academic' %}">
                 <i class="fas fa-scroll"></i> {% trans "Transkriptə bax" context "profile.overall_academic" %}
             </a>
+            {% endif %}
         </div>
 
         {% if not oa.has_record %}
@@ -35,7 +42,12 @@ decoration over the same enrollment aggregation the "Transkript" section uses
         {# Kumulyativ xülasə — ÜOMG 100 bal üzərindən (Σ(bal×kredit)/Σ(kredit)) + toplanmış kredit. #}
         <div class="oa-summary">
             <div class="oa-summary-box oa-summary-box--uomg">
+                {# Hesablana bilməyən ÜOMG sıfırla ƏVƏZ OLUNMUR (bax exam_eligibility.uomg_from). #}
+                {% if oa.overall_uomg_available %}
                 <span class="oa-summary-n">{{ oa.overall_uomg|floatformat:2 }}</span>
+                {% else %}
+                <span class="oa-summary-n oa-summary-n--na" title="{{ oa.overall_uomg_notice }}">{{ oa.overall_uomg_label }}</span>
+                {% endif %}
                 <span class="oa-summary-l">{% trans "Kumulyativ ÜOMG (100 bal)" context "profile.overall_academic" %}</span>
             </div>
             <div class="oa-summary-box">
@@ -151,6 +163,15 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                     {% endif %}
                 </div>
             </div>
+            {% comment %}
+              Köçürülmüş nəticənin qeydi SEMESTR blokunda BİR dəfə — sətir-sətir
+              yox.  Ölçülüb (1280 px, AZ, real köçürülmüş tələbə myedu.student.3373: 49 sətir,
+              8 semestr, 46-sı nişanlı): sətir-səviyyəli qeyd tipik nişanlı sətri
+              96.7 px-dən 152.2 px-ə (+57 %) qaldırırdı və eyni cümləni səhifədə
+              44 dəfə təkrarlayırdı.  Sətri qlif nişanlayır (aşağıda), cümləni isə
+              bu blok deyir — tələbə mətni yenə EKRANDA oxuyur.
+            {% endcomment %}
+            {% include "registrar/partials/_legacy_grade_semester_notice.html" with sem=sem %}
             <div class="oa-table-wrap">
                 <table class="oa-table">
                     <thead>
@@ -188,7 +209,8 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                             <td class="ta-left">{{ row.teacher_name|default:"—" }}</td>
                             <td>{{ row.result.entry_score|floatformat:'-2' }}</td>
                             <td>{% if row.result.graded %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
-                            <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}</td>
+                            {# Qlif HƏR köçürülmüş sətirdə — semestr qeydindəki «nişanlı» sözünün qarşılığıdır. #}
+                            <td>{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}{% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}</td>
                             <td>
                                 {% if row.in_gpa %}
                                 <span class="grade-{{ row.result.letter }} oa-letter">{{ row.result.letter }}</span>
@@ -201,6 +223,22 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                                 <span class="oa-status is-pass">{% trans "Keçdi" context "profile.overall_academic" %}</span>
                                 {% elif row.result.failed %}
                                 <span class="oa-status is-fail">{% trans "Kəsildi" context "profile.overall_academic" %}</span>
+                                {% elif row.result.status_code == "legacy_no_result" %}
+                                {% comment %}
+                                  Tarixi/köçürülmüş semestr: köhnə sistem bu fənn üzrə nəticə YAZMAYIB.
+                                  «Davam edir» demək yalan olardı (semestr bağlanıb), «Kəsildi» demək isə
+                                  sübutsuz mühakimədir. Boşluğu gizlətmək əvəzinə adlandırırıq.
+
+                                  ⚠️ İSTİSNA: sübutda bal VAR, sadəcə nəticə kimi keçməyib
+                                  (ölçülüb: 5,333 yazılış, 1,944 tələbə).  Orada «nəticə yazılmayıb»
+                                  demək tooltip-i təkzib edərdi — tooltip «Mənbədəki yekun bal: 85»
+                                  yazır.  Sətir öz statusunda da dürüst adlanır.
+                                {% endcomment %}
+                                {% if row.legacy.source_only %}
+                                <span class="oa-status is-legacy" title="{{ row.legacy.result_notice }}">{{ row.legacy.status_label }}</span>
+                                {% else %}
+                                <span class="oa-status is-legacy" title="{{ row.result.status_notice }}">{{ row.result.status_label }}</span>
+                                {% endif %}
                                 {% else %}
                                 <span class="oa-status is-progress">{% trans "Davam edir" context "profile.overall_academic" %}</span>
                                 {% endif %}

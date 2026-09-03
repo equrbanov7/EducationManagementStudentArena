@@ -24,6 +24,7 @@ from apps.organizations.models import OrgUnit
 from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope, scope_org_units
 from apps.registrar import transcript
 from apps.registrar.models import Program, StudentAcademicRecord
+from core.program_codes import program_code_search_q
 from core.roles import user_has_any_role
 
 _FILTER_KEYS = ("faculty", "department", "program", "group", "student", "year", "season")
@@ -126,22 +127,44 @@ def _num(value):
 # ── Data endpoint-ləri ───────────────────────────────────────────────────────
 
 
+def _filters(request) -> dict:
+    return {key: (request.GET.get(key) or "").strip() or None for key in _FILTER_KEYS}
+
+
 @login_required
 @require_GET
 def records_overview_data(request):
-    """Xülasə box-ları + səhifələnmiş tələbə siyahısı (filtr + scope üzrə)."""
+    """Səhifələnmiş tələbə siyahısı (filtr + scope üzrə) — box-lar OLMADAN.
+
+    Box-lar qəsdən ayrılıb (:func:`records_overview_summary`): onlar bütün süzgəc
+    sahəsi üzrə aqreqatdır və səhifədən-səhifəyə dəyişmir, cədvəl isə yalnız
+    görünən ~25 tələbəni tələb edir. Ayırmasaq, cədvəl hər dəfə box-ların tam
+    keçidini gözləyirdi (5 000+ tələbəlik təşkilatda onlarla saniyə).
+    """
     organization, scope = _scope(request)
     if organization is None or scope is None or not scope.has_structure_access:
-        return JsonResponse({"has_access": False, "summary": None, "results": [], "has_more": False, "total": 0})
+        return JsonResponse({"has_access": False, "results": [], "has_more": False, "total": 0})
 
-    filters = {key: (request.GET.get(key) or "").strip() or None for key in _FILTER_KEYS}
-    payload = academic_records.build_records_overview(
+    payload = academic_records.build_records_page(
         organization=organization,
         scope=scope,
-        filters=filters,
+        filters=_filters(request),
         offset=_int_param(request, "offset", 0),
         limit=_int_param(request, "limit", academic_records.DEFAULT_PAGE_SIZE),
+        sort=(request.GET.get("sort") or "").strip() or None,
     )
+    return JsonResponse(payload)
+
+
+@login_required
+@require_GET
+def records_overview_summary(request):
+    """Xülasə box-ları + tədris ili seçimləri — cədvəldən AYRICA, gecikmiş sorğu."""
+    organization, scope = _scope(request)
+    if organization is None or scope is None or not scope.has_structure_access:
+        return JsonResponse({"has_access": False, "summary": None, "year_options": []})
+
+    payload = academic_records.build_records_summary(organization=organization, scope=scope, filters=_filters(request))
     return JsonResponse(payload)
 
 
@@ -162,7 +185,19 @@ def _serialize_semester(sem) -> dict:
                 "passed": bool(result.get("passed")),
                 "failed": bool(result.get("failed")),
                 "barred": bool(result.get("barred")),
+                # Nə keçib, nə kəsilib → «qiymətləndirilməyib» (imtahan çıxış
+                # balı yoxdur).  Sətir başqa cür görünməz qalırdı.
+                "ungraded": not (result.get("passed") or result.get("failed")),
                 "fail_reason": row["fail_reason"],
+                # Şəffaflıq: status canlı qaydadan gəlir, yoxsa köhnə sistemdən
+                # (və ya köhnə sistemin BOŞLUĞUNDAN) — bax exam_eligibility.
+                "status_code": result.get("status_code") or "",
+                "status_label": str(result["status_label"]) if result.get("status_label") else "",
+                "status_notice": str(result["status_notice"]) if result.get("status_notice") else "",
+                # JSON drill-down da server-render olunmuş transkript səthləri
+                # ilə eyni legacy mənşə müqaviləsini daşımalıdır. Əks halda JS
+                # ``row.legacy`` oxusa da marker səssizcə itirdi.
+                "legacy": row.get("legacy"),
             }
         )
     return {
@@ -263,8 +298,14 @@ def program_search(request):
         qs = qs.filter(specialty_unit__parent_id=department)
     query = (request.GET.get("q") or "").strip()
     if query:
-        qs = qs.filter(Q(name__icontains=query) | Q(code__icontains=query))
-    return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": f"{p.code} — {p.name}"})
+        # AXTARIŞ İNVARİANTI: seçicidə ``display_label`` göstərilir, o isə cari
+        # şifr yoxdursa KÖHNƏ şifrə geri çəkilir. Ona görə axtarış HƏR İKİ nəsil
+        # şifri əhatə etməlidir — əks halda istifadəçi ekranda gördüyü şifri
+        # (məs. «050401») yazanda sıfır nəticə alırdı.
+        qs = qs.filter(Q(name__icontains=query) | program_code_search_q(query))
+    # Seçicidə YALNIZ rəsmi dövlət ixtisas kodu görünür (``display_label``);
+    # daxili ``Program.code`` (``MYEDU-*``) nə axtarılır, nə göstərilir.
+    return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": p.display_label})
 
 
 @login_required

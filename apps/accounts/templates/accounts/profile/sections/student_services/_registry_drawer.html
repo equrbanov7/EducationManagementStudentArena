@@ -1,0 +1,39 @@
+{% load i18n %}
+{% comment %}
+Ekran 09 — tələbə kartı (çekmecə). Məzmun SERVERDƏN JSON ilə gəlir
+(`accounts:student_registry_card`), burada yalnız SKELET var: JS mətnləri
+`data-sr-*` çəngəllərinə yazır. Belə qurulub ki, sətir sayı artdıqca səhifə
+25 tələbənin kartını əvvəlcədən render etməsin.
+
+GPA yalnız BURADA hesablanır (bir tələbə üçün transkript aqreqatı) — cədvəldə
+QƏSDƏN yoxdur (§8/13, sətir başına aqreqat qadağandır).
+{% endcomment %}
+<div class="stsvc-card" data-sr-card-body>
+    <div class="stsvc-card__head">
+        <span class="stsvc-card__ini" data-sr-field="initials" aria-hidden="true"></span>
+        <div>
+            <p class="stsvc-card__name" data-sr-field="name"></p>
+            <p class="stsvc-card__sub" data-sr-field="program_label"></p>
+        </div>
+    </div>
+
+    <dl class="stsvc-card__facts">
+        <div><dt>{% trans "Tələbə kodu" context "accounts.student_registry" %}</dt><dd data-sr-field="student_code"></dd></div>
+        <div><dt>{% trans "FİN" context "accounts.student_registry" %}</dt><dd data-sr-field="fin"></dd></div>
+        <div><dt>{% trans "Qrup" context "accounts.student_registry" %}</dt><dd data-sr-field="group_name"></dd></div>
+        <div><dt>{% trans "Qəbul ili" context "accounts.student_registry" %}</dt><dd data-sr-field="admission_year"></dd></div>
+        <div><dt>{% trans "Qəbul balı" context "accounts.student_registry" %}</dt><dd data-sr-field="admission_score"></dd></div>
+        <div><dt>{% trans "İmtahan növü" context "accounts.student_registry" %}</dt><dd data-sr-field="admission_exam_type"></dd></div>
+        <div><dt>{% trans "ATİS nömrəsi" context "accounts.student_registry" %}</dt><dd data-sr-field="atis_id"></dd></div>
+        <div><dt>{% trans "Forma" context "accounts.student_registry" %}</dt><dd data-sr-field="form_label"></dd></div>
+        <div><dt>{% trans "Təhsil haqqı" context "accounts.student_registry" %}</dt><dd data-sr-field="funding_label"></dd></div>
+        <div><dt>{% trans "ÜOMG (GPA)" context "accounts.student_registry" %}</dt><dd data-sr-field="gpa"></dd></div>
+        <div><dt>{% trans "Toplanmış kredit" context "accounts.student_registry" %}</dt><dd data-sr-field="credits_earned"></dd></div>
+    </dl>
+
+    <h3 class="stsvc-card__title">{% trans "Hərəkət tarixçəsi" context "accounts.student_registry" %}</h3>
+    <p class="stsvc-card__empty" data-sr-history-empty hidden>
+        {% trans "Bu tələbə üzrə hərəkət əmri yoxdur." context "accounts.student_registry" %}
+    </p>
+    <ol class="ems-tl" data-sr-history aria-label="{% trans 'Hərəkət tarixçəsi' context 'accounts.student_registry' %}"></ol>
+</div>

@@ -22,14 +22,16 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.registrar import exam_eligibility
 from core.constants import OrgUnitType
 
-
-def _(text):
-    """PDF labels live in their own i18n context — short words like "Kod" or
-    "Yekun" already exist context-free elsewhere with unrelated translations."""
-    return pgettext("registrar.pdf", text)
-
+# Every label below is looked up under the "registrar.pdf" context: short words
+# like "Bal" or "Status" already exist context-free elsewhere with unrelated
+# translations. The context is written out at each call site on purpose — it
+# used to hide behind a local ``_()`` alias, and because the i18n extractor
+# reads the context as a *literal* first argument, all 26 labels were extracted
+# context-free. Half of them therefore had no "registrar.pdf" catalog entry and
+# the EN/RU/TR transcript silently fell back to the Azerbaijani msgid.
 
 # ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
 _PAGE_W, _PAGE_H = 595, 842
@@ -135,7 +137,7 @@ class _Sheet:
         self.page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=None, fill=color)
 
     def finish_footers(self, generated_at):
-        note = _("Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır.")
+        note = pgettext("registrar.pdf", "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır.")
         stamp = generated_at.strftime("%d.%m.%Y %H:%M")
         total = len(self.doc)
         for index, page in enumerate(self.doc, start=1):
@@ -196,7 +198,7 @@ def _draw_letterhead(sheet, organization):
     """Ministry + university header — the official AZ transcript letterhead."""
     sheet.y += 4
     top = sheet.y
-    sheet.text(_MARGIN, _("Azərbaycan Respublikası Təhsil Nazirliyi"), size=7.8, color=_MUTED)
+    sheet.text(_MARGIN, pgettext("registrar.pdf", "Azərbaycan Respublikası Təhsil Nazirliyi"), size=7.8, color=_MUTED)
     sheet.text(
         0,
         "Ministry of Education of the Republic of Azerbaijan",
@@ -215,7 +217,9 @@ def _draw_letterhead(sheet, organization):
     if en_name:
         sheet.text(name_x, en_name, size=9.5, color=_MUTED)
         sheet.y += 12
-    sheet.text(name_x, _("PUBLİK HÜQUQİ ŞƏXS / PUBLIC LEGAL ENTITY"), size=7.3, bold=True, color=_MUTED)
+    sheet.text(
+        name_x, pgettext("registrar.pdf", "PUBLİK HÜQUQİ ŞƏXS / PUBLIC LEGAL ENTITY"), size=7.3, bold=True, color=_MUTED
+    )
     sheet.y += 11
     contact_bits = [
         b.strip() for b in (organization.address, organization.phone, organization.email) if b and b.strip()
@@ -229,7 +233,7 @@ def _draw_letterhead(sheet, organization):
     sheet.y += 6
     sheet.rule(color=_BLUE, width=1.4)
     sheet.y += 20
-    sheet.center(_("AKADEMİK TRANSKRİPT"), size=17, bold=True)
+    sheet.center(pgettext("registrar.pdf", "AKADEMİK TRANSKRİPT"), size=17, bold=True)
     sheet.y += 22
 
 
@@ -240,17 +244,21 @@ def _draw_student_info(sheet, record, student):
     if record is not None and record.group_id:
         faculty = _faculty_name(record.group)
         if faculty:
-            pairs.append((_("Fakültə"), faculty))
-    pairs.append((_("Tələbə №"), student.username))
+            pairs.append((pgettext("registrar.pdf", "Fakültə"), faculty))
+    pairs.append((pgettext("registrar.pdf", "Tələbə №"), student.username))
     if record is not None and record.program_id:
-        pairs.append((_("İxtisas"), f"{record.program.code} — {record.program.name}"))
-        pairs.append((_("Təhsil pilləsi"), record.program.get_degree_level_display()))
-    pairs.append((_("Soyadı, adı"), full_name))
+        # Rəsmi sənəddir: HƏR İKİ rəsmi dövlət şifri (varsa) — köhnə tələbənin
+        # diplomunda ƏVVƏLKİ nəsil şifr yazılıb, cari hesabatlarda isə yeni şifr
+        # işlənir; ikisi də görünməlidir. Daxili `Program.code` (`MYEDU-*`)
+        # transkriptdə heç vaxt görünmür.
+        pairs.append((pgettext("registrar.pdf", "İxtisas"), record.program.display_label_full))
+        pairs.append((pgettext("registrar.pdf", "Təhsil pilləsi"), record.program.get_degree_level_display()))
+    pairs.append((pgettext("registrar.pdf", "Soyadı, adı"), full_name))
     if record is not None:
         if record.group_id:
-            pairs.append((_("Qrup"), record.group.name))
-        pairs.append((_("Qəbul ili"), str(record.admission_year)))
-        pairs.append((_("Status"), record.get_status_display()))
+            pairs.append((pgettext("registrar.pdf", "Qrup"), record.group.name))
+        pairs.append((pgettext("registrar.pdf", "Qəbul ili"), str(record.admission_year)))
+        pairs.append((pgettext("registrar.pdf", "Status"), record.get_status_display()))
 
     col_w = _CONTENT_W / 2
     for i in range(0, len(pairs), 2):
@@ -266,6 +274,20 @@ def _draw_student_info(sheet, record, student):
     sheet.y += 18
 
 
+#: Rəsmi transkriptdə köçürülmüş sətrin nişanı (ekranın qlifi PDF şriftində yoxdur).
+_LEGACY_MARK = "*"
+
+
+def _has_legacy_rows(data) -> bool:
+    """Sənəddə ən azı bir köçürülmüş qiymət varmı — izah qeydi yalnız o zaman çap olunur."""
+    for year in data.get("years", ()):
+        for semester in year.get("semesters", ()):
+            for row in semester.get("rows", ()):
+                if row.get("legacy"):
+                    return True
+    return False
+
+
 def _mini_cols(width):
     """Column layout (key, header, x-offset, width, right-aligned) for one
     semester's subject table, scaled to the column's ``width``."""
@@ -274,10 +296,10 @@ def _mini_cols(width):
     bal_w = width * 0.18
     letter_w = width - name_w - credit_w - bal_w
     return (
-        ("name", _("Fənnin şifri və adı"), 0, name_w, False),
-        ("credit", _("Kredit"), name_w, credit_w, True),
-        ("bal", _("Bal"), name_w + credit_w, bal_w, True),
-        ("letter", _("Dərəcə"), name_w + credit_w + bal_w, letter_w, True),
+        ("name", pgettext("registrar.pdf", "Fənnin şifri və adı"), 0, name_w, False),
+        ("credit", pgettext("registrar.pdf", "Kredit"), name_w, credit_w, True),
+        ("bal", pgettext("registrar.pdf", "Bal"), name_w + credit_w, bal_w, True),
+        ("letter", pgettext("registrar.pdf", "Dərəcə"), name_w + credit_w + bal_w, letter_w, True),
     )
 
 
@@ -290,7 +312,7 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
 
     y = top
     sheet.text_at(x, y, f"{semester['season']} semestri", size=9.5, bold=True, color=_BLUE)
-    sheet.text_at(0, y, f"ÜOMG {semester['gpa']:.2f}", size=7.8, color=_MUTED, right_edge=x + width)
+    sheet.text_at(0, y, f"ÜOMG {_uomg_text(semester['gpa'])}", size=7.8, color=_MUTED, right_edge=x + width)
     y += 13
 
     cols = _mini_cols(width)
@@ -311,6 +333,12 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
         result = row["result"]
         definite = result["passed"] or result["failed"]
         code_name = f"{row['subject'].code}  {_truncate(row['subject'].name, name_limit)}"
+        # Köçürülmüş qiymət nişanı.  Rəsmi sənəddə bal-sütununa toxunmuruq —
+        # oxucu «*» görüb altdakı qeydə baxır.  Ekran versiyasında bunun
+        # qarşılığı ``_legacy_grade_mark.html`` qlifidir; hər ikisi eyni
+        # ``row["legacy"]`` mənbəyindən çıxır, ona görə sürüşə bilməz.
+        if row.get("legacy"):
+            code_name = f"{code_name} {_LEGACY_MARK}"
         sheet.text_at(x, y, code_name, size=7.6)
         values = {
             "credit": str(row["credit"]),
@@ -325,10 +353,10 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
     y += 4
     sheet.rule_at(x, x + width, y)
     y += 10
-    sheet.text_at(x, y, _("Semestrin sonu"), size=7.4, color=_MUTED)
-    figures = _("Kredit %(credit)s · ÜOMG %(gpa)s") % {
+    sheet.text_at(x, y, pgettext("registrar.pdf", "Semestrin sonu"), size=7.4, color=_MUTED)
+    figures = pgettext("registrar.pdf", "Kredit %(credit)s · ÜOMG %(gpa)s") % {
         "credit": semester["credits_earned"],
-        "gpa": f"{semester['gpa']:.2f}",
+        "gpa": _uomg_text(semester["gpa"]),
     }
     sheet.text_at(0, y, figures, size=7.4, bold=True, right_edge=x + width)
     y += 16
@@ -347,7 +375,13 @@ def _draw_year(sheet, year):
     estimated = 34 + max_rows * 12 + 40
     sheet.ensure(min(estimated, _BOTTOM_LIMIT - _MARGIN - 10))
 
-    sheet.text(_MARGIN, _("Akademik il %(year)s") % {"year": year["year_label"]}, size=11, bold=True, color=_BLUE)
+    sheet.text(
+        _MARGIN,
+        pgettext("registrar.pdf", "Akademik il %(year)s") % {"year": year["year_label"]},
+        size=11,
+        bold=True,
+        color=_BLUE,
+    )
     sheet.y += 16
     top = sheet.y
     col_w = (_CONTENT_W - _COL_GAP) / 2
@@ -360,10 +394,25 @@ def _draw_year(sheet, year):
         sheet.y = _draw_semester_column(sheet, extra_semester, x=_MARGIN, width=_CONTENT_W, top=sheet.y + 6)
 
     sheet.fill_rect(_MARGIN - 6, sheet.y - 2, _PAGE_W - _MARGIN + 6, sheet.y - 2 + 16, _ROW_ALT)
-    sheet.text(_MARGIN, _("İlin sonu"), size=8.5, bold=True)
-    figures = _("Kredit %(credit)s · ÜOMG %(gpa)s") % {"credit": year["credits_earned"], "gpa": f"{year['gpa']:.2f}"}
+    sheet.text(_MARGIN, pgettext("registrar.pdf", "İlin sonu"), size=8.5, bold=True)
+    figures = pgettext("registrar.pdf", "Kredit %(credit)s · ÜOMG %(gpa)s") % {
+        "credit": year["credits_earned"],
+        "gpa": _uomg_text(year["gpa"]),
+    }
     sheet.text(0, figures, size=8.5, bold=True, right_edge=_PAGE_W - _MARGIN)
     sheet.y += 26
+
+
+def _uomg_text(value) -> str:
+    """ÜOMG mətni — hesablana bilmirsə SIFIR YAZMIR (2026-08-31, 1-ci bloker).
+
+    Transkript rəsmi sənəddir: qəti nəticəli fənn yoxdursa ``0.00`` çap etmək
+    «tələbə sıfır bal aldı» iddiasıdır və tələbənin ziyanınadır.  Onun yerinə
+    :data:`exam_eligibility.UOMG_UNAVAILABLE_LABEL` yazılır.
+    """
+    if value is None:
+        return str(exam_eligibility.UOMG_UNAVAILABLE_LABEL)
+    return f"{value:.2f}"
 
 
 def _draw_footer(sheet, data, generated_at):
@@ -372,21 +421,37 @@ def _draw_footer(sheet, data, generated_at):
     sheet.y += 2
     sheet.rule(color=_BLUE, width=1.2)
     sheet.y += 18
-    sheet.text(_MARGIN, _("Ümumi"), size=11, bold=True, color=_BLUE)
-    figures = _("Kredit %(credit)s · Kumulyativ ÜOMG %(gpa)s") % {
+    sheet.text(_MARGIN, pgettext("registrar.pdf", "Ümumi"), size=11, bold=True, color=_BLUE)
+    figures = pgettext("registrar.pdf", "Kredit %(credit)s · Kumulyativ ÜOMG %(gpa)s") % {
         "credit": data["total_credits_earned"],
-        "gpa": f"{data['cumulative_gpa']:.2f}",
+        "gpa": _uomg_text(data["cumulative_gpa"]),
     }
     sheet.text(0, figures, size=10, bold=True, right_edge=_PAGE_W - _MARGIN)
     sheet.y += 16
     if data.get("ects_total"):
-        sheet.text(_MARGIN, f"{_('Məzuniyyət yükü (ECTS)')}: {data['ects_total']}", size=8.3, color=_MUTED)
+        ects_label = pgettext("registrar.pdf", "Məzuniyyət yükü (ECTS)")
+        sheet.text(_MARGIN, f"{ects_label}: {data['ects_total']}", size=8.3, color=_MUTED)
         sheet.y += 17
 
+    # Köçürülmüş qiymətlərin izahı — rəsmi sənəd nədən ibarət olduğunu ÖZÜ deməlidir.
+    # Qeyd yalnız nişanlanmış sətir varsa çap olunur ki, təmiz transkriptdə
+    # mənasız hüquqi mətn yaranmasın.
+    if _has_legacy_rows(data):
+        sheet.y += 6
+        legacy_note = pgettext(
+            "registrar.pdf",
+            "%(mark)s Bu qiymət köhnə universitet sistemindən köçürülüb; dəyər mənbədən "
+            "olduğu kimi gətirilib və yenidən hesablanmayıb.",
+        ) % {"mark": _LEGACY_MARK}
+        sheet.text(_MARGIN, legacy_note, size=7.4, color=_MUTED)
+        sheet.y += 14
+
     sheet.y += 26
-    sheet.text(_MARGIN, f"{_('Fakültə dekanı')} " + "_" * 26, size=9.5)
+    dean_label = pgettext("registrar.pdf", "Fakültə dekanı")
+    sheet.text(_MARGIN, f"{dean_label} " + "_" * 26, size=9.5)
+    issued_label = pgettext("registrar.pdf", "Verilmə tarixi")
     stamp = generated_at.strftime("%d.%m.%Y")
-    sheet.text(0, f"{_('Verilmə tarixi')}: {stamp}", size=9.5, right_edge=_PAGE_W - _MARGIN)
+    sheet.text(0, f"{issued_label}: {stamp}", size=9.5, right_edge=_PAGE_W - _MARGIN)
     sheet.y += 20
 
 
@@ -395,7 +460,7 @@ def render_transcript_pdf(*, organization, student, record, data) -> bytes:
     import fitz
 
     doc = fitz.open()
-    sheet = _Sheet(doc, _("AKADEMİK TRANSKRİPT"))
+    sheet = _Sheet(doc, pgettext("registrar.pdf", "AKADEMİK TRANSKRİPT"))
     _draw_letterhead(sheet, organization)
     _draw_student_info(sheet, record, student)
 
@@ -409,7 +474,7 @@ def render_transcript_pdf(*, organization, student, record, data) -> bytes:
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     doc.set_metadata(
         {
-            "title": _("Akademik transkript"),
+            "title": pgettext("registrar.pdf", "Akademik transkript"),
             "author": organization.name,
             "creator": getattr(organization, "name", "") or brand,
             "producer": f"{brand} / PyMuPDF",

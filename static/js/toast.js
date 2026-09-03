@@ -110,6 +110,78 @@
         bindDismissButtons();
     }
 
+    /* ── Proqram yolu ilə toast (AJAX əməlləri üçün) ───────────────────────────
+     * Server-render olunmuş Django `messages` toast-ları ilə EYNİ markup/CSS
+     * işlədilir — ona görə auto-hide, bağlama düyməsi və ESC davranışı yuxarıdakı
+     * MutationObserver sayəsində PULSUZ gəlir (əlavə bağlama lazım deyil).
+     *
+     *   EMSToast.show("Tələbə əlavə olundu", "success");
+     */
+    var ICONS = {
+        success: "fa-check",
+        error: "fa-exclamation",
+        danger: "fa-exclamation",
+        warning: "fa-triangle-exclamation",
+        info: "fa-info",
+    };
+
+    function container() {
+        var box = document.querySelector(".toast-container");
+        if (!box) {
+            box = document.createElement("div");
+            box.className = "toast-container";
+            box.setAttribute("aria-live", "polite");
+            box.setAttribute("aria-atomic", "true");
+            document.body.appendChild(box);
+        }
+        return box;
+    }
+
+    function showToast(message, level, timeout) {
+        if (!message) {
+            return null;
+        }
+        var tag = ICONS[level] ? level : "info";
+        var toast = document.createElement("div");
+        toast.className = "alert alert-" + tag + " app-toast app-toast--" + tag + " fade show";
+        toast.setAttribute("role", tag === "error" || tag === "danger" ? "alert" : "status");
+        toast.setAttribute("data-auto-hide", String(timeout || 4000));
+        toast.setAttribute("data-toast-item", "");
+
+        var icon = document.createElement("span");
+        icon.className = "app-toast__icon";
+        icon.setAttribute("aria-hidden", "true");
+        var i = document.createElement("i");
+        i.className = "fas " + ICONS[tag];
+        icon.appendChild(i);
+
+        var body = document.createElement("span");
+        body.className = "app-toast__body";
+        body.textContent = message; // mətn — HTML inyeksiyası yoxdur
+
+        var close = document.createElement("button");
+        close.type = "button";
+        close.className = "app-toast__close";
+        close.setAttribute("data-toast-dismiss", "");
+        // Etiket base.html-dən gəlir (xarici JS tərcümə tag-larından keçmir).
+        var closeLabel = document.body ? document.body.getAttribute("data-toast-close-label") : "";
+        if (closeLabel) {
+            close.setAttribute("aria-label", closeLabel);
+        }
+        var x = document.createElement("i");
+        x.className = "fas fa-xmark";
+        x.setAttribute("aria-hidden", "true");
+        close.appendChild(x);
+
+        toast.appendChild(icon);
+        toast.appendChild(body);
+        toast.appendChild(close);
+        container().appendChild(toast);
+        return toast;
+    }
+
+    window.EMSToast = window.EMSToast || { show: showToast };
+
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", bootAutoHideMessages);
     } else {

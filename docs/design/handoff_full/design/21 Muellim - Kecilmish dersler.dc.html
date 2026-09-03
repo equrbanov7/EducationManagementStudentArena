@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+</style>
+</helmet>
+<div style="max-width:1380px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxWho }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 · Payız semestri</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:10px">
+      <a href="./Müəllim - Elektron jurnal.dc.html" style="font-size:.78rem;font-weight:700">Elektron jurnal</a>
+      <a href="./Müəllim - Sillabuslar.dc.html" style="font-size:.78rem;font-weight:700">Sillabuslar</a>
+      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">{{ ctxRole }}</span>
+    </span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Keçilmiş dərslər</h1>
+      <p style="margin:6px 0 0;max-width:720px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ intro }}</p>
+    </div>
+    <button type="button" onClick="{{ doExport }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-neutral-50)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      Hesabatı yüklə
+    </button>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <span style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);margin-right:2px">Dövr</span>
+    <sc-for list="{{ rangeChips }}" as="c" hint-placeholder-count="5">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 13px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <sc-if value="{{ isCustom }}" hint-placeholder-val="{{ false }}">
+      <span style="display:inline-flex;align-items:center;gap:7px">
+        <label for="ems-d1" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Başlanğıc tarix</label>
+        <input id="ems-d1" type="date" value="{{ from }}" onChange="{{ setFrom }}" style="height:36px;padding:0 10px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.8rem">
+        <span style="color:var(--ems-neutral-400);font-size:.8rem">—</span>
+        <label for="ems-d2" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Son tarix</label>
+        <input id="ems-d2" type="date" value="{{ to }}" onChange="{{ setTo }}" style="height:36px;padding:0 10px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.8rem">
+      </span>
+    </sc-if>
+    <span style="margin-left:auto;font-size:.78rem;font-weight:700;color:var(--ems-neutral-500);text-wrap:pretty">{{ rangeNote }}</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px;margin-bottom:14px">
+    <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+      <div style="padding:12px 14px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px">
+        <div style="font-size:.67rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+        <div style="margin-top:5px;font-size:1.26rem;font-weight:800;letter-spacing:-.02em;color:{{ m.valFg }}">{{ m.value }}</div>
+        <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ isHead }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:15px 17px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px">
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px">
+        <span style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Müəllimlər üzrə keçilmiş dərs</span>
+        <span style="font-size:.75rem;color:var(--ems-neutral-400)">seçilmiş dövrdə · adına klik et, yalnız onun dərsləri qalsın</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ byTeacher }}" as="t" hint-placeholder-count="5">
+          <button type="button" onClick="{{ t.pick }}" aria-current="{{ t.sel }}" style="display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;border:1px solid {{ t.bd }};background:{{ t.bg }};cursor:pointer;text-align:left" style-hover="background:var(--ems-neutral-50)">
+            <span style="width:150px;flex:none;min-width:0">
+              <span style="display:block;font-size:.81rem;font-weight:700;color:{{ t.fg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span>
+              <span style="display:block;font-size:.7rem;color:var(--ems-neutral-400)">{{ t.rank }}</span>
+            </span>
+            <span style="flex:1;height:16px;border-radius:5px;background:var(--ems-neutral-100);overflow:hidden">
+              <span style="display:block;height:100%;width:{{ t.w }};background:{{ t.bar }}"></span>
+            </span>
+            <span style="width:108px;flex:none;text-align:right;font-size:.78rem;font-weight:700;color:var(--ems-neutral-900);white-space:nowrap">{{ t.value }}</span>
+            <sc-if value="{{ t.flag }}" hint-placeholder-val="{{ false }}">
+              <span style="flex:none;padding:2px 8px;border-radius:6px;background:var(--ems-warning-bg);color:#92400e;font-size:.7rem;font-weight:800;white-space:nowrap">{{ t.flagText }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <div style="position:relative;flex:1;min-width:190px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+      <label for="ems-l-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Dərs axtar</label>
+      <input id="ems-l-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Mövzu, fənn və ya qrup axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+    </div>
+    <div style="position:relative">
+      <button type="button" onClick="{{ toggleCourse }}" aria-haspopup="listbox" aria-expanded="{{ courseOpen }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer;max-width:250px">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ courseLabel }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <sc-if value="{{ courseOpen }}" hint-placeholder-val="{{ false }}">
+        <div role="listbox" aria-label="Fənn seç" style="position:absolute;top:100%;left:0;z-index:40;width:290px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);display:flex;flex-direction:column;gap:2px;max-height:250px;overflow:auto">
+          <sc-for list="{{ courseOpts }}" as="o" hint-placeholder-count="5">
+            <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.81rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <sc-for list="{{ kindChips }}" as="c" hint-placeholder-count="4">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <button type="button" onClick="{{ toggleFlagged }}" role="switch" aria-checked="{{ onlyFlagged }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);font-size:.8rem;font-weight:700;color:{{ flagFg }};cursor:pointer">
+      <span style="width:30px;height:17px;border-radius:999px;background:{{ flagTrack }};position:relative;flex:none">
+        <span style="position:absolute;top:2px;left:{{ flagLeft }};width:13px;height:13px;border-radius:999px;background:var(--ems-neutral-0)"></span>
+      </span>
+      Yalnız qeyd tələb edənlər
+    </button>
+    <button type="button" onClick="{{ resetFilters }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Sıfırla</button>
+  </div>
+
+  <sc-if value="{{ rowsEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:56px 24px;text-align:center;background:var(--ems-neutral-0);border:1px dashed var(--ems-neutral-300);border-radius:16px">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+      <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">Seçilmiş dövrdə dərs qeydi yoxdur</div>
+      <button type="button" onClick="{{ resetFilters }}" style="padding:8px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ rowsShown }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ days }}" as="d" hint-placeholder-count="4">
+        <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 15px;background:var(--ems-neutral-50);border-bottom:1px solid var(--ems-neutral-200)">
+            <span style="font-size:.86rem;font-weight:800;color:var(--ems-neutral-900)">{{ d.date }}</span>
+            <span style="font-size:.77rem;color:var(--ems-neutral-500)">{{ d.weekday }}</span>
+            <span style="margin-left:auto;font-size:.78rem;font-weight:700;color:var(--ems-neutral-500)">{{ d.total }}</span>
+          </div>
+          <div style="overflow:auto">
+            <table style="width:100%;min-width:{{ tableMin }};font-size:.81rem">
+              <thead>
+                <tr style="background:var(--ems-neutral-0)">
+                  <th style="padding:8px 14px;text-align:left;width:104px;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Saat</th>
+                  <sc-if value="{{ isHead }}" hint-placeholder-val="{{ false }}">
+                    <th style="padding:8px 10px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Müəllim</th>
+                  </sc-if>
+                  <th style="padding:8px 10px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Fənn və qrup</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100);min-width:250px">Keçilən mövzu</th>
+                  <th style="padding:8px 10px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Dərsin tipi</th>
+                  <th style="padding:8px 10px;text-align:center;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">İştirak</th>
+                  <th style="padding:8px 10px;text-align:right;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Saat</th>
+                  <th style="padding:8px 14px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400);border-bottom:1px solid var(--ems-neutral-100)">Jurnal qeydi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ d.rows }}" as="r" hint-placeholder-count="3">
+                  <tr style="background:{{ r.bg }}">
+                    <td style="padding:9px 14px;border-top:1px solid var(--ems-neutral-100);white-space:nowrap">
+                      <span style="display:block;font-weight:700;color:var(--ems-neutral-900)">{{ r.time }}</span>
+                      <span style="display:block;margin-top:1px;font-size:.7rem;color:var(--ems-neutral-400)">{{ r.slot }}</span>
+                    </td>
+                    <sc-if value="{{ isHead }}" hint-placeholder-val="{{ false }}">
+                      <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700);white-space:nowrap">{{ r.teacher }}</td>
+                    </sc-if>
+                    <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                      <span style="display:block;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ r.course }}</span>
+                      <span style="display:block;margin-top:1px;font-size:.72rem;color:var(--ems-neutral-400)">{{ r.group }} · {{ r.room }}</span>
+                    </td>
+                    <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                      <sc-if value="{{ r.hasTopic }}" hint-placeholder-val="{{ true }}">
+                        <span style="color:var(--ems-neutral-700);text-wrap:pretty">{{ r.topic }}</span>
+                      </sc-if>
+                      <sc-if value="{{ r.noTopic }}" hint-placeholder-val="{{ false }}">
+                        <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:6px;background:var(--ems-warning-bg);color:#92400e;font-size:.75rem;font-weight:700">Mövzu yazılmayıb</span>
+                      </sc-if>
+                    </td>
+                    <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)"><span style="padding:2px 8px;border-radius:6px;background:{{ r.kBg }};color:{{ r.kFg }};font-size:.71rem;font-weight:700;white-space:nowrap">{{ r.kind }}</span></td>
+                    <td style="padding:9px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:{{ r.attFg }};white-space:nowrap">{{ r.att }}</td>
+                    <td style="padding:9px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-neutral-900)">{{ r.hours }}</td>
+                    <td style="padding:9px 14px;border-top:1px solid var(--ems-neutral-100)">
+                      <span style="display:inline-flex;align-items:center;gap:6px">
+                        <span style="width:15px;height:15px;flex:none;display:grid;place-items:center;border-radius:999px;background:{{ r.jBg }};color:var(--ems-neutral-0);font-size:.6rem;font-weight:800">{{ r.jIcon }}</span>
+                        <span style="font-size:.77rem;font-weight:{{ r.jFw }};color:{{ r.jFg }};white-space:nowrap">{{ r.journal }}</span>
+                      </span>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-for>
+
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:12px;text-align:center;font-size:.78rem;color:var(--ems-neutral-400);background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;text-wrap:pretty">{{ moreText }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1420,&quot;height&quot;:1150},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Müəllim&quot;,&quot;Kafedra müdiri&quot;,&quot;Dekanlıq&quot;,&quot;Tədris Şöbəsi müdiri&quot;],&quot;default&quot;:&quot;Müəllim&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Kim baxır&quot;}}">
+const TEACHERS = [
+  { id:'th', n:'b/m Nigar Həsənli', rank:'Baş müəllim', norm:750 },
+  { id:'re', n:'dos. Rəşad Əliyev', rank:'Kafedra müdiri', norm:450 },
+  { id:'em', n:'dos. Elvin Məmmədov', rank:'Dosent', norm:650 },
+  { id:'gr', n:'dos. Günel Rzayeva', rank:'Dosent', norm:650 },
+  { id:'ts', n:'m. Tural Səfərov', rank:'Müəllim', norm:800 },
+  { id:'la', n:'Assistent Leyla Abbasova', rank:'Assistent', norm:850 }
+];
+const COURSES = [
+  { c:'MİF-B04.12', n:'Alqoritmlər və verilənlər strukturu', t:'th' },
+  { c:'MİF-B04.04', n:'Proqramlaşdırma texnologiyaları', t:'re' },
+  { c:'MİF-B09.05', n:'İnformasiya təhlükəsizliyinin əsasları', t:'em' },
+  { c:'MİF-B09.08', n:'Şəbəkələrin təhlükəsizliyi', t:'gr' },
+  { c:'MİF-B02.11', n:'Veb texnologiyalar', t:'ts' },
+  { c:'MİF-B04.01', n:'Proqramlaşdırmanın əsasları', t:'la' }
+];
+const GROUPS = ['236 KE','236 KE ing','235 KE','234 KE','236 İT','235 İT'];
+const KINDS = {
+  'Mühazirə': ['var(--ems-primary-50)','var(--ems-primary-800)'],
+  'Seminar': ['var(--ems-neutral-100)','var(--ems-neutral-700)'],
+  'Laboratoriya': ['var(--ems-warning-bg)','#92400e'],
+  'Məsləhət': ['var(--ems-neutral-100)','var(--ems-neutral-500)']
+};
+const TOPICS = {
+  'MİF-B04.12': ['Yığın və növbə strukturları','İkili axtarış ağacı','Qraflarda enişli axtarış (DFS)','Sıralama alqoritmlərinin müqayisəsi','Heş cədvəllər və toqquşma həlli','Alqoritm mürəkkəbliyi — O notasiyası','Dinamik proqramlaşdırmaya giriş','Ağac balanslaşdırması — AVL'],
+  'MİF-B04.04': ['Versiya idarəetməsi: Git iş axını','Layihə strukturu və modul bölgüsü','Vahid testlərin yazılması','Kodun sənədləşdirilməsi','Refaktorinq üsulları','CI boru xəttinin qurulması'],
+  'MİF-B09.05': ['Konfidensiallıq–bütövlük–əlçatanlıq modeli','Simmetrik şifrələmə: AES','Açıq açarlı kriptoqrafiya','Heş funksiyalar və rəqəmsal imza','Risklərin qiymətləndirilməsi metodikası','Təhlükəsizlik siyasətinin hazırlanması'],
+  'MİF-B09.08': ['TCP/IP protokol yığınının zəiflikləri','Firewall qaydalarının qurulması','IDS və IPS sistemləri','VPN texnologiyaları','Trafik analizi: Wireshark','Şəbəkə seqmentasiyası'],
+  'MİF-B02.11': ['HTTP protokolu və status kodları','Semantik HTML və əlçatanlıq','Responsiv layout: Flexbox və Grid','REST API dizaynı','Autentifikasiya: sessiya və token','Tətbiqin yerləşdirilməsi'],
+  'MİF-B04.01': ['Dəyişənlər və məlumat tipləri','Şərt operatorları','Dövr strukturları: for və while','Funksiyalar və parametrlər','Massivlər üzərində əməliyyatlar','Sətir emalı','Fayllarla iş','Səhvlərin aşkarlanması']
+};
+const SLOTS = [['09:00 – 10:20','1-ci cüt'],['10:30 – 11:50','2-ci cüt'],['12:20 – 13:40','3-cü cüt'],['13:50 – 15:10','4-cü cüt'],['15:20 – 16:40','5-ci cüt']];
+const WD = ['Bazar','Bazar ertəsi','Çərşənbə axşamı','Çərşənbə','Cümə axşamı','Cümə','Şənbə'];
+const MON = ['yanvar','fevral','mart','aprel','may','iyun','iyul','avqust','sentyabr','oktyabr','noyabr','dekabr'];
+
+const rng = (seed) => { let x = seed || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; };
+const nf = (n) => Math.round(n).toLocaleString('az-AZ').replace(/,/g, ' ');
+const iso = (d) => d.toISOString().slice(0, 10);
+const TODAY = new Date(2026, 10, 18);       // 18 noyabr 2026 — payız semestrinin ortası
+const SEM_START = new Date(2026, 8, 15);    // 15 sentyabr 2026 — semestrin başlanğıcı
+const YEAR_START = new Date(2026, 1, 9);    // 2025/2026 yaz semestri — «İl» dövrü üçün
+
+// Hər müəllim üçün həftəlik cədvəl qurulur, sonra semestr həftələri üzrə təkrarlanır.
+// Həftəlik dərs sayı illik normadan çıxır: norma / 2 saat / 16 həftə / 2 semestr.
+function weeklyPlan(t, r) {
+  const perWeek = Math.max(4, Math.round(t.norm / 64));
+  const own = COURSES.filter(c => c.t === t.id);
+  const pool = own.concat(COURSES.filter(c => c.t !== t.id)).slice(0, 3);
+  const plan = [];
+  const used = {};
+  let guard = 0;
+  while (plan.length < perWeek && guard < 200) {
+    guard++;
+    const day = Math.floor(r() * 5);          // 0..4 → B.e — Cümə
+    const slot = Math.floor(r() * SLOTS.length);
+    const key = day + ':' + slot;
+    if (used[key]) continue;
+    used[key] = true;
+    const c = pool[plan.length % pool.length];
+    const roll = r();
+    const kind = roll < 0.4 ? 'Mühazirə' : (roll < 0.72 ? 'Seminar' : (roll < 0.94 ? 'Laboratoriya' : 'Məsləhət'));
+    plan.push({
+      day, slot, code: c.c, course: c.n,
+      group: GROUPS[Math.floor(r() * GROUPS.length)],
+      room: (kind === 'Laboratoriya' ? 'Lab A-' : 'Otaq A-') + (200 + Math.floor(r() * 90)),
+      kind, total: 18 + Math.floor(r() * 20)
+    });
+  }
+  return plan;
+}
+
+function buildLessons() {
+  const out = [];
+  let id = 0;
+  TEACHERS.forEach((t, ti) => {
+    const r = rng(4400 + ti * 977);
+    const plan = weeklyPlan(t, r);
+    // yaz semestri (keçmiş) + payız semestri (cari)
+    [[YEAR_START, new Date(2026, 5, 5)], [SEM_START, TODAY]].forEach(span => {
+      const first = new Date(span[0].getTime());
+      first.setDate(first.getDate() - ((first.getDay() + 6) % 7));   // həftənin bazar ertəsi
+      for (let w = new Date(first); w <= span[1]; w.setDate(w.getDate() + 7)) {
+        plan.forEach(p => {
+          const d = new Date(w.getTime());
+          d.setDate(d.getDate() + p.day);
+          if (d < span[0] || d > span[1]) return;
+          const tp = TOPICS[p.code];
+          const jr = r();
+          const weekNo = Math.floor((d - span[0]) / 604800000);
+          out.push({
+            id: id++, date: d, slot: p.slot, tid: t.id,
+            code: p.code, course: p.course, group: p.group, room: p.room,
+            kind: p.kind, hours: 2,
+            topic: jr < 0.06 ? '' : tp[weekNo % tp.length],
+            present: Math.max(4, p.total - Math.floor(r() * 9)), total: p.total,
+            journal: jr < 0.06 ? 'none' : (jr < 0.19 ? 'late' : 'ok')
+          });
+        });
+      }
+    });
+  });
+  return out;
+}
+const LESSONS = buildLessons();
+
+const RANGES = ['Bu gün','Bu həftə','Bu ay','Semestr','İl','Seçilmiş aralıq'];
+
+class Component extends DCLogic {
+  state = {
+    range:'Bu həftə', from: iso(new Date(2026, 10, 1)), to: iso(TODAY),
+    q:'', qRaw:'', course:'Bütün fənlər', courseOpen:false, kind:'Hamısı',
+    onlyFlagged:false, teacher:null, toast:''
+  };
+  componentDidMount() {
+    this.onKey = (e) => { if (e.key === 'Escape' && this.state.courseOpen) this.setState({ courseOpen:false }); };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { clearTimeout(this.tq); clearTimeout(this.tt); document.removeEventListener('keydown', this.onKey); }
+
+  role() { return this.props.role || 'Müəllim'; }
+  isHead() { const r = this.role(); return r !== 'Müəllim'; }
+  me() { return TEACHERS[0]; }
+  scopeIds() {
+    const r = this.role();
+    if (r === 'Müəllim') return [this.me().id];
+    if (r === 'Kafedra müdiri') return TEACHERS.map(t => t.id);
+    return TEACHERS.map(t => t.id);
+  }
+  bounds() {
+    const s = this.state;
+    const end = new Date(TODAY.getTime());
+    let start;
+    if (s.range === 'Bu gün') start = new Date(TODAY.getTime());
+    else if (s.range === 'Bu həftə') { start = new Date(TODAY.getTime()); start.setDate(start.getDate() - ((start.getDay() + 6) % 7)); }
+    else if (s.range === 'Bu ay') start = new Date(2026, TODAY.getMonth(), 1);
+    else if (s.range === 'Semestr') start = new Date(SEM_START.getTime());
+    else if (s.range === 'İl') start = new Date(YEAR_START.getTime());
+    else return { start: new Date(s.from), end: new Date(s.to) };
+    return { start, end };
+  }
+  fmt(d) { return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear(); }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast:m }); this.tt = setTimeout(() => this.setState({ toast:'' }), 2600); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+
+  renderVals() {
+    const s = this.state;
+    const head = this.isHead();
+    const b = this.bounds();
+    const q = s.q.trim().toLowerCase();
+    const ids = this.scopeIds();
+
+    const inRange = LESSONS.filter(l => l.date >= b.start && l.date <= b.end && ids.indexOf(l.tid) >= 0);
+    const scoped = s.teacher ? inRange.filter(l => l.tid === s.teacher) : inRange;
+
+    const rows = scoped.filter(l =>
+      (!q || l.course.toLowerCase().includes(q) || (l.topic || '').toLowerCase().includes(q) || l.group.toLowerCase().includes(q)) &&
+      (s.course === 'Bütün fənlər' || l.course === s.course) &&
+      (s.kind === 'Hamısı' || l.kind === s.kind) &&
+      (!s.onlyFlagged || l.journal !== 'ok')
+    ).sort((a, c) => c.date - a.date || a.slot - c.slot);
+
+    const hours = scoped.reduce((a, l) => a + l.hours, 0);
+    const missing = scoped.filter(l => l.journal === 'none');
+    const late = scoped.filter(l => l.journal === 'late');
+    const attRate = scoped.length ? Math.round(scoped.reduce((a, l) => a + l.present / l.total, 0) / scoped.length * 100) : 0;
+    const uniqGroups = Array.from(new Set(scoped.map(l => l.group))).length;
+
+    // günə görə qruplaşdırma
+    const byDay = [];
+    const seen = {};
+    rows.slice(0, 90).forEach(l => {
+      const k = iso(l.date);
+      if (!seen[k]) { seen[k] = { date: l.date, rows: [] }; byDay.push(seen[k]); }
+      seen[k].rows.push(l);
+    });
+
+    const attColor = (p) => p >= 0.8 ? 'var(--ems-success)' : (p >= 0.6 ? 'var(--ems-neutral-700)' : 'var(--ems-danger)');
+    const JS = {
+      ok:   { label:'Vaxtında yazılıb', icon:'✓', bg:'var(--ems-success)', fg:'#15803d', fw:600 },
+      late: { label:'Gec yazılıb', icon:'!', bg:'var(--ems-warning)', fg:'#92400e', fw:700 },
+      none: { label:'Jurnal boşdur', icon:'!', bg:'var(--ems-danger)', fg:'#b91c1c', fw:800 }
+    };
+
+    const tMax = Math.max.apply(null, TEACHERS.map(t => inRange.filter(l => l.tid === t.id).reduce((a, l) => a + l.hours, 0)).concat([1]));
+
+    return {
+      ctxWho: head ? 'Kafedra müdirliyi' : 'Müəllim kabineti',
+      ctxScope: head ? 'Proqramlaşdırma və İT kafedrası — bütün müəllimlər' : this.me().n,
+      ctxRole: this.role(),
+      intro: head
+        ? 'Kafedranın müəllimləri hansı dərsi, hansı qrupa, hansı mövzu ilə keçib. Jurnalı vaxtında doldurulmayan dərslər ayrıca işarələnir.'
+        : 'Keçdiyiniz dərslərin qeydi — hansı qrupa, hansı mövzunu, neçə saat. Dövrü dəyişib istənilən aralığa baxa bilərsiniz.',
+      isHead: head,
+      tableMin: head ? '1080px' : '960px',
+
+      rangeChips: RANGES.map(v => { const c = this.chip(v === s.range); return { label:v, bg:c.bg, fg:c.fg, bd:c.bd, pick: () => this.setState({ range:v }) }; }),
+      isCustom: s.range === 'Seçilmiş aralıq',
+      from: s.from, to: s.to,
+      setFrom: (e) => this.setState({ from: e.target.value }),
+      setTo: (e) => this.setState({ to: e.target.value }),
+      rangeNote: this.fmt(b.start) + ' — ' + this.fmt(b.end) + ' · ' + scoped.length + ' dərs qeydi',
+
+      kpis: [
+        { label:'Keçilmiş dərs', value: scoped.length, note: uniqGroups + ' qrup üzrə',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Auditoriya saatı', value: nf(hours), note: head ? 'kafedra üzrə cəmi' : (s.range === 'Semestr' || s.range === 'İl' ? 'illik normanın ' + Math.round(hours / this.me().norm * 100) + '%-i' : 'illik norma ' + nf(this.me().norm) + ' saat'),
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)' },
+        { label:'Orta iştirak', value: attRate + '%', note:'dərsə gələn tələbə payı',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Jurnalı boş dərs', value: missing.length, note: missing.length ? 'mövzu və qiymət yazılmayıb' : 'hamısı doldurulub',
+          bd: missing.length ? '#fecaca' : 'var(--ems-neutral-200)', bg: missing.length ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+          labFg: missing.length ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: missing.length ? '#b91c1c' : 'var(--ems-neutral-900)', noteFg: missing.length ? '#b91c1c' : 'var(--ems-neutral-500)' },
+        { label:'Gec yazılan qeyd', value: late.length, note: late.length ? 'dərsdən 48 saat sonra' : 'gecikmə yoxdur',
+          bd: late.length ? '#fde68a' : 'var(--ems-neutral-200)', bg: late.length ? 'var(--ems-warning-bg)' : 'var(--ems-neutral-0)',
+          labFg: late.length ? '#92400e' : 'var(--ems-neutral-400)', valFg: late.length ? '#92400e' : 'var(--ems-neutral-900)', noteFg: late.length ? '#92400e' : 'var(--ems-neutral-500)' }
+      ],
+
+      byTeacher: TEACHERS.map(t => {
+        const ls = inRange.filter(l => l.tid === t.id);
+        const h = ls.reduce((a, l) => a + l.hours, 0);
+        const bad = ls.filter(l => l.journal === 'none').length;
+        const on = s.teacher === t.id;
+        return {
+          name: t.n, rank: t.rank, sel: on ? 'true' : 'false',
+          value: nf(h) + ' saat · ' + ls.length + ' dərs',
+          w: Math.round(h / tMax * 100) + '%',
+          bar: bad > 2 ? 'var(--ems-warning)' : 'var(--ems-primary-600)',
+          bd: on ? 'var(--ems-primary-600)' : 'transparent',
+          bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          fg: on ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+          flag: bad > 0, flagText: bad + ' jurnal boş',
+          pick: () => this.setState({ teacher: on ? null : t.id })
+        };
+      }),
+
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw:v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q:v }), 260); },
+      courseOpen: s.courseOpen, courseLabel: s.course,
+      toggleCourse: () => this.setState({ courseOpen: !s.courseOpen }),
+      courseOpts: ['Bütün fənlər'].concat(Array.from(new Set(inRange.map(l => l.course)))).map(v => ({
+        label:v, sel: v === s.course ? 'true' : 'false', fw: v === s.course ? 800 : 600,
+        fg: v === s.course ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bg: v === s.course ? 'var(--ems-primary-50)' : 'transparent',
+        pick: () => this.setState({ course:v, courseOpen:false }),
+        key: this.keyActivate(() => this.setState({ course:v, courseOpen:false }))
+      })),
+      kindChips: ['Hamısı'].concat(Object.keys(KINDS)).map(v => {
+        const c = this.chip(v === s.kind);
+        return { label: v === 'Hamısı' ? 'Bütün tiplər' : v, bg:c.bg, fg:c.fg, bd:c.bd, pick: () => this.setState({ kind:v }) };
+      }),
+      onlyFlagged: s.onlyFlagged,
+      toggleFlagged: () => this.setState({ onlyFlagged: !s.onlyFlagged }),
+      flagTrack: s.onlyFlagged ? 'var(--ems-warning)' : 'var(--ems-neutral-300)',
+      flagLeft: s.onlyFlagged ? '15px' : '2px',
+      flagFg: s.onlyFlagged ? '#92400e' : 'var(--ems-neutral-500)',
+      resetFilters: () => this.setState({ q:'', qRaw:'', course:'Bütün fənlər', kind:'Hamısı', onlyFlagged:false, teacher:null }),
+
+      rowsShown: rows.length > 0, rowsEmpty: rows.length === 0,
+      days: byDay.map(d => ({
+        date: this.fmt(d.date), weekday: WD[d.date.getDay()],
+        total: d.rows.length + ' dərs · ' + d.rows.reduce((a, l) => a + l.hours, 0) + ' saat',
+        rows: d.rows.map((l, i) => {
+          const j = JS[l.journal];
+          const k = KINDS[l.kind];
+          const p = l.present / l.total;
+          return {
+            time: SLOTS[l.slot][0], slot: SLOTS[l.slot][1],
+            teacher: (TEACHERS.find(t => t.id === l.tid) || {}).n,
+            course: l.course, group: l.group, room: l.room,
+            topic: l.topic, hasTopic: !!l.topic, noTopic: !l.topic,
+            kind: l.kind, kBg: k[0], kFg: k[1],
+            att: l.present + ' / ' + l.total, attFg: attColor(p),
+            hours: l.hours + ' s',
+            journal: j.label, jIcon: j.icon, jBg: j.bg, jFg: j.fg, jFw: j.fw,
+            bg: l.journal === 'none' ? 'var(--ems-danger-bg)' : (i % 2 ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)')
+          };
+        })
+      })),
+      hasMore: rows.length > 90,
+      moreText: 'İlk 90 dərs göstərilir — cəmi ' + rows.length + ' qeyd var. Daha dar dövr seçin və ya hesabatı yükləyin.',
+
+      doExport: () => this.flash('Hesabat hazırlanır: ' + this.fmt(b.start) + ' — ' + this.fmt(b.end) + ' · ' + scoped.length + ' dərs.'),
+      toast: !!s.toast, toastText: s.toast
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}
+  Köçürülmüş qiymətin GÖRÜNƏN nişanı — bütün səthlərdə EYNİ markup.
+
+  Çağırış:
+      {% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}
+
+  Boz qlif mənşəni, qırmızı mətn isə sahibin tələb etdiyi daimi
+  İmtahan Mərkəzi bildirişini daşıyır. Bildiriş VERIFIED statusunda da
+  qalır; yoxlama statusu ayrıca qlifin tonu/tooltip-i ilə verilir.
+
+  Detal ``title`` atributundadır (mənbə qeydi, köçürmə tarixi, xam dəyərlər) —
+  ekranda daimi yer tutmadan tələb üzrə açılır.
+{% endcomment %}
+{% if legacy %}
+<span class="legacy-grade-indicators">
+  <span class="legacy-mark{% if legacy.review_required %} legacy-mark--unreviewed{% endif %}"
+        tabindex="0"
+        role="img"
+        aria-label="{{ legacy.label }}"
+        title="{{ legacy.label }} — {{ legacy.notice }}{% if legacy.source_system %}
+{% trans "Mənbə sistem" context "registrar.legacy_grade" %}: {{ legacy.source_system }}{% endif %}{% if legacy.source_reference %}
+{% trans "Mənbə qeydi" context "registrar.legacy_grade" %}: {{ legacy.source_reference }}{% endif %}{% if legacy.recorded_at %}
+{% trans "Mənbədə yazılma tarixi" context "registrar.legacy_grade" %}: {{ legacy.recorded_at }}{% endif %}{% if legacy.raw_entry %}
+{% trans "Mənbədəki giriş balı" context "registrar.legacy_grade" %}: {{ legacy.raw_entry }}{% endif %}{% if legacy.raw_exam %}
+{% trans "Mənbədəki imtahan balı" context "registrar.legacy_grade" %}: {{ legacy.raw_exam }}{% endif %}{% if legacy.raw_resit %}
+{% trans "Mənbədəki təkrar imtahan balı" context "registrar.legacy_grade" %}: {{ legacy.raw_resit }}{% endif %}{% if legacy.raw_final %}
+{% trans "Mənbədəki yekun bal" context "registrar.legacy_grade" %}: {{ legacy.raw_final }}{% endif %}{% if legacy.review_notice %}
+{{ legacy.review_notice }}{% endif %}"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i></span>
+  {% if legacy.warning %}<strong class="legacy-grade-warning">{{ legacy.warning }}</strong>{% endif %}
+</span>
+{% endif %}

@@ -160,22 +160,9 @@ a.qsubs-bank-link:hover {
 
 /* ── Göndəriş filtrləri: axtarışlı seçicilər (prefiks: qsf) ──
    Fakültə/kafedra/müəllim uzun siyahılardır — select əvəzinə type-ahead.
-   Üslub _searchable_picker.html DOM-una uyğundur (bax .qbk-ms pariteti). */
+   Komponentin ÖZ üslubu artıq burada deyil: static/css/searchable_select.css
+   (vahid `.ems-ss*`). Burada yalnız yerləşdirmə sarğısı qalır. */
 .qsubf-picker { flex: 1 1 180px; min-width: 160px; }
-.qsf-ms { border: 1px solid var(--ems-neutral-300, #cbd5e1); border-radius: 10px; background: #fff; padding: 0.3rem 0.5rem; position: relative; min-height: 42px; box-sizing: border-box; display: flex; align-items: center; }
-.qsf-ms:focus-within { border-color: var(--ems-primary-500, #3b82f6); box-shadow: 0 0 0 3px var(--ems-primary-100, #dbeafe); }
-.qsf-ms__chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
-.qsf-ms__search { border: 0; outline: none; background: transparent; color: var(--ems-neutral-900, #0f172a); padding: 0.24rem; font-size: 0.87rem; min-width: 80px; flex: 1; }
-.qsf-ms__search::placeholder { color: var(--ems-neutral-400, #94a3b8); }
-.qsf-ms__menu { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; background: #fff; border: 1px solid var(--ems-neutral-200, #e2e8f0); border-radius: 10px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14); max-height: 300px; overflow-y: auto; z-index: 1060; display: none; }
-.qsf-ms.is-open .qsf-ms__menu { display: block; }
-.qsf-ms__opt { padding: 0.55rem 0.8rem; cursor: pointer; font-size: 0.86rem; color: var(--ems-neutral-800, #1e293b); }
-.qsf-ms__opt:hover { background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-700, #1d4ed8); }
-.qsf-ms__more { padding: 0.5rem 0.8rem; text-align: center; color: var(--ems-neutral-400, #94a3b8); font-size: 1rem; letter-spacing: 0.2em; }
-.qsf-chip { display: inline-flex; align-items: center; gap: 0.35rem; background: var(--ems-primary-50, #eff6ff); color: var(--ems-primary-700, #1d4ed8); border: 1px solid var(--ems-primary-200, #bfdbfe); border-radius: 999px; padding: 0.12rem 0.3rem 0.12rem 0.55rem; font-size: 0.8rem; font-weight: 600; max-width: 100%; }
-.qsf-chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qsf-chip__x { border: 0; background: transparent; color: var(--ems-primary-600, #2563eb); font-size: 0.95rem; line-height: 1; cursor: pointer; padding: 0 0.3rem; border-radius: 50%; }
-.qsf-chip__x:hover { color: var(--ems-primary-800, #1e40af); background: var(--ems-primary-100, #dbeafe); }
 
 /* Silinmiş/deaktiv qəbul bankı — linksiz, sönük düymə görkəmi. */
 .qsubd-bank-gone { cursor: default; opacity: 0.75; }

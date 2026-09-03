@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Rəhbər seçicisi — səbəb dialoqunun əlavə sahəsi (`reason_extra_include`).
+Boş dəyər = rəhbəri GÖTÜR (təyinatı ləğv et); səbəb yenə məcburidir.
+Namizəd formatı `_shared._head_candidates`-dən gəlir: {user_id, full_name, role_label}.{% endcomment %}
+<div class="ems-field">
+    <label class="ems-field__label" for="tof-head-user">{% trans "Rəhbər" context "accounts.structure_tree" %}</label>
+    <select class="ems-select" id="tof-head-user" name="head">
+        <option value="">{% trans "Rəhbəri götür (boş)" context "accounts.structure_tree" %}</option>
+        {% for candidate in structure_tree_section.head_candidates %}
+            <option value="{{ candidate.user_id }}">{{ candidate.full_name }}{% if candidate.role_label %} — {{ candidate.role_label }}{% endif %}</option>
+        {% endfor %}
+    </select>
+</div>

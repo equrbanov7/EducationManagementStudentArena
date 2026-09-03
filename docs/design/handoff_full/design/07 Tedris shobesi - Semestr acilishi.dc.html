@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+  @keyframes emsShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+</style>
+</helmet>
+<div style="max-width:1360px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="16" y1="2" x2="16" y2="6"></line></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxRole }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 · Payız semestri</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:{{ lockBg }};color:{{ lockFg }};font-size:.74rem;font-weight:700">{{ lockLabel }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Semestr açılışı</h1>
+      <p style="margin:6px 0 0;max-width:700px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Təsdiqlənmiş tədris planından hər qrup üçün fənn açılışı yaradılır, kafedra müəllim təyin edir, sonra jurnal açılır. Dərs yükü məhz bu açılışlardan hesablanır.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ openGen }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v6"></path><polyline points="8.5 6.5 12 3 15.5 6.5"></polyline><rect x="3" y="12" width="18" height="9" rx="2"></rect></svg>
+          Plandan açılış yarat
+        </button>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:0;margin-bottom:14px;padding:14px 16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow-x:auto">
+    <sc-for list="{{ steps }}" as="st" hint-placeholder-count="5">
+      <div style="flex:1;min-width:170px;display:flex;align-items:flex-start;gap:10px;padding-right:14px">
+        <span style="width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:999px;background:{{ st.dotBg }};color:{{ st.dotFg }};font-size:.74rem;font-weight:800;border:2px solid {{ st.ring }}">{{ st.n }}</span>
+        <span style="min-width:0;flex:1">
+          <span style="display:block;font-size:.82rem;font-weight:{{ st.fw }};color:{{ st.fg }};line-height:1.25;text-wrap:pretty">{{ st.label }}</span>
+          <span style="display:block;margin-top:3px;font-size:.73rem;color:{{ st.noteFg }};text-wrap:pretty">{{ st.note }}</span>
+          <span style="display:block;margin-top:6px;height:4px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+            <span style="display:block;height:100%;width:{{ st.w }};background:{{ st.bar }};border-radius:999px"></span>
+          </span>
+        </span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px;margin-bottom:14px">
+    <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+      <button type="button" onClick="{{ m.pick }}" style="text-align:left;padding:12px 14px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+        <div style="font-size:.67rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+        <div style="margin-top:5px;font-size:1.26rem;font-weight:800;letter-spacing:-.02em;color:{{ m.valFg }}">{{ m.value }}</div>
+        <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;gap:2px;margin-bottom:14px;overflow-x:auto;border-bottom:1px solid var(--ems-neutral-200)">
+    <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+      <button type="button" onClick="{{ v.pick }}" aria-current="{{ v.sel }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:none;border-bottom:2px solid {{ v.bd }};background:transparent;color:{{ v.fg }};font-size:.86rem;font-weight:{{ v.fw }};white-space:nowrap;cursor:pointer">
+        {{ v.label }}
+        <sc-if value="{{ v.hasCount }}" hint-placeholder-val="{{ false }}">
+          <span style="padding:1px 6px;border-radius:999px;background:{{ v.cntBg }};color:{{ v.cntFg }};font-size:.7rem;font-weight:800">{{ v.count }}</span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ vAcilis }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <sc-if value="{{ hasCarry }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+          <div style="flex:1;min-width:280px;display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:var(--ems-success-bg);border:1px solid #bbf7d0;border-radius:13px">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+            <span style="flex:1;min-width:0">
+              <span style="display:block;font-size:.86rem;font-weight:800;color:#15803d;text-wrap:pretty">{{ carryTitle }}</span>
+              <span style="display:block;margin-top:3px;font-size:.79rem;color:#15803d;line-height:1.5;text-wrap:pretty">{{ carryNote }}</span>
+              <span style="display:block;margin-top:5px;font-size:.75rem;color:#15803d;text-wrap:pretty">{{ carryList }}</span>
+            </span>
+          </div>
+          <sc-if value="{{ hasRedo }}" hint-placeholder-val="{{ true }}">
+            <div style="flex:1;min-width:280px;display:flex;align-items:flex-start;gap:11px;padding:13px 15px;background:var(--ems-warning-bg);border:1px solid #fde68a;border-radius:13px">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><line x1="12" y1="9" x2="12" y2="13.5"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:.86rem;font-weight:800;color:#92400e;text-wrap:pretty">{{ redoTitle }}</span>
+                <span style="display:block;margin-top:3px;font-size:.79rem;color:#92400e;line-height:1.5;text-wrap:pretty">{{ redoList }}</span>
+                <a href="#" onClick="{{ goRedo }}" style="display:inline-block;margin-top:6px;font-size:.78rem;font-weight:800;color:#92400e">Bağlanmalı məsələlərə keç</a>
+              </span>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:12px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+        <div style="position:relative;flex:1;min-width:190px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+          <label for="ems-a-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Açılış axtar</label>
+          <input id="ems-a-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Fənn, qrup və ya müəllim axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+        </div>
+        <div style="position:relative">
+          <button type="button" onClick="{{ toggleDept }}" aria-haspopup="listbox" aria-expanded="{{ deptOpen }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer;max-width:240px">
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ deptLabel }}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <sc-if value="{{ deptOpen }}" hint-placeholder-val="{{ false }}">
+            <div role="listbox" aria-label="Dərsi aparan kafedra" style="position:absolute;top:100%;left:0;z-index:40;width:270px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);display:flex;flex-direction:column;gap:2px;max-height:250px;overflow:auto">
+              <sc-for list="{{ deptOpts }}" as="o" hint-placeholder-count="5">
+                <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.81rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <sc-for list="{{ statChips }}" as="c" hint-placeholder-count="5">
+          <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+        </sc-for>
+        <button type="button" onClick="{{ resetFilters }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Sıfırla</button>
+      </div>
+
+      <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:11px 14px;margin-bottom:12px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:12px">
+          <span style="font-size:.83rem;font-weight:800;color:var(--ems-primary-800)">{{ selCount }} açılış seçilib</span>
+          <span style="font-size:.78rem;color:var(--ems-primary-800)">{{ selNote }}</span>
+          <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:8px">
+            <button type="button" onClick="{{ bulkSend }}" style="padding:8px 14px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.8rem;font-weight:700;cursor:pointer">Kafedraya göndər</button>
+            <button type="button" onClick="{{ bulkJournal }}" disabled="{{ bulkJInvalid }}" style="padding:8px 14px;border-radius:9px;border:1px solid {{ bulkJBd }};background:{{ bulkJBg }};color:{{ bulkJFg }};font-size:.8rem;font-weight:700;cursor:{{ bulkJCur }}">Jurnalları aç</button>
+            <button type="button" onClick="{{ bulkCancel }}" style="padding:8px 14px;border-radius:9px;border:1px solid #fecaca;background:var(--ems-neutral-0);color:#b91c1c;font-size:.8rem;font-weight:700;cursor:pointer">Açılışı ləğv et</button>
+            <button type="button" onClick="{{ clearSel }}" style="padding:8px 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.8rem;font-weight:700;cursor:pointer">Seçimi ləğv et</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div aria-busy="true" aria-live="polite" style="height:420px;border-radius:16px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+      </sc-if>
+
+      <sc-if value="{{ rowsEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:52px 20px;text-align:center;background:var(--ems-neutral-0);border:1px dashed var(--ems-neutral-300);border-radius:16px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+          <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">Filtrə uyğun açılış yoxdur</div>
+          <button type="button" onClick="{{ resetFilters }}" style="padding:8px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ rowsShown }}" hint-placeholder-val="{{ true }}">
+        <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:14px;background:var(--ems-neutral-0)">
+          <table style="width:100%;min-width:1180px;font-size:.81rem">
+            <thead>
+              <tr style="background:var(--ems-primary-50)">
+                <th style="padding:9px 12px;width:38px">
+                  <input type="checkbox" checked="{{ allChecked }}" onChange="{{ toggleAll }}" aria-label="Bütün açılışları seç" style="width:15px;height:15px;cursor:pointer">
+                </th>
+                <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənn</th>
+                <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Qrup / ixtisas</th>
+                <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Tələbə sayı</th>
+                <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Semestr saatı</th>
+                <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Dərsi aparan kafedra</th>
+                <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800);min-width:190px">Təyin olunmuş müəllim</th>
+                <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Açılışın vəziyyəti</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+                <tr style="background:{{ r.bg }}">
+                  <td style="padding:9px 12px;border-top:1px solid var(--ems-neutral-100)">
+                    <input type="checkbox" checked="{{ r.checked }}" onChange="{{ r.toggle }}" aria-label="{{ r.selAria }}" style="width:15px;height:15px;cursor:pointer">
+                  </td>
+                  <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                    <span style="display:block;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ r.name }}</span>
+                    <span style="display:block;margin-top:2px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;color:var(--ems-neutral-400)">{{ r.code }} · {{ r.krLabel }}</span>
+                  </td>
+                  <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                    <span style="display:block;font-weight:700;color:var(--ems-neutral-900);white-space:nowrap">{{ r.group }}</span>
+                    <span style="display:block;margin-top:2px;font-size:.72rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ r.prog }}</span>
+                  </td>
+                  <td style="padding:9px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:{{ r.stFg }}">{{ r.students }}</td>
+                  <td style="padding:9px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100)">
+                    <span style="display:block;font-weight:700;color:var(--ems-neutral-900)">{{ r.hours }}</span>
+                    <span style="display:block;margin-top:1px;font-size:.7rem;color:var(--ems-neutral-400);white-space:nowrap">{{ r.hoursNote }}</span>
+                  </td>
+                  <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-500);text-wrap:pretty">{{ r.dept }}</td>
+                  <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                    <sc-if value="{{ r.hasTeacher }}" hint-placeholder-val="{{ true }}">
+                      <span style="display:inline-flex;align-items:center;gap:8px">
+                        <span style="font-weight:600;color:var(--ems-neutral-900);white-space:nowrap">{{ r.teacher }}</span>
+                        <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                          <a href="#" onClick="{{ r.assign }}" style="font-size:.74rem;font-weight:700">dəyiş</a>
+                        </sc-if>
+                      </span>
+                    </sc-if>
+                    <sc-if value="{{ r.noTeacher }}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{ r.assign }}" style="display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:8px;border:1px dashed var(--ems-danger);background:var(--ems-neutral-0);color:var(--ems-danger);font-size:.76rem;font-weight:800;cursor:pointer">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        {{ r.assignLabel }}
+                      </button>
+                    </sc-if>
+                  </td>
+                  <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                    <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:6px;background:{{ r.sBg }};color:{{ r.sFg }};font-size:.72rem;font-weight:700;white-space:nowrap">{{ r.status }}</span>
+                    <sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:block;margin-top:4px;font-size:.71rem;color:#92400e;text-wrap:pretty">{{ r.warn }}</span>
+                    </sc-if>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;font-size:.75rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ rowsNote }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ vKafedra }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="font-size:.82rem;color:var(--ems-neutral-500);margin-bottom:12px;text-wrap:pretty">Hər kafedranın bu semestrdə aparacağı açılışlar və onlardan doğan dərs yükü. Kafedra müəllim təyinatını bitirməyincə yük təsdiqə göndərilmir.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ deptRows }}" as="d" hint-placeholder-count="5">
+          <div style="padding:15px 17px;background:var(--ems-neutral-0);border:1px solid {{ d.bd }};border-radius:14px">
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+              <span style="min-width:0;flex:1">
+                <span style="display:block;font-size:.95rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ d.name }}</span>
+                <span style="display:block;margin-top:3px;font-size:.77rem;color:var(--ems-neutral-500)">{{ d.meta }}</span>
+              </span>
+              <span style="padding:3px 11px;border-radius:999px;background:{{ d.pillBg }};color:{{ d.pillFg }};font-size:.74rem;font-weight:800;white-space:nowrap">{{ d.pill }}</span>
+              <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                <button type="button" onClick="{{ d.remind }}" style="padding:7px 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.79rem;font-weight:700;cursor:pointer;white-space:nowrap">Xatırlatma göndər</button>
+              </sc-if>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+              <span style="flex:1;height:9px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+                <span style="display:block;height:100%;width:{{ d.w }};background:{{ d.bar }};border-radius:999px"></span>
+              </span>
+              <span style="font-size:.78rem;font-weight:800;color:{{ d.bar }};width:44px;text-align:right">{{ d.pct }}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:11px">
+              <sc-for list="{{ d.tags }}" as="t" hint-placeholder-count="3">
+                <span style="padding:3px 10px;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font-size:.73rem;font-weight:700">{{ t.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ vProblem }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <sc-if value="{{ hasProblems }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:.82rem;color:var(--ems-neutral-500);margin-bottom:12px;text-wrap:pretty">Semestri kilidləməzdən əvvəl bağlanmalı olan məsələlər. Hər biri konkret açılış sətrinə aiddir.</div>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ problems }}" as="p" hint-placeholder-count="4">
+            <div style="background:var(--ems-neutral-0);border:1px solid {{ p.bd }};border-radius:14px;overflow:hidden">
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:13px 16px;background:{{ p.bg }}">
+                <span style="width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--ems-neutral-0);color:{{ p.fg }};font-size:.78rem;font-weight:800">{{ p.n }}</span>
+                <span style="min-width:0;flex:1">
+                  <span style="display:block;font-size:.88rem;font-weight:800;color:{{ p.fg }};text-wrap:pretty">{{ p.title }}</span>
+                  <span style="display:block;margin-top:2px;font-size:.77rem;color:{{ p.fg }};text-wrap:pretty">{{ p.note }}</span>
+                </span>
+                <button type="button" onClick="{{ p.go }}" style="padding:7px 13px;border-radius:9px;border:1px solid {{ p.fg }};background:var(--ems-neutral-0);color:{{ p.fg }};font-size:.79rem;font-weight:800;cursor:pointer;white-space:nowrap">{{ p.cta }}</button>
+              </div>
+              <div style="padding:4px 16px 12px">
+                <sc-for list="{{ p.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--ems-neutral-100)">
+                    <span style="font-size:.81rem;font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ it.name }}</span>
+                    <span style="font-size:.76rem;color:var(--ems-neutral-400)">{{ it.meta }}</span>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ p.more }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:8px 0 0;font-size:.76rem;color:var(--ems-neutral-400)">{{ p.moreText }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noProblems }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:56px 20px;text-align:center;background:var(--ems-success-bg);border:1px solid #bbf7d0;border-radius:16px">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+          <div style="font-size:.95rem;font-weight:800;color:#15803d">Bütün açılışlar hazırdır</div>
+          <div style="font-size:.83rem;color:#15803d;max-width:400px;text-wrap:pretty">Müəllim təyinatı, minimum tələbə həddi və jurnal açılışı üzrə açıq məsələ qalmayıb — semestri kilidləmək olar.</div>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <button type="button" onClick="{{ openLock }}" style="padding:10px 18px;border-radius:10px;border:1px solid #15803d;background:#15803d;color:var(--ems-neutral-0);font-size:.84rem;font-weight:700;cursor:pointer">Semestri kilidlə</button>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+</div>
+
+<sc-if value="{{ mAssign }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeAssign }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-as" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:620px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-as" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ av.title }}</h3>
+        <div style="margin-top:4px;font-size:.79rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ av.sub }}</div>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative">
+          <input type="text" value="{{ av.q }}" onChange="{{ av.setQ }}" placeholder="Müəllim adı üzrə axtar" aria-label="Müəllim axtar" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div style="font-size:.73rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ av.listLabel }}</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow:auto">
+          <sc-for list="{{ av.opts }}" as="o" hint-placeholder-count="5">
+            <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="display:flex;align-items:center;gap:11px;padding:10px 12px;border:1px solid {{ o.bd }};background:{{ o.bg }};border-radius:11px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+              <span style="width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;background:{{ o.avBg }};color:{{ o.avFg }};font-size:.72rem;font-weight:800">{{ o.ini }}</span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:.84rem;font-weight:700;color:var(--ems-neutral-900)">{{ o.name }}</span>
+                <span style="display:block;margin-top:1px;font-size:.73rem;color:var(--ems-neutral-500)">{{ o.meta }}</span>
+              </span>
+              <span style="flex:none;text-align:right">
+                <span style="display:block;font-size:.78rem;font-weight:800;color:{{ o.loadFg }}">{{ o.load }}</span>
+                <span style="display:block;margin-top:1px;font-size:.7rem;color:var(--ems-neutral-400)">{{ o.after }}</span>
+              </span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ av.none }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px;font-size:.8rem;color:var(--ems-neutral-400);text-align:center">Uyğun müəllim tapılmadı</div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">{{ av.hint }}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeAssign }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ av.save }}" disabled="{{ av.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ av.bd }};background:{{ av.bg }};color:{{ av.fg }};font-size:.83rem;font-weight:700;cursor:{{ av.cur }}">{{ av.cta }}</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mGen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeGen }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-gn" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:640px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-gn" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Tədris planından açılış yarat</h3>
+        <div style="margin-top:4px;font-size:.79rem;color:var(--ems-neutral-500);text-wrap:pretty">Seçilmiş ixtisasların təsdiqlənmiş planından hər qrup üçün fənn açılışı sətirləri yaradılır.</div>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+          <div>
+            <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Tədris ili</span>
+            <div style="height:38px;display:flex;align-items:center;padding:0 12px;border:1px solid var(--ems-neutral-200);border-radius:9px;background:var(--ems-neutral-50);font-size:.85rem;font-weight:700;color:var(--ems-neutral-500)">2026 / 2027</div>
+          </div>
+          <div>
+            <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Semestr</span>
+            <div style="display:flex;gap:5px">
+              <sc-for list="{{ gv.sems }}" as="o" hint-placeholder-count="2">
+                <button type="button" onClick="{{ o.pick }}" style="flex:1;height:38px;border-radius:9px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Hansı ixtisaslar üçün? <span style="color:var(--ems-danger)">*</span></span>
+          <div style="display:flex;flex-direction:column;gap:5px;max-height:190px;overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:11px;padding:8px">
+            <sc-for list="{{ gv.progs }}" as="p" hint-placeholder-count="5">
+              <label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:{{ p.bg }};cursor:{{ p.cursor }}">
+                <input type="checkbox" checked="{{ p.on }}" onChange="{{ p.toggle }}" disabled="{{ p.disabled }}" style="width:15px;height:15px;cursor:{{ p.cursor }}">
+                <span style="flex:1;min-width:0;font-size:.82rem;font-weight:600;color:{{ p.fg }};text-wrap:pretty">{{ p.name }}</span>
+                <span style="font-size:.73rem;color:{{ p.noteFg }};white-space:nowrap">{{ p.note }}</span>
+              </label>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:12px 14px;background:{{ gv.tipBg }};border:1px solid {{ gv.tipBd }};border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ gv.tipFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.8rem;color:{{ gv.tipFg }};line-height:1.5;text-wrap:pretty">{{ gv.tip }}</span>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" checked="{{ gv.keep }}" onChange="{{ gv.toggleKeep }}" style="width:15px;height:15px;margin-top:2px;cursor:pointer">
+          <span style="font-size:.81rem;color:var(--ems-neutral-700);line-height:1.5;text-wrap:pretty">Keçən ilin müəllim təyinatlarını təklif kimi köçür — kafedra yalnız təsdiqləyəcək.</span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <span style="font-size:.76rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ gv.count }}</span>
+        <div style="display:flex;gap:9px">
+          <button type="button" onClick="{{ closeGen }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+          <button type="button" onClick="{{ gv.run }}" disabled="{{ gv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ gv.bd }};background:{{ gv.bg }};color:{{ gv.fg }};font-size:.83rem;font-weight:700;cursor:{{ gv.cur }}">Açılışları yarat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mLock }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeLock }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-lk" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:540px;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="display:flex;align-items:center;gap:11px;padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <span style="width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--ems-primary-50)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+        </span>
+        <h3 id="ems-lk" style="margin:0;font-size:1rem;font-weight:800;color:var(--ems-neutral-900)">Semestri kilidlə</h3>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:.84rem;color:var(--ems-neutral-700);line-height:1.55;text-wrap:pretty">Kiliddən sonra açılış sətirləri dəyişmir, dərs yükü hesablanır və təsdiq zəncirinə göndərilir. Sonrakı dəyişiklik yalnız Tədris şöbəsi müdirinin icazəsi ilə mümkündür.</div>
+        <div style="display:flex;flex-direction:column;gap:1px;border:1px solid var(--ems-neutral-200);border-radius:11px;overflow:hidden">
+          <sc-for list="{{ lockChecks }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--ems-neutral-0)">
+              <span style="width:18px;height:18px;flex:none;display:grid;place-items:center;border-radius:999px;background:{{ c.iconBg }};color:var(--ems-neutral-0);font-size:.66rem;font-weight:800">{{ c.icon }}</span>
+              <span style="flex:1;font-size:.82rem;color:var(--ems-neutral-900);text-wrap:pretty">{{ c.label }}</span>
+              <span style="font-size:.79rem;font-weight:800;color:{{ c.fg }};white-space:nowrap">{{ c.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeLock }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ confirmLock }}" disabled="{{ lockInvalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ lockBd2 }};background:{{ lockBg2 }};color:{{ lockFg2 }};font-size:.83rem;font-weight:700;cursor:{{ lockCur }}">Kilidlə və yükə göndər</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:1150},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tədris Şöbəsi müdiri&quot;,&quot;Tədris Şöbəsi əməkdaşı&quot;,&quot;Dekanlıq&quot;,&quot;Kafedra müdiri&quot;],&quot;default&quot;:&quot;Tədris Şöbəsi müdiri&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İcazə qatı&quot;}}">
+const DEPTS = {
+  pit: 'Proqramlaşdırma və İT',
+  mex: 'Mexatronika',
+  riy: 'Riyaziyyat',
+  iqt: 'İqtisadiyyat',
+  men: 'Menecment',
+  sos: 'Sosial elmlər',
+  xdil: 'Xarici dillər'
+};
+// kod, ad, kredit, aparan kafedra, seçmə fənndir?, elmi rəhbərlikdir?
+const C = (code, name, kr, dept, sec, sup) => ({ code, name, kr, dept, sec: !!sec, sup: !!sup });
+const PROG = {
+  kmuh: { name:'Kompüter mühəndisliyi', plan:'2026 · v2 · Təsdiqlənib', ready:true, deg:'Bakalavr', planChanged:true, courses:[
+    C('MİF-B04.04','Proqramlaşdırma texnologiyaları',8,'pit'),
+    C('MİF-B04.12','Alqoritmlər və verilənlər strukturu',7,'pit'),
+    C('MİF-B05.03','Kompüter arxitekturası',6,'mex'),
+    C('RİY-B02.05','Ehtimal nəzəriyyəsi',5,'riy'),
+    C('MİF-B02.11','Veb texnologiyalar',4,'pit',true),
+    C('XDL-B01.02','Xarici dil – 2',4,'xdil') ] },
+  itah: { name:'İnformasiya təhlükəsizliyi', plan:'2026 · v1 · Tədris şöbəsində', ready:false, deg:'Bakalavr', planChanged:true, courses:[
+    C('MİF-B09.05','İnformasiya təhlükəsizliyinin əsasları',6,'pit'),
+    C('MİF-B09.08','Şəbəkələrin təhlükəsizliyi',5,'pit'),
+    C('MİF-B04.12','Alqoritmlər və verilənlər strukturu',7,'pit'),
+    C('RİY-B02.05','Ehtimal nəzəriyyəsi',6,'riy'),
+    C('HUM-B02.03','Fəlsəfə',3,'sos') ] },
+  mex: { name:'Mexatronika mühəndisliyi', plan:'2026 · v1 · Təsdiqlənib', ready:true, deg:'Bakalavr', planChanged:false, courses:[
+    C('MEX-B01.04','Mexanika və materiallar',6,'mex'),
+    C('MİF-B03.02','Rəqəmsal sxemlər',6,'mex'),
+    C('RİY-B01.02','Xətti cəbr və analitik həndəsə',6,'riy'),
+    C('MEX-B03.02','Sənaye robotları',5,'mex',true),
+    C('XDL-B01.01','Xarici dil – 1',4,'xdil') ] },
+  iqt: { name:'İqtisadiyyat', plan:'2026 · v2 · Təsdiqlənib', ready:true, deg:'Bakalavr', planChanged:false, courses:[
+    C('İQT-B01.01','İqtisadiyyata giriş',5,'iqt'),
+    C('İQT-B04.02','Statistika',4,'iqt'),
+    C('MEN-B01.02','Menecmentin əsasları',5,'men'),
+    C('HUM-B01.01','Azərbaycan tarixi',4,'sos'),
+    C('XDL-B01.01','Xarici dil – 1',4,'xdil') ] },
+  bid: { name:'Biznesin idarə edilməsi', plan:'2026 · v2 · Təsdiqlənib', ready:true, deg:'Bakalavr', planChanged:false, courses:[
+    C('MEN-B02.03','Marketinq',5,'men'),
+    C('MEN-B04.01','Layihələrin idarə edilməsi',4,'men',true),
+    C('İQT-B01.01','İqtisadiyyata giriş',5,'iqt'),
+    C('XDL-B02.04','İxtisas üzrə xarici dil',3,'xdil',true) ] },
+  kelm: { name:'Kompüter elmləri (magistr)', plan:'2026 · v1 · Təsdiqlənib', ready:true, deg:'Magistr', planChanged:true, courses:[
+    C('MİF-M04.07','Maşın öyrənməsi',8,'pit'),
+    C('MİF-M09.03','Verilənlər elmi',6,'pit'),
+    C('MİF-M04.11','Paylanmış sistemlər',7,'pit'),
+    C('MİF-M02.01','Elmi tədqiqat metodları',4,'sos'),
+    C('MİF-M99.01','Elmi rəhbərlik və dissertasiya işi',0,'pit',false,true) ] },
+  triy: { name:'Tətbiqi riyaziyyat (magistr)', plan:'2026 · v1 · Təsdiqlənib', ready:true, deg:'Magistr', planChanged:false, courses:[
+    C('RİY-M01.02','Funksional analiz',8,'riy'),
+    C('RİY-M01.05','Ədədi metodlar',7,'riy'),
+    C('RİY-M02.01','Optimallaşdırma üsulları',6,'riy'),
+    C('MİF-M02.01','Elmi tədqiqat metodları',4,'sos'),
+    C('MİF-M99.01','Elmi rəhbərlik və dissertasiya işi',0,'riy',false,true) ] }
+};
+// qrup adı, ixtisas, kurs, tələbə sayı
+const G = (name, prog, kurs, st) => ({ name, prog, kurs, st });
+const GROUPS = [
+  G('236 KE','kmuh',1,40), G('236 KE ing','kmuh',1,25), G('235 KE','kmuh',2,34), G('234 KE','kmuh',3,29),
+  G('236 İT','itah',1,32), G('235 İT','itah',2,28),
+  G('236 MX','mex',1,24), G('235 MX','mex',2,22),
+  G('236 İQT','iqt',1,38), G('235 İQT','iqt',2,35),
+  G('236 BİD','bid',1,30),
+  G('236 KE-M','kelm',1,12), G('236 TR-M','triy',1,9)
+];
+const TEACHERS = [
+  { n:'dos. Rəşad Əliyev', d:'pit', rank:'Dosent', norm:450, base:210 },
+  { n:'prof. Səlim Quliyev', d:'pit', rank:'Professor', norm:550, base:260 },
+  { n:'dos. Elvin Məmmədov', d:'pit', rank:'Dosent', norm:650, base:340 },
+  { n:'dos. Günel Rzayeva', d:'pit', rank:'Dosent', norm:650, base:300 },
+  { n:'b/m Nigar Həsənli', d:'pit', rank:'Baş müəllim', norm:750, base:420 },
+  { n:'m. Tural Səfərov', d:'pit', rank:'Müəllim', norm:800, base:460 },
+  { n:'dos. Fərid Nəsirov', d:'mex', rank:'Dosent', norm:450, base:220 },
+  { n:'prof. Elçin Bayramov', d:'mex', rank:'Professor', norm:550, base:250 },
+  { n:'dos. Aynur Salmanova', d:'mex', rank:'Dosent', norm:650, base:360 },
+  { n:'b/m Ramin Əhmədov', d:'mex', rank:'Baş müəllim', norm:750, base:400 },
+  { n:'dos. Sevinc Əliyeva', d:'riy', rank:'Dosent', norm:650, base:350 },
+  { n:'dos. Rauf Bağırov', d:'riy', rank:'Dosent', norm:650, base:330 },
+  { n:'b/m Nərmin Cəfərova', d:'riy', rank:'Baş müəllim', norm:750, base:395 },
+  { n:'dos. Nicat Əsgərov', d:'iqt', rank:'Dosent', norm:650, base:340 },
+  { n:'b/m Emin Cabbarov', d:'iqt', rank:'Baş müəllim', norm:750, base:385 },
+  { n:'dos. Ülviyyə Məmmədli', d:'men', rank:'Dosent', norm:650, base:355 },
+  { n:'b/m Tahir Osmanov', d:'men', rank:'Baş müəllim', norm:750, base:405 },
+  { n:'dos. Nazrin Ağayeva', d:'sos', rank:'Dosent', norm:650, base:360 },
+  { n:'b/m Vüqar Həsənov', d:'sos', rank:'Baş müəllim', norm:750, base:415 },
+  { n:'b/m Ayxan Rzayev', d:'xdil', rank:'Baş müəllim', norm:750, base:425 },
+  { n:'m. Lamiyə Hacıyeva', d:'xdil', rank:'Müəllim', norm:800, base:450 },
+  { n:'m. Ceyran Əsədova', d:'xdil', rank:'Müəllim', norm:800, base:440 }
+];
+// Seçmə fənnin açılması üçün minimum tələbə həddi — magistrdə qruplar kiçik olduğu üçün ayrıdır
+const MIN_SEC = 10;
+const MIN_SEC_M = 5;
+const minOf = (row) => PROG[row.progId].deg === 'Magistr' ? MIN_SEC_M : MIN_SEC;
+const STATUS_STYLE = {
+  'Qaralama': ['var(--ems-neutral-100)','var(--ems-neutral-700)'],
+  'Kafedrada — müəllim gözlənilir': ['var(--ems-warning-bg)','#92400e'],
+  'Müəllim təyin olunub': ['var(--ems-primary-100)','var(--ems-primary-800)'],
+  'Jurnal açılıb': ['var(--ems-success-bg)','#15803d'],
+  'Ləğv edilib': ['var(--ems-danger-bg)','#b91c1c']
+};
+const STATUSES = Object.keys(STATUS_STYLE);
+
+const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+const rng = (seed) => { let x = seed || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; };
+const ini = (n) => { const p = n.replace(/^(dos\.|prof\.|b\/m|m\.)\s*/, '').split(' '); return p.map(x => x[0]).slice(0, 2).join(''); };
+const zebra = (i) => i % 2 ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)';
+const nf = (n) => Math.round(n).toLocaleString('az-AZ').replace(/,/g, ' ');
+
+function buildRows() {
+  const rows = [];
+  GROUPS.forEach(g => {
+    const p = PROG[g.prog];
+    const r = rng(hash(g.name));
+    p.courses.forEach((c, ci) => {
+      const students = c.sec ? Math.max(4, Math.round(g.st * (0.25 + r() * 0.5))) : g.st;
+      const pool = TEACHERS.filter(t => t.d === c.dept);
+      const roll = r();
+      const teacher = roll < 0.72 ? pool[Math.floor(r() * pool.length)].n : null;
+      rows.push({
+        id: g.name + '|' + c.code,
+        code: c.code, name: c.name, kr: c.kr, dept: c.dept, sec: c.sec, sup: c.sup,
+        group: g.name, prog: p.name, progId: g.prog, students,
+        // elmi rəhbərlik hər tələbəyə görə 12 saat hesablanır, adi fənn kreditdən
+        hours: c.sup ? students * 12 : c.kr * 15,
+        teacher,
+        journal: teacher && roll < 0.42 && !c.sup,
+        planReady: p.ready
+      });
+    });
+  });
+  return rows;
+}
+const ROWS = buildRows();
+
+class Component extends DCLogic {
+  state = {
+    loading: true, w: 1360, view: 'Açılışlar',
+    q: '', qRaw: '', dept: 'Bütün kafedralar', deptOpen: false, stat: 'Hamısı',
+    assigned: {}, cancelled: {}, journals: {}, sent: {}, selected: {},
+    assign: null, gen: null, lock: false, locked: false, toast: ''
+  };
+
+  componentDidMount() {
+    this.t1 = setTimeout(() => this.setState({ loading: false }), 620);
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      const s = this.state;
+      if (s.assign) this.setState({ assign: null });
+      else if (s.gen) this.setState({ gen: null });
+      else if (s.lock) this.setState({ lock: false });
+      else if (s.deptOpen) this.setState({ deptOpen: false });
+    };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t1); clearTimeout(this.tq); clearTimeout(this.tt);
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.onKey);
+  }
+
+  role() { return this.props.role || 'Tədris Şöbəsi müdiri'; }
+  canEdit() { const r = this.role(); return !this.state.locked && (r === 'Tədris Şöbəsi müdiri' || r === 'Tədris Şöbəsi əməkdaşı' || r === 'Kafedra müdiri'); }
+  scoped() {
+    const r = this.role();
+    if (r === 'Kafedra müdiri') return ROWS.filter(x => x.dept === 'pit');
+    if (r === 'Dekanlıq') return ROWS.filter(x => ['pit','mex','riy'].indexOf(x.dept) >= 0);
+    return ROWS;
+  }
+  teacherOf(row) {
+    if (this.state.assigned[row.id] !== undefined) return this.state.assigned[row.id];
+    return row.teacher;
+  }
+  statusOf(row) {
+    const s = this.state;
+    if (s.cancelled[row.id]) return 'Ləğv edilib';
+    if (s.journals[row.id] || (row.journal && s.assigned[row.id] === undefined)) return 'Jurnal açılıb';
+    if (this.teacherOf(row)) return 'Müəllim təyin olunub';
+    if (s.sent[row.id] || row.planReady) return 'Kafedrada — müəllim gözlənilir';
+    return 'Qaralama';
+  }
+  loadOf(name) {
+    const t = TEACHERS.find(x => x.n === name);
+    if (!t) return { cur: 0, norm: 1 };
+    const extra = this.scoped().filter(r => this.teacherOf(r) === name && !this.state.cancelled[r.id]).reduce((a, r) => a + r.hours, 0);
+    return { cur: t.base + extra, norm: t.norm };
+  }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast: m }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2800); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+
+  renderVals() {
+    const s = this.state;
+    const all = this.scoped();
+    const q = s.q.trim().toLowerCase();
+
+    const live = all.filter(r => !s.cancelled[r.id]);
+    const withT = live.filter(r => this.teacherOf(r));
+    const withJ = live.filter(r => this.statusOf(r) === 'Jurnal açılıb');
+    const noT = live.filter(r => !this.teacherOf(r));
+    const belowMin = live.filter(r => r.sec && r.students < minOf(r));
+    const supRows = live.filter(r => r.sup);
+    const supMissing = supRows.filter(r => !this.teacherOf(r));
+    // İllik təkrar işlər: planı dəyişməyən ixtisasların açılışı keçən ildən olduğu kimi köçürülür
+    const progIds = Array.from(new Set(all.map(r => r.progId)));
+    const carried = progIds.filter(p => PROG[p].ready && !PROG[p].planChanged);
+    const redo = progIds.filter(p => !PROG[p].ready || PROG[p].planChanged);
+    const carriedRows = live.filter(r => carried.indexOf(r.progId) >= 0);
+    const notReady = live.filter(r => !PROG[r.progId].ready);
+    const overloaded = TEACHERS.filter(t => {
+      const l = this.loadOf(t.n);
+      return l.cur > t.norm * 1.15 && live.some(r => this.teacherOf(r) === t.n);
+    });
+
+    const rows0 = live.filter(r =>
+      (!q || r.name.toLowerCase().includes(q) || r.group.toLowerCase().includes(q) || (this.teacherOf(r) || '').toLowerCase().includes(q)) &&
+      (s.dept === 'Bütün kafedralar' || DEPTS[r.dept] === s.dept) &&
+      (s.stat === 'Hamısı' || this.statusOf(r) === s.stat)
+    );
+
+    const selIds = Object.keys(s.selected).filter(k => s.selected[k]);
+    const selRows = rows0.filter(r => s.selected[r.id]);
+
+    const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+    const sentCount = live.filter(r => s.sent[r.id] || r.planReady).length;
+    const stepDefs = [
+      { label:'Plandan açılış yaradıldı', note: live.length + ' açılış sətri var', done: pct(live.length, live.length) },
+      { label:'Kafedraya göndərildi', note: sentCount + ' / ' + live.length + ' açılış kafedraya ötürülüb', done: pct(sentCount, live.length) },
+      { label:'Müəllim təyin olundu', note: withT.length + ' / ' + live.length + ' açılışda müəllim var', done: pct(withT.length, live.length) },
+      { label:'Jurnal açıldı', note: withJ.length + ' açılışın jurnalı işləyir', done: pct(withJ.length, live.length) },
+      { label:'Semestr kilidləndi', note: s.locked ? 'yük hesablanmağa göndərildi' : 'bütün məsələlər bağlanmalıdır', done: s.locked ? 100 : 0 }
+    ];
+
+    const problems = [];
+    if (noT.length) problems.push({
+      key:'noT', title: noT.length + ' açılışa hələ müəllim təyin olunmayıb',
+      note:'Müəllimsiz açılış üçün jurnal açılmır və dərs yükü hesablanmır.',
+      cta:'Siyahını aç', sev:'danger',
+      items: noT.slice(0, 4).map(r => ({ name: r.name, meta: r.group + ' · ' + DEPTS[r.dept] })),
+      rest: noT.length - 4,
+      go: () => this.setState({ view:'Açılışlar', stat:'Kafedrada — müəllim gözlənilir' })
+    });
+    if (supMissing.length) problems.push({
+      key:'sup', title: supMissing.length + ' magistr qrupuna elmi rəhbər təyin olunmayıb',
+      note:'Magistr tələbəsinin dissertasiya işi elmi rəhbər olmadan başlanmır. Rəhbərlik saatı (hər tələbəyə 12 saat) müəllimin yükünə yazılır.',
+      cta:'Açılışlara bax', sev:'danger',
+      items: supMissing.slice(0, 4).map(r => ({ name: r.name, meta: r.group + ' · ' + r.students + ' tələbə · ' + r.hours + ' saat' })),
+      rest: supMissing.length - 4,
+      go: () => this.setState({ view:'Açılışlar', stat:'Hamısı', q:'', qRaw:'' })
+    });
+    if (belowMin.length) problems.push({
+      key:'min', title: belowMin.length + ' seçmə fənn minimum tələbə həddinə çatmır',
+      note:'Seçmə fənn bakalavrda ' + MIN_SEC + ', magistrdə ' + MIN_SEC_M + ' tələbədən az yazılışla açılmır — ya birləşdirilməli, ya ləğv edilməlidir.',
+      cta:'Açılışlara bax', sev:'warn',
+      items: belowMin.slice(0, 4).map(r => ({ name: r.name, meta: r.group + ' · cəmi ' + r.students + ' tələbə (min. ' + minOf(r) + ')' })),
+      rest: belowMin.length - 4,
+      go: () => this.setState({ view:'Açılışlar', stat:'Hamısı', qRaw:'', q:'' })
+    });
+    if (overloaded.length) problems.push({
+      key:'over', title: overloaded.length + ' müəllimin yükü normanı 15%-dən çox aşır',
+      note:'Bu təyinatlar saxlanarsa əlavə ödəniş və keyfiyyət riski yaranır.',
+      cta:'Kafedralara bax', sev:'warn',
+      items: overloaded.slice(0, 4).map(t => { const l = this.loadOf(t.n); return { name: t.n, meta: nf(l.cur) + ' / ' + nf(t.norm) + ' saat (' + pct(l.cur, t.norm) + '%)' }; }),
+      rest: overloaded.length - 4,
+      go: () => this.setState({ view:'Kafedra üzrə' })
+    });
+    if (notReady.length) problems.push({
+      key:'plan', title: notReady.length + ' açılış təsdiqlənməmiş plandan yaradılıb',
+      note:'Plan Tədris şöbəsində və ya fakültə şurasındadır — təsdiq olmadan açılış rəsmi sayılmır.',
+      cta:'Planlara keç', sev:'warn',
+      items: Array.from(new Set(notReady.map(r => r.progId))).map(pid => ({ name: PROG[pid].name, meta: PROG[pid].plan })),
+      rest: 0,
+      go: () => this.flash('Tədris planı redaktoruna keçid edilir.')
+    });
+    const sevS = {
+      danger:{ bg:'var(--ems-danger-bg)', bd:'#fecaca', fg:'#b91c1c' },
+      warn:{ bg:'var(--ems-warning-bg)', bd:'#fde68a', fg:'#92400e' }
+    };
+
+    const out = {
+      ctxRole:'Tədris Şöbəsi',
+      ctxScope: this.role() === 'Kafedra müdiri' ? 'Proqramlaşdırma və İT kafedrası' : (this.role() === 'Dekanlıq' ? 'Mühəndislik və Tətbiqi Elmlər fakültəsi' : 'bütün fakültələr'),
+      canEdit: this.canEdit(),
+      lockLabel: s.locked ? 'Semestr kilidlidir — dəyişiklik bağlıdır' : 'Açılış mərhələsi davam edir',
+      lockBg: s.locked ? 'var(--ems-neutral-100)' : 'var(--ems-primary-50)',
+      lockFg: s.locked ? 'var(--ems-neutral-700)' : 'var(--ems-primary-800)',
+      steps: stepDefs.map((st, i) => {
+        const active = st.done > 0 && st.done < 100;
+        const done = st.done >= 100;
+        return {
+          n: i + 1, label: st.label, note: st.note, w: st.done + '%',
+          fw: done || active ? 800 : 600,
+          fg: done ? 'var(--ems-neutral-900)' : (active ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)'),
+          noteFg: done || active ? 'var(--ems-neutral-500)' : 'var(--ems-neutral-400)',
+          dotBg: done ? 'var(--ems-success)' : (active ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)'),
+          dotFg: done || active ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-400)',
+          ring: done ? 'var(--ems-success)' : (active ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)'),
+          bar: done ? 'var(--ems-success)' : 'var(--ems-primary-600)'
+        };
+      }),
+      kpis: [
+        { label:'Açılış sətri', value: live.length, note:'bu semestr üçün yaradılıb',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ view:'Açılışlar', stat:'Hamısı' }) },
+        { label:'Müəllim təyin olunub', value: withT.length, note: pct(withT.length, live.length) + '% hazırdır',
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)',
+          pick: () => this.setState({ view:'Açılışlar', stat:'Müəllim təyin olunub' }) },
+        { label:'Müəllim gözləyir', value: noT.length, note: noT.length ? 'kafedra təyinat etməlidir' : 'gözləyən açılış yoxdur',
+          bd: noT.length ? '#fecaca' : 'var(--ems-neutral-200)', bg: noT.length ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+          labFg: noT.length ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: noT.length ? '#b91c1c' : 'var(--ems-neutral-900)', noteFg: noT.length ? '#b91c1c' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ view:'Açılışlar', stat:'Kafedrada — müəllim gözlənilir' }) },
+        { label:'Jurnalı açılıb', value: withJ.length, note:'dərs qeydiyyatı işləyir',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ view:'Açılışlar', stat:'Jurnal açılıb' }) },
+        { label:'Semestr saatı', value: nf(live.reduce((a, r) => a + r.hours, 0)), note:'bu açılışlardan doğan yük',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ view:'Kafedra üzrə' }) }
+      ],
+      views: [
+        { id:'Açılışlar', count: live.length }, { id:'Kafedra üzrə', count: null }, { id:'Bağlanmalı məsələlər', count: problems.length || null }
+      ].map(v => {
+        const a = s.view === v.id;
+        return {
+          label:v.id, sel: a ? 'true' : 'false', hasCount: v.count !== null, count:v.count,
+          bd: a ? 'var(--ems-primary-600)' : 'transparent',
+          fg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)', fw: a ? 800 : 600,
+          cntBg: a ? 'var(--ems-primary-100)' : 'var(--ems-neutral-100)',
+          cntFg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ view: v.id })
+        };
+      }),
+      vAcilis: s.view === 'Açılışlar', vKafedra: s.view === 'Kafedra üzrə', vProblem: s.view === 'Bağlanmalı məsələlər',
+      hasCarry: carried.length > 0,
+      carryTitle: carried.length + ' ixtisasda bu il yenidən işləməyə ehtiyac yoxdur',
+      carryNote: 'Tədris planı dəyişməyib — ' + carriedRows.length + ' açılış sətri keçən ildən olduğu kimi köçürülüb, müəllim təyinatları da təklif kimi saxlanılıb. Yalnız təsdiqləmək qalır.',
+      carryList: carried.map(p => PROG[p].name).join(' · '),
+      redoTitle: redo.length ? redo.length + ' ixtisas yenidən baxmaq tələb edir' : 'Yenidən baxmaq tələb edən ixtisas yoxdur',
+      redoList: redo.map(p => PROG[p].name + (PROG[p].ready ? ' — plan yenilənib' : ' — plan təsdiqlənməyib')).join(' · '),
+      hasRedo: redo.length > 0,
+      goRedo: () => this.setState({ view:'Bağlanmalı məsələlər' }),
+      isLoading: s.loading,
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw: v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q: v }), 260); },
+      deptOpen: s.deptOpen, deptLabel: s.dept,
+      toggleDept: () => this.setState({ deptOpen: !s.deptOpen }),
+      deptOpts: ['Bütün kafedralar'].concat(Array.from(new Set(all.map(r => DEPTS[r.dept])))).map(n => ({
+        label:n, sel: n === s.dept ? 'true' : 'false', fw: n === s.dept ? 800 : 600,
+        fg: n === s.dept ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bg: n === s.dept ? 'var(--ems-primary-50)' : 'transparent',
+        pick: () => this.setState({ dept:n, deptOpen:false }),
+        key: this.keyActivate(() => this.setState({ dept:n, deptOpen:false }))
+      })),
+      statChips: ['Hamısı'].concat(STATUSES.filter(x => x !== 'Ləğv edilib')).map(v => {
+        const x = this.chip(v === s.stat);
+        const short = v === 'Hamısı' ? 'Bütün vəziyyətlər' : (v === 'Kafedrada — müəllim gözlənilir' ? 'Müəllim gözləyir' : v);
+        return { label: short, bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ stat: v }) };
+      }),
+      resetFilters: () => this.setState({ q:'', qRaw:'', dept:'Bütün kafedralar', stat:'Hamısı' }),
+      rows: rows0.map((r, i) => {
+        const t = this.teacherOf(r);
+        const stt = this.statusOf(r);
+        const ss = STATUS_STYLE[stt];
+        const low = r.sec && r.students < minOf(r);
+        return {
+          checked: !!s.selected[r.id], selAria: r.name + ' — ' + r.group + ' açılışını seç',
+          toggle: () => this.setState({ selected: Object.assign({}, s.selected, { [r.id]: !s.selected[r.id] }) }),
+          code: r.code, name: r.name, kr: r.kr, group: r.group, prog: r.prog,
+          krLabel: r.sup ? 'elmi rəhbərlik · kreditsiz' : r.kr + ' kredit',
+          students: r.students, stFg: low ? 'var(--ems-danger)' : 'var(--ems-neutral-900)',
+          hours: r.sup ? r.hours + ' s' : r.hours + ' s',
+          hoursNote: r.sup ? r.students + ' tələbə × 12 saat' : r.kr + ' kredit × 15 saat', dept: DEPTS[r.dept],
+          hasTeacher: !!t, noTeacher: !t, teacher: t || '',
+          assignLabel: r.sup ? 'Elmi rəhbər təyin et' : 'Müəllim təyin et',
+          status: r.sup ? stt.replace('müəllim', 'elmi rəhbər').replace('Müəllim', 'Elmi rəhbər') : stt,
+          sBg: ss[0], sFg: ss[1],
+          hasWarn: low, warn: 'yalnız ' + r.students + ' tələbə — minimum ' + minOf(r),
+          bg: low ? 'var(--ems-warning-bg)' : zebra(i),
+          assign: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ assign: { id: r.id, q: '', pick: t || null } }); }
+        };
+      }),
+      rowsShown: !s.loading && rows0.length > 0, rowsEmpty: !s.loading && rows0.length === 0,
+      rowsNote: rows0.length + ' açılış göstərilir · cəmi ' + nf(rows0.reduce((a, r) => a + r.hours, 0)) + ' semestr saatı · ' + nf(rows0.reduce((a, r) => a + r.students, 0)) + ' tələbə yeri',
+      allChecked: rows0.length > 0 && rows0.every(r => s.selected[r.id]),
+      toggleAll: () => {
+        const on = !(rows0.length > 0 && rows0.every(r => s.selected[r.id]));
+        const next = Object.assign({}, s.selected);
+        rows0.forEach(r => { next[r.id] = on; });
+        this.setState({ selected: next });
+      },
+      hasSelection: selIds.length > 0, selCount: selRows.length,
+      selNote: nf(selRows.reduce((a, r) => a + r.hours, 0)) + ' saat · ' + selRows.filter(r => !this.teacherOf(r)).length + ' müəllimsiz',
+      clearSel: () => this.setState({ selected: {} }),
+      bulkSend: () => { const n = Object.assign({}, s.sent); selRows.forEach(r => { n[r.id] = true; }); this.setState({ sent: n, selected: {} }); this.flash(selRows.length + ' açılış aidiyyəti kafedralara göndərildi.'); },
+      bulkJInvalid: selRows.some(r => !this.teacherOf(r)),
+      bulkJBd: selRows.some(r => !this.teacherOf(r)) ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+      bulkJBg: selRows.some(r => !this.teacherOf(r)) ? 'var(--ems-neutral-200)' : 'var(--ems-neutral-0)',
+      bulkJFg: selRows.some(r => !this.teacherOf(r)) ? 'var(--ems-neutral-400)' : 'var(--ems-primary-800)',
+      bulkJCur: selRows.some(r => !this.teacherOf(r)) ? 'not-allowed' : 'pointer',
+      bulkJournal: () => {
+        if (selRows.some(r => !this.teacherOf(r))) { this.flash('Müəllimi olmayan açılış üçün jurnal açıla bilməz.'); return; }
+        const n = Object.assign({}, s.journals); selRows.forEach(r => { n[r.id] = true; });
+        this.setState({ journals: n, selected: {} }); this.flash(selRows.length + ' açılış üçün elektron jurnal açıldı.');
+      },
+      bulkCancel: () => { const n = Object.assign({}, s.cancelled); selRows.forEach(r => { n[r.id] = true; }); this.setState({ cancelled: n, selected: {} }); this.flash(selRows.length + ' açılış ləğv edildi — səbəb audit izinə yazıldı.'); },
+
+      deptRows: Object.keys(DEPTS).filter(d => all.some(r => r.dept === d)).map(d => {
+        const rs = live.filter(r => r.dept === d);
+        const done = rs.filter(r => this.teacherOf(r)).length;
+        const p = pct(done, rs.length);
+        const hours = rs.reduce((a, r) => a + r.hours, 0);
+        const bar = p === 100 ? 'var(--ems-success)' : (p >= 60 ? 'var(--ems-primary-600)' : 'var(--ems-warning)');
+        return {
+          name: DEPTS[d] + ' kafedrası',
+          meta: rs.length + ' açılış · ' + nf(hours) + ' semestr saatı · ' + Array.from(new Set(rs.map(r => r.prog))).length + ' ixtisasa xidmət',
+          pill: p === 100 ? 'Təyinat bitib' : (rs.length - done) + ' açılış müəllim gözləyir',
+          pillBg: p === 100 ? 'var(--ems-success-bg)' : 'var(--ems-warning-bg)',
+          pillFg: p === 100 ? '#15803d' : '#92400e',
+          bd: p === 100 ? '#bbf7d0' : 'var(--ems-neutral-200)',
+          w: p + '%', pct: p + '%', bar,
+          tags: [
+            { label: rs.filter(r => this.statusOf(r) === 'Jurnal açılıb').length + ' jurnal açılıb', bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)' },
+            { label: rs.filter(r => r.sec).length + ' seçmə fənn', bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)' },
+            { label: nf(rs.reduce((a, r) => a + r.students, 0)) + ' tələbə yeri', bg:'var(--ems-primary-50)', fg:'var(--ems-primary-800)' }
+          ],
+          remind: () => this.flash(DEPTS[d] + ' kafedrasına müəllim təyinatı barədə xatırlatma göndərildi.')
+        };
+      }),
+
+      problems: problems.map((p, i) => Object.assign({}, sevS[p.sev], {
+        n: i + 1, title: p.title, note: p.note, cta: p.cta, items: p.items,
+        more: p.rest > 0, moreText: '+ daha ' + p.rest + ' sətir',
+        go: p.go
+      })),
+      hasProblems: problems.length > 0, noProblems: problems.length === 0,
+
+      openGen: () => this.setState({ gen: { sem:'Payız', progs: { kmuh:true, mex:true, iqt:true, bid:true }, keep:true } }),
+      closeGen: () => this.setState({ gen: null }), mGen: !!s.gen,
+      openLock: () => this.setState({ lock: true }),
+      closeLock: () => this.setState({ lock: false }), mLock: s.lock,
+      lockChecks: [
+        { label:'Bütün açılışlara müəllim təyin olunub', value: withT.length + ' / ' + live.length, ok: noT.length === 0 },
+        { label:'Seçmə fənlər minimum tələbə həddini keçib', value: belowMin.length ? belowMin.length + ' problem' : 'uyğundur', ok: belowMin.length === 0 },
+        { label:'Magistr açılışlarına elmi rəhbər təyin olunub', value: supMissing.length ? supMissing.length + ' qrup gözləyir' : 'hamısı təyin olunub', ok: supMissing.length === 0 },
+        { label:'Açılışlar təsdiqlənmiş plandan gəlir', value: notReady.length ? notReady.length + ' sətir' : 'hamısı təsdiqli', ok: notReady.length === 0 },
+        { label:'Elektron jurnallar açılıb', value: withJ.length + ' / ' + live.length, ok: withJ.length === live.length }
+      ].map(c => ({
+        label:c.label, value:c.value, icon: c.ok ? '✓' : '!',
+        iconBg: c.ok ? 'var(--ems-success)' : 'var(--ems-warning)',
+        fg: c.ok ? '#15803d' : '#92400e'
+      })),
+      lockInvalid: noT.length > 0 || belowMin.length > 0,
+      lockBd2: noT.length || belowMin.length ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+      lockBg2: noT.length || belowMin.length ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+      lockFg2: noT.length || belowMin.length ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+      lockCur: noT.length || belowMin.length ? 'not-allowed' : 'pointer',
+      confirmLock: () => {
+        if (noT.length || belowMin.length) return;
+        this.setState({ lock:false, locked:true });
+        this.flash('Semestr kilidləndi — dərs yükü hesablandı və Koordinator vizasına göndərildi.');
+      },
+      closeAssign: () => this.setState({ assign: null }), mAssign: !!s.assign,
+      toast: !!s.toast, toastText: s.toast,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgRef: (el) => { if (el && this._last !== el) { this._last = el; try { el.focus(); } catch (e) {} } }
+    };
+
+    // ---- müəllim təyinatı modalı
+    const a = s.assign;
+    if (a) {
+      const row = all.find(r => r.id === a.id);
+      const aq = (a.q || '').trim().toLowerCase();
+      const pool = TEACHERS.filter(t => t.d === row.dept && (!aq || t.n.toLowerCase().includes(aq)));
+      const setA = (patch) => this.setState({ assign: Object.assign({}, a, patch) });
+      out.av = {
+        title: row.sup ? 'Elmi rəhbər təyinatı — dissertasiya işi' : row.name,
+        sub: row.sup
+          ? row.group + ' · ' + row.prog + ' · ' + row.students + ' magistr tələbəsi · ' + row.hours + ' saat (hər tələbəyə 12 saat)'
+          : row.group + ' · ' + row.prog + ' · ' + row.hours + ' semestr saatı · ' + row.students + ' tələbə',
+        q: a.q, setQ: (e) => setA({ q: e.target.value }),
+        listLabel: (row.sup
+          ? DEPTS[row.dept] + ' kafedrasının elmi rəhbərlik hüququ olan müəllimləri'
+          : DEPTS[row.dept] + ' kafedrasının müəllimləri') + ' — mötərizədə təyinatdan sonrakı yük',
+        opts: pool.map(t => {
+          const l = this.loadOf(t.n);
+          const after = l.cur + (this.teacherOf(row) === t.n ? 0 : row.hours);
+          const ap = pct(after, t.norm);
+          const on = a.pick === t.n;
+          return {
+            ini: ini(t.n), name: t.n, meta: t.rank + ' · illik norma ' + nf(t.norm) + ' saat',
+            load: nf(l.cur) + ' / ' + nf(t.norm) + ' s',
+            loadFg: ap > 115 ? 'var(--ems-danger)' : (ap > 105 ? 'var(--ems-warning)' : 'var(--ems-neutral-900)'),
+            after: 'təyinatdan sonra ' + ap + '%',
+            sel: on ? 'true' : 'false',
+            bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+            bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+            avBg: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+            avFg: on ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+            pick: () => setA({ pick: t.n }),
+            key: this.keyActivate(() => setA({ pick: t.n }))
+          };
+        }),
+        none: pool.length === 0,
+        hint: row.sup
+          ? 'Elmi rəhbər tələbənin ixtisas kafedrasından olmalıdır. Hər magistr tələbəsinə 12 saat rəhbərlik yükü yazılır — bu qrup üzrə cəmi ' + row.hours + ' saat.'
+          : 'Fənni yalnız onu aparan kafedranın müəllimi apara bilər. Təyinat müəllimin illik yükünə dərhal əlavə olunur.',
+        cta: row.sup ? 'Elmi rəhbəri təsdiqlə' : 'Müəllimi təsdiqlə',
+        invalid: !a.pick,
+        bd: !a.pick ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: !a.pick ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: !a.pick ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: !a.pick ? 'not-allowed' : 'pointer',
+        save: () => {
+          if (!a.pick) return;
+          this.setState({ assigned: Object.assign({}, s.assigned, { [a.id]: a.pick }), assign: null });
+          this.flash(a.pick + (row.sup ? ' — ' + row.group + ' qrupunun elmi rəhbəri təyin olundu.' : ' — «' + row.name + '» (' + row.group + ') açılışına təyin olundu.'));
+        }
+      };
+    } else {
+      out.av = { title:'', sub:'', q:'', opts:[], none:false, hint:'', listLabel:'', cta:'Müəllimi təsdiqlə', invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed' };
+    }
+
+    // ---- açılış yaratma modalı
+    const gn = s.gen;
+    if (gn) {
+      const setG = (patch) => this.setState({ gen: Object.assign({}, gn, patch) });
+      const chosen = Object.keys(gn.progs).filter(k => gn.progs[k] && PROG[k].ready);
+      const rowCount = chosen.reduce((acc, pid) => acc + GROUPS.filter(g => g.prog === pid).length * PROG[pid].courses.length, 0);
+      const blocked = Object.keys(PROG).filter(k => !PROG[k].ready);
+      out.gv = {
+        sems: ['Payız','Yaz'].map(v => { const x = this.chip(v === gn.sem); return { label: v + ' semestri', bg:x.bg, fg:x.fg, bd:x.bd, pick: () => setG({ sem: v }) }; }),
+        progs: Object.keys(PROG).map(pid => {
+          const ready = PROG[pid].ready;
+          return {
+            name: PROG[pid].name, note: ready ? PROG[pid].plan : 'plan təsdiqlənməyib',
+            on: !!gn.progs[pid] && ready, disabled: !ready,
+            cursor: ready ? 'pointer' : 'not-allowed',
+            bg: ready ? 'transparent' : 'var(--ems-neutral-50)',
+            fg: ready ? 'var(--ems-neutral-900)' : 'var(--ems-neutral-400)',
+            noteFg: ready ? 'var(--ems-neutral-400)' : '#92400e',
+            toggle: () => { if (!ready) return; setG({ progs: Object.assign({}, gn.progs, { [pid]: !gn.progs[pid] }) }); }
+          };
+        }),
+        keep: gn.keep, toggleKeep: () => setG({ keep: !gn.keep }),
+        tip: blocked.length
+          ? blocked.length + ' ixtisasın planı hələ təsdiqlənmədiyi üçün siyahıda seçilə bilmir. Plan təsdiqlənəndə açılışı buradan yaradacaqsan.'
+          : 'Bütün seçilmiş ixtisasların planı təsdiqlidir — açılış yaradıla bilər.',
+        tipBg: blocked.length ? 'var(--ems-warning-bg)' : 'var(--ems-success-bg)',
+        tipBd: blocked.length ? '#fde68a' : '#bbf7d0',
+        tipFg: blocked.length ? '#92400e' : '#15803d',
+        count: chosen.length ? 'Təxminən ' + rowCount + ' açılış sətri yaradılacaq' : 'Ən azı bir ixtisas seçin',
+        invalid: chosen.length === 0,
+        bd: chosen.length ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)',
+        bg: chosen.length ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+        fg: chosen.length ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-400)',
+        cur: chosen.length ? 'pointer' : 'not-allowed',
+        run: () => {
+          if (!chosen.length) return;
+          this.setState({ gen: null });
+          this.flash(rowCount + ' açılış sətri yaradıldı' + (gn.keep ? ' · keçən ilin müəllimləri təklif kimi köçürüldü.' : '.'));
+        }
+      };
+    } else {
+      out.gv = { sems:[], progs:[], keep:false, tip:'', tipBg:'var(--ems-neutral-50)', tipBd:'var(--ems-neutral-200)', tipFg:'var(--ems-neutral-500)', count:'', invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed' };
+    }
+
+    return out;
+  }
+}
+
+</script>
+</body>
+</html>

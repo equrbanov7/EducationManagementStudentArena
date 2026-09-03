@@ -148,7 +148,10 @@ def ensure_can_manage_exam_questions(user, exam):
 
 
 def can_create_question_bank(user):
-    return is_exam_center_user(user)
+    """İmtahan mərkəzi tam səlahiyyətli; müəllim də yarada bilər — amma yalnız
+    ŞƏXSİ Quiz bankı (exam_kind məhdudiyyəti view qatında «quiz»-ə bağlanır,
+    bax question_library.crud._normalize_exam_kind)."""
+    return is_exam_center_user(user) or is_teacher_user(user)
 
 
 def ensure_can_create_question_bank(user):

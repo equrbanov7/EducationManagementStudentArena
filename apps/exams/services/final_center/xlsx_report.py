@@ -155,7 +155,7 @@ class _AcademicIndex:
             return {}
 
         info = {
-            "program": record.program.name if record.program_id else "",
+            "program": record.program.display_label if record.program_id else "",
             "admission_year": record.admission_year or "",
             "academic_status": record.get_status_display(),
         }

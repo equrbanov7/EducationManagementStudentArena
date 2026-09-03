@@ -13,12 +13,11 @@ Performans: hər kontekst yalnız aktiv bölmə üçün qurulur (lazy, stage4 ga
 from __future__ import annotations
 
 from django.apps import apps as django_apps
-from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.registrar import analytics, approval, schedule
-from apps.registrar.models import ApprovalStatus, AssessmentScheme, CourseOffering, StudentAcademicRecord
+from apps.registrar import analytics, journal_scope, schedule
+from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
 
 def _profile_section_prefix(section: str) -> str:
@@ -34,7 +33,7 @@ def journal_list_context(user, request=None) -> dict:
     from django.db.models import Count, Q
 
     from apps.registrar import corrections as corrections_service
-    from apps.registrar.models import ScheduleSlot, SlotKind
+    from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
     from apps.registrar.schedule import EVENING_START
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
@@ -42,11 +41,39 @@ def journal_list_context(user, request=None) -> dict:
     can_correct = bool(request is not None and corrections_service.can_correct_journal(request))
     organization = getattr(request, "organization", None) if request is not None else None
     base_qs = CourseOffering.objects.filter(is_active=True)
+    # Jurnal siyahısını idarə edən (koordinator/dekanlıq — `journal.roster`) öz
+    # ALT-AĞACININ jurnallarını görür ki, «alt qrupdan tələbə əlavə et»
+    # düyməsinə çata bilsin. Korrektordan fərqi: əhatə org-wide DEYİL.
+    from apps.registrar import guest_roster
+
+    can_roster = bool(
+        request is not None and organization is not None and guest_roster.can_manage_roster(user, organization)
+    )
     if can_correct and organization is not None:
         base_qs = base_qs.filter(organization=organization)
         is_broad = True
+    elif can_roster:
+        # Əhatə üzrə görünən jurnallar YALNIZ aktiv cari dövrdən gəlir: köçürülmüş
+        # tarixi semestrlərin jurnalı koordinatorun siyahısında ÇIXMAMALIDIR (əks
+        # halda düymə oradadır və köhnə transkript dəyişər — bax guest_roster.
+        # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
+        # tarixçəsi dövr süzgəcindən keçmir.
+        scoped_groups = guest_roster.scoped_group_queryset(user, organization)
+        rosterable = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True)
+        base_qs = base_qs.filter(organization=organization).filter(Q(instructor=user) | rosterable)
+        is_broad = True
     else:
-        base_qs = base_qs.filter(instructor=user)
+        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir
+        # (bax apps/registrar/handover.is_handover_observer). Siyahıda sətir
+        # olmasaydı, ona gedən yeganə keçid itərdi və «bal yazan mən idim, indi
+        # görə bilmirəm» vəziyyəti yaranardı. Yazma hüququ onsuz da
+        # `is_direct_editor`-dədir və təhvildən sonra False-dur.
+        from apps.registrar.handover import observer_offering_ids
+
+        observed = observer_offering_ids(user, organization) if organization is not None else set()
+        base_qs = (
+            base_qs.filter(Q(instructor=user) | Q(pk__in=observed)) if observed else base_qs.filter(instructor=user)
+        )
         is_broad = False
 
     offerings = list(
@@ -65,18 +92,28 @@ def journal_list_context(user, request=None) -> dict:
 
     # Cədvəl slotlarından: offering → dərs tip(lər)i + axşam (magistratura) bayrağı.
     kind_labels = dict(SlotKind.choices)
+    kind_order = {value: index for index, (value, _) in enumerate(SlotKind.choices)}
     kinds_by_offering: dict = {}
     evening_offerings: set = set()
     for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
         "offering_id", "kind", "start_time"
     ):
-        kinds_by_offering.setdefault(offering_id, [])
-        if kind not in kinds_by_offering[offering_id]:
-            kinds_by_offering[offering_id].append(kind)
+        kinds_by_offering.setdefault(offering_id, set()).add(kind)
         if start_time >= EVENING_START:
             evening_offerings.add(offering_id)
+    # Köçürülmüş (legacy) açılışların cədvəl slotu YOXDUR — tip yalnız ``Lesson.kind``-dadır
+    # (köçürmə 293,070 dərsə mühazirə/seminar/lab yazır).  Tələbə kabineti onsuz da dərsdən
+    # oxuyurdu, jurnal siyahısı isə yalnız slota baxdığı üçün «—» göstərirdi.
+    # ``LessonKind`` dəyərləri ``SlotKind`` ilə eynidir (lecture/seminar/lab); naməlum dəyər
+    # süzülür ki, etiket heç vaxt KeyError verməsin.
+    for offering_id, kind in (
+        Lesson.objects.filter(offering__in=offerings).values_list("offering_id", "kind").distinct()
+    ):
+        if kind in kind_labels:
+            kinds_by_offering.setdefault(offering_id, set()).add(kind)
     for offering in offerings:
-        kinds = kinds_by_offering.get(offering.id, [])
+        # Deterministik sıra: ``SlotKind.choices`` ardıcıllığı (mühazirə → seminar → lab).
+        kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
         offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
         offering.is_evening = offering.id in evening_offerings
@@ -249,13 +286,8 @@ def journal_list_context(user, request=None) -> dict:
 
 
 def _season_label(period) -> str:
-    """Yarımilin fəsil adı (Payız / Yaz / Yay) — başlanğıc ayından."""
-    month = period.start_date.month if getattr(period, "start_date", None) else 9
-    if month >= 8 or month == 12:
-        return "Payız semestri"
-    if month <= 5:
-        return "Yaz semestri"
-    return "Yay semestri"
+    """Yarımilin fəsil adı (Payız / Yaz / Yay) — tək mənbə `schedule.season_label`."""
+    return schedule.season_label(period)
 
 
 def _current_semester(periods):
@@ -292,34 +324,6 @@ def calendar_context(organization) -> dict:
     return {"has_context": True, "periods": periods, "today": today}
 
 
-def approvals_context(user, organization) -> dict:
-    """Chair/dean inbox: journals awaiting the current user's approval step."""
-    statuses = []
-    if approval.can_chair_approve(user, organization):
-        statuses.append(ApprovalStatus.SUBMITTED)
-    if approval.can_dean_approve(user, organization):
-        statuses.append(ApprovalStatus.CHAIR_APPROVED)
-    # Gələnlər qutusu da alt-ağacla daraldılır: təsdiq düyməsi onsuz da
-    # offering-səviyyəli yoxlamadan keçir, amma filtrsiz siyahı BAŞQA
-    # kafedraların jurnallarını (fənn, qrup, müəllim adı) göstərirdi — yəni
-    # səlahiyyət artımı yox, məlumat sızması idi.
-    inbox_scope_q = django_apps.get_model("organizations", "OrgUnit").user_scope_subtree_q(
-        user,
-        organization,
-        path_field="offering__group__path",
-        id_field="offering__group__id",
-    )
-    schemes = (
-        AssessmentScheme.objects.filter(organization=organization, approval_status__in=statuses)
-        .select_related("offering__subject", "offering__group", "offering__period", "offering__instructor")
-        .filter(inbox_scope_q if inbox_scope_q is not None else Q())
-        .order_by("offering__subject__code")
-        if statuses
-        else AssessmentScheme.objects.none()
-    )
-    return {"has_context": True, "schemes": schemes, "is_approver": bool(statuses)}
-
-
 def analytics_context(request, organization, *, embedded=False) -> dict:
     """Analytics dashboard: period picker + batched aggregation."""
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
@@ -332,10 +336,7 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     if period is None:
         period = next((p for p in periods if p.is_current), periods[0] if periods else None)
 
-    # Aktorun alt-ağacı: modul sərhədi səbəbindən `organizations` app registry
-    # ilə çağırılır (registrar onu birbaşa import edə bilməz — dövr yaranır).
-    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    scope_q = org_unit_model.user_scope_subtree_q(
+    scope_q = journal_scope.analytics_scope_q(
         request.user,
         organization,
         path_field="offering__group__path",
@@ -350,11 +351,26 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
     return {"periods": periods, "analytics": data, "analytics_embedded": embedded}
 
 
+def _has_active_student_membership(organization, user) -> bool:
+    """`student` rolu ilə AKTİV üzvlük varmı?
+
+    `organizations` statik import edilmir (module_deps qapısı) — `get_model`.
+    """
+    Membership = django_apps.get_model("organizations", "Membership")
+    return Membership.objects.filter(
+        organization=organization, user=user, is_active=True, role__name="student"
+    ).exists()
+
+
 def schedule_context(request, organization, *, embedded=False) -> dict:
     """Role-aware weekly timetable context (student group / teacher own slots)."""
     from apps.registrar.models import WeekType
 
-    period = _current_period(organization)
+    # R-1/R-4: `is_current` bayrağı TƏK meyar deyil — bitmiş semestr cədvəli
+    # görünməz edirdi.  Seçim məntiqi (və dövr seçicisinin siyahısı)
+    # `schedule.resolve_display_period`-dədir.
+    period_view = schedule.resolve_display_period(organization, requested=request.GET.get("period"))
+    period = period_view["period"]
     try:
         week_offset = max(-8, min(16, int(request.GET.get("w") or 0)))
     except (TypeError, ValueError):
@@ -378,6 +394,13 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
                 "course_id", flat=True
             )
         )
+    elif _has_active_student_membership(organization, request.user):
+        # Qrupu (və ya akademik qeydi) hələ olmayan TƏLƏBƏ — əvvəllər «müəllim»
+        # qoluna düşür və başlıqda «Müəllim cədvəli» görürdü (klonda 102 hesab).
+        # Cədvəli boş qalır, amma kimliyi tələbə olaraq qalmalıdır.
+        role = "student"
+        owner_label = request.user.get_full_name() or request.user.username
+        slots = []
     else:
         role = "teacher"
         owner_label = request.user.get_full_name() or request.user.username
@@ -410,7 +433,16 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
     from apps.registrar.models import SlotKind
 
     # Həftə naviqasiyası: standalone-da `?w=N`, profil panelində shell daxilində qalır.
+    # Seçilmiş dövr həftə pillələrində İTMİR (`?period=` müqaviləsi — my-journal ilə eyni).
     nav_prefix = _profile_section_prefix("my-schedule") if embedded else "?"
+    if period_view["selected_id"]:
+        nav_prefix = f"{nav_prefix}period={period_view['selected_id']}&"
+    # ŞƏXSİ cədvəldə idarəetmə düymələri `schedule.manage` açarına bağlıdır
+    # (2026-09). Adi müəllim burada yalnız-oxu rejimindədir — cədvəl qurmaq
+    # koordinator/dekanlıq/RİM işidir və «Cədvəl idarəetməsi» bölməsindədir.
+    from apps.registrar import schedule_manage
+
+    can_manage = schedule_manage.can_manage(request.user, organization)
     return {
         "has_context": True,
         "role": role,
@@ -427,6 +459,13 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "schedule_nav_prefix": nav_prefix,
         "schedule_embedded": embedded,
+        "schedule_can_manage": can_manage,
+        "schedule_next_url": _profile_section_prefix("my-schedule").rstrip("&?") if embedded else "",
+        "schedule_period_choices": period_view["choices"],
+        "schedule_year_choices": period_view["years"],
+        "schedule_selected_period_id": period_view["selected_id"],
+        "schedule_selected_year": getattr(period, "academic_year", ""),
+        "schedule_base_url": reverse("accounts:profile") if embedded else "",
     }
 
 
@@ -461,27 +500,50 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     giriş balı kanonik :func:`gradebook.entry_score_for` ilə hesablanır."""
     from decimal import Decimal
 
-    from apps.registrar import gradebook
+    from apps.registrar import exam_eligibility, gradebook
     from apps.registrar.models import Enrollment
 
     if record is None or period is None:
         return {}
-    limit_percent = record.program.absence_limit_percent if record.program else 25
+    limit_percent = record.program.absence_limit_percent if record.program else exam_eligibility.DEFAULT_LIMIT_PERCENT
     stats: dict = {}
-    enrollments = Enrollment.objects.filter(
-        organization=organization, student=user, offering__period=period
-    ).select_related("offering", "offering__assessment_scheme")
+    enrollments = list(
+        Enrollment.objects.filter(
+            organization=organization,
+            student=user,
+            offering__period=period,
+            status=Enrollment.Status.ENROLLED,
+        ).select_related("offering", "offering__assessment_scheme")
+    )
+    # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu),
+    # cədvəl modalı hər sətir üçün ayrı sorğu ETMİR.
+    offering_ids = [e.offering_id for e in enrollments]
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     for enrollment in enrollments:
         offering = enrollment.offering
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
-        allowed = Decimal(offering.lesson_hours or 0) * Decimal(limit_percent) / Decimal(100)
+        total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
+        allowed = total_hours * Decimal(limit_percent) / Decimal(100)
+        eligibility = exam_eligibility.resolve(
+            absence_hours=enrollment.absence_hours,
+            lesson_hours=total_hours,
+            allowed_hours=allowed,
+            limit_percent=limit_percent,
+            # İdmançı istisnası burada da ötürülür — cədvəl modalı ilə kabinet
+            # eyni sətirdə fərqli cavab verməsin (2026-08-31, 3-cü bloker).
+            exempt=bool(record.national_athlete_exemption),
+            frozen=offering.id in frozen_ids,
+        )
         stats[offering.id] = {
             "absence_hours": enrollment.absence_hours,
             "allowed_absence": allowed,
             "entry_score": gradebook.entry_score_for(enrollment, cap),
             "entry_score_max": cap,
-            "barred": allowed > 0 and Decimal(enrollment.absence_hours) > allowed,
+            "barred": eligibility["barred"],
+            "attendance_score": eligibility["attendance_score"],
+            "eligibility": eligibility,
         }
     return stats
 

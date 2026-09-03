@@ -20,7 +20,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import finals
+from apps.registrar import exam_eligibility, finals, gradebook
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -92,7 +92,12 @@ def _kollokvium_sum_map(enrollment_ids):
 
 
 def _selfwork_map(enrollment_ids):
-    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10)."""
+    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10).
+
+    ⚠️ SELF_WORK komponentinin ``ComponentScore`` balını (köçürülmüş köhnə "si")
+    BURAYA ƏLAVƏ ETMƏYİN — o, giriş balının içində artıq var; üstəgəl etmək
+    ikiqat sayma olar. Bax ``gradebook_components.entry_score_for`` və
+    ``selfwork_board`` modulu."""
     from django.db.models import Count
 
     from apps.registrar.models import SelfWorkMark
@@ -159,7 +164,8 @@ def _evaluate(enrollment, maps):
     # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
     raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
     raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
-    entry = min(raw_entry, Decimal(entry_max))
+    # Giriş balı tam ədəddir (gradebook.entry_score_for güzgüsü — round_score).
+    entry = gradebook.round_score(min(raw_entry, Decimal(entry_max)))
 
     exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
     resit = maps["resits"].get(enrollment.id)
@@ -168,16 +174,40 @@ def _evaluate(enrollment, maps):
 
     record = maps["records"].get(enrollment.student_id)
     limit = record.program.absence_limit_percent if record and record.program_id else _DEFAULT_ABSENCE_LIMIT
-    lesson_hours = offering.lesson_hours or 0
-    barred = lesson_hours > 0 and enrollment.absence_hours > lesson_hours * limit / 100.0 and not resit_done
+    # Məxrəc TƏK tərifdən (bax exam_eligibility.lesson_hours_for) — xam sahəyə
+    # baxmaq jurnal qridindən ayrılmaq demək idi.  Toplu map → əlavə sorğu yox.
+    lesson_hours = exam_eligibility.lesson_hours_for(offering, hours_map=maps.get("lesson_hours", {}))
+    # TƏK MƏNBƏ: buraxılış qərarı burada TƏKRARLANMIR (2026-08-31 auditi —
+    # eyni müqayisə doqquz yerdə dublikat idi). Tarixi/köçürülmüş semestrdə
+    # ``barred`` heç vaxt qalxmır, köhnə sistemin faktiki nəticəsi (aşağıdakı
+    # ``effective`` balı) olduğu kimi göstərilir.
+    eligibility = exam_eligibility.resolve(
+        absence_hours=enrollment.absence_hours,
+        lesson_hours=lesson_hours,
+        limit_percent=limit,
+        # İdmançı-tələbə istisnası (milli yığma) ARTIQ ötürülür. Əvvəl qəsdən
+        # ötürülmürdü — «yalnız burada ötürsək iki mühərrik ayrılar» məntiqi ilə —
+        # amma nəticə tam əksi oldu: ``services.get_student_cabinet_data`` onu
+        # ötürdüyü üçün istisna qoyulmuş tələbə kabinetdə «buraxılır», analitikada
+        # «buraxılmır/kəsilib» görünürdü (2026-08-31 düşmən baxışı, 3-cü bloker).
+        # İndi istisna BİR yerdən — resolver-dən — həll olunur və hər səth onu
+        # eyni cür alır. Əlavə sorğu yaranmır: ``records`` map onsuz da yüklüdür.
+        exempt=bool(record and record.national_athlete_exemption),
+        resit_done=resit_done,
+        frozen=offering.id in maps.get("frozen_offerings", frozenset()),
+    )
+    barred = eligibility["barred"]
 
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))
     total = max(Decimal("0"), min(Decimal("100"), total))  # compute_final_result güzgüsü (U15)
+    # Yekun tam ədəddir — hərf/keçid yuvarlaqlaşdırılmış total-dan (finals güzgüsü).
+    total = gradebook.round_score(total)
     letter, gpa = finals.score_to_letter(total, maps.get("organization"))
     exam_ok = graded and effective >= min_exam
     passed = graded and not barred and total >= pass_threshold and exam_ok
     failed = barred or (graded and not passed)
+    _status = exam_eligibility.status_code(eligibility, graded=graded)
 
     return {
         "graded": graded,
@@ -186,6 +216,15 @@ def _evaluate(enrollment, maps):
         "passed": passed,
         "failed": failed,
         "barred": barred,
+        "eligibility": eligibility,
+        # Şəffaflıq: status hansı mənbədən gəlir (canlı qayda / köhnə sistem /
+        # köhnə sistemdə nəticə YAZILMAYIB). UI etiketi bunu oxuyur.
+        "status_code": _status,
+        "status_label": exam_eligibility.status_label(_status),
+        "status_notice": exam_eligibility.status_notice(_status),
+        # Görünən sahələr də resolver-dən — çağıran heç nə yenidən hesablamır.
+        "attendance_score": eligibility["attendance_score"],
+        "exempt": eligibility["exempt"],
         "credit": int(getattr(offering.subject, "ects", 0) or 0),
         "absence_hours": enrollment.absence_hours or 0,
         "lesson_hours": lesson_hours,
@@ -250,6 +289,9 @@ class _Bucket:
 
     def summary(self) -> dict:
         definite = self.passed + self.failed
+        # ⚠️ Qəti nəticəli fənn yoxdursa orta ÜOMG ``0.00`` DEYİL, hesablana
+        # bilmir — kartda «Hesablana bilmir» göstərilir (2026-08-31, 1-ci bloker).
+        avg_gpa, avg_gpa_available = exam_eligibility.uomg_from(self.quality_points, self.gpa_credits)
         return {
             "key": self.key,
             "label": self.label,
@@ -264,7 +306,9 @@ class _Bucket:
             "pass_rate": _pct(self.passed, definite),
             "fail_rate": _pct(self.failed, definite),
             "definite": definite,
-            "avg_gpa": _round2(self.quality_points / self.gpa_credits) if self.gpa_credits else Decimal("0.00"),
+            "avg_gpa": avg_gpa,
+            "avg_gpa_available": avg_gpa_available,
+            "avg_gpa_unavailable_label": exam_eligibility.UOMG_UNAVAILABLE_LABEL,
             "avg_total": _round2(self.total_sum / self.graded) if self.graded else Decimal("0.00"),
             "absence_rate": _pct(self.absence_hours, self.lesson_hours),
         }
@@ -277,11 +321,32 @@ def build_evaluation_maps(organization, enrollments) -> dict:
     riyaziyyatı (``_evaluate``) bölüşsün deyə çıxarılıb — beləcə iki kod yolu
     ``compute_final_result``-dan fərqlənmir (``test_analytics.py`` konsistensiya
     testi ilə kilidlənib)."""
-    enrollment_ids = [e.id for e in enrollments]
-    offering_ids = list({e.offering_id for e in enrollments})
-    student_ids = list({e.student_id for e in enrollments})
+    return build_evaluation_maps_for(
+        organization,
+        enrollment_ids=[e.id for e in enrollments],
+        offering_ids=list({e.offering_id for e in enrollments}),
+        student_ids=list({e.student_id for e in enrollments}),
+    )
+
+
+def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, student_ids) -> dict:
+    """:func:`build_evaluation_maps`-in id-kolleksiyalı variantı — EYNİ map-lar.
+
+    Fərq yalnız girişdədir: id-lər hazır siyahı ƏVƏZİNƏ **queryset** (məs.
+    ``qs.values("id")``) kimi də verilə bilər. O zaman Django ``IN (SELECT …)``
+    alt-sorğusu yazır və 100 000+ elementli parametr siyahısı ümumiyyətlə
+    yaranmır — böyük miqyasda (universitet üzrə icmal) həm sorğu hazırlığı, həm
+    də PostgreSQL planlaması qat-qat ucuzlaşır. Riyaziyyat dəyişmir; map-ları
+    quran köməkçilər eynidir.
+    """
     return {
         "schemes": _scheme_map(offering_ids),
+        # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
+        # jurnal). Toplu dəst — per-enrollment yoxlama N+1 olardı; bax
+        # :func:`exam_eligibility.frozen_offering_ids`.
+        "frozen_offerings": exam_eligibility.frozen_offering_ids(offering_ids),
+        # Məxrəc fallback-ı (``lesson_hours=0`` olan açılışlar üçün) — tək sorğu.
+        "lesson_hours": exam_eligibility.lesson_hours_map(offering_ids),
         "component_offerings": _component_offerings(offering_ids),
         "component_sums": _component_sum_map(enrollment_ids),
         "kollokvium_sums": _kollokvium_sum_map(enrollment_ids),
@@ -340,7 +405,7 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
             bucket = programs.get(record.program_id)
             if bucket is None:
                 bucket = programs[record.program_id] = _Bucket(
-                    record.program_id, record.program.name, record.program.code
+                    record.program_id, record.program.name, record.program.display_code
                 )
             bucket.add(enrollment.student_id, result)
 

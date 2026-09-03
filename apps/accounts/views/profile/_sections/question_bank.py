@@ -23,6 +23,7 @@ def _inactive_defaults() -> dict:
         "question_bank_kind_filter": "",
         "question_bank_kind_pills": [],
         "question_bank_can_create": False,
+        "question_bank_is_center": False,
     }
 
 
@@ -62,13 +63,29 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
 
     from apps.exams.constants import QUESTION_EXAM_KIND_CHOICES, QUESTION_EXAM_KIND_VALUES
     from apps.exams.models import QuestionBank
-    from apps.exams.public import EXAM_LANGUAGE_CHOICES, accessible_banks, can_create_question_bank
+    from apps.exams.public import (
+        EXAM_LANGUAGE_CHOICES,
+        accessible_banks,
+        can_create_question_bank,
+        is_exam_center_user,
+    )
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
+    # Müəllim üçün bank təyinatı YALNIZ Quiz-dir (şəxsi bank); Final/Midterm
+    # seçimləri və filtr pilləri ancaq imtahan mərkəzinə göstərilir.
+    is_center = is_exam_center_user(request.user)
+    exam_kind_choices = (
+        QUESTION_EXAM_KIND_CHOICES
+        if is_center
+        else tuple((value, label) for value, label in QUESTION_EXAM_KIND_CHOICES if value == "quiz")
+    )
+    allowed_kind_values = {value for value, _label in exam_kind_choices}
     search_query = (request.GET.get("bank_search") or "").strip()[:120]
     kind_filter = (request.GET.get("bank_kind") or "").strip().lower()
     if kind_filter not in QUESTION_EXAM_KIND_VALUES and kind_filter != "general":
+        kind_filter = ""
+    if not is_center and kind_filter and kind_filter != "general" and kind_filter not in allowed_kind_values:
         kind_filter = ""
 
     qs = (
@@ -109,9 +126,10 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
         ),
         "question_bank_language_choices": EXAM_LANGUAGE_CHOICES,
         "question_bank_default_type_choices": QuestionBank.DEFAULT_QUESTION_TYPE_CHOICES,
-        "question_bank_exam_kind_choices": QUESTION_EXAM_KIND_CHOICES,
+        "question_bank_exam_kind_choices": exam_kind_choices,
         "question_bank_kind_filter": kind_filter,
-        "question_bank_kind_pills": _kind_pills(search_query, kind_filter, QUESTION_EXAM_KIND_CHOICES),
-        # Bank yaratma yalnız imtahan mərkəzinə açıqdır — düymə/forma buna görə gizlənir.
+        "question_bank_kind_pills": _kind_pills(search_query, kind_filter, exam_kind_choices),
+        # Mərkəz tam səlahiyyətli; müəllim öz şəxsi Quiz bankını yarada bilir.
         "question_bank_can_create": can_create_question_bank(request.user),
+        "question_bank_is_center": is_center,
     }

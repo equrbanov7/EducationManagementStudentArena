@@ -21,7 +21,9 @@
     margin-bottom: 2rem;
 }
 
-.ai-settings-header h1 {
+/* QA dalğa 2: embed-də başlıq `<h2>`-dir. */
+.ai-settings-header h1,
+.ai-settings-header h2 {
     font-size: 1.5rem;
     margin: 0;
     display: flex;
@@ -29,7 +31,8 @@
     gap: 0.5rem;
 }
 
-.ai-settings-header h1 i {
+.ai-settings-header h1 i,
+.ai-settings-header h2 i {
     color: #6366f1;
 }
 

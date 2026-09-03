@@ -335,3 +335,61 @@ Please provide:
 5. **Recommendations** — Concrete actions for the exam center (e.g. review specific subjects/teachers, revise question wording, retrain graders).
 
 Format the response in clean Markdown with headers. Be concise but insight-driven. Do not restate the raw numbers verbatim; focus on what they mean and what to do."""
+
+
+def generate_people_analytics_summary(
+    *,
+    kind: str,
+    stats: dict,
+    language_code: str | None = None,
+    user_id: int | None = None,
+) -> dict:
+    """«Müəllimlər» / «Tələbələr» kataloqu analitikasının AI xülasəsi.
+
+    ``stats`` — filtrlənmiş kataloqun **AQREQAT** göstəriciləri (say, status,
+    cins, yaş səbətləri, struktur/rol/ixtisas bölgüləri, dərs yükü). Şəxsi
+    məlumat (ad, e-poçt, telefon, FİN) yükə QƏSDƏN düşmür — yük
+    ``apps/accounts/services/people/analytics_ai.py``-də ağ siyahı ilə qurulur.
+
+    Data-hash keş + istifadəçi-başına rate limit ``_execute_summary``-dədir:
+    dəyişməyən data üçün API çağırışı sərf olunmur.
+    """
+    if not _is_ai_enabled():
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "ai_disabled")}
+
+    api_key = _get_api_key()
+    if not api_key:
+        return {"ok": False, "error": pgettext("exams.service.ai_summary.error", "gemini_api_key_missing")}
+
+    lang = language_code or get_language() or "en"
+    lang_name = _language_name(lang)
+    cache_key = _stats_cache_key("people-analytics", kind, stats, lang)
+    prompt = _build_people_prompt(kind=kind, stats=stats, lang_name=lang_name)
+    return _execute_summary(cache_key=cache_key, prompt=prompt, api_key=api_key, user_id=user_id)
+
+
+def _build_people_prompt(*, kind: str, stats: dict, lang_name: str) -> str:
+    stats_json = json.dumps(stats, ensure_ascii=False, default=str)
+    audience = "teaching staff (faculty members)" if kind == "teachers" else "students"
+    return f"""You are an expert higher-education workforce and student-body analyst for a university ERP.
+
+Analyze the following AGGREGATE statistics about {audience} in a university directory. The numbers describe ONLY the currently filtered subset (one faculty, one department, one cohort, ...), not the whole university, so frame every statement as being about "this subset".
+
+**Language:** Respond ONLY in {lang_name}.
+
+**Privacy:** The data contains no personal identifiers by design. Never invent, infer, or ask for names, contact details or ID numbers of individuals.
+
+**Aggregate data (JSON):**
+```json
+{stats_json}
+```
+
+Please provide:
+1. **Overview** - Size of this subset, account-status split (active / suspended / archived), and what stands out.
+2. **Demographics** - Gender and age-band composition IF present. State the data-coverage caveat explicitly when a large share is "unspecified"; do not draw conclusions from sparse fields.
+3. **Structural distribution** - How the subset spreads across faculties, departments, programs, groups, courses/admission years, roles or titles; concentration and imbalance.
+4. **Workload signals** (only if workload figures are present) - Teaching load per staff member, share without any load, subject/group coverage.
+5. **Risks & data-quality gaps** - Missing birth dates/genders, unassigned structure, unusual buckets.
+6. **Recommendations** - Concrete, actionable steps for university leadership (staffing, data cleanup, cohort attention).
+
+Format the response in clean Markdown with headers. Be concise and insight-driven; do not restate every raw number."""

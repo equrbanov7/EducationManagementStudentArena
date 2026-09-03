@@ -1,0 +1,190 @@
+"""
+Legacy (MyEdu) `girish` — giriş balı — reference implementation.
+
+Reverse-engineered from the MyEdu database (`myedudb`) on 2026-08-27:
+  * `yekun` (17 194 rows, semestr = 3, 2022/2023 payız) — the computed results,
+  * `journals_dates_points` — the journal cells the result is derived from,
+  * `balvereqi_logs` (903 943 parsed student rows, 2023-08 … 2026-08) — exported
+    "Tələbələrin biliyinin çoxballı sistemlə qiymətləndirilməsi cədvəli" sheets
+    that show the four components side by side, used as an independent check.
+
+The model
+---------
+    giriş = round( davamiyyət + sərbəst_iş + seminar )            (max 50)
+
+    davamiyyət = 10 * (N - Q) / N            0 … 10   (N = ders saatı/slot sayı,
+                                                       Q = "qb" xanalarının sayı)
+    sərbəst_iş = "si" xanasının dəyəri       0 … 10
+    seminar    = 3 * mean(bütün rəqəmli qiymətlər)   0 … 30
+                 (k1/k2/k3 kollokviumları + gündəlik seminar/lab qiymətləri,
+                  hamısı 0…10 şkalasında, hamısı bərabər çəkili)
+
+`round` = "half away from zero" (PHP `round()`), i.e. 39.5 -> 40.
+
+Because `sərbəst_iş` and (when the only marks are the three kollokviums)
+`seminar` are whole numbers, the rounding effectively only touches
+`davamiyyət`; that is why the legacy giriş balları are always integers.
+
+Kəsr (imtahana buraxılmama): Q / N > 0.25  <=>  davamiyyət < 7.5.
+
+The `lab` part
+--------------
+In the modern (2023+) sheets the seminar column is printed as
+"sem-prak — lab": lessons that also carry a laboratory sheet get a second
+average.  Both halves are simple additions into the same giriş bal, so the
+function accepts an optional `lab_scores` list which is folded into the same
+mean unless `lab_separate=True` is requested.
+
+Not covered: `level = 1` rows (English "Level 0/1/2" courses, 1 252 of the
+17 194).  Those journals carry extra cells (ss/ww/ll/rr = speaking / writing /
+listening / reading, each 0…25, and pa/wr, each 0…10) and their giriş may
+exceed 50, so they use a different scheme.  For them only the exam side is
+solved: imtahan = 0.4 * (ss + ww + ll + rr).
+"""
+
+from __future__ import annotations
+
+import math
+from typing import Iterable, Optional, Sequence
+
+MAX_GIRISH = 50
+MAX_DAVAMIYYET = 10
+MAX_SERBEST_IS = 10
+MAX_SEMINAR = 30
+KESR_THRESHOLD = 0.25          # >25 % qayıb => kəsr
+
+
+def php_round(x: float) -> int:
+    """PHP/JS style round(): halves go away from zero (39.5 -> 40, -0.5 -> -1)."""
+    return int(math.floor(x + 0.5)) if x >= 0 else int(math.ceil(x - 0.5))
+
+
+def davamiyyet_bali(total_slots: int, qb_count: int) -> float:
+    """Attendance component, 0 … 10 (not rounded — the caller rounds the sum)."""
+    if total_slots <= 0:
+        return float(MAX_DAVAMIYYET)
+    attended = max(total_slots - qb_count, 0)
+    return MAX_DAVAMIYYET * attended / float(total_slots)
+
+
+def qayib_cerimesi(total_slots: int, qb_count: int) -> int:
+    """
+    The step table the legacy system effectively used: how many bal are lost
+    for a given number of absences.  Equivalent to `10 - round(davamiyyet)`.
+    """
+    return MAX_DAVAMIYYET - php_round(davamiyyet_bali(total_slots, qb_count))
+
+
+def seminar_bali(marks: Sequence[int]) -> float:
+    """Seminar/kollokvium component, 0 … 30 = 3 x mean(marks on the 0..10 scale)."""
+    marks = [m for m in marks if m is not None]
+    if not marks:
+        return 0.0
+    return 3.0 * sum(marks) / float(len(marks))
+
+
+def is_kesr(total_slots: int, qb_count: int) -> bool:
+    """True when the student missed more than 25 % of the hours."""
+    if total_slots <= 0:
+        return False
+    return qb_count / float(total_slots) > KESR_THRESHOLD
+
+
+def compute_legacy_girish(
+    *,
+    seminar_scores: Iterable[int] = (),
+    kollokvium_scores: Iterable[int] = (),
+    selfwork_score: Optional[int] = None,
+    qb_count: int = 0,
+    excused_qb_count: int = 0,       # accepted for API compatibility; unused (see docs)
+    total_lessons: int = 0,
+    lab_scores: Iterable[int] = (),
+    lab_separate: bool = False,
+    cap: bool = True,
+) -> int:
+    """
+    Reproduce the legacy MyEdu giriş balı.
+
+    seminar_scores    - gündəlik seminar/məşğələ qiymətləri (0…10)
+    kollokvium_scores - k1/k2/k3 qiymətləri (0…10); iştirak etmədiyi kollokvium 0
+    selfwork_score    - "si" (sərbəst iş) xanası, 0…10; None => 0
+    qb_count          - "qb" xanalarının sayı (üzrlü/üzrsüz fərq etmir)
+    excused_qb_count  - üzrlü qayıb sayı; legacy düsturunda TƏSİRSİZDİR
+    total_lessons     - jurnalın (gün x saat) xanalarının ümumi sayı
+    lab_scores        - laborator qiymətlər; default olaraq eyni ortalamaya girir
+    lab_separate      - True olsa lab ayrıca 0…30 komponent kimi hesablanır
+                        (yalnız 2023+ "sem — lab" sütunlu vərəqələr üçün)
+    """
+    seminar_scores = list(seminar_scores)
+    kollokvium_scores = list(kollokvium_scores)
+    lab_scores = list(lab_scores)
+
+    dav = davamiyyet_bali(total_lessons, qb_count)
+    si = float(selfwork_score or 0)
+
+    if lab_separate:
+        sem = seminar_bali(kollokvium_scores + seminar_scores)
+        sem += seminar_bali(lab_scores)
+    else:
+        sem = seminar_bali(kollokvium_scores + seminar_scores + lab_scores)
+
+    value = php_round(dav + si + sem)
+    if cap:
+        value = min(value, MAX_GIRISH)
+    return max(value, 0)
+
+
+# --------------------------------------------------------------------------
+# The absence penalty as an explicit table (what the owner called "öz cədvəli").
+# davamiyyət = 10 - deduction; deduction = round(10 * qayıb_faizi).
+# --------------------------------------------------------------------------
+QAYIB_CEDVELI = [
+    # (qayıb faizinin aşağı həddi [daxil deyil], yuxarı həddi [daxil], davamiyyət balı)
+    # round() 0.5-i yuxarı apardığı üçün sərhəd YUXARI ucda daxildir:
+    # tam 5 % qayıb hələ 10 bal, tam 25 % qayıb hələ 8 baldır.
+    (-0.001, 0.05, 10),
+    (0.05, 0.15, 9),
+    (0.15, 0.25, 8),        # > 25 % => kəsr
+    (0.25, 0.35, 7),
+    (0.35, 0.45, 6),
+    (0.45, 0.55, 5),
+    (0.55, 0.65, 4),
+    (0.65, 0.75, 3),
+    (0.75, 0.85, 2),
+    (0.85, 0.95, 1),
+    (0.95, 1.001, 0),
+]
+
+
+def davamiyyet_from_table(total_slots: int, qb_count: int) -> int:
+    """Same value as round(davamiyyet_bali(...)) but read off the step table."""
+    if total_slots <= 0:
+        return MAX_DAVAMIYYET
+    p = qb_count / float(total_slots)
+    for lo, hi, bal in QAYIB_CEDVELI:
+        if lo < p <= hi:
+            return bal
+    return 0
+
+
+def legacy_imtahan_for_level_course(ss: int, ww: int, ll: int, rr: int) -> float:
+    """
+    English "Level" courses only: the exam score is the four skill marks
+    (speaking / writing / listening / reading, each 0…25) scaled to 50.
+    Verified byte-exact against `yekun.imtahanda` for those rows.
+    """
+    return 0.4 * (ss + ww + ll + rr)
+
+
+if __name__ == "__main__":  # tiny self-test with rows taken from the legacy DB
+    # yekun.id=1 style row: journal 2967, student 2574 -> girish 39
+    assert compute_legacy_girish(kollokvium_scores=[0, 10, 9], selfwork_score=10,
+                                 qb_count=0, total_lessons=30) == 39
+    # journal 2551, 15 slots, 3 absences, si=10, k=10/10/9 -> girish 47
+    assert compute_legacy_girish(kollokvium_scores=[10, 10, 9], selfwork_score=10,
+                                 qb_count=3, total_lessons=15) == 47
+    # journal 2928, 23 slots, 1 absence, si=8, k=7/7/8, day marks 6 and 7 -> 39
+    assert compute_legacy_girish(kollokvium_scores=[7, 7, 8], seminar_scores=[6, 7],
+                                 selfwork_score=8, qb_count=1, total_lessons=23) == 39
+    assert davamiyyet_from_table(23, 1) == php_round(davamiyyet_bali(23, 1))
+    print("self-test OK")

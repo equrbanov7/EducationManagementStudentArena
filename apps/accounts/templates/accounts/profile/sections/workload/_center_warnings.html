@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Göndərmə xəbərdarlıqları — BLOKLAMIR, yalnız sadalayır (spec §5.2).{% endcomment %}
+<ul class="wl-warnlist">
+    {% for warning in workload_center_section.submit_summary.warnings|slice:":8" %}
+    <li>{{ warning.row }} — <span class="ems-mono">{{ warning.code }}</span></li>
+    {% endfor %}
+</ul>

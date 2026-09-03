@@ -1,0 +1,365 @@
+/* ==========================================================================
+   Akademik (jurnal) fənn nəticələri — "Nəticələrim" səthi
+   --------------------------------------------------------------------------
+   Köçürülmüş (legacy) tələbənin bütün tarixçəsi bu kartlarla göstərilir.
+   Yalnız işıqlı tema: rənglər --ems-* tokenlərindən (prefers-color-scheme YOX).
+   Hərf çipi QƏSDƏN burada təyin olunub — .grade-* transcript.css/my_subjects.css
+   faylındadır, onlar isə yalnız həmin bölmələr icazəlidirsə yüklənir.
+   ========================================================================== */
+
+/* --- İl/semestr süzgəc zolağı --- */
+.results-academic-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.results-academic-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 11rem;
+}
+
+.results-academic-filter__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+}
+
+.results-academic-filter__reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--ems-border);
+    border-radius: 8px;
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.results-academic-filter__reset:hover {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-primary-700);
+}
+
+.results-academic-filters__hint {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--ems-neutral-500);
+}
+
+/* --- Akademik kart --- */
+.modern-result-card--academic.is-outcome-fail,
+.modern-result-card--academic.is-outcome-barred {
+    border-left: 3px solid var(--ems-danger-500);
+}
+
+.modern-result-card--academic.is-outcome-pass {
+    border-left: 3px solid var(--ems-success);
+}
+
+.modern-result-card--academic.is-outcome-progress {
+    border-left: 3px solid var(--ems-neutral-300);
+}
+
+.result-period-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+    color: var(--ems-neutral-600);
+}
+
+.result-outcome-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.result-outcome-badge--pass {
+    background: var(--ems-success-100);
+    color: var(--ems-success-600);
+}
+
+.result-outcome-badge--fail,
+.result-outcome-badge--barred {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.result-outcome-badge--progress {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+/* --- Bal şəbəkəsi (kredit / giriş / çıxış / yekun / dərəcə) --- */
+.result-academic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.6rem;
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-bg-subtle);
+}
+
+.result-academic-current {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.result-score-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    color: var(--ems-neutral-600);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.result-academic-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.result-academic-cell dt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.result-academic-cell dd {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ems-text);
+}
+
+.result-letter {
+    display: inline-block;
+    min-width: 1.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.result-letter--A,
+.result-letter--B {
+    background: var(--ems-success-100);
+    color: var(--ems-success-600);
+}
+
+.result-letter--C,
+.result-letter--D {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+
+.result-letter--E {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.result-letter--F {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.result-feedback-box--fail {
+    border-color: var(--ems-danger-200);
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+/* --- Legacy xam bal sübutu (cari hesabdan qəti ayrıdır) ---
+   Panel neytral qalır, amma hər xam dəyərin daimi İmtahan Mərkəzi qeydi
+   sahibin tələbinə uyğun olaraq qırmızıdır. */
+.result-legacy-grade {
+    margin-top: 0.75rem;
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+    background: var(--ems-bg);
+    overflow: hidden;
+}
+
+.result-legacy-grade__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.7rem 0.8rem;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.result-legacy-grade__summary > span:first-child {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.result-legacy-grade__summary:focus-visible {
+    outline: 3px solid var(--ems-primary-600);
+    outline-offset: -3px;
+}
+
+.result-legacy-grade__count {
+    min-width: 1.6rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: var(--ems-bg);
+    text-align: center;
+}
+
+.result-legacy-grade__body {
+    padding: 0.75rem;
+}
+
+.result-legacy-grade__explanation {
+    margin: 0 0 0.65rem;
+    color: var(--ems-neutral-600);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.result-legacy-fact-list {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.result-legacy-fact {
+    padding: 0.65rem;
+    border: 1px solid var(--ems-border);
+    border-radius: 8px;
+    background: var(--ems-bg-subtle);
+}
+
+.result-legacy-fact__header,
+.result-legacy-fact__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.35rem 0.75rem;
+}
+
+.result-legacy-fact__header {
+    color: var(--ems-text);
+    font-size: 0.78rem;
+}
+
+.result-legacy-fact__header span,
+.result-legacy-fact__meta {
+    color: var(--ems-neutral-500);
+    font-size: 0.7rem;
+}
+
+.result-legacy-fact__scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+    gap: 0.4rem;
+    margin: 0.55rem 0;
+}
+
+.result-legacy-fact__scores > div {
+    padding: 0.45rem;
+    border-radius: 6px;
+    background: var(--ems-bg);
+}
+
+.result-legacy-fact__scores dt {
+    color: var(--ems-neutral-500);
+    font-size: 0.68rem;
+}
+
+.result-legacy-fact__scores dd {
+    margin: 0.1rem 0 0;
+    color: var(--ems-text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.result-legacy-fact__score-warning {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--ems-danger-strong);
+    font-size: 0.64rem;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+/* Faktın YOXLAMA STATUSU — «gözlənilir» qırmızı DEYİL.
+   Qırmızı ekranda «kəsilib» deməkdir; gözləyən yoxlama isə uğursuzluq deyil,
+   informativ vəziyyətdir və mavi qeydlə eyni ailədə oxunmalıdır (bax
+   `_legacy_grade_notice.html`-dəki rəng qərarı).  Təsdiqlənmiş fakt yaşıla
+   keçir — ton dəyişməsi statusun ÖZÜNÜ daşıyır. */
+.result-legacy-fact__review {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--ems-primary-700);
+    font-weight: 700;
+}
+
+.result-legacy-fact__review--verified {
+    color: var(--ems-success-600);
+}
+
+/* Akademik kartda detal düyməsi yoxdur (rəsmi sənəd deyil) — gövdə altdan boşluq alsın. */
+.modern-result-card--academic .result-card-body {
+    padding-bottom: 0.9rem;
+}
+
+.assigned-task-icon--academic {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+
+/* --- Boş vəziyyət izahı --- */
+.modern-empty-state__hint {
+    max-width: 46rem;
+    margin: 0.5rem auto 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--ems-neutral-500);
+}
+
+@media (max-width: 640px) {
+    .results-academic-filter {
+        min-width: 100%;
+    }
+
+    .result-academic-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-legacy-fact__scores {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .result-legacy-fact__meta {
+        flex-direction: column;
+    }
+}

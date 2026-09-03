@@ -8,9 +8,11 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from apps.registrar.models import CourseOffering
 from core.constants import OrgUnitType
+from core.staff_position import visible_role_label
 
-from ..models import Membership, Organization, OrgUnit
+from ..models import AcademicPeriod, Membership, Organization, OrgUnit
 from ..views import (
     _can_manage_organization,
     _can_view_structure,
@@ -62,6 +64,49 @@ def _teacher_memberships_qs(organization):
     )
 
 
+def _current_academic_year_period_ids(organization):
+    """Cari tədris ilinin (bütün semestrlərinin) dövr id-ləri.
+
+    "Aktiv müəllim" tərifi cari SEMESTRLƏ (``AcademicPeriod.is_current``) yox,
+    cari TƏDRİS İLİ ilə bağlıdır: bir tədris ili adətən Payız+Yaz semestrindən
+    ibarətdir və Yaz semestri "cari" olanda Payızda dərs demiş müəllim də "bu il
+    aktivdir" sayılmalıdır. Ona görə əvvəlcə ``is_current`` dövr tapılır, sonra
+    onun ``year_display``-inə (bax ``AcademicPeriod.format_year``) uyğun BÜTÜN
+    dövrlərin id-ləri götürülür. ``is_current`` dövr yoxdursa (heç kim təyin
+    etməyib) ən son başlayan dövrün ili istifadə olunur — layihədə mövcud
+    ``AcademicPeriod.objects.filter(is_current=True).first()`` nümunəsinin
+    (bax ``apps/registrar/public.py``, ``apps/registrar/views.py``) təbii
+    genişlənməsidir. Dövrlərin sayı azdır (onluqlarla) — TƏK yüngül sorğu."""
+    periods = list(
+        AcademicPeriod.objects.filter(organization=organization).only("id", "academic_year", "start_date", "is_current")
+    )
+    if not periods:
+        return []
+    current = next((p for p in periods if p.is_current), None)
+    if current is None:
+        current = max(periods, key=lambda p: p.start_date)
+    target_year = current.year_display
+    return [p.id for p in periods if p.year_display == target_year]
+
+
+def _active_teacher_user_ids(organization, period_ids):
+    """Cari tədris ilində ən azı bir ``CourseOffering``-in instruktoru olan
+    istifadəçi id-ləri — TƏK sorğu, çağıran səhifədəki vahid sayından ASILI
+    DEYİL (bir dəfə hesablanır, sonra hər vahid üçün Python-da yoxlanılır)."""
+    if not period_ids:
+        return set()
+    return set(
+        CourseOffering.objects.filter(
+            organization=organization,
+            is_active=True,
+            period_id__in=period_ids,
+            instructor_id__isnull=False,
+        )
+        .values_list("instructor_id", flat=True)
+        .distinct()
+    )
+
+
 def _head_candidates(organization):
     """Rəhbər (dekan/müdir) namizədləri — idarəetmə/müəllim səviyyəli aktiv üzvlər."""
     seen_user_ids = set()
@@ -84,7 +129,7 @@ def _head_candidates(organization):
             {
                 "user_id": membership.user_id,
                 "full_name": membership.user.get_full_name() or membership.user.username,
-                "role_label": membership.role.display_name,
+                "role_label": visible_role_label(membership.role.name, membership.role.display_name),
             }
         )
     return candidates

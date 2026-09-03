@@ -23,18 +23,34 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .academic_results import collect_academic_items, count_academic_items
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
 
 
-def _collect_my_results(request, filter_type=None, search=None):
+def _collect_my_results(request, filter_type=None, search=None, year=None, season=None):
     """
-    Build a unified result list for current user across exams, assignments, labs, and projects.
+    Build a unified result list for current user across exams, assignments, labs,
+    projects **and** the registrar's academic (journal) subject results.
+
+    ``year`` / ``season`` yalnız AKADEMİK sətirlərə aiddir — yeni sistemin
+    cəhd/təhvil sətirlərində semestr mənsubiyyəti yoxdur. Ona görə bu süzgəclərdən
+    biri seçiləndə siyahı akademik sətirlərlə məhdudlaşır (bax aşağıdakı şərh).
     """
     user = request.user
     selected_filter = filter_type if filter_type is not None else request.GET.get("type")
     filter_type = _normalize_results_filter(selected_filter)
+    year = (year or "").strip()
+    season = (season or "").strip()
+    # Semestr süzgəci aktivdirsə yalnız akademik sətirlər mənalıdır: imtahan
+    # cəhdi / sərbəst iş təhvili heç bir semestrə bağlı deyil, ona görə onları
+    # "2024/2025 Payız" kimi bir seçimin altında göstərmək yalan olardı.
+    #
+    # Süzgəc UI-da yalnız "Hamısı"/"Akademik" tablarında göstərilir; başqa tabda
+    # URL-də ilişib qalmış ?results_year= siyahını SƏSSİZCƏ boşaltmasın deyə
+    # orada nəzərə alınmır (əl ilə qurulmuş linklərə qarşı müdafiə).
+    academic_only = bool(year or season) and filter_type in {"all", "academic"}
     now = timezone.now()
     review_cutoff = now - REVIEW_EDIT_WINDOW
     profile_results_url = _append_query_params(
@@ -49,9 +65,9 @@ def _collect_my_results(request, filter_type=None, search=None):
     scoped_course_ids = scoped_courses.values_list("id", flat=True)
 
     items = []
-    counts = {"exams": 0, "courses": 0, "labs": 0, "independent": 0}
+    counts = {"exams": 0, "courses": 0, "labs": 0, "independent": 0, "academic": 0}
 
-    if filter_type in {"all", "exams"}:
+    if filter_type in {"all", "exams"} and not academic_only:
         attempts = (
             ExamAttempt.objects.filter(
                 user=user,
@@ -130,7 +146,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             )
             counts["exams"] += 1
 
-    if filter_type in {"all", "courses"}:
+    if filter_type in {"all", "courses"} and not academic_only:
         assignment_submissions = (
             Submission.objects.filter(
                 user=user,
@@ -173,7 +189,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             )
             counts["courses"] += 1
 
-    if filter_type in {"all", "labs"}:
+    if filter_type in {"all", "labs"} and not academic_only:
         lab_submissions = (
             LabSubmission.objects.filter(
                 assignment__student=user,
@@ -216,7 +232,7 @@ def _collect_my_results(request, filter_type=None, search=None):
             )
             counts["labs"] += 1
 
-    if filter_type in {"all", "independent"}:
+    if filter_type in {"all", "independent"} and not academic_only:
         project_submissions = (
             ProjectSubmission.objects.filter(
                 student=user,
@@ -259,7 +275,17 @@ def _collect_my_results(request, filter_type=None, search=None):
             )
             counts["independent"] += 1
 
-    items.sort(key=lambda item: item["submitted_at"] or now, reverse=True)
+    if filter_type in {"all", "academic"}:
+        # Akademik (jurnal) fənn nəticələri — köçürülmüş tələbənin BÜTÜN tarixçəsi
+        # buradan gəlir. Hesablama registrar fasadındadır; burada yalnız sayılır.
+        academic_items = collect_academic_items(request, year=year, season=season)
+        items.extend(academic_items)
+        counts["academic"] = len(academic_items)
+
+    # Akademik sətirdə `submitted_at` yoxdur (semestr etiketi göstərilir), ona görə
+    # sıralama açarı `sort_at`-dır — semestrin bitmə tarixi. `timezone.now()` ilə
+    # eyni awareness-də qurulur, əks halda naive/aware müqayisəsi TypeError verər.
+    items.sort(key=lambda item: item.get("sort_at") or item["submitted_at"] or now, reverse=True)
 
     search_query = (search or "").strip()
     if search_query:
@@ -272,8 +298,12 @@ def _collect_my_results(request, filter_type=None, search=None):
             or search_lower in (item.get("type_label") or "").lower()
         ]
 
-    if filter_type != "all":
+    # Tab sayğacları HƏMİŞƏ tam (süzgəcsiz) rəqəmi göstərməlidir ki, istifadəçi
+    # digər tabın boş olub-olmadığını görsün. İl/semestr süzgəci yalnız SİYAHINI
+    # daraldır, sayğacları yox — ona görə `academic_only` halında da yenidən yığılır.
+    if filter_type != "all" or academic_only:
         counts = {
+            "academic": count_academic_items(request),
             "exams": ExamAttempt.objects.filter(
                 user=user,
                 exam_id__in=scoped_exam_ids,
@@ -306,6 +336,6 @@ def _collect_my_results(request, filter_type=None, search=None):
             .exclude(status="graded", graded_at__gt=review_cutoff)
             .count(),
         }
-    counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"]
+    counts["all"] = counts["exams"] + counts["courses"] + counts["labs"] + counts["independent"] + counts["academic"]
 
     return items, counts, filter_type
