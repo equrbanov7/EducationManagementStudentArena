@@ -3,7 +3,7 @@
 Üç dialoq (dizayn §3.1): «Yeni versiya», «Keçən ildən köçür», «Təqdimatı geri
 çağır». Hamısı EYNİ qabıqdan istifadə edir — JS yalnız görünən bloku açır.
 
-⚠️ «Geri çağır» üçün SƏBƏB MƏCBURİDİR (ən azı 15 simvol) — həm JS, həm də
+⚠️ «Geri çağır» üçün SƏBƏB MƏCBURİDİR (ən azı 20 simvol) — həm JS, həm də
 `views/syllabus/api.py` yoxlayır (server son sözü deyir).
 ⚠️ «Keçən ildən köçür» nəticəsi HƏR ZAMAN QARALAMADIR — avtomatik təsdiqlənmir.
 {% endcomment %}
@@ -37,7 +37,7 @@
       <textarea id="syl-reason" rows="3" data-syl-reason
                 placeholder="{% trans 'Məsələn: aralıq imtahan tarixi dəyişdi, mövzu planını yeniləyirəm.' context 'accounts.syllabus' %}"
                 aria-describedby="syl-reason-note"></textarea>
-      <p id="syl-reason-note" class="syl-modal__note" data-syl-reason-note>{% trans "Ən azı 15 simvol — səbəb audit izinə yazılır." context "accounts.syllabus" %}</p>
+      <p id="syl-reason-note" class="syl-modal__note" data-syl-reason-note>{% trans "Ən azı 20 simvol — səbəb audit izinə yazılır." context "accounts.syllabus" %}</p>
     </div>
 
     <div class="syl-modal__foot">
@@ -63,6 +63,6 @@ KEÇMİR, ona görə tərcümələr burada `data-*` atributları ilə ötürül�
       data-t-create-body="{% trans 'Boş qaralama açılır və 10 bölmə doldurulmağa hazır olur. Tələbələrə yalnız təsdiqdən sonra görünəcək.' context 'accounts.syllabus' %}"
       data-t-create-ok="{% trans 'Qaralama yarat' context 'accounts.syllabus' %}"
       data-t-pdf="{% trans 'PDF hazırlanır — universitet blankı ilə.' context 'accounts.syllabus' %}"
-      data-t-reason-short="{% trans 'Ən azı 15 simvol — səbəb məcburidir.' context 'accounts.syllabus' %}"
+      data-t-reason-short="{% trans 'Ən azı 20 simvol — səbəb məcburidir.' context 'accounts.syllabus' %}"
       data-t-reason-ok="{% trans 'Səbəb audit izinə yazılır.' context 'accounts.syllabus' %}"
       data-t-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.syllabus' %}"></span>

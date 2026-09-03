@@ -75,7 +75,7 @@ KPI_LABELS = {
         "",
     ),
     "late": (
-        pgettext_lazy(_CTX, "10 gündən çox gözləyir"),
+        pgettext_lazy(_CTX, "Eskalasiya həddini keçib"),
         pgettext_lazy(_CTX, "gözləmə həddi aşılıb"),
         "",
     ),
@@ -86,10 +86,13 @@ KPI_LABELS = {
     ),
     "average": (
         pgettext_lazy(_CTX, "Orta gözləmə"),
-        pgettext_lazy(_CTX, "hədəf: 5 gündən az"),
+        pgettext_lazy(_CTX, "hədəf: SLA çərçivəsində"),
         pgettext_lazy(_CTX, "gün"),
     ),
 }
+
+#: «Eskalasiya həddini keçib» kartının qeydi — hədd SİYASƏTDƏN gəlir (§10.4).
+LATE_KPI_NOTE = pgettext_lazy(_CTX, "%(days)s gündən çox gözləyir")
 
 #: Coverage KPI kartları: (etiket, qeyd).
 COVERAGE_KPI_LABELS = {
@@ -292,6 +295,7 @@ __all__ = [
     "IDENTITY",
     "INTRO",
     "KPI_LABELS",
+    "LATE_KPI_NOTE",
     "NOSCOPE",
     "POLICY_ROWS",
     "READ_ONLY",
