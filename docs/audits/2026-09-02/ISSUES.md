@@ -94,3 +94,17 @@ P1 plan əhatəsi, P1 hadisə lenti trigger-i, P2 idxal qapısı) orada sənədl
 | S2-2 | `TaskRowReview` «tarixçə» deyil: `update_or_create` koordinatorun əvvəlki vizasını üstündən yazır (`apps/workload/services/reviews.py:126`) | WAVE2 | OPEN (P3 — ya sənəd dili «cari viza»ya dəyişsin, ya append + `latest` güzgüsü) |
 | S2-3 | `QuestionSubmissionEvent` DELETE qəsdən bloklanmır: `QuestionSubmission.delete()` (`submission_inbox.py:327`) FK CASCADE ilə bütün izi aparır. UPDATE artıq trigger ilə bağlıdır (`exams/0065`) | WAVE2 | OPEN (P3 — `on_delete=PROTECT` + göndərişin soft-delete-i təklif olunur; `core.audit` sətri qalır) |
 | S2-4 | Qəbulun bir dəfəlik parol siyahısı (`credentials[]`) JSON cavabında qayıdır (`apps/accounts/services/intake/apply.py:246`) — saxlanılmır, amma brauzer tarixçəsinə/proxy loglarına düşə bilər | WAVE2 | OPEN (P3 — ayrıca `no-store` CSV/PDF endpoint-i) |
+
+## QA dalğası 2 (PHASE21_UI_QA_WAVE2, 2026-09-03) — 13 rol × 456 bölmə açılışı, 0×500, 0 CSP
+| # | Problem | Mənbə | Status |
+|---|---|---|---|
+| W2-1 | `EMSCore.getCsrfToken()` çərəz adını sabit yazırdı → `CSRF_COOKIE_NAME` fərqli olan mühitdə BÜTÜN `fetchJSON` yazıları 403 | WAVE2 | FIXED (`static/js/core/csrf.js` DOM/meta fallback, 997a4195) |
+| W2-2 | Köhnə reviziyalı fakültə dilimi qərarı qəbul olunurdu → dekan superseded dilimi «təsdiqləyir», tapşırıq ilişib qalır (səssiz itən qərar) | WAVE2 | FIXED (`workload/services/workflow.py` 409 `stale_revision` + reqressiya testi) |
+| W2-3 | 8 bölmədə qabıq başlığı ilə eyni `<h1>` təkrarı | WAVE2 | FIXED (8 şablon + 2 CSS, embed `h2`; 456/456 tək h1) |
+| W2-4 | 13 yeni ekranın heç biri dashboard-a bağlı deyildi (TŞ rəhbəri kafedra bölgüsünə yönəlirdi, koordinatorda viza, dekanda təsdiq, rektorda baxış, tələbə xidmətlərində qəbul/reyestr yox) | WAVE2 P2-1 | FIXED (`staff.design_link_cards` — 12 rol-qapılı, sorğusuz keçid kartı; 4 yeni test; b7342a3a) |
+| W2-5 | `teaching_office_staff` `semester.open` açarına sahibdir (açılış yarada bilir); `semester.lock/unlock` yoxdur. HANDOFF_FULL_PLAN §2/07 yalnız rəhbər+RİM deyir | WAVE2 P2-2 | OPEN — **sahib qərarı** (açılış ≠ kilid; bloklayıcı deyil) |
+| W2-6 | Menyu səthi plandan genişdir: `exam_center`/`student_services` struktur ekranlarını, `program_coordinator` tədris planı/semestr açılışını OXUYUR (yazı endpoint-ləri ayrıca qapılıdır, sızma yoxdur) | WAVE2 P3-1 | OPEN (P3; P1-10 ailəsi — `org_admin` alias) |
+| W2-7 | `curriculum-editor` (1) və `semester-opening` (2) cədvəllərində `aria-sort` yoxdur | WAVE2 P3-2 | OPEN (P3) |
+| W2-8 | İcazəsiz bölməyə tam səhifə keçidi (`?section=workload-center`, tələbə) səssiz `profile-info`-ya düşür, mesaj yoxdur (AJAX ucu düzgün 403) | WAVE2 P3-3 | OPEN (P3, yalnız UX) |
+| W2-9 | Fikstur: `qa.chair_head` və `qa.dean` fərqli fakültədədir — zənciri uçdan-uca sürmək üçün müvəqqəti üzvlük lazım oldu | WAVE2 | Qeyd (klon fiksturu; növbəti dalğada uyğunlaşdırılsın) |
+

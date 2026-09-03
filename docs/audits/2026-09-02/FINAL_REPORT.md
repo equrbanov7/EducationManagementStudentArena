@@ -79,3 +79,39 @@ Data Migration Integrity: 88/100 · Student Module: 85 · Teacher Module: 84 · 
 
 ### Yekun cavablar
 Bütün tələbələr köçdü: **bəli** (7,816/7,816; SAR 7,799 — 17-si sənədli). Bütün müəllimlər: **bəli** (729/729). Əlaqələr bütövdür: **bəli** (orphan/dublikat 0). Köçürülmüş istifadəçilər giriş edə bilir: **indi bəli** — real e-poçtla self-servis (SMTP şərti) və ya RİM parolu ilə; əvvəl heç biri edə bilmirdi. Hər rol düzgün UI görür: **bəli** (0×500, matris). Yalnız icazəli əməliyyat: **bəli** (56 mənfi test, 2 açıq qərar). Dərs yükü, cədvəl, sillabus, jurnal, tələbə görünüşü, pəncərə kilidi, RİM düzəlişi, ESD (yönləndirmə + tam tarixçə), bildirişlər, tenant izolyasiyası (RLS 82/82), audit, test örtüyü: **bəli, klonda sübutla**. Performans geriləməsi: **yoxdur** (ölçülüb).
+
+---
+
+# Dalğa 2 — 2026-09-03 (PR #120 → Develop)
+
+**Əhatə:** sahib qərarları (sillabus təsdiqçisi = kafedra müdiri; imtahan mərkəzi başqa bankları oxuya bilər), sual göndərişində kafedra müdiri təsdiq mərhələsi, «umumi dizayn.zip» 22 ekranın 7 mərhələdə (0–6) mövcud kabinet qabığına + sol sidebar-a inteqrasiyası, yeni rollar, təhlükəsizlik dalğası 2, QA dalğası 2, i18n. Bütün yoxlamalar yenə klon bazada (`a0d170000901`); real `emsarena_db` toxunulmayıb.
+
+## D2.1 Nə tikildi
+- **Sual zənciri:** müəllim → **kafedra müdiri təsdiqi** → İmtahan Mərkəzi; `QuestionSubmissionEvent` izləmə ledgeri (RLS + UPDATE trigger-i `exams/0065`), `question.chair_review` açarı, «Sual təsdiqi» bölməsi, atlanan mərhələ 409 (`PHASE_QUESTION_CHAIR_APPROVAL`).
+- **Sillabus:** kafedra müdiri yeganə təsdiqçi (`organizations/0035`), dekan oxu/şərh; Mərhələ 5 qəbul qaydaları — çəkilər (cəm 100), kontakt saat = plan saatı, avto-MAJOR versiya, SLA siyasəti, təsdiqlənmiş sillabus → jurnal mövzuları (`DESIGN_STAGE5`).
+- **Mərhələ 0:** `ems_ui` komponent kitabxanası (status kataloqu `core/ui/status_catalog.py`, tag lib, external CSS/JS). Komponent qalereyası **commit olunmur, istifadəçiyə görünmür** (scratchpad-da qalır).
+- **Mərhələ 1 (Tədris şöbəsi):** universitet strukturu ağacı, kafedra profili, ixtisaslar, fənn kataloqu; `teaching_office_head/staff` rolları (`DESIGN_STAGE1`).
+- **Mərhələ 2–3:** tədris planı təsdiq zənciri (kafedra → fakültə şurası → TŞ), qruplar reyestri, semestr açılışı (idempotent `generate`); ATİS qəbulu, tələbə reyestri + 6 hərəkət növü (`StudentMovement`, RLS `registrar/0067`), `student_services` rolu (`DESIGN_STAGE2/3`).
+- **Mərhələ 4 (dərs yükü zənciri):** TŞ mərkəzi → fakültə dilimləri → koordinator vizası → dekanlıq təsdiqi → kafedra bölgüsü → müəllim təsdiqi/etirazı → rektor baxışı; `TaskFacultySlice/TaskRowReview/LoadObjection` (append-only trigger), `workload/0004–0006` (`DESIGN_STAGE4`).
+- **Mərhələ 6:** «Keçilmiş dərslər» (plan saatı ↔ fakt), sillabus tələbi siyasət açarı, tələbə kabineti deltaları (təsdiqlənmiş sillabus, çəkilər, transkript sorğusu) (`DESIGN_STAGE6`).
+- **Dashboard:** 12 rol-qapılı keçid kartı ilə 13 yeni ekran ana səhifəyə bağlandı (QA W2-4).
+- **i18n:** Stage 1–6 + dashboard üçün **1,133 yazı × 4 dil** (185+387+468+33 + sual zənciri 145), `check_i18n_catalogs` `source_missing` 0.
+
+## D2.2 Təhlükəsizlik dalğası 2 (`PHASE23_SECURITY_WAVE2`)
+Düzəldildi (hər biri red→green testlə): **P0** tələbə hərəkət sənədləri (`student_movements/`) anonim açıq idi → qorunan media + UUID ad; **P1** tədris planı əməlləri struktur əhatəsiz idi (B kafedrasının müdiri A-nın planını təsdiqləyə bilirdi) → `plan_scope` (403/404 semantikası qorunub); **P1** `QuestionSubmissionEvent` UPDATE trigger-i; **P2** yük import qapısı. Təmiz: bütün org-scoped cədvəllərdə RLS+FORCE (91 NOBYPASSRLS test), 103 şablonda `|safe`/inline yox, `csrf_exempt` 0, redirect-lər adlı URL. Açıq: S2-1 (slug ↔ aktiv org, tək tenantda latent), S2-2/3/4 (P3).
+
+## D2.3 QA dalğası 2 (`PHASE21_UI_QA_WAVE2`, `PHASE32_ROLE_MATRIX_FINAL` §5)
+13 rol, **456 bölmə açılışı, 0×500, 0 konsol/CSP xətası**, 375 px-də daşma 0, sol sidebar hər panelda aktiv. Axınlar: F1 struktur→plan→təsdiq→semestr açılışı PASS (idempotent), F3 dərs yükü zənciri 21 addım PASS (etiraz + həll daxil), F6/F7 PASS; 15 mənfi hal doğru (403/409, sızma yoxdur). Matris §5: 21 funksiya × 13 rol = 273 xana → 117 ✅ · 28 ⚠️ · 5 ❌ (2 qüsur: dashboard — indi FIXED; koordinator bölgüsü — sahib qərarı). Düzəldilən: CSRF token fallback, köhnə-reviziya dilim qərarı 409, dublikat h1 (8 bölmə), dashboard kartları. Açıq: W2-5 (staff `semester.open` — sahib qərarı), W2-6/7/8 (P3).
+
+## D2.4 Data / cutover namizədi A
+Düzəldilmiş fazalarla **tam təzə repetisiya** `emsarena_rehearsal_d44526b97cbc` (run 8a476c8c, 4h51m): 8,549 hesab, SAR 7,799, dərs 304,805 (J12 daxil 11,735), otaq 158, arxiv 200, identity karantini 0, xəta-səviyyəli 0 (`REHEARSAL_FRESH_RESULT`). 2026-09-03: HEAD miqrasiyaları tətbiq olundu (263, `registrar/0068` və `exams/0065` daxil), `legacy_repair_current_period --period "2025/2026 Yaz" --apply` icra edildi. **Tövsiyə:** serverə bu baza (A) aparılsın; B (`emsarena_db` + repair) ehtiyat. Runbook HANDOFF §8.6–8.9 dəyişməz; `registrar/0068` xam-SQL idxal skriptlərinin NOT NULL pozuntusunu da bağlayır.
+
+## D2.5 Testlər / CI
+Yeni: workload 102 (stage4 26), teaching_office stage2, student_services, question chair review, dashboard 19, media siyasəti (hərəkət sənədləri), registrar `-m postgres` 99 + tam 1,438. Lokal qapılar: black/isort/flake8, modul ölçüsü, sərhəd, worker-atomic, i18n, makemigrations — yaşıl. CI: PR #120 — 6c028efe yaşıl; sonrakı push-larda black (2 skript) düzəldildi; yekun status bu sənədin sonunda.
+
+## D2.6 Qalan iş (dalğa 2-dən sonra)
+1. Sahib qərarları: W2-5 (`teaching_office_staff` `semester.open`), koordinator `workload-distribution` oxusu. 2. S2-1 slug↔aktiv-org naxışı (ayrıca dilim), S2-2/3/4. 3. W2-6/7/8 (menyu genişliyi, `aria-sort`, icazəsiz bölmə mesajı). 4. Dalğa 1-dən: 223 fuzzy AZ yazı (əl ilə), P1-10 `org_admin` alias, profil qabığı sorğu vergisi, `accounts_userprofile` RLS, CI RLS workflow, workload F5 (ödəniş/fərdi plan), fənn birləşmə/prerequisite, normSet siyasət dəyərləri. 5. Serverdə: cutover A bazasının dump/restore-u + `provision-app-db-role`, SMTP, superadmin.
+
+## D2.7 Yenilənmiş qiymət
+Data Migration Integrity: 90 · Student Module: 86 · Teacher Module: 86 · Academic Workflows: **86** (tədris planı → semestr → yük zənciri → sual təsdiqi uçdan-uca) · Timetable: 82 · Syllabus: **84** · Journal: 87 · Applications/ESD: 85 · RBAC/Security: **86** · UX/UI: **81** · Performance: 85 · **Overall Production Readiness: 85/100** (şərt: HANDOFF §8 runbook + 2 sahib qərarı).
+
