@@ -167,6 +167,17 @@ class ComponentPartialRenderTest(SimpleTestCase):
         self.assertIn('aria-pressed="true"', html)
         self.assertIn("ems-kpi--success", html)
 
+    def test_kpi_tile_accent_tone_renders_the_left_border_variant(self):
+        """Dizayn ekran 12/14/15: ağ kart + 4px rəngli sol kontur (`accent-*` tonu)."""
+        html = render_to_string(
+            "partials/ems_ui/_kpi_tile.html",
+            {"tile": {"label": "GÖNDƏRİLMİŞ", "value": "4", "tone": "accent-primary"}},
+        )
+        self.assertIn("ems-kpi--accent-primary", html)
+        css = open("static/css/ems_ui/kpi.css", encoding="utf-8").read()
+        self.assertIn(".ems-kpi--accent-primary", css)
+        self.assertIn("border-left-width: 4px", css)
+
     def test_kpi_tile_progress_bar_uses_a_custom_property_not_a_hardcoded_width(self):
         html = render_to_string(
             "partials/ems_ui/_kpi_tile.html",

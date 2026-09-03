@@ -144,12 +144,13 @@ def build_workload_center_section(request, section, *, active_organization, allo
     kpi = payload["kpi"]
     section["kpi_tiles"] = [
         {"label": pgettext(_CTX, "CƏMİ KAFEDRA"), "value": kpi["chairs"]},
-        {"label": pgettext(_CTX, "GÖNDƏRİLMİŞ"), "value": kpi["submitted"], "tone": "primary"},
-        {"label": pgettext(_CTX, "TƏSDİQLƏNMİŞ"), "value": kpi["approved"], "tone": "success"},
+        # Dizayn ekran 12: ağ kart + 4px rəngli sol kontur (tinted deyil).
+        {"label": pgettext(_CTX, "GÖNDƏRİLMİŞ"), "value": kpi["submitted"], "tone": "accent-primary"},
+        {"label": pgettext(_CTX, "TƏSDİQLƏNMİŞ"), "value": kpi["approved"], "tone": "accent-success"},
         {
             "label": pgettext(_CTX, "QAYTARILMIŞ"),
             "value": kpi["returned"],
-            "tone": "danger" if kpi["returned"] else None,
+            "tone": "accent-danger" if kpi["returned"] else None,
         },
     ]
 
