@@ -61219,3 +61219,1551 @@ msgstr "Не используется в плане"
 msgctxt "accounts.catalog"
 msgid "Qayıb limiti (%%)"
 msgstr "Лимит пропусков (%%)"
+
+msgctxt "accounts.curriculum"
+msgid "%(sem)d-ci semestr: %(credits)d kredit (hədəf %(target)d)"
+msgstr "%(sem)d-й семестр: %(credits)d кредитов (цель %(target)d)"
+
+msgctxt "accounts.curriculum"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "accounts.curriculum"
+msgid "Auditoriya"
+msgstr "Аудиторные часы"
+
+msgctxt "accounts.curriculum"
+msgid "Açıq xəbərdarlıq var — əvvəlcə kredit/saat balansını bağlayın."
+msgstr "Есть открытое предупреждение — сначала закройте баланс кредитов/часов."
+
+msgctxt "accounts.curriculum"
+msgid "Açıq xəbərdarlıqlar — təsdiqə göndərmə bağlıdır"
+msgstr "Открытые предупреждения — отправка на утверждение заблокирована"
+
+msgctxt "accounts.curriculum"
+msgid "Balans — semestr üzrə"
+msgstr "Баланс — по семестрам"
+
+msgctxt "accounts.curriculum"
+msgid "Boş buraxılsa kredit × 30 yazılır."
+msgstr "Если оставить пустым, будет записано кредиты × 30."
+
+msgctxt "accounts.curriculum"
+msgid "Boş buraxılsa ümumi − auditoriya yazılır."
+msgstr "Если оставить пустым, будет записано всего − аудиторные часы."
+
+msgctxt "accounts.curriculum"
+msgid "Bu fənn həmin semestrdə artıq plandadır."
+msgstr "Эта дисциплина уже есть в плане на этот семестр."
+
+msgctxt "accounts.curriculum"
+msgid "Bu ixtisas və qəbul ili üçün plan artıq mövcuddur."
+msgstr "План для этой специальности и года приёма уже существует."
+
+msgctxt "accounts.curriculum"
+msgid "Bu mərhələnin təsdiqi başqa səlahiyyətdədir."
+msgstr "Утверждение этого этапа относится к другому полномочию."
+
+msgctxt "accounts.curriculum"
+msgid "Bu plan üzrə hələ qeyd yoxdur."
+msgstr "По этому плану записей пока нет."
+
+msgctxt "accounts.curriculum"
+msgid "Bu versiya qüvvədədir və semestr açılışının mənbəyidir. Dəyişiklik üçün «Yeni versiya» yaradın — köhnə versiya tarixçə kimi qalır."
+msgstr "Эта версия действует и является источником для открытия семестра. Для изменений создайте «Новую версию» — старая версия остаётся в истории."
+
+msgctxt "accounts.curriculum"
+msgid "Dəyişiklik tarixçəsi"
+msgstr "История изменений"
+
+msgctxt "accounts.curriculum"
+msgid "Elmi Şura protokolu"
+msgstr "Протокол Учёного совета"
+
+msgctxt "accounts.curriculum"
+msgid "Fakültə şurası adından təsdiqlə"
+msgstr "Утвердить от имени совета факультета"
+
+msgctxt "accounts.curriculum"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.curriculum"
+msgid "Fənn seçilməyib."
+msgstr "Дисциплина не выбрана."
+
+msgctxt "accounts.curriculum"
+msgid "Geri qaytar"
+msgstr "Вернуть"
+
+msgctxt "accounts.curriculum"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.curriculum"
+msgid "Kafedra adından təsdiqlə"
+msgstr "Утвердить от имени кафедры"
+
+msgctxt "accounts.curriculum"
+msgid "Kafedra baxışına göndər"
+msgstr "Отправить на рассмотрение кафедры"
+
+msgctxt "accounts.curriculum"
+msgid "Kataloqdan seçin"
+msgstr "Выберите из каталога"
+
+msgctxt "accounts.curriculum"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "accounts.curriculum"
+msgid "Kredit təyin edilməyib"
+msgstr "Кредиты не назначены"
+
+msgctxt "accounts.curriculum"
+msgid "Kredit yazıldıqda ümumi saat (kredit × 30) və həftəlik yük avtomatik hesablanır."
+msgstr "При вводе кредитов общее число часов (кредиты × 30) и недельная нагрузка рассчитываются автоматически."
+
+msgctxt "accounts.curriculum"
+msgid "Laboratoriya"
+msgstr "Лаборатория"
+
+msgctxt "accounts.curriculum"
+msgid "Mühazirə"
+msgstr "Лекция"
+
+msgctxt "accounts.curriculum"
+msgid "Mühazirə + seminar + laboratoriya + sərbəst iş ümumi saatla uyğun gəlmir"
+msgstr "Лекция + семинар + лаборатория + самостоятельная работа не совпадает с общим числом часов"
+
+msgctxt "accounts.curriculum"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "accounts.curriculum"
+msgid "Plan geri qaytarılıb"
+msgstr "План возвращён"
+
+msgctxt "accounts.curriculum"
+msgid "Plan qaralama kimi yaranır; təsdiq zənciri sonra başlayır."
+msgstr "План создаётся как черновик; цепочка утверждения начинается позже."
+
+msgctxt "accounts.curriculum"
+msgid "Plan redaktəsi üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для редактирования плана."
+
+msgctxt "accounts.curriculum"
+msgid "Plan sətri"
+msgstr "Строка плана"
+
+msgctxt "accounts.curriculum"
+msgid "Plan sətri tapılmadı."
+msgstr "Строка плана не найдена."
+
+msgctxt "accounts.curriculum"
+msgid "Plan sətrini sil"
+msgstr "Удалить строку плана"
+
+msgctxt "accounts.curriculum"
+msgid "Plan tapılmadı."
+msgstr "План не найден."
+
+msgctxt "accounts.curriculum"
+msgid "Plan şifri"
+msgstr "Код плана"
+
+msgctxt "accounts.curriculum"
+msgid "Planı geri qaytar"
+msgstr "Вернуть план"
+
+msgctxt "accounts.curriculum"
+msgid "Planın adı"
+msgstr "Название плана"
+
+msgctxt "accounts.curriculum"
+msgid "Proqram ECTS"
+msgstr "ECTS программы"
+
+msgctxt "accounts.curriculum"
+msgid "Qaytar"
+msgstr "Вернуть"
+
+msgctxt "accounts.curriculum"
+msgid "Qaytarma cari mərhələnin təsdiqçisinə aiddir."
+msgstr "Возврат относится к утверждающему текущего этапа."
+
+msgctxt "accounts.curriculum"
+msgid "Qiymətləndirmə forması"
+msgstr "Форма оценивания"
+
+msgctxt "accounts.curriculum"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "accounts.curriculum"
+msgid "Qəbul ili düzgün deyil."
+msgstr "Год поступления указан неверно."
+
+msgctxt "accounts.curriculum"
+msgid "Redaktə"
+msgstr "Редактировать"
+
+msgctxt "accounts.curriculum"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.curriculum"
+msgid "Semestr 1–16 aralığında olmalıdır."
+msgstr "Семестр должен быть в диапазоне 1–16."
+
+msgctxt "accounts.curriculum"
+msgid "Semestr hədəfi: %(target)s kredit (NK 348 b. 3.2.2). Fərq açıq xəbərdarlıq sayılır."
+msgstr "Цель семестра: %(target)s кредитов (NK 348 п. 3.2.2). Разница считается открытым предупреждением."
+
+msgctxt "accounts.curriculum"
+msgid "Semestrlər"
+msgstr "Семестры"
+
+msgctxt "accounts.curriculum"
+msgid "Seminar"
+msgstr "Семинар"
+
+msgctxt "accounts.curriculum"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "accounts.curriculum"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "accounts.curriculum"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.curriculum"
+msgid "Səbəb müəllifə göndərilir və audit jurnalına yazılır."
+msgstr "Причина отправляется автору и записывается в журнал аудита."
+
+msgctxt "accounts.curriculum"
+msgid "Sərbəst"
+msgstr "Самостоятельная"
+
+msgctxt "accounts.curriculum"
+msgid "Sərbəst iş"
+msgstr "Самостоятельная работа"
+
+msgctxt "accounts.curriculum"
+msgid "Sətir yalnız QARALAMA planından silinir; təsdiqlənmiş plan toxunulmazdır."
+msgstr "Строка удаляется только из ЧЕРНОВОГО плана; утверждённый план остаётся неизменным."
+
+msgctxt "accounts.curriculum"
+msgid "Sətir əlavə et"
+msgstr "Добавить строку"
+
+msgctxt "accounts.curriculum"
+msgid "Tədris dili"
+msgstr "Язык обучения"
+
+msgctxt "accounts.curriculum"
+msgid "Tədris edən kafedra"
+msgstr "Кафедра, ведущая дисциплину"
+
+msgctxt "accounts.curriculum"
+msgid "Tədris planı seçilməyib"
+msgstr "Учебный план не выбран"
+
+msgctxt "accounts.curriculum"
+msgid "Tədris planına baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+msgstr "У вас нет прав для просмотра учебного плана. Обратитесь к администратору."
+
+msgctxt "accounts.curriculum"
+msgid "Tədris planına səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав в отношении учебного плана."
+
+msgctxt "accounts.curriculum"
+msgid "Tədris şöbəsi adından təsdiqlə"
+msgstr "Утвердить от имени Учебного отдела"
+
+msgctxt "accounts.curriculum"
+msgid "Təsdiqlənmiş plan dəyişdirilmir"
+msgstr "Утверждённый план не изменяется"
+
+msgctxt "accounts.curriculum"
+msgid "Təsdiqlənmiş plandan yeni qaralama versiya yaradılsın? Köhnə versiya toxunulmaz qalır."
+msgstr "Создать новую черновую версию из утверждённого плана? Старая версия останется без изменений."
+
+msgctxt "accounts.curriculum"
+msgid "Təyin edilməyib"
+msgstr "Не назначено"
+
+msgctxt "accounts.curriculum"
+msgid "Versiya"
+msgstr "Версия"
+
+msgctxt "accounts.curriculum"
+msgid "Yeni plan"
+msgstr "Новый план"
+
+msgctxt "accounts.curriculum"
+msgid "Yeni tədris planı"
+msgstr "Новый учебный план"
+
+msgctxt "accounts.curriculum"
+msgid "Yeni versiya"
+msgstr "Новая версия"
+
+msgctxt "accounts.curriculum"
+msgid "Yeni versiya yalnız təsdiqlənmiş plandan yaradılır."
+msgstr "Новая версия создаётся только из утверждённого плана."
+
+msgctxt "accounts.curriculum"
+msgid "Yenidən işlə (qaralamaya qaytar)"
+msgstr "Доработать (вернуть в черновик)"
+
+msgctxt "accounts.curriculum"
+msgid "kr"
+msgstr "кр"
+
+msgctxt "accounts.curriculum"
+msgid "Çıxarılıb: %(n)s sətir"
+msgstr "Удалено: %(n)s строк(и)"
+
+msgctxt "accounts.curriculum"
+msgid "Ümumi"
+msgstr "Всего"
+
+msgctxt "accounts.curriculum"
+msgid "Ümumi saat"
+msgstr "Всего часов"
+
+msgctxt "accounts.curriculum"
+msgid "Ümumi saat kredit × 30 ilə uyğun gəlmir"
+msgstr "Общее число часов не совпадает с кредиты × 30"
+
+msgctxt "accounts.curriculum"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "accounts.curriculum"
+msgid "İxtisas seçin və ya «Yeni plan» düyməsi ilə qaralama yaradın."
+msgstr "Выберите специальность или создайте черновик кнопкой «Новый план»."
+
+msgctxt "accounts.curriculum"
+msgid "İxtisas tapılmadı."
+msgstr "Специальность не найдена."
+
+msgctxt "accounts.curriculum"
+msgid "İxtisasın çoxillik tədris planı: kredit balansı, saat bölgüsü və təsdiq zənciri. Dərs yükü məhz bu plandan törəyir."
+msgstr "Многолетний учебный план специальности: баланс кредитов, распределение часов и цепочка утверждения. Учебная нагрузка формируется именно из этого плана."
+
+msgctxt "accounts.curriculum"
+msgid "Əlavə olunub: %(n)s sətir"
+msgstr "Добавлено: %(n)s строк(и)"
+
+msgctxt "accounts.curriculum"
+msgid "Əvvəlki versiya ilə fərq"
+msgstr "Отличие от предыдущей версии"
+
+msgctxt "accounts.groups"
+msgid "%%d qrup seçilib"
+msgstr "Выбрано групп: %%d"
+
+msgctxt "accounts.groups"
+msgid "%(name)s qrupunu seç"
+msgstr "Выбрать группу %(name)s"
+
+msgctxt "accounts.groups"
+msgid "Arxivdən qaytar"
+msgstr "Восстановить из архива"
+
+msgctxt "accounts.groups"
+msgid "Arxivlə"
+msgstr "Архивировать"
+
+msgctxt "accounts.groups"
+msgid "Bərpa səbəbi audit jurnalına aktor və vaxtla yazılır."
+msgstr "Причина восстановления записывается в журнал аудита с указанием исполнителя и времени."
+
+msgctxt "accounts.groups"
+msgid "Dil sektoru"
+msgstr "Языковой сектор"
+
+msgctxt "accounts.groups"
+msgid "Dərs cədvəli"
+msgstr "Расписание занятий"
+
+msgctxt "accounts.groups"
+msgid "Hər qrup üçün ayrıca audit yazısı düşür (köhnə kurs → yeni kurs). Son kursdakı qruplar toxunulmur — məzunluq ayrı əməldir."
+msgstr "Для каждой группы записывается отдельная запись аудита (старый курс → новый курс). Группы последнего курса не затрагиваются — выпуск является отдельным действием."
+
+msgctxt "accounts.groups"
+msgid "Kurs"
+msgstr "Курс"
+
+msgctxt "accounts.groups"
+msgid "Kursa keçir"
+msgstr "Перевести на курс"
+
+msgctxt "accounts.groups"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "accounts.groups"
+msgid "Plan üzrə yer sayı"
+msgstr "Количество мест по плану"
+
+msgctxt "accounts.groups"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.groups"
+msgid "Qrup SİLİNMİR — arxivlənir; tələbə qeydiyyatı, jurnal və qiymət tarixçəsi qalır."
+msgstr "Группа НЕ УДАЛЯЕТСЯ — она архивируется; регистрация студентов, журнал и история оценок сохраняются."
+
+msgctxt "accounts.groups"
+msgid "Qrup kodu"
+msgstr "Код группы"
+
+msgctxt "accounts.groups"
+msgid "Qrup reyestrinə baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+msgstr "У вас нет прав для просмотра реестра групп. Обратитесь к администратору."
+
+msgctxt "accounts.groups"
+msgid "Qrup reyestrinə səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав в отношении реестра групп."
+
+msgctxt "accounts.groups"
+msgid "Qrup seçilməyib"
+msgstr "Группа не выбрана"
+
+msgctxt "accounts.groups"
+msgid "Qrup seçilməyib."
+msgstr "Группа не выбрана."
+
+msgctxt "accounts.groups"
+msgid "Qrup tapılmadı."
+msgstr "Группа не найдена."
+
+msgctxt "accounts.groups"
+msgid "Qrupları idarə etmək səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для управления группами."
+
+msgctxt "accounts.groups"
+msgid "Qrupu arxivlə"
+msgstr "Архивировать группу"
+
+msgctxt "accounts.groups"
+msgid "Qrupun adı"
+msgstr "Название группы"
+
+msgctxt "accounts.groups"
+msgid "Qrupun adı boş ola bilməz."
+msgstr "Название группы не может быть пустым."
+
+msgctxt "accounts.groups"
+msgid "Qrupun kursu və dil sektoru bölmə metadatasında saxlanılır — sxem tenantdan asılı deyil."
+msgstr "Курс и языковой сектор группы хранятся в метаданных подразделения — схема не зависит от арендатора."
+
+msgctxt "accounts.groups"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "accounts.groups"
+msgid "Redaktə"
+msgstr "Редактировать"
+
+msgctxt "accounts.groups"
+msgid "Seçilmiş qrupları növbəti kursa keçir"
+msgstr "Перевести выбранные группы на следующий курс"
+
+msgctxt "accounts.groups"
+msgid "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."
+msgstr "Выбранное лицо не является активным членом этой организации."
+
+msgctxt "accounts.groups"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "accounts.groups"
+msgid "Struktur əhatəniz yoxdur."
+msgstr "У вас нет структурного охвата."
+
+msgctxt "accounts.groups"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Причина должна содержать не менее 20 символов — краткая заметка недостаточна для аудита."
+
+msgctxt "accounts.groups"
+msgid "Tələbə qrupları: ixtisas, kurs, dil sektoru, kurator və tələbə tərkibi. Cədvəl və imtahan kohortları ayrı bölmələrdədir."
+msgstr "Студенческие группы: специальность, курс, языковой сектор, куратор и состав студентов. Расписание и экзаменационные когорты находятся в отдельных разделах."
+
+msgctxt "accounts.groups"
+msgid "Tələbəsi olan qrup arxivlənmir — əvvəlcə tələbələri köçürün."
+msgstr "Группа со студентами не архивируется — сначала переведите студентов."
+
+msgctxt "accounts.groups"
+msgid "Yeni qrup"
+msgstr "Новая группа"
+
+msgctxt "accounts.groups"
+msgid "Yeni qrup üçün ixtisas seçilməlidir."
+msgstr "Для новой группы должна быть выбрана специальность."
+
+msgctxt "accounts.groups"
+msgid "İmtahan kohortları"
+msgstr "Экзаменационные когорты"
+
+msgctxt "accounts.groups"
+msgid "İxtisas / kafedra"
+msgstr "Специальность / кафедра"
+
+msgctxt "accounts.groups"
+msgid "İxtisas bölməsi tapılmadı."
+msgstr "Раздел специальности не найден."
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış müəllim gözləyir"
+msgstr "%(n)d открытий ожидают преподавателя"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış sətri"
+msgstr "%(n)d строк открытия"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılışın jurnalı açılmayıb"
+msgstr "У %(n)d открытий не открыт журнал"
+
+msgctxt "accounts.semester"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "accounts.semester"
+msgid "Açılış"
+msgstr "Открытие"
+
+msgctxt "accounts.semester"
+msgid "Açılış SİLİNMİR — ləğv olunur; jurnal, qeydiyyat və qiymət tarixçəsi qalır."
+msgstr "Открытие НЕ УДАЛЯЕТСЯ — оно отменяется; журнал, регистрация и история оценок сохраняются."
+
+msgctxt "accounts.semester"
+msgid "Açılış tapılmadı."
+msgstr "Открытие не найдено."
+
+msgctxt "accounts.semester"
+msgid "Açılış yoxdur."
+msgstr "Открытия нет."
+
+msgctxt "accounts.semester"
+msgid "Açılışlar kafedralara göndərilsin? Kafedra rəhbərlərinə bildiriş gedəcək."
+msgstr "Отправить открытия на кафедры? Заведующим кафедрами будет отправлено уведомление."
+
+msgctxt "accounts.semester"
+msgid "Açılışlar təsdiqlənmiş plandan gəlir"
+msgstr "Открытия формируются из утверждённого плана"
+
+msgctxt "accounts.semester"
+msgid "Açılışları yarat"
+msgstr "Создать открытия"
+
+msgctxt "accounts.semester"
+msgid "Açılışı ləğv et"
+msgstr "Отменить открытие"
+
+msgctxt "accounts.semester"
+msgid "Başlama tarixi"
+msgstr "Дата начала"
+
+msgctxt "accounts.semester"
+msgid "Başlama tarixi bitmə tarixindən əvvəl olmalıdır."
+msgstr "Дата начала должна быть раньше даты окончания."
+
+msgctxt "accounts.semester"
+msgid "Başlama və bitmə tarixi tələb olunur."
+msgstr "Требуются дата начала и дата окончания."
+
+msgctxt "accounts.semester"
+msgid "Bitmə tarixi"
+msgstr "Дата окончания"
+
+msgctxt "accounts.semester"
+msgid "Boş buraxılsa bütün aktiv ixtisaslar götürülür; təsdiqlənmiş planı olmayanlar atlanır."
+msgstr "Если оставить пустым, берутся все активные специальности; специальности без утверждённого плана пропускаются."
+
+msgctxt "accounts.semester"
+msgid "Bu ad və tədris ili ilə dövr artıq mövcuddur."
+msgstr "Период с этим названием и учебным годом уже существует."
+
+msgctxt "accounts.semester"
+msgid "Bu dövr «cari» edilsin? Köhnə cari dövr avtomatik söndürüləcək və əməl audit jurnalına yazılacaq."
+msgstr "Сделать этот период «текущим»? Старый текущий период будет автоматически отключён, и действие будет записано в журнал аудита."
+
+msgctxt "accounts.semester"
+msgid "Bu əməl üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для этого действия."
+
+msgctxt "accounts.semester"
+msgid "Bütün açılışlara müəllim təyin olunub"
+msgstr "Преподаватель назначен на все открытия"
+
+msgctxt "accounts.semester"
+msgid "Cari dövr et"
+msgstr "Сделать текущим"
+
+msgctxt "accounts.semester"
+msgid "Dövr tapılmadı."
+msgstr "Период не найден."
+
+msgctxt "accounts.semester"
+msgid "Dövrün adı boş ola bilməz."
+msgstr "Название периода не может быть пустым."
+
+msgctxt "accounts.semester"
+msgid "Elektron jurnallar açılıb"
+msgstr "Электронные журналы открыты"
+
+msgctxt "accounts.semester"
+msgid "Hansı ixtisaslar üçün?"
+msgstr "Для каких специальностей?"
+
+msgctxt "accounts.semester"
+msgid "Jurnal açıldı"
+msgstr "Журнал открыт"
+
+msgctxt "accounts.semester"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.semester"
+msgid "Kafedralar müəllim təyinatına başlaya bilər"
+msgstr "Кафедры могут начать назначение преподавателей"
+
+msgctxt "accounts.semester"
+msgid "Kafedralar üzrə açılış"
+msgstr "Открытие по кафедрам"
+
+msgctxt "accounts.semester"
+msgid "Kafedraya göndər"
+msgstr "Отправить на кафедру"
+
+msgctxt "accounts.semester"
+msgid "Kafedraya göndərildi"
+msgstr "Отправлено на кафедру"
+
+msgctxt "accounts.semester"
+msgid "Kilid geri qaytarılmır — açmaq üçün ayrıca səlahiyyət lazımdır"
+msgstr "Блокировка не отменяется — для снятия требуется отдельное полномочие"
+
+msgctxt "accounts.semester"
+msgid "Kilid şərtləri"
+msgstr "Условия блокировки"
+
+msgctxt "accounts.semester"
+msgid "Kilidi aç"
+msgstr "Снять блокировку"
+
+msgctxt "accounts.semester"
+msgid "Kilidi açmaq səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для снятия блокировки."
+
+msgctxt "accounts.semester"
+msgid "Kilidlənmiş semestr redaktə olunmur — əvvəlcə kilidi açın."
+msgstr "Заблокированный семестр не редактируется — сначала снимите блокировку."
+
+msgctxt "accounts.semester"
+msgid "Kilidlənmiş semestrdə açılış dəyişmir."
+msgstr "Открытия не изменяются в заблокированном семестре."
+
+msgctxt "accounts.semester"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "accounts.semester"
+msgid "Müəllim təyin olundu"
+msgstr "Преподаватель назначен"
+
+msgctxt "accounts.semester"
+msgid "Müəllim təyin olunub"
+msgstr "Преподаватель назначен"
+
+msgctxt "accounts.semester"
+msgid "Müəllimi olmayan açılış var — semestr kilidlənmir."
+msgstr "Есть открытие без преподавателя — семестр не блокируется."
+
+msgctxt "accounts.semester"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "accounts.semester"
+msgid "Payız semestri"
+msgstr "Осенний семестр"
+
+msgctxt "accounts.semester"
+msgid "Plandan açılış yaradıldı"
+msgstr "Открытия созданы из плана"
+
+msgctxt "accounts.semester"
+msgid "Plandan açılış yarat"
+msgstr "Создать открытия из плана"
+
+msgctxt "accounts.semester"
+msgid "Planın neçənci semestri?"
+msgstr "Какой семестр плана?"
+
+msgctxt "accounts.semester"
+msgid "Saat"
+msgstr "Час"
+
+msgctxt "accounts.semester"
+msgid "Semestr 1–16 aralığında olmalıdır."
+msgstr "Семестр должен быть в диапазоне 1–16."
+
+msgctxt "accounts.semester"
+msgid "Semestr artıq kilidlidir."
+msgstr "Семестр уже заблокирован."
+
+msgctxt "accounts.semester"
+msgid "Semestr açmaq üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для открытия семестра."
+
+msgctxt "accounts.semester"
+msgid "Semestr açılışına baxış üçün səlahiyyətiniz yoxdur. Administratora müraciət edin."
+msgstr "У вас нет прав для просмотра открытия семестра. Обратитесь к администратору."
+
+msgctxt "accounts.semester"
+msgid "Semestr açılışına səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав в отношении открытия семестра."
+
+msgctxt "accounts.semester"
+msgid "Semestr açılışının mərhələləri"
+msgstr "Этапы открытия семестра"
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidli deyil."
+msgstr "Семестр не заблокирован."
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlidir"
+msgstr "Семестр заблокирован"
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlidir — açılış yaradıla bilməz."
+msgstr "Семестр заблокирован — открытие не может быть создано."
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlidir."
+msgstr "Семестр заблокирован."
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidləndi"
+msgstr "Семестр заблокирован"
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlənsin? Kilid geri qaytarılmır — açmaq ayrıca səlahiyyət və səbəb tələb edir."
+msgstr "Заблокировать семестр? Блокировка необратима — снятие требует отдельного полномочия и причины."
+
+msgctxt "accounts.semester"
+msgid "Semestr nömrəsi seçilməyib."
+msgstr "Номер семестра не выбран."
+
+msgctxt "accounts.semester"
+msgid "Semestrdə açılış yoxdur — kilidləmək mümkün deyil."
+msgstr "В семестре нет открытий — заблокировать невозможно."
+
+msgctxt "accounts.semester"
+msgid "Semestri kilidlə"
+msgstr "Заблокировать семестр"
+
+msgctxt "accounts.semester"
+msgid "Semestri kilidləmək səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав для блокировки семестра."
+
+msgctxt "accounts.semester"
+msgid "Semestrin adı"
+msgstr "Название семестра"
+
+msgctxt "accounts.semester"
+msgid "Semestrin adı və tarixləri; «cari dövr» ayrıca əməldir."
+msgstr "Название и даты семестра; «текущий период» — отдельное действие."
+
+msgctxt "accounts.semester"
+msgid "Semestrin kilidini aç"
+msgstr "Снять блокировку с семестра"
+
+msgctxt "accounts.semester"
+msgid "Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından hər qrup üçün açılış sətirləri yaradılır. Əməl idempotentdir — mövcud açılış təkrarlanmır və heç nə silinmir."
+msgstr "Строки открытия создаются для каждой группы из УТВЕРЖДЁННОГО плана выбранных специальностей. Действие идемпотентно — существующие открытия не дублируются, ничего не удаляется."
+
+msgctxt "accounts.semester"
+msgid "Səbəb audit jurnalına aktor və vaxtla yazılır."
+msgstr "Причина записывается в журнал аудита с указанием исполнителя и времени."
+
+msgctxt "accounts.semester"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Причина должна содержать не менее 20 символов — краткая заметка недостаточна для аудита."
+
+msgctxt "accounts.semester"
+msgid "Tədris dövrü"
+msgstr "Учебный период"
+
+msgctxt "accounts.semester"
+msgid "Tədris dövrü yoxdur"
+msgstr "Учебного периода нет"
+
+msgctxt "accounts.semester"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.semester"
+msgid "Tədris ili boş ola bilməz."
+msgstr "Учебный год не может быть пустым."
+
+msgctxt "accounts.semester"
+msgid "Tədris planından açılış yarat"
+msgstr "Создать открытия из учебного плана"
+
+msgctxt "accounts.semester"
+msgid "Təsdiqlənmiş tədris planından hər qrup üçün fənn açılışı yaradılır, kafedra müəllim təyin edir, sonra jurnal açılır. Dərs yükü məhz bu açılışlardan hesablanır."
+msgstr "Из утверждённого учебного плана для каждой группы создаётся открытие дисциплины, кафедра назначает преподавателя, затем открывается журнал. Учебная нагрузка рассчитывается именно из этих открытий."
+
+msgctxt "accounts.semester"
+msgid "Yeni dövr"
+msgstr "Новый период"
+
+msgctxt "accounts.semester"
+msgid "gözləyir"
+msgstr "ожидает"
+
+msgctxt "accounts.semester"
+msgid "«Plan yoxdur» — bu ixtisaslar üçün semestr açıla bilməz"
+msgstr "«Нет плана» — семестр не может быть открыт для этих специальностей"
+
+msgctxt "accounts.semester"
+msgid "ödənilib"
+msgstr "оплачено"
+
+msgctxt "accounts.semester"
+msgid "İxtisas seçilməyib."
+msgstr "Специальность не выбрана."
+
+msgctxt "accounts.semester"
+msgid "Əvvəlcə semestr dövrü yaradın (ad, tədris ili, başlama və bitmə tarixi)."
+msgstr "Сначала создайте период семестра (название, учебный год, дата начала и окончания)."
+
+msgctxt "accounts.student_admission"
+msgid "1 · ATİS şablonunu endirin"
+msgstr "1 · Скачайте шаблон АТИС"
+
+msgctxt "accounts.student_admission"
+msgid "2 · Faylı yükləyin və yoxlayın"
+msgstr "2 · Загрузите файл и проверьте"
+
+msgctxt "accounts.student_admission"
+msgid "ATİS qəbul faylı"
+msgstr "Файл приёма АТИС"
+
+msgctxt "accounts.student_admission"
+msgid "ATİS sütunları"
+msgstr "Столбцы АТИС"
+
+msgctxt "accounts.student_admission"
+msgid "ATİS-dən gələn qəbul siyahısı yüklənir, sistem sətirləri yoxlayır (FİN təkrarı, ixtisas kodunun uyğunluğu, sənəd tamlığı), sonra tələbələr ixtisasın qruplarına təyin edilir. Qrup təklifi avtomatikdir — dil bölməsi və boş yerə görə; operator onu dəyişə bilər."
+msgstr "Загружается список приёма из АТИС, система проверяет строки (дубликаты ПИН, соответствие кода специальности, полнота документов), затем студенты распределяются по группам специальности. Предложение группы автоматическое — по языковому сектору и наличию мест; оператор может его изменить."
+
+msgctxt "accounts.student_admission"
+msgid "Avtomatik təklif — əl ilə dəyişilə bilər"
+msgstr "Автоматическое предложение — можно изменить вручную"
+
+msgctxt "accounts.student_admission"
+msgid "BLOKLAYAN XƏTA"
+msgstr "БЛОКИРУЮЩАЯ ОШИБКА"
+
+msgctxt "accounts.student_admission"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib qrup üzrə tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
+msgstr "Одноразовые пароли отображаются ТОЛЬКО сейчас — они не сохраняются ни в базе данных, ни в журнале аудита. Скачайте CSV и передайте его студентам по группам; при первом входе каждому студенту потребуется подтверждение по электронной почте (OTP) и новый пароль."
+
+msgctxt "accounts.student_admission"
+msgid "Bloklayan xəta olan sətir qrupa təyin edilə bilmir"
+msgstr "Строка с блокирующей ошибкой не может быть назначена в группу"
+
+msgctxt "accounts.student_admission"
+msgid "Boş şablonu endir"
+msgstr "Скачать пустой шаблон"
+
+msgctxt "accounts.student_admission"
+msgid "CƏMİ SƏTİR"
+msgstr "ВСЕГО СТРОК"
+
+msgctxt "accounts.student_admission"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "accounts.student_admission"
+msgid "Emal olunur…"
+msgstr "Обработка…"
+
+msgctxt "accounts.student_admission"
+msgid "Fayl seçilməyib"
+msgstr "Файл не выбран"
+
+msgctxt "accounts.student_admission"
+msgid "Forma / dil"
+msgstr "Форма / язык"
+
+msgctxt "accounts.student_admission"
+msgid "Parolları CSV kimi endir"
+msgstr "Скачать пароли в формате CSV"
+
+msgctxt "accounts.student_admission"
+msgid "Qrup adı"
+msgstr "Название группы"
+
+msgctxt "accounts.student_admission"
+msgid "Qrup ixtisasın altında yaranır; tutum və dil bölməsi sonradan struktur ağacından dəyişdirilə bilər."
+msgstr "Группа создаётся в рамках специальности; вместимость и языковой сектор можно изменить позже из дерева структуры."
+
+msgctxt "accounts.student_admission"
+msgid "Qrup kodu"
+msgstr "Код группы"
+
+msgctxt "accounts.student_admission"
+msgid "Qrup seçilməyib"
+msgstr "Группа не выбрана"
+
+msgctxt "accounts.student_admission"
+msgid "Qrup təyinatı"
+msgstr "Назначение в группу"
+
+msgctxt "accounts.student_admission"
+msgid "Qrupu yarat"
+msgstr "Создать группу"
+
+msgctxt "accounts.student_admission"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Результат сухого прогона (ничего не записано)"
+
+msgctxt "accounts.student_admission"
+msgid "Qəbul axınının addımları"
+msgstr "Этапы процесса приёма"
+
+msgctxt "accounts.student_admission"
+msgid "Qəbul balı"
+msgstr "Балл приёма"
+
+msgctxt "accounts.student_admission"
+msgid "Qəbul olduğu ixtisas"
+msgstr "Специальность зачисления"
+
+msgctxt "accounts.student_admission"
+msgid "Seçilmiş sətirlər üçün hesab yaradılacaq. Davam edilsin?"
+msgstr "Для выбранных строк будут созданы учётные записи. Продолжить?"
+
+msgctxt "accounts.student_admission"
+msgid "Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox %(limit)s sətir, ölçü limiti %(size)s MB."
+msgstr "Порядок столбцов свободный — они распознаются по названию заголовка. В файле не более %(limit)s строк, ограничение размера %(size)s МБ."
+
+msgctxt "accounts.student_admission"
+msgid "Sətir"
+msgstr "Строка"
+
+msgctxt "accounts.student_admission"
+msgid "Tədris dili"
+msgstr "Язык обучения"
+
+msgctxt "accounts.student_admission"
+msgid "Təhsil haqqı"
+msgstr "Плата за обучение"
+
+msgctxt "accounts.student_admission"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.student_admission"
+msgid "Tələbə Xidmətləri Mərkəzi"
+msgstr "Центр обслуживания студентов"
+
+msgctxt "accounts.student_admission"
+msgid "Tələbə qəbulu üçün icazəniz yoxdur — `user.import` açarı tələb olunur."
+msgstr "У вас нет прав для приёма студентов — требуется ключ `user.import`."
+
+msgctxt "accounts.student_admission"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "accounts.student_admission"
+msgid "Tətbiq nəticəsi"
+msgstr "Результат применения"
+
+msgctxt "accounts.student_admission"
+msgid "Universitetin öz adlandırma qaydası tətbiq olunur — təklif yalnız ilkin dəyərdir."
+msgstr "Применяется собственное правило именования университета — предложение является лишь начальным значением."
+
+msgctxt "accounts.student_admission"
+msgid "XƏBƏRDARLIQ"
+msgstr "ПРЕДУПРЕЖДЕНИЕ"
+
+msgctxt "accounts.student_admission"
+msgid "Xəta"
+msgstr "Ошибка"
+
+msgctxt "accounts.student_admission"
+msgid "YOXLAMADAN KEÇDİ"
+msgstr "ПРОШЛА ПРОВЕРКУ"
+
+msgctxt "accounts.student_admission"
+msgid "Yaradılacaq"
+msgstr "Будет создано"
+
+msgctxt "accounts.student_admission"
+msgid "Yaradıldı"
+msgstr "Создано"
+
+msgctxt "accounts.student_admission"
+msgid "Yeni qrup"
+msgstr "Новая группа"
+
+msgctxt "accounts.student_admission"
+msgid "Yeni qrup yarat"
+msgstr "Создать новую группу"
+
+msgctxt "accounts.student_admission"
+msgid "Yer limiti"
+msgstr "Лимит мест"
+
+msgctxt "accounts.student_admission"
+msgid "Yoxla (quru icra)"
+msgstr "Проверить (сухой прогон)"
+
+msgctxt "accounts.student_admission"
+msgid "Yoxlamanın nəticəsi"
+msgstr "Результат проверки"
+
+msgctxt "accounts.student_admission"
+msgid "dolu"
+msgstr "заполнено"
+
+msgctxt "accounts.student_admission"
+msgid "Ötürüldü"
+msgstr "Пропущено"
+
+msgctxt "accounts.student_admission"
+msgid "İxtisas kodu ilə fakültəyə düşür"
+msgstr "Определяется на факультет по коду специальности"
+
+msgctxt "accounts.student_admission"
+msgid "İzah"
+msgstr "Пояснение"
+
+msgctxt "accounts.student_admission"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Операция не выполнена. Попробуйте снова."
+
+msgctxt "accounts.student_admission"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Сначала выберите файл."
+
+msgctxt "accounts.student_registry"
+msgid "ATİS nömrəsi"
+msgstr "Номер АТИС"
+
+msgctxt "accounts.student_registry"
+msgid "Ad Soyad"
+msgstr "ФИО"
+
+msgctxt "accounts.student_registry"
+msgid "Ad, FİN və ya tələbə kodu"
+msgstr "Имя, ПИН или код студента"
+
+msgctxt "accounts.student_registry"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.student_registry"
+msgid "Bu tələbə üzrə hərəkət əmri yoxdur."
+msgstr "По этому студенту нет приказа о движении."
+
+msgctxt "accounts.student_registry"
+msgid "CSV ixracı"
+msgstr "Экспорт CSV"
+
+msgctxt "accounts.student_registry"
+msgid "CƏMİ TƏLƏBƏ"
+msgstr "ВСЕГО СТУДЕНТОВ"
+
+msgctxt "accounts.student_registry"
+msgid "Dil bölməsi"
+msgstr "Языковой сектор"
+
+msgctxt "accounts.student_registry"
+msgid "DÖVLƏT SİFARİŞİ"
+msgstr "ГОСУДАРСТВЕННЫЙ ЗАКАЗ"
+
+msgctxt "accounts.student_registry"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.student_registry"
+msgid "Filtrə uyğun tələbə yoxdur"
+msgstr "Нет студентов, соответствующих фильтру"
+
+msgctxt "accounts.student_registry"
+msgid "Forma"
+msgstr "Форма"
+
+msgctxt "accounts.student_registry"
+msgid "FİN"
+msgstr "ПИН"
+
+msgctxt "accounts.student_registry"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.student_registry"
+msgid "Hərəkət tarixçəsi"
+msgstr "История движений"
+
+msgctxt "accounts.student_registry"
+msgid "Hərəkət əmri"
+msgstr "Приказ о движении"
+
+msgctxt "accounts.student_registry"
+msgid "Kart"
+msgstr "Карта"
+
+msgctxt "accounts.student_registry"
+msgid "Kurs"
+msgstr "Курс"
+
+msgctxt "accounts.student_registry"
+msgid "Məzuniyyət / xaric / məzun"
+msgstr "Академический отпуск / отчисление / выпуск"
+
+msgctxt "accounts.student_registry"
+msgid "Məzuniyyətin bitmə tarixi"
+msgstr "Дата окончания отпуска"
+
+msgctxt "accounts.student_registry"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Результат: %(count)d строк"
+
+msgctxt "accounts.student_registry"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.student_registry"
+msgid "QİYABİ"
+msgstr "ЗАОЧНАЯ"
+
+msgctxt "accounts.student_registry"
+msgid "Qəbul balı"
+msgstr "Балл приёма"
+
+msgctxt "accounts.student_registry"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "accounts.student_registry"
+msgid "Rolunuzda struktur əhatəsi (fakültə/ixtisas) təyin edilməyib — administratorla əlaqə saxlayın. Əhatəsiz rol bütün universiteti görmür."
+msgstr "В вашей роли не задан структурный охват (факультет/специальность) — обратитесь к администратору. Роль без охвата не видит весь университет."
+
+msgctxt "accounts.student_registry"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "accounts.student_registry"
+msgid "Sizə təyin olunmuş əhatə yoxdur"
+msgstr "Вам не назначен охват"
+
+msgctxt "accounts.student_registry"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.student_registry"
+msgid "Statusu"
+msgstr "Статус"
+
+msgctxt "accounts.student_registry"
+msgid "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın."
+msgstr "Измените фильтры или сократите поисковый запрос."
+
+msgctxt "accounts.student_registry"
+msgid "Toplanmış kredit"
+msgstr "Набранные кредиты"
+
+msgctxt "accounts.student_registry"
+msgid "Təhsil forması"
+msgstr "Форма обучения"
+
+msgctxt "accounts.student_registry"
+msgid "Təhsil haqqı"
+msgstr "Плата за обучение"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə hərəkəti — əmr"
+msgstr "Движение студента — приказ"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə kartı"
+msgstr "Карта студента"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə kodu"
+msgstr "Код студента"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə reyestrinə baxış üçün icazəniz yoxdur — administratorla əlaqə saxlayın."
+msgstr "У вас нет прав для просмотра реестра студентов — обратитесь к администратору."
+
+msgctxt "accounts.student_registry"
+msgid "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət yalnız əmr nömrəsi, tarix və əsaslandırma ilə yazılır."
+msgstr "Все студенты университета: специальность, группа, курс, форма, финансирование и академический статус. Движение записывается только с номером приказа, датой и обоснованием."
+
+msgctxt "accounts.student_registry"
+msgid "XÜSUSİ STATUSLU"
+msgstr "СО СПЕЦИАЛЬНЫМ СТАТУСОМ"
+
+msgctxt "accounts.student_registry"
+msgid "Yalnız sizin əhatənizdəki, boş yeri olan qruplar."
+msgstr "Только группы в вашем охвате, имеющие свободные места."
+
+msgctxt "accounts.student_registry"
+msgid "Yeni ixtisas"
+msgstr "Новая специальность"
+
+msgctxt "accounts.student_registry"
+msgid "Yeni ixtisasın həmin qəbul ili üçün tədris planı olmalıdır."
+msgstr "Для новой специальности должен быть учебный план на этот год приёма."
+
+msgctxt "accounts.student_registry"
+msgid "Yeni qrup"
+msgstr "Новая группа"
+
+msgctxt "accounts.student_registry"
+msgid "Yeni təhsil forması"
+msgstr "Новая форма обучения"
+
+msgctxt "accounts.student_registry"
+msgid "ÜOMG (GPA)"
+msgstr "Средний балл (GPA)"
+
+msgctxt "accounts.student_registry"
+msgid "İmtahan növü"
+msgstr "Форма оценивания"
+
+msgctxt "accounts.student_registry"
+msgid "İxrac üçün icazəniz yoxdur."
+msgstr "У вас нет прав для экспорта."
+
+msgctxt "accounts.student_registry"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "accounts.student_registry"
+msgid "İxtisas və qrup"
+msgstr "Специальность и группа"
+
+msgctxt "accounts.student_registry"
+msgid "ƏYANİ"
+msgstr "ОЧНАЯ"
+
+msgctxt "accounts.student_registry"
+msgid "Əmr"
+msgstr "Приказ"
+
+msgctxt "accounts.student_registry"
+msgid "Əmr nömrəsi"
+msgstr "Номер приказа"
+
+msgctxt "accounts.student_registry"
+msgid "Əmr yazıldıqdan sonra silinmir və dəyişdirilmir; tələbənin statusu dərhal dəyişir və tarixçəyə bir sətir əlavə olunur."
+msgstr "После оформления приказ не удаляется и не изменяется; статус студента меняется немедленно и в историю добавляется строка."
+
+msgctxt "accounts.student_registry"
+msgid "Əmri yaz"
+msgstr "Оформить приказ"
+
+msgctxt "accounts.student_registry"
+msgid "Əmrin tarixi"
+msgstr "Дата приказа"
+
+msgctxt "accounts.student_registry"
+msgid "Əməliyyatın növü"
+msgstr "Тип операции"
+
+msgctxt "accounts.student_registry"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "accounts.student_registry"
+msgid "Ərizə, arayış və ya protokol — opsional (ən çox 10 MB)."
+msgstr "Заявление, справка или протокол — необязательно (не более 10 МБ)."
+
+msgctxt "accounts.student_registry"
+msgid "Əsas sənəd"
+msgstr "Основной документ"
+
+msgctxt "accounts.student_registry"
+msgid "Əsas və əsaslandırma"
+msgstr "Основание и обоснование"
+
+msgctxt "organizations.permission.label"
+msgid "Akademik qrup yaratmaq/idarə etmək"
+msgstr "Создавать/управлять академическими группами"
+
+msgctxt "organizations.permission.label"
+msgid "Plandan semestr açılışı yaratmaq"
+msgstr "Создавать открытие семестра из плана"
+
+msgctxt "organizations.permission.label"
+msgid "Qəbulda tələbəni qrupa təyin etmək və qrup yaratmaq"
+msgstr "Назначать студента в группу и создавать группы при приёме"
+
+msgctxt "organizations.permission.label"
+msgid "Semestr açılışına baxış"
+msgstr "Просмотр открытия семестра"
+
+msgctxt "organizations.permission.label"
+msgid "Semestri kilidləmək"
+msgstr "Блокировать семестр"
+
+msgctxt "organizations.permission.label"
+msgid "Semestrin kilidini açmaq (səbəblə)"
+msgstr "Снимать блокировку семестра (с указанием причины)"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planına baxış"
+msgstr "Просмотр учебного плана"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planını Tədris şöbəsi adından təsdiqləmək"
+msgstr "Утверждать учебный план от имени Учебного отдела"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planını fakültə şurası adından təsdiqləmək"
+msgstr "Утверждать учебный план от имени совета факультета"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planını kafedra adından təsdiqləmək"
+msgstr "Утверждать учебный план от имени кафедры"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planını təsdiqə göndərmək"
+msgstr "Отправлять учебный план на утверждение"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris planının qaralamasını redaktə etmək"
+msgstr "Редактировать черновик учебного плана"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə hərəkəti əmri yazmaq (köçürmə, məzuniyyət, bərpa, xaric)"
+msgstr "Оформлять приказ о движении студента (перевод, академический отпуск, восстановление, отчисление)"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbə reyestrinə baxış (hərəkət tarixçəsi və ixrac)"
+msgstr "Просмотр реестра студентов (история движений и экспорт)"
+
+msgctxt "organizations.semester_opening"
+msgid "Başlanmayıb"
+msgstr "Не начато"
+
+msgctxt "organizations.semester_opening"
+msgid "Kafedraya göndərildi"
+msgstr "Отправлено на кафедру"
+
+msgctxt "organizations.semester_opening"
+msgid "Plandan açılış yaradıldı"
+msgstr "Открытия созданы из плана"
+
+msgctxt "organizations.semester_opening"
+msgid "Semestr kilidləndi"
+msgstr "Семестр заблокирован"
+
+msgctxt "profile.sidebar"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "profile.sidebar"
+msgid "Semestr açılışı"
+msgstr "Открытие семестра"
+
+msgctxt "profile.sidebar"
+msgid "Tədris planı"
+msgstr "Учебный план"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə Xidmətləri"
+msgstr "Обслуживание студентов"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə qəbulu"
+msgstr "Приём студентов"
+
+msgctxt "profile.sidebar"
+msgid "Tələbə reyestri"
+msgstr "Реестр студентов"
+
+msgctxt "registrar.assessment_form"
+msgid "Buraxılış işi"
+msgstr "Дипломная работа"
+
+msgctxt "registrar.assessment_form"
+msgid "Hesabat"
+msgstr "Отчёт"
+
+msgctxt "registrar.assessment_form"
+msgid "Kurs işi"
+msgstr "Курсовая работа"
+
+msgctxt "registrar.assessment_form"
+msgid "Təcrübə"
+msgstr "Практика"
+
+msgctxt "registrar.assessment_form"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "registrar.funding_type"
+msgid "Dövlət sifarişi"
+msgstr "Государственный заказ"
+
+msgctxt "registrar.funding_type"
+msgid "Ödənişli"
+msgstr "Платно"
+
+msgctxt "registrar.plan_status"
+msgid "Fakültə şurası"
+msgstr "Совет факультета"
+
+msgctxt "registrar.plan_status"
+msgid "Kafedra baxışı"
+msgstr "Рассмотрение кафедры"
+
+msgctxt "registrar.plan_status"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "registrar.plan_status"
+msgid "Qaytarılıb"
+msgstr "Возвращено"
+
+msgctxt "registrar.plan_status"
+msgid "Tədris şöbəsi"
+msgstr "Учебный отдел"
+
+msgctxt "registrar.plan_status"
+msgid "Təsdiqlənib"
+msgstr "Утверждено"
+
+msgctxt "student_intake"
+msgid "ATİS nömrəsi"
+msgstr "Номер АТИС"
+
+msgctxt "student_intake"
+msgid "ATİS siyahısındakı sətir nömrəsi"
+msgstr "Номер строки в списке АТИС"
+
+msgctxt "student_intake"
+msgid "Bu adla qrup artıq var."
+msgstr "Группа с таким названием уже существует."
+
+msgctxt "student_intake"
+msgid "Bu şifrlə birdən çox ixtisas var — dəqiqləşdirin: %s"
+msgstr "С этим кодом есть более одной специальности — уточните: %s"
+
+msgctxt "student_intake"
+msgid "Məsələn 543,5"
+msgstr "Например 543,5"
+
+msgctxt "student_intake"
+msgid "Məsələn «I qrup»"
+msgstr "Например «I группа»"
+
+msgctxt "student_intake"
+msgid "Qrup avtomatik təklif olundu: %s — tətbiqdən əvvəl dəyişə bilərsiniz."
+msgstr "Группа предложена автоматически: %s — вы можете изменить её перед применением."
+
+msgctxt "student_intake"
+msgid "Qrupun adı boş ola bilməz."
+msgstr "Название группы не может быть пустым."
+
+msgctxt "student_intake"
+msgid "Qəbul balı"
+msgstr "Балл приёма"
+
+msgctxt "student_intake"
+msgid "Qəbul balı tanınmadı — boş saxlanılır."
+msgstr "Балл приёма не распознан — оставлен пустым."
+
+msgctxt "student_intake"
+msgid "Rəsmi şifr (NK 503) — qrup verilməyibsə MƏCBURİ"
+msgstr "Официальный код (NK 503) — ОБЯЗАТЕЛЕН, если группа не указана"
+
+msgctxt "student_intake"
+msgid "Təhsil forması"
+msgstr "Форма обучения"
+
+msgctxt "student_intake"
+msgid "Təhsil forması tanınmadı — «əyani» tətbiq olunur."
+msgstr "Форма обучения не распознана — применяется «очная»."
+
+msgctxt "student_intake"
+msgid "Təhsil haqqı"
+msgstr "Плата за обучение"
+
+msgctxt "student_intake"
+msgid "Təhsil haqqı sütunu tanınmadı — «ödənişli» tətbiq olunur."
+msgstr "Столбец платы за обучение не распознан — применяется «платное»."
+
+msgctxt "student_intake"
+msgid "Uyğun boş qrup tapılmadı — tətbiqdən əvvəl qrup seçin və ya yeni qrup yaradın."
+msgstr "Подходящая свободная группа не найдена — выберите группу или создайте новую перед применением."
+
+msgctxt "student_intake"
+msgid "dövlət sifarişi / ödənişli"
+msgstr "гособеспечение / платно"
+
+msgctxt "student_intake"
+msgid "İmtahan növü"
+msgstr "Форма оценивания"
+
+msgctxt "student_intake"
+msgid "İxtisas kodu"
+msgstr "Код специальности"
+
+msgctxt "student_intake"
+msgid "İxtisas kodu universitetdə tapılmadı"
+msgstr "Код специальности не найден в университете"
+
+msgctxt "student_intake"
+msgid "İxtisas tapılmadı."
+msgstr "Специальность не найдена."
+
+msgctxt "student_intake"
+msgid "əyani / qiyabi / distant"
+msgstr "очная / заочная / дистанционная"
+
+msgctxt "registrar.model.student_movement.meta"
+msgid "student movement"
+msgstr "движение студента"
+
+msgctxt "registrar.model.student_movement.meta"
+msgid "student movements"
+msgstr "движения студента"
+
+msgctxt "ui.dialog"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "ui.status"
+msgid "Ləğv edilib"
+msgstr "Отменено"
+
+msgctxt "ui.status"
+msgid "Məzun"
+msgstr "Выпускник"
+
+msgctxt "ui.status"
+msgid "Xaric edilib"
+msgstr "Отчислен(а)"
