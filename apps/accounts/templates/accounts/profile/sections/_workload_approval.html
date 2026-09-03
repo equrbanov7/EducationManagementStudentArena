@@ -1,0 +1,106 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 15 «Dekanlıq — Yük təsdiqi».
+
+İcazə: `workload.approve` (dekan, öz fakültəsi). Üç görünüş: təsdiq növbəsi ·
+fakültə yükü (yekun) · tarixçə.
+
+Dekan dilimi BÜTÖV təsdiqləyir, ya da SEÇİLMİŞ sətirləri səbəblə qaytarır
+(≥20 simvol, auditli, bildiriş TŞ-yə və kafedra rəhbərinə).
+⚠️ Fakültə yekunu SAXLANILMIR — kafedra sətirlərindən hesablanır (§8/13).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'workload-approval' in allowed_sections %}
+{% trans "Kafedraların yük paketlərini fakültə dilimi üzrə təsdiqləyin və ya səbəblə qaytarın." context "accounts.workload_approval" as wa_subtitle %}
+{% trans "Seçilmiş sətirləri qaytar" context "accounts.workload_approval" as wa_return_title %}
+{% trans "Qaytarma səbəbi tədris şöbəsinə və kafedra rəhbərinə bildiriş kimi gedir və audit jurnalına yazılır." context "accounts.workload_approval" as wa_return_sub %}
+{% trans "Qaytar" context "accounts.workload_approval" as wa_return_btn %}
+{% trans "Qaytarma səbəbi" context "accounts.workload_approval" as wa_return_label %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'workload-approval' %}is-active{% endif %}"
+         data-profile-section-panel="workload-approval"
+         data-source-url="{{ profile_base_url }}?section=workload-approval">
+
+{% if not workload_approval_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=workload_approval_section.access_denied_message %}
+{% else %}
+<div class="tof wl-chain"
+     data-tof-root data-tof-bulk data-tof-bulk-target
+     data-tof-section="workload-approval"
+     data-tof-action-url="{{ workload_approval_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=wa_subtitle header_actions_include="accounts/profile/sections/workload/_approval_header_actions.html" %}
+
+    {% trans "Təsdiq görünüşləri" context "accounts.workload_approval" as wa_tabs_label %}
+    {% include "partials/ems_ui/_tabs.html" with tabs=workload_approval_section.view_tabs tabs_label=wa_tabs_label %}
+
+    {% if workload_approval_section.is_archive %}
+        {% trans "Arxiv rejimi" context "accounts.workload_approval" as wa_arch %}
+        {% trans "Keçmiş tədris ili yalnız oxunuş üçün açıqdır." context "accounts.workload_approval" as wa_arch_body %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wa_arch banner_body=wa_arch_body %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_approval_section.kpi_tiles %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-approval" filter_prefix="wa_" filter_fields=workload_approval_section.filter_fields filter_count_label=workload_approval_section.filter_count_label %}
+
+    {% if workload_approval_section.view == "summary" %}
+        <h3 class="tof-pane__title">{% trans "Kafedralar üzrə yekun" context "accounts.workload_approval" %}</h3>
+        <table class="ems-table ems-table--zebra">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Kafedra" context "accounts.workload_approval" %}</th>
+                    <th scope="col">{% trans "İxtisas" context "accounts.workload_approval" %}</th>
+                    <th scope="col">{% trans "Sətir" context "accounts.workload_approval" %}</th>
+                    <th scope="col">{% trans "Saat" context "accounts.workload_approval" %}</th>
+                    <th scope="col">{% trans "Kredit" context "accounts.workload_approval" %}</th>
+                    <th scope="col">{% trans "Status" context "accounts.workload_approval" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in workload_approval_section.summary %}
+                <tr>
+                    <th scope="row">{{ item.chair }}</th>
+                    <td class="ems-table__num">{{ item.specialties }}</td>
+                    <td class="ems-table__num">{{ item.rows }}</td>
+                    <td class="ems-table__num">{{ item.hours }}</td>
+                    <td class="ems-table__num">{{ item.credits }}</td>
+                    <td>{% ems_status_badge "workload_task" item.status %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">{% trans "Bu fakültə üçün sətir yoxdur." context "accounts.workload_approval" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% elif workload_approval_section.view == "history" %}
+        <h3 class="tof-pane__title">{% trans "Hərəkət jurnalı" context "accounts.workload_approval" %}</h3>
+        {% trans "Dilim qərarlarının tarixçəsi" context "accounts.workload_approval" as wa_tl_label %}
+        {% if workload_approval_section.timeline %}
+            {% include "partials/ems_ui/_timeline.html" with timeline=workload_approval_section.timeline timeline_label=wa_tl_label %}
+        {% else %}
+            {% trans "Hələ qərar verilməyib" context "accounts.workload_approval" as wa_notl %}
+            {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-clock-rotate-left" state_title=wa_notl %}
+        {% endif %}
+
+    {% else %}
+        {% if workload_approval_section.slice %}
+        <div class="wl-taskbar">
+            <div>
+                <span class="wl-taskbar__chair">{{ workload_approval_section.slice.chair }}</span>
+                {% ems_status_badge "workload_line" workload_approval_section.slice.status_key|default:"sent" %}
+            </div>
+            <div class="wl-taskbar__count" data-tof-bulk-count
+                 data-tof-bulk-empty="{% trans 'Sətir seçilməyib' context 'accounts.workload_approval' %}"
+                 data-tof-bulk-selected="{% trans '%d sətir seçilib' context 'accounts.workload_approval' %}">{% trans "Sətir seçilməyib" context "accounts.workload_approval" %}</div>
+        </div>
+        {% endif %}
+        {% include "partials/ems_ui/_data_table.html" with table_columns=workload_approval_section.columns table_rows=workload_approval_section.table_rows table_state=workload_approval_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-stamp" state_title=workload_approval_section.state_title state_body=workload_approval_section.state_body %}
+    {% endif %}
+
+    {% if workload_approval_section.can_decide %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="wlReturnDialog" reason_title=wa_return_title reason_subtitle=wa_return_sub reason_label=wa_return_label reason_submit_label=wa_return_btn reason_submit_tone="danger" reason_action=workload_approval_section.action_url reason_hidden=workload_approval_section.reason_hidden reason_form_data=workload_approval_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

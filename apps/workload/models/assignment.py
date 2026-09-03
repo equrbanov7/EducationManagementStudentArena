@@ -96,6 +96,10 @@ class TeacherWorkloadProfile(UUIDModel, TimeStampedModel):
     )
     annual_norm_hours = models.PositiveIntegerField(default=DEFAULT_ANNUAL_NORM_HOURS)
     is_external = models.BooleanField(default=False, help_text="Kənar (saathesabı) müəllim.")
+    # Ekran 16 «Təsdiq / etiraz»: müəllimin illik yükü təsdiqləməsi. Etiraz
+    # AYRI reyestrdədir (`LoadObjection`) — təsdiq isə bir bayraqdır, çünki
+    # ildə bir dəfə verilir və tarixçəsi `core.audit`-dədir.
+    load_confirmed_at = models.DateTimeField(null=True, blank=True)
     note = models.TextField(blank=True)
 
     class Meta:

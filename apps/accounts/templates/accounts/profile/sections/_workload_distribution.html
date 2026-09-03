@@ -24,6 +24,9 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
 {% else %}
 <div class="wl"
      data-wl-root
+     data-tof-root
+     data-tof-section="workload-distribution"
+     data-tof-action-url="{{ workload_distribution_section.action_url }}"
      data-rows-url="{{ workload_distribution_section.rows_url }}"
      data-task-url="{{ workload_distribution_section.task_url }}"
      data-save-row-url="{{ workload_distribution_section.save_row_url }}"
@@ -39,6 +42,15 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
      data-academic-year="{{ workload_distribution_section.academic_year }}"
      data-can-manage="{% if workload_distribution_section.can_manage %}1{% else %}0{% endif %}"
      data-can-distribute="{% if workload_distribution_section.can_distribute %}1{% else %}0{% endif %}">
+
+  {% comment %}Zəncir qapısı (plan §2/14): göndərilmiş, lakin dekanlıq
+  təsdiqindən keçməmiş tapşırıqda bölgü BAĞLIDIR — server də eyni qərarı
+  verir (`workload.not_approved_yet`).{% endcomment %}
+  {% if workload_distribution_section.task.is_chain_blocked %}
+    {% trans "Tapşırıq dekanlıq təsdiqini gözləyir" context "accounts.workload" as wl_chain_title %}
+    {% trans "Bölgü yalnız fakültə dilimlərinin hamısı təsdiqləndikdən sonra açılır." context "accounts.workload" as wl_chain_body %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wl_chain_title banner_body=wl_chain_body %}
+  {% endif %}
 
   {% comment %}Kataloqlar (fəaliyyət/fəsil/forma/səviyyə/səbəb) JSON blokla
   ötürülür — xarici JS Django template engine-dən keçmir (bax CLAUDE.md).{% endcomment %}
@@ -288,6 +300,39 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
       </div>
     </div>
   </div>
+
+  {# ══ MÜƏLLİM ETİRAZLARI (ekran 16 → 14 zənciri) ═════════════════════ #}
+  {% if workload_distribution_section.objections %}
+  <section class="wl-panel" aria-labelledby="wl-objections-title">
+    <h3 class="wl-panel__title" id="wl-objections-title">{% trans "Müəllim etirazları" context "accounts.workload" %}</h3>
+    <p class="wl-amend__hint">{% trans "Etiraz bölgünü dayandırmır — sətri yenidən bölün və ya etirazı qərarla bağlayın (qərar audit jurnalına yazılır)." context "accounts.workload" %}</p>
+    <ul class="wl-objections">
+      {% for item in workload_distribution_section.objections %}
+      <li class="wl-objection {% if not item.is_open %}wl-objection--closed{% endif %}">
+        <div class="wl-objection__head">
+          <span>{{ item.teacher }} — {{ item.subject }}</span>
+          <span>{{ item.status_label }}</span>
+        </div>
+        <div>{{ item.reason_label }}: {{ item.text }}</div>
+        {% if item.is_open and workload_distribution_section.can_distribute %}
+        <div class="wl-actions">
+          <button type="button" class="wl-btn wl-btn--ghost"
+                  data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "rejected"}'
+                  data-tof-confirm="{% trans 'Etiraz rədd edilsin?' context 'accounts.workload' %}">
+            {% trans "Rədd et" context "accounts.workload" %}
+          </button>
+          <button type="button" class="wl-btn wl-btn--primary"
+                  data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "accepted"}'
+                  data-tof-confirm="{% trans 'Etiraz qəbul edilsin? Sətri yenidən bölməyi unutmayın.' context 'accounts.workload' %}">
+            {% trans "Qəbul et" context "accounts.workload" %}
+          </button>
+        </div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
 
   {# ══ MODAL — təsdiqdən sonrakı düzəliş ══════════════════════════════ #}
   <div class="modal fade wl-modal" id="wlAmendModal" tabindex="-1" aria-hidden="true" data-wl-amend-modal>

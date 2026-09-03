@@ -1,0 +1,109 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 12 «Dərs yükü mərkəzi» — tədris şöbəsi.
+
+Beş görünüş: idarə paneli · tapşırıqlar (redaktor + izləmə) · Excel import ·
+hesabatlar (boş) · parametrlər (boş). Sonuncu ikisi QƏSDƏN boşdur — handoff
+onları belə saxlayır.
+
+İcazə: `workload.manage` (oxu/redaktə), `workload.submit` (dekanlıqlara göndər).
+Arxiv: keçmiş tədris ili yalnız oxunuş — yazma düymələri render OLUNMUR.
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'workload-center' in allowed_sections %}
+{% trans "İlin tapşırıq sətirlərini yaradın, kafedralara paylayın, plandan və ya Excel-dən gətirin, dekanlıq təsdiqini izləyin." context "accounts.workload_center" as wc_subtitle %}
+{% trans "Yeni tapşırıq" context "accounts.workload_center" as wc_new_title %}
+{% trans "Kafedra üçün seçilmiş tədris ilinin sənədi yaradılır (kafedraya ildə bir sənəd)." context "accounts.workload_center" as wc_new_sub %}
+{% trans "Tapşırıq yarat" context "accounts.workload_center" as wc_new_btn %}
+{% trans "Tədris planından gətir" context "accounts.workload_center" as wc_gen_title %}
+{% trans "Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından sətirlər yaradılır. Əməl idempotentdir — mövcud sətir təkrarlanmır və heç nə əzilmir." context "accounts.workload_center" as wc_gen_sub %}
+{% trans "Sətirləri gətir" context "accounts.workload_center" as wc_gen_btn %}
+{% trans "Excel faylı yüklə" context "accounts.workload_center" as wc_imp_title %}
+{% trans "Rəsmi TAPŞIRIQ şablonu (.xlsx / .xlsm, ≤10 MB). Kataloqda tapılmayan fənn və qruplar MƏTN kimi saxlanılır və sonradan bağlana bilər." context "accounts.workload_center" as wc_imp_sub %}
+{% trans "Faylı oxu" context "accounts.workload_center" as wc_imp_btn %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'workload-center' %}is-active{% endif %}"
+         data-profile-section-panel="workload-center"
+         data-source-url="{{ profile_base_url }}?section=workload-center">
+
+{% if not workload_center_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=workload_center_section.access_denied_message %}
+{% else %}
+<div class="tof wl-chain"
+     data-tof-root
+     data-tof-section="workload-center"
+     data-tof-action-url="{{ workload_center_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=wc_subtitle header_note=workload_center_section.archive_note header_actions_include="accounts/profile/sections/workload/_center_header_actions.html" %}
+
+    {% trans "Dərs yükü mərkəzinin görünüşləri" context "accounts.workload_center" as wc_tabs_label %}
+    {% include "partials/ems_ui/_tabs.html" with tabs=workload_center_section.view_tabs tabs_label=wc_tabs_label %}
+
+    {% if workload_center_section.is_archive %}
+        {% trans "Arxiv rejimi" context "accounts.workload_center" as wc_arch_title %}
+        {% trans "Keçmiş tədris ili yalnız oxunuş üçün açıqdır — yazma əməlləri bağlıdır." context "accounts.workload_center" as wc_arch_body %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wc_arch_title banner_body=wc_arch_body %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-center" filter_prefix="wc_" filter_fields=workload_center_section.filter_fields filter_count_label=workload_center_section.filter_count_label %}
+
+    {% if workload_center_section.view == "dashboard" %}
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_center_section.kpi_tiles %}
+        <h3 class="tof-pane__title">{% trans "Kafedra tapşırıqları" context "accounts.workload_center" %}</h3>
+        <div class="wl-cards">
+            {% for card in workload_center_section.cards %}
+            <article class="wl-card">
+                <div class="wl-card__head">
+                    <a class="wl-card__name" href="{{ card.open_url }}">{{ card.name }}</a>
+                    {% ems_status_badge "workload_task" card.status_key %}
+                </div>
+                <p class="wl-card__meta">{{ card.faculty_name|default:"—" }}</p>
+                <div class="wl-card__stats">
+                    <span><b>{{ card.total_hours }}</b> {% trans "saat" context "accounts.workload_center" %}</span>
+                    <span><b>{{ card.credits }}</b> {% trans "kr" context "accounts.workload_center" %}</span>
+                    <span><b>{{ card.row_count }}</b> {% trans "sətir" context "accounts.workload_center" %}</span>
+                </div>
+                <div class="wl-card__split">
+                    <span>{% trans "Payız" context "accounts.workload_center" %} {{ card.fall_hours }}</span>
+                    <span>{% trans "Yaz" context "accounts.workload_center" %} {{ card.spring_hours }}</span>
+                </div>
+                <a class="ems-btn ems-btn--sm" href="{{ card.open_url }}">{% trans "Bax" context "accounts.workload_center" %}</a>
+            </article>
+            {% empty %}
+                {% trans "Kafedra tapılmadı" context "accounts.workload_center" as wc_nocard %}
+                {% trans "Seçilmiş filtrlərə uyğun kafedra yoxdur — «Sıfırla» ilə filtrləri təmizləyin." context "accounts.workload_center" as wc_nocard_body %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=wc_nocard state_body=wc_nocard_body %}
+            {% endfor %}
+        </div>
+
+    {% elif workload_center_section.view == "tasks" %}
+        {% trans "Tapşırıq görünüşləri" context "accounts.workload_center" as wc_inner_label %}
+        {% include "partials/ems_ui/_tabs.html" with tabs=workload_center_section.inner_tabs tabs_label=wc_inner_label %}
+
+        {% if not workload_center_section.task %}
+            {% trans "Tapşırıq yoxdur" context "accounts.workload_center" as wc_notask %}
+            {% trans "Seçilmiş kafedra və tədris ili üçün sənəd yaradılmayıb — «Yeni tapşırıq»." context "accounts.workload_center" as wc_notask_body %}
+            {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-file-lines" state_title=wc_notask state_body=wc_notask_body %}
+        {% elif workload_center_section.tab == "tracking" %}
+            {% include "accounts/profile/sections/workload/_center_tracking.html" %}
+        {% else %}
+            {% include "accounts/profile/sections/workload/_center_editor.html" %}
+        {% endif %}
+
+    {% elif workload_center_section.view == "import" %}
+        {% include "accounts/profile/sections/workload/_center_import.html" %}
+
+    {% else %}
+        {% trans "Bu bölmədə hələ məlumat yoxdur" context "accounts.workload_center" as wc_empty %}
+        {% trans "Tapşırıq dövriyyəsi başlayandan sonra buradakı hesabatlar avtomatik dolacaq." context "accounts.workload_center" as wc_empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-chart-column" state_title=wc_empty state_body=wc_empty_body %}
+    {% endif %}
+
+    {% if not workload_center_section.is_archive %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="wlTaskDialog" form_dialog_title=wc_new_title form_dialog_subtitle=wc_new_sub form_dialog_submit_label=wc_new_btn form_dialog_body_include="accounts/profile/sections/workload/_task_fields.html" form_dialog_action=workload_center_section.action_url form_dialog_hidden=workload_center_section.dialog_hidden form_dialog_data=workload_center_section.form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="wlGenerateDialog" form_dialog_title=wc_gen_title form_dialog_subtitle=wc_gen_sub form_dialog_wide=True form_dialog_submit_label=wc_gen_btn form_dialog_body_include="accounts/profile/sections/workload/_generate_fields.html" form_dialog_action=workload_center_section.action_url form_dialog_hidden=workload_center_section.dialog_hidden form_dialog_data=workload_center_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

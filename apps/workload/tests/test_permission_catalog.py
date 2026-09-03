@@ -13,6 +13,7 @@ from apps.workload.constants import (
     PERM_APPROVE,
     PERM_DISTRIBUTE,
     PERM_MANAGE,
+    PERM_OBJECT,
     PERM_REPORT,
     PERM_REVIEW,
     PERM_SUBMIT,
@@ -27,6 +28,7 @@ _MODULE_KEYS = (
     PERM_APPROVE,
     PERM_DISTRIBUTE,
     PERM_REPORT,
+    PERM_OBJECT,
 )
 
 
@@ -49,7 +51,7 @@ class WorkloadPermissionCatalogTest(TestCase):
         self.assertTrue(validate_permissions(["workload.*"]))
 
     def test_default_roles_carry_the_expected_split(self):
-        """Kafedra müdiri bölür, müəllim yalnız baxır, dekan təsdiqləmir."""
+        """Kafedra müdiri bölür, müəllim yalnız baxır+etiraz edir, dekan bölmür."""
         from apps.organizations.default_roles_university import UNIVERSITY_ROLES
 
         roles = {role["name"]: set(role["permissions"]) for role in UNIVERSITY_ROLES}
@@ -60,8 +62,32 @@ class WorkloadPermissionCatalogTest(TestCase):
         self.assertNotIn(PERM_MANAGE, roles["teacher"])
         self.assertIn(PERM_VIEW, roles["dean"])
         self.assertNotIn(PERM_DISTRIBUTE, roles["dean"])
-        # F2 hələ yoxdur — heç bir default rol `workload.approve` AÇIQ daşımır.
-        for name, permissions in roles.items():
-            if "*" in permissions or "workload.*" in permissions:
-                continue
-            self.assertNotIn(PERM_APPROVE, permissions, f"{name} rolunda approve açarı var")
+
+    def test_stage4_chain_is_split_across_roles(self):
+        """Zəncirin dörd halqası dörd AYRI rolda (səlahiyyət ayrılığı).
+
+        Mərhələ 4-ə qədər `workload.approve` heç bir rolda AÇIQ deyildi (F2
+        yox idi); indi o, YALNIZ dekandadır və dekanda `submit`/`distribute`
+        YOXDUR — yəni bir nəfər zənciri təkbaşına keçirə bilmir.
+        """
+        from apps.organizations.default_roles_university import UNIVERSITY_ROLES
+
+        roles = {role["name"]: set(role["permissions"]) for role in UNIVERSITY_ROLES}
+        operators = {name for name, perms in roles.items() if "*" in perms or "workload.*" in perms}
+
+        self.assertIn(PERM_SUBMIT, roles["teaching_office_head"])
+        self.assertNotIn(PERM_APPROVE, roles["teaching_office_head"])
+        self.assertNotIn(PERM_DISTRIBUTE, roles["teaching_office_head"])
+
+        self.assertIn(PERM_REVIEW, roles["program_coordinator"])
+        self.assertNotIn(PERM_APPROVE, roles["program_coordinator"])
+
+        self.assertIn(PERM_APPROVE, roles["dean"])
+        self.assertNotIn(PERM_SUBMIT, roles["dean"])
+
+        self.assertIn(PERM_OBJECT, roles["teacher"])
+        self.assertNotIn(PERM_APPROVE, roles["teacher"])
+
+        # `approve` açarı YALNIZ dekanda (+ operator rolları) açıqdır.
+        holders = {name for name, permissions in roles.items() if PERM_APPROVE in permissions and name not in operators}
+        self.assertEqual(holders, {"dean"}, f"gözlənilməz approve daşıyıcıları: {holders}")

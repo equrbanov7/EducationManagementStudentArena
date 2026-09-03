@@ -1,0 +1,79 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 17 «Rektor — Ümumi baxış» — YALNIZ OXU.
+
+İcazə: `workload.report` (rektor, prorektor, RİM, tədris şöbəsinin rəhbəri).
+
+⚠️ SƏTİR SƏVİYYƏSİNDƏ REDAKTƏ YOXDUR — heç bir əməl düyməsi render olunmur.
+⚠️ Bütün rəqəmlər AŞAĞIDAN YUXARI hesablanır (kafedra → fakültə → universitet)
+   və heç bir cədvəldə SAXLANILMIR (handoff §8 qayda 13).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'workload-overview' in allowed_sections %}
+{% trans "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin universitet üzrə vəziyyəti." context "accounts.workload_overview" as wo_subtitle %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'workload-overview' %}is-active{% endif %}"
+         data-profile-section-panel="workload-overview"
+         data-source-url="{{ profile_base_url }}?section=workload-overview">
+
+{% if not workload_overview_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=workload_overview_section.access_denied_message %}
+{% else %}
+<div class="tof wl-chain" data-tof-root data-tof-section="workload-overview">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=wo_subtitle %}
+
+    {% trans "Ümumi baxışın görünüşləri" context "accounts.workload_overview" as wo_tabs_label %}
+    {% include "partials/ems_ui/_tabs.html" with tabs=workload_overview_section.view_tabs tabs_label=wo_tabs_label %}
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_overview_section.kpi_tiles %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-overview" filter_prefix="wo_" filter_fields=workload_overview_section.filter_fields filter_count_label=workload_overview_section.filter_count_label %}
+
+    {% if workload_overview_section.view == "rep" %}
+        {% trans "Bu bölmədə hələ məlumat yoxdur" context "accounts.workload_overview" as wo_empty %}
+        {% trans "Elmi Şura və nazirlik formatında hazır hesabatlar növbəti mərhələdə əlavə olunacaq." context "accounts.workload_overview" as wo_empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-file-pdf" state_title=wo_empty state_body=wo_empty_body %}
+
+    {% elif workload_overview_section.view == "fac" %}
+        <h3 class="tof-pane__title">{% trans "Fakültələr üzrə yük mənzərəsi" context "accounts.workload_overview" %}</h3>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=workload_overview_section.faculty_columns table_rows=workload_overview_section.faculty_rows table_state=workload_overview_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-building-columns" state_title=workload_overview_section.state_title state_body=workload_overview_section.state_body %}
+
+    {% elif workload_overview_section.view == "dep" %}
+        <h3 class="tof-pane__title">{% trans "Kafedra bölgüsünün vəziyyəti" context "accounts.workload_overview" %}</h3>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=workload_overview_section.chair_columns table_rows=workload_overview_section.chair_rows table_state=workload_overview_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-sitemap" state_title=workload_overview_section.state_title state_body=workload_overview_section.state_body %}
+
+    {% else %}
+        <div class="tof-split">
+            <div class="tof-pane">
+                <h3 class="tof-pane__title">{% trans "Təsdiq axını" context "accounts.workload_overview" %}</h3>
+                <ul class="wl-flow">
+                    {% for item in workload_overview_section.status_map %}
+                    <li class="wl-flow__item">
+                        {% ems_status_badge "workload_task" item.key %}
+                        <span class="wl-flow__count">{{ item.count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="tof-pane">
+                <h3 class="tof-pane__title">{% trans "Diqqət tələb edən kafedralar" context "accounts.workload_overview" %}</h3>
+                <ul class="wl-risk">
+                    {% for row in workload_overview_section.risky %}
+                    <li class="wl-risk__item">
+                        <span class="wl-risk__name">{{ row.name }}</span>
+                        <span class="wl-risk__meta">{{ row.percent }}% · {% blocktrans context "accounts.workload_overview" with n=row.vacant_hours %}{{ n }} vakant saat{% endblocktrans %}</span>
+                        {% ems_status_badge "load_band" row.band %}
+                    </li>
+                    {% empty %}
+                    <li class="wl-risk__item">{% trans "Risk siqnalı yoxdur." context "accounts.workload_overview" %}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <h3 class="tof-pane__title">{% trans "Fakültələr üzrə bölgü" context "accounts.workload_overview" %}</h3>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=workload_overview_section.faculty_columns table_rows=workload_overview_section.faculty_rows table_state=workload_overview_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-building-columns" state_title=workload_overview_section.state_title state_body=workload_overview_section.state_body %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}
