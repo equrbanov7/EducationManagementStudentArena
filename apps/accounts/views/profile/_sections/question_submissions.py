@@ -16,7 +16,15 @@ from django.utils.translation import pgettext
 
 PAGE_SIZE = 10
 
-_STATUS_VALUES = ("pending", "accepted", "rejected")
+# Status FİLTRLƏRİ artıq QRUPLARDIR: yeni zəncirdə (müəllim → kafedra → mərkəz)
+# bir kartın arxasında bir neçə texniki status dayanır.  Açar → status siyahısı.
+_STATUS_GROUPS = {
+    "at_chair": ("submitted_to_chair",),
+    "at_center": ("chair_approved", "center_review"),
+    "accepted": ("accepted",),
+    "returned": ("chair_revision", "center_revision", "rejected"),
+}
+_STATUS_VALUES = tuple(_STATUS_GROUPS)
 
 # Reviewer filtr açarları → GET parametr adları.
 _FILTER_PARAMS = {
@@ -36,6 +44,7 @@ def _inactive_defaults() -> dict:
         "question_submissions_is_reviewer": False,
         "question_submissions_total_count": 0,
         "question_submissions_pending_count": 0,
+        "question_submissions_chair_count": 0,
         "question_submissions_accepted_count": 0,
         "question_submissions_rejected_count": 0,
         "question_submissions_create_url": "",
@@ -121,9 +130,14 @@ def _status_cards(counts, filters, active_params, *, is_reviewer: bool) -> list:
     rejected_label = pgettext(ctx, "Rədd edilmiş") if is_reviewer else pgettext(ctx, "Düzəliş gözləyən")
     cards = [
         ("", pgettext(ctx, "Ümumi göndəriş"), counts["total"], "fa-paper-plane", "blue"),
-        ("pending", pgettext(ctx, "Baxılır"), counts["pending"], "fa-hourglass-half", "amber"),
+    ]
+    if not is_reviewer:
+        # Müəllim zəncirin HƏR İKİ dayanacağını ayrıca görür.
+        cards.append(("at_chair", pgettext(ctx, "Kafedrada"), counts["at_chair"], "fa-user-tie", "amber"))
+    cards += [
+        ("at_center", pgettext(ctx, "Baxılır"), counts["at_center"], "fa-hourglass-half", "amber"),
         ("accepted", pgettext(ctx, "Qəbul edilmiş"), counts["accepted"], "fa-check", "green"),
-        ("rejected", rejected_label, counts["rejected"], "fa-rotate-left", "red"),
+        ("returned", rejected_label, counts["returned"], "fa-rotate-left", "red"),
     ]
     result = []
     for status, label, value, icon, tone in cards:
@@ -197,15 +211,20 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
 
     is_reviewer = is_exam_center_user(request.user)
     scoped = QuestionSubmission.objects.filter(organization=organization)
-    if not is_reviewer:
+    if is_reviewer:
+        # MƏRKƏZ YALNIZ kafedra təsdiqindən keçmiş göndərişləri görür — kafedrada
+        # gözləyən/qaytarılan dəst mərkəz üçün MÖVCUD DEYİL (fail-closed).
+        scoped = scoped.filter(reached_center_at__isnull=False)
+    else:
         scoped = scoped.filter(teacher=request.user)
 
     # Stat kartlar üçün saylar — filtrsiz skop, TƏK aqreqat sorğu.
     counts = scoped.aggregate(
         total=Count("id"),
-        pending=Count("id", filter=Q(status=QuestionSubmission.STATUS_PENDING)),
-        accepted=Count("id", filter=Q(status=QuestionSubmission.STATUS_ACCEPTED)),
-        rejected=Count("id", filter=Q(status=QuestionSubmission.STATUS_REJECTED)),
+        at_chair=Count("id", filter=Q(status__in=_STATUS_GROUPS["at_chair"])),
+        at_center=Count("id", filter=Q(status__in=_STATUS_GROUPS["at_center"])),
+        accepted=Count("id", filter=Q(status__in=_STATUS_GROUPS["accepted"])),
+        returned=Count("id", filter=Q(status__in=_STATUS_GROUPS["returned"])),
     )
 
     filters = _read_filters(request, is_reviewer=is_reviewer)
@@ -247,7 +266,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     # ── Siyahı queryset-i: axtarış + status + reviewer filtrləri ──
     filtered = scoped
     if filters["status"]:
-        filtered = filtered.filter(status=filters["status"])
+        filtered = filtered.filter(status__in=_STATUS_GROUPS[filters["status"]])
     if filters["q"]:
         condition = (
             Q(title__icontains=filters["q"])
@@ -266,7 +285,13 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
             filtered, filters, faculty=faculty, kafedra=kafedra, periods=periods, year_periods=year_periods
         )
 
-    filtered = filtered.select_related("teacher", "accepted_bank").distinct().order_by("-created_at", "-id")
+    filtered = (
+        filtered.select_related("teacher", "accepted_bank", "chair_unit", "chair_reviewer")
+        # Sətir-daxili «yol» draweri hadisə lentini göstərir — N+1 olmasın.
+        .prefetch_related("events__actor")
+        .distinct()
+        .order_by("-created_at", "-id")
+    )
     page = Paginator(filtered, PAGE_SIZE).get_page(request.GET.get("qsub_page"))
 
     # ── Query string-lər: aktiv parametrlər (page-siz) ──
@@ -280,10 +305,11 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         "question_submissions_page": page,
         "question_submissions_is_reviewer": is_reviewer,
         "question_submissions_total_count": counts["total"] or 0,
-        "question_submissions_pending_count": counts["pending"] or 0,
+        "question_submissions_pending_count": counts["at_center"] or 0,
+        "question_submissions_chair_count": counts["at_chair"] or 0,
         "question_submissions_accepted_count": counts["accepted"] or 0,
         # Müəllim üçün "düzəliş gözləyən", mərkəz üçün "rədd edilmiş" mənasında.
-        "question_submissions_rejected_count": counts["rejected"] or 0,
+        "question_submissions_rejected_count": counts["returned"] or 0,
         "question_submissions_create_url": reverse("exams:question_submission_create"),
         "question_submissions_search": filters["q"],
         "question_submissions_status": filters["status"],

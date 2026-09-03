@@ -1,0 +1,28 @@
+{% comment %}
+Drawer — handoff §4 komponent 7 (720–940px, sağdan, role=dialog aria-modal).
+Davranış `ems_ui/overlay.js`-dədir (fokus tələsi, Escape, fokusun qayıtması).
+
+KONTEKST MÜQAVİLƏSİ
+  drawer_id, drawer_title, drawer_subtitle
+  drawer_body_include — məcburi
+  drawer_foot_include — opsional
+  drawer_xl           — 940px variant
+{% endcomment %}
+{% load i18n %}
+<div class="ems-overlay ems-overlay--drawer" id="{{ drawer_id }}" hidden>
+    <div class="ems-drawer{% if drawer_xl %} ems-drawer--xl{% endif %}"
+         role="dialog" aria-modal="true" aria-labelledby="{{ drawer_id }}-title">
+        <div class="ems-drawer__head">
+            <div>
+                <h2 class="ems-drawer__title" id="{{ drawer_id }}-title">{{ drawer_title }}</h2>
+                {% if drawer_subtitle %}<p class="ems-drawer__sub">{{ drawer_subtitle }}</p>{% endif %}
+            </div>
+            <button type="button" class="ems-drawer__x" data-ems-overlay-close
+                    aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-drawer__body">{% include drawer_body_include %}</div>
+        {% if drawer_foot_include %}
+            <div class="ems-drawer__foot">{% include drawer_foot_include %}</div>
+        {% endif %}
+    </div>
+</div>

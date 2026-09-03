@@ -59229,3 +59229,919 @@ msgstr "Tələbə"
 msgctxt "roles.org_display_name"
 msgid "Üzv"
 msgstr "Üzv"
+
+msgctxt "ui.status"
+msgid "Naməlum"
+msgstr "Naməlum"
+
+msgctxt "ui.status"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "ui.status"
+msgid "Təsdiq gözləyir"
+msgstr "Təsdiq gözləyir"
+
+msgctxt "ui.status"
+msgid "Təsdiqlənib"
+msgstr "Təsdiqlənib"
+
+msgctxt "ui.status"
+msgid "Düzəliş gözləyir"
+msgstr "Düzəliş gözləyir"
+
+msgctxt "ui.status"
+msgid "Rədd edilib"
+msgstr "Rədd edilib"
+
+msgctxt "ui.status"
+msgid "Kilidlənib"
+msgstr "Kilidlənib"
+
+msgctxt "ui.status"
+msgid "Düzəliş tələb olunur"
+msgstr "Düzəliş tələb olunur"
+
+msgctxt "ui.status"
+msgid "Təqdim edilib"
+msgstr "Təqdim edilib"
+
+msgctxt "ui.status"
+msgid "Baxışdadır"
+msgstr "Baxışdadır"
+
+msgctxt "ui.status"
+msgid "Arxivlənib"
+msgstr "Arxivlənib"
+
+msgctxt "ui.status"
+msgid "Kafedra qeydlərini nəzərə alıb yenidən göndər"
+msgstr "Kafedra qeydlərini nəzərə alıb yenidən göndər"
+
+msgctxt "ui.status"
+msgid "Rədd səbəbini oxuyub yeni versiya yarat"
+msgstr "Rədd səbəbini oxuyub yeni versiya yarat"
+
+msgctxt "ui.status"
+msgid "Qaralamanı tamamlayıb təsdiqə göndər"
+msgstr "Qaralamanı tamamlayıb təsdiqə göndər"
+
+msgctxt "ui.status"
+msgid "Kafedra müdirinin baxışı gözlənilir"
+msgstr "Kafedra müdirinin baxışı gözlənilir"
+
+msgctxt "ui.status"
+msgid "Baxış nəticəsi gözlənilir"
+msgstr "Baxış nəticəsi gözlənilir"
+
+msgctxt "ui.status"
+msgid "Əməl tələb olunmur — versiya kilidlidir"
+msgstr "Əməl tələb olunmur — versiya kilidlidir"
+
+msgctxt "ui.status"
+msgid "Arxiv qeydi — yalnız baxış"
+msgstr "Arxiv qeydi — yalnız baxış"
+
+msgctxt "ui.status"
+msgid "Göndərilib"
+msgstr "Göndərilib"
+
+msgctxt "ui.status"
+msgid "Qaytarılıb"
+msgstr "Qaytarılıb"
+
+msgctxt "ui.status"
+msgid "Gözləyir"
+msgstr "Gözləyir"
+
+msgctxt "ui.status"
+msgid "Baxılıb"
+msgstr "Baxılıb"
+
+msgctxt "ui.status"
+msgid "İradlı"
+msgstr "İradlı"
+
+msgctxt "ui.status"
+msgid "Normadan az (< 90%)"
+msgstr "Normadan az (< 90%)"
+
+msgctxt "ui.status"
+msgid "Normada (90–105%)"
+msgstr "Normada (90–105%)"
+
+msgctxt "ui.status"
+msgid "Norma üstü (105–125%)"
+msgstr "Norma üstü (105–125%)"
+
+msgctxt "ui.status"
+msgid "Kritik yüklü (> 125%)"
+msgstr "Kritik yüklü (> 125%)"
+
+msgctxt "ui.status"
+msgid "normadan az"
+msgstr "normadan az"
+
+msgctxt "ui.status"
+msgid "normada"
+msgstr "normada"
+
+msgctxt "ui.status"
+msgid "normadan artıq"
+msgstr "normadan artıq"
+
+msgctxt "ui.status"
+msgid "boş tutum"
+msgstr "boş tutum"
+
+msgctxt "ui.status"
+msgid "yüklü"
+msgstr "yüklü"
+
+msgctxt "ui.status"
+msgid "risk"
+msgstr "risk"
+
+msgctxt "ui.status"
+msgid "Saat sayı düz deyil"
+msgstr "Saat sayı düz deyil"
+
+msgctxt "ui.status"
+msgid "Qrup/tələbə sayı səhvdir"
+msgstr "Qrup/tələbə sayı səhvdir"
+
+msgctxt "ui.status"
+msgid "Fənn ixtisasım deyil"
+msgstr "Fənn ixtisasım deyil"
+
+msgctxt "ui.status"
+msgid "Norma həddindən artıqdır"
+msgstr "Norma həddindən artıqdır"
+
+msgctxt "ui.status"
+msgid "Kafedra baxışı"
+msgstr "Kafedra baxışı"
+
+msgctxt "ui.status"
+msgid "Fakültə şurası"
+msgstr "Fakültə şurası"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi"
+msgstr "Tədris şöbəsi"
+
+msgctxt "ui.status"
+msgid "Müəllim gözləyir"
+msgstr "Müəllim gözləyir"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olunub"
+msgstr "Müəllim təyin olunub"
+
+msgctxt "ui.status"
+msgid "Jurnalı açılıb"
+msgstr "Jurnalı açılıb"
+
+msgctxt "ui.status"
+msgid "Plandan açılış yaradıldı"
+msgstr "Plandan açılış yaradıldı"
+
+msgctxt "ui.status"
+msgid "Kafedraya göndərildi"
+msgstr "Kafedraya göndərildi"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olundu"
+msgstr "Müəllim təyin olundu"
+
+msgctxt "ui.status"
+msgid "Jurnal açıldı"
+msgstr "Jurnal açıldı"
+
+msgctxt "ui.status"
+msgid "Semestr kilidləndi"
+msgstr "Semestr kilidləndi"
+
+msgctxt "ui.status"
+msgid "Uyğundur"
+msgstr "Uyğundur"
+
+msgctxt "ui.status"
+msgid "FİN təkrarlanır — eyni şəxs iki sətirdə"
+msgstr "FİN təkrarlanır — eyni şəxs iki sətirdə"
+
+msgctxt "ui.status"
+msgid "İxtisas kodu universitetdə tapılmadı"
+msgstr "İxtisas kodu universitetdə tapılmadı"
+
+msgctxt "ui.status"
+msgid "Attestatın surəti yüklənməyib"
+msgstr "Attestatın surəti yüklənməyib"
+
+msgctxt "ui.status"
+msgid "ATİS siyahısı yükləndi"
+msgstr "ATİS siyahısı yükləndi"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi yoxladı"
+msgstr "Tədris şöbəsi yoxladı"
+
+msgctxt "ui.status"
+msgid "Fakültələrə paylandı"
+msgstr "Fakültələrə paylandı"
+
+msgctxt "ui.status"
+msgid "Qruplara təyin edildi"
+msgstr "Qruplara təyin edildi"
+
+msgctxt "ui.status"
+msgid "Qrupdan qrupa köçürmə"
+msgstr "Qrupdan qrupa köçürmə"
+
+msgctxt "ui.status"
+msgid "İxtisasdan ixtisasa köçürmə"
+msgstr "İxtisasdan ixtisasa köçürmə"
+
+msgctxt "ui.status"
+msgid "Əyanidən qiyabiyə (və ya tərsi)"
+msgstr "Əyanidən qiyabiyə (və ya tərsi)"
+
+msgctxt "ui.status"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "ui.status"
+msgid "Bərpa"
+msgstr "Bərpa"
+
+msgctxt "ui.status"
+msgid "Xaric etmə"
+msgstr "Xaric etmə"
+
+msgctxt "ui.status"
+msgid "Vaxtında yazılıb"
+msgstr "Vaxtında yazılıb"
+
+msgctxt "ui.status"
+msgid "Gec yazılıb"
+msgstr "Gec yazılıb"
+
+msgctxt "ui.status"
+msgid "Jurnal boşdur"
+msgstr "Jurnal boşdur"
+
+msgctxt "ui.status"
+msgid "Saxlanıldı"
+msgstr "Saxlanıldı"
+
+msgctxt "ui.status"
+msgid "Saxlanılır…"
+msgstr "Saxlanılır…"
+
+msgctxt "ui.status"
+msgid "Son dəyişiklik saxlanılmadı"
+msgstr "Son dəyişiklik saxlanılmadı"
+
+msgctxt "ui.status"
+msgid "İnternet bağlantısı yoxdur"
+msgstr "İnternet bağlantısı yoxdur"
+
+msgctxt "ui.status"
+msgid "Başqa versiya ilə konflikt yarandı"
+msgstr "Başqa versiya ilə konflikt yarandı"
+
+msgctxt "ui.status"
+msgid "Səhifədəki məlumat köhnəlmişdir"
+msgstr "Səhifədəki məlumat köhnəlmişdir"
+
+msgctxt "ui.status"
+msgid "mərhələ açıqdır"
+msgstr "mərhələ açıqdır"
+
+msgctxt "ui.status"
+msgid "arxiv — yalnız oxunuş"
+msgstr "arxiv — yalnız oxunuş"
+
+msgctxt "ui.filters"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "ui.filters"
+msgid "Sıfırla"
+msgstr "Sıfırla"
+
+msgctxt "ui.filters"
+msgid "Tətbiq olunmuş filtrlər"
+msgstr "Tətbiq olunmuş filtrlər"
+
+msgctxt "ui.filters"
+msgid "%(name)s filtrini götür"
+msgstr "%(name)s filtrini götür"
+
+msgctxt "ui.filters"
+msgid "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın."
+msgstr "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın."
+
+msgctxt "ui.dialog"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "ui.dialog"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "ui.dialog"
+msgid "Göndər"
+msgstr "Göndər"
+
+msgctxt "ui.dialog"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "ui.dialog"
+msgid "Səbəb audit jurnalına yazılır və qərar zəncirində görünür."
+msgstr "Səbəb audit jurnalına yazılır və qərar zəncirində görünür."
+
+msgctxt "ui.dialog"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bax və qərar ver"
+msgstr "Bax və qərar ver"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bu şərtlərə uyğun sual dəsti tapılmadı."
+msgstr "Bu şərtlərə uyğun sual dəsti tapılmadı."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün imtahan növləri"
+msgstr "Bütün imtahan növləri"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün müəllimlər"
+msgstr "Bütün müəllimlər"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilib"
+msgstr "Düzəliş istənilib"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtri təmizlə"
+msgstr "Filtri təmizlə"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtrlə"
+msgstr "Filtrlə"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib"
+msgstr "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimdə"
+msgstr "Müəllimdə"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimlərinizin imtahan sual dəstlərini təsdiqləyin — yalnız təsdiqdən sonra İmtahan Mərkəzinə gedir."
+msgstr "Müəllimlərinizin imtahan sual dəstlərini təsdiqləyin — yalnız təsdiqdən sonra İmtahan Mərkəzinə gedir."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz baxır"
+msgstr "Mərkəz baxır"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz qəbul etdi"
+msgstr "Mərkəz qəbul etdi"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Rədd edilib"
+msgstr "Rədd edilib"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Status filtri"
+msgstr "Status filtri"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Sual dəstlərində axtar"
+msgstr "Sual dəstlərində axtar"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təmizlə"
+msgstr "Təmizlə"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyir"
+msgstr "Təsdiq gözləyir"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyən sual dəsti yoxdur."
+msgstr "Təsdiq gözləyən sual dəsti yoxdur."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlənib — mərkəzdə"
+msgstr "Təsdiqlənib — mərkəzdə"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "«%(title)s» dəstinə bax"
+msgstr "«%(title)s» dəstinə bax"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "İmtahan növü"
+msgstr "İmtahan növü"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlədiyim"
+msgstr "Təsdiqlədiyim"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilən"
+msgstr "Düzəliş istənilən"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra düzəliş istəyib"
+msgstr "Kafedra düzəliş istəyib"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra müdirinə göndərilib"
+msgstr "Kafedra müdirinə göndərilib"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra qeydi"
+msgstr "Kafedra qeydi"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra təsdiqləyib — İmtahan Mərkəzində"
+msgstr "Kafedra təsdiqləyib — İmtahan Mərkəzində"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilib — düzəldib yenidən göndərə bilərsiniz"
+msgstr "Rədd edilib — düzəldib yenidən göndərə bilərsiniz"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yolu izlə"
+msgstr "Yolu izlə"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi baxır"
+msgstr "İmtahan Mərkəzi baxır"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi düzəliş istəyib"
+msgstr "İmtahan Mərkəzi düzəliş istəyib"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi: {reason}"
+msgstr "\"{title}\" sual göndərişiniz rədd edildi: {reason}"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz İmtahan Mərkəzi tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "\"{title}\" sual göndərişiniz İmtahan Mərkəzi tərəfindən düzəliş üçün qaytarıldı: {reason}"
+
+msgctxt "exams.service.question_submission.error"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+
+msgctxt "exams.template.question_chain"
+msgid "Dekanlıq təsdiqi"
+msgstr "Dekanlıq təsdiqi"
+
+msgctxt "exams.template.question_chain"
+msgid "Düzəldilib kafedraya yenidən göndərildi"
+msgstr "Düzəldilib kafedraya yenidən göndərildi"
+
+msgctxt "exams.template.question_chain"
+msgid "Göndərişin yolu"
+msgstr "Göndərişin yolu"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra düzəliş istədi"
+msgstr "Kafedra düzəliş istədi"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra müdirinə göndərildi"
+msgstr "Kafedra müdirinə göndərildi"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra rədd etdi"
+msgstr "Kafedra rədd etdi"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra tarixçəsi"
+msgstr "Kafedra tarixçəsi"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqi"
+msgstr "Kafedra təsdiqi"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqlədi — İmtahan Mərkəzinə göndərildi"
+msgstr "Kafedra təsdiqlədi — İmtahan Mərkəzinə göndərildi"
+
+msgctxt "exams.template.question_chain"
+msgid "Müəllim göndərdi"
+msgstr "Müəllim göndərdi"
+
+msgctxt "exams.template.question_chain"
+msgid "Qəbul edildi"
+msgstr "Qəbul edildi"
+
+msgctxt "exams.template.question_chain"
+msgid "Rədd edildi"
+msgstr "Rədd edildi"
+
+msgctxt "exams.template.question_chain"
+msgid "Yekun qərar"
+msgstr "Yekun qərar"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi"
+msgstr "İmtahan Mərkəzi"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi baxışa götürdü"
+msgstr "İmtahan Mərkəzi baxışa götürdü"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi düzəliş istədi"
+msgstr "İmtahan Mərkəzi düzəliş istədi"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi qəbul etdi"
+msgstr "İmtahan Mərkəzi qəbul etdi"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi rədd etdi"
+msgstr "İmtahan Mərkəzi rədd etdi"
+
+msgctxt "exams.template.question_chair"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar dəyişdirilə bilməz."
+msgstr "Bu göndəriş artıq kafedra mərhələsində deyil — qərar dəyişdirilə bilməz."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu kafedraya müdir təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirilib."
+msgstr "Bu kafedraya müdir təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirilib."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu şərtlərə uyğun sual tapılmadı."
+msgstr "Bu şərtlərə uyğun sual tapılmadı."
+
+msgctxt "exams.template.question_chair"
+msgid "Daha çox yüklənir…"
+msgstr "Daha çox yüklənir…"
+
+msgctxt "exams.template.question_chair"
+msgid "Düzəliş istə"
+msgstr "Düzəliş istə"
+
+msgctxt "exams.template.question_chair"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra qərarı"
+msgstr "Kafedra qərarı"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra təsdiqi"
+msgstr "Kafedra təsdiqi"
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllim nəyi düzəltməlidir? Səbəb ona bildiriş kimi gedəcək."
+msgstr "Müəllim nəyi düzəltməlidir? Səbəb ona bildiriş kimi gedəcək."
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllimin qeydi"
+msgstr "Müəllimin qeydi"
+
+msgctxt "exams.template.question_chair"
+msgid "Növbəyə qayıt"
+msgstr "Növbəyə qayıt"
+
+msgctxt "exams.template.question_chair"
+msgid "Rədd et"
+msgstr "Rədd et"
+
+msgctxt "exams.template.question_chair"
+msgid "Rəddin səbəbini yazın — göndəriş İmtahan Mərkəzinə çatmayacaq."
+msgstr "Rəddin səbəbini yazın — göndəriş İmtahan Mərkəzinə çatmayacaq."
+
+msgctxt "exams.template.question_chair"
+msgid "Sual filtri"
+msgstr "Sual filtri"
+
+msgctxt "exams.template.question_chair"
+msgid "Sual və ya variant mətnində axtar…"
+msgstr "Sual və ya variant mətnində axtar…"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Suallar və xəbərdarlıqlar"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallarda axtar"
+msgstr "Suallarda axtar"
+
+msgctxt "exams.template.question_chair"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "exams.template.question_chair"
+msgid "Təmiz"
+msgstr "Təmiz"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiq et"
+msgstr "Təsdiq et"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqdən sonra dəst İmtahan Mərkəzinə göndəriləcək. Düzəliş və rədd üçün səbəb məcburidir."
+msgstr "Təsdiqdən sonra dəst İmtahan Mərkəzinə göndəriləcək. Düzəliş və rədd üçün səbəb məcburidir."
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"
+
+msgctxt "exams.template.question_chair"
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgctxt "exams.template.question_chair"
+msgid "Xətalı"
+msgstr "Xətalı"
+
+msgctxt "exams.template.question_chair"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib, 7-ci sual mövzudan kənardır…"
+msgstr "məs. 3-cü sualda düzgün cavab işarələnməyib, 7-ci sual mövzudan kənardır…"
+
+msgctxt "exams.template.question_chair"
+msgid "Ümumi sual sayı"
+msgstr "Ümumi sual sayı"
+
+msgctxt "exams.template.question_chair"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "exams.template.question_chair"
+msgid "Ən azı {min} simvol — hazırda {n}."
+msgstr "Ən azı {min} simvol — hazırda {n}."
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş istə"
+msgstr "Düzəliş istə"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş üçün geri qaytar"
+msgstr "Düzəliş üçün geri qaytar"
+
+msgctxt "exams.template.question_submission"
+msgid "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər."
+msgstr "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər."
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra müdirinə göndər"
+msgstr "Kafedra müdirinə göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra qeydi"
+msgstr "Kafedra qeydi"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra təsdiqinə sual göndər"
+msgstr "Kafedra təsdiqinə sual göndər"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir."
+msgstr "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir."
+
+msgctxt "exams.template.question_submission"
+msgid "Rədd et"
+msgstr "Rədd et"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra kafedra müdirinə göndərin; təsdiqdən sonra İmtahan Mərkəzinə çatacaq."
+msgstr "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra kafedra müdirinə göndərin; təsdiqdən sonra İmtahan Mərkəzinə çatacaq."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Düzəliş tələbi müəllimə göndərildi — düzəlişdən sonra yenidən kafedradan keçəcək."
+msgstr "Düzəliş tələbi müəllimə göndərildi — düzəlişdən sonra yenidən kafedradan keçəcək."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş kafedra müdirinin təsdiqinə göndərildi ({count} sual, {groups} qrup)."
+msgstr "Göndəriş kafedra müdirinin təsdiqinə göndərildi ({count} sual, {groups} qrup)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və kafedra müdirinin təsdiqinə təkrar göndərildi."
+msgstr "Göndəriş yeniləndi və kafedra müdirinin təsdiqinə təkrar göndərildi."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd/düzəliş üçün müəllimə ən azı {count} simvolluq qeyd yazın — nəyi düzəltməlidir."
+msgstr "Rədd/düzəliş üçün müəllimə ən azı {count} simvolluq qeyd yazın — nəyi düzəltməlidir."
+
+msgctxt "profile.sidebar"
+msgid "Sual təsdiqi"
+msgstr "Sual təsdiqi"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra təsdiqli sual göndərişi"
+msgstr "Kafedra təsdiqli sual göndərişi"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} — \"{title}\" ({subject} · {group}, {count} sual) kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "{teacher} — \"{title}\" ({subject} · {group}, {count} sual) kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Sual dəsti kafedra təsdiqini gözləyir"
+msgstr "Sual dəsti kafedra təsdiqini gözləyir"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini təsdiqə göndərdi. Kafedra müdiri təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirildi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" sual dəstini təsdiqə göndərdi. Kafedra müdiri təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirildi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini kafedra təsdiqinə göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} \"{title}\" sual dəstini kafedra təsdiqinə göndərdi ({subject} · {group}, {count} sual)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar verilə bilməz."
+msgstr "Bu göndəriş artıq kafedra mərhələsində deyil — qərar verilə bilməz."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstinizi təsdiqlədi"
+msgstr "Kafedra sual dəstinizi təsdiqlədi"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "\"{title}\" sual dəstiniz kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra düzəliş istədi"
+msgstr "Kafedra düzəliş istədi"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "\"{title}\" sual dəstiniz kafedra tərəfindən düzəliş üçün qaytarıldı: {reason}"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstini rədd etdi"
+msgstr "Kafedra sual dəstini rədd etdi"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən rədd edildi: {reason}"
+msgstr "\"{title}\" sual dəstiniz kafedra tərəfindən rədd edildi: {reason}"
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "Sual dəsti təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Düzəliş tələbi müəllimə göndərildi."
+msgstr "Düzəliş tələbi müəllimə göndərildi."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti rədd edildi və müəllimə bildirildi."
+msgstr "Sual dəsti rədd edildi və müəllimə bildirildi."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Yanlış əməliyyat."
+msgstr "Yanlış əməliyyat."
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_unit"
+msgstr "Kafedra vahidi"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_reviewer"
+msgstr "Kafedra rəyçisi"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_decision"
+msgstr "Kafedra qərarı"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_note"
+msgstr "Kafedra qeydi"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "draft"
+msgstr "Qaralama"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "submitted_to_chair"
+msgstr "Kafedra müdirinə göndərilib"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_revision"
+msgstr "Kafedra düzəliş istəyib"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_approved"
+msgstr "Kafedra təsdiqləyib"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_review"
+msgstr "İmtahan Mərkəzi baxır"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_revision"
+msgstr "İmtahan Mərkəzi düzəliş istəyib"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "approved"
+msgstr "Təsdiqləndi"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "rejected"
+msgstr "Rədd edildi"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "revision"
+msgstr "Düzəliş istənildi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "submitted"
+msgstr "Göndərildi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "resubmitted"
+msgstr "Yenidən göndərildi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_approved"
+msgstr "Kafedra təsdiqlədi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_revision"
+msgstr "Kafedra düzəliş istədi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_rejected"
+msgstr "Kafedra rədd etdi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_opened"
+msgstr "İmtahan Mərkəzi baxışa götürdü"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_accepted"
+msgstr "İmtahan Mərkəzi qəbul etdi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_revision"
+msgstr "İmtahan Mərkəzi düzəliş istədi"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_rejected"
+msgstr "İmtahan Mərkəzi rədd etdi"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "submission"
+msgstr "Göndəriş"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "organization"
+msgstr "Təşkilat"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "actor"
+msgstr "İcraçı"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "singular"
+msgstr "Sual göndərişi hadisəsi"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "plural"
+msgstr "Sual göndərişi hadisələri"
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_chair_review_denied"
+msgstr "Bu sual göndərişini kafedra müdiri kimi nəzərdən keçirməyə səlahiyyətiniz yoxdur."
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_requires_chair_approval"
+msgstr "Bu sual göndərişi İmtahan Mərkəzinə çatmazdan əvvəl kafedra müdirinin təsdiqindən keçməlidir."

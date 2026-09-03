@@ -302,6 +302,22 @@ def count_applications_pending(request, user) -> int:
     return pending_badge_count(user, organization)
 
 
+def count_question_chair_pending(request, user) -> int:
+    """«Sual təsdiqi» badge-i — kafedra müdirinin gözləyən sual dəstləri.
+
+    Sayğac SERVİS QATININ əhatə filtrini işlədir (``chair_queue_queryset``),
+    yəni badge heç vaxt siyahıdan çox göstərə bilməz; əhatəsi olmayan aktorda
+    0 qaytarır (fail-closed).
+    """
+    from apps.accounts.views._helpers.tenant import _get_active_organization
+    from apps.exams.services.question_chair_review import pending_chair_review_count
+
+    organization = _get_active_organization(request)
+    if organization is None:
+        return 0
+    return pending_chair_review_count(user, organization)
+
+
 def compute_review_badge_counts(*, my_exams_qs, teacher_courses) -> tuple[int, int]:
     """Reviewer sidebar badges: (pending_review, evaluated_review).
 
@@ -392,6 +408,8 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
     badges: dict[str, int] = {}
     if "applications" in capabilities.get("allowed_sections", set()):
         badges["applications_pending"] = count_applications_pending(request, user)
+    if "question-chair-review" in capabilities.get("allowed_sections", set()):
+        badges["question_chair_pending"] = count_question_chair_pending(request, user)
     if capabilities.get("can_view_student_assignments"):
         badges["assigned_tasks"] = count_assigned_tasks(request, user)
         badges["my_results"] = count_my_results(request, user)
@@ -413,4 +431,5 @@ __all__ = [
     "count_assigned_tasks",
     "count_my_results",
     "count_pending_answers",
+    "count_question_chair_pending",
 ]

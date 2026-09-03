@@ -1,0 +1,163 @@
+/* Sual göndərişi zənciri: hadisə lentı + kafedra qərar səthi.
+   Mərhələ zolağının primitivləri (`qsubd-timeline`) question_submission_ui.css-dədir;
+   bu fayl YALNIZ zəncirə xas qatı əlavə edir. Yalnız --ems-* tokenləri, light-only. */
+
+.qsube-log {
+    margin: 12px 0 18px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-surface, #fff);
+}
+
+.qsube-log__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.86rem;
+    color: var(--ems-text, #1e293b);
+    list-style: none;
+}
+
+.qsube-log__summary::-webkit-details-marker { display: none; }
+
+.qsube-log__count {
+    margin-left: auto;
+    min-width: 22px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.74rem;
+    text-align: center;
+}
+
+.qsube-log__list {
+    margin: 0;
+    padding: 4px 14px 14px 14px;
+    list-style: none;
+    border-top: 1px solid var(--ems-border, #e2e8f0);
+}
+
+.qsube-log__item {
+    position: relative;
+    display: flex;
+    gap: 10px;
+    padding: 10px 0 10px 4px;
+}
+
+.qsube-log__item + .qsube-log__item { border-top: 1px dashed var(--ems-border, #e2e8f0); }
+
+.qsube-log__dot {
+    flex: 0 0 auto;
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--ems-primary-400, #60a5fa);
+}
+
+.qsube-log__item--chair_approved .qsube-log__dot,
+.qsube-log__item--center_accepted .qsube-log__dot { background: var(--ems-success-500, #10b981); }
+
+.qsube-log__item--chair_revision .qsube-log__dot,
+.qsube-log__item--center_revision .qsube-log__dot { background: var(--ems-warning-500, #f59e0b); }
+
+.qsube-log__item--chair_rejected .qsube-log__dot,
+.qsube-log__item--center_rejected .qsube-log__dot { background: var(--ems-danger-500, #ef4444); }
+
+.qsube-log__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.qsube-log__action { font-size: 0.84rem; font-weight: 600; color: var(--ems-text, #1e293b); }
+.qsube-log__meta { font-size: 0.74rem; color: var(--ems-text-muted, #64748b); }
+
+.qsube-log__reason {
+    margin: 4px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--ems-surface-muted, #f8fafc);
+    border-left: 3px solid var(--ems-warning-400, #fbbf24);
+    font-size: 0.8rem;
+    color: var(--ems-text, #1e293b);
+    white-space: normal;
+}
+
+/* ── Kafedra qərar paneli ───────────────────────────────────────────────── */
+.qchair-decide { display: grid; gap: 12px; }
+
+.qchair-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.qchair-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--ems-surface-muted, #f1f5f9);
+    color: var(--ems-text, #1e293b);
+}
+
+.qchair-btn--approve { background: var(--ems-success-500, #10b981); color: #fff; }
+.qchair-btn--revision { background: var(--ems-warning-500, #f59e0b); color: #fff; }
+.qchair-btn--reject { background: var(--ems-danger-500, #ef4444); color: #fff; }
+.qchair-btn:focus-visible { outline: 3px solid var(--ems-primary-300, #93c5fd); outline-offset: 2px; }
+
+.qchair-note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+    font-size: 0.82rem;
+}
+
+.qchair-note--warn { background: var(--ems-warning-50, #fffbeb); color: var(--ems-warning-800, #92400e); }
+
+/* ── Səbəb dialoqu (focus trap JS ilə) ──────────────────────────────────── */
+.qchair-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.qchair-dialog[hidden] { display: none !important; }
+
+.qchair-dialog__card {
+    width: min(560px, 100%);
+    background: var(--ems-surface, #fff);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+}
+
+.qchair-dialog__title { margin: 0 0 6px; font-size: 1.02rem; font-weight: 700; }
+.qchair-dialog__hint { margin: 0 0 12px; font-size: 0.8rem; color: var(--ems-text-muted, #64748b); }
+
+.qchair-dialog__textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 10px;
+    font: inherit;
+    resize: vertical;
+}
+
+.qchair-dialog__counter { display: block; margin-top: 6px; font-size: 0.74rem; color: var(--ems-text-muted, #64748b); }
+.qchair-dialog__counter.is-short { color: var(--ems-danger-600, #dc2626); }
+.qchair-dialog__actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
+/* Sətir-daxili «Yolu izlə» draweri — kart qridində tam eni tutur. */
+.qsubs-item__timeline { grid-column: 1 / -1; margin: 8px 0 0; }

@@ -1,0 +1,59 @@
+{% comment %}
+Səbəb tələb edən dialoq — handoff §4 komponent 8 · §8 qayda 6.
+
+«Geri qaytar», «Rədd et», «Yenidən aç», «Düzəliş sorğusu», «İrad»,
+«Arxivləmə», «Xaric etmə», «Semestr kilidini aç» — hamısı ≥20 simvol səbəb
+tələb edir və audit-ə istifadəçi + timestamp ilə yazılır.
+
+Təsdiq düyməsi GİZLƏNMİR — səbəb qısa olduqda disabled stilində qalır.
+
+KONTEKST MÜQAVİLƏSİ
+  reason_id, reason_title, reason_subtitle
+  reason_label       — textarea etiketi (default «Səbəb»)
+  reason_placeholder
+  reason_hint        — normal ipucu
+  reason_hint_invalid— qısa olduqda görünən ipucu
+  reason_min         — minimum simvol (default 20)
+  reason_field_name  — POST sahəsinin adı (default "reason")
+  reason_submit_label, reason_submit_tone (primary|warning|danger)
+  reason_action      — form action URL (verilməsə JS özü göndərir)
+{% endcomment %}
+{% load i18n %}
+<div class="ems-overlay ems-overlay--dialog" id="{{ reason_id }}" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="{{ reason_id }}-title">
+        <form method="post" action="{{ reason_action|default:'' }}" data-ems-reason-form>
+            {% csrf_token %}
+            <div class="ems-dialog__head">
+                <div>
+                    <h2 class="ems-dialog__title" id="{{ reason_id }}-title">{{ reason_title }}</h2>
+                    {% if reason_subtitle %}<p class="ems-dialog__sub">{{ reason_subtitle }}</p>{% endif %}
+                </div>
+                <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                        aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+            </div>
+
+            <div class="ems-dialog__body ems-reason" data-ems-min-length="{{ reason_min|default:20 }}">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="{{ reason_id }}-text">
+                        {% if reason_label %}{{ reason_label }}{% else %}{% trans "Səbəb" context "ui.dialog" %}{% endif %} <span class="ems-field__req" aria-hidden="true">*</span>
+                    </label>
+                    <textarea class="ems-textarea" id="{{ reason_id }}-text"
+                              name="{{ reason_field_name|default:'reason' }}" rows="4" required
+                              minlength="{{ reason_min|default:20 }}"
+                              aria-describedby="{{ reason_id }}-hint"
+                              placeholder="{{ reason_placeholder|default_if_none:'' }}"></textarea>
+                </div>
+                <p class="ems-reason__hint" id="{{ reason_id }}-hint"
+                   data-hint="{% if reason_hint %}{{ reason_hint }}{% else %}{% trans "Səbəb audit jurnalına yazılır və qərar zəncirində görünür." context "ui.dialog" %}{% endif %}"
+                   data-hint-invalid="{% if reason_hint_invalid %}{{ reason_hint_invalid }}{% else %}{% trans "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil." context "ui.dialog" %}{% endif %}">{% if reason_hint %}{{ reason_hint }}{% else %}{% trans "Səbəb audit jurnalına yazılır və qərar zəncirində görünür." context "ui.dialog" %}{% endif %}</p>
+            </div>
+
+            <div class="ems-dialog__foot">
+                <span class="ems-dialog__foot-note ems-reason__counter" aria-hidden="true">0 / {{ reason_min|default:20 }}</span>
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
+                <button type="submit" class="ems-btn ems-btn--{{ reason_submit_tone|default:'primary' }}"
+                        data-ems-reason-submit disabled aria-disabled="true">{% if reason_submit_label %}{{ reason_submit_label }}{% else %}{% trans "Göndər" context "ui.dialog" %}{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</div>

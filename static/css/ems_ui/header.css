@@ -1,0 +1,117 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/header.css — Content header (handoff §3 «Content header»)
+
+   ⚠ SHELL QƏRARI: prototiplərin öz top-bar/sidebar-ı TƏKRAR QURULMUR.
+   Mövcud kabinet qabığı (sol sidebar həmişə görünür) saxlanılır; bu başlıq
+   panelin İÇİNDƏ render olunur — yəni `[data-profile-section-panel]` daxilində
+   ilk blokdur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.ems-header__main {
+    min-width: 0;
+    flex: 1 1 320px;
+}
+
+/* ── Breadcrumb ─────────────────────────────────────────────────────────── */
+.ems-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0 0 var(--ems-sp-2);
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+}
+
+.ems-crumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.ems-crumbs__sep {
+    color: var(--ems-neutral-300);
+}
+
+.ems-crumbs__link {
+    color: var(--ems-neutral-500);
+}
+
+.ems-crumbs__link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+/* Son crumb — cari səhifə; link deyil. */
+.ems-crumbs__item[aria-current="page"] {
+    color: var(--ems-neutral-700);
+    font-weight: 600;
+}
+
+/* ── Başlıq ─────────────────────────────────────────────────────────────── */
+.ems-header__title {
+    margin: 0;
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+    text-wrap: pretty;
+}
+
+.ems-header__subtitle {
+    margin: var(--ems-sp-2) 0 0;
+    max-width: var(--ems-w-text);
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* ── Sağ tərəfdəki əməllər ──────────────────────────────────────────────── */
+.ems-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+/* Rejim qeydi (arxiv / açıq) başlığın altında da dayana bilər. */
+.ems-header__note {
+    margin-top: var(--ems-sp-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+/* ── Mobil: tək sütun (≤768 — handoff responsiv qaydası) ────────────────── */
+@media (max-width: 768px) {
+    .ems-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--ems-sp-4);
+    }
+
+    .ems-header__actions {
+        width: 100%;
+    }
+
+    .ems-header__actions > * {
+        flex: 1 1 auto;
+    }
+
+    .ems-header__title {
+        font-size: var(--ems-fs-2xl);
+    }
+}

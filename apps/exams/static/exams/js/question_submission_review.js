@@ -1,6 +1,8 @@
-/* Mərkəz baxışı — 2 yollu qərar seçicisi.
+/* Mərkəz baxışı — 3 yollu qərar seçicisi (qəbul / düzəliş / rədd).
  *
- * Radio (qəbul / geri qaytar) seçiminə görə uyğun panel açılır, gizli panelin
+ * Panel bir neçə qərara xidmət edə bilər: `data-decision` boşluqla ayrılmış
+ * siyahıdır (məs. "reject revision" — hər ikisi eyni səbəb sahəsini işlədir).
+ * Radio seçiminə görə uyğun panel açılır, gizli panelin
  * sahələri `disabled` olur (hər iki paneldə name="note" var — yalnız aktiv
  * olan POST-a düşsün), submit düyməsinin mətni/rəngi qərara uyğunlaşır.
  * Bank seçimində mövcud bank seçilərsə "yeni bankın adı" sahəsi gizlənir.
@@ -22,7 +24,7 @@
             panel.querySelectorAll("input, select, textarea").forEach(function (field) {
                 field.disabled = !enabled;
             });
-            if (enabled && panel.dataset.decision === "accept") {
+            if (enabled && panel.dataset.decision.indexOf("accept") !== -1) {
                 syncNewBankVisibility();
             }
             // Custom select-in toggle vəziyyətini yenilə (disabled görünüşü).
@@ -47,7 +49,8 @@
 
         function applyDecision(value) {
             panels.forEach(function (panel) {
-                setPanelEnabled(panel, panel.dataset.decision === value);
+                var owners = (panel.dataset.decision || "").split(/\s+/);
+                setPanelEnabled(panel, Boolean(value) && owners.indexOf(value) !== -1);
             });
             if (!submit) {
                 return;
@@ -58,10 +61,14 @@
                 submit.classList.add("qb-btn-green");
                 if (submitLabel) { submitLabel.textContent = submit.dataset.acceptLabel || ""; }
                 if (submitIcon) { submitIcon.className = "fas fa-check js-qsubr-submit-icon"; }
+            } else if (value === "revision") {
+                submit.classList.add("qb-btn-outline-danger");
+                if (submitLabel) { submitLabel.textContent = submit.dataset.revisionLabel || ""; }
+                if (submitIcon) { submitIcon.className = "fas fa-pen js-qsubr-submit-icon"; }
             } else if (value === "reject") {
                 submit.classList.add("qb-btn-outline-danger");
                 if (submitLabel) { submitLabel.textContent = submit.dataset.rejectLabel || ""; }
-                if (submitIcon) { submitIcon.className = "fas fa-rotate-left js-qsubr-submit-icon"; }
+                if (submitIcon) { submitIcon.className = "fas fa-ban js-qsubr-submit-icon"; }
             } else {
                 if (submitLabel) { submitLabel.textContent = submit.dataset.idleLabel || ""; }
                 if (submitIcon) { submitIcon.className = "fas fa-gavel js-qsubr-submit-icon"; }

@@ -90,6 +90,15 @@ def apply_permission_section_gates(
     # yenidən süzülür (əhatəsiz istifadəçi boş vəziyyət görür).
     can_review_syllabus = privileged or has_permission(permissions, "syllabus.review")
 
+    # «Sual təsdiqi» — `question.chair_review`. Müəllimin İmtahan Mərkəzinə
+    # göndərdiyi sual dəsti ƏVVƏLCƏ kafedra müdirindən keçir. Açar QƏSDƏN
+    # `exam.*` ailəsindən KƏNARDADIR: `exam.*` daşıyan dekan/mərkəz/müəllim
+    # bu səlahiyyəti avtomatik almamalıdır. Menyu görünürlüyü yalnız açara
+    # baxır; KONKRET göndərişin qərarı `apps/exams/services/
+    # question_chair_units.py`-da struktur əhatəsi ilə fail-closed yoxlanılır
+    # (əhatəsiz aktor boş növbə görür).
+    can_review_question_chair = privileged or has_permission(permissions, "question.chair_review")
+
     # «Fənn təhvili» — `journal.reassign`. Menyu görünürlüyü YALNIZ açara baxır;
     # KONKRET fənnin təhvil oluna bilməsi (öz fakültəsindədirmi, jurnal bağlıdırmı,
     # semestr keçmişdirmi) `apps/registrar/handover.py`-da fail-closed yenidən
@@ -158,6 +167,7 @@ def apply_permission_section_gates(
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
+        (can_review_question_chair, "question-chair-review"),
         (can_reassign_teaching, "teaching-handover"),
         (can_manage_schedule, "schedule-manage"),
         (can_import_students, "student-intake"),
@@ -177,6 +187,7 @@ def apply_permission_section_gates(
         "can_view_syllabus": can_view_syllabus,
         "can_edit_syllabus": can_edit_syllabus,
         "can_review_syllabus": can_review_syllabus,
+        "can_review_question_chair": can_review_question_chair,
         "can_reassign_teaching": can_reassign_teaching,
         "can_manage_schedule": can_manage_schedule,
         "can_import_students": can_import_students,

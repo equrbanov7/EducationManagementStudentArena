@@ -1,0 +1,10 @@
+{% comment %}
+Sətir-içi validasiya mesajı — handoff §7.
+Sahəyə `aria-describedby="<msg_id>"` və `aria-invalid="true"` verilməlidir.
+Kontekst: `msg_id`, `msg_text`, `msg_kind` (error|warning|success|info).
+{% endcomment %}
+<p class="ems-msg ems-msg--{{ msg_kind|default:'error' }}" id="{{ msg_id }}"
+   {% if msg_kind == "error" %}role="alert"{% else %}role="status"{% endif %}>
+    <span class="ems-msg__icon" aria-hidden="true">{% if msg_kind == "success" %}✓{% elif msg_kind == "info" %}i{% else %}!{% endif %}</span>
+    <span>{{ msg_text }}</span>
+</p>

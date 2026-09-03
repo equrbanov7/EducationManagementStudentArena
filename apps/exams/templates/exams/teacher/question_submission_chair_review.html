@@ -1,0 +1,201 @@
+{% extends "accounts/profile_embed_base.html" %}
+{% load static i18n %}
+{% comment %}
+Kafedra müdiri — sual dəstinin təsdiqi.  Ekran profil ÖRTÜYÜNÜN İÇİNDƏ açılır
+(sol sidebar qalır, məzmun sağda).  Sual önizləməsi İmtahan Mərkəzinin
+səthi ilə EYNİ fraqmentdir (`_question_submission_preview_items.html`) və eyni
+lazy endpoint-dən yüklənir.
+
+Qərar: Təsdiqlə · Düzəliş istə · Rədd et.  Son ikisi üçün səbəb MƏCBURİDİR —
+dialoq (focus trap + aria) `question_submission_chair_review.js`-dədir.
+{% endcomment %}
+
+{% block embed_title %}{{ submission.title }} — {% trans "Kafedra təsdiqi" context "exams.template.question_chair" %}{% endblock %}
+
+{% block embed_extra_css %}
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part1.css' %}?v=20260607-management">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part2.css' %}?v=20260607-management">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission.css' %}?v=20260708-teal">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui.css' %}?v=20260717a">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_ui_ext.css' %}?v=20260731-lazy">
+    <link rel="stylesheet" href="{% static 'exams/css/question_submission_chain.css' %}?v=20260903-chair">
+{% endblock %}
+
+{% block embed_content %}
+<div class="qb-page">
+  <div class="qb-shell">
+    <header class="qb-header">
+        <div class="qb-header-titles">
+            <h1><i class="fas fa-user-tie"></i> {{ submission.title }}</h1>
+            <p>
+                <i class="fas fa-user"></i> {{ submission.teacher.get_full_name|default:submission.teacher.username }}
+                &nbsp;·&nbsp; <i class="fas fa-book"></i> {{ submission.subject }}
+                {% if submission.exam_kind %}&nbsp;·&nbsp; <i class="fas fa-flag-checkered"></i> {{ submission.get_exam_kind_display }}{% endif %}
+                &nbsp;·&nbsp; <i class="fas fa-users"></i> {{ submission.group_label }}
+                &nbsp;·&nbsp; <i class="fas fa-globe"></i> {{ submission.get_language_display }}
+                &nbsp;·&nbsp; <i class="far fa-clock"></i> {{ submission.created_at|date:"d.m.Y H:i" }}
+            </p>
+        </div>
+        <div class="qb-header-actions">
+            <a href="{{ back_url }}" class="qb-btn qb-btn-light">
+                <i class="fas fa-arrow-left"></i> {% trans "Növbəyə qayıt" context "exams.template.question_chair" %}
+            </a>
+        </div>
+    </header>
+
+    {% include "exams/teacher/partials/_question_submission_chain.html" %}
+
+    <section class="qb-stats">
+        <article class="qb-stat-card">
+            <span class="qb-stat-card__icon qb-ic-slate"><i class="fas fa-database"></i></span>
+            <div class="qb-stat-card__body">
+                <span class="qb-stat-card__label">{% trans "Ümumi sual sayı" context "exams.template.question_chair" %}</span>
+                <strong>{{ submission.question_count }}</strong>
+            </div>
+        </article>
+        <article class="qb-stat-card qb-stat-card-red">
+            <span class="qb-stat-card__icon qb-ic-red"><i class="fas fa-circle-xmark"></i></span>
+            <div class="qb-stat-card__body">
+                <span class="qb-stat-card__label">{% trans "Xətalı" context "exams.template.question_chair" %}</span>
+                <strong>{{ submission.error_count }}</strong>
+            </div>
+        </article>
+        <article class="qb-stat-card qb-stat-card-amber">
+            <span class="qb-stat-card__icon qb-ic-amber"><i class="fas fa-triangle-exclamation"></i></span>
+            <div class="qb-stat-card__body">
+                <span class="qb-stat-card__label">{% trans "Xəbərdarlıq" context "exams.template.question_chair" %}</span>
+                <strong>{{ submission.warning_count }}</strong>
+            </div>
+        </article>
+        <article class="qb-stat-card qb-stat-card-blue">
+            <span class="qb-stat-card__icon qb-ic-blue"><i class="fas fa-sitemap"></i></span>
+            <div class="qb-stat-card__body">
+                <span class="qb-stat-card__label">{% trans "Kafedra" context "exams.template.question_chair" %}</span>
+                <strong>{{ submission.chair_unit.name|default:"—" }}</strong>
+            </div>
+        </article>
+    </section>
+
+    {% if submission.routed_to_dean %}
+    <div class="qchair-note qchair-note--warn" role="note">
+        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+        <span>{% trans "Bu kafedraya müdir təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirilib." context "exams.template.question_chair" %}</span>
+    </div>
+    {% endif %}
+
+    {% if submission.teacher_note %}
+    <div class="qsubd-note qsubd-note--teacher">
+        <div class="qsubd-note__icon"><i class="fas fa-comment-dots"></i></div>
+        <div>
+            <div class="qsubd-note__label">{% trans "Müəllimin qeydi" context "exams.template.question_chair" %}</div>
+            <div class="qsubd-note__text">{{ submission.teacher_note|linebreaksbr }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if can_decide %}
+    <h2 class="qsubd-section-title" id="qchairDecision"><i class="fas fa-gavel"></i> {% trans "Kafedra qərarı" context "exams.template.question_chair" %}</h2>
+    <div class="qsubm-card qchair-decide"
+         data-qchair
+         data-decide-url="{% url 'exams:question_submission_chair_decide' submission.id %}"
+         data-min-reason="{{ min_reason_length }}"
+         data-revision-title="{% trans 'Düzəliş istə' context 'exams.template.question_chair' %}"
+         data-revision-hint="{% trans 'Müəllim nəyi düzəltməlidir? Səbəb ona bildiriş kimi gedəcək.' context 'exams.template.question_chair' %}"
+         data-reject-title="{% trans 'Rədd et' context 'exams.template.question_chair' %}"
+         data-reject-hint="{% trans 'Rəddin səbəbini yazın — göndəriş İmtahan Mərkəzinə çatmayacaq.' context 'exams.template.question_chair' %}">
+        <p class="qchair-note">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            <span>{% trans "Təsdiqdən sonra dəst İmtahan Mərkəzinə göndəriləcək. Düzəliş və rədd üçün səbəb məcburidir." context "exams.template.question_chair" %}</span>
+        </p>
+        <form method="post" action="{% url 'exams:question_submission_chair_decide' submission.id %}" data-qchair-form>
+            {% csrf_token %}
+            <input type="hidden" name="decision" value="" data-qchair-decision>
+            <input type="hidden" name="reason" value="" data-qchair-reason>
+            <div class="qchair-actions">
+                <button type="button" class="qchair-btn qchair-btn--approve" data-qchair-action="approve">
+                    <i class="fas fa-check" aria-hidden="true"></i> {% trans "Təsdiqlə" context "exams.template.question_chair" %}
+                </button>
+                <button type="button" class="qchair-btn qchair-btn--revision" data-qchair-action="revision">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Düzəliş istə" context "exams.template.question_chair" %}
+                </button>
+                <button type="button" class="qchair-btn qchair-btn--reject" data-qchair-action="reject">
+                    <i class="fas fa-ban" aria-hidden="true"></i> {% trans "Rədd et" context "exams.template.question_chair" %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="qchair-dialog" data-qchair-dialog hidden role="dialog" aria-modal="true" aria-labelledby="qchairDialogTitle">
+        <div class="qchair-dialog__card">
+            <h3 class="qchair-dialog__title" id="qchairDialogTitle" data-qchair-dialog-title></h3>
+            <p class="qchair-dialog__hint" data-qchair-dialog-hint></p>
+            <label class="visually-hidden" for="qchairReason">{% trans "Səbəb" context "exams.template.question_chair" %}</label>
+            <textarea id="qchairReason" class="qchair-dialog__textarea" data-qchair-dialog-text
+                      placeholder="{% trans 'məs. 3-cü sualda düzgün cavab işarələnməyib, 7-ci sual mövzudan kənardır…' context 'exams.template.question_chair' %}"></textarea>
+            <span class="qchair-dialog__counter" data-qchair-counter
+                  data-template="{% trans 'Ən azı {min} simvol — hazırda {n}.' context 'exams.template.question_chair' %}"></span>
+            <div class="qchair-dialog__actions">
+                <button type="button" class="qchair-btn" data-qchair-cancel>{% trans "İmtina" context "exams.template.question_chair" %}</button>
+                <button type="button" class="qchair-btn qchair-btn--approve" data-qchair-confirm disabled>{% trans "Təsdiq et" context "exams.template.question_chair" %}</button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="qchair-note" role="note">
+        <i class="fas fa-lock" aria-hidden="true"></i>
+        <span>{% trans "Bu göndəriş artıq kafedra mərhələsində deyil — qərar dəyişdirilə bilməz." context "exams.template.question_chair" %}</span>
+    </div>
+    {% endif %}
+
+    <h2 class="qsubd-section-title"><i class="fas fa-list-check"></i> {% trans "Suallar və xəbərdarlıqlar" context "exams.template.question_chair" %}</h2>
+    <div class="qsubq js-qsubq"
+         data-questions-url="{% url 'exams:question_submission_questions' submission.id %}"
+         data-page-size="{{ questions_page_size }}"
+         data-has-more="{% if questions_has_more %}1{% else %}0{% endif %}">
+        <div class="qsubq-toolbar">
+            <div class="qsubq-search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" class="js-qsubq-search"
+                       placeholder="{% trans 'Sual və ya variant mətnində axtar…' context 'exams.template.question_chair' %}"
+                       aria-label="{% trans 'Suallarda axtar' context 'exams.template.question_chair' %}"
+                       autocomplete="off">
+            </div>
+            <div class="qsubq-pills" role="group" aria-label="{% trans 'Sual filtri' context 'exams.template.question_chair' %}">
+                <button type="button" class="qsubq-pill is-active" data-flag="" aria-pressed="true">
+                    {% trans "Hamısı" context "exams.template.question_chair" %}
+                    <span class="qsubq-pill__count" data-count-key="all">{{ question_flag_counts.all }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--error" data-flag="error" aria-pressed="false">
+                    <i class="fas fa-circle-xmark"></i> {% trans "Xətalı" context "exams.template.question_chair" %}
+                    <span class="qsubq-pill__count" data-count-key="error">{{ question_flag_counts.error }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--warning" data-flag="warning" aria-pressed="false">
+                    <i class="fas fa-triangle-exclamation"></i> {% trans "Xəbərdarlıq" context "exams.template.question_chair" %}
+                    <span class="qsubq-pill__count" data-count-key="warning">{{ question_flag_counts.warning }}</span>
+                </button>
+                <button type="button" class="qsubq-pill qsubq-pill--clean" data-flag="clean" aria-pressed="false">
+                    <i class="fas fa-circle-check"></i> {% trans "Təmiz" context "exams.template.question_chair" %}
+                    <span class="qsubq-pill__count" data-count-key="clean">{{ question_flag_counts.clean }}</span>
+                </button>
+            </div>
+        </div>
+        <ol class="qsubp-list js-qsubq-list">
+            {% include "exams/teacher/partials/_question_submission_preview_items.html" with questions=parsed_questions %}
+        </ol>
+        <div class="qsubq-empty js-qsubq-empty" hidden>
+            <i class="fas fa-filter-circle-xmark"></i>
+            {% trans "Bu şərtlərə uyğun sual tapılmadı." context "exams.template.question_chair" %}
+        </div>
+        <button type="button" class="qsubq-more js-qsubq-sentinel"{% if not questions_has_more %} hidden{% endif %}>
+            <span class="qsubq-spinner" aria-hidden="true"></span>
+            {% trans "Daha çox yüklənir…" context "exams.template.question_chair" %}
+        </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block embed_extra_js %}
+<script src="{% static 'exams/js/question_submission_review_questions.js' %}?v=20260731-lazy" defer></script>
+<script src="{% static 'exams/js/question_submission_chair_review.js' %}?v=20260903-chair" defer></script>
+{% endblock %}

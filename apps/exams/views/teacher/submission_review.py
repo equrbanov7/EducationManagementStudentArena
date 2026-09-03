@@ -17,10 +17,14 @@ from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.models import QuestionBank, QuestionSubmission
 from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
+from apps.exams.services.question_chair_review import MIN_REASON_LENGTH
+from apps.exams.services.question_chair_units import can_review_submission_as_chair
 from apps.exams.services.question_submission import (
     accept_submission,
     ensure_can_review_submission,
+    open_center_review,
     reject_submission,
+    request_center_revision,
 )
 from apps.exams.views.teacher.submission_inbox import (
     _profile_section_url,
@@ -57,6 +61,8 @@ def question_submission_review(request, submission_id):
         organization=organization,
     )
     ensure_can_review_submission(request.user, submission)
+    # Mərkəz göndərişi AÇDI — iz lentinə düşür (chair_approved → center_review).
+    open_center_review(submission, reviewer=request.user)
 
     # Bank seçimi: göndərişin fənninə/imtahan növünə uyğun banklar önə düşür
     # (0 = fənn+növ, 1 = fənn, 2 = növ, 3 = qalan) — mərkəz düzgün bankı
@@ -99,6 +105,9 @@ def question_submission_review(request, submission_id):
             "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
             "questions_page_size": QUESTIONS_PAGE_SIZE,
             "banks": banks,
+            # Kafedra qərarı və tam zaman xətti mərkəzin ekranında AÇIQ görünür.
+            "submission_events": list(submission.events.select_related("actor")),
+            "min_reason_length": MIN_REASON_LENGTH,
             "back_url": _profile_section_url("question-submissions"),
         },
     )
@@ -113,10 +122,14 @@ def question_submission_questions(request, submission_id):
     (error/warning/clean) və ``q`` (sual/variant mətnində axtarış). Cavab:
     render olunmuş <li> fraqmenti + filtr sayları + has_more.
     """
-    _ensure_teacher(request.user)
     organization = _require_organization(request)
     submission = get_object_or_404(QuestionSubmission, id=submission_id, organization=organization)
-    if submission.teacher_id != request.user.id and not is_exam_center_user(request.user):
+    is_center = is_exam_center_user(request.user) and submission.has_reached_center
+    if (
+        submission.teacher_id != request.user.id
+        and not is_center
+        and not can_review_submission_as_chair(request.user, submission)
+    ):
         raise Http404()
 
     questions = annotate_display_numbers(annotate_preview_flags(list(submission.parsed_snapshot or [])))
@@ -186,21 +199,31 @@ def question_submission_decide(request, submission_id):
                     'Göndəriş qəbul edildi — {count} sual "{bank}" bankına əlavə olundu.',
                 ).format(count=created_count, bank=bank.name),
             )
-        elif decision == "reject":
-            if not note:
+        elif decision in ("reject", "revision"):
+            if len(note) < MIN_REASON_LENGTH:
                 messages.error(
                     request,
                     pgettext(
                         "exams.view.question_submission.message",
-                        "Rədd üçün müəllimə qeyd yazın — nəyi düzəltməlidir.",
-                    ),
+                        "Rədd/düzəliş üçün müəllimə ən azı {count} simvolluq qeyd yazın — nəyi düzəltməlidir.",
+                    ).format(count=MIN_REASON_LENGTH),
                 )
                 return redirect("exams:question_submission_review", submission_id=submission.id)
-            reject_submission(submission, reviewer=request.user, note=note)
-            messages.success(
-                request,
-                pgettext("exams.view.question_submission.message", "Göndəriş rədd edildi və müəllimə bildirildi."),
-            )
+            if decision == "revision":
+                request_center_revision(submission, reviewer=request.user, note=note)
+                messages.success(
+                    request,
+                    pgettext(
+                        "exams.view.question_submission.message",
+                        "Düzəliş tələbi müəllimə göndərildi — düzəlişdən sonra yenidən kafedradan keçəcək.",
+                    ),
+                )
+            else:
+                reject_submission(submission, reviewer=request.user, note=note)
+                messages.success(
+                    request,
+                    pgettext("exams.view.question_submission.message", "Göndəriş rədd edildi və müəllimə bildirildi."),
+                )
         else:
             messages.error(request, pgettext("exams.view.question_submission.message", "Yanlış əməliyyat."))
             return redirect("exams:question_submission_review", submission_id=submission.id)

@@ -1,0 +1,19 @@
+{% comment %}Ağac qovşağı — `_tree.html` tərəfindən rekursiv çağırılır.{% endcomment %}
+<li role="none">
+    <button type="button" class="ems-tree__row{% if node.flagged %} ems-tree__row--flagged{% endif %}"
+            role="treeitem"
+            data-ems-tree-node="{{ node.id }}"
+            aria-selected="{% if node.selected %}true{% else %}false{% endif %}"
+            {% if node.children %}aria-expanded="{% if node.expanded %}true{% else %}false{% endif %}"{% endif %}>
+        <span class="ems-tree__twisty{% if not node.children %} ems-tree__twisty--leaf{% endif %}" aria-hidden="true">›</span>
+        <span class="ems-tree__label">{{ node.label }}</span>
+        {% if node.type_label %}<span class="ems-tree__type">{{ node.type_label }}</span>{% endif %}
+    </button>
+    {% if node.children %}
+        <ul class="ems-tree__group" role="group"{% if not node.expanded %} hidden{% endif %}>
+            {% for child in node.children %}
+                {% with node=child %}{% include "partials/ems_ui/_tree_node.html" %}{% endwith %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

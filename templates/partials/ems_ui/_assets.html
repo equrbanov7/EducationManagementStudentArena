@@ -1,0 +1,26 @@
+{% comment %}
+Paylaşılan komponent qatının asset-ləri — BİR DƏFƏ, kabinet qabığında yüklənir.
+
+NİYƏ BİR YERDƏ? 10 CSS + 3 JS faylını hər partial-da təkrar linkləmək
+lazımsız request və təkrar parse deməkdir. Qabıq (`accounts/profile.html`)
+bunu bir dəfə daxil edir; bütün bölmə partial-ları asset-in mövcudluğunu
+FƏRZ EDİR. Bölməyə-xas asset-lər əvvəlki kimi öz partial-larındadır.
+
+CSP: bütün fayllar xaricidir (`SELF`) — nonce lazım deyil, inline yoxdur.
+JS-lər `EMSReady`/`EMSDelegate` üzərində qurulub və idempotentdir; `defer`
+ilə yüklənir, `ems_ajax_init.js`-dən sonra işə düşür.
+{% endcomment %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/kpi.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/filter_bar.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/nav.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/timeline.css' %}?v=20260903-1">
+<link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-1">
+<script defer src="{% static 'js/ems_ui/overlay.js' %}?v=20260903-1"></script>
+<script defer src="{% static 'js/ems_ui/filter_bar.js' %}?v=20260903-1"></script>
+<script defer src="{% static 'js/ems_ui/nav.js' %}?v=20260903-1"></script>

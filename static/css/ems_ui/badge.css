@@ -1,0 +1,147 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/badge.css — Status badge (handoff §4 komponent 4)
+
+   MƏNBƏ: `core/ui/status_catalog.py` açar + etiket + TON verir; rəngi YALNIZ
+   bu fayl bilir. Şablonda `{% ems_status_badge "syllabus" row.status %}`.
+
+   QAYDA (handoff §7): status yalnız rənglə deyil, MƏTNlə də verilir — badge
+   həmişə etiketi yazır, rəng yalnız köməkçi siqnaldır.
+
+   KONTRAST: bütün fon/mətn cütləri WCAG AA (≥4.5) ölçülüb —
+     success 4.57 · warning 6.37 · danger 5.30 · info 8.01 · primary 7.15
+     neutral 9.45 · muted 6.92 (neutral-500 4.34 verirdi → neutral-600).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
+    border: 1px solid transparent;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+    text-wrap: pretty;
+}
+
+/* Seçilmiş/vurğulu variant — handoff: «Düzəliş tələb olunur» konturu 2px. */
+.ems-badge.is-strong {
+    border-width: 2px;
+}
+
+/* Uzun etiketlər (məs. «FİN təkrarlanır — eyni şəxs iki sətirdə») sarılsın. */
+.ems-badge--wrap {
+    white-space: normal;
+}
+
+/* Badge içindəki nöqtə — rəngi mətn rəngindən miras alır. */
+.ems-badge__dot {
+    width: 6px;
+    height: 6px;
+    flex: none;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ── Tonlar ─────────────────────────────────────────────────────────────── */
+.ems-badge--neutral {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    border-color: var(--ems-neutral-300);
+}
+
+/* Arxiv / kilid — neutral-500 AA-dan keçmirdi (4.34), neutral-600 keçir. */
+.ems-badge--muted {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border-color: var(--ems-neutral-300);
+}
+
+.ems-badge--info {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-badge--primary {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-badge--success {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+    border-color: var(--ems-success-bd);
+}
+
+.ems-badge--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    border-color: var(--ems-warning-bd);
+}
+
+.ems-badge--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+    border-color: var(--ems-danger-bd);
+}
+
+/* ── Uyğunluq alias-ları ────────────────────────────────────────────────────
+   `apps/accounts/views/syllabus/labels.py` artıq `submitted / review /
+   archived` ton adlarını qaytarır (`.syl-badge--*` üçün). Yeni badge həmin
+   dəyərləri də qəbul etsin ki, sillabus qatı KÖÇÜRÜLƏNDƏ Python tərəfi
+   dəyişməsin — ad fərqlidir, rəng eynidir.                                  */
+.ems-badge--submitted {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-badge--review {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    border-color: var(--ems-primary-200);
+}
+
+.ems-badge--archived {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    border-color: var(--ems-neutral-300);
+}
+
+/* ── «Növbəti addım» sətri — badge-in altındakı izah ────────────────────── */
+.ems-next-step {
+    margin-top: 3px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-next-step--warning {
+    color: var(--ems-warning-800);
+}
+
+.ems-next-step--muted {
+    color: var(--ems-neutral-400);
+}
+
+/* ── Arxiv rejimi qeydi (handoff §4: «arxiv — yalnız oxunuş») ───────────── */
+.ems-mode-note {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.ems-mode-note--archived {
+    color: var(--ems-warning-700);
+}
+
+.ems-mode-note--open {
+    color: var(--ems-primary-600);
+}

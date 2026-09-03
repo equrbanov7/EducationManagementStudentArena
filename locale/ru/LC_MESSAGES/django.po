@@ -59562,3 +59562,919 @@ msgstr "Студент"
 msgctxt "roles.org_display_name"
 msgid "Üzv"
 msgstr "Участник"
+
+msgctxt "ui.status"
+msgid "Naməlum"
+msgstr "Неизвестно"
+
+msgctxt "ui.status"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "ui.status"
+msgid "Təsdiq gözləyir"
+msgstr "Ожидает утверждения"
+
+msgctxt "ui.status"
+msgid "Təsdiqlənib"
+msgstr "Утверждено"
+
+msgctxt "ui.status"
+msgid "Düzəliş gözləyir"
+msgstr "Ожидает доработки"
+
+msgctxt "ui.status"
+msgid "Rədd edilib"
+msgstr "Отклонено"
+
+msgctxt "ui.status"
+msgid "Kilidlənib"
+msgstr "Заблокировано"
+
+msgctxt "ui.status"
+msgid "Düzəliş tələb olunur"
+msgstr "Требуется доработка"
+
+msgctxt "ui.status"
+msgid "Təqdim edilib"
+msgstr "Отправлено"
+
+msgctxt "ui.status"
+msgid "Baxışdadır"
+msgstr "На рассмотрении"
+
+msgctxt "ui.status"
+msgid "Arxivlənib"
+msgstr "В архиве"
+
+msgctxt "ui.status"
+msgid "Kafedra qeydlərini nəzərə alıb yenidən göndər"
+msgstr "Учтите замечания кафедры и отправьте повторно"
+
+msgctxt "ui.status"
+msgid "Rədd səbəbini oxuyub yeni versiya yarat"
+msgstr "Прочитайте причину отклонения и создайте новую версию"
+
+msgctxt "ui.status"
+msgid "Qaralamanı tamamlayıb təsdiqə göndər"
+msgstr "Завершите черновик и отправьте на утверждение"
+
+msgctxt "ui.status"
+msgid "Kafedra müdirinin baxışı gözlənilir"
+msgstr "Ожидается рассмотрение заведующим кафедрой"
+
+msgctxt "ui.status"
+msgid "Baxış nəticəsi gözlənilir"
+msgstr "Ожидается результат рассмотрения"
+
+msgctxt "ui.status"
+msgid "Əməl tələb olunmur — versiya kilidlidir"
+msgstr "Действий не требуется — версия заблокирована"
+
+msgctxt "ui.status"
+msgid "Arxiv qeydi — yalnız baxış"
+msgstr "Архивная запись — только просмотр"
+
+msgctxt "ui.status"
+msgid "Göndərilib"
+msgstr "Отправлено"
+
+msgctxt "ui.status"
+msgid "Qaytarılıb"
+msgstr "Возвращено"
+
+msgctxt "ui.status"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "ui.status"
+msgid "Baxılıb"
+msgstr "Проверено"
+
+msgctxt "ui.status"
+msgid "İradlı"
+msgstr "С замечаниями"
+
+msgctxt "ui.status"
+msgid "Normadan az (< 90%)"
+msgstr "Ниже нормы (< 90%)"
+
+msgctxt "ui.status"
+msgid "Normada (90–105%)"
+msgstr "В пределах нормы (90–105%)"
+
+msgctxt "ui.status"
+msgid "Norma üstü (105–125%)"
+msgstr "Выше нормы (105–125%)"
+
+msgctxt "ui.status"
+msgid "Kritik yüklü (> 125%)"
+msgstr "Критическая нагрузка (> 125%)"
+
+msgctxt "ui.status"
+msgid "normadan az"
+msgstr "ниже нормы"
+
+msgctxt "ui.status"
+msgid "normada"
+msgstr "в норме"
+
+msgctxt "ui.status"
+msgid "normadan artıq"
+msgstr "выше нормы"
+
+msgctxt "ui.status"
+msgid "boş tutum"
+msgstr "свободная ёмкость"
+
+msgctxt "ui.status"
+msgid "yüklü"
+msgstr "загружено"
+
+msgctxt "ui.status"
+msgid "risk"
+msgstr "риск"
+
+msgctxt "ui.status"
+msgid "Saat sayı düz deyil"
+msgstr "Количество часов неверно"
+
+msgctxt "ui.status"
+msgid "Qrup/tələbə sayı səhvdir"
+msgstr "Число групп/студентов неверно"
+
+msgctxt "ui.status"
+msgid "Fənn ixtisasım deyil"
+msgstr "Дисциплина вне моей специализации"
+
+msgctxt "ui.status"
+msgid "Norma həddindən artıqdır"
+msgstr "Норма превышена"
+
+msgctxt "ui.status"
+msgid "Kafedra baxışı"
+msgstr "Рассмотрение кафедрой"
+
+msgctxt "ui.status"
+msgid "Fakültə şurası"
+msgstr "Учёный совет факультета"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi"
+msgstr "Учебный отдел"
+
+msgctxt "ui.status"
+msgid "Müəllim gözləyir"
+msgstr "Ожидает преподавателя"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olunub"
+msgstr "Преподаватель назначен"
+
+msgctxt "ui.status"
+msgid "Jurnalı açılıb"
+msgstr "Журнал открыт"
+
+msgctxt "ui.status"
+msgid "Plandan açılış yaradıldı"
+msgstr "Открытия созданы из плана"
+
+msgctxt "ui.status"
+msgid "Kafedraya göndərildi"
+msgstr "Отправлено на кафедру"
+
+msgctxt "ui.status"
+msgid "Müəllim təyin olundu"
+msgstr "Преподаватели назначены"
+
+msgctxt "ui.status"
+msgid "Jurnal açıldı"
+msgstr "Журнал открыт"
+
+msgctxt "ui.status"
+msgid "Semestr kilidləndi"
+msgstr "Семестр заблокирован"
+
+msgctxt "ui.status"
+msgid "Uyğundur"
+msgstr "Соответствует"
+
+msgctxt "ui.status"
+msgid "FİN təkrarlanır — eyni şəxs iki sətirdə"
+msgstr "Дублируется ИНН — один человек в двух строках"
+
+msgctxt "ui.status"
+msgid "İxtisas kodu universitetdə tapılmadı"
+msgstr "Код специальности не найден в университете"
+
+msgctxt "ui.status"
+msgid "Attestatın surəti yüklənməyib"
+msgstr "Копия аттестата не загружена"
+
+msgctxt "ui.status"
+msgid "ATİS siyahısı yükləndi"
+msgstr "Список зачисления загружен"
+
+msgctxt "ui.status"
+msgid "Tədris şöbəsi yoxladı"
+msgstr "Учебный отдел проверил"
+
+msgctxt "ui.status"
+msgid "Fakültələrə paylandı"
+msgstr "Распределено по факультетам"
+
+msgctxt "ui.status"
+msgid "Qruplara təyin edildi"
+msgstr "Распределено по группам"
+
+msgctxt "ui.status"
+msgid "Qrupdan qrupa köçürmə"
+msgstr "Перевод из группы в группу"
+
+msgctxt "ui.status"
+msgid "İxtisasdan ixtisasa köçürmə"
+msgstr "Перевод между специальностями"
+
+msgctxt "ui.status"
+msgid "Əyanidən qiyabiyə (və ya tərsi)"
+msgstr "Смена очной и заочной формы"
+
+msgctxt "ui.status"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "ui.status"
+msgid "Bərpa"
+msgstr "Восстановление"
+
+msgctxt "ui.status"
+msgid "Xaric etmə"
+msgstr "Отчисление"
+
+msgctxt "ui.status"
+msgid "Vaxtında yazılıb"
+msgstr "Записано вовремя"
+
+msgctxt "ui.status"
+msgid "Gec yazılıb"
+msgstr "Записано с опозданием"
+
+msgctxt "ui.status"
+msgid "Jurnal boşdur"
+msgstr "Журнал пуст"
+
+msgctxt "ui.status"
+msgid "Saxlanıldı"
+msgstr "Сохранено"
+
+msgctxt "ui.status"
+msgid "Saxlanılır…"
+msgstr "Сохранение…"
+
+msgctxt "ui.status"
+msgid "Son dəyişiklik saxlanılmadı"
+msgstr "Последнее изменение не сохранено"
+
+msgctxt "ui.status"
+msgid "İnternet bağlantısı yoxdur"
+msgstr "Нет подключения к интернету"
+
+msgctxt "ui.status"
+msgid "Başqa versiya ilə konflikt yarandı"
+msgstr "Возник конфликт с другой версией"
+
+msgctxt "ui.status"
+msgid "Səhifədəki məlumat köhnəlmişdir"
+msgstr "Данные на странице устарели"
+
+msgctxt "ui.status"
+msgid "mərhələ açıqdır"
+msgstr "этап открыт"
+
+msgctxt "ui.status"
+msgid "arxiv — yalnız oxunuş"
+msgstr "архив — только чтение"
+
+msgctxt "ui.filters"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "ui.filters"
+msgid "Sıfırla"
+msgstr "Сбросить"
+
+msgctxt "ui.filters"
+msgid "Tətbiq olunmuş filtrlər"
+msgstr "Применённые фильтры"
+
+msgctxt "ui.filters"
+msgid "%(name)s filtrini götür"
+msgstr "Убрать фильтр «%(name)s»"
+
+msgctxt "ui.filters"
+msgid "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın."
+msgstr "Изменение не применено — нажмите «Применить»."
+
+msgctxt "ui.dialog"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "ui.dialog"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "ui.dialog"
+msgid "Göndər"
+msgstr "Отправить"
+
+msgctxt "ui.dialog"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "ui.dialog"
+msgid "Səbəb audit jurnalına yazılır və qərar zəncirində görünür."
+msgstr "Причина записывается в журнал аудита и видна в цепочке решений."
+
+msgctxt "ui.dialog"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr "Причина должна содержать не менее 20 символов — короткой заметки для аудита недостаточно."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bax və qərar ver"
+msgstr "Просмотреть и решить"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Başlıq, fənn, qrup və ya müəllim üzrə axtar…"
+msgstr "Поиск по названию, предмету, группе или преподавателю…"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bu şərtlərə uyğun sual dəsti tapılmadı."
+msgstr "По этим условиям пакет вопросов не найден."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün imtahan növləri"
+msgstr "Все виды экзаменов"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Bütün müəllimlər"
+msgstr "Все преподаватели"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilib"
+msgstr "Запрошена доработка"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtri təmizlə"
+msgstr "Сбросить фильтры"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Filtrlə"
+msgstr "Фильтровать"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Kafedra müdiri təyin edilməyib — dekanlığa yönləndirilib"
+msgstr "Заведующий кафедрой не назначен — направлено в деканат"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimdə"
+msgstr "У преподавателя"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Müəllimlərinizin imtahan sual dəstlərini təsdiqləyin — yalnız təsdiqdən sonra İmtahan Mərkəzinə gedir."
+msgstr "Утверждайте пакеты экзаменационных вопросов ваших преподавателей — они попадают в Экзаменационный центр только после утверждения."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz baxır"
+msgstr "Центр рассматривает"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Mərkəz qəbul etdi"
+msgstr "Центр принял"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Rədd edilib"
+msgstr "Отклонено"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Status filtri"
+msgstr "Фильтр по статусу"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Sual dəstlərində axtar"
+msgstr "Поиск по пакетам вопросов"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təmizlə"
+msgstr "Очистить"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyir"
+msgstr "Ожидает утверждения"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiq gözləyən sual dəsti yoxdur."
+msgstr "Нет пакетов вопросов, ожидающих утверждения."
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlənib — mərkəzdə"
+msgstr "Утверждено — в центре"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "«%(title)s» dəstinə bax"
+msgstr "Просмотреть пакет «%(title)s»"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "İmtahan növü"
+msgstr "Вид экзамена"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Təsdiqlədiyim"
+msgstr "Утверждённые мной"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Düzəliş istənilən"
+msgstr "Ожидает доработки"
+
+msgctxt "accounts.profile.question_chair_review"
+msgid "Ümumi"
+msgstr "Всего"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra düzəliş istəyib"
+msgstr "Заведующий кафедрой запросил доработку"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra müdirinə göndərilib"
+msgstr "Отправлено заведующему кафедрой"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra qeydi"
+msgstr "Примечание кафедры"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Kafedra təsdiqləyib — İmtahan Mərkəzində"
+msgstr "Утверждено заведующим кафедрой — в Экзаменационном центре"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Rədd edilib — düzəldib yenidən göndərə bilərsiniz"
+msgstr "Отклонено — вы можете исправить и отправить повторно"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Yolu izlə"
+msgstr "Отследить путь"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi baxır"
+msgstr "Экзаменационный центр рассматривает"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "İmtahan Mərkəzi düzəliş istəyib"
+msgstr "Экзаменационный центр запросил доработку"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz rədd edildi: {reason}"
+msgstr "Ваша отправка вопросов «{title}» отклонена: {reason}"
+
+msgctxt "exams.notification.question_submission"
+msgid "\"{title}\" sual göndərişiniz İmtahan Mərkəzi tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "Ваша отправка вопросов «{title}» возвращена Экзаменационным центром на доработку: {reason}"
+
+msgctxt "exams.service.question_submission.error"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "Причина должна содержать не менее {count} символов — преподаватель должен понимать, что нужно исправить."
+
+msgctxt "exams.template.question_chain"
+msgid "Dekanlıq təsdiqi"
+msgstr "Утверждение деканатом"
+
+msgctxt "exams.template.question_chain"
+msgid "Düzəldilib kafedraya yenidən göndərildi"
+msgstr "Исправлено и повторно отправлено заведующему кафедрой"
+
+msgctxt "exams.template.question_chain"
+msgid "Göndərişin yolu"
+msgstr "Путь заявки"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra düzəliş istədi"
+msgstr "Заведующий кафедрой запросил доработку"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra müdirinə göndərildi"
+msgstr "Отправлено заведующему кафедрой"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra rədd etdi"
+msgstr "Заведующий кафедрой отклонил"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra tarixçəsi"
+msgstr "История кафедры"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqi"
+msgstr "Утверждение кафедрой"
+
+msgctxt "exams.template.question_chain"
+msgid "Kafedra təsdiqlədi — İmtahan Mərkəzinə göndərildi"
+msgstr "Заведующий кафедрой утвердил — отправлено в Экзаменационный центр"
+
+msgctxt "exams.template.question_chain"
+msgid "Müəllim göndərdi"
+msgstr "Преподаватель отправил"
+
+msgctxt "exams.template.question_chain"
+msgid "Qəbul edildi"
+msgstr "Принято"
+
+msgctxt "exams.template.question_chain"
+msgid "Rədd edildi"
+msgstr "Отклонено"
+
+msgctxt "exams.template.question_chain"
+msgid "Yekun qərar"
+msgstr "Итоговое решение"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi"
+msgstr "Экзаменационный центр"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi baxışa götürdü"
+msgstr "Экзаменационный центр взял на рассмотрение"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi düzəliş istədi"
+msgstr "Экзаменационный центр запросил доработку"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi qəbul etdi"
+msgstr "Экзаменационный центр принял"
+
+msgctxt "exams.template.question_chain"
+msgid "İmtahan Mərkəzi rədd etdi"
+msgstr "Экзаменационный центр отклонил"
+
+msgctxt "exams.template.question_chair"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar dəyişdirilə bilməz."
+msgstr "Эта заявка больше не на этапе кафедры — решение изменить нельзя."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu kafedraya müdir təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirilib."
+msgstr "Заведующий на эту кафедру не назначен, поэтому утверждение направлено В ДЕКАНАТ."
+
+msgctxt "exams.template.question_chair"
+msgid "Bu şərtlərə uyğun sual tapılmadı."
+msgstr "По этим условиям вопрос не найден."
+
+msgctxt "exams.template.question_chair"
+msgid "Daha çox yüklənir…"
+msgstr "Загружается ещё…"
+
+msgctxt "exams.template.question_chair"
+msgid "Düzəliş istə"
+msgstr "Запросить доработку"
+
+msgctxt "exams.template.question_chair"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra qərarı"
+msgstr "Решение кафедры"
+
+msgctxt "exams.template.question_chair"
+msgid "Kafedra təsdiqi"
+msgstr "Утверждение кафедрой"
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllim nəyi düzəltməlidir? Səbəb ona bildiriş kimi gedəcək."
+msgstr "Что должен исправить преподаватель? Причина будет отправлена ему в виде уведомления."
+
+msgctxt "exams.template.question_chair"
+msgid "Müəllimin qeydi"
+msgstr "Примечание преподавателя"
+
+msgctxt "exams.template.question_chair"
+msgid "Növbəyə qayıt"
+msgstr "Вернуться в очередь"
+
+msgctxt "exams.template.question_chair"
+msgid "Rədd et"
+msgstr "Отклонить"
+
+msgctxt "exams.template.question_chair"
+msgid "Rəddin səbəbini yazın — göndəriş İmtahan Mərkəzinə çatmayacaq."
+msgstr "Укажите причину отклонения — заявка не попадёт в Экзаменационный центр."
+
+msgctxt "exams.template.question_chair"
+msgid "Sual filtri"
+msgstr "Фильтр вопросов"
+
+msgctxt "exams.template.question_chair"
+msgid "Sual və ya variant mətnində axtar…"
+msgstr "Поиск по тексту вопроса или варианта…"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallar və xəbərdarlıqlar"
+msgstr "Вопросы и предупреждения"
+
+msgctxt "exams.template.question_chair"
+msgid "Suallarda axtar"
+msgstr "Поиск по вопросам"
+
+msgctxt "exams.template.question_chair"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "exams.template.question_chair"
+msgid "Təmiz"
+msgstr "Чистые"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiq et"
+msgstr "Утвердить"
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqdən sonra dəst İmtahan Mərkəzinə göndəriləcək. Düzəliş və rədd üçün səbəb məcburidir."
+msgstr "После утверждения пакет будет отправлен в Экзаменационный центр. Для доработки или отклонения причина обязательна."
+
+msgctxt "exams.template.question_chair"
+msgid "Təsdiqlə"
+msgstr "Утвердить"
+
+msgctxt "exams.template.question_chair"
+msgid "Xəbərdarlıq"
+msgstr "Предупреждение"
+
+msgctxt "exams.template.question_chair"
+msgid "Xətalı"
+msgstr "С ошибками"
+
+msgctxt "exams.template.question_chair"
+msgid "məs. 3-cü sualda düzgün cavab işarələnməyib, 7-ci sual mövzudan kənardır…"
+msgstr "напр. в вопросе 3 не отмечен правильный ответ, вопрос 7 не по теме…"
+
+msgctxt "exams.template.question_chair"
+msgid "Ümumi sual sayı"
+msgstr "Общее число вопросов"
+
+msgctxt "exams.template.question_chair"
+msgid "İmtina"
+msgstr "Отмена"
+
+msgctxt "exams.template.question_chair"
+msgid "Ən azı {min} simvol — hazırda {n}."
+msgstr "Минимум {min} символов — сейчас {n}."
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş istə"
+msgstr "Запросить доработку"
+
+msgctxt "exams.template.question_submission"
+msgid "Düzəliş üçün geri qaytar"
+msgstr "Вернуть на доработку"
+
+msgctxt "exams.template.question_submission"
+msgid "Dəst rədd edilir — müəllim istəsə düzəldib yenidən kafedra təsdiqinə göndərə bilər."
+msgstr "Пакет будет отклонён — при желании преподаватель может исправить и отправить его на утверждение кафедрой повторно."
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra müdirinə göndər"
+msgstr "Отправить заведующему кафедрой"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra qeydi"
+msgstr "Примечание кафедры"
+
+msgctxt "exams.template.question_submission"
+msgid "Kafedra təsdiqinə sual göndər"
+msgstr "Отправить вопросы на утверждение кафедрой"
+
+msgctxt "exams.template.question_submission"
+msgid "Müəllim düzəldib yenidən göndərəcək — düzəlişdən sonra dəst TƏKRAR kafedra təsdiqindən keçir."
+msgstr "Преподаватель исправит и отправит повторно — после исправления пакет СНОВА проходит утверждение кафедрой."
+
+msgctxt "exams.template.question_submission"
+msgid "Rədd et"
+msgstr "Отклонить"
+
+msgctxt "exams.template.question_submission"
+msgid "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra kafedra müdirinə göndərin; təsdiqdən sonra İmtahan Mərkəzinə çatacaq."
+msgstr "Введите вопросы или загрузите файл, просмотрите их — проверьте предупреждения, затем отправьте заведующему кафедрой; после утверждения они попадут в Экзаменационный центр."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Düzəliş tələbi müəllimə göndərildi — düzəlişdən sonra yenidən kafedradan keçəcək."
+msgstr "Запрос на доработку отправлен преподавателю — после исправления заявка снова пройдёт через кафедру."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş kafedra müdirinin təsdiqinə göndərildi ({count} sual, {groups} qrup)."
+msgstr "Заявка отправлена на утверждение заведующему кафедрой ({count} вопросов, {groups} групп)."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Göndəriş yeniləndi və kafedra müdirinin təsdiqinə təkrar göndərildi."
+msgstr "Заявка обновлена и повторно отправлена на утверждение заведующему кафедрой."
+
+msgctxt "exams.view.question_submission.message"
+msgid "Rədd/düzəliş üçün müəllimə ən azı {count} simvolluq qeyd yazın — nəyi düzəltməlidir."
+msgstr "Для отклонения или доработки напишите преподавателю примечание не менее {count} символов — что нужно исправить."
+
+msgctxt "profile.sidebar"
+msgid "Sual təsdiqi"
+msgstr "Утверждение вопросов"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Səbəb ən azı {count} simvol olmalıdır — müəllim nəyi düzəltməli olduğunu bilməlidir."
+msgstr "Причина должна содержать не менее {count} символов — преподаватель должен понимать, что нужно исправить."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra təsdiqli sual göndərişi"
+msgstr "Отправка вопросов, утверждённая кафедрой"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} — \"{title}\" ({subject} · {group}, {count} sual) kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "{teacher} — «{title}» ({subject} · {group}, {count} вопросов) утверждена кафедрой и отправлена в Экзаменационный центр."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Sual dəsti kafedra təsdiqini gözləyir"
+msgstr "Пакет вопросов ожидает утверждения кафедрой"
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini təsdiqə göndərdi. Kafedra müdiri təyin edilmədiyi üçün təsdiq DEKANLIĞA yönləndirildi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} отправил(а) пакет вопросов «{title}» на утверждение. Так как заведующий кафедрой не назначен, утверждение направлено В ДЕКАНАТ ({subject} · {group}, {count} вопросов)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "{teacher} \"{title}\" sual dəstini kafedra təsdiqinə göndərdi ({subject} · {group}, {count} sual)."
+msgstr "{teacher} отправил(а) пакет вопросов «{title}» на утверждение кафедрой ({subject} · {group}, {count} вопросов)."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Bu göndəriş artıq kafedra mərhələsində deyil — qərar verilə bilməz."
+msgstr "Эта заявка больше не на этапе кафедры — решение принять нельзя."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstinizi təsdiqlədi"
+msgstr "Кафедра утвердила ваш пакет вопросов"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "Ваш пакет вопросов «{title}» утверждён кафедрой и отправлен в Экзаменационный центр."
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra düzəliş istədi"
+msgstr "Кафедра запросила доработку"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən düzəliş üçün qaytarıldı: {reason}"
+msgstr "Ваш пакет вопросов «{title}» возвращён кафедрой на доработку: {reason}"
+
+msgctxt "exams.service.question_chair_review"
+msgid "Kafedra sual dəstini rədd etdi"
+msgstr "Кафедра отклонила пакет вопросов"
+
+msgctxt "exams.service.question_chair_review"
+msgid "\"{title}\" sual dəstiniz kafedra tərəfindən rədd edildi: {reason}"
+msgstr "Ваш пакет вопросов «{title}» отклонён кафедрой: {reason}"
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti təsdiqləndi və İmtahan Mərkəzinə göndərildi."
+msgstr "Пакет вопросов утверждён и отправлен в Экзаменационный центр."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Düzəliş tələbi müəllimə göndərildi."
+msgstr "Запрос на доработку отправлен преподавателю."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Sual dəsti rədd edildi və müəllimə bildirildi."
+msgstr "Пакет вопросов отклонён, преподаватель уведомлён."
+
+msgctxt "exams.view.question_submission.chair"
+msgid "Yanlış əməliyyat."
+msgstr "Некорректное действие."
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_unit"
+msgstr "Кафедральное подразделение"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_reviewer"
+msgstr "Проверяющий от кафедры"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_decision"
+msgstr "Решение кафедры"
+
+msgctxt "exams.model.question_submission.field"
+msgid "chair_note"
+msgstr "Примечание кафедры"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "draft"
+msgstr "Черновик"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "submitted_to_chair"
+msgstr "Отправлено заведующему кафедрой"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_revision"
+msgstr "Заведующий кафедрой запросил доработку"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "chair_approved"
+msgstr "Утверждено заведующим кафедрой"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_review"
+msgstr "На рассмотрении Экзаменационного центра"
+
+msgctxt "exams.model.question_submission.choice.status"
+msgid "center_revision"
+msgstr "Экзаменационный центр запросил доработку"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "approved"
+msgstr "Утверждено"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "rejected"
+msgstr "Отклонено"
+
+msgctxt "exams.model.question_submission.choice.chair_decision"
+msgid "revision"
+msgstr "Запрошена доработка"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "submitted"
+msgstr "Отправлено"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "resubmitted"
+msgstr "Повторно отправлено"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_approved"
+msgstr "Кафедра утвердила"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_revision"
+msgstr "Кафедра запросила доработку"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "chair_rejected"
+msgstr "Кафедра отклонила"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_opened"
+msgstr "Центр взял на рассмотрение"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_accepted"
+msgstr "Центр принял"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_revision"
+msgstr "Центр запросил доработку"
+
+msgctxt "exams.model.question_submission_event.choice"
+msgid "center_rejected"
+msgstr "Центр отклонил"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "submission"
+msgstr "Отправка"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "organization"
+msgstr "Организация"
+
+msgctxt "exams.model.question_submission_event.field"
+msgid "actor"
+msgstr "Исполнитель"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "singular"
+msgstr "Событие отправки вопросов"
+
+msgctxt "exams.model.question_submission_event.meta"
+msgid "plural"
+msgstr "События отправки вопросов"
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_chair_review_denied"
+msgstr "У вас нет прав рассматривать эту отправку вопросов в качестве заведующего кафедрой."
+
+msgctxt "exams.service.access.permission"
+msgid "question_submission_requires_chair_approval"
+msgstr "Эта отправка вопросов должна быть утверждена заведующим кафедрой, прежде чем попасть в Экзаменационный центр."
