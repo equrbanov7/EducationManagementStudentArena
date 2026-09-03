@@ -64351,3 +64351,11 @@ msgstr "Kabule git"
 msgctxt "accounts.dashboard"
 msgid "Struktura keç"
 msgstr "Yapıya git"
+
+msgctxt "profile.shell"
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "Bu bölüme erişim izniniz yok."
+
+msgctxt "profile.shell"
+msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+msgstr "İstenen bölüm mevcut değil veya rolünüze açık değil — ana sayfaya yönlendirildiniz."

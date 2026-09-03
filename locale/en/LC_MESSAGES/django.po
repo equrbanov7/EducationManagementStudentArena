@@ -64623,3 +64623,11 @@ msgstr "Go to admission"
 msgctxt "accounts.dashboard"
 msgid "Struktura keç"
 msgstr "Go to the structure"
+
+msgctxt "profile.shell"
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "You do not have access to this section."
+
+msgctxt "profile.shell"
+msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+msgstr "The requested section does not exist or is not open to your role — you were returned to the home page."

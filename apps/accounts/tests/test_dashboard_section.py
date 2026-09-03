@@ -291,6 +291,18 @@ class DashboardWidgetVisibilityTest(DashboardSectionBase):
         keys = self.widget_keys(self.open_dashboard("rector"))
         self.assertIn("workload-overview", keys)
 
+    def test_forbidden_full_page_section_shows_notice(self):
+        """QA dalğa-2 W2-8: icazəsiz bölmə səssiz fallback etmir — xəbərdarlıq var."""
+        client = self.client_for(self.actors["student"])
+        response = client.get(reverse("accounts:profile"), {"section": "workload-center"})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["section_denied"])
+        self.assertNotEqual(response.context["active_section"], "workload-center")
+        self.assertContains(response, 'data-section-denied="1"')
+        ok = client.get(reverse("accounts:profile"), {"section": "dashboard"})
+        self.assertFalse(ok.context["section_denied"])
+        self.assertNotContains(ok, 'data-section-denied="1"')
+
     def test_student_sees_no_design_cards(self):
         from apps.accounts.views.profile._sections.dashboard_staff_widgets import _DESIGN_LINK_CARDS
 

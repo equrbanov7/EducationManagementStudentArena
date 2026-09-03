@@ -55,6 +55,7 @@ class _Stage4Mixin:
             "primary_user_role_label": self.primary_user_role_label,
             "active_section": self.active_section,
             "active_section_title": self.active_section_title,
+            "section_denied": self.section_denied,
             "direct_profile_section": self.direct_profile_section,
             "direct_profile_section_template": self.direct_profile_section_templates.get(
                 self.direct_profile_section, ""
