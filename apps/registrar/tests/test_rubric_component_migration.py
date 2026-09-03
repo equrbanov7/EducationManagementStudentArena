@@ -9,7 +9,14 @@ from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.recorder import MigrationRecorder
 from django.test import TransactionTestCase
 
+import pytest
+
 from core.rls import bypass_rls
+
+# Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
+# paralel miqrasiyası altında 300 s qlobal limiti keçə bilir (Develop run
+# 33778014237 flake-i); modul üçün limit ayrıca qaldırılır.
+pytestmark = pytest.mark.timeout(1200)
 
 
 class CriterionComponentMigrationTest(TransactionTestCase):
