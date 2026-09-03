@@ -22,7 +22,7 @@
   "ru": {
    "bad_placeholder": 0,
    "extra_vs_source": 24,
-   "identity": 124,
+   "identity": 125,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "total": 10733,
@@ -31,7 +31,7 @@
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 1,
-   "identity": 290,
+   "identity": 306,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "total": 10710,

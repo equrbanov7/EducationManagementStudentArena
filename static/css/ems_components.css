@@ -167,3 +167,16 @@ textarea:focus-visible,
     left: 0;
     top: 0;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Klaviatura fokus halqası — sol menyu linkləri + off-canvas bağlama düyməsi
+   (PHASE21 UI QA, U-9). Hər ikisinin öz CSS faylı ölçü budcəsi ilə
+   DONDURULUB (`profile/sidebar.css`, `navbar.css`) — qayda buraya, dondurulmamış
+   ortaq fayla yazılır. `ems_components.css` bazadan (`navbar.css`, `sidebar.css`)
+   SONRA yüklənir, ona görə əlavə spesifiklik lazım deyil.
+   ────────────────────────────────────────────────────────────────────────── */
+.sidebar-menu-link:focus-visible,
+.blog-header__toggle:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}

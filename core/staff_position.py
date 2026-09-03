@@ -42,13 +42,19 @@ def is_placeholder_role_name(role_name) -> bool:
 def visible_role_label(role_name, role_label="") -> str:
     """Rol etiketi — doldurucu rol üçün boş sətir.
 
-    ``role_label`` verilməyibsə heç nə uydurulmur: doldurucu olmayan rol üçün
-    ad özü qaytarılır ki, çağıran tərəf öz etiket xəritəsini tətbiq edə bilsin.
+    2026-09-03: ``role_label`` seed zamanı yazılmış (dəyişməmiş) İngiliscə
+    default dəyərdirsə ``core.roles.resolve_seeded_role_label`` onu AZ
+    etiketlə əvəzləyir (PHASE21 U-2 — kabinetdə İngiliscə rol adları).
+    Admin ``Role.display_name``-i fərqli bir mətnə dəyişibsə TOXUNULMUR.
+    ``role_label`` heç nə vermirsə (nə seed, nə admin) ad özü qaytarılır.
     """
 
     if is_placeholder_role_name(role_name):
         return ""
-    label = str(role_label or "").strip()
+
+    from core.roles import resolve_seeded_role_label
+
+    label = str(resolve_seeded_role_label(role_name, role_label) or "").strip()
     if label:
         return label
     return str(role_name or "").strip()

@@ -520,14 +520,12 @@ msgstr ""
 "области."
 
 #: apps/accounts/models.py:111
-#, fuzzy
 #| msgid "Təyin edilməyib"
 msgctxt "accounts.gender"
 msgid "Təyin edilməyib"
 msgstr "Не назначено"
 
 #: apps/accounts/models.py:112
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Kişi"
 msgctxt "accounts.gender"
@@ -535,7 +533,6 @@ msgid "Kişi"
 msgstr "Мужской"
 
 #: apps/accounts/models.py:113
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Qadın"
 msgctxt "accounts.gender"
@@ -842,13 +839,13 @@ msgid "Təsdiq kodu göndər"
 msgstr "Отправить код подтверждения"
 
 #: apps/accounts/templates/accounts/first_login_set_password.html:60
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "profile.password_otp"
 #| msgid ""
 #| "Birdəfəlik kod <strong>%(email)s</strong> ünvanına göndəriləcək."
 msgctxt "accounts.first_login"
 msgid "Təsdiq kodu <strong>%(email)s</strong> ünvanına göndərildi."
-msgstr "Одноразовый код будет отправлен на <strong>%(email)s</strong>."
+msgstr "Код подтверждения отправлен на адрес <strong>%(email)s</strong>."
 
 #: apps/accounts/templates/accounts/first_login_set_password.html:70
 msgctxt "accounts.first_login"
@@ -1273,12 +1270,11 @@ msgstr "All"
 
 #: apps/accounts/templates/accounts/my_results.html:30
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:28
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Akademik il"
 msgctxt "profile.results.academic"
 msgid "Akademik"
-msgstr "Учебный год"
+msgstr "Академический"
 
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
@@ -1312,7 +1308,6 @@ msgstr "Поиск"
 
 #: apps/accounts/templates/accounts/my_results.html:79
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:71
-#, fuzzy
 #| msgid "Tədris ili"
 msgctxt "profile.results.academic"
 msgid "Tədris ili"
@@ -1320,7 +1315,6 @@ msgstr "Учебный год"
 
 #: apps/accounts/templates/accounts/my_results.html:81
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:78
-#, fuzzy
 #| msgctxt "accounts.profile.question_submissions"
 #| msgid "Bütün illər"
 msgctxt "profile.results.academic"
@@ -1329,7 +1323,6 @@ msgstr "Все годы"
 
 #: apps/accounts/templates/accounts/my_results.html:88
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:87
-#, fuzzy
 #| msgid "Semestr"
 msgctxt "profile.results.academic"
 msgid "Semestr"
@@ -1337,7 +1330,6 @@ msgstr "Семестр"
 
 #: apps/accounts/templates/accounts/my_results.html:90
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:94
-#, fuzzy
 #| msgctxt "accounts.profile.question_submissions"
 #| msgid "Bütün semestrlər"
 msgctxt "profile.results.academic"
@@ -1654,42 +1646,36 @@ msgstr ""
 "фото/PDF экзаменационного листа и примечание."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:21
-#, fuzzy
 #| msgid "Təşkilat"
 msgctxt "registrar.exam_score_entry"
 msgid "Təşkilat"
 msgstr "Организация"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:38
-#, fuzzy
 #| msgid "Tədris ili"
 msgctxt "registrar.exam_score_entry"
 msgid "Tədris ili"
 msgstr "Учебный год"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:54
-#, fuzzy
 #| msgid "Semestr"
 msgctxt "registrar.exam_score_entry"
 msgid "Semestr"
 msgstr "Семестр"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:72
-#, fuzzy
 #| msgid "Fənn"
 msgctxt "registrar.exam_score_entry"
 msgid "Fənn"
 msgstr "Предмет"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:90
-#, fuzzy
 #| msgid "Qrup"
 msgctxt "registrar.exam_score_entry"
 msgid "Qrup"
 msgstr "Группа"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:105
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Təşkilat tapılmadı."
 msgctxt "registrar.exam_score_entry"
@@ -1697,7 +1683,6 @@ msgid "Təşkilat tapılmadı."
 msgstr "Организация не найдена."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:107
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid ""
 #| "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın."
@@ -1707,36 +1692,32 @@ msgstr ""
 "Для этой организации нет учебного семестра — сначала создайте семестр."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:109
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Bu semestrdə hələ fənn açılışı yoxdur."
 msgctxt "registrar.exam_score_entry"
 msgid "Bu semestrdə fənn açılışı yoxdur."
-msgstr "В этом семестре пока нет курсов."
+msgstr "В этом семестре нет открытых предметов."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:111
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "Uyğun fənn açılışı tapılmadı."
 msgctxt "registrar.exam_score_entry"
 msgid "Bu fənn üçün qrup açılışı tapılmadı."
-msgstr "Подходящих предметов не найдено."
+msgstr "Для этого предмета не найдено открытой группы."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:116
-#, fuzzy
 #| msgctxt "exams.final_center.report"
 #| msgid "Tələbə sayı"
 msgctxt "registrar.exam_score_entry"
 msgid "Tələbə balları"
-msgstr "Количество студентов"
+msgstr "Баллы студентов"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:117
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Maksimum yaş"
 msgctxt "registrar.exam_score_entry"
 msgid "maksimum"
-msgstr "Максимальный возраст"
+msgstr "максимум"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:121
 msgctxt "registrar.exam_score_entry"
@@ -1749,30 +1730,26 @@ msgstr ""
 "можно выставить здесь."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:125
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Bu planda hələ fənn yoxdur."
 msgctxt "registrar.exam_score_entry"
 msgid "Bu qrupda qeydiyyatlı tələbə yoxdur."
-msgstr "В этом плане пока нет предметов."
+msgstr "В этой группе нет зачисленных студентов."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:139
-#, fuzzy
 #| msgid "Tələbə"
 msgctxt "registrar.exam_score_entry"
 msgid "Tələbə"
 msgstr "Студент"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:140
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Giriş balı"
 msgctxt "registrar.exam_score_entry"
 msgid "Giriş balı"
-msgstr "Входной балл"
+msgstr "Вступительный балл"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:141
-#, fuzzy
 #| msgctxt "appeals.template"
 #| msgid "İmtahan balı"
 msgctxt "registrar.exam_score_entry"
@@ -1780,7 +1757,6 @@ msgid "İmtahan balı"
 msgstr "Балл за экзамен"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:142
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Yekun"
 msgctxt "registrar.exam_score_entry"
@@ -1793,11 +1769,10 @@ msgid "Sübut və qeyd"
 msgstr "Доказательство и примечание"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:156
-#, fuzzy
 #| msgid "Qalan cəhd"
 msgctxt "registrar.exam_score_entry"
 msgid "cəhd"
-msgstr "Осталось попыток"
+msgstr "попытка"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:158
 msgctxt "registrar.exam_score_entry"
@@ -1805,21 +1780,18 @@ msgid "rəsmi"
 msgstr "официально"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:158
-#, fuzzy
 #| msgid "✓ Əlavə olundu"
 msgctxt "registrar.exam_score_entry"
 msgid "ləğv olundu"
-msgstr "✓ Добавлено"
+msgstr "отменено"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:177
-#, fuzzy
 #| msgid "Səbəb"
 msgctxt "registrar.exam_score_entry"
 msgid "Səbəb"
 msgstr "Причина"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:186
-#, fuzzy
 #| msgid "Qeyd"
 msgctxt "registrar.exam_score_entry"
 msgid "Qeyd"
@@ -1831,12 +1803,11 @@ msgid "Şəkil / PDF"
 msgstr "Изображение / PDF"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:198
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Audit tarixçəsi"
 msgctxt "registrar.exam_score_entry"
 msgid "Daxiletmə tarixçəsi"
-msgstr "История аудита"
+msgstr "История ввода"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:207
 msgctxt "registrar.exam_score_entry"
@@ -1855,12 +1826,11 @@ msgstr ""
 "примечание и документ. Оставленное пустым поле не затрагивается."
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:223
-#, fuzzy
 #| msgctxt "appeals.template"
 #| msgid "Qərarları yadda saxla"
 msgctxt "registrar.exam_score_entry"
 msgid "Balları yadda saxla"
-msgstr "Сохранить решения"
+msgstr "Сохранить баллы"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:233
 msgctxt "registrar.exam_score_entry"
@@ -1872,12 +1842,12 @@ msgstr ""
 "требуются причина, примечание и документ. Продолжить?"
 
 #: apps/accounts/templates/accounts/partials/_exam_score_entry_content.html:234
-#, fuzzy
 #| msgctxt "accounts.org.message"
 #| msgid "Təşkilatdan çıxmaq üçün səbəb qeyd etmək məcburidir."
 msgctxt "registrar.exam_score_entry"
 msgid "Dəyişdirilən bal üçün səbəb, qeyd və sənəd doldurulmalıdır."
-msgstr "Необходимо указать причину выхода из организации."
+msgstr ""
+"Для изменённого балла необходимо указать причину, примечание и документ."
 
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:5
 msgctxt "accounts.grading_queue_page"
@@ -2172,28 +2142,24 @@ msgstr ""
 "кафедре."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:26
-#, fuzzy
 #| msgid "Təşkilat"
 msgctxt "registrar.journal_close"
 msgid "Təşkilat"
 msgstr "Организация"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:43
-#, fuzzy
 #| msgid "Tədris ili"
 msgctxt "registrar.journal_close"
 msgid "Tədris ili"
 msgstr "Учебный год"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:59
-#, fuzzy
 #| msgid "Semestr"
 msgctxt "registrar.journal_close"
 msgid "Semestr"
 msgstr "Семестр"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:73
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Təşkilat tapılmadı."
 msgctxt "registrar.journal_close"
@@ -2201,7 +2167,6 @@ msgid "Təşkilat tapılmadı."
 msgstr "Организация не найдена."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:75
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid ""
 #| "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın."
@@ -2211,15 +2176,13 @@ msgstr ""
 "Для этой организации нет учебного семестра — сначала создайте семестр."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:81
-#, fuzzy
 #| msgid "Jurnallarım"
 msgctxt "registrar.journal_close"
 msgid "Jurnalları bağla"
-msgstr "Мои журналы"
+msgstr "Закрыть журналы"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:92
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:170
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Əhatə"
 msgctxt "registrar.journal_close"
@@ -2229,7 +2192,6 @@ msgstr "Охват"
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:95
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:173
 #: apps/registrar/models/journal_close_notice.py:24
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Bütün universitet"
 msgctxt "registrar.journal_close"
@@ -2240,7 +2202,6 @@ msgstr "Весь университет"
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:174
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:241
 #: apps/registrar/models/journal_close_notice.py:25
-#, fuzzy
 #| msgid "Fakültə"
 msgctxt "registrar.journal_close"
 msgid "Fakültə"
@@ -2250,7 +2211,6 @@ msgstr "Факультет"
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:175
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:242
 #: apps/registrar/models/journal_close_notice.py:26
-#, fuzzy
 #| msgid "Kafedra"
 msgctxt "registrar.journal_close"
 msgid "Kafedra"
@@ -2258,30 +2218,26 @@ msgstr "Кафедра"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:102
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:180
-#, fuzzy
 #| msgid "Bölmə"
 msgctxt "registrar.journal_close"
 msgid "Bölmə"
-msgstr "Раздел"
+msgstr "Подразделение"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:109
-#, fuzzy
 #| msgctxt "profile.edit_v2"
 #| msgid "Önizləmə"
 msgctxt "registrar.journal_close"
 msgid "Önizləməni yenilə"
-msgstr "Предпросмотр"
+msgstr "Обновить предпросмотр"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:115
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Cəmi 100 bal"
 msgctxt "registrar.journal_close"
 msgid "Cəmi jurnal"
-msgstr "Всего 100 баллов"
+msgstr "Всего журналов"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:116
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Açıq"
 msgctxt "registrar.journal_close"
@@ -2289,11 +2245,10 @@ msgid "Açıq"
 msgstr "Открыто"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:117
-#, fuzzy
 #| msgid "Bağlantı"
 msgctxt "registrar.journal_close"
 msgid "Bağlı"
-msgstr "Соединение"
+msgstr "Закрыто"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:131
 msgctxt "registrar.journal_close"
@@ -2301,11 +2256,10 @@ msgid "Bu əhatədə jurnalları bağla"
 msgstr "Закрыть журналы в этом охвате"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:144
-#, fuzzy
 #| msgid "Silinmə səbəbi (məcburi)"
 msgctxt "registrar.journal_close"
 msgid "Açma səbəbi (məcburi)"
-msgstr "Причина удаления (обязательно)"
+msgstr "Причина разблокировки (обязательно)"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:146
 msgctxt "registrar.journal_close"
@@ -2322,12 +2276,11 @@ msgstr ""
 "закрытом журнале используется путь «Исправление журнала» (с PDF-документом)."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:156
-#, fuzzy
 #| msgctxt "exams.template.teacher_questions_bank"
 #| msgid "Bütün xəbərdarlıqları seç"
 msgctxt "registrar.journal_close"
 msgid "Bağlanma xəbərdarlığı"
-msgstr "Выбрать все с предупреждениями"
+msgstr "Предупреждение о закрытии"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:158
 msgctxt "registrar.journal_close"
@@ -2339,28 +2292,25 @@ msgstr ""
 "экзаменационного центра о коллоквиуме."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:188
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "bağlanış tarixi"
 msgctxt "registrar.journal_close"
 msgid "Bağlanma tarixi"
-msgstr "дата закрытия"
+msgstr "Дата закрытия"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:192
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Müəllim (opsional)"
 msgctxt "registrar.journal_close"
 msgid "Öz mətniniz (opsional)"
-msgstr "Преподаватель (необязательно)"
+msgstr "Ваш собственный текст (необязательно)"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:195
-#, fuzzy
 #| msgctxt "exams.template.test_question_bank"
 #| msgid "Xəbərdarlıqları göstər"
 msgctxt "registrar.journal_close"
 msgid "Xəbərdarlığı göndər"
-msgstr "Показать предупреждения"
+msgstr "Отправить предупреждение"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:205
 #| msgid "Aktiv"
@@ -2369,7 +2319,6 @@ msgid "Aktiv"
 msgstr "Активен"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:205
-#, fuzzy
 #| msgctxt "accounts.superadmin_exam_rooms"
 #| msgid "Söndürülüb"
 msgctxt "registrar.journal_close"
@@ -2377,22 +2326,19 @@ msgid "Söndürülüb"
 msgstr "Отключён"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:210
-#, fuzzy
 #| msgid "Redaktə"
 msgctxt "registrar.journal_close"
 msgid "Redaktə"
 msgstr "Изменить"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:218
-#, fuzzy
 #| msgctxt "accounts.superadmin_exam_rooms"
 #| msgid "Söndürülüb"
 msgctxt "registrar.journal_close"
 msgid "Söndür"
-msgstr "Отключён"
+msgstr "Отключить"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:218
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Aktivləşdir"
 msgctxt "registrar.journal_close"
@@ -2400,22 +2346,19 @@ msgid "Aktivləşdir"
 msgstr "Активировать"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:226
-#, fuzzy
 #| msgid "Sil"
 msgctxt "registrar.journal_close"
 msgid "Sil"
 msgstr "Удалить"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:233
-#, fuzzy
 #| msgctxt "registrar.schedule"
 #| msgid "Bu semestr üçün hələ cədvəl slotu yoxdur."
 msgctxt "registrar.journal_close"
 msgid "Bu semestr üçün hələ xəbərdarlıq yoxdur."
-msgstr "Для этого семестра пока нет слотов расписания."
+msgstr "Для этого семестра пока нет предупреждений."
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:243
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid ""
 #| "Bu pəncərəni aktivləşdirsəniz, aralıq açıq olduqda müəllimlər bal yaza "
@@ -2425,8 +2368,8 @@ msgid ""
 "Bu əhatədəki bütün jurnallar bağlanacaq və müəllimlər bal yaza bilməyəcək. "
 "Davam edilsin?"
 msgstr ""
-"Если вы активируете это окно, преподаватели смогут выставлять баллы, пока "
-"интервал открыт. Продолжить?"
+"Все журналы в этой области будут закрыты, и преподаватели не смогут "
+"выставлять оценки. Продолжить?"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:244
 msgctxt "registrar.journal_close"
@@ -2434,11 +2377,10 @@ msgid "Bu əhatədəki bağlı jurnallar yenidən açılacaq. Davam edilsin?"
 msgstr "Закрытые журналы в этом охвате будут открыты заново. Продолжить?"
 
 #: apps/accounts/templates/accounts/partials/_journal_close_content.html:245
-#, fuzzy
 #| msgid "Xəbərdarlıq"
 msgctxt "registrar.journal_close"
 msgid "Xəbərdarlıq silinsin?"
-msgstr "Предупреждение"
+msgstr "Удалить предупреждение?"
 
 #: apps/accounts/templates/accounts/partials/_kollokvium_windows_content.html:18
 msgctxt "registrar.kollokvium_window"
@@ -3677,7 +3619,6 @@ msgid "Qiymətləndirmə"
 msgstr "Оценивание"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:155
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Jurnal"
 msgid "Jurnal"
@@ -3732,17 +3673,15 @@ msgid "Qiymətləndirmə və nəticə axınları"
 msgstr "Потоки оценивания и результатов"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:186
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "Jurnalda sənədli düzəliş etmək"
 msgid "Jurnal baxışı və sənədli düzəlişlər"
-msgstr "Внесение документированной правки в журнал"
+msgstr "Просмотр журнала и документальные исправления"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:188
-#, fuzzy
 #| msgid "Kurs yaradılması və kurs idarəetməsi"
 msgid "Tələbə qruplarının yaradılması və idarəsi"
-msgstr "Создание курсов и управление курсами"
+msgstr "Создание и управление группами студентов"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:190
 msgid "İmtahan idarəetməsi və nəzarət"
@@ -7690,20 +7629,18 @@ msgstr "Дать шанс на экзамен"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_exam_center.html:55
 #: apps/accounts/views/profile/_sections/labels.py:95
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "İmtahan balını sistemə daxil etmək"
 msgctxt "profile.section"
 msgid "İmtahan balının daxil edilməsi"
-msgstr "Внесение экзаменационного балла в систему"
+msgstr "Ввод экзаменационного балла"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_exam_center.html:59
 #: apps/accounts/views/search.py:55
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "İmtahan balını sistemə daxil etmək"
 msgid "İmtahan balının daxil edilməsi"
-msgstr "Внесение экзаменационного балла в систему"
+msgstr "Ввод экзаменационного балла"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_exam_center.html:67
 #: apps/accounts/views/profile/_sections/labels.py:96
@@ -7712,12 +7649,11 @@ msgid "Köçürülmüş nəticələrin dəqiqləşdirilməsi"
 msgstr "Уточнение перенесённых результатов"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_exam_center.html:71
-#, fuzzy
 #| msgctxt "search"
 #| msgid "Axtarış nəticələri"
 msgctxt "profile.section"
 msgid "Köçürülmüş nəticələr"
-msgstr "Результаты поиска"
+msgstr "Перенесённые результаты"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_exam_center.html:79
 #: apps/accounts/views/profile/_sections/labels.py:94
@@ -7765,22 +7701,20 @@ msgstr "Электронный журнал"
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:72
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:75
 #: apps/accounts/views/profile/_sections/labels.py:72
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "Jurnala baxış"
 msgctxt "profile.sidebar"
 msgid "Jurnal bağlama"
-msgstr "Просмотр журнала"
+msgstr "Закрытие журналов"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:87
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:91
 #: apps/accounts/views/profile/_sections/labels.py:73
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Fənnin təsviri"
 msgctxt "profile.sidebar"
 msgid "Fənn təhvili"
-msgstr "Описание предмета"
+msgstr "Сдача предмета"
 
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:99
 #: apps/accounts/templates/accounts/profile/_sidebar_university.html:103
@@ -8048,12 +7982,12 @@ msgid "Q/b"
 msgstr "Пропуски"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:93
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "registrar.records"
 #| msgid "İmtahandan kəsilib — 25% təkrar imtahan"
 msgctxt "registrar.records"
 msgid "İmtahandan kəsilib — 25%% təkrar imtahan"
-msgstr "Не сдал экзамен — повторный экзамен 25%"
+msgstr "Отстранён от экзамена — пересдача 25%%"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:93
 #, python-format
@@ -8068,11 +8002,10 @@ msgstr "Нет выходного экзаменационного балла �
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:94
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:131
-#, fuzzy
 #| msgid "Qiymətləndirilib"
 msgctxt "registrar.records"
 msgid "Qiymətləndirilməyib"
-msgstr "Оценено"
+msgstr "Не оценено"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:95
 msgctxt "registrar.records"
@@ -8149,12 +8082,12 @@ msgid "Q/b-dan kəsr"
 msgstr "Недопуск из-за пропусков"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:130
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "registrar.records"
 #| msgid "İmtahandan (25%)"
 msgctxt "registrar.records"
 msgid "İmtahandan (25%%)"
-msgstr "За экзамен (25%)"
+msgstr "От экзамена (25%%)"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:132
 msgctxt "registrar.records"
@@ -8165,11 +8098,10 @@ msgstr "Средний GPA"
 #: apps/accounts/templates/accounts/profile/sections/_my_transcript.html:120
 #: apps/accounts/templates/accounts/profile/sections/_my_transcript.html:207
 #: apps/registrar/exam_eligibility.py:186
-#, fuzzy
 #| msgid "Hesabatlar"
 msgctxt "registrar.eligibility"
 msgid "Hesablana bilmir"
-msgstr "Невозможно рассчитать"
+msgstr "Не может быть рассчитано"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:134
 msgctxt "registrar.records"
@@ -8262,12 +8194,12 @@ msgid "Q/b-dan kəsilib — imtahana buraxılmayıb"
 msgstr "Недопуск из-за пропусков — к экзамену не допущен"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:152
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "registrar.records"
 #| msgid "İmtahandan kəsilib (25% təkrar imtahan)"
 msgctxt "registrar.records"
 msgid "İmtahandan kəsilib (25%% təkrar imtahan)"
-msgstr "Экзамен не сдан (25% пересдача)"
+msgstr "Отстранён от экзамена (пересдача 25%%)"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_records.html:153
 msgctxt "registrar.records"
@@ -9497,10 +9429,9 @@ msgstr ""
 "Нажмите кнопку для анализа — результат будет готов за несколько секунд."
 
 #: apps/accounts/templates/accounts/profile/sections/_exam_center_stats.html:169
-#, fuzzy
 #| msgid "Cəhdlər"
 msgid "Cəhd"
-msgstr "Попытки"
+msgstr "Попытка"
 
 #: apps/accounts/templates/accounts/profile/sections/_exam_center_stats.html:176
 msgid "/"
@@ -9508,10 +9439,9 @@ msgstr "/"
 
 #: apps/accounts/templates/accounts/profile/sections/_exam_center_stats.html:178
 #: apps/exams/views/exam_center/room_monitor.py:116
-#, fuzzy
 #| msgid "İmtahandan çıxarılıb"
 msgid "İmtahandan uzaqlaşdırılıb"
-msgstr "Исключён с экзамена"
+msgstr "Удалён(а) с экзамена"
 
 #: apps/accounts/templates/accounts/profile/sections/_manage_appeals.html:20
 msgctxt "appeals.template"
@@ -9664,7 +9594,6 @@ msgid "Nəticə axtar..."
 msgstr "Поиск по результатам..."
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:105
-#, fuzzy
 #| msgid "Sıfırla"
 msgctxt "profile.results.academic"
 msgid "Sıfırla"
@@ -9683,23 +9612,20 @@ msgid "Cari sistem üzrə hesablanmış nəticə"
 msgstr "Результат, рассчитанный текущей системой"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:167
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Kredit"
 msgctxt "profile.results.academic"
 msgid "Kredit"
-msgstr "Кредит"
+msgstr "Кредиты"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:171
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Giriş balı"
 msgctxt "profile.results.academic"
 msgid "Giriş balı"
-msgstr "Входной балл"
+msgstr "Вступительный балл"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:175
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Çıxış balı"
 msgctxt "profile.results.academic"
@@ -9708,7 +9634,6 @@ msgstr "Выходной балл"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:179
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:219
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Yekun"
 msgctxt "profile.results.academic"
@@ -9716,7 +9641,6 @@ msgid "Yekun"
 msgstr "Итог"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:183
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Dərəcə"
 msgctxt "profile.results.academic"
@@ -9724,12 +9648,11 @@ msgid "Dərəcə"
 msgstr "Оценка"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:193
-#, fuzzy
 #| msgctxt "syllabus.model"
 #| msgid "Köhnə sistemdən köçürülüb"
 msgctxt "profile.results.academic"
 msgid "Köhnə sistemdən köçürülmüş xam mənbə balları"
-msgstr "Перенесено из старой системы"
+msgstr "Необработанные исходные баллы, перенесённые из старой системы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:195
 msgctxt "profile.results.academic"
@@ -9751,30 +9674,26 @@ msgstr ""
 "базы; они не сверяются с текущим расчётом выше."
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:209
-#, fuzzy
 #| msgctxt "accounts.people.analytics"
 #| msgid "Arxiv"
 msgctxt "profile.results.academic"
 msgid "arxiv"
-msgstr "Архив"
+msgstr "архив"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:213
-#, fuzzy
 #| msgid "Giriş"
 msgctxt "profile.results.academic"
 msgid "Giriş"
 msgstr "Вход"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:216
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Çıxış balı"
 msgctxt "profile.results.academic"
 msgid "Çıxış (imtahan)"
-msgstr "Выходной балл"
+msgstr "Выход (экзамен)"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:222
-#, fuzzy
 #| msgctxt "registrar.finals"
 #| msgid "Təkrar imtahan"
 msgctxt "profile.results.academic"
@@ -9782,20 +9701,18 @@ msgid "Təkrar imtahan"
 msgstr "Пересдача"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:230
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Dərs tipi"
 msgctxt "profile.results.academic"
 msgid "Cəhd tipi"
-msgstr "Тип занятия"
+msgstr "Тип попытки"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:231
-#, fuzzy
 #| msgctxt "registrar.analytics"
 #| msgid "Fənn qeydiyyatı"
 msgctxt "profile.results.academic"
 msgid "Köhnə qeyd vaxtı"
-msgstr "Записи на предметы"
+msgstr "Время старой записи"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:257
 #: apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:237
@@ -9829,12 +9746,11 @@ msgid "view_result"
 msgstr "Посмотреть результат"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:317
-#, fuzzy
 #| msgctxt "profile.overall_academic"
 #| msgid "Filtərə uyğun fənn tapılmadı."
 msgctxt "profile.results.academic"
 msgid "Süzgəcə uyğun nəticə tapılmadı"
-msgstr "По заданному фильтру предметы не найдены."
+msgstr "Не найдено результатов, соответствующих фильтру"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:318
 msgctxt "profile.results.academic"
@@ -9961,11 +9877,10 @@ msgid "saat"
 msgstr "часов"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_subjects.html:127
-#, fuzzy
 #| msgid "Qalan cəhd"
 msgctxt "profile.subjects"
 msgid "cəhd"
-msgstr "Осталось попыток"
+msgstr "попытка"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_subjects.html:129
 msgctxt "profile.subjects"
@@ -9973,11 +9888,10 @@ msgid "rəsmi"
 msgstr "официально"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_subjects.html:129
-#, fuzzy
 #| msgid "✓ Əlavə olundu"
 msgctxt "profile.subjects"
 msgid "ləğv olundu"
-msgstr "✓ Добавлено"
+msgstr "отменено"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_subjects.html:137
 msgctxt "profile.subjects"
@@ -10506,12 +10420,12 @@ msgid "Q/b-dan kəsildiyim (imtahana buraxılmadığım)"
 msgstr "Не сдано из-за пропусков (не допущен(а) к экзамену)"
 
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:129
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "profile.overall_academic"
 #| msgid "İmtahandan kəsildiyim (25%)"
 msgctxt "profile.overall_academic"
 msgid "İmtahandan kəsildiyim (25%%)"
-msgstr "Не сдано на экзамене (25%)"
+msgstr "Отстранён(а) от экзамена (25%%)"
 
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:134
 msgctxt "profile.overall_academic"
@@ -10601,12 +10515,12 @@ msgstr ""
 "заново)"
 
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:195
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "profile.overall_academic"
 #| msgid "İmtahandan kəsilib (25% ilə təkrar imtahan hüququ)"
 msgctxt "profile.overall_academic"
 msgid "İmtahandan kəsilib (25%% ilə təkrar imtahan hüququ)"
-msgstr "Не сдал(а) экзамен (право на пересдачу с 25%)"
+msgstr "Отстранён от экзамена (право на пересдачу с 25%%)"
 
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:197
 msgctxt "profile.overall_academic"
@@ -10770,11 +10684,10 @@ msgid "Redaktə et"
 msgstr "Редактировать"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_directory.html:35
-#, fuzzy
 #| msgid "Post İdarəetmə"
 msgctxt "accounts.people"
 msgid "İdarə et"
-msgstr "Управление постами"
+msgstr "Управлять"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_directory.html:40
 msgctxt "accounts.people"
@@ -11088,52 +11001,45 @@ msgid "Bağla"
 msgstr "Закрыть"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:27
-#, fuzzy
 #| msgid "Yüklənir…"
 msgctxt "accounts.people.academic"
 msgid "Yüklənir…"
 msgstr "Загрузка…"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:28
-#, fuzzy
 #| msgctxt "profile.academic_items"
 #| msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
 msgctxt "accounts.people.academic"
 msgid "Əməliyyat alınmadı — yenidən cəhd edin."
-msgstr "Операция не удалась. Попробуйте ещё раз."
+msgstr "Операция не выполнена — попробуйте снова."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:29
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Bu tələbənin hələ tədris qeydi yoxdur."
 msgctxt "accounts.people.academic"
 msgid "Bu tələbənin sizin sahənizdə akademik qeydi yoxdur."
-msgstr "У этого студента ещё нет учебных записей."
+msgstr "У этого студента нет академической записи в вашей области."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:30
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Bu semestrdə hələ fənn açılışı yoxdur."
 msgctxt "accounts.people.academic"
 msgid "Cari semestrdə aktiv yazılış yoxdur."
-msgstr "В этом семестре пока нет курсов."
+msgstr "В текущем семестре нет активной записи."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:31
-#, fuzzy
 #| msgid "İxtisas"
 msgctxt "accounts.people.academic"
 msgid "İxtisas"
 msgstr "Специальность"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:32
-#, fuzzy
 #| msgid "Status"
 msgctxt "accounts.people.academic"
 msgid "Status"
 msgstr "Статус"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:33
-#, fuzzy
 #| msgctxt "registrar.schedule"
 #| msgid "kurs"
 msgctxt "accounts.people.academic"
@@ -11141,29 +11047,25 @@ msgid "kurs"
 msgstr "курс"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:34
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Qəbul ili"
 msgctxt "accounts.people.academic"
 msgid "Qəbul ili"
-msgstr "Год приёма"
+msgstr "Год поступления"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:35
-#, fuzzy
 #| msgid "Fakültə"
 msgctxt "accounts.people.academic"
 msgid "Fakültə"
 msgstr "Факультет"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:36
-#, fuzzy
 #| msgid "Kafedra"
 msgctxt "accounts.people.academic"
 msgid "Kafedra"
 msgstr "Кафедра"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:37
-#, fuzzy
 #| msgid "Qrup"
 msgctxt "accounts.people.academic"
 msgid "Qrup"
@@ -11175,22 +11077,19 @@ msgid "alt qrupdan"
 msgstr "из подгруппы"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:39
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "qayıb"
 msgctxt "accounts.people.academic"
 msgid "saat qayıb"
-msgstr "пропуски"
+msgstr "час(ов) отсутствия"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:40
-#, fuzzy
 #| msgid "Fənn"
 msgctxt "accounts.people.academic"
 msgid "Fənn"
 msgstr "Предмет"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:41
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Qayıb"
 msgctxt "accounts.people.academic"
@@ -11198,36 +11097,32 @@ msgid "Qayıb"
 msgstr "Пропуски"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:42
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "Jurnal düzəlişi"
 msgctxt "accounts.people.academic"
 msgid "Jurnal işarəsi"
-msgstr "Исправление журнала"
+msgstr "Отметка журнала"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:43
-#, fuzzy
 #| msgctxt "exams.final_center.form"
 #| msgid "Tələbə qrupu"
 msgctxt "accounts.people.academic"
 msgid "Hədəf qrupda"
-msgstr "Студенческая группа"
+msgstr "В целевой группе"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:44
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "açılış tarixi"
 msgctxt "accounts.people.academic"
 msgid "açılış var"
-msgstr "дата открытия"
+msgstr "открытие есть"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:45
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "açılış tarixi"
 msgctxt "accounts.people.academic"
 msgid "açılış yaradılacaq"
-msgstr "дата открытия"
+msgstr "будет создано открытие"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:46
 msgctxt "accounts.people.academic"
@@ -11266,11 +11161,10 @@ msgstr ""
 "преподавателя — преподавателя нужно назначить позже."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:51
-#, fuzzy
 #| msgid "Tələbə yenidən buraxıldı"
 msgctxt "accounts.people.academic"
 msgid "Tələbə onsuz da bu qrupdadır."
-msgstr "Студент повторно допущен"
+msgstr "Студент уже находится в этой группе."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:52
 msgctxt "accounts.people.academic"
@@ -11278,54 +11172,47 @@ msgid "Aktiv cari akademik dövr yoxdur — köçürmə aparıla bilməz."
 msgstr "Нет активного текущего учебного периода — перевод выполнить нельзя."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:53
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Bu sillabus sizin struktur əhatənizdə deyil."
 msgctxt "accounts.people.academic"
 msgid "Hədəf qrup sizin sahənizdə deyil."
-msgstr "Этот силлабус не входит в вашу структурную область."
+msgstr "Целевая группа не входит в вашу область."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:54
-#, fuzzy
 #| msgctxt "exams.service.question_submission.error"
 #| msgid "Sual mətni çox qısadır."
 msgctxt "accounts.people.academic"
 msgid "Səbəb çox qısadır."
-msgstr "Текст вопросов слишком короткий."
+msgstr "Причина слишком короткая."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:55
-#, fuzzy
 #| msgctxt "syllabus.model"
 #| msgid "Keçən ildən köçürülüb"
 msgctxt "accounts.people.academic"
 msgid "Tələbə yeni qrupa köçürüldü."
-msgstr "Скопировано с прошлого года"
+msgstr "Студент переведён в новую группу."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:56
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Akademik status"
 msgctxt "accounts.people.academic"
 msgid "Akademik status yeniləndi."
-msgstr "Академический статус"
+msgstr "Академический статус обновлён."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:57
-#, fuzzy
 #| msgid "Axtarışa uyğun sual tapılmadı."
 msgctxt "accounts.people.academic"
 msgid "Bu ada uyğun qrup tapılmadı."
-msgstr "Вопрос, соответствующий поиску, не найден."
+msgstr "Группа с таким названием не найдена."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:58
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:143
-#, fuzzy
 #| msgid "qrup axtar…"
 msgctxt "accounts.people.academic"
 msgid "Qrup axtarın…"
-msgstr "поиск группы…"
+msgstr "Поиск группы…"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:59
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Hazırkı qrup"
 msgctxt "accounts.people.academic"
@@ -11334,7 +11221,6 @@ msgstr "Текущая группа"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:60
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:141
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Yeni qrup"
 msgctxt "accounts.people.academic"
@@ -11347,12 +11233,11 @@ msgid "Tarixçəyə keçən fənn"
 msgstr "Предметы, перенесённые в историю"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:62
-#, fuzzy
 #| msgctxt "registrar.schedule"
 #| msgid "qayıb saatı"
 msgctxt "accounts.people.academic"
 msgid "Sıfırlanan qayıb saatı"
-msgstr "часы пропусков"
+msgstr "Сброшенные часы отсутствия"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:63
 msgctxt "accounts.people.academic"
@@ -11360,21 +11245,18 @@ msgid "Görünməz olan jurnal işarəsi"
 msgstr "Отметки журнала, которые станут скрытыми"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:79
-#, fuzzy
 #| msgid "Dil idarəetməsi"
 msgctxt "accounts.people.academic"
 msgid "Tələbə idarəetməsi"
-msgstr "Управление языками"
+msgstr "Управление студентами"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:85
-#, fuzzy
 #| msgid "Bağla"
 msgctxt "accounts.people.academic"
 msgid "Bağla"
 msgstr "Закрыть"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:108
-#, fuzzy
 #| msgctxt "profile.sidebar"
 #| msgid "Akademik qeydlər"
 msgctxt "accounts.people.academic"
@@ -11382,28 +11264,25 @@ msgid "Akademik qeydlər"
 msgstr "Академические записи"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:112
-#, fuzzy
 #| msgctxt "profile.sidebar"
 #| msgid "Akademik qeydlər"
 msgctxt "accounts.people.academic"
 msgid "Akademik qeyd"
-msgstr "Академические записи"
+msgstr "Академическая запись"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:120
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Semestr açılışı"
 msgctxt "accounts.people.academic"
 msgid "Cari semestr yazılışları"
-msgstr "Открытие семестра"
+msgstr "Записи текущего семестра"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:132
-#, fuzzy
 #| msgctxt "registrar.schedule"
 #| msgid "Qrup cədvəli"
 msgctxt "accounts.people.academic"
 msgid "Qrupu dəyiş"
-msgstr "Расписание группы"
+msgstr "Изменить группу"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:135
 msgctxt "accounts.people.academic"
@@ -11416,12 +11295,11 @@ msgstr ""
 "преемник."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:146
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Yalnız sizin əhatənizdəki fənlər"
 msgctxt "accounts.people.academic"
 msgid "Yalnız sizin idarə sahənizdəki qruplar göstərilir."
-msgstr "Только дисциплины вашей зоны"
+msgstr "Показаны только группы в вашей области управления."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:158
 msgctxt "accounts.people.academic"
@@ -11434,11 +11312,10 @@ msgid "Qrup seçin — dəyişikliklərin xülasəsi burada görünəcək."
 msgstr "Выберите группу — сводка изменений появится здесь."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:175
-#, fuzzy
 #| msgid "Səbəb (məcburi)"
 msgctxt "accounts.people.academic"
 msgid "Səbəb (audit üçün məcburidir)"
-msgstr "Причина (обязательно)"
+msgstr "Причина (обязательна для аудита)"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:179
 msgctxt "accounts.people.academic"
@@ -11446,16 +11323,14 @@ msgid "Məs.: dekanlıq sərəncamı №…"
 msgstr "напр.: распоряжение деканата №…"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:184
-#, fuzzy
 #| msgctxt "assignment.detail"
 #| msgid "Göndərməni təsdiqləyin"
 msgctxt "accounts.people.academic"
 msgid "Köçürməni təsdiqlə"
-msgstr "Подтвердить отправку"
+msgstr "Подтвердить перенос"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:195
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:202
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Akademik status"
 msgctxt "accounts.people.academic"
@@ -11473,7 +11348,6 @@ msgstr ""
 "обязательна."
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:212
-#, fuzzy
 #| msgid "Səbəb"
 msgctxt "accounts.people.academic"
 msgid "Səbəb"
@@ -11485,11 +11359,10 @@ msgid "Məs.: tələbənin ərizəsi №…"
 msgstr "напр.: заявление студента №…"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_student_manager.html:221
-#, fuzzy
 #| msgid "Rolu yenilə"
 msgctxt "accounts.people.academic"
 msgid "Statusu yenilə"
-msgstr "Обновить роль"
+msgstr "Обновить статус"
 
 #: apps/accounts/templates/accounts/profile/sections/_people_students.html:22
 #: apps/accounts/templates/accounts/profile/sections/_people_teachers.html:28
@@ -11796,15 +11669,13 @@ msgid "Tədris etdiyi fənlər"
 msgstr "Преподаваемые предметы"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:272
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Yeni qrup"
 msgctxt "profile.info"
 msgid "qrup"
-msgstr "Новая группа"
+msgstr "группа"
 
 #: apps/accounts/templates/accounts/profile/sections/_profile_info_identity.html:272
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "semestri"
 msgctxt "profile.info"
@@ -12224,23 +12095,20 @@ msgstr ""
 "попадают в журнал аудита."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:48
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Bu bölmədəki səlahiyyətləriniz"
 msgctxt "profile.rim"
 msgid "Sizin səlahiyyətləriniz"
-msgstr "Ваши права в этом разделе"
+msgstr "Ваши полномочия"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:49
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Bu bölmədəki səlahiyyətləriniz"
 msgctxt "profile.rim"
 msgid "Səlahiyyətləriniz:"
-msgstr "Ваши права в этом разделе"
+msgstr "Ваши полномочия:"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:61
-#, fuzzy
 #| msgid "Axtarış"
 msgctxt "profile.rim"
 msgid "Axtarış"
@@ -12252,14 +12120,12 @@ msgid "məs: Əliyev Elvin Səməd — və ya email / FİN / istifadəçi adı"
 msgstr "напр.: Алиев Эльвин Самед — или email / ПИН / имя пользователя"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:70
-#, fuzzy
 #| msgid "Təmizlə"
 msgctxt "profile.rim"
 msgid "Təmizlə"
 msgstr "Очистить"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:75
-#, fuzzy
 #| msgid "Hamısı"
 msgctxt "profile.rim"
 msgid "Hamısı"
@@ -12273,15 +12139,13 @@ msgid "Aktiv"
 msgstr "Активен"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:81
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Toplanmış"
 msgctxt "profile.rim"
 msgid "Bloklanmış"
-msgstr "Набрано"
+msgstr "Заблокирован(ы)"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:84
-#, fuzzy
 #| msgctxt "accounts.people.analytics"
 #| msgid "Arxiv"
 msgctxt "profile.rim"
@@ -12289,12 +12153,11 @@ msgid "Arxiv"
 msgstr "Архив"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:87
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Silinib"
 msgctxt "profile.rim"
 msgid "Silinmiş"
-msgstr "Удалён"
+msgstr "Удалено"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:95
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:212
@@ -12308,14 +12171,12 @@ msgstr "Введите имя, фамилию или отчество, чтоб�
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:174
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:192
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:203
-#, fuzzy
 #| msgid "Bağla"
 msgctxt "profile.rim"
 msgid "Bağla"
 msgstr "Закрыть"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:131
-#, fuzzy
 #| msgid "Səbəb"
 msgctxt "profile.rim"
 msgid "Səbəb"
@@ -12327,25 +12188,22 @@ msgid "Bu əməliyyatın səbəbini yazın (audit jurnalına düşür)"
 msgstr "Укажите причину этой операции (она попадает в журнал аудита)"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:139
-#, fuzzy
 #| msgid "İmtina"
 msgctxt "profile.rim"
 msgid "İmtina"
 msgstr "Отмена"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:142
-#, fuzzy
 #| msgid "Təsdiqlə"
 msgctxt "profile.rim"
 msgid "Təsdiqlə"
 msgstr "Подтвердить"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:153
-#, fuzzy
 #| msgid "Müvəqqəti blokla"
 msgctxt "profile.rim"
 msgid "Müvəqqəti parol"
-msgstr "Временно заблокировать"
+msgstr "Временный пароль"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:160
 msgctxt "profile.rim"
@@ -12371,12 +12229,11 @@ msgstr ""
 " email (OTP) и установки собственного пароля."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:190
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "siyasət yoxlaması"
 msgctxt "profile.rim"
 msgid "Əl ilə yoxlanmalı"
-msgstr "проверка политики"
+msgstr "Требует ручной проверки"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:197
 msgctxt "profile.rim"
@@ -12386,46 +12243,40 @@ msgstr ""
 "автоматически."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:210
-#, fuzzy
 #| msgid "Yüklənir…"
 msgctxt "profile.rim"
 msgid "Yüklənir…"
 msgstr "Загрузка…"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:211
-#, fuzzy
 #| msgid "Nəticə tapılmadı."
 msgctxt "profile.rim"
 msgid "Nəticə tapılmadı."
 msgstr "Результатов не найдено."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:213
-#, fuzzy
 #| msgid "Xəta baş verdi. Yenidən cəhd edin."
 msgctxt "profile.rim"
 msgid "Xəta baş verdi. Yenidən cəhd edin."
 msgstr "Произошла ошибка. Пожалуйста, попробуйте снова."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:214
-#, fuzzy
 #| msgid "İstifadəçi adı"
 msgctxt "profile.rim"
 msgid "İstifadəçi adı"
 msgstr "Имя пользователя"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:215
-#, fuzzy
 #| msgid "Ad, soyad, istifadəçi adı…"
 msgctxt "profile.rim"
 msgid "Ad, soyad, ata adı"
-msgstr "Имя, фамилия, имя пользователя…"
+msgstr "Имя, фамилия, отчество"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:216
-#, fuzzy
 #| msgid "Email"
 msgctxt "profile.rim"
 msgid "Email"
-msgstr "Эл. почта"
+msgstr "Email"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:217
 msgctxt "profile.rim"
@@ -12433,57 +12284,49 @@ msgid "FİN"
 msgstr "ПИН"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:218
-#, fuzzy
 #| msgid "Telefon"
 msgctxt "profile.rim"
 msgid "Telefon"
 msgstr "Телефон"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:219
-#, fuzzy
 #| msgid "Ad"
 msgctxt "profile.rim"
 msgid "Ad"
-msgstr "Имя"
+msgstr "Название"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:220
-#, fuzzy
 #| msgid "Ad Soyad"
 msgctxt "profile.rim"
 msgid "Soyad"
-msgstr "Имя и фамилия"
+msgstr "Фамилия"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:221
-#, fuzzy
 #| msgid "Kafedra adı"
 msgctxt "profile.rim"
 msgid "Ata adı"
-msgstr "Название кафедры"
+msgstr "Отчество"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:222
-#, fuzzy
 #| msgid "Rollarım"
 msgctxt "profile.rim"
 msgid "Rollar"
-msgstr "Мои роли"
+msgstr "Роли"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:223
-#, fuzzy
 #| msgctxt "exams.final_center.message"
 #| msgid "Aktiv cəhd yoxdur."
 msgctxt "profile.rim"
 msgid "Aktiv rol yoxdur"
-msgstr "Нет активной попытки."
+msgstr "Нет активной роли"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:225
-#, fuzzy
 #| msgid "Blokla"
 msgctxt "profile.rim"
 msgid "Bloklanıb"
-msgstr "Заблокировать"
+msgstr "Заблокировано"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:226
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Silinib"
 msgctxt "profile.rim"
@@ -12491,7 +12334,6 @@ msgid "Silinib"
 msgstr "Удалён"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:227
-#, fuzzy
 #| msgctxt "accounts.people"
 #| msgid "Arxiv (məzun/xaric)"
 msgctxt "profile.rim"
@@ -12499,57 +12341,49 @@ msgid "Arxiv (məzun/xaric)"
 msgstr "Архив (выпускник/отчислен)"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:228
-#, fuzzy
 #| msgid "Aç"
 msgctxt "profile.rim"
 msgid "Aç"
 msgstr "Открыть"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:229
-#, fuzzy
 #| msgid "Rol təyin et"
 msgctxt "profile.rim"
 msgid "Parol təyin et"
-msgstr "Назначить роль"
+msgstr "Установить пароль"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:230
-#, fuzzy
 #| msgid "Blokla"
 msgctxt "profile.rim"
 msgid "Blokla"
 msgstr "Заблокировать"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:231
-#, fuzzy
 #| msgid "Kafedradan çıxar"
 msgctxt "profile.rim"
 msgid "Blokdan çıxar"
-msgstr "Убрать с кафедры"
+msgstr "Разблокировать"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:232
-#, fuzzy
 #| msgid "Sil"
 msgctxt "profile.rim"
 msgid "Sil"
 msgstr "Удалить"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:233
-#, fuzzy
 #| msgid "Bərpa et"
 msgctxt "profile.rim"
 msgid "Bərpa et"
 msgstr "Восстановить"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:234
-#, fuzzy
 #| msgctxt "accounts.superadmin_exam_rooms"
 #| msgid "Zalı redaktə et"
 msgctxt "profile.rim"
 msgid "Məlumatları redaktə et"
-msgstr "Редактировать зал"
+msgstr "Редактировать данные"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:235
-#, fuzzy
 #| msgid "Yadda saxla"
 msgctxt "profile.rim"
 msgid "Yadda saxla"
@@ -12604,11 +12438,10 @@ msgid "Səbəb yazılmalıdır (ən azı 3 simvol)."
 msgstr "Необходимо указать причину (не менее 3 символов)."
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:243
-#, fuzzy
 #| msgid "Cavablandı"
 msgctxt "profile.rim"
 msgid "Kopyalandı"
-msgstr "Отвечено"
+msgstr "Скопировано"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:244
 msgctxt "profile.rim"
@@ -12616,39 +12449,34 @@ msgid "İlk giriş gözlənilir (öz parolunu qurmalıdır)"
 msgstr "Ожидается первый вход (пользователь должен задать свой пароль)"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:245
-#, fuzzy
 #| msgid "Emaili təsdiqlə"
 msgctxt "profile.rim"
 msgid "Email təsdiqlənməyib"
-msgstr "Подтвердить эл. почту"
+msgstr "Email не подтверждён"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:246
-#, fuzzy
 #| msgid "Əvvəlki"
 msgctxt "profile.rim"
 msgid "Əvvəlki"
-msgstr "Предыдущий"
+msgstr "Предыдущая"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:247
-#, fuzzy
 #| msgid "Sonrakı"
 msgctxt "profile.rim"
 msgid "Sonrakı"
-msgstr "Далее"
+msgstr "Следующая"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:248
-#, fuzzy
 #| msgid "Səhifə"
 msgctxt "profile.rim"
 msgid "səhifə"
-msgstr "Страница"
+msgstr "страница"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:249
-#, fuzzy
 #| msgid "sual tapıldı"
 msgctxt "profile.rim"
 msgid "tapıldı"
-msgstr "вопросов найдено"
+msgstr "найдено"
 
 #: apps/accounts/templates/accounts/profile/sections/_statistics.html:12
 msgctxt "profile.statistics"
@@ -13191,12 +13019,11 @@ msgid "Əhatə və analitika"
 msgstr "Охват и аналитика"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:40
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Fənnin təsviri"
 msgctxt "accounts.handover"
 msgid "Fənn təhvili"
-msgstr "Описание предмета"
+msgstr "Сдача предмета"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:42
 msgctxt "accounts.handover"
@@ -13210,30 +13037,26 @@ msgstr ""
 "посещаемость остаются как есть — меняется только владелец журнала."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:45
-#, fuzzy
 #| msgid "Məhdudiyyətsiz"
 msgctxt "accounts.handover"
 msgid "Səlahiyyət sahəniz"
-msgstr "Без ограничений"
+msgstr "Ваша зона полномочий"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:54
-#, fuzzy
 #| msgctxt "syllabus.section"
 #| msgid "Fənnin təsviri və məqsədi"
 msgctxt "accounts.handover"
 msgid "Fənn təhvili bölmələri"
-msgstr "Описание и цель дисциплины"
+msgstr "Разделы сдачи предмета"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:58
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "Təhvil tarixi"
 msgctxt "accounts.handover"
 msgid "Təhvil"
-msgstr "Дата сдачи"
+msgstr "Сдача"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:63
-#, fuzzy
 #| msgid "Tarixçə"
 msgctxt "accounts.handover"
 msgid "Tarixçə"
@@ -13252,14 +13075,12 @@ msgstr ""
 "полномочий."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:81
-#, fuzzy
 #| msgid "Ad, soyad və ya istifadəçi adı…"
 msgctxt "accounts.handover"
 msgid "Müəllim adı və ya istifadəçi adı"
-msgstr "Имя, фамилия или имя пользователя…"
+msgstr "Имя преподавателя или имя пользователя"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:84
-#, fuzzy
 #| msgid "Təmizlə"
 msgctxt "accounts.handover"
 msgid "Təmizlə"
@@ -13271,23 +13092,20 @@ msgid "Təhvil veriləcək fənləri seçin"
 msgstr "Выберите предметы для передачи"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:98
-#, fuzzy
 #| msgid "Axtarış"
 msgctxt "accounts.handover"
 msgid "Axtarış"
 msgstr "Поиск"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:100
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Fənn adı və ya kodu"
 msgctxt "accounts.handover"
 msgid "fənn adı, kodu və ya qrup"
-msgstr "Название или код предмета"
+msgstr "название предмета, код или группа"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:103
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:137
-#, fuzzy
 #| msgid "Semestr"
 msgctxt "accounts.handover"
 msgid "Semestr"
@@ -13296,44 +13114,38 @@ msgstr "Семестр"
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:105
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:111
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:117
-#, fuzzy
 #| msgid "Hamısı"
 msgctxt "accounts.handover"
 msgid "Hamısı"
 msgstr "Все"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:109
-#, fuzzy
 #| msgid "Fakültə"
 msgctxt "accounts.handover"
 msgid "Fakültə"
 msgstr "Факультет"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:115
-#, fuzzy
 #| msgid "Kafedra"
 msgctxt "accounts.handover"
 msgid "Kafedra"
 msgstr "Кафедра"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:122
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Düzəliş tələb olunan bölmələr"
 msgctxt "accounts.handover"
 msgid "Yalnız təhvil oluna bilənlər"
-msgstr "Разделы, требующие доработки"
+msgstr "Только те, что можно сдать"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:128
-#, fuzzy
 #| msgctxt "registrar.analytics"
 #| msgid "kəsilmə faizi ən yüksək fənn açılışları"
 msgctxt "accounts.handover"
 msgid "Səlahiyyət sahənizdəki dərs açılışları"
-msgstr "предметы с наибольшим процентом несдачи"
+msgstr "Открытия предметов в вашей области полномочий"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:133
-#, fuzzy
 #| msgid "Hamısını seç"
 msgctxt "accounts.handover"
 msgid "Hamısını seç"
@@ -13341,14 +13153,12 @@ msgstr "Выбрать все"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:135
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:187
-#, fuzzy
 #| msgid "Fənn"
 msgctxt "accounts.handover"
 msgid "Fənn"
 msgstr "Предмет"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:136
-#, fuzzy
 #| msgid "Qrup"
 msgctxt "accounts.handover"
 msgid "Qrup"
@@ -13360,36 +13170,32 @@ msgid "Təsir"
 msgstr "Что изменится"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:139
-#, fuzzy
 #| msgctxt "accounts.academic_title"
 #| msgid "Baş müəllim"
 msgctxt "accounts.handover"
 msgid "Cari müəllim"
-msgstr "Старший преподаватель"
+msgstr "Текущий преподаватель"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:140
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:158
-#, fuzzy
 #| msgctxt "organizations.unit_detail"
 #| msgid "Aktiv müəllim"
 msgctxt "accounts.handover"
 msgid "Yeni müəllim"
-msgstr "Активные преподаватели"
+msgstr "Новый преподаватель"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:147
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:196
-#, fuzzy
 #| msgid "Səhifələmə"
 msgctxt "accounts.handover"
 msgid "Səhifələmə"
-msgstr "Пагинация"
+msgstr "Постраничная навигация"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:155
-#, fuzzy
 #| msgid "Müəllim təyin et"
 msgctxt "accounts.handover"
 msgid "Yeni müəllimi təyin edin"
-msgstr "Назначить преподавателя"
+msgstr "Назначьте нового преподавателя"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:156
 msgctxt "accounts.handover"
@@ -13401,19 +13207,17 @@ msgstr ""
 "выбрать отдельного преподавателя для каждой строки таблицы."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:162
-#, fuzzy
 #| msgid "Seçilənləri əlavə et"
 msgctxt "accounts.handover"
 msgid "Seçilənlərə tətbiq et"
-msgstr "Добавить выбранные"
+msgstr "Применить к выбранным"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:173
-#, fuzzy
 #| msgctxt "exams.center.stats.status"
 #| msgid "Təhvil verilib"
 msgctxt "accounts.handover"
 msgid "Təhvil ver"
-msgstr "Сдано"
+msgstr "Сдать"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:181
 msgctxt "accounts.handover"
@@ -13425,7 +13229,6 @@ msgstr ""
 " отменить."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:186
-#, fuzzy
 #| msgid "Tarix"
 msgctxt "accounts.handover"
 msgid "Tarix"
@@ -13437,14 +13240,12 @@ msgid "Kimdən → kimə"
 msgstr "От кого → кому"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:189
-#, fuzzy
 #| msgid "Səbəb"
 msgctxt "accounts.handover"
 msgid "Səbəb"
 msgstr "Причина"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:190
-#, fuzzy
 #| msgid "Əməliyyat"
 msgctxt "accounts.handover"
 msgid "Əməliyyat"
@@ -13462,7 +13263,6 @@ msgstr ""
 "но не может выставлять баллы."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:211
-#, fuzzy
 #| msgid "Səbəb (məcburi)"
 msgctxt "accounts.handover"
 msgid "Səbəb (məcburi)"
@@ -13475,67 +13275,58 @@ msgstr "напр. преподаватель уволился; учебная н
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:219
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:239
-#, fuzzy
 #| msgid "İmtina"
 msgctxt "accounts.handover"
 msgid "İmtina"
 msgstr "Отмена"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:222
-#, fuzzy
 #| msgid "Təsdiqlə"
 msgctxt "accounts.handover"
 msgid "Təsdiqlə"
 msgstr "Подтвердить"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:233
-#, fuzzy
 #| msgid "Müəllim seçin"
 msgctxt "accounts.handover"
 msgid "Yeni müəllim seçin"
-msgstr "Выберите преподавателя"
+msgstr "Выберите нового преподавателя"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:235
-#, fuzzy
 #| msgctxt "organizations.unit_detail"
 #| msgid "Müəllim axtar…"
 msgctxt "accounts.handover"
 msgid "Müəllim axtarın"
-msgstr "Поиск преподавателя…"
+msgstr "Поиск преподавателя"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:242
-#, fuzzy
 #| msgctxt "search"
 #| msgid "seç"
 msgctxt "accounts.handover"
 msgid "Seç"
-msgstr "выбрать"
+msgstr "Выбрать"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:250
-#, fuzzy
 #| msgid "Yüklənir…"
 msgctxt "accounts.handover"
 msgid "Yüklənir…"
 msgstr "Загрузка…"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:251
-#, fuzzy
 #| msgctxt "profile.overall_academic"
 #| msgid "Filtərə uyğun fənn tapılmadı."
 msgctxt "accounts.handover"
 msgid "Bu süzgəclərə uyğun fənn tapılmadı."
-msgstr "По заданному фильтру предметы не найдены."
+msgstr "По этим фильтрам предмет не найден."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:252
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Hələ qeyd yoxdur."
 msgctxt "accounts.handover"
 msgid "Hələ təhvil qeydi yoxdur."
-msgstr "Записей пока нет."
+msgstr "Записи о сдаче пока нет."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:253
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Əməliyyat yerinə yetirilmədi."
 msgctxt "accounts.handover"
@@ -13543,7 +13334,6 @@ msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Операция не выполнена."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:254
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Müəllim təyin edilməyib"
 msgctxt "accounts.handover"
@@ -13551,42 +13341,37 @@ msgid "Müəllim təyin edilməyib"
 msgstr "Преподаватель не назначен"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:255
-#, fuzzy
 #| msgid "Müəllim seçin"
 msgctxt "accounts.handover"
 msgid "Müəllim seç"
-msgstr "Выберите преподавателя"
+msgstr "Выбрать преподавателя"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:256
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "dəyişib"
 msgctxt "accounts.handover"
 msgid "Dəyiş"
-msgstr "изменено"
+msgstr "Изменить"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:257
-#, fuzzy
 #| msgctxt "accounts.assigned_tasks"
 #| msgid "İmtahana başlamaq mümkün deyil"
 msgctxt "accounts.handover"
 msgid "Təhvil mümkün deyil"
-msgstr "Невозможно начать экзамен"
+msgstr "Сдача невозможна"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:258
-#, fuzzy
 #| msgid "tələbə"
 msgctxt "accounts.handover"
 msgid "tələbə"
 msgstr "студент"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:259
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Yeni dərs"
 msgctxt "accounts.handover"
 msgid "dərs"
-msgstr "Новое занятие"
+msgstr "занятий"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:260
 msgctxt "accounts.handover"
@@ -13594,11 +13379,10 @@ msgid "bal xanası"
 msgstr "ячеек с баллами"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:261
-#, fuzzy
 #| msgid "seçilib"
 msgctxt "accounts.handover"
 msgid "fənn seçilib"
-msgstr "выбрано"
+msgstr "предмет выбран"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:262
 msgctxt "accounts.handover"
@@ -13606,31 +13390,27 @@ msgid "Seçilmiş sətirlərin hamısına yeni müəllim təyin edin."
 msgstr "Назначьте нового преподавателя на все выбранные строки."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:263
-#, fuzzy
 #| msgctxt "exams.service.question_submission.error"
 #| msgid "Sual mətni çox qısadır."
 msgctxt "accounts.handover"
 msgid "Səbəb çox qısadır."
-msgstr "Текст вопросов слишком короткий."
+msgstr "Причина слишком короткая."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:264
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Tarixləri təsdiqləyin"
 msgctxt "accounts.handover"
 msgid "Təhvili təsdiqləyin"
-msgstr "Подтвердите даты"
+msgstr "Подтвердите сдачу"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:265
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Düzəliş üçün geri qaytarılsın?"
 msgctxt "accounts.handover"
 msgid "Təhvili geri qaytarın"
-msgstr "Вернуть на доработку?"
+msgstr "Отменить сдачу"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:266
-#, fuzzy
 #| msgctxt "registrar.approval"
 #| msgid "Geri qaytar"
 msgctxt "accounts.handover"
@@ -13638,43 +13418,37 @@ msgid "Geri qaytar"
 msgstr "Вернуть"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:267
-#, fuzzy
 #| msgid "Geri qaytarılıb"
 msgctxt "accounts.handover"
 msgid "Geri qaytarılıb"
 msgstr "Возвращено"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:271
-#, fuzzy
 #| msgctxt "ai_assistant.blocked"
 #| msgid "Sistem təlimatlarına baxmaq mümkün deyil."
 msgctxt "accounts.handover"
 msgid "Geri qaytarma mümkün deyil."
-msgstr "Системные инструкции нельзя просматривать."
+msgstr "Отмена невозможна."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:272
-#, fuzzy
 #| msgid "Əməliyyat tamamlanmadı."
 msgctxt "accounts.handover"
 msgid "Təhvil tamamlandı."
-msgstr "Операция не была завершена."
+msgstr "Сдача завершена."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:273
-#, fuzzy
 #| msgid "Geri qaytarılıb"
 msgctxt "accounts.handover"
 msgid "Təhvil geri qaytarıldı."
-msgstr "Возвращено"
+msgstr "Сдача отменена."
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:274
-#, fuzzy
 #| msgid "Əvvəlki"
 msgctxt "accounts.handover"
 msgid "Əvvəlki"
-msgstr "Предыдущий"
+msgstr "Предыдущая"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:275
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Növbəti"
 msgctxt "accounts.handover"
@@ -13682,7 +13456,6 @@ msgid "Növbəti"
 msgstr "Следующий"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:276
-#, fuzzy
 #| msgid "Səhifə"
 msgctxt "accounts.handover"
 msgid "Səhifə"
@@ -13699,7 +13472,6 @@ msgid "Kimə"
 msgstr "Кому"
 
 #: apps/accounts/templates/accounts/profile/sections/_teaching_handover.html:279
-#, fuzzy
 #| msgctxt "organizations.unit_detail"
 #| msgid "Uyğun müəllim tapılmadı."
 msgctxt "accounts.handover"
@@ -14673,12 +14445,12 @@ msgid "simvol"
 msgstr "символ"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html:50
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "accounts.syllabus"
 #| msgid "Ən azı %(min)s simvol — hazırda %(have)s"
 msgctxt "accounts.syllabus"
 msgid "Ən azı %%(min)s simvol — hazırda %%(have)s"
-msgstr "Не менее %(min)s символов — сейчас %(have)s"
+msgstr "Минимум %%(min)s символов — сейчас %%(have)s"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_dialog.html:51
 msgctxt "accounts.syllabus"
@@ -14753,11 +14525,10 @@ msgid "Tapşırıq %(index)s"
 msgstr "Задание %(index)s"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html:65
-#, fuzzy
 #| msgid "Struktur məlumatı"
 msgctxt "accounts.syllabus"
 msgid "strukturdan artıq"
-msgstr "Информация о структуре"
+msgstr "превышает структуру"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_final.html:73
 msgctxt "accounts.syllabus"
@@ -14955,12 +14726,11 @@ msgid "Həftənin mövzusu"
 msgstr "Тема недели"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html:98
-#, fuzzy
 #| msgctxt "registrar.legacy_grade"
 #| msgid "Köhnə imtahan xanası"
 msgctxt "accounts.syllabus"
 msgid "Köhnə sistemdən saxlanılır:"
-msgstr "Старая экзаменационная ячейка"
+msgstr "Сохранено из старой системы:"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html:105
 msgctxt "accounts.syllabus"
@@ -14998,14 +14768,12 @@ msgstr "Перенесено из старой системы — текст с�
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html:171
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html:172
-#, fuzzy
 #| msgid "İmtahandan çıxar"
 msgctxt "accounts.syllabus"
 msgid "Siyahıdan çıxar"
-msgstr "Исключить с экзамена"
+msgstr "Убрать из списка"
 
 #: apps/accounts/templates/accounts/profile/sections/syllabus/_editor_plan.html:172
-#, fuzzy
 #| msgid "Bərpa et"
 msgctxt "accounts.syllabus"
 msgid "Bərpa et"
@@ -15616,11 +15384,10 @@ msgid "Struktur məlumatı"
 msgstr "Информация о структуре"
 
 #: apps/accounts/templates/accounts/public_profile.html:125
-#, fuzzy
 #| msgid "Vəziyyət"
 msgctxt "profile.public"
 msgid "Vəzifə"
-msgstr "Состояние"
+msgstr "Должность"
 
 #: apps/accounts/templates/accounts/public_profile.html:130
 msgid "Bölmə"
@@ -16251,15 +16018,13 @@ msgid "mode_full"
 msgstr "Полное управление"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:42
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Təlim nəticəsi"
 msgctxt "profile.results.academic"
 msgid "Fənn nəticəsi"
-msgstr "Результат обучения"
+msgstr "Результат по предмету"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:49
-#, fuzzy
 #| msgctxt "profile.overall_academic"
 #| msgid ""
 #| "Q/b-dan kəsilib — imtahana buraxılmayıb (fənn yenidən keçilməli)"
@@ -16270,15 +16035,13 @@ msgstr ""
 "заново)"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:53
-#, fuzzy
 #| msgctxt "profile.overall_academic"
 #| msgid "İmtahandan kəsilib (25% ilə təkrar imtahan hüququ)"
 msgctxt "profile.results.academic"
 msgid "İmtahandan kəsilib — 25 faiz ödənişlə təkrar imtahan hüququ"
-msgstr "Не сдал(а) экзамен (право на пересдачу с 25%)"
+msgstr "Отстранён от экзамена — право на пересдачу с оплатой 25 процентов"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:55
-#, fuzzy
 #| msgctxt "profile.overall_academic"
 #| msgid "Ümumi baldan kəsilib"
 msgctxt "profile.results.academic"
@@ -16286,23 +16049,20 @@ msgid "Ümumi baldan kəsilib"
 msgstr "Не сдано по общему баллу"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:59
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Keçdi"
 msgctxt "profile.results.academic"
 msgid "Keçdi"
-msgstr "Сдал"
+msgstr "Сдано"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:60
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Kəsildi"
 msgctxt "profile.results.academic"
 msgid "Kəsildi"
-msgstr "Не сдал"
+msgstr "Не сдано"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:61
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Kəsilir"
 msgctxt "profile.results.academic"
@@ -16310,7 +16070,6 @@ msgid "Kəsilir"
 msgstr "Не проходит"
 
 #: apps/accounts/views/_dashboard_helpers/academic_results.py:62
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Davam edir"
 msgctxt "profile.results.academic"
@@ -16997,12 +16756,11 @@ msgid "join_organization"
 msgstr "Присоединиться к организации"
 
 #: apps/accounts/views/profile/_sections/labels.py:89
-#, fuzzy
 #| msgctxt "roles.display_name"
 #| msgid "exam_center"
 msgctxt "profile.section"
 msgid "rim_center"
-msgstr "Экзаменационный центр"
+msgstr "Центр цифрового развития (RİM)"
 
 #: apps/accounts/views/profile/_sections/labels.py:100
 #: apps/accounts/views/profile/context_builder/_stage4.py:30
@@ -17017,7 +16775,6 @@ msgid "change_password"
 msgstr "Изменить пароль"
 
 #: apps/accounts/views/profile/_sections/labels.py:118
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Sillabus redaktoru"
 msgctxt "profile.sidebar"
@@ -17378,14 +17135,12 @@ msgid "Profil"
 msgstr "Профиль"
 
 #: apps/accounts/views/search.py:47
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Fənlərim"
 msgid "Fənlərim"
 msgstr "Мои предметы"
 
 #: apps/accounts/views/search.py:48
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Transkript"
 msgid "Transkript"
@@ -17404,21 +17159,19 @@ msgid "Akademik təqvim"
 msgstr "Академический календарь"
 
 #: apps/accounts/views/search.py:52
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "Jurnala baxış"
 msgid "Jurnal bağlama"
-msgstr "Просмотр журнала"
+msgstr "Закрытие журналов"
 
 #: apps/accounts/views/search.py:59
 msgid "Akademik analitika"
 msgstr "Академическая аналитика"
 
 #: apps/accounts/views/search.py:60
-#, fuzzy
 #| msgid "İmtahanlar"
 msgid "İmtahanlarım"
-msgstr "Экзамены"
+msgstr "Мои экзамены"
 
 #: apps/accounts/views/search.py:62
 msgid "Bildirişlər"
@@ -18089,7 +17842,7 @@ msgid "Gözləyir"
 msgstr "Ожидает"
 
 #: apps/appeals/templates/appeals/partials/_appeal_detail_body.html:59
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "appeals.template"
 #| msgid ""
 #| "\n"
@@ -18097,9 +17850,7 @@ msgstr "Ожидает"
 #| "        "
 msgctxt "appeals.template"
 msgid "Bu apellyasiya nəticəsində +%(bonus)s bal əlavə olundu"
-msgstr ""
-"\n"
-"В результате этой апелляции добавлено +%(bonus)s балл(ов)"
+msgstr "В результате этой апелляции добавлено +%(bonus)s балл(ов)"
 
 #: apps/appeals/templates/appeals/partials/_appeal_detail_body.html:69
 msgctxt "appeals.template"
@@ -18493,7 +18244,7 @@ msgid "Apellyasiya müddəti bitib"
 msgstr "Срок подачи апелляции истёк"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:52
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "appeals.template"
 #| msgid ""
 #| "\n"
@@ -18505,17 +18256,16 @@ msgid ""
 "Apellyasiya yalnız imtahan bitdikdən sonra %(days)s gün ərzində göndərilə "
 "bilər. Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil."
 msgstr ""
-"\n"
-"Апелляцию можно отправить только в течение %(days)s дней после окончания экзамена.\n"
-"                    Так как этот срок истёк, отправить новую апелляцию невозможно."
+"Апелляцию можно подать только в течение %(days)s дн. после окончания "
+"экзамена. Поскольку этот срок истёк, подать новую апелляцию невозможно."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:58
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "appeals.template"
 #| msgid "son tarix: %(deadline)s"
 msgctxt "appeals.template"
 msgid "Son tarix: %(deadline)s."
-msgstr "крайний срок: %(deadline)s"
+msgstr "Срок: %(deadline)s."
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:69
 msgctxt "appeals.template"
@@ -18523,11 +18273,11 @@ msgid "Apellyasiyanızın nəticəsi"
 msgstr "Результат вашей апелляции"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:80
-#, fuzzy, python-format
+#, python-format
 #| msgid "%(count)s müəllim"
 msgctxt "appeals.template"
 msgid "%(count)s sual üzrə apellyasiya"
-msgstr "%(count)s преподавателей"
+msgstr "Апелляция по %(count)s вопрос(ам)"
 
 #: apps/appeals/templates/appeals/student/appeal_create.html:88
 msgctxt "appeals.template"
@@ -29024,14 +28774,14 @@ msgid "label_score"
 msgstr "Баллы"
 
 #: apps/exams/templates/exams/student/exam_result.html:96
-#, fuzzy, python-format
+#, python-format
 #| msgid "Apellyasiya ilə +%(bonus)s bal əlavə olunub"
 msgctxt "exams.template.student_exam_result"
 msgid "Apellyasiya ilə +%(bonus)s bal əlavə olundu."
-msgstr "По апелляции добавлено +%(bonus)s баллов"
+msgstr "Апелляцией добавлено +%(bonus)s балл(ов)."
 
 #: apps/exams/templates/exams/student/exam_result.html:104
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "exams.template.student_exam_result"
 #| msgid ""
 #| "\n"
@@ -29039,9 +28789,7 @@ msgstr "По апелляции добавлено +%(bonus)s баллов"
 #| "                        "
 msgctxt "exams.template.student_exam_result"
 msgid "%(pending)s sual apellyasiyadadır — cavab gözlənilir."
-msgstr ""
-"\n"
-"%(pending)s вопрос(ов) на апелляции — ожидается ответ."
+msgstr "%(pending)s вопрос(ов) на апелляции — ожидается ответ."
 
 #: apps/exams/templates/exams/student/exam_result.html:114
 #: apps/exams/templates/exams/student/exam_result.html:117
@@ -35875,16 +35623,13 @@ msgid "Zaldakı bütün hazır imtahanlar eyni anda başladılsın?"
 msgstr "Запустить все готовые экзамены в зале одновременно?"
 
 #: apps/exams/views/exam_center/room_monitor.py:93
-#, fuzzy
 #| msgid ""
 #| "Seçilmiş bütün bildirişləri silmək istədiyinizə əminsiniz? Bu əməliyyat geri"
 #| " qaytarıla bilməz."
 msgid ""
 "Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla "
 "bilməz."
-msgstr ""
-"Вы уверены, что хотите удалить все выбранные уведомления? Это действие "
-"нельзя отменить."
+msgstr "Завершить все активные экзамены в зале? Это действие нельзя отменить."
 
 #: apps/exams/views/exam_center/room_monitor.py:95
 msgid "Bağlantı kəsildi"
@@ -35903,23 +35648,20 @@ msgid "Başlatmaq mümkün olmadı."
 msgstr "Не удалось запустить."
 
 #: apps/exams/views/exam_center/room_monitor.py:103
-#, fuzzy
 #| msgctxt "exams.final_center.report"
 #| msgid "İmtahanı bitirib"
 msgid "İmtahanı bitir"
-msgstr "Завершил экзамен"
+msgstr "Завершить экзамен"
 
 #: apps/exams/views/exam_center/room_monitor.py:104
-#, fuzzy
 #| msgid "Bitirib"
 msgid "Bitir"
-msgstr "Завершил"
+msgstr "Завершить"
 
 #: apps/exams/views/exam_center/room_monitor.py:105
-#, fuzzy
 #| msgid "Başlatmaq mümkün olmadı."
 msgid "Bitirmək mümkün olmadı."
-msgstr "Не удалось запустить."
+msgstr "Не удалось завершить."
 
 #: apps/exams/views/exam_center/room_monitor.py:109
 msgid "Blokla"
@@ -35954,11 +35696,10 @@ msgid "Qeydə alınmış qayda pozuntusu yoxdur."
 msgstr "Зарегистрированных нарушений нет."
 
 #: apps/exams/views/exam_center/room_monitor.py:118
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Detal yüklənmədi."
 msgid "Məlumat yüklənmədi."
-msgstr "Не удалось загрузить детали."
+msgstr "Данные не загрузились."
 
 #: apps/exams/views/exam_center/room_monitor.py:195
 msgctxt "exams.final_center.permission"
@@ -40476,12 +40217,11 @@ msgid "Jurnal bağlama (RİM)"
 msgstr "Закрытие журналов (Центр цифрового развития — RİM)"
 
 #: apps/organizations/cabinet_modules.py:63
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "İmtahan balını sistemə daxil etmək"
 msgctxt "accounts.cabinet_modules"
 msgid "İmtahan balının daxil edilməsi"
-msgstr "Внесение экзаменационного балла в систему"
+msgstr "Ввод экзаменационного балла"
 
 #: apps/organizations/cabinet_modules.py:68
 msgctxt "accounts.cabinet_modules"
@@ -41782,45 +41522,39 @@ msgid "grade_given"
 msgstr "Оценка успешно выставлена."
 
 #: apps/registrar/console_views.py:136
-#, fuzzy
 #| msgctxt "appeals.view.message"
 #| msgid "Qərarlar yadda saxlanıldı."
 msgid "Proqram yadda saxlanıldı."
-msgstr "Сохранить решения"
+msgstr "Программа сохранена."
 
 #: apps/registrar/console_views.py:149
-#, fuzzy
 #| msgctxt "accounts.kollokvium_windows"
 #| msgid "Pəncərə yadda saxlanıldı."
 msgid "Fənn yadda saxlanıldı."
-msgstr "Окно сохранено."
+msgstr "Предмет сохранён."
 
 #: apps/registrar/console_views.py:167
-#, fuzzy
 #| msgctxt "appeals.view.message"
 #| msgid "Qərarlar yadda saxlanıldı."
 msgid "Tədris planı yadda saxlanıldı."
-msgstr "Сохранить решения"
+msgstr "Учебный план сохранён."
 
 #: apps/registrar/console_views.py:194
-#, fuzzy
 #| msgid "Dərs əlavə edildi."
 msgid "Plan sətri əlavə edildi."
-msgstr "Занятие добавлено."
+msgstr "Строка плана добавлена."
 
 #: apps/registrar/console_views.py:235
-#, fuzzy
 #| msgctxt "accounts.kollokvium_windows"
 #| msgid "Pəncərə silindi."
 msgid "Plan sətri silindi."
-msgstr "Окно удалено."
+msgstr "Строка плана удалена."
 
 #: apps/registrar/console_views.py:260
-#, fuzzy
 #| msgctxt "accounts.kollokvium_windows"
 #| msgid "Pəncərə yadda saxlanıldı."
 msgid "Semestr fənni (offering) yadda saxlanıldı."
-msgstr "Окно сохранено."
+msgstr "Семестровый предмет (offering) сохранён."
 
 #: apps/registrar/console_views.py:298
 #, python-format
@@ -41833,11 +41567,10 @@ msgid ""
 msgstr "Студент назначен (автозапись пропущена — нет активного семестра)."
 
 #: apps/registrar/console_views.py:305
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Tələbə təyin et"
 msgid "Tələbə təyin olundu."
-msgstr "Назначить студента"
+msgstr "Студент назначен."
 
 #: apps/registrar/console_views.py:342
 #, python-format
@@ -41862,22 +41595,20 @@ msgstr ""
 "журнал и повторите попытку."
 
 #: apps/registrar/correction_reversals.py:49
-#, fuzzy
 #| msgctxt "core.permission.error"
 #| msgid "An active organization is required."
 msgctxt "registrar.correction"
 msgid "A reversal actor is required."
-msgstr "Выбор организации обязателен."
+msgstr "Требуется исполнитель отмены."
 
 #: apps/registrar/correction_reversals.py:284
 #: apps/registrar/correction_reversals.py:334
 #: apps/registrar/correction_reversals.py:390
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "The journal is published — it can't be changed."
 msgctxt "registrar.correction"
 msgid "The published journal cannot be changed."
-msgstr "Журнал опубликован — его нельзя изменить."
+msgstr "Опубликованный журнал нельзя изменить."
 
 #: apps/registrar/correction_views.py:89
 msgctxt "registrar.correction"
@@ -42018,12 +41749,11 @@ msgstr ""
 "%(limit)s%% по этому предмету."
 
 #: apps/registrar/exam_eligibility.py:163
-#, fuzzy
 #| msgctxt "syllabus.model"
 #| msgid "Köhnə sistemdən köçürülüb"
 msgctxt "registrar.eligibility"
 msgid "Köhnə sistemdən"
-msgstr "Из прежней системы"
+msgstr "Из старой системы"
 
 #: apps/registrar/exam_eligibility.py:167
 msgctxt "registrar.eligibility"
@@ -42088,20 +41818,18 @@ msgid "Daxili kod"
 msgstr "Внутренний код"
 
 #: apps/registrar/forms.py:105
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Rəsmi ixtisas kodu"
 msgctxt "registrar.console"
 msgid "Rəsmi ixtisas şifri (cari)"
-msgstr "Официальный код специальности"
+msgstr "Официальный код специальности (текущий)"
 
 #: apps/registrar/forms.py:106
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Rəsmi ixtisas kodu"
 msgctxt "registrar.console"
 msgid "Rəsmi ixtisas şifri (köhnə)"
-msgstr "Официальный код специальности"
+msgstr "Официальный код специальности (старый)"
 
 #: apps/registrar/forms.py:107 apps/registrar/forms.py:160
 msgctxt "registrar.console"
@@ -42317,42 +42045,37 @@ msgid "Dərs dəyişdirilmədi — 2 saatlıq düzəliş pəncərəsi bitib."
 msgstr "Занятие не изменено — двухчасовое окно исправлений закрылось."
 
 #: apps/registrar/journal_actions.py:146
-#, fuzzy
 #| msgid "Dərs cədvəlinə slot əlavə edildi."
 msgid "Dərs sənədli əsasla silindi."
-msgstr "Слот добавлен в расписание."
+msgstr "Занятие удалено на документальном основании."
 
 #: apps/registrar/journal_actions.py:150
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Dərsi sil"
 msgid "Dərs silindi."
-msgstr "Удалить занятие"
+msgstr "Занятие удалено."
 
 #: apps/registrar/journal_actions.py:152
 msgid "Dərs silinmədi — 2 saatlıq düzəliş pəncərəsi bitib."
 msgstr "Занятие не удалено — двухчасовое окно исправлений закрылось."
 
 #: apps/registrar/journal_actions.py:193
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "Jurnalda sənədli düzəliş etmək"
 msgid "Dərs sənədli düzəlişlə yeniləndi."
-msgstr "Внесение документированной правки в журнал"
+msgstr "Занятие обновлено с документальным исправлением."
 
 #: apps/registrar/journal_actions.py:223
-#, fuzzy
 #| msgctxt "accounts.superadmin_exam_rooms"
 #| msgid "Zal yeniləndi."
 msgid "Dərs yeniləndi."
-msgstr "Зал обновлён."
+msgstr "Занятие обновлено."
 
 #: apps/registrar/journal_actions.py:225
 msgid "Dərs yenilənmədi — 2 saatlıq düzəliş pəncərəsi bitib."
 msgstr "Занятие не обновлено — двухчасовое окно исправлений закрылось."
 
 #: apps/registrar/journal_actions.py:265
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid ""
 #| "Hazırda açıq kollokvium pəncərəsi yoxdur — bal yazmaq üçün İmtahan "
@@ -42361,57 +42084,53 @@ msgid ""
 "Kollokvium bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
 "aktivləşdirməlidir."
 msgstr ""
-"Сейчас нет открытого окна коллоквиума — чтобы выставить баллы, дождитесь, "
-"пока Экзаменационный центр активирует интервал."
+"Окно выставления баллов коллоквиума не открыто — Экзаменационный центр "
+"должен активировать интервал."
 
 #: apps/registrar/journal_actions.py:273
 msgid "Bəzi kollokviumların pəncərəsi bağlı olduğu üçün yazılmadı."
 msgstr "Баллы некоторых коллоквиумов не сохранены, так как их окно закрыто."
 
 #: apps/registrar/journal_actions.py:274
-#, fuzzy, python-format
+#, python-format
 #| msgid "Komponent balları yadda saxlanıldı (%(n)s xana)."
 msgid "Kollokvium balları yadda saxlanıldı (%(n)s xana)."
-msgstr "Баллы компонентов сохранены (%(n)s ячеек)."
+msgstr "Баллы коллоквиума сохранены (%(n)s ячейк.)."
 
 #: apps/registrar/journal_actions.py:295
 msgid "Mövzu əlavə olunmadı (boş ad və ya limit doldu)."
 msgstr "Тема не добавлена (пустое название или достигнут лимит)."
 
 #: apps/registrar/journal_actions.py:297
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "sərbəst iş mövzusu"
 msgid "Sərbəst iş mövzusu əlavə edildi."
-msgstr "тема самостоятельной работы"
+msgstr "Тема самостоятельной работы добавлена."
 
 #: apps/registrar/journal_actions.py:303
 msgid "Mövzu (və üzrə balları) silindi."
 msgstr "Тема (и баллы по ней) удалена."
 
 #: apps/registrar/journal_actions.py:305
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Versiya kilidlidir — redaktə bağlıdır."
 msgid "Mövzu silinmədi — jurnal bağlıdır."
-msgstr "Версия заблокирована — редактирование закрыто."
+msgstr "Тема не удалена — журнал закрыт."
 
 #: apps/registrar/journal_actions.py:330
 msgid "Bəzi işarələr dəyişilmədi — geri alma pəncərəsi bitib."
 msgstr "Некоторые отметки не изменены — окно отмены закрылось."
 
 #: apps/registrar/journal_actions.py:332
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Sərbəst işi yadda saxla"
 msgid "Sərbəst iş işarələri yadda saxlanıldı."
-msgstr "Сохранить самостоятельную работу"
+msgstr "Отметки самостоятельной работы сохранены."
 
 #: apps/registrar/journal_actions.py:364
-#, fuzzy
 #| msgid "Rubrik yadda saxlanıldı."
 msgid "Kurs işi yadda saxlanıldı."
-msgstr "Рубрика сохранена."
+msgstr "Курсовая работа сохранена."
 
 #: apps/registrar/journal_actions.py:366
 msgid "Kurs işi dəyişilmədi — 2 saatlıq pəncərə bitib."
@@ -42422,10 +42141,10 @@ msgid "Bəzi kurs işləri dəyişilmədi — 2 saatlıq pəncərə bitib."
 msgstr "Некоторые курсовые работы не изменены — двухчасовое окно закрылось."
 
 #: apps/registrar/journal_actions.py:395
-#, fuzzy, python-format
+#, python-format
 #| msgid "Jurnal yadda saxlanıldı (%(n)s xana)."
 msgid "Kurs işi qeydləri yadda saxlanıldı (%(n)s sətir)."
-msgstr "Журнал сохранён (%(n)s ячеек)."
+msgstr "Записи курсовой работы сохранены (%(n)s строк)."
 
 #: apps/registrar/journal_export.py:64
 msgctxt "registrar.journal"
@@ -42462,14 +42181,12 @@ msgid "Yekun nəticə"
 msgstr "Итоговый результат"
 
 #: apps/registrar/journal_export.py:173
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Yekun"
 msgid "Yekun"
 msgstr "Итог"
 
 #: apps/registrar/journal_export.py:174
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Hərf"
 msgid "Hərf"
@@ -42491,32 +42208,28 @@ msgid "Rəy"
 msgstr "Отзыв"
 
 #: apps/registrar/journal_export.py:200
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Kəsildi"
 msgid "Kəsildi"
-msgstr "Не сдал"
+msgstr "Не сдано"
 
 #: apps/registrar/journal_export.py:202
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Keçdi"
 msgid "Keçdi"
-msgstr "Сдал"
+msgstr "Сдано"
 
 #: apps/registrar/journal_export.py:204
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Davam edir"
 msgid "Davam edir"
 msgstr "В процессе"
 
 #: apps/registrar/journal_extras.py:513
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Mövzu hələ əlavə olunmayıb"
 msgid "Mövzu qeyd olunmayıb"
-msgstr "Тема ещё не добавлена"
+msgstr "Тема не указана"
 
 #: apps/registrar/journal_notifications.py:29
 msgctxt "registrar.notify"
@@ -42565,15 +42278,13 @@ msgid "Elektron jurnal — %(subject)s"
 msgstr "Электронный журнал — %(subject)s"
 
 #: apps/registrar/legacy_excuse.py:50
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "Üzrlü qayıb (üq)"
 msgctxt "registrar.legacy_excuse"
 msgid "Üzrlü qayıb sənədi"
-msgstr "Уважительный пропуск (у)"
+msgstr "Документ об уважительном отсутствии"
 
 #: apps/registrar/legacy_excuse.py:52
-#, fuzzy
 #| msgctxt "syllabus.model"
 #| msgid "Köhnə sistemdən köçürülüb"
 msgctxt "registrar.legacy_excuse"
@@ -42581,12 +42292,11 @@ msgid "Köhnə sistemdən köçürülüb"
 msgstr "Перенесено из старой системы"
 
 #: apps/registrar/legacy_excuse.py:54
-#, fuzzy
 #| msgctxt "registrar.legacy_grade"
 #| msgid "Köhnə sistemin xüsusi bal kodu"
 msgctxt "registrar.legacy_excuse"
 msgid "Köhnə sistem qeydi"
-msgstr "Особый код оценки старой системы"
+msgstr "Запись старой системы"
 
 #: apps/registrar/legacy_excuse.py:60
 msgctxt "registrar.legacy_excuse"
@@ -43201,20 +42911,18 @@ msgid "Documented change"
 msgstr "Документальное изменение"
 
 #: apps/registrar/models/exam_score_entry.py:85
-#, fuzzy
 #| msgctxt "roles.display_name"
 #| msgid "exam_center"
 msgctxt "registrar.model.exam_score_entry.meta"
 msgid "exam score entry"
-msgstr "Экзаменационный центр"
+msgstr "запись экзаменационного балла"
 
 #: apps/registrar/models/exam_score_entry.py:86
-#, fuzzy
 #| msgctxt "roles.display_name"
 #| msgid "exam_center"
 msgctxt "registrar.model.exam_score_entry.meta"
 msgid "exam score entries"
-msgstr "Экзаменационный центр"
+msgstr "записи экзаменационных баллов"
 
 #: apps/registrar/models/grading.py:31
 msgctxt "registrar.lesson_kind"
@@ -43442,12 +43150,11 @@ msgid "resit records"
 msgstr "записи пересдачи"
 
 #: apps/registrar/models/handover.py:109
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Fənnin təsviri"
 msgctxt "registrar.model.handover.meta"
 msgid "fənn təhvili qeydi"
-msgstr "Описание предмета"
+msgstr "запись сдачи предмета"
 
 #: apps/registrar/models/handover.py:110
 msgctxt "registrar.model.handover.meta"
@@ -43455,7 +43162,6 @@ msgid "fənn təhvili qeydləri"
 msgstr "записи о передаче предмета"
 
 #: apps/registrar/models/journal_close_notice.py:61
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "bağlanış tarixi"
 msgctxt "registrar.journal_close"
@@ -43463,20 +43169,18 @@ msgid "bağlanma tarixi"
 msgstr "дата закрытия"
 
 #: apps/registrar/models/journal_close_notice.py:79
-#, fuzzy
 #| msgctxt "exams.template.question_submission"
 #| msgid "Suallar və xəbərdarlıqlar"
 msgctxt "registrar.journal_close"
 msgid "Jurnal bağlanma xəbərdarlığı"
-msgstr "Вопросы и предупреждения"
+msgstr "Предупреждение о закрытии журнала"
 
 #: apps/registrar/models/journal_close_notice.py:80
-#, fuzzy
 #| msgctxt "exams.template.question_submission"
 #| msgid "Suallar və xəbərdarlıqlar"
 msgctxt "registrar.journal_close"
 msgid "Jurnal bağlanma xəbərdarlıqları"
-msgstr "Вопросы и предупреждения"
+msgstr "Предупреждения о закрытии журнала"
 
 #: apps/registrar/models/kollokvium_window.py:42
 msgctxt "registrar.kollokvium_window"
@@ -43514,7 +43218,6 @@ msgid "Kollokvium əlavə günlər"
 msgstr "Дополнительные дни коллоквиума"
 
 #: apps/registrar/models/legacy_excuse.py:66
-#, fuzzy
 #| msgctxt "registrar.calendar"
 #| msgid "Bağlanıb"
 msgctxt "registrar.legacy_excuse_mapping"
@@ -43522,27 +43225,24 @@ msgid "Bağlanıb"
 msgstr "Закрыто"
 
 #: apps/registrar/models/legacy_excuse.py:69
-#, fuzzy
 #| msgid "Tələbə tapılmadı."
 msgctxt "registrar.legacy_excuse_mapping"
 msgid "Tələbə tapılmadı"
-msgstr "Студент не найден."
+msgstr "Студент не найден"
 
 #: apps/registrar/models/legacy_excuse.py:73
-#, fuzzy
 #| msgctxt "exams.final_center.report"
 #| msgid "Tarix aralığı"
 msgctxt "registrar.legacy_excuse_mapping"
 msgid "Yararsız tarix aralığı"
-msgstr "Диапазон дат"
+msgstr "Недопустимый диапазон дат"
 
 #: apps/registrar/models/legacy_excuse.py:154
-#, fuzzy
 #| msgctxt "registrar.correction"
 #| msgid "Üzrlü qayıb (üq)"
 msgctxt "registrar.model.legacy_excuse.meta"
 msgid "üzrlü qayıb sənədi"
-msgstr "Уважительный пропуск (у)"
+msgstr "документ об уважительном отсутствии"
 
 #: apps/registrar/models/legacy_excuse.py:155
 msgctxt "registrar.model.legacy_excuse.meta"
@@ -43712,32 +43412,28 @@ msgid "Slot silindi."
 msgstr "Слот удалён."
 
 #: apps/registrar/syllabus_pdf.py:64
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
 msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
 msgstr "Министерство образования Азербайджанской Республики"
 
 #: apps/registrar/syllabus_pdf.py:93
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Versiya"
 msgid "Versiya"
 msgstr "Версия"
 
 #: apps/registrar/syllabus_pdf.py:95
-#, fuzzy
 #| msgctxt "registrar.kollokvium_window"
 #| msgid "Təsdiq"
 msgid "Təsdiq"
 msgstr "Подтверждение"
 
 #: apps/registrar/syllabus_pdf.py:100
-#, fuzzy
 #| msgctxt "syllabus.status"
 #| msgid "Təsdiqlənib"
 msgid "təsdiqlənməyib"
-msgstr "Утверждено"
+msgstr "не подтверждено"
 
 #: apps/registrar/syllabus_pdf.py:135
 msgid "FƏNN SİLLABUSU"
@@ -43756,7 +43452,6 @@ msgstr ""
 "рабочая копия."
 
 #: apps/registrar/syllabus_views.py:97
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid ""
 #| "Tələbələr yalnız təsdiqlənmiş versiyanı görür. Yeni versiya təsdiqlənənə "
@@ -44171,12 +43866,11 @@ msgstr "Итоговая оценка"
 #: apps/registrar/templates/registrar/journal_detail.html:133
 #: apps/registrar/templates/registrar/journal_detail.html:222
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:36
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Plana fənn əlavə et"
 msgctxt "registrar.guest_roster"
 msgid "Alt qrupdan tələbə əlavə et"
-msgstr "Добавить предмет в план"
+msgstr "Добавить студента из подгруппы"
 
 #: apps/registrar/templates/registrar/journal_detail.html:140
 msgctxt "registrar.guest_roster"
@@ -44206,15 +43900,13 @@ msgstr "Открыть силлабус предмета в режиме чте�
 
 #: apps/registrar/templates/registrar/journal_detail.html:159
 #: apps/registrar/templates/registrar/partials/_journal_student_content.html:91
-#, fuzzy
 #| msgctxt "organizations.permission.label"
 #| msgid "Sillabuslara baxış"
 msgctxt "registrar.syllabus"
 msgid "Sillabusa bax"
-msgstr "Просмотр силлабусов"
+msgstr "Просмотреть силлабус"
 
 #: apps/registrar/templates/registrar/journal_detail.html:173
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Diqqət"
 msgctxt "registrar.journal_close"
@@ -44222,7 +43914,6 @@ msgid "Diqqət"
 msgstr "Внимание"
 
 #: apps/registrar/templates/registrar/journal_detail.html:173
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Jurnallar"
 msgctxt "registrar.journal_close"
@@ -44833,11 +44524,10 @@ msgid "Qayıb limitinə yaxın"
 msgstr "Близко к лимиту пропусков"
 
 #: apps/registrar/templates/registrar/partials/_jd_final_breakdown.html:54
-#, fuzzy
 #| msgid "Qalan cəhd"
 msgctxt "registrar.journal"
 msgid "cəhd"
-msgstr "Осталось попыток"
+msgstr "попытка"
 
 #: apps/registrar/templates/registrar/partials/_jd_final_breakdown.html:56
 msgctxt "registrar.journal"
@@ -44845,11 +44535,10 @@ msgid "rəsmi"
 msgstr "официально"
 
 #: apps/registrar/templates/registrar/partials/_jd_final_breakdown.html:56
-#, fuzzy
 #| msgid "✓ Əlavə olundu"
 msgctxt "registrar.journal"
 msgid "ləğv olundu"
-msgstr "✓ Добавлено"
+msgstr "отменено"
 
 #: apps/registrar/templates/registrar/partials/_jd_final_breakdown.html:68
 msgctxt "registrar.journal"
@@ -44913,13 +44602,13 @@ msgid "QAYIB"
 msgstr "ПРОПУСКИ"
 
 #: apps/registrar/templates/registrar/partials/_jd_grid.html:79
-#, fuzzy, python-format
+#, python-format
 #| msgctxt "registrar.journal"
 #| msgid "Dərs saatına görə icazə verilən maksimum q/b (25% həddi)"
 msgctxt "registrar.journal"
 msgid "Dərs saatına görə icazə verilən maksimum q/b (25%% həddi)"
 msgstr ""
-"Максимально допустимое число пропусков (q/b) по учебным часам (порог 25%)"
+"Максимально допустимое количество пропусков по часу занятия (порог 25%%)"
 
 #: apps/registrar/templates/registrar/partials/_jd_grid.html:79
 msgctxt "registrar.journal"
@@ -45033,37 +44722,32 @@ msgstr ""
 "присутствие/пропуск и выставьте баллы."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:15
-#, fuzzy
 #| msgctxt "profile.academic_items"
 #| msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
 msgctxt "registrar.guest_roster"
 msgid "Əməliyyat alınmadı — yenidən cəhd edin."
-msgstr "Операция не удалась. Попробуйте ещё раз."
+msgstr "Операция не выполнена — попробуйте снова."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:16
-#, fuzzy
 #| msgid "və ya seçmək üçün klikləyin"
 msgctxt "registrar.guest_roster"
 msgid "Təsdiq üçün yenidən klikləyin"
-msgstr "или нажмите, чтобы выбрать"
+msgstr "Нажмите ещё раз для подтверждения"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:17
-#, fuzzy
 #| msgid "Axtarışa uyğun sual tapılmadı."
 msgctxt "registrar.guest_roster"
 msgid "Bu ada uyğun qrup tapılmadı."
-msgstr "Вопрос, соответствующий поиску, не найден."
+msgstr "Группа с таким названием не найдена."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:18
-#, fuzzy
 #| msgid "Tələbə tapılmadı."
 msgctxt "registrar.guest_roster"
 msgid "Bu qrupda uyğun tələbə tapılmadı."
-msgstr "Студент не найден."
+msgstr "В этой группе не найдено подходящего студента."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:20
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:57
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Bütün ixtisas"
 msgctxt "registrar.guest_roster"
@@ -45071,27 +44755,24 @@ msgid "Bütün ixtisas"
 msgstr "Все специальности"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:21
-#, fuzzy
 #| msgid "Tələbə imtahandan çıxarıldı"
 msgctxt "registrar.guest_roster"
 msgid "Tələbə jurnaldan çıxarıldı."
-msgstr "Студент удалён с экзамена"
+msgstr "Студент удалён из журнала."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:22
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:80
-#, fuzzy
 #| msgctxt "exams.template.question_submission"
 #| msgid "Əvvəlcə qərar seçin"
 msgctxt "registrar.guest_roster"
 msgid "Əvvəlcə qrup seçin…"
-msgstr "Сначала выберите решение"
+msgstr "Сначала выберите группу…"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:23
-#, fuzzy
 #| msgid "tələbə axtar…"
 msgctxt "registrar.guest_roster"
 msgid "Tələbə axtarın…"
-msgstr "поиск студента…"
+msgstr "Поиск студента…"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:25
 msgctxt "registrar.guest_roster"
@@ -45104,7 +44785,6 @@ msgid "Yazılmış işarə / bal"
 msgstr "Выставленные отметки / баллы"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:27
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "Qayıb"
 msgctxt "registrar.guest_roster"
@@ -45112,15 +44792,13 @@ msgid "Qayıb"
 msgstr "Пропуски"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:28
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Giriş balı"
 msgctxt "registrar.guest_roster"
 msgid "Giriş balı"
-msgstr "Входной балл"
+msgstr "Вступительный балл"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:29
-#, fuzzy
 #| msgctxt "profile.subjects"
 #| msgid "saat"
 msgctxt "registrar.guest_roster"
@@ -45150,7 +44828,6 @@ msgstr ""
 "группы не меняются."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:42
-#, fuzzy
 #| msgid "Bağla"
 msgctxt "registrar.guest_roster"
 msgid "Bağla"
@@ -45162,22 +44839,19 @@ msgid "QRUP (MƏNBƏ)"
 msgstr "ГРУППА (ИСТОЧНИК)"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:70
-#, fuzzy
 #| msgid "qrup axtar…"
 msgctxt "registrar.guest_roster"
 msgid "Qrup axtarın…"
-msgstr "поиск группы…"
+msgstr "Поиск группы…"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:72
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Yalnız sizin əhatənizdəki fənlər"
 msgctxt "registrar.guest_roster"
 msgid "Yalnız sizin əhatənizdəki qruplar göstərilir."
-msgstr "Только дисциплины вашей зоны"
+msgstr "Показаны только группы в вашей области охвата."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:78
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "TƏLƏBƏ"
 msgctxt "registrar.guest_roster"
@@ -45200,34 +44874,30 @@ msgstr ""
 "студенты этой группы."
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:98
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Təsdiqləyən"
 msgctxt "registrar.guest_roster"
 msgid "Təsdiq ediləcək"
-msgstr "Утвердил"
+msgstr "Будет утверждено"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:100
-#, fuzzy
 #| msgid "Tələbə"
 msgctxt "registrar.guest_roster"
 msgid "Tələbə"
 msgstr "Студент"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:102
-#, fuzzy
 #| msgctxt "exams.final_center.form"
 #| msgid "Tələbə qrupu"
 msgctxt "registrar.guest_roster"
 msgid "Mənbə qrup"
-msgstr "Студенческая группа"
+msgstr "Исходная группа"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:104
-#, fuzzy
 #| msgid "Əlavə olunur..."
 msgctxt "registrar.guest_roster"
 msgid "Əlavə olunur"
-msgstr "Добавляется..."
+msgstr "Добавляется"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:117
 msgctxt "registrar.guest_roster"
@@ -45269,33 +44939,29 @@ msgid "Bu jurnala alt qrupdan əlavə olunanlar"
 msgstr "Добавленные в этот журнал из подгруппы"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:158
-#, fuzzy
 #| msgid "Kafedradan çıxar"
 msgctxt "registrar.guest_roster"
 msgid "Jurnaldan çıxar"
-msgstr "Убрать с кафедры"
+msgstr "Убрать из журнала"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:160
-#, fuzzy
 #| msgid "Çıxar"
 msgctxt "registrar.guest_roster"
 msgid "Çıxar"
 msgstr "Исключить"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:169
-#, fuzzy
 #| msgid "Ləğv et"
 msgctxt "registrar.guest_roster"
 msgid "Ləğv et"
 msgstr "Отмена"
 
 #: apps/registrar/templates/registrar/partials/_jd_guest_modal.html:172
-#, fuzzy
 #| msgctxt "registrar.schedule"
 #| msgid "Kalendara əlavə et"
 msgctxt "registrar.guest_roster"
 msgid "Jurnala əlavə et"
-msgstr "Добавить в календарь"
+msgstr "Добавить в журнал"
 
 #: apps/registrar/templates/registrar/partials/_jd_kollokvium.html:10
 msgctxt "registrar.journal"
@@ -45538,12 +45204,13 @@ msgid "Əlavə et"
 msgstr "Добавить"
 
 #: apps/registrar/templates/registrar/partials/_jd_selfwork.html:56
-#, fuzzy
 #| msgctxt "syllabus.model"
 #| msgid "Köhnə sistemdən köçürülüb"
 msgctxt "registrar.journal"
 msgid "Köhnə sistemdən köçürülmüş sərbəst iş balı — oxu-only"
-msgstr "Перенесено из старой системы"
+msgstr ""
+"Балл самостоятельной работы, перенесённый из старой системы — только для "
+"чтения"
 
 #: apps/registrar/templates/registrar/partials/_jd_selfwork.html:56
 msgctxt "registrar.journal"
@@ -45648,13 +45315,14 @@ msgid "Davamiyyət"
 msgstr "Посещаемость"
 
 #: apps/registrar/templates/registrar/partials/_jd_syllabus_notice.html:26
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Tələbələr köhnə təsdiqlənmiş versiyanı görməyə davam edir"
 msgctxt "registrar.syllabus"
 msgid ""
 "Tələbələr bu müddətdə əvvəlki təsdiqlənmiş versiyanı görməyə davam edir."
-msgstr "Студенты продолжают видеть ранее утверждённую версию"
+msgstr ""
+"В течение этого периода студенты продолжают видеть предыдущую утверждённую "
+"версию."
 
 #: apps/registrar/templates/registrar/partials/_journal_list_content.html:11
 msgctxt "registrar.journal"
@@ -45801,7 +45469,6 @@ msgstr "Предметы"
 
 #: apps/registrar/templates/registrar/partials/_journal_student_content.html:96
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:47
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "PDF yüklə"
 msgctxt "registrar.syllabus"
@@ -46181,7 +45848,6 @@ msgid "boş"
 msgstr "пусто"
 
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:31
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Sillabus"
 msgctxt "registrar.syllabus"
@@ -46189,7 +45855,6 @@ msgid "Sillabus"
 msgstr "Силлабус"
 
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:34
-#, fuzzy
 #| msgctxt "accounts.syllabus"
 #| msgid "Paneli bağla"
 msgctxt "registrar.syllabus"
@@ -46197,22 +45862,19 @@ msgid "Paneli bağla"
 msgstr "Закрыть панель"
 
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:38
-#, fuzzy
 #| msgid "Yüklənir…"
 msgctxt "registrar.syllabus"
 msgid "Yüklənir…"
 msgstr "Загрузка…"
 
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:40
-#, fuzzy
 #| msgctxt "ai_assistant.error"
 #| msgid "Sorğu göndərilmədi. Səhifəni yeniləyib yenidən cəhd edin."
 msgctxt "registrar.syllabus"
 msgid "Sillabus açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
-msgstr "Не удалось отправить запрос. Обновите страницу и попробуйте снова."
+msgstr "Не удалось открыть силлабус. Обновите страницу и попробуйте снова."
 
 #: apps/registrar/templates/registrar/partials/_syllabus_drawer.html:50
-#, fuzzy
 #| msgid "Bağla"
 msgctxt "registrar.syllabus"
 msgid "Bağla"
@@ -46361,7 +46023,6 @@ msgid "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarl�
 msgstr "Документ сформирован системой и действителен в электронном виде."
 
 #: apps/registrar/transcript_pdf.py:201
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
 msgctxt "registrar.pdf"
@@ -46369,7 +46030,6 @@ msgid "Azərbaycan Respublikası Təhsil Nazirliyi"
 msgstr "Министерство образования Азербайджанской Республики"
 
 #: apps/registrar/transcript_pdf.py:221
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "PUBLİK HÜQUQİ ŞƏXS / PUBLIC LEGAL ENTITY"
 msgctxt "registrar.pdf"
@@ -46382,14 +46042,12 @@ msgid "AKADEMİK TRANSKRİPT"
 msgstr "АКАДЕМИЧЕСКАЯ ВЫПИСКА"
 
 #: apps/registrar/transcript_pdf.py:247
-#, fuzzy
 #| msgid "Fakültə"
 msgctxt "registrar.pdf"
 msgid "Fakültə"
 msgstr "Факультет"
 
 #: apps/registrar/transcript_pdf.py:248
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Tələbə №"
 msgctxt "registrar.pdf"
@@ -46397,14 +46055,12 @@ msgid "Tələbə №"
 msgstr "№ студента"
 
 #: apps/registrar/transcript_pdf.py:254
-#, fuzzy
 #| msgid "İxtisas"
 msgctxt "registrar.pdf"
 msgid "İxtisas"
 msgstr "Специальность"
 
 #: apps/registrar/transcript_pdf.py:255
-#, fuzzy
 #| msgctxt "registrar.console"
 #| msgid "Təhsil pilləsi"
 msgctxt "registrar.pdf"
@@ -46412,7 +46068,6 @@ msgid "Təhsil pilləsi"
 msgstr "Уровень образования"
 
 #: apps/registrar/transcript_pdf.py:256
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Soyadı, adı"
 msgctxt "registrar.pdf"
@@ -46435,7 +46090,6 @@ msgid "Status"
 msgstr "Статус"
 
 #: apps/registrar/transcript_pdf.py:299
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Fənnin şifri və adı"
 msgctxt "registrar.pdf"
@@ -46448,14 +46102,12 @@ msgid "Kredit"
 msgstr "Кредит"
 
 #: apps/registrar/transcript_pdf.py:301
-#, fuzzy
 #| msgid "Bal"
 msgctxt "registrar.pdf"
 msgid "Bal"
 msgstr "Балл"
 
 #: apps/registrar/transcript_pdf.py:302
-#, fuzzy
 #| msgctxt "registrar.records"
 #| msgid "Dərəcə"
 msgctxt "registrar.pdf"
@@ -46463,7 +46115,6 @@ msgid "Dərəcə"
 msgstr "Оценка"
 
 #: apps/registrar/transcript_pdf.py:356
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Semestrin sonu"
 msgctxt "registrar.pdf"
@@ -46485,7 +46136,6 @@ msgid "Akademik il %(year)s"
 msgstr "Учебный год %(year)s"
 
 #: apps/registrar/transcript_pdf.py:397
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "İlin sonu"
 msgctxt "registrar.pdf"
@@ -46493,7 +46143,6 @@ msgid "İlin sonu"
 msgstr "Конец года"
 
 #: apps/registrar/transcript_pdf.py:424
-#, fuzzy
 #| msgid "Ümumi"
 msgctxt "registrar.pdf"
 msgid "Ümumi"
@@ -46521,7 +46170,6 @@ msgstr ""
 "взято из источника как есть и не пересчитывалось."
 
 #: apps/registrar/transcript_pdf.py:450
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Fakültə dekanı"
 msgctxt "registrar.pdf"
@@ -46529,7 +46177,6 @@ msgid "Fakültə dekanı"
 msgstr "Декан факультета"
 
 #: apps/registrar/transcript_pdf.py:452
-#, fuzzy
 #| msgctxt "profile.transcript"
 #| msgid "Verilmə tarixi"
 msgctxt "registrar.pdf"
@@ -46579,12 +46226,11 @@ msgid "Dərs tarixi tələb olunur."
 msgstr "Требуется дата занятия."
 
 #: apps/registrar/views.py:374
-#, fuzzy
 #| msgctxt "registrar.journal"
 #| msgid "Dərs saatı seçilməlidir — standart saatlardan birini seçin."
 msgid "Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."
 msgstr ""
-"Необходимо выбрать время занятия — выберите один из стандартных часов."
+"Необходимо выбрать час занятия — выберите один из стандартных часов занятий."
 
 #: apps/registrar/views.py:382
 #, python-format
@@ -51902,13 +51548,13 @@ msgstr[3] "Пожалуйста, отправьте не больше %(num)d ф
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-format, fuzzy
+#, python-format
 msgid "Please submit at least %(num)d form."
 msgid_plural "Please submit at least %(num)d forms."
-msgstr[0] "Сначала выберите хотя бы одно приглашение."
-msgstr[1] "Сначала выберите хотя бы одно приглашение."
-msgstr[2] "Сначала выберите хотя бы одно приглашение."
-msgstr[3] "Сначала выберите хотя бы одно приглашение."
+msgstr[0] "Пожалуйста, отправьте %(num)d форму."
+msgstr[1] "Пожалуйста, отправьте %(num)d формы."
+msgstr[2] "Пожалуйста, отправьте %(num)d форм."
+msgstr[3] "Пожалуйста, отправьте %(num)d форм."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -52735,13 +52381,13 @@ msgstr[3] "of %(count)d selected"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-format, fuzzy
+#, python-format
 msgid "%(total_count)s selected"
 msgid_plural "All %(total_count)s selected"
-msgstr[0] "Ни один студент не был выбран."
-msgstr[1] "Ни один студент не был выбран."
-msgstr[2] "Ни один студент не был выбран."
-msgstr[3] "Ни один студент не был выбран."
+msgstr[0] "Выбран %(total_count)s"
+msgstr[1] "Выбраны все %(total_count)s"
+msgstr[2] "Выбраны все %(total_count)s"
+msgstr[3] "Выбраны все %(total_count)s"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -58915,8 +58561,10 @@ msgid "Faylın başlıq sətrində məcburi sütunlar tapılmadı: %s"
 msgstr "В строке заголовков файла нет обязательных столбцов: %s"
 
 msgctxt "student_intake"
-msgid "Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."
-msgstr "Этот сервер не читает .xlsx — сохраните файл как CSV и загрузите снова."
+msgid ""
+"Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."
+msgstr ""
+"Этот сервер не читает .xlsx — сохраните файл как CSV и загрузите снова."
 
 msgctxt "student_intake"
 msgid "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."
@@ -59107,12 +58755,19 @@ msgid "%(label)s qrupun strukturuna uyğun gəlmir: %(value)s"
 msgstr "%(label)s не соответствует структуре группы: %(value)s"
 
 msgctxt "student_intake"
-msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
-msgstr "Для этой группы не найдена программа — сначала нужно выстроить структуру."
+msgid ""
+"Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur "
+"qurulmalıdır."
+msgstr ""
+"Для этой группы не найдена программа — сначала нужно выстроить структуру."
 
 msgctxt "student_intake"
-msgid "Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq olunur."
-msgstr "Уровень образования не совпадает с программой — применяется уровень программы."
+msgid ""
+"Təhsil səviyyəsi proqramla üst-üstə düşmür — proqramın səviyyəsi tətbiq "
+"olunur."
+msgstr ""
+"Уровень образования не совпадает с программой — применяется уровень "
+"программы."
 
 msgctxt "student_intake"
 msgid "Qəbul ili rəqəm olmalıdır."
@@ -59135,16 +58790,22 @@ msgid "Cins tanınmadı — «təyin edilməyib» qalır."
 msgstr "Пол не распознан — остаётся «не указан»."
 
 msgctxt "student_intake"
-msgid "Bu qəbul ili üçün kurikulum yoxdur — tətbiqdə boş kurikulum yaradılacaq."
-msgstr "Для этого года поступления нет учебного плана — при применении будет создан пустой."
+msgid ""
+"Bu qəbul ili üçün kurikulum yoxdur — tətbiqdə boş kurikulum yaradılacaq."
+msgstr ""
+"Для этого года поступления нет учебного плана — при применении будет создан "
+"пустой."
 
 msgctxt "student_intake"
 msgid "Bu tələbə kodu artıq istifadə olunub — sətir ötürülür."
 msgstr "Этот код студента уже используется — строка пропускается."
 
 msgctxt "student_intake"
-msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
-msgstr "Эл. почты нет — записывается заглушка (пользователь укажет свою при первом входе)."
+msgid ""
+"E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr ""
+"Эл. почты нет — записывается заглушка (пользователь укажет свою при первом "
+"входе)."
 
 msgctxt "student_intake"
 msgid "E-poçt formatı yanlışdır."
@@ -59159,8 +58820,12 @@ msgid "Yaradılacaq."
 msgstr "Будет создан."
 
 msgctxt "student_intake"
-msgid "Bu təşkilatda aktiv «student» rolu yoxdur — əvvəlcə rol kataloqu qurulmalıdır."
-msgstr "В этой организации нет активной роли «student» — сначала нужно настроить каталог ролей."
+msgid ""
+"Bu təşkilatda aktiv «student» rolu yoxdur — əvvəlcə rol kataloqu "
+"qurulmalıdır."
+msgstr ""
+"В этой организации нет активной роли «student» — сначала нужно настроить "
+"каталог ролей."
 
 msgctxt "student_intake"
 msgid "Sətir yazılmadı: %s"
@@ -59175,16 +58840,28 @@ msgid "Tələbə idxalı üçün icazəniz yoxdur."
 msgstr "У вас нет прав на импорт студентов."
 
 msgctxt "student_intake"
-msgid "Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür."
-msgstr "У вас нет прав на импорт студентов — раздел доступен только ролям с ключом `user.import`."
+msgid ""
+"Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı "
+"olan rollar üçündür."
+msgstr ""
+"У вас нет прав на импорт студентов — раздел доступен только ролям с ключом "
+"`user.import`."
 
 msgctxt "student_intake"
 msgid "Tələbə idxalı"
 msgstr "Импорт студентов"
 
 msgctxt "student_intake"
-msgid "Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur."
-msgstr "Загрузите список зачисления: система сначала выполняет СУХОЙ ПРОГОН (ничего не записывается), построчно показывает, что будет создано, и только после подтверждения создаёт учётную запись, членство и академическую запись. При первом входе студент подтверждает почту и задаёт пароль."
+msgid ""
+"Qəbul siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır), "
+"sətir-sətir nəyin yaranacağını göstərir, siz təsdiq edəndən sonra hesab + "
+"üzvlük + akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib "
+"öz parolunu qoyur."
+msgstr ""
+"Загрузите список зачисления: система сначала выполняет СУХОЙ ПРОГОН (ничего "
+"не записывается), построчно показывает, что будет создано, и только после "
+"подтверждения создаёт учётную запись, членство и академическую запись. При "
+"первом входе студент подтверждает почту и задаёт пароль."
 
 msgctxt "student_intake"
 msgid "Hesablar bu təşkilatda yaranır"
@@ -59195,8 +58872,12 @@ msgid "Şablonu endirin"
 msgstr "Скачайте шаблон"
 
 msgctxt "student_intake"
-msgid "Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox %(limit)s sətir, ölçü limiti %(size)s MB."
-msgstr "Порядок столбцов свободный — они распознаются по заголовку. Не более %(limit)s строк в файле, лимит размера %(size)s МБ."
+msgid ""
+"Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox "
+"%(limit)s sətir, ölçü limiti %(size)s MB."
+msgstr ""
+"Порядок столбцов свободный — они распознаются по заголовку. Не более "
+"%(limit)s строк в файле, лимит размера %(size)s МБ."
 
 msgctxt "student_intake"
 msgid "Boş şablonu endir"
@@ -59251,8 +58932,14 @@ msgid "Parolları CSV kimi endir"
 msgstr "Скачать пароли в CSV"
 
 msgctxt "student_intake"
-msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
-msgstr "Одноразовые пароли видны ТОЛЬКО сейчас — они не хранятся ни в базе, ни в журнале аудита. Скачайте CSV и передайте студентам; при первом входе у каждого запрашивается подтверждение почты (OTP) и новый пароль."
+msgid ""
+"Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə də audit jurnalında "
+"saxlanılmır. CSV-ni endirib tələbələrə çatdırın; ilk girişdə hər tələbə "
+"e-poçt təsdiqi (OTP) və yeni parol tələb olunacaq."
+msgstr ""
+"Одноразовые пароли видны ТОЛЬКО сейчас — они не хранятся ни в базе, ни в "
+"журнале аудита. Скачайте CSV и передайте студентам; при первом входе у "
+"каждого запрашивается подтверждение почты (OTP) и новый пароль."
 
 msgctxt "student_intake"
 msgid "Əvvəlcə fayl seçin."
@@ -59311,7 +58998,8 @@ msgid "Xülasə hazır deyil"
 msgstr "Сводка не готова"
 
 msgctxt "accounts.dashboard"
-msgid "Bu kabinet üçün hələ göstəriləcək xülasə yoxdur — sol menyudan bölmə seçin."
+msgid ""
+"Bu kabinet üçün hələ göstəriləcək xülasə yoxdur — sol menyudan bölmə seçin."
 msgstr "Для этого кабинета пока нет сводки — выберите раздел в меню слева."
 
 msgctxt "accounts.dashboard"
@@ -59624,7 +59312,9 @@ msgstr "Запланировано"
 
 msgctxt "accounts.dashboard"
 msgid "Akademik qeydiniz tapılmadı — RİM-ə müraciət edin."
-msgstr "Ваша академическая запись не найдена — обратитесь в Центр цифрового развития (RİM)."
+msgstr ""
+"Ваша академическая запись не найдена — обратитесь в Центр цифрового развития"
+" (RİM)."
 
 msgctxt "accounts.dashboard"
 msgid "Aktiv jurnal bağlama bildirişi yoxdur."
@@ -59704,7 +59394,8 @@ msgstr "В вашем охвате кафедр не найдено."
 
 msgctxt "exams.final_center.permission"
 msgid "Bu bölmə yalnız imtahan mərkəzi və nəzarətçilər üçündür."
-msgstr "Этот раздел предназначен только для экзаменационного центра и наблюдателей."
+msgstr ""
+"Этот раздел предназначен только для экзаменационного центра и наблюдателей."
 
 msgctxt "registrar.journal"
 msgid "Otaq"
@@ -59718,8 +59409,12 @@ msgstr "Итоговый результат"
 
 #: apps/accounts/forms/auth/login.py:73
 msgctxt "accounts.form.password_reset.error"
-msgid "Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün RİM-ə müraciət edin."
-msgstr "Для вашей учётной записи не указан действующий адрес электронной почты — обратитесь в RİM для его регистрации."
+msgid ""
+"Hesabınızda real e-poçt ünvanı qeydə alınmayıb — e-poçt qeydiyyatı üçün "
+"RİM-ə müraciət edin."
+msgstr ""
+"Для вашей учётной записи не указан действующий адрес электронной почты — "
+"обратитесь в RİM для его регистрации."
 
 #: apps/registrar/templates/registrar/partials/_schedule_content.html:31
 msgctxt "registrar.schedule"
@@ -59730,3 +59425,140 @@ msgstr "УЧЕБНЫЙ ГОД"
 msgctxt "registrar.schedule"
 msgid "YARIM İL"
 msgstr "ПОЛУГОДИЕ"
+
+#: apps/accounts/views/syllabus/review_text.py:62
+msgctxt "accounts.syllabus"
+msgid "Təsdiq kafedra müdirinin səlahiyyətindədir"
+msgstr "Утверждение находится в компетенции заведующего кафедрой"
+
+#: apps/accounts/views/syllabus/review_text.py:65
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu panel sizin üçün YALNIZ OXUNUR: sillabusu aça, müqayisə edə və bölmə "
+"şərhi yaza bilərsiniz. Təsdiq, düzəliş və rədd qərarını aid kafedranın "
+"müdiri verir."
+msgstr ""
+"Эта панель доступна ВАМ ТОЛЬКО ДЛЯ ЧТЕНИЯ: вы можете открыть силлабус, "
+"сравнить версии и оставить комментарий к разделу. Решение об утверждении, "
+"доработке или отклонении принимает заведующий соответствующей кафедрой."
+
+#: apps/accounts/views/syllabus/review_text.py:153
+msgctxt "accounts.syllabus"
+msgid ""
+"Bütün sillabuslar üçün məcburidir və YEGANƏ təsdiq mərhələsidir — state "
+"maşını ilə tətbiq olunur."
+msgstr ""
+"Обязательно для всех силлабусов и является ЕДИНСТВЕННЫМ этапом утверждения —"
+" применяется через машину состояний."
+
+#: apps/accounts/views/syllabus/review_text.py:163
+msgctxt "accounts.syllabus"
+msgid ""
+"Tətbiq olunmur: dekanlıq sillabusu görür və şərh yazır, qərar açarı isə "
+"kafedra müdirindədir."
+msgstr ""
+"Не применяется: деканат видит силлабус и оставляет комментарии, но право "
+"принятия решения — у заведующего кафедрой."
+
+#: apps/accounts/views/syllabus/editor.py:134
+msgctxt "accounts.syllabus"
+msgid ""
+"Bütün məcburi tələblər ödənildikdən sonra sillabus kafedra müdirinin "
+"növbəsinə düşür. Təsdiq kafedra müdirinin səlahiyyətindədir — dekanlıq baxa "
+"bilir, qərarı isə müdir verir. Göndərildikdən sonra versiya kilidlənir."
+msgstr ""
+"После выполнения всех обязательных требований силлабус попадает в очередь "
+"заведующего кафедрой. Утверждение — в компетенции заведующего кафедрой: "
+"деканат может просматривать, но решение принимает заведующий. После отправки"
+" версия блокируется."
+
+#: apps/syllabus/services/notifications.py:39
+msgctxt "syllabus.notify"
+msgid ""
+"Bu kafedra üçün kafedra müdiri təyin edilməyib, ona görə bildiriş dekanlığa "
+"göndərildi. Təsdiq kafedra müdirinin səlahiyyətindədir — zəhmət olmasa müdir"
+" təyin edin."
+msgstr ""
+"Для этой кафедры не назначен заведующий, поэтому уведомление было отправлено"
+" в деканат. Утверждение — в компетенции заведующего кафедрой — пожалуйста, "
+"назначьте заведующего."
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Rektor"
+msgstr "Ректор"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Prorektor"
+msgstr "Проректор"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Dekan"
+msgstr "Декан"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Kafedra müdiri"
+msgstr "Заведующий кафедрой"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "İmtahan mərkəzi"
+msgstr "Экзаменационный центр"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "İmtahan mərkəzi rəhbəri"
+msgstr "Руководитель экзаменационного центра"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "İmtahan mərkəzi işçisi"
+msgstr "Сотрудник экзаменационного центра"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "İnsan resursları"
+msgstr "Отдел кадров"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Assistent"
+msgstr "Ассистент"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Laborant"
+msgstr "Лаборант"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Tyutor"
+msgstr "Тьютор"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Proqram koordinatoru"
+msgstr "Координатор программы"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Baş tələbə"
+msgstr "Староста"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Tələbə"
+msgstr "Студент"
+
+#: core/roles.py:1
+msgctxt "roles.org_display_name"
+msgid "Üzv"
+msgstr "Участник"

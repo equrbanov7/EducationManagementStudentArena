@@ -28,7 +28,7 @@ from ..constants import (
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..state_machine import TransitionDenied
 from .scoping import is_author
-from .units import resolve_syllabus_chair_unit
+from .units import ensure_chair_unit, resolve_syllabus_chair_unit
 
 #: Bölmələrin BOŞ məzmun sxemi — autosave müqaviləsinin (public.py) əsasıdır.
 BLANK_SECTION_DATA = {
@@ -214,6 +214,11 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
     if kind not in {ChangeKind.MINOR.value, ChangeKind.MAJOR.value}:
         raise TransitionDenied("version.kind_unknown", params={"kind": kind})
 
+    # Struktur bağının SELF-HEALING-i (R-2): köçürmə vaxtı ixtisasa bağlanmış
+    # köhnə dosye yeni versiya açılanda özü kafedraya çəkilir — əks halda
+    # kafedra müdiri yenə qərar verə bilməzdi (`covers_chair_unit`).
+    ensure_chair_unit(syllabus)
+
     open_version = syllabus.versions.filter(status__in=sorted(OPEN_STATUSES)).first()
     if open_version is not None:
         raise TransitionDenied("version.open_version_exists", params={"version": open_version.label})
@@ -274,6 +279,7 @@ def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, 
     if not is_author(actor, source_syllabus) and not actor.covers_unit(source_syllabus.chair_unit_id, PERM_EDIT):
         raise TransitionDenied("transition.out_of_scope", params={"transition": "copy"})
 
+    ensure_chair_unit(source_syllabus)
     base = source_syllabus.approved_version or source_syllabus.versions.order_by("-major", "-minor").first()
     if base is None:
         raise TransitionDenied("version.base_missing")

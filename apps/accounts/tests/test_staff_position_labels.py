@@ -50,7 +50,11 @@ class StaffPositionKernelTest(TestCase):
     def test_visible_role_label_blanks_placeholder(self):
         self.assertEqual(visible_role_label("member", "Member"), "")
         self.assertEqual(visible_role_label("member", "Üzv"), "")
-        self.assertEqual(visible_role_label("dean", "Dean"), "Dean")
+        # PHASE21 U-2 (2026-09-03): seed-dəki dəyişməmiş İngiliscə "Dean" AZ-a
+        # çevrilir (bax `core.roles.resolve_seeded_role_label`); admin fərqli
+        # bir mətnə dəyişibsə (və ya heç bir etiket verilməyibsə) TOXUNULMUR.
+        self.assertEqual(visible_role_label("dean", "Dean"), "Dekan")
+        self.assertEqual(visible_role_label("dean", "Baş Dekan"), "Baş Dekan")
         # Etiket verilməyibsə ad özü qaytarılır — heç nə uydurulmur.
         self.assertEqual(visible_role_label("dean"), "dean")
 

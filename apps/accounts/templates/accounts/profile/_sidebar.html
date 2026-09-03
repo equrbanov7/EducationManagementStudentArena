@@ -195,11 +195,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=my-courses"
                data-section="my-courses"
-               data-title="{% if university_mode and role_capabilities.is_teacher %}{% trans 'Təyin olunmuş fənlərim' %}{% else %}{% trans 'my_created_courses' context 'profile.section' %}{% endif %}"
+               data-title="{% if university_mode and role_capabilities.is_teacher %}{% trans 'my_courses' context 'profile.section' %}{% else %}{% trans 'my_created_courses' context 'profile.section' %}{% endif %}"
                data-source-url="{{ profile_base_url }}"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
                 <i class="fas fa-book sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% if university_mode and role_capabilities.is_teacher %}{% trans "Təyin olunmuş fənlərim" %}{% else %}{% trans "my_created_courses" context "profile.sidebar" %}{% endif %}</span>
+                <span class="sidebar-menu-text">{% if university_mode and role_capabilities.is_teacher %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "my_created_courses" context "profile.sidebar" %}{% endif %}</span>
                 {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_created_courses_count">{{ my_created_courses_count }}</span>{% endif %}
             </a>
         </li>

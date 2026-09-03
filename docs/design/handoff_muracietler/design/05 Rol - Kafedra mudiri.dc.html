@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+</style>
+</helmet>
+<div style="max-width:1360px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.5-4.4A8.4 8.4 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"></path></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxWho }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">{{ ctxRole }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Müraciətlər</h1>
+      <p style="margin:6px 0 0;max-width:700px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ intro }}</p>
+    </div>
+    <sc-if value="{{ canCreate }}" hint-placeholder-val="{{ true }}">
+      <button type="button" onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Yeni müraciət
+      </button>
+    </sc-if>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:11px;margin-bottom:14px">
+    <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="4">
+      <button type="button" onClick="{{ m.pick }}" style="text-align:left;padding:12px 14px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+        <div style="font-size:.67rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+        <div style="margin-top:5px;font-size:1.26rem;font-weight:800;color:{{ m.valFg }}">{{ m.value }}</div>
+        <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;gap:2px;margin-bottom:14px;overflow-x:auto;border-bottom:1px solid var(--ems-neutral-200)">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+      <button type="button" onClick="{{ t.pick }}" aria-current="{{ t.sel }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 14px;border:none;border-bottom:2px solid {{ t.bd }};background:transparent;color:{{ t.fg }};font-size:.86rem;font-weight:{{ t.fw }};white-space:nowrap;cursor:pointer">
+        {{ t.label }}
+        <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+          <span style="padding:1px 6px;border-radius:999px;background:{{ t.cntBg }};color:{{ t.cntFg }};font-size:.7rem;font-weight:800">{{ t.count }}</span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <div style="position:relative;flex:1;min-width:190px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+      <label for="ems-m-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Müraciət axtar</label>
+      <input id="ems-m-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Mövzu, nömrə və ya göndərən axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+    </div>
+    <sc-for list="{{ statChips }}" as="c" hint-placeholder-count="4">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <div style="position:relative">
+      <button type="button" onClick="{{ toggleKind }}" aria-haspopup="listbox" aria-expanded="{{ kindOpen }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer;max-width:230px">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ kindLabel }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <sc-if value="{{ kindOpen }}" hint-placeholder-val="{{ false }}">
+        <div role="listbox" aria-label="Müraciətin növü" style="position:absolute;top:100%;right:0;z-index:40;width:250px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);display:flex;flex-direction:column;gap:2px;max-height:260px;overflow:auto">
+          <sc-for list="{{ kindOpts }}" as="o" hint-placeholder-count="5">
+            <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.81rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <button type="button" onClick="{{ resetFilters }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Sıfırla</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:{{ colTpl }};gap:16px;align-items:start">
+
+    <div style="min-width:0;display:flex;flex-direction:column;gap:8px">
+      <sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:56px 24px;text-align:center;background:var(--ems-neutral-0);border:1px dashed var(--ems-neutral-300);border-radius:16px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.5-4.4A8.4 8.4 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4Z"></path></svg>
+          <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">{{ emptyTitle }}</div>
+          <div style="font-size:.82rem;color:var(--ems-neutral-500);max-width:360px;text-wrap:pretty">{{ emptyNote }}</div>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ list }}" as="r" hint-placeholder-count="6">
+        <button type="button" onClick="{{ r.open }}" aria-current="{{ r.sel }}" style="display:flex;flex-direction:column;gap:8px;padding:13px 15px;border-radius:13px;border:1px solid {{ r.bd }};background:{{ r.bg }};cursor:pointer;text-align:left" style-hover="border-color:var(--ems-primary-600)">
+          <span style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;font-weight:700;color:var(--ems-neutral-400)">{{ r.no }}</span>
+            <span style="padding:2px 8px;border-radius:6px;background:{{ r.kBg }};color:{{ r.kFg }};font-size:.7rem;font-weight:800">{{ r.kind }}</span>
+            <sc-if value="{{ r.urgent }}" hint-placeholder-val="{{ false }}">
+              <span style="padding:2px 8px;border-radius:6px;background:var(--ems-danger-bg);color:#b91c1c;font-size:.7rem;font-weight:800">cavab müddəti keçir</span>
+            </sc-if>
+            <span style="margin-left:auto;padding:2px 9px;border-radius:999px;background:{{ r.sBg }};color:{{ r.sFg }};font-size:.71rem;font-weight:800;white-space:nowrap">{{ r.status }}</span>
+          </span>
+          <span style="display:block;font-size:.89rem;font-weight:{{ r.fw }};color:var(--ems-neutral-900);line-height:1.35;text-wrap:pretty">{{ r.subject }}</span>
+          <span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;width:100%;font-size:.75rem;color:var(--ems-neutral-500)">
+            <span style="text-wrap:pretty">{{ r.fromLine }}</span>
+            <span style="color:var(--ems-neutral-300)">·</span>
+            <span>{{ r.date }}</span>
+            <sc-if value="{{ r.hasFiles }}" hint-placeholder-val="{{ false }}">
+              <span style="display:inline-flex;align-items:center;gap:4px;color:var(--ems-neutral-400)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.5 12.5 21a5 5 0 0 1-7-7l8-8a3.3 3.3 0 0 1 4.7 4.7l-8 8a1.7 1.7 0 0 1-2.4-2.4l7.3-7.3"></path></svg>
+                {{ r.fileCount }}
+              </span>
+            </sc-if>
+            <span style="margin-left:auto;text-wrap:pretty;color:{{ r.atFg }};font-weight:700">{{ r.atLine }}</span>
+          </span>
+        </button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ true }}">
+      <aside style="position:sticky;top:16px;min-width:0;max-height:calc(100vh - 40px);overflow:auto;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+        <div style="padding:16px 17px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:9px">
+            <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.73rem;font-weight:700;color:var(--ems-neutral-400)">{{ d.no }}</span>
+            <span style="padding:2px 8px;border-radius:6px;background:{{ d.kBg }};color:{{ d.kFg }};font-size:.7rem;font-weight:800">{{ d.kind }}</span>
+            <span style="margin-left:auto;padding:2px 9px;border-radius:999px;background:{{ d.sBg }};color:{{ d.sFg }};font-size:.72rem;font-weight:800">{{ d.status }}</span>
+          </div>
+          <h2 style="margin:0;font-size:1.02rem;font-weight:800;letter-spacing:-.01em;color:var(--ems-neutral-900);text-wrap:pretty">{{ d.subject }}</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:8px;font-size:.77rem;color:var(--ems-neutral-500)">
+            <span style="text-wrap:pretty">{{ d.fromFull }}</span>
+            <span style="color:var(--ems-neutral-300)">·</span>
+            <span>{{ d.date }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:11px;padding:10px 12px;background:{{ d.slaBg }};border:1px solid {{ d.slaBd }};border-radius:10px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ d.slaFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+            <span style="flex:1;font-size:.78rem;font-weight:700;color:{{ d.slaFg }};text-wrap:pretty">{{ d.sla }}</span>
+          </div>
+        </div>
+
+        <div style="padding:16px 17px;display:flex;flex-direction:column;gap:15px">
+          <div>
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:7px">Müraciətin mətni</div>
+            <p style="margin:0;padding:12px 14px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:11px;font-size:.83rem;line-height:1.6;color:var(--ems-neutral-700);text-wrap:pretty">{{ d.body }}</p>
+          </div>
+
+          <sc-if value="{{ d.hasFiles }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:7px">Əlavə olunan sənədlər</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ d.files }}" as="f" hint-placeholder-count="2">
+                  <a href="#" onClick="{{ f.open }}" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--ems-neutral-200);border-radius:10px" style-hover="background:var(--ems-neutral-50)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><polyline points="14 2 14 7 19 7"></polyline></svg>
+                    <span style="flex:1;min-width:0;font-size:.81rem;font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ f.name }}</span>
+                    <span style="font-size:.73rem;color:var(--ems-neutral-400);white-space:nowrap">{{ f.size }}</span>
+                  </a>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <div>
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:9px">Müraciətin gedişi</div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              <sc-for list="{{ d.timeline }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;gap:11px">
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:22px">
+                    <span style="width:20px;height:20px;display:grid;place-items:center;border-radius:999px;background:{{ t.bg }};color:{{ t.fg }};font-size:.64rem;font-weight:800">{{ t.mark }}</span>
+                    <span style="flex:1;width:2px;background:var(--ems-neutral-200);margin:3px 0"></span>
+                  </div>
+                  <div style="flex:1;min-width:0;padding-bottom:14px">
+                    <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px">
+                      <span style="font-size:.82rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ t.who }}</span>
+                      <span style="font-size:.73rem;color:var(--ems-neutral-400)">{{ t.when }}</span>
+                    </div>
+                    <div style="margin-top:3px;font-size:.8rem;color:var(--ems-neutral-500);line-height:1.5;text-wrap:pretty">{{ t.what }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ d.canAct }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:14px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:12px">
+              <label for="ems-r-t" style="display:block;font-size:.82rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Cavab ver</label>
+              <textarea id="ems-r-t" rows="3" value="{{ d.reply }}" onChange="{{ d.setReply }}" placeholder="Müraciət sahibinin görəcəyi cavab" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.83rem;resize:vertical;background:var(--ems-neutral-0)"></textarea>
+              <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:10px">
+                <button type="button" onClick="{{ d.doResolve }}" disabled="{{ d.replyOff }}" style="padding:8px 14px;border-radius:9px;border:1px solid {{ d.okBd }};background:{{ d.okBg }};color:{{ d.okFg }};font-size:.81rem;font-weight:700;cursor:{{ d.okCur }}">Həll olundu — bağla</button>
+                <button type="button" onClick="{{ d.doInfo }}" disabled="{{ d.replyOff }}" style="padding:8px 14px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:{{ d.infoFg }};font-size:.81rem;font-weight:700;cursor:{{ d.okCur }}">Əlavə məlumat istə</button>
+                <button type="button" onClick="{{ openForward }}" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-neutral-0);color:var(--ems-primary-800);font-size:.81rem;font-weight:700;cursor:pointer">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h13"></path><polyline points="12 7 17 12 12 17"></polyline><path d="M21 5v14"></path></svg>
+                  Başqa şöbəyə yönləndir
+                </button>
+                <button type="button" onClick="{{ d.doReject }}" disabled="{{ d.replyOff }}" style="padding:8px 14px;border-radius:9px;border:1px solid #fecaca;background:var(--ems-neutral-0);color:{{ d.rejFg }};font-size:.81rem;font-weight:700;cursor:{{ d.okCur }}">Rədd et</button>
+              </div>
+              <sc-if value="{{ d.replyOff }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:8px;font-size:.75rem;color:var(--ems-neutral-400);text-wrap:pretty">Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək.</div>
+              </sc-if>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ d.watchOnly }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:11px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+              <span style="flex:1;font-size:.79rem;color:var(--ems-neutral-500);line-height:1.5;text-wrap:pretty">{{ d.watchNote }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </aside>
+    </sc-if>
+  </div>
+</div>
+
+<sc-if value="{{ mNew }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeNew }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-nt" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:620px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-nt" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Yeni müraciət</h3>
+        <div style="margin-top:4px;font-size:.78rem;color:var(--ems-neutral-500);text-wrap:pretty">Növü seçin — sistem müraciəti avtomatik aidiyyəti şöbəyə göndərəcək.</div>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:14px">
+        <div>
+          <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Müraciətin növü <span style="color:var(--ems-danger)">*</span></span>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <sc-for list="{{ nv.kinds }}" as="k" hint-placeholder-count="5">
+              <div role="option" tabindex="0" aria-selected="{{ k.sel }}" onClick="{{ k.pick }}" onKeyDown="{{ k.key }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid {{ k.bd }};background:{{ k.bg }};border-radius:10px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+                <span style="width:8px;height:8px;flex:none;border-radius:999px;background:{{ k.dot }}"></span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font-size:.83rem;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ k.label }}</span>
+                  <span style="display:block;margin-top:1px;font-size:.73rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ k.note }}</span>
+                </span>
+                <span style="flex:none;font-size:.72rem;font-weight:700;color:var(--ems-neutral-400);white-space:nowrap">{{ k.days }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <label for="ems-n-s" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Mövzu <span style="color:var(--ems-danger)">*</span></label>
+          <input id="ems-n-s" type="text" value="{{ nv.subject }}" onChange="{{ nv.setSubject }}" placeholder="Bir cümlə ilə nə istədiyiniz" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ nv.subBd }};border-radius:9px;font-size:.85rem">
+        </div>
+        <div>
+          <label for="ems-n-b" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Müraciətin mətni <span style="color:var(--ems-danger)">*</span></label>
+          <textarea id="ems-n-b" rows="4" value="{{ nv.body }}" onChange="{{ nv.setBody }}" placeholder="Konkret tarix, fənn və qrup adı yazsanız cavab daha tez gələcək." style="width:100%;padding:10px 12px;border:1px solid {{ nv.bodyBd }};border-radius:9px;font-size:.84rem;resize:vertical"></textarea>
+          <div style="margin-top:5px;font-size:.74rem;color:{{ nv.countFg }}">{{ nv.count }}</div>
+        </div>
+        <div>
+          <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Sənəd əlavə et</span>
+          <button type="button" onClick="{{ nv.addFile }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1px dashed var(--ems-neutral-300);border-radius:11px;background:var(--ems-neutral-50);color:var(--ems-neutral-500);font-size:.81rem;font-weight:700;cursor:pointer" style-hover="border-color:var(--ems-primary-600);color:var(--ems-primary-700)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"></path><polyline points="7.5 8.5 12 4 16.5 8.5"></polyline><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path></svg>
+            Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB
+          </button>
+          <sc-if value="{{ nv.hasFiles }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:8px">
+              <sc-for list="{{ nv.files }}" as="f" hint-placeholder-count="1">
+                <div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid var(--ems-neutral-200);border-radius:9px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><polyline points="14 2 14 7 19 7"></polyline></svg>
+                  <span style="flex:1;min-width:0;font-size:.8rem;color:var(--ems-neutral-900);text-wrap:pretty">{{ f.name }}</span>
+                  <span style="font-size:.73rem;color:var(--ems-neutral-400)">{{ f.size }}</span>
+                  <button type="button" onClick="{{ f.remove }}" aria-label="Faylı sil" style="width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:6px;border:none;background:transparent;color:var(--ems-neutral-400);cursor:pointer">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">{{ nv.route }}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeNew }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ nv.send }}" disabled="{{ nv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ nv.bd }};background:{{ nv.bg }};color:{{ nv.fg }};font-size:.83rem;font-weight:700;cursor:{{ nv.cur }}">Müraciəti göndər</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mFwd }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeForward }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-ft" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:540px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-ft" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Müraciəti yönləndir</h3>
+        <div style="margin-top:4px;font-size:.78rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ fv.sub }}</div>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:13px">
+        <div>
+          <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Hansı şöbəyə? <span style="color:var(--ems-danger)">*</span></span>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <sc-for list="{{ fv.units }}" as="u" hint-placeholder-count="5">
+              <div role="option" tabindex="0" aria-selected="{{ u.sel }}" onClick="{{ u.pick }}" onKeyDown="{{ u.key }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid {{ u.bd }};background:{{ u.bg }};border-radius:10px;cursor:pointer" style-hover="border-color:var(--ems-primary-600)">
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font-size:.83rem;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ u.name }}</span>
+                  <span style="display:block;margin-top:1px;font-size:.73rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ u.note }}</span>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <label for="ems-f-n" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Yönləndirmə qeydi <span style="color:var(--ems-danger)">*</span></label>
+          <textarea id="ems-f-n" rows="3" value="{{ fv.note }}" onChange="{{ fv.setNote }}" placeholder="Niyə bu şöbəyə göndərilir və nə gözlənilir" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.84rem;resize:vertical"></textarea>
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" checked="{{ fv.keep }}" onChange="{{ fv.toggleKeep }}" style="width:15px;height:15px;margin-top:2px;cursor:pointer">
+          <span style="font-size:.81rem;color:var(--ems-neutral-700);line-height:1.5;text-wrap:pretty">Müraciəti izləməkdə davam edim — cavab veriləndə mənə də bildiriş gəlsin.</span>
+        </label>
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">Müraciət sahibi yönləndirməni öz panelində görəcək — müraciət itmir, sadəcə məsul şöbə dəyişir.</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeForward }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ fv.send }}" disabled="{{ fv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ fv.bd }};background:{{ fv.bg }};color:{{ fv.fg }};font-size:.83rem;font-weight:700;cursor:{{ fv.cur }}">Yönləndir</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:1150},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tələbə&quot;,&quot;Müəllim&quot;,&quot;Tələbə Mərkəzi&quot;,&quot;Dekanlıq&quot;,&quot;Kafedra müdiri&quot;,&quot;Tədris Şöbəsi&quot;],&quot;default&quot;:&quot;Kafedra müdiri&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Kim baxır&quot;}}">
+const UNITS = {
+  telebe:  { name:'Tələbə Xidmətləri Mərkəzi', note:'sənəd, arayış, transkript, qeydiyyat' },
+  tedris:  { name:'Tədris Şöbəsi', note:'plan, cədvəl, fənn, semestr açılışı' },
+  dekan:   { name:'Dekanlıq', note:'tələbə hərəkəti, akademik məsələlər' },
+  kafedra: { name:'Kafedra müdirliyi', note:'müəllim, fənn tədrisi, sillabus' },
+  maliyye: { name:'Maliyyə Şöbəsi', note:'təhsil haqqı, ödəniş, güzəşt' },
+  ikt:     { name:'İKT Şöbəsi', note:'sistem girişi, texniki nasazlıq' }
+};
+const KINDS = {
+  transkript: { label:'Transkript sorğusu', who:['telebe'], to:'telebe', days:3, dot:'var(--ems-primary-600)', bg:'var(--ems-primary-100)', fg:'var(--ems-primary-800)', note:'Rəsmi transkriptin verilməsi' },
+  arayis:     { label:'Arayış sorğusu', who:['telebe'], to:'telebe', days:2, dot:'var(--ems-primary-600)', bg:'var(--ems-primary-100)', fg:'var(--ems-primary-800)', note:'Təhsil, hərbi və ya bank arayışı' },
+  qiymet:     { label:'Qiymətə etiraz', who:['telebe'], to:'dekan', days:5, dot:'var(--ems-warning)', bg:'var(--ems-warning-bg)', fg:'#92400e', note:'İmtahan nəticəsinə apellyasiya' },
+  sikayet:    { label:'Şikayət', who:['telebe','muellim'], to:'dekan', days:10, dot:'var(--ems-danger)', bg:'var(--ems-danger-bg)', fg:'#b91c1c', note:'Tədris prosesi ilə bağlı şikayət' },
+  hereket:    { label:'Tələbə hərəkəti', who:['telebe'], to:'dekan', days:7, dot:'var(--ems-neutral-500)', bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)', note:'Köçürmə, akademik məzuniyyət, bərpa' },
+  odenis:     { label:'Təhsil haqqı', who:['telebe'], to:'maliyye', days:5, dot:'var(--ems-neutral-500)', bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)', note:'Güzəşt, hissə-hissə ödəniş, qaytarma' },
+  teqdimat:   { label:'Təqdimat', who:['muellim'], to:'kafedra', days:10, dot:'var(--ems-primary-600)', bg:'var(--ems-primary-100)', fg:'var(--ems-primary-800)', note:'Kafedraya rəsmi təklif və ya təqdimat' },
+  texniki:    { label:'Texniki problem', who:['telebe','muellim'], to:'ikt', days:2, dot:'var(--ems-neutral-500)', bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)', note:'Sistemə giriş, jurnal, e-poçt' }
+};
+const STATUS = {
+  'Yeni': ['var(--ems-primary-100)','var(--ems-primary-800)'],
+  'Baxılır': ['var(--ems-warning-bg)','#92400e'],
+  'Yönləndirilib': ['var(--ems-neutral-100)','var(--ems-neutral-700)'],
+  'Məlumat gözlənilir': ['var(--ems-warning-bg)','#92400e'],
+  'Həll olunub': ['var(--ems-success-bg)','#15803d'],
+  'Rədd edilib': ['var(--ems-danger-bg)','#b91c1c']
+};
+const MARK = { '↑':['var(--ems-primary-100)','var(--ems-primary-800)'], '👁':['var(--ems-neutral-100)','var(--ems-neutral-700)'], '→':['var(--ems-neutral-100)','var(--ems-neutral-700)'], '?':['var(--ems-warning-bg)','#92400e'], '✓':['var(--ems-success-bg)','#166534'], '✕':['var(--ems-danger-bg)','#b91c1c'] };
+
+const T = (id, kind, subject, body, fromRole, fromName, fromMeta, at, status, age, files, tl) =>
+  ({ id, kind, subject, body, fromRole, fromName, fromMeta, at, status, age, files: files || [], tl });
+
+const TICKETS = [
+  T('MR-2481','transkript','Xaricdə magistratura üçün ingiliscə transkript',
+    'Xaricdə magistratura üçün müraciət edirəm, ingilis dilində rəsmi transkript lazımdır. Son müraciət tarixi 25 sentyabrdır. Zəhmət olmasa iki nüsxə hazırlansın.',
+    'telebe','Aysel Məmmədova','236 KE · Kompüter mühəndisliyi · 4-cü kurs','telebe','Baxılır',2,
+    [{ n:'Universitet_qebul_mektubu.pdf', s:'420 KB' }],
+    [['↑','Aysel Məmmədova','18.08.2026, 09:12','Müraciət göndərildi — Tələbə Xidmətləri Mərkəzinə yönləndi.'],
+     ['👁','Tələbə Mərkəzi — S. Əliyeva','18.08.2026, 11:30','Müraciət qəbul edildi, transkript hazırlanır. Akademik borc yoxlanılır.']]),
+
+  T('MR-2479','qiymet','Riyazi analiz imtahanının nəticəsinə etiraz',
+    'Riyazi analiz fənnindən yekun imtahanda 54 bal aldım. İşimi yenidən yoxlamağınızı xahiş edirəm — 3-cü məsələnin həlli tam idi, amma bal verilməyib.',
+    'telebe','Tural Səfərov','235 İQT · İqtisadiyyat · 2-ci kurs','kafedra','Yönləndirilib',4,
+    [{ n:'Imtahan_isi_surtei.pdf', s:'1.2 MB' }],
+    [['↑','Tural Səfərov','16.08.2026, 14:40','Müraciət göndərildi — Dekanlığa yönləndi.'],
+     ['👁','Dekanlıq — N. Əliyeva','17.08.2026, 09:05','Baxıldı. Fənn Riyaziyyat kafedrasına aiddir.'],
+     ['→','Dekanlıq — N. Əliyeva','17.08.2026, 09:20','Riyaziyyat kafedrasına yönləndirildi: apellyasiya komissiyası yaradılsın, iş yenidən yoxlansın.']]),
+
+  T('MR-2476','sikayet','Cədvəldə eyni saata iki dərs qoyulub',
+    'Çərşənbə günü 10:30-da həm «Alqoritmlər», həm də «Veb texnologiyalar» dərsi görünür. Qrupun yarısı bir dərsə, yarısı digərinə gedir.',
+    'telebe','Nigar Həsənova','234 KE · Kompüter mühəndisliyi · 3-cü kurs','tedris','Həll olunub',8,[],
+    [['↑','Nigar Həsənova','12.08.2026, 16:20','Müraciət göndərildi — Dekanlığa yönləndi.'],
+     ['→','Dekanlıq — N. Əliyeva','13.08.2026, 10:15','Tədris şöbəsinə yönləndirildi: cədvəl konflikti.'],
+     ['✓','Tədris şöbəsi — E. Qurbanov','14.08.2026, 12:00','Konflikt təsdiqləndi və aradan qaldırıldı. «Veb texnologiyalar» cümə 12:20-yə keçirildi.']]),
+
+  T('MR-2474','teqdimat','Süni intellekt üzrə yeni seçmə fənnin açılması',
+    'Kafedraya təqdimat: sənaye tələbini nəzərə alaraq «Süni intellektin əsasları» adlı 4 kreditlik seçmə fənnin növbəti tədris ilindən açılmasını təklif edirəm.',
+    'muellim','dos. Elvin Məmmədov','Proqramlaşdırma və İT kafedrası · Dosent','kafedra','Baxılır',5,
+    [{ n:'Suni_intellekt_sillabus_layihe.docx', s:'86 KB' }, { n:'Senaye_teleb_arasdirmasi.pdf', s:'2.1 MB' }],
+    [['↑','dos. Elvin Məmmədov','15.08.2026, 11:05','Təqdimat göndərildi — Kafedra müdirliyinə yönləndi.'],
+     ['👁','Kafedra müdiri — R. Əliyev','15.08.2026, 15:40','Baxıldı. Növbəti kafedra iclasının gündəliyinə salındı.']]),
+
+  T('MR-2470','sikayet','A-312 auditoriyasında proyektor işləmir',
+    'Üçüncü həftədir proyektor işləmir. Mühazirələri lövhədə aparmalı oluram, slaydları göstərə bilmirəm. Üç dəfə şifahi xəbər vermişəm, nəticə yoxdur.',
+    'muellim','b/m Nigar Həsənli','Proqramlaşdırma və İT kafedrası · Baş müəllim','ikt','Yönləndirilib',6,[],
+    [['↑','b/m Nigar Həsənli','14.08.2026, 08:50','Şikayət göndərildi — Kafedra müdirliyinə yönləndi.'],
+     ['→','Kafedra müdiri — R. Əliyev','14.08.2026, 10:10','İKT Şöbəsinə yönləndirildi: avadanlıq nasazlığı kafedranın səlahiyyətində deyil.']]),
+
+  T('MR-2468','hereket','Qiyabi formadan əyani formaya keçid',
+    'Hazırda qiyabi formada oxuyuram. İş yerimi dəyişdiyim üçün əyani formaya keçmək istəyirəm. Ballarım keçid üçün kifayət edir.',
+    'telebe','Kamran İsmayılov','235 BİD-Q · Biznesin idarə edilməsi · 2-ci kurs','dekan','Məlumat gözlənilir',10,
+    [{ n:'Erize.pdf', s:'180 KB' }],
+    [['↑','Kamran İsmayılov','10.08.2026, 13:30','Müraciət göndərildi — Dekanlığa yönləndi.'],
+     ['👁','Dekanlıq — N. Əliyeva','11.08.2026, 09:00','Baxıldı. Əyani formada boş yer yoxlanılır.'],
+     ['?','Dekanlıq — N. Əliyeva','12.08.2026, 16:45','Əlavə məlumat istənildi: iş yerindən arayış və son semestrin transkripti təqdim edilməlidir.']]),
+
+  T('MR-2465','odenis','Təhsil haqqının hissə-hissə ödənilməsi',
+    'Ailə vəziyyəti ilə əlaqədar payız semestrinin təhsil haqqını üç hissəyə bölərək ödəmək istəyirəm.',
+    'telebe','Leyla Abbasova','236 PSİ · Psixologiya · 1-ci kurs','maliyye','Yeni',1,
+    [{ n:'Ailenin_gelir_arayisi.pdf', s:'340 KB' }],
+    [['↑','Leyla Abbasova','19.08.2026, 10:15','Müraciət göndərildi — Maliyyə Şöbəsinə yönləndi.']]),
+
+  T('MR-2461','texniki','E-jurnala qiymət yazıla bilmir',
+    '«Alqoritmlər və verilənlər strukturu» fənninin jurnalında aralıq imtahan qiymətlərini yaza bilmirəm — yadda saxla düyməsi işləmir.',
+    'muellim','m. Tural Səfərov','Proqramlaşdırma və İT kafedrası · Müəllim','ikt','Həll olunub',12,[],
+    [['↑','m. Tural Səfərov','08.08.2026, 09:40','Müraciət göndərildi — İKT Şöbəsinə yönləndi.'],
+     ['✓','İKT Şöbəsi — V. Quliyev','08.08.2026, 14:20','Jurnalın qiymət giriş müddəti bağlanmışdı, Tədris şöbəsi ilə razılaşdırılıb 20 avqusta qədər uzadıldı.']]),
+
+  T('MR-2458','arayis','Hərbi komissarlıq üçün təhsil arayışı',
+    'Hərbi komissarlığa təqdim etmək üçün möhürlü və imzalı təhsil arayışı lazımdır.',
+    'telebe','Orxan Vəliyev','236 MX · Mexatronika mühəndisliyi · 1-ci kurs','telebe','Həll olunub',15,[],
+    [['↑','Orxan Vəliyev','05.08.2026, 11:00','Müraciət göndərildi — Tələbə Xidmətləri Mərkəzinə yönləndi.'],
+     ['✓','Tələbə Mərkəzi — S. Əliyeva','06.08.2026, 10:30','Arayış hazırlandı. Mərkəzdən şəxsiyyət vəsiqəsi ilə götürə bilərsiniz (otaq B-104, 09:00–17:00).']]),
+
+  T('MR-2455','qiymet','Fəlsəfə fənnindən davamiyyət balına etiraz',
+    'Fəlsəfə fənnindən davamiyyət balı 6 verilib, halbuki cəmi iki dərs buraxmışam. Jurnalda səhv qeyd var.',
+    'telebe','Şəbnəm Muradlı','235 İT · İnformasiya təhlükəsizliyi · 2-ci kurs','dekan','Rədd edilib',18,[],
+    [['↑','Şəbnəm Muradlı','02.08.2026, 15:10','Müraciət göndərildi — Dekanlığa yönləndi.'],
+     ['✕','Dekanlıq — N. Əliyeva','04.08.2026, 11:20','Jurnal yoxlanıldı: semestr ərzində 7 dərs buraxılıb, qeydlər müəllim tərəfindən vaxtında aparılıb. Etiraz əsassız sayıldı.']])
+];
+
+const ROLE_UNIT = { 'Tələbə Mərkəzi':'telebe', 'Tədris Şöbəsi':'tedris', 'Dekanlıq':'dekan', 'Kafedra müdiri':'kafedra' };
+
+class Component extends DCLogic {
+  state = { tab:null, sel:'MR-2481', q:'', qRaw:'', stat:'Açıq', kind:'Hamısı', kindOpen:false,
+    replies:{}, states:{}, newT:null, fwd:null, toast:'' };
+
+  componentDidMount() {
+    this.onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (this.state.fwd) this.setState({ fwd:null });
+      else if (this.state.newT) this.setState({ newT:null });
+      else if (this.state.kindOpen) this.setState({ kindOpen:false });
+    };
+    document.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() { clearTimeout(this.tq); clearTimeout(this.tt); document.removeEventListener('keydown', this.onKey); }
+
+  role() { return this.props.role || 'Tələbə'; }
+  isSender() { const r = this.role(); return r === 'Tələbə' || r === 'Müəllim'; }
+  senderKey() { return this.role() === 'Tələbə' ? 'telebe' : 'muellim'; }
+  myUnit() { return ROLE_UNIT[this.role()] || null; }
+  statusOf(t) { return this.state.states[t.id] || t.status; }
+  atOf(t) { const s = this.state.states[t.id + ':at']; return s || t.at; }
+  tlOf(t) { const ex = this.state.states[t.id + ':tl']; return ex ? t.tl.concat(ex) : t.tl; }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast:m }); this.tt = setTimeout(() => this.setState({ toast:'' }), 2800); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+  isOpen(t) { const s = this.statusOf(t); return s !== 'Həll olunub' && s !== 'Rədd edilib'; }
+  // rolun görə bildiyi müraciətlər
+  visible() {
+    const r = this.role();
+    if (r === 'Tələbə') return TICKETS.filter(t => t.fromRole === 'telebe');
+    if (r === 'Müəllim') return TICKETS.filter(t => t.fromRole === 'muellim');
+    const u = this.myUnit();
+    // şöbə: ona gələnlər + onun yönləndirdikləri (izləmə)
+    return TICKETS.filter(t => this.atOf(t) === u || t.tl.some(x => x[1].indexOf(UNITS[u].name) >= 0 || (u === 'dekan' && x[1].indexOf('Dekanlıq') >= 0) || (u === 'kafedra' && x[1].indexOf('Kafedra') >= 0)));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const role = this.role();
+    const sender = this.isSender();
+    const myUnit = this.myUnit();
+    const q = s.q.trim().toLowerCase();
+    const pool = this.visible();
+
+    const mine = myUnit ? pool.filter(t => this.atOf(t) === myUnit) : pool;
+    const watching = myUnit ? pool.filter(t => this.atOf(t) !== myUnit) : [];
+    const tab = s.tab || (sender ? 'Müraciətlərim' : 'Mənə gələnlər');
+
+    const scope = tab === 'İzlədiklərim' ? watching : (tab === 'Arxiv' ? pool.filter(t => !this.isOpen(t)) : (sender ? pool : mine));
+    const openCount = mine.filter(t => this.isOpen(t)).length;
+    const overdue = mine.filter(t => this.isOpen(t) && t.age > KINDS[t.kind].days);
+    const newCount = mine.filter(t => this.statusOf(t) === 'Yeni').length;
+    const doneCount = pool.filter(t => !this.isOpen(t)).length;
+
+    const list0 = scope.filter(t => {
+      const st = this.statusOf(t);
+      const okS = s.stat === 'Hamısı'
+        || (s.stat === 'Açıq' && this.isOpen(t))
+        || (s.stat === 'Bağlı' && !this.isOpen(t))
+        || (s.stat === 'Gecikən' && this.isOpen(t) && t.age > KINDS[t.kind].days);
+      const okK = s.kind === 'Hamısı' || KINDS[t.kind].label === s.kind;
+      const okQ = !q || t.subject.toLowerCase().includes(q) || t.id.toLowerCase().includes(q) || t.fromName.toLowerCase().includes(q);
+      return okS && okK && okQ;
+    });
+
+    const cur = list0.find(t => t.id === s.sel) || list0[0] || null;
+
+    const out = {
+      ctxWho: sender ? (role === 'Tələbə' ? 'Tələbə kabineti' : 'Müəllim kabineti') : UNITS[myUnit].name,
+      ctxScope: sender ? 'öz müraciətlərim' : 'şöbəyə gələn müraciətlər',
+      ctxRole: role,
+      intro: sender
+        ? 'Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən.'
+        : 'Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz.',
+      canCreate: sender,
+      colTpl: 'minmax(0,1fr) minmax(0,420px)',
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw:v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q:v }), 260); },
+      toast: !!s.toast, toastText: s.toast,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgRef: (el) => { if (el && this._last !== el) { this._last = el; try { el.focus(); } catch (e) {} } },
+
+      kpis: sender ? [
+        { label:'Açıq müraciətim', value: pool.filter(t => this.isOpen(t)).length, note:'cavab gözləyir',
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)',
+          pick: () => this.setState({ stat:'Açıq' }) },
+        { label:'Məlumat gözlənilir', value: pool.filter(t => this.statusOf(t) === 'Məlumat gözlənilir').length, note:'sizdən sənəd istənilib',
+          bd:'#fde68a', bg:'var(--ems-warning-bg)', labFg:'#92400e', valFg:'#92400e', noteFg:'#92400e',
+          pick: () => this.setState({ stat:'Hamısı' }) },
+        { label:'Cavablanıb', value: doneCount, note:'bağlanmış müraciət',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ stat:'Bağlı' }) },
+        { label:'Orta cavab müddəti', value:'2,4 gün', note:'son 30 gün üzrə',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ stat:'Hamısı' }) }
+      ] : [
+        { label:'Mənə gələn açıq', value: openCount, note:'cavab verilməlidir',
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)',
+          pick: () => this.setState({ tab:'Mənə gələnlər', stat:'Açıq' }) },
+        { label:'Yeni — baxılmayıb', value: newCount, note: newCount ? 'ilk baxış gözlənilir' : 'hamısına baxılıb',
+          bd: newCount ? 'var(--ems-primary-200)' : 'var(--ems-neutral-200)', bg: newCount ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          labFg: newCount ? 'var(--ems-primary-700)' : 'var(--ems-neutral-400)', valFg: newCount ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)', noteFg: newCount ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ tab:'Mənə gələnlər', stat:'Hamısı' }) },
+        { label:'Cavab müddəti keçən', value: overdue.length, note: overdue.length ? 'təcili baxılmalıdır' : 'gecikən yoxdur',
+          bd: overdue.length ? '#fecaca' : 'var(--ems-neutral-200)', bg: overdue.length ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+          labFg: overdue.length ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: overdue.length ? '#b91c1c' : 'var(--ems-neutral-900)', noteFg: overdue.length ? '#b91c1c' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ tab:'Mənə gələnlər', stat:'Gecikən' }) },
+        { label:'İzlədiyim', value: watching.length, note:'yönləndirdiyim müraciətlər',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)',
+          pick: () => this.setState({ tab:'İzlədiklərim', stat:'Hamısı' }) }
+      ],
+
+      tabs: (sender ? [{ id:'Müraciətlərim', c: pool.filter(t => this.isOpen(t)).length }, { id:'Arxiv', c:null }]
+        : [{ id:'Mənə gələnlər', c: openCount }, { id:'İzlədiklərim', c: watching.length || null }, { id:'Arxiv', c:null }]
+      ).map(t => {
+        const a = tab === t.id;
+        return { label:t.id, sel: a ? 'true' : 'false', hasCount: t.c !== null && t.c !== undefined, count:t.c,
+          bd: a ? 'var(--ems-primary-600)' : 'transparent',
+          fg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)', fw: a ? 800 : 600,
+          cntBg: a ? 'var(--ems-primary-100)' : 'var(--ems-neutral-100)',
+          cntFg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+          pick: () => this.setState({ tab:t.id, stat: t.id === 'Arxiv' ? 'Hamısı' : s.stat }) };
+      }),
+
+      statChips: ['Açıq','Gecikən','Bağlı','Hamısı'].map(v => {
+        const c = this.chip(v === s.stat);
+        const lab = v === 'Açıq' ? 'Açıq olanlar' : (v === 'Gecikən' ? 'Müddəti keçən' : (v === 'Bağlı' ? 'Bağlananlar' : 'Hamısı'));
+        return { label:lab, bg:c.bg, fg:c.fg, bd:c.bd, pick: () => this.setState({ stat:v }) };
+      }),
+      kindOpen: s.kindOpen, kindLabel: s.kind === 'Hamısı' ? 'Bütün növlər' : s.kind,
+      toggleKind: () => this.setState({ kindOpen: !s.kindOpen }),
+      kindOpts: ['Hamısı'].concat(Object.keys(KINDS).map(k => KINDS[k].label)).map(v => ({
+        label: v === 'Hamısı' ? 'Bütün növlər' : v, sel: v === s.kind ? 'true' : 'false',
+        fw: v === s.kind ? 800 : 600,
+        fg: v === s.kind ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bg: v === s.kind ? 'var(--ems-primary-50)' : 'transparent',
+        pick: () => this.setState({ kind:v, kindOpen:false }),
+        key: this.keyActivate(() => this.setState({ kind:v, kindOpen:false }))
+      })),
+      resetFilters: () => this.setState({ q:'', qRaw:'', stat:'Açıq', kind:'Hamısı' }),
+
+      list: list0.map(t => {
+        const k = KINDS[t.kind];
+        const st = this.statusOf(t);
+        const ss = STATUS[st];
+        const sel = cur && t.id === cur.id;
+        const late = this.isOpen(t) && t.age > k.days;
+        const at = this.atOf(t);
+        return {
+          no: t.id, kind: k.label, kBg: k.bg, kFg: k.fg,
+          subject: t.subject, fw: st === 'Yeni' ? 800 : 700,
+          status: st, sBg: ss[0], sFg: ss[1], urgent: late,
+          fromLine: sender ? UNITS[at].name : t.fromName + ' · ' + t.fromMeta,
+          date: t.tl[0][2].split(',')[0],
+          hasFiles: t.files.length > 0, fileCount: t.files.length,
+          atLine: sender ? (this.isOpen(t) ? k.days + ' iş günü müddət' : 'bağlanıb') : (at === myUnit ? 'sizdədir' : UNITS[at].name + '-də'),
+          atFg: late ? '#b91c1c' : 'var(--ems-neutral-400)',
+          sel: sel ? 'true' : 'false',
+          bd: sel ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+          bg: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          open: () => this.setState({ sel: t.id })
+        };
+      }),
+      listEmpty: list0.length === 0,
+      emptyTitle: tab === 'İzlədiklərim' ? 'İzlədiyiniz müraciət yoxdur' : (s.stat === 'Gecikən' ? 'Müddəti keçən müraciət yoxdur' : 'Müraciət tapılmadı'),
+      emptyNote: tab === 'İzlədiklərim' ? 'Başqa şöbəyə yönləndirdiyiniz müraciətlər burada görünəcək.'
+        : (sender ? 'Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya bilərsiniz.' : 'Bu filtrə uyğun müraciət yoxdur — filtri dəyişin.'),
+      hasSel: !!cur,
+
+      openNew: () => this.setState({ newT: { kind:null, subject:'', body:'', files:[], touched:false } }),
+      closeNew: () => this.setState({ newT:null }), mNew: !!s.newT,
+      openForward: () => this.setState({ fwd: { to:null, note:'', keep:true, touched:false } }),
+      closeForward: () => this.setState({ fwd:null }), mFwd: !!s.fwd
+    };
+
+    // ---- detal
+    if (cur) {
+      const k = KINDS[cur.kind];
+      const st = this.statusOf(cur);
+      const ss = STATUS[st];
+      const at = this.atOf(cur);
+      const late = this.isOpen(cur) && cur.age > k.days;
+      const left = k.days - cur.age;
+      const reply = s.replies[cur.id] || '';
+      const canAct = !sender && at === myUnit && this.isOpen(cur);
+      const act = (status, mark, text) => {
+        if (reply.trim().length < 10) return;
+        this.setState({
+          states: Object.assign({}, s.states, {
+            [cur.id]: status,
+            [cur.id + ':tl']: (s.states[cur.id + ':tl'] || []).concat([[mark, UNITS[myUnit].name + ' — siz', 'İndi', text + ' ' + reply.trim()]])
+          }),
+          replies: Object.assign({}, s.replies, { [cur.id]: '' })
+        });
+        this.flash(cur.id + ' — ' + status.toLowerCase() + '. Müraciət sahibinə bildiriş göndərildi.');
+      };
+      out.d = {
+        no: cur.id, kind: k.label, kBg: k.bg, kFg: k.fg, subject: cur.subject, body: cur.body,
+        status: st, sBg: ss[0], sFg: ss[1],
+        fromFull: cur.fromName + ' · ' + cur.fromMeta,
+        date: cur.tl[0][2],
+        sla: !this.isOpen(cur) ? 'Müraciət bağlanıb — ' + st.toLowerCase()
+          : (late ? 'Cavab müddəti ' + (cur.age - k.days) + ' gün keçib (norma ' + k.days + ' iş günü)'
+          : 'Cavab müddətinə ' + left + ' iş günü qalıb (norma ' + k.days + ' iş günü)'),
+        slaBg: !this.isOpen(cur) ? 'var(--ems-neutral-50)' : (late ? 'var(--ems-danger-bg)' : 'var(--ems-primary-50)'),
+        slaBd: !this.isOpen(cur) ? 'var(--ems-neutral-200)' : (late ? '#fecaca' : 'var(--ems-primary-200)'),
+        slaFg: !this.isOpen(cur) ? 'var(--ems-neutral-500)' : (late ? '#b91c1c' : 'var(--ems-primary-800)'),
+        hasFiles: cur.files.length > 0,
+        files: cur.files.map(f => ({ name:f.n, size:f.s, open: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(f.n + ' açılır.'); } })),
+        timeline: this.tlOf(cur).map(x => ({ mark:x[0], who:x[1], when:x[2], what:x[3], bg: (MARK[x[0]] || MARK['👁'])[0], fg: (MARK[x[0]] || MARK['👁'])[1] })),
+        canAct,
+        reply, setReply: (e) => this.setState({ replies: Object.assign({}, s.replies, { [cur.id]: e.target.value }) }),
+        replyOff: reply.trim().length < 10,
+        okBd: reply.trim().length < 10 ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        okBg: reply.trim().length < 10 ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        okFg: reply.trim().length < 10 ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        okCur: reply.trim().length < 10 ? 'not-allowed' : 'pointer',
+        infoFg: reply.trim().length < 10 ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-700)',
+        rejFg: reply.trim().length < 10 ? 'var(--ems-neutral-400)' : '#b91c1c',
+        doResolve: () => act('Həll olunub', '✓', 'Həll olundu:'),
+        doInfo: () => act('Məlumat gözlənilir', '?', 'Əlavə məlumat istənildi:'),
+        doReject: () => act('Rədd edilib', '✕', 'Rədd edildi:'),
+        watchOnly: !canAct,
+        watchNote: sender
+          ? (this.isOpen(cur) ? 'Müraciətiniz hazırda ' + UNITS[at].name + '-dədir. Cavab veriləndə bildiriş gələcək və mətn burada görünəcək.' : 'Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə bilərsiniz.')
+          : (!this.isOpen(cur) ? 'Müraciət bağlanıb — yalnız oxuna bilər.' : 'Müraciət hazırda ' + UNITS[at].name + '-dədir. Siz yönləndirdiyiniz üçün gedişini izləyirsiniz, amma cavabı həmin şöbə verəcək.')
+      };
+    } else {
+      out.d = { no:'', kind:'', subject:'', body:'', status:'', files:[], timeline:[], hasFiles:false, canAct:false, watchOnly:false, watchNote:'', reply:'', replyOff:true, sla:'', fromFull:'', date:'' };
+    }
+
+    // ---- yeni müraciət
+    const n = s.newT;
+    if (n) {
+      const setN = (p) => this.setState({ newT: Object.assign({}, n, p) });
+      const mine2 = Object.keys(KINDS).filter(k => KINDS[k].who.indexOf(this.senderKey()) >= 0);
+      const badSub = n.subject.trim().length < 5;
+      const badBody = n.body.trim().length < 20;
+      const invalid = !n.kind || badSub || badBody;
+      out.nv = {
+        kinds: mine2.map(k => {
+          const kk = KINDS[k]; const on = n.kind === k;
+          return { label:kk.label, note:kk.note, days: kk.days + ' iş günü', dot:kk.dot, sel: on ? 'true' : 'false',
+            bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)', bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+            pick: () => setN({ kind:k }), key: this.keyActivate(() => setN({ kind:k })) };
+        }),
+        subject: n.subject, body: n.body,
+        setSubject: (e) => setN({ subject:e.target.value, touched:true }),
+        setBody: (e) => setN({ body:e.target.value, touched:true }),
+        subBd: n.touched && badSub ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        bodyBd: n.touched && badBody ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        count: n.body.trim().length < 20 ? 'Ən azı 20 simvol — hazırda ' + n.body.trim().length : n.body.trim().length + ' simvol',
+        countFg: n.body.trim().length < 20 ? 'var(--ems-danger)' : 'var(--ems-neutral-400)',
+        files: n.files.map((f, i) => ({ name:f.n, size:f.s, remove: () => setN({ files: n.files.filter((x, j) => j !== i) }) })),
+        hasFiles: n.files.length > 0,
+        addFile: () => setN({ files: n.files.concat([{ n:'Senad_' + (n.files.length + 1) + '.pdf', s:'640 KB' }]) }),
+        route: n.kind ? 'Bu müraciət «' + UNITS[KINDS[n.kind].to].name + '»-nə gedəcək · cavab müddəti ' + KINDS[n.kind].days + ' iş günü.' : 'Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək.',
+        invalid,
+        bd: invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: invalid ? 'not-allowed' : 'pointer',
+        send: () => { if (invalid) { setN({ touched:true }); return; } this.setState({ newT:null }); this.flash('Müraciət ' + UNITS[KINDS[n.kind].to].name + '-nə göndərildi — gedişini buradan izləyə bilərsiniz.'); }
+      };
+    } else {
+      out.nv = { kinds:[], subject:'', body:'', files:[], hasFiles:false, count:'', countFg:'var(--ems-neutral-400)', route:'', invalid:true, subBd:'var(--ems-neutral-300)', bodyBd:'var(--ems-neutral-300)', bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed' };
+    }
+
+    // ---- yönləndirmə
+    const f = s.fwd;
+    if (f && cur) {
+      const setF = (p) => this.setState({ fwd: Object.assign({}, f, p) });
+      const invalid = !f.to || f.note.trim().length < 10;
+      out.fv = {
+        sub: cur.id + ' · ' + cur.subject,
+        units: Object.keys(UNITS).filter(u => u !== myUnit).map(u => {
+          const on = f.to === u;
+          return { name: UNITS[u].name, note: UNITS[u].note, sel: on ? 'true' : 'false',
+            bd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)', bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+            pick: () => setF({ to:u }), key: this.keyActivate(() => setF({ to:u })) };
+        }),
+        note: f.note, setNote: (e) => setF({ note:e.target.value, touched:true }),
+        keep: f.keep, toggleKeep: () => setF({ keep: !f.keep }),
+        invalid,
+        bd: invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: invalid ? 'not-allowed' : 'pointer',
+        send: () => {
+          if (invalid) { setF({ touched:true }); return; }
+          this.setState({
+            fwd: null,
+            states: Object.assign({}, s.states, {
+              [cur.id]: 'Yönləndirilib',
+              [cur.id + ':at']: f.to,
+              [cur.id + ':tl']: (s.states[cur.id + ':tl'] || []).concat([['→', UNITS[myUnit].name + ' — siz', 'İndi', UNITS[f.to].name + '-nə yönləndirildi: ' + f.note.trim()]])
+            })
+          });
+          this.flash(cur.id + ' — ' + UNITS[f.to].name + '-nə yönləndirildi' + (f.keep ? ' · izləməkdə davam edirsiniz.' : '.'));
+        }
+      };
+    } else {
+      out.fv = { sub:'', units:[], note:'', keep:true, invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed' };
+    }
+
+    return out;
+  }
+}
+
+</script>
+</body>
+</html>
