@@ -191,7 +191,9 @@ def student_admission_create_group(request):
         }
         # CodeQL py/stack-trace-exposure: istisna mətni müştəriyə OLDUĞU KİMİ
         # qaytarılmır — yalnız bilinən kod siyahısından keçir, qalanı generik.
-        code = str(exc) if str(exc) in messages else "invalid"
+        raw = str(exc)
+        # Cavaba istisnadan gələn DƏYƏR deyil, sabit açar siyahısındakı EKVİVALENTİ yazılır.
+        code = next((known for known in messages if known == raw), "invalid")
         message = messages.get(code) or pgettext(_CTX, "Qrup yaradıla bilmədi.")
         return JsonResponse({"ok": False, "error": code, "field": "name", "message": message}, status=400)
 
