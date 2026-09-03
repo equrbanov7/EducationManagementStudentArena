@@ -54,6 +54,11 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "chair-profile": "accounts/profile/sections/_chair_profile.html",
     "programs-registry": "accounts/profile/sections/_programs_registry.html",
     "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
+    "curriculum-editor": "accounts/profile/sections/_curriculum_editor.html",
+    "groups-registry": "accounts/profile/sections/_groups_registry.html",
+    "semester-opening": "accounts/profile/sections/_semester_opening.html",
+    "student-admission": "accounts/profile/sections/_student_admission.html",
+    "student-registry": "accounts/profile/sections/_student_registry.html",
 }
 
 
@@ -139,4 +144,9 @@ def build_section_titles() -> dict:
         "chair-profile": pgettext_lazy("profile.sidebar", "Kafedra profili"),
         "programs-registry": pgettext_lazy("profile.sidebar", "İxtisaslar"),
         "subject-catalog": pgettext_lazy("profile.sidebar", "Fənn kataloqu"),
+        "curriculum-editor": pgettext_lazy("profile.sidebar", "Tədris planı"),
+        "groups-registry": pgettext_lazy("profile.sidebar", "Qruplar"),
+        "semester-opening": pgettext_lazy("profile.sidebar", "Semestr açılışı"),
+        "student-admission": pgettext_lazy("profile.sidebar", "Tələbə qəbulu"),
+        "student-registry": pgettext_lazy("profile.sidebar", "Tələbə reyestri"),
     }

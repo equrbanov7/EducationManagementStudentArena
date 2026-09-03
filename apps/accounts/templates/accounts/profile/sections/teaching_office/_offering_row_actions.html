@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}Açılış sətrinin əməli — LƏĞV (silmə yox). Kilidlənmiş semestrdə
+server 409 qaytarır; düymə burada gizlədilmir, cavab istifadəçiyə göstərilir.{% endcomment %}
+{% if row.data.is_active %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-tof-open="tofOfferingCancelDialog"
+        data-tof-prefill='{"action": "cancel_offering", "period": "{{ semester_opening_section.period.id }}", "id": "{{ row.data.id }}"}'>
+    {% trans "Ləğv et" context "accounts.semester" %}
+</button>
+{% endif %}

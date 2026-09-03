@@ -1,0 +1,246 @@
+/* =========================================================================
+   Tələbə Xidmətləri Mərkəzi — ekran 08 «Tələbə qəbulu» + 09 «Tələbə reyestri».
+
+   YALNIZ DÜZÜM. Kart, cədvəl, badge, KPI, dialoq, çekmecə, timeline ORTAQ
+   `ems_ui` qatındadır (qabıqda bir dəfə yüklənir) və BURADA TƏKRAR TƏRİF
+   OLUNMUR. Rənglər yalnız `--ems-*` tokenlərindən (light-only tema).
+   ========================================================================= */
+
+.stsvc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.stsvc__toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    flex-wrap: wrap;
+}
+
+.stsvc__toolbar-spacer {
+    flex: 1 1 auto;
+}
+
+/* ---- Hərəkət dialoqu ---------------------------------------------------- */
+
+.stsvc__target {
+    margin: 0 0 var(--ems-sp-3);
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 700;
+    font-size: var(--ems-fs-sm);
+}
+
+.stsvc__kinds {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-2);
+    margin: 0 0 var(--ems-sp-3);
+    padding: 0;
+    border: 0;
+}
+
+.stsvc__kinds > .ems-field__label {
+    grid-column: 1 / -1;
+}
+
+.stsvc__kind {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-neutral-0);
+    cursor: pointer;
+    font-size: var(--ems-fs-sm);
+}
+
+.stsvc__kind:hover {
+    border-color: var(--ems-primary-600);
+}
+
+.stsvc__kind:focus-within {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.stsvc__kind-label {
+    color: var(--ems-neutral-900);
+}
+
+.stsvc__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-3);
+}
+
+/* ---- Tələbə kartı (çekmecə) --------------------------------------------- */
+
+.stsvc-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.stsvc-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.stsvc-card__ini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-weight: 800;
+}
+
+.stsvc-card__name {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.stsvc-card__sub {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.stsvc-card__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-2) var(--ems-sp-4);
+    margin: 0;
+}
+
+.stsvc-card__facts > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-block: 4px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.stsvc-card__facts dt {
+    font-size: var(--ems-fs-2xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-600);
+}
+
+.stsvc-card__facts dd {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+.stsvc-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.stsvc-card__empty {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.stsvc__doclink {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-primary-600);
+    text-decoration: underline;
+}
+
+/* ---- Ekran 08: qəbul addımları ------------------------------------------ */
+
+.stsvc__step-note {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.stsvc__assign {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: var(--ems-sp-4);
+    align-items: start;
+}
+
+.stsvc__panel {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-0);
+    padding: var(--ems-sp-3);
+}
+
+.stsvc__panel-title {
+    margin: 0 0 var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-600);
+}
+
+.stsvc__grouplist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.stsvc__grouprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-2);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-sm);
+    font-size: var(--ems-fs-sm);
+}
+
+.stsvc__grouprow--full {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.stsvc__groupmeta {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+}
+
+/* ---- Mobil -------------------------------------------------------------- */
+
+@media (max-width: 767px) {
+    .stsvc__kinds,
+    .stsvc__grid,
+    .stsvc-card__facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stsvc__assign {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

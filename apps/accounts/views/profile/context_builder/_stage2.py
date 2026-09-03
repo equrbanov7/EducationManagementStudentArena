@@ -375,6 +375,14 @@ class _Stage2Mixin:
         self.chair_profile_section = {"has_access": False, "chairs": [], "staff_rows": []}
         self.programs_registry_section = {"has_access": False, "rows": []}
         self.subject_catalog_section = {"has_access": False, "rows": []}
+        # Mərhələ 2 — tədris planı redaktoru, akademik qrup reyestri, semestr açılışı.
+        self.curriculum_editor_section = {"has_access": False, "rows": [], "plan": None}
+        self.groups_registry_section = {"has_access": False, "rows": []}
+        self.semester_opening_section = {"has_access": False, "rows": [], "period": None}
+        # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi (qəbul + reyestr). Default
+        # BOŞDUR: aktiv bölmə olmayanda heç bir sorğu işləmir.
+        self.student_admission_section = {"has_access": False, "columns": (), "steps": []}
+        self.student_registry_section = {"has_access": False, "rows": [], "table_rows": []}
         # İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi.
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində

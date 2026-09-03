@@ -71,16 +71,35 @@
         if (field && field.value) {
             return field.value;
         }
+        // Forma verilməyibsə (dialoqsuz `data-tof-submit`) səhifədəki İSTƏNİLƏN
+        // `{% csrf_token %}` sahəsi götürülür — o da cari sessiyanın tokenidir.
+        field = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (field && field.value) {
+            return field.value;
+        }
         return (window.EMSCore && window.EMSCore.getCsrfToken && window.EMSCore.getCsrfToken()) || "";
     }
 
-    /** Formu `application/x-www-form-urlencoded` kimi göndərir (server `request.POST` oxuyur). */
+    /** Formu `application/x-www-form-urlencoded` kimi göndərir (server `request.POST` oxuyur).
+     *
+     * Massiv dəyər ÇOXLU sahə kimi yazılır (`programs=a&programs=b`) — server
+     * onu `request.POST.getlist()` ilə oxuyur (məs. semestr açılışında ixtisas
+     * seçimi). Massiv olmayan dəyər əvvəlki kimi tək sahədir.
+     */
     function post(url, payload, form) {
         var body = new URLSearchParams();
         Object.keys(payload).forEach(function (key) {
-            if (payload[key] !== null && payload[key] !== undefined) {
-                body.append(key, payload[key]);
+            var value = payload[key];
+            if (value === null || value === undefined) {
+                return;
             }
+            if (Array.isArray(value)) {
+                value.forEach(function (item) {
+                    body.append(key, item);
+                });
+                return;
+            }
+            body.append(key, value);
         });
         return window.EMSCore.fetchJSON(url, {
             method: "POST",
@@ -102,6 +121,19 @@
             }
             if (el.type === "checkbox") {
                 payload[el.name] = el.checked ? "1" : "";
+            } else if (el.tagName === "SELECT" && el.multiple) {
+                // Çoxlu seçim → massiv (server `getlist` oxuyur).
+                payload[el.name] = Array.prototype.filter
+                    .call(el.options, function (option) {
+                        return option.selected;
+                    })
+                    .map(function (option) {
+                        return option.value;
+                    });
+            } else if (Object.prototype.hasOwnProperty.call(payload, el.name)) {
+                // Eyni adlı bir neçə sahə (məs. toplu əməlin gizli `ids`
+                // sahələri) → massiv; `post()` onu təkrarlanan sahə kimi yazır.
+                payload[el.name] = [].concat(payload[el.name], el.value);
             } else {
                 payload[el.name] = el.value;
             }
@@ -221,5 +253,47 @@
             });
     });
 
-    window.EMSTeachingOffice = { post: post, sectionUrl: sectionUrl };
+    /* ---- Birbaşa əməl düyməsi (dialoqsuz) ------------------------------- */
+
+    /* `data-tof-submit='{"action": …}'` — dialoq açmadan JSON POST edir.
+     * `data-tof-confirm` verilibsə ƏVVƏLCƏ təsdiq soruşulur (məs. «cari dövr»
+     * açarı bütün universitetin konteksini dəyişir, ona görə təsadüfi klik
+     * olmamalıdır). Səbəb tələb edən əməllər BU YOLLA GETMİR — onlar
+     * `_reason_dialog.html`-dən keçir. */
+    window.EMSDelegate.on("click", "[data-tof-submit]", function (event, btn) {
+        event.preventDefault();
+        if (btn.disabled) {
+            return;
+        }
+        var host = root();
+        if (!host) {
+            return;
+        }
+        var payload;
+        try {
+            payload = JSON.parse(btn.getAttribute("data-tof-submit"));
+        } catch (err) {
+            return;
+        }
+        var confirmText = btn.getAttribute("data-tof-confirm");
+        if (confirmText && !window.confirm(confirmText)) {
+            return;
+        }
+        var section = host.getAttribute("data-tof-section");
+        var url = host.getAttribute("data-tof-action-url");
+        btn.disabled = true;
+        post(url, payload, null)
+            .then(function () {
+                reload(section, sectionUrl(section, {}));
+            })
+            .catch(function (err) {
+                var message = (err && err.payload && err.payload.message) || "";
+                if (message) {
+                    toast(message, "error");
+                }
+                btn.disabled = false;
+            });
+    });
+
+    window.EMSTeachingOffice = { post: post, sectionUrl: sectionUrl, root: root, reload: reload };
 })(window, document);

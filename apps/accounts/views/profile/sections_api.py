@@ -156,6 +156,15 @@ SECTION_PARTIALS: dict[str, str] = {
     "chair-profile": "accounts/profile/sections/_chair_profile.html",
     "programs-registry": "accounts/profile/sections/_programs_registry.html",
     "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
+    # Mərhələ 2 — tədris planı redaktoru, akademik qrup reyestri, semestr açılışı.
+    "curriculum-editor": "accounts/profile/sections/_curriculum_editor.html",
+    "groups-registry": "accounts/profile/sections/_groups_registry.html",
+    "semester-opening": "accounts/profile/sections/_semester_opening.html",
+    # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09).
+    # Hər ikisi SERVER-render OXU panelidir; mutasiyalar ayrıca JSON /
+    # multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "student-admission": "accounts/profile/sections/_student_admission.html",
+    "student-registry": "accounts/profile/sections/_student_registry.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -238,6 +247,15 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "chair-profile",
         "programs-registry",
         "subject-catalog",
+        # Mərhələ 2 panelləri də OXU-ONLY render olunur: plan sətri, qrup və
+        # açılış mutasiyaları ayrıca JSON POST endpoint-lərinə gedir.
+        "curriculum-editor",
+        "groups-registry",
+        "semester-opening",
+        # Mərhələ 3 — qəbul paneli faylı ayrıca multipart endpoint-inə göndərir,
+        # reyestr isə server-render cədvəldir (filtr/sıralama linklə).
+        "student-admission",
+        "student-registry",
     }
 )
 

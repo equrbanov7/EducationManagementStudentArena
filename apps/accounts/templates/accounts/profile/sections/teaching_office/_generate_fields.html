@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}«Plandan açılış yarat» sahələri.
+
+İxtisas seçimi ÇOXLU seçicidir (`name="programs"` — server `getlist` oxuyur);
+boş buraxılsa BÜTÜN aktiv ixtisaslar götürülür. «Plan yoxdur» olanlar server
+tərəfdə atlanır və nəticədə adları qaytarılır.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gn-sem">{% trans "Planın neçənci semestri?" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="tof-gn-sem" name="semester_number" min="1" max="16" step="1" required>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-gn-programs">{% trans "Hansı ixtisaslar üçün?" context "accounts.semester" %}</label>
+        <select class="ems-select" id="tof-gn-programs" name="programs" multiple size="8" data-live-search="true"
+                aria-describedby="tof-gn-programs-hint">
+            {% for option in semester_opening_section.program_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        <p class="ems-field__hint" id="tof-gn-programs-hint">{% trans "Boş buraxılsa bütün aktiv ixtisaslar götürülür; təsdiqlənmiş planı olmayanlar atlanır." context "accounts.semester" %}</p>
+    </div>
+</div>

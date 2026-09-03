@@ -10,6 +10,9 @@ KONTEKST MÜQAVİLƏSİ (`tile` obyekti / dict)
   filter    — opsional: verilibsə kart KLİK EDİLƏ BİLƏN filtr olur
   pressed   — filtr seçilibmi
   has_bar   — True olduqda `pct` (0–100) progress zolağı kimi göstərilir
+  key       — opsional: `data-ems-kpi-key="<key>"` çəngəli qoyulur. Dəyəri
+              SONRADAN (məs. ATİS quru icrasından sonra) JS yeniləyən kartlar
+              üçündür — `filter`-dən FƏRQLİDİR (o, kartı düyməyə çevirir).
 {% endcomment %}
 {% load ems_ui %}
 {% if tile.filter %}
@@ -22,7 +25,7 @@ KONTEKST MÜQAVİLƏSİ (`tile` obyekti / dict)
         {% if tile.note %}<span class="ems-kpi__note">{{ tile.note }}</span>{% endif %}
     </button>
 {% else %}
-    <div class="ems-kpi{% if tile.tone %} ems-kpi--{{ tile.tone }}{% endif %}">
+    <div class="ems-kpi{% if tile.tone %} ems-kpi--{{ tile.tone }}{% endif %}"{% if tile.key %} data-ems-kpi-key="{{ tile.key }}"{% endif %}>
         <div class="ems-kpi__label">{{ tile.label }}</div>
         <div class="ems-kpi__value">{{ tile.value }}{% if tile.unit %}<span class="ems-kpi__unit">{{ tile.unit }}</span>{% endif %}</div>
         {% if tile.has_bar %}

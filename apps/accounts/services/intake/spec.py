@@ -52,6 +52,26 @@ def columns() -> tuple[Column, ...]:
         Column("course", pgettext(_CTX, "Kurs"), pgettext(_CTX, "1–6 (yalnız yoxlama)")),
         Column("language_sector", pgettext(_CTX, "Dil bölməsi"), pgettext(_CTX, "az / en / ru (yalnız yoxlama)")),
         Column("degree_level", pgettext(_CTX, "Təhsil səviyyəsi"), pgettext(_CTX, "bakalavr / magistr (yoxlama)")),
+        # ── ATİS (Dövlət İmtahan Mərkəzi) ixracının sütunları ───────────────
+        #
+        # HAMISI OPSİONALDIR: köhnə 16 sütunlu fayl olduğu kimi işləməyə davam
+        # edir (başlıq-adına-görə xəritələmə naməlum sütunu atır, çatışmayanı
+        # boş sayır). ATİS-in rəsmi API müqaviləsi YOXDUR — bu sütunlar onun
+        # XLSX ixracının başlıqlarıdır (bax `docs/design/handoff_full` §5/08).
+        Column("atis_id", pgettext(_CTX, "ATİS nömrəsi"), pgettext(_CTX, "ATİS siyahısındakı sətir nömrəsi")),
+        Column(
+            "program_code",
+            pgettext(_CTX, "İxtisas kodu"),
+            pgettext(_CTX, "Rəsmi şifr (NK 503) — qrup verilməyibsə MƏCBURİ"),
+        ),
+        Column("admission_score", pgettext(_CTX, "Qəbul balı"), pgettext(_CTX, "Məsələn 543,5")),
+        Column("exam_type", pgettext(_CTX, "İmtahan növü"), pgettext(_CTX, "Məsələn «I qrup»")),
+        Column("education_form", pgettext(_CTX, "Təhsil forması"), pgettext(_CTX, "əyani / qiyabi / distant")),
+        Column(
+            "funding",
+            pgettext(_CTX, "Təhsil haqqı"),
+            pgettext(_CTX, "dövlət sifarişi / ödənişli"),
+        ),
     )
 
 
@@ -93,6 +113,19 @@ def header_index() -> dict:
     index[normalize_header("qebul ili")] = "admission_year"
     index[normalize_header("dil bolmesi")] = "language_sector"
     index[normalize_header("tehsil seviyyesi")] = "degree_level"
+    # ATİS ixracının tez-tez rast gəlinən başlıq variantları.
+    index[normalize_header("atis id")] = "atis_id"
+    index[normalize_header("atis kodu")] = "atis_id"
+    index[normalize_header("ixtisas kodu")] = "program_code"
+    index[normalize_header("ixtisas sifri")] = "program_code"
+    index[normalize_header("resmi sifr")] = "program_code"
+    index[normalize_header("qebul bali")] = "admission_score"
+    index[normalize_header("bal")] = "admission_score"
+    index[normalize_header("imtahan novu")] = "exam_type"
+    index[normalize_header("tehsil formasi")] = "education_form"
+    index[normalize_header("forma")] = "education_form"
+    index[normalize_header("tehsil haqqi")] = "funding"
+    index[normalize_header("maliyyelesme")] = "funding"
     return index
 
 

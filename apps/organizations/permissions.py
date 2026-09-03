@@ -22,6 +22,9 @@ from core.permissions import (  # noqa: F401
     has_permission,
 )
 
+from .permissions_stage2 import merge_stage2
+from .permissions_stage3 import merge_stage3
+
 # Permission definitions by category
 PERMISSION_CATEGORIES = {
     "organization": [
@@ -434,6 +437,14 @@ PERMISSION_LABELS = {
     "people.manage_teacher_role": pgettext_lazy(_PERM_CTX, "Müəllim statusunu vermək / çıxarmaq"),
     "people.manage_academic": pgettext_lazy(_PERM_CTX, "Tələbənin qrupunu köçürmək və akademik statusunu dəyişmək"),
 }
+
+# Dizayn Mərhələ 2 (ekran 05/06/07) — `plan.*`, `semester.*`, `unit.group_manage`
+# kateqoriya və etiketləri AYRI modulda saxlanılır (fayl ölçü büdcəsi), amma
+# BURADA birləşdirilir: kataloq tək dəst olaraq qalır və `test_permissions.py`
+# «kataloq ↔ etiket tam üst-üstə» yoxlaması pozulmur.
+merge_stage2(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# Dizayn Mərhələ 3 (ekran 08/09) — `student.*` kateqoriyası eyni naxışla.
+merge_stage3(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

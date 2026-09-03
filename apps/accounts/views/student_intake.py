@@ -56,6 +56,21 @@ def _gate(request):
     return organization, None
 
 
+def _group_overrides(request) -> dict:
+    """`group_<sətir>=<qrup id>` POST sahələri → `{sətir: id}`.
+
+    Ekran 08-in «Qrup təyinatı» addımı: operator avtomatik təklifi dəyişəndə
+    seçim faylla BİRLİKDƏ göndərilir. Serverdə state saxlanılmır (PII/parol
+    riski) — ona görə ön baxış da, tətbiq də eyni sözlüyü alır.
+    """
+    overrides = {}
+    for key, value in request.POST.items():
+        if not key.startswith("group_") or not value:
+            continue
+        overrides[key[len("group_") :]] = value
+    return overrides
+
+
 def _plans_from_request(request, organization):
     """``(plans, error_response)`` — faylı oxuyub planları qurur."""
 
@@ -63,7 +78,7 @@ def _plans_from_request(request, organization):
         rows = intake.read_rows(request.FILES.get("file"))
     except intake.IntakeFileError as exc:
         return None, JsonResponse({"ok": False, "error": exc.code, "message": exc.message}, status=400)
-    return intake.build_plans(organization, rows), None
+    return intake.build_plans(organization, rows, group_overrides=_group_overrides(request)), None
 
 
 @never_cache
@@ -128,4 +143,75 @@ def student_intake_apply(request):
     return JsonResponse(result)
 
 
-__all__ = ["student_intake_apply", "student_intake_preview", "student_intake_template"]
+@never_cache
+@login_required
+@require_POST
+def student_admission_create_group(request):
+    """Ekran 08 «Yeni qrup yarat» — `student.assign_group` icazəsi ilə.
+
+    QƏSDƏN `user.import`-dan AYRI AÇAR: siyahı yükləyə bilən operator
+    universitetin struktur ağacına avtomatik qrup əlavə edə bilməməlidir.
+    """
+    from apps.accounts.services import people
+    from apps.accounts.services.student_groups import create_group
+    from apps.organizations.models import OrgUnit
+    from core.audit import log_action
+    from core.constants import AuditAction, OrgUnitType
+
+    organization = _organization(request)
+    actor = people.resolve_actor(request)
+    if organization is None or not actor.can_assign_groups:
+        return _denied()
+
+    specialty = OrgUnit.objects.filter(
+        organization=organization,
+        pk=(request.POST.get("specialty") or "").strip() or None,
+        unit_type=OrgUnitType.SPECIALTY,
+        is_active=True,
+    ).first()
+    if specialty is None:
+        return JsonResponse(
+            {"ok": False, "error": "specialty_not_found", "message": pgettext(_CTX, "İxtisas tapılmadı.")},
+            status=404,
+        )
+    try:
+        group = create_group(
+            organization,
+            specialty_unit=specialty,
+            name=request.POST.get("name") or "",
+            capacity=request.POST.get("capacity") or 0,
+            sector=request.POST.get("sector") or "",
+            code=request.POST.get("code") or "",
+        )
+    except ValueError as exc:
+        messages = {
+            "group_name_required": pgettext(_CTX, "Qrupun adı boş ola bilməz."),
+            "group_name_taken": pgettext(_CTX, "Bu adla qrup artıq var."),
+            "specialty_outside_tenant": pgettext(_CTX, "İxtisas tapılmadı."),
+        }
+        code = str(exc)
+        return JsonResponse(
+            {"ok": False, "error": code, "field": "name", "message": messages.get(code, code)}, status=400
+        )
+
+    log_action(
+        AuditAction.CREATE,
+        user=request.user,
+        organization=organization,
+        obj=group,
+        reason="student_admission_group_created",
+        request=request,
+        resource_type="organizations.org_unit",
+        resource_id=str(group.pk),
+        resource_repr=group.name,
+        changes={"specialty": str(specialty.pk), "capacity": group.settings.get("capacity")},
+    )
+    return JsonResponse({"ok": True, "id": str(group.pk), "name": group.name})
+
+
+__all__ = [
+    "student_admission_create_group",
+    "student_intake_apply",
+    "student_intake_preview",
+    "student_intake_template",
+]
