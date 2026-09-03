@@ -1,8 +1,11 @@
 # Şübhəli ballar — rektor üçün qısa siyahı (metodologiya)
 
-**Tarix:** 2026-09-03 · **Rejim:** YALNIZ OXU · **Şaxə:** `audit/post-migration-qa-2026-09`
+**Tarix:** 2026-09-03 · **Rejim:** YALNIZ OXU
 **Excel:** `/Users/elvin/Desktop/RIM/Hesabat/SUBHELI_BALLAR_REKTOR_2026-09-03.xlsx`
-**Skript:** `scripts/legacy_audit/suspicious_grades.py` *(iş ağacında, commit edilməyib)*
+**Rektor sənədi:** `/Users/elvin/Desktop/RIM/Hesabat/SUBHELI_BALLAR_REKTOR_2026-09-03.docx`
+(+ `.pdf`, 31 səhifə) · generator `scratchpad/make_docx.py`
+**Skript:** `scripts/legacy_audit/suspicious_grades.py`
+**Şaxə:** `docs/suspicious-grades-report` (PR #122) — dəyişikliklər iş ağacındadır, commit EDİLMƏYİB
 
 ---
 
@@ -14,7 +17,15 @@ qurmur — onun üzərində işləyir və sualı dəyişir:
 
 > «Bal fərqi var?» → **«Bu bal fiziki olaraq mümkündürmü? Yoxsa kimsə əl ilə yazıb?»**
 
-Nəticə: **Tier 1 — 48 tapıntı / 47 tələbə**, **Tier 2 — 1 043 tapıntı / 720 tələbə**.
+Nəticə (apellyasiya süzgəcindən sonra):
+
+| Bölmə | Tapıntı | Tələbə | Hara |
+|---|---:|---:|---|
+| **Tier 1 — 100 % şübhəli** | **48** | **47** | rektor sənədi + Excel |
+| **Tier 2 — əsas** (keçid xətti 51–55 · kəsr-ziddiyyəti) | **261** | **238** | rektor sənədi + Excel |
+| Əlavə — köməkçi qaydalar (qayıb silinməsi · kütləvi qayıb · ardıcıllıq) | 697 | 461 | **yalnız Excel** |
+| **İzahı olan — şübhəli SAYILMIR** | **96** | **78** | ayrıca vərəq |
+
 Rəqəmlər şişirdilməyib; aşağıda **nəyin təmiz çıxdığı da açıq yazılıb**.
 
 ---
@@ -73,6 +84,110 @@ balı yazan deyil; vərəqdə açıq yazılıb.
 
 ---
 
+## 3a. Apellyasiya / rəsmi düzəliş izi — nə axtarıldı, nə tapıldı
+
+Sual: **qiymət dəyişiklikləri qanuni apellyasiya (etiraz) nəticəsi ola bilərmi?**
+Cavab tapmaq üçün hər iki baza axtarıldı.
+
+### Köhnə MyEdu bazası — apellyasiya saxlancı YOXDUR
+
+**Cədvəl adları** `apel|appel|apply|etiraz|itiraz|sikay|shikay|complain|review|
+correct|duzel|guzest|objection|revis|protest|appeal|muracie|xidmeti` naxışları ilə
+axtarıldı. Bazanın **80 cədvəlinin** hamısı yoxlanıldı:
+
+```
+alerts_workers, allowed_qb, balvereqi_logs, books, books_order, curricula,
+curricula_plan, curricula_plan_patok, curricula_tam, curricula_tasks,
+curricula_tasks_content, curricula_tasks_content_teachers, departments,
+ders_cedveli, exam_answers, exam_list, exam_questions, exam_question_topics,
+exam_students_start, ferdi_plan, groups, holidays, imthngrscxsblr, journals,
+journals_dates, journals_dates_added_by_teacher, journals_dates_parsed,
+journals_dates_points, journals_dates_points_archive, journals_dates_rooms,
+journals_files, journal_exam_joint, lessons, level_exams, level_exams_questions,
+level_exams_topics, level_results, niq, notifications, notifications_groups,
+notifications_logs, ntg, rooms, room_types, semestr_jurnal, sillabus,
+sillabus_certificates, sillabus_dersin_islenme_formasi, sillabus_derslikler,
+sillabus_eldeolunacaq_tecrubeler, sillabus_elmi_maraq, sillabus_imtahan_suallari,
+sillabus_qarsilama_mesaji, sillabus_sem_muh, sillabus_serbest_is,
+sillabus_tesviri_ve_meqsedi, sillabus_yoxlama_formasi, smestr, speciality,
+students, students_login_logs, students_telegram, students_tg_reply,
+track_student, turnirs, turnirs_joined_students, turnirs_questions,
+turnirs_starts, turnir_results, turnir_schedule, turnir_students_answers,
+umumi_orta_bal, update_log, workers, workers_login_logs, workers_permits,
+xidmeti_muraciet, xidmeti_muraciet_files, yekun, yekun_24_02_2023, yekun_old
+```
+
+**Yeganə uyğunluq:** `xidmeti_muraciet` / `xidmeti_muraciet_files` — **2 sətir**,
+məzmunu «Yüksək Texnologiyalar Məktəbi» təqdimat mətni və «lorem ipsum diolor
+sit amet». Bu, sayt üçün xidməti müraciət/xəbər modulu idi, **apellyasiya deyil**.
+
+**Sütun adları** üzrə axtarış (`reason|sebeb|comment|note|desc|why|izah|qeyd|
+correct|duzel|guzest|…`) da apellyasiya sahəsi tapmadı. Xüsusilə:
+
+| Cədvəl | Sütunlar | Səbəb sahəsi |
+|---|---|---|
+| `update_log` (253 334 dəyişiklik) | id, old_value, new_value, updated_at, sent, student_id, create_date, update_date, j_id | **YOXDUR** |
+| `balvereqi_logs` (52 386 ixrac) | id, owner_id, uniqid, data, export_time | **YOXDUR** |
+| `journals_dates_points.why` | var, amma **5 135 289 xanadan cəmi 28-i** doludur (0,0005 %) | praktiki olaraq işlədilməyib |
+| `yekun_old`, `yekun_24_02_2023` | snapshot cədvəlləri | **0 sətir** |
+
+### Köçürülmüş baza (DB A) — cədvəllər var, sətir yoxdur
+
+Yeni EMSArena-da apellyasiya və düzəliş mexanizmi **mövcuddur**, lakin hamısı boşdur:
+
+| Cədvəl | Sətir |
+|---|---:|
+| `appeals_appeal`, `appeals_appealitem`, `appeals_scoreadjustment` | **0 / 0 / 0** |
+| `registrar_journalcorrection`, `registrar_componentscorecorrection` | **0 / 0** |
+| `registrar_lessoncorrection`, `registrar_selfworkcorrection`, `registrar_courseworkcorrection` | **0 / 0 / 0** |
+| `registrar_correctionreversal`, `registrar_legacygradereview` | **0 / 0** |
+
+Yəni **köçürüləsi apellyasiya qeydi olmayıb**.
+
+### Rəsmi izin YEGANƏ iki mənbəyi
+
+| Mənbə | Həcm | Nəyi izah edir |
+|---|---:|---|
+| Çap vərəqinin **«Güzəşt Giriş/imtahan»** sütunu | **716** sətirdə sıfırdan fərqli | **bal güzəşti** — bal dəyişikliyini izah edə bilər |
+| **`allowed_qb`** — sənədləşdirilmiş qayıb icazəsi | **2 964** icazə, 1 130 tələbə, **hamısında fayl** | **qayıb** — kəsr/qayıb qaydalarını izah edə bilər |
+
+### Sütunun məntiqi — hansı iz hansı qaydaya AİDdir
+
+Bu ayrım vacibdir və qəsdən dardır:
+
+* **`allowed_qb` qayıb icazəsidir.** Bir günlük qayıb icazəsi nə şkaladan çıxmış
+  balı (çıxış 72), nə də qaldırılmış imtahan balını izah edir. Ona görə o, yalnız
+  **qayıba əsaslanan** qaydalarda yoxlanılır.
+  > ⚠️ İlk keçiddə bu ayrım qoyulmamışdı və icazə bütün qaydalara tətbiq olunurdu —
+  > nəticədə **4 Tier 1 sətri səhvən «izahı var»** kimi çıxarılmışdı (məsələn
+  > «çıxış 72 · yekun 114» sətri bir günlük qayıb icazəsi ilə «izah» olunurdu).
+  > Səhv tapıldı və düzəldildi.
+* **Güzəşt sütunu bal güzəştidir** → yalnız bal dəyişikliyi qaydasında.
+* **Tier 1 heç vaxt izah olunmur.** Şkaladan kənar bal nə güzəştlə, nə icazə ilə
+  mümkün olmur; orada sütun yalnız **məlumat** üçündür və sətir siyahıdan
+  **çıxarılmır**.
+
+### Sütunun dəyərləri
+
+| Dəyər | Nə vaxt | Sətir |
+|---|---|---:|
+| **BƏLİ** | uyğun güzəşt qeydi və ya qayıb icazəsi tapıldı → **«İzahı olan» vərəqinə köçürülür** | **96** |
+| **XEYR** | qayıb qaydası üçün icazə tapılmadı / keçid-xətti üçün güzəşt sütunu «0 / 0» | 1 006 |
+| **YOXLANA BİLMİR** | mənbədə belə iz ümumiyyətlə saxlanmır (Tier 1 və ardıcıllıq qaydaları) | 48 + 83 |
+
+**İzahı olduğu üçün çıxarılan 96 tapıntı (78 tələbə):**
+
+| Qayda | Çıxarıldı |
+|---|---:|
+| `T2-QAYIB-SİLİNMƏ` | **85** |
+| `T2-KƏSR-ZİDDİYYƏTİ` | **11** |
+| `T2-KEÇİD-XƏTTİ` | 0 — **173 keçid-xətti halının HEÇ BİRİNDƏ güzəşt qeydi yoxdur** |
+
+> Sonuncu sətir rektor üçün ən vacib nəticələrdən biridir: keçid həddini keçən
+> bal dəyişikliklərinin **heç birinin arxasında sistemdə rəsmi sənəd yoxdur**.
+
+---
+
 ## 4. Qaydalar
 
 ### Tier 1 — «100 % şübhəli» (heç bir qanuni oxunuş yoxdur)
@@ -85,11 +200,23 @@ balı yazan deyil; vərəqdə açıq yazılıb.
 
 ### Tier 2 — «yüksək ehtimal» (güclüdür, amma qanuni izah təsəvvür edilə bilər)
 
+Rəqəmlər **apellyasiya süzgəcindən sonrakıdır** (izahı olan sətirlər çıxarılıb).
+
+**Rektor sənədinə DÜŞƏN (əsas) qaydalar:**
+
 | Kod | Qayda | Sətir | Tələbə |
 |---|---|---:|---:|
-| `T2-QAYIB-SİLİNMƏ` | Semestrin ilk vərəqində «(Kəsr)» var, sonrakında yoxdur, tələbə keçib — davamiyyət balı artıb | **632** | **412** |
-| `T2-KEÇİD-XƏTTİ` | Eyni semestrdə **giriş balı dəyişmədən**, təkrar imtahan sütunu **boş qalaraq** imtahan balı qaldırılıb və yekun 51-i aşıb | **202** | **190** |
+| `T2-KEÇİD-XƏTTİ` | Eyni semestrdə **giriş balı dəyişmədən**, təkrar imtahan sütunu **boş qalaraq** imtahan balı qaldırılıb və yekun 51-i aşıb. **Rektor sənədinə yalnız yekunu 51–55 zolağına düşənlər salınıb (173).** | **202** *(173 əsas + 29 əlavə)* | **190** |
 | `T2-KƏSR-ZİDDİYYƏTİ` | Semestrin son vərəqi eyni anda həm «(Kəsr)» yazır, həm ≥ 51 verir; sənədləşdirilmiş qayıb icazəsi yoxdur *(yalnız 2025 render dəyişikliyindən əvvəlki vərəqlər)* | **88** | **75** |
+
+**Yalnız Excel əlavəsində qalan (köməkçi) qaydalar** — bunlar rektor sənədinə
+qəsdən salınmayıb, çünki hər birinin inandırıcı qanuni izahı ola bilər
+(jurnalın səhv doldurulmasının düzəldilməsi, akademik borcun daşınması,
+transfer tələbə):
+
+| Kod | Qayda | Sətir | Tələbə |
+|---|---|---:|---:|
+| `T2-QAYIB-SİLİNMƏ` | Semestrin ilk vərəqində «(Kəsr)» var, sonrakında yoxdur, tələbə keçib — davamiyyət balı artıb | **547** | **354** |
 | `T2-ARDICILLIQ` | Ön şərt fənn (X‑1) açıq kəsilib və **heç bir mənbədə heç vaxt** keçilməyib, ardıcıl fənn (X‑2) keçilib | **76** | **66** |
 | `T2-KÜTLƏVİ-QAYIB` | Bir jurnalda tələbənin **10+** qayıb xanası sonradan silinib / iştiraka çevrilib | **38** | **27** |
 | `T2-TƏRS-ARDICILLIQ` | X‑2 fənni X‑1-ə ilk cəhddən **ƏVVƏL** bitirilib | **7** | **7** |
@@ -143,7 +270,40 @@ SELECT u.student_id, j.id AS journal_id, COUNT(*) AS silinmis_qayib,
  GROUP BY 1, 2 HAVING COUNT(*) >= 10;
 
 -- 5. Sənədləşdirilmiş qayıb icazələri
-SELECT student_id, allowed_date_start, allowed_date_end, file FROM allowed_qb;
+SELECT id, student_id, allowed_date_start, allowed_date_end, file FROM allowed_qb;
+
+-- 6. APELLYASİYA SAXLANCININ AXTARIŞI (cədvəl adları)
+SELECT table_name FROM information_schema.tables
+ WHERE table_schema = 'myedudb'
+   AND table_name REGEXP 'apel|appel|apply|etiraz|itiraz|sikay|shikay|complain|
+                          review|correct|duzel|guzest|objection|revis|protest|
+                          appeal|muracie|muraciet|xidmeti';
+-- → yalnız xidmeti_muraciet (2 sətir) və xidmeti_muraciet_files
+
+-- 7. APELLYASİYA SAXLANCININ AXTARIŞI (sütun adları)
+SELECT table_name, column_name, column_type FROM information_schema.columns
+ WHERE table_schema = 'myedudb'
+   AND column_name REGEXP 'apel|appel|etiraz|itiraz|sikay|shikay|complain|
+                           review|correct|duzel|guzest|objection|reason|sebeb|
+                           comment|note|desc|why|izah|qeyd';
+-- → update_log və balvereqi_logs-da SƏBƏB sütunu yoxdur
+
+-- 8. `why` (qayıb səbəbi) sahəsi praktiki olaraq işlədilməyib
+SELECT COUNT(*) total, SUM(why <> '') with_why, SUM(excusable <> 0) excusable
+  FROM journals_dates_points;
+-- → 5 135 289 / 28 / 28
+```
+
+Köçürülmüş bazada (yalnız oxu):
+
+```sql
+SET default_transaction_read_only = on;
+SELECT tablename FROM pg_tables
+ WHERE schemaname = 'public'
+   AND tablename ~* 'appeal|apel|objection|correct|duzel|etiraz|complaint|review';
+-- → appeals_appeal, appeals_appealitem, appeals_scoreadjustment,
+--   registrar_*correction, registrar_correctionreversal,
+--   registrar_legacygradereview  … HAMISI 0 sətir
 ```
 
 > **Qeyd.** Yuxarıdakı sorğular **xam sətir** qaytarır; Excel isə
@@ -223,7 +383,7 @@ BAL_CACHE=/tmp/bal_rows.tsv \
 - **«Kim daxil edib» sütunu ixracı edən müəllimin adıdır**, balı yazanın deyil —
   köhnə sxemdə balı yazan istifadəçi ümumiyyətlə saxlanmır.
 - **Dublikat tələbə qeydləri var.** Məsələn `students.id = 1868` və `3388`
-  eyni şəxsdir (Zamiq Mirzəyev Zahid, qrup 111, 2022-01 və 2022-10-da yaradılıb).
+  eyni şəxsdir (legacy ID 1868 və 3388 — eyni ad-soyad, qrup 111, 2022-01 və 2022-10-da yaradılıb).
   Siyahıda hər iki köhnə ID öz sətri ilə görünür — bu, ayrıca təmizlik işidir.
 - **Transfer tələbələr.** Ön şərti başqa universitetdə keçmiş tələbə bu
   datadan görünmür; `T2-ARDICILLIQ` sətirlərində bu ehtimal qalır.
@@ -256,15 +416,56 @@ köçürülmüş bazada `myedu.student.<id>` login-lərinə və eyni ad-soyada d
 
 ---
 
-## 9. Excel-in quruluşu
+## 9. Nəticələrin harada olduğu
 
-| Vərəq | Nədir |
-|---|---|
-| **Xülasə** | nə yoxlanıldı, hər qayda bir cümlə + sətir/tələbə sayı, yalnız-oxu bəyanatı, mənbə identifikatorları, **«yoxlanıb — təmiz çıxdı»** bölməsi |
-| **Tier 1 — 100 % şübhəli** | hər sətir = tələbə × fənn × tapıntı (48 sətir) |
-| **Tier 1 — tələbə üzrə** | **rektorun baxacağı siyahı** — tapıntı sayına görə azalan (47 tələbə) |
-| **Tier 2 — yüksək ehtimal** | 1 043 sətir, eyni sütunlarla |
-| **Müəllim üzrə** | vərəqdə göstərilən müəllim üzrə Tier 1 / Tier 2 / cəmi / fərqli tələbə |
+### Excel — `SUBHELI_BALLAR_REKTOR_2026-09-03.xlsx` (7 vərəq)
+
+| # | Vərəq | Sətir | Nədir |
+|---:|---|---:|---|
+| 1 | **Xülasə** | — | nə yoxlanıldı, hər qayda bir cümlə + saylar, yalnız-oxu bəyanatı, mənbə identifikatorları, **«yoxlanıb — təmiz çıxdı»** bölməsi (apellyasiya saxlancı da burada) |
+| 2 | **Tier 1 — 100 % şübhəli** | **48** | hər sətir = tələbə × fənn × tapıntı |
+| 3 | **Tier 1 — tələbə üzrə** | **47** | tapıntı sayına görə azalan yığcam siyahı |
+| 4 | **Tier 2 — əsas** | **261** | rektor sənədinə düşən güclü hallar (keçid xətti 51–55 · kəsr-ziddiyyəti) |
+| 5 | **Əlavə — köməkçi qaydalar** | **697** | qayıb silinməsi · kütləvi qayıb · ardıcıllıq — **rektor sənədində YOXDUR** |
+| 6 | **İzahı olan** | **96** | rəsmi izi tapılan hallar — **şübhəli SAYILMIR** |
+| 7 | **Müəllim üzrə** | 230 | vərəqdə göstərilən müəllim üzrə Tier 1 / Tier 2 / cəmi / fərqli tələbə |
+
+Sütunlar (2, 4, 5, 6-cı vərəqlərdə eyni): Tələbə · İstifadəçi adı (login) ·
+Köhnə MyEdu ID · Qrup · İxtisas · Fakültə · Fənn · Tədris dövrü · Qayda kodu ·
+Qayda · Faktiki dəyər · Gözlənilən · Kim daxil edib / son dəyişən ·
+**Apellyasiya / rəsmi düzəliş izi** · **İzin təfərrüatı** · Mənbə cədvəl + PK · Tarix.
 
 Bütün vərəqlərdə: başlıq qalın + dondurulmuş sətir, avtosüzgəc, sütun enləri
 təyin olunub, birləşdirilmiş xana yoxdur, `Köhnə MyEdu ID` rəqəm tipindədir.
+
+### Rektor sənədi — `SUBHELI_BALLAR_REKTOR_2026-09-03.docx` / `.pdf`
+
+Azərbaycan dilində, texniki olmayan dildə, **31 səhifə** (A4 albom):
+
+1. Titul səhifəsi
+2. **Qısa icmal** — nə yoxlanıldı, niyə əminik, neçə tələbə, nə tövsiyə olunur
+3. **Qaydaların sadə izahı** — hər qayda üçün bir anonim nümunə
+4. **Səviyyə 1 cədvəli** (48 sətir) — Tələbə (köhnə ID) · Qrup · Fakültə · Fənn ·
+   Dövr · Nə tapılıb · Faktiki · Gözlənilən · Apellyasiya izi
+5. **Səviyyə 2 cədvəli** (261 sətir) — eyni sütunlarla
+6. **«Bu hesabat NƏYİ sübut etmir»** — kim yazdığını, qəsdi, kağız apellyasiyanı,
+   transfer tələbələri, dublikat qeydləri sübut etmir + «təmiz çıxdı» siyahısı
+7. **Metodologiya (qısa)**
+
+Hər səhifənin altlığı: **«Yalnız-oxu analiz — heç bir bal dəyişdirilməyib.»**
+
+PDF `soffice --headless --convert-to pdf` ilə yaradılıb (LibreOffice mövcuddur).
+Generator: `scratchpad/make_docx.py` (python-docx 1.2.0).
+
+---
+
+## 10. Fayl yolları
+
+| Fayl | Yol |
+|---|---|
+| Rektor sənədi (Word) | `/Users/elvin/Desktop/RIM/Hesabat/SUBHELI_BALLAR_REKTOR_2026-09-03.docx` |
+| Rektor sənədi (PDF) | `/Users/elvin/Desktop/RIM/Hesabat/SUBHELI_BALLAR_REKTOR_2026-09-03.pdf` |
+| Tam siyahı (Excel) | `/Users/elvin/Desktop/RIM/Hesabat/SUBHELI_BALLAR_REKTOR_2026-09-03.xlsx` |
+| Metodologiya (bu sənəd) | `docs/migration/reports/SUBHELI_BALLAR_2026-09-03.md` |
+| Analiz skripti | `scripts/legacy_audit/suspicious_grades.py` |
+| Word generatoru | `scratchpad/make_docx.py` |
