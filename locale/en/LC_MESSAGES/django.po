@@ -64491,3 +64491,135 @@ msgstr "load objections"
 msgctxt "workload.model"
 msgid "yük etirazı"
 msgstr "load objection"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yükü mərkəzi"
+msgstr "Teaching load centre"
+
+msgctxt "accounts.dashboard"
+msgid "Yük vizası"
+msgstr "Load visa"
+
+msgctxt "accounts.dashboard"
+msgid "Yük təsdiqi"
+msgstr "Load approval"
+
+msgctxt "accounts.dashboard"
+msgid "Yük — ümumi baxış"
+msgstr "Load — overview"
+
+msgctxt "accounts.dashboard"
+msgid "Sual təsdiqi"
+msgstr "Question approval"
+
+msgctxt "accounts.dashboard"
+msgid "Tədris planı"
+msgstr "Curriculum"
+
+msgctxt "accounts.dashboard"
+msgid "Semestr açılışı"
+msgstr "Semester opening"
+
+msgctxt "accounts.dashboard"
+msgid "Qruplar reyestri"
+msgstr "Groups registry"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə qəbulu"
+msgstr "Student admission"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə reyestri"
+msgstr "Student registry"
+
+msgctxt "accounts.dashboard"
+msgid "Keçilmiş dərslər"
+msgstr "Lessons taught"
+
+msgctxt "accounts.dashboard"
+msgid "Universitet strukturu"
+msgstr "University structure"
+
+msgctxt "accounts.dashboard"
+msgid "Tədris planından dərs yükü tapşırığı yaradın, dilimlərə bölün, vizaları izləyin."
+msgstr "Create a teaching-load task from the curriculum, split it into slices and track the visas."
+
+msgctxt "accounts.dashboard"
+msgid "Fakültə diliminə koordinator vizası verin və ya geri qaytarın."
+msgstr "Grant the coordinator visa to the faculty slice or send it back."
+
+msgctxt "accounts.dashboard"
+msgid "Dekanlıq təsdiqi gözləyən fakültə dilimləri."
+msgstr "Faculty slices awaiting the dean's office approval."
+
+msgctxt "accounts.dashboard"
+msgid "Universitet üzrə dərs yükü zəncirinin gedişi."
+msgstr "Progress of the teaching-load chain across the university."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzinə getməzdən əvvəl kafedra təsdiqi gözləyən sual göndərişləri."
+msgstr "Question submissions awaiting chair approval before they reach the Exam Centre."
+
+msgctxt "accounts.dashboard"
+msgid "İxtisas üzrə tədris planı sətirləri və təsdiq zənciri."
+msgstr "Curriculum rows per programme and the approval chain."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqlənmiş plandan açılışları yaradın və semestri kilidləyin."
+msgstr "Generate offerings from the approved plan and lock the semester."
+
+msgctxt "accounts.dashboard"
+msgid "Kurs/ixtisas üzrə qruplar və dil sektorları."
+msgstr "Groups and language sectors per year/programme."
+
+msgctxt "accounts.dashboard"
+msgid "ATİS qəbul siyahısından tələbə hesabı və akademik qeyd yaradın."
+msgstr "Create student accounts and academic records from the ATİS admission list."
+
+msgctxt "accounts.dashboard"
+msgid "Köçürmə, akademik məzuniyyət, xaric və bərpa hərəkətləri."
+msgstr "Transfer, academic leave, expulsion and reinstatement movements."
+
+msgctxt "accounts.dashboard"
+msgid "Plan saatı ilə faktiki keçilmiş dərslərin müqayisəsi."
+msgstr "Planned hours compared with the lessons actually taught."
+
+msgctxt "accounts.dashboard"
+msgid "Fakültə → kafedra → ixtisas ağacı və rəhbər təyinatları."
+msgstr "Faculty → chair → programme tree and head appointments."
+
+msgctxt "accounts.dashboard"
+msgid "Mərkəzə keç"
+msgstr "Go to the centre"
+
+msgctxt "accounts.dashboard"
+msgid "Vizaya keç"
+msgstr "Go to the visa"
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqə keç"
+msgstr "Go to approval"
+
+msgctxt "accounts.dashboard"
+msgid "Baxışa keç"
+msgstr "Go to the overview"
+
+msgctxt "accounts.dashboard"
+msgid "Plana keç"
+msgstr "Go to the plan"
+
+msgctxt "accounts.dashboard"
+msgid "Açılışa keç"
+msgstr "Go to the opening"
+
+msgctxt "accounts.dashboard"
+msgid "Reyestrə keç"
+msgstr "Go to the registry"
+
+msgctxt "accounts.dashboard"
+msgid "Qəbula keç"
+msgstr "Go to admission"
+
+msgctxt "accounts.dashboard"
+msgid "Struktura keç"
+msgstr "Go to the structure"

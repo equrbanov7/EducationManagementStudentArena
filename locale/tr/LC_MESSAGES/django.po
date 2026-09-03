@@ -64219,3 +64219,135 @@ msgstr "yük itirazları"
 msgctxt "workload.model"
 msgid "yük etirazı"
 msgstr "yük itirazı"
+
+msgctxt "accounts.dashboard"
+msgid "Dərs yükü mərkəzi"
+msgstr "Ders yükü merkezi"
+
+msgctxt "accounts.dashboard"
+msgid "Yük vizası"
+msgstr "Yük vizesi"
+
+msgctxt "accounts.dashboard"
+msgid "Yük təsdiqi"
+msgstr "Yük onayı"
+
+msgctxt "accounts.dashboard"
+msgid "Yük — ümumi baxış"
+msgstr "Yük — genel bakış"
+
+msgctxt "accounts.dashboard"
+msgid "Sual təsdiqi"
+msgstr "Soru onayı"
+
+msgctxt "accounts.dashboard"
+msgid "Tədris planı"
+msgstr "Öğretim planı"
+
+msgctxt "accounts.dashboard"
+msgid "Semestr açılışı"
+msgstr "Dönem açılışı"
+
+msgctxt "accounts.dashboard"
+msgid "Qruplar reyestri"
+msgstr "Grup kaydı"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə qəbulu"
+msgstr "Öğrenci kabulü"
+
+msgctxt "accounts.dashboard"
+msgid "Tələbə reyestri"
+msgstr "Öğrenci kaydı"
+
+msgctxt "accounts.dashboard"
+msgid "Keçilmiş dərslər"
+msgstr "İşlenen dersler"
+
+msgctxt "accounts.dashboard"
+msgid "Universitet strukturu"
+msgstr "Üniversite yapısı"
+
+msgctxt "accounts.dashboard"
+msgid "Tədris planından dərs yükü tapşırığı yaradın, dilimlərə bölün, vizaları izləyin."
+msgstr "Öğretim planından ders yükü görevi oluşturun, dilimlere ayırın ve vizeleri izleyin."
+
+msgctxt "accounts.dashboard"
+msgid "Fakültə diliminə koordinator vizası verin və ya geri qaytarın."
+msgstr "Fakülte dilimine koordinatör vizesi verin veya geri gönderin."
+
+msgctxt "accounts.dashboard"
+msgid "Dekanlıq təsdiqi gözləyən fakültə dilimləri."
+msgstr "Dekanlık onayı bekleyen fakülte dilimleri."
+
+msgctxt "accounts.dashboard"
+msgid "Universitet üzrə dərs yükü zəncirinin gedişi."
+msgstr "Üniversite genelinde ders yükü zincirinin ilerleyişi."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzinə getməzdən əvvəl kafedra təsdiqi gözləyən sual göndərişləri."
+msgstr "Sınav Merkezine gitmeden önce bölüm onayı bekleyen soru gönderimleri."
+
+msgctxt "accounts.dashboard"
+msgid "İxtisas üzrə tədris planı sətirləri və təsdiq zənciri."
+msgstr "Program bazında öğretim planı satırları ve onay zinciri."
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqlənmiş plandan açılışları yaradın və semestri kilidləyin."
+msgstr "Onaylı plandan açılışları oluşturun ve dönemi kilitleyin."
+
+msgctxt "accounts.dashboard"
+msgid "Kurs/ixtisas üzrə qruplar və dil sektorları."
+msgstr "Sınıf/program bazında gruplar ve dil sektörleri."
+
+msgctxt "accounts.dashboard"
+msgid "ATİS qəbul siyahısından tələbə hesabı və akademik qeyd yaradın."
+msgstr "ATİS kabul listesinden öğrenci hesabı ve akademik kayıt oluşturun."
+
+msgctxt "accounts.dashboard"
+msgid "Köçürmə, akademik məzuniyyət, xaric və bərpa hərəkətləri."
+msgstr "Nakil, akademik izin, ihraç ve geri dönüş hareketleri."
+
+msgctxt "accounts.dashboard"
+msgid "Plan saatı ilə faktiki keçilmiş dərslərin müqayisəsi."
+msgstr "Plan saati ile fiilen işlenen derslerin karşılaştırması."
+
+msgctxt "accounts.dashboard"
+msgid "Fakültə → kafedra → ixtisas ağacı və rəhbər təyinatları."
+msgstr "Fakülte → bölüm → program ağacı ve yönetici atamaları."
+
+msgctxt "accounts.dashboard"
+msgid "Mərkəzə keç"
+msgstr "Merkeze git"
+
+msgctxt "accounts.dashboard"
+msgid "Vizaya keç"
+msgstr "Vizeye git"
+
+msgctxt "accounts.dashboard"
+msgid "Təsdiqə keç"
+msgstr "Onaya git"
+
+msgctxt "accounts.dashboard"
+msgid "Baxışa keç"
+msgstr "Genel bakışa git"
+
+msgctxt "accounts.dashboard"
+msgid "Plana keç"
+msgstr "Plana git"
+
+msgctxt "accounts.dashboard"
+msgid "Açılışa keç"
+msgstr "Açılışa git"
+
+msgctxt "accounts.dashboard"
+msgid "Reyestrə keç"
+msgstr "Kayda git"
+
+msgctxt "accounts.dashboard"
+msgid "Qəbula keç"
+msgstr "Kabule git"
+
+msgctxt "accounts.dashboard"
+msgid "Struktura keç"
+msgstr "Yapıya git"
