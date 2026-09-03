@@ -40,6 +40,15 @@ PERM_MANAGE_TEACHER_ROLE = "people.manage_teacher_role"
 #: daşımır — səth ona ümumiyyətlə görünmür.
 PERM_MANAGE_ACADEMIC = "people.manage_academic"
 
+# ── Tələbə Xidmətləri Mərkəzi səthi (handoff Mərhələ 3, ekran 08–09) ─────────
+#
+# QƏSDƏN `people.*`-dan AYRI PREFİKSDƏDİR (bax
+# `apps/organizations/permissions.py` → "student" kateqoriyası). `people.*`
+# KATALOQ səthidir; `student.*` isə rəsmi REYESTR + ƏMR səthi.
+PERM_REGISTRY_VIEW = "student.registry_view"
+PERM_MOVEMENT = "student.movement"
+PERM_ASSIGN_GROUP = "student.assign_group"
+
 PEOPLE_PERMISSIONS = (
     PERM_VIEW_TEACHERS,
     PERM_VIEW_STUDENTS,
@@ -48,6 +57,14 @@ PEOPLE_PERMISSIONS = (
     PERM_MANAGE_STATUS,
     PERM_MANAGE_TEACHER_ROLE,
     PERM_MANAGE_ACADEMIC,
+)
+
+#: Ayrıca dəst: reyestr/qəbul açarları kataloq açarları ilə QARIŞMIR
+#: (`granted_permissions` yalnız kataloq açarlarını UI-a ötürür).
+STUDENT_SERVICE_PERMISSIONS = (
+    PERM_REGISTRY_VIEW,
+    PERM_MOVEMENT,
+    PERM_ASSIGN_GROUP,
 )
 
 #: Bölmə açarı → onu açan «baxış» icazəsi.
@@ -98,6 +115,26 @@ class PeopleActor:
     @property
     def can_manage_academic(self) -> bool:
         return self.has(PERM_MANAGE_ACADEMIC)
+
+    @property
+    def can_view_registry(self) -> bool:
+        """Ekran 09 «Tələbə reyestri» — `student.registry_view`."""
+        return self.has(PERM_REGISTRY_VIEW)
+
+    @property
+    def can_move_students(self) -> bool:
+        """Ekran 09 hərəkət əmri — `student.movement`.
+
+        ⚠️ `can_manage_academic` ilə EYNİ DEYİL: əmri yazmaq səlahiyyəti
+        ayrıdır, faktiki icra isə `people.manage_academic` mexanizmindən keçir.
+        Servis qatı HƏR İKİSİNİ tələb edir (səlahiyyət ayrılığı).
+        """
+        return self.has(PERM_MOVEMENT)
+
+    @property
+    def can_assign_groups(self) -> bool:
+        """Ekran 08 qrup təyinatı / qrup yaratma — `student.assign_group`."""
+        return self.has(PERM_ASSIGN_GROUP)
 
     @property
     def granted_permissions(self) -> list:
@@ -175,6 +212,10 @@ def resolve_actor(request) -> PeopleActor:
 
 __all__ = [
     "PEOPLE_PERMISSIONS",
+    "STUDENT_SERVICE_PERMISSIONS",
+    "PERM_ASSIGN_GROUP",
+    "PERM_MOVEMENT",
+    "PERM_REGISTRY_VIEW",
     "PERM_MANAGE_ACADEMIC",
     "PERM_MANAGE_STATUS",
     "PERM_MANAGE_TEACHER_ROLE",

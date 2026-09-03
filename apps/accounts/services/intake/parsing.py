@@ -60,9 +60,16 @@ def _map_headers(raw_headers) -> dict:
         key = index.get(normalize_header(raw))
         if key and key not in mapping.values():
             mapping[position] = key
+    present = set(mapping.values())
     required = {column.key for column in columns() if column.required}
-    if not required.issubset(set(mapping.values())):
-        missing = sorted(required - set(mapping.values()))
+    # ⚠️ ATİS yolu (ekran 08): qəbul faylında QRUP SÜTUNU OLMAYA BİLƏR — qrup
+    # məhz idxal addımında ixtisas kodundan təyin olunur. Ona görə «qrup»
+    # tələbi «qrup VƏ YA ixtisas kodu» şəklindədir; köhnə 16 sütunlu fayl
+    # (qrupu var, kodu yox) əvvəlki kimi keçir.
+    if "program_code" in present:
+        required.discard("group")
+    if not required.issubset(present):
+        missing = sorted(required - present)
         raise IntakeFileError(
             "intake_headers_missing",
             pgettext(_CTX, "Faylın başlıq sətrində məcburi sütunlar tapılmadı: %s") % ", ".join(missing),

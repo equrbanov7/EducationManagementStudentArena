@@ -8,8 +8,6 @@ işləyir (migrasiyalar da dəyişməz qalır).
 from .academic import (
     AcademicStatus,
     CourseOffering,
-    Curriculum,
-    CurriculumSubject,
     DegreeLevel,
     Enrollment,
     EnrollmentKind,
@@ -21,6 +19,7 @@ from .academic import (
     Subject,
     WeekType,
 )
+from .admission_meta import AdmissionRecordFields, FundingType
 from .corrections import (
     ComponentScoreCorrection,
     CorrectionField,
@@ -31,6 +30,8 @@ from .corrections import (
     LessonCorrection,
     SelfWorkCorrection,
 )
+from .curriculum import Curriculum, CurriculumSubject
+from .curriculum_meta import AssessmentForm, PlanStatus
 from .exam_score_entry import (
     EVIDENCE_EXTENSIONS,
     ExamScoreEntry,
@@ -82,6 +83,13 @@ from .legacy_grade import (
     LegacyGradeReview,
     LegacyGradeReviewDecision,
 )
+from .movement import (
+    MOVEMENT_DOCUMENT_EXTENSIONS,
+    MOVEMENT_REASON_MIN_LENGTH,
+    MovementKind,
+    StudentMovement,
+    movement_document_path,
+)
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
@@ -105,6 +113,7 @@ __all__ = [
     "CourseWorkCorrection",
     "ComponentScoreCorrection",
     "CorrectionReversal",
+    "AssessmentForm",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",
@@ -133,6 +142,13 @@ __all__ = [
     "LegacyGradeMappingStatus",
     "LegacyGradeReview",
     "LegacyGradeReviewDecision",
+    "AdmissionRecordFields",
+    "FundingType",
+    "MOVEMENT_DOCUMENT_EXTENSIONS",
+    "MOVEMENT_REASON_MIN_LENGTH",
+    "MovementKind",
+    "movement_document_path",
+    "PlanStatus",
     "Program",
     "ResitReason",
     "ResitRecord",
@@ -145,6 +161,7 @@ __all__ = [
     "TeachingHandover",
     "SlotKind",
     "StudentAcademicRecord",
+    "StudentMovement",
     "Subject",
     "WeekType",
 ]

@@ -1,0 +1,53 @@
+{% load i18n %}
+{% comment %}Ekran 07 başlıq əməlləri.
+
+«Cari dövr» AYRICA təsdiq tələb edir: `AcademicPeriod.save()` köhnə cari dövrü
+avtomatik söndürür, yəni bir klik bütün universitetin jurnal/açılış konteksini
+dəyişir (əməl audit-ə köhnə/yeni dövrlə yazılır).
+
+Kilid düyməsi şərtlər ödənməyəndə GİZLƏNMİR — `disabled` olur (handoff §4).{% endcomment %}
+{% with period=semester_opening_section.period %}
+{% if semester_opening_section.can_open %}
+<button type="button" class="ems-btn"
+        data-tof-open="tofPeriodDialog"
+        data-tof-prefill='{"action": "save_period", "id": "", "name": "", "academic_year": "", "start_date": "", "end_date": ""}'>
+    {% trans "Yeni dövr" context "accounts.semester" %}
+</button>
+{% endif %}
+{% if period %}
+    {% if semester_opening_section.can_open and not period.is_current %}
+    <button type="button" class="ems-btn"
+            data-tof-submit='{"action": "set_current", "id": "{{ period.id }}"}'
+            data-tof-confirm="{% trans 'Bu dövr «cari» edilsin? Köhnə cari dövr avtomatik söndürüləcək və əməl audit jurnalına yazılacaq.' context 'accounts.semester' %}">
+        {% trans "Cari dövr et" context "accounts.semester" %}
+    </button>
+    {% endif %}
+    {% if semester_opening_section.can_open and not period.is_locked %}
+    <button type="button" class="ems-btn ems-btn--primary"
+            data-tof-open="tofGenerateDialog"
+            data-tof-prefill='{"action": "generate", "period": "{{ period.id }}", "semester_number": "1"}'>
+        {% trans "Plandan açılış yarat" context "accounts.semester" %}
+    </button>
+    <button type="button" class="ems-btn"
+            data-tof-submit='{"action": "send_to_chairs", "period": "{{ period.id }}"}'
+            data-tof-confirm="{% trans 'Açılışlar kafedralara göndərilsin? Kafedra rəhbərlərinə bildiriş gedəcək.' context 'accounts.semester' %}">
+        {% trans "Kafedraya göndər" context "accounts.semester" %}
+    </button>
+    {% endif %}
+    {% if semester_opening_section.can_lock and not period.is_locked %}
+    <button type="button" class="ems-btn ems-btn--warning"
+            data-tof-submit='{"action": "lock", "period": "{{ period.id }}"}'
+            data-tof-confirm="{% trans 'Semestr kilidlənsin? Kilid geri qaytarılmır — açmaq ayrıca səlahiyyət və səbəb tələb edir.' context 'accounts.semester' %}"
+            {% if not semester_opening_section.can_lock_now %}disabled aria-disabled="true"{% endif %}>
+        {% trans "Semestri kilidlə" context "accounts.semester" %}
+    </button>
+    {% endif %}
+    {% if semester_opening_section.can_unlock and period.is_locked %}
+    <button type="button" class="ems-btn ems-btn--danger"
+            data-tof-open="tofSemesterUnlockDialog"
+            data-tof-prefill='{"action": "unlock", "period": "{{ period.id }}"}'>
+        {% trans "Kilidi aç" context "accounts.semester" %}
+    </button>
+    {% endif %}
+{% endif %}
+{% endwith %}

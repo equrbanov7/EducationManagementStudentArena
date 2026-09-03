@@ -7,10 +7,12 @@ from . import (
     catalog_actions,
     console_views,
     correction_views,
+    curriculum_actions,
     guest_roster_views,
     journal_actions,
     pdf_views,
     schedule_views,
+    semester_actions,
     syllabus_views,
     views,
 )
@@ -27,6 +29,10 @@ urlpatterns = [
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
     # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
     path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
+    # Ekran 05 — tədris planı əməlləri (JSON POST, `plan.*` + state maşını).
+    path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
+    # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
+    path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", schedule_views.calendar_view, name="calendar"),

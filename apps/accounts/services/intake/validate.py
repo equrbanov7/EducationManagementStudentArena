@@ -94,6 +94,20 @@ class RowPlan:
             "username": self.username,
             "email": self.email,
             "warnings": list(self.warnings),
+            # Ekran 08 «Qrup təyinatı» addımı üçün: hansı qrup təklif olunub,
+            # seçici üçün hansı variantlar var, hansı qəbul dəyərləri oxunub.
+            "group_id": str(getattr(self.targets.get("group"), "pk", "") or ""),
+            "group_options": list(self.targets.get("group_options") or []),
+            "program_label": str(getattr(self.targets.get("program"), "display_label", "") or ""),
+            "admission_score": (
+                str(self.values.get("admission_score")) if self.values.get("admission_score") is not None else ""
+            ),
+            "exam_type": self.values.get("admission_exam_type", ""),
+            "education_form": self.values.get("education_form", ""),
+            "funding_type": self.values.get("funding_type", ""),
+            "atis_id": self.values.get("atis_id", ""),
+            "specialty_id": str(getattr(self.targets.get("specialty"), "pk", "") or ""),
+            "suggested_group_name": self.values.get("suggested_group_name", ""),
         }
 
 
@@ -187,6 +201,11 @@ class IntakeContext:
             for value in (User.objects.filter(email__in=list(emails)).values_list("email", flat=True) if emails else [])
             if value
         }
+        # ATİS qəbulu (ekran 08): bu FAYL daxilində qruplara təklif olunan
+        # yerlərin sayğacı — 300 sətir eyni qrupa yığılmasın.
+        self.group_usage: dict = {}
+        # Operatorun ön baxışda seçdiyi qruplar: {sətir nömrəsi: OrgUnit}.
+        self.group_overrides: dict = {}
         # İstifadəçi adları sətir-sətir yoxlanılır (namizəd ad sətirdən doğur).
         self.seen_fins: set = set()
         self.seen_emails: set = set()
@@ -304,6 +323,19 @@ def _validate_identity(plan: RowPlan, row: dict, context: IntakeContext) -> bool
 def _validate_structure(plan: RowPlan, row: dict, context: IntakeContext) -> bool:
     group_raw = _text(row.get("group"))
     plan.group_name = group_raw
+
+    override = context.group_overrides.get(plan.row)
+    if override is not None:
+        # Operator ön baxışda qrupu ƏL İLƏ seçib — avtomatik təklif ləğv olunur.
+        return _bind_override(plan, override, context)
+
+    if not group_raw and _text(row.get("program_code")):
+        # ATİS yolu: qrup faylda YOXDUR, ixtisas kodu var → hədəf ixtisasdan
+        # həll olunur və qrup avtomatik TƏKLİF edilir (bax `admission.py`).
+        from . import admission
+
+        return admission.resolve_atis_targets(plan, row, context)
+
     group, code = context.find_unit(group_raw, OrgUnitType.GROUP)
     if code == "missing":
         plan.fail(
@@ -354,6 +386,21 @@ def _validate_structure(plan: RowPlan, row: dict, context: IntakeContext) -> boo
         )
 
     plan.targets.update({"group": group, "program": program})
+    return True
+
+
+def _bind_override(plan: RowPlan, group, context: IntakeContext) -> bool:
+    """Operatorun seçdiyi qrupu plana bağlayır (ixtisas qrupdan çıxarılır)."""
+    specialty = context.specialty_for_group(group)
+    program = context.program_for_specialty(specialty)
+    if program is None:
+        plan.fail(
+            "program_missing",
+            pgettext(_CTX, "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."),
+        )
+        return False
+    plan.targets.update({"group": group, "program": program})
+    plan.group_name = group.name
     return True
 
 
@@ -452,10 +499,17 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
     return True
 
 
-def build_plans(organization, rows) -> list:
-    """Fayl sətirlərini plan siyahısına çevirir — HEÇ NƏ YAZMIR."""
+def build_plans(organization, rows, *, group_overrides=None) -> list:
+    """Fayl sətirlərini plan siyahısına çevirir — HEÇ NƏ YAZMIR.
+
+    ``group_overrides`` — ``{sətir nömrəsi: qrup id}``: ekran 08-in «Qrup
+    təyinatı» addımında operatorun ƏL İLƏ seçdiyi qruplar. Ön baxış və tətbiq
+    EYNİ sözlüyü alır, ona görə «gördüyün nəticə = alacağın nəticə» pozulmur.
+    """
 
     context = IntakeContext(organization, rows)
+    if group_overrides:
+        context.group_overrides = _resolve_overrides(organization, group_overrides)
     plans: list = []
     for row in rows:
         plan = RowPlan(row=int(row.get("_row") or 0))
@@ -467,8 +521,37 @@ def build_plans(organization, rows) -> list:
         ):
             plan.code = "will_create"
             plan.message = pgettext(_CTX, "Yaradılacaq.")
+        if plan.status != "error":
+            # ATİS sahələri (bal, imtahan növü, forma, maliyyələşmə) — bloklamır.
+            from . import admission
+
+            admission.enrich(plan, row, context)
         plans.append(plan)
     return plans
+
+
+def _resolve_overrides(organization, raw: dict) -> dict:
+    """``{sətir: id}`` → ``{sətir: OrgUnit}``; yad tenantın qrupu ATILIR."""
+    from apps.organizations.models import OrgUnit
+
+    wanted = {}
+    for key, value in (raw or {}).items():
+        try:
+            wanted[int(key)] = str(value)
+        except (TypeError, ValueError):
+            continue
+    if not wanted:
+        return {}
+    units = {
+        str(unit.pk): unit
+        for unit in OrgUnit.objects.filter(
+            organization=organization,
+            unit_type=OrgUnitType.GROUP,
+            is_active=True,
+            pk__in=list(set(wanted.values())),
+        )
+    }
+    return {row: units[value] for row, value in wanted.items() if value in units}
 
 
 def summarize(plans) -> dict:

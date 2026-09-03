@@ -102,6 +102,16 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_programs_registry.html" %}
             {% elif active_section == "subject-catalog" and 'subject-catalog' in allowed_sections %}
                 {% include "accounts/profile/sections/_subject_catalog.html" %}
+            {% elif active_section == "curriculum-editor" and 'curriculum-editor' in allowed_sections %}
+                {% include "accounts/profile/sections/_curriculum_editor.html" %}
+            {% elif active_section == "groups-registry" and 'groups-registry' in allowed_sections %}
+                {% include "accounts/profile/sections/_groups_registry.html" %}
+            {% elif active_section == "semester-opening" and 'semester-opening' in allowed_sections %}
+                {% include "accounts/profile/sections/_semester_opening.html" %}
+            {% elif active_section == "student-admission" and 'student-admission' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_admission.html" %}
+            {% elif active_section == "student-registry" and 'student-registry' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_registry.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}

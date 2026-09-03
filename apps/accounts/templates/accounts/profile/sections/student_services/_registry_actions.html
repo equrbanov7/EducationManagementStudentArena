@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}
+Sətir əməlləri — «Kart» (çekmecə) hər zaman; «Hərəkət əmri» yalnız
+`student.movement` + `people.manage_academic` daşıyan aktorda (server qapısı
+`can_move`; endpoint də fail-closed yenidən yoxlayır).
+{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm" data-sr-card="{{ row.data.record_id }}">
+    {% trans "Kart" context "accounts.student_registry" %}
+</button>
+<button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+        data-sr-move="{{ row.data.record_id }}"
+        data-sr-name="{{ row.data.name }}"
+        data-sr-status="{{ row.data.status }}"
+        data-sr-group="{{ row.data.group_name }}">
+    {% trans "Hərəkət əmri" context "accounts.student_registry" %}
+</button>

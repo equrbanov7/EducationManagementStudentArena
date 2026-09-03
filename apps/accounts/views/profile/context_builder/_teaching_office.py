@@ -14,6 +14,15 @@ _SECTIONS = (
     ("chair-profile", "chair_profile_section", "teaching_office", "build_chair_profile_section"),
     ("programs-registry", "programs_registry_section", "catalog_sections", "build_programs_section"),
     ("subject-catalog", "subject_catalog_section", "catalog_sections", "build_subjects_section"),
+    # Mərhələ 2 (ekran 05/06/07) — tədris planı, qrup reyestri, semestr açılışı.
+    ("curriculum-editor", "curriculum_editor_section", "curriculum_sections", "build_curriculum_section"),
+    ("groups-registry", "groups_registry_section", "curriculum_sections", "build_groups_section"),
+    ("semester-opening", "semester_opening_section", "curriculum_sections", "build_semester_section"),
+    # Mərhələ 3 (ekran 08/09) — Tələbə Xidmətləri Mərkəzi. Eyni cədvəldə
+    # saxlanılır ki, «aktiv bölmə deyilsə sorğu işləmir» qaydası TƏK yerdə
+    # qalsın (modul adı tarixi səbəbdən `_teaching_office`-dur).
+    ("student-admission", "student_admission_section", "student_admission", "build_student_admission_section"),
+    ("student-registry", "student_registry_section", "student_registry", "build_student_registry_section"),
 )
 
 

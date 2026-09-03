@@ -175,7 +175,40 @@ def apply_permission_section_gates(
     # kataloqunu redaktə edə bilməməlidir. Yazı açarı `catalog.manage`-dir və
     # `registrar.catalog_actions`-da fail-closed yoxlanılır.
     can_view_catalog = privileged or has_permission(permissions, "catalog.view")
+
+    # «Tələbə qəbulu» (08) + «Tələbə reyestri» (09) — Tələbə Xidmətləri Mərkəzi.
+    #
+    #   `user.import`           → qəbul bölməsi (fayl + hesab yaratma). QƏSDƏN
+    #     köhnə `student-intake` ilə EYNİ açardır: 08 həmin maşının genişlənmiş
+    #     görünüşüdür, yeni səlahiyyət gətirmir.
+    #   `student.registry_view` → reyestr bölməsi (əmr izi + CSV ixracı).
+    #   `student.movement`      → sətir əməlləri (əmr yazmaq); menyunu AÇMIR.
+    #   `student.assign_group`  → qəbulda qrup təyinatı / yeni qrup; menyunu AÇMIR.
+    #
+    # Yazı açarları menyu görünürlüyünə TƏSİR ETMİR — düymələr panelin içində
+    # ayrıca qapılıdır və endpoint fail-closed yenidən yoxlayır.
+    can_view_student_registry = privileged or has_permission(permissions, "student.registry_view")
+    can_move_students = privileged or has_permission(permissions, "student.movement")
+    can_assign_student_groups = privileged or has_permission(permissions, "student.assign_group")
     can_manage_catalog = privileged or has_permission(permissions, "catalog.manage")
+
+    # «Tədris planı redaktoru» — `plan.view`. Zəncirin HƏR halqası (kafedra
+    # müdiri, dekan, Tədris şöbəsi) bölməni GÖRÜR; qərar açarları isə ayrıdır
+    # (`plan.approve_*`) və `registrar.curriculum_state`-də statusa görə
+    # fail-closed yoxlanılır — görünürlük təsdiq hüququ VERMİR.
+    can_view_plan = privileged or has_permission(permissions, "plan.view")
+    can_edit_plan = privileged or has_permission(permissions, "plan.edit")
+
+    # «Qruplar» — AKADEMİK qrup reyestri (`OrgUnit`), `unit.view` ilə açılır.
+    # ⚠️ Mövcud `groups` bölməsi BAŞQA anlayışdır (`exams.StudentGroup` — imtahan
+    # kohortu) və toxunulmur; iki səth bir-birinə çarpaz keçid verir.
+    can_manage_groups = privileged or has_permission(permissions, "unit.group_manage")
+
+    # «Semestr açılışı» — `semester.view`. Açmaq (`semester.open`), kilidləmək
+    # (`semester.lock`) və kilidi açmaq (`semester.unlock`) AYRI açarlardır:
+    # kilid geri qaytarılmır, ona görə onu açan səlahiyyət ayrıca verilir.
+    can_view_semester = privileged or has_permission(permissions, "semester.view")
+    can_open_semester = privileged or has_permission(permissions, "semester.open")
 
     for enabled, section in (
         (can_view_audit, "audit-log"),
@@ -197,6 +230,11 @@ def apply_permission_section_gates(
         (can_view_structure_tree, "chair-profile"),
         (can_view_catalog, "programs-registry"),
         (can_view_catalog, "subject-catalog"),
+        (can_view_plan, "curriculum-editor"),
+        (can_view_structure_tree, "groups-registry"),
+        (can_view_semester, "semester-opening"),
+        (can_import_students, "student-admission"),
+        (can_view_student_registry, "student-registry"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -213,6 +251,9 @@ def apply_permission_section_gates(
         "can_reassign_teaching": can_reassign_teaching,
         "can_manage_schedule": can_manage_schedule,
         "can_import_students": can_import_students,
+        "can_view_student_registry": can_view_student_registry,
+        "can_move_students": can_move_students,
+        "can_assign_student_groups": can_assign_student_groups,
         "can_use_applications": can_use_applications,
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,
@@ -222,6 +263,11 @@ def apply_permission_section_gates(
         "can_view_structure_tree": can_view_structure_tree,
         "can_view_catalog": can_view_catalog,
         "can_manage_catalog": can_manage_catalog,
+        "can_view_plan": can_view_plan,
+        "can_edit_plan": can_edit_plan,
+        "can_manage_groups": can_manage_groups,
+        "can_view_semester": can_view_semester,
+        "can_open_semester": can_open_semester,
     }
 
 

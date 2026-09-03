@@ -1,0 +1,162 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 05 «Tədris planı redaktoru» — versiyalı plan + təsdiq zənciri.
+
+İcazə: `plan.view` (oxu) / `plan.edit` (qaralama redaktəsi) / `plan.approve_*`
+(zəncirin halqaları). TƏSDİQLƏNMİŞ PLAN IMMUTABLE-dır (handoff §8 qayda 1):
+sətir düymələri görünmür, server 409 qaytarır, dəyişiklik yalnız YENİ VERSİYA.
+
+«Açıq xəbərdarlıq» (kredit/saat balansı) varsa təsdiqə göndərmə BLOKLANIR —
+düymə GİZLƏNMİR, `disabled` olur (§4).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'curriculum-editor' in allowed_sections %}
+{% trans "İxtisasın çoxillik tədris planı: kredit balansı, saat bölgüsü və təsdiq zənciri. Dərs yükü məhz bu plandan törəyir." context "accounts.curriculum" as cu_subtitle %}
+{% trans "Plan sətri" context "accounts.curriculum" as cu_row_title %}
+{% trans "Kredit yazıldıqda ümumi saat (kredit × 30) və həftəlik yük avtomatik hesablanır." context "accounts.curriculum" as cu_row_sub %}
+{% trans "Yeni tədris planı" context "accounts.curriculum" as cu_plan_title %}
+{% trans "Plan qaralama kimi yaranır; təsdiq zənciri sonra başlayır." context "accounts.curriculum" as cu_plan_sub %}
+{% trans "Planı geri qaytar" context "accounts.curriculum" as cu_return_title %}
+{% trans "Səbəb müəllifə göndərilir və audit jurnalına yazılır." context "accounts.curriculum" as cu_return_sub %}
+{% trans "Qaytar" context "accounts.curriculum" as cu_return_btn %}
+{% trans "Plan sətrini sil" context "accounts.curriculum" as cu_del_title %}
+{% trans "Sətir yalnız QARALAMA planından silinir; təsdiqlənmiş plan toxunulmazdır." context "accounts.curriculum" as cu_del_sub %}
+{% trans "Sil" context "accounts.curriculum" as cu_del_btn %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'curriculum-editor' %}is-active{% endif %}"
+         data-profile-section-panel="curriculum-editor"
+         data-source-url="{{ profile_base_url }}?section=curriculum-editor">
+
+{% if not curriculum_editor_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=curriculum_editor_section.access_denied_message %}
+{% else %}
+<div class="tof"
+     data-tof-root
+     data-tof-section="curriculum-editor"
+     data-tof-action-url="{{ curriculum_editor_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=cu_subtitle header_actions_include="accounts/profile/sections/teaching_office/_plan_header_actions.html" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="curriculum-editor" filter_prefix="cu_" filter_fields=curriculum_editor_section.filter_fields filter_count_label=curriculum_editor_section.filter_count_label %}
+
+    {% if not curriculum_editor_section.plan %}
+        {% trans "Tədris planı seçilməyib" context "accounts.curriculum" as cu_none_title %}
+        {% trans "İxtisas seçin və ya «Yeni plan» düyməsi ilə qaralama yaradın." context "accounts.curriculum" as cu_none_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-diagram-project" state_title=cu_none_title state_body=cu_none_body %}
+    {% else %}
+
+    {% if curriculum_editor_section.plan.is_approved %}
+        {% trans "Təsdiqlənmiş plan dəyişdirilmir" context "accounts.curriculum" as cu_lock_title %}
+        {% trans "Bu versiya qüvvədədir və semestr açılışının mənbəyidir. Dəyişiklik üçün «Yeni versiya» yaradın — köhnə versiya tarixçə kimi qalır." context "accounts.curriculum" as cu_lock_body %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="success" banner_title=cu_lock_title banner_body=cu_lock_body %}
+    {% elif curriculum_editor_section.plan.status == "returned" %}
+        {% trans "Plan geri qaytarılıb" context "accounts.curriculum" as cu_ret_title %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=cu_ret_title banner_body=curriculum_editor_section.plan.last_reason %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=curriculum_editor_section.kpi_tiles kpi_variant="5" %}
+
+    <div class="tof-plan__meta">
+        <span class="tof-chip">{% trans "Status" context "accounts.curriculum" %}: {% ems_status_badge "plan" curriculum_editor_section.plan.status %}</span>
+        <span class="tof-chip">{% trans "Versiya" context "accounts.curriculum" %}<span class="tof-chip__count">v{{ curriculum_editor_section.plan.version }}</span></span>
+        <span class="tof-chip">{% trans "Qəbul ili" context "accounts.curriculum" %}<span class="tof-chip__count">{{ curriculum_editor_section.plan.admission_year }}</span></span>
+        <span class="tof-chip">{% trans "Proqram ECTS" context "accounts.curriculum" %}<span class="tof-chip__count">{{ curriculum_editor_section.plan.ects_total }}</span></span>
+        {% if curriculum_editor_section.plan.protocol_number %}
+        <span class="tof-chip">{% trans "Elmi Şura protokolu" context "accounts.curriculum" %}<span class="tof-chip__count">{{ curriculum_editor_section.plan.protocol_number }}</span></span>
+        {% endif %}
+    </div>
+
+    {% if curriculum_editor_section.balance.warnings %}
+        {% trans "Açıq xəbərdarlıqlar — təsdiqə göndərmə bağlıdır" context "accounts.curriculum" as cu_warn_title %}
+        {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=cu_warn_title banner_action_include="accounts/profile/sections/teaching_office/_plan_warnings.html" %}
+    {% endif %}
+
+    <nav class="ems-tabs" aria-label="{% trans 'Semestrlər' context 'accounts.curriculum' %}">
+        <a class="ems-tabs__btn" href="{{ curriculum_editor_section.all_tab_url }}"
+           {% if not curriculum_editor_section.filters.semester %}aria-current="page"{% endif %}>
+            {% trans "Hamısı" context "accounts.curriculum" %}
+            <span class="ems-tabs__count">{{ curriculum_editor_section.all_row_count }}</span>
+        </a>
+        {% for tab in curriculum_editor_section.semester_tabs %}
+        <a class="ems-tabs__btn{% if tab.warning %} is-warning{% endif %}" href="{{ tab.url }}"
+           {% if tab.current %}aria-current="page"{% endif %}>
+            {{ tab.label }}
+            <span class="ems-tabs__count">{{ tab.credits }}{% trans "kr" context "accounts.curriculum" %}</span>
+        </a>
+        {% endfor %}
+    </nav>
+
+    {% if curriculum_editor_section.can_edit_rows %}
+    <div class="tof__toolbar">
+        <span class="tof__toolbar-spacer"></span>
+        <button type="button" class="ems-btn ems-btn--primary"
+                data-tof-open="tofPlanRowDialog"
+                data-tof-prefill='{"action": "save_row", "plan": "{{ curriculum_editor_section.plan.id }}", "id": "", "subject": "", "row_code": "", "semester_number": "{{ curriculum_editor_section.filters.semester|default:1 }}", "credits": "", "total_hours": "", "lecture_hours": "", "seminar_hours": "", "lab_hours": "", "selfwork_hours": "", "assessment_form": "exam", "language": "", "teaching_chair": ""}'>
+            {% trans "Sətir əlavə et" context "accounts.curriculum" %}
+        </button>
+    </div>
+    {% endif %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=curriculum_editor_section.columns table_rows=curriculum_editor_section.table_rows table_state=curriculum_editor_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-list-check" state_title=curriculum_editor_section.state_title state_body=curriculum_editor_section.state_body %}
+
+    <div class="tof-split">
+        <div class="tof-pane">
+            <h3 class="tof-pane__title">{% trans "Balans — semestr üzrə" context "accounts.curriculum" %}</h3>
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Semestr" context "accounts.curriculum" %}</th>
+                        <th scope="col">{% trans "Kredit" context "accounts.curriculum" %}</th>
+                        <th scope="col">{% trans "Ümumi" context "accounts.curriculum" %}</th>
+                        <th scope="col">{% trans "Auditoriya" context "accounts.curriculum" %}</th>
+                        <th scope="col">{% trans "Sərbəst" context "accounts.curriculum" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bucket in curriculum_editor_section.balance.semesters %}
+                    <tr>
+                        <th scope="row">{{ bucket.semester_number }}</th>
+                        <td class="ems-table__num{% if bucket.credit_warning %} is-warning{% endif %}">{{ bucket.credits }}</td>
+                        <td class="ems-table__num">{{ bucket.total_hours }}</td>
+                        <td class="ems-table__num">{{ bucket.contact_hours }}</td>
+                        <td class="ems-table__num">{{ bucket.selfwork_hours }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="tof__intro">{% blocktrans context "accounts.curriculum" with target=curriculum_editor_section.balance.credit_target %}Semestr hədəfi: {{ target }} kredit (NK 348 b. 3.2.2). Fərq açıq xəbərdarlıq sayılır.{% endblocktrans %}</p>
+        </div>
+        <div class="tof-pane">
+            <h3 class="tof-pane__title">{% trans "Dəyişiklik tarixçəsi" context "accounts.curriculum" %}</h3>
+            {% if curriculum_editor_section.timeline %}
+                {% include "partials/ems_ui/_timeline.html" with timeline=curriculum_editor_section.timeline timeline_label="audit" %}
+            {% else %}
+                <p class="tof__intro">{% trans "Bu plan üzrə hələ qeyd yoxdur." context "accounts.curriculum" %}</p>
+            {% endif %}
+
+            {% if curriculum_editor_section.diff.has_previous %}
+            <h3 class="tof-pane__title">{% trans "Əvvəlki versiya ilə fərq" context "accounts.curriculum" %}</h3>
+            <ul class="tof-diff">
+                <li class="tof-diff__add">{% blocktrans context "accounts.curriculum" with n=curriculum_editor_section.diff.added|length %}Əlavə olunub: {{ n }} sətir{% endblocktrans %}</li>
+                <li class="tof-diff__del">{% blocktrans context "accounts.curriculum" with n=curriculum_editor_section.diff.removed|length %}Çıxarılıb: {{ n }} sətir{% endblocktrans %}</li>
+                {% for change in curriculum_editor_section.diff.changed %}
+                <li class="tof-diff__chg">{{ change.subject_code }}: <span class="tof-diff__old">{{ change.old }}</span> → <span class="tof-diff__new">{{ change.new }}</span></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if curriculum_editor_section.can_edit %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofPlanDialog" form_dialog_title=cu_plan_title form_dialog_subtitle=cu_plan_sub form_dialog_body_include="accounts/profile/sections/teaching_office/_plan_fields.html" form_dialog_action=curriculum_editor_section.action_url form_dialog_hidden=curriculum_editor_section.dialog_hidden form_dialog_data=curriculum_editor_section.form_data %}
+    {% endif %}
+    {% if curriculum_editor_section.can_edit_rows %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofPlanRowDialog" form_dialog_title=cu_row_title form_dialog_subtitle=cu_row_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_plan_row_fields.html" form_dialog_action=curriculum_editor_section.action_url form_dialog_hidden=curriculum_editor_section.dialog_hidden form_dialog_data=curriculum_editor_section.form_data %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofPlanRowDeleteDialog" reason_title=cu_del_title reason_subtitle=cu_del_sub reason_submit_label=cu_del_btn reason_submit_tone="danger" reason_action=curriculum_editor_section.action_url reason_hidden=curriculum_editor_section.dialog_hidden reason_form_data=curriculum_editor_section.form_data %}
+    {% endif %}
+    {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofPlanReturnDialog" reason_title=cu_return_title reason_subtitle=cu_return_sub reason_submit_label=cu_return_btn reason_submit_tone="danger" reason_action=curriculum_editor_section.action_url reason_hidden=curriculum_editor_section.reason_hidden reason_form_data=curriculum_editor_section.form_data %}
+</div>
+{% endif %}
+</section>
+{% endif %}

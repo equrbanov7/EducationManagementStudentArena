@@ -205,6 +205,10 @@ PLAN: tuple[Status, ...] = (
     _s("faculty_council", _t("Fakültə şurası"), "info", order=2),
     _s("teaching_office", _t("Tədris şöbəsi"), "primary", order=3),
     _s("approved", _t("Təsdiqlənib"), "success", order=4),
+    # `returned` zəncirin İÇİNDƏ deyil: hər hansı baxış mərhələsindən SƏBƏBLƏ
+    # geri qaytarılan plan bura düşür və yalnız qaralamaya qayıdıb yenidən
+    # göndərilə bilər (handoff §6.1 «+ returned with reason»).
+    _s("returned", _t("Qaytarılıb"), "danger", strong=True, order=5),
 )
 
 #: Ekran 07 — açılış sətrinin vəziyyəti.
@@ -212,6 +216,9 @@ OFFERING: tuple[Status, ...] = (
     _s("awaiting_teacher", _t("Müəllim gözləyir"), "warning", order=0),
     _s("teacher_assigned", _t("Müəllim təyin olunub"), "primary", order=1),
     _s("journal_open", _t("Jurnalı açılıb"), "success", order=2),
+    # Açılış SİLİNMİR — ləğv olunur (handoff §8 qayda 5): sətir qalır, jurnal
+    # və qiymət tarixçəsi toxunulmur, yalnız `is_active=False` olur.
+    _s("cancelled", _t("Ləğv edilib"), "muted", order=3),
 )
 
 #: Ekran 07 — 5 addımlı mərhələ zolağı (stepper) etiketləri.
@@ -252,6 +259,18 @@ INTAKE_STEPS: tuple[Status, ...] = (
     _s("checked", _t("Tədris şöbəsi yoxladı"), "primary", order=1),
     _s("distributed", _t("Fakültələrə paylandı"), "primary", order=2),
     _s("assigned", _t("Qruplara təyin edildi"), "primary", order=3),
+)
+
+#: Ekran 09 — tələbənin AKADEMİK statusu (reyestr sətrinin badge-i).
+#: Açarlar ``registrar.AcademicStatus`` ilə eynidir — etiket isə burada TƏK
+#: mənbədədir (dizayn 09-un STATUS xəritəsi: Aktiv / Akademik məzuniyyət /
+#: Xaric edilib / Məzun). Prototipdəki «Təhsil haqqı borcu» statusu BURAYA
+#: DAXİL DEYİL: o, maliyyə modulundan törəyir, akademik status deyil.
+STUDENT_STATUS: tuple[Status, ...] = (
+    _s("enrolled", _t("Aktiv"), "success", order=0),
+    _s("academic_leave", _t("Akademik məzuniyyət"), "warning", order=1),
+    _s("expelled", _t("Xaric edilib"), "danger", order=2),
+    _s("graduated", _t("Məzun"), "info", order=3),
 )
 
 #: Ekran 09 — 6 hərəkət növü (enum kimi saxlanılır).
@@ -311,6 +330,7 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "intake_row": INTAKE_ROW,
     "intake_steps": INTAKE_STEPS,
     "student_movement": STUDENT_MOVEMENT,
+    "student_status": STUDENT_STATUS,
     "journal_note": JOURNAL_NOTE,
     "save_state": SAVE_STATE,
     "archive_mode": ARCHIVE_MODE,

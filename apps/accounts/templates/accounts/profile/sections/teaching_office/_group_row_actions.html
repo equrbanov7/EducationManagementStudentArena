@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}Qrup sətrinin əməlləri + TOPLU SEÇİM xanası.
+
+Seçim xanası burada saxlanılır ki, ortaq `_data_table.html` komponentinə sütun
+əlavə etmək lazım gəlməsin (komponent bütün ekranlarda paylaşılır).{% endcomment %}
+<label class="tof-bulk__check">
+    <input type="checkbox" data-tof-bulk-item="{{ row.data.id }}"
+           aria-label="{% blocktrans context 'accounts.groups' with name=row.data.name %}{{ name }} qrupunu seç{% endblocktrans %}">
+</label>
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofGroupDialog"
+        data-tof-prefill='{"action": "save_group", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "specialty": "{{ row.data.specialty_id }}", "course_year": "{{ row.data.course_year }}", "language_sector": "{{ row.data.language_sector|escapejs }}", "admission_year": "{{ row.data.admission_year }}", "capacity": "{{ row.data.capacity }}", "tutor": "{{ row.data.tutor_id }}"}'>
+    {% trans "Redaktə" context "accounts.groups" %}
+</button>
+{% if row.data.is_active %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-tof-open="tofGroupArchiveDialog"
+        data-tof-prefill='{"action": "archive", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivlə" context "accounts.groups" %}
+</button>
+{% else %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofGroupRestoreDialog"
+        data-tof-prefill='{"action": "restore", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivdən qaytar" context "accounts.groups" %}
+</button>
+{% endif %}

@@ -245,6 +245,24 @@ urlpatterns = [
     path("student-intake/template/", views.student_intake_template, name="student_intake_template"),
     path("student-intake/preview/", views.student_intake_preview, name="student_intake_preview"),
     path("student-intake/apply/", views.student_intake_apply, name="student_intake_apply"),
+    # «Tələbə qəbulu» (ekran 08) — idxal endpoint-lərini TƏKRAR İSTİFADƏ edir;
+    # yalnız qrup yaratma ayrıca açardır (`student.assign_group`).
+    path(
+        "student-admission/groups/create/",
+        views.student_admission_create_group,
+        name="student_admission_create_group",
+    ),
+    # «Tələbə reyestri» (ekran 09) — kart/çekmecə, hədəf seçiciləri, hərəkət
+    # əmri, CSV ixracı və əmr sənədinin icazə-qapılı endirilməsi.
+    path("student-registry/card/<uuid:record_id>/", views.student_registry_card, name="student_registry_card"),
+    path("student-registry/programs/", views.student_registry_programs, name="student_registry_programs"),
+    path("student-registry/action/", views.student_registry_action, name="student_registry_action"),
+    path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
+    path(
+        "student-registry/document/<uuid:movement_id>/",
+        views.student_registry_document,
+        name="student_registry_document",
+    ),
     # «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» (İmtahan Mərkəzi).
     # Növbə bazadakı sübut qatından (LegacyGradeFact + canlı FinalGrade güzgüsü)
     # hesablanır — domen məntiqi registrar-dadır (legacy_grade_review*.py).

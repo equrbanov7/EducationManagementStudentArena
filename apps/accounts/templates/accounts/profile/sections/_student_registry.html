@@ -1,0 +1,54 @@
+{% load i18n %}
+{% comment %}
+Ekran 09 «Tələbə reyestri və hərəkəti» (dizayn handoff Mərhələ 3).
+
+İcazə: `student.registry_view` (oxu) · `student.movement` + `people.manage_academic`
+(əmr yazmaq). Filtr, sıralama və səhifələmə SERVER tərəfdədir (handoff §8/14):
+sütun başlığı adi linkdir, filtr paneli yalnız «Tətbiq et» ilə sorğu göndərir.
+
+SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
+`registrar_studentmovement` append-only reyestrində qalır (PG trigger).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP: SELF+NONCE).
+{% endcomment %}
+{% if 'student-registry' in allowed_sections %}
+{% trans "Universitetin bütün tələbələri: ixtisas, qrup, kurs, forma, maliyyələşmə və akademik status. Hərəkət yalnız əmr nömrəsi, tarix və əsaslandırma ilə yazılır." context "accounts.student_registry" as sr_subtitle %}
+{% trans "Tələbə hərəkəti — əmr" context "accounts.student_registry" as sr_move_title %}
+{% trans "Əmr yazıldıqdan sonra silinmir və dəyişdirilmir; tələbənin statusu dərhal dəyişir və tarixçəyə bir sətir əlavə olunur." context "accounts.student_registry" as sr_move_sub %}
+{% trans "Əmri yaz" context "accounts.student_registry" as sr_move_btn %}
+{% trans "Əsas və əsaslandırma" context "accounts.student_registry" as sr_reason_label %}
+{% trans "Tələbə kartı" context "accounts.student_registry" as sr_card_title %}
+<section class="profile-section-panel profile-section--stsvc {% if active_section == 'student-registry' %}is-active{% endif %}"
+         data-profile-section-panel="student-registry"
+         data-source-url="{{ profile_base_url }}?section=student-registry">
+
+{% if not student_registry_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=student_registry_section.access_denied_message %}
+{% else %}
+<div class="stsvc"
+     data-sr-root
+     data-sr-card-url="{{ student_registry_section.card_url_base }}"
+     data-sr-document-url="{{ student_registry_section.document_url_base }}"
+     data-sr-action-url="{{ student_registry_section.action_url }}"
+     data-sr-groups-url="{{ student_registry_section.groups_url }}"
+     data-sr-programs-url="{{ student_registry_section.programs_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sr_subtitle header_actions_include="accounts/profile/sections/student_services/_registry_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_registry_section.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="student-registry" filter_prefix="sr_" filter_fields=student_registry_section.filter_fields filter_count_label=student_registry_section.filter_count_label %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=student_registry_section.columns table_rows=student_registry_section.table_rows table_state=student_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-user-graduate" state_title=student_registry_section.state_title state_body=student_registry_section.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=student_registry_section.page_obj page_param="sr_page" extra_query=student_registry_section.pagination_query %}
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="srStudentCard" drawer_title=sr_card_title drawer_xl=True drawer_body_include="accounts/profile/sections/student_services/_registry_drawer.html" %}
+
+    {% if student_registry_section.can_move %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="srMovementDialog" reason_title=sr_move_title reason_subtitle=sr_move_sub reason_label=sr_reason_label reason_submit_label=sr_move_btn reason_submit_tone="primary" reason_hidden=student_registry_section.movement_hidden reason_extra_include="accounts/profile/sections/student_services/_movement_fields.html" reason_form_data=student_registry_section.movement_form_data %}
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

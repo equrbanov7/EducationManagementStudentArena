@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
-from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
+from core.models import ActiveManager, TimeStampedModel, UUIDModel
 
 from ..reference_identity import ReferenceIdentityValidationMixin
 from ._program_codes import (
@@ -21,6 +21,7 @@ from ._program_codes import (
     legacy_official_code_field,
     official_code_field,
 )
+from .admission_meta import AdmissionRecordFields
 from .catalog_meta import (
     ArchivableCatalogModel,
     education_form_field,
@@ -152,78 +153,6 @@ class Subject(ArchivableCatalogModel, UUIDModel, TimeStampedModel):
         return f"{self.code} — {self.name}"
 
 
-class Curriculum(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
-    """A study plan (Tədris planı) for one program and admission cohort year.
-
-    The set of ``CurriculumSubject`` rows defines, per semester, which subjects
-    are mandatory and which belong to elective blocks the group/student chooses
-    from (see docs/architecture/UNIVERSITY_SYSTEM_ROADMAP.md §2)."""
-
-    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="curricula")
-    program = models.ForeignKey(Program, on_delete=models.CASCADE, related_name="curricula")
-    admission_year = models.PositiveIntegerField(help_text="Qəbul ili (məs. 2024).")
-    name = models.CharField(max_length=255, blank=True)
-    is_active = models.BooleanField(default=True, db_index=True)
-
-    objects = models.Manager()
-    active = ActiveManager()
-
-    class Meta:
-        verbose_name = pgettext_lazy("registrar.model.curriculum.meta", "curriculum")
-        verbose_name_plural = pgettext_lazy("registrar.model.curriculum.meta", "curricula")
-        ordering = ["-admission_year", "program__name"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["organization", "program", "admission_year"],
-                name="uniq_curriculum_program_year",
-            ),
-        ]
-
-    def __str__(self):
-        return self.name or f"{self.program.display_label} {self.admission_year}"
-
-
-class CurriculumSubject(UUIDModel, TimeStampedModel, OrderedModel):
-    """A single plan row: a subject scheduled in a given semester of a plan.
-
-    ``is_elective`` marks a subject that belongs to an elective block; every row
-    sharing the same ``elective_group`` (within the same curriculum + semester)
-    forms one block from which ``required_choices`` subject(s) are chosen. In the
-    AZ university model the choice is made at GROUP level (see
-    ``GroupElectiveChoice`` design, roadmap §2.5) — implemented in U2."""
-
-    organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="curriculum_subjects"
-    )
-    curriculum = models.ForeignKey(Curriculum, on_delete=models.CASCADE, related_name="rows")
-    subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="curriculum_rows")
-    semester_number = models.PositiveSmallIntegerField(help_text="Neçənci semestr (1..N).")
-    is_elective = models.BooleanField(default=False, db_index=True)
-    elective_group = models.CharField(
-        max_length=50, blank=True, help_text="Seçmə blok adı (eyni blokun sətirləri eyni dəyəri daşıyır)."
-    )
-    required_choices = models.PositiveSmallIntegerField(default=1, help_text="Seçmə blokdan neçə fənn seçilməlidir.")
-
-    class Meta:
-        verbose_name = pgettext_lazy("registrar.model.curriculum_subject.meta", "curriculum subject")
-        verbose_name_plural = pgettext_lazy("registrar.model.curriculum_subject.meta", "curriculum subjects")
-        ordering = ["curriculum", "semester_number", "order"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=["organization", "curriculum", "subject", "semester_number"],
-                name="uniq_curriculum_subject_semester",
-            ),
-        ]
-        indexes = [
-            models.Index(fields=["curriculum", "semester_number"]),
-            models.Index(fields=["curriculum", "elective_group"]),
-        ]
-
-    def __str__(self):
-        kind = "seçmə" if self.is_elective else "məcburi"
-        return f"{self.subject.code} · sem {self.semester_number} · {kind}"
-
-
 # ── Enrollment layer (U2): student record, offerings, enrollments, group choice ──
 
 
@@ -242,7 +171,7 @@ class AcademicStatus(models.TextChoices):
     GRADUATED = "graduated", pgettext_lazy("registrar.academic_status", "Graduated")
 
 
-class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
+class StudentAcademicRecord(ReferenceIdentityValidationMixin, AdmissionRecordFields, UUIDModel, TimeStampedModel):
     """A student's academic profile within a program: which curriculum + group
     they belong to. Drives the mandatory/elective enrollment flow (roadmap §2)."""
 
@@ -251,7 +180,7 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeSta
     )
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academic_records")
     program = models.ForeignKey(Program, on_delete=models.PROTECT, related_name="student_records")
-    curriculum = models.ForeignKey(Curriculum, on_delete=models.PROTECT, related_name="student_records")
+    curriculum = models.ForeignKey("registrar.Curriculum", on_delete=models.PROTECT, related_name="student_records")
     group = models.ForeignKey(
         "organizations.OrgUnit",
         null=True,

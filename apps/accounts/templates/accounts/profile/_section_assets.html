@@ -182,3 +182,18 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office.css' %}?v=20260903-1">
     {% endif %}
+    {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
+    semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
+    {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260903-2">
+    {% endif %}
+    {% comment %}Mərhələ 3 (ekran 08/09) — Tələbə Xidmətləri Mərkəzi. YALNIZ
+    düzüm; stepper/KPI/cədvəl/çekmecə/dialoq `ems_ui`-dədir. Qəbul paneli
+    əlavə olaraq mövcud `student_intake.css` fayl-yükləmə üslubunu işlədir,
+    ona görə o fayl ondan ƏVVƏL yüklənməlidir (kaskad).{% endcomment %}
+    {% if 'student-admission' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260903-3">
+    {% endif %}
+    {% if 'student-admission' in allowed_sections or 'student-registry' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_services.css' %}?v=20260903-3">
+    {% endif %}

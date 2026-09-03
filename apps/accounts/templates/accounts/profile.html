@@ -13,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -151,11 +151,19 @@ yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təs
 idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
 <script src="{% static 'accounts/js/schedule_manage.js' %}?v=20260902-1"></script>
 {% endif %}
-{% if 'student-intake' in allowed_sections %}
-{% comment %}Tələbə idxalı — panel server-render-lidir; JS yalnız fayl yükləməsini,
-quru icranı, nəticə cədvəlini və parol CSV-sinin endirilməsini idarə edir
-(EMSDelegate, `[data-six-root]` yoxdursa heç nə etmir).{% endcomment %}
-<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260902-1"></script>
+{% if 'student-intake' in allowed_sections or 'student-admission' in allowed_sections %}
+{% comment %}Tələbə idxalı / qəbulu — panel server-render-lidir; JS yalnız fayl
+yükləməsini, quru icranı, nəticə cədvəlini (ekran 08-də ATİS sütunları + qrup
+seçicisi) və parol CSV-sinin endirilməsini idarə edir (EMSDelegate,
+`[data-six-root]` yoxdursa heç nə etmir). TƏK fayl — «Tətbiq et» məntiqi iki
+yerdə saxlanılmasın deyə.{% endcomment %}
+<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260903-3"></script>
+{% endif %}
+{% if 'student-registry' in allowed_sections %}
+{% comment %}Tələbə reyestri — cədvəl server-render-lidir; JS yalnız çekmecəni
+(kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
+(EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
+<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20260903-3"></script>
 {% endif %}
 {% if 'teaching-handover' in allowed_sections %}
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
@@ -283,7 +291,12 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
-{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260903-1"></script>
+{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260903-2"></script>
+{% endif %}
+{% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
+gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
+{% if 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% endif %}
 {% endblock %}

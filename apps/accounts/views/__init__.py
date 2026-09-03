@@ -146,7 +146,19 @@ from .schedule_manage import schedule_manage_action, schedule_manage_check
 
 # Global search (⌘K command palette)
 from .search import global_search
-from .student_intake import student_intake_apply, student_intake_preview, student_intake_template
+from .student_intake import (
+    student_admission_create_group,
+    student_intake_apply,
+    student_intake_preview,
+    student_intake_template,
+)
+from .student_registry import (
+    student_registry_action,
+    student_registry_card,
+    student_registry_document,
+    student_registry_export,
+    student_registry_programs,
+)
 
 # Superadmin views
 from .superadmin import (
@@ -248,6 +260,12 @@ __all__ = [
     "student_intake_template",
     "student_intake_preview",
     "student_intake_apply",
+    "student_admission_create_group",
+    "student_registry_action",
+    "student_registry_card",
+    "student_registry_document",
+    "student_registry_export",
+    "student_registry_programs",
     # Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi (`final_score.entry`)
     "legacy_review_queue",
     "legacy_review_options",
