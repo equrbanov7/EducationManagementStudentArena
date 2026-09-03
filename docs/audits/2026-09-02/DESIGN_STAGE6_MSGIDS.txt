@@ -1,0 +1,314 @@
+# Dizayn Mərhələ 6 — YENİ msgid-lər (ekran 21 «Keçilmiş dərslər» + ekran 10 tələbə kabineti)
+# Tarix: 2026-09-03 · Budaq: audit/post-migration-qa-2026-09
+# .po fayllarına TOXUNULMADI — kataloqları i18n agenti doldurur.
+# Cəmi: 97 msgid, 8 kontekst. (HEAD ilə fərq — yalnız bu mərhələdə əlavə olunanlar.)
+# 4 kataloq: az / en / ru / tr
+# QEYD: `profile.sidebar` bölməsində paralel Mərhələ 4 (dərs yükü) agentinin
+#       5 yazısı QƏSDƏN çıxarılıb — onlar öz msgid faylındadır.
+
+## accounts.dashboard  (1)
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslər"
+
+
+## accounts.lessons_log  (54)
+msgctxt "accounts.lessons_log"
+msgid "Aktiv təşkilat konteksti yoxdur"
+
+msgctxt "accounts.lessons_log"
+msgid "Auditoriya saatı"
+
+msgctxt "accounts.lessons_log"
+msgid "Axtarış"
+
+msgctxt "accounts.lessons_log"
+msgid "Bazar"
+
+msgctxt "accounts.lessons_log"
+msgid "Bazar ertəsi"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fənlər"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün müəllimlər"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün qruplar"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün tiplər"
+
+msgctxt "accounts.lessons_log"
+msgid "Cümə"
+
+msgctxt "accounts.lessons_log"
+msgid "Cümə axşamı"
+
+msgctxt "accounts.lessons_log"
+msgid "Dövr"
+
+msgctxt "accounts.lessons_log"
+msgid "Dövrü genişləndirin və ya filtrləri sıfırlayın."
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs əlavə et"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərsin tipi"
+
+msgctxt "accounts.lessons_log"
+msgid "Elektron jurnal"
+
+msgctxt "accounts.lessons_log"
+msgid "Fənn"
+
+msgctxt "accounts.lessons_log"
+msgid "Fənn və qrup"
+
+msgctxt "accounts.lessons_log"
+msgid "Gec yazılan qeyd"
+
+msgctxt "accounts.lessons_log"
+msgid "Hesabatı yüklə"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal qeydi"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnalı aç"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnalı boş dərs"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedranın müəllimləri hansı dərsi, hansı qrupa, hansı mövzu ilə keçib. Jurnalı vaxtında doldurulmayan dərslər ayrıca işarələnir."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçdiyiniz dərslərin qeydi — hansı qrupa, hansı mövzunu, neçə saat. Dövrü dəyişib istənilən aralığa baxa bilərsiniz."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilmiş dərs"
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilən mövzu"
+
+msgctxt "accounts.lessons_log"
+msgid "Mövzu yazılmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid "Mövzu, fənn və ya qrup axtar"
+
+msgctxt "accounts.lessons_log"
+msgid "Müəllim"
+
+msgctxt "accounts.lessons_log"
+msgid "Orta iştirak"
+
+msgctxt "accounts.lessons_log"
+msgid "Qrup"
+
+msgctxt "accounts.lessons_log"
+msgid "Saat"
+
+msgctxt "accounts.lessons_log"
+msgid "Semestr"
+
+msgctxt "accounts.lessons_log"
+msgid "Seçilmiş dövrdə dərs qeydi yoxdur"
+
+msgctxt "accounts.lessons_log"
+msgid "Sillabus mövzu əhatəsi"
+
+msgctxt "accounts.lessons_log"
+msgid "Təsdiqlənmiş sillabus yoxdur"
+
+msgctxt "accounts.lessons_log"
+msgid "Təşkilat seçin və ya administratora müraciət edin."
+
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi"
+
+msgctxt "accounts.lessons_log"
+msgid "dərs"
+
+msgctxt "accounts.lessons_log"
+msgid "dərsdən 48 saat sonra"
+
+msgctxt "accounts.lessons_log"
+msgid "dərsə gələn tələbə payı"
+
+msgctxt "accounts.lessons_log"
+msgid "gecikmə yoxdur"
+
+msgctxt "accounts.lessons_log"
+msgid "hamısı doldurulub"
+
+msgctxt "accounts.lessons_log"
+msgid "mövzu"
+
+msgctxt "accounts.lessons_log"
+msgid "mövzu və qiymət yazılmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid "saat"
+
+msgctxt "accounts.lessons_log"
+msgid "seçilmiş dövrdə"
+
+msgctxt "accounts.lessons_log"
+msgid "Çərşənbə"
+
+msgctxt "accounts.lessons_log"
+msgid "Çərşənbə axşamı"
+
+msgctxt "accounts.lessons_log"
+msgid "Üzrlü qayıb"
+
+msgctxt "accounts.lessons_log"
+msgid "İlk {{ cap }} dərs göstərilir — cəmi {{ total }} qeyd var. Daha dar dövr seçin və ya hesabatı yükləyin."
+
+msgctxt "accounts.lessons_log"
+msgid "İştirak"
+
+msgctxt "accounts.lessons_log"
+msgid "Şənbə"
+
+
+## profile.results  (3)
+msgctxt "profile.results"
+msgid "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü."
+
+msgctxt "profile.results"
+msgid "Rəsmi transkript"
+
+msgctxt "profile.results"
+msgid "Transkript sorğusu göndər"
+
+
+## profile.sidebar  (1)
+msgctxt "profile.sidebar"
+msgid "Keçilmiş dərslər"
+
+
+## profile.subjects  (7)
+msgctxt "profile.subjects"
+msgid "Cari qiymətləndirmə"
+
+msgctxt "profile.subjects"
+msgid "Cəmi"
+
+msgctxt "profile.subjects"
+msgid "Davamiyyət"
+
+msgctxt "profile.subjects"
+msgid "Qiymətləndirmə strukturu"
+
+msgctxt "profile.subjects"
+msgid "Sillabus (təsdiqlənmiş)"
+
+msgctxt "profile.subjects"
+msgid "Sərbəst iş"
+
+msgctxt "profile.subjects"
+msgid "Yekun imtahan"
+
+
+## profile.transcript  (3)
+msgctxt "profile.transcript"
+msgid "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü/imzalı rəsmi transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü."
+
+msgctxt "profile.transcript"
+msgid "Rəsmi transkript Tələbə Xidmətləri Mərkəzindən sorğu ilə verilir (3 iş günü)."
+
+msgctxt "profile.transcript"
+msgid "Transkript sorğusu göndər"
+
+
+## registrar.journal_policy  (3)
+msgctxt "registrar.journal_policy"
+msgid "Jurnal təsdiqlənmiş sillabus olmadan açılmır"
+
+msgctxt "registrar.journal_policy"
+msgid "Sillabusa keç"
+
+msgctxt "registrar.journal_policy"
+msgid "Universitet siyasətinə görə dərs sətri yalnız təsdiqlənmiş sillabusdan yaradılır: mövzu, saat bölgüsü və qiymətləndirmə strukturu oradan gəlir. Jurnal yalnız oxunuş rejimindədir — sillabusu tamamlayıb kafedra müdirinin təsdiqinə göndərin."
+
+
+## registrar.lessons_log  (25)
+msgctxt "registrar.lessons_log"
+msgid "Akademik saat"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu ay"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu gün"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu həftə"
+
+msgctxt "registrar.lessons_log"
+msgid "Dövr"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərsin tipi"
+
+msgctxt "registrar.lessons_log"
+msgid "Fənn"
+
+msgctxt "registrar.lessons_log"
+msgid "Fənn kodu"
+
+msgctxt "registrar.lessons_log"
+msgid "Gec yazılıb"
+
+msgctxt "registrar.lessons_log"
+msgid "Jurnal boşdur"
+
+msgctxt "registrar.lessons_log"
+msgid "Jurnal qeydi"
+
+msgctxt "registrar.lessons_log"
+msgid "Mövzu"
+
+msgctxt "registrar.lessons_log"
+msgid "Müəllim"
+
+msgctxt "registrar.lessons_log"
+msgid "Otaq"
+
+msgctxt "registrar.lessons_log"
+msgid "Qayıb"
+
+msgctxt "registrar.lessons_log"
+msgid "Qiymətləndirilib"
+
+msgctxt "registrar.lessons_log"
+msgid "Qrup"
+
+msgctxt "registrar.lessons_log"
+msgid "Saat"
+
+msgctxt "registrar.lessons_log"
+msgid "Semestr"
+
+msgctxt "registrar.lessons_log"
+msgid "Seçilmiş aralıq"
+
+msgctxt "registrar.lessons_log"
+msgid "Tarix"
+
+msgctxt "registrar.lessons_log"
+msgid "Vaxtında yazılıb"
+
+msgctxt "registrar.lessons_log"
+msgid "Üzrlü"
+
+msgctxt "registrar.lessons_log"
+msgid "İl"
+
+msgctxt "registrar.lessons_log"
+msgid "İştirak"
+

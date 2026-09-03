@@ -216,6 +216,36 @@ def _check_self(data, issues) -> bool:
     return True
 
 
+def _check_assess(data, weights, issues) -> bool:
+    """Qiymətləndirmə çəkiləri — README §8/4: cəm HƏMİŞƏ 100.
+
+    Davamiyyət / sərbəst iş / yekun imtahan universitet SİYASƏTİ ilə kilidlidir
+    (``weights``), müəllim yalnız qalan ``flex`` balı aralıq imtahan ↔ semestr
+    layihəsi arasında bölür.  Bölgü TAM olmalıdır: bölünməmiş bal cəmi 100-dən
+    aşağı salır, ona görə «toxunulmamış» (0/0) bölgü də QƏBUL EDİLMİR.
+
+    Qayda domen qatındadır, redaktor slaydında yox: HTTP səthi
+    (``syllabus_section_save``) ixtiyari JSON qəbul edir, yəni struktur
+    invariantı yalnız burada və ``services.drafts.save_section``-da qorunur.
+    """
+    flex = _int(weights.get("flex"))
+    midterm = _int(data.get("midterm"))
+    project = _int(data.get("project"))
+    if midterm < 0 or project < 0:
+        issues.append(Issue(SectionKey.ASSESS.value, "assess.negative_weight", {}))
+        return False
+    if midterm + project != flex:
+        issues.append(
+            Issue(
+                SectionKey.ASSESS.value,
+                "assess.split_mismatch",
+                {"need": flex, "have": midterm + project},
+            )
+        )
+        return False
+    return True
+
+
 def _check_lit(data, issues) -> bool:
     primary = _lines(data.get("primary"))
     additional = _lines(data.get("additional"))
@@ -235,16 +265,22 @@ def _check_lit(data, issues) -> bool:
     return ok
 
 
-def evaluate(section_data: dict, plan_hours: dict | None = None) -> CompletionReport:
+def evaluate(section_data: dict, plan_hours: dict | None = None, assessment: dict | None = None) -> CompletionReport:
     """Bölmə məzmunundan tamamlanma hesabatı qurur.
 
     ``section_data`` — ``{section_id: data}`` xəritəsi (``SyllabusSection.data``).
     ``plan_hours`` — tədris planından gələn saat bölgüsü; ``week`` qaydası bunun
     ilə tutuşdurulur.
+    ``assessment`` — :mod:`apps.syllabus.policy`-dən gələn çəki siyasəti
+    (kilidli çəkilər + ``flex``); verilməsə org-suz default işlədilir.
 
-    ``assess`` bölməsi HƏMİŞƏ ödənilmiş sayılır: davamiyyət/sərbəst iş/yekun
-    çəkiləri universitet SİYASƏTİ ilə kilidlidir, müəllim onları poza bilmir.
+    ``assess`` bölməsi ARTIQ AVTOMATİK ÖDƏNİLMİŞ SAYILMIR (2026-09-03): kilidli
+    çəkilər müəllimə açıq deyil, amma qalan ``flex`` balın TAM bölünməsi məhz
+    müəllimin işidir və README §8/4 cəmi 100 tələb edir.
     """
+    from .policy import assessment_weights
+
+    weights = assessment or assessment_weights(None)
     data = {key: (section_data.get(key) or {}) for key in RULE_SECTIONS}
     issues: list = []
     results = {
@@ -253,7 +289,7 @@ def evaluate(section_data: dict, plan_hours: dict | None = None) -> CompletionRe
         SectionKey.OUT.value: _check_out(data[SectionKey.OUT], data[SectionKey.WEEK], issues),
         SectionKey.WEEK.value: _check_week(data[SectionKey.WEEK], plan_hours, issues),
         SectionKey.METHOD.value: _check_method(data[SectionKey.METHOD], issues),
-        SectionKey.ASSESS.value: True,
+        SectionKey.ASSESS.value: _check_assess(data[SectionKey.ASSESS], weights, issues),
         SectionKey.SELF.value: _check_self(data[SectionKey.SELF], issues),
         SectionKey.LIT.value: _check_lit(data[SectionKey.LIT], issues),
     }

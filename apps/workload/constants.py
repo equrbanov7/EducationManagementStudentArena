@@ -19,6 +19,7 @@ PERM_REVIEW = "workload.review"
 PERM_APPROVE = "workload.approve"
 PERM_DISTRIBUTE = "workload.distribute"
 PERM_REPORT = "workload.report"
+PERM_OBJECT = "workload.object"
 
 
 class TaskStatus(models.TextChoices):
@@ -41,10 +42,15 @@ class TaskStatus(models.TextChoices):
     CANCELLED = "cancelled", pgettext_lazy(_CTX, "Ləğv edilib")
 
 
-#: Sətirlərin redaktə oluna bildiyi statuslar (F3 — kafedra fazası).
-EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.DISTRIBUTING})
+#: Sətirlərin redaktə oluna bildiyi statuslar.
+#: ``returned`` F1-də əlavə olundu: dekan qaytaranda tədris şöbəsi məhz həmin
+#: sətirləri düzəldib yenidən göndərir (spec §4.1).
+EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.DISTRIBUTING})
 #: Bölgü (təyinat) əməliyyatlarına açıq statuslar.
-ASSIGNABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
+#: ``approved`` F2 zəncirinin çıxışıdır — dekanlıq təsdiqindən sonra kafedra
+#: müdiri bölgüyə başlayır; ``draft`` yalnız HEÇ VAXT göndərilməmiş sənəd üçün
+#: keçərlidir (``services.workflow.ensure_distribution_stage`` yoxlayır).
+ASSIGNABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.APPROVED, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
 #: Təsdiqdən sonrakı statuslar — dəyişiklik yalnız amendment axını ilə.
 LOCKED_STATUSES = frozenset({TaskStatus.DISTRIBUTED, TaskStatus.CANCELLED})
 
@@ -136,6 +142,37 @@ class RowReviewStatus(models.TextChoices):
     RETURNED = "returned", pgettext_lazy(_CTX, "Qaytarılıb")
 
 
+class SliceStatus(models.TextChoices):
+    """Fakültə təsdiq diliminin vəziyyəti (spec §5.3, ekran 15)."""
+
+    PENDING = "pending", pgettext_lazy(_CTX, "Göndərilib")
+    APPROVED = "approved", pgettext_lazy(_CTX, "Təsdiqlənib")
+    RETURNED = "returned", pgettext_lazy(_CTX, "Qaytarılıb")
+
+
+class ObjectionReason(models.TextChoices):
+    """Müəllim etirazının 4 səbəbi — dizayn ekran 16 (`REASONS`, hərfi copy)."""
+
+    HOURS = "hours", pgettext_lazy(_CTX, "Saat sayı düz deyil")
+    STUDENTS = "students", pgettext_lazy(_CTX, "Qrup/tələbə sayı səhvdir")
+    SUBJECT = "subject", pgettext_lazy(_CTX, "Fənn ixtisasım deyil")
+    NORM = "norm", pgettext_lazy(_CTX, "Norma həddindən artıqdır")
+
+
+class ObjectionStatus(models.TextChoices):
+    OPEN = "open", pgettext_lazy(_CTX, "Baxılır")
+    ACCEPTED = "accepted", pgettext_lazy(_CTX, "Qəbul edildi")
+    REJECTED = "rejected", pgettext_lazy(_CTX, "Rədd edildi")
+
+
+#: Səbəb tələb edən əməllərin minimum uzunluğu (handoff §8 qayda 6).
+REASON_MIN_LENGTH = 20
+
+#: Dekanın ikinci təsdiqi — dərs yükü üçün AÇIQDIR (plan §2/15, açıq qərar §10.2).
+#: Sillabusda isə söndürülüdür; ona görə bayraq ailə-ailə saxlanılır.
+DEAN_SECOND_APPROVAL_ENABLED = True
+
+
 class TeacherPosition(models.TextChoices):
     PROFESSOR = "professor", pgettext_lazy(_CTX, "Professor")
     DOSENT = "dosent", pgettext_lazy(_CTX, "Dosent")
@@ -174,6 +211,7 @@ __all__ = [
     "ACTIVITY_TOTAL_FIELD",
     "ASSIGNABLE_STATUSES",
     "CONTACT_TOTAL_FIELDS",
+    "DEAN_SECOND_APPROVAL_ENABLED",
     "DEFAULT_ANNUAL_NORM_HOURS",
     "DEFAULT_HOURLY_PAID_CAP",
     "EDITABLE_STATUSES",
@@ -182,10 +220,12 @@ __all__ = [
     "PERM_APPROVE",
     "PERM_DISTRIBUTE",
     "PERM_MANAGE",
+    "PERM_OBJECT",
     "PERM_REPORT",
     "PERM_REVIEW",
     "PERM_SUBMIT",
     "PERM_VIEW",
+    "REASON_MIN_LENGTH",
     "SEASON_BY_SEMESTER_PARITY",
     "TEACHER_ROLE_NAMES",
     "TEACHING_ACTIVITIES",
@@ -195,9 +235,12 @@ __all__ = [
     "AmendmentTarget",
     "DegreeLevel",
     "EducationForm",
+    "ObjectionReason",
+    "ObjectionStatus",
     "RowKind",
     "RowReviewStatus",
     "Season",
+    "SliceStatus",
     "TaskStatus",
     "TeacherPosition",
 ]

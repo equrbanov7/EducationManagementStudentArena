@@ -17,7 +17,7 @@ from dataclasses import dataclass
 
 from apps.organizations.scoping import get_permission_scope, user_scope_covers_unit
 
-from ..constants import PERM_VIEW
+from ..constants import PERM_APPROVE, PERM_VIEW
 
 
 @dataclass(frozen=True)
@@ -43,6 +43,26 @@ class SyllabusActor:
         if self.is_superadmin:
             return True
         return bool(user_scope_covers_unit(self.user, self.organization, unit_id, permission=permission))
+
+    def covers_chair_unit(self, unit_id, permission: str) -> bool:
+        """QƏRAR əhatəsi: bağ KAFEDRA SƏVİYYƏSİNDƏ olmalıdır (sahibin qərarı).
+
+        ``covers_unit`` alt-ağac yoxlamasıdır — dekanın fakültə scope-u
+        altındakı bütün kafedraları örtür.  Təsdiq/düzəliş/rədd üçün bu AZ
+        DEYİL, ÇOXDUR: qərar kafedra müdirinindir.  Org-wide əhatə (rektor,
+        prorektor, RİM, superadmin) override kimi saxlanılır — hər əməl
+        onsuz da audit jurnalına düşür.
+        """
+        if self.is_superadmin:
+            return True
+        scope = self.scope_for(permission)
+        if scope.is_org_wide:
+            return True
+        if not scope.is_unit_scoped or unit_id is None:
+            return False
+        from .units import chair_level_scope_covers
+
+        return chair_level_scope_covers(scope.unit_ids, unit_id)
 
     def scope_for(self, permission: str):
         """Verilmiş icazə üçün ``UnitScope`` (siyahı sorğularını daraltmaq üçün)."""
@@ -100,4 +120,25 @@ def can_view(actor: SyllabusActor, syllabus) -> bool:
     return actor.covers_unit(syllabus.chair_unit_id, PERM_VIEW)
 
 
-__all__ = ["SyllabusActor", "can_view", "is_author", "resolve_actor"]
+def has_decision_scope(actor: SyllabusActor, permission: str = PERM_APPROVE) -> bool:
+    """Aktorun ÜMUMİYYƏTLƏ qərar əhatəsi varmı — UI düymələri üçün.
+
+    Sətir-sətir ``covers_chair_unit`` per-sillabus cavab verir; növbə ekranı isə
+    düymələri BİR DƏFƏ göstərib-gizlətməlidir.  Burada yalnız «bu aktorun
+    kafedra səviyyəli (və ya org-wide) əhatəsi varmı» sualına baxılır.
+    """
+    if actor.is_superadmin:
+        return True
+    if not actor.has(permission):
+        return False
+    scope = actor.scope_for(permission)
+    if scope.is_org_wide:
+        return True
+    if not scope.is_unit_scoped:
+        return False
+    from .units import has_chair_level_unit
+
+    return has_chair_level_unit(actor.organization, scope.unit_ids)
+
+
+__all__ = ["SyllabusActor", "can_view", "has_decision_scope", "is_author", "resolve_actor"]

@@ -47,7 +47,8 @@ def apply_permission_section_gates(
     ``can_manage_schedule``, ``can_import_students``, ``can_use_applications``,
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``.
     ``can_review_legacy_grades``, ``can_watch_legacy_grades``, ``can_view_workload``,
-    ``can_manage_workload``, ``can_distribute_workload``.
+    ``can_manage_workload``, ``can_distribute_workload``, ``can_view_structure_tree``,
+    ``can_view_catalog``, ``can_manage_catalog``.
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
@@ -89,6 +90,15 @@ def apply_permission_section_gates(
     # `apps/syllabus/services/coverage.py`-da struktur əhatəsi ilə fail-closed
     # yenidən süzülür (əhatəsiz istifadəçi boş vəziyyət görür).
     can_review_syllabus = privileged or has_permission(permissions, "syllabus.review")
+
+    # «Sual təsdiqi» — `question.chair_review`. Müəllimin İmtahan Mərkəzinə
+    # göndərdiyi sual dəsti ƏVVƏLCƏ kafedra müdirindən keçir. Açar QƏSDƏN
+    # `exam.*` ailəsindən KƏNARDADIR: `exam.*` daşıyan dekan/mərkəz/müəllim
+    # bu səlahiyyəti avtomatik almamalıdır. Menyu görünürlüyü yalnız açara
+    # baxır; KONKRET göndərişin qərarı `apps/exams/services/
+    # question_chair_units.py`-da struktur əhatəsi ilə fail-closed yoxlanılır
+    # (əhatəsiz aktor boş növbə görür).
+    can_review_question_chair = privileged or has_permission(permissions, "question.chair_review")
 
     # «Fənn təhvili» — `journal.reassign`. Menyu görünürlüyü YALNIZ açara baxır;
     # KONKRET fənnin təhvil oluna bilməsi (öz fakültəsindədirmi, jurnal bağlıdırmı,
@@ -150,6 +160,75 @@ def apply_permission_section_gates(
     can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
     can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
 
+    # Mərhələ 4 — zəncirin üç yeni səthi. Hər biri ÖZ açarındadır (səlahiyyət
+    # ayrılığı): tədris şöbəsi göndərir, koordinator viza verir, dekan
+    # təsdiqləyir. Görünürlük yazma hüququ VERMİR — `apps/workload/actions.py`
+    # hər əməldə əhatəni fail-closed yenidən yoxlayır.
+    can_review_workload = privileged or has_permission(permissions, "workload.review")
+    can_approve_workload = privileged or has_permission(permissions, "workload.approve")
+    can_report_workload = privileged or has_permission(permissions, "workload.report")
+
+    # «Universitet strukturu» (ağac) + «Kafedra profili» — Tədris şöbəsi səthi.
+    # Qapı `unit.view` açarıdır: müəllim və tələbədə bu açar QƏSDƏN YOXDUR,
+    # dekan/kafedra müdiri/RİM-də isə var. KONKRET bölmənin görünməsi
+    # `organizations.scoping`-də struktur əhatəsi ilə fail-closed yenidən
+    # süzülür — kafedra müdiri yalnız öz kafedrasını görür, əhatəsiz aktor boş
+    # vəziyyət alır (handoff §8/8: «əhatə yoxdur ≠ bütün universitet»).
+    # AĞAC ƏMƏLLƏRİ ayrıca açarlardadır (`unit.tree_manage` / `unit.assign_head`)
+    # və POST endpoint-ində yenidən yoxlanılır — görünürlük yazma hüququ vermir.
+    can_view_structure_tree = privileged or has_permission(permissions, "unit.view")
+
+    # «İxtisaslar» + «Fənn kataloqu» — `catalog.view`. `course.*` ailəsindən
+    # QƏSDƏN AYRIDIR: dərs/açılış idarə edən müəllim avtomatik universitet
+    # kataloqunu redaktə edə bilməməlidir. Yazı açarı `catalog.manage`-dir və
+    # `registrar.catalog_actions`-da fail-closed yoxlanılır.
+    can_view_catalog = privileged or has_permission(permissions, "catalog.view")
+
+    # «Tələbə qəbulu» (08) + «Tələbə reyestri» (09) — Tələbə Xidmətləri Mərkəzi.
+    #
+    #   `user.import`           → qəbul bölməsi (fayl + hesab yaratma). QƏSDƏN
+    #     köhnə `student-intake` ilə EYNİ açardır: 08 həmin maşının genişlənmiş
+    #     görünüşüdür, yeni səlahiyyət gətirmir.
+    #   `student.registry_view` → reyestr bölməsi (əmr izi + CSV ixracı).
+    #   `student.movement`      → sətir əməlləri (əmr yazmaq); menyunu AÇMIR.
+    #   `student.assign_group`  → qəbulda qrup təyinatı / yeni qrup; menyunu AÇMIR.
+    #
+    # Yazı açarları menyu görünürlüyünə TƏSİR ETMİR — düymələr panelin içində
+    # ayrıca qapılıdır və endpoint fail-closed yenidən yoxlayır.
+    can_view_student_registry = privileged or has_permission(permissions, "student.registry_view")
+    can_move_students = privileged or has_permission(permissions, "student.movement")
+    can_assign_student_groups = privileged or has_permission(permissions, "student.assign_group")
+    can_manage_catalog = privileged or has_permission(permissions, "catalog.manage")
+
+    # «Tədris planı redaktoru» — `plan.view`. Zəncirin HƏR halqası (kafedra
+    # müdiri, dekan, Tədris şöbəsi) bölməni GÖRÜR; qərar açarları isə ayrıdır
+    # (`plan.approve_*`) və `registrar.curriculum_state`-də statusa görə
+    # fail-closed yoxlanılır — görünürlük təsdiq hüququ VERMİR.
+    can_view_plan = privileged or has_permission(permissions, "plan.view")
+    can_edit_plan = privileged or has_permission(permissions, "plan.edit")
+
+    # «Qruplar» — AKADEMİK qrup reyestri (`OrgUnit`), `unit.view` ilə açılır.
+    # ⚠️ Mövcud `groups` bölməsi BAŞQA anlayışdır (`exams.StudentGroup` — imtahan
+    # kohortu) və toxunulmur; iki səth bir-birinə çarpaz keçid verir.
+    can_manage_groups = privileged or has_permission(permissions, "unit.group_manage")
+
+    # «Semestr açılışı» — `semester.view`. Açmaq (`semester.open`), kilidləmək
+    # (`semester.lock`) və kilidi açmaq (`semester.unlock`) AYRI açarlardır:
+    # kilid geri qaytarılmır, ona görə onu açan səlahiyyət ayrıca verilir.
+    can_view_semester = privileged or has_permission(permissions, "semester.view")
+    can_open_semester = privileged or has_permission(permissions, "semester.open")
+
+    # «Keçilmiş dərslər» (ekran 21) — OXU-ONLY dərs izi. İki qapıdan biri açır:
+    #
+    #   MÜƏLLİM   → bölmə HƏR müəllimə açıqdır; sorğu `instructor=request.user`
+    #     ilə daralır, yəni açar başqasının dərsini GÖSTƏRMİR. Bayraq
+    #     `rbac_university_sections`-dəki `is_teacher`-dən gəlir (aşağıda).
+    #   `journal.roster` → NƏZARƏT görünüşü (kafedra müdiri / dekanlıq / RİM):
+    #     öz struktur alt-ağacı + «Müəllim» filtri. Konkret dərsin əhatəyə
+    #     düşməsi `apps/registrar/lessons_log.py`-da fail-closed yenidən
+    #     yoxlanılır (əhatəsiz aktor boş nəticə alır — §8/8).
+    can_supervise_lessons = privileged or has_permission(permissions, "journal.roster")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -158,6 +237,7 @@ def apply_permission_section_gates(
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
         (can_review_syllabus, "syllabus-review"),
+        (can_review_question_chair, "question-chair-review"),
         (can_reassign_teaching, "teaching-handover"),
         (can_manage_schedule, "schedule-manage"),
         (can_import_students, "student-intake"),
@@ -165,6 +245,20 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         (can_manage_workload, "workload-distribution"),
         (can_view_workload, "my-workload"),
+        (can_manage_workload, "workload-center"),
+        (can_review_workload, "workload-visa"),
+        (can_approve_workload, "workload-approval"),
+        (can_report_workload, "workload-overview"),
+        (can_view_structure_tree, "org-structure-tree"),
+        (can_view_structure_tree, "chair-profile"),
+        (can_view_catalog, "programs-registry"),
+        (can_view_catalog, "subject-catalog"),
+        (can_view_plan, "curriculum-editor"),
+        (can_view_structure_tree, "groups-registry"),
+        (can_view_semester, "semester-opening"),
+        (can_import_students, "student-admission"),
+        (can_view_student_registry, "student-registry"),
+        (can_supervise_lessons, "lessons-log"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -177,15 +271,31 @@ def apply_permission_section_gates(
         "can_view_syllabus": can_view_syllabus,
         "can_edit_syllabus": can_edit_syllabus,
         "can_review_syllabus": can_review_syllabus,
+        "can_review_question_chair": can_review_question_chair,
         "can_reassign_teaching": can_reassign_teaching,
         "can_manage_schedule": can_manage_schedule,
         "can_import_students": can_import_students,
+        "can_view_student_registry": can_view_student_registry,
+        "can_move_students": can_move_students,
+        "can_assign_student_groups": can_assign_student_groups,
         "can_use_applications": can_use_applications,
         "can_review_legacy_grades": can_review_legacy_grades,
         "can_watch_legacy_grades": can_watch_legacy_grades,
         "can_view_workload": can_view_workload,
+        "can_review_workload": can_review_workload,
+        "can_approve_workload": can_approve_workload,
+        "can_report_workload": can_report_workload,
         "can_manage_workload": can_manage_workload,
         "can_distribute_workload": can_distribute_workload,
+        "can_view_structure_tree": can_view_structure_tree,
+        "can_view_catalog": can_view_catalog,
+        "can_manage_catalog": can_manage_catalog,
+        "can_view_plan": can_view_plan,
+        "can_edit_plan": can_edit_plan,
+        "can_manage_groups": can_manage_groups,
+        "can_view_semester": can_view_semester,
+        "can_open_semester": can_open_semester,
+        "can_supervise_lessons": can_supervise_lessons,
     }
 
 

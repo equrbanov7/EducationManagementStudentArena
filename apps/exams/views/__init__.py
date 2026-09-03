@@ -132,6 +132,10 @@ from .teacher.results import (
     teacher_view_attempt,
 )
 from .teacher.statistics import teacher_exam_statistics
+from .teacher.submission_chair import (
+    question_submission_chair_decide,
+    question_submission_chair_review,
+)
 from .teacher.submission_inbox import (
     ai_generate_submission_questions,
     question_submission_create,
@@ -220,6 +224,8 @@ __all__ = [
     # Teacher - Question bank library + picker
     "question_bank_list",
     "ai_generate_submission_questions",
+    "question_submission_chair_decide",
+    "question_submission_chair_review",
     "question_submission_create",
     "question_submission_decide",
     "question_submission_delete",

@@ -1,0 +1,282 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/controls.css — düymə, sahə, çip, kart: 14 komponentin ortaq bazası.
+
+   Bu fayl heç bir yeni RƏNG icad etmir — hamısı `design-tokens.css`-dən.
+   Ölçülər handoff §2.5/§2.6 və «00 Dizayn konstantları» komponent reseptindən:
+     düymə/sahə 40px r9 · kiçik 34px · əsas əməl 42px · kart r16 · lent r12
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Düymə ──────────────────────────────────────────────────────────────── */
+.ems-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-field);
+    padding: 0 16px;
+    border-radius: var(--ems-r-lg);
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    line-height: 1.2;
+    cursor: pointer;
+    text-decoration: none;
+    transition:
+        background-color 0.12s ease,
+        border-color 0.12s ease,
+        color 0.12s ease;
+}
+
+.ems-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--ems-bg-subtle);
+}
+
+.ems-btn--primary {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.ems-btn--primary:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+}
+
+.ems-btn--success {
+    border-color: var(--ems-success-700);
+    background: var(--ems-success-700);
+    color: var(--ems-neutral-0);
+}
+
+.ems-btn--warning {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.ems-btn--danger {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+.ems-btn--ghost {
+    border-color: transparent;
+    background: transparent;
+    color: var(--ems-neutral-700);
+}
+
+.ems-btn--lg {
+    min-height: var(--ems-h-action);
+    padding: 0 20px;
+}
+
+.ems-btn--sm {
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
+    font-size: var(--ems-fs-sm);
+}
+
+/* Handoff §4: «Disabled düymə gizlədilmir, stillənir». */
+.ems-btn:disabled,
+.ems-btn[aria-disabled="true"] {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-400);
+    border-color: var(--ems-border);
+    cursor: not-allowed;
+}
+
+/* İkon düyməsi — 34×34 r9 (handoff §3 top bar / cədvəl sıra əməli). */
+.ems-iconbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ems-h-xs);
+    height: var(--ems-h-xs);
+    flex: none;
+    border-radius: var(--ems-r-lg);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.ems-iconbtn:hover:not(:disabled) {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.ems-iconbtn--danger:hover:not(:disabled) {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger-bd);
+    color: var(--ems-danger);
+}
+
+/* ── Sahə (input / select / textarea) ───────────────────────────────────── */
+.ems-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.ems-field__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    /* AA: neutral-400 ağ üzərində 2.56 verirdi → neutral-500 (4.76). */
+    color: var(--ems-neutral-500);
+}
+
+.ems-field__req {
+    color: var(--ems-danger);
+}
+
+.ems-input,
+.ems-select,
+.ems-textarea {
+    width: 100%;
+    min-height: var(--ems-h-field);
+    padding: 9px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font: inherit;
+    font-size: var(--ems-fs-base);
+    line-height: 1.45;
+}
+
+.ems-textarea {
+    min-height: 92px;
+    resize: vertical;
+}
+
+.ems-input:focus,
+.ems-select:focus,
+.ems-textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.ems-input[readonly],
+.ems-textarea[readonly] {
+    background: var(--ems-bg-subtle);
+    border-color: var(--ems-border);
+}
+
+.ems-input:disabled,
+.ems-select:disabled,
+.ems-textarea:disabled {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.ems-field__hint {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* ── Kart / panel ───────────────────────────────────────────────────────── */
+.ems-card {
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-card);
+}
+
+.ems-card--flat {
+    box-shadow: none;
+}
+
+.ems-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-6) 18px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.ems-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ems-card__sub {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.ems-card__body {
+    padding: var(--ems-sp-7) 18px;
+}
+
+/* ── Çip ────────────────────────────────────────────────────────────────── */
+.ems-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
+    border-radius: var(--ems-r-pill);
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ems-chip[aria-pressed="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+/* ── Mono kod (fənn kodu, reyestr kodu, FİN) ────────────────────────────── */
+.ems-mono {
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Progress zolağı ────────────────────────────────────────────────────── */
+.ems-bar {
+    height: 7px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200);
+    overflow: hidden;
+}
+
+.ems-bar__fill {
+    height: 100%;
+    background: var(--ems-primary-600);
+    /* Faiz DİNAMİKDİR → şablon `style="--ems-bar-pct:NN%"` custom property
+       verir (CLAUDE.md: dinamik dəyər üçün icazəli yeganə inline forma). */
+    width: var(--ems-bar-pct, 0%);
+}
+
+.ems-bar__fill--success {
+    background: var(--ems-success);
+}
+
+.ems-bar__fill--warning {
+    background: var(--ems-warning-500);
+}
+
+.ems-bar__fill--danger {
+    background: var(--ems-danger);
+}

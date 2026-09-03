@@ -1,0 +1,113 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/validation.css — Sətir-içi validasiya (handoff §7)
+   Status yalnız rənglə deyil, MƏTNlə də verilir; mesaj `aria-describedby`
+   ilə sahəyə bağlanır və `role="alert"` daşıyır.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-2);
+    margin-top: 5px;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+.ems-msg__icon {
+    flex: none;
+    margin-top: 1px;
+}
+
+.ems-msg--error {
+    color: var(--ems-danger-strong);
+}
+
+.ems-msg--warning {
+    color: var(--ems-warning-800);
+}
+
+.ems-msg--success {
+    color: var(--ems-success-700);
+}
+
+.ems-msg--info {
+    color: var(--ems-primary-800);
+}
+
+/* Sahənin özü — `aria-invalid="true"` tək həqiqət mənbəyidir. */
+.ems-input[aria-invalid="true"],
+.ems-select[aria-invalid="true"],
+.ems-textarea[aria-invalid="true"] {
+    border-color: var(--ems-danger);
+}
+
+.ems-input[aria-invalid="true"]:focus,
+.ems-select[aria-invalid="true"]:focus,
+.ems-textarea[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px var(--ems-danger-100);
+}
+
+/* ── Blok lent (banner) — bölmə üstü xəbərdarlıq ────────────────────────── */
+.ems-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    padding: 12px 14px;
+    margin-bottom: var(--ems-sp-6);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-neutral-700);
+    text-wrap: pretty;
+}
+
+.ems-banner--info {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.ems-banner--success {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.ems-banner--warning {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.ems-banner--danger {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.ems-banner__title {
+    font-weight: 800;
+}
+
+.ems-banner__body {
+    margin-top: 2px;
+}
+
+.ems-banner__actions {
+    margin-left: auto;
+    display: flex;
+    gap: var(--ems-sp-3);
+}
+
+@media (max-width: 768px) {
+    .ems-banner {
+        flex-direction: column;
+    }
+
+    .ems-banner__actions {
+        margin-left: 0;
+    }
+}

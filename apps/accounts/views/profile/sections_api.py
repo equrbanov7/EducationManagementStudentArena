@@ -144,9 +144,36 @@ SECTION_PARTIALS: dict[str, str] = {
     "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
     "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
     "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    # «Sual təsdiqi» (kafedra müdiri) — OXU-ONLY növbə; qərar ayrıca səhifədə.
+    "question-chair-review": "accounts/profile/sections/_question_chair_review.html",
     # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
     "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
     "my-workload": "accounts/profile/sections/_my_workload.html",
+    # Mərhələ 4 — dərs yükü zənciri: tədris şöbəsi mərkəzi (12), koordinator
+    # vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi baxışı (17).
+    # Hamısı SERVER-render OXU panelidir; mutasiyalar tək JSON POST-a gedir.
+    "workload-center": "accounts/profile/sections/_workload_center.html",
+    "workload-visa": "accounts/profile/sections/_workload_visa.html",
+    "workload-approval": "accounts/profile/sections/_workload_approval.html",
+    "workload-overview": "accounts/profile/sections/_workload_overview.html",
+    # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra profili,
+    # ixtisas reyestri, fənn kataloqu. Hamısı SERVER-render OXU panelidir;
+    # mutasiyalar ayrıca JSON POST endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "org-structure-tree": "accounts/profile/sections/_org_structure_tree.html",
+    "chair-profile": "accounts/profile/sections/_chair_profile.html",
+    "programs-registry": "accounts/profile/sections/_programs_registry.html",
+    "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
+    # Mərhələ 2 — tədris planı redaktoru, akademik qrup reyestri, semestr açılışı.
+    "curriculum-editor": "accounts/profile/sections/_curriculum_editor.html",
+    "groups-registry": "accounts/profile/sections/_groups_registry.html",
+    "semester-opening": "accounts/profile/sections/_semester_opening.html",
+    # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09).
+    # Hər ikisi SERVER-render OXU panelidir; mutasiyalar ayrıca JSON /
+    # multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    # Mərhələ 6 — ekran 21 «Keçilmiş dərslər» (müəllim + nəzarətçi, OXU-ONLY).
+    "lessons-log": "accounts/profile/sections/_lessons_log.html",
+    "student-admission": "accounts/profile/sections/_student_admission.html",
+    "student-registry": "accounts/profile/sections/_student_registry.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -209,6 +236,9 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "syllabus-list",
         "syllabus-editor",
         "syllabus-review",
+        # Kafedra sual təsdiqi növbəsi OXU-ONLY render olunur (qərar ayrıca
+        # səhifədə, POST-la) → AJAX swap təhlükəsizdir.
+        "question-chair-review",
         # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
         # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
         "teaching-handover",
@@ -216,10 +246,33 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # GET-lə gəlir, bölgü/təsdiq isə ayrıca JSON POST-la gedir.
         "workload-distribution",
         "my-workload",
+        # Mərhələ 4 zənciri — panellər OXU-ONLY render olunur, mutasiyalar
+        # `workload:action` endpoint-inə gedir → AJAX swap təhlükəsizdir.
+        "workload-center",
+        "workload-visa",
+        "workload-approval",
+        "workload-overview",
         # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.
         "legacy-grade-review",
+        # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
+        # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
+        "org-structure-tree",
+        "chair-profile",
+        "programs-registry",
+        "subject-catalog",
+        # Mərhələ 2 panelləri də OXU-ONLY render olunur: plan sətri, qrup və
+        # açılış mutasiyaları ayrıca JSON POST endpoint-lərinə gedir.
+        "curriculum-editor",
+        "groups-registry",
+        "semester-opening",
+        # Mərhələ 3 — qəbul paneli faylı ayrıca multipart endpoint-inə göndərir,
+        # reyestr isə server-render cədvəldir (filtr/sıralama linklə).
+        "student-admission",
+        "student-registry",
+        # Ekran 21 — tam OXU-ONLY hesabat paneli (mutasiya yoxdur) → AJAX-safe.
+        "lessons-log",
     }
 )
 
@@ -419,6 +472,10 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     # mutasiyaları keşi `applications.services.notify` içindən invalidasiya edir.
     if "applications" in capabilities.get("allowed_sections", set()):
         payload["applications_pending_count"] = shared_badges.get("applications_pending", 0)
+    # «Sual təsdiqi» — kafedra növbəsi; yazılar keşi servis qatından
+    # (``question_chair_review._invalidate_badges``) invalidasiya edir.
+    if "question-chair-review" in capabilities.get("allowed_sections", set()):
+        payload["question_chair_pending_count"] = shared_badges.get("question_chair_pending", 0)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

@@ -411,6 +411,10 @@
             .then(function (payload) {
                 NS.catalog = payload;
                 renderKindOptions();
+                // «Yeni müraciət» dərin keçidi (`?section=applications&new_kind=…`).
+                // Kataloq gəldikdən SONRA açılır — növ siyahısı boş dialoqda
+                // seçim göstərə bilməzdi. Naməlum kod səssizcə atılır.
+                openPresetKind(root);
                 // Sətirlərin sağ etiketi növün normasına söykənir → kataloq
                 // gələndən sonra siyahı bir dəfə yenidən boyanır.
                 renderList();
@@ -423,6 +427,23 @@
         if (deepLink) {
             NS.openApplication(deepLink);
         }
+    }
+
+    /** `?new_kind=` → «Yeni müraciət» dialoqu, növ öncədən seçilmiş. */
+    function openPresetKind(root) {
+        var code = root && root.dataset ? (root.dataset.newKind || "").trim() : "";
+        if (!code || root.dataset.canCreate !== "1" || !NS.openCreate) {
+            return;
+        }
+        var kinds = (NS.catalog && NS.catalog.kinds) || [];
+        var known = kinds.filter(function (kind) {
+            return kind.code === code;
+        }).length > 0;
+        if (!known) {
+            return;
+        }
+        root.dataset.newKind = "";
+        NS.openCreate("create", null, code);
     }
 
     NS.boot = boot;

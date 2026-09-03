@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+  @keyframes emsShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+</style>
+</helmet>
+<div style="max-width:1280px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V7l8-4 8 4v14"></path><path d="M9 21v-5h6v5"></path></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxRole }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 tədris ili</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxNorm }}</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">{{ ctxPerm }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Kafedralar</h1>
+      <p style="margin:6px 0 0;max-width:660px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Kafedra pasportu: müəllim heyəti, ştat tutumu, dərs yükünün tarazlığı və akkreditasiya göstəriciləri bir ekranda.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <button type="button" onClick="{{ exportAll }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-neutral-50)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Ştat cədvəli (XLSX)
+      </button>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ openEdit }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          Pasportu redaktə et
+        </button>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+    <button type="button" onClick="{{ toggleRail }}" aria-expanded="{{ railOpen }}" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 14px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      Kafedra siyahısı
+    </button>
+  </sc-if>
+
+  <div style="display:grid;grid-template-columns:{{ colTpl }};gap:16px;align-items:start">
+
+    <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+      <aside style="position:sticky;top:16px;padding:14px 12px 12px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px 11px">
+          <span style="font-size:1.02rem;font-weight:800;letter-spacing:-.01em;color:var(--ems-neutral-900)">{{ railTitle }}</span>
+          <span style="padding:2px 9px;border-radius:999px;background:var(--ems-neutral-100);color:var(--ems-neutral-500);font-size:.72rem;font-weight:800">{{ railCount }}</span>
+        </div>
+
+        <div style="position:relative;padding:0 4px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:14px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+          <label for="ems-k-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Kafedra axtar</label>
+          <input id="ems-k-q" type="text" value="{{ railQ }}" onChange="{{ onRailQ }}" placeholder="Kafedra və ya müdir axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem;color:var(--ems-neutral-900)">
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+          <sc-for list="{{ tree }}" as="f" hint-placeholder-count="3">
+            <div>
+              <div style="display:flex;align-items:center;gap:7px;padding:0 8px 6px">
+                <span style="flex:1;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400);text-wrap:pretty">{{ f.name }}</span>
+                <span style="font-size:.7rem;font-weight:800;color:var(--ems-neutral-300)">{{ f.count }}</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:3px">
+                <sc-for list="{{ f.depts }}" as="d" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ d.pick }}" aria-current="{{ d.sel }}" style="display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;border:1px solid {{ d.bd }};background:{{ d.bg }};cursor:pointer;text-align:left" style-hover="background:{{ d.hoverBg }}">
+                    <span style="width:8px;height:8px;flex:none;border-radius:999px;background:{{ d.dot }}"></span>
+                    <span style="flex:1;min-width:0">
+                      <span style="display:block;font-size:.82rem;font-weight:{{ d.fw }};color:{{ d.fg }};line-height:1.3;text-wrap:pretty">{{ d.name }}</span>
+                      <span style="display:block;margin-top:2px;font-size:.71rem;color:{{ d.sub }}">{{ d.meta }}</span>
+                    </span>
+                    <span style="font-size:.74rem;font-weight:800;color:{{ d.pctFg }}">{{ d.pct }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ treeEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:18px 10px;text-align:center;font-size:.8rem;color:var(--ems-neutral-400);text-wrap:pretty">«{{ railQ }}» üzrə kafedra tapılmadı</div>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:14px;padding:11px 10px 2px;border-top:1px solid var(--ems-neutral-200)">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:.71rem;color:var(--ems-neutral-500)">
+              <span style="width:7px;height:7px;border-radius:999px;background:{{ l.dot }}"></span>{{ l.label }}
+            </span>
+          </sc-for>
+        </div>
+      </aside>
+    </sc-if>
+
+    <div style="min-width:0;display:flex;flex-direction:column;gap:14px">
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div aria-busy="true" aria-live="polite" style="display:flex;flex-direction:column;gap:12px">
+          <div style="height:132px;border-radius:16px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+            <sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+              <div style="height:88px;border-radius:14px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+            </sc-for>
+          </div>
+          <div style="height:320px;border-radius:16px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+        <div role="alert" style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:52px 20px;text-align:center;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-danger)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="7.5" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.5"></line></svg>
+          <div style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Kafedra pasportu yüklənmədi</div>
+          <div style="font-size:.82rem;color:var(--ems-neutral-500);max-width:360px;text-wrap:pretty">Heyət və yük məlumatı gətirilə bilmədi. Bir azdan yenidən cəhd edin.</div>
+          <button type="button" onClick="{{ retry }}" style="padding:9px 17px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.83rem;font-weight:700;cursor:pointer">Yenidən cəhd et</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px;overflow:hidden">
+
+          <div style="padding:16px 18px 0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:.75rem;color:var(--ems-neutral-400);margin-bottom:9px">
+              <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+                <button type="button" onClick="{{ backToList }}" style="display:inline-flex;align-items:center;gap:5px;margin-right:4px;padding:4px 9px;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.74rem;font-weight:700;cursor:pointer">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  Siyahı
+                </button>
+              </sc-if>
+              <sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="3">
+                <span style="display:inline-flex;align-items:center;gap:7px">
+                  <span style="color:{{ c.fg }};font-weight:{{ c.fw }}">{{ c.label }}</span>
+                  <sc-if value="{{ c.sep }}" hint-placeholder-val="{{ false }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </sc-if>
+                </span>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+              <div style="min-width:0;flex:1">
+                <h2 style="margin:0;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900);text-wrap:pretty">{{ k.name }}</h2>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px">
+                  <span style="padding:3px 10px;border-radius:999px;background:{{ k.healthBg }};color:{{ k.healthFg }};font-size:.73rem;font-weight:800">{{ k.healthLabel }}</span>
+                  <span style="padding:3px 10px;border-radius:999px;background:var(--ems-neutral-100);color:var(--ems-neutral-700);font-size:.73rem;font-weight:700">Yaranıb: {{ k.since }}</span>
+                  <span style="padding:3px 10px;border-radius:999px;background:var(--ems-neutral-100);color:var(--ems-neutral-700);font-size:.73rem;font-weight:700">{{ k.room }}</span>
+                  <span style="padding:3px 10px;border-radius:999px;background:var(--ems-neutral-100);color:var(--ems-neutral-700);font-size:.73rem;font-weight:700">{{ k.phone }}</span>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 14px;border:1px solid var(--ems-primary-200);background:var(--ems-primary-50);border-radius:13px">
+                <span style="width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:12px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.9rem;font-weight:800;letter-spacing:.02em">{{ k.headIni }}</span>
+                <span style="min-width:0">
+                  <span style="display:block;font-size:.71rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-primary-700)">Kafedra müdiri</span>
+                  <span style="display:block;margin-top:2px;font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">{{ k.headName }}</span>
+                  <span style="display:block;margin-top:1px;font-size:.75rem;color:var(--ems-primary-800)">{{ k.headMeta }}</span>
+                </span>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:11px;margin-top:16px">
+              <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+                <div style="padding:13px 15px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px">
+                  <div style="font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+                  <div style="margin-top:6px;font-size:1.3rem;font-weight:800;letter-spacing:-.02em;color:{{ m.valFg }}">{{ m.value }}</div>
+                  <div style="margin-top:3px;font-size:.73rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;gap:2px;margin-top:16px;overflow-x:auto;border-bottom:1px solid var(--ems-neutral-200)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+                <button type="button" onClick="{{ t.pick }}" aria-current="{{ t.sel }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 13px;border:none;border-bottom:2px solid {{ t.bd }};background:transparent;color:{{ t.fg }};font-size:.85rem;font-weight:{{ t.fw }};white-space:nowrap;cursor:pointer">
+                  {{ t.label }}
+                  <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+                    <span style="padding:1px 6px;border-radius:999px;background:{{ t.cntBg }};color:{{ t.cntFg }};font-size:.7rem;font-weight:800">{{ t.count }}</span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:18px">
+
+            <sc-if value="{{ tabUmumi }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:{{ ovTpl }};gap:14px;align-items:start">
+
+                <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+                  <div style="padding:16px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                      <span style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Ştat tutumu ilə illik yükün müqayisəsi</span>
+                      <span style="font-size:.75rem;color:var(--ems-neutral-500)">{{ balNorm }}</span>
+                    </div>
+
+                    <div style="position:relative;margin-top:14px;height:34px;border-radius:9px;background:var(--ems-neutral-100);overflow:hidden">
+                      <div style="position:absolute;inset:0 auto 0 0;width:{{ balAssignedW }};background:var(--ems-primary-600)"></div>
+                      <div style="position:absolute;top:0;bottom:0;left:{{ balAssignedW }};width:{{ balUnW }};background:repeating-linear-gradient(45deg,#fca5a5,#fca5a5 6px,#fecaca 6px,#fecaca 12px)"></div>
+                    </div>
+                    <div style="position:relative;height:20px;margin-top:2px">
+                      <span style="position:absolute;left:{{ balCapX }};transform:translateX(-50%);display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:800;color:var(--ems-neutral-700);white-space:nowrap">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="4" x2="12" y2="20"></line></svg>
+                        ştat tutumu
+                      </span>
+                    </div>
+
+                    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:8px">
+                      <sc-for list="{{ balLegend }}" as="b" hint-placeholder-count="3">
+                        <span style="display:inline-flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ems-neutral-500)">
+                          <span style="width:11px;height:11px;border-radius:3px;background:{{ b.color }}"></span>
+                          {{ b.label }} <b style="color:var(--ems-neutral-900)">{{ b.value }}</b>
+                        </span>
+                      </sc-for>
+                    </div>
+
+                    <div style="display:flex;align-items:flex-start;gap:9px;margin-top:14px;padding:11px 13px;background:{{ balTipBg }};border:1px solid {{ balTipBd }};border-radius:11px">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ balTipFg }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+                      <span style="flex:1;font-size:.8rem;line-height:1.5;color:{{ balTipFg }};text-wrap:pretty">{{ balTip }}</span>
+                      <sc-if value="{{ needsHourly }}" hint-placeholder-val="{{ false }}">
+                        <button type="button" onClick="{{ openHourly }}" style="flex:none;padding:6px 12px;border-radius:8px;border:1px solid {{ balTipFg }};background:transparent;color:{{ balTipFg }};font-size:.76rem;font-weight:800;cursor:pointer">Təklif hazırla</button>
+                      </sc-if>
+                    </div>
+                  </div>
+
+                  <div style="padding:16px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:12px">Kadr strukturu — vəzifələr üzrə müəllim sayı</div>
+                    <div style="display:flex;flex-direction:column;gap:9px">
+                      <sc-for list="{{ ranks }}" as="r" hint-placeholder-count="5">
+                        <div style="display:flex;align-items:center;gap:11px">
+                          <span style="width:112px;flex:none;font-size:.79rem;color:var(--ems-neutral-700)">{{ r.label }}</span>
+                          <span style="flex:1;height:9px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+                            <span style="display:block;height:100%;width:{{ r.w }};background:{{ r.color }};border-radius:999px"></span>
+                          </span>
+                          <span style="width:64px;flex:none;text-align:right;font-size:.78rem;font-weight:800;color:var(--ems-neutral-900)">{{ r.value }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--ems-neutral-100);display:flex;flex-wrap:wrap;gap:8px">
+                      <sc-for list="{{ empTypes }}" as="e" hint-placeholder-count="3">
+                        <span style="padding:4px 11px;border-radius:999px;background:{{ e.bg }};color:{{ e.fg }};font-size:.75rem;font-weight:700">{{ e.label }}</span>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+                  <div style="padding:16px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                      <span style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Akkreditasiya göstəriciləri</span>
+                      <span style="font-size:.73rem;font-weight:800;color:{{ accFg }}">{{ accSummary }}</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:1px;margin-top:12px;border:1px solid var(--ems-neutral-200);border-radius:11px;overflow:hidden">
+                      <sc-for list="{{ acc }}" as="a" hint-placeholder-count="5">
+                        <div style="display:flex;align-items:center;gap:10px;padding:11px 13px;background:{{ a.bg }}">
+                          <span style="width:18px;height:18px;flex:none;display:grid;place-items:center;border-radius:999px;background:{{ a.iconBg }};color:var(--ems-neutral-0);font-size:.66rem;font-weight:800">{{ a.icon }}</span>
+                          <span style="flex:1;min-width:0">
+                            <span style="display:block;font-size:.81rem;font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ a.label }}</span>
+                            <span style="display:block;margin-top:1px;font-size:.72rem;color:var(--ems-neutral-500)">{{ a.norm }}</span>
+                          </span>
+                          <span style="font-size:.9rem;font-weight:800;color:{{ a.fg }};white-space:nowrap">{{ a.value }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div style="padding:16px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:11px">Diqqət tələb edən məsələlər</div>
+                    <sc-if value="{{ hasRisks }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <sc-for list="{{ risks }}" as="r" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:{{ r.bg }};border:1px solid {{ r.bd }};border-radius:11px">
+                            <span style="width:7px;height:7px;flex:none;margin-top:6px;border-radius:999px;background:{{ r.dot }}"></span>
+                            <span style="flex:1;min-width:0">
+                              <span style="display:block;font-size:.82rem;font-weight:700;color:{{ r.fg }};text-wrap:pretty">{{ r.title }}</span>
+                              <span style="display:block;margin-top:2px;font-size:.76rem;color:{{ r.subFg }};line-height:1.45;text-wrap:pretty">{{ r.note }}</span>
+                            </span>
+                            <a href="#" onClick="{{ r.go }}" style="flex:none;font-size:.76rem;font-weight:800;white-space:nowrap">{{ r.cta }}</a>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ noRisks }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--ems-success-bg);border-radius:11px">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+                        <span style="font-size:.82rem;font-weight:700;color:#15803d">Açıq məsələ yoxdur — yük bölgüsü tarazdır.</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabHeyet }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px">
+                  <div style="position:relative;flex:1;min-width:190px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                    <label for="ems-t-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Müəllim axtar</label>
+                    <input id="ems-t-q" type="text" value="{{ staffQ }}" onChange="{{ onStaffQ }}" placeholder="Müəllim adı üzrə axtar" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+                  </div>
+                  <sc-for list="{{ typeChips }}" as="c" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 13px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+                  </sc-for>
+                  <button type="button" onClick="{{ toggleOff }}" role="switch" aria-checked="{{ onlyOff }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);font-size:.8rem;font-weight:700;color:{{ offFg }};cursor:pointer">
+                    <span style="width:30px;height:17px;border-radius:999px;background:{{ offTrack }};position:relative;flex:none">
+                      <span style="position:absolute;top:2px;left:{{ offLeft }};width:13px;height:13px;border-radius:999px;background:var(--ems-neutral-0)"></span>
+                    </span>
+                    Normadan kənar
+                  </button>
+                  <div style="position:relative">
+                    <button type="button" onClick="{{ toggleSort }}" aria-haspopup="listbox" aria-expanded="{{ sortOpen }}" style="display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.8rem;font-weight:700;cursor:pointer">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="6" y1="12" x2="18" y2="12"></line><line x1="9" y1="17" x2="15" y2="17"></line></svg>
+                      {{ sortShort }}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <sc-if value="{{ sortOpen }}" hint-placeholder-val="{{ false }}">
+                      <div role="listbox" aria-label="Sıralama" style="position:absolute;top:100%;right:0;z-index:40;width:236px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);display:flex;flex-direction:column;gap:2px">
+                        <sc-for list="{{ sortOpts }}" as="o" hint-placeholder-count="4">
+                          <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.81rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+
+                <sc-if value="{{ staffEmpty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 20px;text-align:center;background:var(--ems-neutral-50);border:1px dashed var(--ems-neutral-300);border-radius:13px">
+                    <div style="font-size:.86rem;font-weight:700;color:var(--ems-neutral-900)">Filtrə uyğun müəllim yoxdur</div>
+                    <button type="button" onClick="{{ resetStaff }}" style="padding:8px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ staffShown }}" hint-placeholder-val="{{ true }}">
+                  <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                    <table style="width:100%;min-width:940px;font-size:.81rem">
+                      <thead>
+                        <tr style="background:var(--ems-primary-50)">
+                          <th style="padding:9px 13px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Müəllim</th>
+                          <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Vəzifə</th>
+                          <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Ştat vahidi</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">İllik norma, saat</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Planlaşdırılmış yük, saat</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Normadan fərq</th>
+                          <th style="padding:9px 12px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800);width:150px">Normanın doldurulması</th>
+                          <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənn sayı</th>
+                          <th style="padding:9px 12px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ staff }}" as="t" hint-placeholder-count="6">
+                          <tr onClick="{{ t.open }}" tabindex="0" onKeyDown="{{ t.key }}" style="background:{{ t.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">
+                            <td style="padding:10px 13px;border-top:1px solid var(--ems-neutral-100)">
+                              <div style="display:flex;align-items:center;gap:10px">
+                                <span style="width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:9px;background:{{ t.avBg }};color:{{ t.avFg }};font-size:.72rem;font-weight:800">{{ t.ini }}</span>
+                                <span style="min-width:0">
+                                  <span style="display:block;font-weight:700;color:var(--ems-neutral-900);white-space:nowrap">{{ t.name }}</span>
+                                  <span style="display:block;margin-top:1px;font-size:.72rem;color:var(--ems-neutral-400)">{{ t.degree }}</span>
+                                </span>
+                              </div>
+                            </td>
+                            <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700);white-space:nowrap">{{ t.rank }}</td>
+                            <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100)">
+                              <span style="padding:2px 8px;border-radius:6px;background:{{ t.typeBg }};color:{{ t.typeFg }};font-size:.71rem;font-weight:700;white-space:nowrap">{{ t.stLabel }}</span>
+                            </td>
+                            <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700)">{{ t.norm }}</td>
+                            <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-neutral-900)">{{ t.plan }}</td>
+                            <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:{{ t.diffFg }};white-space:nowrap">{{ t.diff }}</td>
+                            <td style="padding:10px 12px;border-top:1px solid var(--ems-neutral-100)">
+                              <div style="display:flex;align-items:center;gap:8px">
+                                <span style="flex:1;height:7px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden;min-width:56px">
+                                  <span style="display:block;height:100%;width:{{ t.barW }};background:{{ t.barFg }};border-radius:999px"></span>
+                                </span>
+                                <span style="font-size:.74rem;font-weight:800;color:{{ t.barFg }};width:38px;text-align:right">{{ t.pct }}</span>
+                              </div>
+                            </td>
+                            <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700)">{{ t.sub }}</td>
+                            <td style="padding:10px 12px;text-align:right;border-top:1px solid var(--ems-neutral-100)">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                      <tfoot>
+                        <tr style="background:var(--ems-neutral-50)">
+                          <td colspan="3" style="padding:11px 13px;border-top:1px solid var(--ems-neutral-200);font-size:.78rem;font-weight:800;color:var(--ems-neutral-700)">{{ staffTotalLabel }}</td>
+                          <td style="padding:11px 10px;text-align:right;border-top:1px solid var(--ems-neutral-200);font-weight:800;color:var(--ems-neutral-700)">{{ sumNorm }}</td>
+                          <td style="padding:11px 10px;text-align:right;border-top:1px solid var(--ems-neutral-200);font-weight:800;color:var(--ems-neutral-900)">{{ sumPlan }}</td>
+                          <td style="padding:11px 10px;text-align:right;border-top:1px solid var(--ems-neutral-200);font-weight:800;color:{{ sumDiffFg }}">{{ sumDiff }}</td>
+                          <td colspan="3" style="border-top:1px solid var(--ems-neutral-200)"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                  <div style="margin-top:8px;font-size:.75rem;color:var(--ems-neutral-400);text-wrap:pretty">Saathesabı müəllimlərdə norma yerinə illik müqavilə limiti (300 saat) götürülür — ştat vahidi hesablanmır.</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabBalans }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:13px">
+                  <sc-for list="{{ semChips }}" as="c" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ c.pick }}" style="height:34px;padding:0 14px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+                  </sc-for>
+                  <span style="margin-left:auto;font-size:.78rem;color:var(--ems-neutral-500)">{{ semNote }}</span>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:11px;margin-bottom:15px">
+                  <sc-for list="{{ balTiles }}" as="b" hint-placeholder-count="4">
+                    <div style="padding:13px 15px;border:1px solid {{ b.bd }};background:{{ b.bg }};border-radius:13px">
+                      <div style="font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ b.labFg }}">{{ b.label }}</div>
+                      <div style="margin-top:5px;font-size:1.2rem;font-weight:800;color:{{ b.valFg }}">{{ b.value }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="padding:16px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:13px">
+                    <span style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Müəllim üzrə yük paylanması</span>
+                    <span style="font-size:.74rem;color:var(--ems-neutral-400)">qara şaquli xətt = müəllimin illik norması</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <sc-for list="{{ bars }}" as="b" hint-placeholder-count="7">
+                      <div style="display:flex;align-items:center;gap:11px">
+                        <span style="width:150px;flex:none;min-width:0">
+                          <span style="display:block;font-size:.79rem;font-weight:600;color:var(--ems-neutral-900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.name }}</span>
+                          <span style="display:block;font-size:.7rem;color:var(--ems-neutral-400)">{{ b.rank }}</span>
+                        </span>
+                        <span style="flex:1;position:relative;height:20px;border-radius:6px;background:var(--ems-neutral-100);overflow:hidden">
+                          <span style="display:block;height:100%;width:{{ b.w }};background:{{ b.color }}"></span>
+                          <span style="position:absolute;top:0;bottom:0;left:{{ b.markX }};width:2px;background:var(--ems-neutral-900);opacity:.55"></span>
+                        </span>
+                        <span style="width:112px;flex:none;text-align:right;font-size:.77rem;color:var(--ems-neutral-500);white-space:nowrap">{{ b.meta }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div style="margin-top:15px;padding:16px;border:1px solid {{ unBd }};background:{{ unBg }};border-radius:14px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:11px">
+                    <span style="font-size:.93rem;font-weight:800;color:{{ unFg }}">Müəllimə təyin olunmamış saatlar</span>
+                    <sc-if value="{{ hasUn }}" hint-placeholder-val="{{ true }}">
+                      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                        <button type="button" onClick="{{ openHourly }}" style="padding:8px 14px;border-radius:9px;border:1px solid {{ unFg }};background:var(--ems-neutral-0);color:{{ unFg }};font-size:.8rem;font-weight:800;cursor:pointer">Saathesabı təklifi hazırla</button>
+                      </sc-if>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ hasUn }}" hint-placeholder-val="{{ true }}">
+                    <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:11px;background:var(--ems-neutral-0)">
+                      <table style="width:100%;min-width:640px;font-size:.81rem">
+                        <thead>
+                          <tr style="background:var(--ems-neutral-50)">
+                            <th style="padding:9px 12px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500)">Fənn</th>
+                            <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500)">Qrup</th>
+                            <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500)">İllik saat</th>
+                            <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500)">Niyə təyin olunmayıb</th>
+                            <th style="padding:9px 12px"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <sc-for list="{{ unRows }}" as="u" hint-placeholder-count="2">
+                            <tr>
+                              <td style="padding:10px 12px;border-top:1px solid var(--ems-neutral-100)">
+                                <span style="display:block;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ u.name }}</span>
+                                <span style="display:block;margin-top:2px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;color:var(--ems-neutral-400)">{{ u.code }}</span>
+                              </td>
+                              <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700);white-space:nowrap">{{ u.group }}</td>
+                              <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:var(--ems-danger)">{{ u.hours }}</td>
+                              <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-500);text-wrap:pretty">{{ u.reason }}</td>
+                              <td style="padding:10px 12px;text-align:right;border-top:1px solid var(--ems-neutral-100)"><a href="#" onClick="{{ u.assign }}" style="font-size:.76rem;font-weight:800;white-space:nowrap">Müəllim təyin et</a></td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ noUn }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;align-items:center;gap:10px;font-size:.83rem;font-weight:700;color:#15803d">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+                      Bütün saatlar müəllimlərə təyin olunub.
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabIxtisas }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div>
+                  <div style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:10px">Kafedranın öz ixtisasları</div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:11px">
+                    <sc-for list="{{ programs }}" as="p" hint-placeholder-count="3">
+                      <div style="padding:14px 15px;border:1px solid var(--ems-neutral-200);border-left:3px solid {{ p.accent }};border-radius:12px">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                          <span style="min-width:0">
+                            <span style="display:block;font-size:.88rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ p.name }}</span>
+                            <span style="display:block;margin-top:3px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.73rem;color:var(--ems-neutral-400)">{{ p.code }} · {{ p.deg }}</span>
+                          </span>
+                        </div>
+                        <div style="margin-top:9px"><span style="display:inline-block;padding:2px 9px;border-radius:999px;background:{{ p.planBg }};color:{{ p.planFg }};font-size:.72rem;font-weight:800">{{ p.planLabel }}</span></div>
+                        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:.78rem;color:var(--ems-neutral-500)">
+                          <span><b style="color:var(--ems-neutral-900)">{{ p.groups }}</b> qrup</span>
+                          <span><b style="color:var(--ems-neutral-900)">{{ p.students }}</b> tələbə</span>
+                          <a href="#" onClick="{{ p.go }}" style="margin-left:auto;font-weight:800">İxtisas kartı</a>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px">
+                    <span style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Kafedranın fənlərini başqa ixtisaslara verməsi (xidməti yük)</span>
+                    <span style="font-size:.75rem;color:var(--ems-neutral-400)">bu fənlər başqa kafedranın ixtisas planındadır</span>
+                  </div>
+                  <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                    <table style="width:100%;min-width:620px;font-size:.81rem">
+                      <thead>
+                        <tr style="background:var(--ems-primary-50)">
+                          <th style="padding:9px 13px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">İxtisas</th>
+                          <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Sifarişçi kafedra</th>
+                          <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənn sayı</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">İllik saat</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Xidməti yükdə payı</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ served }}" as="s" hint-placeholder-count="3">
+                          <tr style="background:{{ s.bg }}">
+                            <td style="padding:10px 13px;border-top:1px solid var(--ems-neutral-100);font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ s.prog }}</td>
+                            <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-500);text-wrap:pretty">{{ s.dept }}</td>
+                            <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700)">{{ s.courses }}</td>
+                            <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-neutral-900)">{{ s.hours }}</td>
+                            <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:var(--ems-primary-800)">{{ s.share }}</td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="margin-top:7px;font-size:.76rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ servedNote }}</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabFenn }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px">
+                  <sc-for list="{{ ownChips }}" as="c" hint-placeholder-count="3">
+                    <button type="button" onClick="{{ c.pick }}" style="height:34px;padding:0 14px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+                  </sc-for>
+                  <span style="margin-left:auto;font-size:.78rem;color:var(--ems-neutral-500)">{{ courseNote }}</span>
+                </div>
+                <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                  <table style="width:100%;min-width:860px;font-size:.81rem">
+                    <thead>
+                      <tr style="background:var(--ems-primary-50)">
+                        <th style="padding:9px 13px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Kod</th>
+                        <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənn</th>
+                        <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Kredit</th>
+                        <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Qrup sayı</th>
+                        <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Aparan müəllimlər</th>
+                        <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">İllik saat</th>
+                        <th style="padding:9px 12px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənnin tipi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ courses }}" as="c" hint-placeholder-count="6">
+                        <tr style="background:{{ c.bg }}">
+                          <td style="padding:10px 13px;border-top:1px solid var(--ems-neutral-100);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;color:var(--ems-neutral-500);white-space:nowrap">{{ c.code }}</td>
+                          <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ c.name }}</td>
+                          <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-primary-800)">{{ c.kr }}</td>
+                          <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700)">{{ c.groups }}</td>
+                          <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-500);text-wrap:pretty">{{ c.teachers }}</td>
+                          <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-neutral-900)">{{ c.hours }}</td>
+                          <td style="padding:10px 12px;border-top:1px solid var(--ems-neutral-100)"><span style="padding:2px 8px;border-radius:6px;background:{{ c.tBg }};color:{{ c.tFg }};font-size:.71rem;font-weight:700;white-space:nowrap">{{ c.tLabel }}</span></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabIclas }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+                  <span style="font-size:.82rem;color:var(--ems-neutral-500);text-wrap:pretty">Kafedra iclaslarının protokolları — yük bölgüsü və plan dəyişikliyi bu protokollarla rəsmiləşir.</span>
+                  <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ newProtocol }}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      Yeni protokol
+                    </button>
+                  </sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ meets }}" as="m" hint-placeholder-count="3">
+                    <div style="border:1px solid var(--ems-neutral-200);border-radius:12px;overflow:hidden;background:{{ m.cardBg }}">
+                      <button type="button" onClick="{{ m.toggle }}" aria-expanded="{{ m.open }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;background:transparent;cursor:pointer;text-align:left">
+                        <span style="width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:800">{{ m.prot }}</span>
+                        <span style="flex:1;min-width:0">
+                          <span style="display:block;font-size:.85rem;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ m.title }}</span>
+                          <span style="display:block;margin-top:2px;font-size:.74rem;color:var(--ems-neutral-500)">{{ m.meta }}</span>
+                        </span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;transform:{{ m.rot }};transition:transform .15s ease"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </button>
+                      <sc-if value="{{ m.open }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:0 14px 14px 64px;display:flex;flex-direction:column;gap:10px">
+                          <div>
+                            <div style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400);margin-bottom:6px">Gündəlik</div>
+                            <div style="display:flex;flex-direction:column;gap:5px">
+                              <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="3">
+                                <div style="display:flex;align-items:flex-start;gap:8px;font-size:.82rem;color:var(--ems-neutral-700);text-wrap:pretty">
+                                  <span style="width:19px;height:19px;flex:none;display:grid;place-items:center;border-radius:6px;background:var(--ems-neutral-100);font-size:.68rem;font-weight:800;color:var(--ems-neutral-500)">{{ it.n }}</span>
+                                  {{ it.text }}
+                                </div>
+                              </sc-for>
+                            </div>
+                          </div>
+                          <div style="padding:11px 13px;background:var(--ems-primary-50);border-radius:10px">
+                            <div style="font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-primary-700);margin-bottom:4px">Qərar</div>
+                            <div style="font-size:.82rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">{{ m.dec }}</div>
+                          </div>
+                          <a href="#" onClick="{{ m.open2 }}" style="font-size:.78rem;font-weight:800">Protokolun tam mətnini aç</a>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+<sc-if value="{{ mTeacher }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end;background:rgba(15,23,42,.42)" onClick="{{ closeTeacher }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-tt" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:600px;height:100%;overflow:auto;background:var(--ems-neutral-0);box-shadow:-18px 0 50px rgba(15,23,42,.22)">
+      <div style="position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 22px;background:var(--ems-neutral-0);border-bottom:1px solid var(--ems-neutral-200)">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <span style="width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.95rem;font-weight:800">{{ tv.ini }}</span>
+          <div style="min-width:0">
+            <h3 id="ems-tt" style="margin:0;font-size:1.04rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ tv.name }}</h3>
+            <div style="margin-top:3px;font-size:.79rem;color:var(--ems-neutral-500)">{{ tv.sub }}</div>
+          </div>
+        </div>
+        <button type="button" onClick="{{ closeTeacher }}" aria-label="Paneli bağla" style="width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
+      </div>
+
+      <div style="padding:18px 22px 30px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:1px;border:1px solid var(--ems-neutral-200);border-radius:12px;overflow:hidden;background:var(--ems-neutral-200)">
+          <sc-for list="{{ tv.facts }}" as="f" hint-placeholder-count="4">
+            <div style="padding:11px 13px;background:var(--ems-neutral-0)">
+              <div style="font-size:.66rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ f.label }}</div>
+              <div style="margin-top:4px;font-size:.88rem;font-weight:800;color:{{ f.fg }}">{{ f.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px">
+            <span style="font-size:.88rem;font-weight:800;color:var(--ems-neutral-900)">Semestr üzrə yük</span>
+            <span style="font-size:.74rem;color:var(--ems-neutral-400)">{{ tv.normNote }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ tv.sems }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="width:74px;flex:none;font-size:.79rem;color:var(--ems-neutral-700)">{{ s.label }}</span>
+                <span style="flex:1;height:16px;border-radius:5px;background:var(--ems-neutral-100);overflow:hidden">
+                  <span style="display:block;height:100%;width:{{ s.w }};background:{{ s.color }}"></span>
+                </span>
+                <span style="width:76px;flex:none;text-align:right;font-size:.78rem;font-weight:700;color:var(--ems-neutral-900)">{{ s.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:.88rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Apardığı fənlər</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ tv.courses }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--ems-neutral-200);border-radius:10px">
+                <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.73rem;color:var(--ems-neutral-400);white-space:nowrap">{{ c.code }}</span>
+                <span style="flex:1;min-width:0;font-size:.82rem;font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ c.name }}</span>
+                <span style="font-size:.76rem;color:var(--ems-neutral-500);white-space:nowrap">{{ c.meta }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+          <span style="flex:1;font-size:.79rem;color:var(--ems-neutral-500);line-height:1.5;text-wrap:pretty">{{ tv.planNote }}</span>
+          <a href="#" onClick="{{ tv.goPlan }}" style="flex:none;font-size:.77rem;font-weight:800;white-space:nowrap">Fərdi iş planı</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mHourly }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeHourly }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-ht" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:560px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="display:flex;align-items:center;gap:11px;padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <span style="width:32px;height:32px;flex:none;display:grid;place-items:center;border-radius:9px;background:var(--ems-warning-bg)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+        </span>
+        <h3 id="ems-ht" style="margin:0;font-size:1rem;font-weight:800;color:var(--ems-neutral-900)">Saathesabı müqavilə təklifi</h3>
+      </div>
+      <div style="padding:18px 22px;display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-warning-bg);border:1px solid #fde68a;border-radius:10px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><line x1="12" y1="9" x2="12" y2="13.5"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+          <span style="font-size:.79rem;color:#92400e;line-height:1.5;text-wrap:pretty">{{ hv.warn }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:13px">
+          <div>
+            <label for="ems-h-h" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Tələb olunan saat <span style="color:var(--ems-danger)">*</span></label>
+            <input id="ems-h-h" type="number" value="{{ hv.hours }}" onChange="{{ hv.setHours }}" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ hv.hoursBd }};border-radius:9px;font-size:.85rem">
+            <sc-if value="{{ hv.hoursErr }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:5px;font-size:.74rem;font-weight:700;color:var(--ems-danger)">{{ hv.hoursMsg }}</div>
+            </sc-if>
+          </div>
+          <div>
+            <label for="ems-h-c" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Müqavilə sayı</label>
+            <input id="ems-h-c" type="text" value="{{ hv.contracts }}" disabled="{{ true }}" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-200);border-radius:9px;font-size:.85rem;background:var(--ems-neutral-50);color:var(--ems-neutral-500)">
+          </div>
+        </div>
+        <div>
+          <label for="ems-h-n" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Namizəd / mənbə</label>
+          <input id="ems-h-n" type="text" value="{{ hv.cand }}" onChange="{{ hv.setCand }}" placeholder="Məsələn: sənaye mütəxəssisi, doktorant, digər kafedra" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div>
+          <label for="ems-h-w" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Əsaslandırma <span style="color:var(--ems-danger)">*</span></label>
+          <textarea id="ems-h-w" rows="3" value="{{ hv.why }}" onChange="{{ hv.setWhy }}" placeholder="Ştat tutumunun çatışmazlığının səbəbi və alternativlərin nəzərdən keçirilməsi" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.84rem;resize:vertical"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <span style="font-size:.75rem;color:var(--ems-neutral-500);text-wrap:pretty">Təklif dekanlığa, sonra Tədris şöbəsinə göndərilir.</span>
+        <div style="display:flex;gap:9px">
+          <button type="button" onClick="{{ closeHourly }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+          <button type="button" onClick="{{ hv.send }}" disabled="{{ hv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ hv.bd }};background:{{ hv.bg }};color:{{ hv.fg }};font-size:.83rem;font-weight:700;cursor:{{ hv.cur }}">Təklifi göndər</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mEdit }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeEdit }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-et" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:600px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-et" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Kafedra pasportu</h3>
+        <button type="button" onClick="{{ closeEdit }}" aria-label="Modalı bağla" style="width:30px;height:30px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
+      </div>
+      <div style="padding:20px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div style="grid-column:1/-1">
+          <label for="ems-k-n" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Kafedranın tam adı</label>
+          <input id="ems-k-n" type="text" value="{{ evName }}" onChange="{{ setEvName }}" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ evNameBd }};border-radius:9px;font-size:.85rem">
+        </div>
+        <div>
+          <label for="ems-k-r" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Otaq</label>
+          <input id="ems-k-r" type="text" value="{{ evRoom }}" onChange="{{ setEvRoom }}" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div>
+          <label for="ems-k-p" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Daxili telefon</label>
+          <input id="ems-k-p" type="text" value="{{ evPhone }}" onChange="{{ setEvPhone }}" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div style="grid-column:1/-1">
+          <label for="ems-k-e" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Rəsmi e-poçt</label>
+          <input id="ems-k-e" type="text" value="{{ evMail }}" onChange="{{ setEvMail }}" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div style="grid-column:1/-1;display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">Kafedra müdirinin təyinatı bu formadan dəyişmir — o, rektorun əmri ilə «Rollar» bölməsində rəsmiləşir.</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeEdit }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ saveEv }}" disabled="{{ evInvalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ evBd }};background:{{ evBg }};color:{{ evFg }};font-size:.83rem;font-weight:700;cursor:{{ evCur }}">Yadda saxla</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:1180},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tədris Şöbəsi müdiri&quot;,&quot;Tədris Şöbəsi əməkdaşı&quot;,&quot;Dekanlıq&quot;,&quot;Kafedra müdiri&quot;],&quot;default&quot;:&quot;Tədris Şöbəsi müdiri&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İcazə qatı&quot;},&quot;normSet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Nazirlik normaları&quot;,&quot;Universitet normaları&quot;],&quot;default&quot;:&quot;Nazirlik normaları&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Yük normaları&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Avtomatik&quot;,&quot;Skeleton&quot;,&quot;Xəta&quot;],&quot;default&quot;:&quot;Avtomatik&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Səhifə vəziyyəti&quot;}}">
+const FACS = [
+  { id:'eng', name:'Mühəndislik və Tətbiqi Elmlər', depts:[
+    { id:'pit', name:'Proqramlaşdırma və informasiya təhlükəsizliyi', short:'Proqramlaşdırma və İT' },
+    { id:'mex', name:'Mexatronika və robototexnika', short:'Mexatronika' },
+    { id:'riy', name:'Riyaziyyat', short:'Riyaziyyat' } ] },
+  { id:'eco', name:'İqtisadiyyat və İdarəetmə', depts:[
+    { id:'iqt', name:'İqtisadiyyat', short:'İqtisadiyyat' },
+    { id:'men', name:'Menecment', short:'Menecment' } ] },
+  { id:'hum', name:'Humanitar elmlər', depts:[
+    { id:'fil', name:'Filologiya', short:'Filologiya' },
+    { id:'psi', name:'Psixologiya', short:'Psixologiya' },
+    { id:'sos', name:'Sosial elmlər və humanitar fənlər', short:'Sosial elmlər' },
+    { id:'xdil', name:'Xarici dillər', short:'Xarici dillər' } ] }
+];
+const DEPT = {};
+FACS.forEach(f => f.depts.forEach(d => { DEPT[d.id] = { name:d.name, short:d.short, fac:f.id, facName:f.name }; }));
+
+const NORMSETS = {
+  'Nazirlik normaları': { 'Kafedra müdiri':450, 'Professor':550, 'Dosent':650, 'Baş müəllim':750, 'Müəllim':800, 'Assistent':850 },
+  'Universitet normaları': { 'Kafedra müdiri':500, 'Professor':600, 'Dosent':700, 'Baş müəllim':800, 'Müəllim':850, 'Assistent':900 }
+};
+const HOURLY_LIMIT = 300;
+const RANK_ORDER = ['Kafedra müdiri','Professor','Dosent','Baş müəllim','Müəllim','Assistent'];
+const DEG_LABEL = { 'e.d.':'elmlər doktoru', 'f.d.':'fəlsəfə doktoru', '':'elmi dərəcəsi yoxdur' };
+
+// n=ad, v=vəzifə, d=elmi dərəcə, st=ştat vahidi, typ=məşğulluq, pl=planlanmış saat, sb=fənn sayı, ag=yaş
+const s = (n,v,d,st,typ,pl,sb,ag) => ({ n, v, d, st, typ, pl, sb, ag });
+const c = (code,name,kr,gr,tc,h,srv) => ({ code, name, kr, gr, tc, h, srv });
+const p = (name,code,deg,gr,st,plan) => ({ name, code, deg, gr, st, plan });
+const u = (code,name,g,h,reason) => ({ code, name, g, h, reason });
+
+const KAF = {
+  pit: {
+    since:2004, room:'A-312', phone:'daxili 214', mail:'pit@wcu.edu.az',
+    staff:[
+      s('Rəşad Əliyev','Kafedra müdiri','f.d.',1,'Ştat',430,3,46),
+      s('Səlim Quliyev','Professor','e.d.',1,'Ştat',520,3,58),
+      s('Elvin Məmmədov','Dosent','f.d.',1,'Ştat',690,4,44),
+      s('Günel Rzayeva','Dosent','f.d.',1,'Ştat',640,4,41),
+      s('Nigar Həsənli','Baş müəllim','f.d.',1,'Ştat',810,5,39),
+      s('Kamran İsmayılov','Baş müəllim','f.d.',0.5,'Əvəzçilik',360,2,52),
+      s('Tural Səfərov','Müəllim','',1,'Ştat',880,5,31),
+      s('Aysel Nəbiyeva','Müəllim','',0.5,'Ştat',420,3,28),
+      s('Leyla Abbasova','Assistent','',1,'Ştat',760,4,26),
+      s('Orxan Vəliyev','Müəllim','',0,'Saathesabı',240,2,35)
+    ],
+    programs:[
+      p('Kompüter mühəndisliyi','050632','Bakalavr',4,128,'Təsdiqlənib'),
+      p('İnformasiya təhlükəsizliyi','050656','Bakalavr',3,86,'Tədris şöbəsi'),
+      p('Kompüter elmləri','060509','Magistr',2,31,'Plan yoxdur')
+    ],
+    courses:[
+      c('MİF-B03.01','İnformatika',5,8,4,960,true),
+      c('MİF-B02.07','Müasir İKT və informasiya təhlükəsizliyi',3,10,4,750,true),
+      c('MİF-B04.01','Proqramlaşdırmanın əsasları',8,6,3,900,true),
+      c('MİF-B04.04','Proqramlaşdırma texnologiyaları',8,5,2,780,true),
+      c('MİF-B04.12','Alqoritmlər və verilənlər strukturu',7,4,2,600,true),
+      c('MİF-B04.18','Obyekt yönümlü proqramlaşdırma',6,4,2,540,false),
+      c('MİF-B09.05','İnformasiya təhlükəsizliyinin əsasları',6,3,2,420,true),
+      c('MİF-B09.08','Şəbəkələrin təhlükəsizliyi',5,2,1,300,false),
+      c('MİF-B02.11','Veb texnologiyalar',4,3,2,330,false)
+    ],
+    served:[
+      { prog:'İnformasiya təhlükəsizliyi', dept:'Proqramlaşdırma və İT', courses:6, hours:820 },
+      { prog:'Mexatronika mühəndisliyi', dept:'Mexatronika', courses:3, hours:420 },
+      { prog:'İqtisadiyyat', dept:'İqtisadiyyat', courses:2, hours:260 },
+      { prog:'Biznesin idarə edilməsi', dept:'Menecment', courses:2, hours:240 }
+    ],
+    un:[
+      u('MİF-B05.03','Kompüter arxitekturası','235 KE',150,'Aparan müəllim ezamiyyətdədir'),
+      u('MİF-B04.18','Obyekt yönümlü proqramlaşdırma','234 KE',120,'Ştat vahidi boşdur')
+    ]
+  },
+  mex: {
+    since:2011, room:'B-108', phone:'daxili 231', mail:'mex@wcu.edu.az',
+    staff:[
+      s('Fərid Nəsirov','Kafedra müdiri','f.d.',1,'Ştat',440,3,48),
+      s('Elçin Bayramov','Professor','e.d.',1,'Ştat',500,3,63),
+      s('Aynur Salmanova','Dosent','f.d.',1,'Ştat',720,5,45),
+      s('Ramin Əhmədov','Baş müəllim','',1,'Ştat',800,5,40),
+      s('Samir Qurbanov','Müəllim','',1,'Ştat',850,6,32),
+      s('Vüsalə Tağıyeva','Müəllim','',0,'Saathesabı',180,2,29)
+    ],
+    programs:[
+      p('Mexatronika mühəndisliyi','050638','Bakalavr',3,74,'Təsdiqlənib'),
+      p('Robototexnika mühəndisliyi','050641','Bakalavr',2,48,'Kafedra baxışı')
+    ],
+    courses:[
+      c('MİF-B03.02','Rəqəmsal sxemlər',6,4,2,480,true),
+      c('MİF-B05.03','Kompüter arxitekturası',6,4,2,540,true),
+      c('MEX-B01.04','Mexanika və materiallar',6,3,2,450,false),
+      c('MEX-B02.07','Sensorlar və icraedici qurğular',5,3,2,390,false),
+      c('MEX-B03.02','Sənaye robotları',5,2,1,300,false)
+    ],
+    served:[
+      { prog:'Kompüter mühəndisliyi', dept:'Proqramlaşdırma və İT', courses:2, hours:340 },
+      { prog:'İnformasiya təhlükəsizliyi', dept:'Proqramlaşdırma və İT', courses:1, hours:150 }
+    ],
+    un:[ u('MEX-B03.02','Sənaye robotları','234 MX',90,'Yeni fənn — kadr axtarışı gedir') ]
+  },
+  riy: {
+    since:1998, room:'A-204', phone:'daxili 208', mail:'riyaziyyat@wcu.edu.az',
+    staff:[
+      s('Vaqif Məmmədov','Kafedra müdiri','e.d.',1,'Ştat',410,2,61),
+      s('Sevinc Əliyeva','Dosent','f.d.',1,'Ştat',700,5,49),
+      s('Rauf Bağırov','Dosent','f.d.',1,'Ştat',660,4,53),
+      s('Nərmin Cəfərova','Baş müəllim','f.d.',1,'Ştat',790,6,37),
+      s('İlqar Hüseynov','Müəllim','',1,'Ştat',860,6,33),
+      s('Zeynəb Qasımova','Müəllim','',0.5,'Əvəzçilik',400,3,30),
+      s('Ceyhun Şirinov','Assistent','',1,'Ştat',820,5,27)
+    ],
+    programs:[ p('Riyaziyyat və informatika müəllimliyi','050112','Bakalavr',2,42,'Təsdiqlənib') ],
+    courses:[
+      c('RİY-B01.02','Xətti cəbr və analitik həndəsə',6,7,3,840,true),
+      c('RİY-B01.05','Riyazi analiz',6,4,2,600,true),
+      c('RİY-B02.05','Ehtimal nəzəriyyəsi',5,5,2,540,true),
+      c('MİF-B04.09','Diskret strukturlar',5,3,2,360,true),
+      c('RİY-B03.01','Diferensial tənliklər',5,2,1,240,false)
+    ],
+    served:[
+      { prog:'Kompüter mühəndisliyi', dept:'Proqramlaşdırma və İT', courses:4, hours:640 },
+      { prog:'İnformasiya təhlükəsizliyi', dept:'Proqramlaşdırma və İT', courses:3, hours:480 },
+      { prog:'Mexatronika mühəndisliyi', dept:'Mexatronika', courses:3, hours:420 },
+      { prog:'İqtisadiyyat', dept:'İqtisadiyyat', courses:2, hours:300 }
+    ],
+    un:[]
+  },
+  iqt: {
+    since:2001, room:'C-215', phone:'daxili 240', mail:'iqtisadiyyat@wcu.edu.az',
+    staff:[
+      s('Xəyalə Rüstəmova','Kafedra müdiri','e.d.',1,'Ştat',420,2,55),
+      s('Nicat Əsgərov','Dosent','f.d.',1,'Ştat',680,5,47),
+      s('Lalə Hüseynova','Dosent','f.d.',1,'Ştat',650,4,43),
+      s('Emin Cabbarov','Baş müəllim','f.d.',1,'Ştat',770,5,38),
+      s('Ruslan Kərimov','Baş müəllim','',0.5,'Əvəzçilik',340,2,50),
+      s('Şəbnəm Muradlı','Müəllim','',1,'Ştat',830,6,31),
+      s('Aygün Zeynalova','Assistent','',1,'Ştat',790,5,25)
+    ],
+    programs:[
+      p('İqtisadiyyat','050405','Bakalavr',4,112,'Təsdiqlənib'),
+      p('Maliyyə','050408','Bakalavr',3,88,'Təsdiqlənib')
+    ],
+    courses:[
+      c('İQT-B01.01','İqtisadiyyata giriş',5,6,3,720,true),
+      c('İQT-B02.04','Mikroiqtisadiyyat',5,4,2,540,false),
+      c('İQT-B02.05','Makroiqtisadiyyat',5,4,2,540,false),
+      c('İQT-B04.02','Statistika',4,5,2,480,true),
+      c('İQT-B05.06','Maliyyə bazarları',5,2,1,300,false)
+    ],
+    served:[
+      { prog:'Biznesin idarə edilməsi', dept:'Menecment', courses:3, hours:420 },
+      { prog:'Kompüter mühəndisliyi', dept:'Proqramlaşdırma və İT', courses:1, hours:120 }
+    ],
+    un:[]
+  },
+  men: {
+    since:2006, room:'C-118', phone:'daxili 244', mail:'menecment@wcu.edu.az',
+    staff:[
+      s('Kamil Əliyev','Kafedra müdiri','f.d.',1,'Ştat',400,2,51),
+      s('Ülviyyə Məmmədli','Dosent','f.d.',1,'Ştat',710,5,44),
+      s('Tahir Osmanov','Baş müəllim','',1,'Ştat',810,6,36),
+      s('Nərgiz Sultanova','Müəllim','',1,'Ştat',870,6,30),
+      s('Anar Babayev','Müəllim','',0,'Saathesabı',220,2,41)
+    ],
+    programs:[ p('Biznesin idarə edilməsi','050409','Bakalavr',4,104,'Təsdiqlənib') ],
+    courses:[
+      c('MEN-B01.02','Menecmentin əsasları',5,5,2,600,true),
+      c('MEN-B02.03','Marketinq',5,4,2,480,true),
+      c('MEN-B03.05','İnsan resurslarının idarə edilməsi',4,3,2,360,false),
+      c('MEN-B04.01','Layihələrin idarə edilməsi',4,3,2,360,true)
+    ],
+    served:[
+      { prog:'İqtisadiyyat', dept:'İqtisadiyyat', courses:2, hours:280 },
+      { prog:'Kompüter mühəndisliyi', dept:'Proqramlaşdırma və İT', courses:1, hours:120 }
+    ],
+    un:[ u('MEN-B04.01','Layihələrin idarə edilməsi','235 BİD',60,'Yük normadan artıq qalıb') ]
+  },
+  fil: {
+    since:1996, room:'D-302', phone:'daxili 260', mail:'filologiya@wcu.edu.az',
+    staff:[
+      s('Solmaz Xəlilova','Kafedra müdiri','e.d.',1,'Ştat',430,2,59),
+      s('Mətanət İbrahimova','Dosent','f.d.',1,'Ştat',690,5,50),
+      s('Elnur Qədirov','Baş müəllim','f.d.',1,'Ştat',780,6,42),
+      s('Aytən Rəhimli','Müəllim','',1,'Ştat',840,7,34),
+      s('Fidan Əliyeva','Müəllim','',0.5,'Ştat',410,3,28)
+    ],
+    programs:[ p('Azərbaycan dili və ədəbiyyatı müəllimliyi','050106','Bakalavr',3,64,'Təsdiqlənib') ],
+    courses:[
+      c('FİL-B01.01','Azərbaycan dili və nitq mədəniyyəti',4,9,4,720,true),
+      c('FİL-B02.03','Ədəbiyyat nəzəriyyəsi',4,2,1,240,false),
+      c('FİL-B03.02','Mətn redaktəsi',3,3,2,270,false)
+    ],
+    served:[ { prog:'Bütün bakalavr ixtisasları', dept:'Universitet üzrə', courses:1, hours:720 } ],
+    un:[]
+  },
+  psi: {
+    since:2009, room:'D-114', phone:'daxili 266', mail:'psixologiya@wcu.edu.az',
+    staff:[
+      s('Günay Məmmədova','Kafedra müdiri','f.d.',1,'Ştat',410,2,47),
+      s('Rəna Vəliyeva','Dosent','f.d.',1,'Ştat',670,5,52),
+      s('Turan Əliyev','Baş müəllim','',1,'Ştat',800,6,39),
+      s('Sevil Nəbiyeva','Müəllim','',0.5,'Əvəzçilik',380,3,33)
+    ],
+    programs:[ p('Psixologiya','050303','Bakalavr',3,70,'Təsdiqlənib') ],
+    courses:[
+      c('PSİ-B01.01','Ümumi psixologiya',5,4,2,480,true),
+      c('PSİ-B02.04','İnkişaf psixologiyası',4,3,2,360,false),
+      c('PSİ-B03.02','Sosial psixologiya',4,3,2,360,true)
+    ],
+    served:[ { prog:'Sosial iş', dept:'Sosial elmlər', courses:2, hours:280 } ],
+    un:[]
+  },
+  sos: {
+    since:1995, room:'D-208', phone:'daxili 271', mail:'sosial@wcu.edu.az',
+    staff:[
+      s('Ceyhun Məhərrəmov','Kafedra müdiri','e.d.',1,'Ştat',440,3,57),
+      s('Nazrin Ağayeva','Dosent','f.d.',1,'Ştat',720,6,46),
+      s('Vüqar Həsənov','Baş müəllim','f.d.',1,'Ştat',830,7,41),
+      s('Aysu Mirzəyeva','Müəllim','',1,'Ştat',890,8,32),
+      s('Rəşad Bağırlı','Müəllim','',1,'Ştat',870,8,29),
+      s('Könül Səlimova','Müəllim','',0,'Saathesabı',260,3,36)
+    ],
+    programs:[ p('Sosial iş','050308','Bakalavr',2,46,'Kafedra baxışı') ],
+    courses:[
+      c('HUM-B01.01','Azərbaycan tarixi',4,12,5,1080,true),
+      c('HUM-B02.03','Fəlsəfə',3,11,4,660,true),
+      c('HUM-B03.05','Sosiologiya',3,5,2,300,true),
+      c('HUM-B04.02','Politologiya',3,4,2,240,true),
+      c('SOS-B02.01','Sosial iş texnologiyaları',4,2,1,240,false)
+    ],
+    served:[ { prog:'Bütün bakalavr ixtisasları', dept:'Universitet üzrə', courses:4, hours:2280 } ],
+    un:[ u('HUM-B01.01','Azərbaycan tarixi','236 İQT',120,'Qrup sayı artıb, ştat çatmır') ]
+  },
+  xdil: {
+    since:1997, room:'D-405', phone:'daxili 278', mail:'xaricidiller@wcu.edu.az',
+    staff:[
+      s('Nərmin Əliyeva','Kafedra müdiri','f.d.',1,'Ştat',420,2,45),
+      s('Sevda Quliyeva','Dosent','f.d.',1,'Ştat',700,6,48),
+      s('Ayxan Rzayev','Baş müəllim','',1,'Ştat',850,8,37),
+      s('Lamiyə Hacıyeva','Müəllim','',1,'Ştat',900,9,31),
+      s('Ceyran Əsədova','Müəllim','',1,'Ştat',880,9,28),
+      s('Nurlan Abbasov','Müəllim','',0.5,'Əvəzçilik',430,4,34),
+      s('Elmira Tağıyeva','Assistent','',1,'Ştat',860,8,26),
+      s('Gülnar Mustafayeva','Müəllim','',0,'Saathesabı',280,3,39)
+    ],
+    programs:[ p('Tərcümə (ingilis dili)','050206','Bakalavr',3,58,'Təsdiqlənib') ],
+    courses:[
+      c('XDL-B01.01','Xarici dil – 1',4,14,7,1680,true),
+      c('XDL-B01.02','Xarici dil – 2',4,13,7,1560,true),
+      c('XDL-B02.04','İxtisas üzrə xarici dil',3,6,3,540,true),
+      c('XDL-B03.01','Tərcümə nəzəriyyəsi',4,2,1,240,false)
+    ],
+    served:[ { prog:'Bütün bakalavr ixtisasları', dept:'Universitet üzrə', courses:3, hours:3780 } ],
+    un:[
+      u('XDL-B01.01','Xarici dil – 1','236 KE ing',180,'Ştat vakansiyası bağlanmayıb'),
+      u('XDL-B01.02','Xarici dil – 2','235 İQT',120,'Müəllim məzuniyyətdədir')
+    ]
+  }
+};
+
+const SORTS = ['Yük (çox→az)','Yük (az→çox)','Ad (A→Z)','Vəzifə üzrə','Fənn sayı (çox→az)'];
+const nf = (n) => Math.round(n).toLocaleString('az-AZ').replace(/,/g, ' ');
+const ini = (name) => name.split(' ').map(x => x[0]).slice(0, 2).join('');
+const pctOf = (a, b) => b > 0 ? Math.round(a / b * 100) : 0;
+const zebra = (i) => i % 2 ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)';
+
+class Component extends DCLogic {
+  state = {
+    loading: true, err: false, w: 1280,
+    sel: 'pit', tab: 'Ümumi', stage: 'detail',
+    railQ: '', railOpen: false,
+    staffQ: '', staffQRaw: '', typeF: 'Hamısı', onlyOff: false,
+    sort: 'Yük (çox→az)', sortOpen: false,
+    sem: 'İllik', ownF: 'Hamısı',
+    tsel: null, hourly: null, edit: null, openMeet: { 0: true },
+    toast: ''
+  };
+
+  componentDidMount() {
+    this.t1 = setTimeout(() => this.setState({ loading: false }), 620);
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      const st = this.state;
+      if (st.tsel !== null) this.setState({ tsel: null });
+      else if (st.hourly) this.setState({ hourly: null });
+      else if (st.edit) this.setState({ edit: null });
+      else if (st.sortOpen) this.setState({ sortOpen: false });
+    };
+    document.addEventListener('keydown', this.onKey);
+    try {
+      const h = (location.hash || '').replace('#', '').split('/');
+      if (h[0] && KAF[h[0]]) this.setState({ sel: h[0], tab: h[1] ? decodeURIComponent(h[1]) : 'Ümumi' });
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t1); clearTimeout(this.tq); clearTimeout(this.tn); clearTimeout(this.tt);
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.onKey);
+  }
+
+  role() { return this.props.role || 'Tədris Şöbəsi müdiri'; }
+  canEdit() { const r = this.role(); return r === 'Tədris Şöbəsi müdiri' || r === 'Kafedra müdiri'; }
+  norms() { return NORMSETS[this.props.normSet] || NORMSETS['Nazirlik normaları']; }
+  ids() {
+    const r = this.role();
+    if (r === 'Dekanlıq') return Object.keys(DEPT).filter(id => DEPT[id].fac === 'eng');
+    if (r === 'Kafedra müdiri') return ['pit'];
+    return Object.keys(DEPT);
+  }
+  cap(t) { return t.typ === 'Saathesabı' ? HOURLY_LIMIT : Math.round(this.norms()[t.v] * t.st); }
+  totals(id) {
+    const k = KAF[id];
+    const capacity = k.staff.reduce((a, t) => a + this.cap(t), 0);
+    const plan = k.staff.reduce((a, t) => a + t.pl, 0);
+    const un = k.un.reduce((a, x) => a + x.h, 0);
+    return { capacity, plan, un, need: plan + un, pct: pctOf(plan + un, capacity) };
+  }
+  health(pct) {
+    if (pct > 115) return { key:'risk', label:'Yük riski', dot:'var(--ems-danger)', bg:'var(--ems-danger-bg)', fg:'#b91c1c' };
+    if (pct > 105) return { key:'load', label:'Yüklü', dot:'var(--ems-warning)', bg:'var(--ems-warning-bg)', fg:'#92400e' };
+    if (pct >= 90) return { key:'ok', label:'Normada', dot:'var(--ems-success)', bg:'var(--ems-success-bg)', fg:'#15803d' };
+    return { key:'free', label:'Boş tutum', dot:'var(--ems-primary-600)', bg:'var(--ems-primary-50)', fg:'var(--ems-primary-800)' };
+  }
+  flash(msg) { clearTimeout(this.tt); this.setState({ toast: msg }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  chips(list, cur, key) {
+    return list.map(v => { const x = this.chip(v === cur); return { label:v, bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ [key]: v }) }; });
+  }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+  pickDept(id) {
+    clearTimeout(this.tn);
+    this.setState({ sel:id, tab:'Ümumi', stage:'detail', loading:true, railOpen:false, staffQ:'', staffQRaw:'', typeF:'Hamısı', onlyOff:false, tsel:null, openMeet:{ 0:true } });
+    this.tn = setTimeout(() => this.setState({ loading: false }), 300);
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  meetings(id) {
+    const k = KAF[id];
+    const total = k.staff.length;
+    const first = k.programs[0] ? k.programs[0].name : 'ixtisas';
+    return [
+      { date:'18.08.2026', prot:'№ 08', att: Math.max(total - 2, 1) + '/' + total,
+        title:'2026/2027 payız semestri üzrə dərs yükünün bölgüsü',
+        items:['Yük bölgüsü layihəsinin müzakirəsi və müəllimlər üzrə təsdiqi','Təyinatsız qalan saatlar üzrə təkliflər','Sillabusların yenilənməsi qrafiki'],
+        dec:'Yük bölgüsü təsdiq edildi; təyinatsız saatlar üzrə dekanlığa müraciət hazırlanır.' },
+      { date:'02.07.2026', prot:'№ 07', att: Math.max(total - 1, 1) + '/' + total,
+        title: first + ' ixtisasının tədris planına dəyişiklik',
+        items:['Seçmə fənn blokunun yenilənməsi','Buraxılış işi mövzularının təsdiqi','Praktika bazalarının müzakirəsi'],
+        dec:'Plan dəyişikliyi fakültə elmi şurasına göndərildi.' },
+      { date:'20.05.2026', prot:'№ 06', att: Math.max(total - 3, 1) + '/' + total,
+        title:'Yaz semestrinin yekunları və elmi-tədqiqat hesabatları',
+        items:['Semestr üzrə davamiyyət və uğur göstəriciləri','Müəllimlərin fərdi iş planlarının icra hesabatı'],
+        dec:'Hesabatlar qəbul edildi; iki müəllimin plan icrası üzrə əlavə hesabat tələb olundu.' }
+    ];
+  }
+
+  renderVals() {
+    const st = this.state;
+    const narrow = st.w < 1120;
+    const ids = this.ids();
+    const forced = this.props.dataState || 'Avtomatik';
+    const selId = ids.indexOf(st.sel) >= 0 ? st.sel : ids[0];
+    const k = KAF[selId];
+    const d = DEPT[selId];
+    const N = this.norms();
+    const T = this.totals(selId);
+    const H = this.health(T.pct);
+
+    const rq = st.railQ.trim().toLowerCase();
+    const tree = FACS.map(f => {
+      const depts = f.depts.filter(x => ids.indexOf(x.id) >= 0).filter(x => {
+        if (!rq) return true;
+        const head = KAF[x.id].staff[0].n.toLowerCase();
+        return x.name.toLowerCase().includes(rq) || x.short.toLowerCase().includes(rq) || head.includes(rq);
+      }).map(x => {
+        const tt = this.totals(x.id);
+        const hh = this.health(tt.pct);
+        const sel = x.id === selId;
+        return {
+          id:x.id, name:x.short, sel: sel ? 'true' : 'false',
+          meta: KAF[x.id].staff.length + ' müəllim · ' + nf(tt.need) + ' saat',
+          pct: tt.pct + '%', dot: hh.dot,
+          bg: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          bd: sel ? 'var(--ems-primary-200)' : 'transparent',
+          hoverBg: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-50)',
+          fg: sel ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+          sub: sel ? 'var(--ems-primary-700)' : 'var(--ems-neutral-400)',
+          pctFg: sel ? 'var(--ems-primary-800)' : hh.fg,
+          fw: sel ? 800 : 600,
+          pick: () => this.pickDept(x.id)
+        };
+      });
+      return { id:f.id, name:f.name, count:depts.length, depts };
+    }).filter(f => f.depts.length > 0);
+
+    const isLoading = forced === 'Skeleton' || (forced === 'Avtomatik' && st.loading);
+    const isError = forced === 'Xəta' || (forced === 'Avtomatik' && st.err);
+
+    // ---- heyət
+    const sq = st.staffQ.trim().toLowerCase();
+    let staffRaw = k.staff.map((t, i) => {
+      const capv = this.cap(t);
+      const pct = pctOf(t.pl, capv);
+      return { t, i, cap: capv, pct, diff: t.pl - capv };
+    }).filter(x =>
+      (!sq || x.t.n.toLowerCase().includes(sq)) &&
+      (st.typeF === 'Hamısı' || x.t.typ === st.typeF) &&
+      (!st.onlyOff || x.pct > 105 || x.pct < 85)
+    );
+    staffRaw.sort((a, b) => {
+      if (st.sort === 'Yük (az→çox)') return a.pct - b.pct;
+      if (st.sort === 'Ad (A→Z)') return a.t.n.localeCompare(b.t.n, 'az');
+      if (st.sort === 'Vəzifə üzrə') return RANK_ORDER.indexOf(a.t.v) - RANK_ORDER.indexOf(b.t.v);
+      if (st.sort === 'Fənn sayı (çox→az)') return b.t.sb - a.t.sb;
+      return b.pct - a.pct;
+    });
+    const loadColor = (pct) => pct > 115 ? 'var(--ems-danger)' : (pct > 105 ? 'var(--ems-warning)' : (pct < 85 ? 'var(--ems-neutral-400)' : 'var(--ems-success)'));
+    const typeStyle = (typ) => typ === 'Ştat'
+      ? { bg:'var(--ems-primary-50)', fg:'var(--ems-primary-800)' }
+      : (typ === 'Əvəzçilik' ? { bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)' } : { bg:'var(--ems-warning-bg)', fg:'#92400e' });
+
+    const staff = staffRaw.map((x, idx) => {
+      const ts = typeStyle(x.t.typ);
+      return {
+        ini: ini(x.t.n), name: x.t.n,
+        degree: x.t.d ? DEG_LABEL[x.t.d] : (x.t.typ === 'Saathesabı' ? 'saathesabı müəllim' : 'elmi dərəcəsi yoxdur'),
+        rank: x.t.v,
+        stLabel: x.t.typ === 'Saathesabı' ? 'saathesabı' : x.t.st.toFixed(2).replace('.', ',').replace(',00', ',0') + ' · ' + x.t.typ.toLowerCase(),
+        typeBg: ts.bg, typeFg: ts.fg,
+        avBg: x.t.v === 'Kafedra müdiri' ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+        avFg: x.t.v === 'Kafedra müdiri' ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+        norm: nf(x.cap), plan: nf(x.t.pl),
+        diff: (x.diff > 0 ? '+' : '') + nf(x.diff),
+        diffFg: x.diff > 40 ? 'var(--ems-danger)' : (x.diff < -80 ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-700)'),
+        pct: x.pct + '%', barW: Math.min(x.pct, 100) + '%', barFg: loadColor(x.pct),
+        sub: x.t.sb, bg: zebra(idx),
+        open: () => this.setState({ tsel: x.i }),
+        key: this.keyActivate(() => this.setState({ tsel: x.i }))
+      };
+    });
+    const sumNormV = staffRaw.reduce((a, x) => a + x.cap, 0);
+    const sumPlanV = staffRaw.reduce((a, x) => a + x.t.pl, 0);
+
+    // ---- kadr strukturu
+    const rankCounts = RANK_ORDER.map(v => ({ v, n: k.staff.filter(t => t.v === v).length })).filter(x => x.n > 0);
+    const maxRank = Math.max.apply(null, rankCounts.map(x => x.n));
+    const ranks = rankCounts.map(x => ({
+      label: x.v, value: x.n + ' nəfər', w: Math.round(x.n / maxRank * 100) + '%',
+      color: x.v === 'Professor' || x.v === 'Kafedra müdiri' ? 'var(--ems-primary-700)' : (x.v === 'Dosent' ? 'var(--ems-primary-600)' : 'var(--ems-primary-200)')
+    }));
+    const nType = (typ) => k.staff.filter(t => t.typ === typ).length;
+    const empTypes = [
+      { label:'Ştat: ' + nType('Ştat'), bg:'var(--ems-primary-50)', fg:'var(--ems-primary-800)' },
+      { label:'Əvəzçilik: ' + nType('Əvəzçilik'), bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)' },
+      { label:'Saathesabı: ' + nType('Saathesabı'), bg:'var(--ems-warning-bg)', fg:'#92400e' },
+      { label:'Ştat vahidi cəmi: ' + k.staff.reduce((a, t) => a + t.st, 0).toFixed(1).replace('.', ','), bg:'var(--ems-neutral-100)', fg:'var(--ems-neutral-700)' }
+    ];
+
+    // ---- akkreditasiya
+    const nStaff = k.staff.length;
+    const degShare = Math.round(k.staff.filter(t => t.d).length / nStaff * 100);
+    const profShare = Math.round(k.staff.filter(t => t.v === 'Professor' || t.v === 'Dosent' || t.v === 'Kafedra müdiri').length / nStaff * 100);
+    const studs = k.programs.reduce((a, x) => a + x.st, 0);
+    const ratio = Math.round(studs / nStaff * 10) / 10;
+    const avgAge = Math.round(k.staff.reduce((a, t) => a + t.ag, 0) / nStaff);
+    const mk = (label, norm, value, ok) => ({
+      label, norm, value, icon: ok ? '✓' : '!', iconBg: ok ? 'var(--ems-success)' : 'var(--ems-warning)',
+      fg: ok ? '#15803d' : '#92400e', bg: 'var(--ems-neutral-0)', ok
+    });
+    const acc = [
+      mk('Elmi dərəcəli müəllimlərin payı', 'norma ≥ 50%', degShare + '%', degShare >= 50),
+      mk('Professor-dosent heyətinin payı', 'norma ≥ 30%', profShare + '%', profShare >= 30),
+      mk('Tələbə / müəllim nisbəti', 'norma ≤ 15,0', String(ratio).replace('.', ','), ratio <= 15),
+      mk('Heyətin orta yaşı', 'məsləhət ≤ 50', avgAge + ' yaş', avgAge <= 50),
+      mk('Ştat tutumunun doldurulması', 'norma 90–105% aralığı', T.pct + '%', T.pct >= 90 && T.pct <= 105)
+    ];
+    const accFail = acc.filter(a => !a.ok).length;
+
+    // ---- risklər
+    const risks = [];
+    if (T.un > 0) risks.push({
+      title: nf(T.un) + ' saat hələ müəllimə təyin olunmayıb',
+      note: k.un.length + ' fənn açılışı sahibsizdir — semestr başlayana qədər bağlanmalıdır.',
+      cta:'Balansa keç', sev:'danger', go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab:'Yük balansı' }); }
+    });
+    const over = k.staff.filter(t => pctOf(t.pl, this.cap(t)) > 115);
+    if (over.length) risks.push({
+      title: over.length + ' müəllimin yükü normadan 15%-dən çox artıqdır',
+      note: over.map(t => t.n).join(', ') + ' — əlavə saatların ödənişi və keyfiyyət riski yaranır.',
+      cta:'Heyətə bax', sev:'warn', go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab:'Müəllim heyəti', onlyOff:true }); }
+    });
+    const noPlan = k.programs.filter(x => x.plan === 'Plan yoxdur' || x.plan === 'Kafedra baxışı');
+    if (noPlan.length) risks.push({
+      title: noPlan.length + ' ixtisasın tədris planı bağlanmayıb',
+      note: noPlan.map(x => x.name).join(', ') + ' — plan olmadan fənn açılışı və yük hesablanmır.',
+      cta:'İxtisaslar', sev:'warn', go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab:'İxtisaslar' }); }
+    });
+    if (T.pct < 90) risks.push({
+      title:'Ştat tutumu tam istifadə olunmur',
+      note: nf(T.capacity - T.need) + ' saat boş qalır — xidməti fənlərin bir hissəsi bu kafedraya verilə bilər.',
+      cta:'Balansa keç', sev:'info', go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab:'Yük balansı' }); }
+    });
+    const sevStyle = { danger:{ bg:'var(--ems-danger-bg)', bd:'#fecaca', dot:'var(--ems-danger)', fg:'#b91c1c', subFg:'#b91c1c' },
+      warn:{ bg:'var(--ems-warning-bg)', bd:'#fde68a', dot:'var(--ems-warning)', fg:'#92400e', subFg:'#92400e' },
+      info:{ bg:'var(--ems-primary-50)', bd:'var(--ems-primary-200)', dot:'var(--ems-primary-600)', fg:'var(--ems-primary-800)', subFg:'var(--ems-primary-800)' } };
+
+    // ---- balans
+    const semFactor = st.sem === 'Payız' ? 0.52 : (st.sem === 'Yaz' ? 0.48 : 1);
+    const semCap = Math.round(T.capacity * semFactor);
+    const semPlan = Math.round(T.plan * semFactor);
+    const semUn = Math.round(T.un * (st.sem === 'İllik' ? 1 : semFactor));
+    const barMax = Math.max(T.capacity ? Math.max.apply(null, k.staff.map(t => Math.max(t.pl, this.cap(t)))) : 1, 1) * 1.15;
+    const bars = k.staff.slice().sort((a, b) => pctOf(b.pl, this.cap(b)) - pctOf(a.pl, this.cap(a))).map(t => {
+      const capv = this.cap(t), pl = Math.round(t.pl * semFactor), cp = Math.round(capv * semFactor);
+      const pct = pctOf(t.pl, capv);
+      return {
+        name: t.n, rank: t.v, w: Math.min(Math.round(pl / (barMax * semFactor) * 100), 100) + '%',
+        markX: Math.min(Math.round(cp / (barMax * semFactor) * 100), 100) + '%',
+        color: loadColor(pct), meta: nf(pl) + ' / ' + nf(cp) + ' s'
+      };
+    });
+
+    const tabDefs = [
+      { id:'Ümumi', count:null },
+      { id:'Müəllim heyəti', count:k.staff.length },
+      { id:'Yük balansı', count:k.un.length || null },
+      { id:'İxtisaslar', count:k.programs.length },
+      { id:'Fənlər', count:k.courses.length },
+      { id:'Kafedra iclasları', count:3 }
+    ];
+
+    const planStyle = { 'Təsdiqlənib':['var(--ems-success-bg)','#15803d','var(--ems-success)'],
+      'Tədris şöbəsi':['var(--ems-primary-100)','var(--ems-primary-800)','var(--ems-primary-600)'],
+      'Kafedra baxışı':['var(--ems-primary-50)','var(--ems-primary-800)','var(--ems-primary-200)'],
+      'Plan yoxdur':['var(--ems-warning-bg)','#92400e','var(--ems-warning)'] };
+
+    const servedTotal = k.served.reduce((a, x) => a + x.hours, 0);
+    const ownCourses = k.courses.filter(x => st.ownF === 'Hamısı' || (st.ownF === 'Xidməti fənlər' ? x.srv : !x.srv));
+
+    const out = {
+      ctxRole:'Tədris Şöbəsi',
+      ctxScope: this.role() === 'Dekanlıq' ? 'Mühəndislik və Tətbiqi Elmlər fakültəsi' : (this.role() === 'Kafedra müdiri' ? 'öz kafedram' : 'bütün fakültələr'),
+      ctxNorm: this.props.normSet || 'Nazirlik normaları',
+      ctxPerm: this.role(),
+      canEdit: this.canEdit(), narrow, railOpen: st.railOpen,
+      colTpl: narrow ? '1fr' : '292px minmax(0,1fr)',
+      ovTpl: st.w < 1420 ? '1fr' : 'minmax(0,1fr) minmax(0,1fr)',
+      showRail: !narrow || st.railOpen,
+      toggleRail: () => this.setState({ railOpen: !st.railOpen }),
+      backToList: () => this.setState({ railOpen: true }),
+      railTitle:'Kafedralar', railCount: ids.length,
+      railQ: st.railQ, onRailQ: (e) => this.setState({ railQ: e.target.value }),
+      tree, treeEmpty: tree.length === 0,
+      legend: [
+        { label:'normada', dot:'var(--ems-success)' },
+        { label:'yüklü', dot:'var(--ems-warning)' },
+        { label:'risk', dot:'var(--ems-danger)' },
+        { label:'boş tutum', dot:'var(--ems-primary-600)' }
+      ],
+      isLoading, isError, isData: !isLoading && !isError, skel:[1,2,3,4,5],
+      retry: () => { this.setState({ err:false, loading:true }); this.t1 = setTimeout(() => this.setState({ loading:false }), 500); },
+      exportAll: () => this.flash('Ştat cədvəli hazırlanır — fayl e-poçtunuza göndəriləcək.'),
+      toast: !!st.toast, toastText: st.toast,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgRef: (el) => { if (el && this._last !== el) { this._last = el; try { el.focus(); } catch (e) {} } },
+
+      crumbs: [
+        { label:'Qərbi Kaspi Universiteti', fg:'var(--ems-neutral-400)', fw:500, sep:true },
+        { label:d.facName, fg:'var(--ems-primary-600)', fw:600, sep:true },
+        { label:d.short, fg:'var(--ems-neutral-700)', fw:700, sep:false }
+      ],
+      k: {
+        name:d.name, since:k.since, room:'Otaq ' + k.room, phone:k.phone,
+        healthLabel:H.label, healthBg:H.bg, healthFg:H.fg,
+        headIni: ini(k.staff[0].n), headName: k.staff[0].n,
+        headMeta: (k.staff[0].d ? DEG_LABEL[k.staff[0].d] + ' · ' : '') + 'təyinat: ' + (k.since + 12) + ' · ' + k.mail
+      },
+      kpis: [
+        { label:'Müəllim heyəti', value: nStaff + ' nəfər', note: nType('Ştat') + ' ştat · ' + nType('Əvəzçilik') + ' əvəzçi · ' + nType('Saathesabı') + ' saathesabı',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Ştat tutumu', value: nf(T.capacity) + ' s', note:'heyətin apara biləcəyi illik saat',
+          bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+        { label:'Planlaşdırılmış yük', value: nf(T.plan) + ' s', note:'müəllimlərə artıq bölünüb',
+          bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)' },
+        { label:'Normanın doldurulması', value: T.pct + '%', note: H.label,
+          bd: H.key === 'ok' ? 'var(--ems-success)' : (H.key === 'free' ? 'var(--ems-primary-200)' : (H.key === 'load' ? '#fde68a' : '#fecaca')),
+          bg: H.bg, labFg: H.fg, valFg: H.fg, noteFg: H.fg },
+        { label:'Təyin olunmamış saat', value: nf(T.un) + ' s', note: T.un ? k.un.length + ' fənn açılışı müəllim gözləyir' : 'bütün saatlar təyin olunub',
+          bd: T.un ? '#fecaca' : 'var(--ems-neutral-200)', bg: T.un ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+          labFg: T.un ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: T.un ? '#b91c1c' : 'var(--ems-neutral-900)', noteFg: T.un ? '#b91c1c' : 'var(--ems-neutral-500)' }
+      ],
+      tabs: tabDefs.map(t => {
+        const a = st.tab === t.id;
+        return {
+          label:t.id, sel: a ? 'true' : 'false', hasCount: t.count !== null, count: t.count,
+          bd: a ? 'var(--ems-primary-600)' : 'transparent',
+          fg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)', fw: a ? 800 : 600,
+          cntBg: a ? 'var(--ems-primary-100)' : 'var(--ems-neutral-100)',
+          cntFg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+          pick: () => { this.setState({ tab: t.id }); try { history.replaceState(null, '', '#' + selId + '/' + encodeURIComponent(t.id)); } catch (e) {} }
+        };
+      }),
+      tabUmumi: st.tab === 'Ümumi', tabHeyet: st.tab === 'Müəllim heyəti', tabBalans: st.tab === 'Yük balansı',
+      tabIxtisas: st.tab === 'İxtisaslar', tabFenn: st.tab === 'Fənlər', tabIclas: st.tab === 'Kafedra iclasları',
+
+      balNorm: (this.props.normSet || 'Nazirlik normaları') + ' üzrə hesablanıb',
+      balAssignedW: Math.min(Math.round(T.plan / (T.capacity * 1.25) * 100), 100) + '%',
+      balUnW: Math.min(Math.round(T.un / (T.capacity * 1.25) * 100), 100) + '%',
+      balCapX: Math.min(Math.round(100 / 1.25), 100) + '%',
+      balLegend: [
+        { label:'Bölünmüş yük', value: nf(T.plan) + ' s', color:'var(--ems-primary-600)' },
+        { label:'Təyin olunmamış', value: nf(T.un) + ' s', color:'#fca5a5' },
+        { label:'Ştat tutumu (limit)', value: nf(T.capacity) + ' s', color:'var(--ems-neutral-200)' }
+      ],
+      needsHourly: T.need > T.capacity && this.canEdit(),
+      balTip: T.need > T.capacity
+        ? 'Tələb olunan yük ştat tutumunu ' + nf(T.need - T.capacity) + ' saat üstələyir — bu, təxminən ' + Math.ceil((T.need - T.capacity) / HOURLY_LIMIT) + ' saathesabı müqavilə və ya ' + ((T.need - T.capacity) / N['Müəllim']).toFixed(1).replace('.', ',') + ' ştat vahidi deməkdir.'
+        : (T.pct < 90
+          ? 'Ştat tutumunun ' + nf(T.capacity - T.need) + ' saatı boş qalır — xidməti fənlərin bir hissəsini bu kafedraya vermək olar.'
+          : 'Yük ştat tutumu ilə tarazdır — əlavə müqaviləyə ehtiyac yoxdur.'),
+      balTipBg: T.need > T.capacity ? 'var(--ems-warning-bg)' : (T.pct < 90 ? 'var(--ems-primary-50)' : 'var(--ems-success-bg)'),
+      balTipBd: T.need > T.capacity ? '#fde68a' : (T.pct < 90 ? 'var(--ems-primary-200)' : '#bbf7d0'),
+      balTipFg: T.need > T.capacity ? '#92400e' : (T.pct < 90 ? 'var(--ems-primary-800)' : '#15803d'),
+      ranks, empTypes, acc,
+      accSummary: accFail === 0 ? 'hamısı normada' : accFail + ' göstərici normadan kənar',
+      accFg: accFail === 0 ? '#15803d' : '#92400e',
+      risks: risks.map(r => Object.assign({}, sevStyle[r.sev], { title:r.title, note:r.note, cta:r.cta, go:r.go })),
+      hasRisks: risks.length > 0, noRisks: risks.length === 0,
+
+      staffQ: st.staffQRaw,
+      onStaffQ: (e) => { const v = e.target.value; this.setState({ staffQRaw: v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ staffQ: v }), 250); },
+      typeChips: this.chips(['Hamısı','Ştat','Əvəzçilik','Saathesabı'], st.typeF, 'typeF'),
+      onlyOff: st.onlyOff, toggleOff: () => this.setState({ onlyOff: !st.onlyOff }),
+      offTrack: st.onlyOff ? 'var(--ems-warning)' : 'var(--ems-neutral-300)',
+      offLeft: st.onlyOff ? '15px' : '2px',
+      offFg: st.onlyOff ? '#92400e' : 'var(--ems-neutral-500)',
+      sortOpen: st.sortOpen, sortShort: st.sort.split(' (')[0],
+      toggleSort: () => this.setState({ sortOpen: !st.sortOpen }),
+      sortOpts: SORTS.map(o => ({
+        label:o, sel: o === st.sort ? 'true' : 'false', fw: o === st.sort ? 800 : 600,
+        fg: o === st.sort ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bg: o === st.sort ? 'var(--ems-primary-50)' : 'transparent',
+        pick: () => this.setState({ sort:o, sortOpen:false }),
+        key: this.keyActivate(() => this.setState({ sort:o, sortOpen:false }))
+      })),
+      staff, staffShown: staff.length > 0, staffEmpty: staff.length === 0,
+      resetStaff: () => this.setState({ staffQ:'', staffQRaw:'', typeF:'Hamısı', onlyOff:false }),
+      staffTotalLabel: staff.length + ' müəllim üzrə cəmi',
+      sumNorm: nf(sumNormV), sumPlan: nf(sumPlanV),
+      sumDiff: (sumPlanV - sumNormV > 0 ? '+' : '') + nf(sumPlanV - sumNormV),
+      sumDiffFg: sumPlanV - sumNormV > 0 ? 'var(--ems-danger)' : 'var(--ems-neutral-700)',
+
+      semChips: this.chips(['İllik','Payız','Yaz'], st.sem, 'sem'),
+      semNote: st.sem === 'İllik' ? '2026/2027 tədris ilinin hamısı üzrə' : st.sem + ' semestri · illik yükün ' + Math.round(semFactor * 100) + '%-i',
+      balTiles: [
+        { label:'Ştat tutumu', value: nf(semCap) + ' s', bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)' },
+        { label:'Bölünmüş yük', value: nf(semPlan) + ' s', bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)' },
+        { label:'Təyin olunmamış', value: nf(semUn) + ' s', bd: semUn ? '#fecaca' : 'var(--ems-neutral-200)', bg: semUn ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)', labFg: semUn ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: semUn ? '#b91c1c' : 'var(--ems-neutral-900)' },
+        { label:'Tutumdan fərq', value: (semPlan + semUn - semCap > 0 ? '+' : '') + nf(semPlan + semUn - semCap) + ' s', bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg: semPlan + semUn > semCap ? 'var(--ems-danger)' : 'var(--ems-success)' }
+      ],
+      bars,
+      hasUn: k.un.length > 0, noUn: k.un.length === 0,
+      unBd: k.un.length ? '#fecaca' : 'var(--ems-neutral-200)',
+      unBg: k.un.length ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+      unFg: k.un.length ? '#b91c1c' : 'var(--ems-neutral-900)',
+      unRows: k.un.map(x => ({
+        code:x.code, name:x.name, group:x.g, hours: nf(x.h) + ' s', reason:x.reason,
+        assign: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(x.name + ' üzrə müəllim təyinatı tapşırığı yaradıldı.'); }
+      })),
+      openHourly: () => this.setState({ hourly: { hours: String(Math.max(T.need - T.capacity, 0)), cand:'', why:'', touched:false } }),
+
+      programs: k.programs.map(x => {
+        const ps = planStyle[x.plan];
+        return {
+          name:x.name, code:x.code, deg:x.deg, groups:x.gr, students:x.st,
+          planLabel:x.plan, planBg:ps[0], planFg:ps[1], accent:ps[2],
+          go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(x.name + ' ixtisasının kartı açılır.'); }
+        };
+      }),
+      served: k.served.map((x, i) => ({
+        prog:x.prog, dept:x.dept, courses:x.courses, hours: nf(x.hours),
+        share: Math.round(x.hours / servedTotal * 100) + '%', bg: zebra(i)
+      })),
+      servedNote: 'Xidməti yük cəmi ' + nf(servedTotal) + ' saat — kafedranın ümumi yükünün ' + pctOf(servedTotal, T.plan) + '%-i.',
+
+      ownChips: this.chips(['Hamısı','Kafedra fənləri','Xidməti fənlər'], st.ownF, 'ownF'),
+      courseNote: ownCourses.length + ' fənn · ' + nf(ownCourses.reduce((a, x) => a + x.h, 0)) + ' illik saat',
+      courses: ownCourses.map((x, i) => ({
+        code:x.code, name:x.name, kr:x.kr, groups:x.gr,
+        teachers: x.tc + ' müəllim', hours: nf(x.h), bg: zebra(i),
+        tLabel: x.srv ? 'xidməti fənn' : 'yalnız öz ixtisaslarımızda',
+        tBg: x.srv ? 'var(--ems-primary-50)' : 'var(--ems-neutral-100)',
+        tFg: x.srv ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)'
+      })),
+
+      meets: this.meetings(selId).map((m, i) => ({
+        prot:m.prot, title:m.title, meta: m.date + ' · iştirak ' + m.att + ' · ' + m.items.length + ' məsələ',
+        open: !!st.openMeet[i], rot: st.openMeet[i] ? 'rotate(180deg)' : 'rotate(0deg)',
+        cardBg: st.openMeet[i] ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)',
+        items: m.items.map((text, j) => ({ n: j + 1, text })), dec: m.dec,
+        toggle: () => this.setState({ openMeet: Object.assign({}, st.openMeet, { [i]: !st.openMeet[i] }) }),
+        open2: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(m.prot + ' saylı protokolun tam mətni açılır.'); }
+      })),
+      newProtocol: () => this.flash('Yeni iclas protokolu qaralaması yaradıldı.'),
+
+      mTeacher: st.tsel !== null, mHourly: !!st.hourly, mEdit: !!st.edit,
+      closeTeacher: () => this.setState({ tsel: null }),
+      closeHourly: () => this.setState({ hourly: null }),
+      closeEdit: () => this.setState({ edit: null }),
+      openEdit: () => this.setState({ edit: { name:d.name, room:k.room, phone:k.phone, mail:k.mail, touched:false } })
+    };
+
+    // ---- müəllim paneli
+    if (st.tsel !== null && k.staff[st.tsel]) {
+      const t = k.staff[st.tsel];
+      const capv = this.cap(t);
+      const pct = pctOf(t.pl, capv);
+      const payiz = Math.round(t.pl * 0.52), yaz = t.pl - payiz;
+      const mine = k.courses.slice(0, t.sb);
+      out.tv = {
+        ini: ini(t.n), name: t.n,
+        sub: t.v + ' · ' + (t.d ? DEG_LABEL[t.d] : 'elmi dərəcəsi yoxdur') + ' · ' + t.ag + ' yaş',
+        facts: [
+          { label:'Məşğulluq', value: t.typ === 'Saathesabı' ? 'saathesabı' : t.st.toFixed(1).replace('.', ',') + ' ştat · ' + t.typ.toLowerCase(), fg:'var(--ems-neutral-900)' },
+          { label:'İllik norma', value: nf(capv) + ' s', fg:'var(--ems-neutral-900)' },
+          { label:'Planlanmış', value: nf(t.pl) + ' s', fg:'var(--ems-primary-800)' },
+          { label:'Doldurulma', value: pct + '%', fg: loadColor(pct) }
+        ],
+        normNote: t.typ === 'Saathesabı' ? 'müqavilə limiti ' + HOURLY_LIMIT + ' saat' : this.norms()[t.v] + ' s × ' + t.st.toFixed(1).replace('.', ',') + ' ştat',
+        sems: [
+          { label:'Payız', value: nf(payiz) + ' s', w: Math.min(Math.round(payiz / (capv * 0.6) * 100), 100) + '%', color:'var(--ems-primary-600)' },
+          { label:'Yaz', value: nf(yaz) + ' s', w: Math.min(Math.round(yaz / (capv * 0.6) * 100), 100) + '%', color:'var(--ems-primary-200)' }
+        ],
+        courses: mine.map(x => ({ code:x.code, name:x.name, meta: x.kr + ' kredit · ' + x.gr + ' qrup' })),
+        planNote:'Fərdi iş planı tədris, metodiki, elmi və təşkilati işi əhatə edir; icra faizi semestr sonunda təsdiqlənir.',
+        goPlan: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(t.n + ' üçün fərdi iş planı açılır.'); }
+      };
+    } else {
+      out.tv = { ini:'', name:'', sub:'', facts:[], sems:[], courses:[], normNote:'', planNote:'', goPlan: () => {} };
+    }
+
+    // ---- saathesabı modalı
+    const hh = st.hourly;
+    if (hh) {
+      const hnum = parseInt(hh.hours, 10);
+      const badH = !hnum || hnum <= 0 || hnum > 3000;
+      const badW = hh.why.trim().length < 10;
+      const invalid = badH || badW;
+      const setH = (patch) => this.setState({ hourly: Object.assign({}, hh, patch) });
+      out.hv = {
+        warn: T.need > T.capacity
+          ? 'Kafedranın ştat tutumu ' + nf(T.capacity) + ' saat, tələb olunan yük ' + nf(T.need) + ' saatdır. Fərq: ' + nf(T.need - T.capacity) + ' saat.'
+          : 'Ştat tutumu kifayət edir — təklif yalnız əsaslandırılmış istisna hallarında göndərilməlidir.',
+        hours: hh.hours, cand: hh.cand, why: hh.why,
+        setHours: (e) => setH({ hours: e.target.value, touched:true }),
+        setCand: (e) => setH({ cand: e.target.value }),
+        setWhy: (e) => setH({ why: e.target.value, touched:true }),
+        hoursErr: hh.touched && badH, hoursMsg:'1–3000 aralığında saat yazın',
+        hoursBd: hh.touched && badH ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        contracts: hnum ? Math.ceil(hnum / HOURLY_LIMIT) + ' müqavilə (' + HOURLY_LIMIT + ' s limit)' : '—',
+        invalid,
+        bd: invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: invalid ? 'not-allowed' : 'pointer',
+        send: () => { if (invalid) { setH({ touched:true }); return; } this.setState({ hourly:null }); this.flash('Saathesabı təklifi dekanlığa göndərildi.'); }
+      };
+    } else {
+      out.hv = { warn:'', hours:'', cand:'', why:'', contracts:'—', invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed', hoursErr:false, hoursMsg:'', hoursBd:'var(--ems-neutral-300)' };
+    }
+
+    // ---- pasport modalı
+    const ee = st.edit;
+    const setE = (patch) => this.setState({ edit: Object.assign({}, ee, patch) });
+    const evInvalid = !ee || !ee.name.trim();
+    out.evName = ee ? ee.name : ''; out.evRoom = ee ? ee.room : ''; out.evPhone = ee ? ee.phone : ''; out.evMail = ee ? ee.mail : '';
+    out.setEvName = (e) => setE({ name: e.target.value, touched:true });
+    out.setEvRoom = (e) => setE({ room: e.target.value });
+    out.setEvPhone = (e) => setE({ phone: e.target.value });
+    out.setEvMail = (e) => setE({ mail: e.target.value });
+    out.evNameBd = ee && ee.touched && !ee.name.trim() ? 'var(--ems-danger)' : 'var(--ems-neutral-300)';
+    out.evInvalid = evInvalid;
+    out.evBd = evInvalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)';
+    out.evBg = evInvalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)';
+    out.evFg = evInvalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)';
+    out.evCur = evInvalid ? 'not-allowed' : 'pointer';
+    out.saveEv = () => { if (evInvalid) return; this.setState({ edit: null }); this.flash('Kafedra pasportu yeniləndi.'); };
+
+    return out;
+  }
+}
+
+</script>
+</body>
+</html>

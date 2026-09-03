@@ -1,0 +1,14 @@
+{% comment %}
+Cədvəl skeleton-u — `skeleton_rows` (int, default 6), `skeleton_cols` (int, default 4).
+Qlobal `skeleton.css` animasiyasını təkrar yazmır, yalnız sətir düzümünü verir.
+{% endcomment %}
+<div class="skeleton" aria-hidden="true">
+    {% for _ in skeleton_range %}
+        <div class="ems-skelrow">
+            <div class="skeleton-line skeleton-line--lg"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--sm"></div>
+            <div class="skeleton-line skeleton-line--sm"></div>
+        </div>
+    {% endfor %}
+</div>

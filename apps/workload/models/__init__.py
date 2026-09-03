@@ -2,9 +2,13 @@
 
 from .amendment import WorkloadAmendment, amendment_document_path
 from .assignment import TeacherAssignment, TeacherWorkloadProfile
+from .review import LoadObjection, TaskFacultySlice, TaskRowReview
 from .task import TeachingTask, TeachingTaskRow
 
 __all__ = [
+    "LoadObjection",
+    "TaskFacultySlice",
+    "TaskRowReview",
     "TeacherAssignment",
     "TeacherWorkloadProfile",
     "TeachingTask",

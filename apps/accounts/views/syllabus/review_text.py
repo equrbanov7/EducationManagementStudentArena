@@ -54,6 +54,19 @@ INTRO = {
     "noscope": pgettext_lazy(_CTX, "Əhatə təyin edilməyib."),
 }
 
+#: QƏRAR SƏLAHİYYƏTİ OLMAYAN, amma növbəni görən aktor üçün açıq qeyd
+#: (sahibin qərarı 2026-09-03).  Dekan növbəni oxuyur və şərh yazır — təsdiq,
+#: düzəliş və rədd qərarı kafedra müdirinindir.  Qeyd GİZLƏDİLMİR: düymənin
+#: sadəcə yoxa çıxması istifadəçiyə «sistem xarabdır» kimi görünür.
+READ_ONLY = {
+    "title": pgettext_lazy(_CTX, "Təsdiq kafedra müdirinin səlahiyyətindədir"),
+    "body": pgettext_lazy(
+        _CTX,
+        "Bu panel sizin üçün YALNIZ OXUNUR: sillabusu aça, müqayisə edə və bölmə şərhi yaza bilərsiniz. "
+        "Təsdiq, düzəliş və rədd qərarını aid kafedranın müdiri verir.",
+    ),
+}
+
 #: Növbə KPI kartları: (etiket, qeyd, dəyər şəkilçisi).
 KPI_LABELS = {
     "queued": (
@@ -62,7 +75,7 @@ KPI_LABELS = {
         "",
     ),
     "late": (
-        pgettext_lazy(_CTX, "10 gündən çox gözləyir"),
+        pgettext_lazy(_CTX, "Eskalasiya həddini keçib"),
         pgettext_lazy(_CTX, "gözləmə həddi aşılıb"),
         "",
     ),
@@ -73,10 +86,13 @@ KPI_LABELS = {
     ),
     "average": (
         pgettext_lazy(_CTX, "Orta gözləmə"),
-        pgettext_lazy(_CTX, "hədəf: 5 gündən az"),
+        pgettext_lazy(_CTX, "hədəf: SLA çərçivəsində"),
         pgettext_lazy(_CTX, "gün"),
     ),
 }
+
+#: «Eskalasiya həddini keçib» kartının qeydi — hədd SİYASƏTDƏN gəlir (§10.4).
+LATE_KPI_NOTE = pgettext_lazy(_CTX, "%(days)s gündən çox gözləyir")
 
 #: Coverage KPI kartları: (etiket, qeyd).
 COVERAGE_KPI_LABELS = {
@@ -135,14 +151,20 @@ POLICY_ROWS = (
     {
         "key": "chair",
         "label": pgettext_lazy(_CTX, "Kafedra müdiri təsdiqi"),
-        "note": pgettext_lazy(_CTX, "Bütün sillabuslar üçün məcburidir — state maşını ilə tətbiq olunur."),
+        "note": pgettext_lazy(
+            _CTX,
+            "Bütün sillabuslar üçün məcburidir və YEGANƏ təsdiq mərhələsidir — state maşını ilə tətbiq olunur.",
+        ),
         "state": pgettext_lazy(_CTX, "aktiv"),
         "on": True,
     },
     {
         "key": "dean",
         "label": pgettext_lazy(_CTX, "İkinci təsdiq — dekan"),
-        "note": pgettext_lazy(_CTX, "Universitet siyasətindən asılı ikinci mərhələ — hələ tətbiq olunmayıb."),
+        "note": pgettext_lazy(
+            _CTX,
+            "Tətbiq olunmur: dekanlıq sillabusu görür və şərh yazır, qərar açarı isə kafedra müdirindədir.",
+        ),
         "state": pgettext_lazy(_CTX, "tətbiq olunmur"),
         "on": False,
     },
@@ -273,8 +295,10 @@ __all__ = [
     "IDENTITY",
     "INTRO",
     "KPI_LABELS",
+    "LATE_KPI_NOTE",
     "NOSCOPE",
     "POLICY_ROWS",
+    "READ_ONLY",
     "QUEUE_SORT_LABELS",
     "SCOPE_COUNT",
     "STATUS_FILTER_ALL",

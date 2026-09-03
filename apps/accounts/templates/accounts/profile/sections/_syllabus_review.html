@@ -53,6 +53,18 @@ Davranış: accounts/js/profile/syllabus_review.js (+ ..._panel.js)
       <div class="syl-head__text">
         {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
         <p class="syl-head__lead">{{ sr.intro }}</p>
+        {% if sr.read_only %}
+        {% comment %}
+        Sahibin qərarı (2026-09-03): təsdiq kafedra müdirinindir. Qərar əhatəsi
+        olmayan aktor (dekan) növbəni oxuyur — düymələr gizlədilir, səbəbi isə
+        burada AÇIQ yazılır.
+        {% endcomment %}
+        <p class="syl-note syl-note--readonly" data-syl-readonly>
+          <i class="fas fa-circle-info" aria-hidden="true"></i>
+          <strong>{{ sr.read_only.title }}</strong>
+          <span>{{ sr.read_only.body }}</span>
+        </p>
+        {% endif %}
       </div>
       <div class="syl-tabs" role="group" aria-label="{% trans 'Görünüş' context 'accounts.syllabus' %}">
         <button type="button" class="syl-tabs__btn{% if sr.tab == 'queue' %} is-on{% endif %}"

@@ -27,6 +27,7 @@ from ..constants import (
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
 from . import notifications as syllabus_notifications
+from . import versioning
 from .drafts import recompute_completion, refresh_pointers
 from .scoping import is_author
 
@@ -49,12 +50,26 @@ _SCOPE_PERMISSION = {
     Transition.ARCHIVE: PERM_MANAGE,
 }
 
+#: SAHİBİN QƏRARI (2026-09-03): təsdiq/düzəliş/rədd üçün əhatə KAFEDRA
+#: SƏVİYYƏSİNDƏ olmalıdır — dekanın fakültə alt-ağacı bəs etmir.  Baxışın
+#: AÇILMASI (``START_REVIEW``) və arxivləmə bu siyahıda QƏSDƏN yoxdur: dekan
+#: növbəni açıb oxuya və şərh yaza bilir, sadəcə qərar verə bilmir.
+_CHAIR_LEVEL_TRANSITIONS = frozenset(
+    {
+        Transition.APPROVE,
+        Transition.REQUEST_REVISION,
+        Transition.REJECT,
+    }
+)
+
 
 def _in_scope(actor, syllabus, name: str) -> bool:
     """Müəllif öz sillabusunda həmişə «əhatədədir»; kafedra tərəfi scope ilə."""
     permission = _SCOPE_PERMISSION.get(name)
     if permission is None:
         return is_author(actor, syllabus)
+    if name in _CHAIR_LEVEL_TRANSITIONS:
+        return actor.covers_chair_unit(syllabus.chair_unit_id, permission)
     return actor.covers_unit(syllabus.chair_unit_id, permission)
 
 
@@ -145,7 +160,15 @@ def _apply(
 
 
 def submit(*, version, actor, request=None):
-    """DRAFT/REVISION → SUBMITTED. Versiya kilidlənir."""
+    """DRAFT/REVISION → SUBMITTED. Versiya kilidlənir.
+
+    ⚠️ Göndərmədən ƏVVƏL versiya təsnifatı yoxlanılır (README §10.3): müəllim
+    «kiçik» seçsə də, həftəlik mövzular / qiymətləndirmə çəkiləri / sərbəst iş
+    strukturu dəyişibsə versiya avtomatik MAJOR-a qaldırılır — çünki kiçik
+    versiya CARİ semestrə tətbiq olunur və artıq açılmış jurnalın strukturunu
+    dəyişərdi.  Qaldırma :mod:`apps.syllabus.services.versioning`-dədir.
+    """
+    version, escalated = versioning.escalate_if_structural(version, actor=actor, request=request)
     recompute_completion(version)
     version.refresh_from_db(fields=["completion_percent"])
     now = timezone.now()
@@ -163,6 +186,8 @@ def submit(*, version, actor, request=None):
     )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
     syllabus_notifications.notify_submitted(updated)
+    # UI mesajı üçün: qaldırma baş veribsə hansı bölmələr səbəb olub.
+    updated.escalated_sections = tuple(escalated)
     return updated
 
 

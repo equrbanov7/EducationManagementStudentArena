@@ -374,10 +374,21 @@ def _migrated_then_reopened(world):
 
 
 def test_the_next_version_inherits_the_migrated_assessment_text(world):
-    """Qoruma tələsi: itki yalnız İRS ALINMIŞ məzmunda görünür."""
+    """Qoruma tələsi: itki yalnız İRS ALINMIŞ məzmunda görünür.
+
+    ⚠️ 2026-09-03-dən BİR İSTİSNA var: köçürülmüş qeydin ``midterm``/``project``
+    cütü 0/0-dır, yəni bugünkü siyasətə görə cəmi 100 vermir (README §8/4).
+    Yeni qaralama etibarsız bölgünü irs almır — o, başlanğıc bölgüsü ilə
+    əvəzlənir.  Qalan açarlar (``note``, ``exam_questions``) HƏLƏ DƏ toxunulmaz
+    qalmalıdır — data itkisi tələsi məhz onlarda idi.
+    """
     version, _actor_obj = _migrated_then_reopened(world)
 
-    assert services.section_data_map(version)[SectionKey.ASSESS.value] == MIGRATED_ASSESS
+    data = services.section_data_map(version)[SectionKey.ASSESS.value]
+    assert data["note"] == MIGRATED_ASSESS["note"]
+    assert data["exam_questions"] == MIGRATED_ASSESS["exam_questions"]
+    # Etibarsız 0/0 bölgüsü siyasətə uyğun başlanğıc bölgüsü ilə əvəzlənib.
+    assert data["midterm"] + data["project"] == 30
 
 
 def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world):

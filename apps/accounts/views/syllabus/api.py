@@ -45,8 +45,10 @@ _SUBMITTED = pgettext_lazy(_CTX, "Sillabus kafedra müdirinin təsdiq növbəsin
 _WITHDRAWN = pgettext_lazy(_CTX, "Təqdimat geri çağırıldı, status qaralamaya qaytarıldı.")
 _RESUMED = pgettext_lazy(_CTX, "Düzəlişə başlandı — bölmələr yenidən redaktə oluna bilər.")
 
-#: «Geri çağır» dialoqunun minimum səbəb uzunluğu (dizayn §3.1).
-MIN_REASON_LENGTH = 15
+#: «Geri çağır» dialoqunun minimum səbəb uzunluğu.
+#: README §8/6: səbəb tələb edən HƏR əməl üçün ≥20 simvol (qərar dialoqları ilə
+#: eyni hədd — `review_text.MIN_DECISION_REASON`).
+MIN_REASON_LENGTH = 20
 
 
 def _body(request) -> dict:
@@ -139,6 +141,7 @@ def syllabus_section_save(request, version_id):
 
 def _do_create(request, organization, actor, payload):
     from apps.registrar.models import CourseOffering
+    from apps.registrar.plan_hours import plan_hours_for_offering, program_for_offering
 
     offering = (
         CourseOffering.objects.filter(
@@ -156,14 +159,14 @@ def _do_create(request, organization, actor, payload):
         actor=actor,
         offering=offering,
         chair_unit=getattr(offering.group, "parent", None) if offering.group_id else None,
+        program=program_for_offering(offering),
         author=request.user,
-        # BOŞ ÖTÜRÜLÜR VƏ BU DOĞRUDUR: ``CourseOffering`` yalnız `lesson_hours`
-        # CƏMİNİ daşıyır, `lecture/seminar/lab` bölgüsünü yox.  Uydurma bölgü
-        # yazmaqdansa boş buraxırıq; `completion._check_week` plan verilməyəndə
-        # saat balansını yoxlamır (bax `test_completion_plan_hours.py`).
-        # Bölgü modelləşəndə (apps/workload ↔ apps/syllabus müqaviləsi) burada
-        # ötürülməlidir və qayda öz-özünə yenidən işə düşəcək.
-        plan_hours={},
+        # Saat bölgüsü TƏSDİQLƏNMİŞ tədris planının sətrindən gəlir
+        # (``registrar.plan_hours``) — ``CourseOffering`` yalnız `lesson_hours`
+        # CƏMİNİ daşıyır, növ üzrə bölgünü yox.  Plan sətri tapılmasa BOŞ qalır
+        # və `completion._check_week` «plan yoxdursa məhdudiyyət də yoxdur»
+        # semantikası ilə işləyir (bax `test_completion_plan_hours.py`).
+        plan_hours=plan_hours_for_offering(offering),
         request=request,
     )
     return version, _DRAFT_CREATED
@@ -221,6 +224,10 @@ def syllabus_action(request):
             if action == "submit":
                 version = services.submit(version=version, actor=actor, request=request)
                 message = _SUBMITTED
+                # README §10.3: struktur dəyişikliyi versiyanı avtomatik BÖYÜK
+                # versiyaya qaldırır — istifadəçi bunu SƏSSİZ öyrənməməlidir.
+                if getattr(version, "escalated_sections", ()):
+                    message = f"{message} {transition_text(services.ESCALATION_CODE)}"
             elif action == "resume":
                 version = services.resume_editing(version=version, actor=actor, request=request)
                 message = _RESUMED

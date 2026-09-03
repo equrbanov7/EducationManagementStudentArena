@@ -10,3 +10,13 @@
     </div>
 </div>
 {% endif %}
+
+{% if section_denied %}
+<div class="profile-alert profile-alert--warning" role="alert" data-section-denied="1">
+    <i class="fas fa-lock profile-alert__icon"></i>
+    <div>
+        <strong>{% trans 'Bu bölməyə icazəniz yoxdur.' context 'profile.shell' %}</strong>
+        {% trans 'İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız.' context 'profile.shell' %}
+    </div>
+</div>
+{% endif %}

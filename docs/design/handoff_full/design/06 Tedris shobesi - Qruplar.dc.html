@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+  @keyframes emsShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+</style>
+</helmet>
+<div style="max-width:1320px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:9px 14px;margin-bottom:16px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;font-size:.79rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-600)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="3.5"></circle><path d="M22 20v-2a4 4 0 0 0-3-3.9"></path></svg>
+    <span style="font-weight:800;color:var(--ems-neutral-900)">{{ ctxRole }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">{{ ctxScope }}</span>
+    <span style="color:var(--ems-neutral-300)">·</span>
+    <span style="color:var(--ems-neutral-500)">2026/2027 · Payız semestri</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.74rem;font-weight:700">{{ ctxPerm }}</span>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:14px">
+    <div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Qruplar</h1>
+      <p style="margin:6px 0 0;max-width:680px;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Qrup kartı: tələbə tərkibi, həftəlik cədvəl, elektron jurnal və tələbə hərəkəti əmrləri bir yerdə.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px">
+      <button type="button" onClick="{{ exportList }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-neutral-50)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Siyahını yüklə
+      </button>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <button type="button" onClick="{{ openCreate }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Yeni qrup
+        </button>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 13px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:13px">
+    <div style="position:relative;flex:1;min-width:200px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+      <label for="ems-g-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Qrup axtar</label>
+      <input id="ems-g-q" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Qrup kodu, ixtisas və ya kurator" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+    </div>
+    <div style="position:relative">
+      <button type="button" onClick="{{ toggleProg }}" aria-haspopup="listbox" aria-expanded="{{ progOpen }}" style="display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer;max-width:260px">
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ progLabel }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <sc-if value="{{ progOpen }}" hint-placeholder-val="{{ false }}">
+        <div role="listbox" aria-label="İxtisas" style="position:absolute;top:100%;left:0;z-index:40;width:290px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.16);display:flex;flex-direction:column;gap:2px;max-height:260px;overflow:auto">
+          <sc-for list="{{ progOpts }}" as="o" hint-placeholder-count="4">
+            <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.81rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <sc-for list="{{ kursChips }}" as="c" hint-placeholder-count="5">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;min-width:36px;padding:0 11px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <sc-for list="{{ langChips }}" as="c" hint-placeholder-count="3">
+      <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+    </sc-for>
+    <button type="button" onClick="{{ resetFilters }}" style="height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:transparent;color:var(--ems-neutral-500);font-size:.8rem;font-weight:700;cursor:pointer">Sıfırla</button>
+  </div>
+
+  <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}">
+    <button type="button" onClick="{{ toggleRail }}" aria-expanded="{{ railOpen }}" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 14px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      Qrup siyahısı ({{ listCount }})
+    </button>
+  </sc-if>
+
+  <div style="display:grid;grid-template-columns:{{ colTpl }};gap:16px;align-items:start">
+
+    <sc-if value="{{ showRail }}" hint-placeholder-val="{{ true }}">
+      <aside style="position:sticky;top:16px;max-height:calc(100vh - 40px);overflow:auto;padding:12px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 4px 10px">
+          <span style="font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ listCount }} qrup</span>
+          <span style="font-size:.72rem;font-weight:800;color:var(--ems-neutral-400)">{{ listStudents }} tələbə</span>
+        </div>
+        <sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:26px 12px;text-align:center;font-size:.81rem;color:var(--ems-neutral-400);text-wrap:pretty">Filtrə uyğun qrup yoxdur</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ list }}" as="g" hint-placeholder-count="6">
+            <button type="button" onClick="{{ g.pick }}" aria-current="{{ g.sel }}" style="display:flex;flex-direction:column;gap:5px;padding:10px 11px;border-radius:11px;border:1px solid {{ g.bd }};background:{{ g.bg }};cursor:pointer;text-align:left" style-hover="background:{{ g.hover }}">
+              <span style="display:flex;align-items:center;gap:8px;width:100%">
+                <span style="font-size:.88rem;font-weight:800;color:{{ g.fg }};letter-spacing:-.01em">{{ g.name }}</span>
+                <span style="padding:1px 6px;border-radius:5px;background:{{ g.langBg }};color:{{ g.langFg }};font-size:.66rem;font-weight:800">{{ g.lang }}</span>
+                <span style="margin-left:auto;font-size:.74rem;font-weight:800;color:{{ g.stFg }}">{{ g.students }}</span>
+              </span>
+              <span style="font-size:.75rem;color:{{ g.subFg }};line-height:1.3;text-wrap:pretty">{{ g.prog }}</span>
+              <span style="display:flex;align-items:center;gap:7px;width:100%">
+                <span style="font-size:.71rem;color:{{ g.metaFg }}">{{ g.meta }}</span>
+                <span style="margin-left:auto;width:7px;height:7px;border-radius:999px;background:{{ g.dot }}"></span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </aside>
+    </sc-if>
+
+    <div style="min-width:0;display:flex;flex-direction:column;gap:14px">
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div aria-busy="true" aria-live="polite" style="display:flex;flex-direction:column;gap:12px">
+          <div style="height:150px;border-radius:16px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+          <div style="height:360px;border-radius:16px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-50) 50%,var(--ems-neutral-100) 75%);background-size:640px 100%;animation:emsShimmer 1.25s infinite linear"></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+        <div role="alert" style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:52px 20px;text-align:center;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ems-danger)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="7.5" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.5"></line></svg>
+          <div style="font-size:.93rem;font-weight:800;color:var(--ems-neutral-900)">Qrup kartı yüklənmədi</div>
+          <button type="button" onClick="{{ retry }}" style="padding:9px 17px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.83rem;font-weight:700;cursor:pointer">Yenidən cəhd et</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ noSel }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:70px 24px;text-align:center;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="3.5"></circle></svg>
+          <div style="font-size:.95rem;font-weight:800;color:var(--ems-neutral-900)">Qrup seçin</div>
+          <div style="font-size:.83rem;color:var(--ems-neutral-500);max-width:320px;text-wrap:pretty">Sol siyahıdan qrupa klik edin — tərkibi, cədvəli və jurnalı burada açılacaq.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:16px;overflow:hidden">
+
+          <div style="padding:16px 18px 0">
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:.75rem;color:var(--ems-neutral-400);margin-bottom:9px">
+              <sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="3">
+                <span style="display:inline-flex;align-items:center;gap:7px">
+                  <span style="color:{{ c.fg }};font-weight:{{ c.fw }}">{{ c.label }}</span>
+                  <sc-if value="{{ c.sep }}" hint-placeholder-val="{{ false }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </sc-if>
+                </span>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">
+                  <h2 style="margin:0;font-size:1.42rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">{{ g.name }}</h2>
+                  <span style="padding:3px 10px;border-radius:999px;background:{{ g.stBg }};color:{{ g.stFg }};font-size:.73rem;font-weight:800">{{ g.status }}</span>
+                </div>
+                <div style="margin-top:6px;font-size:.87rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ g.line }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button type="button" onClick="{{ openJournal }}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.82rem;font-weight:700;cursor:pointer">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+                  Jurnal
+                </button>
+                <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" onClick="{{ openMove }}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.82rem;font-weight:700;cursor:pointer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h13"></path><polyline points="13 7 18 12 13 17"></polyline><line x1="21" y1="5" x2="21" y2="19"></line></svg>
+                    Hərəkət əmri
+                  </button>
+                </sc-if>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:11px;margin-top:15px">
+              <sc-for list="{{ kpis }}" as="m" hint-placeholder-count="5">
+                <div style="padding:12px 14px;border:1px solid {{ m.bd }};background:{{ m.bg }};border-radius:13px">
+                  <div style="font-size:.67rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:{{ m.labFg }}">{{ m.label }}</div>
+                  <div style="margin-top:5px;font-size:1.24rem;font-weight:800;letter-spacing:-.02em;color:{{ m.valFg }}">{{ m.value }}</div>
+                  <div style="margin-top:2px;font-size:.72rem;color:{{ m.noteFg }};text-wrap:pretty">{{ m.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;gap:2px;margin-top:16px;overflow-x:auto;border-bottom:1px solid var(--ems-neutral-200)">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+                <button type="button" onClick="{{ t.pick }}" aria-current="{{ t.sel }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 13px;border:none;border-bottom:2px solid {{ t.bd }};background:transparent;color:{{ t.fg }};font-size:.85rem;font-weight:{{ t.fw }};white-space:nowrap;cursor:pointer">
+                  {{ t.label }}
+                  <sc-if value="{{ t.hasCount }}" hint-placeholder-val="{{ false }}">
+                    <span style="padding:1px 6px;border-radius:999px;background:{{ t.cntBg }};color:{{ t.cntFg }};font-size:.7rem;font-weight:800">{{ t.count }}</span>
+                  </sc-if>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="padding:18px">
+
+            <sc-if value="{{ tabUmumi }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:{{ ovTpl }};gap:14px;align-items:start">
+                <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+                  <div style="border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+                    <div style="padding:12px 15px;background:var(--ems-neutral-50);border-bottom:1px solid var(--ems-neutral-200);font-size:.87rem;font-weight:800;color:var(--ems-neutral-900)">Qrup pasportu</div>
+                    <div style="display:flex;flex-direction:column;gap:1px;background:var(--ems-neutral-100)">
+                      <sc-for list="{{ fields }}" as="f" hint-placeholder-count="7">
+                        <div style="display:flex;align-items:center;gap:12px;padding:10px 15px;background:var(--ems-neutral-0)">
+                          <span style="width:158px;flex:none;font-size:.78rem;color:var(--ems-neutral-500)">{{ f.label }}</span>
+                          <span style="flex:1;font-size:.83rem;font-weight:{{ f.fw }};color:{{ f.fg }};text-wrap:pretty">{{ f.value }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div style="padding:15px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px">
+                      <span style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900)">Tələbə tərkibi — kimə görə neçə nəfər</span>
+                      <span style="font-size:.74rem;color:var(--ems-neutral-400)">{{ g.students }} nəfər</span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:9px">
+                      <sc-for list="{{ compo }}" as="c" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:11px">
+                          <span style="width:132px;flex:none;font-size:.79rem;color:var(--ems-neutral-700);text-wrap:pretty">{{ c.label }}</span>
+                          <span style="flex:1;height:9px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+                            <span style="display:block;height:100%;width:{{ c.w }};background:{{ c.color }};border-radius:999px"></span>
+                          </span>
+                          <span style="width:58px;flex:none;text-align:right;font-size:.78rem;font-weight:800;color:var(--ems-neutral-900)">{{ c.value }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+                  <div style="padding:15px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:12px">Payız semestrinin gedişi</div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                      <span style="flex:1;height:10px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden">
+                        <span style="display:block;height:100%;width:{{ semW }};background:var(--ems-primary-600);border-radius:999px"></span>
+                      </span>
+                      <span style="font-size:.8rem;font-weight:800;color:var(--ems-primary-800)">{{ semPct }}</span>
+                    </div>
+                    <div style="font-size:.77rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ semNote }}</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;margin-top:13px;border:1px solid var(--ems-neutral-200);border-radius:11px;overflow:hidden;background:var(--ems-neutral-200)">
+                      <sc-for list="{{ semStats }}" as="s" hint-placeholder-count="3">
+                        <div style="padding:10px 12px;background:var(--ems-neutral-0)">
+                          <div style="font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ s.label }}</div>
+                          <div style="margin-top:3px;font-size:.9rem;font-weight:800;color:{{ s.fg }}">{{ s.value }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div style="padding:15px;border:1px solid var(--ems-neutral-200);border-radius:14px">
+                    <div style="font-size:.9rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:11px">Risk qrupundakı tələbələr</div>
+                    <sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ true }}">
+                      <div style="display:flex;flex-direction:column;gap:7px">
+                        <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:{{ a.bg }};border:1px solid {{ a.bd }};border-radius:10px">
+                            <span style="width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:8px;background:var(--ems-neutral-0);color:{{ a.fg }};font-size:.68rem;font-weight:800">{{ a.n }}</span>
+                            <span style="flex:1;min-width:0;font-size:.81rem;font-weight:700;color:{{ a.fg }};text-wrap:pretty">{{ a.label }}</span>
+                            <a href="#" onClick="{{ a.go }}" style="flex:none;font-size:.76rem;font-weight:800;white-space:nowrap">Siyahı</a>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ noAlerts }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px;padding:13px;background:var(--ems-success-bg);border-radius:10px">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+                        <span style="font-size:.82rem;font-weight:700;color:#15803d">Risk qrupunda tələbə yoxdur.</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabTelebe }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px">
+                  <div style="position:relative;flex:1;min-width:180px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;left:11px;top:11px"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                    <label for="ems-s-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Tələbə axtar</label>
+                    <input id="ems-s-q" type="text" value="{{ stQ }}" onChange="{{ onStQ }}" placeholder="Ad, soyad və ya tələbə kodu" style="width:100%;height:36px;padding:0 12px 0 32px;border:1px solid var(--ems-neutral-200);border-radius:10px;background:var(--ems-neutral-50);font-size:.82rem">
+                  </div>
+                  <sc-for list="{{ stFilters }}" as="c" hint-placeholder-count="4">
+                    <button type="button" onClick="{{ c.pick }}" style="height:36px;padding:0 13px;border-radius:9px;border:1px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-size:.8rem;font-weight:700;cursor:pointer">{{ c.label }}</button>
+                  </sc-for>
+                </div>
+
+                <sc-if value="{{ stEmpty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px 20px;text-align:center;background:var(--ems-neutral-50);border:1px dashed var(--ems-neutral-300);border-radius:13px">
+                    <div style="font-size:.86rem;font-weight:700;color:var(--ems-neutral-900)">Filtrə uyğun tələbə yoxdur</div>
+                    <button type="button" onClick="{{ resetSt }}" style="padding:8px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.81rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ stShown }}" hint-placeholder-val="{{ true }}">
+                  <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                    <table style="width:100%;min-width:900px;font-size:.81rem">
+                      <thead>
+                        <tr style="background:var(--ems-primary-50)">
+                          <th style="padding:9px 12px;text-align:right;width:42px;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">№</th>
+                          <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Tələbə</th>
+                          <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Təhsil haqqı</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Orta bal</th>
+                          <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">GPA</th>
+                          <th style="padding:9px 12px;text-align:left;width:132px;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Dərsə gəlmə faizi</th>
+                          <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Akademik borc, fənn</th>
+                          <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Tələbənin statusu</th>
+                          <th style="padding:9px 12px"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ students }}" as="s" hint-placeholder-count="8">
+                          <tr onClick="{{ s.open }}" tabindex="0" onKeyDown="{{ s.key }}" style="background:{{ s.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">
+                            <td style="padding:9px 12px;text-align:right;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-400);font-size:.75rem">{{ s.no }}</td>
+                            <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)">
+                              <div style="display:flex;align-items:center;gap:10px">
+                                <span style="width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:8px;background:{{ s.avBg }};color:{{ s.avFg }};font-size:.7rem;font-weight:800">{{ s.ini }}</span>
+                                <span style="min-width:0">
+                                  <span style="display:flex;align-items:center;gap:6px;font-weight:700;color:var(--ems-neutral-900);white-space:nowrap">
+                                    {{ s.name }}
+                                    <sc-if value="{{ s.elder }}" hint-placeholder-val="{{ false }}">
+                                      <span style="padding:1px 6px;border-radius:5px;background:var(--ems-primary-100);color:var(--ems-primary-800);font-size:.64rem;font-weight:800">nümayəndə</span>
+                                    </sc-if>
+                                  </span>
+                                  <span style="display:block;margin-top:1px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;color:var(--ems-neutral-400)">{{ s.code }}</span>
+                                </span>
+                              </div>
+                            </td>
+                            <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)"><span style="padding:2px 8px;border-radius:6px;background:{{ s.payBg }};color:{{ s.payFg }};font-size:.7rem;font-weight:700;white-space:nowrap">{{ s.pay }}</span></td>
+                            <td style="padding:9px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:{{ s.balFg }}">{{ s.bal }}</td>
+                            <td style="padding:9px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700)">{{ s.gpa }}</td>
+                            <td style="padding:9px 12px;border-top:1px solid var(--ems-neutral-100)">
+                              <div style="display:flex;align-items:center;gap:8px">
+                                <span style="flex:1;height:6px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden;min-width:44px">
+                                  <span style="display:block;height:100%;width:{{ s.attW }};background:{{ s.attFg }};border-radius:999px"></span>
+                                </span>
+                                <span style="font-size:.74rem;font-weight:800;color:{{ s.attFg }};width:36px;text-align:right">{{ s.att }}</span>
+                              </div>
+                            </td>
+                            <td style="padding:9px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:{{ s.debtFg }}">{{ s.debt }}</td>
+                            <td style="padding:9px 10px;border-top:1px solid var(--ems-neutral-100)"><span style="padding:2px 8px;border-radius:6px;background:{{ s.stBg }};color:{{ s.stFg }};font-size:.7rem;font-weight:700;white-space:nowrap">{{ s.status }}</span></td>
+                            <td style="padding:9px 12px;text-align:right;border-top:1px solid var(--ems-neutral-100)">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="margin-top:8px;font-size:.75rem;color:var(--ems-neutral-400);text-wrap:pretty">{{ stNote }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabCedvel }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px">
+                  <span style="font-size:.82rem;color:var(--ems-neutral-500)">{{ schedNote }}</span>
+                  <div style="margin-left:auto;display:flex;flex-wrap:wrap;gap:12px">
+                    <sc-for list="{{ schedLegend }}" as="l" hint-placeholder-count="3">
+                      <span style="display:inline-flex;align-items:center;gap:6px;font-size:.75rem;color:var(--ems-neutral-500)">
+                        <span style="width:10px;height:10px;border-radius:3px;background:{{ l.color }}"></span>{{ l.label }}
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+                <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                  <table style="width:100%;min-width:900px;font-size:.78rem">
+                    <thead>
+                      <tr style="background:var(--ems-neutral-50)">
+                        <th style="padding:9px 10px;text-align:left;width:88px;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500);border-right:1px solid var(--ems-neutral-200)">Saat</th>
+                        <sc-for list="{{ days }}" as="d" hint-placeholder-count="5">
+                          <th style="padding:9px 10px;text-align:left;font-size:.65rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500)">{{ d.label }}</th>
+                        </sc-for>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ grid }}" as="row" hint-placeholder-count="5">
+                        <tr>
+                          <td style="padding:8px 10px;border-top:1px solid var(--ems-neutral-100);border-right:1px solid var(--ems-neutral-200);vertical-align:top;background:var(--ems-neutral-50)">
+                            <div style="font-size:.8rem;font-weight:800;color:var(--ems-neutral-900)">{{ row.time }}</div>
+                            <div style="margin-top:2px;font-size:.7rem;color:var(--ems-neutral-400)">{{ row.no }}</div>
+                          </td>
+                          <sc-for list="{{ row.cells }}" as="c" hint-placeholder-count="5">
+                            <td style="padding:5px;border-top:1px solid var(--ems-neutral-100);vertical-align:top;width:18%">
+                              <sc-if value="{{ c.has }}" hint-placeholder-val="{{ true }}">
+                                <div style="padding:8px 9px;border-radius:9px;background:{{ c.bg }};border-left:3px solid {{ c.accent }}">
+                                  <div style="font-size:.77rem;font-weight:700;color:var(--ems-neutral-900);line-height:1.28;text-wrap:pretty">{{ c.name }}</div>
+                                  <div style="margin-top:3px;font-size:.7rem;color:{{ c.accent }};font-weight:700">{{ c.kind }}</div>
+                                  <div style="margin-top:3px;font-size:.7rem;color:var(--ems-neutral-500);text-wrap:pretty">{{ c.teacher }}</div>
+                                  <div style="margin-top:2px;font-size:.7rem;color:var(--ems-neutral-400)">{{ c.room }}</div>
+                                </div>
+                              </sc-if>
+                            </td>
+                          </sc-for>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabJurnal }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px">
+                  <span style="font-size:.82rem;color:var(--ems-neutral-500);text-wrap:pretty">Semestr fənləri və elektron jurnalın vəziyyəti — keçilmiş dərs sayı plan saatına nisbətdə.</span>
+                  <span style="margin-left:auto;font-size:.78rem;font-weight:800;color:var(--ems-primary-800)">{{ jNote }}</span>
+                </div>
+                <div style="overflow:auto;border:1px solid var(--ems-neutral-200);border-radius:12px">
+                  <table style="width:100%;min-width:940px;font-size:.81rem">
+                    <thead>
+                      <tr style="background:var(--ems-primary-50)">
+                        <th style="padding:9px 12px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Fənn</th>
+                        <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Aparan müəllim</th>
+                        <th style="padding:9px 10px;text-align:center;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Kredit</th>
+                        <th style="padding:9px 12px;text-align:left;width:150px;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Keçilmiş dərs</th>
+                        <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Orta bal</th>
+                        <th style="padding:9px 10px;text-align:right;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Dərsə gəlmə</th>
+                        <th style="padding:9px 10px;text-align:left;font-size:.66rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-primary-800)">Jurnal vəziyyəti</th>
+                        <th style="padding:9px 12px"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ jrows }}" as="j" hint-placeholder-count="6">
+                        <tr style="background:{{ j.bg }}">
+                          <td style="padding:10px 12px;border-top:1px solid var(--ems-neutral-100)">
+                            <span style="display:block;font-weight:700;color:var(--ems-neutral-900);text-wrap:pretty">{{ j.name }}</span>
+                            <span style="display:block;margin-top:2px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;color:var(--ems-neutral-400)">{{ j.code }}</span>
+                          </td>
+                          <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100);color:var(--ems-neutral-700);white-space:nowrap">{{ j.teacher }}</td>
+                          <td style="padding:10px 10px;text-align:center;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:var(--ems-primary-800)">{{ j.kr }}</td>
+                          <td style="padding:10px 12px;border-top:1px solid var(--ems-neutral-100)">
+                            <div style="display:flex;align-items:center;gap:8px">
+                              <span style="flex:1;height:6px;border-radius:999px;background:var(--ems-neutral-100);overflow:hidden;min-width:50px">
+                                <span style="display:block;height:100%;width:{{ j.w }};background:var(--ems-primary-600);border-radius:999px"></span>
+                              </span>
+                              <span style="font-size:.74rem;color:var(--ems-neutral-500);white-space:nowrap">{{ j.done }}</span>
+                            </div>
+                          </td>
+                          <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:800;color:{{ j.balFg }}">{{ j.bal }}</td>
+                          <td style="padding:10px 10px;text-align:right;border-top:1px solid var(--ems-neutral-100);font-weight:700;color:{{ j.attFg }}">{{ j.att }}</td>
+                          <td style="padding:10px 10px;border-top:1px solid var(--ems-neutral-100)"><span style="padding:2px 8px;border-radius:6px;background:{{ j.sBg }};color:{{ j.sFg }};font-size:.71rem;font-weight:700;white-space:nowrap">{{ j.state }}</span></td>
+                          <td style="padding:10px 12px;text-align:right;border-top:1px solid var(--ems-neutral-100)"><a href="#" onClick="{{ j.go }}" style="font-size:.76rem;font-weight:800;white-space:nowrap">Jurnalı aç</a></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabHereket }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px">
+                  <span style="font-size:.82rem;color:var(--ems-neutral-500);text-wrap:pretty">Tələbə hərəkəti rektor əmri ilə rəsmiləşir — qrupun tərkibi yalnız əmrdən sonra dəyişir.</span>
+                  <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ openMove }}" style="display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.81rem;font-weight:700;cursor:pointer">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                      Yeni əmr layihəsi
+                    </button>
+                  </sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0">
+                  <sc-for list="{{ moves }}" as="m" hint-placeholder-count="4">
+                    <div style="display:flex;gap:13px">
+                      <div style="display:flex;flex-direction:column;align-items:center;flex:none;width:26px">
+                        <span style="width:11px;height:11px;border-radius:999px;background:{{ m.dot }};border:2px solid var(--ems-neutral-0);box-shadow:0 0 0 2px {{ m.dot }}"></span>
+                        <span style="flex:1;width:2px;background:var(--ems-neutral-200);margin:3px 0"></span>
+                      </div>
+                      <div style="flex:1;min-width:0;padding-bottom:16px">
+                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px">
+                          <span style="font-size:.85rem;font-weight:800;color:var(--ems-neutral-900)">{{ m.type }}</span>
+                          <span style="padding:2px 8px;border-radius:6px;background:{{ m.bg }};color:{{ m.fg }};font-size:.7rem;font-weight:700">{{ m.order }}</span>
+                          <span style="font-size:.75rem;color:var(--ems-neutral-400)">{{ m.date }}</span>
+                        </div>
+                        <div style="margin-top:4px;font-size:.82rem;color:var(--ems-neutral-700);text-wrap:pretty">{{ m.who }}</div>
+                        <div style="margin-top:3px;font-size:.78rem;color:var(--ems-neutral-500);line-height:1.45;text-wrap:pretty">{{ m.note }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+<sc-if value="{{ mStudent }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:80;display:flex;justify-content:flex-end;background:rgba(15,23,42,.42)" onClick="{{ closeStudent }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-st" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:580px;height:100%;overflow:auto;background:var(--ems-neutral-0);box-shadow:-18px 0 50px rgba(15,23,42,.22)">
+      <div style="position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 22px;background:var(--ems-neutral-0);border-bottom:1px solid var(--ems-neutral-200)">
+        <div style="display:flex;align-items:center;gap:12px;min-width:0">
+          <span style="width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:13px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.95rem;font-weight:800">{{ sv.ini }}</span>
+          <div style="min-width:0">
+            <h3 id="ems-st" style="margin:0;font-size:1.04rem;font-weight:800;color:var(--ems-neutral-900);text-wrap:pretty">{{ sv.name }}</h3>
+            <div style="margin-top:3px;font-size:.78rem;color:var(--ems-neutral-500)">{{ sv.sub }}</div>
+          </div>
+        </div>
+        <button type="button" onClick="{{ closeStudent }}" aria-label="Paneli bağla" style="width:30px;height:30px;flex:none;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
+      </div>
+      <div style="padding:18px 22px 30px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(124px,1fr));gap:1px;border:1px solid var(--ems-neutral-200);border-radius:12px;overflow:hidden;background:var(--ems-neutral-200)">
+          <sc-for list="{{ sv.facts }}" as="f" hint-placeholder-count="4">
+            <div style="padding:11px 13px;background:var(--ems-neutral-0)">
+              <div style="font-size:.65rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ f.label }}</div>
+              <div style="margin-top:4px;font-size:.88rem;font-weight:800;color:{{ f.fg }}">{{ f.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ sv.hasWarn }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-warning-bg);border:1px solid #fde68a;border-radius:11px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><line x1="12" y1="9" x2="12" y2="13.5"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+            <span style="font-size:.79rem;color:#92400e;line-height:1.5;text-wrap:pretty">{{ sv.warn }}</span>
+          </div>
+        </sc-if>
+
+        <div>
+          <div style="font-size:.88rem;font-weight:800;color:var(--ems-neutral-900);margin-bottom:9px">Semestr fənləri üzrə vəziyyət</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ sv.subjects }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:11px;padding:10px 13px;border:1px solid var(--ems-neutral-200);border-radius:10px">
+                <span style="flex:1;min-width:0;font-size:.82rem;font-weight:600;color:var(--ems-neutral-900);text-wrap:pretty">{{ c.name }}</span>
+                <span style="font-size:.75rem;color:var(--ems-neutral-500);white-space:nowrap">{{ c.att }}</span>
+                <span style="width:38px;text-align:right;font-size:.82rem;font-weight:800;color:{{ c.fg }}">{{ c.bal }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <a href="#" onClick="{{ sv.goCard }}" style="padding:8px 14px;border-radius:9px;border:1px solid var(--ems-neutral-300);font-size:.8rem;font-weight:700;color:var(--ems-neutral-700)">Tələbə kartı</a>
+          <a href="#" onClick="{{ sv.goTranscript }}" style="padding:8px 14px;border-radius:9px;border:1px solid var(--ems-neutral-300);font-size:.8rem;font-weight:700;color:var(--ems-neutral-700)">Transkript</a>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <a href="#" onClick="{{ sv.goMove }}" style="padding:8px 14px;border-radius:9px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.8rem;font-weight:700">Hərəkət əmri</a>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mMove }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeMove }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-mt" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:580px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-mt" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Tələbə hərəkəti əmri</h3>
+        <button type="button" onClick="{{ closeMove }}" aria-label="Modalı bağla" style="width:30px;height:30px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
+      </div>
+      <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+        <div>
+          <span style="display:block;margin-bottom:7px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Əməliyyat növü</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px">
+            <sc-for list="{{ mv.kinds }}" as="o" hint-placeholder-count="4">
+              <button type="button" onClick="{{ o.pick }}" style="padding:10px 12px;border-radius:9px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:.8rem;font-weight:700;cursor:pointer;text-align:left">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <label for="ems-m-s" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Tələbə <span style="color:var(--ems-danger)">*</span></label>
+          <input id="ems-m-s" type="text" value="{{ mv.who }}" onChange="{{ mv.setWho }}" placeholder="Ad, soyad və ya tələbə kodu" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ mv.whoBd }};border-radius:9px;font-size:.85rem">
+        </div>
+        <div>
+          <label for="ems-m-r" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Əsas / səbəb <span style="color:var(--ems-danger)">*</span></label>
+          <textarea id="ems-m-r" rows="3" value="{{ mv.why }}" onChange="{{ mv.setWhy }}" placeholder="Ərizə tarixi, protokol və ya qərar nömrəsi, qısa əsaslandırma" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.84rem;resize:vertical"></textarea>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-primary-50);border:1px solid var(--ems-primary-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-primary-700)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-primary-800);line-height:1.5;text-wrap:pretty">{{ mv.hint }}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeMove }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ mv.send }}" disabled="{{ mv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ mv.bd }};background:{{ mv.bg }};color:{{ mv.fg }};font-size:.83rem;font-weight:700;cursor:{{ mv.cur }}">Əmr layihəsi yarat</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ mCreate }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.42)" onClick="{{ closeCreate }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-ct" tabindex="-1" ref="{{ dlgRef }}" onClick="{{ stop }}" style="width:100%;max-width:560px;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+        <h3 id="ems-ct" style="margin:0;font-size:1.02rem;font-weight:800;color:var(--ems-neutral-900)">Yeni qrup</h3>
+        <button type="button" onClick="{{ closeCreate }}" aria-label="Modalı bağla" style="width:30px;height:30px;display:grid;place-items:center;border-radius:8px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
+      </div>
+      <div style="padding:20px 22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+        <div>
+          <label for="ems-c-n" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Qrup kodu <span style="color:var(--ems-danger)">*</span></label>
+          <input id="ems-c-n" type="text" value="{{ cv.name }}" onChange="{{ cv.setName }}" placeholder="236 KE" style="width:100%;height:38px;padding:0 12px;border:1px solid {{ cv.nameBd }};border-radius:9px;font-size:.85rem">
+          <sc-if value="{{ cv.nameErr }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:5px;font-size:.74rem;font-weight:700;color:var(--ems-danger)">{{ cv.nameMsg }}</div>
+          </sc-if>
+        </div>
+        <div>
+          <label for="ems-c-c" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Plan üzrə yer sayı</label>
+          <input id="ems-c-c" type="number" value="{{ cv.cap }}" onChange="{{ cv.setCap }}" style="width:100%;height:38px;padding:0 12px;border:1px solid var(--ems-neutral-300);border-radius:9px;font-size:.85rem">
+        </div>
+        <div style="grid-column:1/-1">
+          <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Tədris dili</span>
+          <div style="display:flex;gap:5px">
+            <sc-for list="{{ cv.langs }}" as="o" hint-placeholder-count="3">
+              <button type="button" onClick="{{ o.pick }}" style="flex:1;height:38px;border-radius:9px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};font-size:.81rem;font-weight:700;cursor:pointer">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="grid-column:1/-1;display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:11px">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-500)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="11" x2="12" y2="16"></line><line x1="12" y1="7.5" x2="12" y2="7.5"></line></svg>
+          <span style="font-size:.79rem;color:var(--ems-neutral-500);line-height:1.5;text-wrap:pretty">{{ cv.hint }}</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:9px;padding:15px 22px;border-top:1px solid var(--ems-neutral-200);background:var(--ems-neutral-50);border-radius:0 0 16px 16px">
+        <button type="button" onClick="{{ closeCreate }}" style="padding:9px 15px;border-radius:9px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Ləğv et</button>
+        <button type="button" onClick="{{ cv.save }}" disabled="{{ cv.invalid }}" style="padding:9px 17px;border-radius:9px;border:1px solid {{ cv.bd }};background:{{ cv.bg }};color:{{ cv.fg }};font-size:.83rem;font-weight:700;cursor:{{ cv.cur }}">Qrupu yarat</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div role="status" aria-live="polite" style="position:fixed;left:50%;bottom:24px;z-index:95;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 17px;background:var(--ems-neutral-900);color:var(--ems-neutral-0);border-radius:11px;box-shadow:0 14px 34px rgba(15,23,42,.3);font-size:.83rem;font-weight:600">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg>
+    {{ toastText }}
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1360,&quot;height&quot;:1180},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tədris Şöbəsi müdiri&quot;,&quot;Tədris Şöbəsi əməkdaşı&quot;,&quot;Dekanlıq&quot;,&quot;Kafedra müdiri&quot;,&quot;Kurator&quot;],&quot;default&quot;:&quot;Tədris Şöbəsi müdiri&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;İcazə qatı&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Avtomatik&quot;,&quot;Skeleton&quot;,&quot;Xəta&quot;],&quot;default&quot;:&quot;Avtomatik&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Səhifə vəziyyəti&quot;}}">
+const PROG = {
+  kmuh: { name:'Kompüter mühəndisliyi', dept:'Proqramlaşdırma və İT', fac:'Mühəndislik və Tətbiqi Elmlər', deg:'Bakalavr',
+    courses:[
+      ['MİF-B04.04','Proqramlaşdırma texnologiyaları',8,'dos. R. Əliyev'],
+      ['MİF-B04.12','Alqoritmlər və verilənlər strukturu',7,'b/m N. Həsənli'],
+      ['MİF-B05.03','Kompüter arxitekturası',6,'dos. A. Salmanova'],
+      ['RİY-B02.05','Ehtimal nəzəriyyəsi',5,'prof. S. Quliyev'],
+      ['MİF-B02.11','Veb texnologiyalar',4,'m. T. Səfərov'],
+      ['XDL-B01.02','Xarici dil – 2',4,'b/m A. Rzayev'],
+      ['HUM-B02.03','Fəlsəfə',3,'dos. N. Ağayeva']
+    ] },
+  itah: { name:'İnformasiya təhlükəsizliyi', dept:'Proqramlaşdırma və İT', fac:'Mühəndislik və Tətbiqi Elmlər', deg:'Bakalavr',
+    courses:[
+      ['MİF-B09.05','İnformasiya təhlükəsizliyinin əsasları',6,'dos. E. Məmmədov'],
+      ['MİF-B09.08','Şəbəkələrin təhlükəsizliyi',5,'dos. G. Rzayeva'],
+      ['MİF-B04.12','Alqoritmlər və verilənlər strukturu',6,'b/m N. Həsənli'],
+      ['MİF-B09.14','Şəbəkə administrasiyası',5,'m. O. Vəliyev'],
+      ['RİY-B02.05','Ehtimal nəzəriyyəsi',6,'dos. R. Bağırov'],
+      ['XDL-B01.02','Xarici dil – 2',4,'m. L. Hacıyeva']
+    ] },
+  mex: { name:'Mexatronika mühəndisliyi', dept:'Mexatronika', fac:'Mühəndislik və Tətbiqi Elmlər', deg:'Bakalavr',
+    courses:[
+      ['MEX-B01.04','Mexanika və materiallar',6,'prof. E. Bayramov'],
+      ['MİF-B03.02','Rəqəmsal sxemlər',6,'dos. F. Nəsirov'],
+      ['MEX-B02.07','Sensorlar və icraedici qurğular',5,'b/m R. Əhmədov'],
+      ['RİY-B01.02','Xətti cəbr və analitik həndəsə',6,'dos. S. Əliyeva'],
+      ['MİF-B03.01','İnformatika',5,'m. T. Səfərov'],
+      ['XDL-B01.01','Xarici dil – 1',4,'m. C. Əsədova']
+    ] },
+  iqt: { name:'İqtisadiyyat', dept:'İqtisadiyyat', fac:'İqtisadiyyat və İdarəetmə', deg:'Bakalavr',
+    courses:[
+      ['İQT-B02.04','Mikroiqtisadiyyat',5,'dos. N. Əsgərov'],
+      ['İQT-B04.02','Statistika',4,'b/m E. Cabbarov'],
+      ['MEN-B01.02','Menecmentin əsasları',5,'dos. Ü. Məmmədli'],
+      ['RİY-B01.05','Riyazi analiz',6,'b/m N. Cəfərova'],
+      ['HUM-B01.01','Azərbaycan tarixi',4,'b/m V. Həsənov'],
+      ['XDL-B01.01','Xarici dil – 1',4,'m. C. Əsədova']
+    ] },
+  bid: { name:'Biznesin idarə edilməsi', dept:'Menecment', fac:'İqtisadiyyat və İdarəetmə', deg:'Bakalavr',
+    courses:[
+      ['MEN-B02.03','Marketinq',5,'b/m T. Osmanov'],
+      ['MEN-B03.05','İnsan resurslarının idarə edilməsi',4,'m. N. Sultanova'],
+      ['İQT-B01.01','İqtisadiyyata giriş',5,'prof. X. Rüstəmova'],
+      ['MEN-B04.01','Layihələrin idarə edilməsi',4,'dos. K. Əliyev'],
+      ['XDL-B02.04','İxtisas üzrə xarici dil',3,'dos. S. Quliyeva']
+    ] },
+  psi: { name:'Psixologiya', dept:'Psixologiya', fac:'Humanitar elmlər', deg:'Bakalavr',
+    courses:[
+      ['PSİ-B01.01','Ümumi psixologiya',5,'dos. G. Məmmədova'],
+      ['PSİ-B02.04','İnkişaf psixologiyası',4,'dos. R. Vəliyeva'],
+      ['PSİ-B03.02','Sosial psixologiya',4,'b/m T. Əliyev'],
+      ['HUM-B03.05','Sosiologiya',3,'dos. N. Ağayeva'],
+      ['XDL-B01.02','Xarici dil – 2',4,'m. N. Abbasov']
+    ] },
+  trc: { name:'Tərcümə (ingilis dili)', dept:'Xarici dillər', fac:'Humanitar elmlər', deg:'Bakalavr',
+    courses:[
+      ['XDL-B03.01','Tərcümə nəzəriyyəsi',4,'dos. N. Əliyeva'],
+      ['XDL-B01.01','Xarici dil – 1',4,'b/m A. Rzayev'],
+      ['FİL-B01.01','Azərbaycan dili və nitq mədəniyyəti',4,'dos. M. İbrahimova'],
+      ['HUM-B01.01','Azərbaycan tarixi',4,'m. A. Mirzəyeva'],
+      ['XDL-B02.04','İxtisas üzrə xarici dil',3,'m. E. Tağıyeva']
+    ] }
+};
+
+// id, ad, proqram, kurs, dil, tələbə sayı, kurator, status
+const g = (id,name,prog,kurs,lang,st,cur,status) => ({ id, name, prog, kurs, lang, st, cur, status });
+const GROUPS = [
+  g('g1','236 KE','kmuh',1,'AZ',40,'dos. G. Rzayeva','Aktiv'),
+  g('g2','236 KE ing','kmuh',1,'EN',25,'b/m N. Həsənli','Aktiv'),
+  g('g3','235 KE','kmuh',2,'AZ',34,'dos. E. Məmmədov','Aktiv'),
+  g('g4','234 KE','kmuh',3,'AZ',29,'m. T. Səfərov','Aktiv'),
+  g('g5','233 KE','kmuh',4,'AZ',26,'dos. R. Əliyev','Buraxılış kursu'),
+  g('g6','236 İT','itah',1,'AZ',32,'dos. E. Məmmədov','Aktiv'),
+  g('g7','235 İT','itah',2,'AZ',28,'m. O. Vəliyev','Aktiv'),
+  g('g8','234 İT','itah',3,'AZ',26,'dos. G. Rzayeva','Aktiv'),
+  g('g9','236 MX','mex',1,'AZ',24,'b/m R. Əhmədov','Aktiv'),
+  g('g10','235 MX','mex',2,'AZ',22,'dos. A. Salmanova','Aktiv'),
+  g('g11','236 İQT','iqt',1,'AZ',38,'dos. L. Hüseynova','Aktiv'),
+  g('g12','235 İQT','iqt',2,'AZ',35,'b/m E. Cabbarov','Aktiv'),
+  g('g13','236 BİD','bid',1,'AZ',30,'m. N. Sultanova','Aktiv'),
+  g('g14','235 PSİ','psi',2,'AZ',24,'dos. R. Vəliyeva','Aktiv'),
+  g('g15','236 TRC','trc',1,'EN',20,'b/m A. Rzayev','Aktiv')
+];
+
+const AD_Q = ['Aysel','Nigar','Leyla','Günel','Şəbnəm','Aytən','Fidan','Sevinc','Nərmin','Lalə','Zeynəb','Aygün','Ülviyyə','Gülnar','Mələk','Sona','Röya','Nurana','Aysu','Könül'];
+const AD_O = ['Tural','Elvin','Kamran','Orxan','Rəşad','Samir','Ramin','Nicat','Emin','Anar','Ceyhun','Vüqar','Ayxan','Murad','Elmar','Fərid','Rauf','Səbuhi','Zaur','Toğrul'];
+const SOY = ['Əliyev','Məmmədov','Hüseynov','Quliyev','Həsənov','Rzayev','Cəfərov','Səfərov','Abbasov','İsmayılov','Nəbiyev','Bağırov','Kərimov','Vəliyev','Qasımov','Mirzəyev','Salmanov','Tağıyev','Əhmədov','Şirinov'];
+const DAYS = [
+  { key:'be', label:'Bazar ertəsi' }, { key:'ca', label:'Çərşənbə axşamı' }, { key:'c', label:'Çərşənbə' },
+  { key:'ca2', label:'Cümə axşamı' }, { key:'cu', label:'Cümə' }
+];
+const SLOTS = ['09:00 – 10:20','10:30 – 11:50','12:20 – 13:40','13:50 – 15:10','15:20 – 16:40'];
+const KINDS = [
+  { k:'Mühazirə', bg:'var(--ems-primary-50)', accent:'var(--ems-primary-600)' },
+  { k:'Seminar', bg:'var(--ems-neutral-50)', accent:'var(--ems-neutral-500)' },
+  { k:'Laboratoriya', bg:'var(--ems-warning-bg)', accent:'#b45309' }
+];
+const ST_STYLE = {
+  'Aktiv': ['var(--ems-success-bg)', '#15803d'],
+  'Akademik məzuniyyət': ['var(--ems-neutral-100)', 'var(--ems-neutral-700)'],
+  'Təhsil haqqı borcu': ['var(--ems-warning-bg)', '#92400e'],
+  'Xaric edilib': ['var(--ems-danger-bg)', '#b91c1c']
+};
+const MOVE_KINDS = ['Qrupdaxili köçürmə','Akademik məzuniyyət','Bərpa','Xaric etmə'];
+
+const hash = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+const rng = (seed) => { let x = seed || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return x / 4294967296; }; };
+const ini = (n) => n.split(' ').map(x => x[0]).slice(0, 2).join('');
+const zebra = (i) => i % 2 ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)';
+const dec1 = (n) => n.toFixed(1).replace('.', ',');
+const dec2 = (n) => n.toFixed(2).replace('.', ',');
+
+function buildStudents(grp) {
+  const r = rng(hash(grp.id + grp.name));
+  const out = [];
+  for (let i = 0; i < grp.st; i++) {
+    const female = r() < 0.46;
+    const first = female ? AD_Q[Math.floor(r() * AD_Q.length)] : AD_O[Math.floor(r() * AD_O.length)];
+    const last = SOY[Math.floor(r() * SOY.length)] + (female ? 'a' : '');
+    const bal = Math.round(46 + r() * 52);
+    const att = Math.round(62 + r() * 38);
+    const debt = r() < 0.12 ? (r() < 0.35 ? 2 : 1) : 0;
+    const pv = r();
+    const pay = pv < 0.34 ? 'Dövlət sifarişli' : 'Ödənişli';
+    let status = 'Aktiv';
+    const sv = r();
+    if (sv > 0.965) status = 'Akademik məzuniyyət';
+    else if (sv > 0.925) status = 'Təhsil haqqı borcu';
+    out.push({
+      name: first + ' ' + last,
+      code: String(2020 + Math.max(5 - grp.kurs, 1)) + String(1000 + Math.floor(r() * 8999)),
+      bal, att, debt, pay, status, gpa: Math.round((1.2 + bal / 100 * 2.8) * 100) / 100
+    });
+  }
+  out.sort((a, b) => a.name.localeCompare(b.name, 'az'));
+  if (out.length) out[Math.floor(rng(hash(grp.name))() * out.length)].elder = true;
+  return out;
+}
+
+function buildSchedule(grp) {
+  const cs = PROG[grp.prog].courses;
+  const r = rng(hash(grp.name + 'sched'));
+  const cells = {};
+  let di = Math.floor(r() * 5), si = 0;
+  cs.forEach((c, ci) => {
+    const sessions = ci < 4 ? 2 : 1;
+    for (let s = 0; s < sessions; s++) {
+      let guard = 0;
+      while (cells[di + ':' + si] && guard < 30) { si++; if (si >= SLOTS.length) { si = 0; di = (di + 1) % 5; } guard++; }
+      const kind = s === 0 ? KINDS[0] : (c[0].indexOf('MİF') === 0 || c[0].indexOf('MEX') === 0 ? KINDS[2] : KINDS[1]);
+      cells[di + ':' + si] = { name: c[1], teacher: c[3], kind: kind.k, bg: kind.bg, accent: kind.accent, room: (kind.k === 'Laboratoriya' ? 'Lab ' : 'Otaq ') + String.fromCharCode(65 + (ci % 4)) + '-' + (200 + ci * 7 + s) };
+      di = (di + 2) % 5; if (di === 0) si = (si + 1) % SLOTS.length;
+    }
+  });
+  return cells;
+}
+
+class Component extends DCLogic {
+  state = {
+    loading: true, err: false, w: 1320,
+    sel: 'g1', tab: 'Ümumi', railOpen: false,
+    q: '', qRaw: '', prog: 'Bütün ixtisaslar', progOpen: false, kurs: 'Hamısı', lang: 'Hamısı',
+    stQ: '', stQRaw: '', stF: 'Hamısı',
+    ssel: null, move: null, create: null, toast: ''
+  };
+
+  componentDidMount() {
+    this.t1 = setTimeout(() => this.setState({ loading: false }), 620);
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      const s = this.state;
+      if (s.ssel !== null) this.setState({ ssel: null });
+      else if (s.move) this.setState({ move: null });
+      else if (s.create) this.setState({ create: null });
+      else if (s.progOpen) this.setState({ progOpen: false });
+    };
+    document.addEventListener('keydown', this.onKey);
+    try {
+      const h = (location.hash || '').replace('#', '').split('/');
+      if (h[0] && GROUPS.some(x => x.id === h[0])) this.setState({ sel: h[0], tab: h[1] ? decodeURIComponent(h[1]) : 'Ümumi' });
+    } catch (e) {}
+  }
+  componentWillUnmount() {
+    clearTimeout(this.t1); clearTimeout(this.tq); clearTimeout(this.tq2); clearTimeout(this.tn); clearTimeout(this.tt);
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.onKey);
+  }
+
+  role() { return this.props.role || 'Tədris Şöbəsi müdiri'; }
+  canEdit() { const r = this.role(); return r === 'Tədris Şöbəsi müdiri' || r === 'Tədris Şöbəsi əməkdaşı'; }
+  scoped() {
+    const r = this.role();
+    if (r === 'Dekanlıq') return GROUPS.filter(x => PROG[x.prog].fac === 'Mühəndislik və Tətbiqi Elmlər');
+    if (r === 'Kafedra müdiri') return GROUPS.filter(x => PROG[x.prog].dept === 'Proqramlaşdırma və İT');
+    if (r === 'Kurator') return GROUPS.filter(x => x.cur === 'dos. G. Rzayeva');
+    return GROUPS.slice();
+  }
+  flash(m) { clearTimeout(this.tt); this.setState({ toast: m }); this.tt = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  chip(a) { return a ? { bg:'var(--ems-primary-600)', fg:'var(--ems-neutral-0)', bd:'var(--ems-primary-600)' } : { bg:'var(--ems-neutral-0)', fg:'var(--ems-neutral-700)', bd:'var(--ems-neutral-300)' }; }
+  chips(list, cur, key) {
+    return list.map(v => { const c = this.chip(v === cur); return { label:v, bg:c.bg, fg:c.fg, bd:c.bd, pick: () => this.setState({ [key]: v }) }; });
+  }
+  keyActivate(fn) { return (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; }
+  pick(id) {
+    clearTimeout(this.tn);
+    this.setState({ sel:id, tab:'Ümumi', loading:true, railOpen:false, stQ:'', stQRaw:'', stF:'Hamısı', ssel:null });
+    this.tn = setTimeout(() => this.setState({ loading:false }), 300);
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  attColor(a) { return a >= 85 ? 'var(--ems-success)' : (a >= 75 ? 'var(--ems-warning)' : 'var(--ems-danger)'); }
+  balColor(b) { return b >= 81 ? 'var(--ems-success)' : (b >= 51 ? 'var(--ems-neutral-900)' : 'var(--ems-danger)'); }
+
+  renderVals() {
+    const s = this.state;
+    const narrow = s.w < 1160;
+    const forced = this.props.dataState || 'Avtomatik';
+    const pool = this.scoped();
+    const q = s.q.trim().toLowerCase();
+
+    const list0 = pool.filter(x =>
+      (!q || x.name.toLowerCase().includes(q) || PROG[x.prog].name.toLowerCase().includes(q) || x.cur.toLowerCase().includes(q)) &&
+      (s.prog === 'Bütün ixtisaslar' || PROG[x.prog].name === s.prog) &&
+      (s.kurs === 'Hamısı' || String(x.kurs) === s.kurs) &&
+      (s.lang === 'Hamısı' || x.lang === s.lang)
+    );
+
+    const grp = list0.some(x => x.id === s.sel) ? list0.find(x => x.id === s.sel) : (list0[0] || null);
+    const isLoading = forced === 'Skeleton' || (forced === 'Avtomatik' && s.loading);
+    const isError = forced === 'Xəta' || (forced === 'Avtomatik' && s.err);
+
+    const list = list0.map(x => {
+      const sel = grp && x.id === grp.id;
+      const studs = buildStudents(x);
+      const avgAtt = Math.round(studs.reduce((a, y) => a + y.att, 0) / (studs.length || 1));
+      return {
+        name:x.name, prog: PROG[x.prog].name, students: x.st, lang: x.lang,
+        meta: x.kurs + '-ci kurs · ' + x.cur,
+        sel: sel ? 'true' : 'false',
+        bg: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+        bd: sel ? 'var(--ems-primary-200)' : 'var(--ems-neutral-200)',
+        hover: sel ? 'var(--ems-primary-50)' : 'var(--ems-neutral-50)',
+        fg: sel ? 'var(--ems-primary-800)' : 'var(--ems-neutral-900)',
+        subFg: sel ? 'var(--ems-primary-700)' : 'var(--ems-neutral-500)',
+        metaFg: sel ? 'var(--ems-primary-700)' : 'var(--ems-neutral-400)',
+        stFg: sel ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+        langBg: x.lang === 'AZ' ? 'var(--ems-neutral-100)' : 'var(--ems-primary-100)',
+        langFg: x.lang === 'AZ' ? 'var(--ems-neutral-500)' : 'var(--ems-primary-800)',
+        dot: this.attColor(avgAtt),
+        pick: () => this.pick(x.id)
+      };
+    });
+
+    const progNames = ['Bütün ixtisaslar'].concat(Array.from(new Set(pool.map(x => PROG[x.prog].name))));
+
+    const out = {
+      ctxRole:'Tədris Şöbəsi',
+      ctxScope: this.role() === 'Dekanlıq' ? 'Mühəndislik və Tətbiqi Elmlər fakültəsi' : (this.role() === 'Kafedra müdiri' ? 'Proqramlaşdırma və İT kafedrası' : (this.role() === 'Kurator' ? 'kurator olduğum qruplar' : 'bütün fakültələr')),
+      ctxPerm: this.role(), canEdit: this.canEdit(),
+      narrow, railOpen: s.railOpen, colTpl: narrow ? '1fr' : '278px minmax(0,1fr)',
+      ovTpl: s.w < 1460 ? '1fr' : 'minmax(0,1.15fr) minmax(0,1fr)',
+      showRail: !narrow || s.railOpen,
+      toggleRail: () => this.setState({ railOpen: !s.railOpen }),
+      q: s.qRaw,
+      onQ: (e) => { const v = e.target.value; this.setState({ qRaw: v }); clearTimeout(this.tq); this.tq = setTimeout(() => this.setState({ q: v }), 260); },
+      progOpen: s.progOpen, progLabel: s.prog,
+      toggleProg: () => this.setState({ progOpen: !s.progOpen }),
+      progOpts: progNames.map(n => ({
+        label:n, sel: n === s.prog ? 'true' : 'false', fw: n === s.prog ? 800 : 600,
+        fg: n === s.prog ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bg: n === s.prog ? 'var(--ems-primary-50)' : 'transparent',
+        pick: () => this.setState({ prog:n, progOpen:false }),
+        key: this.keyActivate(() => this.setState({ prog:n, progOpen:false }))
+      })),
+      kursChips: ['Hamısı','1','2','3','4'].map(v => {
+        const x = this.chip(v === s.kurs);
+        return { label: v === 'Hamısı' ? 'Bütün kurslar' : v + '-ci kurs', bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ kurs: v }) };
+      }),
+      langChips: ['Hamısı','AZ','EN'].map(v => {
+        const x = this.chip(v === s.lang);
+        return { label: v === 'Hamısı' ? 'Bütün dillər' : (v === 'AZ' ? 'Azərbaycan bölməsi' : 'İngilis bölməsi'), bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ lang: v }) };
+      }),
+      resetFilters: () => this.setState({ q:'', qRaw:'', prog:'Bütün ixtisaslar', kurs:'Hamısı', lang:'Hamısı' }),
+      list, listEmpty: list.length === 0, listCount: list.length,
+      listStudents: list0.reduce((a, x) => a + x.st, 0),
+      isLoading, isError, isData: !isLoading && !isError && !!grp, noSel: !isLoading && !isError && !grp,
+      retry: () => { this.setState({ err:false, loading:true }); this.t1 = setTimeout(() => this.setState({ loading:false }), 500); },
+      exportList: () => this.flash('Qrup siyahısı XLSX formatında hazırlanır.'),
+      openCreate: () => this.setState({ create: { name:'', cap:30, lang:'AZ', touched:false } }),
+      closeCreate: () => this.setState({ create: null }),
+      mCreate: !!s.create,
+      toast: !!s.toast, toastText: s.toast,
+      stop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      dlgRef: (el) => { if (el && this._last !== el) { this._last = el; try { el.focus(); } catch (e) {} } },
+      openMove: () => this.setState({ move: { kind:'Qrupdaxili köçürmə', who:'', why:'', touched:false } }),
+      closeMove: () => this.setState({ move: null }), mMove: !!s.move,
+      closeStudent: () => this.setState({ ssel: null }), mStudent: s.ssel !== null,
+      openJournal: () => this.flash((grp ? grp.name : '') + ' qrupunun elektron jurnalı açılır.')
+    };
+
+    if (!grp) {
+      out.crumbs = []; out.kpis = []; out.tabs = []; out.fields = []; out.compo = []; out.alerts = [];
+      out.students = []; out.jrows = []; out.moves = []; out.grid = []; out.days = DAYS.map(d => ({ label: d.label }));
+      out.semStats = []; out.schedLegend = []; out.stFilters = [];
+      out.g = { name:'', line:'', students:0, status:'', stBg:'', stFg:'' };
+      out.sv = { facts:[], subjects:[] }; out.mv = { kinds:[] }; out.cv = { langs:[] };
+      out.tabUmumi = true;
+      return out;
+    }
+
+    const P = PROG[grp.prog];
+    const studs = buildStudents(grp);
+    const active = studs.filter(x => x.status === 'Aktiv');
+    const avgBal = Math.round(studs.reduce((a, x) => a + x.bal, 0) / studs.length);
+    const avgAtt = Math.round(studs.reduce((a, x) => a + x.att, 0) / studs.length);
+    const avgGpa = studs.reduce((a, x) => a + x.gpa, 0) / studs.length;
+    const debtors = studs.filter(x => x.debt > 0);
+    const lowAtt = studs.filter(x => x.att < 75);
+    const budget = studs.filter(x => x.pay === 'Dövlət sifarişli').length;
+    const elder = studs.find(x => x.elder);
+
+    const gStyle = grp.status === 'Aktiv' ? ['var(--ems-success-bg)', '#15803d'] : ['var(--ems-primary-100)', 'var(--ems-primary-800)'];
+
+    out.crumbs = [
+      { label:'Qərbi Kaspi Universiteti', fg:'var(--ems-neutral-400)', fw:500, sep:true },
+      { label:P.fac, fg:'var(--ems-primary-600)', fw:600, sep:true },
+      { label:P.name, fg:'var(--ems-primary-600)', fw:600, sep:true },
+      { label:grp.name, fg:'var(--ems-neutral-700)', fw:700, sep:false }
+    ];
+    out.g = {
+      name: grp.name, students: grp.st, status: grp.status, stBg: gStyle[0], stFg: gStyle[1],
+      line: P.name + ' · ' + grp.kurs + '-ci kurs · ' + (grp.lang === 'AZ' ? 'Azərbaycan bölməsi' : 'ingilis bölməsi') + ' · kurator ' + grp.cur
+    };
+    out.kpis = [
+      { label:'Tələbə sayı', value: grp.st + ' nəfər', note: active.length + ' aktiv · ' + (grp.st - active.length) + ' xüsusi statuslu',
+        bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+      { label:'Qrupun orta balı', value: avgBal, note:'100 ballıq şkala üzrə',
+        bd:'var(--ems-primary-200)', bg:'var(--ems-primary-50)', labFg:'var(--ems-primary-700)', valFg:'var(--ems-primary-800)', noteFg:'var(--ems-primary-800)' },
+      { label:'Orta GPA', value: dec2(avgGpa), note:'4 ballıq sistem üzrə',
+        bd:'var(--ems-neutral-200)', bg:'var(--ems-neutral-0)', labFg:'var(--ems-neutral-400)', valFg:'var(--ems-neutral-900)', noteFg:'var(--ems-neutral-500)' },
+      { label:'Dərsə gəlmə', value: avgAtt + '%', note: lowAtt.length ? lowAtt.length + ' tələbə qayıb limitinə yaxınlaşıb' : 'qayıb limitini pozan yoxdur',
+        bd: lowAtt.length ? '#fde68a' : 'var(--ems-success)', bg: lowAtt.length ? 'var(--ems-warning-bg)' : 'var(--ems-success-bg)',
+        labFg: lowAtt.length ? '#92400e' : '#15803d', valFg: lowAtt.length ? '#92400e' : '#15803d', noteFg: lowAtt.length ? '#92400e' : '#15803d' },
+      { label:'Akademik borcu olanlar', value: debtors.length + ' nəfər', note: debtors.length ? 'təkrar kurs riski var' : 'borclu tələbə yoxdur',
+        bd: debtors.length ? '#fecaca' : 'var(--ems-neutral-200)', bg: debtors.length ? 'var(--ems-danger-bg)' : 'var(--ems-neutral-0)',
+        labFg: debtors.length ? '#b91c1c' : 'var(--ems-neutral-400)', valFg: debtors.length ? '#b91c1c' : 'var(--ems-neutral-900)', noteFg: debtors.length ? '#b91c1c' : 'var(--ems-neutral-500)' }
+    ];
+
+    const tabDefs = [
+      { id:'Ümumi', count:null }, { id:'Tələbələr', count:grp.st }, { id:'Həftəlik cədvəl', count:null },
+      { id:'Jurnal', count:P.courses.length }, { id:'Tələbə hərəkəti', count:null }
+    ];
+    out.tabs = tabDefs.map(t => {
+      const a = s.tab === t.id;
+      return {
+        label:t.id, sel: a ? 'true' : 'false', hasCount: t.count !== null, count:t.count,
+        bd: a ? 'var(--ems-primary-600)' : 'transparent',
+        fg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)', fw: a ? 800 : 600,
+        cntBg: a ? 'var(--ems-primary-100)' : 'var(--ems-neutral-100)',
+        cntFg: a ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+        pick: () => { this.setState({ tab: t.id }); try { history.replaceState(null, '', '#' + grp.id + '/' + encodeURIComponent(t.id)); } catch (e) {} }
+      };
+    });
+    out.tabUmumi = s.tab === 'Ümumi'; out.tabTelebe = s.tab === 'Tələbələr'; out.tabCedvel = s.tab === 'Həftəlik cədvəl';
+    out.tabJurnal = s.tab === 'Jurnal'; out.tabHereket = s.tab === 'Tələbə hərəkəti';
+
+    // ---- ümumi
+    out.fields = [
+      { label:'İxtisas', value: P.name, fw:700, fg:'var(--ems-neutral-900)' },
+      { label:'Kafedra / fakültə', value: P.dept + ' · ' + P.fac, fw:600, fg:'var(--ems-neutral-700)' },
+      { label:'Təhsil pilləsi və forma', value: P.deg + ' · Əyani', fw:600, fg:'var(--ems-neutral-700)' },
+      { label:'Kurs / semestr', value: grp.kurs + '-ci kurs · ' + (grp.kurs * 2 - 1) + '-ci semestr', fw:600, fg:'var(--ems-neutral-700)' },
+      { label:'Tədris dili', value: grp.lang === 'AZ' ? 'Azərbaycan dili' : 'İngilis dili', fw:600, fg:'var(--ems-neutral-700)' },
+      { label:'Kurator', value: grp.cur, fw:700, fg:'var(--ems-primary-800)' },
+      { label:'Qrup nümayəndəsi', value: elder ? elder.name : '—', fw:700, fg:'var(--ems-neutral-900)' },
+      { label:'Qayıb limiti', value:'25% — limitdən sonra fənn üzrə imtahan hüququ itir', fw:600, fg:'var(--ems-neutral-700)' }
+    ];
+    const compoMax = grp.st;
+    out.compo = [
+      { label:'Dövlət sifarişli oxuyur', value: budget, w: Math.round(budget / compoMax * 100) + '%', color:'var(--ems-primary-600)' },
+      { label:'Ödənişli oxuyur', value: grp.st - budget, w: Math.round((grp.st - budget) / compoMax * 100) + '%', color:'var(--ems-primary-200)' },
+      { label:'Statusu aktivdir', value: active.length, w: Math.round(active.length / compoMax * 100) + '%', color:'var(--ems-success)' },
+      { label:'Akademik borcu var', value: debtors.length, w: Math.round(debtors.length / compoMax * 100) + '%', color:'var(--ems-danger)' }
+    ];
+    const weeksDone = 9, weeksAll = 16;
+    out.semW = Math.round(weeksDone / weeksAll * 100) + '%';
+    out.semPct = Math.round(weeksDone / weeksAll * 100) + '%';
+    out.semNote = weeksDone + '/' + weeksAll + ' həftə keçib — aralıq qiymətləndirmə bitib, yekun imtahanlara ' + (weeksAll - weeksDone) + ' həftə qalır.';
+    out.semStats = [
+      { label:'Semestrdə fənn', value: P.courses.length, fg:'var(--ems-neutral-900)' },
+      { label:'Semestr krediti', value: P.courses.reduce((a, c) => a + c[2], 0), fg:'var(--ems-neutral-900)' },
+      { label:'Həftəlik dərs saatı', value: P.courses.length * 3 + ' s', fg:'var(--ems-neutral-900)' }
+    ];
+    const alerts = [];
+    if (lowAtt.length) alerts.push({ n: lowAtt.length, label:'tələbənin dərsə gəlməsi 75%-dən aşağıdır', sev:'warn' });
+    if (debtors.length) alerts.push({ n: debtors.length, label:'tələbənin akademik borcu var', sev:'danger' });
+    const lowBal = studs.filter(x => x.bal < 51).length;
+    if (lowBal) alerts.push({ n: lowBal, label:'tələbənin orta balı keçid həddindən (51) aşağıdır', sev:'warn' });
+    const spec = studs.filter(x => x.status !== 'Aktiv').length;
+    if (spec) alerts.push({ n: spec, label:'tələbə xüsusi statusdadır (akademik məzuniyyət, təhsil haqqı borcu)', sev:'info' });
+    const sevS = { danger:{ bg:'var(--ems-danger-bg)', bd:'#fecaca', fg:'#b91c1c' }, warn:{ bg:'var(--ems-warning-bg)', bd:'#fde68a', fg:'#92400e' }, info:{ bg:'var(--ems-primary-50)', bd:'var(--ems-primary-200)', fg:'var(--ems-primary-800)' } };
+    out.alerts = alerts.map(a => Object.assign({}, sevS[a.sev], { n:a.n, label:a.label, go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ tab:'Tələbələr' }); } }));
+    out.hasAlerts = alerts.length > 0; out.noAlerts = alerts.length === 0;
+
+    // ---- tələbələr
+    const sq = s.stQ.trim().toLowerCase();
+    const filtered = studs.filter(x =>
+      (!sq || x.name.toLowerCase().includes(sq) || x.code.includes(sq)) &&
+      (s.stF === 'Hamısı'
+        || (s.stF === 'Borclular' && x.debt > 0)
+        || (s.stF === 'Davamiyyət riski' && x.att < 75)
+        || (s.stF === 'Dövlət sifarişli' && x.pay === 'Dövlət sifarişli'))
+    );
+    out.stQ = s.stQRaw;
+    out.onStQ = (e) => { const v = e.target.value; this.setState({ stQRaw: v }); clearTimeout(this.tq2); this.tq2 = setTimeout(() => this.setState({ stQ: v }), 250); };
+    out.stFilters = [
+      ['Hamısı','Bütün tələbələr'],
+      ['Borclular','Akademik borcu olanlar'],
+      ['Davamiyyət riski','Qayıb limiti riskində'],
+      ['Dövlət sifarişli','Dövlət sifarişli oxuyanlar']
+    ].map(pair => {
+      const x = this.chip(pair[0] === s.stF);
+      return { label: pair[1], bg:x.bg, fg:x.fg, bd:x.bd, pick: () => this.setState({ stF: pair[0] }) };
+    });
+    out.resetSt = () => this.setState({ stQ:'', stQRaw:'', stF:'Hamısı' });
+    out.students = filtered.map((x, i) => {
+      const ss = ST_STYLE[x.status];
+      return {
+        no: i + 1, ini: ini(x.name), name: x.name, code: x.code, elder: !!x.elder,
+        avBg: x.elder ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+        avFg: x.elder ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+        pay: x.pay, payBg: x.pay === 'Dövlət sifarişli' ? 'var(--ems-primary-50)' : 'var(--ems-neutral-100)',
+        payFg: x.pay === 'Dövlət sifarişli' ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+        bal: x.bal, balFg: this.balColor(x.bal), gpa: dec2(x.gpa),
+        att: x.att + '%', attW: x.att + '%', attFg: this.attColor(x.att),
+        debt: x.debt || '—', debtFg: x.debt ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        status: x.status, stBg: ss[0], stFg: ss[1], bg: zebra(i),
+        open: () => this.setState({ ssel: studs.indexOf(x) }),
+        key: this.keyActivate(() => this.setState({ ssel: studs.indexOf(x) }))
+      };
+    });
+    out.stShown = filtered.length > 0; out.stEmpty = filtered.length === 0;
+    out.stNote = filtered.length + ' tələbə göstərilir · qrupun orta balı ' + avgBal + ' · orta dərsə gəlmə ' + avgAtt + '%';
+
+    // ---- cədvəl
+    const cells = buildSchedule(grp);
+    out.days = DAYS.map(d => ({ label: d.label }));
+    out.grid = SLOTS.map((time, si) => ({
+      time, no: (si + 1) + '-ci cüt',
+      cells: DAYS.map((d, di) => {
+        const c = cells[di + ':' + si];
+        return c ? { has:true, name:c.name, teacher:c.teacher, kind:c.kind, room:c.room, bg:c.bg, accent:c.accent }
+                 : { has:false, name:'', teacher:'', kind:'', room:'', bg:'transparent', accent:'transparent' };
+      })
+    }));
+    out.schedNote = grp.name + ' · payız semestri · həftəlik cədvəl';
+    out.schedLegend = KINDS.map(k => ({ label:k.k, color:k.accent }));
+
+    // ---- jurnal
+    const jr = rng(hash(grp.name + 'j'));
+    out.jrows = P.courses.map((c, i) => {
+      const total = Math.round(c[2] * 2.2);
+      const done = Math.min(total, Math.round(total * (0.5 + jr() * 0.45)));
+      const bal = Math.round(52 + jr() * 42);
+      const att = Math.round(70 + jr() * 28);
+      const stt = done / total > 0.85 ? ['Aktiv','var(--ems-success-bg)','#15803d'] : (done / total > 0.5 ? ['Aktiv','var(--ems-success-bg)','#15803d'] : ['Gecikir','var(--ems-warning-bg)','#92400e']);
+      return {
+        code: c[0], name: c[1], kr: c[2], teacher: c[3], bg: zebra(i),
+        done: done + '/' + total, w: Math.round(done / total * 100) + '%',
+        bal, balFg: this.balColor(bal), att: att + '%', attFg: this.attColor(att),
+        state: stt[0], sBg: stt[1], sFg: stt[2],
+        go: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(c[1] + ' fənninin jurnalı açılır.'); }
+      };
+    });
+    out.jNote = P.courses.length + ' fənn · ' + P.courses.reduce((a, c) => a + c[2], 0) + ' kredit';
+
+    // ---- hərəkət
+    const mr = rng(hash(grp.name + 'm'));
+    const pickName = () => studs[Math.floor(mr() * studs.length)].name;
+    const moveDefs = [
+      { type:'Qrupdaxili köçürmə', date:'12.08.2026', order:'əmr № 214', dot:'var(--ems-primary-600)', bg:'var(--ems-primary-50)', fg:'var(--ems-primary-800)',
+        who: pickName() + ' — ' + grp.name + ' qrupuna köçürüldü', note:'Tələbənin ərizəsi və dekanlığın rəyi əsasında; fərq fənləri təyin edilməyib.' },
+      { type:'Akademik məzuniyyət', date:'05.08.2026', order:'əmr № 198', dot:'var(--ems-warning)', bg:'var(--ems-warning-bg)', fg:'#92400e',
+        who: pickName() + ' — bir illik akademik məzuniyyət', note:'Səhhət arayışı əsasında; qayıdış 2027/2028 payız semestrində planlaşdırılır.' },
+      { type:'Bərpa', date:'28.07.2026', order:'əmr № 176', dot:'var(--ems-success)', bg:'var(--ems-success-bg)', fg:'#15803d',
+        who: pickName() + ' — təhsilini bərpa etdi', note:'Təhsil haqqı borcu bağlandıqdan sonra qrupun tərkibinə qaytarıldı.' },
+      { type:'Xaric etmə', date:'14.07.2026', order:'əmr № 152', dot:'var(--ems-danger)', bg:'var(--ems-danger-bg)', fg:'#b91c1c',
+        who: pickName() + ' — öz arzusu ilə xaric edildi', note:'Sənədləri geri qaytarılıb; yer bərpa üçün bir il saxlanılır.' }
+    ];
+    out.moves = moveDefs;
+
+    // ---- tələbə paneli
+    if (s.ssel !== null && studs[s.ssel]) {
+      const x = studs[s.ssel];
+      const r2 = rng(hash(x.name + grp.name));
+      out.sv = {
+        ini: ini(x.name), name: x.name,
+        sub: grp.name + ' · ' + P.name + ' · ' + x.code,
+        facts: [
+          { label:'Tələbənin statusu', value:x.status, fg: ST_STYLE[x.status][1] },
+          { label:'Təhsil haqqı', value:x.pay, fg:'var(--ems-neutral-900)' },
+          { label:'Orta bal (100)', value:x.bal, fg: this.balColor(x.bal) },
+          { label:'GPA (4 ballıq)', value: dec2(x.gpa), fg:'var(--ems-neutral-900)' },
+          { label:'Dərsə gəlmə', value:x.att + '%', fg: this.attColor(x.att) },
+          { label:'Akademik borc', value: x.debt ? x.debt + ' fənn' : 'yoxdur', fg: x.debt ? 'var(--ems-danger)' : 'var(--ems-neutral-900)' }
+        ],
+        hasWarn: x.att < 75 || x.debt > 0,
+        warn: x.att < 75
+          ? 'Davamiyyət 25% qayıb limitinə yaxınlaşır — limit aşılarsa tələbə fənn üzrə yekun imtahana buraxılmır.'
+          : 'Akademik borc təkrar kurs riski yaradır — payız semestrində fərq fənləri planlaşdırılmalıdır.',
+        subjects: P.courses.map(c => {
+          const b = Math.max(30, Math.min(99, Math.round(x.bal + (r2() - 0.5) * 22)));
+          const a = Math.max(45, Math.min(100, Math.round(x.att + (r2() - 0.5) * 18)));
+          return { name: c[1], att: 'dərsə gəlmə ' + a + '%', bal: b, fg: this.balColor(b) };
+        }),
+        goCard: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(x.name + ' — tələbə kartı açılır.'); },
+        goTranscript: (e) => { if (e && e.preventDefault) e.preventDefault(); this.flash(x.name + ' üçün transkript hazırlanır.'); },
+        goMove: (e) => { if (e && e.preventDefault) e.preventDefault(); this.setState({ ssel:null, move:{ kind:'Qrupdaxili köçürmə', who:x.name, why:'', touched:false } }); }
+      };
+    } else {
+      out.sv = { ini:'', name:'', sub:'', facts:[], subjects:[], hasWarn:false, warn:'', goCard:()=>{}, goTranscript:()=>{}, goMove:()=>{} };
+    }
+
+    // ---- hərəkət modalı
+    const mm = s.move;
+    if (mm) {
+      const setM = (patch) => this.setState({ move: Object.assign({}, mm, patch) });
+      const invalid = !mm.who.trim() || mm.why.trim().length < 8;
+      out.mv = {
+        kinds: MOVE_KINDS.map(k => { const c = this.chip(k === mm.kind); return { label:k, bg:c.bg, fg:c.fg, bd:c.bd, pick: () => setM({ kind:k }) }; }),
+        who: mm.who, why: mm.why,
+        setWho: (e) => setM({ who: e.target.value, touched:true }),
+        setWhy: (e) => setM({ why: e.target.value, touched:true }),
+        whoBd: mm.touched && !mm.who.trim() ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        hint:'Layihə dekanlığa göndərilir, rektor əmrindən sonra qrupun tərkibi avtomatik yenilənir. Əmrə qədər tələbə cari qrupda qalır.',
+        invalid,
+        bd: invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: invalid ? 'not-allowed' : 'pointer',
+        send: () => { if (invalid) { setM({ touched:true }); return; } this.setState({ move:null }); this.flash(mm.kind + ' üzrə əmr layihəsi yaradıldı və dekanlığa göndərildi.'); }
+      };
+    } else {
+      out.mv = { kinds:[], who:'', why:'', hint:'', invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed', whoBd:'var(--ems-neutral-300)' };
+    }
+
+    // ---- yeni qrup modalı
+    const cc = s.create;
+    if (cc) {
+      const setC = (patch) => this.setState({ create: Object.assign({}, cc, patch) });
+      const dupe = GROUPS.some(x => x.name.toLowerCase() === cc.name.trim().toLowerCase());
+      const badName = !/^\d{3}\s+[A-ZƏİÖÜÇŞĞ]{2,4}(\s+\S+)?$/.test(cc.name.trim()) || dupe;
+      const invalid = badName || !cc.cap;
+      out.cv = {
+        name: cc.name, cap: cc.cap,
+        setName: (e) => setC({ name: e.target.value, touched:true }),
+        setCap: (e) => setC({ cap: e.target.value }),
+        nameErr: cc.touched && badName,
+        nameMsg: dupe ? 'Bu kodla qrup artıq var' : 'Format: qəbul ili + ixtisas qısaltması, məsələn «236 KE»',
+        nameBd: cc.touched && badName ? 'var(--ems-danger)' : 'var(--ems-neutral-300)',
+        langs: ['AZ','EN','RU'].map(l => { const c2 = this.chip(l === cc.lang); return { label:l, bg:c2.bg, fg:c2.fg, bd:c2.bd, pick: () => setC({ lang:l }) }; }),
+        hint:'Qrup seçilmiş ixtisasın cari tədris planına bağlanır — fənlər və cədvəl plandan avtomatik gəlir.',
+        invalid,
+        bd: invalid ? 'var(--ems-neutral-300)' : 'var(--ems-primary-600)',
+        bg: invalid ? 'var(--ems-neutral-200)' : 'var(--ems-primary-600)',
+        fg: invalid ? 'var(--ems-neutral-400)' : 'var(--ems-neutral-0)',
+        cur: invalid ? 'not-allowed' : 'pointer',
+        save: () => { if (invalid) { setC({ touched:true }); return; } this.setState({ create:null }); this.flash(cc.name + ' qrupu yaradıldı — tələbə təyinatı gözlənilir.'); }
+      };
+    } else {
+      out.cv = { name:'', cap:'', langs:[], hint:'', invalid:true, bd:'var(--ems-neutral-300)', bg:'var(--ems-neutral-200)', fg:'var(--ems-neutral-400)', cur:'not-allowed', nameBd:'var(--ems-neutral-300)', nameErr:false, nameMsg:'' };
+    }
+
+    return out;
+  }
+}
+
+</script>
+</body>
+</html>

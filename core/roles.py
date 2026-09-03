@@ -108,7 +108,17 @@ class ProfileRole:
     # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.
     # Bunların səlahiyyəti rol permission-ları ilə müəyyən olunur (məs. imtahan
     # mərkəzi yalnız imtahan sahəsini idarə edir, üzv/struktur idarəetməsi yox).
-    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "exam_center_head", "exam_center_staff", "hr"}
+    # `teaching_office_head` (level 85 ≥ 80) MƏCBURİ olaraq buradadır: onun
+    # səlahiyyəti struktur ağacı + akademik kataloqdur (ekran 01–04). Alias
+    # verilsəydi rol bütün tenant idarəetmə səthini — üzv, rol, təşkilat
+    # ayarları, superadmin panelləri — səssizcə alardı.
+    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {
+        "exam_center",
+        "exam_center_head",
+        "exam_center_staff",
+        "hr",
+        "teaching_office_head",
+    }
 
     ADMIN_EQUIVALENT_ROLE_NAMES = {
         ORG_ADMIN,
@@ -222,3 +232,74 @@ def map_org_role_to_profile_role(role):
     if getattr(role, "level", 0) >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80):
         return ProfileRole.ORG_ADMIN
     return ProfileRole.MEMBER
+
+
+# ── Seed edilmiş organizations.Role adları üçün AZ etiket xəritəsi ─────────
+#
+# `apps/organizations/default_roles_university.py` (və `default_roles.py`)
+# bir çox rolu İNGİLİSCƏ `display_name` ilə seed edir (məs. "Teacher",
+# "Department Chair") — bu, kabinetdə İngiliscə rol adları kimi sızır
+# (2026-09-03 auditi, PHASE21 U-2). `Role.display_name` sərbəst mətn
+# sahəsidir və admin onu istənilən vaxt fərqli bir şeyə dəyişə bilər, ona
+# görə bura KÖR şəkildə tətbiq olunmur: `resolve_seeded_role_label` yalnız
+# `raw_display_name` HƏLƏ DƏ dəyişməmiş default seed dəyəridirsə (və ya
+# boşdursa) əvəzləyir. Admin fərqli bir ad yazıbsa TOXUNULMUR.
+ORG_ROLE_DISPLAY_LABELS = {
+    "rector": pgettext_lazy("roles.org_display_name", "Rektor"),
+    "vice_rector": pgettext_lazy("roles.org_display_name", "Prorektor"),
+    "dean": pgettext_lazy("roles.org_display_name", "Dekan"),
+    "chair_head": pgettext_lazy("roles.org_display_name", "Kafedra müdiri"),
+    "exam_center": pgettext_lazy("roles.org_display_name", "İmtahan mərkəzi"),
+    "exam_center_head": pgettext_lazy("roles.org_display_name", "İmtahan mərkəzi rəhbəri"),
+    "exam_center_staff": pgettext_lazy("roles.org_display_name", "İmtahan mərkəzi işçisi"),
+    "hr": pgettext_lazy("roles.org_display_name", "İnsan resursları"),
+    "teacher": pgettext_lazy("roles.org_display_name", "Müəllim"),
+    "assistant": pgettext_lazy("roles.org_display_name", "Assistent"),
+    "lab_assistant": pgettext_lazy("roles.org_display_name", "Laborant"),
+    "tutor": pgettext_lazy("roles.org_display_name", "Tyutor"),
+    "program_coordinator": pgettext_lazy("roles.org_display_name", "Proqram koordinatoru"),
+    "lead_student": pgettext_lazy("roles.org_display_name", "Baş tələbə"),
+    "student": pgettext_lazy("roles.org_display_name", "Tələbə"),
+    "member": pgettext_lazy("roles.org_display_name", "Üzv"),
+}
+
+#: Seed zamanı yazılan İNGİLİSCƏ default `display_name` dəyərləri (hərfi).
+#: `resolve_seeded_role_label` yalnız `raw_display_name` bunlardan biridirsə
+#: (və ya boşdursa) yuxarıdakı xəritəni tətbiq edir — admin-in fərqli yazdığı
+#: sərbəst etiketlər toxunulmadan qalır.
+_SEEDED_ENGLISH_ROLE_DISPLAY_NAMES = frozenset(
+    {
+        "Rector",
+        "Vice Rector",
+        "Exam Center",
+        "Exam Center Head",
+        "Exam Center Staff",
+        "HR",
+        "Dean",
+        "Department Chair",
+        "Teacher",
+        "Teaching Assistant",
+        "Lab Assistant",
+        "Tutor",
+        "Program Coordinator",
+        "Lead Student",
+        "Student",
+        "Member",
+    }
+)
+
+
+def resolve_seeded_role_label(role_name, raw_display_name=""):
+    """AZ etiket — seed zamanı İngiliscə qalmış ``Role.display_name`` üçün.
+
+    ``raw_display_name`` HƏRFİ olaraq dəyişməmiş default seed dəyəridirsə
+    xəritədəki AZ etiketlə əvəzlənir; boşdursa və ya admin fərqli bir mətnə
+    dəyişibsə (``resolve_position_label``/``visible_role_label``-in "heç nə
+    uydurulmur" prinsipinə uyğun) ``raw_display_name`` TOXUNULMADAN qaytarılır.
+    """
+
+    stripped = str(raw_display_name or "").strip()
+    if stripped not in _SEEDED_ENGLISH_ROLE_DISPLAY_NAMES:
+        return raw_display_name
+    key = str(role_name or "").strip().lower()
+    return ORG_ROLE_DISPLAY_LABELS.get(key, raw_display_name)

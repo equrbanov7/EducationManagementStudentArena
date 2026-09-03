@@ -1,0 +1,138 @@
+{% load i18n static ems_ui %}
+{% comment %}Ekran 21 «Keçilmiş dərslər» — müəllimin (və nəzarətçinin) dərs izi.
+
+Kontekst: `lessons_log_section` (apps/accounts/views/profile/_sections/lessons_log.py).
+Qabıq bölünməsi: `<h1>` BURADA YAZILMIR — kabinet başlığı `#profileSectionTitle`
+kimi qabıqdan gəlir (əks halda səhifədə iki h1 olur).
+
+CSP: inline CSS/JS YOXDUR. Komponent qatı (`ems_ui/*.css`) qabıqdan yüklənir;
+bölmə-xüsusi düzüm `accounts/css/profile/sections/lessons_log.css`-dədir.
+Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
+{% if 'lessons-log' in allowed_sections %}
+{% with sec=lessons_log_section %}
+<section class="profile-section-panel profile-section--lessons-log {% if active_section == 'lessons-log' %}is-active{% endif %}"
+         data-profile-section-panel="lessons-log"
+         data-source-url="{{ profile_base_url }}?section=lessons-log">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log.css' %}?v=20260903-1">
+
+    {% if not sec.has_access %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=sec.state_title state_body=sec.state_body state_icon="fa-circle-info" %}
+    {% else %}
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.header_subtitle header_note=sec.header_note header_actions_include="accounts/profile/sections/_lessons_log_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="lessons-log" filter_prefix=sec.prefix filter_fields=sec.filters.fields filter_base_url=profile_base_url %}
+
+    {% if sec.coverage %}
+    <div class="llog-coverage">
+        <h3 class="llog-coverage__title">{% trans "Sillabus mövzu əhatəsi" context "accounts.lessons_log" %}</h3>
+        <ul class="llog-coverage__list">
+            {% for item in sec.coverage %}
+            <li class="llog-cov">
+                <div class="llog-cov__head">
+                    <span class="ems-mono llog-cov__code">{{ item.subject_code }}</span>
+                    <span class="llog-cov__name">{{ item.subject_name }}</span>
+                    <span class="llog-cov__group">{{ item.group }}</span>
+                    <span class="llog-cov__figures">
+                        {% if item.has_syllabus %}
+                            {{ item.covered }} / {{ item.planned }} {% trans "mövzu" context "accounts.lessons_log" %}
+                        {% else %}
+                            {% trans "Təsdiqlənmiş sillabus yoxdur" context "accounts.lessons_log" %}
+                        {% endif %}
+                    </span>
+                </div>
+                {% if item.has_syllabus %}
+                <div class="ems-bar llog-cov__bar" role="progressbar"
+                     aria-valuenow="{{ item.percent }}" aria-valuemin="0" aria-valuemax="100"
+                     aria-label="{{ item.subject_name }}">
+                    <div class="ems-bar__fill" style="{% ems_pct_style item.percent %}"></div>
+                </div>
+                {% endif %}
+                <div class="llog-cov__foot">
+                    <span class="llog-cov__meta">{{ item.lessons }} {% trans "dərs" context "accounts.lessons_log" %} · {{ item.hours }} {% trans "saat" context "accounts.lessons_log" %}</span>
+                    <a class="ems-btn ems-btn--sm" href="{{ item.journal_url }}" target="_blank" rel="noopener">
+                        {% trans "Jurnalı aç" context "accounts.lessons_log" %}
+                    </a>
+                    {% if item.can_add_lesson %}
+                    <a class="ems-btn ems-btn--sm ems-btn--primary" href="{{ item.journal_url }}" target="_blank" rel="noopener">
+                        {% trans "Dərs əlavə et" context "accounts.lessons_log" %}
+                    </a>
+                    {% else %}
+                    <span class="llog-cov__lock" role="status">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        {{ item.lock_title }}
+                        <a class="llog-cov__lockcta" href="{{ item.lock_action_url }}">{{ item.lock_action_label }}</a>
+                    </span>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if not sec.days %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=sec.state_title state_body=sec.state_body state_icon="fa-calendar-xmark" %}
+    {% else %}
+    <div class="llog-days">
+        {% for day in sec.days %}
+        <div class="llog-day">
+            <div class="llog-day__head">
+                <span class="llog-day__date">{{ day.date|date:"d.m.Y" }}</span>
+                <span class="llog-day__weekday">{{ day.weekday }}</span>
+                <span class="llog-day__total">{{ day.lessons }} {% trans "dərs" context "accounts.lessons_log" %} · {{ day.hours }} {% trans "saat" context "accounts.lessons_log" %}</span>
+            </div>
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra llog-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                            {% if sec.is_supervisor %}<th scope="col">{% trans "Müəllim" context "accounts.lessons_log" %}</th>{% endif %}
+                            <th scope="col">{% trans "Fənn və qrup" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Keçilən mövzu" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Dərsin tipi" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "İştirak" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Jurnal qeydi" context "accounts.lessons_log" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in day.rows %}
+                        <tr class="{% if row.note == 'empty' %}llog-row--empty{% endif %}">
+                            <th scope="row" class="llog-time">
+                                <span class="llog-time__main">{% if row.start_time %}{{ row.start_time|time:"H:i" }}{% if row.end_time %} – {{ row.end_time|time:"H:i" }}{% endif %}{% else %}—{% endif %}</span>
+                            </th>
+                            {% if sec.is_supervisor %}<td>{{ row.teacher|default:"—" }}</td>{% endif %}
+                            <td>
+                                <span class="llog-subject">{{ row.subject_name }}</span>
+                                <span class="llog-submeta">{{ row.group }}{% if row.room %} · {{ row.room }}{% endif %}</span>
+                            </td>
+                            <td>
+                                {% if row.has_topic %}{{ row.topic }}
+                                {% else %}<span class="llog-notopic">{% trans "Mövzu yazılmayıb" context "accounts.lessons_log" %}</span>{% endif %}
+                            </td>
+                            <td>{{ row.kind_label }}</td>
+                            <td class="ems-table__num">{{ row.attendance_label }}{% if row.excused %} <span class="llog-excused" title="{% trans 'Üzrlü qayıb' context 'accounts.lessons_log' %}">+{{ row.excused }}</span>{% endif %}</td>
+                            <td class="ems-table__num">{{ row.hours }}</td>
+                            <td>{% ems_status_badge "journal_note" row.note %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if sec.has_more %}
+    <p class="llog-more" role="status">
+        {% blocktrans context "accounts.lessons_log" with cap=sec.row_cap total=sec.totals.lessons %}İlk {{ cap }} dərs göstərilir — cəmi {{ total }} qeyd var. Daha dar dövr seçin və ya hesabatı yükləyin.{% endblocktrans %}
+    </p>
+    {% endif %}
+    {% endif %}
+
+    {% endif %}
+</section>
+{% endwith %}
+{% endif %}

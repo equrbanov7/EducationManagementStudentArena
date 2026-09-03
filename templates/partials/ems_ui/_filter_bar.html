@@ -1,0 +1,63 @@
+{% comment %}
+Filtr paneli — handoff §4 komponent 2 · §8 qayda 14.
+
+DRAFT ≠ APPLIED: sahə dəyişmək SORĞU GÖNDƏRMİR; yalnız «Tətbiq et» applied
+vəziyyəti yeniləyir, URL-i sinxronlaşdırır və paneli yenidən yükləyir.
+
+KONTEKST MÜQAVİLƏSİ
+  filter_section     — kabinet bölmə açarı (`?section=`), məcburi
+  filter_prefix      — parametr ad fəzası, məs. "wl_" (toqquşmanın qarşısını alır)
+  filter_base_url    — opsional; boşdursa cari yol
+  filter_fields      — [{name, label, kind: select|search|text, options, value,
+                        wide, placeholder}]
+  filter_count_label — opsional «Nəticə: N sətir» mətni
+  filter_applied     — opsional [{name, label, value_label}] — tətbiq olunmuş çiplər
+  filter_dirty_note  — opsional xəbərdarlıq mətni
+{% endcomment %}
+{% load i18n %}
+<form class="ems-filters" data-ems-filters
+      data-section="{{ filter_section }}"
+      data-param-prefix="{{ filter_prefix }}"
+      {% if filter_base_url %}data-base-url="{{ filter_base_url }}"{% endif %}
+      role="search">
+    {% for field in filter_fields %}
+        <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
+            <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+            {% if field.kind == "select" %}
+                <select class="ems-select" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter>
+                    {% for option in field.options %}
+                        <option value="{{ option.value }}"{% if option.value|stringformat:'s' == field.value|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}"
+                       value="{{ field.value|default_if_none:'' }}"
+                       placeholder="{{ field.placeholder|default_if_none:'' }}"
+                       data-ems-filter{% if field.kind == "search" %} data-ems-filter-search{% endif %}>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="ems-filters__actions">
+        <button type="submit" class="ems-btn ems-btn--primary ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>
+        <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
+    </div>
+
+    {% if filter_count_label %}
+        <div class="ems-filters__count" aria-live="polite">{{ filter_count_label }}</div>
+    {% endif %}
+
+    <p class="ems-filters__dirty-note">{% if filter_dirty_note %}{{ filter_dirty_note }}{% else %}{% trans "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın." context "ui.filters" %}{% endif %}</p>
+</form>
+
+{% if filter_applied %}
+    <div class="ems-applied" aria-label="{% trans 'Tətbiq olunmuş filtrlər' context 'ui.filters' %}">
+        {% for chip in filter_applied %}
+            <span class="ems-applied__chip">
+                {{ chip.label }}: {{ chip.value_label }}
+                <button type="button" class="ems-applied__x" data-ems-filter-remove="{{ chip.name }}"
+                        aria-label="{% blocktrans context 'ui.filters' with name=chip.label %}{{ name }} filtrini götür{% endblocktrans %}">×</button>
+            </span>
+        {% endfor %}
+    </div>
+{% endif %}

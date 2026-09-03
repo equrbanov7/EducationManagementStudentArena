@@ -35,6 +35,7 @@ from ..._helpers import (
 from .._sections.exams import build_my_exams_context
 from .._sections.groups import build_groups_context
 from .._sections.question_bank import build_question_bank_context
+from .._sections.question_chair_review import build_question_chair_review_context
 from .._sections.question_submissions import build_question_submissions_context
 from .._sections.unit_exams import build_unit_exams_context
 from ..constants import DEFAULT_PROFILE_SECTION, FALLBACK_PROFILE_SECTION
@@ -103,6 +104,10 @@ class _Stage1Mixin:
         )
         if self.active_section == "delete-account":
             self.active_section = FALLBACK_PROFILE_SECTION
+        # Tam səhifə ilə icazəsiz/naməlum bölmə istənəndə SƏSSİZ fallback etmirik —
+        # qabıq «icazəniz yoxdur» xəbərdarlığı göstərir (QA dalğa-2, W2-8). AJAX ucu
+        # onsuz da 403 verir; burada yalnız UX siqnalıdır, məzmun sızması yoxdur.
+        self.section_denied = self.request.GET.get("section", "") not in ("", *self.allowed_sections)
         self.password_change_form = CustomPasswordChangeForm(self.request.user)
         # OTP ilə şifrə dəyişmə (mövcud şifrə unudulub) — unbound default;
         # POST xətasında post_handler bağlanmış formanı geri qaytarır.
@@ -222,6 +227,9 @@ class _Stage1Mixin:
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
         self._qsub_ctx = build_question_submissions_context(
+            self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
+        )
+        self._qchair_ctx = build_question_chair_review_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
         self.question_bank_banks = self._qb_ctx["question_bank_banks"]
@@ -362,6 +370,8 @@ class _Stage1Mixin:
         # «Müraciətlərim» badge-i PAYLAŞILAN (keşlənən) dəstdən gəlir — səhifə,
         # fraqment və `profile_badges_api` eyni rəqəmi göstərsin deyə.
         self.applications_pending_count = self.profile_badge_counts.get("applications_pending", 0)
+        # «Sual təsdiqi» badge-i — eyni paylaşılan (keşlənən) dəstdən.
+        self.question_chair_pending_count = self.profile_badge_counts.get("question_chair_pending", 0)
         self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
         self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
         self.teacher_groups = []

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f8fafc">
+
+  <div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="brand/wcu-logo-horizontal.svg" alt="Qərbi Kaspi Universiteti" style="height:34px;width:auto;max-width:180px;display:block">
+      <span style="width:1px;height:22px;background:#e2e8f0"></span>
+      <span style="font-size:1.02rem;font-weight:800;color:#2563eb;letter-spacing:-.02em">EMS Arena</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.25">
+        <span style="font-size:.83rem;font-weight:600;color:#0f172a">{{ userName }}</span>
+        <span style="font-size:.72rem;color:#64748b">{{ userRole }}</span>
+      </div>
+      <button type="button" title="Çıxış" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#fee2e2;border-color:#fecaca;color:#dc2626">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start">
+
+    <aside style="flex:0 0 300px;width:300px;align-self:stretch;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1.5rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff">
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#0f172a;white-space:nowrap">Dekanlıq</h2>
+        <button type="button" title="Menyunu yığ" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;background:#eff6ff;color:#3b82f6;cursor:pointer" style-hover="background:#3b82f6;color:#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;gap:.6rem;padding:1rem .75rem">
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Dərs yükü</div>
+        <button type="button" onClick="{{ goQueue }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navQBg }};color:{{ navQFg }};box-shadow:{{ navQSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          Təsdiq növbəsi
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#10b981;color:#fff;font-size:.75rem;font-weight:600;box-shadow:0 1px 2px 0 rgba(0,0,0,.05)">3</span>
+        </button>
+        <button type="button" onClick="{{ goSummary }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navSBg }};color:{{ navSFg }};box-shadow:{{ navSSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Fakültə yükü
+        </button>
+        <button type="button" onClick="{{ goHistory }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navHBg }};color:{{ navHFg }};box-shadow:{{ navHSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+          Tarixçə
+        </button>
+        <div style="margin:.5rem .25rem 0;padding:14px;border-radius:16px;background:#f9fbff;border:1px solid #e2e8f0">
+          <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Fakültə dilimi</div>
+          <div style="margin-top:4px;font-size:.92rem;font-weight:800;color:#1e40af;line-height:1.3">Təbiət elmləri və İT fakültəsi</div>
+          <div style="margin-top:5px;font-size:.74rem;color:{{ yearNoteFg }}">{{ year }} · {{ yearNote }}</div>
+        </div>
+        <div style="margin-top:auto;padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Hesab</div>
+        <button type="button" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:transparent;color:#ef4444;font-size:.95rem;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#fef2f2;color:#dc2626">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Çıxış
+        </button>
+      </nav>
+    </aside>
+
+    <main style="flex:1;min-width:0;padding:24px 28px 40px">
+      <div style="max-width:1400px;margin:0 auto">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#94a3b8;margin-bottom:7px">
+              <span>Ana səhifə</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Dərs yükü</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span style="color:#334155;font-weight:600">{{ crumb }}</span>
+            </div>
+            <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ pageTitle }}</h1>
+            <p style="margin:6px 0 0;font-size:.86rem;color:#64748b;text-wrap:pretty">{{ pageSub }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="padding:6px 12px;border-radius:999px;background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe;font-size:.76rem;font-weight:700">GÖNDƏRİLİB</span>
+            <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Excel yüklə
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ isArchive }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;margin-bottom:16px;border:1px solid #fde68a;background:#fef3c7;border-radius:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <div style="font-size:.83rem;color:#92400e"><strong>Arxiv rejimi</strong> — {{ year }} tədris ili yalnız oxunuş üçün açıqdır.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">TƏDRİS İLİ</label>
+                <select defaultValue="{{ fYear }}" onChange="{{ onFYear }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">SEMESTR</label>
+                <select defaultValue="{{ fSem }}" onChange="{{ onFSem }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:120px"><option>Hamısı</option><option>PAYIZ</option><option>YAZ</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">İXTİSAS</label>
+                <select defaultValue="{{ fSpec }}" onChange="{{ onFSpec }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:210px"><option>Hamısı</option><option>Kompüter elmləri</option><option>İnformasiya texnologiyaları</option><option>Kibertəhlükəsizlik</option><option>Filologiya (xidməti)</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">QRUP</label>
+                <select defaultValue="{{ fGroup }}" onChange="{{ onFGroup }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px;min-width:130px"><option>Hamısı</option><option>236 KE</option><option>236 KE ing</option><option>235 İT</option><option>235 K</option><option>236 İ</option><option>036 / 336 F</option></select>
+              </div>
+              <button type="button" onClick="{{ applyFilters }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Bax
+              </button>
+              <button type="button" onClick="{{ resetFilters }}" style="padding:10px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Sıfırla</button>
+              <div style="margin-left:auto;font-size:.83rem;color:#64748b">Nəticə: <strong style="color:#0f172a">{{ rowCount }}</strong> sətir</div>
+            </div>
+            <sc-if value="{{ isDean }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px">
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1.1">6 120</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">DİLİMİN CƏMİ SAATI</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#1d4ed8;line-height:1.1">98</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">CƏMİ KREDİT</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1.1">3</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">İXTİSAS SAYI</div>
+                  </div>
+                  <div style="background:#fff;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:12px;padding:16px 18px">
+                    <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#dc2626;line-height:1.1">{{ remarkCount }}</div>
+                    <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#b91c1c">İRADLI SƏTİR</div>
+                  </div>
+                </div>
+
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid #e2e8f0">
+                    <div style="font-size:.95rem;font-weight:700;color:#0f172a">Dilimin sətirləri <span style="font-weight:500;color:#64748b">— 41 sətirdən 8-i</span></div>
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <select style="padding:8px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.82rem;color:#334155;background:#fff;cursor:pointer"><option>İxtisas: hamısı</option><option>Kompüter elmləri</option><option>İnformasiya texnologiyaları</option><option>Kibertəhlükəsizlik</option></select>
+                      <select style="padding:8px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.82rem;color:#334155;background:#fff;cursor:pointer"><option>Viza: hamısı</option><option>Baxılıb</option><option>İradlı</option><option>Gözləyir</option></select>
+                    </div>
+                  </div>
+
+                  <div style="overflow:auto;max-height:56vh">
+                    <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:1080px;font-size:.83rem">
+                      <thead>
+                        <tr>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 12px;width:44px;border-bottom:1px solid #bfdbfe">
+                            <input type="checkbox" checked="{{ allChecked }}" onChange="{{ onToggleAll }}" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+                          </th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:290px">FƏNN</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">İXTİSAS</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">QRUPLAR</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SEMESTR</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SAAT</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:150px">KOORDİNATOR VİZASI</th>
+                          <th style="position:sticky;top:0;z-index:3;background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">BAX</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ deanRows }}" as="r" hint-placeholder-count="8">
+                          <tr style="background:{{ r.bg }}">
+                            <td style="padding:12px;border-bottom:1px solid #e2e8f0;text-align:center">
+                              <input type="checkbox" checked="{{ r.checked }}" onChange="{{ r.onToggle }}" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+                            </td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0">
+                              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                                <span style="font-weight:600;color:#0f172a;line-height:1.35">{{ r.subject }}</span>
+                                <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.8rem;font-weight:800;color:#1d4ed8">{{ r.credit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                              </div>
+                            </td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#64748b">{{ r.spec }}</td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#334155;font-weight:600;white-space:nowrap">{{ r.groups }}</td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0">
+                              <span style="padding:3px 8px;border-radius:6px;font-size:.66rem;font-weight:800;letter-spacing:.04em;background:{{ r.semBg }};color:{{ r.semFg }}">{{ r.sem }}</span>
+                            </td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;font-weight:800;color:#0f172a">{{ r.hours }}</td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                              <span title="{{ r.vizaTip }}" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:.72rem;font-weight:700;cursor:default;background:{{ r.vizaBg }};color:{{ r.vizaFg }};border:1px solid {{ r.vizaBd }}">{{ r.viza }}</span>
+                            </td>
+                            <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                              <button type="button" onClick="{{ r.onDetail }}" title="Sətrə bax" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#2563eb;border-color:#bfdbfe;background:#eff6ff">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                              </button>
+                            </td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style="position:sticky;bottom:0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:13px 18px;background:#fff;border-top:2px solid #e2e8f0;box-shadow:0 -6px 18px -12px rgba(15,23,42,.3)">
+                    <div style="font-size:.85rem;color:#64748b"><strong style="color:#0f172a">{{ selCount }}</strong> sətir seçilib</div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+                      <button type="button" onClick="{{ openReturn }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;font-size:.85rem;font-weight:600;cursor:{{ retCur }};border:1px solid {{ retBd }};background:#fff;color:{{ retFg }}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg>
+                        Seçilmişləri qaytar
+                      </button>
+                      <button type="button" onClick="{{ openApprove }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:1px solid #16a34a;background:#16a34a;color:#fff;font-size:.87rem;font-weight:700;cursor:pointer" style-hover="background:#15803d;border-color:#15803d">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Dilimi TƏSDİQLƏ
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSummary }}">
+          <div>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px">
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1.1">3</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">KAFEDRA</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#0f172a;line-height:1.1">12 560</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">FAKÜLTƏ ÜZRƏ SAAT</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:12px;padding:16px 18px">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#1d4ed8;line-height:1.1">202</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">CƏMİ KREDİT</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e2e8f0;border-left:4px solid #16a34a;border-radius:12px;padding:16px 18px">
+                <div style="font-size:1.75rem;font-weight:800;letter-spacing:-.03em;color:#16a34a;line-height:1.1">1 / 3</div>
+                <div style="margin-top:6px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#64748b">TƏSDİQLƏNİB</div>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+              <div style="padding:16px 18px;border-bottom:1px solid #e2e8f0">
+                <div style="font-size:.95rem;font-weight:700;color:#0f172a">Kafedralar üzrə yekun</div>
+                <div style="margin-top:3px;font-size:.81rem;color:#64748b">Təbiət elmləri və İT fakültəsi · {{ year }}</div>
+              </div>
+              <div style="overflow:auto">
+                <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:900px;font-size:.83rem">
+                  <thead>
+                    <tr>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:300px">KAFEDRA</th>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">İXTİSAS</th>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SƏTİR</th>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SAAT</th>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">KREDİT</th>
+                      <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ summary }}" as="k" hint-placeholder-count="3">
+                      <tr style="background:{{ k.bg }}">
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;color:#0f172a">{{ k.name }}</td>
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ k.specs }}</td>
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ k.rows }}</td>
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;text-align:center;font-weight:800;color:#0f172a">{{ k.hours }}</td>
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                          <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.8rem;font-weight:800;color:#1d4ed8">{{ k.credit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                        </td>
+                        <td style="padding:13px 14px;border-bottom:1px solid #e2e8f0">
+                          <span style="padding:4px 10px;border-radius:999px;font-size:.71rem;font-weight:700;background:{{ k.stBg }};color:{{ k.stFg }};border:1px solid {{ k.stBd }}">{{ k.status }}</span>
+                        </td>
+                      </tr>
+                    </sc-for>
+                    <tr style="background:#f1f5f9">
+                      <td style="padding:12px 14px;font-size:.74rem;font-weight:800;letter-spacing:.05em;color:#0f172a">CƏMİ</td>
+                      <td style="padding:12px 14px;text-align:center;font-weight:700;color:#334155">7</td>
+                      <td style="padding:12px 14px;text-align:center;font-weight:700;color:#334155">89</td>
+                      <td style="padding:12px 14px;text-align:center;font-weight:800;color:#0f172a">12 560</td>
+                      <td style="padding:12px 14px;text-align:center">
+                        <span style="display:inline-flex;align-items:baseline;gap:3px;padding:3px 8px;border:1.5px solid #93c5fd;border-radius:7px;background:#dbeafe"><span style="font-size:.82rem;font-weight:800;color:#1e40af">202</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                      </td>
+                      <td style="padding:12px 14px"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isHistory }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 18px;border-bottom:1px solid #e2e8f0">
+              <div>
+                <div style="font-size:.95rem;font-weight:700;color:#0f172a">Hərəkət jurnalı</div>
+                <div style="margin-top:3px;font-size:.81rem;color:#64748b">Təbiət elmləri və İT fakültəsi · 2026/2027</div>
+              </div>
+              <select style="padding:8px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.82rem;color:#334155;background:#fff;cursor:pointer"><option>Bütün hərəkətlər</option><option>Viza</option><option>İrad</option><option>Qaytarma</option><option>Təsdiq</option></select>
+            </div>
+            <div style="padding:20px 22px">
+              <sc-for list="{{ timeline }}" as="e" hint-placeholder-count="6">
+                <div style="display:flex;gap:14px">
+                  <div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto">
+                    <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px;background:{{ e.iconBg }};color:{{ e.iconFg }};border:1px solid {{ e.iconBd }};font-size:.8rem;font-weight:800">{{ e.mark }}</span>
+                    <span style="flex:1;width:2px;background:#e2e8f0;margin:4px 0"></span>
+                  </div>
+                  <div style="padding-bottom:18px;flex:1">
+                    <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                      <span style="font-size:.88rem;font-weight:700;color:#0f172a">{{ e.who }}</span>
+                      <span style="font-size:.75rem;color:#94a3b8">{{ e.when }}</span>
+                    </div>
+                    <div style="margin-top:3px;font-size:.84rem;color:#475569;line-height:1.5;text-wrap:pretty">{{ e.what }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showRemark }}">
+    <div style="position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;max-width:560px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0f172a">İrad bildir</div>
+            <div style="margin-top:2px;font-size:.8rem;color:#64748b">{{ targetName }}</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px">
+          <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Şərh <span style="color:#dc2626">*</span></label>
+          <textarea rows="4" placeholder="İradın səbəbini yazın — kafedra bu mətni görəcək." value="{{ remarkText }}" onChange="{{ onRemarkText }}" style="width:100%;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;font-size:.86rem;color:#0f172a;line-height:1.5;resize:vertical"></textarea>
+          <div style="margin-top:7px;font-size:.75rem;color:{{ remarkHintFg }}">{{ remarkHint }}</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ saveRemark }}" style="padding:10px 20px;border-radius:9px;font-size:.85rem;font-weight:700;cursor:{{ remarkCur }};border:1px solid {{ remarkBtnBd }};background:{{ remarkBtnBg }};color:{{ remarkBtnFg }}">İradı göndər</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showReturn }}">
+    <div style="position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;max-width:560px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0f172a">Seçilmiş sətirləri qaytar</div>
+            <div style="margin-top:2px;font-size:.8rem;color:#64748b">{{ selCount }} sətir kafedraya geri qaytarılacaq</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px">
+          <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Qaytarma səbəbi <span style="color:#dc2626">*</span></label>
+          <textarea rows="4" placeholder="Səbəb yazılmadan sətirlər qaytarıla bilməz." value="{{ returnText }}" onChange="{{ onReturnText }}" style="width:100%;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;font-size:.86rem;color:#0f172a;line-height:1.5;resize:vertical"></textarea>
+          <div style="margin-top:7px;font-size:.75rem;color:{{ returnHintFg }}">{{ returnHint }}</div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ confirmReturn }}" style="padding:10px 20px;border-radius:9px;font-size:.85rem;font-weight:700;cursor:{{ returnCur }};border:1px solid {{ returnBtnBd }};background:{{ returnBtnBg }};color:{{ returnBtnFg }}">Qaytar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showApprove }}">
+    <div style="position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div style="font-size:1.02rem;font-weight:700;color:#0f172a">Dilimi təsdiqlə</div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:22px">
+          <div style="display:flex;gap:14px;margin-bottom:18px">
+            <span style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:#dcfce7;color:#16a34a">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </span>
+            <div style="font-size:.87rem;color:#475569;line-height:1.55;text-wrap:pretty">Aşağıdakı həcm təsdiqlənəcək və kafedra müdirinin bölgü mərhələsinə keçəcək. Təsdiqdən sonra dilim yalnız oxunuş rejimində qalır.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.4rem;font-weight:800;color:#0f172a">41</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#64748b">SƏTİR</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.4rem;font-weight:800;color:#0f172a">6 120</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#64748b">SAAT</div>
+            </div>
+            <div style="border:1.5px solid #bfdbfe;background:#eff6ff;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.4rem;font-weight:800;color:#1d4ed8">98</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#2563eb">KREDİT</div>
+            </div>
+          </div>
+          <sc-if value="{{ hasRemarks }}">
+            <div style="display:flex;gap:11px;margin-top:16px;padding:12px 14px;border:1px solid #fde68a;background:#fef3c7;border-radius:11px">
+              <svg style="flex:0 0 auto;margin-top:1px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+              <div style="font-size:.83rem;color:#92400e;line-height:1.5">{{ remarkCount }} sətirdə koordinator iradı var — təsdiq etsəniz iradlar bağlanacaq.</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ confirmApprove }}" style="padding:10px 20px;border-radius:9px;border:1px solid #16a34a;background:#16a34a;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#15803d;border-color:#15803d">Təsdiqlə</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showDetail }}">
+    <div style="position:fixed;inset:0;z-index:210;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:36px 20px;overflow:auto">
+      <div style="width:100%;max-width:720px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+              <span style="font-size:1.02rem;font-weight:700;color:#0f172a">{{ dSubject }}</span>
+              <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.82rem;font-weight:800;color:#1d4ed8">{{ dCredit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+            </div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">{{ dSpec }} · {{ dGroups }} · {{ dSem }}</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;max-height:62vh;overflow:auto">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px">
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">FORMA</div>
+              <div style="margin-top:3px;font-size:.88rem;font-weight:600;color:#0f172a">{{ dForma }}</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">SƏVİYYƏ</div>
+              <div style="margin-top:3px;font-size:.88rem;font-weight:600;color:#0f172a">{{ dLevel }}</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">TƏLƏBƏ</div>
+              <div style="margin-top:3px;font-size:.88rem;font-weight:600;color:#0f172a">{{ dStudents }}</div>
+            </div>
+            <div style="border:1.5px solid #bfdbfe;background:#eff6ff;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#2563eb">CƏMİ SAAT</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#1d4ed8">{{ dHours }}</div>
+            </div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <table style="border-collapse:separate;border-spacing:0;width:100%;font-size:.83rem">
+              <thead>
+                <tr>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">FƏALİYYƏT</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">PLAN</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">CƏMİ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ detailRows }}" as="d" hint-placeholder-count="5">
+                  <tr style="background:{{ d.bg }}">
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;color:#334155">{{ d.label }}</td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#94a3b8">{{ d.plan }}</td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:center;font-weight:700;color:#0f172a">{{ d.total }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <sc-if value="{{ dRemark }}">
+            <div style="display:flex;gap:11px;margin-top:16px;padding:12px 14px;border:1px solid #fde68a;background:#fef3c7;border-radius:11px">
+              <svg style="flex:0 0 auto;margin-top:1px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+              <div style="font-size:.83rem;color:#92400e;line-height:1.5">Koordinator iradı: {{ dRemark }}</div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Bağla</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:960}}">
+class Component extends DCLogic {
+  state = {
+    view: 'queue',
+    tab: 'dean',
+    reviewed: { 0: true, 1: true, 2: true, 6: true },
+    remarks: { 4: 'Magistr qrupunda laboratoriya saatı ixtisas planından çoxdur.' },
+    selected: {},
+    modal: null,
+    target: null,
+    fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fGroup: 'Hamısı',
+    applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', group: 'Hamısı' },
+    remarkText: '',
+    returnText: ''
+  };
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+
+    const ALL = [
+      ['Proqramlaşdırmanın əsasları – 1', 5, 'Kompüter elmləri', '236 KE, 236 KE ing', 'PAYIZ', 140, 'Əyani', 'Bakalavr', 52, 30, 30, 15, 45, 15, 45, 8, 12, 0, 0, 0],
+      ['Proqramlaşdırmanın əsasları – 3', 4, 'Kompüter elmləri', '236 KE', 'YAZ', 136, 'Əyani', 'Bakalavr', 30, 30, 30, 15, 30, 30, 60, 6, 10, 0, 0, 0],
+      ['Veb texnologiyalar', 4, 'İnformasiya texnologiyaları', '235 İT', 'PAYIZ', 136, 'Əyani', 'Bakalavr', 26, 30, 30, 15, 30, 30, 60, 6, 10, 0, 0, 0],
+      ['İnformasiya təhlükəsizliyinin əsasları', 6, 'Kibertəhlükəsizlik', '235 K, 236 İ', 'PAYIZ', 144, 'Əyani', 'Bakalavr', 48, 30, 30, 30, 60, 15, 30, 10, 14, 0, 0, 0],
+      ['Şəbəkələrin təhlükəsizliyi', 5, 'Kibertəhlükəsizlik', '235 K', 'YAZ', 165, 'Əyani', 'Magistr', 18, 30, 30, 15, 15, 30, 30, 8, 12, 40, 30, 0],
+      ['Müasir informasiya-kommunikasiya texnologiyaları və informasiya təhlükəsizliyi', 3, 'Filologiya (xidməti)', '036 / 336 F', 'YAZ', 74, 'Qiyabi', 'Bakalavr', 80, 10, 20, 10, 40, 0, 0, 6, 8, 0, 0, 0],
+      ['İstehsalat təcrübəsi', 4, 'Kompüter elmləri', '236 KE, 235 İT', 'YAZ', 120, 'Əyani', 'Bakalavr', 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120],
+      ['Veb texnologiyalar', 4, 'Kibertəhlükəsizlik', '236 İ', 'PAYIZ', 136, 'İntensiv', 'Bakalavr', 22, 30, 30, 15, 30, 30, 60, 6, 10, 0, 0, 0]
+    ];
+    const a = s.applied;
+    const arch = a.year !== '2026 / 2027';
+    const keep = ALL.map((d, i) => i).filter((i) => {
+      const d = ALL[i];
+      return (a.sem === 'Hamısı' || d[4] === a.sem) && (a.spec === 'Hamısı' || d[2] === a.spec) && (a.group === 'Hamısı' || d[3].indexOf(a.group) >= 0);
+    });
+    const DATA = keep.map((i) => ALL[i]);
+
+    const semBg = (v) => (v === 'PAYIZ' ? '#dbeafe' : '#e0e7ff');
+    const semFg = (v) => (v === 'PAYIZ' ? '#1d4ed8' : '#4338ca');
+
+    const coordRows = DATA.map((d, k) => {
+      const i = keep[k];
+      const ok = !!s.reviewed[i];
+      const rem = s.remarks[i] || '';
+      return {
+        subject: d[0], credit: d[1], groups: d[3], sem: d[4], hours: d[5],
+        semBg: semBg(d[4]), semFg: semFg(d[4]),
+        remark: rem,
+        bg: rem ? '#fffbeb' : (ok ? '#f0fdf4' : (i % 2 ? '#f8fafc' : '#ffffff')),
+        okLabel: ok ? 'Baxıldı' : 'Baxdım',
+        okBg: ok ? '#16a34a' : '#dcfce7',
+        okFg: ok ? '#ffffff' : '#166534',
+        okBd: ok ? '#16a34a' : '#bbf7d0',
+        onReview: () => {
+          const r = Object.assign({}, s.reviewed);
+          if (r[i]) { delete r[i]; } else { r[i] = true; }
+          set({ reviewed: r });
+        },
+        onRemark: () => set({ modal: 'remark', target: i, remarkText: s.remarks[i] || '' }),
+        onDetail: () => set({ modal: 'detail', target: i })
+      };
+    });
+
+    const deanRows = DATA.map((d, k) => {
+      const i = keep[k];
+      const ok = !!s.reviewed[i];
+      const rem = s.remarks[i] || '';
+      const viza = rem ? 'İrad' : (ok ? 'Baxılıb' : 'Gözləyir');
+      return {
+        subject: d[0], credit: d[1], spec: d[2], groups: d[3], sem: d[4], hours: d[5],
+        semBg: semBg(d[4]), semFg: semFg(d[4]),
+        checked: !!s.selected[i],
+        bg: s.selected[i] ? '#eff6ff' : (rem ? '#fffbeb' : (k % 2 ? '#f8fafc' : '#ffffff')),
+        viza: rem ? '! İrad' : (ok ? '✓ Baxılıb' : 'Gözləyir'),
+        vizaBg: rem ? '#fef3c7' : (ok ? '#dcfce7' : '#f1f5f9'),
+        vizaFg: rem ? '#92400e' : (ok ? '#166534' : '#64748b'),
+        vizaBd: rem ? '#fde68a' : (ok ? '#bbf7d0' : '#e2e8f0'),
+        vizaTip: rem || (ok ? 'Koordinator baxıb, iradı yoxdur' : 'Koordinator hələ baxmayıb'),
+        onToggle: () => {
+          const sel = Object.assign({}, s.selected);
+          if (sel[i]) { delete sel[i]; } else { sel[i] = true; }
+          set({ selected: sel });
+        },
+        onDetail: () => set({ modal: 'detail', target: i })
+      };
+    });
+
+    const reviewedCount = Object.keys(s.reviewed).length;
+    const totalReviewed = 17 + reviewedCount;
+    const selCount = Object.keys(s.selected).length;
+    const remarkCount = Object.keys(s.remarks).length;
+    const allChecked = DATA.length > 0 && selCount === DATA.length;
+
+    const timeline = [
+      { mark: '↑', who: 'Tədris şöbəsi — E. Qurbanov', when: '04.08.2026, 10:24', what: 'Sənəd dekanlıqlara göndərildi: 3 fakültə dilimi, 64 sətir, 8 965 saat, 142 kredit.', iconBg: '#dbeafe', iconFg: '#1d4ed8', iconBd: '#bfdbfe' },
+      { mark: '✓', who: 'Koordinator — L. Hüseynova (Kompüter elmləri)', when: '04.08.2026, 14:05', what: '12 sətrə viza verdi.', iconBg: '#dcfce7', iconFg: '#166534', iconBd: '#bbf7d0' },
+      { mark: '!', who: 'Koordinator — K. Abbasov (Kibertəhlükəsizlik)', when: '05.08.2026, 09:12', what: '«Şəbəkələrin təhlükəsizliyi» sətrinə irad bildirdi: magistr qrupunda laboratoriya saatı ixtisas planından çoxdur.', iconBg: '#fef3c7', iconFg: '#92400e', iconBd: '#fde68a' },
+      { mark: '←', who: 'Dekan — A. Rəhimova', when: '05.08.2026, 11:40', what: '1 sətir kafedraya qaytarıldı: qrup sayı ixtisas planı ilə uyğun gəlmir.', iconBg: '#fee2e2', iconFg: '#b91c1c', iconBd: '#fecaca' },
+      { mark: '✓', who: 'Dekan — T. Vəliyev (İqtisadiyyat və idarəetmə)', when: '03.08.2026, 16:30', what: 'Dilim təsdiqləndi: 9 sətir, 1 000 saat, 16 kredit.', iconBg: '#dcfce7', iconFg: '#166534', iconBd: '#bbf7d0' },
+      { mark: '↑', who: 'Tədris şöbəsi — E. Qurbanov', when: '01.08.2026, 09:00', what: '2026/2027 tapşırıq dövriyyəsi açıldı.', iconBg: '#f1f5f9', iconFg: '#475569', iconBd: '#e2e8f0' }
+    ];
+
+    const ST = {
+      'Göndərilib': { stBg: '#dbeafe', stFg: '#1d4ed8', stBd: '#bfdbfe' },
+      'Qaytarılıb': { stBg: '#fee2e2', stFg: '#b91c1c', stBd: '#fecaca' },
+      'Təsdiqlənib': { stBg: '#dcfce7', stFg: '#166534', stBd: '#bbf7d0' }
+    };
+
+    const onQ = s.view === 'queue';
+    const TT = {
+      queue: ['Təsdiq növbəsi', 'Yük təsdiqi', 'Təbiət elmləri və İT fakültəsi · Proqramlaşdırma və informasiya təhlükəsizliyi kafedrasının dilimi.'],
+      summary: ['Fakültə yükü', 'Fakültə üzrə yekun', 'Fakültənin bütün kafedraları üzrə saat, kredit və mərhələ vəziyyəti.'],
+      history: ['Tarixçə', 'Hərəkət tarixçəsi', 'Dilim üzrə bütün viza, irad, qaytarma və təsdiq hərəkətləri.']
+    };
+    const titles = TT[s.view];
+
+    const det = s.target === null ? ['', '', '', '', '', '', '', '', ''] : ALL[s.target];
+    const dr = s.target === null ? null : ALL[s.target];
+    const detailRows = !dr ? [] : [
+      ['Mühazirə', dr[9], dr[10]], ['Təcrübi-seminar', dr[11], dr[12]], ['Laboratoriya', dr[13], dr[14]],
+      ['Məsləhət', '—', dr[15]], ['İmtahan', '—', dr[16]], ['Buraxılış işinə rəhbərlik', '—', dr[17]],
+      ['Doktorantlara rəhbərlik', '—', dr[18]], ['Təcrübə', '—', dr[19]]
+    ].filter((x) => x[2] > 0).map((x, i) => ({ label: x[0], plan: x[1], total: x[2], bg: i % 2 ? '#f8fafc' : '#ffffff' }));
+
+    const remarkOk = s.remarkText.trim().length > 0;
+    const returnOk = s.returnText.trim().length > 0 && selCount > 0;
+
+    return {
+      crumb: titles[0], pageTitle: titles[1], pageSub: titles[2],
+      userName: 'prof. A. Rəhimova',
+      userRole: 'Dekan · Təbiət elmləri və İT fakültəsi',
+      isQueue: onQ, isSummary: s.view === 'summary', isHistory: s.view === 'history',
+      summary: [
+        Object.assign({ name: 'Proqramlaşdırma və informasiya təhlükəsizliyi', specs: 3, rows: 41, hours: '6 120', credit: 98, bg: '#ffffff' }, ST['Göndərilib'], { status: 'Göndərilib' }),
+        Object.assign({ name: 'Kompüter mühəndisliyi', specs: 2, rows: 26, hours: '3 480', credit: 56, bg: '#fef2f2' }, ST['Qaytarılıb'], { status: 'Qaytarılıb' }),
+        Object.assign({ name: 'Riyaziyyat və statistika', specs: 2, rows: 22, hours: '2 960', credit: 48, bg: '#ffffff' }, ST['Təsdiqlənib'], { status: 'Təsdiqlənib' })
+      ],
+      isDean: true,
+      coordRows, deanRows, timeline,
+      coordProgressText: '28 sətirdən ' + totalReviewed + '-i baxılıb',
+      coordPct: Math.round((totalReviewed / 28) * 100) + '%',
+      selCount, remarkCount, allChecked, hasRemarks: remarkCount > 0,
+
+      navQBg: onQ ? '#3b82f6' : 'transparent', navQFg: onQ ? '#ffffff' : '#64748b', navQSh: onQ ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navSBg: s.view === 'summary' ? '#3b82f6' : 'transparent', navSFg: s.view === 'summary' ? '#ffffff' : '#64748b', navSSh: s.view === 'summary' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navHBg: s.view === 'history' ? '#3b82f6' : 'transparent', navHFg: s.view === 'history' ? '#ffffff' : '#64748b', navHSh: s.view === 'history' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+
+      tabCBg: s.tab === 'coord' ? '#fff' : 'transparent',
+      tabCFg: s.tab === 'coord' ? '#1d4ed8' : '#64748b',
+      tabCSh: s.tab === 'coord' ? '0 1px 3px rgba(15,23,42,.12)' : 'none',
+      tabDBg: s.tab === 'dean' ? '#fff' : 'transparent',
+      tabDFg: s.tab === 'dean' ? '#1d4ed8' : '#64748b',
+      tabDSh: s.tab === 'dean' ? '0 1px 3px rgba(15,23,42,.12)' : 'none',
+
+      retBd: selCount ? '#dc2626' : '#e2e8f0',
+      retFg: selCount ? '#dc2626' : '#94a3b8',
+      retCur: selCount ? 'pointer' : 'not-allowed',
+
+      showRemark: s.modal === 'remark', showReturn: s.modal === 'return', showApprove: s.modal === 'approve',
+      targetName: s.target === null ? '' : ALL[s.target][0] + ' · ' + ALL[s.target][3],
+      remarkText: s.remarkText, returnText: s.returnText,
+      remarkHint: remarkOk ? 'Şərh kafedraya və dekana görünəcək.' : 'Şərh yazılmadan irad göndərilə bilməz.',
+      remarkHintFg: remarkOk ? '#64748b' : '#dc2626',
+      remarkBtnBg: remarkOk ? '#f59e0b' : '#f1f5f9',
+      remarkBtnFg: remarkOk ? '#ffffff' : '#94a3b8',
+      remarkBtnBd: remarkOk ? '#f59e0b' : '#e2e8f0',
+      remarkCur: remarkOk ? 'pointer' : 'not-allowed',
+      returnHint: selCount === 0 ? 'Əvvəlcə cədvəldən sətir seçin.' : (returnOk ? 'Sətirlər kafedraya qaytarılacaq və qırmızı işarələnəcək.' : 'Səbəb məcburidir.'),
+      returnHintFg: returnOk ? '#64748b' : '#dc2626',
+      returnBtnBg: returnOk ? '#dc2626' : '#f1f5f9',
+      returnBtnFg: returnOk ? '#ffffff' : '#94a3b8',
+      returnBtnBd: returnOk ? '#dc2626' : '#e2e8f0',
+      returnCur: returnOk ? 'pointer' : 'not-allowed',
+
+      goQueue: () => set({ view: 'queue' }),
+      goSummary: () => set({ view: 'summary' }),
+      goHistory: () => set({ view: 'history' }),
+      tabCoord: () => set({ tab: 'coord' }),
+      tabDean: () => set({ tab: 'dean' }),
+      fYear: s.fYear, fSem: s.fSem, fSpec: s.fSpec, fGroup: s.fGroup,
+      isArchive: arch, year: a.year,
+      yearNote: arch ? 'arxiv — yalnız oxunuş' : '04.08.2026-da daxil olub',
+      yearNoteFg: arch ? '#b45309' : '#2563eb',
+      rowCount: DATA.length,
+      onFYear: (e) => set({ fYear: e.target.value }),
+      onFSem: (e) => set({ fSem: e.target.value }),
+      onFSpec: (e) => set({ fSpec: e.target.value }),
+      onFGroup: (e) => set({ fGroup: e.target.value }),
+      applyFilters: () => set({ applied: { year: s.fYear, sem: s.fSem, spec: s.fSpec, group: s.fGroup } }),
+      resetFilters: () => set({ fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fGroup: 'Hamısı', applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', group: 'Hamısı' } }),
+      showDetail: s.modal === 'detail',
+      dSubject: det[0], dCredit: det[1], dSpec: det[2], dGroups: det[3], dSem: det[4], dHours: det[5],
+      dForma: det[6], dLevel: det[7], dStudents: det[8],
+      dRemark: s.target === null ? '' : (s.remarks[s.target] || ''),
+      detailRows,
+      reviewAll: () => { const r = {}; ALL.forEach((d, i) => { r[i] = true; }); set({ reviewed: r }); },
+      onToggleAll: () => {
+        if (allChecked) { set({ selected: {} }); return; }
+        const sel = {}; keep.forEach((i) => { sel[i] = true; }); set({ selected: sel });
+      },
+      openReturn: () => { if (selCount) set({ modal: 'return', returnText: '' }); },
+      openApprove: () => set({ modal: 'approve' }),
+      closeModal: () => set({ modal: null, target: null }),
+      onRemarkText: (e) => set({ remarkText: e.target.value }),
+      onReturnText: (e) => set({ returnText: e.target.value }),
+      saveRemark: () => {
+        if (!remarkOk) return;
+        const r = Object.assign({}, s.remarks);
+        r[s.target] = s.remarkText.trim();
+        const rv = Object.assign({}, s.reviewed);
+        delete rv[s.target];
+        set({ remarks: r, reviewed: rv, modal: null, target: null, remarkText: '' });
+      },
+      confirmReturn: () => { if (returnOk) set({ modal: null, selected: {}, returnText: '' }); },
+      confirmApprove: () => set({ modal: null, view: 'history' })
+    };
+  }
+}
+</script>
+</body>
+</html>

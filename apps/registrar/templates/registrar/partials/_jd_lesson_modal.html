@@ -1,7 +1,8 @@
 {% load i18n %}
 {% comment %}Yeni dərs / dərs redaktəsi modalı (mockup: navy başlıq + tarixin yanında
-həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu LMS kursunun
-mövzu siyahısından gəlir (siyahı yoxdursa sərbəst mətn); cədvəldə tək növ slot
+həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu TƏSDİQLƏNMİŞ
+sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
+kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
 varsa dərs tipi kilidlidir.{% endcomment %}
 <div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}" hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
@@ -36,13 +37,13 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <div class="bootstrap-single-select">
                         <select name="lesson_topic" class="bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices_meta %}<option value="{{ t.title }}"{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
+                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.kinds %} · {% for k in t.kinds %}{% if k == 'lecture' %}{% trans "mühazirə" context "registrar.journal" %}{% elif k == 'seminar' %}{% trans "seminar" context "registrar.journal" %}{% else %}{% trans "laboratoriya" context "registrar.journal" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
                         </select>
                     </div>
                     {% else %}
                     <input type="text" name="lesson_topic" maxlength="255" data-jd-lesson-topic
                            placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
-                    <small class="jd-field-hint">{% trans "Kursun mövzu siyahısı yoxdur — mövzunu əl ilə yazın." context "registrar.journal" %}</small>
+                    <small class="jd-field-hint">{% trans "Təsdiqlənmiş sillabus və kurs mövzu planı yoxdur — mövzunu əl ilə yazın." context "registrar.journal" %}</small>
                     {% endif %}
                 </div>
                 <div class="jd2-field-pair">

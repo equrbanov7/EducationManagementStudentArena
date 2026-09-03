@@ -1,0 +1,64 @@
+{% load i18n %}
+{% comment %}Ekran 12 «Excel import sehrbazı» — 3 addım.
+
+Addım 1 fayl yükləyir (multipart → `wl-upload-form`, `workload_chain.js`),
+addım 2 kataloq uyğunluğunu göstərir, addım 3 idxalı təsdiqləyir. Kataloqda
+tapılmayan ad SİLİNMİR — sətir `*_text` fallback-ı ilə qalır.{% endcomment %}
+{% with preview=workload_center_section.import_preview task=workload_center_section.task %}
+{% include "partials/ems_ui/_stepper.html" with steps=workload_center_section.import_steps steps_label=workload_center_section.import_steps_label %}
+
+{% if not task %}
+    {% trans "Əvvəlcə tapşırıq seçin" context "accounts.workload_center" as wc_imp_notask %}
+    {% trans "İdxal sətirləri mövcud QARALAMA sənədə əlavə olunur — «Tapşırıqlar» görünüşündən kafedra seçin." context "accounts.workload_center" as wc_imp_notask_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-file-arrow-up" state_title=wc_imp_notask state_body=wc_imp_notask_body %}
+{% elif not preview %}
+<form class="wl-upload" method="post" enctype="multipart/form-data"
+      action="{{ workload_center_section.action_url }}"
+      data-wl-upload
+      data-wl-section="workload-center">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="import_upload">
+    <input type="hidden" name="task" value="{{ task.id }}">
+    <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+    <div class="ems-field">
+        <label class="ems-field__label" for="wl-import-file">{% trans "Excel faylı" context "accounts.workload_center" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="file" id="wl-import-file" name="file" accept=".xlsx,.xlsm" required>
+        <p class="ems-field__hint">{% trans ".xlsx və ya .xlsm · maksimum 10 MB · sütun adları dəyişdirilməməlidir." context "accounts.workload_center" %}</p>
+    </div>
+    <button type="submit" class="ems-btn ems-btn--primary">{% trans "Faylı oxu" context "accounts.workload_center" %}</button>
+</form>
+{% else %}
+<div class="ems-kpis ems-kpis--4">
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "SƏTİR" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ preview.row_count }}</div></div>
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "CƏMİ SAAT" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ preview.total_hours }}</div></div>
+    <div class="ems-kpi ems-kpi--success"><div class="ems-kpi__label">{% trans "UYĞUNLAŞDI" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ preview.matched }}</div></div>
+    <div class="ems-kpi ems-kpi--warning"><div class="ems-kpi__label">{% trans "MƏTN KİMİ QALAN" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ preview.unmatched }}</div></div>
+</div>
+
+<table class="ems-table ems-table--zebra">
+    <thead>
+        <tr>
+            <th scope="col">{% trans "Fayldakı ad" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Növ" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Kataloq uyğunluğu" context "accounts.workload_center" %}</th>
+            <th scope="col">{% trans "Status" context "accounts.workload_center" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in preview.entries|slice:":100" %}
+        <tr>
+            <th scope="row">{{ entry.source }}</th>
+            <td>{{ entry.kind }}</td>
+            <td>{{ entry.target|default:"—" }}</td>
+            <td>{% if entry.matched %}{% trans "Uyğunlaşdı" context "accounts.workload_center" %}{% else %}{% trans "Mətn kimi qalacaq" context "accounts.workload_center" %}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="wl-actions">
+    <button type="button" class="ems-btn" data-tof-submit='{"action": "import_cancel"}'>{% trans "Ləğv et" context "accounts.workload_center" %}</button>
+    <button type="button" class="ems-btn ems-btn--primary" data-tof-submit='{"action": "import_apply"}'>{% trans "İdxal et" context "accounts.workload_center" %}</button>
+</div>
+{% endif %}
+{% endwith %}

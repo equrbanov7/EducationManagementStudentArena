@@ -16,6 +16,7 @@ from .coverage import (  # noqa: F401
 )
 from .drafts import (  # noqa: F401
     SectionConflict,
+    assess_split_is_valid,
     blank_section_data,
     copy_from_previous,
     create_draft,
@@ -26,6 +27,7 @@ from .drafts import (  # noqa: F401
     resolve_pointer_versions,
     save_section,
     section_data_map,
+    set_plan_hours,
 )
 from .offerings import (  # noqa: F401
     ACTION_STATES,
@@ -49,7 +51,14 @@ from .queries import (  # noqa: F401
     version_diff,
     version_timeline,
 )
-from .scoping import SyllabusActor, can_view, is_author, resolve_actor  # noqa: F401
+from .scoping import SyllabusActor, can_view, has_decision_scope, is_author, resolve_actor  # noqa: F401
+from .versioning import (  # noqa: F401
+    ESCALATION_CODE,
+    STRUCTURAL_SECTIONS,
+    classify,
+    escalate_if_structural,
+    structural_changes,
+)
 from .workflow import (  # noqa: F401
     approve,
     archive,
@@ -64,6 +73,7 @@ from .workflow import (  # noqa: F401
 
 __all__ = [
     "ACTION_STATES",
+    "ESCALATION_CODE",
     "GROUP_CHAIR",
     "GROUP_PROGRAM",
     "QUEUE_SORT_KEYS",
@@ -74,6 +84,7 @@ __all__ = [
     "STATE_PENDING",
     "STATE_REJECTED",
     "STATE_REVISION",
+    "STRUCTURAL_SECTIONS",
     "SectionConflict",
     "SyllabusActor",
     "approve",
@@ -82,13 +93,17 @@ __all__ = [
     "audit_entries",
     "available_actions",
     "blank_section_data",
+    "assess_split_is_valid",
     "can_view",
+    "classify",
     "copy_from_previous",
     "coverage_breakdown",
     "coverage_report",
     "coverage_trend",
     "create_draft",
     "create_next_version",
+    "escalate_if_structural",
+    "has_decision_scope",
     "has_review_scope",
     "import_migrated_version",
     "is_author",
@@ -103,7 +118,9 @@ __all__ = [
     "review_scope_queryset",
     "save_section",
     "section_data_map",
+    "set_plan_hours",
     "start_review",
+    "structural_changes",
     "status_counts",
     "submit",
     "syllabus_for_offering",

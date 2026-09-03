@@ -4,12 +4,16 @@ from django.urls import path
 
 from . import (
     analytics_views,
+    catalog_actions,
     console_views,
     correction_views,
+    curriculum_actions,
     guest_roster_views,
     journal_actions,
+    lessons_log_views,
     pdf_views,
     schedule_views,
+    semester_actions,
     syllabus_views,
     views,
 )
@@ -24,7 +28,15 @@ urlpatterns = [
     path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
+    # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
+    path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
+    # Ekran 05 — tədris planı əməlləri (JSON POST, `plan.*` + state maşını).
+    path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
+    # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
+    path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
+    # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
+    path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", schedule_views.calendar_view, name="calendar"),
     path("cedvel/", schedule_views.schedule_view, name="schedule"),

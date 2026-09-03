@@ -184,7 +184,7 @@ def row_warnings(row: TeachingTaskRow) -> list[dict]:
     return warnings
 
 
-def _resolve_specialty_and_faculty(organization, specialty_id):
+def resolve_specialty_and_faculty(organization, specialty_id):
     """İxtisas ``OrgUnit`` + onun fakültəsi (path ilə yuxarı gedərək)."""
     if not specialty_id:
         return None, None
@@ -249,7 +249,7 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
             row.period = None
 
     if "specialty_id" in data:
-        specialty, faculty = _resolve_specialty_and_faculty(task.organization, data.get("specialty_id") or None)
+        specialty, faculty = resolve_specialty_and_faculty(task.organization, data.get("specialty_id") or None)
         row.specialty = specialty
         row.faculty = faculty
 
@@ -318,6 +318,7 @@ __all__ = [
     "get_or_create_task",
     "list_years",
     "normalize_academic_year",
+    "resolve_specialty_and_faculty",
     "row_warnings",
     "save_row",
 ]

@@ -27,7 +27,27 @@
         return null;
     };
 
+    /**
+     * CSRF token — kuki adı layihəyə görə dəyişə bilər (`CSRF_COOKIE_NAME`;
+     * məs. staging-də `emsarena_staging_csrftoken`).  Ona görə YALNIZ kukiyə
+     * güvənmirik: tapılmasa DOM-dakı `{% csrf_token %}` gizli sahəsindən,
+     * sonra isə `<meta name="csrf-token">`-dan oxuyuruq.  Əks halda bütün
+     * `fetchJSON` yazıları boş `X-CSRFToken` göndərib 403 alır.
+     * (QA dalğa 2, 2026-09-03 — :8100 klonunda hər AJAX yazısı 403 verirdi.)
+     */
     EMSCore.getCsrfToken = function getCsrfToken() {
-        return EMSCore.getCookie("csrftoken");
+        var fromCookie = EMSCore.getCookie("csrftoken");
+        if (fromCookie) {
+            return fromCookie;
+        }
+        var input = document.querySelector("input[name=csrfmiddlewaretoken]");
+        if (input && input.value) {
+            return input.value;
+        }
+        var meta = document.querySelector("meta[name=csrf-token]");
+        if (meta && meta.content) {
+            return meta.content;
+        }
+        return null;
     };
 })(window, document);

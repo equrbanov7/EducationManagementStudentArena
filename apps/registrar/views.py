@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -112,7 +112,7 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_close_notices, journal_extras, syllabus_notice
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
 
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections_service.corrections_map_for_offering(offering)
@@ -141,6 +141,7 @@ def journal_detail(request, offering_id):
     today = _tz.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
     rooms = lesson_rooms.lesson_room_choices(offering)
+    syllabus_gate = journal_policy.syllabus_gate(offering)
 
     context = {
         "offering": offering,
@@ -152,7 +153,7 @@ def journal_detail(request, offering_id):
         "selfwork_board": journal_extras.get_selfwork_board(offering),
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
-        "can_edit": is_direct_editor and not journal_locked,
+        "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
         "handover_observer": handover_observer,
         "journal_locked": journal_locked,
         # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
@@ -160,6 +161,10 @@ def journal_detail(request, offering_id):
         # Sillabus vəziyyəti: xəbərdarlıq zolağı + «Sillabusa bax» keçidi.
         # ⚠️ Jurnalı KİLİDLƏMİR — yalnız məlumat verir (bax syllabus_notice.py).
         "syllabus_notice": syllabus_notice.journal_syllabus_notice(offering),
+        # README §8/2 qapısı — ORG SİYASƏTİ (default söndürülü).  Açıq olduqda
+        # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
+        # yuxarıda söndürülür) və panel kilid + CTA göstərir.
+        "syllabus_gate": syllabus_gate,
         "grade_history": grade_audit.get_grade_history(offering=offering),
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
@@ -357,6 +362,13 @@ def _handle_save_finals(request, offering):
 
 def _handle_add_lesson(request, offering):
     """Create a new lesson column (date + type + topic + standart dərs saatı)."""
+    # README §8/2 — siyasət açıqdırsa təsdiqlənmiş sillabussuz dərs açılmır:
+    # 403 + SƏBƏB KODU (mesaj/redirect deyil, çünki qayda acceptance şərtidir).
+    from apps.registrar import journal_policy
+
+    gate = journal_policy.syllabus_gate(offering)
+    if gate["locked"]:
+        return HttpResponseForbidden(gate["reason_code"], content_type="text/plain; charset=utf-8")
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — dərs əlavə etmək olmaz."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))

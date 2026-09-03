@@ -1,6 +1,11 @@
 # FAZA 32 — Yekun rol × funksiya matrisi
 
-**Tarix:** 2026-09-02 · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901`
+> **YENİLƏNDİ 2026-09-03 (QA dalğa 2).** §1–§4 dalğa 1-in (9 rol × 35 funksiya) nəticəsidir və
+> **dəyişdirilməyib**. Dizayn handoff-unun 22 ekranı və 3 yeni rol (`teaching_office_head`,
+> `teaching_office_staff`, `student_services`) **§5-də** əlavə olunub — orada matris
+> **13 rola** genişlənir. Dəlil: `PHASE21_UI_QA_WAVE2.md` (456 bölmə açılışı, 0×500).
+
+**Tarix:** 2026-09-02 (§1–4) · 2026-09-03 (§5) · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901`
 **Mənbələr:** FAZA 27 (uçdan-uca axınlar — bu auditin ƏSAS dəlili) · PHASE21 §1/§7 (252 bölmə açılışı,
 konsol/CSP, responsiv) · PHASE23 §A (56 mənfi hal) + PHASE23_SECURITY_FIXES · PHASE22 (ana səhifə) ·
 PHASE4 (dərs yükü) · PHASE5 (cədvəl) · PHASE11/18 (müraciətlər) · PHASE1_STUDENT_INTAKE · PHASE24 (performans).
@@ -131,3 +136,124 @@ Qısaltmalar: **st**=student · **tc**=teacher · **ch**=chair_head · **pc**=pr
 | P1-10 (dean/chair_head alias) | OPEN | **AÇIQ** — menyu səthi hələ eynidir |
 | P1-5 (J12) · P1-8 · P1-9 · P2-6 | OPEN/DEFERRED/WONTFIX | dəyişməyib (PHASE31 §1) |
 | **YENİ** | — | **R-1, R-2, R-5, R-8, R-9** → PHASE27 §2 |
+
+---
+
+## 5. DALĞA 2 — dizayn handoff-unun ekranları × 13 rol (2026-09-03)
+
+**Dəlil:** `PHASE21_UI_QA_WAVE2.md` · **456 bölmə açılışı · 0 × 500 · 0 konsol/CSP xətası.**
+Hər rol öz portalından real login etdi; hər bölmə həm AJAX fraqment, həm tam səhifə ucundan açıldı.
+
+**Yeni sütunlar:** **toh**=`teaching_office_head` (85) · **tos**=`teaching_office_staff` (60) ·
+**ss**=`student_services` (60) · **ad**=`staging_admin` (superadmin).
+Qalanları §2 ilə eyni: st · tc · ch · pc · dn · ec · hr · rm · rc.
+
+**İşarələr:** ✅ görünür + yüklənir + əhatəyə uyğun · ⚠️ işləyir, amma qeyd var
+(çox vaxt: plan bu rola bu ekranı vermirdi — OXU paneli, yazı ayrıca qapılıdır) ·
+❌ olmalı idi, yoxdur · — qəsdən bağlıdır.
+
+### 5.1 Rol × bölmə (yüklənmə)
+
+| rol | bölmə sayı | AJAX 200 | AJAX 403 (qəsdli) | tam səhifə 200 | **500** |
+|---|---:|---:|---:|---:|---:|
+| `student` | 17 | 15 | 2 | 17 | **0** |
+| `teacher` | 21 | 18 | 3 | 21 | **0** |
+| `program_coordinator` | 24 | 22 | 2 | 24 | **0** |
+| `hr` | 26 | — | — | 26 | **0** |
+| `exam_center` | 31 | 21 | 10 | 31 | **0** |
+| `student_services` | 18 | 16 | 2 | 18 | **0** |
+| `teaching_office_staff` | 21 | 19 | 2 | 21 | **0** |
+| `teaching_office_head` | 23 | 21 | 2 | 23 | **0** |
+| `chair_head` | 44 | 36 | 8 | 44 | **0** |
+| `dean` | 44 | 36 | 8 | 44 | **0** |
+| `rector` | 54 | 44 | 10 | 54 | **0** |
+| `ikt_rehber` (RİM) | 60 | 45 | 15 | 60 | **0** |
+| `staging_admin` | 73 | 50 | 23 | 73 | **0** |
+
+> Dalğa 1-də `chair_head` (33) və `dean` (32) siyahıları demək olar eyni idi (**P1-10**).
+> Dalğa 2-də hər ikisi **44**-dür və hələ də eynidir — **P1-10 AÇIQ QALIR**.
+
+### 5.2 Ekran × rol matrisi
+
+| # | Ekran (dizayn №) | bölmə | st | tc | ch | pc | dn | ec | hr | rm | rc | toh | tos | ss | ad |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 36 | **Universitetin strukturu** (01) | `org-structure-tree` | — | — | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| 37 | **Kafedra profili** (02) | `chair-profile` | — | — | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| 38 | **İxtisaslar reyestri** (03) | `programs-registry` | — | — | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| 39 | **Fənn kataloqu** (04) | `subject-catalog` | — | — | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| 40 | **Tədris planı redaktoru** (05) | `curriculum-editor` | — | — | ✅ | ⚠️ | ✅ | — | — | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| 41 | **Qruplar reyestri** (06) | `groups-registry` | — | — | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | ✅ | ✅ | ✅ | ✅ | ⚠️ | ✅ |
+| 42 | **Semestr açılışı** (07) | `semester-opening` | — | — | ✅ | ⚠️ | ✅ | — | — | ✅ | ✅ | ✅ | ⚠️ | — | ✅ |
+| 43 | **Tələbə qəbulu** (08) | `student-admission`, `student-intake` | — | — | — | — | — | — | ✅ | ✅ | ✅ | — | — | ✅ | ✅ |
+| 44 | **Tələbə reyestri və hərəkəti** (09) | `student-registry` | — | — | — | ✅ | ✅ | — | — | ✅ | ✅ | — | — | ✅ | ✅ |
+| 45 | **Dərs yükü mərkəzi** (12) | `workload-center` | — | — | ✅ | — | — | — | — | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| 46 | **Koordinator — yük vizası** (13) | `workload-visa` | — | — | — | ✅ | — | — | — | ✅ | ✅ | — | — | — | ✅ |
+| 47 | **Kafedra — yük bölgüsü** (14) | `workload-distribution` | — | — | ✅ | ❌ | — | — | — | ✅ | ✅ | ✅ | ✅ | — | ✅ |
+| 48 | **Dekanlıq — yük təsdiqi** (15) | `workload-approval` | — | — | — | — | ✅ | — | — | ✅ | ✅ | — | — | — | ✅ |
+| 49 | **Müəllim — şəxsi yük** (16) | `my-workload` | — | ✅ | ⚠️ | ⚠️ | ⚠️ | — | — | ⚠️ | ⚠️ | ⚠️ | ⚠️ | — | ✅ |
+| 50 | **Rektor — ümumi baxış** (17) | `workload-overview` | — | — | ✅ | — | ✅ | — | — | ✅ | ✅ | ✅ | — | — | ✅ |
+| 51 | **Sillabus siyahısı/təsdiqi** (18–20) | `syllabus-list/-review` | — | ✅ | ✅ | — | ✅ | — | — | ✅ | ✅ | — | — | — | ✅ |
+| 52 | **Keçilmiş dərslər** (21) | `lessons-log` | — | ✅ | ✅ | ✅ | ✅ | — | — | ✅ | ✅ | — | — | — | ✅ |
+| 53 | **Sual — kafedra təsdiqi** | `question-chair-review` | — | — | ✅ | — | ✅ | — | — | ⚠️ | ✅ | — | — | — | ✅ |
+| 54 | **Sual göndərişləri** | `question-submissions` | — | ✅ | — | — | — | ✅ | — | ✅ | — | — | — | — | ✅ |
+| 55 | **Müraciətlər** (11) | `applications` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 56 | **Ana səhifə vidjetləri** (yeni ekranlar üçün) | `dashboard` | — | ✅ | ⚠️ | ❌ | ⚠️ | — | ⚠️ | ⚠️ | ⚠️ | ❌ | ❌ | ❌ | ⚠️ |
+
+### 5.3 Say
+
+21 yeni funksiya sətri × 13 rol = **273 xana**:
+
+| | ✅ | ⚠️ | ❌ | — |
+|---|---:|---:|---:|---:|
+| **Cəmi xana** | **117** | **28** | **5** | **123** |
+
+### 5.4 Xanaların izahı
+
+**❌ (5 xana, 3 fərqli defekt):**
+
+| xana | səbəb |
+|---|---|
+| 47 / `pc` | `program_coordinator` `workload-distribution` görmür — **dalğa 1-dən qalan sahib qərarı** (PHASE21 U-7). Dalğa 2-də `workload-visa` verildi, amma bölgü səthi hələ bağlıdır. |
+| 56 / `pc`, `toh`, `tos`, `ss` | **P2-1** — 13 yeni ekranın heç biri dashboard-a bağlanmayıb; bu 4 rolun ana səhifəsi öz əsas ekranlarına keçid vermir. |
+
+**⚠️ (28 xana) — iki kökdən:**
+
+1. **Menyu səthi plandan genişdir (P3-1, 17 xana).** `ec`/`hr`/`ss` akademik struktur
+   ekranlarını, `pc` isə `curriculum-editor` + `semester-opening` görür. Hamısı **OXU**
+   panelidir, məzmun əhatə ilə süzülür, yazı endpoint-ləri ayrıca qapılıdır
+   (13 mənfi hal yoxlandı — hamısı 403/409, **sızma yoxdur**). P1-10 ailəsindəndir.
+2. **«Dərs yüküm» tədris aparmayan rolda boşdur (49-cu sətir, 6 xana)** — dalğa 1-in
+   U-5/U-6 qeydi dəyişməyib.
+3. **Tək-tək:** 42/`tos` — `teaching_office_staff`-da `semester.open` icazəsi var
+   (**P2-2**, spesifikasiya §2/07 onu yalnız `toh` + `rm`-ə verir; `semester.lock`
+   düzgün şəkildə YOXDUR) · 53/`rm` — RİM `question-chair-review` görmür (RİM-in
+   adətən tam-nəzarət səthi olduğu üçün qeyd edilir; bloklayıcı deyil).
+
+### 5.5 Uçdan-uca axın dəlili (dalğa 2)
+
+| axın | addım | nəticə |
+|---|---|---|
+| **F1** struktur → ixtisas → fənn → plan → təsdiq zənciri → semestr açılışı | 15 | ✅ **PASS** (11 müsbət + 4 mənfi: 403 səhv rol, **409 addım atlanır**) |
+| **F3** dərs yükü: TŞ → koordinator vizası → dekan qaytarma → təkrar göndəriş → dekan təsdiqi → kafedra bölgüsü → müəllim etirazı → həll → müəllim təsdiqi → rektor baxışı | 21 | ✅ **PASS** (16 müsbət + 5 mənfi) — **1 defekt aşkarlandı və düzəldildi** |
+| **F6** transkript sorğusu CTA (`my-results` → öncədən seçilmiş növ) | 3 | ✅ **PASS** |
+| **F7** `journal.require_approved_syllabus` AÇIQ/SÖNDÜRÜLÜ | 3 | ✅ **PASS** (`no_approved_syllabus` kilidi işlədi, sonra geri qaytarıldı) |
+| **F8** ana səhifə vidjetləri | 7 rol | ❌ **BOŞLUQ** — P2-1 |
+
+### 5.6 Dalğa 2-də düzəldilən defektlər
+
+| # | Defekt | Fayl | Status |
+|---|---|---|---|
+| W2-1 | `EMSCore.getCsrfToken()` kuki adını hardcode edirdi → `CSRF_COOKIE_NAME` fərqli olanda **bütün** AJAX yazıları boş token ilə 403 alırdı | `static/js/core/csrf.js:30-53` | ✅ DÜZƏLDİ (DOM fallback; prod davranışı dəyişmir) |
+| W2-2 | **Köhnəlmiş revision-un dilimi təsdiqlənə bilirdi** — dekan `ok: true` alırdı, audit «təsdiqləndi» yazırdı, sənəd isə irəliləmirdi (sükutla itən qərar) | `apps/workload/services/workflow.py:196` + `apps/workload/actions.py:54` | ✅ DÜZƏLDİ (409 `stale_revision`) + **reqressiya testi** |
+| W2-3 | 8 bölmədə **görünən** ikinci `<h1>` (qabıq + panel eyni başlığı verirdi) | 8 şablon + 2 CSS | ✅ DÜZƏLDİ (embed-də `<h2>`; 430/430 açılışda `h1`=1) |
+
+### 5.7 Dalğa 2-də AÇIQ qalan
+
+| # | Defekt | Ağırlıq |
+|---|---|---|
+| P2-1 | 13 yeni ekran dashboard-a bağlanmayıb (`dashboard_staff_widgets.py`, 382/600 sətir) | P2 |
+| P2-2 | `teaching_office_staff`-da `semester.open` — spesifikasiya §2/07 ilə ziddiyyət (**sahib qərarı**) | P2 |
+| P3-1 | Menyu səthi `ec`/`hr`/`ss`/`pc`-də plandan genişdir (oxu-only, sızma yoxdur) | P3 |
+| P3-2 | `curriculum-editor` və `semester-opening` cədvəllərində `aria-sort` yoxdur | P3 |
+| P3-3 | İcazəsiz bölməyə tam səhifə keçidi səssiz fallback edir (mesaj yoxdur; AJAX ucu düzgün 403) | P3 |
+| — | **P1-10 (dean/chair_head eyni menyu səthi) DALĞA 2-DƏ DƏ AÇIQDIR** — hər ikisi 44 bölmə | P1 |

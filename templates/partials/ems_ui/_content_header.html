@@ -1,0 +1,43 @@
+{% comment %}
+Content header — handoff §3 «Content header».
+
+⚠ Bu başlıq PANELİN İÇİNDƏ render olunur. Prototiplərin top-bar-ı və sidebar-ı
+təkrar qurulmur: kabinetin mövcud qabığı və sol sidebar-ı olduğu kimi qalır.
+
+KONTEKST MÜQAVİLƏSİ
+  header_title      — OPSİONAL. Kabinet bölmələrində BOŞ BURAXIN: qabıq
+                      (`accounts/profile/_header.html`) bölmə adını artıq
+                      `#profileSectionTitle` kimi render edir; başlığı burada
+                      da yazsanız səhifədə İKİ h1 olur. Yalnız qabıqdan kənar
+                      (müstəqil səhifə) kontekstində doldurun.
+  header_subtitle   — opsional, bir cümləlik izah
+  header_crumbs     — opsional, [{label, url}] siyahısı; sonuncu cari sayılır
+  header_actions_include — opsional şablon yolu; sağ tərəfdəki düymə/select
+                      qrupu ORADA render olunur (blok deyil — `{% include %}`
+                      daxilində `{% block %}` işləmir)
+  header_note       — opsional, rejim qeydi (arxiv / açıq)
+{% endcomment %}
+<div class="ems-header">
+    <div class="ems-header__main">
+        {% if header_crumbs %}
+            <ol class="ems-crumbs">
+                {% for crumb in header_crumbs %}
+                    <li class="ems-crumbs__item"{% if forloop.last %} aria-current="page"{% endif %}>
+                        {% if crumb.url and not forloop.last %}
+                            <a class="ems-crumbs__link" href="{{ crumb.url }}">{{ crumb.label }}</a>
+                        {% else %}
+                            {{ crumb.label }}
+                        {% endif %}
+                        {% if not forloop.last %}<span class="ems-crumbs__sep" aria-hidden="true">/</span>{% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        {% endif %}
+        {% if header_title %}<h1 class="ems-header__title">{{ header_title }}</h1>{% endif %}
+        {% if header_subtitle %}<p class="ems-header__subtitle">{{ header_subtitle }}</p>{% endif %}
+        {% if header_note %}<div class="ems-header__note">{{ header_note }}</div>{% endif %}
+    </div>
+    {% if header_actions_include %}
+        <div class="ems-header__actions">{% include header_actions_include %}</div>
+    {% endif %}
+</div>

@@ -9,6 +9,7 @@ from django.views.decorators.http import require_GET
 from apps.exams.models import QuestionSubmission
 from apps.exams.services.access_policy import _ensure_teacher, is_exam_center_user
 from apps.exams.services.import_preview import render_stashed_question_preview
+from apps.exams.services.question_chair_units import can_review_submission_as_chair
 from core.tenancy import get_request_organization
 
 
@@ -43,7 +44,10 @@ def question_import_visual_preview(request, token, source_index):
 @login_required
 @require_GET
 def question_submission_visual_preview(request, submission_id, source_index):
-    _ensure_teacher(request.user)
+    # `_ensure_teacher` QƏSDƏN YOXDUR: kafedra müdirinin profil rolu müəllim
+    # olmaya bilər, amma o, təsdiq üçün vizual mənbəni GÖRMƏLİDİR. Əhatə
+    # aşağıda üç yolla (sahib / kafedra / kafedra təsdiqindən keçmiş mərkəz)
+    # fail-closed yoxlanılır.
     organization = get_request_organization(request)
     if organization is None:
         raise Http404()
@@ -52,7 +56,13 @@ def question_submission_visual_preview(request, submission_id, source_index):
         id=submission_id,
         organization=organization,
     )
-    if submission.teacher_id != request.user.id and not is_exam_center_user(request.user):
+    # Mərkəz YALNIZ kafedra təsdiqindən sonra görür (mövcudluq sızması yoxdur).
+    is_center = is_exam_center_user(request.user) and submission.has_reached_center
+    if (
+        submission.teacher_id != request.user.id
+        and not is_center
+        and not can_review_submission_as_chair(request.user, submission)
+    ):
         raise Http404()
     if not submission.import_token:
         raise Http404()

@@ -7,7 +7,9 @@
 yalnız TƏSDİQLƏNMİŞ (`distributed`/`amended`) tapşırıqların sətirlərini verir:
 kafedra hələ bölgü aparırkən müəllim yarımçıq rəqəm görmür.
 
-Panel yalnız-oxudur: heç bir yazma endpoint-i yoxdur (ixrac GET-dir).
+Panelin YEGANƏ yazma əməli müəllimin ÖZ yükünə münasibətidir (ekran 16 §4):
+«Yükü təsdiqlə» və 4 səbəbdən biri ilə «Etiraz bildir» (`workload.object`).
+Etiraz reyestri append-only-dur; mətn heç vaxt redaktə olunmur.
 CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
 {% endcomment %}
 {% if 'my-workload' in allowed_sections %}
@@ -20,6 +22,9 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
 {% else %}
 <div class="wlm"
      data-wlm-root
+     data-tof-root
+     data-tof-section="my-workload"
+     data-tof-action-url="{{ my_workload_section.action_url }}"
      data-rows-url="{{ my_workload_section.rows_url }}"
      data-export-url="{{ my_workload_section.export_url }}"
      data-academic-year="{{ my_workload_section.academic_year }}"
@@ -32,10 +37,28 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
         {% trans "Kafedra tərəfindən sizə ayrılmış illik dərs yükü. Cədvəl yalnız təsdiqlənmiş bölgünü göstərir; sual yaranarsa kafedra müdirinə müraciət edin." context "accounts.workload" %}
       </p>
     </div>
-    <a class="wl-btn wl-btn--ghost" data-wlm-export href="{{ my_workload_section.export_url }}?year={{ my_workload_section.academic_year }}">
-      <i class="fas fa-file-excel" aria-hidden="true"></i>
-      <span>{% trans "Excel yüklə" context "accounts.workload" %}</span>
-    </a>
+    <div class="wlm__actions">
+      <a class="wl-btn wl-btn--ghost" data-wlm-export href="{{ my_workload_section.export_url }}?year={{ my_workload_section.academic_year }}">
+        <i class="fas fa-file-excel" aria-hidden="true"></i>
+        <span>{% trans "Excel yüklə" context "accounts.workload" %}</span>
+      </a>
+      {% if my_workload_section.can_object and my_workload_section.rows %}
+        {% if my_workload_section.is_load_confirmed %}
+        <span class="wlm__confirmed" role="status">{% trans "Yükü təsdiqləmisiniz" context "accounts.workload" %}</span>
+        {% else %}
+        <button type="button" class="wl-btn wl-btn--primary"
+                data-tof-submit='{"action": "confirm_load", "academic_year": "{{ my_workload_section.academic_year }}"}'
+                data-tof-confirm="{% trans 'İllik dərs yükünüzü təsdiqləyirsiniz? Təsdiq audit jurnalına yazılır.' context 'accounts.workload' %}">
+          {% trans "Yükü təsdiqlə" context "accounts.workload" %}
+        </button>
+        {% endif %}
+        <button type="button" class="wl-btn wl-btn--ghost"
+                data-tof-open="wlObjectionDialog"
+                data-tof-prefill='{"action": "object", "assignment": "", "reason_key": ""}'>
+          {% trans "Etiraz bildir" context "accounts.workload" %}
+        </button>
+      {% endif %}
+    </div>
   </header>
 
   {# ── Stat kartlar ───────────────────────────────────────────────────── #}
@@ -132,7 +155,32 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
       </tfoot>
     </table>
   </div>
+
+  {% if my_workload_section.objections %}
+  <h3 class="wlm__subtitle">{% trans "Etirazlarım" context "accounts.workload" %}</h3>
+  <p class="wlm__intro">{% trans "Kafedra müdiri 3 iş günü ərzində cavab verir." context "accounts.workload" %}</p>
+  <ul class="wl-objections">
+    {% for item in my_workload_section.objections %}
+    <li class="wl-objection {% if item.status != 'open' %}wl-objection--closed{% endif %}">
+      <div class="wl-objection__head">
+        <span>{{ item.subject }} — {{ item.reason_label }}</span>
+        <span>{{ item.status_label }}</span>
+      </div>
+      <div>{{ item.text }}</div>
+      {% if item.resolution_note %}<div>{{ item.resolution_note }}</div>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
 </div>
+
+{% if my_workload_section.can_object %}
+  {% trans "Yük üzrə etiraz bildir" context "accounts.workload" as wlm_obj_title %}
+  {% trans "Etiraz kafedra müdirinə və dekanlığa göndərilir. Mətn sonradan dəyişdirilmir." context "accounts.workload" as wlm_obj_sub %}
+  {% trans "Göndər" context "accounts.workload" as wlm_obj_btn %}
+  {% trans "İzah" context "accounts.workload" as wlm_obj_label %}
+  {% include "partials/ems_ui/_reason_dialog.html" with reason_id="wlObjectionDialog" reason_title=wlm_obj_title reason_subtitle=wlm_obj_sub reason_label=wlm_obj_label reason_submit_label=wlm_obj_btn reason_submit_tone="warning" reason_action=my_workload_section.action_url reason_hidden=my_workload_section.objection_hidden reason_form_data=my_workload_section.form_data reason_extra_include="accounts/profile/sections/workload/_objection_fields.html" %}
+{% endif %}
 {% endif %}
 </section>
 {% endif %}

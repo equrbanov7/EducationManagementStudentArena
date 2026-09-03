@@ -1,0 +1,13 @@
+{% comment %}
+Boş / xəta vəziyyəti — handoff §4 komponent 14 (hər siyahıda üçü də var).
+Kontekst: `state_kind` (empty|error), `state_title`, `state_body`,
+          `state_action_label`, `state_action_url`, `state_icon` (fa-*).
+{% endcomment %}
+<div class="ems-state{% if state_kind == 'error' %} ems-state--error{% endif %}" role="status">
+    <i class="fas {{ state_icon|default:'fa-folder-open' }} ems-state__icon" aria-hidden="true"></i>
+    <p class="ems-state__title">{{ state_title }}</p>
+    {% if state_body %}<p class="ems-state__body">{{ state_body }}</p>{% endif %}
+    {% if state_action_label %}
+        <a class="ems-btn ems-btn--primary" href="{{ state_action_url|default:'#' }}">{{ state_action_label }}</a>
+    {% endif %}
+</div>

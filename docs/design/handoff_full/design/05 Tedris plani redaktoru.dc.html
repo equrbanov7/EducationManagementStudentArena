@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  :root{
+    --ems-primary-50:#eff6ff;  --ems-primary-100:#dbeafe; --ems-primary-200:#bfdbfe;
+    --ems-primary-600:#2563eb; --ems-primary-700:#1d4ed8; --ems-primary-800:#1e40af;
+    --ems-neutral-0:#ffffff; --ems-neutral-50:#f8fafc; --ems-neutral-100:#f1f5f9;
+    --ems-neutral-200:#e2e8f0; --ems-neutral-300:#cbd5e1; --ems-neutral-400:#94a3b8;
+    --ems-neutral-500:#64748b; --ems-neutral-700:#334155; --ems-neutral-900:#0f172a;
+    --ems-success:#16a34a; --ems-success-bg:#dcfce7;
+    --ems-danger:#dc2626;  --ems-danger-bg:#fee2e2;
+    --ems-warning:#f59e0b; --ems-warning-bg:#fef3c7;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--ems-neutral-50);color:var(--ems-neutral-900);-webkit-font-smoothing:antialiased}
+  a{color:var(--ems-primary-600);text-decoration:none}
+  a:hover{color:var(--ems-primary-700)}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--ems-primary-600);box-shadow:0 0 0 3px var(--ems-primary-100)}
+  button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--ems-primary-600);outline-offset:2px}
+  table{border-collapse:separate;border-spacing:0}
+  @keyframes emsShimmer{0%{background-position:-320px 0}100%{background-position:320px 0}}
+</style>
+</helmet>
+<div style="max-width:1180px;padding:24px 28px 40px">
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px 16px;margin-bottom:18px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px">
+    <div style="display:flex;flex-direction:column;gap:2px;padding-right:14px;border-right:1px solid var(--ems-neutral-200)">
+      <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">İxtisas</span>
+      <span style="font-size:.92rem;font-weight:700;color:var(--ems-neutral-900)">Kompüter mühəndisliyi</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;padding-right:14px;border-right:1px solid var(--ems-neutral-200)">
+      <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Qəbul ili</span>
+      <span style="font-size:.92rem;font-weight:700;color:var(--ems-neutral-900)">2026</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;padding-right:14px;border-right:1px solid var(--ems-neutral-200)">
+      <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Pillə</span>
+      <span style="font-size:.92rem;font-weight:700;color:var(--ems-neutral-900)">Bakalavr · 240 kredit</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px;padding-right:14px;border-right:1px solid var(--ems-neutral-200)">
+      <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Status</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:.76rem;font-weight:700;background:{{ stBg }};color:{{ stFg }};border:1px solid {{ stBd }}">{{ stLabel }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Elmi Şura protokolu</span>
+      <span style="font-size:.92rem;font-weight:600;color:var(--ems-neutral-700)">№ 04 — 12.05.2026</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:10px;background:{{ dlBg }};border:1px solid {{ dlBd }}">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ dlFg }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg>
+      <span style="font-size:.78rem;font-weight:700;color:{{ dlFg }}">{{ dlText }}</span>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px">
+    <div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--ems-neutral-400);margin-bottom:7px">
+        <span>Tədris planları</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span>Kompüter mühəndisliyi 2026</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        <span style="color:var(--ems-neutral-700);font-weight:600">{{ crumb }}</span>
+      </div>
+      <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900)">Tədris planı redaktoru</h1>
+      <p style="margin:6px 0 0;font-size:.86rem;color:var(--ems-neutral-500);text-wrap:pretty">Dərs yükü bu plandan törəyir — kredit, saat və prerekvizit balansı burada bağlanır.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button type="button" onClick="{{ openClone }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:var(--ems-primary-50);border-color:var(--ems-primary-200);color:var(--ems-primary-800)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        Keçən ildən klonla
+      </button>
+      <button type="button" onClick="{{ openBlok }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid var(--ems-neutral-300);background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:var(--ems-primary-50);border-color:var(--ems-primary-200);color:var(--ems-primary-800)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Blok əlavə et
+      </button>
+      <button type="button" onClick="{{ openSend }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--ems-primary-600);background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700);border-color:var(--ems-primary-700)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        Fakültə şurasına göndər
+      </button>
+    </div>
+  </div>
+
+  <div role="tablist" aria-label="Plan bölmələri" style="display:flex;gap:6px;padding:5px;margin-bottom:18px;background:var(--ems-neutral-100);border-radius:12px;width:fit-content">
+    <button type="button" role="tab" aria-selected="{{ tabPlanSel }}" onClick="{{ goPlan }}" style="padding:9px 18px;border:0;border-radius:9px;background:{{ tabPlanBg }};color:{{ tabPlanFg }};box-shadow:{{ tabPlanSh }};font-size:.86rem;font-weight:700;cursor:pointer">Tədris planı</button>
+    <button type="button" role="tab" aria-selected="{{ tabGrSel }}" onClick="{{ goGrafik }}" style="padding:9px 18px;border:0;border-radius:9px;background:{{ tabGrBg }};color:{{ tabGrFg }};box-shadow:{{ tabGrSh }};font-size:.86rem;font-weight:700;cursor:pointer">Tədris qrafiki</button>
+  </div>
+
+  <sc-if value="{{ isPlan }}" hint-placeholder-val="{{ true }}">
+    <div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:14px;margin-bottom:18px">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="5">
+          <div style="padding:15px 18px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-left:4px solid {{ s.accent }};border-radius:12px">
+            <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ s.label }}</div>
+            <div style="margin-top:7px;font-size:1.6rem;font-weight:800;letter-spacing:-.02em;color:var(--ems-neutral-900);line-height:1">{{ s.value }}</div>
+            <div style="margin-top:5px;font-size:.75rem;color:var(--ems-neutral-500)">{{ s.sub }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;padding:14px 16px;margin-bottom:14px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+          <div data-dd="1" style="position:relative;display:flex;flex-direction:column;gap:5px;min-width:170px;flex:1 1 170px">
+            <span style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ f.label }}</span>
+            <button type="button" onClick="{{ f.toggle }}" aria-haspopup="listbox" aria-expanded="{{ f.expanded }}" aria-label="{{ f.aria }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:9px 12px;border:1px solid {{ f.bd }};border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-900);font-size:.84rem;font-weight:600;text-align:left;cursor:pointer">
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.value }}</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+              <div role="listbox" aria-label="{{ f.aria }}" style="position:absolute;top:100%;left:0;z-index:40;width:100%;min-width:220px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;box-shadow:0 12px 28px rgba(15,23,42,.14)">
+                <input type="text" value="{{ f.query }}" onChange="{{ f.onQuery }}" placeholder="Axtar…" aria-label="Seçimlər arasında axtar" style="width:100%;padding:8px 10px;margin-bottom:6px;border:1px solid var(--ems-neutral-200);border-radius:8px;font-size:.82rem;color:var(--ems-neutral-900)">
+                <div style="max-height:210px;overflow:auto;display:flex;flex-direction:column;gap:2px">
+                  <sc-for list="{{ f.filtered }}" as="o" hint-placeholder-count="4">
+                    <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.83rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+                  </sc-for>
+                  <sc-if value="{{ f.none }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding:10px;font-size:.8rem;color:var(--ems-neutral-400)">Nəticə yoxdur</div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+
+        <div style="display:flex;flex-direction:column;gap:5px;min-width:210px;flex:1 1 210px">
+          <label for="ems-plan-search" style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Axtarış</label>
+          <div style="position:relative;display:flex;align-items:center">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:11px" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+            <input id="ems-plan-search" type="text" value="{{ q }}" onChange="{{ onQ }}" placeholder="Şifr və ya fənn adı" style="width:100%;padding:9px 12px 9px 32px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.84rem;color:var(--ems-neutral-900)">
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-left:auto;padding-bottom:1px">
+          <span style="font-size:.72rem;color:var(--ems-neutral-400)">{{ liveNote }}</span>
+          <button type="button" onClick="{{ resetFilters }}" style="padding:9px 14px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.82rem;font-weight:600;cursor:pointer" style-hover="background:var(--ems-neutral-100)">Filtrləri sıfırla</button>
+        </div>
+      </div>
+
+      <sc-if value="{{ hasFocus }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:var(--ems-warning-bg);border:1px solid #fde68a;border-radius:12px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span style="font-size:.83rem;font-weight:700;color:#92400e">{{ focusText }}</span>
+          <button type="button" onClick="{{ clearFocus }}" aria-label="Xəbərdarlıq filtrini götür" style="margin-left:auto;padding:6px 12px;border:1px solid #fcd34d;border-radius:8px;background:var(--ems-neutral-0);color:#92400e;font-size:.78rem;font-weight:700;cursor:pointer">Götür</button>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+
+        <div style="flex:1 1 620px;min-width:0;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--ems-neutral-200)">
+            <div>
+              <div style="font-size:.98rem;font-weight:800;color:var(--ems-neutral-900)">Plan sətirləri</div>
+              <div style="margin-top:2px;font-size:.76rem;color:var(--ems-neutral-500)">{{ rowNote }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="display:flex;align-items:center;gap:6px" role="group" aria-label="Cədvəl vəziyyəti (demo)">
+                <span style="font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Vəziyyət</span>
+                <sc-for list="{{ states }}" as="v" hint-placeholder-count="3">
+                  <button type="button" onClick="{{ v.pick }}" aria-pressed="{{ v.on }}" style="padding:5px 10px;border:1px solid {{ v.bd }};border-radius:7px;background:{{ v.bg }};color:{{ v.fg }};font-size:.72rem;font-weight:700;cursor:pointer">{{ v.label }}</button>
+                </sc-for>
+              </div>
+              <button type="button" onClick="{{ openRow }}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--ems-primary-600);border-radius:10px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.82rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-700)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Sətir əlavə et
+              </button>
+            </div>
+          </div>
+
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px" aria-busy="true" aria-live="polite">
+              <sc-for list="{{ skeleton }}" as="k" hint-placeholder-count="6">
+                <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--ems-neutral-100)">
+                  <div style="height:13px;width:{{ k.a }};border-radius:6px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%);background-size:320px 100%;animation:emsShimmer 1.3s linear infinite"></div>
+                  <div style="height:13px;flex:1;border-radius:6px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%);background-size:320px 100%;animation:emsShimmer 1.3s linear infinite"></div>
+                  <div style="height:13px;width:{{ k.b }};border-radius:6px;background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%);background-size:320px 100%;animation:emsShimmer 1.3s linear infinite"></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+            <div role="alert" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:52px 24px;text-align:center">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ems-danger)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12.01" y2="16.5"></line></svg>
+              <div style="font-size:.95rem;font-weight:800;color:var(--ems-neutral-900)">Məlumat yüklənmədi</div>
+              <div style="max-width:340px;font-size:.83rem;color:var(--ems-neutral-500);text-wrap:pretty">Plan sətirləri serverdən gəlmədi. Bağlantını yoxlayıb yenidən cəhd edin.</div>
+              <button type="button" onClick="{{ retry }}" style="padding:9px 18px;border:1px solid var(--ems-primary-600);border-radius:10px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.83rem;font-weight:700;cursor:pointer">Yenidən cəhd et</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:52px 24px;text-align:center">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-300)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="9" x2="9" y2="21"></line></svg>
+              <div style="font-size:.95rem;font-weight:800;color:var(--ems-neutral-900)">Bu filtrlərə uyğun sətir yoxdur</div>
+              <div style="max-width:360px;font-size:.83rem;color:var(--ems-neutral-500);text-wrap:pretty">Seçilmiş kurs, semestr və ya kafedra üzrə plan sətri qeydə alınmayıb. Filtrləri sıfırlayın və ya yeni sətir əlavə edin.</div>
+              <div style="display:flex;gap:8px">
+                <button type="button" onClick="{{ resetFilters }}" style="padding:9px 16px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer">Filtrləri sıfırla</button>
+                <button type="button" onClick="{{ openRow }}" style="padding:9px 16px;border:1px solid var(--ems-primary-600);border-radius:10px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.83rem;font-weight:700;cursor:pointer">Sətir əlavə et</button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+            <div style="overflow:auto">
+              <table style="width:100%;min-width:1180px;font-size:.82rem">
+                <thead>
+                  <tr>
+                    <th scope="col" aria-sort="{{ sortSifr }}" onClick="{{ sortBySifr }}" style="position:sticky;left:0;z-index:3;padding:11px 12px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:left;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200);cursor:pointer">Şifr {{ sortSifrIco }}</th>
+                    <th scope="col" style="padding:11px 12px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:left;border-bottom:1px solid var(--ems-primary-200);min-width:230px">Fənnin adı</th>
+                    <th scope="col" aria-sort="{{ sortKr }}" onClick="{{ sortByKredit }}" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200);cursor:pointer">Kredit {{ sortKrIco }}</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Ümumi saat</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Sərbəst iş</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Auditoriya</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Mühazirə</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Seminar</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Laborat.</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:left;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Prerekvizit</th>
+                    <th scope="col" aria-sort="{{ sortSem }}" onClick="{{ sortBySem }}" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:left;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200);cursor:pointer">Semestr {{ sortSemIco }}</th>
+                    <th scope="col" style="padding:11px 10px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:right;white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">Həftəlik</th>
+                    <th scope="col" style="padding:11px 12px;background:var(--ems-primary-50);color:var(--ems-primary-800);font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:left;border-bottom:1px solid var(--ems-primary-200);min-width:190px">Tədris edən kafedra</th>
+                    <th scope="col" style="padding:11px 12px;background:var(--ems-primary-50);border-bottom:1px solid var(--ems-primary-200)"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Əməliyyat</span></th>
+                  </tr>
+                </thead>
+                <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+                  <tbody>
+                    <tr style="background:var(--ems-primary-50)">
+                      <td style="position:sticky;left:0;z-index:2;padding:10px 12px;background:var(--ems-primary-50);font-size:.72rem;font-weight:800;color:var(--ems-primary-800);white-space:nowrap;border-bottom:1px solid var(--ems-primary-200)">{{ g.code }}</td>
+                      <td style="padding:10px 12px;font-size:.83rem;font-weight:800;color:var(--ems-primary-800);border-bottom:1px solid var(--ems-primary-200)">{{ g.title }}</td>
+                      <td style="padding:10px;text-align:center;font-size:.83rem;font-weight:800;color:var(--ems-primary-800);border-bottom:1px solid var(--ems-primary-200)">{{ g.kredit }}</td>
+                      <td style="padding:10px;text-align:right;font-size:.83rem;font-weight:800;color:var(--ems-primary-800);border-bottom:1px solid var(--ems-primary-200)">{{ g.umumi }}</td>
+                      <td style="padding:10px;text-align:right;font-size:.83rem;font-weight:700;color:var(--ems-primary-800);border-bottom:1px solid var(--ems-primary-200)">{{ g.serbest }}</td>
+                      <td style="padding:10px;text-align:right;font-size:.83rem;font-weight:700;color:var(--ems-primary-800);border-bottom:1px solid var(--ems-primary-200)">{{ g.aud }}</td>
+                      <td colspan="8" style="padding:10px 12px;font-size:.75rem;color:var(--ems-primary-700);border-bottom:1px solid var(--ems-primary-200)">{{ g.note }}</td>
+                    </tr>
+                    <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="4">
+                      <tr tabindex="0" role="button" aria-label="{{ r.aria }}" onClick="{{ r.open }}" onKeyDown="{{ r.key }}" style="background:{{ r.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">
+                        <td style="position:sticky;left:0;z-index:1;padding:11px 12px;background:{{ r.bg }};font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;font-weight:700;color:var(--ems-neutral-700);white-space:nowrap;border-bottom:1px solid var(--ems-neutral-100)">{{ r.sifr }}</td>
+                        <td style="padding:11px 12px;border-bottom:1px solid var(--ems-neutral-100)">
+                          <div style="font-weight:600;color:var(--ems-neutral-900)">{{ r.name }}</div>
+                          <sc-if value="{{ r.hasAlts }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:5px;display:flex;flex-direction:column;gap:2px">
+                              <sc-for list="{{ r.alts }}" as="a" hint-placeholder-count="2">
+                                <div style="font-size:.76rem;color:var(--ems-neutral-500)">{{ a.text }}</div>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                        </td>
+                        <td style="padding:11px 10px;text-align:center;border-bottom:1px solid var(--ems-neutral-100)"><span style="display:inline-block;min-width:30px;padding:3px 8px;border-radius:999px;background:var(--ems-primary-100);color:var(--ems-primary-800);font-size:.78rem;font-weight:800">{{ r.kredit }}</span></td>
+                        <td style="padding:11px 10px;text-align:right;border-bottom:1px solid var(--ems-neutral-100)">
+                          <span style="font-weight:700;color:{{ r.umumiFg }}">{{ r.umumi }}</span>
+                          <div style="font-size:.7rem;color:{{ r.umumiFg }}">{{ r.umumiNote }}</div>
+                        </td>
+                        <td style="padding:11px 10px;text-align:right;color:var(--ems-neutral-700);border-bottom:1px solid var(--ems-neutral-100)">{{ r.serbest }}</td>
+                        <td style="padding:11px 10px;text-align:right;font-weight:700;color:var(--ems-neutral-900);border-bottom:1px solid var(--ems-neutral-100)">{{ r.aud }}</td>
+                        <td style="padding:11px 10px;text-align:right;color:var(--ems-neutral-700);border-bottom:1px solid var(--ems-neutral-100)">{{ r.muh }}</td>
+                        <td style="padding:11px 10px;text-align:right;color:var(--ems-neutral-700);border-bottom:1px solid var(--ems-neutral-100)">{{ r.sem }}</td>
+                        <td style="padding:11px 10px;text-align:right;color:var(--ems-neutral-700);border-bottom:1px solid var(--ems-neutral-100)">{{ r.lab }}</td>
+                        <td style="padding:11px 10px;border-bottom:1px solid var(--ems-neutral-100)">
+                          <sc-if value="{{ r.hasPre }}" hint-placeholder-val="{{ false }}">
+                            <span style="display:inline-block;padding:2px 8px;border-radius:6px;background:var(--ems-neutral-100);color:var(--ems-neutral-700);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;font-weight:700">{{ r.prereq }}</span>
+                          </sc-if>
+                          <sc-if value="{{ r.noPre }}" hint-placeholder-val="{{ false }}">
+                            <span style="color:var(--ems-neutral-300)">—</span>
+                          </sc-if>
+                        </td>
+                        <td style="padding:11px 10px;white-space:nowrap;color:var(--ems-neutral-700);border-bottom:1px solid var(--ems-neutral-100)">{{ r.semestr }}</td>
+                        <td style="padding:11px 10px;text-align:right;font-weight:700;color:var(--ems-neutral-900);border-bottom:1px solid var(--ems-neutral-100)">{{ r.heftelik }}</td>
+                        <td style="padding:11px 12px;border-bottom:1px solid var(--ems-neutral-100)">
+                          <sc-if value="{{ r.hasKaf }}" hint-placeholder-val="{{ true }}">
+                            <span style="color:var(--ems-neutral-700)">{{ r.kaf }}</span>
+                          </sc-if>
+                          <sc-if value="{{ r.noKaf }}" hint-placeholder-val="{{ false }}">
+                            <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;background:var(--ems-warning-bg);color:#92400e;font-size:.75rem;font-weight:700">Təyin edilməyib</span>
+                          </sc-if>
+                        </td>
+                        <td style="padding:11px 12px;text-align:right;border-bottom:1px solid var(--ems-neutral-100)">
+                          <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;border:1px solid var(--ems-neutral-200);color:var(--ems-neutral-500)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                          </span>
+                        </td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </sc-for>
+                <tfoot>
+                  <tr>
+                    <td style="position:sticky;left:0;z-index:2;padding:13px 12px;background:var(--ems-neutral-50);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-500);border-top:1px solid var(--ems-neutral-200)">Yekun</td>
+                    <td style="padding:13px 12px;background:var(--ems-neutral-50);font-size:.8rem;font-weight:700;color:var(--ems-neutral-700);border-top:1px solid var(--ems-neutral-200)">{{ footNote }}</td>
+                    <td style="padding:13px 10px;text-align:center;background:var(--ems-neutral-50);font-size:.85rem;font-weight:800;color:var(--ems-neutral-900);border-top:1px solid var(--ems-neutral-200)">{{ tKredit }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-size:.85rem;font-weight:800;color:var(--ems-neutral-900);border-top:1px solid var(--ems-neutral-200)">{{ tUmumi }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-weight:700;color:var(--ems-neutral-700);border-top:1px solid var(--ems-neutral-200)">{{ tSerbest }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-weight:800;color:var(--ems-neutral-900);border-top:1px solid var(--ems-neutral-200)">{{ tAud }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-weight:700;color:var(--ems-neutral-700);border-top:1px solid var(--ems-neutral-200)">{{ tMuh }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-weight:700;color:var(--ems-neutral-700);border-top:1px solid var(--ems-neutral-200)">{{ tSem }}</td>
+                    <td style="padding:13px 10px;text-align:right;background:var(--ems-neutral-50);font-weight:700;color:var(--ems-neutral-700);border-top:1px solid var(--ems-neutral-200)">{{ tLab }}</td>
+                    <td colspan="5" style="padding:13px 12px;background:var(--ems-neutral-50);font-size:.76rem;color:var(--ems-neutral-500);border-top:1px solid var(--ems-neutral-200)">{{ tKreditNote }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="flex:0 1 320px;min-width:280px;position:sticky;top:16px;display:flex;flex-direction:column;gap:14px">
+          <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid var(--ems-neutral-200)">
+              <div style="font-size:.95rem;font-weight:800;color:var(--ems-neutral-900)">Balans</div>
+              <div style="margin-top:2px;font-size:.75rem;color:var(--ems-neutral-500)">Bütün plan üzrə · canlı hesablanır</div>
+            </div>
+            <div style="padding:6px 8px">
+              <sc-for list="{{ semLines }}" as="s" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 8px;border-radius:9px;background:{{ s.bg }}">
+                  <span style="flex:1;font-size:.82rem;font-weight:600;color:var(--ems-neutral-700)">{{ s.name }}</span>
+                  <span style="font-size:.82rem;font-weight:800;color:{{ s.fg }};white-space:nowrap">{{ s.val }}</span>
+                  <span style="width:16px;text-align:center;font-size:.85rem;color:{{ s.fg }}">{{ s.ico }}</span>
+                </div>
+                <sc-if value="{{ s.hasNote }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:0 8px 8px 8px;font-size:.74rem;font-weight:700;color:{{ s.fg }}">{{ s.note }}</div>
+                </sc-if>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:10px;margin:6px 0;padding:10px 8px;border-top:1px solid var(--ems-neutral-200);border-bottom:1px solid var(--ems-neutral-200)">
+                <span style="flex:1;font-size:.74rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-900)">Ümumi</span>
+                <span style="font-size:.9rem;font-weight:800;color:{{ totFg }};white-space:nowrap">{{ totVal }}</span>
+                <span style="width:16px;text-align:center;font-size:.85rem;color:{{ totFg }}">{{ totIco }}</span>
+              </div>
+              <sc-for list="{{ checks }}" as="c" hint-placeholder-count="5">
+                <button type="button" onClick="{{ c.click }}" aria-label="{{ c.aria }}" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 8px;border:0;border-radius:9px;background:{{ c.bg }};text-align:left;cursor:{{ c.cur }}" style-hover="background:var(--ems-primary-50)">
+                  <span style="flex:1;font-size:.82rem;font-weight:600;color:var(--ems-neutral-700)">{{ c.label }}</span>
+                  <span style="font-size:.8rem;font-weight:800;color:{{ c.fg }};white-space:nowrap">{{ c.val }}</span>
+                  <span style="width:16px;text-align:center;font-size:.85rem;color:{{ c.fg }}">{{ c.ico }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <sc-if value="{{ showAudit }}" hint-placeholder-val="{{ true }}">
+            <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+              <div style="padding:14px 16px;border-bottom:1px solid var(--ems-neutral-200);font-size:.95rem;font-weight:800;color:var(--ems-neutral-900)">Audit tarixçəsi</div>
+              <div style="display:flex;flex-direction:column;gap:12px;padding:14px 16px">
+                <sc-for list="{{ audit }}" as="a" hint-placeholder-count="4">
+                  <div style="display:flex;gap:10px">
+                    <span style="flex:0 0 7px;height:7px;margin-top:6px;border-radius:50%;background:{{ a.dot }}"></span>
+                    <div>
+                      <div style="font-size:.81rem;font-weight:700;color:var(--ems-neutral-900)">{{ a.what }}</div>
+                      <div style="margin-top:2px;font-size:.75rem;color:var(--ems-neutral-500)">{{ a.who }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isGrafik }}" hint-placeholder-val="{{ false }}">
+    <div style="background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:14px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--ems-neutral-200)">
+        <div>
+          <div style="font-size:.98rem;font-weight:800;color:var(--ems-neutral-900)">Tədris qrafiki — 1-ci kurs</div>
+          <div style="margin-top:2px;font-size:.76rem;color:var(--ems-neutral-500)">2026 / 2027 · sentyabr → avqust, həftələr üzrə</div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="5">
+            <span style="display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:{{ l.bg }};border:1px solid {{ l.bd }};font-size:.75rem;font-weight:700;color:{{ l.fg }}">{{ l.label }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <div style="overflow:auto;padding:16px">
+        <div style="min-width:760px;display:grid;grid-template-columns:130px repeat(5,minmax(0,1fr));gap:6px">
+          <div style="padding:8px 10px;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Ay</div>
+          <sc-for list="{{ weekHead }}" as="w" hint-placeholder-count="5">
+            <div style="padding:8px 10px;text-align:center;font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ w.label }}</div>
+          </sc-for>
+          <sc-for list="{{ grafik }}" as="m" hint-placeholder-count="12">
+            <div style="display:flex;align-items:center;padding:0 10px;font-size:.83rem;font-weight:700;color:var(--ems-neutral-700)">{{ m.month }}</div>
+            <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="5">
+              <div title="{{ c.title }}" style="display:flex;align-items:center;justify-content:center;height:38px;border-radius:8px;background:{{ c.bg }};border:1px solid {{ c.bd }};font-size:.74rem;font-weight:800;color:{{ c.fg }}">{{ c.code }}</div>
+            </sc-for>
+          </sc-for>
+        </div>
+        <p style="margin:16px 0 0;font-size:.78rem;color:var(--ems-neutral-500);text-wrap:pretty">Yekun attestasiya 4-cü kursun yaz semestrində planlaşdırılır — 1-ci kursda göstərilmir.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ mRow }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-row-title" style="position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45)">
+      <div style="width:100%;max-width:720px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div>
+            <h2 id="ems-row-title" style="margin:0;font-size:1.1rem;font-weight:800;color:var(--ems-neutral-900)">{{ rowModalTitle }}</h2>
+            <p style="margin:5px 0 0;font-size:.82rem;color:var(--ems-neutral-500)">Kredit yazıldıqda ümumi saat və həftəlik yük avtomatik hesablanır.</p>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" aria-label="Bağla" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer" style-hover="background:var(--ems-danger-bg);border-color:#fecaca;color:var(--ems-danger)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+          <div>
+            <label for="ems-cat" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Fənn kataloqu</label>
+            <input id="ems-cat" type="text" value="{{ catQ }}" onChange="{{ onCatQ }}" placeholder="Fənn adı və ya şifr üzrə axtar" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;max-height:150px;overflow:auto">
+              <sc-for list="{{ catalog }}" as="c" hint-placeholder-count="3">
+                <div role="button" tabindex="0" onClick="{{ c.pick }}" onKeyDown="{{ c.key }}" style="display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--ems-neutral-200);border-radius:9px;cursor:pointer" style-hover="background:var(--ems-primary-50);border-color:var(--ems-primary-200)">
+                  <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;font-weight:700;color:var(--ems-neutral-500)">{{ c.sifr }}</span>
+                  <span style="flex:1;font-size:.84rem;font-weight:600;color:var(--ems-neutral-900)">{{ c.name }}</span>
+                  <span style="font-size:.76rem;color:var(--ems-neutral-500)">{{ c.kaf }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ catNone }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:10px;font-size:.8rem;color:var(--ems-neutral-400)">Kataloqda uyğun fənn tapılmadı — yeni fənn kimi yazın.</div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+            <div>
+              <label for="ems-f-sifr" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Şifr</label>
+              <input id="ems-f-sifr" type="text" value="{{ dSifr }}" onChange="{{ onDSifr }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div style="grid-column:span 2">
+              <label for="ems-f-name" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Fənnin adı</label>
+              <input id="ems-f-name" type="text" value="{{ dName }}" onChange="{{ onDName }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div>
+              <label for="ems-f-kredit" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Kredit</label>
+              <input id="ems-f-kredit" type="number" value="{{ dKredit }}" onChange="{{ onDKredit }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div>
+              <label for="ems-f-serbest" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Sərbəst iş</label>
+              <input id="ems-f-serbest" type="number" value="{{ dSerbest }}" onChange="{{ onDSerbest }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div>
+              <label for="ems-f-muh" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Mühazirə</label>
+              <input id="ems-f-muh" type="number" value="{{ dMuh }}" onChange="{{ onDMuh }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div>
+              <label for="ems-f-sem" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Seminar</label>
+              <input id="ems-f-sem" type="number" value="{{ dSem }}" onChange="{{ onDSem }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <div>
+              <label for="ems-f-lab" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Laboratoriya</label>
+              <input id="ems-f-lab" type="number" value="{{ dLab }}" onChange="{{ onDLab }}" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+            </div>
+            <sc-for list="{{ rowDds }}" as="f" hint-placeholder-count="2">
+              <div data-dd="1" style="position:relative;grid-column:{{ f.span }}">
+                <span style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ f.label }}</span>
+                <button type="button" onClick="{{ f.toggle }}" aria-haspopup="listbox" aria-expanded="{{ f.expanded }}" aria-label="{{ f.aria }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px 12px;border:1px solid {{ f.bd }};border-radius:10px;background:var(--ems-neutral-0);color:{{ f.fg }};font-size:.86rem;font-weight:600;text-align:left;cursor:pointer">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.value }}</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ems-neutral-400)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                  <div role="listbox" aria-label="{{ f.aria }}" style="position:absolute;top:100%;left:0;z-index:50;width:100%;min-width:240px;margin-top:6px;padding:8px;background:var(--ems-neutral-0);border:1px solid var(--ems-neutral-200);border-radius:12px;box-shadow:0 12px 28px rgba(15,23,42,.18)">
+                    <input type="text" value="{{ f.query }}" onChange="{{ f.onQuery }}" placeholder="Axtar…" aria-label="Seçimlər arasında axtar" style="width:100%;padding:8px 10px;margin-bottom:6px;border:1px solid var(--ems-neutral-200);border-radius:8px;font-size:.82rem;color:var(--ems-neutral-900)">
+                    <div style="max-height:190px;overflow:auto;display:flex;flex-direction:column;gap:2px">
+                      <sc-for list="{{ f.filtered }}" as="o" hint-placeholder-count="3">
+                        <div role="option" tabindex="0" aria-selected="{{ o.sel }}" onClick="{{ o.pick }}" onKeyDown="{{ o.key }}" style="padding:8px 10px;border-radius:8px;font-size:.83rem;font-weight:{{ o.fw }};color:{{ o.fg }};background:{{ o.bg }};cursor:pointer" style-hover="background:var(--ems-primary-50)">{{ o.label }}</div>
+                      </sc-for>
+                      <sc-if value="{{ f.none }}" hint-placeholder-val="{{ false }}">
+                        <div style="padding:10px;font-size:.8rem;color:var(--ems-neutral-400)">Nəticə yoxdur</div>
+                      </sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:14px 16px;background:var(--ems-neutral-50);border:1px solid var(--ems-neutral-200);border-radius:12px">
+            <div>
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Ümumi saat</div>
+              <div style="margin-top:4px;font-size:1.1rem;font-weight:800;color:var(--ems-neutral-900)">{{ cUmumi }}</div>
+              <div style="font-size:.72rem;color:var(--ems-neutral-500)">kredit × 30</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Auditoriya</div>
+              <div style="margin-top:4px;font-size:1.1rem;font-weight:800;color:var(--ems-neutral-900)">{{ cAud }}</div>
+              <div style="font-size:.72rem;color:var(--ems-neutral-500)">ümumi − sərbəst</div>
+            </div>
+            <div>
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">Həftəlik</div>
+              <div style="margin-top:4px;font-size:1.1rem;font-weight:800;color:var(--ems-neutral-900)">{{ cHeft }}</div>
+              <div style="font-size:.72rem;color:var(--ems-neutral-500)">auditoriya ÷ 15</div>
+            </div>
+          </div>
+
+          <div aria-live="polite" style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ validation }}" as="v" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;background:{{ v.bg }};font-size:.81rem;font-weight:600;color:{{ v.fg }}">
+                <span style="font-weight:800">{{ v.ico }}</span>
+                <span>{{ v.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <button type="button" onClick="{{ openPrereq }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.83rem;font-weight:700;cursor:pointer" style-hover="background:var(--ems-primary-50);border-color:var(--ems-primary-200)">Prerekvizit seç — {{ dPreLabel }}</button>
+            <div style="display:flex;gap:10px">
+              <button type="button" onClick="{{ closeModal }}" style="padding:10px 16px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:700;cursor:pointer">İmtina</button>
+              <button type="button" onClick="{{ closeModal }}" style="padding:10px 20px;border:1px solid {{ saveBd }};border-radius:10px;background:{{ saveBg }};color:{{ saveFg }};font-size:.85rem;font-weight:700;cursor:{{ saveCur }}">Yadda saxla</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ mPre }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-pre-title" style="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45)">
+      <div style="width:100%;max-width:520px;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div>
+            <h2 id="ems-pre-title" style="margin:0;font-size:1.05rem;font-weight:800;color:var(--ems-neutral-900)">Prerekvizit seçimi</h2>
+            <p style="margin:5px 0 0;font-size:.82rem;color:var(--ems-neutral-500)">{{ preSub }}</p>
+          </div>
+          <button type="button" onClick="{{ backToRow }}" aria-label="Bağla" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:16px 22px;display:flex;flex-direction:column;gap:6px;max-height:340px;overflow:auto">
+          <sc-if value="{{ preNone }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:9px;padding:12px 14px;border-radius:10px;background:var(--ems-neutral-50);font-size:.83rem;color:var(--ems-neutral-500);text-wrap:pretty">1-payız semestri planın ilk semestridir — ondan əvvəl fənn olmadığı üçün prerekvizit təyin edilə bilməz.</div>
+          </sc-if>
+          <sc-for list="{{ preOptions }}" as="p" hint-placeholder-count="4">
+            <div role="button" tabindex="0" onClick="{{ p.pick }}" onKeyDown="{{ p.key }}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid {{ p.bd }};border-radius:10px;background:{{ p.bg }};cursor:pointer" style-hover="border-color:var(--ems-primary-200)">
+              <span style="display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;border:1.5px solid {{ p.boxBd }};background:{{ p.boxBg }};color:var(--ems-neutral-0);font-size:.7rem;font-weight:900">{{ p.mark }}</span>
+              <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;font-weight:700;color:var(--ems-neutral-500)">{{ p.sifr }}</span>
+              <span style="flex:1;font-size:.84rem;font-weight:600;color:var(--ems-neutral-900)">{{ p.name }}</span>
+              <span style="font-size:.75rem;color:var(--ems-neutral-500)">{{ p.semestr }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--ems-neutral-200)">
+          <button type="button" onClick="{{ backToRow }}" style="padding:10px 18px;border:1px solid var(--ems-primary-600);border-radius:10px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer">{{ preBtn }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ mBlok }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-blok-title" style="position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45)">
+      <div style="width:100%;max-width:520px;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+          <h2 id="ems-blok-title" style="margin:0;font-size:1.05rem;font-weight:800;color:var(--ems-neutral-900)">Blok əlavə et</h2>
+          <button type="button" onClick="{{ closeModal }}" aria-label="Bağla" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+          <div>
+            <label for="ems-blok-code" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Blok şifri</label>
+            <input id="ems-blok-code" type="text" value="{{ blokCode }}" onChange="{{ onBlokCode }}" placeholder="məs. MİF-S07" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+          </div>
+          <div>
+            <label for="ems-blok-name" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Blokun adı</label>
+            <input id="ems-blok-name" type="text" value="{{ blokName }}" onChange="{{ onBlokName }}" placeholder="məs. Seçmə fənlər (sahə)" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.86rem;color:var(--ems-neutral-900)">
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;background:var(--ems-primary-50);font-size:.81rem;color:var(--ems-primary-800)">Blok yalnız aqreqat sətri kimi görünür — kredit və saat daxilindəki fənlərdən hesablanır.</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--ems-neutral-200)">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 16px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:700;cursor:pointer">İmtina</button>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border:1px solid {{ blokBd }};border-radius:10px;background:{{ blokBg }};color:{{ blokFg }};font-size:.85rem;font-weight:700;cursor:{{ blokCur }}">Əlavə et</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ mClone }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-clone-title" style="position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45)">
+      <div style="width:100%;max-width:640px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div>
+            <h2 id="ems-clone-title" style="margin:0;font-size:1.05rem;font-weight:800;color:var(--ems-neutral-900)">Keçən ildən klonla</h2>
+            <p style="margin:5px 0 0;font-size:.82rem;color:var(--ems-neutral-500)">Mənbə planı seçin — dəyişiklikləri təsdiqdən əvvəl görəcəksiniz.</p>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" aria-label="Bağla" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Mənbə plan</span>
+            <sc-for list="{{ cloneSources }}" as="c" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ c.pick }}" onKeyDown="{{ c.key }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid {{ c.bd }};border-radius:11px;background:{{ c.bg }};cursor:pointer" style-hover="border-color:var(--ems-primary-200)">
+                <span style="display:flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.5px solid {{ c.dotBd }};background:{{ c.dotBg }}"></span>
+                <div style="flex:1">
+                  <div style="font-size:.87rem;font-weight:700;color:var(--ems-neutral-900)">{{ c.name }}</div>
+                  <div style="margin-top:2px;font-size:.76rem;color:var(--ems-neutral-500)">{{ c.meta }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="border:1px solid var(--ems-neutral-200);border-radius:12px;overflow:hidden">
+            <div style="padding:11px 14px;background:var(--ems-neutral-50);font-size:.78rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--ems-neutral-500);border-bottom:1px solid var(--ems-neutral-200)">Nə dəyişəcək</div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ cloneDiff }}" as="d" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--ems-neutral-100)">
+                  <span style="display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:6px;background:{{ d.bg }};color:{{ d.fg }};font-size:.75rem;font-weight:900">{{ d.mark }}</span>
+                  <span style="flex:1;font-size:.83rem;color:var(--ems-neutral-700)">{{ d.text }}</span>
+                  <span style="font-size:.8rem;font-weight:800;color:{{ d.fg }}">{{ d.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:10px;background:var(--ems-warning-bg);font-size:.81rem;font-weight:600;color:#92400e">Mövcud 12 sətir əvəz olunacaq — bu əməliyyat geri alına bilməz.</div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--ems-neutral-200)">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 16px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:700;cursor:pointer">İmtina</button>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border:1px solid var(--ems-primary-600);border-radius:10px;background:var(--ems-primary-600);color:var(--ems-neutral-0);font-size:.85rem;font-weight:700;cursor:pointer">Klonla</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ mSend }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ems-send-title" style="position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45)">
+      <div style="width:100%;max-width:600px;max-height:88vh;overflow:auto;background:var(--ems-neutral-0);border-radius:16px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px;border-bottom:1px solid var(--ems-neutral-200)">
+          <div>
+            <h2 id="ems-send-title" style="margin:0;font-size:1.05rem;font-weight:800;color:var(--ems-neutral-900)">Fakültə şurasına göndər</h2>
+            <p style="margin:5px 0 0;font-size:.82rem;color:var(--ems-neutral-500)">Göndərişdən sonra plan yalnız oxunuş rejimində olacaq.</p>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" aria-label="Bağla" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid var(--ems-neutral-200);background:var(--ems-neutral-0);color:var(--ems-neutral-500);cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px">
+            <sc-for list="{{ sendStats }}" as="s" hint-placeholder-count="3">
+              <div style="padding:13px 15px;border:1px solid var(--ems-neutral-200);border-left:4px solid {{ s.accent }};border-radius:11px">
+                <div style="font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ems-neutral-400)">{{ s.label }}</div>
+                <div style="margin-top:5px;font-size:1.15rem;font-weight:800;color:var(--ems-neutral-900)">{{ s.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Açıq xəbərdarlıqlar</span>
+            <sc-for list="{{ sendWarns }}" as="w" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;background:{{ w.bg }};font-size:.82rem;font-weight:600;color:{{ w.fg }}">
+                <span style="font-weight:900">{{ w.ico }}</span>
+                <span>{{ w.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div>
+            <label for="ems-send-note" style="display:block;margin-bottom:6px;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ems-neutral-400)">Şuraya qeyd</label>
+            <textarea id="ems-send-note" value="{{ sendNote }}" onChange="{{ onSendNote }}" rows="3" placeholder="Açıq xəbərdarlıqlar üçün əsaslandırma yazın" style="width:100%;padding:10px 12px;border:1px solid var(--ems-neutral-300);border-radius:10px;font-size:.85rem;color:var(--ems-neutral-900);resize:vertical"></textarea>
+            <div style="margin-top:6px;font-size:.76rem;font-weight:600;color:{{ sendHintFg }}">{{ sendHint }}</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--ems-neutral-200)">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 16px;border:1px solid var(--ems-neutral-300);border-radius:10px;background:var(--ems-neutral-0);color:var(--ems-neutral-700);font-size:.85rem;font-weight:700;cursor:pointer">İmtina</button>
+          <button type="button" onClick="{{ confirmSend }}" style="padding:10px 18px;border:1px solid {{ sendBd }};border-radius:10px;background:{{ sendBg }};color:{{ sendFg }};font-size:.85rem;font-weight:700;cursor:{{ sendCur }}">Göndər</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:1180},&quot;planStatus&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Qaralama&quot;,&quot;Kafedra baxışı&quot;,&quot;Fakültə şurası&quot;,&quot;Tədris şöbəsi&quot;,&quot;Təsdiqlənib&quot;],&quot;default&quot;:&quot;Kafedra baxışı&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Plan&quot;},&quot;semTarget&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:30,&quot;min&quot;:20,&quot;max&quot;:40,&quot;unit&quot;:&quot;kredit&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Norma&quot;},&quot;showAudit&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Panel&quot;}}">
+const BLOKS = [
+  { code: 'MİF-H01', title: 'Ümumi humanitar və sosial fənlər', note: 'Norma: bütün plan üzrə 15–20%', kind: 'human' },
+  { code: 'MİF-T02', title: 'Təbiət-elmi və riyazi fənlər', note: 'Baza hazırlıq bloku', kind: 'base' },
+  { code: 'MİF-B04', title: 'İxtisas fənləri — məcburi', title2: '', note: 'Peşə hazırlığı — ixtisas kafedrası', kind: 'core' },
+  { code: 'MİF-S06', title: 'Seçmə fənlər (ixtisas)', note: 'Norma: bütün plan üzrə 25–30% · alternativlər nömrələnir', kind: 'secme' }
+];
+
+const ROWS = [
+  { blok: 'MİF-H01', sifr: 'MİF-H01.01', name: 'Azərbaycan tarixi', kredit: 4, umumi: 120, serbest: 90, muh: 30, sem: 0, lab: 0, prereq: '', semestr: '1-payız', kaf: 'Sosial elmlər və humanitar fənlər' },
+  { blok: 'MİF-H01', sifr: 'MİF-H01.02', name: 'Xarici dil – 1', kredit: 4, umumi: 120, serbest: 60, muh: 0, sem: 60, lab: 0, prereq: '', semestr: '1-payız', kaf: 'Xarici dillər' },
+  { blok: 'MİF-H01', sifr: 'MİF-H01.03', name: 'Fəlsəfə', kredit: 4, umumi: 120, serbest: 90, muh: 30, sem: 0, lab: 0, prereq: '', semestr: '2-yaz', kaf: 'Sosial elmlər və humanitar fənlər' },
+  { blok: 'MİF-H01', sifr: 'MİF-H01.04', name: 'Xarici dil – 2', kredit: 4, umumi: 120, serbest: 60, muh: 0, sem: 60, lab: 0, prereq: 'MİF-H01.02', semestr: '2-yaz', kaf: 'Xarici dillər' },
+  { blok: 'MİF-T02', sifr: 'MİF-T02.01', name: 'Ali riyaziyyat – 1', kredit: 6, umumi: 185, serbest: 110, muh: 45, sem: 30, lab: 0, prereq: '', semestr: '1-payız', kaf: 'Riyaziyyat və statistika' },
+  { blok: 'MİF-T02', sifr: 'MİF-T02.02', name: 'Fizika', kredit: 5, umumi: 150, serbest: 90, muh: 30, sem: 0, lab: 30, prereq: '', semestr: '1-payız', kaf: '' },
+  { blok: 'MİF-T02', sifr: 'MİF-T02.03', name: 'Ali riyaziyyat – 2', kredit: 6, umumi: 180, serbest: 105, muh: 45, sem: 30, lab: 0, prereq: 'MİF-T02.01', semestr: '2-yaz', kaf: 'Riyaziyyat və statistika' },
+  { blok: 'MİF-B04', sifr: 'MİF-B04.01', name: 'Proqramlaşdırmanın əsasları', kredit: 8, umumi: 240, serbest: 150, muh: 30, sem: 30, lab: 30, prereq: '', semestr: '1-payız', kaf: 'Proqramlaşdırma və informasiya təhlükəsizliyi' },
+  { blok: 'MİF-B04', sifr: 'MİF-B04.04', name: 'Proqramlaşdırma texnologiyaları', kredit: 8, umumi: 240, serbest: 180, muh: 30, sem: 30, lab: 0, prereq: 'MİF-B04.01', semestr: '2-yaz', kaf: 'Proqramlaşdırma və informasiya təhlükəsizliyi' },
+  { blok: 'MİF-B04', sifr: 'MİF-B04.05', name: 'Müasir İKT və informasiya təhlükəsizliyi', kredit: 3, umumi: 90, serbest: 60, muh: 15, sem: 0, lab: 15, prereq: '', semestr: '2-yaz', kaf: '' },
+  { blok: 'MİF-S06', sifr: 'MİF-S06.01', name: 'Seçmə fənn – 1', kredit: 3, umumi: 90, serbest: 45, muh: 15, sem: 30, lab: 0, prereq: '', semestr: '1-payız', kaf: 'Proqramlaşdırma və informasiya təhlükəsizliyi', alts: ['Skript dilləri', 'Mobil proqramlaşdırma', 'Verilənlər bazasının əsasları'] },
+  { blok: 'MİF-S06', sifr: 'MİF-S06.02', name: 'Seçmə fənn – 2', kredit: 3, umumi: 95, serbest: 50, muh: 15, sem: 15, lab: 15, prereq: 'MİF-B04.01', semestr: '2-yaz', kaf: '', alts: ['Şəbəkələrin təhlükəsizliyi', 'Kriptoqrafiyanın əsasları'] }
+];
+
+const LATER = [
+  { n: 3, kredit: 30, secme: 8, human: 4 }, { n: 4, kredit: 30, secme: 8, human: 4 },
+  { n: 5, kredit: 30, secme: 12, human: 4 }, { n: 6, kredit: 30, secme: 12, human: 4 },
+  { n: 7, kredit: 30, secme: 12, human: 4 }, { n: 8, kredit: 30, secme: 11, human: 4 }
+];
+
+const KATALOQ = [
+  { sifr: 'MİF-B04.02', name: 'Kompüter arxitekturası', kaf: 'Kompüter mühəndisliyi', kredit: 5 },
+  { sifr: 'MİF-B04.03', name: 'Alqoritmlər və verilənlər strukturu', kaf: 'Proqramlaşdırma və İT', kredit: 6 },
+  { sifr: 'MİF-T02.04', name: 'Diskret riyaziyyat', kaf: 'Riyaziyyat və statistika', kredit: 4 },
+  { sifr: 'MİF-B05.01', name: 'İnformasiya təhlükəsizliyinin əsasları', kaf: 'Proqramlaşdırma və İT', kredit: 6 },
+  { sifr: 'MİF-B05.02', name: 'Şəbəkələrin təhlükəsizliyi', kaf: 'Proqramlaşdırma və İT', kredit: 5 },
+  { sifr: 'MİF-B04.06', name: 'Veb texnologiyalar', kaf: 'Proqramlaşdırma və İT', kredit: 4 }
+];
+
+const GRAFIK = [
+  ['Sentyabr', 't t t t t'], ['Oktyabr', 't t t t t'], ['Noyabr', 't t t t t'], ['Dekabr', 't t t t i'],
+  ['Yanvar', 'i i v v v'], ['Fevral', 't t t t t'], ['Mart', 't t t t t'], ['Aprel', 't t t t t'],
+  ['May', 't t t t i'], ['İyun', 'i i i p p'], ['İyul', 'p p p v v'], ['Avqust', 'v v v v v']
+];
+
+const CELL = {
+  t: { code: 'NT', title: 'Nəzəri təlim', bg: 'var(--ems-neutral-0)', bd: 'var(--ems-neutral-200)', fg: 'var(--ems-neutral-400)' },
+  i: { code: 'İS', title: 'İmtahan sessiyası', bg: 'var(--ems-primary-100)', bd: 'var(--ems-primary-200)', fg: 'var(--ems-primary-800)' },
+  p: { code: 'TC', title: 'Təcrübə', bg: 'var(--ems-warning-bg)', bd: '#fde68a', fg: '#92400e' },
+  a: { code: 'YA', title: 'Yekun attestasiya', bg: 'var(--ems-success-bg)', bd: '#bbf7d0', fg: '#166534' },
+  v: { code: 'TT', title: 'Tətil', bg: 'var(--ems-neutral-100)', bd: 'var(--ems-neutral-200)', fg: 'var(--ems-neutral-400)' }
+};
+
+const STATUS = {
+  'Qaralama': ['var(--ems-neutral-100)', 'var(--ems-neutral-700)', 'var(--ems-neutral-200)'],
+  'Kafedra baxışı': ['var(--ems-primary-50)', 'var(--ems-primary-800)', 'var(--ems-primary-200)'],
+  'Fakültə şurası': ['var(--ems-warning-bg)', '#92400e', '#fde68a'],
+  'Tədris şöbəsi': ['var(--ems-warning-bg)', '#92400e', '#fde68a'],
+  'Təsdiqlənib': ['var(--ems-success-bg)', '#166534', '#bbf7d0']
+};
+
+const KURS = ['1-ci kurs', '2-ci kurs', '3-cü kurs', '4-cü kurs'];
+const nf = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const dec = (n) => n.toFixed(1).replace('.', ',');
+
+class Component extends DCLogic {
+  state = {
+    tab: 'plan', kurs: '1-ci kurs', fSem: 'Hamısı', fBlok: 'Hamısı', fKaf: 'Hamısı',
+    q: '', qApplied: '', openDd: null, ddQuery: '', tableState: 'data', focus: null,
+    sortKey: 'sifr', sortDir: 1, modal: null, target: null,
+    dSifr: '', dName: '', dKredit: '', dSerbest: '', dMuh: '', dSem: '', dLab: '', dSemestr: '2-yaz', dPre: [], dKaf: '',
+    catQ: '', blokCode: '', blokName: '', cloneSrc: 0, sendNote: ''
+  };
+
+  componentDidMount() {
+    this._out = (e) => {
+      if (this.state.openDd && !(e.target.closest && e.target.closest('[data-dd]'))) this.setState({ openDd: null, ddQuery: '' });
+    };
+    document.addEventListener('mousedown', this._out);
+  }
+  componentWillUnmount() { document.removeEventListener('mousedown', this._out); clearTimeout(this._t); }
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+    const keyAct = (fn) => (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } };
+
+    const kafList = [];
+    ROWS.forEach((r) => { const k = r.kaf || 'Təyin edilməyib'; if (kafList.indexOf(k) < 0) kafList.push(k); });
+
+    const badCredit = ROWS.filter((r) => r.umumi !== r.kredit * 30);
+    const badKaf = ROWS.filter((r) => !r.kaf);
+
+    let shown = ROWS.filter((r) => {
+      if (s.kurs !== '1-ci kurs') return false;
+      if (s.fSem !== 'Hamısı' && r.semestr !== s.fSem) return false;
+      if (s.fBlok !== 'Hamısı' && r.blok !== s.fBlok) return false;
+      if (s.fKaf !== 'Hamısı' && (r.kaf || 'Təyin edilməyib') !== s.fKaf) return false;
+      if (s.focus === 'credit' && r.umumi === r.kredit * 30) return false;
+      if (s.focus === 'kaf' && r.kaf) return false;
+      if (s.focus === 'sem2' && r.semestr !== '2-yaz') return false;
+      const q = s.qApplied.trim().toLowerCase();
+      if (q && (r.name + ' ' + r.sifr).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+
+    const dirs = { sifr: (a, b) => a.sifr.localeCompare(b.sifr), kredit: (a, b) => a.kredit - b.kredit, semestr: (a, b) => a.semestr.localeCompare(b.semestr) };
+    shown = shown.slice().sort((a, b) => dirs[s.sortKey](a, b) * s.sortDir);
+
+    const sum = (list, f) => list.reduce((t, r) => t + f(r), 0);
+    const uniqueCredit = (list) => { const seen = {}; let t = 0; list.forEach((r) => { if (!seen[r.sifr]) { seen[r.sifr] = 1; t += r.kredit; } }); return t; };
+
+    const groups = BLOKS.map((b) => {
+      const rows = shown.filter((r) => r.blok === b.code);
+      return {
+        code: b.code, title: b.title, note: b.note,
+        kredit: uniqueCredit(rows), umumi: nf(sum(rows, (r) => r.umumi)),
+        serbest: nf(sum(rows, (r) => r.serbest)), aud: nf(sum(rows, (r) => r.umumi - r.serbest)),
+        rows: rows.map((r, i) => {
+          const bad = r.umumi !== r.kredit * 30;
+          return {
+            sifr: r.sifr, name: r.name, kredit: r.kredit, umumi: nf(r.umumi), serbest: nf(r.serbest),
+            aud: nf(r.umumi - r.serbest), muh: r.muh || '—', sem: r.sem || '—', lab: r.lab || '—',
+            prereq: r.prereq, hasPre: !!r.prereq, noPre: !r.prereq,
+            semestr: r.semestr, heftelik: dec((r.umumi - r.serbest) / 15),
+            kaf: r.kaf, hasKaf: !!r.kaf, noKaf: !r.kaf,
+            bg: i % 2 ? 'var(--ems-neutral-50)' : 'var(--ems-neutral-0)',
+            umumiFg: bad ? 'var(--ems-danger)' : 'var(--ems-neutral-900)',
+            umumiNote: bad ? (r.kredit * 30) + ' olmalı' : '',
+            hasAlts: !!r.alts, alts: (r.alts || []).map((a, j) => ({ text: (j + 1) + ') ' + a })),
+            aria: r.sifr + ' — ' + r.name + ', sətri redaktə et',
+            open: () => this.openEdit(r), key: keyAct(() => this.openEdit(r))
+          };
+        })
+      };
+    }).filter((g) => g.rows.length > 0);
+
+    const sem1 = ROWS.filter((r) => r.semestr === '1-payız');
+    const sem2 = ROWS.filter((r) => r.semestr === '2-yaz');
+    const target = this.props.semTarget ?? 30;
+    const humanNames = ['MİF-H01'], secmeNames = ['MİF-S06'];
+    const kr = (list) => uniqueCredit(list);
+    const blokKr = (list, code) => kr(list.filter((r) => r.blok === code));
+
+    const semLines = [];
+    [[1, sem1], [2, sem2]].forEach((p) => {
+      const have = kr(p[1]);
+      const diff = have - target;
+      const ok = diff === 0;
+      semLines.push({
+        name: 'Semestr ' + p[0], val: have + ' / ' + target + ' kredit',
+        ok: ok, ico: ok ? '✓' : '⚠', fg: ok ? 'var(--ems-success)' : 'var(--ems-warning)',
+        bg: ok ? 'transparent' : 'var(--ems-warning-bg)',
+        hasNote: !ok, note: diff < 0 ? Math.abs(diff) + ' kredit çatmır' : diff + ' kredit artıqdır'
+      });
+    });
+    LATER.forEach((l) => {
+      semLines.push({ name: 'Semestr ' + l.n, val: l.kredit + ' / ' + target + ' kredit', ok: true, ico: '✓', fg: 'var(--ems-success)', bg: 'transparent', hasNote: false, note: '' });
+    });
+
+    const totKr = kr(sem1) + kr(sem2) + sum(LATER, (l) => l.kredit);
+    const totTarget = target * 8;
+    const totOk = totKr === totTarget;
+    const secmeKr = blokKr(sem1, 'MİF-S06') + blokKr(sem2, 'MİF-S06') + sum(LATER, (l) => l.secme);
+    const humanKr = blokKr(sem1, 'MİF-H01') + blokKr(sem2, 'MİF-H01') + sum(LATER, (l) => l.human);
+    const secmePct = (secmeKr / totKr) * 100;
+    const humanPct = (humanKr / totKr) * 100;
+    const secmeOk = secmePct >= 25 && secmePct <= 30;
+    const humanOk = humanPct >= 15 && humanPct <= 20;
+
+    const chk = (label, val, ok, click, aria) => ({
+      label, val, ico: ok ? '✓' : '⚠', fg: ok ? 'var(--ems-success)' : 'var(--ems-warning)',
+      bg: ok ? 'transparent' : 'var(--ems-warning-bg)', cur: click ? 'pointer' : 'default',
+      click: click || (() => {}), aria: aria || label
+    });
+
+    const cat = KATALOQ.filter((c) => (c.name + ' ' + c.sifr).toLowerCase().indexOf(s.catQ.trim().toLowerCase()) >= 0);
+    const dKredit = parseFloat(s.dKredit) || 0;
+    const dSerbest = parseFloat(s.dSerbest) || 0;
+    const dMuh = parseFloat(s.dMuh) || 0, dSem = parseFloat(s.dSem) || 0, dLab = parseFloat(s.dLab) || 0;
+    const cUmumi = dKredit * 30;
+    const cAud = cUmumi - dSerbest;
+    const split = dMuh + dSem + dLab;
+    const val = [];
+    if (dKredit > 0) val.push({ ico: '✓', text: 'Kredit × 30 = ' + cUmumi + ' saat — ümumi saat avtomatik bağlandı.', bg: 'var(--ems-success-bg)', fg: '#166534' });
+    else val.push({ ico: '⚠', text: 'Kredit yazılmayıb — ümumi saat hesablanmır.', bg: 'var(--ems-warning-bg)', fg: '#92400e' });
+    if (dKredit > 0 && split !== cAud) val.push({ ico: '⚠', text: 'Auditoriya bölgüsü (' + split + ' saat) auditoriya saatı ilə (' + cAud + ') üst-üstə düşmür.', bg: 'var(--ems-danger-bg)', fg: 'var(--ems-danger)' });
+    if (dKredit > 0 && split === cAud) val.push({ ico: '✓', text: 'Mühazirə + seminar + laboratoriya = auditoriya saatı.', bg: 'var(--ems-success-bg)', fg: '#166534' });
+    if (!s.dKaf) val.push({ ico: '⚠', text: 'Tədris edən kafedra seçilməyib — xidməti fənlərdə bu məcburidir.', bg: 'var(--ems-warning-bg)', fg: '#92400e' });
+    else val.push({ ico: '✓', text: 'Tədris edən kafedra: ' + s.dKaf, bg: 'var(--ems-success-bg)', fg: '#166534' });
+    const saveOk = dKredit > 0 && s.dName.trim().length > 0 && split === cAud && !!s.dKaf;
+
+    const preOk = s.dSemestr === '1-payız' ? [] : ROWS.filter((r) => r.semestr === '1-payız');
+    const sendOk = (badCredit.length === 0 && badKaf.length === 0 && totOk) || s.sendNote.trim().length > 0;
+
+    return {
+      crumb: s.tab === 'plan' ? 'Tədris planı' : 'Tədris qrafiki',
+      stLabel: this.props.planStatus ?? 'Kafedra baxışı',
+      stBg: (STATUS[this.props.planStatus ?? 'Kafedra baxışı'] || STATUS['Qaralama'])[0],
+      stFg: (STATUS[this.props.planStatus ?? 'Kafedra baxışı'] || STATUS['Qaralama'])[1],
+      stBd: (STATUS[this.props.planStatus ?? 'Kafedra baxışı'] || STATUS['Qaralama'])[2],
+      dlText: 'Son tarix: 20 iyun 2026 · 12 gün qalıb',
+      dlFg: '#92400e', dlBg: 'var(--ems-warning-bg)', dlBd: '#fde68a',
+
+      isPlan: s.tab === 'plan', isGrafik: s.tab === 'grafik',
+      tabPlanSel: s.tab === 'plan' ? 'true' : 'false', tabGrSel: s.tab === 'grafik' ? 'true' : 'false',
+      tabPlanBg: s.tab === 'plan' ? 'var(--ems-neutral-0)' : 'transparent',
+      tabPlanFg: s.tab === 'plan' ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+      tabPlanSh: s.tab === 'plan' ? '0 2px 6px rgba(15,23,42,.08)' : 'none',
+      tabGrBg: s.tab === 'grafik' ? 'var(--ems-neutral-0)' : 'transparent',
+      tabGrFg: s.tab === 'grafik' ? 'var(--ems-primary-800)' : 'var(--ems-neutral-500)',
+      tabGrSh: s.tab === 'grafik' ? '0 2px 6px rgba(15,23,42,.08)' : 'none',
+      goPlan: () => set({ tab: 'plan' }), goGrafik: () => set({ tab: 'grafik' }),
+
+      stats: [
+        { label: 'Plan sətri', value: nf(shown.length), sub: ROWS.length + ' sətirdən filtrlənib', accent: 'var(--ems-primary-600)' },
+        { label: 'Cəmi kredit (təkrarsız fənn)', value: uniqueCredit(shown), sub: 'göstərilən sətirlər üzrə', accent: 'var(--ems-primary-800)' },
+        { label: 'Ümumi saat', value: nf(sum(shown, (r) => r.umumi)), sub: 'kredit × 30', accent: 'var(--ems-neutral-700)' },
+        { label: 'Auditoriya saatı', value: nf(sum(shown, (r) => r.umumi - r.serbest)), sub: 'sərbəst iş çıxılmaqla', accent: 'var(--ems-success)' },
+        { label: 'Açıq xəbərdarlıq', value: badCredit.length + badKaf.length + (totOk ? 0 : 1), sub: 'balans panelinə bax', accent: 'var(--ems-warning)' }
+      ],
+
+      filters: [
+        this.dd('kurs', 'Kurs', s.kurs, KURS, 'Kurs seçimi'),
+        this.dd('fSem', 'Semestr', s.fSem, ['Hamısı', '1-payız', '2-yaz'], 'Semestr filtri'),
+        this.dd('fBlok', 'Blok', s.fBlok, ['Hamısı'].concat(BLOKS.map((b) => b.code)), 'Blok filtri'),
+        this.dd('fKaf', 'Tədris edən kafedra', s.fKaf, ['Hamısı'].concat(kafList), 'Kafedra filtri')
+      ],
+      q: s.q,
+      onQ: (e) => { const v = e.target.value; set({ q: v }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ qApplied: v }), 300); },
+      liveNote: 'Dəyişiklik dərhal tətbiq olunur',
+      resetFilters: () => { clearTimeout(this._t); set({ kurs: '1-ci kurs', fSem: 'Hamısı', fBlok: 'Hamısı', fKaf: 'Hamısı', q: '', qApplied: '', focus: null, tableState: 'data' }); },
+
+      hasFocus: !!s.focus,
+      focusText: s.focus === 'credit' ? 'Filtr: kredit ↔ saat uyğunsuzluğu olan sətirlər' : s.focus === 'kaf' ? 'Filtr: tədris edən kafedrası boş sətirlər' : 'Filtr: 2-yaz semestrinin sətirləri',
+      clearFocus: () => set({ focus: null }),
+
+      isLoading: s.tableState === 'loading', isError: s.tableState === 'error',
+      isEmpty: s.tableState === 'data' && groups.length === 0,
+      isData: s.tableState === 'data' && groups.length > 0,
+      retry: () => set({ tableState: 'data' }),
+      skeleton: [['92px', '64px'], ['92px', '48px'], ['92px', '72px'], ['92px', '56px'], ['92px', '68px'], ['92px', '44px']].map((a) => ({ a: a[0], b: a[1] })),
+      states: [['data', 'Data'], ['loading', 'Yüklənir'], ['error', 'Xəta']].map((v) => ({
+        label: v[1], on: s.tableState === v[0] ? 'true' : 'false',
+        bg: s.tableState === v[0] ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+        fg: s.tableState === v[0] ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-500)',
+        bd: s.tableState === v[0] ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+        pick: () => set({ tableState: v[0] })
+      })),
+
+      rowNote: shown.length + ' sətir · ' + groups.length + ' blok · ' + s.kurs,
+      groups,
+      sortSifr: s.sortKey === 'sifr' ? (s.sortDir > 0 ? 'ascending' : 'descending') : 'none',
+      sortKr: s.sortKey === 'kredit' ? (s.sortDir > 0 ? 'ascending' : 'descending') : 'none',
+      sortSem: s.sortKey === 'semestr' ? (s.sortDir > 0 ? 'ascending' : 'descending') : 'none',
+      sortSifrIco: s.sortKey === 'sifr' ? (s.sortDir > 0 ? '↑' : '↓') : '',
+      sortKrIco: s.sortKey === 'kredit' ? (s.sortDir > 0 ? '↑' : '↓') : '',
+      sortSemIco: s.sortKey === 'semestr' ? (s.sortDir > 0 ? '↑' : '↓') : '',
+      sortBySifr: () => this.sort('sifr'), sortByKredit: () => this.sort('kredit'), sortBySem: () => this.sort('semestr'),
+
+      footNote: 'göstərilən ' + shown.length + ' sətir üzrə',
+      tKredit: uniqueCredit(shown), tUmumi: nf(sum(shown, (r) => r.umumi)), tSerbest: nf(sum(shown, (r) => r.serbest)),
+      tAud: nf(sum(shown, (r) => r.umumi - r.serbest)), tMuh: nf(sum(shown, (r) => r.muh)),
+      tSem: nf(sum(shown, (r) => r.sem)), tLab: nf(sum(shown, (r) => r.lab)),
+      tKreditNote: 'Kredit təkrarsız fənn üzrə cəmlənir — eyni fənn iki blokda görünsə bir dəfə sayılır.',
+
+      semLines,
+      totVal: totKr + ' / ' + totTarget, totIco: totOk ? '✓' : '⚠',
+      totFg: totOk ? 'var(--ems-success)' : 'var(--ems-warning)',
+      checks: [
+        chk('Seçmə payı', dec(secmePct) + '%  (25–30%)', secmeOk, null, 'Seçmə fənlərin payı'),
+        chk('Humanitar payı', dec(humanPct) + '%  (15–20%)', humanOk, null, 'Humanitar fənlərin payı'),
+        chk('Kredit ↔ saat', badCredit.length ? badCredit.length + ' sətirdə pozulub' : 'uyğundur', badCredit.length === 0, () => set({ focus: 'credit', tableState: 'data' }), 'Kredit-saat uyğunsuzluğu olan sətirlərə keç'),
+        chk('Prerekvizit', 'dövr yoxdur', true, null, 'Prerekvizit dövrü yoxdur'),
+        chk('Tədris edən kafedra', badKaf.length ? badKaf.length + ' sətir boş' : 'tamamdır', badKaf.length === 0, () => set({ focus: 'kaf', tableState: 'data' }), 'Kafedrası boş sətirlərə keç')
+      ],
+
+      showAudit: this.props.showAudit ?? true,
+      audit: [
+        { what: '2-yaz semestrinə «Proqramlaşdırma texnologiyaları» əlavə edildi', who: 'dos. A. Məmmədov · 14.05.2026, 11:20', dot: 'var(--ems-primary-600)' },
+        { what: '«Ali riyaziyyat – 1» ümumi saatı 180 → 185 dəyişdirildi', who: 'b/m N. Əliyeva · 13.05.2026, 16:05', dot: 'var(--ems-warning)' },
+        { what: 'Plan kafedra iclasına təqdim edildi (protokol № 04)', who: 'dos. A. Məmmədov · 12.05.2026, 09:40', dot: 'var(--ems-success)' },
+        { what: 'Plan 2025 qəbulundan klonlandı', who: 'Tədris şöbəsi · 05.05.2026, 10:12', dot: 'var(--ems-neutral-300)' }
+      ],
+
+      weekHead: [1, 2, 3, 4, 5].map((n) => ({ label: n + '. həftə' })),
+      legend: ['t', 'i', 'p', 'a', 'v'].map((k) => ({ label: CELL[k].title, bg: CELL[k].bg, bd: CELL[k].bd, fg: k === 't' ? 'var(--ems-neutral-700)' : CELL[k].fg })),
+      grafik: GRAFIK.map((m) => ({
+        month: m[0],
+        cells: m[1].split(' ').map((c) => ({ code: CELL[c].code, title: CELL[c].title, bg: CELL[c].bg, bd: CELL[c].bd, fg: CELL[c].fg }))
+      })),
+
+      mRow: s.modal === 'row', mPre: s.modal === 'pre', mBlok: s.modal === 'blok', mClone: s.modal === 'clone', mSend: s.modal === 'send',
+      closeModal: () => set({ modal: null, target: null }),
+      openRow: () => set({ modal: 'row', target: null, dSifr: '', dName: '', dKredit: '', dSerbest: '', dMuh: '', dSem: '', dLab: '', dSemestr: '1-payız', dPre: [], dKaf: '', catQ: '' }),
+      rowDds: [
+        this.dd('dSemestr', 'Semestr', s.dSemestr, ['1-payız', '2-yaz'], 'Semestr seçimi', null, '1'),
+        this.dd('dKaf', 'Tədris edən kafedra', s.dKaf || 'Təyin edilməyib', ['Təyin edilməyib'].concat(kafList.filter((k) => k !== 'Təyin edilməyib')), 'Tədris edən kafedranın seçimi', (o) => (o === 'Təyin edilməyib' ? '' : o), 'span 2', !s.dKaf)
+      ],
+      rowModalTitle: s.target === null ? 'Yeni plan sətri' : 'Sətri redaktə et — ' + s.dSifr,
+      catQ: s.catQ, onCatQ: (e) => set({ catQ: e.target.value }),
+      catalog: cat.map((c) => ({
+        sifr: c.sifr, name: c.name, kaf: c.kaf,
+        pick: () => set({ dSifr: c.sifr, dName: c.name, dKaf: c.kaf, dKredit: String(c.kredit) }),
+        key: keyAct(() => set({ dSifr: c.sifr, dName: c.name, dKaf: c.kaf, dKredit: String(c.kredit) }))
+      })),
+      catNone: cat.length === 0,
+      dSifr: s.dSifr, dName: s.dName, dKredit: s.dKredit, dSerbest: s.dSerbest, dMuh: s.dMuh, dSem: s.dSem, dLab: s.dLab, dSemestr: s.dSemestr,
+      onDSifr: (e) => set({ dSifr: e.target.value }), onDName: (e) => set({ dName: e.target.value }),
+      onDKredit: (e) => set({ dKredit: e.target.value }), onDSerbest: (e) => set({ dSerbest: e.target.value }),
+      onDMuh: (e) => set({ dMuh: e.target.value }), onDSem: (e) => set({ dSem: e.target.value }), onDLab: (e) => set({ dLab: e.target.value }),
+      cUmumi: cUmumi ? nf(cUmumi) : '—', cAud: cUmumi ? nf(cAud) : '—', cHeft: cUmumi ? dec(cAud / 15) : '—',
+      validation: val,
+      saveBg: saveOk ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+      saveFg: saveOk ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-400)',
+      saveBd: saveOk ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+      saveCur: saveOk ? 'pointer' : 'not-allowed',
+      dPreLabel: s.dPre.length ? s.dPre.join(', ') : 'seçilməyib',
+      openPrereq: () => set({ modal: 'pre' }), backToRow: () => set({ modal: 'row' }),
+      preNone: preOk.length === 0, preSome: preOk.length > 0,
+      preSub: preOk.length === 0 ? 'Bu sətir planın ilk semestrindədir.' : 'Yalnız ' + s.dSemestr + '-dan əvvəlki semestrlərin fənləri seçilə bilər.',
+      preBtn: preOk.length === 0 ? 'Bağla' : 'Təsdiq et',
+      preOptions: preOk.map((r) => {
+        const on = s.dPre.indexOf(r.sifr) >= 0;
+        const t = () => { const a = s.dPre.slice(); const i = a.indexOf(r.sifr); if (i < 0) a.push(r.sifr); else a.splice(i, 1); set({ dPre: a }); };
+        return {
+          sifr: r.sifr, name: r.name, semestr: r.semestr, mark: on ? '✓' : '',
+          bd: on ? 'var(--ems-primary-200)' : 'var(--ems-neutral-200)', bg: on ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+          boxBd: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)', boxBg: on ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+          pick: t, key: keyAct(t)
+        };
+      }),
+
+      openBlok: () => set({ modal: 'blok', blokCode: '', blokName: '' }),
+      blokCode: s.blokCode, blokName: s.blokName,
+      onBlokCode: (e) => set({ blokCode: e.target.value }), onBlokName: (e) => set({ blokName: e.target.value }),
+      blokBg: s.blokName.trim() ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+      blokFg: s.blokName.trim() ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-400)',
+      blokBd: s.blokName.trim() ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+      blokCur: s.blokName.trim() ? 'pointer' : 'not-allowed',
+
+      openClone: () => set({ modal: 'clone' }),
+      cloneSources: [
+        { name: 'Kompüter mühəndisliyi — 2025 qəbulu', meta: '48 sətir · 240 kredit · təsdiqlənib' },
+        { name: 'Kompüter elmləri — 2026 qəbulu', meta: '46 sətir · 240 kredit · fakültə şurasında' },
+        { name: 'İnformasiya təhlükəsizliyi — 2025 qəbulu', meta: '47 sətir · 240 kredit · təsdiqlənib' }
+      ].map((c, i) => ({
+        name: c.name, meta: c.meta,
+        bd: s.cloneSrc === i ? 'var(--ems-primary-200)' : 'var(--ems-neutral-200)',
+        bg: s.cloneSrc === i ? 'var(--ems-primary-50)' : 'var(--ems-neutral-0)',
+        dotBd: s.cloneSrc === i ? 'var(--ems-primary-600)' : 'var(--ems-neutral-300)',
+        dotBg: s.cloneSrc === i ? 'var(--ems-primary-600)' : 'var(--ems-neutral-0)',
+        pick: () => set({ cloneSrc: i }), key: keyAct(() => set({ cloneSrc: i }))
+      })),
+      cloneDiff: [
+        { mark: '+', text: 'Yeni sətir gətirilir', count: '36', bg: 'var(--ems-success-bg)', fg: '#166534' },
+        { mark: '~', text: 'Kredit və ya saatı dəyişən sətir', count: '7', bg: 'var(--ems-warning-bg)', fg: '#92400e' },
+        { mark: '−', text: 'Kataloqdan çıxarılmış fənn — gətirilmir', count: '2', bg: 'var(--ems-danger-bg)', fg: 'var(--ems-danger)' },
+        { mark: '=', text: 'Dəyişmədən köçürülür', count: '5', bg: 'var(--ems-neutral-100)', fg: 'var(--ems-neutral-500)' }
+      ],
+
+      openSend: () => set({ modal: 'send' }),
+      sendStats: [
+        { label: 'Cəmi kredit', value: totKr + ' / ' + totTarget, accent: totOk ? 'var(--ems-success)' : 'var(--ems-warning)' },
+        { label: 'Plan sətri', value: nf(ROWS.length), accent: 'var(--ems-primary-600)' },
+        { label: 'Açıq xəbərdarlıq', value: badCredit.length + badKaf.length + (totOk ? 0 : 1), accent: 'var(--ems-warning)' }
+      ],
+      sendWarns: [
+        { ico: '⚠', text: badCredit.length + ' sətirdə kredit × 30 ≠ ümumi saat', bg: 'var(--ems-danger-bg)', fg: 'var(--ems-danger)' },
+        { ico: '⚠', text: badKaf.length + ' sətirdə tədris edən kafedra boşdur', bg: 'var(--ems-warning-bg)', fg: '#92400e' },
+        { ico: '⚠', text: 'Semestr 2 üzrə ' + Math.abs(kr(sem2) - target) + ' kredit çatmır', bg: 'var(--ems-warning-bg)', fg: '#92400e' },
+        { ico: '✓', text: 'Prerekvizit dövrü yoxdur', bg: 'var(--ems-success-bg)', fg: '#166534' }
+      ],
+      sendNote: s.sendNote, onSendNote: (e) => set({ sendNote: e.target.value }),
+      sendHint: sendOk ? 'Qeyd şura protokoluna əlavə olunacaq.' : 'Açıq xəbərdarlıq var — əsaslandırma yazmadan göndərilə bilməz.',
+      sendHintFg: sendOk ? 'var(--ems-neutral-500)' : 'var(--ems-danger)',
+      sendBg: sendOk ? 'var(--ems-primary-600)' : 'var(--ems-neutral-100)',
+      sendFg: sendOk ? 'var(--ems-neutral-0)' : 'var(--ems-neutral-400)',
+      sendBd: sendOk ? 'var(--ems-primary-600)' : 'var(--ems-neutral-200)',
+      sendCur: sendOk ? 'pointer' : 'not-allowed',
+      confirmSend: () => { if (sendOk) set({ modal: null }); }
+    };
+  }
+
+  dd(key, label, value, options, aria, map, span, warn) {
+    const s = this.state;
+    const open = s.openDd === key;
+    const q = open ? s.ddQuery.trim().toLowerCase() : '';
+    const list = options.filter((o) => o.toLowerCase().indexOf(q) >= 0);
+    return {
+      label, value, aria, open, expanded: open ? 'true' : 'false',
+      span: span || 'auto',
+      fg: warn ? '#92400e' : 'var(--ems-neutral-900)',
+      bd: open ? 'var(--ems-primary-600)' : warn ? '#fcd34d' : 'var(--ems-neutral-300)',
+      query: s.ddQuery,
+      toggle: () => this.setState({ openDd: open ? null : key, ddQuery: '' }),
+      onQuery: (e) => this.setState({ ddQuery: e.target.value }),
+      none: list.length === 0,
+      filtered: list.map((o) => {
+        const sel = o === value;
+        const pick = () => { const p = {}; p[key] = map ? map(o) : o; p.openDd = null; p.ddQuery = ''; this.setState(p); };
+        return {
+          label: o, sel: sel ? 'true' : 'false', fw: sel ? '800' : '500',
+          fg: sel ? 'var(--ems-primary-800)' : 'var(--ems-neutral-700)',
+          bg: sel ? 'var(--ems-primary-50)' : 'transparent',
+          pick, key: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }
+        };
+      })
+    };
+  }
+
+  sort(k) {
+    this.setState((s) => ({ sortKey: k, sortDir: s.sortKey === k ? -s.sortDir : 1 }));
+  }
+
+  openEdit(r) {
+    this.setState({
+      modal: 'row', target: r.sifr, dSifr: r.sifr, dName: r.name, dKredit: String(r.kredit),
+      dSerbest: String(r.serbest), dMuh: String(r.muh), dSem: String(r.sem), dLab: String(r.lab),
+      dSemestr: r.semestr, dPre: r.prereq ? [r.prereq] : [], dKaf: r.kaf, catQ: ''
+    });
+  }
+}
+
+</script>
+</body>
+</html>

@@ -30,12 +30,24 @@ _CTX = "accounts.syllabus"
 
 _DASH = "—"
 
-#: Gözləmə müddəti eşikləri (dizayn §3.3: 10 gündən çox → qırmızı).
+#: Gözləmə müddəti eşikləri — DEFAULT dəyərlər.
+#:
+#: ⚠️ HARDCODE DEYİL: həqiqi hədd təşkilat siyasətindən gəlir
+#: (:mod:`apps.syllabus.policy` → ``sla_days`` = 5, ``escalation_days`` = 10).
+#: Bu sabitlər yalnız təşkilat verilməyəndə (test/köhnə çağırış) fallback-dir.
 LATE_DAYS = 10
 WARN_DAYS = 5
 
+
+def thresholds(organization=None) -> tuple:
+    """``(warn, late)`` — SLA həddi və eskalasiya həddi (siyasətdən)."""
+    from apps.syllabus.policy import escalation_days, sla_days
+
+    return sla_days(organization), escalation_days(organization)
+
+
 RISK_LABELS = {
-    "late": (pgettext_lazy(_CTX, "10 gündən çox gözləyir"), "danger"),
+    "late": (pgettext_lazy(_CTX, "Eskalasiya həddini keçib"), "danger"),
     "miss": (pgettext_lazy(_CTX, "çatışmayan bölmə var"), "warning"),
     "policy": (pgettext_lazy(_CTX, "siyasət yoxlaması"), "warning"),
     "diff": (pgettext_lazy(_CTX, "böyük dəyişiklik"), "primary"),
@@ -43,6 +55,7 @@ RISK_LABELS = {
 }
 
 _TODAY = pgettext_lazy(_CTX, "bugün gəlib")
+_SLA_BREACH = pgettext_lazy(_CTX, "%(days)s gündür gözləyir — SLA %(sla)s gün")
 _WAITING = pgettext_lazy(_CTX, "%(days)s gündür gözləyir")
 _ACTIVE_VERSION = pgettext_lazy(_CTX, "%(version)s aktivdir")
 _UNKNOWN_PERSON = pgettext_lazy(_CTX, "Müəllif göstərilməyib")
@@ -65,15 +78,23 @@ def waiting_days(version, *, now) -> int:
     return max((now - moment).days, 0)
 
 
-def wait_text(days: int) -> str:
-    """«bugün gəlib» / «N gündür gözləyir» — cədvəl və panel üçün EYNİ mətn."""
-    return str(_TODAY) if days == 0 else str(_WAITING) % {"days": days}
+def wait_text(days: int, *, sla: int | None = None) -> str:
+    """«bugün gəlib» / «N gündür gözləyir» — cədvəl və panel üçün EYNİ mətn.
+
+    SLA verilibsə və aşılıbsa mətn həddi də göstərir («… — SLA 5 gün»), çünki
+    rəng tək başına status daşıya bilməz (a11y: §7 «status yalnız rənglə deyil»).
+    """
+    if days == 0:
+        return str(_TODAY)
+    if sla and days > sla:
+        return str(_SLA_BREACH) % {"days": days, "sla": sla}
+    return str(_WAITING) % {"days": days}
 
 
-def wait_tone(days: int) -> str:
-    if days >= LATE_DAYS:
+def wait_tone(days: int, *, warn: int = WARN_DAYS, late: int = LATE_DAYS) -> str:
+    if days >= late:
         return "danger"
-    if days >= WARN_DAYS:
+    if days > warn:
         return "warning"
     return "muted"
 
@@ -87,9 +108,9 @@ def percent_tone(percent: int) -> str:
     return "warning"
 
 
-def risk_keys(version, *, days: int, policy_breach: bool) -> list:
+def risk_keys(version, *, days: int, policy_breach: bool, late: int = LATE_DAYS) -> list:
     keys = []
-    if days >= LATE_DAYS:
+    if days >= late:
         keys.append("late")
     if (version.completion_percent or 0) < 100:
         keys.append("miss")
@@ -100,15 +121,15 @@ def risk_keys(version, *, days: int, policy_breach: bool) -> list:
     return keys or ["none"]
 
 
-def build_risks(version, *, days: int, policy_breach: bool) -> list:
+def build_risks(version, *, days: int, policy_breach: bool, late: int = LATE_DAYS) -> list:
     rows = []
-    for key in risk_keys(version, days=days, policy_breach=policy_breach):
+    for key in risk_keys(version, days=days, policy_breach=policy_breach, late=late):
         label, tone = RISK_LABELS[key]
         rows.append({"key": key, "label": label, "tone": tone})
     return rows
 
 
-def build_queue_row(version, *, now, policy_breach: bool = False) -> dict:
+def build_queue_row(version, *, now, policy_breach: bool = False, warn: int = WARN_DAYS, late: int = LATE_DAYS) -> dict:
     """Bir təsdiq növbəsi sətri (dizayn §3.3 cədvəlinin 7 sütunu)."""
     syllabus = version.syllabus
     days = waiting_days(version, now=now)
@@ -129,13 +150,14 @@ def build_queue_row(version, *, now, policy_breach: bool = False) -> dict:
         "chair": syllabus.chair_unit.name if syllabus.chair_unit_id else str(_NO_CHAIR),
         "sent": version.submitted_at,
         "wait_days": days,
-        "wait_text": wait_text(days),
-        "wait_tone": wait_tone(days),
+        "wait_text": wait_text(days, sla=warn),
+        "wait_tone": wait_tone(days, warn=warn, late=late),
+        "sla_breached": days > warn,
         "percent": percent,
         "percent_tone": percent_tone(percent),
         "version_label": version.label,
         "active_version": (str(_ACTIVE_VERSION) % {"version": approved.label} if approved is not None else _DASH),
-        "risks": build_risks(version, days=days, policy_breach=policy_breach),
+        "risks": build_risks(version, days=days, policy_breach=policy_breach, late=late),
         "status_key": version.status,
         "status_label": SyllabusStatus(version.status).label,
         "status_tone": STATUS_TONES.get(version.status, "neutral"),
@@ -151,6 +173,7 @@ __all__ = [
     "percent_tone",
     "person",
     "risk_keys",
+    "thresholds",
     "wait_text",
     "wait_tone",
     "waiting_days",
