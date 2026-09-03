@@ -39,10 +39,19 @@ class AdmissionRecordFields(models.Model):
 
     #: ATİS (Dövlət İmtahan Mərkəzi) sətir identifikatoru — idxalın idempotentlik
     #: açarı DEYİL (o, FİN-dir); yalnız mənbəyə istinad üçün saxlanılır.
+    #: `db_default` (Django 5+) — Django-nun adi `default=` arqumenti YALNIZ
+    #: ORM-dən (`Model.save()`) keçən yazılara tətbiq olunur; `AddField`
+    #: miqrasiyası mövcud sətirləri doldurmaq üçün MÜVƏQQƏTİ DB defaultu
+    #: qoyur, sonra onu SİLİR (Django-nun standart davranışı). Nəticədə xam
+    #: SQL `INSERT` (test/legacy-repair/ATİS idxal skripti bu sütunları
+    #: buraxsa) `NOT NULL` pozuntusu ilə uğursuz olur — `0068` miqrasiyası
+    #: bunu server-side DEFAULT əlavə edərək bağlayır (bax audit
+    #: `apps/accounts/tests/test_account_archive_postgres.py`).
     atis_id = models.CharField(
         max_length=64,
         blank=True,
         default="",
+        db_default="",
         db_index=True,
         help_text="ATİS qəbul siyahısındakı sətir nömrəsi/identifikatoru.",
     )
@@ -57,12 +66,14 @@ class AdmissionRecordFields(models.Model):
         max_length=64,
         blank=True,
         default="",
+        db_default="",
         help_text="İmtahan növü/qrupu (məs. «I qrup», «Blok», «Magistratura»).",
     )
     education_form = models.CharField(
         max_length=16,
         choices=EducationForm.choices,
         default=EducationForm.FULL_TIME,
+        db_default=EducationForm.FULL_TIME,
         db_index=True,
         help_text="Tələbənin təhsil forması (ixtisasın default formasından fərqlənə bilər).",
     )
@@ -70,6 +81,7 @@ class AdmissionRecordFields(models.Model):
         max_length=16,
         choices=FundingType.choices,
         default=FundingType.PAID,
+        db_default=FundingType.PAID,
         db_index=True,
         help_text="Maliyyələşmə mənbəyi (dövlət sifarişi / ödənişli).",
     )

@@ -62767,3 +62767,1875 @@ msgstr "Выпускник"
 msgctxt "ui.status"
 msgid "Xaric edilib"
 msgstr "Отчислен(а)"
+
+msgctxt "accounts.syllabus"
+msgid "Sərbəst bölünən %(need)s bal tam paylanmayıb (hazırda %(have)s) — cəm 100 olmalıdır"
+msgstr "Свободно распределяемые %(need)s баллов распределены не полностью (сейчас %(have)s) — сумма должна быть 100"
+
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə çəkisi mənfi ola bilməz"
+msgstr "Вес оценивания не может быть отрицательным"
+
+msgctxt "accounts.syllabus"
+msgid "Qiymətləndirmə bölgüsü siyasətə uyğun deyil: sərbəst bölünən %(need)s bal tam paylanmalıdır."
+msgstr "Распределение оценивания не соответствует политике: свободно распределяемые %(need)s баллов должны быть распределены полностью."
+
+msgctxt "accounts.syllabus"
+msgid "Mövzu, çəki və ya struktur dəyişdiyi üçün versiya avtomatik BÖYÜK versiyaya qaldırıldı — dəyişiklik növbəti semestrdən qüvvəyə minir."
+msgstr "Поскольку тема, вес или структура изменились, версия была автоматически повышена до ГЛАВНОЙ версии — изменение вступает в силу со следующего семестра."
+
+msgctxt "accounts.syllabus"
+msgid "SLA-nı keçib"
+msgstr "Просрочено по SLA"
+
+msgctxt "accounts.syllabus"
+msgid "%(days)s gündən çox kafedra növbəsindədir"
+msgstr "Уже более %(days)s дней ожидает на кафедре"
+
+msgctxt "accounts.syllabus"
+msgid "%(days)s gündür gözləyir — SLA %(sla)s gün"
+msgstr "Ожидает %(days)s дней — SLA %(sla)s дней"
+
+msgctxt "accounts.syllabus"
+msgid "%(days)s gündən çox gözləyir"
+msgstr "Ожидает более %(days)s дней"
+
+msgctxt "accounts.syllabus"
+msgid "Eskalasiya həddini keçib"
+msgstr "Превышен порог эскалации"
+
+msgctxt "accounts.syllabus"
+msgid "hədəf: SLA çərçivəsində"
+msgstr "цель: в рамках SLA"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 20 simvol — səbəb audit izinə yazılır."
+msgstr "Не менее 20 символов — причина записывается в журнал аудита."
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı 20 simvol — səbəb məcburidir."
+msgstr "Не менее 20 символов — причина обязательна."
+
+msgctxt "registrar.journal"
+msgid "mühazirə"
+msgstr "лекция"
+
+msgctxt "registrar.journal"
+msgid "seminar"
+msgstr "семинар"
+
+msgctxt "registrar.journal"
+msgid "laboratoriya"
+msgstr "лаборатория"
+
+msgctxt "registrar.journal"
+msgid "Təsdiqlənmiş sillabus və kurs mövzu planı yoxdur — mövzunu əl ilə yazın."
+msgstr "Нет утверждённого силлабуса или плана тем курса — введите тему вручную."
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslər"
+msgstr "Сегодня / ближайшие занятия"
+
+msgctxt "accounts.lessons_log"
+msgid "Aktiv təşkilat konteksti yoxdur"
+msgstr "Нет активного контекста организации"
+
+msgctxt "accounts.lessons_log"
+msgid "Auditoriya saatı"
+msgstr "Аудиторные часы"
+
+msgctxt "accounts.lessons_log"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.lessons_log"
+msgid "Bazar"
+msgstr "Воскресенье"
+
+msgctxt "accounts.lessons_log"
+msgid "Bazar ertəsi"
+msgstr "Понедельник"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fənlər"
+msgstr "Все дисциплины"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün müəllimlər"
+msgstr "Все преподаватели"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün tiplər"
+msgstr "Все типы"
+
+msgctxt "accounts.lessons_log"
+msgid "Cümə"
+msgstr "Пятница"
+
+msgctxt "accounts.lessons_log"
+msgid "Cümə axşamı"
+msgstr "Четверг"
+
+msgctxt "accounts.lessons_log"
+msgid "Dövr"
+msgstr "Период"
+
+msgctxt "accounts.lessons_log"
+msgid "Dövrü genişləndirin və ya filtrləri sıfırlayın."
+msgstr "Расширьте период или сбросьте фильтры."
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs əlavə et"
+msgstr "Добавить занятие"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərsin tipi"
+msgstr "Тип занятия"
+
+msgctxt "accounts.lessons_log"
+msgid "Elektron jurnal"
+msgstr "Электронный журнал"
+
+msgctxt "accounts.lessons_log"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.lessons_log"
+msgid "Fənn və qrup"
+msgstr "Дисциплина и группа"
+
+msgctxt "accounts.lessons_log"
+msgid "Gec yazılan qeyd"
+msgstr "Поздняя запись"
+
+msgctxt "accounts.lessons_log"
+msgid "Hesabatı yüklə"
+msgstr "Скачать отчёт"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal qeydi"
+msgstr "Запись в журнале"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnalı aç"
+msgstr "Открыть журнал"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnalı boş dərs"
+msgstr "Занятие с пустым журналом"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedranın müəllimləri hansı dərsi, hansı qrupa, hansı mövzu ilə keçib. Jurnalı vaxtında doldurulmayan dərslər ayrıca işarələnir."
+msgstr "Какое занятие преподаватели кафедры провели, для какой группы, по какой теме. Занятия, журнал которых не был заполнен вовремя, отмечаются отдельно."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçdiyiniz dərslərin qeydi — hansı qrupa, hansı mövzunu, neçə saat. Dövrü dəyişib istənilən aralığa baxa bilərsiniz."
+msgstr "Запись проведённых вами занятий — какой группе, какую тему, сколько часов. Вы можете изменить период, чтобы посмотреть любой диапазон."
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilmiş dərs"
+msgstr "Проведённое занятие"
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilən mövzu"
+msgstr "Пройденная тема"
+
+msgctxt "accounts.lessons_log"
+msgid "Mövzu yazılmayıb"
+msgstr "Тема не указана"
+
+msgctxt "accounts.lessons_log"
+msgid "Mövzu, fənn və ya qrup axtar"
+msgstr "Поиск по теме, дисциплине или группе"
+
+msgctxt "accounts.lessons_log"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.lessons_log"
+msgid "Orta iştirak"
+msgstr "Средняя посещаемость"
+
+msgctxt "accounts.lessons_log"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.lessons_log"
+msgid "Saat"
+msgstr "Час"
+
+msgctxt "accounts.lessons_log"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.lessons_log"
+msgid "Seçilmiş dövrdə dərs qeydi yoxdur"
+msgstr "За выбранный период нет записей занятий"
+
+msgctxt "accounts.lessons_log"
+msgid "Sillabus mövzu əhatəsi"
+msgstr "Охват тем силлабуса"
+
+msgctxt "accounts.lessons_log"
+msgid "Təsdiqlənmiş sillabus yoxdur"
+msgstr "Нет утверждённого силлабуса"
+
+msgctxt "accounts.lessons_log"
+msgid "Təşkilat seçin və ya administratora müraciət edin."
+msgstr "Выберите организацию или обратитесь к администратору."
+
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi"
+msgstr "всего академических часов"
+
+msgctxt "accounts.lessons_log"
+msgid "dərs"
+msgstr "занятие"
+
+msgctxt "accounts.lessons_log"
+msgid "dərsdən 48 saat sonra"
+msgstr "через 48 часов после занятия"
+
+msgctxt "accounts.lessons_log"
+msgid "dərsə gələn tələbə payı"
+msgstr "доля студентов, посетивших занятие"
+
+msgctxt "accounts.lessons_log"
+msgid "gecikmə yoxdur"
+msgstr "без задержки"
+
+msgctxt "accounts.lessons_log"
+msgid "hamısı doldurulub"
+msgstr "все заполнено"
+
+msgctxt "accounts.lessons_log"
+msgid "mövzu"
+msgstr "тема"
+
+msgctxt "accounts.lessons_log"
+msgid "mövzu və qiymət yazılmayıb"
+msgstr "тема и оценка не указаны"
+
+msgctxt "accounts.lessons_log"
+msgid "saat"
+msgstr "час"
+
+msgctxt "accounts.lessons_log"
+msgid "seçilmiş dövrdə"
+msgstr "за выбранный период"
+
+msgctxt "accounts.lessons_log"
+msgid "Çərşənbə"
+msgstr "Среда"
+
+msgctxt "accounts.lessons_log"
+msgid "Çərşənbə axşamı"
+msgstr "Вторник"
+
+msgctxt "accounts.lessons_log"
+msgid "Üzrlü qayıb"
+msgstr "Уважительный пропуск"
+
+msgctxt "accounts.lessons_log"
+msgid "İlk %(cap)s dərs göstərilir — cəmi %(total)s qeyd var. Daha dar dövr seçin və ya hesabatı yükləyin."
+msgstr "Показаны первые %(cap)s занятий — всего %(total)s записей. Выберите более узкий период или скачайте отчёт."
+
+msgctxt "accounts.lessons_log"
+msgid "İştirak"
+msgstr "Посещаемость"
+
+msgctxt "accounts.lessons_log"
+msgid "Şənbə"
+msgstr "Суббота"
+
+msgctxt "profile.results"
+msgid "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü."
+msgstr "Эта страница является неофициальной предварительной копией. Заверенный печатью транскрипт выдаётся по заявке в Центр обслуживания студентов — среднее время ответа 3 рабочих дня."
+
+msgctxt "profile.results"
+msgid "Rəsmi transkript"
+msgstr "Официальный транскрипт"
+
+msgctxt "profile.results"
+msgid "Transkript sorğusu göndər"
+msgstr "Отправить запрос на транскрипт"
+
+msgctxt "profile.sidebar"
+msgid "Keçilmiş dərslər"
+msgstr "Проведённые занятия"
+
+msgctxt "profile.subjects"
+msgid "Cari qiymətləndirmə"
+msgstr "Текущее оценивание"
+
+msgctxt "profile.subjects"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "profile.subjects"
+msgid "Davamiyyət"
+msgstr "Посещаемость"
+
+msgctxt "profile.subjects"
+msgid "Qiymətləndirmə strukturu"
+msgstr "Структура оценивания"
+
+msgctxt "profile.subjects"
+msgid "Sillabus (təsdiqlənmiş)"
+msgstr "Силлабус (утверждён)"
+
+msgctxt "profile.subjects"
+msgid "Sərbəst iş"
+msgstr "Самостоятельная работа"
+
+msgctxt "profile.subjects"
+msgid "Yekun imtahan"
+msgstr "Итоговый экзамен"
+
+msgctxt "profile.transcript"
+msgid "Bu səhifə qeyri-rəsmi baxış nüsxəsidir. Möhürlü/imzalı rəsmi transkript Tələbə Xidmətləri Mərkəzinə müraciət əsasında verilir — orta cavab müddəti 3 iş günü."
+msgstr "Эта страница является неофициальной предварительной копией. Официальный транскрипт с печатью/подписью выдаётся по заявке в Центр обслуживания студентов — среднее время ответа 3 рабочих дня."
+
+msgctxt "profile.transcript"
+msgid "Rəsmi transkript Tələbə Xidmətləri Mərkəzindən sorğu ilə verilir (3 iş günü)."
+msgstr "Официальный транскрипт выдаётся Центром обслуживания студентов по заявке (3 рабочих дня)."
+
+msgctxt "profile.transcript"
+msgid "Transkript sorğusu göndər"
+msgstr "Отправить запрос на транскрипт"
+
+msgctxt "registrar.journal_policy"
+msgid "Jurnal təsdiqlənmiş sillabus olmadan açılmır"
+msgstr "Журнал не открывается без утверждённого силлабуса"
+
+msgctxt "registrar.journal_policy"
+msgid "Sillabusa keç"
+msgstr "Перейти к силлабусу"
+
+msgctxt "registrar.journal_policy"
+msgid "Universitet siyasətinə görə dərs sətri yalnız təsdiqlənmiş sillabusdan yaradılır: mövzu, saat bölgüsü və qiymətləndirmə strukturu oradan gəlir. Jurnal yalnız oxunuş rejimindədir — sillabusu tamamlayıb kafedra müdirinin təsdiqinə göndərin."
+msgstr "Согласно политике университета, строка занятия создаётся только из утверждённого силлабуса: тема, распределение часов и структура оценивания берутся из него. Журнал доступен только для чтения — завершите силлабус и отправьте его на утверждение заведующему кафедрой."
+
+msgctxt "registrar.lessons_log"
+msgid "Akademik saat"
+msgstr "Академический час"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu ay"
+msgstr "Этот месяц"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu gün"
+msgstr "Сегодня"
+
+msgctxt "registrar.lessons_log"
+msgid "Bu həftə"
+msgstr "Эта неделя"
+
+msgctxt "registrar.lessons_log"
+msgid "Dövr"
+msgstr "Период"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərsin tipi"
+msgstr "Тип занятия"
+
+msgctxt "registrar.lessons_log"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "registrar.lessons_log"
+msgid "Fənn kodu"
+msgstr "Код дисциплины"
+
+msgctxt "registrar.lessons_log"
+msgid "Gec yazılıb"
+msgstr "Записано с опозданием"
+
+msgctxt "registrar.lessons_log"
+msgid "Jurnal boşdur"
+msgstr "Журнал пуст"
+
+msgctxt "registrar.lessons_log"
+msgid "Jurnal qeydi"
+msgstr "Запись в журнале"
+
+msgctxt "registrar.lessons_log"
+msgid "Mövzu"
+msgstr "Тема"
+
+msgctxt "registrar.lessons_log"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "registrar.lessons_log"
+msgid "Otaq"
+msgstr "Аудитория"
+
+msgctxt "registrar.lessons_log"
+msgid "Qayıb"
+msgstr "Пропуск"
+
+msgctxt "registrar.lessons_log"
+msgid "Qiymətləndirilib"
+msgstr "Оценено"
+
+msgctxt "registrar.lessons_log"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "registrar.lessons_log"
+msgid "Saat"
+msgstr "Час"
+
+msgctxt "registrar.lessons_log"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "registrar.lessons_log"
+msgid "Seçilmiş aralıq"
+msgstr "Выбранный диапазон"
+
+msgctxt "registrar.lessons_log"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "registrar.lessons_log"
+msgid "Vaxtında yazılıb"
+msgstr "Записано вовремя"
+
+msgctxt "registrar.lessons_log"
+msgid "Üzrlü"
+msgstr "Уважительная"
+
+msgctxt "registrar.lessons_log"
+msgid "İl"
+msgstr "Год"
+
+msgctxt "registrar.lessons_log"
+msgid "İştirak"
+msgstr "Посещаемость"
+
+msgctxt "accounts.workload"
+msgid "Bölgü yalnız fakültə dilimlərinin hamısı təsdiqləndikdən sonra açılır."
+msgstr "Распределение открывается только после утверждения всех факультетских долей."
+
+msgctxt "accounts.workload"
+msgid "Etiraz bildir"
+msgstr "Подать возражение"
+
+msgctxt "accounts.workload"
+msgid "Etiraz bölgünü dayandırmır — sətri yenidən bölün və ya etirazı qərarla bağlayın (qərar audit jurnalına yazılır)."
+msgstr "Возражение не останавливает распределение — перераспределите строку заново или закройте возражение решением (решение записывается в журнал аудита)."
+
+msgctxt "accounts.workload"
+msgid "Etiraz kafedra müdirinə və dekanlığa göndərilir. Mətn sonradan dəyişdirilmir."
+msgstr "Возражение отправляется заведующему кафедрой и деканату. Текст впоследствии не может быть изменён."
+
+msgctxt "accounts.workload"
+msgid "Etiraz qəbul edilsin? Sətri yenidən bölməyi unutmayın."
+msgstr "Принять возражение? Не забудьте перераспределить строку заново."
+
+msgctxt "accounts.workload"
+msgid "Etiraz rədd edilsin?"
+msgstr "Отклонить возражение?"
+
+msgctxt "accounts.workload"
+msgid "Etirazlarım"
+msgstr "Мои возражения"
+
+msgctxt "accounts.workload"
+msgid "Fənn / iş"
+msgstr "Дисциплина / работа"
+
+msgctxt "accounts.workload"
+msgid "Göndər"
+msgstr "Отправить"
+
+msgctxt "accounts.workload"
+msgid "Kafedra müdiri 3 iş günü ərzində cavab verir."
+msgstr "Заведующий кафедрой отвечает в течение 3 рабочих дней."
+
+msgctxt "accounts.workload"
+msgid "Müəllim etirazları"
+msgstr "Возражения преподавателей"
+
+msgctxt "accounts.workload"
+msgid "Qəbul et"
+msgstr "Принять"
+
+msgctxt "accounts.workload"
+msgid "Rədd et"
+msgstr "Отклонить"
+
+msgctxt "accounts.workload"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "accounts.workload"
+msgid "Tapşırıq dekanlıq təsdiqini gözləyir"
+msgstr "Задание ожидает утверждения деканата"
+
+msgctxt "accounts.workload"
+msgid "Yük üzrə etiraz bildir"
+msgstr "Подать возражение по нагрузке"
+
+msgctxt "accounts.workload"
+msgid "Yükü təsdiqlə"
+msgstr "Утвердить нагрузку"
+
+msgctxt "accounts.workload"
+msgid "Yükü təsdiqləmisiniz"
+msgstr "Вы утвердили нагрузку"
+
+msgctxt "accounts.workload"
+msgid "İllik dərs yükünüzü təsdiqləyirsiniz? Təsdiq audit jurnalına yazılır."
+msgstr "Вы утверждаете свою годовую учебную нагрузку? Утверждение записывается в журнал аудита."
+
+msgctxt "accounts.workload"
+msgid "İzah"
+msgstr "Пояснение"
+
+msgctxt "accounts.workload_approval"
+msgid "%%d sətir seçilib"
+msgstr "Выбрано строк: %%d"
+
+msgctxt "accounts.workload_approval"
+msgid "%(name)s sətrini seç"
+msgstr "Выбрать строку %(name)s"
+
+msgctxt "accounts.workload_approval"
+msgid "Arxiv rejimi"
+msgstr "Режим архива"
+
+msgctxt "accounts.workload_approval"
+msgid "Baxılıb"
+msgstr "Рассмотрено"
+
+msgctxt "accounts.workload_approval"
+msgid "Bu fakültə üçün göndərilmiş tapşırıq sətri tapılmadı."
+msgstr "Для этого факультета не найдено отправленных строк задания."
+
+msgctxt "accounts.workload_approval"
+msgid "Bu fakültə üçün sətir yoxdur."
+msgstr "Для этого факультета нет строк."
+
+msgctxt "accounts.workload_approval"
+msgid "CƏMİ KREDİT"
+msgstr "ВСЕГО КРЕДИТОВ"
+
+msgctxt "accounts.workload_approval"
+msgid "Dilim qərarlarının tarixçəsi"
+msgstr "История решений по доле"
+
+msgctxt "accounts.workload_approval"
+msgid "Dilim təsdiqlənsin? Təsdiqdən sonra dilim yalnız oxunuş rejimində qalır və kafedra bölgüsü açılır."
+msgstr "Утвердить долю? После утверждения доля остаётся доступной только для чтения, и открывается распределение по кафедрам."
+
+msgctxt "accounts.workload_approval"
+msgid "Dilimdə sətir yoxdur"
+msgstr "В доле нет строк"
+
+msgctxt "accounts.workload_approval"
+msgid "Dilimi TƏSDİQLƏ"
+msgstr "УТВЕРДИТЬ долю"
+
+msgctxt "accounts.workload_approval"
+msgid "DİLİMİN CƏMİ SAATI"
+msgstr "ВСЕГО ЧАСОВ ДОЛИ"
+
+msgctxt "accounts.workload_approval"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.workload_approval"
+msgid "Fakültə yükü"
+msgstr "Нагрузка факультета"
+
+msgctxt "accounts.workload_approval"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.workload_approval"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "accounts.workload_approval"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.workload_approval"
+msgid "Hələ qərar verilməyib"
+msgstr "Решение ещё не принято"
+
+msgctxt "accounts.workload_approval"
+msgid "Hərəkət jurnalı"
+msgstr "Журнал действий"
+
+msgctxt "accounts.workload_approval"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.workload_approval"
+msgid "Kafedralar üzrə yekun"
+msgstr "Итог по кафедрам"
+
+msgctxt "accounts.workload_approval"
+msgid "Kafedraların yük paketlərini fakültə dilimi üzrə təsdiqləyin və ya səbəblə qaytarın."
+msgstr "Утвердите пакеты нагрузки кафедр в рамках факультетской доли или верните их с указанием причины."
+
+msgctxt "accounts.workload_approval"
+msgid "Keçmiş tədris ili yalnız oxunuş üçün açıqdır."
+msgstr "Прошедший учебный год открыт только для чтения."
+
+msgctxt "accounts.workload_approval"
+msgid "Koordinator vizası"
+msgstr "Виза координатора"
+
+msgctxt "accounts.workload_approval"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "accounts.workload_approval"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Результат: %(count)d строк"
+
+msgctxt "accounts.workload_approval"
+msgid "Qaytar"
+msgstr "Вернуть"
+
+msgctxt "accounts.workload_approval"
+msgid "Qaytarma səbəbi"
+msgstr "Причина возврата"
+
+msgctxt "accounts.workload_approval"
+msgid "Qaytarma səbəbi tədris şöbəsinə və kafedra rəhbərinə bildiriş kimi gedir və audit jurnalına yazılır."
+msgstr "Причина возврата отправляется в виде уведомления в учебный отдел и заведующему кафедрой и записывается в журнал аудита."
+
+msgctxt "accounts.workload_approval"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "accounts.workload_approval"
+msgid "Saat"
+msgstr "Час"
+
+msgctxt "accounts.workload_approval"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.workload_approval"
+msgid "Seç"
+msgstr "Выбрать"
+
+msgctxt "accounts.workload_approval"
+msgid "Seçilmiş sətirləri qaytar"
+msgstr "Вернуть выбранные строки"
+
+msgctxt "accounts.workload_approval"
+msgid "Seçilmişləri qaytar"
+msgstr "Вернуть выбранные"
+
+msgctxt "accounts.workload_approval"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.workload_approval"
+msgid "Sətir"
+msgstr "Строка"
+
+msgctxt "accounts.workload_approval"
+msgid "Sətir seçilməyib"
+msgstr "Строка не выбрана"
+
+msgctxt "accounts.workload_approval"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "accounts.workload_approval"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.workload_approval"
+msgid "Təsdiq görünüşləri"
+msgstr "Представления утверждения"
+
+msgctxt "accounts.workload_approval"
+msgid "Təsdiq növbəsi"
+msgstr "Очередь на утверждение"
+
+msgctxt "accounts.workload_approval"
+msgid "Viza"
+msgstr "Виза"
+
+msgctxt "accounts.workload_approval"
+msgid "Yük təsdiqi üçün «Tapşırığı təsdiqləmək» səlahiyyəti tələb olunur."
+msgstr "Для утверждения нагрузки требуется полномочие «Утвердить задание»."
+
+msgctxt "accounts.workload_approval"
+msgid "İRADLI SƏTİR"
+msgstr "СТРОКА С ЗАМЕЧАНИЕМ"
+
+msgctxt "accounts.workload_approval"
+msgid "İXTİSAS SAYI"
+msgstr "КОЛИЧЕСТВО СПЕЦИАЛЬНОСТЕЙ"
+
+msgctxt "accounts.workload_approval"
+msgid "İradlı"
+msgstr "С замечанием"
+
+msgctxt "accounts.workload_approval"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "accounts.workload_center"
+msgid ".xlsx və ya .xlsm · maksimum 10 MB · sütun adları dəyişdirilməməlidir."
+msgstr ".xlsx или .xlsm · максимум 10 МБ · названия столбцов менять нельзя."
+
+msgctxt "accounts.workload_center"
+msgid "Arxiv rejimi"
+msgstr "Режим архива"
+
+msgctxt "accounts.workload_center"
+msgid "Bax"
+msgstr "Просмотр"
+
+msgctxt "accounts.workload_center"
+msgid "Birl."
+msgstr "Объед."
+
+msgctxt "accounts.workload_center"
+msgid "Boş buraxsanız kafedranın bütün ixtisasları götürülür."
+msgstr "Если оставить пустым, будут взяты все специальности кафедры."
+
+msgctxt "accounts.workload_center"
+msgid "Bu bölmədə hələ məlumat yoxdur"
+msgstr "В этом разделе пока нет данных"
+
+msgctxt "accounts.workload_center"
+msgid "Bu sətirlərdə ixtisas göstərilməyib — dekanlıq dilimi yaranmır və sənəd göndərilmir."
+msgstr "В этих строках не указана специальность — доля деканата не создаётся, и документ не отправляется."
+
+msgctxt "accounts.workload_center"
+msgid "Buraxılış"
+msgstr "Выпуск"
+
+msgctxt "accounts.workload_center"
+msgid "Bölüşdürülüb"
+msgstr "Распределено"
+
+msgctxt "accounts.workload_center"
+msgid "CƏMİ KAFEDRA"
+msgstr "ВСЕГО КАФЕДР"
+
+msgctxt "accounts.workload_center"
+msgid "CƏMİ KREDİT"
+msgstr "ВСЕГО КРЕДИТОВ"
+
+msgctxt "accounts.workload_center"
+msgid "CƏMİ SAAT"
+msgstr "ВСЕГО ЧАСОВ"
+
+msgctxt "accounts.workload_center"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "accounts.workload_center"
+msgid "Dekan qərarı"
+msgstr "Решение декана"
+
+msgctxt "accounts.workload_center"
+msgid "Dekanlıqlara göndər"
+msgstr "Отправить в деканаты"
+
+msgctxt "accounts.workload_center"
+msgid "Doktorant"
+msgstr "Докторант"
+
+msgctxt "accounts.workload_center"
+msgid "Dərs yükü mərkəzinin görünüşləri"
+msgstr "Представления центра учебной нагрузки"
+
+msgctxt "accounts.workload_center"
+msgid "Dərs yükü mərkəzinə giriş üçün «Tədris tapşırığını idarə etmək» səlahiyyəti tələb olunur."
+msgstr "Для доступа к центру учебной нагрузки требуется полномочие «Управлять учебным заданием»."
+
+msgctxt "accounts.workload_center"
+msgid "Excel faylı"
+msgstr "Файл Excel"
+
+msgctxt "accounts.workload_center"
+msgid "Excel faylı yüklə"
+msgstr "Загрузить файл Excel"
+
+msgctxt "accounts.workload_center"
+msgid "Excel idxalının mərhələləri"
+msgstr "Этапы импорта Excel"
+
+msgctxt "accounts.workload_center"
+msgid "Excel import"
+msgstr "Импорт Excel"
+
+msgctxt "accounts.workload_center"
+msgid "FAKÜLTƏ DİLİMİ"
+msgstr "ДОЛЯ ФАКУЛЬТЕТА"
+
+msgctxt "accounts.workload_center"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.workload_center"
+msgid "Fakültə dilimləri"
+msgstr "Доли факультетов"
+
+msgctxt "accounts.workload_center"
+msgid "Fayl yüklə"
+msgstr "Загрузить файл"
+
+msgctxt "accounts.workload_center"
+msgid "Fayldakı ad"
+msgstr "Имя в файле"
+
+msgctxt "accounts.workload_center"
+msgid "Faylı oxu"
+msgstr "Прочитать файл"
+
+msgctxt "accounts.workload_center"
+msgid "Forma"
+msgstr "Форма"
+
+msgctxt "accounts.workload_center"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.workload_center"
+msgid "GÖNDƏRİLMİŞ"
+msgstr "ОТПРАВЛЕНО"
+
+msgctxt "accounts.workload_center"
+msgid "GÖZLƏYİR"
+msgstr "ОЖИДАЕТ"
+
+msgctxt "accounts.workload_center"
+msgid "Göndərilib"
+msgstr "Отправлено"
+
+msgctxt "accounts.workload_center"
+msgid "Göndərmədən əvvəl yoxlama"
+msgstr "Проверка перед отправкой"
+
+msgctxt "accounts.workload_center"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.workload_center"
+msgid "Hesabatlar"
+msgstr "Отчёты"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedra tapılmadı"
+msgstr "Кафедра не найдена"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedra tapşırıqları"
+msgstr "Задания кафедры"
+
+msgctxt "accounts.workload_center"
+msgid "Kafedra üçün seçilmiş tədris ilinin sənədi yaradılır (kafedraya ildə bir sənəd)."
+msgstr "Для кафедры создаётся документ на выбранный учебный год (один документ на кафедру в год)."
+
+msgctxt "accounts.workload_center"
+msgid "Kataloq uyğunluğu"
+msgstr "Соответствие каталогу"
+
+msgctxt "accounts.workload_center"
+msgid "Keçmiş tədris ili yalnız oxunuş üçün açıqdır — yazma əməlləri bağlıdır."
+msgstr "Прошедший учебный год открыт только для чтения — операции записи отключены."
+
+msgctxt "accounts.workload_center"
+msgid "Koordinator vizası"
+msgstr "Виза координатора"
+
+msgctxt "accounts.workload_center"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "accounts.workload_center"
+msgid "Laboratoriya (plan/cəmi)"
+msgstr "Лаборатория (план/итого)"
+
+msgctxt "accounts.workload_center"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "accounts.workload_center"
+msgid "Marşrutsuz sətirlər"
+msgstr "Строки без маршрута"
+
+msgctxt "accounts.workload_center"
+msgid "Mühazirə (plan/cəmi)"
+msgstr "Лекция (план/итого)"
+
+msgctxt "accounts.workload_center"
+msgid "MƏTN KİMİ QALAN"
+msgstr "ОСТАВЛЕНО КАК ТЕКСТ"
+
+msgctxt "accounts.workload_center"
+msgid "Məsləhət"
+msgstr "Консультация"
+
+msgctxt "accounts.workload_center"
+msgid "Mətn kimi qalacaq"
+msgstr "Останется как текст"
+
+msgctxt "accounts.workload_center"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "accounts.workload_center"
+msgid "Nəticə"
+msgstr "Результат"
+
+msgctxt "accounts.workload_center"
+msgid "Nəticə: %(count)d kafedra"
+msgstr "Результат: %(count)d кафедр"
+
+msgctxt "accounts.workload_center"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Результат: %(count)d строк"
+
+msgctxt "accounts.workload_center"
+msgid "PAYIZ CƏMİ"
+msgstr "ИТОГО ОСЕНЬ"
+
+msgctxt "accounts.workload_center"
+msgid "Parametrlər"
+msgstr "Параметры"
+
+msgctxt "accounts.workload_center"
+msgid "Payız"
+msgstr "Осень"
+
+msgctxt "accounts.workload_center"
+msgid "QAYTARILIB"
+msgstr "ВОЗВРАЩЕНО"
+
+msgctxt "accounts.workload_center"
+msgid "QAYTARILMIŞ"
+msgstr "ВОЗВРАЩЁННЫЕ"
+
+msgctxt "accounts.workload_center"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "accounts.workload_center"
+msgid "Qaytarılan sətirlər"
+msgstr "Возвращённые строки"
+
+msgctxt "accounts.workload_center"
+msgid "Qaytarılıb"
+msgstr "Возвращено"
+
+msgctxt "accounts.workload_center"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "accounts.workload_center"
+msgid "Rəsmi TAPŞIRIQ şablonu (.xlsx / .xlsm, ≤10 MB). Kataloqda tapılmayan fənn və qruplar MƏTN kimi saxlanılır və sonradan bağlana bilər."
+msgstr "Официальный шаблон ЗАДАНИЯ (.xlsx / .xlsm, ≤10 МБ). Дисциплины и группы, не найденные в каталоге, сохраняются как ТЕКСТ и могут быть привязаны позже."
+
+msgctxt "accounts.workload_center"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.workload_center"
+msgid "Seminar (plan/cəmi)"
+msgstr "Семинар (план/итого)"
+
+msgctxt "accounts.workload_center"
+msgid "Seçilmiş filtrlərə uyğun kafedra yoxdur — «Sıfırla» ilə filtrləri təmizləyin."
+msgstr "Нет кафедры, соответствующей выбранным фильтрам — очистите фильтры с помощью «Сбросить»."
+
+msgctxt "accounts.workload_center"
+msgid "Seçilmiş filtrlərə uyğun sətir tapılmadı"
+msgstr "Не найдено строк, соответствующих выбранным фильтрам"
+
+msgctxt "accounts.workload_center"
+msgid "Seçilmiş ixtisasların TƏSDİQLƏNMİŞ planından sətirlər yaradılır. Əməl idempotentdir — mövcud sətir təkrarlanmır və heç nə əzilmir."
+msgstr "Строки создаются из УТВЕРЖДЁННОГО учебного плана выбранных специальностей. Действие идемпотентно — существующие строки не дублируются, ничего не перезаписывается."
+
+msgctxt "accounts.workload_center"
+msgid "Seçilmiş kafedra və tədris ili üçün sənəd yaradılmayıb — «Yeni tapşırıq»."
+msgstr "Для выбранной кафедры и учебного года документ не создан — «Новое задание»."
+
+msgctxt "accounts.workload_center"
+msgid "Seçin"
+msgstr "Выберите"
+
+msgctxt "accounts.workload_center"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.workload_center"
+msgid "SƏTİR"
+msgstr "СТРОКА"
+
+msgctxt "accounts.workload_center"
+msgid "Səhifələmə"
+msgstr "Постраничная навигация"
+
+msgctxt "accounts.workload_center"
+msgid "Sənəd dekanlıqlara göndərilsin? Göndərişdən sonra sətirlər yalnız qaytarıldıqda redaktə olunur."
+msgstr "Отправить документ в деканаты? После отправки строки редактируются только после возврата."
+
+msgctxt "accounts.workload_center"
+msgid "Sənəd hələ göndərilməyib — dilim yoxdur."
+msgstr "Документ ещё не отправлен — доли нет."
+
+msgctxt "accounts.workload_center"
+msgid "Sətirləri gətir"
+msgstr "Загрузить строки"
+
+msgctxt "accounts.workload_center"
+msgid "Səviyyə"
+msgstr "Уровень"
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıq dövriyyəsi başlayandan sonra buradakı hesabatlar avtomatik dolacaq."
+msgstr "После начала цикла задания отчёты здесь будут заполняться автоматически."
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıq görünüşləri"
+msgstr "Представления задания"
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıq redaktoru"
+msgstr "Редактор задания"
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıq yarat"
+msgstr "Создать задание"
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıq yoxdur"
+msgstr "Задания нет"
+
+msgctxt "accounts.workload_center"
+msgid "Tapşırıqlar"
+msgstr "Задания"
+
+msgctxt "accounts.workload_center"
+msgid "TƏSDİQLƏNMİŞ"
+msgstr "УТВЕРЖДЕНО"
+
+msgctxt "accounts.workload_center"
+msgid "TƏSDİQLƏNİB"
+msgstr "УТВЕРЖДЕНО"
+
+msgctxt "accounts.workload_center"
+msgid "Təcrübə"
+msgstr "Практика"
+
+msgctxt "accounts.workload_center"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.workload_center"
+msgid "Tədris planından gətir"
+msgstr "Загрузить из учебного плана"
+
+msgctxt "accounts.workload_center"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.workload_center"
+msgid "Təsdiqlənib"
+msgstr "Утверждено"
+
+msgctxt "accounts.workload_center"
+msgid "UYĞUNLAŞDI"
+msgstr "СОПОСТАВЛЕНО"
+
+msgctxt "accounts.workload_center"
+msgid "Uyğunlaşdı"
+msgstr "Сопоставлено"
+
+msgctxt "accounts.workload_center"
+msgid "Uyğunlaşdırma"
+msgstr "Сопоставление"
+
+msgctxt "accounts.workload_center"
+msgid "Viza"
+msgstr "Виза"
+
+msgctxt "accounts.workload_center"
+msgid "YAZ CƏMİ"
+msgstr "ИТОГО ВЕСНА"
+
+msgctxt "accounts.workload_center"
+msgid "Yarımq."
+msgstr "Подгр."
+
+msgctxt "accounts.workload_center"
+msgid "Yaz"
+msgstr "Весна"
+
+msgctxt "accounts.workload_center"
+msgid "Yeni tapşırıq"
+msgstr "Новое задание"
+
+msgctxt "accounts.workload_center"
+msgid "kr"
+msgstr "кр"
+
+msgctxt "accounts.workload_center"
+msgid "plan yoxdur"
+msgstr "плана нет"
+
+msgctxt "accounts.workload_center"
+msgid "redaktə dövrü %(n)s"
+msgstr "цикл редактирования %(n)s"
+
+msgctxt "accounts.workload_center"
+msgid "saat"
+msgstr "час"
+
+msgctxt "accounts.workload_center"
+msgid "sətir"
+msgstr "строка"
+
+msgctxt "accounts.workload_center"
+msgid "«Sıfırla» ilə filtrləri təmizləyin və ya plandan sətir gətirin."
+msgstr "Очистите фильтры с помощью «Сбросить» или загрузите строки из учебного плана."
+
+msgctxt "accounts.workload_center"
+msgid "ÜMUMİ SAAT"
+msgstr "ВСЕГО ЧАСОВ"
+
+msgctxt "accounts.workload_center"
+msgid "İdarə paneli"
+msgstr "Панель управления"
+
+msgctxt "accounts.workload_center"
+msgid "İdxal et"
+msgstr "Импортировать"
+
+msgctxt "accounts.workload_center"
+msgid "İdxal sətirləri mövcud QARALAMA sənədə əlavə olunur — «Tapşırıqlar» görünüşündən kafedra seçin."
+msgstr "Импортированные строки добавляются в существующий документ-ЧЕРНОВИК — выберите кафедру в представлении «Задания»."
+
+msgctxt "accounts.workload_center"
+msgid "İlin tapşırıq sətirlərini yaradın, kafedralara paylayın, plandan və ya Excel-dən gətirin, dekanlıq təsdiqini izləyin."
+msgstr "Создавайте строки задания на год, распределяйте их по кафедрам, загружайте из учебного плана или Excel, отслеживайте утверждение деканатом."
+
+msgctxt "accounts.workload_center"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "accounts.workload_center"
+msgid "İxtisaslar"
+msgstr "Специальности"
+
+msgctxt "accounts.workload_center"
+msgid "İzləmə"
+msgstr "Отслеживание"
+
+msgctxt "accounts.workload_center"
+msgid "Şərh"
+msgstr "Комментарий"
+
+msgctxt "accounts.workload_center"
+msgid "Əvvəlcə tapşırıq seçin"
+msgstr "Сначала выберите задание"
+
+msgctxt "accounts.workload_overview"
+msgid "%(fac)d fakültə · %(chair)d kafedra · %(teacher)d müəllim"
+msgstr "%(fac)d факультетов · %(chair)d кафедр · %(teacher)d преподавателей"
+
+msgctxt "accounts.workload_overview"
+msgid "%(n)s vakant saat"
+msgstr "%(n)s вакантных часов"
+
+msgctxt "accounts.workload_overview"
+msgid "%(pct)d%% bölünüb"
+msgstr "%(pct)d%% распределено"
+
+msgctxt "accounts.workload_overview"
+msgid "Bu bölmədə hələ məlumat yoxdur"
+msgstr "В этом разделе пока нет данных"
+
+msgctxt "accounts.workload_overview"
+msgid "Bu tədris ili üçün tapşırıq yoxdur"
+msgstr "Для этого учебного года нет задания"
+
+msgctxt "accounts.workload_overview"
+msgid "BÖLÜNMÜŞ YÜK"
+msgstr "РАСПРЕДЕЛЁННАЯ НАГРУЗКА"
+
+msgctxt "accounts.workload_overview"
+msgid "Bölgü"
+msgstr "Распределение"
+
+msgctxt "accounts.workload_overview"
+msgid "Bölünmüş"
+msgstr "Распределено"
+
+msgctxt "accounts.workload_overview"
+msgid "Diqqət tələb edən kafedralar"
+msgstr "Кафедры, требующие внимания"
+
+msgctxt "accounts.workload_overview"
+msgid "Elmi Şura və nazirlik formatında hazır hesabatlar növbəti mərhələdə əlavə olunacaq."
+msgstr "Готовые отчёты в формате Учёного совета и министерства будут добавлены на следующем этапе."
+
+msgctxt "accounts.workload_overview"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.workload_overview"
+msgid "Fakültələr"
+msgstr "Факультеты"
+
+msgctxt "accounts.workload_overview"
+msgid "Fakültələr üzrə bölgü"
+msgstr "Распределение по факультетам"
+
+msgctxt "accounts.workload_overview"
+msgid "Fakültələr üzrə yük mənzərəsi"
+msgstr "Картина нагрузки по факультетам"
+
+msgctxt "accounts.workload_overview"
+msgid "Gediş"
+msgstr "Отток"
+
+msgctxt "accounts.workload_overview"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.workload_overview"
+msgid "Hesabatlar"
+msgstr "Отчёты"
+
+msgctxt "accounts.workload_overview"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.workload_overview"
+msgid "Kafedra bölgüsünün vəziyyəti"
+msgstr "Статус распределения по кафедрам"
+
+msgctxt "accounts.workload_overview"
+msgid "Kafedralar"
+msgstr "Кафедры"
+
+msgctxt "accounts.workload_overview"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.workload_overview"
+msgid "NORMA AŞIMI"
+msgstr "ПРЕВЫШЕНИЕ НОРМЫ"
+
+msgctxt "accounts.workload_overview"
+msgid "Norma üstü"
+msgstr "Сверх нормы"
+
+msgctxt "accounts.workload_overview"
+msgid "Nəticə: %(count)d kafedra"
+msgstr "Результат: %(count)d кафедр"
+
+msgctxt "accounts.workload_overview"
+msgid "Risk siqnalı yoxdur."
+msgstr "Сигналов риска нет."
+
+msgctxt "accounts.workload_overview"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıq"
+msgstr "Задание"
+
+msgctxt "accounts.workload_overview"
+msgid "Tapşırıqdan müəllim təsdiqinə qədər bütün mərhələlərin universitet üzrə vəziyyəti."
+msgstr "Общеуниверситетский статус всех этапов, от задания до утверждения преподавателем."
+
+msgctxt "accounts.workload_overview"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.workload_overview"
+msgid "Tədris şöbəsi tapşırıqları yaradandan sonra rəqəmlər burada görünəcək."
+msgstr "После того как учебный отдел создаст задания, здесь появятся цифры."
+
+msgctxt "accounts.workload_overview"
+msgid "Təsdiq axını"
+msgstr "Поток утверждения"
+
+msgctxt "accounts.workload_overview"
+msgid "VAKANT SAAT"
+msgstr "ВАКАНТНЫЕ ЧАСЫ"
+
+msgctxt "accounts.workload_overview"
+msgid "Vakant"
+msgstr "Вакантно"
+
+msgctxt "accounts.workload_overview"
+msgid "müəllim sayı"
+msgstr "количество преподавателей"
+
+msgctxt "accounts.workload_overview"
+msgid "ÜMUMİ TƏDRİS YÜKÜ"
+msgstr "ОБЩАЯ УЧЕБНАЯ НАГРУЗКА"
+
+msgctxt "accounts.workload_overview"
+msgid "Ümumi baxış"
+msgstr "Обзор"
+
+msgctxt "accounts.workload_overview"
+msgid "Ümumi baxış üçün «Dərs yükü hesabatları» səlahiyyəti tələb olunur."
+msgstr "Для обзора требуется полномочие «Отчёты по учебной нагрузке»."
+
+msgctxt "accounts.workload_overview"
+msgid "Ümumi baxışın görünüşləri"
+msgstr "Представления обзора"
+
+msgctxt "accounts.workload_visa"
+msgid "%(pct)d%% baxılıb"
+msgstr "%(pct)d%% рассмотрено"
+
+msgctxt "accounts.workload_visa"
+msgid "Arxiv rejimi"
+msgstr "Режим архива"
+
+msgctxt "accounts.workload_visa"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.workload_visa"
+msgid "BAXILIB"
+msgstr "РАССМОТРЕНО"
+
+msgctxt "accounts.workload_visa"
+msgid "Baxdım"
+msgstr "Просмотрено"
+
+msgctxt "accounts.workload_visa"
+msgid "Baxılıb"
+msgstr "Рассмотрено"
+
+msgctxt "accounts.workload_visa"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.workload_visa"
+msgid "Fənn və ya qrup"
+msgstr "Дисциплина или группа"
+
+msgctxt "accounts.workload_visa"
+msgid "GÖZLƏYİR"
+msgstr "ОЖИДАЕТ"
+
+msgctxt "accounts.workload_visa"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "accounts.workload_visa"
+msgid "Gözləyən bütün sətirlərə viza verilsin? İradlı sətirlərə toxunulmayacaq."
+msgstr "Выдать визу всем ожидающим строкам? Строки с замечаниями затронуты не будут."
+
+msgctxt "accounts.workload_visa"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.workload_visa"
+msgid "Hamısına viza ver"
+msgstr "Выдать визу всем"
+
+msgctxt "accounts.workload_visa"
+msgid "Hələ heç bir viza verməmisiniz."
+msgstr "Вы ещё не выдали ни одной визы."
+
+msgctxt "accounts.workload_visa"
+msgid "Kafedra müdirinə çatmazdan əvvəl öz ixtisasınızın hər yük sətrini yoxlayın: viza verin və ya irad yazın."
+msgstr "Прежде чем это дойдёт до заведующего кафедрой, проверьте каждую строку нагрузки вашей специальности: выдайте визу или напишите замечание."
+
+msgctxt "accounts.workload_visa"
+msgid "Keçmiş tədris ili yalnız oxunuş üçün açıqdır — viza mərhələsi bağlıdır."
+msgstr "Прошедший учебный год открыт только для чтения — этап визирования закрыт."
+
+msgctxt "accounts.workload_visa"
+msgid "Kredit"
+msgstr "Кредит"
+
+msgctxt "accounts.workload_visa"
+msgid "Mənim hərəkətlərim"
+msgstr "Мои действия"
+
+msgctxt "accounts.workload_visa"
+msgid "Nəticə: %(count)d sətir"
+msgstr "Результат: %(count)d строк"
+
+msgctxt "accounts.workload_visa"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "accounts.workload_visa"
+msgid "Qərar"
+msgstr "Решение"
+
+msgctxt "accounts.workload_visa"
+msgid "Saat"
+msgstr "Час"
+
+msgctxt "accounts.workload_visa"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.workload_visa"
+msgid "Seçilmiş filtrlərə uyğun sətir tapılmadı"
+msgstr "Не найдено строк, соответствующих выбранным фильтрам"
+
+msgctxt "accounts.workload_visa"
+msgid "Sizin ixtisasınıza aid göndərilmiş tapşırıq sətri yoxdur."
+msgstr "Для вашей специальности нет отправленных строк задания."
+
+msgctxt "accounts.workload_visa"
+msgid "SƏTİR"
+msgstr "СТРОКА"
+
+msgctxt "accounts.workload_visa"
+msgid "Səviyyə"
+msgstr "Уровень"
+
+msgctxt "accounts.workload_visa"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.workload_visa"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.workload_visa"
+msgid "Viza"
+msgstr "Виза"
+
+msgctxt "accounts.workload_visa"
+msgid "Viza görünüşləri"
+msgstr "Представления визирования"
+
+msgctxt "accounts.workload_visa"
+msgid "Viza növbəsi"
+msgstr "Очередь визирования"
+
+msgctxt "accounts.workload_visa"
+msgid "Viza vermək üçün «Tapşırıq sətirlərinə viza vermək» səlahiyyəti tələb olunur."
+msgstr "Для выдачи визы требуется полномочие «Визировать строки задания»."
+
+msgctxt "accounts.workload_visa"
+msgid "Üzvlüyünüzdə ixtisas əhatəsi təyin edilməyib — administrator ilə əlaqə saxlayın."
+msgstr "Для вашего членства не назначен охват по специальности — обратитесь к администратору."
+
+msgctxt "accounts.workload_visa"
+msgid "İRADLI"
+msgstr "С ЗАМЕЧАНИЕМ"
+
+msgctxt "accounts.workload_visa"
+msgid "İrad"
+msgstr "Замечание"
+
+msgctxt "accounts.workload_visa"
+msgid "İrad bildir"
+msgstr "Оставить замечание"
+
+msgctxt "accounts.workload_visa"
+msgid "İradlı"
+msgstr "С замечанием"
+
+msgctxt "accounts.workload_visa"
+msgid "İradı göndər"
+msgstr "Отправить замечание"
+
+msgctxt "accounts.workload_visa"
+msgid "Şərh"
+msgstr "Комментарий"
+
+msgctxt "accounts.workload_visa"
+msgid "Şərh kafedraya və dekana görünəcək. İrad yazılan sətir «vizalanmış» sayılmır."
+msgstr "Комментарий будет виден кафедре и декану. Строка с замечанием не считается «завизированной»."
+
+msgctxt "accounts.workload_visa"
+msgid "Şərh yazılmadan irad göndərilə bilməz."
+msgstr "Замечание нельзя отправить без комментария."
+
+msgctxt "accounts.workload_visa"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükü hesabatları və ixracı"
+msgstr "Отчёты и экспорт учебной нагрузки"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükünü müəllimlərə bölmək"
+msgstr "Распределять учебную нагрузку между преподавателями"
+
+msgctxt "organizations.permission.label"
+msgid "Dərs yükünə baxış"
+msgstr "Просмотр учебной нагрузки"
+
+msgctxt "organizations.permission.label"
+msgid "Jurnala alt qrupdan tələbə əlavə etmək/çıxarmaq"
+msgstr "Добавлять/удалять студента в журнал из подгруппы"
+
+msgctxt "organizations.permission.label"
+msgid "Sual dəstini kafedra adından təsdiqləmək"
+msgstr "Утверждать набор вопросов от имени кафедры"
+
+msgctxt "organizations.permission.label"
+msgid "Tapşırıq sətirlərinə viza vermək"
+msgstr "Визировать строки задания"
+
+msgctxt "organizations.permission.label"
+msgid "Tapşırığı dekanlığa göndərmək"
+msgstr "Отправлять задание в деканат"
+
+msgctxt "organizations.permission.label"
+msgid "Tapşırığı təsdiqləmək"
+msgstr "Утверждать задание"
+
+msgctxt "organizations.permission.label"
+msgid "Tədris tapşırığını yaratmaq/redaktə etmək"
+msgstr "Создавать/редактировать учебное задание"
+
+msgctxt "organizations.permission.label"
+msgid "Tələbənin qrupunu köçürmək və akademik statusunu dəyişmək"
+msgstr "Переводить группу студента и изменять его академический статус"
+
+msgctxt "organizations.permission.label"
+msgid "Öz dərs yükünə etiraz bildirmək"
+msgstr "Подавать возражение по своей учебной нагрузке"
+
+msgctxt "profile.sidebar"
+msgid "Dərs yükü mərkəzi"
+msgstr "Центр учебной нагрузки"
+
+msgctxt "profile.sidebar"
+msgid "Yük təsdiqi"
+msgstr "Утверждение нагрузки"
+
+msgctxt "profile.sidebar"
+msgid "Yük vizası"
+msgstr "Виза нагрузки"
+
+msgctxt "profile.sidebar"
+msgid "Yük — ümumi baxış"
+msgstr "Нагрузка — обзор"
+
+msgctxt "workload"
+msgid "Assistent"
+msgstr "Ассистент"
+
+msgctxt "workload"
+msgid "Bakalavr"
+msgstr "Бакалавриат"
+
+msgctxt "workload"
+msgid "Baxılıb"
+msgstr "Рассмотрено"
+
+msgctxt "workload"
+msgid "Baxılır"
+msgstr "На рассмотрении"
+
+msgctxt "workload"
+msgid "Baş müəllim"
+msgstr "Старший преподаватель"
+
+msgctxt "workload"
+msgid "Buraxılış işinə rəhbərlik"
+msgstr "Руководство выпускной работой"
+
+msgctxt "workload"
+msgid "Buraxılış/dissertasiya işi"
+msgstr "Выпускная/диссертационная работа"
+
+msgctxt "workload"
+msgid "Bölgü sətri"
+msgstr "Строка распределения"
+
+msgctxt "workload"
+msgid "Bölüşdürülüb"
+msgstr "Распределено"
+
+msgctxt "workload"
+msgid "Bölüşdürülür"
+msgstr "Распределяется"
+
+msgctxt "workload"
+msgid "Dekanlığa göndərilib"
+msgstr "Отправлено в деканат"
+
+msgctxt "workload"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "workload"
+msgid "Dissertant rəhbərliyi"
+msgstr "Руководство диссертантом"
+
+msgctxt "workload"
+msgid "Dissertant/doktorant"
+msgstr "Диссертант/докторант"
+
+msgctxt "workload"
+msgid "Distant"
+msgstr "Дистанционная"
+
+msgctxt "workload"
+msgid "Doktorantura"
+msgstr "Докторантура"
+
+msgctxt "workload"
+msgid "Dosent"
+msgstr "Доцент"
+
+msgctxt "workload"
+msgid "Düzəliş edilib"
+msgstr "Исправлено"
+
+msgctxt "workload"
+msgid "Dərs"
+msgstr "Занятие"
+
+msgctxt "workload"
+msgid "Elmi-tədqiqat təcrübəsi"
+msgstr "Научно-исследовательская практика"
+
+msgctxt "workload"
+msgid "Fənn ixtisasım deyil"
+msgstr "Дисциплина не по моей специальности"
+
+msgctxt "workload"
+msgid "Göndərilib"
+msgstr "Отправлено"
+
+msgctxt "workload"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "workload"
+msgid "Kadr dəyişikliyi"
+msgstr "Кадровое изменение"
+
+msgctxt "workload"
+msgid "Laboratoriya"
+msgstr "Лаборатория"
+
+msgctxt "workload"
+msgid "Ləğv edilib"
+msgstr "Отменено"
+
+msgctxt "workload"
+msgid "Magistr"
+msgstr "Магистратура"
+
+msgctxt "workload"
+msgid "Mühazirə"
+msgstr "Лекция"
+
+msgctxt "workload"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "workload"
+msgid "Məsləhət"
+msgstr "Консультация"
+
+msgctxt "workload"
+msgid "Norma həddindən artıqdır"
+msgstr "Превышает предел нормы"
+
+msgctxt "workload"
+msgid "Payız"
+msgstr "Осень"
+
+msgctxt "workload"
+msgid "Professor"
+msgstr "Профессор"
+
+msgctxt "workload"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "workload"
+msgid "Qaytarılıb"
+msgstr "Возвращено"
+
+msgctxt "workload"
+msgid "Qiyabi"
+msgstr "Заочная"
+
+msgctxt "workload"
+msgid "Qrup/tələbə sayı səhvdir"
+msgstr "Количество групп/студентов указано неверно"
+
+msgctxt "workload"
+msgid "Qəbul edildi"
+msgstr "Принято"
+
+msgctxt "workload"
+msgid "Rədd edildi"
+msgstr "Отклонено"
+
+msgctxt "workload"
+msgid "Rəsmi sərəncam/əmr"
+msgstr "Официальное распоряжение/приказ"
+
+msgctxt "workload"
+msgid "Saat sayı düz deyil"
+msgstr "Количество часов указано неверно"
+
+msgctxt "workload"
+msgid "Seminar/təcrübi"
+msgstr "Семинар/практическое"
+
+msgctxt "workload"
+msgid "Tapşırıq sətri"
+msgstr "Строка задания"
+
+msgctxt "workload"
+msgid "Texniki səhvin düzəlişi"
+msgstr "Исправление технической ошибки"
+
+msgctxt "workload"
+msgid "Təcrübə"
+msgstr "Практика"
+
+msgctxt "workload"
+msgid "Tələbə sayının dəyişməsi"
+msgstr "Изменение количества студентов"
+
+msgctxt "workload"
+msgid "Təsdiqlənib"
+msgstr "Утверждено"
+
+msgctxt "workload"
+msgid "Yay"
+msgstr "Лето"
+
+msgctxt "workload"
+msgid "Yaz"
+msgstr "Весна"
+
+msgctxt "workload"
+msgid "Yekun təsdiq gözləyir"
+msgstr "Ожидает окончательного утверждения"
+
+msgctxt "workload"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "workload"
+msgid "İntensiv"
+msgstr "Интенсивная"
+
+msgctxt "workload"
+msgid "İradlı"
+msgstr "С замечанием"
+
+msgctxt "workload"
+msgid "İstehsalat təcrübəsi"
+msgstr "Производственная практика"
+
+msgctxt "workload"
+msgid "Əyani"
+msgstr "Очная"
+
+msgctxt "workload.model"
+msgid "Düzəliş qeydi dəyişdirilə bilməz (append-only reyestr)."
+msgstr "Запись исправления нельзя изменить (реестр только для добавления)."
+
+msgctxt "workload.model"
+msgid "Düzəliş qeydi silinə bilməz (append-only reyestr)."
+msgstr "Запись исправления нельзя удалить (реестр только для добавления)."
+
+msgctxt "workload.model"
+msgid "Düzəliş üçün qeyd MƏCBURİDİR."
+msgstr "Для исправления ОБЯЗАТЕЛЬНА заметка."
+
+msgctxt "workload.model"
+msgid "bölgü sətirləri"
+msgstr "строки распределения"
+
+msgctxt "workload.model"
+msgid "bölgü sətri"
+msgstr "строка распределения"
+
+msgctxt "workload.model"
+msgid "fakültə təsdiq dilimi"
+msgstr "доля утверждения факультета"
+
+msgctxt "workload.model"
+msgid "fakültə təsdiq dilimləri"
+msgstr "доли утверждения факультета"
+
+msgctxt "workload.model"
+msgid "müəllim yük profili"
+msgstr "профиль нагрузки преподавателя"
+
+msgctxt "workload.model"
+msgid "müəllim yük profilləri"
+msgstr "профили нагрузки преподавателя"
+
+msgctxt "workload.model"
+msgid "sətir vizaları"
+msgstr "визы строк"
+
+msgctxt "workload.model"
+msgid "sətir vizası"
+msgstr "виза строки"
+
+msgctxt "workload.model"
+msgid "tapşırıq sətirləri"
+msgstr "строки задания"
+
+msgctxt "workload.model"
+msgid "tapşırıq sətri"
+msgstr "строка задания"
+
+msgctxt "workload.model"
+msgid "tədris tapşırıqları"
+msgstr "учебные задания"
+
+msgctxt "workload.model"
+msgid "tədris tapşırığı"
+msgstr "учебное задание"
+
+msgctxt "workload.model"
+msgid "yük düzəlişi"
+msgstr "исправление нагрузки"
+
+msgctxt "workload.model"
+msgid "yük düzəlişləri"
+msgstr "исправления нагрузки"
+
+msgctxt "workload.model"
+msgid "yük etirazları"
+msgstr "возражения по нагрузке"
+
+msgctxt "workload.model"
+msgid "yük etirazı"
+msgstr "возражение по нагрузке"
