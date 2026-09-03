@@ -136,6 +136,7 @@ BAL_FIELDS = [
     "lab",
     "giris",
     "imtahan",
+    "guzest",
     "yekun",
     "t_imtahan",
     "kesr",
@@ -143,8 +144,12 @@ BAL_FIELDS = [
 ]
 
 
+PHP_RE = re.compile(r"<\?php.*", re.S)
+
+
 def _txt(s):
-    return _norm(html.unescape(html.unescape(TAG_RE.sub(" ", s))))
+    """HTML-i mətnə çevirir; çap şablonundan sızan `<?php …` qalığını atır."""
+    return _norm(html.unescape(html.unescape(TAG_RE.sub(" ", PHP_RE.sub("", s)))))
 
 
 def _num(s):
@@ -193,6 +198,7 @@ def parse_bal_sheets(conn):
                             lab=_num(parts[1]) if len(parts) > 1 else "",
                             giris=_num(tds[5]),
                             imtahan=_num(tds[6]),
+                            guzest=_txt(tds[7]),
                             yekun=_num(tds[8]),
                             t_imtahan=_num(tds[9]) if len(tds) > 9 else "",
                             kesr="1" if "kəsr" in _txt(tds[2]).lower() else "0",
@@ -297,8 +303,9 @@ def scan_scale(bal_rows, yekun_rows, imth_rows, lessons):
     """T1-ŞKALA / T1-ABSURD — üç mənbədə şkaladan kənar ballar."""
     out = []
 
-    def emit(src, pk, sid, subject, term, tags, actual, who, when):
+    def emit(src, pk, sid, subject, term, tags, actual, who, when, row=None):
         code = "T1-ABSURD" if any(t.startswith("ABSURD") for t in tags) else "T1-ŞKALA"
+        stamp = _dt(when) if when and len(str(when)) >= 19 else None
         out.append(
             dict(
                 tier=1,
@@ -311,6 +318,8 @@ def scan_scale(bal_rows, yekun_rows, imth_rows, lessons):
                 who=who,
                 source=f"{src}#{pk}",
                 when=when,
+                win=(stamp, stamp) if stamp else None,
+                guzest=guzest_ref(row) if row else None,
             )
         )
 
@@ -343,6 +352,7 @@ def scan_scale(bal_rows, yekun_rows, imth_rows, lessons):
                 f"giriş={r['giris']}, çıxış={r['imtahan']}, yekun={r['yekun']}",
                 r["teacher"],
                 r["export_time"],
+                row=r,
             )
     for r in yekun_rows:
         name = lessons.get(str(r["lesson_id"]), {}).get("name", "")
@@ -404,6 +414,8 @@ def scan_arithmetic(bal_rows, yekun_rows, lessons):
                 who=r["teacher"],
                 source=f"balvereqi_logs#{r['log_id']}",
                 when=r["export_time"],
+                win=(_dt(r["export_time"]), _dt(r["export_time"])),
+                guzest=guzest_ref(r),
             )
         )
     for r in yekun_rows:
@@ -434,7 +446,7 @@ def scan_arithmetic(bal_rows, yekun_rows, lessons):
     return out
 
 
-def scan_term_edits(bal_rows, permits):
+def scan_term_edits(bal_rows):
     """T2-KEÇİD-XƏTTİ, T2-QAYIB-SİLİNMƏ, T2-KƏSR-ZİDDİYYƏTİ."""
     groups = collections.defaultdict(list)
     for r in bal_rows:
@@ -478,6 +490,9 @@ def scan_term_edits(bal_rows, permits):
                             who=r["teacher"],
                             source=f"balvereqi_logs#{failed['log_id']}→#{r['log_id']}",
                             when=r["export_time"],
+                            win=(_dt(failed["export_time"]), _dt(r["export_time"])),
+                            guzest=guzest_ref(r) or guzest_ref(failed),
+                            landing=_f(r["yekun"]),
                         )
                     )
                     break
@@ -503,13 +518,15 @@ def scan_term_edits(bal_rows, permits):
                             who=last["teacher"],
                             source=f"balvereqi_logs#{first['log_id']}→#{last['log_id']}",
                             when=last["export_time"],
+                            win=(_dt(first["export_time"]), _dt(last["export_time"])),
+                            guzest=guzest_ref(last) or guzest_ref(first),
                         )
                     )
 
             # --- kəsr ziddiyyəti: son vərəq həm kəsr, həm keçid -------------
             elif last["kesr"] == "1" and _dt(last["export_time"]) < KESR_RENDER_CHANGE:
                 y = _f(last["yekun"])
-                if y is not None and y >= PASS_MARK and not _has_permit(permits, sid, cl):
+                if y is not None and y >= PASS_MARK:
                     out.append(
                         dict(
                             tier=2,
@@ -523,15 +540,32 @@ def scan_term_edits(bal_rows, permits):
                             who=last["teacher"],
                             source=f"balvereqi_logs#{last['log_id']}",
                             when=last["export_time"],
+                            win=(_dt(first["export_time"]), _dt(last["export_time"])),
+                            guzest=guzest_ref(last),
                         )
                     )
     return out
 
 
-def _has_permit(permits, sid, cluster):
-    lo = _dt(cluster[0]["export_time"]) - dtm.timedelta(days=180)
-    hi = _dt(cluster[-1]["export_time"]) + dtm.timedelta(days=30)
-    return any(not (end < lo or start > hi) for start, end in permits.get(sid, ()))
+def guzest_ref(row):
+    """Çap vərəqinin «Güzəşt Giriş/imtahan» sütunu — rəsmi güzəşt qeydi.
+
+    Format «giriş / imtahan» (məs. «0 / 2»). Sıfırdan fərqli dəyər sənəddə
+    RƏSMİ güzəşt qeyd olunduğunu göstərir → tapıntı «izahı olan»dır.
+    """
+    raw = _norm(row.get("guzest") or "")
+    nums = [float(x) for x in re.findall(r"-?\d+(?:\.\d+)?", raw)]
+    if nums and any(n != 0 for n in nums):
+        return f"vərəqdə güzəşt «{raw}» (çap log #{row['log_id']})"
+    return None
+
+
+def permit_ref(permits, sid, lo, hi):
+    """Tapıntının pəncərəsi ilə kəsişən sənədləşdirilmiş qayıb icazəsi."""
+    for pid, start, end, fname in permits.get(str(sid), ()):
+        if not (end < lo or start > hi):
+            return f"allowed_qb #{pid} · {start:%Y-%m-%d}–{end:%Y-%m-%d}" + (f" · sənəd {fname}" if fname else "")
+    return None
 
 
 def scan_mass_absence_removal(update_log, journals_by_uid, journals_by_id, lessons, workers, threshold=10):
@@ -650,6 +684,79 @@ def scan_sequences(bal_rows, yekun_rows, imth_rows, lessons):
 # --------------------------------------------------------------------------- #
 
 
+# --------------------------------------------------------------------------- #
+# Apellyasiya / rəsmi düzəliş izi
+# --------------------------------------------------------------------------- #
+
+# Qayıba əsaslanan qaydalarda rəsmi mexanizm `allowed_qb` cədvəlidir (2 964
+# istifadə, hamısında sənəd faylı) — orada iz yoxdursa «XEYR» demək olar.
+# Bal dəyişikliyinə əsaslanan qaydalarda köhnə sistemdə apellyasiya saxlanmır;
+# yeganə rəsmi iz çap vərəqinin «Güzəşt Giriş/imtahan» sütunudur. O sütun
+# oxuna bilmirsə hökm verilmir → «YOXLANA BİLMİR».
+ABSENCE_RULES = {"T2-KƏSR-ZİDDİYYƏTİ", "T2-QAYIB-SİLİNMƏ", "T2-KÜTLƏVİ-QAYIB"}
+
+APPEAL_YES = "BƏLİ"
+APPEAL_NO = "XEYR"
+APPEAL_UNKNOWN = "YOXLANA BİLMİR"
+
+
+def appeal_trace(findings, permits):
+    """Hər tapıntıya «Apellyasiya / rəsmi düzəliş izi» sütunu yazır.
+
+    Hansı izin hansı qaydaya AİD olduğu vacibdir:
+
+    * `allowed_qb` **qayıb icazəsidir** — yalnız qayıba əsaslanan qaydaları
+      izah edə bilər. Bir günlük qayıb icazəsi nə şkaladan çıxmış balı, nə də
+      qaldırılmış imtahan balını izah etmir; ona görə digər qaydalarda
+      ÜMUMİYYƏTLƏ yoxlanılmır.
+    * Çap vərəqinin «Güzəşt Giriş/imtahan» sütunu **bal güzəştidir** — bal
+      dəyişikliyini izah edə bilər.
+    * **Tier 1 heç vaxt izah olunmur.** Şkaladan kənar bal (çıxış 72, seminar
+      66.43) nə güzəştlə, nə icazə ilə mümkün olmur — orada sütun yalnız
+      MƏLUMAT üçündür, sətir siyahıdan ÇIXARILMIR.
+    """
+    for f in findings:
+        f["appeal_movable"] = False
+        gz = f.get("guzest")
+        if f["tier"] == 1:
+            # Məlumat üçün izi göstər, amma hökmü dəyişmə.
+            f["appeal"] = APPEAL_UNKNOWN
+            f["appeal_ref"] = (
+                "Tier 1 şkala pozuntusudur — güzəşt və ya qayıb icazəsi bunu "
+                "izah edə bilməz (köhnə sistemdə apellyasiya cədvəli yoxdur)"
+            )
+            if gz:
+                f["appeal_ref"] = "vərəqdə güzəşt qeydi var, lakin şkaladan " "kənar balı izah etmir: " + gz.rstrip(
+                    "( ,"
+                )
+            continue
+        if f["code"] in ABSENCE_RULES:
+            win = f.get("win")
+            ref = None
+            if win and win[0] and win[1]:
+                ref = permit_ref(
+                    permits, f["student_id"], win[0] - dtm.timedelta(days=180), win[1] + dtm.timedelta(days=30)
+                )
+            if ref:
+                f["appeal"], f["appeal_ref"] = APPEAL_YES, ref
+                f["appeal_movable"] = True
+            else:
+                f["appeal"] = APPEAL_NO
+                f["appeal_ref"] = "sənədləşdirilmiş qayıb icazəsi (allowed_qb) " "tapılmadı"
+        elif f["code"] == "T2-KEÇİD-XƏTTİ":
+            if gz:
+                f["appeal"] = APPEAL_YES
+                f["appeal_ref"] = "rəsmi güzəşt: " + gz.rstrip("( ,")
+                f["appeal_movable"] = True
+            else:
+                f["appeal"] = APPEAL_NO
+                f["appeal_ref"] = "vərəqdə güzəşt sütunu «0 / 0»; köhnə " "sistemdə apellyasiya cədvəli yoxdur"
+        else:
+            f["appeal"] = APPEAL_UNKNOWN
+            f["appeal_ref"] = "bu qayda üçün mənbədə rəsmi iz saxlanmır — " "hökm verilmir"
+    return findings
+
+
 def load_identity_bridge():
     """legacy_import xəritəsindən köhnə id → (username, ad soyad). Yalnız oxu."""
     try:
@@ -720,6 +827,8 @@ COLUMNS = [
     ("Faktiki dəyər", "actual", 62),
     ("Gözlənilən", "expected", 40),
     ("Kim daxil edib / son dəyişən", "who", 28),
+    ("Apellyasiya / rəsmi düzəliş izi", "appeal", 22),
+    ("İzin təfərrüatı", "appeal_ref", 46),
     ("Mənbə cədvəl + PK", "source", 34),
     ("Tarix", "when", 20),
 ]
@@ -798,7 +907,7 @@ def _write_summary(wb, stats, checked_clean):
     ws.freeze_panes = "A2"
 
 
-def write_workbook(path, tier1, tier2, stats, checked_clean, by_user):
+def write_workbook(path, tier1, tier2_main, tier2_extra, explained, stats, checked_clean, by_user):
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, PatternFill
 
@@ -833,7 +942,9 @@ def write_workbook(path, tier1, tier2, stats, checked_clean, by_user):
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = ws.dimensions
 
-    _write_sheet(wb, "Tier 2 — yüksək ehtimal", tier2)
+    _write_sheet(wb, "Tier 2 — əsas", tier2_main)
+    _write_sheet(wb, "Əlavə — köməkçi qaydalar", tier2_extra)
+    _write_sheet(wb, "İzahı olan", explained)
 
     ws = wb.create_sheet("Müəllim üzrə")
     heads = ["Vərəqdə göstərilən müəllim / mənbə", "Tier 1", "Tier 2", "Cəmi", "Fərqli tələbə"]
@@ -898,9 +1009,11 @@ def main():
     )
     update_log = fetch(conn, "SELECT old_value, new_value, updated_at, student_id, " "j_id FROM update_log")
     permits = collections.defaultdict(list)
-    for r in fetch(conn, "SELECT student_id, allowed_date_start, allowed_date_end " "FROM allowed_qb"):
+    for r in fetch(conn, "SELECT id, student_id, allowed_date_start, " "allowed_date_end, file FROM allowed_qb"):
         if r["allowed_date_start"] and r["allowed_date_end"]:
-            permits[str(r["student_id"])].append((r["allowed_date_start"], r["allowed_date_end"]))
+            permits[str(r["student_id"])].append(
+                (r["id"], r["allowed_date_start"], r["allowed_date_end"], _norm(r["file"]))
+            )
 
     workers_rows = fetch(conn, "SELECT id, first_name, last_name, father_name " "FROM workers")
     bal_rows = load_bal_rows(conn, args.cache)
@@ -909,7 +1022,7 @@ def main():
 
     tier1 = scan_scale(bal_rows, yekun_rows, imth_rows, lessons)
     tier1 += scan_arithmetic(bal_rows, yekun_rows, lessons)
-    tier2 = scan_term_edits(bal_rows, permits)
+    tier2 = scan_term_edits(bal_rows)
     workers = {
         str(w["id"]): html.unescape(html.unescape(_clean_name(w["first_name"], w["last_name"], w["father_name"])))
         for w in workers_rows
@@ -921,17 +1034,39 @@ def main():
     for f in tier1 + tier2:
         f["rule_text"] = RULES[f["code"]]
 
+    # Apellyasiya / rəsmi düzəliş izi — izi OLANLAR şübhəli sayılmır
+    appeal_trace(tier1 + tier2, permits)
+
     students_idx = build_student_index(students, groups, specialities, departments)
     bridge = load_identity_bridge()
     enrich(tier1, students_idx, bridge)
     enrich(tier2, students_idx, bridge)
-    tier1.sort(key=lambda f: (f["code"], f["tələbə"]))
-    tier2.sort(key=lambda f: (f["code"], f["tələbə"]))
 
-    by_rule = collections.Counter(f["code"] for f in tier1 + tier2)
-    students_by_rule = {code: len({f["student_id"] for f in tier1 + tier2 if f["code"] == code}) for code in by_rule}
+    explained = [f for f in tier2 if f.get("appeal_movable")]
+    tier2 = [f for f in tier2 if not f.get("appeal_movable")]
+
+    # Rektor sənədi üçün ən güclü Tier 2 alt-çoxluğu:
+    #   · keçid xətti — yekun məhz 51–55 zolağına düşənlər
+    #   · kəsr ziddiyyəti — «kəsilməli idi, keçib»
+    def _rector_scope(f):
+        if f["code"] == "T2-KƏSR-ZİDDİYYƏTİ":
+            return True
+        if f["code"] == "T2-KEÇİD-XƏTTİ":
+            land = f.get("landing")
+            return land is not None and PASS_MARK <= land <= PASS_MARK + 4
+        return False
+
+    tier2_main = [f for f in tier2 if _rector_scope(f)]
+    tier2_extra = [f for f in tier2 if not _rector_scope(f)]
+
+    for lst in (tier1, tier2_main, tier2_extra, explained):
+        lst.sort(key=lambda f: (f["code"], f["tələbə"]))
+
+    kept = tier1 + tier2_main + tier2_extra
+    by_rule = collections.Counter(f["code"] for f in kept)
+    students_by_rule = {code: len({f["student_id"] for f in kept if f["code"] == code}) for code in by_rule}
     who = collections.defaultdict(lambda: {"t1": 0, "t2": 0, "st": set()})
-    for f in tier1 + tier2:
+    for f in kept:
         k = f.get("who") or "(vərəqdə göstərilməyib)"
         who[k]["t1" if f["tier"] == 1 else "t2"] += 1
         who[k]["st"].add(f["student_id"])
@@ -966,13 +1101,33 @@ def main():
                 f"update_log {len(update_log):,}",
             ),
             ("Tier 1 — 100% şübhəli", f"{len(tier1)} tapıntı · " f"{len({f['student_id'] for f in tier1})} tələbə"),
-            ("Tier 2 — yüksək ehtimal", f"{len(tier2)} tapıntı · " f"{len({f['student_id'] for f in tier2})} tələbə"),
+            (
+                "Tier 2 — əsas (rektor)",
+                f"{len(tier2_main)} tapıntı · " f"{len({f['student_id'] for f in tier2_main})} tələbə",
+            ),
+            (
+                "Əlavə — köməkçi qaydalar",
+                f"{len(tier2_extra)} tapıntı · " f"{len({f['student_id'] for f in tier2_extra})} tələbə",
+            ),
+            (
+                "İzahı olan (şübhəli SAYILMIR)",
+                f"{len(explained)} tapıntı · "
+                f"{len({f['student_id'] for f in explained})} tələbə — "
+                "rəsmi güzəşt və ya sənədləşdirilmiş qayıb icazəsi tapıldı",
+            ),
+            (
+                "Apellyasiya saxlancı",
+                "Köhnə MyEdu bazasının 80 cədvəlində apellyasiya/etiraz cədvəli "
+                "YOXDUR; `update_log` və `balvereqi_logs` səbəb sütunu saxlamır. "
+                "Köçürülmüş bazada apellyasiya/düzəliş cədvəlləri var, lakin "
+                "hamısı BOŞDUR (0 sətir).",
+            ),
         ],
     )
 
     # T2-KEÇİD-XƏTTİ tapıntılarının keçid həddinə yığılması (statistik arqument)
     land = collections.Counter()
-    for f in tier2:
+    for f in tier2_main + tier2_extra:
         if f["code"] != "T2-KEÇİD-XƏTTİ":
             continue
         m = re.search(r"yekun=(\d+)\s*\(giriş", f["actual"])
@@ -982,6 +1137,23 @@ def main():
     n_all = sum(land.values()) or 1
 
     checked_clean = [
+        "APELLYASİYA SAXLANCI YOXDUR. Köhnə MyEdu bazasının 80 cədvəlinin adları "
+        "və bütün sütun adları apel*/appel*/etiraz/şikayət/complaint/review/"
+        "correction/düzəliş/güzəşt nümunələri ilə axtarıldı. Yeganə uyğunluq "
+        "`xidmeti_muraciet` (2 sətir — məktəb təqdimat mətni və «lorem ipsum», "
+        "apellyasiya deyil). `update_log` sütunları: id, old_value, new_value, "
+        "updated_at, sent, student_id, create_date, update_date, j_id — SƏBƏB "
+        "sütunu yoxdur. `balvereqi_logs`: id, owner_id, uniqid, data, "
+        "export_time — səbəb sütunu yoxdur. Rəsmi izin YEGANƏ iki mənbəyi: "
+        "çap vərəqinin «Güzəşt Giriş/imtahan» sütunu (716 sətirdə sıfırdan "
+        "fərqli) və `allowed_qb` (2 964 qayıb icazəsi, hamısında sənəd faylı).",
+        "Köçürülmüş bazada (DB A) apellyasiya və düzəliş cədvəlləri MÖVCUDDUR "
+        "(appeals_appeal, appeals_appealitem, appeals_scoreadjustment, "
+        "registrar_journalcorrection, registrar_componentscorecorrection, "
+        "registrar_lessoncorrection, registrar_selfworkcorrection, "
+        "registrar_courseworkcorrection, registrar_correctionreversal, "
+        "registrar_legacygradereview) — lakin ONUNCUSU DA DAXİL hamısında "
+        "0 sətir var: köhnə sistemdə köçürüləsi apellyasiya qeydi olmayıb.",
         f"T2-KEÇİD-XƏTTİ tapıntılarının {n_line}/{n_all}-i "
         f"({n_line / n_all:.0%}) düz keçid həddinin üstünə "
         f"({PASS_MARK}–{PASS_MARK + 4} bal) düşür, {land.get(PASS_MARK, 0)}-i isə "
@@ -1011,11 +1183,23 @@ def main():
         "əks halda yüzlərlə yalançı müsbət yaranırdı.",
     ]
 
-    write_workbook(args.out, tier1, tier2, stats, checked_clean, by_user)
-    print(f"\nTier 1: {len(tier1)} tapıntı, " f"{len({f['student_id'] for f in tier1})} tələbə", file=sys.stderr)
-    print(f"Tier 2: {len(tier2)} tapıntı, " f"{len({f['student_id'] for f in tier2})} tələbə", file=sys.stderr)
+    write_workbook(args.out, tier1, tier2_main, tier2_extra, explained, stats, checked_clean, by_user)
+
+    def _n(lst):
+        return f"{len(lst)} tapıntı, {len({f['student_id'] for f in lst})} tələbə"
+
+    print(f"\nTier 1 (rektor)          : {_n(tier1)}", file=sys.stderr)
+    print(f"Tier 2 — əsas (rektor)   : {_n(tier2_main)}", file=sys.stderr)
+    print(f"Əlavə — köməkçi qaydalar : {_n(tier2_extra)}", file=sys.stderr)
+    print(f"İzahı olan (çıxarıldı)   : {_n(explained)}", file=sys.stderr)
+    print("\nQayda üzrə:", file=sys.stderr)
     for code, n in by_rule.most_common():
         print(f"  {code:22s} {n:6d}  ({students_by_rule[code]} tələbə)", file=sys.stderr)
+    exp_by_rule = collections.Counter(f["code"] for f in explained)
+    if exp_by_rule:
+        print("\nİzahı olduğu üçün çıxarılanlar:", file=sys.stderr)
+        for code, n in exp_by_rule.most_common():
+            print(f"  {code:22s} {n:6d}", file=sys.stderr)
     print(f"\n→ {args.out}", file=sys.stderr)
 
 
