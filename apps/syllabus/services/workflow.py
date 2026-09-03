@@ -27,6 +27,7 @@ from ..constants import (
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
 from . import notifications as syllabus_notifications
+from . import versioning
 from .drafts import recompute_completion, refresh_pointers
 from .scoping import is_author
 
@@ -159,7 +160,15 @@ def _apply(
 
 
 def submit(*, version, actor, request=None):
-    """DRAFT/REVISION → SUBMITTED. Versiya kilidlənir."""
+    """DRAFT/REVISION → SUBMITTED. Versiya kilidlənir.
+
+    ⚠️ Göndərmədən ƏVVƏL versiya təsnifatı yoxlanılır (README §10.3): müəllim
+    «kiçik» seçsə də, həftəlik mövzular / qiymətləndirmə çəkiləri / sərbəst iş
+    strukturu dəyişibsə versiya avtomatik MAJOR-a qaldırılır — çünki kiçik
+    versiya CARİ semestrə tətbiq olunur və artıq açılmış jurnalın strukturunu
+    dəyişərdi.  Qaldırma :mod:`apps.syllabus.services.versioning`-dədir.
+    """
+    version, escalated = versioning.escalate_if_structural(version, actor=actor, request=request)
     recompute_completion(version)
     version.refresh_from_db(fields=["completion_percent"])
     now = timezone.now()
@@ -177,6 +186,8 @@ def submit(*, version, actor, request=None):
     )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
     syllabus_notifications.notify_submitted(updated)
+    # UI mesajı üçün: qaldırma baş veribsə hansı bölmələr səbəb olub.
+    updated.escalated_sections = tuple(escalated)
     return updated
 
 

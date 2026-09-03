@@ -41,13 +41,14 @@ from apps.syllabus.public import build_review_queue_context
 
 from .labels import STATUS_TONES
 from .lookup import safe_uuid
-from .review_rows import LATE_DAYS, build_queue_row, waiting_days
+from .review_rows import build_queue_row, thresholds, waiting_days
 from .review_text import (
     ACCESS_DENIED,
     COVERAGE_KPI_LABELS,
     IDENTITY,
     INTRO,
     KPI_LABELS,
+    LATE_KPI_NOTE,
     MIN_DECISION_REASON,
     NOSCOPE,
     POLICY_ROWS,
@@ -106,10 +107,14 @@ def _policy_breaches(versions) -> set:
     return breached
 
 
-def _kpis(versions, *, now):
-    """4 kart (dizayn §3.3): növbə · SLA pozuntusu · çatışmayan · orta gözləmə."""
+def _kpis(versions, *, now, warn: int, late_days: int):
+    """4 kart (dizayn §3.3): növbə · SLA pozuntusu · çatışmayan · orta gözləmə.
+
+    Hədlər SİYASƏTDƏN gəlir (``syllabus.sla_days`` / ``escalation_days``) — kodda
+    hardcode YOXDUR (README §10.4).
+    """
     days = [waiting_days(version, now=now) for version in versions]
-    late = sum(1 for value in days if value >= LATE_DAYS)
+    late = sum(1 for value in days if value >= late_days)
     incomplete = sum(1 for version in versions if (version.completion_percent or 0) < 100)
     average = round(sum(days) / len(days)) if days else 0
     values = {
@@ -121,6 +126,8 @@ def _kpis(versions, *, now):
     cards = []
     for key, tone in (("queued", "neutral"), ("late", "danger"), ("incomplete", "warning"), ("average", "primary")):
         label, note, suffix = KPI_LABELS[key]
+        if key == "late":
+            note = str(LATE_KPI_NOTE) % {"days": late_days}
         cards.append(
             {
                 "key": key,
@@ -264,7 +271,11 @@ def build_syllabus_review_section(request, *, organization) -> dict:
     page_versions = list(page.object_list)
     breached = _policy_breaches(page_versions)
     now = timezone.now()
-    rows = [build_queue_row(version, now=now, policy_breach=version.pk in breached) for version in page_versions]
+    warn_days, late_days = thresholds(organization)
+    rows = [
+        build_queue_row(version, now=now, policy_breach=version.pk in breached, warn=warn_days, late=late_days)
+        for version in page_versions
+    ]
     years, _seasons = academic_filter_options(organization)
     titles = coverage_titles(scope_mode)
 
@@ -277,7 +288,8 @@ def build_syllabus_review_section(request, *, organization) -> dict:
             "identity": _identity(request, scope_mode=scope_mode, coverage_rows=coverage["rows"]),
             "intro": INTRO[scope_mode],
             "tab": tab,
-            "kpis": _kpis(versions, now=now),
+            "kpis": _kpis(versions, now=now, warn=warn_days, late_days=late_days),
+            "policy": {"sla_days": warn_days, "escalation_days": late_days},
             "rows": rows,
             "filters": {"q": search, "status": status, "unit": unit, "sort": sort, "year": year, "tab": tab},
             "filter_options": {

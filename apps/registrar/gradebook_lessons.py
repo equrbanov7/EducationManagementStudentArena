@@ -62,6 +62,12 @@ def create_lesson(
     ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir."""
     if journal_is_locked(offering):
         raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
+    # README §8/2 — «jurnal təsdiqlənmiş sillabus olmadan bloklanır».  Qayda
+    # ORG SİYASƏTİDİR və default SÖNDÜRÜLÜDÜR (köçürülmüş data qorunur);
+    # açıq olduqda `SyllabusGateError` (səbəb kodu ilə) atılır.
+    from apps.registrar import journal_policy
+
+    journal_policy.ensure_lesson_allowed(offering)
     parsed = _coerce_date(date)
     if parsed is None:
         raise LessonRuleError("Dərs tarixi düzgün deyil.")

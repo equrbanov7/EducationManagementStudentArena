@@ -19,11 +19,25 @@ def test_complete_data_is_100_percent():
     assert set(report.sections) == set(RULE_SECTIONS)
 
 
-def test_empty_data_is_zero_except_policy_locked_assess():
+def test_empty_data_is_zero_including_the_unallocated_assessment_split():
+    """BOŞ sillabusda `assess` də ödənilmiş SAYILMIR (2026-09-03, README §8/4).
+
+    Kilidli çəkilər (10/10/50) müəllimə açıq deyil, amma qalan 30 balın
+    bölünməsi məhz onun işidir — bölünməmiş bal cəmi 100-dən aşağı salır.
+    """
     report = completion.evaluate({}, PLAN_HOURS)
-    # `assess` çəkiləri siyasətlə kilidlidir → həmişə ödənilmiş sayılır.
-    assert report.sections[SectionKey.ASSESS.value] is True
-    assert report.percent == round(1 / len(RULE_SECTIONS) * 100)
+    assert report.sections[SectionKey.ASSESS.value] is False
+    assert report.percent == 0
+    assert "assess.split_mismatch" in {issue.code for issue in report.issues}
+
+
+def test_the_assessment_split_must_consume_the_whole_flexible_budget():
+    data = complete_section_data()
+    data[SectionKey.ASSESS.value] = {"midterm": 10, "project": 10}
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.ASSESS.value] is False
+    issue = next(item for item in report.issues if item.code == "assess.split_mismatch")
+    assert issue.params == {"need": 30, "have": 20}
 
 
 def test_partially_filled_section_does_not_count_as_partially_complete():
