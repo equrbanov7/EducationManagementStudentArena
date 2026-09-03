@@ -12,7 +12,7 @@
     <div class="console-head">
         <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
         <h1 class="console-title"><i class="fas fa-graduation-cap"></i>
-            {% if instance %}{{ instance.code }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni ixtisas (proqram)" context "registrar.console" %}{% endif %}
+            {% if instance %}{{ instance.display_label }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni ixtisas (proqram)" context "registrar.console" %}{% endif %}
         </h1>
     </div>
     {% include "accounts/profile/_messages.html" %}

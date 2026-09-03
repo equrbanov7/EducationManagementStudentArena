@@ -1,0 +1,246 @@
+{% load i18n static %}
+{% comment %}RİM — semestr sonu jurnal bağlaması (kabinet).
+Full-page-nav bölmə (kollokvium_windows pattern-i) → stil/skript XARİCİ fayllara
+köçürülüb (CSP: no inline). Formlar accounts:journal_close-a POST edir, action +
+next ilə; view redirect edir. Səhifə açıq-mənbəli (light-only) — --ems-* token.
+Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/journal_close.css' %}">
+
+{{ s.faculties|json_script:"jc-faculties-data" }}
+{{ s.departments|json_script:"jc-departments-data" }}
+
+<div class="jc"
+     data-org="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
+     data-superadmin="{% if s.is_superadmin %}1{% else %}0{% endif %}"
+     data-scope="{{ s.selected_scope|default:'organization' }}"
+     data-unit="{{ s.selected_unit_id }}">
+  <p class="jc-sub jc-sub--lead">{% trans "Semestr sonunda jurnalları bağlayın — bundan sonra müəllim bal yaza bilməz və tələbələrin giriş balı yekunlaşır. Bağlama bütün universitet, bir fakültə və ya bir kafedra üzrə aparıla bilər." context "registrar.journal_close" %}</p>
+
+  {# ── Alət paneli: (superadmin) təşkilat + tədris ili + semestr ──────────── #}
+  <div class="jc-toolbar">
+    {% if s.is_superadmin %}
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="journal-close">
+      <div class="jc-field">
+        <label for="jc-org-select">{% trans "Təşkilat" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-org-select" name="jc_org" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for o in s.org_options %}
+            <option value="{{ o.id }}" {% if s.selected_org and s.selected_org.id == o.id %}selected{% endif %}>{{ o.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+
+    {% if s.selected_org %}
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="journal-close">
+      {% if s.is_superadmin %}<input type="hidden" name="jc_org" value="{{ s.selected_org.id }}">{% endif %}
+      <div class="jc-field">
+        <label for="jc-year-select">{% trans "Tədris ili" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-year-select" name="jc_year" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for y in s.years %}
+            <option value="{{ y }}" {% if s.selected_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+
+    <form method="get" action="{{ profile_base_url }}">
+      <input type="hidden" name="section" value="journal-close">
+      {% if s.is_superadmin %}<input type="hidden" name="jc_org" value="{{ s.selected_org.id }}">{% endif %}
+      {% if s.selected_year %}<input type="hidden" name="jc_year" value="{{ s.selected_year }}">{% endif %}
+      <div class="jc-field">
+        <label for="jc-period-select">{% trans "Semestr" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-period-select" name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-autosubmit>
+            {% for p in s.periods %}
+            <option value="{{ p.id }}" {% if s.period and s.period.id == p.id %}selected{% endif %}>{{ p.season_label }} — {{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if not s.selected_org %}
+  <div class="jc-empty">{% trans "Təşkilat tapılmadı." context "registrar.journal_close" %}</div>
+  {% elif not s.period %}
+  <div class="jc-empty">{% trans "Bu təşkilat üçün akademik semestr yoxdur — əvvəlcə semestr yaradın." context "registrar.journal_close" %}</div>
+  {% else %}
+
+  {# ── 1) Toplu bağlama / açma ──────────────────────────────────────────── #}
+  <div class="jc-card" data-jc-bulk>
+    <div class="jc-card__head">
+      <h3 class="jc-card__title"><i class="fas fa-lock"></i> {% trans "Jurnalları bağla" context "registrar.journal_close" %}</h3>
+      <span class="jc-card__meta">{{ s.period.season_label }} — {{ s.period.name }}</span>
+    </div>
+
+    {# Əhatə seçimi GET ilə önizləməni yeniləyir (server-side hesablanır). #}
+    <form method="get" action="{{ profile_base_url }}" class="jc-scopeform" data-jc-scopeform>
+      <input type="hidden" name="section" value="journal-close">
+      {% if s.is_superadmin %}<input type="hidden" name="jc_org" value="{{ s.selected_org.id }}">{% endif %}
+      {% if s.selected_year %}<input type="hidden" name="jc_year" value="{{ s.selected_year }}">{% endif %}
+      <input type="hidden" name="period" value="{{ s.period.id }}">
+      <div class="jc-field">
+        <label for="jc-scope">{% trans "Əhatə" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-scope" name="jc_scope" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-jc-scope>
+            <option value="organization" {% if s.selected_scope == 'organization' %}selected{% endif %}>{% trans "Bütün universitet" context "registrar.journal_close" %}</option>
+            <option value="faculty" {% if s.selected_scope == 'faculty' %}selected{% endif %}>{% trans "Fakültə" context "registrar.journal_close" %}</option>
+            <option value="department" {% if s.selected_scope == 'department' %}selected{% endif %}>{% trans "Kafedra" context "registrar.journal_close" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="jc-field jc-field--hidden" data-jc-unit-wrap>
+        <label for="jc-unit" data-jc-unit-label>{% trans "Bölmə" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-unit" name="jc_unit" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-jc-unit>
+            <option value="">—</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="jc-btn jc-btn--ghost"><i class="fas fa-rotate"></i> {% trans "Önizləməni yenilə" context "registrar.journal_close" %}</button>
+    </form>
+
+    {% if s.preview %}
+    <div class="jc-preview">
+      <span class="jc-chip jc-chip--scope"><i class="fas fa-sitemap"></i> {{ s.preview.scope_label }}</span>
+      <span class="jc-chip"><i class="fas fa-book"></i> {% trans "Cəmi jurnal" context "registrar.journal_close" %}: <b>{{ s.preview.total }}</b></span>
+      <span class="jc-chip jc-chip--open"><i class="fas fa-lock-open"></i> {% trans "Açıq" context "registrar.journal_close" %}: <b>{{ s.preview.open }}</b></span>
+      <span class="jc-chip jc-chip--closed"><i class="fas fa-lock"></i> {% trans "Bağlı" context "registrar.journal_close" %}: <b>{{ s.preview.closed }}</b></span>
+    </div>
+    {% endif %}
+
+    <div class="jc-actions">
+      <form method="post" action="{% url 'accounts:journal_close' %}" data-jc-confirm-form>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="close">
+        <input type="hidden" name="next" value="{{ s.post_next_url }}">
+        {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+        <input type="hidden" name="period" value="{{ s.period.id }}">
+        <input type="hidden" name="scope" value="{{ s.selected_scope|default:'organization' }}" data-jc-mirror-scope>
+        <input type="hidden" name="org_unit" value="{{ s.selected_unit_id }}" data-jc-mirror-unit>
+        <button type="submit" class="jc-btn jc-btn--danger" data-jc-confirm-key="close">
+          <i class="fas fa-lock"></i> {% trans "Bu əhatədə jurnalları bağla" context "registrar.journal_close" %}
+        </button>
+      </form>
+
+      <form method="post" action="{% url 'accounts:journal_close' %}" class="jc-reopen" data-jc-confirm-form>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reopen">
+        <input type="hidden" name="next" value="{{ s.post_next_url }}">
+        {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+        <input type="hidden" name="period" value="{{ s.period.id }}">
+        <input type="hidden" name="scope" value="{{ s.selected_scope|default:'organization' }}" data-jc-mirror-scope>
+        <input type="hidden" name="org_unit" value="{{ s.selected_unit_id }}" data-jc-mirror-unit>
+        <input type="text" name="reason" maxlength="1000" class="jc-reason" required
+               placeholder="{% trans 'Açma səbəbi (məcburi)' context 'registrar.journal_close' %}">
+        <button type="submit" class="jc-btn jc-btn--ghost" data-jc-confirm-key="reopen">
+          <i class="fas fa-lock-open"></i> {% trans "Bağlamanı geri qaytar (aç)" context "registrar.journal_close" %}
+        </button>
+      </form>
+    </div>
+    <p class="jc-note"><i class="fas fa-circle-info"></i> {% trans "Açmaq sənədli düzəlişi əvəz etmir: bağlı jurnalda tək-tək düzəliş üçün «Jurnal düzəlişi» (PDF sənədli) yolu istifadə olunur." context "registrar.journal_close" %}</p>
+  </div>
+
+  {# ── 2) Bağlanma xəbərdarlığı (jurnalda sürüşən zolaq) ─────────────────── #}
+  <div class="jc-card">
+    <div class="jc-card__head">
+      <h3 class="jc-card__title"><i class="fas fa-bullhorn"></i> {% trans "Bağlanma xəbərdarlığı" context "registrar.journal_close" %}</h3>
+    </div>
+    <p class="jc-sub">{% trans "Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin kollokvium bildirişi kimi." context "registrar.journal_close" %}</p>
+
+    <form method="post" action="{% url 'accounts:journal_close' %}" class="jc-noticeform">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save_notice">
+      <input type="hidden" name="next" value="{{ s.post_next_url }}">
+      {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+      <input type="hidden" name="period" value="{{ s.period.id }}">
+      <input type="hidden" name="notice_id" value="" data-jc-notice-id>
+      <input type="hidden" name="is_active" value="1">
+
+      <div class="jc-field">
+        <label for="jc-notice-scope">{% trans "Əhatə" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-notice-scope" name="scope" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-jc-notice-scope>
+            <option value="organization">{% trans "Bütün universitet" context "registrar.journal_close" %}</option>
+            <option value="faculty">{% trans "Fakültə" context "registrar.journal_close" %}</option>
+            <option value="department">{% trans "Kafedra" context "registrar.journal_close" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="jc-field jc-field--hidden" data-jc-notice-unit-wrap>
+        <label for="jc-notice-unit" data-jc-notice-unit-label>{% trans "Bölmə" context "registrar.journal_close" %}</label>
+        <div class="bootstrap-single-select">
+          <select id="jc-notice-unit" name="org_unit" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-jc-notice-unit>
+            <option value="">—</option>
+          </select>
+        </div>
+      </div>
+      <div class="jc-field">
+        <label for="jc-notice-date">{% trans "Bağlanma tarixi" context "registrar.journal_close" %}</label>
+        <input type="date" id="jc-notice-date" name="closes_on" required data-jc-notice-date>
+      </div>
+      <div class="jc-field jc-field--grow">
+        <label for="jc-notice-message">{% trans "Öz mətniniz (opsional)" context "registrar.journal_close" %}</label>
+        <input type="text" id="jc-notice-message" name="message" maxlength="200" data-jc-notice-message>
+      </div>
+      <button type="submit" class="jc-btn jc-btn--primary"><i class="fas fa-paper-plane"></i> {% trans "Xəbərdarlığı göndər" context "registrar.journal_close" %}</button>
+    </form>
+
+    {% if s.notices %}
+    <ul class="jc-notices">
+      {% for n in s.notices %}
+      <li class="jc-notice {% if not n.is_active %}is-off{% endif %}">
+        <span class="jc-notice__scope">{{ n.get_scope_display }}{% if n.org_unit %} · {{ n.org_unit.name }}{% endif %}</span>
+        <span class="jc-notice__date"><i class="fas fa-calendar-day"></i> {{ n.closes_on|date:"d.m.Y" }}</span>
+        {% if n.message %}<span class="jc-notice__msg">{{ n.message }}</span>{% endif %}
+        <span class="jc-notice__state">{% if n.is_active %}{% trans "Aktiv" context "registrar.journal_close" %}{% else %}{% trans "Söndürülüb" context "registrar.journal_close" %}{% endif %}</span>
+        <span class="jc-notice__ops">
+          <button type="button" class="jc-linkbtn" data-jc-edit-notice
+                  data-id="{{ n.id }}" data-scope="{{ n.scope }}" data-unit="{{ n.org_unit_id|default:'' }}"
+                  data-date="{{ n.closes_on|date:'Y-m-d' }}" data-message="{{ n.message }}">
+            {% trans "Redaktə" context "registrar.journal_close" %}
+          </button>
+          <form method="post" action="{% url 'accounts:journal_close' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_notice">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+            <input type="hidden" name="notice_id" value="{{ n.id }}">
+            <button type="submit" class="jc-linkbtn">{% if n.is_active %}{% trans "Söndür" context "registrar.journal_close" %}{% else %}{% trans "Aktivləşdir" context "registrar.journal_close" %}{% endif %}</button>
+          </form>
+          <form method="post" action="{% url 'accounts:journal_close' %}" data-jc-confirm-form>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_notice">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
+            <input type="hidden" name="notice_id" value="{{ n.id }}">
+            <button type="submit" class="jc-linkbtn jc-linkbtn--danger" data-jc-confirm-key="delete">{% trans "Sil" context "registrar.journal_close" %}</button>
+          </form>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="jc-empty jc-empty--soft">{% trans "Bu semestr üçün hələ xəbərdarlıq yoxdur." context "registrar.journal_close" %}</div>
+    {% endif %}
+  </div>
+
+  {% endif %}
+</div>
+
+<div id="jcI18n" class="d-none"
+     data-faculty="{% trans 'Fakültə' context 'registrar.journal_close' %}"
+     data-department="{% trans 'Kafedra' context 'registrar.journal_close' %}"
+     data-confirm-close="{% trans 'Bu əhatədəki bütün jurnallar bağlanacaq və müəllimlər bal yaza bilməyəcək. Davam edilsin?' context 'registrar.journal_close' %}"
+     data-confirm-reopen="{% trans 'Bu əhatədəki bağlı jurnallar yenidən açılacaq. Davam edilsin?' context 'registrar.journal_close' %}"
+     data-confirm-delete="{% trans 'Xəbərdarlıq silinsin?' context 'registrar.journal_close' %}"></div>
+<script src="{% static 'accounts/js/journal_close.js' %}"></script>

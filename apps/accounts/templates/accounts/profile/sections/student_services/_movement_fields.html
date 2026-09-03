@@ -1,0 +1,82 @@
+{% load i18n %}
+{% comment %}
+Ekran 09 — «Tələbə hərəkəti» dialoqunun sahələri (`_reason_dialog.html`-in
+`reason_extra_include`-u). Səbəb məcburiyyəti (≥20 simvol) dialoqun ÖZ
+qatındadır — burada TƏKRARLANMIR.
+
+Hansı hədəf sahəsinin görünəcəyi SEÇİLƏN NÖVDƏN asılıdır; qayda serverdən
+`data-sr-kinds` JSON-u ilə gəlir (`movement_kinds()` → `RULES`), yəni state
+maşını iki yerdə saxlanılmır. JS yalnız görünürlüyü açıb-bağlayır; faktiki
+məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
+{% endcomment %}
+{{ student_registry_section.movement_kinds|json_script:"srMovementKinds" }}
+
+<p class="stsvc__target" data-sr-target-name aria-live="polite"></p>
+
+<fieldset class="ems-field stsvc__kinds">
+    <legend class="ems-field__label">
+        {% trans "Əməliyyatın növü" context "accounts.student_registry" %}
+        <span class="ems-field__req" aria-hidden="true">*</span>
+    </legend>
+    {% for kind in student_registry_section.movement_kinds %}
+        <label class="stsvc__kind">
+            <input type="radio" name="kind" value="{{ kind.key }}" data-sr-kind{% if forloop.first %} checked{% endif %}>
+            <span class="stsvc__kind-label">{{ kind.label }}</span>
+        </label>
+    {% endfor %}
+</fieldset>
+
+<div class="stsvc__grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="srOrderNumber">
+            {% trans "Əmr nömrəsi" context "accounts.student_registry" %}
+            <span class="ems-field__req" aria-hidden="true">*</span>
+        </label>
+        <input class="ems-input" type="text" id="srOrderNumber" name="order_number" maxlength="64" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="srOrderDate">
+            {% trans "Əmrin tarixi" context "accounts.student_registry" %}
+            <span class="ems-field__req" aria-hidden="true">*</span>
+        </label>
+        <input class="ems-input" type="date" id="srOrderDate" name="order_date" required>
+    </div>
+</div>
+
+<div class="ems-field" data-sr-need="group" hidden>
+    <label class="ems-field__label" for="srTargetGroup">{% trans "Yeni qrup" context "accounts.student_registry" %}</label>
+    <select class="ems-select" id="srTargetGroup" name="target_group" data-sr-group-select>
+        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+    </select>
+    <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki, boş yeri olan qruplar." context "accounts.student_registry" %}</p>
+</div>
+
+<div class="ems-field" data-sr-need="program" hidden>
+    <label class="ems-field__label" for="srTargetProgram">{% trans "Yeni ixtisas" context "accounts.student_registry" %}</label>
+    <select class="ems-select" id="srTargetProgram" name="target_program" data-sr-program-select>
+        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+    </select>
+    <p class="ems-field__hint">{% trans "Yeni ixtisasın həmin qəbul ili üçün tədris planı olmalıdır." context "accounts.student_registry" %}</p>
+</div>
+
+<div class="ems-field" data-sr-need="form" hidden>
+    <label class="ems-field__label" for="srTargetForm">{% trans "Yeni təhsil forması" context "accounts.student_registry" %}</label>
+    <select class="ems-select" id="srTargetForm" name="target_form">
+        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+        {% for option in student_registry_section.form_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="ems-field" data-sr-need="until" hidden>
+    <label class="ems-field__label" for="srEffectiveUntil">{% trans "Məzuniyyətin bitmə tarixi" context "accounts.student_registry" %}</label>
+    <input class="ems-input" type="date" id="srEffectiveUntil" name="effective_until">
+</div>
+
+<div class="ems-field">
+    <label class="ems-field__label" for="srDocument">{% trans "Əsas sənəd" context "accounts.student_registry" %}</label>
+    <input class="ems-input" type="file" id="srDocument" name="document"
+           accept=".pdf,.jpg,.jpeg,.png,.webp">
+    <p class="ems-field__hint">{% trans "Ərizə, arayış və ya protokol — opsional (ən çox 10 MB)." context "accounts.student_registry" %}</p>
+</div>

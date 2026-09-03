@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}«Ana səhifə» — UNİVERSAL sidebar bəndi və kabinetin DEFAULT açılışı
+(FAZA 22).  Rol qapısı yoxdur: panel yalnız istifadəçinin icazəli bölmələrinin
+vidjetlərini yığır, ona görə bənd hər aktiv üzvdə görünür.
+
+Ayrıca fayldadır ki, `_sidebar.html` 600 sətirlik modul-ölçü qapısını keçməsin
+(qonşu `_org_menu_group.html` ilə eyni konvensiya).{% endcomment %}
+{% if 'dashboard' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=dashboard"
+       data-section="dashboard"
+       data-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'dashboard' %}active{% endif %}">
+        <i class="fas fa-house sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Ana səhifə" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

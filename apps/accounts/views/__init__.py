@@ -18,6 +18,9 @@ from .account_management import (
     superadmin_user_management,
 )
 
+# «Müraciətlərim» — «Təyin et» dialoqunun namizəd siyahısı
+from .applications import applications_assignees
+
 # Authentication views
 from .auth import (
     CustomLoginView,
@@ -58,7 +61,33 @@ from .dashboard import (
 
 # İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri
 from .exam_chance import exam_chance
+
+# İmtahan Mərkəzi — kağız imtahan balının əl ilə daxil edilməsi
+from .exam_score_entry import exam_score_entry
+
+# Fənn təhvili — dərs açılışının başqa müəllimə verilməsi (`journal.reassign`)
+from .handover import (
+    handover_action,
+    handover_history,
+    handover_offerings,
+    handover_options,
+    handover_teachers,
+)
+
+# RİM — semestr sonu jurnal bağlaması
+from .journal_close import journal_close
 from .kollokvium_windows import kollokvium_windows
+
+# İmtahan Mərkəzi — köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi
+from .legacy_review import (
+    legacy_review_action,
+    legacy_review_groups,
+    legacy_review_options,
+    legacy_review_queue,
+    legacy_review_subjects,
+    legacy_review_teachers,
+    legacy_review_units,
+)
 
 # Organization views
 from .organization import (
@@ -66,6 +95,19 @@ from .organization import (
     student_org_invitation_action,
     student_organization_management,
     student_organization_request,
+)
+
+# RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
+from .people import (
+    people_academic_groups,
+    people_action,
+    people_analytics,
+    people_analytics_ai,
+    people_detail,
+    people_list,
+    people_options,
+    people_student_card,
+    people_transfer_preview,
 )
 
 # Post management views
@@ -78,6 +120,8 @@ from .post_management import (
 
 # Profile views
 from .profile import (
+    academic_items_api,
+    change_password_otp_request,
     profile_avatar,
     profile_badges_api,
     profile_section_fragment,
@@ -88,6 +132,7 @@ from .profile import (
     view_as_start,
     view_as_stop,
 )
+from .rim import rim_action, rim_user_detail, rim_user_search
 
 # Role management views
 from .roles import (
@@ -96,14 +141,41 @@ from .roles import (
     role_assignment,
 )
 
+# Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
+from .schedule_manage import schedule_manage_action, schedule_manage_check
+
 # Global search (⌘K command palette)
 from .search import global_search
+from .student_intake import (
+    student_admission_create_group,
+    student_intake_apply,
+    student_intake_preview,
+    student_intake_template,
+)
+from .student_registry import (
+    student_registry_action,
+    student_registry_card,
+    student_registry_document,
+    student_registry_export,
+    student_registry_programs,
+)
 
 # Superadmin views
 from .superadmin import (
     superadmin_ai_settings,
     superadmin_exam_rooms,
     superadmin_organizations,
+)
+
+# Sillabus — müəllim səthi (siyahı + redaktor) profil bölməsi kimi açılır
+from .syllabus import (
+    syllabus_action,
+    syllabus_decision,
+    syllabus_detail,
+    syllabus_detail_pdf,
+    syllabus_preview,
+    syllabus_review_open,
+    syllabus_section_save,
 )
 
 __all__ = [
@@ -124,6 +196,8 @@ __all__ = [
     "logout_view",
     # Profile
     "user_profile",
+    "academic_items_api",
+    "change_password_otp_request",
     "public_user_profile",
     "profile_avatar",
     "statistics_export_csv",
@@ -164,6 +238,53 @@ __all__ = [
     # Account management
     "delete_account",
     "superadmin_user_management",
+    # RİM mərkəzi — hesab idarəetməsi (axtarış/parol/blok/silmə/redaktə)
+    "people_list",
+    "people_options",
+    "people_detail",
+    "people_action",
+    "people_analytics",
+    "people_analytics_ai",
+    "people_student_card",
+    "people_academic_groups",
+    "people_transfer_preview",
+    # Fənn təhvili (`journal.reassign`)
+    "handover_teachers",
+    "handover_offerings",
+    "handover_options",
+    "handover_history",
+    "handover_action",
+    "applications_assignees",
+    "schedule_manage_check",
+    "schedule_manage_action",
+    "student_intake_template",
+    "student_intake_preview",
+    "student_intake_apply",
+    "student_admission_create_group",
+    "student_registry_action",
+    "student_registry_card",
+    "student_registry_document",
+    "student_registry_export",
+    "student_registry_programs",
+    # Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi (`final_score.entry`)
+    "legacy_review_queue",
+    "legacy_review_options",
+    "legacy_review_units",
+    "legacy_review_groups",
+    "legacy_review_subjects",
+    "legacy_review_teachers",
+    "legacy_review_action",
+    "rim_user_search",
+    "rim_user_detail",
+    "rim_action",
+    # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)
+    "syllabus_action",
+    "syllabus_decision",
+    "syllabus_detail",
+    "syllabus_detail_pdf",
+    "syllabus_preview",
+    "syllabus_review_open",
+    "syllabus_section_save",
     # Post management
     "superadmin_post_management",
     "superadmin_delete_post",
@@ -175,4 +296,6 @@ __all__ = [
     "superadmin_exam_rooms",
     "exam_chance",
     "kollokvium_windows",
+    "exam_score_entry",
+    "journal_close",
 ]

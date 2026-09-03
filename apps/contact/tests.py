@@ -111,13 +111,19 @@ class CreateContactMessageTest(TestCase):
         self.assertEqual(message.user_agent, "TestAgent/1.0")
         notify.assert_called_once_with(message)
 
-    def test_extract_client_ip_prefers_first_xff_entry(self):
+    def test_extract_client_ip_uses_the_trusted_proxy_member(self):
+        """2026-09-02 audit, P2-6: SOL üzv müştəri tərəfindən saxtalaşdırıla bilər.
+
+        Əvvəl bu test məhz sol üzvü («ilk XFF girişi») gözləyirdi, yəni
+        saxtalaşdırıla bilən davranışı kilidləmişdi.  Edge nginx başlığı
+        overwrite edir → doğru üzv SONUNCU-dur.
+        """
         request = self.factory.get(
             "/contact/",
             HTTP_X_FORWARDED_FOR="203.0.113.7, 10.0.0.1",
             REMOTE_ADDR="10.0.0.1",
         )
-        self.assertEqual(_extract_client_ip(request), "203.0.113.7")
+        self.assertEqual(_extract_client_ip(request), "10.0.0.1")
 
     def test_extract_client_ip_falls_back_to_remote_addr(self):
         request = self.factory.get("/contact/", REMOTE_ADDR="198.51.100.5")

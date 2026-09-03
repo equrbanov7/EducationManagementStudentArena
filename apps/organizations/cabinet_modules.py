@@ -52,9 +52,16 @@ CABINET_MODULES: dict[str, dict] = {
         "sections": ("my-journal",),
         "default": True,
     },
-    "approvals": {
-        "label": pgettext_lazy("accounts.cabinet_modules", "Qiymət təsdiqləri"),
-        "sections": ("grade-approvals",),
+    # Köhnə "approvals" (qiymət təsdiqləri) modulu ləğv edildi — təsdiq zənciri
+    # yoxdur. Yerini RİM-in semestr-sonu jurnal bağlaması tutur.
+    "journal_close": {
+        "label": pgettext_lazy("accounts.cabinet_modules", "Jurnal bağlama (RİM)"),
+        "sections": ("journal-close",),
+        "default": True,
+    },
+    "exam_score_entry": {
+        "label": pgettext_lazy("accounts.cabinet_modules", "İmtahan balının daxil edilməsi"),
+        "sections": ("exam-score-entry",),
         "default": True,
     },
     "analytics": {

@@ -18,6 +18,12 @@ from __future__ import annotations
 
 from django.db import transaction
 
+from . import exam_eligibility
+from .integrity import (
+    validate_group_elective_target,
+    validate_offering_target,
+    validate_same_organization,
+)
 from .models import (
     CourseOffering,
     CurriculumSubject,
@@ -30,6 +36,13 @@ from .models import (
 
 def get_or_create_offering(*, organization, subject, period, group, course=None):
     """The section for (subject, semester, group). Reuses the LMS course if given."""
+    validate_offering_target(
+        organization=organization,
+        subject=subject,
+        period=period,
+        group=group,
+        course=course,
+    )
     offering, created = CourseOffering.objects.get_or_create(
         organization=organization,
         subject=subject,
@@ -44,7 +57,17 @@ def get_or_create_offering(*, organization, subject, period, group, course=None)
 
 
 def enroll_student_in_subject(*, record, subject, period, kind):
-    """Ensure the student is enrolled in *subject* for *period* (their group section)."""
+    """Ensure the student is enrolled in *subject* for *period* (their group section).
+
+    Existing rows, including historical ones, are never reactivated implicitly;
+    callers that require a current enrollment must inspect ``status``.
+    """
+    validate_same_organization(
+        organization=record.organization,
+        record=record,
+        subject=subject,
+        period=period,
+    )
     offering = get_or_create_offering(
         organization=record.organization, subject=subject, period=period, group=record.group
     )
@@ -97,6 +120,15 @@ def choose_group_elective(
     Akademik təqvim (U11/U14): period qeydiyyat pəncərəsi konfiqurasiya edibsə,
     qərar yalnız pəncərə AÇIQ olanda verilə bilər (staff ``enforce_window=False``
     ilə keçə bilər)."""
+    validate_group_elective_target(
+        organization=organization,
+        group=group,
+        curriculum=curriculum,
+        period=period,
+        elective_group=elective_group,
+        subject=subject,
+        decided_by=decided_by,
+    )
     if enforce_window:
         state = getattr(period, "registration_state", None)
         if state is not None and state != "open":
@@ -140,9 +172,16 @@ def get_student_semester_plan(*, record, period, semester_number):
         }
     """
     enrollments = list(
-        Enrollment.objects.filter(
-            organization=record.organization, student=record.student, offering__period=period
-        ).select_related("offering__subject", "offering__course", "offering__assessment_scheme")
+        Enrollment.objects.filter(organization=record.organization, student=record.student, offering__period=period)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .select_related(
+            "offering__subject",
+            "offering__course",
+            "offering__assessment_scheme",
+            # Ekran 10 — fənn kartında MÜƏLLİM adı göstərilir; `instructor`
+            # olmadan hər sətir ayrıca sorğu edərdi (N+1).
+            "offering__instructor",
+        )
     )
 
     elective_rows = CurriculumSubject.objects.filter(
@@ -166,20 +205,27 @@ def get_student_semester_plan(*, record, period, semester_number):
 # ── Bologna credits + absence (qayıb) eligibility (U2-UI) ────────────────────
 
 
-def get_credit_summary(*, record):
+def get_credit_summary(*, record, today=None):
     """Bologna ECTS graduation progress for a student's program.
 
-    Earned = ECTS of COMPLETED enrollments; in-progress = ECTS of currently
-    ENROLLED ones; required = ``program.ects_total``. ``can_graduate`` is True
-    once earned ≥ required (mandatory-pass checks live in the grading layer, U3)."""
-    completed = Enrollment.objects.filter(
-        organization=record.organization, student=record.student, status=Enrollment.Status.COMPLETED
-    ).select_related("offering__subject")
-    active = Enrollment.objects.filter(
-        organization=record.organization, student=record.student, status=Enrollment.Status.ENROLLED
-    ).select_related("offering__subject")
-    earned = sum(e.offering.subject.ects for e in completed)
-    in_progress = sum(e.offering.subject.ects for e in active)
+    Earned = ECTS of **passed** subjects, in-progress = ECTS of not-yet-passed
+    subjects in a period that has not ended; required = ``program.ects_total``.
+    ``can_graduate`` is True once earned ≥ required (mandatory-pass checks live
+    in the grading layer, U3).
+
+    Kredit ``Enrollment.status``-dan DEYİL, qiymətlərdən oxunur — transkript
+    qatı ilə eyni mənbədən, ona görə «Fənlərim» ECTS qutusu ilə «Ümumi tədris
+    məlumatı» bir daha ayrılmır (səbəb + performans qərarı:
+    :func:`transcript.student_credit_totals` docstring-i). Import funksiya
+    daxilindədir: ``transcript`` → ``analytics`` → ``finals`` → ``services``
+    zənciri modul səviyyəsində dövri import yaradardı."""
+    from apps.registrar import transcript as transcript_service
+
+    totals = transcript_service.student_credit_totals(
+        student=record.student, organization=record.organization, today=today
+    )
+    earned = totals["earned"]
+    in_progress = totals["in_progress"]
     required = record.program.ects_total or 0
     remaining = max(0, required - earned)
     percent = round(earned / required * 100, 1) if required else 0.0
@@ -193,22 +239,40 @@ def get_credit_summary(*, record):
     }
 
 
-def get_exam_eligibility(*, enrollment, limit_percent):
+def get_exam_eligibility(*, enrollment, limit_percent, exempt=False, resit_done=False, frozen=None, hours_map=None):
     """Absence (qayıb) rule: a student is barred from the subject's exam when
     unexcused absence hours exceed ``limit_percent`` of the lesson hours.
 
     ``limit_percent`` comes from the student's program
-    (``Program.absence_limit_percent``); it is tenant/program-configurable."""
-    lesson_hours = enrollment.offering.lesson_hours or 0
-    allowed_hours = lesson_hours * limit_percent / 100.0
-    barred = lesson_hours > 0 and enrollment.absence_hours > allowed_hours
-    return {
-        "barred": barred,
-        "absence_hours": enrollment.absence_hours,
-        "lesson_hours": lesson_hours,
-        "allowed_hours": allowed_hours,
-        "limit_percent": limit_percent,
-    }
+    (``Program.absence_limit_percent``); it is tenant/program-configurable.
+
+    ``exempt`` — rəsmi idmançı-tələbə istisnası (milli yığma;
+    ``StudentAcademicRecord.national_athlete_exemption``).  ``True`` olduqda
+    saatlar olduğu kimi qalır (``absence_hours`` dəyişmir, davamiyyət balı yenə
+    real qayıba görə hesablanır), sadəcə ``barred`` heç vaxt qalxmır.
+
+    ``frozen`` — ``None`` olduqda açılış üçün özü yoxlanılır
+    (:func:`exam_eligibility.is_frozen`).  Toplu səthlər bunu
+    :func:`exam_eligibility.frozen_offering_ids` ilə əvvəlcədən hesablayıb
+    ötürməlidir (N+1-in qarşısını alır).
+
+    ⚠️ Bu funksiya artıq yalnız **nazik sarğıdır**: qərarın özü
+    :func:`apps.registrar.exam_eligibility.resolve`-dadır — sistemdə yeganə
+    yerdir.  2026-08-31 auditinə qədər eyni müqayisə doqquz yerdə təkrarlanırdı;
+    yeni buraxılış qaydası ARTIQ təkrarlanmamalıdır, o qapıdan keçməlidir.
+    """
+    return exam_eligibility.resolve(
+        absence_hours=enrollment.absence_hours,
+        # Məxrəc TƏK tərifdən (``lesson_hours`` boşdursa dərslərin saat cəmi) —
+        # əvvəl bu səth xam sahəyə baxırdı, jurnal qridi isə fallback-a, yəni
+        # eyni sətir iki ekranda fərqli cavab alırdı.  ``hours_map`` verilibsə
+        # sorğu yaranmır (döngüdə çağıranlar onu əvvəlcədən qurur).
+        lesson_hours=exam_eligibility.lesson_hours_for(enrollment.offering, hours_map=hours_map),
+        limit_percent=limit_percent,
+        exempt=exempt,
+        resit_done=resit_done,
+        frozen=exam_eligibility.is_frozen(enrollment.offering) if frozen is None else frozen,
+    )
 
 
 def get_student_cabinet_data(*, record, period, semester_number):
@@ -219,10 +283,22 @@ def get_student_cabinet_data(*, record, period, semester_number):
     Bologna credit progress."""
     plan = get_student_semester_plan(record=record, period=period, semester_number=semester_number)
     limit_percent = record.program.absence_limit_percent
+    # Donma dəsti bir dəfə (iki sorğu) — hər fənn üçün ayrıca yoxlama N+1 olardı.
+    offering_ids = [e.offering_id for e in plan["enrollments"]]
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    # Məxrəc fallback-ı da toplu (tək aqreqat sorğu) — 25,314 köçürülmüş
+    # yazılışda ``lesson_hours=0`` olduğu üçün sətir-sətir oxumaq N+1 olardı.
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     subjects = []
     for enrollment in plan["enrollments"]:
         subject = enrollment.offering.subject
-        eligibility = get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
+        eligibility = get_exam_eligibility(
+            enrollment=enrollment,
+            limit_percent=limit_percent,
+            exempt=record.national_athlete_exemption,
+            frozen=enrollment.offering_id in frozen_ids,
+            hours_map=hours_map,
+        )
         subjects.append(
             {
                 "enrollment": enrollment,
@@ -230,6 +306,8 @@ def get_student_cabinet_data(*, record, period, semester_number):
                 "ects": subject.ects,
                 "kind": enrollment.kind,
                 "course": enrollment.offering.course,
+                "offering": enrollment.offering,
+                "teacher": enrollment.offering.instructor,
                 "eligibility": eligibility,
             }
         )

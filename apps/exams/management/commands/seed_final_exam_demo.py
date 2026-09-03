@@ -6,7 +6,7 @@ Tələbələri qrup VƏ fərdi olaraq oturuma təyin edir və hər tələbə ü�
 PIN yaradır. Oturumu "giriş açıq" (entry_open) vəziyyətinə gətirir ki, tələbə
 dərhal PIN ilə daxil ola bilsin; STARTı nəzarətçi əl ilə versin (demonstrasiya).
 
-Sonda bütün giriş məlumatlarını (istifadəçi + şifrə + PIN) çap edir.
+Sonda demo hesablarını və təhlükəsiz test addımlarını çap edir.
 
 İşə salma:
     python manage.py seed_final_exam_demo
@@ -29,8 +29,9 @@ from apps.exams.models import (
     FinalExamTicket,
     StudentGroup,
 )
-from apps.exams.services.final_center import assign_students, decrypt_ticket_pin, open_entry
+from apps.exams.services.final_center import assign_students, open_entry
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -38,7 +39,8 @@ from core.roles import ProfileRole
 from ._seed_helpers import UsersSeedMixin
 
 
-class Command(UsersSeedMixin, BaseCommand):
+class Command(ProductionCommandSafetyMixin, UsersSeedMixin, BaseCommand):
+    safety_command_name = "seed_final_exam_demo"
     help = "Final imtahan mərkəzi üçün uçdan-uca demo (imtahan + suallar + qrup/fərdi təyinat + PIN + oturum)."
 
     def add_arguments(self, parser):
@@ -109,7 +111,7 @@ class Command(UsersSeedMixin, BaseCommand):
         # ── Girişi aç (tələbələr dərhal PIN ilə daxil ola bilsin) ───────────
         open_entry(session, center)
 
-        self._report(password, org, center, invigilator, exam, session, main_group, sub_group, individual, all_students)
+        self._report(org, center, invigilator, exam, session, main_group, sub_group, individual, all_students)
 
     # ------------------------------------------------------------------ helpers
 
@@ -238,7 +240,7 @@ class Command(UsersSeedMixin, BaseCommand):
             },
         )
 
-    def _report(self, password, org, center, invigilator, exam, session, main_group, sub_group, individual, students):
+    def _report(self, org, center, invigilator, exam, session, main_group, sub_group, individual, students):
         out = self.stdout
         ok = self.style.SUCCESS
         warn = self.style.WARNING
@@ -256,32 +258,29 @@ class Command(UsersSeedMixin, BaseCommand):
         )
 
         out.write(ok("── İMTAHAN MƏRKƏZİ (yaradan) ──"))
-        out.write(f"  İstifadəçi: {center.username}   Şifrə: {password}")
+        out.write(f"  İstifadəçi: {center.username}")
         out.write(f"  Panel     : /exams/center/sessions/{session.pk}/\n")
 
         out.write(ok("── NƏZARƏTÇI (start + monitorinq) ──"))
-        out.write(f"  İstifadəçi: {invigilator.username}   Şifrə: {password}")
+        out.write(f"  İstifadəçi: {invigilator.username}")
         out.write(f"  Monitor   : /exams/center/sessions/{session.pk}/monitor/")
         out.write("  → Monitor səhifəsində 'İmtahanı başlat' düyməsi ilə hamıya sinxron start verilir.\n")
 
-        out.write(ok("── TƏLƏBƏLƏR (istifadəçi / şifrə / PIN) ──"))
+        out.write(ok("── TƏLƏBƏLƏR (credential dəyərləri loglanmır) ──"))
         by_id = {t.student_id: t for t in FinalExamTicket.objects.filter(session=session).select_related("student")}
         for student in students:
             ticket = by_id.get(student.id)
             if ticket is None:
                 out.write(warn(f"  {student.username:26}  — bilet yaradılmadı (ötürüldü)"))
                 continue
-            pin = decrypt_ticket_pin(ticket)
             sector = self._sector_label(student, main_group, sub_group, individual)
-            out.write(f"  {student.username:26}  şifrə={password:14}  PIN={pin}   [{sector}]")
+            out.write(f"  {student.username:26}  [{sector}]")
 
         out.write(ok("\n── TEST ADDIMLARI (tələbə tərəfi) ──"))
         first_student = students[0]
-        first_ticket = by_id.get(first_student.id)
-        first_pin = decrypt_ticket_pin(first_ticket) if first_ticket else "—"
         out.write("  1) İmtahan giriş səhifəsini aç:   /exams/final/")
         out.write("     (normal login LAZIM DEYİL — birbaşa istifadəçi adı + PIN yazılır)")
-        out.write(f"  2) İstifadəçi adı: {first_student.username}   PIN: {first_pin}  → 'İmtahana daxil ol'")
+        out.write(f"  2) İstifadəçi adı: {first_student.username}; PIN-i mərkəz panelindən təhlükəsiz götür")
         out.write("  3) Açılan MODALDA imtahan məlumatı + qaydalar → təsdiqlə → 'Davam et'")
         out.write("  4) Gözləmə otağı → nəzarətçi 'İmtahanı başlat' basanda imtahan avtomatik açılır.\n")
         out.write(ok("Qeyd: PIN-lər hər tələbədə fərqlidir və yalnız bir imtahana keçərlidir.\n"))

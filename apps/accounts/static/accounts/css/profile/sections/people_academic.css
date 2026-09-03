@@ -1,0 +1,459 @@
+/* Tələbə idarəetmə çekməcəsi (psm-*) — koordinator / dekanlıq səthi.
+ *
+ * Dizayn dili kataloqun (`people_*`) və jurnalın «alt qrup» modalının (`jgs-*`)
+ * davamıdır: yumşaq kart, navy başlıq, göy aksent. YENİ RƏNG İCAD EDİLMİR —
+ * hamısı mövcud `--ems-*` tokenlərindəndir (mövcud olmayan `--ems-primary-300/
+ * -400` İŞLƏDİLMİR). Tətbiq yalnız-işıqlıdır: `prefers-color-scheme` bloku
+ * QƏSDƏN yoxdur (MEMORY: app is light-only).
+ */
+
+/* ── Kataloq sətrindəki «İdarə et» düyməsi ───────────────────────────────── */
+.people__action--manage {
+    background: var(--ems-primary-50, #eef4ff);
+    border-color: var(--ems-primary-200, #bfd4fe);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-weight: 700;
+}
+.people__action--manage:hover {
+    background: var(--ems-primary-100, #dbe7fe);
+    border-color: var(--ems-primary-500, #3b82f6);
+}
+
+/* ── Çekməcə çərçivəsi ───────────────────────────────────────────────────── */
+.psm {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    justify-content: flex-end;
+}
+.psm[hidden] {
+    display: none;
+}
+
+/* ⚠️ `hidden` ATRIBUTUNUN QORUYUCUSU — silinməsin.
+ *
+ * Çekməcənin içindəki blokları JS `node.hidden = true/false` ilə açıb-bağlayır
+ * (skelet, məzmun, qeyd seçicisi, ön baxış, cədvəl sarğısı, xəta qutusu).
+ * Onların hamısında komponent üslubu `display: flex` verir; brauzerin daxili
+ * `[hidden] { display: none }` qaydası ilə EYNİ spesifiklikdə (0,1,0) olduğu
+ * üçün mənbə sırasına görə `display: flex` QALİB gəlirdi — nəticədə skelet
+ * məlumat gələndən sonra da ekranda qalır, ön baxış qutusu isə qrup
+ * seçilməmişdən əvvəl görünürdü (brauzerdə təsdiqləndi).
+ *
+ * `.psm [hidden]` (0,1,1) hər iki fayldakı sinif qaydalarını (0,1,0) üstələyir,
+ * ona görə yüklənmə sırasından ASILI DEYİL və `!important` tələb etmir.
+ */
+.psm [hidden] {
+    display: none;
+}
+.psm__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+    /* Cədvəl arxada GÖRÜNÜR — istifadəçi hansı sətirlə işlədiyini itirmir. */
+    backdrop-filter: blur(1.5px);
+}
+.psm__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(560px, 100%);
+    max-height: 100%;
+    background: var(--ems-surface, #ffffff);
+    border-left: 1px solid var(--ems-border, #d5dbe5);
+    box-shadow: -18px 0 48px rgba(15, 23, 42, 0.18);
+    animation: psm-slide-in 0.18s ease-out;
+}
+.psm__panel:focus-visible {
+    outline: none;
+}
+
+@keyframes psm-slide-in {
+    from {
+        transform: translateX(24px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .psm__panel {
+        animation: none;
+    }
+}
+
+/* ── Başlıq ──────────────────────────────────────────────────────────────── */
+.psm__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: var(--ems-navy-900, #0f172a);
+    color: var(--ems-neutral-0, #ffffff);
+}
+.psm__head-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.psm__head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.psm__avatar {
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+    font-weight: 800;
+    font-size: 0.95rem;
+    overflow: hidden;
+}
+.psm__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.psm__title {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+.psm__subtitle {
+    font-size: 0.78rem;
+    opacity: 0.78;
+    overflow-wrap: anywhere;
+}
+.psm__close {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: transparent;
+    color: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.psm__close:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+.psm__close:focus-visible {
+    outline: 2px solid var(--ems-neutral-0, #ffffff);
+    outline-offset: 2px;
+}
+
+/* ── Gövdə ───────────────────────────────────────────────────────────────── */
+.psm__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 18px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: var(--ems-bg-subtle, #f7f9fc);
+}
+.psm__content {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.psm__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.psm__sk {
+    display: block;
+    height: 16px;
+    border-radius: 8px;
+    background: linear-gradient(
+        90deg,
+        var(--ems-neutral-100, #f1f5f9) 25%,
+        var(--ems-neutral-200, #e2e8f0) 50%,
+        var(--ems-neutral-100, #f1f5f9) 75%
+    );
+    background-size: 200% 100%;
+    animation: psm-shimmer 1.2s linear infinite;
+}
+.psm__sk--lg {
+    height: 52px;
+}
+.psm__sk--sm {
+    width: 55%;
+}
+@keyframes psm-shimmer {
+    from {
+        background-position: 200% 0;
+    }
+    to {
+        background-position: -200% 0;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .psm__sk {
+        animation: none;
+    }
+}
+
+.psm__alert {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+}
+.psm__alert--danger {
+    background: var(--ems-danger-bg, #fef2f2);
+    border: 1px solid var(--ems-danger-200, #fecaca);
+    color: var(--ems-danger-strong, #b91c1c);
+}
+
+/* ── Qeyd seçicisi (bir neçə proqram qeydi olanda) ───────────────────────── */
+.psm__records {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.psm__record-tab {
+    border: 1px solid var(--ems-border, #d5dbe5);
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.psm__record-tab[aria-selected="true"] {
+    background: var(--ems-primary-600, #2563eb);
+    border-color: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+    font-weight: 700;
+}
+.psm__record-tab:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+/* ── Kartlar ─────────────────────────────────────────────────────────────── */
+.psm__card {
+    background: var(--ems-surface, #ffffff);
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 14px;
+    padding: 14px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.psm__card--action {
+    border-color: var(--ems-primary-200, #bfd4fe);
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.06);
+}
+.psm__card-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    color: var(--ems-navy-800, #1e293b);
+}
+.psm__period,
+.psm__count {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+}
+.psm__hint {
+    margin: 0;
+    font-size: 0.79rem;
+    line-height: 1.45;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+/* ── Faktlar (proqram / qrup / kurs / status) ────────────────────────────── */
+.psm__facts {
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(96px, auto) 1fr;
+    gap: 6px 12px;
+    font-size: 0.85rem;
+}
+.psm__facts dt {
+    color: var(--ems-text-muted, #5b6472);
+}
+.psm__facts dd {
+    margin: 0;
+    color: var(--ems-text, #1f2937);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.psm__code {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 6px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.psm__pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+.psm__pill--ok {
+    background: var(--ems-success-bg, #ecfdf5);
+    border-color: var(--ems-success-bd, #a7f3d0);
+    color: var(--ems-success-strong, #047857);
+}
+.psm__pill--warn {
+    background: var(--ems-warning-bg, #fffbeb);
+    border-color: var(--ems-warning-bd, #fde68a);
+    color: var(--ems-warning-800, #92400e);
+}
+.psm__pill--danger {
+    background: var(--ems-danger-bg, #fef2f2);
+    border-color: var(--ems-danger-200, #fecaca);
+    color: var(--ems-danger-strong, #b91c1c);
+}
+.psm__pill--info {
+    background: var(--ems-primary-50, #eef4ff);
+    border-color: var(--ems-primary-200, #bfd4fe);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+/* ── Yazılışlar ──────────────────────────────────────────────────────────── */
+.psm__enrollments {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.psm__enrollment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--ems-neutral-200, #e2e8f0);
+    font-size: 0.83rem;
+}
+.psm__enrollment-code {
+    font-weight: 800;
+    color: var(--ems-primary-700, #1d4ed8);
+}
+.psm__enrollment-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.psm__enrollment-absence {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ems-warning-800, #92400e);
+}
+.psm__guest-chip {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eef4ff);
+    border: 1px solid var(--ems-primary-200, #bfd4fe);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+.psm__empty {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+/* ── Sahələr ─────────────────────────────────────────────────────────────── */
+.psm__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.psm__label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ems-text, #1f2937);
+}
+.psm__step {
+    width: 19px;
+    height: 19px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+.psm__field input[type="text"] {
+    min-height: 42px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 9px;
+    padding: 8px 11px;
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    font: inherit;
+    max-width: 100%;
+}
+.psm__field input[type="text"]:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 1px;
+}
+
+/* ── Kiçik ekran: çekməcə tam enə keçir ──────────────────────────────────── */
+@media (max-width: 600px) {
+    .psm__panel {
+        width: 100%;
+        border-left: none;
+    }
+    .psm__facts {
+        grid-template-columns: 1fr;
+        gap: 2px 0;
+    }
+    .psm__facts dd {
+        margin-bottom: 6px;
+    }
+}

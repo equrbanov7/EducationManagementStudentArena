@@ -13,6 +13,14 @@
         name="{{ field_name }}"
         class="form-select bootstrap-single-select__native js-bootstrap-single-select{% if field_select_class %} {{ field_select_class }}{% endif %}"
         data-bootstrap-select
+        {% comment %}
+        A11y (dizayn handoff §7): görünən label yoxdursa `aria-label` MƏCBURİDİR;
+        ipucu mətni isə `aria-describedby` ilə sahəyə bağlanır — əks halda
+        ekran oxuyucu «Optional: choose…» qeydini heç vaxt oxumur.
+        Hər ikisi ƏLAVƏdir; mövcud çağırışlar dəyişmədən işləyir.
+        {% endcomment %}
+        {% if not field_label and field_aria_label %}aria-label="{{ field_aria_label }}"{% endif %}
+        {% if field_hint %}aria-describedby="{{ field_id }}-hint"{% endif %}
         {% if field_extra_attrs %}{{ field_extra_attrs|safe }}{% endif %}
     >
         <option value="">{{ field_placeholder }}</option>
@@ -29,7 +37,7 @@
     </select>
 
     {% if field_hint %}
-        <div class="bootstrap-single-select__hint{% if field_hint_class %} {{ field_hint_class }}{% endif %}" {% if field_hint_attrs %}{{ field_hint_attrs|safe }}{% endif %}>
+        <div id="{{ field_id }}-hint" class="bootstrap-single-select__hint{% if field_hint_class %} {{ field_hint_class }}{% endif %}" {% if field_hint_attrs %}{{ field_hint_attrs|safe }}{% endif %}>
             {{ field_hint }}
         </div>
     {% endif %}

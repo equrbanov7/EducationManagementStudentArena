@@ -201,3 +201,6 @@ QKU_Stress_Test_Hesabat_*.docx
 
 # Scratch/temp build directories (codex agent working dirs — never repo content)
 .codex_tmp/
+
+# Böyük dizayn-handoff arxivləri GitHub-a getmir (100MB limit)
+docs/design/*.zip

@@ -41,10 +41,12 @@ from .monitor import (
     session_monitor_snapshot,
 )
 from .permissions import (
+    can_enter_supervision_surface,
     can_manage_final_center,
     can_supervise_session,
     can_supervise_session_ws,
     can_view_final_history,
+    ensure_can_enter_supervision_surface,
     ensure_can_manage_final_center,
     ensure_can_supervise_session,
     ensure_can_view_final_history,
@@ -124,6 +126,7 @@ __all__ = [
     "broadcast_to_staff",
     "broadcast_to_students",
     "can_manage_final_center",
+    "can_enter_supervision_surface",
     "can_supervise_session",
     "can_supervise_session_ws",
     "can_view_final_history",
@@ -135,6 +138,7 @@ __all__ = [
     "drop_presence",
     "end_room",
     "ensure_can_manage_final_center",
+    "ensure_can_enter_supervision_surface",
     "ensure_can_supervise_session",
     "ensure_can_view_final_history",
     "ensure_ticket_owner",

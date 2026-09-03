@@ -1,0 +1,223 @@
+{% load i18n %}
+{% comment %}
+TƏLƏBƏ İDARƏETMƏ ÇEKMƏCƏSİ (psm-*) — proqram koordinatoru / dekanlıq səthi.
+
+Kataloqun ÜSTÜNDƏ oturur: paralel ikinci siyahı YOXDUR. Sətirdəki «İdarə et»
+düyməsi bu çekməcəni açır; cədvəl arxada olduğu yerdə qalır (modal tam səhifəni
+örtmür), ona görə istifadəçi kontekstini itirmir.
+
+Şablon yalnız SABİT mətnləri və çərçivəni verir — qeydlər, yazılışlar və
+köçürmə ön baxışı JSON-la gəlir və JS tərəfindən qurulur. JS Django şablon
+mühərrindən keçmədiyi üçün oradakı DİNAMİK mətnlər `data-i18n-*` atributları
+ilə ötürülür (CLAUDE.md: xarici faylda `{% templatetag openvariable %}` işləmir).
+
+⚠️ Bu fayl YALNIZ `people_section.can_manage_academic` doğru olanda daxil edilir
+(bax `_people_directory.html`). Endpoint-lər onsuz da fail-closed-dur; şablon
+qapısı isə icazəsiz istifadəçiyə ölü markup göndərməməyə xidmət edir.
+{% endcomment %}
+<div class="psm"
+     data-psm-root
+     hidden
+     data-card-url="{{ people_section.card_url_template }}"
+     data-groups-url="{{ people_section.groups_url }}"
+     data-preview-url="{{ people_section.preview_url_template }}"
+     data-action-url="{{ people_section.action_url }}"
+     data-min-reason-length="{{ people_section.min_reason_length }}"
+     data-max-reason-length="{{ people_section.max_reason_length }}"
+     data-i18n-loading="{% trans 'Yüklənir…' context 'accounts.people.academic' %}"
+     data-i18n-error="{% trans 'Əməliyyat alınmadı — yenidən cəhd edin.' context 'accounts.people.academic' %}"
+     data-i18n-no-records="{% trans 'Bu tələbənin sizin sahənizdə akademik qeydi yoxdur.' context 'accounts.people.academic' %}"
+     data-i18n-no-enrollments="{% trans 'Cari semestrdə aktiv yazılış yoxdur.' context 'accounts.people.academic' %}"
+     data-i18n-program="{% trans 'İxtisas' context 'accounts.people.academic' %}"
+     data-i18n-status-term="{% trans 'Status' context 'accounts.people.academic' %}"
+     data-i18n-course="{% trans 'kurs' context 'accounts.people.academic' %}"
+     data-i18n-admission="{% trans 'Qəbul ili' context 'accounts.people.academic' %}"
+     data-i18n-faculty="{% trans 'Fakültə' context 'accounts.people.academic' %}"
+     data-i18n-kafedra="{% trans 'Kafedra' context 'accounts.people.academic' %}"
+     data-i18n-group="{% trans 'Qrup' context 'accounts.people.academic' %}"
+     data-i18n-guest="{% trans 'alt qrupdan' context 'accounts.people.academic' %}"
+     data-i18n-absence-hours="{% trans 'saat qayıb' context 'accounts.people.academic' %}"
+     data-i18n-col-subject="{% trans 'Fənn' context 'accounts.people.academic' %}"
+     data-i18n-col-absence="{% trans 'Qayıb' context 'accounts.people.academic' %}"
+     data-i18n-col-marks="{% trans 'Jurnal işarəsi' context 'accounts.people.academic' %}"
+     data-i18n-col-target="{% trans 'Hədəf qrupda' context 'accounts.people.academic' %}"
+     data-i18n-target-yes="{% trans 'açılış var' context 'accounts.people.academic' %}"
+     data-i18n-target-no="{% trans 'açılış yaradılacaq' context 'accounts.people.academic' %}"
+     data-i18n-preview-empty="{% trans 'Bu semestrdə köçürüləcək yazılış yoxdur — yalnız qrup dəyişir.' context 'accounts.people.academic' %}"
+     data-i18n-warn-attendance="{% trans 'Qayıb saatı və giriş balı yeni qrupda SIFIRDAN başlayır.' context 'accounts.people.academic' %}"
+     data-i18n-warn-barred="{% trans 'Tələbə qayıb limitinə görə imtahana buraxılmırdı — köçürmədən sonra bu kilid aradan qalxır.' context 'accounts.people.academic' %}"
+     data-i18n-warn-finals="{% trans 'Mövcud yekun qiymətlər siyahılarda görünməyəcək (bazada və auditdə qalır).' context 'accounts.people.academic' %}"
+     data-i18n-warn-offerings="{% trans 'Hədəf qrupda açılışı olmayan fənnlər üçün müəllimsiz açılış yaradılacaq — sonra müəllim təyin edilməlidir.' context 'accounts.people.academic' %}"
+     data-i18n-block-same="{% trans 'Tələbə onsuz da bu qrupdadır.' context 'accounts.people.academic' %}"
+     data-i18n-block-period="{% trans 'Aktiv cari akademik dövr yoxdur — köçürmə aparıla bilməz.' context 'accounts.people.academic' %}"
+     data-i18n-block-scope="{% trans 'Hədəf qrup sizin sahənizdə deyil.' context 'accounts.people.academic' %}"
+     data-i18n-reason-short="{% trans 'Səbəb çox qısadır.' context 'accounts.people.academic' %}"
+     data-i18n-transferred="{% trans 'Tələbə yeni qrupa köçürüldü.' context 'accounts.people.academic' %}"
+     data-i18n-status-saved="{% trans 'Akademik status yeniləndi.' context 'accounts.people.academic' %}"
+     data-i18n-group-empty="{% trans 'Bu ada uyğun qrup tapılmadı.' context 'accounts.people.academic' %}"
+     data-i18n-group-placeholder="{% trans 'Qrup axtarın…' context 'accounts.people.academic' %}"
+     data-i18n-summary-from="{% trans 'Hazırkı qrup' context 'accounts.people.academic' %}"
+     data-i18n-summary-to="{% trans 'Yeni qrup' context 'accounts.people.academic' %}"
+     data-i18n-summary-subjects="{% trans 'Tarixçəyə keçən fənn' context 'accounts.people.academic' %}"
+     data-i18n-summary-absence="{% trans 'Sıfırlanan qayıb saatı' context 'accounts.people.academic' %}"
+     data-i18n-summary-marks="{% trans 'Görünməz olan jurnal işarəsi' context 'accounts.people.academic' %}">
+
+  <div class="psm__scrim" data-psm-close></div>
+
+  <aside class="psm__panel"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="psm-title"
+         tabindex="-1"
+         data-psm-panel>
+
+    <header class="psm__head">
+      <div class="psm__head-main">
+        <span class="psm__avatar" data-psm-avatar aria-hidden="true"></span>
+        <span class="psm__head-text">
+          <h3 class="psm__title" id="psm-title" data-psm-name>
+            {% trans "Tələbə idarəetməsi" context "accounts.people.academic" %}
+          </h3>
+          <span class="psm__subtitle" data-psm-username></span>
+        </span>
+      </div>
+      <button type="button" class="psm__close" data-psm-close
+              aria-label="{% trans 'Bağla' context 'accounts.people.academic' %}">✕</button>
+    </header>
+
+    <div class="psm__body" data-psm-body>
+
+      {% comment %}Skeleton — kart gələnə qədər boş ekran yerinə forma göstərilir.{% endcomment %}
+      <div class="psm__skeleton" data-psm-skeleton aria-hidden="true">
+        <span class="psm__sk psm__sk--lg"></span>
+        <span class="psm__sk"></span>
+        <span class="psm__sk psm__sk--sm"></span>
+      </div>
+
+      <p class="psm__alert psm__alert--danger" data-psm-error role="alert" hidden></p>
+
+      <div class="psm__content" data-psm-content hidden>
+
+        {% comment %}── AKADEMİK QEYD(LƏR) ────────────────────────────────────
+        Bir tələbənin bir neçə proqram qeydi ola bilər; hər əməlin hədəfi məhz
+        SEÇİLMİŞ qeyddir (`record_id`), tələbənin özü deyil. Bir qeyd varsa
+        seçici gizlənir — süni addım yaratmır.{% endcomment %}
+        <nav class="psm__records" data-psm-record-tabs hidden
+             aria-label="{% trans 'Akademik qeydlər' context 'accounts.people.academic' %}"></nav>
+
+        <section class="psm__card" aria-labelledby="psm-record-title">
+          <h4 class="psm__card-title" id="psm-record-title">
+            {% trans "Akademik qeyd" context "accounts.people.academic" %}
+            <span class="psm__period" data-psm-period></span>
+          </h4>
+          <dl class="psm__facts" data-psm-facts></dl>
+        </section>
+
+        <section class="psm__card" aria-labelledby="psm-enroll-title">
+          <h4 class="psm__card-title" id="psm-enroll-title">
+            {% trans "Cari semestr yazılışları" context "accounts.people.academic" %}
+            <span class="psm__count" data-psm-enroll-count></span>
+          </h4>
+          <ul class="psm__enrollments" data-psm-enrollments></ul>
+        </section>
+
+        {% comment %}── QRUP KÖÇÜRMƏSİ ────────────────────────────────────────
+        Üç addım: qrup seç → nəticəni gör → səbəblə təsdiqlə. Təsdiq düyməsi
+        ÖN BAXIŞ gəlmədən aktivləşmir — sahibin tələbi: «sürpriz olmasın».{% endcomment %}
+        <section class="psm__card psm__card--action" aria-labelledby="psm-transfer-title">
+          <h4 class="psm__card-title" id="psm-transfer-title">
+            {% trans "Qrupu dəyiş" context "accounts.people.academic" %}
+          </h4>
+          <p class="psm__hint">
+            {% trans "Köçürmə rəsmi sübutlu axınla aparılır: köhnə yazılışlar silinmir, tarixçəyə keçir və yeni qrupda varisi yaradılır." context "accounts.people.academic" %}
+          </p>
+
+          <div class="psm__field">
+            <span class="psm__label">
+              <span class="psm__step">1</span>
+              {% trans "Yeni qrup" context "accounts.people.academic" %}
+            </span>
+            {% trans "Qrup axtarın…" context "accounts.people.academic" as psm_group_ph %}
+            {% include "accounts/profile/sections/_searchable_picker.html" with prefix="psm" hook="psm-group" placeholder=psm_group_ph %}
+            <small class="psm__hint">
+              {% trans "Yalnız sizin idarə sahənizdəki qruplar göstərilir." context "accounts.people.academic" %}
+            </small>
+          </div>
+
+          {% comment %}2-ci addımın BAŞLIĞI həmişə görünür, yalnız MƏZMUNU
+          gizlənir. Əvvəllər bütün blok `hidden` idi və qrup seçilməmiş addımlar
+          «1 → 3» kimi oxunurdu (brauzerdə görüldü). İndi istifadəçi növbəti
+          addımın nə olduğunu əvvəlcədən görür.{% endcomment %}
+          <div class="psm__preview">
+            <div class="psm__preview-head">
+              <span class="psm__step">2</span>
+              {% trans "Bu köçürmə nə dəyişəcək" context "accounts.people.academic" %}
+            </div>
+            <p class="psm__preview-idle" data-psm-preview-idle>
+              {% trans "Qrup seçin — dəyişikliklərin xülasəsi burada görünəcək." context "accounts.people.academic" %}
+            </p>
+            <div class="psm__preview-body" data-psm-preview hidden>
+              <div class="psm__totals" data-psm-totals></div>
+              <ul class="psm__warnings" data-psm-warnings></ul>
+              <div class="psm__table-wrap">
+                <table class="psm__table" data-psm-preview-table></table>
+              </div>
+            </div>
+          </div>
+
+          <div class="psm__field">
+            <label class="psm__label" for="psm-transfer-reason">
+              <span class="psm__step">3</span>
+              {% trans "Səbəb (audit üçün məcburidir)" context "accounts.people.academic" %}
+            </label>
+            <input type="text" id="psm-transfer-reason" data-psm-transfer-reason
+                   maxlength="{{ people_section.max_reason_length }}"
+                   placeholder="{% trans 'Məs.: dekanlıq sərəncamı №…' context 'accounts.people.academic' %}">
+          </div>
+
+          <div class="psm__actions">
+            <button type="button" class="psm__btn psm__btn--primary" data-psm-transfer disabled>
+              {% trans "Köçürməni təsdiqlə" context "accounts.people.academic" %}
+            </button>
+          </div>
+        </section>
+
+        {% comment %}── AKADEMİK STATUS ───────────────────────────────────────
+        «Çıxarma» tələbəni SİLMİR: akademik statusu dəyişir və qeyd passivləşir.
+        Bal/davamiyyət tarixçəsi olduğu kimi qalır.{% endcomment %}
+        <section class="psm__card psm__card--action" aria-labelledby="psm-status-title">
+          <h4 class="psm__card-title" id="psm-status-title">
+            {% trans "Akademik status" context "accounts.people.academic" %}
+          </h4>
+          <p class="psm__hint">
+            {% trans "Status dəyişikliyi tələbəni silmir — qeydiyyatlar, bal və davamiyyət tarixçəsi qalır. «Xaric» və «Akademik məzuniyyət» üçün səbəb məcburidir." context "accounts.people.academic" %}
+          </p>
+
+          <div class="psm__statuses" role="radiogroup"
+               aria-label="{% trans 'Akademik status' context 'accounts.people.academic' %}"
+               data-psm-statuses>
+            {% for option in people_section.academic_status_options %}
+              <button type="button" class="psm__status-opt" role="radio" aria-checked="false"
+                      data-psm-status="{{ option.key }}">{{ option.label }}</button>
+            {% endfor %}
+          </div>
+
+          <div class="psm__field">
+            <label class="psm__label" for="psm-status-reason">
+              {% trans "Səbəb" context "accounts.people.academic" %}
+            </label>
+            <input type="text" id="psm-status-reason" data-psm-status-reason
+                   maxlength="{{ people_section.max_reason_length }}"
+                   placeholder="{% trans 'Məs.: tələbənin ərizəsi №…' context 'accounts.people.academic' %}">
+          </div>
+
+          <div class="psm__actions">
+            <button type="button" class="psm__btn" data-psm-status-save disabled>
+              {% trans "Statusu yenilə" context "accounts.people.academic" %}
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </aside>
+</div>

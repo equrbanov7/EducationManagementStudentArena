@@ -227,6 +227,11 @@ def _apply_rls(apps, schema_editor):
             ) THEN
                 CREATE ROLE rls_app_role NOSUPERUSER NOLOGIN;
             END IF;
+        EXCEPTION
+            -- Rol klaster səviyyəsindədir: paralel test DB-ləri (pytest-xdist,
+            -- hər worker öz DB-sini eyni anda miqrasiya edir) IF NOT EXISTS
+            -- yoxlamasından sonra yarışa bilər — «already exists» zərərsizdir.
+            WHEN duplicate_object THEN NULL;
         END
         $$
         """)

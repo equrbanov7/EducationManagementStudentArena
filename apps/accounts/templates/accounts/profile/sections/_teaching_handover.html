@@ -1,0 +1,280 @@
+{% load i18n %}
+{% comment %}
+«Fənn təhvili» bölməsi — dərs açılışının başqa müəllimə verilməsi.
+
+İcazə: `journal.reassign` (RİM / prorektor org-wide, dekan öz fakültəsi, kafedra
+müdiri öz kafedrası). Menyu görünürlüyü `rbac_sections.py`-dadır; KONKRET fənnin
+təhvil oluna bilməsi `apps/registrar/handover.py`-da fail-closed yenidən
+yoxlanılır və cədvəldə «niyə olmaz» kimi AÇIQ göstərilir.
+
+Panel SPA-dır: server yalnız çərçivəni (icazə + endpoint URL-ləri + sabitlər)
+verir, data JSON-la gəlir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) və
+`profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları ilə ötürülür.
+
+⚠️ Müəllim seçiciləri VAHİD komponentdir (`_searchable_picker.html` +
+static/js/searchable_select.js): axtarışlı, debounce-lu, lazy səhifələnən.
+{% endcomment %}
+{% if 'teaching-handover' in allowed_sections %}
+<section class="profile-section-panel profile-section--handover {% if active_section == 'teaching-handover' %}is-active{% endif %}"
+         data-profile-section-panel="teaching-handover"
+         data-source-url="{{ profile_base_url }}?section=teaching-handover">
+
+{% if not handover_section.has_access %}
+  <p class="thx__denied" role="status">{{ handover_section.access_denied_message }}</p>
+{% else %}
+<div class="thx"
+     data-thx-root
+     data-teachers-url="{{ handover_section.teachers_url }}"
+     data-offerings-url="{{ handover_section.offerings_url }}"
+     data-options-url="{{ handover_section.options_url }}"
+     data-history-url="{{ handover_section.history_url }}"
+     data-action-url="{{ handover_section.action_url }}"
+     data-page-size="{{ handover_section.default_page_size }}"
+     data-min-reason="{{ handover_section.min_reason_length }}"
+     data-max-reason="{{ handover_section.max_reason_length }}"
+     data-max-bulk="{{ handover_section.max_bulk_rows }}">
+
+  {# ── Başlıq + əhatə ──────────────────────────────────────────────────── #}
+  <header class="thx__head">
+    <div>
+      <h2 class="thx__title">{% trans "Fənn təhvili" context "accounts.handover" %}</h2>
+      <p class="thx__intro">
+        {% trans "Müəllim işdən çıxdıqda və ya dərs yükü dəyişdikdə fənnin elektron jurnalını başqa müəllimə verin. Yazılmış bal və davamiyyət olduğu kimi qalır — yalnız jurnalın sahibi dəyişir." context "accounts.handover" %}
+      </p>
+    </div>
+    <span class="thx__scope" title="{% trans 'Səlahiyyət sahəniz' context 'accounts.handover' %}">
+      <i class="fas fa-sitemap" aria-hidden="true"></i> {{ handover_section.scope_label }}
+    </span>
+  </header>
+
+  {% comment %}Tablar — `role="tablist"` + ox düymələri ilə tam klaviatura
+  idarəsi (JS-də). ⚠️ ÇOXSƏTİRLİ `{#…#}` komment SAYILMIR və səhifəyə sızır —
+  ona görə burada `{% comment %}` işlədilir (bax CLAUDE.md).{% endcomment %}
+  <div class="thx__tabs" role="tablist" aria-label="{% trans 'Fənn təhvili bölmələri' context 'accounts.handover' %}">
+    <button type="button" class="thx__tab is-active" role="tab" id="thx-tab-transfer"
+            aria-controls="thx-panel-transfer" aria-selected="true" data-thx-tab="transfer">
+      <i class="fas fa-right-left" aria-hidden="true"></i>
+      <span>{% trans "Təhvil" context "accounts.handover" %}</span>
+    </button>
+    <button type="button" class="thx__tab" role="tab" id="thx-tab-history"
+            aria-controls="thx-panel-history" aria-selected="false" tabindex="-1" data-thx-tab="history">
+      <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+      <span>{% trans "Tarixçə" context "accounts.handover" %}</span>
+    </button>
+  </div>
+
+  {# ══ TAB 1 — Təhvil ═════════════════════════════════════════════════════ #}
+  <div class="thx__panel" role="tabpanel" id="thx-panel-transfer" aria-labelledby="thx-tab-transfer" data-thx-panel="transfer">
+
+    {# Addım 1 — kimdən #}
+    <div class="thx-step">
+      <span class="thx-step__no" aria-hidden="true">1</span>
+      <div class="thx-step__body">
+        {% comment %}`_searchable_picker.html` input-u id-siz render olunur (təkrar
+        istifadə üçün), ona görə burada `<label for>` YOX — başlıq `<span>`-dır və
+        seçici öz `placeholder`-i ilə adlanır (a11y: ad rəngdən asılı deyil).{% endcomment %}
+        <span class="thx-step__label">{% trans "Hansı müəllimin fənləri?" context "accounts.handover" %}</span>
+        <p class="thx-step__hint">{% trans "Boş buraxsanız səlahiyyət sahənizdəki bütün fənlər göstərilir." context "accounts.handover" %}</p>
+        <div class="thx-step__control">
+          {% trans "Müəllim adı və ya istifadəçi adı" context "accounts.handover" as thx_ph_source %}
+          {% include "accounts/profile/sections/_searchable_picker.html" with prefix="thx" hook="thx-source" placeholder=thx_ph_source %}
+          <button type="button" class="thx-btn thx-btn--ghost" data-thx-clear-source>
+            {% trans "Təmizlə" context "accounts.handover" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {# Addım 2 — süzgəclər + cədvəl #}
+    <div class="thx-step">
+      <span class="thx-step__no" aria-hidden="true">2</span>
+      <div class="thx-step__body">
+        <span class="thx-step__label">{% trans "Təhvil veriləcək fənləri seçin" context "accounts.handover" %}</span>
+
+        <form class="thx-filters" data-thx-filters novalidate>
+          <div class="thx-field thx-field--search">
+            <label for="thx-q">{% trans "Axtarış" context "accounts.handover" %}</label>
+            <input type="search" id="thx-q" name="q" autocomplete="off"
+                   placeholder="{% trans 'fənn adı, kodu və ya qrup' context 'accounts.handover' %}">
+          </div>
+          <div class="thx-field">
+            <label for="thx-period">{% trans "Semestr" context "accounts.handover" %}</label>
+            <select id="thx-period" name="period" data-thx-option="periods">
+              <option value="">{% trans "Hamısı" context "accounts.handover" %}</option>
+            </select>
+          </div>
+          <div class="thx-field">
+            <label for="thx-faculty">{% trans "Fakültə" context "accounts.handover" %}</label>
+            <select id="thx-faculty" name="faculty" data-thx-option="faculties">
+              <option value="">{% trans "Hamısı" context "accounts.handover" %}</option>
+            </select>
+          </div>
+          <div class="thx-field">
+            <label for="thx-kafedra">{% trans "Kafedra" context "accounts.handover" %}</label>
+            <select id="thx-kafedra" name="kafedra" data-thx-option="kafedras">
+              <option value="">{% trans "Hamısı" context "accounts.handover" %}</option>
+            </select>
+          </div>
+          <label class="thx-toggle">
+            <input type="checkbox" name="scope" value="open" data-thx-only-open>
+            <span>{% trans "Yalnız təhvil oluna bilənlər" context "accounts.handover" %}</span>
+          </label>
+        </form>
+
+        <div class="thx-table__wrap" data-thx-table-wrap>
+          <table class="thx-table">
+            <caption class="thx-sr">{% trans "Səlahiyyət sahənizdəki dərs açılışları" context "accounts.handover" %}</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="thx-col-check">
+                  <input type="checkbox" data-thx-check-all
+                         aria-label="{% trans 'Hamısını seç' context 'accounts.handover' %}">
+                </th>
+                <th scope="col">{% trans "Fənn" context "accounts.handover" %}</th>
+                <th scope="col">{% trans "Qrup" context "accounts.handover" %}</th>
+                <th scope="col">{% trans "Semestr" context "accounts.handover" %}</th>
+                <th scope="col">{% trans "Təsir" context "accounts.handover" %}</th>
+                <th scope="col">{% trans "Cari müəllim" context "accounts.handover" %}</th>
+                <th scope="col">{% trans "Yeni müəllim" context "accounts.handover" %}</th>
+              </tr>
+            </thead>
+            <tbody data-thx-rows></tbody>
+          </table>
+        </div>
+
+        <nav class="thx-pager" data-thx-pager aria-label="{% trans 'Səhifələmə' context 'accounts.handover' %}"></nav>
+      </div>
+    </div>
+
+    {# Addım 3 — hədəf + təsdiq #}
+    <div class="thx-step">
+      <span class="thx-step__no" aria-hidden="true">3</span>
+      <div class="thx-step__body">
+        <span class="thx-step__label">{% trans "Yeni müəllimi təyin edin" context "accounts.handover" %}</span>
+        <p class="thx-step__hint">{% trans "Seçilmiş fənlərin hamısına eyni müəllimi tətbiq edə, yaxud cədvəldə hər sətir üçün ayrıca müəllim seçə bilərsiniz." context "accounts.handover" %}</p>
+        <div class="thx-step__control">
+          {% trans "Yeni müəllim" context "accounts.handover" as thx_ph_bulk %}
+          {% include "accounts/profile/sections/_searchable_picker.html" with prefix="thx" hook="thx-bulk" placeholder=thx_ph_bulk %}
+          <button type="button" class="thx-btn thx-btn--ghost" data-thx-apply-all disabled>
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+            {% trans "Seçilənlərə tətbiq et" context "accounts.handover" %}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {# Sabit əməl zolağı — seçim varsa görünür #}
+    <div class="thx-bar" data-thx-bar hidden>
+      <span class="thx-bar__text" data-thx-bar-text role="status" aria-live="polite"></span>
+      <button type="button" class="thx-btn thx-btn--primary" data-thx-submit disabled>
+        <i class="fas fa-right-left" aria-hidden="true"></i>
+        {% trans "Təhvil ver" context "accounts.handover" %}
+      </button>
+    </div>
+  </div>
+
+  {# ══ TAB 2 — Tarixçə ════════════════════════════════════════════════════ #}
+  <div class="thx__panel" role="tabpanel" id="thx-panel-history" aria-labelledby="thx-tab-history"
+       data-thx-panel="history" hidden>
+    <p class="thx-step__hint">{% trans "Kim, nə vaxt, hansı fənni kimdən kimə verib. Səhv təyinat geri qaytarıla bilər." context "accounts.handover" %}</p>
+    <div class="thx-table__wrap">
+      <table class="thx-table thx-table--history">
+        <thead>
+          <tr>
+            <th scope="col">{% trans "Tarix" context "accounts.handover" %}</th>
+            <th scope="col">{% trans "Fənn" context "accounts.handover" %}</th>
+            <th scope="col">{% trans "Kimdən → kimə" context "accounts.handover" %}</th>
+            <th scope="col">{% trans "Səbəb" context "accounts.handover" %}</th>
+            <th scope="col">{% trans "Əməliyyat" context "accounts.handover" %}</th>
+          </tr>
+        </thead>
+        <tbody data-thx-history></tbody>
+      </table>
+    </div>
+    <nav class="thx-pager" data-thx-history-pager aria-label="{% trans 'Səhifələmə' context 'accounts.handover' %}"></nav>
+  </div>
+
+  {# ══ Təsdiq dialoqu ═════════════════════════════════════════════════════ #}
+  <div class="thx-dialog" data-thx-dialog hidden>
+    <div class="thx-dialog__backdrop" data-thx-dialog-close></div>
+    <div class="thx-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="thx-dialog-title">
+      <h3 class="thx-dialog__title" id="thx-dialog-title" data-thx-dialog-title></h3>
+      <div class="thx-dialog__body" data-thx-dialog-body></div>
+
+      <div class="thx-dialog__note">
+        <i class="fas fa-shield-halved" aria-hidden="true"></i>
+        <span>{% trans "Yazılmış bal, davamiyyət və keçmiş dərslərin müəllimi DƏYİŞMİR. Köhnə müəllim jurnalı yalnız-oxu rejimində görməyə davam edir, amma bal yaza bilməz." context "accounts.handover" %}</span>
+      </div>
+
+      <label class="thx-dialog__label" for="thx-reason">{% trans "Səbəb (məcburi)" context "accounts.handover" %}</label>
+      <textarea id="thx-reason" class="thx-dialog__reason" data-thx-reason rows="3"
+                maxlength="{{ handover_section.max_reason_length }}"
+                placeholder="{% trans 'məs. müəllim işdən çıxdı; dərs yükü yenidən bölündü' context 'accounts.handover' %}"></textarea>
+      <p class="thx-dialog__error" data-thx-dialog-error role="alert" hidden></p>
+
+      <div class="thx-dialog__actions">
+        <button type="button" class="thx-btn thx-btn--ghost" data-thx-dialog-close>
+          {% trans "İmtina" context "accounts.handover" %}
+        </button>
+        <button type="button" class="thx-btn thx-btn--primary" data-thx-dialog-confirm>
+          {% trans "Təsdiqlə" context "accounts.handover" %}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {# ══ Sətir-səviyyəli müəllim seçimi (paylaşılan dialoq) ═════════════════ #}
+  <div class="thx-dialog" data-thx-picker hidden>
+    <div class="thx-dialog__backdrop" data-thx-picker-close></div>
+    <div class="thx-dialog__panel thx-dialog__panel--slim" role="dialog" aria-modal="true"
+         aria-labelledby="thx-picker-title">
+      <h3 class="thx-dialog__title" id="thx-picker-title">{% trans "Yeni müəllim seçin" context "accounts.handover" %}</h3>
+      <p class="thx-dialog__subject" data-thx-picker-subject></p>
+      {% trans "Müəllim axtarın" context "accounts.handover" as thx_ph_row %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="thx" hook="thx-row" placeholder=thx_ph_row %}
+      <div class="thx-dialog__actions">
+        <button type="button" class="thx-btn thx-btn--ghost" data-thx-picker-close>
+          {% trans "İmtina" context "accounts.handover" %}
+        </button>
+        <button type="button" class="thx-btn thx-btn--primary" data-thx-picker-confirm>
+          {% trans "Seç" context "accounts.handover" %}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {# ── JS üçün mətn kataloqu (xarici fayl Django template-dən keçmir) ───── #}
+  <div class="thx-i18n" data-thx-i18n hidden
+       data-loading="{% trans 'Yüklənir…' context 'accounts.handover' %}"
+       data-empty="{% trans 'Bu süzgəclərə uyğun fənn tapılmadı.' context 'accounts.handover' %}"
+       data-empty-history="{% trans 'Hələ təhvil qeydi yoxdur.' context 'accounts.handover' %}"
+       data-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.handover' %}"
+       data-no-instructor="{% trans 'Müəllim təyin edilməyib' context 'accounts.handover' %}"
+       data-choose="{% trans 'Müəllim seç' context 'accounts.handover' %}"
+       data-change="{% trans 'Dəyiş' context 'accounts.handover' %}"
+       data-blocked="{% trans 'Təhvil mümkün deyil' context 'accounts.handover' %}"
+       data-students="{% trans 'tələbə' context 'accounts.handover' %}"
+       data-lessons="{% trans 'dərs' context 'accounts.handover' %}"
+       data-marks="{% trans 'bal xanası' context 'accounts.handover' %}"
+       data-selected-one="{% trans 'fənn seçilib' context 'accounts.handover' %}"
+       data-needs-target="{% trans 'Seçilmiş sətirlərin hamısına yeni müəllim təyin edin.' context 'accounts.handover' %}"
+       data-reason-short="{% trans 'Səbəb çox qısadır.' context 'accounts.handover' %}"
+       data-confirm-title="{% trans 'Təhvili təsdiqləyin' context 'accounts.handover' %}"
+       data-revert-title="{% trans 'Təhvili geri qaytarın' context 'accounts.handover' %}"
+       data-revert="{% trans 'Geri qaytar' context 'accounts.handover' %}"
+       data-reverted="{% trans 'Geri qaytarılıb' context 'accounts.handover' %}"
+       {% comment %}Səbəb kodu gəlmədikdə tarixçə sətrinin ümumi mətni — «Təhvil
+       mümkün deyil» (data-blocked) burada YANLIŞ istiqamətdir.{% endcomment %}
+       data-revert-blocked="{% trans 'Geri qaytarma mümkün deyil.' context 'accounts.handover' %}"
+       data-done="{% trans 'Təhvil tamamlandı.' context 'accounts.handover' %}"
+       data-revert-done="{% trans 'Təhvil geri qaytarıldı.' context 'accounts.handover' %}"
+       data-prev="{% trans 'Əvvəlki' context 'accounts.handover' %}"
+       data-next="{% trans 'Növbəti' context 'accounts.handover' %}"
+       data-page="{% trans 'Səhifə' context 'accounts.handover' %}"
+       data-from="{% trans 'Kimdən' context 'accounts.handover' %}"
+       data-to="{% trans 'Kimə' context 'accounts.handover' %}"
+       data-picker-empty="{% trans 'Uyğun müəllim tapılmadı.' context 'accounts.handover' %}"></div>
+</div>
+{% endif %}
+</section>
+{% endif %}

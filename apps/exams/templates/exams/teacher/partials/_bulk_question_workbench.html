@@ -47,7 +47,8 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
     <header class="page-header">
         <div class="title-section">
             <div class="page-header-links">
-                {% if wb_back_url %}
+                {# wb_hide_back_link: səhifənin ÖZ qb-header-ində eyni link varsa təkrar göstərilmir. #}
+                {% if wb_back_url and not wb_hide_back_link %}
                 <a href="{{ wb_back_url }}" class="page-header-link page-header-link--secondary">
                     <i class="fas fa-arrow-left"></i>
                     {{ wb_back_label|default:default_wb_back_label }}

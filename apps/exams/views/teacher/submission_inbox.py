@@ -112,11 +112,11 @@ def question_submission_create(request):
                         group_label=group_label,
                         language=form_state["language"],
                         raw_text=state["raw_text"],
+                        groups=chosen_groups,
                         parsed=state["chosen"],
                         teacher_note=form_state["teacher_note"],
                         import_token=state["math_token"],
                     )
-                    submission.student_groups.set(chosen_groups)
                 except ValidationError as exc:
                     messages.error(request, exc.messages[0])
                 else:
@@ -124,7 +124,7 @@ def question_submission_create(request):
                         request,
                         pgettext(
                             "exams.view.question_submission.message",
-                            "Göndəriş imtahan mərkəzinə çatdırıldı ({count} sual, {groups} qrup).",
+                            "Göndəriş kafedra müdirinin təsdiqinə göndərildi ({count} sual, {groups} qrup).",
                         ).format(count=submission.question_count, groups=len(chosen_groups)),
                     )
                     return redirect("exams:question_submission_detail", submission_id=submission.id)
@@ -139,12 +139,13 @@ def question_submission_create(request):
         selected=state["selected"],
         raw_text=state["raw_text"],
         math_token=state["math_token"],
-        title=pgettext("exams.template.question_submission", "İmtahan mərkəzinə sual göndər"),
+        title=pgettext("exams.template.question_submission", "Kafedra təsdiqinə sual göndər"),
         subtitle=pgettext(
             "exams.template.question_submission",
-            "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra göndərin.",
+            "Sualları yazın və ya fayl yükləyin, önizləyin — xəbərdarlıqları görün, sonra kafedra "
+            "müdirinə göndərin; təsdiqdən sonra İmtahan Mərkəzinə çatacaq.",
         ),
-        save_label=pgettext("exams.template.question_submission", "İmtahan mərkəzinə göndər"),
+        save_label=pgettext("exams.template.question_submission", "Kafedra müdirinə göndər"),
     )
     context.update(
         {
@@ -196,7 +197,9 @@ def question_submission_detail(request, submission_id):
     organization = _require_organization(request)
     submission = get_object_or_404(QuestionSubmission, id=submission_id, organization=organization)
 
-    is_reviewer = is_exam_center_user(request.user)
+    # Mərkəz göndərişi YALNIZ kafedra təsdiqindən sonra görür (mövcudluq
+    # sızmasın deyə əks halda 404 — «var, amma icazən yoxdur» demirik).
+    is_reviewer = is_exam_center_user(request.user) and submission.has_reached_center
     if submission.teacher_id != request.user.id and not is_reviewer:
         raise Http404()
 
@@ -233,11 +236,11 @@ def question_submission_detail(request, submission_id):
                         group_label=group_label,
                         language=form_state["language"],
                         raw_text=state["raw_text"],
+                        groups=chosen_groups,
                         parsed=state["chosen"],
                         teacher_note=form_state["teacher_note"],
                         import_token=state["math_token"],
                     )
-                    submission.student_groups.set(chosen_groups)
                 except ValidationError as exc:
                     messages.error(request, exc.messages[0])
                 else:
@@ -245,7 +248,7 @@ def question_submission_detail(request, submission_id):
                         request,
                         pgettext(
                             "exams.view.question_submission.message",
-                            "Göndəriş yeniləndi və imtahan mərkəzinə təkrar çatdırıldı.",
+                            "Göndəriş yeniləndi və kafedra müdirinin təsdiqinə təkrar göndərildi.",
                         ),
                     )
                     return redirect("exams:question_submission_detail", submission_id=submission.id)
@@ -277,7 +280,7 @@ def _detail_workbench_context(request, organization, groups, submission, form_st
         save_label = pgettext("exams.template.question_submission", "Düzəlt və yenidən göndər")
     else:
         save_label = pgettext("exams.template.question_submission", "Yenidən göndər")
-    return build_workbench_context(
+    context = build_workbench_context(
         request,
         organization,
         groups,
@@ -294,6 +297,11 @@ def _detail_workbench_context(request, organization, groups, submission, form_st
         ),
         save_label=save_label,
     )
+    # Detal səhifəsinin öz qb-header-i (üst sağda «Göndərişlərə qayıt») var —
+    # workbench-in daxili header-i eyni linki TƏKRARLAYIRDI. Yalnız geri-link
+    # gizlədilir (wb_hide_header YOX: o, canlı parse statistikalarını da aparardı).
+    context["wb_hide_back_link"] = True
+    return context
 
 
 @login_required
@@ -333,6 +341,7 @@ def _detail_context(submission, *, can_edit, is_reviewer):
         "embed_active_section": "question-submissions",
         "embed_section_title": submission.title,
         "submission": submission,
+        "submission_events": list(submission.events.select_related("actor")),
         "parsed_questions": annotate_preview_flags(list(submission.parsed_snapshot or [])),
         "can_edit": can_edit,
         "is_reviewer": is_reviewer,

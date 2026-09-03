@@ -3,7 +3,8 @@
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.http import Http404
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -52,6 +53,13 @@ class JournalViewTest(TestCase):
                     is_primary=True,
                     is_active=True,
                 )
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             cls.offering = services.get_or_create_offering(
                 organization=cls.org, subject=cls.subject, period=cls.period, group=cls.group
             )
@@ -128,6 +136,56 @@ class JournalViewTest(TestCase):
     def test_non_instructor_cannot_access(self):
         resp = self._client(self.other_teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertEqual(resp.status_code, 404)
+
+    def test_offering_loader_denies_missing_active_organization_context(self):
+        from apps.registrar.journal_access import offering_or_404
+
+        request = RequestFactory().get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        request.user = self.teacher
+        request.organization = None
+        request.org_memberships = []
+        with self.assertRaises(Http404):
+            offering_or_404(request, self.offering.id)
+
+    def test_instructor_membership_revocation_denies_journal_get(self):
+        client = self._client(self.teacher)
+        with bypass_rls():
+            Membership.objects.filter(user=self.teacher, organization=self.org).update(is_active=False)
+        response = client.get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_instructor_role_deactivation_denies_journal_get(self):
+        client = self._client(self.teacher)
+        with bypass_rls():
+            self.org.roles.filter(name="teacher").update(is_active=False)
+        response = client.get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_grade_input_revocation_denies_journal_get_and_post(self):
+        from django.utils import timezone as _tz
+
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                allow_past=True,
+                offering=self.offering,
+                date=_tz.localdate(),
+                kind=LessonKind.SEMINAR,
+            )
+        client = self._client(self.teacher)
+        with bypass_rls():
+            self.org.roles.filter(name="teacher").update(permissions=[])
+        url = reverse("registrar:journal_detail", args=[self.offering.id])
+        self.assertEqual(client.get(url).status_code, 404)
+        response = client.post(
+            url,
+            {
+                f"cell__{lesson.id}__{self.enrollment.id}": "1",
+                f"score__{lesson.id}__{self.enrollment.id}": "9",
+            },
+        )
+        self.assertEqual(response.status_code, 404)
+        with bypass_rls():
+            self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
 
     def test_anonymous_redirected_to_login(self):
         resp = Client().get(reverse("registrar:journal_list"))
@@ -290,14 +348,16 @@ class JournalFinalsViewTest(JournalViewTest):
             cs = ComponentScore.objects.get(component=comps["Seminar"], enrollment=self.enrollment)
             self.assertEqual(str(cs.score), "18.00")
 
-    def test_publish_locks_journal(self):
+    def test_direct_publish_is_denied(self):
         client = self._client(self.teacher)
         resp = client.post(reverse("registrar:journal_detail", args=[self.offering.id]), {"action": "publish"})
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 404)
         with bypass_rls():
-            from apps.registrar.models import AssessmentScheme
+            from apps.registrar.models import ApprovalStatus, AssessmentScheme
 
-            self.assertTrue(AssessmentScheme.objects.get(offering=self.offering).is_published)
+            scheme = AssessmentScheme.objects.get(offering=self.offering)
+            self.assertEqual(scheme.approval_status, ApprovalStatus.DRAFT)
+            self.assertFalse(scheme.is_published)
 
     def test_non_instructor_cannot_save_finals(self):
         client = self._client(self.other_teacher)

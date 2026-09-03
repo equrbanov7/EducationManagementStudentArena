@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from django.db.models import Q, QuerySet
 
 from core.constants import RoleScopeType
+from core.permissions import has_permission
 
 # from typing import Optional
 
@@ -146,6 +147,70 @@ def get_unit_scope(user, organization, request=None) -> UnitScope:
     return scope
 
 
+def get_permission_scope(user, organization, permission: str, request=None) -> UnitScope:
+    """Resolve structural scope only from memberships granting ``permission``.
+
+    A UNIT-scoped role without a valid ``scope_unit`` grants no structural
+    access.  This deliberately differs from the legacy generic scope resolver:
+    an unrelated membership must never lend its unit to a privileged role.
+    """
+    user_id = getattr(user, "pk", None)
+    org_id = getattr(organization, "pk", None)
+    cache_key = ("permission", user_id, org_id, permission)
+    if request is not None:
+        cache = getattr(request, "_unit_scope_cache", None)
+        if cache is None:
+            cache = {}
+            request._unit_scope_cache = cache
+        if cache_key in cache:
+            return cache[cache_key]
+
+    if not user or not getattr(user, "is_authenticated", False) or organization is None:
+        scope = EMPTY_SCOPE
+    elif getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        scope = ORG_WIDE_SCOPE
+    elif getattr(organization, "owner_id", None) == user_id:
+        scope = ORG_WIDE_SCOPE
+    else:
+        from apps.organizations.models import Membership, OrgUnit
+
+        memberships = Membership.objects.filter(
+            user=user,
+            organization=organization,
+            is_active=True,
+            role__organization=organization,
+            role__is_active=True,
+        ).select_related("role", "scope_unit")
+        unit_ids = set()
+        scope = EMPTY_SCOPE
+        for membership in memberships:
+            role = membership.role
+            if not has_permission(list(role.permissions or []), permission):
+                continue
+            if role.scope_type == RoleScopeType.ORGANIZATION:
+                scope = ORG_WIDE_SCOPE
+                break
+            if role.scope_type == RoleScopeType.UNIT and membership.scope_unit_id:
+                unit_ids.add(membership.scope_unit_id)
+        if not scope.is_org_wide and unit_ids:
+            rows = OrgUnit.objects.filter(
+                organization=organization,
+                pk__in=unit_ids,
+                is_active=True,
+            ).values_list("pk", "path")
+            resolved = list(rows)
+            if resolved:
+                scope = UnitScope(
+                    scope_type="unit",
+                    unit_ids=frozenset(pk for pk, _path in resolved),
+                    unit_paths=tuple(path for _pk, path in resolved if path),
+                )
+
+    if request is not None:
+        request._unit_scope_cache[cache_key] = scope
+    return scope
+
+
 def scope_org_units(queryset: QuerySet, scope: UnitScope) -> QuerySet:
     """OrgUnit queryset-ini scope-a görə məhdudlaşdırır."""
     if scope.is_org_wide:
@@ -182,12 +247,13 @@ __all__ = [
     "ORG_WIDE_MIN_LEVEL",
     "UnitScope",
     "get_unit_scope",
+    "get_permission_scope",
     "scope_memberships_by_unit",
     "scope_org_units",
 ]
 
 
-def user_scope_subtree_q(user, organization, *, path_field, id_field):
+def user_scope_subtree_q(user, organization, *, path_field, id_field, permission=None):
     """İstifadəçinin unit alt-ağacı üçün filtr Q-su — ixtiyari sahə prefiksi ilə.
 
     `user_scope_covers_unit` bir unit üçün bool qaytarır; siyahı/aqreqat
@@ -211,13 +277,16 @@ def user_scope_subtree_q(user, organization, *, path_field, id_field):
     Boş ``Q()`` əvəzinə ``None`` seçilib ki, çağıran niyyəti açıq yazsın və bu,
     təsadüfən «heç nə uyğun gəlmir» (``Q(pk__in=[])``) ilə qarışmasın.
     """
+    if permission:
+        scope = get_permission_scope(user, organization, permission)
+        return scope.unit_subtree_q(path_field=path_field, id_field=id_field)
     scope = get_unit_scope(user, organization)
     if scope.is_org_wide or not scope.has_structure_access:
         return None
     return scope.unit_subtree_q(path_field=path_field, id_field=id_field)
 
 
-def user_scope_covers_unit(user, organization, unit_id) -> bool:
+def user_scope_covers_unit(user, organization, unit_id, permission=None) -> bool:
     """İstifadəçinin unit alt-ağacı verilmiş bölməni əhatə edirmi.
 
     MODUL SƏRHƏDİ: bu yoxlama registrar-dan (jurnal təsdiqi) lazımdır, lakin
@@ -235,7 +304,9 @@ def user_scope_covers_unit(user, organization, unit_id) -> bool:
     """
     from .models import OrgUnit
 
-    scope = get_unit_scope(user, organization)
+    scope = get_permission_scope(user, organization, permission) if permission else get_unit_scope(user, organization)
+    if permission and not scope.has_structure_access:
+        return False
     if scope.is_org_wide or not scope.has_structure_access:
         return True
     if unit_id is None:

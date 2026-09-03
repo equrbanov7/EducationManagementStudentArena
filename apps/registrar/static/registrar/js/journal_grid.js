@@ -216,17 +216,17 @@
     });
 
     // ── Sərbəst iş CƏMİ (canlı — 1/0 çipləri) ─────────────────────────────
+    // Çeklist boşdursa CƏMİ köçürülmüş "arxiv" balını göstərir — selfwork_board.effective_total güzgüsü.
     function recomputeSelfworkTotal(row) {
         if (!row) return;
         var total = 0;
-        row.querySelectorAll("[data-jd-sw]").forEach(function (input) {
-            if (input.value === "1") total += 1;
-        });
-        row.querySelectorAll("[data-jd-sw-ro]").forEach(function (ro) {
-            if (ro.getAttribute("data-jd-sw-ro") === "1") total += 1;
+        row.querySelectorAll("[data-jd-sw], [data-jd-sw-ro]").forEach(function (el) {
+            var v = el.value !== undefined ? el.value : el.getAttribute("data-jd-sw-ro");
+            if (v === "1") total += 1;
         });
         var out = row.querySelector("[data-jd-sw-total]");
-        if (out) out.textContent = String(total);
+        var archive = row.getAttribute("data-jd-sw-archive");
+        if (out) out.textContent = total === 0 && archive !== null ? archive : String(total);
     }
 
     // ── Kollokvium CƏMİ (canlı — K1+K2+K3) ────────────────────────────────
@@ -581,18 +581,12 @@
             form.action = editData.actionUrl;
             actionInput.value = "update_lesson";
             // Təsdiq modalında hansı dərs silinir — tarix + mövzu göstər.
-            deleteBtn.setAttribute(
-                "data-confirm-detail",
-                (editData.date || "") + (editData.topic ? " · " + editData.topic : "")
-            );
+            deleteBtn.setAttribute("data-confirm-detail", (editData.date || "") + (editData.topic ? " · " + editData.topic : ""));
             dateInput.value = editData.date;
             if (kindField) setSelectValue(kindField, editData.kind);
             if (topicField) {
-                if (topicField.tagName === "SELECT") {
-                    setSelectValue(topicField, editData.topic || "");
-                } else {
-                    topicField.value = editData.topic || "";
-                }
+                if (topicField.tagName === "SELECT") setSelectValue(topicField, editData.topic || "");
+                else topicField.value = editData.topic || "";
             }
             setSelectValue(modal.querySelector("[data-jd-lesson-hours]"), String(editData.hours || 2));
             // Standart dərs saatı: mövcud start-end cütünü seçimdə tap.
@@ -604,6 +598,8 @@
             form.action = form.getAttribute("data-add-url");
             actionInput.value = "add_lesson";
         }
+        // Korpus → otaq kaskadı ayrı modula (journal_lesson_room.js) buradan xəbər verilir.
+        modal.dispatchEvent(new CustomEvent("jd:lesson-modal-open", { detail: editData || null, bubbles: true }));
         // Sənədli düzəliş sahələri (İKT): yalnız KİLİDLİ dərs redaktəsində — PDF
         // + qeyd məcburi olur; əlavə/kilidsiz redaktədə gizli və məcburiyyətsiz.
         var corrFields = modal.querySelector("[data-jd-corr-fields]");
@@ -659,6 +655,7 @@
                 start: editBtn.getAttribute("data-lesson-start"),
                 end: editBtn.getAttribute("data-lesson-end"),
                 instructor: editBtn.getAttribute("data-lesson-instructor"),
+                room: editBtn.getAttribute("data-lesson-room"),
                 locked: editBtn.getAttribute("data-lesson-locked") === "1",
             });
             return;

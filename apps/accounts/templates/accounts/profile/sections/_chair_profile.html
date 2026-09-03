@@ -1,0 +1,102 @@
+{% load i18n ems_ui %}
+{% comment %}
+Ekran 02 «Kafedra profili» — ştat cədvəli, müəllim heyəti, yük riski.
+
+İcazə: `unit.view` (görünürlük). ƏHATƏ (handoff §8/8): kafedra müdiri YALNIZ öz
+kafedrasını görür — siyahı `organizations.scoping` üzərindən gəlir, əhatəsiz
+aktor BOŞ vəziyyət + administrator kanalı alır.
+
+MƏNBƏLƏR: struktur/sayğaclar → `organizations.structure_views.unit_detail`;
+saat və norma → `apps.workload.public.chair_staff_load` (norma POLICY
+cədvəlindən — kodda hardcode YOX); sillabus əhatəsi → `apps.syllabus`.
+
+Yük statusu 4 vəziyyət (`dept_load` status ailəsi): boş tutum / normada /
+yüklü / risk — rəng + MƏTN (handoff §7).
+
+⚠️ `<h1>` yazılmır (qabıq verir). CSS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'chair-profile' in allowed_sections %}
+{% trans "Kafedranın ştat cədvəli, müəllim heyəti və illik yük riski. Norma dəyərləri müəllim yük profilindən oxunur." context "accounts.chair_profile" as cp_subtitle %}
+{% trans "Müəllim tapılmadı" context "accounts.chair_profile" as cp_empty_title %}
+{% trans "Bu kafedraya hələ müəllim təyin edilməyib və ya süzgəc nəticəni boşaldıb." context "accounts.chair_profile" as cp_empty_body %}
+<section class="profile-section-panel profile-section--tof {% if active_section == 'chair-profile' %}is-active{% endif %}"
+         data-profile-section-panel="chair-profile"
+         data-source-url="{{ profile_base_url }}?section=chair-profile">
+
+{% if not chair_profile_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=chair_profile_section.state_title state_body=chair_profile_section.state_body %}
+{% elif not chair_profile_section.chairs %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building-columns" state_title=chair_profile_section.state_title state_body=chair_profile_section.state_body %}
+{% else %}
+<div class="tof" data-tof-root data-tof-section="chair-profile">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=cp_subtitle header_note=chair_profile_section.norm_source_note %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=chair_profile_section.kpi_tiles kpi_variant="4" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="chair-profile" filter_prefix="cp_" filter_fields=chair_profile_section.filter_fields filter_count_label=chair_profile_section.filter_count_label %}
+
+    <div class="tof-pane">
+        <div class="tof-detail__head">
+            <h2 class="tof-detail__name">{{ chair_profile_section.chair.name }}</h2>
+            {% if chair_profile_section.chair.head %}
+                <span class="ems-badge ems-badge--info">{% trans "Müdir" context "accounts.chair_profile" %}: {{ chair_profile_section.chair.head.get_full_name|default:chair_profile_section.chair.head.username }}</span>
+            {% else %}
+                <span class="ems-badge ems-badge--warning">{% trans "Müdir təyin edilməyib" context "accounts.chair_profile" %}</span>
+            {% endif %}
+        </div>
+
+        <div class="tof-chips">
+            <span class="tof-chip">{% trans "Ştat" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.employment_counts.stat }}</span></span>
+            <span class="tof-chip">{% trans "Əvəzçilik" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.employment_counts.evezcilik }}</span></span>
+            <span class="tof-chip">{% trans "Saathesabı" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.employment_counts.saathesabi }}</span></span>
+            <span class="tof-chip">{% trans "İxtisas" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.detail.program_count }}</span></span>
+            <span class="tof-chip">{% trans "Qrup" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.detail.group_count }}</span></span>
+            <span class="tof-chip">{% trans "Tələbə" context "accounts.chair_profile" %} <span class="tof-chip__count">{{ chair_profile_section.detail.student_count }}</span></span>
+        </div>
+
+        {% if chair_profile_section.staff_state == "empty" %}
+            {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-group" state_title=cp_empty_title state_body=cp_empty_body %}
+        {% else %}
+        <div class="ems-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra ems-table--sticky">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Müəllim" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Vəzifə" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Ştat növü" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Ştat payı" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "İllik saat" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Norma" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Yük vəziyyəti" context "accounts.chair_profile" %}</th>
+                            <th scope="col">{% trans "Sillabus" context "accounts.chair_profile" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in chair_profile_section.staff_rows %}
+                        <tr>
+                            <th scope="row">{{ row.name }}</th>
+                            <td>{{ row.position_label|default:"—" }}</td>
+                            <td>
+                                {% if row.employment == "stat" %}{% trans "Ştat" context "accounts.chair_profile" %}
+                                {% elif row.employment == "evezcilik" %}{% trans "Əvəzçilik" context "accounts.chair_profile" %}
+                                {% else %}{% trans "Saathesabı" context "accounts.chair_profile" %}{% endif %}
+                            </td>
+                            <td class="ems-table__num">{{ row.staff_fraction|default:"—" }}</td>
+                            <td class="ems-table__num">{{ row.hours }}</td>
+                            <td class="ems-table__num">{{ row.norm_hours }}</td>
+                            <td>{% ems_status_badge "dept_load" row.load_band %} <span class="ems-table__num">{{ row.fill_percent }}%</span></td>
+                            <td class="ems-table__num">{{ row.syllabus_approved }} / {{ row.syllabus_total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+</section>
+{% endif %}

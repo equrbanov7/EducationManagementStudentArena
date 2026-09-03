@@ -12,7 +12,7 @@
     <div class="console-head">
         <a class="console-back" href="{% url 'registrar:console' %}"><i class="fas fa-arrow-left"></i> {% trans "Registrar idarəetməsi" context "registrar.console" %}</a>
         <h1 class="console-title"><i class="fas fa-clipboard-list"></i>
-            {% if instance %}{{ instance.program.code }} · {{ instance.admission_year }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni tədris planı" context "registrar.console" %}{% endif %}
+            {% if instance %}{{ instance.program.display_label }} · {{ instance.admission_year }} — {% trans "redaktə" context "registrar.console" %}{% else %}{% trans "Yeni tədris planı" context "registrar.console" %}{% endif %}
         </h1>
     </div>
     {% include "accounts/profile/_messages.html" %}

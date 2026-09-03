@@ -16,6 +16,8 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from core.staff_position import resolve_position_label
+
 from ..models import ProfileRole
 from ..services.account_deletion import (
     AccountDeletionError,
@@ -87,11 +89,18 @@ def _build_superadmin_user_row(user, *, actor=None):
         USER_STATUS_DELETED: "status-badge status-badge--deleted",
     }.get(status_key, "status-badge")
 
+    # ⚠️ Doldurucu «Üzv» rolu etiket kimi yazılmır — sütun «-» qalır; əvəzinə
+    # profildə vəzifə varsa o göstərilir (bax core/staff_position.py).
     role_label = "-"
     if getattr(user, "is_superuser", False):
         role_label = PROFILE_ROLE_LABELS.get(ProfileRole.SUPERADMIN, "Super Admin")
-    elif profile and profile.role:
-        role_label = PROFILE_ROLE_LABELS.get(profile.role, profile.get_role_display())
+    elif profile:
+        resolved = resolve_position_label(
+            staff_position=getattr(profile, "staff_position", "") or "",
+            role_name=profile.role or "",
+            role_label=str(PROFILE_ROLE_LABELS.get(profile.role, profile.get_role_display() if profile.role else "")),
+        )
+        role_label = resolved or "-"
 
     organization_name = "-"
     if profile:

@@ -1,0 +1,6 @@
+{% comment %}«Plan yoxdur» ixtisasları — lentin içində, ADLA (handoff §6.1).{% endcomment %}
+<ul class="tof-warnings">
+    {% for item in semester_opening_section.blockers|slice:":20" %}
+    <li class="tof-warnings__item">{{ item.label }}</li>
+    {% endfor %}
+</ul>

@@ -365,6 +365,12 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             from apps.exams.metrics import record_attempt_submitted
 
             record_attempt_submitted(getattr(self.exam, "exam_type", "unknown"), status)
+            # 2026-08 auditi (G9): cəhdin bitməsi jurnal körpüsünün YEGANƏ
+            # boğaz nöqtəsidir — tələbənin təhvili, vaxt bitməsi, proctor
+            # dayandırması və final-mərkəz təhvili hamısı buradan keçir.
+            from apps.exams.services.journal_sync import schedule_journal_sync
+
+            schedule_journal_sync(self)
 
     def recalculate_score(self):
         if getattr(self.exam, "exam_type", None) == "test":

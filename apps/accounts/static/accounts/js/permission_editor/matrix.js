@@ -44,6 +44,13 @@
             : '<i class="fas fa-plus-circle"></i> ' + ctx.text.actionAdd;
     }
 
+    function hasExplicitServerLabel(ctx, node) {
+        // Server tərəfdən render olunan AZ etiket (PERMISSION_LABELS) — AZ
+        // interfeysdə JS-in avto-generasiya etiketi onu ƏVƏZ ETMƏMƏLİDİR.
+        // Digər dillərdə JS lokalizasiyası əvvəlki kimi işləyir.
+        return Boolean(node) && node.getAttribute("data-permission-label-explicit") === "1" && ctx.uiLang === "az";
+    }
+
     function bindPermissionLabels(ctx, root) {
         var rows = root.querySelectorAll("[data-permission-row]");
         rows.forEach(function (row) {
@@ -52,13 +59,14 @@
             var description = ns.labels.formatPermissionDescription(ctx, key);
             var labelNode = row.querySelector("[data-permission-label]");
             var descriptionNode = row.querySelector("[data-permission-description]");
-            if (labelNode && label) {
+            if (labelNode && label && !hasExplicitServerLabel(ctx, labelNode)) {
                 labelNode.textContent = label;
             }
             if (descriptionNode && description) {
                 descriptionNode.textContent = description;
             }
-            row.setAttribute("data-search", (key + " " + label + " " + description).toLowerCase());
+            var searchLabel = labelNode ? labelNode.textContent : label;
+            row.setAttribute("data-search", (key + " " + searchLabel + " " + label + " " + description).toLowerCase());
         });
     }
 
@@ -69,7 +77,10 @@
             if (!key) {
                 return;
             }
-            badge.textContent = key === "*" ? ctx.text.allPermissionsBadge : ns.labels.formatPermissionLabel(ctx, key);
+            if (!hasExplicitServerLabel(ctx, badge)) {
+                badge.textContent =
+                    key === "*" ? ctx.text.allPermissionsBadge : ns.labels.formatPermissionLabel(ctx, key);
+            }
             badge.setAttribute("title", ns.labels.formatPermissionDescription(ctx, key));
         });
     }

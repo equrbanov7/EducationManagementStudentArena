@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Plan sətrinin əməlləri — YALNIZ qaralama/qaytarılmış planda render
+olunur (`can_edit_rows`); təsdiqlənmiş planda sütunun özü yoxdur.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofPlanRowDialog"
+        data-tof-prefill='{"action": "save_row", "plan": "{{ curriculum_editor_section.plan.id }}", "id": "{{ row.data.id }}", "subject": "{{ row.data.subject_id }}", "row_code": "{{ row.data.row_code|escapejs }}", "semester_number": "{{ row.data.semester_number }}", "credits": "{{ row.data.credits }}", "total_hours": "{{ row.data.total_hours }}", "lecture_hours": "{{ row.data.lecture_hours }}", "seminar_hours": "{{ row.data.seminar_hours }}", "lab_hours": "{{ row.data.lab_hours }}", "selfwork_hours": "{{ row.data.selfwork_hours }}", "assessment_form": "{{ row.data.assessment_form }}", "language": "{{ row.data.language|escapejs }}", "teaching_chair": "{{ row.data.chair_id }}"}'>
+    {% trans "Redaktə" context "accounts.curriculum" %}
+</button>
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-tof-open="tofPlanRowDeleteDialog"
+        data-tof-prefill='{"action": "delete_row", "plan": "{{ curriculum_editor_section.plan.id }}", "id": "{{ row.data.id }}"}'>
+    {% trans "Sil" context "accounts.curriculum" %}
+</button>

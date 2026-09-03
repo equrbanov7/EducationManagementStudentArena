@@ -1,0 +1,23 @@
+{% comment %}
+Stepper / mərhələ zolağı — handoff §4 komponent 10.
+Vəziyyətlər: done (yaşıl tik) · current (primary) · todo (boz) · error (qırmızı).
+
+Kontekst: `steps` = [{label, note, state, pct, has_bar}], `steps_label`.
+{% endcomment %}
+{% load ems_ui %}
+<ol class="ems-steps" aria-label="{{ steps_label }}">
+    {% for step in steps %}
+        <li class="ems-step ems-step--{{ step.state|default:'todo' }}">
+            <div class="ems-step__top">
+                <span class="ems-step__mark" aria-hidden="true">{% if step.state == "done" %}✓{% elif step.state == "error" %}!{% else %}{{ forloop.counter }}{% endif %}</span>
+                <span class="ems-step__label">{{ step.label }}</span>
+            </div>
+            {% if step.note %}<div class="ems-step__note">{{ step.note }}</div>{% endif %}
+            {% if step.has_bar %}
+                <div class="ems-bar ems-step__bar">
+                    <div class="ems-bar__fill" style="{% ems_pct_style step.pct %}"></div>
+                </div>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ol>

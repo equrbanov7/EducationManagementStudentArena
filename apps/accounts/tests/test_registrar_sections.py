@@ -27,7 +27,9 @@ class RegistrarProfileSectionsTest(TestCase):
                 status="active",
                 is_active=True,
             )
-            OrgUnit.objects.create(organization=cls.org, name="G1", slug="ps-g1", unit_type=OrgUnitType.GROUP)
+            cls.group = OrgUnit.objects.create(
+                organization=cls.org, name="G1", slug="ps-g1", unit_type=OrgUnitType.GROUP
+            )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
                 name="2024/2025 Payız",
@@ -40,11 +42,20 @@ class RegistrarProfileSectionsTest(TestCase):
             cls.teacher = User.objects.create_user("ps_teacher", "ps_teacher@qku.edu.az", "pw")
             cls.student = User.objects.create_user("ps_student", "ps_student@qku.edu.az", "pw")
             cls.dean = User.objects.create_user("ps_dean", "ps_dean@qku.edu.az", "pw")
-            for user, role in ((cls.teacher, "teacher"), (cls.student, "student"), (cls.dean, "dean")):
+            cls.hr_user = User.objects.create_user("ps_hr", "ps_hr@qku.edu.az", "pw")
+            cls.rim = User.objects.create_user("ps_rim", "ps_rim@qku.edu.az", "pw")
+            for user, role in (
+                (cls.teacher, "teacher"),
+                (cls.student, "student"),
+                (cls.dean, "dean"),
+                (cls.hr_user, "hr"),
+                (cls.rim, "ikt_rehber"),
+            ):
                 Membership.objects.create(
                     user=user,
                     organization=cls.org,
                     role=cls.org.roles.get(name=role),
+                    scope_unit=cls.group if role == "dean" else None,
                     is_primary=True,
                     is_active=True,
                 )
@@ -79,11 +90,21 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'data-profile-section-panel="my-journal"')
 
-    def test_dean_gets_analytics_and_approvals_sections(self):
-        for section in ("analytics", "grade-approvals"):
-            resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": section})
-            self.assertEqual(resp.status_code, 200)
-            self.assertContains(resp, f'data-profile-section-panel="{section}"')
+    def test_dean_gets_analytics_section(self):
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "analytics"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'data-profile-section-panel="analytics"')
+
+    def test_dean_has_no_journal_close_section(self):
+        """Təsdiq zənciri ləğv olundu; jurnalı RİM bağlayır, dekan yox."""
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "journal-close"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'data-profile-section-panel="journal-close"')
+
+    def test_rim_gets_journal_close_section(self):
+        resp = self._client(self.rim).get(reverse("accounts:profile"), {"section": "journal-close"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'data-profile-section-panel="journal-close"')
 
     # ── AJAX fragment API respects role gating ───────────────────────────────
     def test_fragment_api_returns_schedule_for_student(self):
@@ -108,9 +129,30 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(json.loads(resp.content)["ok"])
 
+    def test_org_scoped_view_unit_role_has_matching_nav_and_view_access(self):
+        page = self._client(self.hr_user).get(reverse("accounts:profile"))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'data-section="analytics"')
+
+        fragment = self._fragment(self.hr_user, "analytics")
+        self.assertEqual(fragment.status_code, 200)
+        self.assertTrue(json.loads(fragment.content)["ok"])
+
     # ── Sidebar shows the Universitet group links per role ───────────────────
+    def _sidebar(self, user) -> str:
+        """YALNIZ sol menyunun HTML-i.
+
+        FAZA 22-dən sonra kabinetin default bölməsi «Ana səhifə»dir və onun
+        vidjet kartları da `data-section="…"` keçidləri daşıyır.  Bu test
+        SİDEBAR tərkibini qoruyur, ona görə müqayisə yalnız `<aside>` blokunda
+        aparılır — əks halda ana səhifənin keçidi «menyuda var» kimi oxunardı.
+        """
+        page = self._client(user).get(reverse("accounts:profile")).content.decode()
+        start = page.index('<aside class="profile-sidebar"')
+        return page[start : page.index("</aside>", start)]
+
     def test_sidebar_links_per_role(self):
-        student_page = self._client(self.student).get(reverse("accounts:profile")).content.decode()
+        student_page = self._sidebar(self.student)
         self.assertIn('data-section="my-schedule"', student_page)
         self.assertIn('data-section="academic-calendar"', student_page)
         self.assertNotIn('data-section="analytics"', student_page)
@@ -118,10 +160,13 @@ class RegistrarProfileSectionsTest(TestCase):
         self.assertIn('data-section="my-journal"', student_page)
 
         # Müəllim: jurnal iş sahəsi yeni tabda ayrıca URL-də açılır.
-        teacher_page = self._client(self.teacher).get(reverse("accounts:profile")).content.decode()
+        teacher_page = self._sidebar(self.teacher)
         self.assertNotIn('data-section="my-journal"', teacher_page)
         self.assertIn('href="/jurnal/" target="_blank"', teacher_page)
 
-        dean_page = self._client(self.dean).get(reverse("accounts:profile")).content.decode()
+        dean_page = self._sidebar(self.dean)
         self.assertIn('data-section="analytics"', dean_page)
-        self.assertIn('data-section="grade-approvals"', dean_page)
+        self.assertNotIn('data-section="journal-close"', dean_page)
+
+        rim_page = self._sidebar(self.rim)
+        self.assertIn('data-section="journal-close"', rim_page)

@@ -10,9 +10,11 @@ target-version = ['py311']
 extend-exclude = '''
 /(
     \.git
+    | \.claude
     | \.venv
     | venv
     | migrations
+    | apps/syllabus/tests/e2e
     | __pycache__
 )/
 '''
@@ -43,6 +45,7 @@ markers = [
     #   Run only these:  pytest -m postgres
     #   Skip these:      pytest -m "not postgres"
     "postgres: test requires a PostgreSQL database (RLS / DB-engine specific)",
+    "mariadb: test requires a disposable MariaDB instance on loopback",
 ]
 
 # ── Coverage measurement (FAZA 11) ─────────────────────────────────────────

@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}«Tədris planından gətir» — ixtisas çoxseçimi (server `getlist` oxuyur).
+
+Boş seçim = kafedranın BÜTÜN ixtisasları. Planı təsdiqlənməmiş ixtisas sətir
+vermir və nəticədə «blocked» siyahısında adla göstərilir.{% endcomment %}
+<div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="wl-gen-programs">{% trans "İxtisaslar" context "accounts.workload_center" %}</label>
+    <select class="ems-select" id="wl-gen-programs" name="programs" multiple size="8">
+        {% for option in workload_center_section.program_options %}
+        <option value="{{ option.value }}">{{ option.label }}{% if not option.has_plan %} — {% trans "plan yoxdur" context "accounts.workload_center" %}{% endif %}</option>
+        {% endfor %}
+    </select>
+    <p class="ems-field__hint">{% trans "Boş buraxsanız kafedranın bütün ixtisasları götürülür." context "accounts.workload_center" %}</p>
+</div>

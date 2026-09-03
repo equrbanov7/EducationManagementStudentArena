@@ -16,8 +16,10 @@ Modules:
 * ``constants`` — length limits, regexes, section-name sets
 """
 
+from .academic_items import academic_items_api
 from .avatar import profile_avatar
 from .main import user_profile
+from .password_otp import change_password_otp_request
 from .public import public_user_profile
 from .sections_api import profile_badges_api, profile_section_fragment
 from .statistics_export import statistics_export_csv
@@ -28,6 +30,9 @@ __all__ = [
     "profile_avatar",
     "public_user_profile",
     "statistics_export_csv",
+    # «Akademik fəaliyyət» + şifrə-dəyişmə OTP endpoint-ləri
+    "academic_items_api",
+    "change_password_otp_request",
     # P3 — progressive enhancement endpoints
     "profile_section_fragment",
     "profile_badges_api",

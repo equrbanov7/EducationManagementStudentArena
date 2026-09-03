@@ -1,0 +1,123 @@
+{% load i18n %}
+{% comment %}
+«Əhatə və analitika» tabı (dizayn §3.3): 5 KPI · breakdown cədvəli ·
+semestr dinamikası · təsdiq marşrutu.
+
+⚠️ «Təsdiq marşrutu» kartı KONFİQURASİYA EKRANI DEYİL — cari siyasətin oxu-rejimi
+təsviridir. Tətbiq olunmayan mərhələlər «aktiv» kimi göstərilmir (bax
+`views/syllabus/review_text.POLICY_ROWS`).
+{% endcomment %}
+{% with cov=sr.coverage %}
+<div class="syl-kpis syl-kpis--5">
+  {% for kpi in cov.kpis %}
+  <div class="syl-kpi syl-kpi--static syl-kpi--{{ kpi.tone }}">
+    <span class="syl-kpi__label">{{ kpi.label }}</span>
+    <span class="syl-kpi__value syl-kpi__value--lg">{{ kpi.value }}</span>
+    <span class="syl-kpi__note">{{ kpi.note }}</span>
+  </div>
+  {% endfor %}
+</div>
+
+<section class="syl-card">
+  <header class="syl-card__head">
+    <h3 class="syl-card__title">{{ cov.title }}</h3>
+    <span class="syl-card__sub">{{ cov.subtitle }}</span>
+  </header>
+  {% if not cov.rows %}
+    <p class="syl-empty__body">{% trans "Seçilmiş tədris ilində qeyd tapılmadı." context "accounts.syllabus" %}</p>
+  {% else %}
+  <div class="syl-tablescroll">
+    <table class="syl-table syl-table--coverage">
+      <caption class="sr-only">{{ cov.title }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ cov.col_label }}</th>
+          <th scope="col" class="is-num">{% trans "Fənn" context "accounts.syllabus" %}</th>
+          <th scope="col" class="is-num">{% trans "Təsdiqlənmiş" context "accounts.syllabus" %}</th>
+          <th scope="col" class="is-num">{% trans "Baxışda" context "accounts.syllabus" %}</th>
+          <th scope="col" class="is-num">{% trans "Düzəlişdə" context "accounts.syllabus" %}</th>
+          <th scope="col" class="is-num">{% trans "Gecikib" context "accounts.syllabus" %}</th>
+          <th scope="col" class="syl-col-wide">{% trans "Təsdiq faizi" context "accounts.syllabus" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in cov.rows %}
+        <tr>
+          <th scope="row">{% if row.name %}{{ row.name }}{% if row.code %} <span class="syl-code">{{ row.code }}</span>{% endif %}{% else %}{% trans "Təyin edilməyib" context "accounts.syllabus" %}{% endif %}</th>
+          <td class="is-num">{{ row.total }}</td>
+          <td class="is-num syl-num--success">{{ row.approved }}</td>
+          <td class="is-num syl-num--primary">{{ row.in_review }}</td>
+          <td class="is-num syl-num--warning">{{ row.revision }}</td>
+          <td class="is-num {% if row.late %}syl-num--danger{% else %}syl-num--muted{% endif %}">{{ row.late }}</td>
+          <td>
+            <span class="syl-progress">
+              <span class="syl-bar syl-bar--wide">
+                <span class="syl-bar__fill" data-syl-percent="{{ row.percent }}"></span>
+              </span>
+              <span class="syl-bar__value">{{ row.percent }}%</span>
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">{% trans "Cəmi" context "accounts.syllabus" %}</th>
+          <td class="is-num">{{ cov.totals.total }}</td>
+          <td class="is-num syl-num--success">{{ cov.totals.approved }}</td>
+          <td class="is-num syl-num--primary">{{ cov.totals.in_review }}</td>
+          <td class="is-num syl-num--warning">{{ cov.totals.revision }}</td>
+          <td class="is-num {% if cov.totals.late %}syl-num--danger{% else %}syl-num--muted{% endif %}">{{ cov.totals.late }}</td>
+          <td>
+            <span class="syl-progress">
+              <span class="syl-bar syl-bar--wide">
+                <span class="syl-bar__fill" data-syl-percent="{{ cov.totals.percent }}"></span>
+              </span>
+              <span class="syl-bar__value">{{ cov.totals.percent }}%</span>
+            </span>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+<div class="syl-grid2">
+  <section class="syl-card">
+    <h3 class="syl-card__title">{% trans "Semestr üzrə dinamika" context "accounts.syllabus" %}</h3>
+    {% if not cov.trend %}
+      <p class="syl-empty__body">{% trans "Müqayisə üçün kifayət qədər semestr qeydi yoxdur." context "accounts.syllabus" %}</p>
+    {% else %}
+    <ul class="syl-trend">
+      {% for row in cov.trend %}
+      <li class="syl-trend__row">
+        <span class="syl-trend__label">{{ row.label }}</span>
+        <span class="syl-bar syl-bar--wide">
+          <span class="syl-bar__fill" data-syl-percent="{{ row.percent }}"></span>
+        </span>
+        <span class="syl-trend__value">{{ row.percent }}%</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  <section class="syl-card">
+    <h3 class="syl-card__title">{% trans "Təsdiq marşrutu — universitet siyasəti" context "accounts.syllabus" %}</h3>
+    <p class="syl-card__lead">{% trans "Kafedra təsdiqi state maşını ilə məcburidir. Sonrakı mərhələlər (dekan təsdiqi, tədris şöbəsinin yekun yoxlaması) hələ tətbiq olunmayıb — burada onların cari vəziyyəti göstərilir." context "accounts.syllabus" %}</p>
+    <ul class="syl-policy">
+      {% for row in cov.policy %}
+      <li class="syl-policy__row{% if row.on %} is-on{% endif %}">
+        <span class="syl-policy__mark" aria-hidden="true"></span>
+        <span class="syl-policy__text">
+          <span class="syl-policy__label">{{ row.label }}</span>
+          <span class="syl-policy__note">{{ row.note }}</span>
+        </span>
+        <span class="syl-chip-static">{{ row.state }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endwith %}

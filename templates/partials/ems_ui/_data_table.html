@@ -1,0 +1,77 @@
+{% comment %}
+Data cədvəli — handoff §4 komponent 5 · §7 a11y · §8 qayda 14.
+
+* `th scope="col"` / sıra başlığı `th scope="row"` · sıralanan başlıq `aria-sort`
+* sıralama və səhifələmə SERVER tərəfdədir (link ilə); JS məcburi deyil
+* boş / xəta / skeleton vəziyyətləri `table_state` ilə seçilir
+
+KONTEKST MÜQAVİLƏSİ
+  table_columns  — [{key, label, align, sortable, sort_url, sort_dir}]
+                   `sort_dir` ∈ "ascending"|"descending"|None
+  table_rows     — [{cells: [{text, mono, muted, num, badge_family, badge_key,
+                    html_include}], actions_include, row_head}]
+                   `row_head` birinci sütunun məzmunudur (th scope="row")
+  table_state    — "ready" | "empty" | "error" | "loading"
+  table_sticky   — birinci sütun sticky olsun
+  table_zebra    — zebra zolaqlar
+  table_wide     — min-width 1080px
+  table_foot_left / table_foot_right — opsional alt zolaq məzmunu
+  Boş/xəta mətnləri `_empty.html` müqaviləsindən gəlir.
+{% endcomment %}
+{% load ems_ui %}
+<div class="ems-tablewrap">
+    {% if table_state == "loading" %}
+        {% include "partials/ems_ui/_skeleton_rows.html" %}
+    {% elif table_state == "empty" or table_state == "error" %}
+        {% include "partials/ems_ui/_empty.html" %}
+    {% else %}
+        <div class="ems-tablescroll">
+            <table class="ems-table{% if table_zebra %} ems-table--zebra{% endif %}{% if table_sticky %} ems-table--sticky{% endif %}{% if table_wide %} ems-table--wide{% endif %}">
+                <thead>
+                    <tr>
+                        {% for col in table_columns %}
+                            <th scope="col"{% if col.sort_dir %} aria-sort="{{ col.sort_dir }}"{% endif %}>
+                                {% if col.sortable and col.sort_url %}
+                                    <a class="ems-sort" href="{{ col.sort_url }}">
+                                        {{ col.label }}
+                                        <span class="ems-sort__arrow" aria-hidden="true">{% if col.sort_dir == "ascending" %}▲{% elif col.sort_dir == "descending" %}▼{% else %}↕{% endif %}</span>
+                                    </a>
+                                {% else %}
+                                    {{ col.label }}
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table_rows %}
+                        <tr>
+                            <th scope="row">{{ row.row_head }}</th>
+                            {% for cell in row.cells %}
+                                <td class="{% if cell.num %}ems-table__num{% endif %}{% if cell.nowrap %} ems-table__nowrap{% endif %}">
+                                    {% if cell.badge_family %}
+                                        {% ems_status_badge cell.badge_family cell.badge_key %}
+                                    {% elif cell.mono %}
+                                        <span class="ems-mono">{{ cell.text }}</span>
+                                    {% else %}
+                                        {{ cell.text }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                            {% if row.actions_include %}
+                                <td><div class="ems-rowactions">{% include row.actions_include %}</div></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {% if table_foot_left or table_foot_right %}
+        <div class="ems-tablefoot">
+            <div>{{ table_foot_left }}</div>
+            <div>{{ table_foot_right }}</div>
+        </div>
+    {% endif %}
+</div>

@@ -1,0 +1,143 @@
+{% load i18n %}
+{% comment %}
+«Müəllim — Sillabuslar» (dizayn təhvili §3.1).
+
+Ekran profil shell-inin İÇİNDƏ açılır — SOL SIDEBAR QALIR. Bütün mətnlər
+`{% trans %}` ilə, rənglər `syllabus.css`-dəki `--ems-*` tokenləri ilə gəlir
+(inline stil YOXDUR — CSP `style-src` `unsafe-inline` vermir).
+
+Context müqaviləsi: apps/accounts/views/syllabus/section.py
+Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
+{% endcomment %}
+{% if 'syllabus-list' in allowed_sections %}
+{% with sl=syllabus_list_section %}
+<section class="profile-section-panel profile-section--syllabus {% if active_section == 'syllabus-list' %}is-active{% endif %}"
+         data-profile-section-panel="syllabus-list"
+         data-source-url="{{ profile_base_url }}?section=syllabus-list">
+
+  {% if not sl.has_access %}
+    <div class="syl-empty syl-empty--denied">
+      <i class="fas fa-lock syl-empty__icon" aria-hidden="true"></i>
+      <p class="syl-empty__title">{{ sl.access_denied_message }}</p>
+    </div>
+  {% else %}
+  <div class="syl"
+       data-syllabus-list
+       data-profile-url="{{ profile_base_url }}"
+       data-action-url="{{ sl.urls.action }}"
+       data-preview-url="{{ sl.urls.preview }}"
+       data-view="{{ sl.filters.view }}">
+
+    <header class="syl-head">
+      <div class="syl-head__text">
+        {% comment %}Başlıq profil qabığında artıq göstərilir (bölmə adı) — burada təkrarlanmır (sahibin 2026-09-02 tələbi).{% endcomment %}
+        <p class="syl-head__lead">{% trans "Yalnız sizə təyin olunmuş fənlər üzrə sillabus yaradırsınız. Təsdiqlənmiş versiya dəyişdirilmir — düzəliş lazımsa yeni versiya açılır, jurnal və qiymətlər olduğu kimi qalır." context "accounts.syllabus" %}</p>
+      </div>
+    </header>
+
+    {% comment %}5 KPI kartı — klikləndikdə status filtrini tətbiq edir (aria-pressed).{% endcomment %}
+    <div class="syl-kpis">
+      {% for kpi in sl.kpis %}
+      <button type="button"
+              class="syl-kpi syl-kpi--{{ kpi.tone }}{% if kpi.active %} is-on{% endif %}"
+              data-syl-filter="status" data-value="{{ kpi.chip }}"
+              aria-pressed="{% if kpi.active %}true{% else %}false{% endif %}">
+        <span class="syl-kpi__label">{{ kpi.label }}</span>
+        <span class="syl-kpi__value">{{ kpi.value }}</span>
+        <span class="syl-kpi__note">{{ kpi.note }}</span>
+      </button>
+      {% endfor %}
+    </div>
+
+    <div class="syl-filters">
+      <div class="syl-filters__row">
+        <div class="syl-field syl-field--search">
+          <label for="syl-q">{% trans "Axtarış" context "accounts.syllabus" %}</label>
+          <input id="syl-q" type="search" class="syl-input" value="{{ sl.filters.q }}"
+                 data-syl-search
+                 placeholder="{% trans 'Fənn adı və ya kodu' context 'accounts.syllabus' %}">
+        </div>
+        <div class="syl-field">
+          <label for="syl-year">{% trans "Akademik il" context "accounts.syllabus" %}</label>
+          <select id="syl-year" class="syl-select" data-syl-filter="year">
+            <option value="">{% trans "Bütün illər" context "accounts.syllabus" %}</option>
+            {% for option in sl.filter_options.years %}
+            <option value="{{ option.key }}" {% if option.key == sl.filters.year %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="syl-field">
+          <label for="syl-semester">{% trans "Semestr" context "accounts.syllabus" %}</label>
+          <select id="syl-semester" class="syl-select" data-syl-filter="semester">
+            <option value="">{% trans "Bütün semestrlər" context "accounts.syllabus" %}</option>
+            {% for option in sl.filter_options.semesters %}
+            <option value="{{ option.key }}" {% if option.key == sl.filters.semester %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="syl-field">
+          <label for="syl-unit">{% trans "Kafedra" context "accounts.syllabus" %}</label>
+          <select id="syl-unit" class="syl-select" data-syl-filter="unit">
+            <option value="">{% trans "Bütün kafedralar" context "accounts.syllabus" %}</option>
+            {% for option in sl.filter_options.units %}
+            <option value="{{ option.key }}" {% if option.key == sl.filters.unit %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="button" class="syl-btn syl-btn--ghost" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
+      </div>
+
+      <div class="syl-filters__row syl-filters__row--chips">
+        <span class="syl-filters__legend" id="syl-chip-legend">{% trans "Status" context "accounts.syllabus" %}</span>
+        <div class="syl-chips" role="group" aria-labelledby="syl-chip-legend">
+          {% for chip in sl.chips %}
+          <button type="button"
+                  class="syl-chip{% if chip.active %} is-on{% endif %}"
+                  data-syl-filter="status" data-value="{{ chip.key }}"
+                  aria-pressed="{% if chip.active %}true{% else %}false{% endif %}">
+            {{ chip.label }}<span class="syl-chip__count">{{ chip.count }}</span>
+          </button>
+          {% endfor %}
+        </div>
+        <div class="syl-filters__tail">
+          <label for="syl-sort" class="syl-filters__legend">{% trans "Sıralama" context "accounts.syllabus" %}</label>
+          <select id="syl-sort" class="syl-select syl-select--sm" data-syl-filter="sort">
+            {% for option in sl.filter_options.sorts %}
+            <option value="{{ option.key }}" {% if option.key == sl.filters.sort %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+          <span class="syl-viewtoggle" role="group" aria-label="{% trans 'Görünüş' context 'accounts.syllabus' %}">
+            <button type="button" class="syl-viewtoggle__btn{% if sl.filters.view == 'table' %} is-on{% endif %}"
+                    data-syl-view="table" aria-pressed="{% if sl.filters.view == 'table' %}true{% else %}false{% endif %}">{% trans "Cədvəl" context "accounts.syllabus" %}</button>
+            <button type="button" class="syl-viewtoggle__btn{% if sl.filters.view == 'card' %} is-on{% endif %}"
+                    data-syl-view="card" aria-pressed="{% if sl.filters.view == 'card' %}true{% else %}false{% endif %}">{% trans "Kart" context "accounts.syllabus" %}</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    {% if sl.empty %}
+      <div class="syl-empty">
+        <i class="fas fa-file-lines syl-empty__icon" aria-hidden="true"></i>
+        <p class="syl-empty__title">{% trans "Filtrə uyğun sillabus yoxdur" context "accounts.syllabus" %}</p>
+        <p class="syl-empty__body">{% trans "Seçilmiş akademik il, semestr və status kombinasiyasında qeyd tapılmadı." context "accounts.syllabus" %}</p>
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
+      </div>
+    {% else %}
+      {% include "accounts/profile/sections/syllabus/_list_table.html" with sl=sl %}
+      {% include "accounts/profile/sections/syllabus/_list_cards.html" with sl=sl %}
+      {% include "accounts/profile/sections/syllabus/_list_pager.html" with page=sl.page %}
+    {% endif %}
+
+    {% include "accounts/profile/sections/syllabus/_list_drawer.html" %}
+    {% include "accounts/profile/sections/syllabus/_list_dialogs.html" %}
+
+    <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
+      <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>
+      <span data-syl-toast-text></span>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endwith %}
+{% endif %}

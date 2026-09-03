@@ -1,0 +1,9 @@
+{% comment %}
+Status badge — handoff §4 komponent 4, §7 (status yalnız rənglə deyil, MƏTNlə).
+Kontekst: `status` (core.ui.status_catalog.Status), `wrap`, `dot`.
+Çağırış:  {% ems_status_badge "syllabus" row.status %}
+{% endcomment %}
+<span class="{{ status.css_class }}{% if wrap %} ems-badge--wrap{% endif %}">
+    {% if dot %}<span class="ems-badge__dot" aria-hidden="true"></span>{% endif %}
+    {{ status.label }}
+</span>

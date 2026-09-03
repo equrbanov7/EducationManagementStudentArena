@@ -49,24 +49,100 @@ def _audit_score_change(request, reviewer, attempt, *, appeal, adjustment):
         from apps.audit.public import log_action
         from core.constants import AuditAction
 
-        log_action(
-            action=AuditAction.UPDATE,
-            user=reviewer,
-            organization=getattr(appeal, "organization", None),
-            obj=adjustment,
-            reason="Appeal accepted — score adjustment applied",
-            request=request,
-            new_values={
-                "attempt_id": attempt.id,
-                "appeal_id": appeal.id,
-                "appeal_item_id": adjustment.appeal_item_id,
-                "delta_points": str(adjustment.delta_points),
-                "previous_score": str(adjustment.previous_score),
-                "new_score": str(adjustment.new_score),
-            },
-        )
+        # SAVEPOINT: audit yazısı düşərsə yalnız ÖZÜ geri qayıtsın. Savepoint
+        # olmadan udulmuş DB xətası PostgreSQL-də bütün qərar tranzaksiyasını
+        # səssizcə zəhərləyir (bax: JSONField lazy-proxy tx zəhəri dərsi).
+        with transaction.atomic():
+            log_action(
+                action=AuditAction.UPDATE,
+                user=reviewer,
+                organization=getattr(appeal, "organization", None),
+                obj=adjustment,
+                reason="Appeal accepted — score adjustment applied",
+                request=request,
+                new_values={
+                    "attempt_id": attempt.id,
+                    "appeal_id": appeal.id,
+                    "appeal_item_id": adjustment.appeal_item_id,
+                    "delta_points": str(adjustment.delta_points),
+                    "previous_score": str(adjustment.previous_score),
+                    "new_score": str(adjustment.new_score),
+                },
+            )
     except Exception:
         logger.warning("Appeal score-change audit log failed.", exc_info=True)
+
+
+def _audit_score_revert(request, reviewer, adjustment):
+    """Bal düzəlişinin GERİ ALINMASI audit izi (2026-08 auditi, G10).
+
+    Əvvəl ``revert_item_adjustment`` tamamilə auditsiz idi: tələbənin balı
+    geri götürülürdü, amma «kim, nə vaxt, nədən nəyə» izi qalmırdı."""
+    try:
+        from apps.audit.public import log_action
+        from core.constants import AuditAction
+
+        with transaction.atomic():  # savepoint — bax _audit_score_change
+            log_action(
+                action=AuditAction.UPDATE,
+                user=reviewer,
+                organization=getattr(adjustment.appeal_item.appeal, "organization", None),
+                obj=adjustment,
+                reason="Appeal score adjustment reverted",
+                request=request,
+                resource_type="appeals.score_adjustment.revert",
+                resource_id=str(adjustment.pk),
+                old_values={"delta_points": str(adjustment.delta_points)},
+                new_values={
+                    "attempt_id": adjustment.attempt_id,
+                    "appeal_item_id": adjustment.appeal_item_id,
+                    "delta_points": "0",
+                    "restored_answer_score": str(adjustment.previous_answer_score),
+                },
+            )
+    except Exception:
+        logger.warning("Appeal score-revert audit log failed.", exc_info=True)
+
+
+def _question_credit(*, is_correct, question_points):
+    """Sualın tələbəyə verdiyi kredit (ledger sətri üçün TAM ədəd)."""
+    return int(question_points) if is_correct else 0
+
+
+def _write_grade_event(attempt, *, question, grader, old_score, new_score, max_points):
+    """İmtahan ledger-inə (``ExamGradeEvent``) əlavə-yalnız sətir yaz.
+
+    Apellyasiya qərarı da ƏL İLƏ bal dəyişikliyidir — manual grading ilə eyni
+    tamper-evidence izinə düşməlidir (2026-08 auditi, G10). Bal dəyişmirsə
+    sətir yazılmır (səs-küy azaldılır).
+
+    FAIL-CLOSED (manual grading ilə eyni siyasət): ledger yazıla bilmirsə bal
+    dəyişikliyi də qalmır — qərar bütün tranzaksiya ilə geri qayıdır."""
+    if old_score == new_score:
+        return None
+    from apps.exams.models import ExamGradeEvent
+
+    return ExamGradeEvent.objects.create(
+        attempt=attempt,
+        question=question,
+        grader=grader,
+        old_score=old_score,
+        new_score=new_score,
+        max_points=max_points,
+    )
+
+
+def _schedule_journal_sync(attempt, *, actor):
+    """Qərardan sonra rəsmi qiyməti (elektron jurnal) yenilə.
+
+    ``apps.exams.public`` fasadı üzərindən — appeals→exams istiqaməti legitim,
+    əks istiqamət (exams→appeals) ``score_adjustments`` hook-larıyla qalır."""
+    try:
+        from apps.exams.public import schedule_journal_sync
+
+        schedule_journal_sync(attempt, actor=actor)
+    except Exception:
+        logger.warning("Appeal journal sync scheduling failed.", exc_info=True)
 
 
 # ---------------------------------------------------------------------------
@@ -97,7 +173,8 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
 
     existing = ScoreAdjustment.objects.filter(appeal_item=item).first()
     if existing and not existing.reverted:
-        # Artıq tətbiq olunub — ikiqat artımın qarşısını alırıq.
+        # Artıq tətbiq olunub — ikiqat artımın qarşısını alırıq (bal dəyişmir,
+        # ona görə nə yeni ledger sətri, nə də yeni jurnal yazısı lazımdır).
         _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text)
         recompute_appeal_status(appeal, reviewer=reviewer)
         return existing
@@ -128,6 +205,16 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
         delta = Decimal("0") if (prev_is_correct or already_credited) else bonus
         new_is_correct = True if delta > 0 else None
         new_score = previous_score + delta
+        # Ledger: sualın tələbəyə verdiyi kredit 0 → +delta (bax _write_grade_event).
+        event_old = _question_credit(is_correct=prev_is_correct, question_points=question_points)
+        _write_grade_event(
+            attempt,
+            question=question,
+            grader=reviewer,
+            old_score=event_old,
+            new_score=event_old + int(delta),
+            max_points=int(question_points),
+        )
     else:
         # Yazılı/praktiki: cavabın balına +1 (sualın maksimumu ilə clamp),
         # sonra attempt.teacher_score cavablardan yenidən hesablanır.
@@ -144,6 +231,14 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
                 target = question_points
             answer.teacher_score = int(target)
             answer.save(update_fields=["teacher_score", "updated_at"])
+            _write_grade_event(
+                attempt,
+                question=question,
+                grader=reviewer,
+                old_score=None if previous_answer_score is None else int(previous_answer_score),
+                new_score=answer.teacher_score,
+                max_points=int(question_points),
+            )
         new_score = calculate_attempt_score(attempt)
         delta = new_score - previous_score
         any_score = attempt.answers.filter(teacher_score__isnull=False).exists()
@@ -189,6 +284,9 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
 
     _mark_item_resolved(item, APPEAL_ITEM_STATUS_ACCEPTED, reviewer, response_text)
     _audit_score_change(request, reviewer, attempt, appeal=appeal, adjustment=adjustment)
+    # 2026-08 auditi (G10): qərar RƏSMİ qiymətə (elektron jurnal) də çatmalıdır —
+    # əvvəl bal yalnız ScoreAdjustment-da qalırdı. Aktor = reviewer.
+    _schedule_journal_sync(attempt, actor=reviewer)
     recompute_appeal_status(appeal, reviewer=reviewer)
     return adjustment
 
@@ -200,19 +298,23 @@ def reject_appeal_item(item, *, reviewer, response_text="", request=None):
     revert olunur (bal geri alınır). Bal dəyişmir (rədd halında).
     """
     item = AppealItem.objects.select_for_update().select_related("appeal").get(pk=item.pk)
-    revert_item_adjustment(item)
+    revert_item_adjustment(item, reviewer=reviewer, request=request)
     _mark_item_resolved(item, APPEAL_ITEM_STATUS_REJECTED, reviewer, response_text)
     recompute_appeal_status(item.appeal, reviewer=reviewer)
     return item
 
 
-def revert_item_adjustment(item):
+def revert_item_adjustment(item, *, reviewer=None, request=None):
     """
     Item üzrə aktiv bal düzəlişini revert edir.
 
     - Test: düzəliş `reverted=True` olur → effektiv bonusdan çıxır.
     - Yazılı/praktiki: cavabın əvvəlki balı (`previous_answer_score`) bərpa edilir
       və `attempt.teacher_score` cavablardan yenidən hesablanır.
+
+    2026-08 auditi (G10): geri alma da ledger + audit izi qoyur və rəsmi
+    qiyməti (elektron jurnal) yenidən hesablatdırır — əvvəl bunların heç biri
+    yox idi (bal səssizcə geri götürülürdü).
     """
     adjustment = ScoreAdjustment.objects.filter(appeal_item=item, reverted=False).first()
     if adjustment is None:
@@ -220,6 +322,8 @@ def revert_item_adjustment(item):
 
     attempt = adjustment.attempt
     exam = attempt.exam
+    question_points = int(getattr(adjustment.question, "points", 1) or 1) if adjustment.question_id else 1
+    delta = int(adjustment.delta_points or 0)
 
     if getattr(exam, "exam_type", None) != "test" and adjustment.question_id:
         from apps.exams.public import calculate_attempt_score
@@ -227,15 +331,36 @@ def revert_item_adjustment(item):
         answer = item.answer or attempt.answers.filter(question_id=adjustment.question_id).first()
         if answer is not None:
             restore = adjustment.previous_answer_score
+            previous_answer_total = answer.teacher_score
             answer.teacher_score = int(restore) if restore is not None else None
             answer.save(update_fields=["teacher_score", "updated_at"])
+            _write_grade_event(
+                attempt,
+                question=adjustment.question,
+                grader=reviewer,
+                old_score=previous_answer_total,
+                new_score=answer.teacher_score,
+                max_points=question_points,
+            )
             new_total = calculate_attempt_score(attempt)
             any_score = attempt.answers.filter(teacher_score__isnull=False).exists()
             attempt.teacher_score = int(new_total) if any_score else None
             attempt.save(update_fields=["teacher_score"])
+    elif getattr(exam, "exam_type", None) == "test" and adjustment.question_id:
+        credit = _question_credit(is_correct=bool(adjustment.previous_is_correct), question_points=question_points)
+        _write_grade_event(
+            attempt,
+            question=adjustment.question,
+            grader=reviewer,
+            old_score=credit + delta,
+            new_score=credit,
+            max_points=question_points,
+        )
 
     adjustment.reverted = True
     adjustment.save(update_fields=["reverted"])
+    _audit_score_revert(request, reviewer, adjustment)
+    _schedule_journal_sync(attempt, actor=reviewer)
     return adjustment
 
 

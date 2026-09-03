@@ -206,6 +206,9 @@
 
 .exam-status--ok { color: var(--ems-success-600); }
 .exam-status--barred { color: var(--ems-danger-strong); }
+/* Tarixi (köçürülmüş + bağlı) semestr: status hesablanmır, köhnə sistemin
+   nəticəsi göstərilir. Neytral ton — nə uğur, nə xəbərdarlıq. */
+.exam-status--legacy { color: var(--ems-neutral-600); cursor: help; }
 
 .subject-content-link {
     display: inline-flex;
@@ -370,6 +373,22 @@
 }
 .my-subjects-schedule-link:hover { text-decoration: underline; }
 
+/* ── Çox cəhd: rəsmi sonuncu, əvvəlkilər ləğv olunub (M2) ─────────────────── */
+.subject-attempts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+}
+.subject-attempt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+}
+.subject-attempt.is-official { background: #dcfce7; color: #15803d; }
+.subject-attempt.is-superseded { background: var(--ems-neutral-100); color: var(--ems-neutral-500); text-decoration: line-through; }
+
 /* ── Final result + resit (U3+) ───────────────────────────────────────────── */
 .subject-final {
     display: flex;
@@ -440,3 +459,67 @@
     color: var(--ems-neutral-600);
 }
 .subject-final-comment i { color: var(--ems-primary-400); margin-right: 3px; }
+
+/* ── Ekran 10 əlavələri (dizayn handoff Mərhələ 6) ────────────────────────
+   Qiymətləndirmə strukturu zolağı (README §8/4), müəllim adı və
+   «Sillabus (təsdiqlənmiş)» keçidi. Rənglər yalnız `--ems-*` tokenlərindən. */
+
+.assess-weights {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 14px;
+    padding: 10px 13px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 12px);
+    font-size: var(--ems-fs-xs, 0.78rem);
+}
+
+.assess-weights__title {
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    color: var(--ems-neutral-600);
+}
+
+.assess-weight {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 600;
+}
+
+.assess-weights__total {
+    margin-inline-start: auto;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.subject-teacher {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--ems-neutral-600);
+}
+
+.subject-syllabus-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ems-primary-700);
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .assess-weights__total {
+        margin-inline-start: 0;
+        width: 100%;
+    }
+}

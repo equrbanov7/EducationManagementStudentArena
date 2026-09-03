@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}«Yeni tapşırıq» dialoqunun sahələri (kafedra + tədris ili).{% endcomment %}
+<div class="ems-field">
+    <label class="ems-field__label" for="wl-task-chair">{% trans "Kafedra" context "accounts.workload_center" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <select class="ems-select" id="wl-task-chair" name="chair" required>
+        <option value="">{% trans "Seçin" context "accounts.workload_center" %}</option>
+        {% for option in workload_center_section.chair_options %}
+        <option value="{{ option.value }}">{{ option.label }}</option>
+        {% endfor %}
+    </select>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="wl-task-year">{% trans "Tədris ili" context "accounts.workload_center" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="text" id="wl-task-year" name="academic_year" required
+           value="{{ workload_center_section.year }}"
+           placeholder="2026/2027">
+</div>

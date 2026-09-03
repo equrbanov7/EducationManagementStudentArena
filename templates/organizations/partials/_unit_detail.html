@@ -1,0 +1,149 @@
+{% load i18n org_tags %}
+<div class="org-unit-detail">
+    <nav class="org-unit-detail__breadcrumb" aria-label="{% trans 'Struktur yolu' context 'organizations.unit_detail' %}">
+        <a href="{{ structure_list_url }}">{% if is_faculty %}{% trans 'Fakültələr' %}{% else %}{% trans 'Kafedralar' %}{% endif %}</a>
+        {% for ancestor in parent_chain %}
+            <span aria-hidden="true">›</span>
+            <span>{{ ancestor.name }}</span>
+        {% endfor %}
+        <span aria-hidden="true">›</span>
+        <strong>{{ unit.name }}</strong>
+    </nav>
+
+    <div class="org-unit-detail__header">
+        <span class="org-management__avatar org-management__avatar--lg {% if is_faculty %}org-management__avatar--blue{% else %}org-management__avatar--green{% endif %}" aria-hidden="true">{{ unit.name|first|upper }}</span>
+        <div>
+            <p class="org-unit-detail__type">{{ unit_type_label }}{% if unit.code %} · {{ unit.code }}{% endif %}</p>
+            <h2 class="org-unit-detail__name">{{ unit.name }}</h2>
+            <p class="org-unit-detail__head">
+                <i class="fas fa-user-tie" aria-hidden="true"></i>
+                {% if unit.head %}{{ unit.head.get_full_name|default:unit.head.username }}{% else %}{% trans 'Təyin edilməyib' %}{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="org-unit-detail__stats">
+        <div class="org-unit-detail__stat org-unit-detail__stat--accent">
+            <strong>{{ active_teacher_count }}</strong>
+            <span>{% trans 'Aktiv müəllim' context 'organizations.unit_detail' %}</span>
+        </div>
+        <div class="org-unit-detail__stat">
+            <strong>{{ total_teacher_count }}</strong>
+            <span>{% trans 'İndiyə kimi müəllim' context 'organizations.unit_detail' %}</span>
+        </div>
+        <div class="org-unit-detail__stat">
+            <strong>{{ student_count }}</strong>
+            <span>{% trans 'Tələbə' %}</span>
+        </div>
+        {% if is_faculty %}
+        <div class="org-unit-detail__stat">
+            <strong>{{ kafedra_rows|length }}</strong>
+            <span>{% trans 'Kafedra' %}</span>
+        </div>
+        {% endif %}
+        <div class="org-unit-detail__stat">
+            <strong>{{ program_count }}</strong>
+            <span>{% trans 'İxtisas' %}</span>
+        </div>
+        <div class="org-unit-detail__stat">
+            <strong>{{ group_count }}</strong>
+            <span>{% trans 'Qrup' %}</span>
+        </div>
+        <div class="org-unit-detail__stat">
+            <strong>{{ subject_count }}</strong>
+            <span>{% trans 'Fənn' %}</span>
+        </div>
+        <div class="org-unit-detail__stat">
+            <strong>{{ offering_current_year_count }}</strong>
+            <span>{% trans 'Cari ilin açılışı' context 'organizations.unit_detail' %}</span>
+        </div>
+    </div>
+
+    {% if year_breakdown %}
+    <section class="org-unit-detail__block">
+        <h3>{% trans 'Tədris ili üzrə açılışlar' context 'organizations.unit_detail' %}</h3>
+        <div class="org-unit-detail__year-bars">
+            {% for year, count in year_breakdown %}
+            <div class="org-unit-detail__year-row">
+                <span class="org-unit-detail__year-label">{{ year }}</span>
+                <span class="org-unit-detail__year-bar-track">
+                    <span class="org-unit-detail__year-bar" style="--org-unit-detail-bar-pct: {% widthratio count max_year_count 100 %}%"></span>
+                </span>
+                <strong>{{ count }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if is_faculty %}
+    <section class="org-unit-detail__block">
+        <h3>{% trans 'Kafedralar' %}</h3>
+        {% if kafedra_rows %}
+        <div class="org-unit-detail__kafedra-list">
+            {% for row in kafedra_rows %}
+            <div class="org-unit-detail__kafedra-row">
+                <span class="org-management__avatar org-management__avatar--small org-management__avatar--green" aria-hidden="true">{{ row.unit.name|first|upper }}</span>
+                <span class="org-unit-detail__kafedra-name">{{ row.unit.name }}</span>
+                <span class="org-management__badge org-management__badge--green">{% blocktrans with n=row.active_teacher_count context 'organizations.unit_detail' %}{{ n }} aktiv{% endblocktrans %}</span>
+                <span class="org-management__badge">{% blocktrans with n=row.teacher_count context 'organizations.unit_detail' %}{{ n }} indiyə kimi{% endblocktrans %}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="org-management__muted">{% trans 'Bu fakültəyə hələ kafedra bağlanmayıb.' context 'organizations.unit_detail' %}</p>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <section class="org-unit-detail__block">
+        <div class="org-unit-detail__block-head">
+            <h3>{% trans 'Müəllimlər' %}</h3>
+            {% if teacher_memberships %}
+            <label class="org-unit-detail__search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <input type="search" class="js-org-unit-detail-teacher-search" placeholder="{% trans 'Müəllim axtar…' context 'organizations.unit_detail' %}" aria-label="{% trans 'Müəllim axtar…' context 'organizations.unit_detail' %}">
+            </label>
+            {% endif %}
+        </div>
+        {% if teacher_memberships %}
+        <div class="org-unit-detail__teacher-list">
+            {% for membership in teacher_memberships %}
+            <div class="org-unit-detail__teacher-row" data-teacher-name="{{ membership.user.get_full_name|default:membership.user.username|lower }}">
+                <span class="org-management__avatar org-management__avatar--small {% if membership.is_active_teacher %}org-management__avatar--green{% endif %}" aria-hidden="true">{{ membership.user.username|first|upper }}</span>
+                <span class="org-unit-detail__teacher-info">
+                    <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
+                    <small>
+                        {{ membership.role|role_badge_label }}
+                        {% if is_faculty and membership.scope_unit %} · {{ membership.scope_unit.name }}{% endif %}
+                    </small>
+                </span>
+                <span class="org-management__badge {% if membership.is_active_teacher %}org-management__badge--green{% endif %}">
+                    {% if membership.is_active_teacher %}{% trans 'Aktiv' %}{% else %}{% trans 'Passiv' %}{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+            <p class="org-unit-detail__teacher-nomatch js-org-unit-detail-teacher-nomatch org-management__muted" hidden>{% trans 'Uyğun müəllim tapılmadı.' context 'organizations.unit_detail' %}</p>
+        </div>
+        {% if teacher_hidden_count %}
+        <p class="org-management__muted">+{% blocktrans with n=teacher_hidden_count context 'organizations.unit_detail' %}{{ n }} daha{% endblocktrans %}</p>
+        {% endif %}
+        {% else %}
+        <p class="org-management__empty">{% trans 'Hələ müəllim təyin edilməyib.' context 'organizations.unit_detail' %}</p>
+        {% endif %}
+    </section>
+
+    {% if subject_preview %}
+    <section class="org-unit-detail__block">
+        <h3>{% trans 'Fənlər' %} <span class="org-unit-detail__block-count">({{ subject_count }})</span></h3>
+        <div class="org-unit-detail__chip-list">
+            {% for row in subject_preview %}
+            <span class="org-unit-detail__chip">{{ row.code }} — {{ row.name }}</span>
+            {% endfor %}
+            {% if subject_hidden_count %}
+            <span class="org-unit-detail__chip org-unit-detail__chip--muted">+{% blocktrans with n=subject_hidden_count context 'organizations.unit_detail' %}{{ n }} daha{% endblocktrans %}</span>
+            {% endif %}
+        </div>
+    </section>
+    {% endif %}
+</div>

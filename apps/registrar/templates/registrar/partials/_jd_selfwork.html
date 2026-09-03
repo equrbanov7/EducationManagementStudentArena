@@ -52,12 +52,17 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                     <tr>
                         <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                         {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %}>{{ slot.index }}</th>{% endfor %}
+                        {% if selfwork_board.has_archive %}<th class="jd-sw2-th-arch" title="{% trans 'Köhnə sistemdən köçürülmüş sərbəst iş balı — oxu-only' context 'registrar.journal' %}">{% trans "ARXİV" context "registrar.journal" %}</th>{% endif %}
                         <th class="jd-sw2-th-sum">{% trans "CƏMİ" context "registrar.journal" %} /{{ selfwork_board.max_topics }}</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% comment %}data-jd-sw-archive: köçürülmüş "si" balı — journal_grid.js CƏMİ-ni
+                    canlı hesablayanda çeklist boş qalarsa bu dəyəri geri qaytarır (server qərarının
+                    güzgüsü). Bal AYRICA ARXİV sütununda oxu-only göstərilir və heç bir mövzu
+                    "təhvil verilmiş" işarələnmir.{% endcomment %}
                     {% for row in selfwork_board.rows %}
-                    <tr class="journal-row" data-jd-sw-row>
+                    <tr class="journal-row" data-jd-sw-row{% if row.archive_score is not None %} data-jd-sw-archive="{{ row.archive_score }}"{% endif %}>
                         <td class="jd2-td-student"><span class="jd2-rowno">{{ forloop.counter }}</span> {{ row.student.get_full_name|default:row.student.username }}</td>
                         {% for cell in row.cells %}
                         <td class="jd-sw2-cell">
@@ -84,7 +89,16 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                             {% endif %}
                         </td>
                         {% endfor %}
-                        <td class="jd-sw2-sum"><span class="cell-entry" data-jd-sw-total>{{ row.total }}</span></td>
+                        {% if selfwork_board.has_archive %}
+                        <td class="jd-sw2-arch">
+                            {% if row.archive_score is not None %}
+                            <span class="jd-sw2-arch-val" title="{% trans 'Köhnə sistemdən köçürülmüş sərbəst iş balı. Oxu-only — dəyişdirilmir və çeklisti bloklamır.' context 'registrar.journal' %}">{{ row.archive_score }}</span>
+                            {% else %}
+                            <span class="jd-sw2-arch-empty">—</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                        <td class="jd-sw2-sum"{% if not row.checklist_total and row.archive_score is not None %} title="{% trans 'Çeklist boşdur — CƏMİ arxiv (köçürülmüş) balını göstərir.' context 'registrar.journal' %}"{% endif %}><span class="cell-entry" data-jd-sw-total>{{ row.total }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -102,3 +116,12 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
     <b class="jd2-ie">1</b> {% trans "təhvil verilib" context "registrar.journal" %},
     <b class="jd2-qb">0</b> {% trans "verilməyib" context "registrar.journal" %}.
 </p>
+{% if selfwork_board.has_archive %}
+<p class="jd-sw2-foot jd-sw2-foot-arch">
+    <i class="fas fa-archive"></i>
+    {% trans "ARXİV sütunu köhnə sistemdən köçürülmüş sərbəst iş balıdır — oxu-only, dəyişdirilmir." context "registrar.journal" %}
+    {% trans "Köhnə sistemdə sərbəst iş tək bal idi və hansı mövzuların təhvil verildiyi saxlanılmayıb, ona görə çeklist boşdur — heç bir mövzu «təhvil verilib» işarələnmir." context "registrar.journal" %}
+    {% trans "CƏMİ sütunu çeklist boş olduğu müddətdə arxiv balını göstərir; ilk mövzu işarələnən kimi canlı çeklist cəminə keçir." context "registrar.journal" %}
+    {% trans "Arxiv balı imtahana qədər bala AYRICA əlavə olunmur — o, artıq həmin balın içindədir." context "registrar.journal" %}
+</p>
+{% endif %}

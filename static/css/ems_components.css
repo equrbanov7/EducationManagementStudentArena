@@ -151,3 +151,32 @@ textarea:focus-visible,
 }
 .search-field__clear:hover { background: var(--ems-neutral-100); color: var(--ems-danger-500, #ef4444); }
 .search-field__clear[hidden] { display: none; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   `.sr-only` — üfüqi sürüşmə düzəlişi (PHASE21 UI QA)
+
+   Font Awesome-un vendor `all.min.css`-i `.sr-only`-ni `position: absolute`
+   verir, amma `left/top` TƏYİN ETMİR — element STATİK mövqeyində qalır.
+   Geniş (`overflow-x: auto` içində sürüşən) cədvəlin `<th>`-ində duran
+   `.sr-only` beləcə viewport-dan KƏNARDA yerləşir və `documentElement`-in
+   sürüşmə sahəsini genişləndirir: 768 px-də səhifə 200 px üfüqi sürüşürdü
+   (sillabus siyahısı).  Vendor faylına toxunmuruq — burada bərkidirik.
+   `:focus` variantı (`.sr-only-focusable`) toxunulmaz qalır.
+   ────────────────────────────────────────────────────────────────────────── */
+.sr-only:not(:focus) {
+    left: 0;
+    top: 0;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Klaviatura fokus halqası — sol menyu linkləri + off-canvas bağlama düyməsi
+   (PHASE21 UI QA, U-9). Hər ikisinin öz CSS faylı ölçü budcəsi ilə
+   DONDURULUB (`profile/sidebar.css`, `navbar.css`) — qayda buraya, dondurulmamış
+   ortaq fayla yazılır. `ems_components.css` bazadan (`navbar.css`, `sidebar.css`)
+   SONRA yüklənir, ona görə əlavə spesifiklik lazım deyil.
+   ────────────────────────────────────────────────────────────────────────── */
+.sidebar-menu-link:focus-visible,
+.blog-header__toggle:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}

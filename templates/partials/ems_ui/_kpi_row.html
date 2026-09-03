@@ -1,0 +1,7 @@
+{% comment %}
+KPI sırası — `kpi_tiles` (siyahı) + opsional `kpi_variant` (4|5).
+Hər element üçün `_kpi_tile.html` müqaviləsi keçərlidir.
+{% endcomment %}
+<div class="ems-kpis{% if kpi_variant %} ems-kpis--{{ kpi_variant }}{% endif %}">
+    {% for tile in kpi_tiles %}{% include "partials/ems_ui/_kpi_tile.html" %}{% endfor %}
+</div>

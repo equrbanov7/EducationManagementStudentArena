@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.audit.models import AuditLog
-from apps.organizations.models import Organization
+from apps.organizations.models import Membership, Organization
 from apps.registrar import status
 from apps.registrar.models import AcademicStatus, Curriculum, Program, StudentAcademicRecord
 from core.constants import OrganizationType
@@ -30,6 +30,13 @@ class AcademicStatusServiceTest(TestCase):
                 organization=self.org, program=self.program, admission_year=2024
             )
             self.student = User.objects.create_user("st_student", "st_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,

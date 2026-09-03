@@ -55,6 +55,11 @@
     color: var(--ems-neutral-900);
     line-height: 1.1;
 }
+/* Orta ÜOMG hesablana bilmir (qəti nəticəli fənn yoxdur) — sıfır YAZILMIR. */
+.analytics-card-value--na {
+    font-size: 0.95rem;
+    color: var(--ems-neutral-500);
+}
 .analytics-card-label {
     font-size: 0.78rem;
     font-weight: 600;

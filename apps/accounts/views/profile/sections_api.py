@@ -39,6 +39,7 @@ from django.views.decorators.http import require_GET
 from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
+from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _role_capabilities
@@ -52,6 +53,8 @@ logger = logging.getLogger(__name__)
 
 # Bütün mövcud profile section-ları → partial template adı.
 SECTION_PARTIALS: dict[str, str] = {
+    # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+    "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
     "notifications": "accounts/profile/sections/_notifications.html",
     "publish-notification": "accounts/profile/sections/_publish_notification.html",
@@ -81,12 +84,15 @@ SECTION_PARTIALS: dict[str, str] = {
     "superadmin-org-features": "accounts/profile/sections/superadmin/_superadmin_org_features.html",
     "superadmin-organizations": "accounts/profile/sections/superadmin/_superadmin_organizations.html",
     "superadmin-users": "accounts/profile/sections/superadmin/_superadmin_user_management.html",
+    "rim-center": "accounts/profile/sections/_rim_center.html",
     "superadmin-ai": "accounts/profile/sections/superadmin/_superadmin_ai_settings.html",
     "superadmin-exam-rooms": "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html",
     "exam-center-pins": "accounts/profile/sections/_exam_center_pins.html",
     "exam-center-stats": "accounts/profile/sections/_exam_center_stats.html",
     "appeal-stats": "accounts/profile/sections/_appeal_stats.html",
     "kollokvium-windows": "accounts/profile/sections/_kollokvium_windows.html",
+    "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
+    "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "system-monitoring": "accounts/profile/sections/superadmin/_system_monitoring.html",
     "statistics": "accounts/profile/sections/_statistics.html",
@@ -102,19 +108,80 @@ SECTION_PARTIALS: dict[str, str] = {
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
+    # 2026-08-27: bu ikisi `profile.html`-in `data-ajax-sections` siyahısında
+    # VAR idi, amma burada YOX idi — yəni ön tərəf fraqment istəyirdi, backend
+    # isə `_ensure_section_allowed`-da 403 qaytarırdı.  Dekan/kafedra müdiri
+    # menyuda «Bölmə imtahanları»nı görür, klikləyəndə isə xəta alırdı.
+    # (Tam səhifə yolu `?section=` işləyirdi — ona görə problem yalnız QA
+    # süpürgəsində üzə çıxdı.)
+    "unit-exams": "accounts/profile/sections/_unit_exams.html",
+    "superadmin-org-inspector": "accounts/profile/sections/superadmin/_superadmin_org_inspector.html",
     # U12 — registrar kabinet bölmələri (profil shell-inin içində)
     "my-schedule": "accounts/profile/sections/_my_schedule.html",
     "academic-calendar": "accounts/profile/sections/_academic_calendar.html",
     "my-journal": "accounts/profile/sections/_my_journal.html",
-    "grade-approvals": "accounts/profile/sections/_grade_approvals.html",
+    "journal-close": "accounts/profile/sections/_journal_close.html",
+    # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel, mutasiyalar
+    # ayrıca JSON POST endpoint-inə gedir → AJAX swap təhlükəsizdir.
+    "schedule-manage": "accounts/profile/sections/_schedule_manage.html",
+    # «Tələbə idxalı» (`user.import`) — server yalnız çərçivəni verir; fayl
+    # yüklənməsi, quru icra və tətbiq ayrıca JSON endpoint-lərinə gedir →
+    # AJAX swap təhlükəsizdir.
+    "student-intake": "accounts/profile/sections/_student_intake.html",
+    # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
+    # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "applications": "accounts/profile/sections/_applications.html",
     "analytics": "accounts/profile/sections/_analytics.html",
     "academic-records": "accounts/profile/sections/_academic_records.html",
+    # «Müəllimlər» / «Tələbələr» kataloqu (icazə: `people.*`, scope: unit)
+    "people-teachers": "accounts/profile/sections/_people_teachers.html",
+    "people-students": "accounts/profile/sections/_people_students.html",
+    # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil
+    # shell-inin içində açılır (sol sidebar qalır), hədəf versiya `?version=`
+    # sorğu parametrindən gəlir.
+    # Fənn təhvili (`journal.reassign`) — RİM / dekan / kafedra müdiri.
+    "teaching-handover": "accounts/profile/sections/_teaching_handover.html",
+    "syllabus-list": "accounts/profile/sections/_syllabus_list.html",
+    "syllabus-editor": "accounts/profile/sections/_syllabus_editor.html",
+    "syllabus-review": "accounts/profile/sections/_syllabus_review.html",
+    # «Sual təsdiqi» (kafedra müdiri) — OXU-ONLY növbə; qərar ayrıca səhifədə.
+    "question-chair-review": "accounts/profile/sections/_question_chair_review.html",
+    # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
+    "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
+    "my-workload": "accounts/profile/sections/_my_workload.html",
+    # Mərhələ 4 — dərs yükü zənciri: tədris şöbəsi mərkəzi (12), koordinator
+    # vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi baxışı (17).
+    # Hamısı SERVER-render OXU panelidir; mutasiyalar tək JSON POST-a gedir.
+    "workload-center": "accounts/profile/sections/_workload_center.html",
+    "workload-visa": "accounts/profile/sections/_workload_visa.html",
+    "workload-approval": "accounts/profile/sections/_workload_approval.html",
+    "workload-overview": "accounts/profile/sections/_workload_overview.html",
+    # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra profili,
+    # ixtisas reyestri, fənn kataloqu. Hamısı SERVER-render OXU panelidir;
+    # mutasiyalar ayrıca JSON POST endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "org-structure-tree": "accounts/profile/sections/_org_structure_tree.html",
+    "chair-profile": "accounts/profile/sections/_chair_profile.html",
+    "programs-registry": "accounts/profile/sections/_programs_registry.html",
+    "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
+    # Mərhələ 2 — tədris planı redaktoru, akademik qrup reyestri, semestr açılışı.
+    "curriculum-editor": "accounts/profile/sections/_curriculum_editor.html",
+    "groups-registry": "accounts/profile/sections/_groups_registry.html",
+    "semester-opening": "accounts/profile/sections/_semester_opening.html",
+    # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09).
+    # Hər ikisi SERVER-render OXU panelidir; mutasiyalar ayrıca JSON /
+    # multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    # Mərhələ 6 — ekran 21 «Keçilmiş dərslər» (müəllim + nəzarətçi, OXU-ONLY).
+    "lessons-log": "accounts/profile/sections/_lessons_log.html",
+    "student-admission": "accounts/profile/sections/_student_admission.html",
+    "student-registry": "accounts/profile/sections/_student_registry.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
 # bölmələri normal full-page naviqasiyada qalır.
 AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
     {
+        # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
+        "dashboard",
         "profile-info",
         "notifications",
         "posts",
@@ -144,13 +211,68 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
+        # Hər ikisi OXU-ONLY siyahıdır (form/admin vəziyyəti daşımır) — AJAX-safe.
+        "unit-exams",
+        "superadmin-org-inspector",
+        # RİM mərkəzi — panel oxu-only render olunur (bütün mutasiyalar ayrıca
+        # JSON POST endpoint-inə gedir), ona görə AJAX swap təhlükəsizdir.
+        "rim-center",
         # U12 — registrar kabinet bölmələri (read-mostly; formlar registrar
         # endpoint-lərinə POST edir və `next` ilə shell-ə qayıdır).
         "my-schedule",
+        "schedule-manage",
+        "student-intake",
+        "applications",
         "academic-calendar",
         "my-journal",
-        "grade-approvals",
         "analytics",
+        # Kataloq panelləri OXU-ONLY render olunur (bütün mutasiyalar ayrıca
+        # JSON POST endpoint-inə gedir) → AJAX swap təhlükəsizdir.
+        "people-teachers",
+        "people-students",
+        # Sillabus siyahısı və redaktoru OXU-ONLY render olunur — bütün yazı
+        # əməliyyatları ayrıca JSON POST endpoint-inə gedir (autosave/əməllər),
+        # ona görə AJAX swap təhlükəsizdir.
+        "syllabus-list",
+        "syllabus-editor",
+        "syllabus-review",
+        # Kafedra sual təsdiqi növbəsi OXU-ONLY render olunur (qərar ayrıca
+        # səhifədə, POST-la) → AJAX swap təhlükəsizdir.
+        "question-chair-review",
+        # Fənn təhvili paneli də OXU-ONLY render olunur: cədvəl/seçicilər JSON
+        # GET-lə, təhvil və geri qaytarma isə ayrıca JSON POST-la gedir.
+        "teaching-handover",
+        # Dərs yükü panelləri SPA-dır: server çərçivəni verir, sətirlər JSON
+        # GET-lə gəlir, bölgü/təsdiq isə ayrıca JSON POST-la gedir.
+        "workload-distribution",
+        "my-workload",
+        # Mərhələ 4 zənciri — panellər OXU-ONLY render olunur, mutasiyalar
+        # `workload:action` endpoint-inə gedir → AJAX swap təhlükəsizdir.
+        "workload-center",
+        "workload-visa",
+        "workload-approval",
+        "workload-overview",
+        # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
+        # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
+        # POST endpoint-inə (multipart, sənədlə) gedir.
+        "legacy-grade-review",
+        # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
+        # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
+        "org-structure-tree",
+        "chair-profile",
+        "programs-registry",
+        "subject-catalog",
+        # Mərhələ 2 panelləri də OXU-ONLY render olunur: plan sətri, qrup və
+        # açılış mutasiyaları ayrıca JSON POST endpoint-lərinə gedir.
+        "curriculum-editor",
+        "groups-registry",
+        "semester-opening",
+        # Mərhələ 3 — qəbul paneli faylı ayrıca multipart endpoint-inə göndərir,
+        # reyestr isə server-render cədvəldir (filtr/sıralama linklə).
+        "student-admission",
+        "student-registry",
+        # Ekran 21 — tam OXU-ONLY hesabat paneli (mutasiya yoxdur) → AJAX-safe.
+        "lessons-log",
     }
 )
 
@@ -264,7 +386,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     try:
         html = render_to_string(SECTION_PARTIALS[section], context, request=request)
     except Exception:  # noqa: BLE001 — defensive
-        logger.exception("profile section fragment render failed: %s", section)
+        logger.exception("profile section fragment render failed: %s", safe_log_value(section))
         return JsonResponse({"ok": False, "error": "render_failed"}, status=500)
 
     return JsonResponse(
@@ -346,6 +468,14 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     if capabilities.get("can_review_submissions"):
         payload["pending_review_count"] = shared_badges.get("pending_review", 0)
         payload["evaluated_review_count"] = shared_badges.get("evaluated_review", 0)
+    # «Müraciətlərim» — sayğac paylaşılan (keşlənən) dəstdən gəlir; müraciət
+    # mutasiyaları keşi `applications.services.notify` içindən invalidasiya edir.
+    if "applications" in capabilities.get("allowed_sections", set()):
+        payload["applications_pending_count"] = shared_badges.get("applications_pending", 0)
+    # «Sual təsdiqi» — kafedra növbəsi; yazılar keşi servis qatından
+    # (``question_chair_review._invalidate_badges``) invalidasiya edir.
+    if "question-chair-review" in capabilities.get("allowed_sections", set()):
+        payload["question_chair_pending_count"] = shared_badges.get("question_chair_pending", 0)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

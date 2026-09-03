@@ -4,18 +4,28 @@ Yekun bal = jurnaldan "giriş balı" (semestr fəaliyyəti, ≈50) + yekun imtah
 balı (≈50). Tələbə kəsilir (qayıb limitini keçib, VƏ YA ümumi bal < keçid həddi,
 VƏ YA imtahan < minimum) → ``ResitRecord`` (təkrar imtahan hüququ). Təkrar
 imtahan balı daxil ediləndə yekun yenidən hesablanır (resit balı imtahan balını
-əvəz edir və qayıb bloku aradan qalxır). Jurnal finalizasiyası (``is_published``)
-audit-ə yazılır.
+əvəz edir və qayıb bloku aradan qalxır). Jurnal finalizasiyası yalnız təsdiq
+zəncirində edilir və həmin tranzaksiyada auditə yazılır.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
 from apps.registrar import grade_audit, gradebook, grading_scale, services
-from apps.registrar.models import FinalGrade, ResitReason, ResitRecord, ResitStatus
+from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
+from apps.registrar.exam_eligibility import status_code as eligibility_status
+from apps.registrar.exam_eligibility import status_label as eligibility_label
+from apps.registrar.exam_eligibility import status_notice as eligibility_notice
+from apps.registrar.models import ApprovalStatus, Enrollment, FinalGrade, ResitReason, ResitRecord, ResitStatus
+
+
+def _is_current_enrollment(enrollment) -> bool:
+    """Check persisted state so a stale pre-transfer instance cannot write."""
+    return Enrollment.objects.filter(pk=enrollment.pk, status=Enrollment.Status.ENROLLED).exists()
 
 
 def score_to_letter(total, organization=None) -> tuple[str, Decimal]:
@@ -49,35 +59,103 @@ def exam_score_max(scheme) -> int:
     return max(0, 100 - scheme.entry_score_max)
 
 
-def compute_final_result(*, enrollment, scheme=None, organization=None):
+def athlete_exemption(enrollment) -> bool:
+    """Bu yazılışın tələbəsində rəsmi idmançı istisnası varmı (tək sorğu).
+
+    ``compute_final_result`` sətir-sətir işlədiyi üçün toplu səthlər
+    (``transcript``, ``analytics``) istisnanı ÖZLƏRİ həll edib ötürür —
+    bu fallback yalnız tək-sətir çağırışları üçündür
+    (:func:`exam_eligibility.exempt_student_ids` toplu variantdır).
+
+    ⚠️ PUBLIC (adı alt-xətsizdir): imtahan **giriş qapısı** da
+    (:func:`apps.registrar.exam_bridge.exam_eligibility`) məhz bunu çağırır.
+    Qapı istisnanı ötürməyəndə idmançı-tələbə kabinetdə «buraxılır», imtahan
+    qapısında isə «buraxılmır» görürdü — 3-cü blokerin ən bahalı halı, çünki
+    orada söhbət ekran etiketindən yox, imtahana BURAXILMAMAQDAN gedirdi.
+    """
+    from apps.registrar.models import StudentAcademicRecord
+
+    return bool(
+        StudentAcademicRecord.objects.filter(
+            organization_id=enrollment.organization_id, student_id=enrollment.student_id
+        )
+        .values_list("national_athlete_exemption", flat=True)
+        .first()
+    )
+
+
+def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None, batch=None):
     """Full result for one enrollment: entry + exam → total → letter → pass/fail.
 
     A completed resit supersedes the original exam score and lifts the absence
     bar. Until an exam (or resit) score exists the result is "not graded yet".
     ``organization`` feeds the tenant letter-band scale (U17); when omitted it
-    is resolved from the scheme (FK-cached per instance)."""
+    is resolved from the scheme (FK-cached per instance).
+
+    ``total`` TAM ƏDƏDDİR (sahibin qaydası, 2026-08-30): clamp-dan SONRA
+    yarım-yuxarı yuvarlaqlaşdırılır (``gradebook.round_score``; 72.5 → 73,
+    72.4 → 72) və hərf/keçid qərarı MƏHZ yuvarlaqlaşdırılmış dəyər üzərindən
+    verilir (50.5 → 51 keçir).
+
+    ``batch`` — :class:`apps.registrar.finals_batch.FinalsBatch`: roster
+    səthləri (jurnalın «Yekun» tab-ı, transkript, «Nəticələrim») bu funksiyanı
+    DÖNGÜDƏ çağırır, ona görə komponent/bal/sərbəst-iş/``FinalGrade``/
+    ``ResitRecord``/donma/hədd/istisna oxumaları BİR dəfə toplu edilib buraya
+    ötürülür.  Verilməsə davranış əvvəlki kimidir (sətir-sətir sorğu) — yazı
+    yolları (``evaluate_resit``) məhz o yolla getməlidir ki, eyni tranzaksiyada
+    təzəcə yazılmış bal görünsün."""
     scheme = scheme or getattr(enrollment.offering, "assessment_scheme", None)
     if scheme is None:
         scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     if organization is None:
         organization = scheme.organization
 
-    entry_score = entry_score_for(enrollment, scheme.entry_score_max)
-    # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
-    final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
+    entry_score = gradebook.entry_score_for(
+        enrollment, scheme.entry_score_max, **(batch.entry_kwargs(enrollment) if batch is not None else {})
+    )
+    frozen = None
+    if batch is None:
+        # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
+        final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
+        resit = ResitRecord.objects.filter(enrollment=enrollment).first()
+        limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
+    else:
+        final_grade = batch.final_grade_for(enrollment)
+        resit = batch.resit_for(enrollment)
+        limit_percent = batch.limit_percent_for(enrollment.offering)
+        frozen = batch.frozen_for(enrollment.offering)
+        if exempt is None:
+            exempt = batch.exempt_for(enrollment)
+        if hours_map is None:
+            hours_map = batch.hours_map
     exam_score = final_grade.exam_score if (final_grade and final_grade.exam_score is not None) else None
-    resit = ResitRecord.objects.filter(enrollment=enrollment).first()
     resit_done = bool(resit and resit.resit_score is not None)
     effective_exam = resit.resit_score if resit_done else exam_score
 
-    limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
-    eligibility = services.get_exam_eligibility(enrollment=enrollment, limit_percent=limit_percent)
-    barred = eligibility["barred"] and not resit_done  # a completed resit lifts the bar
+    # TƏK MƏNBƏ: «tamamlanmış təkrar imtahan qadağanı qaldırır» qaydası da artıq
+    # resolver-in içindədir (``resit_done=``), burada TƏKRARLANMIR.  Tarixi/
+    # köçürülmüş semestrdə ``barred`` heç vaxt qalxmır — aşağıdakı ``passed``/
+    # ``failed`` köhnə sistemin faktiki imtahan balından çıxır.
+    # İdmançı-tələbə istisnası da resolver-dən keçir (2026-08-31, 3-cü bloker):
+    # əvvəl yalnız kabinet onu ötürürdü, yəni eyni tələbə kabinetdə «buraxılır»,
+    # yekun/analitika yolunda «buraxılmır» görünürdü.  ``exempt=None`` = özün tap.
+    eligibility = services.get_exam_eligibility(
+        enrollment=enrollment,
+        limit_percent=limit_percent,
+        exempt=athlete_exemption(enrollment) if exempt is None else bool(exempt),
+        resit_done=resit_done,
+        # Məxrəc fallback-ı: döngüdə çağıran (transkript) map-i əvvəlcədən qurur.
+        hours_map=hours_map,
+        # Donma dəsti də toplu gəlir — ``None`` olduqda açılış başına sorğu olur.
+        frozen=frozen,
+    )
+    barred = eligibility["barred"]
 
     bonus = final_grade.bonus if final_grade is not None else Decimal("0")
     graded = effective_exam is not None
     total = entry_score + (effective_exam or Decimal("0")) + bonus
     total = max(Decimal("0"), min(Decimal("100"), total))  # bonus/cərimə clamp (U15)
+    total = gradebook.round_score(total)  # tam ədəd — hərf və keçid bundan hesablanır
     letter, gpa = score_to_letter(total, organization)
     exam_ok = graded and effective_exam >= scheme.min_final_exam_score
     passed = graded and not barred and total >= scheme.pass_threshold and exam_ok
@@ -102,6 +180,16 @@ def compute_final_result(*, enrollment, scheme=None, organization=None):
         "min_final_exam_score": scheme.min_final_exam_score,
         "exam_score_max": exam_score_max(scheme),
         "is_published": scheme.is_published,
+        "eligibility": eligibility,
+        # Şəffaflıq: status canlı qaydadan, köhnə sistemdən, yoxsa köhnə
+        # sistemin BOŞLUĞUNDAN gəlir (bax exam_eligibility.status_code).
+        "status_code": eligibility_status(eligibility, graded=graded),
+        "status_label": eligibility_label(eligibility_status(eligibility, graded=graded)),
+        "status_notice": eligibility_notice(eligibility_status(eligibility, graded=graded)),
+        # Görünən sahələr də resolver-dən gəlir — çağıran yenidən hesablamır.
+        "attendance_score": eligibility["attendance_score"],
+        "exempt": eligibility["exempt"],
+        "fail_reason": (eligibility_reason({"barred": barred, "graded": graded, "passed": passed}) if failed else ""),
         "bonus": bonus,
         "comment": final_grade.comment if final_grade is not None else "",
     }
@@ -121,6 +209,8 @@ def evaluate_resit(*, enrollment, by_user=None):
 
     Creates/keeps an ``eligible`` resit when the student is failing; removes a
     still-unused eligible resit once they pass."""
+    if not _is_current_enrollment(enrollment):
+        return enrollment.resit_records.first()
     result = compute_final_result(enrollment=enrollment)
     existing = enrollment.resit_records.first()
 
@@ -147,13 +237,31 @@ def evaluate_resit(*, enrollment, by_user=None):
 
 
 @transaction.atomic
-def set_exam_score(*, enrollment, score, by_user=None):
+def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
 
-    Blocked when the offering's journal is locked (finalised / under approval)."""
-    scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
-    if gradebook.journal_is_locked(enrollment.offering):
+    ⚠️ JURNAL KİLİDİ BURADA TƏTBİQ OLUNMUR (sahibin qərarı, 2026-08).
+
+    Jurnal semestr SONUNDA bağlanır, imtahan isə ondan SONRA keçir — yəni yekun
+    imtahan balı demək olar həmişə KİLİDLİ jurnala düşür. Əvvəllər bu yol kilidli
+    jurnalda sükutla ``None`` qaytarırdı və nəticə İTİRDİ (körpü tərəfdə yalnız
+    WARNING kimi loglanırdı). İndi bölgü belədir:
+
+    * GİRİŞ balı (jurnal xanaları: davamiyyət, dərs balı, kollokvium, sərbəst iş)
+      — kilidlidir; dəyişiklik yalnız sənədli düzəlişlə (``corrections``) olur;
+    * ÇIXIŞ balı (yekun imtahan) — kilidə TABE DEYİL, çünki imtahan jurnal
+      bağlandıqdan sonra keçir.
+
+    ``set_resit_score`` və ``set_final_extras`` kilid yoxlamasını SAXLAYIR —
+    onlar jurnal-daxili redaktədir.
+
+    ``source_note`` — audit izində bal sətrinin yanına yazılan MƏNBƏ qeydi
+    (məsələn "imtahan mərkəzi · avtomatik"): aktoru olmayan sistem yazılarının
+    tarixçədə boş "kim?" xanası ilə qalmaması üçün (2026-08 auditi, G7).
+    İDEMPOTENT: ``get_or_create`` + yalnız real dəyişiklikdə audit."""
+    if not _is_current_enrollment(enrollment):
         return None
+    scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
     )
@@ -170,7 +278,7 @@ def set_exam_score(*, enrollment, score, by_user=None):
             changes=[
                 {
                     "student": grade_audit.student_label(enrollment),
-                    "item": "Yekun imtahan",
+                    "item": f"Yekun imtahan ({source_note})" if source_note else "Yekun imtahan",
                     "old": grade_audit.score_repr(old_score),
                     "new": grade_audit.score_repr(new_score),
                 }
@@ -183,6 +291,8 @@ def set_exam_score(*, enrollment, score, by_user=None):
 @transaction.atomic
 def set_resit_score(*, enrollment, score, by_user=None):
     """Record a resit exam score → mark the resit completed + recompute."""
+    if not _is_current_enrollment(enrollment):
+        return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     if gradebook.journal_is_locked(enrollment.offering):
         return None
@@ -220,7 +330,7 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
 
     Bonus bal düzəlişidir → dəyişikliyi qiymət audit izinə yazılır; rəy bal
     deyil, audit olunmur. Jurnal kilidlidirsə heç nə yazılmır.""" % {"limit": _BONUS_LIMIT}
-    if gradebook.journal_is_locked(enrollment.offering):
+    if not _is_current_enrollment(enrollment) or gradebook.journal_is_locked(enrollment.offering):
         return None
     final_grade, _created = FinalGrade.objects.get_or_create(
         organization=enrollment.organization, enrollment=enrollment
@@ -257,48 +367,38 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
     return final_grade
 
 
-def _audit_publish(offering, by_user):
-    """Best-effort audit entry for journal finalisation (never breaks publish)."""
-    try:
-        from django.apps import apps as django_apps
-
-        from core.constants import AuditAction
-
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.journal",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject.code} jurnalı",
-            reason="Jurnal yekunlaşdırıldı (finalised).",
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the domain action
-        pass
-
-
 @transaction.atomic
 def publish_offering(*, offering, by_user=None):
-    """Finalise (lock) the offering's journal + write an audit entry."""
+    """Compatibility guard: only the full approval chain may publish."""
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    if not scheme.is_published:
-        scheme.is_published = True
-        scheme.save(update_fields=["is_published"])
-        _audit_publish(offering, by_user)
+    if scheme.approval_status != ApprovalStatus.APPROVED or not scheme.is_published:
+        raise PermissionDenied("Jurnal yalnız tam təsdiq zənciri ilə rəsmiləşdirilə bilər.")
     return scheme
 
 
-def get_offering_results(*, offering):
-    """Per-student final result rows for the teacher's "Yekun/Nəticə" grid."""
+def get_offering_results(*, offering, batch=None):
+    """Per-student final result rows for the teacher's "Yekun/Nəticə" grid.
+
+    ⚠️ TOPLU SƏTHDİR: sətir başına ~18 sorğu (555 tələbəlik açılışda 10 000)
+    əvəzinə ``finals_batch`` ilə sabit ~11 sorğu edilir.  ``batch`` xaricdən
+    verilə bilər — jurnal səhifəsi eyni dəsti qrid və «Yekun» tab-ı ilə bölüşür.
+    """
+    from apps.registrar import finals_batch
+
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     enrollments = list(
         offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
         .select_related("student")
         .order_by("student__last_name", "student__username")
     )
+    if batch is None:
+        batch = finals_batch.build(enrollments)
     rows = [
-        {"enrollment": e, "student": e.student, "result": compute_final_result(enrollment=e, scheme=scheme)}
+        {
+            "enrollment": e,
+            "student": e.student,
+            "result": compute_final_result(enrollment=e, scheme=scheme, batch=batch),
+        }
         for e in enrollments
     ]
     return {"offering": offering, "scheme": scheme, "rows": rows}

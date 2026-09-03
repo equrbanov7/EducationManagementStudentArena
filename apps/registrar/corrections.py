@@ -95,6 +95,7 @@ def correction_author_name(by_user, request=None) -> str:
     return f"{base} ({actor_name})"[:200]
 
 
+@transaction.atomic
 def apply_correction(
     *,
     mark: LessonMark,
@@ -121,7 +122,9 @@ def apply_correction(
     if not document:
         raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
 
-    lesson = mark.lesson
+    from .correction_target_locks import lock_grade_for_apply
+
+    mark, lesson, enrollment = lock_grade_for_apply(mark, expected_empty=was_empty)
     # lesson_mark QƏSDƏN indi təyin edilmir: boş xanada mark hələ saxlanmayıb.
     # Onu validasiyadan SONRA, bu atomik blokda yaradırıq ki, düzəliş rədd olunsa
     # (məs. PDF yox/yanlış) savepoint geri alsın — audit olunmamış iz qalmasın.
@@ -132,6 +135,9 @@ def apply_correction(
         note=note,
         document=document,
         created_mark=was_empty,
+        lesson_mark_ref=mark.pk,
+        lesson_ref=mark.lesson_id,
+        enrollment_ref=mark.enrollment_id,
         corrected_by=by_user,
         corrected_by_name=correction_author_name(by_user, request),
     )
@@ -158,14 +164,13 @@ def apply_correction(
     # 2 saatlıq pəncərə + PG trigger rəsmi düzəliş yolunda keçilir. Boş xanada
     # LessonMark məhz burada — validasiyadan sonra — INSERT olunur.
     with journal_unlock():
-        if mark.pk is None:
+        if mark._state.adding:
             mark.save()
         else:
             mark.save(update_fields=["status", "score", "updated_at"])
     correction.lesson_mark = mark
     correction.save()
 
-    enrollment = mark.enrollment
     recompute_absence_hours(enrollment=enrollment)
 
     old_repr = (
@@ -182,6 +187,7 @@ def apply_correction(
         offering=lesson.offering,
         by_user=by_user,
         kind="correction",
+        fail_closed=True,
         changes=[
             {
                 "student": grade_audit.student_label(enrollment),
@@ -191,18 +197,15 @@ def apply_correction(
             }
         ],
     )
-    try:
-        log_action(
-            action=AuditAction.UPDATE,
-            user=by_user,
-            organization=mark.organization,
-            obj=correction,
-            reason=f"journal correction: {reason}",
-            request=request,
-            changes=[{"field": field, "old": old_repr, "new": new_repr}],
-        )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
+    log_action(
+        action=AuditAction.UPDATE,
+        user=by_user,
+        organization=mark.organization,
+        obj=correction,
+        reason=f"journal correction: {reason}",
+        request=request,
+        changes=[{"field": field, "old": old_repr, "new": new_repr}],
+    )
 
     from apps.registrar import journal_notifications as jn
 
@@ -253,6 +256,10 @@ def apply_lesson_correction(
         raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
     if not document:
         raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+
+    from .correction_target_locks import lock_lesson
+
+    lesson = lock_lesson(lesson)
 
     def _iname(user):
         return (user.get_full_name() or user.username) if user else "—"
@@ -366,23 +373,22 @@ def apply_lesson_correction(
         )
     for c in changes:
         c["student"] = f"{lesson.date} · {_k.get(lesson.kind, lesson.kind)}"
-    # Audit savepoint-də: xəta olsa yalnız audit geri qayıdır, dərs düzəlişi qalır.
-    try:
-        with transaction.atomic():
-            grade_audit.log_grade_changes(
-                offering=lesson.offering, by_user=by_user, kind="lesson-correction", changes=changes
-            )
-            log_action(
-                action=AuditAction.UPDATE,
-                user=by_user,
-                organization=lesson.organization,
-                obj=correction,
-                reason=f"lesson correction: {reason}",
-                request=request,
-                changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
-            )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
+    grade_audit.log_grade_changes(
+        offering=lesson.offering,
+        by_user=by_user,
+        kind="lesson-correction",
+        changes=changes,
+        fail_closed=True,
+    )
+    log_action(
+        action=AuditAction.UPDATE,
+        user=by_user,
+        organization=lesson.organization,
+        obj=correction,
+        reason=f"lesson correction: {reason}",
+        request=request,
+        changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
+    )
     return correction
 
 
@@ -400,6 +406,10 @@ def apply_lesson_deletion(*, lesson, reason, note, document, by_user, request=No
         raise ValidationError(pgettext("registrar.correction", "A note explaining the correction is required."))
     if not document:
         raise ValidationError(pgettext("registrar.correction", "A justification document (PDF) is required."))
+
+    from .correction_target_locks import lock_lesson
+
+    lesson = lock_lesson(lesson)
 
     _k = {k: str(v) for k, v in dict(LessonKind.choices).items()}
     label = f"{lesson.date} · {_k.get(lesson.kind, lesson.kind)}"
@@ -427,129 +437,31 @@ def apply_lesson_deletion(*, lesson, reason, note, document, by_user, request=No
     changes = [
         {"student": label, "item": str(pgettext("registrar.correction", "Lesson deleted")), "old": label, "new": "—"}
     ]
-    try:
-        with transaction.atomic():
-            grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="lesson-deletion", changes=changes)
-            log_action(
-                action=AuditAction.DELETE,
-                user=by_user,
-                organization=offering.organization,
-                obj=correction,
-                reason=f"lesson deletion: {reason}",
-                request=request,
-                changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
-            )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
+    grade_audit.log_grade_changes(
+        offering=offering,
+        by_user=by_user,
+        kind="lesson-deletion",
+        changes=changes,
+        fail_closed=True,
+    )
+    log_action(
+        action=AuditAction.DELETE,
+        user=by_user,
+        organization=offering.organization,
+        obj=correction,
+        reason=f"lesson deletion: {reason}",
+        request=request,
+        changes=[{"field": c["item"], "old": c["old"], "new": c["new"]} for c in changes],
+    )
     # Dərsi sil — SET_NULL sayəsində yuxarıdakı correction (PDF ilə) qalır.
     delete_lesson(lesson=lesson, by_user=by_user, allow_locked=True)
     return correction
 
 
-@transaction.atomic
-def revert_last_grade_correction(*, mark, by_user, request=None) -> bool:
-    """Bir xananın SON düzəlişini geri al: dəyəri köhnəyə qaytar, qeydi sil.
-
-    Səhvən edilmiş düzəlişi geri qaytarmaq üçün (İKT/korrektor). Zəncirdə başqa
-    düzəliş qalsa xana sarı qalır; sonuncu da silinsə əsl (müəllim) dəyər qayıdır
-    və sarı işarə itir. Davamiyyət saatları yenidən hesablanır; audit yazılır."""
-    correction = mark.corrections.order_by("-created_at").first()
-    if correction is None:
-        return False
-    enrollment = mark.enrollment
-    lesson = mark.lesson
-    if correction.field == CorrectionField.ATTENDANCE:
-        prev, cur = correction.new_status, correction.old_status
-        old_repr = _ATT_LABELS.get(prev, prev)
-        new_repr = _ATT_LABELS.get(cur, cur) or "—"
-    else:
-        old_repr = str(correction.new_score)
-        new_repr = str(correction.old_score if correction.old_score is not None else "—")
-    if correction.created_mark and mark.corrections.count() == 1:
-        # Bu düzəliş boş xanaya mark-ı özü yaradıb və zəncirdə tək odur → geri alma
-        # saxta sətri tam silir ki, xana yenidən BOŞ ("—") olsun (CASCADE düzəlişi də silir).
-        with journal_unlock():
-            mark.delete()
-    else:
-        if correction.field == CorrectionField.ATTENDANCE:
-            mark.status = correction.old_status
-        else:
-            mark.score = correction.old_score
-        with journal_unlock():
-            mark.save(update_fields=["status", "score", "updated_at"])
-        correction.delete()
-    recompute_absence_hours(enrollment=enrollment)
-    try:
-        with transaction.atomic():
-            grade_audit.log_grade_changes(
-                offering=lesson.offering,
-                by_user=by_user,
-                kind="correction-revert",
-                changes=[
-                    {
-                        "student": grade_audit.student_label(enrollment),
-                        "item": f"{lesson.date} · {str(lesson.get_kind_display())}",
-                        "old": old_repr,
-                        "new": f"{new_repr} ({str(pgettext('registrar.correction', 'correction reverted'))})",
-                    }
-                ],
-            )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
-
-    from apps.registrar import journal_notifications as jn
-
-    transaction.on_commit(
-        lambda: jn.send_journal_events(
-            offering=lesson.offering, events=[{"enrollment": enrollment, "kind": jn.EVENT_CORRECTED}]
-        )
-    )
-    return True
-
-
-@transaction.atomic
-def revert_last_lesson_correction(*, lesson, by_user, request=None) -> bool:
-    """Dərsin SON sənədli düzəlişini geri al: tarix/tip/saat/mövzu/müəllim köhnəyə qaytar."""
-    from .gradebook import update_lesson
-
-    correction = lesson.corrections.order_by("-created_at").first()
-    if correction is None:
-        return False
-    start = end = None
-    if correction.old_time and "–" in correction.old_time:
-        from apps.registrar import schedule as schedule_service
-
-        start, end = schedule_service.parse_time_slot(correction.old_time.replace("–", "|"))
-    update_lesson(
-        lesson=lesson,
-        date=correction.old_date,
-        kind=correction.old_kind or None,
-        topic=correction.old_topic,
-        hours=correction.old_hours,
-        start_time=start or "",
-        end_time=end or "",
-        instructor=correction.old_instructor,
-        allow_past=True,
-        allow_locked=True,
-    )
-    # instructor=None (köhnə per-dərs müəllim yox) update_lesson-da skip olunur → birbaşa təmizlə.
-    if correction.old_instructor_id is None and lesson.instructor_id is not None:
-        with journal_unlock():
-            lesson.instructor = None
-            lesson.save(update_fields=["instructor"])
-    correction.delete()
-    try:
-        with transaction.atomic():
-            grade_audit.log_grade_changes(
-                offering=lesson.offering,
-                by_user=by_user,
-                kind="lesson-correction-revert",
-                changes=[{"student": str(lesson.date), "item": "dərs", "old": "düzəliş", "new": "geri alındı"}],
-            )
-    except Exception:  # audit heç vaxt axını sındırmır
-        pass
-    return True
-
+from .correction_reversals import (  # noqa: E402,F401 — public compatibility facade
+    revert_last_grade_correction,
+    revert_last_lesson_correction,
+)
 
 # ── Oxu köməkçiləri (grid/tələbə annotasiyası) ───────────────────────────────
 
@@ -578,7 +490,10 @@ def _entry(c: JournalCorrection, *, include_document: bool) -> dict:
 def corrections_map_for_offering(offering, *, include_document: bool = False) -> dict[str, list[dict]]:
     """Grid annotasiyası: {mark_id: [düzəliş qeydləri]} (sarı xana + tarixçə)."""
     result: dict[str, list[dict]] = {}
-    qs = JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).order_by("created_at")
+    qs = JournalCorrection.objects.filter(
+        lesson_mark__lesson__offering=offering,
+        reversal__isnull=True,
+    ).order_by("created_at")
     for c in qs:
         result.setdefault(str(c.lesson_mark_id), []).append(_entry(c, include_document=include_document))
     return result
@@ -587,7 +502,10 @@ def corrections_map_for_offering(offering, *, include_document: bool = False) ->
 def corrections_map_for_enrollment(enrollment) -> dict[str, list[dict]]:
     """Tələbə görünüşü üçün: öz xanalarının düzəliş tarixçəsi (sənədsiz)."""
     result: dict[str, list[dict]] = {}
-    qs = JournalCorrection.objects.filter(lesson_mark__enrollment=enrollment).order_by("created_at")
+    qs = JournalCorrection.objects.filter(
+        lesson_mark__enrollment=enrollment,
+        reversal__isnull=True,
+    ).order_by("created_at")
     for c in qs:
         result.setdefault(str(c.lesson_mark_id), []).append(_entry(c, include_document=False))
     return result

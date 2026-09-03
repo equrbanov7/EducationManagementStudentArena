@@ -1,0 +1,434 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — KAFEDRA TƏSDİQ ekranı (dizayn təhvili §3.3)
+   ───────────────────────────────────────────────────────────────────────────
+   Bu fayl YALNIZ təsdiq ekranına aid qatı verir. KPI kartı, filtr paneli,
+   cədvəl, səhifələmə və badge kimi ORTAQ primitivlər `syllabus_base.css` +
+   `syllabus_list.css`-dədir və TƏKRAR TƏRİF EDİLMİR (profile.html hər ikisini
+   bu ekran üçün də yükləyir).
+
+   Rəng HARDCODE EDİLMİR — hamısı `static/css/design-tokens.css` tokenləridir.
+   ⚠️ «təsdiqlənib» MƏTNİ `--ems-success-700` (#15803d, AA); `--ems-success`
+   (#10b981) yalnız ikon/accent kimi işlədilir.
+   ⚠️ Tətbiq YALNIZ İŞIQLI temadır — `prefers-color-scheme: dark` YOXDUR.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Kimlik zolağı (panel · şəxs · rol · əhatə) ───────────────────────── */
+.syl-identity {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 9px 14px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-card);
+    font-size: 0.79rem;
+}
+
+.syl-identity__icon {
+    color: var(--ems-primary-600);
+}
+
+.syl-identity__panel {
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.syl-identity__dot {
+    color: var(--ems-neutral-300);
+}
+
+.syl-identity__person {
+    color: var(--ems-text-muted);
+}
+
+.syl-identity__tail {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.syl-chip-static {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.74rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.syl-chip-static--primary {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.syl-chip-static--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+/* ── Başlıq + tab açarı ───────────────────────────────────────────────── */
+.syl-head--row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.syl-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--ems-neutral-100);
+    border-radius: 10px;
+}
+
+.syl-tabs__btn {
+    min-height: 36px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ems-text-muted);
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.syl-tabs__btn.is-on {
+    background: var(--ems-bg);
+    color: var(--ems-neutral-900);
+    font-weight: 800;
+}
+
+/* ── KPI şəbəkəsi (növbə 4, əhatə 5 kart) ─────────────────────────────── */
+.syl-kpis--4 {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.syl-kpis--5 {
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+}
+
+/* Bu ekranda kartlar FİLTR DÜYMƏSİ deyil — sadəcə göstəricidir. */
+.syl-kpi--static {
+    cursor: default;
+    text-align: left;
+}
+
+.syl-kpi--static:hover {
+    border-color: inherit;
+}
+
+.syl-kpi__value--lg {
+    font-size: 1.5rem;
+}
+
+/* ── Növbə cədvəlinin özəl sütunları ──────────────────────────────────── */
+.syl-table--queue {
+    min-width: 1040px;
+}
+
+.syl-person {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.syl-cell-wait {
+    white-space: nowrap;
+}
+
+.syl-sent {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-700);
+}
+
+.syl-wait {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ems-text-muted);
+}
+
+.syl-wait--warning {
+    color: var(--ems-warning-800);
+}
+
+.syl-wait--danger {
+    color: var(--ems-danger-strong);
+}
+
+.syl-cell-risks {
+    min-width: 180px;
+}
+
+/* ── Risk çipləri (4 açar + «risk yoxdur») ────────────────────────────── */
+.syl-risk {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 5px 4px 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.syl-risk--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.syl-risk--warning {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.syl-risk--primary {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.syl-risk--success {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+/* ── Əhatə (coverage) tabı ────────────────────────────────────────────── */
+.syl-card {
+    padding: 16px 18px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+}
+
+.syl-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.syl-card__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+}
+
+.syl-card__sub {
+    font-size: 0.78rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-card__lead {
+    margin: 8px 0 12px;
+    font-size: 0.81rem;
+    line-height: 1.6;
+    color: var(--ems-text-muted);
+}
+
+.syl-grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 13px;
+}
+
+.syl-table--coverage {
+    min-width: 760px;
+}
+
+.syl-table--coverage .is-num {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.syl-table--coverage tfoot th,
+.syl-table--coverage tfoot td {
+    border-top: 1px solid var(--ems-neutral-300);
+    font-weight: 800;
+}
+
+.syl-col-wide {
+    min-width: 160px;
+}
+
+.syl-num--success {
+    color: var(--ems-success-700);
+    font-weight: 700;
+}
+
+.syl-num--primary {
+    color: var(--ems-primary-700);
+}
+
+.syl-num--warning {
+    color: var(--ems-warning-800);
+}
+
+.syl-num--danger {
+    color: var(--ems-danger-strong);
+    font-weight: 800;
+}
+
+.syl-num--muted {
+    color: var(--ems-neutral-400);
+}
+
+.syl-progress {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.syl-bar--wide {
+    flex: 1;
+    min-width: 70px;
+    height: 7px;
+}
+
+/* ── Semestr dinamikası ───────────────────────────────────────────────── */
+.syl-trend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.syl-trend__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.syl-trend__label {
+    width: 130px;
+    flex: none;
+    font-size: 0.78rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-trend__value {
+    width: 46px;
+    flex: none;
+    text-align: right;
+    font-size: 0.79rem;
+    font-weight: 800;
+    color: var(--ems-primary-700);
+}
+
+/* ── Təsdiq marşrutu (oxu-rejimi siyasət kartı) ───────────────────────── */
+.syl-policy {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syl-policy__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+    border-radius: 10px;
+}
+
+.syl-policy__row.is-on {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.syl-policy__mark {
+    width: 10px;
+    height: 10px;
+    flex: none;
+    border-radius: 999px;
+    background: var(--ems-neutral-300);
+}
+
+.syl-policy__row.is-on .syl-policy__mark {
+    background: var(--ems-primary-600);
+}
+
+.syl-policy__text {
+    flex: 1;
+    min-width: 160px;
+}
+
+.syl-policy__label {
+    display: block;
+    font-size: 0.83rem;
+    font-weight: 700;
+}
+
+.syl-policy__note {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+}
+
+/* ── «Əhatə yoxdur» boş vəziyyəti (README §3.3 noscope) ───────────────── */
+.syl-noscope {
+    border-style: solid;
+    border-color: var(--ems-border);
+    padding: 64px 26px;
+}
+
+.syl-noscope__icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 1.1rem;
+}
+
+.syl-noscope__body {
+    max-width: 560px;
+    line-height: 1.65;
+}
+
+.syl-empty__icon--ok {
+    color: var(--ems-success);
+}
+
+/* ── Dar ekran: kimlik zolağı və başlıq alt-alta düşür ────────────────── */
+@media (max-width: 720px) {
+    .syl-identity__tail {
+        margin-left: 0;
+    }
+
+    .syl-head--row {
+        align-items: flex-start;
+    }
+
+    .syl-trend__label {
+        width: 100px;
+    }
+}

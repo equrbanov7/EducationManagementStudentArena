@@ -22,6 +22,7 @@ from .._sections.role_assignment import build_role_assignment_section
 from .._sections.statistics import build_statistics_section
 from .._sections.superadmin_orgs import build_superadmin_orgs_sections
 from ._helpers import _get_publish_notification_targets
+from ._teaching_office import dispatch_teaching_office_sections
 
 
 class _Stage3Mixin:
@@ -280,6 +281,44 @@ class _Stage3Mixin:
                     self.request, base_url=reverse("accounts:profile"), include_section=True
                 )
             )
+        if "rim-center" in self.allowed_sections and self.active_section == "rim-center":
+            from ...rim import build_rim_center_section
+
+            self.rim_center_section.update(build_rim_center_section(self.request))
+        if self.active_section in ("people-teachers", "people-students") and self.active_section in (
+            self.allowed_sections
+        ):
+            from ...people import build_people_section
+
+            _people_kind = "teachers" if self.active_section == "people-teachers" else "students"
+            self.people_section.update(build_people_section(self.request, _people_kind)["people_section"])
+        if self.active_section == "syllabus-list" and "syllabus-list" in self.allowed_sections:
+            from ...syllabus import build_syllabus_list_section
+
+            self.syllabus_list_section.update(
+                build_syllabus_list_section(self.request, organization=self.active_organization)[
+                    "syllabus_list_section"
+                ]
+            )
+        if self.active_section == "syllabus-editor" and "syllabus-editor" in self.allowed_sections:
+            from ...syllabus import build_syllabus_editor_section
+            from ...syllabus.lookup import resolve_editor_version
+
+            self.syllabus_editor_section.update(
+                build_syllabus_editor_section(
+                    self.request,
+                    organization=self.active_organization,
+                    version=resolve_editor_version(self.request, self.active_organization),
+                )["syllabus_editor_section"]
+            )
+        if self.active_section == "syllabus-review" and "syllabus-review" in self.allowed_sections:
+            from ...syllabus import build_syllabus_review_section
+
+            self.syllabus_review_section.update(
+                build_syllabus_review_section(self.request, organization=self.active_organization)[
+                    "syllabus_review_section"
+                ]
+            )
         if "superadmin-ai" in self.allowed_sections and self.active_section == "superadmin-ai":
             self.superadmin_ai_settings_section.update(build_superadmin_ai_settings_context())
             self.superadmin_ai_settings_section["post_next_url"] = _append_query_params(
@@ -304,6 +343,113 @@ class _Stage3Mixin:
                 self.kollokvium_windows_section,
                 is_superadmin=self.capabilities["is_superadmin"],
                 active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "journal-close" in self.allowed_sections and self.active_section == "journal-close":
+            from .._sections.journal_close import build_journal_close_section
+
+            build_journal_close_section(
+                self.request,
+                self.journal_close_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "teaching-handover" in self.allowed_sections and self.active_section == "teaching-handover":
+            from .._sections.handover import build_handover_section
+
+            build_handover_section(
+                self.request,
+                self.handover_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "schedule-manage" in self.allowed_sections and self.active_section == "schedule-manage":
+            from .._sections.schedule_manage import build_schedule_manage_section
+
+            build_schedule_manage_section(
+                self.request,
+                self.schedule_manage_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "workload-distribution" in self.allowed_sections and self.active_section == "workload-distribution":
+            from .._sections.workload import build_workload_distribution_section
+
+            build_workload_distribution_section(
+                self.request,
+                self.workload_distribution_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "my-workload" in self.allowed_sections and self.active_section == "my-workload":
+            from .._sections.workload import build_my_workload_section
+
+            build_my_workload_section(
+                self.request,
+                self.my_workload_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        # Tədris şöbəsi bölmələri (ekran 01–04) — dispatch AYRI moduldadır
+        # (`_stage3` modul ölçüsü büdcəsi 600 sətir).
+        dispatch_teaching_office_sections(self)
+        if "dashboard" in self.allowed_sections and self.active_section == "dashboard":
+            from .._sections.dashboard import build_dashboard_section
+
+            build_dashboard_section(
+                self.request,
+                self.dashboard_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+                capabilities=self.capabilities,
+                applications_pending_count=self.applications_pending_count,
+                pending_appeals_count=self.pending_appeals_count,
+            )
+        if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
+            from .._sections.student_intake import build_student_intake_section
+
+            build_student_intake_section(
+                self.request,
+                self.student_intake_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "applications" in self.allowed_sections and self.active_section == "applications":
+            from .._sections.applications import build_applications_section
+
+            build_applications_section(
+                self.request,
+                self.applications_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "exam-score-entry" in self.allowed_sections and self.active_section == "exam-score-entry":
+            from .._sections.exam_score_entry import build_exam_score_entry_section
+
+            build_exam_score_entry_section(
+                self.request,
+                self.exam_score_entry_section,
+                is_superadmin=self.capabilities["is_superadmin"],
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
+        if "legacy-grade-review" in self.allowed_sections and self.active_section == "legacy-grade-review":
+            from .._sections.legacy_grade_review import build_legacy_grade_review_section
+
+            build_legacy_grade_review_section(
+                self.request,
+                self.legacy_grade_review_section,
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )

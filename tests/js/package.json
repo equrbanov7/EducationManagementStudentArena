@@ -1,0 +1,13 @@
+{
+  "name": "emsarena-shipped-js-gate",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CI qapısı: göndərilən brauzer JS-ini ƏSL DOM-da icra edən qoşqu (jsdom).",
+  "license": "UNLICENSED",
+  "scripts": {
+    "collect": "node collect_shipped.js"
+  },
+  "dependencies": {
+    "jsdom": "24.1.3"
+  }
+}

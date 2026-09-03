@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}
+Ekran 08 — «Yeni qrup yarat» dialoqunun sahələri (`_form_dialog.html` gövdəsi).
+
+`specialty` gizli sahədir: dəyəri sətirdən (təklif olunan ixtisas) JS ilə
+doldurulur — şablona xam GET dəyəri düşmür. Server `student.assign_group`
+açarını və ixtisasın tenant-a aidliyini fail-closed yenidən yoxlayır.
+{% endcomment %}
+<input type="hidden" name="specialty" value="" data-sa-specialty>
+
+<div class="ems-field">
+    <label class="ems-field__label" for="saGroupName">
+        {% trans "Qrup adı" context "accounts.student_admission" %}
+        <span class="ems-field__req" aria-hidden="true">*</span>
+    </label>
+    <input class="ems-input" type="text" id="saGroupName" name="name" maxlength="120" required>
+    <p class="ems-field__hint">{% trans "Universitetin öz adlandırma qaydası tətbiq olunur — təklif yalnız ilkin dəyərdir." context "accounts.student_admission" %}</p>
+</div>
+
+<div class="stsvc__grid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="saGroupCapacity">{% trans "Yer limiti" context "accounts.student_admission" %}</label>
+        <input class="ems-input" type="number" id="saGroupCapacity" name="capacity" min="1" max="200" value="25">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="saGroupSector">{% trans "Tədris dili" context "accounts.student_admission" %}</label>
+        <input class="ems-input" type="text" id="saGroupSector" name="sector" maxlength="32" placeholder="az / en / ru">
+    </div>
+</div>
+
+<div class="ems-field">
+    <label class="ems-field__label" for="saGroupCode">{% trans "Qrup kodu" context "accounts.student_admission" %}</label>
+    <input class="ems-input" type="text" id="saGroupCode" name="code" maxlength="50">
+</div>

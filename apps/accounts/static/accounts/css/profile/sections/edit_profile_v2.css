@@ -1,0 +1,414 @@
+/* Profil redaktəsi (2026-08-15 redesign) + «Akademik fəaliyyət» idarəetməsi.
+   Yalnız işıqlı tema — --ems-* tokenləri (bax design-tokens.css). */
+
+.edit-profile-form .section-card {
+    margin-bottom: 20px;
+}
+
+.edit-profile-form .info-item input.form-control,
+.edit-profile-form .info-item .bootstrap-single-select {
+    margin-top: 2px;
+}
+
+/* Universitet tərəfindən idarə olunan (yalnız-oxu) sahələr */
+.edit-profile-locked-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    color: var(--ems-primary-800);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.edit-profile-locked-note i {
+    color: var(--ems-primary-600);
+}
+
+.info-item--locked {
+    background: var(--ems-neutral-50, #f8fafc);
+    border-style: dashed;
+}
+
+.info-item--locked:hover {
+    box-shadow: none;
+    border-color: var(--profile-border);
+    background: var(--ems-neutral-50, #f8fafc);
+}
+
+.info-item--borderless {
+    border: none;
+    padding: 0;
+    background: transparent;
+}
+
+.info-item--borderless:hover {
+    box-shadow: none;
+    background: transparent;
+}
+
+.edit-profile-title-grid {
+    margin-top: 4px;
+}
+
+/* ── «Akademik fəaliyyət» idarəetməsi ─────────────────────────────────── */
+.academic-items-groups {
+    display: grid;
+    gap: 14px;
+}
+
+.academic-items-group {
+    border: 1px solid var(--profile-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: var(--profile-bg);
+}
+
+.academic-items-group__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.academic-items-group__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--profile-text);
+}
+
+.academic-items-group__label i {
+    color: var(--ems-primary-600);
+}
+
+.academic-items-group__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.academic-items-empty {
+    margin: 10px 0 0;
+    color: var(--profile-muted);
+    font-size: 0.9rem;
+}
+
+.academic-items-list {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.academic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--profile-border);
+    border-radius: 10px;
+    background: var(--ems-neutral-0, #fff);
+}
+
+.academic-item__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.academic-item__title {
+    font-weight: 600;
+    color: var(--profile-text);
+    word-break: break-word;
+}
+
+.academic-item__meta {
+    font-size: 0.82rem;
+    color: var(--profile-muted);
+    word-break: break-word;
+}
+
+.academic-item__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Əməliyyat düymələri GÖRÜNƏN çərçivəlidir: əvvəl çərçivəsiz/solğun ikon idi
+   və dolu mavi «Əlavə et» düyməsinin yanında klik oluna bilən kimi oxunmurdu
+   (sahib: «qoyduğunu dəyişmək olmur kimidir»). Ölçü 32px hündürlükdə qalır. */
+.academic-item__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--profile-border);
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--profile-text);
+    font-size: 0.82rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* «Redaktə» əsas əməliyyatdır — etiketi ilə birlikdə mavi vurğulanır. */
+.academic-item__action--edit {
+    border-color: var(--ems-primary-200, #bfdbfe);
+    color: var(--ems-primary-700);
+}
+
+.academic-item__action-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.academic-item__action:hover,
+.academic-item__action:focus-visible {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.academic-item__action--danger:hover,
+.academic-item__action--danger:focus-visible {
+    background: var(--ems-danger-100, #fee2e2);
+    border-color: #991b1b;
+    color: #991b1b;
+}
+
+/* ── Qeyd modalı ──────────────────────────────────────────────────────── */
+.academic-item-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.academic-item-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.academic-item-field--full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 575px) {
+    .academic-item-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .academic-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .academic-item__actions {
+        align-self: flex-end;
+    }
+}
+
+/* ── 2026-08-15 v2: sticky savebar, axtarış, «Daha çox göstər», add button ── */
+
+.edit-profile-field-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 0.78rem;
+    color: var(--profile-muted);
+}
+
+.edit-profile-field-hint i {
+    color: var(--ems-primary-600);
+    font-size: 0.72rem;
+}
+
+/* Üzən əməliyyat paneli: .profile-main overflow:auto olduğundan sticky
+   window-a görə işləmir — fixed + mərkəzləşmiş pill (modern floating bar).
+   Bölmə gizli olanda (display:none valideyn) fixed element də gizlənir. */
+.edit-profile-savebar {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40; /* modal (1055) və backdrop-dan aşağı */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+    /* Məzmuna görə daralır: sabit 760px-də «Yadda saxlanmamış dəyişikliklər»
+       nişanı gizli olanda pilləkin sol yarısı BOŞ ağ zolaq kimi qalırdı.
+       max-width uzun status mətnində əvvəlki tavanı saxlayır. */
+    width: auto;
+    max-width: min(760px, calc(100vw - 32px));
+    box-sizing: border-box;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--profile-border);
+    border-radius: 999px;
+    box-shadow: 0 10px 34px rgba(15, 23, 42, 0.18);
+}
+
+/* Fixed panel son kartı örtməsin deyə bölmənin sonunda nəfəslik. */
+.profile-section--edit-profile {
+    padding-bottom: 96px;
+}
+
+.edit-profile-savebar .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 575px) {
+    .edit-profile-savebar {
+        justify-content: stretch;
+        border-radius: 16px;
+        bottom: 8px;
+        /* Mobil davranış DƏYİŞMİR: burada düymələr 3 sütunlu grid ilə tam eni
+           tutur, ona görə desktop-dakı «məzmuna görə daral» qaydası ləğv olunur. */
+        width: min(760px, calc(100vw - 32px));
+    }
+
+    .edit-profile-savebar__actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+    }
+}
+
+.edit-profile-savebar__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.edit-profile-savebar__status i {
+    color: #f59e0b;
+}
+
+.edit-profile-savebar__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Qəşəng «Əlavə et» düyməsi */
+.academic-items-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 8px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-500));
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+.academic-items-add-btn:hover,
+.academic-items-add-btn:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    filter: brightness(1.05);
+    color: #fff;
+}
+
+.academic-items-add-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    font-size: 0.72rem;
+}
+
+/* Qeyd axtarışı */
+.academic-items-search {
+    position: relative;
+    margin-bottom: 14px;
+    max-width: 420px;
+}
+
+.academic-items-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--profile-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.academic-items-search .form-control {
+    padding-left: 34px;
+    border-radius: 10px;
+}
+
+/* «Daha çox göstər / Daha az göstər» */
+.academic-items-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 4px 12px;
+    border: 1px dashed var(--ems-primary-200);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.academic-items-toggle:hover {
+    background: var(--ems-primary-100);
+}
+
+/* [hidden] atributu author display qaydalarını (flex/inline-flex) MƏĞLUB
+   etməlidir — əks halda axtarış/collapse gizlətməsi işləmir (review tapıntısı). */
+.academic-item[hidden],
+.academic-items-toggle[hidden],
+.academic-items-nomatch[hidden],
+.edit-profile-savebar__status[hidden] {
+    display: none !important;
+}

@@ -66,6 +66,7 @@ class UserProfileAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
         "phone",
         "location",
         "created_at",
+        "fin",
     ]
     list_filter = ["role", "organization_type", "organization", "created_at"]
     list_editable = [
@@ -82,6 +83,7 @@ class UserProfileAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
         "phone",
         "location",
         "supervisor_code",
+        "fin",
     ]
     readonly_fields = ["created_at", "updated_at"]
 
@@ -97,6 +99,7 @@ class UserProfileAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
                     "country",
                     "student_university_name",
                     "student_school_identifier",
+                    "fin",
                     "avatar",
                 ),
             },

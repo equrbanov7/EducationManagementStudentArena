@@ -1,0 +1,190 @@
+/* =========================================================================
+   Tədris şöbəsi bölmələri — ekran 01/02/03/04 (dizayn handoff Mərhələ 1).
+
+   BU FAYL YALNIZ DÜZÜMDÜR. Kart, cədvəl, badge, KPI, filtr paneli, dialoq və
+   ağac ORTAQ komponent qatındadır (`static/css/ems_ui/*.css`) — burada onların
+   üslubu TƏKRAR TƏRİF OLUNMUR, yalnız bu dörd ekranın grid-i və bir neçə
+   ekran-xüsusi element (ağac/detal bölgüsü, ştat çipləri) verilir.
+
+   Rənglər `--ems-*` tokenlərindəndir (light-only; `prefers-color-scheme: dark`
+   QƏSDƏN yoxdur — layihə yalnız açıq temadır).
+   ========================================================================= */
+
+.tof {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 20px);
+}
+
+.tof__intro {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: 0.86rem;
+    text-wrap: pretty;
+}
+
+.tof__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.tof__toolbar-spacer {
+    flex: 1 1 auto;
+}
+
+/* ---- Ekran 01: ağac + detal bölgüsü ------------------------------------ */
+
+.tof-split {
+    display: grid;
+    grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+    gap: var(--ems-sp-5, 20px);
+    align-items: start;
+}
+
+.tof-pane {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 14px);
+    background: var(--ems-neutral-0, #fff);
+    padding: var(--ems-pad-card, 16px);
+    min-width: 0;
+}
+
+.tof-pane__title {
+    margin: 0 0 12px;
+    font-size: 0.93rem;
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tof-pane--tree {
+    max-height: 620px;
+    overflow: auto;
+}
+
+/* ---- Detal kartı ------------------------------------------------------- */
+
+.tof-detail__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.tof-detail__name {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tof-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 0 0 16px;
+}
+
+.tof-fact {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md, 12px);
+    background: var(--ems-bg-subtle);
+    padding: 12px;
+}
+
+.tof-fact__label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600, #475569);
+}
+
+.tof-fact__value {
+    display: block;
+    margin-top: 4px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tof-fact__value--muted {
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* ---- Ştat çipləri (ekran 02) ------------------------------------------- */
+
+.tof-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.tof-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--ems-h-chip, 28px);
+    padding: 0.15rem 0.7rem;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg-subtle);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ems-neutral-700, #334155);
+}
+
+.tof-chip__count {
+    font-weight: 800;
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+/* ---- Dialoq formu ------------------------------------------------------ */
+
+.tof-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.tof-form__full {
+    grid-column: 1 / -1;
+}
+
+/* ---- Sətir əməlləri ---------------------------------------------------- */
+
+.tof-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* ---- Mobil (375) ------------------------------------------------------- */
+
+@media (max-width: 900px) {
+    .tof-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tof-pane--tree {
+        max-height: 340px;
+    }
+}
+
+@media (max-width: 560px) {
+    .tof__toolbar > .ems-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+
+    .tof-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

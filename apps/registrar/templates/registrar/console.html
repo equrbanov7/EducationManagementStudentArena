@@ -27,7 +27,14 @@
                 {% for program in programs %}
                 <li class="console-item {% if not program.is_active %}is-inactive{% endif %}">
                     <a class="console-item-main" href="{% url 'registrar:program_edit' program.id %}">
-                        <span class="console-item-code">{{ program.code }}</span>
+                        {% comment %}
+                        HƏR İKİ rəsmi dövlət ixtisas şifri göstərilir (cari NK 503
+                        şifri və köhnə 050/060 şifri — `official_code_pair`); daxili
+                        `program.code` (köçürmənin `MYEDU-*` açarı) heç vaxt
+                        göstərilmir. Şifr hələ doldurulmayıbsa nişan tamamilə
+                        gizlədilir — asılı qalmış ayırıcı olmur.
+                        {% endcomment %}
+                        {% if program.official_code_pair %}<span class="console-item-code">{{ program.official_code_pair }}</span>{% endif %}
                         <span class="console-item-name">{{ program.name }}</span>
                     </a>
                     <div class="console-item-meta">
@@ -103,8 +110,8 @@
                 {% for curriculum in curricula %}
                 <li class="console-item {% if not curriculum.is_active %}is-inactive{% endif %}">
                     <a class="console-item-main" href="{% url 'registrar:curriculum_detail' curriculum.id %}">
-                        <span class="console-item-code">{{ curriculum.program.code }} · {{ curriculum.admission_year }}</span>
-                        <span class="console-item-name">{{ curriculum.name|default:curriculum.program.name }}</span>
+                        <span class="console-item-code">{{ curriculum.program.display_label }} · {{ curriculum.admission_year }}</span>
+                        <span class="console-item-name">{{ curriculum.name|default:curriculum.program.display_label }}</span>
                     </a>
                     <div class="console-item-meta">
                         <span><i class="fas fa-list-ol"></i> {{ curriculum.rows.count }} {% trans "fənn" context "registrar.console" %}</span>
@@ -162,7 +169,7 @@
                 <li class="console-item {% if not record.is_active %}is-inactive{% endif %}">
                     <a class="console-item-main" href="{% url 'registrar:student_record_edit' record.id %}">
                         <span class="console-item-code">{{ record.student.get_full_name|default:record.student.username }}</span>
-                        <span class="console-item-name">{{ record.program.code }} — {{ record.program.name }}</span>
+                        <span class="console-item-name">{{ record.program.display_label }}</span>
                     </a>
                     <div class="console-item-meta">
                         {% if record.group %}<span><i class="fas fa-users"></i> {{ record.group.name }}</span>{% endif %}

@@ -78,12 +78,14 @@
 }
 .sjx-th-date { width: 80px; padding-left: 18px !important; }
 .sjx-th-week { width: 70px; }
+.sjx-th-room { width: 120px; }
 .sjx-th-att, .sjx-th-score { text-align: center !important; width: 110px; }
 .sjx-table tbody td { padding: 10px 8px; border-bottom: 1px solid #eef3fb; }
 .sjx-table tbody tr:last-child td { border-bottom: none; }
 .sjx-table tbody tr.is-koll td { background: #fffbeb; }
 .sjx-date { padding-left: 18px !important; font-weight: 700; color: var(--s-muted); white-space: nowrap; }
 .sjx-topic { font-weight: 600; color: var(--s-mid); }
+.sjx-room-cell { color: var(--s-soft); font-size: 12.5px; white-space: nowrap; }
 .sjx-kollmark { color: #b45309; font-weight: 700; }
 .sjx-att-cell, .sjx-score-cell { text-align: center; }
 .sjx-att { font-weight: 800; font-size: 12px; }
@@ -141,6 +143,10 @@
 .sjx-card-badge { font-size: 0.72rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
 .sjx-card-badge.is-ok { color: #15803d; background: #eafaef; }
 .sjx-card-badge.is-danger { color: #b42318; background: #fef3f2; }
+/* Tarixi semestr: buraxılış statusu hesablanmır (bax exam_eligibility). */
+.sjx-card-badge.is-legacy { color: #475467; background: #f2f4f7; cursor: help; }
+.sjx-kpi--legacy { border-color: #d0d5dd; }
+.sjx-kpi-status.is-legacy { color: #475467; cursor: help; }
 
 /* Detal başlığı + geri */
 .sjx-detail-head { display: flex; align-items: center; gap: 14px; margin: 0.75rem 0 1rem; flex-wrap: wrap; }

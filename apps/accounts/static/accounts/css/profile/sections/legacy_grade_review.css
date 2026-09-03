@@ -1,0 +1,539 @@
+/* «Köçürülmüş imtahan nəticələrinin dəqiqləşdirilməsi» — İmtahan Mərkəzi bölməsi.
+ *
+ * QAYDALAR (CLAUDE.md + MEMORY):
+ *   • YALNIZ İŞIQLI tema — `prefers-color-scheme: dark` İŞLƏDİLMİR;
+ *   • rənglər mövcud `--ems-*` tokenlərindən gəlir, yeni rəng İCAD EDİLMİR;
+ *   • seçicilər VAHİD `ems-ss*` komponentindəndir — burada yalnız yerləşdirmə;
+ *   • bütün süzgəc input-ları EYNİ hündürlükdədir (`--lgr-control-h`).
+ *
+ * ŞİDDƏT RƏNGİ vs DÜZƏLİŞ SARISI — QƏSDƏN AYRIDIR:
+ * `correction.css`-dəki SARI YALNIZ «bu xanaya auditli düzəliş yazılıb» deməkdir.
+ * Burada sarı `is-warn` ŞİDDƏT üçün işlənmir; diqqət səviyyəsi narıncı-qəhvəyi
+ * mətn + sol kənar zolağı ilə verilir, kritik isə qırmızı zolaqla. Beləliklə
+ * «köçürülüb» (mənşə), «baxılmalıdır» (şiddət) və «düzəldilib» (auditli düzəliş)
+ * üç ayrı vizual dil olaraq qalır.
+ */
+
+.lgr {
+    --lgr-control-h: 38px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.lgr__denied,
+.lgr__notice {
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle, #f8fafc);
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.92rem;
+}
+
+.lgr__notice--observer {
+    border-color: var(--ems-primary-200, #bfdbfe);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+/* ── Başlıq + irəliləyiş ─────────────────────────────────────────────────── */
+
+.lgr__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.lgr__title {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.lgr__intro {
+    margin: 0;
+    max-width: 74ch;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.lgr__progress {
+    min-width: 230px;
+    flex: 0 0 auto;
+}
+
+.lgr__progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    overflow: hidden;
+}
+
+.lgr__progress-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--ems-primary-600, #2563eb);
+    transition: width 0.25s ease;
+}
+
+.lgr__progress-text {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    color: var(--ems-text-muted, #64748b);
+    text-align: right;
+}
+
+/* ── Kateqoriya çipləri ──────────────────────────────────────────────────── */
+
+.lgr-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lgr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 999px;
+    background: var(--ems-neutral-0, #ffffff);
+    color: var(--ems-text, #0f172a);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.lgr-chip:hover {
+    border-color: var(--ems-primary-300, #93c5fd);
+}
+
+.lgr-chip.is-active {
+    border-color: var(--ems-primary-600, #2563eb);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.lgr-chip__count {
+    font-weight: 700;
+}
+
+.lgr-chip__done {
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.8rem;
+}
+
+/* Şiddət YALNIZ sol nöqtə ilə — çipin öz fonu seçim vəziyyətini daşıyır. */
+.lgr-chip::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ems-neutral-200, #e2e8f0);
+}
+
+.lgr-chip.is-critical::before {
+    background: #dc2626;
+}
+
+.lgr-chip.is-warn::before {
+    background: #d97706;
+}
+
+.lgr-chip.is-watch::before {
+    background: var(--ems-neutral-600, #475569);
+}
+
+/* ── Süzgəclər ───────────────────────────────────────────────────────────── */
+
+.lgr-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-bg-subtle, #f8fafc);
+}
+
+.lgr-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.lgr-field > label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ems-text-muted, #64748b);
+}
+
+.lgr-field--action {
+    justify-content: flex-end;
+}
+
+/* Bərabər hündürlük — seçici, select və input eyni sırada oturur. */
+.lgr-input,
+.lgr-field .ems-ss__chips {
+    min-height: var(--lgr-control-h);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #ffffff);
+    color: var(--ems-text, #0f172a);
+    font-size: 0.9rem;
+}
+
+.lgr-input {
+    padding: 0 10px;
+    width: 100%;
+}
+
+.lgr-textarea {
+    padding: 8px 10px;
+    min-height: 84px;
+    resize: vertical;
+}
+
+.lgr-file {
+    padding: 6px 10px;
+    line-height: 1.6;
+}
+
+/* ── Cədvəl ──────────────────────────────────────────────────────────────── */
+
+.lgr-tablewrap {
+    overflow-x: auto;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 12px;
+    background: var(--ems-neutral-0, #ffffff);
+}
+
+.lgr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.lgr-table th,
+.lgr-table td {
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--ems-neutral-100, #f1f5f9);
+}
+
+.lgr-table th {
+    background: var(--ems-neutral-50, #f8fafc);
+    color: var(--ems-neutral-700, #334155);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.lgr-th--actions,
+.lgr-td--actions {
+    text-align: right;
+}
+
+/* Sətir şiddəti — sol kənar zolağı (rəng TƏK daşıyıcı deyil: «Niyə burada»
+   xanasında eyni məlumat MƏTNLƏ də var). */
+.lgr-row.is-critical {
+    box-shadow: inset 3px 0 0 0 #dc2626;
+}
+
+.lgr-row.is-warn {
+    box-shadow: inset 3px 0 0 0 #d97706;
+}
+
+.lgr-row.is-watch {
+    box-shadow: inset 3px 0 0 0 var(--ems-neutral-200, #e2e8f0);
+}
+
+.lgr-student {
+    display: block;
+    font-weight: 600;
+    color: var(--ems-text, #0f172a);
+}
+
+.lgr-subject {
+    display: block;
+    font-weight: 600;
+}
+
+.lgr-muted {
+    display: block;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.8rem;
+}
+
+.lgr-raw {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lgr-raw__item {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+}
+
+.lgr-raw__key {
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.76rem;
+    min-width: 52px;
+}
+
+.lgr-raw__value {
+    font-variant-numeric: tabular-nums;
+}
+
+.lgr-source {
+    display: block;
+    margin-top: 4px;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.74rem;
+}
+
+.lgr-live {
+    font-variant-numeric: tabular-nums;
+    font-size: 1rem;
+}
+
+.lgr-reasons {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lgr-reason {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-700, #334155);
+}
+
+.lgr-reason::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ems-neutral-200, #e2e8f0);
+    flex: 0 0 auto;
+}
+
+.lgr-reason.is-critical::before {
+    background: #dc2626;
+}
+
+.lgr-reason.is-warn::before {
+    background: #d97706;
+}
+
+.lgr-status {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.lgr-status.is-verified,
+.lgr-status.is-corrected {
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.lgr-status__by,
+.lgr-status__note {
+    display: block;
+    margin-top: 3px;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.75rem;
+}
+
+.lgr-empty {
+    padding: 26px 12px;
+    text-align: center;
+    color: var(--ems-text-muted, #64748b);
+}
+
+/* Skeleton — ilk yükləmədə «boş cədvəl» təəssüratı yaranmasın. */
+.lgr-skel {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--ems-neutral-100, #f1f5f9) 25%,
+        var(--ems-neutral-50, #f8fafc) 37%,
+        var(--ems-neutral-100, #f1f5f9) 63%
+    );
+    background-size: 400% 100%;
+    animation: lgr-shimmer 1.3s ease infinite;
+}
+
+@keyframes lgr-shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lgr-skel {
+        animation: none;
+    }
+}
+
+/* ── Düymələr + səhifələmə ───────────────────────────────────────────────── */
+
+.lgr-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.lgr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #ffffff);
+    color: var(--ems-text, #0f172a);
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.lgr-btn:hover {
+    border-color: var(--ems-primary-300, #93c5fd);
+}
+
+.lgr-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.lgr-btn--primary,
+.lgr-btn--ok {
+    border-color: var(--ems-primary-600, #2563eb);
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #ffffff);
+}
+
+.lgr-btn--primary:hover,
+.lgr-btn--ok:hover {
+    background: var(--ems-primary-700, #1d4ed8);
+    border-color: var(--ems-primary-700, #1d4ed8);
+}
+
+.lgr-btn--warn {
+    border-color: #d97706;
+    color: var(--ems-warning-800, #92400e);
+}
+
+.lgr-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.lgr-pager__label {
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.85rem;
+}
+
+/* ── Dialoqlar ───────────────────────────────────────────────────────────── */
+
+.lgr-dialog {
+    width: min(480px, 92vw);
+    padding: 0;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 14px;
+    background: var(--ems-neutral-0, #ffffff);
+    color: var(--ems-text, #0f172a);
+}
+
+.lgr-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.lgr-dialog__form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+}
+
+.lgr-dialog__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.lgr-dialog__meta {
+    margin: 0;
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.86rem;
+}
+
+.lgr-dialog__hint {
+    margin: 0 0 4px;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.lgr-dialog__label {
+    margin-top: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ems-text-muted, #64748b);
+}
+
+.lgr-dialog__error {
+    margin: 4px 0 0;
+    min-height: 1em;
+    color: #b91c1c;
+    font-size: 0.82rem;
+}
+
+.lgr-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+@media (max-width: 720px) {
+    .lgr__progress {
+        min-width: 100%;
+    }
+
+    .lgr__progress-text {
+        text-align: left;
+    }
+}

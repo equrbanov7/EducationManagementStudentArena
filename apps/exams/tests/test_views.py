@@ -218,6 +218,71 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(StudentGroup.objects.filter(name="Deleg Group").exists())
 
+    def test_program_coordinator_needs_explicit_group_manage_permission(self):
+        # Rol-əsaslı özəllik açarı: koordinatorun default-da qrup yaratmaq
+        # icazəsi YOXDUR (403); permission-editor məntiqi ilə roluna
+        # `group.manage` əlavə olunandan sonra keçir.
+        from apps.organizations.models import Membership, Role
+        from core.constants import RoleScopeType
+
+        coordinator = User.objects.create_user("coord_a", "coord_a@example.com", "StrongPass123!")
+        # Universitet defaultundakı program_coordinator rolunun bənzəri
+        # (org_a məktəb tiplidir — rolu explicit yaradırıq).
+        coord_role = Role.objects.create(
+            organization=self.org_a,
+            name="program_coordinator",
+            display_name="Program Coordinator",
+            level=45,
+            scope_type=RoleScopeType.UNIT,
+            permissions=["member.view", "course.view", "exam.view", "analytics.view_unit"],
+            is_active=True,
+        )
+        self.assertNotIn("group.manage", coord_role.permissions)
+        _assign_user_to_org(coordinator, self.org_a, ProfileRole.MEMBER, membership_role_name="program_coordinator")
+        self.assertTrue(Membership.objects.filter(user=coordinator, organization=self.org_a, role=coord_role).exists())
+
+        self._login_as(coordinator)
+        self._set_active_org(self.org_a)
+        self.assertEqual(self.client.get(reverse("exams:create_student_group")).status_code, 403)
+        self.assertEqual(
+            self.client.post(reverse("exams:teacher_create_group"), self._group_payload(name="Coord No")).status_code,
+            403,
+        )
+
+        # Editor-un etdiyini modelləşdiririk: rola icazə əlavə olunur.
+        coord_role.permissions = list(coord_role.permissions) + ["group.view", "group.manage"]
+        coord_role.save(update_fields=["permissions", "updated_at"])
+
+        response = self.client.post(
+            reverse("exams:teacher_create_group"),
+            self._group_payload(name="Coord Group"),
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(StudentGroup.objects.filter(name="Coord Group", organization=self.org_a).exists())
+
+    def test_section_head_keeps_group_creation_after_permission_gate(self):
+        # DAVRANIŞ QORUNMASI: section_head adı department_head-ə normallaşır
+        # (ADMIN_EQUIVALENT) → əvvəl org_admin-alias ilə qrup yaradırdı;
+        # permission-əsaslı qapıdan sonra da (default rolda group.manage) yaradır.
+        # (Universitet qarşılığı — dean/chair_head — default_roles testi ilə
+        # qorunur: test_group_permission_seed.DefaultRoleGroupPermissionTest.)
+        from apps.organizations.models import Role
+
+        section_head_role = Role.objects.get(organization=self.org_a, name="section_head")
+        self.assertIn("group.manage", section_head_role.permissions)
+
+        section_head_user = User.objects.create_user("sh_a", "sh_a@example.com", "StrongPass123!")
+        _assign_user_to_org(section_head_user, self.org_a, ProfileRole.MEMBER, membership_role_name="section_head")
+
+        self._login_as(section_head_user)
+        self._set_active_org(self.org_a)
+        response = self.client.post(
+            reverse("exams:teacher_create_group"),
+            self._group_payload(name="Section Head Group"),
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(StudentGroup.objects.filter(name="Section Head Group", organization=self.org_a).exists())
+
     def test_groups_are_created_and_listed_per_active_tenant(self):
         # Yaratma admin əməliyyatıdır; org_a-da org_admin qrup yaradır və
         # müəllimi (primary_teacher) təyin edir.
