@@ -222,6 +222,119 @@ def student_intake(*, allowed_sections) -> dict | None:
 
 
 # --------------------------------------------------------------------------- #
+# Dizayn dalğası (22 ekran) — keçid kartları (sorğu YOXDUR)
+# --------------------------------------------------------------------------- #
+
+#: (bölmə, başlıq, ikon, boş-hal/izah mətni, keçid etiketi) — sıra = prioritet.
+#: Hər kart YALNIZ bölmə ``allowed_sections``-da olanda çıxır; rəqəm/sorğu
+#: yoxdur, yəni ana səhifə heç bir yeni məlumat səthi açmır (QA dalğa-2, P2-1).
+_DESIGN_LINK_CARDS: tuple[tuple[str, object, str, object, object], ...] = (
+    (
+        "workload-center",
+        pgettext_lazy(_CTX, "Dərs yükü mərkəzi"),
+        "fa-layer-group",
+        pgettext_lazy(_CTX, "Tədris planından dərs yükü tapşırığı yaradın, dilimlərə bölün, vizaları izləyin."),
+        pgettext_lazy(_CTX, "Mərkəzə keç"),
+    ),
+    (
+        "workload-visa",
+        pgettext_lazy(_CTX, "Yük vizası"),
+        "fa-stamp",
+        pgettext_lazy(_CTX, "Fakültə diliminə koordinator vizası verin və ya geri qaytarın."),
+        pgettext_lazy(_CTX, "Vizaya keç"),
+    ),
+    (
+        "workload-approval",
+        pgettext_lazy(_CTX, "Yük təsdiqi"),
+        "fa-check-double",
+        pgettext_lazy(_CTX, "Dekanlıq təsdiqi gözləyən fakültə dilimləri."),
+        pgettext_lazy(_CTX, "Təsdiqə keç"),
+    ),
+    (
+        "workload-overview",
+        pgettext_lazy(_CTX, "Yük — ümumi baxış"),
+        "fa-chart-column",
+        pgettext_lazy(_CTX, "Universitet üzrə dərs yükü zəncirinin gedişi."),
+        pgettext_lazy(_CTX, "Baxışa keç"),
+    ),
+    (
+        "question-chair-review",
+        pgettext_lazy(_CTX, "Sual təsdiqi"),
+        "fa-clipboard-check",
+        pgettext_lazy(_CTX, "İmtahan Mərkəzinə getməzdən əvvəl kafedra təsdiqi gözləyən sual göndərişləri."),
+        pgettext_lazy(_CTX, "Təsdiqə keç"),
+    ),
+    (
+        "curriculum-editor",
+        pgettext_lazy(_CTX, "Tədris planı"),
+        "fa-table-list",
+        pgettext_lazy(_CTX, "İxtisas üzrə tədris planı sətirləri və təsdiq zənciri."),
+        pgettext_lazy(_CTX, "Plana keç"),
+    ),
+    (
+        "semester-opening",
+        pgettext_lazy(_CTX, "Semestr açılışı"),
+        "fa-door-open",
+        pgettext_lazy(_CTX, "Təsdiqlənmiş plandan açılışları yaradın və semestri kilidləyin."),
+        pgettext_lazy(_CTX, "Açılışa keç"),
+    ),
+    (
+        "groups-registry",
+        pgettext_lazy(_CTX, "Qruplar reyestri"),
+        "fa-people-group",
+        pgettext_lazy(_CTX, "Kurs/ixtisas üzrə qruplar və dil sektorları."),
+        pgettext_lazy(_CTX, "Reyestrə keç"),
+    ),
+    (
+        "student-admission",
+        pgettext_lazy(_CTX, "Tələbə qəbulu"),
+        "fa-file-import",
+        pgettext_lazy(_CTX, "ATİS qəbul siyahısından tələbə hesabı və akademik qeyd yaradın."),
+        pgettext_lazy(_CTX, "Qəbula keç"),
+    ),
+    (
+        "student-registry",
+        pgettext_lazy(_CTX, "Tələbə reyestri"),
+        "fa-address-book",
+        pgettext_lazy(_CTX, "Köçürmə, akademik məzuniyyət, xaric və bərpa hərəkətləri."),
+        pgettext_lazy(_CTX, "Reyestrə keç"),
+    ),
+    (
+        "lessons-log",
+        pgettext_lazy(_CTX, "Keçilmiş dərslər"),
+        "fa-list-check",
+        pgettext_lazy(_CTX, "Plan saatı ilə faktiki keçilmiş dərslərin müqayisəsi."),
+        pgettext_lazy(_CTX, "Jurnala keç"),
+    ),
+    (
+        "org-structure-tree",
+        pgettext_lazy(_CTX, "Universitet strukturu"),
+        "fa-sitemap",
+        pgettext_lazy(_CTX, "Fakültə → kafedra → ixtisas ağacı və rəhbər təyinatları."),
+        pgettext_lazy(_CTX, "Struktura keç"),
+    ),
+)
+
+
+def design_link_cards(*, allowed_sections) -> list[dict]:
+    """22-ekran dalğasının bölmələrinə keçid kartları — rol qapısı ``allowed_sections``."""
+    cards = []
+    for section, title, icon, hint, label in _DESIGN_LINK_CARDS:
+        if section not in allowed_sections:
+            continue
+        cards.append(
+            widget(
+                section,
+                str(title),
+                icon,
+                link=section_link(section, str(label)),
+                empty=str(hint),
+            )
+        )
+    return cards
+
+
+# --------------------------------------------------------------------------- #
 # İmtahan Mərkəzi
 # --------------------------------------------------------------------------- #
 
@@ -371,6 +484,7 @@ __all__ = [
     "appeals",
     "applications",
     "corrections",
+    "design_link_cards",
     "journal_close",
     "kollokvium_windows",
     "org_kpis",
