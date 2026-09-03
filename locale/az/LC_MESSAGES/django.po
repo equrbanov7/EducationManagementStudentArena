@@ -64438,3 +64438,11 @@ msgstr "Qəbula keç"
 msgctxt "accounts.dashboard"
 msgid "Struktura keç"
 msgstr "Struktura keç"
+
+msgctxt "profile.shell"
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "Bu bölməyə icazəniz yoxdur."
+
+msgctxt "profile.shell"
+msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+msgstr "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."

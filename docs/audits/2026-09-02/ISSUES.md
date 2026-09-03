@@ -105,6 +105,6 @@ P1 plan əhatəsi, P1 hadisə lenti trigger-i, P2 idxal qapısı) orada sənədl
 | W2-5 | `teaching_office_staff` `semester.open` açarına sahibdir (açılış yarada bilir); `semester.lock/unlock` yoxdur. HANDOFF_FULL_PLAN §2/07 yalnız rəhbər+RİM deyir | WAVE2 P2-2 | OPEN — **sahib qərarı** (açılış ≠ kilid; bloklayıcı deyil) |
 | W2-6 | Menyu səthi plandan genişdir: `exam_center`/`student_services` struktur ekranlarını, `program_coordinator` tədris planı/semestr açılışını OXUYUR (yazı endpoint-ləri ayrıca qapılıdır, sızma yoxdur) | WAVE2 P3-1 | OPEN (P3; P1-10 ailəsi — `org_admin` alias) |
 | W2-7 | `curriculum-editor` (1) və `semester-opening` (2) cədvəllərində `aria-sort` yoxdur | WAVE2 P3-2 | OPEN (P3) |
-| W2-8 | İcazəsiz bölməyə tam səhifə keçidi (`?section=workload-center`, tələbə) səssiz `profile-info`-ya düşür, mesaj yoxdur (AJAX ucu düzgün 403) | WAVE2 P3-3 | OPEN (P3, yalnız UX) |
+| W2-8 | İcazəsiz bölməyə tam səhifə keçidi (`?section=workload-center`, tələbə) səssiz `profile-info`-ya düşür, mesaj yoxdur (AJAX ucu düzgün 403) | WAVE2 P3-3 | FIXED (`_stage1.section_denied` + qabıq xəbərdarlığı `_messages.html`, test) |
 | W2-9 | Fikstur: `qa.chair_head` və `qa.dean` fərqli fakültədədir — zənciri uçdan-uca sürmək üçün müvəqqəti üzvlük lazım oldu | WAVE2 | Qeyd (klon fiksturu; növbəti dalğada uyğunlaşdırılsın) |
 

@@ -106,6 +106,21 @@ ENTRIES = {
 }
 
 
+#: Qabıq xəbərdarlığı (W2-8) — `accounts/profile/_messages.html`, kontekst `profile.shell`.
+SHELL_ENTRIES = {
+    "Bu bölməyə icazəniz yoxdur.": _e(
+        "You do not have access to this section.",
+        "У вас нет доступа к этому разделу.",
+        "Bu bölüme erişim izniniz yok.",
+    ),
+    "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız.": _e(
+        "The requested section does not exist or is not open to your role — you were returned to the home page.",
+        "Запрошенный раздел не существует или недоступен для вашей роли — вы возвращены на главную страницу.",
+        "İstenen bölüm mevcut değil veya rolünüze açık değil — ana sayfaya yönlendirildiniz.",
+    ),
+}
+
+
 def po_path(lang):
     return os.path.join(BASE, "locale", lang, "LC_MESSAGES", "django.po")
 
@@ -126,15 +141,16 @@ def fill(lang):
     with open(path, encoding="utf-8") as handle:
         text = handle.read()
     blocks, added = [], 0
-    for msgid, translations in ENTRIES.items():
-        if (CTX, msgid) in existing:
-            continue
-        probe = f'msgctxt "{esc(CTX)}"\nmsgid "{esc(msgid)}"'
-        if probe in text:
-            continue
-        msgstr = msgid if lang == "az" else translations[lang]
-        blocks.append(f'msgctxt "{esc(CTX)}"\nmsgid "{esc(msgid)}"\nmsgstr "{esc(msgstr)}"\n')
-        added += 1
+    for ctx, entries in ((CTX, ENTRIES), ("profile.shell", SHELL_ENTRIES)):
+        for msgid, translations in entries.items():
+            if (ctx, msgid) in existing:
+                continue
+            probe = f'msgctxt "{esc(ctx)}"\nmsgid "{esc(msgid)}"'
+            if probe in text:
+                continue
+            msgstr = msgid if lang == "az" else translations[lang]
+            blocks.append(f'msgctxt "{esc(ctx)}"\nmsgid "{esc(msgid)}"\nmsgstr "{esc(msgstr)}"\n')
+            added += 1
     if blocks:
         text = text.rstrip("\n") + "\n\n" + "\n".join(blocks)
         with open(path, "w", encoding="utf-8") as handle:

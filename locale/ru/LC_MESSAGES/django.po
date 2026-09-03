@@ -64771,3 +64771,11 @@ msgstr "Перейти к приёму"
 msgctxt "accounts.dashboard"
 msgid "Struktura keç"
 msgstr "Перейти к структуре"
+
+msgctxt "profile.shell"
+msgid "Bu bölməyə icazəniz yoxdur."
+msgstr "У вас нет доступа к этому разделу."
+
+msgctxt "profile.shell"
+msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+msgstr "Запрошенный раздел не существует или недоступен для вашей роли — вы возвращены на главную страницу."
