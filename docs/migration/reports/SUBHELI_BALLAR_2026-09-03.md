@@ -383,7 +383,7 @@ BAL_CACHE=/tmp/bal_rows.tsv \
 - **«Kim daxil edib» sütunu ixracı edən müəllimin adıdır**, balı yazanın deyil —
   köhnə sxemdə balı yazan istifadəçi ümumiyyətlə saxlanmır.
 - **Dublikat tələbə qeydləri var.** Məsələn `students.id = 1868` və `3388`
-  eyni şəxsdir (Zamiq Mirzəyev Zahid, qrup 111, 2022-01 və 2022-10-da yaradılıb).
+  eyni şəxsdir (legacy ID 1868 və 3388 — eyni ad-soyad, qrup 111, 2022-01 və 2022-10-da yaradılıb).
   Siyahıda hər iki köhnə ID öz sətri ilə görünür — bu, ayrıca təmizlik işidir.
 - **Transfer tələbələr.** Ön şərti başqa universitetdə keçmiş tələbə bu
   datadan görünmür; `T2-ARDICILLIQ` sətirlərində bu ehtimal qalır.
