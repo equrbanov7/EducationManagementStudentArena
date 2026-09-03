@@ -1,6 +1,8 @@
 {% load i18n %}
 <div class="ai-settings-header">
-    <h1><i class="fas fa-robot"></i> {% trans "heading" context "superadmin.ai_settings" %}</h1>
+    {% comment %}QA dalğa 2 (2026-09-03): kabinet qabığı eyni başlığı `<h1>` ilə
+verir → embed halında ikinci `<h1>` dublikat idi; `<h2>`-yə enirik.{% endcomment %}
+    <{% if embedded_in_profile %}h2{% else %}h1{% endif %}><i class="fas fa-robot"></i> {% trans "heading" context "superadmin.ai_settings" %}</{% if embedded_in_profile %}h2{% else %}h1{% endif %}>
 </div>
 
 <form method="post" action="{% url 'accounts:superadmin_ai_settings' %}">

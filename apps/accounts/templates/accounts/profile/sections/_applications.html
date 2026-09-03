@@ -66,7 +66,8 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
   {# ── Başlıq + izah (dizayn §4.2 — mətn mənbədən eynilə) ───────────────── #}
   <div class="apx-head">
     <div>
-      <h1 class="apx-head__title">{% trans "Müraciətlər" context "applications" %}</h1>
+      {% comment %}QA dalğa 2: qabıq eyni başlığı `<h1>` ilə verir → burada `<h2>`.{% endcomment %}
+      <h2 class="apx-head__title">{% trans "Müraciətlər" context "applications" %}</h2>
       {% if applications_section.is_handler %}
       <p class="apx-head__intro">{% trans "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz." context "applications" %}</p>
       {% else %}

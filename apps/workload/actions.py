@@ -52,7 +52,13 @@ def _error(message, *, status=400, code="invalid", field=""):
 
 
 def _denied(exc: WorkloadDenied):
-    status = 409 if exc.code in ("workload.illegal_transition", "workload.slice_not_open") else 403
+    # QA dalğa 2: `stale_revision` da konfliktdir (403 deyil) — istifadəçi
+    # səlahiyyətsiz deyil, sadəcə səhifəsi köhnəlib.
+    status = (
+        409
+        if exc.code in ("workload.illegal_transition", "workload.slice_not_open", "workload.stale_revision")
+        else 403
+    )
     if exc.code in (
         "workload.reason_too_short",
         "workload.invalid_reason",

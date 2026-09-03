@@ -298,6 +298,45 @@ class DeanDecisionTest(ChainBase):
         # Köhnə qərar TARİXÇƏ kimi qalır (silinmir).
         self.assertEqual(TaskFacultySlice.objects.filter(task=self.task).count(), 2)
 
+    def test_stale_revision_slice_cannot_be_decided(self):
+        """QA dalğa 2 (2026-09-03) reqressiyası — köhnəlmiş dilim qərarı.
+
+        Dilim qaytarılıb sənəd YENİDƏN göndəriləndə cari revision üçün yeni
+        dilim yaranır, köhnəsi tarixçə kimi qalır.  Əvvəllər dekan həmin KÖHNƏ
+        dilimi təsdiqləyə bilirdi: `ok: true` qayıdır, audit «təsdiqləndi»
+        yazır, LAKİN `slice_progress` yalnız cari revision-u saydığı üçün sənəd
+        irəliləmirdi — sükutla itən qərar.  İndi 409 (`stale_revision`).
+        """
+        stale = self.slice
+        return_slice(
+            slice_obj=stale,
+            actor=self.actor(self.dean),
+            reason="Saat bölgüsü düzəldilməlidir — mühazirə cəmi plan ilə uyğun deyil.",
+        )
+        self.task.refresh_from_db()
+        submit_task(task=self.task, actor=self.actor(self.office))
+        self.task.refresh_from_db()
+        stale.refresh_from_db()
+        self.assertNotEqual(stale.revision, self.task.revision)
+
+        with self.assertRaises(WorkloadDenied) as ctx:
+            approve_slice(slice_obj=stale, actor=self.actor(self.dean), comment="köhnə dilim")
+        self.assertEqual(ctx.exception.code, "workload.stale_revision")
+
+        with self.assertRaises(WorkloadDenied) as ctx:
+            return_slice(
+                slice_obj=stale,
+                actor=self.actor(self.dean),
+                reason="Köhnəlmiş dilimi qaytarmaq da mümkün olmamalıdır.",
+            )
+        self.assertEqual(ctx.exception.code, "workload.stale_revision")
+
+        # CARİ revision-un dilimi normal işləyir.
+        current = TaskFacultySlice.objects.get(task=self.task, revision=self.task.revision)
+        approve_slice(slice_obj=current, actor=self.actor(self.dean), comment="cari dilim")
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.status, TaskStatus.APPROVED)
+
 
 class DistributionGateTest(ChainBase):
     def test_chair_cannot_distribute_before_the_deanery_approves(self):

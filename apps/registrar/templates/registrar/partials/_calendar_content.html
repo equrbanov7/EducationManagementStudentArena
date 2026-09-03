@@ -1,9 +1,14 @@
 {% load static i18n %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 <div class="journal-page">
     <div class="journal-head">
-        <h1 class="journal-title">
+        <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="journal-title">
             <i class="fas fa-calendar-days"></i> {% trans "Akademik təqvim" context "registrar.calendar" %}
-        </h1>
+        </{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
         <p class="journal-subtitle">{% trans "Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları." context "registrar.calendar" %}</p>
     </div>
 
