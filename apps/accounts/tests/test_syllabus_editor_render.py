@@ -269,7 +269,20 @@ class SyllabusEditorAssetWiringTest(TestCase):
     2026-08-30-da məhz bu sınmışdı: ``profile.html`` ``syllabus_editor.js``-i
     yükləyirdi, fayl isə heç yazılmamışdı — redaktorda autosave, addım
     naviqasiyası və dialoqlar tamamilə ölü idi, konsolda yalnız 404 vardı.
+
+    2026-09-03: qabıq modul ölçüsü qapısına görə BÖLÜNDÜ — bölmə CSS-i
+    ``profile/_section_assets.html``-ə köçdü (JS ``profile.html``-də qaldı).
+    Skan ikisini də oxuyur: yer dəyişikliyi bağı qırmamalıdır.
     """
+
+    #: Qabığın asset daşıyan faylları (CSS ayrıca include-a çıxarılıb).
+    _SHELL_TEMPLATES = (
+        "apps/accounts/templates/accounts/profile.html",
+        "apps/accounts/templates/accounts/profile/_section_assets.html",
+    )
+
+    def _shell_body(self) -> str:
+        return "\n".join((Path(settings.BASE_DIR) / name).read_text("utf-8") for name in self._SHELL_TEMPLATES)
 
     #: `{% static '…' %}` istinadları — həm JS, həm CSS (ikisi də bölünüb).
     _ASSET_PATTERNS = (
@@ -278,14 +291,13 @@ class SyllabusEditorAssetWiringTest(TestCase):
     )
 
     def test_every_syllabus_asset_referenced_by_the_shell_exists(self):
-        template = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile.html"
         static_root = Path(settings.BASE_DIR) / "apps/accounts/static"
-        body = template.read_text("utf-8")
+        body = self._shell_body()
 
         for pattern in self._ASSET_PATTERNS:
             referenced = re.findall(pattern, body)
             with self.subTest(pattern=pattern):
-                self.assertTrue(referenced, "profile.html sillabus asseti yükləmir")
+                self.assertTrue(referenced, "qabıq sillabus assetini yükləmir")
                 missing = [name for name in referenced if not (static_root / name).is_file()]
                 self.assertEqual(missing, [], f"İstinad edilən, amma diskdə olmayan fayl: {missing}")
 

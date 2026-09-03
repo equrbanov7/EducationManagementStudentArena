@@ -21,6 +21,12 @@ from ._program_codes import (
     legacy_official_code_field,
     official_code_field,
 )
+from .catalog_meta import (
+    ArchivableCatalogModel,
+    education_form_field,
+    owning_chair_field,
+    subject_kind_field,
+)
 
 
 class DegreeLevel(models.TextChoices):
@@ -29,7 +35,7 @@ class DegreeLevel(models.TextChoices):
     PHD = "phd", pgettext_lazy("registrar.degree", "PhD")
 
 
-class Program(ProgramCodeLabelsMixin, UUIDModel, TimeStampedModel):
+class Program(ProgramCodeLabelsMixin, ArchivableCatalogModel, UUIDModel, TimeStampedModel):
     """An academic program (İxtisas) offered by the university.
 
     Optionally anchored to a specialty ``OrgUnit`` so the hierarchy
@@ -89,6 +95,8 @@ class Program(ProgramCodeLabelsMixin, UUIDModel, TimeStampedModel):
     legacy_official_code = legacy_official_code_field()
     name = models.CharField(max_length=255)
     degree_level = models.CharField(max_length=16, choices=DegreeLevel.choices, default=DegreeLevel.BACHELOR)
+    # Təhsil forması + arxiv qatı: bax `catalog_meta` (silmə yoxdur, arxivləmə var).
+    education_form = education_form_field()
     ects_total = models.PositiveIntegerField(
         default=240, help_text="Məzuniyyət üçün tələb olunan tam ECTS kredit yükü (Boloniya)."
     )
@@ -115,7 +123,7 @@ class Program(ProgramCodeLabelsMixin, UUIDModel, TimeStampedModel):
         return self.display_label
 
 
-class Subject(UUIDModel, TimeStampedModel):
+class Subject(ArchivableCatalogModel, UUIDModel, TimeStampedModel):
     """A subject/course catalogue entry (Fənn) — the reusable definition that
     curricula reference and semester offerings instantiate."""
 
@@ -123,6 +131,9 @@ class Subject(UUIDModel, TimeStampedModel):
     code = models.CharField(max_length=32)
     name = models.CharField(max_length=255)
     ects = models.PositiveSmallIntegerField(default=5, help_text="Fənnin ECTS kredit dəyəri.")
+    # Kataloq metadatası (ekran 04) + arxiv qatı — bax `catalog_meta`.
+    kind = subject_kind_field()
+    chair_unit = owning_chair_field()
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True, db_index=True)
 

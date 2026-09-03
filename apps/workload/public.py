@@ -57,6 +57,7 @@ from .constants import (
     RowKind,
     Season,
     TaskStatus,
+    TeacherPosition,
 )
 from .services import (
     can_manage_chair,
@@ -188,8 +189,65 @@ def build_my_workload_context(request, *, organization, academic_year: str = "")
     return payload
 
 
+# ── Kafedra profili (ekran 02) — ştat və yük xülasəsi ────────────────────────
+
+
+def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> dict:
+    """Kafedra profilinin ştat/yük qatı — müəllim id → xülasə + kafedra cəmi.
+
+    NİYƏ BURADA? «Kafedra profili» ekranı ``apps.accounts``-dadır və dərs yükü
+    modulunun DAXİLİNƏ girməməlidir. Fasad yalnız hazır aqreqat qaytarır:
+    saat, norma, doluluq faizi, ştat növü. Norma dəyəri POLICY cədvəlindən
+    (``TeacherWorkloadProfile.annual_norm_hours``) gəlir — kodda hardcode YOX;
+    profil yoxdursa NK №215 default-u (``DEFAULT_ANNUAL_NORM_HOURS``) tətbiq
+    olunur (spec §8).
+
+    ``dept_load`` status ailəsi (``core/ui/status_catalog.py``) üçün hər müəllimə
+    bant açarı da verilir: `free` (<70%), `normal` (70–100%), `loaded` (100–120%),
+    `risk` (>120%).
+    """
+    from django.contrib.auth import get_user_model
+
+    ids = [tid for tid in teacher_ids if tid]
+    summaries: dict = {}
+    totals = {"teachers": len(ids), "hours": 0, "norm_hours": 0, "hourly_paid_hours": 0}
+    if not ids:
+        return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": 0.0}
+
+    users = {user.pk: user for user in get_user_model().objects.filter(pk__in=ids)}
+    staff_fraction_total = 0.0
+    for teacher_id in ids:
+        user = users.get(teacher_id)
+        if user is None:
+            continue
+        summary = teacher_workload_summary(organization=organization, teacher=user, academic_year=academic_year)
+        percent = int(summary.get("fill_percent") or 0)
+        if percent < 70:
+            band = "free"
+        elif percent <= 100:
+            band = "normal"
+        elif percent <= 120:
+            band = "loaded"
+        else:
+            band = "risk"
+        summary["load_band"] = band
+        summary["position_label"] = str(dict(TeacherPosition.choices).get(summary.get("position"), ""))
+        summaries[teacher_id] = summary
+        totals["hours"] += int(summary.get("total_hours") or 0)
+        totals["norm_hours"] += int(summary.get("norm_hours") or 0)
+        totals["hourly_paid_hours"] += int(summary.get("hourly_paid_hours") or 0)
+        try:
+            staff_fraction_total += float(summary.get("staff_fraction") or 0)
+        except (TypeError, ValueError):
+            pass
+
+    totals["fill_percent"] = int(round(totals["hours"] * 100 / totals["norm_hours"])) if totals["norm_hours"] else 0
+    return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": round(staff_fraction_total, 2)}
+
+
 __all__ = [
     "STATUS_LABELS",
     "build_distribution_context",
     "build_my_workload_context",
+    "chair_staff_load",
 ]

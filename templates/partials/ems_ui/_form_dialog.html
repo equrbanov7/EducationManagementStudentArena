@@ -1,0 +1,54 @@
+{% comment %}
+Formlu dialoq — handoff §4 komponent 8 («sadə · siyahılı · seçimli» variantı).
+
+NİYƏ AYRICA PARTIAL? `_dialog.html`-də `<form>` yalnız gövdənin İÇİNDƏ ola
+bilər, yəni «Yadda saxla» düyməsi (foot-da) formaya aid olmur. Yaratma/redaktə
+dialoqlarında düymə mütləq formanın içində olmalıdır — `_reason_dialog.html`
+ilə eyni quruluş, sadəcə səbəb məcburiyyəti olmadan.
+
+Davranış ORTAQ qatdadır (`ems_ui/overlay.js`): fokus tələsi, Escape, fokusun
+qayıtması, scrim. Bu fayl YALNIZ markup-dır.
+
+KONTEKST MÜQAVİLƏSİ
+  form_dialog_id            — məcburi; `data-ems-overlay-open="<id>"` ilə açılır
+  form_dialog_title         — məcburi (dinamik başlıq JS-dən dəyişdirilə bilər)
+  form_dialog_subtitle      — opsional
+  form_dialog_body_include  — məcburi şablon yolu (sahələr)
+  form_dialog_action        — opsional form action URL
+  form_dialog_hidden        — opsional [{name, value}] gizli sahələr
+  form_dialog_data          — opsional {atribut adı: dəyər} (məs. `data-tof-form`);
+                              adlar YALNIZ server şablonundan gəlir
+  form_dialog_submit_label  — düymə mətni (default «Yadda saxla»)
+  form_dialog_submit_tone   — primary|warning|danger (default primary)
+  form_dialog_wide          — 720px variant
+{% endcomment %}
+{% load i18n %}
+<div class="ems-overlay ems-overlay--dialog" id="{{ form_dialog_id }}" hidden>
+    <div class="ems-dialog{% if form_dialog_wide %} ems-dialog--wide{% endif %}"
+         role="dialog" aria-modal="true" aria-labelledby="{{ form_dialog_id }}-title">
+        <form method="post" action="{{ form_dialog_action|default:'' }}"{% for key, value in form_dialog_data.items %} {{ key }}="{{ value }}"{% endfor %} novalidate>
+            {% csrf_token %}
+            {% for field in form_dialog_hidden %}
+                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}"{% if field.keep %} data-tof-keep="1"{% endif %}>
+            {% endfor %}
+            <div class="ems-dialog__head">
+                <div>
+                    <h2 class="ems-dialog__title" id="{{ form_dialog_id }}-title">{{ form_dialog_title }}</h2>
+                    {% if form_dialog_subtitle %}<p class="ems-dialog__sub">{{ form_dialog_subtitle }}</p>{% endif %}
+                </div>
+                <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                        aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+            </div>
+
+            <div class="ems-dialog__body">
+                <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+                {% include form_dialog_body_include %}
+            </div>
+
+            <div class="ems-dialog__foot">
+                <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
+                <button type="submit" class="ems-btn ems-btn--{{ form_dialog_submit_tone|default:'primary' }}">{% if form_dialog_submit_label %}{{ form_dialog_submit_label }}{% else %}{% trans "Yadda saxla" context "ui.dialog" %}{% endif %}</button>
+            </div>
+        </form>
+    </div>
+</div>

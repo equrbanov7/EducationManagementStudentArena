@@ -108,7 +108,17 @@ class ProfileRole:
     # Yüksək level-ə baxmayaraq avtomatik org_admin aliası ALMAMALI rollar.
     # Bunların səlahiyyəti rol permission-ları ilə müəyyən olunur (məs. imtahan
     # mərkəzi yalnız imtahan sahəsini idarə edir, üzv/struktur idarəetməsi yox).
-    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {"exam_center", "exam_center_head", "exam_center_staff", "hr"}
+    # `teaching_office_head` (level 85 ≥ 80) MƏCBURİ olaraq buradadır: onun
+    # səlahiyyəti struktur ağacı + akademik kataloqdur (ekran 01–04). Alias
+    # verilsəydi rol bütün tenant idarəetmə səthini — üzv, rol, təşkilat
+    # ayarları, superadmin panelləri — səssizcə alardı.
+    ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {
+        "exam_center",
+        "exam_center_head",
+        "exam_center_staff",
+        "hr",
+        "teaching_office_head",
+    }
 
     ADMIN_EQUIVALENT_ROLE_NAMES = {
         ORG_ADMIN,

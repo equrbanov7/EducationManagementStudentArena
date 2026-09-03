@@ -17,12 +17,22 @@ KONTEKST MÜQAVİLƏSİ
   reason_field_name  — POST sahəsinin adı (default "reason")
   reason_submit_label, reason_submit_tone (primary|warning|danger)
   reason_action      — form action URL (verilməsə JS özü göndərir)
+  reason_hidden      — opsional [{name, value, keep}] gizli sahələr (əməl açarı,
+                       hədəf id) — JS dialoqu açanda `data-tof-prefill` ilə doldurur
+  reason_form_data   — opsional {atribut adı: dəyər}; adlar YALNIZ server
+                       şablonundan gəlir (məs. `data-tof-form`)
+  reason_extra_include — opsional şablon: səbəb sahəsindən ƏVVƏL render olunan
+                       əlavə sahələr (məs. «rəhbər» seçicisi). Səbəb məcburiyyəti
+                       DƏYİŞMİR — təsdiq düyməsi yenə ≥20 simvola bağlıdır.
 {% endcomment %}
 {% load i18n %}
 <div class="ems-overlay ems-overlay--dialog" id="{{ reason_id }}" hidden>
     <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="{{ reason_id }}-title">
-        <form method="post" action="{{ reason_action|default:'' }}" data-ems-reason-form>
+        <form method="post" action="{{ reason_action|default:'' }}" data-ems-reason-form{% for key, value in reason_form_data.items %} {{ key }}="{{ value }}"{% endfor %} novalidate>
             {% csrf_token %}
+            {% for field in reason_hidden %}
+                <input type="hidden" name="{{ field.name }}" value="{{ field.value }}"{% if field.keep %} data-tof-keep="1"{% endif %}>
+            {% endfor %}
             <div class="ems-dialog__head">
                 <div>
                     <h2 class="ems-dialog__title" id="{{ reason_id }}-title">{{ reason_title }}</h2>
@@ -33,6 +43,8 @@ KONTEKST MÜQAVİLƏSİ
             </div>
 
             <div class="ems-dialog__body ems-reason" data-ems-min-length="{{ reason_min|default:20 }}">
+                <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+                {% if reason_extra_include %}{% include reason_extra_include %}{% endif %}
                 <div class="ems-field">
                     <label class="ems-field__label" for="{{ reason_id }}-text">
                         {% if reason_label %}{{ reason_label }}{% else %}{% trans "Səbəb" context "ui.dialog" %}{% endif %} <span class="ems-field__req" aria-hidden="true">*</span>

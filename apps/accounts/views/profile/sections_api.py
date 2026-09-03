@@ -149,6 +149,13 @@ SECTION_PARTIALS: dict[str, str] = {
     # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
     "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
     "my-workload": "accounts/profile/sections/_my_workload.html",
+    # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra profili,
+    # ixtisas reyestri, fənn kataloqu. Hamısı SERVER-render OXU panelidir;
+    # mutasiyalar ayrıca JSON POST endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    "org-structure-tree": "accounts/profile/sections/_org_structure_tree.html",
+    "chair-profile": "accounts/profile/sections/_chair_profile.html",
+    "programs-registry": "accounts/profile/sections/_programs_registry.html",
+    "subject-catalog": "accounts/profile/sections/_subject_catalog.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -225,6 +232,12 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.
         "legacy-grade-review",
+        # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
+        # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
+        "org-structure-tree",
+        "chair-profile",
+        "programs-registry",
+        "subject-catalog",
     }
 )
 
