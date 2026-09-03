@@ -20,6 +20,7 @@
 #
 # İstifadə:
 #   scripts/staging_inspect.sh migrate            # bootstrap bazası
+#   scripts/staging_inspect.sh manage <əmr>       # ixtiyari manage.py əmri
 #   scripts/staging_inspect.sh rehearsal-init     # yeni rehearsal bazası
 #   STAGING_POSTGRES_DB=emsarena_rehearsal_ab12cd34ef56 \
 #       scripts/staging_inspect.sh serve          # məşq datasına bax
@@ -268,6 +269,18 @@ provision_app_role_for_db() {
     return "$rc"
 }
 
+do_manage() {
+    # İxtiyari `manage.py` alt-komandası hədəf bazaya qarşı (owner rolu ilə).
+    # `migrate`/`serve` üçün ayrıca funksiyalar var; bu, `shell`, `showmigrations`,
+    # `createsuperuser`, `dbshell` kimi gündəlik əməllər üçündür.
+    if [ "$#" -eq 0 ]; then
+        echo "İstifadə: $0 manage <əmr> [arqumentlər]   (məs. manage showmigrations)" >&2
+        return 2
+    fi
+    do_up
+    manage "$(owner_dsn_for "$STAGING_DB_NAME")" off "$@"
+}
+
 do_migrate() {
     do_up
     # Miqrasiyalar owner (superuser) rolu ilə işləyir — bu qanunidir, ona görə
@@ -509,6 +522,9 @@ case "$command" in
         ;;
     migrate)
         do_migrate "$@"
+        ;;
+    manage)
+        do_manage "$@"
         ;;
     superuser)
         do_superuser "$@"
