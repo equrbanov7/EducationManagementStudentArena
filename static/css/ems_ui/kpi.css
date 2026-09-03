@@ -131,6 +131,50 @@ button.ems-kpi {
     color: var(--ems-danger-strong);
 }
 
+/* ── «Rəngli sol kontur» variantı — dizayn ekran 12/14/15 (ağ kart,
+   4px semantik sol kontur, rəngli rəqəm; etiket neytral qalır).
+   Tinted variantlardan FƏRQİ: fon ağdır — sıx KPI zolağında göz yormur. */
+.ems-kpi--accent-primary,
+.ems-kpi--accent-success,
+.ems-kpi--accent-warning,
+.ems-kpi--accent-danger {
+    background: var(--ems-bg);
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+
+.ems-kpi--accent-primary {
+    border-left-color: var(--ems-primary-600);
+}
+
+.ems-kpi--accent-primary .ems-kpi__value {
+    color: var(--ems-primary-600);
+}
+
+.ems-kpi--accent-success {
+    border-left-color: var(--ems-success-600);
+}
+
+.ems-kpi--accent-success .ems-kpi__value {
+    color: var(--ems-success-700);
+}
+
+.ems-kpi--accent-warning {
+    border-left-color: var(--ems-warning-500);
+}
+
+.ems-kpi--accent-warning .ems-kpi__value {
+    color: var(--ems-warning-800);
+}
+
+.ems-kpi--accent-danger {
+    border-left-color: var(--ems-danger);
+}
+
+.ems-kpi--accent-danger .ems-kpi__value {
+    color: var(--ems-danger-strong);
+}
+
 /* Tünd «cəm» kartı (ekran 17 — universitet yekunu). */
 .ems-kpi--dark {
     background: var(--ems-neutral-900);

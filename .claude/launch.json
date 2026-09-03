@@ -4,14 +4,30 @@
     {
       "name": "emsarena-dev",
       "runtimeExecutable": "venv/bin/python",
-      "runtimeArgs": ["manage.py", "runserver", "8010", "--noreload"],
+      "runtimeArgs": [
+        "manage.py",
+        "runserver",
+        "8010",
+        "--noreload"
+      ],
       "port": 8010
     },
     {
       "name": "emsarena-staging-inspect",
       "runtimeExecutable": "scripts/staging_inspect.sh",
-      "runtimeArgs": ["serve"],
+      "runtimeArgs": [
+        "serve"
+      ],
       "port": 8100
+    },
+    {
+      "name": "design-proto",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /private/tmp/claude-501/-Users-elvin-Desktop-Programming-Folders-EMSArena-EMSArena/55ac1404-bb3d-4d26-82e4-93cffb81e113/scratchpad/design_proto && exec /usr/bin/python3 -m http.server 8790 --directory /private/tmp/claude-501/-Users-elvin-Desktop-Programming-Folders-EMSArena-EMSArena/55ac1404-bb3d-4d26-82e4-93cffb81e113/scratchpad/design_proto"
+      ],
+      "port": 8790
     }
   ]
 }

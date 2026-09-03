@@ -234,7 +234,8 @@ def build_workload_approval_section(request, section, *, active_organization, al
         {
             "label": pgettext(_CTX_APPROVAL, "İRADLI SƏTİR"),
             "value": kpi["flagged"],
-            "tone": "warning" if kpi["flagged"] else None,
+            # Dizayn ekran 15: rəngli sol kontur variantı.
+            "tone": "accent-warning" if kpi["flagged"] else None,
         },
     ]
 
