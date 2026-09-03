@@ -149,6 +149,13 @@ SECTION_PARTIALS: dict[str, str] = {
     # Dərs yükü (apps.workload) — kafedra bölgüsü + müəllimin öz yükü.
     "workload-distribution": "accounts/profile/sections/_workload_distribution.html",
     "my-workload": "accounts/profile/sections/_my_workload.html",
+    # Mərhələ 4 — dərs yükü zənciri: tədris şöbəsi mərkəzi (12), koordinator
+    # vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi baxışı (17).
+    # Hamısı SERVER-render OXU panelidir; mutasiyalar tək JSON POST-a gedir.
+    "workload-center": "accounts/profile/sections/_workload_center.html",
+    "workload-visa": "accounts/profile/sections/_workload_visa.html",
+    "workload-approval": "accounts/profile/sections/_workload_approval.html",
+    "workload-overview": "accounts/profile/sections/_workload_overview.html",
     # Tədris şöbəsi (dizayn handoff Mərhələ 1) — struktur ağacı, kafedra profili,
     # ixtisas reyestri, fənn kataloqu. Hamısı SERVER-render OXU panelidir;
     # mutasiyalar ayrıca JSON POST endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
@@ -163,6 +170,8 @@ SECTION_PARTIALS: dict[str, str] = {
     # Mərhələ 3 — Tələbə Xidmətləri Mərkəzi: qəbul (08) və reyestr (09).
     # Hər ikisi SERVER-render OXU panelidir; mutasiyalar ayrıca JSON /
     # multipart endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
+    # Mərhələ 6 — ekran 21 «Keçilmiş dərslər» (müəllim + nəzarətçi, OXU-ONLY).
+    "lessons-log": "accounts/profile/sections/_lessons_log.html",
     "student-admission": "accounts/profile/sections/_student_admission.html",
     "student-registry": "accounts/profile/sections/_student_registry.html",
 }
@@ -237,6 +246,12 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # GET-lə gəlir, bölgü/təsdiq isə ayrıca JSON POST-la gedir.
         "workload-distribution",
         "my-workload",
+        # Mərhələ 4 zənciri — panellər OXU-ONLY render olunur, mutasiyalar
+        # `workload:action` endpoint-inə gedir → AJAX swap təhlükəsizdir.
+        "workload-center",
+        "workload-visa",
+        "workload-approval",
+        "workload-overview",
         # Dəqiqləşdirmə növbəsi də OXU-ONLY render olunur — server yalnız
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.
@@ -256,6 +271,8 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # reyestr isə server-render cədvəldir (filtr/sıralama linklə).
         "student-admission",
         "student-registry",
+        # Ekran 21 — tam OXU-ONLY hesabat paneli (mutasiya yoxdur) → AJAX-safe.
+        "lessons-log",
     }
 )
 

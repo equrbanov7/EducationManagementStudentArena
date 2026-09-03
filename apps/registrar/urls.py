@@ -10,6 +10,7 @@ from . import (
     curriculum_actions,
     guest_roster_views,
     journal_actions,
+    lessons_log_views,
     pdf_views,
     schedule_views,
     semester_actions,
@@ -34,6 +35,8 @@ urlpatterns = [
     # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
     path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
+    # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
+    path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     path("teqvim/", schedule_views.calendar_view, name="calendar"),
     path("cedvel/", schedule_views.schedule_view, name="schedule"),

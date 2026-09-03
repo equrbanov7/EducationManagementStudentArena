@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}Ekran 12 başlıq əməlləri.
+
+Arxiv ilində HEÇ BİR yazma düyməsi render olunmur (server də bloklayır).
+«Dekanlıqlara göndər» yalnız qaralama/qaytarılmış sənəddə və `workload.submit`
+səlahiyyəti ilə görünür; sətir yoxdursa DISABLED olur (gizlədilmir — §4).{% endcomment %}
+{% with task=workload_center_section.task summary=workload_center_section.submit_summary %}
+{% if not workload_center_section.is_archive %}
+<button type="button" class="ems-btn"
+        data-tof-open="wlTaskDialog"
+        data-tof-prefill='{"action": "create_task", "academic_year": "{{ workload_center_section.year }}", "chair": ""}'>
+    {% trans "Yeni tapşırıq" context "accounts.workload_center" %}
+</button>
+{% if task and task.is_office_editable %}
+<button type="button" class="ems-btn"
+        data-tof-open="wlGenerateDialog"
+        data-tof-prefill='{"action": "generate_rows", "task": "{{ task.id }}"}'>
+    {% trans "Tədris planından gətir" context "accounts.workload_center" %}
+</button>
+{% endif %}
+{% if workload_center_section.can_submit and task and task.is_office_editable %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-submit='{"action": "submit", "task": "{{ task.id }}"}'
+        data-tof-confirm="{% trans 'Sənəd dekanlıqlara göndərilsin? Göndərişdən sonra sətirlər yalnız qaytarıldıqda redaktə olunur.' context 'accounts.workload_center' %}"
+        {% if not summary or not summary.can_submit %}disabled aria-disabled="true"{% endif %}>
+    {% trans "Dekanlıqlara göndər" context "accounts.workload_center" %}
+</button>
+{% endif %}
+{% endif %}
+{% endwith %}

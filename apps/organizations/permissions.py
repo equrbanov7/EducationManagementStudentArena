@@ -154,6 +154,7 @@ PERMISSION_CATEGORIES = {
         "workload.approve",
         "workload.distribute",
         "workload.report",
+        "workload.object",
     ],
     # Tələbə qrupları (exams.StudentGroup) — qrup yaratmaq/idarə etmək açarı
     # permission-editordan istənilən rola (dekan, koordinator…) verilə bilər.
@@ -393,6 +394,7 @@ PERMISSION_LABELS = {
     "workload.approve": pgettext_lazy(_PERM_CTX, "Tapşırığı təsdiqləmək"),
     "workload.distribute": pgettext_lazy(_PERM_CTX, "Dərs yükünü müəllimlərə bölmək"),
     "workload.report": pgettext_lazy(_PERM_CTX, "Dərs yükü hesabatları və ixracı"),
+    "workload.object": pgettext_lazy(_PERM_CTX, "Öz dərs yükünə etiraz bildirmək"),
     # groups
     "group.view": pgettext_lazy(_PERM_CTX, "Qruplara baxış"),
     "group.manage": pgettext_lazy(_PERM_CTX, "Qrup yaratmaq/idarə etmək"),

@@ -49,6 +49,11 @@ def university_role_sections(
         # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
         if is_teacher or is_org_admin or is_superadmin or is_student or can_manage_journal_roster:
             sections.add("my-journal")
+        # Ekran 21 «Keçilmiş dərslər» — müəllimin ÖZ dərs izi (OXU-ONLY).
+        # Tələbədə QƏSDƏN YOXDUR. Nəzarətçi (`journal.roster`) bölməni ayrıca
+        # `rbac_sections.apply_permission_section_gates`-dən alır.
+        if is_teacher or is_org_admin or is_superadmin or can_manage_journal_roster:
+            sections.add("lessons-log")
         if can_close_journals:
             sections.add("journal-close")
         if can_enter_exam_scores:

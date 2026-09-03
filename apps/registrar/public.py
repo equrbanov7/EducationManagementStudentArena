@@ -11,6 +11,12 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 
 from apps.registrar import services
+from apps.registrar.cabinet_policy import (
+    TRANSCRIPT_APPLICATION_KIND,
+    approved_syllabus_offerings,
+    assessment_weights_view,
+    transcript_policy,
+)
 from apps.registrar.exam_bridge import (
     exam_eligibility,
     exam_result_summary,
@@ -22,6 +28,7 @@ from apps.registrar.models import StudentAcademicRecord
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
     "STUDENT_TRANSCRIPT_SELF_SERVICE",
+    "TRANSCRIPT_APPLICATION_KIND",
     "exam_eligibility",
     "exam_result_summary",
     "record_exam_result",
@@ -98,6 +105,8 @@ def build_student_transcript_context(request, *, organization) -> dict:
 
     data = transcript_service.build_student_transcript(student=request.user, organization=organization, program=program)
     data["record"] = record
+    # Transkript siyasəti (README §10.1) — bax `cabinet_policy.transcript_policy`.
+    data.update(transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE))
     return {"student_transcript_section": data}
 
 
@@ -534,9 +543,21 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
     journal_by_enrollment = {row["enrollment"].id: row["journal"] for row in journal_summary["subjects"]}
     # Çox cəhdli imtahan (sahibin qərarı M2): rəsmi olan SONUNCU cəhddir, amma
     # əvvəlkilərin balı itmir — tələbə kabinetində açıq göstərilir.
+    from django.urls import reverse
+
     from apps.registrar import exam_attempt_history, finals
 
+    # Ekran 10 — «Sillabusa bax» keçidi (YALNIZ APPROVED, §8/9) toplu həll olunur.
+    approved_ids = approved_syllabus_offerings(organization, [row["enrollment"].offering for row in data["subjects"]])
     for subject_row in data["subjects"]:
+        offering = subject_row["enrollment"].offering
+        subject_row["syllabus_available"] = offering.id in approved_ids
+        subject_row["syllabus_url"] = (
+            reverse("registrar:offering_syllabus_json", args=[offering.id]) if offering.id in approved_ids else ""
+        )
+        subject_row["syllabus_pdf_url"] = (
+            reverse("registrar:offering_syllabus_pdf", args=[offering.id]) if offering.id in approved_ids else ""
+        )
         subject_row["journal"] = journal_by_enrollment.get(subject_row["enrollment"].id)
         subject_row["final"] = finals.compute_final_result(
             enrollment=subject_row["enrollment"], organization=organization
@@ -564,6 +585,10 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
             "elective_blocks": elective_blocks,
             "group_decisions": group_decisions,
             "credit_summary": data["credit_summary"],
+            # Qiymətləndirmə çəkiləri — universitet SİYASƏTİ ilə kilidli
+            # (README §8/4: davamiyyət 10 · sərbəst iş 10 · cari 30 · yekun 50).
+            # Kodda hardcode YOX — `apps.syllabus.policy` org səviyyəsindən oxuyur.
+            "assessment_weights": assessment_weights_view(organization),
         }
     )
     return {"student_subjects_section": section}

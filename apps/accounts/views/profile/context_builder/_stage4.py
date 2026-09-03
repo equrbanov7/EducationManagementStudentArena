@@ -12,6 +12,20 @@ from ..contact_inbox import build_contact_inbox_context
 from ..password_otp import mask_email
 
 
+def _transcript_request_cta() -> dict:
+    """«Transkript sorğusu» CTA-sı — yalnız `request` siyasətində göstərilir.
+
+    Bayraq açılanda (`download`) CTA SÖNÜR: tələbə transkripti «Transkript»
+    bölməsindən birbaşa alır və sorğuya ehtiyac qalmır.
+    """
+    from apps.registrar.cabinet_policy import transcript_policy
+    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE
+
+    policy = transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE)
+    policy["show"] = not policy["self_service"]
+    return policy
+
+
 class _Stage4Mixin:
 
     def _stage_4_context(self):
@@ -104,6 +118,10 @@ class _Stage4Mixin:
             "my_results_page_obj": self.my_results_page_obj,
             "my_result_counts": self.my_result_counts,
             "my_results_active_filter": self.my_results_active_filter,
+            # Transkript siyasəti (README §10.1 — default `request`). «Nəticələrim»
+            # RƏSMİ SƏNƏD DEYİL və sənəd linki VERMİR; burada yalnız SORĞU
+            # kanalına (Müraciətlər → «Transkript sorğusu») keçid göstərilir.
+            "transcript_request": _transcript_request_cta(),
             "my_results_search_query": self.my_results_search_query,
             "my_results_year": self.my_results_year,
             "my_results_season": self.my_results_season,
@@ -242,6 +260,11 @@ class _Stage4Mixin:
             "applications_section": self.applications_section,
             "workload_distribution_section": self.workload_distribution_section,
             "my_workload_section": self.my_workload_section,
+            "workload_center_section": self.workload_center_section,
+            "workload_visa_section": self.workload_visa_section,
+            "workload_approval_section": self.workload_approval_section,
+            "workload_overview_section": self.workload_overview_section,
+            "lessons_log_section": self.lessons_log_section,
             "structure_tree_section": self.structure_tree_section,
             "chair_profile_section": self.chair_profile_section,
             "programs_registry_section": self.programs_registry_section,

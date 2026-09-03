@@ -149,14 +149,31 @@ SYLLABUS: tuple[Status, ...] = (
 # 3. Dərs yükü zənciri
 # --------------------------------------------------------------------------- #
 
-#: Ekran 15 — dekanlıq növbəsindəki sətir pill-i.
+#: Ekran 15 — dekanlıq dilim pill-i. ⚠️ `SliceStatus.PENDING` bu ailədə «sent»
+#: açarı ilə göstərilir (dizayn palitrası üç pill-dir; glue qatı çevirir).
 WORKLOAD_LINE: tuple[Status, ...] = (
     _s("sent", _t("Göndərilib"), "primary", order=0),
     _s("returned", _t("Qaytarılıb"), "danger", order=1),
     _s("approved", _t("Təsdiqlənib"), "success", order=2),
 )
 
-#: Ekran 13 — koordinator vizası.
+#: Ekran 12 — tapşırıq sənədinin 9 statusu (spec §4.1, `TaskStatus` güzgüsü).
+WORKLOAD_TASK: tuple[Status, ...] = (
+    _s("draft", _t("Qaralama"), "neutral", order=0),
+    _s("submitted", _t("Göndərilib"), "primary", order=1),
+    _s("returned", _t("Qaytarılıb"), "danger", order=2),
+    _s("pending_final_approval", _t("Yekun təsdiq gözləyir"), "info", order=3),
+    _s("approved", _t("Təsdiqlənib"), "success", order=4),
+    _s("distributing", _t("Bölüşdürülür"), "info", order=5),
+    _s("distributed", _t("Bölüşdürülüb"), "success", order=6),
+    _s("amended", _t("Düzəliş edilib"), "warning", order=7),
+    _s("cancelled", _t("Ləğv edilib"), "muted", order=8),
+    _s("none", _t("Tapşırıq yoxdur"), "muted", order=9),
+)
+
+#: Ekran 13 — koordinator vizası. ⚠️ `RowReviewStatus.FLAGGED` burada
+#: «remarked», `RETURNED` isə `workload_line`-ın «returned» açarıdır — glue
+#: qatı çevirir (dizayn palitrası üç pill-dir, DB kataloqu dördü saxlayır).
 WORKLOAD_VISA: tuple[Status, ...] = (
     _s("pending", _t("Gözləyir"), "neutral", order=0),
     _s("reviewed", _t("Baxılıb"), "success", order=1),
@@ -318,6 +335,7 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "generic": GENERIC,
     "syllabus": SYLLABUS,
     "workload_line": WORKLOAD_LINE,
+    "workload_task": WORKLOAD_TASK,
     "workload_visa": WORKLOAD_VISA,
     "load_band": LOAD_BAND,
     "teacher_norm": TEACHER_NORM,

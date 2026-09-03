@@ -187,6 +187,11 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260903-2">
     {% endif %}
+    {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm
+    (kart sırası, yekun zolağı, risk siyahısı); komponentlər `ems_ui`-dədir.{% endcomment %}
+    {% if 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_chain.css' %}?v=20260903-4">
+    {% endif %}
     {% comment %}Mərhələ 3 (ekran 08/09) — Tələbə Xidmətləri Mərkəzi. YALNIZ
     düzüm; stepper/KPI/cədvəl/çekmecə/dialoq `ems_ui`-dədir. Qəbul paneli
     əlavə olaraq mövcud `student_intake.css` fayl-yükləmə üslubunu işlədir,

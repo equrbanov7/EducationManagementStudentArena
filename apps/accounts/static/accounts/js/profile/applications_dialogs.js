@@ -174,14 +174,14 @@
         }
     }
 
-    function openCreate(mode, app) {
+    function openCreate(mode, app, presetKind) {
         var box = open("create");
         if (!box) {
             return;
         }
         box.__files = [];
         box.__mode = mode || "create";
-        box.__kind = app && app.kind ? app.kind.code : "";
+        box.__kind = app && app.kind ? app.kind.code : (presetKind || "");
         box.__app = app || null;
         box.querySelector("[data-apx-subject]").value = app ? app.subject : "";
         box.querySelector("[data-apx-body]").value = app ? app.body : "";

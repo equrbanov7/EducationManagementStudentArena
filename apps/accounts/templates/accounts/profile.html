@@ -13,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-csp-nonce="{{ request.csp_nonce }}">
@@ -291,12 +291,17 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
-{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260903-2"></script>
 {% endif %}
 {% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
 gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
-{% if 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+{% if 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-approval' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
+{% endif %}
+{% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq
+`teaching_office.js` urlencoded göndərir, fayl ondan keçmir).{% endcomment %}
+{% if 'workload-center' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/workload_chain.js' %}?v=20260903-4"></script>
 {% endif %}
 {% endblock %}

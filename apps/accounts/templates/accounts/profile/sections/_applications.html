@@ -39,7 +39,11 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
      data-min-subject="{{ applications_section.rules.min_subject_length|default:5 }}"
      data-min-body="{{ applications_section.rules.min_body_length|default:20 }}"
      data-min-note="{{ applications_section.rules.min_note_length|default:10 }}"
-     data-open-application="{{ request.GET.application|default:'' }}">
+     data-open-application="{{ request.GET.application|default:'' }}"
+     {% comment %}«Yeni müraciət» dialoqunu ÖNCƏDƏN SEÇİLMİŞ növlə açır — kabinetin
+     başqa bölmələri (məs. Transkript → «Transkript sorğusu») buraya belə keçid verir.
+     Dəyər kataloqda yoxdursa JS onu SƏSSİZCƏ atır (server tərəfdə yoxlama var).{% endcomment %}
+     data-new-kind="{{ request.GET.new_kind|default:'' }}">
 
   {% comment %}Panelin ÖZ CSRF token-i. `EMSCore.getCsrfToken()` kuki adını
   `csrftoken` kimi sabit oxuyur; QA/staging konfiqurasiyası kukini
