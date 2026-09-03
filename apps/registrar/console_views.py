@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -42,32 +43,20 @@ from .models import (
 )
 from .views import _current_period
 
-# Roles that may manage the registrar catalogue (besides superuser + org owner).
-# QEYD (2026-07-29): `ikt_rehber` burada YOX idi, halbuki sidebar-dakı
-# `role_capabilities.can_manage_registrar` onu buraxırdı — nəticədə link
-# görünürdü, açanda isə view 404 verirdi. Rolun öz tərifində `unit.*` və
-# `member.*` səlahiyyəti var (organizations/default_roles.py), yəni struktur
-# kataloqunu idarə etmək onun təyinatına daxildir.
-_REGISTRAR_ADMIN_ROLES = ("org_admin", "org_owner", "rector", "vice_rector", "dean", "ikt_rehber")
+REGISTRAR_MANAGE_PERMISSION = "course.edit"
 
 
 def _can_manage_registrar(user, organization) -> bool:
-    """Only the org owner, an admin-ish role membership, or a superuser may manage."""
+    """Require catalogue permission plus a resolvable structural scope."""
     if not getattr(user, "is_authenticated", False) or organization is None:
         return False
-    if getattr(user, "is_superuser", False):
-        return True
-    if getattr(organization, "owner_id", None) == user.id:
-        return True
     from django.apps import apps as django_apps
 
-    Membership = django_apps.get_model("organizations", "Membership")
-    return Membership.objects.filter(
-        organization=organization,
-        user=user,
-        is_active=True,
-        role__name__in=_REGISTRAR_ADMIN_ROLES,
-    ).exists()
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    scope = OrgUnit.user_permission_scope(user, organization, REGISTRAR_MANAGE_PERMISSION)
+    # Unit-scoped catalogue CRUD is not yet object-scoped end to end.  Until it
+    # is, granting the console would expose organization-wide rows/actions.
+    return scope.is_org_wide
 
 
 @login_required
@@ -397,8 +386,8 @@ def rubric_form_view(request, pk=None):
                 criteria=criteria,
                 rubric=instance,
             )
-        except ValueError as exc:
-            messages.error(request, str(exc))
+        except (ValueError, ValidationError) as exc:
+            messages.error(request, " ".join(exc.messages) if isinstance(exc, ValidationError) else str(exc))
         except IntegrityError:
             messages.error(request, _("Bu adla rubrik artıq mövcuddur."))
         else:

@@ -25,6 +25,10 @@
                    class="results-tab {% if active_filter == 'all' %}active{% endif %}">
                     {% trans "tab_all" context "accounts.my_results_page" %} ({{ counts.all|default:0 }})
                 </a>
+                <a href="{% url 'accounts:my_results' %}?type=academic{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
+                   class="results-tab {% if active_filter == 'academic' %}active{% endif %}">
+                    {% trans "Akademik" context "profile.results.academic" %} ({{ counts.academic|default:0 }})
+                </a>
                 <a href="{% url 'accounts:my_results' %}?type=exams{% if search_query %}&q={{ search_query|urlencode }}{% endif %}"
                    class="results-tab {% if active_filter == 'exams' %}active{% endif %}">
                     {% trans "tab_exams" context "accounts.my_results_page" %} ({{ counts.exams|default:0 }})
@@ -43,7 +47,7 @@
                 </a>
             </div>
 
-            <form method="get" class="results-search-form">
+            <form method="get" class="results-search-form" data-my-results-filter-form>
                 {% if active_filter and active_filter != 'all' %}
                     <input type="hidden" name="type" value="{{ active_filter }}">
                 {% endif %}
@@ -61,6 +65,39 @@
                         </a>
                     {% endif %}
                 </div>
+
+                {% comment %}
+                İl/semestr süzgəci yalnız akademik (jurnal) fənn nəticələrinə aiddir —
+                imtahan cəhdinin/təhvilin semestr mənsubiyyəti yoxdur, ona görə yalnız
+                "Hamısı" və "Akademik" tablarında göstərilir.
+                {% endcomment %}
+                {% if active_filter == 'all' or active_filter == 'academic' %}
+                {% if year_options %}
+                <div class="results-academic-filters">
+                    <div class="results-academic-filter">
+                        <label class="results-academic-filter__label" for="myResultsPageYear">{% trans "Tədris ili" context "profile.results.academic" %}</label>
+                        <select id="myResultsPageYear" name="year" class="form-control" data-my-results-filter>
+                            <option value="">{% trans "Bütün illər" context "profile.results.academic" %}</option>
+                            {% for year in year_options %}
+                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="results-academic-filter">
+                        <label class="results-academic-filter__label" for="myResultsPageSeason">{% trans "Semestr" context "profile.results.academic" %}</label>
+                        <select id="myResultsPageSeason" name="season" class="form-control" data-my-results-filter>
+                            <option value="">{% trans "Bütün semestrlər" context "profile.results.academic" %}</option>
+                            {% for season in season_options %}
+                            <option value="{{ season }}" {% if season == selected_season %}selected{% endif %}>{{ season }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="results-academic-filters__hint">
+                        {% trans "İl və semestr süzgəci yalnız akademik (jurnal) fənn nəticələrinə aiddir." context "profile.results.academic" %}
+                    </p>
+                </div>
+                {% endif %}
+                {% endif %}
             </form>
         </div>
 
@@ -76,9 +113,14 @@
                     <div class="post-date">
                         <span class="kind-badge">{{ item.type_label }}</span>
                         {{ item.kind }}
-                        {% if item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                        {% if item.category == 'academic' %}
+                            {% if item.academic.period_label %} · {{ item.academic.period_label }}{% endif %}
+                        {% elif item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
                     </div>
                     <div class="result-meta">
+                        {% if item.category == 'academic' %}
+                        <span class="result-outcome-badge result-outcome-badge--{{ item.academic.outcome }}">{{ item.academic.outcome_label }}</span>
+                        {% else %}
                         <span class="result-status result-status--{{ item.status }}">
                             {% if item.status == "graded" %}
                                 {% trans "status_graded" context "accounts.my_results_page" %}
@@ -88,21 +130,32 @@
                                 {% trans "status_submitted" context "accounts.my_results_page" %}
                             {% endif %}
                         </span>
+                        {% endif %}
                         {% if item.score != None %}
                         <span class="result-score">{% trans "score_prefix" context "accounts.my_results_page" %}: {{ item.score }}</span>
                         {% endif %}
+                        {% if item.category == 'academic' and item.academic.letter %}
+                        <span class="result-letter result-letter--{{ item.academic.letter }}">{{ item.academic.letter }}</span>
+                        {% endif %}
                     </div>
+                    {% if item.academic.fail_reason_label %}
+                    <div class="result-feedback">
+                        {{ item.academic.fail_reason_label }}
+                    </div>
+                    {% endif %}
                     {% if item.feedback %}
                     <div class="result-feedback">
                         {{ item.feedback|truncatechars:180 }}
                     </div>
                     {% endif %}
                 </div>
+                {% if item.detail_url %}
                 <div class="result-action">
                     <a href="{{ item.detail_url }}" class="btn btn-primary btn-sm">
                         {% trans "view_details" context "accounts.my_results_page" %}
                     </a>
                 </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -114,13 +167,20 @@
         {% else %}
         <div class="empty-state section-card">
             <i class="fas fa-clipboard-list"></i>
-            {% if search_query %}
+            {% if search_query or selected_year or selected_season %}
                 <p>{% trans "no_search_results" context "accounts.my_results_page" %}</p>
             {% else %}
                 <p>{% trans "empty_state" context "accounts.my_results_page" %}</p>
+                <p class="modern-empty-state__hint">
+                    {% trans "İmtahan və tapşırıq nəticələri sən onları təhvil verdikdən, akademik fənn nəticələri isə müəllim jurnalı yekunlaşdırıldıqdan sonra burada görünür. Fənlərin var, amma siyahı boşdursa — tədris hissəsi ilə əlaqə saxla." context "profile.results.academic" %}
+                </p>
             {% endif %}
         </div>
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'accounts/js/profile/my_results_filters.js' %}?v=20260827-academic"></script>
 {% endblock %}

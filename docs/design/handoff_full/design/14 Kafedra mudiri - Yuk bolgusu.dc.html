@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f8fafc">
+
+  <div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="brand/wcu-logo-horizontal.svg" alt="Qərbi Kaspi Universiteti" style="height:34px;width:auto;max-width:180px;display:block">
+      <span style="width:1px;height:22px;background:#e2e8f0"></span>
+      <span style="font-size:1.02rem;font-weight:800;color:#2563eb;letter-spacing:-.02em">EMS Arena</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.25">
+        <span style="font-size:.83rem;font-weight:600;color:#0f172a">prof. İ. Səmədov</span>
+        <span style="font-size:.72rem;color:#64748b">Kafedra müdiri · Proqramlaşdırma və İT</span>
+      </div>
+      <button type="button" title="Çıxış" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#fee2e2;border-color:#fecaca;color:#dc2626">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start">
+
+    <aside style="flex:0 0 300px;width:300px;align-self:stretch;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1.5rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff">
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#0f172a;white-space:nowrap">Kafedra</h2>
+        <button type="button" title="Menyunu yığ" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;background:#eff6ff;color:#3b82f6;cursor:pointer" style-hover="background:#3b82f6;color:#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;gap:.6rem;padding:1rem .75rem">
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Dərs yükü</div>
+        <button type="button" onClick="{{ goDist }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navDBg }};color:{{ navDFg }};box-shadow:{{ navDSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M7 12h14"></path><path d="M11 18h10"></path></svg>
+          Yük bölgüsü
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#10b981;color:#fff;font-size:.75rem;font-weight:600">{{ openCount }}</span>
+        </button>
+        <button type="button" onClick="{{ goTeachers }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navTBg }};color:{{ navTFg }};box-shadow:{{ navTSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+          Müəllim yükləri
+        </button>
+        <button type="button" onClick="{{ goReports }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navRBg }};color:{{ navRFg }};box-shadow:{{ navRSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          Hesabatlar
+        </button>
+
+        <div style="margin:.5rem .25rem 0;padding:14px;border-radius:16px;background:#f9fbff;border:1px solid #e2e8f0">
+          <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b">Təsdiqlənmiş tapşırıq</div>
+          <div style="margin-top:4px;font-size:1.05rem;font-weight:800;color:#1e40af">8 965 saat</div>
+          <div style="margin-top:2px;font-size:.74rem;color:{{ yearNoteFg }}">{{ year }} · {{ yearNote }}</div>
+        </div>
+
+        <div style="margin-top:auto;padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Hesab</div>
+        <button type="button" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:transparent;color:#ef4444;font-size:.95rem;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#fef2f2;color:#dc2626">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Çıxış
+        </button>
+      </nav>
+    </aside>
+
+    <main style="flex:1;min-width:0;padding:24px 28px 40px">
+      <div style="max-width:1500px;margin:0 auto">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#94a3b8;margin-bottom:7px">
+              <span>Ana səhifə</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Dərs yükü</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span style="color:#334155;font-weight:600">{{ crumb }}</span>
+            </div>
+            <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ pageTitle }}</h1>
+            <p style="margin:6px 0 0;font-size:.86rem;color:#64748b;text-wrap:pretty">{{ pageSub }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="padding:6px 12px;border-radius:999px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;font-size:.76rem;font-weight:700">BÖLGÜDƏ</span>
+            <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Excel yüklə
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ isArchive }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;margin-bottom:16px;border:1px solid #fde68a;background:#fef3c7;border-radius:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <div style="font-size:.83rem;color:#92400e"><strong>Arxiv rejimi</strong> — {{ year }} tədris ili yalnız oxunuş üçün açıqdır.</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDist }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">TƏDRİS İLİ</label>
+                <select value="{{ fYear }}" onChange="{{ onFYear }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">SEMESTR</label>
+                <select value="{{ fSem }}" onChange="{{ onFSem }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:130px"><option>Hamısı</option><option>PAYIZ</option><option>YAZ</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">İXTİSAS</label>
+                <select value="{{ fSpec }}" onChange="{{ onFSpec }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:200px"><option>Hamısı</option><option>Kompüter elmləri</option><option>İnformasiya texnologiyaları</option><option>Kibertəhlükəsizlik</option><option>Filologiya (xidməti)</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">FORMA</label>
+                <select value="{{ fForma }}" onChange="{{ onFForma }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:130px"><option>Hamısı</option><option>Əyani</option><option>Qiyabi</option><option>İntensiv</option></select>
+              </div>
+              <label style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:.83rem;color:#334155;cursor:pointer">
+                <input type="checkbox" checked="{{ fOnlyOpen }}" onChange="{{ onFOnlyOpen }}" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+                Yalnız bölünməmişlər
+              </label>
+              <button type="button" onClick="{{ applyFilters }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8;border-color:#1d4ed8">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                Bax
+              </button>
+              <button type="button" onClick="{{ resetFilters }}" style="padding:10px 16px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Sıfırla</button>
+              <div style="margin-left:auto;font-size:.83rem;color:#64748b">Nəticə: <strong style="color:#0f172a">{{ rowCount }}</strong> sətir</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start">
+
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+                  <div style="background:#fff;border:1px solid {{ r.cardBd }};border-radius:14px;padding:16px 18px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px">
+                      <div>
+                        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                          <span style="font-size:.95rem;font-weight:700;color:#0f172a;line-height:1.35">{{ r.subject }}</span>
+                          <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.8rem;font-weight:800;color:#1d4ed8">{{ r.credit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+                          <sc-if value="{{ r.isFull }}">
+                            <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:#16a34a;color:#fff;font-size:.68rem;font-weight:800">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                              TAM
+                            </span>
+                          </sc-if>
+                        </div>
+                        <div style="margin-top:5px;font-size:.79rem;color:#64748b">{{ r.groups }} · {{ r.spec }} · {{ r.sem }} · {{ r.forma }}</div>
+                      </div>
+                      <button type="button" onClick="{{ r.onOpen }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:9px;font-size:.83rem;font-weight:600;cursor:pointer;border:1px solid {{ r.btnBd }};background:{{ r.btnBg }};color:{{ r.btnFg }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                        {{ r.btnLabel }}
+                      </button>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+                      <sc-for list="{{ r.acts }}" as="ac" hint-placeholder-count="3">
+                        <div>
+                          <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
+                            <span style="font-size:.75rem;font-weight:600;color:#475569">{{ ac.label }}</span>
+                            <span style="font-size:.75rem;font-weight:700;color:{{ ac.fg }}">{{ ac.text }}</span>
+                          </div>
+                          <div style="height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+                            <div style="height:100%;width:{{ ac.pct }};background:{{ ac.bar }}"></div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <sc-if value="{{ r.hasVacant }}">
+                      <div style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;padding:4px 10px;border:1px solid #dc2626;border-radius:999px;background:#fff;color:#dc2626;font-size:.72rem;font-weight:700">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.6"></line></svg>
+                        Vakant: {{ r.vacantHours }} saat
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ noRows }}">
+                  <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:48px 24px;text-align:center">
+                    <div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:#f1f5f9;color:#94a3b8;margin-bottom:12px">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div style="font-size:.95rem;font-weight:700;color:#334155">Bu filtrlərə uyğun bölünməmiş sətir yoxdur</div>
+                    <div style="margin-top:6px;font-size:.84rem;color:#64748b">Filtrləri dəyişin və ya <strong>Sıfırla</strong> düyməsinə basın.</div>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:12px;position:sticky;top:76px">
+                <div style="background:#fff;border:1px solid #fecaca;border-left:4px solid #dc2626;border-radius:14px;padding:16px 18px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                    <div>
+                      <div style="font-size:1.6rem;font-weight:800;letter-spacing:-.03em;color:#dc2626;line-height:1.1">{{ vacantTotal }}</div>
+                      <div style="margin-top:5px;font-size:.7rem;font-weight:700;letter-spacing:.07em;color:#b91c1c">VAKANT SAATLAR</div>
+                    </div>
+                    <button type="button" style="padding:8px 13px;border-radius:9px;border:1px solid #fecaca;background:#fee2e2;color:#b91c1c;font-size:.79rem;font-weight:600;cursor:pointer" style-hover="background:#fecaca">Siyahı</button>
+                  </div>
+                </div>
+
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+                  <div style="padding:13px 16px;border-bottom:1px solid #e2e8f0;font-size:.88rem;font-weight:700;color:#0f172a">Müəllim yük paneli</div>
+                  <div style="padding:12px;display:flex;flex-direction:column;gap:10px">
+                    <sc-for list="{{ teachers }}" as="t" hint-placeholder-count="4">
+                      <button type="button" onClick="{{ t.onOpen }}" style="text-align:left;border:1px solid {{ t.bd }};background:{{ t.bg }};border-radius:12px;padding:12px 14px;cursor:pointer" style-hover="border-color:#bfdbfe;background:#f8fafc">
+                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+                          <div>
+                            <div style="font-size:.87rem;font-weight:700;color:#0f172a">{{ t.name }}</div>
+                            <div style="margin-top:2px;font-size:.74rem;color:#64748b">{{ t.title }} · {{ t.stat }} ştat</div>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:6px">
+                            <sc-if value="{{ t.over }}">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+                            </sc-if>
+                            <span style="font-size:.82rem;font-weight:800;color:{{ t.fg }};white-space:nowrap">{{ t.hours }} / {{ t.norm }}</span>
+                          </div>
+                        </div>
+                        <div style="height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-top:9px">
+                          <div style="height:100%;width:{{ t.pct }};background:{{ t.bar }}"></div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:.73rem;color:#64748b">
+                          <span>Payız {{ t.fall }} · Yaz {{ t.spring }}</span>
+                          <span>saathesabı {{ t.hourly }}</span>
+                        </div>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="position:sticky;bottom:0;margin-top:18px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:14px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 -6px 18px -12px rgba(15,23,42,.35)">
+              <div style="min-width:300px;flex:1">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+                  <span style="font-size:.83rem;color:#64748b">Bölünüb: <strong style="color:#0f172a">{{ distText }}</strong></span>
+                  <span style="font-size:.85rem;font-weight:800;color:#1d4ed8">{{ distPct }}</span>
+                </div>
+                <div style="height:9px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+                  <div style="height:100%;width:{{ distPct }};background:#2563eb"></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-left:auto">
+                <sc-if value="{{ vacantTotal }}">
+                  <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #dc2626;border-radius:999px;color:#dc2626;font-size:.76rem;font-weight:700">Vakant: {{ vacantTotal }} saat</span>
+                </sc-if>
+                <button type="button" onClick="{{ openConfirm }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;font-size:.87rem;font-weight:700;cursor:{{ confirmCur }};border:1px solid {{ confirmBd }};background:{{ confirmBg }};color:{{ confirmFg }}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Bölgünü TƏSDİQLƏ
+                </button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isTeachers }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+            <div style="padding:16px 18px;border-bottom:1px solid #e2e8f0">
+              <div style="font-size:.95rem;font-weight:700;color:#0f172a">Müəllim yükləri</div>
+              <div style="margin-top:3px;font-size:.81rem;color:#64748b">Proqramlaşdırma və informasiya təhlükəsizliyi kafedrası · {{ year }}</div>
+            </div>
+            <div style="overflow:auto">
+              <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:980px;font-size:.83rem">
+                <thead>
+                  <tr>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:220px">MÜƏLLİM</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">VƏZİFƏ</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">ŞTAT</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">NORMA</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:left;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:200px">CARİ YÜK</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">PAYIZ</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">YAZ</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SAATHESABI</th>
+                    <th style="background:#eff6ff;padding:10px 14px;text-align:center;font-size:.67rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">BAX</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ teachers }}" as="t" hint-placeholder-count="4">
+                    <tr style="background:{{ t.rowBg }}">
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;font-weight:700;color:#0f172a">{{ t.name }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;color:#64748b">{{ t.title }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ t.stat }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ t.norm }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0">
+                        <div style="display:flex;align-items:center;gap:9px">
+                          <div style="flex:1;height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+                            <div style="height:100%;width:{{ t.pct }};background:{{ t.bar }}"></div>
+                          </div>
+                          <span style="font-size:.8rem;font-weight:800;color:{{ t.fg }};white-space:nowrap">{{ t.hours }} s.</span>
+                        </div>
+                      </td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ t.fall }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ t.spring }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center;color:#334155">{{ t.hourly }}</td>
+                      <td style="padding:12px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                        <button type="button" onClick="{{ t.onOpen }}" title="Yükünə bax" style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#2563eb;border-color:#bfdbfe;background:#eff6ff">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5.5 12 5.5 22.5 12 22.5 12 19 18.5 12 18.5 1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReports }}">
+          <div style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:56px 24px;text-align:center">
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:16px;background:#f1f5f9;color:#94a3b8;margin-bottom:14px">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+            <div style="font-size:.98rem;font-weight:700;color:#334155">Hesabatlar bölgü təsdiqləndikdən sonra açılır</div>
+            <div style="margin-top:6px;font-size:.85rem;color:#64748b">Bölgü 100% tamamlananda müəllim və fənn kəsimli hesabatlar avtomatik formalaşacaq.</div>
+            <button type="button" onClick="{{ goDist }}" style="margin-top:18px;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#1d4ed8">Yük bölgüsünə qayıt</button>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showDist }}">
+    <div style="position:fixed;inset:0;z-index:200;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;overflow:auto">
+      <div style="width:100%;max-width:860px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+              <span style="font-size:1.02rem;font-weight:700;color:#0f172a">{{ mSubject }}</span>
+              <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 8px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.82rem;font-weight:800;color:#1d4ed8">{{ mCredit }}</span><span style="font-size:.62rem;font-weight:700;color:#2563eb">kr</span></span>
+            </div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">{{ mGroups }} · {{ mSem }} · {{ mSpec }}</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div style="padding:20px 22px;max-height:66vh;overflow:auto">
+          <div style="font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#64748b;margin-bottom:8px">FƏALİYYƏT NÖVÜ</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px">
+            <sc-for list="{{ mActs }}" as="ac" hint-placeholder-count="3">
+              <button type="button" onClick="{{ ac.onPick }}" style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:9px 14px;border-radius:11px;cursor:{{ ac.cur }};border:1.5px solid {{ ac.bd }};background:{{ ac.bg }};color:{{ ac.fg }}">
+                <span style="font-size:.83rem;font-weight:700">{{ ac.label }}</span>
+                <span style="font-size:.72rem;opacity:.85">qalıq {{ ac.left }} saat</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start">
+            <div>
+              <div style="font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#64748b;margin-bottom:8px">MÜƏLLİM</div>
+              <div style="position:relative;display:flex;align-items:center;margin-bottom:9px">
+                <svg style="position:absolute;left:11px" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.7" y2="16.7"></line></svg>
+                <input type="text" placeholder="Müəllim axtar…" value="{{ mSearch }}" onChange="{{ onSearch }}" style="width:100%;padding:9px 12px 9px 34px;border:1px solid #cbd5e1;border-radius:10px;font-size:.84rem;color:#0f172a;background:#fff">
+              </div>
+              <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;max-height:250px;overflow-y:auto">
+                <sc-for list="{{ mTeachers }}" as="t" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ t.onPick }}" style="display:block;width:100%;text-align:left;padding:11px 13px;border:0;border-bottom:1px solid #f1f5f9;cursor:pointer;background:{{ t.bg }}" style-hover="background:#eff6ff">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+                      <span style="font-size:.84rem;font-weight:600;color:{{ t.nameFg }}">{{ t.name }}</span>
+                      <span style="font-size:.76rem;font-weight:700;color:{{ t.fg }};white-space:nowrap">{{ t.hours }} / {{ t.norm }} s.</span>
+                    </div>
+                    <div style="height:5px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-top:7px">
+                      <div style="height:100%;width:{{ t.pct }};background:{{ t.bar }}"></div>
+                    </div>
+                  </button>
+                </sc-for>
+                <button type="button" onClick="{{ pickVacant }}" style="display:flex;align-items:center;gap:8px;width:100%;padding:11px 13px;border:0;background:{{ vacBg }};color:#dc2626;font-size:.83rem;font-weight:700;text-align:left;cursor:pointer" style-hover="background:#fee2e2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="13"></line><line x1="12" y1="16.5" x2="12" y2="16.6"></line></svg>
+                  Vakant saxla (müəllimsiz)
+                </button>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Saat (maks. {{ mLeft }})</label>
+                <input type="number" value="{{ mHours }}" onChange="{{ onHours }}" style="width:100%;padding:10px 12px;border:1.5px solid {{ hoursBd }};border-radius:10px;font-size:1rem;font-weight:700;color:{{ hoursFg }};background:{{ hoursBg }}">
+                <sc-if value="{{ hoursError }}">
+                  <div style="margin-top:6px;font-size:.75rem;color:#dc2626;font-weight:600">{{ hoursError }}</div>
+                </sc-if>
+              </div>
+              <div>
+                <label style="display:block;font-size:.75rem;font-weight:700;color:#334155;margin-bottom:6px">Qrup / yarımqrup qeydi</label>
+                <input type="text" placeholder="məs. 236 KE — 1-ci yarımqrup" value="{{ mNote }}" onChange="{{ onNote }}" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.84rem;color:#0f172a;background:#fff">
+              </div>
+              <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-size:.83rem;color:#334155;cursor:pointer">
+                <input type="checkbox" checked="{{ mHourly }}" onChange="{{ onHourly }}" style="width:15px;height:15px;accent-color:#2563eb;cursor:pointer">
+                Saathesabı ödəniş
+              </label>
+              <button type="button" onClick="{{ addAlloc }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-size:.85rem;font-weight:700;cursor:{{ addCur }};border:1px solid {{ addBd }};background:{{ addBg }};color:{{ addFg }}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Əlavə et
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-top:20px">
+            <div style="font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#64748b;margin-bottom:8px">BU SƏTİR ÜZRƏ BÖLGÜLƏR</div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+              <sc-for list="{{ mAllocs }}" as="al" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid #f1f5f9;background:{{ al.bg }}">
+                  <div>
+                    <div style="font-size:.85rem;font-weight:600;color:{{ al.fg }}">{{ al.who }}</div>
+                    <div style="margin-top:2px;font-size:.75rem;color:#64748b">{{ al.meta }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span style="font-size:.88rem;font-weight:800;color:#0f172a">{{ al.hours }} s.</span>
+                    <button type="button" onClick="{{ al.onRemove }}" title="Sil" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="color:#dc2626;border-color:#fecaca;background:#fee2e2">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ mNoAllocs }}">
+                <div style="padding:22px;text-align:center;font-size:.83rem;color:#94a3b8">Hələ bölgü edilməyib — yuxarıdan fəaliyyət və müəllim seçin.</div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <span style="font-size:.8rem;color:#64748b">Ümumi qalıq: <strong style="color:#0f172a">{{ mRowLeft }} saat</strong></span>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 20px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">Bitir</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showTeacher }}">
+    <div style="position:fixed;inset:0;z-index:210;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;overflow:auto">
+      <div style="width:100%;max-width:820px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0f172a">{{ tName }}</div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">{{ tTitle }} · {{ tStat }} ştat · norma {{ tNorm }} saat</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;max-height:62vh;overflow:auto">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px">
+            <div style="border:1.5px solid #bfdbfe;background:#eff6ff;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#2563eb">CƏMİ SAAT</div>
+              <div style="margin-top:3px;font-size:1.15rem;font-weight:800;color:#1d4ed8">{{ tHours }}</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">PAYIZ</div>
+              <div style="margin-top:3px;font-size:1.15rem;font-weight:800;color:#0f172a">{{ tFall }}</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">YAZ</div>
+              <div style="margin-top:3px;font-size:1.15rem;font-weight:800;color:#0f172a">{{ tSpring }}</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px">
+              <div style="font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#94a3b8">SAATHESABI</div>
+              <div style="margin-top:3px;font-size:1.15rem;font-weight:800;color:#0f172a">{{ tHourly }}</div>
+            </div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+            <table style="border-collapse:separate;border-spacing:0;width:100%;font-size:.82rem">
+              <thead>
+                <tr>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe;min-width:220px">FƏNN</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">KREDİT</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">FƏALİYYƏT</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">QRUPLAR</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:left;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SEMESTR</th>
+                  <th style="background:#eff6ff;padding:9px 14px;text-align:center;font-size:.66rem;font-weight:700;letter-spacing:.06em;color:#1e40af;border-bottom:1px solid #bfdbfe">SAAT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ tRows }}" as="x" hint-placeholder-count="4">
+                  <tr style="background:{{ x.bg }}">
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;color:#0f172a">{{ x.subject }}</td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:center">
+                      <span style="display:inline-flex;align-items:baseline;gap:3px;padding:2px 7px;border:1.5px solid #bfdbfe;border-radius:7px;background:#eff6ff"><span style="font-size:.78rem;font-weight:800;color:#1d4ed8">{{ x.credit }}</span><span style="font-size:.6rem;font-weight:700;color:#2563eb">kr</span></span>
+                    </td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0">
+                      <span style="padding:3px 9px;border-radius:999px;font-size:.71rem;font-weight:700;background:{{ x.actBg }};color:{{ x.actFg }}">{{ x.act }}</span>
+                    </td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;color:#334155">{{ x.groups }}</td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;color:#64748b">{{ x.sem }}</td>
+                    <td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:center;font-weight:800;color:#0f172a">{{ x.hours }}</td>
+                  </tr>
+                </sc-for>
+                <tr style="background:#f1f5f9">
+                  <td colspan="5" style="padding:11px 14px;font-size:.74rem;font-weight:800;letter-spacing:.05em;color:#0f172a">CƏMİ</td>
+                  <td style="padding:11px 14px;text-align:center;font-weight:800;color:#0f172a">{{ tHours }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Bağla</button>
+          <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Excel yüklə
+          </button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showConfirm }}">
+    <div style="position:fixed;inset:0;z-index:210;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="width:100%;max-width:520px;background:#fff;border-radius:16px;box-shadow:0 24px 60px -20px rgba(15,23,42,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid #e2e8f0">
+          <div style="font-size:1.02rem;font-weight:700;color:#0f172a">Bölgünü təsdiqlə</div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9;color:#0f172a">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:22px">
+          <sc-if value="{{ vacantTotal }}">
+            <div style="display:flex;gap:11px;padding:12px 14px;border:1px solid #fde68a;background:#fef3c7;border-radius:11px;margin-bottom:16px">
+              <svg style="flex:0 0 auto;margin-top:1px" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17.1"></line></svg>
+              <div style="font-size:.83rem;color:#92400e;line-height:1.5">{{ vacantTotal }} saat vakant qalır. Təsdiqləsəniz bu saatlar «vakant fond»a düşəcək və tədris şöbəsinə bildiriş gedəcək.</div>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.35rem;font-weight:800;color:#0f172a">{{ distributed }}</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#64748b">BÖLÜNMÜŞ SAAT</div>
+            </div>
+            <div style="border:1px solid #e2e8f0;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.35rem;font-weight:800;color:#0f172a">4</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#64748b">MÜƏLLİM</div>
+            </div>
+            <div style="border:1.5px solid #fecaca;background:#fee2e2;border-radius:12px;padding:14px;text-align:center">
+              <div style="font-size:1.35rem;font-weight:800;color:#dc2626">{{ vacantTotal }}</div>
+              <div style="margin-top:4px;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:#b91c1c">VAKANT</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid #e2e8f0;background:#f8fafc">
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 18px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f1f5f9">Ləğv et</button>
+          <button type="button" onClick="{{ closeModal }}" style="padding:10px 20px;border-radius:9px;border:1px solid #16a34a;background:#16a34a;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#15803d;border-color:#15803d">Təsdiqlə</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1500,&quot;height&quot;:980}}">
+class Component extends DCLogic {
+  state = {
+    view: 'dist',
+    modal: null,
+    rowIdx: null,
+    actKey: null,
+    teacher: null,
+    hours: '',
+    note: '',
+    hourly: false,
+    search: '',
+    tIdx: null,
+    fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fForma: 'Hamısı', fOnlyOpen: false,
+    applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', forma: 'Hamısı', onlyOpen: false },
+    alloc: [
+      { row: 0, act: 'muh', who: 'dos. A. Məmmədov', h: 30, note: 'birləşmiş axın', hourly: false },
+      { row: 0, act: 'sem', who: 'dos. A. Məmmədov', h: 15, note: '236 KE — 1-ci yarımqrup', hourly: false },
+      { row: 1, act: 'muh', who: 'b/m N. Əliyeva', h: 30, note: '', hourly: false },
+      { row: 1, act: 'sem', who: 'b/m N. Əliyeva', h: 30, note: '', hourly: false },
+      { row: 1, act: 'lab', who: 'assist. S. Quliyeva', h: 60, note: '2 yarımqrup', hourly: true },
+      { row: 2, act: 'muh', who: 'müəl. R. Həsənov', h: 30, note: '', hourly: false },
+      { row: 2, act: 'sem', who: 'müəl. R. Həsənov', h: 30, note: '', hourly: false },
+      { row: 2, act: 'lab', who: 'müəl. R. Həsənov', h: 30, note: '1-ci yarımqrup', hourly: false },
+      { row: 4, act: 'muh', who: 'dos. A. Məmmədov', h: 30, note: 'magistr', hourly: false },
+      { row: 4, act: 'sem', who: 'b/m N. Əliyeva', h: 15, note: '', hourly: false },
+      { row: 4, act: 'lab', who: 'VAKANT', h: 15, note: 'müəllim təyin olunmayıb', hourly: false },
+      { row: 5, act: 'muh', who: 'b/m N. Əliyeva', h: 20, note: 'xidməti tədris', hourly: false },
+      { row: 5, act: 'sem', who: 'assist. S. Quliyeva', h: 20, note: '', hourly: true }
+    ]
+  };
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+    const fmt = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    const ROWS = [
+      { subject: 'Proqramlaşdırmanın əsasları – 1', credit: 5, groups: '236 KE, 236 KE ing', spec: 'Kompüter elmləri', sem: 'PAYIZ', forma: 'Əyani', muh: 30, sm: 45, lab: 45 },
+      { subject: 'Proqramlaşdırmanın əsasları – 3', credit: 4, groups: '236 KE', spec: 'Kompüter elmləri', sem: 'YAZ', forma: 'Əyani', muh: 30, sm: 30, lab: 60 },
+      { subject: 'Veb texnologiyalar', credit: 4, groups: '235 İT', spec: 'İnformasiya texnologiyaları', sem: 'PAYIZ', forma: 'Əyani', muh: 30, sm: 30, lab: 60 },
+      { subject: 'İnformasiya təhlükəsizliyinin əsasları', credit: 6, groups: '235 K, 236 İ', spec: 'Kibertəhlükəsizlik', sem: 'PAYIZ', forma: 'Əyani', muh: 30, sm: 60, lab: 30 },
+      { subject: 'Şəbəkələrin təhlükəsizliyi', credit: 5, groups: '235 K', spec: 'Kibertəhlükəsizlik', sem: 'YAZ', forma: 'Əyani', muh: 30, sm: 15, lab: 30 },
+      { subject: 'Müasir informasiya-kommunikasiya texnologiyaları və informasiya təhlükəsizliyi', credit: 3, groups: '036 / 336 F', spec: 'Filologiya (xidməti)', sem: 'YAZ', forma: 'Qiyabi', muh: 20, sm: 40, lab: 0 }
+    ];
+    const ACTS = [{ key: 'muh', label: 'Mühazirə', f: 'muh' }, { key: 'sem', label: 'Seminar', f: 'sm' }, { key: 'lab', label: 'Laboratoriya', f: 'lab' }];
+
+    const TEACHERS = [
+      { name: 'dos. A. Məmmədov', title: 'Dosent', stat: '1.0', norm: 500, base: 345, fall: 240, spring: 180, hourly: 0 },
+      { name: 'b/m N. Əliyeva', title: 'Baş müəllim', stat: '1.0', norm: 550, base: 410, fall: 270, spring: 235, hourly: 0 },
+      { name: 'müəl. R. Həsənov', title: 'Müəllim', stat: '1.0', norm: 600, base: 525, fall: 330, spring: 285, hourly: 0 },
+      { name: 'assist. S. Quliyeva', title: 'Assistent', stat: '0.5', norm: 250, base: 100, fall: 95, spring: 85, hourly: 40 }
+    ];
+
+    const done = (ri, ak) => s.alloc.filter((x) => x.row === ri && x.act === ak).reduce((n, x) => n + x.h, 0);
+    const totalOf = (ri, ak) => ROWS[ri][ACTS.filter((a) => a.key === ak)[0].f];
+    const leftOf = (ri, ak) => Math.max(0, totalOf(ri, ak) - done(ri, ak));
+    const rowLeft = (ri) => ACTS.reduce((n, a) => n + leftOf(ri, a.key), 0);
+    const rowVacant = (ri) => s.alloc.filter((x) => x.row === ri && x.who === 'VAKANT').reduce((n, x) => n + x.h, 0);
+
+    const a = s.applied;
+    const arch = a.year !== '2026 / 2027';
+    const keep = ROWS.map((r, i) => i).filter((i) => {
+      const r = ROWS[i];
+      return (a.sem === 'Hamısı' || r.sem === a.sem)
+        && (a.spec === 'Hamısı' || r.spec === a.spec)
+        && (a.forma === 'Hamısı' || r.forma === a.forma)
+        && (!a.onlyOpen || rowLeft(i) > 0);
+    });
+
+    const rows = keep.map((i) => {
+      const r = ROWS[i];
+      const full = rowLeft(i) === 0;
+      const vac = rowVacant(i);
+      return {
+        subject: r.subject, credit: r.credit, groups: r.groups, spec: r.spec, sem: r.sem, forma: r.forma,
+        isFull: full, cardBd: full ? '#bbf7d0' : '#e2e8f0',
+        hasVacant: vac > 0, vacantHours: vac,
+        btnLabel: full ? 'Bölgüyə bax' : 'Bölgü et',
+        btnBg: full ? '#ffffff' : '#2563eb',
+        btnFg: full ? '#334155' : '#ffffff',
+        btnBd: full ? '#cbd5e1' : '#2563eb',
+        acts: ACTS.filter((ac) => r[ac.f] > 0).map((ac) => {
+          const d = done(i, ac.key), t = r[ac.f];
+          const p = Math.round((d / t) * 100);
+          return {
+            label: ac.label, text: d + '/' + t, pct: p + '%',
+            bar: d === 0 ? '#cbd5e1' : (d >= t ? '#16a34a' : '#f59e0b'),
+            fg: d === 0 ? '#94a3b8' : (d >= t ? '#16a34a' : '#b45309')
+          };
+        }),
+        onOpen: () => set({ modal: 'dist', rowIdx: i, actKey: null, teacher: null, hours: '', note: '', hourly: false, search: '' })
+      };
+    });
+
+    const tHoursOf = (name) => TEACHERS.filter((t) => t.name === name)[0].base + s.alloc.filter((x) => x.who === name).reduce((n, x) => n + x.h, 0);
+    const teachers = TEACHERS.map((t, i) => {
+      const h = tHoursOf(t.name);
+      const p = Math.min(100, Math.round((h / t.norm) * 100));
+      const over = h > t.norm;
+      return {
+        name: t.name, title: t.title, stat: t.stat, norm: t.norm, hours: h,
+        fall: t.fall, spring: t.spring, hourly: t.hourly,
+        pct: p + '%', over,
+        bar: over ? '#dc2626' : (p >= 90 ? '#f59e0b' : '#2563eb'),
+        fg: over ? '#dc2626' : '#0f172a',
+        bd: over ? '#fecaca' : '#e2e8f0',
+        bg: over ? '#fef2f2' : '#ffffff',
+        rowBg: over ? '#fef2f2' : (i % 2 ? '#f8fafc' : '#ffffff'),
+        onOpen: () => set({ modal: 'teacher', tIdx: i })
+      };
+    });
+
+    const vacantTotal = s.alloc.filter((x) => x.who === 'VAKANT').reduce((n, x) => n + x.h, 0) + 120;
+    const distributed = 7475 + s.alloc.reduce((n, x) => n + x.h, 0);
+    const distPct = Math.round((distributed / 8965) * 100);
+    const full = distributed >= 8965;
+
+    const ri = s.rowIdx;
+    const mRow = ri === null ? null : ROWS[ri];
+    const mLeft = ri === null || !s.actKey ? 0 : leftOf(ri, s.actKey);
+    const hv = parseInt(s.hours, 10);
+    const hoursNum = isNaN(hv) ? 0 : hv;
+    const tooMuch = hoursNum > mLeft;
+    const canAdd = !!s.actKey && !!s.teacher && hoursNum > 0 && !tooMuch;
+
+    const q = s.search.toLowerCase();
+    const mTeachers = teachers.filter((t) => !q || t.name.toLowerCase().indexOf(q) >= 0).map((t) => ({
+      name: t.name, norm: t.norm, hours: t.hours, pct: t.pct, bar: t.bar, fg: t.fg,
+      nameFg: s.teacher === t.name ? '#1d4ed8' : '#0f172a',
+      bg: s.teacher === t.name ? '#eff6ff' : '#ffffff',
+      onPick: () => set({ teacher: t.name })
+    }));
+
+    const actName = { muh: 'Mühazirə', sem: 'Seminar', lab: 'Laboratoriya' };
+    const mAllocs = ri === null ? [] : s.alloc.map((x, k) => ({ x, k })).filter((o) => o.x.row === ri).map((o, i) => ({
+      who: o.x.who,
+      meta: actName[o.x.act] + (o.x.note ? ' · ' + o.x.note : '') + (o.x.hourly ? ' · saathesabı' : ''),
+      hours: o.x.h,
+      fg: o.x.who === 'VAKANT' ? '#dc2626' : '#0f172a',
+      bg: o.x.who === 'VAKANT' ? '#fef2f2' : (i % 2 ? '#f8fafc' : '#ffffff'),
+      onRemove: () => set({ alloc: s.alloc.filter((y, j) => j !== o.k) })
+    }));
+
+    const ti = s.tIdx;
+    const tSel = ti === null ? null : TEACHERS[ti];
+    const tRows = ti === null ? [] : s.alloc.filter((x) => x.who === tSel.name).map((x, i) => ({
+      subject: ROWS[x.row].subject, credit: ROWS[x.row].credit, groups: ROWS[x.row].groups, sem: ROWS[x.row].sem,
+      act: actName[x.act], hours: x.h,
+      actBg: x.act === 'muh' ? '#dbeafe' : (x.act === 'sem' ? '#fef3c7' : '#dcfce7'),
+      actFg: x.act === 'muh' ? '#1d4ed8' : (x.act === 'sem' ? '#92400e' : '#166534'),
+      bg: i % 2 ? '#f8fafc' : '#ffffff'
+    }));
+
+    const TT = {
+      dist: ['Yük bölgüsü', 'Yük bölgüsü', 'Təsdiqlənmiş tapşırığı müəllimlərə bölün — qalıq saat canlı azalır.'],
+      teachers: ['Müəllim yükləri', 'Müəllim yükləri', 'Kafedra müəllimlərinin illik yükü, norma və saathesabı hissəsi.'],
+      reports: ['Hesabatlar', 'Hesabatlar', 'Kafedra üzrə yük hesabatları.']
+    };
+    const t = TT[s.view];
+
+    return {
+      crumb: t[0], pageTitle: t[1], pageSub: t[2],
+      isDist: s.view === 'dist', isTeachers: s.view === 'teachers', isReports: s.view === 'reports',
+      rows, teachers, noRows: rows.length === 0, rowCount: rows.length,
+      openCount: ROWS.filter((r, i) => rowLeft(i) > 0).length,
+
+      navDBg: s.view === 'dist' ? '#3b82f6' : 'transparent', navDFg: s.view === 'dist' ? '#ffffff' : '#64748b', navDSh: s.view === 'dist' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navTBg: s.view === 'teachers' ? '#3b82f6' : 'transparent', navTFg: s.view === 'teachers' ? '#ffffff' : '#64748b', navTSh: s.view === 'teachers' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navRBg: s.view === 'reports' ? '#3b82f6' : 'transparent', navRFg: s.view === 'reports' ? '#ffffff' : '#64748b', navRSh: s.view === 'reports' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+
+      isArchive: arch, year: a.year,
+      yearNote: arch ? 'arxiv — yalnız oxunuş' : 'bölgü mərhələsi açıqdır',
+      yearNoteFg: arch ? '#b45309' : '#2563eb',
+
+      fYear: s.fYear, fSem: s.fSem, fSpec: s.fSpec, fForma: s.fForma, fOnlyOpen: s.fOnlyOpen,
+      onFYear: (e) => set({ fYear: e.target.value }),
+      onFSem: (e) => set({ fSem: e.target.value }),
+      onFSpec: (e) => set({ fSpec: e.target.value }),
+      onFForma: (e) => set({ fForma: e.target.value }),
+      onFOnlyOpen: (e) => set({ fOnlyOpen: e.target.checked }),
+      applyFilters: () => set({ applied: { year: s.fYear, sem: s.fSem, spec: s.fSpec, forma: s.fForma, onlyOpen: s.fOnlyOpen } }),
+      resetFilters: () => set({ fYear: '2026 / 2027', fSem: 'Hamısı', fSpec: 'Hamısı', fForma: 'Hamısı', fOnlyOpen: false, applied: { year: '2026 / 2027', sem: 'Hamısı', spec: 'Hamısı', forma: 'Hamısı', onlyOpen: false } }),
+
+      vacantTotal, distributed: fmt(distributed),
+      distText: fmt(distributed) + ' / 8 965 saat',
+      distPct: distPct + '%',
+      confirmBg: full ? '#16a34a' : '#f1f5f9',
+      confirmFg: full ? '#ffffff' : '#94a3b8',
+      confirmBd: full ? '#16a34a' : '#e2e8f0',
+      confirmCur: full ? 'pointer' : 'not-allowed',
+
+      showDist: s.modal === 'dist', showTeacher: s.modal === 'teacher', showConfirm: s.modal === 'confirm',
+      mSubject: mRow ? mRow.subject : '', mCredit: mRow ? mRow.credit : '',
+      mGroups: mRow ? mRow.groups : '', mSem: mRow ? mRow.sem : '', mSpec: mRow ? mRow.spec : '',
+      mRowLeft: ri === null ? 0 : rowLeft(ri),
+      mActs: ri === null ? [] : ACTS.filter((ac) => mRow[ac.f] > 0).map((ac) => {
+        const l = leftOf(ri, ac.key), sel = s.actKey === ac.key;
+        return {
+          label: ac.label, left: l,
+          cur: l > 0 ? 'pointer' : 'not-allowed',
+          bd: sel ? '#2563eb' : (l > 0 ? '#cbd5e1' : '#e2e8f0'),
+          bg: sel ? '#eff6ff' : (l > 0 ? '#ffffff' : '#f8fafc'),
+          fg: sel ? '#1d4ed8' : (l > 0 ? '#334155' : '#94a3b8'),
+          onPick: () => { if (l > 0) set({ actKey: ac.key, hours: String(l) }); }
+        };
+      }),
+      mTeachers, mAllocs, mNoAllocs: mAllocs.length === 0,
+      mSearch: s.search, mHours: s.hours, mNote: s.note, mHourly: s.hourly, mLeft,
+      vacBg: s.teacher === 'VAKANT' ? '#fee2e2' : '#f8fafc',
+      hoursBd: tooMuch ? '#dc2626' : '#bfdbfe',
+      hoursBg: tooMuch ? '#fee2e2' : '#eff6ff',
+      hoursFg: tooMuch ? '#b91c1c' : '#1d4ed8',
+      hoursError: tooMuch ? 'Qalıqdan çoxdur — maksimum ' + mLeft + ' saat' : '',
+      addBg: canAdd ? '#2563eb' : '#f1f5f9',
+      addFg: canAdd ? '#ffffff' : '#94a3b8',
+      addBd: canAdd ? '#2563eb' : '#e2e8f0',
+      addCur: canAdd ? 'pointer' : 'not-allowed',
+
+      tName: tSel ? tSel.name : '', tTitle: tSel ? tSel.title : '', tStat: tSel ? tSel.stat : '',
+      tNorm: tSel ? tSel.norm : '', tHours: tSel ? tHoursOf(tSel.name) : '',
+      tFall: tSel ? tSel.fall : '', tSpring: tSel ? tSel.spring : '', tHourly: tSel ? tSel.hourly : '',
+      tRows,
+
+      goDist: () => set({ view: 'dist' }),
+      goTeachers: () => set({ view: 'teachers' }),
+      goReports: () => set({ view: 'reports' }),
+      openConfirm: () => { if (full) set({ modal: 'confirm' }); },
+      closeModal: () => set({ modal: null, rowIdx: null, tIdx: null }),
+      onSearch: (e) => set({ search: e.target.value }),
+      onHours: (e) => set({ hours: e.target.value }),
+      onNote: (e) => set({ note: e.target.value }),
+      onHourly: (e) => set({ hourly: e.target.checked }),
+      pickVacant: () => set({ teacher: 'VAKANT' }),
+      addAlloc: () => {
+        if (!canAdd) return;
+        set({
+          alloc: s.alloc.concat([{ row: ri, act: s.actKey, who: s.teacher, h: hoursNum, note: s.note, hourly: s.hourly }]),
+          hours: '', note: '', teacher: null, hourly: false
+        });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

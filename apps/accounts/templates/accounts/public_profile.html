@@ -6,12 +6,23 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'accounts/css/public_profile.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/public_profile_academic.css' %}?v=20260816-1">
 {% endblock %}
 
 {% block content %}
 <section class="public-profile-shell">
     <div class="public-profile-container">
-        <header class="public-profile-hero">
+        {% if is_self_preview %}
+        <div class="public-preview-banner" role="status">
+            <i class="fas fa-eye"></i>
+            {% trans 'Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür.' context 'accounts.public_profile' %}
+            <a href="{% url 'accounts:profile' %}?section=edit-profile">
+                {% trans 'Redaktəyə qayıt' context 'accounts.public_profile' %}
+            </a>
+        </div>
+        {% endif %}
+
+        <header class="public-profile-hero public-profile-hero--modern">
             <div class="public-profile-hero__identity">
                 <div class="public-profile-avatar">
                     {% if request.user.is_authenticated and profile.avatar %}
@@ -28,6 +39,12 @@
                 <div class="public-profile-hero__copy">
                     <span class="public-profile-eyebrow">{% trans 'Açıq profil' %}</span>
                     <h1 class="public-profile-title">{{ display_name }}</h1>
+                    {% if profile.academic_title_display %}
+                    <p class="public-profile-academic-title">
+                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                        {{ profile.academic_title_display }}
+                    </p>
+                    {% endif %}
                     <p class="public-profile-subtitle">
                         {% trans 'Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür.' %}
                         {% trans 'Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir.' %}
@@ -63,6 +80,107 @@
                 </article>
             </div>
         </header>
+
+        {# ── Şəxs haqqında əsas məlumat bandı: Haqqında + Əlaqə/Struktur ── #}
+        {% if profile_bio or contact_phones or admin_membership %}
+        <div class="public-info-band">
+            {% if profile_bio %}
+            <section class="public-section-card public-info-band__main">
+                <div class="public-section-card__header">
+                    <h2><i class="fas fa-align-left" aria-hidden="true"></i> {% trans 'Haqqında' %}</h2>
+                </div>
+                <div class="public-profile-bio">{{ profile_bio|linebreaksbr }}</div>
+            </section>
+            {% endif %}
+
+            <div class="public-info-band__side">
+                {% if contact_phones %}
+                <section class="public-section-card">
+                    <div class="public-section-card__header">
+                        <h2><i class="fas fa-phone" aria-hidden="true"></i> {% trans 'Əlaqə' context 'accounts.public_profile' %}</h2>
+                    </div>
+                    <dl class="public-profile-facts">
+                        {% for phone_number in contact_phones %}
+                        <div class="public-profile-facts__row">
+                            <dt>{% trans 'Telefon' context 'accounts.public_profile' %}{% if not forloop.first %} 2{% endif %}</dt>
+                            <dd>{{ phone_number }}</dd>
+                        </div>
+                        {% endfor %}
+                    </dl>
+                    <p class="public-contact-note">
+                        <i class="fas fa-lock" aria-hidden="true"></i>
+                        {% trans 'Nömrələr yalnız əməkdaş səviyyəli istifadəçilərə görünür.' context 'accounts.public_profile' %}
+                    </p>
+                </section>
+                {% endif %}
+
+                {% if admin_membership %}
+                <section class="public-section-card">
+                    <div class="public-section-card__header">
+                        <h2><i class="fas fa-sitemap" aria-hidden="true"></i> {% trans 'Struktur məlumatı' %}</h2>
+                    </div>
+                    <dl class="public-profile-facts">
+                        {% if admin_position_label %}
+                        <div class="public-profile-facts__row">
+                            <dt>{% trans 'Vəzifə' context 'profile.public' %}</dt>
+                            <dd>{{ admin_position_label }}</dd>
+                        </div>
+                        {% endif %}
+                        <div class="public-profile-facts__row">
+                            <dt>{% trans 'Bölmə' %}</dt>
+                            <dd>{% if admin_membership.scope_unit %}{{ admin_membership.scope_unit.name }}{% else %}{% trans 'Hamısı' %}{% endif %}</dd>
+                        </div>
+                        <div class="public-profile-facts__row">
+                            <dt>{% trans 'Email' %}</dt>
+                            <dd>{{ profile_user.email }}</dd>
+                        </div>
+                        <div class="public-profile-facts__row">
+                            <dt>{% trans 'Üzvlüyə qoşulma' %}</dt>
+                            <dd>{{ admin_membership.created_at|date:"d M Y" }}</dd>
+                        </div>
+                    </dl>
+                </section>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {# ── Akademik fəaliyyət — tam enli, ön planda ── #}
+        {% if academic_display_groups %}
+        <section class="public-section-card public-academic-band">
+            <div class="public-section-card__header">
+                <h2><i class="fas fa-award" aria-hidden="true"></i> {% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}</h2>
+            </div>
+            <div class="public-academic-groups public-academic-groups--band">
+                {% for group in academic_display_groups %}
+                <div class="public-academic-group">
+                    <div class="public-academic-group__label">
+                        <i class="fas {{ group.icon }}" aria-hidden="true"></i>
+                        {{ group.label }}
+                        <span class="public-academic-group__count">{{ group.items|length }}</span>
+                    </div>
+                    <ul class="public-academic-list">
+                        {% for item in group.items %}
+                        <li class="public-academic-item">
+                            <span class="public-academic-item__title">
+                                {% if item.link %}
+                                <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">{{ item.title }}
+                                    <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                                {% else %}
+                                {{ item.title }}
+                                {% endif %}
+                            </span>
+                            {% if item.detail or item.year %}
+                            <span class="public-academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
         <section class="public-search-panel">
             <form method="get" class="public-search-form" role="search">
@@ -177,32 +295,6 @@
             </main>
 
             <aside class="public-profile-sidebar">
-                {% if admin_membership %}
-                    <section class="public-section-card public-section-card--sidebar">
-                        <div class="public-section-card__header">
-                            <h2>{% trans 'Struktur məlumatı' %}</h2>
-                        </div>
-                        <dl class="public-profile-facts">
-                            <div class="public-profile-facts__row">
-                                <dt>{% trans 'Rol' %}</dt>
-                                <dd>{{ admin_membership.role.display_name }}</dd>
-                            </div>
-                            <div class="public-profile-facts__row">
-                                <dt>{% trans 'Bölmə' %}</dt>
-                                <dd>{% if admin_membership.scope_unit %}{{ admin_membership.scope_unit.name }}{% else %}{% trans 'Hamısı' %}{% endif %}</dd>
-                            </div>
-                            <div class="public-profile-facts__row">
-                                <dt>{% trans 'Email' %}</dt>
-                                <dd>{{ profile_user.email }}</dd>
-                            </div>
-                            <div class="public-profile-facts__row">
-                                <dt>{% trans 'Üzvlüyə qoşulma' %}</dt>
-                                <dd>{{ admin_membership.created_at|date:"d M Y" }}</dd>
-                            </div>
-                        </dl>
-                    </section>
-                {% endif %}
-
                 <section class="public-section-card public-section-card--sidebar">
                     <div class="public-section-card__header">
                         <h2>{% trans 'Açıq məlumatlar' %}</h2>
@@ -224,15 +316,6 @@
                         {% endif %}
                     </dl>
                 </section>
-
-                {% if profile_bio %}
-                    <section class="public-section-card public-section-card--sidebar">
-                        <div class="public-section-card__header">
-                            <h2>{% trans 'Haqqında' %}</h2>
-                        </div>
-                        <div class="public-profile-bio">{{ profile_bio|linebreaksbr }}</div>
-                    </section>
-                {% endif %}
 
                 {% if category_items %}
                     <section class="public-section-card public-section-card--sidebar">

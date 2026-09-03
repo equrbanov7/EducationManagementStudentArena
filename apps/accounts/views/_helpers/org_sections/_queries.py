@@ -10,6 +10,7 @@ from apps.notifications.models import (
 )
 from apps.organizations.models import Membership
 from core.rls import bypass_rls
+from core.staff_position import visible_role_label
 
 from ....models import ProfileRole, UserProfile
 from ..constants import PROFILE_ROLE_LABELS, STUDENT_PENDING_INVITE_TITLE
@@ -78,9 +79,12 @@ def _mgmt_section_queries(
     for invite_membership in sent_pending_invites:
         mapped_role = _map_org_role_to_profile_role(invite_membership.role)
         invite_membership.management_role_key = mapped_role
-        invite_membership.management_role_label = getattr(
-            invite_membership.role, "display_name", ""
-        ) or PROFILE_ROLE_LABELS.get(mapped_role, getattr(invite_membership.role, "name", "Üzv"))
+        # ⚠️ «Üzv» doldurucusu YAZILMIR — vəzifəsiz dəvətdə etiket boş qalır.
+        invite_membership.management_role_label = visible_role_label(
+            getattr(invite_membership.role, "name", ""),
+            getattr(invite_membership.role, "display_name", "")
+            or PROFILE_ROLE_LABELS.get(mapped_role, getattr(invite_membership.role, "name", "")),
+        )
         invite_membership.management_position = (
             getattr(getattr(invite_membership.user, "profile", None), "staff_position", "") or ""
         ).strip()
@@ -427,11 +431,11 @@ def _mgmt_section_queries(
             seen_member_user_ids.add(membership.user_id)
             mapped_role = _map_org_role_to_profile_role(membership.role)
             membership.management_role_key = mapped_role
-            membership.management_role_label = getattr(
-                membership.role,
-                "display_name",
-                "",
-            ) or PROFILE_ROLE_LABELS.get(mapped_role, membership.role.name)
+            # ⚠️ «Üzv» doldurucusu YAZILMIR — vəzifəsiz işçidə etiket boş qalır.
+            membership.management_role_label = visible_role_label(
+                membership.role.name,
+                getattr(membership.role, "display_name", "") or PROFILE_ROLE_LABELS.get(mapped_role, ""),
+            )
             membership.management_position = (getattr(membership.user.profile, "staff_position", "") or "").strip()
             membership.management_can_remove = mapped_role in removable_member_roles and membership.user_id != getattr(
                 organization, "owner_id", None

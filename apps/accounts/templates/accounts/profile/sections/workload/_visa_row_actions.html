@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Ekran 13 sətir əməlləri — «Baxdım» açarı və «İrad» modalı.
+
+⚠️ İrad yazılan sətrin `reviewed` bayrağı SİLİNİR (servis atomik edir) — ona
+görə burada iki AYRI əməl var, checkbox toggle deyil.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm{% if row.data.is_reviewed %} ems-btn--primary{% endif %}"
+        data-tof-submit='{"action": "row_review", "row": "{{ row.data.id }}", "state": "reviewed"}'>
+    {% trans "Baxdım" context "accounts.workload_visa" %}
+</button>
+<button type="button" class="ems-btn ems-btn--sm ems-btn--warning"
+        data-tof-open="wlRemarkDialog"
+        data-tof-prefill='{"action": "row_review", "row": "{{ row.data.id }}", "state": "flagged"}'>
+    {% trans "İrad" context "accounts.workload_visa" %}
+</button>

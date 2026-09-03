@@ -1,0 +1,7 @@
+{% comment %}Açıq xəbərdarlıq siyahısı — lentin içində (banner_action_include).
+Status yalnız rənglə deyil, MƏTNLƏ də verilir (handoff §7).{% endcomment %}
+<ul class="tof-warnings">
+    {% for warning in curriculum_editor_section.balance.warnings %}
+    <li class="tof-warnings__item">{{ warning.text }}</li>
+    {% endfor %}
+</ul>

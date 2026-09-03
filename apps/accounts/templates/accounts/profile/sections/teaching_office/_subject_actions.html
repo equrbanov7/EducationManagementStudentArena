@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}Fənn sətrinin əməlləri — `_data_table.html` `row.actions_include`.
+Birləşdirmə (merge) BU MƏRHƏLƏDƏ YOXDUR: destruktiv əməldir, plan sətirləri və
+sillabusların köçürülməsini tələb edir (hesabatda «təxirə salınanlar»).{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofSubjectDialog"
+        data-tof-prefill='{"action": "save_subject", "id": "{{ row.data.id }}", "code": "{{ row.data.code|escapejs }}", "name": "{{ row.data.name|escapejs }}", "ects": "{{ row.data.ects }}", "kind": "{{ row.data.kind }}", "chair_unit": "{{ row.data.chair_id }}"}'>
+    {% trans "Redaktə" context "accounts.catalog" %}
+</button>
+{% if row.data.is_archived %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="tofCatalogRestoreDialog"
+        data-tof-prefill='{"action": "restore", "kind": "subject", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivdən qaytar" context "accounts.catalog" %}
+</button>
+{% else %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-tof-open="tofCatalogArchiveDialog"
+        data-tof-prefill='{"action": "archive", "kind": "subject", "id": "{{ row.data.id }}"}'>
+    {% trans "Arxivlə" context "accounts.catalog" %}
+</button>
+{% endif %}

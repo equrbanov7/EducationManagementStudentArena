@@ -75,3 +75,14 @@ EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip()
 }
 # Post management delete endpoints
 POST_DELETE_RATE_LIMIT = os.getenv("POST_DELETE_RATE_LIMIT", "10/5m")
+
+
+# ---------------------------------------------------------------------------
+# FAIL-CLOSED konfiqurasiya yoxlaması (2026-09-02 audit, P2-5)
+# ---------------------------------------------------------------------------
+# Səhv yazılmış env dəyəri (məs. ``5/10min`` — düzgünü ``5/10m``) əvvəllər ya
+# sükutla limiti söndürürdü, ya da yalnız İLK sorğuda 500 verirdi: yəni login
+# və OTP limitləri xəbərsiz itə bilirdi.  İndi proses BAŞLAYARKƏN çökür.
+from core.rate_limit import validate_rate_limit_settings  # noqa: E402
+
+validate_rate_limit_settings(dict(globals()))

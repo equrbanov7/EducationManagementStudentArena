@@ -9,6 +9,8 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 from django.urls import reverse
 
+from core.staff_position import visible_role_label
+
 from ...models import ProfileRole
 from .constants import PROFILE_ROLE_LABELS
 from .formatting import _append_query_params
@@ -54,8 +56,9 @@ def _build_user_organization_access_rows(
             },
         )
         row["memberships"].append(membership)
-        role_label = membership.role.display_name
-        if role_label not in row["role_labels"]:
+        # ⚠️ Doldurucu «Üzv» rolu nişan kimi göstərilmir — sətir nişansız qalır.
+        role_label = visible_role_label(membership.role.name, membership.role.display_name)
+        if role_label and role_label not in row["role_labels"]:
             row["role_labels"].append(role_label)
 
     owned_organizations = (

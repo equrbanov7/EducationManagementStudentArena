@@ -16,6 +16,7 @@ from .groups import (
     teacher_add_student_to_group,
     teacher_create_group,
     teacher_delete_group,
+    teacher_group_candidates,
     teacher_group_list,
     teacher_remove_student_from_group,
     teacher_update_group,
@@ -41,6 +42,7 @@ from .results import (
 __all__ = [
     "teacher_group_list",
     "teacher_create_group",
+    "teacher_group_candidates",
     "teacher_update_group",
     "teacher_delete_group",
     "teacher_remove_student_from_group",

@@ -416,3 +416,45 @@
 .results-search-clear {
     white-space: nowrap;
 }
+
+/* Rəsmi transkript SORĞU kanalı (dizayn README §10.1 — `transcriptPolicy = request`).
+   Sənəd linki deyil: Müraciətlər panelindəki «Transkript sorğusu» növünə keçid. */
+.results-transcript-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin: 0 0 16px;
+    padding: 12px 15px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-md, 12px);
+    color: var(--ems-primary-800);
+}
+
+.results-transcript-cta__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1 1 260px;
+    font-size: var(--ems-fs-xs, 0.8rem);
+    line-height: 1.45;
+}
+
+.results-transcript-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-radius: var(--ems-r-sm, 9px);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-xs, 0.82rem);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.results-transcript-cta__btn:hover,
+.results-transcript-cta__btn:focus-visible {
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}

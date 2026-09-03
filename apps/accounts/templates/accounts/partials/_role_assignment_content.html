@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n org_tags %}
 {% trans "organization_not_found_choose_in_profile" context "profile.role_assignment" as role_assignment_org_not_found %}
 {% if organization %}
 <div class="section-card">
@@ -83,7 +83,7 @@
                 <td>{{ member.user.email }}</td>
                 <td>
                     <div class="role-assignment-current-role">
-                        <span class="role-badge">{{ member.role.display_name }}</span>
+                        <span class="role-badge">{{ member.role|localized_role_label }}</span>
                         {% if member.is_primary %}
                         <span class="role-assignment-primary-badge" title="{% trans 'Primary = ən yüksək səviyyə' %}">Primary</span>
                         {% endif %}
@@ -101,7 +101,7 @@
                             <select name="role_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" required data-bootstrap-select data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
                                 {% for role in assignable_roles %}
                                 <option value="{{ role.id }}" {% if role.id == member.role.id %}selected{% endif %}>
-                                    {{ role.display_name }} ({{ role.level }})
+                                    {{ role|localized_role_label }} ({{ role.level }})
                                 </option>
                                 {% endfor %}
                             </select>
@@ -115,7 +115,7 @@
                                 data-user-username="{{ member.user.username }}"
                                 data-user-email="{{ member.user.email }}"
                                 data-organization-name="{{ organization.name }}"
-                                data-old-role="{{ member.role.display_name }} ({{ member.role.level }})"
+                                data-old-role="{{ member.role|localized_role_label }} ({{ member.role.level }})"
                                 {% if not can_assign_roles %}disabled{% endif %}>
                             {% trans 'Rolu yenilə' %}
                         </button>
@@ -209,7 +209,7 @@
                             <div class="bootstrap-single-select">
                                 <select name="role_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" required data-bootstrap-select data-role-assignment-role-select {% if not can_assign_roles %}disabled{% endif %}>
                                     {% for role in assignable_roles %}
-                                    <option value="{{ role.id }}">{{ role.display_name }} ({{ role.level }})</option>
+                                    <option value="{{ role.id }}">{{ role|localized_role_label }} ({{ role.level }})</option>
                                     {% endfor %}
                                 </select>
                             </div>

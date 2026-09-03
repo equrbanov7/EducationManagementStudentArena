@@ -22,6 +22,7 @@
 
         var U = {
             data: root.dataset.dataUrl,
+            summary: root.dataset.summaryUrl,
             detail: root.dataset.detailUrl,
             faculty: root.dataset.facultyUrl,
             department: root.dataset.departmentUrl,
@@ -138,14 +139,17 @@
                 card(s.fails, T.fails, "bad") +
                 card(s.qb, T.qb, "warn") +
                 card(s.exam25, T.exam25, "warn") +
-                card(s.avg_gpa, T.avg_gpa);
+                // Nə keçib, nə kəsilib — imtahan çıxış balı yoxdur. Ayrıca qutu
+                // olmasa rəqəmlər cəmlənmir (tələbə × fənn sayı ilə uyğun gəlmir).
+                card(s.ungraded, T.ungraded, "muted") +
+                card(s.avg_gpa || T.gpa_na, T.avg_gpa);
         }
 
         function skeleton() {
             var tr = "";
             for (var i = 0; i < 8; i++) {
                 tr += "<tr>";
-                for (var c = 0; c < 10; c++) {
+                for (var c = 0; c < 11; c++) {
                     tr += '<td><div class="acr-skel"></div></td>';
                 }
                 tr += "</tr>";
@@ -156,7 +160,7 @@
         function renderRows(d) {
             if (d.has_access === false) {
                 rows.innerHTML =
-                    '<tr><td colspan="10"><div class="acr-state"><i class="fas fa-lock"></i>' + esc(T.no_access) + "</div></td></tr>";
+                    '<tr><td colspan="11"><div class="acr-state"><i class="fas fa-lock"></i>' + esc(T.no_access) + "</div></td></tr>";
                 pager.innerHTML = "";
                 cards.innerHTML = "";
                 return;
@@ -164,7 +168,7 @@
             var list = d.results || [];
             if (!list.length) {
                 rows.innerHTML =
-                    '<tr><td colspan="10"><div class="acr-state"><i class="fas fa-folder-open"></i>' + esc(T.none) + "</div></td></tr>";
+                    '<tr><td colspan="11"><div class="acr-state"><i class="fas fa-folder-open"></i>' + esc(T.none) + "</div></td></tr>";
                 pager.innerHTML = "";
                 return;
             }
@@ -175,13 +179,17 @@
                         '<tr' + failCls + '>' +
                         '<td class="acr-td-no">' + (page + i + 1) + "</td>" +
                         '<td><b>' + esc(r.name) + '</b><br><span class="acr-uname">@' + esc(r.username) + "</span></td>" +
-                        '<td class="acr-clip" title="' + esc(r.program) + '">' + esc(r.program) + "</td>" +
+                        // title: ad + HƏR İKİ rəsmi şifr (cari + köhnə); xanada kompakt etiket.
+                        '<td class="acr-clip" title="' + esc(r.program_full || r.program) + '">' + esc(r.program) + "</td>" +
                         "<td>" + esc(r.group) + "</td>" +
                         '<td class="acr-num acr-strong">' + esc(r.credits_earned) + "</td>" +
                         '<td class="acr-num' + (r.fails > 0 ? " acr-bad" : "") + '">' + esc(r.fails) + "</td>" +
                         '<td class="acr-num' + (r.qb > 0 ? " acr-warn" : "") + '">' + esc(r.qb) + "</td>" +
                         '<td class="acr-num' + (r.exam25 > 0 ? " acr-warn" : "") + '">' + esc(r.exam25) + "</td>" +
-                        '<td class="acr-num">' + esc(r.gpa) + "</td>" +
+                        '<td class="acr-num' + (r.ungraded > 0 ? " acr-muted" : "") + '">' + esc(r.ungraded) + "</td>" +
+                        // Boş ÜOMG = hesablana bilmir (köhnə sistemdə nəticə yoxdur) —
+                        // sıfır göstərmək «sıfır bal aldı» kimi oxunardı.
+                        '<td class="acr-num">' + (r.gpa ? esc(r.gpa) : "—") + "</td>" +
                         '<td><button type="button" class="acr-view js-acr-view" data-sid="' + esc(r.student_id) +
                         '" data-name="' + esc(r.name) + '"><i class="fas fa-eye"></i> ' + esc(T.view) + "</button></td></tr>"
                     );
@@ -231,7 +239,46 @@
             }
         }
 
+        // Box-lar süzgəc sahəsinin TAMI üzrə aqreqatdır (cədvəl isə yalnız görünən
+        // ~25 tələbə). Ona görə iki AYRI sorğu gedir: cədvəl dərhal gəlir, box-lar
+        // öz skeleton-u ilə sonra dolur — cədvəl box-ları gözləmir.
+        var summarySeq = 0;
+
+        function cardSkeleton() {
+            var html = "";
+            for (var i = 0; i < 6; i++) {
+                html += '<div class="acr-card acr-card--loading"><div class="acr-skel acr-skel--card"></div></div>';
+            }
+            cards.innerHTML = html;
+        }
+
+        function loadSummary() {
+            var seq = ++summarySeq;
+            cardSkeleton();
+            fetch(U.summary + "?" + params().toString(), {
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+            })
+                .then(function (r) {
+                    return r.ok ? r.json() : null;
+                })
+                .then(function (d) {
+                    if (seq !== summarySeq) return; // köhnəlmiş cavab — süzgəc dəyişib
+                    if (!d) {
+                        cards.innerHTML = "";
+                        return;
+                    }
+                    populateYears(d.year_options);
+                    renderCards(d.summary);
+                })
+                .catch(function () {
+                    if (seq === summarySeq) cards.innerHTML = "";
+                });
+        }
+
+        var rowsSeq = 0;
+
         function load() {
+            var seq = ++rowsSeq;
             skeleton();
             fetch(U.data + "?" + params({ offset: page, limit: LIMIT }).toString(), {
                 headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -240,9 +287,7 @@
                     return r.ok ? r.json() : null;
                 })
                 .then(function (d) {
-                    if (!d) return;
-                    populateYears(d.year_options);
-                    renderCards(d.summary);
+                    if (seq !== rowsSeq || !d) return;
                     renderRows(d);
                 });
         }
@@ -250,6 +295,7 @@
         function reload() {
             page = 0;
             load();
+            loadSummary();
         }
 
         [yearSel, seasonSel].forEach(function (sel) {
@@ -275,7 +321,43 @@
             if (row.barred) return '<span class="acr-status is-barred">' + esc(T.barred) + "</span>";
             if (row.passed) return '<span class="acr-status is-pass">' + esc(T.passed) + "</span>";
             if (row.failed) return '<span class="acr-status is-fail">' + esc(T.failed) + "</span>";
+            if (row.ungraded) return '<span class="acr-status is-ungraded">' + esc(T.ungraded) + "</span>";
             return '<span class="acr-status is-progress">' + esc(T.progress) + "</span>";
+        }
+
+        function ungradedBadge(row) {
+            if (!row.ungraded) return "";
+            return '<div class="acr-reason is-ungraded"><i class="fas fa-circle-question"></i> ' + esc(T.ungraded_badge) + "</div>";
+        }
+
+        // Köçürülmüş qiymət nişanı — ekranın qalan səthləri ilə EYNİ markup
+        // (`registrar/partials/_legacy_grade_mark.html`).  Burada şablon
+        // include edilə bilmir (sətirlər JSON-dan JS ilə qurulur), ona görə
+        // markup əl ilə təkrarlanır; CSS isə ORTAQDIR (`css/legacy_mark.css`),
+        // yəni görünüş bir yerdən idarə olunur.
+        //
+        // Qırmızı qeyd review statusundan asılı olmayan legacy-bal bildirişidir;
+        // VERIFIED statusu da daxil olmaqla server ``lg.warning``-i saxlayır.
+        function legacyMark(row) {
+            var lg = row.legacy;
+            if (!lg) return "";
+            var lines = [lg.label + " — " + lg.notice];
+            if (lg.source_system) lines.push(T.legacy_source + ": " + lg.source_system);
+            if (lg.source_reference) lines.push(T.legacy_ref + ": " + lg.source_reference);
+            if (lg.recorded_at) lines.push(T.legacy_date + ": " + lg.recorded_at);
+            if (lg.raw_entry) lines.push(T.legacy_raw_entry + ": " + lg.raw_entry);
+            if (lg.raw_exam) lines.push(T.legacy_raw_exam + ": " + lg.raw_exam);
+            if (lg.raw_resit) lines.push(T.legacy_raw_resit + ": " + lg.raw_resit);
+            if (lg.raw_final) lines.push(T.legacy_raw_final + ": " + lg.raw_final);
+            if (lg.review_notice) lines.push(lg.review_notice);
+            return (
+                '<span class="legacy-grade-indicators"><span class="legacy-mark' +
+                (lg.review_required ? " legacy-mark--unreviewed" : "") +
+                '" tabindex="0" role="img" aria-label="' + esc(lg.label) + '" title="' + esc(lines.join("\n")) +
+                '"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i></span>' +
+                (lg.warning ? '<strong class="legacy-grade-warning">' + esc(lg.warning) + "</strong>" : "") +
+                "</span>"
+            );
         }
 
         function reasonBadge(row) {
@@ -311,12 +393,12 @@
                             return (
                                 '<tr class="' + cls.trim() + '">' +
                                 '<td class="acr-ta-left"><b>' + esc(row.code) + "</b><br><span class=\"acr-uname\">" + esc(row.name) + "</span>" +
-                                reasonBadge(row) + "</td>" +
-                                "<td>" + esc(row.credit) + "</td>" +
+                                reasonBadge(row) + ungradedBadge(row) + "</td>" +
+                                '<td class="' + (row.ungraded ? "acr-muted" : "") + '">' + esc(row.credit) + "</td>" +
                                 '<td class="acr-ta-left">' + esc(row.teacher) + "</td>" +
                                 "<td>" + esc(row.entry == null ? "—" : row.entry) + "</td>" +
                                 "<td>" + esc(row.exit == null ? "—" : row.exit) + "</td>" +
-                                "<td>" + (row.total == null ? "—" : "<b>" + esc(row.total) + "</b>") + "</td>" +
+                                "<td>" + (row.total == null ? "—" : "<b>" + esc(row.total) + "</b>") + legacyMark(row) + "</td>" +
                                 "<td>" + (row.letter ? '<span class="grade-' + esc(row.letter) + ' acr-letter">' + esc(row.letter) + "</span>" : "—") + "</td>" +
                                 "<td>" + statusCell(row) + "</td></tr>"
                             );
@@ -362,6 +444,7 @@
         });
 
         load();
+        loadSummary();
     }
 
     if (document.readyState === "loading") {

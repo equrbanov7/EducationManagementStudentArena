@@ -4,14 +4,13 @@ Kollokvium mövcud komponent mexanizmi üzərində işləyir (``AssessmentCompon
 kind=KOLLOKVIUM + ``held_on`` tarixi; ballar ``ComponentScore``-da — 2 saat
 pəncərəsi və DB trigger oraya da şamildir). Sərbəst iş mövzu-çeklistdir
 (``SelfWorkTopic``/``SelfWorkMark``): bal yazılmır, təhvil sayı avtomatik giriş
-balına çevrilir (bax ``gradebook.entry_score_for``). Kurs işi giriş balından
-kənar ayrıca 0-100 qiymətdir.
+balına çevrilir (bax ``gradebook.entry_score_for``); lövhənin özü —
+köçürülmüş "arxiv" balı da daxil — ``selfwork_board`` modulundadır. Kurs işi
+giriş balından kənar ayrıca 0-100 qiymətdir.
 
-Kilid qaydaları:
-* jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır;
-* sərbəst iş: "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat
-  içində (bal silmə saxtakarlığına qarşı);
-* kurs işi: yazılışdan 2 saat sonra dondurulur.
+Kilid qaydaları: jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır; sərbəst
+işdə "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat içində (bal
+silmə saxtakarlığına qarşı); kurs işi yazılışdan 2 saat sonra dondurulur.
 """
 
 from __future__ import annotations
@@ -19,10 +18,11 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.registrar import grade_audit
+from apps.registrar import exam_eligibility, grade_audit
 from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
 from apps.registrar.models import (
     AssessmentComponent,
@@ -34,9 +34,15 @@ from apps.registrar.models import (
     SelfWorkTopic,
 )
 
+# Sərbəst iş lövhəsi modul-ölçü büdcəsinə görə ayrıca moduldadır; adlar
+# buradan re-eksport olunur — çağıranlar üçün API dəyişməyib.
+from apps.registrar.selfwork_board import (  # noqa: F401
+    SELF_WORK_MAX_TOPICS,
+    get_selfwork_board,
+)
+
 KOLLOKVIUM_COUNT = 3
 KOLLOKVIUM_MAX = 10
-SELF_WORK_MAX_TOPICS = 10
 COURSE_WORK_MAX = Decimal("100")
 
 
@@ -156,7 +162,10 @@ def get_kollokvium_grid(offering):
 def ensure_selfwork_component(offering):
     """Sərbəst iş komponentini idempotent yarat (kind=SELF_WORK, max 10).
 
-    Balı ComponentScore-da SAXLANMIR — entry_score_for çeklist cəmindən oxuyur."""
+    Yeni jurnalda bura bal YAZILMIR — ``entry_score_for`` çeklist cəmindən
+    oxuyur. Tək istisna: köçürmə köhnə ``si`` balını bu komponentə
+    ``ComponentScore`` kimi yazır; o bal YALNIZ lövhədə "arxiv" sütunu kimi
+    göstərilir və giriş balına əlavə OLUNMUR (bax ``selfwork_board``)."""
     component = AssessmentComponent.objects.filter(offering=offering, kind=ComponentKind.SELF_WORK).first()
     if component is None:
         component = AssessmentComponent.objects.create(
@@ -188,12 +197,18 @@ def add_selfwork_topic(*, offering, title) -> SelfWorkTopic | None:
 
 
 @transaction.atomic
-def delete_selfwork_topic(*, topic) -> bool:
-    """Mövzunu sil. Bu mövzu üzrə tələbə işarələri (SelfWorkMark) də silinir
-    (topic FK CASCADE) — UI silmədən əvvəl bal itkisi barədə xəbərdarlıq göstərir."""
+def delete_selfwork_topic(*, topic, by_user=None) -> bool:
+    """Mövzunu sil. İşarələr də silinir (CASCADE) → giriş balı düşür, yəni akademik
+    nəticə dəyişir; itən təhvillər audit izinə yazılır (2026-08 auditi)."""
     if journal_is_locked(topic.offering):
         return False
-    topic.delete()  # SelfWorkMark-lar FK cascade ilə birlikdə silinir (bal da gedir)
+    offering, title = topic.offering, topic.title
+    losing = list(SelfWorkMark.objects.filter(topic=topic, done=True).select_related("enrollment__student"))
+    try:
+        topic.delete()  # Correction evidence varsa PROTECT akademik tarixi saxlayır.
+    except ProtectedError:
+        return False
+    grade_audit.log_selfwork_topic_removal(offering=offering, topic_title=title, marks=losing, by_user=by_user)
     return True
 
 
@@ -238,50 +253,14 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, 
     return True
 
 
-def get_selfwork_board(offering):
-    """Sərbəst iş tabı: HƏMİŞƏ 10 sabit slot (mövzu sayından asılı deyil) ×
-    tələbələr, 1/0 + canlı cəm. Mövzu əlavə olunmamış slot boş/deaktivdir —
-    mockup kimi cədvəl həmişə 10 sütunlu görünür, cəmi maksimum 10 bal."""
-    topics = list(SelfWorkTopic.objects.filter(offering=offering).order_by("order", "created_at"))
-    # 10 slot: i-ci slotda mövzu varsa onu, yoxdursa None göstər.
-    slots = [{"index": i + 1, "topic": (topics[i] if i < len(topics) else None)} for i in range(SELF_WORK_MAX_TOPICS)]
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
-        .order_by("student__last_name", "student__username")
-    )
-    now = timezone.now()
-    mark_map = {}
-    for m in SelfWorkMark.objects.filter(topic__offering=offering):
-        mark_map[(m.enrollment_id, m.topic_id)] = m
-    rows = []
-    for e in enrollments:
-        cells = []
-        total = 0
-        for slot in slots:
-            topic = slot["topic"]
-            mark = mark_map.get((e.id, topic.id)) if topic else None
-            done = bool(mark and mark.done)
-            total += 1 if done else 0
-            cells.append(
-                {
-                    "index": slot["index"],
-                    "topic": topic,  # None → boş slot (mövzu hələ əlavə olunmayıb)
-                    "done": done,
-                    # geri alma kilidi: verilib və 2 saat keçib
-                    "locked": bool(mark and mark.done and (now - mark.updated_at) > MARK_EDIT_WINDOW),
-                }
-            )
-        rows.append({"enrollment": e, "student": e.student, "cells": cells, "total": total})
-    return {"topics": topics, "slots": slots, "rows": rows, "max_topics": SELF_WORK_MAX_TOPICS}
-
-
 # ── Kurs işi (0-100, giriş balından kənar) ───────────────────────────────────
 
 
 @transaction.atomic
 def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=None, allow_locked=False) -> bool:
     """Kurs işini yaz/yenilə — mövcud qeyd yalnız 2 saat içində (İKT keçir)."""
+    if not Enrollment.objects.filter(pk=enrollment.pk, status=Enrollment.Status.ENROLLED).exists():
+        return False
     offering = enrollment.offering
     if journal_is_locked(offering):
         return False
@@ -359,7 +338,7 @@ def get_final_breakdown(offering):
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
-    from apps.registrar import attendance, gradebook
+    from apps.registrar import finals_batch, gradebook
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -389,10 +368,18 @@ def get_final_breakdown(offering):
     selfwork_totals = {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering)["rows"]}
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     lessons_all = list(offering.lessons.all())
-    allowed = Decimal(offering.lesson_hours or sum(item.hours for item in lessons_all))
+    # Məxrəc də TƏK yerdən (tələbənin öz işarələrindən YOX) — bax
+    # :func:`exam_eligibility.lesson_hours_for`.
+    allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
     limit_percent = gradebook.absence_limit_percent_for(offering)
     allowed_absence = allowed * Decimal(limit_percent) / Decimal(100)
     warn_at = allowed_absence * Decimal("0.75")
+    # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`) — açılış üzrə bir dəfə.
+    frozen = exam_eligibility.is_frozen(offering)
+    exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
+    # Giriş balı üçün komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
+    # 4 sorğu idi — bax :mod:`apps.registrar.finals_batch`).
+    entry_batch = finals_batch.entry_batch(enrollments)
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
@@ -403,17 +390,26 @@ def get_final_breakdown(offering):
         kvals = [kscore_map.get((e.id, c.id)) for c in kolls]
         entered = [v for v in kvals if v is not None]
         absence_hours = Decimal(e.absence_hours)
-        barred = allowed_absence > 0 and absence_hours > allowed_absence
-        warning = (not barred) and allowed_absence > 0 and absence_hours >= warn_at
-        entry = gradebook.entry_score_for(e, scheme.entry_score_max)
-        # Davamiyyət balı (10-luq) — rəsmi cədvəl: 10 × (1 − buraxılmış_saat/dərs_saatı),
-        # 25% həddi keçiləndə None (imtahana buraxılmır). ``allowed`` = ümumi dərs saatı.
-        dav_score, _dav_barred = attendance.attendance_score(allowed, absence_hours, limit_percent=limit_percent)
+        eligibility = exam_eligibility.resolve(
+            absence_hours=absence_hours,
+            lesson_hours=allowed,
+            allowed_hours=allowed_absence,
+            limit_percent=limit_percent,
+            exempt=e.student_id in exempt_ids,
+            frozen=frozen,
+        )
+        barred = eligibility["barred"]
+        warning = (not frozen) and (not barred) and allowed_absence > 0 and absence_hours >= warn_at
+        entry = gradebook.entry_score_for(e, scheme.entry_score_max, **entry_batch.entry_kwargs(e))
         rows.append(
             {
                 "enrollment": e,
                 "student": e.student,
-                "dav": dav_score,  # rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli üzrə
+                # Rəsmi "DAVAMİYYƏT BALININ HESABLANMASI" cədvəli — resolver-dən.
+                # ⚠️ ``attendance.attendance_score``-u BURADA çağırmayın: istisna /
+                # təkrar imtahan / donma qaydası ikinci dəfə yazılmış olur və
+                # tələbənin öz ekranı ilə ayrılır (2026-08-31, 2-ci bloker).
+                "dav": eligibility["attendance_score"],
                 "kvals": kvals,
                 "korta": _avg(entered),
                 "sorta": _avg(agg["sem"]),
@@ -425,6 +421,7 @@ def get_final_breakdown(offering):
                     min(100, int(entry / Decimal(scheme.entry_score_max) * 100)) if scheme.entry_score_max else 0
                 ),
                 "barred": barred,
+                "eligibility": eligibility,
                 "warning": warning,
                 "absence_hours": e.absence_hours,
             }
@@ -454,33 +451,15 @@ def locked_lesson_kind(offering):
     return kinds[0] if len(kinds) == 1 else None
 
 
-def lesson_topic_choices(offering):
-    """Yeni dərs modalındakı mövzu SİYAHISI — LMS kursunun mövzularından
-    (əllə yazılmır; kurs/mövzu yoxdursa template sərbəst mətn göstərir)."""
-    if not offering.course_id:
-        return []
-    from django.apps import apps as django_apps
-
-    CourseTopic = django_apps.get_model("courses", "CourseTopic")
-    return list(
-        CourseTopic.objects.filter(course_id=offering.course_id).order_by("order").values_list("title", flat=True)
-    )
-
-
-def lesson_topic_meta(offering, lessons):
-    """Yeni dərs modalındakı mövzu dropdown-u üçün: hər mövzu + KEÇİRİLİB statusu
-    (+ tarix). ``lesson_topic_choices`` düz başlıqları başqa yerlərdə istifadə
-    olunur; burada müəllim artıq keçirilmiş mövzuları bir baxışda görsün deyə
-    keçirilmə məlumatı da qaytarılır."""
-    covered = {}
-    for lesson in lessons:
-        if lesson.topic and lesson.topic not in covered:
-            covered[lesson.topic] = lesson.date
-    return [
-        {"title": title, "covered": title in covered, "date": covered.get(title)}
-        for title in lesson_topic_choices(offering)
-    ]
-
+# Mövzu mənbəyi (təsdiqlənmiş sillabus → LMS kursu) ayrıca modula köçürülüb ki,
+# bu fayl modul-ölçü büdcəsində (600 sətir) qalsın; adlar geriyə uyğunluq üçün
+# buradan da import oluna bilər.
+from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yoxdur)
+    SYLLABUS_HOUR_KINDS,
+    lesson_topic_choices,
+    lesson_topic_meta,
+    syllabus_topic_rows,
+)
 
 # Qeyd: dərs saatı artıq STANDARD_LESSON_TIMES-dan seçilir (schedule.py) —
 # köhnə slot-əsaslı seçici silinib.

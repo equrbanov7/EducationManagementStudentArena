@@ -1,4 +1,9 @@
-{% load i18n %}
+{% load i18n org_tags %}
+{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
+kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
+mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
+dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
+dəyişmir).{% endcomment %}
 {% with s=org_kafedras_section %}
 <div class="org-management org-management--kafedras">
     {% if not s.organization %}
@@ -7,7 +12,7 @@
     <div class="org-management__header">
         <div>
             <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
-            <h1>{% trans 'Kafedralar' %}</h1>
+            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="org-management__title">{% trans 'Kafedralar' %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
             <p class="org-management__subtitle">
                 {% trans 'Hər kafedra bir fakültəyə aiddir; bir fakültədə bir neçə kafedra ola bilər.' %}
                 {% trans 'Kafedraya müdir və müəllimlər təyin edin.' %}
@@ -92,8 +97,14 @@
                                 </small>
                             </span>
                         </div>
-                        {% if s.can_edit or s.can_delete or s.can_assign_head %}
                         <div class="org-management__actions">
+                            <button type="button"
+                                    class="org-management__icon-btn js-org-unit-detail"
+                                    title="{% trans 'Ətraflı bax' %}"
+                                    data-unit-name="{{ kafedra.name }}"
+                                    data-detail-url="{% url 'organizations:structure_unit_detail' s.organization.slug kafedra.id %}">
+                                <i class="fas fa-circle-info"></i>
+                            </button>
                             {% if s.can_assign_head %}
                             <button type="button"
                                     class="org-management__icon-btn js-org-unit-head"
@@ -128,13 +139,27 @@
                             </button>
                             {% endif %}
                         </div>
-                        {% endif %}
                     </div>
 
-                    <div class="org-management__unit-card-meta">
+                    <div class="org-management__unit-card-meta org-management__unit-card-meta--teachers">
                         <span class="org-management__badge org-management__badge--green">
-                            <i class="fas fa-chalkboard-teacher"></i> {% blocktrans with count=kafedra.teacher_count %}{{ count }} müəllim{% endblocktrans %}
+                            {% blocktrans with n=kafedra.active_teacher_count context 'organizations.unit_detail' %}{{ n }} aktiv{% endblocktrans %}
                         </span>
+                        <span class="org-management__badge">
+                            {% blocktrans with n=kafedra.teacher_count context 'organizations.unit_detail' %}{{ n }} indiyə kimi{% endblocktrans %}
+                        </span>
+                        {% if kafedra.teacher_members_preview %}
+                        <span class="org-management__teacher-preview">
+                            <span class="org-management__teacher-preview-avatars" aria-hidden="true">
+                                {% for membership in kafedra.teacher_members_preview %}
+                                    <span class="org-management__avatar org-management__avatar--small {% if membership.is_active_teacher %}org-management__avatar--green{% endif %}">{{ membership.user.username|first|upper }}</span>
+                                {% endfor %}
+                            </span>
+                            {% if kafedra.teacher_members_hidden_count %}
+                                <span class="org-management__teacher-preview-more">+{% blocktrans with n=kafedra.teacher_members_hidden_count context 'organizations.unit_detail' %}{{ n }} daha{% endblocktrans %}</span>
+                            {% endif %}
+                        </span>
+                        {% endif %}
                         <span class="org-management__badge">
                             <i class="fas fa-user-tie"></i>
                             {% if kafedra.head %}{{ kafedra.head.get_full_name|default:kafedra.head.username }}{% else %}{% trans 'Müdir təyin edilməyib' %}{% endif %}
@@ -144,10 +169,9 @@
                     <div class="org-management__unit-card-foot">
                         <button type="button"
                                 class="org-management__link-btn"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#kafedraTeachers{{ forloop.counter }}"
-                                aria-expanded="false">
-                            <i class="fas fa-users"></i> {% blocktrans with count=kafedra.teacher_members|length %}Müəllimlər ({{ count }}){% endblocktrans %}
+                                data-bs-toggle="modal"
+                                data-bs-target="#kafedraTeachersModal{{ forloop.counter }}">
+                            <i class="fas fa-users"></i> {% blocktrans with count=kafedra.teacher_count %}Müəllimlər ({{ count }}){% endblocktrans %}
                         </button>
                         {% if s.can_assign_teachers %}
                         <button type="button"
@@ -159,39 +183,60 @@
                         </button>
                         {% endif %}
                     </div>
-
-                    <div class="collapse org-management__teacher-list" id="kafedraTeachers{{ forloop.counter }}">
-                        {% if kafedra.teacher_members %}
-                            {% for membership in kafedra.teacher_members %}
-                                <div class="org-management__teacher-row">
-                                    <div class="org-management__member">
-                                        <span class="org-management__avatar org-management__avatar--small">{{ membership.user.username|first|upper }}</span>
-                                        <span>
-                                            <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
-                                            <small>{{ membership.role.display_name }}</small>
-                                        </span>
-                                    </div>
-                                    {% if s.can_assign_teachers %}
-                                    <form method="post"
-                                          action="{% url 'organizations:structure_kafedras' s.organization.slug %}"
-                                          data-profile-ajax-post="1"
-                                          data-section="org-kafedras">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="remove_teacher">
-                                        <input type="hidden" name="unit_id" value="{{ kafedra.id }}">
-                                        <input type="hidden" name="membership_id" value="{{ membership.id }}">
-                                        <button type="submit" class="org-management__icon-btn org-management__icon-btn--danger" title="{% trans 'Kafedradan çıxar' %}">
-                                            <i class="fas fa-user-minus"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="org-management__muted">{% trans 'Bu kafedraya hələ müəllim təyin edilməyib.' %}</p>
-                        {% endif %}
-                    </div>
                 </article>
+
+                {% comment %}
+                Kafedranın tam müəllim siyahısı (silmə düymələri ilə) — MODALDA,
+                kart daxilində DEYİL: köhnə `.collapse` bloku çox müəllimli
+                kafedrada kartı aşağı dartıb qonşu kartları da eyni sətirdə
+                stretch edirdi (CSS grid sətir hündürlüyü). Modal grid axınından
+                tamam kənardır — kart hündürlüyü artıq müəllim sayından asılı
+                deyil.
+                {% endcomment %}
+                <div class="modal fade" id="kafedraTeachersModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content org-management__modal">
+                            <div class="modal-header">
+                                <h5 class="modal-title">{{ kafedra.name }} — {% trans 'Müəllimlər' %}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' %}"></button>
+                            </div>
+                            <div class="modal-body org-management__teacher-list">
+                                {% if kafedra.teacher_members %}
+                                    {% for membership in kafedra.teacher_members %}
+                                        <div class="org-management__teacher-row">
+                                            <div class="org-management__member">
+                                                <span class="org-management__avatar org-management__avatar--small {% if membership.is_active_teacher %}org-management__avatar--green{% endif %}">{{ membership.user.username|first|upper }}</span>
+                                                <span>
+                                                    <strong>{{ membership.user.get_full_name|default:membership.user.username }}</strong>
+                                                    <small>{{ membership.role|localized_role_label }}</small>
+                                                </span>
+                                            </div>
+                                            {% if s.can_assign_teachers %}
+                                            <form method="post"
+                                                  action="{% url 'organizations:structure_kafedras' s.organization.slug %}"
+                                                  data-profile-ajax-post="1"
+                                                  data-section="org-kafedras">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="remove_teacher">
+                                                <input type="hidden" name="unit_id" value="{{ kafedra.id }}">
+                                                <input type="hidden" name="membership_id" value="{{ membership.id }}">
+                                                <button type="submit" class="org-management__icon-btn org-management__icon-btn--danger" title="{% trans 'Kafedradan çıxar' %}">
+                                                    <i class="fas fa-user-minus"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="org-management__muted">{% trans 'Bu kafedraya hələ müəllim təyin edilməyib.' %}</p>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans 'Bağla' %}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
         </div>
         {% include "partials/_pagination.html" with page_obj=s.kafedras_page_obj page_param="kafedra_page" extra_query=s.pagination_query %}
@@ -375,7 +420,7 @@
                                     {% for membership in s.teacher_options %}
                                         <option value="{{ membership.id }}">
                                             {{ membership.user.get_full_name|default:membership.user.username }}
-                                            ({{ membership.role.display_name }}{% if membership.scope_unit %} — {% trans 'hazırda:' %} {{ membership.scope_unit.name }}{% else %} — {% trans 'təyinatsız' %}{% endif %})
+                                            ({{ membership.role|localized_role_label }}{% if membership.scope_unit %} — {% trans 'hazırda:' %} {{ membership.scope_unit.name }}{% else %} — {% trans 'təyinatsız' %}{% endif %})
                                         </option>
                                     {% endfor %}
                                 </select>
@@ -429,6 +474,7 @@
         </div>
     </div>
     {% endif %}
+    {% include "organizations/partials/_unit_detail_modal.html" %}
     {% endif %}
 </div>
 {% endwith %}

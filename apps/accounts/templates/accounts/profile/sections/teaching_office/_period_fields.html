@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}Tədris dövrü sahələri — `_form_dialog.html` gövdəsi.
+Akademik il formatı «2025/2026» (layihə qərarı); semestr adı Payız/Yaz/Yay.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-name">{% trans "Semestrin adı" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-sm-name" name="name" maxlength="100" required
+               placeholder="{% trans 'Payız semestri' context 'accounts.semester' %}">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-year">{% trans "Tədris ili" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-sm-year" name="academic_year" maxlength="20" required
+               placeholder="2026/2027">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-start">{% trans "Başlama tarixi" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="date" id="tof-sm-start" name="start_date" required>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-sm-end">{% trans "Bitmə tarixi" context "accounts.semester" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="date" id="tof-sm-end" name="end_date" required>
+    </div>
+</div>

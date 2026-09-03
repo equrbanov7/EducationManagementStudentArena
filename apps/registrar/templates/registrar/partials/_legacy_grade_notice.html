@@ -1,0 +1,43 @@
+{% comment %}
+  Köçürülmüş nəticənin OXUNAN qeydi — tələbə səthləri üçün ORTAQ markup.
+
+  Çağırış:
+      {% include "registrar/partials/_legacy_grade_notice.html" with legacy=row.legacy %}
+      {% include "registrar/partials/_legacy_grade_notice.html" with legacy=item.academic.legacy variant="block" %}
+
+  MİQYAS: bir NƏTİCƏNİN göründüyü səth (tələbənin «Nəticələrim» kartı).
+  Cədvəl səthində (``_overall_academic.html``) bu partial sətir-sətir ÇAĞIRILMIR —
+  orada cümlə semestr blokunda bir dəfə çıxır
+  (``_legacy_grade_semester_notice.html``); səbəb və ölçmə oradadır.
+
+  ``_legacy_grade_mark.html`` ilə fərq
+  ------------------------------------
+  * ``_legacy_grade_mark.html`` = incə qlif + tooltip.  Səs-küy büdcəsi ucuzdur,
+    ona görə jurnal qridi kimi sıx səthlərdə hər köçürülmüş sətirdə qalır.
+  * bu partial = ekranda daimi MƏTN.  Yalnız ``legacy.show_result_notice``
+    doğru olanda çıxır, yəni İmtahan Mərkəzi hələ dəqiqləşdirməyib VƏ
+    ikisindən biri var:
+      (a) sətrin qəti nəticəsi (keçdi/kəsildi) — ``LEGACY_RESULT_CHECK_NOTICE``;
+      (b) sətirdə nəticə görünmür, amma SÜBUTDA bal var — ``LEGACY_SOURCE_ONLY_NOTICE``.
+    (b) məhz kor nöqtədir: əvvəl qeyd orada susurdu və köhnə sistemin balı
+    yalnız qlif tooltip-ində görünürdü (ölçülüb: 5,333 yazılış, 1,944 tələbə).
+    Nə nəticəsi, nə mənbə balı olan sətirdə qeyd yenə susur — orada
+    dəqiqləşdiriləsi heç nə yoxdur (bax ``legacy_grade_read.attach_legacy_provenance``).
+
+  Rəng qərarı
+  -----------
+  Ton İNFORMATİVDİR (mavi), xəbərdarlıq deyil:
+    * QIRMIZI (``oa-row--fail``, ``result-feedback-box--fail``) «kəsilib» deməkdir —
+      köçürülmüş keçmə balı qırmızı olsa, tələbə kəsildiyini düşünər;
+    * SARI (``correction.css``: #fff3cd / #d99e13) «auditli düzəliş» deməkdir —
+      burada heç nə düzəldilməyib;
+    * TƏK BOZ da yaramır: boz artıq «nəticə yazılmayıb» dilidir
+      (``oa-status.is-legacy``, ``legacy-mark``), yəni məhz qeydin GÖRÜNMƏDİYİ hal.
+  Mavi hər üç lüğətdə boşdur və «məlumat üçün» oxunur.
+{% endcomment %}
+{% if legacy.show_result_notice %}
+<p class="legacy-notice legacy-notice--{{ variant|default:'inline' }}">
+    <i class="fas fa-circle-info legacy-notice__icon" aria-hidden="true"></i>
+    <span class="legacy-notice__text">{{ legacy.result_notice }}</span>
+</p>
+{% endif %}

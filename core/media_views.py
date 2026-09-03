@@ -41,13 +41,19 @@ import posixpath
 
 from django.apps import apps as django_apps
 from django.conf import settings
-from django.core.exceptions import PermissionDenied, SuspiciousFileOperation
+from django.core.exceptions import SuspiciousFileOperation
 from django.core.files.storage import default_storage
 from django.db.models import Q
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import redirect
 from django.utils._os import safe_join
 from django.views.decorators.http import require_GET
+
+from core import media_policies
+
+# Geri uyğunluq: düzəliş sənədi siyasəti ``core.media_policies``-ə köçdü; köhnə
+# ad (testlər/monkeypatch) eyni funksiyaya işarə edir.
+_check_journal_correction_access = media_policies.check_journal_correction_access
 
 # Paths that are considered public and do not require authentication.
 # These are served openly (blog images, course covers, etc.).
@@ -69,8 +75,7 @@ _PRIVATE_PREFIXES: tuple[str, ...] = (
     "question_imports/",
     "import_jobs/",
     "trial_exams/",
-    "journal_corrections/",
-)
+) + media_policies.PRIVATE_PREFIXES
 
 # Minimum role level considered "teacher-level" for access to sensitive files
 # (lab_assistant = 50, teacher = 60; using 50 to include lab assistants).
@@ -80,7 +85,11 @@ _TEACHER_MIN_LEVEL = 50
 def _is_private(path: str) -> bool:
     """Return True if the path prefix belongs to sensitive private storage."""
     clean = path.lstrip("/")
-    return clean.startswith(_PRIVATE_PREFIXES)
+    if clean.startswith(_PRIVATE_PREFIXES):
+        return True
+    # App-ların `AppConfig.ready()`-dən qeyd etdiyi prefikslər (registry).
+    registered = media_policies.registered_prefixes()
+    return bool(registered) and clean.startswith(registered)
 
 
 def _user_has_org_membership(user, organization, *, min_level: int = 0) -> bool:
@@ -418,29 +427,6 @@ def _check_trial_exam_access(user, path: str) -> bool:
         return False
 
 
-# Təşkilat-admin səviyyəsi (org_admin=80) — jurnal düzəliş sənədləri həssasdır
-# (tibbi arayış və s.), yalnız korrektorlar (admin) + sənədin aid olduğu tələbə.
-_ORG_ADMIN_MIN_LEVEL = 80
-
-
-def _check_journal_correction_access(user, path: str) -> bool:
-    """Verify access to ``journal_corrections/`` PDFs (medical/official docs).
-
-    Superusers/staff are granted earlier. Here: the student whose corrected mark
-    it is, OR an admin-level member of the correction's organization."""
-    try:
-        JournalCorrection = django_apps.get_model("registrar", "JournalCorrection")
-        correction = JournalCorrection.objects.select_related("organization", "lesson_mark__enrollment").get(
-            document=path
-        )
-    except JournalCorrection.DoesNotExist:
-        return False
-    student_id = getattr(correction.lesson_mark.enrollment, "student_id", None)
-    if student_id is not None and student_id == user.id:
-        return True
-    return _user_has_org_membership(user, correction.organization, min_level=_ORG_ADMIN_MIN_LEVEL)
-
-
 # ---------------------------------------------------------------------------
 # Access-checker registry
 # ---------------------------------------------------------------------------
@@ -465,7 +451,9 @@ _ACCESS_CHECKERS: dict[str, object] = {
     "question_imports/": _check_question_import_access,
     "import_jobs/": _check_import_job_access,
     "trial_exams/": _check_trial_exam_access,
-    "journal_corrections/": _check_journal_correction_access,
+    # Jurnal düzəliş sənədləri, imtahan bal sübutu, köhnə üzrlü qayıb aktları
+    # və müraciət qoşmaları ayrıca siyasət modulundadır (bax core/media_policies.py).
+    **media_policies.ACCESS_CHECKERS,
 }
 
 
@@ -499,7 +487,12 @@ def _check_private_media_access(request, path: str) -> bool:
 
     for prefix, checker in _ACCESS_CHECKERS.items():
         if clean.startswith(prefix):
-            return checker(user, path)
+            # Runtime reyestrdəki qeyd (varsa) statik default-u əvəz edir.
+            return media_policies.resolve_checker(prefix, checker)(user, path)
+
+    for prefix in media_policies.registered_prefixes():
+        if clean.startswith(prefix):
+            return media_policies.resolve_checker(prefix)(user, path)
 
     # Unknown private path — deny by default.
     return False
@@ -533,7 +526,9 @@ def protected_media(request, path: str):
 
             return redirect_to_login(request.get_full_path())
         if not _check_private_media_access(request, clean_path):
-            raise PermissionDenied
+            # 403 DEYİL, 404: icazəsiz aktora faylın MÖVCUDLUĞU da bildirilmir
+            # (2026-09-02 audit, P0-1 — sənəd yolları UUID ilə qorunur).
+            raise Http404("Media file not found.")
 
     if getattr(settings, "OBJECT_STORAGE_ENABLED", False):
         if not default_storage.exists(clean_path):

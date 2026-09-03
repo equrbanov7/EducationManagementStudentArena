@@ -444,3 +444,47 @@ class AuditLogManagerIntrospectionCacheTests(TestCase):
         AuditLog.objects.create(action=AuditAction.CREATE, resource_type="warmup", resource_id="1")
         with self.assertNumQueries(1):
             list(AuditLog.objects.all()[:5])
+
+
+# ---------------------------------------------------------------------------
+# P1-3 (2026-09-02 audit): audit jurnalı SİLİNƏ BİLİRDİ
+# ---------------------------------------------------------------------------
+#
+# ``AuditLogAdmin.has_delete_permission`` ``request.user.is_superuser``
+# qaytarırdı: ələ keçirilmiş superadmin 22 301 sətirlik izi — o cümlədən öz
+# əməllərinin qeydini — admin UI-dan silə bilərdi.  Yaratma və dəyişmə artıq
+# bağlı idi, silmə isə deyildi.
+class AuditLogAppendOnlyTest(TestCase):
+    def setUp(self):
+        from django.contrib.admin.sites import AdminSite
+
+        from .admin import AuditLogAdmin
+
+        self.admin = AuditLogAdmin(AuditLog, AdminSite())
+        self.factory = RequestFactory()
+        self.superuser = User.objects.create_superuser("audit_super", "audit_super@qku.edu.az", "StrongPass123!")
+
+    def _request(self, user):
+        request = self.factory.get("/admin/audit/auditlog/")
+        request.user = user
+        return request
+
+    def test_superuser_has_no_delete_permission(self):
+        self.assertFalse(self.admin.has_delete_permission(self._request(self.superuser)))
+
+    def test_bulk_delete_action_is_removed(self):
+        actions = self.admin.get_actions(self._request(self.superuser))
+        self.assertNotIn("delete_selected", actions)
+
+    def test_add_and_change_stay_disabled(self):
+        request = self._request(self.superuser)
+        self.assertFalse(self.admin.has_add_permission(request))
+        self.assertFalse(self.admin.has_change_permission(request))
+
+    def test_model_delete_raises(self):
+        from django.core.exceptions import ValidationError
+
+        entry = AuditLog.objects.create(action=AuditAction.VIEW, resource_type="probe", resource_id="1")
+        with self.assertRaises(ValidationError):
+            entry.delete()
+        self.assertTrue(AuditLog.objects.filter(pk=entry.pk).exists())

@@ -1,0 +1,13 @@
+{% comment %}
+Tab-lar — handoff §7 (`aria-current`). Panellər `data-ems-tabpanel="<key>"`.
+Kontekst: `tabs` = [{key, label, count, current}], `tabs_label` (aria-label).
+{% endcomment %}
+<nav class="ems-tabs" data-ems-tabs aria-label="{{ tabs_label }}">
+    {% for tab in tabs %}
+        <button type="button" class="ems-tabs__btn" data-ems-tab="{{ tab.key }}"
+                {% if tab.current %}aria-current="page"{% endif %}>
+            {{ tab.label }}
+            {% if tab.count %}<span class="ems-tabs__count">{{ tab.count }}</span>{% endif %}
+        </button>
+    {% endfor %}
+</nav>

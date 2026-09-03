@@ -1,6 +1,6 @@
 {% load i18n %}
 {# ── U12: Universitet bölmələri — SPA panel (sidebar itmir) ────────── #}
-{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "grade-approvals" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "lessons-log" in allowed_sections or "journal-close" in allowed_sections or "analytics" in allowed_sections or "academic-records" in allowed_sections or "overall-academic" in allowed_sections or "people-teachers" in allowed_sections or "people-students" in allowed_sections or "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "question-chair-review" in allowed_sections or "teaching-handover" in allowed_sections or "schedule-manage" in allowed_sections or "workload-distribution" in allowed_sections or "my-workload" in allowed_sections or "workload-center" in allowed_sections or "workload-visa" in allowed_sections or "workload-approval" in allowed_sections or "workload-overview" in allowed_sections %}
 <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "Universitet" context "profile.sidebar" %}</span></li>
 {% endif %}
 {% if "overall-academic" in allowed_sections %}
@@ -24,6 +24,21 @@
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-schedule' %}active{% endif %}">
         <i class="fas fa-calendar-week sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Dərs cədvəli" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Cədvəl idarəetməsi — `schedule.manage` (proqram koordinatoru, RİM,
+dekan, kafedra müdiri). Adi müəllim bu sətri GÖRMÜR: onun üçün yuxarıdakı «Dərs
+cədvəli» yalnız-oxu görünüşdür. Panel AJAX-safe-dir (sidebar itmir).{% endcomment %}
+{% if "schedule-manage" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=schedule-manage"
+       data-section="schedule-manage"
+       data-title="{% trans 'Cədvəl idarəetməsi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'schedule-manage' %}active{% endif %}">
+        <i class="fas fa-calendar-plus sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Cədvəl idarəetməsi" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}
@@ -62,15 +77,124 @@
     {% endif %}
 </li>
 {% endif %}
-{% if "grade-approvals" in allowed_sections %}
+{% comment %}Ekran 21 «Keçilmiş dərslər» — müəllimin öz dərs izi (OXU-ONLY panel,
+sol sidebar qalır). Tələbədə YOXDUR; nəzarətçi `journal.roster` ilə alır.{% endcomment %}
+{% if "lessons-log" in allowed_sections %}
 <li class="sidebar-menu-item">
-    <a href="{{ profile_base_url }}?section=grade-approvals"
-       data-section="grade-approvals"
-       data-title="{% trans 'Qiymət təsdiqləri' context 'profile.sidebar' %}"
+    <a href="{{ profile_base_url }}?section=lessons-log"
+       data-section="lessons-log"
+       data-title="{% trans 'Keçilmiş dərslər' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
-       class="sidebar-menu-link js-profile-section-link {% if active_section == 'grade-approvals' %}active{% endif %}">
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'lessons-log' %}active{% endif %}">
+        <i class="fas fa-clock-rotate-left sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Keçilmiş dərslər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}RİM: semestr sonu jurnal bağlama. Form-heavy bölmədir (kollokvium
+pəncərələri kimi) — AJAX swap YOX, tam səhifə naviqasiyası.{% endcomment %}
+{% if "journal-close" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=journal-close"
+       data-section="journal-close"
+       data-title="{% trans 'Jurnal bağlama' context 'profile.sidebar' %}"
+       class="sidebar-menu-link {% if active_section == 'journal-close' %}active{% endif %}">
+        <i class="fas fa-lock sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Jurnal bağlama" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Fənn təhvili — `journal.reassign`. AJAX-safe SPA bölməsidir
+(cədvəl/seçicilər JSON-la gəlir), ona görə `js-profile-section-link` ilə
+sidebar itmədən açılır.{% endcomment %}
+{% if "teaching-handover" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=teaching-handover"
+       data-section="teaching-handover"
+       data-title="{% trans 'Fənn təhvili' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'teaching-handover' %}active{% endif %}">
+        <i class="fas fa-right-left sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Fənn təhvili" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Mərhələ 4 — dərs yükü zənciri: tədris şöbəsi mərkəzi (12),
+koordinator vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi baxışı (17).
+Hər biri ÖZ icazə açarındadır; panellər server-render OXU-ONLYdir.{% endcomment %}
+{% if "workload-center" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-center"
+       data-section="workload-center"
+       data-title="{% trans 'Dərs yükü mərkəzi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-center' %}active{% endif %}">
+        <i class="fas fa-diagram-project sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Dərs yükü mərkəzi" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "workload-visa" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-visa"
+       data-section="workload-visa"
+       data-title="{% trans 'Yük vizası' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-visa' %}active{% endif %}">
         <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
-        <span class="sidebar-menu-text">{% trans "Qiymət təsdiqləri" context "profile.sidebar" %}</span>
+        <span class="sidebar-menu-text">{% trans "Yük vizası" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "workload-approval" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-approval"
+       data-section="workload-approval"
+       data-title="{% trans 'Yük təsdiqi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-approval' %}active{% endif %}">
+        <i class="fas fa-stamp sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Yük təsdiqi" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "workload-overview" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-overview"
+       data-section="workload-overview"
+       data-title="{% trans 'Yük — ümumi baxış' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-overview' %}active{% endif %}">
+        <i class="fas fa-chart-pie sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Yük — ümumi baxış" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Dərs yükü — kafedra müdirinin bölgü ekranı (`workload.manage` /
+`workload.distribute`). SPA bölməsidir: sətirlər JSON-la gəlir, bölgü/təsdiq
+ayrıca POST-la.{% endcomment %}
+{% if "workload-distribution" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=workload-distribution"
+       data-section="workload-distribution"
+       data-title="{% trans 'Yük bölgüsü' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-distribution' %}active{% endif %}">
+        <i class="fas fa-scale-balanced sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Yük bölgüsü" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}«Dərs yüküm» — hər müəllim ÖZ yükünü görür (`workload.view`).{% endcomment %}
+{% if "my-workload" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-workload"
+       data-section="my-workload"
+       data-title="{% trans 'Dərs yüküm' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-workload' %}active{% endif %}">
+        <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Dərs yüküm" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}
@@ -86,6 +210,49 @@
     </a>
 </li>
 {% endif %}
+{% comment %}Sillabus: SİYAHI menyuda görünür; redaktor bölməsi siyahıdan açılır
+(ayrıca menyu sətri yoxdur, amma o da profil shell-inin içindədir — sidebar itmir).{% endcomment %}
+{% if "syllabus-list" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=syllabus-list"
+       data-section="syllabus-list"
+       data-title="{% trans 'Sillabuslar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-list' or active_section == 'syllabus-editor' %}active{% endif %}">
+        <i class="fas fa-file-lines sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Sillabuslar" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Sillabus təsdiqi — AYRI icazə açarı (`syllabus.review`): kafedra
+müdiri, dekan, RİM. Müəllim bu sətri görmür.{% endcomment %}
+{% if "syllabus-review" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=syllabus-review"
+       data-section="syllabus-review"
+       data-title="{% trans 'Sillabus təsdiqi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-review' %}active{% endif %}">
+        <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Sillabus təsdiqi" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% comment %}Sual təsdiqi — kafedra müdirinin sual dəsti növbəsi
+(`question.chair_review`). Müəllim və imtahan mərkəzi bu sətri GÖRMÜR.{% endcomment %}
+{% if "question-chair-review" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=question-chair-review"
+       data-section="question-chair-review"
+       data-title="{% trans 'Sual təsdiqi' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-chair-review' %}active{% endif %}">
+        <i class="fas fa-file-circle-check sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Sual təsdiqi" context "profile.sidebar" %}</span>
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="question_chair_pending_count">{% if question_chair_pending_count %}{{ question_chair_pending_count }}{% endif %}</span>
+    </a>
+</li>
+{% endif %}
 {% if "academic-records" in allowed_sections %}
 <li class="sidebar-menu-item">
     <a href="{{ profile_base_url }}?section=academic-records"
@@ -95,6 +262,30 @@
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
         <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
         <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "people-teachers" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=people-teachers"
+       data-section="people-teachers"
+       data-title="{% trans 'Müəllimlər' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-teachers' %}active{% endif %}">
+        <i class="fas fa-chalkboard-user sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Müəllimlər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}
+{% if "people-students" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=people-students"
+       data-section="people-students"
+       data-title="{% trans 'Tələbələr' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-students' %}active{% endif %}">
+        <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+        <span class="sidebar-menu-text">{% trans "Tələbələr" context "profile.sidebar" %}</span>
     </a>
 </li>
 {% endif %}

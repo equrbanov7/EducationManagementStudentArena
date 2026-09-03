@@ -1,0 +1,188 @@
+/* =========================================================================
+   Dərs yükü zənciri — ekran 12/13/15/16/17 (dizayn handoff Mərhələ 4).
+
+   YALNIZ DÜZÜM. Kart, cədvəl, badge, KPI, dialoq, timeline, tab — hamısı
+   ORTAQ `ems_ui` qatındadır (`static/css/ems_ui/*.css`) və burada TƏKRAR
+   TƏRİF OLUNMUR. Rənglər yalnız `--ems-*` tokenlərindən gəlir (light-only).
+   ========================================================================= */
+
+/* Kafedra tapşırıq kartları (ekran 12 «İdarə paneli») */
+.wl-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--ems-sp-4, 14px);
+    margin-block: var(--ems-sp-4, 14px);
+}
+
+.wl-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 8px);
+    padding: var(--ems-pad-card, 16px);
+    background: var(--ems-surface, #fff);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-md, 10px);
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, .06));
+}
+
+.wl-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-2, 8px);
+}
+
+.wl-card__name {
+    font-weight: 600;
+    color: var(--ems-neutral-900, #0f172a);
+    text-decoration: none;
+}
+
+.wl-card__name:hover { text-decoration: underline; }
+
+.wl-card__meta {
+    margin: 0;
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-neutral-600, #475569);
+}
+
+.wl-card__stats,
+.wl-card__split {
+    display: flex;
+    gap: var(--ems-sp-3, 12px);
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-neutral-600, #475569);
+}
+
+.wl-card__stats b { color: var(--ems-neutral-900, #0f172a); }
+
+/* Tapşırıq başlıq zolağı (ekran 12/15) */
+.wl-taskbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-2, 8px);
+    margin-block: var(--ems-sp-3, 12px);
+}
+
+.wl-taskbar__chair { font-weight: 600; margin-inline-end: var(--ems-sp-2, 8px); }
+.wl-taskbar__rev,
+.wl-taskbar__count {
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-neutral-600, #475569);
+}
+
+/* Yekun zolağı (ekran 12 «PAYIZ CƏMİ … CƏMİ KREDİT») */
+.wl-totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--ems-sp-3, 12px);
+    padding: var(--ems-pad-row, 10px) var(--ems-pad-card, 16px);
+    margin-block: var(--ems-sp-3, 12px);
+    background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-md, 10px);
+}
+
+.wl-totals__item { display: flex; flex-direction: column; gap: 2px; }
+.wl-totals__item span {
+    font-size: var(--ems-fs-2xs, 11px);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600, #475569);
+}
+.wl-totals__item b { font-size: var(--ems-fs-lg, 18px); color: var(--ems-neutral-900, #0f172a); }
+
+/* Xəbərdarlıq / qaytarılan sətir siyahıları */
+.wl-warnlist { margin: 0; padding-inline-start: 18px; font-size: var(--ems-fs-sm, 13px); }
+.wl-warnlist--danger { color: var(--ems-danger-strong, #b91c1c); }
+
+/* Fayl yükləmə (ekran 12 «Excel import») */
+.wl-upload {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 12px);
+    max-width: var(--ems-w-text, 640px);
+    margin-block: var(--ems-sp-4, 14px);
+}
+
+.wl-actions {
+    display: flex;
+    gap: var(--ems-sp-2, 8px);
+    justify-content: flex-end;
+    margin-block: var(--ems-sp-4, 14px);
+}
+
+/* Səhifələmə (server tərəfli linklər) */
+.wl-pager { display: flex; flex-wrap: wrap; gap: 6px; margin-block: var(--ems-sp-3, 12px); }
+.wl-pager__link {
+    min-width: 32px;
+    padding: 4px 8px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--ems-neutral-700, #334155);
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: var(--ems-r-sm, 6px);
+}
+.wl-pager__link.is-current {
+    color: #fff;
+    background: var(--ems-primary, #2563eb);
+    border-color: var(--ems-primary, #2563eb);
+}
+
+/* Təsdiq axını + riskli kafedralar (ekran 17) */
+.wl-flow,
+.wl-risk { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.wl-flow__item,
+.wl-risk__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-2, 8px);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ems-border-soft, #f1f5f9);
+    font-size: var(--ems-fs-sm, 13px);
+}
+
+.wl-flow__count { font-weight: 600; color: var(--ems-neutral-900, #0f172a); }
+.wl-risk__name { font-weight: 600; }
+.wl-risk__meta { color: var(--ems-neutral-600, #475569); font-size: var(--ems-fs-xs, 12px); }
+
+/* Müəllim etirazları (ekran 14 sağ panel / ekran 16) */
+.wl-objections { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wl-objection {
+    padding: var(--ems-pad-row, 10px);
+    background: var(--ems-warning-bg, #fef3c7);
+    border: 1px solid var(--ems-warning-bd, #fde68a);
+    border-radius: var(--ems-r-sm, 6px);
+    font-size: var(--ems-fs-sm, 13px);
+    color: var(--ems-warning-800, #92400e);
+}
+.wl-objection--closed {
+    background: var(--ems-neutral-50, #f8fafc);
+    border-color: var(--ems-border, #e2e8f0);
+    color: var(--ems-neutral-700, #334155);
+}
+.wl-objection__head { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+
+@media (max-width: 767px) {
+    .wl-cards { grid-template-columns: 1fr; }
+    .wl-totals { grid-template-columns: 1fr 1fr; }
+    .wl-taskbar { flex-direction: column; align-items: flex-start; }
+}
+
+/* «Dərs yüküm» başlıq əməlləri (ekran 16 §4 — təsdiq/etiraz) */
+.wlm__actions { display: flex; flex-wrap: wrap; gap: var(--ems-sp-2, 8px); align-items: center; }
+.wlm__confirmed {
+    font-size: var(--ems-fs-xs, 12px);
+    color: var(--ems-success-700, #15803d);
+    font-weight: 600;
+}
+.wlm__subtitle {
+    margin-block: var(--ems-sp-4, 14px) var(--ems-sp-1, 4px);
+    font-size: var(--ems-fs-md, 15px);
+    font-weight: 600;
+    color: var(--ems-neutral-900, #0f172a);
+}

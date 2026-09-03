@@ -1,0 +1,160 @@
+{
+  "snapshot_type": "sanitized_migration_verification_summary",
+  "generated_at": "2026-08-24T10:37:49Z",
+  "production_decision": "NO-GO",
+  "migration_complete": false,
+  "verified_scope": {
+    "m1_disposable_environment": "verified",
+    "m2_transfer_history": "verified_local",
+    "m2_approval_and_permission_scope": "verified_local",
+    "m2_core_cross_fk_and_instructor_integrity": "verified_local_core_scope",
+    "m3_source_preflight": "verified_real_snapshot_read_only",
+    "m3_control_plane_and_lifecycle": "verified_local",
+    "m3_reviewed_remap_versioning": "verified_local",
+    "m3_credential_safe_projection": "verified_contract_not_yet_connected_to_extractor",
+    "domain_adapters": "not_started",
+    "pilot_and_full_rehearsals": "not_started",
+    "production_cutover": "not_authorized"
+  },
+  "disposable_postgresql": {
+    "major_version": 16,
+    "all_current_schema_migrations_applied": true,
+    "legacy_0005_rollback_reapply": true,
+    "registrar_0041_rollback_reapply": true,
+    "non_super_no_bypass_migration_owner_rehearsal": true,
+    "target_kind": "isolated disposable test database",
+    "real_server_changed": false
+  },
+  "restricted_test_role": {
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false
+  },
+  "verification_suites": [
+    {
+      "suite": "legacy import full focused suite",
+      "engine": "SQLite",
+      "passed": 114,
+      "skipped": 34,
+      "failed": 0,
+      "status": "verified"
+    },
+    {
+      "suite": "legacy import full focused suite",
+      "engine": "PostgreSQL 16",
+      "passed": 146,
+      "skipped": 2,
+      "failed": 0,
+      "status": "verified"
+    },
+    {
+      "suite": "transfer, approval, analytics, console, journal authorization and permission integration",
+      "engine": "SQLite",
+      "passed": 203,
+      "skipped": 2,
+      "failed": 0,
+      "status": "verified"
+    },
+    {
+      "suite": "transfer, approval, analytics, console, journal authorization and permission integration",
+      "engine": "PostgreSQL 16",
+      "passed": 197,
+      "skipped": 0,
+      "failed": 0,
+      "status": "verified"
+    },
+    {
+      "suite": "registrar core cross-FK integrity and registrar/organizations RLS baseline",
+      "engine": "PostgreSQL 16",
+      "passed": 84,
+      "skipped": 0,
+      "failed": 0,
+      "status": "verified_core_scope"
+    },
+    {
+      "suite": "journal export tenant surface",
+      "engine": "SQLite and PostgreSQL 16",
+      "passed_per_engine": 10,
+      "skipped": 0,
+      "failed": 0,
+      "status": "verified"
+    }
+  ],
+  "legacy_import_control_plane": {
+    "models": [
+      "LegacyMigrationRun",
+      "LegacyEntityMap",
+      "LegacyEntityObservation",
+      "LegacyMigrationIssue",
+      "LegacyEntityMapVersion"
+    ],
+    "canonical_source_identity_unique": true,
+    "exact_rerun_noop": true,
+    "mapping_drift_rejected": true,
+    "per_run_observation_immutable": true,
+    "reviewer_attribution_and_evidence_required": true,
+    "reviewed_remap_append_only": true,
+    "review_history_reverse_guard": true,
+    "database_derived_terminal_counts": true,
+    "force_row_level_security": true,
+    "cross_scope_and_lifecycle_guards": true,
+    "raw_delete_and_truncate_guards": true,
+    "credential_safe_projection_default_deny": true,
+    "credential_safe_projection_connected_to_real_extractor": false,
+    "domain_or_business_data_written": false
+  },
+  "source_preflight": {
+    "access_mode": "strict_read_only",
+    "permission_octal": "0600",
+    "size_bytes": 2142912818,
+    "sha256": "177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0",
+    "table_count": 81,
+    "content_unchanged": true,
+    "result": "passed",
+    "encrypted_custody": "open_gate"
+  },
+  "target_hardening": {
+    "group_transfer_history_preserved": true,
+    "direct_publish_bypass_closed": true,
+    "approval_publish_database_invariant": true,
+    "approval_audit_atomic": true,
+    "permission_scope_fail_closed": true,
+    "core_cross_fk_child_and_parent_tenant_immutability": true,
+    "core_instructor_membership_and_permission_required": true,
+    "journal_authorization_rechecked_after_role_revocation": true,
+    "remaining_registrar_relation_matrix": "open_gate",
+    "existing_publish_state_reconciliation": "open_gate",
+    "same_semester_return_to_dropped_group": "open_business_decision"
+  },
+  "open_production_gates": [
+    "encrypted legacy source custody and retention",
+    "remaining registrar cross-foreign-key, actor and correction relation matrix",
+    "real extractor integration with zero credential output and safe account activation",
+    "versioned and approved syllabus source-of-truth",
+    "production RBAC authorizer and tenant-aware target validator registry for reviewed remap",
+    "deterministic domain adapters and business-approved pilot",
+    "two full PostgreSQL rehearsals with equal counts and reconciliation digest",
+    "production backup/restore, runtime-role and cutover attestations"
+  ],
+  "evidence_paths": [
+    "docs/migration/MASTER_PLAN.md",
+    "docs/migration/STATUS.md",
+    "docs/migration/SECURITY_BASELINE.md",
+    "apps/legacy_import/models.py",
+    "apps/legacy_import/services/preflight.py",
+    "apps/legacy_import/services/ledger.py",
+    "apps/legacy_import/services/field_contracts.py",
+    "apps/legacy_import/services/review.py",
+    "apps/legacy_import/migrations/0005_reviewed_mapping_versions.py",
+    "apps/registrar/migrations/0039_preserve_enrollment_transfer_history.py",
+    "apps/registrar/migrations/0040_assessment_scheme_publish_invariant.py",
+    "apps/registrar/migrations/0041_migration_target_tenant_integrity.py"
+  ],
+  "safety": {
+    "contains_personal_data": false,
+    "contains_credentials": false,
+    "contains_connection_strings": false,
+    "contains_local_absolute_paths": false
+  }
+}

@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Səhifələmə — server tərəfli (`?page=`); JS eyni fraqment endpoint-ini çağırır.{% endcomment %}
+<nav class="syl-pager" aria-label="{% trans 'Səhifələmə' context 'accounts.syllabus' %}">
+  <span class="syl-pager__text">
+    {% blocktrans context "accounts.syllabus" with total=page.total start=page.start end=page.end %}{{ total }} qeyddən {{ start }}–{{ end }} göstərilir{% endblocktrans %}
+  </span>
+  <div class="syl-pager__buttons">
+    <button type="button" class="syl-btn syl-btn--secondary syl-btn--sm"
+            data-syl-page="{{ page.number|add:'-1' }}" {% if not page.has_prev %}disabled{% endif %}>{% trans "Əvvəlki" context "accounts.syllabus" %}</button>
+    {% for number in page.numbers %}
+    <button type="button" class="syl-pager__num{% if number == page.number %} is-on{% endif %}"
+            data-syl-page="{{ number }}"
+            {% if number == page.number %}aria-current="page"{% endif %}>{{ number }}</button>
+    {% endfor %}
+    <button type="button" class="syl-btn syl-btn--secondary syl-btn--sm"
+            data-syl-page="{{ page.number|add:'1' }}" {% if not page.has_next %}disabled{% endif %}>{% trans "Növbəti" context "accounts.syllabus" %}</button>
+  </div>
+</nav>

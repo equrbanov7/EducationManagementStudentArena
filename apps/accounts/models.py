@@ -3,196 +3,16 @@ User profile models for EMS Arena.
 Extends Django's User model with additional profile information.
 """
 
-import re
-from datetime import timedelta
-
 from django.conf import settings
-from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.hashers import check_password, identify_hasher
 from django.db import models
-from django.utils import timezone
-from django.utils.crypto import constant_time_compare, salted_hmac
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import OrganizationType
 
 # M2 (2026-07-02): ProfileRole core.roles-a köçürülüb (dövri asılılıq kökü idi).
 # Köhnə `from apps.accounts.models import ProfileRole` import səthi qorunur (AGENTS §1).
 from core.roles import ProfileRole  # noqa: F401
-from core.utils import get_auth_otp_expiry_seconds, get_auth_otp_max_attempts
-
-
-class EmailOTP(models.Model):
-    """Secure one-time password record for signup, login, and recovery flows."""
-
-    _HEX_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
-
-    class Purpose(models.TextChoices):
-        SIGNUP = "signup", "Signup verification"
-        LOGIN = "login", "Login verification"
-        PASSWORD_RESET = "password_reset", "Password reset"
-        ADMIN_LOGIN = "admin_login", "Admin login"
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="email_otps",
-        null=True,
-        blank=True,
-    )
-    email = models.EmailField(db_index=True, blank=True, default="")
-    # Legacy storage kept temporarily so pre-migration OTP rows remain verifiable.
-    code = models.CharField(max_length=128, blank=True, default="")
-    otp_hash = models.CharField(max_length=64, blank=True, default="")
-    purpose = models.CharField(
-        max_length=32,
-        choices=Purpose.choices,
-        default=Purpose.SIGNUP,
-        db_index=True,
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    is_verified = models.BooleanField(default=False)
-    attempts_count = models.PositiveSmallIntegerField(default=0)
-    is_used = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = "Email OTP"
-        verbose_name_plural = "Email OTPs"
-        indexes = [
-            models.Index(fields=["email", "purpose", "created_at"]),
-            models.Index(fields=["user", "purpose", "created_at"]),
-        ]
-
-    @staticmethod
-    def normalize_email(email):
-        return BaseUserManager.normalize_email(str(email or "").strip()).lower()
-
-    @classmethod
-    def build_otp_hash(cls, *, email, otp, purpose):
-        normalized_email = cls.normalize_email(email)
-        payload = f"{purpose}:{normalized_email}:{str(otp or '').strip()}"
-        return salted_hmac(
-            "apps.accounts.email_otp",
-            payload,
-            secret=settings.SECRET_KEY,
-            algorithm="sha256",
-        ).hexdigest()
-
-    @staticmethod
-    def _code_is_hashed(value):
-        try:
-            identify_hasher(value)
-            return True
-        except Exception:
-            return False
-
-    @classmethod
-    def _is_sha256_digest(cls, value):
-        return bool(value and cls._HEX_DIGEST_RE.fullmatch(str(value).strip().lower()))
-
-    def save(self, *args, **kwargs):
-        if self.user_id and not self.email:
-            self.email = self.normalize_email(getattr(self.user, "email", ""))
-        else:
-            self.email = self.normalize_email(self.email)
-
-        if self.code and not self.otp_hash and not self._code_is_hashed(self.code):
-            self.otp_hash = self.build_otp_hash(
-                email=self.email or getattr(self.user, "email", ""),
-                otp=self.code,
-                purpose=self.purpose,
-            )
-            self.code = ""
-        elif self.otp_hash and not self._is_sha256_digest(self.otp_hash):
-            self.otp_hash = self.build_otp_hash(
-                email=self.email or getattr(self.user, "email", ""),
-                otp=self.otp_hash,
-                purpose=self.purpose,
-            )
-
-        if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(seconds=get_auth_otp_expiry_seconds())
-        super().save(*args, **kwargs)
-
-    def is_expired(self):
-        return timezone.now() >= self.expires_at
-
-    def matches_code(self, raw_code):
-        candidate = str(raw_code or "").strip()
-        if not candidate:
-            return False
-
-        if self.otp_hash:
-            candidate_hash = self.build_otp_hash(
-                email=self.email or getattr(self.user, "email", ""),
-                otp=candidate,
-                purpose=self.purpose,
-            )
-            if constant_time_compare(candidate_hash, self.otp_hash):
-                return True
-
-        if self.code:
-            if self._code_is_hashed(self.code):
-                return check_password(candidate, self.code)
-            return constant_time_compare(candidate, self.code)
-
-        return False
-
-    @property
-    def remaining_attempts(self):
-        return max(0, get_auth_otp_max_attempts() - int(self.attempts_count or 0))
-
-    def mark_verified(self):
-        self.is_verified = True
-        self.is_used = True
-        self.save(update_fields=["is_verified", "is_used"])
-
-    def invalidate(self):
-        if self.is_used:
-            return
-        self.is_used = True
-        self.save(update_fields=["is_used"])
-
-    def register_failed_attempt(self):
-        self.attempts_count = int(self.attempts_count or 0) + 1
-        if self.attempts_count >= get_auth_otp_max_attempts():
-            self.is_used = True
-            self.save(update_fields=["attempts_count", "is_used"])
-            return
-        self.save(update_fields=["attempts_count"])
-
-    @classmethod
-    def pending_queryset(cls, *, user=None, email=None, purpose=None):
-        if not user and not email:
-            return cls.objects.none()
-
-        filters = {
-            "is_used": False,
-        }
-        if user is not None:
-            filters["user"] = user
-        if email:
-            filters["email"] = cls.normalize_email(email)
-        if purpose:
-            filters["purpose"] = purpose
-        return cls.objects.filter(**filters).order_by("-created_at")
-
-    @classmethod
-    def get_matching_otp(cls, *, user=None, email=None, code="", purpose=None):
-        candidate = str(code or "").strip()
-        if not candidate:
-            return None
-
-        queryset = cls.pending_queryset(user=user, email=email, purpose=purpose).filter(
-            expires_at__gte=timezone.now(),
-        )
-
-        for otp in queryset[:10]:
-            if otp.matches_code(candidate):
-                return otp
-
-        return None
+from core.validators import validate_fin
 
 
 class UserProfile(models.Model):
@@ -202,6 +22,25 @@ class UserProfile(models.Model):
     """
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
+
+    class AccessState(models.TextChoices):
+        """``STAGED`` import keçididir; ``ARCHIVED`` (məzun/xaric) hesabda
+        ``is_active`` QƏSDƏN True qalır ki, registrar trigger-ləri tarixi jurnal
+        sətirlərini qəbul etsin — giriş yalnız bu vəziyyətlə bağlanır
+        (bax ``services/identity_archive.py``)."""
+
+        ACTIVE = "active", "Aktiv giriş"
+        STAGED = "staged", "Mərhələlənmiş (giriş bağlıdır)"
+        ARCHIVED = "archived", "Arxiv — məzun/xaric (giriş bağlıdır)"
+
+    access_state = models.CharField(
+        max_length=16,
+        choices=AccessState.choices,
+        default=AccessState.ACTIVE,
+        db_index=True,
+        verbose_name="Giriş vəziyyəti",
+        help_text="Legacy import staged qalır; məzun/xaric archived olur (giriş bağlı, data qalır).",
+    )
 
     # Organization linkage for multi-tenant support
     organization = models.ForeignKey(
@@ -248,6 +87,49 @@ class UserProfile(models.Model):
         help_text="Hansı təşkilat tipində qeydiyyatdan keçdiniz",
     )
 
+    # ── Şəxsiyyət (RİM axtarışı və identifikasiya üçün) ────────────────────
+    # Azərbaycanda insanlar rəsmi sənədlərdə "ad + soyad + ATA ADI" üçlüyü ilə
+    # tanınır; köhnə sistemdən idxal olunmuş hesabların username-i (myedu.*)
+    # istifadəçiyə məlum deyil, ona görə RİM hesabı məhz bu üçlüklə tapır.
+    # Django User modelində ata adı üçün yer yoxdur — profildə saxlanılır.
+    patronymic = models.CharField(
+        max_length=100,
+        blank=True,
+        default="",
+        db_index=True,
+        verbose_name="Ata adı",
+        help_text="Ad+soyad eyni olan hesabları ayırd etmək üçün (RİM axtarışı).",
+    )
+
+    # ── Demoqrafiya (kataloq filtrləri: «cinsə görə», «yaşa görə») ─────────
+    # Köhnə sistem bu iki sahəni ÇOX SEYRƏK doldurub (mənbədə cins 21 %, doğum
+    # tarixi 28 %), ona görə hər ikisi fail-closed sentinel ilə gəlir: kataloq
+    # «məlum deyil»i heç vaxt təxmin edilmiş dəyərlə əvəz etmir.
+    class Gender(models.TextChoices):
+        """Cins — mənbədəki ``students.sex``/``workers.sex`` (0/1/2) qarşılığı."""
+
+        UNSPECIFIED = "unspecified", pgettext_lazy("accounts.gender", "Təyin edilməyib")
+        MALE = "male", pgettext_lazy("accounts.gender", "Kişi")
+        FEMALE = "female", pgettext_lazy("accounts.gender", "Qadın")
+
+    gender = models.CharField(
+        max_length=16,
+        choices=Gender.choices,
+        default=Gender.UNSPECIFIED,
+        db_index=True,
+        verbose_name="Cins",
+        help_text="Mənbədə göstərilməyibsə «təyin edilməyib» qalır — təxmin edilmir.",
+    )
+
+    birth_date = models.DateField(
+        null=True,
+        blank=True,
+        default=None,
+        db_index=True,
+        verbose_name="Doğum tarixi",
+        help_text="Yaş filtri üçün; pozuq və ya qeyri-müəyyən mənbə dəyəri NULL qalır.",
+    )
+
     country = models.CharField(max_length=100, blank=True, default="", verbose_name="Ölkə")
 
     student_university_name = models.CharField(
@@ -264,6 +146,31 @@ class UserProfile(models.Model):
         default="",
         verbose_name="Məktəb nömrəsi/identifikatoru",
         help_text="Tələbə üçün məktəb nömrəsi və ya rəsmi identifikator",
+    )
+
+    # ``student_school_identifier`` tarixən məktəbin öz təşkilat kodunu daşıya
+    # bilir və tələbələr arasında unikal deyil. Ona görə legacy cutover üçün
+    # həmin biznes sahəsinin mənası dəyişdirilmir; təsdiqlənmiş, tələbəyə aid
+    # institusional açar ayrıca və boş/null semantikasını qoruyaraq saxlanılır.
+    institutional_identifier = models.CharField(
+        max_length=120,
+        null=True,
+        blank=True,
+        default=None,
+        editable=False,
+        verbose_name="İnstitusional tələbə identifikatoru",
+        help_text="Yalnız təsdiqlənmiş import mapping-i ilə doldurulan tələbə açarı.",
+    )
+
+    fin = models.CharField(
+        max_length=7,
+        null=True,
+        blank=True,
+        default=None,
+        unique=True,
+        validators=[validate_fin],
+        verbose_name="FİN",
+        help_text="Şəxsiyyət vəsiqəsi FİN kodu (7 simvol, A-Z0-9) — idxal/uzlaşdırma açarı.",
     )
 
     student_specialization = models.CharField(
@@ -288,6 +195,39 @@ class UserProfile(models.Model):
         default="",
         verbose_name="Departament / Kafedra",
         help_text="Müəllim və ya işçinin departamenti/kafedrası",
+    )
+
+    class AcademicTitle(models.TextChoices):
+        """Elmi ad / vəzifə — müəllim və akademik heyət üçün."""
+
+        ASSISTANT = "assistant", pgettext_lazy("accounts.academic_title", "Assistent")
+        TEACHER = "teacher", pgettext_lazy("accounts.academic_title", "Müəllim")
+        SENIOR_TEACHER = "senior_teacher", pgettext_lazy("accounts.academic_title", "Baş müəllim")
+        DOCENT = "docent", pgettext_lazy("accounts.academic_title", "Dosent")
+        PROFESSOR = "professor", pgettext_lazy("accounts.academic_title", "Professor")
+
+    class AcademicDegree(models.TextChoices):
+        """Elmi dərəcə."""
+
+        PHD = "phd", pgettext_lazy("accounts.academic_degree", "Fəlsəfə doktoru (PhD)")
+        DSC = "dsc", pgettext_lazy("accounts.academic_degree", "Elmlər doktoru")
+
+    academic_title = models.CharField(
+        max_length=30,
+        choices=AcademicTitle.choices,
+        blank=True,
+        default="",
+        verbose_name="Elmi ad / vəzifə",
+        help_text="Müəllim/akademik heyət üçün: assistent → professor",
+    )
+
+    academic_degree = models.CharField(
+        max_length=30,
+        choices=AcademicDegree.choices,
+        blank=True,
+        default="",
+        verbose_name="Elmi dərəcə",
+        help_text="Fəlsəfə doktoru (PhD) və ya elmlər doktoru",
     )
 
     staff_position = models.CharField(
@@ -331,6 +271,14 @@ class UserProfile(models.Model):
     )
 
     phone = models.CharField(max_length=20, blank=True, verbose_name="Telefon", help_text="Əlaqə nömrəsi")
+
+    phone_secondary = models.CharField(
+        max_length=20,
+        blank=True,
+        default="",
+        verbose_name="Əlavə telefon",
+        help_text="İkinci əlaqə nömrəsi. Nömrələr yalnız əməkdaş səviyyəli baxanlara göstərilir.",
+    )
 
     bio = models.TextField(blank=True, verbose_name="Haqqında", help_text="Qısa məlumat")
 
@@ -386,6 +334,48 @@ class UserProfile(models.Model):
         help_text="Hesabın silinmə tarixi",
     )
 
+    # ── RİM əməliyyat izləri ───────────────────────────────────────────────
+    # Audit log (apps.audit) əməliyyatın TAM tarixçəsini saxlayır; buradakı
+    # sahələr isə hesabın CARİ vəziyyətinin səbəbini siyahıda göstərmək üçündür
+    # ("Bloklanıb — səbəb: ...") — hər sətir üçün audit sorğusu atmadan.
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rim_deleted_profiles",
+        verbose_name="Silən",
+        help_text="Hesabı soft-delete edən RİM operatoru",
+    )
+    deletion_reason = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Silinmə səbəbi",
+        help_text="RİM operatorunun yazdığı səbəb",
+    )
+    blocked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Bloklanma tarixi",
+    )
+    blocked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="rim_blocked_profiles",
+        verbose_name="Bloklayan",
+        help_text="Hesabı bloklayan RİM operatoru",
+    )
+    block_reason = models.CharField(
+        max_length=300,
+        blank=True,
+        default="",
+        verbose_name="Bloklanma səbəbi",
+        help_text="RİM operatorunun yazdığı səbəb",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")
 
@@ -398,6 +388,7 @@ class UserProfile(models.Model):
             models.Index(fields=["role"]),
             models.Index(fields=["requested_organization"]),
             models.Index(fields=["is_deleted", "deleted_at"]),
+            # RİM axtarışı: FİN ilə birbaşa tapma (dəqiq uyğunluq).
         ]
 
     def __str__(self):
@@ -419,3 +410,43 @@ class UserProfile(models.Model):
     def role_level(self):
         """Numeric level for the current role."""
         return ProfileRole.LEVELS.get(self.role, 0)
+
+    @property
+    def is_academics_locked(self):
+        """Akademik sahələr (müəssisə/ixtisas/qrup) qurum tərəfindən idarə olunurmu?
+
+        Yalnız həqiqi qurum üzvlüyündə (universitet/məktəb/kurs mərkəzi) True —
+        şəxsi (INDIVIDUAL tipli) təşkilatda istifadəçi öz təhsil məlumatını
+        sərbəst mətnlə redaktə edə bilər.
+        """
+        organization = self.organization
+        return organization is not None and organization.org_type != OrganizationType.INDIVIDUAL
+
+    @property
+    def academic_title_display(self):
+        """«Professor · Elmlər doktoru» kimi birləşmiş etiket (boş ola bilər)."""
+        parts = []
+        if self.academic_title:
+            parts.append(self.get_academic_title_display())
+        if self.academic_degree:
+            parts.append(self.get_academic_degree_display())
+        return " · ".join(parts)
+
+    @property
+    def full_name_with_patronymic(self):
+        """«Ad Soyad Ata adı» — RİM siyahılarında rəsmi göstərim."""
+        parts = [
+            (getattr(self.user, "first_name", "") or "").strip(),
+            (getattr(self.user, "last_name", "") or "").strip(),
+            (self.patronymic or "").strip(),
+        ]
+        return " ".join(part for part in parts if part)
+
+
+# Ölçü budcəsi: akademik qeyd modeli ayrıca moduldadır, buradan yenidən ixrac olunur.
+from .academic_models import AcademicProfileItem  # noqa: E402,F401
+from .identity_models import (  # noqa: E402,F401
+    AccountActivationEvidence,
+    AccountRestoreEvidence,
+)
+from .otp_models import EmailOTP  # noqa: E402,F401

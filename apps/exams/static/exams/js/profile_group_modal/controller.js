@@ -131,6 +131,75 @@
     var groupPayloadMap = parseGroupPayloadMap(ctx.payloadScript);
     var activeEditState = null;
     var pendingDeleteForm = null;
+    var candidatesPromise = null;
+
+    /*
+     * Namizəd siyahıları (tələbələr/müəllimlər) səhifə ilə RENDER OLUNMUR —
+     * modal ilk dəfə açılanda `data-candidates-url`-dən gəlir (performans
+     * auditi F4: ~7 700 tələbəlik seçim siyahısı hər bölmə yükündə ~690 ms
+     * saf Python/şablon vaxtı yeyirdi).  Serverdə EYNİ forma/eyni widget
+     * render olunur, yəni variantların HTML-i dəyişmir.
+     */
+    function injectOptions(select, markup) {
+      if (!select || !markup) {
+        return;
+      }
+      var holder = document.createElement("div");
+      holder.innerHTML = markup;
+      var parsed = holder.querySelector("select");
+      if (parsed) {
+        select.innerHTML = parsed.innerHTML;
+      }
+    }
+
+    function markChecklistsBusy(busy) {
+      Array.from(ctx.form.querySelectorAll("[data-checkbox-select] .js-select-list")).forEach(function (list) {
+        list.setAttribute("aria-busy", busy ? "true" : "false");
+        if (busy) {
+          list.innerHTML = '<div class="group-checklist__skeleton"></div>'
+            + '<div class="group-checklist__skeleton"></div>'
+            + '<div class="group-checklist__skeleton"></div>';
+        }
+      });
+    }
+
+    function ensureCandidates() {
+      if (candidatesPromise) {
+        return candidatesPromise;
+      }
+      if (!ctx.candidatesUrl || typeof window.fetch !== "function") {
+        candidatesPromise = Promise.resolve(false);
+        return candidatesPromise;
+      }
+      markChecklistsBusy(true);
+      candidatesPromise = window
+        .fetch(ctx.candidatesUrl, {
+          credentials: "same-origin",
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("candidates_unavailable");
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          injectOptions(ctx.studentsSelect, data.students);
+          injectOptions(ctx.primaryTeacherSelect, data.primary_teacher);
+          injectOptions(ctx.assignedTeachersSelect, data.assigned_teachers);
+          markChecklistsBusy(false);
+          checklistControllers.forEach(function (controller) {
+            controller.refresh();
+          });
+          return true;
+        })
+        .catch(function () {
+          markChecklistsBusy(false);
+          candidatesPromise = null; // növbəti açılışda yenidən cəhd
+          return false;
+        });
+      return candidatesPromise;
+    }
 
     bindModalWheelBridge(ctx);
 
@@ -212,12 +281,6 @@
         ctx.nextInput.value = ctx.nextUrl;
       }
 
-      applyDefaultTeacherSelection();
-      clearPrimaryTeacherFilter();
-      checklistControllers.forEach(function (controller) {
-        controller.resetSearch();
-      });
-
       if (ctx.titleEl) {
         ctx.titleEl.textContent = ctx.modalTitleCreate;
       }
@@ -225,13 +288,22 @@
         ctx.submitLabel.textContent = ctx.submitLabelCreate;
       }
 
+      // Modal DƏRHAL açılır; siyahılar gələndə doldurulur (skeleton).
       ctx.modal.show();
       if (ctx.modalBody) {
         ctx.modalBody.scrollTop = 0;
       }
-      window.setTimeout(function () {
+      ensureCandidates().then(function () {
+        if (activeEditState) {
+          return; // istifadəçi bu arada redaktəyə keçib
+        }
+        applyDefaultTeacherSelection();
+        clearPrimaryTeacherFilter();
+        checklistControllers.forEach(function (controller) {
+          controller.resetSearch();
+        });
         ctx.modal.handleUpdate();
-      }, 20);
+      });
     }
 
     function buildEditState(button) {
@@ -341,10 +413,10 @@
       if (ctx.modalBody) {
         ctx.modalBody.scrollTop = 0;
       }
-      window.setTimeout(function () {
+      ensureCandidates().then(function () {
         applyEditState(editState);
         ctx.modal.handleUpdate();
-      }, 20);
+      });
     }
 
     ctx.modalElement.addEventListener("shown.bs.modal", function () {

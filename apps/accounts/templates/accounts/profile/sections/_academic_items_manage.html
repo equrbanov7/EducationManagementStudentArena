@@ -1,0 +1,81 @@
+{% load i18n %}
+{% comment %}
+«Akademik fəaliyyət» idarəetmə siyahısı — həm ilkin render, həm də
+academic_items_api uğurlu cavabındakı ``html`` swap-ı üçün eyni fraqment.
+Düymə data-atributları academic_items.js tərəfindən oxunur (CSP: inline JS yox).
+{% endcomment %}
+<div class="academic-items-groups">
+    {% for group in academic_item_groups %}
+    <div class="academic-items-group" data-kind="{{ group.kind }}">
+        <div class="academic-items-group__head">
+            <span class="academic-items-group__label">
+                <i class="fas {{ group.icon }}"></i>
+                {{ group.label }}
+                <span class="academic-items-group__count">{{ group.items|length }}</span>
+            </span>
+            <button type="button" class="academic-items-add-btn js-academic-item-add"
+                    data-kind="{{ group.kind }}" data-kind-label="{{ group.label }}">
+                <span class="academic-items-add-btn__icon"><i class="fas fa-plus"></i></span>
+                {% trans 'Əlavə et' context 'profile.academic_items' %}
+            </button>
+        </div>
+        {% if group.items %}
+        <ul class="academic-items-list">
+            {% for item in group.items %}
+            <li class="academic-item">
+                <div class="academic-item__body">
+                    <span class="academic-item__title">{{ item.title }}</span>
+                    {% if item.detail or item.year %}
+                    <span class="academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
+                    {% endif %}
+                </div>
+                {% comment %}
+                «Redaktə» AÇIQ ETİKETLİ düymədir. Əvvəl hər iki əməliyyat
+                çərçivəsiz, solğun-boz 32×32 ikon idi və «Əlavə et» dolu mavi
+                düymənin yanında bəzək kimi oxunurdu — sahibin «yenisini əlavə
+                etmək olur, qoyduğunu dəyişmək olmur kimidir» bildirişinin
+                səbəbi (funksiya işləyirdi, affordans görünmürdü).
+                {% endcomment %}
+                <div class="academic-item__actions">
+                    {% if item.link %}
+                    <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer"
+                       class="academic-item__action"
+                       title="{% trans 'Keçidi aç' context 'profile.academic_items' %}"
+                       aria-label="{% trans 'Keçidi aç' context 'profile.academic_items' %}">
+                        <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+                    {% comment %}
+                    aria-label QOYULMUR: düymənin GÖRÜNƏN mətni var, ona görə
+                    əlçatan ad ondan gəlir. aria-label onu ƏVƏZ edərdi və
+                    tərcümə fərqində «label in name» pozulardı.
+                    {% endcomment %}
+                    <button type="button" class="academic-item__action academic-item__action--edit js-academic-item-edit"
+                            title="{% trans 'Redaktə et' context 'profile.academic_items' %}"
+                            data-item-id="{{ item.id }}"
+                            data-kind="{{ item.kind }}"
+                            data-kind-label="{{ group.label }}"
+                            data-title="{{ item.title }}"
+                            data-detail="{{ item.detail }}"
+                            data-year="{{ item.year|default_if_none:'' }}"
+                            data-link="{{ item.link }}">
+                        <i class="fas fa-pen" aria-hidden="true"></i>
+                        <span class="academic-item__action-label">{% trans 'Redaktə et' context 'profile.academic_items' %}</span>
+                    </button>
+                    <button type="button" class="academic-item__action academic-item__action--danger js-academic-item-delete"
+                            title="{% trans 'Sil' context 'profile.academic_items' %}"
+                            aria-label="{% trans 'Sil' context 'profile.academic_items' %}"
+                            data-item-id="{{ item.id }}"
+                            data-title="{{ item.title }}">
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="academic-items-empty">{% trans 'Hələ qeyd əlavə edilməyib.' context 'profile.academic_items' %}</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>

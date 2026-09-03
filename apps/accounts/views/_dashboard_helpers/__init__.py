@@ -12,11 +12,14 @@ Modules:
 * ``formatters``       — small shared format/normalize helpers
 * ``assigned_tasks``   — ``_collect_assigned_tasks``
 * ``results``          — ``_collect_my_results``
+* ``academic_results`` — registrar/jurnal fənn nəticələri (``_collect_my_results``-un
+  "academic" qolu; hesablama registrar fasadındadır, burada yalnız formatlama)
 * ``pending_answers``  — ``_collect_pending_answer_items``
 * ``pending_review``   — ``_collect_pending_review_items``
 * ``evaluated_review`` — ``_collect_evaluated_review_items``
 """
 
+from .academic_results import academic_filter_options, count_academic_items
 from .assigned_tasks import _collect_assigned_tasks
 from .constants import SUBMISSION_DATE_ORDER_CHOICES
 from .evaluated_review import _collect_evaluated_review_items
@@ -37,6 +40,8 @@ from .results import _collect_my_results
 
 __all__ = [
     "SUBMISSION_DATE_ORDER_CHOICES",
+    "academic_filter_options",
+    "count_academic_items",
     "_build_student_group_map_and_available",
     "_format_score_display",
     "_normalize_pending_review_status",

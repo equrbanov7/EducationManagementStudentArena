@@ -8,7 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import approval, finals, gradebook, services
+from apps.registrar import finals, gradebook, services
 from apps.registrar.models import Curriculum, CurriculumSubject, LessonKind, Program, StudentAcademicRecord, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
@@ -29,8 +29,25 @@ class JournalExportTest(TestCase):
                 status="active",
                 is_active=True,
             )
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Fakültə",
+                slug="je-faculty",
+                unit_type=OrgUnitType.FACULTY,
+            )
+            cls.chair_unit = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Kafedra",
+                slug="je-chair",
+                unit_type=OrgUnitType.CHAIR,
+                parent=cls.faculty,
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name="G1", slug="je-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org,
+                name="G1",
+                slug="je-g1",
+                unit_type=OrgUnitType.GROUP,
+                parent=cls.chair_unit,
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -53,9 +70,17 @@ class JournalExportTest(TestCase):
                 "je_student", "je_student@qku.edu.az", "pw", first_name="Əli", last_name="Vəliyev"
             )
             Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
                 user=cls.chair,
                 organization=cls.org,
                 role=cls.org.roles.get(name="chair_head"),
+                scope_unit=cls.chair_unit,
                 is_primary=True,
                 is_active=True,
             )
@@ -120,11 +145,9 @@ class JournalExportTest(TestCase):
         resp = self._client(self.student).get(self._url())
         self.assertEqual(resp.status_code, 404)
 
-    def test_chair_cannot_export_draft_but_can_after_submit(self):
+    def test_chair_cannot_export(self):
+        """Təsdiq zənciri ləğv edildi — kafedra müdirinin «rəyçi» ixracı da yoxdur."""
         self.assertEqual(self._client(self.chair).get(self._url()).status_code, 404)
-        with bypass_rls():
-            approval.submit_for_approval(offering=self.offering, by_user=self.teacher)
-        self.assertEqual(self._client(self.chair).get(self._url()).status_code, 200)
 
     def test_export_is_audited(self):
         from apps.audit.models import AuditLog

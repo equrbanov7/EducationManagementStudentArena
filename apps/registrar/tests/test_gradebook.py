@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import gradebook, services
 from apps.registrar.models import (
     AttendanceStatus,
@@ -66,6 +66,20 @@ class JournalServiceTest(TestCase):
             )
             self.teacher = User.objects.create_user("gb_teacher", "gb_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("gb_student", "gb_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             self.record = StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=self.student,
@@ -183,11 +197,14 @@ class JournalServiceTest(TestCase):
             self.assertEqual(written, 0)
 
     def test_published_scheme_blocks_marks(self):
+        from apps.registrar.models import ApprovalStatus
+
         with bypass_rls():
             scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
             lesson = self._lesson()
+            scheme.approval_status = ApprovalStatus.APPROVED
             scheme.is_published = True
-            scheme.save(update_fields=["is_published"])
+            scheme.save(update_fields=["approval_status", "is_published"])
             written = gradebook.save_marks(
                 enforce_day=False,
                 offering=self.offering,
@@ -279,6 +296,20 @@ class CourseBridgeTest(TestCase):
             self.subject = Subject.objects.create(organization=self.org, code="CS101", name="Proqramlaşdırma")
             self.teacher = User.objects.create_user("cb_teacher", "cb_teacher@qku.edu.az", "pw")
             self.student = User.objects.create_user("cb_student", "cb_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.teacher,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
 
     def test_ensure_offering_course_creates_and_links(self):
         from apps.courses.models import Course

@@ -10,22 +10,74 @@ ki, kilid (approval) və qiymət auditi semantikası dəyişməz qalsın.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from decimal import Decimal, InvalidOperation
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Sum
 
 from apps.registrar import gradebook
-from apps.registrar.models import CriterionScore, Rubric, RubricCriterion
+from apps.registrar.integrity import validate_same_organization
+from apps.registrar.models import AssessmentComponent, ComponentScore, CriterionScore, Rubric, RubricCriterion
 
 _MAX_CRITERIA = 20
 
 
-def _to_decimal(raw) -> Decimal:
+def _validated_criteria(criteria) -> list[tuple[str, int]]:
+    """Normalize the public service input without relying on the UI parser."""
+
     try:
-        return Decimal(str(raw))
-    except (InvalidOperation, TypeError, ValueError):
-        return Decimal("0")
+        raw_rows = list(criteria)
+    except (TypeError, ValueError):
+        raise ValidationError(
+            {"criteria": f"Meyar sayı 1–{_MAX_CRITERIA} aralığında olmalıdır."},
+            code="rubric_definition_invalid",
+        ) from None
+    if not 1 <= len(raw_rows) <= _MAX_CRITERIA:
+        raise ValidationError(
+            {"criteria": f"Meyar sayı 1–{_MAX_CRITERIA} aralığında olmalıdır."},
+            code="rubric_definition_invalid",
+        )
+
+    normalized: list[tuple[str, int]] = []
+    seen: set[str] = set()
+    for row in raw_rows:
+        if not isinstance(row, (list, tuple)) or len(row) != 2:
+            raise ValidationError(
+                {"criteria": "Hər meyar (ad, maksimum bal) cütü olmalıdır."},
+                code="rubric_definition_invalid",
+            )
+        raw_name, raw_max = row
+        name = raw_name.strip() if isinstance(raw_name, str) else ""
+        if not name or len(name) > 150:
+            raise ValidationError(
+                {"criteria": "Meyar adı boş ola bilməz və 150 simvolu keçməməlidir."},
+                code="rubric_definition_invalid",
+            )
+        try:
+            numeric_max = Decimal(str(raw_max))
+        except (InvalidOperation, TypeError, ValueError):
+            numeric_max = Decimal("NaN")
+        if (
+            isinstance(raw_max, bool)
+            or not numeric_max.is_finite()
+            or numeric_max != numeric_max.to_integral_value()
+            or not Decimal("1") <= numeric_max <= Decimal("100")
+        ):
+            raise ValidationError(
+                {"criteria": "Meyar balı 1–100 aralığında tam ədəd olmalıdır."},
+                code="rubric_definition_invalid",
+            )
+        identity = name.casefold()
+        if identity in seen:
+            raise ValidationError(
+                {"criteria": f"Meyar təkrarlanır: {name}"},
+                code="rubric_definition_invalid",
+            )
+        seen.add(identity)
+        normalized.append((name, int(numeric_max)))
+    return normalized
 
 
 # ── Rubrik CRUD (registrar konsolu) ──────────────────────────────────────────
@@ -71,17 +123,53 @@ def save_rubric(*, organization, name, criteria, description="", rubric=None):
 
     Meyarlar ada görə upsert olunur ki, mövcud :class:`CriterionScore`-lar ad
     dəyişməyəndə itməsin; siyahıdan çıxarılan meyarlar silinir."""
+    criteria = _validated_criteria(criteria)
     name = (name or "").strip()
     if not name:
         raise ValueError("Rubrik adı boş ola bilməz.")
     if rubric is None:
         rubric = Rubric.objects.create(organization=organization, name=name, description=description.strip())
     else:
-        rubric.name = name
-        rubric.description = description.strip()
-        rubric.save(update_fields=["name", "description", "updated_at"])
+        validate_same_organization(organization=organization, rubric=rubric)
+        rubric = Rubric.objects.select_for_update().get(pk=rubric.pk)
 
-    existing = {c.name.strip().lower(): c for c in rubric.criteria.all()}
+    existing = {c.name.strip().lower(): c for c in rubric.criteria.select_for_update()}
+    requested = {criterion_name.strip().lower(): max_points for criterion_name, max_points in criteria}
+    requested_names = {criterion_name.strip().lower(): criterion_name for criterion_name, _ in criteria}
+    scored_criterion_ids = set(
+        CriterionScore.objects.filter(criterion__rubric=rubric).values_list("criterion_id", flat=True)
+    )
+    if scored_criterion_ids and rubric.name != name:
+        raise ValidationError(
+            {"name": "Qiymətləndirmə sübutu olan rubrikin adı dəyişdirilə bilməz."},
+            code="rubric_evidence_protected",
+        )
+    removed_scored = [
+        criterion
+        for key, criterion in existing.items()
+        if key not in requested and criterion.id in scored_criterion_ids
+    ]
+    if removed_scored:
+        raise ValidationError(
+            {"criteria": "Qiymətləndirmə sübutu olan meyar rubrikdən silinə bilməz."},
+            code="rubric_evidence_protected",
+        )
+    for key, criterion in existing.items():
+        new_max = requested.get(key)
+        requested_name = requested_names.get(key)
+        if requested_name is not None and requested_name != criterion.name and criterion.id in scored_criterion_ids:
+            raise ValidationError(
+                {"criteria": "Qiymətləndirmə sübutu olan meyarın adı dəyişdirilə bilməz."},
+                code="rubric_evidence_protected",
+            )
+        if new_max is not None and new_max != criterion.max_points and criterion.id in scored_criterion_ids:
+            raise ValidationError(
+                {"criteria": "Qiymətləndirmə sübutu olan meyarın maksimum balı dəyişdirilə bilməz."},
+                code="rubric_evidence_protected",
+            )
+    rubric.name = name
+    rubric.description = description.strip()
+    rubric.save(update_fields=["name", "description", "updated_at"])
     seen_ids: set = set()
     for order, (criterion_name, max_points) in enumerate(criteria):
         criterion = existing.get(criterion_name.strip().lower())
@@ -121,7 +209,7 @@ def get_rubric_grid(component):
     )
     points_map = {
         (score.criterion_id, score.enrollment_id): score.points
-        for score in CriterionScore.objects.filter(criterion__rubric=rubric, enrollment__in=enrollments)
+        for score in CriterionScore.objects.filter(component=component, enrollment__in=enrollments)
     }
     component_scores = {cs.enrollment_id: cs.score for cs in component.scores.filter(enrollment__in=enrollments)}
     rows = []
@@ -151,32 +239,98 @@ def save_criterion_scores(*, component, entries, by_user=None):
     """Meyar ballarını yaz + komponent ballarını yenidən hesabla.
 
     ``entries`` = [{"criterion_id", "enrollment_id", "points"}, …]. Hər bal
-    0..meyar.max_points aralığına clamp olunur. Toxunulan hər tələbənin
+    0..meyar.max_points aralığında olmalıdır. Toxunulan hər tələbənin
     komponent balı = meyar cəmi (komponent.max_score ilə clamp) və
     :func:`gradebook.save_component_scores` ilə yazılır — kilid + audit oradan
-    gəlir. Jurnal kilidlidirsə heç nə yazılmır (0 qaytarır)."""
+    gəlir. Bütün paket atomikdir; bir sətrin xətası bütün yazıları geri alır."""
+    try:
+        entries = list(entries or [])
+    except (TypeError, ValueError):
+        raise ValidationError(
+            "Rubrik balı paketi siyahı olmalıdır.",
+            code="criterion_score_batch_rejected",
+        ) from None
+    # ``rubric`` nullable FK olduğuna görə ``select_related`` PostgreSQL-də
+    # nullable OUTER JOIN-ın o biri tərəfinə FOR UPDATE tətbiq etməyə çalışır.
+    # Komponent sətrini ayrıca kilidlə; əlaqələri sonra normal FK lookup həll edir.
+    component = AssessmentComponent.objects.select_for_update().get(pk=component.pk)
     rubric = component.rubric
-    if rubric is None or gradebook.journal_is_locked(component.offering):
+    if rubric is None:
+        raise ValidationError(
+            "Komponentə rubrik qoşulmayıb.",
+            code="criterion_score_batch_rejected",
+        )
+    if gradebook.journal_is_locked(component.offering):
+        raise ValidationError(
+            "Jurnal kilidli olduğu üçün rubrik balları yazılmadı.",
+            code="criterion_score_batch_rejected",
+        )
+    if not entries:
         return 0
 
-    valid_criteria = {str(c.id): c for c in rubric.criteria.all()}
-    valid_enrollments = {str(e.id): e for e in component.offering.enrollments.all()}
+    valid_criteria = {str(c.id): c for c in rubric.criteria.select_for_update()}
+    valid_enrollments = {
+        str(e.id): e
+        for e in component.offering.enrollments.select_for_update().filter(
+            status=component.offering.enrollments.model.Status.ENROLLED
+        )
+    }
+    list(CriterionScore.objects.select_for_update().filter(component=component).values_list("pk", flat=True))
+    list(ComponentScore.objects.select_for_update().filter(component=component).values_list("pk", flat=True))
     touched: set = set()
+    seen_targets = set()
     written = 0
     for entry in entries:
+        if not isinstance(entry, Mapping):
+            raise ValidationError(
+                "Rubrik balı sətri açar-dəyər formatında olmalıdır.",
+                code="criterion_score_batch_rejected",
+            )
         criterion = valid_criteria.get(str(entry.get("criterion_id")))
         enrollment = valid_enrollments.get(str(entry.get("enrollment_id")))
         if criterion is None or enrollment is None:
-            continue
+            raise ValidationError(
+                "Rubrik balı sətrinin meyarı və ya tələbə qeydiyyatı etibarlı deyil.",
+                code="criterion_score_batch_rejected",
+            )
+        target = (criterion.id, enrollment.id)
+        if target in seen_targets:
+            raise ValidationError(
+                "Eyni rubrik balı sətri paketdə təkrarlana bilməz.",
+                code="criterion_score_batch_rejected",
+            )
+        seen_targets.add(target)
         raw = entry.get("points")
         if raw in (None, ""):
-            deleted, _ = CriterionScore.objects.filter(criterion=criterion, enrollment=enrollment).delete()
+            deleted, _ = CriterionScore.objects.filter(
+                component=component,
+                criterion=criterion,
+                enrollment=enrollment,
+            ).delete()
             if deleted:
                 touched.add(enrollment)
             continue
-        points = max(Decimal("0"), min(_to_decimal(raw), Decimal(criterion.max_points)))
+        try:
+            parsed = Decimal(str(raw))
+        except (InvalidOperation, TypeError, ValueError):
+            raise ValidationError(
+                "Rubrik balı ədəd olmalıdır.",
+                code="criterion_score_batch_rejected",
+            ) from None
+        if not parsed.is_finite():
+            raise ValidationError(
+                "Rubrik balı sonlu ədəd olmalıdır.",
+                code="criterion_score_batch_rejected",
+            )
+        if parsed < 0 or parsed > Decimal(criterion.max_points):
+            raise ValidationError(
+                "Rubrik balı 0 ilə meyarın maksimum balı arasında olmalıdır.",
+                code="criterion_score_batch_rejected",
+            )
+        points = parsed
         CriterionScore.objects.update_or_create(
             organization=component.organization,
+            component=component,
             criterion=criterion,
             enrollment=enrollment,
             defaults={"points": points, "entered_by": by_user},
@@ -187,9 +341,9 @@ def save_criterion_scores(*, component, entries, by_user=None):
     # Toxunulan tələbələrin komponent balını meyar cəmindən yenilə (audit daxil).
     score_entries = []
     for enrollment in touched:
-        total = CriterionScore.objects.filter(criterion__rubric=rubric, enrollment=enrollment).aggregate(
-            s=Sum("points")
-        )["s"]
+        total = CriterionScore.objects.filter(component=component, enrollment=enrollment).aggregate(s=Sum("points"))[
+            "s"
+        ]
         score_entries.append(
             {
                 "component_id": str(component.id),
@@ -198,5 +352,11 @@ def save_criterion_scores(*, component, entries, by_user=None):
             }
         )
     if score_entries:
-        gradebook.save_component_scores(offering=component.offering, entries=score_entries, by_user=by_user)
+        gradebook.save_component_scores(
+            offering=component.offering,
+            entries=score_entries,
+            by_user=by_user,
+            require_all=True,
+            fail_closed_audit=True,
+        )
     return written

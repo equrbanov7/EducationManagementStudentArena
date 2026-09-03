@@ -1,0 +1,52 @@
+{% load i18n %}
+{% comment %}
+Redaktorun VƏZİYYƏT bannerləri (dizayn §3.2 `saveState` + `viewState`).
+
+`readonly` banneri serverdə render olunur (versiya statusundan bilinir); qalan
+dördü autosave nəticəsindən asılıdır, ona görə gizli qalır və JS açır. Mətnlər
+şablonda qalır ki, 4 dilə tərcümə `{% trans %}` ilə getsin — JS-də mətn yoxdur.
+{% endcomment %}
+{% if se.readonly %}
+<div class="syl-banner syl-banner--neutral" role="status">
+  <i class="fas fa-lock syl-banner__icon" aria-hidden="true"></i>
+  <div>
+    <p class="syl-banner__title">{% trans "Bu versiya kilidlidir və dəyişdirilə bilmir" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Təsdiqlənmiş sillabus jurnalın mənbəyidir, ona görə redaktə bağlıdır. Dəyişiklik üçün yeni versiya yaradın — mövcud jurnal və qiymətlər olduğu kimi qalır." context "accounts.syllabus" %}</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="syl-banner syl-banner--danger" data-syl-banner="failed" role="alert" hidden>
+  <i class="fas fa-triangle-exclamation syl-banner__icon" aria-hidden="true"></i>
+  <div>
+    <p class="syl-banner__title">{% trans "Son dəyişiklik saxlanılmadı" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Server cavab vermədi. Mətn brauzerdə saxlanılıb — bağlantı bərpa olunanda avtomatik göndərilir." context "accounts.syllabus" %}</p>
+  </div>
+  <button type="button" class="syl-btn syl-btn--danger syl-btn--sm" data-syl-retry>{% trans "Yenidən cəhd et" context "accounts.syllabus" %}</button>
+</div>
+
+<div class="syl-banner syl-banner--warning" data-syl-banner="offline" role="alert" hidden>
+  <i class="fas fa-wifi syl-banner__icon" aria-hidden="true"></i>
+  <div>
+    <p class="syl-banner__title">{% trans "İnternet bağlantısı yoxdur" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Redaktə davam edir, dəyişikliklər cihazda növbəyə alınır. Bağlantı qayıtdıqdan sonra avtomatik göndərilir; təsdiqə göndərmə isə yalnız onlayn mümkündür." context "accounts.syllabus" %}</p>
+  </div>
+</div>
+
+<div class="syl-banner syl-banner--danger" data-syl-banner="conflict" role="alert" hidden>
+  <i class="fas fa-code-branch syl-banner__icon" aria-hidden="true"></i>
+  <div>
+    <p class="syl-banner__title">{% trans "Başqa versiya ilə konflikt yarandı" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Bu bölmə başqa sessiyada da dəyişdirilib, sizin dəyişikliklər göndərilmədi. Serverdəki variantı yükləyin və düzəlişi yenidən edin." context "accounts.syllabus" %}</p>
+  </div>
+  <button type="button" class="syl-btn syl-btn--danger syl-btn--sm" data-syl-reload>{% trans "Serverdəki variantı yüklə" context "accounts.syllabus" %}</button>
+</div>
+
+<div class="syl-banner syl-banner--warning" data-syl-banner="stale" role="alert" hidden>
+  <i class="fas fa-clock-rotate-left syl-banner__icon" aria-hidden="true"></i>
+  <div>
+    <p class="syl-banner__title">{% trans "Səhifədəki məlumat köhnəlmişdir" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Sillabus server tərəfində yenilənib. Redaktəyə davam etməzdən əvvəl səhifəni yeniləyin — əks halda dəyişikliklər itə bilər." context "accounts.syllabus" %}</p>
+  </div>
+  <button type="button" class="syl-btn syl-btn--secondary syl-btn--sm" data-syl-reload>{% trans "Yenilə" context "accounts.syllabus" %}</button>
+</div>

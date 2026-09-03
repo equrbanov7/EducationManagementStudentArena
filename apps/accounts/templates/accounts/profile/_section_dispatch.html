@@ -1,0 +1,195 @@
+{% comment %}
+Kabinet bölmələrinin RENDER ZƏNCİRİ — `profile.html`-dən olduğu kimi çıxarılıb.
+
+NİYƏ AYRI FAYL? `profile.html` modul ölçüsü limitinə (600) dayanmışdı. Zəncir
+burada saxlanılır; qabıq onu `«include»` ilə gətirir. Kontekst
+dəyişməz qalır (include valideynin kontekstini miras alır) — yəni davranış eynidir.
+
+MÜQAVİLƏ: hər yeni bölmə üçün BURAYA bir `«elif»` budağı,
+`sections_api.SECTION_PARTIALS`-a bir sətir və (AJAX-safe-dirsə) `AJAX_SAFE_SECTIONS`-a
+bir açar əlavə olunur. Üçü bir yerdə olmalıdır — `test_section_registry_consistency.py`
+uyğunsuzluğu tutur.
+{% endcomment %}
+            {% if active_section == "dashboard" %}
+                {% include "accounts/profile/sections/_dashboard.html" %}
+            {% elif active_section == "profile-info" %}
+                {% include "accounts/profile/sections/_profile_info.html" %}
+            {% elif active_section == "notifications" %}
+                {% include "accounts/profile/sections/_notifications.html" %}
+            {% elif active_section == "publish-notification" %}
+                {% include "accounts/profile/sections/_publish_notification.html" %}
+            {% elif active_section == "create-post" %}
+                {% include "accounts/profile/sections/_create_post.html" %}
+            {% elif active_section == "posts" %}
+                {% include "accounts/profile/sections/_posts.html" %}
+            {% elif active_section == "my-exams" %}
+                {% include "accounts/profile/sections/_my_exams.html" %}
+            {% elif active_section == "question-bank" %}
+                {% include "accounts/profile/sections/_question_bank.html" %}
+            {% elif active_section == "question-submissions" %}
+                {% include "accounts/profile/sections/_question_submissions.html" %}
+            {% elif active_section == "unit-exams" %}
+                {% include "accounts/profile/sections/_unit_exams.html" %}
+            {% elif active_section == "org-structure" %}
+                {% include "accounts/profile/sections/_org_structure.html" %}
+            {% elif active_section == "org-faculties" %}
+                {% include "accounts/profile/sections/_org_faculties.html" %}
+            {% elif active_section == "org-kafedras" %}
+                {% include "accounts/profile/sections/_org_kafedras.html" %}
+            {% elif active_section == "org-members" %}
+                {% include "accounts/profile/sections/_org_members.html" %}
+            {% elif active_section == "org-roles" %}
+                {% include "accounts/profile/sections/_org_roles.html" %}
+            {% elif active_section == "audit-log" %}
+                {% include "accounts/profile/sections/_audit_log.html" %}
+            {% elif active_section == "my-courses" %}
+                {% include "accounts/profile/sections/_my_courses.html" %}
+            {% elif active_section == "courses" %}
+                {% include "accounts/profile/sections/_courses.html" %}
+            {% elif active_section == "assigned-exams" %}
+                {% include "accounts/profile/sections/_assigned_exams.html" %}
+            {% elif active_section == "assigned-courses" %}
+                {% include "accounts/profile/sections/_assigned_courses.html" %}
+            {% elif active_section == "my-results" %}
+                {% include "accounts/profile/sections/_my_results.html" %}
+            {% elif active_section == "my-subjects" %}
+                {% include "accounts/profile/sections/_my_subjects.html" %}
+            {% elif active_section == "my-transcript" %}
+                {% include "accounts/profile/sections/_my_transcript.html" %}
+            {% elif active_section == "overall-academic" %}
+                {% include "accounts/profile/sections/_overall_academic.html" %}
+            {% elif active_section == "my-schedule" %}
+                {% include "accounts/profile/sections/_my_schedule.html" %}
+            {% elif active_section == "schedule-manage" and 'schedule-manage' in allowed_sections %}
+                {% include "accounts/profile/sections/_schedule_manage.html" %}
+            {% elif active_section == "student-intake" and 'student-intake' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_intake.html" %}
+            {% elif active_section == "applications" and 'applications' in allowed_sections %}
+                {% include "accounts/profile/sections/_applications.html" %}
+            {% elif active_section == "academic-calendar" %}
+                {% include "accounts/profile/sections/_academic_calendar.html" %}
+            {% elif active_section == "lessons-log" %}
+                {% include "accounts/profile/sections/_lessons_log.html" %}
+            {% elif active_section == "my-journal" %}
+                {% include "accounts/profile/sections/_my_journal.html" %}
+            {% elif active_section == "journal-close" and 'journal-close' in allowed_sections %}
+                {% include "accounts/profile/sections/_journal_close.html" %}
+            {% elif active_section == "analytics" %}
+                {% include "accounts/profile/sections/_analytics.html" %}
+            {% elif active_section == "academic-records" and 'academic-records' in allowed_sections %}
+                {% include "accounts/profile/sections/_academic_records.html" %}
+            {% elif active_section == "people-teachers" and 'people-teachers' in allowed_sections %}
+                {% include "accounts/profile/sections/_people_teachers.html" %}
+            {% elif active_section == "people-students" and 'people-students' in allowed_sections %}
+                {% include "accounts/profile/sections/_people_students.html" %}
+            {% elif active_section == "teaching-handover" and 'teaching-handover' in allowed_sections %}
+                {% include "accounts/profile/sections/_teaching_handover.html" %}
+            {% elif active_section == "syllabus-list" and 'syllabus-list' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_list.html" %}
+            {% elif active_section == "syllabus-editor" and 'syllabus-editor' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_editor.html" %}
+            {% elif active_section == "syllabus-review" and 'syllabus-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_syllabus_review.html" %}
+            {% elif active_section == "question-chair-review" and 'question-chair-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_question_chair_review.html" %}
+            {% elif active_section == "workload-distribution" and 'workload-distribution' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_distribution.html" %}
+            {% elif active_section == "my-workload" and 'my-workload' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_workload.html" %}
+            {% elif active_section == "org-structure-tree" and 'org-structure-tree' in allowed_sections %}
+                {% include "accounts/profile/sections/_org_structure_tree.html" %}
+            {% elif active_section == "chair-profile" and 'chair-profile' in allowed_sections %}
+                {% include "accounts/profile/sections/_chair_profile.html" %}
+            {% elif active_section == "programs-registry" and 'programs-registry' in allowed_sections %}
+                {% include "accounts/profile/sections/_programs_registry.html" %}
+            {% elif active_section == "subject-catalog" and 'subject-catalog' in allowed_sections %}
+                {% include "accounts/profile/sections/_subject_catalog.html" %}
+            {% elif active_section == "curriculum-editor" and 'curriculum-editor' in allowed_sections %}
+                {% include "accounts/profile/sections/_curriculum_editor.html" %}
+            {% elif active_section == "groups-registry" and 'groups-registry' in allowed_sections %}
+                {% include "accounts/profile/sections/_groups_registry.html" %}
+            {% elif active_section == "semester-opening" and 'semester-opening' in allowed_sections %}
+                {% include "accounts/profile/sections/_semester_opening.html" %}
+            {% elif active_section == "workload-center" and 'workload-center' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_center.html" %}
+            {% elif active_section == "workload-visa" and 'workload-visa' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_visa.html" %}
+            {% elif active_section == "workload-approval" and 'workload-approval' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_approval.html" %}
+            {% elif active_section == "workload-overview" and 'workload-overview' in allowed_sections %}
+                {% include "accounts/profile/sections/_workload_overview.html" %}
+            {% elif active_section == "student-admission" and 'student-admission' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_admission.html" %}
+            {% elif active_section == "student-registry" and 'student-registry' in allowed_sections %}
+                {% include "accounts/profile/sections/_student_registry.html" %}
+            {% elif active_section == "my-appeals" %}
+                {% include "accounts/profile/sections/_my_appeals.html" %}
+            {% elif active_section == "manage-appeals" %}
+                {% include "accounts/profile/sections/_manage_appeals.html" %}
+            {% elif active_section == "pending-answers" %}
+                {% include "accounts/profile/sections/_pending_answers.html" %}
+            {% elif active_section == "groups" %}
+                {% include "accounts/profile/sections/_groups.html" %}
+            {% elif active_section == "pending-post-approvals" %}
+                {% include "accounts/profile/sections/_pending_post_approvals.html" %}
+            {% elif active_section == "pending-review" %}
+                {% include "accounts/profile/sections/_pending_review.html" %}
+            {% elif active_section == "review-results" %}
+                {% include "accounts/profile/sections/_review_results.html" %}
+            {% elif active_section == "role-assignment" %}
+                {% include "accounts/profile/sections/_role_assignment.html" %}
+            {% elif active_section == "student-organization-request" %}
+                {% include "accounts/profile/sections/_student_org_request.html" %}
+            {% elif active_section == "student-organization-management" %}
+                {% include "accounts/profile/sections/_student_org_management.html" %}
+            {% elif active_section == "permission-editor" %}
+                {% include "accounts/profile/sections/_permission_editor.html" %}
+            {% elif active_section == "manage-roles" %}
+                {% include "accounts/profile/sections/_manage_roles.html" %}
+            {% elif active_section == "create-category" %}
+                {% include "accounts/profile/sections/_create_category.html" %}
+            {% elif active_section == "category-management" %}
+                {% include "accounts/profile/sections/_category_management.html" %}
+            {% elif active_section == "superadmin-org-features" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_org_features.html" %}
+            {% elif active_section == "superadmin-org-inspector" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_org_inspector.html" %}
+            {% elif active_section == "superadmin-organizations" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_organizations.html" %}
+            {% elif active_section == "superadmin-users" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_user_management.html" %}
+            {% elif active_section == "rim-center" and 'rim-center' in allowed_sections %}
+                {% include "accounts/profile/sections/_rim_center.html" %}
+            {% elif active_section == "superadmin-ai" %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_ai_settings.html" %}
+            {% elif active_section == "superadmin-exam-rooms" and 'superadmin-exam-rooms' in allowed_sections %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html" %}
+            {% elif active_section == "exam-center-pins" and 'exam-center-pins' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_center_pins.html" %}
+            {% elif active_section == "exam-center-stats" and 'exam-center-stats' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_center_stats.html" %}
+            {% elif active_section == "appeal-stats" and 'appeal-stats' in allowed_sections %}
+                {% include "accounts/profile/sections/_appeal_stats.html" %}
+            {% elif active_section == "kollokvium-windows" and 'kollokvium-windows' in allowed_sections %}
+                {% include "accounts/profile/sections/_kollokvium_windows.html" %}
+            {% elif active_section == "exam-score-entry" and 'exam-score-entry' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_score_entry.html" %}
+            {% elif active_section == "legacy-grade-review" and 'legacy-grade-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_legacy_grade_review.html" %}
+            {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
+                {% include "accounts/profile/sections/_exam_chance.html" %}
+            {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}
+                {% include "accounts/profile/sections/superadmin/_superadmin_contact_messages.html" %}
+            {% elif active_section == "system-monitoring" and 'system-monitoring' in allowed_sections %}
+                {% include "accounts/profile/sections/superadmin/_system_monitoring.html" %}
+            {% elif active_section == "statistics" %}
+                {% include "accounts/profile/sections/_statistics.html" %}
+            {% elif active_section == "edit-profile" %}
+                {% include "accounts/profile/sections/_edit_profile.html" %}
+            {% elif active_section == "change-password" %}
+                {% include "accounts/profile/sections/_change_password.html" %}
+            {% else %}
+                {# Naməlum və ya shortcut section: profile-info-ya fallback. #}
+                {% include "accounts/profile/sections/_profile_info.html" %}
+                {% include "accounts/profile/sections/_shortcut_sections.html" %}
+            {% endif %}

@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from core.admin_security import AcademicScoreReadOnlyAdminMixin
+
 from .models import (
     AssessmentScheme,
     CourseOffering,
@@ -27,9 +29,18 @@ class CurriculumSubjectInline(admin.TabularInline):
 
 @admin.register(Program)
 class ProgramAdmin(admin.ModelAdmin):
-    list_display = ("code", "name", "degree_level", "ects_total", "organization", "is_active")
+    list_display = (
+        "name",
+        "official_code",
+        "legacy_official_code",
+        "code",
+        "degree_level",
+        "ects_total",
+        "organization",
+        "is_active",
+    )
     list_filter = ("degree_level", "is_active")
-    search_fields = ("code", "name")
+    search_fields = ("code", "official_code", "legacy_official_code", "name")
 
 
 @admin.register(Subject)
@@ -43,7 +54,7 @@ class SubjectAdmin(admin.ModelAdmin):
 class CurriculumAdmin(admin.ModelAdmin):
     list_display = ("__str__", "program", "admission_year", "organization", "is_active")
     list_filter = ("admission_year", "is_active")
-    search_fields = ("name", "program__code", "program__name")
+    search_fields = ("name", "program__official_code", "program__legacy_official_code", "program__name")
     inlines = (CurriculumSubjectInline,)
 
 
@@ -51,7 +62,12 @@ class CurriculumAdmin(admin.ModelAdmin):
 class StudentAcademicRecordAdmin(admin.ModelAdmin):
     list_display = ("student", "program", "curriculum", "group", "admission_year", "is_active")
     list_filter = ("admission_year", "is_active")
-    search_fields = ("student__username", "program__code")
+    search_fields = (
+        "student__username",
+        "program__official_code",
+        "program__legacy_official_code",
+        "program__name",
+    )
     autocomplete_fields = ("student", "program", "curriculum", "group")
 
 
@@ -95,7 +111,10 @@ class LessonAdmin(admin.ModelAdmin):
 
 
 @admin.register(LessonMark)
-class LessonMarkAdmin(admin.ModelAdmin):
+class LessonMarkAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    # Bal/davamiyyət yalnız jurnal servisləri (2 saat pəncərəsi) və ya sənədli
+    # düzəliş (PDF + audit) ilə dəyişir — admin formasından yox.
+    protected_score_fields = ("status", "score")
     list_display = ("lesson", "enrollment", "status", "score", "entered_by", "organization")
     list_filter = ("status",)
     search_fields = ("enrollment__student__username",)
@@ -111,7 +130,8 @@ class ScheduleSlotAdmin(admin.ModelAdmin):
 
 
 @admin.register(FinalGrade)
-class FinalGradeAdmin(admin.ModelAdmin):
+class FinalGradeAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("exam_score", "bonus", "is_published")
     list_display = ("enrollment", "exam_score", "is_published", "entered_by", "organization")
     list_filter = ("is_published",)
     search_fields = ("enrollment__student__username",)
@@ -119,7 +139,8 @@ class FinalGradeAdmin(admin.ModelAdmin):
 
 
 @admin.register(ResitRecord)
-class ResitRecordAdmin(admin.ModelAdmin):
+class ResitRecordAdmin(AcademicScoreReadOnlyAdminMixin, admin.ModelAdmin):
+    protected_score_fields = ("resit_score", "status")
     list_display = ("enrollment", "reason", "status", "resit_score", "decided_by", "organization")
     list_filter = ("reason", "status")
     search_fields = ("enrollment__student__username",)

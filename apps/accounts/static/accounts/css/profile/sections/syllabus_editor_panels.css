@@ -1,0 +1,538 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus redaktoru — BÖLMƏ PANELLƏRİNİN daxili düzülüşü
+   ───────────────────────────────────────────────────────────────────────────
+   `syllabus_editor.css`-dən ayrıldı (modul ölçüsü SOFT_CAP=600).
+   Ardıcıllıq dizayn §3.2-dəki 10 bölmə ilə eynidir: info · out · week ·
+   method · assess · self · lit · prev · send.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── `info`: kilidli sətirlər ─────────────────────────────────────────── */
+.syl-locked {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--ems-border);
+    border-radius: 11px;
+    overflow: hidden;
+    background: var(--ems-neutral-100);
+}
+
+.syl-locked__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    background: var(--ems-bg);
+}
+
+.syl-locked__row dt {
+    width: 180px;
+    flex: none;
+    font-size: 0.76rem;
+    color: var(--ems-text-muted);
+}
+
+.syl-locked__row dd {
+    flex: 1;
+    min-width: 120px;
+    margin: 0;
+    font-size: 0.83rem;
+    font-weight: 700;
+}
+
+.syl-locked__src {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.67rem;
+    font-weight: 800;
+}
+
+/* ── `out`: təlim nəticələri ──────────────────────────────────────────── */
+.syl-outcomes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syl-outcome {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+/* TN etiketi və «sil» düyməsi sahənin BİRİNCİ sətri ilə eyni xətdə dursun. */
+.syl-outcome > .syl-outcome__tag,
+.syl-outcome > .syl-iconbtn {
+    margin-top: 8px;
+}
+
+.syl-outcome__tag {
+    width: 34px;
+    flex: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.73rem;
+    font-weight: 800;
+    color: var(--ems-neutral-400);
+}
+
+/* ── `week`: saat xülasəsi + 16 sətirlik cədvəl ───────────────────────── */
+.syl-hours {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 13px;
+    border-radius: 11px;
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+.syl-hours--ok {
+    background: var(--ems-success-bg);
+    border-color: var(--ems-success-bd);
+    color: var(--ems-success-700);
+}
+
+.syl-hours__note {
+    flex: 1;
+    min-width: 220px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.syl-hourchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--ems-neutral-700);
+}
+
+.syl-hourchip--lecture {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-700);
+}
+
+.syl-hourchip--seminar {
+    background: var(--ems-emerald-50);
+    border-color: var(--ems-emerald-100);
+    color: var(--ems-success-600);
+}
+
+.syl-hourchip--lab {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-700);
+}
+
+.syl-hourchip.is-bad {
+    color: var(--ems-danger);
+}
+
+.syl-weeks {
+    width: 100%;
+    min-width: 820px;
+    border-collapse: collapse;
+    font-size: 0.81rem;
+}
+
+.syl-weeks th[scope="col"] {
+    padding: 8px 9px;
+    text-align: left;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.syl-weeks__h--lecture {
+    color: var(--ems-primary-700);
+}
+
+.syl-weeks__h--seminar {
+    color: var(--ems-success-600);
+}
+
+.syl-weeks__h--lab {
+    color: var(--ems-warning-700);
+}
+
+.syl-weeks th[scope="row"] {
+    padding: 5px 9px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--ems-neutral-500);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.syl-weeks td {
+    padding: 5px 9px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.syl-weeks__cell {
+    text-align: center;
+}
+
+/* ── `method`: metod çipləri ──────────────────────────────────────────── */
+.syl-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.syl-method {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.syl-method.is-on {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.syl-method__box {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    border-radius: 4px;
+    border: 1.5px solid var(--ems-neutral-300);
+}
+
+.syl-method.is-on .syl-method__box {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+}
+
+/* ── `assess`: çəkilər ────────────────────────────────────────────────── */
+.syl-weights {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+}
+
+.syl-weight {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 11px;
+}
+
+.syl-weight__label {
+    width: 150px;
+    flex: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.syl-weight input[type="range"] {
+    flex: 1;
+    min-width: 140px;
+    accent-color: var(--ems-primary-600);
+}
+
+.syl-weight__value {
+    width: 46px;
+    flex: none;
+    text-align: right;
+    font-size: 0.84rem;
+    font-weight: 800;
+}
+
+.syl-weight--fixed .syl-weight__value {
+    color: var(--ems-text-muted);
+}
+
+.syl-weight__lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.66rem;
+    font-weight: 800;
+}
+
+/* ── `self`: sərbəst iş strukturu ─────────────────────────────────────── */
+.syl-swopts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 11px;
+}
+
+.syl-swopt {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 13px 14px;
+    text-align: left;
+    border: 1px solid var(--ems-border);
+    border-radius: 13px;
+    background: var(--ems-bg);
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.syl-swopt.is-on {
+    border-width: 2px;
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+/* Siyasətə uyğun OLMAYAN variant — qəsdən görünür qalır, izah edir. */
+.syl-swopt.is-blocked {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-400);
+    cursor: not-allowed;
+}
+
+.syl-swopt__radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    border: 1.5px solid var(--ems-neutral-300);
+}
+
+.syl-swopt.is-on .syl-swopt__radio {
+    border-color: var(--ems-primary-600);
+    background: radial-gradient(circle, var(--ems-primary-600) 0 3.5px, transparent 3.5px);
+}
+
+.syl-swopt__title {
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.syl-swopt__note {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+}
+
+.syl-swopt__sum {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--ems-neutral-400);
+}
+
+.syl-swopt__sum.is-bad {
+    color: var(--ems-danger);
+}
+
+.syl-swtopics {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.syl-swtopic {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 10px;
+}
+
+.syl-swtopic__label {
+    width: 78px;
+    flex: none;
+    font-size: 0.73rem;
+    font-weight: 800;
+    color: var(--ems-text-muted);
+}
+
+/* Mövzu sahəsi artıq `<textarea>`-dir (sətir sonu itməsin deyə) — ölçü
+   qaydası hər iki elementə eyni tətbiq olunur. */
+.syl-swtopic input,
+.syl-swtopic textarea {
+    flex: 1;
+    min-width: 180px;
+}
+
+.syl-swtopic__pts {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--ems-neutral-700);
+}
+
+.syl-swtopic__graded {
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.syl-archived {
+    padding: 12px 14px;
+    background: var(--ems-bg-subtle);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--syl-radius-card);
+}
+
+.syl-archived__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 0.83rem;
+}
+
+.syl-archived__row {
+    margin: 0 0 6px;
+    font-size: 0.81rem;
+    color: var(--ems-text-muted);
+}
+
+/* ── `prev`: yekun görünüş ────────────────────────────────────────────── */
+.syl-preview {
+    padding: 22px 24px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--syl-radius-card);
+}
+
+.syl-preview__head {
+    padding-bottom: 13px;
+    border-bottom: 2px solid var(--ems-neutral-900);
+}
+
+.syl-preview__org {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-preview__title {
+    margin: 6px 0 0;
+    font-size: 1.14rem;
+    font-weight: 800;
+}
+
+.syl-preview__block {
+    padding: 13px 0;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.syl-preview__label {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+}
+
+.syl-preview__body {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    white-space: pre-line;
+    color: var(--ems-neutral-700);
+}
+
+/* ── `send`: yoxlama siyahısı ─────────────────────────────────────────── */
+.syl-checklist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid var(--ems-border);
+    border-radius: 11px;
+    overflow: hidden;
+    background: var(--ems-neutral-100);
+}
+
+.syl-check {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 13px;
+    background: var(--ems-bg);
+}
+
+.syl-check__mark {
+    width: 20px;
+    height: 20px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--ems-warning);
+    color: var(--ems-neutral-0);
+    font-size: 0.63rem;
+    font-weight: 800;
+}
+
+.syl-check--done .syl-check__mark {
+    background: var(--ems-success);
+}
+
+.syl-check__label {
+    flex: 1;
+    min-width: 180px;
+    font-size: 0.83rem;
+    font-weight: 600;
+}
+
+.syl-check__note {
+    font-size: 0.77rem;
+    color: var(--ems-warning-800);
+}
+
+.syl-check--done .syl-check__note {
+    color: var(--ems-text-muted);
+}

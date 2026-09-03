@@ -72,10 +72,23 @@ class _RoleAssignmentFlow(_AuditMixin, _PredicatesMixin, _ResolversMixin):
             or has_permission(actor_permission_list, "org.manage_members")
         )
         self.can_assign_owner_roles = self.is_superadmin or has_permission(actor_permission_list, "org.owner.assign")
+        # `user.grant_privileged` — RİM əsasnaməsinin 5.5 bəndinin («Təhlükəsizlik
+        # üzrə səlahiyyət ayrılığı»: yeni administrator səlahiyyəti bir nəfərin
+        # nəzarətsiz qərarı ilə verilməməlidir) RİM icazə dəstindəki adı.
+        #
+        # YENİ QAPI YARADILMIR: mexanizm onsuz da mövcuddur (`org.admin.assign`),
+        # bu açar sadəcə ona EKVİVALENTDİR. Səbəb — RİM operatoru icazələri
+        # «Hesab idarəetməsi (RİM)» kateqoriyasında görür; ora ayrıca açar qoyub
+        # arxada eyni yoxlamaya bağlamaq iki paralel qapıdan (və onların
+        # uyğunsuzlaşmasından) təhlükəsizdir.
+        #
+        # DİQQƏT: `role.*` bu açarı ƏHATƏ ETMİR — RİM rəhbəri adi rolları təyin
+        # edə bilir, amma YENİ ADMİN yarada bilmir; onu sahib ayrıca verməlidir.
         self.can_assign_admin_roles = (
             self.is_superadmin
             or self.can_assign_owner_roles
             or has_permission(actor_permission_list, "org.admin.assign")
+            or has_permission(actor_permission_list, "user.grant_privileged")
         )
 
     def run(self):

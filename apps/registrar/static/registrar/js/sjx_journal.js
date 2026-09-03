@@ -78,10 +78,14 @@
     put("[data-sjx-day-kind]", row.getAttribute("data-kind-label"));
     put("[data-sjx-day-teacher]", row.getAttribute("data-teacher"));
     put("[data-sjx-day-topic]", row.getAttribute("data-topic"));
+    put("[data-sjx-day-room]", row.getAttribute("data-room"));
     put("[data-sjx-day-att]", row.getAttribute("data-att"));
     put("[data-sjx-day-score]", row.getAttribute("data-score"));
     var corr = m.querySelector("[data-sjx-day-corr]");
     if (corr) corr.hidden = row.getAttribute("data-corrected") !== "1";
+    // Köhnə sistemdən köçürülmüş üzrlü-qayıb sənədi (sarı sətir, ✎ nişanı).
+    var excuse = m.querySelector("[data-sjx-day-excuse]");
+    if (excuse) excuse.hidden = row.getAttribute("data-legacy-excuse") !== "1";
     m.hidden = false;
     document.body.style.overflow = "hidden";
   });

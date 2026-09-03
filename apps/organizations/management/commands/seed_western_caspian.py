@@ -12,10 +12,8 @@ Usage::
 
     python manage.py seed_western_caspian --password "DemoPass123!"
 
-The password is required so seeded credentials are always explicit (never a
-baked-in default). Every sample user shares that password and (per the
-e-university provisioning model) is flagged to set their own password + verify
-their email on first login when that flow is enabled.
+The required password is explicit and shared by sample users; the first-login
+flow replaces it and verifies email when enabled.
 """
 
 from __future__ import annotations
@@ -39,6 +37,7 @@ from apps.registrar.models import (
     Subject,
 )
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -46,7 +45,8 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
-class Command(BaseCommand):
+class Command(ProductionCommandSafetyMixin, BaseCommand):
+    safety_command_name = "seed_western_caspian"
     help = "Seed the Qərbi Kaspi Universiteti demo tenant with all university roles and the academic hierarchy."
 
     ORG_NAME = "Qərbi Kaspi Universiteti"
@@ -333,23 +333,16 @@ class Command(BaseCommand):
     def _seed_demo_progress(self, org):
         """Give the demo enrollments contact hours + some progress/absence data.
 
-        So the student cabinet shows a real Bologna credit bar and the
-        absence (qayıb) limit is exercisable: every offering gets 60 lesson
-        hours, one mandatory subject is marked COMPLETED (earned credits), and
-        one student is pushed over the 25% absence limit (barred from the exam).
+        Hər offering 60 dərs saatı alır; MATH101 KEÇİLMİŞ fənn kimi qiymətlənir
+        (toplanmış kredit ``Enrollment.status``-dan GƏLMİR — bax
+        ``transcript.student_credit_totals``), CS101-də isə bir tələbə 25% qayıb
+        həddini keçir (imtahana buraxılmır — qayıb bloku jurnalın özündən çıxır).
         """
         CourseOffering.objects.filter(organization=org, lesson_hours=0).update(lesson_hours=60)
-
-        # One completed mandatory subject per student → earned ECTS on the bar.
-        for enrollment in Enrollment.objects.filter(
-            organization=org, offering__subject__code="MATH101", status=Enrollment.Status.ENROLLED
-        ):
-            enrollment.status = Enrollment.Status.COMPLETED
-            enrollment.save(update_fields=["status"])
-
-        # The absence-barred demo is produced by the journal itself (wcu_student_az1
-        # is marked absent in every session — see _seed_journal), which recomputes
-        # Enrollment.absence_hours; no manual override needed here.
+        # Köhnə seed qalığı: jurnal/imtahan yazısı yalnız ENROLLED sətirləri görür.
+        Enrollment.objects.filter(organization=org, status=Enrollment.Status.COMPLETED).update(
+            status=Enrollment.Status.ENROLLED
+        )
         self._seed_journal(org)
 
     def _seed_lms_student_groups(self, org, units):
@@ -429,6 +422,7 @@ class Command(BaseCommand):
             registrar_services.sync_offering_course_members(offering=offering)
             registrar_gradebook.ensure_assessment_scheme(offering=offering)
             enrollments = list(offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student"))
+            is_passed_demo = offering.subject.code == "MATH101"  # "hamı keçdi" fənni → real ECTS
 
             # Kursa mövzu planı (idempotent) — modal seçimi + təqvim planı üçün.
             if offering.course_id and not CourseTopic.objects.filter(course_id=offering.course_id).exists():
@@ -448,8 +442,8 @@ class Command(BaseCommand):
                     )
                     entries = []
                     for enrollment in enrollments:
-                        # wcu_student_az1 misses every session → exceeds the limit.
-                        absent = enrollment.student.username == "wcu_student_az1"
+                        # wcu_student_az1 misses every session → exceeds the limit (MATH101 xaric).
+                        absent = enrollment.student.username == "wcu_student_az1" and not is_passed_demo
                         entries.append(
                             {
                                 "lesson_id": lesson.id,
@@ -466,7 +460,9 @@ class Command(BaseCommand):
             # → resit (absence); az2 → low exam (fails → resit); others → pass.
             for enrollment in enrollments:
                 uname = enrollment.student.username
-                if uname == "wcu_student_az1":
+                if is_passed_demo:
+                    registrar_finals.set_exam_score(enrollment=enrollment, score=40, by_user=teacher)
+                elif uname == "wcu_student_az1":
                     registrar_finals.evaluate_resit(enrollment=enrollment, by_user=teacher)
                 else:
                     registrar_finals.set_exam_score(

@@ -11,8 +11,14 @@ from __future__ import annotations
 
 from django import forms
 from django.apps import apps as django_apps
+from django.db.models import Q as models_Q
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.integrity import (
+    eligible_instructor_user_ids,
+    validate_instructor_assignment,
+    validate_student_record_target,
+)
 from apps.registrar.models import (
     CourseOffering,
     Curriculum,
@@ -21,6 +27,29 @@ from apps.registrar.models import (
     StudentAcademicRecord,
     Subject,
 )
+
+
+def program_choices(organization, *, current_pk=None):
+    """İxtisas SEÇİCİSİ üçün queryset — arxivlənmişlər (``is_active=False``) gizlidir.
+
+    Sahibin 2026-08-31 qərarı: ixtisas OLMAYAN sətirlər («Level», «Kollec»,
+    «Magistratura və doktorantura» …) silinmir, ``is_active=False`` ilə
+    arxivlənir — «seçicilərdə görünməsin, amma onlara bağlı tarixi qeydlər
+    toxunulmaz qalsın» (``manage.py archive_non_program_rows``).
+
+    ⚠️ ``current_pk`` — redaktə olunan sətrin HAZIRKİ proqramının pk-sı.  Tarixi bir qeyd
+    arxivlənmiş proqrama bağlıdırsa, onu queryset-dən çıxarmaq formanı
+    saxlanılmaz edərdi (``ModelChoiceField`` mövcud dəyəri «etibarsız seçim»
+    sayar) — yəni arxivləşdirmə tarixi datanı DOLAYI YOLLA zədələyərdi.  Ona
+    görə cari dəyər həmişə siyahıya geri əlavə olunur.
+    """
+
+    if organization is None:
+        return Program.objects.none()
+    visible = models_Q(is_active=True)
+    if current_pk is not None:
+        visible |= models_Q(pk=current_pk)
+    return Program.objects.filter(organization=organization).filter(visible).order_by("name")
 
 
 class _OrgScopedModelForm(forms.ModelForm):
@@ -40,13 +69,41 @@ class _OrgScopedModelForm(forms.ModelForm):
 class ProgramForm(_OrgScopedModelForm):
     class Meta:
         model = Program
-        fields = ["code", "name", "degree_level", "specialty_unit", "ects_total", "absence_limit_percent", "is_active"]
+        fields = [
+            "code",
+            "official_code",
+            "legacy_official_code",
+            "name",
+            "degree_level",
+            "specialty_unit",
+            "ects_total",
+            "absence_limit_percent",
+            "is_active",
+        ]
         widgets = {
             "code": forms.TextInput(attrs={"maxlength": 32}),
+            "official_code": forms.TextInput(attrs={"maxlength": 32, "inputmode": "numeric"}),
+            "legacy_official_code": forms.TextInput(attrs={"maxlength": 32, "inputmode": "numeric"}),
             "name": forms.TextInput(attrs={"maxlength": 255}),
         }
+        help_texts = {
+            "official_code": pgettext_lazy(
+                "registrar.console",
+                "CARİ rəsmi dövlət ixtisas şifri (NK 503/2024) — 7 rəqəm, məsələn 6006004. "
+                "İstifadəçilərə ixtisas adının yanında bu şifr göstərilir. İxtisas yeni "
+                "təsnifatda ləğv olunubsa boş qalır. Eyni şifr bir neçə ixtisasda təkrarlana bilər.",
+            ),
+            "legacy_official_code": pgettext_lazy(
+                "registrar.console",
+                "ƏVVƏLKİ nəsil ixtisas şifri — 050XXX bakalavr, 060XXX magistratura. "
+                "Köhnə tələbələrin diplomundakı şifrdir; ixtisas yalnız yeni təsnifatda "
+                "varsa boş qalır.",
+            ),
+        }
         labels = {
-            "code": pgettext_lazy("registrar.console", "Kod"),
+            "code": pgettext_lazy("registrar.console", "Daxili kod"),
+            "official_code": pgettext_lazy("registrar.console", "Rəsmi ixtisas şifri (cari)"),
+            "legacy_official_code": pgettext_lazy("registrar.console", "Rəsmi ixtisas şifri (köhnə)"),
             "name": pgettext_lazy("registrar.console", "Ad"),
             "degree_level": pgettext_lazy("registrar.console", "Təhsil pilləsi"),
             "specialty_unit": pgettext_lazy("registrar.console", "İxtisas bölməsi (opsional)"),
@@ -74,6 +131,19 @@ class ProgramForm(_OrgScopedModelForm):
         if code and self._code_is_taken(Program, code):
             raise forms.ValidationError(pgettext_lazy("registrar.console", "Bu proqram kodu artıq mövcuddur."))
         return code
+
+    def clean_official_code(self):
+        """Cari rəsmi şifr: yalnız kənar boşluqlar təmizlənir.
+
+        UNİKALLIQ YOXLAMASI QƏSDƏN YOXDUR — bir rəsmi şifr bir neçə ixtisasa
+        (magistr ixtisaslaşmaları, AZ/EN bölmələri, əyani/qiyabi formalar) aid
+        ola bilər; bax ``Program`` model docstring-i.
+        """
+        return (self.cleaned_data.get("official_code") or "").strip()
+
+    def clean_legacy_official_code(self):
+        """Köhnə nəsil rəsmi şifr — eyni qayda (unikallıq yoxlanmır)."""
+        return (self.cleaned_data.get("legacy_official_code") or "").strip()
 
 
 class SubjectForm(_OrgScopedModelForm):
@@ -115,11 +185,7 @@ class CurriculumForm(_OrgScopedModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         field = self.fields["program"]
-        field.queryset = (
-            Program.objects.filter(organization=self.organization).order_by("name")
-            if self.organization is not None
-            else Program.objects.none()
-        )
+        field.queryset = program_choices(self.organization, current_pk=self.instance.program_id)
 
     def clean(self):
         cleaned = super().clean()
@@ -221,13 +287,7 @@ class OfferingForm(_OrgScopedModelForm):
         instructor_field = self.fields["instructor"]
         instructor_field.required = False
         instructor_field.queryset = (
-            user_model.objects.filter(
-                memberships__organization=org,
-                memberships__role__name__in=["teacher", "assistant_teacher"],
-                memberships__is_active=True,
-            )
-            .distinct()
-            .order_by("username")
+            user_model.objects.filter(pk__in=eligible_instructor_user_ids(organization=org)).order_by("username")
             if org
             else user_model.objects.none()
         )
@@ -237,6 +297,12 @@ class OfferingForm(_OrgScopedModelForm):
         subject = cleaned.get("subject")
         period = cleaned.get("period")
         group = cleaned.get("group")
+        instructor = cleaned.get("instructor")
+        if instructor is not None and self.organization is not None:
+            validate_instructor_assignment(
+                organization=self.organization,
+                instructor=instructor,
+            )
         if subject and period:
             qs = CourseOffering.objects.filter(
                 organization=self.organization, subject=subject, period=period, group=group
@@ -297,9 +363,7 @@ class StudentRecordForm(_OrgScopedModelForm):
             if org
             else user_model.objects.none()
         )
-        self.fields["program"].queryset = (
-            Program.objects.filter(organization=org).order_by("name") if org else Program.objects.none()
-        )
+        self.fields["program"].queryset = program_choices(org, current_pk=self.instance.program_id)
         self.fields["curriculum"].queryset = (
             Curriculum.objects.filter(organization=org).select_related("program").order_by("-admission_year")
             if org
@@ -318,6 +382,15 @@ class StudentRecordForm(_OrgScopedModelForm):
         student = cleaned.get("student")
         program = cleaned.get("program")
         curriculum = cleaned.get("curriculum")
+        group = cleaned.get("group")
+        if student and program and curriculum and self.organization is not None:
+            validate_student_record_target(
+                organization=self.organization,
+                student=student,
+                program=program,
+                curriculum=curriculum,
+                group=group,
+            )
         if curriculum and program and curriculum.program_id != program.id:
             self.add_error(
                 "curriculum",

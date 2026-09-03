@@ -52,6 +52,68 @@ ALTER DEFAULT PRIVILEGES FOR ROLE :"owner_role" IN SCHEMA public
 ALTER DEFAULT PRIVILEGES FOR ROLE :"owner_role" IN SCHEMA public
     GRANT USAGE, SELECT ON SEQUENCES TO :"app_role";
 
+-- Staged-account activation evidence is append-only.  The broad application
+-- DML grant above must never turn this ledger into a writable table; the only
+-- transition surface is the audited, fixed-search_path activation function.
+SELECT format(
+    'REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE '
+    'public.accounts_accountactivationevidence FROM %I',
+    :'app_role'
+)
+WHERE to_regclass('public.accounts_accountactivationevidence') IS NOT NULL
+\gexec
+
+SELECT format(
+    'GRANT EXECUTE ON FUNCTION '
+    'public.accounts_activate_staged_identity('
+    'uuid,bigint,uuid,uuid,bigint,text,text) TO %I',
+    :'app_role'
+)
+WHERE to_regprocedure(
+    'public.accounts_activate_staged_identity('
+    'uuid,bigint,uuid,uuid,bigint,text,text)'
+) IS NOT NULL
+\gexec
+
+-- Registrar group identity changes use a two-phase evidence surface.  The app
+-- role may execute begin/finalize, but cannot forge or mutate ledger rows.
+SELECT format(
+    'REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON TABLE '
+    'public.registrar_grouptransferevidence FROM %I',
+    :'app_role'
+)
+WHERE to_regclass('public.registrar_grouptransferevidence') IS NOT NULL
+\gexec
+
+SELECT format(
+    'GRANT SELECT ON TABLE public.registrar_grouptransferevidence TO %I',
+    :'app_role'
+)
+WHERE to_regclass('public.registrar_grouptransferevidence') IS NOT NULL
+\gexec
+
+SELECT format(
+    'GRANT EXECUTE ON FUNCTION '
+    'public.registrar_begin_student_group_transfer('
+    'uuid,uuid,uuid,uuid,uuid,bigint) TO %I',
+    :'app_role'
+)
+WHERE to_regprocedure(
+    'public.registrar_begin_student_group_transfer('
+    'uuid,uuid,uuid,uuid,uuid,bigint)'
+) IS NOT NULL
+\gexec
+
+SELECT format(
+    'GRANT EXECUTE ON FUNCTION '
+    'public.registrar_finalize_student_group_transfer(uuid,uuid) TO %I',
+    :'app_role'
+)
+WHERE to_regprocedure(
+    'public.registrar_finalize_student_group_transfer(uuid,uuid)'
+) IS NOT NULL
+\gexec
+
 -- Yoxlama: atributlar gözlənildiyi kimidirmi?
 SELECT rolname, rolsuper, rolbypassrls, rolcanlogin
 FROM pg_roles WHERE rolname = :'app_role';

@@ -352,9 +352,17 @@ class ProfileSectionResolutionTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context["active_section"], "profile-info")
 
-    def test_default_section_is_profile_info(self):
+    def test_default_section_is_dashboard(self):
+        """FAZA 22 — parametrsiz açılış «Ana səhifə»dir (əvvəl `profile-info`).
+
+        `?section=profile-info` əvvəlki kimi işləyir (aşağıdakı yoxlama) —
+        dəyişən yalnız DEFAULT hədəfdir.
+        """
         resp = self.client.get(reverse("accounts:profile"))
-        self.assertEqual(resp.context["active_section"], "profile-info")
+        self.assertEqual(resp.context["active_section"], "dashboard")
+
+        explicit = self.client.get(reverse("accounts:profile"), {"section": "profile-info"})
+        self.assertEqual(explicit.context["active_section"], "profile-info")
 
 
 class ProfilePostHandlingTest(TestCase):

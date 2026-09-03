@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% comment %}
+Sillabusun AYRICA TAM SƏHİFƏSİ — siyahıdan və təsdiq növbəsindən
+`target="_blank"` ilə açılır. Profil qabığından KƏNARDIR: sol sidebar burada
+YOXDUR, çünki bu, profil bölməsi deyil, müstəqil sənəd səthidir.
+
+CSP: inline `<style>` / `<script>` YOXDUR — hər ikisi `static/`-dən yüklənir.
+Dinamik dəyər JS-ə `data-*` atributu ilə ötürülür.
+{% endcomment %}
+
+{% block title %}{{ syllabus_detail.code }} — {{ syllabus_detail.name }}{% endblock %}
+
+{% block extraCss %}
+  <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}">
+  <link rel="stylesheet" href="{% static 'accounts/css/syllabus_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="syl syl-doc" data-syllabus-detail>
+
+  <header class="syl-doc__head">
+    <div class="syl-doc__headline">
+      <p class="syl-doc__kicker">{{ syllabus_detail.title }}</p>
+      <h1 class="syl-doc__title">{{ syllabus_detail.name }}</h1>
+      <p class="syl-doc__code"><span class="syl-code">{{ syllabus_detail.code }}</span></p>
+    </div>
+    <div class="syl-doc__headside">
+      <span class="syl-badge syl-badge--{{ syllabus_detail.status.tone }}">{{ syllabus_detail.status.label }}</span>
+      <div class="syl-doc__tools">
+        <a class="syl-btn syl-btn--secondary syl-btn--sm" href="{{ syllabus_detail.pdf_url }}">
+          <i class="fas fa-file-pdf" aria-hidden="true"></i>{{ syllabus_detail.pdf_label }}
+        </a>
+        <button type="button" class="syl-btn syl-btn--ghost syl-btn--sm" data-syl-print>
+          <i class="fas fa-print" aria-hidden="true"></i>{{ syllabus_detail.print_label }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  {% if syllabus_detail.status.banner %}
+  <p class="syl-doc__banner syl-doc__banner--{{ syllabus_detail.status.tone }}">
+    {{ syllabus_detail.status.banner }}
+    {% if syllabus_detail.status.reason %} {{ syllabus_detail.status.reason }}{% endif %}
+  </p>
+  {% endif %}
+
+  {% if syllabus_detail.student_note %}
+  <p class="syl-doc__banner syl-doc__banner--neutral">{{ syllabus_detail.student_note }}</p>
+  {% endif %}
+
+  <section class="syl-doc__identity" aria-label="{{ syllabus_detail.title }}">
+    <dl class="syl-doc__grid">
+      {% for row in syllabus_detail.identity %}
+      <div class="syl-doc__pair">
+        <dt>{{ row.label }}</dt>
+        <dd>{{ row.value }}</dd>
+      </div>
+      {% endfor %}
+      <div class="syl-doc__pair syl-doc__pair--progress">
+        <dt>{% trans "Tamamlanma" context "accounts.syllabus" %}</dt>
+        <dd>
+          <span class="syl-bar syl-bar--{{ syllabus_detail.percent_tone }}">
+            <span class="syl-bar__fill" data-syl-percent="{{ syllabus_detail.percent }}"></span>
+          </span>
+          <span class="syl-bar__value syl-bar__value--{{ syllabus_detail.percent_tone }}">{{ syllabus_detail.percent }}%</span>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="syl-doc__body" aria-label="{% trans 'Sillabus bölmələri' context 'accounts.syllabus' %}">
+    {% for section in syllabus_detail.sections %}
+    <article class="syl-doc__section" id="syl-section-{{ section.id }}">
+      <h2 class="syl-doc__section-title">{{ section.label }}</h2>
+      {% if section.lines %}
+      <ul class="syl-doc__lines">
+        {% for line in section.lines %}<li>{{ line }}</li>{% endfor %}
+      </ul>
+      {% else %}
+      <p class="syl-doc__empty">{% trans "— doldurulmayıb —" context "accounts.syllabus" %}</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </section>
+
+  {% comment %}
+  Daxili təsdiq tarixçəsi: context-də YALNIZ ştat rejimi üçün doldurulur
+  (bax detail_context.TIMELINE_MODES). Tələbədə siyahı boşdur — o zaman başlıq
+  da yazılmır ki, boş «Audit tarixçəsi» bloku qalmasın.
+  {% endcomment %}
+  {% if syllabus_detail.timeline %}
+  <section class="syl-doc__history" aria-label="{% trans 'Audit tarixçəsi' context 'accounts.syllabus' %}">
+    <h2 class="syl-doc__section-title">{% trans "Audit tarixçəsi" context "accounts.syllabus" %}</h2>
+    <ol class="syl-doc__timeline">
+      {% for event in syllabus_detail.timeline %}
+      <li class="syl-doc__event syl-doc__event--{{ event.tone }}">
+        <span class="syl-doc__event-what">{{ event.what }}</span>
+        <span class="syl-meta">{{ event.who }}{% if event.when %} · {{ event.when }}{% endif %}</span>
+        {% if event.body %}<span class="syl-doc__event-body">{{ event.body }}</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extraJs %}
+  <script src="{% static 'accounts/js/syllabus_detail.js' %}"></script>
+{% endblock %}

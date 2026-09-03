@@ -26,6 +26,16 @@
                 data-group="{% if off.group %}{{ off.group.name }}{% endif %}"
                 data-count="{{ item.student_count|default:0 }}"
                 data-journal-url="{% url 'registrar:journal_detail' off.id %}"
+                {% endif %}
+                {% comment %}İdarəetmə görünüşü (schedule-manage): qrup + müəllim
+                modalın hər iki sətrini doldurur, silmə düyməsi isə YALNIZ
+                `schedule.manage` icazəsi olanda çıxır (bax schedule_manage.py).{% endcomment %}
+                {% if role == 'manage' %}
+                data-group="{% if off.group %}{{ off.group.name }}{% endif %}"
+                {% if off.instructor %}data-teacher="{{ off.instructor.get_full_name|default:off.instructor.username }}"{% endif %}
+                {% endif %}
+                {% if schedule_can_manage %}
+                data-slot-id="{{ slot.id }}"
                 data-delete-url="{% url 'registrar:schedule_slot_delete' slot.id %}"
                 {% endif %}
                 {% if item.stats %}
@@ -40,7 +50,7 @@
                 {% elif slot.week_type == 'even' %}<span class="sgx-chip sgx-chip--alt">ALT</span>{% endif %}
                 <span class="sgx-card-title">{{ off.subject.name }}</span>
             </span>
-            <span class="sgx-card-meta">{{ slot.get_kind_display }}{% if role == 'student' and off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% elif role == 'teacher' and off.group %} · {{ off.group.name }}{% endif %}</span>
+            <span class="sgx-card-meta">{{ slot.get_kind_display }}{% if role == 'student' and off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% elif role == 'teacher' and off.group %} · {{ off.group.name }}{% elif role == 'manage' and off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% endif %}</span>
             {% if slot.room %}<span class="sgx-card-room">{{ slot.room }}</span>{% endif %}
         </button>
         {% endwith %}

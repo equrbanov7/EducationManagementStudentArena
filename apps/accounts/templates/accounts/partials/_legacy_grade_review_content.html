@@ -1,0 +1,236 @@
+{% load i18n static %}
+{% comment %}
+Dəqiqləşdirmə növbəsinin məzmunu. Bütün data JSON-la gəlir; burada YALNIZ
+çərçivə, süzgəc qabları və dialoqların skeleti var.
+
+Seçicilər VAHİD komponentdir (`_searchable_picker.html` + static/js/searchable_select.js):
+axtarışlı, DEBOUNCE-lu, LAZY səhifələnən, kaskadlı (fakültə → kafedra → ixtisas
+→ qrup). Cədvəl və kartlar üçün SKELETON yükləyici var — «boş cədvəl» təəssüratı
+yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/legacy_grade_review.css' %}?v=20260831-1">
+
+{% if not s.has_access %}
+  <p class="lgr__denied" role="status">{{ s.access_denied_message }}</p>
+{% else %}
+<div class="lgr"
+     data-lgr-root
+     data-queue-url="{{ s.queue_url }}"
+     data-options-url="{{ s.options_url }}"
+     data-faculty-url="{{ s.faculty_url }}"
+     data-kafedra-url="{{ s.kafedra_url }}"
+     data-specialty-url="{{ s.specialty_url }}"
+     data-group-url="{{ s.group_url }}"
+     data-subject-url="{{ s.subject_url }}"
+     data-teacher-url="{{ s.teacher_url }}"
+     data-action-url="{{ s.action_url }}"
+     data-page-size="{{ s.default_page_size }}"
+     data-min-note="{{ s.min_note_length }}"
+     data-max-note="{{ s.max_note_length }}"
+     data-can-review="{% if s.can_review %}1{% else %}0{% endif %}">
+
+  <header class="lgr__head">
+    <div>
+      <h2 class="lgr__title">{% trans "Köçürülmüş nəticələrin dəqiqləşdirilməsi" context "accounts.legacy_review" %}</h2>
+      <p class="lgr__intro">
+        {% trans "Köhnə sistemdən gətirilmiş imtahan nəticələri arasında yoxlanmalı olanlar burada toplanır. Siyahı hər dəfə sübut qatından yenidən hesablanır — dondurulmuş fayl deyil. Dəyər doğrudursa təsdiqləyin; səhvdirsə sənədli düzəliş yazın. Köhnə mənbə sətri heç bir halda üzərindən yazılmır." context "accounts.legacy_review" %}
+      </p>
+    </div>
+    <div class="lgr__progress" data-lgr-progress aria-live="polite">
+      <div class="lgr__progress-bar"><span class="lgr__progress-fill" data-lgr-progress-fill></span></div>
+      <p class="lgr__progress-text" data-lgr-progress-text>&nbsp;</p>
+    </div>
+  </header>
+
+  {% if not s.can_review %}
+  <p class="lgr__notice lgr__notice--observer" role="status">
+    <i class="fas fa-eye" aria-hidden="true"></i> {{ s.observer_notice }}
+  </p>
+  {% endif %}
+
+  {% comment %}Kateqoriya çipləri — SAYLAR da, ETİKETLƏR də serverdən gəlir,
+  çünki kateqoriyalar enum-dan doğulur: enum genişlənsə şablona toxunmaq lazım
+  deyil. Çipə klik = həmin kateqoriya üzrə süzgəc.{% endcomment %}
+  <div class="lgr-cats" data-lgr-cats role="group"
+       aria-label="{% trans 'Kateqoriya süzgəcləri' context 'accounts.legacy_review' %}"></div>
+
+  <div class="lgr-filters" data-lgr-filters>
+    <div class="lgr-field">
+      <label for="lgr-q">{% trans "Axtarış" context "accounts.legacy_review" %}</label>
+      <input type="search" id="lgr-q" name="q" class="lgr-input" autocomplete="off"
+             placeholder="{% trans 'Tələbə, fənn, köhnə ID…' context 'accounts.legacy_review' %}">
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-faculty-label">
+      <label id="lgr-faculty-label">{% trans "Fakültə" context "accounts.legacy_review" %}</label>
+      {% trans "fakültə axtar…" context "accounts.legacy_review" as lgr_faculty_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-faculty" placeholder=lgr_faculty_ph %}
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-kafedra-label">
+      <label id="lgr-kafedra-label">{% trans "Kafedra" context "accounts.legacy_review" %}</label>
+      {% trans "kafedra axtar…" context "accounts.legacy_review" as lgr_kafedra_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-kafedra" placeholder=lgr_kafedra_ph %}
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-specialty-label">
+      <label id="lgr-specialty-label">{% trans "İxtisas" context "accounts.legacy_review" %}</label>
+      {% trans "ixtisas axtar…" context "accounts.legacy_review" as lgr_specialty_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-specialty" placeholder=lgr_specialty_ph %}
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-group-label">
+      <label id="lgr-group-label">{% trans "Qrup" context "accounts.legacy_review" %}</label>
+      {% trans "qrup axtar…" context "accounts.legacy_review" as lgr_group_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-group" placeholder=lgr_group_ph %}
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-subject-label">
+      <label id="lgr-subject-label">{% trans "Fənn" context "accounts.legacy_review" %}</label>
+      {% trans "fənn axtar…" context "accounts.legacy_review" as lgr_subject_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-subject" placeholder=lgr_subject_ph %}
+    </div>
+    <div class="lgr-field" role="group" aria-labelledby="lgr-teacher-label">
+      <label id="lgr-teacher-label">{% trans "Müəllim" context "accounts.legacy_review" %}</label>
+      {% trans "müəllim axtar…" context "accounts.legacy_review" as lgr_teacher_ph %}
+      {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-teacher" placeholder=lgr_teacher_ph %}
+    </div>
+    <div class="lgr-field">
+      <label for="lgr-year">{% trans "Tədris ili" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="lgr-year" name="year" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="lgr-field">
+      <label for="lgr-period">{% trans "Semestr" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="lgr-period" name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="lgr-field">
+      <label for="lgr-severity">{% trans "Şiddət" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="lgr-severity" name="severity" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="lgr-field">
+      <label for="lgr-status">{% trans "Baxış statusu" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select">
+        <select id="lgr-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+          <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
+        </select>
+      </div>
+    </div>
+    <div class="lgr-field lgr-field--action">
+      <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-reset>
+        <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Süzgəcləri sıfırla" context "accounts.legacy_review" %}
+      </button>
+    </div>
+  </div>
+
+  <div class="lgr-tablewrap">
+    <table class="lgr-table">
+      <thead>
+        <tr>
+          <th>{% trans "Tələbə" context "accounts.legacy_review" %}</th>
+          <th>{% trans "Fənn / qrup" context "accounts.legacy_review" %}</th>
+          <th>{% trans "Köhnə sistemdə (xam)" context "accounts.legacy_review" %}</th>
+          <th>{% trans "Canlı sistemdə" context "accounts.legacy_review" %}</th>
+          <th>{% trans "Niyə burada" context "accounts.legacy_review" %}</th>
+          <th>{% trans "Baxış" context "accounts.legacy_review" %}</th>
+          <th class="lgr-th--actions">{% trans "Əməl" context "accounts.legacy_review" %}</th>
+        </tr>
+      </thead>
+      <tbody data-lgr-rows></tbody>
+    </table>
+  </div>
+  <div class="lgr-pager" data-lgr-pager></div>
+
+  {% comment %}Düzəliş dialoqu — «Düzəlt» mövcud auditli imtahan-balı axınına
+  gedir (exam_score_entry): səbəb + qeyd + SƏNƏD üçü də məcburidir, çünki artıq
+  yazılmış bal dəyişdirilir. Yeni düzəliş axını YARADILMIR.{% endcomment %}
+  <dialog class="lgr-dialog" data-lgr-correct-dialog aria-labelledby="lgr-correct-title">
+    <form method="dialog" class="lgr-dialog__form" data-lgr-correct-form>
+      <h3 class="lgr-dialog__title" id="lgr-correct-title">
+        {% trans "İmtahan balını düzəlt" context "accounts.legacy_review" %}
+      </h3>
+      <p class="lgr-dialog__meta" data-lgr-correct-meta></p>
+      <p class="lgr-dialog__hint">
+        {% trans "Düzəliş canlı imtahan balına yazılır və auditli daxiletmə jurnalına düşür. Köhnə mənbə sətri olduğu kimi qalır." context "accounts.legacy_review" %}
+      </p>
+      <label class="lgr-dialog__label" for="lgr-correct-score">{% trans "Yeni imtahan balı" context "accounts.legacy_review" %}</label>
+      <input type="number" id="lgr-correct-score" class="lgr-input" min="0" step="1" inputmode="numeric" required>
+
+      <label class="lgr-dialog__label" for="lgr-correct-reason">{% trans "Səbəb" context "accounts.legacy_review" %}</label>
+      <select id="lgr-correct-reason" class="lgr-input" required>
+        <option value="">—</option>
+        {% for reason in s.reasons %}
+        <option value="{{ reason.value }}">{{ reason.label }}</option>
+        {% endfor %}
+      </select>
+
+      <label class="lgr-dialog__label" for="lgr-correct-note">{% trans "Qeyd" context "accounts.legacy_review" %}</label>
+      <textarea id="lgr-correct-note" class="lgr-input lgr-textarea" rows="3"
+                maxlength="{{ s.max_note_length }}" required></textarea>
+
+      <label class="lgr-dialog__label" for="lgr-correct-evidence">{% trans "Təsdiqedici sənəd (PDF / şəkil)" context "accounts.legacy_review" %}</label>
+      <input type="file" id="lgr-correct-evidence" class="lgr-input lgr-file"
+             accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" required>
+
+      <p class="lgr-dialog__error" data-lgr-correct-error role="alert"></p>
+      <div class="lgr-dialog__actions">
+        <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
+        <button type="submit" class="lgr-btn lgr-btn--primary">{% trans "Düzəlişi yaz" context "accounts.legacy_review" %}</button>
+      </div>
+    </form>
+  </dialog>
+
+  {% comment %}Mübahisə dialoqu — qərar verilə bilmirsə sətir növbədə qalır,
+  amma «heç kim baxmayıb» statusundan çıxır. Qeyd MƏCBURİDİR.{% endcomment %}
+  <dialog class="lgr-dialog" data-lgr-dispute-dialog aria-labelledby="lgr-dispute-title">
+    <form method="dialog" class="lgr-dialog__form" data-lgr-dispute-form>
+      <h3 class="lgr-dialog__title" id="lgr-dispute-title">
+        {% trans "Mübahisəli kimi işarələ" context "accounts.legacy_review" %}
+      </h3>
+      <p class="lgr-dialog__meta" data-lgr-dispute-meta></p>
+      <p class="lgr-dialog__hint">
+        {% trans "Sətir növbədə qalır, amma «baxılmayıb» statusundan çıxır — kağız jurnal yoxlandıqdan sonra qərar verilə bilər." context "accounts.legacy_review" %}
+      </p>
+      <label class="lgr-dialog__label" for="lgr-dispute-note">{% trans "Səbəb (məcburi)" context "accounts.legacy_review" %}</label>
+      <textarea id="lgr-dispute-note" class="lgr-input lgr-textarea" rows="3"
+                maxlength="{{ s.max_note_length }}" required></textarea>
+      <p class="lgr-dialog__error" data-lgr-dispute-error role="alert"></p>
+      <div class="lgr-dialog__actions">
+        <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
+        <button type="submit" class="lgr-btn lgr-btn--primary">{% trans "İşarələ" context "accounts.legacy_review" %}</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="d-none" data-lgr-i18n
+       data-empty="{% trans 'Dəqiqləşdirmə tələb edən nəticə yoxdur.' context 'accounts.legacy_review' %}"
+       data-error="{% trans 'Siyahı yüklənmədi. Bir az sonra yenidən cəhd edin.' context 'accounts.legacy_review' %}"
+       data-verify="{% trans 'Təsdiqlə' context 'accounts.legacy_review' %}"
+       data-correct="{% trans 'Düzəlt' context 'accounts.legacy_review' %}"
+       data-dispute="{% trans 'Mübahisəli' context 'accounts.legacy_review' %}"
+       data-verify-confirm="{% trans 'Bu dəyər doğrudur və baxış bitir. Təsdiqlənsin?' context 'accounts.legacy_review' %}"
+       data-progress="{% trans 'baxılıb' context 'accounts.legacy_review' %}"
+       data-progress-of="{% trans 'sətirdən' context 'accounts.legacy_review' %}"
+       data-prev="{% trans 'Əvvəlki' context 'accounts.legacy_review' %}"
+       data-next="{% trans 'Sonrakı' context 'accounts.legacy_review' %}"
+       data-page="{% trans 'Səhifə' context 'accounts.legacy_review' %}"
+       data-no-live="{% trans 'canlı bal yoxdur' context 'accounts.legacy_review' %}"
+       data-unlinked="{% trans 'Qeydiyyata bağlanmayıb — əvvəlcə sahibi müəyyənləşdirilməlidir.' context 'accounts.legacy_review' %}"
+       data-entry="{% trans 'giriş' context 'accounts.legacy_review' %}"
+       data-exam="{% trans 'imtahan' context 'accounts.legacy_review' %}"
+       data-resit="{% trans 'təkrar' context 'accounts.legacy_review' %}"
+       data-final="{% trans 'yekun' context 'accounts.legacy_review' %}"
+       data-saved="{% trans 'Yadda saxlanıldı.' context 'accounts.legacy_review' %}"
+       data-note-short="{% trans 'Qeyd çox qısadır.' context 'accounts.legacy_review' %}"></div>
+</div>
+{% endif %}
+
+<script src="{% static 'accounts/js/profile/legacy_grade_review_render.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/legacy_grade_review_actions.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/legacy_grade_review.js' %}?v=20260831-1"></script>

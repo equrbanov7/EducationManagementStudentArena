@@ -1,0 +1,1025 @@
+MƏXFİ — YALNIZ DAXİLİ İSTİFADƏ ÜÇÜN
+
+EMSArena ELEKTRON UNİVERSİTET SİSTEMİ
+CANLI SERVER AUDİTİ, TUTUM PLANI VƏ HƏDƏF İNFRASTRUKTUR
+
+Hesabat tarixi: 2026-08-04
+Audit üsulu: lokal repozitoriya təhlili + serverdə yalnız oxuma məqsədli SSH auditi
+Audit vaxt bazası: server UTC; bu hesabatdakı canlı sayğaclar audit anının
+snapshot-ı, Prometheus göstəriciləri isə əvvəlki 14 günlük pəncərədir
+Server: wcuserver / daxili ünvan 10.0.2.42
+Məqsəd: 15 000 qeydiyyatlı istifadəçi, elektron imtahan, elektron jurnal və
+gələcək universitet modulları üçün dayanıqlı, ehtiyatlı və genişlənə bilən sistem
+
+TƏHLÜKƏSİZLİK QEYDİ
+-------------------
+Bu hesabatda heç bir parol, token, private key və ya .env məzmunu verilmir.
+Audit üçün paylaşılmış SSH parolu artıq ifşa olunmuş hesab edilməlidir və dərhal
+dəyişdirilməlidir. Audit zamanı heç bir server konfiqurasiyası dəyişdirilməyib.
+Hesabat daxili IP, hostname və zəiflik məlumatları ehtiva etdiyindən açıq
+repo-ya qoyulmamalıdır. Vendor üçün verilən nüsxədə daxili ünvanlar, hostname və
+əməliyyat zəiflikləri redaktə edilməlidir.
+
+
+1. QISA YEKUN QƏRAR
+===================
+
+1. Mövcud HPE DL360 Gen10-da müşahidə olunan cari yük zamanı CPU istifadəsi
+   aşağıdır. Bu, 3 000 nəfərlik imtahan tutumunun sübutu deyil; amma ilkin
+   prioritet CPU dəyişməkdən əvvəl host SPOF-u, RAM və şəbəkəni düzəltməkdir.
+
+2. Əsas risk sistemin hamısının bir fiziki hostda olmasıdır. 12 app replika
+   olsa da PostgreSQL, Redis, Nginx, media, backup, monitoring və app-lər eyni
+   server söndükdə birlikdə dayanır. Bu, proses səviyyəsində replika olsa da
+   host səviyyəsində HA deyil.
+
+3. Mövcud server saxlanılmalı və gücləndirilməlidir:
+   - RAM iki CPU üzrə simmetrik və kanal-balanslı artırılmalıdır;
+   - minimum dual 10 GbE NIC əlavə edilməli, platforma 25 GbE-ready olmalıdır;
+   - disklərin fiziki sayı, wear/SMART, controller cache və firmware iLO/SSA
+     ilə yoxlanmalıdır;
+   - 3.54 TiB istifadə olunmayan LVM sahəsi planlı şəkildə ayrılmalıdır;
+   - production data, Docker, log və backup eyni root filesystem-də
+     saxlanmamalıdır.
+
+4. 15 000 qeydiyyatlı istifadəçi üçün ən balanslı seçim "ORTA BÜDCƏ" modelidir:
+   mövcud server daxil olmaqla 3 müstəqil container/compute host, 3 PostgreSQL
+   data nüsxəsi, 3 üzvlü quorum/DCS, iki load balancer və VIP,
+   ayrılmış Redis workload-ları, dual-controller media/object storage, ayrıca
+   immutable backup serveri, iki switch, iki firewall və iki UPS enerji xətti.
+
+5. Hesablamanın əsas dizayn hədəfi 3 000 eyni-vaxtlı standart imtahan
+   istifadəçisi, sertifikasiya testi isə ən az 4 500 istifadəçi olmalıdır.
+   Bunlar ölçülmüş cari capacity deyil, ilkin planlama fərziyyəsidir; yalnız tam
+   imtahan axını, failover və məlumat bütövlüyü testindən sonra təsdiqlənə bilər.
+   Bütün 15 000 nəfərin eyni anda imtahana girməsi tələb olunarsa bu ayrıca
+   "15K concurrency" layihəsidir və yüksək büdcə arxitekturası da əlavə app
+   node-ları ilə böyüdülməlidir.
+
+6. Avadanlıq alınmasından əvvəl P0 əməliyyat riskləri bağlanmalıdır:
+   - paylaşılmış SSH credential-i dərhal ləğv etmək, digər production
+     secret-ləri dependency-aware planla mərhələli rotasiya etmək;
+   - .env və backup .env fayllarını 0600, yalnız deployment owner üçün etmək;
+   - dirty production checkout-dan image build etməyi dayandırmaq;
+   - off-host + immutable backup və real restore testi qurmaq;
+   - PostgreSQL WAL arxivləmə/PITR və standby qurmaq;
+   - SSH-ni VPN/management VLAN-a məhdudlaşdırmaq;
+   - OS security update və tələb olunan reboot-u planlı icra etmək.
+
+
+2. SİSTEM VƏ PROYEKTİN ARXİTEKTURASI
+====================================
+
+Repo təhlilinin nəticəsi:
+
+- Django 5.2, Python 3.11/3.12, PostgreSQL 16, Redis 7.
+- HTTP və WebSocket üçün Daphne + Django Channels.
+- Fon əməliyyatları üçün Celery; normal və heavy queue ayrılıb.
+- Edge qatı Nginx, DB connection pool qatı PgBouncer-dir.
+- Prometheus, Grafana, Alertmanager, Loki, Promtail, cAdvisor və exporter-lər var.
+- Sistem modular monolitdir; təxminən 19 domain app, 91 konkret model və
+  yüzdən çox DB cədvəli var.
+- Əsas modullar: exams, live_exam, registrar, organizations, accounts, courses,
+  assignments, labs, projects, appeals, notifications, audit, monitoring,
+  ai_assistant və trial_exams.
+- Multi-tenant izolasiya PostgreSQL RLS və mərkəzi RBAC ilə qorunur.
+- OCR/PDF/Office importu, AI inteqrasiyası, S3 storage dəstəyi və coding exam
+  backend-i üçün kod var.
+
+Elektron jurnal barədə vacib nəticə:
+
+Elektron jurnal hələ sıfırdan yazılacaq modul deyil; repo-da onun böyük hissəsi
+artıq mövcuddur. registrar modulu aşağıdakıları ehtiva edir:
+
+- program, fənn, kurikulum, akademik dövr və təklif olunan dərs;
+- qeydiyyat/enrollment, dərs cədvəli və tədris qrupu;
+- Lesson, LessonMark, davamiyyət və qiymət komponentləri;
+- AssessmentScheme, ComponentScore, FinalGrade, ResitRecord;
+- gradebook, jurnal korreksiyası və təsdiq axını;
+- Excel/PDF export, transkript, bildiriş və exam -> journal inteqrasiyası.
+
+Nəticə: sistemi indi mikroservislərə parçalamaq vacib deyil. RLS, RBAC, imtahan
+və jurnal əməliyyatları eyni tranzaksiya sərhədindən faydalanır. Yalnız ağır və
+stateless işlər - OCR, AI, böyük export, video emalı və tələbə kodunun icrası -
+ayrı worker/runner serverlərinə çıxarılmalıdır.
+
+
+3. MÖVCUD FİZİKİ SERVER İNVENTARI
+=================================
+
+Server modeli              : HPE ProLiant DL360 Gen10
+OS                          : Ubuntu Server 22.04.5 LTS
+Kernel                      : Linux 5.15.0-185-generic
+CPU                         : 2 x Intel Xeon Gold 6138 @ 2.00 GHz
+Fiziki nüvə / thread        : 40 nüvə / 80 thread
+NUMA                        : 2 node
+RAM                         : 64 GiB DDR4-2666 HPE DIMM
+RAM yerləşməsi              : yalnız 1 x 64 GB DIMM, CPU1 tərəfində
+RAM slotları                : 24 slot, hər CPU üçün 6 kanal
+Storage controller          : HPE Smart Array P408i-a SR Gen10, FW 5.61
+OS-un gördüyü disk          : 4.00 TB / 3.64 TiB HPE logical SSD volume
+RAID                        : controller/OS "RAID 1(1+0)" logical volume göstərir
+LVM                         : 3.64 TiB PV; root LV yalnız 100 GiB
+Root filesystem             : 98 GiB, 46 GiB istifadə, 48 GiB boş
+LVM-də ayrılmamış sahə       : təxminən 3.54 TiB
+PSU                         : 2 x 500 W, present/OK, hot-replaceable
+NIC                         : Intel I350, 4 x 1 GbE
+Aktiv link                  : yalnız 1 port, 1 Gb/s full duplex
+NIC bonding                 : yoxdur
+Internal IP konfiqurasiyası : DHCP; OS səviyyəsində statik deyil
+Uptime audit anında         : 32 gün
+Saat                        : UTC, NTP sinxronlaşıb
+
+Yaddaş yerləşməsi optimal deyil. İki CPU olan serverdə RAM-in tək DIMM və tək
+CPU tərəfində olması ikinci CPU üçün remote NUMA memory access yaradır və 12
+mövcud memory kanalından yalnız birini istifadə edir. Bu, RAM həcmi az olmasa
+belə memory bandwidth-i lazımsız məhdudlaşdırır.
+
+Disk barədə bildiyimiz və bilmədiyimiz:
+
+- Controller/OS RAID 1+0 tipli logical volume göstərir. Fiziki disk sayı
+  bilinmədiyinə görə faktiki fault tolerance hələ təsdiqlənməyib.
+- Fiziki SSD sayı, hər diskin modeli, wear faizi, media error sayı, controller
+  cache/batareya sağlamlığı audit hesabından tam görünmür.
+- Serverdə ssacli/hpssacli yoxdur; son qərar HPE iLO/Smart Storage
+  Administrator ilə fiziki auditdən sonra verilməlidir.
+- RAID logical volume backup deyil; controller, server, yanğın, səhv silinmə və ransomware
+  risklərini aradan qaldırmır.
+
+
+4. CANLI RUNTIME TOPOLOGİYASI
+=============================
+
+Audit anında 34 Docker konteyneri işləyirdi:
+
+- 12 x Django/Daphne app replika;
+- 2 x normal Celery worker;
+- 1 x heavy Celery worker;
+- 1 x Celery Beat;
+- 1 x PostgreSQL 16;
+- 1 x PgBouncer;
+- 1 x Redis;
+- 1 x Nginx;
+- PostgreSQL dump sidecar;
+- Prometheus, Grafana, Alertmanager, Loki, Promtail, cAdvisor;
+- Node, PostgreSQL, Redis, Nginx, PgBouncer exporter-ləri və blackbox probe.
+
+Audit anında bütün 34 konteyner running idi, healthcheck olan kritik
+konteynerlər healthy idi, restart və OOM kill sayı 0 idi.
+
+Faktiki resource limitləri:
+
+- Hər app replika: 2 GiB RAM, CPU hard cap yoxdur.
+- PostgreSQL: 20 GiB RAM limit, CPU hard cap yoxdur.
+- Redis: 4 GiB RAM, 2 CPU.
+- Nginx: 512 MiB RAM, 4 CPU.
+- PgBouncer: 512 MiB RAM, 1 CPU.
+
+Vacib limit problemi:
+
+- App, Nginx, PostgreSQL və PgBouncer PID 1 üçün soft nofile = 1024-dur.
+- Nginx worker_connections = 1024, worker_processes = auto (80 worker).
+- Canlı PgBouncer max_client_conn = 1000, default pool = 200 və reserve pool =
+  40-dır; proses soft nofile=1024 olduğuna görə client limiti ilə descriptor
+  ehtiyatı arasında təhlükəli dərəcədə az fərq qalır.
+- Canlı pool_mode=transaction-dır, versiyalanmış compose default-u isə
+  session-dır. RLS_TRANSACTION_SCOPED ilə birlikdə effective .env snapshot-ı
+  alınmadan PgBouncer və ya bütün stack recreate edilməməlidir.
+- Nginx-də limit hər worker üçün tətbiq olunsa da hər proxy connection client və
+  upstream daxil olmaqla bir neçə file descriptor işlədə bilər. Buna görə sadə
+  worker_connections vurması real client tutumu deyil.
+- 4 CPU quota verilmiş Nginx konteynerində hostun 80 CPU-suna görə 80 worker
+  açılması uyğunsuzdur və ölçülərək explicit worker sayı verilməlidir.
+- Bu vəziyyət 15 000 WebSocket və ya çoxlu paralel uzun connection üçün hazır
+  deyil. Nofile limiti gözlənilən client x hər connection üçün FD + upstream,
+  log və ehtiyat formulu ilə hesablanmalı; container ulimit, systemd, Nginx
+  worker_rlimit_nofile və PgBouncer birlikdə staging-də yoxlanmalıdır.
+
+
+5. CANLI YÜK VƏ DB ÖLÇÜLƏRİ
+===========================
+
+Cari snapshot:
+
+- Host CPU: təxminən 99% idle.
+- RAM: 62 GiB total, 55 GiB available, 5.2 GiB used.
+- Swap: 8 GiB, yalnız 33 MiB istifadə.
+- Load average: 0.58 / 0.76 / 0.73.
+- Root disk: 50%-ə yaxın doludur.
+- Docker build cache: 19.1 GiB, 17.65 GiB reclaimable.
+
+Prometheus-in son 14 günlük pəncərəsi:
+
+- 5 dəqiqəlik host CPU istifadəsinin piki: təxminən 15.5%.
+- Minimum available RAM: təxminən 88%.
+- Disk busy pik göstəricisi: təxminən 10.7%.
+- Nginx 1 dəqiqəlik req/s piki: təxminən 1 634 req/s.
+- Aktiv Nginx connection piki: 502.
+- PgBouncer aktiv client piki: 179; gözləyən client əsasən 0, maksimum 1.
+- PostgreSQL connection piki: 29.
+- PostgreSQL 5 dəqiqəlik commit piki: təxminən 118 TPS.
+- Son 14 gündə DB deadlock: 0; temp spill: 0.
+- Redis memory piki: təxminən 4.4 MiB; client piki: 475; eviction: 0.
+
+Bu req/s piki real full exam capacity sübutu deyil. Repo-dakı auditlər göstərir
+ki, bəzi testlər yalnız /ping endpoint-ini, tək source IP-ni və ya 12 app-dan
+yalnız bir replikanı ölçüb. Tam login -> start -> question -> autosave ->
+submit -> result -> WebSocket axını hələ sertifikatlaşdırılmayıb.
+
+Real login stampede testi (2026-07-18, deployment yolu):
+Mənbə artefaktı:
+k6/reports/login-stampede-DEPLOYED_20260718-214509/REPORT.md
+
+VU       fail       p95 latency
+50       0%         0.87 s
+100      0%         1.08 s
+200      0%         2.09 s
+500      0%         6.37 s
+750      2.2%       9.56 s
+1000     0%         15.96 s
+
+Nəticə: hesab sayı 15 000 olsa da 1 000 nəfərin eyni saniyələrdə login olması
+artıq gecikmə yaradır. Waiting room, staggered start və auth hot-path
+optimallaşdırması lazımdır.
+750 VU-da 2.2% xəta, 1 000 VU-da isə 0% xəta qeyri-monoton nəticədir; testin
+rampı, müddəti, request sayı və mühit şərtləri bərpa olunmadan bu nəticələr
+capacity sertifikatı sayıla bilməz.
+
+Canlı PostgreSQL:
+
+- Version: PostgreSQL 16.14.
+- DB ölçüsü: təxminən 491 MiB.
+- Ən böyük cədvəl: registrar_lessonmark, 885 000 sətir, 250 MiB.
+- audit_auditlog: təxminən 136 000 sətir, 74 MiB.
+- auth_user: təxminən 10 118 sətir.
+- RLS aktiv cədvəl: 100; FORCE RLS aktiv cədvəl: 100; policy: 100.
+- App traffic-də emsarena_app rolu NOSUPERUSER/NOBYPASSRLS-dir - bu müsbətdir.
+- Owner/migration rolu superuser-dir və app traffic-də istifadə olunmamalıdır.
+- archive_mode = off.
+- DB standby/replica yoxdur.
+- data_checksums = off.
+- track_io_timing = off.
+- slow-query logging bağlıdır.
+
+DB həcmi və cari TPS çox kiçikdir. Yeni DB serveri əsasən cari tutum üçün
+deyil, HA, PITR, gələcək jurnal/reporting artımı və imtahan cavablarının
+dayanıqlılığı üçün lazımdır.
+
+
+6. BACKUP VƏ DISASTER RECOVERY AUDİTİ
+=====================================
+
+Mövcud müsbət cəhətlər:
+
+- Docker sidecar hər gecə 00:00-da pg_dump yaradır.
+- Retention: 7 daily, 4 weekly, 3 monthly.
+- Ayrıca systemd timer hər gecə 02:00-da timestamp-li pg_dump yaradır.
+- Systemd dump gzip integrity check edir və 60 gün saxlayır.
+- 2026-08-04 tarixli son iki backup uğurludur.
+
+Kritik çatışmayanlar:
+
+- Hər iki backup eyni fiziki serverin eyni controller-reported RAID 1+0 logical
+  volume failure domain-indədir.
+- Bir nüsxə repo qovluğundadır, digəri /var/backups altındadır; host/RAID
+  itəndə ikisi də itir.
+- Off-site, offline və ya immutable backup sübutu yoxdur.
+- Media volume üçün avtomatik off-host backup sübutu yoxdur.
+- PostgreSQL archive_mode off olduğu üçün WAL archive və PITR yoxdur.
+- Real restore testinin uğurlu nəticə artefaktı tapılmadı.
+- Replikasiya da backup deyil: səhv silinmə və ransomware standby-a keçir.
+
+Cari faktiki RPO/RTO:
+
+- Yalnız dump-a əsaslansa, məlumat itkisi 22-24 saata qədər ola bilər.
+- Tam host itkisi üçün RTO ölçülməyib və off-host nüsxə olmadığına görə
+  zəmanət verilmir.
+
+Tələb olunan minimum:
+
+- PostgreSQL base backup + fasiləsiz WAL archive, pgBackRest/WAL-G kimi
+  yoxlanmış alətlə PITR.
+- Eyni kampusda ayrıca backup repository.
+- Başqa bina/site və ya cloud-da şifrəli immutable/offline nüsxə.
+- DB ilə birlikdə media, deployment manifestləri, sertifikatlar, şifrəli
+  secret escrow və restore runbook-u.
+- Hər ay isolated restore testi; hər kritik imtahandan əvvəl restore smoke.
+- Backup age, WAL lag, archive failure, storage dolması və restore-test age
+  üçün alert.
+- Backup tutumu sabit disk sayı ilə deyil, qorunan məlumat x gündəlik dəyişmə
+  faizi x retention müddəti / ölçülmüş compression-dedupe nisbəti + ən az 30%
+  boş yer formulu ilə hesablanmalıdır. Media və DB üçün ayrıca artım proqnozu
+  verilməlidir.
+
+İmtahan datasına hədəf:
+
+- "Uğurlu saxlanıldı" cavabı verilmiş autosave/submit üçün arzu olunan RPO=0.
+- Bu hədəf yalnız synchronous_commit, synchronous_standby_names, çatmış
+  standby-a promotion, dayanıqlı WAL, split-brain fencing və tətbiqin yalnız DB
+  commit-dən sonra ACK verməsi ilə mümkün sayılır.
+- Eyni-site DB nasazlığı: RTO 10-30 dəqiqə.
+- Tam site itkisi: orta modeldə RPO <=15 dəqiqə, RTO <=4 saat.
+- Off-site RPO üçün archive_timeout, WAL upload SLO-su, replication lag həddi və
+  köhnə standby-nın promotion edilməməsi qaydası ayrıca konfiqurasiya olunur.
+- Bu rəqəmlər rəhbərlik tərəfindən Business Impact Analysis ilə təsdiqlənməlidir.
+
+
+7. ŞƏBƏKƏ, STATİK IP VƏ GİRİŞ QATI
+==================================
+
+Cari vəziyyət:
+
+- Server 10.0.2.42/19 ünvanını DHCP ilə alır.
+- 4 x 1 GbE portdan yalnız biri aktivdir; bonding yoxdur.
+- UFW aktivdir, default incoming deny-dir.
+- 22, 80 və 443 TCP UFW-də Anywhere/IPv6 üçün açıqdır. Server RFC1918
+  ünvanındadır; bu, internetdən birbaşa açıq olduğunu sübut etmir, amma upstream
+  firewall/NAT-dan serverə çata bilən bütün L3 mənbələrinə icazə verir.
+- Grafana, Prometheus və Alertmanager yalnız 127.0.0.1-ə bind olunub.
+- Nginx-in /metrics/ marşrutu RFC1918 mənbələrinə açıq ola bilər; yalnız ayrıca
+  monitoring subnet/service identity ilə məhdudlaşdırılmalıdır.
+- PostgreSQL və Redis public host portuna bind olunmayıb - bu müsbətdir.
+- SSH root login bağlıdır, public key işləyir, amma password auth aktivdir.
+- Fail2ban-da sshd jail aktivdir.
+- eno7-də boot-dan sonra təxminən 37.3 milyon RX paketindən 3.15 milyon host
+  səviyyəli RX drop görünüb; hardware error/drop counter-i 0-dır. Multicast,
+  queue/buffer və host-stack səbəbi ayrıca paket capture və NIC metriki ilə
+  araşdırılmalıdır.
+
+Statik public IP serverin özünə verilməməlidir. Düzgün yol:
+
+Internet / kampus WAN
+  -> HA firewall/VPN
+  -> public static IP və NAT
+  -> load-balancer virtual IP (VIP)
+  -> ən az 2 app host
+  -> private DB/cache/storage VLAN-ları
+
+Daxili ünvanlar ya statik netplan, ya da sənədləşdirilmiş DHCP reservation
+ilə sabit olmalıdır. Load balancer VIP serverin tək NIC ünvanından ayrılmalıdır.
+
+Load balancer əlavə edilərkən real client IP itirilməməlidir. Yalnız allowlist
+edilmiş LB ünvanlarından PROXY protocol və ya Nginx set_real_ip_from /
+real_ip_header qəbul edilməli, origin-ə birbaşa giriş bloklanmalıdır. Cari IP
+əsaslı 200 request/s və limit_conn 1000 qaydaları kampus NAT-ı və ya LB IP-si
+arxasında bütün istifadəçiləri bir client kimi bloklaya bilər; rate-limit,
+audit, IP allowlist və 3 000 WebSocket ssenarisi birlikdə test edilməlidir.
+
+Repo/deployment-də imtahan zalı cihazını yoxlamaq üçün host ARP cədvəlinə baxan
+arp-agent var. MAC ünvanı router/VLAN/LB sərhədini keçmir və multi-host HA-da
+hər node eyni məlumatı görməz. Bu yoxlama NAC/switch-controller/DHCP
+source-of-truth və ya idarə olunan cihaz sertifikatı ilə əvəzlənməli; routed və
+failover ssenarisi ayrıca qəbul testindən keçməlidir.
+
+Minimum VLAN-lar:
+
+1. User/exam hall VLAN
+2. DMZ/load balancer VLAN
+3. Application VLAN
+4. Database VLAN
+5. Storage/media VLAN
+6. Backup VLAN
+7. Management/iLO/SSH VLAN
+8. Monitoring VLAN
+9. Coding sandbox VLAN, əgər coding exam aktiv olacaqsa
+
+VLAN siyahısı özü izolasiya deyil. Zonalararası ACL matrisi default-deny
+olmalı, hər istiqamət və port sənədləşdirilməli; iLO yalnız MFA-lı VPN/bastion
+üzərindən management VLAN-da əlçatan olmalıdır.
+
+SSH yalnız VPN/bastion + management VLAN-dan açıq olmalıdır. 22/tcp Anywhere
+qaydası ləğv edilməli, password auth key-lər təsdiqləndikdən sonra bağlanmalıdır.
+
+TLS:
+
+- Cari sertifikat öz-özünə imzalanıb və 10.0.2.42 IP-si üçündür.
+- Yalnız idarə olunan daxili cihazlarda universitet CA-sı quraşdırılıbsa bu
+  qəbul edilə bilər.
+- Public giriş üçün DNS adı və etibarlı public CA sertifikatı lazımdır.
+
+
+8. OBSERVABILITY VƏ OPERATIONS
+==============================
+
+Müsbət cəhətlər:
+
+- Prometheus retention 15 gündür.
+- 8 alert group və 31 rule mövcuddur.
+- HTTP, DB, Redis, PgBouncer, backup, host və konteyner metrikləri var.
+- Audit anında failed systemd unit yox idi.
+
+Çatışmayanlar:
+
+- Prometheus, Alertmanager, Grafana və Loki də əsas hostdadır. Host söndükdə
+  monitorinq və xəbərdarlıq da sönür.
+- Xarici probe/Alertmanager ikinci failure domain-ə çıxarılmalıdır.
+- Node exporter-in historical network metrikində host eno7 deyil, konteyner
+  eth0 görünür; host NIC throughput/drop dashboard-u düzəldilməlidir.
+- App metrics scrape-i load balancer arxasından yalnız bir replikanı görə bilər;
+  hər replika ayrı scrape target olmalıdır.
+- ContainerMemoryNearLimit alerti raw usage_bytes istifadə etdiyinə görə page
+  cache-ni də sayır; working_set_bytes ilə kalibrasiya edilməlidir.
+- 11 zombie wget/tr prosesi cAdvisor PID 1 altında qalıb; healthcheck/init
+  davranışı düzəldilməlidir.
+- iLO/RAID/PSU/UPS metrikləri monitorinqdə görünmür.
+
+
+9. P0 / P1 / P2 RİSK SİYAHISI
+=============================
+
+P0 - növbəti kritik imtahandan əvvəl:
+
+P0-01. Bu auditdə paylaşılmış SSH credential-i dərhal ləğv et və fərdi açarlara
+       keç. Digər production secret-ləri inventory/dependency map, dual-key
+       keçidi və rollback ilə mərhələli rotasiya et; hamısını plansız eyni anda
+       dəyişib fasilə yaratma.
+P0-02. Production .env faylı 0644-dur; yalnız dedicated deployment/service
+       account oxuya biləcək 0600, yaxud zəruridirsə 0640 + məhdud qrup et.
+       0644/0664 olan bütün .env backup-ları şifrəli vault-a köçür və plaintext
+       nüsxələri təsdiqli qayda ilə ləğv et.
+P0-03. Production checkout 738 tracked dəyişiklik + 841 untracked fayldır.
+       Mövcud işi itirmədən snapshot/backup al, sonra hər build-i commit SHA və
+       image digest ilə reproduksiya olunan CI artefaktına çevir.
+P0-04. Off-host DB+media backup və isolated restore testi qur.
+P0-05. PostgreSQL WAL archive/PITR və ən az bir standby qur.
+P0-06. Serverdə 74 update, onlardan 3 standard security update və "restart
+       required" var. Backup/rollback ilə maintenance pəncərəsində patch et.
+P0-07. SSH-ni management VLAN/VPN ilə məhdudlaşdır; key təsdiqindən sonra
+       PasswordAuthentication-i bağla.
+P0-08. App/Nginx/PgBouncer nofile, Nginx worker/upstream keepalive və socket
+       limitlərini 3K/15K test profilindən əvvəl düzəlt.
+P0-09. Full exam flow yük testi və zero acknowledged-answer-loss reconciliation
+       olmadan 15K capacity təsdiqi vermə.
+P0-10. Fiziki SSD, RAID cache, firmware, fan, PSU və iLO health auditini bitir.
+P0-11. Trusted real-IP modelini qur; birbaşa origin girişini bağla və
+       limit_conn 1000 / 200 r/s qaydalarını kampus NAT/LB arxasında test et.
+P0-12. ARP/MAC əsaslı imtahan girişini VLAN, LB və host failover zamanı sına;
+       keçmirsə NAC/DHCP/switch mənbəyi və ya cihaz sertifikatına keçir.
+P0-13. eno7 RX-drop sayğacının semantikasını növbəti imtahandan əvvəl araşdır:
+       ethtool -S, ring, IRQ, softnet, driver və yük altında counter artımını
+       ölç; bunu sübut olmadan birbaşa real packet loss kimi adlandırma.
+
+P1 - 30-90 gün:
+
+P1-01. İkinci fiziki host, DB replication, media replication və LB/VIP qur.
+P1-02. Üçüncü witness/quorum node əlavə et; iki-node avtomatik failover-i
+       split-brain riski ilə buraxma.
+P1-03. RAM-i simmetrik və memory-channel balanslı artır.
+P1-04. Minimum dual 10 GbE, iki switch və link bonding/MLAG qur; 25 GbE-ni
+       replication/rebuild/backup benchmark-ı əsaslandırarsa aktiv et.
+P1-05. Cache/Channels ilə Celery broker-i eyni Redis prosesindən ayır.
+P1-06. Monitorinq və alert delivery-ni ayrıca host/site-a çıxar.
+P1-07. DB, storage, backup, management və exam client VLAN-larını ayır.
+P1-08. UPS, generator, temperatur və fiziki giriş monitorinqini test et.
+P1-09. Rate-limit-i bir NAT IP arxasındakı minlərlə tələbə ssenarisi ilə test et.
+P1-10. Rüblük failover və aylıq restore məşqi qur.
+P1-11. data_checksums-u planlı downtime/rebuild ilə aktivləşdir; corruption
+       yoxlaması və restore doğrulaması qur.
+P1-12. track_io_timing, PII-safe slow-query log və pg_stat_statements-i staging
+       ölçümündən sonra aktivləşdir.
+P1-13. Ubuntu/HPE platforması üçün warranty, firmware, ehtiyat hissə və OS
+       upgrade/support lifecycle planı təsdiqlə.
+P1-14. Multi-host rollout runbook-u hazırla: Celery Beat yalnız bir aktiv node,
+       migration/collectstatic yalnız bir dəfə, WebSocket drain, TLS/secret
+       paylanması, media keçidi və backup yalnız DB primary-dən.
+
+P2 - 3-12 ay:
+
+P2-01. İkinci bina/site üçün warm DR.
+P2-02. Infrastructure-as-Code və configuration management.
+P2-03. Immutable image registry, SBOM, image signing və staged rollout.
+P2-04. SIEM/SOC, immutable audit log və incident response məşqləri.
+P2-05. Video proctoring və coding runner-ları ayrıca capacity layihəsi kimi qur.
+
+
+10. TUTUM FƏRZİYYƏLƏRİ
+======================
+
+15 000 qeydiyyatlı istifadəçi 15 000 eyni-vaxtlı istifadəçi deyil. Bu
+cədvəldəki 3 000/4 500 rəqəmləri cari sistemdə ölçülmüş limit yox, satınalma və
+qəbul testi üçün ilkin sizing fərziyyəsidir.
+
+İş rejimi                         Eyni-vaxtlı istifadəçi
+Adi gün                           450-750
+Qeydiyyat/nəticə açılması         1 200-1 800
+Planlı imtahan piki               1 500-3 000
+Tövsiyə olunan dizayn hədəfi     3 000
+Tövsiyə olunan stress testi      4 500
+Ən pis tələb                      15 000 eyni anda - ayrıca layihə
+
+Mövcud app parametri ilə autosave 30 saniyə + 0-10 saniyə jitter-dir:
+
+- 3 000 aktiv tələbə: təxminən 75-100 autosave POST/s.
+- 15 000 aktiv tələbə: təxminən 375-500 autosave POST/s.
+- 30 saniyəlik WebSocket heartbeat ilə 3 000 tələbə: 100 heartbeat/s.
+- 15 000 tələbə: 500 heartbeat/s; cari consumer DB və Redis işləri də görür.
+
+Trafik fərziyyəsi, video olmadan:
+
+- Orta 100 Kbit/s aktiv istifadəçi ilə 3 000 nəfər: 300 Mbit/s.
+- 15 000 nəfər: 1.5 Gbit/s.
+- Buna görə minimum server fabric 10 GbE-dir. 25/100 GbE yalnız storage rebuild,
+  DB replication, backup window, east-west traffic və gələcək video testinin
+  ölçülmüş nəticəsi ilə əsaslandırılmalıdır; kampus uplink də həmin ölçüyə görə
+  seçilməlidir.
+
+Video-proctoring bu hesablamaya daxil deyil. 3 000 nəfər x 0.5-1 Mbit/s video
+1.5-3 Gbit/s daimi trafik və 3 saatda təxminən 2-4 TB storage yarada bilər.
+
+Coding exam da baza hesaba daxil deyil. Tələbə kodu production app/DB hostunda
+işləməməli; CPU/RAM/PID/network limitli, ephemeral və ayrıca runner klasterində
+icra olunmalıdır.
+
+
+11. ÜÇ BÜDCƏ VARIANTI
+=====================
+
+Qiymətlər marka, yeni/refurbished seçimi, warranty, gömrük, lisenziya və lokal
+vendor SLA-sına görə çox dəyişdiyi üçün bu hesabat saxta AZN qiyməti vermir.
+Tender üçün eyni texniki şərtnamə ilə ən az 3 vendor təklifi alınmalıdır.
+
+
+11.1. UCUZ BÜDCƏ - MINIMUM DÜZGÜN STRUKTUR
+------------------------------------------
+
+Hədəf:
+- 15 000 qeydiyyatlı hesab;
+- 1 000-1 500 eyni-vaxtlı standart imtahan;
+- video yoxdur;
+- primary host itkisi zamanı fasilə və manual keçid qəbul olunur; bu variant
+  fasiləsiz HA deyil.
+
+Mövcud HPE server:
+- saxlanılır;
+- minimum 128 GB simmetrik RAM, arzu olunan 192 GB channel-balanced ECC;
+- dual-port 10 GbE NIC;
+- RAID/iLO/firmware health təsdiqi;
+- LVM və Docker data ayrı mount-lara bölünür.
+
+Yeni Server-2:
+- minimum 24 fiziki core / 48 thread;
+- vendor tərəfindən dəstəklənən cari platforma nəsli və mövcud Xeon 6138-dən
+  yüksək per-core nəticə; acceptance benchmark məcburidir;
+- 128-192 GB ECC RAM;
+- 2 x 960 GB enterprise SSD, RAID1 boot;
+- 4 x 1.92 TB enterprise SSD/NVMe, RAID10, təxminən 3.84 TB nominal mirror
+  tutumu; format və ehtiyatdan sonra daha az istifadə olunur;
+- dual 10 GbE;
+- dual hot-swap PSU və BMC/iLO/iDRAC sinfi idarəetmə.
+
+Backup server:
+- 8-12 CPU core, 32-64 GB ECC RAM;
+- 2 x boot SSD RAID1;
+- 6 x 8 TB enterprise HDD RAID6/RAIDZ2 başlanğıc nümunəsi, 32 TB nominal
+  parity-dən sonrakı tutum; yekun disk sayı retention/churn düsturu ilə;
+- 10 GbE;
+- production control-plane-dən ayrılmış immutable backup repository.
+
+Quorum witness:
+- ayrıca kiçik node/VM, 2-4 vCPU, 4-8 GB RAM;
+- backup serveri ilə eyni failure və idarəetmə domain-ində olmamalıdır.
+
+Servis yerləşməsi:
+- HAProxy/Keepalived VIP hər iki hostda, hər hostun öz lokal Nginx/app
+  instansiyasına trafik göndərir; Docker bridge və named volume hostlar arasında
+  paylaşılmış hesab edilmir;
+- image-lər private registry-dən commit SHA/digest ilə eyni versiyada yayılır;
+- PostgreSQL primary + asynchronous standby;
+- hər app hostda lokal PgBouncer, DB writer konfiqurasiyasına qoşulur;
+- Redis primary/replica + 3 Sentinel prosesi; cari tək REDIS_URL üçün stabil
+  proxy/VIP və ya Sentinel-aware tətbiq konfiqurasiyası tələb olunur;
+- media S3/NAS-da və ayrıca ikinci nüsxə ilə; tək-controller storage qalarsa
+  onun itkisi zamanı media fasiləsi qəbul edilir;
+- manual və ya idarə olunan DB failover.
+
+Şəbəkə/enerji:
+- 2 x managed 10 GbE switch arzu olunur; minimumda 1 aktiv + konfiqurasiyalı
+  cold spare avtomatik HA deyil;
+- firewall active/standby;
+- 2 online double-conversion UPS; hər biri bütün kritik yükü tək daşıya
+  bilməlidir: ölçülmüş load x minimum 1.3;
+- 20-30 dəqiqə runtime və generator/shutdown inteqrasiyası.
+
+Hədəf RPO/RTO:
+- DB RPO <=5 dəqiqə, RTO 30-60 dəqiqə;
+- alternativ site olmadığı üçün full-site RTO ölçülməyib və zəmanət verilmir;
+- primary host itkisində manual failover-dan sonra 30-60 dəqiqəyə bərpa hədəfi
+  var; servis fasiləsi olacaq və uninterrupted HA təmin edilmir;
+- ucuz modeldə imtahanlar 1 000-1 500 nəfərlik slotlara bölünməlidir.
+
+
+11.2. ORTA BÜDCƏ - TÖVSİYƏ OLUNAN MODEL
+---------------------------------------
+
+Hədəf:
+- 3 000 eyni-vaxtlı standart imtahan;
+- 4 500 istifadəçi stress testi;
+- bir compute host itdikdə də planlı pik davam edir;
+- elektron jurnal, reporting və yeni modullar üçün 3 illik artım payı.
+- 3 000/4 500 tutumu full-flow acceptance testindən əvvəl zəmanət deyil.
+
+Compute qatı - 3 müstəqil fiziki container host, mövcud HPE bu saya daxildir:
+
+Host-1, mövcud HPE:
+- 192 GB minimum, arzu olunan 384 GB simmetrik/channel-balanced ECC RAM;
+- minimum dual 10 GbE NIC, 25 GbE-ready;
+- mövcud controller-reported 4 TB RAID 1+0 logical SSD volume;
+- əsasən app/worker/utility rolu.
+
+Host-2 və Host-3, hər biri:
+- 24-32 fiziki core;
+- dəstəklənən cari server platforması və mövcud Xeon 6138-dən yüksək per-core
+  acceptance benchmark nəticəsi;
+- 256 GB ECC RAM;
+- 2 x 960 GB boot SSD RAID1;
+- 4 x 3.84 TB enterprise NVMe RAID10, 7.68 TB nominal mirror tutumu;
+- power-loss protection və DB workload üçün minimum 1 DWPD endurance;
+- minimum dual 10 GbE, 25 GbE-ready NIC və dual PSU.
+
+Məntiqi yerləşmə:
+- hostlar Ansible/IaC ilə eyni qurulan müstəqil container node-lardır; lokal
+  NVMe virtualizasiya və ya VM live-migration HA-sı kimi təqdim edilmir;
+- ayrı failure domain-lərdə 2 kiçik HAProxy/Keepalived node/VM saxlanılır; VIP
+  hər compute hostun lokal Nginx endpoint-inə, Nginx isə yalnız həmin hostun
+  lokal app replikalarına trafik verir;
+- trusted real-IP yalnız LB-lərdən qəbul olunur, origin birbaşa bloklanır;
+- app image private registry-dən commit SHA + digest ilə 3 hosta yayılır;
+- PostgreSQL primary Host-2, synchronous standby Host-3 və hardware auditi
+  keçmiş Host-1-də üçüncü asynchronous/caught-up failover standby;
+- failover mexanizmi olaraq Patroni seçilir; etcd/DCS üzvləri Host-1/2/3-də,
+  fencing və yalnız sağlam/çatmış standby-ya promotion qaydası ilə işləyir;
+- DCS üzvü DB data nüsxəsi deyil. Yalnız iki DB data nüsxəsi saxlanarsa sync
+  standby itəndə strict rejim yazını dayandırır, non-strict rejim isə RPO~0
+  zəmanətini itirir. Bir node itkisi zamanı yazının davamı + RPO~0 tələb edilirsə
+  üçüncü PostgreSQL standby məcburidir; yeni sync namizəd çatana qədər qısa write
+  pause qəbul edilir;
+- DB writer endpoint-i HAProxy-nin Patroni /primary healthcheck-i ilə seçilir;
+  hər app/worker host lokal PgBouncer-ə qoşulur, lokal PgBouncer həmin writer
+  endpoint-i istifadə edir; PgBouncer nasaz host LB-dən unhealthy çıxarılır,
+  failover-da köhnə connection-lar drain/close edilir;
+- cache/Channels üçün bir Redis primary + 2 replica/Sentinel, Celery broker üçün
+  bundan tam ayrı bir Redis primary + 2 replica/Sentinel və AOF; task itkisi,
+  duplicate delivery və idempotency failover testində yoxlanır;
+- cari tətbiq tək REDIS_URL istifadə etdiyi üçün hər Redis workload-u qarşısında
+  ayrıca stabil health-checked proxy/VIP verilir; alternativ Sentinel-aware
+  Celery/Channels/cache konfiqurasiyası tətbiq edilir. Master dəyişikliyindən
+  sonra reconnect və stale connection testi məcburidir;
+- Celery Beat yalnız bir aktiv instansiyadır; migration/collectstatic hər
+  rollout-da bir dəfə icra olunur, WebSocket connection-lar drain edilir;
+- Prometheus/Alertmanager-dən ən az biri production hostlardan kənarda.
+
+Media/object storage:
+- 1 dual-controller HA NAS/object-gateway appliance, redundant disk shelf və
+  iki switch yolu; compute hostlardan fiziki ayrıdır;
+- vendor 20-40 TB xalis istifadə edilə bilən tutumu RAID/erasure, filesystem və
+  minimum 25% boş yer çıxıldıqdan sonra zəmanət etməlidir;
+- private bucket üçün presigned URL verən S3-compatible API, media versioning,
+  snapshot/replication və lifecycle;
+- tələbə browser-i storage VLAN-a buraxılmır: TLS-li object gateway/custom DNS
+  edge LB arxasında publish olunur, backend storage private qalır; presigned URL,
+  tenant authorization və gateway failover ayrıca test edilir;
+- video olacaqsa ayrıca 100+ TB hesablaması.
+
+Backup server:
+- 12-16 core, 64-128 GB ECC;
+- 8 x 12 TB HDD RAID6/RAIDZ2 yalnız başlanğıc nümunəsidir: 72 TB nominal
+  parity-dən sonrakı, maksimum təxminən 54 TB doldurma hədəfi 20-40 TB media
+  üçün retention-a çatmaya bilər. Tender disk sayı 6-cı bölmədəki
+  data/churn/retention düsturu ilə artırılmalıdır;
+- immutable snapshot/repository;
+- ayrıca binada şifrəli nüsxə;
+- minimum dual 10 GbE, 25 GbE-ready.
+
+Şəbəkə/enerji:
+- 2 x 25 GbE-ready managed core switch; ilk mərhələdə redundant 10 GbE
+  işlədilə bilər, 25 GbE portlar benchmark nəticəsinə görə aktivləşdirilir;
+- kampusdan data-centre-ə minimum 10 GbE;
+- 2 x HA firewall, minimum 5 Gb/s inspected throughput;
+- xarici giriş varsa 2 x 1 Gb/s ISP arzu olunur;
+- iki UPS/PDU enerji xətti, generator.
+
+Hədəf RPO/RTO:
+- eyni-site kritik commit RPO 0-a yaxın, yalnız 6-cı bölmədəki synchronous
+  commit, WAL durability, caught-up promotion və fencing şərtləri ilə;
+- lokal RTO 10-30 dəqiqə;
+- off-site RPO <=15 dəqiqə planlama hədəfidir. Bu BOM-da hazır warm DR compute,
+  DB, network və storage olmadığı üçün full-site RTO <=4 saat zəmanət deyil;
+  rəhbərliyin BIA hədəfidir və yalnız ayrıca warm DR ilə qəbul testinə çevrilir.
+
+N+1 qaydası:
+- kritik ümumi yük istənilən sağ qalan iki hostun birgə CPU/RAM/IO capacity-
+  sinin maksimum 70%-i olmalıdır;
+- üç eyni hostda bu, normal rejimdə orta hesabla hər hostun təxminən 46.7%-dən
+  yuxarı planlanmaması deməkdir; fərqli hostlarda ən zəif sağ qalan cüt əsasdır;
+- bir host itəndə qalan iki host bütün kritik exam workload-unu daşıyır və ən az
+  30% headroom saxlayır;
+- qeyri-kritik AI/export/report job-ları avtomatik dayandırılmalıdır.
+
+
+11.3. YÜKSƏK BÜDCƏ - İKİNCİ SITE VƏ YÜKSƏK ƏLÇATANLIQ
+-----------------------------------------------------
+
+Bu bölmə ölçülmüş zərurət deyil, yuxarı sərhəd/reference arxitekturadır. Dəqiq
+saylar yalnız full-flow yük, storage rebuild, backup window, video və 3 illik
+artım benchmark-larından sonra satınalma minimumuna çevrilməlidir.
+
+Hədəf:
+- 5 000 eyni-vaxtlı standart imtahan;
+- 7 500 stress testi;
+- video/coding kimi ağır funksiyalar;
+- ikinci data-centre/site;
+- lokal host itkisinə avtomatik, site itkisinə idarə olunan/manual cavab.
+
+Primary site compute:
+- 4 host;
+- hər biri 32-48 fiziki core, 512 GB ECC RAM;
+- enterprise NVMe, dual 25/100 GbE, dual PSU;
+- 30-40% daimi boş tutum.
+
+Dedicated DB klasteri:
+- 3 DB node;
+- hər biri 24-32 fiziki core, 256-384 GB ECC;
+- 4 x 7.68 TB NVMe RAID10, 15.36 TB nominal mirror tutumu;
+- primary + synchronous standby + asynchronous/reporting standby;
+- avtomatik failover, fencing və split-brain qorunması.
+
+App qatı:
+- app instance sayı ASGI process/thread, WebSocket socket sayı və full-flow
+  benchmark-la hesablanır; cari 12 replika ilə sadə say müqayisəsi aparılmır;
+- ilkin resurs vahidi 12-16 vCPU / 32 GB RAM, N+1 və 30-40% headroom şərti;
+- 4 worker instance, ağır queue-lar ayrıca;
+- 2 load balancer, hər biri 8 vCPU / 16 GB RAM;
+- 3-node Redis/Sentinel və ayrıca durable broker klasteri.
+
+Storage/backup:
+- minimum 4 object-storage node; 100-200 TB xalis usable hədəfi erasure coding,
+  rebuild və minimum 25-30% boş yer çıxıldıqdan sonra vendorla təsdiqlənir;
+- 200-400 TB immutable backup repository yalnız retention/churn düsturu ilə;
+- ikinci site-da object replica və DB standby.
+
+DR site:
+- minimum 2 compute host;
+- 1 DB standby;
+- ayrıca firewall, switch, UPS və storage replica;
+- DNS/BGP/VPN failover məşqi;
+- üçüncü-site quorum/DCS, fencing/STONITH və stale-standby qadağası ayrıca
+  layihələndirilməyibsə site promotion avtomatik deyil, səlahiyyətli operatorun
+  checklist-i ilə manual/idarə olunan şəkildə edilir.
+
+Şəbəkə:
+- redundant 25/100 GbE-ready core; 100 GbE portlar yalnız storage rebuild,
+  backup və east-west benchmark tələb edərsə alınır;
+- iki müstəqil ISP, 2-10 Gb/s;
+- firewall HA, 10-20 Gb/s inspected throughput.
+
+Coding exam:
+- 2-3 ayrıca runner serveri;
+- hər biri 32-64 core, 128-256 GB RAM;
+- production DB/Redis/management şəbəkəsinə default-deny;
+- ephemeral sandbox, CPU/RAM/PID/disk/time limitləri.
+
+Hədəf RPO/RTO:
+- lokal RPO 0-a yaxın, RTO 5-15 dəqiqə;
+- ikinci site üçün planlama hədəfi RPO <=5 dəqiqə, RTO 1-2 saatdır; faktiki
+  nəticə controlled promotion və DR məşqində ölçülməlidir.
+
+Qeyd: Bütün 15 000 nəfər eyni anda aktiv olacaqsa bu yüksək modelin app,
+WebSocket və edge qatı da ən az 15K, test hədəfi isə 20K istifadəçi üçün
+yenidən ölçülüb böyüdülməlidir. Yalnız server sayına baxıb 15K təsdiqi verilmir.
+
+
+11.4. QISA BOM / AVADANLIQ SAYI
+-------------------------------
+
+Ucuz büdcə:
+- compute: 1 mövcud + 1 yeni server;
+- DB: həmin 2 hostda primary/standby, manual failover;
+- load balancer: 2 software instansiyası həmin ayrı hostlarda;
+- media: 1 NAS/S3 appliance + ayrıca ikinci nüsxə, fasiləsiz storage HA deyil;
+- backup: 1 ayrıca fiziki server;
+- quorum witness: 1 ayrıca kiçik node/VM;
+- şəbəkə: 2 x 10 GbE managed switch tövsiyə olunur, 2 x HA firewall;
+- enerji: 2 x online UPS və 2 x PDU/enerji xətti;
+- ehtiyat: ən az 1 uyğun SSD/HDD, 1 PSU, 1 NIC, fan və uyğun DAC/optics.
+
+Orta büdcə — tövsiyə olunan:
+- compute: 1 mövcud + 2 yeni server;
+- DB: 3 compute hostda primary + synchronous standby + üçüncü asynchronous/
+  caught-up failover standby; Patroni + 3 DCS üzvü;
+- load balancer: 2 kiçik node/VM, müxtəlif host və enerji failure domain-ində;
+- media: 1 dual-controller HA NAS/object appliance, redundant disk shelf/yol;
+- backup: 1 ayrıca immutable repository serveri + 1 off-site nüsxə hədəfi;
+- Redis: cache/Channels üçün 3 data node, broker üçün ayrıca 3 data node;
+  kiçik instansiyalar compute hostlarda yerləşə bilər, resursları ayrıca ayrılır;
+- şəbəkə: 2 x 25 GbE-ready managed switch, 2 x HA firewall;
+- enerji: 2 x online UPS, 2 x PDU/enerji xətti və generator inteqrasiyası;
+- ehtiyat: hər disk sinfindən ən az 1 ədəd, 1 PSU, 1 NIC, fan, kabellər və
+  switch portlarının 20-30% boş ehtiyatı.
+
+Yüksək büdcə reference:
+- primary site: 4 compute + 3 DB + minimum 4 object-storage node;
+- edge: 2 load balancer, 2 firewall və 2 core switch;
+- backup: ölçülmüş retention-a uyğun 1 və ya daha çox immutable repository;
+- DR site: minimum 2 compute + 1 DB standby + storage replica, 2 firewall və
+  2 switch; site promotion ilkin mərhələdə manual/idarə olunandır;
+- coding aktivdirsə əlavə 2-3 izolə runner serveri;
+- hər site üçün iki UPS/PDU xətti, generator və kritik komponent üçün vendor
+  SLA-sına uyğun on-site spare dəsti.
+
+Rack U, enerji (W/kVA), soyutma, optics/DAC uzunluğu və real disk sayı vendor
+modeli seçildikdən sonra ayrıca fiziki survey və power budget ilə təsdiqlənir.
+
+
+12. MÖVCUD SERVER ÜÇÜN KONKRET UPGRADE PLANI
+============================================
+
+12.1. RAM
+
+- Təcili minimum: CPU2 tərəfində HPE population rule-a uyğun eyni 64 GB DIMM
+  ilə 128 GB simmetrik konfiqurasiya.
+- Tövsiyə olunan orta hədəf: hər CPU-nun 6 kanalını balanslayan 192 GB
+  (məsələn 12 x 16 GB) və ya 384 GB (12 x 32 GB) HPE-compatible RDIMM.
+- Mövcud 64 GB DIMM-in saxlanması/qarışdırılması yalnız HPE memory population
+  matrix və vendor testi ilə edilməlidir.
+
+12.2. Şəbəkə
+
+- Dual-port 10 GbE minimum, server və switch 25 GbE-ready olmalıdır; 25 GbE
+  replication/rebuild/backup-window benchmark-ı əsaslandırarsa alınır.
+- Portlar iki fərqli switch-ə bağlanmalı, bonding/MLAG test edilməlidir.
+- iLO ayrıca management VLAN-a bağlanmalıdır.
+
+12.3. Disk/LVM
+
+Mövcud 3.54 TiB free extent istifadə oluna bilər, amma kor-koranə root-a əlavə
+etmək düzgün deyil. 3.64 TiB PV üçün bir konkret başlanğıc nümunəsi:
+
+- OS/root: 200 GiB;
+- Docker image/container data: 300 GiB;
+- PostgreSQL: 600 GiB;
+- media: 1 100 GiB;
+- Prometheus/Loki/log: 300 GiB;
+- təxminən 1 227 GiB, yəni 33% unallocated/free ehtiyat.
+
+Bu rəqəmlər growth ölçümündən sonra dəyişdirilə bilər. Ayrı LV və mount-lar
+dolma riskini idarə edir, amma eyni RAID üzərində olduqları üçün fiziki I/O və
+hardware failure-domain izolyasiyası yaratmır.
+
+DB, media və Docker volume köçürülməsi backup + maintenance ilə edilməlidir.
+17.65 GB reclaimable build cache təsdiqdən sonra təmizlənə bilər; audit zamanı
+destruktiv prune icra edilməyib.
+
+12.4. Firmware və hardware health
+
+- HPE SSA/ssacli və iLO ilə fiziki disk sayı, model, wear, predictive failure;
+- P408i-a cache və battery/capacitor status;
+- BIOS, iLO, Smart Array və SSD firmware;
+- fan, temperatur, PSU və ECC error history;
+- hər PSU-nun fərqli UPS/PDU xəttində olması.
+
+
+13. YÜK TESTİ VƏ QƏBUL MEYARLARI
+================================
+
+Satınalma və rollout qərarı aşağıdakı test olmadan verilməməlidir:
+
+1. Representative staging; production-a bənzəyən DB cardinality.
+2. Ən az 4 500 unikal synthetic tələbə.
+3. Bir neçə source IP/load-generator; tək IP Nginx 200 r/s və limit_conn 1000
+   hədlərinə dəyir. Trusted real-IP və kampus NAT ssenarisi ayrıca yoxlanılır.
+4. Tam flow:
+   login -> waiting/start -> question -> autosave -> readback -> submit -> result.
+5. 30-40 saniyəlik autosave və deadline-da eyni-anlı submit herd.
+6. 3 000 WebSocket + reconnect storm; yüksək modeldə 7 500/15 000.
+7. Elektron jurnal: davamiyyət, LessonMark, toplu grade import/export.
+8. Ən uzun imtahan müddətinin ən az 2 qatı soak test.
+9. Yük altında bir app hostun söndürülməsi.
+10. Yük altında PostgreSQL primary failover.
+11. Redis/broker dayanması, disk dolması və qısa şəbəkə kəsintisi.
+12. Autosave/submit DB reconciliation: acknowledged data loss = 0.
+13. ARP/MAC imtahan girişinin VLAN, LB və app-host failover ssenarisi.
+14. PostgreSQL failover-da leader endpoint, PgBouncer drain və stale
+    connection-ların bağlanması.
+15. ethtool/ring/IRQ/softnet ilə NIC və kernel drop sayğacı; soak zamanı
+    izahsız davamlı artım olmamalı, end-to-end packet loss <0.1% olmalıdır.
+16. Aktiv LB/VIP node, bir link/switch/MLAG yolu, firewall, NAS controller/
+    storage path, object gateway və bir PSU/UPS enerji xəttinin ayrıca itkisi.
+
+İlkin SLO/qəbul hədəfləri:
+
+- HTTP error rate <0.1%.
+- Autosave p95 <2 saniyə.
+- Submit p95 <3 saniyə.
+- Adi read endpoint p95 <1.5 saniyə.
+- Zero acknowledged-answer loss.
+- Pikdə CPU <65%, RAM <70%, disk sahəsi <70%.
+- DB/Redis/PgBouncer queue saturation yoxdur.
+- Bir host itəndən sonra da SLO və minimum 30% headroom qalır.
+
+
+14. MƏRHƏLƏLİ İCRA PLANI
+========================
+
+0-7 gün:
+
+- Parol/secret rotasiyası; .env permission 0600.
+- Dirty production checkout-un itkisiz snapshot-ı; commit/tag/image digest planı.
+- Cari backup-ın şifrəli off-host nüsxəsi.
+- Isolated restore testi.
+- Security update + planlı reboot.
+- SSD/RAID/iLO/UPS audit.
+- SSH management VLAN/VPN məhdudiyyəti.
+- nofile və kritik alert düzəlişlərinin staging testi.
+
+2-6 həftə:
+
+- Mövcud server RAM/NIC upgrade.
+- Backup server/NAS və immutable repository.
+- Internal static IP/DHCP reservation, VLAN və VIP dizaynı.
+- External monitoring/Alertmanager.
+- Real 1 000/1 500 full-flow load baseline.
+
+1-3 ay:
+
+- Seçilən büdcəyə görə ikinci/üçüncü hostlar.
+- PostgreSQL streaming standby + WAL/PITR.
+- Load balancer VIP və app active/active.
+- Media object storage/replication.
+- Redis workload separation və quorum.
+- 3 000 VU + 4 500 stress, failover və DR məşqi.
+
+3-12 ay:
+
+- İkinci site, əgər biznes tələbi varsa.
+- Coding/video üçün ayrıca klaster.
+- IaC, immutable deployment, SIEM və rüblük DR məşqləri.
+
+
+15. SATINALMA ŞƏRTNAMƏSİNDƏ MƏCBURİ BƏNDLƏR
+===========================================
+
+- Vendor-supported cari CPU/platforma nəsli; core sayından əlavə per-core və
+  full-system acceptance benchmark həddi.
+- ECC RDIMM, vendor-approved simmetrik population.
+- Enterprise SSD/NVMe, power-loss protection, DB üçün minimum 1 DWPD.
+- Boot RAID1, DB/data RAID10; hardware cache protection.
+- Dual hot-swap PSU.
+- Remote BMC/iLO/iDRAC, Redfish/SNMP monitoring və lisenziyası.
+- Dual 10/25 GbE; switch optics/DAC və support daxil.
+- 3-5 il warranty, 4 saat/NBD replacement SLA.
+- Ehtiyat SSD, PSU, fan və NIC.
+- UPS batareya monitorinqi və generator inteqrasiyası.
+- Vendor tərəfindən burn-in, memory test, disk benchmark və failover acceptance.
+- Bütün firmware və serial/asset inventory təhvil verilməsi.
+- Tender qiymətində support, rack, PDU, kabel, optics, firewall lisenziyası,
+  backup software və off-site storage ayrıca göstərilsin.
+
+
+16. AUDİT MƏHDUDİYYƏTLƏRİ
+=========================
+
+- Audit read-only olub; heç bir konfiqurasiya dəyişdirilməyib.
+- Fiziki disklərin tam sayı/wear, UPS, switch, firewall, ISP, iLO və otaq
+  şərtləri uzaq SSH ilə tam təsdiqlənməyib.
+- Prometheus retention yalnız 15 gündür.
+- Network historical metriki host NIC-i tam göstərmir.
+- Upstream router/firewall/NAT və public IP marşrutu yoxlanmadığı üçün serverin
+  internetdən birbaşa əlçatan olub-olmadığı təsdiqlənməyib.
+- Full 3K/15K exam flow capacity testi auditin bir hissəsi kimi icra olunmayıb.
+- Qiymət üçün vendor təklifləri alınmayıb.
+
+
+17. RƏSMİ İSTİNADLAR
+====================
+
+HPE DL360 Gen10 QuickSpecs - 24 DIMM slot, 6 kanal/CPU, NIC/storage seçimləri:
+https://www.hpe.com/us/en/collaterals/collateral.a00008159enw.html
+
+PostgreSQL 16 warm standby və streaming/synchronous replication:
+https://www.postgresql.org/docs/16/warm-standby.html
+
+PostgreSQL continuous archiving və PITR:
+https://www.postgresql.org/docs/16/continuous-archiving.html
+
+CISA StopRansomware - offline/şifrəli backup və regular restore testi:
+https://www.cisa.gov/stopransomware/ransomware-guide
+
+NIST SP 800-34 Rev.1 - BIA, contingency planning, RTO/RPO:
+https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final
+
+
+SON NƏTİCƏ
+==========
+
+Mövcud server atılmamalı: müşahidə olunan cari yükdə CPU az istifadə olunur,
+amma 3K full-flow tutum hələ sübut edilməyib. Onu simmetrik RAM, minimum dual
+10 GbE, düzgün LVM və hardware monitorinqi ilə app/worker node kimi saxlayın.
+Əsas investisiya ikinci və üçüncü failure domain, PostgreSQL standby/PITR,
+ortaq media storage, ayrıca immutable backup, redundant network/UPS və
+reproduksiya olunan deployment prosesinə getməlidir.
+
+15 000 qeydiyyatlı istifadəçi üçün tövsiyə: ORTA BÜDCƏ modeli. 3 000 concurrent
+dizayn və 4 500 stress rəqəmi ilkin sizing fərziyyəsidir; yalnız full-flow,
+failover və zero-data-loss qəbul testindən sonra sertifikatlaşdırılır. Bütün
+15 000 eyni anda tələb olunarsa satınalmadan əvvəl 20 000 istifadəçili
+full-flow test və yüksək büdcə app/edge genişlənməsi məcburidir.

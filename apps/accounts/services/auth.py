@@ -26,6 +26,11 @@ from core.utils import (
     get_auth_otp_resend_cooldown_seconds,
 )
 
+from ..identity import (
+    StagedAccountAccessError,
+    assert_account_access_allowed,
+    staged_user_for_email,
+)
 from ..queries import get_latest_pending_otp
 from .organization_requests import activate_verified_membership
 
@@ -177,6 +182,11 @@ def issue_email_otp(
 ):
     """Create a fresh OTP and invalidate older pending OTPs for the same purpose."""
 
+    if user is not None:
+        assert_account_access_allowed(user)
+    elif staged_user_for_email(email) is not None:
+        raise StagedAccountAccessError()
+
     normalized_email = _normalize_email(email or getattr(user, "email", ""))
     if not normalized_email:
         raise ValueError("A valid email address is required to issue an OTP.")
@@ -298,6 +308,14 @@ def verify_email_otp(
 ) -> OTPVerificationResult:
     """Verify the provided OTP against the latest active record for an email/purpose."""
 
+    if user is not None:
+        try:
+            assert_account_access_allowed(user)
+        except StagedAccountAccessError:
+            return OTPVerificationResult(success=False, reason="access_denied")
+    elif staged_user_for_email(email) is not None:
+        return OTPVerificationResult(success=False, reason="access_denied")
+
     normalized_email = _normalize_email(email or getattr(user, "email", ""))
     candidate = "".join(character for character in str(code or "").strip() if character.isdigit())
     if not normalized_email or len(candidate) != 6:
@@ -351,6 +369,7 @@ def verify_otp_code(user, code, *, purpose: str = EmailOTP.Purpose.SIGNUP):
 def activate_user_account(user):
     """Activate the account and finalize any post-verification membership work."""
 
+    assert_account_access_allowed(user)
     user.is_active = True
     user.save(update_fields=["is_active"])
     return activate_verified_membership(user)

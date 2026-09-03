@@ -1,0 +1,102 @@
+daxili_kod	ad	seviyye	kohne_kod	kohne_ad	cari_kod	cari_ad	eminlik	qeyd
+050118	Təhsildə sosial psixoloji xidmət	bachelor	050121	Təhsildə sosial-psixoloji xidmət	6001021	Təhsildə sosial-psixoloji xidmət	dəqiq	Mövcud kod 050118 SƏHV idi (=İbtidai sinif müəllimliyi).
+050204	Fəlsəfə	bachelor	050202	Fəlsəfə	6002005	Fəlsəfə	dəqiq	Mövcud kod 050204 SƏHV idi (=Jurnalistika).
+050211	Psixologiya	bachelor	050209	Psixologiya	6002013	Psixologiya	dəqiq	Mövcud kod 050211 SƏHV idi (=Regionşünaslıq).
+050212	Regionşünaslıq	bachelor	050211	Regionşünaslıq (regionlar üzrə)	6002014	Regionşünaslıq	dəqiq	Mövcud kod 050212 SƏHV idi. Köhnə ad: Regionşünaslıq (regionlar üzrə).
+050214	Tarix	bachelor	050206	Tarix	6002016	Tarix	dəqiq	Mövcud kod 050214 SƏHV idi (=Dinşünaslıq).
+050403	Davamlı inkişafın idarə edilməsi	bachelor	050412	Davamlı inkişafın idarə edilməsi	6002002	Davamlı inkişaf	yüksək	AD DƏYİŞİB. Mövcud kod 050403 SƏHV idi (=Maliyyə).
+050501	Biologiya	bachelor	050505	Biologiya	6005001	Biologiya	dəqiq	Mövcud kod 050501 SƏHV idi (=Riyaziyyat).
+050501-63	Ekologiya Mühəndisliyi	bachelor	050649	Ekologiya mühəndisliyi	6006007	Ekologiya mühəndisliyi	dəqiq	Mövcud kod SƏHV idi.
+050504	Ekologiya	bachelor	050510	Ekologiya	6005004	Ekologiya	dəqiq	Mövcud kod 050504 SƏHV idi (=Kimya).
+050604	Cihaz Mühəndisliyi	bachelor	050624	Cihazqayırma mühəndisliyi	6006004	Cihaz mühəndisliyi	yüksək	AD DƏYİŞİB: Cihazqayırma mühəndisliyi → Cihaz mühəndisliyi. Mövcud kod 050604 SƏHV idi (=Geofizika müh.).
+050615	İnformasiya Təhlükəsizliyi	bachelor			6006017	İnformasiya təhlükəsizliyi	dəqiq	Köhnə təsnifatda YOXDUR — yeni ixtisasdır. Mövcud kod 050615 SƏHV idi (=Hava nəql. hərəkətinin idarə olunması müh.).
+050616	İnformasiya Texnologiyaları	bachelor	050655	İnformasiya texnologiyaları	6006016	İnformasiya texnologiyaları	dəqiq	Mövcud kod 050616 SƏHV idi (=Uçuş mühəndisliyi).
+050620	Kompüter Mühəndisliyi	bachelor	050631	Kompüter mühəndisliyi	6006022	Kompüter mühəndisliyi	dəqiq	Mövcud kod 050620 SƏHV idi (=Dəniz naviqasiyası müh.).
+050624	Cihazqayırma mühəndisliyi	bachelor	050624	Cihazqayırma mühəndisliyi	6006004	Cihaz mühəndisliyi	dəqiq	Mövcud kod DOĞRU. Yeni təsnifatda ad Cihaz mühəndisliyi.
+050628	Mexanika mühəndisliyi	bachelor	050630	Mexanika mühəndisliyi	6006028	Mexanika mühəndisliyi	dəqiq	Mövcud kod 050628 SƏHV idi.
+050629	Mexatronika və robototexnika mühəndisliyi	bachelor	050629	Mexatronika və robototexnika mühəndisliyi	6006029	Mexatronika və robototexnika mühəndisliyi	dəqiq	Mövcud kod DOĞRU.
+050706	Meşəçilik	bachelor	050708	Meşəçilik	6007007	Meşəçilik	dəqiq	Mövcud kod 050706 SƏHV idi (=Aqromühəndislik). Meşəçilik = 050708.
+050708	Su Bioehtiyyatları və Akvakultura	bachelor	050709	Su bioehtiyatları və akvabitkilər	6005013	Su bioehtiyatları və akvakultura	yüksək	AD DƏYİŞİB: Su bioehtiyatları və akvabitkilər → ...və akvakultura. Mövcud kod 050708 SƏHV idi (=Meşəçilik).
+050807	Sosial Iş	bachelor	050813	Sosial iş	6008006	Sosial iş	dəqiq	Mövcud kod 050807 SƏHV idi (=Həkim yardımçısı).
+050809	Turizm bələdçiliyi	bachelor			6008007	Turizm bələdçiliyi	dəqiq	Köhnə təsnifatda YOXDUR — yeni ixtisasdır. Mövcud kod 050809 SƏHV idi (=Bədən tərbiyəsi və idman).
+MYEDU-101	Kollec 2	bachelor					tapılmadı	İXTISAS DEYİL — struktur qeydi (Kollec 2).
+MYEDU-12	Meşə materiallarının və ağac emalının texnologiyası mühəndisliyi	bachelor	050639	Meşə materiallarının və ağac emalının texnologiyası mühəndisliyi			dəqiq	Yeni təsnifatda LƏĞV edilib. (Əvvəlki turun 050706 təklifi SƏHV idi — 050706=Aqromühəndislik.)
+MYEDU-13	Poliqrafiya mühəndisliyi	bachelor	050645	Poliqrafiya mühəndisliyi			dəqiq	Yeni təsnifatda LƏĞV edilib.
+MYEDU-14	Politologiya	bachelor	050208	Politologiya	6002012	Politologiya	dəqiq	
+MYEDU-15	Politologiya (Tədris Ingilis Dilində)	bachelor	050208	Politologiya	6002012	Politologiya	dəqiq	Tədris dili variantı.
+MYEDU-17	Beynəlxalq Münasibətlər (Tədris Ingilis Dilində)	bachelor	050213	Beynəlxalq münasibətlər	6002001	Beynəlxalq münasibətlər	dəqiq	Tədris dili variantı — kod eynidir.
+MYEDU-18	Beynəlxalq münasibətlər	bachelor	050213	Beynəlxalq münasibətlər	6002001	Beynəlxalq münasibətlər	dəqiq	
+MYEDU-20	Tarix (Tədris Ingilis Dilində)	bachelor	050206	Tarix	6002016	Tarix	dəqiq	Tədris dili variantı.
+MYEDU-24	Tarix müəllimliyi	bachelor	050113	Tarix müəllimliyi	6001018	Tarix müəllimliyi	dəqiq	
+MYEDU-25	Azərbaycan dili və ədəbiyyatı	bachelor	050201	Filologiya (dil və ədəbiyyat göstərilməklə)	6002006	Filologiya	şübhəli	Ad 'müəllimliyi'siz — Filologiya kimi oxunur. ALTERNATİV: 050101/6001001 (Az. dili və ədəbiyyatı müəllimliyi). SAHİB SEÇSİN.
+MYEDU-26	Filologiya (İngilis dili və ədəbiyyatı)	bachelor	050201	Filologiya (dil və ədəbiyyat göstərilməklə)	6002006	Filologiya	dəqiq	(İngilis dili və ədəbiyyatı) — Filologiya-nın dil variantı.
+MYEDU-27	Tərcümə	bachelor	050203	Tərcümə (dillər üzrə)	6002017	Tərcümə	dəqiq	
+MYEDU-28	Tərcümə (Dillər üzrə)	bachelor	050203	Tərcümə (dillər üzrə)	6002017	Tərcümə	dəqiq	
+MYEDU-29	Azərbaycan dili və ədəbiyyatı müəllimliyi	bachelor	050101	Azərbaycan dili və ədəbiyyatı müəllimliyi	6001001	Azərbaycan dili və ədəbiyyatı müəllimliyi	dəqiq	
+MYEDU-30	İngilis dili və ədəbiyyatı müəllimliyi	bachelor	050103	Xarici dil müəllimliyi (dillər üzrə)	6001007	Xarici dil müəllimliyi	yüksək	İngilis dili = 'Xarici dil müəllimliyi (dillər üzrə)'-nin dil variantı.
+MYEDU-35	Dizayn (İnteryer)	bachelor	050321	Dizayn	6003005	Dizayn	dəqiq	(İnteryer) — daxili ixtisaslaşma, rəsmi kod eynidir.
+MYEDU-40	İqtisadiyyat	bachelor	050404	İqtisadiyyat	6004004	İqtisadiyyat	dəqiq	
+MYEDU-41	Dünya iqtisadiyyatı	bachelor	050401	Dünya iqtisadiyyatı			dəqiq	Yeni təsnifatda LƏĞV — ehtimal 6004004 İqtisadiyyat-a birləşib. SAHİB TƏSDİQLƏSİN.
+MYEDU-42	Biznesin idarə edilməsi	bachelor	050409	Biznesin idarə edilməsi	6004002	Biznesin idarə edilməsi	dəqiq	
+MYEDU-43	Maliyyə	bachelor	050403	Maliyyə	6004005	Maliyyə	dəqiq	
+MYEDU-44	Menecment	bachelor	050407	Menecment	6004007	Menecment	dəqiq	
+MYEDU-45	Turizm və otelçilik	bachelor	050810	Turizm və otelçilik			şübhəli	Yeni təsnifatda BÖLÜNÜB: 6008007 Turizm bələdçiliyi / 6008008 Turizm işinin təşkili. Bakalavrda 'Turizm və otelçilik' YOXDUR. SAHİB SEÇSİN.
+MYEDU-46	Mühasibat uçotu və audit	bachelor	050402	Mühasibat uçotu və audit	6004008	Mühasibat	dəqiq	AD DƏYİŞİB (yeni: Mühasibat).
+MYEDU-47	Marketinq	bachelor	050408	Marketinq	6004006	Marketinq	dəqiq	
+MYEDU-48	Mühasibat	bachelor	050402	Mühasibat uçotu və audit	6004008	Mühasibat	yüksək	AD DƏYİŞİB: Mühasibat uçotu və audit → Mühasibat.
+MYEDU-49	Turizm işinin təşkili	bachelor			6008008	Turizm işinin təşkili	dəqiq	Köhnə təsnifatda YOXDUR — yeni ixtisasdır (köhnədə 050810 Turizm və otelçilik daxilində idi).
+MYEDU-50	Dövlət və bələdiyyə idarəetməsi	bachelor	050410	Dövlət və bələdiyyə idarəetməsi	6004003	Dövlət və bələdiyyə idarəetməsi	dəqiq	
+MYEDU-51	İstehlak mallarının ekspertizası və marketinqi	bachelor	050644	İstehlak mallarının ekspertizası və marketinqi			dəqiq	Yeni təsnifatda LƏĞV edilib.
+MYEDU-52	Sənayenin təşkili və idarə edilməsi	bachelor	050405	Sənayenin təşkili və idarə olunması			yüksək	Köhnə ad variantı: '...idarə OLUNMASI'. Yeni təsnifatda LƏĞV — ehtimal 6004002-yə birləşib.
+MYEDU-53	Beynəlxalq ticarət və logistika	bachelor			6004001	Beynəlxalq ticarət və logistika	dəqiq	Köhnə təsnifatda YOXDUR — 2024 təsnifatının yeni ixtisasıdır.
+MYEDU-56	Dizayn (Qrafik)	bachelor	050321	Dizayn	6003005	Dizayn	dəqiq	(Qrafik) — daxili ixtisaslaşma, rəsmi kod eynidir.
+MYEDU-61	Level	bachelor					tapılmadı	İXTISAS DEYİL — test/struktur qeydi ('Level').
+MYEDU-62	Kompüter elmləri	bachelor	050509	Kompüter elmləri	6005009	Kompüter elmləri	dəqiq	
+MYEDU-65	aaa	bachelor					tapılmadı	İXTISAS DEYİL — test qeydi ('aaa').
+MYEDU-66	Dizayn Məktəbi	bachelor					tapılmadı	İXTISAS DEYİL — struktur/məktəb qeydi.
+MYEDU-67	Davamlı inkişafın idarə edilməsi	bachelor	050412	Davamlı inkişafın idarə edilməsi	6002002	Davamlı inkişaf	yüksək	AD DƏYİŞİB: Davamlı inkişafın idarə edilməsi → Davamlı inkişaf.
+MYEDU-68	Qida mühəndisliyi	bachelor	050642	Qida məhsulları mühəndisliyi	6006023	Qida mühəndisliyi	yüksək	AD DƏYİŞİB: Qida məhsulları mühəndisliyi → Qida mühəndisliyi.
+MYEDU-77	Maliyyə nəzarəti və auidit	bachelor	050403	Maliyyə			şübhəli	Bu, magistratura İXTİSASLAŞMASININ adıdır (060403 Maliyyə → 'Maliyyə nəzarəti və audit'). Bakalavrda qarşılığı yoxdur. NAMİZƏDLƏR: 050403 Maliyyə / 050402 Mühasibat uçotu və audit. SAHİB SEÇSİN.
+MYEDU-84	İqtisadiyyatın tənzimlənməsi (ingilis)	bachelor	050404	İqtisadiyyat			şübhəli	Bu, magistratura İXTİSASLAŞMASININ adıdır (060404 → 'İqtisadiyyatın tənzimlənməsi'). Bakalavrda qarşılığı yoxdur. SAHİB TƏSDİQLƏSİN.
+MYEDU-91	Lifelong	bachelor					tapılmadı	İXTISAS DEYİL — struktur qeydi ('Lifelong').
+MYEDU-92	Kollec	bachelor					tapılmadı	İXTISAS DEYİL — struktur qeydi (Kollec).
+050211-M	Psixologiya	master	060209	Psixologiya	7002013	Psixologiya	dəqiq	Mövcud kod SƏHV idi.
+050214-M	Tarix	master	060206	Tarix	7002016	Tarix	dəqiq	Mövcud kod SƏHV idi.
+050501-M	Biologiya	master	060505	Biologiya	7005001	Biologiya	dəqiq	Mövcud kod 050501-M SƏHV idi (magistratura 060XXX-dir).
+050504-M	Ekologiya	master	060510	Ekologiya	7005004	Ekologiya	dəqiq	Mövcud kod SƏHV idi.
+050616-M	İnformasiya Texnologiyaları	master	060632	İnformasiya texnologiyaları və sistemləri mühəndisliyi	7006016	İnformasiya texnologiyaları	yüksək	AD DƏYİŞİB: İnformasiya texnologiyaları və sistemləri mühəndisliyi → İnformasiya texnologiyaları. Mövcud kod SƏHV idi.
+050620-M	Kompüter Mühəndisliyi	master	060631	Kompüter mühəndisliyi	7006022	Kompüter mühəndisliyi	dəqiq	Mövcud kod SƏHV idi.
+050708-M	Su Bioehtiyyatları və Akvakultura	master	060709	Su bioehtiyatları və akvabitkilər	7005013	Su bioehtiyatları və akvakultura	yüksək	AD DƏYİŞİB (akvabitkilər → akvakultura). Mövcud kod SƏHV idi.
+060411-M	Elektron kommersiya	master	060411	Kommersiya			dəqiq	Mövcud kod 060411 DOĞRU (Kommersiya). İXTİSASLAŞMA: 'Elektron kommersiya'. Yeni təsnifatda Kommersiya LƏĞV edilib.
+MYEDU-17-M	Beynəlxalq Münasibətlər (Tədris Ingilis Dilində)	master	060213	Beynəlxalq münasibətlər	7002001	Beynəlxalq münasibətlər	dəqiq	
+MYEDU-18-M	Beynəlxalq münasibətlər	master	060213	Beynəlxalq münasibətlər	7002001	Beynəlxalq münasibətlər	dəqiq	
+MYEDU-35-M	Dizayn (İnteryer)	master	060321	Dizayn	7003005	Dizayn	dəqiq	
+MYEDU-36-M	Magistratura və doktorantura	master					tapılmadı	İXTISAS DEYİL — struktur qeydi ('Magistratura və doktorantura').
+MYEDU-40-M	İqtisadiyyat	master	060404	İqtisadiyyat	7004005	İqtisadiyyat	dəqiq	
+MYEDU-42-M	Biznesin idarə edilməsi	master	060409	Biznesin idarə edilməsi	7004002	Biznesin idarə edilməsi	dəqiq	ALTERNATİV yeni kod: 7004003 (MBA).
+MYEDU-43-M	Maliyyə	master	060403	Maliyyə	7004006	Maliyyə	dəqiq	
+MYEDU-44-M	Menecment	master	060407	Menecment	7004008	Menecment	dəqiq	
+MYEDU-49-M	Turizm işinin təşkili	master	060803	Turizm və otelçilik	7008004	Turizm və otelçilik	yüksək	Köhnə 060803-ün tərkibində; magistraturada 'Turizm işinin təşkili' ayrıca ixtisas deyil.
+MYEDU-56-M	Dizayn (Qrafik)	master	060321	Dizayn	7003005	Dizayn	dəqiq	
+MYEDU-69-M	Turizm və hotelçiliyin idarə edilməsi	master	060803	Turizm və otelçilik	7008004	Turizm və otelçilik	yüksək	İXTİSASLAŞMA: 'Otelçilik' / 'Turizm işi'. ALTERNATİV: 060409 Biznesin idarə edilməsi.
+MYEDU-70-M	Turizm işi	master	060803	Turizm və otelçilik	7008004	Turizm və otelçilik	dəqiq	İXTİSASLAŞMA: 'Turizm işi'.
+MYEDU-71-M	Orta əsrər tarixi	master	060206	Tarix	7002016	Tarix	dəqiq	İXTİSASLAŞMA: 'Orta əsrlər tarixi' (bazada 'əsrər' — orfoqrafik səhv).
+MYEDU-72-M	Məhkəmə psixologiyası	master	060209	Psixologiya	7002013	Psixologiya	şübhəli	'Məhkəmə psixologiyası' rəsmi ixtisaslaşma adı deyil. NAMİZƏDLƏR: 060209 Psixologiya ('Hüquq psixologiyası') / 060212 Hüquqşünaslıq. SAHİB SEÇSİN.
+MYEDU-73-M	Ümumi idarəetmə	master					şübhəli	'Ümumi idarəetmə' rəsmi adda yoxdur. NAMİZƏDLƏR: 060407 Menecment ('Strateji idarəetmə') / 060409 Biznesin idarə edilməsi / 060410 Dövlət və bələdiyyə idarəetməsi. SAHİB SEÇSİN.
+MYEDU-74-M	Sosial psixologiya	master	060209	Psixologiya	7002013	Psixologiya	dəqiq	İXTİSASLAŞMA: 'Sosial psixologiya'.
+MYEDU-75-M	Qafqaz xalqlarının tarixi	master	060206	Tarix	7002016	Tarix	dəqiq	İXTİSASLAŞMA: 'Qafqaz xalqlarının tarixi'.
+MYEDU-76-M	Malekulyar biologiya	master	060505	Biologiya	7005001	Biologiya	dəqiq	İXTİSASLAŞMA: 'Molekulyar biologiya' (bazada 'Malekulyar' — orfoqrafik səhv).
+MYEDU-77-M	Maliyyə nəzarəti və auidit	master	060403	Maliyyə	7004006	Maliyyə	dəqiq	İXTİSASLAŞMA: 'Maliyyə nəzarəti və audit' (bazada 'auidit' — orfoqrafik səhv).
+MYEDU-78-M	Maliyyə nəzarəti və auidit (ingilis)	master	060403	Maliyyə	7004006	Maliyyə	dəqiq	İXTİSASLAŞMA: eyni (ingilis bölmə).
+MYEDU-79-M	Komputer sistemləri və şəbəkələri	master	060631	Kompüter mühəndisliyi	7006022	Kompüter mühəndisliyi	dəqiq	İXTİSASLAŞMA: 060631 Kompüter mühəndisliyi → 'Kompüter sistemləri və şəbəkələri'.
+MYEDU-80-M	Komputer sistemləri və şəbəkələri (ing)	master	060631	Kompüter mühəndisliyi	7006022	Kompüter mühəndisliyi	dəqiq	İXTİSASLAŞMA: eyni (ingilis bölmə).
+MYEDU-81-M	Klinik psixologiya	master	060209	Psixologiya	7002013	Psixologiya	dəqiq	İXTİSASLAŞMA: 'Klinik (tibbi) psixologiya'.
+MYEDU-82-M	Klinik psixologiya (ing)	master	060209	Psixologiya	7002013	Psixologiya	dəqiq	İXTİSASLAŞMA: 'Klinik (tibbi) psixologiya' (ingilis bölmə).
+MYEDU-83-M	İqtisadiyyatın tənzimlənməsi	master	060404	İqtisadiyyat	7004005	İqtisadiyyat	dəqiq	İXTİSASLAŞMA: 'İqtisadiyyatın tənzimlənməsi'.
+MYEDU-85-M	İdarəetmədə informasiya sistemləri və şəbəkələri	master	060632	İnformasiya texnologiyaları və sistemləri mühəndisliyi	7006016	İnformasiya texnologiyaları	yüksək	İXTİSASLAŞMA: 060632 → 'İdarəetmədə informasiya sistemləri'. Yeni kod üçün ALTERNATİV: 7006017.
+MYEDU-86-M	Genetika	master	060505	Biologiya	7005001	Biologiya	dəqiq	İXTİSASLAŞMA: 060505 Biologiya → 'Genetika'. (060939 Tibbi genetika DEYİL.)
+MYEDU-87-M	Beynəlxalq turizm	master	060803	Turizm və otelçilik	7008004	Turizm və otelçilik	yüksək	İXTİSASLAŞMA: 'Beynəlxalq turizm və ölkəşünaslıq'.
+MYEDU-88-M	Beynəlxalq münasibətlər və diplomatiya	master	060213	Beynəlxalq münasibətlər	7002001	Beynəlxalq münasibətlər	dəqiq	İXTİSASLAŞMA: 'Beynəlxalq münasibətlər və diplomatiya'.
+MYEDU-89-M	Akvabioresurslar	master	060709	Su bioehtiyatları və akvabitkilər	7005013	Su bioehtiyatları və akvakultura	şübhəli	'Akvabioresurslar' rəsmi adda yoxdur; 060709 'Su bioehtiyatları' ixtisaslaşmasına uyğun gəlir. ALTERNATİV: 060707 Balıqçılıq. SAHİB SEÇSİN.
+MYEDU-90-M	Ətraf mühitin mühafizə və bərpa metodları	master	060510	Ekologiya	7005004	Ekologiya	dəqiq	İXTİSASLAŞMA: 060510 Ekologiya → 'Ətraf mühitin mühafizə metodları və bərpası'.
+MYEDU-91-M	Lifelong	master					tapılmadı	İXTISAS DEYİL — struktur qeydi ('Lifelong').

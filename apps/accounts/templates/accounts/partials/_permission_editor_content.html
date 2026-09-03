@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n permission_extras %}
 {% trans "organization_not_found" context "profile.permission_editor" as permission_editor_org_not_found %}
 {% if organization %}
 <div class="section-card">
@@ -115,11 +115,14 @@
         </div>
         <div class="role-badges">
             {% for perm in actor_permissions %}
+            {% with perm_az_label=perm|permission_label %}
             <span class="role-badge permission-active-badge"
                   data-active-permission-badge
+                  {% if perm_az_label %}data-permission-label-explicit="1"{% endif %}
                   data-permission-key="{{ perm|lower }}">
-                {% if perm == "*" %}{% trans 'Bütün icazələr (*)' %}{% else %}{{ perm }}{% endif %}
+                {% if perm == "*" %}{% trans 'Bütün icazələr (*)' %}{% elif perm_az_label %}{{ perm_az_label }} ({{ perm }}){% else %}{{ perm }}{% endif %}
             </span>
+            {% endwith %}
             {% empty %}
             <span class="text-muted">{% trans "permissions_not_found" context "profile.permission_editor" %}</span>
             {% endfor %}
@@ -148,6 +151,10 @@
                         Kurslar
                         {% elif category == "grading" %}
                         {% trans 'Qiymətləndirmə' %}
+                        {% elif category == "journal" %}
+                        {% trans 'Jurnal' %}
+                        {% elif category == "groups" %}
+                        {% trans 'Qruplar' %}
                         {% elif category == "exams" %}
                         {% trans 'İmtahanlar' %}
                         {% elif category == "appeal" %}
@@ -175,6 +182,10 @@
                         {% trans 'Kurs yaradılması və kurs idarəetməsi' %}
                         {% elif category == "grading" %}
                         {% trans 'Qiymətləndirmə və nəticə axınları' %}
+                        {% elif category == "journal" %}
+                        {% trans 'Jurnal baxışı və sənədli düzəlişlər' %}
+                        {% elif category == "groups" %}
+                        {% trans 'Tələbə qruplarının yaradılması və idarəsi' %}
                         {% elif category == "exams" %}
                         {% trans 'İmtahan idarəetməsi və nəzarət' %}
                         {% elif category == "appeal" %}
@@ -241,7 +252,13 @@
                             </label>
                             <div class="permission-row-text">
                                 <div class="permission-key">{{ perm }}</div>
+                                {% with perm_az_label=perm|permission_label %}
+                                {% if perm_az_label %}
+                                <div class="permission-label" data-permission-label data-permission-label-explicit="1">{{ perm_az_label }}</div>
+                                {% else %}
                                 <div class="permission-label" data-permission-label>{{ perm }}</div>
+                                {% endif %}
+                                {% endwith %}
                                 <div class="permission-description" data-permission-description></div>
                             </div>
                         </div>

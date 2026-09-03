@@ -1,0 +1,366 @@
+/* «Müraciətlərim» — detal paneli, dialoqlar və dar ekran davranışı.
+ *
+ * `applications.css`-in DAVAMIDIR (ölçü büdcəsi 600 sətir) və ondan SONRA
+ * yüklənməlidir: burada eyni `--apx-*` custom property-ləri işlədilir.
+ * Dialoq stilləri AYRI fayldadır: `applications_dialogs.css`.
+ */
+
+/* ── Detal paneli (§4.7) ─────────────────────────────────────────────────── */
+.apx-detail {
+    position: sticky;
+    top: 16px;
+    min-width: 0;
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 16px;
+}
+
+.apx-detail__head {
+    padding: 16px 17px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.apx-detail__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.apx-detail__title {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.apx-detail__from {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 12px;
+    margin-top: 8px;
+    font-size: 0.77rem;
+    color: var(--ems-neutral-500);
+}
+
+.apx-sla {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 11px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.apx-sla__text {
+    flex: 1;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-wrap: pretty;
+}
+
+.apx-sla--overdue {
+    border-color: var(--apx-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--apx-danger-fg);
+}
+
+.apx-sla--closed {
+    border-color: var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
+}
+
+.apx-detail__body {
+    padding: 16px 17px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.apx-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+    margin-bottom: 7px;
+}
+
+.apx-text {
+    margin: 0;
+    padding: 12px 14px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: var(--ems-neutral-700);
+    white-space: pre-wrap;
+    text-wrap: pretty;
+}
+
+.apx-files {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.apx-file {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.apx-file:hover {
+    background: var(--ems-neutral-50);
+}
+
+.apx-file__name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.81rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.apx-file__size {
+    font-size: 0.73rem;
+    color: var(--ems-neutral-400);
+    white-space: nowrap;
+}
+
+/* Zaman xətti */
+.apx-tl {
+    display: flex;
+    flex-direction: column;
+}
+
+.apx-tl__item {
+    display: flex;
+    gap: 11px;
+}
+
+.apx-tl__gutter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: none;
+    width: 22px;
+}
+
+.apx-mark {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    font-size: 0.64rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.apx-mark--primary {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.apx-mark--warning {
+    background: var(--ems-warning-bg);
+    color: var(--apx-warn-fg);
+}
+
+.apx-mark--success {
+    background: var(--ems-success-bg);
+    color: var(--apx-mark-success-fg);
+}
+
+.apx-mark--danger {
+    background: var(--ems-danger-bg);
+    color: var(--apx-danger-fg);
+}
+
+.apx-tl__line {
+    flex: 1;
+    width: 2px;
+    background: var(--ems-neutral-200);
+    margin: 3px 0;
+}
+
+.apx-tl__item:last-child .apx-tl__line {
+    background: transparent;
+}
+
+.apx-tl__main {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 14px;
+}
+
+.apx-tl__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.apx-tl__who {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.apx-tl__when {
+    font-size: 0.73rem;
+    color: var(--ems-neutral-400);
+}
+
+.apx-tl__what {
+    margin-top: 3px;
+    font-size: 0.8rem;
+    color: var(--ems-neutral-500);
+    line-height: 1.5;
+    text-wrap: pretty;
+    white-space: pre-wrap;
+}
+
+.apx-tl__internal {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: var(--ems-warning-bg);
+    color: var(--apx-warn-fg);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+/* Cavab qutusu + yalnız-oxu qeyd */
+.apx-act {
+    padding: 14px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+}
+
+.apx-act__label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    margin-bottom: 9px;
+}
+
+.apx-act__input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 9px;
+    font-size: 0.83rem;
+    resize: vertical;
+    background: var(--ems-neutral-0);
+}
+
+.apx-act__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.apx-act__hint {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--ems-neutral-400);
+    text-wrap: pretty;
+}
+
+.apx-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px 13px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+}
+
+.apx-note__text {
+    flex: 1;
+    font-size: 0.79rem;
+    color: var(--ems-neutral-500);
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+.apx-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px 13px;
+    background: var(--ems-primary-50);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 11px;
+    font-size: 0.79rem;
+    color: var(--ems-primary-800);
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+.apx-detail__close {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-500);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ── Dar ekran: tək sütun + slide-over detal (§4.6) ──────────────────────── */
+@media (max-width: 1100px) {
+    .apx-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .apx-detail {
+        position: fixed;
+        inset: 0;
+        z-index: 1080;
+        top: auto;
+        bottom: 0;
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -14px 40px rgba(15, 23, 42, 0.22);
+    }
+
+    .apx-detail[hidden] {
+        display: none;
+    }
+
+    .apx-detail__close {
+        display: inline-flex;
+    }
+}
+

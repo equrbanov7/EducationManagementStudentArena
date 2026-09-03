@@ -24,10 +24,15 @@ MONITORING_API_RATE = "240/1m"
 
 
 def _client_ip(request) -> str | None:
-    # nginx XFF-i overwrite edir (bax docker/nginx/nginx.conf) — son üzv real IP-dir.
-    xff = (request.META.get("HTTP_X_FORWARDED_FOR") or "").split(",")
-    candidate = (xff[-1] if xff else "").strip() or request.META.get("REMOTE_ADDR")
-    return candidate or None
+    """Vahid ``core.utils.get_client_ip`` helperinə həvalə (2026-09-02 audit, P2-6).
+
+    Başlıq layihədə beş yerdə müstəqil parse olunurdu; ikisi soldan (saxta
+    edilə bilən) oxuyurdu.  Artıq TƏK mənbə var: etibarlı proxy semantikası
+    (sağdan ``TRUSTED_PROXY_HOPS``).
+    """
+    from core.utils import get_client_ip
+
+    return get_client_ip(request) or None
 
 
 def _record_unauthorized(request):
@@ -79,6 +84,14 @@ def superadmin_monitoring_required(view_func):
                 response["Retry-After"] = str(retry_after)
             return response
 
-        return view_func(request, *args, **kwargs)
+        # Monitorinq PLATFORMA səthidir: superadmin bütün tenantların
+        # telemetriyasını görməlidir.  ``monitoring_securityevent`` 2026-09-02
+        # auditindən sonra RLS altındadır (0002_rls_securityevent), ona görə
+        # oxu açıq ``bypass_rls()`` ilə aparılır — əks halda superadmin yalnız
+        # aktiv org-un (və org-suz) sətirlərini görərdi.
+        from core.rls import bypass_rls
+
+        with bypass_rls():
+            return view_func(request, *args, **kwargs)
 
     return wrapper

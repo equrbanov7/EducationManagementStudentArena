@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:#f8fafc;color:#0f172a;-webkit-font-smoothing:antialiased}
+  a{color:#2563eb;text-decoration:none}
+  a:hover{color:#1d4ed8}
+  input,select,textarea,button{font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px #dbeafe}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  ::-webkit-scrollbar-track{background:#f1f5f9}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#f8fafc">
+
+  <div style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;background:#fff;border-bottom:1px solid #e2e8f0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="brand/wcu-logo-horizontal.svg" alt="Qərbi Kaspi Universiteti" style="height:34px;width:auto;max-width:180px;display:block">
+      <span style="width:1px;height:22px;background:#e2e8f0"></span>
+      <span style="font-size:1.02rem;font-weight:800;color:#2563eb;letter-spacing:-.02em">EMS Arena</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button type="button" onClick="{{ goNotes }}" title="Bildirişlər" style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#eff6ff;border-color:#bfdbfe;color:#2563eb">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+        <span style="position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff">{{ noteCount }}</span>
+      </button>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.25">
+        <span style="font-size:.83rem;font-weight:600;color:#0f172a">dos. N. Əliyeva</span>
+        <span style="font-size:.72rem;color:#64748b">Müəllim · Proqramlaşdırma və İT</span>
+      </div>
+      <button type="button" title="Çıxış" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#fee2e2;border-color:#fecaca;color:#dc2626">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start">
+
+    <aside style="flex:0 0 300px;width:300px;align-self:stretch;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:1.5rem 1.25rem;border-bottom:1px solid #e2e8f0;background:#fff">
+        <h2 style="margin:0;font-size:1.25rem;font-weight:700;color:#0f172a;white-space:nowrap">Kabinet</h2>
+        <button type="button" title="Menyunu yığ" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:0;background:#eff6ff;color:#3b82f6;cursor:pointer" style-hover="background:#3b82f6;color:#fff">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;gap:.6rem;padding:1rem .75rem">
+        <div style="padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Dərs yükü</div>
+        <button type="button" onClick="{{ goLoad }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navLBg }};color:{{ navLFg }};box-shadow:{{ navLSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          Şəxsi yükum
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:.75rem;font-weight:700">780</span>
+        </button>
+        <button type="button" onClick="{{ goPlan }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navPBg }};color:{{ navPFg }};box-shadow:{{ navPSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Fərdi plan
+        </button>
+        <button type="button" onClick="{{ goPaid }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navSBg }};color:{{ navSFg }};box-shadow:{{ navSSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10"></path><path d="M15 9.5a2.5 2.5 0 0 0-3-1.5c-2 .4-2.2 3-.2 3.4 2 .4 2.6.9 2.6 2 0 1.2-1.2 1.8-2.4 1.6a2.6 2.6 0 0 1-2-1.4"></path></svg>
+          Saathesabı
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#f1f5f9;color:#475569;font-size:.75rem;font-weight:700">80 s</span>
+        </button>
+        <button type="button" onClick="{{ goNotes }}" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:{{ navNBg }};color:{{ navNFg }};box-shadow:{{ navNSh }};font-size:.95rem;font-weight:500;text-align:left;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+          Bildirişlər
+          <span style="margin-left:auto;padding:.15rem .6rem;border-radius:999px;background:#ef4444;color:#fff;font-size:.75rem;font-weight:700">{{ noteCount }}</span>
+        </button>
+
+        <div style="margin:.5rem .25rem 0;padding:14px;border-radius:16px;background:#f9fbff;border:1px solid #e2e8f0">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#64748b">İllik yükum</div>
+            <div style="font-size:.72rem;font-weight:700;color:{{ normFg }}">{{ normPct }}</div>
+          </div>
+          <div style="margin-top:4px;font-size:1.05rem;font-weight:800;color:#1e40af">780 / 700 saat</div>
+          <div style="margin-top:8px;height:7px;border-radius:999px;background:#e2e8f0;overflow:hidden">
+            <div style="height:100%;width:{{ normBarW }};background:{{ normBar }};border-radius:999px"></div>
+          </div>
+          <div style="margin-top:6px;font-size:.72rem;color:#64748b">Normadan 80 saat çox — saathesabı ödənişlə</div>
+        </div>
+
+        <div style="margin-top:auto;padding:1rem 1rem .5rem;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af">Hesab</div>
+        <button type="button" style="display:flex;align-items:center;gap:.8rem;width:100%;padding:.82rem 1.05rem;border:0;border-radius:.75rem;background:transparent;color:#ef4444;font-size:.95rem;font-weight:500;text-align:left;cursor:pointer" style-hover="background:#fef2f2;color:#dc2626">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Çıxış
+        </button>
+      </nav>
+    </aside>
+
+    <main style="flex:1;min-width:0;padding:24px 28px 40px">
+      <div style="max-width:1500px;margin:0 auto">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px">
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;font-size:.76rem;color:#94a3b8;margin-bottom:7px">
+              <span>Ana səhifə</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span>Kabinet</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              <span style="color:#334155;font-weight:600">{{ crumb }}</span>
+            </div>
+            <h1 style="margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.02em;color:#0f172a">{{ pageTitle }}</h1>
+            <p style="margin:6px 0 0;font-size:.86rem;color:#64748b;text-wrap:pretty">{{ pageSub }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="padding:6px 12px;border-radius:999px;background:{{ okBg }};color:{{ okFg }};border:1px solid {{ okBd }};font-size:.76rem;font-weight:700">{{ okLabel }}</span>
+            <button type="button" onClick="{{ openObj }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>
+              Etiraz bildir
+            </button>
+            <button type="button" onClick="{{ confirmLoad }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid {{ cfBd }};background:{{ cfBg }};color:{{ cfFg }};font-size:.85rem;font-weight:700;cursor:{{ cfCur }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {{ cfLabel }}
+            </button>
+          </div>
+        </div>
+
+        <sc-if value="{{ isLoad }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:14px 16px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">TƏDRİS İLİ</label>
+                <select value="{{ fYear }}" onChange="{{ onFYear }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:150px"><option>2026 / 2027</option><option>2025 / 2026</option><option>2024 / 2025</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">SEMESTR</label>
+                <select value="{{ fSem }}" onChange="{{ onFSem }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:130px"><option>Hamısı</option><option>Payız</option><option>Yaz</option></select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <label style="font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#64748b">PİLLƏ</label>
+                <select value="{{ fLevel }}" onChange="{{ onFLevel }}" style="padding:9px 11px;border:1px solid #cbd5e1;border-radius:9px;font-size:.83rem;color:#0f172a;background:#fff;cursor:pointer;min-width:130px"><option>Hamısı</option><option>Bakalavr</option><option>Magistr</option></select>
+              </div>
+              <button type="button" onClick="{{ applyFilters }}" style="display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:9px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.7" y2="16.7"></line></svg>
+                Göstər
+              </button>
+              <button type="button" onClick="{{ resetFilters }}" style="padding:10px 14px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:.84rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc;color:#334155">Sıfırla</button>
+              <div style="margin-left:auto;font-size:.78rem;color:#64748b">{{ rowCount }} sətir · {{ shownHours }} saat</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px">
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">İllik yük</div>
+                <div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.7rem;font-weight:800;color:#0f172a;letter-spacing:-.02em">780</span><span style="font-size:.8rem;color:#94a3b8">saat</span></div>
+                <div style="margin-top:8px;height:6px;border-radius:999px;background:#eff6ff;overflow:hidden"><div style="height:100%;width:100%;background:#2563eb"></div></div>
+              </div>
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Ştat norması</div>
+                <div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.7rem;font-weight:800;color:#0f172a;letter-spacing:-.02em">700</span><span style="font-size:.8rem;color:#94a3b8">saat · 1,0 ştat</span></div>
+                <div style="margin-top:8px;font-size:.75rem;color:#b45309;font-weight:600">+80 saat norma üstü</div>
+              </div>
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Semestrlər</div>
+                <div style="margin-top:6px;display:flex;align-items:baseline;gap:10px">
+                  <span style="font-size:1.15rem;font-weight:800;color:#0f172a">402</span><span style="font-size:.74rem;color:#64748b">payız</span>
+                  <span style="width:1px;height:16px;background:#e2e8f0"></span>
+                  <span style="font-size:1.15rem;font-weight:800;color:#0f172a">378</span><span style="font-size:.74rem;color:#64748b">yaz</span>
+                </div>
+                <div style="margin-top:8px;display:flex;height:6px;border-radius:999px;overflow:hidden;background:#e2e8f0"><div style="width:51.5%;background:#3b82f6"></div><div style="width:48.5%;background:#93c5fd"></div></div>
+              </div>
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 1px 2px rgba(15,23,42,.04)">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Saathesabı</div>
+                <div style="margin-top:6px;display:flex;align-items:baseline;gap:6px"><span style="font-size:1.7rem;font-weight:800;color:#0f172a;letter-spacing:-.02em">80</span><span style="font-size:.8rem;color:#94a3b8">saat · 1 000 ₼</span></div>
+                <div style="margin-top:8px;font-size:.75rem;color:#64748b">40 saat ödənilib · 40 saat gözləyir</div>
+              </div>
+            </div>
+
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #e2e8f0">
+                <div>
+                  <div style="font-size:.98rem;font-weight:700;color:#0f172a">Mənə təyin edilmiş fənlər</div>
+                  <div style="margin-top:2px;font-size:.78rem;color:#64748b">Sətrə klikləyin — qrup, həftəlik saat və tələbə sayı açılır.</div>
+                </div>
+                <span style="padding:5px 11px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:.74rem;font-weight:700">{{ appliedLabel }}</span>
+              </div>
+              <div style="overflow-x:auto">
+                <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+                  <thead>
+                    <tr style="background:#f8fafc">
+                      <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Fənn / iş</th>
+                      <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Qrup</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Semestr</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Mühazirə</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Seminar</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Lab</th>
+                      <th style="padding:11px 10px;text-align:center;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Digər</th>
+                      <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Cəmi</th>
+                      <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                      <tr onClick="{{ r.onOpen }}" style="background:{{ r.bg }};cursor:pointer;border-bottom:1px solid #f1f5f9" style-hover="background:#eff6ff">
+                        <td style="padding:12px 14px">
+                          <div style="font-weight:600;color:#0f172a">{{ r.subject }}</div>
+                          <div style="margin-top:2px;font-size:.75rem;color:#94a3b8">{{ r.meta }}</div>
+                        </td>
+                        <td style="padding:12px 14px;color:#475569">{{ r.groups }}</td>
+                        <td style="padding:12px 10px;text-align:center"><span style="padding:3px 9px;border-radius:999px;background:{{ r.semBg }};color:{{ r.semFg }};font-size:.72rem;font-weight:700">{{ r.sem }}</span></td>
+                        <td style="padding:12px 10px;text-align:center;color:#334155">{{ r.muh }}</td>
+                        <td style="padding:12px 10px;text-align:center;color:#334155">{{ r.sem_ }}</td>
+                        <td style="padding:12px 10px;text-align:center;color:#334155">{{ r.lab }}</td>
+                        <td style="padding:12px 10px;text-align:center;color:#334155">{{ r.other }}</td>
+                        <td style="padding:12px 12px;text-align:right;font-weight:800;color:#0f172a">{{ r.total }}</td>
+                        <td style="padding:12px 14px"><span style="padding:4px 10px;border-radius:999px;background:{{ r.stBg }};color:{{ r.stFg }};font-size:.72rem;font-weight:700;white-space:nowrap">{{ r.status }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                  <tfoot>
+                    <tr style="background:#f8fafc;border-top:2px solid #e2e8f0">
+                      <td colspan="3" style="padding:13px 14px;font-weight:800;color:#0f172a">Cəmi</td>
+                      <td style="padding:13px 10px;text-align:center;font-weight:700;color:#334155">{{ sumMuh }}</td>
+                      <td style="padding:13px 10px;text-align:center;font-weight:700;color:#334155">{{ sumSem }}</td>
+                      <td style="padding:13px 10px;text-align:center;font-weight:700;color:#334155">{{ sumLab }}</td>
+                      <td style="padding:13px 10px;text-align:center;font-weight:700;color:#334155">{{ sumOther }}</td>
+                      <td style="padding:13px 12px;text-align:right;font-weight:800;color:#1d4ed8">{{ shownHours }}</td>
+                      <td style="padding:13px 14px"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <sc-if value="{{ noRows }}">
+                <div style="padding:44px 20px;text-align:center;color:#94a3b8;font-size:.86rem">Bu filtrə uyğun sətir yoxdur.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPlan }}">
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:16px 20px;margin-bottom:18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px">
+              <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                <div>
+                  <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Fərdi iş planı</div>
+                  <div style="margin-top:3px;font-size:1.02rem;font-weight:800;color:#0f172a">2026 / 2027 tədris ili</div>
+                </div>
+                <span style="width:1px;height:34px;background:#e2e8f0"></span>
+                <div>
+                  <div style="font-size:.72rem;color:#64748b">Plan üzrə</div>
+                  <div style="font-size:1.02rem;font-weight:800;color:#0f172a">1 160 saat</div>
+                </div>
+                <div>
+                  <div style="font-size:.72rem;color:#64748b">İcra olunub</div>
+                  <div style="font-size:1.02rem;font-weight:800;color:#16a34a">607 saat · 52%</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                  Çap et
+                </button>
+                <button type="button" style="display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid #2563eb;background:#2563eb;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer" style-hover="background:#1d4ed8">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  PDF
+                </button>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ plan }}" as="p" hint-placeholder-count="4">
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 18px;border-bottom:1px solid #f1f5f9">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <span style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:{{ p.iconBg }};color:{{ p.iconFg }};font-size:.85rem;font-weight:800">{{ p.no }}</span>
+                      <div>
+                        <div style="font-size:.96rem;font-weight:700;color:#0f172a">{{ p.title }}</div>
+                        <div style="margin-top:2px;font-size:.77rem;color:#64748b">{{ p.note }}</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:18px">
+                      <div style="text-align:right">
+                        <div style="font-size:.7rem;color:#94a3b8;font-weight:700;letter-spacing:.05em">PLAN</div>
+                        <div style="font-size:.95rem;font-weight:800;color:#0f172a">{{ p.plan }}</div>
+                      </div>
+                      <div style="text-align:right">
+                        <div style="font-size:.7rem;color:#94a3b8;font-weight:700;letter-spacing:.05em">FAKTİKİ</div>
+                        <div style="font-size:.95rem;font-weight:800;color:{{ p.factFg }}">{{ p.fact }}</div>
+                      </div>
+                      <div style="width:120px">
+                        <div style="height:8px;border-radius:999px;background:#e2e8f0;overflow:hidden"><div style="height:100%;width:{{ p.pct }};background:{{ p.bar }};border-radius:999px"></div></div>
+                        <div style="margin-top:4px;font-size:.7rem;text-align:right;color:#64748b">{{ p.pct }}</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-direction:column">
+                    <sc-for list="{{ p.items }}" as="it" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:12px;padding:11px 18px 11px 64px;border-bottom:1px solid #f8fafc;background:{{ it.bg }}">
+                        <span style="width:8px;height:8px;border-radius:50%;background:{{ it.dot }};flex:0 0 8px"></span>
+                        <div style="flex:1;min-width:0;font-size:.83rem;color:#334155">{{ it.name }}</div>
+                        <div style="font-size:.78rem;color:#94a3b8">{{ it.due }}</div>
+                        <div style="width:74px;text-align:right;font-size:.83rem;font-weight:700;color:#0f172a">{{ it.hours }}</div>
+                        <span style="min-width:96px;text-align:center;padding:4px 10px;border-radius:999px;background:{{ it.stBg }};color:{{ it.stFg }};font-size:.72rem;font-weight:700">{{ it.status }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPaid }}">
+          <div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px">
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Saathesabı saat</div>
+                <div style="margin-top:6px;font-size:1.7rem;font-weight:800;color:#0f172a">80</div>
+                <div style="margin-top:4px;font-size:.76rem;color:#64748b">Normadan artıq icra edilən yük</div>
+              </div>
+              <div style="padding:16px 18px;background:#fff;border:1px solid #e2e8f0;border-radius:14px">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Tarif</div>
+                <div style="margin-top:6px;font-size:1.7rem;font-weight:800;color:#0f172a">12,50 ₼</div>
+                <div style="margin-top:4px;font-size:.76rem;color:#64748b">dosent · 1 saat</div>
+              </div>
+              <div style="padding:16px 18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px">
+                <div style="font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#166534">Hesablanmış məbləğ</div>
+                <div style="margin-top:6px;font-size:1.7rem;font-weight:800;color:#166534">1 000 ₼</div>
+                <div style="margin-top:4px;font-size:.76rem;color:#15803d">500 ₼ ödənilib · 500 ₼ gözləyir</div>
+              </div>
+            </div>
+
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+              <div style="padding:14px 18px;border-bottom:1px solid #e2e8f0">
+                <div style="font-size:.98rem;font-weight:700;color:#0f172a">Aylıq saathesabı cədvəli</div>
+                <div style="margin-top:2px;font-size:.78rem;color:#64748b">Kafedra müdiri təsdiqləyir, mühasibatlıq ödəyir.</div>
+              </div>
+              <table style="width:100%;border-collapse:collapse;font-size:.84rem">
+                <thead>
+                  <tr style="background:#f8fafc">
+                    <th style="padding:11px 16px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Ay</th>
+                    <th style="padding:11px 14px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">İş növü</th>
+                    <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Saat</th>
+                    <th style="padding:11px 12px;text-align:right;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Məbləğ</th>
+                    <th style="padding:11px 16px;text-align:left;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b;border-bottom:1px solid #e2e8f0">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ paid }}" as="p" hint-placeholder-count="5">
+                    <tr style="background:{{ p.bg }};border-bottom:1px solid #f1f5f9">
+                      <td style="padding:12px 16px;font-weight:600;color:#0f172a">{{ p.month }}</td>
+                      <td style="padding:12px 14px;color:#475569">{{ p.work }}</td>
+                      <td style="padding:12px 12px;text-align:right;font-weight:700;color:#0f172a">{{ p.hours }}</td>
+                      <td style="padding:12px 12px;text-align:right;color:#334155">{{ p.amount }}</td>
+                      <td style="padding:12px 16px"><span style="padding:4px 10px;border-radius:999px;background:{{ p.stBg }};color:{{ p.stFg }};font-size:.72rem;font-weight:700">{{ p.status }}</span></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+                <tfoot>
+                  <tr style="background:#f8fafc;border-top:2px solid #e2e8f0">
+                    <td colspan="2" style="padding:13px 16px;font-weight:800;color:#0f172a">Cəmi</td>
+                    <td style="padding:13px 12px;text-align:right;font-weight:800;color:#0f172a">80</td>
+                    <td style="padding:13px 12px;text-align:right;font-weight:800;color:#1d4ed8">1 000,00 ₼</td>
+                    <td style="padding:13px 16px"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isNotes }}">
+          <div style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start">
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.04);overflow:hidden">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e2e8f0">
+                <div style="font-size:.98rem;font-weight:700;color:#0f172a">Yük hərəkətləri və bildirişlər</div>
+                <button type="button" onClick="{{ readAll }}" style="padding:7px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:.78rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc;color:#334155">Hamısını oxundu et</button>
+              </div>
+              <div style="display:flex;flex-direction:column">
+                <sc-for list="{{ notes }}" as="n" hint-placeholder-count="5">
+                  <div style="display:flex;gap:13px;padding:15px 18px;border-bottom:1px solid #f1f5f9;background:{{ n.bg }}">
+                    <span style="flex:0 0 34px;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:{{ n.iconBg }};color:{{ n.iconFg }}">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4l3 2"></path></svg>
+                    </span>
+                    <div style="flex:1;min-width:0">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                        <span style="font-size:.87rem;font-weight:700;color:#0f172a">{{ n.title }}</span>
+                        <span style="padding:2px 8px;border-radius:999px;background:{{ n.tagBg }};color:{{ n.tagFg }};font-size:.68rem;font-weight:800;letter-spacing:.04em">{{ n.tag }}</span>
+                      </div>
+                      <div style="margin-top:4px;font-size:.82rem;color:#475569;text-wrap:pretty">{{ n.body }}</div>
+                      <div style="margin-top:5px;font-size:.74rem;color:#94a3b8">{{ n.when }} · {{ n.who }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="padding:18px;background:#fff;border:1px solid #e2e8f0;border-radius:16px">
+                <div style="font-size:.95rem;font-weight:700;color:#0f172a">Etirazlarım</div>
+                <div style="margin-top:3px;font-size:.79rem;color:#64748b">Kafedra müdiri 3 iş günü ərzində cavab verir.</div>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:9px">
+                  <sc-for list="{{ objections }}" as="o" hint-placeholder-count="2">
+                    <div style="padding:12px 13px;border:1px solid {{ o.bd }};background:{{ o.bg }};border-radius:12px">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                        <span style="font-size:.84rem;font-weight:700;color:#0f172a">{{ o.subject }}</span>
+                        <span style="padding:3px 9px;border-radius:999px;background:{{ o.stBg }};color:{{ o.stFg }};font-size:.7rem;font-weight:800">{{ o.status }}</span>
+                      </div>
+                      <div style="margin-top:5px;font-size:.79rem;color:#475569;text-wrap:pretty">{{ o.text }}</div>
+                      <div style="margin-top:5px;font-size:.72rem;color:#94a3b8">{{ o.when }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <button type="button" onClick="{{ openObj }}" style="margin-top:12px;width:100%;padding:11px;border-radius:10px;border:1px dashed #bfdbfe;background:#f8fbff;color:#1d4ed8;font-size:.84rem;font-weight:700;cursor:pointer" style-hover="background:#eff6ff;border-color:#93c5fd">+ Yeni etiraz</button>
+              </div>
+
+              <div style="padding:18px;background:#0f172a;border-radius:16px;color:#e2e8f0">
+                <div style="font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8">Yükün gedişi</div>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ flow }}" as="f" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:11px">
+                      <span style="flex:0 0 20px;display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:{{ f.dotBg }};color:{{ f.dotFg }};font-size:.66rem;font-weight:800">{{ f.mark }}</span>
+                      <div style="flex:1;min-width:0">
+                        <div style="font-size:.84rem;font-weight:600;color:{{ f.fg }}">{{ f.step }}</div>
+                        <div style="font-size:.72rem;color:#64748b">{{ f.when }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showRow }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:28px">
+      <div onClick="{{ stop }}" style="width:100%;max-width:720px;max-height:88vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#64748b">Fənn detalı</div>
+            <div style="margin-top:4px;font-size:1.15rem;font-weight:800;color:#0f172a">{{ mSubject }}</div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">{{ mMeta }}</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:18px">
+            <div style="padding:12px 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Kredit</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#0f172a">{{ mCredit }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Tələbə</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#0f172a">{{ mStudents }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Həftəlik</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#0f172a">{{ mWeekly }}</div>
+            </div>
+            <div style="padding:12px 13px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px">
+              <div style="font-size:.68rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#1d4ed8">Cəmi saat</div>
+              <div style="margin-top:3px;font-size:1.05rem;font-weight:800;color:#1d4ed8">{{ mTotal }}</div>
+            </div>
+          </div>
+          <div style="font-size:.8rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Fəaliyyət növləri</div>
+          <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:18px">
+            <sc-for list="{{ mActs }}" as="a" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid #f1f5f9;background:{{ a.bg }}">
+                <span style="padding:3px 9px;border-radius:6px;background:{{ a.tagBg }};color:{{ a.tagFg }};font-size:.72rem;font-weight:700">{{ a.label }}</span>
+                <div style="flex:1;min-width:0;font-size:.82rem;color:#64748b">{{ a.note }}</div>
+                <div style="font-size:.86rem;font-weight:800;color:#0f172a">{{ a.hours }} saat</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 15px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            <div style="flex:1;min-width:0;font-size:.8rem;color:#475569;text-wrap:pretty">Saatlar kafedra müdiri tərəfindən təyin edilib. Uyğunsuzluq görürsünüzsə etiraz göndərin.</div>
+            <button type="button" onClick="{{ objFromRow }}" style="padding:9px 14px;border-radius:9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap" style-hover="background:#fff7ed;border-color:#fed7aa;color:#c2410c">Etiraz bildir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showObj }}">
+    <div onClick="{{ closeModal }}" style="position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:28px">
+      <div onClick="{{ stop }}" style="width:100%;max-width:560px;background:#fff;border-radius:18px;box-shadow:0 24px 60px rgba(15,23,42,.28)">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:20px 22px;border-bottom:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#b45309">Etiraz</div>
+            <div style="margin-top:4px;font-size:1.12rem;font-weight:800;color:#0f172a">Yük üzrə etiraz bildir</div>
+            <div style="margin-top:3px;font-size:.8rem;color:#64748b">Etiraz kafedra müdirinə və dekanlığa göndərilir.</div>
+          </div>
+          <button type="button" onClick="{{ closeModal }}" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;border:1px solid #e2e8f0;background:#fff;color:#64748b;cursor:pointer" style-hover="background:#f1f5f9">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Fənn / iş</label>
+            <select value="{{ oSubject }}" onChange="{{ onOSubject }}" style="padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.86rem;color:#0f172a;background:#fff;cursor:pointer">
+              <sc-for list="{{ subjectOptions }}" as="s" hint-placeholder-count="6">
+                <option value="{{ s.name }}">{{ s.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">Səbəb</label>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ reasons }}" as="r" hint-placeholder-count="4">
+                <button type="button" onClick="{{ r.onPick }}" style="padding:10px 12px;border-radius:10px;border:1px solid {{ r.bd }};background:{{ r.bg }};color:{{ r.fg }};font-size:.82rem;font-weight:600;text-align:left;cursor:pointer">{{ r.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b">İzah</label>
+            <textarea value="{{ oText }}" onChange="{{ onOText }}" rows="4" placeholder="Məsələn: CS-402 qrupu ilə laboratoriya saatı 30 yerinə 15 saat göstərilib." style="padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;font-size:.86rem;color:#0f172a;resize:vertical"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;padding-top:4px;border-top:1px solid #f1f5f9">
+            <button type="button" onClick="{{ closeModal }}" style="padding:10px 16px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:.85rem;font-weight:600;cursor:pointer" style-hover="background:#f8fafc">Ləğv et</button>
+            <button type="button" onClick="{{ sendObj }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid {{ sendBd }};background:{{ sendBg }};color:{{ sendFg }};font-size:.85rem;font-weight:700;cursor:{{ sendCur }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Göndər
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}">
+    <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:120;display:flex;align-items:center;gap:10px;padding:13px 20px;border-radius:12px;background:#0f172a;color:#fff;box-shadow:0 14px 34px rgba(15,23,42,.32);font-size:.86rem;font-weight:600">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      {{ toast }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1024}}">
+const ROWS = [
+  { subject: 'Alqoritmlər və verilənlər strukturu', code: 'CS-3021', credit: '6 kredit', groups: 'CS-401, CS-402', sem: 'Payız', level: 'Bakalavr', muh: 60, sem_: 30, lab: 30, other: 0, students: 48, weekly: '4+2+2', status: 'Təsdiqlənib' },
+  { subject: 'Obyekt yönümlü proqramlaşdırma', code: 'CS-2015', credit: '5 kredit', groups: 'CS-301', sem: 'Payız', level: 'Bakalavr', muh: 45, sem_: 30, lab: 30, other: 0, students: 26, weekly: '3+2+2', status: 'Təsdiqlənib' },
+  { subject: 'Verilənlər bazasının idarə edilməsi', code: 'CS-3110', credit: '5 kredit', groups: 'CS-302, CS-303', sem: 'Payız', level: 'Bakalavr', muh: 60, sem_: 0, lab: 60, other: 0, students: 52, weekly: '4+0+4', status: 'Dəyişdirilib' },
+  { subject: 'Buraxılış işi rəhbərliyi', code: '—', credit: '—', groups: '7 tələbə', sem: 'Payız', level: 'Bakalavr', muh: 0, sem_: 0, lab: 0, other: 57, students: 7, weekly: '—', status: 'Təsdiqlənib' },
+  { subject: 'Veb texnologiyalar', code: 'CS-2208', credit: '4 kredit', groups: 'CS-201, CS-202', sem: 'Yaz', level: 'Bakalavr', muh: 30, sem_: 0, lab: 60, other: 0, students: 44, weekly: '2+0+4', status: 'Təsdiqlənib' },
+  { subject: 'Süni intellekt əsasları', code: 'CS-4102', credit: '5 kredit', groups: 'CS-401', sem: 'Yaz', level: 'Bakalavr', muh: 45, sem_: 30, lab: 0, other: 0, students: 24, weekly: '3+2+0', status: 'Yeni təyin edilib' },
+  { subject: 'Mobil proqramlaşdırma', code: 'CS-3304', credit: '4 kredit', groups: 'CS-303', sem: 'Yaz', level: 'Bakalavr', muh: 30, sem_: 0, lab: 45, other: 0, students: 22, weekly: '2+0+3', status: 'Təsdiqlənib' },
+  { subject: 'Elmi tədqiqat seminarı (magistr)', code: 'CS-5011', credit: '6 kredit', groups: 'CSM-101', sem: 'Yaz', level: 'Magistr', muh: 0, sem_: 60, lab: 0, other: 0, students: 11, weekly: '0+4+0', status: 'Təsdiqlənib' },
+  { subject: 'Kurs işi rəhbərliyi', code: '—', credit: '—', groups: '13 tələbə', sem: 'Yaz', level: 'Bakalavr', muh: 0, sem_: 0, lab: 0, other: 78, students: 13, weekly: '—', status: 'Təsdiqlənib' }
+];
+
+const PLAN = [
+  { no: '1', title: 'Tədris işi', note: 'Auditoriya saatları, kurs və buraxılış işləri', plan: 780, fact: 402, items: [
+    { name: 'Payız semestri auditoriya yükü', due: 'sent — dek 2026', hours: 345, status: 'İcra olunub', ok: 1 },
+    { name: 'Buraxılış işi rəhbərliyi (7 tələbə)', due: 'dekabr 2026', hours: 57, status: 'İcra olunub', ok: 1 },
+    { name: 'Yaz semestri auditoriya yükü', due: 'fev — may 2027', hours: 300, status: 'Planda', ok: 0 },
+    { name: 'Kurs işi rəhbərliyi (13 tələbə)', due: 'aprel 2027', hours: 78, status: 'Planda', ok: 0 }
+  ] },
+  { no: '2', title: 'Metodiki iş', note: 'Sillabus, fənn proqramı, test bankı', plan: 120, fact: 65, items: [
+    { name: '«Süni intellekt əsasları» fənn proqramının hazırlanması', due: 'oktyabr 2026', hours: 30, status: 'İcra olunub', ok: 1 },
+    { name: 'Sillabusların yenilənməsi (4 fənn)', due: 'noyabr 2026', hours: 35, status: 'İcra olunub', ok: 1 },
+    { name: 'Elektron test bankının genişləndirilməsi', due: 'mart 2027', hours: 55, status: 'İcra olunmada', ok: 2 }
+  ] },
+  { no: '3', title: 'Elmi-tədqiqat işi', note: 'Məqalə, konfrans, layihə', plan: 200, fact: 110, items: [
+    { name: 'Scopus jurnalında məqalə (1 ədəd)', due: 'yanvar 2027', hours: 80, status: 'İcra olunmada', ok: 2 },
+    { name: 'Beynəlxalq konfrans məruzəsi', due: 'noyabr 2026', hours: 30, status: 'İcra olunub', ok: 1 },
+    { name: 'Daxili qrant layihəsində iştirak', due: 'may 2027', hours: 90, status: 'Planda', ok: 0 }
+  ] },
+  { no: '4', title: 'Təşkilati iş', note: 'Kafedra, kurator, qəbul komissiyası', plan: 60, fact: 30, items: [
+    { name: 'CS-301 qrupunun kuratorluğu', due: 'il boyu', hours: 30, status: 'İcra olunmada', ok: 2 },
+    { name: 'Açıq qapı günü və qəbul komissiyası', due: 'iyul 2027', hours: 30, status: 'Planda', ok: 0 }
+  ] }
+];
+
+const PAID = [
+  { month: 'Oktyabr 2026', work: 'Verilənlər bazası — laboratoriya', hours: 20, amount: '250,00 ₼', status: 'Ödənilib' },
+  { month: 'Noyabr 2026', work: 'Verilənlər bazası — laboratoriya', hours: 20, amount: '250,00 ₼', status: 'Ödənilib' },
+  { month: 'Dekabr 2026', work: 'Buraxılış işi rəhbərliyi', hours: 15, amount: '187,50 ₼', status: 'Təsdiqlənib' },
+  { month: 'Fevral 2027', work: 'Magistr elmi seminarı', hours: 15, amount: '187,50 ₼', status: 'Gözləyir' },
+  { month: 'Mart 2027', work: 'Magistr elmi seminarı', hours: 10, amount: '125,00 ₼', status: 'Gözləyir' }
+];
+
+const NOTES = [
+  { title: 'Yeni fənn təyin edildi', tag: 'YENİ', body: '«Süni intellekt əsasları» (CS-401) fənni sizə təyin olundu — 75 saat. İllik yükünüz 705 → 780 saat.', when: '05.08.2026, 14:20', who: 'prof. İ. Səmədov, kafedra müdiri', kind: 'new' },
+  { title: 'Tapşırıq təsdiqləndi', tag: 'TƏSDİQ', body: '2026/2027 tədris ili üzrə kafedra tapşırığı dekanlıq tərəfindən təsdiqləndi. Yük bölgüsü başladı.', when: '02.08.2026, 09:05', who: 'dos. R. Hüseynov, dekan', kind: 'ok' },
+  { title: 'Saat dəyişikliyi', tag: 'DƏYİŞİK', body: '«Verilənlər bazası» fənninin laboratoriya saatı 45 → 60 saat dəyişdirildi (CS-303 qrupu əlavə olundu).', when: '28.07.2026, 16:40', who: 'Tədris şöbəsi', kind: 'warn' },
+  { title: 'Etirazınız cavablandırıldı', tag: 'CAVAB', body: 'CS-402 qrupundaki tələbə sayı düzəldildi, seminar saatı yenidən hesablandı. Təşəkkür edirik.', when: '20.07.2026, 11:15', who: 'prof. İ. Səmədov, kafedra müdiri', kind: 'ok' },
+  { title: 'Saathesabı ödənişi', tag: 'ÖDƏNİŞ', body: 'Oktyabr–noyabr ayları üzrə 40 saat saathesabı yük ödənişə göndərildi (500,00 ₼).', when: '12.07.2026, 10:00', who: 'Mühasibatlıq', kind: 'pay' }
+];
+
+const REASONS = [
+  { key: 'hours', label: 'Saat sayı düz deyil' },
+  { key: 'group', label: 'Qrup/tələbə sayı səhvdir' },
+  { key: 'subject', label: 'Fənn ixtisasım deyil' },
+  { key: 'over', label: 'Norma həddindən artıqdır' }
+];
+
+class Component extends DCLogic {
+  state = {
+    view: 'load', modal: null, toast: '',
+    fYear: '2026 / 2027', fSem: 'Hamısı', fLevel: 'Hamısı',
+    applied: { sem: 'Hamısı', level: 'Hamısı' },
+    rowIdx: null, confirmed: false, read: false,
+    oSubject: ROWS[0].subject, oReason: null, oText: '',
+    objections: [
+      { subject: 'Verilənlər bazasının idarə edilməsi', text: 'CS-303 qrupu əlavə olundu, lakin laboratoriya saatı ikiqat artmadı.', when: '30.07.2026', status: 'Cavablandırıldı', done: true },
+      { subject: 'Alqoritmlər və verilənlər strukturu', text: 'CS-402 qrupunda tələbə sayı 26 deyil, 22-dir.', when: '18.07.2026', status: 'Bağlandı', done: true }
+    ]
+  };
+
+  renderVals() {
+    const s = this.state;
+    const set = (o) => this.setState(o);
+    const fmt = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const a = s.applied;
+
+    const stColor = (st) => st === 'Yeni təyin edilib' ? ['#dcfce7', '#166534']
+      : (st === 'Dəyişdirilib' ? ['#fef3c7', '#92400e'] : ['#eff6ff', '#1d4ed8']);
+
+    const shown = ROWS.map((r, i) => ({ r, i })).filter((o) =>
+      (a.sem === 'Hamısı' || o.r.sem === a.sem) && (a.level === 'Hamısı' || o.r.level === a.level));
+
+    const rows = shown.map((o, k) => {
+      const r = o.r, total = r.muh + r.sem_ + r.lab + r.other;
+      const st = stColor(r.status);
+      return {
+        subject: r.subject, meta: r.code + ' · ' + r.credit + ' · ' + r.level,
+        groups: r.groups, sem: r.sem,
+        semBg: r.sem === 'Payız' ? '#eff6ff' : '#f5f3ff',
+        semFg: r.sem === 'Payız' ? '#1d4ed8' : '#6d28d9',
+        muh: r.muh || '—', sem_: r.sem_ || '—', lab: r.lab || '—', other: r.other || '—',
+        total, status: r.status, stBg: st[0], stFg: st[1],
+        bg: k % 2 ? '#f8fafc' : '#ffffff',
+        onOpen: () => set({ modal: 'row', rowIdx: o.i })
+      };
+    });
+
+    const sum = (f) => shown.reduce((n, o) => n + o.r[f], 0);
+    const shownHours = sum('muh') + sum('sem_') + sum('lab') + sum('other');
+
+    const plan = PLAN.map((p) => {
+      const pct = Math.round((p.fact / p.plan) * 100);
+      return {
+        no: p.no, title: p.title, note: p.note,
+        plan: p.plan + ' saat', fact: p.fact + ' saat',
+        pct: pct + '%',
+        bar: pct >= 90 ? '#16a34a' : (pct >= 40 ? '#2563eb' : '#f59e0b'),
+        factFg: pct >= 90 ? '#16a34a' : '#0f172a',
+        iconBg: p.no === '1' ? '#eff6ff' : (p.no === '2' ? '#f5f3ff' : (p.no === '3' ? '#ecfdf5' : '#fff7ed')),
+        iconFg: p.no === '1' ? '#1d4ed8' : (p.no === '2' ? '#6d28d9' : (p.no === '3' ? '#047857' : '#c2410c')),
+        items: p.items.map((it, i) => ({
+          name: it.name, due: it.due, hours: it.hours + ' saat', status: it.status,
+          dot: it.ok === 1 ? '#16a34a' : (it.ok === 2 ? '#f59e0b' : '#cbd5e1'),
+          stBg: it.ok === 1 ? '#f0fdf4' : (it.ok === 2 ? '#fffbeb' : '#f1f5f9'),
+          stFg: it.ok === 1 ? '#166534' : (it.ok === 2 ? '#92400e' : '#64748b'),
+          bg: i % 2 ? '#fcfdfe' : '#ffffff'
+        }))
+      };
+    });
+
+    const paid = PAID.map((p, i) => ({
+      month: p.month, work: p.work, hours: p.hours, amount: p.amount, status: p.status,
+      stBg: p.status === 'Ödənilib' ? '#f0fdf4' : (p.status === 'Təsdiqlənib' ? '#eff6ff' : '#fffbeb'),
+      stFg: p.status === 'Ödənilib' ? '#166534' : (p.status === 'Təsdiqlənib' ? '#1d4ed8' : '#92400e'),
+      bg: i % 2 ? '#f8fafc' : '#ffffff'
+    }));
+
+    const kc = { new: ['#dcfce7', '#166534'], ok: ['#eff6ff', '#1d4ed8'], warn: ['#fef3c7', '#92400e'], pay: ['#f1f5f9', '#475569'] };
+    const notes = NOTES.map((n, i) => ({
+      title: n.title, tag: n.tag, body: n.body, when: n.when, who: n.who,
+      tagBg: kc[n.kind][0], tagFg: kc[n.kind][1],
+      iconBg: kc[n.kind][0], iconFg: kc[n.kind][1],
+      bg: (!s.read && i < 2) ? '#f9fbff' : '#ffffff'
+    }));
+
+    const objections = s.objections.map((o) => ({
+      subject: o.subject, text: o.text, when: o.when, status: o.status,
+      bd: o.done ? '#e2e8f0' : '#fed7aa',
+      bg: o.done ? '#ffffff' : '#fff7ed',
+      stBg: o.done ? '#f1f5f9' : '#ffedd5',
+      stFg: o.done ? '#475569' : '#c2410c'
+    }));
+
+    const flow = [
+      { step: 'Tədris şöbəsi tapşırığı hazırladı', when: '18.07.2026', done: true },
+      { step: 'Koordinator vizası', when: '25.07.2026', done: true },
+      { step: 'Dekanlıq təsdiqi', when: '02.08.2026', done: true },
+      { step: 'Kafedra bölgüsü — sizə təyin edildi', when: '05.08.2026', done: true },
+      { step: 'Müəllim təsdiqi', when: s.confirmed ? '07.08.2026' : 'gözlənilir', done: s.confirmed }
+    ].map((f) => ({
+      step: f.step, when: f.when,
+      mark: f.done ? '✓' : '•',
+      dotBg: f.done ? '#16a34a' : '#334155',
+      dotFg: f.done ? '#ffffff' : '#94a3b8',
+      fg: f.done ? '#e2e8f0' : '#94a3b8'
+    }));
+
+    const mi = s.rowIdx;
+    const m = mi === null ? null : ROWS[mi];
+    const mActs = m === null ? [] : [
+      { label: 'Mühazirə', hours: m.muh, note: 'axın dərsi', tagBg: '#dbeafe', tagFg: '#1d4ed8' },
+      { label: 'Seminar', hours: m.sem_, note: 'qrup üzrə', tagBg: '#fef3c7', tagFg: '#92400e' },
+      { label: 'Laboratoriya', hours: m.lab, note: 'yarımqrup üzrə', tagBg: '#dcfce7', tagFg: '#166534' },
+      { label: 'Digər iş', hours: m.other, note: 'rəhbərlik saatları', tagBg: '#f1f5f9', tagFg: '#475569' }
+    ].filter((x) => x.hours > 0).map((x, i) => Object.assign({}, x, { bg: i % 2 ? '#f8fafc' : '#ffffff' }));
+
+    const canSend = !!s.oReason && s.oText.trim().length > 4;
+
+    return {
+      crumb: { load: 'Şəxsi yükum', plan: 'Fərdi plan', paid: 'Saathesabı', notes: 'Bildirişlər' }[s.view],
+      pageTitle: { load: 'Şəxsi dərs yükum', plan: 'Fərdi iş planı', paid: 'Saathesabı yük və ödəniş', notes: 'Bildirişlər və etirazlar' }[s.view],
+      pageSub: {
+        load: '2026 / 2027 tədris ili üzrə mənə təyin edilmiş yük — kafedra müdirinin bölgüsü əsasında.',
+        plan: 'Tədris, metodiki, elmi və təşkilati işin illik planı və icra vəziyyəti.',
+        paid: 'Norma üstü icra edilən saatlar və onların ödəniş vəziyyəti.',
+        notes: 'Yükünüzdə baş verən dəyişikliklər və göndərdiyiniz etirazların gedişi.'
+      }[s.view],
+      isLoad: s.view === 'load', isPlan: s.view === 'plan', isPaid: s.view === 'paid', isNotes: s.view === 'notes',
+
+      navLBg: s.view === 'load' ? '#3b82f6' : 'transparent', navLFg: s.view === 'load' ? '#ffffff' : '#64748b', navLSh: s.view === 'load' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navPBg: s.view === 'plan' ? '#3b82f6' : 'transparent', navPFg: s.view === 'plan' ? '#ffffff' : '#64748b', navPSh: s.view === 'plan' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navSBg: s.view === 'paid' ? '#3b82f6' : 'transparent', navSFg: s.view === 'paid' ? '#ffffff' : '#64748b', navSSh: s.view === 'paid' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+      navNBg: s.view === 'notes' ? '#3b82f6' : 'transparent', navNFg: s.view === 'notes' ? '#ffffff' : '#64748b', navNSh: s.view === 'notes' ? '0 4px 12px rgba(59,130,246,.25)' : 'none',
+
+      noteCount: s.read ? 0 : 2,
+      normPct: '111%', normBarW: '100%', normBar: '#f59e0b', normFg: '#b45309',
+
+      okLabel: s.confirmed ? 'TƏSDİQLƏDİM' : 'TƏSDİQ GÖZLƏYİR',
+      okBg: s.confirmed ? '#dcfce7' : '#fef3c7',
+      okFg: s.confirmed ? '#166534' : '#92400e',
+      okBd: s.confirmed ? '#bbf7d0' : '#fde68a',
+      cfLabel: s.confirmed ? 'Təsdiqlənib · 07.08.2026' : 'Yükumu təsdiqləyirəm',
+      cfBg: s.confirmed ? '#f0fdf4' : '#16a34a',
+      cfFg: s.confirmed ? '#166534' : '#ffffff',
+      cfBd: s.confirmed ? '#bbf7d0' : '#16a34a',
+      cfCur: s.confirmed ? 'default' : 'pointer',
+
+      fYear: s.fYear, fSem: s.fSem, fLevel: s.fLevel,
+      onFYear: (e) => set({ fYear: e.target.value }),
+      onFSem: (e) => set({ fSem: e.target.value }),
+      onFLevel: (e) => set({ fLevel: e.target.value }),
+      applyFilters: () => set({ applied: { sem: s.fSem, level: s.fLevel } }),
+      resetFilters: () => set({ fSem: 'Hamısı', fLevel: 'Hamısı', applied: { sem: 'Hamısı', level: 'Hamısı' } }),
+      appliedLabel: s.fYear + ' · ' + a.sem + ' · ' + a.level,
+
+      rows, noRows: rows.length === 0, rowCount: rows.length,
+      shownHours: fmt(shownHours),
+      sumMuh: sum('muh'), sumSem: sum('sem_'), sumLab: sum('lab'), sumOther: sum('other'),
+
+      plan, paid, notes, objections, flow,
+
+      showRow: s.modal === 'row', showObj: s.modal === 'obj', toast: s.toast,
+      mSubject: m ? m.subject : '',
+      mMeta: m ? (m.code + ' · ' + m.groups + ' · ' + m.sem + ' semestri') : '',
+      mCredit: m ? m.credit : '', mStudents: m ? m.students : '',
+      mWeekly: m ? m.weekly : '', mTotal: m ? (m.muh + m.sem_ + m.lab + m.other) : '',
+      mActs,
+
+      subjectOptions: ROWS.map((r) => ({ name: r.subject })),
+      oSubject: s.oSubject, oText: s.oText,
+      onOSubject: (e) => set({ oSubject: e.target.value }),
+      onOText: (e) => set({ oText: e.target.value }),
+      reasons: REASONS.map((r) => ({
+        label: r.label,
+        bd: s.oReason === r.key ? '#2563eb' : '#cbd5e1',
+        bg: s.oReason === r.key ? '#eff6ff' : '#ffffff',
+        fg: s.oReason === r.key ? '#1d4ed8' : '#334155',
+        onPick: () => set({ oReason: r.key })
+      })),
+      sendBg: canSend ? '#c2410c' : '#f1f5f9',
+      sendFg: canSend ? '#ffffff' : '#94a3b8',
+      sendBd: canSend ? '#c2410c' : '#e2e8f0',
+      sendCur: canSend ? 'pointer' : 'not-allowed',
+
+      goLoad: () => set({ view: 'load' }),
+      goPlan: () => set({ view: 'plan' }),
+      goPaid: () => set({ view: 'paid' }),
+      goNotes: () => set({ view: 'notes' }),
+      readAll: () => set({ read: true }),
+      stop: (e) => e.stopPropagation(),
+      closeModal: () => set({ modal: null, rowIdx: null }),
+      openObj: () => set({ modal: 'obj', oReason: null, oText: '' }),
+      objFromRow: () => set({ modal: 'obj', oSubject: m ? m.subject : s.oSubject, oReason: null, oText: '' }),
+      confirmLoad: () => { if (!s.confirmed) { set({ confirmed: true, toast: 'Yükünüz təsdiqləndi — kafedra müdirinə bildiriş göndərildi.' }); setTimeout(() => this.setState({ toast: '' }), 3200); } },
+      sendObj: () => {
+        if (!canSend) return;
+        set({
+          modal: null,
+          objections: [{ subject: s.oSubject, text: s.oText.trim(), when: '07.08.2026', status: 'Baxılır', done: false }].concat(s.objections),
+          oText: '', oReason: null,
+          view: 'notes',
+          toast: 'Etiraz göndərildi — kafedra müdiri 3 iş günü ərzində cavab verəcək.'
+        });
+        setTimeout(() => this.setState({ toast: '' }), 3600);
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

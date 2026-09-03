@@ -18,7 +18,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.registrar import grade_audit, services
+from apps.registrar import exam_eligibility, grade_audit, services
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -35,6 +35,10 @@ MARK_EDIT_WINDOW = timedelta(hours=2)  # iştirak/bal yazıldıqdan sonra
 DATE_EDIT_WINDOW = LESSON_EDIT_WINDOW  # köhnə ad (geriyə-uyğunluq)
 
 DEFAULT_LESSON_HOURS = 2
+
+#: "Verilməyib" sentineli — ``None`` özü mənalı dəyərdir (məs. otağı təmizlə),
+#: ona görə "dəyişmə" halını ondan ayırmaq lazımdır (gradebook_lessons işlədir).
+UNSET = object()
 LESSON_SCORE_MAX = Decimal("10")  # seminar/lab balı: min 0, max 10
 _DEFAULT_ABSENCE_LIMIT = 25
 _WARN_RATIO = Decimal("0.75")  # limitin bu payına çatanda xəbərdarlıq (bozarır)
@@ -60,14 +64,17 @@ def ensure_assessment_scheme(*, offering):
     return scheme
 
 
-# Approval-chain statuses that freeze the journal (no mark/score edits) — U7.2.
-_APPROVAL_LOCK_STATUSES = frozenset({"submitted", "chair_approved", "approved"})
+# Jurnalı donduran YEGANƏ vəziyyət: RİM-in bağladığı jurnal. Ara statuslar
+# artıq yaradılmır — təsdiq zənciri ləğv edilib (registrar.0048 DRAFT-a endirir).
+# Tərif ``exam_eligibility``-dən gəlir: buraxılış statusunun donma meyarı da
+# EYNİ kilidə söykənir, iki tərif heç vaxt bir-birindən sürüşməməlidir.
+_CLOSED_STATUSES = exam_eligibility._LOCKED_STATUSES
 
 
 def journal_is_locked(offering) -> bool:
-    """The journal is locked once finalised OR while under grade approval."""
+    """Jurnal bağlıdırmı — RİM semestr sonunda bağlayıb (yaxud legacy import)."""
     scheme = ensure_assessment_scheme(offering=offering)
-    return scheme.is_published or scheme.approval_status in _APPROVAL_LOCK_STATUSES
+    return scheme.is_published or scheme.approval_status in _CLOSED_STATUSES
 
 
 def lesson_allows_score(lesson) -> bool:
@@ -104,140 +111,6 @@ def absence_limit_percent_for(offering) -> int:
     return _DEFAULT_ABSENCE_LIMIT
 
 
-# ── Lesson (dərs) CRUD ───────────────────────────────────────────────────────
-
-
-def _coerce_date(value):
-    import datetime
-
-    if isinstance(value, datetime.date):
-        return value
-    try:
-        return datetime.date.fromisoformat(str(value))
-    except (TypeError, ValueError):
-        return None
-
-
-@transaction.atomic
-def create_lesson(
-    *,
-    offering,
-    date,
-    kind=LessonKind.LECTURE,
-    topic="",
-    hours=None,
-    start_time=None,
-    end_time=None,
-    created_by=None,
-    instructor=None,
-    allow_past=False,
-):
-    """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
-    ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir."""
-    if journal_is_locked(offering):
-        raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
-    parsed = _coerce_date(date)
-    if parsed is None:
-        raise LessonRuleError("Dərs tarixi düzgün deyil.")
-    if not allow_past and parsed < timezone.localdate():
-        raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
-    new_hours = hours or DEFAULT_LESSON_HOURS
-    if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
-        raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
-    ensure_assessment_scheme(offering=offering)
-    return Lesson.objects.create(
-        organization=offering.organization,
-        offering=offering,
-        date=parsed,
-        kind=kind,
-        topic=topic or "",
-        hours=new_hours,
-        start_time=start_time,
-        end_time=end_time,
-        created_by=created_by,
-        instructor=instructor or offering.instructor,
-    )
-
-
-@transaction.atomic
-def update_lesson(
-    *,
-    lesson,
-    date=None,
-    kind=None,
-    topic=None,
-    hours=None,
-    start_time=None,
-    end_time=None,
-    instructor=None,
-    allow_past=False,
-    allow_locked=False,
-) -> bool:
-    """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked``/``allow_past``
-    pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli."""
-    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
-        return False
-    fields = []
-    if date is not None:
-        parsed = _coerce_date(date)
-        if parsed is None:
-            raise LessonRuleError("Dərs tarixi düzgün deyil.")
-        if parsed < timezone.localdate() and not allow_past:
-            raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
-        lesson.date = parsed
-        fields.append("date")
-    if kind is not None and kind in dict(LessonKind.choices):
-        lesson.kind = kind
-        fields.append("kind")
-    if topic is not None:
-        lesson.topic = topic
-        fields.append("topic")
-    if hours is not None:
-        lesson.hours = hours
-        fields.append("hours")
-    if start_time is not None:
-        lesson.start_time = start_time or None
-        fields.append("start_time")
-    if end_time is not None:
-        lesson.end_time = end_time or None
-        fields.append("end_time")
-    if instructor is not None:
-        lesson.instructor = instructor
-        fields.append("instructor")
-    if fields:
-        lesson.save(update_fields=fields)
-    return True
-
-
-@transaction.atomic
-def delete_lesson(*, lesson, by_user=None, allow_locked=False) -> bool:
-    """Səhv açılmış dərsi sil (2 saat içində; ``allow_locked`` İKT/superuser üçün keçir).
-    İşarələr kaskadla silinir; əməliyyat audit tarixçəsinə düşür."""
-    if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
-        return False
-    offering = lesson.offering
-    label = f"{lesson.date} · {lesson.get_kind_display()}"
-    touched = [m.enrollment for m in LessonMark.objects.filter(lesson=lesson).select_related("enrollment")]
-    lesson.delete()
-    for enrollment in touched:
-        recompute_absence_hours(enrollment=enrollment)
-    grade_audit.log_grade_changes(
-        offering=offering,
-        by_user=by_user,
-        kind="mark",
-        changes=[{"student": "—", "item": label, "old": "dərs sütunu", "new": "silindi"}],
-    )
-    return True
-
-
-# Köhnə ad — mövcud çağırışlar üçün (yalnız tarix dəyişən variant).
-def update_lesson_date(*, lesson, date) -> bool:
-    try:
-        return update_lesson(lesson=lesson, date=date)
-    except LessonRuleError:
-        return False
-
-
 # ── Mark (iştirak/bal) yazma ─────────────────────────────────────────────────
 
 
@@ -263,7 +136,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     from .models import JournalCorrection
 
     corrected_ids = set(
-        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering, reversal__isnull=True).values_list(
             "lesson_mark_id", flat=True
         )
     )
@@ -365,13 +238,21 @@ def _mark_repr(status, score) -> str:
 
 
 def recompute_absence_hours(*, enrollment):
-    """Recompute Enrollment.absence_hours from the student's lesson marks (qb)."""
+    """Recompute Enrollment.absence_hours from the student's lesson marks (qb).
+
+    ALT QRUP BİRLƏŞMƏSİ: tələbə öz jurnalından azad edilib bura köçürülübsə,
+    əvvəlki jurnalda yığdığı qayıb saatı da ÜSTƏGƏLdir — 25% buraxılış həddi
+    dərsə yox, FƏNNƏ + SEMESTRƏ aiddir, birləşmə onu sıfırlamamalıdır
+    (bax :mod:`apps.registrar.guest_merge`). Adi sətirlərdə ƏLAVƏ SORĞU OLMUR.
+    """
+    from apps.registrar import guest_merge
+
     hours = sum(
         m.lesson.hours
         for m in LessonMark.objects.filter(enrollment=enrollment, status=AttendanceStatus.ABSENT).select_related(
             "lesson"
         )
-    )
+    ) + guest_merge.carried_absence_hours(enrollment)
     if enrollment.absence_hours != hours:
         enrollment.absence_hours = hours
         enrollment.save(update_fields=["absence_hours"])
@@ -391,9 +272,17 @@ def _lesson_parity(offering, lesson) -> str:
 # ── Jurnal görünüşü (müəllim grid) ───────────────────────────────────────────
 
 
-def _allowed_absence_hours(offering, lessons):
-    total_hours = offering.lesson_hours or sum(latt.hours for latt in lessons)
-    return Decimal(total_hours) * Decimal(absence_limit_percent_for(offering)) / Decimal(100)
+def _allowed_absence_hours(offering, lessons, *, limit_percent=None):
+    """İcazəli qayıb saatı.
+
+    ``limit_percent`` verilibsə TƏKRAR sorğu edilmir — çağıran onu artıq
+    oxuyubsa (``get_offering_journal``), ``absence_limit_percent_for`` ikinci
+    dəfə ``StudentAcademicRecord``-a getməməlidir.
+    """
+    total_hours = exam_eligibility.lesson_hours_for(offering, lessons)
+    if limit_percent is None:
+        limit_percent = absence_limit_percent_for(offering)
+    return Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
 
 
 def get_offering_journal(*, offering, newest_first=False):
@@ -408,24 +297,50 @@ def get_offering_journal(*, offering, newest_first=False):
     lessons = list(offering.lessons.order_by("date", "created_at"))
     if newest_first:
         lessons.reverse()
+    # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student", "source_group")
         .order_by("student__last_name", "student__username")
     )
     mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
+    # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
+    from apps.registrar import finals_batch
+
+    entry_batch = finals_batch.entry_batch(enrollments)
+    # «Alt qrup» çipi CARİ iddiadır: rəsmi köçürmədən sonra tələbə artıq bu qrupun
+    # üzvüdürsə provenans qalsa da çip yalan danışmamalıdır (bax guest_roster).
+    from apps.registrar import guest_merge, guest_roster
+
+    guest_ids = [e.id for e in enrollments if e.source_group_id]
+    current_groups = guest_roster.current_group_map(
+        organization_id=offering.organization_id,
+        student_ids=[e.student_id for e in enrollments if e.source_group_id],
+    )
+    # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
+    carry_map = guest_merge.carry_over_map(guest_ids)
     # Rəsmi düzəliş almış xanalar (sarı + kilidli göstəriş üçün).
     from .models import JournalCorrection
 
     corrected_mark_ids = set(
-        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering).values_list(
+        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering, reversal__isnull=True).values_list(
             "lesson_mark_id", flat=True
         )
     )
 
     now = timezone.now()
     today = timezone.localdate()
-    allowed_absence = _allowed_absence_hours(offering, lessons)
+    limit_percent = absence_limit_percent_for(offering)
+    allowed_absence = _allowed_absence_hours(offering, lessons, limit_percent=limit_percent)
+    # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`): qrid buraxılış
+    # qaydasını təkrar yazmır. Açılış üzrə bir dəfə həll olunur — sətir başına
+    # yoxlama N+1 olardı.
+    frozen = exam_eligibility.is_frozen(offering)
+    # Məxrəc + idmançı istisnası da TƏK mənbədən; istisna toplu oxunur (tək
+    # sorğu), sətir-sətir N+1 olardı (2026-08-31 düşmən baxışı, 3-cü bloker).
+    total_hours = exam_eligibility.lesson_hours_for(offering, lessons)
+    exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
     warn_at = allowed_absence * _WARN_RATIO
 
     # Per-lesson özət (müəllim: redaktə pəncərəsi keçmiş sütun başlığına klik →
@@ -494,10 +409,27 @@ def get_offering_journal(*, offering, newest_first=False):
                     and ((mark is not None and not locked) or (mark is None and lesson.date == today)),
                 }
             )
+        # Birləşmədən gələn qayıb saatı buraxılış həddinə DAXİLDİR (bax
+        # guest_merge): əks halda alt qrup birləşməsi hədd sayğacını sıfırlayardı.
+        carry = carry_map.get(enrollment.id)
+        own_absence_hours = absence_hours
+        if carry:
+            absence_hours += carry["absence_hours"]
+            absence_count += carry["absence_count"]
         # Canonical entry score (component-weighted when defined, else lesson sum).
-        entry_score = entry_score_for(enrollment, scheme.entry_score_max)
-        barred = allowed_absence > 0 and Decimal(absence_hours) > allowed_absence
-        warning = (not barred) and allowed_absence > 0 and Decimal(absence_hours) >= warn_at
+        entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_batch.entry_kwargs(enrollment))
+        eligibility = exam_eligibility.resolve(
+            absence_hours=absence_hours,
+            lesson_hours=total_hours,
+            allowed_hours=allowed_absence,
+            limit_percent=limit_percent,
+            exempt=enrollment.student_id in exempt_ids,
+            frozen=frozen,
+        )
+        barred = eligibility["barred"]
+        # Xəbərdarlıq zolağı da donmuş dilimdə susur: «həddə yaxınlaşır» xəbəri
+        # yalnız hələ qərar verilə bilən semestrdə mənalıdır.
+        warning = (not frozen) and (not barred) and allowed_absence > 0 and Decimal(absence_hours) >= warn_at
         rows.append(
             {
                 "enrollment": enrollment,
@@ -509,6 +441,18 @@ def get_offering_journal(*, offering, newest_first=False):
                 "entry_score": entry_score,
                 "barred": barred,
                 "warning": warning,
+                "eligibility": eligibility,
+                # Alt qrupdan əlavə olunmuş tələbə: sətirdə çip + geri götürmə.
+                # Şərt CARİ vəziyyətə baxır — rəsmi köçürmədən sonra çip susur.
+                "is_guest": guest_roster.row_is_guest(
+                    enrollment,
+                    offering=offering,
+                    current_group_id=current_groups.get(enrollment.student_id),
+                ),
+                "source_group": enrollment.source_group,
+                # Birləşmədən gələn əvvəlki jurnal işi (yoxdursa None).
+                "carry_over": carry,
+                "own_absence_hours": own_absence_hours,
             }
         )
 
@@ -518,8 +462,10 @@ def get_offering_journal(*, offering, newest_first=False):
         "lessons": lessons,
         "lesson_meta": lesson_meta,
         "rows": rows,
+        # Alt qrupdan əlavə olunmuş sətirlər (idarəetmə modalının siyahısı).
+        "guest_rows": [row for row in rows if row["is_guest"]],
         "today": today,
-        "limit_percent": absence_limit_percent_for(offering),
+        "limit_percent": limit_percent,
         "allowed_absence": allowed_absence,
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
         "limit_qb": int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0,
@@ -533,8 +479,19 @@ def get_offering_journal(*, offering, newest_first=False):
 def get_student_journal_summary(*, record, period, semester_number):
     """Per-subject entry score + attendance for the student view.
 
-    Computes each enrolled subject's absence hours and accumulated entry score
-    from this student's own lesson marks (only their row — never the roster)."""
+    ⚠️ **9-cu səth — QAYIB SAATI DENORMALLAŞMIŞ SAYĞACDAN GƏLİR.**
+    Bu funksiya qayıb saatını tələbənin ÖZ işarələrindən yığırdı
+    (``sum(m.lesson.hours for m in marks if ABSENT)``) və məhz buna görə
+    :func:`recompute_absence_hours` ilə ZİDD idi: o, ``öz işarələr +
+    guest_merge.carried_absence_hours(...)`` yazır. Alt qrup birləşməsindən
+    sonra hədəf jurnalda tələbənin öz işarəsi hələ yoxdur, yəni bu səth 0 saat
+    görüb «buraxılır ✓, davamiyyət 10.00» yazırdı, ``exam_bridge`` isə eyni
+    tələbəni imtahandan BLOKLAYIRDI. Üstəlik ``registrar.public`` EYNİ səhifədə
+    hər iki rəqəmi göstərirdi (fənn kartı 0, detal paneli 6).
+
+    İndi mənbə digər səkkiz səthlə eynidir: ``Enrollment.absence_hours``.
+    İşarələr yalnız giriş balı üçün oxunur (bal dərsə bağlıdır, sayğac deyil).
+    """
     plan = services.get_student_semester_plan(record=record, period=period, semester_number=semester_number)
     limit_percent = record.program.absence_limit_percent if record.program else _DEFAULT_ABSENCE_LIMIT
     enrollments = plan["enrollments"]
@@ -552,6 +509,9 @@ def get_student_journal_summary(*, record, period, semester_number):
     comps_by_off: dict = defaultdict(list)
     for c in AssessmentComponent.objects.filter(offering_id__in=offering_ids):
         comps_by_off[c.offering_id].append(c)
+    # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu).
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     lesson_counts = {
         row["offering_id"]: row["c"]
         for row in Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(c=Count("id"))
@@ -561,14 +521,24 @@ def get_student_journal_summary(*, record, period, semester_number):
     for enrollment in enrollments:
         offering = enrollment.offering
         marks = marks_by_enr.get(enrollment.id, [])
-        absence_hours = sum(m.lesson.hours for m in marks if m.status == AttendanceStatus.ABSENT)
+        # TƏK MƏNBƏ: birləşmə ilə köçürülən saat da buradadır (bax yuxarıdakı şərh).
+        absence_hours = enrollment.absence_hours or 0
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
         entry_score = entry_score_for(enrollment, cap, marks=marks, components=comps_by_off.get(offering.id, []))
         lessons_held = lesson_counts.get(offering.id, 0)
-        total_hours = offering.lesson_hours or 0
+        total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
         allowed = Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
-        barred = allowed > 0 and Decimal(absence_hours) > allowed
+        eligibility = exam_eligibility.resolve(
+            absence_hours=absence_hours,
+            lesson_hours=total_hours,
+            allowed_hours=allowed,
+            limit_percent=limit_percent,
+            # Tək tələbəlik səth — istisna onsuz da qeyddədir (əlavə sorğu yox).
+            exempt=bool(record and record.national_athlete_exemption),
+            frozen=offering.id in frozen_ids,
+        )
+        barred = eligibility["barred"]
         subjects.append(
             {
                 "enrollment": enrollment,
@@ -582,6 +552,7 @@ def get_student_journal_summary(*, record, period, semester_number):
                     "entry_score": entry_score,
                     "entry_score_max": cap,
                     "barred": barred,
+                    "eligibility": eligibility,
                 },
             }
         )
@@ -594,6 +565,16 @@ from apps.registrar.gradebook_components import (  # noqa: E402,F401
     get_component_breakdown,
     get_component_grid,
     get_components,
+    round_score,
     save_component_scores,
     save_components,
+)
+
+# ── Dərs CRUD ayrıca modulda (modul-ölçü büdcəsi) — re-eksport ──────────────
+from apps.registrar.gradebook_lessons import (  # noqa: E402,F401
+    _coerce_date,
+    create_lesson,
+    delete_lesson,
+    update_lesson,
+    update_lesson_date,
 )

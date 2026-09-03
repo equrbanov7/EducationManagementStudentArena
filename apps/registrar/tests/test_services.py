@@ -3,7 +3,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import services
 from apps.registrar.models import (
     Curriculum,
@@ -81,6 +81,12 @@ class EnrollmentFlowTest(TestCase):
             self.students = []
             for i in range(3):
                 u = User.objects.create_user(f"svc_student{i}", f"svc_student{i}@qku.edu.az", "pw")
+                Membership.objects.create(
+                    organization=self.org,
+                    user=u,
+                    role=self.org.roles.get(name="student"),
+                    is_active=True,
+                )
                 rec = StudentAcademicRecord.objects.create(
                     organization=self.org,
                     student=u,
@@ -138,6 +144,12 @@ class EnrollmentFlowTest(TestCase):
             )
             # A new student joins the group after the decision.
             late = User.objects.create_user("svc_late", "svc_late@qku.edu.az", "pw")
+            Membership.objects.create(
+                organization=self.org,
+                user=late,
+                role=self.org.roles.get(name="student"),
+                is_active=True,
+            )
             StudentAcademicRecord.objects.create(
                 organization=self.org,
                 student=late,
@@ -186,23 +198,35 @@ class EnrollmentFlowTest(TestCase):
             self.assertEqual(plan["group_decisions"]["SB1"].code, "EL-B")
 
     def test_credit_summary_bologna_progress(self):
+        """Kredit qiymətlərdən gəlir, ``Enrollment.status``-dan YOX.
+
+        Qiymətsiz (hələ gedən) semestrdə heç bir kredit toplanmır; qeydiyyatları
+        ``COMPLETED`` işarələmək də kredit qazandırmır — status bu layihədə
+        yazı/görünmə qapısıdır, kredit mənbəyi deyil. Toplanmış kreditin
+        transkriptlə eyniliyi ``test_transcript.py``-də kilidlənib."""
+        import datetime
+
         from apps.registrar.models import Enrollment
 
         with bypass_rls():
             self.program.ects_total = 12  # small for the test
             self.program.save(update_fields=["ects_total"])
             services.enroll_mandatory_subjects(record=self.students[0], period=self.period, semester_number=1)
-            # MATH101(default ects=5) + CS101(5) enrolled → in-progress 10, earned 0.
-            summary = services.get_credit_summary(record=self.students[0])
+            # MATH101(default ects=5) + CS101(5) — semestr hələ gedir → davam edən 10, toplanmış 0.
+            during = datetime.date(2024, 10, 1)  # self.period: 2024-09-01 → 2025-01-31
+            summary = services.get_credit_summary(record=self.students[0], today=during)
             self.assertEqual(summary["earned"], 0)
             self.assertEqual(summary["in_progress"], 10)
             self.assertEqual(summary["required"], 12)
             self.assertFalse(summary["can_graduate"])
-            # Complete both → earned 10, remaining 2.
+            # Semestr bitəndən sonra qiymətsiz fənlər artıq "davam etmir".
+            ended = services.get_credit_summary(record=self.students[0], today=datetime.date(2025, 3, 1))
+            self.assertEqual(ended["in_progress"], 0)
+            # Statusu COMPLETED etmək krediti QAZANDIRMIR (köhnə xətanın qapısı).
             Enrollment.objects.filter(student=self.students[0].student).update(status=Enrollment.Status.COMPLETED)
-            summary = services.get_credit_summary(record=self.students[0])
-            self.assertEqual(summary["earned"], 10)
-            self.assertEqual(summary["remaining"], 2)
+            summary = services.get_credit_summary(record=self.students[0], today=during)
+            self.assertEqual(summary["earned"], 0)
+            self.assertEqual(summary["remaining"], 12)
 
     def test_exam_eligibility_absence_limit(self):
         from apps.registrar.models import CourseOffering

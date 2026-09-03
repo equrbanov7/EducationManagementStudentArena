@@ -5,5 +5,5 @@ build_profile_registrar_section (yalnız aktiv bölmə üçün qurulur — lazy)
 <section class="profile-section-panel profile-section--analytics profile-section--registrar-embed {% if active_section == 'analytics' %}is-active{% endif %}"
          data-profile-section-panel="analytics"
          data-source-url="{{ profile_base_url }}?section=analytics">
-    {% include "registrar/partials/_analytics_content.html" %}
+    {% include "registrar/partials/_analytics_content.html" with embedded_in_shell=True %}
 </section>

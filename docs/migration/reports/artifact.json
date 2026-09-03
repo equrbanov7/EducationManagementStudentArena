@@ -1,0 +1,460 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "EMSArena legacy miqrasiyası: icra planı və cari verification baseline",
+    "description": "Legacy məlumatın lokal uyğunlaşdırılması, təsdiqlənmiş PostgreSQL/control-plane baseline-ı və bir dəfəlik production cutover üçün texniki qərar hesabatı.",
+    "generatedAt": "2026-08-24T10:37:49Z",
+    "charts": [
+      {
+        "id": "reconciliation_workload_chart",
+        "title": "Təsdiqlənmiş reconciliation iş həcmi",
+        "subtitle": "Kateqoriya üzrə təsirlənən legacy sətir sayı; denominator-lar fərqlidir və sıralama severity deyil.",
+        "showDescription": true,
+        "type": "horizontalBar",
+        "intent": "comparison",
+        "question": "İlkin mapping və reconciliation işində hansı təsdiqlənmiş kateqoriyalar daha çox sətir tələb edir?",
+        "rationale": "Dörd uzun kateqoriya etiketi üzrə bir ölçünü müqayisə etmək üçün sıralanmış horizontal bar ən oxunaqlı formadır.",
+        "comparisonContext": {
+          "denominator": "Hər kateqoriyanın öz ayrıca denominator-u var; tooltip və bitişik izahda göstərilir.",
+          "grain": "Bir reconciliation kateqoriyası üzrə təsirlənən legacy sətirləri",
+          "normalization": "Raw row count; kateqoriyalar toplanmır və severity score-a çevrilmir.",
+          "semanticFamily": "Legacy data-quality reconciliation workload",
+          "unit": "sətir"
+        },
+        "dataset": "reconciliation_workload",
+        "sourceId": "report_data_sql",
+        "encodings": {
+          "x": {
+            "field": "category",
+            "type": "nominal",
+            "label": "Reconciliation kateqoriyası"
+          },
+          "y": {
+            "field": "affected_rows",
+            "type": "quantitative",
+            "label": "Təsirlənən sətir sayı",
+            "format": "number"
+          },
+          "tooltip": [
+            {
+              "field": "affected_rows",
+              "type": "quantitative",
+              "label": "Təsirlənən sətir",
+              "format": "number"
+            },
+            {
+              "field": "denominator_rows",
+              "type": "quantitative",
+              "label": "Denominator",
+              "format": "number"
+            },
+            {
+              "field": "rate_label",
+              "type": "text",
+              "label": "Kateqoriya daxili pay"
+            },
+            {
+              "field": "denominator_label",
+              "type": "text",
+              "label": "Əhali"
+            }
+          ]
+        },
+        "xAxisTitle": "Reconciliation kateqoriyası",
+        "yAxisTitle": "Təsirlənən sətir sayı",
+        "valueFormat": "number",
+        "layout": "full",
+        "maxRows": 4,
+        "labels": {
+          "values": "all"
+        },
+        "palette": {
+          "kind": "sequential",
+          "name": "blue"
+        },
+        "settings": {
+          "orientation": "horizontal",
+          "groupMode": "single",
+          "sort": "descending",
+          "showValues": true,
+          "categoryLabelPolicy": "wrap"
+        },
+        "surface": {
+          "surface": "card",
+          "interactiveLegend": false,
+          "showControls": true,
+          "viewMode": "both"
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "phase_sequence_table",
+        "title": "Miqrasiya mərhələləri və çıxış sübutları",
+        "subtitle": "M0–M8 ardıcıllığı; hər mərhələ növbəti mərhələyə keçməzdən əvvəl yoxlanılan gate yaradır.",
+        "showDescription": true,
+        "dataset": "phase_sequence",
+        "sourceId": "report_data_sql",
+        "defaultSort": {
+          "field": "phase_order",
+          "direction": "asc"
+        },
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          {
+            "field": "phase_order",
+            "label": "Sıra",
+            "type": "number"
+          },
+          {
+            "field": "phase",
+            "label": "Mərhələ",
+            "type": "text"
+          },
+          {
+            "field": "objective",
+            "label": "Əsas məqsəd",
+            "type": "text"
+          },
+          {
+            "field": "exit_evidence",
+            "label": "Çıxış sübutu",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "engine_gate_table",
+        "title": "Test engine məsuliyyət matrisi",
+        "subtitle": "SQLite transformasiya sürəti üçündür; PostgreSQL tenant və əməliyyat semantikası üçün məcburidir.",
+        "showDescription": true,
+        "dataset": "engine_gate_matrix",
+        "sourceId": "report_data_sql",
+        "defaultSort": {
+          "field": "gate_order",
+          "direction": "asc"
+        },
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          {
+            "field": "gate_order",
+            "label": "Sıra",
+            "type": "number"
+          },
+          {
+            "field": "check",
+            "label": "Yoxlama",
+            "type": "text"
+          },
+          {
+            "field": "sqlite",
+            "label": "SQLite",
+            "type": "text"
+          },
+          {
+            "field": "postgresql",
+            "label": "PostgreSQL",
+            "type": "text"
+          },
+          {
+            "field": "production_gate",
+            "label": "Production qərarı",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "migration_master_plan",
+        "label": "EMSArena legacy məlumat miqrasiyası — əsas plan",
+        "path": "docs/migration/MASTER_PLAN.md"
+      },
+      {
+        "id": "migration_status",
+        "label": "EMSArena legacy miqrasiyası — status ledger",
+        "path": "docs/migration/STATUS.md"
+      },
+      {
+        "id": "legacy_audit_snapshot",
+        "label": "Sanitizasiya edilmiş legacy audit snapshot-ı",
+        "path": "docs/migration/reports/LEGACY_AUDIT_SNAPSHOT.json"
+      },
+      {
+        "id": "report_data_sql",
+        "label": "Portable hesabat dataset derivation SQL-i",
+        "path": "docs/migration/reports/REPORT_DATA.sql"
+      },
+      {
+        "id": "current_verification_snapshot",
+        "label": "Cari sanitizasiya edilmiş migration verification snapshot-ı",
+        "path": "docs/migration/reports/CURRENT_VERIFICATION_SNAPSHOT.json"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# EMSArena legacy miqrasiyası: icra planı və cari verification baseline"
+      },
+      {
+        "id": "technical_summary",
+        "type": "markdown",
+        "sourceId": "current_verification_snapshot",
+        "body": "## İcra qərarı: core M2/M3 təhlükəsizlik qatları təsdiqlənib, production hələ NO-GO-dur\n\nReal 2.14 GB legacy snapshot strict read-only preflight-dən yenidən keçib: permission `0600`, ölçü **2,142,912,818** bayt, **81** cədvəl və gözlənilən SHA-256 eynidir. SQLite legacy suite-i **114 pass / 34 engine skip**, PostgreSQL legacy suite-i **146 pass / 2 engine skip** verib. Geniş inteqrasiya PostgreSQL-də **197/197**, core FK/RLS matrix-i **84/84** keçib.\n\nQrup transfer tarixçəsi, direct publish, permission scope, core child/parent tenant integrity, canlı instructor revocation, reviewed-remap versioning və credential-safe projection lokal kodda bağlanıb. Bu nəticə legacy data miqrasiyasının tamamlandığını göstərmir: qalan relation matrix, real extractor və activation, syllabus lifecycle, domain adapterləri, pilot, iki full rehearsal, encrypted custody və production cutover gate-ləri açıqdır; real server və business data dəyişdirilməyib."
+      },
+      {
+        "id": "baseline_status",
+        "type": "markdown",
+        "sourceId": "current_verification_snapshot",
+        "body": "## Cari verification: tarixçə, tenant integrity və append-only provenance yaşıl keçib\n\n- Disposable PostgreSQL 16 full schema-nı qəbul edib; legacy `0005 → 0004 → 0005` və registrar `0041 → 0040 → 0041` rollback/reapply keçib.\n- Ayrı synthetic migration owner-ları `NOSUPERUSER/NOBYPASSRLS` rejimində RLS-aware backfill və invalid-row precheck-i fail-closed təsdiqləyib.\n- Canonical `LegacyEntityMap` dəyişməzdir; hər run observation-u və reviewed remap version-u append-only saxlanır. Reviewer/time/reason/evidence natamamdırsa remap qəbul edilmir; review tarixçəsi varsa rollback məlumatı silmək əvəzinə STOP edir.\n- Default-deny source contract password, show_password və PIN sütunlarını projection-a buraxmır; bu contract hələ real extractor-a qoşulmayıb.\n- Core registrar graph-da child və parent tenant dəyişməsi, same-org FK və instructor membership/permission PostgreSQL trigger-ləri ilə qorunur; səlahiyyət revoke olduqda jurnal GET/POST dərhal 404 olur.\n- SQLite inteqrasiya suite-i **203 pass / 2 PG skip**, PostgreSQL inteqrasiya suite-i **197/197**, RLS/integrity suite-i **84/84** verib.\n- Heç bir legacy domain/business data və real server dəyişdirilməyib. Encrypted custody hələ açıq production gate-dir."
+      },
+      {
+        "id": "workload_finding",
+        "type": "markdown",
+        "sourceId": "legacy_audit_snapshot",
+        "body": "## Reconciliation yükü exam-answer orphan-larında cəmlənir, amma bu severity reytinqi deyil\n\nƏn böyük təsdiqlənmiş kateqoriya **575,715 / 1,306,274** orphan type-1 exam answer-dır. Digər ölçülər **23,979 / 5,135,289** aktiv orphan jurnal balı, **7,816 / 7,816** `speciality_id=0` tələbə və **7,225 / 7,816** FIN-i boş tələbədir.\n\nChart yalnız adapter, identity resolution və quarantine işinin **sətir həcmini** göstərir. Denominator-lar fərqlidir, tələbə kateqoriyaları üst-üstə düşə bilər və bar-lar toplanmamalıdır; buna görə bu vizual nə risk severity-si, nə də miqrasiya uğur faizi kimi oxunmalıdır."
+      },
+      {
+        "id": "workload_chart",
+        "type": "chart",
+        "chartId": "reconciliation_workload_chart",
+        "layout": "full"
+      },
+      {
+        "id": "metric_definitions",
+        "type": "markdown",
+        "sourceId": "migration_master_plan",
+        "body": "## Ölçü tərifləri migration success-i schema-fit-dən ayırır\n\n- **Source row accounting:** hər legacy sətir yekunda `migrated`, `skipped` və ya `quarantined` statusu almalıdır; kateqoriyaların cəmi source row sayına bərabər olmalıdır.\n- **Reconciliation workload:** avtomatik etibarlı mapping verilməyən və qayda, review və ya quarantine tələb edən source sətirləridir. Bu, severity ölçüsü deyil.\n- **Schema-fit:** `74.01%` row-volume-weighted ekspert uyğunluq qiymətidir, miqrasiya uğur faizi deyil. Böyük jurnal cədvəlinin payı nəticəni yuxarı çəkə bilər.\n- **Rehearsal:** immutable snapshot-dan təmiz PostgreSQL target-a tam, təkrarlana bilən import və reconciliation run-ıdır.\n- **Quarantine:** problemli sətirin silinməsi deyil; rule code, digest və redaktə edilmiş context ilə təhlükəsiz review növbəsinə ayrılmasıdır."
+      },
+      {
+        "id": "methodology_intro",
+        "type": "markdown",
+        "sourceId": "migration_master_plan",
+        "body": "## M0–M8 gate-ləri data yazma səlahiyyətini mərhələli açır\n\nPlan əvvəl source custody və test mühitini sabitləşdirir, sonra history, approval və tenant P0-larını bağlayır. Yalnız bundan sonra migration ledger, canonical mapping, pilot və iki full rehearsal domain data importuna etibar yaradır. Production cutover ayrıca backup/restore, write-freeze, məhdud importer role və iki nəfərlik GO qərarı tələb edir."
+      },
+      {
+        "id": "phase_sequence",
+        "type": "table",
+        "tableId": "phase_sequence_table",
+        "layout": "full"
+      },
+      {
+        "id": "engine_methodology",
+        "type": "markdown",
+        "sourceId": "migration_master_plan",
+        "body": "## SQLite sürətli yoxlamadır; PostgreSQL təhlükəsizlik və cutover sübutudur\n\nEngine-agnostic parser, normalization və deterministic transform testləri SQLite-da işləyə bilər. Tenant isolation, real FK/check semantics, advisory lock, concurrency, batch performance və restore davranışı isə PostgreSQL-dən asılıdır. Bu səbəbdən SQLite yaşıl olsa belə, məcburi PostgreSQL gate-lərindən biri fail edərsə production qərarı `STOP` olaraq qalır."
+      },
+      {
+        "id": "engine_gate",
+        "type": "table",
+        "tableId": "engine_gate_table",
+        "layout": "full"
+      },
+      {
+        "id": "limitations",
+        "type": "markdown",
+        "sourceId": "current_verification_snapshot",
+        "body": "## Yaşıl testlər migration complete və ya cutover-ready demək deyil\n\nCari testlər source preflight-i, disposable PostgreSQL schema/rollback-u, core RLS/FK davranışını, transfer/approval/scope düzəlişlərini, credential-safe projection müqaviləsini və reviewed-remap lifecycle invariant-lərini təsdiqləyir. Onlar 9,044,531 legacy sətrin field mapping-i, business-code çevrilməsi, source-row accounting-i, akademik reconciliation-u, batch resume performansı və iki full rehearsal determinism-i barədə hələ sübut vermir.\n\nEncrypted source custody; elective/rubric/self-work/coursework/resit/correction və actor FK-ləri; real extractor və account activation; approved syllabus lifecycle; production RBAC authorizer/target-validator; canonical domain adapterləri; biznes təsdiqli pilot; iki tam rehearsal və production backup/role/cutover attestasiyaları açıqdır. `0040` ziddiyyətli publish/status sətirlərini, `0041` isə mövcud tenant pozuntusunu səssiz dəyişmir və reconciliation olmadan dayanır. Buna görə status **production NO-GO** olaraq qalır."
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "sourceId": "current_verification_snapshot",
+        "body": "## Növbəti təhlükəsiz addım qalan relation matrix və read-only extractor-dur\n\n1. Legacy dump üçün encrypted, access-controlled custody qurmaq və eyni SHA/size manifestini hər run əvvəl attestasiya etmək.\n2. Elective, rubric, self-work, coursework, resit, correction və actor FK-ləri üçün cross-tenant INSERT/UPDATE və parent-mutation PostgreSQL matrix-i qurmaq.\n3. Real MySQL extractor-u yalnız compiled default-deny projection ilə qoşmaq; actual schema-da credential output/log sayını sıfır təsdiqləmək.\n4. Mövcud parolu overwrite etməyən locked-account və ayrıca qısaömürlü activation flow-u test etmək.\n5. Yekun dizayn/business acceptance-dan sonra versioned/approved syllabus source-of-truth və journal activation invariant-i qurmaq.\n6. Organization/academic reference adapterlərini read-only/dry-run hazırlamaq, sonra məhdud pilot və eyni source SHA ilə iki tam PostgreSQL rehearsal aparmaq."
+      },
+      {
+        "id": "further_questions",
+        "type": "markdown",
+        "body": "## Cutover-dan əvvəl cavablandırılmalı suallar\n\n- İlk pilot üçün hansı akademik period və təşkilati vahid biznes sahibi ilə təsdiqlənəcək?\n- Nonnumeric jurnal business-code mapping-lərini kim imzalayacaq və dəyişikliklər necə version-lanacaq?\n- Encrypted legacy custody və production backup restore sübutunun sahibi kim olacaq?\n- Production-da schema owner, məhdud importer və app runtime rolları hansı ayrı credential lifecycle-ları ilə idarə ediləcək?\n- Syllabus → approval → Journal vertical slice-i üçün yekun acceptance qərarını kim verəcək?"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-24T10:37:49Z",
+    "status": "ready",
+    "datasets": {
+      "reconciliation_workload": [
+        {
+          "rank": 1,
+          "category": "Orphan type-1 exam cavabı",
+          "affected_rows": 575715,
+          "denominator_rows": 1306274,
+          "rate_fraction": 0.440731,
+          "rate_label": "44.07%",
+          "denominator_label": "Bütün type-1 exam answer sətirləri",
+          "rule": "exam_answers.question_id -> exam_questions"
+        },
+        {
+          "rank": 2,
+          "category": "Orphan aktiv jurnal balı",
+          "affected_rows": 23979,
+          "denominator_rows": 5135289,
+          "rate_fraction": 0.004669,
+          "rate_label": "0.47%",
+          "denominator_label": "Bütün aktiv jurnal bal sətirləri",
+          "rule": "journals_dates_points.student_id -> students"
+        },
+        {
+          "rank": 3,
+          "category": "speciality_id=0 tələbə",
+          "affected_rows": 7816,
+          "denominator_rows": 7816,
+          "rate_fraction": 1.0,
+          "rate_label": "100.00%",
+          "denominator_label": "Bütün legacy tələbələr",
+          "rule": "students.speciality_id = 0"
+        },
+        {
+          "rank": 4,
+          "category": "FIN-i boş tələbə",
+          "affected_rows": 7225,
+          "denominator_rows": 7816,
+          "rate_fraction": 0.924386,
+          "rate_label": "92.44%",
+          "denominator_label": "Bütün legacy tələbələr",
+          "rule": "students.fincode is blank"
+        }
+      ],
+      "phase_sequence": [
+        {
+          "phase_order": 0,
+          "phase": "M0 — Baseline və custody",
+          "objective": "Source hash, icazə, mühit inventarı, plan və status ledger-i",
+          "exit_evidence": "Source dəyişməyib; production və business data yazılmayıb"
+        },
+        {
+          "phase_order": 1,
+          "phase": "M1 — Təkrarlana bilən test mühiti",
+          "objective": "Pinned venv, SQLite və disposable PostgreSQL baseline",
+          "exit_evidence": "Migration head, RLS/trigger smoke və lint gate-ləri yaşıl"
+        },
+        {
+          "phase_order": 2,
+          "phase": "M2 — Target P0 hardening",
+          "objective": "History, approval, scope, cross-tenant FK və syllabus invariant-ləri",
+          "exit_evidence": "Negative security və characterization testləri yaşıl"
+        },
+        {
+          "phase_order": 3,
+          "phase": "M3 — Control plane və preflight",
+          "objective": "Idempotency ledger, dry-run, locks, checkpoint və safe logging",
+          "exit_evidence": "Rerun duplicate yaratmır; explicit apply olmadan domain write yoxdur"
+        },
+        {
+          "phase_order": 4,
+          "phase": "M4 — Canonical mapping",
+          "objective": "Tenant-scoped adapterlər, live/archive/quarantine qərarları",
+          "exit_evidence": "Hər adapter üçün count, digest, rollback və reconciliation qaydası"
+        },
+        {
+          "phase_order": 5,
+          "phase": "M5 — Pilot",
+          "objective": "Məhdud period və vahid üzrə akademik biznes yoxlaması",
+          "exit_evidence": "Enrollment, jurnal, final və transcript nümunələri təsdiqlənib"
+        },
+        {
+          "phase_order": 6,
+          "phase": "M6 — İki full rehearsal",
+          "objective": "Təmiz PostgreSQL target-larda determinism və recovery sübutu",
+          "exit_evidence": "Count/digest eyni; violation və credential import sıfır"
+        },
+        {
+          "phase_order": 7,
+          "phase": "M7 — Production cutover",
+          "objective": "Backup, write-freeze, role ayrılığı və idarə olunan açılış",
+          "exit_evidence": "Bütün GO gate-ləri və iki nəfərlik qərar qeydə alınıb"
+        },
+        {
+          "phase_order": 8,
+          "phase": "M8 — Keçiddən sonrakı nəzarət",
+          "objective": "Monitorinq, activation dalğası və issue queue idarəsi",
+          "exit_evidence": "Reconciliation qəbul edilib; legacy retention qərarı verilib"
+        }
+      ],
+      "engine_gate_matrix": [
+        {
+          "gate_order": 1,
+          "check": "Parser və field transform",
+          "sqlite": "Bəli",
+          "postgresql": "Bəli",
+          "production_gate": "Hər ikisi yaşıl"
+        },
+        {
+          "gate_order": 2,
+          "check": "Idempotency model logic və dry-run",
+          "sqlite": "Bəli",
+          "postgresql": "Bəli",
+          "production_gate": "PostgreSQL nəticəsi əsasdır"
+        },
+        {
+          "gate_order": 3,
+          "check": "RLS deny və tenant visibility",
+          "sqlite": "Xeyr",
+          "postgresql": "Məcburi",
+          "production_gate": "Fail olarsa STOP"
+        },
+        {
+          "gate_order": 4,
+          "check": "Cross-tenant INSERT və UPDATE reject",
+          "sqlite": "Xeyr",
+          "postgresql": "Məcburi",
+          "production_gate": "Violation = 0"
+        },
+        {
+          "gate_order": 5,
+          "check": "Append-only trigger və advisory lock",
+          "sqlite": "Xeyr",
+          "postgresql": "Məcburi",
+          "production_gate": "Fail olarsa STOP"
+        },
+        {
+          "gate_order": 6,
+          "check": "Batch resume və performans",
+          "sqlite": "Xeyr",
+          "postgresql": "Məcburi",
+          "production_gate": "Maintenance window ölçülür"
+        },
+        {
+          "gate_order": 7,
+          "check": "Backup və restore rehearsal",
+          "sqlite": "Xeyr",
+          "postgresql": "Məcburi",
+          "production_gate": "Scratch restore sübutu"
+        }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "migration_master_plan",
+      "label": "EMSArena legacy məlumat miqrasiyası — əsas plan",
+      "path": "docs/migration/MASTER_PLAN.md"
+    },
+    {
+      "id": "migration_status",
+      "label": "EMSArena legacy miqrasiyası — status ledger",
+      "path": "docs/migration/STATUS.md"
+    },
+    {
+      "id": "legacy_audit_snapshot",
+      "label": "Sanitizasiya edilmiş legacy audit snapshot-ı",
+      "path": "docs/migration/reports/LEGACY_AUDIT_SNAPSHOT.json"
+    },
+    {
+      "id": "report_data_sql",
+      "label": "Portable hesabat dataset derivation SQL-i",
+      "path": "docs/migration/reports/REPORT_DATA.sql"
+    },
+    {
+      "id": "current_verification_snapshot",
+      "label": "Cari sanitizasiya edilmiş migration verification snapshot-ı",
+      "path": "docs/migration/reports/CURRENT_VERIFICATION_SNAPSHOT.json"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
+from apps.accounts.identity import user_access_is_login_blocked
 from apps.accounts.models import EmailOTP
 from apps.organizations.public import is_tenant_accessible_organization
 from core.tenancy import restore_request_organization_from_profile
@@ -49,7 +50,7 @@ def send_otp_api_view(request):
     pending_registration = get_pending_registration(email)
 
     if purpose == EmailOTP.Purpose.LOGIN:
-        if user is None or not user.is_active:
+        if user is None or not user.is_active or user_access_is_login_blocked(user):
             return JsonResponse(
                 {
                     "success": True,
@@ -80,6 +81,9 @@ def send_otp_api_view(request):
             },
             status=202,
         )
+
+    if user is not None and user_access_is_login_blocked(user):
+        return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
 
     if user is None and not pending_registration:
         return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
@@ -168,7 +172,12 @@ def verify_otp_api_view(request):
             if is_tenant_accessible_organization(joined_organization):
                 request.session["active_organization"] = joined_organization.slug
 
-    if purpose == EmailOTP.Purpose.LOGIN and user is not None and user.is_active:
+    if (
+        purpose == EmailOTP.Purpose.LOGIN
+        and user is not None
+        and user.is_active
+        and not user_access_is_login_blocked(user)
+    ):
         backend = settings.AUTHENTICATION_BACKENDS[0]
         login(request, user, backend=backend)
         restore_request_organization_from_profile(request, profile=getattr(user, "profile", None))
@@ -181,7 +190,9 @@ def verify_otp_api_view(request):
             "success": True,
             "detail": "OTP uğurla təsdiqləndi.",
             "verified": True,
-            "authenticated": bool(purpose == EmailOTP.Purpose.LOGIN and user and user.is_active),
+            "authenticated": bool(
+                purpose == EmailOTP.Purpose.LOGIN and user and user.is_active and not user_access_is_login_blocked(user)
+            ),
         }
     )
 
@@ -202,7 +213,7 @@ def resend_otp_api_view(request):
     pending_registration = get_pending_registration(email)
 
     if purpose == EmailOTP.Purpose.LOGIN:
-        if user is None or not user.is_active:
+        if user is None or not user.is_active or user_access_is_login_blocked(user):
             return JsonResponse(
                 {
                     "success": True,
@@ -215,6 +226,8 @@ def resend_otp_api_view(request):
             return send_login_otp(email, request=request, user=user, enforce_cooldown=True)
 
     else:
+        if user is not None and user_access_is_login_blocked(user):
+            return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
         if user is None and not pending_registration:
             return _json_error("Bu email üçün istifadəçi tapılmadı.", status=404)
         if user is not None:

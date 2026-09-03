@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import PermissionDenied
 from django.db.models.signals import post_save
+from django.http import Http404
 from django.test import RequestFactory, TestCase, override_settings
 
 from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt
@@ -133,7 +133,8 @@ class MediaViewCrossTenantExamUploadTest(TestCase):
         request = self.factory.get(f"/media/{self.file_path}")
         request.user = self.intruder
 
-        with self.assertRaises(PermissionDenied):
+        # 2026-09-02: yad kirayəçi üçün mövcudluq sızmasın deyə 403 yox, 404 (PHASE23_SECURITY_FIXES).
+        with self.assertRaises(Http404):
             protected_media(request, path=self.file_path)
 
     @override_settings(
@@ -286,12 +287,12 @@ class QuestionMediaProtectionIntegrationTest(TestCase):
     )
     def test_cross_org_user_denied_question_media(self):
         """A user with no org membership is denied access to question media."""
-        from django.core.exceptions import PermissionDenied
 
         request = self.factory.get(f"/media/{self.file_path}")
         request.user = self.stranger
 
-        with self.assertRaises(PermissionDenied):
+        # 2026-09-02: yad kirayəçi üçün mövcudluq sızmasın deyə 403 yox, 404 (PHASE23_SECURITY_FIXES).
+        with self.assertRaises(Http404):
             protected_media(request, path=self.file_path)
 
     @override_settings(

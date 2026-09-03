@@ -8,8 +8,6 @@ işləyir (migrasiyalar da dəyişməz qalır).
 from .academic import (
     AcademicStatus,
     CourseOffering,
-    Curriculum,
-    CurriculumSubject,
     DegreeLevel,
     Enrollment,
     EnrollmentKind,
@@ -21,14 +19,24 @@ from .academic import (
     Subject,
     WeekType,
 )
+from .admission_meta import AdmissionRecordFields, FundingType
 from .corrections import (
     ComponentScoreCorrection,
     CorrectionField,
     CorrectionReason,
+    CorrectionReversal,
     CourseWorkCorrection,
     JournalCorrection,
     LessonCorrection,
     SelfWorkCorrection,
+)
+from .curriculum import Curriculum, CurriculumSubject
+from .curriculum_meta import AssessmentForm, PlanStatus
+from .exam_score_entry import (
+    EVIDENCE_EXTENSIONS,
+    ExamScoreEntry,
+    ExamScoreEntryKind,
+    exam_score_evidence_path,
 )
 from .grading import (
     ApprovalStatus,
@@ -51,11 +59,38 @@ from .grading import (
     SelfWorkMark,
     SelfWorkTopic,
 )
+from .handover import TeachingHandover
+from .journal_close_notice import (
+    JournalCloseNotice,
+    JournalCloseScope,
+)
 from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
     KollokviumExtraGrant,
     KollokviumWindow,
 )
+from .legacy_excuse import (
+    LEGACY_EXCUSE_EXTENSIONS,
+    LegacyExcuseDocument,
+    LegacyExcuseMappingStatus,
+)
+from .legacy_grade import (
+    LegacyGradeArtifact,
+    LegacyGradeArtifactKind,
+    LegacyGradeEvidenceKind,
+    LegacyGradeFact,
+    LegacyGradeMappingStatus,
+    LegacyGradeReview,
+    LegacyGradeReviewDecision,
+)
+from .movement import (
+    MOVEMENT_DOCUMENT_EXTENSIONS,
+    MOVEMENT_REASON_MIN_LENGTH,
+    MovementKind,
+    StudentMovement,
+    movement_document_path,
+)
+from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
     "AcademicStatus",
@@ -70,24 +105,50 @@ __all__ = [
     "CourseWork",
     "CriterionScore",
     "CourseOffering",
+    "JournalCloseNotice",
+    "JournalCloseScope",
     "JournalCorrection",
     "LessonCorrection",
     "SelfWorkCorrection",
     "CourseWorkCorrection",
     "ComponentScoreCorrection",
+    "CorrectionReversal",
+    "AssessmentForm",
     "Curriculum",
     "CurriculumSubject",
     "DegreeLevel",
     "Enrollment",
     "EnrollmentKind",
+    "EVIDENCE_EXTENSIONS",
+    "ExamScoreEntry",
+    "ExamScoreEntryKind",
+    "exam_score_evidence_path",
     "FinalGrade",
     "GroupElectiveChoice",
+    "GroupTransferEvidence",
     "KOLLOKVIUM_WINDOW_COUNT",
     "KollokviumExtraGrant",
     "KollokviumWindow",
     "Lesson",
     "LessonKind",
     "LessonMark",
+    "LEGACY_EXCUSE_EXTENSIONS",
+    "LegacyExcuseDocument",
+    "LegacyExcuseMappingStatus",
+    "LegacyGradeArtifact",
+    "LegacyGradeArtifactKind",
+    "LegacyGradeEvidenceKind",
+    "LegacyGradeFact",
+    "LegacyGradeMappingStatus",
+    "LegacyGradeReview",
+    "LegacyGradeReviewDecision",
+    "AdmissionRecordFields",
+    "FundingType",
+    "MOVEMENT_DOCUMENT_EXTENSIONS",
+    "MOVEMENT_REASON_MIN_LENGTH",
+    "MovementKind",
+    "movement_document_path",
+    "PlanStatus",
     "Program",
     "ResitReason",
     "ResitRecord",
@@ -97,8 +158,10 @@ __all__ = [
     "ScheduleSlot",
     "SelfWorkMark",
     "SelfWorkTopic",
+    "TeachingHandover",
     "SlotKind",
     "StudentAcademicRecord",
+    "StudentMovement",
     "Subject",
     "WeekType",
 ]

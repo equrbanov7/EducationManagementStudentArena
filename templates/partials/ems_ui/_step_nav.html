@@ -1,0 +1,18 @@
+{% comment %}
+Addım naviqasiyası (sol sütun) — handoff §4 komponent 11.
+Aktiv addım `--ems-primary-50` fon + `--ems-primary-600` sol kontur.
+Kontekst: `step_items` = [{key, label, mark: done|error|todo, current}], `step_nav_label`.
+{% endcomment %}
+<nav aria-label="{{ step_nav_label }}">
+    <ul class="ems-stepnav">
+        {% for item in step_items %}
+            <li>
+                <button type="button" class="ems-stepnav__btn" data-ems-step="{{ item.key }}"
+                        {% if item.current %}aria-current="step"{% endif %}>
+                    <span class="ems-stepnav__mark--{{ item.mark|default:'todo' }}" aria-hidden="true">{% if item.mark == "done" %}✓{% elif item.mark == "error" %}!{% else %}○{% endif %}</span>
+                    <span>{{ item.label }}</span>
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>

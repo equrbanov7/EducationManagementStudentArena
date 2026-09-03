@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -61,6 +62,13 @@ class RubricBaseTest(TestCase):
                 user=cls.teacher,
                 organization=cls.org,
                 role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
                 is_primary=True,
                 is_active=True,
             )
@@ -129,7 +137,7 @@ class RubricServiceTest(RubricBaseTest):
             rubrics.save_rubric(
                 organization=self.org,
                 name="Layihə təqdimatı",
-                criteria=[("Məzmun", 5), ("Yeni meyar", 5)],  # Təqdimat/Suallara cavab silinir
+                criteria=[("Məzmun", 4), ("Yeni meyar", 5)],  # Təqdimat/Suallara cavab silinir
                 rubric=self.rubric,
             )
             self.rubric.refresh_from_db()
@@ -156,16 +164,28 @@ class RubricServiceTest(RubricBaseTest):
             score = ComponentScore.objects.get(component=self.component, enrollment=self.enrollment)
         self.assertEqual(score.score, Decimal("6.5"))
 
-    def test_points_clamped_to_criterion_max(self):
+    def test_points_above_criterion_max_are_rejected(self):
         with bypass_rls():
             criterion = self.rubric.criteria.get(name="Təqdimat")  # max 3
-            rubrics.save_criterion_scores(
-                component=self.component,
-                entries=[{"criterion_id": str(criterion.id), "enrollment_id": str(self.enrollment.id), "points": "99"}],
-                by_user=self.teacher,
+            with self.assertRaises(ValidationError):
+                rubrics.save_criterion_scores(
+                    component=self.component,
+                    entries=[
+                        {
+                            "criterion_id": str(criterion.id),
+                            "enrollment_id": str(self.enrollment.id),
+                            "points": "99",
+                        }
+                    ],
+                    by_user=self.teacher,
+                )
+            self.assertFalse(
+                CriterionScore.objects.filter(
+                    component=self.component,
+                    criterion=criterion,
+                    enrollment=self.enrollment,
+                ).exists()
             )
-            saved = CriterionScore.objects.get(criterion=criterion, enrollment=self.enrollment)
-        self.assertEqual(saved.points, Decimal("3"))
 
     def test_component_total_clamped_to_component_max(self):
         with bypass_rls():

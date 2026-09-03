@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -17,9 +17,11 @@ from apps.exams.constants import (
     QUESTION_EXAM_KIND_VALUES,
 )
 from apps.exams.models import QuestionBank
-from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank
+from apps.exams.services.access_policy import _ensure_teacher, ensure_can_create_question_bank, is_exam_center_user
 from apps.exams.services.bank_analysis import analyze_bank_questions
 from apps.exams.services.question_bank_attach import accessible_banks
+from core.audit import log_action
+from core.constants import AuditAction
 from core.tenancy import get_request_organization
 
 from ._shared import (
@@ -73,7 +75,12 @@ def _resolve_bank_teacher(organization, raw_teacher_id):
     )
 
 
-def _normalize_exam_kind(raw_value):
+def _normalize_exam_kind(raw_value, user=None):
+    """Bank təyinatını yoxlayır. İmtahan mərkəzi olmayan istifadəçi (müəllim)
+    üçün nəticə HƏMİŞƏ «quiz»-dir — şəxsi bank final/midterm ola bilməz
+    (UI yalnız quiz göstərir; bu, birbaşa POST-a qarşı server müdafiəsidir)."""
+    if user is not None and not is_exam_center_user(user):
+        return "quiz"
     value = (raw_value or "").strip().lower()
     return value if value in QUESTION_EXAM_KIND_VALUES else ""
 
@@ -85,9 +92,10 @@ def question_bank_list(request):
     profile_bank_url = f"{reverse('accounts:profile')}?section=question-bank"
 
     if request.method == "POST" and (request.POST.get("action") == "create_bank"):
-        # Sual bankını yalnız imtahan mərkəzi yarada bilər (müəllim mövcud
-        # banklardan istifadə edə bilər, amma yenisini aça bilməz).
+        # İmtahan mərkəzi tam səlahiyyətli; müəllim yalnız ÖZÜ üçün Quiz bankı
+        # yarada bilər (_normalize_exam_kind «quiz»-ə bağlayır, mənbə müəllim özüdür).
         ensure_can_create_question_bank(request.user)
+        creator_is_center = is_exam_center_user(request.user)
         name = (request.POST.get("name") or "").strip()
         if not name:
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
@@ -97,8 +105,12 @@ def question_bank_list(request):
                 name=name,
                 subject=subject_text,
                 subject_ref=subject_ref,
-                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind")),
-                source_teacher=_resolve_bank_teacher(organization, request.POST.get("source_teacher_id")),
+                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind"), user=request.user),
+                source_teacher=(
+                    _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
+                    if creator_is_center
+                    else request.user
+                ),
                 description=(request.POST.get("description") or "").strip(),
                 language=(request.POST.get("language") or DEFAULT_EXAM_LANGUAGE).strip().lower(),
                 default_question_type=_normalize_format(request.POST.get("default_question_type")),
@@ -140,8 +152,12 @@ def question_bank_update(request, bank_id):
             subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
             bank.subject_ref = subject_ref
             bank.subject = subject_text
-            bank.exam_kind = _normalize_exam_kind(request.POST.get("exam_kind"))
-            bank.source_teacher = _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
+            bank.exam_kind = _normalize_exam_kind(request.POST.get("exam_kind"), user=request.user)
+            # source_teacher yalnız imtahan mərkəzi tərəfindən dəyişdirilə bilər:
+            # müəllim formasında sahə yoxdur (boş POST mövcud dəyəri silərdi) və
+            # müəllim başqasının adına atribusiya saxtalaşdıra bilməməlidir.
+            if is_exam_center_user(request.user):
+                bank.source_teacher = _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
             bank.language = (request.POST.get("language") or bank.language).strip().lower()
             bank.default_question_type = _normalize_format(
                 request.POST.get("default_question_type") or bank.default_question_type
@@ -188,6 +204,43 @@ def question_bank_delete(request, bank_id):
     return redirect("exams:question_bank_detail", bank_id=bank.id)
 
 
+def _can_mutate_bank(user, bank) -> bool:
+    """Bankın MƏZMUNUNU dəyişməyə kimin haqqı var.
+
+    2026-09-02 audit, P0-2: ``question_bank_detail`` POST budağı yalnız OXU
+    görünürlüyünə (``accessible_banks``) söykənirdi.  Həmin köməkçi imtahan
+    mərkəzi rollarına başqa müəllimin bankını GÖSTƏRİR — nəticədə
+    ``bulk_action=delete`` ilə yad müəllimin sualları HARD-DELETE olunurdu
+    (audit sətri də yazılmırdı).  Mutasiya artıq sahibliyə bağlıdır.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if bank.created_by_id == user.id:
+        return True
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    organization = getattr(bank, "organization", None)
+    return organization is not None and getattr(organization, "owner_id", None) == user.id
+
+
+def _ensure_bank_mutation_allowed(request, bank, action: str):
+    """Sahib deyilsə: rədd et + audit yaz (səssiz keçid YOXDUR)."""
+    if _can_mutate_bank(request.user, bank):
+        return
+    log_action(
+        AuditAction.DENY,
+        user=request.user,
+        organization=getattr(bank, "organization", None),
+        obj=bank,
+        reason=f"question bank mutation refused (not owner): bulk_action={action or '-'}",
+        request=request,
+        resource_type="exams.QuestionBank",
+        resource_id=str(bank.pk),
+        resource_repr=bank.name[:500],
+    )
+    raise PermissionDenied(pgettext("exams.view.bank.message", "Yalnız bankın sahibi bu əməliyyatı edə bilər."))
+
+
 @login_required
 def question_bank_detail(request, bank_id):
     _ensure_teacher(request.user)
@@ -197,23 +250,31 @@ def question_bank_detail(request, bank_id):
     # ---- POST: toplu/tək aktiv-deaktiv-sil ----
     if request.method == "POST":
         action = (request.POST.get("bulk_action") or "").strip().lower()
+        # HƏR mutasiya budağı üçün eyni qapı — oxu görünürlüyü kifayət etmir.
+        _ensure_bank_mutation_allowed(request, bank, action)
 
         # Dil üzrə bütün sualları sil (yalnız bank sahibi)
         if action == "delete_language":
-            if bank.created_by_id != request.user.id:
-                messages.error(
-                    request, pgettext("exams.view.bank.message", "Yalnız bankın sahibi bu əməliyyatı edə bilər.")
-                )
-            else:
-                lang = (request.POST.get("language") or "").strip().lower()
-                qs = bank.library_questions.all()
-                if lang:
-                    qs = qs.filter(language=lang)
-                deleted = qs.count()
-                qs.delete()
-                messages.success(
-                    request, pgettext("exams.view.bank.message", "{count} sual silindi.").format(count=deleted)
-                )
+            lang = (request.POST.get("language") or "").strip().lower()
+            qs = bank.library_questions.all()
+            if lang:
+                qs = qs.filter(language=lang)
+            deleted = qs.count()
+            qs.delete()
+            log_action(
+                AuditAction.DELETE,
+                user=request.user,
+                organization=getattr(bank, "organization", None),
+                obj=bank,
+                reason=f"question bank bulk delete_language: language={lang or 'all'}, count={deleted}",
+                request=request,
+                resource_type="exams.QuestionBank",
+                resource_id=str(bank.pk),
+                resource_repr=bank.name[:500],
+            )
+            messages.success(
+                request, pgettext("exams.view.bank.message", "{count} sual silindi.").format(count=deleted)
+            )
             redirect_params = {}
             keep_lang = (request.POST.get("language") or "").strip()
             if keep_lang:
@@ -240,7 +301,20 @@ def question_bank_detail(request, bank_id):
                 request, pgettext("exams.view.bank.message", "{count} sual aktiv edildi.").format(count=updated)
             )
         elif action == "delete":
+            deleted_ids = sorted(selected_qs.values_list("id", flat=True))
             selected_qs.delete()
+            log_action(
+                AuditAction.DELETE,
+                user=request.user,
+                organization=getattr(bank, "organization", None),
+                obj=bank,
+                changes={"deleted_question_ids": deleted_ids},
+                reason=f"question bank bulk delete: count={count}",
+                request=request,
+                resource_type="exams.QuestionBank",
+                resource_id=str(bank.pk),
+                resource_repr=bank.name[:500],
+            )
             messages.success(request, pgettext("exams.view.bank.message", "{count} sual silindi.").format(count=count))
         else:
             messages.error(request, pgettext("exams.view.bank.message", "Yanlış əməliyyat."))

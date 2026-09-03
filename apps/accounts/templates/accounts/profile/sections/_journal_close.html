@@ -1,0 +1,10 @@
+{% if 'journal-close' in allowed_sections %}
+{% comment %}RİM — semestr sonu jurnal bağlama/açma + bağlanma xəbərdarlığı.
+Panel sarğısı (kollokvium-windows pattern-i): məzmun ayrıca partial-dadır,
+stil/skript XARİCİ fayllardadır (CSP: inline yoxdur).{% endcomment %}
+<section class="profile-section-panel profile-section--journal-close {% if active_section == 'journal-close' %}is-active{% endif %}"
+         data-profile-section-panel="journal-close"
+         data-source-url="{{ profile_base_url }}?section=journal-close">
+    {% include "accounts/partials/_journal_close_content.html" with s=journal_close_section %}
+</section>
+{% endif %}

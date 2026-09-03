@@ -5,9 +5,25 @@ from django.utils.translation import pgettext_lazy
 
 from apps.notifications.models import NotificationType
 
+from ....models import UserProfile
 from .._sections.labels import DIRECT_PROFILE_SECTION_TEMPLATES, build_section_titles
 from ..constants import PROFILE_EXAM_NAV_SECTIONS
 from ..contact_inbox import build_contact_inbox_context
+from ..password_otp import mask_email
+
+
+def _transcript_request_cta() -> dict:
+    """«Transkript sorğusu» CTA-sı — yalnız `request` siyasətində göstərilir.
+
+    Bayraq açılanda (`download`) CTA SÖNÜR: tələbə transkripti «Transkript»
+    bölməsindən birbaşa alır və sorğuya ehtiyac qalmır.
+    """
+    from apps.registrar.cabinet_policy import transcript_policy
+    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE
+
+    policy = transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE)
+    policy["show"] = not policy["self_service"]
+    return policy
 
 
 class _Stage4Mixin:
@@ -39,6 +55,7 @@ class _Stage4Mixin:
             "primary_user_role_label": self.primary_user_role_label,
             "active_section": self.active_section,
             "active_section_title": self.active_section_title,
+            "section_denied": self.section_denied,
             "direct_profile_section": self.direct_profile_section,
             "direct_profile_section_template": self.direct_profile_section_templates.get(
                 self.direct_profile_section, ""
@@ -81,6 +98,7 @@ class _Stage4Mixin:
             "question_bank_kind_pills": self.question_bank_kind_pills,
             "question_bank_can_create": self.question_bank_can_create,
             **self._qsub_ctx,
+            **self._qchair_ctx,
             "unit_exams_page_obj": self.unit_exams_page_obj,
             "unit_exams_search_query": self.unit_exams_search_query,
             "unit_exams_total_count": self.unit_exams_total_count,
@@ -101,7 +119,15 @@ class _Stage4Mixin:
             "my_results_page_obj": self.my_results_page_obj,
             "my_result_counts": self.my_result_counts,
             "my_results_active_filter": self.my_results_active_filter,
+            # Transkript siyasəti (README §10.1 — default `request`). «Nəticələrim»
+            # RƏSMİ SƏNƏD DEYİL və sənəd linki VERMİR; burada yalnız SORĞU
+            # kanalına (Müraciətlər → «Transkript sorğusu») keçid göstərilir.
+            "transcript_request": _transcript_request_cta(),
             "my_results_search_query": self.my_results_search_query,
+            "my_results_year": self.my_results_year,
+            "my_results_season": self.my_results_season,
+            "my_results_year_options": self.my_results_year_options,
+            "my_results_season_options": self.my_results_season_options,
             "my_results_pagination_query": self.my_results_pagination_query,
             "my_results_page_param": self.my_results_page_param,
             "pending_answers_count": self.pending_answers_count,
@@ -110,6 +136,8 @@ class _Stage4Mixin:
             "pending_answers_active_filter": self.pending_answers_active_filter,
             "pending_answers_search_query": self.pending_answers_search_query,
             "pending_appeals_count": self.pending_appeals_count,
+            "applications_pending_count": self.applications_pending_count,
+            "question_chair_pending_count": self.question_chair_pending_count,
             "pending_review_count": self.pending_review_count,
             "evaluated_review_count": self.evaluated_review_count,
             "teacher_groups": self.teacher_groups,
@@ -133,6 +161,14 @@ class _Stage4Mixin:
             "academic_units": self.academic_units,
             "teacher_subjects": self.teacher_subjects,
             "student_records": self.student_records,
+            # «Akademik fəaliyyət» qeydləri + elmi ad/dərəcə seçimləri (redaktə).
+            "academic_item_groups": self.academic_item_groups,
+            "academic_item_display_groups": self.academic_item_display_groups,
+            "academic_title_choices": UserProfile.AcademicTitle.choices,
+            "academic_degree_choices": UserProfile.AcademicDegree.choices,
+            # OTP ilə şifrə dəyişmə («mövcud şifrəni unutdum» axını).
+            "password_otp_form": self.password_otp_form,
+            "password_otp_masked_email": mask_email(self.request.user.email),
             "group_form": self.group_form,
             "can_multi_assign_group_teachers": self.can_multi_assign_group_teachers,
             "groups_section_return_url": self.groups_section_return_url,
@@ -193,6 +229,11 @@ class _Stage4Mixin:
             "audit_log_section": self.audit_log_section,
             "superadmin_org_inspector_section": self.superadmin_org_inspector_section,
             "superadmin_users_section": self.superadmin_users_section,
+            "rim_center_section": self.rim_center_section,
+            "people_section": self.people_section,
+            "syllabus_list_section": self.syllabus_list_section,
+            "syllabus_editor_section": self.syllabus_editor_section,
+            "syllabus_review_section": self.syllabus_review_section,
             "superadmin_ai_settings_section": self.superadmin_ai_settings_section,
             "superadmin_org_features_section": self.superadmin_org_features_section,
             "category_management_create_form": self.category_management_create_form,
@@ -212,6 +253,30 @@ class _Stage4Mixin:
             "superadmin_pending_org_count": self.superadmin_organizations_section.get("pending_count", 0),
             "exam_rooms_section": self.exam_rooms_section,
             "kollokvium_windows_section": self.kollokvium_windows_section,
+            "journal_close_section": self.journal_close_section,
+            "handover_section": self.handover_section,
+            "schedule_manage_section": self.schedule_manage_section,
+            "dashboard_section": self.dashboard_section,
+            "student_intake_section": self.student_intake_section,
+            "applications_section": self.applications_section,
+            "workload_distribution_section": self.workload_distribution_section,
+            "my_workload_section": self.my_workload_section,
+            "workload_center_section": self.workload_center_section,
+            "workload_visa_section": self.workload_visa_section,
+            "workload_approval_section": self.workload_approval_section,
+            "workload_overview_section": self.workload_overview_section,
+            "lessons_log_section": self.lessons_log_section,
+            "structure_tree_section": self.structure_tree_section,
+            "chair_profile_section": self.chair_profile_section,
+            "programs_registry_section": self.programs_registry_section,
+            "subject_catalog_section": self.subject_catalog_section,
+            "curriculum_editor_section": self.curriculum_editor_section,
+            "groups_registry_section": self.groups_registry_section,
+            "semester_opening_section": self.semester_opening_section,
+            "student_admission_section": self.student_admission_section,
+            "student_registry_section": self.student_registry_section,
+            "exam_score_entry_section": self.exam_score_entry_section,
+            "legacy_grade_review_section": self.legacy_grade_review_section,
             "exam_chance_section": self.exam_chance_section,
             "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],
@@ -307,7 +372,7 @@ class _Stage4Mixin:
             )
         # U12 — registrar kabineti bölmələri (SPA panel): yalnız aktiv bölmə üçün
         # qurulur (lazy) ki, hər profil açılışında lazımsız sorğular işləməsin.
-        _registrar_sections = {"my-schedule", "academic-calendar", "my-journal", "grade-approvals", "analytics"}
+        _registrar_sections = {"my-schedule", "academic-calendar", "my-journal", "analytics"}
         if self.active_section in _registrar_sections and self.active_section in self.allowed_sections:
             from apps.registrar.public import build_profile_registrar_section
 

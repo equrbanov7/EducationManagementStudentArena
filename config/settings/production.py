@@ -26,6 +26,7 @@ from .base import (
     ADMIN_OTP_RESEND_RATE_LIMIT,
     ADMIN_OTP_VERIFY_RATE_LIMIT,
     ADMIN_URL_PREFIX,
+    ALERTMANAGER_WEBHOOK_TOKEN,
     ASGI_APPLICATION,
     AUTH_OTP_EXPIRY_SECONDS,
     AUTH_PASSWORD_VALIDATORS,
@@ -242,6 +243,25 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # SECURITY WARNING: Don't run with debug turned on in production!
 DEBUG = False
+MANAGEMENT_COMMAND_ENVIRONMENT = "production"
+# Production source attestation is opt-in and never permits the plaintext disposable mode.
+LEGACY_MARIADB_SOURCE_ATTEST_ENABLED = _env_bool("LEGACY_MARIADB_SOURCE_ATTEST_ENABLED", False)
+LEGACY_MARIADB_SOURCE_LOCAL_DISPOSABLE = False
+if LEGACY_MARIADB_SOURCE_ATTEST_ENABLED:
+    LEGACY_MARIADB_SOURCE_SNAPSHOT_SHA256 = os.getenv("LEGACY_MARIADB_SOURCE_SNAPSHOT_SHA256", "")
+    LEGACY_MARIADB_SOURCE_HOST = os.getenv("LEGACY_MARIADB_SOURCE_HOST", "")
+    LEGACY_MARIADB_SOURCE_PORT = os.getenv("LEGACY_MARIADB_SOURCE_PORT", "")
+    LEGACY_MARIADB_SOURCE_USER = os.getenv("LEGACY_MARIADB_SOURCE_USER", "")
+    LEGACY_MARIADB_SOURCE_PASSWORD = os.getenv("LEGACY_MARIADB_SOURCE_PASSWORD", "")
+    LEGACY_MARIADB_SOURCE_DATABASE = os.getenv("LEGACY_MARIADB_SOURCE_DATABASE", "")
+    LEGACY_MARIADB_SOURCE_CA_PATH = os.getenv("LEGACY_MARIADB_SOURCE_CA_PATH", "")
+    LEGACY_MARIADB_SOURCE_CONNECT_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_CONNECT_TIMEOUT", "5")
+    LEGACY_MARIADB_SOURCE_READ_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_READ_TIMEOUT", "60")
+    LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT = os.getenv("LEGACY_MARIADB_SOURCE_WRITE_TIMEOUT", "10")
+
+# Rehearsal targets are disposable local databases only; production can never
+# opt in, so this is a hard constant rather than an environment lookup.
+LEGACY_REHEARSAL_TARGET_DISPOSABLE = False
 
 # Heavy exam features are disabled in production to protect server resources.
 # This keeps practical/coding exams, Piston-backed code execution, WebSockets,

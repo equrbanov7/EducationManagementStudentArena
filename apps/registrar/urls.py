@@ -2,25 +2,46 @@
 
 from django.urls import path
 
-from . import analytics_views, console_views, correction_views, journal_actions, pdf_views, views
+from . import (
+    analytics_views,
+    catalog_actions,
+    console_views,
+    correction_views,
+    curriculum_actions,
+    guest_roster_views,
+    journal_actions,
+    lessons_log_views,
+    pdf_views,
+    schedule_views,
+    semester_actions,
+    syllabus_views,
+    views,
+)
 
 app_name = "registrar"
 
 urlpatterns = [
     path("", views.journal_list, name="journal_list"),
-    path("tesdiqler/", views.approvals_inbox, name="approvals_inbox"),
     # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
     # uuid catch-all-dan əvvəl.
     path("duzelis/", correction_views.correction_offering_list, name="correction_list"),
     path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
+    # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
+    path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
+    # Ekran 05 — tədris planı əməlləri (JSON POST, `plan.*` + state maşını).
+    path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
+    # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
+    path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
+    # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
+    path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
-    path("teqvim/", views.calendar_view, name="calendar"),
-    path("cedvel/", views.schedule_view, name="schedule"),
+    path("teqvim/", schedule_views.calendar_view, name="calendar"),
+    path("cedvel/", schedule_views.schedule_view, name="schedule"),
     path("cedvel/export.ics", pdf_views.schedule_ics, name="schedule_ics"),
-    path("cedvel/slot/<uuid:slot_id>/sil/", views.schedule_slot_delete, name="schedule_slot_delete"),
+    path("cedvel/slot/<uuid:slot_id>/sil/", schedule_views.schedule_slot_delete, name="schedule_slot_delete"),
     # Registrar console (K3) — literal prefixes, must precede the uuid catch-all.
     path("idareetme/", console_views.registrar_console, name="console"),
     path("idareetme/proqram/yeni/", console_views.program_form_view, name="program_create"),
@@ -43,6 +64,35 @@ urlpatterns = [
     path("idareetme/telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
     path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),
+    # «Sillabusa bax» — jurnal (müəllim) və kabinet (tələbə) üçün ORTAQ oxu səthi.
+    path(
+        "<uuid:offering_id>/sillabus.json",
+        syllabus_views.offering_syllabus_json,
+        name="offering_syllabus_json",
+    ),
+    path(
+        "<uuid:offering_id>/sillabus.pdf",
+        syllabus_views.offering_syllabus_pdf,
+        name="offering_syllabus_pdf",
+    ),
+    # «Alt qrupdan tələbə əlavə et» (koordinator/dekanlıq) — uuid catch-all-dan ƏVVƏL.
+    path(
+        "<uuid:offering_id>/alt-qrup/qruplar/",
+        guest_roster_views.guest_group_search,
+        name="journal_guest_group_search",
+    ),
+    path(
+        "<uuid:offering_id>/alt-qrup/telebeler/",
+        guest_roster_views.guest_student_search,
+        name="journal_guest_student_search",
+    ),
+    path(
+        "<uuid:offering_id>/alt-qrup/onbaxis/",
+        guest_roster_views.guest_add_preview,
+        name="journal_guest_add_preview",
+    ),
+    path("<uuid:offering_id>/alt-qrup/elave/", guest_roster_views.guest_add, name="journal_guest_add"),
+    path("<uuid:offering_id>/alt-qrup/cixar/", guest_roster_views.guest_remove, name="journal_guest_remove"),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),

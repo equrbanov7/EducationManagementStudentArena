@@ -48,6 +48,19 @@ INTENTIONAL_EXEMPTIONS = {
     # make_user_import_template yalnız openpyxl ilə .xlsx şablonu yazır —
     # heç bir DB sorğusu yoxdur (sabit nümunə sətirlər).
     "apps/accounts/management/commands/make_user_import_template.py",
+    # Legacy miqrasiya komandaları — QƏSDƏN exempt:
+    # preflight yalnız fayl sistemində SHA/ölçü/cədvəl sayı oxuyur — DB yoxdur.
+    "apps/legacy_import/management/commands/legacy_import_preflight.py",
+    # source_attest / source_pk_inventory yalnız inject olunmuş read-only
+    # MariaDB mənbəyinə qoşulur; Django DB-yə heç bir sorğu yoxdur.
+    "apps/legacy_import/management/commands/legacy_import_source_attest.py",
+    "apps/legacy_import/management/commands/legacy_import_source_pk_inventory.py",
+    # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
+    # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
+    # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı
+    # resume semantikasını pozardı. Bax: apps/legacy_import/services/
+    # rehearsal_orchestrator.py §11 transaction cədvəli.
+    "apps/legacy_import/management/commands/legacy_import_rehearse.py",
 }
 
 SEARCH_DIRS = ["apps", "core"]

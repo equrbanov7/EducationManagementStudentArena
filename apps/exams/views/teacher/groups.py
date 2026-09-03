@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
@@ -20,7 +21,15 @@ def _is_superadmin(user):
     return user.is_superuser or getattr(user, "is_superadmin", False)
 
 
-def _ensure_group_manager(user):
+def _ensure_group_manager(request):
+    """Qrup SƏHİFƏSİNƏ giriş guard-ı (siyahı/baxış).
+
+    Mövcud müəllim/tələbə məntiqi saxlanılır: yalnız-tələbə istifadəçi bloklanır,
+    idarəçi qolu isə əlavə olaraq `group.view` / `group.manage` icazələrini də
+    tanıyır — yəni permission-editordan bu açarı almış rol (məs. proqram
+    koordinatoru) səhifəni görə bilir.
+    """
+    user = request.user
     if _is_superadmin(user):
         return
     has_student_role = hasattr(user, "has_role") and (
@@ -33,24 +42,31 @@ def _ensure_group_manager(user):
         or user.has_role(ProfileRole.ORG_OWNER)
         or user.has_role(ProfileRole.HR)
     )
+    has_group_permission = request_has_permission(request, "group.view") or request_has_permission(
+        request, "group.manage"
+    )
 
-    if has_student_role and not has_teacher_like_role:
+    if has_student_role and not has_teacher_like_role and not has_group_permission:
         raise PermissionDenied(pgettext("exams.view.groups.message", "no_page_permission"))
 
 
 def _user_can_create_group(request):
-    """Qrup YARATMAQ icazəsi (bool):
+    """Qrup YARATMAQ/İDARƏ ETMƏK icazəsi (bool) — permission-əsaslı qapı:
     * superadmin;
-    * təşkilat administratorları (org_owner / org_admin);
-    * Faza 3 DELEQASİYA: superadmin `group.manage` icazəsini bir rola verə
-      bilər — həmin roldakı istifadəçi də qrup yarada bilər. Default HEÇ BİR
-      rolda `group.manage` yoxdur, yəni əlavə icazə verilməyibsə heç kimin
-      (adi müəllim daxil) qrup yaratmaq icazəsi olmur.
+    * aktiv təşkilatın SAHİBİ (davranış-qorunması: əvvəl `has_role(org_owner)`
+      ilə keçirdi; sahibin üzvlük rolu aşağı səviyyəli olsa belə imkanını
+      itirməməlidir);
+    * `group.manage` icazəsi olan İSTƏNİLƏN rol — default rollarda bu açar
+      org-admin-ekvivalent rollara (rektor `*`, prorektor, dekan, kafedra
+      müdiri, İKT rəhbəri və s.) verilib (bax organizations/default_roles.py
+      + migration 0027); permission-editordan başqa rollara da (koordinator,
+      tyutor…) əlavə edilə bilər. Adi müəllimdə default YOXDUR.
     """
     user = request.user
     if _is_superadmin(user):
         return True
-    if hasattr(user, "has_role") and (user.has_role(ProfileRole.ORG_OWNER) or user.has_role(ProfileRole.ORG_ADMIN)):
+    organization = get_active_organization(request)
+    if organization is not None and getattr(organization, "owner_id", None) == user.id:
         return True
     return request_has_permission(request, "group.manage")
 
@@ -140,7 +156,7 @@ def _create_group_template_context(request, organization, form):
 
 @login_required
 def teacher_group_list(request):
-    _ensure_group_manager(request.user)
+    _ensure_group_manager(request)
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
@@ -156,6 +172,30 @@ def teacher_group_list(request):
         "can_create_group": _user_can_create_group(request),
     }
     return render(request, "exams/teacher/teacher_group_list.html", context)
+
+
+@login_required
+def teacher_group_candidates(request):
+    """Qrup modalının namizəd siyahıları — modal AÇILANDA (lazy) yüklənir.
+
+    Profil «Qruplar» bölməsi əvvəllər ~7 700 tələbəlik seçim siyahısını HƏR
+    səhifə yüklənişində qurub render edirdi (813 ms divar vaxtının ~690 ms-i
+    saf Python/şablon idi — 2026-09-02 performans auditi, F4).  İndi bölmə
+    formanı ``defer_choices=True`` ilə boş render edir, variantları isə bu
+    endpoint qaytarır — eyni forma, eyni widget, eyni HTML.
+    """
+    _ensure_group_creator(request)
+    organization = _get_required_organization(request)
+    if organization is None:
+        raise Http404
+    form = _group_form_for_request(request, organization)
+    return JsonResponse(
+        {
+            "students": str(form["students"]),
+            "primary_teacher": str(form["primary_teacher"]),
+            "assigned_teachers": str(form["assigned_teachers"]),
+        }
+    )
 
 
 @login_required

@@ -9,6 +9,7 @@ from django.db import transaction
 
 from apps.exams.models import StudentGroup
 from core.constants import OrganizationType
+from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 from core.roles import ProfileRole
@@ -16,7 +17,8 @@ from core.roles import ProfileRole
 from ._seed_helpers import CoursesSeedMixin, ExamsSeedMixin, UsersSeedMixin
 
 
-class Command(UsersSeedMixin, CoursesSeedMixin, ExamsSeedMixin, BaseCommand):
+class Command(ProductionCommandSafetyMixin, UsersSeedMixin, CoursesSeedMixin, ExamsSeedMixin, BaseCommand):
+    safety_command_name = "seed_group_demo_data"
     help = (
         "Qrup idarəetməsi üçün demo data yaradır: təşkilatlar, müəllimlər, tələbələr, "
         "qruplar, dolu kurslar, postlar, test/yazılı imtahanlar və suallar."
@@ -183,7 +185,7 @@ class Command(UsersSeedMixin, CoursesSeedMixin, ExamsSeedMixin, BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 (
-                    f"Superadmin: demo_superadmin / {password}\n"
+                    "Superadmin: demo_superadmin (credential dəyəri loglanmır)\n"
                     f"Təşkilatlar: {len(org_specs)}\n"
                     f"Tələbələr (yenilənən/yaradılan): {created_students}\n"
                     f"Qruplar (yeni): {created_groups}\n"

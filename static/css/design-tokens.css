@@ -82,6 +82,19 @@
     /* Teal — kontakt/blog haqqında səhifələri. */
     --ems-teal-500: #14b8a6;
 
+    /* ── Sillabus axını üçün əlavə tokenlər (dizayn təhvili §1) ──────────── */
+    /* Mock-lar bu adları işlədir; dəyərlər MÖVCUD ailələrin eynisidir — yeni
+       rəng icad edilmir, yalnız semantik alias verilir. `--ems-success-700`
+       istisnadır: «təsdiqlənib» MƏTNİ üçün AA-dan keçən yaşıl lazımdır
+       (`--ems-success` #10b981 mətn kimi AA-dan keçmir → yalnız ikon/accent). */
+    --ems-success-bg: var(--ems-success-100); /* #dcfce7 */
+    --ems-warning-bg: var(--ems-warning-100); /* #fef3c7 */
+    --ems-danger-bg: var(--ems-danger-100); /* #fee2e2 */
+    --ems-warning: var(--ems-warning-500); /* #f59e0b */
+    --ems-success-700: #15803d; /* yaşıl MƏTN (badge fg) — AA */
+    --ems-warning-bd: #fde68a; /* sarı kart konturu */
+    --ems-success-bd: #bbf7d0; /* yaşıl kart konturu */
+
     /* ── Səma-uyğun alias-lar (istifadəni asanlaşdırmaq üçün) ────────────── */
     --ems-text: var(--ems-neutral-900);
     --ems-text-muted: var(--ems-neutral-500);
@@ -90,4 +103,89 @@
     --ems-bg-subtle: var(--ems-neutral-50);
     --ems-link: var(--ems-primary-600);
     --ems-link-hover: var(--ems-primary-700);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dizayn handoff (22 ekran) — ƏLAVƏ tokenlər · §2.2 «add-only» bloku
+   ───────────────────────────────────────────────────────────────────────────
+   QAYDA: bu blok YALNIZ əlavə edir. Yuxarıdakı heç bir ad dəyişdirilmir,
+   heç bir dəyər yenidən təyin olunmur. Handoff README §2.2-dəki 8 addan 7-si
+   artıq yuxarıda (sillabus qatı ilə) gəlib — burada yalnız qalan fərq var.
+
+   ZİDDİYYƏTİN HƏLLİ (README §2.3) — WCAG AA lehinə:
+     Prototiplər «təsdiqlənib» üçün həm #15803d, həm #166534 işlədir və bəzi
+     yerlərdə `--ems-success` (#10b981) mətn kimi görünür. Ölçülmüş kontrast
+     (dcfce7 fonunda):  #10b981 → 2.31 (KEÇMİR) · #15803d → 4.57 (AA) ·
+     #166534 → 6.49 (AA). Qərar: yaşıl MƏTN həmişə `--ems-success-700`
+     (#15803d); iki yaşıl mətn çaları saxlanılmır. `--ems-success` (#10b981)
+     yalnız ikon / nöqtə / progress fill / accent üçündür — heç vaxt mətn.
+     Eyni məntiq: sarı mətn `--ems-warning-800`, qırmızı mətn
+     `--ems-danger-strong`.
+     İkinci düzəliş: `--ems-neutral-400` (#94a3b8) ağ/neutral-50 üzərində
+     2.45–2.56 verir — kiçik mətn üçün KEÇMİR. Cədvəl başlığı və KPI etiketi
+     kimi 11px CAPS mətnlərdə `--ems-neutral-500` (ağ üzərində 4.76 AA),
+     neutral-100 fonunda isə `--ems-neutral-600` (6.92 AA) işlədilir.
+     `--ems-neutral-400` yalnız placeholder və disabled mətn üçün qalır.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* ── Rəng: handoff kataloqundakı (00 Dizayn konstantları) çatışmayanlar ── */
+    --ems-danger-bd: var(--ems-danger-200); /* #fecaca — qırmızı kart konturu */
+    --ems-green-400: #4ade80; /* toast təsdiq ikonu (tünd navy fon üzərində) */
+    --ems-blue-300: #93c5fd; /* tünd fon üzərində kod/tarix */
+
+    /* ── Tipoqrafiya şkalası (handoff §2.4 + kataloq TYPE) ─────────────── */
+    --ems-fs-2xs: 10px; /* mikro işarə, sütun alt qeydi */
+    --ems-fs-xs: 11px; /* CAPS etiket, th, badge */
+    --ems-fs-sm: 12px; /* çip, sayğac, mono kod */
+    --ems-fs-base: 13px; /* cədvəl sətri, düymə — əsas UI ölçüsü */
+    --ems-fs-md: 14px; /* paraqraf, lent */
+    --ems-fs-lg: 15px; /* kart başlığı */
+    --ems-fs-xl: 16px; /* h2, dialoq başlığı */
+    --ems-fs-2xl: 20px; /* panel başlığı */
+    --ems-fs-3xl: 25px; /* səhifə h1, KPI rəqəmi */
+    --ems-ff-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* ── Radius (handoff §2.5 + kataloq RADII) ─────────────────────────── */
+    --ems-r-xs: 5px;
+    --ems-r-sm: 6px;
+    --ems-r-md: 8px;
+    --ems-r-lg: 9px; /* düymə, input, select, tab */
+    --ems-r-xl: 12px; /* lent, KPI kartı */
+    --ems-r-2xl: 16px; /* panel, dialoq, boş vəziyyət */
+    --ems-r-pill: 999px;
+
+    /* ── Kölgə (kataloq SHADOWS) ───────────────────────────────────────── */
+    --ems-sh-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --ems-sh-raised: 0 8px 28px rgba(15, 23, 42, 0.07);
+    --ems-sh-dialog: 0 24px 60px rgba(15, 23, 42, 0.24);
+    --ems-sh-toast: 0 14px 34px rgba(15, 23, 42, 0.28);
+    --ems-sh-focus: 0 0 0 3px var(--ems-primary-100);
+    --ems-sh-nav-active: 0 4px 12px rgba(59, 130, 246, 0.25);
+
+    /* ── Kontrol hündürlükləri (kataloq HEIGHTS · §2.6 toxunma hədəfi) ─── */
+    --ems-h-chip: 24px;
+    --ems-h-cell: 30px; /* cədvəl içi kontrol */
+    --ems-h-xs: 34px; /* kiçik ikinci düymə, filtr — minimum toxunma */
+    --ems-h-tab: 36px;
+    --ems-h-field: 40px; /* input, select, ikinci düymə */
+    --ems-h-action: 42px; /* əsas hərəkət düyməsi */
+
+    /* ── Boşluq şkalası (4px baza · kataloq SPACE) ─────────────────────── */
+    --ems-sp-1: 4px;
+    --ems-sp-2: 6px;
+    --ems-sp-3: 8px;
+    --ems-sp-4: 10px;
+    --ems-sp-5: 12px;
+    --ems-sp-6: 16px;
+    --ems-sp-7: 20px;
+    --ems-sp-8: 24px;
+    --ems-pad-row: 10px 14px; /* cədvəl sətri */
+    --ems-pad-card: 14px 16px; /* KPI / kiçik kart */
+
+    /* ── Enlər ─────────────────────────────────────────────────────────── */
+    --ems-w-page: 1180px;
+    --ems-w-text: 760px;
+    --ems-w-dialog: 560px;
+    --ems-w-drawer: 720px; /* handoff §4/7: 720–940px */
 }

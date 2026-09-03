@@ -1,0 +1,234 @@
+/* «Fənn təhvili» — DÜYMƏLƏR, MODALLAR və mobil uyğunlaşma.
+ *
+ * Niyə ayrı fayl? Modul ölçü büdcəsi (SOFT_CAP = 600 sətir). Bölgü təsadüfi
+ * deyil: `teaching_handover.css` SƏTHİ (addım kartları, süzgəclər, cədvəl,
+ * səhifələmə) təsvir edir, bu fayl isə ÜST QATLARI (düymə, təsdiq dialoqu,
+ * müəllim seçimi dialoqu) və 375 px uyğunlaşmasını.
+ *
+ * ⚠️ YÜKLƏNMƏ ARDICILLIĞI: bu fayl `teaching_handover.css`-dən SONRA yüklənir
+ * (mobil qaydalar baza qaydalarını qəsdən üstələyir).
+ *
+ * Qaydalar eynidir: yalnız işıqlı tema, yalnız mövcud `--ems-*` tokenləri.
+ */
+
+/* ── Düymələr ────────────────────────────────────────────────────────────── */
+
+.thx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.87rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.thx-btn--primary {
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #fff);
+}
+
+.thx-btn--primary:hover:not(:disabled) {
+    background: var(--ems-primary-700, #1d4ed8);
+}
+
+.thx-btn--ghost {
+    background: var(--ems-bg, #fff);
+    border-color: var(--ems-border, #e2e8f0);
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-btn--ghost:hover:not(:disabled) {
+    background: var(--ems-neutral-50, #f8fafc);
+}
+
+.thx-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Modallar ────────────────────────────────────────────────────────────── */
+
+.thx-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.thx-dialog[hidden] {
+    display: none;
+}
+
+.thx-dialog__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.thx-dialog__panel {
+    position: relative;
+    width: min(640px, 100%);
+    max-height: min(86vh, 760px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 14px;
+    background: var(--ems-bg, #fff);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, 0.24);
+}
+
+.thx-dialog__panel--slim {
+    width: min(440px, 100%);
+    /* Seçici menyusu FIXED yerləşdirilir, amma kəsilməmək üçün yer saxlanır. */
+    overflow: visible;
+}
+
+.thx-dialog__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-dialog__subject {
+    margin: 0;
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.88rem;
+}
+
+.thx-dialog__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.thx-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+.thx-summary__head {
+    font-weight: 700;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-summary__meta {
+    color: var(--ems-text-muted, #64748b);
+    font-size: 0.8rem;
+}
+
+.thx-summary__move {
+    color: var(--ems-primary-700, #1d4ed8);
+    font-weight: 600;
+}
+
+.thx-dialog__note {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.thx-dialog__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ems-text, #0f172a);
+}
+
+.thx-dialog__reason {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.thx-dialog__error {
+    margin: 0;
+    color: var(--ems-danger-strong, #b91c1c);
+    font-size: 0.83rem;
+}
+
+.thx-dialog__error[hidden] {
+    display: none;
+}
+
+.thx-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* ── Yalnız ekran-oxuyucu üçün ───────────────────────────────────────────── */
+
+.thx-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Mobil (375 px) ──────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .thx-step {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .thx-step__no {
+        width: 22px;
+        height: 22px;
+        font-size: 0.75rem;
+    }
+
+    .thx-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .thx-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .thx-bar .thx-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .thx-dialog__panel {
+        padding: 16px;
+    }
+
+    .thx__head {
+        flex-direction: column;
+    }
+}
