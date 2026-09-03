@@ -1,5 +1,6 @@
 """PostgreSQL RLS and append-only guards for legacy-grade evidence."""
 
+import os
 import uuid
 from contextlib import contextmanager
 
@@ -30,7 +31,10 @@ pytestmark = [
 
 
 class LegacyGradeEvidencePostgresTests(LegacyGradeEvidenceModelTests):
-    _PROBE_ROLE = "ems_legacy_grade_probe"
+    # PostgreSQL rolları KLASTER səviyyəsindədir (DB-yə bağlı deyil): pytest-xdist
+    # worker-ləri paralel işləyəndə eyni adlı rol yarat/sil toqquşur (başqa
+    # worker-in DB-sindəki GRANT DROP ROLE-u bloklayır). Ad worker-ə görə ayrılır.
+    _PROBE_ROLE = "ems_legacy_grade_probe" + os.environ.get("PYTEST_XDIST_WORKER", "")
     _TABLES = (
         "registrar_legacygradereview",
         "registrar_legacygradefact",

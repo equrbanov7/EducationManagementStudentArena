@@ -1,6 +1,7 @@
 """PostgreSQL negative matrix for the append-only correction ledger."""
 
 import datetime
+import os
 from contextlib import contextmanager
 
 from django.contrib.auth import get_user_model
@@ -48,7 +49,10 @@ class CorrectionReversalPostgresTests(_BaseJournalSetup):
             by_user=self.admin,
         )
 
-    _PROBE_ROLE = "ems_guard_probe"
+    # PostgreSQL rolları KLASTER səviyyəsindədir (DB-yə bağlı deyil): pytest-xdist
+    # worker-ləri paralel işləyəndə eyni adlı rol yarat/sil toqquşur (başqa
+    # worker-in DB-sindəki GRANT DROP ROLE-u bloklayır). Ad worker-ə görə ayrılır.
+    _PROBE_ROLE = "ems_guard_probe" + os.environ.get("PYTEST_XDIST_WORKER", "")
     # TRUNCATE ... CASCADE needs the TRUNCATE privilege on every table the
     # cascade reaches; the reversal ledger references all evidence tables.
     _PROBE_TABLES = (

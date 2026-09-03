@@ -1,5 +1,6 @@
 """PostgreSQL RLS və DB-level legacy ledger integrity testləri."""
 
+import os
 from contextlib import contextmanager
 
 from django.contrib.auth import get_user_model
@@ -45,7 +46,10 @@ def _enable_rls(organization_id):
         cursor.execute("SET LOCAL ROLE rls_app_role")
 
 
-_PROBE_ROLE = "ems_guard_probe"
+# PostgreSQL rolları KLASTER səviyyəsindədir (DB-yə bağlı deyil): pytest-xdist
+# worker-ləri paralel işləyəndə eyni adlı rol yarat/sil toqquşur (başqa
+# worker-in DB-sindəki GRANT DROP ROLE-u bloklayır). Ad worker-ə görə ayrılır.
+_PROBE_ROLE = "ems_guard_probe" + os.environ.get("PYTEST_XDIST_WORKER", "")
 
 
 def _drop_probe_role(cursor):

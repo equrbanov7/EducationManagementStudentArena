@@ -14,8 +14,14 @@ psycopg2-binary==2.9.9
 # ═══════════════════════════════════════════════════════════════════════════
 # TESTING TOOLS
 # ═══════════════════════════════════════════════════════════════════════════
-pytest==9.0.2
+# pytest 9.1+ məcburidir: unittest.subTest(obj=…) parametrləri xdist worker→
+# nəzarətçi kanalında serializasiya olunmalıdır (pytest-dev/pytest-xdist#1273,
+# 9.1-də saferepr ilə düzəldilib; 9.0.x-də DumpError verir).
+pytest==9.1.1
 pytest-asyncio==1.3.0
 pytest-django==4.12.0
 pytest-cov==6.1.0
 pytest-timeout==2.4.0
+# CI paralelləşdirmə (2026-09-03): `-n 4 --dist loadfile` — hər worker öz
+# test DB-sini (test_<db>_gwN) yaradır; bax .github/workflows/_unit-tests.yml.
+pytest-xdist==3.8.0
