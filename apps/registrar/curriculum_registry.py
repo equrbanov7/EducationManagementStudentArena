@@ -67,6 +67,51 @@ def _org_unit_model():
     return django_apps.get_model("organizations", "OrgUnit")
 
 
+def plan_scope(request, organization, permission: str):
+    """Aktorun HƏMİN AÇAR üzrə struktur əhatəsi (``UnitScope``).
+
+    MODUL SƏRHƏDİ: ``apps.organizations`` statik import EDİLMİR — scope
+    ``OrgUnit.user_permission_scope`` sinif metodu ilə həll olunur
+    (``apps/registrar/handover.py`` ilə eyni naxış).
+    """
+    return _org_unit_model().user_permission_scope(getattr(request, "user", None), organization, permission)
+
+
+def unit_in_scope(organization, unit_id, scope) -> bool:
+    """Verilmiş bölmə aktorun alt-ağacındadırmı — FAIL-CLOSED.
+
+    Əhatəsiz aktor (``EMPTY_SCOPE``) və bölməsiz (``specialty_unit=None``)
+    ixtisas üçün ``False``; org-wide rol üçün həmişə ``True``.
+    """
+    if not scope.has_structure_access:
+        return False
+    if scope.is_org_wide:
+        return True
+    if not unit_id:
+        return False
+    OrgUnit = _org_unit_model()
+    return OrgUnit.objects.filter(organization=organization, pk=unit_id).filter(scope.unit_subtree_q()).exists()
+
+
+def program_in_scope(request, organization, program, permission: str) -> bool:
+    """İxtisas (``Program``) aktorun ``permission`` əhatəsindədirmi.
+
+    ⚠️ TƏHLÜKƏSİZLİK (audit 2026-09-03, P1): açar («nə edə bilərsən») əhatə
+    («nəyə toxuna bilərsən») demək DEYİL. ``plan.edit`` / ``plan.approve_chair``
+    daşıyan kafedra müdiri əvvəl BÜTÜN universitetin planlarını redaktə edə və
+    kafedra mərhələsini keçirə bilirdi — burada onun öz alt-ağacı ilə
+    məhdudlaşdırılır. Tədris şöbəsi ORGANIZATION scope-lu olduğu üçün
+    təsirlənmir.
+    """
+    scope = plan_scope(request, organization, permission)
+    return unit_in_scope(organization, getattr(program, "specialty_unit_id", None), scope)
+
+
+def plan_in_scope(request, organization, plan, permission: str) -> bool:
+    """Plan (``Curriculum``) aktorun ``permission`` əhatəsindədirmi."""
+    return program_in_scope(request, organization, plan.program, permission)
+
+
 def chair_options(organization) -> list:
     OrgUnit = _org_unit_model()
     return [
@@ -428,6 +473,10 @@ def plan_hour_totals(plan) -> dict:
 
 
 __all__ = [
+    "plan_in_scope",
+    "plan_scope",
+    "program_in_scope",
+    "unit_in_scope",
     "PERM_EDIT",
     "PERM_VIEW",
     "ROW_ERROR_LABELS",

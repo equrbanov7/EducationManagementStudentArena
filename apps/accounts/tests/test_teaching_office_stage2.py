@@ -798,3 +798,137 @@ class Stage2PermissionCatalogTest(TestCase):
         self.assertIn("plan.approve_chair", by_name.get("chair_head", set()))
         self.assertIn("plan.approve_council", by_name.get("dean", set()))
         self.assertNotIn("plan.approve_office", by_name.get("teaching_office_staff", set()))
+
+
+class PlanCrossScopeTest(Stage2BaseTest):
+    """5 — ƏHATƏ (audit 2026-09-03): başqa kafedranın/fakültənin planı 404-dür.
+
+    İcazə açarı («nə edə bilərsən») ilə struktur əhatəsi («nəyə toxuna
+    bilərsən») AYRI suallardır. `plan.edit` / `plan.approve_chair` daşıyan
+    kafedra müdiri YALNIZ öz alt-ağacındakı ixtisasın planına toxunmalıdır;
+    əks halda bir kafedra müdiri bütün universitetin tədris planlarını
+    redaktə edə və kafedra mərhələsini keçirə bilərdi.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.faculty_b = OrgUnit.objects.create(
+            organization=cls.org, unit_type=OrgUnitType.FACULTY, name="Dizayn", slug="ds2-fak-b"
+        )
+        cls.chair_b = OrgUnit.objects.create(
+            organization=cls.org,
+            parent=cls.faculty_b,
+            unit_type=OrgUnitType.CHAIR,
+            name="Dizayn kafedrası",
+            slug="ds2-kaf-b",
+        )
+        cls.specialty_b = OrgUnit.objects.create(
+            organization=cls.org,
+            parent=cls.chair_b,
+            unit_type=OrgUnitType.SPECIALTY,
+            name="Qrafik dizayn",
+            slug="ds2-ixt-b",
+        )
+        cls.program_b = Program.objects.create(
+            organization=cls.org,
+            code="QA-DS2-PRG-B",
+            official_code="6050300",
+            name="QA-DS2 Qrafik dizayn",
+            specialty_unit=cls.specialty_b,
+        )
+        cls.chair_head_b = User.objects.create_user("ds2_chair_head_b", "ds2_chb@qku.edu.az", PASSWORD)
+        Membership.objects.create(
+            user=cls.chair_head_b,
+            organization=cls.org,
+            role=cls.roles["chair_head"],
+            scope_unit=cls.chair_b,
+            is_primary=True,
+            is_active=True,
+        )
+        cls.dean_b = User.objects.create_user("ds2_dean_b", "ds2_deanb@qku.edu.az", PASSWORD)
+        Membership.objects.create(
+            user=cls.dean_b,
+            organization=cls.org,
+            role=cls.roles["dean"],
+            scope_unit=cls.faculty_b,
+            is_primary=True,
+            is_active=True,
+        )
+
+    def _client_for(self, user):
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        return client
+
+    def _post_as(self, user, payload):
+        return self._client_for(user).post(reverse("registrar:curriculum_action"), payload)
+
+    def _post(self, role, payload):
+        return self._client(role).post(reverse("registrar:curriculum_action"), payload)
+
+    def test_foreign_chair_head_cannot_add_a_row_to_another_chairs_plan(self):
+        plan = self._plan()
+        response = self._post_as(
+            self.chair_head_b,
+            {
+                "action": "save_row",
+                "plan": str(plan.id),
+                "subject": str(self.subject.id),
+                "semester_number": "1",
+                "credits": "5",
+            },
+        )
+        self.assertIn(response.status_code, (403, 404), response.content)
+        self.assertEqual(CurriculumSubject.objects.filter(curriculum=plan).count(), 0)
+
+    def test_foreign_chair_head_cannot_approve_the_chair_stage(self):
+        plan = self._plan(status=PlanStatus.CHAIR_REVIEW)
+        self._balanced_row(plan)
+        response = self._post_as(self.chair_head_b, {"action": "approve_chair", "plan": str(plan.id)})
+        self.assertIn(response.status_code, (403, 404), response.content)
+        plan.refresh_from_db()
+        self.assertEqual(plan.status, PlanStatus.CHAIR_REVIEW)
+
+    def test_foreign_dean_cannot_approve_the_faculty_council_stage(self):
+        plan = self._plan(status=PlanStatus.FACULTY_COUNCIL)
+        self._balanced_row(plan)
+        response = self._post_as(self.dean_b, {"action": "approve_council", "plan": str(plan.id)})
+        self.assertIn(response.status_code, (403, 404), response.content)
+        plan.refresh_from_db()
+        self.assertEqual(plan.status, PlanStatus.FACULTY_COUNCIL)
+
+    def test_foreign_chair_head_cannot_create_a_plan_for_another_specialty(self):
+        response = self._post_as(
+            self.chair_head_b,
+            {"action": "create_plan", "program": str(self.program.id), "admission_year": "2027"},
+        )
+        self.assertIn(response.status_code, (403, 404), response.content)
+        self.assertFalse(Curriculum.objects.filter(program=self.program, admission_year=2027).exists())
+
+    def test_own_chair_head_still_works(self):
+        """Pozitiv nəzarət — öz kafedrasında heç nə qırılmır."""
+        plan = self._plan(status=PlanStatus.CHAIR_REVIEW)
+        self._balanced_row(plan)
+        response = self._post("chair_head", {"action": "approve_chair", "plan": str(plan.id)})
+        self.assertEqual(response.status_code, 200, response.content)
+        plan.refresh_from_db()
+        self.assertEqual(plan.status, PlanStatus.FACULTY_COUNCIL)
+
+    def test_org_wide_teaching_office_is_unaffected(self):
+        """Tədris şöbəsi ORGANIZATION scope-ludur — hər ixtisasa toxuna bilər."""
+        plan = self._plan()
+        response = self._post(
+            "teaching_office_head",
+            {
+                "action": "save_row",
+                "plan": str(plan.id),
+                "subject": str(self.subject.id),
+                "semester_number": "1",
+                "credits": "5",
+            },
+        )
+        self.assertEqual(response.status_code, 200, response.content)

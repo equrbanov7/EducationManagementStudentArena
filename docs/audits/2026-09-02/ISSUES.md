@@ -83,3 +83,14 @@ Status: OPEN · IN-PROGRESS · FIXED (klonda yoxlanıb) · DEFERRED (sahib qəra
 | P3-2 | ~90 kod şərhində hələ «İKT» | scout | WONTFIX (kosmetik) |
 | P3-3 | Kollokvium pəncərəsi view qatı üçün ayrıca test yoxdur | scout | OPEN |
 | P3-4 | Host: repo iCloud-sinxron Desktop-dadır → pack fayl boşalması, `git diff` sınır; yenidən yükləmə `/private/tmp` scratchpad-ı sildi | infra | Qeyd: hesabatlar indi `docs/audits/2026-09-02/`-də saxlanır |
+
+## Təhlükəsizlik dalğası 2 (PHASE23_SECURITY_WAVE2, 2026-09-03) — `a5d3ee9c..HEAD`
+Tam hesabat: `PHASE23_SECURITY_WAVE2.md`. Aşağıda **AÇIQ** qalanlar; düzəldilənlər (P0 media,
+P1 plan əhatəsi, P1 hadisə lenti trigger-i, P2 idxal qapısı) orada sənədləşdirilib.
+
+| # | Problem | Mənbə | Status |
+|---|---|---|---|
+| S2-1 | `structure_tree_action` / `group_action` hədəf təşkilatı URL **slug**-ından, icazəni isə `request.org_permissions`-dan (**AKTİV** təşkilat) alır. A-da `unit.tree_manage`, B-də yalnız `unit.view` üzvlüyü olan aktor B-nin struktur ağacını dəyişə bilər. Tək tenantda latent. `apps/organizations/structure_actions.py:205`, `group_actions.py:271`, `views/shared/_helpers.py:68` | WAVE2 | OPEN (P2 — eyni naxış bütün `organizations/<slug>/…` səthindədir, ayrıca dilim kimi aparılmalıdır) |
+| S2-2 | `TaskRowReview` «tarixçə» deyil: `update_or_create` koordinatorun əvvəlki vizasını üstündən yazır (`apps/workload/services/reviews.py:126`) | WAVE2 | OPEN (P3 — ya sənəd dili «cari viza»ya dəyişsin, ya append + `latest` güzgüsü) |
+| S2-3 | `QuestionSubmissionEvent` DELETE qəsdən bloklanmır: `QuestionSubmission.delete()` (`submission_inbox.py:327`) FK CASCADE ilə bütün izi aparır. UPDATE artıq trigger ilə bağlıdır (`exams/0065`) | WAVE2 | OPEN (P3 — `on_delete=PROTECT` + göndərişin soft-delete-i təklif olunur; `core.audit` sətri qalır) |
+| S2-4 | Qəbulun bir dəfəlik parol siyahısı (`credentials[]`) JSON cavabında qayıdır (`apps/accounts/services/intake/apply.py:246`) — saxlanılmır, amma brauzer tarixçəsinə/proxy loglarına düşə bilər | WAVE2 | OPEN (P3 — ayrıca `no-store` CSV/PDF endpoint-i) |
