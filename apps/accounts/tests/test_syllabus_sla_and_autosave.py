@@ -174,3 +174,59 @@ class SyllabusAutosaveConflictTest(_Base):
         )
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["code"], "assess.split_mismatch")
+
+
+class SyllabusInputGuardTest(_Base):
+    """QA 2026-09-05 SYLLABUS-01/02: dublikat yaratma 500 (IntegrityError), ixtiyari JSON forması
+    autosave-də qəbul olunub redaktoru 500 ilə kilidləyirdi."""
+
+    def test_second_create_for_the_same_offering_returns_409_not_500(self):
+        client = self._client()
+        response = client.post(
+            reverse("accounts:syllabus_action"),
+            data=json.dumps({"action": "create", "offering": str(self.offering.pk)}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+        payload = response.json()
+        self.assertEqual(payload["code"], "syllabus.exists")
+        self.assertEqual(payload["syllabus"], str(self.syllabus.pk))
+
+    def test_invalid_week_row_shape_is_refused_with_400(self):
+        client = self._client()
+        revision = self.version.sections.get(section_id=SectionKey.WEEK.value).revision
+        response = client.post(
+            reverse("accounts:syllabus_section_save", kwargs={"version_id": str(self.version.pk)}),
+            data=json.dumps(
+                {
+                    "section": SectionKey.WEEK.value,
+                    "revision": revision,
+                    "data": {"rows": [1, None, {"topic": {"a": 1}}]},
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        payload = response.json()
+        self.assertEqual(payload["code"], "section.invalid_shape")
+        self.assertEqual(payload["field"], "rows[0]")
+        # Redaktor bundan sonra da açılır (məzmun toxunulmaz qalıb).
+        editor = client.get(
+            reverse("accounts:profile_section_fragment", kwargs={"section": "syllabus-editor"})
+            + f"?version={self.version.pk}",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(editor.status_code, 200)
+
+    def test_oversized_description_is_refused_with_400(self):
+        client = self._client()
+        revision = self.version.sections.get(section_id=SectionKey.DESC.value).revision
+        response = client.post(
+            reverse("accounts:syllabus_section_save", kwargs={"version_id": str(self.version.pk)}),
+            data=json.dumps(
+                {"section": SectionKey.DESC.value, "revision": revision, "data": {"description": "B" * 30000}}
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["code"], "section.too_long")

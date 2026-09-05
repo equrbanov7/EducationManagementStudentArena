@@ -64943,3 +64943,24 @@ msgstr "Выдать статус преподавателя"
 msgctxt "accounts.people.detail"
 msgid "Müəllim statusunu çıxar"
 msgstr "Снять статус преподавателя"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Выбранный преподаватель не входит в преподавательский состав организации."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Журнал закрыт — изменения не сохранены."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Ни одна ячейка не сохранена — помешало правило дня занятия или блокировка ячейки."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Содержимое раздела имеет неверный формат (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "Содержимое слишком велико — не более %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Для этого курса силлабус уже существует — откройте его из списка."

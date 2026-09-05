@@ -29,6 +29,7 @@ from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, Syll
 from ..policy import assessment_weights
 from ..state_machine import TransitionDenied
 from .scoping import is_author
+from .section_shape import normalize_section_data
 from .units import ensure_chair_unit, resolve_syllabus_chair_unit
 
 #: Bölmələrin BOŞ məzmun sxemi — autosave müqaviləsinin (public.py) əsasıdır.
@@ -407,6 +408,9 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         raise TransitionDenied("transition.author_only", params={"transition": "save_section"})
     if section_id not in SECTION_ORDER:
         raise TransitionDenied("section.unknown", params={"section": section_id})
+    # Forma/uzunluq yoxlaması — ixtiyari JSON redaktoru 500 ilə kilidləyirdi
+    # (QA 2026-09-05 SYLLABUS-02/03).
+    data = normalize_section_data(section_id, data or {})
     if section_id == SectionKey.SELF.value:
         option = (data or {}).get("option") or ""
         if option and option not in SELFWORK_OPTIONS:

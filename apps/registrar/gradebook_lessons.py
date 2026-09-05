@@ -42,6 +42,19 @@ def _coerce_date(value):
         return None
 
 
+#: `Lesson.topic` CharField(255) — ORM uzunluğu yoxlamır, uzun mövzu DB `DataError`
+#: (500) verirdi (QA 2026-09-05 JOURNAL-TEACHER-01). Həm yaratma, həm yeniləmə yolu
+#: buradan keçir.
+MAX_TOPIC_LENGTH = Lesson._meta.get_field("topic").max_length or 255
+
+
+def clean_topic(topic) -> str:
+    text = topic.strip() if isinstance(topic, str) else ""
+    if len(text) > MAX_TOPIC_LENGTH:
+        raise LessonRuleError(f"Dərs mövzusu ən çox {MAX_TOPIC_LENGTH} simvol ola bilər ({len(text)} göndərildi).")
+    return text
+
+
 @transaction.atomic
 def create_lesson(
     *,
@@ -82,7 +95,7 @@ def create_lesson(
         offering=offering,
         date=parsed,
         kind=kind,
-        topic=topic or "",
+        topic=clean_topic(topic),
         hours=new_hours,
         start_time=start_time,
         end_time=end_time,
@@ -124,7 +137,7 @@ def update_lesson(
         lesson.kind = kind
         fields.append("kind")
     if topic is not None:
-        lesson.topic = topic
+        lesson.topic = clean_topic(topic)
         fields.append("topic")
     if hours is not None:
         lesson.hours = hours

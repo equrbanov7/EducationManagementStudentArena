@@ -94,6 +94,9 @@ TRANSITION_MESSAGES = {
     "version.base_missing": pgettext_lazy(_CTX, "Mənbə versiya tapılmadı."),
     "version.kind_unknown": pgettext_lazy(_CTX, "Versiya növü tanınmır."),
     "section.unknown": pgettext_lazy(_CTX, "Bölmə tanınmır."),
+    "section.invalid_shape": pgettext_lazy(_CTX, "Bölmə məzmununun formatı düzgün deyil (%(field)s)."),
+    "section.too_long": pgettext_lazy(_CTX, "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."),
+    "syllabus.exists": pgettext_lazy(_CTX, "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."),
     "section.conflict": pgettext_lazy(_CTX, "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."),
     "self.option_not_allowed": pgettext_lazy(_CTX, "Seçilmiş sərbəst iş strukturu universitet siyasətinə uyğun deyil."),
     "assess.split_mismatch": pgettext_lazy(

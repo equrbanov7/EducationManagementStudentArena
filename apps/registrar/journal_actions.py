@@ -79,7 +79,10 @@ def _resolve_instructor(offering, raw_id):
 
     from apps.registrar.integrity import validate_instructor_assignment
 
-    instructor = get_user_model().objects.filter(pk=raw_id).first()
+    try:
+        instructor = get_user_model().objects.filter(pk=raw_id).first()
+    except (ValueError, TypeError) as exc:  # "abc" kimi id → 500 deyil, 404
+        raise Http404 from exc
     if instructor is None:
         raise Http404
     try:

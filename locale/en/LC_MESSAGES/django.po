@@ -64795,3 +64795,24 @@ msgstr "Grant teacher status"
 msgctxt "accounts.people.detail"
 msgid "Müəllim statusunu çıxar"
 msgstr "Revoke teacher status"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "The selected teacher is not on this organisation's teaching staff."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "The journal is closed — the changes were not saved."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "No cell was saved — the lesson-day rule or a cell lock prevented it."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "The section content has an invalid format (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "The content is too large — at most %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "A syllabus already exists for this course offering — open it from the list."

@@ -68,12 +68,16 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
       </select>
     </div>
 
+    {% comment %}Tələbə qrupları kafedra altında deyil (fakültə→ixtisas→qrup) —
+    kafedra filtri tələbə kataloqunda həmişə 0 verirdi (QA 2026-09-05 PEOPLE-RBAC-02).{% endcomment %}
+    {% if people_section.kind == 'teachers' %}
     <div class="people__field">
       <label for="people-kafedra-{{ people_section.kind }}">{% trans "Kafedra" context "accounts.people" %}</label>
       <select id="people-kafedra-{{ people_section.kind }}" name="kafedra" data-people-option="kafedras">
         <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
       </select>
     </div>
+    {% endif %}
 
     {% if people_section.kind == 'students' %}
     <div class="people__field">

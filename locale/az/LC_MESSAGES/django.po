@@ -64610,3 +64610,24 @@ msgstr "Müəllim statusu ver"
 msgctxt "accounts.people.detail"
 msgid "Müəllim statusunu çıxar"
 msgstr "Müəllim statusunu çıxar"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."

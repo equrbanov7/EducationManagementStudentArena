@@ -28,7 +28,9 @@ from .filters import (
 from .permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
 from .scoping import unit_subtree_q
 
-MAX_OPTIONS = 500
+#: 766 aktiv qrup 500-də kəsilirdi (QA 2026-09-05 PEOPLE-RBAC-06) — açılışlar
+#: kliyent-tərəfi axtarışlıdır, ona görə hədd tənzimləndi.
+MAX_OPTIONS = 2000
 
 _STATUS_BUCKETS = (STATUS_ACTIVE, STATUS_BLOCKED, STATUS_ARCHIVED, STATUS_DELETED)
 

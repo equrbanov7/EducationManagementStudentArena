@@ -406,9 +406,17 @@ def _handle_add_lesson(request, offering):
     instructor = None
     _inst_id = (request.POST.get("lesson_instructor") or "").strip()
     if _inst_id:
-        from django.contrib.auth import get_user_model
+        # Yeniləmə yolu ilə EYNİ həlledici: tip + təşkilat/rol yoxlaması (etibarsız
+        # id və ya tələbə id-si əvvəl 500 ValueError/IntegrityError verirdi —
+        # QA 2026-09-05 JOURNAL-TEACHER-02). Call-time import: journal_actions
+        # views-dən idxal edir.
+        from .journal_actions import _resolve_instructor
 
-        instructor = get_user_model().objects.filter(pk=_inst_id).first()
+        try:
+            instructor = _resolve_instructor(offering, _inst_id)
+        except Http404:
+            messages.error(request, _("Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."))
+            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     # Dərsin otağı (opsional) — korpus yalnız UI süzgəcidir, saxlanan dəyər otaqdır.
     # Otaq təşkilat daxilində həll olunur: başqa tenant-ın otağı keçmir.
@@ -480,8 +488,16 @@ def _handle_save_marks(request, offering):
                 }
             )
 
+    if gradebook.journal_is_locked(offering):
+        # Əvvəl «Jurnal yadda saxlanıldı (0 xana)» UĞUR mesajı gedirdi (QA 2026-09-05
+        # JOURNAL-TEACHER-04) — kilidli jurnala yazı səssiz atılmamalıdır.
+        messages.error(request, _("Jurnal bağlıdır — dəyişikliklər yazılmadı."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     written = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user)
-    messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
+    if entries and not written:
+        messages.warning(request, _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."))
+    else:
+        messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
