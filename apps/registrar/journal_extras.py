@@ -516,9 +516,9 @@ def journal_teaching_summary(offering):
       * ``held_total`` keçirilmiş toplam saat, ``total`` fənnin tam saatı,
         ``remaining`` qalan saat (#7). ``over`` — həddi keçibsə True (#6 göstərişi).
     """
-    from apps.registrar.models import Lesson, LessonKind
-
     from django.utils import timezone
+
+    from apps.registrar.models import Lesson, LessonKind
 
     lessons = list(
         Lesson.objects.filter(offering=offering)

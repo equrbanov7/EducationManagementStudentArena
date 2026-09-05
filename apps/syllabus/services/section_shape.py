@@ -23,21 +23,30 @@ _MAX_KEY_CHARS = 64
 
 
 class SectionShapeError(TransitionDenied):
-    """Bölmə gövdəsi gözlənilən formada deyil — 400 (kliyent xətası)."""
+    """Bölmə gövdəsi gözlənilən formada deyil — 400 (kliyent xətası).
 
-    def __init__(self, code: str, field: str, **params):
-        super().__init__(code, "", {"field": field, **params})
-        self.field = field
+    `__init__` QƏSDƏN override edilmir (flake8-bugbear B042) — nümunə
+    `shape_error()` fabriki ilə qurulur, `field` orada təyin olunur.
+    """
+
+    field = ""
+
+
+def shape_error(code: str, field: str, **params) -> SectionShapeError:
+    """`SectionShapeError` qurucusu — `field`-i həm parametrlərə, həm atributa yazır."""
+    error = SectionShapeError(code, "", {"field": field, **params})
+    error.field = field
+    return error
 
 
 def _text(value, field: str) -> str:
     if value is None:
         return ""
     if isinstance(value, bool) or not isinstance(value, (str, int, float)):
-        raise SectionShapeError("section.invalid_shape", field)
+        raise shape_error("section.invalid_shape", field)
     text = value if isinstance(value, str) else str(value)
     if len(text) > MAX_TEXT_CHARS:
-        raise SectionShapeError("section.too_long", field, max=MAX_TEXT_CHARS)
+        raise shape_error("section.too_long", field, max=MAX_TEXT_CHARS)
     return text
 
 
@@ -45,14 +54,14 @@ def _int(value, field: str) -> int:
     if value is None or value == "":
         return 0
     if isinstance(value, bool):
-        raise SectionShapeError("section.invalid_shape", field)
+        raise shape_error("section.invalid_shape", field)
     if isinstance(value, (int, float)):
         if isinstance(value, float) and not math.isfinite(value):
-            raise SectionShapeError("section.invalid_shape", field)
+            raise shape_error("section.invalid_shape", field)
         return int(value)
     if isinstance(value, str) and value.strip().lstrip("-").isdigit():
         return int(value.strip())
-    raise SectionShapeError("section.invalid_shape", field)
+    raise shape_error("section.invalid_shape", field)
 
 
 def _scalar_or_nested(value, field: str, depth: int):
@@ -61,26 +70,26 @@ def _scalar_or_nested(value, field: str, depth: int):
         return value
     if isinstance(value, (int, float)):
         if isinstance(value, float) and not math.isfinite(value):
-            raise SectionShapeError("section.invalid_shape", field)
+            raise shape_error("section.invalid_shape", field)
         return value
     if isinstance(value, str):
         return _text(value, field)
     if depth >= _MAX_DEPTH:
-        raise SectionShapeError("section.invalid_shape", field)
+        raise shape_error("section.invalid_shape", field)
     if isinstance(value, list):
         if len(value) > MAX_LIST_ITEMS:
-            raise SectionShapeError("section.too_long", field, max=MAX_LIST_ITEMS)
+            raise shape_error("section.too_long", field, max=MAX_LIST_ITEMS)
         return [_scalar_or_nested(item, f"{field}[{index}]", depth + 1) for index, item in enumerate(value)]
     if isinstance(value, dict):
         if len(value) > _MAX_KEYS:
-            raise SectionShapeError("section.too_long", field, max=_MAX_KEYS)
+            raise shape_error("section.too_long", field, max=_MAX_KEYS)
         out = {}
         for key, item in value.items():
             if not isinstance(key, str) or not key or len(key) > _MAX_KEY_CHARS:
-                raise SectionShapeError("section.invalid_shape", field)
+                raise shape_error("section.invalid_shape", field)
             out[key] = _scalar_or_nested(item, f"{field}.{key}", depth + 1)
         return out
-    raise SectionShapeError("section.invalid_shape", field)
+    raise shape_error("section.invalid_shape", field)
 
 
 def _string_list(value, field: str) -> list[str]:
@@ -89,9 +98,9 @@ def _string_list(value, field: str) -> list[str]:
     if isinstance(value, str):
         return [_text(value, field)]
     if not isinstance(value, list):
-        raise SectionShapeError("section.invalid_shape", field)
+        raise shape_error("section.invalid_shape", field)
     if len(value) > MAX_LIST_ITEMS:
-        raise SectionShapeError("section.too_long", field, max=MAX_LIST_ITEMS)
+        raise shape_error("section.too_long", field, max=MAX_LIST_ITEMS)
     return [_text(item, f"{field}[{index}]") for index, item in enumerate(value)]
 
 
@@ -99,9 +108,9 @@ def _week_rows(value) -> list[dict]:
     if value is None:
         return []
     if not isinstance(value, list):
-        raise SectionShapeError("section.invalid_shape", "rows")
+        raise shape_error("section.invalid_shape", "rows")
     if len(value) > MAX_WEEK_ROWS:
-        raise SectionShapeError("section.too_long", "rows", max=MAX_WEEK_ROWS)
+        raise shape_error("section.too_long", "rows", max=MAX_WEEK_ROWS)
     rows = []
     for index, raw in enumerate(value):
         field = f"rows[{index}]"
@@ -109,11 +118,11 @@ def _week_rows(value) -> list[dict]:
             rows.append({})
             continue
         if not isinstance(raw, dict):
-            raise SectionShapeError("section.invalid_shape", field)
+            raise shape_error("section.invalid_shape", field)
         row = {}
         for key, item in raw.items():
             if not isinstance(key, str):
-                raise SectionShapeError("section.invalid_shape", field)
+                raise shape_error("section.invalid_shape", field)
             if key in ("topic", "outcome"):
                 row[key] = _text(item, f"{field}.{key}")
             elif key in LESSON_HOUR_KINDS:
@@ -134,11 +143,11 @@ _LIST_FIELDS = {
 def normalize_section_data(section_id: str, data: dict) -> dict:
     """Göndərilən açarları normallaşdırır; uyğunsuz forma → ``SectionShapeError``."""
     if not isinstance(data, dict):
-        raise SectionShapeError("section.invalid_shape", "data")
+        raise shape_error("section.invalid_shape", "data")
     out = {}
     for key, value in data.items():
         if not isinstance(key, str) or not key or len(key) > _MAX_KEY_CHARS:
-            raise SectionShapeError("section.invalid_shape", "data")
+            raise shape_error("section.invalid_shape", "data")
         if section_id == SectionKey.WEEK.value and key == "rows":
             out[key] = _week_rows(value)
         elif key in _LIST_FIELDS.get(section_id, ()):

@@ -6,6 +6,7 @@ ayrılıb — MƏZMUN DƏYİŞMƏYİB, yalnız yer dəyişib.
 
 from core.constants import RoleScopeType
 
+from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import (
     PEOPLE_DIRECTORY_FULL,
     PEOPLE_DIRECTORY_READ,
@@ -13,7 +14,6 @@ from .default_roles_shared import (
 )
 from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
-from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 
