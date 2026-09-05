@@ -65,8 +65,15 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
     ``full_clean`` QƏSDƏN çağırılır: validator model sahəsinə bağlıdır və
     yalnız təmizləmə zamanı işə düşür, ``objects.create`` onu keçir.
     """
+    incoming = list(files or [])
+    # QA 2026-09-05 (P3-17): hədddən artıq fayl SƏSSİZCƏ atılırdı — istifadəçi
+    # sənədinin əlavə olunmadığını görmürdü.
+    if len(incoming) > MAX_ATTACHMENTS_PER_ACTION:
+        raise ValidationError(
+            {"files": [f"Bir əməliyyatda ən çox {MAX_ATTACHMENTS_PER_ACTION} fayl əlavə edilə bilər."]}
+        )
     created = []
-    for uploaded in list(files or [])[:MAX_ATTACHMENTS_PER_ACTION]:
+    for uploaded in incoming:
         attachment = ApplicationAttachment(
             organization=application.organization,
             application=application,

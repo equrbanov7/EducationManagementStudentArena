@@ -44,3 +44,22 @@ class DuplicateSubmissionTest(TestCase):
             submit_application(**payload)
         self.assertEqual(ctx.exception.code, "duplicate.recent")
         self.assertEqual(first.organization.applications.count(), 1)
+
+
+class AttachmentLimitTest(SimpleTestCase):
+    """Hədddən artıq fayl səssizcə atılmamalıdır — QA 2026-09-05 P3-17."""
+
+    def test_more_than_the_limit_raises(self):
+        from django.core.exceptions import ValidationError
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        from apps.applications.constants import MAX_ATTACHMENTS_PER_ACTION
+        from apps.applications.services.submit import attach_files
+
+        files = [
+            SimpleUploadedFile(f"sened{i}.pdf", b"%PDF-1.4 test", content_type="application/pdf")
+            for i in range(MAX_ATTACHMENTS_PER_ACTION + 1)
+        ]
+        with self.assertRaises(ValidationError) as ctx:
+            attach_files(None, files)
+        self.assertIn("files", ctx.exception.message_dict)
