@@ -55,6 +55,13 @@ ENTRIES = {
             "tr": "Hiçbir hücre kaydedilmedi — ders günü kuralı veya hücre kilidi buna izin vermedi.",
         },
     },
+    "roles.display_name": {
+        "rim_staff": {
+            "en": "RİM staff",
+            "ru": "Сотрудник Центра цифрового развития (RİM)",
+            "tr": "Dijital Gelişim Merkezi (RİM) çalışanı",
+        },
+    },
     "accounts.manage_roles.message": {
         "missing_member_management_permission": {
             "en": "You need the `role.assign` or `org.manage_members` permission for this action.",
@@ -113,6 +120,7 @@ ENTRIES = {
 
 #: Açar-tipli msgid-lər üçün AZ mətni (kataloq qapısı xam açar sızmasını rədd edir).
 AZ_OVERRIDES = {
+    "rim_staff": "Rəqəmsal İnkişaf Mərkəzi (RİM) əməkdaşı",
     "missing_member_management_permission": "Bu əməl üçün `role.assign` və ya `org.manage_members` icazəsi lazımdır.",
     "target_outside_structure_scope": "Bu istifadəçi sizin struktur əhatənizdən kənardadır.",
     "role_not_defined_in_organization": "Seçilmiş rol bu təşkilatda müəyyən edilməyib: %(roles)s.",

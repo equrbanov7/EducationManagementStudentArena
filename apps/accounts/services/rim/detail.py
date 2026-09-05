@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from django.urls import reverse
 
+from core.staff_position import visible_role_label
+
 from .policy import RimActor, target_level
 from .search import account_status
 
@@ -58,7 +60,7 @@ def serialize_memberships(user, organization=None, *, scope=None):
             {
                 "id": str(membership.id),
                 "role_name": membership.role.name,
-                "role_label": membership.role.display_name or membership.role.name,
+                "role_label": visible_role_label(membership.role.name, membership.role.display_name),
                 "role_level": int(membership.role.level or 0),
                 "organization": membership.organization.name,
                 "scope_unit": membership.scope_unit.name if membership.scope_unit_id else "",

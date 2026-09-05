@@ -64583,3 +64583,7 @@ msgstr "Varsayılan biçim"
 
 msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgstr "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Dijital Gelişim Merkezi (RİM) çalışanı"

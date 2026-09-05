@@ -1,4 +1,4 @@
-{% load i18n permission_extras %}
+{% load i18n permission_extras org_tags %}
 {% trans "organization_not_found" context "profile.permission_editor" as permission_editor_org_not_found %}
 {% if organization %}
 <div class="section-card">
@@ -20,12 +20,12 @@
                     {% if embedded_in_profile %}
                     <a href="{{ profile_base_url }}?section=permission-editor&role={{ role.id }}"
                        class="role-badge {% if selected_role and selected_role.id == role.id %}admin{% else %}student{% endif %}">
-                        {{ role.display_name }} ({{ role.level }})
+                        {{ role|localized_role_label }} ({{ role.level }})
                     </a>
                     {% else %}
                     <a href="{% url 'accounts:permission_editor' %}?role={{ role.id }}"
                        class="role-badge {% if selected_role and selected_role.id == role.id %}admin{% else %}student{% endif %}">
-                        {{ role.display_name }} ({{ role.level }})
+                        {{ role|localized_role_label }} ({{ role.level }})
                     </a>
                     {% endif %}
                 {% endfor %}
@@ -42,7 +42,7 @@
 {% if not access_denied_message and selected_role %}
 <div class="section-card js-permission-editor" data-permission-editor>
     <div class="section-title">
-        <i class="fas fa-lock"></i> {{ selected_role.display_name }} - {% trans "permissions_suffix" context "profile.permission_editor" %}
+        <i class="fas fa-lock"></i> {{ selected_role|localized_role_label }} - {% trans "permissions_suffix" context "profile.permission_editor" %}
     </div>
 
     <div class="permission-editor-search-wrap">
