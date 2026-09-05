@@ -12,12 +12,12 @@
 
 | Göstərici | 05 sentyabr | **06 sentyabr (indi)** |
 |---|---|---|
-| Ümumi QA balı | 71 / 100 | **76 / 100** |
+| Ümumi QA balı | 71 / 100 | **83 / 100** |
 | Tapılan problem | 91 | **92** (P1 11 · P2 41 · P3 22 · UX 18) |
-| Düzəldilmiş | 43 | **63** (+3 qismən) |
-| Açıq qalan | 44 | **24** (heç biri P0 deyil; 1-i P1) |
+| Düzəldilmiş | 43 | **69** (+1 qismən) |
+| Açıq qalan | 44 | **20** (heç biri P0 və ya P1 deyil) |
 | P0 (istehsalı bloklayan) | 0 | **0** |
-| Yeni reqressiya testi | 8 fayl | **13 fayl** |
+| Yeni reqressiya testi | 8 fayl | **18 fayl** |
 
 **Qərar: ŞƏRTLƏ HAZIR (READY WITH CONDITIONS)** — §9-dakı 5 şərt ödənilməlidir.
 
@@ -135,13 +135,13 @@
 
 İstehsalı bloklayan (P0) qüsur yoxdur; auditin tapdığı bütün icazə boşluqları və data korlayan hallar bağlanıb. Buraxılışdan əvvəl **5 şərt**:
 
-1. **Jurnal miqyası (P1-8).** Ən böyük açılış 41.5 MB HTML / 6.3 s verir — real sessiyada brauzer donur. Dərs pəncərəsi üzrə səhifələmə tələb olunur.
-2. **`academic-records` ilk açılışı (P2-19).** Keş sonrakı açılışları həll edir, İLK açılış hələ 13 s: profil göstərir ki, vaxt Python-dadır — 148 633 yazılış üçün `analytics._evaluate` (~4 s), 969 162 UUID obyekti (~2 s), 203 515 model instansiyası (~1.8 s). Həll: yazılışları model kimi yükləmədən (values/SQL aqreqatı) hesablamaq. *(Analitika bölməsi 06.09-da keşləndi: 7.69 s → 0.11 s.)*
+1. ~~**Jurnal miqyası (P1-8).**~~ ✅ **BAĞLANDI (06.09):** üç kök səbəb (beş tabın eyni anda render olunması, sütun pəncərəsinin olmaması, girintili markup) həll edildi — 555×32 açılışda **9.83 MB / 3.20 s → 1.07 MB / 2.16 s**.
+2. ~~**`academic-records` ilk açılışı (P2-19).**~~ ✅ **BAĞLANDI (06.09):** 7.3–8.0 s → **~2.0 s**, rəqəmlər 32 kombinasiyada eynidir. Köhnə mətn: Keş sonrakı açılışları həll edir, İLK açılış hələ 13 s: profil göstərir ki, vaxt Python-dadır — 148 633 yazılış üçün `analytics._evaluate` (~4 s), 969 162 UUID obyekti (~2 s), 203 515 model instansiyası (~1.8 s). Həll: yazılışları model kimi yükləmədən (values/SQL aqreqatı) hesablamaq. *(Analitika bölməsi 06.09-da keşləndi: 7.69 s → 0.11 s.)*
 3. ~~**Dərs yükü biznes qapıları (P2-35/36/37).**~~ ✅ **BAĞLANDI (06.09):** 0 saatlıq sətir göndərilmir, dublikat sətir yaradılmır, dekan təsdiqi koordinator vizası tələb edir (`workload.visa_required`, əhatə qaydası ilə).
-4. **Legacy «Level …» psevdo-qrupları (P2-8).** 72 qrup + 2 «Xaric olunanlar» konteyneri statusa çevrilməli və ya «xidməti» kimi işarələnməlidir; əks halda dekan/RİM siyahılarında əsl akademik qrup kimi görünür.
+4. **Legacy psevdo-qruplar (P2-8) — ALƏT HAZIRDIR, İCRA SAHİB QƏRARI GÖZLƏYİR.** `legacy_repair_pseudo_groups` (dry-run default) klonda 73 vahidi xidməti işarələdi və **31 «xaric» tələbəsini faktiki olaraq xaric etdi — onların statusu heç vaxt yazılmamışdı, yəni girişləri hələ açıq idi**. Prod-da icra üçün iki qərar lazımdır: «Level 2025-2026» (228 tələbə, real ixtisas altında) və `Silinmelidir` adlı qrup (7 tələbə).
 5. **Prod başlıqları və a11y minimumu.** HSTS təsdiqlənməli; ən çox işlənən 5 formada (imtahan balı, rol təyinatı, tələbə idxalı, müraciət, yük bölgüsü) label-siz input-lar bağlanmalıdır.
 
-**Tövsiyə edilən ardıcıllıq:** 4 (semestr məlumatı) → 1 (jurnal miqyası) → 2 → 5.
+**Qalan ardıcıllıq:** 4 (sahib qərarı + prod icrası) → 5 (HSTS) → 3 (jurnal siyahısının səhifələnməsi, P2-18).
 
 ---
 
