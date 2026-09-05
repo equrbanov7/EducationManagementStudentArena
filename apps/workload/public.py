@@ -71,6 +71,7 @@ from .services import (
     manageable_chairs,
     resolve_actor,
     teacher_workload_rows,
+    teacher_workload_summaries,
     teacher_workload_summary,
     teacher_years,
 )
@@ -294,11 +295,13 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
 
     users = {user.pk: user for user in get_user_model().objects.filter(pk__in=ids)}
     staff_fraction_total = 0.0
+    # Toplu aqreqat: hər müəllimə 5 sorğu əvəzinə cəmi 2 sorğu (QA 2026-09-05 P2-3).
+    bulk = teacher_workload_summaries(organization=organization, teacher_ids=ids, academic_year=academic_year)
     for teacher_id in ids:
         user = users.get(teacher_id)
         if user is None:
             continue
-        summary = teacher_workload_summary(organization=organization, teacher=user, academic_year=academic_year)
+        summary = dict(bulk.get(teacher_id) or {})
         percent = int(summary.get("fill_percent") or 0)
         if percent < 70:
             band = "free"

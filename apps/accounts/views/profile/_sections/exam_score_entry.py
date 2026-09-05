@@ -119,9 +119,7 @@ def build_exam_score_entry_section(
     if not is_superadmin:
         # Unit-scoped aktor (dekan/kafedra müdiri `exam.*` ilə) yalnız öz
         # alt-ağacının qruplarını görür — yazı qapısı ilə eyni əhatə.
-        offerings = [
-            offering for offering in offerings if service.offering_in_actor_scope(request.user, selected_org, offering)
-        ]
+        offerings = service.offerings_in_actor_scope(request.user, selected_org, offerings)
     for offering in offerings:
         offering.group_label = service.offering_label(offering)
     offering = _resolve_offering(request, offerings)
