@@ -324,8 +324,12 @@ def _role_capabilities(user, profile):
             "delete-account",
             "statistics",
         }
-        allowed_sections.add("my-results")
+        # QA 2026-09-05 (P3-5): «Nəticələrim» sidebar-da `can_view_student_assignments`
+        # blokunun içindədir (tələbə + adi üzv). Siyahı isə HƏR kəsə verirdi —
+        # heyət rolları menyuda görmədikləri boş səhifəni URL ilə aça bilirdi.
+        # Menyu ↔ capability indi eyni şərtdən gəlir.
         if can_view_student_assignments:
+            allowed_sections.add("my-results")
             allowed_sections.add("pending-answers")
 
         # Superadminin həvalə etdiyi (bayraqlı) qeyri-superadmin zal idarəçisi:
