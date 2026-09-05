@@ -73,7 +73,7 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                        name="results_search"
                        value="{{ my_results_search_query }}"
                        placeholder="{% trans 'Nəticə axtar...' %}"
-                       autocomplete="off">
+                       autocomplete="off" aria-label="{% trans 'Nəticə axtar...' %}">
                 {% if my_results_search_query %}
                 <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}"
                    class="results-section-search-clear"

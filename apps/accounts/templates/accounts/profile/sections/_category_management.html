@@ -32,7 +32,7 @@
                         value="{{ category_management_search_query }}"
                         placeholder="{% trans 'search_ph_names' context 'profile.category_management' %}"
                         class="form-control"
-                    >
+                     aria-label="{% trans 'search_ph_names' context 'profile.category_management' %}">
                     <button type="submit" class="btn btn-primary">{% trans "search" context "profile.category_management" %}</button>
                     {% if category_management_search_query %}
                         <a href="{{ profile_base_url }}?section=category-management" class="btn btn-outline-secondary">{% trans "reset" context "profile.category_management" %}</a>

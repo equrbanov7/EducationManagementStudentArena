@@ -141,7 +141,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
         <input type="hidden" name="scope" value="{{ s.selected_scope|default:'organization' }}" data-jc-mirror-scope>
         <input type="hidden" name="org_unit" value="{{ s.selected_unit_id }}" data-jc-mirror-unit>
         <input type="text" name="reason" maxlength="1000" class="jc-reason" required
-               placeholder="{% trans 'Açma səbəbi (məcburi)' context 'registrar.journal_close' %}">
+               placeholder="{% trans 'Açma səbəbi (məcburi)' context 'registrar.journal_close' %}" aria-label="{% trans 'Açma səbəbi (məcburi)' context 'registrar.journal_close' %}">
         <button type="submit" class="jc-btn jc-btn--ghost" data-jc-confirm-key="reopen">
           <i class="fas fa-lock-open"></i> {% trans "Bağlamanı geri qaytar (aç)" context "registrar.journal_close" %}
         </button>

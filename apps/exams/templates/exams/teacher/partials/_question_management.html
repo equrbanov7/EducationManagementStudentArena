@@ -120,7 +120,7 @@ Kontekst (view-dən):
                     <i class="fas fa-search"></i>
                     <input id="questionSearchInput" name="q" value="{{ search_query }}" type="text" autocomplete="off"
                         {% if question_bank_search_max_length %}maxlength="{{ question_bank_search_max_length }}" data-max-length="{{ question_bank_search_max_length }}"{% endif %}
-                        placeholder="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}">
+                        placeholder="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}" aria-label="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}">
                 </div>
 
                 <div class="bootstrap-single-select">
