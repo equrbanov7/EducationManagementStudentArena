@@ -258,10 +258,37 @@
             }
         }
 
+        // QA 2026-09-05 (UX-11): yüklənərkən boş başlıq sətri + pager görünürdü.
+        // İndi cədvəl `aria-busy` olur və skelet sətirlər yerini tutur.
+        function setBusy(busy) {
+            var table = tbody.closest("table") || tbody.parentElement;
+            if (table) {
+                table.setAttribute("aria-busy", busy ? "true" : "false");
+            }
+            if (!busy) {
+                return;
+            }
+            if (empty) {
+                empty.hidden = true;
+            }
+            var columns = (table && table.querySelectorAll("thead th").length) || 1;
+            var html = "";
+            for (var row = 0; row < 6; row += 1) {
+                html += '<tr class="people__row--skeleton" aria-hidden="true">';
+                for (var col = 0; col < columns; col += 1) {
+                    html += '<td><span class="skeleton skeleton-line skeleton-line--sm"></span></td>';
+                }
+                html += "</tr>";
+            }
+            tbody.innerHTML = html;
+        }
+
         function load() {
             publishFilters();
+            setBusy(true);
             window.EMSCore.fetchJSON(urls.list + "?" + params().toString())
                 .then(function (payload) {
+                    setBusy(false);
                     if (!payload || !payload.has_access) {
                         tbody.textContent = "";
                         if (empty) {
@@ -272,6 +299,7 @@
                     render(payload);
                 })
                 .catch(function () {
+                    setBusy(false);
                     tbody.textContent = "";
                 });
         }

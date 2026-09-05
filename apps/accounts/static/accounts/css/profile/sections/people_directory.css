@@ -353,3 +353,19 @@
         min-width: 560px;
     }
 }
+
+/* ── Yüklənmə vəziyyəti (QA 2026-09-05 UX-11) ─────────────────────────────
+   `people_directory.js` sorğu gedərkən cədvələ `aria-busy="true"` qoyur və
+   skelet sətirlər əlavə edir — əvvəl boş başlıq sətri + pager görünürdü. */
+.people__row--skeleton td {
+    padding: 12px 10px;
+}
+
+.people__row--skeleton .skeleton-line {
+    height: 12px;
+    margin: 0;
+}
+
+.people__table[aria-busy="true"] tbody tr:not(.people__row--skeleton) {
+    display: none;
+}
