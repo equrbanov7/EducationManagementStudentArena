@@ -94,6 +94,38 @@ def offering_in_actor_scope(user, organization, offering) -> bool:
     return journal_scope.offering_in_actor_scope(user, organization, offering, permission=ENTRY_PERMISSION)
 
 
+def offerings_in_actor_scope(user, organization, offerings):
+    """``offerings`` siyahısını aktorun əhatəsinə görə BİR sorğu ilə süzür.
+
+    Əvvəl seçici hər açılış üçün ``offering_in_actor_scope`` çağırırdı — 62 açılış
+    = 62 əhatə + 62 təşkilat sorğusu (QA 2026-09-05 P2-5).
+    """
+    offerings = list(offerings)
+    if not offerings:
+        return []
+    if _is_superadmin(user):
+        return offerings
+    if organization is None:
+        return []
+    from . import journal_scope
+
+    scope = journal_scope.permission_scope_for(user, organization, ENTRY_PERMISSION)
+    if not scope.has_structure_access:
+        return []
+    if scope.is_org_wide:
+        return offerings
+    from django.apps import apps as django_apps
+
+    group_ids = {getattr(o, "group_id", None) for o in offerings} - {None}
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    allowed = set(
+        org_unit_model.objects.filter(organization=organization, pk__in=group_ids)
+        .filter(scope.unit_subtree_q())
+        .values_list("pk", flat=True)
+    )
+    return [o for o in offerings if getattr(o, "group_id", None) in allowed]
+
+
 def assert_offering_in_actor_scope(user, organization, offering):
     """Əhatədən kənar açılışda yazını fail-closed dayandır."""
     if not offering_in_actor_scope(user, organization, offering):

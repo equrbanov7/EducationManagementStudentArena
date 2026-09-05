@@ -249,6 +249,60 @@ def teacher_workload_summary(*, organization, teacher, academic_year: str = "") 
     }
 
 
+def teacher_workload_summaries(*, organization, teacher_ids, academic_year: str = "") -> dict:
+    """``teacher_workload_summary``-nin TOPLU variantı — müəllim id → eyni formalı xülasə.
+
+    Kafedra profili 72 müəllim üçün hər birinə 4 SUM + 1 profil sorğusu edirdi
+    (288 + 72 sorğu — QA 2026-09-05 P2-3). Burada bütün cəmlər BİR GROUP BY ilə,
+    profillər BİR sorğu ilə gəlir; müəllimsiz id-lər sıfır xülasə alır.
+    """
+    from django.db.models import Q
+
+    ids = [tid for tid in teacher_ids if tid]
+    if not ids:
+        return {}
+    queryset = TeacherAssignment.objects.filter(
+        organization=organization,
+        teacher_id__in=ids,
+        row__task__status__in=(TaskStatus.DISTRIBUTED, TaskStatus.AMENDED),
+    )
+    if academic_year:
+        queryset = queryset.filter(row__task__academic_year=academic_year)
+    sums = {
+        row["teacher_id"]: row
+        for row in queryset.values("teacher_id").annotate(
+            total=Sum("hours"),
+            hourly=Sum("hours", filter=Q(is_hourly_paid=True)),
+            fall=Sum("hours", filter=Q(row__season=Season.FALL)),
+            spring=Sum("hours", filter=Q(row__season=Season.SPRING)),
+        )
+    }
+    profiles = {
+        profile.teacher_id: profile
+        for profile in TeacherWorkloadProfile.objects.filter(
+            organization=organization, teacher_id__in=ids, academic_year=academic_year
+        )
+    }
+    out = {}
+    for teacher_id in ids:
+        row = sums.get(teacher_id, {})
+        profile = profiles.get(teacher_id)
+        total = int(row.get("total") or 0)
+        norm = int(profile.annual_norm_hours if profile else DEFAULT_ANNUAL_NORM_HOURS)
+        out[teacher_id] = {
+            "total_hours": total,
+            "fall_hours": int(row.get("fall") or 0),
+            "spring_hours": int(row.get("spring") or 0),
+            "hourly_paid_hours": int(row.get("hourly") or 0),
+            "norm_hours": norm,
+            "fill_percent": int(round(total * 100 / norm)) if norm else 0,
+            "is_over_norm": bool(norm and total > norm),
+            "position": profile.position if profile else "",
+            "staff_fraction": str(profile.staff_fraction) if profile else "",
+        }
+    return out
+
+
 def chair_tasks(*, organization, chair_ids, academic_year: str = ""):
     queryset = TeachingTask.objects.filter(organization=organization, chair_id__in=list(chair_ids))
     if academic_year:
@@ -262,6 +316,7 @@ __all__ = [
     "task_rows",
     "teacher_load_panel",
     "teacher_workload_rows",
+    "teacher_workload_summaries",
     "teacher_workload_summary",
     "teacher_years",
 ]

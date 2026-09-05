@@ -29,6 +29,7 @@ from .queries import (
     task_rows,
     teacher_load_panel,
     teacher_workload_rows,
+    teacher_workload_summaries,
     teacher_workload_summary,
     teacher_years,
 )
@@ -152,6 +153,7 @@ __all__ = [
     "teacher_load_panel",
     "teacher_pool",
     "teacher_workload_rows",
+    "teacher_workload_summaries",
     "teacher_workload_summary",
     "teacher_years",
     "unassign",
