@@ -141,6 +141,40 @@
     color: var(--ems-primary-800, #1e3a8a);
 }
 
+/* QA 2026-09-05 (UX-17): sıralana bilən başlıq düyməsi — `<button>` başlığın
+   bütün kliklənən sahəsini tutur (mouse + klaviatura Tab/Enter/Space). Ox
+   göstəricisi `aria-sort` dəyərinə görə göstərilir (people_directory.js). */
+.people__th-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+.people__th-sort:hover {
+    color: var(--ems-primary-600, #2563eb);
+}
+.people__th-sort-icon::after {
+    content: "⇅";
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+th[aria-sort="ascending"] .people__th-sort-icon::after {
+    content: "↑";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+th[aria-sort="descending"] .people__th-sort-icon::after {
+    content: "↓";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+
 .people__cell-person {
     display: flex;
     align-items: center;

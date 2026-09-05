@@ -185,12 +185,22 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
       </caption>
       <thead>
         <tr>
-          <th scope="col">{% trans "Şəxs" context "accounts.people" %}</th>
+          {% comment %}QA 2026-09-05 (UX-17): "Şəxs"/"Kafedra"/"Qrup" başlıqları
+          `people-sort-{{ kind }}` select-i ilə eyni sıralama meyarlarına
+          uyğundur — düymə klaviatura ilə select-i dəyişir, aria-sort JS-də
+          (people_directory.js → initSortHeaders) yenilənir.{% endcomment %}
+          <th scope="col" data-people-sort-asc="name" data-people-sort-desc="-name">
+            <button type="button" class="people__th-sort">{% trans "Şəxs" context "accounts.people" %}<span class="people__th-sort-icon" aria-hidden="true"></span></button>
+          </th>
           {% if people_section.kind == 'teachers' %}
             <th scope="col">{% trans "Vəzifə / rol" context "accounts.people" %}</th>
-            <th scope="col">{% trans "Kafedra" context "accounts.people" %}</th>
+            <th scope="col" data-people-sort-asc="unit">
+              <button type="button" class="people__th-sort">{% trans "Kafedra" context "accounts.people" %}<span class="people__th-sort-icon" aria-hidden="true"></span></button>
+            </th>
           {% else %}
-            <th scope="col">{% trans "Qrup" context "accounts.people" %}</th>
+            <th scope="col" data-people-sort-asc="group">
+              <button type="button" class="people__th-sort">{% trans "Qrup" context "accounts.people" %}<span class="people__th-sort-icon" aria-hidden="true"></span></button>
+            </th>
             <th scope="col">{% trans "İxtisas" context "accounts.people" %}</th>
           {% endif %}
           <th scope="col">{% trans "Fakültə" context "accounts.people" %}</th>

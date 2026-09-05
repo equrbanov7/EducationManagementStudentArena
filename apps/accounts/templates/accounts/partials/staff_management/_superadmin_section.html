@@ -32,7 +32,7 @@
             </button>
         </div>
         <div class="bootstrap-single-select org-management-select">
-            <select name="organization_status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+            <select name="organization_status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select aria-label="{% trans 'Status' context 'staff.management' %}">
                 <option value="">{% trans "All statuses" context "staff.management" %}</option>
                 <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
                 <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
@@ -41,7 +41,7 @@
             </select>
         </div>
         <div class="bootstrap-single-select org-management-select">
-            <select name="organization_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+            <select name="organization_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select aria-label="{% trans 'Type' context 'staff.management' %}">
                 <option value="">{% trans "All types" context "staff.management" %}</option>
                 <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
                 <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>

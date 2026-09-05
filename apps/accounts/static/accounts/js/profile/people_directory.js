@@ -94,6 +94,51 @@
         row.appendChild(cell);
     }
 
+    /* QA 2026-09-05 (UX-17): "Şəxs"/"Kafedra"/"Qrup" başlıqları `data-people-sort-*`
+     * ilə mövcud "Sıralama" select-inin (name="sort") dəyərlərinə bağlanır.
+     * Sıralama MƏNTİQİ dəyişmir — düymə yalnız select-i dəyişib "change" hadisəsi
+     * göndərir, cədvəl `load()` mövcud axını ilə yenilənir. `<button>` olduğu üçün
+     * Tab ilə çatır, Enter/Space native click kimi işləyir (əlavə keydown lazım deyil). */
+    function initSortHeaders(root, form) {
+        var sortSelect = form && form.querySelector('select[name="sort"]');
+        var headers = root.querySelectorAll("[data-people-sort-asc]");
+        if (!sortSelect || !headers.length) {
+            return;
+        }
+
+        function refresh() {
+            Array.prototype.forEach.call(headers, function (th) {
+                var asc = th.dataset.peopleSortAsc;
+                var desc = th.dataset.peopleSortDesc;
+                if (sortSelect.value === asc) {
+                    th.setAttribute("aria-sort", "ascending");
+                } else if (desc && sortSelect.value === desc) {
+                    th.setAttribute("aria-sort", "descending");
+                } else {
+                    th.setAttribute("aria-sort", "none");
+                }
+            });
+        }
+
+        Array.prototype.forEach.call(headers, function (th) {
+            var button = th.querySelector(".people__th-sort");
+            if (!button) {
+                return;
+            }
+            button.addEventListener("click", function () {
+                var asc = th.dataset.peopleSortAsc;
+                var desc = th.dataset.peopleSortDesc;
+                var next = sortSelect.value === asc && desc ? desc : asc;
+                sortSelect.value = next;
+                sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                refresh();
+            });
+        });
+
+        sortSelect.addEventListener("change", refresh);
+        refresh();
+    }
+
     function boot() {
         var roots = document.querySelectorAll("[data-people-root]");
         Array.prototype.forEach.call(roots, function (root) {
@@ -370,6 +415,7 @@
             load();
         });
 
+        initSortHeaders(root, form);
         loadOptions();
         load();
     }
