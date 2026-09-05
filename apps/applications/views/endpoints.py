@@ -5,11 +5,11 @@ from __future__ import annotations
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_GET, require_POST
 
-from ..constants import PAGE_SIZE, PERM_CREATE, PERM_MANAGE
+from ..constants import PAGE_SIZE, PERM_CREATE, PERM_MANAGE, ApplicationStatus
 from ..models import ApplicationKind, ApplicationUnit
 from ..payloads import STATUS_CATALOG, detail_payload, kind_payload, row_payload, rules_payload, unit_payload
 from ..services import access, queries, routing, submit, workflow
-from ..state_machine import Action, TransitionDenied
+from ..state_machine import Action
 from ._base import error, json_endpoint, load_application, ok
 
 
@@ -50,11 +50,15 @@ def application_detail(request, application_id, *, organization):
     application = load_application(request, organization, application_id)
     if application is None:
         return error("Müraciət tapılmadı.", status=404)
-    # Emalçı ilk dəfə açanda «Yeni → Baxılır» (dizayn §3.4).
-    try:
+    # Emalçı ilk dəfə açanda «Yeni → Baxılır» (dizayn §3.4) — bilərəkdən qalan
+    # GET-daxili keçid (QA 2026-09-05 P3-19: "yan-təsirli GET"). Read-only
+    # baxıcı (göndərən, izləyən şöbə) heç bir yazı TƏTİKLƏMİR: `can_act` yalnız
+    # QƏRAR hüququ olan cari şöbənin emalçısını keçirir (bax `access.can_act`).
+    # Status yoxlaması ilə eyni şərt təkrar (idempotent) açılışlarda `mark_seen`-i
+    # heç çağırmır — `workflow.mark_seen`-in öz daxili yoxlaması ilə üst-üstə
+    # düşür, amma burada AÇIQ və şərtsiz istisna-tutma OLMADAN yoxlanır.
+    if application.status == ApplicationStatus.SUBMITTED.value and access.can_act(request.user, application):
         workflow.mark_seen(application=application, user=request.user, request=request)
-    except TransitionDenied:
-        pass
     return ok({"application": detail_payload(application, user=request.user)})
 
 

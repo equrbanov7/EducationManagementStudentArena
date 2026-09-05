@@ -14,10 +14,14 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.views._helpers.rbac import _role_capabilities
-from apps.organizations.models import Organization
+from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.registrar import services as registrar_services
+from apps.registrar.models import Curriculum, Enrollment, Program, StudentAcademicRecord, Subject
 from apps.registrar.public import build_student_subjects_context
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
 User = get_user_model()
@@ -50,6 +54,118 @@ class BuildStudentSubjectsContextTest(TestCase):
         student = User.objects.create_user("cab_s0", "cab_s0@qku.edu.az", "pw")
         ctx = build_student_subjects_context(self._request(student), organization=org)
         self.assertFalse(ctx["student_subjects_section"]["has_record"])
+
+
+class OtherPeriodActiveEnrollmentTest(TestCase):
+    """QA 2026-09-05 P3-16 (SYLLABUS-07): «Fənlərim» tək cari dövrü göstərirdi —
+    tələbənin BAŞQA dövrdə (paralel Yay sessiyası) silinməmiş qeydiyyatı olan
+    fənni siyahıya heç düşmürdü, ona görə «Sillabusa bax» keçidi əlçatmaz idi.
+    """
+
+    def setUp(self):
+        self.factory = RequestFactory()
+        with bypass_rls():
+            owner = User.objects.create_user("otp_owner", "otp_owner@qku.edu.az", "pw")
+            self.org = Organization.objects.create(
+                name="OTP Univ",
+                slug="otp-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=owner,
+                status="active",
+                is_active=True,
+            )
+        self.group = OrgUnit.objects.create(
+            organization=self.org, name="OTP-G1", slug="otp-g1", unit_type=OrgUnitType.GROUP
+        )
+        self.current_period = AcademicPeriod.objects.create(
+            organization=self.org,
+            name="Yaz",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2025/2026",
+            start_date="2026-02-01",
+            end_date="2026-06-30",
+            is_current=True,
+        )
+        self.summer_period = AcademicPeriod.objects.create(
+            organization=self.org,
+            name="Yay",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2025/2026",
+            start_date="2026-07-01",
+            end_date="2026-08-15",
+            is_current=False,
+        )
+        self.subject = Subject.objects.create(organization=self.org, code="OTP101", name="Yay fənni")
+        self.student = User.objects.create_user("otp_student", "otp_student@qku.edu.az", "pw")
+        self.program = Program.objects.create(organization=self.org, code="OTP-PRG", name="OTP proqramı")
+        self.curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
+        self.record = StudentAcademicRecord.objects.create(
+            organization=self.org,
+            student=self.student,
+            program=self.program,
+            curriculum=self.curriculum,
+            group=self.group,
+            admission_year=2024,
+        )
+        self.summer_offering = registrar_services.get_or_create_offering(
+            organization=self.org, subject=self.subject, period=self.summer_period, group=self.group
+        )
+        # Cari dövrdə qeydiyyat YOXDUR (bilərəkdən) — düzəlişdən əvvəl bu, "Fənlərim"i
+        # tamamilə boş göstərirdi, halbuki Yay açılışında AKTİV qeydiyyat var idi.
+        self.enrollment = Enrollment.objects.create(
+            organization=self.org, student=self.student, offering=self.summer_offering
+        )
+        self.assertEqual(self.enrollment.status, Enrollment.Status.ENROLLED)
+        self._approve_syllabus(self.summer_offering)
+
+    def _approve_syllabus(self, offering):
+        from apps.syllabus.constants import SyllabusStatus
+        from apps.syllabus.models import ApprovalSource, Syllabus, SyllabusVersion
+
+        syllabus = Syllabus.objects.create(
+            organization=self.org,
+            subject=offering.subject,
+            period=offering.period,
+            offering=offering,
+        )
+        version = SyllabusVersion.objects.create(
+            organization=self.org,
+            syllabus=syllabus,
+            major=1,
+            minor=0,
+            status=SyllabusStatus.APPROVED,
+            locked_at=timezone.now(),
+            approved_at=timezone.now(),
+            approved_by=self.student,
+            approval_source=ApprovalSource.HUMAN,
+        )
+        syllabus.approved_version = version
+        syllabus.current_version = version
+        syllabus.save(update_fields=["approved_version", "current_version"])
+        return syllabus
+
+    def _request(self):
+        request = self.factory.get("/accounts/profile/?section=my-subjects")
+        request.user = self.student
+        return request
+
+    def test_other_period_active_enrollment_gets_a_syllabus_link(self):
+        ctx = build_student_subjects_context(self._request(), organization=self.org)
+        section = ctx["student_subjects_section"]
+        self.assertTrue(section["has_record"])
+        rows = {row["enrollment"].id: row for row in section["subjects"]}
+        self.assertIn(self.enrollment.id, rows, "digər dövrün aktiv qeydiyyatı siyahıda görünmür")
+        row = rows[self.enrollment.id]
+        self.assertTrue(row["syllabus_available"])
+        self.assertTrue(row["syllabus_pdf_url"])
+
+    def test_dropped_enrollment_in_other_period_is_not_pulled_in(self):
+        self.enrollment.status = Enrollment.Status.DROPPED
+        self.enrollment.save(update_fields=["status"])
+        ctx = build_student_subjects_context(self._request(), organization=self.org)
+        section = ctx["student_subjects_section"]
+        rows = {row["enrollment"].id: row for row in section["subjects"]}
+        self.assertNotIn(self.enrollment.id, rows)
 
 
 @override_settings(UNIVERSITY_MODE=True)

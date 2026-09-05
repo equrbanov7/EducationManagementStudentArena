@@ -251,6 +251,40 @@ class AmendmentTest(TestCase):
         self.assertEqual(amendment.old_values["total_hours"], self.row.total_hours)
         self.assertTrue(AuditLog.objects.filter(resource_type="workload.WorkloadAmendment").exists())
 
+    def test_row_is_editable_after_amendment_is_opened(self):
+        # QA 2026-09-05 (P3-22): `amended` was missing from `EDITABLE_STATUSES`,
+        # so the "düzəliş axını istifadə edilməlidir" (use the amendment flow)
+        # message was a dead end — opening the amendment never actually
+        # unlocked the row for editing.
+        open_amendment(
+            task=self.task,
+            actor=self.actor,
+            target_kind=AmendmentTarget.ROW,
+            target_id=self.row.pk,
+            reason=AmendmentReason.STUDENT_COUNT,
+            note="Tələbə sayı dəyişdi",
+        )
+        self.task.refresh_from_db()
+        updated = save_row(task=self.task, actor=self.actor, data={"student_count": 40}, row=self.row)
+        self.assertEqual(updated.student_count, 40)
+
+    def test_amendment_new_values_is_a_snapshot_not_auto_applied(self):
+        # `new_values` documents the CALLER's intent for the audit trail — it
+        # is not written to the row by `open_amendment` itself; the caller
+        # must still apply it via the normal write path (see test above).
+        original_student_count = self.row.student_count
+        open_amendment(
+            task=self.task,
+            actor=self.actor,
+            target_kind=AmendmentTarget.ROW,
+            target_id=self.row.pk,
+            reason=AmendmentReason.STUDENT_COUNT,
+            note="Tələbə sayı dəyişdi",
+            new_values={"student_count": 999},
+        )
+        self.row.refresh_from_db()
+        self.assertEqual(self.row.student_count, original_student_count)
+
     def test_amendment_is_append_only(self):
         amendment = open_amendment(
             task=self.task,

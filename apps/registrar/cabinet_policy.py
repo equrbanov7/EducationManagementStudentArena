@@ -79,6 +79,45 @@ def approved_syllabus_offerings(organization, offerings) -> set:
     }
 
 
+def other_period_subject_rows(organization, record, period, semester_number, existing_rows):
+    """Digər (CARİ olmayan) dövrlərdəki SİLİNMƏMİŞ qeydiyyatların fənn sətirləri.
+
+    QA 2026-09-05 (P3-16 / SYLLABUS-07): «Fənlərim» yalnız cari dövrü göstərir
+    — tələbənin paralel bir sessiyada (məs. Yay) aktiv qeydiyyatı olan fənn
+    siyahıya heç düşmürdü, deməli «Sillabusa bax» keçidi də əlçatmaz idi.
+    ``existing_rows`` — çağıranın ARTIQ yığdığı (əsas dövrün) sətirləri; onların
+    ``enrollment`` id-ləri təkrar qaytarılmır. Qaytarılan sətirlər
+    ``services.get_student_cabinet_data``-nın "subjects" formasındadır ki,
+    çağıran tərəf onları elə eyni siyahıya əlavə etsin — aşağıdakı toplu
+    syllabus/journal zənginləşdirməsi onları da əhatə edir. Tam period
+    seçicisi (SYLLABUS-07-in özü) ayrıca (bahalı) qərardır.
+    """
+    from django.apps import apps as django_apps
+
+    from apps.registrar import services
+    from apps.registrar.models import Enrollment
+
+    other_period_ids = (
+        Enrollment.objects.filter(organization=organization, student=record.student)
+        .exclude(offering__period_id=period.id)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .values_list("offering__period_id", flat=True)
+        .distinct()
+    )
+    if not other_period_ids:
+        return []
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    seen = {row["enrollment"].id for row in existing_rows}
+    rows = []
+    for other_period in AcademicPeriod.objects.filter(organization=organization, id__in=list(other_period_ids)):
+        extra = services.get_student_cabinet_data(record=record, period=other_period, semester_number=semester_number)
+        for row in extra["subjects"]:
+            if row["enrollment"].id not in seen:
+                seen.add(row["enrollment"].id)
+                rows.append(row)
+    return rows
+
+
 def assessment_weights_view(organization) -> dict:
     """Qiymətləndirmə çəkiləri (10/10/30/50) — ekran 10-un «struktur» zolağı."""
     from apps.syllabus.policy import assessment_weights
@@ -97,5 +136,6 @@ __all__ = [
     "TRANSCRIPT_APPLICATION_KIND",
     "approved_syllabus_offerings",
     "assessment_weights_view",
+    "other_period_subject_rows",
     "transcript_policy",
 ]

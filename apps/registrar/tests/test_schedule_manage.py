@@ -269,6 +269,19 @@ class ScheduleValidationTest(ScheduleManageBase):
         self.assertFalse(resp.json()["ok"])
         self.assertIn("time_slot", resp.json()["errors"])
 
+    def test_oversized_room_name_is_rejected_not_truncated(self):
+        # QA 2026-09-05 (P3-22): a 300-char room name used to be silently cut
+        # to 64 (`ScheduleSlot.room` max_length) with no feedback to the user.
+        resp = self._check(self.coordinator, room="A" * 300)
+        self.assertFalse(resp.json()["ok"])
+        self.assertIn("room", resp.json()["errors"])
+        with bypass_rls():
+            self.assertFalse(ScheduleSlot.objects.filter(offering=self.offering).exists())
+
+    def test_64_char_room_name_is_accepted(self):
+        resp = self._check(self.coordinator, room="A" * 64)
+        self.assertTrue(resp.json()["ok"])
+
     def test_group_conflict_is_reported_with_reason(self):
         self._post_add(self.coordinator)
         # Eyni qrup + eyni gün, üst-üstə düşən vaxt, BAŞQA fənn.
