@@ -477,7 +477,9 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 <div class="q-card{% if forloop.counter in selected %} is-selected{% endif %} q-card--sev-{{ q.meta.top_severity|default:'none' }} {{ q.meta.flags }}"
                      id="qcard-{{ forloop.counter }}" data-q-index="{{ forloop.counter }}" data-q-flags="{{ q.meta.flags }}" data-toggle-row-card>
                     <div class="q-checkbox-wrapper">
-                        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}" {% if forloop.counter in selected %}checked{% endif %}>
+                        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}"
+                               aria-label="#{{ forloop.counter }} — {{ q.text|striptags|truncatechars:60 }}"
+                               {% if forloop.counter in selected %}checked{% endif %}>
                     </div>
 
                     <div class="points-mini">

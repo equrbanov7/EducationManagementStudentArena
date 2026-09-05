@@ -1,3 +1,47 @@
+/* QA 2026-09-05 (UX-17): cədvəl başlıqları mövcud "Sıralama" (`user_sort`)
+ * select-inə bağlıdır. Sıralama məntiqi DƏYİŞMİR — düymə yalnız select-in
+ * dəyərini təyin edib formu göndərir (server tam səhifəni yeni sıralama ilə
+ * render edir); aktiv sütunun aria-sort-u serverdə şablonla qoyulur. AJAX-safe:
+ * `EMSReady` + idempotent + `EMSProfileReinitHooks` (bölmə panel swap-ı). */
+function initSuperadminUserSort(root) {
+    var scope = root || document;
+    var tables = scope.querySelectorAll ? scope.querySelectorAll("[data-user-management-table]") : [];
+    Array.prototype.forEach.call(tables, function (table) {
+        if (table.dataset.userSortReady === "1") {
+            return;
+        }
+        table.dataset.userSortReady = "1";
+        var form = table.closest(".user-management-container").querySelector("form.user-management-filters");
+        var select = form && form.querySelector('select[name="user_sort"]');
+        if (!select) {
+            return;
+        }
+        table.querySelectorAll("[data-user-sort-value]").forEach(function (button) {
+            button.addEventListener("click", function () {
+                select.value = button.dataset.userSortValue;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+                if (typeof form.requestSubmit === "function") {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            });
+        });
+    });
+}
+
+if (window.EMSReady) {
+    window.EMSReady(initSuperadminUserSort);
+} else {
+    document.addEventListener("DOMContentLoaded", function () {
+        initSuperadminUserSort(document);
+    });
+}
+window.EMSProfileReinitHooks = window.EMSProfileReinitHooks || {};
+window.EMSProfileReinitHooks.superadminUserSort = function (panel) {
+    initSuperadminUserSort(panel || document);
+};
+
 document.addEventListener("DOMContentLoaded", function () {
     var deleteModal = document.getElementById("superadminUserDeleteModal");
     if (!deleteModal) {

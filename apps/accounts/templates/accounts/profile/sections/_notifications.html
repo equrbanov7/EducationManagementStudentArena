@@ -186,7 +186,8 @@
                 data-id="{{ notification.pk }}">
                 <div class="form-check profile-notif-checkbox-wrap mb-0">
                     <input class="form-check-input profile-notif-checkbox" type="checkbox"
-                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}">
+                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}"
+                           aria-label="{{ notification.title|default:'' }} — {% trans 'Seç' context 'accounts.a11y' %}">
                 </div>
                 <div class="profile-notif-icon">
                     {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt text-warning"></i>
