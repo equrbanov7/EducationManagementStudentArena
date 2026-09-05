@@ -22,10 +22,12 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
+from .. import policy
 from .. import state_machine as sm
 from ..constants import (
     DEAN_SECOND_APPROVAL_ENABLED,
     PERM_APPROVE,
+    PERM_REVIEW,
     PERM_SUBMIT,
     REASON_MIN_LENGTH,
     RowReviewStatus,
@@ -220,6 +222,50 @@ def _ensure_current_revision(locked: TaskFacultySlice, task) -> None:
         )
 
 
+def _ensure_slice_reviewed(slice_obj, task) -> None:
+    """Dilim təsdiqindən əvvəl koordinator baxışı (QA 2026-09-05 P2-36).
+
+    * İradlı (`flagged`) sətir varsa təsdiq HƏMİŞƏ bağlıdır — əvvəl irad
+      həll olunmalı və ya sətir geri qaytarılmalıdır.
+    * Baxılmamış (`pending`) sətir qapısı org açarına tabedir
+      (`workload.visa_required`, default AÇIQ — bax `apps/workload/policy.py`).
+    """
+    rows = TeachingTaskRow.objects.filter(task=task, faculty_id=slice_obj.faculty_id)
+    flagged = rows.filter(review_status=RowReviewStatus.FLAGGED).count()
+    if flagged:
+        raise WorkloadDenied(
+            "workload.rows_flagged",
+            f"{flagged} sətirdə koordinator iradı var — təsdiqdən əvvəl həll olunmalıdır.",
+        )
+    if not policy.visa_required(slice_obj.organization):
+        return
+    # ƏHATƏ QAYDASI (P1-9 ilə eyni prinsip): yalnız BAXA BİLƏN adamı olan
+    # ixtisasların sətirləri viza tələb edir. Koordinatoru olmayan ixtisas
+    # dekanı kilidləməməlidir — əks halda dilim heç vaxt təsdiqlənməzdi.
+    pending_rows = list(rows.filter(review_status=RowReviewStatus.PENDING).select_related("specialty"))
+    blocked = 0
+    covered: dict = {}
+    for row in pending_rows:
+        specialty = row.specialty
+        if specialty is None:
+            continue
+        if specialty.pk not in covered:
+            covered[specialty.pk] = bool(
+                _unit_role_users(
+                    slice_obj.organization,
+                    [specialty],
+                    COORDINATOR_ROLES,
+                    permission=PERM_REVIEW,
+                )
+            )
+        blocked += int(covered[specialty.pk])
+    if blocked:
+        raise WorkloadDenied(
+            "workload.visa_missing",
+            f"{blocked} sətrə koordinator vizası yoxdur — təsdiqdən əvvəl baxış tamamlanmalıdır.",
+        )
+
+
 @transaction.atomic
 def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", request=None) -> dict:
     """Dekan fakültə dilimini bütöv təsdiqləyir."""
@@ -231,6 +277,7 @@ def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", requ
     _ensure_current_revision(locked, task)
     if locked.status == SliceStatus.APPROVED:
         raise WorkloadDenied("workload.slice_already_approved", "Dilim artıq təsdiqlənib.")
+    _ensure_slice_reviewed(locked, task)
 
     locked.status = SliceStatus.APPROVED
     locked.decided_by = getattr(actor, "user", None)
@@ -347,7 +394,7 @@ def _recipients(queryset):
     return [user for user in queryset if user is not None]
 
 
-def _unit_role_users(organization, units, role_names):
+def _unit_role_users(organization, units, role_names, permission=None):
     """Vahid(lər)i əhatə edən, verilmiş rolları daşıyan AKTİV üzvlərin istifadəçiləri.
 
     Əvvəl alıcı yalnız ``OrgUnit.head`` idi — klonda fakültə/kafedraların çoxu
@@ -360,10 +407,16 @@ def _unit_role_users(organization, units, role_names):
     for unit in units:
         if unit is None:
             continue
-        for membership in members_covering_unit(organization, unit, role_names=role_names):
+        for membership in members_covering_unit(organization, unit, role_names=role_names, permission=permission):
             users.setdefault(membership.user_id, membership.user)
     return list(users.values())
 
+
+#: Viza verə bilən rollar — sətrin ixtisasını əhatə edən koordinator/dekanlıq.
+#: DİQQƏT: əhatə yoxlanışı bu adlarla YANAŞI `workload.review` icazəsini də
+#: tələb edir (aşağı), əks halda icazəsiz «dekan» rolu «baxan var» sayılıb
+#: dilimi əbədi kilidləyərdi.
+COORDINATOR_ROLES = ("program_coordinator", "tutor", "vice_dean", "dean", "chair_head", "department_head")
 
 FACULTY_ACTOR_ROLES = ("dean", "vice_dean", "program_coordinator")
 CHAIR_ACTOR_ROLES = ("chair_head", "department_head", "section_head")

@@ -355,11 +355,22 @@ class RimCredentialTests(RimCenterTestBase):
 
         cache.clear()
         self.login_operator()
-        self.assertEqual(self.act("set_password", self.teacher, reason="1").status_code, 200)
-        self.assertEqual(self.act("set_password", self.namesake, reason="2").status_code, 200)
-        throttled = self.act("set_password", self.teacher, reason="3")
+        self.assertEqual(self.act("set_password", self.teacher, reason="Parol itib").status_code, 200)
+        self.assertEqual(self.act("set_password", self.namesake, reason="Yeni işçi").status_code, 200)
+        throttled = self.act("set_password", self.teacher, reason="Üçüncü cəhd")
         self.assertEqual(throttled.status_code, 429)
         self.assertEqual(throttled.json()["error"], "rate_limited")
+        cache.clear()
+
+    def test_password_reset_requires_a_reason(self):
+        """QA 2026-09-05 P2-15: audit izində «Səbəb: -» qalmamalıdır."""
+        from django.core.cache import cache
+
+        cache.clear()
+        self.login_operator()
+        response = self.act("set_password", self.teacher, reason="")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "reason_required")
         cache.clear()
 
 

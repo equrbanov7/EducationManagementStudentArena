@@ -6,7 +6,8 @@
     var actions = (ns.actions = {});
 
     /** Səbəb MƏCBURİ olan (dağıdıcı) əməliyyatlar. */
-    var REASON_REQUIRED = { block: true, soft_delete: true };
+    // QA 2026-09-05 (P2-15): parol sıfırlaması da audit izinə səbəb yazır.
+    var REASON_REQUIRED = { block: true, soft_delete: true, set_password: true };
 
     function http() {
         return window.EMSCore && window.EMSCore.fetchJSON;

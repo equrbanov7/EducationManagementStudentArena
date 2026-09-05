@@ -22,6 +22,7 @@ from apps.workload.constants import (
 )
 from apps.workload.models import LoadObjection, TaskFacultySlice, TaskRowReview
 from apps.workload.services import (
+    review_all,
     WorkloadDenied,
     approve_slice,
     assign_teacher,
@@ -125,6 +126,10 @@ class ChainBase(TestCase):
         make_row(task, self.stack)
         return task
 
+    def visa_all(self, user=None):
+        """Koordinator vizası — dekan təsdiqi bunsuz bağlıdır (P2-36)."""
+        return review_all(actor=self.actor(user or self.coordinator))
+
 
 class SubmitTest(ChainBase):
     def test_submit_creates_one_slice_per_faculty(self):
@@ -203,6 +208,7 @@ class ReviewTest(ChainBase):
 
     def test_review_is_closed_once_the_document_leaves_the_review_stage(self):
         slice_obj = TaskFacultySlice.objects.get(task=self.task)
+        self.visa_all()
         approve_slice(slice_obj=slice_obj, actor=self.actor(self.dean))
         fresh_row = self.row.__class__.objects.select_related("task").get(pk=self.row.pk)
         with self.assertRaises(WorkloadDenied) as ctx:
@@ -219,6 +225,7 @@ class DeanDecisionTest(ChainBase):
         self.slice = TaskFacultySlice.objects.get(task=self.task)
 
     def test_approving_every_slice_approves_the_document(self):
+        self.visa_all()
         result = approve_slice(slice_obj=self.slice, actor=self.actor(self.dean))
         self.task.refresh_from_db()
         self.assertEqual(self.slice.__class__.objects.get(pk=self.slice.pk).status, SliceStatus.APPROVED)
@@ -237,6 +244,7 @@ class DeanDecisionTest(ChainBase):
         self.assertEqual(slice_progress(self.task)["total"], 2)
 
         first = TaskFacultySlice.objects.get(task=self.task, faculty=self.stack["faculty"])
+        self.visa_all()
         approve_slice(slice_obj=first, actor=self.actor(self.dean))
         self.task.refresh_from_db()
         self.assertEqual(self.task.status, TaskStatus.SUBMITTED)
@@ -251,6 +259,7 @@ class DeanDecisionTest(ChainBase):
             scope_type="unit",
         )
         second = TaskFacultySlice.objects.get(task=self.task, faculty=other["faculty"])
+        self.visa_all()
         approve_slice(slice_obj=second, actor=self.actor(second_dean))
         self.task.refresh_from_db()
         self.assertEqual(self.task.status, TaskStatus.APPROVED)
@@ -262,6 +271,7 @@ class DeanDecisionTest(ChainBase):
             self.org, stranger, "dean2", permissions=DEAN_PERMS, scope_unit=other["faculty"], scope_type="unit"
         )
         with self.assertRaises(WorkloadDenied) as ctx:
+            self.visa_all()
             approve_slice(slice_obj=self.slice, actor=self.actor(stranger))
         self.assertEqual(ctx.exception.code, "workload.approve_denied")
 
@@ -320,6 +330,7 @@ class DeanDecisionTest(ChainBase):
         self.assertNotEqual(stale.revision, self.task.revision)
 
         with self.assertRaises(WorkloadDenied) as ctx:
+            self.visa_all()
             approve_slice(slice_obj=stale, actor=self.actor(self.dean), comment="köhnə dilim")
         self.assertEqual(ctx.exception.code, "workload.stale_revision")
 
@@ -333,6 +344,7 @@ class DeanDecisionTest(ChainBase):
 
         # CARİ revision-un dilimi normal işləyir.
         current = TaskFacultySlice.objects.get(task=self.task, revision=self.task.revision)
+        self.visa_all()
         approve_slice(slice_obj=current, actor=self.actor(self.dean), comment="cari dilim")
         self.task.refresh_from_db()
         self.assertEqual(self.task.status, TaskStatus.APPROVED)
@@ -356,6 +368,7 @@ class DistributionGateTest(ChainBase):
         row = task.rows.first()
         submit_task(task=task, actor=self.actor(self.office))
         task.refresh_from_db()
+        self.visa_all()
         approve_slice(slice_obj=TaskFacultySlice.objects.get(task=task), actor=self.actor(self.dean))
         task.refresh_from_db()
         row.refresh_from_db()
@@ -382,6 +395,7 @@ class ObjectionTest(ChainBase):
         self.row = self.task.rows.first()
         submit_task(task=self.task, actor=self.actor(self.office))
         self.task.refresh_from_db()
+        self.visa_all()
         approve_slice(slice_obj=TaskFacultySlice.objects.get(task=self.task), actor=self.actor(self.dean))
         self.task.refresh_from_db()
         self.row.refresh_from_db()
