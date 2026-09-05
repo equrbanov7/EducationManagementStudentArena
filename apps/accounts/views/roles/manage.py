@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
+from apps.accounts.policies.roles import resolve_membership_role
 from apps.organizations.models import Membership
 
 from ...models import ProfileRole, UserProfile
@@ -34,6 +35,70 @@ from .._helpers import (
 )
 
 User = get_user_model()
+
+
+#: Təşkilat-səviyyəli heyət rolları — vahid-əhatəli aktor (dekan, kafedra müdiri) verə bilməz.
+ORG_WIDE_STAFF_ROLES = frozenset(
+    {
+        ProfileRole.HR,
+        ProfileRole.EXAM_CENTER,
+        ProfileRole.EXAM_CENTER_HEAD,
+        ProfileRole.EXAM_CENTER_STAFF,
+        ProfileRole.IKT_REHBER,
+        ProfileRole.ORG_ADMIN,
+        ProfileRole.ORG_OWNER,
+        ProfileRole.SUPERADMIN,
+    }
+)
+
+
+def _assign_scope(user, organization):
+    from apps.organizations.public import get_permission_scope
+
+    scope = get_permission_scope(user, organization, "role.assign")
+    if not scope.has_structure_access:
+        scope = get_permission_scope(user, organization, "org.manage_members")
+    return scope
+
+
+def _actor_is_unit_scoped(user, organization) -> bool:
+    return _assign_scope(user, organization).is_unit_scoped
+
+
+def _target_in_unit_scope(organization, scope, target_user) -> bool:
+    """Hədəf aktorun alt-ağacındadır? — vahidli üzvlük və ya akademik qeydin qrupu ilə."""
+    from apps.organizations.models import OrgUnit
+
+    subtree = OrgUnit.objects.filter(scope.unit_subtree_q()).filter(organization=organization).values("pk")
+    if Membership.objects.filter(
+        user=target_user, organization=organization, is_active=True, scope_unit__in=subtree
+    ).exists():
+        return True
+    from apps.registrar.models import StudentAcademicRecord
+
+    return StudentAcademicRecord.objects.filter(
+        organization=organization, student=target_user, group__in=subtree
+    ).exists()
+
+
+def _manage_roles_gate_error(request, organization, target_user, *, is_superadmin):
+    """`None` = icazə var; əks halda istifadəçiyə göstəriləcək mesaj."""
+    if is_superadmin or getattr(organization, "owner_id", None) == request.user.id:
+        return None
+    from core.permissions import has_permission
+
+    from .._helpers.rbac import _collect_actor_permissions
+
+    actor_permissions, _ = _collect_actor_permissions(request.user, organization)
+    permission_list = list(actor_permissions)
+    if not (has_permission(permission_list, "role.assign") or has_permission(permission_list, "org.manage_members")):
+        return pgettext_lazy("accounts.manage_roles.message", "missing_member_management_permission")
+    scope = _assign_scope(request.user, organization)
+    if scope.is_org_wide:
+        return None
+    if not scope.is_unit_scoped or not _target_in_unit_scope(organization, scope, target_user):
+        return pgettext_lazy("accounts.manage_roles.message", "target_outside_structure_scope")
+    return None
 
 
 @login_required
@@ -73,6 +138,14 @@ def manage_roles(request):
             return redirect(next_url)
 
         target_user = get_object_or_404(User, id=user_id)
+
+        # QA 2026-09-05 PEOPLE-RBAC-08: bu legacy səth yalnız səviyyəyə baxırdı — dekan
+        # başqa fakültənin müəlliminə org-səviyyəli rol (HR, İmtahan Mərkəzi) verə bilirdi.
+        # Rol təyinatı axını ilə EYNİ qapı: `role.assign`/`org.manage_members` + struktur əhatəsi.
+        gate_error = _manage_roles_gate_error(request, user_org, target_user, is_superadmin=is_superadmin)
+        if gate_error is not None:
+            messages.error(request, gate_error)
+            return redirect(next_url)
 
         target_is_superadmin = target_user.is_superuser or getattr(target_user, "is_superadmin", False)
         target_has_membership = Membership.objects.filter(
@@ -115,6 +188,23 @@ def manage_roles(request):
         disallowed_roles = selected_role_names - assignable_role_names
         if disallowed_roles:
             messages.error(request, pgettext_lazy("accounts.manage_roles.message", "not_allowed_to_assign_some_roles"))
+            return redirect(next_url)
+        if not is_superadmin and _actor_is_unit_scoped(request.user, user_org):
+            org_wide = selected_role_names & ORG_WIDE_STAFF_ROLES
+            if org_wide:
+                messages.error(
+                    request, pgettext_lazy("accounts.manage_roles.message", "not_allowed_to_assign_some_roles")
+                )
+                return redirect(next_url)
+        # Təşkilatda qarşılığı olmayan rol adı üçün heç nə yazılmır (əvvəl səssizcə
+        # ən aşağı rol yaranırdı — PEOPLE-RBAC-09).
+        unresolved = [name for name in sorted(selected_role_names) if resolve_membership_role(user_org, name) is None]
+        if unresolved:
+            messages.error(
+                request,
+                pgettext_lazy("accounts.manage_roles.message", "role_not_defined_in_organization")
+                % {"roles": ", ".join(str(PROFILE_ROLE_LABELS.get(name, name)) for name in unresolved)},
+            )
             return redirect(next_url)
 
         current_roles = set(_extract_profile_roles_for_user(target_user))

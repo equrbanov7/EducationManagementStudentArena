@@ -64816,3 +64816,15 @@ msgstr "The content is too large — at most %(max)s (%(field)s)."
 msgctxt "accounts.syllabus"
 msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
 msgstr "A syllabus already exists for this course offering — open it from the list."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "You need the `role.assign` or `org.manage_members` permission for this action."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "This user is outside your structural scope."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "The selected role is not defined in this organisation: %(roles)s."

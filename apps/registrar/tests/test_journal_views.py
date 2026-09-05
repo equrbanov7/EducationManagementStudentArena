@@ -363,7 +363,9 @@ class JournalViewTest(TestCase):
 class JournalFinalsViewTest(JournalViewTest):
     """Final-exam + publish actions on the journal page (U3+)."""
 
-    def test_save_finals_records_exam_score(self):
+    def test_teacher_cannot_write_final_exam_score_via_journal_post(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-08: yekun imtahan balı İmtahan Mərkəzinin (`final_score.entry`)
+        səthidir; müəllim UI-da olmayan `exam__` sahəsini crafted POST ilə yaza bilirdi."""
         from apps.registrar.models import FinalGrade
 
         client = self._client(self.teacher)
@@ -371,10 +373,30 @@ class JournalFinalsViewTest(JournalViewTest):
             reverse("registrar:journal_detail", args=[self.offering.id]),
             {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
         )
-        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.status_code, 404)
         with bypass_rls():
-            fg = FinalGrade.objects.get(enrollment=self.enrollment)
-            self.assertEqual(str(fg.exam_score), "42.00")
+            self.assertFalse(FinalGrade.objects.filter(enrollment=self.enrollment, exam_score=42).exists())
+
+    def test_superuser_instructor_can_still_record_exam_score(self):
+        from apps.registrar.models import FinalGrade
+
+        with bypass_rls():
+            self.teacher.is_superuser = True
+            self.teacher.save(update_fields=["is_superuser"])
+        try:
+            client = self._client(self.teacher)
+            resp = client.post(
+                reverse("registrar:journal_detail", args=[self.offering.id]),
+                {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
+            )
+            self.assertEqual(resp.status_code, 302)
+            with bypass_rls():
+                fg = FinalGrade.objects.get(enrollment=self.enrollment)
+                self.assertEqual(str(fg.exam_score), "42.00")
+        finally:
+            with bypass_rls():
+                self.teacher.is_superuser = False
+                self.teacher.save(update_fields=["is_superuser"])
 
     def test_save_components_and_scores(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore

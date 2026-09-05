@@ -518,16 +518,25 @@ def journal_teaching_summary(offering):
     """
     from apps.registrar.models import Lesson, LessonKind
 
+    from django.utils import timezone
+
     lessons = list(
         Lesson.objects.filter(offering=offering)
         .select_related("instructor")
-        .only("kind", "hours", "instructor__first_name", "instructor__last_name", "instructor__username")
+        .only("kind", "hours", "date", "instructor__first_name", "instructor__last_name", "instructor__username")
     )
     fallback = offering.instructor
+    today = timezone.localdate()
     by_kind: dict = {}
+    scheduled_total = 0
     for lesson in lessons:
         row = by_kind.setdefault(lesson.kind, {"held": 0, "teachers": {}})
-        row["held"] += int(lesson.hours or 0)
+        hours = int(lesson.hours or 0)
+        scheduled_total += hours
+        # «Keçirilmiş» yalnız bu günə qədərki dərslərdir; gələcək tarixli dərs
+        # planlaşdırılmışdır (QA 2026-09-05 JOURNAL-TEACHER-11).
+        if lesson.date is None or lesson.date <= today:
+            row["held"] += hours
         inst = lesson.instructor or fallback
         if inst is not None:
             row["teachers"][inst.id] = (inst.get_full_name() or "").strip() or inst.username
@@ -548,9 +557,11 @@ def journal_teaching_summary(offering):
     return {
         "kinds": kinds,
         "held_total": held_total,
+        # Bütün (gələcək daxil) dərslərin saatı — saat həddi bununla yoxlanır.
+        "scheduled_total": scheduled_total,
         "total": total,
-        "remaining": max(0, total - held_total) if total else None,
-        "over": bool(total and held_total > total),
+        "remaining": max(0, total - scheduled_total) if total else None,
+        "over": bool(total and scheduled_total > total),
     }
 
 

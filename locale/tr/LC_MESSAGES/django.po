@@ -64544,3 +64544,15 @@ msgstr "İçerik çok büyük — en fazla %(max)s (%(field)s)."
 msgctxt "accounts.syllabus"
 msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
 msgstr "Bu ders açılışı için zaten bir izlence var — listeden açın."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Bu işlem için `role.assign` veya `org.manage_members` izni gerekir."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Bu kullanıcı yapısal yetki alanınızın dışındadır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Seçilen rol bu kurumda tanımlı değil: %(roles)s."

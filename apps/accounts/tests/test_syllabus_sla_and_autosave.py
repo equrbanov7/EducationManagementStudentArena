@@ -172,7 +172,8 @@ class SyllabusAutosaveConflictTest(_Base):
             data=json.dumps({"section": SectionKey.ASSESS.value, "data": {"midterm": 80, "project": 80}}),
             content_type="application/json",
         )
-        self.assertEqual(response.status_code, 403)
+        # Validasiya xətası kliyent xətasıdır (QA 2026-09-05 SYLLABUS-06): 400, icazə 403 deyil.
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["code"], "assess.split_mismatch")
 
 

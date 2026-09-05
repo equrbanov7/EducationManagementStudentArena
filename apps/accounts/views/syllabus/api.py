@@ -129,7 +129,10 @@ def syllabus_section_save(request, version_id):
         # Kliyent xətası (forma / uzunluq) — 400; TransitionDenied-in 403-ü deyil.
         return _fail(transition_text(bad.code, bad.params), status=400, code=bad.code, field=bad.field)
     except TransitionDenied as denied:
-        return _fail(transition_text(denied.code, denied.params), status=403, code=denied.code)
+        # Validasiya kodları (çəki bölgüsü, sərbəst iş variantı) kliyent xətasıdır — 400;
+        # icazə/kilid 403 qalır (QA 2026-09-05 SYLLABUS-06).
+        status = 400 if denied.code.startswith(("assess.", "self.", "section.")) else 403
+        return _fail(transition_text(denied.code, denied.params), status=status, code=denied.code)
 
     return JsonResponse(
         {
@@ -273,7 +276,9 @@ def syllabus_action(request):
         else:
             return _fail(_BAD_REQUEST)
     except TransitionDenied as denied:
-        return _fail(transition_text(denied.code, denied.params), status=409, code=denied.code)
+        # Əhatədən kənar sillabus mövcudluğu sızmasın — 404 (QA 2026-09-05 SYLLABUS-05).
+        status = 404 if denied.code == "transition.out_of_scope" else 409
+        return _fail(transition_text(denied.code, denied.params), status=status, code=denied.code)
 
     if version is None:
         return _fail(message, status=404)
