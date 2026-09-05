@@ -18,11 +18,13 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
 from apps.exams.public import is_exam_center_user
 from apps.registrar import kollokvium_notifications
+from apps.registrar import kollokvium_windows as kollokvium_window_rules
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
 from core.audit import log_action
 from core.constants import AuditAction
@@ -156,6 +158,20 @@ def _dispatch_action(request, action, organization):
                 pgettext("accounts.kollokvium_windows", "Əvvəlcə K%(n)s təyin edilməlidir.") % {"n": k_index}
             )
         existing = KollokviumWindow.objects.filter(organization=organization, period=period, k_index=k_index).first()
+        # Tarix qaydaları (keçmiş bağlanış YALNIZ yaradılışda + K-sırası/toqquşma) —
+        # domen qaydası servis qatındadır (QA 2026-09-05 P3-21), view yalnız çevirir.
+        try:
+            kollokvium_window_rules.validate_window_save(
+                organization=organization,
+                period=period,
+                k_index=k_index,
+                opens_on=form.cleaned_data["opens_on"],
+                closes_on=form.cleaned_data["closes_on"],
+                is_new=existing is None,
+                today=timezone.localdate(),
+            )
+        except kollokvium_window_rules.KollokviumWindowRuleError as exc:
+            raise KollokviumAdminError(str(exc)) from exc
         window, created = KollokviumWindow.objects.update_or_create(
             organization=organization,
             period=period,
