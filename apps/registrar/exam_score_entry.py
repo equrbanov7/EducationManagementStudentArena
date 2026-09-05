@@ -211,9 +211,14 @@ def roster_for_offering(*, offering):
     for entry in ExamScoreEntry.objects.filter(enrollment__in=enrollments).select_related("entered_by"):
         entries_by_enrollment.setdefault(str(entry.enrollment_id), []).append(entry)
 
+    # Komponent/bal/FinalGrade/ResitRecord oxumaları BİR dəfə toplu (əvvəl hər
+    # tələbə üçün ayrıca — 58 tələbə ≈ 170 sorğu; QA 2026-09-05 P2-5).
+    from . import finals_batch
+
+    batch = finals_batch.build(enrollments)
     rows = []
     for enrollment in enrollments:
-        result = finals.compute_final_result(enrollment=enrollment, scheme=scheme)
+        result = finals.compute_final_result(enrollment=enrollment, scheme=scheme, batch=batch)
         history = entries_by_enrollment.get(str(enrollment.id), [])
         rows.append(
             {
