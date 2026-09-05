@@ -119,8 +119,9 @@ def journal_detail(request, offering_id):
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
-    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy
     from apps.registrar import journal_window as _jw
+    from apps.registrar import syllabus_notice
 
     window_size, window_offset = _jw.resolve_request_window(request)
 
