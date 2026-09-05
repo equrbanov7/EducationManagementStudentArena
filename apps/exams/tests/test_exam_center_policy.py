@@ -194,6 +194,16 @@ class QuestionBankCreationViewTests(_Base):
         self.assertEqual(bank.created_by_id, self.teacher.id)
         self.assertEqual(bank.source_teacher_id, self.teacher.id)
 
+    def test_overlong_bank_name_is_refused_not_500(self):
+        """QA 2026-09-05 EXAMS-01: 255+ simvol bank adı DB DataError (500) verirdi."""
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "B" * 300, "exam_kind": "quiz"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(QuestionBank.objects.filter(name__startswith="BBBB").exists())
+
     def test_teacher_cannot_edit_own_bank_to_final(self):
         client = self._client_for(self.teacher)
         client.post(

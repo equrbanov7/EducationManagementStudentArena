@@ -97,8 +97,15 @@ def question_bank_list(request):
         ensure_can_create_question_bank(request.user)
         creator_is_center = is_exam_center_user(request.user)
         name = (request.POST.get("name") or "").strip()
+        name_max = QuestionBank._meta.get_field("name").max_length or 255
         if not name:
             messages.error(request, pgettext("exams.view.bank.message", "Bank adı boş ola bilməz."))
+        elif len(name) > name_max:
+            # 255+ simvol DB DataError (500) verirdi (QA 2026-09-05 EXAMS-01).
+            messages.error(
+                request,
+                pgettext("exams.view.bank.message", "Bank adı ən çox %(n)s simvol ola bilər.") % {"n": name_max},
+            )
         else:
             subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
             QuestionBank.objects.create(
