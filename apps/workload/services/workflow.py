@@ -148,6 +148,14 @@ def submit_task(*, task: TeachingTask, actor, request=None) -> dict:
         )
     if not locked.rows.exists():
         raise WorkloadDenied("workload.no_rows", "Boş sənəd göndərilmir.")
+    # QA 2026-09-05 (P2-35): saatı 0 olan sətir dekanlığa gedib təsdiqlənirdi —
+    # sonra bölünə bilməyən «approved» sətirə çevrilirdi. Göndəriş qapısı.
+    zero_hour_rows = locked.rows.filter(total_hours=0).count()
+    if zero_hour_rows:
+        raise WorkloadDenied(
+            "workload.rows_zero_hours",
+            f"{zero_hour_rows} sətirdə yekun saat 0-dır — göndərişdən əvvəl doldurun və ya sətri silin.",
+        )
 
     was_returned = locked.status == TaskStatus.RETURNED
     if was_returned:

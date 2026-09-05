@@ -465,3 +465,57 @@ class JournalFinalsViewTest(JournalViewTest):
             {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
         )
         self.assertEqual(resp.status_code, 404)
+
+
+class LessonDateUpperBoundTest(JournalViewTest):
+    """Dərs tarixinin üst həddi — QA 2026-09-05 P2-11."""
+
+    def test_far_future_date_is_refused(self):
+        import datetime
+
+        from apps.registrar import gradebook
+        from apps.registrar.gradebook_lessons import LessonRuleError
+
+        with bypass_rls(), self.assertRaises(LessonRuleError):
+            gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date(2099, 12, 31),
+                created_by=self.teacher,
+            )
+
+    def test_date_beyond_an_open_period_end_is_refused(self):
+        import datetime
+
+        from apps.registrar import gradebook
+        from apps.registrar.gradebook_lessons import LessonRuleError
+
+        with bypass_rls():
+            period = self.offering.period
+            period.end_date = datetime.date.today() + datetime.timedelta(days=10)
+            period.save(update_fields=["end_date"])
+            with self.assertRaises(LessonRuleError):
+                gradebook.create_lesson(
+                    offering=self.offering,
+                    date=datetime.date.today() + datetime.timedelta(days=30),
+                    created_by=self.teacher,
+                )
+            lesson = gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date.today() + datetime.timedelta(days=5),
+                created_by=self.teacher,
+            )
+        self.assertIsNotNone(lesson.pk)
+
+    def test_rim_override_still_passes(self):
+        import datetime
+
+        from apps.registrar import gradebook
+
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date(2099, 12, 31),
+                created_by=self.teacher,
+                allow_past=True,
+            )
+        self.assertIsNotNone(lesson.pk)
