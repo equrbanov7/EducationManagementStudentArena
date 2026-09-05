@@ -111,6 +111,10 @@ class RowPlan:
         }
 
 
+#: `User.first_name/last_name` CharField(150) — tətbiqdə DataError sızmasın.
+MAX_NAME_LENGTH = 150
+
+
 def _text(value: object) -> str:
     return unicodedata.normalize("NFKC", str(value or "")).strip()
 
@@ -299,6 +303,12 @@ def _validate_identity(plan: RowPlan, row: dict, context: IntakeContext) -> bool
         return False
     if not first_name or not last_name:
         plan.fail("name_required", pgettext(_CTX, "Ad və soyad məcburidir."))
+        return False
+    if max(len(first_name), len(last_name), len(_text(row.get("patronymic")))) > MAX_NAME_LENGTH:
+        # Əvvəl ön baxış «Yaradılacaq» deyir, tətbiqdə xam DB xətası sızırdı (STUDENT-MGMT-02).
+        plan.fail(
+            "name_too_long", pgettext(_CTX, "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər.") % {"n": MAX_NAME_LENGTH}
+        )
         return False
     if fin in context.seen_fins:
         plan.fail("fin_duplicate_in_file", pgettext(_CTX, "Bu FİN faylda təkrarlanır."))
