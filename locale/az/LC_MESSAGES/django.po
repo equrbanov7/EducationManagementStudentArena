@@ -64631,3 +64631,15 @@ msgstr "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
 msgctxt "accounts.syllabus"
 msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
 msgstr "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Bu əməl üçün `role.assign` və ya `org.manage_members` icazəsi lazımdır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Bu istifadəçi sizin struktur əhatənizdən kənardadır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Seçilmiş rol bu təşkilatda müəyyən edilməyib: %(roles)s."

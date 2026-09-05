@@ -64964,3 +64964,15 @@ msgstr "Содержимое слишком велико — не более %(m
 msgctxt "accounts.syllabus"
 msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
 msgstr "Для этого курса силлабус уже существует — откройте его из списка."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Для этого действия требуется право `role.assign` или `org.manage_members`."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Этот пользователь вне вашей структурной зоны ответственности."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Выбранная роль не определена в этой организации: %(roles)s."

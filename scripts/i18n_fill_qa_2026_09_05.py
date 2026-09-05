@@ -30,6 +30,23 @@ ENTRIES = {
             "tr": "Hiçbir hücre kaydedilmedi — ders günü kuralı veya hücre kilidi buna izin vermedi.",
         },
     },
+    "accounts.manage_roles.message": {
+        "missing_member_management_permission": {
+            "en": "You need the `role.assign` or `org.manage_members` permission for this action.",
+            "ru": "Для этого действия требуется право `role.assign` или `org.manage_members`.",
+            "tr": "Bu işlem için `role.assign` veya `org.manage_members` izni gerekir.",
+        },
+        "target_outside_structure_scope": {
+            "en": "This user is outside your structural scope.",
+            "ru": "Этот пользователь вне вашей структурной зоны ответственности.",
+            "tr": "Bu kullanıcı yapısal yetki alanınızın dışındadır.",
+        },
+        "role_not_defined_in_organization": {
+            "en": "The selected role is not defined in this organisation: %(roles)s.",
+            "ru": "Выбранная роль не определена в этой организации: %(roles)s.",
+            "tr": "Seçilen rol bu kurumda tanımlı değil: %(roles)s.",
+        },
+    },
     "accounts.syllabus": {
         "Bölmə məzmununun formatı düzgün deyil (%(field)s).": {
             "en": "The section content has an invalid format (%(field)s).",
@@ -47,6 +64,14 @@ ENTRIES = {
             "tr": "Bu ders açılışı için zaten bir izlence var — listeden açın.",
         },
     },
+}
+
+
+#: Açar-tipli msgid-lər üçün AZ mətni (kataloq qapısı xam açar sızmasını rədd edir).
+AZ_OVERRIDES = {
+    "missing_member_management_permission": "Bu əməl üçün `role.assign` və ya `org.manage_members` icazəsi lazımdır.",
+    "target_outside_structure_scope": "Bu istifadəçi sizin struktur əhatənizdən kənardadır.",
+    "role_not_defined_in_organization": "Seçilmiş rol bu təşkilatda müəyyən edilməyib: %(roles)s.",
 }
 
 
@@ -69,7 +94,7 @@ def fill(lang):
             probe = f'{head}msgid "{esc(msgid)}"\nmsgstr'
             if probe in text:
                 continue
-            msgstr = msgid if lang == "az" else translations.get(lang, msgid)
+            msgstr = AZ_OVERRIDES.get(msgid, msgid) if lang == "az" else translations.get(lang, msgid)
             blocks.append(f'{head}msgid "{esc(msgid)}"\nmsgstr "{esc(msgstr)}"\n')
             added += 1
     if blocks:

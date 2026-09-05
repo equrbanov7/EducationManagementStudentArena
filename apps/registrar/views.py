@@ -322,8 +322,21 @@ def _handle_save_component_scores(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
+def _can_write_finals(user, offering) -> bool:
+    """Yekun imtahan / təkrar balı — YALNIZ `final_score.entry` daşıyan aktor (İmtahan
+    Mərkəzi) və ya superuser.  Müəllim jurnal redaktoru olsa da bu sahəni yazmır
+    (UI-da sahə yoxdur; crafted POST ilə yazıla bilirdi — QA 2026-09-05 JOURNAL-TEACHER-08)."""
+    if getattr(user, "is_superuser", False):
+        return True
+    from apps.organizations.public import get_permission_scope
+
+    return get_permission_scope(user, offering.organization, "final_score.entry").has_structure_access
+
+
 def _handle_save_finals(request, offering):
     """Persist final-exam + resit scores per student (exam__<enr> / resit__<enr>)."""
+    if not _can_write_finals(request.user, offering):
+        raise Http404
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
@@ -394,11 +407,11 @@ def _handle_add_lesson(request, offering):
 
     # #6 — fənnin tam saat həddi: keçirilmiş + yeni saat toplamı keçməsin (60→62 olmaz).
     summary = _je.journal_teaching_summary(offering)
-    if summary["total"] and summary["held_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
+    if summary["total"] and summary["scheduled_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
         messages.error(
             request,
             _("Fənnin dərs saatı həddi (%(t)s saat) keçilir — keçirilmiş %(h)s saat, qalan yalnız %(r)s saat.")
-            % {"t": summary["total"], "h": summary["held_total"], "r": summary["remaining"]},
+            % {"t": summary["total"], "h": summary["scheduled_total"], "r": summary["remaining"]},
         )
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 

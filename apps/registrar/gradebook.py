@@ -166,8 +166,9 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
         if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
             status = AttendanceStatus.PRESENT
         score = None
-        if lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
-            # Seminar/lab balı: min 0, max 10 (sərt tavan).
+        if status != AttendanceStatus.ABSENT and lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
+            # Seminar/lab balı: min 0, max 10 (sərt tavan). Qayıb tələbəyə bal
+            # yazılmır — «q/b + 8 bal» xanası mümkün idi (QA 2026-09-05 JOURNAL-TEACHER-09).
             score = min(max(Decimal("0"), _to_decimal(entry.get("score"))), LESSON_SCORE_MAX)
 
         old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
