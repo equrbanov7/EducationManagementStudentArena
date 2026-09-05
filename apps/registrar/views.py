@@ -54,6 +54,21 @@ def journal_list(request):
     return render(request, "registrar/journal_list.html", context)
 
 
+#: Jurnalın tabları — hər biri AYRICA səhifə yükü ilə render olunur (P1-8).
+_JOURNAL_TABS = ("grid", "kollokvium", "kurs-isi", "serbest", "yekun")
+
+
+def _kollokvium_columns_only(offering):
+    """Kollokvium XƏBƏRDARLIQ lenti üçün yalnız sütun meta (sətirsiz).
+
+    Lent hər tabda görünür, amma 555 sətirlik grid yalnız öz tabında lazımdır.
+    """
+    from apps.registrar import journal_extras as _je
+
+    grid = _je.get_kollokvium_grid(offering)
+    return {**grid, "rows": []} if isinstance(grid, dict) else grid
+
+
 @login_required
 def journal_detail(request, offering_id):
     """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
@@ -114,11 +129,41 @@ def journal_detail(request, offering_id):
 
     from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
 
-    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
+    # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
+    # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
+    from apps.registrar import journal_window as _jw
+
+    try:
+        window_size = int(request.GET.get("lw", _jw.DEFAULT_LESSON_WINDOW))
+    except (TypeError, ValueError):
+        window_size = _jw.DEFAULT_LESSON_WINDOW
+    if window_size and window_size not in _jw.WINDOW_CHOICES:
+        window_size = _jw.DEFAULT_LESSON_WINDOW
+    try:
+        window_offset = int(request.GET.get("lo", 0))
+    except (TypeError, ValueError):
+        window_offset = 0
+    # AKTİV TAB (P1-8): əvvəl beş tabın hamısı — hər biri 555 sətirlik cədvəl —
+    # eyni HTML-ə render olunurdu. İndi yalnız aktiv tabın datası qurulur.
+    active_tab = request.GET.get("jt", "grid")
+    if active_tab not in _JOURNAL_TABS:
+        active_tab = "grid"
+    journal = gradebook.get_offering_journal(
+        offering=offering,
+        newest_first=True,
+        # Grid-dən başqa tablarda sütunlar lazım deyil (sətir sayı/qonaq siyahısı üçün
+        # yenə tam sətir dəsti qurulur, amma xanasız).
+        lesson_limit=(window_size or None) if active_tab == "grid" else 1,
+        lesson_offset=window_offset if active_tab == "grid" else 0,
+    )
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
-    coursework_rows = journal_extras.get_course_work_rows(offering)
-    finals_data = finals.get_offering_results(offering=offering)
+    # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
+    needs_coursework = active_tab in {"kurs-isi", "yekun"}
+    needs_finals = active_tab == "yekun"
+    coursework_rows = journal_extras.get_course_work_rows(offering) if needs_coursework else []
+    finals_data = finals.get_offering_results(offering=offering) if needs_finals else {"rows": []}
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
     # Çox cəhd (sahibin qərarı M2): rəsmi SONUNCU cəhddir, əvvəlkilərin balı
     # itmir — müəllim görünüşündə «Yekun» tabının QEYD sütununda açıq göstərilir.
@@ -147,10 +192,19 @@ def journal_detail(request, offering_id):
         "offering": offering,
         "journal": journal,
         "corrections_map": corrections_map,
+        "active_tab": active_tab,
         "finals": finals_data,
-        "final_breakdown": _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map),
-        "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
-        "selfwork_board": journal_extras.get_selfwork_board(offering),
+        "final_breakdown": (
+            _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map) if needs_finals else []
+        ),
+        # Kollokvium lenti (xəbərdarlıq zolağı) hər tabda görünür — sütun meta
+        # ucuzdur, sətir grid-i isə yalnız öz tabında qurulur.
+        "kollokvium_grid": (
+            journal_extras.get_kollokvium_grid(offering)
+            if active_tab == "kollokvium"
+            else _kollokvium_columns_only(offering)
+        ),
+        "selfwork_board": journal_extras.get_selfwork_board(offering) if active_tab == "serbest" else None,
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
         "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
@@ -165,7 +219,7 @@ def journal_detail(request, offering_id):
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.
         "syllabus_gate": syllabus_gate,
-        "grade_history": grade_audit.get_grade_history(offering=offering),
+        "grade_history": grade_audit.get_grade_history(offering=offering) if active_tab in {"grid", "yekun"} else [],
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
         "topic_choices": journal_extras.lesson_topic_choices(offering),

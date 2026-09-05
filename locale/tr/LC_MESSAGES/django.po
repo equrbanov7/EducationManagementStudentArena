@@ -64593,3 +64593,35 @@ msgstr "Ders türü doğru seçilmemiş."
 
 msgid "Dərs saatı müsbət tam ədəd olmalıdır."
 msgstr "Ders saati pozitif bir tam sayı olmalıdır."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Ders sütunları"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Tümünü göster"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Son 20 ders"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(total)s dersten %(first)s–%(last)s"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "%(total)s dersin tamamı gösteriliyor"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Sonraki dersler"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Önceki dersler"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Seçiniz"
