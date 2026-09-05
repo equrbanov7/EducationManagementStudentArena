@@ -64664,3 +64664,9 @@ msgstr "Bank adı ən çox %(n)s simvol ola bilər."
 
 msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
 msgstr "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+
+msgid "Standart format"
+msgstr "Standart format"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."

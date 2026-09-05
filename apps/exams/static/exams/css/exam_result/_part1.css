@@ -509,7 +509,7 @@
 }
 
 .option-icon { font-size: 1.2rem; margin-right: 12px; color: #d1d5db; }
-.correct-icon { font-size: 1.2rem; margin-right: 12px; color: var(--ems-success); }
+.correct-icon { font-size: 1.2rem; margin-right: 12px; color: var(--ems-success-700); }
 .wrong-icon { font-size: 1.2rem; margin-right: 12px; color: var(--ems-danger-500); }
 
 /* Variant rəngləri */

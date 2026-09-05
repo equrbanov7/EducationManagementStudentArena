@@ -71,7 +71,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     margin-bottom: 2px;
 }
 
@@ -190,7 +190,7 @@
 .fxc-cell-ini {
     font-size: .64rem;
     font-weight: 700;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     text-transform: uppercase;
     max-width: 100%;
     padding: 0 4px;
@@ -209,7 +209,7 @@
 .fxc-cell--removed { background: #FEE2E2; border-color: #F87171; }
 .fxc-cell--removed .fxc-cell-num { color: #B91C1C; }
 .fxc-cell--idle { background: #F8FAFC; border-color: #E2E8F0; }
-.fxc-cell--idle .fxc-cell-num { color: #94A3B8; }
+.fxc-cell--idle .fxc-cell-num { color: var(--ems-neutral-500); }
 
 .fxc-cell-vio {
     position: absolute;
@@ -242,7 +242,7 @@
 .fxc-map-hint {
     margin: 14px 0 0;
     font-size: .8rem;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     display: flex;
     align-items: center;
     gap: 7px;
@@ -298,7 +298,7 @@
 
 .fxc-violations-list { display: flex; flex-direction: column; gap: 8px; }
 
-.fxc-vio-empty { text-align: center; color: #94A3B8; font-size: .84rem; padding: 20px 0; }
+.fxc-vio-empty { text-align: center; color: var(--ems-neutral-500); font-size: .84rem; padding: 20px 0; }
 
 .fxc-vio-row {
     border: 1px solid #FDE8E8;
@@ -337,7 +337,7 @@
 
 /* ── Başlıq: bağlantı vəziyyəti + son yenilənmə ── */
 .fxc-headline-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.fxc-updated { font-size: .76rem; color: #94A3B8; font-variant-numeric: tabular-nums; }
+.fxc-updated { font-size: .76rem; color: var(--ems-neutral-500); font-variant-numeric: tabular-nums; }
 .fxc-conn[data-state="offline"] { color: #B91C1C; }
 
 @media (max-width: 900px) {
@@ -417,13 +417,13 @@
 }
 
 .fxc-snapshot-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.fxc-snapshot-meta i { color: #94A3B8; }
+.fxc-snapshot-meta i { color: var(--ems-neutral-500); }
 
 .fxc-snapshot-body { max-height: 52vh; overflow-y: auto; }
 
 .fxc-snapshot-empty {
     text-align: center;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     padding: 34px 0;
 }
 

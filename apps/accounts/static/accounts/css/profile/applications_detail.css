@@ -91,7 +91,7 @@
     font-weight: 800;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     margin-bottom: 7px;
 }
 
@@ -140,7 +140,7 @@
 
 .apx-file__size {
     font-size: 0.73rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     white-space: nowrap;
 }
 
@@ -228,7 +228,7 @@
 
 .apx-tl__when {
     font-size: 0.73rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .apx-tl__what {
@@ -287,7 +287,7 @@
 .apx-act__hint {
     margin-top: 8px;
     font-size: 0.75rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     text-wrap: pretty;
 }
 

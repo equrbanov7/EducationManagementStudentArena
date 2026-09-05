@@ -41,7 +41,7 @@
 }
 
 .fexc-langbar-icon {
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     font-size: .82rem;
     padding: 0 3px 0 5px;
 }
@@ -211,7 +211,7 @@
 .fexc-hint {
     margin: 6px 0 0;
     font-size: .8rem;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
 }
 
 /* ── Düymələr ── */
@@ -255,7 +255,7 @@
 .fexc-footnote {
     margin: 18px 0 0;
     font-size: .8rem;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     display: flex;
     gap: 8px;
     align-items: center;
@@ -280,7 +280,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     margin-bottom: 3px;
 }
 
@@ -465,7 +465,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     margin-bottom: 3px;
 }
 

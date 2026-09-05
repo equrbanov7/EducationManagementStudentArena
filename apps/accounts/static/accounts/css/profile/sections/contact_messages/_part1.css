@@ -190,7 +190,7 @@
 }
 
 .contact-msg-item--recorded {
-    border-left-color: var(--ems-neutral-400);
+    border-left-color: var(--ems-neutral-500);
 }
 
 .contact-msg-item--trial {
@@ -261,7 +261,7 @@
 }
 
 .contact-msg-date {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
@@ -270,7 +270,7 @@
 .contact-msg-empty {
     text-align: center;
     padding: 48px 20px;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .contact-msg-empty i {

@@ -83,7 +83,7 @@
 .ems-btn:disabled,
 .ems-btn[aria-disabled="true"] {
     background: var(--ems-neutral-100);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     border-color: var(--ems-border);
     cursor: not-allowed;
 }
@@ -173,7 +173,7 @@
 .ems-select:disabled,
 .ems-textarea:disabled {
     background: var(--ems-neutral-100);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 

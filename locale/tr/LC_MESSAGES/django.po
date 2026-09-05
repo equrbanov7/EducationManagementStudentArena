@@ -64577,3 +64577,9 @@ msgstr "Banka adı en fazla %(n)s karakter olabilir."
 
 msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
 msgstr "Sınav/bütünleme puanını yalnızca Sınav Merkezi girebilir — bu alanlar kaydedilmedi."
+
+msgid "Standart format"
+msgstr "Varsayılan biçim"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz)."

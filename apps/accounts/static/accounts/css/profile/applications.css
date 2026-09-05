@@ -159,7 +159,7 @@
 .apx-btn[aria-disabled="true"] {
     background: var(--ems-neutral-200);
     border-color: var(--ems-neutral-300);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 
@@ -196,7 +196,7 @@
     font-weight: 800;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .apx-kpi__value {
@@ -468,7 +468,7 @@
     font-family: var(--apx-mono);
     font-size: 0.71rem;
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .apx-badge {
@@ -514,13 +514,13 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .apx-row__owner {
     margin-left: auto;
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     text-wrap: pretty;
 }
 

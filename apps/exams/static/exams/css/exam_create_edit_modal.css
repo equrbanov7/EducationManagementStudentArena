@@ -197,7 +197,7 @@
     left: 0.7rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     pointer-events: none;
 }
 

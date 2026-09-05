@@ -34,6 +34,16 @@ ENTRIES = {
             "ru": "Журнал закрыт — изменения не сохранены.",
             "tr": "Yoklama defteri kapalı — değişiklikler kaydedilmedi.",
         },
+        "Standart format": {
+            "en": "Default format",
+            "ru": "Формат по умолчанию",
+            "tr": "Varsayılan biçim",
+        },
+        "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz).": {
+            "en": "Default question format (you can change it when adding a question).",
+            "ru": "Формат вопроса по умолчанию (можно изменить при добавлении вопроса).",
+            "tr": "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz).",
+        },
         "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı.": {
             "en": "Only the Examination Centre may record exam/resit scores — those fields were not saved.",
             "ru": "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены.",

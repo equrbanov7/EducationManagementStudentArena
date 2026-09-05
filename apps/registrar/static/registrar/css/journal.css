@@ -51,7 +51,7 @@
 .journal-offering-body { flex: 1; min-width: 0; }
 .journal-offering-name { font-weight: 600; color: var(--ems-neutral-900); }
 .journal-offering-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.82rem; color: var(--ems-neutral-500); margin-top: 2px; }
-.journal-offering-go { color: var(--ems-neutral-400); }
+.journal-offering-go { color: var(--ems-neutral-500); }
 
 /* ── Detail head ──────────────────────────────────────────────────────────── */
 .journal-back {
@@ -163,7 +163,7 @@
 
 /* Lesson column header */
 .col-lesson { min-width: 52px; line-height: 1.2; }
-.lesson-seq { display: block; font-size: 0.68rem; color: var(--ems-neutral-400); }
+.lesson-seq { display: block; font-size: 0.68rem; color: var(--ems-neutral-500); }
 .lesson-date { display: block; font-weight: 600; color: var(--ems-neutral-800); }
 .lesson-kind-badge {
     display: inline-block;
@@ -240,7 +240,7 @@
 .journal-save-btn:hover { background: var(--ems-primary-700); }
 
 .journal-empty, .journal-hint { text-align: center; padding: 3rem 1rem; color: var(--ems-neutral-500); }
-.journal-empty i, .journal-hint i { font-size: 2rem; color: var(--ems-neutral-400); margin-bottom: 0.5rem; }
+.journal-empty i, .journal-hint i { font-size: 2rem; color: var(--ems-neutral-500); margin-bottom: 0.5rem; }
 .journal-empty p, .journal-hint p { margin: 0; }
 
 /* ── Yekun / Nəticə (final grade + resit, U3+) ────────────────────────────── */
@@ -319,7 +319,7 @@
     color: var(--ems-neutral-900);
 }
 .journal-comp-total { margin-left: 12px; font-size: 0.8rem; color: var(--ems-neutral-500); }
-.journal-grid .th-max { font-weight: 400; color: var(--ems-neutral-400); font-size: 0.72rem; }
+.journal-grid .th-max { font-weight: 400; color: var(--ems-neutral-500); font-size: 0.72rem; }
 .cell-score {
     width: 60px;
     padding: 4px 6px;
@@ -401,7 +401,7 @@
     padding: 1px 7px;
     border-radius: 6px;
 }
-.gh-arrow { color: var(--ems-neutral-400); font-size: 0.7rem; }
+.gh-arrow { color: var(--ems-neutral-500); font-size: 0.7rem; }
 
 /* ═══ Qrup seçimi cədvəli (jurnal giriş nöqtəsi — mockup ilə birə-bir) ═══ */
 .jl-table-wrap {

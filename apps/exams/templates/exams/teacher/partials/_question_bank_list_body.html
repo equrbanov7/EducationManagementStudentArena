@@ -92,7 +92,7 @@ Kontekst:
                         {% endfor %}
                     </select>
                 </div>
-                <span class="qb-field__hint">{% trans "Default sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</span>
+                <span class="qb-field__hint">{% trans "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</span>
             </div>
 
             <div class="qb-field">
@@ -264,7 +264,7 @@ Kontekst:
                             </div>
                         </div>
                         <div class="qb-edit-field">
-                            <label for="editBankFormat2">{% trans "Default format" %}</label>
+                            <label for="editBankFormat2">{% trans "Standart format" %}</label>
                             <div class="bootstrap-single-select">
                                 <select id="editBankFormat2" name="default_question_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
                                     {% for value, label in default_type_choices %}<option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</option>{% endfor %}

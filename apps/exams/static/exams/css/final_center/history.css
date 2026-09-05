@@ -77,14 +77,14 @@
 .fxc-tl-meta {
     margin-top: 6px;
     font-size: .76rem;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     font-variant-numeric: tabular-nums;
 }
 
-.fxc-tl-empty { text-align: center; color: #94A3B8; padding: 24px 0; }
+.fxc-tl-empty { text-align: center; color: var(--ems-neutral-500); padding: 24px 0; }
 
 @media (max-width: 560px) {
     .fxc-timeline::before { left: 15px; }

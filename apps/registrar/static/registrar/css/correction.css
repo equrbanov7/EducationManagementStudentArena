@@ -50,7 +50,7 @@
 .corr-modal-card { position: relative; width: min(460px, 92vw); max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(15,42,94,.3); }
 .corr-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #eef1f7; }
 .corr-modal-head h2 { font-size: 1.1rem; font-weight: 700; color: #0f2a5e; margin: 0; }
-.corr-modal-x { background: none; border: none; font-size: 1.5rem; line-height: 1; color: #94a3b8; cursor: pointer; }
+.corr-modal-x { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--ems-neutral-500); cursor: pointer; }
 .corr-modal-form, .corr-modal form { padding: 0; }
 .corr-modal form { padding: 1.25rem; }
 .corr-modal-meta { font-size: 0.83rem; color: #5b6b8c; margin-bottom: 0.9rem; padding: 0.5rem 0.75rem; background: #f5f8ff; border-radius: 8px; }
@@ -69,10 +69,10 @@
 .corr-hist-date { font-size: 0.78rem; color: #7887a8; }
 .corr-hist-doc { font-size: 0.75rem; font-weight: 700; color: #2563eb; text-decoration: none; padding: 2px 8px; border: 1px solid #cdd8ee; border-radius: 6px; }
 .corr-hist-change { font-size: 0.9rem; color: #33415c; margin: 4px 0; }
-.corr-hist-arrow { color: #94a3b8; }
+.corr-hist-arrow { color: var(--ems-neutral-500); }
 .corr-hist-reason { font-size: 0.8rem; font-weight: 600; color: #92600a; }
 .corr-hist-note { font-size: 0.82rem; color: #5b6b8c; margin-top: 2px; }
-.corr-hist-by { font-size: 0.76rem; color: #94a3b8; margin-top: 4px; font-style: italic; }
+.corr-hist-by { font-size: 0.76rem; color: var(--ems-neutral-500); margin-top: 4px; font-style: italic; }
 /* "Düzəlişi sil" — yalnız ən son düzəliş qeydində (korrektor geri alır). */
 .corr-hist-del {
     margin-top: 8px; border: 1px solid #fca5a5; background: #fef2f2; color: #dc2626;
@@ -108,7 +108,7 @@
 .jd-day-topic { margin-bottom: 0.75rem; color: #33415c; }
 .jd-day-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .jd-day-stat--full { grid-column: 1 / -1; }
-.jd-day-note { margin-top: 0.9rem; font-size: 0.82rem; color: #94a3b8; }
+.jd-day-note { margin-top: 0.9rem; font-size: 0.82rem; color: var(--ems-neutral-500); }
 
 /* ── Yerində düzəliş rejimi (journal_detail ?correct=1) ────────────────────── */
 /* Correction rejimi NORMAL grid-in ÖZÜNDƏ işləyir (ayrı editor yox) — xanalar
