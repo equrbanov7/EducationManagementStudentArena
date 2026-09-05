@@ -64680,3 +64680,9 @@ msgstr "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgctxt "roles.display_name"
 msgid "rim_staff"
 msgstr "Rəqəmsal İnkişaf Mərkəzi (RİM) əməkdaşı"
+
+msgid "Dərs tipi düzgün seçilməyib."
+msgstr "Dərs tipi düzgün seçilməyib."
+
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Dərs saatı müsbət tam ədəd olmalıdır."

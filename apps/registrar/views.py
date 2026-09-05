@@ -403,14 +403,27 @@ def _handle_add_lesson(request, offering):
     # Dərs tipi kilidi: cədvəldə tək növ slot varsa POST nə deyirsə desin o növ.
     from apps.registrar import journal_extras as _je
 
-    kind = _je.locked_lesson_kind(offering) or request.POST.get("lesson_kind")
+    locked_kind = _je.locked_lesson_kind(offering)
+    kind = locked_kind or request.POST.get("lesson_kind")
     if kind not in dict(LessonKind.choices):
-        kind = LessonKind.LECTURE
+        # QA 2026-09-05 (P3-9): naməlum dərs tipi səssizcə «mühazirə»yə çevrilirdi —
+        # müəllim yanlış tipdə dərs açdığını görmürdü. Kilidli tipdə (cədvəl tək
+        # növ verir) POST-a baxılmır, orada susmaq düzgündür.
+        if locked_kind:
+            kind = locked_kind
+        else:
+            messages.error(request, _("Dərs tipi düzgün seçilməyib."))
+            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     if not date:
         messages.error(request, _("Dərs tarixi tələb olunur."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     hours_raw = (request.POST.get("lesson_hours") or "").strip()
+    # QA 2026-09-05 (P3-9): «-5» / «abc» səssizcə standart saata çevrilirdi.
+    # Boş dəyər normaldır (standart saat), amma YAZILMIŞ yanlış dəyər rədd olunur.
+    if hours_raw and not (hours_raw.isdigit() and int(hours_raw) > 0):
+        messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
     # Dərs saatı MƏCBURİDİR — standart saat seçilmədən dərs açılmasın.

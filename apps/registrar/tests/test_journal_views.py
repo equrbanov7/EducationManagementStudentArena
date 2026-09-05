@@ -519,3 +519,26 @@ class LessonDateUpperBoundTest(JournalViewTest):
                 allow_past=True,
             )
         self.assertIsNotNone(lesson.pk)
+
+
+class LessonInputEchoTest(JournalViewTest):
+    """Yanlış dərs tipi/saatı səssizcə defolta çevrilməməlidir — QA 2026-09-05 P3-9."""
+
+    def _post_lesson(self, **overrides):
+        payload = {
+            "action": "add_lesson",
+            "lesson_date": str(datetime.date.today()),
+            "lesson_kind": LessonKind.SEMINAR,
+            "lesson_time": "08:30-10:00",
+        }
+        payload.update(overrides)
+        client = self._client(self.teacher)
+        return client.post(reverse("registrar:journal_detail", args=[self.offering.id]), payload, follow=True)
+
+    def test_unknown_kind_is_reported(self):
+        response = self._post_lesson(lesson_kind="exam")
+        self.assertContains(response, "Dərs tipi düzgün seçilməyib")
+
+    def test_negative_hours_are_reported(self):
+        response = self._post_lesson(lesson_hours="-5")
+        self.assertContains(response, "müsbət tam ədəd")

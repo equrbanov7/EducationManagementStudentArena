@@ -44,6 +44,16 @@ ENTRIES = {
             "ru": "Формат вопроса по умолчанию (можно изменить при добавлении вопроса).",
             "tr": "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz).",
         },
+        "Dərs tipi düzgün seçilməyib.": {
+            "en": "The lesson type is not selected correctly.",
+            "ru": "Тип занятия выбран неверно.",
+            "tr": "Ders türü doğru seçilmemiş.",
+        },
+        "Dərs saatı müsbət tam ədəd olmalıdır.": {
+            "en": "The lesson hours must be a positive whole number.",
+            "ru": "Количество часов занятия должно быть целым положительным числом.",
+            "tr": "Ders saati pozitif bir tam sayı olmalıdır.",
+        },
         "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı.": {
             "en": "Only the Examination Centre may record exam/resit scores — those fields were not saved.",
             "ru": "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены.",
