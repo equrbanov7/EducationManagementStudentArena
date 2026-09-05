@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+import logging
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.organizations.unit_heads import members_covering_unit
+
 from ..constants import (
     MAX_ATTACHMENTS_PER_ACTION,
+    MAX_BODY_LENGTH,
+    MAX_SUBJECT_LENGTH,
     MIN_BODY_LENGTH,
     MIN_SUBJECT_LENGTH,
     PERM_CREATE,
@@ -19,6 +25,8 @@ from ..sla import add_working_days
 from ..state_machine import TransitionDenied
 from . import access, notify
 from .routing import route_for, sender_family_for
+
+logger = logging.getLogger(__name__)
 
 
 def next_number(organization) -> str:
@@ -37,10 +45,16 @@ def next_number(organization) -> str:
 def validate_text(subject: str, body: str) -> dict:
     """Server tərəfli uzunluq yoxlaması (dizayn §8.4) → sahə-xəta xəritəsi."""
     errors = {}
-    if len((subject or "").strip()) < MIN_SUBJECT_LENGTH:
+    subject_len = len((subject or "").strip())
+    body_len = len((body or "").strip())
+    if subject_len < MIN_SUBJECT_LENGTH:
         errors["subject"] = [f"Mövzu ən azı {MIN_SUBJECT_LENGTH} simvol olmalıdır."]
-    if len((body or "").strip()) < MIN_BODY_LENGTH:
+    elif subject_len > MAX_SUBJECT_LENGTH:
+        errors["subject"] = [f"Mövzu ən çox {MAX_SUBJECT_LENGTH} simvol ola bilər."]
+    if body_len < MIN_BODY_LENGTH:
         errors["body"] = [f"Müraciətin mətni ən azı {MIN_BODY_LENGTH} simvol olmalıdır."]
+    elif body_len > MAX_BODY_LENGTH:
+        errors["body"] = [f"Müraciətin mətni ən çox {MAX_BODY_LENGTH} simvol ola bilər."]
     return errors
 
 
@@ -89,6 +103,22 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
         raise ValidationError(errors)
 
     unit, scope_unit, family, sender_unit = route_for(kind, user, organization=organization, family=family)
+    # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
+    # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.
+    # Belə halda əhatə açılır — şöbənin rolunu daşıyan HƏR KƏS görür (fail-open görünüş,
+    # əməl yenə rol qapısındadır) — və audit izində qeyd olunur.
+    coverage_fallback = False
+    if (
+        scope_unit is not None
+        and not members_covering_unit(organization, scope_unit, role_names=unit.role_names).exists()
+    ):
+        logger.warning(
+            "applications: no handler covers %s for unit %s — falling back to org-wide scope",
+            getattr(scope_unit, "pk", None),
+            unit.code,
+        )
+        scope_unit = None
+        coverage_fallback = True
     now = timezone.now()
     application = Application.objects.create(
         organization=organization,
@@ -125,7 +155,12 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
         action=notify.AUDIT_CREATE,
         actor=user,
         event_kind=EventKind.SUBMITTED,
-        changes={"kind": kind.code, "unit": unit.code, "number": application.number},
+        changes={
+            "kind": kind.code,
+            "unit": unit.code,
+            "number": application.number,
+            **({"coverage": "fallback_unscoped"} if coverage_fallback else {}),
+        },
         request=request,
     )
     notify.notify_current_unit(

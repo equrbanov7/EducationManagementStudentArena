@@ -44,12 +44,33 @@ def _safe(callable_, *args, **kwargs):
 
 
 def handler_recipients(application):
-    """Cari şöbəni əhatə edən emalçı istifadəçilər (təkrarsız)."""
-    memberships = members_covering_unit(
-        application.organization,
-        application.current_scope_unit,
-        role_names=application.current_unit.role_names,
-    )
+    """Cari şöbəni əhatə edən emalçı istifadəçilər (təkrarsız).
+
+    Aidiyyət bölməsi YOXDURSA (mərkəzi şöbə və ya əhatə açılıb — QA 2026-09-05
+    APPLICATIONS-01) oxu tərəfindəki qayda ilə eyni: rol adı kifayətdir, vahid-əhatəli
+    daşıyıcılar da (koordinator/dekan) bildiriş alır — əvvəl yalnız org-səviyyəli
+    rollar seçilirdi və heç kim xəbər tutmurdu.
+    """
+    role_names = [name for name in (application.current_unit.role_names or []) if name]
+    if application.current_scope_unit_id is None:
+        from apps.organizations.models import Membership
+
+        memberships = (
+            Membership.objects.filter(
+                organization=application.organization,
+                is_active=True,
+                role__is_active=True,
+                role__name__in=role_names,
+            ).select_related("user", "role")
+            if role_names
+            else Membership.objects.none()
+        )
+    else:
+        memberships = members_covering_unit(
+            application.organization,
+            application.current_scope_unit,
+            role_names=role_names,
+        )
     seen = {}
     for membership in memberships:
         seen.setdefault(membership.user_id, membership.user)

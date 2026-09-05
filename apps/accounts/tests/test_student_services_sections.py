@@ -667,6 +667,15 @@ class AtisAdmissionTest(StudentServicesBase):
         self.assertEqual(created.parent_id, self.specialty.pk)
         self.assertEqual(created.settings["capacity"], 25)
 
+    def test_non_uuid_specialty_is_a_404_not_a_500(self):
+        """QA 2026-09-05 STUDENT-MGMT-01: `specialty=x` `filter(pk=...)`-də ValidationError → 500 verirdi."""
+        response = self._client("student_services").post(
+            reverse("accounts:student_admission_create_group"),
+            {"specialty": "x", "name": "QA-x", "capacity": "25"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "specialty_not_found")
+
     def test_duplicate_group_name_is_rejected(self):
         response = self._client("student_services").post(
             reverse("accounts:student_admission_create_group"),
