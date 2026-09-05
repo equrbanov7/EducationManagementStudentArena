@@ -64587,3 +64587,9 @@ msgstr "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz)."
 msgctxt "roles.display_name"
 msgid "rim_staff"
 msgstr "Dijital Gelişim Merkezi (RİM) çalışanı"
+
+msgid "Dərs tipi düzgün seçilməyib."
+msgstr "Ders türü doğru seçilmemiş."
+
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Ders saati pozitif bir tam sayı olmalıdır."
