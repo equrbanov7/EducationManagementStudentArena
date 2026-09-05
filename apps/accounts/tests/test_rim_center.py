@@ -252,19 +252,24 @@ class RimHierarchyTests(RimCenterTestBase):
 
         self.login_operator()
         response = self.act("block", peer, reason="yoxlama")
-        self.assertEqual(response.status_code, 404)
+        # QA 2026-09-05 (P3-8): eyni təşkilatın hesabı üçün SƏBƏB göstərilir
+        # (əvvəl hamısı 404 `target_not_found` idi).
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
     def test_cannot_manage_higher_level_account(self):
         self.login_operator()
         response = self.act("block", self.higher, reason="yoxlama")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
         self.higher.refresh_from_db()
         self.assertTrue(self.higher.is_active)
 
     def test_cannot_target_self(self):
         self.login_operator()
         response = self.act("soft_delete", self.operator, reason="özümü silim")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_is_self")
         self.operator.refresh_from_db()
         self.assertTrue(self.operator.is_active)
         self.assertFalse(self.operator.profile.is_deleted)
@@ -272,6 +277,7 @@ class RimHierarchyTests(RimCenterTestBase):
     def test_cannot_target_superuser(self):
         self.login_operator()
         response = self.act("block", self.superuser, reason="yoxlama")
+        # Superuser təşkilat üzvü DEYİL — mövcudluğu sızmasın deyə yenə 404.
         self.assertEqual(response.status_code, 404)
         self.superuser.refresh_from_db()
         self.assertTrue(self.superuser.is_active)
@@ -489,7 +495,8 @@ class RimSoftDeleteTests(RimCenterTestBase):
 
         self.login_operator()
         response = self.act("restore", self.higher, reason="bərpa")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
     def test_no_hard_delete_action_is_exposed(self):
         """RİM səthində hard delete YOXDUR."""
@@ -700,7 +707,8 @@ class RimDualRoleTests(RimCenterTestBase):
             data={"action": "block", "user_id": self.dual.pk, "reason": "yoxlama"},
             content_type="application/json",
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
 
 class RimSectionGateTests(RimCenterTestBase):
