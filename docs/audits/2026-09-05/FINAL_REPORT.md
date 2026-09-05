@@ -1,5 +1,5 @@
 # EMSArena — istehsala hazırlıq üzrə tam QA auditi
-**Tarix:** 2026-09-05 · **Branch:** `audit/full-qa-2026-09-05` · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901` (:8100)
+**Tarix:** 2026-09-05 (düzəliş dalğası: 2026-09-06) · **Branch:** `audit/full-qa-2026-09-05` · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901` (:8100)
 **Sübut qovluğu:** `~/EMSArena-backups/qa-2026-09-05/` · **Problem siyahısı:** `docs/audits/2026-09-05/ISSUES.md`
 
 ---
@@ -10,15 +10,14 @@
 
 **Nəticə:** sistemin **əsas iş axınları işləyir və tenant izolyasiyası möhkəmdir** (bölmə səviyyəsində sızma tapılmadı), lakin auditə qədər **giriş validasiyası zəif** idi (uzunluq/UUID/forma yoxlanmadığı yerlərdə onlarla 500), **iki icazə boşluğu** (crafted POST ilə yekun imtahan balı; dekanın öz əhatəsindən kənar rol verməsi) və **bir «səssiz data itkisi»** (naməlum rol adı → hesab məzuna çevrilirdi) mövcud idi. Bunların hamısı düzəldildi.
 
-| Göstərici | Dəyər |
-|---|---|
-| Ümumi QA balı | **71 / 100** |
-| Tapılan problem | **91** (P1 11 · P2 40 · P3 22 · UX/i18n 18) |
-| Düzəldilmiş | **43** (+2 qismən) |
-| Açıq qalan | **44** (heç biri P0 deyil; 1-i P1) |
-| P0 (istehsalı bloklayan) | **0** |
-| Yeni reqressiya testi | 8 yeni fayl / 16 test faylına toxunuldu |
-| Kod dəyişikliyi | 14 commit · 200 fayl · +5 184 / −353 sətir |
+| Göstərici | 05 sentyabr | **06 sentyabr (indi)** |
+|---|---|---|
+| Ümumi QA balı | 71 / 100 | **76 / 100** |
+| Tapılan problem | 91 | **92** (P1 11 · P2 41 · P3 22 · UX 18) |
+| Düzəldilmiş | 43 | **63** (+3 qismən) |
+| Açıq qalan | 44 | **24** (heç biri P0 deyil; 1-i P1) |
+| P0 (istehsalı bloklayan) | 0 | **0** |
+| Yeni reqressiya testi | 8 fayl | **13 fayl** |
 
 **Qərar: ŞƏRTLƏ HAZIR (READY WITH CONDITIONS)** — §9-dakı 5 şərt ödənilməlidir.
 
@@ -28,17 +27,17 @@
 
 | Kateqoriya | Bal | Əsas |
 |---|---:|---|
-| Funksional doğruluq | 74 | Bütün əsas axınlar işlədi; 25 P2 səviyyəli funksional qüsur düzəldildi (500-lər, səhv uğur mesajları, dublikat yaratma) |
-| Biznes məntiqi | 70 | Jurnal kilidləri, dövr qaydaları, hərəkət qaydaları möhkəmdir; dərs yükündə viza/0-saat/dublikat qapıları hələ açıqdır |
-| Rollar və icazələr | 82 | RBAC permission-açar əsaslıdır və möhkəmdir; iki boşluq düzəldildi; menyu↔capability uyğunsuzluğu (P3-5) qalır |
-| UX / UI | 66 | ems_ui bölmələri sabitdir; filtr paneli/əməl düyməsi/boş hal nümunələri modullar arasında fərqlidir |
-| Rəng sistemi | 52 → 62 | 3 AA kontrast pozuntusu düzəldildi; 790 fərqli hex / 2 badge sistemi dizayn borcu olaraq qalır |
-| Performans | 58 | 2 böyük N+1 düzəldildi (463→129 və 425→67 sorğu); jurnal 41 MB səhifə və analytics 3–8 s açıqdır |
-| Data ardıcıllığı | 68 | Xaric/məzun ↔ giriş vəziyyəti sinxronlaşdırıldı; legacy «Level …» psevdo-qrupları (72 ədəd) qalır |
-| Təhlükəsizlik | 80 | Bölmə səviyyəsində sızma yoxdur; CSP/XFO/nosniff var; HSTS prod-da təsdiqlənməlidir |
-| Responsiv | 74 | Mobil sidebar örtmə problemi düzəldildi; cədvəllər 375 px-də hələ üfüqi sürüşmə tələb edir |
-| Əlçatanlıq (a11y) | 52 | 355 label-siz input, `aria-sort` yalnız 10 bölmədə, native `alert/confirm` 138 çağırış |
-| İstehsala hazırlıq | 70 | Bloklayan qüsur yoxdur; şərtlər §9-da |
+| Funksional doğruluq | 78 | 13 ədəd 500 bağlandı, yalançı «uğur» mesajları, səssiz defoltlar (dərs tipi/saatı), səssiz fayl atma və ikiqat göndəriş qapıları |
+| Biznes məntiqi | 78 | Dərs yükündə 0-saat / dublikat sətir / koordinator vizası qapıları TƏTBİQ EDİLDİ; dərs tarixinin üst həddi qoyuldu; sillabus «kopyala» və məzun kabineti sahib qərarı gözləyir |
+| Rollar və icazələr | 85 | Yeni **RİM əməkdaşı** rolu (məhdud dəst); iki icazə boşluğu bağlandı; «Nəticələrim» menyu↔capability uyğunlaşdırıldı; rədd səbəbləri dəqiqləşdi |
+| UX / UI | 72 | Jurnalda yapışqan başlıq, AI düyməsinin örtməsi, yüklənmə skeleti; filtr/əməl nümunələrinin vahidləşməsi qalır |
+| Rəng sistemi | 66 | 3 AA pozuntusu + bootstrap badge kontrastı (1.63:1 → 10.95:1) düzəldildi; 790 hex / 2 badge sistemi borc olaraq qalır |
+| Performans | 72 | Bütün bölmələrdə icazə sorğuları request-də bir dəfə (dashboard 79→50, 42→13 dublikat); imtahan balı 463→129; kafedra profili 425→67; müraciətlər 81→67; analitika 7.69 s → 0.11 s (keşdən). Jurnalın 41 MB HTML-i açıqdır |
+| Data ardıcıllığı | 70 | Xaric/məzun ↔ giriş sinxron; «cari tədris ili» tək mənbədən; legacy «Level …» psevdo-qrupları (72) qalır |
+| Təhlükəsizlik | 84 | Bölmə sızması yoxdur (5 rol × bütün yad bölmələr təkrar yoxlanıldı); icazə keşi mutasiya nöqtələrində invalidasiya olunur; HSTS prod-da təsdiqlənməlidir |
+| Responsiv | 74 | Mobil sidebar düzəldildi; cədvəllər 375 px-də hələ üfüqi sürüşmə tələb edir |
+| Əlçatanlıq (a11y) | 62 | 70 sahəyə `aria-label`, `aria-busy` yüklənmə vəziyyəti, badge kontrastı; `aria-sort` və qalan label-siz sütunlar açıqdır |
+| İstehsala hazırlıq | 76 | Bloklayan qüsur yoxdur; qalan şərtlər §9-da (3-cü şərt — dərs yükü qapıları — ARTIQ BAĞLANDI) |
 
 ---
 
@@ -137,9 +136,22 @@
 İstehsalı bloklayan (P0) qüsur yoxdur; auditin tapdığı bütün icazə boşluqları və data korlayan hallar bağlanıb. Buraxılışdan əvvəl **5 şərt**:
 
 1. **Jurnal miqyası (P1-8).** Ən böyük açılış 41.5 MB HTML / 6.3 s verir — real sessiyada brauzer donur. Dərs pəncərəsi üzrə səhifələmə tələb olunur.
-2. **`academic-records` və `analytics` (P2-19 / P2-2).** Keş ilk açılışı xilas etmir; aqreqatlar SQL-ə köçürülməlidir (7 802 tələbənin qiymətləndirməsi Python-da yığılır).
-3. **Dərs yükü biznes qapıları (P2-35/36/37).** 0 saatlıq sətir, dublikat sətir və vizasız təsdiq — semestr başlamazdan əvvəl bağlanmalıdır.
+2. **`academic-records` ilk açılışı (P2-19).** Keş sonrakı açılışları həll edir, İLK açılış hələ 13 s: profil göstərir ki, vaxt Python-dadır — 148 633 yazılış üçün `analytics._evaluate` (~4 s), 969 162 UUID obyekti (~2 s), 203 515 model instansiyası (~1.8 s). Həll: yazılışları model kimi yükləmədən (values/SQL aqreqatı) hesablamaq. *(Analitika bölməsi 06.09-da keşləndi: 7.69 s → 0.11 s.)*
+3. ~~**Dərs yükü biznes qapıları (P2-35/36/37).**~~ ✅ **BAĞLANDI (06.09):** 0 saatlıq sətir göndərilmir, dublikat sətir yaradılmır, dekan təsdiqi koordinator vizası tələb edir (`workload.visa_required`, əhatə qaydası ilə).
 4. **Legacy «Level …» psevdo-qrupları (P2-8).** 72 qrup + 2 «Xaric olunanlar» konteyneri statusa çevrilməli və ya «xidməti» kimi işarələnməlidir; əks halda dekan/RİM siyahılarında əsl akademik qrup kimi görünür.
 5. **Prod başlıqları və a11y minimumu.** HSTS təsdiqlənməli; ən çox işlənən 5 formada (imtahan balı, rol təyinatı, tələbə idxalı, müraciət, yük bölgüsü) label-siz input-lar bağlanmalıdır.
 
-**Tövsiyə edilən ardıcıllıq:** 3 → 4 (semestr məlumatı) → 1 → 2 → 5.
+**Tövsiyə edilən ardıcıllıq:** 4 (semestr məlumatı) → 1 (jurnal miqyası) → 2 → 5.
+
+---
+
+## 10. İkinci dalğa (06 sentyabr) — əlavə düzəlişlər
+
+- **RİM əməkdaşı rolu** (`rim_staff`, səviyyə 60): akademik səthlərin oxusu + imtahan/QA əməlləri; rol vermə, parol/blok, tələbə idxalı və jurnal düzəlişi rəhbərdə qalır.
+- **Kollokvium pəncərələri:** keçmiş bağlanış tarixi və K-sırası pozuntusu rədd olunur.
+- **Qlobal tərcümə səhvi:** Django-nun `"This field is required."` msgid-i AZ kataloqda «Fayl seçilməyib.» idi — bütün formalarda hər boş məcburi sahə yanlış mesaj verirdi.
+- **Performans:** icazə sorğularının deduplikasiyası (bütün bölmələr), müraciətlər kataloq keşi, analitika keşi.
+- **Jurnal:** yapışqan başlıq sətri (555 tələbədə yoxlanıldı), ikiqat «Yadda saxla» qoruması, dərs tipi/saatı validasiyası.
+- **A11y/UX:** 70 `aria-label`, badge kontrastı, yüklənmə skeleti, AI düyməsinin örtməsi.
+- **Audit izi:** parol sıfırlamasında səbəb məcburi; RİM rədd səbəbləri dəqiq.
+
