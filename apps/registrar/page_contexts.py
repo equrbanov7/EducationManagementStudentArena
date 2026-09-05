@@ -24,6 +24,42 @@ def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
 
 
+def attach_kind_labels(offerings) -> None:
+    """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (iki toplu sorğu).
+
+    Ayrıca funksiyadır ki, jurnal siyahısı onu YALNIZ lazım olan dəst üçün
+    çağıra bilsin (səhifə dilimi, ya da `kind` süzgəci seçiləndə tam dəst) —
+    QA 2026-09-05 P2-18.
+    """
+    from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
+    from apps.registrar.schedule import EVENING_START
+
+    offerings = list(offerings)
+    if not offerings:
+        return
+    kind_labels = dict(SlotKind.choices)
+    kind_order = {value: index for index, (value, _) in enumerate(SlotKind.choices)}
+    kinds_by_offering: dict = {}
+    evening_offerings: set = set()
+    for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
+        "offering_id", "kind", "start_time"
+    ):
+        kinds_by_offering.setdefault(offering_id, set()).add(kind)
+        if start_time >= EVENING_START:
+            evening_offerings.add(offering_id)
+    # Köçürülmüş (legacy) açılışların cədvəl slotu YOXDUR — tip yalnız ``Lesson.kind``-dadır.
+    for offering_id, kind in (
+        Lesson.objects.filter(offering__in=offerings).values_list("offering_id", "kind").distinct()
+    ):
+        if kind in kind_labels:
+            kinds_by_offering.setdefault(offering_id, set()).add(kind)
+    for offering in offerings:
+        kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
+        offering.slot_kinds = kinds
+        offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
+        offering.is_evening = offering.id in evening_offerings
+
+
 def journal_list_context(user, request=None) -> dict:
     """The teacher's own offerings — entry points into each journal.
 
@@ -33,8 +69,13 @@ def journal_list_context(user, request=None) -> dict:
     from django.db.models import Count, Q
 
     from apps.registrar import corrections as corrections_service
-    from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
-    from apps.registrar.schedule import EVENING_START
+    from apps.registrar.models import SlotKind
+
+    # `kind` süzgəci seçilibsə etiketlər BÜTÜN dəst üçün lazımdır (süzgəc onlara baxır);
+    # əks halda yalnız görünən səhifə üçün hesablanır (P2-18).
+    selected_kind_requested = bool(
+        request is not None and (request.GET.get("kind") or "").strip() in dict(SlotKind.choices)
+    )
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
     # təşkilatın jurnallarını görür (öz dərsi olmasa da); adi müəllim yalnız özününkünü.
@@ -90,33 +131,12 @@ def journal_list_context(user, request=None) -> dict:
         .order_by("-period__start_date", "subject__code")
     )
 
-    # Cədvəl slotlarından: offering → dərs tip(lər)i + axşam (magistratura) bayrağı.
-    kind_labels = dict(SlotKind.choices)
-    kind_order = {value: index for index, (value, _) in enumerate(SlotKind.choices)}
-    kinds_by_offering: dict = {}
-    evening_offerings: set = set()
-    for offering_id, kind, start_time in ScheduleSlot.objects.filter(offering__in=offerings).values_list(
-        "offering_id", "kind", "start_time"
-    ):
-        kinds_by_offering.setdefault(offering_id, set()).add(kind)
-        if start_time >= EVENING_START:
-            evening_offerings.add(offering_id)
-    # Köçürülmüş (legacy) açılışların cədvəl slotu YOXDUR — tip yalnız ``Lesson.kind``-dadır
-    # (köçürmə 293,070 dərsə mühazirə/seminar/lab yazır).  Tələbə kabineti onsuz da dərsdən
-    # oxuyurdu, jurnal siyahısı isə yalnız slota baxdığı üçün «—» göstərirdi.
-    # ``LessonKind`` dəyərləri ``SlotKind`` ilə eynidir (lecture/seminar/lab); naməlum dəyər
-    # süzülür ki, etiket heç vaxt KeyError verməsin.
-    for offering_id, kind in (
-        Lesson.objects.filter(offering__in=offerings).values_list("offering_id", "kind").distinct()
-    ):
-        if kind in kind_labels:
-            kinds_by_offering.setdefault(offering_id, set()).add(kind)
-    for offering in offerings:
-        # Deterministik sıra: ``SlotKind.choices`` ardıcıllığı (mühazirə → seminar → lab).
-        kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
-        offering.slot_kinds = kinds
-        offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
-        offering.is_evening = offering.id in evening_offerings
+    # Dərs tipi etiketləri (QA 2026-09-05 P2-18): əvvəl BÜTÜN açılışlar üçün
+    # hesablanırdı — İKT görünüşündə 11 124 açılış = 293 min dərs üzərində
+    # DISTINCT sorğusu (0.39 s) + slot sorğusu, halbuki səhifədə cəmi 20 sətir
+    # görünür. İndi yalnız `kind` süzgəci seçiləndə tam dəst hesablanır.
+    if selected_kind_requested:
+        attach_kind_labels(offerings)
 
     periods = sorted({o.period for o in offerings if o.period}, key=lambda p: p.start_date, reverse=True)
     for p in periods:
@@ -246,6 +266,8 @@ def journal_list_context(user, request=None) -> dict:
     paginator = Paginator(offerings, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
+    if not selected_kind_requested:
+        attach_kind_labels(page_obj.object_list)
     querystring = ""
     if request is not None:
         params = request.GET.copy()
