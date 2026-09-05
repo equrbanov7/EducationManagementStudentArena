@@ -64446,3 +64446,167 @@ msgstr "Bu bölməyə icazəniz yoxdur."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "E-poçt"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Telefon"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FİN"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Cins"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Doğum tarixi / yaş"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "yaş"
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Son giriş"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Heç vaxt"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Qeydiyyat"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Üzvlüklər"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "Aktiv üzvlük yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Akademik qeydlər"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "Akademik qeyd yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Tədris"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "Cari dövrdə açılış yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Profil səhifəsi"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Məlumat yüklənmədi."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Kişi"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Qadın"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Göstərilməyib"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Bloklanıb"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Passiv"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "Arxiv"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "Gözləmədə"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Oxuyur"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "Xaric edilib"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Məzun"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Köçürülüb"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Dayandırılıb"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Hesabı dayandır"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Hesabı bərpa et"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Müəllim statusu ver"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Müəllim statusunu çıxar"

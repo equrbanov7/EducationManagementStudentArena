@@ -64631,3 +64631,167 @@ msgstr "You do not have access to this section."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "The requested section does not exist or is not open to your role — you were returned to the home page."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "Email"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Phone"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FIN"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Gender"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Date of birth / age"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "y.o."
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Last sign-in"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Never"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Registered"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Memberships"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "No active membership"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Academic records"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "No academic record"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Admission year"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Teaching"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "No course offering in the current period"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Profile page"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Could not load the data."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Male"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Female"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Not specified"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Blocked"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Inactive"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "Archived"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "Pending"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Enrolled"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Academic leave"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "Expelled"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Graduated"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Transferred"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Suspended"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Suspend account"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Restore account"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Grant teacher status"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Revoke teacher status"

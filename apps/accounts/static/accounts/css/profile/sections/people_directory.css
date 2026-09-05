@@ -223,41 +223,124 @@
     color: var(--ems-text-muted, #5b6472);
 }
 
-.people__modal {
-    position: fixed;
-    inset: 0;
+/* Şəxs kartı (drawer gövdəsi) — konteyner ems_ui overlay.css-dəndir. */
+.people-detail__loading,
+.people-detail__error,
+.people-detail__empty {
+    margin: 0;
+    color: var(--ems-text-muted, #5b6472);
+    font-size: 0.92rem;
+}
+
+.people-detail__error {
+    color: var(--ems-danger-strong, #b91c1c);
+}
+
+.people-detail__identity {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(15, 23, 42, 0.45);
-    z-index: 1050;
-    padding: 16px;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
 }
 
-.people__modal[hidden] {
-    display: none;
+.people-detail__avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.1rem;
+    flex: 0 0 56px;
+    overflow: hidden;
 }
 
-.people__modal-body {
-    background: var(--ems-surface, #ffffff);
-    border-radius: 12px;
-    padding: 20px;
-    max-width: 640px;
+.people-detail__avatar-img {
     width: 100%;
-    max-height: 80vh;
-    overflow-y: auto;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
 }
 
-.people__modal-close {
-    position: absolute;
-    top: 24px;
-    inset-inline-end: 24px;
-    min-height: 44px;
-    padding: 6px 14px;
-    border: 0;
+.people-detail__meta {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.people-detail__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    margin: 12px 0 0;
+}
+
+.people-detail__fact {
+    min-width: 0;
+}
+
+.people-detail__label {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+.people-detail__value {
+    margin: 2px 0 0;
+    font-size: 0.93rem;
+    color: var(--ems-text, #1f2937);
+    overflow-wrap: anywhere;
+}
+
+.people-detail__section {
+    padding-top: 16px;
+}
+
+.people-detail__heading {
+    margin: 0 0 8px;
+    font-size: 0.93rem;
+    font-weight: 800;
+    color: var(--ems-text, #1f2937);
+}
+
+.people-detail__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.people-detail__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-border, #e2e8f0);
     border-radius: 8px;
-    background: var(--ems-surface, #ffffff);
-    cursor: pointer;
+    background: var(--ems-bg-subtle, #f8fafc);
+    font-size: 0.9rem;
+}
+
+.people-detail__cell.is-strong {
+    font-weight: 700;
+    color: var(--ems-text, #1f2937);
+}
+
+.people-detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 20px;
+    margin-top: 16px;
+    border-top: 1px solid var(--ems-border, #e2e8f0);
+}
+
+@media (max-width: 480px) {
+    .people-detail__facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 @media (max-width: 640px) {
