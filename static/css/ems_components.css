@@ -180,3 +180,16 @@ textarea:focus-visible,
     outline: 2px solid var(--ems-primary-600);
     outline-offset: 2px;
 }
+
+/* ── Bootstrap badge kontrastı (QA 2026-09-05 UX-05) ──────────────────────
+   Bootstrap `.badge` mətni #fff-dir; `bg-warning` (#ffc107) və `bg-info`
+   (#0dcaf0) üzərində bu 1.6–1.9:1 verir — AA (4.5) tələbindən çox aşağı.
+   Layihədə 50-yə yaxın belə nişan var; mətni tünd edirik (fon dəyişmir,
+   ona görə status rəngi tanınan qalır). */
+.badge.bg-warning,
+.badge.bg-info,
+.badge.bg-light,
+.badge.bg-warning a,
+.badge.bg-info a {
+    color: var(--ems-neutral-900);
+}
