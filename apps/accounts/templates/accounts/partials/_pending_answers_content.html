@@ -27,7 +27,7 @@
                 value="{{ pending_answers_search_query }}"
                 placeholder="{% trans 'search_placeholder' context 'accounts.pending_answers' %}"
                 class="pr-form-control pending-answers-search-input"
-            >
+             aria-label="{% trans 'search_placeholder' context 'accounts.pending_answers' %}">
 
             <div class="bootstrap-single-select pending-answers-select-wrap">
                 <select name="pending_type"

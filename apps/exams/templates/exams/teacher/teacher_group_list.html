@@ -23,7 +23,7 @@
     <div class="header-actions-toolbar">
       <div class="group-search-box">
         <i class="fas fa-search search-icon-main"></i>
-        <input type="text" id="groupListSearch" placeholder="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}" class="group-search-input">
+        <input type="text" id="groupListSearch" placeholder="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}" class="group-search-input" aria-label="{% trans 'placeholder_search_group_name' context 'exams.template.teacher_group_list' %}">
       </div>
 
       {% if can_create_group %}
@@ -164,7 +164,7 @@
           {% if can_multi_assign_teachers %}
             <div class="search-wrapper mb-2">
               <i class="fas fa-search search-icon"></i>
-              <input type="text" id="teacherSearchInput" class="custom-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
+              <input type="text" id="teacherSearchInput" class="custom-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}" aria-label="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
             </div>
           {% else %}
             <div class="form-text mb-2">{% trans "help_only_one_primary_teacher" context "exams.template.teacher_group_list" %}</div>
@@ -180,7 +180,7 @@
 
           <div class="student-search-wrapper">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}">
+            <input type="text" id="studentSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}" aria-label="{% trans 'placeholder_search_name_or_username' context 'exams.template.teacher_group_list' %}">
           </div>
 
           <div id="studentListContainer" class="student-list-container" role="group" aria-labelledby="group-students-label">
@@ -223,7 +223,7 @@
 
             <div class="student-search-wrapper">
               <i class="fas fa-search search-icon"></i>
-              <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
+              <input type="text" id="assignedTeacherSearchInput" class="student-search-input" placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}" aria-label="{% trans 'placeholder_search_teacher' context 'exams.template.teacher_group_list' %}">
             </div>
 
             <div id="assignedTeacherListContainer" class="student-list-container" role="group" aria-labelledby="group-assigned-teachers-label">

@@ -42,7 +42,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     </div>
                     {% else %}
                     <input type="text" name="lesson_topic" maxlength="255" data-jd-lesson-topic
-                           placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
+                           placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}" aria-label="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
                     <small class="jd-field-hint">{% trans "Təsdiqlənmiş sillabus və kurs mövzu planı yoxdur — mövzunu əl ilə yazın." context "registrar.journal" %}</small>
                     {% endif %}
                 </div>
@@ -157,7 +157,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "QEYD (məcburi)" context "registrar.journal" %}</span>
                         <textarea name="correction_note" rows="2" data-jd-corr-note
-                                  placeholder="{% trans 'Düzəlişin izahı…' context 'registrar.journal' %}"></textarea>
+                                  placeholder="{% trans 'Düzəlişin izahı…' context 'registrar.journal' %}" aria-label="{% trans 'Düzəlişin izahı…' context 'registrar.journal' %}"></textarea>
                     </div>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "SƏNƏD — PDF (məcburi)" context "registrar.journal" %}</span>

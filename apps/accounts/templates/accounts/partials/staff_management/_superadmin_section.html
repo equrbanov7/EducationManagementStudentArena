@@ -22,7 +22,7 @@
                    placeholder="{% trans 'Search organizations...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search organizations...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -102,7 +102,7 @@
                                     <i class="fas fa-check"></i> {% trans "Approve" context "staff.management" %}
                                 </button>
                                 <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}">
+                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}" aria-label="{% trans 'Reject reason (optional)' context 'staff.management' %}">
                                     <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
                                         <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
                                     </button>
@@ -112,7 +112,7 @@
                             <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">{% trans "Unsuspend" context "staff.management" %}</button>
                             {% else %}
                             <div class="d-flex flex-column gap-2">
-                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}">
+                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}" aria-label="{% trans 'Suspension reason' context 'staff.management' %}">
                                 <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "Suspend" context "staff.management" %}</button>
                             </div>
                             {% endif %}

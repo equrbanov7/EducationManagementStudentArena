@@ -23,7 +23,7 @@
 
         <div class="section-card">
             <form method="get" class="search-form">
-                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}" class="form-control">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}" class="form-control" aria-label="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>
         </div>
@@ -97,7 +97,7 @@
                        placeholder="{% trans 'modal_code_placeholder' context 'accounts.assigned_exams_page' %}"
                        autocomplete="off"
                        inputmode="numeric"
-                       required>
+                       required aria-label="{% trans 'modal_code_placeholder' context 'accounts.assigned_exams_page' %}">
                 <div id="exam-code-error" class="assigned-exams-2" hidden></div>
             </div>
             <div class="exam-code-actions">

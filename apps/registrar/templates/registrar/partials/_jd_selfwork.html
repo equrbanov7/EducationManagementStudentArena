@@ -37,7 +37,7 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
             {% csrf_token %}
             <input type="hidden" name="action" value="add_topic">
             <input type="text" name="topic_title" maxlength="255"
-                   placeholder="{% trans 'Yeni mövzu daxil edin…' context 'registrar.journal' %}">
+                   placeholder="{% trans 'Yeni mövzu daxil edin…' context 'registrar.journal' %}" aria-label="{% trans 'Yeni mövzu daxil edin…' context 'registrar.journal' %}">
             <button type="submit" class="jd-sw2-add-btn" aria-label="{% trans 'Əlavə et' context 'registrar.journal' %}"><i class="fas fa-plus"></i></button>
         </form>
         {% endif %}
