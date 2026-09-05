@@ -139,10 +139,13 @@
 }
 
 /* ── Yadda saxla paneli (sticky) ─────────────────────────────────────────── */
+/* z-index 45 — AI köməkçi FAB-ından (static/css/ai_assistant.css, QA UX-07
+   düzəlişindən sonra z-index:40) yuxarıda saxlanılır ki, "Yadda saxla" düyməsi
+   sağ-alt küncdə FAB-ın altında qalıb basıla bilməz vəziyyətə düşməsin. */
 .jd-save-bar {
     position: sticky;
     bottom: 0;
-    z-index: 5;
+    z-index: 45;
     display: flex;
     align-items: center;
     justify-content: flex-end;

@@ -7,12 +7,12 @@
     box-sizing: border-box;
 }
 
-/* Floating button */
+/* Floating button — QA UX-07: z-index 9998 → 40 (sticky başlığı basırdı; modal 1000+ toxunulmur). */
 .ai-bot-btn {
     position: fixed;
     right: 24px;
     bottom: 24px;
-    z-index: 9998;
+    z-index: 40;
     width: 70px;
     height: 70px;
     padding: 0;
@@ -47,7 +47,7 @@
     position: fixed;
     right: 102px;
     bottom: 42px;
-    z-index: 9997;
+    z-index: 39;
     padding: 8px 14px;
     border-radius: 12px;
     background: var(--ems-neutral-0);

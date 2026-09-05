@@ -135,21 +135,27 @@
     border-radius: 5px; padding: 2px 6px; margin-left: 6px; white-space: nowrap;
 }
 .jd2-gridcol { overflow: hidden; }
-/* Bütün tələbələr tam görünsün — DAXİLİ şaquli scroll YOX (səhifə özü sürüşür);
-   yalnız tarix sütunları üçün üfüqi scroll qalır. (journal_detail.css-dəki
-   köhnə max-height:68vh burada ləğv olunur — bu fayl sonra yüklənir.) */
-.jd2-grid-wrap { overflow-x: auto; overflow-y: hidden; max-height: none; }
+/* QA UX-06 (2026-09): 500+ tələbəli qruplarda başlıq sətri (dərs tarixləri)
+   səhifə-scroll ilə birlikdə itirdi — hansı sütunun hansı dərs olduğunu
+   itirmək asan idi. DAXİLİ şaquli scroll + sticky başlıq bərpa olunur (əvvəlki
+   "hamısı bir səhifədə görünsün" qərarı ləğv edilir); üfüqi scroll saxlanılır. */
+.jd2-grid-wrap { overflow-x: auto; overflow-y: auto; max-height: 65vh; }
 
 /* ── Grid cədvəli ───────────────────────────────────────────────────────── */
 .jd2-table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 12.5px; }
 .jd2-table thead th {
     background: var(--j-headbg); color: var(--j-muted);
     padding: 10px 6px; font-size: 10.5px; font-weight: 800; text-align: center;
+    position: sticky; top: 0; z-index: 3;
+    box-shadow: inset 0 -1px 0 var(--j-line);
 }
 .jd2-th-student {
     text-align: left !important; padding-left: 16px !important; min-width: 210px;
-    position: sticky; left: 0; background: var(--j-headbg); z-index: 3;
-    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18);
+    /* z-index !important — tək-class seçici `.jd2-table thead th`-dan (tip
+       seçicilər hesabına daha spesifik) zəifdir; !important olmasa bu künc
+       xana adi başlıq xanaları ilə eyni z-index-ə (3) düşür (QA UX-06). */
+    position: sticky; left: 0; top: 0; background: var(--j-headbg); z-index: 4 !important;
+    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18), inset 0 -1px 0 var(--j-line);
 }
 .jd2-th-lesson.is-today { background: #dbeafe; color: #1d4ed8; }
 .jd2-th-today { font-weight: 800; }

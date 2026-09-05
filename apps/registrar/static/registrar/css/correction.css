@@ -100,7 +100,11 @@
 /* Müəllim grid: redaktə vaxtı keçmiş tarix başlığı klik-edilə bilən (gün özəti). */
 .jd2-th-date-btn { background: none; border: none; cursor: pointer; font: inherit; color: #2563eb; padding: 0; text-decoration: underline dotted; }
 .jd2-th-date-btn:hover { color: #1d4ed8; }
-.jd2-th-lesson--locked { opacity: 0.95; }
+/* opacity:0.95 SİLİNDİ (QA UX-06) — bu başlıq xanası indi sticky (jd2.css)
+   olduğu üçün <1 opacity onu bir az şəffaf edib, altından sürüşən sətrin
+   məzmununu (~5%) görünən edirdi ("xəyal sətir"). Fərq elə də hiss olunmurdu,
+   ona görə effekt sadəcə çıxarılır — opaklıq indi tam saxlanılır. */
+.jd2-th-lesson--locked { opacity: 1; }
 .jd-day-stat { background: #f5f8ff; border: 1px solid #e2e8f5; border-radius: 8px; padding: 8px 10px; font-size: 0.85rem; color: #33415c; }
 .jd-day-stat b { color: #0f2a5e; font-size: 1.05rem; }
 /* Gün özəti modal gövdəsi (journal_detail #jdDayModal) — köhnə inline style-lardan. */
