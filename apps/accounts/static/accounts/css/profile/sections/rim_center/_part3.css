@@ -1,0 +1,520 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RİM mərkəzi — 3/3: «Yeni hesab» axını (növ seçimi, tək-tək form, toplu idxal).
+
+   Dialoq ÇƏRÇİVƏSİ ortaq komponentdəndir (`css/ems_ui/overlay.css` +
+   `controls.css` + `validation.css`); bu fayl yalnız RİM-ə xas MƏZMUNU
+   üslublaşdırır. Layihə AÇIQ (light-only) temadadır — `prefers-color-scheme`
+   QƏSDƏN yoxdur; rənglər `static/css/design-tokens.css`-dəki --ems-* tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Bölmə başlığındakı yeganə giriş nöqtəsi ───────────────────────────── */
+
+.rim-head__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+}
+
+.rim-head__cta {
+    flex: none;
+}
+
+/* ── 1. Növ seçimi (üç kart) ───────────────────────────────────────────── */
+
+.rimc-choices {
+    display: grid;
+    gap: var(--ems-sp-4);
+}
+
+.rimc-choice {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 14px 16px;
+    text-align: start;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.rimc-choice:hover {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+}
+
+.rimc-choice:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.rimc-choice__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex: none;
+    font-size: 1.05rem;
+    border-radius: var(--ems-r-lg);
+}
+
+.rimc-choice__icon--student {
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
+}
+
+.rimc-choice__icon--teacher {
+    color: var(--ems-success-700);
+    background: var(--ems-success-100);
+}
+
+.rimc-choice__icon--bulk {
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+}
+
+.rimc-choice__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.rimc-choice__title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.rimc-choice__note {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+    text-wrap: pretty;
+}
+
+.rimc-choice__go {
+    margin-inline-start: auto;
+    flex: none;
+    color: var(--ems-neutral-500);
+}
+
+/* ── 2. Tək-tək form ───────────────────────────────────────────────────── */
+
+/* ⚠️ `.ems-dialog` şaquli FLEX konteynerdir və `__body`-nin sürüşməsi,
+   `__foot`-un isə dibə yapışması buna söykənir. Yaratma/redaktə dialoqlarında
+   arada bir `<form>` durur (düymə formanın İÇİNDƏ olmalıdır — bax
+   `partials/ems_ui/_form_dialog.html`), yəni flex zənciri qırılır: uzun form
+   `max-height`-ı aşır və altlıq (düymələr) kəsilir. Forma da flex sütun
+   edilir — zəncir bərpa olunur.
+
+   Qayda QƏSDƏN `.rimc` altına daraldılıb: eyni nöqsan ortaq `_form_dialog` /
+   `_reason_dialog` şablonlarında da var, amma ortaq `ems_ui/overlay.css`
+   paralel işlərdə istifadə olunur — onu bu tapşırıqda dəyişmirik. */
+.rimc .ems-dialog > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.rimc-group {
+    margin: 0 0 var(--ems-sp-6);
+    padding: 0;
+    border: 0;
+}
+
+.rimc-group__legend {
+    padding: 0 0 var(--ems-sp-4);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rimc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.rimc-mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+/* Sahə xətası: mesaj sahənin ALTINDA, kontur qırmızı (handoff §7). */
+.rimc [data-rimc-error]:not([hidden]) {
+    margin-top: 5px;
+}
+
+.rimc .ems-input[aria-invalid="true"],
+.rimc .ems-select[aria-invalid="true"] {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-100);
+}
+
+/* ── Axtarışlı seçici (766 qrupluq tenant üçün) ────────────────────────── */
+
+.rimc-combo {
+    position: relative;
+}
+
+.rimc-combo__list {
+    position: absolute;
+    z-index: 3;
+    inset-inline: 0;
+    top: calc(100% - 34px);
+    max-height: 240px;
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    list-style: none;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+}
+
+.rimc-combo__list[hidden] {
+    display: none;
+}
+
+.rimc-combo__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: var(--ems-r-sm);
+    cursor: pointer;
+}
+
+.rimc-combo__item:hover,
+.rimc-combo__item.is-active {
+    background: var(--ems-primary-50);
+}
+
+.rimc-combo__item[aria-selected="true"] {
+    font-weight: 700;
+}
+
+.rimc-combo__text {
+    font-size: 0.9rem;
+    color: var(--ems-neutral-900);
+}
+
+.rimc-combo__hint {
+    font-size: 0.78rem;
+    color: var(--ems-neutral-500);
+}
+
+.rimc-combo__empty {
+    padding: 10px;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+}
+
+/* ── 3. Uğur vəziyyəti (birdəfəlik parol) ──────────────────────────────── */
+
+.rimc-done {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+}
+
+.rimc-cred {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    margin: 0;
+    padding: 14px 16px;
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+}
+
+.rimc-cred__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+}
+
+.rimc-cred__row dt {
+    flex: 0 0 140px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.rimc-cred__row dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    margin: 0;
+    min-width: 0;
+}
+
+.rimc-cred__value {
+    padding: 7px 12px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 1rem;
+    color: var(--ems-neutral-900);
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+    word-break: break-all;
+}
+
+.rimc-cred__value--key {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    color: var(--ems-primary-700);
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.rimc-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    margin: 0;
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    font-weight: 600;
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-lg);
+    text-wrap: pretty;
+}
+
+.rimc-notes {
+    margin: 0;
+    padding-inline-start: 20px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--ems-neutral-600);
+}
+
+/* ── 4. Toplu idxal ────────────────────────────────────────────────────── */
+
+.rimc-bulk__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.rimc-drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 26px 18px;
+    text-align: center;
+    background: var(--ems-primary-50);
+    border: 2px dashed var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    cursor: pointer;
+}
+
+.rimc-drop.is-over {
+    background: var(--ems-primary-100);
+    border-color: var(--ems-primary-600);
+}
+
+.rimc-drop.is-filled {
+    background: var(--ems-success-100);
+    border-style: solid;
+    border-color: var(--ems-success-bd);
+}
+
+/* Fayl seçicisi görünmür, amma FOKUSLANA bilir (klaviatura ilə açılır). */
+.rimc-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.rimc-drop__input:focus-visible + .rimc-drop__icon {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 4px;
+    border-radius: var(--ems-r-sm);
+}
+
+.rimc-drop__icon {
+    font-size: 1.5rem;
+    color: var(--ems-primary-600);
+}
+
+.rimc-drop.is-filled .rimc-drop__icon {
+    color: var(--ems-success-600);
+}
+
+.rimc-drop__title {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    word-break: break-all;
+}
+
+.rimc-drop__hint {
+    font-size: 0.8rem;
+    color: var(--ems-neutral-600);
+}
+
+.rimc-bulk__result {
+    margin-top: var(--ems-sp-6);
+}
+
+.rimc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: var(--ems-sp-5);
+}
+
+.rimc-chip {
+    padding: 4px 11px;
+    font-size: 0.79rem;
+    font-weight: 700;
+    border-radius: var(--ems-r-pill);
+    border: 1px solid transparent;
+}
+
+.rimc-chip--info {
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+}
+
+.rimc-chip--ok {
+    color: var(--ems-success-700);
+    background: var(--ems-success-100);
+    border-color: var(--ems-success-bd);
+}
+
+.rimc-chip--warn {
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+    border-color: var(--ems-warning-bd);
+}
+
+.rimc-chip--danger {
+    color: var(--ems-danger-strong);
+    background: var(--ems-danger-100);
+    border-color: var(--ems-danger-bd);
+}
+
+.rimc-table__wrap {
+    max-height: 320px;
+    overflow: auto;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg);
+}
+
+.rimc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.rimc-table th,
+.rimc-table td {
+    padding: 8px 10px;
+    text-align: start;
+    vertical-align: top;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.rimc-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+    background: var(--ems-neutral-50);
+}
+
+.rimc-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.rimc-status {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rimc-status--ok {
+    color: var(--ems-success-700);
+}
+
+.rimc-status--info {
+    color: var(--ems-primary-700);
+}
+
+.rimc-status--warn {
+    color: var(--ems-warning-800);
+}
+
+.rimc-status--danger {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Yüklənmə vəziyyəti ────────────────────────────────────────────────── */
+
+.rimc [aria-busy="true"] {
+    cursor: progress;
+}
+
+.rimc [aria-busy="true"] .rimc-grid {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ── Mobil (kabinet bölməsi 375 px-də də işlək olmalıdır) ──────────────── */
+
+@media (max-width: 640px) {
+    .rim-head__bar {
+        align-items: stretch;
+    }
+
+    .rim-head__cta {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .rimc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rimc-cred__row dt {
+        flex-basis: 100%;
+    }
+
+    .rimc-choice {
+        align-items: flex-start;
+    }
+
+    .rimc-choice__go {
+        display: none;
+    }
+
+    .rimc-table__wrap {
+        max-height: 260px;
+    }
+}

@@ -36,6 +36,7 @@ from core.constants import OrgUnitType
 from core.validators import validate_fin
 
 from ...identity import canonical_identity
+from . import create
 
 _CTX = "student_intake"
 
@@ -273,15 +274,9 @@ class IntakeContext:
         return self._curricula[cache_key]
 
     def claim_username(self, base: str) -> str:
-        candidate = base
-        suffix = 1
-        while (
-            candidate in self.seen_usernames
-            or User.objects.filter(username__iexact=candidate).exists()
-            or User.objects.filter(email__iexact=candidate).exists()
-        ):
-            suffix += 1
-            candidate = "%s.%d" % (base, suffix)
+        # Unikallıq məntiqi ORTAQ nüvədədir (`create.claim_username`) — RİM-in
+        # tək-tək yaratma səthi eyni funksiyanı çağırır, drift olmur.
+        candidate = create.claim_username(base, taken=self.seen_usernames)
         self.seen_usernames.add(candidate)
         return candidate
 
@@ -470,20 +465,8 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
     if code:
         context.existing_codes.add(code)
 
-    base = (
-        "%s.%s" % (USERNAME_PREFIX, _key(code).replace(" ", ""))
-        if code
-        else "%s.fin.%s"
-        % (
-            USERNAME_PREFIX,
-            plan.fin.lower(),
-        )
-    )
-    base = "".join(ch for ch in base if ch.isalnum() or ch in "._-")[:140] or "%s.fin.%s" % (
-        USERNAME_PREFIX,
-        plan.fin.lower(),
-    )
-    plan.username = context.claim_username(base)
+    # Ad şablonu ORTAQ nüvədədir (`create.username_base`) — «st.<kod>» / «st.fin.<fin>».
+    plan.username = context.claim_username(create.username_base(create.KIND_STUDENT, code=code, fin=plan.fin))
 
     email = _text(row.get("email"))
     placeholder = "intake.%s@%s" % (plan.fin.lower(), PLACEHOLDER_DOMAIN)
@@ -573,11 +556,24 @@ def summarize(plans) -> dict:
     }
 
 
+# ── PAYLAŞILAN NORMALLAŞDIRMA (RİM «tək-tək hesab yarat» səthi üçün) ────────
+#
+# Bu üç funksiya faylın sətirlərini normallaşdıran qaydalardır. RİM mərkəzinin
+# tək-tək yaratma formu MƏHZ ONLARI çağırır ki, «toplu idxalda keçən dəyər
+# formada keçməsin» kimi drift yaranmasın. Adlar public alias-dır; məntiq
+# yuxarıdakı tək implementasiyadadır.
+normalize_text = _text
+parse_birth_date = _parse_date
+parse_gender = _parse_gender
+
 __all__ = [
     "PLACEHOLDER_DOMAIN",
     "USERNAME_PREFIX",
     "IntakeContext",
     "RowPlan",
     "build_plans",
+    "normalize_text",
+    "parse_birth_date",
+    "parse_gender",
     "summarize",
 ]

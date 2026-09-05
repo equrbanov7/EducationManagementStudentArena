@@ -1,0 +1,380 @@
+{% load i18n %}
+{% comment %}
+«Yeni hesab» — RİM mərkəzinin yaratma axını (tək-tək + toplu).
+
+NİYƏ PANELİN İÇİNDƏ? AJAX swap yalnız [data-profile-section-panel] elementini
+götürür; kənarda qalan dialoq swap-dan sonra itərdi
+(bax docs/frontend/AJAX_SAFE_JS_PATTERN.md).
+
+Dialoq davranışı (fokus tələsi, Escape, scrim, fokusun qayıtması) ORTAQ
+qatdadır — `static/js/ems_ui/overlay.js`; bu fayl YALNIZ markup-dır və
+`templates/partials/ems_ui/_dialog.html` ilə eyni quruluşu daşıyır.
+
+CSP: inline <style>/<script> YOXDUR. Dinamik dəyərlər `data-*` atributlarında,
+JS-in ehtiyacı olan mətnlər isə aşağıdakı JSON blokundadır (xarici .js faylı
+Django şablon mühərrikindən keçmir).
+{% endcomment %}
+
+<div class="rimc"
+     data-rimc-root
+     data-create-url="{{ rim_center_section.create_url }}"
+     data-catalog-url="{{ rim_center_section.create_catalog_url }}"
+     data-template-url="{{ rim_center_section.intake_template_url }}"
+     data-preview-url="{{ rim_center_section.intake_preview_url }}"
+     data-apply-url="{{ rim_center_section.intake_apply_url }}"
+     data-max-note="{{ rim_center_section.max_note_length }}">
+
+  {# ── 1. Növ seçimi ───────────────────────────────────────────────────── #}
+  <div class="ems-overlay ems-overlay--dialog" id="rimc-chooser" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="rimc-chooser-title">
+      <div class="ems-dialog__head">
+        <div>
+          <h2 class="ems-dialog__title" id="rimc-chooser-title">{% trans "Yeni hesab yaradın" context "profile.rim" %}</h2>
+          <p class="ems-dialog__sub">{% trans "Hansı hesab növünü yaradırsınız?" context "profile.rim" %}</p>
+        </div>
+        <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+      </div>
+      <div class="ems-dialog__body">
+        <div class="rimc-choices">
+          <button type="button" class="rimc-choice" data-rimc-open="student">
+            <span class="rimc-choice__icon rimc-choice__icon--student" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
+            <span class="rimc-choice__text">
+              <span class="rimc-choice__title">{% trans "Tələbə" context "profile.rim" %}</span>
+              <span class="rimc-choice__note">{% trans "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə." context "profile.rim" %}</span>
+            </span>
+            <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="rimc-choice" data-rimc-open="teacher">
+            <span class="rimc-choice__icon rimc-choice__icon--teacher" aria-hidden="true"><i class="fas fa-chalkboard-user"></i></span>
+            <span class="rimc-choice__text">
+              <span class="rimc-choice__title">{% trans "Müəllim" context "profile.rim" %}</span>
+              <span class="rimc-choice__note">{% trans "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)." context "profile.rim" %}</span>
+            </span>
+            <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="rimc-choice" data-rimc-open="bulk">
+            <span class="rimc-choice__icon rimc-choice__icon--bulk" aria-hidden="true"><i class="fas fa-file-arrow-up"></i></span>
+            <span class="rimc-choice__text">
+              <span class="rimc-choice__title">{% trans "Toplu idxal (tələbə siyahısı)" context "profile.rim" %}</span>
+              <span class="rimc-choice__note">{% blocktrans context "profile.rim" with limit=rim_center_section.intake_max_rows %}Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox {{ limit }} sətir.{% endblocktrans %}</span>
+            </span>
+            <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+      <div class="ems-dialog__foot">
+        <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "profile.rim" %}</button>
+      </div>
+    </div>
+  </div>
+
+  {# ── 2. Tək-tək form ─────────────────────────────────────────────────── #}
+  <div class="ems-overlay ems-overlay--dialog" id="rimc-form" hidden data-ems-static="true">
+    <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="rimc-form-title">
+      <form data-rimc-form novalidate>
+        <div class="ems-dialog__head">
+          <div>
+            <h2 class="ems-dialog__title" id="rimc-form-title" data-rimc-title>{% trans "Yeni tələbə hesabı" context "profile.rim" %}</h2>
+            <p class="ems-dialog__sub" data-rimc-subtitle>{% trans "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür." context "profile.rim" %}</p>
+          </div>
+          <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                  aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+        </div>
+
+        <div class="ems-dialog__body" data-rimc-body>
+          <p class="ems-msg ems-msg--error" data-rimc-form-error role="alert" hidden></p>
+
+          {# ── Şəxsi məlumat ── #}
+          <fieldset class="rimc-group">
+            <legend class="rimc-group__legend">{% trans "Şəxsi məlumat" context "profile.rim" %}</legend>
+            <div class="rimc-grid">
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-fin">
+                  {% trans "FİN" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <input class="ems-input rimc-mono" id="rimc-fin" type="text" name="fin" required
+                       maxlength="7" autocomplete="off" spellcheck="false"
+                       data-rimc-field="fin" aria-describedby="rimc-fin-hint">
+                <p class="ems-field__hint" id="rimc-fin-hint">{% trans "7 simvol, yalnız A–Z və 0–9." context "profile.rim" %}</p>
+                <p class="ems-msg ems-msg--error" data-rimc-error="fin" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-first-name">
+                  {% trans "Ad" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <input class="ems-input" id="rimc-first-name" type="text" name="first_name" required
+                       maxlength="150" autocomplete="off" data-rimc-field="first_name">
+                <p class="ems-msg ems-msg--error" data-rimc-error="first_name" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-last-name">
+                  {% trans "Soyad" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <input class="ems-input" id="rimc-last-name" type="text" name="last_name" required
+                       maxlength="150" autocomplete="off" data-rimc-field="last_name">
+                <p class="ems-msg ems-msg--error" data-rimc-error="last_name" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-patronymic">{% trans "Ata adı" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-patronymic" type="text" name="patronymic"
+                       maxlength="150" autocomplete="off" data-rimc-field="patronymic">
+                <p class="ems-msg ems-msg--error" data-rimc-error="patronymic" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-birth-date">
+                  {% trans "Doğum tarixi" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <input class="ems-input" id="rimc-birth-date" type="date" name="birth_date" required
+                       data-rimc-field="birth_date">
+                <p class="ems-msg ems-msg--error" data-rimc-error="birth_date" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-gender">{% trans "Cins" context "profile.rim" %}</label>
+                <select class="ems-select" id="rimc-gender" name="gender" data-rimc-field="gender">
+                  <option value="">{% trans "Təyin edilməyib" context "profile.rim" %}</option>
+                  <option value="kişi">{% trans "Kişi" context "profile.rim" %}</option>
+                  <option value="qadın">{% trans "Qadın" context "profile.rim" %}</option>
+                </select>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-email">{% trans "E-poçt" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-email" type="email" name="email"
+                       autocomplete="off" data-rimc-field="email" aria-describedby="rimc-email-hint">
+                <p class="ems-field__hint" id="rimc-email-hint">{% trans "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir." context "profile.rim" %}</p>
+                <p class="ems-msg ems-msg--error" data-rimc-error="email" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-phone">{% trans "Telefon" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-phone" type="tel" name="phone" maxlength="20"
+                       autocomplete="off" data-rimc-field="phone">
+                <p class="ems-msg ems-msg--error" data-rimc-error="phone" role="alert" hidden></p>
+              </div>
+            </div>
+          </fieldset>
+
+          {# ── Təşkilat ── #}
+          <fieldset class="rimc-group">
+            <legend class="rimc-group__legend">{% trans "Təşkilatdakı yeri" context "profile.rim" %}</legend>
+            <div class="rimc-grid">
+              <div class="ems-field rimc-combo" data-rimc-only="student" data-rimc-combo="group">
+                <label class="ems-field__label" for="rimc-group">
+                  {% trans "Qrup" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <input class="ems-input" id="rimc-group" type="text" role="combobox" autocomplete="off"
+                       aria-expanded="false" aria-autocomplete="list" aria-controls="rimc-group-list"
+                       placeholder="{% trans 'Qrupun adını və ya kodunu yazın' context 'profile.rim' %}"
+                       data-rimc-combo-input aria-describedby="rimc-group-hint">
+                <input type="hidden" name="group" data-rimc-field="group" data-rimc-combo-value>
+                <ul class="rimc-combo__list" id="rimc-group-list" role="listbox"
+                    aria-label="{% trans 'Qrup nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
+                <p class="ems-field__hint" id="rimc-group-hint" data-rimc-combo-hint>{% trans "Axtarmaq üçün ən azı 1 simvol yazın." context "profile.rim" %}</p>
+                <p class="ems-msg ems-msg--error" data-rimc-error="group" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-admission-year">
+                  {% trans "Qəbul ili" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                </label>
+                <select class="ems-select" id="rimc-admission-year" name="admission_year" required
+                        data-rimc-field="admission_year">
+                  {% for year in rim_center_section.admission_years %}
+                    <option value="{{ year }}"{% if forloop.counter == 2 %} selected{% endif %}>{{ year }}</option>
+                  {% endfor %}
+                </select>
+                <p class="ems-msg ems-msg--error" data-rimc-error="admission_year" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field rimc-combo" data-rimc-only="teacher" data-rimc-combo="unit">
+                <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-unit" type="text" role="combobox" autocomplete="off"
+                       aria-expanded="false" aria-autocomplete="list" aria-controls="rimc-unit-list"
+                       placeholder="{% trans 'Kafedranın adını yazın' context 'profile.rim' %}"
+                       data-rimc-combo-input aria-describedby="rimc-unit-hint">
+                <input type="hidden" name="unit" data-rimc-field="unit" data-rimc-combo-value>
+                <ul class="rimc-combo__list" id="rimc-unit-list" role="listbox"
+                    aria-label="{% trans 'Kafedra nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
+                <p class="ems-field__hint" id="rimc-unit-hint" data-rimc-combo-hint>{% trans "Boş qala bilər — kafedra sonradan da təyin edilə bilər." context "profile.rim" %}</p>
+                <p class="ems-msg ems-msg--error" data-rimc-error="unit" role="alert" hidden></p>
+              </div>
+
+              <div class="ems-field">
+                <label class="ems-field__label" for="rimc-code" data-rimc-code-label>{% trans "Tələbə kodu" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-code" type="text" name="code" maxlength="50"
+                       autocomplete="off" data-rimc-field="code" aria-describedby="rimc-code-hint">
+                <p class="ems-field__hint" id="rimc-code-hint">{% trans "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur." context "profile.rim" %}</p>
+                <p class="ems-msg ems-msg--error" data-rimc-error="code" role="alert" hidden></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="ems-field">
+            <label class="ems-field__label" for="rimc-note">{% trans "Qeyd (audit üçün)" context "profile.rim" %}</label>
+            <textarea class="ems-textarea" id="rimc-note" name="note" rows="2"
+                      maxlength="{{ rim_center_section.max_note_length }}"
+                      placeholder="{% trans 'Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…' context 'profile.rim' %}"
+                      data-rimc-note></textarea>
+          </div>
+        </div>
+
+        {# ── Uğur vəziyyəti (form əvəzinə göstərilir) ── #}
+        <div class="ems-dialog__body rimc-done" data-rimc-done hidden>
+          <p class="ems-msg ems-msg--success" role="status">
+            <span class="ems-msg__icon" aria-hidden="true">✓</span>
+            <span data-rimc-done-title>{% trans "Hesab yaradıldı." context "profile.rim" %}</span>
+          </p>
+
+          <dl class="rimc-cred">
+            <div class="rimc-cred__row">
+              <dt>{% trans "İstifadəçi adı" context "profile.rim" %}</dt>
+              <dd>
+                <code class="rimc-cred__value" data-rimc-done-username></code>
+                <button type="button" class="ems-btn ems-btn--sm" data-rimc-copy="username">
+                  <i class="fas fa-copy" aria-hidden="true"></i> {% trans "Kopyala" context "profile.rim" %}
+                </button>
+              </dd>
+            </div>
+            <div class="rimc-cred__row">
+              <dt>{% trans "Birdəfəlik parol" context "profile.rim" %}</dt>
+              <dd>
+                <code class="rimc-cred__value rimc-cred__value--key" data-rimc-done-password></code>
+                <button type="button" class="ems-btn ems-btn--sm" data-rimc-copy="password">
+                  <i class="fas fa-copy" aria-hidden="true"></i> {% trans "Kopyala" context "profile.rim" %}
+                </button>
+              </dd>
+            </div>
+          </dl>
+
+          <p class="rimc-warn">
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            {% trans "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın." context "profile.rim" %}
+          </p>
+          <ul class="rimc-notes" data-rimc-done-warnings hidden></ul>
+          <p class="ems-field__hint">
+            {% trans "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək." context "profile.rim" %}
+          </p>
+        </div>
+
+        <div class="ems-dialog__foot">
+          <button type="button" class="ems-btn" data-ems-overlay-close data-rimc-cancel>{% trans "Ləğv et" context "profile.rim" %}</button>
+          <button type="button" class="ems-btn" data-rimc-again hidden>{% trans "Daha bir hesab yarat" context "profile.rim" %}</button>
+          <button type="submit" class="ems-btn ems-btn--primary" data-rimc-submit disabled aria-disabled="true">
+            {% trans "Hesabı yarat" context "profile.rim" %}
+          </button>
+          <button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-close data-rimc-done-close hidden>
+            {% trans "Bağla" context "profile.rim" %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ── 3. Toplu idxal ──────────────────────────────────────────────────── #}
+  <div class="ems-overlay ems-overlay--dialog" id="rimc-bulk" hidden data-ems-static="true">
+    <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="rimc-bulk-title">
+      <div class="ems-dialog__head">
+        <div>
+          <h2 class="ems-dialog__title" id="rimc-bulk-title">{% trans "Toplu idxal — tələbə siyahısı" context "profile.rim" %}</h2>
+          <p class="ems-dialog__sub">{% trans "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir." context "profile.rim" %}</p>
+        </div>
+        <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+      </div>
+
+      <div class="ems-dialog__body">
+        <p class="ems-msg ems-msg--error" data-rimb-error role="alert" hidden></p>
+
+        <div class="rimc-bulk__top">
+          <a class="ems-btn" href="{{ rim_center_section.intake_template_url }}" download>
+            <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
+            {% trans "Boş şablonu endir" context "profile.rim" %}
+          </a>
+          <span class="ems-field__hint">
+            {% blocktrans context "profile.rim" with limit=rim_center_section.intake_max_rows size=rim_center_section.intake_max_upload_mb %}Sütunların sırası sərbəstdir. Ən çox {{ limit }} sətir, {{ size }} MB.{% endblocktrans %}
+          </span>
+        </div>
+
+        <label class="rimc-drop" data-rimb-drop>
+          <input type="file" class="rimc-drop__input" accept=".xlsx,.xlsm,.csv" data-rimb-file
+                 aria-describedby="rimc-drop-hint">
+          <i class="fas fa-cloud-arrow-up rimc-drop__icon" aria-hidden="true"></i>
+          <span class="rimc-drop__title" data-rimb-file-label>{% trans "Faylı bura sürüşdürün və ya seçmək üçün klikləyin" context "profile.rim" %}</span>
+          <span class="rimc-drop__hint" id="rimc-drop-hint">{% trans ".xlsx, .xlsm və ya .csv" context "profile.rim" %}</span>
+        </label>
+
+        <div class="rimc-bulk__result" data-rimb-result hidden>
+          <div class="rimc-chips" data-rimb-counts></div>
+          <div class="rimc-table__wrap">
+            <table class="rimc-table">
+              <caption class="rim-visually-hidden" data-rimb-caption>{% trans "Quru icra nəticəsi" context "profile.rim" %}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{% trans "Sətir" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "Vəziyyət" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "FİN" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "Ad, soyad" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "Qrup" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "İstifadəçi adı" context "profile.rim" %}</th>
+                  <th scope="col">{% trans "İzah" context "profile.rim" %}</th>
+                </tr>
+              </thead>
+              <tbody data-rimb-rows></tbody>
+            </table>
+          </div>
+          <p class="rimc-warn" data-rimb-note hidden>
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            {% trans "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın." context "profile.rim" %}
+          </p>
+        </div>
+      </div>
+
+      <div class="ems-dialog__foot">
+        <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "profile.rim" %}</button>
+        <button type="button" class="ems-btn" data-rimb-download hidden>
+          <i class="fas fa-key" aria-hidden="true"></i> {% trans "Parolları CSV kimi endir" context "profile.rim" %}
+        </button>
+        <button type="button" class="ems-btn ems-btn--primary" data-rimb-preview disabled aria-disabled="true">
+          {% trans "Yoxla (quru icra)" context "profile.rim" %}
+        </button>
+        <button type="button" class="ems-btn ems-btn--success" data-rimb-apply hidden>
+          {% trans "Tətbiq et" context "profile.rim" %}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {# ── JS mətnləri (xarici .js Django şablonundan keçmir) ──────────────── #}
+  <script type="application/json" data-rimc-i18n>{
+    "title_student": "{% trans 'Yeni tələbə hesabı'|escapejs context 'profile.rim' %}",
+    "title_teacher": "{% trans 'Yeni müəllim hesabı'|escapejs context 'profile.rim' %}",
+    "code_student": "{% trans 'Tələbə kodu'|escapejs context 'profile.rim' %}",
+    "code_teacher": "{% trans 'İşçi kodu'|escapejs context 'profile.rim' %}",
+    "done_student": "{% trans 'Tələbə hesabı yaradıldı.'|escapejs context 'profile.rim' %}",
+    "done_teacher": "{% trans 'Müəllim hesabı yaradıldı.'|escapejs context 'profile.rim' %}",
+    "failed": "{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.'|escapejs context 'profile.rim' %}",
+    "busy": "{% trans 'Yaradılır…'|escapejs context 'profile.rim' %}",
+    "copied": "{% trans 'Kopyalandı'|escapejs context 'profile.rim' %}",
+    "searching": "{% trans 'Axtarılır…'|escapejs context 'profile.rim' %}",
+    "no_results": "{% trans 'Nəticə tapılmadı.'|escapejs context 'profile.rim' %}",
+    "more_results": "{% trans 'Daha çox nəticə var — axtarışı dəqiqləşdirin.'|escapejs context 'profile.rim' %}",
+    "combo_hint": "{% trans 'Axtarmaq üçün ən azı 1 simvol yazın.'|escapejs context 'profile.rim' %}",
+    "bulk_nofile": "{% trans 'Əvvəlcə fayl seçin.'|escapejs context 'profile.rim' %}",
+    "bulk_busy": "{% trans 'Emal olunur…'|escapejs context 'profile.rim' %}",
+    "bulk_preview": "{% trans 'Quru icra nəticəsi (heç nə yazılmadı)'|escapejs context 'profile.rim' %}",
+    "bulk_applied": "{% trans 'Tətbiq nəticəsi'|escapejs context 'profile.rim' %}",
+    "bulk_apply_label": "{% trans 'Tətbiq et'|escapejs context 'profile.rim' %}",
+    "bulk_apply_count": "{% trans 'Tətbiq et ({n} hesab)'|escapejs context 'profile.rim' %}",
+    "st_create": "{% trans 'Yaradılacaq'|escapejs context 'profile.rim' %}",
+    "st_created": "{% trans 'Yaradıldı'|escapejs context 'profile.rim' %}",
+    "st_skip": "{% trans 'Ötürüldü'|escapejs context 'profile.rim' %}",
+    "st_error": "{% trans 'Xəta'|escapejs context 'profile.rim' %}",
+    "total": "{% trans 'Cəmi'|escapejs context 'profile.rim' %}"
+  }</script>
+</div>
