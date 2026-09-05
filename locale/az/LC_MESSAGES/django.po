@@ -64643,3 +64643,11 @@ msgstr "Bu istifadəçi sizin struktur əhatənizdən kənardadır."
 msgctxt "accounts.manage_roles.message"
 msgid "role_not_defined_in_organization"
 msgstr "Seçilmiş rol bu təşkilatda müəyyən edilməyib: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "sahə uzunluğu həddi keçildi"

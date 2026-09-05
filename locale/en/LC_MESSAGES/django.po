@@ -64828,3 +64828,11 @@ msgstr "This user is outside your structural scope."
 msgctxt "accounts.manage_roles.message"
 msgid "role_not_defined_in_organization"
 msgstr "The selected role is not defined in this organisation: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "First/last/patronymic name may be at most %(n)s characters."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "field length limit exceeded"
