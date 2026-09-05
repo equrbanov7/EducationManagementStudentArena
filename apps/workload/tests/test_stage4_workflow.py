@@ -69,6 +69,15 @@ class StateMachineTest(TestCase):
         with self.assertRaises(sm.IllegalTransition):
             sm.ensure_transition(sm.DRAFT, sm.DISTRIBUTED)
 
+    def test_approved_cannot_return_directly(self):
+        # QA 2026-09-05 (P3-20): the table used to say `approved -> returned`
+        # is legal while `services.workflow.return_slice` always refused it
+        # with 409 (`REVIEWABLE` only covers submitted/pending_final_approval).
+        # The table now agrees with the service — the safer direction.
+        self.assertFalse(sm.can_transition(sm.APPROVED, sm.RETURNED))
+        with self.assertRaises(sm.IllegalTransition):
+            sm.ensure_transition(sm.APPROVED, sm.RETURNED)
+
 
 class ChainBase(TestCase):
     @classmethod

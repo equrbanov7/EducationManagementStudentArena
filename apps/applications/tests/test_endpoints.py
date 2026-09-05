@@ -10,8 +10,8 @@ from django.urls import reverse
 
 import pytest
 
-from apps.applications.constants import ApplicationStatus
-from apps.applications.models import ApplicationAttachment
+from apps.applications.constants import ApplicationStatus, EventKind
+from apps.applications.models import ApplicationAttachment, ApplicationEvent
 from apps.applications.services import submit, workflow
 from apps.applications.tests.factories import kind_of, make_world, unit_of
 
@@ -129,6 +129,21 @@ def test_detail_does_not_mark_seen_for_the_sender(world, application):
     assert payload["application"]["viewer"]["is_sender"] is True
     assert "cancel" in payload["application"]["allowed_actions"]
     assert "resolve" not in payload["application"]["allowed_actions"]
+
+
+def test_detail_mark_seen_is_idempotent_across_repeated_gets(world, application):
+    # QA 2026-09-05 (P3-19): the "opened → seen" transition lives inside a GET
+    # endpoint (design §3.4 wants it automatic). Repeated opens by the same
+    # handler must not re-fire the transition or write a second SEEN event —
+    # the view now checks status+`can_act` explicitly instead of relying on a
+    # caught `TransitionDenied`, so this locks the idempotency in either way.
+    client = client_for(world["coordinator"], world["organization"])
+    first = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert first["application"]["status"]["key"] == ApplicationStatus.IN_REVIEW
+    second = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert second["application"]["status"]["key"] == ApplicationStatus.IN_REVIEW
+    seen_events = ApplicationEvent.objects.filter(application=application, kind=EventKind.SEEN).count()
+    assert seen_events == 1
 
 
 def test_detail_is_404_for_a_stranger(world, application):

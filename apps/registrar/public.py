@@ -15,6 +15,7 @@ from apps.registrar.cabinet_policy import (
     TRANSCRIPT_APPLICATION_KIND,
     approved_syllabus_offerings,
     assessment_weights_view,
+    other_period_subject_rows,
     transcript_policy,
 )
 from apps.registrar.exam_bridge import (
@@ -536,6 +537,7 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
         semester_number = _resolve_semester_number(request)
 
     data = services.get_student_cabinet_data(record=record, period=period, semester_number=semester_number)
+    data["subjects"] += other_period_subject_rows(organization, record, period, semester_number, data["subjects"])
 
     # Attach each subject's electronic-journal summary (giriş balı + davamiyyət),
     # so "Fənlərim" doubles as the student's "Qiymətlərim" view.

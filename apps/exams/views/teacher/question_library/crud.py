@@ -108,25 +108,38 @@ def question_bank_list(request):
             )
         else:
             subject_ref, subject_text = _resolve_bank_subject(organization, request.POST.get("subject_id"))
-            QuestionBank.objects.create(
-                name=name,
-                subject=subject_text,
-                subject_ref=subject_ref,
-                exam_kind=_normalize_exam_kind(request.POST.get("exam_kind"), user=request.user),
-                source_teacher=(
-                    _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
-                    if creator_is_center
-                    else request.user
-                ),
-                description=(request.POST.get("description") or "").strip(),
-                language=(request.POST.get("language") or DEFAULT_EXAM_LANGUAGE).strip().lower(),
-                default_question_type=_normalize_format(request.POST.get("default_question_type")),
-                organization=organization,
-                created_by=request.user,
-                # Banklar default olaraq GİZLİDİR — "Təşkilatda paylaş" UI-dan çıxarılıb.
-                is_shared=False,
-            )
-            messages.success(request, pgettext("exams.view.bank.message", "Sual bankı yaradıldı."))
+            # Eyni müəllim eyni ad (+fənn) ilə ikinci bank yaradanda səssiz
+            # dublikat çıxırdı (QA 2026-09-05 EXAMS-05) — id 4/6 eyni adla.
+            # `created_by` + `name` (case-insensitive) + `subject_ref` üzrə
+            # mövcudluq yoxlanır; `room_admin.add_computer` naxışı ilə eyni.
+            duplicate = QuestionBank.objects.filter(
+                created_by=request.user, name__iexact=name, subject_ref=subject_ref
+            ).exists()
+            if duplicate:
+                messages.warning(
+                    request,
+                    pgettext("exams.view.bank.message", "Bu adla bankınız artıq var: %(name)s") % {"name": name},
+                )
+            else:
+                QuestionBank.objects.create(
+                    name=name,
+                    subject=subject_text,
+                    subject_ref=subject_ref,
+                    exam_kind=_normalize_exam_kind(request.POST.get("exam_kind"), user=request.user),
+                    source_teacher=(
+                        _resolve_bank_teacher(organization, request.POST.get("source_teacher_id"))
+                        if creator_is_center
+                        else request.user
+                    ),
+                    description=(request.POST.get("description") or "").strip(),
+                    language=(request.POST.get("language") or DEFAULT_EXAM_LANGUAGE).strip().lower(),
+                    default_question_type=_normalize_format(request.POST.get("default_question_type")),
+                    organization=organization,
+                    created_by=request.user,
+                    # Banklar default olaraq GİZLİDİR — "Təşkilatda paylaş" UI-dan çıxarılıb.
+                    is_shared=False,
+                )
+                messages.success(request, pgettext("exams.view.bank.message", "Sual bankı yaradıldı."))
         next_url = (request.POST.get("next") or "").strip()
         if next_url and url_has_allowed_host_and_scheme(
             next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
