@@ -64556,3 +64556,11 @@ msgstr "Bu kullanıcı yapısal yetki alanınızın dışındadır."
 msgctxt "accounts.manage_roles.message"
 msgid "role_not_defined_in_organization"
 msgstr "Seçilen rol bu kurumda tanımlı değil: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Ad/soyad/baba adı en fazla %(n)s karakter olabilir."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "alan uzunluğu sınırı aşıldı"

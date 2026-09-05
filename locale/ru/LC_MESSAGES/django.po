@@ -64976,3 +64976,11 @@ msgstr "Этот пользователь вне вашей структурно
 msgctxt "accounts.manage_roles.message"
 msgid "role_not_defined_in_organization"
 msgstr "Выбранная роль не определена в этой организации: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Имя/фамилия/отчество — не более %(n)s символов."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "превышена допустимая длина поля"

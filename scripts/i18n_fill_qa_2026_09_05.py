@@ -47,6 +47,18 @@ ENTRIES = {
             "tr": "Seçilen rol bu kurumda tanımlı değil: %(roles)s.",
         },
     },
+    "student_intake": {
+        "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər.": {
+            "en": "First/last/patronymic name may be at most %(n)s characters.",
+            "ru": "Имя/фамилия/отчество — не более %(n)s символов.",
+            "tr": "Ad/soyad/baba adı en fazla %(n)s karakter olabilir.",
+        },
+        "sahə uzunluğu həddi keçildi": {
+            "en": "field length limit exceeded",
+            "ru": "превышена допустимая длина поля",
+            "tr": "alan uzunluğu sınırı aşıldı",
+        },
+    },
     "accounts.syllabus": {
         "Bölmə məzmununun formatı düzgün deyil (%(field)s).": {
             "en": "The section content has an invalid format (%(field)s).",
