@@ -81,9 +81,19 @@ _INT_FIELDS = {
 
 
 def normalize_academic_year(raw: str) -> str:
-    """«2026», «2026-2027», «2026/2027» → «2026/2027» (AcademicPeriod konvensiyası)."""
+    """«2026», «2026-2027», «2026/2027» → «2026/2027» (AcademicPeriod konvensiyası).
+
+    Yalnız formatlayırdı — `year='abc'` ilə tapşırıq yaranırdı (QA 2026-09-05
+    WORKLOAD-SCHEDULE-02). İndi «YYYY/YYYY+1» nümunəsi tələb olunur; uyğunsuz → boş.
+    """
+    import re
+
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    return AcademicPeriod.format_year(raw)
+    year = AcademicPeriod.format_year(raw) or ""
+    match = re.fullmatch(r"(\d{4})/(\d{4})", year)
+    if not match or int(match.group(2)) != int(match.group(1)) + 1 or not 2000 <= int(match.group(1)) <= 2100:
+        return ""
+    return year
 
 
 # ── Tapşırıq ────────────────────────────────────────────────────────────────
@@ -91,8 +101,8 @@ def normalize_academic_year(raw: str) -> str:
 
 def get_or_create_task(*, organization, chair_id, academic_year: str, actor, request=None):
     """Kafedra + il üçün tapşırıq (yoxdursa yaradılır). Kafedra müdiri / RİM."""
-    ensure_can_manage(actor, chair_id)
-    chair = resolve_chair(organization, chair_id)
+    chair = resolve_chair(organization, chair_id)  # UUID qapısı burada (WORKLOAD-SCHEDULE-01)
+    ensure_can_manage(actor, chair.pk)
     year = normalize_academic_year(academic_year)
     if not year:
         raise WorkloadDenied("workload.year_required", "Tədris ili göstərilməlidir.")

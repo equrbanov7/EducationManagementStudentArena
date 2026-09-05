@@ -357,9 +357,14 @@ def _has_active_student_membership(organization, user) -> bool:
     `organizations` statik import edilmir (module_deps qapısı) — `get_model`.
     """
     Membership = django_apps.get_model("organizations", "Membership")
+    # Tələbə ailəsi: adi tələbə, qrup nümayəndəsi, məzun — heç biri «müəllim» üzü görməməlidir
+    # (QA 2026-09-05 P2-31: qeydsiz məzun/tələbə cədvəldə «Müəllim cədvəli» görürdü).
     return Membership.objects.filter(
-        organization=organization, user=user, is_active=True, role__name="student"
+        organization=organization, user=user, is_active=True, role__name__in=STUDENT_FAMILY_ROLE_NAMES
     ).exists()
+
+
+STUDENT_FAMILY_ROLE_NAMES = ("student", "lead_student", "alumni")
 
 
 def schedule_context(request, organization, *, embedded=False) -> dict:
