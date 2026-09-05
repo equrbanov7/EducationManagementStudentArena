@@ -64865,3 +64865,35 @@ msgstr "The lesson type is not selected correctly."
 
 msgid "Dərs saatı müsbət tam ədəd olmalıdır."
 msgstr "The lesson hours must be a positive whole number."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Lesson columns"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Show all"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Last 20 lessons"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(first)s–%(last)s of %(total)s lessons"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "Showing all %(total)s lessons"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Later lessons"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Earlier lessons"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Select"

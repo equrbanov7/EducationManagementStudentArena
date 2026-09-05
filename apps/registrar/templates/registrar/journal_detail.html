@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260906-1">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     <link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">
@@ -106,19 +107,19 @@
         {% endif %}
 
         <nav class="jd2-tabsbar" role="tablist" aria-label="{% trans 'Jurnal bölmələri' context 'registrar.journal' %}" data-journal-tabs>
-            <button type="button" class="jd2-tab is-active" role="tab" aria-selected="true" data-jtab="grid" data-jd-step-of="2" id="jd-tab-grid" aria-controls="jd-panel-grid">
+            <button type="button" class="jd2-tab{% if active_tab == "grid" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "grid" %}true{% else %}false{% endif %}" data-jt-url="?jt=grid" data-jtab="grid" data-jd-step-of="2" id="jd-tab-grid" aria-controls="jd-panel-grid">
                 {% trans "Qiymətləndirmə" context "registrar.journal" %}
             </button>
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="kollokvium" id="jd-tab-kollokvium" aria-controls="jd-panel-kollokvium">
+            <button type="button" class="jd2-tab{% if active_tab == "kollokvium" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kollokvium" %}true{% else %}false{% endif %}" data-jt-url="?jt=kollokvium" data-jtab="kollokvium" id="jd-tab-kollokvium" aria-controls="jd-panel-kollokvium">
                 {% trans "Kollokvium" context "registrar.journal" %}
             </button>
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="kurs-isi" data-jd-step-of="4" id="jd-tab-kurs-isi" aria-controls="jd-panel-kurs-isi">
+            <button type="button" class="jd2-tab{% if active_tab == "kurs-isi" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kurs-isi" %}true{% else %}false{% endif %}" data-jt-url="?jt=kurs-isi" data-jtab="kurs-isi" data-jd-step-of="4" id="jd-tab-kurs-isi" aria-controls="jd-panel-kurs-isi">
                 {% trans "Kurs işi" context "registrar.journal" %}
             </button>
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="serbest" data-jd-step-of="5" id="jd-tab-serbest" aria-controls="jd-panel-serbest">
+            <button type="button" class="jd2-tab{% if active_tab == "serbest" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "serbest" %}true{% else %}false{% endif %}" data-jt-url="?jt=serbest" data-jtab="serbest" data-jd-step-of="5" id="jd-tab-serbest" aria-controls="jd-panel-serbest">
                 {% trans "Sərbəst iş" context "registrar.journal" %}
             </button>
-            <button type="button" class="jd2-tab" role="tab" aria-selected="false" data-jtab="yekun" data-jd-step-of="6" id="jd-tab-yekun" aria-controls="jd-panel-yekun">
+            <button type="button" class="jd2-tab{% if active_tab == "yekun" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "yekun" %}true{% else %}false{% endif %}" data-jt-url="?jt=yekun" data-jtab="yekun" data-jd-step-of="6" id="jd-tab-yekun" aria-controls="jd-panel-yekun">
                 {% trans "Yekun qiymət" context "registrar.journal" %}
             </button>
             <div class="jd2-tabsbar-actions">
@@ -176,30 +177,43 @@
         </div>
         {% endif %}
 
-        {# ═══ Qiymətləndirmə: təqvim planı + davamiyyət/bal grid-i ═══════════ #}
+        {% comment %}TAB SERVER TƏRƏFDƏ (QA 2026-09-05 P1-8): əvvəl BEŞ tabın hamısı —
+        hər biri 555 sətirlik cədvəl — eyni HTML-ə render olunurdu (41.5 MB). İndi
+        yalnız aktiv tab qurulur; tab dəyişikliyi `?jt=` ilə səhifə yükləyir
+        (journal_detail.js panel yoxdursa naviqasiya edir).{% endcomment %}
+        {% if active_tab == "grid" %}
         <section class="jd-panel is-active" data-jtab-panel="grid" id="jd-panel-grid" role="tabpanel" aria-labelledby="jd-tab-grid">
             {% include "registrar/partials/_jd_grid.html" %}
         </section>
+        {% endif %}
 
         {# ═══ Kollokvium (3 ədəd, tarix + bal — dizayna əlavə tələb) ═════════ #}
-        <section class="jd-panel" data-jtab-panel="kollokvium" id="jd-panel-kollokvium" role="tabpanel" aria-labelledby="jd-tab-kollokvium" hidden>
+        {% if active_tab == "kollokvium" %}
+        <section class="jd-panel is-active" data-jtab-panel="kollokvium" id="jd-panel-kollokvium" role="tabpanel" aria-labelledby="jd-tab-kollokvium">
             {% include "registrar/partials/_jd_kollokvium.html" %}
         </section>
+        {% endif %}
 
         {# ═══ Kurs işi (siyahı + sağda form — mockup) ════════════════════════ #}
-        <section class="jd-panel" data-jtab-panel="kurs-isi" id="jd-panel-kurs-isi" role="tabpanel" aria-labelledby="jd-tab-kurs-isi" hidden>
+        {% if active_tab == "kurs-isi" %}
+        <section class="jd-panel is-active" data-jtab-panel="kurs-isi" id="jd-panel-kurs-isi" role="tabpanel" aria-labelledby="jd-tab-kurs-isi">
             {% include "registrar/partials/_jd_coursework.html" %}
         </section>
+        {% endif %}
 
         {# ═══ Sərbəst iş (mövzu çeklisti — mockup) ═══════════════════════════ #}
-        <section class="jd-panel" data-jtab-panel="serbest" id="jd-panel-serbest" role="tabpanel" aria-labelledby="jd-tab-serbest" hidden>
+        {% if active_tab == "serbest" %}
+        <section class="jd-panel is-active" data-jtab-panel="serbest" id="jd-panel-serbest" role="tabpanel" aria-labelledby="jd-tab-serbest">
             {% include "registrar/partials/_jd_selfwork.html" %}
         </section>
+        {% endif %}
 
         {# ═══ Yekun qiymət (imtahana qədər bal breakdown — mockup) ═══════════ #}
-        <section class="jd-panel" data-jtab-panel="yekun" id="jd-panel-yekun" role="tabpanel" aria-labelledby="jd-tab-yekun" hidden>
+        {% if active_tab == "yekun" %}
+        <section class="jd-panel is-active" data-jtab-panel="yekun" id="jd-panel-yekun" role="tabpanel" aria-labelledby="jd-tab-yekun">
             {% include "registrar/partials/_jd_final_breakdown.html" %}
         </section>
+        {% endif %}
 
     </div>
 
@@ -277,6 +291,8 @@
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260827-room"></script>
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260827-room"></script>
+    {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
+    <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
     {% if can_manage_roster %}

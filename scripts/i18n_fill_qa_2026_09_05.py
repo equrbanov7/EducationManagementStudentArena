@@ -72,6 +72,43 @@ ENTRIES = {
             "tr": "Dijital Gelişim Merkezi (RİM) çalışanı",
         },
     },
+    "registrar.journal": {
+        "Sonrakı dərslər": {
+            "en": "Later lessons",
+            "ru": "Следующие занятия",
+            "tr": "Sonraki dersler",
+        },
+        "Əvvəlki dərslər": {
+            "en": "Earlier lessons",
+            "ru": "Предыдущие занятия",
+            "tr": "Önceki dersler",
+        },
+        "Dərs sütunları": {
+            "en": "Lesson columns",
+            "ru": "Столбцы занятий",
+            "tr": "Ders sütunları",
+        },
+        "Hamısını göstər": {
+            "en": "Show all",
+            "ru": "Показать все",
+            "tr": "Tümünü göster",
+        },
+        "Son 20 dərs": {
+            "en": "Last 20 lessons",
+            "ru": "Последние 20 занятий",
+            "tr": "Son 20 ders",
+        },
+        "%(first)s–%(last)s / %(total)s dərs": {
+            "en": "%(first)s–%(last)s of %(total)s lessons",
+            "ru": "%(first)s–%(last)s из %(total)s занятий",
+            "tr": "%(total)s dersten %(first)s–%(last)s",
+        },
+        "Bütün %(total)s dərs göstərilir": {
+            "en": "Showing all %(total)s lessons",
+            "ru": "Показаны все %(total)s занятий",
+            "tr": "%(total)s dersin tamamı gösteriliyor",
+        },
+    },
     "accounts.manage_roles.message": {
         "missing_member_management_permission": {
             "en": "You need the `role.assign` or `org.manage_members` permission for this action.",
@@ -106,6 +143,13 @@ ENTRIES = {
             "en": "The bank name may be at most %(n)s characters.",
             "ru": "Название банка — не более %(n)s символов.",
             "tr": "Banka adı en fazla %(n)s karakter olabilir.",
+        },
+    },
+    "accounts.a11y": {
+        "Seç": {
+            "en": "Select",
+            "ru": "Выбрать",
+            "tr": "Seçiniz",
         },
     },
     "accounts.syllabus": {

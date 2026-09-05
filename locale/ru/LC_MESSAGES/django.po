@@ -65013,3 +65013,35 @@ msgstr "Тип занятия выбран неверно."
 
 msgid "Dərs saatı müsbət tam ədəd olmalıdır."
 msgstr "Количество часов занятия должно быть целым положительным числом."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Столбцы занятий"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Показать все"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Последние 20 занятий"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(first)s–%(last)s из %(total)s занятий"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "Показаны все %(total)s занятий"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Следующие занятия"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Предыдущие занятия"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Выбрать"

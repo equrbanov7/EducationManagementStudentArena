@@ -542,3 +542,51 @@ class LessonInputEchoTest(JournalViewTest):
     def test_negative_hours_are_reported(self):
         response = self._post_lesson(lesson_hours="-5")
         self.assertContains(response, "müsbət tam ədəd")
+
+
+class JournalWindowIntegrationTest(JournalViewTest):
+    """Pəncərə rəqəmləri təhrif etmir + tab server tərəfdə render olunur (P1-8)."""
+
+    def test_absence_totals_ignore_the_window(self):
+        import datetime
+
+        from apps.registrar import gradebook
+
+        with bypass_rls():
+            for day in range(1, 6):
+                lesson = gradebook.create_lesson(
+                    allow_past=True,
+                    offering=self.offering,
+                    date=datetime.date(2024, 10, day),
+                    kind=LessonKind.SEMINAR,
+                )
+                gradebook.save_marks(
+                    enforce_day=False,
+                    offering=self.offering,
+                    entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                    by_user=self.teacher,
+                )
+            full = gradebook.get_offering_journal(offering=self.offering, newest_first=True)
+            windowed = gradebook.get_offering_journal(
+                offering=self.offering, newest_first=True, lesson_limit=2, lesson_offset=0
+            )
+        self.assertEqual(len(windowed["lessons"]), 2)
+        self.assertGreater(len(full["lessons"]), 2)
+        # Qayıb sayğacı pəncərədən ASILI DEYİL.
+        self.assertEqual(full["rows"][0]["absence_count"], windowed["rows"][0]["absence_count"])
+        self.assertEqual(full["rows"][0]["absence_hours"], windowed["rows"][0]["absence_hours"])
+        self.assertEqual(full["allowed_absence"], windowed["allowed_absence"])
+
+    def test_only_the_requested_tab_is_rendered(self):
+        client = self._client(self.teacher)
+        grid = client.get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertContains(grid, 'data-jtab-panel="grid"')
+        self.assertNotContains(grid, 'data-jtab-panel="yekun"')
+        final = client.get(reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=yekun")
+        self.assertContains(final, 'data-jtab-panel="yekun"')
+        self.assertNotContains(final, 'data-jtab-panel="grid"')
+
+    def test_unknown_tab_falls_back_to_grid(self):
+        client = self._client(self.teacher)
+        response = client.get(reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=zzz")
+        self.assertContains(response, 'data-jtab-panel="grid"')

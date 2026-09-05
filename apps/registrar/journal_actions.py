@@ -33,8 +33,16 @@ def _offering_or_404(request, offering_id):
 
 
 def _back(offering, tab=""):
+    """Jurnala qayıdış — TAB SERVER TƏRƏFDƏ render olunur (QA 2026-09-05 P1-8).
+
+    Əvvəl yalnız hash (`#serbest`) qaytarılırdı, çünki bütün tablar eyni səhifədə
+    render olunurdu. İndi səhifə yalnız aktiv tabı qurur, ona görə `?jt=` sorğu
+    parametri də lazımdır (hash JS-in scroll/bərpa məntiqi üçün qalır).
+    """
     url = reverse("registrar:journal_detail", args=[offering.pk])
-    return redirect(f"{url}#{tab}" if tab else url)
+    if not tab or tab == "grid":
+        return redirect(url)
+    return redirect(f"{url}?jt={tab}#{tab}")
 
 
 def _can_write_documented_correction(request) -> bool:
