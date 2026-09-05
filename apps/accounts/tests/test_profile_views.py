@@ -2176,6 +2176,18 @@ class ProfileViewTest(TestCase):
             f'name="next" value="{reverse("accounts:profile")}?section=superadmin-ai"',
             html=False,
         )
+        # `type=number` lokal ayırıcı (5,00) qəbul etmir → sahə brauzerdə boş görünürdü
+        # (QA 2026-09-05 P3-1): dəyər həmişə nöqtə ilə render olunmalıdır.
+        import re as _re
+
+        from django.utils import translation as _translation
+
+        with _translation.override("az"):
+            localized = self.client.get(reverse("accounts:profile") + "?section=superadmin-ai")
+        html = localized.content.decode("utf-8")
+        match = _re.search(r'id="monthly_budget"[^>]*value="([^"]*)"', html)
+        self.assertIsNotNone(match, "monthly_budget sahəsi yoxdur")
+        self.assertNotIn(",", match.group(1), match.group(0))
 
     def test_superadmin_org_features_section_renders_inside_profile(self):
         superuser = User.objects.create_superuser(
