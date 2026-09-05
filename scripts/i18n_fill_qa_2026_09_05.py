@@ -14,6 +14,16 @@ LOCALES = ["az", "en", "ru", "tr"]
 
 ENTRIES = {
     None: {
+        "Akademik qeydiniz hələ yaradılmayıb.": {
+            "en": "Your academic record has not been created yet.",
+            "ru": "Ваша академическая запись ещё не создана.",
+            "tr": "Akademik kaydınız henüz oluşturulmamış.",
+        },
+        "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin.": {
+            "en": "The journal appears after enrolment in a group — contact student services.",
+            "ru": "Журнал появится после зачисления в группу — обратитесь в студенческую службу.",
+            "tr": "Yoklama defteri gruba kayıttan sonra görünür — öğrenci hizmetlerine başvurun.",
+        },
         "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil.": {
             "en": "The selected teacher is not on this organisation's teaching staff.",
             "ru": "Выбранный преподаватель не входит в преподавательский состав организации.",
@@ -57,6 +67,13 @@ ENTRIES = {
             "en": "field length limit exceeded",
             "ru": "превышена допустимая длина поля",
             "tr": "alan uzunluğu sınırı aşıldı",
+        },
+    },
+    "exams.view.bank.message": {
+        "Bank adı ən çox %(n)s simvol ola bilər.": {
+            "en": "The bank name may be at most %(n)s characters.",
+            "ru": "Название банка — не более %(n)s символов.",
+            "tr": "Banka adı en fazla %(n)s karakter olabilir.",
         },
     },
     "accounts.syllabus": {

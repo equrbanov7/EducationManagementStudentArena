@@ -64564,3 +64564,13 @@ msgstr "Ad/soyad/baba adı en fazla %(n)s karakter olabilir."
 msgctxt "student_intake"
 msgid "sahə uzunluğu həddi keçildi"
 msgstr "alan uzunluğu sınırı aşıldı"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Akademik kaydınız henüz oluşturulmamış."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "Yoklama defteri gruba kayıttan sonra görünür — öğrenci hizmetlerine başvurun."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "Banka adı en fazla %(n)s karakter olabilir."
