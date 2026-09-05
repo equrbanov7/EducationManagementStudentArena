@@ -64574,3 +64574,6 @@ msgstr "Yoklama defteri gruba kayıttan sonra görünür — öğrenci hizmetler
 msgctxt "exams.view.bank.message"
 msgid "Bank adı ən çox %(n)s simvol ola bilər."
 msgstr "Banka adı en fazla %(n)s karakter olabilir."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "Sınav/bütünleme puanını yalnızca Sınav Merkezi girebilir — bu alanlar kaydedilmedi."

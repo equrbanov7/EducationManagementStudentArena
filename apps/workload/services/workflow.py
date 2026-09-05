@@ -339,6 +339,28 @@ def _recipients(queryset):
     return [user for user in queryset if user is not None]
 
 
+def _unit_role_users(organization, units, role_names):
+    """Vahid(lər)i əhatə edən, verilmiş rolları daşıyan AKTİV üzvlərin istifadəçiləri.
+
+    Əvvəl alıcı yalnız ``OrgUnit.head`` idi — klonda fakültə/kafedraların çoxu
+    rəhbərsizdir, ona görə dekan/kafedra müdiri bildiriş almırdı (QA 2026-09-05
+    WORKLOAD-SCHEDULE-09). İndi rol üzvlüyü də alıcıdır (rəhbər + rol daşıyıcıları).
+    """
+    from apps.organizations.unit_heads import members_covering_unit
+
+    users: dict = {}
+    for unit in units:
+        if unit is None:
+            continue
+        for membership in members_covering_unit(organization, unit, role_names=role_names):
+            users.setdefault(membership.user_id, membership.user)
+    return list(users.values())
+
+
+FACULTY_ACTOR_ROLES = ("dean", "vice_dean", "program_coordinator")
+CHAIR_ACTOR_ROLES = ("chair_head", "department_head", "section_head")
+
+
 def send_notification(organization, recipients, *, title, body, link, event, metadata=None) -> int:
     recipients = _recipients(recipients)
     if not recipients:
@@ -368,10 +390,12 @@ def _notify_faculty_actors(task, faculty_ids) -> int:
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     faculties = list(OrgUnit.objects.filter(pk__in=list(faculty_ids)).select_related("head"))
-    heads = [unit.head for unit in faculties]
+    unique = {u.pk: u for u in [unit.head for unit in faculties] if u is not None}
+    for user in _unit_role_users(task.organization, faculties, FACULTY_ACTOR_ROLES):
+        unique.setdefault(user.pk, user)
     return send_notification(
         task.organization,
-        heads,
+        list(unique.values()),
         title=f"Dərs yükü dilimi: {task.academic_year}",
         body="Kafedranın tədris tapşırığı fakültənizə göndərildi — təsdiq gözlənilir.",
         link=_SECTION_LINKS["approval"],
@@ -387,6 +411,7 @@ def _notify_office(task, *, title, body) -> int:
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     chair = OrgUnit.objects.filter(pk=task.chair_id).select_related("head").first()
     recipients = [task.submitted_by, task.created_by, getattr(chair, "head", None)]
+    recipients += _unit_role_users(task.organization, [chair], CHAIR_ACTOR_ROLES)
     unique: dict = {}
     for user in recipients:
         if user is not None:
@@ -407,9 +432,12 @@ def _notify_chair(task) -> int:
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     chair = OrgUnit.objects.filter(pk=task.chair_id, unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)).first()
+    unique = {u.pk: u for u in [getattr(chair, "head", None)] if u is not None}
+    for user in _unit_role_users(task.organization, [chair], CHAIR_ACTOR_ROLES):
+        unique.setdefault(user.pk, user)
     return send_notification(
         task.organization,
-        [getattr(chair, "head", None)],
+        list(unique.values()),
         title=f"Tədris tapşırığı təsdiqləndi: {task.academic_year}",
         body="Bütün fakültə dilimləri təsdiqləndi — yükü müəllimlərə bölə bilərsiniz.",
         link=_SECTION_LINKS["distribution"],

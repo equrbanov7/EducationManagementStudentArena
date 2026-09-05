@@ -34,6 +34,11 @@ ENTRIES = {
             "ru": "Журнал закрыт — изменения не сохранены.",
             "tr": "Yoklama defteri kapalı — değişiklikler kaydedilmedi.",
         },
+        "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı.": {
+            "en": "Only the Examination Centre may record exam/resit scores — those fields were not saved.",
+            "ru": "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены.",
+            "tr": "Sınav/bütünleme puanını yalnızca Sınav Merkezi girebilir — bu alanlar kaydedilmedi.",
+        },
         "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi.": {
             "en": "No cell was saved — the lesson-day rule or a cell lock prevented it.",
             "ru": "Ни одна ячейка не сохранена — помешало правило дня занятия или блокировка ячейки.",

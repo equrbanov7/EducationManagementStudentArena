@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
+from . import finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
@@ -328,27 +328,37 @@ def _can_write_finals(user, offering) -> bool:
     (UI-da sahə yoxdur; crafted POST ilə yazıla bilirdi — QA 2026-09-05 JOURNAL-TEACHER-08)."""
     if getattr(user, "is_superuser", False):
         return True
-    from apps.organizations.public import get_permission_scope
-
-    return get_permission_scope(user, offering.organization, "final_score.entry").has_structure_access
+    scope = journal_scope.permission_scope_for(user, offering.organization, "final_score.entry")
+    return scope.has_structure_access
 
 
 def _handle_save_finals(request, offering):
-    """Persist final-exam + resit scores per student (exam__<enr> / resit__<enr>)."""
-    if not _can_write_finals(request.user, offering):
-        raise Http404
+    """Yekun imtahan/təkrar balı (exam__/resit__) + bonus-rəy (bonus__/fcomment__).
+
+    Bal sahəsi `final_score.entry` tələb edir (İmtahan Mərkəzi); bonus/rəy (U15)
+    isə jurnal redaktorunundur. Ona görə icazəsiz aktorda bütün əməl 404 olmur —
+    yalnız bal açarları nəzərə alınmır (QA 2026-09-05 JOURNAL-TEACHER-08).
+    """
+    can_write_scores = _can_write_finals(request.user, offering)
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     extras: dict = {}
+    refused_scores = False
     for key, raw in request.POST.items():
         if key.startswith("exam__"):
+            if not can_write_scores:
+                refused_scores = True
+                continue
             enrollment = enrollments.get(key[len("exam__") :])
             if enrollment is not None:
                 finals.set_exam_score(enrollment=enrollment, score=raw, by_user=request.user)
         elif key.startswith("resit__"):
+            if not can_write_scores:
+                refused_scores = True
+                continue
             enrollment = enrollments.get(key[len("resit__") :])
             if enrollment is not None and raw.strip() != "":
                 finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
@@ -369,7 +379,10 @@ def _handle_save_finals(request, offering):
             comment=data.get("comment"),
             by_user=request.user,
         )
-    messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
+    if refused_scores:
+        messages.warning(request, _("İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."))
+    else:
+        messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
