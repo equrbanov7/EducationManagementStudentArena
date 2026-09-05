@@ -53,9 +53,7 @@ def _academic_rows(user, actor, *, request=None, limit=MAX_DETAIL_ROWS):
     if scoped is None:
         return []
     records = (
-        scoped.filter(student=user)
-        .select_related("program", "group", "curriculum")
-        .order_by("-admission_year")[:limit]
+        scoped.filter(student=user).select_related("program", "group", "curriculum").order_by("-admission_year")[:limit]
     )
     return [
         {
@@ -97,9 +95,7 @@ def build_detail(*, actor, user_id, request=None, today=None) -> dict:
     row["last_login"] = target.last_login.isoformat() if target.last_login else ""
     row["date_joined"] = target.date_joined.isoformat() if target.date_joined else ""
     permission = PERM_VIEW_TEACHERS if catalog == "teacher" else PERM_VIEW_STUDENTS
-    row["memberships"] = serialize_memberships(
-        target, organization, scope=actor.scope_for(permission, request=request)
-    )
+    row["memberships"] = serialize_memberships(target, organization, scope=actor.scope_for(permission, request=request))
 
     is_teacher = _is_teacher(target, organization) if organization is not None else False
     row["is_teacher"] = is_teacher
