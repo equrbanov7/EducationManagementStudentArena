@@ -44,6 +44,17 @@ Per-enrollment riyaziyyat dəyişməyib: :func:`analytics.evaluate_enrollment` +
 :func:`analytics.build_evaluation_maps_for` — yəni ``compute_final_result``
 N dəfə çağırılmır və q/b vs 25% ayrımı :func:`transcript._fail_reason_code`
 semantikası ilə eynidir.
+
+**Box-ların sürətli yolu (2026-09 QA P2-19).** Sorğu sayı sabit olsa da, ilk
+yüklənmə org-səviyyəli aktorda 7–13 s çəkirdi: vaxt SQL-də deyil, **Python
+obyekt qurmağa** gedirdi (148 634 model obyekti + 969 162 ``UUID`` + hər sətir
+üçün hərf qiyməti, davamiyyət balı və eligibility dicti — box-ların heç birində
+istifadə olunmur).  Ona görə :func:`build_records_summary` artıq
+:mod:`apps.accounts.academic_summary`-dən keçir: eyni sorğular, eyni düstur,
+amma model obyekti yaradılmır və birləşmə açarları SQL-də mətnə çevrilir
+(ölçülüb: 7.2 s → 1.8 s, ``qa.rector``, 148 634 yazılış).  Cədvəl yolu
+(:func:`build_records_page`) dəyişməyib — orada sətir sayı onsuz da ~25-dir və
+``_row`` hərf/etiket sahələrini oxuyur.
 """
 
 from __future__ import annotations
@@ -52,6 +63,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db.models import Q
 
+from apps.accounts import academic_summary
 from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.organizations.scoping import UnitScope
 from apps.registrar import analytics, exam_eligibility, transcript
@@ -459,10 +471,13 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
 
     box = _empty_summary()
     box["students"] = _distinct_student_count(records)
-    for _enrollment, result in _evaluate_all(
-        organization, _enrollment_qs(organization, records.order_by().values("student_id"), period_ids)
-    ):
-        _accumulate(box, result)
+    # SÜRƏTLİ YOL (2026-09 QA P2-19): box-lar per-enrollment nəticənin yalnız
+    # altı sahəsini oxuyur, ona görə burada model obyekti / hərf qiyməti /
+    # eligibility dicti qurulmur — bax :mod:`apps.accounts.academic_summary`.
+    # Rəqəmlər eynidir (``test_academic_summary_fast_path`` iki yolu kilidləyir).
+    academic_summary.accumulate_summary(
+        organization, _enrollment_qs(organization, records.order_by().values("student_id"), period_ids), box
+    )
     payload = {
         "has_access": True,
         "summary": _public_summary(box),
