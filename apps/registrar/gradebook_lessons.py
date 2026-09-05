@@ -12,6 +12,8 @@ halı ``UNSET`` sentineli ilə ayrılır.
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -55,6 +57,33 @@ def clean_topic(topic) -> str:
     return text
 
 
+#: Dövr bitibsə üst hədd: bu gündən bir tədris ili irəli (sağlamlıq qapısı).
+MAX_FUTURE_LESSON_DAYS = 365
+
+
+def ensure_date_within_period(offering, parsed) -> None:
+    """Dərs tarixinin ÜST həddi (QA 2026-09-05 P2-11).
+
+    Əvvəl yalnız keçmiş tarix yoxlanılırdı — 2099-cu ilə dərs açmaq mümkün idi
+    və başlıqdakı «keçirilmiş saat» hesabı pozulurdu.
+
+    * Dövr HƏLƏ BİTMƏYİBSƏ üst hədd dövrün ``end_date``-idir.
+    * Dövr artıq bitibsə (köhnə jurnala sonradan qeyd aparmaq normal axındır —
+      semestr kilidləri onsuz da ayrıca işləyir) hədd bu gündən bir il irəlidir.
+
+    RİM/superuser override-i (``allow_past``) bu qapını da keçir.
+    """
+    # `end_date` obyektdə hələ sətir ola bilər (yeni yaradılmış, refresh olunmamış dövr).
+    end_date = _coerce_date(getattr(getattr(offering, "period", None), "end_date", None))
+    today = timezone.localdate()
+    if end_date and end_date >= today:
+        if parsed > end_date:
+            raise LessonRuleError(f"Dərs tarixi dövrün sonundan ({end_date:%d.%m.%Y}) sonra ola bilməz.")
+        return
+    if parsed > today + timedelta(days=MAX_FUTURE_LESSON_DAYS):
+        raise LessonRuleError("Dərs tarixi bir ildən artıq irəlidə ola bilməz.")
+
+
 @transaction.atomic
 def create_lesson(
     *,
@@ -86,6 +115,8 @@ def create_lesson(
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
     if not allow_past and parsed < timezone.localdate():
         raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
+    if not allow_past:
+        ensure_date_within_period(offering, parsed)
     new_hours = hours or DEFAULT_LESSON_HOURS
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
@@ -131,6 +162,8 @@ def update_lesson(
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
         if parsed < timezone.localdate() and not allow_past:
             raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
+        if not allow_past:
+            ensure_date_within_period(lesson.offering, parsed)
         lesson.date = parsed
         fields.append("date")
     if kind is not None and kind in dict(LessonKind.choices):

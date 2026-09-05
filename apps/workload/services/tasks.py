@@ -219,6 +219,29 @@ def _ensure_editable(task: TeachingTask) -> None:
         )
 
 
+def _duplicate_row_exists(row: TeachingTaskRow) -> bool:
+    """Eyni fənn + ixtisas + semestr + QRUP DƏSTİ ilə ikinci sətir varmı (QA P2-37).
+
+    Qruplar M2M olduğu üçün müqayisə sətir yaddaşa yazılıb qruplar təyin
+    ediləndən SONRA aparılır; `save_row` atomik olduğuna görə tapılan dublikat
+    yazını geri qaytarır.
+    """
+    others = TeachingTaskRow.objects.filter(
+        task=row.task,
+        season=row.season,
+        specialty_id=row.specialty_id,
+    ).exclude(pk=row.pk)
+    if row.subject_id:
+        others = others.filter(subject_id=row.subject_id)
+    else:
+        others = others.filter(subject_id__isnull=True, subject_text__iexact=(row.subject_text or "").strip())
+    wanted = set(row.groups.values_list("id", flat=True))
+    for other in others.prefetch_related("groups"):
+        if set(other.groups.values_list("id", flat=True)) == wanted:
+            return True
+    return False
+
+
 @transaction.atomic
 def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -> TeachingTaskRow:
     """Sətir yaradır və ya redaktə edir (draft/distributing statuslarında)."""
@@ -283,6 +306,12 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
         if not row.groups_text:
             row.groups_text = " / ".join(group.name for group in groups)
             row.save(update_fields=["groups_text", "updated_at"])
+
+    if _duplicate_row_exists(row):
+        raise WorkloadDenied(
+            "workload.duplicate_row",
+            "Eyni fənn, ixtisas, semestr və qrup dəsti ilə sətir artıq var — mövcud sətri redaktə edin.",
+        )
 
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,
