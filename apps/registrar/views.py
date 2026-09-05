@@ -127,12 +127,12 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
-
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy
     from apps.registrar import journal_window as _jw
+    from apps.registrar import syllabus_notice
 
     try:
         window_size = int(request.GET.get("lw", _jw.DEFAULT_LESSON_WINDOW))
