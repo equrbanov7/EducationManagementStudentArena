@@ -22,7 +22,6 @@ from apps.workload.constants import (
 )
 from apps.workload.models import LoadObjection, TaskFacultySlice, TaskRowReview
 from apps.workload.services import (
-    review_all,
     WorkloadDenied,
     approve_slice,
     assign_teacher,
@@ -31,6 +30,7 @@ from apps.workload.services import (
     create_objection,
     resolve_actor,
     return_slice,
+    review_all,
     review_queue,
     set_row_review,
     slice_progress,
