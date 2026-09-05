@@ -9,9 +9,12 @@ view-səviyyə testi yox idi — SCOUT §5).
 
 from __future__ import annotations
 
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.notifications.models import InAppNotification
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -237,6 +240,10 @@ class KollokviumWindowsViewIntegrationTests(KollokviumNotificationsBase):
 
     def test_new_window_creation_sends_nothing_yet_inactive_by_default(self):
         url = reverse("accounts:kollokvium_windows")
+        # Dinamik gələcək tarixlər (QA 2026-09-05 P3-21: yeni pəncərənin bağlanışı
+        # keçmişdə ola bilməz — sabit "2025-12-…" tarixi zamanla keçmişə düşüb bu
+        # testi qırardı).
+        today = timezone.localdate()
         with self.captureOnCommitCallbacks(execute=True):
             self.client.post(
                 url,
@@ -244,8 +251,8 @@ class KollokviumWindowsViewIntegrationTests(KollokviumNotificationsBase):
                     "action": "save_window",
                     "period": str(self.period.pk),
                     "k_index": "1",
-                    "opens_on": "2025-12-01",
-                    "closes_on": "2025-12-10",
+                    "opens_on": (today + datetime.timedelta(days=30)).isoformat(),
+                    "closes_on": (today + datetime.timedelta(days=40)).isoformat(),
                     "organization_id": str(self.org.pk),
                 },
             )

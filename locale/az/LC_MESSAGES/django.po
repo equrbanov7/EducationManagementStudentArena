@@ -51241,8 +51241,14 @@ msgstr ":?.!"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
+#. QA 2026-09-06 (P3-21): bu msgid Django-nun ÖZ ümumi "sahə mütləqdir" mesajıdır
+#. (kontekstsiz, bütün formalarda paylaşılır) — səhvən fayl sahəsi mesajı ilə
+#. qarışdırılmışdı ("Fayl seçilməyib."), nəticədə HƏR boş məcburi sahə (fayl
+#. olmayan formalar daxil, məs. kollokvium pəncərəsi tarix formu) istifadəçiyə
+#. yanlış "fayl seçilməyib" mesajı göstərirdi. Django-nun öz rəsmi az tərcüməsi
+#. ilə uyğunlaşdırıldı (venv/…/django/conf/locale/az/LC_MESSAGES/django.po).
 msgid "This field is required."
-msgstr "Fayl seçilməyib."
+msgstr "Bu sahə vacibdir."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
