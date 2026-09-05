@@ -64721,3 +64721,407 @@ msgstr "Seç"
 
 msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
 msgstr "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+
+msgctxt "exams.view.bank.message"
+msgid "Bu adla bankınız artıq var: %(name)s"
+msgstr "Bu adla bankınız artıq var: %(name)s"
+
+msgctxt "profile.rim"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm və ya .csv"
+
+msgctxt "profile.rim"
+msgid "7 simvol, yalnız A–Z və 0–9."
+msgstr "7 simvol, yalnız A–Z və 0–9."
+
+msgctxt "profile.rim"
+msgid "Ad, soyad"
+msgstr "Ad, soyad"
+
+msgctxt "profile.rim"
+msgid "Axtarmaq üçün ən azı 1 simvol yazın."
+msgstr "Axtarmaq üçün ən azı 1 simvol yazın."
+
+msgctxt "profile.rim"
+msgid "Axtarılır…"
+msgstr "Axtarılır…"
+
+msgctxt "profile.rim"
+msgid "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+msgstr "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+
+msgctxt "profile.rim"
+msgid "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+msgstr "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parol"
+msgstr "Birdəfəlik parol"
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+msgstr "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+msgstr "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+msgstr "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+msgstr "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+
+msgctxt "profile.rim"
+msgid "Boş şablonu endir"
+msgstr "Boş şablonu endir"
+
+msgctxt "profile.rim"
+msgid "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+msgstr "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+
+msgctxt "profile.rim"
+msgid "Cins"
+msgstr "Cins"
+
+msgctxt "profile.rim"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "profile.rim"
+msgid "Daha bir hesab yarat"
+msgstr "Daha bir hesab yarat"
+
+msgctxt "profile.rim"
+msgid "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+msgstr "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi"
+msgstr "Doğum tarixi"
+
+msgctxt "profile.rim"
+msgid "E-poçt"
+msgstr "E-poçt"
+
+msgctxt "profile.rim"
+msgid "Emal olunur…"
+msgstr "Emal olunur…"
+
+msgctxt "profile.rim"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+
+msgctxt "profile.rim"
+msgid "Hansı hesab növünü yaradırsınız?"
+msgstr "Hansı hesab növünü yaradırsınız?"
+
+msgctxt "profile.rim"
+msgid "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+msgstr "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+
+msgctxt "profile.rim"
+msgid "Hesab yaradıldı."
+msgstr "Hesab yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Hesabı yarat"
+msgstr "Hesabı yarat"
+
+msgctxt "profile.rim"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "profile.rim"
+msgid "Kafedra nəticələri"
+msgstr "Kafedra nəticələri"
+
+msgctxt "profile.rim"
+msgid "Kafedranın adını yazın"
+msgstr "Kafedranın adını yazın"
+
+msgctxt "profile.rim"
+msgid "Kişi"
+msgstr "Kişi"
+
+msgctxt "profile.rim"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "profile.rim"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabı yaradıldı."
+msgstr "Müəllim hesabı yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+msgstr "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+
+msgctxt "profile.rim"
+msgid "Parolları CSV kimi endir"
+msgstr "Parolları CSV kimi endir"
+
+msgctxt "profile.rim"
+msgid "Qadın"
+msgstr "Qadın"
+
+msgctxt "profile.rim"
+msgid "Qeyd (audit üçün)"
+msgstr "Qeyd (audit üçün)"
+
+msgctxt "profile.rim"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "profile.rim"
+msgid "Qrup nəticələri"
+msgstr "Qrup nəticələri"
+
+msgctxt "profile.rim"
+msgid "Qrupun adını və ya kodunu yazın"
+msgstr "Qrupun adını və ya kodunu yazın"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi"
+msgstr "Quru icra nəticəsi"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Quru icra nəticəsi (heç nə yazılmadı)"
+
+msgctxt "profile.rim"
+msgid "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+msgstr "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "profile.rim"
+msgid "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+msgstr "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+
+msgctxt "profile.rim"
+msgid "Sətir"
+msgstr "Sətir"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal (tələbə siyahısı)"
+msgstr "Toplu idxal (tələbə siyahısı)"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal — tələbə siyahısı"
+msgstr "Toplu idxal — tələbə siyahısı"
+
+msgctxt "profile.rim"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "profile.rim"
+msgid "Tələbə hesabı yaradıldı."
+msgstr "Tələbə hesabı yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Tələbə kodu"
+msgstr "Tələbə kodu"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et ({n} hesab)"
+msgstr "Tətbiq et ({n} hesab)"
+
+msgctxt "profile.rim"
+msgid "Tətbiq nəticəsi"
+msgstr "Tətbiq nəticəsi"
+
+msgctxt "profile.rim"
+msgid "Təyin edilməyib"
+msgstr "Təyin edilməyib"
+
+msgctxt "profile.rim"
+msgid "Təşkilatdakı yeri"
+msgstr "Təşkilatdakı yeri"
+
+msgctxt "profile.rim"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "profile.rim"
+msgid "Xəta"
+msgstr "Xəta"
+
+msgctxt "profile.rim"
+msgid "Yaradılacaq"
+msgstr "Yaradılacaq"
+
+msgctxt "profile.rim"
+msgid "Yaradıldı"
+msgstr "Yaradıldı"
+
+msgctxt "profile.rim"
+msgid "Yaradılır…"
+msgstr "Yaradılır…"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab"
+msgstr "Yeni hesab"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaradın"
+msgstr "Yeni hesab yaradın"
+
+msgctxt "profile.rim"
+msgid "Yeni müəllim hesabı"
+msgstr "Yeni müəllim hesabı"
+
+msgctxt "profile.rim"
+msgid "Yeni tələbə hesabı"
+msgstr "Yeni tələbə hesabı"
+
+msgctxt "profile.rim"
+msgid "Yoxla (quru icra)"
+msgstr "Yoxla (quru icra)"
+
+msgctxt "profile.rim"
+msgid "Ötürüldü"
+msgstr "Ötürüldü"
+
+msgctxt "profile.rim"
+msgid "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+msgstr "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+
+msgctxt "profile.rim"
+msgid "İzah"
+msgstr "İzah"
+
+msgctxt "profile.rim"
+msgid "İşçi kodu"
+msgstr "İşçi kodu"
+
+msgctxt "profile.rim"
+msgid "Şəxsi məlumat"
+msgstr "Şəxsi məlumat"
+
+msgctxt "profile.rim"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı. Yenidən cəhd edin."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+msgstr "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Əvvəlcə fayl seçin."
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+msgstr "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+
+msgctxt "profile.rim"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "profile.rim"
+msgid "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+msgstr "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+
+msgctxt "profile.rim"
+msgid "Formda düzəliş tələb olunan sahələr var."
+msgstr "Formda düzəliş tələb olunan sahələr var."
+
+msgctxt "profile.rim"
+msgid "Naməlum hesab növü."
+msgstr "Naməlum hesab növü."
+
+msgctxt "profile.rim"
+msgid "FİN boşdur."
+msgstr "FİN boşdur."
+
+msgctxt "profile.rim"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+msgstr "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+
+msgctxt "profile.rim"
+msgid "Ad məcburidir."
+msgstr "Ad məcburidir."
+
+msgctxt "profile.rim"
+msgid "Soyad məcburidir."
+msgstr "Soyad məcburidir."
+
+msgctxt "profile.rim"
+msgid "Ən çox %(n)s simvol ola bilər."
+msgstr "Ən çox %(n)s simvol ola bilər."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Doğum tarixi məntiqsizdir."
+
+msgctxt "profile.rim"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Cins tanınmadı — «təyin edilməyib» qalır."
+
+msgctxt "profile.rim"
+msgid "Qrup seçilməyib və ya tapılmadı."
+msgstr "Qrup seçilməyib və ya tapılmadı."
+
+msgctxt "profile.rim"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+
+msgctxt "profile.rim"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+msgstr "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Qəbul ili rəqəm olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Qəbul ili 1950–%d aralığında olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Kafedra tapılmadı."
+msgstr "Kafedra tapılmadı."
+
+msgctxt "profile.rim"
+msgid "Bu kod artıq istifadə olunub."
+msgstr "Bu kod artıq istifadə olunub."
+
+msgctxt "profile.rim"
+msgid "E-poçt formatı yanlışdır."
+msgstr "E-poçt formatı yanlışdır."
+
+msgctxt "profile.rim"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+
+msgctxt "profile.rim"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "E-poçt artıq istifadə olunur — placeholder yazılır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Auditoriya adı 64 simvoldan uzun ola bilməz."
+msgstr "Auditoriya adı 64 simvoldan uzun ola bilməz."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məcburidir."
+msgstr "Doğum tarixi məcburidir."

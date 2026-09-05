@@ -36,10 +36,25 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
     {% else %}
 
     <div class="rim-head">
-      <h2 class="rim-title">
-        <i class="fas fa-id-card-alt"></i>
-        {% trans "RİM mərkəzi" context "profile.rim" %}
-      </h2>
+      <div class="rim-head__bar">
+        <h2 class="rim-title">
+          <i class="fas fa-id-card-alt"></i>
+          {% trans "RİM mərkəzi" context "profile.rim" %}
+        </h2>
+        {% comment %}
+          Yaratma səlahiyyəti (`user.import`) AYRICA açardır: axtarış/parol
+          səlahiyyəti olan hər operator yeni kimlik yarada bilməz. Düymənin
+          görünməsi UI rahatlığıdır — FAKTİKİ qapı serverdədir
+          (services/rim/create.py::require_create).
+        {% endcomment %}
+        {% if rim_center_section.can_create %}
+        <button type="button" class="ems-btn ems-btn--primary rim-head__cta"
+                data-ems-overlay-open="rimc-chooser">
+          <i class="fas fa-user-plus" aria-hidden="true"></i>
+          {% trans "Yeni hesab" context "profile.rim" %}
+        </button>
+        {% endif %}
+      </div>
       <p class="rim-lead">
         {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" %}
       </p>
@@ -88,6 +103,15 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
         </button>
       </div>
     </div>
+
+    {% comment %}
+      «Yeni hesab» axını (tək-tək form + toplu idxal) — dialoqlar PANELİN
+      İÇİNDƏDİR ki, AJAX swap-dan sonra itməsin. Markup ayrı partial-dadır:
+      bu fayl axtarış/idarəetmə səthidir, o isə yaratma səthi.
+    {% endcomment %}
+    {% if rim_center_section.can_create %}
+      {% include "accounts/profile/sections/partials/_rim_create.html" %}
+    {% endif %}
 
     <div class="rim-results" data-rim-results aria-live="polite">
       <div class="rim-state">

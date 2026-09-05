@@ -132,7 +132,7 @@ from .profile import (
     view_as_start,
     view_as_stop,
 )
-from .rim import rim_action, rim_user_detail, rim_user_search
+from .rim import rim_action, rim_create_account, rim_create_catalog, rim_user_detail, rim_user_search
 
 # Role management views
 from .roles import (
@@ -277,6 +277,8 @@ __all__ = [
     "rim_user_search",
     "rim_user_detail",
     "rim_action",
+    "rim_create_account",
+    "rim_create_catalog",
     # Sillabus — müəllim səthi (autosave / əməllər / baxış paneli)
     "syllabus_action",
     "syllabus_decision",
