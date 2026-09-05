@@ -273,10 +273,22 @@
     color: var(--ems-neutral-500);
 }
 
-/* «Rəhbəri olmayan bölmə» — vurğulanır (ekran 01 xüsusi vəziyyəti). */
+/* «Rəhbəri olmayan bölmə» — vurğulanır (ekran 01 xüsusi vəziyyəti).
+   QA 2026-09-06: 31 bölmə eyni anda bayraqlı ola bilir; tam sarı fon bütün
+   ağacı «seçilmiş» kimi göstərirdi. İndi nazik sol zolaq + çox açıq fon. */
 .ems-tree__row--flagged {
-    background: var(--ems-warning-bg);
+    background: color-mix(in srgb, var(--ems-warning-bg) 45%, transparent);
     color: var(--ems-warning-800);
+    box-shadow: inset 3px 0 0 var(--ems-warning-500);
+}
+
+/* SEÇİM həmişə bayraqdan güclüdür (QA 2026-09-06: seçilmiş sətir bayraqlı
+   olanda heç bir vizual dəyişiklik olmurdu — istifadəçi «seçmir» deyirdi). */
+.ems-tree__row[aria-selected="true"],
+.ems-tree__row--flagged[aria-selected="true"] {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
 }
 
 @media (max-width: 768px) {
