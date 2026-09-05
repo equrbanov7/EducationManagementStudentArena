@@ -65045,3 +65045,6 @@ msgstr "Предыдущие занятия"
 msgctxt "accounts.a11y"
 msgid "Seç"
 msgstr "Выбрать"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s ячеек не сохранено — балл должен быть целым числом от 0 до 10."

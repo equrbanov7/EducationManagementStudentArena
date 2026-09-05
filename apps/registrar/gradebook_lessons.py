@@ -13,6 +13,7 @@ halı ``UNSET`` sentineli ilə ayrılır.
 from __future__ import annotations
 
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone
@@ -22,6 +23,7 @@ from apps.registrar.models import Lesson, LessonKind, LessonMark
 
 from .gradebook import (  # noqa: F401
     DEFAULT_LESSON_HOURS,
+    LESSON_SCORE_MAX,
     UNSET,
     LessonRuleError,
     can_edit_lesson,
@@ -48,6 +50,25 @@ def _coerce_date(value):
 #: (500) verirdi (QA 2026-09-05 JOURNAL-TEACHER-01). Həm yaratma, həm yeniləmə yolu
 #: buradan keçir.
 MAX_TOPIC_LENGTH = Lesson._meta.get_field("topic").max_length or 255
+
+
+def parse_lesson_score(raw):
+    """Xana balı — düzgün deyilsə ``None`` (SƏSSİZ 0 YAZILMIR).
+
+    QA 2026-09-05 (P3-10): `'abc'` → 0, `-3` → 0, `11` → 10, `7.5` → 7.50 kimi
+    səssiz çevrilirdi; yazı səhvi tələbəyə SIFIR bal yazırdı. Bal tam ədəddir
+    (bax akademik qayda: bütöv qiymətlər) və 0..``LESSON_SCORE_MAX`` aralığındadır;
+    kənar dəyər YAZILMIR — çağıran tərəf istifadəçiyə xəbər verir.
+    """
+    try:
+        value = Decimal(str(raw).strip())
+    except (InvalidOperation, TypeError, ValueError, AttributeError):
+        return None
+    if value != value.to_integral_value():
+        return None
+    if value < 0 or value > LESSON_SCORE_MAX:
+        return None
+    return value.to_integral_value()
 
 
 def clean_topic(topic) -> str:

@@ -115,7 +115,7 @@ def absence_limit_percent_for(offering) -> int:
 
 
 @transaction.atomic
-def save_marks(*, offering, entries, by_user=None, enforce_day=True):
+def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
     ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
@@ -124,9 +124,14 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     (locked cells are skipped) and the lesson type (lecture cells never store a
     score). Blocked entirely when the journal is locked. Returns cells written.
     ``enforce_day=False`` YALNIZ seed/test üçündür — HTTP qatı heç vaxt ötürmür.
+    ``report=True`` → ``{"written", "rejected"}`` (yazılmayan xanaların sayı ilə;
+    çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10).
     """
     if journal_is_locked(offering):
-        return 0
+        return {"written": 0, "rejected": 0} if report else 0
+
+    # Çağırış vaxtı idxal: `gradebook_lessons` bu moduldan idxal edir (dövr).
+    from apps.registrar.gradebook_lessons import parse_lesson_score as _parse_score
 
     lessons = {str(latt.id): latt for latt in offering.lessons.all()}
     enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
@@ -144,6 +149,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     prior_hours = {e.id: e.absence_hours for e in enrollments.values()}
 
     written = 0
+    rejected = 0
     touched = set()
     audit_changes = []
     notify_events = []
@@ -167,9 +173,13 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
             status = AttendanceStatus.PRESENT
         score = None
         if status != AttendanceStatus.ABSENT and lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
-            # Seminar/lab balı: min 0, max 10 (sərt tavan). Qayıb tələbəyə bal
-            # yazılmır — «q/b + 8 bal» xanası mümkün idi (QA 2026-09-05 JOURNAL-TEACHER-09).
-            score = min(max(Decimal("0"), _to_decimal(entry.get("score"))), LESSON_SCORE_MAX)
+            # Seminar/lab balı: tam ədəd, 0..10. Qayıb tələbəyə bal yazılmır —
+            # «q/b + 8 bal» xanası mümkün idi (QA 2026-09-05 JOURNAL-TEACHER-09).
+            score = _parse_score(entry.get("score"))
+            if score is None:
+                # Səhv dəyər SƏSSİZ 0-a çevrilmir — xana toxunulmadan qalır (P3-10).
+                rejected += 1
+                continue
 
         old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
         old_status = mark.status if mark is not None and mark.pk else None
@@ -224,7 +234,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
         from apps.registrar import journal_notifications as jn
 
         _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
-    return written
+    return {"written": written, "rejected": rejected} if report else written
 
 
 def _mark_repr(status, score) -> str:
