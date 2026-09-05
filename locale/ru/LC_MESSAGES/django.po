@@ -64994,3 +64994,6 @@ msgstr "Журнал появится после зачисления в гру�
 msgctxt "exams.view.bank.message"
 msgid "Bank adı ən çox %(n)s simvol ola bilər."
 msgstr "Название банка — не более %(n)s символов."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены."

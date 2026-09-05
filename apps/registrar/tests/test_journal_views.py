@@ -373,9 +373,24 @@ class JournalFinalsViewTest(JournalViewTest):
             reverse("registrar:journal_detail", args=[self.offering.id]),
             {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
         )
-        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 302)  # bonus/rəy (U15) müəllimindir — əməl bütövlükdə rədd edilmir
         with bypass_rls():
             self.assertFalse(FinalGrade.objects.filter(enrollment=self.enrollment, exam_score=42).exists())
+
+    def test_teacher_can_still_save_bonus_and_comment(self):
+        """Bal qapısı bonus/rəyi bağlamamalıdır (U15 müəllim səthidir)."""
+        from apps.registrar.models import FinalGrade
+
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_finals", f"bonus__{self.enrollment.id}": "5", f"fcomment__{self.enrollment.id}": "Əla"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            fg = FinalGrade.objects.get(enrollment=self.enrollment)
+            self.assertEqual(str(fg.bonus), "5.00")
+            self.assertEqual(fg.comment, "Əla")
 
     def test_superuser_instructor_can_still_record_exam_score(self):
         from apps.registrar.models import FinalGrade

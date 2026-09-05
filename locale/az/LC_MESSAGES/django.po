@@ -64661,3 +64661,6 @@ msgstr "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərin�
 msgctxt "exams.view.bank.message"
 msgid "Bank adı ən çox %(n)s simvol ola bilər."
 msgstr "Bank adı ən çox %(n)s simvol ola bilər."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
