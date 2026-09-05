@@ -163,9 +163,16 @@ def student_admission_create_group(request):
     if organization is None or not actor.can_assign_groups:
         return _denied()
 
+    import uuid
+
+    try:
+        specialty_pk = uuid.UUID((request.POST.get("specialty") or "").strip())
+    except ValueError:
+        # Qeyri-UUID dəyər `filter(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 STUDENT-MGMT-01).
+        specialty_pk = None
     specialty = OrgUnit.objects.filter(
         organization=organization,
-        pk=(request.POST.get("specialty") or "").strip() or None,
+        pk=specialty_pk,
         unit_type=OrgUnitType.SPECIALTY,
         is_active=True,
     ).first()
