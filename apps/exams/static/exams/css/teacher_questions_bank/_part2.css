@@ -198,7 +198,7 @@
 .qb-card__num {
     flex: 0 0 auto;
     font-weight: 800;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 0.86rem;
 }
 .qb-card .qb-question-text { margin: 0; }
@@ -237,7 +237,7 @@
     font-size: 0.76rem;
 }
 .qb-chip-tag--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-500); }
-.qb-card__date { font-size: 0.78rem; color: var(--ems-neutral-400); }
+.qb-card__date { font-size: 0.78rem; color: var(--ems-neutral-500); }
 .qb-card__date i { margin-right: 4px; }
 
 /* ---- Variant grid ---- */

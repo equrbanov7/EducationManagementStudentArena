@@ -253,7 +253,7 @@
     justify-content: center;
     width: 16px;
     flex: none;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     transition: transform 0.12s ease;
 }
 
@@ -270,7 +270,7 @@
     margin-left: auto;
     font-size: var(--ems-fs-sm);
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* «Rəhbəri olmayan bölmə» — vurğulanır (ekran 01 xüsusi vəziyyəti). */

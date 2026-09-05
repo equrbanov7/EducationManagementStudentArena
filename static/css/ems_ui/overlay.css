@@ -189,7 +189,7 @@
 /* Siyasətə zidd variant gizlədilmir — izah edilir (handoff ekran 19). */
 .ems-pick.is-disabled {
     background: var(--ems-neutral-50);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 
@@ -200,7 +200,7 @@
 }
 
 .ems-pick.is-disabled .ems-pick__title {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .ems-pick__note {

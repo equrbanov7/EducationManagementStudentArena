@@ -64997,3 +64997,9 @@ msgstr "Название банка — не более %(n)s символов."
 
 msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
 msgstr "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены."
+
+msgid "Standart format"
+msgstr "Формат по умолчанию"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Формат вопроса по умолчанию (можно изменить при добавлении вопроса)."

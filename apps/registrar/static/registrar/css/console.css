@@ -117,7 +117,7 @@
 }
 
 .console-empty { padding: 2rem 1rem; text-align: center; color: var(--ems-neutral-500); }
-.console-empty i { font-size: 1.6rem; color: var(--ems-neutral-400); margin-bottom: 0.4rem; }
+.console-empty i { font-size: 1.6rem; color: var(--ems-neutral-500); margin-bottom: 0.4rem; }
 .console-empty p { margin: 0; }
 
 /* Form card */
@@ -210,7 +210,7 @@
 .plan-row-del button {
     background: transparent;
     border: none;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: pointer;
     font-size: 0.75rem;
     padding: 2px 5px;

@@ -345,14 +345,14 @@
 
 .filter-chip[disabled] {
     opacity: 1;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     background: var(--ems-neutral-50);
     border-color: #edf2f7;
     cursor: not-allowed;
 }
 
 .filter-chip[disabled] i {
-    color: var(--ems-neutral-400) !important;
+    color: var(--ems-neutral-500) !important;
 }
 
 .filter-chip__count {
@@ -438,7 +438,7 @@
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 }
 
-.filter-toolbar__search i { color: var(--ems-neutral-400); font-size: 0.85rem; }
+.filter-toolbar__search i { color: var(--ems-neutral-500); font-size: 0.85rem; }
 
 .filter-toolbar__search input {
     border: none;

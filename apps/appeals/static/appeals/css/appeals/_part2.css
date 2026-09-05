@@ -52,7 +52,7 @@
     top: 50%;
     left: 14px;
     transform: translateY(-50%);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     pointer-events: none;
 }
 
@@ -472,7 +472,7 @@
     line-height: 1;
 }
 
-.appeal-stat-tile--pending { border-left-color: var(--ems-neutral-400); }
+.appeal-stat-tile--pending { border-left-color: var(--ems-neutral-500); }
 .appeal-stat-tile--under_review { border-left-color: var(--ems-warning-500); }
 .appeal-stat-tile--accepted { border-left-color: #22c55e; }
 .appeal-stat-tile--rejected { border-left-color: var(--ems-danger-500); }
@@ -562,7 +562,7 @@
 
 .appeal-score-summary__arrow {
     align-self: center;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 1.1rem;
 }
 

@@ -170,7 +170,7 @@
 .org-management__form input:disabled,
 .org-management__form select:disabled {
     background: var(--ems-neutral-50);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .org-management__submit {
@@ -392,7 +392,7 @@
 }
 
 .org-management__muted-cell {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .org-management__actions {

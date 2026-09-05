@@ -459,7 +459,7 @@
 .appeal-empty i {
     display: block;
     margin-bottom: 12px;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 2rem;
 }
 

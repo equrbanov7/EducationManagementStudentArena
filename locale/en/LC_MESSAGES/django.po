@@ -64849,3 +64849,9 @@ msgstr "The bank name may be at most %(n)s characters."
 
 msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
 msgstr "Only the Examination Centre may record exam/resit scores — those fields were not saved."
+
+msgid "Standart format"
+msgstr "Default format"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Default question format (you can change it when adding a question)."
