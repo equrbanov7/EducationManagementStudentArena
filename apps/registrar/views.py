@@ -58,17 +58,6 @@ def journal_list(request):
 _JOURNAL_TABS = ("grid", "kollokvium", "kurs-isi", "serbest", "yekun")
 
 
-def _kollokvium_columns_only(offering):
-    """Kollokvium XƏBƏRDARLIQ lenti üçün yalnız sütun meta (sətirsiz).
-
-    Lent hər tabda görünür, amma 555 sətirlik grid yalnız öz tabında lazımdır.
-    """
-    from apps.registrar import journal_extras as _je
-
-    grid = _je.get_kollokvium_grid(offering)
-    return {**grid, "rows": []} if isinstance(grid, dict) else grid
-
-
 @login_required
 def journal_detail(request, offering_id):
     """Lesson-by-lesson journal for one offering: view (GET) + edit (POST).
@@ -130,20 +119,11 @@ def journal_detail(request, offering_id):
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
-    from apps.registrar import journal_close_notices, journal_extras, journal_policy
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
     from apps.registrar import journal_window as _jw
-    from apps.registrar import syllabus_notice
 
-    try:
-        window_size = int(request.GET.get("lw", _jw.DEFAULT_LESSON_WINDOW))
-    except (TypeError, ValueError):
-        window_size = _jw.DEFAULT_LESSON_WINDOW
-    if window_size and window_size not in _jw.WINDOW_CHOICES:
-        window_size = _jw.DEFAULT_LESSON_WINDOW
-    try:
-        window_offset = int(request.GET.get("lo", 0))
-    except (TypeError, ValueError):
-        window_offset = 0
+    window_size, window_offset = _jw.resolve_request_window(request)
+
     # AKTİV TAB (P1-8): əvvəl beş tabın hamısı — hər biri 555 sətirlik cədvəl —
     # eyni HTML-ə render olunurdu. İndi yalnız aktiv tabın datası qurulur.
     active_tab = request.GET.get("jt", "grid")
@@ -202,7 +182,7 @@ def journal_detail(request, offering_id):
         "kollokvium_grid": (
             journal_extras.get_kollokvium_grid(offering)
             if active_tab == "kollokvium"
-            else _kollokvium_columns_only(offering)
+            else journal_extras.kollokvium_columns_only(offering)
         ),
         "selfwork_board": journal_extras.get_selfwork_board(offering) if active_tab == "serbest" else None,
         "coursework_rows": coursework_rows,

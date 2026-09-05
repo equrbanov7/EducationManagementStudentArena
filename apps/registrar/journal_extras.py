@@ -581,3 +581,12 @@ def lesson_teacher_choices(offering):
         ids.add(offering.instructor_id)
     users = get_user_model().objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
     return [{"id": str(u.id), "name": (u.get_full_name() or "").strip() or u.username} for u in users]
+
+
+def kollokvium_columns_only(offering):
+    """Kollokvium XƏBƏRDARLIQ lenti üçün yalnız sütun meta (sətirsiz).
+
+    Lent hər tabda görünür, amma 555 sətirlik grid yalnız öz tabında lazımdır.
+    """
+    grid = get_kollokvium_grid(offering)
+    return {**grid, "rows": []} if isinstance(grid, dict) else grid

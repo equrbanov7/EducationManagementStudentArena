@@ -83,4 +83,31 @@ def lesson_summaries(lessons, enrollments, mark_map, total_students: int) -> dic
     return summary
 
 
-__all__ = ["DEFAULT_LESSON_WINDOW", "WINDOW_CHOICES", "lesson_summaries", "resolve_window", "window_meta"]
+def resolve_request_window(request):
+    """`?lw=` (pəncərə ölçüsü) və `?lo=` (başlanğıc) — təhlükəsiz oxunuş.
+
+    Naməlum ölçü default-a düşür (`?lw=0` = «hamısını göstər»), zibil dəyər
+    istisna vermir. View-dan ayrıdır ki, jurnal görünüşü modul büdcəsini
+    aşmasın (QA 2026-09-05 P1-8).
+    """
+    try:
+        size = int(request.GET.get("lw", DEFAULT_LESSON_WINDOW))
+    except (TypeError, ValueError):
+        size = DEFAULT_LESSON_WINDOW
+    if size and size not in WINDOW_CHOICES:
+        size = DEFAULT_LESSON_WINDOW
+    try:
+        offset = int(request.GET.get("lo", 0))
+    except (TypeError, ValueError):
+        offset = 0
+    return size, offset
+
+
+__all__ = [
+    "DEFAULT_LESSON_WINDOW",
+    "WINDOW_CHOICES",
+    "lesson_summaries",
+    "resolve_request_window",
+    "resolve_window",
+    "window_meta",
+]
