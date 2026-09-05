@@ -152,8 +152,9 @@ def detail_payload(application, *, user) -> dict:
     """Detal paneli (dizayn §4.7) — icazəyə görə süzülmüş zaman xətti."""
     is_handler = access.can_act(user, application)
     is_sender = access.is_sender(user, application)
+    sees_internal = is_handler or access.can_see_internal(user, application)
     events = application.events.select_related("actor", "from_unit", "to_unit").prefetch_related("attachments")
-    timeline = [event_payload(event) for event in events if is_handler or not event.is_internal]
+    timeline = [event_payload(event) for event in events if sees_internal or not event.is_internal]
     return {
         **row_payload(application, viewer_is_handler=is_handler),
         "body": application.body,

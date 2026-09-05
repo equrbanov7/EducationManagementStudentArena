@@ -444,6 +444,16 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
     if not scope.has_structure_access:
         return {"has_access": False, "summary": _public_summary(_empty_summary()), "year_options": []}
 
+    # Org-səviyyəli aktor üçün 7 800 tələbənin bütün yazılışları qiymətləndirilir
+    # (7.8–9.5 s, QA 2026-09-05 P2-19). Box-lar səhifəyə görə dəyişmir → qısa TTL keş;
+    # açar aktorun əhatəsi + süzgəclərdir, istifadəçi adı deyil (eyni əhatə eyni rəqəm).
+    from django.core.cache import cache
+
+    cache_key = _summary_cache_key(organization, scope, filters)
+    cached = cache.get(cache_key) if cache_key else None
+    if cached is not None:
+        return cached
+
     records = _scoped_records(organization, scope, filters)
     period_ids = _period_ids_for(organization, filters.get("year"), filters.get("season"))
 
@@ -453,11 +463,36 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
         organization, _enrollment_qs(organization, records.order_by().values("student_id"), period_ids)
     ):
         _accumulate(box, result)
-    return {
+    payload = {
         "has_access": True,
         "summary": _public_summary(box),
         "year_options": _year_options(organization),
     }
+    if cache_key:
+        cache.set(cache_key, payload, SUMMARY_CACHE_TTL)
+    return payload
+
+
+#: Xülasə box-larının keş müddəti (saniyə) — bal yazıları bir neçə dəqiqə gecikə bilər.
+SUMMARY_CACHE_TTL = 300
+
+
+def _summary_cache_key(organization, scope, filters) -> str:
+    import hashlib
+    import json
+
+    try:
+        raw = json.dumps(
+            {
+                "org": str(getattr(organization, "pk", "")),
+                "scope": [scope.scope_type, sorted(str(u) for u in (scope.unit_ids or ()))],
+                "filters": {k: str(v) for k, v in sorted((filters or {}).items()) if v},
+            },
+            sort_keys=True,
+        )
+    except (TypeError, ValueError):
+        return ""
+    return "academic_records:summary:" + hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
 
 def build_records_overview(

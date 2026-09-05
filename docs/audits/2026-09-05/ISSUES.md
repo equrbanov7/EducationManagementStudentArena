@@ -41,10 +41,14 @@ Sübut qovluğu: `~/EMSArena-backups/qa-2026-09-05/` (crawl JSON, ekran görünt
 | P2-16 | registrar (jurnal) | `save_marks` | müəllim | Qayıb (absent) işarəsi ilə birlikdə bal saxlanırdı — q/b tələbədə 8 bal görünürdü | `gradebook.save_marks` status/score müstəqil | FIXED: absent → score=None |
 | P2-17 | registrar (jurnal) | başlıq «Keçirilmiş: 22/45 saat» | müəllim | Gələcək tarixli dərslər (2027, 2099) «keçirilmiş» sayılırdı | `journal_extras.journal_teaching_summary` tarixə baxmırdı | FIXED: `held_total` yalnız bu günə qədər; `scheduled_total` saat həddi üçün |
 | P2-18 | registrar (jurnal) | korrektor siyahısı | RİM | Jurnal siyahısı 3.4–4.2 s (COUNT FILTER 0.74 s + DISTINCT lesson 0.40 s) | aqreqat sorğular | OPEN |
-| P2-19 | accounts | `academic-records` summary | org-səviyyəli rollar | `/accounts/profile/academic-records/summary/` 7.8–9.5 s (32 SQL; 7 802 tələbənin enrollment SUM-ları Python-da yığılır) — P2-4-ün kök səbəbi | `services/academic_records.py` summary | OPEN (GROUP BY student + keş; UI-da gecikmiş yüklənmə) |
+| P2-19 | accounts | `academic-records` summary | org-səviyyəli rollar | `/accounts/profile/academic-records/summary/` 7.8–9.5 s (32 SQL; 7 802 tələbənin enrollment SUM-ları Python-da yığılır) — P2-4-ün kök səbəbi | `accounts/academic_records.py build_records_summary` — `_evaluate_all` bütün yazılışları Python-da qiymətləndirir | QİSMƏN: 5 dəq TTL keş (əhatə+süzgəc açarı) — ilk açılış yenə ağır, sonrakılar ani; kök həll (GROUP BY student) OPEN |
 | P2-20 | syllabus | `copy` əməli | müəllim | Eyni dövr üçün ikinci (açılışsız) sillabus dosyesi yaranır — bir fənn/dövr üçün paralel dosye | `services.copy_from_previous` offering-suz dosye | OPEN (sahib qərarı: copy mövcud açılışın dosyesinə yazsın) |
 | P2-21 | applications | müraciət mətni | tələbə | Mətnin maksimum uzunluğu yoxdur — 2 MB qəbul olunur | `validate_text` yalnız MIN_* | FIXED: MAX_BODY_LENGTH=20000, MAX_SUBJECT_LENGTH=255; test |
 | P2-22 | registrar (qruplar) | «Yeni qrup yarat» | TŞ | qeyri-UUID `specialty` → HTTP 500 | `student_intake.py:166` UUID yoxlanmırdı | FIXED: qeyri-UUID → 404 `specialty_not_found`; test |
+| P2-23 | applications | `action=assign` | RİM | Boş/qeyri-rəqəm `assignee` → 500 ValueError (HTML) | `views/endpoints.py:129` `filter(pk='abc')` | FIXED: int parse → assignee None → xidmət qatı xətası (JSON) |
+| P2-24 | applications | yönləndirmə | emalçılar | Hədəf şöbənin vahid-əhatəli emalçısı bildiriş almırdı (inbox-da görünür, xəbər getmir) | `notify.handler_recipients` scope=None → yalnız org-səviyyəli rollar | FIXED (P1-9 ilə eyni dəyişiklik) |
+| P2-25 | applications | detal — daxili qeydlər | emalçılar | Müraciət həll/bağlanandan və ya yönləndiriləndən sonra emalçı ÖZ daxili qeydini də görmürdü | `payloads.detail_payload` süzgəci `can_act` (statusa bağlı) idi | FIXED: `access.can_see_internal` (statusdan asılı olmayan görmə hüququ) |
+| P2-26 | applications | `applications` bölməsi | hamı | 80–86 sorğu / 37–42 dublikat: hər müraciət növü üçün `ApplicationUnit` (19×) və `Membership` (16–26×) təkrar sorğu | `public.build_applications_context` → `route_for` → `unit_by_code` hər növdə | OPEN (units dict-i bir dəfə çəkib `route_for`-a ötür; `_active_memberships` keş) |
 | P2-7 | accounts | `org-members` (imtahan mərkəzi 9 s), `student-organization-management` (RİM 1.3 s / dekan 3.5 s), `my-exams` (3 s), `student-admission` (3–9 s) | müxtəlif | Yavaş bölmələr (brauzer ölçüsü, yük altında) | ölçülür | OPEN |
 
 ## P3 — cilalama
@@ -66,6 +70,8 @@ Sübut qovluğu: `~/EMSArena-backups/qa-2026-09-05/` (crawl JSON, ekran görünt
 | P3-15 | syllabus | autosave | müəllim | Validasiya xətaları (çəki bölgüsü, sərbəst iş variantı) 403 ilə qayıdırdı | api.py | FIXED: `assess.*`/`self.*`/`section.*` → 400 |
 | P3-16 | syllabus | tələbə kabineti | tələbə | «Sillabusa bax» yalnız cari dövrün fənləri üçün; başqa dövrün aktiv qeydiyyatı üçün keçid yoxdur | my-subjects | OPEN |
 | P3-17 | applications | mövzu/fayl | tələbə | Mövzu 255+ səssiz kəsilir (FIXED: 255+ → xəta); 5-dən çox fayl səssiz atılır; uzantı üçün məzmun imzası yoxlanmır (HTML məzmunlu .png) | form | QİSMƏN (fayl sayı/imza OPEN) |
+| P3-18 | applications | göndəriş | tələbə | Eyni mövzu+mətn ilə ardıcıl ikiqat göndəriş iki müraciət yaradır | dublikat qoruması yoxdur | OPEN |
+| P3-19 | applications | detal GET | emalçı | GET detal statusu dəyişir (submitted→in_review + hadisə) — yan-təsirli GET; ləğv olunmuşda `mark_seen` 200 | dizayn qərarı | OPEN |
 | P3-3 | accounts (test) | `apps/accounts/tests/test_people_directory.py::RowShapeTest` | — | sqlite-də 2 test HEAD-də də (adb7e07f) düşür (`faculty_name '' != 'Fakültə A'`); Postgres-də 10/10 keçir (agent yoxladı) — backend-asılı test, reqressiya deyil | path/ancestor SQL sqlite-də fərqli | WONTFIX (CI Postgres-dədir) |
 
 ## Təhlükəsizlik matrisi (scripts/qa_live/security_matrix.py, 14 hesab × menyuda olmayan bütün bölmələr)

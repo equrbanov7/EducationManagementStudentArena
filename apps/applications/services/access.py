@@ -158,6 +158,26 @@ def can_act(user, application) -> bool:
     return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
 
 
+def can_see_internal(user, application) -> bool:
+    """Daxili qeydləri GÖRMƏ hüququ — statusdan ASILI DEYİL (QA 2026-09-05 APPLICATIONS-08).
+
+    ``can_act`` (qərar hüququ) müraciət bağlananda/yönləndiriləndə False olur və
+    emalçı ÖZ yazdığı daxili qeydi də görmürdü. Görmə: superuser, `application.manage`
+    daşıyıcısı, cari şöbənin emalçısı və ya izləyən (watch) şöbənin emalçısı.
+    """
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    organization = application.organization
+    if has_app_permission(user, organization, PERM_MANAGE):
+        return True
+    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+        return True
+    for watch in application.watches.select_related("unit", "scope_unit"):
+        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+            return True
+    return False
+
+
 def is_sender(user, application) -> bool:
     return bool(user and getattr(user, "is_authenticated", False) and application.created_by_id == user.pk)
 

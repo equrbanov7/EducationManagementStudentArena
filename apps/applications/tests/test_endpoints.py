@@ -279,3 +279,25 @@ def test_disallowed_extension_is_rejected(world):
     )
     assert response.status_code == 400
     assert not ApplicationAttachment.objects.exists()
+
+
+def test_internal_notes_stay_visible_to_the_handler_after_the_case_is_closed(world, application):
+    """QA 2026-09-05 APPLICATIONS-08: emalçı öz daxili qeydini müraciət bağlanandan sonra da görməlidir."""
+    workflow.mark_seen(application=application, user=world["coordinator"])
+    workflow.add_comment(application=application, user=world["coordinator"], text="Daxili qeyd", is_internal=True)
+    client = client_for(world["coordinator"], world["organization"])
+    url = reverse("applications:action", kwargs={"application_id": application.pk})
+    assert client.post(url, {"action": "resolve", "text": "Həll olundu, sənəd verildi."}).status_code == 200
+    payload = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert any(event["is_internal"] for event in payload["application"]["events"])
+
+
+def test_assign_with_an_invalid_assignee_is_a_json_error_not_a_500(world, application):
+    """QA 2026-09-05 APPLICATIONS-06: `assignee=abc` `filter(pk=...)` ValueError ilə 500 verirdi."""
+    client = client_for(world["coordinator"], world["organization"])
+    url = reverse("applications:action", kwargs={"application_id": application.pk})
+    client.post(url, {"action": "mark_seen"})
+    for bad in ("abc", "", "1 OR 1=1"):
+        response = client.post(url, {"action": "assign", "assignee": bad, "text": "Təyinat sınağı üçün qeyd."})
+        assert response.status_code < 500, bad
+        assert response["Content-Type"].startswith("application/json"), bad

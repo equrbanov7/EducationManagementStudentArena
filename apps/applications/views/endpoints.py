@@ -127,7 +127,13 @@ def _action_kwargs(request, organization, action):
     if action == Action.ASSIGN:
         from django.contrib.auth import get_user_model
 
-        assignee = get_user_model().objects.filter(pk=(request.POST.get("assignee") or "").strip()).first()
+        raw_assignee = (request.POST.get("assignee") or "").strip()
+        try:
+            assignee_pk = int(raw_assignee)
+        except ValueError:
+            # 'abc' / boş → `filter(pk=...)` ValueError ilə 500 verirdi (QA 2026-09-05 APPLICATIONS-06).
+            assignee_pk = None
+        assignee = get_user_model().objects.filter(pk=assignee_pk).first() if assignee_pk is not None else None
         return {"assignee": assignee, "note": text}
     if action == Action.ADD_COMMENT:
         return {
