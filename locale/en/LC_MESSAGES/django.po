@@ -64836,3 +64836,13 @@ msgstr "First/last/patronymic name may be at most %(n)s characters."
 msgctxt "student_intake"
 msgid "sahə uzunluğu həddi keçildi"
 msgstr "field length limit exceeded"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Your academic record has not been created yet."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "The journal appears after enrolment in a group — contact student services."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "The bank name may be at most %(n)s characters."

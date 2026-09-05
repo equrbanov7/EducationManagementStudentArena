@@ -9,6 +9,8 @@ Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin �
          data-source-url="{{ profile_base_url }}?section=my-journal">
     {% if journal_student_section %}
     {% include "registrar/partials/_journal_student_content.html" %}
+    {% elif journal_student_missing %}
+    {% include "partials/_empty_state.html" with empty_icon="fa-book-open" empty_title=_("Akademik qeydiniz hələ yaradılmayıb.") empty_hint=_("Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin.") %}
     {% else %}
     {% include "registrar/partials/_journal_list_content.html" with embedded_in_shell=True %}
     {% endif %}

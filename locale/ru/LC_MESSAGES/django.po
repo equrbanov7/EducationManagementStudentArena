@@ -64984,3 +64984,13 @@ msgstr "Имя/фамилия/отчество — не более %(n)s сим�
 msgctxt "student_intake"
 msgid "sahə uzunluğu həddi keçildi"
 msgstr "превышена допустимая длина поля"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Ваша академическая запись ещё не создана."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "Журнал появится после зачисления в группу — обратитесь в студенческую службу."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "Название банка — не более %(n)s символов."

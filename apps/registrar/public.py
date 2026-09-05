@@ -193,6 +193,10 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
         student_context = build_student_journal_context(request, organization=organization)
         if student_context is not None:
             return student_context
+        if page_contexts._has_active_student_membership(organization, request.user):
+            # Akademik qeydi olmayan tələbə/məzun — MÜƏLLİM siyahısına düşməsin
+            # (QA 2026-09-05 P2-31): boş-hal göstərilir, kimlik tələbə qalır.
+            return {"journal_student_missing": True}
         return page_contexts.journal_list_context(request.user, request=request)
     if section == "analytics":
         from apps.registrar import journal_scope

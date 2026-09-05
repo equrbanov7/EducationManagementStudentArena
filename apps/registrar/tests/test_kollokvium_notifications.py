@@ -144,6 +144,14 @@ class KollokviumWindowsViewIntegrationTests(KollokviumNotificationsBase):
         self.client = Client()
         assert self.client.login(username="kw_super", password="StrongPass123!")
 
+    def test_non_uuid_window_id_is_a_404_not_a_500(self):
+        """QA 2026-09-05 EXAMS-02: `window_id=x` `get_object_or_404(pk=...)`-də ValidationError → 500 verirdi."""
+        response = self.client.post(
+            reverse("accounts:kollokvium_windows"),
+            {"action": "toggle_window_active", "window_id": "x"},
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_toggle_active_sends_opened_notification(self):
         url = reverse("accounts:kollokvium_windows")
         with self.captureOnCommitCallbacks(execute=True):
