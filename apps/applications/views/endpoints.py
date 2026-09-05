@@ -77,7 +77,9 @@ def application_catalog(request, *, organization):
             )
             kinds.append(kind_payload(kind, destination=destination))
 
-    units = ApplicationUnit.objects.filter(organization=organization, is_active=True).order_by("order", "name")
+    # ``access.active_units`` təşkilat üzrə keşlənib (bax P2-26/P2-6) — yuxarıdakı
+    # dövr də daxil olmaqla eyni kataloqu artıq təkrar sorğulamır.
+    units = access.active_units(organization)
     return ok(
         {
             "family": family,
