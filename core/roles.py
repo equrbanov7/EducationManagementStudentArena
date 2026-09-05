@@ -30,6 +30,9 @@ class ProfileRole:
     # bitmiş semestr), kollokvium keçmiş-kilidini keçir, səhv qeydləri sənədli
     # düzəliş (correction + PDF) ilə düzəldir/silir. Bütün əməlləri audit olunur.
     IKT_REHBER = "ikt_rehber"
+    # RİM əməkdaşı (2026-09-06) — mərkəzin RƏHBƏRİ deyil: yalnız oxu səthləri +
+    # imtahan/QA əməlləri. Hesab və rol açarları QƏSDƏN yoxdur.
+    RIM_STAFF = "rim_staff"
     TEACHER = "teacher"
     ASSISTANT_TEACHER = "assistant_teacher"
     LEAD_STUDENT = "lead_student"
@@ -50,6 +53,7 @@ class ProfileRole:
         (EXAM_CENTER_STAFF, pgettext_lazy("roles.display_name", "exam_center_staff")),
         (EXAM_CENTER, pgettext_lazy("roles.display_name", "exam_center")),
         (IKT_REHBER, pgettext_lazy("roles.display_name", "ikt_rehber")),
+        (RIM_STAFF, pgettext_lazy("roles.display_name", "rim_staff")),
         (TEACHER, pgettext_lazy("roles.display_name", "teacher")),
         (ASSISTANT_TEACHER, pgettext_lazy("roles.display_name", "assistant_teacher")),
         (LEAD_STUDENT, pgettext_lazy("roles.display_name", "lead_student")),
@@ -64,6 +68,7 @@ class ProfileRole:
         EXAM_CENTER_HEAD: 85,
         EXAM_CENTER: 85,
         IKT_REHBER: 88,
+        RIM_STAFF: 60,
         MEMBER: 20,
         HR: 65,
         EXAM_CENTER_STAFF: 60,
@@ -100,6 +105,8 @@ class ProfileRole:
         # İKT Rəhbəri həm imtahan mərkəzi (final/kollokvium/statistika), həm də
         # org-admin (level 88 ≥ 80 → aşağıdakı alias qaydası ilə org_admin) gücünə malikdir.
         IKT_REHBER: {IKT_REHBER, EXAM_CENTER_HEAD},
+        # Əməkdaş imtahan mərkəzinin İŞÇİ səthini alır (nəzarətçi təyini rəhbərdədir).
+        RIM_STAFF: {RIM_STAFF, EXAM_CENTER_STAFF},
         "tutor": {"tutor"},
         # Proqram koordinatoru tyutor-ekvivalentdir (eyni akademik kurasiya işi).
         "program_coordinator": {"program_coordinator", "tutor"},

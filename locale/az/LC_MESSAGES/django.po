@@ -64670,3 +64670,7 @@ msgstr "Standart format"
 
 msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgstr "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Rəqəmsal İnkişaf Mərkəzi (RİM) əməkdaşı"

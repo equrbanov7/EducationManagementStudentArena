@@ -64855,3 +64855,7 @@ msgstr "Default format"
 
 msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgstr "Default question format (you can change it when adding a question)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "RİM staff"

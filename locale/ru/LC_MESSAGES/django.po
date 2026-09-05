@@ -65003,3 +65003,7 @@ msgstr "Формат по умолчанию"
 
 msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
 msgstr "Формат вопроса по умолчанию (можно изменить при добавлении вопроса)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Сотрудник Центра цифрового развития (RİM)"
