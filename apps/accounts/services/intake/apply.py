@@ -228,9 +228,16 @@ def apply_plans(*, organization, plans, actor, request=None) -> dict:
                 )
         except Exception as exc:  # noqa: BLE001 — sətir izolyasiyası qəsdəndir
             failed_count += 1
+            from django.db import DataError
+
+            detail = (
+                pgettext(_CTX, "sahə uzunluğu həddi keçildi")
+                if isinstance(exc, DataError)  # xam DB mesajı istifadəçiyə sızmasın (STUDENT-MGMT-02)
+                else (str(exc)[:180] or exc.__class__.__name__)
+            )
             plan.fail(
                 "apply_failed",
-                pgettext(_CTX, "Sətir yazılmadı: %s") % (str(exc)[:180] or exc.__class__.__name__),
+                pgettext(_CTX, "Sətir yazılmadı: %s") % detail,
             )
             results.append(plan.as_dict())
             continue

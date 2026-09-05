@@ -766,3 +766,41 @@ class ContractTest(StudentServicesBase):
         catalog_keys = set(status_catalog.keys("student_movement"))
         self.assertEqual(catalog_keys, set(RULES))
         self.assertEqual(len(catalog_keys), 6)
+
+
+class MovementGuardsTest(StudentServicesBase):
+    """QA 2026-09-05 STUDENT-MGMT-04/05/06/07/08 — hərəkət əmrinin giriş qapıları və giriş vəziyyəti."""
+
+    def test_unknown_kind_is_a_json_400_not_a_500(self):
+        response = self._post_movement(kind="nope")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.json())
+
+    def test_non_uuid_record_or_group_is_a_404(self):
+        self.assertEqual(self._post_movement(record_id="x").status_code, 404)
+        self.assertEqual(self._post_movement(target_group="x").status_code, 404)
+
+    def test_transfer_to_the_current_group_is_refused(self):
+        response = self._post_movement(target_group=str(self.group_a.pk))
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "same_group")
+
+    def test_academic_leave_with_a_past_end_date_is_refused(self):
+        response = self._post_movement(kind="academic_leave", target_group="", effective_until="01.01.2020")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "effective_until_past")
+
+    def test_expulsion_archives_access_and_reinstatement_restores_it(self):
+        from apps.accounts.models import UserProfile
+
+        profile, _ = UserProfile.objects.get_or_create(user=self.record.student)
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ACTIVE)
+        response = self._post_movement(kind="expulsion", target_group="")
+        self.assertEqual(response.status_code, 200, response.content)
+        profile.refresh_from_db()
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ARCHIVED)
+
+        response = self._post_movement(kind="reinstatement", order_number="R-141")
+        self.assertEqual(response.status_code, 200, response.content)
+        profile.refresh_from_db()
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ACTIVE)
