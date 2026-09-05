@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from django.test import SimpleTestCase, TestCase
 
-
 from apps.applications.constants import MAX_BODY_LENGTH, MAX_SUBJECT_LENGTH, MIN_BODY_LENGTH, MIN_SUBJECT_LENGTH
 from apps.applications.services.submit import validate_text
 
