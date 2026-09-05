@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -82,6 +83,10 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
     return created
 
 
+#: İkiqat göndəriş pəncərəsi (P3-18) — eyni mətnli təkrar bu müddət ərzində rədd olunur.
+DUPLICATE_WINDOW = timedelta(minutes=2)
+
+
 @transaction.atomic
 def submit_application(*, organization, user, kind, subject: str, body: str, files=None, request=None) -> Application:
     """Yeni müraciət yaradır və aidiyyəti şöbəyə göndərir.
@@ -101,6 +106,23 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
     errors = validate_text(subject, body)
     if errors:
         raise ValidationError(errors)
+
+    # QA 2026-09-05 (P3-18): ikiqat klik / şəbəkə təkrarı eyni mətnlə İKİ müraciət
+    # yaradırdı. Qısa pəncərədə eyni göndərən + növ + mövzu + mətn → rədd.
+    duplicate = Application.objects.filter(
+        organization=organization,
+        created_by=user,
+        kind=kind,
+        subject=subject.strip()[:255],
+        body=body.strip(),
+        created_at__gte=timezone.now() - DUPLICATE_WINDOW,
+    ).first()
+    if duplicate is not None:
+        raise TransitionDenied(
+            "duplicate.recent",
+            "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın.",
+            {"number": duplicate.number},
+        )
 
     unit, scope_unit, family, sender_unit = route_for(kind, user, organization=organization, family=family)
     # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
