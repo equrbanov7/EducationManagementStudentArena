@@ -16,6 +16,7 @@ from apps.organizations.permissions import (  # noqa: F401
 from apps.organizations.scoping import (  # noqa: F401
     get_permission_scope,
     get_unit_scope,
+    invalidate_permission_scope_cache,
     scope_memberships_by_unit,
 )
 from apps.organizations.services import (  # noqa: F401
@@ -66,6 +67,7 @@ __all__ = [
     "get_permission_scope",
     "get_unit_scope",
     "get_user_org_role_level",
+    "invalidate_permission_scope_cache",
     "is_grant_entry",
     "is_tenant_accessible_organization",
     "members_covering_unit",
