@@ -65,6 +65,7 @@ Sübut qovluğu: `~/EMSArena-backups/qa-2026-09-05/` (crawl JSON, ekran görünt
 | P2-38 | exams | sual bankı yaratma | müəllim, imtahan mərkəzi | Bank adı 255+ → 500 DataError | `question_library/crud.py:100` | FIXED: uzunluq mesajı; test |
 | P2-39 | exams | kollokvium pəncərələri | imtahan mərkəzi | `window_id`/`grant_id` qeyri-UUID və ya mövcud olmayan → 500 | `views/kollokvium_windows.py` UUID/404 yoxlamır | FIXED: `_uuid_or_404`; test `test_non_uuid_window_id_is_a_404_not_a_500` |
 | P2-40 | workload | iş axını bildirişləri | dekan, kafedra müdiri | Dekan/kafedra müdiri bildiriş almır — alıcı `OrgUnit.head`-dən oxunur, rol üzvlüyündən yox (klonda çoxu rəhbərsiz) | `workload/services/workflow` alıcı seçimi | FIXED: `_unit_role_users` — dekan/prodekan/koordinator və kafedra müdiri rol üzvlüyü ilə də alıcıdır |
+| P2-41 | accounts/organizations | bütün bölmələr | hamı | Hər bölmə açılışında 20-40 TƏKRAR `Membership`/`OrgUnit` sorğusu | `_collect_actor_permissions`/`get_permission_scope` request-keşi çağırış yerlərində heç vaxt aktivləşmirdi | FIXED: `user` obyektində memoizasiya + iki mutasiya nöqtəsində invalidasiya; dean/dashboard 79→50 (42→13 dublikat), chair_head 82→53, hr 57→39; `test_rbac_permission_cache.py` |
 | P2-7 | accounts | `org-members` (imtahan mərkəzi 9 s), `student-organization-management` (RİM 1.3 s / dekan 3.5 s), `my-exams` (3 s), `student-admission` (3–9 s) | müxtəlif | Yavaş bölmələr (brauzer ölçüsü, yük altında) | ölçülür | OPEN |
 
 ## P3 — cilalama
@@ -77,16 +78,16 @@ Sübut qovluğu: `~/EMSArena-backups/qa-2026-09-05/` (crawl JSON, ekran görünt
 | P3-6 | accounts/people | kataloq filtrləri | RİM | Qrup açılışı 500 elementdə kəsilirdi (766 aktiv qrup; «Level…»/«Xaric…» seçilmirdi) | `lookups.py MAX_OPTIONS=500` | FIXED: 2000 (kliyent-tərəfi axtarışlı select) |
 | P3-7 | accounts/people | kataloq başlığı | dekan | Aktorun bütün `people.*` açarları çip kimi sadalanır (6–7 çip) — istifadəçiyə heç bir əməl vermir, səs-küy | `_people_directory.html` `granted_permissions` | OPEN (UX: çipləri «?» tooltip-ə yığ) |
 | P3-8 | accounts/rim | `rim-center` əməllər | RİM | İcazə/iyerarxiya səbəbləri (target_is_self, rank_too_high) hamısı 404 `target_not_found`-a çevrilir — istifadəçi səbəbi bilmir | `views/rim/actions.py` | FIXED: öz təşkilatındakı hədəf üçün əsl kod (`target_is_self`/`target_rank_too_high`), kənarda 404 qalır |
-| P3-9 | registrar (jurnal) | dərs əlavəsi | müəllim | `lesson_hours=-5`, `lesson_kind=exam`, `lesson_room=99999` səssizcə defolta çevrilir | parse fallback | OPEN |
+| P3-9 | registrar (jurnal) | dərs əlavəsi | müəllim | `lesson_hours=-5`, `lesson_kind=exam`, `lesson_room=99999` səssizcə defolta çevrilir | parse fallback | FIXED: naməlum dərs tipi və mənfi/hərfli saat xəta verir (kilidli tipdə POST-a baxılmır); 2 test |
 | P3-10 | registrar (jurnal) | bal xanası | müəllim | Bal səssiz clamp/çevrilir: 11→10, -3→0, 'abc'→0, 7.5→7.50 (tam ədəd qaydası) | `_to_decimal` + clamp (testlə sabitlənib) | OPEN (qərar: 7.5 rədd olunsun?) |
-| P3-11 | registrar (jurnal) | «Yadda saxla» | müəllim | Düymə göndərişdən sonra disable olunmur — ikiqat klik iki POST | JS | OPEN |
+| P3-11 | registrar (jurnal) | «Yadda saxla» | müəllim | Düymə göndərişdən sonra disable olunmur — ikiqat klik iki POST | JS | FIXED: `form[data-jd-draft]` ilk göndərişdən sonra düymələri bloklayır (bubble + `defaultPrevented` yoxlaması) |
 | P3-12 | registrar (jurnal) | seminar xanası | müəllim | Eyni adlı iki gizli `att__` input render olunurdu | `_jd_grid.html` | FIXED: mühazirə input-u `else` budağına köçürüldü |
 | P3-13 | registrar (jurnal) | dərs modalı | müəllim | «Bu dərsin müəllimi» 554 istifadəçi, otaq 159 option hər səhifə yükündə | `lesson_teacher_choices` | OPEN (lazy/searchable select) |
 | P3-14 | syllabus | copy/new_version | müəllim | Yad sillabus üçün 404 əvəzinə 409 «əhatənizdə deyil» (mövcudluq sızır) | api.py TransitionDenied → 409 | FIXED: `transition.out_of_scope` → 404 |
 | P3-15 | syllabus | autosave | müəllim | Validasiya xətaları (çəki bölgüsü, sərbəst iş variantı) 403 ilə qayıdırdı | api.py | FIXED: `assess.*`/`self.*`/`section.*` → 400 |
 | P3-16 | syllabus | tələbə kabineti | tələbə | «Sillabusa bax» yalnız cari dövrün fənləri üçün; başqa dövrün aktiv qeydiyyatı üçün keçid yoxdur | my-subjects | OPEN |
-| P3-17 | applications | mövzu/fayl | tələbə | Mövzu 255+ səssiz kəsilir (FIXED: 255+ → xəta); 5-dən çox fayl səssiz atılır; uzantı üçün məzmun imzası yoxlanmır (HTML məzmunlu .png) | form | QİSMƏN (fayl sayı/imza OPEN) |
-| P3-18 | applications | göndəriş | tələbə | Eyni mövzu+mətn ilə ardıcıl ikiqat göndəriş iki müraciət yaradır | dublikat qoruması yoxdur | OPEN |
+| P3-17 | applications | mövzu/fayl | tələbə | Mövzu 255+ səssiz kəsilir (FIXED: 255+ → xəta); 5-dən çox fayl səssiz atılır; uzantı üçün məzmun imzası yoxlanmır (HTML məzmunlu .png) | form | FIXED (mətn + fayl sayı): 255+ mövzu və 5-dən çox fayl artıq səssiz atılmır; MIME/imza yoxlaması OPEN |
+| P3-18 | applications | göndəriş | tələbə | Eyni mövzu+mətn ilə ardıcıl ikiqat göndəriş iki müraciət yaradır | dublikat qoruması yoxdur | FIXED: 2 dəqiqəlik pəncərədə eyni mətnli təkrar göndəriş `duplicate.recent` ilə rədd olunur |
 | P3-19 | applications | detal GET | emalçı | GET detal statusu dəyişir (submitted→in_review + hadisə) — yan-təsirli GET; ləğv olunmuşda `mark_seen` 200 | dizayn qərarı | OPEN |
 | P3-20 | workload | sətir validasiyası | kafedra müdiri | total_hours mənfi/ondalıq olanda xəta mesajı «student_count» sahəsini göstərir; yay semestri sətri «Payız» kimi görünür; APPROVED→RETURNED state machine icazə verir, `return_slice` 409 | `tasks.py`, `workflow.py` | OPEN |
 | P3-21 | exams | kollokvium pəncərəsi | imtahan mərkəzi | Keçmiş tarixə və K-sırasına zidd (K2 K1-dən əvvəl/üst-üstə) pəncərə açıla bilir; boş forma «Fayl seçilməyib.» xətası; eyni adlı ikinci bank səssiz yaranır | `kollokvium_windows` validasiya, bank unikal ad | FIXED (tarix+K sırası): `validate_window_save`; «Fayl seçilməyib» qlobal tərcümə səhvi də düzəldildi; bank unikal adı OPEN |
@@ -115,8 +116,8 @@ Sübut qovluğu: `~/EMSArena-backups/qa-2026-09-05/` (crawl JSON, ekran görünt
 | UX-13 | exams | AZ interfeysdə «Default format» / «Default sual formatı …» | FIXED: «Standart …» + 4 dil kataloqu |
 | UX-03 | qlobal | 790 fərqli hex (734-ü tokenə uyğun deyil; 315 mavi çaları) + 688 rgba() | OPEN (dizayn borcu: token miqrasiyası faza-faza) |
 | UX-05 | qlobal | İki badge sistemi: bootstrap `badge bg-*` (ağ mətnlə 1.6–1.9:1) vs `ems-badge` | FIXED (kontrast): `bg-warning/bg-info/bg-light` mətni tünd — 10.95:1; iki sistemin birləşdirilməsi OPEN |
-| UX-06 | registrar (jurnal) | Cədvəl başlıq sətri şaquli sürüşmədə yapışmır — 555 tələbədə sütun kimliyi itir | OPEN (P1-8 səhifələmə işi ilə birlikdə) |
-| UX-07 | qlobal | AI köməkçi FAB (z-index 9998) cədvəlin «Əməllər» sütununu və pager-i örtür | OPEN |
+| UX-06 | registrar (jurnal) | Cədvəl başlıq sətri şaquli sürüşmədə yapışmır — 555 tələbədə sütun kimliyi itir | FIXED: `jd2-grid-wrap` daxili scroll (65vh) + sticky `thead`; künc xanası z-index 4. ⚠️ 2026-07-16 «daxili scroll yox» qərarı ləğv edildi |
+| UX-07 | qlobal | AI köməkçi FAB (z-index 9998) cədvəlin «Əməllər» sütununu və pager-i örtür | FIXED: FAB z-index 9998 → 40, `#main-content` alt boşluğu 110px; `.jd-save-bar` 45 |
 | UX-08 | workload | Filtr: Kafedra/Semestr ikili render (mətn sahəsi + bootstrap-select), Tədris ili sərbəst mətn | OPEN |
 | UX-09 | qlobal | «Cari tədris ili» modullar arasında fərqlidir — iki mənbə | FIXED (kod): `current_academic_year` sırası is_current dövr → ən son dövr → tapşırıq ili; klondakı data uyğunsuzluğu ayrıca |
 | UX-10 | qlobal | Filtr paneli və səhifə əməl düyməsi 4 fərqli nümunədə; subject-catalog-da 2 primary düymə | OPEN |
