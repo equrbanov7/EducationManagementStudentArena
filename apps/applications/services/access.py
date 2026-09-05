@@ -57,6 +57,28 @@ def active_memberships(user, organization):
     return memberships
 
 
+def active_units(organization) -> list:
+    """Təşkilatın aktiv ``ApplicationUnit`` kataloqu — request daxilində keşlənir.
+
+    ``handled_unit_ids`` (bir kontekst qurulmasında 7-8 dəfə: ``is_handler_anywhere``,
+    tab sayğacları, KPI-lar, ``handled_unit_names``) və marşrutlaşdırma
+    (``routing.unit_by_code``) eyni kataloqu dəfələrlə sorğulayırdı — keş olmadan
+    hər çağırış ayrı SELECT idi (QA P2-26/P2-6: bölmə açılışında 80+ sorğu, 37-42
+    dublikat). ``active_memberships``-dəki eyni keş naxışı (obyekt-atributu).
+    """
+    if organization is None:
+        return []
+    cached = getattr(organization, "_applications_units_cache", None)
+    if cached is not None:
+        return cached
+    units = list(ApplicationUnit.objects.filter(organization=organization, is_active=True).order_by("order", "name"))
+    try:
+        organization._applications_units_cache = units
+    except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
+        pass
+    return units
+
+
 def user_permissions(user, organization) -> list:
     permissions = set()
     for membership in active_memberships(user, organization):
@@ -118,8 +140,7 @@ def handled_unit_ids(user, organization) -> set:
     role_names = {membership.role.name for membership in active_memberships(user, organization)}
     if not role_names:
         return set()
-    units = ApplicationUnit.objects.filter(organization=organization, is_active=True)
-    return {unit.pk for unit in units if role_names & set(unit.role_names)}
+    return {unit.pk for unit in active_units(organization) if role_names & set(unit.role_names)}
 
 
 def is_handler_anywhere(user, organization) -> bool:
@@ -224,6 +245,7 @@ def visible_q(user, organization) -> Q:
 
 __all__ = [
     "active_memberships",
+    "active_units",
     "can_act",
     "can_view",
     "handled_unit_ids",

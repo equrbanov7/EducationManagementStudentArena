@@ -84,9 +84,10 @@ def build_applications_context(request, *, organization) -> dict:
             )
             kinds.append(kind_payload(kind, destination=destination))
 
-    from .models import ApplicationUnit
-
-    units = ApplicationUnit.objects.filter(organization=organization, is_active=True).order_by("order", "name")
+    # ``access.active_units`` təşkilat üzrə keşlənib — ``route_for`` dövründəki
+    # hər KIND üçün ayrı ``ApplicationUnit`` sorğusunun (əvvəllər 3-19 əlavə
+    # sorğu) qarşısını alır, bura da EYNİ keşdən (0 əlavə sorğu) oxuyur.
+    units = access.active_units(organization)
     return {
         "section": PROFILE_SECTION,
         "family": family,
@@ -128,18 +129,14 @@ def pending_badge_count(user, organization) -> int:
 
 def handled_unit_names(user, organization) -> list:
     """Aktorun emalçısı olduğu şöbələrin adları (kontekst zolağı üçün)."""
-    from .models import ApplicationUnit
-
     if organization is None:
         return []
     unit_ids = access.handled_unit_ids(user, organization)
     if not unit_ids:
         return []
-    return list(
-        ApplicationUnit.objects.filter(organization=organization, pk__in=unit_ids)
-        .order_by("order", "name")
-        .values_list("name", flat=True)
-    )
+    # ``access.active_units`` artıq ("order", "name") sırası ilə keşlənib —
+    # filtrləmək sıranı qoruyur, ayrıca sorğu/order_by lazım deyil.
+    return [unit.name for unit in access.active_units(organization) if unit.pk in unit_ids]
 
 
 def assignable_handlers(user, organization, application_id) -> list:
