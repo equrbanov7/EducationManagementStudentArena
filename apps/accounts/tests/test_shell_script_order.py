@@ -112,3 +112,20 @@ class EarlyQueueDrainTest(unittest.TestCase):
         self.assertTrue(result["earlyQueueCleared"])
         self.assertEqual(result["clickListeners"], 1)
         self.assertGreaterEqual(result["sectionLoadedListeners"], 1)
+
+
+class DocumentTitleTest(TestCase):
+    """`<title>` bölmə adı ilə başlayır (QA 2026-09-05 P3-4) — əvvəl həmişə «Profil - user - brend» idi."""
+
+    def test_title_starts_with_section_title(self):
+        user = get_user_model().objects.create_user(
+            username="doc-title-user", email="doc-title@example.com", password="StrongPass123!"
+        )
+        self.client.force_login(user)
+        response = self.client.get("/accounts/profile/?section=notifications", follow=True)
+        html = response.content.decode("utf-8")
+        title = re.search(r"<title>\s*(.*?)\s*</title>", html, re.S).group(1)
+        h1 = re.search(r'id="profileSectionTitle">(.*?)</h1>', html, re.S).group(1).strip()
+        self.assertTrue(h1, "bölmə başlığı boşdur")
+        self.assertTrue(title.startswith(h1), f"title={title!r} h1={h1!r}")
+        self.assertIn('data-title-suffix="', html)

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
+{% block title %}{% if active_section_title %}{{ active_section_title }} - {% endif %}{% trans "title" context "profile.sidebar" %} - {{ user.username }} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
     {% include "accounts/profile/_section_assets.html" %}
@@ -16,6 +16,7 @@
      data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
+     data-title-suffix="{% trans 'title' context 'profile.sidebar' %} - {{ user.username }} - {{ site_brand_name }}"
      data-csp-nonce="{{ request.csp_nonce }}">
     {% include "accounts/profile/_sidebar.html" %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>

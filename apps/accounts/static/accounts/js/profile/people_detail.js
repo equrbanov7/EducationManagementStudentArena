@@ -146,8 +146,8 @@
         var actions = person.actions || {};
         var defs = [
             ["block", caps.can_manage_status && actions.block, "ems-btn ems-btn--danger"],
-            ["unblock", caps.can_manage_status && actions.unblock, "ems-btn ems-btn--secondary"],
-            ["grant_teacher", caps.can_manage_teacher_role && actions.grant_teacher, "ems-btn ems-btn--secondary"],
+            ["unblock", caps.can_manage_status && actions.unblock, "ems-btn ems-btn--ghost"],
+            ["grant_teacher", caps.can_manage_teacher_role && actions.grant_teacher, "ems-btn ems-btn--ghost"],
             ["revoke_teacher", caps.can_manage_teacher_role && actions.revoke_teacher, "ems-btn ems-btn--danger"]
         ];
         var available = defs.filter(function (d) { return d[1]; });
