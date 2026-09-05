@@ -130,7 +130,7 @@ class AssessmentComponentTest(TestCase):
                 enforce_day=False,
                 offering=self.offering,
                 entries=[
-                    {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 12}
+                    {"lesson_id": seminar.id, "enrollment_id": self.enrollment.id, "status": "present", "score": 10}
                 ],
                 by_user=self.teacher,
             )

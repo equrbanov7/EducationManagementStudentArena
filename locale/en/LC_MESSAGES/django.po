@@ -64897,3 +64897,6 @@ msgstr "Earlier lessons"
 msgctxt "accounts.a11y"
 msgid "Seç"
 msgstr "Select"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s cell(s) were not saved — the score must be a whole number between 0 and 10."

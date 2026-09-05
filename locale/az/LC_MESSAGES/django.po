@@ -64718,3 +64718,6 @@ msgstr "Əvvəlki dərslər"
 msgctxt "accounts.a11y"
 msgid "Seç"
 msgstr "Seç"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."

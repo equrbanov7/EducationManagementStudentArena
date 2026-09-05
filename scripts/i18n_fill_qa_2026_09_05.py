@@ -54,6 +54,11 @@ ENTRIES = {
             "ru": "Количество часов занятия должно быть целым положительным числом.",
             "tr": "Ders saati pozitif bir tam sayı olmalıdır.",
         },
+        "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır.": {
+            "en": "%(n)s cell(s) were not saved — the score must be a whole number between 0 and 10.",
+            "ru": "%(n)s ячеек не сохранено — балл должен быть целым числом от 0 до 10.",
+            "tr": "%(n)s hücre kaydedilmedi — puan 0–10 arasında tam sayı olmalıdır.",
+        },
         "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı.": {
             "en": "Only the Examination Centre may record exam/resit scores — those fields were not saved.",
             "ru": "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены.",
