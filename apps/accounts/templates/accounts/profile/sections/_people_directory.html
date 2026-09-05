@@ -272,13 +272,53 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
     </div>
   </section>
 
-  <div class="people__modal" data-people-detail-modal hidden role="dialog" aria-modal="true"
-       aria-label="{% trans 'Şəxs kartı' context 'accounts.people' %}">
-    <div class="people__modal-body" data-people-detail-body tabindex="-1"></div>
-    <button type="button" class="people__modal-close" data-people-detail-close>
-      {% trans "Bağla" context "accounts.people" %}
-    </button>
+  {% comment %}Şəxs kartı — ems_ui drawer (fokus tələsi / Escape / overlay kliki
+  `ems_ui/overlay.js`-dədir); gövdə `people_detail.js` ilə JSON-dan render olunur.
+  Mətnlər aşağıdakı JSON blokundan gəlir (CSP: inline JS yox). QA 2026-09-05 P1-2.{% endcomment %}
+  <div class="ems-overlay ems-overlay--drawer" id="people-detail-{{ people_section.kind }}" data-people-detail-modal hidden>
+    <div class="ems-drawer" role="dialog" aria-modal="true" aria-labelledby="people-detail-{{ people_section.kind }}-title">
+      <div class="ems-drawer__head">
+        <div>
+          <h2 class="ems-drawer__title" id="people-detail-{{ people_section.kind }}-title" data-people-detail-title>{% trans "Şəxs kartı" context "accounts.people" %}</h2>
+          <p class="ems-drawer__sub" data-people-detail-sub></p>
+        </div>
+        <button type="button" class="ems-drawer__x" data-ems-overlay-close data-people-detail-close
+                aria-label="{% trans 'Bağla' context 'accounts.people' %}">×</button>
+      </div>
+      <div class="ems-drawer__body people-detail" data-people-detail-body tabindex="-1"></div>
+    </div>
   </div>
+  <script type="application/json" id="people-detail-i18n-{{ people_section.kind }}">{
+    "title_student": "{% trans 'Tələbə' context 'accounts.people.detail' %}",
+    "title_teacher": "{% trans 'Müəllim' context 'accounts.people.detail' %}",
+    "username": "{% trans 'İstifadəçi adı' context 'accounts.people.detail' %}",
+    "email": "{% trans 'E-poçt' context 'accounts.people.detail' %}",
+    "phone": "{% trans 'Telefon' context 'accounts.people.detail' %}",
+    "fin": "{% trans 'FİN' context 'accounts.people.detail' %}",
+    "gender": "{% trans 'Cins' context 'accounts.people.detail' %}",
+    "age": "{% trans 'Doğum tarixi / yaş' context 'accounts.people.detail' %}",
+    "age_suffix": "{% trans 'yaş' context 'accounts.people.detail' %}",
+    "last_login": "{% trans 'Son giriş' context 'accounts.people.detail' %}",
+    "never": "{% trans 'Heç vaxt' context 'accounts.people.detail' %}",
+    "date_joined": "{% trans 'Qeydiyyat' context 'accounts.people.detail' %}",
+    "memberships": "{% trans 'Üzvlüklər' context 'accounts.people.detail' %}",
+    "no_memberships": "{% trans 'Aktiv üzvlük yoxdur' context 'accounts.people.detail' %}",
+    "academic": "{% trans 'Akademik qeydlər' context 'accounts.people.detail' %}",
+    "no_academic": "{% trans 'Akademik qeyd yoxdur' context 'accounts.people.detail' %}",
+    "group": "{% trans 'Qrup' context 'accounts.people.detail' %}",
+    "admission_year": "{% trans 'Qəbul ili' context 'accounts.people.detail' %}",
+    "teaching": "{% trans 'Tədris' context 'accounts.people.detail' %}",
+    "no_teaching": "{% trans 'Cari dövrdə açılış yoxdur' context 'accounts.people.detail' %}",
+    "profile_page": "{% trans 'Profil səhifəsi' context 'accounts.people.detail' %}",
+    "loading": "{% trans 'Yüklənir…' context 'accounts.people.detail' %}",
+    "error": "{% trans 'Məlumat yüklənmədi.' context 'accounts.people.detail' %}",
+    "gender_labels": {"male": "{% trans 'Kişi' context 'accounts.people.detail' %}", "female": "{% trans 'Qadın' context 'accounts.people.detail' %}", "unspecified": "{% trans 'Göstərilməyib' context 'accounts.people.detail' %}"},
+    "status": {"active": "{% trans 'Aktiv' context 'accounts.people.detail' %}", "blocked": "{% trans 'Bloklanıb' context 'accounts.people.detail' %}", "inactive": "{% trans 'Passiv' context 'accounts.people.detail' %}", "archived": "{% trans 'Arxiv' context 'accounts.people.detail' %}", "staged": "{% trans 'Gözləmədə' context 'accounts.people.detail' %}"},
+    "status_tone": {"active": "success", "blocked": "danger", "inactive": "muted", "archived": "muted", "staged": "warning"},
+    "academic_status": {"enrolled": "{% trans 'Oxuyur' context 'accounts.people.detail' %}", "academic_leave": "{% trans 'Akademik məzuniyyət' context 'accounts.people.detail' %}", "expelled": "{% trans 'Xaric edilib' context 'accounts.people.detail' %}", "graduated": "{% trans 'Məzun' context 'accounts.people.detail' %}", "transferred": "{% trans 'Köçürülüb' context 'accounts.people.detail' %}", "suspended": "{% trans 'Dayandırılıb' context 'accounts.people.detail' %}"},
+    "academic_status_tone": {"enrolled": "success", "academic_leave": "warning", "expelled": "danger", "graduated": "info", "transferred": "info", "suspended": "warning"},
+    "actions": {"block": "{% trans 'Hesabı dayandır' context 'accounts.people.detail' %}", "unblock": "{% trans 'Hesabı bərpa et' context 'accounts.people.detail' %}", "grant_teacher": "{% trans 'Müəllim statusu ver' context 'accounts.people.detail' %}", "revoke_teacher": "{% trans 'Müəllim statusunu çıxar' context 'accounts.people.detail' %}"}
+  }</script>
 
   {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ `people.manage_academic`
   daşıyan aktor üçün. Kataloqun ÜSTÜNDƏ oturur, ikinci siyahı yaratmır.{% endcomment %}

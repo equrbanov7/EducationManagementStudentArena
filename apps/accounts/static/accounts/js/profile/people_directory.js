@@ -347,6 +347,20 @@
     }
 
     function openDetail(root, urls, userId) {
+        // Şəxs kartı — tam render `people_detail.js`-dədir (QA 2026-09-05 P1-2);
+        // əməllər (block/unblock/grant/revoke) buradakı `runAction` ilə icra olunur
+        // və siyahı `people:refresh` ilə yenilənir.
+        if (window.EMSPeopleDetail && typeof window.EMSPeopleDetail.open === "function") {
+            window.EMSPeopleDetail.open(root, urls, userId, {
+                runAction: function (action, id, onDone) {
+                    runAction(root, urls, action, id, function () {
+                        root.dispatchEvent(new CustomEvent("people:refresh"));
+                        onDone();
+                    });
+                }
+            });
+            return;
+        }
         var modal = root.querySelector("[data-people-detail-modal]");
         var body = root.querySelector("[data-people-detail-body]");
         if (!modal || !body) {
@@ -362,23 +376,12 @@
                 var title = document.createElement("h3");
                 title.textContent = [person.full_name, person.patronymic].filter(Boolean).join(" ");
                 body.appendChild(title);
-                var link = document.createElement("a");
-                link.href = person.profile_url;
-                link.textContent = "Profil səhifəsi";
-                body.appendChild(link);
                 modal.hidden = false;
                 body.focus();
             })
             .catch(function () {
                 /* səssiz — sətir cədvəldə qalır */
             });
-        var close = root.querySelector("[data-people-detail-close]");
-        if (close && !close.dataset.bound) {
-            close.dataset.bound = "1";
-            close.addEventListener("click", function () {
-                modal.hidden = true;
-            });
-        }
     }
 
     function runAction(root, urls, action, userId, onDone) {

@@ -64779,3 +64779,167 @@ msgstr "У вас нет доступа к этому разделу."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "Запрошенный раздел не существует или недоступен для вашей роли — вы возвращены на главную страницу."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "Эл. почта"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Телефон"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FIN"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Пол"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Дата рождения / возраст"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "лет"
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Последний вход"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Никогда"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Регистрация"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Членства"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "Нет активного членства"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Академические записи"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "Нет академических записей"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Преподавание"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "Нет открытых курсов в текущем периоде"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Страница профиля"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Не удалось загрузить данные."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Мужской"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Женский"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Не указано"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Заблокирован"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Неактивен"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "В архиве"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "В ожидании"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Обучается"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "Отчислен"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Выпускник"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Переведён"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Приостановлен"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Приостановить учётную запись"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Восстановить учётную запись"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Выдать статус преподавателя"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Снять статус преподавателя"

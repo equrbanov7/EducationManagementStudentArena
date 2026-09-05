@@ -44,8 +44,8 @@
 (function () {
     "use strict";
 
-    if (window.EMSDelegate && window.EMSReady) {
-        return; // Already loaded.
+    if (window.EMSDelegate && window.EMSReady && !window.EMSReady.__emsStub) {
+        return; // Already loaded (real implementation, not the ems_early.js stub).
     }
 
     /* ---- 1. Event delegation -------------------------------------------- */
@@ -78,7 +78,7 @@
         });
     }
 
-    window.EMSDelegate = window.EMSDelegate || { on: on };
+    window.EMSDelegate = { on: on };
 
     /* ---- 2. AJAX-safe ready -------------------------------------------- */
     function safeRun(fn, detail) {
@@ -120,5 +120,16 @@
         fn();
     };
 
-    window.EMSReady = window.EMSReady || ready;
+    window.EMSReady = ready;
+
+    /* ---- 3. ems_early.js növbəsini boşalt ------------------------------ */
+    // <head>-dəki stub (static/js/ems_early.js) bu fayl yüklənənə qədər edilən
+    // qeydiyyatları yığır; eyni sıra ilə əsl implementasiyaya ötürürük.
+    var early = window.__emsEarlyQueue;
+    if (early) {
+        (early.on || []).forEach(function (args) { on(args[0], args[1], args[2]); });
+        (early.ready || []).forEach(function (fn) { ready(fn); });
+        (early.once || []).forEach(function (pair) { ready.once(pair[0], pair[1]); });
+        window.__emsEarlyQueue = null;
+    }
 })();

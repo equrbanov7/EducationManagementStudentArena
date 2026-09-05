@@ -364,6 +364,12 @@
             if (localStorage.getItem("profileSidebarCollapsed") === "true") {
                 ctx.sidebar.classList.add("collapsed");
             }
+            // Mobil görünüşdə ilk yükləmə: sidebar overlay kimi məzmunu örtməsin —
+            // AJAX swap-dan sonrakı davranışla (section_loader → setSidebarCollapsed)
+            // eyni. localStorage-a yazılmır ki, desktop seçimi pozulmasın (QA P2-1).
+            if (isMobileViewport()) {
+                ctx.sidebar.classList.add("collapsed");
+            }
             syncSidebarToggleState();
         }
 

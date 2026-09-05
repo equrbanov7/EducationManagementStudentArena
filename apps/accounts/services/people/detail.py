@@ -17,16 +17,22 @@ from ..rim.detail import serialize_memberships
 from .actions import assert_in_catalog_scope, load_target
 from .constants import TEACHER_ROLE_NAMES
 from .filters import STATUS_ACTIVE, STATUS_BLOCKED
+from .permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
 from .rows import identity_row, resolve_unit_ancestors
+from .students import scoped_student_records
 
 MAX_DETAIL_ROWS = 60
 
 
-def _teaching_rows(user, organization, *, limit=MAX_DETAIL_ROWS):
+def _teaching_rows(user, actor, *, request=None, limit=MAX_DETAIL_ROWS):
     from apps.registrar.models import CourseOffering
 
+    scope = actor.scope_for(PERM_VIEW_TEACHERS, request=request)
+    if not scope.has_structure_access:
+        return []
     offerings = (
-        CourseOffering.objects.filter(organization=organization, instructor=user, is_active=True)
+        CourseOffering.objects.filter(organization=actor.organization, instructor=user, is_active=True)
+        .filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
         .select_related("subject", "group", "period")
         .order_by("-period__academic_year", "period__name", "subject__name")[:limit]
     )
@@ -42,11 +48,12 @@ def _teaching_rows(user, organization, *, limit=MAX_DETAIL_ROWS):
     ]
 
 
-def _academic_rows(user, organization, *, limit=MAX_DETAIL_ROWS):
-    from apps.registrar.models import StudentAcademicRecord
-
+def _academic_rows(user, actor, *, request=None, limit=MAX_DETAIL_ROWS):
+    scoped = scoped_student_records(actor, request=request)
+    if scoped is None:
+        return []
     records = (
-        StudentAcademicRecord.objects.filter(organization=organization, student=user)
+        scoped.filter(student=user)
         .select_related("program", "group", "curriculum")
         .order_by("-admission_year")[:limit]
     )
@@ -89,12 +96,15 @@ def build_detail(*, actor, user_id, request=None, today=None) -> dict:
     row["profile_url"] = reverse("accounts:public_profile", kwargs={"username": target.username})
     row["last_login"] = target.last_login.isoformat() if target.last_login else ""
     row["date_joined"] = target.date_joined.isoformat() if target.date_joined else ""
-    row["memberships"] = serialize_memberships(target, organization)
+    permission = PERM_VIEW_TEACHERS if catalog == "teacher" else PERM_VIEW_STUDENTS
+    row["memberships"] = serialize_memberships(
+        target, organization, scope=actor.scope_for(permission, request=request)
+    )
 
     is_teacher = _is_teacher(target, organization) if organization is not None else False
     row["is_teacher"] = is_teacher
-    row["teaching"] = _teaching_rows(target, organization) if (organization and is_teacher) else []
-    row["academic"] = _academic_rows(target, organization) if (organization and catalog == "student") else []
+    row["teaching"] = _teaching_rows(target, actor, request=request) if (organization and is_teacher) else []
+    row["academic"] = _academic_rows(target, actor, request=request) if (organization and catalog == "student") else []
 
     unit_ids = [membership for membership in row["memberships"] if membership.get("scope_unit")]
     row["units"] = [membership["scope_unit"] for membership in unit_ids]
