@@ -64523,3 +64523,24 @@ msgstr "Öğretim elemanı statüsü ver"
 msgctxt "accounts.people.detail"
 msgid "Müəllim statusunu çıxar"
 msgstr "Öğretim elemanı statüsünü kaldır"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Seçilen öğretim elemanı bu kurumun öğretim kadrosunda değil."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Yoklama defteri kapalı — değişiklikler kaydedilmedi."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Hiçbir hücre kaydedilmedi — ders günü kuralı veya hücre kilidi buna izin vermedi."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Bölüm içeriğinin biçimi geçersiz (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "İçerik çok büyük — en fazla %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Bu ders açılışı için zaten bir izlence var — listeden açın."

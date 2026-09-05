@@ -228,6 +228,68 @@ class JournalViewTest(TestCase):
         with bypass_rls():
             self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
 
+    def test_add_lesson_topic_over_255_is_rejected_not_500(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-01: 255+ simvol mövzu DB DataError (500) verirdi."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {
+                "action": "add_lesson",
+                "lesson_date": _tz.localdate().isoformat(),
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+                "lesson_time": "08:30|10:00",
+                "lesson_topic": "M" * 300,
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "255 simvol")
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_add_lesson_invalid_or_student_instructor_is_rejected_not_500(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-02: 'abc' → ValueError, tələbə id → IntegrityError (500)."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        url = reverse("registrar:journal_detail", args=[self.offering.id])
+        base = {
+            "action": "add_lesson",
+            "lesson_date": _tz.localdate().isoformat(),
+            "lesson_kind": "seminar",
+            "lesson_hours": "2",
+            "lesson_time": "08:30|10:00",
+        }
+        for bad in ("abc", str(self.student.pk)):
+            resp = client.post(url, {**base, "lesson_instructor": bad})
+            self.assertEqual(resp.status_code, 302, bad)
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_save_marks_on_locked_journal_reports_error_not_success(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-04: kilidli jurnala POST «yadda saxlanıldı (0 xana)» deyirdi."""
+        from apps.registrar.models import ApprovalStatus, AssessmentScheme
+
+        with bypass_rls():
+            from apps.registrar import gradebook as _gb
+
+            _gb.ensure_assessment_scheme(offering=self.offering)
+            AssessmentScheme.objects.filter(offering=self.offering).update(
+                is_published=True, approval_status=ApprovalStatus.APPROVED
+            )
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_marks", "att__1__1": "absent"},
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Jurnal bağlıdır")
+        self.assertNotContains(resp, "yadda saxlanıldı")
+
     def test_add_lesson_duplicate_time_rejected(self):
         """Eyni gündə eyni dərs saatına ikinci dərs yaradılmır."""
         from django.utils import timezone as _tz
