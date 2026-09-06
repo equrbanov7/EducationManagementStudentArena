@@ -215,6 +215,7 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                             <span>
                                 <i class="fas fa-box-archive" aria-hidden="true"></i>
                                 {% trans "Köhnə sistemdən köçürülmüş xam mənbə balları" context "profile.results.academic" %}
+                                <strong class="result-legacy-grade__summary-warning">{{ item.academic.legacy.warning }}</strong>
                             </span>
                             <span class="result-legacy-grade__count" aria-label="{% trans 'Mənbə qeydlərinin sayı' context 'profile.results.academic' %}">{{ item.academic.legacy_grade_facts|length }}</span>
                         </summary>

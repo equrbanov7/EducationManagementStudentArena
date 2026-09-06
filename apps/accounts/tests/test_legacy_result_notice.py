@@ -471,9 +471,11 @@ class LegacyResultNoticeTest(TestCase):
                     resp = self._get(section)
                     self.assertEqual(resp.status_code, 200)
                     self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING))
-                    self.assertContains(
-                        resp, "legacy-grade-warning" if section != "my-results" else "result-legacy-fact__score-warning"
-                    )
+                    if section == "my-results":
+                        self.assertContains(resp, "result-legacy-grade__summary-warning")
+                        self.assertContains(resp, "result-legacy-fact__score-warning")
+                    else:
+                        self.assertContains(resp, "legacy-grade-warning")
 
     def test_transcript_speaks_like_the_other_two_surfaces(self):
         """ÜÇÜNCÜ SƏTH susmamalıdır.
@@ -647,4 +649,8 @@ class LegacyNoticeColourTest(TestCase):
 
     def test_each_raw_score_warning_is_red(self):
         body = _rule_body(self.PANEL_CSS, ".result-legacy-fact__score-warning")
+        self.assertIn("--ems-danger-strong", body)
+
+    def test_closed_evidence_panel_summary_keeps_warning_visible_and_red(self):
+        body = _rule_body(self.PANEL_CSS, ".result-legacy-grade__summary-warning")
         self.assertIn("--ems-danger-strong", body)
