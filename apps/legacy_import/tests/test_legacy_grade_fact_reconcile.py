@@ -5,6 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 from types import SimpleNamespace
 
+from apps.legacy_import.services.rehearsal_legacy_grade_facts_target import fact_materialization_digest
 from scripts.legacy_reconcile.grade_facts import (
     SOURCE_GRADE_FACT_ROWS_SQL,
     TARGET_GRADE_FACT_ROWS_SQL,
@@ -166,6 +167,35 @@ def _target(source_row, *, status="linked", issue="", enrollment="enrollment-uui
     return row
 
 
+def _set_j12_importer_digest(row):
+    """Test double-ı J12 writer-in real, seyrək payload möhürünə keçir."""
+
+    payload = {
+        "enrollment_id": row[28] or None,
+        "source_snapshot_sha256": row[32],
+        "source_row_hash": row[30],
+        "transform_version": row[33],
+        "evidence_kind": row[2],
+        "score_code": row[3],
+        "is_archive": str(row[4]).casefold() in {"1", "t", "true"},
+        "mapping_status": row[26],
+        "mapping_issue_code": row[27],
+        "source_student_ref": row[5],
+        "source_journal_ref": row[6],
+        "source_lesson_ref": row[7],
+        "source_enrollment_ref": row[9],
+        "raw_score_text": row[14],
+        "requires_exam_center_review": bool(row[25]),
+    }
+    digest = fact_materialization_digest(
+        natural_key=("myedu_mariadb", row[0], int(row[1])),
+        source_row_hash=row[30],
+        payload=payload,
+    )
+    row[31] = row[39] = row[44] = digest
+    return row
+
+
 def test_reconciliation_passes_for_exact_summary_and_point_payloads():
     source_rows = [
         _source_summary(),
@@ -213,18 +243,25 @@ def test_j12_conflict_and_unresolved_rows_are_part_of_the_exact_source_gate():
             unresolved_calendar_evidence=[unresolved],
         )
     )
-    conflict_target = _target(
-        extra[0],
-        status="conflict",
-        issue="legacy_grade_fact_conflict",
-        enrollment="enrollment-uuid",
+    conflict_target = _set_j12_importer_digest(
+        _target(
+            extra[0],
+            status="conflict",
+            issue="legacy_grade_fact_conflict",
+            enrollment="enrollment-uuid",
+        )
     )
-    unresolved_target = _target(
-        extra[1],
-        status="unresolved",
-        issue="legacy_grade_fact_unresolved",
-        enrollment="",
+    unresolved_target = _set_j12_importer_digest(
+        _target(
+            extra[1],
+            status="unresolved",
+            issue="legacy_grade_fact_unresolved",
+            enrollment="",
+        )
     )
+    # J12-də tələbə/yazılış məlum ola bilər; unresolved hissə tarixcə mümkün
+    # olmayan dərs slotudur. Buna görə map MIGRATED olsa da fakt qəsdən FK-sızdır.
+    unresolved_target[45:48] = ["enrollment-map-uuid", "migrated", "historical-enrollment-target"]
 
     result = reconcile_grade_facts(
         FakeReader([]),
