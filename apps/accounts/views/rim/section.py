@@ -23,6 +23,7 @@ from apps.accounts.services.rim import (
     resolve_actor,
 )
 from apps.accounts.services.rim.create import MAX_NOTE_LENGTH
+from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.rim.profile_edit import FIELD_LABELS
 from apps.organizations.permissions import get_permission_label as permission_label
@@ -63,6 +64,31 @@ def _create_context(actor) -> dict:
     }
 
 
+def _unit_context(actor) -> dict:
+    """«Yeni inzibati bölmə» axınının çərçivəsi — YAZI YOLU BURADA DEYİL.
+
+    Bölməni mövcud struktur-ağac endpoint-i yaradır (``action=create_child``,
+    `unit.tree_manage`); burada yalnız həmin endpoint-in URL-i, icazəli tiplər və
+    düymənin görünüb-görünməməsi hesablanır (bax `services/rim/create_unit.py`).
+    """
+
+    allowed = can_create_unit(actor)
+    organization = actor.organization
+    profile_url = reverse("accounts:profile")
+    return {
+        "can_create_unit": allowed,
+        "unit_action_url": (
+            reverse("organizations:structure_tree_action", kwargs={"slug": organization.slug})
+            if organization is not None
+            else ""
+        ),
+        "unit_type_choices": admin_unit_type_choices(organization) if allowed else [],
+        # Uğur vəziyyətindən «struktur ağacında aç» — rəhbər təyini, adın
+        # dəyişdirilməsi və arxivləmə ORADA qalır (öz açarları ilə).
+        "unit_tree_url": f"{profile_url}?section=org-structure-tree",
+    }
+
+
 def build_rim_center_section(request) -> dict:
     """«RİM mərkəzi» bölməsi üçün context (bax `context_builder/_stage3.py`)."""
     actor = resolve_actor(request)
@@ -88,6 +114,7 @@ def build_rim_center_section(request) -> dict:
         "max_reason_length": MAX_REASON_LENGTH,
         "access_denied_message": ("" if actor.can_use_rim else "Bu bölmə üçün icazəniz yoxdur."),
         **_create_context(actor),
+        **_unit_context(actor),
     }
 
 

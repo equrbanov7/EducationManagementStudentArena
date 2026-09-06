@@ -65332,3 +65332,119 @@ msgstr "An approved syllabus exists for this subject/term — open a new version
 msgctxt "accounts.people.movements"
 msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
 msgstr "The academic record was reinstated, but we could not reopen the account's access automatically. Open it from the identity surface (the reason is in the audit trail)."
+
+msgctxt "profile.rim"
+msgid "Nə yaratmaq istəyirsiniz?"
+msgstr "What would you like to create?"
+
+msgctxt "profile.rim"
+msgid "Hesab və ya inzibati bölmə seçin."
+msgstr "Choose an account or an administrative unit."
+
+msgctxt "profile.rim"
+msgid "Yeni yarat"
+msgstr "Create new"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə"
+msgstr "New unit"
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati bölmə"
+msgstr "New administrative unit"
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya."
+msgstr "Department, centre, institute or laboratory."
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır."
+msgstr "Department, centre, institute or laboratory — created in the structure tree."
+
+msgctxt "profile.rim"
+msgid "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür."
+msgstr "The unit is created in the structure tree and the change is written to the audit log."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə"
+msgstr "Parent unit"
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə nəticələri"
+msgstr "Parent unit results"
+
+msgctxt "profile.rim"
+msgid "Rektorat, fakültə və ya şöbənin adını yazın"
+msgstr "Type the name of the rectorate, faculty or department"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə bu vahidin altında yaranacaq."
+msgstr "The new unit will be created under this one."
+
+msgctxt "profile.rim"
+msgid "Məsələn: Beynəlxalq əlaqələr şöbəsi"
+msgstr "For example: International Relations Department"
+
+msgctxt "profile.rim"
+msgid "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur."
+msgstr "Faculties, chairs and specialities live in the academic tree — build them on the «University structure» screen."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə."
+msgstr "May be left empty — the short code used in document circulation."
+
+msgctxt "profile.rim"
+msgid "İnzibati bölmə yaradıldı."
+msgstr "The administrative unit has been created."
+
+msgctxt "profile.rim"
+msgid "Bölmə"
+msgstr "Unit"
+
+msgctxt "profile.rim"
+msgid "Tip"
+msgstr "Type"
+
+msgctxt "profile.rim"
+msgid "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə."
+msgstr "Head assignment, renaming and archiving are on the «University structure» screen — each with its own permission."
+
+msgctxt "profile.rim"
+msgid "Struktur ağacında aç"
+msgstr "Open in the structure tree"
+
+msgctxt "profile.rim"
+msgid "Daha bir bölmə yarat"
+msgstr "Create another unit"
+
+msgctxt "profile.rim"
+msgid "Bölməni yarat"
+msgstr "Create the unit"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılır…"
+msgstr "Creating the unit…"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılmadı. Yenidən cəhd edin."
+msgstr "The unit was not created. Please try again."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölməni siyahıdan seçin."
+msgstr "Pick the parent unit from the list."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə tapılmadı — siyahıdan yenidən seçin."
+msgstr "The parent unit was not found — pick it from the list again."
+
+msgctxt "profile.rim"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "The unit name cannot be empty."
+
+msgctxt "profile.rim"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "The unit type is not valid for this organisation."
+
+msgctxt "profile.rim"
+msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
+msgstr "You do not have permission to create a structural unit."

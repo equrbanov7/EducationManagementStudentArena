@@ -65153,3 +65153,119 @@ msgstr "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köç�
 msgctxt "accounts.people.movements"
 msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
 msgstr "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+
+msgctxt "profile.rim"
+msgid "Nə yaratmaq istəyirsiniz?"
+msgstr "Nə yaratmaq istəyirsiniz?"
+
+msgctxt "profile.rim"
+msgid "Hesab və ya inzibati bölmə seçin."
+msgstr "Hesab və ya inzibati bölmə seçin."
+
+msgctxt "profile.rim"
+msgid "Yeni yarat"
+msgstr "Yeni yarat"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə"
+msgstr "Yeni bölmə"
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati bölmə"
+msgstr "Yeni inzibati bölmə"
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya."
+msgstr "Şöbə, mərkəz, institut və ya laboratoriya."
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır."
+msgstr "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır."
+
+msgctxt "profile.rim"
+msgid "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür."
+msgstr "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə"
+msgstr "Valideyn bölmə"
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə nəticələri"
+msgstr "Valideyn bölmə nəticələri"
+
+msgctxt "profile.rim"
+msgid "Rektorat, fakültə və ya şöbənin adını yazın"
+msgstr "Rektorat, fakültə və ya şöbənin adını yazın"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə bu vahidin altında yaranacaq."
+msgstr "Yeni bölmə bu vahidin altında yaranacaq."
+
+msgctxt "profile.rim"
+msgid "Məsələn: Beynəlxalq əlaqələr şöbəsi"
+msgstr "Məsələn: Beynəlxalq əlaqələr şöbəsi"
+
+msgctxt "profile.rim"
+msgid "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur."
+msgstr "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə."
+msgstr "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə."
+
+msgctxt "profile.rim"
+msgid "İnzibati bölmə yaradıldı."
+msgstr "İnzibati bölmə yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "profile.rim"
+msgid "Tip"
+msgstr "Tip"
+
+msgctxt "profile.rim"
+msgid "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə."
+msgstr "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə."
+
+msgctxt "profile.rim"
+msgid "Struktur ağacında aç"
+msgstr "Struktur ağacında aç"
+
+msgctxt "profile.rim"
+msgid "Daha bir bölmə yarat"
+msgstr "Daha bir bölmə yarat"
+
+msgctxt "profile.rim"
+msgid "Bölməni yarat"
+msgstr "Bölməni yarat"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılır…"
+msgstr "Bölmə yaradılır…"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılmadı. Yenidən cəhd edin."
+msgstr "Bölmə yaradılmadı. Yenidən cəhd edin."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölməni siyahıdan seçin."
+msgstr "Valideyn bölməni siyahıdan seçin."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə tapılmadı — siyahıdan yenidən seçin."
+msgstr "Valideyn bölmə tapılmadı — siyahıdan yenidən seçin."
+
+msgctxt "profile.rim"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "Bölmənin adı boş ola bilməz."
+
+msgctxt "profile.rim"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "Bölmə tipi bu təşkilat üçün keçərli deyil."
+
+msgctxt "profile.rim"
+msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
+msgstr "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
