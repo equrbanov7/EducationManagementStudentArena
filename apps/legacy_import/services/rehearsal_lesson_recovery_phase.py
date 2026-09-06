@@ -145,7 +145,7 @@ from .rehearsal_structure_phase import probe_cancellation
 
 JOURNAL_LESSON_RECOVERY_PHASE_KEY = "journal_lesson_recovery"
 JOURNAL_LESSON_RECOVERY_PHASE_ORDER = 41  # journal_marks (40) ilə journal_components (42) arasında
-DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-journal-lesson-recovery-v1"
+DERIVED_DIGEST_NAMESPACE = "legacy-rehearsal-journal-lesson-recovery-v2"
 REQUIRED_PHASE_KEYS = frozenset({JOURNAL_LESSONS_PHASE_KEY, JOURNAL_MARKS_PHASE_KEY})
 
 #: ``mr:`` prefiksinin uzunluğu — resume qapısı BARE ``uniqid`` gözləyir.
@@ -424,6 +424,7 @@ class JournalLessonRecoveryPhase:
                 row_hash=cell.row_hash,
                 student_ref=str(cell.student_id),
                 month_id=f"{cell.month:02d}",
+                source_lesson_ref=f"calendar:{cell.month:02d}:{cell.day}:{cell.time_text}",
             ),
         )
 
@@ -448,9 +449,9 @@ class JournalLessonRecoveryPhase:
                 student_ref=request.student_ref,
                 enrollment_pk=request.enrollment_pk,
                 month_id=request.month_id,
+                source_lesson_ref=request.source_lesson_ref,
                 losing_text=request.point_text,
                 winning_text=stored_status if stored_score is None else f"{Decimal(stored_score):f}",
-                target_ref=request.lesson_pk,
                 issue_code=OUTCOME_RULES["conflict"][0],
             )
         )
@@ -504,9 +505,9 @@ class JournalLessonRecoveryPhase:
                 student_ref=str(cell.student_id),
                 enrollment_pk=enrollment_pk,
                 month_id=cell.month_id,
+                source_lesson_ref="",
                 losing_text=cell.point,
                 winning_text=kept[1],
-                target_ref="",
                 issue_code=OUTCOME_RULES["component_conflict"][0],
             )
         )

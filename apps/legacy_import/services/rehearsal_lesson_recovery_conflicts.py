@@ -45,7 +45,7 @@ CONFLICT_ISSUE_SEVERITY = MappingProxyType(
 MARK_CONFLICT_SEALER = JournalSealer(
     entity_type=MARK_CONFLICT_ENTITY_TYPE,
     source_table=POINT_SOURCE_TABLE,
-    derivation_prefix=b"legacy-rehearsal-mark-conflict-derivation-v1\x00",
+    derivation_prefix=b"legacy-rehearsal-mark-conflict-derivation-v2\x00",
     contract_fingerprint=JOURNAL_POINT_FIELDS.fingerprint,
     issue_severity=CONFLICT_ISSUE_SEVERITY,
 )
@@ -79,9 +79,9 @@ class ConflictFact:
     student_ref: str
     enrollment_pk: str
     month_id: str
+    source_lesson_ref: str
     losing_text: str
     winning_text: str
-    target_ref: str
     issue_code: str
 
     def digest_parts(self) -> tuple[str, ...]:
@@ -224,7 +224,9 @@ class ConflictFactWriter:
             "mapping_issue_code": FACT_CONFLICT_ISSUE_CODE,
             "source_student_ref": fact.student_ref,
             "source_journal_ref": fact.uniqid,
-            "source_lesson_ref": fact.target_ref,
+            # Mənbə xanasının stabil təqvim locator-u saxlanır. Disposable
+            # target Lesson UUID-si source provenansına və digest-ə düşmür.
+            "source_lesson_ref": fact.source_lesson_ref,
             "source_enrollment_ref": f"{fact.uniqid}:{fact.student_ref}",
             "raw_score_text": fact.losing_text,
             "requires_exam_center_review": True,
