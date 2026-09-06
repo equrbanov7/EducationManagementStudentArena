@@ -28,13 +28,17 @@ def _profile_of(user):
     return getattr(user, "profile", None)
 
 
-def serialize_memberships(user, organization=None):
+def serialize_memberships(user, organization=None, *, scope=None):
     """İstifadəçinin AKTİV üzvlüklərini qaytarır (ikili rol burada görünür)."""
     from apps.organizations.models import Membership
 
     queryset = Membership.objects.filter(user=user, is_active=True).select_related("role", "organization", "scope_unit")
     if organization is not None:
         queryset = queryset.filter(organization=organization)
+    if scope is not None:
+        from apps.organizations.public import scope_memberships_by_unit
+
+        queryset = scope_memberships_by_unit(queryset, scope, organization=organization)
 
     rows = []
     for membership in queryset.order_by("-role__level", "role__name"):

@@ -305,6 +305,33 @@ def _materialization_digest(row) -> str:
         "transform_version": _text(row[33]),
         "requires_exam_center_review": _boolean(row[25]),
     }
+    # J12 toqquşma/həll-olunmayan xana faktlarını ayrıca writer yaradır və
+    # onun importer payload-u modelin boş default sahələrini daşımır. Digest
+    # məhz həmin source-sabit payload-dan qurulub; PostgreSQL-in sonradan
+    # doldurduğu default-ları əlavə etsək 1 849 dürüst fakt yalnış pozuntu kimi
+    # görünər. Bu forma conflict/unresolved writer-lərin `_payload()` müqaviləsi
+    # ilə eynidir. Digər grade-fact növlərində tam payload qalır.
+    if _is_j12_evidence(row):
+        payload = {
+            key: payload[key]
+            for key in (
+                "enrollment_id",
+                "source_snapshot_sha256",
+                "source_row_hash",
+                "transform_version",
+                "evidence_kind",
+                "score_code",
+                "is_archive",
+                "mapping_status",
+                "mapping_issue_code",
+                "source_student_ref",
+                "source_journal_ref",
+                "source_lesson_ref",
+                "source_enrollment_ref",
+                "raw_score_text",
+                "requires_exam_center_review",
+            )
+        }
     deterministic_payload = {key: value for key, value in payload.items() if key != "enrollment_id"}
     deterministic_payload["enrollment_linked"] = payload["enrollment_id"] is not None
     digest = hashlib.sha256(MATERIALIZATION_DIGEST_NAMESPACE)
@@ -315,6 +342,19 @@ def _materialization_digest(row) -> str:
         digest.update(encoded_part(name))
         digest.update(encoded_part(stable_source_value(deterministic_payload[name])))
     return digest.hexdigest()
+
+
+def _is_j12_evidence(row) -> bool:
+    """Sətir J12-nin xüsusi xana-sübut writer-indən gəlibmi?"""
+
+    source_table = _text(row[0])
+    status = _text(row[26])
+    score_code = _text(row[3])
+    if source_table not in {"journals_dates_points", "journals_dates_points_archive"}:
+        return False
+    if status == "conflict":
+        return bool(re.fullmatch(r"0[1-9]|1[0-2]|k[1-3]|si", score_code))
+    return status == "unresolved" and bool(re.fullmatch(r"0[1-9]|1[0-2]", score_code))
 
 
 def _digest_matches(row) -> bool:
@@ -329,6 +369,7 @@ def _guard_failures(row) -> tuple[str, ...]:
     status = _text(row[26])
     issue = _text(row[27])
     linked = status in {"linked", "conflict"}
+    j12_unresolved = status == "unresolved" and _is_j12_evidence(row)
     expected_issue = {
         "linked": "",
         "conflict": "legacy_grade_fact_conflict",
@@ -358,7 +399,12 @@ def _guard_failures(row) -> tuple[str, ...]:
         "enrollment_map_missing": bool(_text(row[45])) or not linked,
         "enrollment_map_state_invalid": _text(row[46]) == "migrated" or not linked,
         "enrollment_map_target_mismatch": _text(row[47]) == _text(row[28]) or not linked,
-        "nonlinked_migrated_enrollment_map": linked or not (_text(row[45]) and _text(row[46]) == "migrated"),
+        # J12 unresolved faktında tələbə/yazılış xəritəsi mövcud ola bilər;
+        # bağlana bilməyən hissə məhz etibarlı təqvim dərsidir. Writer qəsdən
+        # enrollment FK yazmır, xam faktı unresolved saxlayır.
+        "nonlinked_migrated_enrollment_map": linked
+        or j12_unresolved
+        or not (_text(row[45]) and _text(row[46]) == "migrated"),
     }
     for code, passed in checks.items():
         if not passed:
