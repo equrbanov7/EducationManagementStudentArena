@@ -46,10 +46,13 @@ Prod-da eyni qaçış **tələbəyə prorektor/dekan səlahiyyəti** verərdi.
 1. Eyni ad-soyad birdən çox HESABA uyğun gəlirsə, əvvəlcə tələbə/məzun/valideyn
    hesabları kənarlaşdırılır; heyət hesabı BİRDİRSƏ seçim birmənalıdır.
 2. Yenə də bir neçə heyət hesabı qalırsa → **atlanır** və hesabatda göstərilir.
-3. Ad siyahının özündə təkrarlanırsa (məs. «Vəliyeva Fəridə Rəsul» iki bölmədə)
-   → **atlanır**.
-4. Tapılan yeganə hesab TƏLƏBƏ hesabıdırsa → **atlanır** (laborant işləyən magistr
-   ola bilər, ad toqquşması da ola bilər — sistem bunu bilə bilməz).
+3. ~~Ad siyahının özündə təkrarlanırsa (məs. «Vəliyeva Fəridə Rəsul» iki bölmədə)
+   → atlanır.~~ 2026-09-06 (bax bölmə 0c): sahib qərarı ilə **hər sətrə ayrıca
+   yeni hesab yaradılır** (atlanmır).
+4. ~~Tapılan yeganə hesab TƏLƏBƏ hesabıdırsa → atlanır.~~ 2026-09-06 (bax bölmə 0c):
+   sahib qərarı ilə **tələbə hesabına toxunulmadan YENİ heyət hesabı yaradılır**
+   (laborant işləyən magistr ola bilər, ad toqquşması da ola bilər — insan sonra
+   əl ilə birləşdirə bilər; sistem bunu bilə bilməz).
 5. Django tələsi: `.values_list("user_id").distinct()` `Membership.Meta.ordering`
    sahəsini DISTINCT-ə əlavə edir və bir adamın bir neçə üzvlüyü «fərqli hesab»
    kimi görünürdü — `.order_by()` ilə sıfırlanır.
@@ -86,6 +89,60 @@ Parollar (yalnız yeni hesablar, bir dəfə): `~/EMSArena-backups/qa-2026-09-05/
 **Giriş yoxlanıldı:** ilk 5 hesab birdəfəlik parolla klona daxil oldu (45–55 ms)
 və hamısı düzgün şəkildə **ilk-giriş parol təyini** axınına düşdü — yəni parol
 dəyişmədən sistemə keçə bilmirlər.
+
+## 0c. 2026-09-06 (davam) — sahib qərarı: «yeni ola bilər, yoxdusa yarat»
+
+Yuxarıdakı fail-closed siyahısının 3-cü və 4-cü bəndləri sahib tərəfindən
+yenidən nəzərdən keçirildi: *«bəziləri yeni ola bilər, ona görə nəzərə al,
+yoxdusa hesabını yarat»*. Nəticə — `seed_staff_roster` / `staff_roster.classify_match`:
+
+| Hal | Əvvəl (0b) | İndi |
+|---|---|---|
+| (a) Ad siyahının özündə təkrarlanır (məs. Vəliyeva Fəridə Rəsul) | atlanır | hər sətrə AYRICA YENİ hesab (mövcud uyğunluq İSTİFADƏ OLUNMUR — hansının hansı olduğu bilinmir) |
+| (b) Bazada BİRDƏN ÇOX HEYƏT hesabı adaşdır | atlanır | **DƏYİŞMƏDİ** — yeganə həqiqi fail-closed hal (səhv seçim mövcud işçinin hesabını korlaya bilər) |
+| (c) Tapılan yeganə uyğunluq TƏLƏBƏ/məzun hesabıdır | atlanır | həmin hesaba TOXUNULMUR, YENİ HEYƏT hesabı yaradılır; hesabatda «adaş tapıldı» qeydi ilə işarələnir ki, insan sonra eyni şəxsdirsə əl ilə birləşdirsin |
+
+Dry-run/apply hesabatı indi **üç ayrı say** göstərir: `Yaradılacaq` / `yenilənəcək` /
+`çox mənalı (atlanır)`; `çox mənalı` bölməsi bazadakı namizəd `username`/e-poçtları
+sadalayır ki, (b) halı saniyələr içində əl ilə həll edilə bilsin.
+
+**QA klonunda (`emsarena_rehearsal_a0d170000901`) yenidən icra edildi:**
+
+| | Əvvəl (0b) | Sonra (0c, bu dəyişiklikdən sonra) |
+|---|---:|---:|
+| Yaradılacaq (yeni hesab) | 0 (16 atlanırdı) | **13** (11 tələbə-adaş + 2 fayl-daxili adaş) |
+| Yenilənəcək (mövcud) | 103 | **103** |
+| Çox mənalı (atlanır) | 16 (7 heyət-adaş + 9 tələbə-adaş) | **3** (yalnız heyət-heyət adaşlığı) |
+
+Qalan 3 nəfər (dəyişməyib, hələ də əl ilə həll gözləyir): Bağırov Rəşad Hüseynqulu
+(Prorektor), Novruzov Nurlan Rasim (Rəqəmsal İnkişaf mərkəzi), Əliyeva Fidan Mahir
+(Siyasi və ictimai elmlər məktəbi/Dekan) — hər üçü üçün hesabat İKİ namizəd
+`myedu.worker.*` username/e-poçtunu göstərir.
+
+### (a) halının idempotentliyi — düzəldildi
+
+İlk yanaşmada fayl-daxili adaşlıq **hər** `--apply` icrasında yeni hesab
+yaradırdı (mövcud uyğunluq qəsdən yoxlanmadığı üçün) — yəni faylı iki dəfə
+tətbiq etmək «Vəliyeva Fəridə Rəsul» cütlüyü üçün dublikat açırdı. İndi sətrin
+ÖZ hesabı tanınır:
+
+1. bölmə sistemdə varsa — üzvlüyün `scope_unit`-i açardır;
+2. bölmənin qarşılığı yoxdursa (siyahıdakı 23 bölmə belədir) — profil üzərindəki
+   **vəzifə mətni** ayırd edir («Müdir» vs «Müavin»).
+
+Namizəd birdən çoxdursa yenə də yeni hesab yaradılır (təxmin etmirik).
+Klonda təsdiqləndi: əvvəlki qaçışların qoyduğu 2 dublikat silindikdən sonra
+təkrar quru icra **«Yaradılacaq: 0 · yenilənəcək: 116 · çox mənalı: 3»** verir —
+yəni komanda artıq təkrar-təhlükəsizdir. Test: `test_repeating_the_run_does_not_
+duplicate_namesake_accounts`.
+
+Testlər: `apps/accounts/tests/test_staff_roster_command.py` (5 test — yeni: tələbə-adaş
+halında yeni hesab + toxunulmamış tələbə, fayl-daxili adaşlıq → 2 fərqli username,
+heyət-heyət adaşlığı hələ də rədd edilir) və `apps/accounts/tests/test_staff_roster.py`
+(`ClassifyMatchTest`, DB-siz qərar məntiqi).
+
+Yeni hesabların birdəfəlik parolları: `/tmp/staff_roster_credentials_2026-09-06.csv`
+(yalnız bu klon icrası üçün, məxfi saxlanılıb, sənədə köçürülməyib).
 
 ---
 
