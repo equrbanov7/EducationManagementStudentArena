@@ -65176,3 +65176,7 @@ msgstr "Birim türü bu kurum için geçerli değil."
 msgctxt "profile.rim"
 msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
 msgstr "Yapısal birim oluşturma yetkiniz yok."
+
+msgctxt "registrar.journal"
+msgid "Nəticələr yüklənir…"
+msgstr "Sonuçlar yükleniyor…"

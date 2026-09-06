@@ -101,13 +101,18 @@
 .jd-panel-hint i { color: var(--ems-primary-400); margin-right: 4px; }
 
 /* ── Excel-vari grid: sticky sütun + sticky başlıq ────────────────────────── */
+/* Daxili şaquli scroll YOXDUR (sahib qərarı, 2026-09-06) — yalnız üfüqi.
+   Bax: jd2.css `.jd2-grid-wrap` şərhi. */
 .jd-grid-wrap {
-    max-height: 68vh;
-    overflow: auto;
+    overflow-x: auto;
     border: 1px solid var(--ems-neutral-200);
     border-radius: 12px;
     background: #fff;
 }
+/* `top:0` artıq HEÇ NƏ etmir — qutu şaquli scroll etmədiyi üçün başlıq
+   səhifə ilə birlikdə yuxarı çıxır (sahibin qərarına görə qəbul edilən güzəşt).
+   Qayda saxlanılır: opaq fon + z-index üfüqi scroll-da sol sütunun altından
+   keçən xanaları örtür. */
 .jd-grid thead th {
     position: sticky;
     top: 0;
@@ -174,7 +179,6 @@
     .jd-stats { gap: 0.4rem; }
     .jd-stat { padding: 0.35rem 0.6rem; }
     .jd-kbd-hint { display: none; }
-    .jd-grid-wrap { max-height: none; }
 }
 
 /* ── Excel ixrac linki (U14) ─────────────────────────────────────────────── */

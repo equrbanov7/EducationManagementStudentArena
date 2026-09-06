@@ -108,18 +108,47 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
         {% endif %}
     </form>
 
-    {% comment %}Filtr yüklənmə skeleti — filtr dəyişəndə JS `.jl-page`-ə
-    `is-loading` verir; server cavabını gözləyərkən dizayn sıçramır.{% endcomment %}
-    <div class="jl-skel" data-jl-skel aria-hidden="true">
-        {% for _ in "123456" %}
-        <div class="jl-skel-row">
-            <span class="skeleton jl-skel-cell jl-skel-cell--no"></span>
-            <span class="skeleton jl-skel-cell jl-skel-cell--grow"></span>
-            <span class="skeleton jl-skel-cell jl-skel-cell--kind"></span>
-            <span class="skeleton jl-skel-cell jl-skel-cell--count"></span>
-            <span class="skeleton jl-skel-cell jl-skel-cell--btn"></span>
-        </div>
-        {% endfor %}
+    {% comment %}Filtr yüklənmə vəziyyəti (sahib tələbi 2026-09-06: «search edəndə,
+    seçəndə dizaynı pozmuyan rahat formada olan bir hissə olsun»).
+
+    Filtr/axtarış dəyişəndə JS `.jl-page`-ə `is-loading` verir; nəticə cədvəli
+    gizlənir və YERİNƏ eyni kartda, eyni sütun düzümündə skeleton qalır — başlıq
+    sətri olduğu kimi görünür, ona görə səhifə sıçramır və istifadəçi hansı
+    sütunun gələcəyini itirmir. Qlobal `skeleton.css` şimmer animasiyası təkrar
+    yazılmır, yalnız sütun ölçüləri verilir (journal.css `.jl-skel-*`).{% endcomment %}
+    <p class="jl-skel-note" data-jl-skel-note role="status">
+        <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
+        {% trans "Nəticələr yüklənir…" context "registrar.journal" %}
+    </p>
+    <div class="jl-table-wrap jl-skel" data-jl-skel aria-hidden="true">
+        <table class="jl-table">
+            <thead>
+                <tr>
+                    <th class="jl-col-no">№</th>
+                    <th>{% trans "QRUPLAR" context "registrar.journal" %}</th>
+                    <th class="jl-col-kind">{% trans "DƏRS TİPİ" context "registrar.journal" %}</th>
+                    <th class="jl-col-count">{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}</th>
+                    <th class="jl-col-action"></th>
+                </tr>
+            </thead>
+            {% comment %}Sətir sayı CARİ nəticə sayı qədərdir (`offerings|default`) —
+            skeleton eyni hündürlüyü tutur, ona görə yüklənərkən səhifə qısalıb
+            sıçramır. Nəticə boşdursa 6 sətir göstərilir.{% endcomment %}
+            <tbody>
+                {% for _ in offerings|default:"123456" %}
+                <tr class="jl-skel-row">
+                    <td class="jl-col-no"><span class="skeleton jl-skel-cell jl-skel-cell--no"></span></td>
+                    <td>
+                        <span class="skeleton jl-skel-cell jl-skel-cell--grow"></span>
+                        <span class="skeleton jl-skel-cell jl-skel-cell--sub"></span>
+                    </td>
+                    <td class="jl-col-kind"><span class="skeleton jl-skel-cell jl-skel-cell--kind"></span></td>
+                    <td class="jl-col-count"><span class="skeleton jl-skel-cell jl-skel-cell--count"></span></td>
+                    <td class="jl-col-action"><span class="skeleton jl-skel-cell jl-skel-cell--btn"></span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     {% if offerings %}
@@ -136,7 +165,10 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             </thead>
             <tbody>
                 {% for offering in offerings %}
-                <tr class="jl-row" data-jl-href="{% url 'registrar:journal_detail' offering.id %}">
+                {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
+                2026-09-06): siyahıda «Seminar» seçib jurnalı açanda mühazirə sütunları
+                qarışmamalıdır.{% endcomment %}
+                <tr class="jl-row" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
@@ -148,7 +180,7 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
                     <td class="jl-col-kind">{{ offering.kind_label|default:"—" }}</td>
                     <td class="jl-col-count"><b>{{ offering.student_count }}</b></td>
                     <td class="jl-col-action">
-                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}">
+                        <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                             {% trans "Jurnalı aç" context "registrar.journal" %} →
                         </a>
                     </td>

@@ -34,29 +34,43 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
             sütunlar bir səhifəyə render olunurdu (41.5 MB HTML). İndi bir dəfəyə
             yalnız bir dilim göstərilir; rəqəmlər (q/b, giriş balı, buraxılış)
             HƏMİŞƏ bütün dərslər üzrədir.{% endcomment %}
+            {% if journal_kind_tabs %}
+            {% comment %}Dərs tipi süzgəci (sahib tələbi 2026-09-06): müəllim
+            «Seminar» seçəndə mühazirə sütunları qarışmır. Yalnız bu açılışda
+            MÖVCUD tiplər göstərilir; tək tip varsa pillələr ümumiyyətlə yoxdur.
+            Tip dəyişəndə pəncərə başlanğıcı (`lo`) sıfırlanır — sütun dəsti
+            tamam başqadır.{% endcomment %}
+            <nav class="jd2-kindnav" aria-label="{% trans 'Dərs tipi' context 'registrar.journal' %}">
+                {% for tab in journal_kind_tabs %}
+                <a class="jd2-kindnav__btn{% if tab.active %} is-active{% endif %}"
+                   href="?{{ journal_kind_query }}{% if journal_kind_query %}&amp;{% endif %}kind={{ tab.value }}"
+                   {% if tab.active %}aria-current="true"{% endif %}>{{ tab.label }}</a>
+                {% endfor %}
+            </nav>
+            {% endif %}
             {% if journal.lesson_window.enabled %}
-            <nav class="jd2-window" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
-                <a class="jd2-window__btn {% if not journal.lesson_window.has_prev %}is-disabled{% endif %}"
-                   href="?lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.prev_offset }}"
+            <nav class="jd2-lwnav" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
+                <a class="jd2-lwnav__btn {% if not journal.lesson_window.has_prev %}is-disabled{% endif %}"
+                   href="?{{ journal_nav_query }}{% if journal_nav_query %}&amp;{% endif %}lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.prev_offset }}"
                    {% if not journal.lesson_window.has_prev %}aria-disabled="true" tabindex="-1"{% endif %}>
                     <i class="fas fa-chevron-left"></i> {% trans "Sonrakı dərslər" context "registrar.journal" %}
                 </a>
-                <span class="jd2-window__label">
+                <span class="jd2-lwnav__label">
                     {% blocktrans context "registrar.journal" with first=journal.lesson_window.first_seq last=journal.lesson_window.last_seq total=journal.lesson_window.total %}{{ first }}–{{ last }} / {{ total }} dərs{% endblocktrans %}
                 </span>
-                <a class="jd2-window__btn {% if not journal.lesson_window.has_next %}is-disabled{% endif %}"
-                   href="?lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.next_offset }}"
+                <a class="jd2-lwnav__btn {% if not journal.lesson_window.has_next %}is-disabled{% endif %}"
+                   href="?{{ journal_nav_query }}{% if journal_nav_query %}&amp;{% endif %}lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.next_offset }}"
                    {% if not journal.lesson_window.has_next %}aria-disabled="true" tabindex="-1"{% endif %}>
                     {% trans "Əvvəlki dərslər" context "registrar.journal" %} <i class="fas fa-chevron-right"></i>
                 </a>
-                <a class="jd2-window__all" href="?lw=0">{% trans "Hamısını göstər" context "registrar.journal" %}</a>
+                <a class="jd2-lwnav__all" href="?{{ journal_nav_query }}{% if journal_nav_query %}&amp;{% endif %}lw=0">{% trans "Hamısını göstər" context "registrar.journal" %}</a>
             </nav>
             {% elif journal.lesson_window.total > journal.lesson_window.size %}
-            <nav class="jd2-window" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
-                <span class="jd2-window__label">
+            <nav class="jd2-lwnav" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
+                <span class="jd2-lwnav__label">
                     {% blocktrans context "registrar.journal" with total=journal.lesson_window.total %}Bütün {{ total }} dərs göstərilir{% endblocktrans %}
                 </span>
-                <a class="jd2-window__all" href="?lw=20">{% trans "Son 20 dərs" context "registrar.journal" %}</a>
+                <a class="jd2-lwnav__all" href="?{{ journal_nav_query }}{% if journal_nav_query %}&amp;{% endif %}lw=20">{% trans "Son 20 dərs" context "registrar.journal" %}</a>
             </nav>
             {% endif %}
             <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
