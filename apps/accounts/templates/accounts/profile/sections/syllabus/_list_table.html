@@ -45,7 +45,7 @@ və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə 
           <td class="syl-cell-next">
             <span class="syl-next syl-next--{{ row.next_tone }}">{{ row.next_step }}</span>
             <span class="syl-meta">
-              {% if row.touched %}{% trans "Son dəyişiklik" context "accounts.syllabus" %}: {{ row.touched|date:"d.m.Y, H:i" }}
+              {% if row.touched %}{% trans "Son dəyişiklik" context "accounts.syllabus" %}: {{ row.touched|date:"d.m.Y H:i" }}
               {% else %}{{ row.touched_text }}{% endif %}
             </span>
           </td>

@@ -57,7 +57,7 @@
                         </span>
                         <span class="public-profile-meta__item">
                             <i class="far fa-calendar-alt" aria-hidden="true"></i>
-                            {{ profile_user.date_joined|date:"d M Y" }}
+                            {{ profile_user.date_joined|date:"d.m.Y" }}
                         </span>
                         {% if profile_location %}
                             <span class="public-profile-meta__item">
@@ -136,7 +136,7 @@
                         </div>
                         <div class="public-profile-facts__row">
                             <dt>{% trans 'Üzvlüyə qoşulma' %}</dt>
-                            <dd>{{ admin_membership.created_at|date:"d M Y" }}</dd>
+                            <dd>{{ admin_membership.created_at|date:"d.m.Y" }}</dd>
                         </div>
                     </dl>
                 </section>
@@ -245,7 +245,7 @@
 
                                     <div class="public-post-card__body">
                                         <div class="public-post-card__meta">
-                                            <span><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ post.created_at|date:"d M Y" }}</span>
+                                            <span><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ post.created_at|date:"d.m.Y" }}</span>
                                             {% if post.average_rating %}
                                                 <span><i class="fas fa-star" aria-hidden="true"></i> {{ post.average_rating|floatformat:1 }}</span>
                                             {% endif %}
@@ -306,7 +306,7 @@
                         </div>
                         <div class="public-profile-facts__row">
                             <dt>{% trans 'Qoşulma tarixi' %}</dt>
-                            <dd>{{ profile_user.date_joined|date:"d M Y" }}</dd>
+                            <dd>{{ profile_user.date_joined|date:"d.m.Y" }}</dd>
                         </div>
                         {% if profile_location %}
                             <div class="public-profile-facts__row">

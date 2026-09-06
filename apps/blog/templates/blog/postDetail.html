@@ -30,7 +30,7 @@
             <h1 class="article-title">{{ post.title }}</h1>
 
             <div class="article-meta">
-                <span><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}</span>
+                <span><i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d.m.Y" }}</span>
                 {% if post.author %}
                     <span><a href="{% url 'accounts:public_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
                 {% endif %}
@@ -78,7 +78,7 @@
                     <header class="comment-header">
                         <strong class="comment-author">{{ comment.user.username }}</strong>
                         <span class="comment-meta">
-                            {{ comment.created_at|date:"d M Y H:i" }} •
+                            {{ comment.created_at|date:"d.m.Y H:i" }} •
                             <span class="star-rating">
                                 {% for _ in ""|ljust:comment.rating %} <i class="fas fa-star"></i> {% endfor %}
                             </span>

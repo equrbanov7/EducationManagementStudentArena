@@ -27,7 +27,7 @@
                 </a>
                 {% endif %}
                 <span class="card-date">
-                    <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d M Y" }}
+                    <i class="far fa-calendar-alt"></i> {{ post.created_at|date:"d.m.Y" }}
                 </span>
                 <span class="card-views">
                     <i class="far fa-eye"></i> {% blocktrans with count=post.view_count|compact_number %}{{ count }} baxış{% endblocktrans %}
