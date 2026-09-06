@@ -12,9 +12,9 @@
 
 | Göstərici | 05 sentyabr | **06 sentyabr (indi)** |
 |---|---|---|
-| Ümumi QA balı | 71 / 100 | **91 / 100** |
+| Ümumi QA balı | 71 / 100 | **92 / 100** |
 | Tapılan problem | 91 | **92** (P1 11 · P2 41 · P3 22 · UX 18) |
-| Düzəldilmiş | 43 | **86** (+2 qismən, 1 təxirə salınmış) |
+| Düzəldilmiş | 43 | **87** (+1 qismən, 1 təxirə salınmış) |
 | Açıq qalan | 44 | **0** — hər maddə ya bağlandı, ya sənədləşdirilmiş qərara çevrildi |
 | P0 (istehsalı bloklayan) | 0 | **0** |
 | Yeni reqressiya testi | 8 fayl | **24 fayl** |
@@ -32,7 +32,7 @@
 | Rollar və icazələr | 85 | Yeni **RİM əməkdaşı** rolu (məhdud dəst); iki icazə boşluğu bağlandı; «Nəticələrim» menyu↔capability uyğunlaşdırıldı; rədd səbəbləri dəqiqləşdi |
 | UX / UI | 72 | Jurnalda yapışqan başlıq, AI düyməsinin örtməsi, yüklənmə skeleti; filtr/əməl nümunələrinin vahidləşməsi qalır |
 | Rəng sistemi | 66 | 3 AA pozuntusu + bootstrap badge kontrastı (1.63:1 → 10.95:1) düzəldildi; 790 hex / 2 badge sistemi borc olaraq qalır |
-| Performans | 72 | Bütün bölmələrdə icazə sorğuları request-də bir dəfə (dashboard 79→50, 42→13 dublikat); imtahan balı 463→129; kafedra profili 425→67; müraciətlər 81→67; analitika 7.69 s → 0.11 s (keşdən). Jurnalın 41 MB HTML-i açıqdır |
+| Performans | 88 | Bütün bölmələrdə icazə sorğuları request-də bir dəfə (dashboard 79→50, 42→13 dublikat); imtahan balı 463→129; kafedra profili 425→67; müraciətlər 81→67; analitika soyuq keşdə 3.0–3.9 s → 0.54–0.73 s; jurnal 41.5 MB / 6.3 s → 1.07 MB / 2.16 s |
 | Data ardıcıllığı | 70 | Xaric/məzun ↔ giriş sinxron; «cari tədris ili» tək mənbədən; legacy «Level …» psevdo-qrupları (72) qalır |
 | Təhlükəsizlik | 84 | Bölmə sızması yoxdur (5 rol × bütün yad bölmələr təkrar yoxlanıldı); icazə keşi mutasiya nöqtələrində invalidasiya olunur; HSTS prod-da təsdiqlənməlidir |
 | Responsiv | 74 | Mobil sidebar düzəldildi; cədvəllər 375 px-də hələ üfüqi sürüşmə tələb edir |
@@ -104,11 +104,12 @@
 |---|---|---|---|
 | `exam-score-entry` | 466 sorğu / 697 ms | 129 / 193 ms | ✅ |
 | `chair-profile` | 425 sorğu / 368 ms | 67 | ✅ |
-| `academic-records` xülasəsi | 7.8–9.5 s | keşdən sonra ani | ⚠️ qismən |
-| jurnal (555 tələbə × 226 dərs) | **41.5 MB HTML / 6.3 s** | — | ❌ açıq (P1-8) |
-| `analytics` | 2.8–8.2 s | — | ❌ açıq |
-| `applications` | 80 sorğu / 38 dublikat | — | ❌ açıq |
-| jurnal siyahısı (korrektor) | 3.4–4.2 s | — | ❌ açıq |
+| `academic-records` xülasəsi | 7.8–9.5 s | ~2.0 s (soyuq) / 0.10 s | ✅ |
+| jurnal (555 tələbə × 226 dərs) | **41.5 MB HTML / 6.3 s** | 1.07 MB / 2.16 s | ✅ (P1-8) |
+| `analytics` (soyuq keş) | 2.8–8.2 s | 0.54–0.73 s | ✅ |
+| `applications` | 80 sorğu / 38 dublikat | 67 sorğu, dublikatsız | ✅ |
+| jurnal siyahısı (korrektor) | 3.4–4.2 s | 0.60 s | ✅ |
+| `org-members` (imtahan mərkəzi) | 9 s | 0.37 s | ✅ |
 
 ---
 
@@ -190,10 +191,10 @@ seçilmiş sətir görünürə gətirilir.
 | `org-members` (imtahan mərkəzi) | 9 s | **0.37 s** |
 | Tələbə «Fənlərim» | 192 sorğu | **142 sorğu** |
 | Dərs modalı (`<option>` sayı) | 700+ | **20** |
+| Analitika (rektor, soyuq keş, 19 643 yazılış) | 3.0–3.9 s | **0.54–0.73 s** |
 | Login POST · jurnal yazısı (20 xana) | — | 0.42 s · 0.29 s |
 
-**Qalan yeganə açıq performans maddəsi** analitika bölməsinin İLK açılışıdır (keşdən
-sonra 0.11 s); onun da kök həlli ayrıca iş kimi davam edir.
+**Açıq performans maddəsi qalmadı.** Sonuncu — analitikanın soyuq-keş açılışı — `analytics_fast.py` ilə bağlandı: 3.0–3.9 s → 0.54–0.73 s (in-process), canlı serverdə 0.80 s.
 
 **Sənədləşdirilmiş qərarlar (kod yox, seçim):** legacy «Level 2025-2026» (228 tələbə) və
 `Silinmelidir` qrupu toxunulmadı; `UX-03` token miqrasiyası üç fazaya bölündü; e-poçt
