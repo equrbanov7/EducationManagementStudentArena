@@ -12,6 +12,7 @@ yalnız lazımi dəstlər üzərində alınır. Ayrıca moduldur ki, `page_conte
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 #: `schedule.season_label` ilə EYNİ ay-bölgüsü (SQL tərəfə güzgülənir).
@@ -52,6 +53,27 @@ def path_segment_q(field: str, unit_id: str) -> Q:
         | Q(**{f"{field}__endswith": f"/{unit_id}"})
         | Q(**{f"{field}__contains": f"/{unit_id}/"})
     )
+
+
+def label_for_selection(kind: str, value: str) -> str:
+    """Seçilmiş id-nin adı — dropdown siyahısında olmayan hallar üçün fallback.
+
+    Kafedra/qrup üçün ``OrgUnit.name``, müəllim üçün tam ad (yoxdursa username).
+    Etibarsız id səssizcə boş qaytarır — qutu ən pis halda placeholder göstərir.
+    """
+    if not value:
+        return ""
+    try:
+        if kind == "unit":
+            unit = django_apps.get_model("organizations", "OrgUnit").objects.filter(pk=value).only("name").first()
+            return unit.name if unit else ""
+        if kind == "teacher":
+            user_model = django_apps.get_model("auth", "User")
+            user = user_model.objects.filter(pk=value).only("first_name", "last_name", "username").first()
+            return (user.get_full_name() or user.username).strip() if user else ""
+    except (ValueError, TypeError, ValidationError):
+        return ""
+    return ""
 
 
 def apply_kind_filter(qs, kind: str):

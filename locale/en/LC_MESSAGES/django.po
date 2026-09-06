@@ -65448,3 +65448,7 @@ msgstr "The unit type is not valid for this organisation."
 msgctxt "profile.rim"
 msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
 msgstr "You do not have permission to create a structural unit."
+
+msgctxt "registrar.journal"
+msgid "Nəticələr yüklənir…"
+msgstr "Loading results…"

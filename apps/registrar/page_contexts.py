@@ -24,12 +24,17 @@ def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
 
 
-def attach_kind_labels(offerings) -> None:
+def attach_kind_labels(offerings, selected_kind: str = "") -> None:
     """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (iki toplu sorğu).
 
     Ayrıca funksiyadır ki, jurnal siyahısı onu YALNIZ lazım olan dəst üçün
     çağıra bilsin (səhifə dilimi, ya da `kind` süzgəci seçiləndə tam dəst) —
     QA 2026-09-05 P2-18.
+
+    ``selected_kind`` verilibsə etiket YALNIZ həmin tipi göstərir (sahib tələbi
+    2026-09-06): «Seminar» pilləsi seçiləndə sətirdə «Mühazirə · Seminar»
+    yazılırdı, yəni süzgəcin nə etdiyi görünmürdü. ``slot_kinds`` isə TAM qalır —
+    jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
     """
     from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
     from apps.registrar.schedule import EVENING_START
@@ -56,7 +61,8 @@ def attach_kind_labels(offerings) -> None:
     for offering in offerings:
         kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
-        offering.kind_label = " · ".join(str(kind_labels[k]) for k in kinds) if kinds else ""
+        shown = [k for k in kinds if k == selected_kind] if selected_kind else kinds
+        offering.kind_label = " · ".join(str(kind_labels[k]) for k in shown) if shown else ""
         offering.is_evening = offering.id in evening_offerings
 
 
@@ -218,8 +224,18 @@ def journal_list_context(user, request=None) -> dict:
         "-period__start_date", "subject__code", "pk"
     )
 
-    def _sel_label(choices, val):
-        return next((c["label"] for c in choices if c["value"] == val), "")
+    def _sel_label(choices, val, *, kind=""):
+        """Seçilmiş dəyərin ADI — əvvəl hazır siyahıdan, tapılmasa BAZADAN.
+
+        Siyahılar açılışların qrup-yolundan qurulur; kafedra çox vaxt orada
+        OLMUR (qruplar ixtisas altındadır) — nəticədə seçim edilsə də qutu boş
+        görünürdü və istifadəçi «seçdim, gəlmir» deyirdi (sahib şikayəti
+        2026-09-06). Fallback ilə etiket həmişə tapılır.
+        """
+        label = next((c["label"] for c in choices if c["value"] == val), "")
+        if label or not val or not kind:
+            return label
+        return jlq.label_for_selection(kind, val)
 
     # "Sıfırla" düyməsi yalnız bir filtr aktivdirsə göstərilir.
     has_filters = any(
@@ -247,7 +263,7 @@ def journal_list_context(user, request=None) -> dict:
     # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
-    attach_kind_labels(page_obj.object_list)
+    attach_kind_labels(page_obj.object_list, selected_kind)
     querystring = ""
     if request is not None:
         params = request.GET.copy()
@@ -280,10 +296,10 @@ def journal_list_context(user, request=None) -> dict:
         "journal_selected_department": selected_dept,
         "journal_query": query,
         # Searchable-picker preselection üçün cari seçimin adı (AJAX picker setValue).
-        "journal_selected_teacher_label": _sel_label(teacher_choices, selected_teacher),
-        "journal_selected_group_label": _sel_label(group_choices, selected_group),
-        "journal_selected_faculty_label": _sel_label(faculty_choices, selected_faculty),
-        "journal_selected_department_label": _sel_label(dept_choices, selected_dept),
+        "journal_selected_teacher_label": _sel_label(teacher_choices, selected_teacher, kind="teacher"),
+        "journal_selected_group_label": _sel_label(group_choices, selected_group, kind="unit"),
+        "journal_selected_faculty_label": _sel_label(faculty_choices, selected_faculty, kind="unit"),
+        "journal_selected_department_label": _sel_label(dept_choices, selected_dept, kind="unit"),
     }
 
 

@@ -122,7 +122,9 @@
     padding: 12px 16px; font-size: 11.5px; font-weight: 800; color: var(--j-soft);
     letter-spacing: 0.5px; border-bottom: 1px solid var(--j-cell);
 }
-.jd2-topic-scroll { max-height: 520px; overflow-y: auto; }
+/* Təqvim planı paneli də daxili scroll-suzdur (eyni qərar) — mövzular
+   grid ilə yan-yana axır, panel sətir sayına görə uzanır. */
+.jd2-topic-scroll { min-height: 0; }
 .jd2-topic-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f1f5fc; }
 .jd2-topic-date { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 38px; flex-shrink: 0; }
 .jd2-topic-title { font-size: 12.5px; font-weight: 600; color: var(--j-mid); }
@@ -135,11 +137,15 @@
     border-radius: 5px; padding: 2px 6px; margin-left: 6px; white-space: nowrap;
 }
 .jd2-gridcol { overflow: hidden; }
-/* QA UX-06 (2026-09): 500+ tələbəli qruplarda başlıq sətri (dərs tarixləri)
-   səhifə-scroll ilə birlikdə itirdi — hansı sütunun hansı dərs olduğunu
-   itirmək asan idi. DAXİLİ şaquli scroll + sticky başlıq bərpa olunur (əvvəlki
-   "hamısı bir səhifədə görünsün" qərarı ləğv edilir); üfüqi scroll saxlanılır. */
-.jd2-grid-wrap { overflow-x: auto; overflow-y: auto; max-height: 65vh; }
+/* Jurnalın İÇİNDƏ şaquli scroll YOXDUR (sahib qərarı, 2026-09-06 — QA UX-06-nın
+   `max-height:65vh` qutusu geri alınır). Səbəb: yaşlı nəsil müəllim daxili
+   scroll zolağını görmür, sətirlərin bir hissəsini itmiş sayır. Bütün sətirlər
+   göründüyü üçün səhifənin öz scroll-u işləyir. Üfüqi scroll (tarix sütunları)
+   qalır və YALNIZ bu qutunun içindədir — səhifə gövdəsi yana sürüşmür.
+   Qeyd: overflow-x:auto olan qutuda overflow-y "visible" qala bilmir (CSS
+   qaydası) — auto-ya çevrilir; max-height olmadığı üçün scrollHeight ==
+   clientHeight, yəni real şaquli scroll yaranmır. */
+.jd2-grid-wrap { overflow-x: auto; }
 
 /* ── Grid cədvəli ───────────────────────────────────────────────────────── */
 .jd2-table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 12.5px; }

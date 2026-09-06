@@ -1,7 +1,13 @@
 /* Jurnal grid-inin DƏRS PƏNCƏRƏSİ naviqasiyası — ayrı fayl (jd2.css ölçü
-   büdcəsinin həddindədir). Bax: apps/registrar/journal_window.py. */
+   büdcəsinin həddindədir). Bax: apps/registrar/journal_window.py.
+
+   ⚠️ AD TOQQUŞMASI (2026-09-06): bu blok əvvəl `.jd2-window` adlanırdı — jd2.css-də
+   jurnalın BÖYÜK ağ kart çərçivəsi də eyni adı daşıyır. Bu fayl jd2.css-dən SONRA
+   yükləndiyi üçün kart `display:flex; flex-wrap:wrap; padding:8px 12px; background:#f0f6ff`
+   alırdı: navy başlıq yarım enə yığılır, tab zolağı və çip sırası qırılırdı — sahibin
+   «dağılıb» şikayətinin əsas səbəbi. Prefiks `jd2-lwnav` (lesson-window nav) edildi. */
 /* ── Dərs pəncərəsi naviqasiyası (QA 2026-09-05 P1-8) ────────────────────── */
-.jd2-window {
+.jd2-lwnav {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -14,8 +20,8 @@
     font-size: 12.5px;
 }
 
-.jd2-window__btn,
-.jd2-window__all {
+.jd2-lwnav__btn,
+.jd2-lwnav__all {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -28,23 +34,54 @@
     text-decoration: none;
 }
 
-.jd2-window__btn:hover,
-.jd2-window__all:hover {
+.jd2-lwnav__btn:hover,
+.jd2-lwnav__all:hover {
     background: var(--ems-primary-50);
 }
 
-.jd2-window__btn.is-disabled {
+.jd2-lwnav__btn.is-disabled {
     color: var(--ems-neutral-400);
     border-color: var(--ems-neutral-200);
     pointer-events: none;
 }
 
-.jd2-window__label {
+.jd2-lwnav__label {
     color: var(--j-muted);
     font-weight: 700;
     margin-inline: auto;
 }
 
-.jd2-window__all {
+.jd2-lwnav__all {
     color: var(--ems-neutral-700);
 }
+
+/* ── Dərs tipi pillələri (sahib tələbi 2026-09-06) ────────────────────────────
+   Mühazirə/Seminar/Laboratoriya sütunlarını qarışdırmamaq üçün. Pəncərə
+   naviqasiyası ilə eyni vizual dildə, amma seçili vəziyyət dolu fonludur. */
+.jd2-kindnav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 0 0 8px;
+}
+.jd2-kindnav__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-200);
+    background: #fff;
+    color: var(--ems-neutral-700);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.jd2-kindnav__btn:hover { border-color: var(--ems-primary-300); color: var(--ems-primary-700); }
+.jd2-kindnav__btn.is-active {
+    background: var(--ems-primary-600);
+    border-color: var(--ems-primary-600);
+    color: #fff;
+}
+.jd2-kindnav__btn:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 2px; }

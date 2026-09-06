@@ -65596,3 +65596,7 @@ msgstr "Тип подразделения недопустим для этой �
 msgctxt "profile.rim"
 msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
 msgstr "У вас нет права создавать структурное подразделение."
+
+msgctxt "registrar.journal"
+msgid "Nəticələr yüklənir…"
+msgstr "Загрузка результатов…"

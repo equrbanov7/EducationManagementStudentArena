@@ -11,6 +11,8 @@ dərslər üzrə hesablanır — əks halda pəncərə rəqəmləri təhrif edə
 
 from __future__ import annotations
 
+from django.utils.translation import pgettext
+
 #: Bir səhifədə göstərilən dərs sütunlarının default sayı.
 DEFAULT_LESSON_WINDOW = 20
 
@@ -103,10 +105,73 @@ def resolve_request_window(request):
     return size, offset
 
 
+def resolve_request_kind(request, offering) -> str:
+    """`?kind=` — jurnalın içindəki dərs tipi süzgəci (sahib tələbi 2026-09-06).
+
+    Siyahıdakı «Mühazirə / Seminar / Laboratoriya» pilləsi jurnala da keçir.
+    Fail-soft: naməlum tip və ya bu açılışda HEÇ BİR dərsi olmayan tip «hamısı»
+    kimi oxunur — boş cədvəl göstərmək istifadəçini çaşdırardı.
+    """
+    from apps.registrar.models import Lesson, SlotKind
+
+    kind = (request.GET.get("kind") or "").strip()
+    if kind not in dict(SlotKind.choices):
+        return ""
+    if not Lesson.objects.filter(offering=offering, kind=kind).exists():
+        return ""
+    return kind
+
+
+def nav_query(request, *, drop=()) -> str:
+    """Cari query-dən `drop` açarlarını çıxarıb urlencode edir (sonda `&` YOX).
+
+    `?lw=…` kimi yalnız-sorğu keçidləri bütün query-ni əvəz edir; şablon bu
+    qalığı əvvələ qoyaraq seçilmiş tipi/tabı saxlayır.
+    """
+    if request is None:
+        return ""
+    params = request.GET.copy()
+    for key in drop:
+        params.pop(key, None)
+    return params.urlencode()
+
+
+def grid_nav_context(request, offering, *, selected_kind: str, active_tab: str) -> dict:
+    """Grid naviqasiyasının şablon açarları (tip pillələri + qorunan query).
+
+    View-da ayrı-ayrı sətirlər kimi yazılmır — jurnal görünüşü modul büdcəsinə
+    (600 sətir) sığmalıdır, bax P1-8 şərhi.
+    """
+    return {
+        "journal_kind": selected_kind,
+        "journal_kind_tabs": kind_tabs(offering, selected_kind) if active_tab == "grid" else [],
+        "journal_nav_query": nav_query(request, drop=("lw", "lo", "page")),
+        "journal_kind_query": nav_query(request, drop=("kind", "lo", "page")),
+    }
+
+
+def kind_tabs(offering, selected_kind: str) -> list:
+    """Jurnal başlığındakı tip pillələri — YALNIZ mövcud tiplər göstərilir."""
+    from apps.registrar.models import Lesson, SlotKind
+
+    labels = dict(SlotKind.choices)
+    present = set(Lesson.objects.filter(offering=offering).values_list("kind", flat=True).distinct())
+    tabs = [{"value": "", "label": pgettext("registrar.journal", "Hamısı"), "active": not selected_kind}]
+    for value, _label in SlotKind.choices:
+        if value in present:
+            tabs.append({"value": value, "label": str(labels[value]), "active": selected_kind == value})
+    # Tək tip varsa seçim mənasızdır — pillələr gizlədilir.
+    return tabs if len(tabs) > 2 else []
+
+
 __all__ = [
     "DEFAULT_LESSON_WINDOW",
     "WINDOW_CHOICES",
+    "grid_nav_context",
+    "kind_tabs",
     "lesson_summaries",
+    "nav_query",
+    "resolve_request_kind",
     "resolve_request_window",
     "resolve_window",
     "window_meta",

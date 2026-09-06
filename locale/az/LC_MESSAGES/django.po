@@ -65269,3 +65269,7 @@ msgstr "Bölmə tipi bu təşkilat üçün keçərli deyil."
 msgctxt "profile.rim"
 msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
 msgstr "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
+
+msgctxt "registrar.journal"
+msgid "Nəticələr yüklənir…"
+msgstr "Nəticələr yüklənir…"
