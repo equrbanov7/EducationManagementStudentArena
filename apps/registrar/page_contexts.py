@@ -65,17 +65,18 @@ def journal_list_context(user, request=None) -> dict:
 
     Mockup filter zolağı TAM işləkdir: TƏDRİS İLİ (``?year=``), YARIM İL
     (``?period=``), dərs tipi pilləri (``?kind=`` — cədvəl slotlarından).
-    Hər offering-ə dərs tipi etiketi və magistratura (axşam) bayrağı bağlanır."""
+    Hər offering-ə dərs tipi etiketi və magistratura (axşam) bayrağı bağlanır.
+
+    Bütün süzgəclər (il/fəsil/tip/müəllim/qrup/fakültə/kafedra/mətn) ORM
+    səviyyəsində tətbiq olunur, səhifələmə isə queryset üzərində gedir (QA
+    2026-09-05 P2-18 — bax :mod:`apps.registrar.journal_list_query`): əvvəllər
+    BÜTÜN offering-lər (11 124-ə qədər) model instansiyası kimi yüklənib
+    Python-da süzülürdü (İKT rəhbəri görünüşündə 1.96 s / 32 sorğu)."""
     from django.db.models import Count, Q
 
     from apps.registrar import corrections as corrections_service
+    from apps.registrar import journal_list_query as jlq
     from apps.registrar.models import SlotKind
-
-    # `kind` süzgəci seçilibsə etiketlər BÜTÜN dəst üçün lazımdır (süzgəc onlara baxır);
-    # əks halda yalnız görünən səhifə üçün hesablanır (P2-18).
-    selected_kind_requested = bool(
-        request is not None and (request.GET.get("kind") or "").strip() in dict(SlotKind.choices)
-    )
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
     # təşkilatın jurnallarını görür (öz dərsi olmasa da); adi müəllim yalnız özününkünü.
@@ -117,28 +118,16 @@ def journal_list_context(user, request=None) -> dict:
         )
         is_broad = False
 
-    offerings = list(
-        base_qs.select_related(
-            "subject",
-            "period",
-            "group",
-            "group__parent",
-            "group__parent__parent",
-            "group__parent__parent__parent",
-            "instructor",
-        )
-        .annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled")))
-        .order_by("-period__start_date", "subject__code")
-    )
+    # `group__parent*` zənciri artıq lazım DEYİL — fakültə/kafedra ata-axtarışı
+    # `journal_list_query.faculty_department_choices_for`-da ``path``-dan gedir.
+    base_qs = base_qs.select_related("subject", "period", "group", "instructor")
 
-    # Dərs tipi etiketləri (QA 2026-09-05 P2-18): əvvəl BÜTÜN açılışlar üçün
-    # hesablanırdı — İKT görünüşündə 11 124 açılış = 293 min dərs üzərində
-    # DISTINCT sorğusu (0.39 s) + slot sorğusu, halbuki səhifədə cəmi 20 sətir
-    # görünür. İndi yalnız `kind` süzgəci seçiləndə tam dəst hesablanır.
-    if selected_kind_requested:
-        attach_kind_labels(offerings)
-
-    periods = sorted({o.period for o in offerings if o.period}, key=lambda p: p.start_date, reverse=True)
+    # Dövr (il/fəsil) dropdown-u — TAM əhatədən (süzgəclərdən ƏVVƏL), amma yalnız
+    # TƏKRARSIZ dövrlər üçün yüngül sorğu (bax P2-18: əvvəllər 11 124 model
+    # instansiyasından `{o.period for o in offerings}` ilə çıxarılırdı).
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    period_ids = base_qs.order_by().values_list("period_id", flat=True).distinct()
+    periods = sorted(AcademicPeriod.objects.filter(pk__in=period_ids), key=lambda p: p.start_date, reverse=True)
     for p in periods:
         p.year_label = p.year_display  # "2025/2026" formatı (AcademicPeriod.format_year)
         p.season_label = _season_label(p)
@@ -177,41 +166,17 @@ def journal_list_context(user, request=None) -> dict:
             selected_season = current.season_label
 
     # ── Korrektor (geniş) görünüş üçün əlavə filtrlər: müəllim, qrup, fakültə,
-    # kafedra, mətn axtarışı. Seçim siyahıları TAM dəstdən (illik süzgəcdən əvvəl)
-    # qurulur ki, dropdown-lar həmişə mövcud variantları göstərsin. Fakültə/kafedra
-    # OrgUnit ata-zəncirindən (path) alınır — organizations importu yoxdur (dövr yox).
-    def _ancestor_of(unit, types):
-        node = unit
-        while node is not None:
-            if getattr(node, "unit_type", None) in types:
-                return node
-            node = getattr(node, "parent", None)
-        return None
-
+    # kafedra, mətn axtarışı. Seçim siyahıları TAM əhatədən (illik süzgəcdən
+    # əvvəl, ``base_qs``) yüngül `values_list` sorğuları ilə qurulur ki,
+    # dropdown-lar həmişə mövcud variantları göstərsin (bax P2-18: əvvəllər
+    # 11 124 model instansiyası üzərində əl ilə təkrarsızlaşdırılırdı).
     teacher_choices, group_choices, faculty_choices, dept_choices = [], [], [], []
     selected_teacher = selected_group = selected_faculty = selected_dept = ""
     query = ""
     if is_broad:
-        seen_t, seen_g, seen_f, seen_d = set(), set(), set(), set()
-        for o in offerings:
-            if o.instructor_id and o.instructor_id not in seen_t:
-                seen_t.add(o.instructor_id)
-                label = (o.instructor.get_full_name() or o.instructor.username) if o.instructor else ""
-                teacher_choices.append({"value": str(o.instructor_id), "label": label})
-            g = o.group
-            if g is not None and g.id not in seen_g:
-                seen_g.add(g.id)
-                group_choices.append({"value": str(g.id), "label": g.name})
-            fac = _ancestor_of(g, ("faculty", "deanery")) if g is not None else None
-            if fac is not None and fac.id not in seen_f:
-                seen_f.add(fac.id)
-                faculty_choices.append({"value": str(fac.id), "label": fac.name})
-            dep = _ancestor_of(g, ("chair", "department")) if g is not None else None
-            if dep is not None and dep.id not in seen_d:
-                seen_d.add(dep.id)
-                dept_choices.append({"value": str(dep.id), "label": dep.name})
-        for choices in (teacher_choices, group_choices, faculty_choices, dept_choices):
-            choices.sort(key=lambda c: c["label"].lower())
+        teacher_choices = jlq.teacher_choices_for(base_qs)
+        group_choices = jlq.group_choices_for(base_qs)
+        faculty_choices, dept_choices = jlq.faculty_department_choices_for(base_qs)
         if request is not None:
             selected_teacher = (request.GET.get("teacher") or "").strip()
             selected_group = (request.GET.get("group") or "").strip()
@@ -219,28 +184,39 @@ def journal_list_context(user, request=None) -> dict:
             selected_dept = (request.GET.get("department") or "").strip()
             query = (request.GET.get("q") or "").strip()
 
+    # ── Süzgəclər ORM səviyyəsində (P2-18) — eyni nəticə, DB tərəfdə. ─────────
+    qs = base_qs
     if selected_year:
-        offerings = [o for o in offerings if o.period and o.period.academic_year == selected_year]
+        qs = qs.filter(period__academic_year=selected_year)
     if selected_season:
-        offerings = [o for o in offerings if o.period and _season_label(o.period) == selected_season]
+        months = jlq.SEASON_MONTHS.get(selected_season)
+        if months:
+            qs = qs.filter(period__start_date__month__in=months)
     if selected_kind:
-        offerings = [o for o in offerings if selected_kind in o.slot_kinds]
+        qs = jlq.apply_kind_filter(qs, selected_kind)
     if selected_teacher:
-        offerings = [o for o in offerings if str(o.instructor_id) == selected_teacher]
+        teacher_pk = jlq.int_or_none(selected_teacher)
+        qs = qs.filter(instructor_id=teacher_pk) if teacher_pk is not None else qs.none()
     if selected_group:
-        offerings = [o for o in offerings if o.group_id and str(o.group_id) == selected_group]
+        group_pk = jlq.uuid_or_none(selected_group)
+        qs = qs.filter(group_id=group_pk) if group_pk is not None else qs.none()
     if selected_faculty:
-        offerings = [o for o in offerings if o.group and o.group.path and selected_faculty in o.group.path.split("/")]
+        qs = qs.filter(jlq.path_segment_q("group__path", selected_faculty))
     if selected_dept:
-        offerings = [o for o in offerings if o.group and o.group.path and selected_dept in o.group.path.split("/")]
+        qs = qs.filter(jlq.path_segment_q("group__path", selected_dept))
     if query:
-        ql = query.lower()
-        offerings = [
-            o
-            for o in offerings
-            if ql in f"{o.subject.code} {o.subject.name} "
-            f"{(o.instructor.get_full_name() or o.instructor.username) if o.instructor else ''}".lower()
-        ]
+        qs = jlq.apply_text_query(qs, query)
+
+    # `pk` sondan ƏLAVƏ tiebreaker-dir: eyni dövr YARADIŞ TARİXİ + eyni fənn kodlu
+    # (məs. bir fənn bir neçə qrupa açılıb) sətirlər arasında əvvəlki versiyada
+    # SIRA TƏYİN OLUNMAMIŞDI (yalnız iki açar) — Python siyahısını tam yükləyib
+    # sonra dilimləyəndə "təsadüfən" sabit qalırdı, DB-də LIMIT/OFFSET ilə
+    # səhifələnəndə (bu P2-18 düzəlişi) isə sorğu planı dəyişəndə fərqli ola
+    # bilərdi (sətir təkrarı/itməsi riski). `pk` yalnız bu NİZAMSIZ hallarda
+    # işə düşür — elan olunmuş iki açarın (dövr, fənn kodu) sırasını DƏYİŞMİR.
+    qs = qs.annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled"))).order_by(
+        "-period__start_date", "subject__code", "pk"
+    )
 
     def _sel_label(choices, val):
         return next((c["label"] for c in choices if c["value"] == val), "")
@@ -259,15 +235,19 @@ def journal_list_context(user, request=None) -> dict:
         ]
     )
 
-    # Səhifələmə (İKT rəhbəri bütün offering-ləri görür → çox sətir). Filtr
-    # querystring-i qorunur (page istisna) ki, keçidlər filtri saxlasın.
+    # Səhifələmə (İKT rəhbəri bütün offering-ləri görür → çox sətir) birbaşa
+    # QUERYSET üzərində gedir (Paginator siyahı DEYİL, queryset alır) — yalnız
+    # görünən 20 sətir DB-dən LIMIT/OFFSET ilə gəlir. Filtr querystring-i
+    # qorunur (page istisna) ki, keçidlər filtri saxlasın.
     from django.core.paginator import Paginator
 
-    paginator = Paginator(offerings, 20)
+    paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
-    if not selected_kind_requested:
-        attach_kind_labels(page_obj.object_list)
+    # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —
+    # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
+    # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
+    attach_kind_labels(page_obj.object_list)
     querystring = ""
     if request is not None:
         params = request.GET.copy()

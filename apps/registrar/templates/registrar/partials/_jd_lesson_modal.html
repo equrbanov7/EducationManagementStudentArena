@@ -1,10 +1,11 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}Yeni dərs / dərs redaktəsi modalı (mockup: navy başlıq + tarixin yanında
 həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu TƏSDİQLƏNMİŞ
 sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
 kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
 varsa dərs tipi kilidlidir.{% endcomment %}
-<div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}" hidden>
+<div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
+     data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}" hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
     <div class="jd-modal-card" role="dialog" aria-modal="true" aria-labelledby="jd-lesson-modal-title">
         <div class="jd-modal-head jd2-modal-head">
@@ -91,8 +92,9 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 {% comment %}
                 Korpus → otaq kaskadı. Korpus AYRICA model deyil — otağın öz "building"
                 sahəsidir, ona görə korpus seçimi yalnız otaq siyahısını daraldır və
-                POST-a YALNIZ otaq (lesson_room) gedir. Otaq siyahısı json_script ilə
-                ötürülür (xarici JS Django şablonundan keçmir).
+                POST-a YALNIZ otaq (lesson_room) gedir. Otaq siyahısı (QA 2026-09-05
+                P3-13) artıq bura bişirilmir — modal İLK dəfə açılanda
+                `data-rooms-url`-dan AJAX ilə gətirilir (bax journal_lesson_room.js).
                 MƏCBURİ DEYİL: hər ikisi boş qala bilər (köhnə dərslərdə otaq yoxdur).
                 {% endcomment %}
                 <div class="jd2-field-pair">
@@ -123,17 +125,18 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <small class="jd-field-hint" data-jd-room-hint>{% trans "Təşkilat üçün hələ otaq qeyd olunmayıb — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "registrar.journal" %}</small>
                     {% endif %}
                 </div>
-                {{ lesson_rooms|json_script:"jd-lesson-rooms" }}
                 {% if lesson_teacher_choices %}
+                {% comment %}QA 2026-09-05 P3-13: əvvəllər təşkilatın BÜTÜN namizədləri
+                (554-ə qədər) <option> kimi bura bişirilirdi. İndi axtarışlı/lazy seçici
+                (bax journal_lesson_teacher_picker.js) — server EMSSearchableSelect
+                müqaviləsi ilə `journal_lesson_teacher_search` endpoint-indən axtarır.{% endcomment %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRSİN MÜƏLLİMİ" context "registrar.journal" %}</span>
-                    <div class="bootstrap-single-select">
-                        <select name="lesson_instructor" class="bootstrap-single-select__native" data-jd-lesson-instructor data-bootstrap-select>
-                            {% for t in lesson_teacher_choices %}
-                            <option value="{{ t.id }}"{% if offering.instructor_id|stringformat:'s' == t.id %} selected{% endif %}>{{ t.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    <input type="hidden" name="lesson_instructor" value="{{ offering.instructor_id|default:'' }}"
+                           data-jd-lesson-instructor
+                           data-search-url="{% url 'registrar:journal_lesson_teacher_search' offering.id %}">
+                    {% trans "müəllim axtar…" as jdt_teacher_ph %}
+                    {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jdt" hook="jdt-teacher" placeholder=jdt_teacher_ph %}
                     <small class="jd-field-hint">{% trans "Fənn 2 müəllim arasında bölünübsə (məs. mühazirə bir, seminar başqa) bu dərsin müəllimini seçin." context "registrar.journal" %}</small>
                 </div>
                 {% endif %}
@@ -185,3 +188,6 @@ varsa dərs tipi kilidlidir.{% endcomment %}
         </form>
     </div>
 </div>
+{% if lesson_teacher_choices %}
+<script src="{% static 'registrar/js/journal_lesson_teacher_picker.js' %}"></script>
+{% endif %}
