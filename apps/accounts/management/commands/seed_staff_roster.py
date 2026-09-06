@@ -29,6 +29,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.accounts.services import staff_roster as roster
+from core.rls_pooling import rls_worker_atomic
 
 _KIND_TEACHER = "teacher"
 
@@ -66,6 +67,12 @@ class Command(BaseCommand):
         parser.add_argument("--limit", type=int, default=0, help="Yalnız ilk N sətir (sınaq üçün)")
 
     def handle(self, *args, **options):
+        # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): request-dən kənar
+        # bütün DB işi bir worker-atomic sərhədi içindədir.
+        with rls_worker_atomic():
+            self._run(**options)
+
+    def _run(self, **options):
         from apps.organizations.models import Membership, Organization, OrgUnit
 
         path = pathlib.Path(options["file"]).expanduser()
