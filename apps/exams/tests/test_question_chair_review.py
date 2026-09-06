@@ -85,7 +85,7 @@ class _ChairBase(TestCase):
         cls.chair_head = cls._member("qc_chair", ProfileRole.MEMBER, "chair_head", cls.chair)
         cls.other_chair_head = cls._member("qc_chair2", ProfileRole.MEMBER, "chair_head", cls.other_chair)
         cls.dean = cls._member("qc_dean", ProfileRole.MEMBER, "dean", cls.faculty)
-        cls.exam_center = cls._member("qc_center", ProfileRole.MEMBER, "exam_center", None)
+        cls.exam_center = cls._member("qc_center", ProfileRole.MEMBER, "exam_center_head", None)
 
     @classmethod
     def _member(cls, username, profile_role, role_name, scope_unit):

@@ -110,7 +110,7 @@ class _RecordsBase(TestCase):
             Membership.objects.create(
                 user=cls.exam_center,
                 organization=cls.org,
-                role=cls.org.roles.get(name="exam_center"),
+                role=cls.org.roles.get(name="exam_center_head"),
                 is_primary=True,
                 is_active=True,
             )
@@ -581,7 +581,7 @@ class RecordsRoleGateTest(_RecordsBase):
 
         self.assertIn("dean", ACADEMIC_RECORDS_ROLES)
         self.assertIn("department_head", ACADEMIC_RECORDS_ROLES)
-        self.assertIn("exam_center", ACADEMIC_RECORDS_ROLES)
+        self.assertIn("exam_center_head", ACADEMIC_RECORDS_ROLES)
         self.assertIn("ikt_rehber", ACADEMIC_RECORDS_ROLES)
         self.assertNotIn("teacher", ACADEMIC_RECORDS_ROLES)
         self.assertNotIn("assistant_teacher", ACADEMIC_RECORDS_ROLES)

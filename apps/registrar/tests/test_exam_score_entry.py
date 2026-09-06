@@ -105,7 +105,7 @@ class ExamScoreEntryServiceTest(TestCase):
             Membership.objects.create(
                 user=self.center,
                 organization=self.org,
-                role=self.org.roles.get(name="exam_center"),
+                role=self.org.roles.get(name="exam_center_head"),
                 is_primary=True,
                 is_active=True,
             )
@@ -434,6 +434,7 @@ class ExamScoreEntryNarrowedPermissionTests(TestCase):
                 holders.add(role["name"])
 
         # Rektor `*` ilə əhatə olunur; qalanlar YALNIZ imtahan mərkəzinin qərar rollarıdır.
-        self.assertEqual(holders - {"rector"}, {"exam_center", "exam_center_head"})
+        # 2026-09-06-dan sonra imtahan mərkəzi TƏK roldur (`exam_center` birləşdirildi).
+        self.assertEqual(holders - {"rector"}, {"exam_center_head"})
         for denied in ("teacher", "dean", "chair_head", "vice_rector", "ikt_rehber", "exam_center_staff"):
             self.assertNotIn(denied, holders, f"{denied} yekun imtahan balını yaza bilməməlidir")

@@ -63,7 +63,7 @@ class _Base(TestCase):
         _assign_user_to_org(cls.teacher, cls.org, ProfileRole.TEACHER, "teacher")
 
         cls.exam_center = User.objects.create_user("ec_center", "ec_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center_head")
 
         # Final/midterm imtahanlar üçün fənn (registrar.Subject) məcburidir.
         cls.subject = Subject.objects.create(organization=cls.org, code="SUBJ101", name="Test Fənni")

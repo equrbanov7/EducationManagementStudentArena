@@ -2,12 +2,30 @@
 
 ## Qısa cavab
 
+Terminalda (istənilən qovluqdan):
+
 ```bash
-cd ~/Developer/EMSArena
-./scripts/dev-daphne.sh
+ddaphne
 ```
 
 → http://127.0.0.1:8000 · dayandırmaq: `Ctrl+C` · loglar elə terminaldadır.
+
+`ddaphne` artıq ALIAS deyil, FUNKSİYADIR (`~/.zshrc` + `~/.bashrc`) və birbaşa
+`scripts/dev-daphne.sh`-i çağırır. Skript **portu özü boşaldır**: əvvəlki
+sessiyadan qalan daphne varsa onu dayandırıb yenisini qaldırır (yad proses
+tutubsa toxunmur və başqa port təklif edir). Əvvəl belə deyildi — köhnə proses
+portu tutanda `ddaphne` sadəcə «port tutulub» deyib çıxırdı, istifadəçi isə
+«girə bilmirəm» sanırdı.
+
+Faydalı variantlar:
+
+| Əmr | Nə edir |
+|---|---|
+| `ddaphne` | 127.0.0.1:8000, köhnə prosesi əvəz edir |
+| `REUSE=1 ddaphne` | işləyirsə toxunmur, sadəcə ünvanı yazır |
+| `HOST=0.0.0.0 ddaphne` | LAN-dan görünsün (telefon, başqa kompüter) |
+| `PORT=8010 ddaphne` | başqa port |
+| `ddaphne-stop` | :8000-i dayandır |
 
 LAN-dan (telefon, başqa kompüter) görünsün: `HOST=0.0.0.0 ./scripts/dev-daphne.sh`
 Başqa port: `PORT=8010 ./scripts/dev-daphne.sh`

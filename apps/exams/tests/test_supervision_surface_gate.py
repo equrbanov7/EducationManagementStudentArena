@@ -40,7 +40,7 @@ class SupervisionSurfaceGateTests(TestCase):
         cls.invigilator = User.objects.create_user("sg_inv", "sg_inv@test.az", PASSWORD)
         _assign_user_to_org(cls.invigilator, cls.org, ProfileRole.TEACHER, "teacher")
         cls.exam_center = User.objects.create_user("sg_center", "sg_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center_head")
 
         cls.room = ExamRoom.objects.create(organization=cls.org, name="Zal 38", capacity=30)
         cls.room.invigilators.add(cls.invigilator)

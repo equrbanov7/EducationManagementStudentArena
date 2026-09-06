@@ -41,7 +41,8 @@ User = get_user_model()
 ORG_WIDE_STAFF_ROLES = frozenset(
     {
         ProfileRole.HR,
-        ProfileRole.EXAM_CENTER,
+        # `EXAM_CENTER` QƏSDƏN yoxdur: rol `exam_center_head`-ə birləşdirildi
+        # (miqrasiya 0046) və artıq təyin üçün TƏKLİF OLUNMUR.
         ProfileRole.EXAM_CENTER_HEAD,
         ProfileRole.EXAM_CENTER_STAFF,
         ProfileRole.IKT_REHBER,

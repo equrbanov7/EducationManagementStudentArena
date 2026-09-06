@@ -39,7 +39,7 @@ def test_wildcard_validates_and_expands():
 
 
 def test_almost_every_role_may_send_an_application():
-    for name in ("student", "lead_student", "teacher", "assistant", "tutor", "dean", "hr", "exam_center"):
+    for name in ("student", "lead_student", "teacher", "assistant", "tutor", "dean", "hr", "exam_center_head"):
         assert has_permission(_role(name)["permissions"], PERM_CREATE), name
 
 
@@ -55,7 +55,7 @@ def test_handler_roles_hold_the_handle_key():
         "program_coordinator",
         "hr",
         "vice_rector",
-        "exam_center",
+        "exam_center_head",
         "exam_center_head",
         "exam_center_staff",
         "ikt_rehber",
@@ -72,7 +72,7 @@ def test_teachers_and_students_never_decide():
 def test_only_rim_and_vice_rector_manage_the_catalog():
     for name in ("ikt_rehber", "vice_rector"):
         assert has_permission(_role(name)["permissions"], PERM_MANAGE), name
-    for name in ("dean", "chair_head", "program_coordinator", "hr", "exam_center"):
+    for name in ("dean", "chair_head", "program_coordinator", "hr", "exam_center_head"):
         assert not has_permission(_role(name)["permissions"], PERM_MANAGE), name
 
 
