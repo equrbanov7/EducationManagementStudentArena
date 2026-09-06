@@ -69,6 +69,14 @@
     }
 }
 
+/* Modal açıqkən gizlə. Tetikleyici `position: fixed; z-index: 1060` daşıyır —
+   yəni ems_ui dialoqundan (1051) və sidebar-dan (1050) YUXARIDIR və mobil
+   ekranda dialoqun başlığının üstünə düşürdü (QA 06.09, RİM «Yeni hesab»).
+   `modal-open` sinfini həm ems_ui/overlay.js, həm Bootstrap qoyur. */
+body.modal-open .profile-mobile-sidebar-trigger {
+    display: none;
+}
+
 .profile-sidebar-backdrop {
     display: none;
 }
