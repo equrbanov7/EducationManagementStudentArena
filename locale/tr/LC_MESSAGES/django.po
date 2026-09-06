@@ -65056,3 +65056,7 @@ msgstr "Bu ders/dönem için zaten açık bir taslak var (%(version)s) — kopya
 msgctxt "accounts.syllabus"
 msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
 msgstr "Bu ders/dönem için onaylı bir izlence var — üzerine kopyalamak yerine yeni sürüm açın."
+
+msgctxt "accounts.people.movements"
+msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+msgstr "Akademik kayıt geri alındı, ancak hesabın erişimini otomatik açamadık. Erişimi kimlik yüzeyinden açın (nedeni denetim izinde)."

@@ -16,9 +16,11 @@ Hər ikisi tələb olunur. Səbəb: kataloqdan qrup köçürməsi apara bilən r
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
+from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction
@@ -26,6 +28,9 @@ from core.constants import AuditAction
 from ..rim.policy import RimAccessError
 from .academic import load_record, scoped_groups_qs
 from .permissions import PERM_MANAGE_ACADEMIC, PERM_MOVEMENT, PERM_REGISTRY_VIEW
+
+logger = logging.getLogger(__name__)
+_CTX = "accounts.people.movements"
 
 _AUDIT_RESOURCE = "accounts.people.movement"
 
@@ -236,6 +241,61 @@ def _programme_watchers(organization, record) -> list:
     return list(get_user_model().objects.filter(pk__in=list(user_ids), is_active=True))
 
 
+def _reopen_access(record, *, order_number, order_date, actor) -> str:
+    """Bərpa əmri hesabın girişini də açır (sahib qərarı, 2026-09-06).
+
+    `archived → active` keçidi Postgres-də sübut tələb edir (accounts 0016);
+    sübutu yalnız SECURITY DEFINER funksiyası yaza bilər. Rəsmi bərpa əmri üçün
+    o səth accounts 0021-dədir; sübutun barmaq izi ƏMRİN ÖZÜDÜR (nömrə + tarix +
+    qeyd + aktor), yəni əmr sonradan dəyişsə digest uyuşmaz.
+
+    NİYƏ BURADA, registrar-da yox: registrar domeni kimlik səthini tanımır və
+    `registrar → accounts` importu modul dövrü yaradardı (`module_deps` qapısı).
+    Hərəkət axını onsuz da bu qatdan başlayır.
+
+    Açılış SAVEPOINT içindədir: səlahiyyət və ya data-forması qapısına dəysə
+    akademik bərpa QALIR, operator isə xəbərdarlıq görür. Savepoint olmasa
+    Postgres xətası tranzaksiyanı zəhərləyər və bütün əmr geri qayıdardı.
+    """
+    from django.db import transaction as db_transaction
+
+    from apps.accounts.models import UserProfile
+    from apps.accounts.services.identity_reinstate import order_evidence_digest, reinstate_student_access
+
+    profile = UserProfile.objects.filter(user_id=record.student_id, organization_id=record.organization_id).first()
+    if profile is None or profile.access_state != UserProfile.AccessState.ARCHIVED:
+        return ""
+    digest = order_evidence_digest(
+        order_number=order_number,
+        order_date=order_date,
+        record_id=record.pk,
+        actor_id=getattr(actor, "pk", ""),
+    )
+    try:
+        with db_transaction.atomic():
+            reinstate_student_access(
+                user=record.student,
+                organization=record.organization,
+                actor=actor,
+                evidence_digest=digest,
+            )
+    except Exception:  # noqa: BLE001 — səbəb audit/log-dadır, əmr dayanmır
+        logger.warning(
+            "student reinstatement could not reopen access",
+            exc_info=True,
+            extra={"record_id": str(record.pk), "order_number": order_number},
+        )
+        # Mətn funksiyanın İÇİNDƏ qurulur: modul səviyyəsindəki `pgettext` i18n
+        # qapısına görünmür (bax docs/i18n qeydləri), lazy proxy isə JSON-a düşəndə
+        # audit sətrini zəhərləyir.
+        return pgettext(
+            _CTX,
+            "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. "
+            "Girişi kimlik səthindən açın (səbəb audit izindədir).",
+        )
+    return ""
+
+
 def create_movement(
     actor,
     *,
@@ -316,6 +376,16 @@ def create_movement(
         },
     )
     _notify(record, movement, organization=actor.organization)
+    # Bərpa əmri girişi də açır — sübut ƏMRİN ÖZÜDÜR, ona görə sətir yazıldıqdan
+    # SONRA çağırılır. Keçici sahə (DB-də saxlanmır): açılış alınmasa UI xəbərdarlıq
+    # göstərir.
+    if rule.kind == domain.MovementKind.REINSTATEMENT:
+        movement.access_notice = _reopen_access(
+            record,
+            order_number=movement.order_number,
+            order_date=movement.order_date,
+            actor=actor.user,
+        )
     return movement_row(movement)
 
 

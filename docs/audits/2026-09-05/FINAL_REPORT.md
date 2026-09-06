@@ -95,10 +95,10 @@
 | Parol sıfırlaması səbəbsiz qəbul olunurdu | TƏTBİQ EDİLDİ (səbəb məcburi) |
 | Məzun kabinetinin əhatəsi | TƏTBİQ EDİLDİ (nəticə + akademik xülasə + transkript) |
 | «Cari tədris ili» iki mənbədən gəlirdi | TƏTBİQ EDİLDİ (tək mənbə) |
-| **Bərpa əmri hesabın girişini avtomatik açsınmı?** Hazırda AÇMIR: `archived → active` Postgres trigger-i ilə sübutlu dar qapıdır; bərpa əmri `access_notice` qaytarır, operator kimlik səthindən açır | **AÇIQ — sahib qərarı** (alternativ: hərəkət əmri üçün ayrıca sübut səbəbi + servis) |
-| **«Baş direktor»** `rector` rolu ilə eyni sayılsınmı? (heyət siyahısı) | **AÇIQ — sahib qərarı** (hazırda `member`) |
-| **«Qəyyumlar şurası»** üçün ayrıca rol yaradılsınmı? | **AÇIQ — sahib qərarı** (hazırda `member`) |
-| **İnzibati «şöbə müdiri»** üçün ümumi rol lazımdırmı? (39 nəfər) | **AÇIQ — sahib qərarı** (hazırda `member` + vəzifə mətni) |
+| Bərpa əmri hesabın girişini açır | QƏRAR VERİLDİ (06.09) + TƏTBİQ EDİLDİ: ayrıca sübutlu funksiya (accounts 0021), aktordan `student.movement` + `people.manage_academic` cütlüyü; xam UPDATE hələ də bağlıdır |
+| «Baş direktor» = `rector` | QƏRAR VERİLDİ (06.09) + TƏTBİQ EDİLDİ (siyahıdakı yazılış «Baş dirketor» — hər iki forma tutulur) |
+| «Qəyyumlar şurası» üçün rol | QƏRAR VERİLDİ (06.09): yeni `trustee` (səviyyə 78, YALNIZ oxu — sıfır yazma açarı) |
+| İnzibati «şöbə müdiri» üçün rol | QƏRAR VERİLDİ (06.09): yeni `admin_unit_head` (səviyyə 65, UNIT əhatəsi) |
 
 ---
 

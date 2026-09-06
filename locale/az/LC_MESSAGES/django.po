@@ -65149,3 +65149,7 @@ msgstr "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — k�
 msgctxt "accounts.syllabus"
 msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
 msgstr "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+
+msgctxt "accounts.people.movements"
+msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+msgstr "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."

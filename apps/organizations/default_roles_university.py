@@ -6,6 +6,7 @@ ayrılıb — MƏZMUN DƏYİŞMƏYİB, yalnız yer dəyişib.
 
 from core.constants import RoleScopeType
 
+from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import (
     PEOPLE_DIRECTORY_FULL,
@@ -585,9 +586,8 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 # Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
 
-# 2026-09-06 əlavələri: RİM əməkdaşı (mərkəzin yalnız rəhbəri var idi) və
-# dekan müavini (səviyyə cədvəlində var idi, rol kataloqunda yox).
-UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES)
+# 2026-09-06 əlavələri — izahlar öz modullarındadır (rim / vice_dean / oversight).
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 

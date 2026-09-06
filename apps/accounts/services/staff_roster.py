@@ -7,6 +7,11 @@ bölməsi, 118 nəfər). Bu modul siyahını MƏNTİQƏ çevirir; yazı əməli
 QAYDA: tanınmayan vəzifə UYDURULMUR — `member` rolu + vəzifə mətni yazılır və
 hesabatda «xəritələnmədi» kimi göstərilir (sahibin göstərişi: sistemdə olmayan
 rollar hələlik olduğu kimi qalsın).
+
+2026-09-06 sahib qərarları (bax `docs/audits/2026-09-05/HEYET_SIYAHISI.md`
+bölmə 3): «Baş direktor» → `rector`, «Qəyyumlar şurası» bölməsinin hər üzvü →
+`trustee`, qarşılıqsız bölmədəki hər «Müdir» → `admin_unit_head` (əvvəllər
+üçü də `member`-ə düşürdü).
 """
 
 from __future__ import annotations
@@ -65,6 +70,10 @@ POSITION_ROLE_RULES = (
     ("müavin", "vice_dean"),
     ("icraçı prorektor", "vice_rector"),
     ("prorektor", "vice_rector"),
+    # 2026-09-06 sahib qərarı: «Baş direktor» = rektorla eyni səviyyə → `rector`.
+    # Siyahıda yazı səhvi var («Baş dirketor») — hər iki yazılış saxlanılır.
+    ("baş direktor", "rector"),
+    ("baş dirketor", "rector"),
     ("tyutor", "tutor"),
     ("laborant", "lab_assistant"),
     ("müəllim", "teacher"),
@@ -92,6 +101,12 @@ UNIT_STAFF_ROLE_RULES = (
 #: Heç bir qaydaya düşməyən vəzifə üçün rol (səlahiyyət vermir).
 FALLBACK_ROLE = "member"
 
+#: Heyət siyahısındakı adam BU rolları daşıyan hesab OLA BİLMƏZ. Eyni ad-soyadlı
+#: bir neçə hesab tapılanda tələbə/məzun/valideyn hesabları kənarlaşdırılır —
+#: 2026-09-06 klon yoxlamasında «Babayeva Nigar» adına PROREKTOR rolu tələbə
+#: hesabına yapışdırılmışdı, çünki uyğunlaşdırma yalnız ada baxırdı.
+NON_STAFF_ROLE_NAMES = frozenset({"student", "alumni", "lead_student", "parent"})
+
 _PERSON_STOPWORDS = {"və", "üzrə", "ilə", "üçün"}
 
 
@@ -106,6 +121,12 @@ def _norm(value: str) -> str:
     text = unicodedata.normalize("NFC", str(value or "")).strip().translate(_FOLD).lower()
     text = unicodedata.normalize("NFD", text).replace("\u0307", "")
     return re.sub(r"\s+", " ", unicodedata.normalize("NFC", text))
+
+
+#: `_norm()`-dan keçmiş «Qəyyumlar şurası» — sondakı «ı» folding-dən sonra
+#: «i»-ə düşür (məs. «şurasi»), ona görə literalı əl ilə yazmaq əvəzinə
+#: `_norm()`-un özündən alırıq (2026-09-06 sahib qərarı: bax `role_for`).
+_QƏYYUMLAR_ŞURASI = _norm("Qəyyumlar şurası")
 
 
 def looks_like_person(text: str) -> bool:
@@ -146,8 +167,9 @@ def parse_rows(rows):
 def role_for(section: str, position: str) -> tuple[str, bool]:
     """(rol adı, xəritələndi?) — tanınmayan vəzifə `member`-ə düşür.
 
-    Sıra: (1) prorektor bloku, (2) dekanlıq (fakültə/məktəb), (3) bölmə RƏHBƏRİ,
-    (4) bölmə MÜAVİNİ, (5) ümumi vəzifə qaydaları, (6) bölmənin adi əməkdaşı.
+    Sıra: (1) prorektor bloku, (1b) Qəyyumlar Şurası, (2) dekanlıq (fakültə/
+    məktəb), (3) bölmə RƏHBƏRİ, (4) bölmə MÜAVİNİ, (5) ümumi vəzifə qaydaları,
+    (6) bölmənin adi əməkdaşı.
     """
     unit = _norm(section)
     title = _norm(position)
@@ -158,6 +180,12 @@ def role_for(section: str, position: str) -> tuple[str, bool]:
     if unit.startswith("prorektor"):
         return "vice_rector", True
 
+    # (1b) Qəyyumlar Şurası — NƏZARƏT orqanıdır, vəzifə mətni («Sədr», üzv...)
+    #      əhəmiyyətsizdir; prorektor qaydası ilə EYNİ naxış (bölmə həll edir).
+    #      2026-09-06 sahib qərarı, bax `default_roles_oversight.py`.
+    if unit.startswith(_QƏYYUMLAR_ŞURASI):
+        return "trustee", True
+
     # (2) Dekanlıq.
     if title.startswith(("dekan müavini", "dekan müvini", "dekan əvəzi")):
         return "vice_dean", True
@@ -166,11 +194,15 @@ def role_for(section: str, position: str) -> tuple[str, bool]:
     if is_faculty and title.startswith("müavin"):
         return "vice_dean", True
 
-    # (3) Bölmə rəhbəri («Müdir», «Müdir əvəzi») — yalnız qarşılığı olan bölmələrdə.
+    # (3) Bölmə rəhbəri («Müdir», «Müdir əvəzi»). Qarşılığı olan (akademik/
+    #     mərkəz) bölmələrdə domen-spesifik rol; qalanlarında (mühasibatlıq,
+    #     kadrlar, arxiv...) 2026-09-06-dan `admin_unit_head` — əvvəllər bura
+    #     `member`-ə düşürdü (bax HEYET_SIYAHISI.md bölmə 3, sahib qərarı).
     if title.startswith("müdir") and not title.startswith("müdir müavini"):
         for keyword, role in UNIT_HEAD_ROLE_RULES:
             if keyword in unit:
                 return role, True
+        return "admin_unit_head", True
 
     # (4) Bölmə müavini rəhbər DEYİL: varsa həmin bölmənin əməkdaş rolu.
     if title.startswith(("müdir müavini", "müavin")):

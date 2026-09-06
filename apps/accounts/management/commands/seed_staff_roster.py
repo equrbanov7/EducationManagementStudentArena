@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import csv
 import pathlib
+from collections import Counter
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -89,6 +90,13 @@ class Command(BaseCommand):
         units = list(OrgUnit.objects.filter(organization=organization, is_active=True))
         roles = {role.name: role for role in organization.roles.all()}
 
+        # Ad-soyad ÜZRƏ eyniadlılar: siyahıda «Vəliyeva Fəridə Rəsul» iki fərqli
+        # bölmədə var. Uyğunlaşdırma yalnız ad+soyada baxdığı üçün hər iki sətir
+        # EYNİ hesaba bağlanır və o hesab iki rol daşıyır, ikinci şəxs isə heç vaxt
+        # hesab almır. Avtomatik həll YOXDUR (eyni adam, yoxsa iki adam?) — ona görə
+        # belə sətirlər FAIL-CLOSED atlanır və hesabatda ayrıca göstərilir.
+        name_counts = Counter(roster.split_name(person["name"]) for person in people)
+
         plans, missing_roles, unmatched_units, unmapped = [], set(), set(), 0
         for person in people:
             role_name, mapped = roster.role_for(person["section"], person["position"])
@@ -99,12 +107,54 @@ class Command(BaseCommand):
             if unit is None and person["section"]:
                 unmatched_units.add(person["section"])
             first, last = roster.split_name(person["name"])
-            existing = (
+            # DİQQƏT: sayım İSTİFADƏÇİ üzrədir, üzvlük üzrə yox — komanda təkrar
+            # işlədiləndə bir adamda bir neçə üzvlük olur və üzvlük sayımı hər kəsi
+            # yalançı «çox mənalı» edərdi.
+            match_ids = list(
                 Membership.objects.filter(
                     organization=organization, user__first_name__iexact=first, user__last_name__iexact=last
                 )
+                # `.order_by()` MƏCBURİDİR: `Membership.Meta.ordering` sahəsi
+                # DISTINCT-ə əlavə olunur və eyni istifadəçinin bir neçə üzvlüyü
+                # «fərqli hesab» kimi görünərdi (Django-nun klassik tələsi).
+                .order_by()
+                .values_list("user_id", flat=True)
+                .distinct()[:2]
+            )
+            if len(match_ids) > 1:
+                # Ad-soyad eyni olanda TƏLƏBƏ/məzun hesabları kənarlaşdırılır:
+                # klonda «Babayeva Nigar» adına prorektor rolu tələbə hesabına
+                # yapışmışdı. Heyət hesabı BİRDİRSƏ seçim birmənalıdır.
+                staff_ids = [
+                    user_id
+                    for user_id in match_ids
+                    if Membership.objects.filter(organization=organization, user_id=user_id)
+                    .exclude(role__name__in=roster.NON_STAFF_ROLE_NAMES)
+                    .exists()
+                ]
+                if len(staff_ids) == 1:
+                    match_ids = staff_ids
+            ambiguous = ""
+            if name_counts[(first, last)] > 1:
+                ambiguous = "siyahıda eyni ad-soyad birdən çox sətirdədir"
+            elif len(match_ids) > 1:
+                ambiguous = "bazada eyni ad-soyadlı birdən çox HEYƏT hesabı var"
+            elif match_ids and not (
+                Membership.objects.filter(organization=organization, user_id=match_ids[0])
+                .exclude(role__name__in=roster.NON_STAFF_ROLE_NAMES)
+                .exists()
+            ):
+                # Tapılan yeganə hesab TƏLƏBƏ hesabıdır. Eyni adam ola bilər
+                # (laborant kimi işləyən magistr), ad toqquşması da ola bilər —
+                # sistem bunu bilə bilməz, ona görə fail-closed: heyət rolu
+                # tələbə hesabına AVTOMATİK yapışdırılmır.
+                ambiguous = "yalnız TƏLƏBƏ hesabı tapıldı — eyni adamdırsa əl ilə təsdiqləyin"
+            existing = (
+                Membership.objects.filter(organization=organization, user_id=match_ids[0])
                 .select_related("user", "role")
                 .first()
+                if match_ids
+                else None
             )
             plans.append(
                 {
@@ -114,6 +164,7 @@ class Command(BaseCommand):
                     "unit": unit,
                     "existing": existing.user if existing else None,
                     "current_role": existing.role.name if existing else "",
+                    "ambiguous": ambiguous,
                 }
             )
 
@@ -125,15 +176,24 @@ class Command(BaseCommand):
 
     # ── Hesabat ─────────────────────────────────────────────────────────────
     def _report(self, plans, organization, missing_roles, unmatched_units, unmapped):
-        from collections import Counter
-
         self.stdout.write(f"\n=== HEYƏT SİYAHISI · {organization.name} ===")
         self.stdout.write(f"Şəxs: {len(plans)} · rol xəritələnən: {len(plans) - unmapped} · qalıq (member): {unmapped}")
         by_role = Counter(plan["role_name"] for plan in plans)
         for role_name, count in by_role.most_common():
             self.stdout.write(f"   {role_name:24s} {count}")
-        creates = sum(1 for plan in plans if plan["existing"] is None)
-        self.stdout.write(f"\nYeni hesab: {creates} · mövcud hesab: {len(plans) - creates}")
+        ambiguous = [plan for plan in plans if plan.get("ambiguous")]
+        creates = sum(1 for plan in plans if plan["existing"] is None and not plan.get("ambiguous"))
+        self.stdout.write(
+            f"\nYeni hesab: {creates} · mövcud hesab: {len(plans) - creates - len(ambiguous)}"
+            f" · çox mənalı (atlanır): {len(ambiguous)}"
+        )
+        if ambiguous:
+            self.stdout.write(self.style.WARNING("ÇOX MƏNALI — əl ilə həll edilməlidir (heç nə yazılmır):"))
+            for plan in ambiguous:
+                person = plan["person"]
+                self.stdout.write(
+                    f"   · {person['name']} — {person['section']} / {person['position']}" f"  [{plan['ambiguous']}]"
+                )
         if missing_roles:
             self.stdout.write(self.style.ERROR(f"Təşkilatda OLMAYAN rollar: {', '.join(sorted(missing_roles))}"))
         if unmatched_units:
@@ -151,6 +211,12 @@ class Command(BaseCommand):
         taken = set()
         for plan in plans:
             role = roles.get(plan["role_name"])
+            # Eyniadlılıq həll olunmayana qədər heç nə yazmırıq: səhv hesaba rol
+            # yapışdırmaq, yoxsa dublikat hesab yaratmaq — hər ikisi geri qaytarılması
+            # çətin data qüsurudur (bax `_run`-dakı `name_counts` şərhi).
+            if plan.get("ambiguous"):
+                skipped += 1
+                continue
             if role is None:
                 skipped += 1
                 continue
