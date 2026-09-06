@@ -65328,3 +65328,7 @@ msgstr "This subject/term already has an open draft (%(version)s) — edit it in
 msgctxt "accounts.syllabus"
 msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
 msgstr "An approved syllabus exists for this subject/term — open a new version instead of copying over it."
+
+msgctxt "accounts.people.movements"
+msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+msgstr "The academic record was reinstated, but we could not reopen the account's access automatically. Open it from the identity surface (the reason is in the audit trail)."

@@ -5,6 +5,82 @@
 **Tətbiq:** QA klonunda icra edildi — **47 yeni hesab**, **72 mövcud hesab yeniləndi**.
 Real bazaya (`emsarena_db`) TOXUNULMAYIB; prod icrası sizin qərarınızdır.
 
+## 0. 2026-09-06 yeniləmə — 3 qərar tətbiq olundu
+
+Bölmə 3-dəki üç sual sahib tərəfindən cavablandı və xəritəyə köçürüldü
+(`apps/accounts/services/staff_roster.py`, testlər `test_staff_roster.py`).
+Yeni rollar (`trustee`, `admin_unit_head`) `apps/organizations/default_roles_oversight.py`-da
+təyin olunub, miqrasiya `0045_seed_oversight_roles` ilə əkilib.
+
+| Qərar | Qayda | Nəticə |
+|---|---|---|
+| «Baş direktor» | `POSITION_ROLE_RULES`-a əlavə (+ siyahıdakı yazı səhvi «Baş dirketor») → `rector` | 1 nəfər (Nuriyeva Düriya Seyid) |
+| «Qəyyumlar şurası» bölməsi | Bölmə-səviyyəli qayda (Prorektor ilə EYNİ naxış) → `trustee` | 1 nəfər (Bağırov Hüseynqulu Seyid, Sədr) |
+| Qarşılıqsız bölmədə «Müdir» | `UNIT_HEAD_ROLE_RULES`-da uyğunluq yoxdursa artıq `member` yox, `admin_unit_head` | 9 nəfər |
+
+QA klonunda (`emsarena_rehearsal_a0d170000901`, `myedu-univ`) yenidən tətbiq edildi
+(`--apply`, idempotent — **0 yeni hesab, 119 mövcud hesab yeniləndi**, dublikat yaranmadı).
+
+**Əvvəl → sonra (119 nəfərdən):**
+
+| | Rola xəritələnən | `member` qalıq |
+|---|---:|---:|
+| Əvvəl (bu sənədin ilk versiyası) | 80 | 39 |
+| Sonra (2026-09-06 yeniləmə) | **91** | **28** |
+
+## 0b. TƏHLÜKƏSİZLİK TAPINTISI — ad-uyğunluğu səhv hesaba rol yapışdırırdı
+
+Rolları tətbiq edəndən sonra klonu yoxlayanda ortaya çıxdı: alət mövcud hesabı
+**yalnız ad + soyad** ilə tapırdı. Klonda **463 eyni ad-soyad qrupu (1 047 hesab)**
+var. Nəticə: **21 heyət rolu səhv hesaba yapışmışdı** — o cümlədən
+
+* `vice_rector` → `myedu.student.8088` (TƏLƏBƏ hesabı; əsl işçi hesabı
+  `myedu.worker.522`, `nigar.babayeva@wcu.edu.az` boş qalmışdı),
+* `dean`, `student_services`, `exam_center_staff`, `rim_staff`, `tutor`,
+  `lab_assistant` → müxtəlif tələbə hesabları.
+
+Prod-da eyni qaçış **tələbəyə prorektor/dekan səlahiyyəti** verərdi.
+
+**Düzəliş (fail-closed, `seed_staff_roster`):**
+
+1. Eyni ad-soyad birdən çox HESABA uyğun gəlirsə, əvvəlcə tələbə/məzun/valideyn
+   hesabları kənarlaşdırılır; heyət hesabı BİRDİRSƏ seçim birmənalıdır.
+2. Yenə də bir neçə heyət hesabı qalırsa → **atlanır** və hesabatda göstərilir.
+3. Ad siyahının özündə təkrarlanırsa (məs. «Vəliyeva Fəridə Rəsul» iki bölmədə)
+   → **atlanır**.
+4. Tapılan yeganə hesab TƏLƏBƏ hesabıdırsa → **atlanır** (laborant işləyən magistr
+   ola bilər, ad toqquşması da ola bilər — sistem bunu bilə bilməz).
+5. Django tələsi: `.values_list("user_id").distinct()` `Membership.Meta.ordering`
+   sahəsini DISTINCT-ə əlavə edir və bir adamın bir neçə üzvlüyü «fərqli hesab»
+   kimi görünürdü — `.order_by()` ilə sıfırlanır.
+
+Testlər: `apps/accounts/tests/test_staff_roster_command.py` (4 test).
+
+**Klon təmizləndi:** 21 + 9 səhv üzvlük silindi, `staff_position` sıfırlandı,
+sonra siyahı yenidən tətbiq olundu.
+
+| | Nəticə |
+|---|---|
+| Tətbiq olundu | **103 nəfər** |
+| Əl ilə həll gözləyir | **16 nəfər** (7 eyniadlı heyət hesabı + 9 «yalnız tələbə hesabı») |
+| Səhv hesaba düşən rol | **0** |
+
+⚠️ **Prod icrasından əvvəl** həmin 16 nəfər üçün FİN və ya rəsmi e-poçt ilə
+dəqiqləşdirmə lazımdır — alət onları qəsdən atlayır.
+
+Yeni say `rector` +1 (cəm 1), `trustee` +1 (yeni, cəm 1), `admin_unit_head` +9 (yeni, cəm 9) —
+əlavə 11 nəfər `member`-dən çıxdı (39 − 11 = 28).
+
+⚠️ **Qeydə dəyər tapıntı (yeni qayda ilə əlaqəsi yoxdur, mövcud oxşar-ad məhdudiyyəti):**
+siyahıda EYNİ tam adla (Vəliyeva Fəridə Rəsul) İKİ sətir var — «Arxiv şöbəsi / Müdir»
+və «Filologiya və tərcümə məktəbi / Müavin». `seed_staff_roster` mövcud hesabı YALNIZ
+ad/soyada görə tapır (bölməni nəzərə almır), ona görə hər iki sətir EYNİ hesaba
+üzvlük yazır (bu, `admin_unit_head` əlavəsindən ƏVVƏL də «member + vice_dean» kimi
+mövcud idi — yeni qayda onu sadəcə görünən etdi, yaratmadı). Tək belə hal tapıldı
+(119 nəfərdən). Bu iki sətir eyni şəxsdirsə problem yoxdur; fərqli şəxslərdirsə
+`staff_roster.py`-ın ad-uyğunlaşdırması bölməni də nəzərə almalıdır — ayrıca qərar
+lazımdır, bu sənədin əhatəsindən kənardır.
+
 Parollar (yalnız yeni hesablar, bir dəfə): `~/EMSArena-backups/qa-2026-09-05/staff_roster_credentials.csv`
 
 **Giriş yoxlanıldı:** ilk 5 hesab birdəfəlik parolla klona daxil oldu (45–55 ms)
@@ -30,56 +106,56 @@ dəyişmədən sistemə keçə bilmirlər.
 | `hr` | 1 | Novruzova Zümrüd Qafar (İnsan Resusları şöbəsi) |
 | `ikt_rehber` | 1 | İmaməliyev Kamran Səməd (Rəqəmsal İnkişaf mərkəzi) |
 | `exam_center_head` | 1 | Quliyeva Ləman Ağasəlim (Imtahan Mərkəzi) |
+| `rector` | 1 | Nuriyeva Düriya Seyid (Direktor, «Baş dirketor») — 2026-09-06 sahib qərarı |
+| `trustee` | 1 | Bağırov Hüseynqulu Seyid (Qəyyumlar şurası, Sədr) — 2026-09-06 sahib qərarı |
+| `admin_unit_head` | 9 | Şəfiyeva Şəlalə (Elm və İnnovasiyalar şöbəsi), Cəbrayılzadə Arzu (Beynəlxalq şöbə), Orucəliyev Orxan (İnformasiya Texnologiyaları mərkəzi) … +6 — 2026-09-06 sahib qərarı |
 
 ## 2. Sistemdə qarşılığı OLMAYAN vəzifələr (hələlik `member` + vəzifə mətni)
 
 Sahibin göstərişi: «bəziləri yoxdursa elə rollar bizdə, onlar qalsın hələ».
 Bu adamlar hesab alır, kabinetə girir, amma əlavə səlahiyyət ALMIR.
 
+2026-09-06 yeniləməsindən sonra qalan **28** nəfər (əvvəlki 39-dan 11-i bölmə 0-dakı
+üç qərarla çıxdı — bax silinən sətirlərin qeydi cədvəldən sonra).
+
 | Bölmə | Vəzifə | Nəfər |
 |---|---|---:|
-| Arxiv şöbəsi | Müdir | 1 |
 | Beynəlxalq şöbə | Koorinator | 1 |
-| Beynəlxalq şöbə | Müdir | 1 |
 | Beynəlxalq şöbə | Mütəxəssis | 1 |
 | Biznes və idarəetmə Məktəbi | Aparıcı mütəxəssis | 1 |
-| Direktor | Baş dirketor | 1 |
 | Direktor | İnkişaf üzrə direktor | 1 |
 | Elm və İnnovasiyalar şöbəsi | Koorinator | 1 |
-| Elm və İnnovasiyalar şöbəsi | Müdir | 1 |
 | Elm və İnnovasiyalar şöbəsi | Mütəxəssis | 2 |
 | Elmi Kitabxana | Kitabxanaçı | 4 |
 | Elmi Kitabxana | Köməkçi | 1 |
 | Elmi Kitabxana | Müdir müavini | 1 |
-| Elmi nəşirlərlə iş şöbəsi | Müdir | 1 |
 | Elmi nəşirlərlə iş şöbəsi | Sektor müdiri | 1 |
 | Elmi tədbirlərin təşkili şöbəsi | Sektor müdiri | 1 |
-| Keyfiyyətin təminatı Mərkəzi | Müdir əvəzi | 1 |
 | Laborotoriya | Koorinator | 1 |
 | Maliyyə və Mühasibat şöbəsi | Baş Mühasib | 1 |
 | Maliyyə və Mühasibat şöbəsi | Mühasib | 4 |
-| Monitorinq şöbəsi | Müdir | 1 |
 | Nəşriyyat və çoxaltma mərkəzi | Dizayner | 1 |
-| Nəşriyyat və çoxaltma mərkəzi | Müdir | 1 |
-| Qəyyumlar şurası | Sədir | 1 |
 | Strateji İnkişaf | Mütəxəssis | 1 |
 | Tələbə və məzunların təcrübə və inkişaf mərkəzi | Mütəxəssis | 1 |
 | Yüksək Texnologiyalar | Koorinator | 2 |
-| İnformasiya Texnologiyaları mərkəzi | Müdir | 1 |
 | İnformasiya Texnologiyaları mərkəzi | Mütəxəssis | 1 |
-| Əcnəbi tələbələrlə iş şöbəsi | Müdir | 1 |
 | Əcnəbi tələbələrlə iş şöbəsi | Mütəxəssis | 1 |
 
-## 3. Qərar gözləyən üç hal
+**Bu 3 qərarla çıxan 11 sətir** (2026-09-06-dan əvvəl bu cədvəldə idi, indi
+yuxarıdakı `rector`/`trustee`/`admin_unit_head` sətirlərinə köçüb): Arxiv şöbəsi/Müdir,
+Beynəlxalq şöbə/Müdir, Direktor/Baş dirketor, Elm və İnnovasiyalar şöbəsi/Müdir,
+Elmi nəşirlərlə iş şöbəsi/Müdir, Keyfiyyətin təminatı Mərkəzi/Müdir əvəzi,
+Monitorinq şöbəsi/Müdir, Nəşriyyat və çoxaltma mərkəzi/Müdir, Qəyyumlar şurası/Sədir,
+İnformasiya Texnologiyaları mərkəzi/Müdir, Əcnəbi tələbələrlə iş şöbəsi/Müdir.
 
-1. **«Baş direktor» / «İnkişaf üzrə direktor»** (Direktor bölməsi) — sistemdə `rector` var,
-   amma «direktor»u avtomatik rektor saymaq idarəetmə qərarıdır: `rector` rolu `*` (bütün)
-   səlahiyyətə malikdir. Təsdiq etsəniz bir sətirlik dəyişikliklə xəritəyə əlavə edirəm.
-2. **«Qəyyumlar şurası / Sədr»** — sistemdə qəyyumlar şurası anlayışı yoxdur.
-   Nəzarət səthi lazımdırsa ayrıca yalnız-oxu rol (analitika + audit) təklif edə bilərəm.
-3. **İnzibati şöbə müdirləri** (Beynəlxalq şöbə, Arxiv, Kitabxana, Mühasibat, Monitorinq,
-   Nəşriyyat, İT mərkəzi, Elm və İnnovasiyalar) — akademik iyerarxiyada qarşılığı yoxdur.
-   İstəsəniz «şöbə müdiri» tipli ümumi rol (öz şöbəsinin heyətini görmək + hesabat) əlavə olunur.
+## 3. Qərar gözləyən üç hal — HƏLL OLUNDU (2026-09-06, bax bölmə 0)
+
+1. ~~**«Baş direktor» / «İnkişaf üzrə direktor»**~~ — sahib təsdiqi: «Baş direktor» → `rector`
+   (eyni səviyyə). «İnkişaf üzrə direktor» AYRICA qərara düşməyib, `member` olaraq qalır.
+2. ~~**«Qəyyumlar şurası / Sədr»**~~ — sahib qərarı: yeni `trustee` rolu (səviyyə 78,
+   yalnız-oxu — analitika + audit, bax `default_roles_oversight.py`).
+3. ~~**İnzibati şöbə müdirləri**~~ — sahib qərarı: yeni `admin_unit_head` rolu (səviyyə 65,
+   UNIT əhatəli — öz vahidinin oxu səthi + şəxs kataloqu).
 
 ## 4. Yol boyu düzəlmiş qüsurlar
 
