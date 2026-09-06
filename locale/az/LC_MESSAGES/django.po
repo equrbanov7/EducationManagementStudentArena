@@ -65125,3 +65125,15 @@ msgstr "Auditoriya adı 64 simvoldan uzun ola bilməz."
 msgctxt "profile.rim"
 msgid "Doğum tarixi məcburidir."
 msgstr "Doğum tarixi məcburidir."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"

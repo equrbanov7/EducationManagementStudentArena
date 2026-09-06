@@ -65452,3 +65452,15 @@ msgstr "Название аудитории не может превышать 6
 msgctxt "profile.rim"
 msgid "Doğum tarixi məcburidir."
 msgstr "Дата рождения обязательна."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Подтвердить"

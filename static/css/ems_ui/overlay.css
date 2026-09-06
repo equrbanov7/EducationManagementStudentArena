@@ -42,6 +42,20 @@
     max-width: 720px;
 }
 
+/* `.ems-dialog` şaquli FLEX konteynerdir: `__body`-nin sürüşməsi və `__foot`-un
+   dibə yapışması buna söykənir. Yaratma/redaktə və səbəb dialoqlarında arada bir
+   `<form>` durur (düymə formanın İÇİNDƏ olmalıdır — bax
+   `partials/ems_ui/_form_dialog.html` və `_reason_dialog.html`), yəni forma tək
+   flex uşağı olur və zəncir qırılır: uzun form `max-height`-ı aşır, gövdə
+   sürüşmür, altlıq (düymələr) kəsilir. Forma da flex sütun edilir — zəncir
+   bərpa olunur. */
+.ems-dialog > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
 /* ── Drawer (sağdan, 720–940px) ─────────────────────────────────────────── */
 .ems-overlay--drawer {
     align-items: stretch;

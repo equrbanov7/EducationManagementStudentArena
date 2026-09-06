@@ -543,7 +543,7 @@
     }
 
     function showError(message) {
-      alert((config.errorPrefix || "") + (message || ""));
+      window.EMSToast.show((config.errorPrefix || "") + (message || ""), "error");
     }
 
     function postExamAction(url, examId) {

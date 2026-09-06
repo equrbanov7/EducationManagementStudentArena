@@ -51,6 +51,7 @@ import json
 
 from django.urls import reverse
 
+from .center_registry import known_years
 from .constants import (
     PERM_DISTRIBUTE,
     PERM_MANAGE,
@@ -147,9 +148,21 @@ def build_distribution_context(request, *, organization, chair_id=None, academic
         base["chair_id"] = str(chair.pk)
         base["chair_name"] = chair.name
 
-    years = list_years(organization=organization, chair_ids=[unit.pk for unit in chairs])
+    # UX-08 (2026-09-05): «Tədris ili» əvvəllər sərbəst mətn idi, çünki
+    # `list_years` yalnız ARTIQ TeachingTask yaradılmış illəri qaytarırdı —
+    # kafedra hələ tapşırıq açmayıbsa siyahı boş görünürdü. `known_years`
+    # (ekran 12 «Dərs yükü mərkəzi»ndə artıq işlənən helper) `AcademicPeriod`
+    # illərini də daxil edir, ona görə picker açılış anında da doludur.
+    years = sorted(
+        set(list_years(organization=organization, chair_ids=[unit.pk for unit in chairs]))
+        | set(known_years(organization)),
+        reverse=True,
+    )
     base["years"] = years
     year = academic_year or (years[0] if years else "")
+    if year and year not in years:
+        years = sorted(set(years) | {year}, reverse=True)
+        base["years"] = years
     base["academic_year"] = year
 
     base["objections"] = []

@@ -65304,3 +65304,15 @@ msgstr "The room name cannot be longer than 64 characters."
 msgctxt "profile.rim"
 msgid "Doğum tarixi məcburidir."
 msgstr "The date of birth is required."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Confirm"
