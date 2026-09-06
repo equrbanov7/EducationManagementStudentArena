@@ -94,6 +94,13 @@ ENTRIES = {
             "tr": "Onayla",
         },
     },
+    "accounts.people": {
+        "səlahiyyət": {
+            "en": "permissions",
+            "ru": "прав",
+            "tr": "yetki",
+        },
+    },
     "registrar.journal": {
         "Sonrakı dərslər": {
             "en": "Later lessons",

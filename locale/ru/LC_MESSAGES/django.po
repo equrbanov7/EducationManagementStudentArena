@@ -65464,3 +65464,7 @@ msgstr "Отмена"
 msgctxt "ui.confirm_modal"
 msgid "Təsdiqlə"
 msgstr "Подтвердить"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "прав"
