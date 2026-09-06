@@ -92,29 +92,50 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
     syllabus/journal zənginləşdirməsi onları da əhatə edir. Tam period
     seçicisi (SYLLABUS-07-in özü) ayrıca (bahalı) qərardır.
     """
-    from django.apps import apps as django_apps
-
-    from apps.registrar import services
+    from apps.registrar import exam_eligibility, services
     from apps.registrar.models import Enrollment
 
-    other_period_ids = (
+    seen = {row["enrollment"].id for row in existing_rows}
+    # BİR sorğu: bütün digər dövrlərin aktiv yazılışları. Əvvəl hər dövr üçün
+    # `get_student_cabinet_data` çağırılırdı (semestr planı + kredit tərəqqisi
+    # yenidən) — 7 dövrlü tələbədə səhifə 171 sorğuya çıxırdı (QA 2026-09-06
+    # ölçüsü). Burada YALNIZ fənn sətri lazımdır.
+    extra = list(
         Enrollment.objects.filter(organization=organization, student=record.student)
         .exclude(offering__period_id=period.id)
         .exclude(status=Enrollment.Status.DROPPED)
-        .values_list("offering__period_id", flat=True)
-        .distinct()
+        .exclude(id__in=seen)
+        .select_related("offering__subject", "offering__course", "offering__instructor", "offering__period")
+        .order_by("-offering__period__start_date", "offering__subject__code")
     )
-    if not other_period_ids:
+    if not extra:
         return []
-    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    seen = {row["enrollment"].id for row in existing_rows}
+
+    offering_ids = [enrollment.offering_id for enrollment in extra]
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    limit_percent = record.program.absence_limit_percent
     rows = []
-    for other_period in AcademicPeriod.objects.filter(organization=organization, id__in=list(other_period_ids)):
-        extra = services.get_student_cabinet_data(record=record, period=other_period, semester_number=semester_number)
-        for row in extra["subjects"]:
-            if row["enrollment"].id not in seen:
-                seen.add(row["enrollment"].id)
-                rows.append(row)
+    for enrollment in extra:
+        subject = enrollment.offering.subject
+        rows.append(
+            {
+                "enrollment": enrollment,
+                "subject": subject,
+                "ects": subject.ects,
+                "kind": enrollment.kind,
+                "course": enrollment.offering.course,
+                "offering": enrollment.offering,
+                "teacher": enrollment.offering.instructor,
+                "eligibility": services.get_exam_eligibility(
+                    enrollment=enrollment,
+                    limit_percent=limit_percent,
+                    exempt=record.national_athlete_exemption,
+                    frozen=enrollment.offering_id in frozen_ids,
+                    hours_map=hours_map,
+                ),
+            }
+        )
     return rows
 
 
