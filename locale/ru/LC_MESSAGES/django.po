@@ -65476,3 +65476,7 @@ msgstr "Для этого предмета/периода уже есть отк
 msgctxt "accounts.syllabus"
 msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
 msgstr "Для этого предмета/периода есть утверждённый силлабус — откройте новую версию."
+
+msgctxt "accounts.people.movements"
+msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+msgstr "Академическая запись восстановлена, но доступ к учётной записи не удалось открыть автоматически. Откройте его через раздел управления учётными записями (причина — в журнале аудита)."
