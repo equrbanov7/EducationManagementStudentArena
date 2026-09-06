@@ -205,9 +205,9 @@ def test_conflict_fact_and_seal_roll_back_together_then_recorded_resume_is_a_noo
         student_ref=str(harness.STUDENT_A),
         enrollment_pk=str(enrollment.pk),
         month_id="11",
+        source_lesson_ref="calendar:11:9:11:30",
         losing_text="3",
         winning_text="8",
-        target_ref="",
         issue_code="legacy_journal_mark_recovered_target_conflict",
     )
     writer = ConflictFactWriter(context, run=run)

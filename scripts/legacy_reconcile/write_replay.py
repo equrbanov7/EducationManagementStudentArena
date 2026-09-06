@@ -181,7 +181,8 @@ class CollisionEvidence:
     student_ref: str
     enrollment_pk: str
     month_id: str
-    target_ref: str
+    day: int
+    time_text: str
     raw_value: str
     normalized_value: str
     winner_source_table: str
@@ -199,6 +200,14 @@ class CollisionEvidence:
     @property
     def winner_source_row_hash_key(self) -> tuple[str, int]:
         return self.winner_source_table, self.winner_source_pk
+
+    @property
+    def source_lesson_ref(self) -> str:
+        """Target UUID-dən asılı olmayan mənbə təqvim locator-u."""
+
+        if self.domain != DOMAIN_MARKS:
+            return ""
+        return f"calendar:{self.month_id}:{self.day}:{self.time_text}"
 
 
 @dataclass(frozen=True)
@@ -237,7 +246,6 @@ class _Claim:
     student_ref: str
     enrollment_pk: str
     month_id: str
-    target_ref: str
     raw_value: str
     normalized_value: str
 
@@ -511,6 +519,7 @@ def replay_writes(
                 result.collision_journals.add(uniqid)
                 result.note_rung(rung, journal=uniqid, enrollment=enrollment_pk, point=row[ROW_POINT])
                 if not same:
+                    month, day = _calendar_coordinates(row) if domain == DOMAIN_MARKS else (0, 0)
                     result.conflict_evidence.append(
                         CollisionEvidence(
                             domain=domain,
@@ -520,8 +529,9 @@ def replay_writes(
                             journal_uniqid=str(uniqid),
                             student_ref=str(row[ROW_STUDENT]),
                             enrollment_pk=str(enrollment_pk),
-                            month_id=str(row[ROW_MONTH]),
-                            target_ref=str(slot_target or "") if domain == DOMAIN_MARKS else "",
+                            month_id=f"{month:02d}" if domain == DOMAIN_MARKS else str(row[ROW_MONTH]),
+                            day=day,
+                            time_text=str(row[ROW_TIME]) if domain == DOMAIN_MARKS else "",
                             raw_value=row[ROW_POINT],
                             normalized_value=normalized,
                             winner_source_table=previous.source_table,
@@ -540,7 +550,6 @@ def replay_writes(
                 student_ref=str(row[ROW_STUDENT]),
                 enrollment_pk=str(enrollment_pk),
                 month_id=str(row[ROW_MONTH]),
-                target_ref=str(slot_target or "") if domain == DOMAIN_MARKS else "",
                 raw_value=row[ROW_POINT],
                 normalized_value=normalized_target_value(domain, row[ROW_POINT]),
             )

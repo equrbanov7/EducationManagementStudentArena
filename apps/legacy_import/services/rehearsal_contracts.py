@@ -47,7 +47,7 @@ if TYPE_CHECKING:  # pragma: no cover - annotations only; keeps this module impo
 REHEARSAL_CONTRACT_VERSION = "legacy-rehearsal-v1"
 MAX_STABLE_TEXT_BYTES = 4096
 SOURCE_SYSTEM = "myedu_mariadb"
-TRANSFORM_FAMILY = "rehearsal-identity-v2"  # v1→v2: 2026-09-02 auditi (P0-1/P0-2) qərar qaydasını dəyişdi
+TRANSFORM_FAMILY = "rehearsal-identity-v3"
 DEFAULT_BATCH_ROWS = 1_000
 MAX_BATCH_ROWS = 10_000
 IDENTITY_COHORT_MAX_ROWS = 20_000
