@@ -65,12 +65,37 @@ class RoleMappingTest(SimpleTestCase):
     def test_unknown_position_falls_back_without_inventing_a_role(self):
         for section, title in (
             ("Elmi Kitabxana", "Kitabxanaçı"),
-            ("Arxiv şöbəsi", "Müdir"),
-            ("Direktor", "Baş dirketor"),
+            ("Beynəlxalq şöbə", "Koorinator"),
+            ("Direktor", "İnkişaf üzrə direktor"),
         ):
             role, mapped = roster.role_for(section, title)
             self.assertEqual(role, roster.FALLBACK_ROLE, f"{section}/{title}")
             self.assertFalse(mapped)
+
+    def test_bas_direktor_maps_to_rector(self):
+        """2026-09-06 sahib qərarı: «Baş direktor» = rektorla eyni səviyyə."""
+        self.assertEqual(roster.role_for("Direktor", "Baş direktor"), ("rector", True))
+        # Siyahıdakı əsl yazı səhvi («Baş dirketor») da tutulmalıdır.
+        self.assertEqual(roster.role_for("Direktor", "Baş dirketor"), ("rector", True))
+        # Eyni bölmədəki QOHUM vəzifə qərara düşməyib — uydurulmur.
+        self.assertEqual(roster.role_for("Direktor", "İnkişaf üzrə direktor"), (roster.FALLBACK_ROLE, False))
+
+    def test_qeyyumlar_surasi_maps_to_trustee(self):
+        """2026-09-06 sahib qərarı: bölmənin hər üzvü — vəzifədən asılı olmayaraq."""
+        for title in ("Sədir", "Sədr", "Üzv", ""):
+            self.assertEqual(roster.role_for("Qəyyumlar şurası", title), ("trustee", True), title)
+        # Case/Türk «İ» folding-ə davamlı olmalıdır (bax `_FOLD`/`_norm`).
+        self.assertEqual(roster.role_for("QƏYYUMLAR ŞURASI", "Sədir"), ("trustee", True))
+        self.assertEqual(roster.role_for("qəyyumlar şurası", "Sədir"), ("trustee", True))
+
+    def test_unmatched_section_head_maps_to_admin_unit_head(self):
+        """2026-09-06 sahib qərarı: qarşılıqsız bölmədə «Müdir» artıq member deyil."""
+        for section in ("Arxiv şöbəsi", "Beynəlxalq şöbə", "Maliyyə və Mühasibat şöbəsi"):
+            self.assertEqual(roster.role_for(section, "Müdir"), ("admin_unit_head", True), section)
+        # «Müdir müavini» rəhbər DEYİL — bu qərara aid deyil, əvvəlki kimi qalır.
+        self.assertEqual(roster.role_for("Arxiv şöbəsi", "Müdir müavini"), (roster.FALLBACK_ROLE, False))
+        # Qarşılığı OLAN bölmələrdə mövcud domen-spesifik rol dəyişməyib.
+        self.assertEqual(roster.role_for("Tarix kafedrası", "Müdir"), ("chair_head", True))
 
 
 class NameHelpersTest(SimpleTestCase):
