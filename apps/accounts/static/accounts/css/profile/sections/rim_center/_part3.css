@@ -78,6 +78,11 @@
     background: var(--ems-warning-100);
 }
 
+.rimc-choice__icon--unit {
+    color: var(--ems-sky-800);
+    background: var(--ems-blue-100-soft);
+}
+
 .rimc-choice__text {
     display: flex;
     flex-direction: column;
@@ -125,6 +130,17 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: var(--ems-sp-5);
+}
+
+/* Uzun sahə (ad, valideyn seçicisi) sətri tam tutur — iki sütunlu şəbəkədə
+   yarım eni siyahının oxunmasını çətinləşdirir. */
+.rimc-field--full {
+    grid-column: 1 / -1;
+}
+
+.rimc-unit__value {
+    font-weight: 700;
+    color: var(--ems-neutral-900);
 }
 
 .rimc-mono {

@@ -330,6 +330,14 @@
             return;
         }
         window.EMSOverlay.close("rimc-chooser");
+        if (kind === "unit") {
+            // İnzibati bölmə AYRI axındır (`create_unit.js`) — mövcud struktur
+            // ağacı endpoint-inə gedir, hesab formu ilə heç nə paylaşmır.
+            if (ns.unit && ns.unit.open) {
+                ns.unit.open();
+            }
+            return;
+        }
         if (kind === "bulk") {
             if (ns.bulk && ns.bulk.reset) {
                 ns.bulk.reset();

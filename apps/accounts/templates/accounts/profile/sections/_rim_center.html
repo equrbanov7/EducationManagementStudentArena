@@ -42,16 +42,24 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
           {% trans "RİM mərkəzi" context "profile.rim" %}
         </h2>
         {% comment %}
-          Yaratma səlahiyyəti (`user.import`) AYRICA açardır: axtarış/parol
-          səlahiyyəti olan hər operator yeni kimlik yarada bilməz. Düymənin
+          Yaratma səlahiyyətləri AYRICA açarlardır: axtarış/parol səlahiyyəti olan
+          hər operator yeni kimlik yarada bilməz (`user.import`), inzibati bölmə
+          isə struktur ağacının açarındandır (`unit.tree_manage`). Düymənin
           görünməsi UI rahatlığıdır — FAKTİKİ qapı serverdədir
-          (services/rim/create.py::require_create).
+          (services/rim/create.py::require_create,
+          organizations/structure_actions.py::structure_tree_action).
         {% endcomment %}
-        {% if rim_center_section.can_create %}
+        {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
         <button type="button" class="ems-btn ems-btn--primary rim-head__cta"
                 data-ems-overlay-open="rimc-chooser">
-          <i class="fas fa-user-plus" aria-hidden="true"></i>
-          {% trans "Yeni hesab" context "profile.rim" %}
+          <i class="fas fa-plus" aria-hidden="true"></i>
+          {% if rim_center_section.can_create and rim_center_section.can_create_unit %}
+            {% trans "Yeni yarat" context "profile.rim" %}
+          {% elif rim_center_section.can_create %}
+            {% trans "Yeni hesab" context "profile.rim" %}
+          {% else %}
+            {% trans "Yeni bölmə" context "profile.rim" %}
+          {% endif %}
         </button>
         {% endif %}
       </div>
@@ -105,11 +113,12 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
     </div>
 
     {% comment %}
-      «Yeni hesab» axını (tək-tək form + toplu idxal) — dialoqlar PANELİN
-      İÇİNDƏDİR ki, AJAX swap-dan sonra itməsin. Markup ayrı partial-dadır:
-      bu fayl axtarış/idarəetmə səthidir, o isə yaratma səthi.
+      Yaratma axını (hesab: tək-tək form + toplu idxal; inzibati bölmə: struktur
+      ağacı əməli) — dialoqlar PANELİN İÇİNDƏDİR ki, AJAX swap-dan sonra itməsin.
+      Markup ayrı partial-dadır: bu fayl axtarış/idarəetmə səthidir, o isə
+      yaratma səthi. Hər seçim ÖZ açarına görə ayrıca gizlənir.
     {% endcomment %}
-    {% if rim_center_section.can_create %}
+    {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
       {% include "accounts/profile/sections/partials/_rim_create.html" %}
     {% endif %}
 
