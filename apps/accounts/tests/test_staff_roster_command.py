@@ -1,12 +1,15 @@
-"""`seed_staff_roster` — eyniadlılıq qapısı (2026-09-06 klon tapıntısı).
+"""`seed_staff_roster` — eyniadlılıq qapısı (2026-09-06 klon tapıntısı + yeniləmə).
 
 NİYƏ. Komanda mövcud hesabı YALNIZ ad+soyada görə tapırdı. Klonda 463 eyni
 ad-soyad qrupu var; nəticədə 21 heyət rolu SƏHV hesaba yapışmışdı — o cümlədən
 `vice_rector` bir TƏLƏBƏ hesabına. Prod-da eyni qaçış tələbəyə prorektor
 səlahiyyəti verərdi.
 
-Qapı fail-closed-dur: şübhəli sətir üçün heç nə yazılmır, hesabatda ayrıca
-göstərilir və operator əl ilə həll edir.
+2026-09-06 sahib qərarı («bəziləri yeni ola bilər, hesabı yoxdusa yarat»)
+qapının əhatəsini daraltdı: YALNIZ birdən çox HEYƏT hesabı adaşlığı fail-closed
+qalır (kimin kim olduğunu bilmək mümkün deyil, TƏXMİN edilmir). Digər iki hal
+(yalnız tələbə/məzun adaşı, fayl-daxili adaşlıq) artıq ATLANMIR — YENİ hesab
+yaradılır və hesabatda ayrıca qeyd olunur ki, əl ilə birləşdirmə lazım ola bilər.
 """
 
 from __future__ import annotations
@@ -25,7 +28,7 @@ User = get_user_model()
 
 
 class AmbiguousMatchTest(TestCase):
-    """Dry-run: eyniadlı və yalnız-tələbə halları «çox mənalı» sayılır."""
+    """Dry-run/apply: yalnız birdən-çox-HEYƏT-adaşlığı «çox mənalı» sayılır."""
 
     @classmethod
     def setUpTestData(cls):
@@ -68,32 +71,93 @@ class AmbiguousMatchTest(TestCase):
         call_command("seed_staff_roster", file=path, org=self.org.slug, stdout=out, **options)
         return out.getvalue()
 
-    def test_a_staff_role_is_not_glued_to_a_student_only_account(self):
-        """Yalnız tələbə hesabı tapılırsa heyət rolu AVTOMATİK verilmir."""
+    def test_a_new_account_is_created_for_a_student_only_namesake(self):
+        """Yalnız tələbə hesabı tapılırsa: tələbə hesabına TOXUNULMUR, YENİ
+        heyət hesabı yaradılır (2026-09-06 sahib qərarı: «yeni ola bilər»)."""
         student = self._member("sr_student", "Günay", "Qasımova", "student")
         rows = [("Elmi Kitabxana", ""), ("Qasımova Günay Elşən", "Kitabxanaçı")]
-        output = self._run(rows)
-        self.assertIn("ÇOX MƏNALI", output)
-        self.assertIn("yalnız TƏLƏBƏ hesabı", output)
+        before_user_count = User.objects.count()
+        output = self._run(rows, apply=True)
+        # Fail-closed «çox mənalı» bölməsi bura aid deyil (yalnız staff-staff adaşlığı) —
+        # amma hesabat YENİ hesabın adaş-tapılmış şəraitdə yarandığını aydın qeyd edir.
+        self.assertNotIn("ÇOX MƏNALI", output)
+        self.assertIn("YENİ HESAB", output)
+        self.assertIn("yalnız tələbə/məzun hesabı tapıldı", output)
         with bypass_rls():
+            # Tələbə hesabı DƏYİŞMƏYİB — hələ də tək (tələbə) üzvlüyü var,
+            # `staff_position` yazılmayıb (komanda ona TOXUNMADI).
             self.assertEqual(Membership.objects.filter(user=student, organization=self.org).count(), 1)
+            student.refresh_from_db()
+            self.assertEqual(student.profile.staff_position, "")
+            self.assertEqual(User.objects.count(), before_user_count + 1)
+            new_membership = (
+                Membership.objects.filter(organization=self.org).exclude(user=student).order_by("-id").first()
+            )
+            self.assertIsNotNone(new_membership)
+            self.assertNotEqual(new_membership.user_id, student.id)
 
     def test_two_staff_accounts_with_the_same_name_are_refused(self):
+        """Birdən çox HEYƏT hesabı adaşlığı hələ də fail-closed atlanır."""
         self._member("sr_a", "Rəşad", "Bağırov", "teacher")
         self._member("sr_b", "Rəşad", "Bağırov", "teacher")
         rows = [("Prorektor", ""), ("Bağırov Rəşad Hüseynqulu", "İcraçı prorektor")]
-        output = self._run(rows)
+        before_membership_count = Membership.objects.count()
+        output = self._run(rows, apply=True)
         self.assertIn("birdən çox HEYƏT hesabı", output)
+        # Hesabat namizədləri (username + e-poçt) göstərir ki, sahib saniyələr
+        # içində əl ilə həll edə bilsin — üçüncü dublikat hesab YARADILMIR.
+        self.assertIn("sr_a", output)
+        self.assertIn("sr_b", output)
+        with bypass_rls():
+            self.assertEqual(Membership.objects.count(), before_membership_count)
 
-    def test_a_name_repeated_in_the_file_is_refused(self):
+    def test_repeating_the_run_does_not_duplicate_namesake_accounts(self):
+        """İDEMPOTENTLİK: adaş sətirlər ikinci qaçışda TƏZƏ hesab yaratmır.
+
+        Sətrin öz hesabı bölməyə görə tanınır (üzvlüyün `scope_unit`-i),
+        yoxsa hər `--apply` eyni iki adama yeni hesab açardı.
+        """
+        from apps.organizations.models import OrgUnit
+        from core.constants import OrgUnitType
+
+        with bypass_rls():
+            for name, slug in (("Arxiv şöbəsi", "sr-arxiv"), ("Filologiya məktəbi", "sr-filologiya")):
+                OrgUnit.objects.create(organization=self.org, name=name, slug=slug, unit_type=OrgUnitType.DEPARTMENT)
         rows = [
             ("Arxiv şöbəsi", ""),
             ("Vəliyeva Fəridə Rəsul", "Müdir"),
             ("Filologiya məktəbi", ""),
             ("Vəliyeva Fəridə Rəsul", "Müavin"),
         ]
-        output = self._run(rows)
+        self._run(rows, apply=True)
+        with bypass_rls():
+            after_first = User.objects.filter(first_name="Fəridə", last_name="Vəliyeva").count()
+        self.assertEqual(after_first, 2)
+
+        self._run(rows, apply=True)
+        with bypass_rls():
+            after_second = User.objects.filter(first_name="Fəridə", last_name="Vəliyeva").count()
+        self.assertEqual(after_second, 2, "ikinci qaçış yeni hesab yaratmamalıdır")
+
+    def test_a_name_repeated_in_the_file_creates_two_distinct_accounts(self):
+        """Fayl-daxili adaşlıq = iki fərqli insan → hər sətrə ayrı hesab,
+        `claim_username` istifadəçi adlarını dublikatlaşdırmır."""
+        rows = [
+            ("Arxiv şöbəsi", ""),
+            ("Vəliyeva Fəridə Rəsul", "Müdir"),
+            ("Filologiya məktəbi", ""),
+            ("Vəliyeva Fəridə Rəsul", "Müavin"),
+        ]
+        output = self._run(rows, apply=True)
+        self.assertNotIn("ÇOX MƏNALI", output)
         self.assertIn("siyahıda eyni ad-soyad", output)
+        with bypass_rls():
+            memberships = Membership.objects.filter(
+                organization=self.org, user__first_name__iexact="Fəridə", user__last_name__iexact="Vəliyeva"
+            ).select_related("user")
+            self.assertEqual(memberships.count(), 2)
+            usernames = {membership.user.username for membership in memberships}
+            self.assertEqual(len(usernames), 2)  # `claim_username` fərqli ad verib
 
     def test_a_single_staff_account_wins_over_a_namesake_student(self):
         """Tələbə + heyət cütlüyündə HEYƏT hesabı seçilir (birmənalıdır)."""

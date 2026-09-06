@@ -31,10 +31,18 @@ Modul bölgüsü:
 * ``profile_edit`` — şəxsi məlumatların redaktəsi (email dəyişəndə təsdiq sıfırlanır)
 * ``lifecycle``    — blok / blokdan çıxarma / soft-delete / bərpa (hard delete YOX)
 * ``detail``       — siyahı sətri + detal kartı serializasiyası (ikili rol görünür)
+* ``create_unit``  — «yeni inzibati bölmə» OXU qapısı (yazı struktur ağacındadır)
 """
 
 from .create import PERM_CREATE, RimCreateError, can_create, create_account, require_create
 from .create_options import CATALOGS, search_catalog
+from .create_unit import (
+    ADMIN_UNIT_TYPES,
+    PERM_UNIT_TREE,
+    admin_unit_type_choices,
+    can_create_unit,
+    require_create_unit,
+)
 from .credentials import set_temporary_password
 from .detail import serialize_detail, serialize_memberships, serialize_row
 from .lifecycle import block_user, normalize_reason, restore_user, soft_delete_user, unblock_user
@@ -57,6 +65,7 @@ from .profile_edit import EDITABLE_FIELDS, FIELD_LABELS, update_user_fields
 from .search import account_status, search_users
 
 __all__ = [
+    "ADMIN_UNIT_TYPES",
     "CATALOGS",
     "EDITABLE_FIELDS",
     "FIELD_LABELS",
@@ -66,19 +75,23 @@ __all__ = [
     "PERM_EDIT",
     "PERM_SEARCH",
     "PERM_SOFT_DELETE",
+    "PERM_UNIT_TREE",
     "RIM_PERMISSIONS",
     "RimAccessError",
     "RimActor",
     "RimCreateError",
     "account_status",
+    "admin_unit_type_choices",
     "assert_can_manage",
     "block_user",
     "can_create",
+    "can_create_unit",
     "create_account",
     "require_create",
     "search_catalog",
     "manageable_users_queryset",
     "normalize_reason",
+    "require_create_unit",
     "require_permission",
     "resolve_actor",
     "restore_user",
