@@ -82,6 +82,14 @@ class ProfileRole:
         "deputy_director": "vice_director",
         "chair_head": "department_head",
         "section_head": "department_head",
+        # İmtahan Mərkəzi = İmtahan Mərkəzi RƏHBƏRİ (sahib qərarı, 2026-09-06):
+        # praktikada eyni adamdır və səlahiyyətləri onsuz da eyni idi
+        # (`is_exam_center_head` hər ikisini qəbul edirdi, fərq yalnız
+        # `people.view_contacts` idi). Rol kataloqundan `exam_center` YIĞIŞDIRILDI;
+        # köhnə üzvlük sətirləri miqrasiya ilə köçürülür, bu xəritə isə hələ
+        # qalmış sətirlərin (və profil rolu sahəsinin) rəhbər kimi oxunmasını
+        # təmin edir — geriyə-uyğunluq.
+        EXAM_CENTER: EXAM_CENTER_HEAD,
     }
 
     MEMBERSHIP_ROLE_ALIASES = {

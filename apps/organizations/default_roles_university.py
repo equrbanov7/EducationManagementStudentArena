@@ -68,39 +68,13 @@ UNIVERSITY_ROLES = [
         "description": "Vice rector with broad administrative permissions",
     },
     {
-        # İmtahan mərkəzi — imtahan həyat dövrünü (yaratma, təyinat,
-        # monitorinq, nəticə, apellyasiya) idarə edir; üzv/struktur
-        # idarəetməsinə girişi YOXDUR (admin-alias exempt).
-        "name": "exam_center",
-        "display_name": "Exam Center",
-        "level": 85,
-        "scope_type": RoleScopeType.ORGANIZATION,
-        "permissions": [
-            "org.view",
-            "unit.view",
-            "member.view",
-            "course.view",
-            "exam.*",
-            # final_score.entry `exam.*`-a DAXİL DEYİL (ayrıca prefiks) — açıq verilir.
-            "final_score.entry",
-            "grade.view",
-            "grade.publish",
-            "appeal.respond",
-            "appeal.decide",
-            "qa.*",
-            # Kataloq: imtahan mərkəzi iştirakçıları tapmaq üçün org-wide OXU alır;
-            # hesab dayandırma / müəllim statusu QƏSDƏN yoxdur (kadr işi deyil).
-            "people.view_teachers",
-            "people.view_students",
-            "analytics.view_all",
-            "audit.view",
-        ],
-        "description": "Exam center managing exam lifecycle, monitoring, results and appeals",
-    },
-    {
-        # İmtahan mərkəzi RƏHBƏRİ — imtahan mərkəzinin başçısı; zala nəzarətçi
-        # təyin edə bilir (yeganə fərq). Digər imtahan səlahiyyətləri exam_center
-        # ilə eynidir. is_exam_center → final mərkəzinə giriş.
+        # İmtahan Mərkəzi — TƏK rol (sahib qərarı, 2026-09-06). Əvvəl iki sətir
+        # vardı: `exam_center` və `exam_center_head`. Praktikada eyni adamdır və
+        # səlahiyyətlər onsuz da eyni idi (`is_exam_center_head` hər ikisini
+        # qəbul edirdi; yeganə fərq `people.view_contacts` idi). `exam_center`
+        # kataloqdan yığışdırıldı, köhnə üzvlüklər miqrasiya 0046 ilə buraya
+        # köçürülür, ad isə `ROLE_NAME_NORMALIZATION` ilə rəhbərə oxunur.
+        # Zala nəzarətçi təyini və final mərkəzinə giriş bu roldadır.
         "name": "exam_center_head",
         "display_name": "Exam Center Head",
         "level": 85,

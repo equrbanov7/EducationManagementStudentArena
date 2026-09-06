@@ -1015,7 +1015,7 @@ class ProfileViewTest(TestCase):
             status="active",
             is_active=True,
         )
-        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="exam_center")
+        _assign_user_to_org(self.user, organization, ProfileRole.MEMBER, membership_role_name="exam_center_head")
         _login_with_org(self.client, self.user, organization)
 
         response = self.client.get(reverse("accounts:profile") + "?section=my-exams")

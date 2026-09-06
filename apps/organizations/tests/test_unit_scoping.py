@@ -41,12 +41,12 @@ class UniversityDefaultRolesTest(TestCase):
 
     def test_new_management_roles_created(self):
         role_names = set(self.org.roles.values_list("name", flat=True))
-        self.assertIn("exam_center", role_names)
+        self.assertIn("exam_center_head", role_names)
         self.assertIn("hr", role_names)
         self.assertIn("lead_student", role_names)
 
     def test_exam_center_role_has_exam_but_not_member_manage(self):
-        role = self.org.roles.get(name="exam_center")
+        role = self.org.roles.get(name="exam_center_head")
         self.assertIn("exam.*", role.permissions)
         self.assertIn("appeal.respond", role.permissions)
         self.assertIn("appeal.decide", role.permissions)
@@ -67,9 +67,9 @@ class UniversityDefaultRolesTest(TestCase):
         self.assertNotIn("exam.create", role.permissions)
 
     def test_exam_center_not_admin_alias(self):
-        aliases = ProfileRole.aliases_for_membership_role("exam_center", level=85)
+        aliases = ProfileRole.aliases_for_membership_role("exam_center_head", level=85)
         self.assertNotIn(ProfileRole.ORG_ADMIN, aliases)
-        self.assertIn("exam_center", aliases)
+        self.assertIn("exam_center_head", aliases)
 
     def test_hr_not_admin_alias(self):
         aliases = ProfileRole.aliases_for_membership_role("hr", level=65)
