@@ -122,9 +122,7 @@ class AmbiguousMatchTest(TestCase):
 
         with bypass_rls():
             for name, slug in (("Arxiv şöbəsi", "sr-arxiv"), ("Filologiya məktəbi", "sr-filologiya")):
-                OrgUnit.objects.create(
-                    organization=self.org, name=name, slug=slug, unit_type=OrgUnitType.DEPARTMENT
-                )
+                OrgUnit.objects.create(organization=self.org, name=name, slug=slug, unit_type=OrgUnitType.DEPARTMENT)
         rows = [
             ("Arxiv şöbəsi", ""),
             ("Vəliyeva Fəridə Rəsul", "Müdir"),

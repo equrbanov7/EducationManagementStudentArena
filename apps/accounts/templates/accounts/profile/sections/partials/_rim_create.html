@@ -22,21 +22,32 @@ Django şablon mühərrikindən keçmir).
      data-template-url="{{ rim_center_section.intake_template_url }}"
      data-preview-url="{{ rim_center_section.intake_preview_url }}"
      data-apply-url="{{ rim_center_section.intake_apply_url }}"
-     data-max-note="{{ rim_center_section.max_note_length }}">
+     data-max-note="{{ rim_center_section.max_note_length }}"
+     data-unit-action-url="{{ rim_center_section.unit_action_url }}"
+     data-unit-tree-url="{{ rim_center_section.unit_tree_url }}">
 
   {# ── 1. Növ seçimi ───────────────────────────────────────────────────── #}
   <div class="ems-overlay ems-overlay--dialog" id="rimc-chooser" hidden>
     <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="rimc-chooser-title">
       <div class="ems-dialog__head">
         <div>
-          <h2 class="ems-dialog__title" id="rimc-chooser-title">{% trans "Yeni hesab yaradın" context "profile.rim" %}</h2>
-          <p class="ems-dialog__sub">{% trans "Hansı hesab növünü yaradırsınız?" context "profile.rim" %}</p>
+          {% if rim_center_section.can_create and rim_center_section.can_create_unit %}
+            <h2 class="ems-dialog__title" id="rimc-chooser-title">{% trans "Nə yaratmaq istəyirsiniz?" context "profile.rim" %}</h2>
+            <p class="ems-dialog__sub">{% trans "Hesab və ya inzibati bölmə seçin." context "profile.rim" %}</p>
+          {% elif rim_center_section.can_create %}
+            <h2 class="ems-dialog__title" id="rimc-chooser-title">{% trans "Yeni hesab yaradın" context "profile.rim" %}</h2>
+            <p class="ems-dialog__sub">{% trans "Hansı hesab növünü yaradırsınız?" context "profile.rim" %}</p>
+          {% else %}
+            <h2 class="ems-dialog__title" id="rimc-chooser-title">{% trans "Yeni inzibati bölmə" context "profile.rim" %}</h2>
+            <p class="ems-dialog__sub">{% trans "Şöbə, mərkəz, institut və ya laboratoriya." context "profile.rim" %}</p>
+          {% endif %}
         </div>
         <button type="button" class="ems-dialog__x" data-ems-overlay-close
                 aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
       </div>
       <div class="ems-dialog__body">
         <div class="rimc-choices">
+          {% if rim_center_section.can_create %}
           <button type="button" class="rimc-choice" data-rimc-open="student">
             <span class="rimc-choice__icon rimc-choice__icon--student" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
             <span class="rimc-choice__text">
@@ -61,6 +72,22 @@ Django şablon mühərrikindən keçmir).
             </span>
             <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
           </button>
+          {% endif %}
+          {% comment %}
+            İNZİBATİ BÖLMƏ — ayrı açar (`unit.tree_manage`). Yazı yolu bu
+            paneldə DEYİL: dialoq mövcud struktur-ağac endpoint-inə (create_child)
+            göndərir, ona görə audit və görünürlük qapısı ağac ekranı ilə eynidir.
+          {% endcomment %}
+          {% if rim_center_section.can_create_unit %}
+          <button type="button" class="rimc-choice" data-rimc-open="unit">
+            <span class="rimc-choice__icon rimc-choice__icon--unit" aria-hidden="true"><i class="fas fa-sitemap"></i></span>
+            <span class="rimc-choice__text">
+              <span class="rimc-choice__title">{% trans "Yeni inzibati bölmə" context "profile.rim" %}</span>
+              <span class="rimc-choice__note">{% trans "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır." context "profile.rim" %}</span>
+            </span>
+            <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
+          </button>
+          {% endif %}
         </div>
       </div>
       <div class="ems-dialog__foot">
@@ -69,6 +96,7 @@ Django şablon mühərrikindən keçmir).
     </div>
   </div>
 
+  {% if rim_center_section.can_create %}
   {# ── 2. Tək-tək form ─────────────────────────────────────────────────── #}
   <div class="ems-overlay ems-overlay--dialog" id="rimc-form" hidden data-ems-static="true">
     <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="rimc-form-title">
@@ -350,6 +378,13 @@ Django şablon mühərrikindən keçmir).
     </div>
   </div>
 
+  {% endif %}
+
+  {# ── 4. İnzibati bölmə (mövcud struktur-ağac əməli) ──────────────────── #}
+  {% if rim_center_section.can_create_unit %}
+    {% include "accounts/profile/sections/partials/_rim_create_unit.html" %}
+  {% endif %}
+
   {# ── JS mətnləri (xarici .js Django şablonundan keçmir) ──────────────── #}
   <script type="application/json" data-rimc-i18n>{
     "title_student": "{% trans 'Yeni tələbə hesabı'|escapejs context 'profile.rim' %}",
@@ -375,6 +410,12 @@ Django şablon mühərrikindən keçmir).
     "st_created": "{% trans 'Yaradıldı'|escapejs context 'profile.rim' %}",
     "st_skip": "{% trans 'Ötürüldü'|escapejs context 'profile.rim' %}",
     "st_error": "{% trans 'Xəta'|escapejs context 'profile.rim' %}",
-    "total": "{% trans 'Cəmi'|escapejs context 'profile.rim' %}"
+    "total": "{% trans 'Cəmi'|escapejs context 'profile.rim' %}",
+    "unit_busy": "{% trans 'Bölmə yaradılır…'|escapejs context 'profile.rim' %}",
+    "unit_failed": "{% trans 'Bölmə yaradılmadı. Yenidən cəhd edin.'|escapejs context 'profile.rim' %}",
+    "unit_parent_required": "{% trans 'Valideyn bölməni siyahıdan seçin.'|escapejs context 'profile.rim' %}",
+    "unit_no_parent": "{% trans 'Valideyn bölmə tapılmadı — siyahıdan yenidən seçin.'|escapejs context 'profile.rim' %}",
+    "unit_name_required": "{% trans 'Bölmənin adı boş ola bilməz.'|escapejs context 'profile.rim' %}",
+    "unit_bad_type": "{% trans 'Bölmə tipi bu təşkilat üçün keçərli deyil.'|escapejs context 'profile.rim' %}"
   }</script>
 </div>

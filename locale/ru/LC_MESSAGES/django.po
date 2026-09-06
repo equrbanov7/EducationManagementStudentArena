@@ -65480,3 +65480,119 @@ msgstr "Для этого предмета/периода есть утверж�
 msgctxt "accounts.people.movements"
 msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
 msgstr "Академическая запись восстановлена, но доступ к учётной записи не удалось открыть автоматически. Откройте его через раздел управления учётными записями (причина — в журнале аудита)."
+
+msgctxt "profile.rim"
+msgid "Nə yaratmaq istəyirsiniz?"
+msgstr "Что вы хотите создать?"
+
+msgctxt "profile.rim"
+msgid "Hesab və ya inzibati bölmə seçin."
+msgstr "Выберите учётную запись или административное подразделение."
+
+msgctxt "profile.rim"
+msgid "Yeni yarat"
+msgstr "Создать"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə"
+msgstr "Новое подразделение"
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati bölmə"
+msgstr "Новое административное подразделение"
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya."
+msgstr "Отдел, центр, институт или лаборатория."
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır."
+msgstr "Отдел, центр, институт или лаборатория — создаётся в дереве структуры."
+
+msgctxt "profile.rim"
+msgid "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür."
+msgstr "Подразделение создаётся в дереве структуры, изменение записывается в журнал аудита."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə"
+msgstr "Родительское подразделение"
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə nəticələri"
+msgstr "Результаты по родительским подразделениям"
+
+msgctxt "profile.rim"
+msgid "Rektorat, fakültə və ya şöbənin adını yazın"
+msgstr "Введите название ректората, факультета или отдела"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə bu vahidin altında yaranacaq."
+msgstr "Новое подразделение будет создано под этим."
+
+msgctxt "profile.rim"
+msgid "Məsələn: Beynəlxalq əlaqələr şöbəsi"
+msgstr "Например: отдел международных связей"
+
+msgctxt "profile.rim"
+msgid "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur."
+msgstr "Факультет, кафедра и специальность находятся в академическом дереве — они создаются на экране «Структура университета»."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə."
+msgstr "Можно оставить пустым — краткое обозначение в документообороте."
+
+msgctxt "profile.rim"
+msgid "İnzibati bölmə yaradıldı."
+msgstr "Административное подразделение создано."
+
+msgctxt "profile.rim"
+msgid "Bölmə"
+msgstr "Подразделение"
+
+msgctxt "profile.rim"
+msgid "Tip"
+msgstr "Тип"
+
+msgctxt "profile.rim"
+msgid "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə."
+msgstr "Назначение руководителя, переименование и архивирование — на экране «Структура университета», каждое со своим правом."
+
+msgctxt "profile.rim"
+msgid "Struktur ağacında aç"
+msgstr "Открыть в дереве структуры"
+
+msgctxt "profile.rim"
+msgid "Daha bir bölmə yarat"
+msgstr "Создать ещё одно подразделение"
+
+msgctxt "profile.rim"
+msgid "Bölməni yarat"
+msgstr "Создать подразделение"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılır…"
+msgstr "Создание подразделения…"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılmadı. Yenidən cəhd edin."
+msgstr "Подразделение не создано. Попробуйте ещё раз."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölməni siyahıdan seçin."
+msgstr "Выберите родительское подразделение из списка."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə tapılmadı — siyahıdan yenidən seçin."
+msgstr "Родительское подразделение не найдено — выберите его из списка заново."
+
+msgctxt "profile.rim"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "Название подразделения не может быть пустым."
+
+msgctxt "profile.rim"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "Тип подразделения недопустим для этой организации."
+
+msgctxt "profile.rim"
+msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
+msgstr "У вас нет права создавать структурное подразделение."

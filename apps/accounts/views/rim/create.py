@@ -83,7 +83,11 @@ def rim_create_account(request):
 @login_required
 @require_GET
 def rim_create_catalog(request):
-    """Qrup / kafedra seçicisinin axtarış nəticələri."""
+    """Qrup / kafedra / valideyn bölmə seçicisinin axtarış nəticələri.
+
+    ``request`` servisə ÖTÜRÜLÜR: valideyn kataloqu struktur əhatəsini
+    (``unit.view``) həll edir və resolver sorğu başına keşlənir.
+    """
 
     actor = resolve_actor(request)
     try:
@@ -93,6 +97,7 @@ def rim_create_catalog(request):
             query=request.GET.get("q", ""),
             limit=request.GET.get("limit", DEFAULT_LIMIT),
             offset=request.GET.get("offset", 0),
+            request=request,
         )
     except RimAccessError as exc:
         return _error_response(exc)
