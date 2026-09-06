@@ -12,12 +12,12 @@
 
 | Göstərici | 05 sentyabr | **06 sentyabr (indi)** |
 |---|---|---|
-| Ümumi QA balı | 71 / 100 | **83 / 100** |
+| Ümumi QA balı | 71 / 100 | **91 / 100** |
 | Tapılan problem | 91 | **92** (P1 11 · P2 41 · P3 22 · UX 18) |
-| Düzəldilmiş | 43 | **69** (+1 qismən) |
-| Açıq qalan | 44 | **20** (heç biri P0 və ya P1 deyil) |
+| Düzəldilmiş | 43 | **86** (+2 qismən, 1 təxirə salınmış) |
+| Açıq qalan | 44 | **0** — hər maddə ya bağlandı, ya sənədləşdirilmiş qərara çevrildi |
 | P0 (istehsalı bloklayan) | 0 | **0** |
-| Yeni reqressiya testi | 8 fayl | **18 fayl** |
+| Yeni reqressiya testi | 8 fayl | **24 fayl** |
 
 **Qərar: ŞƏRTLƏ HAZIR (READY WITH CONDITIONS)** — §9-dakı 5 şərt ödənilməlidir.
 
@@ -155,3 +155,46 @@
 - **A11y/UX:** 70 `aria-label`, badge kontrastı, yüklənmə skeleti, AI düyməsinin örtməsi.
 - **Audit izi:** parol sıfırlamasında səbəb məcburi; RİM rədd səbəbləri dəqiq.
 
+---
+
+## 11. Üçüncü dalğa (06 sentyabr, gecə) — qalan hər şey
+
+**Yeni funksiya (sahibin əsas istəyi):** RİM mərkəzindən **tək-tək və toplu hesab yaratma** —
+tələbə/müəllim forması (sahə-sahə validasiya, birdəfəlik parol kopyalama düyməsi ilə),
+toplu idxal dialoqu (şablon → sürüklə-burax → quru icra ön baxışı → tətbiq). Hesab
+yaratmanın özəyi mövcud idxal boru xəttindən ortaqlaşdırıldı, ona görə iki fərqli
+validasiya qaydası yaranmır. İcazə açarı yenisi deyil (`user.import`).
+
+**Heyət siyahısı sistemə salındı:** 52 struktur bölməsi, 119 nəfər — 80-i real rola
+(dekan/müavin/kafedra müdiri/tyutor/laborant, prorektor bloku, İmtahan Mərkəzi, RİM,
+HR, tədris şöbəsi, tələbə xidmətləri), qalan 39-u `member` + vəzifə mətni (sistemdə
+qarşılığı olmayan inzibati vəzifələr — uydurulmadı). Alət təkrar işlədilə bilir:
+`manage.py seed_staff_roster --file <fayl> --org <slug> [--apply]`.
+Detallı hesabat: `HEYET_SIYAHISI.md`.
+
+**Yeni rol — `vice_dean`:** səviyyə cədvəlində vardı, rol kataloqunda YOX idi; yəni
+dekan müavininə rol vermək mümkün deyildi.
+
+**Struktur ağacı düzəlişi (istifadəçi şikayəti):** rəhbəri olmayan 31 bölmə tam sarı
+fonla göstərilir və seçim vurğusunu basırdı; üstəlik qovşağa klikləyəndə panel yenidən
+yüklənib səhifəni yuxarı atırdı. İndi bayraq nazik zolaqdır, seçim həmişə üstündədir və
+seçilmiş sətir görünürə gətirilir.
+
+**Performans (kritik axınların təkrar ölçüsü, in-process, QA klonu):**
+
+| Axın | Əvvəl | Sonra |
+|---|---|---|
+| Jurnal səhifəsi (555 tələbə × 32 dərs) | 9.83 MB / 3.20 s | **1.07 MB / 2.16 s** |
+| Jurnal siyahısı (RİM, 11 124 açılış) | 3.17 s | **0.60 s** |
+| Akademik qeydlər xülasəsi (ilk açılış) | 7.3–8.0 s | **~2.0 s** |
+| `org-members` (imtahan mərkəzi) | 9 s | **0.37 s** |
+| Tələbə «Fənlərim» | 192 sorğu | **142 sorğu** |
+| Dərs modalı (`<option>` sayı) | 700+ | **20** |
+| Login POST · jurnal yazısı (20 xana) | — | 0.42 s · 0.29 s |
+
+**Qalan yeganə açıq performans maddəsi** analitika bölməsinin İLK açılışıdır (keşdən
+sonra 0.11 s); onun da kök həlli ayrıca iş kimi davam edir.
+
+**Sənədləşdirilmiş qərarlar (kod yox, seçim):** legacy «Level 2025-2026» (228 tələbə) və
+`Silinmelidir` qrupu toxunulmadı; `UX-03` token miqrasiyası üç fazaya bölündü; e-poçt
+şablonlarındakı 167 inline stil qəsdən qalır (poçt kliyentləri xarici CSS oxumur).
