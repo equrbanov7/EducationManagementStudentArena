@@ -193,7 +193,8 @@ SELECT source_table, source_pk, score_code, raw_score_text, source_journal_ref,
 
 * `raw_score_text` — **itən** dəyər (clamp/quantize edilmədən);
 * `score_code` — hansı domendən (`01`…`12` təqvim, `k1`/`k2`/`k3`/`si` komponent);
-* `source_lesson_ref` — qalibin daşıyıcısı olan `Lesson` (təqvim halında);
+* `source_lesson_ref` — target UUID-si deyil, xananın stabil
+  `calendar:{ay}:{gün}:{saat}` mənbə locator-u (təqvim halında);
 * `enrollment` — hər iki dəyərin baxdığı yazılış.
 
 > `mapping_issue_code` sütunu `legacy_grade_fact_conflict`-dir — onu PostgreSQL

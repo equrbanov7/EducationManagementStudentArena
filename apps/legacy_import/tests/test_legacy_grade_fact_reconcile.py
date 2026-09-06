@@ -192,7 +192,7 @@ def test_j12_conflict_and_unresolved_rows_are_part_of_the_exact_source_gate():
         is_archive=False,
         student_ref="101",
         journal_uniqid="journal-x",
-        target_ref="lesson-uuid",
+        source_lesson_ref="calendar:03:9:11:30",
         month_id="03",
         raw_value="7",
     )
@@ -235,7 +235,7 @@ def test_j12_conflict_and_unresolved_rows_are_part_of_the_exact_source_gate():
 
     assert result.passed
     assert result.source_rows == result.target_rows == 2
-    assert extra[0][7] == "lesson-uuid"
+    assert extra[0][7] == "calendar:03:9:11:30"
     assert extra[1][7] == "calendar:02:30:11:30"
     assert result.mapping_statuses == {"conflict": 1, "unresolved": 1}
 
