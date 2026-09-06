@@ -11,6 +11,7 @@
 # İstifadə:
 #   ./scripts/dev-daphne.sh              # 127.0.0.1:8000, ön planda (Ctrl+C dayandırır)
 #   REUSE=1 ./scripts/dev-daphne.sh      # işləyirsə toxunma, sadəcə ünvanı yaz
+#   REAL=1  ./scripts/dev-daphne.sh      # klon YOX, LOKAL REAL baza ilə
 #   PORT=8010 ./scripts/dev-daphne.sh    # başqa port
 #   HOST=0.0.0.0 ./scripts/dev-daphne.sh # LAN-dan görünsün (telefon/başqa kompüter)
 #
@@ -71,6 +72,38 @@ fi
 
 export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.local}"
 
+# ── HANSI BAZA? ──────────────────────────────────────────────────────────────
+# DEFAULT: KLON (`:8100`-ün göstərdiyi baza). Sahib tələbi 2026-09-06:
+# «8100-də gördüyümü 8000-də də görüm» + «real bazanı elə saxla ki, real
+# sistemə köçürəndə problem olmasın». Yəni gündəlik test REAL datanı ƏLLƏMİR.
+#
+#   ddaphne            → klon bazası (təhlükəsiz, :8100 ilə eyni məzmun)
+#   REAL=1 ddaphne     → lokal REAL baza (`.env`-dəki DATABASE_URL)
+#
+# Klon bağlantısı `staging_inspect.sh` ilə EYNİ rol və portdan gedir: tətbiq
+# rolu (superuser YOX) — RLS qapıları prod-dakı kimi işləsin.
+CLONE_DB="${CLONE_DB:-emsarena_rehearsal_a0d170000901}"
+CLONE_PORT="${STAGING_DB_PORT:-55433}"
+CLONE_USER="${STAGING_APP_USER:-emsarena_app}"
+CLONE_PASSWORD="${STAGING_APP_PASSWORD:-emsarena_staging_app_password}"
+
+if [ "${REAL:-}" = "1" ]; then
+    DB_LABEL="REAL lokal baza (.env)"
+else
+    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^emsarena-staging-pg$'; then
+        echo "→ Klon bazasının konteyneri qaldırılır …"
+        "$PROJECT_DIR/scripts/staging_inspect.sh" up >/dev/null 2>&1 || {
+            echo "✗ Klon bazası qalxmadı. REAL baza ilə işə salmaq üçün: REAL=1 $0" >&2
+            exit 1
+        }
+    fi
+    export DATABASE_URL="postgres://$CLONE_USER:$CLONE_PASSWORD@127.0.0.1:$CLONE_PORT/$CLONE_DB"
+    # Tətbiq rolu ilə xidmət: superuser/BYPASSRLS ilə işləməyə İCAZƏ VERMƏ.
+    export EMS_DB_ROLE_ENFORCE="${EMS_DB_ROLE_ENFORCE:-error}"
+    DB_LABEL="KLON: $CLONE_DB@127.0.0.1:$CLONE_PORT (real data TOXUNULMUR)"
+fi
+
 echo "→ Daphne: http://$HOST:$PORT  (settings: $DJANGO_SETTINGS_MODULE)"
+echo "  Baza: $DB_LABEL"
 echo "  Dayandırmaq: Ctrl+C"
 exec "$PY_BIN/daphne" -b "$HOST" -p "$PORT" config.asgi:application
