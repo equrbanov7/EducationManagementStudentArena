@@ -65141,3 +65141,11 @@ msgstr "Təsdiqlə"
 msgctxt "accounts.people"
 msgid "səlahiyyət"
 msgstr "səlahiyyət"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."

@@ -269,22 +269,41 @@ class _Bucket:
         self.lesson_hours = 0
 
     def add(self, student_id, result):
+        """``_evaluate`` nəticəsindən yığım — 18 açarlı dictin YALNIZ 8-i oxunur."""
+        self.add_row(
+            student_id,
+            result["absence_hours"],
+            result["lesson_hours"],
+            result["barred"],
+            result["graded"],
+            result["total"],
+            result["passed"],
+            result["failed"],
+            result["credit"],
+        )
+
+    def add_row(self, student_id, absence_hours, lesson_hours, barred, graded, total, passed, failed, credit):
+        """Yığımın TƏK gövdəsi — dict qurmadan da çağırıla bilir.
+
+        ``analytics_fast`` sürətli yolu məhz bunu çağırır: nəticə dicti
+        ümumiyyətlə yaranmır, amma düstur ikiləşmir (:meth:`add` bura
+        yönləndirir)."""
         self.students.add(student_id)
         self.enrollments += 1
-        self.absence_hours += result["absence_hours"]
-        self.lesson_hours += result["lesson_hours"]
-        if result["barred"]:
+        self.absence_hours += absence_hours
+        self.lesson_hours += lesson_hours
+        if barred:
             self.barred += 1
-        if result["graded"]:
+        if graded:
             self.graded += 1
-            self.total_sum += result["total"]
-        if result["passed"] or result["failed"]:
+            self.total_sum += total
+        if passed or failed:
             # ÜOMG 100 bal üzərindən: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
-            self.quality_points += result["total"] * result["credit"]
-            self.gpa_credits += result["credit"]
-        if result["passed"]:
+            self.quality_points += total * credit
+            self.gpa_credits += credit
+        if passed:
             self.passed += 1
-        elif result["failed"]:
+        elif failed:
             self.failed += 1
 
     def summary(self) -> dict:

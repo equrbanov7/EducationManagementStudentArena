@@ -65048,3 +65048,11 @@ msgstr "Onayla"
 msgctxt "accounts.people"
 msgid "səlahiyyət"
 msgstr "yetki"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Bu ders/dönem için zaten açık bir taslak var (%(version)s) — kopyalamak yerine onu düzenleyin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Bu ders/dönem için onaylı bir izlence var — üzerine kopyalamak yerine yeni sürüm açın."
