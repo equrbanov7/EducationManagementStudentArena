@@ -90,3 +90,19 @@ def university_role_sections(
 
 
 __all__ = ["university_role_sections"]
+
+
+def alumni_sections() -> set:
+    """MƏZUNUN səthi (QA 2026-09-05 P2-32 — sahib qərarı).
+
+    Məzun hesab sahibidir, amma tələbə DEYİL: təyinat/imtahan bölmələri
+    verilmir. Yalnız ÖZ akademik izini oxuyur; transkript rəsmi sənəd olduğuna
+    görə yalnız self-service bayrağı açıq olanda görünür (əks halda müraciət
+    pəncərəsindən keçir — bax `registrar/public.py`).
+    """
+    from apps.registrar import public as _registrar_public
+
+    sections = {"my-results", "overall-academic"}
+    if _registrar_public.STUDENT_TRANSCRIPT_SELF_SERVICE:
+        sections.add("my-transcript")
+    return sections

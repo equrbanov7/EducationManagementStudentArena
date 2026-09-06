@@ -10,7 +10,7 @@ from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
 from .rbac_sections import apply_permission_section_gates
-from .rbac_university_sections import university_role_sections
+from .rbac_university_sections import alumni_sections, university_role_sections
 from .tenant import _bind_active_role_context
 
 
@@ -273,6 +273,8 @@ def _role_capabilities(user, profile):
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
+    # MƏZUN: hesab sahibi, amma tələbə deyil — səthi `alumni_sections()`-dədir (P2-32).
+    is_alumni = _user_has_any_role(user, {"alumni"})
     can_manage_blog = getattr(user, "is_authenticated", False)
     can_approve_posts = is_superadmin or user_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
@@ -356,6 +358,8 @@ def _role_capabilities(user, profile):
         if can_view_student_assignments:
             allowed_sections.add("my-results")
             allowed_sections.add("pending-answers")
+        elif is_alumni:
+            allowed_sections.update(alumni_sections())
 
         # Superadminin həvalə etdiyi (bayraqlı) qeyri-superadmin zal idarəçisi:
         # öz aktiv təşkilatının zallarını idarə edə bilir (cross-org yalnız
