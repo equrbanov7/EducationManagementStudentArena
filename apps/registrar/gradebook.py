@@ -296,7 +296,7 @@ def _allowed_absence_hours(offering, lessons, *, limit_percent=None):
     return Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
 
 
-def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, lesson_offset=0):
+def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, lesson_offset=0, lesson_kind=""):
     """Full journal grid: lessons (columns) × enrolled students (rows) + summary.
 
     One pass over the marks (no per-cell query). Each row carries the running
@@ -315,10 +315,12 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     * ``lesson_window`` açarı şablona naviqasiya üçün meta qaytarır.
 
     ``lesson_limit=None`` → bütün dərslər (export, düzəliş rejimi, «hamısını göstər»).
+
+    ``lesson_kind`` — dərs tipi süzgəci: pəncərə kimi YALNIZ SÜTUNLARA aiddir.
     """
     scheme = ensure_assessment_scheme(offering=offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
-    lessons = list(all_lessons)
+    lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
     if newest_first:
         lessons.reverse()
     total_lessons = len(lessons)

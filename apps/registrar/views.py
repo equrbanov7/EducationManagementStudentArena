@@ -130,6 +130,10 @@ def journal_detail(request, offering_id):
     active_tab = request.GET.get("jt", "grid")
     if active_tab not in _JOURNAL_TABS:
         active_tab = "grid"
+    # DƏRS TİPİ süzgəci (sahib tələbi 2026-09-06): siyahıdakı «Mühazirə/Seminar/
+    # Laboratoriya» pilləsi jurnalın İÇİNDƏ də davam edir — müəllim seminar
+    # seçəndə mühazirə sütunları qarışmır. Naməlum dəyər səssizcə «hamısı».
+    lesson_kind = _jw.resolve_request_kind(request, offering)
     journal = gradebook.get_offering_journal(
         offering=offering,
         newest_first=True,
@@ -137,6 +141,7 @@ def journal_detail(request, offering_id):
         # yenə tam sətir dəsti qurulur, amma xanasız).
         lesson_limit=(window_size or None) if active_tab == "grid" else 1,
         lesson_offset=window_offset if active_tab == "grid" else 0,
+        lesson_kind=lesson_kind if active_tab == "grid" else "",
     )
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
@@ -174,6 +179,8 @@ def journal_detail(request, offering_id):
         "journal": journal,
         "corrections_map": corrections_map,
         "active_tab": active_tab,
+        # Dərs tipi pillələri + pəncərə keçidlərində qorunan query (bax modul).
+        **_jw.grid_nav_context(request, offering, selected_kind=lesson_kind, active_tab=active_tab),
         "finals": finals_data,
         "final_breakdown": (
             _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map) if needs_finals else []
