@@ -36,7 +36,7 @@ ROLE_LEVELS = {
     "teacher": 60,
     "student": 10,
     "hr": 65,
-    "exam_center": 85,
+    "exam_center_head": 85,
     "dean": 80,
     "department_head": 70,
     "tutor": 40,
@@ -100,7 +100,7 @@ class SidebarRoleMatrixTest(TestCase):
 
     def test_staff_roles_do_not_get_student_surfaces(self):
         """«Mənə təyin edilmiş imtahanlar» əməkdaş menyusunda yeri yoxdur."""
-        for role in ("hr", "exam_center", "dean", "department_head", "tutor", "ikt_rehber"):
+        for role in ("hr", "exam_center_head", "dean", "department_head", "tutor", "ikt_rehber"):
             with self.subTest(role=role):
                 leaked = self._sections(role) & STUDENT_ONLY
                 self.assertEqual(leaked, set(), f"{role} tələbə bölməsi alır: {sorted(leaked)}")
@@ -157,7 +157,7 @@ class SidebarRoleMatrixTest(TestCase):
         expected = {
             "org_admin": {"my-exams", "my-courses", "groups", "role-assignment", "manage-roles"},
             "teacher": {"my-exams", "my-courses", "groups", "pending-review", "review-results"},
-            "exam_center": {"my-exams", "groups", "exam-center-pins", "exam-center-stats", "academic-records"},
+            "exam_center_head": {"my-exams", "groups", "exam-center-pins", "exam-center-stats", "academic-records"},
             "student": {"assigned-exams", "assigned-courses", "my-results"},
             "hr": {"role-assignment", "manage-roles", "student-organization-management"},
         }
@@ -209,7 +209,7 @@ class SidebarRoleMatrixTest(TestCase):
 
     def test_role_flag_based_groups_visibility_is_preserved(self):
         """Mövcud qollar qalır: org_admin/teacher/exam_center/member `groups` görür."""
-        for role in ("org_admin", "teacher", "exam_center", "member", "dean", "department_head"):
+        for role in ("org_admin", "teacher", "exam_center_head", "member", "dean", "department_head"):
             with self.subTest(role=role):
                 self.assertIn("groups", self._sections(role))
 

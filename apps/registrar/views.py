@@ -574,7 +574,9 @@ def _handle_save_marks(request, offering):
         # JOURNAL-TEACHER-04) — kilidli jurnala yazı səssiz atılmamalıdır.
         messages.error(request, _("Jurnal bağlıdır — dəyişikliklər yazılmadı."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    result = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user, report=True)
+    result = gradebook.save_marks(
+        offering=offering, entries=entries, by_user=request.user, report=True, request=request
+    )
     written, rejected = result["written"], result["rejected"]
     if entries and not written:
         messages.warning(request, _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."))

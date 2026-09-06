@@ -115,7 +115,7 @@ def absence_limit_percent_for(offering) -> int:
 
 
 @transaction.atomic
-def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False):
+def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False, request=None):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
     ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
@@ -226,7 +226,10 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
             elif prev < warn_at <= cur <= allowed:
                 notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_LIMIT_WARNING, "hours": new_hours})
 
-    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=audit_changes)
+    # `request` → audit sətrinə «kim impersonasiya edib» möhürü (sahib qərarı).
+    grade_audit.log_grade_changes(
+        offering=offering, by_user=by_user, kind="mark", changes=audit_changes, request=request
+    )
 
     if notify_events:
         from django.db import transaction as _tx
@@ -305,14 +308,9 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     ``newest_first=True`` → sütun sırası tərs (ən yeni dərs adların yanında) —
     müəllim grid-i üçün; export xronoloji qalır.
 
-    DƏRS PƏNCƏRƏSİ (QA 2026-09-05 P1-8): 555 tələbə × 226 dərs açılışında bütün
-    xanalar bir səhifəyə render olunurdu — 41.5 MB HTML / 6.3 s, brauzer donurdu.
-    ``lesson_limit``/``lesson_offset`` YALNIZ göstərilən SÜTUNLARI kəsir:
-
-    * qayıb saatı, giriş balı, buraxılış qərarı və q/b sayğacı HƏMİŞƏ BÜTÜN
-      dərslər üzrə hesablanır (pəncərə rəqəmləri təhrif etmir);
-    * ``lessons``/``lesson_meta`` və sətirlərin ``cells`` sahəsi pəncərəyə aiddir;
-    * ``lesson_window`` açarı şablona naviqasiya üçün meta qaytarır.
+    DƏRS PƏNCƏRƏSİ (QA 2026-09-05 P1-8): ``lesson_limit``/``lesson_offset`` YALNIZ
+    göstərilən SÜTUNLARI kəsir — qayıb saatı, giriş balı və buraxılış qərarı
+    HƏMİŞƏ bütün dərslər üzrədir; ``lesson_window`` şablona naviqasiya metası verir.
 
     ``lesson_limit=None`` → bütün dərslər (export, düzəliş rejimi, «hamısını göstər»).
 

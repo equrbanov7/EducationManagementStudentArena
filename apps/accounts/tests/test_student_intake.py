@@ -204,7 +204,7 @@ class IntakePermissionGateTest(StudentIntakeBase):
     def test_default_roles_carry_the_permission(self):
         for role_name in ("ikt_rehber", "hr"):
             self.assertIn("user.import", self.org.roles.get(name=role_name).permissions, role_name)
-        for role_name in ("teacher", "student", "exam_center"):
+        for role_name in ("teacher", "student", "exam_center_head"):
             self.assertNotIn("user.import", self.org.roles.get(name=role_name).permissions, role_name)
 
     def test_student_and_teacher_are_denied(self):

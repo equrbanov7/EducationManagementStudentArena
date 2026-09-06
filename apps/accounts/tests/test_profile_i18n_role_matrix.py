@@ -36,7 +36,7 @@ ROLE_LEVELS = {
     "teacher": 60,
     "student": 10,
     "hr": 65,
-    "exam_center": 85,
+    "exam_center_head": 85,
     "dean": 80,
 }
 

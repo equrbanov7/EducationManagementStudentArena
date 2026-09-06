@@ -66,7 +66,7 @@ class _FlowBase(TestCase):
             is_active=True,
         )
         cls.center = User.objects.create_user("fcf_center", "fcf_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center_head")
         cls.invigilator = User.objects.create_user("fcf_invig", "fcf_invig@test.az", PASSWORD)
         _assign_user_to_org(cls.invigilator, cls.org, ProfileRole.TEACHER, "teacher")
         cls.teacher = User.objects.create_user("fcf_teacher", "fcf_teacher@test.az", PASSWORD)
@@ -520,7 +520,7 @@ class PermissionAndTenantTests(_FlowBase):
             is_active=True,
         )
         cls.other_center = User.objects.create_user("fcf_center2", "fcf_center2@test.az", PASSWORD)
-        _assign_user_to_org(cls.other_center, cls.other_org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.other_center, cls.other_org, ProfileRole.MEMBER, "exam_center_head")
 
     def _other_org_client(self, user):
         client = Client()

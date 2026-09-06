@@ -40,7 +40,7 @@ class _Base(TestCase):
         cls.teacher = User.objects.create_user("sc_teacher", "sc_teacher@test.az", PASSWORD)
         _assign_user_to_org(cls.teacher, cls.org, ProfileRole.TEACHER, "teacher")
         cls.center = User.objects.create_user("sc_center", "sc_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center_head")
         cls.student = User.objects.create_user("sc_student", "sc_student@test.az", PASSWORD)
         _assign_user_to_org(cls.student, cls.org, ProfileRole.STUDENT, "student")
 

@@ -79,7 +79,7 @@ class ExamScoreEntrySectionTest(TestCase):
             cls.teacher = User.objects.create_user("eses_teacher", "eses_teacher@qku.edu.az", "pw")
             cls.student = User.objects.create_user("eses_student", "eses_student@qku.edu.az", "pw")
             for user, role in (
-                (cls.center, "exam_center"),
+                (cls.center, "exam_center_head"),
                 (cls.teacher, "teacher"),
                 (cls.student, "student"),
             ):
