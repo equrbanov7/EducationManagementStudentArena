@@ -189,17 +189,16 @@ class FastPathParityTest(_AnalyticsBase):
             name="Aqrar iqtisadiyyat",
             absence_limit_percent=10,
         )
-        cls.curriculum_b = Curriculum.objects.create(
-            organization=cls.org, program=cls.program_b, admission_year=2024
-        )
+        cls.curriculum_b = Curriculum.objects.create(organization=cls.org, program=cls.program_b, admission_year=2024)
         cls.group_b = OrgUnit.objects.create(
             organization=cls.org, name="AI-201", slug="an-g2", unit_type=OrgUnitType.GROUP, parent=cls.faculty
         )
 
-        # ── Üç yeni fənn: komponentli / məxrəcsiz / donmuş ────────────────────
+        # ── Dörd yeni fənn: komponentli / məxrəcsiz / donmuş / hədd-sınağı ────
         subject_b = Subject.objects.create(organization=cls.org, code="CS201", name="Alqoritmlər", ects=4)
         subject_c = Subject.objects.create(organization=cls.org, code="CS301", name="Statistika", ects=3)
         subject_d = Subject.objects.create(organization=cls.org, code="CS401", name="Tarix", ects=5)
+        subject_e = Subject.objects.create(organization=cls.org, code="CS501", name="Fəlsəfə", ects=2)
 
         # Komponentli açılış: kanonik saat 30, custom sxem hədləri.
         cls.off_b = CourseOffering.objects.create(
@@ -232,23 +231,34 @@ class FastPathParityTest(_AnalyticsBase):
         )
         _freeze(cls.org, cls.off_d)
 
+        # HƏDD sınaq açılışı (DEFOLT sxem: giriş 50, keçid 51, min imtahan 17) —
+        # yuxarı/aşağı 100-bal kəsimi və «imtahan minimumu» qolu burada işə düşür.
+        cls.off_e = CourseOffering.objects.create(
+            organization=cls.org, subject=subject_e, period=cls.period, group=cls.group, lesson_hours=20
+        )
+        generic_e = AssessmentComponent.objects.create(
+            organization=cls.org, offering=cls.off_e, name="Layihə", kind=ComponentKind.GENERIC, max_score=60
+        )
+
         # ── İki yeni tələbə: biri idmançı istisnalı, biri AKADEMİK QEYDSİZ ────
         student_role = cls.org.roles.get(name="student")
         cls.athlete = User.objects.create_user("an_athlete", "an_athlete@qku.edu.az", "pw")
         cls.orphan = User.objects.create_user("an_orphan", "an_orphan@qku.edu.az", "pw")
-        for user in (cls.athlete, cls.orphan):
+        cls.strict = User.objects.create_user("an_strict", "an_strict@qku.edu.az", "pw")
+        for user in (cls.athlete, cls.orphan, cls.strict):
             Membership.objects.create(
                 user=user, organization=cls.org, role=student_role, is_primary=True, is_active=True
             )
-        StudentAcademicRecord.objects.create(
-            organization=cls.org,
-            student=cls.athlete,
-            program=cls.program_b,
-            curriculum=cls.curriculum_b,
-            group=cls.group_b,
-            admission_year=2024,
-            national_athlete_exemption=True,
-        )
+        for user, exempt in ((cls.athlete, True), (cls.strict, False)):
+            StudentAcademicRecord.objects.create(
+                organization=cls.org,
+                student=user,
+                program=cls.program_b,
+                curriculum=cls.curriculum_b,
+                group=cls.group_b,
+                admission_year=2024,
+                national_athlete_exemption=exempt,
+            )
         # ``orphan`` üçün QEYD YARADILMIR — ``records`` map-də yoxdur.
 
         # ── Komponentli açılışın yazılışları ──────────────────────────────────
@@ -265,6 +275,9 @@ class FastPathParityTest(_AnalyticsBase):
             organization=cls.org, component=kollokvium, enrollment=enr_b0, score=Decimal("12")
         )
         ComponentScore.objects.create(organization=cls.org, component=generic, enrollment=enr_b1, score=Decimal("20"))
+        # a1-də kollokvium giriş tavanının ALTINDA qalır (20 + 8 + 3 = 31 < 40),
+        # yəni onu unutmaq rəqəmi dəyişir — «üstəgəl» qolunun kilidi.
+        ComponentScore.objects.create(organization=cls.org, component=kollokvium, enrollment=enr_b1, score=Decimal("8"))
         ComponentScore.objects.create(organization=cls.org, component=generic, enrollment=enr_b3, score=Decimal("25"))
 
         # Sərbəst iş: 12 təhvil → 10 balla kəsilir; a1-də 3 təhvil.
@@ -278,9 +291,7 @@ class FastPathParityTest(_AnalyticsBase):
 
         # a0 keçir (giriş tavanı 40 kəsir, bonus əlavə olunur), a1 imtahan
         # minimumundan aşağı qalır (15 < 20) VƏ davamiyyətdən kəsilir.
-        FinalGrade.objects.create(
-            organization=cls.org, enrollment=enr_b0, exam_score=Decimal("25"), bonus=Decimal("3")
-        )
+        FinalGrade.objects.create(organization=cls.org, enrollment=enr_b0, exam_score=Decimal("25"), bonus=Decimal("3"))
         FinalGrade.objects.create(organization=cls.org, enrollment=enr_b1, exam_score=Decimal("15"))
         # a2: kəsilmə həddindədir, amma TƏKRAR İMTAHAN qadağanı qaldırır.
         ResitRecord.objects.create(
@@ -307,6 +318,41 @@ class FastPathParityTest(_AnalyticsBase):
         enr_d1 = Enrollment.objects.create(organization=cls.org, student=a1, offering=cls.off_d, absence_hours=9)
         Enrollment.objects.create(organization=cls.org, student=a2, offering=cls.off_d, absence_hours=9)
         FinalGrade.objects.create(organization=cls.org, enrollment=enr_d1, exam_score=Decimal("30"))
+
+        # ── Hədd sınaqları (defolt sxem: giriş 50, keçid 51, min imtahan 17) ──
+        enr_e0 = Enrollment.objects.create(organization=cls.org, student=a0, offering=cls.off_e, absence_hours=0)
+        # a1: qayıb həddi AŞILIB (10 > 20×25% = 5), amma bal onsuz da keçid
+        # həddindən yuxarıdır → «kəsilib» qərarı YALNIZ ``barred``-dan gəlir.
+        enr_e1 = Enrollment.objects.create(organization=cls.org, student=a1, offering=cls.off_e, absence_hours=10)
+        # a2: qayıb DƏQİQ həddədir (5 = 5) → strict ``>`` qaydası ilə kəsilmir.
+        enr_e2 = Enrollment.objects.create(organization=cls.org, student=a2, offering=cls.off_e, absence_hours=5)
+        enr_e3 = Enrollment.objects.create(
+            organization=cls.org, student=cls.athlete, offering=cls.off_e, absence_hours=0
+        )
+        # ``strict``: proqram həddi 10% (20 saatın 2-si) — 4 saat qayıb KƏSİR.
+        # Defolt 25% həddi ilə (5 saat) kəsməzdi → hədd mənbəyinin kilidi.
+        Enrollment.objects.create(organization=cls.org, student=cls.strict, offering=cls.off_e, absence_hours=4)
+        # ``orphan``: qeydsiz (defolt hədd 25% → 5 saat), 10 saat qayıb → kəsilir
+        # və imtahanı YOXDUR → «kəsilib» qərarı yalnız ``barred``-dan gəlir.
+        Enrollment.objects.create(organization=cls.org, student=cls.orphan, offering=cls.off_e, absence_hours=10)
+        # Kəsr balı (44.50) — giriş və yekun TAM ƏDƏDƏ yuvarlaqlaşdırılır.
+        ComponentScore.objects.create(
+            organization=cls.org, component=generic_e, enrollment=enr_e0, score=Decimal("44.50")
+        )
+        ComponentScore.objects.create(organization=cls.org, component=generic_e, enrollment=enr_e1, score=Decimal("45"))
+        ComponentScore.objects.create(organization=cls.org, component=generic_e, enrollment=enr_e2, score=Decimal("60"))
+        FinalGrade.objects.create(organization=cls.org, enrollment=enr_e1, exam_score=Decimal("30"))
+        # a0: giriş 44.50 → 45 (yarım-yuxarı), 45 + 16.40 = 61.40 → 61 ≥ 51,
+        # AMMA imtahan minimumu (17) keçilmir → KƏSR.
+        FinalGrade.objects.create(organization=cls.org, enrollment=enr_e0, exam_score=Decimal("16.40"))
+        # a2: giriş tavanı 50 kəsir, 50 + 45 + 20 = 115 → 100-ə kəsilir.
+        FinalGrade.objects.create(
+            organization=cls.org, enrollment=enr_e2, exam_score=Decimal("45"), bonus=Decimal("20")
+        )
+        # idmançı: 0 + 0 − 10 = −10 → aşağıdan 0-a kəsilir (qiymətləndirilib).
+        FinalGrade.objects.create(
+            organization=cls.org, enrollment=enr_e3, exam_score=Decimal("0"), bonus=Decimal("-10")
+        )
 
         # Dərs saatı fallback-i: donmuş açılışın dərsləri (kanonik saat 10 olsa
         # da) — ``lesson_hours_for`` kanoniki üstün tutmalıdır, fallback yox.
@@ -347,8 +393,8 @@ class FastPathParityTest(_AnalyticsBase):
         data = self._assert_same(None, "org-səviyyəli")
         # Fikstura həqiqətən «çirklidir» — boş nəticəni səhvən müqayisə etmirik.
         self.assertTrue(data["has_data"])
-        self.assertEqual(data["totals"]["enrollments"], 10)
-        self.assertEqual(data["totals"]["students"], 5)
+        self.assertEqual(data["totals"]["enrollments"], 16)
+        self.assertEqual(data["totals"]["students"], 6)
         self.assertEqual(len(data["programs"]), 2)
         self.assertEqual(len(data["groups"]), 2)  # qrupsuz açılış bucket YARATMIR
 
@@ -386,7 +432,7 @@ class FastPathParityTest(_AnalyticsBase):
         subject_c_rows = [row for row in data["at_risk"] if row["sublabel"] == "CS301"]
         # CS301-də yalnız qeydsiz tələbənin (qiymətsiz) yazılışı qalır → risk yox.
         self.assertEqual(subject_c_rows, [])
-        self.assertEqual(data["totals"]["enrollments"], 10)
+        self.assertEqual(data["totals"]["enrollments"], 16)
 
     def test_frozen_offering_is_not_barred(self):
         """Donmuş açılışda 9 saat qayıb (canlı hədd 2.5) kəsr YARATMIR."""
