@@ -1,12 +1,14 @@
 # Legacy miqrasiyası audit checkpoint-i
 
 **Tarix:** 2026-09-06  
-**Status:** yekun hesabat deyil; uzunmüddətli müstəqil reconciliation davam edir  
+**Status:** bağlanıb; yekun hesabatla əvəz olunub  
 **Production:** toxunulmayıb  
 **Kod bazası:** `Develop` @ `adb7e07f2a0a9764b9e5b9d24b9f16f6d961c8b0`
 
-Bu checkpoint limit və ya proses kəsilərsə görülmüş işin itirilməməsi üçündür.
-Yekun qərar yalnız aşağıdakı açıq addımlar tamamlandıqdan sonra verilməlidir.
+Bu checkpoint limit və ya proses kəsilərsə görülmüş işin itirilməməsi üçün idi.
+Hər iki deep reconciliation 0 izah olunmamış fərq, 0 grade-fact guard
+pozuntusu və 0 artifact fərqi ilə tamamlanıb. Cari qərar və production
+şərtləri üçün `LEGACY_MIGRATION_FINAL_AUDIT_2026-09-06.md` əsas sənəddir.
 
 ## 1. İndiyə qədər dəqiq təsdiqlənənlər
 
@@ -149,17 +151,13 @@ Claude bu checkpoint-i yekun təsdiq kimi qəbul etməməlidir. Əmin olmaq üç
 7. Production cutover-dan əvvəl backup/restore sınağı, runtime rol attestasiyası,
    freeze window və rollback qərar nöqtəsinin ayrıca təsdiqini tələb etsin.
 
-## 8. Hazırda yarım qala biləcək hissə
+## 8. Checkpoint-in bağlanması
 
-- Run 1 üçün müstəqil deep reconciliation işləyir; Run 2 də eyni yoxlamadan
-  keçirilməlidir. İlk Run 1 cəhdi artifact axınında defolt 600 saniyəlik
-  PostgreSQL statement timeout-a çatdı; bu məlumat uyğunsuzluğu deyil.
-  Read-only auditor sənədləşdirilmiş `2h` limitlə sıfırdan yenidən başladılıb.
-- Deep nəticələrdən sonra yekun Markdown/PDF hesabat yaradılmalı, vizual və
-  mətn QA edilməlidir.
-- Dəyişikliklərin tam repo lint/check/migration-test matrisi yenidən
-  işlədilməlidir.
-- Production cutover bu auditin daxilində deyil və hələ icazəli deyil.
-
-Bu dörd bənd bitmədən avtomatlaşdırma dayandırılmamalı və “production-ready”
-hökmü verilməməlidir.
+- Run 1 və Run 2 üçün müstəqil deep reconciliation uğurla tamamlanıb.
+- Run-spesifik başlıq/timing çıxarılandan sonra deep məzmun byte-identikdir:
+  `15e66b46e43062500abe22ef985479d59833c61e8c8e0b24a12d020d3141c1e2`.
+- Yekun Markdown, PII-siz evidence bundle və vizual QA edilmiş PDF hazırlanıb.
+- Bağlı UI panelində qırmızı xəbərdarlığın görünməməsi düzəldilib və 41 fokus
+  UI testi keçib.
+- Production cutover bu auditin daxilində deyil və hələ icazəli deyil;
+  yekun hesabatdakı preflight/rollback şərtləri qüvvədədir.
