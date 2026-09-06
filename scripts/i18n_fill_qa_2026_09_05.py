@@ -695,7 +695,6 @@ ENTRIES = {
             "ru": "Для этого предмета/периода есть утверждённый силлабус — откройте новую версию.",
             "tr": "Bu ders/dönem için onaylı bir izlence var — üzerine kopyalamak yerine yeni sürüm açın.",
         },
-
         "Bölmə məzmununun formatı düzgün deyil (%(field)s).": {
             "en": "The section content has an invalid format (%(field)s).",
             "ru": "Содержимое раздела имеет неверный формат (%(field)s).",
