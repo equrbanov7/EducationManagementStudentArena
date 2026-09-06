@@ -364,6 +364,8 @@ class MovementStateMachineTest(StudentServicesBase):
         self.record.refresh_from_db()
         self.assertEqual(self.record.status, AcademicStatus.ENROLLED)
         self.assertEqual(self.record.group_id, self.group_b.pk)
+        # Akademik qeyd qayıdır, hesabın girişi isə ayrı (sübutlu) qapıdan açılır.
+        self.assertTrue(response.json()["movement"]["access_notice"])
 
     def test_form_change_updates_education_form(self):
         response = self._post_movement(
@@ -790,7 +792,13 @@ class MovementGuardsTest(StudentServicesBase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "effective_until_past")
 
-    def test_expulsion_archives_access_and_reinstatement_restores_it(self):
+    def test_expulsion_archives_access_and_reinstatement_only_warns(self):
+        """Xaric → giriş bağlanır; bərpa → qeyd qayıdır, GİRİŞ isə bildirişlə qalır.
+
+        `archived → active` keçidi Postgres trigger-i ilə qorunur (sübut sətri
+        olmadan `42501`), ona görə bərpa əmri girişi avtomatik açmır — cavabda
+        `access_notice` gəlir və operator kimlik səthinin bərpa axınına yönəlir.
+        """
         from apps.accounts.models import UserProfile
 
         profile, _ = UserProfile.objects.get_or_create(user=self.record.student)
@@ -803,4 +811,5 @@ class MovementGuardsTest(StudentServicesBase):
         response = self._post_movement(kind="reinstatement", order_number="R-141")
         self.assertEqual(response.status_code, 200, response.content)
         profile.refresh_from_db()
-        self.assertEqual(profile.access_state, UserProfile.AccessState.ACTIVE)
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ARCHIVED)
+        self.assertIn("giriş", response.json()["movement"]["access_notice"])

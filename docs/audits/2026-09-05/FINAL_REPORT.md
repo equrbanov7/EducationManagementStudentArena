@@ -88,13 +88,17 @@
 | Yekun imtahan balı yalnız İmtahan Mərkəzinin səthidir; bonus/rəy müəllimindir | AYDINLAŞDIRILDI + kodla tətbiq edildi |
 | Dekan/koordinator öz struktur alt-ağacından kənara rol verə bilməz | TƏTBİQ EDİLDİ |
 | Xaric/məzun statusu girişi bağlamalıdır | TƏTBİQ EDİLDİ |
-| Dərs yükü diliminin təsdiqi koordinator vizası tələb etməlidirmi? | **AÇIQ — sahib qərarı** (tövsiyə: `workload.visa_required` org-konfiqi, defolt bəli) |
-| 0 saatlıq və dublikat yük sətirləri göndərilib təsdiqlənə bilir | **AÇIQ** (readiness → `WorkloadDenied`) |
-| Dərs tarixi dövrün `end_date`-ini keçə bilir (2099) | **AÇIQ** |
-| Sillabus «kopyala» açılışsız paralel dosye yaradır | **AÇIQ — sahib qərarı** |
-| Parol sıfırlaması səbəbsiz qəbul olunur (blok/silmə üçün səbəb məcburidir) | **AÇIQ** (tövsiyə: səbəb məcburi) |
-| Məzun kabinetinin əhatəsi (nəticə/transkript bölmələri yoxdur, profil 403) | **AÇIQ — sahib qərarı** |
-| «Cari tədris ili» iki mənbədən gəlir (dashboard 2025/2026 Yaz vs yük 2026/2027) | **AÇIQ — konfiq vahidləşməlidir** |
+| Dərs yükü diliminin təsdiqi koordinator vizası tələb edir | TƏTBİQ EDİLDİ (`workload.visa_required`, defolt açıq) |
+| 0 saatlıq və dublikat yük sətirləri | TƏTBİQ EDİLDİ (bloklanır) |
+| Dərs tarixinin üst həddi | TƏTBİQ EDİLDİ (dövrün sonu) |
+| Sillabus «kopyala» paralel dosye yaradırdı | TƏTBİQ EDİLDİ (mövcud dosyeyə kopyalayır) |
+| Parol sıfırlaması səbəbsiz qəbul olunurdu | TƏTBİQ EDİLDİ (səbəb məcburi) |
+| Məzun kabinetinin əhatəsi | TƏTBİQ EDİLDİ (nəticə + akademik xülasə + transkript) |
+| «Cari tədris ili» iki mənbədən gəlirdi | TƏTBİQ EDİLDİ (tək mənbə) |
+| **Bərpa əmri hesabın girişini avtomatik açsınmı?** Hazırda AÇMIR: `archived → active` Postgres trigger-i ilə sübutlu dar qapıdır; bərpa əmri `access_notice` qaytarır, operator kimlik səthindən açır | **AÇIQ — sahib qərarı** (alternativ: hərəkət əmri üçün ayrıca sübut səbəbi + servis) |
+| **«Baş direktor»** `rector` rolu ilə eyni sayılsınmı? (heyət siyahısı) | **AÇIQ — sahib qərarı** (hazırda `member`) |
+| **«Qəyyumlar şurası»** üçün ayrıca rol yaradılsınmı? | **AÇIQ — sahib qərarı** (hazırda `member`) |
+| **İnzibati «şöbə müdiri»** üçün ümumi rol lazımdırmı? (39 nəfər) | **AÇIQ — sahib qərarı** (hazırda `member` + vəzifə mətni) |
 
 ---
 

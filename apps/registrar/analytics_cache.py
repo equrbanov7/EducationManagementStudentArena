@@ -23,7 +23,7 @@ ANALYTICS_CACHE_TTL = 300
 
 def analytics_cache_key(organization, period, scope_q) -> str:
     raw = f"{getattr(organization, 'pk', '')}|{getattr(period, 'pk', '')}|{scope_q}"
-    return "registrar:analytics:" + hashlib.sha1(raw.encode("utf-8")).hexdigest()
+    return "registrar:analytics:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def cached_period_analytics(organization, period, scope_q):

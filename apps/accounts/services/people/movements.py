@@ -339,6 +339,8 @@ def movement_row(movement) -> dict:
         "actor_name": movement.actor_name,
         "has_document": bool(movement.document),
         "created_at": movement.created_at.isoformat() if movement.created_at else "",
+        # Bərpa əmrindən sonra giriş avtomatik açılmır — səbəb registrar.movements-də.
+        "access_notice": str(getattr(movement, "access_notice", "") or ""),
     }
 
 
