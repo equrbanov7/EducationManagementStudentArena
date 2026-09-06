@@ -10,6 +10,12 @@ ddaphne
 
 → http://127.0.0.1:8000 · dayandırmaq: `Ctrl+C` · loglar elə terminaldadır.
 
+⚠️ **Default baza KLONDUR** (sahib qərarı 2026-09-06): `ddaphne` `:8100`-ün
+göstərdiyi `emsarena_rehearsal_*` bazasını açır, yəni gündəlik test **real
+datanı əlləmir** — real bazanı prod-a köçürməzdən əvvəl toxunulmaz saxlamaq
+üçün. Real baza lazımdırsa: `REAL=1 ddaphne`. Klon `qa.*` hesabları hər iki
+portda işləyir.
+
 `ddaphne` artıq ALIAS deyil, FUNKSİYADIR (`~/.zshrc` + `~/.bashrc`) və birbaşa
 `scripts/dev-daphne.sh`-i çağırır. Skript **portu özü boşaldır**: əvvəlki
 sessiyadan qalan daphne varsa onu dayandırıb yenisini qaldırır (yad proses
@@ -21,7 +27,8 @@ Faydalı variantlar:
 
 | Əmr | Nə edir |
 |---|---|
-| `ddaphne` | 127.0.0.1:8000, köhnə prosesi əvəz edir |
+| `ddaphne` | 127.0.0.1:8000, **KLON bazası** (:8100 ilə eyni məzmun) |
+| `REAL=1 ddaphne` | lokal **REAL** baza ilə (`.env`-dəki `DATABASE_URL`) |
 | `REUSE=1 ddaphne` | işləyirsə toxunmur, sadəcə ünvanı yazır |
 | `HOST=0.0.0.0 ddaphne` | LAN-dan görünsün (telefon, başqa kompüter) |
 | `PORT=8010 ddaphne` | başqa port |
