@@ -651,7 +651,7 @@ msgstr "Təyin olunmuş kurslarım"
 #: apps/accounts/templates/accounts/assigned_courses.html:21
 msgctxt "accounts.assigned_courses_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:27
 msgctxt "accounts.assigned_courses_page"
@@ -676,7 +676,7 @@ msgstr "Təyin olunmuş imtahanlarım"
 #: apps/accounts/templates/accounts/assigned_exams.html:21
 msgctxt "accounts.assigned_exams_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:27
 msgctxt "accounts.assigned_exams_page"
@@ -740,7 +740,7 @@ msgstr "• • • • • •"
 #: apps/accounts/templates/accounts/assigned_exams.html:105
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_cancel"
-msgstr "Cancel"
+msgstr "Ləğv et"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:106
 msgctxt "accounts.assigned_exams_page"
@@ -1019,12 +1019,12 @@ msgstr "Feedback (optional)"
 #: apps/accounts/templates/accounts/grading_queue.html:176
 msgctxt "accounts.grading_queue_page"
 msgid "submit_grade"
-msgstr "Submit grade"
+msgstr "Balı göndər"
 
 #: apps/accounts/templates/accounts/grading_queue.html:179
 msgctxt "accounts.grading_queue_page"
 msgid "next_grade"
-msgstr "Next grade"
+msgstr "Növbəti qiymətləndirmə"
 
 #: apps/accounts/templates/accounts/grading_queue.html:192
 msgctxt "accounts.grading_queue_page"
@@ -1259,7 +1259,7 @@ msgstr "My Results"
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/my_results.html:26
 msgctxt "accounts.my_results_page"
@@ -3993,7 +3993,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:11
 msgctxt "staff.management"
 msgid "Staff Management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:17
 #, python-format
@@ -4104,23 +4104,23 @@ msgstr "Müəllim dəvətləri"
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:115
 msgctxt "staff.management"
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:121
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:100
 msgctxt "staff.management"
 msgid "Staff requests"
-msgstr "Staff müraciətləri"
+msgstr "Heyət müraciətləri"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:127
 msgctxt "staff.management"
 msgid "Unassigned staff"
-msgstr "Staff dəvətsizlər"
+msgstr "Təyinatsız heyət"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:133
 msgctxt "staff.management"
 msgid "Staff invites"
-msgstr "Staff dəvətləri"
+msgstr "Heyət dəvətləri"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:142
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:5
@@ -5614,7 +5614,7 @@ msgstr "Qeyri-müəllim əməkdaşlar burada göstərilir."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:214
 msgctxt "staff.management"
 msgid "Search staff..."
-msgstr "Staff axtar..."
+msgstr "Heyət üzrə axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:33
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:124
@@ -5697,7 +5697,7 @@ msgstr "Əməliyyat"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:87
 msgctxt "staff.management"
 msgid "No staff member found."
-msgstr "Staff tapılmadı."
+msgstr "Heyət üzvü tapılmadı."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:102
 msgctxt "staff.management"
@@ -5707,7 +5707,7 @@ msgstr "Gözləyən staff müraciətlərini buradan cavablandırın."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:117
 msgctxt "staff.management"
 msgid "Search staff requests..."
-msgstr "Staff müraciəti axtar..."
+msgstr "Heyət müraciətlərində axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:142
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:94
@@ -5811,7 +5811,7 @@ msgstr "Kafedra"
 #: apps/accounts/views/_helpers/roles_map.py:58
 msgctxt "membership_request.role"
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:312
 msgctxt "staff.management"
@@ -5831,7 +5831,7 @@ msgstr "Qəbul edilməmiş staff dəvətlərini buradan geri çəkin."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:343
 msgctxt "staff.management"
 msgid "Search staff invites..."
-msgstr "Staff dəvəti axtar..."
+msgstr "Heyət dəvətlərində axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:385
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:391
@@ -6715,7 +6715,7 @@ msgstr ""
 #: apps/accounts/templates/accounts/password_reset_complete.html:29
 msgctxt "accounts.password_reset_complete_page"
 msgid "login_now"
-msgstr "Login now"
+msgstr "İndi daxil olun"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:4
 msgctxt "accounts.password_reset_confirm_page"
@@ -15200,7 +15200,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/views/profile/_sections/labels.py:83
 msgctxt "profile.section"
 msgid "staff_management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:39
 msgctxt "profile.sidebar"
@@ -15210,7 +15210,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:39
 msgctxt "profile.sidebar"
 msgid "staff_management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:48
 #: apps/accounts/views/profile/_sections/labels.py:84
@@ -15815,7 +15815,7 @@ msgstr "Welcome"
 #: apps/accounts/templates/accounts/student_dashboard.html:19
 msgctxt "accounts.student_dashboard"
 msgid "btn_profile"
-msgstr "Profile"
+msgstr "Profil"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:22
 msgctxt "accounts.student_dashboard"
@@ -21908,7 +21908,7 @@ msgstr "Django site admin"
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:13
 #: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:13
 msgid "Home"
-msgstr "Home"
+msgstr "Ana səhifə"
 
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:17
 #: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:17
@@ -22276,7 +22276,7 @@ msgstr "Təşkilat seçimi məcburidir."
 #: apps/courses/templates/courses/course_dashboard.html:46
 msgctxt "courses.dashboard"
 msgid "page_suffix_dashboard"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #: apps/courses/templates/courses/course_dashboard.html:38
 #: apps/courses/templates/courses/course_dashboard.html:204
@@ -22379,7 +22379,7 @@ msgstr "Üzvlər"
 #: apps/courses/templates/courses/course_members.html:24
 msgctxt "courses.members_page"
 msgid "back_dashboard"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #: apps/courses/templates/courses/course_members.html:27
 msgctxt "courses.members_page"
@@ -22489,7 +22489,7 @@ msgstr "Kurs yaradıldıqdan sonra dashboard səhifəsinə yönləndirilirsiniz.
 #: apps/courses/templates/courses/create_course.html:74
 msgctxt "courses.create_page"
 msgid "after_create_item_2"
-msgstr "Dashboard-da Mövzular, İşlər, Resurslar əlavə edə bilərsiniz."
+msgstr "İdarə panelində Mövzular, İşlər, Resurslar əlavə edə bilərsiniz."
 
 #: apps/courses/templates/courses/create_course.html:75
 msgctxt "courses.create_page"
@@ -22631,7 +22631,7 @@ msgstr "tələbə"
 #: apps/courses/templates/courses/my_courses.html:70
 msgctxt "courses.my_courses"
 msgid "action_go_dashboard"
-msgstr "Dashboard-a Get"
+msgstr "İdarə panelinə keç"
 
 #: apps/courses/templates/courses/my_courses.html:84
 msgctxt "courses.my_courses"
@@ -24595,12 +24595,12 @@ msgstr "Proktorinq səviyyəsi"
 #: apps/exams/domain/exam_definition.py:174
 msgctxt "exams.model.exam.field"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #: apps/exams/domain/exam_definition.py:175
 msgctxt "exams.model.exam.help"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #: apps/exams/domain/exam_definition.py:178
 msgctxt "exams.model.exam.field"
@@ -31156,17 +31156,17 @@ msgstr "İmtahan yoxdur."
 #: apps/exams/templates/exams/teacher/export_waiting.html:14
 msgctxt "exams.template.export_waiting"
 msgid "export_preparing_title"
-msgstr "Export hazırlanır"
+msgstr "İxrac hazırlanır"
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:11
 msgctxt "exams.template.export_waiting"
 msgid "export_failed_body"
-msgstr "Export alınmadı. Yenidən cəhd edin."
+msgstr "İxrac alınmadı. Yenidən cəhd edin."
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:12
 msgctxt "exams.template.export_waiting"
 msgid "export_timeout_body"
-msgstr "Export çox uzun çəkdi. Bir az sonra yenidən cəhd edin."
+msgstr "İxrac çox uzun çəkdi. Bir az sonra yenidən cəhd edin."
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:16
 msgctxt "exams.template.export_waiting"
@@ -36117,12 +36117,12 @@ msgstr "Fayl seçilməyib."
 #: apps/exams/views/teacher/extract_jobs.py:221
 msgctxt "exams.view.export_job.error"
 msgid "empty_export"
-msgstr "Export üçün aktiv sual tapılmadı."
+msgstr "İxrac üçün aktiv sual tapılmadı."
 
 #: apps/exams/views/teacher/extract_jobs.py:223
 msgctxt "exams.view.export_job.error"
 msgid "export_failed"
-msgstr "Export alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "İxrac alınmadı. Bir az sonra yenidən cəhd edin."
 
 #: apps/exams/views/teacher/groups.py:49 apps/exams/views/teacher/groups.py:76
 msgctxt "exams.view.groups.message"
@@ -36281,7 +36281,7 @@ msgstr "Sual bankı uğurla yadda saxlanıldı!"
 #: apps/exams/views/teacher/question_bank/_views_misc.py:76
 msgctxt "exams.question_bank.message"
 msgid "Export üçün sual tapılmadı."
-msgstr "Export üçün sual tapılmadı."
+msgstr "İxrac üçün sual tapılmadı."
 
 #: apps/exams/views/teacher/question_bank/_views_misc.py:84
 #, python-format
@@ -36387,7 +36387,7 @@ msgstr "Toplu sual əlavə et"
 #: apps/exams/views/teacher/question_library/export.py:70
 msgctxt "exams.view.bank.message"
 msgid "Export üçün aktiv sual tapılmadı."
-msgstr "Export üçün aktiv sual tapılmadı."
+msgstr "İxrac üçün aktiv sual tapılmadı."
 
 #: apps/exams/views/teacher/question_library/picker.py:52
 #: apps/exams/views/teacher/question_library/picker.py:55
@@ -37638,7 +37638,7 @@ msgstr "Əlavə edilir..."
 #: apps/labs/templates/labs/manage_blocks.html:381
 msgctxt "labs.js.manage_blocks"
 msgid "state_importing"
-msgstr "Import edilir..."
+msgstr "İdxal edilir..."
 
 #: apps/labs/templates/labs/manage_blocks.html:382
 msgctxt "labs.js.manage_blocks"
@@ -39534,7 +39534,7 @@ msgstr "Müəllim"
 
 #: apps/notifications/models.py:22
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/notifications/models.py:86
 msgid "Assignment"
@@ -43790,7 +43790,7 @@ msgstr "Jurnalı Excel (xlsx) olaraq yüklə"
 #: apps/registrar/templates/registrar/journal_detail.html:150
 msgctxt "registrar.journal"
 msgid "Export"
-msgstr "Export"
+msgstr "İxrac"
 
 #: apps/registrar/templates/registrar/journal_detail.html:157
 msgctxt "registrar.syllabus"
@@ -48455,7 +48455,7 @@ msgstr "Panel"
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "home"
-msgstr "Home"
+msgstr "Ana səhifə"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -48491,19 +48491,19 @@ msgstr "Reports"
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "profile"
-msgstr "Profile"
+msgstr "Profil"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "dashboard_title"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
