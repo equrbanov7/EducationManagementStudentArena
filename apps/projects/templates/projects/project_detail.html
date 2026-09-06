@@ -44,7 +44,7 @@
                     <div class="d-flex flex-wrap gap-4">
                         <div>
                             <small class="text-muted">{% trans "due_date" context "projects.detail" %}</small>
-                            <div class="fw-bold">{{ project.deadline|date:"SHORT_DATETIME_FORMAT" }}</div>
+                            <div class="fw-bold">{{ project.deadline|date:"d.m.Y H:i" }}</div>
                         </div>
                         <div>
                             <small class="text-muted">{% trans "max_score" context "projects.detail" %}</small>
@@ -96,7 +96,7 @@
                         {% for sub in user_submissions %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if sub.file %}
                                 <a href="{{ sub.file.url }}" target="_blank" class="text-primary">

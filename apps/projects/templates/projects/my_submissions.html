@@ -71,7 +71,7 @@
                         <span class="badge bg-success fs-6">{% trans "status_active" context "projects.my_submissions" %}</span>
                     {% endif %}
                     <br>
-                    <small class="text-muted">{{ project.deadline|date:"SHORT_DATETIME_FORMAT" }}</small>
+                    <small class="text-muted">{{ project.deadline|date:"d.m.Y H:i" }}</small>
                 </div>
             </div>
         </div>
@@ -98,7 +98,7 @@
                         {% for sub in submissions %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}</td>
+                            <td>{{ sub.submitted_at|date:"d.m.Y H:i" }}</td>
                             <td>
                                 {% if sub.status == 'pending' %}
                                     <span class="badge project-sub-status project-sub-status-pending">{% trans "status_pending" context "projects.my_submissions" %}</span>
@@ -147,7 +147,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <strong>{% trans "submitted_at" context "projects.my_submissions" %}</strong> {{ sub.submitted_at|date:"SHORT_DATETIME_FORMAT" }}
+                        <strong>{% trans "submitted_at" context "projects.my_submissions" %}</strong> {{ sub.submitted_at|date:"d.m.Y H:i" }}
                     </div>
 
                     {% if sub.content %}

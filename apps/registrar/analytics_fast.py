@@ -232,6 +232,26 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
 
     İkinci qaytarma dəyəri — dərs balı cəmi LAZIM olan açılışların id-ləri
     (generic komponenti olmayanlar); bax :func:`_lesson_sum_map`."""
+    # Açılış sətirləri ƏVVƏL oxunur: əhatəsi boş olan aktorda (məs. altında
+    # açılış olmayan kafedra) qalan beş sorğu ümumiyyətlə getmir — köhnə yolun
+    # «yazılış yoxdursa dərhal qayıt» qısa-qapanması ilə eyni ucuzluq.
+    rows = list(
+        CourseOffering.objects.filter(id__in=offering_ids)
+        .annotate(key_text=_text("id"))
+        .values_list(
+            "id",
+            "key_text",
+            "lesson_hours",
+            "subject__ects",
+            "subject__name",
+            "subject__code",
+            "group_id",
+            "group__name",
+        )
+    )
+    if not rows:
+        return {}, []
+
     schemes = {
         key: (entry_max, pass_threshold, min_exam)
         for key, entry_max, pass_threshold, min_exam in AssessmentScheme.objects.filter(offering_id__in=offering_ids)
@@ -251,20 +271,6 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
 
     info: dict = {}
     lesson_source_ids: list = []
-    rows = (
-        CourseOffering.objects.filter(id__in=offering_ids)
-        .annotate(key_text=_text("id"))
-        .values_list(
-            "id",
-            "key_text",
-            "lesson_hours",
-            "subject__ects",
-            "subject__name",
-            "subject__code",
-            "group_id",
-            "group__name",
-        )
-    )
     for offering_id, key, lesson_hours, ects, subject_name, subject_code, group_id, group_name in rows:
         entry_max, pass_threshold, min_exam = schemes.get(key, _DEFAULT_SCHEME)
         # ``exam_eligibility.lesson_hours_for`` güzgüsü: kanonik saat 0/None

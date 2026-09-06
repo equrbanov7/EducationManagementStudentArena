@@ -63,7 +63,7 @@
                         <div class="post-date">
                             <span class="kind-badge">{{ item.type_label }}</span>
                             {{ item.kind }}
-                            {% if item.submitted_at %}· {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                            {% if item.submitted_at %}· {{ item.submitted_at|date:"d.m.Y H:i" }}{% endif %}
                             <span class="pending-answer-status pending-answer-status--{{ item.status_class }}">{{ item.status_label }}</span>
                         </div>
                         {% if item.review_window_seconds_left > 0 %}

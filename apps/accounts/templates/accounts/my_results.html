@@ -115,7 +115,7 @@
                         {{ item.kind }}
                         {% if item.category == 'academic' %}
                             {% if item.academic.period_label %} · {{ item.academic.period_label }}{% endif %}
-                        {% elif item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                        {% elif item.submitted_at %} · {{ item.submitted_at|date:"d.m.Y H:i" }}{% endif %}
                     </div>
                     <div class="result-meta">
                         {% if item.category == 'academic' %}

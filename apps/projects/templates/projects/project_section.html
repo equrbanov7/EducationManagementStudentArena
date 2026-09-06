@@ -53,7 +53,7 @@
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 <small class="text-muted">
                                     <i class="fa-solid fa-calendar-days"></i>
-                                    {{ p.deadline|date:"SHORT_DATETIME_FORMAT" }}
+                                    {{ p.deadline|date:"d.m.Y H:i" }}
 
                                     {% if p.status == 'active' %}
                                         {% if p.is_deadline_passed %}
@@ -121,7 +121,7 @@
                             <div class="d-flex flex-wrap gap-3 mb-3">
                                 <small class="text-muted">
                                     <i class="fa-solid fa-calendar-days"></i>
-                                    {{ p.deadline|date:"SHORT_DATETIME_FORMAT" }}
+                                    {{ p.deadline|date:"d.m.Y H:i" }}
 
                                     {% if p.status == 'active' %}
                                         {% if item.is_deadline_passed %}

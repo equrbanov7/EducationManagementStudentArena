@@ -138,13 +138,13 @@
                     <td>
                         <span class="{{ row.status_badge_class }}">{{ row.status_label }}</span>
                         {% if row.deleted_at %}
-                        <div class="user-table-muted">{% blocktrans with deleted_at=row.deleted_at|date:"d M Y H:i" %}Silinmə: {{ deleted_at }}{% endblocktrans %}</div>
+                        <div class="user-table-muted">{% blocktrans with deleted_at=row.deleted_at|date:"d.m.Y H:i" %}Silinmə: {{ deleted_at }}{% endblocktrans %}</div>
                         {% endif %}
                     </td>
                     <td>
                         {% trans 'Heç daxil olmayıb' as never_logged_in %}
-                        <div>{{ row.last_login|date:"d M Y H:i"|default:never_logged_in }}</div>
-                        <div class="user-table-muted">{% blocktrans with joined_at=row.date_joined|date:"d M Y" %}Qeydiyyat: {{ joined_at }}{% endblocktrans %}</div>
+                        <div>{{ row.last_login|date:"d.m.Y H:i"|default:never_logged_in }}</div>
+                        <div class="user-table-muted">{% blocktrans with joined_at=row.date_joined|date:"d.m.Y" %}Qeydiyyat: {{ joined_at }}{% endblocktrans %}</div>
                     </td>
                     <td>
                         {% if row.can_block or row.can_unblock or row.can_soft_delete or row.can_restore or row.can_hard_delete %}

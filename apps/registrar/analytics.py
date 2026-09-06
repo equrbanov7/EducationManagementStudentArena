@@ -25,7 +25,6 @@ from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
     ComponentScore,
-    Enrollment,
     FinalGrade,
     LessonMark,
     ResitRecord,
@@ -384,63 +383,11 @@ def evaluate_enrollment(enrollment, maps) -> dict:
     return _evaluate(enrollment, maps)
 
 
-def build_period_analytics(*, organization, period, scope_q=None) -> dict:
-    """Full dashboard payload for one org + period (fixed query count).
+def assemble_payload(period, overall, programs, groups, subjects) -> dict:
+    """Bucket-lərdən panel payload-u — sıralama və «risk fənləri» seçimi BURADA.
 
-    ``scope_q`` — aktorun unit alt-ağacı üzrə filtr (``None`` = org-səviyyəli
-    aktor, filtr yoxdur).
-
-    NİYƏ VAR (2026-07-31 auditi): panel bütün təşkilat üzrə aqreqasiya edirdi,
-    giriş qapısı isə yalnız «kafedra müdiri/dekan/admin?» sualını verirdi. Yəni
-    20 nəfərlik bir kafedranın müdiri bütün universitetin keçid faizini, orta
-    GPA-sını və fənn üzrə kəsr statistikasını görürdü. Təsdiq axını artıq
-    offering-səviyyəli scope-la məhdudlaşdırılmışdı; panel isə həmin
-    məhdudiyyətdən kənarda qalmışdı.
-    """
-    enrollment_qs = Enrollment.objects.filter(organization=organization, offering__period=period)
-    if scope_q is not None:
-        enrollment_qs = enrollment_qs.filter(scope_q)
-    enrollments = list(
-        enrollment_qs.exclude(status=Enrollment.Status.DROPPED).select_related(
-            "offering", "offering__subject", "offering__group"
-        )
-    )
-    if not enrollments:
-        return {"has_data": False, "period": period, "totals": None, "programs": [], "groups": [], "at_risk": []}
-
-    maps = build_evaluation_maps(organization, enrollments)
-
-    overall = _Bucket("overall", "")
-    programs: dict = {}
-    groups: dict = {}
-    subjects: dict = {}
-
-    for enrollment in enrollments:
-        result = _evaluate(enrollment, maps)
-        overall.add(enrollment.student_id, result)
-
-        record = maps["records"].get(enrollment.student_id)
-        if record is not None and record.program_id:
-            bucket = programs.get(record.program_id)
-            if bucket is None:
-                bucket = programs[record.program_id] = _Bucket(
-                    record.program_id, record.program.name, record.program.display_code
-                )
-            bucket.add(enrollment.student_id, result)
-
-        group = enrollment.offering.group
-        if group is not None:
-            bucket = groups.get(group.id)
-            if bucket is None:
-                bucket = groups[group.id] = _Bucket(group.id, group.name)
-            bucket.add(enrollment.student_id, result)
-
-        subject = enrollment.offering.subject
-        bucket = subjects.get(enrollment.offering_id)
-        if bucket is None:
-            bucket = subjects[enrollment.offering_id] = _Bucket(enrollment.offering_id, subject.name, subject.code)
-        bucket.add(enrollment.student_id, result)
-
+    Ayrıca funksiyadır ki, sürətli yol (:mod:`apps.registrar.analytics_fast`) və
+    qiymətləndirici-əsaslı yol EYNİ yekun formasını qursun."""
     at_risk = [b.summary() for b in subjects.values()]
     at_risk = sorted(
         (s for s in at_risk if s["definite"] and s["fail_rate"] > 0),
@@ -456,3 +403,32 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         "groups": sorted((b.summary() for b in groups.values()), key=lambda s: s["label"]),
         "at_risk": at_risk,
     }
+
+
+def build_period_analytics(*, organization, period, scope_q=None) -> dict:
+    """Full dashboard payload for one org + period (fixed query count).
+
+    ``scope_q`` — aktorun unit alt-ağacı üzrə filtr (``None`` = org-səviyyəli
+    aktor, filtr yoxdur).
+
+    NİYƏ VAR (2026-07-31 auditi): panel bütün təşkilat üzrə aqreqasiya edirdi,
+    giriş qapısı isə yalnız «kafedra müdiri/dekan/admin?» sualını verirdi. Yəni
+    20 nəfərlik bir kafedranın müdiri bütün universitetin keçid faizini, orta
+    GPA-sını və fənn üzrə kəsr statistikasını görürdü. Təsdiq axını artıq
+    offering-səviyyəli scope-la məhdudlaşdırılmışdı; panel isə həmin
+    məhdudiyyətdən kənarda qalmışdı.
+
+    NİYƏ GÖVDƏ BURADA DEYİL (2026-09 QA P2-2): panel bir semestrin bütün
+    yazılışlarını ``select_related`` ilə model obyekti kimi materiallaşdırıb hər
+    biri üçün 18 açarlı :func:`_evaluate` nəticəsi qururdu — rektorda 19 643
+    sətir, 3.0–3.9 s.  Bucket-lər isə həmin nəticənin yalnız səkkiz sahəsini
+    oxuyur.  Obyektsiz (``values_list`` + mətn açar) yol
+    :mod:`apps.registrar.analytics_fast`-dədir; riyaziyyat KÖÇÜRÜLÜB,
+    DƏYİŞMƏYİB və ``test_analytics_fast_path.py`` iki yolu eyni fikstura
+    üzərində müqayisə edərək kilidləyir.
+    """
+    # Modul-səviyyəli idxal DÖVR yaradardı (``analytics_fast`` bu modulun
+    # ``_Bucket``/hədlərini oxuyur) — ona görə funksiya daxilində.
+    from apps.registrar import analytics_fast
+
+    return analytics_fast.build_period_analytics(organization=organization, period=period, scope_q=scope_q)
