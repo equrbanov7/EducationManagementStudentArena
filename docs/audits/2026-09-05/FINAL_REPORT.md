@@ -166,6 +166,19 @@ toplu idxal dialoqu (şablon → sürüklə-burax → quru icra ön baxışı �
 yaratmanın özəyi mövcud idxal boru xəttindən ortaqlaşdırıldı, ona görə iki fərqli
 validasiya qaydası yaranmır. İcazə açarı yenisi deyil (`user.import`).
 
+**Uçdan-uca vizual yoxlama (06.09, səhər — klonda, real brauzerlə):** RİM rəhbəri ilə
+girilib «Yeni hesab» axını sınandı. Növ seçimi → tələbə forması → qrup axtarışı
+(21 variant) → «Hesabı yarat»: hesab yarandı (`st.fin.qa9x001`), birdəfəlik parol
+kopyalama düymələri ilə göstərildi, konsolda **0 xəta**. Toplu idxal: 3 sətirlik fayl
+(biri qəsdən pozuq FİN) → quru icra «Cəmi 3 · Yaradılacaq 2 · Xəta 1» və sətir-sətir
+səbəb → tətbiq «Yaradıldı 2 · Xəta 1» + parol faylının endirilməsi. Ekran görüntüləri
+`~/EMSArena-backups/qa-2026-09-05/rimc/`.
+
+**Dil qalığı (həmin yoxlamada tapıldı):** sol menyuda «Staff İdarəetməsi» yazırdı;
+kataloq süpürgəsi eyni naxışdan **41 sətir** tapdı (Staff→Heyət, Dashboard→İdarə
+paneli, Export→İxrac, Profile/Settings/Home). Hamısı azərbaycancalaşdı; «Unassigned
+staff» tərcüməsi həm də səhv mənalı idi («Staff dəvətsizlər» → «Təyinatsız heyət»).
+
 **Heyət siyahısı sistemə salındı:** 52 struktur bölməsi, 119 nəfər — 80-i real rola
 (dekan/müavin/kafedra müdiri/tyutor/laborant, prorektor bloku, İmtahan Mərkəzi, RİM,
 HR, tədris şöbəsi, tələbə xidmətləri), qalan 39-u `member` + vəzifə mətni (sistemdə
