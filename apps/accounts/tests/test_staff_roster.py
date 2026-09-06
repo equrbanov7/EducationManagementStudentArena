@@ -108,6 +108,41 @@ class NameHelpersTest(SimpleTestCase):
         self.assertTrue(seed.replace(".", "").isascii())
 
 
+class ClassifyMatchTest(SimpleTestCase):
+    """2026-09-06 sahib qərarı: yalnız staff-staff adaşlığı fail-closed qalır."""
+
+    def test_duplicate_in_file_always_creates_regardless_of_db_state(self):
+        """Fayl-daxili adaşlıq bazada mövcud uyğunluq olsa belə YARADIR."""
+        self.assertEqual(
+            roster.classify_match(duplicate_in_file=True, staff_user_ids=[], student_only_match=False),
+            ("create", "siyahıda eyni ad-soyad birdən çox sətirdədir — hər sətrə ayrıca hesab yaradıldı"),
+        )
+        action, _note = roster.classify_match(duplicate_in_file=True, staff_user_ids=[1], student_only_match=False)
+        self.assertEqual(action, "create")
+
+    def test_multiple_staff_namesakes_are_refused(self):
+        action, note = roster.classify_match(duplicate_in_file=False, staff_user_ids=[1, 2], student_only_match=False)
+        self.assertEqual(action, "skip")
+        self.assertIn("birdən çox HEYƏT hesabı", note)
+
+    def test_single_staff_match_updates(self):
+        self.assertEqual(
+            roster.classify_match(duplicate_in_file=False, staff_user_ids=[1], student_only_match=False),
+            ("update", ""),
+        )
+
+    def test_student_only_match_creates_with_a_merge_hint(self):
+        action, note = roster.classify_match(duplicate_in_file=False, staff_user_ids=[], student_only_match=True)
+        self.assertEqual(action, "create")
+        self.assertIn("əl ilə birləşdirin", note)
+
+    def test_no_match_at_all_creates_silently(self):
+        self.assertEqual(
+            roster.classify_match(duplicate_in_file=False, staff_user_ids=[], student_only_match=False),
+            ("create", ""),
+        )
+
+
 class UnitMatchTest(SimpleTestCase):
     class _Unit:
         def __init__(self, name):

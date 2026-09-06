@@ -74,7 +74,12 @@ class Command(BaseCommand):
             self._run(**options)
 
     def _run(self, **options):
+        from django.contrib.auth import get_user_model
+
+        from apps.accounts.models import UserProfile
         from apps.organizations.models import Membership, Organization, OrgUnit
+
+        User = get_user_model()
 
         path = pathlib.Path(options["file"]).expanduser()
         if not path.exists():
@@ -91,10 +96,9 @@ class Command(BaseCommand):
         roles = {role.name: role for role in organization.roles.all()}
 
         # Ad-soyad ÜZRƏ eyniadlılar: siyahıda «Vəliyeva Fəridə Rəsul» iki fərqli
-        # bölmədə var. Uyğunlaşdırma yalnız ad+soyada baxdığı üçün hər iki sətir
-        # EYNİ hesaba bağlanır və o hesab iki rol daşıyır, ikinci şəxs isə heç vaxt
-        # hesab almır. Avtomatik həll YOXDUR (eyni adam, yoxsa iki adam?) — ona görə
-        # belə sətirlər FAIL-CLOSED atlanır və hesabatda ayrıca göstərilir.
+        # bölmədə var. 2026-09-06 sahib qərarı: bu, İKİ FƏRQLİ İNSAN sayılır —
+        # uyğunlaşdırma İSTİFADƏ OLUNMUR (hansının hansı olduğu bilinmir) və
+        # hər sətrə ayrıca hesab yaradılır (bax `roster.classify_match`).
         name_counts = Counter(roster.split_name(person["name"]) for person in people)
 
         plans, missing_roles, unmatched_units, unmapped = [], set(), set(), 0
@@ -119,52 +123,63 @@ class Command(BaseCommand):
                 # «fərqli hesab» kimi görünərdi (Django-nun klassik tələsi).
                 .order_by()
                 .values_list("user_id", flat=True)
-                .distinct()[:2]
+                .distinct()
             )
-            if len(match_ids) > 1:
-                # Ad-soyad eyni olanda TƏLƏBƏ/məzun hesabları kənarlaşdırılır:
-                # klonda «Babayeva Nigar» adına prorektor rolu tələbə hesabına
-                # yapışmışdı. Heyət hesabı BİRDİRSƏ seçim birmənalıdır.
-                staff_ids = [
-                    user_id
-                    for user_id in match_ids
-                    if Membership.objects.filter(organization=organization, user_id=user_id)
-                    .exclude(role__name__in=roster.NON_STAFF_ROLE_NAMES)
-                    .exists()
-                ]
-                if len(staff_ids) == 1:
-                    match_ids = staff_ids
-            ambiguous = ""
-            if name_counts[(first, last)] > 1:
-                ambiguous = "siyahıda eyni ad-soyad birdən çox sətirdədir"
-            elif len(match_ids) > 1:
-                ambiguous = "bazada eyni ad-soyadlı birdən çox HEYƏT hesabı var"
-            elif match_ids and not (
-                Membership.objects.filter(organization=organization, user_id=match_ids[0])
+            # TƏLƏBƏ/məzun/valideyn hesabları HEYƏT namizədi sayılmır (klonda
+            # «Babayeva Nigar» adına prorektor rolu tələbə hesabına yapışmışdı).
+            staff_ids = [
+                user_id
+                for user_id in match_ids
+                if Membership.objects.filter(organization=organization, user_id=user_id)
                 .exclude(role__name__in=roster.NON_STAFF_ROLE_NAMES)
                 .exists()
-            ):
-                # Tapılan yeganə hesab TƏLƏBƏ hesabıdır. Eyni adam ola bilər
-                # (laborant kimi işləyən magistr), ad toqquşması da ola bilər —
-                # sistem bunu bilə bilməz, ona görə fail-closed: heyət rolu
-                # tələbə hesabına AVTOMATİK yapışdırılmır.
-                ambiguous = "yalnız TƏLƏBƏ hesabı tapıldı — eyni adamdırsa əl ilə təsdiqləyin"
-            existing = (
-                Membership.objects.filter(organization=organization, user_id=match_ids[0])
-                .select_related("user", "role")
-                .first()
-                if match_ids
-                else None
+            ]
+            # Adaş sətirlərdə İDEMPOTENTLİK: əvvəlki qaçış bu sətrə hesab
+            # yaradıbsa, o hesab MƏHZ BU bölmədə üzvlük daşıyır. Bölməyə görə
+            # tanımasaq, hər `--apply` adaşlara təzə hesab yaradardı.
+            row_specific_ids = []
+            if name_counts[(first, last)] > 1 and staff_ids:
+                position = (person["position"] or "").strip()[:120]
+                for user_id in staff_ids:
+                    if unit is not None:
+                        # Bölmə tanınıbsa üzvlüyün əhatəsi ən dəqiq açardır.
+                        matched = Membership.objects.filter(
+                            organization=organization, user_id=user_id, scope_unit=unit
+                        ).exists()
+                    else:
+                        # Siyahıdakı 23 bölmənin sistemdə qarşılığı yoxdur — onda
+                        # vəzifə mətni ayırd edir («Müdir» vs «Müavin»).
+                        matched = (
+                            bool(position)
+                            and UserProfile.objects.filter(user_id=user_id, staff_position=position).exists()
+                        )
+                    if matched:
+                        row_specific_ids.append(user_id)
+            action, note = roster.classify_match(
+                duplicate_in_file=name_counts[(first, last)] > 1,
+                staff_user_ids=staff_ids,
+                student_only_match=bool(match_ids) and not staff_ids,
+                row_specific_match=len(row_specific_ids) == 1,
             )
+            existing_user, skip_candidates = None, []
+            if action == "update":
+                existing_user = User.objects.get(id=row_specific_ids[0] if row_specific_ids else staff_ids[0])
+            elif action == "skip":
+                # Hesabatda birbaşa göstərmək üçün namizəd username/e-poçt —
+                # sahib bunu saniyələr içində əl ilə həll edə bilsin deyə.
+                skip_candidates = list(
+                    User.objects.filter(id__in=staff_ids).order_by("username").values_list("username", "email")
+                )
             plans.append(
                 {
                     "person": person,
                     "role_name": role_name,
                     "mapped": mapped,
                     "unit": unit,
-                    "existing": existing.user if existing else None,
-                    "current_role": existing.role.name if existing else "",
-                    "ambiguous": ambiguous,
+                    "existing": existing_user,
+                    "action": action,
+                    "note": note,
+                    "skip_candidates": skip_candidates,
                 }
             )
 
@@ -181,18 +196,37 @@ class Command(BaseCommand):
         by_role = Counter(plan["role_name"] for plan in plans)
         for role_name, count in by_role.most_common():
             self.stdout.write(f"   {role_name:24s} {count}")
-        ambiguous = [plan for plan in plans if plan.get("ambiguous")]
-        creates = sum(1 for plan in plans if plan["existing"] is None and not plan.get("ambiguous"))
+        # Üç aydın hesab: yaradılacaq / yenilənəcək / çox-mənalı (atlanır) —
+        # 2026-09-06 sahib qərarından sonra «çox mənalı» YALNIZ birdən çox
+        # HEYƏT hesabı adaşlığı deməkdir (bax `roster.classify_match`).
+        created = [plan for plan in plans if plan["action"] == "create"]
+        updated = [plan for plan in plans if plan["action"] == "update"]
+        skipped = [plan for plan in plans if plan["action"] == "skip"]
+        flagged = [plan for plan in created if plan["note"]]
         self.stdout.write(
-            f"\nYeni hesab: {creates} · mövcud hesab: {len(plans) - creates - len(ambiguous)}"
-            f" · çox mənalı (atlanır): {len(ambiguous)}"
+            f"\nYaradılacaq (yeni hesab): {len(created)} · yenilənəcək (mövcud hesab): {len(updated)}"
+            f" · çox mənalı (atlanır): {len(skipped)}"
         )
-        if ambiguous:
-            self.stdout.write(self.style.WARNING("ÇOX MƏNALI — əl ilə həll edilməlidir (heç nə yazılmır):"))
-            for plan in ambiguous:
+        if flagged:
+            self.stdout.write(
+                self.style.WARNING("YENİ HESAB — adaş tapıldı, sonra əl ilə yoxlayın/lazım olsa birləşdirin:")
+            )
+            for plan in flagged:
                 person = plan["person"]
                 self.stdout.write(
-                    f"   · {person['name']} — {person['section']} / {person['position']}" f"  [{plan['ambiguous']}]"
+                    f"   · {person['name']} — {person['section']} / {person['position']}  [{plan['note']}]"
+                )
+        if skipped:
+            self.stdout.write(self.style.WARNING("ÇOX MƏNALI — əl ilə həll edilməlidir (heç nə yazılmır):"))
+            for plan in skipped:
+                person = plan["person"]
+                candidates = (
+                    ", ".join(f"{username} <{email or 'e-poçt yoxdur'}>" for username, email in plan["skip_candidates"])
+                    or "?"
+                )
+                self.stdout.write(
+                    f"   · {person['name']} — {person['section']} / {person['position']}"
+                    f"  [{plan['note']} — namizədlər: {candidates}]"
                 )
         if missing_roles:
             self.stdout.write(self.style.ERROR(f"Təşkilatda OLMAYAN rollar: {', '.join(sorted(missing_roles))}"))
@@ -211,10 +245,11 @@ class Command(BaseCommand):
         taken = set()
         for plan in plans:
             role = roles.get(plan["role_name"])
-            # Eyniadlılıq həll olunmayana qədər heç nə yazmırıq: səhv hesaba rol
-            # yapışdırmaq, yoxsa dublikat hesab yaratmaq — hər ikisi geri qaytarılması
-            # çətin data qüsurudur (bax `_run`-dakı `name_counts` şərhi).
-            if plan.get("ambiguous"):
+            # Birdən çox HEYƏT hesabı adaşlığı həll olunmayana qədər heç nə
+            # yazmırıq: səhv hesaba rol yapışdırmaq geri qaytarılması çətin data
+            # qüsurudur (bax `roster.classify_match`). Digər «çox mənalı» hallar
+            # (fayl-daxili adaşlıq, tələbə-yalnız adaş) artıq `action == "create"`-dir.
+            if plan["action"] == "skip":
                 skipped += 1
                 continue
             if role is None:
@@ -250,7 +285,9 @@ class Command(BaseCommand):
                         scope_unit=plan["unit"],
                         audit_reason="staff_roster_created",
                     )
-                    credentials.append((username, person["name"], person["section"], person["position"], password))
+                    credentials.append(
+                        (username, person["name"], person["section"], person["position"], password, plan["note"])
+                    )
                     created += 1
                 else:
                     Membership.objects.get_or_create(
@@ -273,6 +310,6 @@ class Command(BaseCommand):
             out = pathlib.Path(credentials_out).expanduser()
             with out.open("w", encoding="utf-8", newline="") as handle:
                 writer = csv.writer(handle)
-                writer.writerow(["username", "ad", "bölmə", "vəzifə", "birdəfəlik_parol"])
+                writer.writerow(["username", "ad", "bölmə", "vəzifə", "birdəfəlik_parol", "qeyd"])
                 writer.writerows(credentials)
             self.stdout.write(self.style.WARNING(f"Parollar: {out} — bir dəfə göstərilir, təhlükəsiz saxlayın."))

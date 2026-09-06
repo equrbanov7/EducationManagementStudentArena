@@ -255,6 +255,58 @@ def match_unit(section: str, units):
     return best if best_ratio >= 0.72 else None
 
 
+#: 2026-09-06 sahib qərarı: «bəziləri yeni ola bilər, hesabı yoxdusa yarat».
+#: Yalnız BİRDƏN ÇOX HEYƏT hesabı adaşlığı TƏXMİN edilmir (kim olduğunu
+#: bilmək mümkün deyil); qalan hallarda (fayl-daxili adaşlıq, yalnız tələbə/
+#: məzun adaşı, heç bir uyğunluq) YENİ hesab yaradılır — DB sorğuları
+#: `seed_staff_roster.py::_run`-dadır, bu funksiya sadəcə QƏRARI verir ki,
+#: DB olmadan sınaqlana bilsin.
+def classify_match(
+    *,
+    duplicate_in_file: bool,
+    staff_user_ids,
+    student_only_match: bool,
+    row_specific_match: bool = False,
+) -> tuple[str, str]:
+    """(əməliyyat, qeyd) — ``"update"`` / ``"create"`` / ``"skip"``.
+
+    Args:
+        duplicate_in_file: eyni ad-soyad siyahıda birdən çox sətirdədirmi.
+        staff_user_ids: bazada tapılan HEYƏT (qeyri-`NON_STAFF_ROLE_NAMES`)
+            hesablarının id-ləri (adaş sayını bilmək üçün, yalnız uzunluğu
+            işlədilir).
+        student_only_match: bazada uyğunluq var, amma hamısı tələbə/məzun/
+            valideyn hesabıdır (heç biri heyət deyil).
+        row_specific_match: adaş sətirlərdə MƏHZ BU sətrin əvvəlki qaçışda
+            yaratdığı hesab tapılıb (eyni ad + eyni bölmə). İDEMPOTENTLİK üçün
+            vacibdir: onsuz hər `--apply` adaşlara təzə hesab yaradardı.
+    """
+    if duplicate_in_file and row_specific_match:
+        return "update", "siyahıda adaş var, amma bu sətrin hesabı bölməyə görə tanındı"
+    if duplicate_in_file:
+        # Fayl özü iki fərqli insanı EYNİ adla yazıb ola bilər (adaşlıq) —
+        # hansının hansı olduğunu bilmək mümkün deyil, ona görə TƏXMİN etmək
+        # əvəzinə hər sətrə ayrıca hesab yaradılır (mövcud uyğunluq İSTİFADƏ
+        # OLUNMUR, çünki iki sətri EYNİ hesaba yapışdırmaq əvvəlki qüsurun
+        # təkrarı olardı — bax modul başlığındakı şərh).
+        return "create", "siyahıda eyni ad-soyad birdən çox sətirdədir — hər sətrə ayrıca hesab yaradıldı"
+    if len(staff_user_ids) > 1:
+        # Bir neçə HEYƏT hesabı eyni adda — bu TƏK real fail-closed haldır,
+        # çünki səhv seçim mövcud bir işçinin hesabını korlaya bilər.
+        return "skip", "bazada eyni ad-soyadlı birdən çox HEYƏT hesabı var"
+    if len(staff_user_ids) == 1:
+        return "update", ""
+    if student_only_match:
+        # Tapılan yeganə hesab(lar) tələbə/məzun — həmin hesaba TOXUNMURUQ,
+        # yeni HEYƏT hesabı yaradılır; insan sonra eyni şəxsdirsə əl ilə
+        # birləşdirir (sahib: «bəziləri yeni ola bilər»).
+        return (
+            "create",
+            "yalnız tələbə/məzun hesabı tapıldı — yeni HEYƏT hesabı yaradıldı (eyni adamdırsa əl ilə birləşdirin)",
+        )
+    return "create", ""
+
+
 def split_name(full_name: str) -> tuple[str, str]:
     """«Soyad Ad Ata adı» → (ad, soyad). Siyahı bu sıradadır."""
     tokens = str(full_name or "").split()
@@ -280,6 +332,7 @@ __all__ = [
     "POSITION_ROLE_RULES",
     "UNIT_HEAD_ROLE_RULES",
     "UNIT_STAFF_ROLE_RULES",
+    "classify_match",
     "looks_like_person",
     "match_unit",
     "parse_rows",
