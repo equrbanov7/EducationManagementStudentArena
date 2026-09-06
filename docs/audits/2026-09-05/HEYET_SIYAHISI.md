@@ -7,6 +7,10 @@ Real bazaya (`emsarena_db`) TOXUNULMAYIB; prod icrası sizin qərarınızdır.
 
 Parollar (yalnız yeni hesablar, bir dəfə): `~/EMSArena-backups/qa-2026-09-05/staff_roster_credentials.csv`
 
+**Giriş yoxlanıldı:** ilk 5 hesab birdəfəlik parolla klona daxil oldu (45–55 ms)
+və hamısı düzgün şəkildə **ilk-giriş parol təyini** axınına düşdü — yəni parol
+dəyişmədən sistemə keçə bilmirlər.
+
 ---
 
 ## 1. Xəritələnən vəzifələr

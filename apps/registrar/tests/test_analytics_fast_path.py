@@ -335,16 +335,17 @@ class FastPathParityTest(_AnalyticsBase):
         # ``orphan``: qeydsiz (defolt hədd 25% → 5 saat), 10 saat qayıb → kəsilir
         # və imtahanı YOXDUR → «kəsilib» qərarı yalnız ``barred``-dan gəlir.
         Enrollment.objects.create(organization=cls.org, student=cls.orphan, offering=cls.off_e, absence_hours=10)
-        # Kəsr balı (44.50) — giriş və yekun TAM ƏDƏDƏ yuvarlaqlaşdırılır.
+        # Kəsr balları — giriş VƏ yekun AYRI-AYRILIQDA tam ədədə yuvarlaqlaşır:
+        # round(44.60) + 16.60 = 61.60 → 62, yuvarlaqlaşdırmasız 61.20 → 61.
         ComponentScore.objects.create(
-            organization=cls.org, component=generic_e, enrollment=enr_e0, score=Decimal("44.50")
+            organization=cls.org, component=generic_e, enrollment=enr_e0, score=Decimal("44.60")
         )
         ComponentScore.objects.create(organization=cls.org, component=generic_e, enrollment=enr_e1, score=Decimal("45"))
         ComponentScore.objects.create(organization=cls.org, component=generic_e, enrollment=enr_e2, score=Decimal("60"))
         FinalGrade.objects.create(organization=cls.org, enrollment=enr_e1, exam_score=Decimal("30"))
-        # a0: giriş 44.50 → 45 (yarım-yuxarı), 45 + 16.40 = 61.40 → 61 ≥ 51,
-        # AMMA imtahan minimumu (17) keçilmir → KƏSR.
-        FinalGrade.objects.create(organization=cls.org, enrollment=enr_e0, exam_score=Decimal("16.40"))
+        # a0: giriş 44.60 → 45, 45 + 16.60 = 61.60 → 62 ≥ 51, AMMA imtahan
+        # minimumu (17) keçilmir → KƏSR.
+        FinalGrade.objects.create(organization=cls.org, enrollment=enr_e0, exam_score=Decimal("16.60"))
         # a2: giriş tavanı 50 kəsir, 50 + 45 + 20 = 115 → 100-ə kəsilir.
         FinalGrade.objects.create(
             organization=cls.org, enrollment=enr_e2, exam_score=Decimal("45"), bonus=Decimal("20")
