@@ -65,3 +65,19 @@ INSPECT_PORT=8100 STAGING_POSTGRES_DB=emsarena_rehearsal_a0d170000901 scripts/st
 
 `scripts/staging_inspect.sh serve 8100` **İŞLƏMİR** (runserver «unrecognized arguments» verir,
 skript səssizcə ölür və köhnə proses portda qalır).
+
+## Push-dan əvvəl: lint qapıları
+
+CI-nin lint işi **yeddi** qapı işlədir və hamısı repo-genişdir — fayl-fayl
+`black` yoxlamaq kifayət etmir. Push-dan əvvəl:
+
+```bash
+./scripts/preflight.sh
+```
+
+Formatlaşdırma qapılarını avtomatik düzəltmək üçün `./scripts/preflight.sh --fix`.
+
+Qapılar: `black`, `isort`, `flake8`, modul ölçüsü (600 sətir), modul sərhədi
+(dövr yoxdur), i18n kataloqu (tərcümə borcu artmır), RLS worker-atomic əhatəsi
+(request-dən kənar DB girişləri `rls_worker_atomic()` içində olmalıdır).
+
