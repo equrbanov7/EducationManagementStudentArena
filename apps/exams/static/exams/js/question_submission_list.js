@@ -74,9 +74,15 @@
             return;
         }
         var message = form.getAttribute("data-confirm") || "";
-        if (message && !window.confirm(message)) {
-            event.preventDefault();
+        if (!message) {
+            return;
         }
+        event.preventDefault();
+        window.EMSConfirm.open({ body: message, danger: true }).then(function (ok) {
+            if (ok) {
+                form.submit();
+            }
+        });
     });
 
     // Detal səhifəsindəki formaction düyməsi.
@@ -91,9 +97,20 @@
             return;
         }
         var message = button.getAttribute("data-confirm") || "";
-        if (message && !window.confirm(message)) {
-            event.preventDefault();
+        if (!message) {
+            return;
         }
+        event.preventDefault();
+        window.EMSConfirm.open({ body: message, danger: true }).then(function (ok) {
+            if (!ok || !button.form) {
+                return;
+            }
+            if (typeof button.form.requestSubmit === "function") {
+                button.form.requestSubmit(button);
+            } else {
+                button.form.submit();
+            }
+        });
     });
 
     // ── Uzun-siyahılı filtrlər: fakültə/kafedra/müəllim axtarışlı seçiciləri ──

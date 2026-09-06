@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260618-1">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20260618-1">
+    {# UX-15: qlobal təsdiq dialoqu (EMSConfirm) — native confirm() əvəzi #}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/confirm.css' %}?v=20260906-1">
     {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
     <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260815-1">
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
@@ -146,6 +148,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
     {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
 
+    {# UX-15: qlobal təsdiq dialoqu markup-ı — bax static/js/ems_ui/confirm.js #}
+    {% include "partials/ems_ui/_confirm_modal.html" %}
+
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
@@ -185,6 +190,8 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>
+    {# UX-15: qlobal təsdiq dialoqu (EMSConfirm) — native confirm() əvəzi #}
+    <script src="{% static 'js/ems_ui/confirm.js' %}?v=20260906-1"></script>
 
     {% block extraJs %}{% endblock %}
 </body>

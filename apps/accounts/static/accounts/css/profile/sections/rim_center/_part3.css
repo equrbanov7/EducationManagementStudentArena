@@ -106,23 +106,6 @@
 
 /* ── 2. Tək-tək form ───────────────────────────────────────────────────── */
 
-/* ⚠️ `.ems-dialog` şaquli FLEX konteynerdir və `__body`-nin sürüşməsi,
-   `__foot`-un isə dibə yapışması buna söykənir. Yaratma/redaktə dialoqlarında
-   arada bir `<form>` durur (düymə formanın İÇİNDƏ olmalıdır — bax
-   `partials/ems_ui/_form_dialog.html`), yəni flex zənciri qırılır: uzun form
-   `max-height`-ı aşır və altlıq (düymələr) kəsilir. Forma da flex sütun
-   edilir — zəncir bərpa olunur.
-
-   Qayda QƏSDƏN `.rimc` altına daraldılıb: eyni nöqsan ortaq `_form_dialog` /
-   `_reason_dialog` şablonlarında da var, amma ortaq `ems_ui/overlay.css`
-   paralel işlərdə istifadə olunur — onu bu tapşırıqda dəyişmirik. */
-.rimc .ems-dialog > form {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 0;
-}
-
 .rimc-group {
     margin: 0 0 var(--ems-sp-6);
     padding: 0;

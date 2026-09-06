@@ -65032,3 +65032,15 @@ msgstr "Derslik adı 64 karakterden uzun olamaz."
 msgctxt "profile.rim"
 msgid "Doğum tarixi məcburidir."
 msgstr "Doğum tarihi zorunludur."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Vazgeç"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Onayla"

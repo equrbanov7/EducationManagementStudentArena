@@ -77,6 +77,23 @@ ENTRIES = {
             "tr": "Dijital Gelişim Merkezi (RİM) çalışanı",
         },
     },
+    "ui.confirm_modal": {
+        "Bağla": {
+            "en": "Close",
+            "ru": "Закрыть",
+            "tr": "Kapat",
+        },
+        "Ləğv et": {
+            "en": "Cancel",
+            "ru": "Отмена",
+            "tr": "Vazgeç",
+        },
+        "Təsdiqlə": {
+            "en": "Confirm",
+            "ru": "Подтвердить",
+            "tr": "Onayla",
+        },
+    },
     "registrar.journal": {
         "Sonrakı dərslər": {
             "en": "Later lessons",
