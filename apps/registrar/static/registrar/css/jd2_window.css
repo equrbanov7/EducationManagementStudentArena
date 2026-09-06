@@ -1,0 +1,50 @@
+/* Jurnal grid-inin DƏRS PƏNCƏRƏSİ naviqasiyası — ayrı fayl (jd2.css ölçü
+   büdcəsinin həddindədir). Bax: apps/registrar/journal_window.py. */
+/* ── Dərs pəncərəsi naviqasiyası (QA 2026-09-05 P1-8) ────────────────────── */
+.jd2-window {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--j-line);
+    border-radius: 10px;
+    background: var(--j-headbg);
+    font-size: 12.5px;
+}
+
+.jd2-window__btn,
+.jd2-window__all {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-neutral-0);
+    color: var(--ems-primary-700);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.jd2-window__btn:hover,
+.jd2-window__all:hover {
+    background: var(--ems-primary-50);
+}
+
+.jd2-window__btn.is-disabled {
+    color: var(--ems-neutral-400);
+    border-color: var(--ems-neutral-200);
+    pointer-events: none;
+}
+
+.jd2-window__label {
+    color: var(--j-muted);
+    font-weight: 700;
+    margin-inline: auto;
+}
+
+.jd2-window__all {
+    color: var(--ems-neutral-700);
+}

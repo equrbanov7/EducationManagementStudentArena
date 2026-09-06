@@ -35,11 +35,28 @@ PAGE_SIZE = 25
 
 
 def current_academic_year(organization) -> str:
-    """Cari dövrün tədris ili — yoxdursa ən son tapşırıq ilindən."""
+    """Cari tədris ili — TƏK MƏNBƏ: akademik dövr.
+
+    Sıra: (1) `is_current` dövr, (2) ən son başlayan dövr, (3) ən son tapşırıq ili.
+
+    QA 2026-09-05 (UX-09): əvvəl `is_current` yoxdursa dərhal ən son TAPŞIRIQ
+    ilinə keçirdi — nəticədə dashboard «2025/2026 Yaz», dərs yükü isə
+    «2026/2027» göstərirdi. Dövr cədvəli hər iki səthin ortaq mənbəyidir, ona
+    görə tapşırıq ili yalnız ƏN SON ehtiyatdır.
+    """
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
     period = AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
     if period is not None and period.academic_year:
         return period.academic_year
+    latest_period = (
+        AcademicPeriod.objects.filter(organization=organization)
+        .exclude(academic_year="")
+        .order_by("-start_date")
+        .values_list("academic_year", flat=True)
+        .first()
+    )
+    if latest_period:
+        return latest_period
     latest = (
         TeachingTask.objects.filter(organization=organization)
         .order_by("-academic_year")

@@ -129,7 +129,7 @@
     width: 100%;
 }
 .ems-ss__search::placeholder {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 /* Seçim EDİLİB: input artıq yer tələb etmir — əks halda çip + 90px input
    çərçivəyə sığmayıb sətri sındırırdı. Fokusda yenidən genişlənir ki,
@@ -191,7 +191,7 @@
 .ems-ss__more {
     padding: 0.5rem 0.8rem;
     text-align: center;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 1rem;
     letter-spacing: 0.2em;
 }
@@ -202,14 +202,14 @@
    görünüş dəyişmir. Yeni rəng icad edilmir, hamısı `--ems-*` tokenidir. */
 .ems-ss__opt--disabled {
     cursor: not-allowed;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 .ems-ss__opt--disabled:hover {
     background: transparent;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 .ems-ss__opt-label {
     flex: 1;

@@ -73,8 +73,8 @@
     </div>
   </div>
 
-  <script src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260716-3"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260716-3"
           nonce="{{ request.csp_nonce }}"></script>
-  <script src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260716-3"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260716-3"
           nonce="{{ request.csp_nonce }}"></script>
 </section>

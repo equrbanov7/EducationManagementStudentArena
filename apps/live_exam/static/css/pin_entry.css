@@ -345,7 +345,7 @@ body.pin-entry-page {
 .pin-entry-input::placeholder {
     letter-spacing: normal;
     font-size: 1rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-family: "Manrope", sans-serif;
 }
 

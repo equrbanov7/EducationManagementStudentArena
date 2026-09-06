@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from django.urls import reverse
 
+from core.staff_position import visible_role_label
+
 from .policy import RimActor, target_level
 from .search import account_status
 
@@ -28,13 +30,29 @@ def _profile_of(user):
     return getattr(user, "profile", None)
 
 
-def serialize_memberships(user, organization=None):
+def serialize_memberships(user, organization=None, *, scope=None):
     """İstifadəçinin AKTİV üzvlüklərini qaytarır (ikili rol burada görünür)."""
     from apps.organizations.models import Membership
 
     queryset = Membership.objects.filter(user=user, is_active=True).select_related("role", "organization", "scope_unit")
     if organization is not None:
         queryset = queryset.filter(organization=organization)
+    if scope is not None and not scope.is_org_wide:
+        # Vahid-əhatəli aktor (dekan/kafedra müdiri) yalnız öz alt-ağacındakı
+        # vahid üzvlüklərini görür; vahidsiz (təşkilat-səviyyəli) üzvlüklər —
+        # «tələbə», «müəllim» — hədəf artıq kataloq əhatəsindədirsə görünməlidir,
+        # əks halda şəxs kartı boş gəlir (QA 2026-09-05 P1-2).
+        if not scope.is_unit_scoped:
+            queryset = queryset.none()
+        else:
+            from django.db.models import Q
+
+            from apps.organizations.models import OrgUnit
+
+            subtree = OrgUnit.objects.filter(scope.unit_subtree_q())
+            if organization is not None:
+                subtree = subtree.filter(organization=organization)
+            queryset = queryset.filter(Q(scope_unit__isnull=True) | Q(scope_unit__in=subtree.values("pk")))
 
     rows = []
     for membership in queryset.order_by("-role__level", "role__name"):
@@ -42,7 +60,7 @@ def serialize_memberships(user, organization=None):
             {
                 "id": str(membership.id),
                 "role_name": membership.role.name,
-                "role_label": membership.role.display_name or membership.role.name,
+                "role_label": visible_role_label(membership.role.name, membership.role.display_name),
                 "role_level": int(membership.role.level or 0),
                 "organization": membership.organization.name,
                 "scope_unit": membership.scope_unit.name if membership.scope_unit_id else "",

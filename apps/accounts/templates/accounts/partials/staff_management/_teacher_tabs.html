@@ -25,7 +25,7 @@
                    placeholder="{% trans 'Search teachers...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search teachers...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -114,7 +114,7 @@
                    placeholder="{% trans 'Search teacher requests...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search teacher requests...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -211,7 +211,7 @@
                    placeholder="{% trans 'Search teachers...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search teachers...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -281,6 +281,7 @@
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
                                    data-target-role="{% trans 'Teacher' context 'membership.role' %}"
+                                   aria-label="{{ profile.user.get_full_name|default:profile.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not can_invite_members %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
@@ -338,7 +339,7 @@
                    placeholder="{% trans 'Search teacher invites...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search teacher invites...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -408,6 +409,7 @@
                                    class="sent-invite-checkbox form-check-input"
                                    name="selected_sent_teacher_invite_user_ids"
                                    value="{{ invite.user.id }}"
+                                   aria-label="{{ invite.user.get_full_name|default:invite.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not can_invite_members %}disabled{% endif %}>
                         </td>
                         <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>

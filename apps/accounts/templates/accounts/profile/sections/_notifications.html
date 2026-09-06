@@ -148,7 +148,7 @@
                        placeholder="{% trans 'Search notifications...' context 'profile.notifications' %}"
                        class="form-control role-assignment-search-input"
                        autocomplete="off"
-                       data-standard-search-input>
+                       data-standard-search-input aria-label="{% trans 'Search notifications...' context 'profile.notifications' %}">
                 <button type="button"
                         class="role-assignment-search-clear"
                         data-standard-search-clear
@@ -186,7 +186,8 @@
                 data-id="{{ notification.pk }}">
                 <div class="form-check profile-notif-checkbox-wrap mb-0">
                     <input class="form-check-input profile-notif-checkbox" type="checkbox"
-                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}">
+                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}"
+                           aria-label="{{ notification.title|default:'' }} — {% trans 'Seç' context 'accounts.a11y' %}">
                 </div>
                 <div class="profile-notif-icon">
                     {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt text-warning"></i>

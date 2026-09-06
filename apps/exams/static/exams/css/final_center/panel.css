@@ -79,7 +79,7 @@
 .rma-cempty {
     padding: 1rem;
     text-align: center;
-    color: #94a3b8;
+    color: var(--ems-neutral-500);
     font-size: .86rem;
 }
 

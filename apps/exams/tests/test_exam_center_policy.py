@@ -194,6 +194,16 @@ class QuestionBankCreationViewTests(_Base):
         self.assertEqual(bank.created_by_id, self.teacher.id)
         self.assertEqual(bank.source_teacher_id, self.teacher.id)
 
+    def test_overlong_bank_name_is_refused_not_500(self):
+        """QA 2026-09-05 EXAMS-01: 255+ simvol bank adı DB DataError (500) verirdi."""
+        client = self._client_for(self.teacher)
+        response = client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "B" * 300, "exam_kind": "quiz"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(QuestionBank.objects.filter(name__startswith="BBBB").exists())
+
     def test_teacher_cannot_edit_own_bank_to_final(self):
         client = self._client_for(self.teacher)
         client.post(
@@ -208,6 +218,52 @@ class QuestionBankCreationViewTests(_Base):
         self.assertEqual(response.status_code, 302)
         bank.refresh_from_db()
         self.assertEqual(bank.exam_kind, "quiz")
+
+    def test_duplicate_bank_name_is_refused_not_silently_created_twice(self):
+        """QA 2026-09-05 EXAMS-05: eyni müəllim eyni adla ikinci bank yaradanda
+        səssizcə iki ayrı bank (id 4/6) yaranırdı."""
+        client = self._client_for(self.teacher)
+        first = client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "QA-Bank T1", "exam_kind": "quiz"},
+        )
+        self.assertEqual(first.status_code, 302)
+        second = client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "qa-bank t1", "exam_kind": "quiz"},
+        )
+        self.assertEqual(second.status_code, 302)
+        self.assertEqual(QuestionBank.objects.filter(name__iexact="QA-Bank T1", created_by=self.teacher).count(), 1)
+
+    def test_same_name_different_subject_is_allowed(self):
+        """Eyni ad, FƏRQLİ fənn — bu dublikat sayılmır (`created_by`+`name`+`subject_ref`)."""
+        client = self._client_for(self.teacher)
+        client.post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "Ümumi bank", "exam_kind": "quiz"},
+        )
+        client.post(
+            reverse("exams:question_bank_list"),
+            {
+                "action": "create_bank",
+                "name": "Ümumi bank",
+                "exam_kind": "quiz",
+                "subject_id": str(self.subject.id),
+            },
+        )
+        self.assertEqual(QuestionBank.objects.filter(name="Ümumi bank", created_by=self.teacher).count(), 2)
+
+    def test_same_name_different_teacher_is_allowed(self):
+        """Eyni ad, FƏRQLİ yaradan — dublikat qapısı YALNIZ öz banklarına baxır."""
+        self._client_for(self.teacher).post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "Paylaşılan ad", "exam_kind": "quiz"},
+        )
+        self._client_for(self.exam_center).post(
+            reverse("exams:question_bank_list"),
+            {"action": "create_bank", "name": "Paylaşılan ad", "exam_kind": "quiz"},
+        )
+        self.assertEqual(QuestionBank.objects.filter(name="Paylaşılan ad").count(), 2)
 
     def test_exam_center_can_create_bank(self):
         client = self._client_for(self.exam_center)

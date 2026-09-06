@@ -147,6 +147,102 @@ def get_unit_scope(user, organization, request=None) -> UnitScope:
     return scope
 
 
+def _permission_scope_memberships(user, organization) -> list:
+    """Active memberships used to resolve ``get_permission_scope`` — memoized on ``user``.
+
+    QA 2026-09 duplicate-query audit: ``_role_capabilities`` calls
+    ``get_permission_scope`` up to 6x per build (course.edit, journal.close,
+    journal.roster, final_score.entry, analytics.view_all, analytics.view_unit)
+    for the SAME (user, organization) — every call re-ran this exact SELECT
+    because the request-level cache below is keyed by permission and the
+    caller (``apps/accounts/views/_helpers/rbac.py``) never threads a
+    ``request`` through. Memoizing the membership rows themselves — same
+    object-attribute pattern as ``apps.applications.services.access.
+    active_memberships`` — collapses those 6 queries into 1, independent of
+    whether a ``request`` is available.
+
+    No cross-request cache: the attribute lives on the ``user`` instance,
+    which Django/AuthenticationMiddleware re-creates fresh from the DB at the
+    start of every request. Any code path that mutates this user's
+    memberships/roles within the SAME request must call
+    ``invalidate_permission_scope_cache(user)`` afterwards.
+    """
+    from apps.organizations.models import Membership
+
+    org_pk = getattr(organization, "pk", None)
+    cache = getattr(user, "_org_scope_memberships_cache", None)
+    if cache is not None and org_pk in cache:
+        return cache[org_pk]
+    memberships = list(
+        Membership.objects.filter(
+            user=user,
+            organization=organization,
+            is_active=True,
+            role__organization=organization,
+            role__is_active=True,
+        ).select_related("role", "scope_unit")
+    )
+    if cache is None:
+        cache = {}
+        try:
+            user._org_scope_memberships_cache = cache
+        except Exception:  # noqa: BLE001 — bəzi user obyektləri immutable ola bilər (məs. AnonymousUser)
+            cache = None
+    if cache is not None:
+        cache[org_pk] = memberships
+    return memberships
+
+
+def _resolve_active_unit_paths(user, organization, unit_ids) -> list:
+    """Resolve ``(pk, path)`` rows for active org units — memoized per (org, unit_ids).
+
+    For UNIT-scoped roles (dean, chair_head), ``get_permission_scope`` calls
+    this once per permission checked; the qualifying ``unit_ids`` set is often
+    IDENTICAL across those calls (same membership, several permissions on its
+    role), so without memoization this ``OrgUnit`` lookup repeats 6-11x per
+    ``_role_capabilities`` build (QA 2026-09 audit). Keyed by the exact
+    ``unit_ids`` set (not just org) because different permissions can
+    legitimately resolve to different qualifying units.
+    """
+    from apps.organizations.models import OrgUnit
+
+    org_pk = getattr(organization, "pk", None)
+    key = (org_pk, frozenset(unit_ids))
+    cache = getattr(user, "_org_scope_unit_paths_cache", None)
+    if cache is not None and key in cache:
+        return cache[key]
+    resolved = list(
+        OrgUnit.objects.filter(organization=organization, pk__in=unit_ids, is_active=True).values_list("pk", "path")
+    )
+    if cache is None:
+        cache = {}
+        try:
+            user._org_scope_unit_paths_cache = cache
+        except Exception:  # noqa: BLE001 — bəzi user obyektləri immutable ola bilər
+            cache = None
+    if cache is not None:
+        cache[key] = resolved
+    return resolved
+
+
+def invalidate_permission_scope_cache(user) -> None:
+    """Drop the memoized membership rows kept by ``_permission_scope_memberships``
+    and ``_resolve_active_unit_paths``.
+
+    Call this immediately after a code path mutates ``user``'s Membership/Role
+    rows (role assignment, membership create/update) so a later
+    ``get_permission_scope``/``get_unit_scope`` read in the SAME request never
+    returns pre-mutation data. A stale permission cache is a security bug, not
+    a perf detail — see the module docstring.
+    """
+    for attr in ("_org_scope_memberships_cache", "_org_scope_unit_paths_cache"):
+        try:
+            if hasattr(user, attr):
+                delattr(user, attr)
+        except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
+            pass
+
+
 def get_permission_scope(user, organization, permission: str, request=None) -> UnitScope:
     """Resolve structural scope only from memberships granting ``permission``.
 
@@ -172,15 +268,7 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
     elif getattr(organization, "owner_id", None) == user_id:
         scope = ORG_WIDE_SCOPE
     else:
-        from apps.organizations.models import Membership, OrgUnit
-
-        memberships = Membership.objects.filter(
-            user=user,
-            organization=organization,
-            is_active=True,
-            role__organization=organization,
-            role__is_active=True,
-        ).select_related("role", "scope_unit")
+        memberships = _permission_scope_memberships(user, organization)
         unit_ids = set()
         scope = EMPTY_SCOPE
         for membership in memberships:
@@ -193,12 +281,7 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
             if role.scope_type == RoleScopeType.UNIT and membership.scope_unit_id:
                 unit_ids.add(membership.scope_unit_id)
         if not scope.is_org_wide and unit_ids:
-            rows = OrgUnit.objects.filter(
-                organization=organization,
-                pk__in=unit_ids,
-                is_active=True,
-            ).values_list("pk", "path")
-            resolved = list(rows)
+            resolved = _resolve_active_unit_paths(user, organization, unit_ids)
             if resolved:
                 scope = UnitScope(
                     scope_type="unit",
@@ -248,6 +331,7 @@ __all__ = [
     "UnitScope",
     "get_unit_scope",
     "get_permission_scope",
+    "invalidate_permission_scope_cache",
     "scope_memberships_by_unit",
     "scope_org_units",
 ]

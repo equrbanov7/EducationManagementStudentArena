@@ -2,6 +2,7 @@
 
 from .access import (
     active_memberships,
+    active_units,
     can_act,
     can_view,
     handled_unit_ids,
@@ -52,6 +53,7 @@ from .workflow import (
 __all__ = [
     "ACTION_DISPATCH",
     "active_memberships",
+    "active_units",
     "add_comment",
     "allowed_kinds_for",
     "assign",

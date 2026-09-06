@@ -216,6 +216,18 @@ class _Stage2Mixin:
             "min_reason_length": 3,
             "max_reason_length": 300,
             "access_denied_message": "",
+            # «Yeni hesab» axını — bölmə aktiv deyilsə fail-closed boş çərçivə.
+            "can_create": False,
+            "create_url": "",
+            "create_catalog_url": "",
+            "intake_template_url": "",
+            "intake_preview_url": "",
+            "intake_apply_url": "",
+            "intake_max_rows": 0,
+            "intake_max_upload_mb": 0,
+            "intake_columns": [],
+            "admission_years": [],
+            "max_note_length": 300,
         }
         self.superadmin_ai_settings_section = {
             "config": None,

@@ -12,6 +12,9 @@ halı ``UNSET`` sentineli ilə ayrılır.
 
 from __future__ import annotations
 
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
 from django.utils import timezone
 
@@ -20,6 +23,7 @@ from apps.registrar.models import Lesson, LessonKind, LessonMark
 
 from .gradebook import (  # noqa: F401
     DEFAULT_LESSON_HOURS,
+    LESSON_SCORE_MAX,
     UNSET,
     LessonRuleError,
     can_edit_lesson,
@@ -40,6 +44,65 @@ def _coerce_date(value):
         return datetime.date.fromisoformat(str(value))
     except (TypeError, ValueError):
         return None
+
+
+#: `Lesson.topic` CharField(255) — ORM uzunluğu yoxlamır, uzun mövzu DB `DataError`
+#: (500) verirdi (QA 2026-09-05 JOURNAL-TEACHER-01). Həm yaratma, həm yeniləmə yolu
+#: buradan keçir.
+MAX_TOPIC_LENGTH = Lesson._meta.get_field("topic").max_length or 255
+
+
+def parse_lesson_score(raw):
+    """Xana balı — düzgün deyilsə ``None`` (SƏSSİZ 0 YAZILMIR).
+
+    QA 2026-09-05 (P3-10): `'abc'` → 0, `-3` → 0, `11` → 10, `7.5` → 7.50 kimi
+    səssiz çevrilirdi; yazı səhvi tələbəyə SIFIR bal yazırdı. Bal tam ədəddir
+    (bax akademik qayda: bütöv qiymətlər) və 0..``LESSON_SCORE_MAX`` aralığındadır;
+    kənar dəyər YAZILMIR — çağıran tərəf istifadəçiyə xəbər verir.
+    """
+    try:
+        value = Decimal(str(raw).strip())
+    except (InvalidOperation, TypeError, ValueError, AttributeError):
+        return None
+    if value != value.to_integral_value():
+        return None
+    if value < 0 or value > LESSON_SCORE_MAX:
+        return None
+    return value.to_integral_value()
+
+
+def clean_topic(topic) -> str:
+    text = topic.strip() if isinstance(topic, str) else ""
+    if len(text) > MAX_TOPIC_LENGTH:
+        raise LessonRuleError(f"Dərs mövzusu ən çox {MAX_TOPIC_LENGTH} simvol ola bilər ({len(text)} göndərildi).")
+    return text
+
+
+#: Dövr bitibsə üst hədd: bu gündən bir tədris ili irəli (sağlamlıq qapısı).
+MAX_FUTURE_LESSON_DAYS = 365
+
+
+def ensure_date_within_period(offering, parsed) -> None:
+    """Dərs tarixinin ÜST həddi (QA 2026-09-05 P2-11).
+
+    Əvvəl yalnız keçmiş tarix yoxlanılırdı — 2099-cu ilə dərs açmaq mümkün idi
+    və başlıqdakı «keçirilmiş saat» hesabı pozulurdu.
+
+    * Dövr HƏLƏ BİTMƏYİBSƏ üst hədd dövrün ``end_date``-idir.
+    * Dövr artıq bitibsə (köhnə jurnala sonradan qeyd aparmaq normal axındır —
+      semestr kilidləri onsuz da ayrıca işləyir) hədd bu gündən bir il irəlidir.
+
+    RİM/superuser override-i (``allow_past``) bu qapını da keçir.
+    """
+    # `end_date` obyektdə hələ sətir ola bilər (yeni yaradılmış, refresh olunmamış dövr).
+    end_date = _coerce_date(getattr(getattr(offering, "period", None), "end_date", None))
+    today = timezone.localdate()
+    if end_date and end_date >= today:
+        if parsed > end_date:
+            raise LessonRuleError(f"Dərs tarixi dövrün sonundan ({end_date:%d.%m.%Y}) sonra ola bilməz.")
+        return
+    if parsed > today + timedelta(days=MAX_FUTURE_LESSON_DAYS):
+        raise LessonRuleError("Dərs tarixi bir ildən artıq irəlidə ola bilməz.")
 
 
 @transaction.atomic
@@ -73,6 +136,8 @@ def create_lesson(
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
     if not allow_past and parsed < timezone.localdate():
         raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
+    if not allow_past:
+        ensure_date_within_period(offering, parsed)
     new_hours = hours or DEFAULT_LESSON_HOURS
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
@@ -82,7 +147,7 @@ def create_lesson(
         offering=offering,
         date=parsed,
         kind=kind,
-        topic=topic or "",
+        topic=clean_topic(topic),
         hours=new_hours,
         start_time=start_time,
         end_time=end_time,
@@ -118,13 +183,15 @@ def update_lesson(
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
         if parsed < timezone.localdate() and not allow_past:
             raise LessonRuleError("Dərs tarixi bu gündən əvvəl ola bilməz.")
+        if not allow_past:
+            ensure_date_within_period(lesson.offering, parsed)
         lesson.date = parsed
         fields.append("date")
     if kind is not None and kind in dict(LessonKind.choices):
         lesson.kind = kind
         fields.append("kind")
     if topic is not None:
-        lesson.topic = topic
+        lesson.topic = clean_topic(topic)
         fields.append("topic")
     if hours is not None:
         lesson.hours = hours

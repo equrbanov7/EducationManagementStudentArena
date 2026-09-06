@@ -403,7 +403,7 @@
 
 .question-form-shell--modal .custom-checkbox-container input:checked ~ .checkmark {
     background: var(--ems-success);
-    border-color: var(--ems-success);
+    border-color: var(--ems-success-700);
 }
 
 .question-form-shell--modal .checkmark:after {

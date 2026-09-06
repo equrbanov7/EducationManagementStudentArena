@@ -164,8 +164,15 @@ def build_structure_tree_context(request, organization) -> dict:
 
     units = []
     if can_view:
+        # ``is_service_unit=True`` — köçürmədən gələn texniki/status konteyneri
+        # (bax ``OrgUnit.is_service_unit``) — ağacda GÖSTƏRİLMİR. Digər
+        # istehlakçılar (qrup reyestri, struktur əməlləri) bu filtri
+        # DAŞIMIR — orada bölmə hələ də tapılıb idarə oluna bilər.
         units = list(
-            _visible_units_queryset(organization, scope).select_related("head", "parent").order_by("path", "order")
+            _visible_units_queryset(organization, scope)
+            .filter(is_service_unit=False)
+            .select_related("head", "parent")
+            .order_by("path", "order")
         )
 
     if type_filter:

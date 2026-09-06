@@ -150,6 +150,9 @@ MAX_ATTACHMENTS_PER_ACTION = 5
 # ── Server-side uzunluq qaydaları (dizayn §8.4) ─────────────────────────────
 MIN_SUBJECT_LENGTH = 5
 MIN_BODY_LENGTH = 20
+#: Yuxarı hədlər (QA 2026-09-05 APPLICATIONS-02/03): 2 MB mətn qəbul olunurdu, 255+ mövzu səssiz kəsilirdi.
+MAX_SUBJECT_LENGTH = 255
+MAX_BODY_LENGTH = 20000
 MIN_NOTE_LENGTH = 10
 
 #: «Həll olundu» statusunda cavabsız qalan müraciət neçə iş günündən sonra
@@ -407,6 +410,8 @@ __all__ = [
     "HANDLER_ACTION_SOURCES",
     "MAX_ATTACHMENTS_PER_ACTION",
     "MAX_ATTACHMENT_MB",
+    "MAX_BODY_LENGTH",
+    "MAX_SUBJECT_LENGTH",
     "MIN_BODY_LENGTH",
     "MIN_NOTE_LENGTH",
     "MIN_SUBJECT_LENGTH",

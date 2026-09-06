@@ -125,8 +125,14 @@ def syllabus_section_save(request, version_id):
             code=conflict.code,
             revision=conflict.current_revision,
         )
+    except services.SectionShapeError as bad:
+        # Kliyent xətası (forma / uzunluq) — 400; TransitionDenied-in 403-ü deyil.
+        return _fail(transition_text(bad.code, bad.params), status=400, code=bad.code, field=bad.field)
     except TransitionDenied as denied:
-        return _fail(transition_text(denied.code, denied.params), status=403, code=denied.code)
+        # Validasiya kodları (çəki bölgüsü, sərbəst iş variantı) kliyent xətasıdır — 400;
+        # icazə/kilid 403 qalır (QA 2026-09-05 SYLLABUS-06).
+        status = 400 if denied.code.startswith(("assess.", "self.", "section.")) else 403
+        return _fail(transition_text(denied.code, denied.params), status=status, code=denied.code)
 
     return JsonResponse(
         {
@@ -141,7 +147,6 @@ def syllabus_section_save(request, version_id):
 
 def _do_create(request, organization, actor, payload):
     from apps.registrar.models import CourseOffering
-    from apps.registrar.plan_hours import plan_hours_for_offering, program_for_offering
 
     offering = (
         CourseOffering.objects.filter(
@@ -152,7 +157,31 @@ def _do_create(request, organization, actor, payload):
     )
     if offering is None:
         return None, _NOT_FOUND
-    syllabus, version = services.create_draft(
+    existing = Syllabus.objects.filter(organization=organization, offering=offering).only("pk").first()
+    if existing is not None:
+        # İkiqat klik / köhnə tab: unikal məhdudiyyət 500 verirdi (QA 2026-09-05 SYLLABUS-01).
+        raise _DuplicateSyllabus(existing.pk)
+    from django.db import IntegrityError, transaction
+
+    try:
+        with transaction.atomic():
+            syllabus, version = _create_draft(request, organization, actor, offering)
+    except IntegrityError as exc:  # yarış pəncərəsi — eyni nəticə
+        existing = Syllabus.objects.filter(organization=organization, offering=offering).only("pk").first()
+        raise _DuplicateSyllabus(existing.pk if existing else None) from exc
+    return version, _DRAFT_CREATED
+
+
+class _DuplicateSyllabus(Exception):
+    def __init__(self, syllabus_id):
+        super().__init__("syllabus.exists")
+        self.syllabus_id = syllabus_id
+
+
+def _create_draft(request, organization, actor, offering):
+    from apps.registrar.plan_hours import plan_hours_for_offering, program_for_offering
+
+    return services.create_draft(
         organization=organization,
         subject=offering.subject,
         period=offering.period,
@@ -169,7 +198,6 @@ def _do_create(request, organization, actor, payload):
         plan_hours=plan_hours_for_offering(offering),
         request=request,
     )
-    return version, _DRAFT_CREATED
 
 
 def _do_copy(request, organization, actor, payload):
@@ -212,7 +240,15 @@ def syllabus_action(request):
 
     try:
         if action == "create":
-            version, message = _do_create(request, organization, actor, payload)
+            try:
+                version, message = _do_create(request, organization, actor, payload)
+            except _DuplicateSyllabus as dup:
+                return _fail(
+                    transition_text("syllabus.exists"),
+                    status=409,
+                    code="syllabus.exists",
+                    syllabus=str(dup.syllabus_id or ""),
+                )
         elif action == "copy":
             version, message = _do_copy(request, organization, actor, payload)
         elif action == "new_version":
@@ -240,7 +276,9 @@ def syllabus_action(request):
         else:
             return _fail(_BAD_REQUEST)
     except TransitionDenied as denied:
-        return _fail(transition_text(denied.code, denied.params), status=409, code=denied.code)
+        # Əhatədən kənar sillabus mövcudluğu sızmasın — 404 (QA 2026-09-05 SYLLABUS-05).
+        status = 404 if denied.code == "transition.out_of_scope" else 409
+        return _fail(transition_text(denied.code, denied.params), status=status, code=denied.code)
 
     if version is None:
         return _fail(message, status=404)

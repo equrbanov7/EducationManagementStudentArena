@@ -37,7 +37,14 @@ TRANSITIONS: dict[str, frozenset[str]] = {
     SUBMITTED: frozenset({RETURNED, PENDING_FINAL_APPROVAL, APPROVED, CANCELLED}),
     RETURNED: frozenset({SUBMITTED, CANCELLED}),
     PENDING_FINAL_APPROVAL: frozenset({APPROVED, RETURNED}),
-    APPROVED: frozenset({DISTRIBUTING, RETURNED}),
+    # QA 2026-09-05 (P3-20): `RETURNED` BURADAN ÇIXARILDI — `services.workflow.
+    # return_slice` `task.status not in REVIEWABLE` (= {SUBMITTED,
+    # PENDING_FINAL_APPROVAL}) qapısı ilə `approved`-u onsuz da 409
+    # (`workload.slice_not_open`) ilə rədd edirdi — cədvəl "icazəli" deyirdi,
+    # servis "yox" deyirdi. Diaqram da (yuxarı şərh) `approved → returned`
+    # oxu ÇƏKMİR; TƏHLÜKƏSİZ istiqamət — cədvəli servislə UZLAŞDIRMAQ (keçidi
+    # rədd etmək), REVIEWABLE qapısını açmaq YOX.
+    APPROVED: frozenset({DISTRIBUTING}),
     DISTRIBUTING: frozenset({DISTRIBUTED, APPROVED}),
     DISTRIBUTED: frozenset({AMENDED}),
     AMENDED: frozenset({DISTRIBUTED}),

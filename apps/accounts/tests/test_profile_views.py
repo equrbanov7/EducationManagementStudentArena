@@ -2176,6 +2176,18 @@ class ProfileViewTest(TestCase):
             f'name="next" value="{reverse("accounts:profile")}?section=superadmin-ai"',
             html=False,
         )
+        # `type=number` lokal ayırıcı (5,00) qəbul etmir → sahə brauzerdə boş görünürdü
+        # (QA 2026-09-05 P3-1): dəyər həmişə nöqtə ilə render olunmalıdır.
+        import re as _re
+
+        from django.utils import translation as _translation
+
+        with _translation.override("az"):
+            localized = self.client.get(reverse("accounts:profile") + "?section=superadmin-ai")
+        html = localized.content.decode("utf-8")
+        match = _re.search(r'id="monthly_budget"[^>]*value="([^"]*)"', html)
+        self.assertIsNotNone(match, "monthly_budget sahəsi yoxdur")
+        self.assertNotIn(",", match.group(1), match.group(0))
 
     def test_superadmin_org_features_section_renders_inside_profile(self):
         superuser = User.objects.create_superuser(
@@ -5632,3 +5644,70 @@ class ReviewResultsViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Detail Assignment")
+
+
+class AlumniCabinetTest(TestCase):
+    """Məzun öz akademik izini görür, təyinat səthlərini görmür — QA 2026-09-05 P2-32.
+
+    ⚠️ Rol xassələri YALNIZ aktiv təşkilat kontekstində həll olunur
+    (`core.roles.user_has_any_role` → `has_role` → aktiv üzvlük), ona görə test
+    HTTP sessiyasından keçir.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+        from core.rls import bypass_rls
+
+        User = get_user_model()
+        cls.owner = User.objects.create_user("alu_owner", "alu_owner@qku.edu.az", "pw")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="Alu Univ",
+                slug="alu-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=cls.owner,
+                status="active",
+                is_active=True,
+            )
+            cls.alumni = User.objects.create_user("alu_grad", "alu_grad@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.alumni,
+                organization=cls.org,
+                role=cls.org.roles.get(name="alumni"),
+                is_primary=True,
+                is_active=True,
+            )
+
+    def _client(self):
+        from django.test import Client
+
+        client = Client()
+        client.force_login(self.alumni)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        return client
+
+    #: Bölmə açıq deyilsə qabıq bu xəbərdarlığı göstərir (bax `_section_denied`).
+    DENIED = "Bu bölməyə icazəniz yoxdur"
+
+    def _section_html(self, section):
+        response = self._client().get(f"/accounts/profile/?section={section}")
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode("utf-8", "ignore")
+
+    def test_alumni_sees_own_results(self):
+        self.assertNotIn(self.DENIED, self._section_html("my-results"))
+
+    def test_alumni_sees_academic_summary(self):
+        self.assertNotIn(self.DENIED, self._section_html("overall-academic"))
+
+    def test_alumni_does_not_get_assignment_surfaces(self):
+        for forbidden in ("assigned-exams", "assigned-courses", "my-subjects"):
+            self.assertIn(self.DENIED, self._section_html(forbidden), forbidden)
+
+    def test_alumni_keeps_account_self_service(self):
+        self.assertNotIn(self.DENIED, self._section_html("edit-profile"))
+        self.assertNotIn(self.DENIED, self._section_html("change-password"))

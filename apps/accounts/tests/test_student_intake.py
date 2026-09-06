@@ -304,6 +304,22 @@ class IntakeDryRunTest(StudentIntakeBase):
         self.assertEqual(rows[3]["code"], "speciality_unknown")
         self.assertEqual(rows[4]["code"], "program_missing")
 
+    def test_overlong_name_and_duplicate_email_are_errors_in_preview(self):
+        """QA 2026-09-05 STUDENT-MGMT-02/03: 150+ ad tətbiqdə xam DB xətası sızırdı; təkrar e-poçt
+        səssizcə placeholder alırdı (OTP-siz hesab)."""
+        response = self.preview(
+            self.rim,
+            [
+                student_row("2KKKKK2", "A" * 151, "B"),
+                student_row("3LLLLL3", "C", "D", email="dup.intake@example.com"),
+                student_row("4MMMMM4", "E", "F", email="dup.intake@example.com"),
+            ],
+        )
+        rows = self._rows_by_status(response.json())
+        self.assertEqual(rows[2]["code"], "name_too_long")
+        # Təkrar e-poçt dizayna görə placeholder + XƏBƏRDARLIQ alır (ön baxış JS-i göstərir).
+        self.assertTrue(rows[4].get("warnings"), rows[4])
+
     def test_bad_date_and_year_are_errors(self):
         response = self.preview(
             self.rim,

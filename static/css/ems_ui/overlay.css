@@ -10,7 +10,11 @@
 .ems-overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    /* Səhifə xromundan YUXARI olmalıdır: profil sidebar-ı `position: fixed;
+       z-index: 1050` daşıyır və 200-lə dialoqun üstünü örtürdü (mobil şuxlada
+       gözlə görünür). Bootstrap modal-ı (1055) isə ÜSTDƏ qalmalıdır — EMSConfirm
+       ems-dialoqun içindən çağırıla bilər. Ona görə 1051. */
+    z-index: 1051;
     display: flex;
     background: rgba(15, 23, 42, 0.55);
 }
@@ -40,6 +44,20 @@
 
 .ems-dialog--wide {
     max-width: 720px;
+}
+
+/* `.ems-dialog` şaquli FLEX konteynerdir: `__body`-nin sürüşməsi və `__foot`-un
+   dibə yapışması buna söykənir. Yaratma/redaktə və səbəb dialoqlarında arada bir
+   `<form>` durur (düymə formanın İÇİNDƏ olmalıdır — bax
+   `partials/ems_ui/_form_dialog.html` və `_reason_dialog.html`), yəni forma tək
+   flex uşağı olur və zəncir qırılır: uzun form `max-height`-ı aşır, gövdə
+   sürüşmür, altlıq (düymələr) kəsilir. Forma da flex sütun edilir — zəncir
+   bərpa olunur. */
+.ems-dialog > form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
 }
 
 /* ── Drawer (sağdan, 720–940px) ─────────────────────────────────────────── */
@@ -189,7 +207,7 @@
 /* Siyasətə zidd variant gizlədilmir — izah edilir (handoff ekran 19). */
 .ems-pick.is-disabled {
     background: var(--ems-neutral-50);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 
@@ -200,7 +218,7 @@
 }
 
 .ems-pick.is-disabled .ems-pick__title {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .ems-pick__note {

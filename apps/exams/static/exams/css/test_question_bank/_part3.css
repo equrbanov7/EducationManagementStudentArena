@@ -175,7 +175,7 @@
 .filter-empty-state {
     padding: 48px 20px;
     text-align: center;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     border: 2px dashed var(--ems-neutral-200);
     border-radius: 14px;
     background: #fafbfc;

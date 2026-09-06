@@ -33,8 +33,12 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     {% endif %}
     {% if 'rim-center' in allowed_sections %}
+    {% comment %}⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl səth
+    (panel/axtarış/siyahı), sonra modallar, ən sonda «Yeni hesab» axını —
+    üçüncü fayl ilk ikisinin başlıq və kart qaydalarını qəsdən tamamlayır.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part1.css' %}?v=20260826-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part2.css' %}?v=20260826-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part3.css' %}?v=20260906-2">
     {% endif %}
     {% if 'superadmin-ai' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">

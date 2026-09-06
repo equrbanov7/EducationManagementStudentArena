@@ -54,7 +54,17 @@ def open_amendment(
     new_values: dict | None = None,
     request=None,
 ) -> WorkloadAmendment:
-    """Düzəliş qeydi açır və tapşırığı ``amended`` statusuna qaytarır."""
+    """Düzəliş qeydi açır və tapşırığı ``amended`` statusuna qaytarır.
+
+    ⚠️ ``new_values`` YALNIZ audit/snapshot üçün saxlanılır — BURADA sətrə/bölgüyə
+    TƏTBİQ OLUNMUR (QA 2026-09-05 P3-22: əvvəllər sənədləşdirilmir, "tətbiq
+    olunur" kimi anlaşıla bilərdi). Faktiki dəyişiklik AYRI addımdır: bu funksiya
+    yalnız səbəb+köhnə/niyyət edilən dəyəri qeyd edir və tapşırığı kilidsizləşdirir
+    (``amended`` → ``EDITABLE_STATUSES``/``ASSIGNABLE_STATUSES``-da), sonra çağıran
+    tərəf normal yazma yolu ilə (``tasks.save_row`` sətir üçün, ``assignments.
+    assign_teacher``/``unassign`` bölgü üçün) dəyişikliyi ÖZÜ edir, son olaraq
+    ``distribution.confirm_distribution`` sənədi yenidən ``distributed``-ə qaytarır.
+    """
     ensure_can_distribute(actor, task.chair_id)
     if task.status not in (TaskStatus.DISTRIBUTED, TaskStatus.AMENDED):
         raise WorkloadDenied(

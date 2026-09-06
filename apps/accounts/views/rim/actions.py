@@ -18,12 +18,14 @@ import json
 import logging
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from apps.accounts.services.rim import (
     RimAccessError,
+    assert_can_manage,
     block_user,
     manageable_users_queryset,
     resolve_actor,
@@ -73,6 +75,41 @@ def _error_response(exc: RimAccessError) -> JsonResponse:
     )
 
 
+def _target_error(actor, user_id) -> JsonResponse:
+    """Hədəf idarə sahəsində deyil — SƏBƏBİ dəqiqləşdirir (QA 2026-09-05 P3-8).
+
+    Əvvəl bütün hallar `target_not_found` (404) idi: operator «bu hesab niyə
+    idarə olunmur?» sualına cavab ala bilmirdi (öz hesabı? superadmin? rütbə
+    yüksəkdir?). İndi hədəf AKTORUN ÖZ TƏŞKİLATINDA tapılırsa siyasət qatı
+    dəqiq səbəb kodunu verir; təşkilatdan kənar hesab yenə 404-dür (mövcudluq
+    sızmır).
+    """
+    from django.contrib.auth import get_user_model
+
+    not_found = JsonResponse(
+        {"ok": False, "error": "target_not_found", "message": "İstifadəçi tapılmadı."},
+        status=404,
+    )
+    organization = getattr(actor, "organization", None)
+    try:
+        candidate = get_user_model().objects.select_related("profile").filter(pk=user_id).first()
+    except (TypeError, ValueError, ValidationError):
+        return not_found
+    if candidate is None:
+        return not_found
+
+    is_self = getattr(actor.user, "pk", None) == candidate.pk
+    in_org = organization is not None and candidate.memberships.filter(organization=organization).exists()
+    if not (is_self or in_org or getattr(actor, "is_superadmin", False)):
+        return not_found
+
+    try:
+        assert_can_manage(actor, candidate)
+    except RimAccessError as exc:
+        return _error_response(exc)
+    return not_found
+
+
 @never_cache
 @login_required
 @require_POST
@@ -101,10 +138,7 @@ def rim_action(request):
     except (TypeError, ValueError):
         target = None
     if target is None:
-        return JsonResponse(
-            {"ok": False, "error": "target_not_found", "message": "İstifadəçi tapılmadı."},
-            status=404,
-        )
+        return _target_error(actor, user_id)
 
     reason = payload.get("reason", "")
     extra: dict = {}

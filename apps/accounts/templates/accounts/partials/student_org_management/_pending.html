@@ -90,6 +90,7 @@
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
                                    data-target-role="{% trans 'role_student' context 'accounts.student_org' %}"
+                                   aria-label="{{ profile.user.get_full_name|default:profile.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>

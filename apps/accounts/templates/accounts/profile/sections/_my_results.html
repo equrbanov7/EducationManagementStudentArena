@@ -73,7 +73,7 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                        name="results_search"
                        value="{{ my_results_search_query }}"
                        placeholder="{% trans 'Nəticə axtar...' %}"
-                       autocomplete="off">
+                       autocomplete="off" aria-label="{% trans 'Nəticə axtar...' %}">
                 {% if my_results_search_query %}
                 <a href="{{ profile_base_url }}?section=my-results&results_type={{ my_results_active_filter }}"
                    class="results-section-search-clear"
@@ -158,7 +158,7 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                                 {% endif %}
                             {% elif item.submitted_at %}
                             <span class="meta-divider">•</span>
-                            <span><i class="far fa-clock"></i> {{ item.submitted_at|date:"d M Y H:i" }}</span>
+                            <span><i class="far fa-clock"></i> {{ item.submitted_at|date:"d.m.Y H:i" }}</span>
                             {% endif %}
                         </div>
                     </div>

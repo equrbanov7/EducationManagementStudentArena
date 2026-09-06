@@ -33,6 +33,8 @@ Modul bölgüsü:
 * ``detail``       — siyahı sətri + detal kartı serializasiyası (ikili rol görünür)
 """
 
+from .create import PERM_CREATE, RimCreateError, can_create, create_account, require_create
+from .create_options import CATALOGS, search_catalog
 from .credentials import set_temporary_password
 from .detail import serialize_detail, serialize_memberships, serialize_row
 from .lifecycle import block_user, normalize_reason, restore_user, soft_delete_user, unblock_user
@@ -55,9 +57,11 @@ from .profile_edit import EDITABLE_FIELDS, FIELD_LABELS, update_user_fields
 from .search import account_status, search_users
 
 __all__ = [
+    "CATALOGS",
     "EDITABLE_FIELDS",
     "FIELD_LABELS",
     "PERM_BLOCK",
+    "PERM_CREATE",
     "PERM_CREDENTIALS",
     "PERM_EDIT",
     "PERM_SEARCH",
@@ -65,9 +69,14 @@ __all__ = [
     "RIM_PERMISSIONS",
     "RimAccessError",
     "RimActor",
+    "RimCreateError",
     "account_status",
     "assert_can_manage",
     "block_user",
+    "can_create",
+    "create_account",
+    "require_create",
+    "search_catalog",
     "manageable_users_queryset",
     "normalize_reason",
     "require_permission",

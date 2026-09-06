@@ -89,13 +89,15 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
   <div class="wlm-controls">
     <label class="wlm-field">
       <span>{% trans "Tədris ili" context "accounts.workload" %}</span>
-      <select class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wlm-year>
-        {% for year in my_workload_section.years %}
-        <option value="{{ year }}" {% if year == my_workload_section.academic_year %}selected{% endif %}>{{ year }}</option>
-        {% empty %}
-        <option value="">{% trans "Məlumat yoxdur" context "accounts.workload" %}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select">
+        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wlm-year>
+          {% for year in my_workload_section.years %}
+          <option value="{{ year }}" {% if year == my_workload_section.academic_year %}selected{% endif %}>{{ year }}</option>
+          {% empty %}
+          <option value="">{% trans "Məlumat yoxdur" context "accounts.workload" %}</option>
+          {% endfor %}
+        </select>
+      </div>
     </label>
     <div class="wlm-tabs" role="tablist" aria-label="{% trans 'Semestr' context 'accounts.workload' %}">
       <button type="button" class="wlm-tab is-active" role="tab" aria-selected="true" data-wlm-season="">

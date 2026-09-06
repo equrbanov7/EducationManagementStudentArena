@@ -128,7 +128,7 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     z-index: 2;
 }
 

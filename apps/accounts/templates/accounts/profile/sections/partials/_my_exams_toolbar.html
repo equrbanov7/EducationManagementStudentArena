@@ -26,7 +26,7 @@
            data-tx-search
            placeholder="{% trans 'search_placeholder' context 'profile.my_exams' %}"
            value="{{ my_exams_search_query|default:'' }}"
-           autocomplete="off">
+           autocomplete="off" aria-label="{% trans 'search_placeholder' context 'profile.my_exams' %}">
   </div>
 
   <div class="tx-typeseg" data-tx-typeseg role="group" aria-label="{% trans 'filter_all_types' context 'profile.my_exams' %}">

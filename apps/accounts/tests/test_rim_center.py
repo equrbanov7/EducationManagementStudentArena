@@ -252,19 +252,24 @@ class RimHierarchyTests(RimCenterTestBase):
 
         self.login_operator()
         response = self.act("block", peer, reason="yoxlama")
-        self.assertEqual(response.status_code, 404)
+        # QA 2026-09-05 (P3-8): eyni təşkilatın hesabı üçün SƏBƏB göstərilir
+        # (əvvəl hamısı 404 `target_not_found` idi).
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
     def test_cannot_manage_higher_level_account(self):
         self.login_operator()
         response = self.act("block", self.higher, reason="yoxlama")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
         self.higher.refresh_from_db()
         self.assertTrue(self.higher.is_active)
 
     def test_cannot_target_self(self):
         self.login_operator()
         response = self.act("soft_delete", self.operator, reason="özümü silim")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_is_self")
         self.operator.refresh_from_db()
         self.assertTrue(self.operator.is_active)
         self.assertFalse(self.operator.profile.is_deleted)
@@ -272,6 +277,7 @@ class RimHierarchyTests(RimCenterTestBase):
     def test_cannot_target_superuser(self):
         self.login_operator()
         response = self.act("block", self.superuser, reason="yoxlama")
+        # Superuser təşkilat üzvü DEYİL — mövcudluğu sızmasın deyə yenə 404.
         self.assertEqual(response.status_code, 404)
         self.superuser.refresh_from_db()
         self.assertTrue(self.superuser.is_active)
@@ -355,11 +361,22 @@ class RimCredentialTests(RimCenterTestBase):
 
         cache.clear()
         self.login_operator()
-        self.assertEqual(self.act("set_password", self.teacher, reason="1").status_code, 200)
-        self.assertEqual(self.act("set_password", self.namesake, reason="2").status_code, 200)
-        throttled = self.act("set_password", self.teacher, reason="3")
+        self.assertEqual(self.act("set_password", self.teacher, reason="Parol itib").status_code, 200)
+        self.assertEqual(self.act("set_password", self.namesake, reason="Yeni işçi").status_code, 200)
+        throttled = self.act("set_password", self.teacher, reason="Üçüncü cəhd")
         self.assertEqual(throttled.status_code, 429)
         self.assertEqual(throttled.json()["error"], "rate_limited")
+        cache.clear()
+
+    def test_password_reset_requires_a_reason(self):
+        """QA 2026-09-05 P2-15: audit izində «Səbəb: -» qalmamalıdır."""
+        from django.core.cache import cache
+
+        cache.clear()
+        self.login_operator()
+        response = self.act("set_password", self.teacher, reason="")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "reason_required")
         cache.clear()
 
 
@@ -478,7 +495,8 @@ class RimSoftDeleteTests(RimCenterTestBase):
 
         self.login_operator()
         response = self.act("restore", self.higher, reason="bərpa")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
     def test_no_hard_delete_action_is_exposed(self):
         """RİM səthində hard delete YOXDUR."""
@@ -689,7 +707,8 @@ class RimDualRoleTests(RimCenterTestBase):
             data={"action": "block", "user_id": self.dual.pk, "reason": "yoxlama"},
             content_type="application/json",
         )
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "target_rank_too_high")
 
 
 class RimSectionGateTests(RimCenterTestBase):

@@ -92,17 +92,27 @@
 
     {% if user_rows %}
     <div class="table-responsive">
-        <table class="user-table">
+        <table class="user-table" data-user-management-table>
             <thead>
                 <tr>
-                    <th>{% trans "col_username" context "superadmin.users" %}</th>
+                    {% comment %}QA 2026-09-05 (UX-17): başlıqlar mövcud "Sıralama"
+                    (`user_sort`) select-inin dəyərlərinə bağlıdır — düymə select-i
+                    dəyişib formu göndərir (server-tərəf sıralama dəyişmir), aria-sort
+                    cari `sort_filter`-ə görə server render-də qoyulur.{% endcomment %}
+                    <th{% if sort_filter == "username" %} aria-sort="ascending"{% else %} aria-sort="none"{% endif %}>
+                        <button type="button" class="user-table__th-sort" data-user-sort-value="username">{% trans "col_username" context "superadmin.users" %}<span class="user-table__th-sort-icon" aria-hidden="true"></span></button>
+                    </th>
                     <th>{% trans "col_email" context "superadmin.users" %}</th>
-                    <th>{% trans "col_name" context "superadmin.users" %}</th>
+                    <th{% if sort_filter == "name" %} aria-sort="ascending"{% else %} aria-sort="none"{% endif %}>
+                        <button type="button" class="user-table__th-sort" data-user-sort-value="name">{% trans "col_name" context "superadmin.users" %}<span class="user-table__th-sort-icon" aria-hidden="true"></span></button>
+                    </th>
                     <th>{% trans "col_role" context "superadmin.users" %}</th>
                     <th>{% trans "col_organization" context "superadmin.users" %}</th>
                     <th>Qrup / departament</th>
                     <th>{% trans "col_status" context "superadmin.users" %}</th>
-                    <th>Aktivlik</th>
+                    <th{% if sort_filter == "last_login" %} aria-sort="descending"{% else %} aria-sort="none"{% endif %}>
+                        <button type="button" class="user-table__th-sort" data-user-sort-value="last_login">Aktivlik<span class="user-table__th-sort-icon" aria-hidden="true"></span></button>
+                    </th>
                     <th>{% trans "col_actions" context "superadmin.users" %}</th>
                 </tr>
             </thead>
@@ -128,13 +138,13 @@
                     <td>
                         <span class="{{ row.status_badge_class }}">{{ row.status_label }}</span>
                         {% if row.deleted_at %}
-                        <div class="user-table-muted">{% blocktrans with deleted_at=row.deleted_at|date:"d M Y H:i" %}Silinmə: {{ deleted_at }}{% endblocktrans %}</div>
+                        <div class="user-table-muted">{% blocktrans with deleted_at=row.deleted_at|date:"d.m.Y H:i" %}Silinmə: {{ deleted_at }}{% endblocktrans %}</div>
                         {% endif %}
                     </td>
                     <td>
                         {% trans 'Heç daxil olmayıb' as never_logged_in %}
-                        <div>{{ row.last_login|date:"d M Y H:i"|default:never_logged_in }}</div>
-                        <div class="user-table-muted">{% blocktrans with joined_at=row.date_joined|date:"d M Y" %}Qeydiyyat: {{ joined_at }}{% endblocktrans %}</div>
+                        <div>{{ row.last_login|date:"d.m.Y H:i"|default:never_logged_in }}</div>
+                        <div class="user-table-muted">{% blocktrans with joined_at=row.date_joined|date:"d.m.Y" %}Qeydiyyat: {{ joined_at }}{% endblocktrans %}</div>
                     </td>
                     <td>
                         {% if row.can_block or row.can_unblock or row.can_soft_delete or row.can_restore or row.can_hard_delete %}

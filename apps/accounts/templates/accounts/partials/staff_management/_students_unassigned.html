@@ -25,7 +25,7 @@
                    placeholder="{% trans 'Search students...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search students...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -93,6 +93,7 @@
                                    data-user-username="@{{ profile.user.username }}"
                                    data-user-email="{{ profile.user.email }}"
                                    data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                   aria-label="{{ profile.user.get_full_name|default:profile.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not can_invite_members %}disabled{% endif %}>
                         </td>
                         <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>

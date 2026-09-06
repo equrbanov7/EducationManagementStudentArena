@@ -5,10 +5,12 @@
  * saxlanan yeganə dəyər otaqdır (`lesson_room`). Hər ikisi opsionaldır: köhnə
  * dərslərdə otaq yoxdur və boş qala bilər.
  *
- * Otaq siyahısı `json_script` bloku ilə gəlir (#jd-lesson-rooms) — xarici JS
- * Django şablonundan keçmədiyi üçün dinamik data DOM-dan oxunur. Siyahı kiçik
- * olduğundan (universitetdə onlarla/yüzlərlə otaq) ayrıca AJAX kaskadı yoxdur:
- * süzgəc dərhal, gözləmədən işləyir.
+ * Otaq siyahısı əvvəllər `json_script` bloku ilə HƏR jurnal səhifəsi
+ * yüklənməsində modala bişirilirdi (159 otağa qədər). QA 2026-09-05 P3-13:
+ * indi modal İLK dəfə açılanda `data-rooms-url`-dan (bax
+ * `_jd_lesson_modal.html`) AJAX ilə gətirilir və bu modulun ömrü boyu
+ * keşlənir — kaskadın özü (korpus süzgəci) DƏYİŞMİR, dinamik olan yalnız
+ * data mənbəyidir.
  *
  * QOŞULMA: journal_grid.js dərs modalını açanda `jd:lesson-modal-open` hadisəsini
  * göndərir (detail = redaktə datası, əlavə rejimində null). Bu modul yalnız ona
@@ -18,14 +20,50 @@
 (function () {
     "use strict";
 
+    var _cache = null; // null = hələ gətirilməyib; [] = gətirilib, boşdur.
+    var _pending = null;
+
     function rooms() {
-        var el = document.getElementById("jd-lesson-rooms");
-        if (!el) return [];
-        try {
-            return JSON.parse(el.textContent) || [];
-        } catch (e) {
-            return [];
+        return _cache || [];
+    }
+
+    /** Otaq siyahısını (bir dəfə) gətirir, sonra keşdən qaytarır. */
+    function ensureRooms(modal, callback) {
+        if (_cache) {
+            callback();
+            return;
         }
+        if (_pending) {
+            _pending.push(callback);
+            return;
+        }
+        _pending = [callback];
+        var url = modal.dataset.roomsUrl;
+        if (!url) {
+            _cache = [];
+            _pending.forEach(function (cb) {
+                cb();
+            });
+            _pending = null;
+            return;
+        }
+        fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } })
+            .then(function (r) {
+                return r.ok ? r.json() : [];
+            })
+            .then(function (data) {
+                _cache = Array.isArray(data) ? data : [];
+            })
+            .catch(function () {
+                _cache = [];
+            })
+            .finally(function () {
+                var queued = _pending || [];
+                _pending = null;
+                queued.forEach(function (cb) {
+                    cb();
+                });
+            });
     }
 
     function buildingSelect(modal) {
@@ -94,8 +132,10 @@
     document.addEventListener("jd:lesson-modal-open", function (event) {
         var modal = event.target;
         if (!modal || !roomSelect(modal)) return; // otaq sahəsi yoxdursa heç nə etmə
-        apply(modal, (event.detail && event.detail.room) || "");
-        bind(modal);
+        ensureRooms(modal, function () {
+            apply(modal, (event.detail && event.detail.room) || "");
+            bind(modal);
+        });
     });
 
     window.EMSJournalLessonRoom = { bind: bind, apply: apply };

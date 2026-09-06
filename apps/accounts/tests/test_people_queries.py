@@ -6,11 +6,16 @@
    məlumat bazasında bir sətir üçün əlavə sorğu 25 sətirlik səhifəni 25 əlavə
    gediş-gəlişə çevirər. Test iki fərqli ölçüdə eyni sorğu sayını tələb edir.
 
-2. **MÜTLƏQ BÜDCƏ = 5 sorğu.** Yalnız «artmır» demək azdır: sabit qalan, amma
+2. **MÜTLƏQ BÜDCƏ = 4 sorğu.** Yalnız «artmır» demək azdır: sabit qalan, amma
    9-a sıçramış say da reqressiyadır. Tələbə idarəetmə səthi (``psm-*`` çekməcəsi)
    QƏSDƏN kataloqun ÜSTÜNDƏ, AYRI endpoint-lərdə oturur — siyahı yoluna bir
-   sorğu belə əlavə etməməlidir. Beş sorğu: üzvlük/scope həlli · COUNT ·
-   səhifə sətirləri · struktur vahidləri · vahid adları (ata-baba həlli).
+   sorğu belə əlavə etməməlidir. Dörd sorğu: COUNT · səhifə sətirləri ·
+   struktur vahidləri · vahid adları (ata-baba həlli). Üzvlük/scope həlli
+   (``get_permission_scope``) AYRICA sorğu DEYİL — QA 2026-09 keş auditindən
+   sonra ``user`` obyektinə görə memoizasiya olunur (bax
+   ``apps.organizations.scoping._permission_scope_memberships``), ona görə bu
+   testin «isindirmə» çağırışı ilə eyni aktoru bölüşən ölçmə çağırışı onu
+   TƏKRAR sorğulamır.
 
 3. **Əməllər SCOPE-LUDUR.** Dekan öz fakültəsindən kənar hesabı dayandıra
    BİLMƏMƏLİDİR — RİM qatı bunu bilmir (o, yalnız rütbə/tenant yoxlayır), ona
@@ -45,7 +50,11 @@ def _filters(**params):
 #: Bir kataloq səhifəsinin MÜTLƏQ sorğu büdcəsi. Rəqəmi qaldırmaq üçün əvvəlcə
 #: yeni sorğunun niyə qaçılmaz olduğu izah edilməlidir — «testi düzəltmək» kifayət
 #: deyil (bax modul başlığı, 2-ci müqavilə).
-LIST_QUERY_BUDGET = 5
+#: 5 → 4 (QA 2026-09 RBAC keş auditi): `get_permission_scope`-un membership
+#: sorğusu artıq `user` obyektinə görə memoizasiya olunur, ona görə bu testin
+#: isindirmə çağırışı ilə eyni aktoru bölüşən ölçmə çağırışı onu TƏKRAR
+#: sorğulamır (bax `apps.organizations.scoping._permission_scope_memberships`).
+LIST_QUERY_BUDGET = 4
 
 
 class PeopleQueryBudgetTest(TestCase):

@@ -171,14 +171,29 @@ class MarkRulesTest(TestCase):
             mark.refresh_from_db()
             self.assertEqual(mark.status, AttendanceStatus.ABSENT)  # dondu
 
-    def test_seminar_score_clamped_to_ten(self):
+    def test_out_of_range_score_is_refused_not_clamped(self):
+        """QA 2026-09-05 (P3-10): 37 SƏSSİZ 10-a çevrilmirdi — indi xana yazılmır.
+
+        UI yalnız 0–10 təklif edir; 37 yalnız crafted POST/idxaldan gələ bilər və
+        səssiz «10» müəllimin yazmadığı qiyməti uydurardı."""
         with bypass_rls():
             lesson = gradebook.create_lesson(
                 offering=self.offering, date=TODAY(), kind=LessonKind.SEMINAR, created_by=self.teacher
             )
             self._mark(lesson, score="37")
+            self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+
+    def test_fractional_and_garbage_scores_are_refused(self):
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                offering=self.offering, date=TODAY(), kind=LessonKind.SEMINAR, created_by=self.teacher
+            )
+            for raw in ("7.5", "abc", "-3"):
+                self._mark(lesson, score=raw)
+            self.assertFalse(LessonMark.objects.filter(lesson=lesson, enrollment=self.enrollment).exists())
+            self._mark(lesson, score="9")
             mark = LessonMark.objects.get(lesson=lesson, enrollment=self.enrollment)
-            self.assertEqual(mark.score, Decimal("10"))
+            self.assertEqual(mark.score, Decimal("9"))
 
 
 class KollokviumTest(TestCase):

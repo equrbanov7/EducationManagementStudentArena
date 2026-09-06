@@ -267,7 +267,7 @@
                         {% else %}
                             <textarea name="q_{{ q.id }}" 
                                       class="written-answer" 
-                                      placeholder="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
+                                      placeholder="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}" aria-label="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
                             <br>
                                 
                             {# --- PAINT CAVABI --- #}

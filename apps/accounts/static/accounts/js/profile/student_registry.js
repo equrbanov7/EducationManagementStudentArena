@@ -342,7 +342,15 @@
                 if (window.EMSOverlay) {
                     window.EMSOverlay.close(form.closest(".ems-overlay"));
                 }
-                toast(form.getAttribute("data-sr-success") || "", "success");
+                // Bərpa əmrindən sonra giriş avtomatik açılmır (server `access_notice`
+                // qaytarır) — operator bunu görməlidir, yoxsa tələbə səssizcə bağlı qalır.
+                var notice =
+                    result.payload && result.payload.movement ? result.payload.movement.access_notice : "";
+                if (notice) {
+                    toast(notice, "warning");
+                } else {
+                    toast(form.getAttribute("data-sr-success") || "", "success");
+                }
                 if (window.EMSProfileLoadSection) {
                     window.EMSProfileLoadSection("student-registry", window.location.href);
                 } else {

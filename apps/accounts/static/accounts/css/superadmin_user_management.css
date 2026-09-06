@@ -197,6 +197,43 @@
     border-bottom: 1px solid var(--ems-neutral-200);
 }
 
+/* QA 2026-09-05 (UX-17): sıralana bilən başlıq düyməsi — `<button>` bütöv
+   başlıq mətnini tutur (Tab/Enter/Space ilə işlək), mövcud "Sıralama"
+   select-inə (`user_sort`) bağlıdır. Ox işarəsi aktiv sütunun `aria-sort`
+   dəyərinə görə göstərilir (server render, superadmin_user_management.js). */
+.user-table__th-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+.user-table__th-sort:hover {
+    color: var(--ems-primary-600, #2563eb);
+}
+.user-table__th-sort-icon::after {
+    content: "⇅";
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+.user-table thead th[aria-sort="ascending"] .user-table__th-sort-icon::after {
+    content: "↑";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+.user-table thead th[aria-sort="descending"] .user-table__th-sort-icon::after {
+    content: "↓";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+
 .user-table tbody td {
     padding: 1rem 0.95rem;
     vertical-align: top;

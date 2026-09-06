@@ -10,8 +10,8 @@ from django.urls import reverse
 
 import pytest
 
-from apps.applications.constants import ApplicationStatus
-from apps.applications.models import ApplicationAttachment
+from apps.applications.constants import ApplicationStatus, EventKind
+from apps.applications.models import ApplicationAttachment, ApplicationEvent
 from apps.applications.services import submit, workflow
 from apps.applications.tests.factories import kind_of, make_world, unit_of
 
@@ -129,6 +129,21 @@ def test_detail_does_not_mark_seen_for_the_sender(world, application):
     assert payload["application"]["viewer"]["is_sender"] is True
     assert "cancel" in payload["application"]["allowed_actions"]
     assert "resolve" not in payload["application"]["allowed_actions"]
+
+
+def test_detail_mark_seen_is_idempotent_across_repeated_gets(world, application):
+    # QA 2026-09-05 (P3-19): the "opened → seen" transition lives inside a GET
+    # endpoint (design §3.4 wants it automatic). Repeated opens by the same
+    # handler must not re-fire the transition or write a second SEEN event —
+    # the view now checks status+`can_act` explicitly instead of relying on a
+    # caught `TransitionDenied`, so this locks the idempotency in either way.
+    client = client_for(world["coordinator"], world["organization"])
+    first = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert first["application"]["status"]["key"] == ApplicationStatus.IN_REVIEW
+    second = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert second["application"]["status"]["key"] == ApplicationStatus.IN_REVIEW
+    seen_events = ApplicationEvent.objects.filter(application=application, kind=EventKind.SEEN).count()
+    assert seen_events == 1
 
 
 def test_detail_is_404_for_a_stranger(world, application):
@@ -279,3 +294,25 @@ def test_disallowed_extension_is_rejected(world):
     )
     assert response.status_code == 400
     assert not ApplicationAttachment.objects.exists()
+
+
+def test_internal_notes_stay_visible_to_the_handler_after_the_case_is_closed(world, application):
+    """QA 2026-09-05 APPLICATIONS-08: emalçı öz daxili qeydini müraciət bağlanandan sonra da görməlidir."""
+    workflow.mark_seen(application=application, user=world["coordinator"])
+    workflow.add_comment(application=application, user=world["coordinator"], text="Daxili qeyd", is_internal=True)
+    client = client_for(world["coordinator"], world["organization"])
+    url = reverse("applications:action", kwargs={"application_id": application.pk})
+    assert client.post(url, {"action": "resolve", "text": "Həll olundu, sənəd verildi."}).status_code == 200
+    payload = body(client.get(reverse("applications:detail", kwargs={"application_id": application.pk})))
+    assert any(event["is_internal"] for event in payload["application"]["events"])
+
+
+def test_assign_with_an_invalid_assignee_is_a_json_error_not_a_500(world, application):
+    """QA 2026-09-05 APPLICATIONS-06: `assignee=abc` `filter(pk=...)` ValueError ilə 500 verirdi."""
+    client = client_for(world["coordinator"], world["organization"])
+    url = reverse("applications:action", kwargs={"application_id": application.pk})
+    client.post(url, {"action": "mark_seen"})
+    for bad in ("abc", "", "1 OR 1=1"):
+        response = client.post(url, {"action": "assign", "assignee": bad, "text": "Təyinat sınağı üçün qeyd."})
+        assert response.status_code < 500, bad
+        assert response["Content-Type"].startswith("application/json"), bad
