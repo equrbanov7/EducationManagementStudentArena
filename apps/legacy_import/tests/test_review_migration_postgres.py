@@ -13,7 +13,7 @@ from apps.legacy_import.models import LegacyEntityMapVersion, LegacyEntityObserv
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
-pytestmark = pytest.mark.postgres
+pytestmark = [pytest.mark.postgres, pytest.mark.migration_roundtrip]
 User = get_user_model()
 
 

@@ -9,6 +9,7 @@
 # Dependency graph:
 #
 #   lint ──┬──► unit-tests (3.11 + 3.12)
+#          ├──► migration-tests (MigrationExecutor round-trip, 3.11)
 #          ├──► build
 #          ├──► security
 #          ├──► secret-scan
@@ -78,6 +79,15 @@ jobs:
     with:
       python-version: "3.12"
 
+  # ── 2b'. Migration round-trip tests (2026-09-03) ───────────────────────
+  # MigrationExecutor geri/irəli testləri unit-test job-larından çıxarılıb
+  # (coverage-siz, ayrıca postgres, --dist worksteal) — bax _migration-tests.yml.
+  migration-tests:
+    needs: lint
+    uses: ./.github/workflows/_migration-tests.yml
+    with:
+      python-version: "3.11"
+
   # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
   # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
   # tenant izolyasiyasının transaction-pooling rejimində qorunmasını yoxlayır.
@@ -143,6 +153,7 @@ jobs:
       - lint
       - unit-tests-311
       - unit-tests-312
+      - migration-tests
       - rls-txn-pool
       - build
       - security
@@ -160,6 +171,7 @@ jobs:
           echo "Lint:             ${{ needs.lint.result }}"
           echo "Unit Tests 3.11:  ${{ needs.unit-tests-311.result }}"
           echo "Unit Tests 3.12:  ${{ needs.unit-tests-312.result }}"
+          echo "Migration Tests:  ${{ needs.migration-tests.result }}"
           echo "RLS Txn-Pool:     ${{ needs.rls-txn-pool.result }}"
           echo "Build:            ${{ needs.build.result }}"
           echo "Security:         ${{ needs.security.result }}"
@@ -181,6 +193,10 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.migration-tests.result }}" != "success" ]]; then
+            echo "❌ Migration round-trip tests did not succeed: ${{ needs.migration-tests.result }}"
+            exit 1
+          fi
           if [[ "${{ needs.rls-txn-pool.result }}" != "success" ]]; then
             echo "❌ RLS Transaction-Pooling Gate did not succeed: ${{ needs.rls-txn-pool.result }}"
             exit 1

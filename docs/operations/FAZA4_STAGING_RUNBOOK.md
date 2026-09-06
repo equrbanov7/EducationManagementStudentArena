@@ -11,6 +11,7 @@
 
 - [ ] `main` və ya `Staging` branch-də bütün CI gate-ləri yaşıl:
   - `unit-tests-311`, `unit-tests-312`
+  - `migration-tests` (MigrationExecutor geri/irəli round-trip testləri — ayrıca job, coverage-siz)
   - `rls-txn-pool` (FAZA 4/Task 3 — bu, transaction-pooling regressiyanı tutur)
   - `lint` (worker-atomic coverage daxil)
   - `docker-build`, `container-scan`
