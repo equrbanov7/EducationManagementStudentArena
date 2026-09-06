@@ -10,7 +10,11 @@
 .ems-overlay {
     position: fixed;
     inset: 0;
-    z-index: 200;
+    /* Səhifə xromundan YUXARI olmalıdır: profil sidebar-ı `position: fixed;
+       z-index: 1050` daşıyır və 200-lə dialoqun üstünü örtürdü (mobil şuxlada
+       gözlə görünür). Bootstrap modal-ı (1055) isə ÜSTDƏ qalmalıdır — EMSConfirm
+       ems-dialoqun içindən çağırıla bilər. Ona görə 1051. */
+    z-index: 1051;
     display: flex;
     background: rgba(15, 23, 42, 0.55);
 }
