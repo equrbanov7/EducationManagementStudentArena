@@ -16,6 +16,7 @@ from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
+from .default_roles_vice_dean import VICE_DEAN_ROLES
 
 UNIVERSITY_ROLES = [
     {
@@ -584,8 +585,9 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 # Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
 
-# RİM əməkdaşı (2026-09-06) — mərkəzin rəhbəri `ikt_rehber` tək rol idi.
-UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES)
+# 2026-09-06 əlavələri: RİM əməkdaşı (mərkəzin yalnız rəhbəri var idi) və
+# dekan müavini (səviyyə cədvəlində var idi, rol kataloqunda yox).
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 
