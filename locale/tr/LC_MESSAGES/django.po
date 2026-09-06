@@ -65044,3 +65044,7 @@ msgstr "Vazgeç"
 msgctxt "ui.confirm_modal"
 msgid "Təsdiqlə"
 msgstr "Onayla"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "yetki"

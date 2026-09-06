@@ -403,3 +403,37 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
 .people__table[aria-busy="true"] tbody tr:not(.people__row--skeleton) {
     display: none;
 }
+
+/* ── İcazə çipləri: yığcam açılan blok (QA 2026-09-05 P3-7) ─────────────── */
+.people__perms-box {
+    margin-top: 6px;
+}
+
+.people__perms-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+    list-style: none;
+}
+
+.people__perms-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.people__perms-toggle::before {
+    content: "›";
+    display: inline-block;
+    transition: transform 0.12s ease;
+}
+
+.people__perms-box[open] .people__perms-toggle::before {
+    transform: rotate(90deg);
+}
+
+.people__perms-box[open] .people__perms {
+    margin-top: 6px;
+}

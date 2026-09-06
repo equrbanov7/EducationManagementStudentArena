@@ -65316,3 +65316,7 @@ msgstr "Cancel"
 msgctxt "ui.confirm_modal"
 msgid "Təsdiqlə"
 msgstr "Confirm"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "permissions"

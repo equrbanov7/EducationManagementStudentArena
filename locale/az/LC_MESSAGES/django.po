@@ -65137,3 +65137,7 @@ msgstr "Ləğv et"
 msgctxt "ui.confirm_modal"
 msgid "Təsdiqlə"
 msgstr "Təsdiqlə"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "səlahiyyət"
