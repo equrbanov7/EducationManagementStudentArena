@@ -10,6 +10,7 @@ from . import (
     curriculum_actions,
     guest_roster_views,
     journal_actions,
+    journal_lesson_lookup,
     lessons_log_views,
     pdf_views,
     schedule_views,
@@ -93,6 +94,18 @@ urlpatterns = [
     ),
     path("<uuid:offering_id>/alt-qrup/elave/", guest_roster_views.guest_add, name="journal_guest_add"),
     path("<uuid:offering_id>/alt-qrup/cixar/", guest_roster_views.guest_remove, name="journal_guest_remove"),
+    # Dərs modalının axtarışlı/lazy seçiciləri (QA 2026-09-05 P3-13) — uuid
+    # catch-all-dan ƏVVƏL.
+    path(
+        "<uuid:offering_id>/ders-muellimleri/axtar/",
+        journal_lesson_lookup.lesson_teacher_search,
+        name="journal_lesson_teacher_search",
+    ),
+    path(
+        "<uuid:offering_id>/ders-otaqlari/",
+        journal_lesson_lookup.lesson_room_data,
+        name="journal_lesson_rooms",
+    ),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),
