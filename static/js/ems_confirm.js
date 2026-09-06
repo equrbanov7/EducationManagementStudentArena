@@ -1,5 +1,9 @@
 /* =========================================================================
-   ems_ui/confirm.js — Qlobal, promise-based təsdiq dialoqu (EMSConfirm)
+   ems_confirm.js — Qlobal, promise-based təsdiq dialoqu (EMSConfirm)
+
+   YER: `static/js/` (kabinetin `ems_ui/` komponent qatında DEYİL) — bu utiliti
+   kabinetdən kənar səhifələr də (imtahan, kurs, blog) işlədir və `base.html`-dən
+   yüklənir; `ems_ui/` qatının asset/AJAX-safe müqaviləsi kabinet komponentlərinə aiddir.
 
    NİYƏ
    ----
