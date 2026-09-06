@@ -12,7 +12,7 @@ from apps.exams.services.access_code_crypto import decrypt_access_code
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
-pytestmark = pytest.mark.postgres
+pytestmark = [pytest.mark.postgres, pytest.mark.migration_roundtrip]
 
 User = get_user_model()
 

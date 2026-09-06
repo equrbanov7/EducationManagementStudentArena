@@ -9,7 +9,11 @@ from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.recorder import MigrationRecorder
 from django.test import TransactionTestCase
 
+import pytest
+
 from core.rls import bypass_rls
+
+pytestmark = pytest.mark.migration_roundtrip
 
 
 class CriterionComponentMigrationTest(TransactionTestCase):

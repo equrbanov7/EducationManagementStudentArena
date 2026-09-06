@@ -1,0 +1,133 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Migration Round-Trip Tests
+# ═══════════════════════════════════════════════════════════════════════════
+# `migration_roundtrip` markerli testləri ayrıca PostgreSQL servisi ilə işlədir.
+# Bunlar MigrationExecutor ilə qrafı geri/irəli gəzən TransactionTestCase
+# sinifləridir (registrar 0044/0045, exams 0050, legacy_import 0005/0006):
+# hər test 40–90 miqrasiyanı unapply + reapply edir və DB-ni flush edir —
+# 2026-09-03 ölçməsi: 14 test ≈ 25 serial-dəqiqə, yəni bütün unit-test
+# dəstinin ~55%-i. `_unit-tests.yml`-də loadfile altında ən uzun fayl tək
+# worker-də qalıb job-un quyruğunu ~7 dəq uzadırdı (3 worker boş).
+#
+# Bu job:
+#   • coverage YOXDUR — `--cov` (branch tracing) saf-Python migration
+#     executor-u ~1.7× yavaşladır (rls-txn-pool ilə müqayisə: eyni testlər
+#     cov-suz 40–84 s, cov-lu 68–94 s). Migration/test faylları onsuz da
+#     coverage `omit`-dədir (pyproject), ona görə 68% qapısına təsiri yoxdur.
+#   • `--dist worksteal` — testlər bir-birindən asılı deyil (hər biri öz
+#     setUp-ında hədəfə miqrasiya edir, teardown-da qrafı bərpa edib flush
+#     edir), ona görə fayl-səviyyə qruplaşma lazım deyil; boş worker uzun
+#     faylın qalan testlərini götürür. Seed-flush sıralama problemi burada
+#     yoxdur: job-dakı HƏR test TransactionTestCase-dir və flush-dan sonra
+#     işləməyə onsuz da dözür (eyni fayldakı 2-ci test elə həmin vəziyyətdə
+#     işləyir).
+#   • yalnız bir Python versiyası — miqrasiya DDL/RunPython davranışı
+#     interpreter versiyasından asılı deyil.
+# Called by ci.yml via workflow_call.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🗃️ Migration Tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.11"
+
+jobs:
+  migration-tests:
+    name: 🗃️ Migration round-trip (Python ${{ inputs.python-version }})
+    runs-on: ubuntu-latest
+
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.test"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ inputs.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements/test.txt
+
+      - name: 🔍 Marker guard — hər MigrationExecutor testi markerlidir
+        run: |
+          echo "::group::🔍 migration_roundtrip marker guard"
+          # Markersiz executor testi səssizcə _unit-tests.yml-ə düşür və
+          # oradakı worker quyruğunu yenidən uzadır. Burada fail-fast.
+          missing=0
+          while IFS= read -r f; do
+            if ! grep -q "pytest.mark.migration_roundtrip" "$f"; then
+              echo "::error file=$f::MigrationExecutor işlədir, amma 'pytestmark = pytest.mark.migration_roundtrip' yoxdur"
+              missing=1
+            fi
+          done < <(grep -rl "MigrationExecutor" apps core tests --include='test_*.py')
+          if [ "$missing" -eq 0 ]; then echo "✅ bütün executor testləri markerlidir"; fi
+          echo "::endgroup::"
+          exit "$missing"
+
+      - name: 🧪 Run migration round-trip tests
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          echo "::group::🧪 Migration round-trip tests"
+          pytest \
+            -n 4 --dist worksteal \
+            --ds=config.settings.test \
+            --ignore=tests/e2e \
+            -m migration_roundtrip \
+            -v \
+            --tb=short \
+            --timeout=600 \
+            --durations=20
+          echo "::endgroup::"

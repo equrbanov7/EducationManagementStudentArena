@@ -123,10 +123,16 @@ jobs:
           # (test_test_db_gw0..gw3; `test_user` POSTGRES_USER = superuser →
           # CREATEDB var). pytest-cov worker məlumatını özü birləşdirir —
           # `--cov-fail-under` birləşmiş nəticəyə tətbiq olunur.
+          #
+          # `-m "not migration_roundtrip"` (2026-09-03): MigrationExecutor
+          # round-trip testləri (~25 serial-dəq, dəstin ~55%-i) ayrıca
+          # `_migration-tests.yml` job-unda, coverage-siz işləyir — bax oradakı
+          # şərh. Coverage-ə təsiri yoxdur (migrations/ və tests/ omit-dədir).
           pytest \
             -n 4 --dist loadfile \
             --ds=config.settings.test \
             --ignore=tests/e2e \
+            -m "not migration_roundtrip" \
             --cov=apps \
             --cov=core \
             --cov=config \
