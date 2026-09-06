@@ -685,6 +685,17 @@ ENTRIES = {
         },
     },
     "accounts.syllabus": {
+        "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin.": {
+            "en": "This subject/term already has an open draft (%(version)s) — edit it instead of copying.",
+            "ru": "Для этого предмета/периода уже есть открытый черновик (%(version)s) — отредактируйте его.",
+            "tr": "Bu ders/dönem için zaten açık bir taslak var (%(version)s) — kopyalamak yerine onu düzenleyin.",
+        },
+        "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın.": {
+            "en": "An approved syllabus exists for this subject/term — open a new version instead of copying over it.",
+            "ru": "Для этого предмета/периода есть утверждённый силлабус — откройте новую версию.",
+            "tr": "Bu ders/dönem için onaylı bir izlence var — üzerine kopyalamak yerine yeni sürüm açın.",
+        },
+
         "Bölmə məzmununun formatı düzgün deyil (%(field)s).": {
             "en": "The section content has an invalid format (%(field)s).",
             "ru": "Содержимое раздела имеет неверный формат (%(field)s).",

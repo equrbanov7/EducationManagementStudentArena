@@ -65468,3 +65468,11 @@ msgstr "Подтвердить"
 msgctxt "accounts.people"
 msgid "səlahiyyət"
 msgstr "прав"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Для этого предмета/периода уже есть открытый черновик (%(version)s) — отредактируйте его."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Для этого предмета/периода есть утверждённый силлабус — откройте новую версию."
