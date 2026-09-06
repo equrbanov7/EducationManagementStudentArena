@@ -97,7 +97,7 @@ def test_rector_wildcard_covers_syllabus():
 
 
 def test_unrelated_roles_get_nothing_by_default():
-    for name in ("student", "assistant", "tutor", "hr", "exam_center"):
+    for name in ("student", "assistant", "tutor", "hr", "exam_center_head"):
         permissions = _role(name)["permissions"]
         for permission in ALL_SYLLABUS_PERMS:
             assert not has_permission(permissions, permission), f"{name} → {permission}"
