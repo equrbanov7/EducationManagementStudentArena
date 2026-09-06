@@ -507,7 +507,7 @@ def _summary_cache_key(organization, scope, filters) -> str:
         )
     except (TypeError, ValueError):
         return ""
-    return "academic_records:summary:" + hashlib.sha1(raw.encode("utf-8")).hexdigest()
+    return "academic_records:summary:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def build_records_overview(

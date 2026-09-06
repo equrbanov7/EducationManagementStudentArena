@@ -17,7 +17,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.views._helpers.rbac import _role_capabilities
-from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import services as registrar_services
 from apps.registrar.models import Curriculum, Enrollment, Program, StudentAcademicRecord, Subject
 from apps.registrar.public import build_student_subjects_context
@@ -97,6 +97,15 @@ class OtherPeriodActiveEnrollmentTest(TestCase):
         )
         self.subject = Subject.objects.create(organization=self.org, code="OTP101", name="Yay fənni")
         self.student = User.objects.create_user("otp_student", "otp_student@qku.edu.az", "pw")
+        # Postgres-də `registrar_guard_active_member` akademik qeydin sahibindən AKTİV
+        # «student» üzvlüyü tələb edir (sqlite-da trigger yoxdur → lokalda görünmür).
+        Membership.objects.create(
+            user=self.student,
+            organization=self.org,
+            role=self.org.roles.get(name="student"),
+            is_primary=True,
+            is_active=True,
+        )
         self.program = Program.objects.create(organization=self.org, code="OTP-PRG", name="OTP proqramı")
         self.curriculum = Curriculum.objects.create(organization=self.org, program=self.program, admission_year=2024)
         self.record = StudentAcademicRecord.objects.create(

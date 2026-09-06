@@ -80,7 +80,19 @@ def _make_group(organization, specialty, name, *, slug):
 def _make_student(organization, program, curriculum, group, *, username, status=AcademicStatus.ENROLLED):
     from django.contrib.auth import get_user_model
 
+    from apps.organizations.models import Membership
+
     user = get_user_model().objects.create_user(username=username, email=f"{username}@example.test")
+    # Postgres-də `registrar_guard_active_member` trigger-i akademik qeydin sahibindən
+    # AKTİV «student» üzvlüyü tələb edir (sqlite-da trigger yoxdur — ona görə lokal
+    # sürətli qaçışda görünmür, CI-də düşür).
+    Membership.objects.create(
+        user=user,
+        organization=organization,
+        role=organization.roles.get(name="student"),
+        is_primary=True,
+        is_active=True,
+    )
     return StudentAcademicRecord.objects.create(
         organization=organization,
         student=user,
