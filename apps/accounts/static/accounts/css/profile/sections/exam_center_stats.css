@@ -11,7 +11,7 @@
 /* Bütün filtr elementləri eyni hündürlükdə (axtarış-seçici, dropdown, input). */
 .ecs-field input, .ecs-field select { width:100%; min-height:2.7rem; box-sizing:border-box; padding:.5rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
 .ecs-field input:focus, .ecs-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
-.ecs-field input::placeholder { color:var(--ems-neutral-400); }
+.ecs-field input::placeholder { color: var(--ems-neutral-500); }
 /* Filtrlərdəki Bootstrap select-lər — kompakt (nəhəng default toggle yox) */
 .ecs-filters .bootstrap-single-select__toggle { min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; padding:.5rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
 .ecs-filters .bootstrap-single-select__toggle:hover { border-color:var(--ems-primary-300); }
@@ -32,7 +32,7 @@
 .ecs-table thead th.is-sortable { cursor:pointer; user-select:none; }
 .ecs-table thead th.is-sortable:hover { background:var(--ems-primary-100); }
 .ecs-table thead th.is-active { background:var(--ems-primary-100); color:var(--ems-primary-800); }
-.ecs-arrow { font-size:.95rem; margin-left:.35rem; vertical-align:-1px; color:var(--ems-neutral-400); }
+.ecs-arrow { font-size:.95rem; margin-left:.35rem; vertical-align:-1px; color: var(--ems-neutral-500); }
 .ecs-table thead th.is-active .ecs-arrow { color:var(--ems-primary-600); }
 .ecs-table tbody td { color:var(--ems-neutral-900); }
 .ecs-clip { max-width:220px; overflow:hidden; text-overflow:ellipsis; }
@@ -61,17 +61,17 @@
 .ecs-chartbox--wide { grid-column:1 / -1; }
 .ecs-chartbox__title { font-size:.86rem; font-weight:800; color:var(--ems-neutral-700); display:flex; align-items:center; gap:.45rem; margin-bottom:.7rem; }
 .ecs-chartbox__title i { color:var(--ems-primary-600); }
-.ecs-chartbox__title span { font-weight:600; color:var(--ems-neutral-400); font-size:.76rem; }
+.ecs-chartbox__title span { font-weight:600; color: var(--ems-neutral-500); font-size:.76rem; }
 .ecs-chartbox__wrap { position:relative; height:250px; }
 .ecs-chartbox--wide .ecs-chartbox__wrap { height:280px; }
-.ecs-chartbox__empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--ems-neutral-400); font-size:.88rem; }
+.ecs-chartbox__empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color: var(--ems-neutral-500); font-size:.88rem; }
 /* AI analiz paneli */
 .ecs-ai { margin-top:1.25rem; border:1px solid var(--ems-primary-100); border-radius:12px; background:linear-gradient(180deg, var(--ems-primary-50), #fff 55%); padding:1.1rem 1.2rem; }
 .ecs-ai__head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
 .ecs-ai__head h3 { margin:0; font-size:1.05rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
 .ecs-ai__head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; max-width:46rem; }
 .ecs-ai__out { margin-top:.9rem; }
-.ecs-ai__hint { color:var(--ems-neutral-400); font-size:.86rem; }
+.ecs-ai__hint { color: var(--ems-neutral-500); font-size:.86rem; }
 .ecs-ai__loading { color:var(--ems-primary-700); font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
 .ecs-ai__error { color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:.7rem .9rem; font-size:.88rem; }
 .ecs-ai__text { background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; padding:1rem 1.15rem; color:var(--ems-neutral-800); font-size:.92rem; line-height:1.6; }

@@ -23,7 +23,7 @@
 
         <div class="section-card">
             <form method="get" class="search-form">
-                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_courses_page' %}" class="form-control">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_courses_page' %}" class="form-control" aria-label="{% trans 'search_placeholder' context 'accounts.assigned_courses_page' %}">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
             </form>
         </div>

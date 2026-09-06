@@ -651,7 +651,7 @@ msgstr "Təyin olunmuş kurslarım"
 #: apps/accounts/templates/accounts/assigned_courses.html:21
 msgctxt "accounts.assigned_courses_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:27
 msgctxt "accounts.assigned_courses_page"
@@ -676,7 +676,7 @@ msgstr "Təyin olunmuş imtahanlarım"
 #: apps/accounts/templates/accounts/assigned_exams.html:21
 msgctxt "accounts.assigned_exams_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:27
 msgctxt "accounts.assigned_exams_page"
@@ -740,7 +740,7 @@ msgstr "• • • • • •"
 #: apps/accounts/templates/accounts/assigned_exams.html:105
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_cancel"
-msgstr "Cancel"
+msgstr "Ləğv et"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:106
 msgctxt "accounts.assigned_exams_page"
@@ -1019,12 +1019,12 @@ msgstr "Feedback (optional)"
 #: apps/accounts/templates/accounts/grading_queue.html:176
 msgctxt "accounts.grading_queue_page"
 msgid "submit_grade"
-msgstr "Submit grade"
+msgstr "Balı göndər"
 
 #: apps/accounts/templates/accounts/grading_queue.html:179
 msgctxt "accounts.grading_queue_page"
 msgid "next_grade"
-msgstr "Next grade"
+msgstr "Növbəti qiymətləndirmə"
 
 #: apps/accounts/templates/accounts/grading_queue.html:192
 msgctxt "accounts.grading_queue_page"
@@ -1259,7 +1259,7 @@ msgstr "My Results"
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Profilə qayıt"
 
 #: apps/accounts/templates/accounts/my_results.html:26
 msgctxt "accounts.my_results_page"
@@ -3993,7 +3993,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:11
 msgctxt "staff.management"
 msgid "Staff Management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:17
 #, python-format
@@ -4104,23 +4104,23 @@ msgstr "Müəllim dəvətləri"
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:115
 msgctxt "staff.management"
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:121
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:100
 msgctxt "staff.management"
 msgid "Staff requests"
-msgstr "Staff müraciətləri"
+msgstr "Heyət müraciətləri"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:127
 msgctxt "staff.management"
 msgid "Unassigned staff"
-msgstr "Staff dəvətsizlər"
+msgstr "Təyinatsız heyət"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:133
 msgctxt "staff.management"
 msgid "Staff invites"
-msgstr "Staff dəvətləri"
+msgstr "Heyət dəvətləri"
 
 #: apps/accounts/templates/accounts/partials/_staff_management_content.html:142
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:5
@@ -5614,7 +5614,7 @@ msgstr "Qeyri-müəllim əməkdaşlar burada göstərilir."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:214
 msgctxt "staff.management"
 msgid "Search staff..."
-msgstr "Staff axtar..."
+msgstr "Heyət üzrə axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:33
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:124
@@ -5697,7 +5697,7 @@ msgstr "Əməliyyat"
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:87
 msgctxt "staff.management"
 msgid "No staff member found."
-msgstr "Staff tapılmadı."
+msgstr "Heyət üzvü tapılmadı."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:102
 msgctxt "staff.management"
@@ -5707,7 +5707,7 @@ msgstr "Gözləyən staff müraciətlərini buradan cavablandırın."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:117
 msgctxt "staff.management"
 msgid "Search staff requests..."
-msgstr "Staff müraciəti axtar..."
+msgstr "Heyət müraciətlərində axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:142
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:94
@@ -5811,7 +5811,7 @@ msgstr "Kafedra"
 #: apps/accounts/views/_helpers/roles_map.py:58
 msgctxt "membership_request.role"
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:312
 msgctxt "staff.management"
@@ -5831,7 +5831,7 @@ msgstr "Qəbul edilməmiş staff dəvətlərini buradan geri çəkin."
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:343
 msgctxt "staff.management"
 msgid "Search staff invites..."
-msgstr "Staff dəvəti axtar..."
+msgstr "Heyət dəvətlərində axtarış..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:385
 #: apps/accounts/templates/accounts/partials/staff_management/_staff_tabs.html:391
@@ -6715,7 +6715,7 @@ msgstr ""
 #: apps/accounts/templates/accounts/password_reset_complete.html:29
 msgctxt "accounts.password_reset_complete_page"
 msgid "login_now"
-msgstr "Login now"
+msgstr "İndi daxil olun"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:4
 msgctxt "accounts.password_reset_confirm_page"
@@ -15200,7 +15200,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/views/profile/_sections/labels.py:83
 msgctxt "profile.section"
 msgid "staff_management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:39
 msgctxt "profile.sidebar"
@@ -15210,7 +15210,7 @@ msgstr "Tələbə İdarəetməsi"
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:39
 msgctxt "profile.sidebar"
 msgid "staff_management"
-msgstr "Staff İdarəetməsi"
+msgstr "Heyət idarəetməsi"
 
 #: apps/accounts/templates/accounts/profile/sidebar/_org_menu_group.html:48
 #: apps/accounts/views/profile/_sections/labels.py:84
@@ -15815,7 +15815,7 @@ msgstr "Welcome"
 #: apps/accounts/templates/accounts/student_dashboard.html:19
 msgctxt "accounts.student_dashboard"
 msgid "btn_profile"
-msgstr "Profile"
+msgstr "Profil"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:22
 msgctxt "accounts.student_dashboard"
@@ -21908,7 +21908,7 @@ msgstr "Django site admin"
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:13
 #: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:13
 msgid "Home"
-msgstr "Home"
+msgstr "Ana səhifə"
 
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:17
 #: apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:17
@@ -22276,7 +22276,7 @@ msgstr "Təşkilat seçimi məcburidir."
 #: apps/courses/templates/courses/course_dashboard.html:46
 msgctxt "courses.dashboard"
 msgid "page_suffix_dashboard"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #: apps/courses/templates/courses/course_dashboard.html:38
 #: apps/courses/templates/courses/course_dashboard.html:204
@@ -22379,7 +22379,7 @@ msgstr "Üzvlər"
 #: apps/courses/templates/courses/course_members.html:24
 msgctxt "courses.members_page"
 msgid "back_dashboard"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #: apps/courses/templates/courses/course_members.html:27
 msgctxt "courses.members_page"
@@ -22489,7 +22489,7 @@ msgstr "Kurs yaradıldıqdan sonra dashboard səhifəsinə yönləndirilirsiniz.
 #: apps/courses/templates/courses/create_course.html:74
 msgctxt "courses.create_page"
 msgid "after_create_item_2"
-msgstr "Dashboard-da Mövzular, İşlər, Resurslar əlavə edə bilərsiniz."
+msgstr "İdarə panelində Mövzular, İşlər, Resurslar əlavə edə bilərsiniz."
 
 #: apps/courses/templates/courses/create_course.html:75
 msgctxt "courses.create_page"
@@ -22631,7 +22631,7 @@ msgstr "tələbə"
 #: apps/courses/templates/courses/my_courses.html:70
 msgctxt "courses.my_courses"
 msgid "action_go_dashboard"
-msgstr "Dashboard-a Get"
+msgstr "İdarə panelinə keç"
 
 #: apps/courses/templates/courses/my_courses.html:84
 msgctxt "courses.my_courses"
@@ -24595,12 +24595,12 @@ msgstr "Proktorinq səviyyəsi"
 #: apps/exams/domain/exam_definition.py:174
 msgctxt "exams.model.exam.field"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #: apps/exams/domain/exam_definition.py:175
 msgctxt "exams.model.exam.help"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #: apps/exams/domain/exam_definition.py:178
 msgctxt "exams.model.exam.field"
@@ -31156,17 +31156,17 @@ msgstr "İmtahan yoxdur."
 #: apps/exams/templates/exams/teacher/export_waiting.html:14
 msgctxt "exams.template.export_waiting"
 msgid "export_preparing_title"
-msgstr "Export hazırlanır"
+msgstr "İxrac hazırlanır"
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:11
 msgctxt "exams.template.export_waiting"
 msgid "export_failed_body"
-msgstr "Export alınmadı. Yenidən cəhd edin."
+msgstr "İxrac alınmadı. Yenidən cəhd edin."
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:12
 msgctxt "exams.template.export_waiting"
 msgid "export_timeout_body"
-msgstr "Export çox uzun çəkdi. Bir az sonra yenidən cəhd edin."
+msgstr "İxrac çox uzun çəkdi. Bir az sonra yenidən cəhd edin."
 
 #: apps/exams/templates/exams/teacher/export_waiting.html:16
 msgctxt "exams.template.export_waiting"
@@ -36117,12 +36117,12 @@ msgstr "Fayl seçilməyib."
 #: apps/exams/views/teacher/extract_jobs.py:221
 msgctxt "exams.view.export_job.error"
 msgid "empty_export"
-msgstr "Export üçün aktiv sual tapılmadı."
+msgstr "İxrac üçün aktiv sual tapılmadı."
 
 #: apps/exams/views/teacher/extract_jobs.py:223
 msgctxt "exams.view.export_job.error"
 msgid "export_failed"
-msgstr "Export alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "İxrac alınmadı. Bir az sonra yenidən cəhd edin."
 
 #: apps/exams/views/teacher/groups.py:49 apps/exams/views/teacher/groups.py:76
 msgctxt "exams.view.groups.message"
@@ -36281,7 +36281,7 @@ msgstr "Sual bankı uğurla yadda saxlanıldı!"
 #: apps/exams/views/teacher/question_bank/_views_misc.py:76
 msgctxt "exams.question_bank.message"
 msgid "Export üçün sual tapılmadı."
-msgstr "Export üçün sual tapılmadı."
+msgstr "İxrac üçün sual tapılmadı."
 
 #: apps/exams/views/teacher/question_bank/_views_misc.py:84
 #, python-format
@@ -36387,7 +36387,7 @@ msgstr "Toplu sual əlavə et"
 #: apps/exams/views/teacher/question_library/export.py:70
 msgctxt "exams.view.bank.message"
 msgid "Export üçün aktiv sual tapılmadı."
-msgstr "Export üçün aktiv sual tapılmadı."
+msgstr "İxrac üçün aktiv sual tapılmadı."
 
 #: apps/exams/views/teacher/question_library/picker.py:52
 #: apps/exams/views/teacher/question_library/picker.py:55
@@ -37638,7 +37638,7 @@ msgstr "Əlavə edilir..."
 #: apps/labs/templates/labs/manage_blocks.html:381
 msgctxt "labs.js.manage_blocks"
 msgid "state_importing"
-msgstr "Import edilir..."
+msgstr "İdxal edilir..."
 
 #: apps/labs/templates/labs/manage_blocks.html:382
 msgctxt "labs.js.manage_blocks"
@@ -39534,7 +39534,7 @@ msgstr "Müəllim"
 
 #: apps/notifications/models.py:22
 msgid "Staff"
-msgstr "Staff"
+msgstr "Heyət"
 
 #: apps/notifications/models.py:86
 msgid "Assignment"
@@ -43790,7 +43790,7 @@ msgstr "Jurnalı Excel (xlsx) olaraq yüklə"
 #: apps/registrar/templates/registrar/journal_detail.html:150
 msgctxt "registrar.journal"
 msgid "Export"
-msgstr "Export"
+msgstr "İxrac"
 
 #: apps/registrar/templates/registrar/journal_detail.html:157
 msgctxt "registrar.syllabus"
@@ -48455,7 +48455,7 @@ msgstr "Panel"
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "home"
-msgstr "Home"
+msgstr "Ana səhifə"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -48491,19 +48491,19 @@ msgstr "Reports"
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "profile"
-msgstr "Profile"
+msgstr "Profil"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "settings"
-msgstr "Settings"
+msgstr "Parametrlər"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
 msgctxt "accounts.teacher_dashboard"
 msgid "dashboard_title"
-msgstr "Dashboard"
+msgstr "İdarə paneli"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -51241,8 +51241,14 @@ msgstr ":?.!"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
+#. QA 2026-09-06 (P3-21): bu msgid Django-nun ÖZ ümumi "sahə mütləqdir" mesajıdır
+#. (kontekstsiz, bütün formalarda paylaşılır) — səhvən fayl sahəsi mesajı ilə
+#. qarışdırılmışdı ("Fayl seçilməyib."), nəticədə HƏR boş məcburi sahə (fayl
+#. olmayan formalar daxil, məs. kollokvium pəncərəsi tarix formu) istifadəçiyə
+#. yanlış "fayl seçilməyib" mesajı göstərirdi. Django-nun öz rəsmi az tərcüməsi
+#. ilə uyğunlaşdırıldı (venv/…/django/conf/locale/az/LC_MESSAGES/django.po).
 msgid "This field is required."
-msgstr "Fayl seçilməyib."
+msgstr "Bu sahə vacibdir."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -64446,3 +64452,700 @@ msgstr "Bu bölməyə icazəniz yoxdur."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "E-poçt"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Telefon"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FİN"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Cins"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Doğum tarixi / yaş"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "yaş"
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Son giriş"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Heç vaxt"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Qeydiyyat"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Üzvlüklər"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "Aktiv üzvlük yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Akademik qeydlər"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "Akademik qeyd yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Tədris"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "Cari dövrdə açılış yoxdur"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Profil səhifəsi"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Məlumat yüklənmədi."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Kişi"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Qadın"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Göstərilməyib"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Bloklanıb"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Passiv"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "Arxiv"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "Gözləmədə"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Oxuyur"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "Xaric edilib"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Məzun"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Köçürülüb"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Dayandırılıb"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Hesabı dayandır"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Hesabı bərpa et"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Müəllim statusu ver"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Müəllim statusunu çıxar"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Bu əməl üçün `role.assign` və ya `org.manage_members` icazəsi lazımdır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Bu istifadəçi sizin struktur əhatənizdən kənardadır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Seçilmiş rol bu təşkilatda müəyyən edilməyib: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "sahə uzunluğu həddi keçildi"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Akademik qeydiniz hələ yaradılmayıb."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "Bank adı ən çox %(n)s simvol ola bilər."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+
+msgid "Standart format"
+msgstr "Standart format"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Rəqəmsal İnkişaf Mərkəzi (RİM) əməkdaşı"
+
+msgid "Dərs tipi düzgün seçilməyib."
+msgstr "Dərs tipi düzgün seçilməyib."
+
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Dərs saatı müsbət tam ədəd olmalıdır."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Dərs sütunları"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Hamısını göstər"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Son 20 dərs"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(first)s–%(last)s / %(total)s dərs"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "Bütün %(total)s dərs göstərilir"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Sonrakı dərslər"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Əvvəlki dərslər"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Seç"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+
+msgctxt "exams.view.bank.message"
+msgid "Bu adla bankınız artıq var: %(name)s"
+msgstr "Bu adla bankınız artıq var: %(name)s"
+
+msgctxt "profile.rim"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm və ya .csv"
+
+msgctxt "profile.rim"
+msgid "7 simvol, yalnız A–Z və 0–9."
+msgstr "7 simvol, yalnız A–Z və 0–9."
+
+msgctxt "profile.rim"
+msgid "Ad, soyad"
+msgstr "Ad, soyad"
+
+msgctxt "profile.rim"
+msgid "Axtarmaq üçün ən azı 1 simvol yazın."
+msgstr "Axtarmaq üçün ən azı 1 simvol yazın."
+
+msgctxt "profile.rim"
+msgid "Axtarılır…"
+msgstr "Axtarılır…"
+
+msgctxt "profile.rim"
+msgid "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+msgstr "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+
+msgctxt "profile.rim"
+msgid "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+msgstr "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parol"
+msgstr "Birdəfəlik parol"
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+msgstr "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+msgstr "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+msgstr "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+msgstr "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+
+msgctxt "profile.rim"
+msgid "Boş şablonu endir"
+msgstr "Boş şablonu endir"
+
+msgctxt "profile.rim"
+msgid "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+msgstr "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+
+msgctxt "profile.rim"
+msgid "Cins"
+msgstr "Cins"
+
+msgctxt "profile.rim"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "profile.rim"
+msgid "Daha bir hesab yarat"
+msgstr "Daha bir hesab yarat"
+
+msgctxt "profile.rim"
+msgid "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+msgstr "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi"
+msgstr "Doğum tarixi"
+
+msgctxt "profile.rim"
+msgid "E-poçt"
+msgstr "E-poçt"
+
+msgctxt "profile.rim"
+msgid "Emal olunur…"
+msgstr "Emal olunur…"
+
+msgctxt "profile.rim"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+
+msgctxt "profile.rim"
+msgid "Hansı hesab növünü yaradırsınız?"
+msgstr "Hansı hesab növünü yaradırsınız?"
+
+msgctxt "profile.rim"
+msgid "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+msgstr "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+
+msgctxt "profile.rim"
+msgid "Hesab yaradıldı."
+msgstr "Hesab yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Hesabı yarat"
+msgstr "Hesabı yarat"
+
+msgctxt "profile.rim"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "profile.rim"
+msgid "Kafedra nəticələri"
+msgstr "Kafedra nəticələri"
+
+msgctxt "profile.rim"
+msgid "Kafedranın adını yazın"
+msgstr "Kafedranın adını yazın"
+
+msgctxt "profile.rim"
+msgid "Kişi"
+msgstr "Kişi"
+
+msgctxt "profile.rim"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "profile.rim"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabı yaradıldı."
+msgstr "Müəllim hesabı yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+msgstr "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+
+msgctxt "profile.rim"
+msgid "Parolları CSV kimi endir"
+msgstr "Parolları CSV kimi endir"
+
+msgctxt "profile.rim"
+msgid "Qadın"
+msgstr "Qadın"
+
+msgctxt "profile.rim"
+msgid "Qeyd (audit üçün)"
+msgstr "Qeyd (audit üçün)"
+
+msgctxt "profile.rim"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "profile.rim"
+msgid "Qrup nəticələri"
+msgstr "Qrup nəticələri"
+
+msgctxt "profile.rim"
+msgid "Qrupun adını və ya kodunu yazın"
+msgstr "Qrupun adını və ya kodunu yazın"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi"
+msgstr "Quru icra nəticəsi"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Quru icra nəticəsi (heç nə yazılmadı)"
+
+msgctxt "profile.rim"
+msgid "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+msgstr "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "profile.rim"
+msgid "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+msgstr "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+
+msgctxt "profile.rim"
+msgid "Sətir"
+msgstr "Sətir"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal (tələbə siyahısı)"
+msgstr "Toplu idxal (tələbə siyahısı)"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal — tələbə siyahısı"
+msgstr "Toplu idxal — tələbə siyahısı"
+
+msgctxt "profile.rim"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "profile.rim"
+msgid "Tələbə hesabı yaradıldı."
+msgstr "Tələbə hesabı yaradıldı."
+
+msgctxt "profile.rim"
+msgid "Tələbə kodu"
+msgstr "Tələbə kodu"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et ({n} hesab)"
+msgstr "Tətbiq et ({n} hesab)"
+
+msgctxt "profile.rim"
+msgid "Tətbiq nəticəsi"
+msgstr "Tətbiq nəticəsi"
+
+msgctxt "profile.rim"
+msgid "Təyin edilməyib"
+msgstr "Təyin edilməyib"
+
+msgctxt "profile.rim"
+msgid "Təşkilatdakı yeri"
+msgstr "Təşkilatdakı yeri"
+
+msgctxt "profile.rim"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "profile.rim"
+msgid "Xəta"
+msgstr "Xəta"
+
+msgctxt "profile.rim"
+msgid "Yaradılacaq"
+msgstr "Yaradılacaq"
+
+msgctxt "profile.rim"
+msgid "Yaradıldı"
+msgstr "Yaradıldı"
+
+msgctxt "profile.rim"
+msgid "Yaradılır…"
+msgstr "Yaradılır…"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab"
+msgstr "Yeni hesab"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaradın"
+msgstr "Yeni hesab yaradın"
+
+msgctxt "profile.rim"
+msgid "Yeni müəllim hesabı"
+msgstr "Yeni müəllim hesabı"
+
+msgctxt "profile.rim"
+msgid "Yeni tələbə hesabı"
+msgstr "Yeni tələbə hesabı"
+
+msgctxt "profile.rim"
+msgid "Yoxla (quru icra)"
+msgstr "Yoxla (quru icra)"
+
+msgctxt "profile.rim"
+msgid "Ötürüldü"
+msgstr "Ötürüldü"
+
+msgctxt "profile.rim"
+msgid "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+msgstr "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+
+msgctxt "profile.rim"
+msgid "İzah"
+msgstr "İzah"
+
+msgctxt "profile.rim"
+msgid "İşçi kodu"
+msgstr "İşçi kodu"
+
+msgctxt "profile.rim"
+msgid "Şəxsi məlumat"
+msgstr "Şəxsi məlumat"
+
+msgctxt "profile.rim"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı. Yenidən cəhd edin."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+msgstr "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Əvvəlcə fayl seçin."
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+msgstr "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+
+msgctxt "profile.rim"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "profile.rim"
+msgid "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+msgstr "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+
+msgctxt "profile.rim"
+msgid "Formda düzəliş tələb olunan sahələr var."
+msgstr "Formda düzəliş tələb olunan sahələr var."
+
+msgctxt "profile.rim"
+msgid "Naməlum hesab növü."
+msgstr "Naməlum hesab növü."
+
+msgctxt "profile.rim"
+msgid "FİN boşdur."
+msgstr "FİN boşdur."
+
+msgctxt "profile.rim"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+msgstr "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+
+msgctxt "profile.rim"
+msgid "Ad məcburidir."
+msgstr "Ad məcburidir."
+
+msgctxt "profile.rim"
+msgid "Soyad məcburidir."
+msgstr "Soyad məcburidir."
+
+msgctxt "profile.rim"
+msgid "Ən çox %(n)s simvol ola bilər."
+msgstr "Ən çox %(n)s simvol ola bilər."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Doğum tarixi məntiqsizdir."
+
+msgctxt "profile.rim"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Cins tanınmadı — «təyin edilməyib» qalır."
+
+msgctxt "profile.rim"
+msgid "Qrup seçilməyib və ya tapılmadı."
+msgstr "Qrup seçilməyib və ya tapılmadı."
+
+msgctxt "profile.rim"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+
+msgctxt "profile.rim"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+msgstr "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Qəbul ili rəqəm olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Qəbul ili 1950–%d aralığında olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Kafedra tapılmadı."
+msgstr "Kafedra tapılmadı."
+
+msgctxt "profile.rim"
+msgid "Bu kod artıq istifadə olunub."
+msgstr "Bu kod artıq istifadə olunub."
+
+msgctxt "profile.rim"
+msgid "E-poçt formatı yanlışdır."
+msgstr "E-poçt formatı yanlışdır."
+
+msgctxt "profile.rim"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+
+msgctxt "profile.rim"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "E-poçt artıq istifadə olunur — placeholder yazılır."
+
+msgctxt "registrar.schedule_manage"
+msgid "Auditoriya adı 64 simvoldan uzun ola bilməz."
+msgstr "Auditoriya adı 64 simvoldan uzun ola bilməz."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məcburidir."
+msgstr "Doğum tarixi məcburidir."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "səlahiyyət"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."

@@ -31,7 +31,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     margin-top: 2px;
 }
 

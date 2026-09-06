@@ -27,7 +27,7 @@
     vertical-align: baseline;
     font-size: 0.78em;
     line-height: 1;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: help;
     /* Nişan sətrin axınını pozmasın: fon/haşiyə YOXDUR, yalnız qlif. */
     background: none;

@@ -30,6 +30,35 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
 
         {# ── Sağ: davamiyyət grid-i ───────────────────────────────────────── #}
         <div class="jd2-gridcol">
+            {% comment %}Dərs pəncərəsi (QA 2026-09-05 P1-8): 226 dərsli açılışda bütün
+            sütunlar bir səhifəyə render olunurdu (41.5 MB HTML). İndi bir dəfəyə
+            yalnız bir dilim göstərilir; rəqəmlər (q/b, giriş balı, buraxılış)
+            HƏMİŞƏ bütün dərslər üzrədir.{% endcomment %}
+            {% if journal.lesson_window.enabled %}
+            <nav class="jd2-window" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
+                <a class="jd2-window__btn {% if not journal.lesson_window.has_prev %}is-disabled{% endif %}"
+                   href="?lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.prev_offset }}"
+                   {% if not journal.lesson_window.has_prev %}aria-disabled="true" tabindex="-1"{% endif %}>
+                    <i class="fas fa-chevron-left"></i> {% trans "Sonrakı dərslər" context "registrar.journal" %}
+                </a>
+                <span class="jd2-window__label">
+                    {% blocktrans context "registrar.journal" with first=journal.lesson_window.first_seq last=journal.lesson_window.last_seq total=journal.lesson_window.total %}{{ first }}–{{ last }} / {{ total }} dərs{% endblocktrans %}
+                </span>
+                <a class="jd2-window__btn {% if not journal.lesson_window.has_next %}is-disabled{% endif %}"
+                   href="?lw={{ journal.lesson_window.size }}&amp;lo={{ journal.lesson_window.next_offset }}"
+                   {% if not journal.lesson_window.has_next %}aria-disabled="true" tabindex="-1"{% endif %}>
+                    {% trans "Əvvəlki dərslər" context "registrar.journal" %} <i class="fas fa-chevron-right"></i>
+                </a>
+                <a class="jd2-window__all" href="?lw=0">{% trans "Hamısını göstər" context "registrar.journal" %}</a>
+            </nav>
+            {% elif journal.lesson_window.total > journal.lesson_window.size %}
+            <nav class="jd2-window" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
+                <span class="jd2-window__label">
+                    {% blocktrans context "registrar.journal" with total=journal.lesson_window.total %}Bütün {{ total }} dərs göstərilir{% endblocktrans %}
+                </span>
+                <a class="jd2-window__all" href="?lw=20">{% trans "Son 20 dərs" context "registrar.journal" %}</a>
+            </nav>
+            {% endif %}
             <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
                 <table class="jd2-table">
                     <thead>
@@ -80,6 +109,10 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                     </thead>
                     {% comment %}`data-jgs-tbody` — «alt qrupdan əlavə» əməlindən sonra
                     cədvəl YERİNDƏ yenilənir (journal_guest.js sətirləri buradan dəyişir).{% endcomment %}
+                    {% comment %}`spaceless` (QA 2026-09-05 P1-8): sətir markup-ı 40 boşluqlu
+                    girinti ilə render olunurdu — 555×20 xanada bu tək başına ~3 MB HTML
+                    demək idi. Teqlər ARASINDAKI boşluq silinir, mətn toxunulmur.{% endcomment %}
+                    {% spaceless %}
                     <tbody data-jgs-tbody>
                         {% for row in journal.rows %}
                         <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}{% if row.is_guest %} is-guest{% endif %}" data-jd-enrollment="{{ row.enrollment.id }}">
@@ -146,8 +179,6 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                     {% if cell.mark.status == 'absent' %}q/b{% elif cell.mark.status == 'excused' %}üq{% elif cell.mark.score is not None %}{{ cell.mark.score|floatformat:0 }}{% elif cell.mark %}i/e{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% elif cell.legacy_excuse %}<span class="corr-fixed-badge corr-excuse-badge">✎</span>{% endif %}
                                 </button>
                                 {% elif can_edit and cell.writable %}
-                                <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
-                                       value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
                                 {% if cell.allows_score %}
                                 {% comment %}Seminar/lab: tək bootstrap-select — q/b · i/e · bal (0–10).
                                 Bal seçilsə i/e avtomatik; gizli att/score sahələri JS ilə sinxronlanır.{% endcomment %}
@@ -167,6 +198,10 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                     </select>
                                 </div>
                                 {% else %}
+                                {% comment %}Mühazirə xanası: tək gizli att input + çip (seminar xanasında eyni adlı
+                                ikinci input render olunurdu — QA 2026-09-05 JOURNAL-TEACHER-13).{% endcomment %}
+                                <input type="hidden" name="att__{{ cell.lesson.id }}__{{ row.enrollment.id }}"
+                                       value="{% if cell.mark %}{{ cell.mark.status }}{% endif %}" data-jd-att>
                                 <button type="button"
                                         class="att-chip {% if cell.mark and cell.mark.status == 'absent' %}att-chip--qb{% elif cell.mark %}att-chip--ie{% else %}att-chip--empty{% endif %}"
                                         data-jd-chip data-lesson="{{ cell.lesson.id }}">
@@ -191,6 +226,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                         </tr>
                         {% endfor %}
                     </tbody>
+                    {% endspaceless %}
                 </table>
             </div>
             {% if can_edit and journal.lessons %}

@@ -37,6 +37,27 @@
         }
     }
 
+    /* Ağac qovşağı seçiləndə bölmə YENİDƏN yüklənir; swap-dan sonra brauzer
+       panelin başına qayıdır və istifadəçi «başqa sətir seçildi» zənn edirdi
+       (QA 2026-09-06 şikayəti). Yükləndikdən sonra seçilmiş sətri öz
+       sürüşmə konteynerində görünürə gətiririk — səhifə tullanmır. */
+    document.addEventListener("profile:section:loaded", function (event) {
+        var detail = event.detail || {};
+        if (detail.section !== "org-structure-tree") {
+            return;
+        }
+        var panel = detail.panel || document;
+        var selected = panel.querySelector('.ems-tree__row[aria-selected="true"]');
+        if (!selected) {
+            return;
+        }
+        try {
+            selected.scrollIntoView({ block: "center", inline: "nearest" });
+        } catch (e) {
+            selected.scrollIntoView(false);
+        }
+    });
+
     function sectionUrl(section, params) {
         var url = new URL(window.location.pathname, window.location.origin);
         var search = new URLSearchParams(window.location.search);

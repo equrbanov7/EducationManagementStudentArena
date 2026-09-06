@@ -240,6 +240,7 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
     level = models.PositiveIntegerField(default=0, db_index=True)
     path = models.CharField(max_length=1000, blank=True, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
+    is_service_unit = models.BooleanField(default=False, db_index=True)  # ortoqonal is_active-ə, bax QA P2-8
 
     objects = models.Manager()
     active = ActiveManager()

@@ -64779,3 +64779,700 @@ msgstr "У вас нет доступа к этому разделу."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "Запрошенный раздел не существует или недоступен для вашей роли — вы возвращены на главную страницу."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "Эл. почта"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Телефон"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FIN"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Пол"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Дата рождения / возраст"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "лет"
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Последний вход"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Никогда"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Регистрация"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Членства"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "Нет активного членства"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Академические записи"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "Нет академических записей"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Год поступления"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Преподавание"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "Нет открытых курсов в текущем периоде"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Страница профиля"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Не удалось загрузить данные."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Мужской"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Женский"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Не указано"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Заблокирован"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Неактивен"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "В архиве"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "В ожидании"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Обучается"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "Отчислен"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Выпускник"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Переведён"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Приостановлен"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Приостановить учётную запись"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Восстановить учётную запись"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Выдать статус преподавателя"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Снять статус преподавателя"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Выбранный преподаватель не входит в преподавательский состав организации."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Журнал закрыт — изменения не сохранены."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Ни одна ячейка не сохранена — помешало правило дня занятия или блокировка ячейки."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Содержимое раздела имеет неверный формат (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "Содержимое слишком велико — не более %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Для этого курса силлабус уже существует — откройте его из списка."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Для этого действия требуется право `role.assign` или `org.manage_members`."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Этот пользователь вне вашей структурной зоны ответственности."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Выбранная роль не определена в этой организации: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Имя/фамилия/отчество — не более %(n)s символов."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "превышена допустимая длина поля"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Ваша академическая запись ещё не создана."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "Журнал появится после зачисления в группу — обратитесь в студенческую службу."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "Название банка — не более %(n)s символов."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "Экзаменационные/пересдачные баллы вносит только Экзаменационный центр — эти поля не сохранены."
+
+msgid "Standart format"
+msgstr "Формат по умолчанию"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Формат вопроса по умолчанию (можно изменить при добавлении вопроса)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Сотрудник Центра цифрового развития (RİM)"
+
+msgid "Dərs tipi düzgün seçilməyib."
+msgstr "Тип занятия выбран неверно."
+
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Количество часов занятия должно быть целым положительным числом."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Столбцы занятий"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Показать все"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Последние 20 занятий"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(first)s–%(last)s из %(total)s занятий"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "Показаны все %(total)s занятий"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Следующие занятия"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Предыдущие занятия"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Выбрать"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s ячеек не сохранено — балл должен быть целым числом от 0 до 10."
+
+msgctxt "exams.view.bank.message"
+msgid "Bu adla bankınız artıq var: %(name)s"
+msgstr "У вас уже есть банк с таким названием: %(name)s"
+
+msgctxt "profile.rim"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm или .csv"
+
+msgctxt "profile.rim"
+msgid "7 simvol, yalnız A–Z və 0–9."
+msgstr "7 символов, только A–Z и 0–9."
+
+msgctxt "profile.rim"
+msgid "Ad, soyad"
+msgstr "Имя и фамилия"
+
+msgctxt "profile.rim"
+msgid "Axtarmaq üçün ən azı 1 simvol yazın."
+msgstr "Введите хотя бы 1 символ для поиска."
+
+msgctxt "profile.rim"
+msgid "Axtarılır…"
+msgstr "Идёт поиск…"
+
+msgctxt "profile.rim"
+msgid "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+msgstr "Одна учётная запись преподавателя с назначением на кафедру (академическая запись не создаётся)."
+
+msgctxt "profile.rim"
+msgid "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+msgstr "Одна учётная запись студента с группой, годом приёма и академической записью."
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parol"
+msgstr "Одноразовый пароль"
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+msgstr "Одноразовые пароли показываются ТОЛЬКО сейчас — они не хранятся ни в базе, ни в журнале аудита. Скачайте CSV и передайте их студентам."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+msgstr "Можно оставить пустым — тогда записывается заполнитель, а пользователь укажет адрес при первом входе."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+msgstr "Можно оставить пустым — имя пользователя формируется из кода или ФИН."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+msgstr "Можно оставить пустым — кафедру можно назначить позже."
+
+msgctxt "profile.rim"
+msgid "Boş şablonu endir"
+msgstr "Скачать пустой шаблон"
+
+msgctxt "profile.rim"
+msgid "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+msgstr "Этот пароль больше не будет показан и нигде не хранится. Передайте его пользователю до закрытия окна."
+
+msgctxt "profile.rim"
+msgid "Cins"
+msgstr "Пол"
+
+msgctxt "profile.rim"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "profile.rim"
+msgid "Daha bir hesab yarat"
+msgstr "Создать ещё одну запись"
+
+msgctxt "profile.rim"
+msgid "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+msgstr "Есть ещё результаты — уточните запрос."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi"
+msgstr "Дата рождения"
+
+msgctxt "profile.rim"
+msgid "E-poçt"
+msgstr "Эл. почта"
+
+msgctxt "profile.rim"
+msgid "Emal olunur…"
+msgstr "Обработка…"
+
+msgctxt "profile.rim"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Перетащите файл сюда или нажмите, чтобы выбрать"
+
+msgctxt "profile.rim"
+msgid "Hansı hesab növünü yaradırsınız?"
+msgstr "Какую учётную запись вы создаёте?"
+
+msgctxt "profile.rim"
+msgid "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+msgstr "Учётная запись создаётся в этой организации, и каждый шаг попадает в журнал аудита."
+
+msgctxt "profile.rim"
+msgid "Hesab yaradıldı."
+msgstr "Учётная запись создана."
+
+msgctxt "profile.rim"
+msgid "Hesabı yarat"
+msgstr "Создать учётную запись"
+
+msgctxt "profile.rim"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "profile.rim"
+msgid "Kafedra nəticələri"
+msgstr "Результаты по кафедрам"
+
+msgctxt "profile.rim"
+msgid "Kafedranın adını yazın"
+msgstr "Введите название кафедры"
+
+msgctxt "profile.rim"
+msgid "Kişi"
+msgstr "Мужской"
+
+msgctxt "profile.rim"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "profile.rim"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabı yaradıldı."
+msgstr "Учётная запись преподавателя создана."
+
+msgctxt "profile.rim"
+msgid "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+msgstr "Например: студент по переводу, обращение деканата №…"
+
+msgctxt "profile.rim"
+msgid "Parolları CSV kimi endir"
+msgstr "Скачать пароли в CSV"
+
+msgctxt "profile.rim"
+msgid "Qadın"
+msgstr "Женский"
+
+msgctxt "profile.rim"
+msgid "Qeyd (audit üçün)"
+msgstr "Примечание (для журнала аудита)"
+
+msgctxt "profile.rim"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "profile.rim"
+msgid "Qrup nəticələri"
+msgstr "Результаты по группам"
+
+msgctxt "profile.rim"
+msgid "Qrupun adını və ya kodunu yazın"
+msgstr "Введите название или код группы"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi"
+msgstr "Результат пробного прогона"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Результат пробного прогона (ничего не записано)"
+
+msgctxt "profile.rim"
+msgid "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+msgstr "Загрузите файл приёма: сначала пробный прогон, затем применение. Не более %(limit)s строк в файле."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili"
+msgstr "Год приёма"
+
+msgctxt "profile.rim"
+msgid "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+msgstr "Порядок столбцов произвольный. Не более %(limit)s строк, %(size)s МБ."
+
+msgctxt "profile.rim"
+msgid "Sətir"
+msgstr "Строка"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal (tələbə siyahısı)"
+msgstr "Массовый импорт (список студентов)"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal — tələbə siyahısı"
+msgstr "Массовый импорт — список студентов"
+
+msgctxt "profile.rim"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "profile.rim"
+msgid "Tələbə hesabı yaradıldı."
+msgstr "Учётная запись студента создана."
+
+msgctxt "profile.rim"
+msgid "Tələbə kodu"
+msgstr "Код студента"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et ({n} hesab)"
+msgstr "Применить ({n} записей)"
+
+msgctxt "profile.rim"
+msgid "Tətbiq nəticəsi"
+msgstr "Результат применения"
+
+msgctxt "profile.rim"
+msgid "Təyin edilməyib"
+msgstr "Не указан"
+
+msgctxt "profile.rim"
+msgid "Təşkilatdakı yeri"
+msgstr "Место в организации"
+
+msgctxt "profile.rim"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "profile.rim"
+msgid "Xəta"
+msgstr "Ошибка"
+
+msgctxt "profile.rim"
+msgid "Yaradılacaq"
+msgstr "Будет создан"
+
+msgctxt "profile.rim"
+msgid "Yaradıldı"
+msgstr "Создан"
+
+msgctxt "profile.rim"
+msgid "Yaradılır…"
+msgstr "Создание…"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab"
+msgstr "Новая учётная запись"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaradın"
+msgstr "Создание учётной записи"
+
+msgctxt "profile.rim"
+msgid "Yeni müəllim hesabı"
+msgstr "Новая учётная запись преподавателя"
+
+msgctxt "profile.rim"
+msgid "Yeni tələbə hesabı"
+msgstr "Новая учётная запись студента"
+
+msgctxt "profile.rim"
+msgid "Yoxla (quru icra)"
+msgstr "Проверить (пробный прогон)"
+
+msgctxt "profile.rim"
+msgid "Ötürüldü"
+msgstr "Пропущено"
+
+msgctxt "profile.rim"
+msgid "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+msgstr "После входа с этим паролем пользователь будет направлен к подтверждению почты (OTP) и созданию собственного пароля."
+
+msgctxt "profile.rim"
+msgid "İzah"
+msgstr "Пояснение"
+
+msgctxt "profile.rim"
+msgid "İşçi kodu"
+msgstr "Код сотрудника"
+
+msgctxt "profile.rim"
+msgid "Şəxsi məlumat"
+msgstr "Личные данные"
+
+msgctxt "profile.rim"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "Операция не выполнена. Попробуйте ещё раз."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+msgstr "Сначала ПРОБНЫЙ ПРОГОН: ничего не записывается, а результат показывается построчно."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Сначала выберите файл."
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+msgstr "У вас нет прав на создание учётных записей."
+
+msgctxt "profile.rim"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "profile.rim"
+msgid "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+msgstr "Создано слишком много учётных записей. Повторите чуть позже."
+
+msgctxt "profile.rim"
+msgid "Formda düzəliş tələb olunan sahələr var."
+msgstr "В форме есть поля, требующие исправления."
+
+msgctxt "profile.rim"
+msgid "Naməlum hesab növü."
+msgstr "Неизвестный тип учётной записи."
+
+msgctxt "profile.rim"
+msgid "FİN boşdur."
+msgstr "ФИН не заполнен."
+
+msgctxt "profile.rim"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "ФИН должен состоять из 7 символов формата [A-Z0-9]."
+
+msgctxt "profile.rim"
+msgid "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+msgstr "Этот ФИН уже есть в системе — учётная запись не создана."
+
+msgctxt "profile.rim"
+msgid "Ad məcburidir."
+msgstr "Имя обязательно."
+
+msgctxt "profile.rim"
+msgid "Soyad məcburidir."
+msgstr "Фамилия обязательна."
+
+msgctxt "profile.rim"
+msgid "Ən çox %(n)s simvol ola bilər."
+msgstr "Допускается не более %(n)s символов."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Дата рождения не распознана (используйте формат дд.мм.гггг)."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Дата рождения неправдоподобна."
+
+msgctxt "profile.rim"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Пол не распознан — остаётся «не указан»."
+
+msgctxt "profile.rim"
+msgid "Qrup seçilməyib və ya tapılmadı."
+msgstr "Группа не выбрана или не найдена."
+
+msgctxt "profile.rim"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Для этой группы не найдена образовательная программа (Program) — сначала постройте структуру."
+
+msgctxt "profile.rim"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+msgstr "Для этого года приёма нет учебного плана — при создании записи будет создан пустой план."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Год приёма должен быть числом."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Год приёма должен быть в диапазоне 1950–%d."
+
+msgctxt "profile.rim"
+msgid "Kafedra tapılmadı."
+msgstr "Кафедра не найдена."
+
+msgctxt "profile.rim"
+msgid "Bu kod artıq istifadə olunub."
+msgstr "Этот код уже используется."
+
+msgctxt "profile.rim"
+msgid "E-poçt formatı yanlışdır."
+msgstr "Неверный формат адреса эл. почты."
+
+msgctxt "profile.rim"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "Адрес эл. почты отсутствует — записывается заполнитель (пользователь укажет его при первом входе)."
+
+msgctxt "profile.rim"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "Адрес эл. почты уже используется — записывается заполнитель."
+
+msgctxt "registrar.schedule_manage"
+msgid "Auditoriya adı 64 simvoldan uzun ola bilməz."
+msgstr "Название аудитории не может превышать 64 символа."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məcburidir."
+msgstr "Дата рождения обязательна."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Подтвердить"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "прав"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Для этого предмета/периода уже есть открытый черновик (%(version)s) — отредактируйте его."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Для этого предмета/периода есть утверждённый силлабус — откройте новую версию."

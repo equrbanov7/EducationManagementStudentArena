@@ -340,7 +340,7 @@
 }
 
 .syl-panel__state--check {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-panel__hint {

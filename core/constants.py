@@ -65,6 +65,7 @@ ROLE_LEVELS = {
     "vice_dean": 85,
     "exam_center": 85,
     "ikt_rehber": 88,
+    "rim_staff": 60,
     "department_head": 80,
     "professor": 75,
     "associate_professor": 70,

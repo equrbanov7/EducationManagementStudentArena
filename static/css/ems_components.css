@@ -14,7 +14,7 @@
     height: 52px;
     border-radius: 14px;
     background: var(--ems-neutral-100);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 1.4rem;
     margin-bottom: 0.7rem;
 }
@@ -111,7 +111,7 @@ textarea:focus-visible,
     background: var(--ems-neutral-0, #fff);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.search-field__input::placeholder { color: var(--ems-neutral-400); }
+.search-field__input::placeholder { color: var(--ems-neutral-500); }
 .search-field__input:focus {
     outline: none;
     border-color: var(--ems-primary-500);
@@ -146,7 +146,7 @@ textarea:focus-visible,
     width: 26px;
     height: 26px;
     border-radius: 999px;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 0.9rem;
 }
 .search-field__clear:hover { background: var(--ems-neutral-100); color: var(--ems-danger-500, #ef4444); }
@@ -179,4 +179,17 @@ textarea:focus-visible,
 .blog-header__toggle:focus-visible {
     outline: 2px solid var(--ems-primary-600);
     outline-offset: 2px;
+}
+
+/* ── Bootstrap badge kontrastı (QA 2026-09-05 UX-05) ──────────────────────
+   Bootstrap `.badge` mətni #fff-dir; `bg-warning` (#ffc107) və `bg-info`
+   (#0dcaf0) üzərində bu 1.6–1.9:1 verir — AA (4.5) tələbindən çox aşağı.
+   Layihədə 50-yə yaxın belə nişan var; mətni tünd edirik (fon dəyişmir,
+   ona görə status rəngi tanınan qalır). */
+.badge.bg-warning,
+.badge.bg-info,
+.badge.bg-light,
+.badge.bg-warning a,
+.badge.bg-info a {
+    color: var(--ems-neutral-900);
 }

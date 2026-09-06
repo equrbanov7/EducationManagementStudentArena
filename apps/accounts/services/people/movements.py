@@ -81,8 +81,19 @@ def registry_records_qs(actor, *, request=None):
     return records
 
 
+def _uuid_or_none(raw):
+    """Qeyri-UUID id `filter(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 STUDENT-MGMT-05)."""
+    import uuid
+
+    try:
+        return uuid.UUID(str(raw).strip())
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
 def load_registry_record(actor, record_id, *, request=None):
     """Reyestr sahəsindən akademik qeyd — yoxdursa 404 (mövcudluq sızmır)."""
+    record_id = _uuid_or_none(record_id)
     if not record_id:
         raise RimAccessError("record_not_found", "Akademik qeyd tapılmadı.", status=404)
     record = (
@@ -124,7 +135,8 @@ def movement_kinds() -> list:
 def _target_group(actor, group_id, *, request):
     if not group_id:
         return None
-    group = scoped_groups_qs(actor, request=request).filter(pk=group_id).first()
+    group_id = _uuid_or_none(group_id)
+    group = scoped_groups_qs(actor, request=request).filter(pk=group_id).first() if group_id else None
     if group is None:
         raise RimAccessError("target_group_outside_scope", "Hədəf qrup sizin sahənizdə deyil.", status=404)
     return group
@@ -149,7 +161,12 @@ def _target_program(actor, program_id):
         return None
     from apps.registrar.models import Program
 
-    program = Program.objects.filter(organization=actor.organization, pk=program_id, is_active=True).first()
+    program_id = _uuid_or_none(program_id)
+    program = (
+        Program.objects.filter(organization=actor.organization, pk=program_id, is_active=True).first()
+        if program_id
+        else None
+    )
     if program is None:
         raise RimAccessError("target_program_not_found", "Hədəf ixtisas tapılmadı.", status=404)
     return program
@@ -240,7 +257,10 @@ def create_movement(
     _require(actor)
     record = load_record(actor, record_id, request=request)
 
-    rule = domain.rule_for(kind)
+    try:
+        rule = domain.rule_for(kind)
+    except domain.MovementError as exc:  # naməlum növ → 500 deyil, JSON xəta (STUDENT-MGMT-04)
+        raise RimAccessError(exc.code, str(exc.args[1] if len(exc.args) > 1 else exc), status=400) from exc
     group = _target_group(actor, target_group_id, request=request) if rule.requires_group or target_group_id else None
     if group is not None:
         _assert_capacity(actor, group)
@@ -319,6 +339,8 @@ def movement_row(movement) -> dict:
         "actor_name": movement.actor_name,
         "has_document": bool(movement.document),
         "created_at": movement.created_at.isoformat() if movement.created_at else "",
+        # Bərpa əmrindən sonra giriş avtomatik açılmır — səbəb registrar.movements-də.
+        "access_notice": str(getattr(movement, "access_notice", "") or ""),
     }
 
 

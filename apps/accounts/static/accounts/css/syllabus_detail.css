@@ -90,7 +90,7 @@
 }
 
 .syl-doc__banner--success {
-    border-color: var(--ems-success);
+    border-color: var(--ems-success-700);
     background: var(--ems-success-bg);
     color: var(--ems-success-700);
 }

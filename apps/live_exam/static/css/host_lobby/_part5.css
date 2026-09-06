@@ -361,7 +361,7 @@ body.host-presentation-page .scoreboard-row__score {
 .debug-log {
     display: none;
     background: #000;
-    color: var(--ems-success);
+    color: var(--ems-success-700);
     padding: 10px;
     border-radius: 10px;
     margin-top: 10px;

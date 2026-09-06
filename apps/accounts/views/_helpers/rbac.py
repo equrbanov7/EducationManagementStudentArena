@@ -10,7 +10,7 @@ from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
 from .rbac_sections import apply_permission_section_gates
-from .rbac_university_sections import university_role_sections
+from .rbac_university_sections import alumni_sections, university_role_sections
 from .tenant import _bind_active_role_context
 
 
@@ -117,13 +117,23 @@ def _collect_actor_permissions(user, organization, *, request=None):
     DB sorğusu olmaması üçün nəticə `request._actor_perms_cache` dict-ində
     saxlanılır. Cross-request cache yoxdur — RLS və icazə dəyişiklikləri
     request başında həmişə yenidən qiymətləndirilir.
+
+    QA 2026-09 duplicate-query audit: `_role_capabilities` bu funksiyanı
+    HEÇ VAXT `request` ötürmədən çağırır (3x öz daxilində: sual bankı
+    axtarışı, müəllim-tələbə idarəsi, "Qruplar" bölməsi qapısı) — yəni yuxarıdakı
+    `request`-əsaslı keş faktiki İŞLƏMİRDİ, hər çağırış təzə SELECT idi.
+    `request` yoxdursa `user` obyektinə (eyni `apps.applications.services.
+    access.active_memberships` naxışı) düşürük — `request.user` bir request
+    daxilində SABİT obyektdir (`SimpleLazyObject` bir dəfə həll olunur), ona
+    görə bu, faktiki request-ömürlü keşdir, cross-request sızma yoxdur.
+    Mutasiya edən yol varsa `_invalidate_actor_permissions_cache(user)` çağırın.
     """
     from apps.organizations.models import Membership
 
     user_id = getattr(user, "pk", None) or getattr(user, "id", None)
     org_id = getattr(organization, "pk", None) or getattr(organization, "id", None)
     cache_key = (user_id, org_id)
-    cache_owner = request if request is not None else None
+    cache_owner = request if request is not None else user
     if cache_owner is not None and user_id is not None and org_id is not None:
         cache = getattr(cache_owner, "_actor_perms_cache", None)
         if cache is None:
@@ -154,6 +164,21 @@ def _collect_actor_permissions(user, organization, *, request=None):
             cache[cache_key] = (set(effective_permissions), set(grantable_permissions))
 
     return effective_permissions, grantable_permissions
+
+
+def _invalidate_actor_permissions_cache(user) -> None:
+    """Drop the ``_actor_perms_cache`` memoized on ``user`` by ``_collect_actor_permissions``.
+
+    Call this immediately after a code path mutates ``user``'s Membership/Role
+    rows (role assignment, membership create/update) so a later permission
+    read in the SAME request never returns pre-mutation data. A stale
+    permission cache is a security bug, not a perf detail.
+    """
+    try:
+        if hasattr(user, "_actor_perms_cache"):
+            del user._actor_perms_cache
+    except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
+        pass
 
 
 def _role_capabilities(user, profile):
@@ -248,6 +273,8 @@ def _role_capabilities(user, profile):
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
     can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
+    # MƏZUN: hesab sahibi, amma tələbə deyil — səthi `alumni_sections()`-dədir (P2-32).
+    is_alumni = _user_has_any_role(user, {"alumni"})
     can_manage_blog = getattr(user, "is_authenticated", False)
     can_approve_posts = is_superadmin or user_level >= ProfileRole.LEVELS.get(ProfileRole.TEACHER, 60)
 
@@ -324,9 +351,15 @@ def _role_capabilities(user, profile):
             "delete-account",
             "statistics",
         }
-        allowed_sections.add("my-results")
+        # QA 2026-09-05 (P3-5): «Nəticələrim» sidebar-da `can_view_student_assignments`
+        # blokunun içindədir (tələbə + adi üzv). Siyahı isə HƏR kəsə verirdi —
+        # heyət rolları menyuda görmədikləri boş səhifəni URL ilə aça bilirdi.
+        # Menyu ↔ capability indi eyni şərtdən gəlir.
         if can_view_student_assignments:
+            allowed_sections.add("my-results")
             allowed_sections.add("pending-answers")
+        elif is_alumni:
+            allowed_sections.update(alumni_sections())
 
         # Superadminin həvalə etdiyi (bayraqlı) qeyri-superadmin zal idarəçisi:
         # öz aktiv təşkilatının zallarını idarə edə bilir (cross-org yalnız

@@ -2,12 +2,19 @@
 
 from __future__ import annotations
 
+import logging
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.organizations.unit_heads import members_covering_unit
+
 from ..constants import (
     MAX_ATTACHMENTS_PER_ACTION,
+    MAX_BODY_LENGTH,
+    MAX_SUBJECT_LENGTH,
     MIN_BODY_LENGTH,
     MIN_SUBJECT_LENGTH,
     PERM_CREATE,
@@ -19,6 +26,8 @@ from ..sla import add_working_days
 from ..state_machine import TransitionDenied
 from . import access, notify
 from .routing import route_for, sender_family_for
+
+logger = logging.getLogger(__name__)
 
 
 def next_number(organization) -> str:
@@ -37,10 +46,16 @@ def next_number(organization) -> str:
 def validate_text(subject: str, body: str) -> dict:
     """Server tərəfli uzunluq yoxlaması (dizayn §8.4) → sahə-xəta xəritəsi."""
     errors = {}
-    if len((subject or "").strip()) < MIN_SUBJECT_LENGTH:
+    subject_len = len((subject or "").strip())
+    body_len = len((body or "").strip())
+    if subject_len < MIN_SUBJECT_LENGTH:
         errors["subject"] = [f"Mövzu ən azı {MIN_SUBJECT_LENGTH} simvol olmalıdır."]
-    if len((body or "").strip()) < MIN_BODY_LENGTH:
+    elif subject_len > MAX_SUBJECT_LENGTH:
+        errors["subject"] = [f"Mövzu ən çox {MAX_SUBJECT_LENGTH} simvol ola bilər."]
+    if body_len < MIN_BODY_LENGTH:
         errors["body"] = [f"Müraciətin mətni ən azı {MIN_BODY_LENGTH} simvol olmalıdır."]
+    elif body_len > MAX_BODY_LENGTH:
+        errors["body"] = [f"Müraciətin mətni ən çox {MAX_BODY_LENGTH} simvol ola bilər."]
     return errors
 
 
@@ -50,8 +65,15 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
     ``full_clean`` QƏSDƏN çağırılır: validator model sahəsinə bağlıdır və
     yalnız təmizləmə zamanı işə düşür, ``objects.create`` onu keçir.
     """
+    incoming = list(files or [])
+    # QA 2026-09-05 (P3-17): hədddən artıq fayl SƏSSİZCƏ atılırdı — istifadəçi
+    # sənədinin əlavə olunmadığını görmürdü.
+    if len(incoming) > MAX_ATTACHMENTS_PER_ACTION:
+        raise ValidationError(
+            {"files": [f"Bir əməliyyatda ən çox {MAX_ATTACHMENTS_PER_ACTION} fayl əlavə edilə bilər."]}
+        )
     created = []
-    for uploaded in list(files or [])[:MAX_ATTACHMENTS_PER_ACTION]:
+    for uploaded in incoming:
         attachment = ApplicationAttachment(
             organization=application.organization,
             application=application,
@@ -66,6 +88,10 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
         attachment.save()
         created.append(attachment)
     return created
+
+
+#: İkiqat göndəriş pəncərəsi (P3-18) — eyni mətnli təkrar bu müddət ərzində rədd olunur.
+DUPLICATE_WINDOW = timedelta(minutes=2)
 
 
 @transaction.atomic
@@ -88,7 +114,40 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
     if errors:
         raise ValidationError(errors)
 
+    # QA 2026-09-05 (P3-18): ikiqat klik / şəbəkə təkrarı eyni mətnlə İKİ müraciət
+    # yaradırdı. Qısa pəncərədə eyni göndərən + növ + mövzu + mətn → rədd.
+    duplicate = Application.objects.filter(
+        organization=organization,
+        created_by=user,
+        kind=kind,
+        subject=subject.strip()[:255],
+        body=body.strip(),
+        created_at__gte=timezone.now() - DUPLICATE_WINDOW,
+    ).first()
+    if duplicate is not None:
+        raise TransitionDenied(
+            "duplicate.recent",
+            "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın.",
+            {"number": duplicate.number},
+        )
+
     unit, scope_unit, family, sender_unit = route_for(kind, user, organization=organization, family=family)
+    # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
+    # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.
+    # Belə halda əhatə açılır — şöbənin rolunu daşıyan HƏR KƏS görür (fail-open görünüş,
+    # əməl yenə rol qapısındadır) — və audit izində qeyd olunur.
+    coverage_fallback = False
+    if (
+        scope_unit is not None
+        and not members_covering_unit(organization, scope_unit, role_names=unit.role_names).exists()
+    ):
+        logger.warning(
+            "applications: no handler covers %s for unit %s — falling back to org-wide scope",
+            getattr(scope_unit, "pk", None),
+            unit.code,
+        )
+        scope_unit = None
+        coverage_fallback = True
     now = timezone.now()
     application = Application.objects.create(
         organization=organization,
@@ -125,7 +184,12 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
         action=notify.AUDIT_CREATE,
         actor=user,
         event_kind=EventKind.SUBMITTED,
-        changes={"kind": kind.code, "unit": unit.code, "number": application.number},
+        changes={
+            "kind": kind.code,
+            "unit": unit.code,
+            "number": application.number,
+            **({"coverage": "fallback_unscoped"} if coverage_fallback else {}),
+        },
         request=request,
     )
     notify.notify_current_unit(

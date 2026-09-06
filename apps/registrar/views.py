@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from . import finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
+from . import finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
@@ -52,6 +52,10 @@ def journal_list(request):
     # Korrektorlara (superadmin / journal.correct) düzəliş interfeysinə keçid göstər.
     context["can_correct_journal"] = corrections_service.can_correct_journal(request)
     return render(request, "registrar/journal_list.html", context)
+
+
+#: Jurnalın tabları — hər biri AYRICA səhifə yükü ilə render olunur (P1-8).
+_JOURNAL_TABS = ("grid", "kollokvium", "kurs-isi", "serbest", "yekun")
 
 
 @login_required
@@ -112,13 +116,35 @@ def journal_detail(request, offering_id):
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import journal_close_notices, journal_extras, journal_policy, syllabus_notice
+    # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
+    # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
+    # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
+    from apps.registrar import journal_close_notices, journal_extras, journal_policy
+    from apps.registrar import journal_window as _jw
+    from apps.registrar import syllabus_notice
 
-    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
+    window_size, window_offset = _jw.resolve_request_window(request)
+
+    # AKTİV TAB (P1-8): əvvəl beş tabın hamısı — hər biri 555 sətirlik cədvəl —
+    # eyni HTML-ə render olunurdu. İndi yalnız aktiv tabın datası qurulur.
+    active_tab = request.GET.get("jt", "grid")
+    if active_tab not in _JOURNAL_TABS:
+        active_tab = "grid"
+    journal = gradebook.get_offering_journal(
+        offering=offering,
+        newest_first=True,
+        # Grid-dən başqa tablarda sütunlar lazım deyil (sətir sayı/qonaq siyahısı üçün
+        # yenə tam sətir dəsti qurulur, amma xanasız).
+        lesson_limit=(window_size or None) if active_tab == "grid" else 1,
+        lesson_offset=window_offset if active_tab == "grid" else 0,
+    )
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
-    coursework_rows = journal_extras.get_course_work_rows(offering)
-    finals_data = finals.get_offering_results(offering=offering)
+    # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
+    needs_coursework = active_tab in {"kurs-isi", "yekun"}
+    needs_finals = active_tab == "yekun"
+    coursework_rows = journal_extras.get_course_work_rows(offering) if needs_coursework else []
+    finals_data = finals.get_offering_results(offering=offering) if needs_finals else {"rows": []}
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
     # Çox cəhd (sahibin qərarı M2): rəsmi SONUNCU cəhddir, əvvəlkilərin balı
     # itmir — müəllim görünüşündə «Yekun» tabının QEYD sütununda açıq göstərilir.
@@ -147,10 +173,19 @@ def journal_detail(request, offering_id):
         "offering": offering,
         "journal": journal,
         "corrections_map": corrections_map,
+        "active_tab": active_tab,
         "finals": finals_data,
-        "final_breakdown": _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map),
-        "kollokvium_grid": journal_extras.get_kollokvium_grid(offering),
-        "selfwork_board": journal_extras.get_selfwork_board(offering),
+        "final_breakdown": (
+            _with_attempts(journal_extras.get_final_breakdown(offering), attempts_map) if needs_finals else []
+        ),
+        # Kollokvium lenti (xəbərdarlıq zolağı) hər tabda görünür — sütun meta
+        # ucuzdur, sətir grid-i isə yalnız öz tabında qurulur.
+        "kollokvium_grid": (
+            journal_extras.get_kollokvium_grid(offering)
+            if active_tab == "kollokvium"
+            else journal_extras.kollokvium_columns_only(offering)
+        ),
+        "selfwork_board": journal_extras.get_selfwork_board(offering) if active_tab == "serbest" else None,
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
         "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
@@ -165,7 +200,7 @@ def journal_detail(request, offering_id):
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.
         "syllabus_gate": syllabus_gate,
-        "grade_history": grade_audit.get_grade_history(offering=offering),
+        "grade_history": grade_audit.get_grade_history(offering=offering) if active_tab in {"grid", "yekun"} else [],
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
         "topic_choices": journal_extras.lesson_topic_choices(offering),
@@ -322,20 +357,43 @@ def _handle_save_component_scores(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
+def _can_write_finals(user, offering) -> bool:
+    """Yekun imtahan / təkrar balı — YALNIZ `final_score.entry` daşıyan aktor (İmtahan
+    Mərkəzi) və ya superuser.  Müəllim jurnal redaktoru olsa da bu sahəni yazmır
+    (UI-da sahə yoxdur; crafted POST ilə yazıla bilirdi — QA 2026-09-05 JOURNAL-TEACHER-08)."""
+    if getattr(user, "is_superuser", False):
+        return True
+    scope = journal_scope.permission_scope_for(user, offering.organization, "final_score.entry")
+    return scope.has_structure_access
+
+
 def _handle_save_finals(request, offering):
-    """Persist final-exam + resit scores per student (exam__<enr> / resit__<enr>)."""
+    """Yekun imtahan/təkrar balı (exam__/resit__) + bonus-rəy (bonus__/fcomment__).
+
+    Bal sahəsi `final_score.entry` tələb edir (İmtahan Mərkəzi); bonus/rəy (U15)
+    isə jurnal redaktorunundur. Ona görə icazəsiz aktorda bütün əməl 404 olmur —
+    yalnız bal açarları nəzərə alınmır (QA 2026-09-05 JOURNAL-TEACHER-08).
+    """
+    can_write_scores = _can_write_finals(request.user, offering)
     if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
         messages.warning(request, _("Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     enrollments = {str(e.id): e for e in offering.enrollments.all()}
     extras: dict = {}
+    refused_scores = False
     for key, raw in request.POST.items():
         if key.startswith("exam__"):
+            if not can_write_scores:
+                refused_scores = True
+                continue
             enrollment = enrollments.get(key[len("exam__") :])
             if enrollment is not None:
                 finals.set_exam_score(enrollment=enrollment, score=raw, by_user=request.user)
         elif key.startswith("resit__"):
+            if not can_write_scores:
+                refused_scores = True
+                continue
             enrollment = enrollments.get(key[len("resit__") :])
             if enrollment is not None and raw.strip() != "":
                 finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
@@ -356,7 +414,10 @@ def _handle_save_finals(request, offering):
             comment=data.get("comment"),
             by_user=request.user,
         )
-    messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
+    if refused_scores:
+        messages.warning(request, _("İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."))
+    else:
+        messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
@@ -377,14 +438,27 @@ def _handle_add_lesson(request, offering):
     # Dərs tipi kilidi: cədvəldə tək növ slot varsa POST nə deyirsə desin o növ.
     from apps.registrar import journal_extras as _je
 
-    kind = _je.locked_lesson_kind(offering) or request.POST.get("lesson_kind")
+    locked_kind = _je.locked_lesson_kind(offering)
+    kind = locked_kind or request.POST.get("lesson_kind")
     if kind not in dict(LessonKind.choices):
-        kind = LessonKind.LECTURE
+        # QA 2026-09-05 (P3-9): naməlum dərs tipi səssizcə «mühazirə»yə çevrilirdi —
+        # müəllim yanlış tipdə dərs açdığını görmürdü. Kilidli tipdə (cədvəl tək
+        # növ verir) POST-a baxılmır, orada susmaq düzgündür.
+        if locked_kind:
+            kind = locked_kind
+        else:
+            messages.error(request, _("Dərs tipi düzgün seçilməyib."))
+            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     if not date:
         messages.error(request, _("Dərs tarixi tələb olunur."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     hours_raw = (request.POST.get("lesson_hours") or "").strip()
+    # QA 2026-09-05 (P3-9): «-5» / «abc» səssizcə standart saata çevrilirdi.
+    # Boş dəyər normaldır (standart saat), amma YAZILMIŞ yanlış dəyər rədd olunur.
+    if hours_raw and not (hours_raw.isdigit() and int(hours_raw) > 0):
+        messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
     # Dərs saatı MƏCBURİDİR — standart saat seçilmədən dərs açılmasın.
@@ -394,11 +468,11 @@ def _handle_add_lesson(request, offering):
 
     # #6 — fənnin tam saat həddi: keçirilmiş + yeni saat toplamı keçməsin (60→62 olmaz).
     summary = _je.journal_teaching_summary(offering)
-    if summary["total"] and summary["held_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
+    if summary["total"] and summary["scheduled_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
         messages.error(
             request,
             _("Fənnin dərs saatı həddi (%(t)s saat) keçilir — keçirilmiş %(h)s saat, qalan yalnız %(r)s saat.")
-            % {"t": summary["total"], "h": summary["held_total"], "r": summary["remaining"]},
+            % {"t": summary["total"], "h": summary["scheduled_total"], "r": summary["remaining"]},
         )
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
@@ -406,9 +480,17 @@ def _handle_add_lesson(request, offering):
     instructor = None
     _inst_id = (request.POST.get("lesson_instructor") or "").strip()
     if _inst_id:
-        from django.contrib.auth import get_user_model
+        # Yeniləmə yolu ilə EYNİ həlledici: tip + təşkilat/rol yoxlaması (etibarsız
+        # id və ya tələbə id-si əvvəl 500 ValueError/IntegrityError verirdi —
+        # QA 2026-09-05 JOURNAL-TEACHER-02). Call-time import: journal_actions
+        # views-dən idxal edir.
+        from .journal_actions import _resolve_instructor
 
-        instructor = get_user_model().objects.filter(pk=_inst_id).first()
+        try:
+            instructor = _resolve_instructor(offering, _inst_id)
+        except Http404:
+            messages.error(request, _("Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."))
+            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     # Dərsin otağı (opsional) — korpus yalnız UI süzgəcidir, saxlanan dəyər otaqdır.
     # Otaq təşkilat daxilində həll olunur: başqa tenant-ın otağı keçmir.
@@ -480,8 +562,24 @@ def _handle_save_marks(request, offering):
                 }
             )
 
-    written = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user)
-    messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
+    if gradebook.journal_is_locked(offering):
+        # Əvvəl «Jurnal yadda saxlanıldı (0 xana)» UĞUR mesajı gedirdi (QA 2026-09-05
+        # JOURNAL-TEACHER-04) — kilidli jurnala yazı səssiz atılmamalıdır.
+        messages.error(request, _("Jurnal bağlıdır — dəyişikliklər yazılmadı."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    result = gradebook.save_marks(offering=offering, entries=entries, by_user=request.user, report=True)
+    written, rejected = result["written"], result["rejected"]
+    if entries and not written:
+        messages.warning(request, _("Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."))
+    else:
+        messages.success(request, _("Jurnal yadda saxlanıldı (%(n)s xana).") % {"n": written})
+    if rejected:
+        # QA 2026-09-05 (P3-10): səhv bal SƏSSİZ 0-a çevrilmirdi; xana yazılmır və
+        # müəllim bunu görməlidir.
+        messages.warning(
+            request,
+            _("%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır.") % {"n": rejected},
+        )
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 

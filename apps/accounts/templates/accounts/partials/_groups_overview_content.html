@@ -35,7 +35,7 @@
                 name="group_q"
                 value="{{ teacher_groups_search_query }}"
                 placeholder="{% trans 'search_placeholder_groups' context 'profile.groups' %}"
-            >
+             aria-label="{% trans 'search_placeholder_groups' context 'profile.groups' %}">
             <button type="submit" class="btn btn-outline-primary">{% trans "search_action" context "profile.groups" %}</button>
             {% if teacher_groups_search_query %}
                 <a href="?section=groups{% if selected_teacher_group %}&group={{ selected_teacher_group.id }}{% endif %}" class="btn btn-outline-secondary">{% trans "clear_search" context "profile.groups" %}</a>
@@ -196,7 +196,7 @@
                             name="student_q"
                             value="{{ group_students_search_query }}"
                             placeholder="{% trans 'student_search_placeholder' context 'profile.groups' %}"
-                        >
+                         aria-label="{% trans 'student_search_placeholder' context 'profile.groups' %}">
                         <button type="submit" class="btn btn-outline-primary">{% trans "search_action" context "profile.groups" %}</button>
                         {% if group_students_search_query %}
                             <a href="?section=groups&group={{ selected_teacher_group.id }}{% if teacher_groups_search_query %}&group_q={{ teacher_groups_search_query|urlencode }}{% endif %}{% if teacher_groups_page %}&groups_page={{ teacher_groups_page.number }}{% endif %}" class="btn btn-outline-secondary">{% trans "clear_search" context "profile.groups" %}</a>
@@ -282,7 +282,7 @@
     </div>
 </div>
 
-<script src="{% static 'accounts/js/groups_overview.js' %}"></script>
+<script defer src="{% static 'accounts/js/groups_overview.js' %}"></script>
 {% endif %}
 
 {% if group_form %}
@@ -334,7 +334,7 @@
                                 class="form-control"
                                 placeholder="{% trans 'placeholder_search_primary_teacher' context 'profile.groups' %}"
                                 id="profileGroupPrimaryTeacherSearch"
-                            >
+                             aria-label="{% trans 'placeholder_search_primary_teacher' context 'profile.groups' %}">
                         </div>
                         {{ group_form.primary_teacher }}
                         {% for error in group_form.primary_teacher.errors %}

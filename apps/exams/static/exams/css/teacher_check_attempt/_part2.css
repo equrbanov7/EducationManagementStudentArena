@@ -198,13 +198,13 @@
 }
 .coding-exec-note > summary::before {
     content: "\2139"; /* ℹ info simvolu — font asılılığı yoxdur */
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-weight: 700;
 }
 .coding-exec-note > summary::after {
     content: "\25B8"; /* ▸ */
     margin-left: auto;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     transition: transform 0.15s ease;
 }
 .coding-exec-note[open] > summary::after {

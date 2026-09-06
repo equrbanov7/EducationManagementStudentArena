@@ -80,7 +80,7 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.73rem;
     font-weight: 800;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* ── `week`: saat xülasəsi + 16 sətirlik cədvəl ───────────────────────── */
@@ -159,7 +159,7 @@
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     border-bottom: 1px solid var(--ems-border);
 }
 
@@ -320,7 +320,7 @@
 /* Siyasətə uyğun OLMAYAN variant — qəsdən görünür qalır, izah edir. */
 .syl-swopt.is-blocked {
     background: var(--ems-bg-subtle);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 
@@ -350,7 +350,7 @@
 .syl-swopt__sum {
     font-size: 0.72rem;
     font-weight: 800;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-swopt__sum.is-bad {
@@ -450,7 +450,7 @@
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-preview__title {
@@ -470,7 +470,7 @@
     font-weight: 800;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-preview__body {

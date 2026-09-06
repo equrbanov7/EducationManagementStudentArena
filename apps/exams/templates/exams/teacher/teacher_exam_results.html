@@ -384,7 +384,8 @@
                             {% if can_delete_attempts %}
                                 <td>
                                     {% if item.can_delete_attempt %}
-                                        <input type="checkbox" class="ter-checkbox js-attempt-checkbox" value="{{ att.id }}">
+                                        <input type="checkbox" class="ter-checkbox js-attempt-checkbox" value="{{ att.id }}"
+                                               aria-label="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} — {% trans 'Seç' context 'accounts.a11y' %}">
                                     {% else %}
                                         <span class="ter-muted" title="{% trans 'Akademik tarixçə qorunur' %}"><i class="fas fa-lock" aria-hidden="true"></i></span>
                                     {% endif %}
