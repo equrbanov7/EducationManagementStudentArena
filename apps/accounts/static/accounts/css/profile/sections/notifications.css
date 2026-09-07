@@ -1,324 +1,582 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   Profile — Notifications & Publish Notification Sections
+   Profil — «Bildirişlər» (inbox) · 2026-09-07 yenidən dizayn
+   ──────────────────────────────────────────────────────────────────────────
+   PRİNSİPLƏR
+   1. BİR səth: 10 ayrı çərçivəli kart əvəzinə tək panel + hairline sətirlər.
+      Çərçivə sayı azalanda göz mətnə düşür, kartların kənarına yox.
+   2. Oxunmamışlıq NÖQTƏ + çox zərif fonla verilir. Tam mavi fon sətri
+      «seçilmiş» kimi göstərirdi və 5 oxunmamış = ekran mavi divar idi.
+   3. Əməllər DAİMİ görünmür — hover/fokusda gəlir (`hover: hover` qapısı
+      arxasında; toxunma cihazında həmişə görünür).
+   4. Rəng SEMANTİKDİR: ikon tonu bildirişin növünü kodlayır, bəzək deyil.
+   5. Tipoqrafiya iyerarxiyası üç pillədir — başlıq / önizləmə / meta.
+
+   Rənglər `--ems-*` token-lərindəndir (static/css/design-tokens.css).
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Filter tabs ── */
-.notif-filter-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-items: center;
+.nfx {
+    --nfx-radius: 14px;
+    --nfx-row-gap: 12px;
+    color: var(--ems-neutral-900);
 }
 
-.notif-filter-tab {
+.nfx *,
+.nfx *::before,
+.nfx *::after {
+    box-sizing: border-box;
+}
+
+/* ── Ortaq düymə ─────────────────────────────────────────────────────────── */
+.nfx-btn {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.82rem;
-    color: #6c757d;
-    border-radius: 20px;
-    transition: background 0.18s, color 0.18s;
-    padding: 0.32rem 0.75rem;
-    text-decoration: none;
-    border: 1.5px solid transparent;
+    gap: 7px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
     white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
-.notif-filter-tab:hover {
-    background-color: #e9f0fb;
-    color: #0d6efd;
-    border-color: #d0e3ff;
+.nfx-btn:hover:not(:disabled) {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
 }
 
-.notif-filter-tab.is-active {
-    background-color: #0d6efd;
+.nfx-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.nfx-btn.is-on {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.nfx-btn--primary {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
-    border-color: #0d6efd;
 }
 
-.notif-filter-badge {
+.nfx-btn--primary:hover:not(:disabled) {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.nfx-btn--danger {
+    border-color: var(--ems-danger-200);
+    color: var(--ems-danger-strong);
+}
+
+.nfx-btn--danger:hover:not(:disabled) {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.nfx-btn--danger-solid {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+}
+
+.nfx-btn--danger-solid:hover:not(:disabled) {
+    background: var(--ems-danger-strong);
+    border-color: var(--ems-danger-strong);
+    color: var(--ems-neutral-0);
+}
+
+.nfx-btn__caret {
+    font-size: 0.62rem;
+    opacity: 0.6;
+}
+
+/* ── Gözləyən sorğu / dəvət ──────────────────────────────────────────────── */
+.nfx-callouts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.nfx-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--ems-warning-100);
+    border-left: 3px solid var(--ems-warning-500);
+    border-radius: 12px;
+    background: #fffbeb;
+}
+
+.nfx-callout--invite {
+    border-color: var(--ems-primary-100);
+    border-left-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.nfx-callout__icon {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-warning-700);
+    font-size: 0.85rem;
+}
+
+.nfx-callout--invite .nfx-callout__icon {
+    color: var(--ems-primary-700);
+}
+
+.nfx-callout__body {
+    flex: 1;
+    min-width: 0;
+}
+
+.nfx-callout__text {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+}
+
+.nfx-callout__note {
+    margin: 5px 0 0;
+    font-size: 0.79rem;
+    color: var(--ems-neutral-600);
+    text-wrap: pretty;
+}
+
+.nfx-callout__actions {
+    display: flex;
+    flex: none;
+    gap: 7px;
+}
+
+/* ── Alət zolağı ─────────────────────────────────────────────────────────── */
+.nfx-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.nfx-segment {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-100);
+}
+
+.nfx-segment__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 7px;
+    color: var(--ems-neutral-600);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.nfx-segment__item:hover {
+    color: var(--ems-neutral-900);
+}
+
+/* Aktiv seqment ağ «lövhə» kimi qalxır — mavi doldurma bütün zolağı ağır edirdi. */
+.nfx-segment__item.is-active {
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-900);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.nfx-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 1.25rem;
-    height: 1.25rem;
-    padding: 0 0.3rem;
-    font-size: 0.68rem;
-    font-weight: 700;
-    line-height: 1;
-    border-radius: 10px;
-    background-color: #dc3545;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
 }
 
-.notif-filter-tab.is-active .notif-filter-badge {
-    background-color: var(--ems-neutral-0);
-    color: #dc3545;
-}
-
-/* ── Notification list items ── */
-.profile-notif-list {
-    margin: 0;
-    padding: 0;
+/* ── Axtarış ─────────────────────────────────────────────────────────────── */
+.nfx-search {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.profile-notif-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.65rem 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e9ecef;
-    background-color: var(--ems-neutral-0);
-    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
-}
-
-.profile-notif-item:hover {
-    background-color: #f8f9fa;
-    border-color: #d0d7de;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-
-/* Unread */
-.profile-notif-item--unread {
-    background-color: #eef5ff;
-    border-color: #86b7fe;
-    border-left: 4px solid #0d6efd;
-    padding-left: calc(0.75rem - 4px);
-}
-
-.profile-notif-item--unread:hover {
-    background-color: #dceeff;
-    border-color: #0d6efd;
-}
-
-.profile-notif-checkbox-wrap {
-    flex-shrink: 0;
-    padding-top: 0.2rem;
-}
-
-.profile-notif-icon {
-    font-size: 1rem;
-    flex-shrink: 0;
-    width: 1.2rem;
-    text-align: center;
-    padding-top: 0.15rem;
-}
-
-.profile-notif-body {
-    flex: 1 1 0;
+    align-items: center;
+    flex: 1 1 220px;
     min-width: 0;
+    max-width: 380px;
+    height: 34px;
+    padding: 0 8px 0 32px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-0);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.nfx-search:focus-within {
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.nfx-search__icon {
+    position: absolute;
+    left: 11px;
+    color: var(--ems-neutral-400);
+    font-size: 0.8rem;
+    pointer-events: none;
+}
+
+.nfx-search__input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: var(--ems-neutral-900);
+    font-size: 0.83rem;
+}
+
+.nfx-search__input:focus {
+    outline: none;
+}
+
+.nfx-search__input::-webkit-search-cancel-button {
+    display: none;
+}
+
+.nfx-search__clear,
+.nfx-search__submit {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ems-neutral-400);
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.nfx-search__clear:hover,
+.nfx-search__submit:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.nfx-search__clear[hidden] {
+    display: none;
+}
+
+.nfx-toolbar__end {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.nfx-menu {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    padding: 5px;
+    font-size: 0.83rem;
+}
+
+.nfx-menu .dropdown-item {
+    border-radius: 7px;
+    padding: 7px 10px;
+}
+
+.nfx-menu .dropdown-item.active {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-weight: 600;
+}
+
+/* ── Siyahı paneli ───────────────────────────────────────────────────────── */
+.nfx-panel {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--nfx-radius);
+    background: var(--ems-neutral-0);
     overflow: hidden;
 }
 
-.profile-notif-title {
-    font-size: 0.875rem;
-    line-height: 1.4;
-    word-break: break-word;
+.nfx-select {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+}
+
+.nfx-select__all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+    cursor: pointer;
+    margin: 0;
+}
+
+.nfx-select__count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ems-primary-700);
+}
+
+/* Silmə seçim OLMADAN görünmür — boş ekranda qırmızı düymə lazımsız təhdiddir. */
+.nfx-select form {
+    margin-left: auto;
+    display: none;
+}
+
+.nfx-select.is-selecting form {
+    display: block;
+}
+
+.nfx-check {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.nfx-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Zaman qrupu başlığı — sətirləri skan edilə bilən dəstələrə bölür. */
+.nfx-group {
+    padding: 11px 16px 6px;
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-400);
+    background: var(--ems-neutral-0);
+}
+
+.nfx-list .nfx-group:first-child {
+    padding-top: 6px;
+}
+
+/* ── Sətir ───────────────────────────────────────────────────────────────── */
+.nfx-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nfx-row-gap);
+    padding: 12px 16px;
+    border-top: 1px solid var(--ems-neutral-100);
+    transition: background 0.14s;
+}
+
+.nfx-group + .nfx-row {
+    border-top: none;
+}
+
+.nfx-row:hover {
+    background: var(--ems-neutral-50);
+}
+
+/* Oxunmamış: zərif fon + solda nöqtə. Fon «var/yox» siqnalıdır, vurğu deyil. */
+.nfx-row.profile-notif-item--unread {
+    /* Fallback əvvəl: `color-mix` dəstəklənməyən brauzerdə sətir yenə tonlanır. */
+    background: #f7faff;
+    background: color-mix(in srgb, var(--ems-primary-50) 60%, var(--ems-neutral-0));
+}
+
+.nfx-row.profile-notif-item--unread:hover {
+    background: var(--ems-primary-50);
+}
+
+.nfx-row__pick {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 34px;
+    margin: 0;
+}
+
+.nfx-icon {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+/* Növ tonları — semantik, bəzək deyil. */
+.nfx-icon--blue   { background: var(--ems-primary-50);   color: var(--ems-primary-700); }
+.nfx-icon--amber  { background: var(--ems-warning-100);  color: var(--ems-warning-800); }
+.nfx-icon--green  { background: var(--ems-emerald-50);   color: var(--ems-success-strong); }
+.nfx-icon--cyan   { background: #ecfeff;                 color: #0e7490; }
+.nfx-icon--red    { background: var(--ems-danger-100);   color: var(--ems-danger-strong); }
+.nfx-icon--violet { background: #f5f3ff;                 color: #6d28d9; }
+.nfx-icon--slate  { background: var(--ems-neutral-100);  color: var(--ems-neutral-600); }
+
+.nfx-row__main {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.nfx-row__main:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.nfx-row__head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.nfx-row__title {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--ems-neutral-700);
     overflow-wrap: anywhere;
 }
 
-.profile-notif-preview {
-    font-size: 0.78rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.nfx-row__title strong {
+    font-weight: 700;
+    color: var(--ems-neutral-900);
 }
 
-.profile-notif-thumb-img {
+.nfx-row__time {
+    flex: none;
+    font-size: 0.73rem;
+    color: var(--ems-neutral-400);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.nfx-row__preview {
+    margin: 3px 0 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--ems-neutral-500);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.nfx-row__thumb {
     display: block;
-    max-height: 64px;
-    max-width: min(100%, 120px);
+    margin-top: 8px;
+    max-height: 88px;
+    max-width: min(100%, 160px);
     width: auto;
     object-fit: cover;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-200);
 }
 
-.profile-notif-meta {
-    font-size: 0.72rem;
-    line-height: 1.3;
+/* Oxunmamış nöqtəsi — sətrin sol kənarında, mətn axınından KƏNARDA. */
+.nfx-row__dot {
+    position: absolute;
+    left: 6px;
+    top: 21px;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
 }
 
-.profile-notif-actions {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    align-items: flex-end;
-}
-
-/* Bulk action bar */
-.notif-bulk-bar {
-    background: #f0f4ff;
-    border-radius: 0.375rem;
-    padding: 0.4rem 0.75rem;
-    border: 1px solid #d0d9f0;
-}
-
-/* Empty state */
-.notif-empty-state { padding: 3rem 1rem; }
-.notif-empty-icon { font-size: 2.8rem; color: #dee2e6; }
-
-/* ── Notification detail modal ── */
-#profileNotifModal .modal-content {
-    border-radius: 0.6rem;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-}
-
-#profileNotifModalMessage {
-    font-size: 0.93rem;
-    line-height: 1.6;
-    color: #343a40;
-    white-space: pre-line;
-}
-
-/* Responsive image in modal — never overflow modal width */
-#profileNotifModalImageEl {
-    display: block;
-    max-width: 100%;
-    max-height: 280px;
-    width: auto;
-    object-fit: contain;
-    border-radius: 0.375rem;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   Publish Notification Section
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Multi-select target checkbox list ── */
-.pn-target-list {
-    border: 1.5px solid #dee2e6;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    /* The scroll area is inside .pn-target-scroll, not on the list itself */
-}
-
-.pn-target-scroll {
-    max-height: 224px; /* ~4 items @ ~56px each */
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-.pn-target-item {
+/* ── Sətir əməlləri ──────────────────────────────────────────────────────── */
+.nfx-row__actions {
+    flex: none;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.55rem 0.85rem;
+    gap: 4px;
+}
+
+.nfx-icon-btn {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ems-neutral-400);
+    font-size: 0.78rem;
     cursor: pointer;
-    transition: background 0.14s;
-    border-bottom: 1px solid #f0f2f5;
-    user-select: none;
-    font-size: 0.9rem;
+    transition: background 0.14s, color 0.14s, border-color 0.14s;
 }
 
-.pn-target-item:last-child {
-    border-bottom: none;
+.nfx-icon-btn:hover {
+    border-color: var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-primary-700);
 }
 
-.pn-target-item:hover {
-    background-color: #f0f4ff;
+.nfx-icon-btn--danger:hover {
+    border-color: var(--ems-danger-200);
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
 }
 
-.pn-target-item input[type="checkbox"] {
-    flex-shrink: 0;
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-    accent-color: #0d6efd;
-}
-
-.pn-target-item.is-exclusive {
-    background-color: #fff8e1;
-    border-bottom-color: #ffe082;
-}
-
-.pn-target-item.is-exclusive:hover {
-    background-color: #fff3cd;
-}
-
-.pn-target-item.is-exclusive:last-child {
-    border-bottom: none;
-}
-
-.pn-target-icon {
-    width: 1.3rem;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 0.9rem;
-}
-
-.pn-target-label {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.pn-target-search-wrap {
-    border-bottom: 1px solid #dee2e6;
-    padding: 0.4rem 0.85rem;
-    background: #f8f9fa;
-}
-
-.pn-target-search-wrap .form-control {
-    font-size: 0.85rem;
-    border-radius: 0.35rem;
-}
-
-/* Btn send */
-.btn-send-notif {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    border: none;
-    color: var(--ems-neutral-0);
-    font-weight: 600;
-    padding: 0.5rem 1.4rem;
-    border-radius: 0.4rem;
-    transition: filter 0.18s, transform 0.1s, box-shadow 0.18s;
-    box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
-}
-
-.btn-send-notif:hover {
-    filter: brightness(1.08);
-    box-shadow: 0 5px 14px rgba(40, 167, 69, 0.4);
-    color: var(--ems-neutral-0);
-    transform: translateY(-1px);
-}
-
-.btn-send-notif:active {
-    transform: translateY(0);
-    filter: brightness(0.97);
-}
-
-.pn-target-no-results {
-    padding: 0.5rem 0.85rem;
-    color: #6c757d;
-    font-size: 0.85rem;
-}
-
-/* Responsive */
-@media (max-width: 576px) {
-    .profile-notif-actions {
-        flex-direction: row;
+/* Siçanı olan cihazda əməllər yalnız hover/fokusda görünür; toxunma
+   cihazında hover yoxdur, ona görə orada həmişə açıqdır. */
+@media (hover: hover) and (pointer: fine) {
+    .nfx-row__actions {
+        opacity: 0;
+        transition: opacity 0.14s;
     }
 
-    .profile-notif-item {
-        flex-wrap: nowrap;
-    }
-
-    .pn-target-scroll {
-        max-height: 180px; /* ~3 items on mobile */
+    .nfx-row:hover .nfx-row__actions,
+    .nfx-row:focus-within .nfx-row__actions {
+        opacity: 1;
     }
 }
-
-/* ═══ Faza 6.4 Sprint-4 (2026-07-02): inline → klass ═══ */
-.notif-item--clickable { cursor: pointer; }
-.notif-new-badge { font-size: 0.65rem; }
-.notif-modal-head--danger { border-bottom-color: #dc3545; }
-.notif-modal-title--danger { color: #dc3545; }
-.notif-modal-msg { white-space: pre-line; }

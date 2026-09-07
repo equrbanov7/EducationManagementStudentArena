@@ -39,6 +39,12 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
      data-min-subject="{{ applications_section.rules.min_subject_length|default:5 }}"
      data-min-body="{{ applications_section.rules.min_body_length|default:20 }}"
      data-min-note="{{ applications_section.rules.min_note_length|default:10 }}"
+     {% comment %}Yükləmə hədləri SERVER-dən gəlir (`payloads.rules_payload`) — fayl
+     seçicisi `accept`/ölçü/say qaydasını TƏKRAR YAZMIR. Server siyahını dəyişəndə
+     UI özündən dəyişir.{% endcomment %}
+     data-max-files="{{ applications_section.rules.max_files|default:5 }}"
+     data-max-file-mb="{{ applications_section.rules.max_file_mb|default:10 }}"
+     data-accept="{{ applications_section.rules.allowed_extensions|join:',' }}"
      data-open-application="{{ request.GET.application|default:'' }}"
      {% comment %}«Yeni müraciət» dialoqunu ÖNCƏDƏN SEÇİLMİŞ növlə açır — kabinetin
      başqa bölmələri (məs. Transkript → «Transkript sorğusu») buraya belə keçid verir.
@@ -171,6 +177,22 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
     <button type="button" class="apx-chip" data-apx-stat="overdue" aria-pressed="false">{% trans "Müddəti keçən" context "applications" %}</button>
     <button type="button" class="apx-chip" data-apx-stat="closed" aria-pressed="false">{% trans "Bağlananlar" context "applications" %}</button>
     <button type="button" class="apx-chip" data-apx-stat="all" aria-pressed="false">{% trans "Hamısı" context "applications" %}</button>
+    {% comment %}Tarix aralığı — GÖNDƏRİLMƏ tarixi üzrə (server `submitted_at`
+    ilə süzür). Native `type="date"` seçilib: brauzerin öz təqvimi, klaviatura
+    ilə giriş və lokal format pulsuz gəlir, əlavə kitabxana lazım deyil.{% endcomment %}
+    <div class="apx-dates" data-apx-dates>
+      <label class="apx__sr" for="apx-from">{% trans "Başlanğıc tarix" context "applications" %}</label>
+      <input id="apx-from" type="date" class="apx-date" data-apx-date-from
+             aria-label="{% trans 'Başlanğıc tarix' context 'applications' %}">
+      <span class="apx-dates__dash" aria-hidden="true">—</span>
+      <label class="apx__sr" for="apx-to">{% trans "Son tarix" context "applications" %}</label>
+      <input id="apx-to" type="date" class="apx-date" data-apx-date-to
+             aria-label="{% trans 'Son tarix' context 'applications' %}">
+      <button type="button" class="apx-dates__clear" data-apx-dates-clear hidden
+              aria-label="{% trans 'Tarix aralığını təmizlə' context 'applications' %}">
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
     <div class="apx-kind" data-apx-kind>
       <button type="button" class="apx-kind__toggle" data-apx-kind-toggle aria-haspopup="listbox" aria-expanded="false">
         <span class="apx-kind__label" data-apx-kind-label>{% trans "Bütün növlər" context "applications" %}</span>
@@ -182,11 +204,20 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
     <button type="button" class="apx-btn apx-btn--ghost" data-apx-reset>{% trans "Sıfırla" context "applications" %}</button>
   </div>
 
-  {# ── İki sütunlu gövdə (dizayn §4.6/§4.7) ─────────────────────────────── #}
+  {# ── Siyahı (dizayn §4.6) — tam en ─────────────────────────────────────── #}
   <div class="apx-body">
     <div class="apx-list" data-apx-list aria-live="polite"></div>
-    <aside class="apx-detail" data-apx-detail hidden
-           aria-label="{% trans 'Müraciətin detalı' context 'applications' %}"></aside>
+  </div>
+
+  {% comment %}Detal MODAL-dır (əvvəl sağda yapışqan sütun idi): yan sütunda
+  yazışma sıxılırdı və «ən son nə yazılıb, cavab nə gəlib» görünmürdü. Modal
+  bütün eni tutur, mətn oxunaqlı ölçüdə gedir və açılanda son mesaja sürüşür.
+  İçəriyi JS doldurur (`applications_thread.js`); `data-apx-files-scope` cavab
+  qutusunun fayl seçicisini dialoqlarla EYNİ məntiqə bağlayır.{% endcomment %}
+  <div class="apx-modal" data-apx-detail hidden>
+    <div class="apx-modal__panel" role="dialog" aria-modal="true" tabindex="-1"
+         data-apx-modal-panel data-apx-files-scope
+         aria-label="{% trans 'Müraciətin detalı' context 'applications' %}"></div>
   </div>
 
   {# ── Dialoqlar — panelin İÇİNDƏ (AJAX swap-da itməsin) ────────────────── #}
@@ -199,10 +230,12 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
 ad fəzasına yazır; nüvə funksiyaları ÇAĞIRIŞ anında oxuyur, ona görə sıra pozulsa
 da uçmur. Script-lər panelin İÇİNDƏDİR — `section_loader.executeInlineScripts`
 onları swap-dan sonra yenidən icra edir (init idempotentdir).{% endcomment %}
-<script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20260902-4"></script>
-<script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20260902-4"></script>
-<script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20260902-4"></script>
-<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20260902-4"></script>
+<script defer src="{% static 'accounts/js/profile/applications_core.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_dialogs.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_filters.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_thread.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications_detail.js' %}?v=20260907-modal"></script>
+<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20260907-modal"></script>
 {% endif %}
 </section>
 {% endif %}

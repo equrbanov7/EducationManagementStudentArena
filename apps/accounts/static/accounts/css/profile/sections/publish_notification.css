@@ -1,0 +1,124 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Profil — «Bildiriş yayımla» bölməsi (hədəf seçimi + göndər).
+   ──────────────────────────────────────────────────────────────────────────
+   `notifications.css`-dən AYRILIB (2026-09-07): həmin fayl oxucu inbox-udur,
+   bu isə yazıcı formasıdır — iki fərqli ekran, iki fərqli fayl. Sinif adları
+   və davranış DƏYİŞMİR (`_publish_notification.html` + `publish_notification.js`);
+   yalnız hardcode rənglər `--ems-*` token-lərinə çevrilib.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Hədəf seçimi (çoxseçimli siyahı) ────────────────────────────────────── */
+.pn-target-list {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+    overflow: hidden;
+    /* Sürüşən sahə `.pn-target-scroll`-dadır, siyahının özündə deyil. */
+}
+
+.pn-target-scroll {
+    max-height: 224px; /* ~4 element × ~56px */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.pn-target-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.85rem;
+    cursor: pointer;
+    transition: background 0.14s;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    user-select: none;
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.pn-target-item:last-child {
+    border-bottom: none;
+}
+
+.pn-target-item:hover {
+    background-color: var(--ems-primary-50);
+}
+
+.pn-target-item input[type="checkbox"] {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    accent-color: var(--ems-primary-600);
+}
+
+/* «Hamıya» kimi eksklüziv hədəf — digərlərini söndürdüyü üçün fərqli tonda. */
+.pn-target-item.is-exclusive {
+    background-color: #fffbeb;
+    border-bottom-color: var(--ems-warning-100);
+}
+
+.pn-target-item.is-exclusive:hover {
+    background-color: var(--ems-warning-100);
+}
+
+.pn-target-item.is-exclusive:last-child {
+    border-bottom: none;
+}
+
+.pn-target-icon {
+    width: 1.3rem;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    color: var(--ems-neutral-500);
+}
+
+.pn-target-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pn-target-search-wrap {
+    border-bottom: 1px solid var(--ems-neutral-200);
+    padding: 0.4rem 0.85rem;
+    background: var(--ems-neutral-50);
+}
+
+.pn-target-search-wrap .form-control {
+    font-size: 0.85rem;
+    border-radius: 8px;
+}
+
+.pn-target-no-results {
+    padding: 0.5rem 0.85rem;
+    color: var(--ems-neutral-500);
+    font-size: 0.85rem;
+}
+
+/* ── Göndər düyməsi ──────────────────────────────────────────────────────── */
+.btn-send-notif {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ems-success-600);
+    border: 1px solid var(--ems-success-600);
+    color: var(--ems-neutral-0);
+    font-weight: 700;
+    padding: 0.5rem 1.2rem;
+    border-radius: 9px;
+    transition: background 0.16s, border-color 0.16s;
+}
+
+.btn-send-notif:hover {
+    background: var(--ems-success-strong);
+    border-color: var(--ems-success-strong);
+    color: var(--ems-neutral-0);
+}
+
+@media (max-width: 576px) {
+    .pn-target-scroll {
+        max-height: 180px; /* ~3 element */
+    }
+}

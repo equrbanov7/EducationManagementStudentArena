@@ -272,10 +272,11 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
 {% endif %}
 {% if 'groups' in allowed_sections %}
-<script src="{% static 'exams/js/profile_group_modal/namespace.js' %}?v=20260612-detail-ajax"></script>
-<script src="{% static 'exams/js/profile_group_modal/checklist.js' %}?v=20260612-detail-ajax"></script>
-<script src="{% static 'exams/js/profile_group_modal/controller.js' %}?v=20260612-detail-ajax"></script>
-<script src="{% static 'exams/js/profile_group_modal/entry.js' %}?v=20260612-detail-ajax"></script>
+<script src="{% static 'exams/js/profile_group_modal/namespace.js' %}?v=20260907-confirm"></script>
+<script src="{% static 'exams/js/profile_group_modal/checklist.js' %}?v=20260907-confirm"></script>
+<script src="{% static 'exams/js/profile_group_modal/controller.js' %}?v=20260907-confirm"></script>
+<script src="{% static 'exams/js/profile_group_modal/confirm.js' %}?v=20260907-confirm5"></script>
+<script src="{% static 'exams/js/profile_group_modal/entry.js' %}?v=20260907-confirm"></script>
 {% endif %}
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
@@ -300,12 +301,15 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
 {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260903-2"></script>
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260907-headpicker"></script>
 {% endif %}
 {% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
 gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
 {% if 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-approval' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
+{% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
+`data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260907-1"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq
 `teaching_office.js` urlencoded göndərir, fayl ondan keçmir).{% endcomment %}

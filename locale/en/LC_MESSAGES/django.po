@@ -65452,3 +65452,481 @@ msgstr "You do not have permission to create a structural unit."
 msgctxt "registrar.journal"
 msgid "Nəticələr yüklənir…"
 msgstr "Loading results…"
+
+msgctxt "applications"
+msgid "Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Choose a file — PDF, image, DOCX or ZIP · max. %(mb)s MB · up to %(n)s files"
+
+msgctxt "applications"
+msgid "ən son"
+msgstr "latest"
+
+msgctxt "applications"
+msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, image, DOCX or ZIP · max. {mb} MB · up to {n} files"
+
+msgctxt "applications"
+msgid "«{action}» əməli sənəd qəbul etmir — faylları silin və ya başqa əməl seçin."
+msgstr "“{action}” does not accept documents — remove the files or choose another action."
+
+msgctxt "applications"
+msgid "Cavab göndərilməyib"
+msgstr "The reply has not been sent"
+
+msgctxt "applications"
+msgid "Yazdığınız mətn və seçdiyiniz sənədlər hələ göndərilməyib — pəncərəni bağlasanız itəcək. Bağlayaq?"
+msgstr "Your text and the files you picked have not been sent yet — closing the window discards them. Close it?"
+
+msgctxt "applications"
+msgid "Cavab mətni ən azı {n} simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
+msgstr "The reply must be at least {n} characters — the applicant sees exactly this text."
+
+msgctxt "applications"
+msgid "«{name}» {mb} MB-dan böyükdür."
+msgstr "“{name}” is larger than {mb} MB."
+
+msgctxt "applications"
+msgid "«{name}» dəstəklənmir — icazəli formatlar: {list}."
+msgstr "“{name}” is not supported — allowed formats: {list}."
+
+msgctxt "applications"
+msgid "Bir əməldə ən çoxu {n} fayl əlavə edilə bilər."
+msgstr "At most {n} files can be attached in one action."
+
+msgctxt "applications"
+msgid "Cavabdan razı qalmadı — yenidən baxışa göndərdi"
+msgstr "Was not satisfied with the answer — sent back for review"
+
+msgctxt "applications"
+msgid "Razı deyiləm — yenidən bax"
+msgstr "Not satisfied — review again"
+
+msgctxt "applications"
+msgid "Razı deyiləm — yenidən baxılsın"
+msgstr "Not satisfied — please review again"
+
+msgctxt "applications"
+msgid "Nə həll olunmadı?"
+msgstr "What was left unresolved?"
+
+msgctxt "applications"
+msgid "Cavab gəldi. Razısınızsa təsdiqləyib bağlayın; problem həll olunmayıbsa səbəbini yazın — müraciət eyni nömrə ilə həmin şöbəyə qayıdacaq."
+msgstr "The answer has arrived. Confirm and close it if you are satisfied; if the problem is still unresolved, write why — the application returns to the same unit under the same number."
+
+msgctxt "applications"
+msgid "Başlanğıc tarix"
+msgstr "Start date"
+
+msgctxt "applications"
+msgid "Son tarix"
+msgstr "End date"
+
+msgctxt "applications"
+msgid "Tarix aralığını təmizlə"
+msgstr "Clear the date range"
+
+msgid "%(joined)s-dan bəri"
+msgstr "Member since %(joined)s"
+
+msgid "%(org_type)s · %(count)s üzv"
+msgstr "%(org_type)s · %(count)s members"
+
+msgid "Kateqoriyalar"
+msgstr "Categories"
+
+msgctxt "accounts.public_profile"
+msgid "açıq paylaşım"
+msgstr "public posts"
+
+msgctxt "accounts.public_profile"
+msgid "kateqoriya"
+msgstr "categories"
+
+msgctxt "profile.notifications"
+msgid "{n} seçilib"
+msgstr "{n} selected"
+
+msgctxt "profile.notifications"
+msgid "Bu gün"
+msgstr "Today"
+
+msgctxt "profile.notifications"
+msgid "Dünən"
+msgstr "Yesterday"
+
+msgctxt "profile.notifications"
+msgid "Bu həftə"
+msgstr "This week"
+
+msgctxt "profile.notifications"
+msgid "Daha əvvəl"
+msgstr "Earlier"
+
+msgctxt "profile.notifications"
+msgid "indicə"
+msgstr "just now"
+
+msgid "Panel"
+msgstr "Dashboard"
+
+msgid "Rollar"
+msgstr "Roles"
+
+msgid "%(count)s qrup"
+msgstr "%(count)s groups"
+
+msgctxt "accounts.structure_tree"
+msgid "Ad və ya istifadəçi adı üzrə axtar"
+msgstr "Search by name or username"
+
+msgctxt "accounts.structure_tree"
+msgid "Seçimi boş buraxsanız bölmənin rəhbəri götürülür."
+msgstr "Leave the selection empty to remove the unit's head."
+
+msgctxt "accounts.structure_tree"
+msgid "Uyğun namizəd tapılmadı."
+msgstr "No matching candidate found."
+
+msgctxt "accounts.groups"
+msgid "%%d tələbə"
+msgstr "%%d students"
+
+msgctxt "accounts.groups"
+msgid "Ad və ya istifadəçi adı üzrə axtar"
+msgstr "Search by name or username"
+
+msgctxt "accounts.groups"
+msgid "Akademik məzuniyyət"
+msgstr "Academic leave"
+
+msgctxt "accounts.groups"
+msgid "Aktiv qeydiyyatlı tələbələr. Hər əməl səbəb və təsdiq tələb edir; tarixçə silinmir."
+msgstr "Active enrolled students. Every action requires a reason and confirmation; history is never deleted."
+
+msgctxt "accounts.groups"
+msgid "Axtarışa uyğun tələbə tapılmadı."
+msgstr "No student matches the search."
+
+msgctxt "accounts.groups"
+msgid "Bu qrupda aktiv tələbə yoxdur."
+msgstr "This group has no active students."
+
+msgctxt "accounts.groups"
+msgid "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; bərpa ayrıca əməldir."
+msgstr "Until this date the student's status is “academic leave”; reinstatement is a separate action."
+
+msgctxt "accounts.groups"
+msgid "Dondur"
+msgstr "Freeze"
+
+msgctxt "accounts.groups"
+msgid "Fərdi plan (DOCX)"
+msgstr "Individual plan (DOCX)"
+
+msgctxt "accounts.groups"
+msgid "Fərdi tədris planı (DOCX) — bütöv qrup"
+msgstr "Individual study plan (DOCX) — whole group"
+
+msgctxt "accounts.groups"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.groups"
+msgid "Məs.: 12/T"
+msgstr "e.g. 12/T"
+
+msgctxt "accounts.groups"
+msgid "Məzun"
+msgstr "Graduated"
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətdə"
+msgstr "On leave"
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətin bitmə tarixi"
+msgstr "Leave end date"
+
+msgctxt "accounts.groups"
+msgid "Qeydiyyatlı"
+msgstr "Enrolled"
+
+msgctxt "accounts.groups"
+msgid "Qrupdan çıxar"
+msgstr "Remove from group"
+
+msgctxt "accounts.groups"
+msgid "Qrupun fərdi planı (DOCX)"
+msgstr "Group individual plan (DOCX)"
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbələri"
+msgstr "Group students"
+
+msgctxt "accounts.groups"
+msgid "Qəbul"
+msgstr "Admitted"
+
+msgctxt "accounts.groups"
+msgid "Siyahı yüklənmədi — yenidən cəhd edin."
+msgstr "The list failed to load — try again."
+
+msgctxt "accounts.groups"
+msgid "Status «akademik məzuniyyət» olur, qrup üzvlüyü qalır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir; hərəkət sətri silinmir."
+msgstr "Status becomes “academic leave”; group membership stays. Order number, order date and end date are mandatory; the movement record is never deleted."
+
+msgctxt "accounts.groups"
+msgid "Status «xaric edilib» olur. Əmr nömrəsi və tarixi məcburidir; bərpa ayrıca əməldir və yenə səbəblə audit olunur."
+msgstr "Status becomes “expelled”. Order number and date are mandatory; reinstatement is a separate, audited action."
+
+msgctxt "accounts.groups"
+msgid "Statusa görə süz"
+msgstr "Filter by status"
+
+msgctxt "accounts.groups"
+msgid "Sənəd universitetin rəsmi formasındadır — hər tələbə ayrıca səhifədə."
+msgstr "The document follows the university's official form — one page per student."
+
+msgctxt "accounts.groups"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.groups"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "accounts.groups"
+msgid "Tələbələr yüklənir…"
+msgstr "Loading students…"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni dondur (akademik məzuniyyət)"
+msgstr "Freeze student (academic leave)"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni uzaqlaşdır (xaric)"
+msgstr "Expel student"
+
+msgctxt "accounts.groups"
+msgid "Uzaqlaşdır"
+msgstr "Expel"
+
+msgctxt "accounts.groups"
+msgid "Xaric edilib"
+msgstr "Expelled"
+
+msgctxt "accounts.groups"
+msgid "Əmr nömrəsi"
+msgstr "Order number"
+
+msgctxt "accounts.groups"
+msgid "Əmr tarixi"
+msgstr "Order date"
+
+msgctxt "accounts.semester"
+msgid "Açılış sətirləri"
+msgstr "Offering rows"
+
+msgctxt "accounts.semester"
+msgid "Hər kafedranın neçə açılışı var və neçəsinə müəllim təyin olunub — təyinat kafedra rəhbərinin «Dərs yükü» bölməsindən edilir."
+msgstr "How many offerings each chair has and how many have an instructor — assignment is done from the chair head's “Teaching load” section."
+
+msgctxt "accounts.semester"
+msgid "Necə işləyir — 5 addımda semestr açılışı"
+msgstr "How it works — semester opening in 5 steps"
+
+msgctxt "accounts.semester"
+msgid "Planı təsdiqlənməmiş ixtisaslar"
+msgstr "Specialties without an approved plan"
+
+msgctxt "accounts.semester"
+msgid "cəmi %(n)s ixtisas"
+msgstr "%(n)s specialties in total"
+
+msgctxt "accounts.semester"
+msgid "«Plan yoxdur» — bu ixtisaslar üçün açılış yaradıla bilməz"
+msgstr "“No plan” — offerings cannot be created for these specialties"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt də ödənəndə «Semestri kilidlə» düyməsi aktivləşir. Kilid açılış sətirlərini dondurur; geri açmaq ayrıca səlahiyyət və səbəb tələb edir."
+msgstr "When all three conditions are met, “Lock semester” becomes active. The lock freezes offering rows; unlocking needs a separate permission and a reason."
+
+msgctxt "accounts.semester"
+msgid "İndi:"
+msgstr "Now:"
+
+msgctxt "accounts.semester"
+msgid "Əvvəlcə «Tədris planı» bölməsində həmin ixtisasın planı təsdiqlənməlidir; təsdiqdən sonra «Plandan açılış yarat» onları da əhatə edir."
+msgstr "First approve that specialty's plan in the “Curriculum” section; after approval “Create offerings from plan” covers them too."
+
+msgctxt "accounts.semester"
+msgid "Tədris dövrünü seçin və plandan açılış yaradın"
+msgstr "Pick the term and create offerings from the plan"
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» hər qrup üçün təsdiqlənmiş tədris planından fənn sətirləri yaradır; mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Pick the semester in the filter above. “Create offerings from plan” creates subject rows for every group from the approved curriculum; existing rows are not duplicated and nothing is deleted. No rows are created for “no plan” specialties — approve the plan in “Curriculum” first."
+
+msgctxt "accounts.semester"
+msgid "Tədris şöbəsi"
+msgstr "Teaching office"
+
+msgctxt "accounts.semester"
+msgid "Kafedralara göndərin"
+msgstr "Send to chairs"
+
+msgctxt "accounts.semester"
+msgid "Açılış sətirləri hazır olanda «Kafedraya göndər» kafedra rəhbərlərinə bildiriş göndərir — bundan sonra onlar «Dərs yükü» bölməsində öz fənlərinə müəllim təyin edə bilir."
+msgstr "Once offering rows are ready, “Send to chair” notifies chair heads — after that they assign instructors to their subjects in “Teaching load”."
+
+msgctxt "accounts.semester"
+msgid "Kafedra müəllim təyin edir"
+msgstr "Chair assigns instructors"
+
+msgctxt "accounts.semester"
+msgid "Hər açılışa müəllim təyin olunmalıdır. Aşağıdakı «Kafedralar üzrə açılış» cədvəli neçə sətrin müəllim gözlədiyini göstərir; açılış sətrindəki «Müəllim» əməli ilə buradan da təyin etmək olar."
+msgstr "Every offering needs an instructor. The “Offerings by chair” table below shows how many rows are still waiting; you can also assign from the row's “Instructor” action here."
+
+msgctxt "accounts.semester"
+msgid "Dərs yükü → Müəllim təyin et"
+msgstr "Teaching load → Assign instructor"
+
+msgctxt "accounts.semester"
+msgid "Kafedra rəhbəri"
+msgstr "Chair head"
+
+msgctxt "accounts.semester"
+msgid "Jurnallar açılır"
+msgstr "Journals open"
+
+msgctxt "accounts.semester"
+msgid "Müəllim təyin olunan kimi həmin fənnin elektron jurnalı avtomatik yaranır. Jurnalı olmayan sətir müəllimi olmayan sətirdir — ayrıca əməl tələb olunmur."
+msgstr "As soon as an instructor is assigned, the subject's e-journal is created automatically. A row without a journal is a row without an instructor — no separate action is needed."
+
+msgctxt "accounts.semester"
+msgid "Sistem (avtomatik)"
+msgstr "System (automatic)"
+
+msgctxt "accounts.semester"
+msgid "Semestri kilidləyin"
+msgstr "Lock the semester"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt ödənəndə (plan təsdiqlənib, bütün açılışlara müəllim var, jurnallar açılıb) «Semestri kilidlə» aktivləşir. Kilid açılış sətirlərini dondurur; onu yalnız ayrıca səlahiyyətli şəxs səbəb yazmaqla aça bilər."
+msgstr "When the three conditions hold (plan approved, every offering has an instructor, journals open), “Lock semester” becomes active. The lock freezes offering rows; only a separately authorised person can unlock it with a reason."
+
+msgctxt "accounts.semester"
+msgid "Tədris şöbəsi rəhbəri"
+msgstr "Head of teaching office"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış sətri yaradılıb"
+msgstr "%(n)d offering rows created"
+
+msgctxt "accounts.semester"
+msgid "«Plandan açılış yarat» düyməsi ilə başlayın"
+msgstr "Start with the “Create offerings from plan” button"
+
+msgctxt "accounts.semester"
+msgid "Kafedra rəhbərlərinə bildiriş gedib"
+msgstr "Chair heads have been notified"
+
+msgctxt "accounts.semester"
+msgid "«Kafedraya göndər» — rəhbərlərə bildiriş gedir, təyinat başlayır"
+msgstr "“Send to chair” — heads get notified, assignment begins"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış müəllim gözləyir — kafedra «Dərs yükü»ndən təyin edir"
+msgstr "%(n)d offerings await an instructor — the chair assigns from “Teaching load”"
+
+msgctxt "accounts.semester"
+msgid "Bütün jurnallar açılıb"
+msgstr "All journals are open"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılışın jurnalı açılmayıb — müəllim təyin olunduqca açılır"
+msgstr "%(n)d offerings have no journal yet — it opens once an instructor is assigned"
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlidir — açılış sətirləri dəyişmir"
+msgstr "Semester is locked — offering rows are frozen"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt ödənəndə «Semestri kilidlə» aktivləşir; kilid geri qaytarılmır"
+msgstr "“Lock semester” activates when the three conditions hold; the lock is not reversible"
+
+msgctxt "profile.checkbox_select"
+msgid "all_specialties"
+msgstr "All specialties"
+
+msgctxt "profile.checkbox_select"
+msgid "filter_by_specialty"
+msgstr "Filter by specialty"
+
+msgctxt "profile.groups"
+msgid "confirm_back"
+msgstr "Back"
+
+msgctxt "profile.groups"
+msgid "confirm_create_submit"
+msgstr "Confirm and create"
+
+msgctxt "profile.groups"
+msgid "confirm_create_title"
+msgstr "Confirm group creation"
+
+msgctxt "profile.groups"
+msgid "confirm_no_students"
+msgstr "No students selected — the group will be created empty."
+
+msgctxt "profile.groups"
+msgid "confirm_student_count"
+msgstr "Number of students"
+
+msgctxt "registrar.guest_roster"
+msgid "PDF və ya şəkil, 10 MB-dək. Sənəd əlavə qeydiyyatı ilə birlikdə saxlanılır və silinmir."
+msgstr "PDF or image, up to 10 MB. The document is stored with the enrollment and never deleted."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)"
+msgstr "DOCUMENT — SUBMISSION / ORDER (REQUIRED)"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd"
+msgstr "Document"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir."
+msgstr "A document (submission / order) must be uploaded."
+
+msgctxt "registrar.guest_roster"
+msgid "Təqdimat və ya sərəncamın skanı (PDF/şəkil, 10 MB-dək)"
+msgstr "Scan of the submission or order (PDF/image, up to 10 MB)"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrupdan əlavə sənədsiz edilmir."
+msgstr "A document (submission / order) must be uploaded — adding from a subgroup is not allowed without it."
+
+msgctxt "registrar.model.guest_document.meta"
+msgid "guest roster document"
+msgstr "guest roster document"
+
+msgctxt "registrar.model.guest_document.meta"
+msgid "guest roster documents"
+msgstr "guest roster documents"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni qrupdan çıxar (başqa qrupa köçür)"
+msgstr "Remove student from group (transfer to another group)"
+
+msgctxt "accounts.groups"
+msgid "Qrup dəyişikliyi yalnız rəsmi köçürmə ilə olur: hədəf qrup, əmr nömrəsi və tarixi məcburidir. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir."
+msgstr "A group change is only done by an official transfer: target group, order number and date are mandatory. Journal enrollments in the old group move to history — nothing is deleted."
+
+msgctxt "accounts.groups"
+msgid "Hədəf qrup"
+msgstr "Target group"
+
+msgctxt "accounts.groups"
+msgid "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır."
+msgstr "Only active groups within your scope. The transfer is made in the current academic term."

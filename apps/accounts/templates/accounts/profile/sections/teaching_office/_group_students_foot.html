@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Tələbə çekmecəsinin ayağı — bütöv qrupun rəsmi «Fərdi tədris planı»
+sənədi. `href` JS ilə açılan qrupa görə qoyulur (`data-tof-students-plan`).{% endcomment %}
+<span class="ems-dialog__foot-note">{% trans "Sənəd universitetin rəsmi formasındadır — hər tələbə ayrıca səhifədə." context "accounts.groups" %}</span>
+<a class="ems-btn ems-btn--primary" href="#" data-tof-students-plan download>
+    <i class="fas fa-file-word" aria-hidden="true"></i> {% trans "Qrupun fərdi planı (DOCX)" context "accounts.groups" %}
+</a>

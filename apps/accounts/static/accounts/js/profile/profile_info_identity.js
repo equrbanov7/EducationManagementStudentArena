@@ -54,6 +54,7 @@
                     avatarPreviewFallback.style.display = "none";
                 }
                 avatarPreviewImage.src = URL.createObjectURL(file);
+                avatarPreviewImage.hidden = false;
                 avatarPreviewImage.style.display = "";
             });
         }

@@ -35,6 +35,7 @@ LEGAL = [
     (Action.RESOLVE, S.ASSIGNED),
     (Action.REJECT, S.IN_REVIEW),
     (Action.CLOSE, S.RESOLVED),
+    (Action.REOPEN, S.RESOLVED),
     (Action.CANCEL, S.SUBMITTED),
     (Action.CANCEL, S.IN_REVIEW),
     (Action.CANCEL, S.WAITING_INFO),
@@ -54,6 +55,11 @@ ILLEGAL = [
     (Action.RESUBMIT, S.SUBMITTED),
     (Action.CLOSE, S.IN_REVIEW),
     (Action.CLOSE, S.CLOSED),
+    # «Razı deyiləm» YALNIZ cavabdan sonra mümkündür: rədd terminaldır (öz
+    # apellyasiya yolu var), bağlanmış müraciət isə artıq təsdiqlənib.
+    (Action.REOPEN, S.REJECTED),
+    (Action.REOPEN, S.CLOSED),
+    (Action.REOPEN, S.IN_REVIEW),
     (Action.CANCEL, S.RESOLVED),
     (Action.CANCEL, S.CLOSED),
     (Action.CANCEL, S.REJECTED),
@@ -110,6 +116,23 @@ def test_terminal_statuses_admit_no_action_except_sender_close():
     for status in (S.REJECTED, S.CLOSED, S.CANCELLED):
         assert available_actions(status=status.value, is_handler=True, is_sender=True) == ()
     assert Action.CLOSE in available_actions(status=S.RESOLVED.value, is_handler=True, is_sender=True)
+
+
+def test_resolved_gives_the_sender_both_a_yes_and_a_no():
+    """«Həll olundu» sahibin QƏRAR anıdır — təsdiq ilə yanaşı etiraz yolu da olmalıdır."""
+    sender = available_actions(status=S.RESOLVED.value, is_handler=False, is_sender=True)
+    assert Action.CLOSE in sender and Action.REOPEN in sender
+    # Emalçı öz cavabını geri qaytara bilməz — bu, yalnız sahibin sözüdür.
+    assert Action.REOPEN not in available_actions(status=S.RESOLVED.value, is_handler=True, is_sender=False)
+
+
+def test_reopen_requires_a_reason_of_ten_characters():
+    with pytest.raises(TransitionDenied) as empty:
+        ensure_allowed(action=Action.REOPEN, status=S.RESOLVED.value, text="  ")
+    assert empty.value.code == "transition.reason_required"
+    with pytest.raises(TransitionDenied) as short:
+        ensure_allowed(action=Action.REOPEN, status=S.RESOLVED.value, text="qısa")
+    assert short.value.code == "transition.text_too_short"
 
 
 def test_available_actions_respect_the_actor():
