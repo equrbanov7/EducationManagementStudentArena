@@ -236,16 +236,35 @@ def guest_add(request, offering_id):
     if student is None:
         return _error(pgettext(_CTX, "Tələbə seçilmiş qrupda tapılmadı."), status=404)
 
+    # SAHİBİN QƏRARI (2026-09-07): alt qrupdan əlavə SƏNƏDSİZ olmur — təqdimat /
+    # sərəncam yüklənməlidir və qeydiyyatla birlikdə tarixçədə qalır.
+    document = request.FILES.get("document")
+    if document is None:
+        return _error(pgettext(_CTX, "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrupdan əlavə sənədsiz edilmir."))
+    from django.db import transaction
+
+    from .models import GuestRosterDocument
+
     release = _flag(data, "release_source")
     try:
-        enrollment = guest_roster.add_guest_student(
-            offering=offering,
-            student=student,
-            by_user=request.user,
-            source_group=group,
-            reason=_field(data, "reason"),
-            release_source=release,
-        )
+        with transaction.atomic():
+            enrollment = guest_roster.add_guest_student(
+                offering=offering,
+                student=student,
+                by_user=request.user,
+                source_group=group,
+                reason=_field(data, "reason"),
+                release_source=release,
+            )
+            record = GuestRosterDocument(
+                organization=offering.organization,
+                enrollment=enrollment,
+                document=document,
+                note=_field(data, "reason")[:255],
+                uploaded_by=request.user,
+            )
+            record.full_clean(exclude=["uploaded_by_name"])
+            record.save()
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
 

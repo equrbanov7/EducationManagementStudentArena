@@ -40,7 +40,31 @@ def score_repr(score) -> str:
     return str(score)
 
 
-def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False):
+def _stamp_impersonation(changes, request):
+    """«Başqasının adından» yazılıbsa siyahıya ƏSL aktorun möhürünü əlavə edir.
+
+    `changes` burada SİYAHIDIR (core.audit-də lüğətdir), ona görə möhür ayrıca
+    sətir kimi əlavə olunur — mövcud oxucular sətirləri gəzir, naməlum açar onları
+    pozmur.
+    """
+    if request is None or not getattr(request, "is_view_as", False):
+        return changes
+    real_user = getattr(request, "real_user", None)
+    if real_user is None or not getattr(real_user, "is_authenticated", False):
+        return changes
+    from core.audit import IMPERSONATION_KEY
+
+    stamp = {
+        IMPERSONATION_KEY: {
+            "id": str(getattr(real_user, "pk", "")),
+            "username": str(getattr(real_user, "username", ""))[:150],
+            "mode": str(getattr(request, "view_as_mode", "") or ""),
+        }
+    }
+    return list(changes) + [stamp]
+
+
+def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, request=None):
     """Write one aggregated grade-change audit entry.
 
     ``kind``  — short slug (``mark`` / ``component`` / ``final`` / ``resit``).
@@ -48,9 +72,14 @@ def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False):
     to actual changes; all values JSON-serialisable strings).
     ``fail_closed`` — re-raise storage errors for formal, transaction-bound
     workflows such as documented corrections.
+    ``request`` — verilibsə və «başqasının adından» rejimi aktivdirsə sətrə ƏSL
+    aktorun möhürü qoyulur (sahib qərarı, 2026-09-06: «RİM başqasının yerinə
+    yaza bilər, amma RİM izi düşsün»). Möhür `core.audit` ilə EYNİ formadadır,
+    ona görə hesabatlar bir açardan oxuyur.
     """
     if not changes:
         return
+    changes = _stamp_impersonation(changes, request)
     try:
         from django.apps import apps as django_apps
 

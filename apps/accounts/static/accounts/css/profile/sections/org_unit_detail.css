@@ -141,7 +141,7 @@
 
 .org-unit-detail__head i {
     margin-right: 0.35rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .org-unit-detail__stats {
@@ -198,7 +198,7 @@
 }
 
 .org-unit-detail__block-count {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-weight: 600;
 }
 
@@ -223,7 +223,7 @@
     border-radius: 8px;
     background: var(--ems-neutral-0);
     padding: 0.4rem 0.65rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     min-height: 44px;
 }
 
@@ -329,7 +329,7 @@
 .org-unit-detail__chip--muted {
     background: transparent;
     border: 1px dashed var(--ems-neutral-300);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 @media (max-width: 560px) {

@@ -69,7 +69,8 @@ STUDENT_SERVICES_ROLES = [
 STUDENT_SERVICES_GRANTS: dict[str, tuple[str, ...]] = {
     "ikt_rehber": ("student.registry_view", "student.movement", "student.assign_group"),
     "dean": ("student.registry_view",),
-    "program_coordinator": ("student.registry_view",),
+    # 2026-09-07: koordinator tələbənin qrupunu da təyin edir/dəyişir.
+    "program_coordinator": ("student.registry_view", "student.assign_group"),
     "vice_rector": ("student.registry_view",),
 }
 

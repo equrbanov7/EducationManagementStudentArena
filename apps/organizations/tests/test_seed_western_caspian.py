@@ -44,7 +44,7 @@ class SeedWesternCaspianCommandTest(TransactionTestCase):
             for expected in {
                 "rector",
                 "vice_rector",
-                "exam_center",
+                "exam_center_head",
                 "hr",
                 "dean",
                 "chair_head",

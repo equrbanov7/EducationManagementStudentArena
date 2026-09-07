@@ -11,8 +11,11 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .constants import (
+    ATTACHMENT_ACCEPT,
     BADGE_PALETTES,
     GRADE_APPEAL_KIND_CODE,
+    MAX_ATTACHMENT_MB,
+    MAX_ATTACHMENTS_PER_ACTION,
     MIN_BODY_LENGTH,
     MIN_NOTE_LENGTH,
     MIN_SUBJECT_LENGTH,
@@ -104,13 +107,20 @@ def attachment_payload(attachment) -> dict:
     }
 
 
-def event_payload(event) -> dict:
+def event_payload(event, *, sender_id=None) -> dict:
+    """Zaman xəttinin bir sətri.
+
+    ``sender_id`` verilirsə hadisə YAZIŞMA tərəfi ilə işarələnir
+    (``actor_is_sender``): UI müraciət sahibinin sözünü şöbənin cavabından
+    vizual olaraq ayırır. Ad müqayisəsi kifayət deyil (adaşlar) — id verilir.
+    """
     return {
         "id": str(event.pk),
         "kind": event.kind,
         "kind_label": str(EventKind(event.kind).label),
         "actor": event.actor_name or person(event.actor)["name"],
         "actor_role": event.actor_role_name,
+        "actor_is_sender": bool(sender_id is not None and event.actor_id and event.actor_id == sender_id),
         "from_unit": event.from_unit.name if event.from_unit_id else "",
         "to_unit": event.to_unit.name if event.to_unit_id else "",
         "old_status": event.old_status,
@@ -152,8 +162,13 @@ def detail_payload(application, *, user) -> dict:
     """Detal paneli (dizayn §4.7) — icazəyə görə süzülmüş zaman xətti."""
     is_handler = access.can_act(user, application)
     is_sender = access.is_sender(user, application)
+    sees_internal = is_handler or access.can_see_internal(user, application)
     events = application.events.select_related("actor", "from_unit", "to_unit").prefetch_related("attachments")
-    timeline = [event_payload(event) for event in events if is_handler or not event.is_internal]
+    timeline = [
+        event_payload(event, sender_id=application.created_by_id)
+        for event in events
+        if sees_internal or not event.is_internal
+    ]
     return {
         **row_payload(application, viewer_is_handler=is_handler),
         "body": application.body,
@@ -182,11 +197,18 @@ def detail_payload(application, *, user) -> dict:
 
 
 def rules_payload() -> dict:
-    """Klient tərəfli yoxlamanın SERVER qaydası ilə eyni olması üçün."""
+    """Klient tərəfli yoxlamanın SERVER qaydası ilə eyni olması üçün.
+
+    Yükləmə hədləri də buradadır: fayl seçicisi (`accept`, ölçü, say) qaydanı
+    TƏKRAR YAZMIR — server nə qəbul edirsə, UI onu göstərir.
+    """
     return {
         "min_subject_length": MIN_SUBJECT_LENGTH,
         "min_body_length": MIN_BODY_LENGTH,
         "min_note_length": MIN_NOTE_LENGTH,
+        "max_files": MAX_ATTACHMENTS_PER_ACTION,
+        "max_file_mb": MAX_ATTACHMENT_MB,
+        "allowed_extensions": list(ATTACHMENT_ACCEPT),
     }
 
 

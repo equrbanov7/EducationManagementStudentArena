@@ -21,6 +21,7 @@ from ..services import (
     parse_workbook,
     resolve_actor,
     return_slice,
+    review_all,
     submit_task,
 )
 from ..services.imports import ImportFileError
@@ -29,6 +30,7 @@ from .factories import activate_member, make_org, make_row, make_structure, make
 User = get_user_model()
 
 OFFICE_PERMS = ["workload.view", "workload.manage", "workload.submit", "workload.report"]
+COORD_PERMS = ["workload.view", "workload.review"]
 DEAN_PERMS = ["workload.view", "workload.approve"]
 
 
@@ -178,6 +180,7 @@ class NotificationRecipientTest(TestCase):
         cls.office = User.objects.create_user("note.office", "n1@x.test", "pw")
         cls.dean = User.objects.create_user("note.dean", "n2@x.test", "pw")
         cls.chair_head = User.objects.create_user("note.chair", "n3@x.test", "pw")
+        cls.coordinator = User.objects.create_user("note.coord", "n4@x.test", "pw")
         activate_member(cls.org, cls.office, "teaching_office_head", permissions=OFFICE_PERMS, level=85)
         activate_member(
             cls.org,
@@ -187,6 +190,16 @@ class NotificationRecipientTest(TestCase):
             scope_unit=cls.stack["faculty"],
             scope_type=RoleScopeType.UNIT,
             level=70,
+        )
+        # Koordinator vizası (P2-36) — bunsuz dekan təsdiqi `visa_missing` ilə bağlıdır.
+        activate_member(
+            cls.org,
+            cls.coordinator,
+            "program_coordinator",
+            permissions=COORD_PERMS,
+            scope_unit=cls.stack["specialty"],
+            scope_type=RoleScopeType.UNIT,
+            level=45,
         )
         # Bildiriş alıcıları BÖLMƏ RƏHBƏRİNDƏN gəlir (OrgUnit.head).
         cls.stack["faculty"].head = cls.dean
@@ -223,6 +236,7 @@ class NotificationRecipientTest(TestCase):
         task = make_task(self.org, self.stack["chair"], created_by=self.office)
         make_row(task, self.stack)
         submit_task(task=task, actor=resolve_actor(self.office, self.org))
+        review_all(actor=resolve_actor(self.coordinator, self.org))
         approve_slice(slice_obj=TaskFacultySlice.objects.get(task=task), actor=resolve_actor(self.dean, self.org))
         task.refresh_from_db()
         self.assertEqual(task.status, TaskStatus.APPROVED)

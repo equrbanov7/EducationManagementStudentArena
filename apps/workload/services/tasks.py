@@ -77,13 +77,28 @@ _INT_FIELDS = {
     "practice_production_hours",
     "credits_value",
     "order",
+    # `total_hours` (əl ilə override) BURADA olmalıdır ki, `_coerce("total_hours", …)`
+    # düz int-yoxlamasından keçsin (QA 2026-09-05 P3-20: əvvəllər çağırış
+    # `_coerce("student_count", …)` işlədirdi — xəta mesajı yanlış sahə adı
+    # göstərirdi, çünki `total_hours` bu dəstdə yox idi).
+    "total_hours",
 }
 
 
 def normalize_academic_year(raw: str) -> str:
-    """«2026», «2026-2027», «2026/2027» → «2026/2027» (AcademicPeriod konvensiyası)."""
+    """«2026», «2026-2027», «2026/2027» → «2026/2027» (AcademicPeriod konvensiyası).
+
+    Yalnız formatlayırdı — `year='abc'` ilə tapşırıq yaranırdı (QA 2026-09-05
+    WORKLOAD-SCHEDULE-02). İndi «YYYY/YYYY+1» nümunəsi tələb olunur; uyğunsuz → boş.
+    """
+    import re
+
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    return AcademicPeriod.format_year(raw)
+    year = AcademicPeriod.format_year(raw) or ""
+    match = re.fullmatch(r"(\d{4})/(\d{4})", year)
+    if not match or int(match.group(2)) != int(match.group(1)) + 1 or not 2000 <= int(match.group(1)) <= 2100:
+        return ""
+    return year
 
 
 # ── Tapşırıq ────────────────────────────────────────────────────────────────
@@ -91,8 +106,8 @@ def normalize_academic_year(raw: str) -> str:
 
 def get_or_create_task(*, organization, chair_id, academic_year: str, actor, request=None):
     """Kafedra + il üçün tapşırıq (yoxdursa yaradılır). Kafedra müdiri / RİM."""
-    ensure_can_manage(actor, chair_id)
-    chair = resolve_chair(organization, chair_id)
+    chair = resolve_chair(organization, chair_id)  # UUID qapısı burada (WORKLOAD-SCHEDULE-01)
+    ensure_can_manage(actor, chair.pk)
     year = normalize_academic_year(academic_year)
     if not year:
         raise WorkloadDenied("workload.year_required", "Tədris ili göstərilməlidir.")
@@ -142,6 +157,16 @@ def list_years(*, organization, chair_ids=None) -> list[str]:
 
 def _coerce(field: str, value):
     if field in _INT_FIELDS:
+        # QA 2026-09-05 (P3-22): JSON `true`/`false` `int(value)`-dan səssizcə
+        # 1/0 alırdı (`bool` `int`-in alt-sinifidir) — məntiqi dəyər ədəd DEYİL,
+        # açıq rədd edilir.
+        if isinstance(value, bool):
+            raise WorkloadDenied("workload.invalid_number", f"«{field}» rəqəm olmalıdır (məntiqi dəyər deyil).")
+        # JSON float (12.5) `int()`-də səssizcə 12-yə kəsilirdi. Tam ədədə
+        # bərabər float (12.0) məlumat itirmədiyi üçün keçir; kəsr hissəsi
+        # olan dəyər açıq rədd edilir.
+        if isinstance(value, float) and not value.is_integer():
+            raise WorkloadDenied("workload.invalid_number", f"«{field}» tam ədəd olmalıdır (kəsr qəbul edilmir).")
         try:
             number = int(value)
         except (TypeError, ValueError):
@@ -201,12 +226,56 @@ def resolve_specialty_and_faculty(organization, specialty_id):
     return specialty, faculty
 
 
+def _season_from_period(period) -> str:
+    """AcademicPeriod başlanğıc ayından fəsil (Payız/Yaz/Yay).
+
+    QA 2026-09-05 (P3-20 / WORKLOAD-SCHEDULE-07): sətrin ``season`` sahəsi
+    ``period_id`` ilə heç UYĞUNLAŞDIRILMIRDI — «Yay · 2025/2026» dövrü seçilib
+    ayrıca ``season`` göndərilməyəndə sətir modelin defolt «fall» (Payız)
+    dəyərində qalırdı. Qayda ``accounts`` bölməsindəki ``_season_label``
+    (ay-əsaslı) ilə EYNİDİR: avqust–dekabr → Payız, yanvar–may → Yaz,
+    iyun–iyul → Yay.
+    """
+    start_date = getattr(period, "start_date", None)
+    if start_date is None:
+        return Season.FALL
+    month = start_date.month
+    if month >= 8 or month == 12:
+        return Season.FALL
+    if month <= 5:
+        return Season.SPRING
+    return Season.SUMMER
+
+
 def _ensure_editable(task: TeachingTask) -> None:
     if task.status not in EDITABLE_STATUSES:
         raise WorkloadDenied(
             "workload.task_not_editable",
             "Bu statusda sətir dəyişmək olmaz — düzəliş axını (amendment) istifadə edilməlidir.",
         )
+
+
+def _duplicate_row_exists(row: TeachingTaskRow) -> bool:
+    """Eyni fənn + ixtisas + semestr + QRUP DƏSTİ ilə ikinci sətir varmı (QA P2-37).
+
+    Qruplar M2M olduğu üçün müqayisə sətir yaddaşa yazılıb qruplar təyin
+    ediləndən SONRA aparılır; `save_row` atomik olduğuna görə tapılan dublikat
+    yazını geri qaytarır.
+    """
+    others = TeachingTaskRow.objects.filter(
+        task=row.task,
+        season=row.season,
+        specialty_id=row.specialty_id,
+    ).exclude(pk=row.pk)
+    if row.subject_id:
+        others = others.filter(subject_id=row.subject_id)
+    else:
+        others = others.filter(subject_id__isnull=True, subject_text__iexact=(row.subject_text or "").strip())
+    wanted = set(row.groups.values_list("id", flat=True))
+    for other in others.prefetch_related("groups"):
+        if set(other.groups.values_list("id", flat=True)) == wanted:
+            return True
+    return False
 
 
 @transaction.atomic
@@ -245,6 +314,11 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
             if period is None:
                 raise WorkloadDenied("workload.period_not_found", "Semestr tapılmadı.")
             row.period = period
+            if "season" not in data:
+                # Əl ilə `season` göndərilməyibsə dövrün ÖZÜNDƏN törədilir —
+                # əks halda sətir modelin defolt «fall» dəyərində donub qalırdı
+                # (QA 2026-09-05 P3-20). Açıq göndərilmiş `season` DƏYİŞMİR.
+                row.season = _season_from_period(period)
         else:
             row.period = None
 
@@ -259,8 +333,11 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
     # `total_hours` DB-də saxlanılır (rəsmi Excel-in «CƏMİ» sütunu); əl ilə
     # verilməyibsə cəmilərin cəmindən hesablanır — fərq varsa xəbərdarlıq
     # (`row_warnings`) çıxır, amma BLOKLANMIR.
+    # QA 2026-09-05 (P3-20): bura `_coerce("student_count", …)` çağırırdı —
+    # mənfi/ondalıq dəyərdə xəta mesajı «total_hours» əvəzinə «student_count»
+    # göstərirdi (istifadəçini çaşdırırdı).
     manual_total = data.get("total_hours")
-    row.total_hours = _coerce("student_count", manual_total) if manual_total else row.computed_total_hours
+    row.total_hours = _coerce("total_hours", manual_total) if manual_total else row.computed_total_hours
     row.save()
 
     if "group_ids" in data:
@@ -273,6 +350,12 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
         if not row.groups_text:
             row.groups_text = " / ".join(group.name for group in groups)
             row.save(update_fields=["groups_text", "updated_at"])
+
+    if _duplicate_row_exists(row):
+        raise WorkloadDenied(
+            "workload.duplicate_row",
+            "Eyni fənn, ixtisas, semestr və qrup dəsti ilə sətir artıq var — mövcud sətri redaktə edin.",
+        )
 
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,

@@ -8,7 +8,7 @@ Hamısı `role="dialog" aria-modal="true"`, Esc + overlay ilə bağlanır, açı
 panel fokuslanır (§7).{% endcomment %}
 
 {# ── §4.8 «Yeni müraciət» ─────────────────────────────────────────────────── #}
-<div class="apx-dlg" data-apx-dialog="create" hidden>
+<div class="apx-dlg" data-apx-files-scope data-apx-dialog="create" hidden>
   <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-create-title" tabindex="-1">
     <div class="apx-dlg__head">
       <h3 class="apx-dlg__title" id="apx-create-title">{% trans "Yeni müraciət" context "applications" %}</h3>
@@ -35,9 +35,10 @@ panel fokuslanır (§7).{% endcomment %}
         <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
         <button type="button" class="apx-drop" data-apx-pick-files>
           <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
-          {% trans "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB" context "applications" %}
+          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:10 n=applications_section.rules.max_files|default:5 %}Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
         </button>
-        <input type="file" class="apx__sr" data-apx-files multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+        <input type="file" class="apx__sr" data-apx-files multiple
+               accept="{{ applications_section.rules.allowed_extensions|join:',' }}">
         <div class="apx-picked" data-apx-picked></div>
       </div>
       <div class="apx-info" data-apx-route>
@@ -53,7 +54,7 @@ panel fokuslanır (§7).{% endcomment %}
 </div>
 
 {# ── §4.9 «Müraciəti yönləndir» ───────────────────────────────────────────── #}
-<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="forward" hidden>
+<div class="apx-dlg apx-dlg--narrow" data-apx-files-scope data-apx-dialog="forward" hidden>
   <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-forward-title" tabindex="-1">
     <div class="apx-dlg__head">
       <h3 class="apx-dlg__title" id="apx-forward-title">{% trans "Müraciəti yönləndir" context "applications" %}</h3>
@@ -87,7 +88,7 @@ panel fokuslanır (§7).{% endcomment %}
 </div>
 
 {# ── Səbəb istəyən əməllər: rədd / qaytar / məlumat istə / ləğv / cavab ──── #}
-<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="reason" hidden>
+<div class="apx-dlg apx-dlg--narrow" data-apx-files-scope data-apx-dialog="reason" hidden>
   <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-reason-title" tabindex="-1">
     <div class="apx-dlg__head">
       <h3 class="apx-dlg__title" id="apx-reason-title" data-apx-reason-title></h3>
@@ -104,9 +105,10 @@ panel fokuslanır (§7).{% endcomment %}
         <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
         <button type="button" class="apx-drop" data-apx-pick-files>
           <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
-          {% trans "Fayl seç — PDF, JPG və ya DOCX, maks. 10 MB" context "applications" %}
+          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:10 n=applications_section.rules.max_files|default:5 %}Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
         </button>
-        <input type="file" class="apx__sr" data-apx-files multiple accept=".pdf,.jpg,.jpeg,.png,.docx">
+        <input type="file" class="apx__sr" data-apx-files multiple
+               accept="{{ applications_section.rules.allowed_extensions|join:',' }}">
         <div class="apx-picked" data-apx-picked></div>
       </div>
     </div>
@@ -118,7 +120,7 @@ panel fokuslanır (§7).{% endcomment %}
 </div>
 
 {# ── «Təyin et» — məsul şəxs seçimi ───────────────────────────────────────── #}
-<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="assign" hidden>
+<div class="apx-dlg apx-dlg--narrow" data-apx-files-scope data-apx-dialog="assign" hidden>
   <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-assign-title" tabindex="-1">
     <div class="apx-dlg__head">
       <h3 class="apx-dlg__title" id="apx-assign-title">{% trans "Məsul şəxsə təyin et" context "applications" %}</h3>
@@ -144,7 +146,7 @@ panel fokuslanır (§7).{% endcomment %}
 </div>
 
 {# ── Yekun əməllər üçün təsdiq ────────────────────────────────────────────── #}
-<div class="apx-dlg apx-dlg--narrow" data-apx-dialog="confirm" hidden>
+<div class="apx-dlg apx-dlg--narrow" data-apx-files-scope data-apx-dialog="confirm" hidden>
   <div class="apx-dlg__panel" role="dialog" aria-modal="true" aria-labelledby="apx-confirm-title" tabindex="-1">
     <div class="apx-dlg__head">
       <h3 class="apx-dlg__title" id="apx-confirm-title" data-apx-confirm-title></h3>

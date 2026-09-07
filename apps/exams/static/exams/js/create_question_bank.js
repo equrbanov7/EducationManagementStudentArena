@@ -204,6 +204,7 @@
                 var inputs = document.querySelectorAll('.block-name-input');
                 var names = [];
                 var hasDuplicate = false;
+                var duplicateMessage = "";
 
                 inputs.forEach(function(input) {
                     var parentBlock = input.closest('.block-item');
@@ -215,7 +216,7 @@
                     if (names.includes(val)) {
                         hasDuplicate = true;
                         input.style.borderColor = 'red';
-                        alert(
+                        duplicateMessage = duplicateMessage || (
                             (I18N_QBANK.alertDuplicateBlockName || "")
                                 .replace("{block_name}", input.value)
                                 .replace("{name}", input.value)
@@ -226,7 +227,10 @@
                     }
                 });
 
-                if (hasDuplicate) e.preventDefault();
+                if (hasDuplicate) {
+                    e.preventDefault();
+                    window.EMSToast.show(duplicateMessage, "error");
+                }
             });
         }
     });

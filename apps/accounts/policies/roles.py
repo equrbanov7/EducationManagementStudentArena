@@ -22,6 +22,14 @@ def resolve_membership_role(organization, initial_role):
     if not roles.exists():
         return None
 
+    # Dəqiq ad uyğunluğu birinci: `exam_center_staff`, `ikt_rehber`, `lead_student` və s.
+    # üçün aşağıdakı budaqlar yox idi və funksiya təşkilatın ƏN AŞAĞI roluna (alumni,
+    # level 5) düşürdü — «İmtahan Mərkəzi işçisi əlavə edildi» mesajı ilə məzun
+    # üzvlüyü yaranırdı (QA 2026-09-05 PEOPLE-RBAC-09).
+    exact = roles.filter(name=initial_role).first()
+    if exact is not None:
+        return exact
+
     if initial_role in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}:
         return roles.order_by("-level").first()
 
@@ -70,7 +78,8 @@ def resolve_membership_role(organization, initial_role):
             is_active=True,
         )
 
-    return roles.order_by("level").first()
+    # Naməlum rol adı üçün səssiz «ən aşağı rol» əvəzləməsi YOXDUR — fail-closed.
+    return None
 
 
 def permission_is_grantable(permission, effective_permissions, grantable_permissions):

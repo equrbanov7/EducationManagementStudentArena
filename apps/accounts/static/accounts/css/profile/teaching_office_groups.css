@@ -1,0 +1,68 @@
+/* Ekran 06 «Qruplar» — tələbə çekmecəsi + hərəkət dialoqlarının əlavə sahələri.
+ * Ton və ölçülər ems_ui token-larından (drawer/dialog) götürülür. */
+
+.tof-students { display: flex; flex-direction: column; gap: 14px; }
+
+.tof-students__head { display: flex; flex-direction: column; gap: 10px; }
+.tof-students__meta { font-size: 13px; color: var(--ems-text-muted, #64748b); min-height: 18px; }
+
+.tof-students__search { position: relative; display: block; }
+.tof-students__search > i {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--ems-text-muted, #94a3b8); font-size: 13px; pointer-events: none;
+}
+.tof-students__search .ems-input { padding-left: 34px; }
+
+.tof-students__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+
+.tof-students__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.tof-students__row {
+    display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
+    padding: 10px 12px; border: 1px solid var(--ems-border, #e2e8f0); border-radius: 12px;
+    background: var(--ems-surface, #fff);
+}
+.tof-students__row--academic_leave { background: #fffbeb; }
+.tof-students__row--expelled { opacity: .7; }
+
+.tof-students__avatar {
+    width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ems-primary-soft, #e0e7ff); color: var(--ems-primary, #4338ca);
+    font-weight: 700; font-size: 13px;
+}
+.tof-students__main { min-width: 0; }
+.tof-students__name { font-weight: 600; font-size: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tof-students__sub { font-size: 12px; color: var(--ems-text-muted, #64748b); overflow-wrap: anywhere; }
+
+.tof-students__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.tof-students__btn-label { margin-left: 4px; }
+
+.tof-students__skeleton { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--ems-border, #eef2f7); border-radius: 12px; }
+.tof-students__skeleton .skeleton-line { display: block; height: 12px; border-radius: 6px; }
+.tof-students__skeleton .skeleton-line--lg { width: 60%; }
+.tof-students__skeleton .skeleton-line--sm { width: 35%; height: 10px; }
+
+.tof-students__empty {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 28px 12px; color: var(--ems-text-muted, #64748b); text-align: center; font-size: 13px;
+}
+.tof-students__empty > i { font-size: 26px; opacity: .5; }
+
+/* Hərəkət dialoqundakı hədəf tələbə */
+.tof-students__target {
+    display: flex; align-items: baseline; gap: 8px; margin: 4px 0 10px;
+    padding: 8px 12px; border-radius: 10px; background: var(--ems-surface-2, #f8fafc);
+    border: 1px dashed var(--ems-border, #cbd5e1); font-size: 13px;
+}
+.tof-students__target-label { color: var(--ems-text-muted, #64748b); }
+
+.ems-badge--enrolled { background: #ecfdf5; color: #047857; }
+.ems-badge--academic_leave { background: #fffbeb; color: #b45309; }
+.ems-badge--expelled { background: #fef2f2; color: #b91c1c; }
+.ems-badge--graduated { background: #eff6ff; color: #1d4ed8; }
+
+@media (max-width: 640px) {
+    .tof-students__row { grid-template-columns: 32px 1fr; }
+    .tof-students__actions { grid-column: 1 / -1; justify-content: flex-start; }
+}

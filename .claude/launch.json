@@ -28,6 +28,15 @@
         "cd /private/tmp/claude-501/-Users-elvin-Desktop-Programming-Folders-EMSArena-EMSArena/55ac1404-bb3d-4d26-82e4-93cffb81e113/scratchpad/design_proto && exec /usr/bin/python3 -m http.server 8790 --directory /private/tmp/claude-501/-Users-elvin-Desktop-Programming-Folders-EMSArena-EMSArena/55ac1404-bb3d-4d26-82e4-93cffb81e113/scratchpad/design_proto"
       ],
       "port": 8790
+    },
+    {
+      "name": "emsarena-qa-clone",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/elvin/Developer/EMSArena && STAGING_POSTGRES_DB=emsarena_rehearsal_a0d170000901 exec scripts/staging_inspect.sh serve"
+      ],
+      "port": 8100
     }
   ]
 }

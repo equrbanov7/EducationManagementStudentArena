@@ -45,7 +45,14 @@ class TaskStatus(models.TextChoices):
 #: Sətirlərin redaktə oluna bildiyi statuslar.
 #: ``returned`` F1-də əlavə olundu: dekan qaytaranda tədris şöbəsi məhz həmin
 #: sətirləri düzəldib yenidən göndərir (spec §4.1).
-EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.DISTRIBUTING})
+#: ``amended`` QA 2026-09-05 (P3-22) əlavə olundu: `services.amendments.open_amendment`
+#: sətir hədəfi üçün tapşırığı `amended`-ə keçirir və mesajı "düzəliş axını
+#: istifadə edilməlidir" deyir — amma bu status əvvəllər EDITABLE deyildi, ona
+#: görə amendment açandan sonra sətri REDAKTƏ ETMƏK MÜMKÜN DEYİLDİ (`amendment.
+#: new_values` sənədləşdirilir, TƏTBİQ olunmurdu). `confirm_distribution` artıq
+#: `amended`-i qəbul edir (yenidən `distributed`-ə bağlamaq üçün) — simmetriya
+#: bura ilə tamamlanır.
+EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
 #: Bölgü (təyinat) əməliyyatlarına açıq statuslar.
 #: ``approved`` F2 zəncirinin çıxışıdır — dekanlıq təsdiqindən sonra kafedra
 #: müdiri bölgüyə başlayır; ``draft`` yalnız HEÇ VAXT göndərilməmiş sənəd üçün

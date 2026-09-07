@@ -20,6 +20,17 @@
     var EMSCore = (window.EMSCore = window.EMSCore || {});
     var UNSAFE_METHOD = /^(POST|PUT|PATCH|DELETE)$/i;
 
+    function notifyViewAsBlocked(detail) {
+        var text = detail || "";
+        if (!text) { return; }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(text, "warning");
+            return;
+        }
+        // Toast qatı hələ yüklənməyibsə səbəb yenə də itməməlidir.
+        if (window.console && window.console.warn) { window.console.warn(text); }
+    }
+
     EMSCore.fetchJSON = function fetchJSON(url, options) {
         options = options || {};
         var method = (options.method || "GET").toUpperCase();
@@ -58,6 +69,14 @@
                         error.status = response.status;
                         error.payload = payload;
                         error.response = response;
+                        // «Başqasının adından» rejimində bloklanan yazma: server
+                        // 403 + {view_as_blocked:true} qaytarır. Hər çağırış yeri
+                        // bunu ayrıca tutmadığı üçün istifadəçi səbəbi görmür və
+                        // «məni jurnaldan atdı» hissi yaranır (sahib şikayəti
+                        // 2026-09-06) — səbəbi MƏRKƏZDƏ bir dəfə göstəririk.
+                        if (response.status === 403 && payload && payload.view_as_blocked) {
+                            notifyViewAsBlocked(payload.detail);
+                        }
                         throw error;
                     }
                     return payload;

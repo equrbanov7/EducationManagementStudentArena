@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from ..constants import MIN_NOTE_LENGTH, ApplicationStatus, EventKind
 from ..models import ApplicationEvent, ApplicationWatch
+from ..sla import add_working_days
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
 from . import access, notify
 from .submit import attach_files
@@ -26,6 +27,7 @@ _EVENT_KIND = {
     Action.RETURN_FOR_CORRECTION: EventKind.RETURNED,
     Action.RESUBMIT: EventKind.RESUBMITTED,
     Action.RESOLVE: EventKind.RESOLVED,
+    Action.REOPEN: EventKind.REOPENED,
     Action.REJECT: EventKind.REJECTED,
     Action.CLOSE: EventKind.CLOSED,
     Action.CANCEL: EventKind.CANCELLED,
@@ -221,6 +223,10 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
 
 
 def _handler_status_change(*, application, user, action, text, event_kind, request, sender_title):
+    """Statusu dəyişən emalçı əməli. ``(müraciət, hadisə)`` qaytarır — hadisə
+    çağırana LAZIMDIR: cavabın sənədləri məhz həmin sətrə bağlanır ki, UI-dakı
+    yazışmada mətnin ALTINDA görünsün (bağlanmayan fayl yalnız ümumi sənəd
+    siyahısına düşür)."""
     rule = _guard(user, application, action, text)
     old = application.status
     application.status = rule.target
@@ -233,7 +239,7 @@ def _handler_status_change(*, application, user, action, text, event_kind, reque
         application.closed_at = timezone.now()
         fields += ["resolved_at", "closed_at"]
     _touch(application, fields)
-    _write_event(application, kind=event_kind, actor=user, text=text, old=old)
+    event = _write_event(application, kind=event_kind, actor=user, text=text, old=old)
     notify.audit(
         application,
         action=notify.AUDIT_UPDATE,
@@ -244,12 +250,12 @@ def _handler_status_change(*, application, user, action, text, event_kind, reque
         request=request,
     )
     notify.notify_sender(application, title=sender_title, message=(text or "").strip()[:400])
-    return application
+    return application, event
 
 
 @transaction.atomic
 def request_info(*, application, user, text: str, files=None, request=None):
-    application = _handler_status_change(
+    application, event = _handler_status_change(
         application=application,
         user=user,
         action=Action.REQUEST_INFO,
@@ -258,13 +264,13 @@ def request_info(*, application, user, text: str, files=None, request=None):
         request=request,
         sender_title=f"{application.number} — əlavə məlumat istənilir",
     )
-    attach_files(application, files, uploaded_by=user)
+    attach_files(application, files, event=event, uploaded_by=user)
     return application
 
 
 @transaction.atomic
 def return_for_correction(*, application, user, reason: str, request=None):
-    return _handler_status_change(
+    application, _event = _handler_status_change(
         application=application,
         user=user,
         action=Action.RETURN_FOR_CORRECTION,
@@ -273,11 +279,12 @@ def return_for_correction(*, application, user, reason: str, request=None):
         request=request,
         sender_title=f"{application.number} düzəliş üçün qaytarıldı",
     )
+    return application
 
 
 @transaction.atomic
 def resolve(*, application, user, text: str, files=None, request=None):
-    application = _handler_status_change(
+    application, event = _handler_status_change(
         application=application,
         user=user,
         action=Action.RESOLVE,
@@ -286,7 +293,7 @@ def resolve(*, application, user, text: str, files=None, request=None):
         request=request,
         sender_title=f"{application.number} həll olundu",
     )
-    attach_files(application, files, uploaded_by=user)
+    attach_files(application, files, event=event, uploaded_by=user)
     notify.notify_users(
         application,
         notify.watcher_recipients(application),
@@ -298,7 +305,7 @@ def resolve(*, application, user, text: str, files=None, request=None):
 
 @transaction.atomic
 def reject(*, application, user, reason: str, request=None):
-    application = _handler_status_change(
+    application, _event = _handler_status_change(
         application=application,
         user=user,
         action=Action.REJECT,
@@ -365,6 +372,55 @@ def resubmit(*, application, user, subject: str, body: str, files=None, request=
 
 
 @transaction.atomic
+def reopen(*, application, user, text: str, files=None, request=None):
+    """Müraciət sahibi cavabdan RAZI QALMIR → müraciət eyni şöbədə yenidən açılır.
+
+    Əvvəl bu yolun yeganə alternativi eyni mövzuda YENİ müraciət açmaq idi:
+    nömrə qopur, yazışma iki yerə bölünür və şöbə əvvəlki cavabını görmür.
+    Burada müraciət ÖZ nömrəsi altında qalır, səbəb yazışmanın davamı kimi
+    yazılır və sənəd (məs. səhv arayışın şəkli) əlavə oluna bilər.
+
+    İki sahə QƏSDƏN sıfırlanır:
+
+    * ``resolved_at`` — müraciət artıq həll olunmuş sayılmır; təmizlənməsə
+      «orta cavab müddəti» KPI-si BİRİNCİ (qəbul olunmamış) cavabı ölçərdi və
+      ``close_stale_resolved`` üçün köhnə tarix qalardı.
+    * ``sla_due_on`` — şöbəyə normativ pəncərə YENİDƏN verilir. Əks halda köhnə
+      tarix çoxdan keçdiyi üçün müraciət qayıtdığı AN «müddəti keçən» olurdu.
+    """
+    rule = _guard(user, application, Action.REOPEN, text)
+    old = application.status
+    application.status = rule.target
+    application.resolved_at = None
+    application.sla_due_on = add_working_days(timezone.localdate(), application.kind.sla_days)
+    _touch(application, ["status", "resolved_at", "sla_due_on"])
+    event = _write_event(application, kind=EventKind.REOPENED, actor=user, text=text, old=old)
+    attach_files(application, files, event=event, uploaded_by=user)
+    notify.audit(
+        application,
+        action=notify.AUDIT_UPDATE,
+        actor=user,
+        event_kind=EventKind.REOPENED,
+        reason=text,
+        changes={"status": [old, application.status]},
+        request=request,
+    )
+    notify.notify_current_unit(
+        application,
+        title=f"{application.number} — cavab qəbul olunmadı",
+        message=text.strip()[:200],
+    )
+    # İzləyən şöbə (yönləndirmiş olan) da bilməlidir: onun gözündə iş bitmişdi.
+    notify.notify_users(
+        application,
+        notify.watcher_recipients(application),
+        title=f"{application.number} yenidən açıldı",
+        message=application.subject,
+    )
+    return application
+
+
+@transaction.atomic
 def close(*, application, user, text: str = "", request=None):
     """Müraciət sahibi «Həll olunub» nəticəsini təsdiqləyir."""
     rule = _guard(user, application, Action.CLOSE)
@@ -414,6 +470,7 @@ ACTION_DISPATCH = {
     Action.RESUBMIT: resubmit,
     Action.RESOLVE: resolve,
     Action.REJECT: reject,
+    Action.REOPEN: reopen,
     Action.CLOSE: close,
     Action.CANCEL: cancel,
 }
@@ -431,6 +488,7 @@ __all__ = [
     "mark_seen",
     "provide_info",
     "reject",
+    "reopen",
     "request_info",
     "resolve",
     "resubmit",

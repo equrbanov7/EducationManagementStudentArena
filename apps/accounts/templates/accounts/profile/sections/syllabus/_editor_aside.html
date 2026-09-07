@@ -52,7 +52,7 @@ aid olduğu bölməyə tullanır (mətn `views/syllabus/labels.py`-dan gəlir).
         <span>
           <span class="syl-timeline__title">{{ event.title }}</span>
           <span class="syl-timeline__meta">
-            {{ event.meta|date:"d.m.Y, H:i" }}{% if event.actor %} · {{ event.actor.get_full_name|default:event.actor.username }}{% endif %}
+            {{ event.meta|date:"d.m.Y H:i" }}{% if event.actor %} · {{ event.actor.get_full_name|default:event.actor.username }}{% endif %}
           </span>
           {% if event.reason %}<span class="syl-timeline__reason">{{ event.reason }}</span>{% endif %}
         </span>

@@ -178,7 +178,7 @@
 .sjx-daymodal-card { position: relative; width: min(420px, 92vw); background: #fff; border-radius: 16px; box-shadow: 0 20px 60px rgba(15,42,94,.3); overflow: hidden; }
 .sjx-daymodal-head { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; background: linear-gradient(180deg,#f5f8ff,#eef3ff); border-bottom: 1px solid #e2e8f5; }
 .sjx-daymodal-head h3 { margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f2a5e; }
-.sjx-daymodal-x { background: none; border: none; font-size: 1.5rem; line-height: 1; color: #94a3b8; cursor: pointer; }
+.sjx-daymodal-x { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--ems-neutral-500); cursor: pointer; }
 .sjx-daymodal-body { padding: 1rem 1.25rem; }
 .sjx-day-row { display: flex; justify-content: space-between; gap: 12px; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; color: #1e293b; }
 .sjx-day-row:last-child { border-bottom: none; }

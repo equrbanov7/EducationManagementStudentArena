@@ -1,355 +1,285 @@
 {% load i18n static %}
 {% trans "not_set" context "profile.info" as profile_not_set %}
 {% trans "default_org" context "profile.info" as profile_default_org %}
-<div class="profile-identity-wrapper">
-    <div class="avatar-section">
-        <div class="avatar-container avatar-container--interactive"
-             data-bs-toggle="modal"
-             data-bs-target="#profileAvatarUpdateModal"
-             role="button"
-             aria-label="{% trans 'Profil şəklini dəyiş' %}">
-            {% if profile.avatar %}
-            <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
-                 alt="Avatar"
-                 class="avatar-large"
-                 id="profileIdentityAvatarImage">
-            <div class="avatar-placeholder avatar-placeholder--fallback d-none" id="profileIdentityAvatarFallback">
-                {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
-            </div>
-            {% else %}
-            <div class="avatar-placeholder" id="profileIdentityAvatarFallback">
-                {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
-            </div>
-            {% endif %}
-            <button type="button"
-                    class="avatar-change-btn"
-                    data-bs-toggle="modal"
-                    data-bs-target="#profileAvatarUpdateModal"
-                    aria-label="{% trans 'Profil şəklini dəyiş' %}">
-                <i class="fas fa-camera"></i>
-            </button>
+{% comment %}«Profil məlumatları» — kimlik başlığı + məlumat kartları.
+
+DİZAYN QƏRARI (2026-09-07 yenidən dizayn): əvvəl ekran MƏRKƏZLƏNMİŞ nəhəng
+avatar bloku + 9 ayrı çərçivəli qutudan ibarət «info-grid» idi. İki problem:
+(1) mərkəzləmə geniş kanvasda gözün giriş nöqtəsini itirir, (2) hər sahənin öz
+çərçivəsi olması siyahını forma dump-una çevirirdi.
+
+İndi: SOLA hizalanmış başlıq (avatar + ad + rol çipləri + əməllər bir sətirdə)
+və altında iki sütun — əsas məlumat kartları solda, təşkilat/kontekst sağda.
+Sahələr `<dl>` sətirləridir (etiket | dəyər, hairline ilə ayrılıb) — Stripe/
+GitHub tənzimləmə səhifələrinin naxışı; oxumaq üçün skan xətti bir dənədir.
+
+⚠️ Sinif adları QƏSDƏN yenidir (`pfx-*`): köhnə `.info-item` / `.role-badge` /
+`.section-title` onlarla başqa şablonda işlədilir — onlara toxunmaq bütün
+kabineti dəyişərdi. Üslub `profile_identity.css`-dədir.
+
+JS müqaviləsi (profile_info_identity.js) dəyişmir: `profileIdentityAvatarImage`,
+`profileIdentityAvatarFallback`, `profileAvatarInput`, `profileAvatarPreview*`
+və `#profileAvatarUpdateModal` id-ləri saxlanılıb.
+{% endcomment %}
+
+{# ── Kimlik başlığı ──────────────────────────────────────────────────────── #}
+<header class="pfx-hero">
+    <div class="pfx-hero__avatar avatar-container--interactive"
+         data-bs-toggle="modal" data-bs-target="#profileAvatarUpdateModal"
+         role="button" tabindex="0" aria-label="{% trans 'Profil şəklini dəyiş' %}">
+        {% if profile.avatar %}
+        <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
+             alt="" class="pfx-hero__img" id="profileIdentityAvatarImage">
+        <div class="pfx-hero__initials pfx-hero__initials--fallback" id="profileIdentityAvatarFallback">
+            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
         </div>
-        <p class="avatar-hint mb-0">{% trans 'Şəklin üzərinə klik edin, böyüdülmüş önizləmə ilə dəyişin.' %}</p>
-
-        <h2 class="user-name">{{ user.get_full_name|default:user.username }}</h2>
-        {% if profile.academic_title_display %}
-        <p class="user-academic-title">
-            <i class="fas fa-graduation-cap"></i>
-            {{ profile.academic_title_display }}
-        </p>
+        {% else %}
+        <div class="pfx-hero__initials" id="profileIdentityAvatarFallback">
+            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+        </div>
         {% endif %}
-        <p class="user-email">{{ user.email }}</p>
+        <span class="pfx-hero__camera" aria-hidden="true"><i class="fas fa-camera"></i></span>
+    </div>
 
-{% comment %}
-        Vəzifə nişanları. Vəzifə/rol yoxdursa BOŞLUQ qalır — «Üzv» və ya
-        «İstifadəçi» kimi doldurucu YAZILMIR (bax core/staff_position.py).
-        {% endcomment %}
+    <div class="pfx-hero__id">
+        <h2 class="pfx-hero__name">{{ user.get_full_name|default:user.username }}</h2>
+        {% if profile.academic_title_display %}
+        <p class="pfx-hero__role">{{ profile.academic_title_display }}</p>
+        {% endif %}
+        <div class="pfx-hero__meta">
+            <span><i class="fas fa-at" aria-hidden="true"></i>{{ user.username }}</span>
+            <span><i class="fas fa-envelope" aria-hidden="true"></i>{{ user.email }}</span>
+            <span><i class="far fa-calendar" aria-hidden="true"></i>{{ user.date_joined|date:"d.m.Y" }}</span>
+        </div>
+        {% comment %}Vəzifə nişanları. Vəzifə/rol yoxdursa BOŞLUQ qalır — «Üzv» və ya
+        «İstifadəçi» kimi doldurucu YAZILMIR (bax core/staff_position.py).{% endcomment %}
         {% if user_roles or primary_user_role_label %}
-        <div class="role-badges">
+        <div class="pfx-chips">
             {% if user_roles %}
                 {% for role in user_roles %}
-                <span class="role-badge {{ role.name }}">
-                    <i class="fas fa-shield-alt"></i>
-                    {{ role.label }}
-                </span>
+                <span class="pfx-chip"><i class="fas fa-shield-halved" aria-hidden="true"></i>{{ role.label }}</span>
                 {% endfor %}
             {% else %}
-            <span class="role-badge">
-                <i class="fas fa-user"></i>
-                {{ primary_user_role_label }}
-            </span>
+            <span class="pfx-chip"><i class="fas fa-user" aria-hidden="true"></i>{{ primary_user_role_label }}</span>
             {% endif %}
         </div>
         {% endif %}
-    </div> 
+    </div>
 
-    <div class="profile-details-section">
-        {% if pending_student_join_requests %}
-        <div class="section-card mb-3">
-            <div class="section-title">
-                <i class="fas fa-hourglass-half"></i>
-                <span>{% trans 'Təşkilat təsdiqi gözlənilir' %}</span>
-            </div>
-            <div class="d-grid gap-2">
-                {% for pending_request in pending_student_join_requests %}
-                <div class="{% if not forloop.last %}pb-2 border-bottom{% endif %}">
-                    {% trans 'üzv' as default_member_role %}
-                    <p class="mb-0">
-                        {% blocktrans with org_name=pending_request.organization.name role=pending_request.role_label_lower|default:default_member_role %}<strong>{{ org_name }}</strong> üçün {{ role }} müraciətiniz göndərilib və hazırda təsdiq gözləyir.{% endblocktrans %}
-                    </p>
-                    {% if pending_request.message %}
-                    <p class="mt-2 mb-0">
-                        <small class="text-muted"><strong>{% trans 'Mesajınız:' %}</strong> {{ pending_request.message }}</small>
-                    </p>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
+    <div class="pfx-hero__actions">
+        <a href="{{ profile_base_url }}?section=edit-profile" class="pfx-btn pfx-btn--primary js-profile-section-link"
+           data-section="edit-profile" data-title="{% trans 'edit_profile' context 'profile.section' %}">
+            <i class="fas fa-pen" aria-hidden="true"></i>{% trans "edit_profile" context "profile.sidebar" %}
+        </a>
+        <a href="{% url 'accounts:public_profile' user.username %}?preview=1" class="pfx-btn" target="_blank" rel="noopener">
+            <i class="fas fa-eye" aria-hidden="true"></i>{% trans 'Önizləmə' context 'profile.edit_v2' %}
+        </a>
+        <a href="{{ profile_base_url }}?section=change-password" class="pfx-btn js-profile-section-link"
+           data-section="change-password" data-title="{% trans 'Şifrəni dəyiş' %}">
+            <i class="fas fa-lock" aria-hidden="true"></i>{% trans 'Şifrəni dəyiş' %}
+        </a>
+    </div>
+</header>
 
-        {% if organization_access_rows %}
-        {% if is_superadmin or can_manage_org or organization_access_rows|length > 1 %}
-        <div class="section-card mb-3">
-            <div class="section-title">
-                <i class="fas fa-building"></i>
-                <span>{% trans 'Təşkilat girişləri' %}</span>
-            </div>
-            <div class="d-grid gap-3">
-                {% for org_access in organization_access_rows %}
-                <div class="border rounded-3 p-3">
-                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-                        <div>
-                            <div class="fw-semibold">{{ org_access.organization.name }}</div>
-                            <div class="text-muted small mt-1">
-                                {% blocktrans with org_type=org_access.organization.get_org_type_display owner=org_access.organization.owner.username count=org_access.member_count %}{{ org_type }} · Owner: {{ owner }} · Üzv sayı: {{ count }}{% endblocktrans %}
-                            </div>
-                            <div class="text-muted small">
-                                Status: {{ org_access.status_label }}
-                                {% if org_access.organization.organization_identifier %} · Kod: {{ org_access.organization.organization_identifier }}{% endif %}
-                                {% if org_access.organization.license_identifier %} · Lisenziya: {{ org_access.organization.license_identifier }}{% endif %}
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% if org_access.is_current %}
-                            <span class="role-badge role-success">{% trans 'Aktiv təşkilat' %}</span>
-                            {% else %}
-                            <a href="{{ org_access.switch_url }}" class="btn btn-sm btn-outline-primary">Aktiv et</a>
-                            {% endif %}
-                            <a href="{{ org_access.dashboard_url }}" class="btn btn-sm btn-outline-secondary">Panel</a>
-                            <a href="{{ org_access.members_url }}" class="btn btn-sm btn-outline-secondary">{% trans 'Üzvlər' %}</a>
-                            <a href="{{ org_access.roles_url }}" class="btn btn-sm btn-outline-secondary">Rollar</a>
-                        </div>
-                    </div>
-                    <div class="role-badges mt-3">
-                        {% for role_label in org_access.role_labels %}
-                        <span class="role-badge">
-                            <i class="fas fa-shield-alt"></i>
-                            {{ role_label }}
-                        </span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-        {% endif %}
+<div class="pfx-grid">
+    <div class="pfx-col">
+        {# ── Şəxsi məlumatlar ────────────────────────────────────────────── #}
+        <section class="pfx-card">
+            <h3 class="pfx-card__title"><i class="fas fa-address-card" aria-hidden="true"></i>{% trans "personal_info" context "profile.info" %}</h3>
+            <dl class="pfx-facts">
+                <div class="pfx-fact"><dt>{% trans "first_name" context "profile.info" %}</dt><dd>{{ user.first_name|default:profile_not_set }}</dd></div>
+                <div class="pfx-fact"><dt>{% trans "last_name" context "profile.info" %}</dt><dd>{{ user.last_name|default:profile_not_set }}</dd></div>
+                <div class="pfx-fact"><dt>{% trans "email" context "profile.info" %}</dt><dd>{{ user.email }}</dd></div>
+                <div class="pfx-fact"><dt>{% trans "phone" context "profile.info" %}</dt><dd>{{ profile.phone|default:profile_not_set }}</dd></div>
+                {% if profile.phone_secondary %}
+                <div class="pfx-fact"><dt>{% trans 'Əlavə telefon' context 'profile.edit_v2' %}</dt><dd>{{ profile.phone_secondary }}</dd></div>
+                {% endif %}
+                <div class="pfx-fact"><dt>{% trans "location" context "profile.info" %}</dt><dd>{{ profile.location|default:profile_not_set }}</dd></div>
+                {% if primary_user_role_label %}
+                <div class="pfx-fact"><dt>{% trans "position" context "profile.info" %}</dt><dd>{{ primary_user_role_label }}</dd></div>
+                {% endif %}
+                <div class="pfx-fact"><dt>{% trans "organization" context "profile.info" %}</dt><dd>{{ profile.organization_name|default:profile_default_org }}</dd></div>
+                {% if role_capabilities.is_student and not profile.is_academics_locked and profile.student_university_name %}
+                <div class="pfx-fact"><dt>{% trans "institution_name" context "profile.info" %}</dt><dd>{{ profile.student_university_name }}</dd></div>
+                {% endif %}
+                {% if profile.supervisor_code %}
+                <div class="pfx-fact"><dt>{% trans "supervisor_code" context "profile.info" %}</dt><dd><code class="pfx-code">{{ profile.supervisor_code }}</code></dd></div>
+                {% endif %}
+            </dl>
+        </section>
 
-        <div class="section-title">
-            <i class="fas fa-address-card"></i>
-            <span>{% trans "personal_info" context "profile.info" %}</span>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-at"></i> {% trans "username" context "profile.info" %}</div>
-                <div class="info-value">{{ user.username }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-id-badge"></i> {% trans "first_name" context "profile.info" %}</div>
-                <div class="info-value">{{ user.first_name|default:profile_not_set }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-id-badge"></i> {% trans "last_name" context "profile.info" %}</div>
-                <div class="info-value">{{ user.last_name|default:profile_not_set }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-envelope"></i> {% trans "email" context "profile.info" %}</div>
-                <div class="info-value">{{ user.email }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-phone-alt"></i> {% trans "phone" context "profile.info" %}</div>
-                <div class="info-value">{{ profile.phone|default:profile_not_set }}</div>
-            </div>
-            {% if profile.phone_secondary %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-phone-alt"></i> {% trans 'Əlavə telefon' context 'profile.edit_v2' %}</div>
-                <div class="info-value">{{ profile.phone_secondary }}</div>
-            </div>
-            {% endif %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-map-marker-alt"></i> {% trans "location" context "profile.info" %}</div>
-                <div class="info-value">{{ profile.location|default:profile_not_set }}</div>
-            </div>
-            {% if primary_user_role_label %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-user-tag"></i> {% trans "position" context "profile.info" %}</div>
-                <div class="info-value">{{ primary_user_role_label }}</div>
-            </div>
-            {% endif %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-building"></i> {% trans "organization" context "profile.info" %}</div>
-                <div class="info-value">{{ profile.organization_name|default:profile_default_org }}</div>
-            </div>
-            {# Tələbə-yönlü sahələr yalnız tələbə/lider tələbə üçün (müəllimdə "-" görünməsin). #}
-            {% if role_capabilities.is_student %}
-            <div class="info-item info-item--full">
-                <div class="info-label"><i class="fas fa-users"></i> {% trans 'Qrup üzvlüyü' %}</div>
-                <div class="info-value">
-                    {% if student_member_groups %}
-                    <div class="profile-group-chip-meta">{{ student_member_groups_count|default:0 }} qrup</div>
-                    <div class="profile-group-chip-list profile-group-chip-list--scroll">
-                        {% for student_group in student_member_groups %}
-                        <span class="profile-group-chip">
-                            {{ student_group.name }}
-                            {% if student_group.organization %}
-                                <small>· {{ student_group.organization.name }}</small>
-                            {% endif %}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% if student_member_groups_more_count > 0 %}
-                    <div class="profile-group-chip-note">{% blocktrans with count=student_member_groups_more_count %}+{{ count }} əlavə qrup var{% endblocktrans %}</div>
-                    {% endif %}
-                    {% else %}
-                    <span class="text-muted">{% trans 'Qrup təyin edilməyib' %}</span>
-                    {% endif %}
-                </div>
-            </div>
-            {# Sərbəst mətnli təhsil müəssisəsi yalnız fərdi (qurumsuz) tələbədə: #}
-            {# qurum üzvündə mənbə təşkilat/akademik strukturdur (aşağıda). #}
-            {% if not profile.is_academics_locked and profile.student_university_name %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-university"></i> {% trans "institution_name" context "profile.info" %}</div>
-                <div class="info-value">{{ profile.student_university_name }}</div>
-            </div>
-            {% endif %}
-            {% endif %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-calendar-alt"></i> {% trans "joined_date" context "profile.info" %}</div>
-                <div class="info-value">{{ user.date_joined|date:"d M Y" }}</div>
-            </div>
-        </div>
-
-        {# ── Rol-əsaslı akademik məlumatlar (müəllim/dekan/kafedra/tələbə) ── #}
+        {# ── Akademik struktur / tədris ──────────────────────────────────── #}
         {% if academic_units or teacher_subjects or student_records %}
-        <div class="section-title profile-section-title--academic">
-            <i class="fas fa-graduation-cap"></i>
-            <span>{% trans 'Akademik məlumatlar' %}</span>
-        </div>
-        <div class="info-grid">
-            {% for entry in academic_units %}
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-building-columns"></i> {% trans 'Fakültə' %}</div>
-                <div class="info-value info-value--readonly">{{ entry.faculty.name|default:profile_not_set }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label"><i class="fas fa-sitemap"></i> {% trans 'Kafedra' %}</div>
-                <div class="info-value info-value--readonly">{{ entry.department.name|default:profile_not_set }}</div>
-            </div>
-            {% endfor %}
-            {# Akademik struktur: hər səviyyə (Fakültə/Kafedra/İxtisas/Qrup — #}
-            {# tenant-a görə mövcud olanlar) AYRICA kart kimi göstərilir — #}
-            {# əvvəllər tək "Fakültə > Kafedra > İxtisas > Qrup" breadcrumb-ı idi #}
-            {# (sahib şikayəti: çirkin görünürdü). Siyahı ``build_student_structure_levels`` #}
-            {# ilə view-də qurulur (bax context_builder/_helpers.py). #}
-            {% for record in student_records %}
-            {% for level in record.structure_levels %}
-            <div class="info-item profile-structure-card">
-                <div class="info-label"><i class="fas {{ level.icon }}"></i> {{ level.label }}</div>
-                <div class="info-value">
-                    {{ level.value }}
-                    {% if level.code %}<span class="profile-structure-card__code">{{ level.code }}</span>{% endif %}
+        <section class="pfx-card">
+            <h3 class="pfx-card__title"><i class="fas fa-graduation-cap" aria-hidden="true"></i>{% trans 'Akademik məlumatlar' %}</h3>
+            <dl class="pfx-facts">
+                {% for entry in academic_units %}
+                <div class="pfx-fact"><dt>{% trans 'Fakültə' %}</dt><dd>{{ entry.faculty.name|default:profile_not_set }}</dd></div>
+                <div class="pfx-fact"><dt>{% trans 'Kafedra' %}</dt><dd>{{ entry.department.name|default:profile_not_set }}</dd></div>
+                {% endfor %}
+                {% comment %}Akademik struktur hər səviyyə üçün AYRICA sətirdir —
+                əvvəl tək «Fakültə > Kafedra > İxtisas > Qrup» breadcrumb-ı idi
+                (sahib şikayəti). Siyahını `build_student_structure_levels` qurur.{% endcomment %}
+                {% for record in student_records %}
+                {% for level in record.structure_levels %}
+                <div class="pfx-fact pfx-fact--structure">
+                    <dt>{{ level.label }}</dt>
+                    <dd>{{ level.value }}{% if level.code %} <span class="pfx-code">{{ level.code }}</span>{% endif %}</dd>
                 </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
-            {% if teacher_subjects %}
-            <div class="info-item info-item--full">
-                <div class="info-label"><i class="fas fa-book"></i> {% trans 'Tədris etdiyi fənlər' %}</div>
-                <div class="info-value">
-                    {% comment %}
-                    Siyahı FƏNN üzrə təkrarsızdır (build_teacher_subject_rows) —
-                    əvvəl hər qrup/semestr ayrıca çip idi və eyni fənn onlarla
-                    dəfə təkrarlanırdı. Məlumat itmir: tək qrupda qrup adı,
-                    çoxunda qrup/semestr sayı + title tooltip-ində qrup adları.
-                    {% endcomment %}
-                    <div class="profile-group-chip-list profile-group-chip-list--scroll">
-                        {% for subject in teacher_subjects %}
-                        <span class="profile-group-chip"{% if subject.groups_tooltip %} title="{{ subject.groups_tooltip }}"{% endif %}>{{ subject.name }}{% if subject.single_group_name %} <small>· {{ subject.single_group_name }}</small>{% elif subject.group_count %} <small>· {{ subject.group_count }}&nbsp;{% trans 'qrup' context 'profile.info' %}{% if subject.period_count > 1 %} · {{ subject.period_count }}&nbsp;{% trans 'semestr' context 'profile.info' %}{% endif %}</small>{% endif %}</span>
-                        {% endfor %}
-                    </div>
+                {% endfor %}
+                {% endfor %}
+                {% if teacher_subjects %}
+                <div class="pfx-fact pfx-fact--stack">
+                    <dt>{% trans 'Tədris etdiyi fənlər' %}</dt>
+                    <dd>
+                        {% comment %}Siyahı FƏNN üzrə təkrarsızdır (build_teacher_subject_rows);
+                        çoxqruplu fənndə say + tooltip-də qrup adları verilir.{% endcomment %}
+                        <div class="pfx-taglist">
+                            {% for subject in teacher_subjects %}
+                            <span class="pfx-tag"{% if subject.groups_tooltip %} title="{{ subject.groups_tooltip }}"{% endif %}>{{ subject.name }}{% if subject.single_group_name %} <small>{{ subject.single_group_name }}</small>{% elif subject.group_count %} <small>{{ subject.group_count }}&nbsp;{% trans 'qrup' context 'profile.info' %}{% if subject.period_count > 1 %} · {{ subject.period_count }}&nbsp;{% trans 'semestr' context 'profile.info' %}{% endif %}</small>{% endif %}</span>
+                            {% endfor %}
+                        </div>
+                    </dd>
                 </div>
+                {% endif %}
+            </dl>
+        </section>
+        {% endif %}
+
+        {% comment %}Qrup üzvlüyü AYRI kartdır: akademik kartın içində olanda
+        `academic_units/teacher_subjects/student_records` şərtinə ilişirdi və
+        yalnız qrupu olan tələbədə blok görünmürdü.{% endcomment %}
+        {% if role_capabilities.is_student %}
+        <section class="pfx-card">
+            <h3 class="pfx-card__title">
+                <i class="fas fa-users" aria-hidden="true"></i>{% trans 'Qrup üzvlüyü' %}
+                {% if student_member_groups %}
+                <span class="pfx-card__count">{% blocktrans with count=student_member_groups_count|default:0 %}{{ count }} qrup{% endblocktrans %}</span>
+                {% endif %}
+            </h3>
+            {% if student_member_groups %}
+            <div class="pfx-taglist pfx-taglist--roomy">
+                {% for student_group in student_member_groups %}
+                <span class="pfx-tag">{{ student_group.name }}{% if student_group.organization %} <small>{{ student_group.organization.name }}</small>{% endif %}</span>
+                {% endfor %}
             </div>
+            {% if student_member_groups_more_count > 0 %}
+            <p class="pfx-fact__note">{% blocktrans with count=student_member_groups_more_count %}+{{ count }} əlavə qrup var{% endblocktrans %}</p>
             {% endif %}
-        </div>
+            {% else %}
+            <p class="pfx-muted pfx-fact__note">{% trans 'Qrup təyin edilməyib' %}</p>
+            {% endif %}
+        </section>
         {% endif %}
 
         {% include "accounts/profile/sections/_profile_info_academic.html" %}
 
         {% if profile.bio %}
-        <div class="profile-bio info-item bio-item">
-            <div class="info-label"><i class="fas fa-align-left"></i> {% trans "about" context "profile.info" %}</div>
-            <div class="info-value">{{ profile.bio }}</div>
-        </div>
+        <section class="pfx-card">
+            <h3 class="pfx-card__title"><i class="fas fa-align-left" aria-hidden="true"></i>{% trans "about" context "profile.info" %}</h3>
+            <p class="pfx-bio">{{ profile.bio }}</p>
+        </section>
         {% endif %}
-
-        {% if profile.supervisor_code %}
-        <div class="profile-supervisor info-item">
-            <div class="info-label"><i class="fas fa-key"></i> {% trans "supervisor_code" context "profile.info" %}</div>
-            <div class="info-value info-value--readonly">{{ profile.supervisor_code }}</div>
-        </div>
-        {% endif %}
-
-        <div class="profile-edit-link">
-            <a href="{{ profile_base_url }}?section=edit-profile" class="btn-edit-profile js-profile-section-link"
-               data-section="edit-profile" data-title="{% trans 'edit_profile' context 'profile.section' %}">
-                <i class="fas fa-user-edit"></i> {% trans "edit_profile" context "profile.sidebar" %}
-            </a>
-            <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
-               class="btn-edit-profile" target="_blank" rel="noopener">
-                <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
-            </a>
-            <a href="{{ profile_base_url }}?section=change-password" class="btn-edit-profile js-profile-section-link"
-               data-section="change-password" data-title="{% trans 'Şifrəni dəyiş' %}">
-                <i class="fas fa-lock"></i> {% trans 'Şifrəni dəyiş' %}
-            </a>
-        </div>
     </div>
+
+    <aside class="pfx-col pfx-col--side">
+        {% if pending_student_join_requests %}
+        <section class="pfx-card pfx-card--waiting">
+            <h3 class="pfx-card__title"><i class="fas fa-hourglass-half" aria-hidden="true"></i>{% trans 'Təşkilat təsdiqi gözlənilir' %}</h3>
+            {% for pending_request in pending_student_join_requests %}
+            <div class="pfx-wait">
+                {% trans 'üzv' as default_member_role %}
+                <p class="pfx-wait__text">
+                    {% blocktrans with org_name=pending_request.organization.name role=pending_request.role_label_lower|default:default_member_role %}<strong>{{ org_name }}</strong> üçün {{ role }} müraciətiniz göndərilib və hazırda təsdiq gözləyir.{% endblocktrans %}
+                </p>
+                {% if pending_request.message %}
+                <p class="pfx-wait__note"><strong>{% trans 'Mesajınız:' %}</strong> {{ pending_request.message }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if organization_access_rows %}
+        {% if is_superadmin or can_manage_org or organization_access_rows|length > 1 %}
+        <section class="pfx-card">
+            <h3 class="pfx-card__title"><i class="fas fa-building" aria-hidden="true"></i>{% trans 'Təşkilat girişləri' %}</h3>
+            <div class="pfx-orgs">
+                {% for org_access in organization_access_rows %}
+                <article class="pfx-org {% if org_access.is_current %}is-current{% endif %}">
+                    <div class="pfx-org__head">
+                        <span class="pfx-org__name">{{ org_access.organization.name }}</span>
+                        {% if org_access.is_current %}
+                        <span class="pfx-chip pfx-chip--success">{% trans 'Aktiv' %}</span>
+                        {% endif %}
+                    </div>
+                    <p class="pfx-org__meta">
+                        {% blocktrans with org_type=org_access.organization.get_org_type_display count=org_access.member_count %}{{ org_type }} · {{ count }} üzv{% endblocktrans %}
+                        {% if org_access.organization.organization_identifier %} · {{ org_access.organization.organization_identifier }}{% endif %}
+                    </p>
+                    {% if org_access.role_labels %}
+                    <div class="pfx-chips pfx-chips--tight">
+                        {% for role_label in org_access.role_labels %}
+                        <span class="pfx-chip pfx-chip--quiet">{{ role_label }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="pfx-org__links">
+                        {% if not org_access.is_current %}
+                        <a href="{{ org_access.switch_url }}" class="pfx-link pfx-link--strong">{% trans 'Aktiv et' %}</a>
+                        {% endif %}
+                        <a href="{{ org_access.dashboard_url }}" class="pfx-link">{% trans 'Panel' %}</a>
+                        <a href="{{ org_access.members_url }}" class="pfx-link">{% trans 'Üzvlər' %}</a>
+                        <a href="{{ org_access.roles_url }}" class="pfx-link">{% trans 'Rollar' %}</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        {% endif %}
+    </aside>
 </div>
 
+{# ── Avatar dəyişmə modalı ───────────────────────────────────────────────── #}
 <div class="modal fade" id="profileAvatarUpdateModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content pfx-modal">
             <form method="post" enctype="multipart/form-data" action="{{ profile_base_url }}">
                 {% csrf_token %}
                 <input type="hidden" name="profile_form" value="update-avatar">
                 <input type="hidden" name="section" value="profile-info">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-image me-2"></i>{% trans 'Profil şəklini dəyiş' %}</h5>
+                <div class="modal-header pfx-modal__head">
+                    <h5 class="modal-title pfx-modal__title">
+                        <span class="pfx-modal__mark"><i class="fas fa-image" aria-hidden="true"></i></span>
+                        {% trans 'Profil şəklini dəyiş' %}
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="avatar-modal-preview">
+                    <div class="pfx-avatar-preview">
                         {% if profile.avatar %}
                         <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
-                             alt="Avatar"
-                             id="profileAvatarPreviewImage">
-                        <div class="avatar-placeholder avatar-placeholder--fallback" id="profileAvatarPreviewFallback">
+                             alt="" id="profileAvatarPreviewImage">
+                        <div class="pfx-hero__initials pfx-hero__initials--fallback" id="profileAvatarPreviewFallback">
                             {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
                         </div>
                         {% else %}
-                        <img src="" alt="Avatar" id="profileAvatarPreviewImage" style="display:none">
-                        <div class="avatar-placeholder" id="profileAvatarPreviewFallback">
+                        <img src="" alt="" id="profileAvatarPreviewImage" hidden>
+                        <div class="pfx-hero__initials" id="profileAvatarPreviewFallback">
                             {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
                         </div>
                         {% endif %}
                     </div>
 
-                    <label for="profileAvatarInput" class="form-label">{% trans 'Yeni şəkil seçin' %}</label>
-                    <input id="profileAvatarInput"
-                           name="avatar"
-                           type="file"
-                           class="form-control"
-                           accept="image/*"
-                           required>
-                    <div class="form-text">{% trans 'Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.' %}</div>
+                    <label for="profileAvatarInput" class="pfx-label">{% trans 'Yeni şəkil seçin' %}</label>
+                    <input id="profileAvatarInput" name="avatar" type="file" class="form-control" accept="image/*" required>
+                    <p class="pfx-help">{% trans 'Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.' %}</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> {% trans 'Şəkli yenilə' %}
+                <div class="modal-footer pfx-modal__foot">
+                    <button type="button" class="pfx-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                    <button type="submit" class="pfx-btn pfx-btn--primary">
+                        <i class="fas fa-check" aria-hidden="true"></i>{% trans 'Şəkli yenilə' %}
                     </button>
                 </div>
             </form>
@@ -358,4 +288,4 @@
 </div>
 
 {# defer: tam səhifə renderində EMSReady hələ yüklənməmiş olur (base.html sonunda). #}
-<script src="{% static 'accounts/js/profile/profile_info_identity.js' %}?v=20260815-1" defer></script>
+<script src="{% static 'accounts/js/profile/profile_info_identity.js' %}?v=20260907-redesign" defer></script>

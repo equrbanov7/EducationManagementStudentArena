@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}
+EMSConfirm — qlobal təsdiq dialoqu (UX-15). Bax static/js/ems_ui/confirm.js.
+Bir dəfə, `base.html`-də render olunur; bütün ekranlar `EMSConfirm.open(...)`
+ilə eyni instansiyanı proqramla idarə edir. Markup Bootstrap 5 modal-ıdır.
+{% endcomment %}
+<div class="modal fade" id="emsConfirmModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="emsConfirmModalTitle" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emsConfirmModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="{% trans 'Bağla' context 'ui.confirm_modal' %}"></button>
+            </div>
+            <div class="modal-body" id="emsConfirmModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="emsConfirmCancelBtn" data-bs-dismiss="modal">
+                    {% trans "Ləğv et" context "ui.confirm_modal" %}
+                </button>
+                <button type="button" class="btn btn-primary" id="emsConfirmOkBtn">
+                    {% trans "Təsdiqlə" context "ui.confirm_modal" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

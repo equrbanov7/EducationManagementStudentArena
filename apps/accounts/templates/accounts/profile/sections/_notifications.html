@@ -1,4 +1,21 @@
 {% load i18n %}
+{% comment %}«Bildirişlər» bölməsi — inbox naxışı.
+
+DİZAYN QƏRARI (2026-09-07 yenidən dizayn): əvvəl hər bildiriş AYRI çərçivəli
+kart idi (10 kart = 10 çərçivə), oxunmamış sətir tam mavi fonla boyanırdı və
+sağda iki xırda Bootstrap düyməsi daimi dururdu. Nəticə: iyerarxiya yox, sıxlıq
+çox, skan etmək çətin.
+
+İndi: BİR kart + hairline ilə ayrılmış sətirlər (poçt qutusu naxışı), zamana
+görə qruplar («Bu gün / Dünən / …»), oxunmamışlıq nöqtə + zərif fonla, əməllər
+isə yalnız hover/fokusda. Növ ikonu rəngli konteynerdədir — ton view-dən gəlir
+(`notifications_ui.TYPE_UI`), şablonda `{% if %}` zənciri YOXDUR.
+
+JS müqaviləsi (accounts/js/profile/notifications.js) DƏYİŞMİR: sinif/id
+adları — `profile-notif-item(--unread)`, `profile-notif-body.js-notif-open`,
+`profile-notif-checkbox`, `profile-notif-actions`, `notif-new-badge`,
+`#profileNotifBulkBar` və modal id-ləri — olduğu kimi saxlanılıb.
+{% endcomment %}
 {% if 'notifications' in allowed_sections %}
 <section class="profile-section-panel profile-section--notifications {% if active_section == 'notifications' %}is-active{% endif %}"
          data-profile-section-panel="notifications"
@@ -7,324 +24,303 @@
          data-current-search="{{ notif_search_query }}"
          data-in-app-unread-count="{{ in_app_unread_count }}"
          data-total-unread-count="{{ notifications_unread_count }}">
-    <div class="section-card">
-        {% comment %}
-            Bölmə başlığı QƏSDƏN yoxdur: səhifənin öz H1-i (profile/_header.html →
-            `active_section_title`) eyni "Bildirişlər" mətnini verirdi, yəni ekranda
-            iki eyni başlıq üst-üstə düşürdü. Oxunmamış sayğac sidebar naviqasiyasında
-            qalır; `notifications.js` badge-in olmamasına null-safe-dir.
-        {% endcomment %}
 
-        {% if pending_student_join_requests %}
-            {% for pending_request in pending_student_join_requests %}
-            <div class="alert alert-warning mb-3">
-                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
-                    <div>
-                        <div>
-                            {% blocktrans trimmed with organization_name=pending_request.organization.name role_label=pending_request.role_label_lower context "profile.notifications" %}
-                            Your {{ role_label }} request has been sent to {{ organization_name }} and is currently awaiting a response.
-                            {% endblocktrans %}
-                        </div>
-                        {% if pending_request.message %}<div class="mt-2"><small><strong>{% trans "message" context "profile.notifications" %}:</strong> {{ pending_request.message }}</small></div>{% endif %}
-                    </div>
-                    <form method="post" action="{% url 'accounts:student_organization_request' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
-                        <input type="hidden" name="action" value="clear_request">
-                        <input type="hidden" name="request_id" value="{{ pending_request.id }}">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">{% trans "cancel" context "profile.notifications" %}</button>
-                    </form>
-                </div>
+    {# ── Təşkilat sorğusu / dəvəti — bildiriş axınından ƏVVƏL, çünki əməl tələb edir ── #}
+    {% if pending_student_join_requests or pending_student_invites %}
+    <div class="nfx-callouts">
+        {% for pending_request in pending_student_join_requests %}
+        <div class="nfx-callout nfx-callout--waiting" role="status">
+            <span class="nfx-callout__icon"><i class="fas fa-hourglass-half" aria-hidden="true"></i></span>
+            <div class="nfx-callout__body">
+                <p class="nfx-callout__text">
+                    {% blocktrans trimmed with organization_name=pending_request.organization.name role_label=pending_request.role_label_lower context "profile.notifications" %}
+                    Your {{ role_label }} request has been sent to {{ organization_name }} and is currently awaiting a response.
+                    {% endblocktrans %}
+                </p>
+                {% if pending_request.message %}
+                <p class="nfx-callout__note">{{ pending_request.message }}</p>
+                {% endif %}
             </div>
-            {% endfor %}
-        {% endif %}
+            <form method="post" action="{% url 'accounts:student_organization_request' %}" class="nfx-callout__actions">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
+                <input type="hidden" name="action" value="clear_request">
+                <input type="hidden" name="request_id" value="{{ pending_request.id }}">
+                <button type="submit" class="nfx-btn">{% trans "cancel" context "profile.notifications" %}</button>
+            </form>
+        </div>
+        {% endfor %}
 
-        {% if pending_student_invites %}
-        <div class="mb-3">
-            {% for invite in pending_student_invites %}
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 {% if not forloop.last %}mb-2 pb-2 border-bottom{% endif %}">
-                <div>
+        {% for invite in pending_student_invites %}
+        <div class="nfx-callout nfx-callout--invite">
+            <span class="nfx-callout__icon"><i class="fas fa-envelope-open-text" aria-hidden="true"></i></span>
+            <div class="nfx-callout__body">
+                <p class="nfx-callout__text">
                     {% blocktrans trimmed with organization_name=invite.organization.name role_label=invite.role_label_lower context "profile.notifications" %}
                     {{ organization_name }} has invited you as {{ role_label }}.
                     {% endblocktrans %}
-                </div>
-                <div class="d-flex gap-2">
-                    <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
-                        <input type="hidden" name="invite_id" value="{{ invite.id }}">
-                        <input type="hidden" name="action" value="accept">
-                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-check"></i> {% trans "accept" context "profile.notifications" %}</button>
-                    </form>
-                    <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
-                        <input type="hidden" name="invite_id" value="{{ invite.id }}">
-                        <input type="hidden" name="action" value="reject">
-                        <button type="submit" class="btn btn-outline-secondary btn-sm">{% trans "reject" context "profile.notifications" %}</button>
-                    </form>
-                </div>
+                </p>
             </div>
-            {% endfor %}
+            <div class="nfx-callout__actions">
+                <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
+                    <input type="hidden" name="invite_id" value="{{ invite.id }}">
+                    <input type="hidden" name="action" value="accept">
+                    <button type="submit" class="nfx-btn nfx-btn--primary">
+                        <i class="fas fa-check" aria-hidden="true"></i>{% trans "accept" context "profile.notifications" %}
+                    </button>
+                </form>
+                <form method="post" action="{% url 'accounts:student_org_invitation_action' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
+                    <input type="hidden" name="invite_id" value="{{ invite.id }}">
+                    <input type="hidden" name="action" value="reject">
+                    <button type="submit" class="nfx-btn">{% trans "reject" context "profile.notifications" %}</button>
+                </form>
+            </div>
         </div>
-        {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
 
-        {% comment %}
-            Ayırıcı yalnız YUXARIDA məzmun (gözləyən sorğu/dəvət) olanda lazımdır.
-            Bölmə başlığı silindikdən sonra şərtsiz `hr` kartın ilk elementi olub
-            boş üfüqi xətt kimi görünürdü.
-        {% endcomment %}
-        {% if pending_student_join_requests or pending_student_invites %}<hr class="my-3">{% endif %}
-
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <nav class="nav notif-filter-tabs" role="tablist">
-                <a class="notif-filter-tab {% if notif_filter == 'all' %}is-active{% endif %}"
+    <div class="nfx">
+        {# ── Alət zolağı: seqment + növ + axtarış + toplu əməl ─────────────── #}
+        <div class="nfx-toolbar">
+            <nav class="nfx-segment" role="tablist" aria-label="{% trans 'filter_all' context 'profile.notifications' %}">
+                <a class="nfx-segment__item {% if notif_filter == 'all' %}is-active{% endif %}" role="tab"
+                   aria-selected="{% if notif_filter == 'all' %}true{% else %}false{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=all{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
-                    <i class="fas fa-list"></i>
-                    <span>{% trans "filter_all" context "profile.notifications" %}</span>
+                    {% trans "filter_all" context "profile.notifications" %}
                 </a>
-                <a class="notif-filter-tab {% if notif_filter == 'unread' %}is-active{% endif %}"
+                <a class="nfx-segment__item {% if notif_filter == 'unread' %}is-active{% endif %}" role="tab"
+                   aria-selected="{% if notif_filter == 'unread' %}true{% else %}false{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=unread{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
-                    <i class="fas fa-envelope"></i>
-                    <span>{% trans "filter_unread" context "profile.notifications" %}</span>
-                    {% if in_app_unread_count > 0 %}<span class="notif-filter-badge" data-profile-notif-filter-badge>{{ in_app_unread_count }}</span>{% endif %}
+                    {% trans "filter_unread" context "profile.notifications" %}
+                    {% if in_app_unread_count > 0 %}<span class="nfx-count" data-profile-notif-filter-badge>{{ in_app_unread_count }}</span>{% endif %}
                 </a>
-                <a class="notif-filter-tab {% if notif_filter == 'read' %}is-active{% endif %}"
+                <a class="nfx-segment__item {% if notif_filter == 'read' %}is-active{% endif %}" role="tab"
+                   aria-selected="{% if notif_filter == 'read' %}true{% else %}false{% endif %}"
                    href="{{ profile_base_url }}?section=notifications&notif_filter=read{% if notif_type %}&notif_type={{ notif_type }}{% endif %}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">
-                    <i class="fas fa-envelope-open"></i>
-                    <span>{% trans "filter_read" context "profile.notifications" %}</span>
+                    {% trans "filter_read" context "profile.notifications" %}
                 </a>
+            </nav>
 
-                {# Tip filtri — standalone bildirişlər səhifəsindəki ilə eyni davranış #}
-                <div class="dropdown">
-                    <a class="notif-filter-tab dropdown-toggle {% if notif_type %}is-active{% endif %}"
-                       href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-filter"></i>
-                        <span>
-                            {% if notif_type %}
-                                {% for value, label in notif_notification_types %}{% if value == notif_type %}{{ label }}{% endif %}{% endfor %}
-                            {% else %}
-                                {% trans "Type" %}
-                            {% endif %}
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item {% if not notif_type %}active{% endif %}"
-                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{% trans "All types" %}</a>
-                        </li>
+            <form method="get" class="nfx-search" data-standard-search-form data-debounce-ms="600"
+                  action="{{ profile_base_url }}" role="search">
+                <input type="hidden" name="section" value="notifications">
+                <input type="hidden" name="notif_filter" value="{{ notif_filter }}">
+                {% if notif_type %}<input type="hidden" name="notif_type" value="{{ notif_type }}">{% endif %}
+                <i class="fas fa-magnifying-glass nfx-search__icon" aria-hidden="true"></i>
+                <input type="search" name="notif_search" value="{{ notif_search_query }}"
+                       class="nfx-search__input" autocomplete="off" data-standard-search-input
+                       placeholder="{% trans 'Search notifications...' context 'profile.notifications' %}"
+                       aria-label="{% trans 'Search notifications...' context 'profile.notifications' %}">
+                <button type="button" class="nfx-search__clear" data-standard-search-clear hidden
+                        aria-label="{% trans 'Clear notification search' context 'profile.notifications' %}">
+                    <i class="fas fa-xmark" aria-hidden="true"></i>
+                </button>
+                {% comment %}Debounce ilə avtomatik göndərilir; düymə yalnız
+                klaviatura/JS-siz istifadəçi üçün qalır.{% endcomment %}
+                <button type="submit" class="nfx-search__submit" data-standard-search-submit
+                        aria-label="{% trans 'Search' context 'profile.notifications' %}">
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <div class="nfx-toolbar__end">
+                <div class="dropdown nfx-type">
+                    <button class="nfx-btn {% if notif_type %}is-on{% endif %}" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter" aria-hidden="true"></i>
+                        <span>{% if notif_type %}{% for value, label in notif_notification_types %}{% if value == notif_type %}{{ label }}{% endif %}{% endfor %}{% else %}{% trans "Type" %}{% endif %}</span>
+                        <i class="fas fa-chevron-down nfx-btn__caret" aria-hidden="true"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end nfx-menu">
+                        <li><a class="dropdown-item {% if not notif_type %}active{% endif %}"
+                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{% trans "All types" %}</a></li>
                         {% for value, label in notif_notification_types %}
-                        <li>
-                            <a class="dropdown-item {% if notif_type == value %}active{% endif %}"
-                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_type={{ value }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{{ label }}</a>
-                        </li>
+                        <li><a class="dropdown-item {% if notif_type == value %}active{% endif %}"
+                               href="{{ profile_base_url }}?section=notifications&notif_filter={{ notif_filter }}&notif_type={{ value }}{% if notif_search_query %}&notif_search={{ notif_search_query|urlencode }}{% endif %}">{{ label }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
-            </nav>
-            {% if in_app_notifications_page.object_list %}
-            <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
-                <button type="submit" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-check-double me-1"></i>{% trans "mark_all_read" context "profile.notifications" %}
-                </button>
-            </form>
-            {% endif %}
-        </div>
 
-        <form method="get"
-              class="search-form role-assignment-search-form mb-3"
-              data-standard-search-form
-              data-debounce-ms="700"
-              action="{{ profile_base_url }}">
-            <input type="hidden" name="section" value="notifications">
-            <input type="hidden" name="notif_filter" value="{{ notif_filter }}">
-            {% if notif_type %}<input type="hidden" name="notif_type" value="{{ notif_type }}">{% endif %}
-            <div class="role-assignment-search-input-wrap">
-                <input type="text"
-                       name="notif_search"
-                       value="{{ notif_search_query }}"
-                       placeholder="{% trans 'Search notifications...' context 'profile.notifications' %}"
-                       class="form-control role-assignment-search-input"
-                       autocomplete="off"
-                       data-standard-search-input>
-                <button type="button"
-                        class="role-assignment-search-clear"
-                        data-standard-search-clear
-                        aria-label="{% trans 'Clear notification search' context 'profile.notifications' %}"
-                        hidden>
-                    <i class="fas fa-times"></i>
-                </button>
+                {% if in_app_notifications_page.object_list and in_app_unread_count > 0 %}
+                <form method="post" action="{% url 'notifications:notification_mark_all_read' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
+                    <button type="submit" class="nfx-btn">
+                        <i class="fas fa-check-double" aria-hidden="true"></i>
+                        <span>{% trans "mark_all_read" context "profile.notifications" %}</span>
+                    </button>
+                </form>
+                {% endif %}
             </div>
-            <button type="submit"
-                    class="btn btn-primary role-assignment-search-submit"
-                    data-standard-search-submit>
-                <i class="fas fa-search"></i> {% trans "Search" context "profile.notifications" %}
-            </button>
-        </form>
+        </div>
 
         {% if in_app_notifications_page.object_list %}
-        <div class="d-flex align-items-center gap-2 mb-2 notif-bulk-bar" id="profileNotifBulkBar" style="display:none !important">
-            <div class="form-check mb-0">
-                <input class="form-check-input" type="checkbox" id="profileNotifSelectAll">
-                <label class="form-check-label small fw-semibold" for="profileNotifSelectAll">{% trans "select_all" context "profile.notifications" %}</label>
+        {# ── Siyahı: bir kart, hairline ilə ayrılmış sətirlər ──────────────── #}
+        <div class="nfx-panel">
+            <div class="nfx-select" id="profileNotifBulkBar">
+                <label class="nfx-select__all">
+                    <input class="nfx-check" type="checkbox" id="profileNotifSelectAll">
+                    <span>{% trans "select_all" context "profile.notifications" %}</span>
+                </label>
+                <span class="nfx-select__count" data-profile-notif-selected-count></span>
+                <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="profileNotifBulkDeleteForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
+                    <div id="profileNotifBulkIds"></div>
+                    <button type="submit" class="nfx-btn nfx-btn--danger" id="profileNotifBulkDeleteBtn" disabled>
+                        <i class="fas fa-trash" aria-hidden="true"></i>
+                        <span>{% trans "delete_selected" context "profile.notifications" %}</span>
+                    </button>
+                </form>
             </div>
-            <form method="post" action="{% url 'notifications:notification_bulk_delete' %}" id="profileNotifBulkDeleteForm" class="ms-2">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}{% if in_app_notifications_page.number %}&notif_page={{ in_app_notifications_page.number }}{% endif %}">
-                <div id="profileNotifBulkIds"></div>
-                <button type="submit" class="btn btn-sm btn-outline-danger" id="profileNotifBulkDeleteBtn" disabled>
-                    <i class="fas fa-trash me-1"></i>{% trans "delete_selected" context "profile.notifications" %}
-                </button>
-            </form>
-        </div>
 
-        <ul class="list-unstyled profile-notif-list" id="profileNotifList">
-            {% for notification in in_app_notifications_page %}
-            <li class="profile-notif-item {% if not notification.is_read %}profile-notif-item--unread{% endif %}"
-                data-id="{{ notification.pk }}">
-                <div class="form-check profile-notif-checkbox-wrap mb-0">
-                    <input class="form-check-input profile-notif-checkbox" type="checkbox"
-                           value="{{ notification.pk }}" id="pn-{{ notification.pk }}">
-                </div>
-                <div class="profile-notif-icon">
-                    {% if notification.notification_type == 'assignment' %}<i class="fas fa-file-alt text-warning"></i>
-                    {% elif notification.notification_type == 'exam' %}<i class="fas fa-clipboard-list text-primary"></i>
-                    {% elif notification.notification_type == 'grade' %}<i class="fas fa-star text-success"></i>
-                    {% elif notification.notification_type == 'course' %}<i class="fas fa-book text-info"></i>
-                    {% elif notification.notification_type == 'live_exam' %}<i class="fas fa-broadcast-tower text-danger"></i>
-                    {% elif notification.notification_type == 'approval' %}<i class="fas fa-user-check text-primary"></i>
-                    {% else %}<i class="fas fa-bell text-secondary"></i>{% endif %}
-                </div>
-                <div class="profile-notif-body js-notif-open notif-item--clickable"
-                     data-notif-id="{{ notification.pk }}"
-                     data-notif-title="{{ notification.title|default:''|escape }}"
-                     data-notif-message="{{ notification.message|default:''|escape }}"
-                     data-notif-time="{{ notification.created_at|date:'d M Y, H:i' }}"
-                     data-notif-type="{{ notification.get_notification_type_display }}"
-                     data-notif-link="{{ notification.link|default:''|escape }}"
-                     data-notif-link-label="{{ notification.metadata.link_label|default:''|escape }}"
-                     data-notif-image="{{ notification.metadata.image_url|default:''|escape }}"
-                     data-notif-is-read="{% if notification.is_read %}1{% else %}0{% endif %}"
-                     data-mark-read-url="{% url 'notifications:notification_mark_read' notification.pk %}">
-                    <div class="profile-notif-title">
-                        {% if not notification.is_read %}<strong>{{ notification.title }}</strong>
-                        {% else %}{{ notification.title }}{% endif %}
-                    </div>
-                    {% if notification.message %}
-                    <div class="profile-notif-preview text-muted small">{{ notification.message|truncatechars:80 }}</div>
-                    {% endif %}
-                    {% if notification.metadata.image_url %}
-                    <div class="mt-1">
-                        <img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img">
-                    </div>
-                    {% endif %}
-                    <div class="profile-notif-meta text-muted small mt-1">
-                        <i class="fas fa-clock me-1"></i>{{ notification.created_at|timesince }} {% trans "ago" context "profile.notifications" %}
+            <ul class="nfx-list" id="profileNotifList">
+                {% regroup in_app_notifications_page.object_list by ui_bucket as notif_groups %}
+                {% for group in notif_groups %}
+                <li class="nfx-group" aria-hidden="true">{{ group.grouper }}</li>
+                {% for notification in group.list %}
+                <li class="profile-notif-item nfx-row {% if not notification.is_read %}profile-notif-item--unread{% endif %}"
+                    data-id="{{ notification.pk }}">
+                    <label class="nfx-row__pick">
+                        <input class="nfx-check profile-notif-checkbox" type="checkbox"
+                               value="{{ notification.pk }}" id="pn-{{ notification.pk }}"
+                               aria-label="{{ notification.title|default:'' }} — {% trans 'Seç' context 'accounts.a11y' %}">
+                    </label>
+
+                    <span class="profile-notif-icon nfx-icon nfx-icon--{{ notification.ui_tone }}" aria-hidden="true">
+                        <i class="fas {{ notification.ui_icon }}"></i>
+                    </span>
+
+                    <div class="profile-notif-body js-notif-open nfx-row__main"
+                         role="button" tabindex="0"
+                         data-notif-id="{{ notification.pk }}"
+                         data-notif-title="{{ notification.title|default:''|escape }}"
+                         data-notif-message="{{ notification.message|default:''|escape }}"
+                         data-notif-time="{{ notification.created_at|date:'d M Y, H:i' }}"
+                         data-notif-type="{{ notification.get_notification_type_display }}"
+                         data-notif-link="{{ notification.link|default:''|escape }}"
+                         data-notif-link-label="{{ notification.metadata.link_label|default:''|escape }}"
+                         data-notif-image="{{ notification.metadata.image_url|default:''|escape }}"
+                         data-notif-is-read="{% if notification.is_read %}1{% else %}0{% endif %}"
+                         data-mark-read-url="{% url 'notifications:notification_mark_read' notification.pk %}">
+                        <div class="nfx-row__head">
+                            <span class="profile-notif-title nfx-row__title">
+                                {% if not notification.is_read %}<strong>{{ notification.title }}</strong>{% else %}{{ notification.title }}{% endif %}
+                            </span>
+                            <time class="nfx-row__time">{{ notification.ui_time }}</time>
+                        </div>
+                        {% if notification.message %}
+                        <p class="profile-notif-preview nfx-row__preview">{{ notification.message|truncatechars:120 }}</p>
+                        {% endif %}
+                        {% if notification.metadata.image_url %}
+                        <img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img nfx-row__thumb">
+                        {% endif %}
                         {% if not notification.is_read %}
-                        <span class="badge bg-primary notif-new-badge ms-2">{% trans "new_badge" context "profile.notifications" %}</span>
+                        <span class="notif-new-badge nfx-row__dot" title="{% trans 'new_badge' context 'profile.notifications' %}"></span>
                         {% endif %}
                     </div>
-                </div>
-                <div class="profile-notif-actions">
-                    {% if not notification.is_read %}
-                    <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
-                        <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans 'mark_read' context 'profile.notifications' %}">
-                            <i class="fas fa-envelope-open"></i>
-                        </button>
-                    </form>
-                    {% endif %}
-                    <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}" class="d-inline">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'delete' context 'profile.notifications' %}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </form>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+
+                    <div class="profile-notif-actions nfx-row__actions">
+                        {% if not notification.is_read %}
+                        <form method="post" action="{% url 'notifications:notification_mark_read' notification.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
+                            <button type="submit" class="nfx-icon-btn" title="{% trans 'mark_read' context 'profile.notifications' %}"
+                                    aria-label="{% trans 'mark_read' context 'profile.notifications' %}">
+                                <i class="fas fa-envelope-open" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ profile_base_url }}?{{ notif_pagination_query }}&notif_page={{ in_app_notifications_page.number }}">
+                            <button type="submit" class="nfx-icon-btn nfx-icon-btn--danger" title="{% trans 'delete' context 'profile.notifications' %}"
+                                    aria-label="{% trans 'delete' context 'profile.notifications' %}">
+                                <i class="fas fa-trash-can" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
 
         {% if in_app_notifications_page.has_other_pages %}
         {% include "partials/_pagination.html" with page_obj=in_app_notifications_page extra_query=notif_pagination_query page_param="notif_page" %}
         {% endif %}
 
-        {% else %}
-        {% if not pending_student_invites and not pending_student_join_requests %}
-        <div class="notif-empty-state py-5 text-center">
-            <div class="notif-empty-icon mb-3"><i class="fas fa-bell-slash"></i></div>
-            <p class="text-muted fw-semibold mb-1">
+        {% elif not pending_student_invites and not pending_student_join_requests %}
+        <div class="nfx-empty">
+            <span class="nfx-empty__icon"><i class="fas fa-bell-slash" aria-hidden="true"></i></span>
+            <p class="nfx-empty__title">
                 {% if notif_search_query %}{% trans "No notifications matched your search." context "profile.notifications" %}
                 {% elif notif_filter == 'unread' %}{% trans "empty_unread" context "profile.notifications" %}
                 {% elif notif_filter == 'read' %}{% trans "empty_read" context "profile.notifications" %}
                 {% else %}{% trans "empty_all" context "profile.notifications" %}{% endif %}
             </p>
-            <p class="text-muted small">
+            <p class="nfx-empty__note">
                 {% if notif_search_query %}{% trans "Try a different search term or clear the search filter." context "profile.notifications" %}
                 {% else %}{% trans "empty_hint" context "profile.notifications" %}{% endif %}
             </p>
         </div>
         {% endif %}
-        {% endif %}
     </div>
 
-    {# Silmə təsdiq modal-ı — həm tək, həm də bulk silmə üçün #}
+    {# Silmə təsdiqi — həm tək, həm toplu silmə üçün #}
     <div class="modal fade" id="profileNotifDeleteConfirmModal" tabindex="-1"
          aria-labelledby="profileNotifDeleteConfirmLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header notif-modal-head--danger">
-                    <h5 class="modal-title notif-modal-title--danger" id="profileNotifDeleteConfirmLabel">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+            <div class="modal-content nfx-modal">
+                <div class="modal-header nfx-modal__head">
+                    <h5 class="modal-title nfx-modal__title" id="profileNotifDeleteConfirmLabel">
+                        <span class="nfx-modal__mark nfx-modal__mark--danger"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
                         {% trans "Silməyi təsdiqləyin" %}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.notifications' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-0" id="profileNotifDeleteConfirmMessage">
+                    <p class="nfx-modal__text" id="profileNotifDeleteConfirmMessage">
                         {% trans "Bu bildirişi silmək istədiyinizə əminsiniz? Bu əməliyyat geri qaytarıla bilməz." %}
                     </p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>{% trans "cancel" context "profile.edit" %}
-                    </button>
-                    <button type="button" class="btn btn-danger" id="profileNotifDeleteConfirmBtn">
-                        <i class="fas fa-trash me-1"></i>{% trans "delete" context "profile.notifications" %}
+                <div class="modal-footer nfx-modal__foot">
+                    <button type="button" class="nfx-btn" data-bs-dismiss="modal">{% trans "cancel" context "profile.edit" %}</button>
+                    <button type="button" class="nfx-btn nfx-btn--danger-solid" id="profileNotifDeleteConfirmBtn">
+                        <i class="fas fa-trash" aria-hidden="true"></i>{% trans "delete" context "profile.notifications" %}
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    {# Notification detail modal #}
+    {# Bildiriş detalı #}
     <div class="modal fade" id="profileNotifModal" tabindex="-1"
          aria-labelledby="profileNotifModalLabel" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="profileNotifModalLabel">
-                        <i class="fas fa-bell me-2 text-primary" id="profileNotifModalIcon"></i>
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content nfx-modal">
+                <div class="modal-header nfx-modal__head">
+                    <h5 class="modal-title nfx-modal__title" id="profileNotifModalLabel">
+                        <span class="nfx-modal__mark"><i class="fas fa-bell" id="profileNotifModalIcon" aria-hidden="true"></i></span>
                         <span id="profileNotifModalTitle">{% trans "notification" context "profile.notifications" %}</span>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'close' context 'profile.notifications' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="text-muted small mb-3" id="profileNotifModalMeta"></div>
-                    <div id="profileNotifModalImage" class="mb-3" style="display:none">
+                    <div class="nfx-modal__meta" id="profileNotifModalMeta"></div>
+                    <div id="profileNotifModalImage" class="nfx-modal__image" hidden>
                         <img id="profileNotifModalImageEl" src="" alt="">
                     </div>
-                    <div id="profileNotifModalMessage" class="mb-3 notif-modal-msg"></div>
-                    <div id="profileNotifModalLink"></div>
+                    <div id="profileNotifModalMessage" class="nfx-modal__msg"></div>
+                    <div id="profileNotifModalLink" class="nfx-modal__link"></div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>{% trans "close" context "profile.notifications" %}
-                    </button>
+                <div class="modal-footer nfx-modal__foot">
+                    <button type="button" class="nfx-btn" data-bs-dismiss="modal">{% trans "close" context "profile.notifications" %}</button>
                 </div>
             </div>
         </div>

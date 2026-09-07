@@ -101,6 +101,9 @@
     };
 
     ns.controller.createController(ctx);
+    if (ns.confirm && typeof ns.confirm.bind === "function") {
+      ns.confirm.bind(ctx);
+    }
   }
 
   ns.init = init;

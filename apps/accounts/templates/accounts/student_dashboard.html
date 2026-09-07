@@ -159,7 +159,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
                                     <div class="item-title">{{ submission.assignment.title }}</div>
-                                    <div class="item-meta">{{ submission.graded_at|date:"d M Y" }}</div>
+                                    <div class="item-meta">{{ submission.graded_at|date:"d.m.Y" }}</div>
                                 </div>
                                 <span class="grade-badge 
                                     {% if submission.grade >= 90 %}excellent

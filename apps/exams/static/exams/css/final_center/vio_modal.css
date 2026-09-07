@@ -75,4 +75,4 @@
 .fxc-vio-modal__item.fxc-vio-sev--low,
 .fxc-vio-modal__item.fxc-vio-sev--info { border-left-color: #38BDF8; }
 .fxc-vio-modal__rule { font-size: .84rem; font-weight: 600; color: #1E293B; }
-.fxc-vio-modal__time { flex: none; font-size: .72rem; color: #94A3B8; white-space: nowrap; }
+.fxc-vio-modal__time { flex: none; font-size: .72rem; color: var(--ems-neutral-500); white-space: nowrap; }
