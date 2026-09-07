@@ -1,8 +1,13 @@
+{% comment %}`.pfx` sarğısı MƏNALIDIR: kimlik səthinin üslubları (profile_identity.css)
+paylaşılan `.stat-card` / `.stats-grid` qaydalarını YALNIZ bu ekranda üstələyir —
+qonşu bölmələrdəki eyni siniflərə toxunmur.{% endcomment %}
 <section class="profile-section-panel profile-section--profile-info {% if active_section == 'profile-info' %}is-active{% endif %}" data-profile-section-panel="profile-info">
-    {% include "accounts/profile/sections/_profile_org_invites.html" %}
-    {% include "accounts/profile/sections/_profile_info_identity.html" %}
-    {% if not university_mode or not role_capabilities.is_student %}
-    {% include "accounts/profile/sections/_profile_info_stats.html" %}
-    {% endif %}
+    <div class="pfx">
+        {% include "accounts/profile/sections/_profile_org_invites.html" %}
+        {% include "accounts/profile/sections/_profile_info_identity.html" %}
+        {% if not university_mode or not role_capabilities.is_student %}
+        {% include "accounts/profile/sections/_profile_info_stats.html" %}
+        {% endif %}
+    </div>
 </section>
  

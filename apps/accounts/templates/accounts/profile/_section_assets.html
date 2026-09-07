@@ -21,7 +21,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
         yükləyirdi (2026-07-31 auditi).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260902-badge-empty">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260907-redesign">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260902-1">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
@@ -172,11 +172,15 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
     {% endif %}
     {% if 'applications' in allowed_sections %}
-    {% comment %}«Müraciətlərim» — panelin öz stili; detal/dialoq faylı əsas
-    fayldan SONRA gəlir (eyni `--apx-*` custom property-lərini işlədir).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260902-2">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260902-2">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260902-2">
+    {% comment %}«Müraciətlərim» — panelin öz stili; detal/modal/dialoq faylları
+    əsas fayldan SONRA gəlir (eyni `--apx-*` custom property-lərini işlədir).
+    `applications_modal.css` `_detail`-dən də SONRA olmalıdır: detal panelinin
+    `.apx-body` sütun qaydasını və cavab qutusunun fonunu QƏSDƏN üstələyir.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_filters.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_modal.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260907-modal">
     {% endif %}
     {% if 'analytics' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
@@ -189,7 +193,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260903-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260907-howto">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20260907-1">
     {% endif %}
     {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm
     (kart sırası, yekun zolağı, risk siyahısı); komponentlər `ems_ui`-dədir.{% endcomment %}

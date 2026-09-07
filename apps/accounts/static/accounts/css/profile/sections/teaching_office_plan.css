@@ -178,3 +178,86 @@
         flex: 1 1 auto;
     }
 }
+
+/* ── Ekran 07: «Necə işləyir» kartı (2026-09-07) ─────────────────────────── */
+.tof-howto {
+    margin: 4px 0 16px; border: 1px solid var(--ems-border, #e2e8f0); border-radius: 14px;
+    background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+}
+.tof-howto__summary {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer;
+    list-style: none; font-weight: 600; font-size: 14px; color: var(--ems-text, #1e293b);
+}
+.tof-howto__summary::-webkit-details-marker { display: none; }
+.tof-howto__icon { color: var(--ems-primary, #4f46e5); font-size: 16px; }
+.tof-howto__label { flex: 1 1 auto; }
+.tof-howto__current {
+    font-weight: 500; font-size: 12px; padding: 3px 10px; border-radius: 999px;
+    background: var(--ems-primary-soft, #e0e7ff); color: var(--ems-primary, #4338ca);
+}
+.tof-howto__chev { color: var(--ems-text-muted, #94a3b8); font-size: 12px; transition: transform .15s ease; }
+.tof-howto[open] .tof-howto__chev { transform: rotate(180deg); }
+
+.tof-howto__list {
+    list-style: none; margin: 0; padding: 4px 16px 14px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+}
+.tof-howto__item {
+    display: grid; grid-template-columns: 30px 1fr; gap: 10px; padding: 12px;
+    border-radius: 12px; border: 1px solid var(--ems-border, #e2e8f0); background: #fff;
+}
+.tof-howto__item--current { border-color: var(--ems-primary, #4f46e5); box-shadow: 0 0 0 3px rgba(79, 70, 229, .12); }
+.tof-howto__item--error { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, .12); }
+.tof-howto__item--done { opacity: .75; }
+.tof-howto__num {
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    font-weight: 700; font-size: 13px; background: #eef2f7; color: #475569;
+}
+.tof-howto__item--current .tof-howto__num { background: var(--ems-primary, #4f46e5); color: #fff; }
+.tof-howto__item--error .tof-howto__num { background: #ef4444; color: #fff; }
+.tof-howto__item--done .tof-howto__num { background: #d1fae5; color: #047857; }
+.tof-howto__body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.tof-howto__title { font-weight: 600; font-size: 13px; }
+.tof-howto__text { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--ems-text-muted, #475569); }
+.tof-howto__btn {
+    display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+    font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 8px;
+    background: #f1f5f9; color: #334155; border: 1px dashed #cbd5e1;
+}
+.tof-howto__who { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Çiplər (bloklayıcılar, status süzgəci) ─────────────────────────────── */
+.tof-chips { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.tof-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px; font-size: 12px; line-height: 1.4;
+    border: 1px solid var(--ems-border, #e2e8f0); background: var(--ems-surface, #fff);
+    color: var(--ems-text, #1e293b); cursor: pointer; font-family: inherit;
+}
+.tof-chip.is-active { background: var(--ems-primary-soft, #e0e7ff); border-color: var(--ems-primary, #4f46e5); color: var(--ems-primary, #4338ca); }
+.tof-chip--danger { background: #fff; border-color: #fecaca; color: #991b1b; cursor: default; }
+.tof-chip--danger > i { color: #dc2626; font-size: 11px; }
+.tof-chip__count { font-weight: 700; opacity: .8; }
+
+.tof-blockers { align-items: flex-start; }
+.tof-blockers__main { min-width: 0; flex: 1 1 auto; }
+
+/* ── Panellər: ipucu, sürüşən cədvəl, təyinat proqresi ──────────────────── */
+.tof-pane__hint { margin: -4px 0 10px; font-size: 12.5px; line-height: 1.5; color: var(--ems-text-muted, #64748b); }
+.tof-pane__scroll { overflow-x: auto; }
+.tof-progress {
+    display: inline-block; vertical-align: middle; width: 56px; height: 6px; margin-right: 6px;
+    border-radius: 999px; background: #e2e8f0; overflow: hidden;
+}
+.tof-progress__bar { display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit; background: #f59e0b; }
+.tof-progress__bar--full { background: #10b981; }
+.tof-progress__bar--low { background: #ef4444; }
+.tof-table-title { margin: 18px 0 8px; display: flex; align-items: baseline; gap: 10px; }
+.tof-table-title__count { font-size: 12px; font-weight: 500; color: var(--ems-text-muted, #64748b); }
+
+/* ── Qrup sətri: «Tələbələr» düyməsi ─────────────────────────────────────── */
+.tof-row-students__count {
+    display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px;
+    margin-left: 4px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    background: var(--ems-primary-soft, #e0e7ff); color: var(--ems-primary, #4338ca);
+}

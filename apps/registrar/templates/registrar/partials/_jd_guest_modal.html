@@ -27,6 +27,7 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
      data-merge-label-absence="{% trans 'Qayıb' context 'registrar.guest_roster' %}"
      data-merge-label-entry="{% trans 'Giriş balı' context 'registrar.guest_roster' %}"
      data-merge-unit-hours="{% trans 'saat' context 'registrar.guest_roster' %}"
+     data-document-required="{% trans 'Sənəd (təqdimat / sərəncam) yüklənməlidir.' context 'registrar.guest_roster' %}"
      data-merge-reason-required="{% trans 'Birləşmə üçün səbəb yazılmalıdır (məs.: dekanlıq sərəncamı nömrəsi).' context 'registrar.guest_roster' %}"
      data-refresh-failed="{% trans 'Əməliyyat alındı, amma cədvəl yenilənmədi — səhifəni yeniləyin.' context 'registrar.guest_roster' %}">
     <div class="jd-modal-backdrop" data-jgs-close></div>
@@ -123,6 +124,18 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
                 <p class="jgs-merge-blocked" data-jgs-merge-blocked hidden></p>
             </div>
 
+            {% comment %}SƏNƏD MƏCBURİDİR (sahib, 2026-09-07): təqdimat / sərəncam. Fayl
+            olmadan «Jurnala əlavə et» açılmır; server də eyni qapını qoyur.{% endcomment %}
+            <div class="jd2-field jgs-field jgs-field--doc">
+                <span class="jd2-field-label">
+                    <span class="jgs-step-dot">3</span>
+                    {% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)" context "registrar.guest_roster" %}
+                </span>
+                <input type="file" data-jgs-document accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                       aria-label="{% trans 'Təqdimat və ya sərəncamın skanı (PDF/şəkil, 10 MB-dək)' context 'registrar.guest_roster' %}">
+                <small class="jd-field-hint">{% trans "PDF və ya şəkil, 10 MB-dək. Sənəd əlavə qeydiyyatı ilə birlikdə saxlanılır və silinmir." context "registrar.guest_roster" %}</small>
+            </div>
+
             <div class="jd2-field jgs-field">
                 <span class="jd2-field-label">{% trans "SƏBƏB (AUDİT ÜÇÜN)" context "registrar.guest_roster" %}</span>
                 <input type="text" maxlength="255" data-jgs-reason
@@ -148,6 +161,13 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
                     <li class="jgs-current-item" data-jgs-item="{{ row.enrollment.id }}">
                         <span class="jgs-current-name">{{ row.student.get_full_name|default:row.student.username }}</span>
                         {% if row.source_group %}<span class="jgs-current-group">{{ row.source_group.name }}</span>{% endif %}
+                        {% if row.guest_document %}
+                        <a class="jgs-current-doc" href="{{ row.guest_document.1 }}" target="_blank" rel="noopener"
+                           title="{% if row.guest_document.0.uploaded_by_name %}{{ row.guest_document.0.uploaded_by_name }} · {% endif %}{{ row.guest_document.0.created_at|date:'d.m.Y H:i' }}">
+                            <i class="fas fa-paperclip" aria-hidden="true"></i>
+                            {% trans "Sənəd" context "registrar.guest_roster" %}
+                        </a>
+                        {% endif %}
                         <button type="button" class="jgs-remove-btn" data-jgs-remove="{{ row.enrollment.id }}"
                                 title="{% trans 'Jurnaldan çıxar' context 'registrar.guest_roster' %}">
                             <i class="fas fa-user-minus" aria-hidden="true"></i>

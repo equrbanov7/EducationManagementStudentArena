@@ -24,6 +24,7 @@ MODUL SƏRHƏDİ: ``apps.organizations`` STATİK import EDİLMİR.
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.utils.translation import pgettext
@@ -40,6 +41,10 @@ PERM_VIEW = "semester.view"
 PERM_OPEN = "semester.open"
 PERM_LOCK = "semester.lock"
 PERM_UNLOCK = "semester.unlock"
+
+#: Açılış cədvəlinin səhifə ölçüsü. Əvvəl ilk 400 sətir BİR səhifədə gedirdi —
+#: 1200+ açılışlı semestrdə cədvəl həm kəsilirdi, həm də ekranı boğurdu.
+PAGE_SIZE = 25
 
 
 def actor_permissions(request) -> list:
@@ -144,6 +149,72 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
     return {**counters, "blocked_programs": blocked, "offering_ids": offering_ids}
 
 
+def semester_howto(steps: list) -> list:
+    """«Necə işləyir» kartı — hər addımda NƏ edilir, HANSI düymə, KİM edir.
+
+    Stepper yalnız vəziyyəti göstərir; bu mətnlər prosesi düymə axtarmadan
+    başa düşmək üçündür (sahib rəyi 2026-09-07: «izahı biraz çətindi»).
+    Vəziyyət (`done/current/todo/error`) stepper addımından götürülür.
+    """
+    items = [
+        {
+            "title": pgettext(_CTX, "Tədris dövrünü seçin və plandan açılış yaradın"),
+            "text": pgettext(
+                _CTX,
+                "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» hər qrup üçün təsdiqlənmiş "
+                "tədris planından fənn sətirləri yaradır; mövcud sətir təkrarlanmır, heç nə silinmir. "
+                "«Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin.",
+            ),
+            "button": pgettext(_CTX, "Plandan açılış yarat"),
+            "who": pgettext(_CTX, "Tədris şöbəsi"),
+        },
+        {
+            "title": pgettext(_CTX, "Kafedralara göndərin"),
+            "text": pgettext(
+                _CTX,
+                "Açılış sətirləri hazır olanda «Kafedraya göndər» kafedra rəhbərlərinə bildiriş göndərir — "
+                "bundan sonra onlar «Dərs yükü» bölməsində öz fənlərinə müəllim təyin edə bilir.",
+            ),
+            "button": pgettext(_CTX, "Kafedraya göndər"),
+            "who": pgettext(_CTX, "Tədris şöbəsi"),
+        },
+        {
+            "title": pgettext(_CTX, "Kafedra müəllim təyin edir"),
+            "text": pgettext(
+                _CTX,
+                "Hər açılışa müəllim təyin olunmalıdır. Aşağıdakı «Kafedralar üzrə açılış» cədvəli neçə sətrin "
+                "müəllim gözlədiyini göstərir; açılış sətrindəki «Müəllim» əməli ilə buradan da təyin etmək olar.",
+            ),
+            "button": pgettext(_CTX, "Dərs yükü → Müəllim təyin et"),
+            "who": pgettext(_CTX, "Kafedra rəhbəri"),
+        },
+        {
+            "title": pgettext(_CTX, "Jurnallar açılır"),
+            "text": pgettext(
+                _CTX,
+                "Müəllim təyin olunan kimi həmin fənnin elektron jurnalı avtomatik yaranır. "
+                "Jurnalı olmayan sətir müəllimi olmayan sətirdir — ayrıca əməl tələb olunmur.",
+            ),
+            "button": "",
+            "who": pgettext(_CTX, "Sistem (avtomatik)"),
+        },
+        {
+            "title": pgettext(_CTX, "Semestri kilidləyin"),
+            "text": pgettext(
+                _CTX,
+                "Üç şərt ödənəndə (plan təsdiqlənib, bütün açılışlara müəllim var, jurnallar açılıb) "
+                "«Semestri kilidlə» aktivləşir. Kilid açılış sətirlərini dondurur; onu yalnız ayrıca "
+                "səlahiyyətli şəxs səbəb yazmaqla aça bilər.",
+            ),
+            "button": pgettext(_CTX, "Semestri kilidlə"),
+            "who": pgettext(_CTX, "Tədris şöbəsi rəhbəri"),
+        },
+    ]
+    for item, step in zip(items, steps):
+        item["state"] = step.get("state", "todo")
+    return items
+
+
 def coverage(organization, period) -> dict:
     """Açılış əhatəsi — KPI sırasının mənbəyi (heç nə saxlanılmır, §8/13)."""
     offerings = CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
@@ -207,12 +278,36 @@ def semester_steps(period, stats: dict, blockers: list) -> list:
         pgettext(_CTX, "Jurnal açıldı"),
         pgettext(_CTX, "Semestr kilidləndi"),
     ]
+    # Qeydlər «nə oldu» yox, «İNDİ NƏ EDİLMƏLİDİR» dilində yazılır — istifadəçi
+    # prosesin harasında olduğunu və növbəti addımı düymə axtarmadan başa düşsün.
     notes = [
-        pgettext(_CTX, "%(n)d açılış sətri") % {"n": total},
-        pgettext(_CTX, "Kafedralar müəllim təyinatına başlaya bilər"),
-        pgettext(_CTX, "%(n)d açılış müəllim gözləyir") % {"n": stats["without_instructor"]},
-        pgettext(_CTX, "%(n)d açılışın jurnalı açılmayıb") % {"n": stats["without_journal"]},
-        pgettext(_CTX, "Kilid geri qaytarılmır — açmaq üçün ayrıca səlahiyyət lazımdır"),
+        (
+            pgettext(_CTX, "%(n)d açılış sətri yaradılıb") % {"n": total}
+            if created_done
+            else pgettext(_CTX, "«Plandan açılış yarat» düyməsi ilə başlayın")
+        ),
+        (
+            pgettext(_CTX, "Kafedra rəhbərlərinə bildiriş gedib")
+            if sent_done
+            else pgettext(_CTX, "«Kafedraya göndər» — rəhbərlərə bildiriş gedir, təyinat başlayır")
+        ),
+        (
+            pgettext(_CTX, "Bütün açılışlara müəllim təyin olunub")
+            if assigned_done
+            else pgettext(_CTX, "%(n)d açılış müəllim gözləyir — kafedra «Dərs yükü»ndən təyin edir")
+            % {"n": stats["without_instructor"]}
+        ),
+        (
+            pgettext(_CTX, "Bütün jurnallar açılıb")
+            if journal_done
+            else pgettext(_CTX, "%(n)d açılışın jurnalı açılmayıb — müəllim təyin olunduqca açılır")
+            % {"n": stats["without_journal"]}
+        ),
+        (
+            pgettext(_CTX, "Semestr kilidlidir — açılış sətirləri dəyişmir")
+            if locked_done
+            else pgettext(_CTX, "Üç şərt ödənəndə «Semestri kilidlə» aktivləşir; kilid geri qaytarılmır")
+        ),
     ]
 
     steps = []
@@ -284,8 +379,10 @@ def build_semester_opening(request, organization) -> dict:
         .annotate(total=Count("id"))
     )
 
+    # Səhifələmə SERVER tərfdədir (handoff §8/14) — 400-lük kəsik yox.
+    page_obj = Paginator(offerings, PAGE_SIZE).get_page(request.GET.get("sm_page"))
     rows = []
-    for offering in offerings[:400]:
+    for offering in page_obj.object_list:
         rows.append(
             {
                 "id": str(offering.id),
@@ -321,7 +418,12 @@ def build_semester_opening(request, organization) -> dict:
             },
             "stats": stats,
             "rows": rows,
-            "steps": semester_steps(period, stats, payload["blockers"]),
+            "page_obj": page_obj,
+            "rows_total": page_obj.paginator.count,
+            "steps": (steps := semester_steps(period, stats, payload["blockers"])),
+            "howto": semester_howto(steps),
+            "howto_done": all(step["state"] == "done" for step in steps),
+            "howto_current": next((step["label"] for step in steps if step["state"] in ("current", "error")), ""),
             "table_state": "ready" if rows else "empty",
             "chair_options": [
                 {"value": str(unit.id), "label": unit.name}
@@ -379,6 +481,7 @@ def offering_counts_by_chair(organization, period) -> list:
 
 
 __all__ = [
+    "PAGE_SIZE",
     "PERM_LOCK",
     "PERM_OPEN",
     "PERM_UNLOCK",
@@ -394,5 +497,6 @@ __all__ = [
     "groups_for_program",
     "offering_counts_by_chair",
     "offering_status_key",
+    "semester_howto",
     "semester_steps",
 ]

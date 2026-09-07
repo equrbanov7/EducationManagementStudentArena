@@ -348,6 +348,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     )
     # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
     carry_map = guest_merge.carry_over_map(guest_ids)
+    guest_docs = guest_roster.guest_document_map(guest_ids)  # alt-qrup sənədi (təqdimat)
     # Rəsmi düzəliş almış xanalar (sarı + kilidli göstəriş üçün).
     from .models import JournalCorrection
 
@@ -460,6 +461,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
                     current_group_id=current_groups.get(enrollment.student_id),
                 ),
                 "source_group": enrollment.source_group,
+                "guest_document": guest_docs.get(enrollment.id),  # (sənəd, qorunan URL) və ya None
                 # Birləşmədən gələn əvvəlki jurnal işi (yoxdursa None).
                 "carry_over": carry,
                 "own_absence_hours": own_absence_hours,

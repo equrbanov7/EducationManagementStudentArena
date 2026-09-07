@@ -583,3 +583,72 @@ class UnitDetailViewTests(StructureViewsTestBase):
         )
         other_response = self.client.get(other_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(other_response.status_code, 404)
+
+
+class HeadCandidateLookupTests(StructureViewsTestBase):
+    """Rəhbər seçicisinin lookup-u — axtarış, səhifələmə, fail-closed qapı.
+
+    Siyahı əvvəl səhifə ilə birlikdə native ``<select>``-ə render olunurdu;
+    indi axtarışlı seçici onu bu endpoint-dən səhifə-səhifə alır.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.url = reverse(
+            "organizations:structure_head_candidates",
+            kwargs={"slug": self.organization.slug},
+        )
+        # `unit.assign_head` ROL açarıdır — sahib olmaq özlüyündə kifayət etmir.
+        # `vice_rector` seed-i həmin açarı daşıyır (default_roles_teaching_office).
+        self.assigner = User.objects.create_user(
+            username="structure_assigner", email="structure_assigner@example.com", password="testpass123"
+        )
+        Membership.objects.create(
+            user=self.assigner,
+            organization=self.organization,
+            role=self.organization.roles.get(name="vice_rector"),
+            is_primary=True,
+            is_active=True,
+        )
+
+    def _login_assigner(self):
+        self.client.force_login(self.assigner)
+        session = self.client.session
+        session["active_organization"] = self.organization.slug
+        session.save()
+
+    def test_assigner_gets_paged_candidates(self):
+        self._login_assigner()
+        response = self.client.get(self.url, {"limit": 1})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(len(payload["results"]), 1)
+        self.assertIn("id", payload["results"][0])
+        self.assertIn("text", payload["results"][0])
+        # Namizəd birdən çoxdursa ikinci səhifə var.
+        self.assertIsInstance(payload["has_more"], bool)
+
+    def test_search_narrows_the_list(self):
+        self._login_assigner()
+        hit = self.client.get(self.url, {"q": "structure_teacher"}).json()
+        self.assertTrue(any("structure_teacher" in row["text"] for row in hit["results"]))
+
+        miss = self.client.get(self.url, {"q": "zzz-belə-ad-yoxdur"}).json()
+        self.assertEqual(miss["results"], [])
+        self.assertFalse(miss["has_more"])
+
+    def test_offset_moves_the_window(self):
+        self._login_assigner()
+        first = self.client.get(self.url, {"limit": 1, "offset": 0}).json()["results"]
+        second = self.client.get(self.url, {"limit": 1, "offset": 1}).json()["results"]
+        if first and second:
+            self.assertNotEqual(first[0]["id"], second[0]["id"])
+
+    def test_member_without_assign_head_permission_is_refused(self):
+        """Fail-closed: namizəd adları YALNIZ təyinat edə bilən aktora açılır."""
+        self.client.force_login(self.student_user)
+        response = self.client.get(self.url)
+        self.assertIn(response.status_code, {302, 403})
+        if response.status_code == 403:
+            self.assertEqual(response.json()["results"], [])
+

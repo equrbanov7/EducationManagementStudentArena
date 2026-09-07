@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_GET, require_POST
 
 from ..constants import PAGE_SIZE, PERM_CREATE, PERM_MANAGE, ApplicationStatus
@@ -11,6 +12,18 @@ from ..payloads import STATUS_CATALOG, detail_payload, kind_payload, row_payload
 from ..services import access, queries, routing, submit, workflow
 from ..state_machine import Action
 from ._base import error, json_endpoint, load_application, ok
+
+
+def _date_param(request, name):
+    """``?from=`` / ``?to=`` → ``date`` | ``None``. FAIL-SOFT.
+
+    ``parse_date`` formatı tutan, amma mövcud olmayan tarixdə (``2026-13-45``)
+    ``ValueError`` atır — tutulmasa süzgəc sətrinə yazılan zibil 500 verərdi.
+    """
+    try:
+        return parse_date((request.GET.get(name) or "").strip())
+    except ValueError:
+        return None
 
 
 @require_GET
@@ -25,6 +38,10 @@ def application_list(request, *, organization):
         stat=request.GET.get("stat", "open"),
         kind_code=(request.GET.get("kind") or "").strip(),
         search=request.GET.get("q", ""),
+        # Tarix aralığı fail-soft-dur: yararsız dəyər `None` olur və süzgəc
+        # sadəcə tətbiq olunmur — 400 vermək filtrləri «qırıq» göstərərdi.
+        date_from=_date_param(request, "from"),
+        date_to=_date_param(request, "to"),
     )
     paginator = Paginator(queryset, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
@@ -155,7 +172,7 @@ def _action_kwargs(request, organization, action):
         }
     if action in {Action.RETURN_FOR_CORRECTION, Action.REJECT, Action.CANCEL}:
         return {"reason": text}
-    if action in {Action.RESOLVE, Action.REQUEST_INFO, Action.PROVIDE_INFO}:
+    if action in {Action.RESOLVE, Action.REQUEST_INFO, Action.PROVIDE_INFO, Action.REOPEN}:
         return {"text": text, "files": files}
     if action == Action.CLOSE:
         return {"text": text}

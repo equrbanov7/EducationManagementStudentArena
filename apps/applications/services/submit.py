@@ -10,6 +10,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.organizations.unit_heads import members_covering_unit
+from core.upload_security import validate_zip_archive
 
 from ..constants import (
     MAX_ATTACHMENTS_PER_ACTION,
@@ -74,6 +75,11 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
         )
     created = []
     for uploaded in incoming:
+        # ZIP model validator-undan (uzantı + MIME + ölçü) keçir, amma arxivin
+        # İÇİ yoxlanmır — zip-bomba/dərin yuva məhz burada tutulur (eyni qapı
+        # `apps.exams.validators`-də də işlədilir).
+        if (getattr(uploaded, "name", "") or "").lower().endswith(".zip"):
+            validate_zip_archive(uploaded)
         attachment = ApplicationAttachment(
             organization=application.organization,
             application=application,

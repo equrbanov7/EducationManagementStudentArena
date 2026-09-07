@@ -1,0 +1,62 @@
+{% load i18n %}
+{% comment %}Ekran 06 «Qruplar» — TƏLƏBƏ ÇEKMECƏSİNİN gövdəsi (`_drawer.html` body).
+
+Siyahı JSON-dan (`organizations:group_students`) gəlir və
+`teaching_office_groups.js` render edir — burada yalnız karkas, skeleton,
+axtarış və boş vəziyyət var. Bütün mətnlər data-atributla JS-ə ötürülür
+(xarici JS Django şablonundan keçmir). Düymələr `data-tof-open` ilə mövcud
+səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR.{% endcomment %}
+<div class="tof-students"
+     data-tof-students
+     data-t-loading="{% trans 'Tələbələr yüklənir…' context 'accounts.groups' %}"
+     data-t-empty="{% trans 'Bu qrupda aktiv tələbə yoxdur.' context 'accounts.groups' %}"
+     data-t-no-match="{% trans 'Axtarışa uyğun tələbə tapılmadı.' context 'accounts.groups' %}"
+     data-t-error="{% trans 'Siyahı yüklənmədi — yenidən cəhd edin.' context 'accounts.groups' %}"
+     data-t-count="{% trans '%d tələbə' context 'accounts.groups' %}"
+     data-t-admission="{% trans 'Qəbul' context 'accounts.groups' %}"
+     data-t-plan="{% trans 'Fərdi plan (DOCX)' context 'accounts.groups' %}"
+     data-t-detach="{% trans 'Qrupdan çıxar' context 'accounts.groups' %}"
+     data-t-freeze="{% trans 'Dondur' context 'accounts.groups' %}"
+     data-t-expel="{% trans 'Uzaqlaşdır' context 'accounts.groups' %}"
+     data-t-status-enrolled="{% trans 'Qeydiyyatlı' context 'accounts.groups' %}"
+     data-t-status-academic_leave="{% trans 'Akademik məzuniyyət' context 'accounts.groups' %}"
+     data-t-status-expelled="{% trans 'Xaric edilib' context 'accounts.groups' %}"
+     data-t-status-graduated="{% trans 'Məzun' context 'accounts.groups' %}">
+
+    <div class="tof-students__head">
+        <div class="tof-students__meta" data-tof-students-meta aria-live="polite"></div>
+        <label class="tof-students__search">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" class="ems-input" data-tof-students-search
+                   placeholder="{% trans 'Ad və ya istifadəçi adı üzrə axtar' context 'accounts.groups' %}"
+                   aria-label="{% trans 'Ad və ya istifadəçi adı üzrə axtar' context 'accounts.groups' %}">
+        </label>
+        <div class="tof-students__chips" role="group" aria-label="{% trans 'Statusa görə süz' context 'accounts.groups' %}">
+            <button type="button" class="tof-chip is-active" data-tof-students-status="">{% trans "Hamısı" context "accounts.groups" %}</button>
+            <button type="button" class="tof-chip" data-tof-students-status="enrolled">{% trans "Qeydiyyatlı" context "accounts.groups" %}</button>
+            <button type="button" class="tof-chip" data-tof-students-status="academic_leave">{% trans "Məzuniyyətdə" context "accounts.groups" %}</button>
+        </div>
+    </div>
+
+    <p class="ems-msg ems-msg--error" data-tof-students-error role="alert" hidden></p>
+
+    <ul class="tof-students__list" data-tof-students-list aria-busy="true">
+        <li class="tof-students__skeleton" aria-hidden="true">
+            <span class="skeleton skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton skeleton-line skeleton-line--sm"></span>
+        </li>
+        <li class="tof-students__skeleton" aria-hidden="true">
+            <span class="skeleton skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton skeleton-line skeleton-line--sm"></span>
+        </li>
+        <li class="tof-students__skeleton" aria-hidden="true">
+            <span class="skeleton skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton skeleton-line skeleton-line--sm"></span>
+        </li>
+    </ul>
+
+    <div class="tof-students__empty" data-tof-students-empty hidden>
+        <i class="fas fa-user-graduate" aria-hidden="true"></i>
+        <span data-tof-students-empty-text></span>
+    </div>
+</div>

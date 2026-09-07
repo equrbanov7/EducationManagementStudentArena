@@ -44,6 +44,13 @@ def _transcript_row_count(student, organization) -> int:
     return sum(len(bucket["rows"]) for bucket in data["semesters"])
 
 
+
+def _doc():
+    """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+
 class _FrozenRosterBase(_GuestRosterBase):
     """Baza fixtura + RİM (jurnal bağlayan) + KÖÇÜRÜLMÜŞ 2019/2020 semestri."""
 
@@ -110,7 +117,7 @@ class ClosedJournalRosterTest(_FrozenRosterBase):
         client = self._client(self.coordinator)
         response = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         self.assertNotEqual(response.status_code, 200)
         self.assertEqual(response.status_code, 409)
@@ -124,7 +131,7 @@ class ClosedJournalRosterTest(_FrozenRosterBase):
         client = self._client(self.coordinator)
         added = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         self.assertEqual(added.status_code, 200)
         enrollment_id = added.json()["enrollment_id"]
@@ -194,7 +201,7 @@ class PastPeriodRosterTest(_FrozenRosterBase):
         client = self._client(self.coordinator)
         response = client.post(
             reverse("registrar:journal_guest_add", args=[self.past_offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         self.assertEqual(response.status_code, 409)
         self.assertFalse(response.json()["ok"])
