@@ -149,7 +149,7 @@ jobs:
       # Install Python + Playwright for the E2E test runner.
       # Only the Chromium browser is installed to keep install time short.
       - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ inputs.python-version }}
 
