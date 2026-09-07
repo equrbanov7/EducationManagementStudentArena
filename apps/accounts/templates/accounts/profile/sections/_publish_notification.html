@@ -33,7 +33,7 @@
                         <input type="text" class="form-control form-control-sm"
                                id="pnTargetSearch"
                                placeholder="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
-                               autocomplete="off">
+                               autocomplete="off" aria-label="{% trans 'search_placeholder' context 'profile.publish_notification' %}">
                     </div>
 
                     <div class="pn-target-scroll">
@@ -133,6 +133,6 @@
         {% endif %}
     </div>
 
-    <script src="{% static 'accounts/js/profile/publish_notification.js' %}"></script>
+    <script defer src="{% static 'accounts/js/profile/publish_notification.js' %}"></script>
 </section>
 {% endif %}

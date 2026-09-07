@@ -17,6 +17,14 @@
             id="{{ container_id }}_search"
         >
     </div>
+    {% if show_student_group_number %}
+    {% comment %}İxtisasa görə süzgəc — variantlar JS-də tələbələrin `data-specialty`
+    atributundan qurulur; ixtisas məlumatı yoxdursa seçici gizli qalır.{% endcomment %}
+    <select class="form-select group-checklist__specialty js-select-specialty"
+            id="{{ container_id }}_specialty"
+            aria-label="{% trans 'filter_by_specialty' context 'profile.checkbox_select' %}"
+            data-all-label="{% trans 'all_specialties' context 'profile.checkbox_select' %}" hidden></select>
+    {% endif %}
 
     <div class="group-checklist__list js-select-list" id="{{ container_id }}_list"
          role="group" aria-labelledby="{{ container_id }}_label"></div>

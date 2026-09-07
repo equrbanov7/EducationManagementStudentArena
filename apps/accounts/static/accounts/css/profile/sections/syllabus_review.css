@@ -287,7 +287,7 @@
 }
 
 .syl-num--muted {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-progress {
@@ -415,7 +415,7 @@
 }
 
 .syl-empty__icon--ok {
-    color: var(--ems-success);
+    color: var(--ems-success-700);
 }
 
 /* ── Dar ekran: kimlik zolağı və başlıq alt-alta düşür ────────────────── */

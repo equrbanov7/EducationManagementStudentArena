@@ -122,7 +122,9 @@
     padding: 12px 16px; font-size: 11.5px; font-weight: 800; color: var(--j-soft);
     letter-spacing: 0.5px; border-bottom: 1px solid var(--j-cell);
 }
-.jd2-topic-scroll { max-height: 520px; overflow-y: auto; }
+/* Təqvim planı paneli də daxili scroll-suzdur (eyni qərar) — mövzular
+   grid ilə yan-yana axır, panel sətir sayına görə uzanır. */
+.jd2-topic-scroll { min-height: 0; }
 .jd2-topic-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f1f5fc; }
 .jd2-topic-date { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 38px; flex-shrink: 0; }
 .jd2-topic-title { font-size: 12.5px; font-weight: 600; color: var(--j-mid); }
@@ -135,21 +137,31 @@
     border-radius: 5px; padding: 2px 6px; margin-left: 6px; white-space: nowrap;
 }
 .jd2-gridcol { overflow: hidden; }
-/* Bütün tələbələr tam görünsün — DAXİLİ şaquli scroll YOX (səhifə özü sürüşür);
-   yalnız tarix sütunları üçün üfüqi scroll qalır. (journal_detail.css-dəki
-   köhnə max-height:68vh burada ləğv olunur — bu fayl sonra yüklənir.) */
-.jd2-grid-wrap { overflow-x: auto; overflow-y: hidden; max-height: none; }
+/* Jurnalın İÇİNDƏ şaquli scroll YOXDUR (sahib qərarı, 2026-09-06 — QA UX-06-nın
+   `max-height:65vh` qutusu geri alınır). Səbəb: yaşlı nəsil müəllim daxili
+   scroll zolağını görmür, sətirlərin bir hissəsini itmiş sayır. Bütün sətirlər
+   göründüyü üçün səhifənin öz scroll-u işləyir. Üfüqi scroll (tarix sütunları)
+   qalır və YALNIZ bu qutunun içindədir — səhifə gövdəsi yana sürüşmür.
+   Qeyd: overflow-x:auto olan qutuda overflow-y "visible" qala bilmir (CSS
+   qaydası) — auto-ya çevrilir; max-height olmadığı üçün scrollHeight ==
+   clientHeight, yəni real şaquli scroll yaranmır. */
+.jd2-grid-wrap { overflow-x: auto; }
 
 /* ── Grid cədvəli ───────────────────────────────────────────────────────── */
 .jd2-table { border-collapse: collapse; width: 100%; min-width: 980px; font-size: 12.5px; }
 .jd2-table thead th {
     background: var(--j-headbg); color: var(--j-muted);
     padding: 10px 6px; font-size: 10.5px; font-weight: 800; text-align: center;
+    position: sticky; top: 0; z-index: 3;
+    box-shadow: inset 0 -1px 0 var(--j-line);
 }
 .jd2-th-student {
     text-align: left !important; padding-left: 16px !important; min-width: 210px;
-    position: sticky; left: 0; background: var(--j-headbg); z-index: 3;
-    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18);
+    /* z-index !important — tək-class seçici `.jd2-table thead th`-dan (tip
+       seçicilər hesabına daha spesifik) zəifdir; !important olmasa bu künc
+       xana adi başlıq xanaları ilə eyni z-index-ə (3) düşür (QA UX-06). */
+    position: sticky; left: 0; top: 0; background: var(--j-headbg); z-index: 4 !important;
+    box-shadow: 6px 0 8px -6px rgba(15, 23, 42, 0.18), inset 0 -1px 0 var(--j-line);
 }
 .jd2-th-lesson.is-today { background: #dbeafe; color: #1d4ed8; }
 .jd2-th-today { font-weight: 800; }

@@ -61,7 +61,7 @@
 
 .collapse-icon {
     transition: transform 0.3s ease;
-    color: #94a3b8;
+    color: var(--ems-neutral-500);
     font-size: 14px;
 }
 

@@ -27,6 +27,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from .scoping import get_permission_scope
@@ -36,6 +37,9 @@ _CTX = "accounts.groups"
 
 PERM_VIEW = "unit.view"
 PERM_MANAGE = "unit.group_manage"
+#: Tələbə hərəkəti (akademik məzuniyyət / xaric) — `apps.accounts.services.people`
+#: ilə EYNİ açar; qrup çekmecəsindəki düymələr buna görə görünür/gizlənir.
+PERM_STUDENT_MOVEMENT = "student.movement"
 
 PAGE_SIZE = 25
 
@@ -61,6 +65,10 @@ def can_view_groups(request) -> bool:
 
 def can_manage_groups(request) -> bool:
     return _has_org_permission(request, PERM_MANAGE)
+
+
+def can_move_students(request) -> bool:
+    return _has_org_permission(request, PERM_STUDENT_MOVEMENT)
 
 
 def group_meta(unit) -> dict:
@@ -207,6 +215,9 @@ def build_groups_registry(request, organization) -> dict:
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
                 "is_active": unit.is_active,
+                # Tələbə çekmecəsi (JSON) və rəsmi «Fərdi tədris planı» DOCX-u.
+                "students_url": reverse("organizations:group_students", args=[organization.slug, unit.id]),
+                "plan_url": reverse("registrar:group_individual_plan", args=[unit.id]),
                 "has_approved_plan": unit.parent_id in planned_specialty_ids,
                 "status_key": (
                     "archived"
@@ -248,17 +259,25 @@ def build_groups_registry(request, organization) -> dict:
             ).order_by("name")[:500]
         ],
         "language_options": language_options(organization),
+        # Köçürmə dialoqunun hədəf qrupları — əhatədəki AKTİV qruplar (səhifədən asılı deyil).
+        "group_options": [
+            {"value": str(unit.id), "label": unit.name}
+            for unit in _visible_units_queryset(organization, scope).filter(unit_type="group").order_by("name")[:1000]
+        ],
         "can_manage": can_manage_groups(request),
+        "can_move_students": can_move_students(request),
     }
 
 
 __all__ = [
     "PAGE_SIZE",
     "PERM_MANAGE",
+    "PERM_STUDENT_MOVEMENT",
     "PERM_VIEW",
     "SETTING_KEYS",
     "build_groups_registry",
     "can_manage_groups",
+    "can_move_students",
     "can_view_groups",
     "group_meta",
     "group_scope",

@@ -1,0 +1,474 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Profil — «Profil məlumatları» kimlik səthi · 2026-09-07 yenidən dizayn
+   ──────────────────────────────────────────────────────────────────────────
+   NİYƏ AYRI FAYL? `profile_info.css` faktiki olaraq PAYLAŞILAN komponent
+   vərəqidir: `.info-item`, `.role-badge`, `.section-title`, `.stats-grid`
+   onlarla başqa şablonda işlədilir. Bu ekranı yeniləmək üçün oradakı sinifləri
+   dəyişmək bütün kabineti dəyişərdi — ona görə burada YENİ ad fəzası (`pfx-*`).
+
+   PRİNSİPLƏR
+   1. Sola hizalanma: göz bir nöqtədən girir (avatar → ad → əməllər).
+   2. Sahələr QUTU deyil, SƏTİRDİR — 9 çərçivə əvəzinə bir kart + hairline.
+   3. Rəng statusa saxlanılır (aktiv təşkilat = yaşıl); rollar neytral çipdir.
+   4. İki sütun: oxunacaq məzmun solda, kontekst (təşkilat) sağda.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.pfx {
+    --pfx-radius: 14px;
+    color: var(--ems-neutral-900);
+}
+
+.pfx *,
+.pfx *::before,
+.pfx *::after {
+    box-sizing: border-box;
+}
+
+/* ── Düymə / link ────────────────────────────────────────────────────────── */
+.pfx-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.pfx-btn:hover {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
+}
+
+.pfx-btn--primary {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.pfx-btn--primary:hover {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.pfx-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+    text-decoration: none;
+}
+
+.pfx-link:hover {
+    color: var(--ems-primary-700);
+    text-decoration: underline;
+}
+
+.pfx-link--strong {
+    color: var(--ems-primary-700);
+}
+
+/* ── Kimlik başlığı ──────────────────────────────────────────────────────── */
+.pfx-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 22px 24px;
+    margin-bottom: 18px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 18px;
+    background: var(--ems-neutral-0);
+}
+
+.pfx-hero__avatar {
+    position: relative;
+    flex: none;
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--ems-neutral-100);
+}
+
+.pfx-hero__avatar:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 3px;
+}
+
+.pfx-hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.pfx-hero__initials {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* JS şəkil yüklənməyəndə `display:flex` qoyur — default gizlidir. */
+.pfx-hero__initials--fallback {
+    display: none;
+}
+
+/* Kamera işarəsi yalnız hover/fokusda — avatar «düymə» kimi qışqırmır. */
+.pfx-hero__camera {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    background: rgba(15, 23, 42, 0.62);
+    color: var(--ems-neutral-0);
+    font-size: 0.72rem;
+    opacity: 0;
+    transition: opacity 0.16s;
+}
+
+.pfx-hero__avatar:hover .pfx-hero__camera,
+.pfx-hero__avatar:focus-visible .pfx-hero__camera {
+    opacity: 1;
+}
+
+.pfx-hero__id {
+    flex: 1;
+    min-width: 0;
+}
+
+.pfx-hero__name {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.pfx-hero__role {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+}
+
+.pfx-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-top: 8px;
+    font-size: 0.81rem;
+    color: var(--ems-neutral-500);
+}
+
+.pfx-hero__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.pfx-hero__meta i {
+    color: var(--ems-neutral-400);
+    font-size: 0.75rem;
+}
+
+.pfx-hero__actions {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    max-width: 320px;
+}
+
+/* ── Çiplər ──────────────────────────────────────────────────────────────── */
+.pfx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.pfx-chips--tight {
+    margin-top: 8px;
+}
+
+/* Bütün rollar EYNİ tonda: fərq MƏTNDƏDİR. Hər rola ayrı pastel rəng vermək
+   ekranı karnavala çevirirdi və heç bir məlumat daşımırdı. */
+.pfx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 8px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-size: 0.76rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.pfx-chip i {
+    color: var(--ems-neutral-400);
+    font-size: 0.7rem;
+}
+
+.pfx-chip--quiet {
+    background: transparent;
+    color: var(--ems-neutral-500);
+}
+
+/* Rəng YALNIZ statusda — «hansı təşkilat aktivdir» sualının cavabı. */
+.pfx-chip--success {
+    border-color: var(--ems-emerald-200);
+    background: var(--ems-emerald-50);
+    color: var(--ems-success-strong);
+}
+
+/* ── İki sütunlu gövdə ───────────────────────────────────────────────────── */
+.pfx-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 330px);
+    gap: 18px;
+    align-items: start;
+}
+
+.pfx-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+.pfx-card {
+    padding: 20px 22px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--pfx-radius);
+    background: var(--ems-neutral-0);
+}
+
+.pfx-card--waiting {
+    border-color: var(--ems-warning-100);
+    background: #fffbeb;
+}
+
+.pfx-card__title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 4px;
+    font-size: 0.93rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.pfx-card__title i {
+    color: var(--ems-neutral-400);
+    font-size: 0.85rem;
+}
+
+/* Başlıqdakı sayğac — «Qrup üzvlüyü · 55 qrup» kimi kontekst verir. */
+.pfx-card__count {
+    margin-left: auto;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.73rem;
+    font-weight: 700;
+}
+
+/* ── Məlumat sətirləri (etiket | dəyər) ──────────────────────────────────── */
+.pfx-facts {
+    margin: 0;
+}
+
+.pfx-fact {
+    display: grid;
+    /* Etiket sütunu UYĞUNLAŞIR: dar kartda 120px-ə sıxılır, geniş kartda
+       30%-i keçmir — «Ad» kimi qısa etiketdən sonra nəhəng boşluq qalmır. */
+    grid-template-columns: minmax(120px, 30%) minmax(0, 1fr);
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.pfx-fact:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.pfx-fact dt {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.pfx-fact dd {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+}
+
+/* Çip siyahısı kimi uzun dəyərlər tam eni tutur. */
+.pfx-fact--stack {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+}
+
+.pfx-fact__note {
+    margin: 8px 0 0;
+    font-size: 0.78rem;
+    color: var(--ems-neutral-500);
+}
+
+.pfx-muted {
+    font-weight: 500;
+    color: var(--ems-neutral-400);
+}
+
+.pfx-code {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 6px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.pfx-taglist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 168px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Öz kartında dayanan siyahı daha çox nəfəs alır (qrup üzvlüyü 55 çipə çata bilir). */
+.pfx-taglist--roomy {
+    margin-top: 14px;
+    max-height: 232px;
+}
+
+.pfx-tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 8px;
+    background: var(--ems-neutral-0);
+    font-size: 0.79rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.pfx-tag small {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--ems-neutral-400);
+}
+
+.pfx-bio {
+    margin: 8px 0 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--ems-neutral-700);
+    white-space: pre-line;
+    text-wrap: pretty;
+}
+
+/* ── Yan sütun: təşkilat girişləri ───────────────────────────────────────── */
+.pfx-orgs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.pfx-org {
+    padding: 13px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 11px;
+    background: var(--ems-neutral-0);
+}
+
+.pfx-org.is-current {
+    border-color: var(--ems-emerald-200);
+    background: var(--ems-emerald-50);
+}
+
+.pfx-org__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pfx-org__name {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.pfx-org__meta {
+    margin: 4px 0 0;
+    font-size: 0.75rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.pfx-org__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.pfx-wait__text {
+    margin: 10px 0 0;
+    font-size: 0.83rem;
+    line-height: 1.55;
+    color: var(--ems-neutral-700);
+    text-wrap: pretty;
+}
+
+.pfx-wait__note {
+    margin: 6px 0 0;
+    font-size: 0.77rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}

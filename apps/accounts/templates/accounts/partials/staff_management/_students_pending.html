@@ -25,7 +25,7 @@
                    placeholder="{% trans 'Search pending students...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search pending students...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -107,6 +107,7 @@
                                    data-user-username="@{{ pending_request.user.username }}"
                                    data-user-email="{{ pending_request.user.email }}"
                                    data-target-role="{% trans 'Student' context 'membership_request.role' %}"
+                                   aria-label="{{ pending_request.user.get_full_name|default:pending_request.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not pending_request.request_is_actionable %}disabled{% endif %}>
                         </td>
                         <td>{{ pending_request.user.get_full_name|default:pending_request.user.username }}</td>

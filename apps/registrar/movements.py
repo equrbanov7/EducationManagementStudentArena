@@ -32,6 +32,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from django.db import transaction
+from django.db.models import Q
+from django.utils import timezone
 
 from apps.registrar.models import (
     MOVEMENT_REASON_MIN_LENGTH,
@@ -240,7 +242,40 @@ def _apply_status(record, *, to_status, actor, reason):
     record.is_active = academic_status.is_active_for(to_status)
     record.save(update_fields=["status", "is_active", "updated_at"])
     academic_status.audit_status_change(record=record, previous=previous, by_user=actor, reason=reason)
+    _sync_access_state(record, to_status=to_status)
     return previous
+
+
+def _sync_access_state(record, *, to_status) -> None:
+    """Xaric/məzun → hesabın girişi bağlanır (QA 2026-09-05 STUDENT-MGMT-08).
+
+    Əvvəl yalnız akademik qeyd dəyişirdi — xaric edilmiş tələbə məhdudiyyətsiz giriş
+    edib kabinetdə qrupun aktiv tələbəsi kimi görünürdü. `UserProfile.access_state`
+    tərifən «ARCHIVED — məzun/xaric (giriş bağlıdır)»dır; portal qapısı onu yoxlayır.
+    accounts modelinə Python-səviyyəli import yoxdur (dövr) — app registry ilə.
+
+    BU FUNKSİYA YALNIZ BAĞLAYIR. `active → archived` məhdudlaşdırıcı olduğu üçün
+    trigger-siz keçir; əks istiqamət (bərpa əmri) sübut tələb edir və kimlik
+    sahibinin özündədir — `accounts/services/people/movements.py::_reopen_access`
+    (registrar → accounts asılılığı yaratmamaq üçün çağırış accounts qatındadır).
+    """
+    from django.apps import apps as django_apps
+
+    profile_model = django_apps.get_model("accounts", "UserProfile")
+    if to_status not in (AcademicStatus.EXPELLED, AcademicStatus.GRADUATED):
+        return
+    # Tenant-əhatəli axtarış: profil sətri təşkilata bağlıdır. Köhnə idxaldan
+    # qalan `organization IS NULL` sətirləri də tutulur (klonda 8 ədəd), yoxsa
+    # onlar üçün giriş bağlanmazdı.
+    profile = (
+        profile_model.objects.filter(user_id=record.student_id)
+        .filter(Q(organization_id=record.organization_id) | Q(organization__isnull=True))
+        .first()
+    )
+    if profile is None or profile.access_state == profile_model.AccessState.ARCHIVED:
+        return
+    profile.access_state = profile_model.AccessState.ARCHIVED
+    profile.save(update_fields=["access_state"])
 
 
 def validate(record, *, kind, new_group=None, new_program=None, new_form=None, effective_until=None) -> MovementRule:
@@ -255,6 +290,9 @@ def validate(record, *, kind, new_group=None, new_program=None, new_form=None, e
         )
     if rule.requires_group and new_group is None:
         raise MovementError("target_group_required", "Hədəf qrup seçilməlidir.")
+    if new_group is not None and record.group_id and new_group.pk == record.group_id:
+        # «229K → 229K» boş hərəkəti tarixçəyə yazılırdı (QA 2026-09-05 STUDENT-MGMT-06).
+        raise MovementError("same_group", "Tələbə onsuz da bu qrupdadır.", status=409)
     if rule.requires_program and new_program is None:
         raise MovementError("target_program_required", "Hədəf ixtisas seçilməlidir.")
     if rule.requires_form and not new_form:
@@ -263,6 +301,9 @@ def validate(record, *, kind, new_group=None, new_program=None, new_form=None, e
         # Kod aktor qatı ilə EYNİDİR (`movements.parse_date` sahə adından qurur),
         # yəni UI eyni açarı iki fərqli mesajla görmür.
         raise MovementError("effective_until_required", "Akademik məzuniyyətin bitmə tarixi məcburidir.")
+    if effective_until is not None and effective_until < timezone.localdate():
+        # Keçmiş bitmə tarixi tələbəni dərhal «bitmiş» məzuniyyətdə qoyurdu (STUDENT-MGMT-07).
+        raise MovementError("effective_until_past", "Akademik məzuniyyətin bitmə tarixi keçmişdə ola bilməz.")
     return rule
 
 

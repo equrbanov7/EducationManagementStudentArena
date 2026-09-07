@@ -114,7 +114,7 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                     {% if structure_tree_section.can_assign_head %}
                     <button type="button" class="ems-btn"
                             data-tof-open="tofHeadDialog"
-                            data-tof-prefill='{"action": "assign_head", "unit": "{{ unit.id }}", "head": "{{ unit.head_id|default_if_none:'' }}"}'>
+                            data-tof-prefill='{"action": "assign_head", "unit": "{{ unit.id }}", "head": "{{ unit.head_id|default_if_none:'' }}", "head_label": "{% if unit.head %}{{ unit.head.get_full_name|default:unit.head.username|escapejs }}{% endif %}"}'>
                         {% trans "Rəhbər təyin et" context "accounts.structure_tree" %}
                     </button>
                     {% endif %}

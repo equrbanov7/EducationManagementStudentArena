@@ -293,3 +293,33 @@
     0% { background-position: 100% 50%; }
     100% { background-position: 0 50%; }
 }
+
+/* ── İxtisas süzgəci + yaratma təsdiqi (2026-09-07) ────────────────────── */
+.group-checklist__specialty { margin: 8px 0 0; font-size: 13px; }
+.group-checklist__badge--specialty { background: #eef2ff; color: #3730a3; }
+
+.group-confirm__facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font-size: 14px; }
+.group-confirm__facts dt { color: #64748b; font-weight: 500; }
+.group-confirm__facts dd { margin: 0; font-weight: 600; }
+.group-confirm__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.group-confirm__chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
+    font-size: 12px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0;
+}
+.group-confirm__chip b { color: #4338ca; }
+.group-confirm__list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
+.group-confirm__row { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.group-confirm__row:last-child { border-bottom: 0; }
+.group-confirm__name { font-weight: 600; }
+.group-confirm__meta { font-size: 12px; color: #64748b; }
+.group-confirm__empty { margin: 0 0 8px; font-size: 13px; }
+
+/* Təsdiq paneli — yaratma modalının içini örtür (ikinci modal yoxdur). */
+.profile-group-modal__content { position: relative; }
+.group-confirm-panel {
+    position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
+    background: #fff; border-radius: inherit; overflow: hidden;
+}
+.group-confirm-panel[hidden] { display: none; }
+.group-confirm-panel .modal-body { flex: 1 1 auto; overflow: auto; }
+.group-confirm__list { max-height: none; }

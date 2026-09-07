@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n l10n %}
 <div class="ai-settings-header">
     {% comment %}QA dalğa 2 (2026-09-03): kabinet qabığı eyni başlığı `<h1>` ilə
 verir → embed halında ikinci `<h1>` dublikat idi; `<h2>`-yə enirik.{% endcomment %}
@@ -36,7 +36,7 @@ verir → embed halında ikinci `<h1>` dublikat idi; `<h2>`-yə enirik.{% endcom
             </div>
             <div class="form-group">
                 <label for="monthly_budget">{% trans "label_budget" context "superadmin.ai_settings" %}</label>
-                <input type="number" id="monthly_budget" name="monthly_budget" value="{{ config.monthly_budget }}" step="0.50" min="0">
+                <input type="number" id="monthly_budget" name="monthly_budget" value="{{ config.monthly_budget|unlocalize }}" step="0.50" min="0">
                 <p class="hint">{% trans "hint_budget" context "superadmin.ai_settings" %}</p>
             </div>
         </div>

@@ -362,7 +362,7 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
             <form method="get" class="contact-msg-search">
                 <input type="hidden" name="section" value="superadmin-contact-messages">
                 <input type="search" name="q" value="{{ contact_search_query }}"
-                       placeholder="{% trans 'Search name, email, message, file...' %}">
+                       placeholder="{% trans 'Search name, email, message, file...' %}" aria-label="{% trans 'Search name, email, message, file...' %}">
                 <button type="submit"><i class="fas fa-search" aria-hidden="true"></i></button>
             </form>
         </div>
@@ -413,6 +413,6 @@ Only rendered when 'superadmin-contact-messages' is in allowed_sections.
         {% endif %}
     {% endif %}
 
-    <script src="{% static 'accounts/js/profile/superadmin_contact_messages.js' %}"></script>
+    <script defer src="{% static 'accounts/js/profile/superadmin_contact_messages.js' %}"></script>
 </section>
 {% endif %}

@@ -48,7 +48,7 @@ class FinalCenterConsumerAuthTests(TransactionTestCase):
             is_active=True,
         )
         self.center = User.objects.create_user("fcc_center", "fcc_center@test.az", PASSWORD)
-        _assign_user_to_org(self.center, self.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(self.center, self.org, ProfileRole.MEMBER, "exam_center_head")
         self.student = User.objects.create_user("fcc_student", "fcc_student@test.az", PASSWORD)
         _assign_user_to_org(self.student, self.org, ProfileRole.STUDENT, "student")
         self.student2 = User.objects.create_user("fcc_student2", "fcc_student2@test.az", PASSWORD)
@@ -63,7 +63,7 @@ class FinalCenterConsumerAuthTests(TransactionTestCase):
             is_active=True,
         )
         self.other_center = User.objects.create_user("fcc_center2", "fcc_center2@test.az", PASSWORD)
-        _assign_user_to_org(self.other_center, self.other_org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(self.other_center, self.other_org, ProfileRole.MEMBER, "exam_center_head")
 
         self.exam = Exam.objects.create(
             title="FCC Final",

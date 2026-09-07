@@ -126,6 +126,10 @@ RULE_SECTIONS = (
 
 # ── Biznes-qayda limitləri (README §3.2). Tamamlanma faizi DOLDURULMUŞ INPUT
 # SAYINA görə YOX, məhz bu qaydalara görə hesablanır (bax completion.py).
+#: Yuxarı hədlər (QA 2026-09-05 SYLLABUS-03): mətn sahəsi, siyahı elementi, həftə sətri.
+MAX_TEXT_CHARS = 20000
+MAX_LIST_ITEMS = 60
+MAX_WEEK_ROWS = 40
 MIN_DESCRIPTION_CHARS = 120
 MIN_GOAL_CHARS = 60
 MIN_OUTCOME_CHARS = 15
@@ -181,6 +185,9 @@ PERM_REJECT = "syllabus.reject"
 PERM_MANAGE = "syllabus.manage"
 
 __all__ = [
+    "MAX_LIST_ITEMS",
+    "MAX_TEXT_CHARS",
+    "MAX_WEEK_ROWS",
     "EDITABLE_STATUSES",
     "LESSON_HOUR_KINDS",
     "OPEN_STATUSES",

@@ -1,0 +1,139 @@
+/* ═══ Elektron jurnal — sakit düzüm qatı ═══════════════════════════════════
+ *
+ * Sahibin şikayəti (2026-09-06): «burda dizayn problemi var … biraz dağılıb,
+ * bir də scroll olmasın jurnalın içində, onu normal hamı görünsün — yaşlı nəsil
+ * müəllimlər onu bilmiyəcək».
+ *
+ * Bu fayl jd2.css / jd2_window.css / correction.css / syllabus_view.css-dən
+ * SONRA yüklənir və YALNIZ düzüm qatını verir: boşluq ritmi, daşma, sıra və
+ * dar ekran davranışı. Rəng palitrası dəyişmir — hamısı mövcud `--ems-*` /
+ * `.jd2` `--j-*` tokenləridir. Tək tema: işıqlı (`prefers-color-scheme: dark`
+ * bloku QƏSDƏN yoxdur — layihə qaydası).
+ *
+ * ⚠️ Daxili ŞAQULİ scroll bu səhifədə YOXDUR. Bax: jd2.css `.jd2-grid-wrap`
+ *    və journal_detail.css `.jd-grid-wrap`. Bura yeni `max-height` ƏLAVƏ
+ *    ETMƏYİN — sətirlərin bir hissəsini gizlədir və şikayəti geri qaytarır.
+ */
+
+/* ── 1. Lövhə yığınının vahid ritmi ──────────────────────────────────────────
+   Kilid lövhəsi, sillabus xəbərdarlığı, düzəliş banneri və mesajlar ayrı-ayrı
+   fayllarda fərqli margin-lərlə gəlirdi (0.75rem / 16px / 12px) — yığın
+   pilləkən kimi görünürdü. Hamısı 12px olur. */
+.jd-page .jd2-closedbar,
+.jd-page .jd2-sylbar,
+.jd-page .jd2-correct-banner,
+.jd-page .jd2-kmarquee { margin: 0 0 12px; }
+.jd-page .jd2-stepper { margin-bottom: 14px; }
+.jd-page .jd2-window { margin-bottom: 20px; }
+
+/* ── 2. Pəncərə başlığı və çip zolağı daşmasın ─────────────────────────────
+   `.jd2-window` `overflow:hidden` olduğu üçün uzun müəllim adı olan çip
+   sadəcə kəsilirdi (375px-də «Seminar · 32 saat · …» yarımçıq görünürdü). */
+.jd2-teach-summary { padding: 10px 16px; row-gap: 6px; }
+.jd2-teach-kind,
+.jd2-teach-total { max-width: 100%; white-space: normal; }
+.jd2-winhead-left { min-width: 0; row-gap: 6px; }
+.jd2-winsub { min-width: 0; overflow-wrap: anywhere; }
+
+/* ── 3. Grid sütunu: naviqasiya sətirləri kart kənarına yapışmasın ─────────
+   Dərs tipi pillələri və dərs-pəncərəsi naviqasiyası əvvəl sol bölücü xəttə
+   və kartın sağ kənarına dirənirdi. */
+.jd2-gridcol > .jd2-kindnav,
+.jd2-gridcol > .jd2-lwnav { margin: 12px 14px; }
+.jd2-gridcol > .jd2-kindnav + .jd2-lwnav { margin-top: -2px; }
+
+/* ── 4. Üfüqi scroll GÖRÜNƏN olsun ─────────────────────────────────────────
+   Şaquli scroll silindiyi üçün qalan tək daxili scroll üfüqidir (tarix
+   sütunları — enin qarşısı alına bilmir). macOS-un «overlay» scrollbar-ı
+   yalnız sürüşdürəndə görünür; yaşlı istifadəçi sütunların davam etdiyini
+   bilmirdi. Zolaq həmişə görünən və qalın edilir. */
+.jd2-grid-wrap {
+    scrollbar-width: auto;
+    scrollbar-color: #b9cbe8 var(--j-headbg, #f0f6ff);
+    overscroll-behavior-x: contain;
+}
+.jd2-grid-wrap::-webkit-scrollbar { height: 12px; }
+.jd2-grid-wrap::-webkit-scrollbar-track {
+    background: var(--j-headbg, #f0f6ff);
+    border-top: 1px solid var(--j-line, #dce6f7);
+}
+.jd2-grid-wrap::-webkit-scrollbar-thumb {
+    background: #b9cbe8;
+    border-radius: 999px;
+    border: 3px solid var(--j-headbg, #f0f6ff);
+}
+.jd2-grid-wrap::-webkit-scrollbar-thumb:hover { background: #8fadd8; }
+
+/* ── 5. QAYIB sütunu sağda sabit qalsın ────────────────────────────────────
+   Ad sütunu solda sabitdir; ən vacib yekun rəqəm (q/b sayı + limit) isə
+   cədvəlin ən sağında idi və yalnız sona qədər sürüşdürəndə görünürdü.
+   İndi sol sütunun güzgüsü kimi sağda sabitdir — heç bir scroll tələb
+   etmədən oxunur. */
+.jd2-table .jd2-th-qayib,
+.jd2-table .jd2-td-qayib {
+    position: sticky;
+    right: 0;
+    box-shadow: -6px 0 8px -6px rgba(15, 23, 42, 0.14);
+}
+.jd2-table thead .jd2-th-qayib { background: var(--j-headbg, #f0f6ff); z-index: 4; }
+.jd2-table .jd2-row .jd2-td-qayib { background: #fff; z-index: 2; }
+.jd2-table .jd2-row.is-warning .jd2-td-qayib { background: #fffbeb; }
+.jd2-table .jd2-row.is-barred .jd2-td-qayib { background: #fef2f2; }
+
+/* ── 5b. Təqvim planı paneli boş ağ boşluq kimi görünməsin ─────────────────
+   55 tələbəli qrupda cədvəl 20 mövzudan xeyli uzundur; solda yüzlərlə piksel
+   ağ boşluq qalırdı və panel «yarımçıq» görünürdü. Tab zolağı/alt legend ilə
+   eyni açıq ton verilir — sərhəd xətti deyil, səth panelin harada bitdiyini
+   göstərir. (Sticky QƏSDƏN yox: uzun plan ekrana sığmayanda hissəsi əlçatmaz
+   qalardı — «hamı görünsün» qərarına zidd.) */
+.jd2-split > .jd2-topics { background: #f7faff; }
+.jd2-topics .jd2-panel-label { background: #fff; }
+
+/* ── 6. Dar ekran: təqvim planı grid-in ALTINA düşür ───────────────────────
+   `320px 1fr` bölgüsü 1100px-dən aşağıda əsas iş sahəsini (grid) 200px-ə
+   sıxırdı. Planşetdə/telefonda əvvəlcə grid, sonra mövzu siyahısı gəlir. */
+@media (max-width: 1100px) {
+    .jd2-split,
+    .jd2-split--cw { grid-template-columns: 1fr; }
+    .jd2-gridcol { order: 1; }
+    .jd2-topics {
+        order: 2;
+        border-right: 0;
+        border-top: 1px solid var(--j-cell, #e7eef9);
+    }
+    .jd2-cw-list { border-right: 0; border-bottom: 1px solid var(--j-cell, #e7eef9); }
+}
+
+/* ── 7. Telefon: pəncərə başlığı və tab zolağı ─────────────────────────────── */
+@media (max-width: 720px) {
+    .jd2-winhead {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 12px 14px;
+    }
+    .jd2-winhead-right { width: 100%; justify-content: space-between; }
+    .jd2-tabsbar { padding: 10px 12px; row-gap: 8px; }
+    .jd2-tabsbar-actions { margin-left: 0; width: 100%; flex-wrap: wrap; }
+    .jd2-gridcol > .jd2-kindnav,
+    .jd2-gridcol > .jd2-lwnav { margin: 10px; }
+    .jd2-teach-summary { padding: 10px 12px; }
+    .jd2-teach-total { margin-left: 0; }
+}
+
+/* ── AI köməkçi düyməsi jurnal grid-ini örtməsin ──────────────────────────────
+   QAYIB sütunu artıq sağda yapışqandır; `position: fixed` köməkçi düyməsi
+   (`static/css/ai_assistant.css`, sağ 24px) məhz onun üstünə düşür və 2–3
+   sətrin qayıb sayı oxunmur. Jurnal səhifəsində düyməni bir qədər aşağı-sağa
+   çəkirik — komponentin öz faylına toxunmadan, YALNIZ bu səhifədə. */
+body:has(.jd2) .ai-bot-btn {
+    right: 10px;
+    bottom: 10px;
+    width: 52px;
+    height: 52px;
+    opacity: 0.88;
+}
+body:has(.jd2) .ai-bot-btn:hover,
+body:has(.jd2) .ai-bot-btn:focus-visible {
+    opacity: 1;
+}

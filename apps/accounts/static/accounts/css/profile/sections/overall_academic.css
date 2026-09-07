@@ -34,7 +34,7 @@
 .oa-empty-record i {
     font-size: 2rem;
     margin-bottom: 0.5rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* ── Filter bar ────────────────────────────────────────────────────────── */
@@ -60,7 +60,7 @@
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 0.85rem;
     pointer-events: none;
 }
@@ -194,7 +194,7 @@
 .oa-empty i {
     font-size: 1.6rem;
     margin-bottom: 0.4rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* ── Semester block ───────────────────────────────────────────────────── */

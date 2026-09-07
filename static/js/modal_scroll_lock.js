@@ -22,8 +22,17 @@
     window.__emsModalScrollLock = true;
 
     function syncLock() {
-        var anyOpen = document.querySelector(".modal.show") !== null;
+        // Həm Bootstrap modalı, həm də layihənin öz `ems-overlay` dialoq/çekmecəsi
+        // (static/js/ems_ui/overlay.js) kilidi paylaşır — biri açıqdırsa kilid qalır.
+        var anyOpen =
+            document.querySelector(".modal.show") !== null ||
+            document.querySelector(".ems-overlay:not([hidden])") !== null;
         document.documentElement.classList.toggle("ems-modal-open", anyOpen);
+        // Bölmə AJAX ilə yenilənəndə açıq overlay DOM-la birlikdə itir və
+        // `overlay.js`-in unlockScroll-u çağırılmır — kilid burada da düşsün.
+        if (!anyOpen) {
+            document.body.classList.remove("modal-open");
+        }
     }
 
     document.addEventListener("shown.bs.modal", syncLock);

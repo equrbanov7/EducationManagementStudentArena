@@ -1,6 +1,20 @@
-{% comment %}«Plan yoxdur» ixtisasları — lentin içində, ADLA (handoff §6.1).{% endcomment %}
-<ul class="tof-warnings">
-    {% for item in semester_opening_section.blockers|slice:":20" %}
-    <li class="tof-warnings__item">{{ item.label }}</li>
-    {% endfor %}
-</ul>
+{% load i18n %}
+{% comment %}«Plan yoxdur» bloklayıcıları — AYRICA lent (handoff §6.1).
+
+Əvvəl siyahı `_banner.html`-in sağ (action) yuvasına sıxılırdı və 20 ixtisas
+dar sütunda «düşürdü» (dizayn problemi, sahib 2026-09-07). İndi çiplər lentin
+GÖVDƏSİNDƏ sətir-sətir sarınır və nə etmək lazım olduğu yazılır.{% endcomment %}
+<div class="ems-banner ems-banner--danger tof-blockers" role="status">
+    <div class="tof-blockers__main">
+        <div class="ems-banner__title">{% trans "«Plan yoxdur» — bu ixtisaslar üçün açılış yaradıla bilməz" context "accounts.semester" %}</div>
+        <div class="ems-banner__body">{% trans "Əvvəlcə «Tədris planı» bölməsində həmin ixtisasın planı təsdiqlənməlidir; təsdiqdən sonra «Plandan açılış yarat» onları da əhatə edir." context "accounts.semester" %}</div>
+        <ul class="tof-chips" aria-label="{% trans 'Planı təsdiqlənməmiş ixtisaslar' context 'accounts.semester' %}">
+            {% for item in semester_opening_section.blockers|slice:":30" %}
+            <li class="tof-chip tof-chip--danger"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i>{{ item.label }}</li>
+            {% endfor %}
+            {% if semester_opening_section.blockers|length > 30 %}
+            <li class="tof-chip">{% blocktrans context "accounts.semester" with n=semester_opening_section.blockers|length %}cəmi {{ n }} ixtisas{% endblocktrans %}</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

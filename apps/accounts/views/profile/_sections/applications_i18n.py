@@ -40,15 +40,36 @@ def _detail() -> dict:
         "secTimeline": pgettext(_CTX, "Müraciətin gedişi"),
         "replyLabel": pgettext(_CTX, "Cavab ver"),
         "replyPlaceholder": pgettext(_CTX, "Müraciət sahibinin görəcəyi cavab"),
-        "replyHint": pgettext(_CTX, "Cavab mətni ən azı 10 simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."),
+        # Hədd MƏTNƏ bişirilmir: `{n}` server qaydasından (`rules.min_note_length`) doldurulur.
+        "replyHint": pgettext(
+            _CTX, "Cavab mətni ən azı {n} simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
+        ),
         "internal": pgettext(_CTX, "daxili qeyd"),
         "closeDetail": pgettext(_CTX, "Bağla"),
+        # ── Modal (yazışma + cavab qutusu) ───────────────────────────────
+        "msgLatest": pgettext(_CTX, "ən son"),
+        "attachLabel": pgettext(_CTX, "Sənəd əlavə et"),
+        "attachHint": pgettext(_CTX, "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"),
+        "filesNotAllowed": pgettext(
+            _CTX, "«{action}» əməli sənəd qəbul etmir — faylları silin və ya başqa əməl seçin."
+        ),
+        "closeDirtyTitle": pgettext(_CTX, "Cavab göndərilməyib"),
+        "closeDirtyText": pgettext(
+            _CTX,
+            "Yazdığınız mətn və seçdiyiniz sənədlər hələ göndərilməyib — pəncərəni bağlasanız itəcək. "
+            "Bağlayaq?",
+        ),
         "slaOntime": pgettext(_CTX, "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"),
         "slaOverdue": pgettext(_CTX, "Cavab müddəti {n} gün keçib (norma {m} iş günü)"),
         "slaClosed": pgettext(_CTX, "Müraciət bağlanıb — {status}"),
         "noteSenderOpen": pgettext(
             _CTX,
             "Müraciətiniz hazırda {unit}-dədir. Cavab veriləndə bildiriş gələcək və mətn burada görünəcək.",
+        ),
+        "noteSenderResolved": pgettext(
+            _CTX,
+            "Cavab gəldi. Razısınızsa təsdiqləyib bağlayın; problem həll olunmayıbsa səbəbini yazın — "
+            "müraciət eyni nömrə ilə həmin şöbəyə qayıdacaq.",
         ),
         "noteSenderClosed": pgettext(
             _CTX, "Müraciət bağlanıb. Razı deyilsinizsə, eyni mövzuda yeni müraciət göndərə bilərsiniz."
@@ -74,6 +95,7 @@ def _actions() -> dict:
         "actClose": pgettext(_CTX, "Təsdiqləyirəm — bağla"),
         "actCancel": pgettext(_CTX, "Müraciəti ləğv et"),
         "actProvideInfo": pgettext(_CTX, "Əlavə məlumat göndər"),
+        "actReopen": pgettext(_CTX, "Razı deyiləm — yenidən bax"),
         "actResubmit": pgettext(_CTX, "Düzəlişdən sonra yenidən göndər"),
     }
 
@@ -86,6 +108,8 @@ def _dialogs() -> dict:
         "dlgCancelLabel": pgettext(_CTX, "Ləğv səbəbi"),
         "dlgProvideTitle": pgettext(_CTX, "Əlavə məlumat göndər"),
         "dlgProvideLabel": pgettext(_CTX, "İstənilən məlumat"),
+        "dlgReopenTitle": pgettext(_CTX, "Razı deyiləm — yenidən baxılsın"),
+        "dlgReopenLabel": pgettext(_CTX, "Nə həll olunmadı?"),
         "dlgResubmitTitle": pgettext(_CTX, "Düzəlişdən sonra yenidən göndər"),
         "dlgSend": pgettext(_CTX, "Göndər"),
         "confirmCloseTitle": pgettext(_CTX, "Müraciəti bağlayaq?"),
@@ -94,9 +118,10 @@ def _dialogs() -> dict:
         "counterOk": pgettext(_CTX, "{n} simvol"),
         "routeEmpty": pgettext(_CTX, "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."),
         "noAssignee": pgettext(_CTX, "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."),
-        "fileTooBig": pgettext(_CTX, "«{name}» 10 MB-dan böyükdür."),
-        "fileBadType": pgettext(_CTX, "«{name}» dəstəklənmir — PDF, JPG, PNG və ya DOCX olmalıdır."),
-        "tooManyFiles": pgettext(_CTX, "Bir əməldə ən çoxu 5 fayl əlavə edilə bilər."),
+        # Hədlər/uzantılar SERVER-dən gəlir (`rules_payload`) — mətnə bişirilmir.
+        "fileTooBig": pgettext(_CTX, "«{name}» {mb} MB-dan böyükdür."),
+        "fileBadType": pgettext(_CTX, "«{name}» dəstəklənmir — icazəli formatlar: {list}."),
+        "tooManyFiles": pgettext(_CTX, "Bir əməldə ən çoxu {n} fayl əlavə edilə bilər."),
     }
 
 

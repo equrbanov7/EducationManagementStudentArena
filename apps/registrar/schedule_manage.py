@@ -166,7 +166,14 @@ def parse_payload(data) -> tuple[dict, dict]:
     cleaned["week_type"] = week_type if week_type in dict(WeekType.choices) else WeekType.ALL
     slot_kind = str(data.get("slot_kind") or data.get("kind") or "").strip()
     cleaned["kind"] = slot_kind if slot_kind in dict(SlotKind.choices) else SlotKind.LECTURE
-    cleaned["room"] = str(data.get("room") or "").strip()[:64]
+
+    room = str(data.get("room") or "").strip()
+    # QA 2026-09-05 (P3-22): 300 simvollu auditoriya adı `[:64]` ilə səssizcə
+    # 64-ə kəsilirdi (`ScheduleSlot.room` `max_length=64`) — istifadəçiyə heç
+    # bir xəbərdarlıq getmirdi. İndi açıq rədd edilir.
+    if len(room) > 64:
+        errors["room"] = pgettext(_CTX, "Auditoriya adı 64 simvoldan uzun ola bilməz.")
+    cleaned["room"] = room
     return cleaned, errors
 
 

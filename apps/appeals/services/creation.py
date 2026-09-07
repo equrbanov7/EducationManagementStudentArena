@@ -149,7 +149,9 @@ def _exam_center_recipients(appeal):
         .filter(
             organization_id=appeal.organization_id,
             is_active=True,
-            role__name="exam_center",
+            # İmtahan Mərkəzi TƏK roldur (2026-09-06 birləşməsi, miqrasiya 0046);
+            # köhnə ad hələ də sətirlərdə qala bilər — hər ikisi qəbul olunur.
+            role__name__in=("exam_center_head", "exam_center"),
             role__is_active=True,
             user__is_active=True,
         )

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from apps.legacy_import.services.cell_election import CellElection
+
 from . import source_sql as S
 from . import target_sql as T
 from .analysis import (
@@ -225,11 +227,6 @@ def _cell_election_key(row) -> tuple[str, str, str, int, str]:
 
 def source_cell_elections(source, table_counts: dict[str, int]):
     """Importer-in bit-bucket namizəd seçkisini mənbədən dəqiq yenidən qur."""
-
-    # CLI (`legacy_reconcile_report.py --help`) Django qaldırmır. Bu importer
-    # sinfi model moduluna qədər gedir, ona görə yalnız deep replay başlayanda
-    # lazy import edilməlidir.
-    from apps.legacy_import.services.rehearsal_journal_points_source import CellElection
 
     tables = (S.POINT_TABLE, S.ARCHIVE_TABLE)
     elections = {

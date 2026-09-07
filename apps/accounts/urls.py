@@ -202,6 +202,10 @@ urlpatterns = [
     path("rim/search/", views.rim_user_search, name="rim_user_search"),
     path("rim/user/<int:user_id>/", views.rim_user_detail, name="rim_user_detail"),
     path("rim/action/", views.rim_action, name="rim_action"),
+    # «Yeni hesab» — tək-tək tələbə/müəllim yaratma. QAPI toplu idxalla EYNİDİR
+    # (`user.import`), ona görə bir universitet birini verib digərini unutmur.
+    path("rim/create/", views.rim_create_account, name="rim_create_account"),
+    path("rim/create/catalog/", views.rim_create_catalog, name="rim_create_catalog"),
     # «Müəllimlər» / «Tələbələr» kataloqu — icazə-qapılı (`people.*`) VƏ struktur
     # scope-una tabe. RİM-dən FƏRQİ: burada dekan/kafedra müdiri yalnız öz
     # alt-ağacını görür (bax apps/accounts/services/people/permissions.py).

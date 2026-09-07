@@ -31,7 +31,7 @@ class RoomMonitorDemoSeedTests(TestCase):
             is_active=True,
         )
         cls.center = User.objects.create_user("rmd_center", "rmd_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center_head")
 
         cls.room = ExamRoom.objects.create(
             organization=cls.org, name="Demo Zal", code="RMD-101", capacity=30, created_by=cls.owner

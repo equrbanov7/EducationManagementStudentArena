@@ -148,7 +148,9 @@ def exam_center_members(organization):
         membership.user
         for membership in Membership.objects.filter(
             organization=organization,
-            role__name="exam_center",
+            # İmtahan Mərkəzi TƏK roldur (2026-09-06 birləşməsi, miqrasiya 0046);
+            # köhnə ad hələ də sətirlərdə qala bilər — hər ikisi qəbul olunur.
+            role__name__in=("exam_center_head", "exam_center"),
             is_active=True,
         ).select_related("user")
     ]

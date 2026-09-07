@@ -59,6 +59,7 @@ from .grading import (
     SelfWorkMark,
     SelfWorkTopic,
 )
+from .guest_document import GUEST_DOCUMENT_EXTENSIONS, GuestRosterDocument, guest_document_path
 from .handover import TeachingHandover
 from .journal_close_notice import (
     JournalCloseNotice,
@@ -145,6 +146,9 @@ __all__ = [
     "AdmissionRecordFields",
     "FundingType",
     "MOVEMENT_DOCUMENT_EXTENSIONS",
+    "GUEST_DOCUMENT_EXTENSIONS",
+    "GuestRosterDocument",
+    "guest_document_path",
     "MOVEMENT_REASON_MIN_LENGTH",
     "MovementKind",
     "movement_document_path",

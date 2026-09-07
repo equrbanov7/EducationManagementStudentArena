@@ -64359,3 +64359,1302 @@ msgstr "Bu bölüme erişim izniniz yok."
 msgctxt "profile.shell"
 msgid "İstənilən bölmə mövcud deyil və ya rolunuz üçün açıq deyil — ana səhifəyə qaytarıldınız."
 msgstr "İstenen bölüm mevcut değil veya rolünüze açık değil — ana sayfaya yönlendirildiniz."
+
+msgctxt "accounts.people.detail"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+msgctxt "accounts.people.detail"
+msgid "İstifadəçi adı"
+msgstr "Kullanıcı adı"
+
+msgctxt "accounts.people.detail"
+msgid "E-poçt"
+msgstr "E-posta"
+
+msgctxt "accounts.people.detail"
+msgid "Telefon"
+msgstr "Telefon numarası"
+
+msgctxt "accounts.people.detail"
+msgid "FİN"
+msgstr "FIN kodu"
+
+msgctxt "accounts.people.detail"
+msgid "Cins"
+msgstr "Cinsiyet"
+
+msgctxt "accounts.people.detail"
+msgid "Doğum tarixi / yaş"
+msgstr "Doğum tarihi / yaş"
+
+msgctxt "accounts.people.detail"
+msgid "yaş"
+msgstr "yaşında"
+
+msgctxt "accounts.people.detail"
+msgid "Son giriş"
+msgstr "Son oturum açma"
+
+msgctxt "accounts.people.detail"
+msgid "Heç vaxt"
+msgstr "Hiç"
+
+msgctxt "accounts.people.detail"
+msgid "Qeydiyyat"
+msgstr "Kayıt"
+
+msgctxt "accounts.people.detail"
+msgid "Üzvlüklər"
+msgstr "Üyelikler"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv üzvlük yoxdur"
+msgstr "Aktif üyelik yok"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeydlər"
+msgstr "Akademik kayıtlar"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik qeyd yoxdur"
+msgstr "Akademik kayıt yok"
+
+msgctxt "accounts.people.detail"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "accounts.people.detail"
+msgid "Qəbul ili"
+msgstr "Kabul yılı"
+
+msgctxt "accounts.people.detail"
+msgid "Tədris"
+msgstr "Öğretim"
+
+msgctxt "accounts.people.detail"
+msgid "Cari dövrdə açılış yoxdur"
+msgstr "Mevcut dönemde ders açılışı yok"
+
+msgctxt "accounts.people.detail"
+msgid "Profil səhifəsi"
+msgstr "Profil sayfası"
+
+msgctxt "accounts.people.detail"
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgctxt "accounts.people.detail"
+msgid "Məlumat yüklənmədi."
+msgstr "Veri yüklenemedi."
+
+msgctxt "accounts.people.detail"
+msgid "Kişi"
+msgstr "Erkek"
+
+msgctxt "accounts.people.detail"
+msgid "Qadın"
+msgstr "Kadın"
+
+msgctxt "accounts.people.detail"
+msgid "Göstərilməyib"
+msgstr "Belirtilmemiş"
+
+msgctxt "accounts.people.detail"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "accounts.people.detail"
+msgid "Bloklanıb"
+msgstr "Engellendi"
+
+msgctxt "accounts.people.detail"
+msgid "Passiv"
+msgstr "Pasif"
+
+msgctxt "accounts.people.detail"
+msgid "Arxiv"
+msgstr "Arşiv"
+
+msgctxt "accounts.people.detail"
+msgid "Gözləmədə"
+msgstr "Beklemede"
+
+msgctxt "accounts.people.detail"
+msgid "Oxuyur"
+msgstr "Okuyor"
+
+msgctxt "accounts.people.detail"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik izin"
+
+msgctxt "accounts.people.detail"
+msgid "Xaric edilib"
+msgstr "İlişiği kesildi"
+
+msgctxt "accounts.people.detail"
+msgid "Məzun"
+msgstr "Mezun"
+
+msgctxt "accounts.people.detail"
+msgid "Köçürülüb"
+msgstr "Nakil"
+
+msgctxt "accounts.people.detail"
+msgid "Dayandırılıb"
+msgstr "Askıya alındı"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı dayandır"
+msgstr "Hesabı askıya al"
+
+msgctxt "accounts.people.detail"
+msgid "Hesabı bərpa et"
+msgstr "Hesabı geri yükle"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusu ver"
+msgstr "Öğretim elemanı statüsü ver"
+
+msgctxt "accounts.people.detail"
+msgid "Müəllim statusunu çıxar"
+msgstr "Öğretim elemanı statüsünü kaldır"
+
+msgid "Seçilmiş müəllim bu təşkilatın tədris heyətində deyil."
+msgstr "Seçilen öğretim elemanı bu kurumun öğretim kadrosunda değil."
+
+msgid "Jurnal bağlıdır — dəyişikliklər yazılmadı."
+msgstr "Yoklama defteri kapalı — değişiklikler kaydedilmedi."
+
+msgid "Heç bir xana yazılmadı — dərs günü qaydası və ya xana kilidi buna imkan vermədi."
+msgstr "Hiçbir hücre kaydedilmedi — ders günü kuralı veya hücre kilidi buna izin vermedi."
+
+msgctxt "accounts.syllabus"
+msgid "Bölmə məzmununun formatı düzgün deyil (%(field)s)."
+msgstr "Bölüm içeriğinin biçimi geçersiz (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."
+msgstr "İçerik çok büyük — en fazla %(max)s (%(field)s)."
+
+msgctxt "accounts.syllabus"
+msgid "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."
+msgstr "Bu ders açılışı için zaten bir izlence var — listeden açın."
+
+msgctxt "accounts.manage_roles.message"
+msgid "missing_member_management_permission"
+msgstr "Bu işlem için `role.assign` veya `org.manage_members` izni gerekir."
+
+msgctxt "accounts.manage_roles.message"
+msgid "target_outside_structure_scope"
+msgstr "Bu kullanıcı yapısal yetki alanınızın dışındadır."
+
+msgctxt "accounts.manage_roles.message"
+msgid "role_not_defined_in_organization"
+msgstr "Seçilen rol bu kurumda tanımlı değil: %(roles)s."
+
+msgctxt "student_intake"
+msgid "Ad/soyad/ata adı ən çox %(n)s simvol ola bilər."
+msgstr "Ad/soyad/baba adı en fazla %(n)s karakter olabilir."
+
+msgctxt "student_intake"
+msgid "sahə uzunluğu həddi keçildi"
+msgstr "alan uzunluğu sınırı aşıldı"
+
+msgid "Akademik qeydiniz hələ yaradılmayıb."
+msgstr "Akademik kaydınız henüz oluşturulmamış."
+
+msgid "Jurnal qrupa yazılışdan sonra görünür — tələbə xidmətlərinə müraciət edin."
+msgstr "Yoklama defteri gruba kayıttan sonra görünür — öğrenci hizmetlerine başvurun."
+
+msgctxt "exams.view.bank.message"
+msgid "Bank adı ən çox %(n)s simvol ola bilər."
+msgstr "Banka adı en fazla %(n)s karakter olabilir."
+
+msgid "İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."
+msgstr "Sınav/bütünleme puanını yalnızca Sınav Merkezi girebilir — bu alanlar kaydedilmedi."
+
+msgid "Standart format"
+msgstr "Varsayılan biçim"
+
+msgid "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)."
+msgstr "Varsayılan soru biçimi (soru eklerken değiştirebilirsiniz)."
+
+msgctxt "roles.display_name"
+msgid "rim_staff"
+msgstr "Dijital Gelişim Merkezi (RİM) çalışanı"
+
+msgid "Dərs tipi düzgün seçilməyib."
+msgstr "Ders türü doğru seçilmemiş."
+
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Ders saati pozitif bir tam sayı olmalıdır."
+
+msgctxt "registrar.journal"
+msgid "Dərs sütunları"
+msgstr "Ders sütunları"
+
+msgctxt "registrar.journal"
+msgid "Hamısını göstər"
+msgstr "Tümünü göster"
+
+msgctxt "registrar.journal"
+msgid "Son 20 dərs"
+msgstr "Son 20 ders"
+
+msgctxt "registrar.journal"
+msgid "%(first)s–%(last)s / %(total)s dərs"
+msgstr "%(total)s dersten %(first)s–%(last)s"
+
+msgctxt "registrar.journal"
+msgid "Bütün %(total)s dərs göstərilir"
+msgstr "%(total)s dersin tamamı gösteriliyor"
+
+msgctxt "registrar.journal"
+msgid "Sonrakı dərslər"
+msgstr "Sonraki dersler"
+
+msgctxt "registrar.journal"
+msgid "Əvvəlki dərslər"
+msgstr "Önceki dersler"
+
+msgctxt "accounts.a11y"
+msgid "Seç"
+msgstr "Seçiniz"
+
+msgid "%(n)s xana yazılmadı — bal 0–10 aralığında TAM ədəd olmalıdır."
+msgstr "%(n)s hücre kaydedilmedi — puan 0–10 arasında tam sayı olmalıdır."
+
+msgctxt "exams.view.bank.message"
+msgid "Bu adla bankınız artıq var: %(name)s"
+msgstr "Bu adla bir bankanız zaten var: %(name)s"
+
+msgctxt "profile.rim"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm veya .csv"
+
+msgctxt "profile.rim"
+msgid "7 simvol, yalnız A–Z və 0–9."
+msgstr "7 karakter, yalnızca A–Z ve 0–9."
+
+msgctxt "profile.rim"
+msgid "Ad, soyad"
+msgstr "Adı ve soyadı"
+
+msgctxt "profile.rim"
+msgid "Axtarmaq üçün ən azı 1 simvol yazın."
+msgstr "Aramak için en az 1 karakter yazın."
+
+msgctxt "profile.rim"
+msgid "Axtarılır…"
+msgstr "Aranıyor…"
+
+msgctxt "profile.rim"
+msgid "Bir müəllim hesabı: kafedra təyinatı ilə (akademik qeyd yaradılmır)."
+msgstr "Bölüm ataması ile tek bir öğretim elemanı hesabı (akademik kayıt oluşturulmaz)."
+
+msgctxt "profile.rim"
+msgid "Bir tələbə hesabı: qrup, qəbul ili və akademik qeyd ilə."
+msgstr "Grup, kayıt yılı ve akademik kayıt ile tek bir öğrenci hesabı."
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parol"
+msgstr "Tek kullanımlık parola"
+
+msgctxt "profile.rim"
+msgid "Birdəfəlik parollar YALNIZ indi görünür — nə bazada, nə audit jurnalında saxlanılmır. CSV-ni endirib tələbələrə çatdırın."
+msgstr "Tek kullanımlık parolalar YALNIZCA şimdi görünür — ne veritabanında ne de denetim kaydında saklanır. CSV dosyasını indirip öğrencilere iletin."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — bu halda placeholder yazılır və istifadəçi ilk girişdə özü daxil edir."
+msgstr "Boş bırakılabilir — bu durumda yer tutucu yazılır ve kullanıcı ilk girişte kendisi girer."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — istifadəçi adı kod və ya FİN əsasında qurulur."
+msgstr "Boş bırakılabilir — kullanıcı adı koddan veya FIN’den oluşturulur."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — kafedra sonradan da təyin edilə bilər."
+msgstr "Boş bırakılabilir — bölüm daha sonra da atanabilir."
+
+msgctxt "profile.rim"
+msgid "Boş şablonu endir"
+msgstr "Boş şablonu indir"
+
+msgctxt "profile.rim"
+msgid "Bu parol bir daha göstərilməyəcək və heç bir yerdə saxlanılmır. Pəncərəni bağlamazdan əvvəl istifadəçiyə çatdırın."
+msgstr "Bu parola bir daha gösterilmeyecek ve hiçbir yerde saklanmıyor. Pencereyi kapatmadan önce kullanıcıya iletin."
+
+msgctxt "profile.rim"
+msgid "Cins"
+msgstr "Cinsiyet"
+
+msgctxt "profile.rim"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "profile.rim"
+msgid "Daha bir hesab yarat"
+msgstr "Bir hesap daha oluştur"
+
+msgctxt "profile.rim"
+msgid "Daha çox nəticə var — axtarışı dəqiqləşdirin."
+msgstr "Daha fazla sonuç var — aramanızı daraltın."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi"
+msgstr "Doğum tarihi"
+
+msgctxt "profile.rim"
+msgid "E-poçt"
+msgstr "E-posta"
+
+msgctxt "profile.rim"
+msgid "Emal olunur…"
+msgstr "İşleniyor…"
+
+msgctxt "profile.rim"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Dosyayı buraya sürükleyin ya da seçmek için tıklayın"
+
+msgctxt "profile.rim"
+msgid "Hansı hesab növünü yaradırsınız?"
+msgstr "Hangi hesap türünü oluşturuyorsunuz?"
+
+msgctxt "profile.rim"
+msgid "Hesab bu təşkilatda yaradılır və hər addım audit jurnalına düşür."
+msgstr "Hesap bu kurumda oluşturulur ve her adım denetim kaydına yazılır."
+
+msgctxt "profile.rim"
+msgid "Hesab yaradıldı."
+msgstr "Hesap oluşturuldu."
+
+msgctxt "profile.rim"
+msgid "Hesabı yarat"
+msgstr "Hesabı oluştur"
+
+msgctxt "profile.rim"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "profile.rim"
+msgid "Kafedra nəticələri"
+msgstr "Bölüm sonuçları"
+
+msgctxt "profile.rim"
+msgid "Kafedranın adını yazın"
+msgstr "Bölümün adını yazın"
+
+msgctxt "profile.rim"
+msgid "Kişi"
+msgstr "Erkek"
+
+msgctxt "profile.rim"
+msgid "Ləğv et"
+msgstr "Vazgeç"
+
+msgctxt "profile.rim"
+msgid "Müəllim"
+msgstr "Öğretim elemanı"
+
+msgctxt "profile.rim"
+msgid "Müəllim hesabı yaradıldı."
+msgstr "Öğretim elemanı hesabı oluşturuldu."
+
+msgctxt "profile.rim"
+msgid "Məsələn: köçürmə ilə gələn tələbə, dekanlıq müraciəti №…"
+msgstr "Örneğin: yatay geçişle gelen öğrenci, dekanlık başvurusu no…"
+
+msgctxt "profile.rim"
+msgid "Parolları CSV kimi endir"
+msgstr "Parolaları CSV olarak indir"
+
+msgctxt "profile.rim"
+msgid "Qadın"
+msgstr "Kadın"
+
+msgctxt "profile.rim"
+msgid "Qeyd (audit üçün)"
+msgstr "Not (denetim kaydı için)"
+
+msgctxt "profile.rim"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "profile.rim"
+msgid "Qrup nəticələri"
+msgstr "Grup sonuçları"
+
+msgctxt "profile.rim"
+msgid "Qrupun adını və ya kodunu yazın"
+msgstr "Grubun adını veya kodunu yazın"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi"
+msgstr "Deneme çalıştırma sonucu"
+
+msgctxt "profile.rim"
+msgid "Quru icra nəticəsi (heç nə yazılmadı)"
+msgstr "Deneme çalıştırma sonucu (hiçbir şey yazılmadı)"
+
+msgctxt "profile.rim"
+msgid "Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox %(limit)s sətir."
+msgstr "Kayıt dosyasını yükleyin: önce deneme çalıştırma, sonra uygulama. Dosya başına en fazla %(limit)s satır."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili"
+msgstr "Kayıt yılı"
+
+msgctxt "profile.rim"
+msgid "Sütunların sırası sərbəstdir. Ən çox %(limit)s sətir, %(size)s MB."
+msgstr "Sütun sırası serbesttir. En fazla %(limit)s satır, %(size)s MB."
+
+msgctxt "profile.rim"
+msgid "Sətir"
+msgstr "Satır"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal (tələbə siyahısı)"
+msgstr "Toplu içe aktarma (öğrenci listesi)"
+
+msgctxt "profile.rim"
+msgid "Toplu idxal — tələbə siyahısı"
+msgstr "Toplu içe aktarma — öğrenci listesi"
+
+msgctxt "profile.rim"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "profile.rim"
+msgid "Tələbə hesabı yaradıldı."
+msgstr "Öğrenci hesabı oluşturuldu."
+
+msgctxt "profile.rim"
+msgid "Tələbə kodu"
+msgstr "Öğrenci numarası"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "profile.rim"
+msgid "Tətbiq et ({n} hesab)"
+msgstr "Uygula ({n} hesap)"
+
+msgctxt "profile.rim"
+msgid "Tətbiq nəticəsi"
+msgstr "Uygulama sonucu"
+
+msgctxt "profile.rim"
+msgid "Təyin edilməyib"
+msgstr "Belirtilmemiş"
+
+msgctxt "profile.rim"
+msgid "Təşkilatdakı yeri"
+msgstr "Kurumdaki yeri"
+
+msgctxt "profile.rim"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "profile.rim"
+msgid "Xəta"
+msgstr "Hata"
+
+msgctxt "profile.rim"
+msgid "Yaradılacaq"
+msgstr "Oluşturulacak"
+
+msgctxt "profile.rim"
+msgid "Yaradıldı"
+msgstr "Oluşturuldu"
+
+msgctxt "profile.rim"
+msgid "Yaradılır…"
+msgstr "Oluşturuluyor…"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab"
+msgstr "Yeni hesap"
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaradın"
+msgstr "Yeni bir hesap oluşturun"
+
+msgctxt "profile.rim"
+msgid "Yeni müəllim hesabı"
+msgstr "Yeni öğretim elemanı hesabı"
+
+msgctxt "profile.rim"
+msgid "Yeni tələbə hesabı"
+msgstr "Yeni öğrenci hesabı"
+
+msgctxt "profile.rim"
+msgid "Yoxla (quru icra)"
+msgstr "Denetle (deneme çalıştırma)"
+
+msgctxt "profile.rim"
+msgid "Ötürüldü"
+msgstr "Atlandı"
+
+msgctxt "profile.rim"
+msgid "İstifadəçi bu parolla girəndən sonra e-poçt təsdiqi (OTP) və öz parolunu qurmaq addımına yönləndiriləcək."
+msgstr "Kullanıcı bu parolayla giriş yaptıktan sonra e-posta doğrulaması (OTP) ve kendi parolasını belirleme adımına yönlendirilir."
+
+msgctxt "profile.rim"
+msgid "İzah"
+msgstr "Açıklama"
+
+msgctxt "profile.rim"
+msgid "İşçi kodu"
+msgstr "Personel numarası"
+
+msgctxt "profile.rim"
+msgid "Şəxsi məlumat"
+msgstr "Kişisel bilgiler"
+
+msgctxt "profile.rim"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "İşlem gerçekleşmedi. Yeniden deneyin."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir."
+msgstr "Önce DENEME ÇALIŞTIRMA: hiçbir şey yazılmaz, ne oluşacağı satır satır gösterilir."
+
+msgctxt "profile.rim"
+msgid "Əvvəlcə fayl seçin."
+msgstr "Önce bir dosya seçin."
+
+msgctxt "profile.rim"
+msgid "Yeni hesab yaratmaq üçün icazəniz yoxdur."
+msgstr "Yeni hesap oluşturma yetkiniz yok."
+
+msgctxt "profile.rim"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Etkin bir kurum bağlamı yok."
+
+msgctxt "profile.rim"
+msgid "Çox sayda hesab yaradıldı. Bir az sonra yenidən cəhd edin."
+msgstr "Çok fazla hesap oluşturuldu. Biraz sonra yeniden deneyin."
+
+msgctxt "profile.rim"
+msgid "Formda düzəliş tələb olunan sahələr var."
+msgstr "Formda düzeltilmesi gereken alanlar var."
+
+msgctxt "profile.rim"
+msgid "Naməlum hesab növü."
+msgstr "Bilinmeyen hesap türü."
+
+msgctxt "profile.rim"
+msgid "FİN boşdur."
+msgstr "FIN boş."
+
+msgctxt "profile.rim"
+msgid "FİN 7 simvolluq [A-Z0-9] formatında olmalıdır."
+msgstr "FIN, [A-Z0-9] biçiminde 7 karakter olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Bu FİN artıq sistemdə var — hesab yaradılmadı."
+msgstr "Bu FIN sistemde zaten var — hesap oluşturulmadı."
+
+msgctxt "profile.rim"
+msgid "Ad məcburidir."
+msgstr "Ad zorunludur."
+
+msgctxt "profile.rim"
+msgid "Soyad məcburidir."
+msgstr "Soyadı zorunludur."
+
+msgctxt "profile.rim"
+msgid "Ən çox %(n)s simvol ola bilər."
+msgstr "En fazla %(n)s karakter olabilir."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."
+msgstr "Doğum tarihi tanınmadı (gg.aa.yyyy biçimini kullanın)."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məntiqsizdir."
+msgstr "Doğum tarihi mantıksız."
+
+msgctxt "profile.rim"
+msgid "Cins tanınmadı — «təyin edilməyib» qalır."
+msgstr "Cinsiyet tanınmadı — “belirtilmemiş” olarak kalıyor."
+
+msgctxt "profile.rim"
+msgid "Qrup seçilməyib və ya tapılmadı."
+msgstr "Grup seçilmedi veya bulunamadı."
+
+msgctxt "profile.rim"
+msgid "Bu qrupun ixtisas proqramı (Program) tapılmadı — əvvəlcə struktur qurulmalıdır."
+msgstr "Bu grup için uzmanlık programı (Program) bulunamadı — önce yapıyı kurun."
+
+msgctxt "profile.rim"
+msgid "Bu qəbul ili üçün kurikulum yoxdur — hesab yaradılarkən boş kurikulum yaradılacaq."
+msgstr "Bu kayıt yılı için müfredat yok — hesap oluşturulurken boş bir müfredat oluşturulacak."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili rəqəm olmalıdır."
+msgstr "Kayıt yılı bir sayı olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Qəbul ili 1950–%d aralığında olmalıdır."
+msgstr "Kayıt yılı 1950 ile %d arasında olmalıdır."
+
+msgctxt "profile.rim"
+msgid "Kafedra tapılmadı."
+msgstr "Bölüm bulunamadı."
+
+msgctxt "profile.rim"
+msgid "Bu kod artıq istifadə olunub."
+msgstr "Bu kod zaten kullanılıyor."
+
+msgctxt "profile.rim"
+msgid "E-poçt formatı yanlışdır."
+msgstr "E-posta biçimi hatalı."
+
+msgctxt "profile.rim"
+msgid "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."
+msgstr "E-posta yok — yer tutucu yazılıyor (kullanıcı ilk girişte kendisi girer)."
+
+msgctxt "profile.rim"
+msgid "E-poçt artıq istifadə olunur — placeholder yazılır."
+msgstr "E-posta zaten kullanılıyor — yer tutucu yazılıyor."
+
+msgctxt "registrar.schedule_manage"
+msgid "Auditoriya adı 64 simvoldan uzun ola bilməz."
+msgstr "Derslik adı 64 karakterden uzun olamaz."
+
+msgctxt "profile.rim"
+msgid "Doğum tarixi məcburidir."
+msgstr "Doğum tarihi zorunludur."
+
+msgctxt "ui.confirm_modal"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "ui.confirm_modal"
+msgid "Ləğv et"
+msgstr "Vazgeç"
+
+msgctxt "ui.confirm_modal"
+msgid "Təsdiqlə"
+msgstr "Onayla"
+
+msgctxt "accounts.people"
+msgid "səlahiyyət"
+msgstr "yetki"
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+msgstr "Bu ders/dönem için zaten açık bir taslak var (%(version)s) — kopyalamak yerine onu düzenleyin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+msgstr "Bu ders/dönem için onaylı bir izlence var — üzerine kopyalamak yerine yeni sürüm açın."
+
+msgctxt "accounts.people.movements"
+msgid "Akademik qeyd bərpa olundu, amma hesabın girişini avtomatik aça bilmədik. Girişi kimlik səthindən açın (səbəb audit izindədir)."
+msgstr "Akademik kayıt geri alındı, ancak hesabın erişimini otomatik açamadık. Erişimi kimlik yüzeyinden açın (nedeni denetim izinde)."
+
+msgctxt "profile.rim"
+msgid "Nə yaratmaq istəyirsiniz?"
+msgstr "Ne oluşturmak istiyorsunuz?"
+
+msgctxt "profile.rim"
+msgid "Hesab və ya inzibati bölmə seçin."
+msgstr "Bir hesap ya da idari birim seçin."
+
+msgctxt "profile.rim"
+msgid "Yeni yarat"
+msgstr "Yeni oluştur"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə"
+msgstr "Yeni birim"
+
+msgctxt "profile.rim"
+msgid "Yeni inzibati bölmə"
+msgstr "Yeni idari birim"
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya."
+msgstr "Şube, merkez, enstitü veya laboratuvar."
+
+msgctxt "profile.rim"
+msgid "Şöbə, mərkəz, institut və ya laboratoriya — struktur ağacında yaradılır."
+msgstr "Şube, merkez, enstitü veya laboratuvar — yapı ağacında oluşturulur."
+
+msgctxt "profile.rim"
+msgid "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür."
+msgstr "Birim yapı ağacında oluşturulur ve değişiklik denetim günlüğüne yazılır."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə"
+msgstr "Üst birim"
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə nəticələri"
+msgstr "Üst birim sonuçları"
+
+msgctxt "profile.rim"
+msgid "Rektorat, fakültə və ya şöbənin adını yazın"
+msgstr "Rektörlük, fakülte veya şube adını yazın"
+
+msgctxt "profile.rim"
+msgid "Yeni bölmə bu vahidin altında yaranacaq."
+msgstr "Yeni birim bunun altında oluşturulacak."
+
+msgctxt "profile.rim"
+msgid "Məsələn: Beynəlxalq əlaqələr şöbəsi"
+msgstr "Örneğin: Uluslararası İlişkiler Şubesi"
+
+msgctxt "profile.rim"
+msgid "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur."
+msgstr "Fakülte, bölüm ve program akademik ağaçtadır — «Üniversite yapısı» ekranından kurulur."
+
+msgctxt "profile.rim"
+msgid "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə."
+msgstr "Boş bırakılabilir — evrak akışındaki kısa işaret."
+
+msgctxt "profile.rim"
+msgid "İnzibati bölmə yaradıldı."
+msgstr "İdari birim oluşturuldu."
+
+msgctxt "profile.rim"
+msgid "Bölmə"
+msgstr "Birim"
+
+msgctxt "profile.rim"
+msgid "Tip"
+msgstr "Tür"
+
+msgctxt "profile.rim"
+msgid "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə."
+msgstr "Yönetici ataması, ad değişikliği ve arşivleme «Üniversite yapısı» ekranındadır — her biri kendi yetkisiyle."
+
+msgctxt "profile.rim"
+msgid "Struktur ağacında aç"
+msgstr "Yapı ağacında aç"
+
+msgctxt "profile.rim"
+msgid "Daha bir bölmə yarat"
+msgstr "Bir birim daha oluştur"
+
+msgctxt "profile.rim"
+msgid "Bölməni yarat"
+msgstr "Birimi oluştur"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılır…"
+msgstr "Birim oluşturuluyor…"
+
+msgctxt "profile.rim"
+msgid "Bölmə yaradılmadı. Yenidən cəhd edin."
+msgstr "Birim oluşturulmadı. Yeniden deneyin."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölməni siyahıdan seçin."
+msgstr "Üst birimi listeden seçin."
+
+msgctxt "profile.rim"
+msgid "Valideyn bölmə tapılmadı — siyahıdan yenidən seçin."
+msgstr "Üst birim bulunamadı — listeden yeniden seçin."
+
+msgctxt "profile.rim"
+msgid "Bölmənin adı boş ola bilməz."
+msgstr "Birim adı boş olamaz."
+
+msgctxt "profile.rim"
+msgid "Bölmə tipi bu təşkilat üçün keçərli deyil."
+msgstr "Birim türü bu kurum için geçerli değil."
+
+msgctxt "profile.rim"
+msgid "Struktur bölməsi yaratmaq üçün icazəniz yoxdur."
+msgstr "Yapısal birim oluşturma yetkiniz yok."
+
+msgctxt "registrar.journal"
+msgid "Nəticələr yüklənir…"
+msgstr "Sonuçlar yükleniyor…"
+
+msgctxt "applications"
+msgid "Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Dosya seç — PDF, görsel, DOCX veya ZIP · en fazla %(mb)s MB · en çok %(n)s dosya"
+
+msgctxt "applications"
+msgid "ən son"
+msgstr "en son"
+
+msgctxt "applications"
+msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, görsel, DOCX veya ZIP · en fazla {mb} MB · en çok {n} dosya"
+
+msgctxt "applications"
+msgid "«{action}» əməli sənəd qəbul etmir — faylları silin və ya başqa əməl seçin."
+msgstr "“{action}” belge kabul etmiyor — dosyaları kaldırın ya da başka bir işlem seçin."
+
+msgctxt "applications"
+msgid "Cavab göndərilməyib"
+msgstr "Yanıt gönderilmedi"
+
+msgctxt "applications"
+msgid "Yazdığınız mətn və seçdiyiniz sənədlər hələ göndərilməyib — pəncərəni bağlasanız itəcək. Bağlayaq?"
+msgstr "Yazdığınız metin ve seçtiğiniz dosyalar henüz gönderilmedi — pencereyi kapatırsanız kaybolur. Kapatalım mı?"
+
+msgctxt "applications"
+msgid "Cavab mətni ən azı {n} simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
+msgstr "Yanıt metni en az {n} karakter olmalı — başvuru sahibi tam olarak bu metni görecek."
+
+msgctxt "applications"
+msgid "«{name}» {mb} MB-dan böyükdür."
+msgstr "“{name}” {mb} MB’den büyük."
+
+msgctxt "applications"
+msgid "«{name}» dəstəklənmir — icazəli formatlar: {list}."
+msgstr "“{name}” desteklenmiyor — izin verilen biçimler: {list}."
+
+msgctxt "applications"
+msgid "Bir əməldə ən çoxu {n} fayl əlavə edilə bilər."
+msgstr "Bir işlemde en çok {n} dosya eklenebilir."
+
+msgctxt "applications"
+msgid "Cavabdan razı qalmadı — yenidən baxışa göndərdi"
+msgstr "Yanıttan memnun kalmadı — yeniden incelemeye gönderdi"
+
+msgctxt "applications"
+msgid "Razı deyiləm — yenidən bax"
+msgstr "Memnun değilim — yeniden incele"
+
+msgctxt "applications"
+msgid "Razı deyiləm — yenidən baxılsın"
+msgstr "Memnun değilim — yeniden incelensin"
+
+msgctxt "applications"
+msgid "Nə həll olunmadı?"
+msgstr "Ne çözülmedi?"
+
+msgctxt "applications"
+msgid "Cavab gəldi. Razısınızsa təsdiqləyib bağlayın; problem həll olunmayıbsa səbəbini yazın — müraciət eyni nömrə ilə həmin şöbəyə qayıdacaq."
+msgstr "Yanıt geldi. Memnunsanız onaylayıp kapatın; sorun çözülmediyse nedenini yazın — başvuru aynı numarayla aynı birime geri döner."
+
+msgctxt "applications"
+msgid "Başlanğıc tarix"
+msgstr "Başlangıç tarihi"
+
+msgctxt "applications"
+msgid "Son tarix"
+msgstr "Bitiş tarihi"
+
+msgctxt "applications"
+msgid "Tarix aralığını təmizlə"
+msgstr "Tarih aralığını temizle"
+
+msgid "%(joined)s-dan bəri"
+msgstr "%(joined)s tarihinden beri"
+
+msgid "%(org_type)s · %(count)s üzv"
+msgstr "%(org_type)s · %(count)s üye"
+
+msgid "Kateqoriyalar"
+msgstr "Kategoriler"
+
+msgctxt "accounts.public_profile"
+msgid "açıq paylaşım"
+msgstr "açık paylaşım"
+
+msgctxt "accounts.public_profile"
+msgid "kateqoriya"
+msgstr "kategori"
+
+msgctxt "profile.notifications"
+msgid "{n} seçilib"
+msgstr "{n} seçildi"
+
+msgctxt "profile.notifications"
+msgid "Bu gün"
+msgstr "Bugün"
+
+msgctxt "profile.notifications"
+msgid "Dünən"
+msgstr "Dün"
+
+msgctxt "profile.notifications"
+msgid "Bu həftə"
+msgstr "Bu hafta"
+
+msgctxt "profile.notifications"
+msgid "Daha əvvəl"
+msgstr "Daha önce"
+
+msgctxt "profile.notifications"
+msgid "indicə"
+msgstr "az önce"
+
+msgid "Panel"
+msgstr "Kontrol paneli"
+
+msgid "Rollar"
+msgstr "Roller"
+
+msgid "%(count)s qrup"
+msgstr "%(count)s grup"
+
+msgctxt "accounts.structure_tree"
+msgid "Ad və ya istifadəçi adı üzrə axtar"
+msgstr "Ad veya kullanıcı adına göre ara"
+
+msgctxt "accounts.structure_tree"
+msgid "Seçimi boş buraxsanız bölmənin rəhbəri götürülür."
+msgstr "Seçimi boş bırakırsanız birimin yöneticisi kaldırılır."
+
+msgctxt "accounts.structure_tree"
+msgid "Uyğun namizəd tapılmadı."
+msgstr "Uygun aday bulunamadı."
+
+msgctxt "accounts.groups"
+msgid "%%d tələbə"
+msgstr "%%d öğrenci"
+
+msgctxt "accounts.groups"
+msgid "Ad və ya istifadəçi adı üzrə axtar"
+msgstr "Ad veya kullanıcı adına göre ara"
+
+msgctxt "accounts.groups"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik izin"
+
+msgctxt "accounts.groups"
+msgid "Aktiv qeydiyyatlı tələbələr. Hər əməl səbəb və təsdiq tələb edir; tarixçə silinmir."
+msgstr "Aktif kayıtlı öğrenciler. Her işlem gerekçe ve onay ister; geçmiş silinmez."
+
+msgctxt "accounts.groups"
+msgid "Axtarışa uyğun tələbə tapılmadı."
+msgstr "Aramaya uyan öğrenci bulunamadı."
+
+msgctxt "accounts.groups"
+msgid "Bu qrupda aktiv tələbə yoxdur."
+msgstr "Bu grupta aktif öğrenci yok."
+
+msgctxt "accounts.groups"
+msgid "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; bərpa ayrıca əməldir."
+msgstr "Bu tarihe kadar öğrencinin durumu “akademik izin” olur; geri dönüş ayrı bir işlemdir."
+
+msgctxt "accounts.groups"
+msgid "Dondur"
+msgstr "Askıya al"
+
+msgctxt "accounts.groups"
+msgid "Fərdi plan (DOCX)"
+msgstr "Bireysel plan (DOCX)"
+
+msgctxt "accounts.groups"
+msgid "Fərdi tədris planı (DOCX) — bütöv qrup"
+msgstr "Bireysel öğretim planı (DOCX) — tüm grup"
+
+msgctxt "accounts.groups"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "accounts.groups"
+msgid "Məs.: 12/T"
+msgstr "örn. 12/T"
+
+msgctxt "accounts.groups"
+msgid "Məzun"
+msgstr "Mezun"
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətdə"
+msgstr "İzinde"
+
+msgctxt "accounts.groups"
+msgid "Məzuniyyətin bitmə tarixi"
+msgstr "İzin bitiş tarihi"
+
+msgctxt "accounts.groups"
+msgid "Qeydiyyatlı"
+msgstr "Kayıtlı"
+
+msgctxt "accounts.groups"
+msgid "Qrupdan çıxar"
+msgstr "Gruptan çıkar"
+
+msgctxt "accounts.groups"
+msgid "Qrupun fərdi planı (DOCX)"
+msgstr "Grubun bireysel planı (DOCX)"
+
+msgctxt "accounts.groups"
+msgid "Qrupun tələbələri"
+msgstr "Grubun öğrencileri"
+
+msgctxt "accounts.groups"
+msgid "Qəbul"
+msgstr "Kabul"
+
+msgctxt "accounts.groups"
+msgid "Siyahı yüklənmədi — yenidən cəhd edin."
+msgstr "Liste yüklenemedi — yeniden deneyin."
+
+msgctxt "accounts.groups"
+msgid "Status «akademik məzuniyyət» olur, qrup üzvlüyü qalır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir; hərəkət sətri silinmir."
+msgstr "Durum “akademik izin” olur, grup üyeliği kalır. Emir numarası, tarihi ve bitiş tarihi zorunludur; hareket kaydı silinmez."
+
+msgctxt "accounts.groups"
+msgid "Status «xaric edilib» olur. Əmr nömrəsi və tarixi məcburidir; bərpa ayrıca əməldir və yenə səbəblə audit olunur."
+msgstr "Durum “ihraç edildi” olur. Emir numarası ve tarihi zorunludur; geri dönüş ayrı ve denetlenen bir işlemdir."
+
+msgctxt "accounts.groups"
+msgid "Statusa görə süz"
+msgstr "Duruma göre süz"
+
+msgctxt "accounts.groups"
+msgid "Sənəd universitetin rəsmi formasındadır — hər tələbə ayrıca səhifədə."
+msgstr "Belge üniversitenin resmi formundadır — her öğrenci ayrı sayfada."
+
+msgctxt "accounts.groups"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "accounts.groups"
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.groups"
+msgid "Tələbələr yüklənir…"
+msgstr "Öğrenciler yükleniyor…"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni dondur (akademik məzuniyyət)"
+msgstr "Öğrenciyi askıya al (akademik izin)"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni uzaqlaşdır (xaric)"
+msgstr "Öğrenciyi uzaklaştır (ihraç)"
+
+msgctxt "accounts.groups"
+msgid "Uzaqlaşdır"
+msgstr "Uzaklaştır"
+
+msgctxt "accounts.groups"
+msgid "Xaric edilib"
+msgstr "İhraç edildi"
+
+msgctxt "accounts.groups"
+msgid "Əmr nömrəsi"
+msgstr "Emir numarası"
+
+msgctxt "accounts.groups"
+msgid "Əmr tarixi"
+msgstr "Emir tarihi"
+
+msgctxt "accounts.semester"
+msgid "Açılış sətirləri"
+msgstr "Açılış satırları"
+
+msgctxt "accounts.semester"
+msgid "Hər kafedranın neçə açılışı var və neçəsinə müəllim təyin olunub — təyinat kafedra rəhbərinin «Dərs yükü» bölməsindən edilir."
+msgstr "Her bölümün kaç açılışı var ve kaçına öğretim üyesi atandı — atama bölüm başkanının “Ders yükü” bölümünden yapılır."
+
+msgctxt "accounts.semester"
+msgid "Necə işləyir — 5 addımda semestr açılışı"
+msgstr "Nasıl çalışır — 5 adımda dönem açılışı"
+
+msgctxt "accounts.semester"
+msgid "Planı təsdiqlənməmiş ixtisaslar"
+msgstr "Planı onaylanmamış uzmanlıklar"
+
+msgctxt "accounts.semester"
+msgid "cəmi %(n)s ixtisas"
+msgstr "toplam %(n)s uzmanlık"
+
+msgctxt "accounts.semester"
+msgid "«Plan yoxdur» — bu ixtisaslar üçün açılış yaradıla bilməz"
+msgstr "“Plan yok” — bu uzmanlıklar için açılış oluşturulamaz"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt də ödənəndə «Semestri kilidlə» düyməsi aktivləşir. Kilid açılış sətirlərini dondurur; geri açmaq ayrıca səlahiyyət və səbəb tələb edir."
+msgstr "Üç koşul da sağlanınca “Dönemi kilitle” etkinleşir. Kilit açılış satırlarını dondurur; açmak ayrı yetki ve gerekçe ister."
+
+msgctxt "accounts.semester"
+msgid "İndi:"
+msgstr "Şimdi:"
+
+msgctxt "accounts.semester"
+msgid "Əvvəlcə «Tədris planı» bölməsində həmin ixtisasın planı təsdiqlənməlidir; təsdiqdən sonra «Plandan açılış yarat» onları da əhatə edir."
+msgstr "Önce “Öğretim planı” bölümünde o uzmanlığın planı onaylanmalı; onaydan sonra “Plandan açılış oluştur” onları da kapsar."
+
+msgctxt "accounts.semester"
+msgid "Tədris dövrünü seçin və plandan açılış yaradın"
+msgstr "Dönemi seçin ve plandan açılış oluşturun"
+
+msgctxt "accounts.semester"
+msgid "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» hər qrup üçün təsdiqlənmiş tədris planından fənn sətirləri yaradır; mövcud sətir təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin."
+msgstr "Yukarıdaki süzgeçten dönemi seçin. “Plandan açılış oluştur” onaylı öğretim planından her grup için ders satırları oluşturur; mevcut satır yinelenmez, hiçbir şey silinmez. “Plan yok” uzmanlıklar için satır oluşmaz — önce “Öğretim planı”nda planı onaylayın."
+
+msgctxt "accounts.semester"
+msgid "Tədris şöbəsi"
+msgstr "Öğretim işleri"
+
+msgctxt "accounts.semester"
+msgid "Kafedralara göndərin"
+msgstr "Bölümlere gönderin"
+
+msgctxt "accounts.semester"
+msgid "Açılış sətirləri hazır olanda «Kafedraya göndər» kafedra rəhbərlərinə bildiriş göndərir — bundan sonra onlar «Dərs yükü» bölməsində öz fənlərinə müəllim təyin edə bilir."
+msgstr "Açılış satırları hazır olunca “Bölüme gönder” bölüm başkanlarına bildirim yollar — sonra onlar “Ders yükü”nde derslerine öğretim üyesi atar."
+
+msgctxt "accounts.semester"
+msgid "Kafedra müəllim təyin edir"
+msgstr "Bölüm öğretim üyesi atar"
+
+msgctxt "accounts.semester"
+msgid "Hər açılışa müəllim təyin olunmalıdır. Aşağıdakı «Kafedralar üzrə açılış» cədvəli neçə sətrin müəllim gözlədiyini göstərir; açılış sətrindəki «Müəllim» əməli ilə buradan da təyin etmək olar."
+msgstr "Her açılışa öğretim üyesi atanmalı. Aşağıdaki “Bölümlere göre açılış” tablosu kaç satırın beklediğini gösterir; satırdaki “Öğretim üyesi” işlemiyle buradan da atanabilir."
+
+msgctxt "accounts.semester"
+msgid "Dərs yükü → Müəllim təyin et"
+msgstr "Ders yükü → Öğretim üyesi ata"
+
+msgctxt "accounts.semester"
+msgid "Kafedra rəhbəri"
+msgstr "Bölüm başkanı"
+
+msgctxt "accounts.semester"
+msgid "Jurnallar açılır"
+msgstr "Günlükler açılır"
+
+msgctxt "accounts.semester"
+msgid "Müəllim təyin olunan kimi həmin fənnin elektron jurnalı avtomatik yaranır. Jurnalı olmayan sətir müəllimi olmayan sətirdir — ayrıca əməl tələb olunmur."
+msgstr "Öğretim üyesi atanır atanmaz dersin e-günlüğü otomatik oluşur. Günlüğü olmayan satır öğretim üyesi olmayan satırdır — ayrı işlem gerekmez."
+
+msgctxt "accounts.semester"
+msgid "Sistem (avtomatik)"
+msgstr "Sistem (otomatik)"
+
+msgctxt "accounts.semester"
+msgid "Semestri kilidləyin"
+msgstr "Dönemi kilitleyin"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt ödənəndə (plan təsdiqlənib, bütün açılışlara müəllim var, jurnallar açılıb) «Semestri kilidlə» aktivləşir. Kilid açılış sətirlərini dondurur; onu yalnız ayrıca səlahiyyətli şəxs səbəb yazmaqla aça bilər."
+msgstr "Üç koşul sağlanınca (plan onaylı, her açılışta öğretim üyesi var, günlükler açık) “Dönemi kilitle” etkinleşir. Kilit açılış satırlarını dondurur; yalnız ayrı yetkili biri gerekçe yazarak açabilir."
+
+msgctxt "accounts.semester"
+msgid "Tədris şöbəsi rəhbəri"
+msgstr "Öğretim işleri başkanı"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış sətri yaradılıb"
+msgstr "%(n)d açılış satırı oluşturuldu"
+
+msgctxt "accounts.semester"
+msgid "«Plandan açılış yarat» düyməsi ilə başlayın"
+msgstr "“Plandan açılış oluştur” düğmesiyle başlayın"
+
+msgctxt "accounts.semester"
+msgid "Kafedra rəhbərlərinə bildiriş gedib"
+msgstr "Bölüm başkanlarına bildirim gitti"
+
+msgctxt "accounts.semester"
+msgid "«Kafedraya göndər» — rəhbərlərə bildiriş gedir, təyinat başlayır"
+msgstr "“Bölüme gönder” — başkanlara bildirim gider, atama başlar"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılış müəllim gözləyir — kafedra «Dərs yükü»ndən təyin edir"
+msgstr "%(n)d açılış öğretim üyesi bekliyor — bölüm “Ders yükü”nden atar"
+
+msgctxt "accounts.semester"
+msgid "Bütün jurnallar açılıb"
+msgstr "Tüm günlükler açıldı"
+
+msgctxt "accounts.semester"
+msgid "%(n)d açılışın jurnalı açılmayıb — müəllim təyin olunduqca açılır"
+msgstr "%(n)d açılışın günlüğü açılmadı — öğretim üyesi atanınca açılır"
+
+msgctxt "accounts.semester"
+msgid "Semestr kilidlidir — açılış sətirləri dəyişmir"
+msgstr "Dönem kilitli — açılış satırları değişmez"
+
+msgctxt "accounts.semester"
+msgid "Üç şərt ödənəndə «Semestri kilidlə» aktivləşir; kilid geri qaytarılmır"
+msgstr "Üç koşul sağlanınca “Dönemi kilitle” etkinleşir; kilit geri alınmaz"
+
+msgctxt "profile.checkbox_select"
+msgid "all_specialties"
+msgstr "Tüm uzmanlıklar"
+
+msgctxt "profile.checkbox_select"
+msgid "filter_by_specialty"
+msgstr "Uzmanlığa göre süz"
+
+msgctxt "profile.groups"
+msgid "confirm_back"
+msgstr "Geri"
+
+msgctxt "profile.groups"
+msgid "confirm_create_submit"
+msgstr "Onayla ve oluştur"
+
+msgctxt "profile.groups"
+msgid "confirm_create_title"
+msgstr "Grup oluşturmayı onaylayın"
+
+msgctxt "profile.groups"
+msgid "confirm_no_students"
+msgstr "Öğrenci seçilmedi — grup boş oluşturulacak."
+
+msgctxt "profile.groups"
+msgid "confirm_student_count"
+msgstr "Öğrenci sayısı"
+
+msgctxt "registrar.guest_roster"
+msgid "PDF və ya şəkil, 10 MB-dək. Sənəd əlavə qeydiyyatı ilə birlikdə saxlanılır və silinmir."
+msgstr "PDF veya görsel, 10 MB'a kadar. Belge kayıtla birlikte saklanır ve silinmez."
+
+msgctxt "registrar.guest_roster"
+msgid "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)"
+msgstr "BELGE — SUNUM / TALİMAT (ZORUNLU)"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd"
+msgstr "Belge"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir."
+msgstr "Belge (sunum / talimat) yüklenmelidir."
+
+msgctxt "registrar.guest_roster"
+msgid "Təqdimat və ya sərəncamın skanı (PDF/şəkil, 10 MB-dək)"
+msgstr "Sunum veya talimatın taraması (PDF/görsel, 10 MB'a kadar)"
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrupdan əlavə sənədsiz edilmir."
+msgstr "Belge (sunum / talimat) yüklenmelidir — alt gruptan ekleme belgesiz yapılamaz."
+
+msgctxt "registrar.model.guest_document.meta"
+msgid "guest roster document"
+msgstr "alt grup belgesi"
+
+msgctxt "registrar.model.guest_document.meta"
+msgid "guest roster documents"
+msgstr "alt grup belgeleri"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni qrupdan çıxar (başqa qrupa köçür)"
+msgstr "Öğrenciyi gruptan çıkar (başka gruba aktar)"
+
+msgctxt "accounts.groups"
+msgid "Qrup dəyişikliyi yalnız rəsmi köçürmə ilə olur: hədəf qrup, əmr nömrəsi və tarixi məcburidir. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir."
+msgstr "Grup değişikliği yalnızca resmi aktarımla yapılır: hedef grup, emir numarası ve tarihi zorunludur. Eski gruptaki günlük kayıtları geçmişe geçer, silinmez."
+
+msgctxt "accounts.groups"
+msgid "Hədəf qrup"
+msgstr "Hedef grup"
+
+msgctxt "accounts.groups"
+msgid "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır."
+msgstr "Yalnızca kapsamınızdaki aktif gruplar. Aktarım cari öğretim döneminde yapılır."

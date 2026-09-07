@@ -6,6 +6,8 @@ ayrılıb — MƏZMUN DƏYİŞMƏYİB, yalnız yer dəyişib.
 
 from core.constants import RoleScopeType
 
+from .default_roles_oversight import OVERSIGHT_ROLES
+from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import (
     PEOPLE_DIRECTORY_FULL,
     PEOPLE_DIRECTORY_READ,
@@ -15,6 +17,7 @@ from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
+from .default_roles_vice_dean import VICE_DEAN_ROLES
 
 UNIVERSITY_ROLES = [
     {
@@ -65,39 +68,13 @@ UNIVERSITY_ROLES = [
         "description": "Vice rector with broad administrative permissions",
     },
     {
-        # İmtahan mərkəzi — imtahan həyat dövrünü (yaratma, təyinat,
-        # monitorinq, nəticə, apellyasiya) idarə edir; üzv/struktur
-        # idarəetməsinə girişi YOXDUR (admin-alias exempt).
-        "name": "exam_center",
-        "display_name": "Exam Center",
-        "level": 85,
-        "scope_type": RoleScopeType.ORGANIZATION,
-        "permissions": [
-            "org.view",
-            "unit.view",
-            "member.view",
-            "course.view",
-            "exam.*",
-            # final_score.entry `exam.*`-a DAXİL DEYİL (ayrıca prefiks) — açıq verilir.
-            "final_score.entry",
-            "grade.view",
-            "grade.publish",
-            "appeal.respond",
-            "appeal.decide",
-            "qa.*",
-            # Kataloq: imtahan mərkəzi iştirakçıları tapmaq üçün org-wide OXU alır;
-            # hesab dayandırma / müəllim statusu QƏSDƏN yoxdur (kadr işi deyil).
-            "people.view_teachers",
-            "people.view_students",
-            "analytics.view_all",
-            "audit.view",
-        ],
-        "description": "Exam center managing exam lifecycle, monitoring, results and appeals",
-    },
-    {
-        # İmtahan mərkəzi RƏHBƏRİ — imtahan mərkəzinin başçısı; zala nəzarətçi
-        # təyin edə bilir (yeganə fərq). Digər imtahan səlahiyyətləri exam_center
-        # ilə eynidir. is_exam_center → final mərkəzinə giriş.
+        # İmtahan Mərkəzi — TƏK rol (sahib qərarı, 2026-09-06). Əvvəl iki sətir
+        # vardı: `exam_center` və `exam_center_head`. Praktikada eyni adamdır və
+        # səlahiyyətlər onsuz da eyni idi (`is_exam_center_head` hər ikisini
+        # qəbul edirdi; yeganə fərq `people.view_contacts` idi). `exam_center`
+        # kataloqdan yığışdırıldı, köhnə üzvlüklər miqrasiya 0046 ilə buraya
+        # köçürülür, ad isə `ROLE_NAME_NORMALIZATION` ilə rəhbərə oxunur.
+        # Zala nəzarətçi təyini və final mərkəzinə giriş bu roldadır.
         "name": "exam_center_head",
         "display_name": "Exam Center Head",
         "level": 85,
@@ -444,6 +421,12 @@ UNIVERSITY_ROLES = [
             # Koordinator öz ixtisasının qrupları arasında tələbə köçürür və
             # akademik statusu qeyd edir (əhatə ixtisas alt-ağacı ilə məhduddur).
             "people.manage_academic",
+            # SAHİBİN QƏRARI (2026-09-07): koordinator YENİ QRUP yaradır və ona
+            # tələbə əlavə edir — həm imtahan kohortu (`group.manage`), həm də
+            # akademik qrup reyestri (`unit.view` + Mərhələ 2 `unit.group_manage`,
+            # `student.assign_group` — bax default_roles_student_services).
+            "group.manage",
+            "unit.view",
             # Proqram koordinatorunun ƏSAS əməli: öz ixtisasının jurnallarına
             # alt qrupdan tələbə əlavə etmək / geri götürmək (audited, scope-lu).
             "journal.roster",
@@ -582,6 +565,9 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 
 # Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
+
+# 2026-09-06 əlavələri — izahlar öz modullarındadır (rim / vice_dean / oversight).
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 

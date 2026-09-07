@@ -39,7 +39,16 @@ KONTEKST MÜQAVİLƏSİ
     {% endfor %}
 
     <div class="ems-filters__actions">
-        <button type="submit" class="ems-btn ems-btn--primary ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>
+        {% comment %}
+        UX-10 (2026-09-05): `ems-btn--primary` BURADA yazılmır. `filter_bar.js`
+        yalnız formaya `is-dirty` əlavə edir; mavi (primary) görünüş
+        `.ems-filters.is-dirty .ems-filters__apply` qaydasından gəlir (bax
+        filter_bar.css) — draft dəyişəndə vurğulanır, əks halda neytraldır.
+        Əvvəl `ems-btn--primary` sabit yazılmışdı → Apply düyməsi HƏMİŞƏ mavi
+        görünürdü və səhifənin əsl əməl düyməsi ilə (məs. «Yeni fənn») rəqabət
+        edirdi (subject-catalog-da 2 primary düymə).
+        {% endcomment %}
+        <button type="submit" class="ems-btn ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>
         <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
     </div>
 

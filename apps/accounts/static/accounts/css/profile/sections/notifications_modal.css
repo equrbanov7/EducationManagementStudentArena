@@ -1,0 +1,182 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Profil — «Bildirişlər»: boş vəziyyət, modallar və dar ekran qaydaları.
+   ──────────────────────────────────────────────────────────────────────────
+   `notifications.css`-in DAVAMIDIR (ölçü büdcəsi 600 sətir) və ondan SONRA
+   yüklənməlidir: `.nfx-btn` və `--nfx-*` dəyərlərini oradan miras alır.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Boş vəziyyət ────────────────────────────────────────────────────────── */
+.nfx-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 64px 24px;
+    border: 1px dashed var(--ems-neutral-200);
+    border-radius: var(--nfx-radius);
+    background: var(--ems-neutral-0);
+    text-align: center;
+}
+
+.nfx-empty__icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-400);
+    font-size: 1.2rem;
+}
+
+.nfx-empty__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.nfx-empty__note {
+    margin: 0;
+    max-width: 380px;
+    font-size: 0.83rem;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+/* ── Modallar ────────────────────────────────────────────────────────────── */
+.nfx-modal {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+}
+
+.nfx-modal__head {
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.nfx-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.nfx-modal__mark {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 0.85rem;
+}
+
+.nfx-modal__mark--danger {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.nfx-modal__meta {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+    margin-bottom: 14px;
+}
+
+.nfx-modal__image[hidden] {
+    display: none;
+}
+
+.nfx-modal__image {
+    margin-bottom: 14px;
+}
+
+.nfx-modal__image img {
+    display: block;
+    max-width: 100%;
+    max-height: 280px;
+    width: auto;
+    border-radius: 10px;
+    border: 1px solid var(--ems-neutral-200);
+}
+
+.nfx-modal__msg {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ems-neutral-700);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.nfx-modal__link {
+    margin-top: 16px;
+}
+
+.nfx-modal__text {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--ems-neutral-700);
+    text-wrap: pretty;
+}
+
+.nfx-modal__foot {
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    border-radius: 0 0 16px 16px;
+}
+
+/* ── Dar ekran ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .nfx-toolbar__end {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .nfx-search {
+        max-width: none;
+    }
+
+    .nfx-row {
+        padding: 12px 12px 12px 14px;
+    }
+
+    .nfx-row__pick {
+        display: none;
+    }
+
+    .nfx-row__head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .nfx-callout {
+        flex-wrap: wrap;
+    }
+
+    .nfx-callout__actions {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nfx-row,
+    .nfx-row__actions,
+    .nfx-btn,
+    .nfx-segment__item {
+        transition: none;
+    }
+}

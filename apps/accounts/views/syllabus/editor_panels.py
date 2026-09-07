@@ -213,7 +213,7 @@ def week_rows(data, tags=()) -> list:
         outcome = str(source.get("outcome") or "")
         row = {
             "index": index + 1,
-            "topic": (source.get("topic") or "").strip(),
+            "topic": str(source.get("topic") or "").strip(),
             "outcome": outcome,
             "is_extra": index >= WEEK_ROWS,
             # Sətrin `practical` / `note` (və gələcək) açarları — toplayıcı
