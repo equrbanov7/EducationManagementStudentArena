@@ -1,0 +1,83 @@
+/* «Müraciətlərim» — süzgəc zolağının TARİX ARALIĞI nəzarəti.
+ *
+ * Ayrı fayl, çünki `applications.css` ölçü büdcəsinin (600 sətir) həddindədir.
+ * Ondan SONRA yüklənməlidir: `.apx-chip` / `.apx-kind` ilə eyni zolaqda dayanır
+ * və `--apx-*` custom property-lərini oradan miras alır.
+ */
+
+.apx-dates {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+}
+
+/* Aralıq seçiləndə süzgəcin AKTİV olduğu qonşu çiplərlə eyni dildə görünür. */
+.apx-dates.is-active {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.apx-date {
+    height: 28px;
+    padding: 0 6px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--ems-neutral-700);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.apx-dates.is-active .apx-date {
+    color: var(--ems-primary-800);
+}
+
+.apx-date:focus {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 1px;
+}
+
+.apx-dates__dash {
+    color: var(--ems-neutral-300);
+    font-weight: 700;
+}
+
+.apx-dates__clear {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.apx-dates__clear[hidden] {
+    display: none;
+}
+
+.apx-dates__clear:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
+}
+
+/* Dar ekranda aralıq öz sətrini alır — çiplərlə yan-yana sıxılmasın. */
+@media (max-width: 720px) {
+    .apx-dates {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .apx-date {
+        flex: 1;
+        min-width: 0;
+    }
+}

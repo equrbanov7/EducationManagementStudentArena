@@ -285,7 +285,8 @@ class PublicProfileViewTest(TestCase):
             reverse("accounts:profile_avatar", kwargs={"user_id": self.owner.id}),
             html=False,
         )
-        self.assertContains(response, "public-profile-avatar__fallback", html=False)
+        # 2026-09-07 redizaynı: `.public-profile-avatar__fallback` → `.ppx-hero__initials`.
+        self.assertContains(response, "ppx-hero__initials", html=False)
 
     def test_public_profile_search_and_pagination_work(self):
         search_response = self.client.get(

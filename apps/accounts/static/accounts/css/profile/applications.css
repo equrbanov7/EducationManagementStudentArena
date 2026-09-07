@@ -499,6 +499,9 @@
     color: var(--ems-neutral-900);
     line-height: 1.35;
     text-wrap: pretty;
+    /* Boşluqsuz uzun mövzu («QA-xxxxx…») sətri genişləndirib BÜTÜN paneli
+       üfüqi daşdırırdı — mövzu istifadəçidən gəlir, sözün İÇİNDƏN qırılmalıdır. */
+    overflow-wrap: anywhere;
 }
 
 .apx-row--new .apx-row__subject {

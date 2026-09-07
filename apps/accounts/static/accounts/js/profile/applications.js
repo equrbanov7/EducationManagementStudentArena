@@ -25,6 +25,8 @@
             stat: "open",
             kind: "",
             q: "",
+            from: "",
+            to: "",
             page: 1,
             rows: [],
             pages: 1,
@@ -223,6 +225,8 @@
                 stat: NS.state.stat,
                 kind: NS.state.kind,
                 q: NS.state.q,
+                from: NS.state.from,
+                to: NS.state.to,
                 page: NS.state.page,
             })
             .then(function (payload) {
@@ -245,29 +249,17 @@
             });
     }
 
+    /* Detal MODAL olduğu üçün heç vaxt ÖZ-ÖZÜNƏ açılmır (əvvəl geniş ekranda
+     * ilk sətir avtomatik seçilirdi — modalda bu, siyahını örtən sürpriz olardı).
+     * Burada yalnız artıq siyahıda olmayan seçim təmizlənir. */
     function autoSelect() {
         var stillThere = NS.state.rows.some(function (row) {
             return row.id === NS.state.selectedId;
         });
-        if (stillThere) {
+        if (stillThere || !NS.detail || !NS.detail.isOpen || NS.detail.isOpen()) {
             return;
         }
-        if (!NS.state.rows.length) {
-            NS.state.selectedId = "";
-            if (NS.detail && NS.detail.clear) {
-                NS.detail.clear();
-            }
-            return;
-        }
-        // Dar ekranda detal slide-over-dur — istifadəçi seçməyibsə AÇILMIR.
-        if (window.matchMedia && window.matchMedia("(max-width: 1100px)").matches) {
-            NS.state.selectedId = "";
-            if (NS.detail && NS.detail.clear) {
-                NS.detail.clear();
-            }
-            return;
-        }
-        NS.openApplication(NS.state.rows[0].id);
+        NS.state.selectedId = "";
     }
 
     NS.loadList = loadList;
@@ -291,6 +283,10 @@
         }
         NS.state.selectedId = id;
         renderList();
+        // Modal SORĞUDAN ƏVVƏL skeletlə açılır — klikin nəticəsi dərhal görünür.
+        if (NS.detail && NS.detail.openSkeleton) {
+            NS.detail.openSkeleton();
+        }
         return NS.api
             .detail(id)
             .then(function (payload) {
@@ -301,6 +297,9 @@
                 NS.refreshCounts();
             })
             .catch(function (error) {
+                if (NS.detail && NS.detail.clear) {
+                    NS.detail.clear();
+                }
                 NS.toast(NS.errorList(error)[0], "error");
             });
     };
@@ -394,6 +393,13 @@
             subject: Number(root.dataset.minSubject) || 5,
             body: Number(root.dataset.minBody) || 20,
             note: Number(root.dataset.minNote) || 10,
+            // Yükləmə hədləri də SERVER-dəndir (`payloads.rules_payload`).
+            maxFiles: Number(root.dataset.maxFiles) || 5,
+            maxMb: Number(root.dataset.maxFileMb) || 10,
+            // Fraqment köhnə keşdən gəlib atribut boş qalsa siyahı BOŞ olmamalıdır —
+            // boş siyahı hər faylı «dəstəklənmir» sayardı. Ehtiyat dəst serverin
+            // `ALLOWED_ATTACHMENT_EXTENSIONS` default-u ilə eynidir.
+            accept: (root.dataset.accept || ".docx,.jpeg,.jpg,.pdf,.png,.webp,.zip").split(",").filter(Boolean),
         };
         NS.family = root.dataset.family || "";
         NS.canCreate = root.dataset.canCreate === "1";
@@ -495,6 +501,9 @@
             if (input) {
                 input.value = "";
             }
+            if (NS.filters) {
+                NS.filters.reset();
+            }
             setKind("");
         });
 
@@ -546,6 +555,9 @@
                     return;
                 }
                 if (NS.dialogs && NS.dialogs.closeTop && NS.dialogs.closeTop()) {
+                    return;
+                }
+                if (NS.detail && NS.detail.requestClose && NS.detail.requestClose()) {
                     return;
                 }
                 NS.closeKindPanel();

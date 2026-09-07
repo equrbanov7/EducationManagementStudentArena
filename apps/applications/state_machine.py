@@ -2,6 +2,7 @@
 
 ```
 submitted ──baxış──▶ in_review ──┬── resolve ──▶ resolved ──(təsdiq / 5 iş günü)──▶ closed
+     │                           │                    └── reopen (səbəb, yalnız sahib) ──▶ in_review
      │                           ├── reject (səbəb) ──▶ rejected            [terminal]
      │                           ├── request_info ──▶ waiting_info ──provide_info──▶ in_review
      │                           ├── return_for_correction (səbəb) ──▶ returned ──resubmit──▶ submitted
@@ -47,6 +48,7 @@ class Action:
     RESUBMIT = "resubmit"
     RESOLVE = "resolve"
     REJECT = "reject"
+    REOPEN = "reopen"
     CLOSE = "close"
     CANCEL = "cancel"
 
@@ -145,6 +147,18 @@ RULES = {
         reason_required=True,
         min_text_length=10,
     ),
+    #: «Razı deyiləm» — cavab müraciəti həll etmirsə sahibin YEGANƏ alternativi
+    #: eyni mövzuda YENİ müraciət açmaq idi (nömrə qopur, yazışma itir). Bu qayda
+    #: müraciəti öz nömrəsi altında EYNİ şöbəyə qaytarır; səbəb məcburidir, çünki
+    #: emalçı nəyin çatışmadığını bilməlidir.
+    Action.REOPEN: ActionRule(
+        name=Action.REOPEN,
+        sources=frozenset({ApplicationStatus.RESOLVED.value}),
+        target=ApplicationStatus.IN_REVIEW.value,
+        actor=ACTOR_SENDER,
+        reason_required=True,
+        min_text_length=10,
+    ),
     Action.CLOSE: ActionRule(
         name=Action.CLOSE,
         sources=frozenset({ApplicationStatus.RESOLVED.value}),
@@ -170,7 +184,7 @@ HANDLER_ACTIONS = (
     Action.ADD_COMMENT,
     Action.MARK_SEEN,
 )
-SENDER_ACTIONS = (Action.PROVIDE_INFO, Action.RESUBMIT, Action.CLOSE, Action.CANCEL)
+SENDER_ACTIONS = (Action.PROVIDE_INFO, Action.RESUBMIT, Action.CLOSE, Action.REOPEN, Action.CANCEL)
 
 
 def rule_for(action: str) -> ActionRule:

@@ -91,6 +91,7 @@ class EventKind(models.TextChoices):
     RETURNED = "returned", pgettext_lazy(_CTX, "Düzəliş üçün qaytarıldı")
     RESUBMITTED = "resubmitted", pgettext_lazy(_CTX, "Düzəlişdən sonra yenidən göndərildi")
     RESOLVED = "resolved", pgettext_lazy(_CTX, "Həll olundu")
+    REOPENED = "reopened", pgettext_lazy(_CTX, "Cavabdan razı qalmadı — yenidən baxışa göndərdi")
     REJECTED = "rejected", pgettext_lazy(_CTX, "Rədd edildi")
     CLOSED = "closed", pgettext_lazy(_CTX, "Bağlandı")
     CANCELLED = "cancelled", pgettext_lazy(_CTX, "Ləğv edildi")
@@ -143,9 +144,16 @@ STATUS_PALETTE = {
 }
 
 # ── Yükləmə qaydaları ───────────────────────────────────────────────────────
-ALLOWED_ATTACHMENT_EXTENSIONS = frozenset({".pdf", ".jpg", ".jpeg", ".png", ".docx"})
+#: ``.zip`` QƏSDƏN buradadır: bir müraciətə çox sənəd lazım olanda (məs. bir
+#: neçə skan + arayış) 5 fayl limiti azlıq edir — arxiv bir fayl kimi gedir.
+#: Arxivin İÇİ ``services.submit.attach_files``-də zip-bomba yoxlamasından
+#: keçir (``core.upload_security.validate_zip_archive``).
+ALLOWED_ATTACHMENT_EXTENSIONS = frozenset({".pdf", ".jpg", ".jpeg", ".png", ".webp", ".docx", ".zip"})
 MAX_ATTACHMENT_MB = 10
 MAX_ATTACHMENTS_PER_ACTION = 5
+#: Fayl seçicisinin `accept` atributu + UI mətni üçün sabit sıra (frozenset
+#: sırasız olduğu üçün payload hər dəfə eyni görünsün deyə çeşidlənir).
+ATTACHMENT_ACCEPT = tuple(sorted(ALLOWED_ATTACHMENT_EXTENSIONS))
 
 # ── Server-side uzunluq qaydaları (dizayn §8.4) ─────────────────────────────
 MIN_SUBJECT_LENGTH = 5
@@ -399,6 +407,7 @@ DEFAULT_KIND_SEED = (
 
 __all__ = [
     "ALLOWED_ATTACHMENT_EXTENSIONS",
+    "ATTACHMENT_ACCEPT",
     "AUTO_CLOSE_WORKING_DAYS",
     "BADGE_PALETTES",
     "CLOSED_STATUSES",
