@@ -68,13 +68,23 @@
         return open.length ? open[open.length - 1] : null;
     }
 
+    /* Səhifənin ƏSL scroller-i SPA kontekstində `<html>`-dir (bax
+     * static/js/modal_scroll_lock.js) — Bootstrap-ın `body.modal-open`-u fonu
+     * saxlamırdı: qrup dialoqu açıq ikən arxadakı cədvəl siçan təkəri ilə
+     * sürüşürdü (sahib şikayəti 2026-09-07). `html.ems-modal-open` layihənin
+     * öz kilididir (`modal_scroll_lock.css`); hər iki sinif qoyulur. */
     function lockScroll() {
         document.body.classList.add("modal-open");
+        document.documentElement.classList.add("ems-modal-open");
     }
 
     function unlockScroll() {
         if (!openOverlays().length) {
             document.body.classList.remove("modal-open");
+            // Bootstrap modalı hələ açıqdırsa onun kilidi qalsın.
+            if (!document.querySelector(".modal.show")) {
+                document.documentElement.classList.remove("ems-modal-open");
+            }
         }
     }
 
@@ -187,9 +197,25 @@
         close(btn);
     });
 
-    // Scrim-ə klik bağlayır; dialoqun İÇİNƏ klik bağlamır.
+    /* Scrim-ə klik bağlayır; dialoqun İÇİNƏ klik bağlamır.
+     *
+     * ⚠️ Bağlamaq üçün mousedown VƏ mouseup — HƏR İKİSİ scrim-in ÖZÜNDƏ olmalıdır.
+     * Tək `mousedown` yoxlaması iki halda dialoqu YANLIŞ bağlayırdı:
+     *   • native `<select>` popup-ı dialoqun sərhədindən kənara daşanda variantın
+     *     üzərinə edilən klik popup bağlandıqdan sonra scrim-ə düşürdü — sahib
+     *     şikayəti 2026-09-07: «rəhbər seçimini açan kimi bağlanır»;
+     *   • dialoq içində mətn seçib siçanı scrim üzərində buraxanda.
+     * Bu naxış (down+up eyni hədəfdə) modal komponentlərində standartdır. */
+    var scrimDown = null;
+
     window.EMSDelegate.on("mousedown", ".ems-overlay", function (event, overlay) {
-        if (event.target === overlay && overlay.dataset.emsStatic !== "true") {
+        scrimDown = event.target === overlay ? overlay : null;
+    });
+
+    window.EMSDelegate.on("mouseup", ".ems-overlay", function (event, overlay) {
+        var startedOnScrim = scrimDown === overlay;
+        scrimDown = null;
+        if (startedOnScrim && event.target === overlay && overlay.dataset.emsStatic !== "true") {
             close(overlay);
         }
     });
@@ -201,6 +227,16 @@
         }
     });
 
+    window.EMSReady.once("ems-ui-overlay-scrim", function () {
+        // Siçan overlay-dən KƏNARDA buraxılırsa yaddaş təmizlənir — əks halda
+        // növbəti mouseup köhnə `scrimDown` ilə yanlış bağlaya bilərdi.
+        document.addEventListener("mouseup", function (event) {
+            if (!event.target || !event.target.closest || !event.target.closest(".ems-overlay")) {
+                scrimDown = null;
+            }
+        });
+    });
+
     window.EMSReady.once("ems-ui-overlay-keys", function () {
         document.addEventListener("keydown", function (event) {
             var overlay = topOverlay();
@@ -208,6 +244,14 @@
                 return;
             }
             if (event.key === "Escape") {
+                // Açıq AXTARIŞLI SEÇİCİ (rəhbər/müəllim menyusu) varsa Escape
+                // ONU bağlayır, dialoqu yox — əks halda istifadəçi menyunu
+                // yığmaq istəyəndə bütün forma itirdi. Seçicinin öz qatı hadisəni
+                // `preventDefault` edir; dinləyici sırasından asılı qalmamaq üçün
+                // burada həm o bayraq, həm də DOM vəziyyəti yoxlanır.
+                if (event.defaultPrevented || overlay.querySelector(".ems-ss.is-open")) {
+                    return;
+                }
                 event.stopPropagation();
                 close(overlay);
                 return;

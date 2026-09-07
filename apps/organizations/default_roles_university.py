@@ -421,6 +421,12 @@ UNIVERSITY_ROLES = [
             # Koordinator öz ixtisasının qrupları arasında tələbə köçürür və
             # akademik statusu qeyd edir (əhatə ixtisas alt-ağacı ilə məhduddur).
             "people.manage_academic",
+            # SAHİBİN QƏRARI (2026-09-07): koordinator YENİ QRUP yaradır və ona
+            # tələbə əlavə edir — həm imtahan kohortu (`group.manage`), həm də
+            # akademik qrup reyestri (`unit.view` + Mərhələ 2 `unit.group_manage`,
+            # `student.assign_group` — bax default_roles_student_services).
+            "group.manage",
+            "unit.view",
             # Proqram koordinatorunun ƏSAS əməli: öz ixtisasının jurnallarına
             # alt qrupdan tələbə əlavə etmək / geri götürmək (audited, scope-lu).
             "journal.roster",

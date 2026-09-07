@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Tələbə hərəkəti (DONDUR = akademik məzuniyyət / UZAQLAŞDIR = xaric) —
+səbəb dialoqunun ƏLAVƏ sahələri (`reason_extra_include`).
+
+Qayda `apps.accounts.services.people.movements.create_movement` ilə eynidir:
+əmr nömrəsi + əmr tarixi MƏCBURİDİR, akademik məzuniyyətdə bitmə tarixi də
+(`effective_until`). Səbəb ≥20 simvol — dialoqun öz qaydası. Kim və nə vaxt
+etdiyi audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
+<div class="ems-grid ems-grid--2">
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off"
+               placeholder="{% trans 'Məs.: 12/T' context 'accounts.groups' %}">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ reason_id }}-order-date">{% trans "Əmr tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date">
+    </div>
+</div>
+{% if movement_target_group %}
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ reason_id }}-target">{% trans "Hədəf qrup" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <select class="ems-select" id="{{ reason_id }}-target" name="target_group" data-live-search="true">
+        <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+        {% for option in groups_registry_section.group_options %}
+        <option value="{{ option.value }}">{{ option.label }}</option>
+        {% endfor %}
+    </select>
+    <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır." context "accounts.groups" %}</p>
+</div>
+{% endif %}
+{% if movement_until %}
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ reason_id }}-until">{% trans "Məzuniyyətin bitmə tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input type="date" class="ems-input" id="{{ reason_id }}-until" name="effective_until">
+    <p class="ems-field__hint">{% trans "Bu tarixə qədər tələbənin statusu «akademik məzuniyyət» olur; bərpa ayrıca əməldir." context "accounts.groups" %}</p>
+</div>
+{% endif %}
+<div class="tof-students__target" data-tof-movement-target>
+    <span class="tof-students__target-label">{% trans "Tələbə" context "accounts.groups" %}</span>
+    <strong data-tof-movement-name></strong>
+</div>

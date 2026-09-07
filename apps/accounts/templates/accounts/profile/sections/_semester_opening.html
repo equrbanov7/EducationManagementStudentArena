@@ -11,6 +11,11 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
 
 «Plan yoxdur» ixtisaslar BLOKLAYICIDIR: onlar üçün açılış yaradılmır.
 
+2026-09-07 (sahib rəyi «izahı biraz çətindi»): prosesin izahı ayrıca «Necə
+işləyir» kartına çıxarıldı (hər addımda NƏ edilir, HANSI düymə), bloklayıcı
+ixtisaslar lentin sağ yuvasından gövdəyə (çip) köçdü, açılış cədvəli
+SƏHİFƏLƏNİR (`sm_page`, 25/səhifə) — əvvəl ilk 400 sətir bir səhifədə gedirdi.
+
 ⚠️ `<h1>` yazılmır (qabıq verir). CSS/JS xarici fayldadır (CSP).
 {% endcomment %}
 {% if 'semester-opening' in allowed_sections %}
@@ -33,7 +38,7 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
 {% if not semester_opening_section.has_access %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=semester_opening_section.access_denied_message %}
 {% else %}
-<div class="tof"
+<div class="tof tof--semester"
      data-tof-root
      data-tof-section="semester-opening"
      data-tof-action-url="{{ semester_opening_section.action_url }}">
@@ -58,14 +63,16 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
     {% trans "Semestr açılışının mərhələləri" context "accounts.semester" as sm_steps_label %}
     {% include "partials/ems_ui/_stepper.html" with steps=semester_opening_section.steps steps_label=sm_steps_label %}
 
+    {% include "accounts/profile/sections/teaching_office/_semester_howto.html" %}
+
     {% if semester_opening_section.blockers %}
-        {% trans "«Plan yoxdur» — bu ixtisaslar üçün semestr açıla bilməz" context "accounts.semester" as sm_block_title %}
-        {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=sm_block_title banner_action_include="accounts/profile/sections/teaching_office/_semester_blockers.html" %}
+        {% include "accounts/profile/sections/teaching_office/_semester_blockers.html" %}
     {% endif %}
 
     <div class="tof-split">
         <div class="tof-pane">
             <h3 class="tof-pane__title">{% trans "Kilid şərtləri" context "accounts.semester" %}</h3>
+            <p class="tof-pane__hint">{% trans "Üç şərt də ödənəndə «Semestri kilidlə» düyməsi aktivləşir. Kilid açılış sətirlərini dondurur; geri açmaq ayrıca səlahiyyət və səbəb tələb edir." context "accounts.semester" %}</p>
             <ul class="tof-gates">
                 {% for gate in semester_opening_section.lock_gates %}
                 <li class="tof-gates__item tof-gates__item--{% if gate.ok %}ok{% else %}pending{% endif %}">
@@ -78,6 +85,8 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
         </div>
         <div class="tof-pane">
             <h3 class="tof-pane__title">{% trans "Kafedralar üzrə açılış" context "accounts.semester" %}</h3>
+            <p class="tof-pane__hint">{% trans "Hər kafedranın neçə açılışı var və neçəsinə müəllim təyin olunub — təyinat kafedra rəhbərinin «Dərs yükü» bölməsindən edilir." context "accounts.semester" %}</p>
+            <div class="tof-pane__scroll">
             <table class="ems-table ems-table--zebra">
                 <thead>
                     <tr>
@@ -92,7 +101,12 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
                     <tr>
                         <th scope="row">{{ chair.name }}</th>
                         <td class="ems-table__num">{{ chair.total }}</td>
-                        <td class="ems-table__num">{{ chair.assigned }} ({{ chair.pct }}%)</td>
+                        <td class="ems-table__num">
+                            <span class="tof-progress" data-pct="{{ chair.pct }}">
+                                <span class="tof-progress__bar tof-progress__bar--{% if chair.pct >= 100 %}full{% elif chair.pct >= 50 %}half{% else %}low{% endif %}" style="--pct:{{ chair.pct }}%"></span>
+                            </span>
+                            {{ chair.assigned }} ({{ chair.pct }}%)
+                        </td>
                         <td class="ems-table__num">{{ chair.hours }}</td>
                     </tr>
                     {% empty %}
@@ -100,10 +114,14 @@ təyin olunub» · «jurnallar açılıb». Üçü ödənməsə kilid düyməsi 
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
+    <h3 class="tof-pane__title tof-table-title">{% trans "Açılış sətirləri" context "accounts.semester" %} <span class="tof-table-title__count">{{ semester_opening_section.filter_count_label }}</span></h3>
     {% include "partials/ems_ui/_data_table.html" with table_columns=semester_opening_section.columns table_rows=semester_opening_section.table_rows table_state=semester_opening_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-calendar-check" state_title=semester_opening_section.state_title state_body=semester_opening_section.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=semester_opening_section.page_obj page_param="sm_page" extra_query=semester_opening_section.pagination_query %}
     {% endif %}
 
     {% if semester_opening_section.can_open %}

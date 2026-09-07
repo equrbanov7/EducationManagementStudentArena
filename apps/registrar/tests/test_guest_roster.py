@@ -42,6 +42,13 @@ from core.rls import bypass_rls
 User = get_user_model()
 
 
+
+def _doc():
+    """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+
 class _GuestRosterBase(TestCase):
     """Bir fakültə · bir kafedra · İKİ qrup (G1 hədəf, G2 alt qrup) + kənar fakültə."""
 
@@ -342,7 +349,7 @@ class GuestPermissionTest(_GuestRosterBase):
         self.assertEqual(
             client.post(
                 reverse("registrar:journal_guest_add", args=[self.offering.id]),
-                {"group": str(self.group2.id), "student": str(self.guest.id)},
+                {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
             ).status_code,
             404,
         )
@@ -365,7 +372,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
 
         client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
 
         after = client.get(url, {"group": str(self.group2.id)}).json()
@@ -379,7 +386,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
         """Görünürlük icazə deyil: `disabled` sətri POST-la da keçməməlidir."""
         self._drop_own_history(self.guest)
         client = self._client(self.coordinator)
-        payload = {"group": str(self.group2.id), "student": str(self.guest.id)}
+        payload = {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)}
         self.assertTrue(
             client.post(reverse("registrar:journal_guest_add", args=[self.offering.id]), payload).json()["ok"]
         )
@@ -399,7 +406,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
         client = self._client(self.coordinator)
         added = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id), "reason": "alt qrup"},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id), "reason": "alt qrup"},
         )
         self.assertEqual(added.status_code, 200)
         body = added.json()
@@ -419,7 +426,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
         client = self._client(self.coordinator)
         resp = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.far_group.id), "student": str(self.far_student.id)},
+            {"document": _doc(), "group": str(self.far_group.id), "student": str(self.far_student.id)},
         )
         self.assertEqual(resp.status_code, 403)
         self.assertFalse(resp.json()["ok"])
@@ -444,7 +451,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
         client = self._client(self.coordinator)
         client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         page = client.get(reverse("registrar:journal_detail", args=[self.offering.id])).content.decode()
         self.assertIn("data-jgs-open", page)
@@ -464,7 +471,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
         client = self._client(self.coordinator)
         added = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         ).json()
         page = client.get(reverse("registrar:journal_detail", args=[self.offering.id])).content.decode()
         self.assertIn("data-jgs-tbody", page)

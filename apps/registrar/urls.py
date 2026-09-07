@@ -9,6 +9,7 @@ from . import (
     correction_views,
     curriculum_actions,
     guest_roster_views,
+    individual_plan_views,
     journal_actions,
     journal_lesson_lookup,
     lessons_log_views,
@@ -35,6 +36,8 @@ urlpatterns = [
     path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
     # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).
     path("semestr/emel/", semester_actions.semester_action, name="semester_action"),
+    # Ekran 06 «Qruplar» — rəsmi «Fərdi tədris planı» DOCX (qrup / ?student=<record>).
+    path("qrup/<uuid:group_id>/ferdi-plan.docx", individual_plan_views.group_individual_plan, name="group_individual_plan"),
     path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
     # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
     path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),

@@ -188,6 +188,58 @@
         reload(section, sectionUrl(section, { st_unit: event.detail.node }));
     });
 
+    /* ---- Rəhbər seçicisi (axtarışlı, server-backed) ---------------------- */
+
+    /* Native `<select>` əvəzlənib: siyahı `structure_head_candidates` lookup-undan
+     * debounce-lu axtarışla, səhifə-səhifə gəlir. Seçici BİR dəfə qurulur —
+     * dialoq DOM-da qalır, hər açılışda yalnız dəyəri sinxronlaşdırılır. */
+    var headPicker = null;
+    //: Dialoq açılana qədər saxlanılan prefill dəyərləri (bax aşağıdakı handler).
+    var pendingHeadValues = null;
+
+    function headPickerFor(dialog) {
+        var host = dialog.querySelector("[data-tof-head-picker]");
+        var field = dialog.querySelector("#tof-head-user");
+        // `data-url` boşdursa (məs. server yenidən başladılmayıb və kontekst
+        // açarı hələ yoxdur) YARIMÇIQ seçici qurma: boş URL cari səhifəyə fetch
+        // edib HTML alır, menyu isə heç vaxt dolmur. Sahə adi mətn kimi qalır,
+        // gizli `head` dəyəri prefill-dən gəlir — forma yenə göndərilir.
+        if (!host || !field || !window.EMSSearchableSelect || !host.dataset.url) {
+            return null;
+        }
+        if (!headPicker || !document.contains(headPicker.el)) {
+            headPicker = window.EMSSearchableSelect.create(host, {
+                url: host.dataset.url || "",
+                multi: false,
+                skeleton: true,
+                emptyText: host.dataset.empty || "",
+                // Seçim BİRBAŞA gizli sahəyə yazılır — forma dəyişmədən göndərilir.
+                onChange: function () {
+                    field.value = headPicker ? headPicker.value() : "";
+                },
+            });
+        }
+        return headPicker;
+    }
+
+    /* Dialoq açılanda: cari rəhbər çip kimi görünsün, boşdursa seçici təmiz olsun. */
+    function syncHeadPicker(dialog, values) {
+        var picker = headPickerFor(dialog);
+        if (!picker) {
+            return;
+        }
+        var id = values && values.head ? String(values.head) : "";
+        var label = (values && values.head_label) || "";
+        picker.reset();
+        if (id && label) {
+            picker.setValue(id, label);
+        }
+        var field = dialog.querySelector("#tof-head-user");
+        if (field) {
+            field.value = id;
+        }
+    }
+
     /* ---- Dialoq açılışı: sətir/qovşaq dəyərlərini formaya köçür ---------- */
 
     window.EMSDelegate.on("click", "[data-tof-open]", function (event, btn) {
@@ -228,6 +280,7 @@
                     window.EMSBootstrapSelect.sync(el);
                 }
             }
+            pendingHeadValues = dialog.querySelector("[data-tof-head-picker]") ? values : null;
             var title = dialog.querySelector(".ems-dialog__title");
             var titleOverride = btn.getAttribute("data-tof-title");
             if (title && titleOverride) {
@@ -237,6 +290,11 @@
         if (window.EMSOverlay) {
             window.EMSOverlay.open(dialog);
             window.EMSOverlay.syncReason(dialog);
+        }
+        // Seçici GÖRÜNƏN dialoqda qurulur — menyunun yerləşdirilməsi ölçü tələb edir.
+        if (pendingHeadValues) {
+            syncHeadPicker(dialog, pendingHeadValues);
+            pendingHeadValues = null;
         }
     });
 

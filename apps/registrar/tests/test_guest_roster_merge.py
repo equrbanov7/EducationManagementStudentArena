@@ -41,6 +41,13 @@ from .test_guest_roster import _GuestRosterBase
 REASON = "Dekanlıq sərəncamı №77 — alt qrup birləşməsi"
 
 
+
+def _doc():
+    """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+
 class _MergeBase(_GuestRosterBase):
     """Alt qrupun ÖZ Tarix jurnalında real iz (dərs + qayıb + bal) yaradır."""
 
@@ -226,7 +233,7 @@ class MergeHttpTest(_MergeBase):
         client = self._client(self.coordinator)
         response = client.get(
             reverse("registrar:journal_guest_add_preview", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         self.assertEqual(response.status_code, 200)
         body = response.json()
@@ -244,14 +251,14 @@ class MergeHttpTest(_MergeBase):
         client = self._client(self.coordinator)
         body = client.get(
             reverse("registrar:journal_guest_add_preview", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         ).json()
         self.assertFalse(body["conflict"])
 
     def test_add_over_http_requires_the_release_flag(self):
         client = self._client(self.coordinator)
         url = reverse("registrar:journal_guest_add", args=[self.offering.id])
-        payload = {"group": str(self.group2.id), "student": str(self.guest.id), "reason": REASON}
+        payload = {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id), "reason": REASON}
         refused = client.post(url, payload)
         self.assertEqual(refused.status_code, 400)
         self.assertIn("azad et", refused.json()["error"])
@@ -270,6 +277,7 @@ class MergeHttpTest(_MergeBase):
         client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
             {
+                "document": _doc(),
                 "group": str(self.group2.id),
                 "student": str(self.guest.id),
                 "reason": REASON,
@@ -313,7 +321,7 @@ class StatusMismatchTest(_MergeBase):
         client = self._client(self.coordinator)
         response = client.post(
             reverse("registrar:journal_guest_add", args=[self.offering.id]),
-            {"group": str(self.group2.id), "student": str(self.guest.id)},
+            {"document": _doc(), "group": str(self.group2.id), "student": str(self.guest.id)},
         )
         self.assertEqual(response.status_code, 404)
         with bypass_rls():
