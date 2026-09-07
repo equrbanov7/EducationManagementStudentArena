@@ -3,6 +3,7 @@ Student group forms (teacher/admin-facing).
 """
 
 from django import forms
+from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch
@@ -44,6 +45,25 @@ class UserMetadataSelectMultiple(forms.SelectMultiple):
             option["attrs"]["data-student-group-number"] = student_group_number
             search_labels.append(student_group_number)
 
+        # Akademik qeyd (registrar): ixtisas adı/şifri + qeydiyyat qrupu — modalda
+        # ixtisasa görə süzgəc və təsdiq xülasəsi üçün (sahib, 2026-09-07).
+        record = next(iter(getattr(user, "_records_for_form", []) or []), None)
+        if record is not None:
+            program = getattr(record, "program", None)
+            specialty_unit = getattr(program, "specialty_unit", None)
+            specialty = (getattr(specialty_unit, "name", "") or getattr(program, "name", "") or "").strip()
+            code = (getattr(program, "official_code", "") or getattr(program, "legacy_official_code", "") or "").strip()
+            group = getattr(record, "group", None)
+            if specialty:
+                option["attrs"]["data-specialty"] = specialty
+                search_labels.append(specialty)
+            if code:
+                option["attrs"]["data-specialty-code"] = code
+                search_labels.append(code)
+            if group is not None and group.name:
+                option["attrs"]["data-academic-group"] = group.name
+                search_labels.append(group.name)
+
         for group in self._iter_prefetched_group_memberships(user):
             group_name = (getattr(group, "name", "") or "").strip()
             if group_name and group_name not in membership_labels:
@@ -73,7 +93,7 @@ class StudentGroupForm(forms.ModelForm):
 
     primary_teacher = forms.ModelChoiceField(
         queryset=User.objects.none(),
-        required=True,
+        required=False,
         label=pgettext_lazy("exams.form.group.label", "primary_teacher"),
         widget=forms.Select(
             attrs={
@@ -174,12 +194,20 @@ class StudentGroupForm(forms.ModelForm):
                 .order_by("name")
             )
 
+        StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+        records_qs = StudentAcademicRecord.objects.filter(is_active=True).select_related(
+            "program", "program__specialty_unit", "group"
+        )
+        if self.organization is not None:
+            records_qs = records_qs.filter(organization=self.organization)
         students_qs = students_qs.prefetch_related(
             Prefetch(
                 "student_groups_as_student",
                 queryset=group_memberships_qs,
                 to_attr="_student_group_memberships_for_form",
-            )
+            ),
+            # İxtisas/qrup metadatası (bax UserMetadataSelectMultiple.create_option).
+            Prefetch("academic_records", queryset=records_qs.order_by("-created_at"), to_attr="_records_for_form"),
         )
         teachers_qs = teachers_qs.prefetch_related(
             Prefetch(
@@ -293,8 +321,24 @@ class StudentGroupForm(forms.ModelForm):
             if any(subject.id not in allowed_subject_ids for subject in subjects):
                 raise ValidationError(pgettext_lazy("exams.form.group.error", "tenant_subjects_only"))
 
+        # SAHİBİN QƏRARI (2026-09-07): qrup yaradarkən «əsas müəllim» seçmək
+        # MƏCBURİ DEYİL — koordinator/dekanlıq qrupu müəllimsiz yaradır. Model
+        # sahəsi boş ola bilmədiyi üçün sahib = mövcud müəllim (redaktə) və ya
+        # aktorun özü (yaratma). Bu halda müəllim-rol yoxlaması tətbiq olunmur:
+        # aktor koordinator ola bilər.
+        if primary_teacher is None and self.errors.get("primary_teacher"):
+            # Sahə səhvi (məs. başqa tenantın müəllimi) — ehtiyat sahibə DÜŞMÜR,
+            # səhv olduğu kimi qalır (əvvəlki «tenant mismatch» davranışı).
+            return cleaned_data
         if primary_teacher is None:
-            raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_required"))
+            fallback = self.instance.teacher if (self.instance and self.instance.pk) else self.actor
+            if fallback is None:
+                raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_required"))
+            cleaned_data["primary_teacher"] = fallback
+            self._validated_assigned_teacher_ids = {
+                *(t.id for t in (assigned_teachers or [])),
+            } or {fallback.id}
+            return cleaned_data
 
         if not self._is_teacher_profile(primary_teacher):
             raise ValidationError(pgettext_lazy("exams.form.group.error", "primary_teacher_role_required"))

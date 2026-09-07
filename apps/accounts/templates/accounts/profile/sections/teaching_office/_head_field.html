@@ -1,13 +1,30 @@
 {% load i18n %}
 {% comment %}Rəhbər seçicisi — səbəb dialoqunun əlavə sahəsi (`reason_extra_include`).
-Boş dəyər = rəhbəri GÖTÜR (təyinatı ləğv et); səbəb yenə məcburidir.
-Namizəd formatı `_shared._head_candidates`-dən gəlir: {user_id, full_name, role_label}.{% endcomment %}
+
+2026-09-07: native `<select>` AXTARIŞLI seçici ilə əvəzləndi. İki səbəb:
+* siyahı bütün namizədləri (yüzlərlə ad) səhifə ilə birlikdə yükləyirdi və
+  axtarış yox idi — indi `EMSSearchableSelect` server-dən debounce-lu axtarışla
+  səhifə-səhifə gətirir (`organizations:structure_head_candidates`);
+* native popup dialoqun sərhədindən daşdığı üçün seçim kliki scrim-ə düşür və
+  dialoq bağlanırdı (sahib şikayəti). Popup indi dialoqun ÖZ DOM-undadır.
+
+Dəyər gizli `head` sahəsindədir — dialoq açılışındakı prefill (`data-tof-prefill`)
+onu olduğu kimi doldurur, JS isə çipi `head_label` ilə göstərir. BOŞ dəyər =
+rəhbəri GÖTÜR (təyinatı ləğv et); səbəb yenə məcburidir.{% endcomment %}
 <div class="ems-field">
-    <label class="ems-field__label" for="tof-head-user">{% trans "Rəhbər" context "accounts.structure_tree" %}</label>
-    <select class="ems-select" id="tof-head-user" name="head">
-        <option value="">{% trans "Rəhbəri götür (boş)" context "accounts.structure_tree" %}</option>
-        {% for candidate in structure_tree_section.head_candidates %}
-            <option value="{{ candidate.user_id }}">{{ candidate.full_name }}{% if candidate.role_label %} — {{ candidate.role_label }}{% endif %}</option>
-        {% endfor %}
-    </select>
+    <label class="ems-field__label" for="tof-head-search">{% trans "Rəhbər" context "accounts.structure_tree" %}</label>
+    <input type="hidden" name="head" id="tof-head-user" value="">
+    <div class="ems-ss tof-ms js-tof-head"
+         data-tof-head-picker
+         data-url="{{ structure_tree_section.head_lookup_url }}"
+         data-placeholder="{% trans 'Ad və ya istifadəçi adı üzrə axtar' context 'accounts.structure_tree' %}"
+         data-empty="{% trans 'Uyğun namizəd tapılmadı.' context 'accounts.structure_tree' %}">
+        <div class="ems-ss__chips tof-ms__chips">
+            <input type="text" id="tof-head-search" class="ems-ss__search tof-ms__search"
+                   placeholder="{% trans 'Ad və ya istifadəçi adı üzrə axtar' context 'accounts.structure_tree' %}"
+                   autocomplete="off">
+        </div>
+        <div class="ems-ss__menu tof-ms__menu"></div>
+    </div>
+    <p class="ems-field__hint">{% trans "Seçimi boş buraxsanız bölmənin rəhbəri götürülür." context "accounts.structure_tree" %}</p>
 </div>

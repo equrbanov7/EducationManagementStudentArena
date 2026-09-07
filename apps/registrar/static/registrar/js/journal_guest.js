@@ -321,6 +321,11 @@
         var summary = modal.querySelector("[data-jgs-summary]");
         var hintbox = modal.querySelector("[data-jgs-hintbox]");
         var ready = !!(group.value() && student.value());
+        // SƏNƏD MƏCBURİDİR (sahib, 2026-09-07) — fayl seçilməyibsə düymə bağlı qalır.
+        var docEl = modal.querySelector("[data-jgs-document]");
+        if (ready && docEl && !(docEl.files && docEl.files.length)) {
+            ready = false;
+        }
         // Münaqişə varsa təsdiq YALNIZ «azad et» işarələnəndən + səbəb
         // yazılandan sonra açılır (server qapısı da eynisini tələb edir).
         if (ready && merge.conflict) {
@@ -440,18 +445,25 @@
         button.disabled = true;
         show(skeleton);
         setError(modal, "");
-        window.EMSCore.fetchJSON(attr(modal, "data-add-url"), {
-            method: "POST",
-            data: {
-                group: pickers.group.value(),
-                student: pickers.student.value(),
-                reason: reason ? reason.value : "",
-                release_source: releaseChecked(modal),
-            },
-        })
+        var docEl = modal.querySelector("[data-jgs-document]");
+        if (docEl && !(docEl.files && docEl.files.length)) {
+            hide(skeleton);
+            button.disabled = false;
+            setError(modal, attr(modal, "data-document-required"));
+            return;
+        }
+        // Fayl var → multipart (FormData); JSON body ilə göndərilə bilməz.
+        var body = new FormData();
+        body.append("group", pickers.group.value());
+        body.append("student", pickers.student.value());
+        body.append("reason", reason ? reason.value : "");
+        body.append("release_source", releaseChecked(modal) ? "1" : "0");
+        if (docEl) body.append("document", docEl.files[0]);
+        window.EMSCore.fetchJSON(attr(modal, "data-add-url"), { method: "POST", body: body })
             .then(function (payload) {
                 hide(skeleton);
                 if (reason) reason.value = "";
+                if (docEl) docEl.value = "";
                 resetMerge(modal);
                 pickers.student.reset();
                 syncSubmit(modal, pickers.group, pickers.student);
@@ -503,7 +515,7 @@
             if (event.target && event.target.closest("[data-jgs-reason]")) resync();
         });
         modal.addEventListener("change", function (event) {
-            if (event.target && event.target.closest("[data-jgs-release]")) {
+            if (event.target && event.target.closest("[data-jgs-release], [data-jgs-document]")) {
                 setError(modal, "");
                 resync();
             }

@@ -24,6 +24,17 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 {% trans "Seçilmiş qrupları növbəti kursa keçir" context "accounts.groups" as gr_promote_title %}
 {% trans "Hər qrup üçün ayrıca audit yazısı düşür (köhnə kurs → yeni kurs). Son kursdakı qruplar toxunulmur — məzunluq ayrı əməldir." context "accounts.groups" as gr_promote_sub %}
 {% trans "Kursa keçir" context "accounts.groups" as gr_promote_btn %}
+{% trans "Qrupun tələbələri" context "accounts.groups" as gr_students_title %}
+{% trans "Aktiv qeydiyyatlı tələbələr. Hər əməl səbəb və təsdiq tələb edir; tarixçə silinmir." context "accounts.groups" as gr_students_sub %}
+{% trans "Tələbəni qrupdan çıxar (başqa qrupa köçür)" context "accounts.groups" as gr_detach_title %}
+{% trans "Qrup dəyişikliyi yalnız rəsmi köçürmə ilə olur: hədəf qrup, əmr nömrəsi və tarixi məcburidir. Köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir." context "accounts.groups" as gr_detach_sub %}
+{% trans "Qrupdan çıxar" context "accounts.groups" as gr_detach_btn %}
+{% trans "Tələbəni dondur (akademik məzuniyyət)" context "accounts.groups" as gr_freeze_title %}
+{% trans "Status «akademik məzuniyyət» olur, qrup üzvlüyü qalır. Əmr nömrəsi, tarixi və bitmə tarixi məcburidir; hərəkət sətri silinmir." context "accounts.groups" as gr_freeze_sub %}
+{% trans "Dondur" context "accounts.groups" as gr_freeze_btn %}
+{% trans "Tələbəni uzaqlaşdır (xaric)" context "accounts.groups" as gr_expel_title %}
+{% trans "Status «xaric edilib» olur. Əmr nömrəsi və tarixi məcburidir; bərpa ayrıca əməldir və yenə səbəblə audit olunur." context "accounts.groups" as gr_expel_sub %}
+{% trans "Uzaqlaşdır" context "accounts.groups" as gr_expel_btn %}
 <section class="profile-section-panel profile-section--tof {% if active_section == 'groups-registry' %}is-active{% endif %}"
          data-profile-section-panel="groups-registry"
          data-source-url="{{ profile_base_url }}?section=groups-registry">
@@ -67,6 +78,14 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
     {% include "partials/ems_ui/_data_table.html" with table_columns=groups_registry_section.columns table_rows=groups_registry_section.table_rows table_state=groups_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-users-rectangle" state_title=groups_registry_section.state_title state_body=groups_registry_section.state_body %}
 
     {% include "partials/_pagination.html" with page_obj=groups_registry_section.page_obj page_param="gr_page" extra_query=groups_registry_section.pagination_query %}
+
+    {% comment %}Tələbə çekmecəsi — hər kəs (oxu) görür; hərəkət dialoqları səlahiyyətə görə.{% endcomment %}
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="tofGroupStudentsDrawer" drawer_title=gr_students_title drawer_subtitle=gr_students_sub drawer_body_include="accounts/profile/sections/teaching_office/_group_students_drawer.html" drawer_foot_include="accounts/profile/sections/teaching_office/_group_students_foot.html" %}
+    {% if groups_registry_section.can_move_students %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentTransferDialog" reason_title=gr_detach_title reason_subtitle=gr_detach_sub reason_submit_label=gr_detach_btn reason_submit_tone="warning" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_target_group=True %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentFreezeDialog" reason_title=gr_freeze_title reason_subtitle=gr_freeze_sub reason_submit_label=gr_freeze_btn reason_submit_tone="warning" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_until=True %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofStudentExpelDialog" reason_title=gr_expel_title reason_subtitle=gr_expel_sub reason_submit_label=gr_expel_btn reason_submit_tone="danger" reason_action=groups_registry_section.movement_action_url reason_hidden=groups_registry_section.movement_hidden reason_form_data=groups_registry_section.movement_form_data reason_extra_include="accounts/profile/sections/teaching_office/_movement_extra_fields.html" movement_until=False %}
+    {% endif %}
 
     {% if groups_registry_section.can_manage %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupDialog" form_dialog_title=gr_dialog_title form_dialog_subtitle=gr_dialog_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_group_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.dialog_hidden form_dialog_data=groups_registry_section.form_data %}

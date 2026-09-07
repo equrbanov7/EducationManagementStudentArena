@@ -3,7 +3,8 @@
   "use strict";
 
   function initChecklist(ctx, root) {
-    var hiddenSelect = root.querySelector("select");
+    // Sahənin ÖZ select-i (`name` daşıyır); ixtisas süzgəci select-i `name`-sizdir.
+    var hiddenSelect = root.querySelector("select[name]");
     var searchInput = root.querySelector(".js-select-search");
     var listContainer = root.querySelector(".js-select-list");
     var counterEl = root.querySelector(".js-selected-count");
@@ -14,6 +15,48 @@
       return null;
     }
     var showStudentGroupNumber = root.getAttribute("data-show-student-group-number") === "1";
+    // İxtisasa görə süzgəc (yalnız tələbə siyahısında) — variantların
+    // `data-specialty` atributundan qurulur (sahib, 2026-09-07).
+    var specialtySelect = root.querySelector(".js-select-specialty");
+    var specialtyBuilt = "";
+
+    function currentSpecialty() {
+      return specialtySelect ? String(specialtySelect.value || "") : "";
+    }
+
+    function buildSpecialtyOptions() {
+      if (!specialtySelect) {
+        return;
+      }
+      var values = {};
+      Array.from(hiddenSelect.options || []).forEach(function (option) {
+        var name = option.getAttribute("data-specialty") || "";
+        if (name) {
+          values[name] = (values[name] || 0) + 1;
+        }
+      });
+      var keys = Object.keys(values).sort();
+      var signature = keys.join("|");
+      if (signature === specialtyBuilt) {
+        return;
+      }
+      specialtyBuilt = signature;
+      var previous = specialtySelect.value;
+      var allLabel = specialtySelect.getAttribute("data-all-label") || "";
+      specialtySelect.innerHTML = "";
+      var allOption = document.createElement("option");
+      allOption.value = "";
+      allOption.textContent = allLabel;
+      specialtySelect.appendChild(allOption);
+      keys.forEach(function (key) {
+        var opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = key + " (" + values[key] + ")";
+        specialtySelect.appendChild(opt);
+      });
+      specialtySelect.value = keys.indexOf(previous) !== -1 ? previous : "";
+      specialtySelect.hidden = !keys.length;
+    }
 
     function normalize(text) {
       return String(text || "").toLowerCase();
@@ -40,6 +83,10 @@
     }
 
     function optionMatchesFilter(option, filterValue) {
+      var specialty = currentSpecialty();
+      if (specialty && (option.getAttribute("data-specialty") || "") !== specialty) {
+        return false;
+      }
       if (!filterValue) {
         return true;
       }
@@ -54,6 +101,7 @@
     }
 
     function render() {
+      buildSpecialtyOptions();
       var filterValue = currentFilterValue();
       var options = Array.from(hiddenSelect.options || []);
       listContainer.innerHTML = "";
@@ -87,6 +135,20 @@
           groupBadge.className = "group-checklist__badge";
           groupBadge.textContent = ctx.studentGroupLabel + ": " + groupLabels;
           contentNode.appendChild(groupBadge);
+        }
+        // İxtisas şifri / adı + akademik qrup — seçim zamanı kimin kim olduğu görünsün.
+        if (showStudentGroupNumber) {
+          var specialtyText = [
+            option.getAttribute("data-specialty-code") || "",
+            option.getAttribute("data-specialty") || "",
+            option.getAttribute("data-academic-group") || ""
+          ].filter(Boolean).join(" · ");
+          if (specialtyText) {
+            var specialtyBadge = document.createElement("span");
+            specialtyBadge.className = "group-checklist__badge group-checklist__badge--specialty";
+            specialtyBadge.textContent = specialtyText;
+            contentNode.appendChild(specialtyBadge);
+          }
         }
 
         checkbox.addEventListener("change", function () {
@@ -147,11 +209,17 @@
       if (searchInput) {
         searchInput.value = "";
       }
+      if (specialtySelect) {
+        specialtySelect.value = "";
+      }
       render();
     }
 
     if (searchInput) {
       searchInput.addEventListener("input", render);
+    }
+    if (specialtySelect) {
+      specialtySelect.addEventListener("change", render);
     }
 
     if (selectAllBtn) {

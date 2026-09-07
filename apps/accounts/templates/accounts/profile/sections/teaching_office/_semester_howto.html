@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}Ekran 07 — «Necə işləyir» kartı.
+
+Stepper YALNIZ «harada olduğumuzu» göstərir; bu kart isə hər addımda NƏ
+EDİLDİYİNİ və HANSI DÜYMƏNİN basıldığını yazır — tədris şöbəsi prosesi düymə
+axtarmadan başa düşsün (sahib rəyi 2026-09-07: «izahı biraz çətindi»).
+Addımların vəziyyəti (`done` / `current` / `todo`) və mətnləri serverdən
+(`semester_open.semester_howto`) gəlir; hamısı bitibsə kart bükülü açılır.{% endcomment %}
+<details class="tof-howto"{% if not semester_opening_section.howto_done %} open{% endif %}>
+    <summary class="tof-howto__summary">
+        <span class="tof-howto__icon" aria-hidden="true"><i class="fas fa-circle-info"></i></span>
+        <span class="tof-howto__label">{% trans "Necə işləyir — 5 addımda semestr açılışı" context "accounts.semester" %}</span>
+        {% if semester_opening_section.howto_current %}
+        <span class="tof-howto__current">{% trans "İndi:" context "accounts.semester" %} {{ semester_opening_section.howto_current }}</span>
+        {% endif %}
+        <span class="tof-howto__chev" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+    </summary>
+    <ol class="tof-howto__list">
+        {% for step in semester_opening_section.howto %}
+        <li class="tof-howto__item tof-howto__item--{{ step.state }}">
+            <span class="tof-howto__num" aria-hidden="true">{% if step.state == 'done' %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+            <div class="tof-howto__body">
+                <div class="tof-howto__title">{{ step.title }}</div>
+                <p class="tof-howto__text">{{ step.text }}</p>
+                {% if step.button %}
+                <span class="tof-howto__btn"><i class="fas fa-hand-pointer" aria-hidden="true"></i> {{ step.button }}</span>
+                {% endif %}
+                {% if step.who %}<span class="tof-howto__who">{{ step.who }}</span>{% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+</details>
