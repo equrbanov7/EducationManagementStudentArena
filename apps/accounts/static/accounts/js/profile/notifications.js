@@ -99,10 +99,19 @@
         }
     }
 
+    var selectedCountEl = document.querySelector('[data-profile-notif-selected-count]');
+
     function updateBulkState() {
         var checkboxes = getNotificationCheckboxes();
         var checked = document.querySelectorAll('.profile-notif-checkbox:checked');
         if (bulkDeleteBtn) bulkDeleteBtn.disabled = checked.length === 0;
+        if (bulkBar) bulkBar.classList.toggle('is-selecting', checked.length > 0);
+        if (selectedCountEl) {
+            var template = I18N.selected_count || '';
+            selectedCountEl.textContent = checked.length
+                ? template.replace('{n}', String(checked.length))
+                : '';
+        }
         if (bulkIdsContainer) {
             bulkIdsContainer.innerHTML = '';
             checked.forEach(function (cb) {
@@ -120,7 +129,6 @@
     }
 
     if (bulkBar) {
-        bulkBar.style.removeProperty('display');
         if (selectAllCb) {
             selectAllCb.addEventListener('change', function () {
                 var checkboxes = getNotificationCheckboxes();
@@ -133,6 +141,12 @@
 
     // ── Modal: open notification detail via manual Bootstrap trigger ──
     document.querySelectorAll('.profile-notif-body.js-notif-open').forEach(function (body) {
+        body.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                body.click();
+            }
+        });
         body.addEventListener('click', function () {
             function decodeEscapedAttribute(value) {
                 if (!value) {
@@ -169,9 +183,9 @@
             var imgEl   = document.getElementById('profileNotifModalImageEl');
             if (image) {
                 imgEl.src = image;
-                imgWrap.style.display = '';
+                imgWrap.hidden = false;
             } else {
-                imgWrap.style.display = 'none';
+                imgWrap.hidden = true;
                 imgEl.src = '';
             }
 
@@ -181,7 +195,7 @@
             if (link) {
                 var a = document.createElement('a');
                 a.href = link;
-                a.className = 'btn btn-sm btn-outline-primary';
+                a.className = 'nfx-btn nfx-btn--primary';
                 if (link.charAt(0) !== '/') {
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';

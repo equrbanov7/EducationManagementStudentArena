@@ -51,6 +51,7 @@
     font-size: 0.78rem;
     color: var(--ems-neutral-500);
     text-wrap: pretty;
+    overflow-wrap: anywhere;
 }
 
 .apx-dlg__body {

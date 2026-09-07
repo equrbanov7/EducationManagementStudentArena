@@ -1520,7 +1520,8 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "STR-047")
         # Daxili köçürmə açarı ("MYEDU-*") istifadəçi səthinə sızmır.
         self.assertNotContains(response, "MYEDU-STR")
-        self.assertContains(response, "profile-structure-card")
+        # 2026-09-07 redizaynı: struktur qutusu → `<dl>` sətri (`.pfx-fact--structure`).
+        self.assertContains(response, "pfx-fact--structure")
 
     def test_profile_info_handles_many_student_groups_without_breaking(self):
         from apps.accounts.models import ProfileRole
