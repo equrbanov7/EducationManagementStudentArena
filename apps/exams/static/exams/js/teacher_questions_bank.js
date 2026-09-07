@@ -76,8 +76,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function openConfirm(opts) {
     if (!confirmModal) {
-      // Modal yoxdursa native fallback
-      if (window.confirm(opts.body || "?") && typeof opts.onConfirm === "function") opts.onConfirm();
+      // Modal yoxdursa qlobal EMSConfirm fallback (UX-15 — native confirm() yox).
+      window.EMSConfirm.open({ body: opts.body || "?", danger: (opts.variant || "danger") === "danger" }).then(function (ok) {
+        if (ok && typeof opts.onConfirm === "function") opts.onConfirm();
+      });
       return;
     }
     pendingConfirm = typeof opts.onConfirm === "function" ? opts.onConfirm : null;

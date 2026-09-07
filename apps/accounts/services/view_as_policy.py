@@ -71,20 +71,34 @@ EXAM_OPERATION_URL_NAMES = frozenset(
     }
 )
 
-#: İKT Rəhbərinin LIMITED rejimdə yaza bildiyi marşrutlar — QƏSDƏN BOŞ.
+#: RİM (İKT) rəhbərinin LIMITED rejimdə yaza bildiyi marşrutlar.
 #:
-#: Qayda «texniki dəstək və AÇIQ ŞƏKİLDƏ İCAZƏ VERİLMİŞ sistem əməliyyatları»
-#: deyir. Marşrut təsnifatında İKT üçün namizəd olan iki axın
-#: (``registrar:correction_apply`` / ``correction_delete``) əks-yoxlamada
-#: rədd olundu: hər ikisi jurnal balını və davamiyyəti dəyişir (yəni imtahandan
-#: kənar akademik nəticədir), üstəlik impersonasiya altında düzəliş HƏDƏFİN
-#: adına və imzası ilə yazılır — sənədli düzəlişin bütün zəmanəti itir.
-#: İKT Rəhbəri bu səlahiyyəti ÖZ kimliyi ilə saxlayır (``journal.correct``);
-#: view-as onun üçün müşahidə alətidir.
+#: SAHİB QƏRARI (2026-09-06): «RİM başqasının yerinə yaza bilər, amma RİM izi
+#: düşsün ki, bunu RİM edib». Əvvəl siyahı BOŞ idi — yəni RİM baxış rejimində
+#: heç bir düymə işləmirdi və istifadəçi «məni jurnaldan atır» deyirdi.
 #:
-#: Konkret sistem əməliyyatına icazə lazım olsa, marşrutun adı buraya əlavə
-#: olunur — mexanizm hazırdır, sadəcə hələ heç nə icazəli deyil.
-IKT_TECHNICAL_URL_NAMES = frozenset()
+#: Qərarın şərti İZDİR, səlahiyyət deyil. İki qat iz yazılır:
+#:   1. middleware hər icazəli yazma üçün ƏSL aktor adına audit sətri yazır
+#:      (``_audit_view_as_write``);
+#:   2. `core.audit.log_action` və jurnalın öz bal auditi
+#:      (`registrar.grade_audit.log_grade_changes`) sətrə ``impersonation``
+#:      möhürü (RİM-in id/username + rejim) qoyur.
+#: Yəni jurnal tarixçəsində dəyişikliyin arxasında RİM-in durduğu görünür.
+#:
+#: Sənədli düzəliş axını (`journal.correct` → PDF) YENƏ DƏ RİM-in ÖZ kimliyi
+#: ilə işləyir; bu siyahı gündəlik jurnal əməliyyatları üçündür.
+IKT_TECHNICAL_URL_NAMES = frozenset(
+    {
+        # Jurnalın gündəlik yazma səthləri (bal, davamiyyət, dərs, kollokvium,
+        # sərbəst iş, alt-qrup siyahısı).
+        "registrar:journal_detail",
+        "registrar:journal_lesson_action",
+        "registrar:journal_kollokvium_save",
+        "registrar:journal_selfwork_action",
+        "registrar:journal_guest_add",
+        "registrar:journal_guest_remove",
+    }
+)
 
 #: LIMITED rejimdə rol → icazəli yazma marşrutları.
 LIMITED_WRITE_ALLOWLIST = {

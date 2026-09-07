@@ -68,7 +68,7 @@ a.qsubs-stat--link:hover {
 .qsubf-search > i {
     position: absolute;
     left: 13px;
-    color: #94a3b8;
+    color: var(--ems-neutral-500);
     font-size: 0.82rem;
     pointer-events: none;
 }
@@ -277,7 +277,7 @@ a.qsubs-stat--link:hover {
     justify-content: center;
     font-size: 0.72rem;
     background: #f1f5f9;
-    color: #94a3b8;
+    color: var(--ems-neutral-500);
     border: 2px solid #e2e8f0;
     position: relative;
     z-index: 1;
@@ -291,7 +291,7 @@ a.qsubs-stat--link:hover {
     color: #64748b;
 }
 
-.qsubd-timeline__date { font-size: 0.72rem; color: #94a3b8; }
+.qsubd-timeline__date { font-size: 0.72rem; color: var(--ems-neutral-500); }
 
 .qsubd-timeline__step.is-done .qsubd-timeline__dot {
     background: var(--ems-primary-600, #2563eb);

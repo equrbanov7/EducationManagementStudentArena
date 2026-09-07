@@ -1,0 +1,15 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ems_ui/confirm.css — Qlobal təsdiq dialoqu (EMSConfirm)
+
+   Native `window.confirm()` əvəzi. Markup Bootstrap 5 modal-ıdır (layihədə
+   artıq geniş istifadə olunan komponent — bax apps/exams/.../_exam_modals.html
+   və s.); bu fayl yalnız EMSConfirm-ə xas kiçik tənzimləmələri saxlayır.
+   Davranış: static/js/ems_ui/confirm.js. Markup: templates/partials/ems_ui/_confirm_modal.html.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Çoxsətirli mesajlarda (əvvəlki confirm()-lərdə \n ilə formatlanmış mətnlər)
+   sətir sonlarını qoru — Bootstrap modal-body defolt olaraq boşluğu sıxışdırır. */
+#emsConfirmModalBody {
+    white-space: pre-line;
+    text-wrap: pretty;
+}

@@ -84,7 +84,7 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-modal__reason textarea {
@@ -101,7 +101,7 @@
 .syl-modal__note {
     margin: 0;
     font-size: 0.74rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-modal__note.is-bad {

@@ -44,6 +44,17 @@ Per-enrollment riyaziyyat dəyişməyib: :func:`analytics.evaluate_enrollment` +
 :func:`analytics.build_evaluation_maps_for` — yəni ``compute_final_result``
 N dəfə çağırılmır və q/b vs 25% ayrımı :func:`transcript._fail_reason_code`
 semantikası ilə eynidir.
+
+**Box-ların sürətli yolu (2026-09 QA P2-19).** Sorğu sayı sabit olsa da, ilk
+yüklənmə org-səviyyəli aktorda 7–13 s çəkirdi: vaxt SQL-də deyil, **Python
+obyekt qurmağa** gedirdi (148 634 model obyekti + 969 162 ``UUID`` + hər sətir
+üçün hərf qiyməti, davamiyyət balı və eligibility dicti — box-ların heç birində
+istifadə olunmur).  Ona görə :func:`build_records_summary` artıq
+:mod:`apps.accounts.academic_summary`-dən keçir: eyni sorğular, eyni düstur,
+amma model obyekti yaradılmır və birləşmə açarları SQL-də mətnə çevrilir
+(ölçülüb: 7.2 s → 1.8 s, ``qa.rector``, 148 634 yazılış).  Cədvəl yolu
+(:func:`build_records_page`) dəyişməyib — orada sətir sayı onsuz da ~25-dir və
+``_row`` hərf/etiket sahələrini oxuyur.
 """
 
 from __future__ import annotations
@@ -52,6 +63,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db.models import Q
 
+from apps.accounts import academic_summary
 from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.organizations.scoping import UnitScope
 from apps.registrar import analytics, exam_eligibility, transcript
@@ -444,20 +456,58 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
     if not scope.has_structure_access:
         return {"has_access": False, "summary": _public_summary(_empty_summary()), "year_options": []}
 
+    # Org-səviyyəli aktor üçün 7 800 tələbənin bütün yazılışları qiymətləndirilir
+    # (7.8–9.5 s, QA 2026-09-05 P2-19). Box-lar səhifəyə görə dəyişmir → qısa TTL keş;
+    # açar aktorun əhatəsi + süzgəclərdir, istifadəçi adı deyil (eyni əhatə eyni rəqəm).
+    from django.core.cache import cache
+
+    cache_key = _summary_cache_key(organization, scope, filters)
+    cached = cache.get(cache_key) if cache_key else None
+    if cached is not None:
+        return cached
+
     records = _scoped_records(organization, scope, filters)
     period_ids = _period_ids_for(organization, filters.get("year"), filters.get("season"))
 
     box = _empty_summary()
     box["students"] = _distinct_student_count(records)
-    for _enrollment, result in _evaluate_all(
-        organization, _enrollment_qs(organization, records.order_by().values("student_id"), period_ids)
-    ):
-        _accumulate(box, result)
-    return {
+    # SÜRƏTLİ YOL (2026-09 QA P2-19): box-lar per-enrollment nəticənin yalnız
+    # altı sahəsini oxuyur, ona görə burada model obyekti / hərf qiyməti /
+    # eligibility dicti qurulmur — bax :mod:`apps.accounts.academic_summary`.
+    # Rəqəmlər eynidir (``test_academic_summary_fast_path`` iki yolu kilidləyir).
+    academic_summary.accumulate_summary(
+        organization, _enrollment_qs(organization, records.order_by().values("student_id"), period_ids), box
+    )
+    payload = {
         "has_access": True,
         "summary": _public_summary(box),
         "year_options": _year_options(organization),
     }
+    if cache_key:
+        cache.set(cache_key, payload, SUMMARY_CACHE_TTL)
+    return payload
+
+
+#: Xülasə box-larının keş müddəti (saniyə) — bal yazıları bir neçə dəqiqə gecikə bilər.
+SUMMARY_CACHE_TTL = 300
+
+
+def _summary_cache_key(organization, scope, filters) -> str:
+    import hashlib
+    import json
+
+    try:
+        raw = json.dumps(
+            {
+                "org": str(getattr(organization, "pk", "")),
+                "scope": [scope.scope_type, sorted(str(u) for u in (scope.unit_ids or ()))],
+                "filters": {k: str(v) for k, v in sorted((filters or {}).items()) if v},
+            },
+            sort_keys=True,
+        )
+    except (TypeError, ValueError):
+        return ""
+    return "academic_records:summary:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def build_records_overview(

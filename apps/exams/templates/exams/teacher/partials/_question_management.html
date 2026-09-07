@@ -120,7 +120,7 @@ Kontekst (view-dən):
                     <i class="fas fa-search"></i>
                     <input id="questionSearchInput" name="q" value="{{ search_query }}" type="text" autocomplete="off"
                         {% if question_bank_search_max_length %}maxlength="{{ question_bank_search_max_length }}" data-max-length="{{ question_bank_search_max_length }}"{% endif %}
-                        placeholder="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}">
+                        placeholder="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}" aria-label="{% trans 'placeholder_search_questions' context 'exams.template.teacher_questions_bank' %}">
                 </div>
 
                 <div class="bootstrap-single-select">
@@ -269,7 +269,8 @@ Kontekst (view-dən):
                     {% with meta=q.analysis_meta %}
                     <article class="qb-card{% if not q.is_active %} is-inactive{% endif %}{% if meta and meta.top_severity != 'none' %} qb-card--sev-{{ meta.top_severity }}{% endif %}" id="qcard-{{ q.id }}">
                         <div class="qb-card__select">
-                            <input type="checkbox" class="question-checkbox" name="selected_question_ids" value="{{ q.id }}">
+                            <input type="checkbox" class="question-checkbox" name="selected_question_ids" value="{{ q.id }}"
+                                   aria-label="{% if qm_context == 'exam' %}#{{ q.order }} — {% else %}#{{ forloop.counter0|add:page_obj.start_index }} — {% endif %}{{ q.text|striptags|truncatechars:60 }}">
                         </div>
                         <div class="qb-card__main">
                             <div class="qb-card__top">
@@ -505,7 +506,7 @@ Kontekst (view-dən):
                     </div>
                 </div>
                 <div class="qb-edit-field">
-                    <label for="editBankFormat">{% trans "Default format" %}</label>
+                    <label for="editBankFormat">{% trans "Standart format" %}</label>
                     <div class="bootstrap-single-select">
                         <select id="editBankFormat" name="default_question_type" class="form-select bootstrap-single-select__native" data-bootstrap-select>
                             {% for value, label in qm_default_type_choices %}

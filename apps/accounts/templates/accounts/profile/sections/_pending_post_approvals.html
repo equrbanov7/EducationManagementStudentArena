@@ -19,7 +19,7 @@
                         value="{{ pending_post_approval_search_query }}"
                         placeholder="{% trans 'Post, tələbə və məzmun üzrə axtar' %}"
                         class="pr-form-control{% if pending_post_approval_available_organizations %} pr-filter-search-full{% endif %}"
-                    >
+                     aria-label="{% trans 'Post, tələbə və məzmun üzrə axtar' %}">
 
                     <div class="bootstrap-single-select pending-review-select-wrap">
                         <select name="approval_status"
@@ -358,6 +358,6 @@
          data-i18n-confirm-title="{% trans 'Əminsiniz?' %}"
          data-i18n-reason-required="{% trans 'Zəhmət olmasa səbəbi yazın.' %}"
          hidden></div>
-    <script src="{% static 'accounts/js/profile/pending_post_approvals.js' %}"></script>
+    <script defer src="{% static 'accounts/js/profile/pending_post_approvals.js' %}"></script>
 </section>
 {% endif %}

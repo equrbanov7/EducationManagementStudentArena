@@ -33,6 +33,7 @@ from apps.audit.public import log_action
 from core.constants import AuditAction
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 
+from .lifecycle import normalize_reason
 from .policy import PERM_CREDENTIALS, RimAccessError, RimActor, assert_can_manage, require_permission
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,9 @@ def set_temporary_password(actor: RimActor, target_user, *, request=None, reason
     """
     require_permission(actor, PERM_CREDENTIALS)
     assert_can_manage(actor, target_user)
+    # QA 2026-09-05 (P2-15): parol sıfırlaması audit izində «Səbəb: -» qalırdı —
+    # blok/soft-delete kimi burada da səbəb MƏCBURİDİR.
+    reason = normalize_reason(reason)
 
     profile = getattr(target_user, "profile", None)
     if profile is not None and getattr(profile, "is_deleted", False):

@@ -228,6 +228,68 @@ class JournalViewTest(TestCase):
         with bypass_rls():
             self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
 
+    def test_add_lesson_topic_over_255_is_rejected_not_500(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-01: 255+ simvol mövzu DB DataError (500) verirdi."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {
+                "action": "add_lesson",
+                "lesson_date": _tz.localdate().isoformat(),
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+                "lesson_time": "08:30|10:00",
+                "lesson_topic": "M" * 300,
+            },
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "255 simvol")
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_add_lesson_invalid_or_student_instructor_is_rejected_not_500(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-02: 'abc' → ValueError, tələbə id → IntegrityError (500)."""
+        from django.utils import timezone as _tz
+
+        client = self._client(self.teacher)
+        url = reverse("registrar:journal_detail", args=[self.offering.id])
+        base = {
+            "action": "add_lesson",
+            "lesson_date": _tz.localdate().isoformat(),
+            "lesson_kind": "seminar",
+            "lesson_hours": "2",
+            "lesson_time": "08:30|10:00",
+        }
+        for bad in ("abc", str(self.student.pk)):
+            resp = client.post(url, {**base, "lesson_instructor": bad})
+            self.assertEqual(resp.status_code, 302, bad)
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
+
+    def test_save_marks_on_locked_journal_reports_error_not_success(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-04: kilidli jurnala POST «yadda saxlanıldı (0 xana)» deyirdi."""
+        from apps.registrar.models import ApprovalStatus, AssessmentScheme
+
+        with bypass_rls():
+            from apps.registrar import gradebook as _gb
+
+            _gb.ensure_assessment_scheme(offering=self.offering)
+            AssessmentScheme.objects.filter(offering=self.offering).update(
+                is_published=True, approval_status=ApprovalStatus.APPROVED
+            )
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_marks", "att__1__1": "absent"},
+            follow=True,
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "Jurnal bağlıdır")
+        self.assertNotContains(resp, "yadda saxlanıldı")
+
     def test_add_lesson_duplicate_time_rejected(self):
         """Eyni gündə eyni dərs saatına ikinci dərs yaradılmır."""
         from django.utils import timezone as _tz
@@ -301,7 +363,9 @@ class JournalViewTest(TestCase):
 class JournalFinalsViewTest(JournalViewTest):
     """Final-exam + publish actions on the journal page (U3+)."""
 
-    def test_save_finals_records_exam_score(self):
+    def test_teacher_cannot_write_final_exam_score_via_journal_post(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-08: yekun imtahan balı İmtahan Mərkəzinin (`final_score.entry`)
+        səthidir; müəllim UI-da olmayan `exam__` sahəsini crafted POST ilə yaza bilirdi."""
         from apps.registrar.models import FinalGrade
 
         client = self._client(self.teacher)
@@ -309,10 +373,45 @@ class JournalFinalsViewTest(JournalViewTest):
             reverse("registrar:journal_detail", args=[self.offering.id]),
             {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
         )
+        self.assertEqual(resp.status_code, 302)  # bonus/rəy (U15) müəllimindir — əməl bütövlükdə rədd edilmir
+        with bypass_rls():
+            self.assertFalse(FinalGrade.objects.filter(enrollment=self.enrollment, exam_score=42).exists())
+
+    def test_teacher_can_still_save_bonus_and_comment(self):
+        """Bal qapısı bonus/rəyi bağlamamalıdır (U15 müəllim səthidir)."""
+        from apps.registrar.models import FinalGrade
+
+        client = self._client(self.teacher)
+        resp = client.post(
+            reverse("registrar:journal_detail", args=[self.offering.id]),
+            {"action": "save_finals", f"bonus__{self.enrollment.id}": "5", f"fcomment__{self.enrollment.id}": "Əla"},
+        )
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():
             fg = FinalGrade.objects.get(enrollment=self.enrollment)
-            self.assertEqual(str(fg.exam_score), "42.00")
+            self.assertEqual(str(fg.bonus), "5.00")
+            self.assertEqual(fg.comment, "Əla")
+
+    def test_superuser_instructor_can_still_record_exam_score(self):
+        from apps.registrar.models import FinalGrade
+
+        with bypass_rls():
+            self.teacher.is_superuser = True
+            self.teacher.save(update_fields=["is_superuser"])
+        try:
+            client = self._client(self.teacher)
+            resp = client.post(
+                reverse("registrar:journal_detail", args=[self.offering.id]),
+                {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
+            )
+            self.assertEqual(resp.status_code, 302)
+            with bypass_rls():
+                fg = FinalGrade.objects.get(enrollment=self.enrollment)
+                self.assertEqual(str(fg.exam_score), "42.00")
+        finally:
+            with bypass_rls():
+                self.teacher.is_superuser = False
+                self.teacher.save(update_fields=["is_superuser"])
 
     def test_save_components_and_scores(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
@@ -366,3 +465,128 @@ class JournalFinalsViewTest(JournalViewTest):
             {"action": "save_finals", f"exam__{self.enrollment.id}": "42"},
         )
         self.assertEqual(resp.status_code, 404)
+
+
+class LessonDateUpperBoundTest(JournalViewTest):
+    """Dərs tarixinin üst həddi — QA 2026-09-05 P2-11."""
+
+    def test_far_future_date_is_refused(self):
+        import datetime
+
+        from apps.registrar import gradebook
+        from apps.registrar.gradebook_lessons import LessonRuleError
+
+        with bypass_rls(), self.assertRaises(LessonRuleError):
+            gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date(2099, 12, 31),
+                created_by=self.teacher,
+            )
+
+    def test_date_beyond_an_open_period_end_is_refused(self):
+        import datetime
+
+        from apps.registrar import gradebook
+        from apps.registrar.gradebook_lessons import LessonRuleError
+
+        with bypass_rls():
+            period = self.offering.period
+            period.end_date = datetime.date.today() + datetime.timedelta(days=10)
+            period.save(update_fields=["end_date"])
+            with self.assertRaises(LessonRuleError):
+                gradebook.create_lesson(
+                    offering=self.offering,
+                    date=datetime.date.today() + datetime.timedelta(days=30),
+                    created_by=self.teacher,
+                )
+            lesson = gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date.today() + datetime.timedelta(days=5),
+                created_by=self.teacher,
+            )
+        self.assertIsNotNone(lesson.pk)
+
+    def test_rim_override_still_passes(self):
+        import datetime
+
+        from apps.registrar import gradebook
+
+        with bypass_rls():
+            lesson = gradebook.create_lesson(
+                offering=self.offering,
+                date=datetime.date(2099, 12, 31),
+                created_by=self.teacher,
+                allow_past=True,
+            )
+        self.assertIsNotNone(lesson.pk)
+
+
+class LessonInputEchoTest(JournalViewTest):
+    """Yanlış dərs tipi/saatı səssizcə defolta çevrilməməlidir — QA 2026-09-05 P3-9."""
+
+    def _post_lesson(self, **overrides):
+        payload = {
+            "action": "add_lesson",
+            "lesson_date": str(datetime.date.today()),
+            "lesson_kind": LessonKind.SEMINAR,
+            "lesson_time": "08:30-10:00",
+        }
+        payload.update(overrides)
+        client = self._client(self.teacher)
+        return client.post(reverse("registrar:journal_detail", args=[self.offering.id]), payload, follow=True)
+
+    def test_unknown_kind_is_reported(self):
+        response = self._post_lesson(lesson_kind="exam")
+        self.assertContains(response, "Dərs tipi düzgün seçilməyib")
+
+    def test_negative_hours_are_reported(self):
+        response = self._post_lesson(lesson_hours="-5")
+        self.assertContains(response, "müsbət tam ədəd")
+
+
+class JournalWindowIntegrationTest(JournalViewTest):
+    """Pəncərə rəqəmləri təhrif etmir + tab server tərəfdə render olunur (P1-8)."""
+
+    def test_absence_totals_ignore_the_window(self):
+        import datetime
+
+        from apps.registrar import gradebook
+
+        with bypass_rls():
+            for day in range(1, 6):
+                lesson = gradebook.create_lesson(
+                    allow_past=True,
+                    offering=self.offering,
+                    date=datetime.date(2024, 10, day),
+                    kind=LessonKind.SEMINAR,
+                )
+                gradebook.save_marks(
+                    enforce_day=False,
+                    offering=self.offering,
+                    entries=[{"lesson_id": lesson.id, "enrollment_id": self.enrollment.id, "status": "absent"}],
+                    by_user=self.teacher,
+                )
+            full = gradebook.get_offering_journal(offering=self.offering, newest_first=True)
+            windowed = gradebook.get_offering_journal(
+                offering=self.offering, newest_first=True, lesson_limit=2, lesson_offset=0
+            )
+        self.assertEqual(len(windowed["lessons"]), 2)
+        self.assertGreater(len(full["lessons"]), 2)
+        # Qayıb sayğacı pəncərədən ASILI DEYİL.
+        self.assertEqual(full["rows"][0]["absence_count"], windowed["rows"][0]["absence_count"])
+        self.assertEqual(full["rows"][0]["absence_hours"], windowed["rows"][0]["absence_hours"])
+        self.assertEqual(full["allowed_absence"], windowed["allowed_absence"])
+
+    def test_only_the_requested_tab_is_rendered(self):
+        client = self._client(self.teacher)
+        grid = client.get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertContains(grid, 'data-jtab-panel="grid"')
+        self.assertNotContains(grid, 'data-jtab-panel="yekun"')
+        final = client.get(reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=yekun")
+        self.assertContains(final, 'data-jtab-panel="yekun"')
+        self.assertNotContains(final, 'data-jtab-panel="grid"')
+
+    def test_unknown_tab_falls_back_to_grid(self):
+        client = self._client(self.teacher)
+        response = client.get(reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=zzz")
+        self.assertContains(response, 'data-jtab-panel="grid"')

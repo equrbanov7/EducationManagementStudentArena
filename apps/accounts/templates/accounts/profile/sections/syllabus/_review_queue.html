@@ -95,7 +95,7 @@ Birinci sütun `th scope="row"`, başlıqlar `th scope="col"` (§6 a11y).
             <span class="syl-meta">{{ row.chair }}</span>
           </td>
           <td class="syl-cell-wait">
-            <span class="syl-sent">{% if row.sent %}{{ row.sent|date:"d.m.Y, H:i" }}{% else %}—{% endif %}</span>
+            <span class="syl-sent">{% if row.sent %}{{ row.sent|date:"d.m.Y H:i" }}{% else %}—{% endif %}</span>
             <span class="syl-wait syl-wait--{{ row.wait_tone }}">{{ row.wait_text }}</span>
           </td>
           <td class="syl-cell-progress">

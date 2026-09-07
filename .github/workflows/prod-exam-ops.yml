@@ -34,8 +34,9 @@ on:
           - exam_day_import_questions
           - exam_day_verify_login
           - exam_day_seed
+          - legacy_expelled_access
       apply:
-        description: "YALNIZ exam_day_seed üçün: faktiki yaz (işarələnməsə dry-run)"
+        description: "exam_day_seed / legacy_expelled_access üçün: faktiki yaz (işarələnməsə dry-run)"
         required: false
         type: boolean
         default: false
@@ -79,6 +80,16 @@ on:
         required: false
         type: string
         default: "Mülki müdafiə"
+      repair_actor:
+        description: "legacy_expelled_access: əməliyyatı aparan istifadəçi adı (boş = təşkilat sahibi)"
+        required: false
+        type: string
+        default: ""
+      repair_order:
+        description: "legacy_expelled_access: əmr nömrəsi (audit izində qalır)"
+        required: false
+        type: string
+        default: "LEGACY-XARIC-2026-09"
 
 concurrency:
   group: production-deploy
@@ -100,6 +111,8 @@ jobs:
       AZ_EXAM_ID: ${{ inputs.az_exam_id }}
       WINDOW_DAYS: ${{ inputs.window_days }}
       MM_EXAM_TITLE: ${{ inputs.mm_exam_title }}
+      REPAIR_ACTOR: ${{ inputs.repair_actor }}
+      REPAIR_ORDER: ${{ inputs.repair_order }}
       APPLY_FLAG: ${{ inputs.apply && 'yes' || 'no' }}
       TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
@@ -113,6 +126,7 @@ jobs:
           # Ağ siyahı — ixtiyari yol/skript ötürülə bilməz.
           case "$SCRIPT_NAME" in
             exam_day_probe|exam_day_probe2|exam_day_probe3|exam_day_seed|exam_day_import_questions|exam_day_verify_login) ;;
+            legacy_expelled_access) ;;
             *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
           esac
 
@@ -144,6 +158,10 @@ jobs:
             -e PROBE_SUBJECTS="$SUBJECTS" \
             -e SEED_ORG="$ORG" \
             -e SEED_APPLY="$APPLY_FLAG" \
+            -e REPAIR_ORG="$ORG" \
+            -e REPAIR_APPLY="$APPLY_FLAG" \
+            -e REPAIR_ACTOR="$REPAIR_ACTOR" \
+            -e REPAIR_ORDER="$REPAIR_ORDER" \
             -e SEED_GROUP_TEACHER="$GROUP_TEACHER" \
             -e SEED_AZ_EXAM_ID="$AZ_EXAM_ID" \
             -e SEED_WINDOW_DAYS="$WINDOW_DAYS" \

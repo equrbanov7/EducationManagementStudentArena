@@ -66,7 +66,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
     ROLE_USERS = [
         ("wcu_rector", "rector", ProfileRole.ORG_ADMIN, None),
         ("wcu_vice_rector", "vice_rector", ProfileRole.ORG_ADMIN, None),
-        ("wcu_exam_center", "exam_center", ProfileRole.MEMBER, None),
+        ("wcu_exam_center", "exam_center_head", ProfileRole.MEMBER, None),
         ("wcu_hr", "hr", ProfileRole.HR, None),
         ("wcu_dean", "dean", ProfileRole.ORG_ADMIN, "faculty"),
         ("wcu_department_head", "chair_head", ProfileRole.ORG_ADMIN, "chair"),

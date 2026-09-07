@@ -57,6 +57,11 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
     return org_unit_model.objects.filter(organization=organization, pk=group_id).filter(scope.unit_subtree_q()).exists()
 
 
+def permission_scope_for(user, organization, permission):
+    """Aktorun icazə əhatəsi (public sarğı) — toplu filtrlər üçün bir dəfə hesablanır."""
+    return _permission_scope(user, organization, permission)
+
+
 def permission_scope_q(user, organization, permission, *, path_field, id_field):
     """Fail-closed queryset filter for one permission's structural scope."""
     return _permission_scope(user, organization, permission).unit_subtree_q(

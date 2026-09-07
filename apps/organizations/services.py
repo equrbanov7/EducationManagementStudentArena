@@ -89,6 +89,7 @@ def ensure_owner_membership(user, organization):
             },
         )
         if created:
+            _invalidate_scope_cache_after_membership_write(user)
             return membership
 
         changed = False
@@ -103,7 +104,23 @@ def ensure_owner_membership(user, organization):
             changed = True
         if changed:
             membership.save()
+            _invalidate_scope_cache_after_membership_write(user)
         return membership
+
+
+def _invalidate_scope_cache_after_membership_write(user) -> None:
+    """Clear the per-user membership memoization after a backfill write.
+
+    QA 2026-09 duplicate-query audit: `get_permission_scope` memoizes active
+    memberships on the `user` object (see `apps.organizations.scoping`). This
+    backfill runs both in request middleware (before anything reads the
+    cache — harmless) and from `apps.accounts` admin-membership backfill
+    (which reads permissions right after) — clearing defensively here covers
+    every caller without relying on each one remembering to do it.
+    """
+    from apps.organizations.scoping import invalidate_permission_scope_cache
+
+    invalidate_permission_scope_cache(user)
 
 
 def _membership_role_aliases(user, membership, organization=None):

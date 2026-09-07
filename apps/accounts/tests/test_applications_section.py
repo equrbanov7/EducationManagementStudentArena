@@ -64,6 +64,24 @@ class ApplicationsSectionTest(TestCase):
         # JS mətn kataloqu json_script ilə gəlir (xarici .js template-dən keçmir).
         self.assertIn('id="apx-i18n"', payload["html"])
 
+    def test_detail_opens_as_a_modal_with_server_side_upload_rules(self):
+        """Detal MODAL-dır (sağdakı yapışqan sütun deyil) və fayl qaydası SERVER-dəndir."""
+        html = self._fragment(self.world["student"]).json()["html"]
+        self.assertIn("data-apx-modal-panel", html)
+        self.assertIn('class="apx-modal"', html)
+        # Köhnə yan sütun markup-ı qalmamalıdır — qalsaydı iki detal qabı olardı.
+        self.assertNotIn('class="apx-detail"', html)
+        # `accept` siyahısı `rules_payload`-dan gəlir: UI uzantıları özündən yazmır.
+        self.assertIn('data-accept=".docx,.jpeg,.jpg,.pdf,.png,.webp,.zip"', html)
+        self.assertIn('data-max-files="5"', html)
+        self.assertIn('data-max-file-mb="10"', html)
+        self.assertIn("applications_thread.js", html)
+
+    def test_profile_shell_links_the_modal_stylesheet(self):
+        """Modal CSS-i qabıqdan yüklənir — əks halda yazışma ÜSLUBSUZ render olunur."""
+        response = self._client(self.world["student"]).get(reverse("accounts:profile"))
+        self.assertContains(response, "profile/applications_modal.css")
+
     # ── Ailəyə görə budaqlanma (bir şablon, bir view) ────────────────────
     def test_sender_sees_the_create_button_and_handler_does_not(self):
         student = self._fragment(self.world["student"]).json()["html"]

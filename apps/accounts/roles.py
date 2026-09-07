@@ -243,7 +243,9 @@ User.add_to_class(
         )
     ),
 )
-# Yalnız RƏHBƏR (və köhnə exam_center, İKT Rəhbəri) — zala nəzarətçi təyin edə bilir.
+# Yalnız RƏHBƏR (və İKT Rəhbəri) — zala nəzarətçi təyin edə bilir. Köhnə
+# `exam_center` adı 2026-09-06-da rəhbərə birləşdirildi (miqrasiya 0046 +
+# `ROLE_NAME_NORMALIZATION`); yoxlama geriyə-uyğunluq üçün saxlanılır.
 User.add_to_class(
     "is_exam_center_head",
     property(

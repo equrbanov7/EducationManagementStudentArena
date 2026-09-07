@@ -395,6 +395,12 @@ class ViewAsMiddleware:
 
         if referer and url_has_allowed_host_and_scheme(referer, allowed_hosts={request.get_host()}):
             return redirect(referer)
+        # Referer yoxdursa da istifadəçini JURNALDAN ATMIRIQ: profilə atmaq
+        # «məni jurnaldan çıxardı» hissi yaradırdı (sahib şikayəti 2026-09-06).
+        # YALNIZ yazma cəhdi üçün və YALNIZ jurnal yolunda — bloklanmış GET
+        # səthinə (məs. `/admin/`) geri yönləndirmək dövr yaradardı.
+        if request.method not in self.SAFE_METHODS and request.path.startswith("/jurnal/"):
+            return redirect(request.path)
         return redirect(reverse("accounts:profile"))
 
     def __call__(self, request):

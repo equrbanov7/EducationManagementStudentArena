@@ -17,6 +17,7 @@ from core.constants import RoleScopeType
 
 from ..constants import RESOLVE_BY_FALLBACK_UNIT_TYPES, ResolveBy, SenderFamily
 from ..models import ApplicationUnit
+from . import access
 
 #: Müəllim/assistent sayılan üzvlük rol adları.
 _TEACHER_ROLE_NAMES = frozenset(
@@ -24,21 +25,23 @@ _TEACHER_ROLE_NAMES = frozenset(
 )
 _STUDENT_ROLE_NAMES = frozenset({"student", "lead_student"})
 
+#: ``route_for``-da «sender_unit verilməyib» ilə «sender_unit HƏLL OLUNUB, nəticə
+#: None-dur» (məs. mərkəzi/org-scope aktor) fərqini ayırmaq üçün. ``None`` hər
+#: ikisi üçün işlədilsəydi, ikincisi hər KIND üçün YENİDƏN hesablanardı — bu da
+#: hər dövrədə eyni üzvlük+SAR sorğularını təkrarlayan gizli N+1 idi (QA
+#: P2-26/P2-6: bölmə açılışında 80+ sorğu, 37-42 dublikat).
+_UNRESOLVED = object()
+
 
 def _active_memberships(user, organization):
-    from apps.organizations.models import Membership
+    """``access.active_memberships``-in keşlənmiş nəticəsini istifadə edir.
 
-    if user is None or organization is None or not getattr(user, "is_authenticated", False):
-        return []
-    return list(
-        Membership.objects.filter(
-            user=user,
-            organization=organization,
-            is_active=True,
-            role__organization=organization,
-            role__is_active=True,
-        ).select_related("role", "scope_unit")
-    )
+    Əvvəllər bu modul EYNİ sorğunu ÖZ-ÖZÜNƏ, keşsiz təkrarlayırdı —
+    ``access.active_memberships`` isə artıq ``organization``/``user`` üzrə
+    request-daxili keşə malikdir. İki ayrı tətbiqin sinxron qalması riski
+    yaratmamaq üçün bura sadəcə DELEGASİYA edir.
+    """
+    return access.active_memberships(user, organization)
 
 
 def sender_family_for(user, organization) -> str | None:
@@ -105,20 +108,37 @@ def resolve_scope_unit(unit: ApplicationUnit, sender_unit):
 
 
 def unit_by_code(organization, code: str):
-    return ApplicationUnit.objects.filter(organization=organization, code=code, is_active=True).first()
+    """Koda görə vahid axtarışı — ``access.active_units`` keşindən (0 əlavə sorğu).
+
+    Əvvəllər hər çağırış ayrı ``SELECT ... WHERE code=…`` idi; ``route_for``
+    hər KIND üçün (bir ailədə 3-19 arası) bunu çağırdığından bölmə açılışında
+    onlarla əlavə sorğu yaranırdı. Kataloq artıq təşkilat üzrə keşlənib —
+    burda sadəcə yaddaşdaxili axtarışdır.
+    """
+    for unit in access.active_units(organization):
+        if unit.code == code:
+            return unit
+    return None
 
 
-def route_for(kind, user, *, organization=None, family=None, sender_unit=None):
+def route_for(kind, user, *, organization=None, family=None, sender_unit=_UNRESOLVED):
     """``(unit, scope_unit, family, sender_unit)`` — müraciətin ünvanı.
 
     Növün ``route_overrides``-i ailəyə görə şöbəni dəyişir (məs. «Digər»).
     Override-dəki kod tapılmazsa ``target_unit``-ə düşülür.
+
+    ``sender_unit`` DEFAULT-u ``_UNRESOLVED``-dur, ``None`` DEYİL: çağıran
+    (məs. bir dövrədə 19 KIND üçün) artıq HƏLL EDİLMİŞ ``sender_unit``-i
+    ötürəndə onun nəticəsi HƏQİQƏTƏN ``None`` ola bilər (mərkəzi/org-scope
+    aktor — heç bir şöbəyə bağlı deyil). ``None``-u «hələ hesablanmayıb» ilə
+    qarışdırmaq hər KIND üçün ``sender_scope_unit_for``-u (deməli üzvlük və
+    tələbənin akademik qeydi sorğularını) TƏKRAR işə salırdı.
     """
     organization = organization or kind.organization
     family = family or sender_family_for(user, organization)
     if family is None:
         return None, None, None, None
-    if sender_unit is None:
+    if sender_unit is _UNRESOLVED:
         sender_unit = sender_scope_unit_for(user, organization, family)
 
     unit = unit_by_code(organization, kind.unit_code_for(family))

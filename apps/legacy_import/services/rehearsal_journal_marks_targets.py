@@ -105,7 +105,7 @@ MARK_SEALER = JournalSealer(
 class MarkWrite:
     """Bir xananın yazısı üçün lazım olan hər şey — həll bitib.
 
-    ``legacy_pk``…``month_id`` YALNIZ provenans daşıyır: toqquşma halında uduzan
+    ``legacy_pk``…``source_lesson_ref`` YALNIZ provenans daşıyır: toqquşma halında uduzan
     dəyəri sübut qatına yazan J12 (``journal_lesson_recovery``) onları
     ``on_conflict`` hook-u ilə oxuyur.  J4 onları doldurmur (defolt boşdur) və
     heç bir möhür digest-inə girmirlər — yazı davranışı dəyişməz qalır.
@@ -121,6 +121,7 @@ class MarkWrite:
     row_hash: str = ""
     student_ref: str = ""
     month_id: str = ""
+    source_lesson_ref: str = ""
 
 
 def classify_mark_write(existing, request: MarkWrite) -> str:

@@ -218,6 +218,14 @@
     gap: 0.4rem;
 }
 
+.result-legacy-grade__summary-warning {
+    flex-basis: 100%;
+    color: var(--ems-danger-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
 .result-legacy-grade__summary:focus-visible {
     outline: 3px solid var(--ems-primary-600);
     outline-offset: -3px;

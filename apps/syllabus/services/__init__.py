@@ -52,6 +52,7 @@ from .queries import (  # noqa: F401
     version_timeline,
 )
 from .scoping import SyllabusActor, can_view, has_decision_scope, is_author, resolve_actor  # noqa: F401
+from .section_shape import SectionShapeError, normalize_section_data  # noqa: F401
 from .versioning import (  # noqa: F401
     ESCALATION_CODE,
     STRUCTURAL_SECTIONS,
@@ -86,6 +87,7 @@ __all__ = [
     "STATE_REVISION",
     "STRUCTURAL_SECTIONS",
     "SectionConflict",
+    "SectionShapeError",
     "SyllabusActor",
     "approve",
     "approved_version_for",

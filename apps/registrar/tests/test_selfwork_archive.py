@@ -168,14 +168,18 @@ class SelfWorkArchiveScoreTest(TestCase):
     def test_journal_page_renders_read_only_archive_column(self):
         with bypass_rls():
             self._write_archive(self.enrollment, "7")
-        resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        # QA 2026-09-05 (P1-8): tablar server tərəfdə ayrı-ayrı render olunur —
+        # sərbəst iş paneli üçün `?jt=serbest` lazımdır.
+        url = reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=serbest"
+        resp = self._client(self.teacher).get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "jd-sw2-arch-val")  # oxu-only nişan (input DEYİL)
         self.assertContains(resp, 'data-jd-sw-archive="7"')
         self.assertContains(resp, "ARXİV")
 
     def test_journal_page_has_no_archive_column_without_migrated_data(self):
-        resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        url = reverse("registrar:journal_detail", args=[self.offering.id]) + "?jt=serbest"
+        resp = self._client(self.teacher).get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertNotContains(resp, "jd-sw2-arch-val")
         self.assertNotContains(resp, "data-jd-sw-archive")

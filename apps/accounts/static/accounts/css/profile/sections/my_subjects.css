@@ -302,7 +302,7 @@
 .my-subjects-empty i {
     font-size: 2rem;
     margin-bottom: 0.6rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .my-subjects-empty p { margin: 0; }
@@ -326,7 +326,7 @@
     font-weight: 700;
     color: var(--ems-neutral-900);
 }
-.subject-grade-max { font-size: 0.8rem; font-weight: 400; color: var(--ems-neutral-400); }
+.subject-grade-max { font-size: 0.8rem; font-weight: 400; color: var(--ems-neutral-500); }
 
 .subject-grade-letter {
     font-weight: 700;

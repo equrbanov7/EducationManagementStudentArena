@@ -13,7 +13,7 @@ from ...services import (
     set_student_org_request_status,
     sync_profile_pending_request_snapshot,
 )
-from .rbac import _is_superadmin_user
+from .rbac import _invalidate_actor_permissions_cache, _is_superadmin_user
 from .roles_map import _map_org_role_to_profile_role, _resolve_membership_role
 from .tenant import _bind_active_role_context
 
@@ -115,6 +115,14 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
         final_memberships[0] = primary_membership
 
     _bind_active_role_context(user, organization, memberships=final_memberships)
+    # QA 2026-09 — bu funksiya `user`-in üzvlüklərini MUTASİYA edir (deaktivasiya/
+    # yaratma/is_primary). Eyni request daxilində sonradan `get_permission_scope`/
+    # `_collect_actor_permissions` çağırılarsa (məs. rol icazələrinin dərhal
+    # göstərilməsi), keşlənmiş köhnə üzvlük siyahısı qayıtmamalıdır.
+    _invalidate_actor_permissions_cache(user)
+    from apps.organizations.public import invalidate_permission_scope_cache
+
+    invalidate_permission_scope_cache(user)
     return final_memberships
 
 
@@ -141,3 +149,8 @@ def _ensure_profile_admin_membership(user, organization):
     if Membership.objects.filter(user=user, organization=organization, is_active=True).exists():
         return
     ensure_owner_membership(user, organization)
+    # `ensure_owner_membership` yalnız organizations-öz keşini (`_org_scope_
+    # memberships_cache`) təmizləyir (modul sərhədi); accounts-öz `_actor_perms_
+    # cache`-i buradan silinməlidir — yeni üzvlük yarandı, əvvəlki (üzvlüksüz)
+    # icazə nəticələri artıq etibarsızdır (bax `_sync_user_role_memberships`).
+    _invalidate_actor_permissions_cache(user)

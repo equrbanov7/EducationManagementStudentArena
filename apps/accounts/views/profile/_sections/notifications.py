@@ -8,6 +8,8 @@ from apps.notifications.models import NotificationType
 from apps.notifications.public import get_user_notifications
 from core.rls import bypass_rls
 
+from .notifications_ui import decorate
+
 
 def _defaults() -> dict:
     return {
@@ -49,7 +51,9 @@ def build_notifications_context(request, *, active_section) -> dict:
     in_app_notifications_paginator = Paginator(in_app_notifications_qs, 10)
     with bypass_rls():
         in_app_notifications_page = in_app_notifications_paginator.get_page(request.GET.get("notif_page", 1))
-        in_app_notifications_page.object_list = list(in_app_notifications_page.object_list)
+        # Şablon ikon/ton/zaman qrupunu HESABLAMIR — hazır atribut kimi alır
+        # (bax `notifications_ui.decorate`).
+        in_app_notifications_page.object_list = decorate(in_app_notifications_page.object_list)
     notif_pagination_query = _query_string(
         section="notifications",
         notif_filter=notif_filter,

@@ -54,7 +54,7 @@
                 <div class="results-search-row">
                     <input type="text" name="q" value="{{ search_query }}"
                            class="form-control results-search-input"
-                           placeholder="{% trans 'search_placeholder' context 'accounts.my_results_page' %}">
+                           placeholder="{% trans 'search_placeholder' context 'accounts.my_results_page' %}" aria-label="{% trans 'search_placeholder' context 'accounts.my_results_page' %}">
                     <button type="submit" class="btn btn-primary results-search-btn">
                         <i class="fas fa-search"></i> {% trans 'search' context 'accounts.my_results_page' %}
                     </button>
@@ -115,7 +115,7 @@
                         {{ item.kind }}
                         {% if item.category == 'academic' %}
                             {% if item.academic.period_label %} · {{ item.academic.period_label }}{% endif %}
-                        {% elif item.submitted_at %} · {{ item.submitted_at|date:"d M Y H:i" }}{% endif %}
+                        {% elif item.submitted_at %} · {{ item.submitted_at|date:"d.m.Y H:i" }}{% endif %}
                     </div>
                     <div class="result-meta">
                         {% if item.category == 'academic' %}

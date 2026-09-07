@@ -1,225 +1,193 @@
-/* «Müraciətlərim» — DETAL paneli (dizayn §4.7).
+/* «Müraciətlərim» — DETAL MODALININ QABIĞI (aç / bağla / fokus / əməl).
  *
- * Başlıq + SLA zolağı + mətn + sənədlər + zaman xətti + cavab qutusu.
+ * Detal əvvəl sağdakı yapışqan sütun idi; indi MODAL-dır: siyahı tam eni tutur,
+ * yazışma isə oxunaqlı ölçüdə açılır. Markup `applications_thread.js`-dədir —
+ * burada yalnız DAVRANIŞ var:
+ *
+ *   • sorğu gedərkən modal DƏRHAL skeletlə açılır (boş gözləmə yoxdur),
+ *   • qıraqa klik / Esc / ✕ bağlayır,
+ *   • cavab yazılıb GÖNDƏRİLMƏYİBSƏ bağlamazdan əvvəl xəbərdarlıq çıxır,
+ *   • arxa fon scroll-u kilidlənir (`html.apx-modal-open`).
+ *
  * Düymələr YALNIZ server-in `allowed_actions` siyahısından doğulur — UI-da
- * rol/status məntiqi yoxdur (backend müqaviləsi §8.2). Mətn tələb edən üç
- * düymə (həll / məlumat istə / rədd) cavab mətni normadan qısa olduqda
- * deaktivdir (dizayn §4.7); qalanları öz dialoqunu açır.
+ * rol/status məntiqi yoxdur (backend müqaviləsi §8.2).
  */
 (function () {
     "use strict";
 
     var NS = (window.EMSApplications = window.EMSApplications || {});
 
-    //: Hadisə növü → (nişan, palitra sinfi). Dizayn §3.4-ün altı nişanı +
-    //: backend-in əlavə hadisələri (təyinat, qaytarma, təkrar göndəriş, …).
-    var MARKS = {
-        submitted: ["↑", "primary"],
-        seen: ["👁", "neutral"],
-        comment: ["💬", "neutral"],
-        assigned: ["⚑", "primary"],
-        info_requested: ["?", "warning"],
-        info_provided: ["!", "warning"],
-        forwarded: ["→", "neutral"],
-        returned: ["↩", "warning"],
-        resubmitted: ["⟳", "primary"],
-        resolved: ["✓", "success"],
-        rejected: ["✕", "danger"],
-        closed: ["✓", "neutral"],
-        cancelled: ["✕", "neutral"],
+    //: Cavab qutusunun mətnini İŞLƏDƏN əməllər — qalanları öz dialoqunu açır.
+    //: `min`: mətn həddi ("note" = `rules.note`, "one" = 1 simvol).
+    //: `files`: server həmin əməldə sənəd qəbul edirmi (`views._action_kwargs`).
+    //: Rədd/qaytar/ləğv yalnız SƏBƏB alır — fayl seçilibsə istifadəçi xəbərdarlıq
+    //: görür, fayl səssizcə İTMİR.
+    var INLINE_ACTIONS = {
+        resolve: { min: "note", files: true },
+        request_info: { min: "note", files: true },
+        add_comment: { min: "one", files: true },
+        reject: { min: "note", files: false },
     };
 
-    //: Cavab qutusunun mətnini İSTİFADƏ EDƏN əməllər (dizayn §4.7) — qalanları
-    //: dialoq açır. Dəyər: minimum simvol (server `rules`-u ilə üst-üstə düşür).
-    var INLINE_ACTIONS = { resolve: "note", request_info: "note", reject: "note", add_comment: "one" };
-
-    //: Əməl → (etiket açarı, düymə sinfi). Sıra dizayn §4.7-dəki sıradır.
-    var BUTTONS = [
-        ["resolve", "actResolve", "apx-btn apx-btn--primary"],
-        ["request_info", "actRequestInfo", "apx-btn"],
-        ["forward", "actForward", "apx-btn apx-btn--outline"],
-        ["return_for_correction", "actReturn", "apx-btn"],
-        ["reject", "actReject", "apx-btn apx-btn--danger"],
-        ["assign", "actAssign", "apx-btn"],
-        ["add_comment", "actComment", "apx-btn"],
-        ["provide_info", "actProvideInfo", "apx-btn apx-btn--primary"],
-        ["resubmit", "actResubmit", "apx-btn apx-btn--primary"],
-        ["close", "actClose", "apx-btn apx-btn--primary"],
-        ["cancel", "actCancel", "apx-btn apx-btn--danger"],
-    ];
-
-    function slaText(sla) {
-        if (!sla) {
-            return "";
-        }
-        if (sla.tone === "closed") {
-            return NS.t("slaClosed", { status: String(sla.status_label || "").toLocaleLowerCase("az") });
-        }
-        if (sla.tone === "overdue") {
-            return NS.t("slaOverdue", { n: sla.days, m: sla.sla_days });
-        }
-        return NS.t("slaOntime", { n: sla.days, m: sla.sla_days });
+    function host() {
+        return NS.root && NS.root.querySelector("[data-apx-detail]");
     }
 
-    function filesHtml(app) {
-        if (!app.attachments || !app.attachments.length) {
-            return "";
-        }
-        var rows = app.attachments
-            .map(function (file) {
-                return (
-                    '<a class="apx-file" href="' +
-                    NS.esc(file.download_url) +
-                    '" rel="nofollow">' +
-                    '<i class="fas fa-file-lines" aria-hidden="true"></i>' +
-                    '<span class="apx-file__name">' + NS.esc(file.name) + "</span>" +
-                    '<span class="apx-file__size">' + NS.esc(NS.size(file.size)) + "</span></a>"
-                );
-            })
-            .join("");
-        return (
-            '<div><div class="apx-label">' + NS.esc(NS.t("secFiles")) + "</div>" +
-            '<div class="apx-files">' + rows + "</div></div>"
-        );
+    function panel() {
+        var box = host();
+        return box ? box.querySelector("[data-apx-modal-panel]") : null;
     }
 
-    function timelineHtml(app) {
-        var items = (app.events || [])
-            .map(function (event) {
-                var mark = MARKS[event.kind] || MARKS.comment;
-                var who = event.actor || "";
-                if (event.kind === "forwarded" && event.to_unit) {
-                    who = who + " → " + event.to_unit;
-                }
-                var what = event.text || event.kind_label || "";
-                return (
-                    '<div class="apx-tl__item"><div class="apx-tl__gutter">' +
-                    '<span class="apx-mark apx-mark--' + mark[1] + '" aria-hidden="true">' + mark[0] + "</span>" +
-                    '<span class="apx-tl__line"></span></div>' +
-                    '<div class="apx-tl__main"><div class="apx-tl__head">' +
-                    '<span class="apx-tl__who">' + NS.esc(who) + "</span>" +
-                    '<span class="apx-tl__when">' + NS.esc(NS.dateTime(event.created_at)) + "</span>" +
-                    (event.is_internal
-                        ? '<span class="apx-tl__internal">' + NS.esc(NS.t("internal")) + "</span>"
-                        : "") +
-                    "</div>" +
-                    '<div class="apx-tl__what">' + NS.esc(event.kind_label) +
-                    (what && what !== event.kind_label ? " — " + NS.esc(what) : "") +
-                    "</div></div></div>"
-                );
-            })
-            .join("");
-        return (
-            '<div><div class="apx-label">' + NS.esc(NS.t("secTimeline")) + "</div>" +
-            '<div class="apx-tl">' + items + "</div></div>"
-        );
+    function isOpen() {
+        var box = host();
+        return !!box && !box.hidden;
     }
 
-    function actionsHtml(app) {
-        var allowed = app.allowed_actions || [];
-        var buttons = BUTTONS.filter(function (entry) {
-            return allowed.indexOf(entry[0]) !== -1;
-        });
-        if (!buttons.length) {
-            return noteHtml(app);
-        }
-        var needsText = buttons.some(function (entry) {
-            return INLINE_ACTIONS[entry[0]] === "note";
-        });
-        // Cavab qutusu YALNIZ mətn tələb edən əməl varsa göstərilir. Sahibin
-        // «ləğv et» / «bağla» kimi əməlləri öz dialoqunu açır — onlara boş
-        // textarea vermək dizaynın «yalnız-oxu qeyd» qaydasını pozardı (§4.7).
-        var inline = buttons.some(function (entry) {
-            return !!INLINE_ACTIONS[entry[0]];
-        });
-        var html =
-            '<div class="apx-act">' +
-            (inline
-                ? '<label class="apx-act__label" for="apx-reply">' + NS.esc(NS.t("replyLabel")) + "</label>" +
-                  '<textarea id="apx-reply" rows="3" class="apx-act__input" data-apx-reply placeholder="' +
-                  NS.esc(NS.t("replyPlaceholder")) + '"></textarea>'
-                : noteHtml(app)) +
-            '<div class="apx-act__buttons">' +
-            buttons
-                .map(function (entry) {
-                    var gated = !!INLINE_ACTIONS[entry[0]];
-                    return (
-                        '<button type="button" class="' + entry[2] + '" data-apx-action="' + entry[0] + '"' +
-                        (gated ? " disabled" : "") + ">" + NS.esc(NS.t(entry[1])) + "</button>"
-                    );
-                })
-                .join("") +
-            "</div>";
-        if (needsText) {
-            html += '<div class="apx-act__hint" data-apx-reply-hint>' + NS.esc(NS.t("replyHint")) + "</div>";
-        }
-        return html + "</div>";
+    function lock(on) {
+        document.documentElement.classList.toggle("apx-modal-open", !!on);
     }
 
-    function noteHtml(app) {
-        var viewer = app.viewer || {};
-        var unit = (app.current_unit && app.current_unit.name) || "";
-        var text;
-        if (viewer.is_sender) {
-            text = app.is_open ? NS.t("noteSenderOpen", { unit: unit }) : NS.t("noteSenderClosed");
-        } else if (!app.is_open) {
-            text = NS.t("noteHandlerClosed");
-        } else {
-            text = NS.t("noteHandlerWatching", { unit: unit });
+    function focusPanel() {
+        var body = panel();
+        if (!body) {
+            return;
         }
-        return (
-            '<div class="apx-note"><i class="fas fa-eye" aria-hidden="true"></i>' +
-            '<span class="apx-note__text">' + NS.esc(text) + "</span></div>"
-        );
+        try {
+            body.focus();
+        } catch (error) {
+            /* fokus alınmasa da modal işləyir */
+        }
+    }
+
+    function show(markup) {
+        var box = host();
+        var body = panel();
+        if (!box || !body) {
+            return null;
+        }
+        body.__files = [];
+        body.innerHTML = markup;
+        box.hidden = false;
+        lock(true);
+        focusPanel();
+        return body;
+    }
+
+    /* Skelet — detal sorğusu gedərkən. */
+    function openSkeleton() {
+        show(NS.thread.skeleton());
     }
 
     function render(app) {
-        var host = NS.root && NS.root.querySelector("[data-apx-detail]");
-        if (!host) {
+        NS.current = app;
+        var body = show(NS.thread.html(app, INLINE_ACTIONS));
+        if (!body) {
             return;
         }
-        NS.current = app;
-        var sla = app.sla || {};
-        var tone = sla.tone === "overdue" ? "apx-sla--overdue" : sla.tone === "closed" ? "apx-sla--closed" : "";
-        var fromLine = NS.esc(app.requester.name) + (app.requester_scope ? " · " + NS.esc(app.requester_scope) : "");
-        host.innerHTML =
-            '<div class="apx-detail__head"><div class="apx-detail__top">' +
-            '<span class="apx-no">' + NS.esc(app.number) + "</span>" +
-            '<span class="apx-badge" data-bg="' + NS.esc(app.kind.bg) + '" data-fg="' + NS.esc(app.kind.fg) + '">' +
-            NS.esc(app.kind.label) + "</span>" +
-            '<span class="apx-pill" data-bg="' + NS.esc(app.status.bg) + '" data-fg="' + NS.esc(app.status.fg) + '">' +
-            NS.esc(app.status.label) + "</span>" +
-            '<button type="button" class="apx-detail__close" data-apx-detail-close>' +
-            '<i class="fas fa-xmark" aria-hidden="true"></i>' + NS.esc(NS.t("closeDetail")) + "</button>" +
-            "</div>" +
-            '<h2 class="apx-detail__title">' + NS.esc(app.subject) + "</h2>" +
-            '<div class="apx-detail__from"><span>' + fromLine + "</span>" +
-            '<span class="apx-ctx__dot" aria-hidden="true">·</span>' +
-            "<span>" + NS.esc(NS.dateTime(app.submitted_at)) + "</span></div>" +
-            '<div class="apx-sla ' + tone + '"><i class="fas fa-clock" aria-hidden="true"></i>' +
-            '<span class="apx-sla__text">' + NS.esc(slaText(sla)) + "</span></div></div>" +
-            '<div class="apx-detail__body">' +
-            '<div><div class="apx-label">' + NS.esc(NS.t("secBody")) + "</div>" +
-            '<p class="apx-text">' + NS.esc(app.body) + "</p></div>" +
-            filesHtml(app) +
-            timelineHtml(app) +
-            actionsHtml(app) +
-            "</div>";
-        host.hidden = false;
-        NS.paintSwatches(host);
+        NS.paintSwatches(body);
+        NS.thread.scrollToLatest(body);
     }
 
-    function clear() {
-        var host = NS.root && NS.root.querySelector("[data-apx-detail]");
-        if (!host) {
+    /* Yazılmış, amma GÖNDƏRİLMƏMİŞ məzmun varmı? */
+    function isDirty() {
+        var body = panel();
+        if (!body || !isOpen()) {
+            return false;
+        }
+        var field = body.querySelector("[data-apx-reply]");
+        if (field && field.value.trim().length) {
+            return true;
+        }
+        return !!(body.__files && body.__files.length);
+    }
+
+    function close() {
+        var box = host();
+        if (!box) {
             return;
         }
         NS.current = null;
-        host.innerHTML = "";
-        host.hidden = true;
+        box.hidden = true;
+        var body = panel();
+        if (body) {
+            body.innerHTML = "";
+            body.__files = [];
+        }
+        lock(false);
+        if (NS.state) {
+            NS.state.selectedId = "";
+        }
+        if (NS.renderList) {
+            NS.renderList();
+        }
     }
 
-    NS.detail = { render: render, clear: clear, MARKS: MARKS, INLINE_ACTIONS: INLINE_ACTIONS };
+    /* Bağlama İSTƏYİ — göndərilməmiş mətn/sənəd varsa əvvəlcə təsdiq istənilir.
+     * `true` qaytarır = istək qəbul olundu (Esc zənciri dayanır). */
+    function requestClose() {
+        if (!isOpen()) {
+            return false;
+        }
+        if (!isDirty()) {
+            close();
+            return true;
+        }
+        NS.dialogs.confirm(NS.t("closeDirtyTitle"), NS.t("closeDirtyText"), function () {
+            NS.dialogs.close("confirm");
+            close();
+        });
+        return true;
+    }
+
+    function errors(messages) {
+        var body = panel();
+        if (body && NS.dialogs && NS.dialogs.showErrors) {
+            NS.dialogs.showErrors(body, messages);
+        }
+    }
+
+    /* Mətn tələb edən əməllər cavab qutusunun UZUNLUĞUNA görə açılır/bağlanır.
+     * Tək mənbə: həm yazarkən, həm də uğursuz göndərişdən sonra bura qayıdılır —
+     * əks halda `busy(false)` qısa mətndə də bütün düymələri açardı. */
+    function syncGates(box) {
+        if (!box) {
+            return;
+        }
+        var field = box.querySelector("[data-apx-reply]");
+        var length = field ? field.value.trim().length : 0;
+        box.querySelectorAll("[data-apx-action]").forEach(function (button) {
+            var need = INLINE_ACTIONS[button.getAttribute("data-apx-action")];
+            button.disabled = need ? (need.min === "one" ? length < 1 : length < NS.rules.note) : false;
+        });
+    }
+
+    /* Göndəriş anında bütün əməl düymələri kilidlənir — ikiqat klik yeni sətir
+     * yaradırdı (eyni sinif problem `submit.DUPLICATE_WINDOW`-da server tərəfdə
+     * bağlanıb; burada UI tərəfi). */
+    function busy(on) {
+        var body = panel();
+        if (!body) {
+            return;
+        }
+        if (on) {
+            body.querySelectorAll("[data-apx-action]").forEach(function (button) {
+                button.disabled = true;
+            });
+        } else {
+            syncGates(body.querySelector(".apx-act"));
+        }
+        body.setAttribute("aria-busy", on ? "true" : "false");
+    }
+
+    NS.detail = {
+        render: render,
+        clear: close,
+        openSkeleton: openSkeleton,
+        requestClose: requestClose,
+        isOpen: isOpen,
+        isDirty: isDirty,
+        INLINE_ACTIONS: INLINE_ACTIONS,
+    };
 
     /* ── Delegasiya (bir dəfə) ──────────────────────────────────────────── */
     function start() {
@@ -229,24 +197,18 @@
         NS.__detailWired = true;
 
         window.EMSDelegate.on("input", "[data-apx-reply]", function (event, node) {
-            var length = node.value.trim().length;
-            var box = node.closest(".apx-act");
-            if (!box) {
-                return;
-            }
-            box.querySelectorAll("[data-apx-action]").forEach(function (button) {
-                var need = INLINE_ACTIONS[button.getAttribute("data-apx-action")];
-                if (!need) {
-                    return;
-                }
-                button.disabled = need === "one" ? length < 1 : length < NS.rules.note;
-            });
+            syncGates(node.closest(".apx-act"));
         });
 
         window.EMSDelegate.on("click", "[data-apx-detail-close]", function () {
-            clear();
-            NS.state.selectedId = "";
-            NS.renderList();
+            requestClose();
+        });
+
+        // Yalnız overlay-in ÖZÜNƏ klik bağlayır (panelin içi qabarcıqlanmır).
+        window.EMSDelegate.on("click", "[data-apx-detail]", function (event, node) {
+            if (event.target === node) {
+                requestClose();
+            }
         });
 
         window.EMSDelegate.on("click", "[data-apx-action]", function (event, node) {
@@ -255,15 +217,24 @@
             if (!app) {
                 return;
             }
-            if (INLINE_ACTIONS[action]) {
-                var field = NS.root.querySelector("[data-apx-reply]");
-                var text = field ? field.value.trim() : "";
-                NS.submitAction(app.id, action, { text: text }).catch(function (error) {
-                    NS.toast(NS.errorList(error)[0], "error");
-                });
+            var inline = INLINE_ACTIONS[action];
+            if (!inline) {
+                NS.dialogs.openForAction(action, app);
                 return;
             }
-            NS.dialogs.openForAction(action, app);
+            var body = panel();
+            var field = body && body.querySelector("[data-apx-reply]");
+            var files = (body && body.__files) || [];
+            if (files.length && !inline.files) {
+                errors([NS.t("filesNotAllowed", { action: node.textContent.trim() })]);
+                return;
+            }
+            errors([]);
+            busy(true);
+            NS.submitAction(app.id, action, { text: field ? field.value.trim() : "" }, files).catch(function (error) {
+                busy(false);
+                errors(NS.errorList(error));
+            });
         });
     }
 

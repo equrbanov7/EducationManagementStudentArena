@@ -210,6 +210,12 @@
                 }
                 if (isMatch && ctx.sectionTitle) {
                     ctx.sectionTitle.textContent = link.getAttribute("data-title") || ctx.defaultSectionTitle;
+                    // Brauzer tab-ı / tarixçə / ekran oxuyucu üçün sənəd başlığı da
+                    // bölmə ilə dəyişir (QA 2026-09-05 P3-4).
+                    var titleSuffix = ctx.profilePage ? ctx.profilePage.getAttribute("data-title-suffix") : "";
+                    if (titleSuffix) {
+                        document.title = ctx.sectionTitle.textContent + " - " + titleSuffix;
+                    }
                 }
             });
             openSidebarMenuGroupForSection(section);
@@ -362,6 +368,12 @@
             }
 
             if (localStorage.getItem("profileSidebarCollapsed") === "true") {
+                ctx.sidebar.classList.add("collapsed");
+            }
+            // Mobil görünüşdə ilk yükləmə: sidebar overlay kimi məzmunu örtməsin —
+            // AJAX swap-dan sonrakı davranışla (section_loader → setSidebarCollapsed)
+            // eyni. localStorage-a yazılmır ki, desktop seçimi pozulmasın (QA P2-1).
+            if (isMobileViewport()) {
                 ctx.sidebar.classList.add("collapsed");
             }
             syncSidebarToggleState();

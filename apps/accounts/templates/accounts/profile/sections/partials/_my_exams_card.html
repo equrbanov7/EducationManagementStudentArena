@@ -38,7 +38,7 @@
   <div class="tx-card-meta">
     <span class="tx-m">
       <i class="far fa-calendar" aria-hidden="true"></i>
-      {% if exam.start_datetime %}{{ exam.start_datetime|date:"d M Y" }}{% else %}{{ exam.created_at|date:"d M Y" }}{% endif %}
+      {% if exam.start_datetime %}{{ exam.start_datetime|date:"d.m.Y" }}{% else %}{{ exam.created_at|date:"d.m.Y" }}{% endif %}
     </span>
     <span class="tx-m"><i class="fas fa-list-ol" aria-hidden="true"></i> <b>{{ exam.card_question_count }}</b> {% trans "meta_questions" context "exams.dashboard" %}</span>
     {% if exam.total_duration_minutes %}

@@ -96,7 +96,8 @@
 }
 
 .sidebar-menu-link.active {
-    background: var(--primary-blue);
+    /* QA 2026-09-05 UX-01: ağ mətn #3b82f6 üzərində 3.68:1 idi (AA 4.5 tələb edir) → 5.17:1. */
+    background: var(--ems-primary-600);
     color: white;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }

@@ -1,0 +1,130 @@
+{% load i18n %}
+{% comment %}
+«Yeni inzibati bölmə» — RİM mərkəzindən şöbə / mərkəz / institut / laboratoriya.
+
+YAZI YOLU BU PANELDƏ DEYİL. Forma mövcud struktur-ağac endpoint-inə göndərir
+(`organizations:structure_tree_action`, `action=create_child`) — eyni
+`unit.tree_manage` açarı, eyni görünürlük qapısı, eyni audit sətri. Ona görə
+burada nə ayrıca servis, nə də ayrıca icazə yoxdur; URL kök elementin
+`data-unit-action-url` atributundadır (bax `_rim_create.html`).
+
+NİYƏ PANELİN İÇİNDƏ? AJAX swap yalnız [data-profile-section-panel] elementini
+götürür; kənarda qalan dialoq swap-dan sonra itərdi
+(bax docs/frontend/AJAX_SAFE_JS_PATTERN.md).
+
+CSP: inline <style>/<script> YOXDUR — mətnlər `_rim_create.html`-dəki ortaq
+JSON blokundadır, davranış isə `js/rim_center/create_unit.js`-dədir.
+
+İKİ TƏRCÜMƏ KONTEKSTİ: bölmə sahələrinin etiketləri (ad / tip / kod) ağac
+ekranının `accounts.structure_tree` kontekstindən GƏLİR — eyni sahə, eyni
+tərcümə; RİM-ə xas mətnlər isə `profile.rim` kontekstindədir.
+{% endcomment %}
+
+<div class="ems-overlay ems-overlay--dialog" id="rimc-admin-unit" hidden data-ems-static="true">
+  <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="rimc-admin-unit-title">
+    <form data-rimu-form novalidate>
+      <div class="ems-dialog__head">
+        <div>
+          <h2 class="ems-dialog__title" id="rimc-admin-unit-title">{% trans "Yeni inzibati bölmə" context "profile.rim" %}</h2>
+          <p class="ems-dialog__sub">{% trans "Bölmə struktur ağacında yaradılır və dəyişiklik audit jurnalına düşür." context "profile.rim" %}</p>
+        </div>
+        <button type="button" class="ems-dialog__x" data-ems-overlay-close
+                aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+      </div>
+
+      <div class="ems-dialog__body" data-rimu-body>
+        <p class="ems-msg ems-msg--error" data-rimu-form-error role="alert" hidden></p>
+
+        <div class="rimc-grid">
+          <div class="ems-field rimc-combo rimc-field--full" data-rimc-combo="admin_parent">
+            <label class="ems-field__label" for="rimu-parent">
+              {% trans "Valideyn bölmə" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
+            </label>
+            <input class="ems-input" id="rimu-parent" type="text" role="combobox" autocomplete="off"
+                   aria-expanded="false" aria-autocomplete="list" aria-controls="rimu-parent-list"
+                   placeholder="{% trans 'Rektorat, fakültə və ya şöbənin adını yazın' context 'profile.rim' %}"
+                   data-rimc-combo-input aria-describedby="rimu-parent-hint">
+            <input type="hidden" name="parent" data-rimc-combo-value data-rimu-field="parent">
+            <ul class="rimc-combo__list" id="rimu-parent-list" role="listbox"
+                aria-label="{% trans 'Valideyn bölmə nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
+            <p class="ems-field__hint" id="rimu-parent-hint" data-rimc-combo-hint>{% trans "Yeni bölmə bu vahidin altında yaranacaq." context "profile.rim" %}</p>
+            <p class="ems-msg ems-msg--error" data-rimu-error="parent" role="alert" hidden></p>
+          </div>
+
+          <div class="ems-field rimc-field--full">
+            <label class="ems-field__label" for="rimu-name">
+              {% trans "Bölmənin adı" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span>
+            </label>
+            <input class="ems-input" id="rimu-name" type="text" name="name" required
+                   maxlength="255" autocomplete="off" data-rimu-field="name"
+                   placeholder="{% trans 'Məsələn: Beynəlxalq əlaqələr şöbəsi' context 'profile.rim' %}">
+            <p class="ems-msg ems-msg--error" data-rimu-error="name" role="alert" hidden></p>
+          </div>
+
+          <div class="ems-field">
+            <label class="ems-field__label" for="rimu-type">
+              {% trans "Bölmə tipi" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span>
+            </label>
+            <select class="ems-select" id="rimu-type" name="unit_type" required data-rimu-field="unit_type">
+              <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
+              {% for option in rim_center_section.unit_type_choices %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+              {% endfor %}
+            </select>
+            <p class="ems-field__hint">{% trans "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur." context "profile.rim" %}</p>
+            <p class="ems-msg ems-msg--error" data-rimu-error="unit_type" role="alert" hidden></p>
+          </div>
+
+          <div class="ems-field">
+            <label class="ems-field__label" for="rimu-code">{% trans "Kod" context "accounts.structure_tree" %}</label>
+            <input class="ems-input" id="rimu-code" type="text" name="code" maxlength="50"
+                   autocomplete="off" data-rimu-field="code" aria-describedby="rimu-code-hint">
+            <p class="ems-field__hint" id="rimu-code-hint">{% trans "Boş qala bilər — sənəd dövriyyəsindəki qısa işarə." context "profile.rim" %}</p>
+            <p class="ems-msg ems-msg--error" data-rimu-error="code" role="alert" hidden></p>
+          </div>
+        </div>
+      </div>
+
+      {# ── Uğur vəziyyəti (form əvəzinə göstərilir) ── #}
+      <div class="ems-dialog__body rimc-done" data-rimu-done hidden>
+        <p class="ems-msg ems-msg--success" role="status">
+          <span class="ems-msg__icon" aria-hidden="true">✓</span>
+          <span>{% trans "İnzibati bölmə yaradıldı." context "profile.rim" %}</span>
+        </p>
+
+        <dl class="rimc-cred">
+          <div class="rimc-cred__row">
+            <dt>{% trans "Bölmə" context "profile.rim" %}</dt>
+            <dd><span class="rimc-unit__value" data-rimu-done-name></span></dd>
+          </div>
+          <div class="rimc-cred__row">
+            <dt>{% trans "Tip" context "profile.rim" %}</dt>
+            <dd><span data-rimu-done-type></span></dd>
+          </div>
+          <div class="rimc-cred__row">
+            <dt>{% trans "Valideyn bölmə" context "profile.rim" %}</dt>
+            <dd><span data-rimu-done-parent></span></dd>
+          </div>
+        </dl>
+
+        <p class="ems-field__hint">
+          {% trans "Rəhbər təyini, adın dəyişdirilməsi və arxivləmə «Universitet strukturu» ekranındadır — orada öz açarları ilə." context "profile.rim" %}
+        </p>
+      </div>
+
+      <div class="ems-dialog__foot">
+        <button type="button" class="ems-btn" data-ems-overlay-close data-rimu-cancel>{% trans "Ləğv et" context "profile.rim" %}</button>
+        <a class="ems-btn" data-rimu-tree-link href="{{ rim_center_section.unit_tree_url }}" hidden>
+          <i class="fas fa-sitemap" aria-hidden="true"></i> {% trans "Struktur ağacında aç" context "profile.rim" %}
+        </a>
+        <button type="button" class="ems-btn" data-rimu-again hidden>{% trans "Daha bir bölmə yarat" context "profile.rim" %}</button>
+        <button type="submit" class="ems-btn ems-btn--primary" data-rimu-submit disabled aria-disabled="true">
+          {% trans "Bölməni yarat" context "profile.rim" %}
+        </button>
+        <button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-close data-rimu-done-close hidden>
+          {% trans "Bağla" context "profile.rim" %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

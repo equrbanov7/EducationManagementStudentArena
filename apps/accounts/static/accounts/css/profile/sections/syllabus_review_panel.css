@@ -106,7 +106,7 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-rvsec__note textarea {
@@ -203,7 +203,7 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-diff__text {
@@ -296,7 +296,7 @@
 .syl-timeline__when {
     margin-left: 8px;
     font-size: 0.74rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-timeline__who {
@@ -416,7 +416,7 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-secchips {
@@ -507,5 +507,5 @@
 .syl-modal__foot .syl-btn:disabled {
     border-color: var(--ems-neutral-300);
     background: var(--ems-neutral-200);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }

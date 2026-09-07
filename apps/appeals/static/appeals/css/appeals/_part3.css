@@ -86,7 +86,7 @@
 }
 
 .appeal-locked-note i {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* Bootstrap-select müraciət panelində native ilə eyni hündürlük */
@@ -151,7 +151,7 @@
 
 .appeal-option__icon {
     flex-shrink: 0;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .appeal-option__text {
@@ -547,7 +547,7 @@
 .appeal-empty--modal i {
     font-size: 1.75rem;
     margin-bottom: 0.5rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 @media (max-width: 576px) {

@@ -6,7 +6,10 @@
 document.addEventListener("DOMContentLoaded", function () {
   var i18n = window.TEACHER_QUESTIONS_BANK_I18N || {};
   var confirmFn = window.qbConfirm || function (o) {
-    if (window.confirm(o.body || "?") && typeof o.onConfirm === "function") o.onConfirm();
+    // qbConfirm hələ qeydiyyatdan keçməyibsə qlobal EMSConfirm-ə keç (UX-15 — native confirm() yox).
+    window.EMSConfirm.open({ body: o.body || "?", danger: (o.variant || "danger") === "danger" }).then(function (ok) {
+      if (ok && typeof o.onConfirm === "function") o.onConfirm();
+    });
   };
 
   // ── Bankı redaktə (modal aç/bağla) ──

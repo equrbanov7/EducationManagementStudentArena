@@ -79,6 +79,66 @@ def approved_syllabus_offerings(organization, offerings) -> set:
     }
 
 
+def other_period_subject_rows(organization, record, period, semester_number, existing_rows):
+    """Digər (CARİ olmayan) dövrlərdəki SİLİNMƏMİŞ qeydiyyatların fənn sətirləri.
+
+    QA 2026-09-05 (P3-16 / SYLLABUS-07): «Fənlərim» yalnız cari dövrü göstərir
+    — tələbənin paralel bir sessiyada (məs. Yay) aktiv qeydiyyatı olan fənn
+    siyahıya heç düşmürdü, deməli «Sillabusa bax» keçidi də əlçatmaz idi.
+    ``existing_rows`` — çağıranın ARTIQ yığdığı (əsas dövrün) sətirləri; onların
+    ``enrollment`` id-ləri təkrar qaytarılmır. Qaytarılan sətirlər
+    ``services.get_student_cabinet_data``-nın "subjects" formasındadır ki,
+    çağıran tərəf onları elə eyni siyahıya əlavə etsin — aşağıdakı toplu
+    syllabus/journal zənginləşdirməsi onları da əhatə edir. Tam period
+    seçicisi (SYLLABUS-07-in özü) ayrıca (bahalı) qərardır.
+    """
+    from apps.registrar import exam_eligibility, services
+    from apps.registrar.models import Enrollment
+
+    seen = {row["enrollment"].id for row in existing_rows}
+    # BİR sorğu: bütün digər dövrlərin aktiv yazılışları. Əvvəl hər dövr üçün
+    # `get_student_cabinet_data` çağırılırdı (semestr planı + kredit tərəqqisi
+    # yenidən) — 7 dövrlü tələbədə səhifə 171 sorğuya çıxırdı (QA 2026-09-06
+    # ölçüsü). Burada YALNIZ fənn sətri lazımdır.
+    extra = list(
+        Enrollment.objects.filter(organization=organization, student=record.student)
+        .exclude(offering__period_id=period.id)
+        .exclude(status=Enrollment.Status.DROPPED)
+        .exclude(id__in=seen)
+        .select_related("offering__subject", "offering__course", "offering__instructor", "offering__period")
+        .order_by("-offering__period__start_date", "offering__subject__code")
+    )
+    if not extra:
+        return []
+
+    offering_ids = [enrollment.offering_id for enrollment in extra]
+    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    limit_percent = record.program.absence_limit_percent
+    rows = []
+    for enrollment in extra:
+        subject = enrollment.offering.subject
+        rows.append(
+            {
+                "enrollment": enrollment,
+                "subject": subject,
+                "ects": subject.ects,
+                "kind": enrollment.kind,
+                "course": enrollment.offering.course,
+                "offering": enrollment.offering,
+                "teacher": enrollment.offering.instructor,
+                "eligibility": services.get_exam_eligibility(
+                    enrollment=enrollment,
+                    limit_percent=limit_percent,
+                    exempt=record.national_athlete_exemption,
+                    frozen=enrollment.offering_id in frozen_ids,
+                    hours_map=hours_map,
+                ),
+            }
+        )
+    return rows
+
+
 def assessment_weights_view(organization) -> dict:
     """Qiymətləndirmə çəkiləri (10/10/30/50) — ekran 10-un «struktur» zolağı."""
     from apps.syllabus.policy import assessment_weights
@@ -97,5 +157,6 @@ __all__ = [
     "TRANSCRIPT_APPLICATION_KIND",
     "approved_syllabus_offerings",
     "assessment_weights_view",
+    "other_period_subject_rows",
     "transcript_policy",
 ]

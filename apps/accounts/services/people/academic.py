@@ -129,6 +129,13 @@ def load_record(actor, record_id, *, request=None):
 
     404 (403 deyil) qəsdəndir: sahədən kənar qeydin MÖVCUDLUĞU da məlumatdır.
     """
+    # Qeyri-UUID id `filter(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 STUDENT-MGMT-05).
+    import uuid
+
+    try:
+        record_id = uuid.UUID(str(record_id or "").strip())
+    except ValueError:
+        raise RimAccessError("record_not_found", "Akademik qeyd tapılmadı.", status=404) from None
     if not record_id:
         raise RimAccessError("record_not_found", "Akademik qeyd tapılmadı.", status=404)
     record = (

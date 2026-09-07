@@ -22,7 +22,30 @@
     var tabs = Array.prototype.slice.call(tabBar.querySelectorAll("[data-jtab]"));
     var panels = Array.prototype.slice.call(page.querySelectorAll("[data-jtab-panel]"));
 
+    // QA 2026-09-05 (P1-8): panellər artıq SERVER TƏRƏFDƏ, bir-bir render olunur —
+    // səhifədə yalnız aktiv panel var. İstənilən panel DOM-da yoxdursa tab
+    // dəyişikliyi `?jt=` ilə səhifə yükləyir (əvvəl bütün panellər gizlədilib
+    // boş səhifə qalırdı).
+    function serverTabUrl(name) {
+      var params = new URLSearchParams(window.location.search);
+      params.set("jt", name);
+      return window.location.pathname + "?" + params.toString() + "#" + name;
+    }
+
+    function hasPanel(name) {
+      return panels.some(function (panel) {
+        return panel.getAttribute("data-jtab-panel") === name;
+      });
+    }
+
     function activate(name, persist) {
+      if (!hasPanel(name)) {
+        if (persist) {
+          try { window.sessionStorage.setItem(storageKey, name); } catch (e) { /* ignore */ }
+          window.location.href = serverTabUrl(name);
+        }
+        return false;
+      }
       var found = false;
       panels.forEach(function (panel) {
         var match = panel.getAttribute("data-jtab-panel") === name;
@@ -56,7 +79,7 @@
     if (!initial) {
       try { initial = window.sessionStorage.getItem(storageKey) || ""; } catch (e) { /* ignore */ }
     }
-    if (initial && initial !== "grid") {
+    if (initial && initial !== "grid" && hasPanel(initial)) {
       activate(initial, false);
     }
 

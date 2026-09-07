@@ -71,6 +71,16 @@ class LessonRoomTest(TestCase):
                 is_primary=True,
                 is_active=True,
             )
+            # Eyni təşkilatda, amma bu açılışla HEÇ bir əlaqəsi olmayan üzv —
+            # lookup-ların icazə qapısını (org kontekstindən AYRI) yoxlamaq üçün.
+            cls.student = User.objects.create_user("lr_student", "lr_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.student,
+                organization=cls.org,
+                role=cls.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
             cls.offering = services.get_or_create_offering(
                 organization=cls.org, subject=cls.subject, period=cls.period, group=cls.group
             )
@@ -179,11 +189,27 @@ class LessonRoomTest(TestCase):
         self.assertIn("data-jd-lesson-building", html)
         self.assertIn("data-jd-lesson-room", html)
         self.assertIn('name="lesson_room"', html)
-        # Korpus seçimləri dolu, otaqlar isə JSON blokundan gəlir.
+        # Korpus seçimləri (kiçik siyahı) hələ də bişirilir; OTAQLAR isə artıq
+        # HTML-ə YOX — modal İLK dəfə açılanda `data-rooms-url`-dan AJAX ilə
+        # gətirilir (QA 2026-09-05 P3-13 — bax journal_lesson_room.js).
         self.assertIn("I korpus", html)
-        self.assertIn('id="jd-lesson-rooms"', html)
-        # Layihə qaydası: inline CSS/JS yoxdur — otaq datası json_script ilə gəlir.
-        self.assertIn('type="application/json"', html)
+        self.assertIn("data-rooms-url=", html)
+        self.assertNotIn('id="jd-lesson-rooms"', html)
+
+    def test_lesson_room_lookup_endpoint_returns_org_rooms(self):
+        resp = self._client(self.teacher).get(reverse("registrar:journal_lesson_rooms", args=[self.offering.id]))
+        self.assertEqual(resp.status_code, 200)
+        payload = resp.json()
+        ids = {row["id"] for row in payload}
+        self.assertEqual(ids, {str(self.room_a1.id), str(self.room_a2.id), str(self.room_b1.id)})
+        self.assertNotIn(str(self.room_off.id), ids)
+        self.assertNotIn(str(self.room_alien.id), ids)
+
+    def test_lesson_room_lookup_denies_unrelated_user(self):
+        # Eyni təşkilatın üzvüdür (org konteksti mövcuddur), amma bu açılışın
+        # nə redaktoru, nə korrektoru, nə də siyahı idarəçisidir.
+        resp = self._client(self.student).get(reverse("registrar:journal_lesson_rooms", args=[self.offering.id]))
+        self.assertEqual(resp.status_code, 404)
 
     def test_modal_has_no_inline_script_or_style(self):
         resp = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))

@@ -50,7 +50,7 @@ class EffectiveDisplayTests(TestCase):
         Membership.objects.create(
             user=self.exam_center,
             organization=self.org,
-            role=self.org.roles.get(name="exam_center"),
+            role=self.org.roles.get(name="exam_center_head"),
             is_primary=True,
             is_active=True,
         )

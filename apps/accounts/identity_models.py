@@ -12,6 +12,10 @@ class AccountActivationEvidence(models.Model):
         INSTITUTION_REGISTRY_MATCH = "institution_registry_match", "Institution registry match"
         MANUAL_REGISTRY_VERIFICATION = "manual_registry_verification", "Manual registry verification"
         SIGNED_AUTHORITATIVE_EXPORT = "signed_authoritative_export", "Signed authoritative export"
+        # 2026-09-06 (sahib qərarı): rəsmi BƏRPA ƏMRİ də səlahiyyət sübutudur.
+        # Yalnız `AccountRestoreEvidence` yolunda işlədilir — staged→active
+        # aktivləşdirmə funksiyası bu kodu QƏBUL ETMİR (bax miqrasiya 0021).
+        STUDENT_REINSTATEMENT_ORDER = "student_reinstatement_order", "Student reinstatement order"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     organization = models.ForeignKey(

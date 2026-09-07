@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -107,10 +108,12 @@ def _active_teacher_user_ids(organization, period_ids):
     )
 
 
-def _head_candidates(organization):
-    """Rəhbər (dekan/müdir) namizədləri — idarəetmə/müəllim səviyyəli aktiv üzvlər."""
-    seen_user_ids = set()
-    candidates = []
+def head_candidate_memberships(organization, *, search: str = ""):
+    """Rəhbər namizədlərinin ÜZVLÜK sorğusu (siyahı və axtarış lookup-u üçün ortaq).
+
+    `search` verilirsə ad/soyad/username üzrə süzülür — axtarışlı seçici
+    (`EMSSearchableSelect`) bütün siyahını yükləmir, yalnız uyğun səhifəni alır.
+    """
     memberships = (
         Membership.objects.filter(
             organization=organization,
@@ -121,6 +124,20 @@ def _head_candidates(organization):
         .select_related("user", "role")
         .order_by("-role__level", "user__first_name", "user__username")
     )
+    term = (search or "").strip()
+    if term:
+        memberships = memberships.filter(
+            Q(user__first_name__icontains=term)
+            | Q(user__last_name__icontains=term)
+            | Q(user__username__icontains=term)
+        )
+    return memberships
+
+
+def head_candidate_rows(memberships):
+    """Üzvlükləri TƏKRARSIZ namizəd sətirlərinə çevirir (bir şəxs bir dəfə)."""
+    seen_user_ids = set()
+    candidates = []
     for membership in memberships:
         if membership.user_id in seen_user_ids:
             continue
@@ -133,6 +150,11 @@ def _head_candidates(organization):
             }
         )
     return candidates
+
+
+def _head_candidates(organization):
+    """Rəhbər (dekan/müdir) namizədləri — idarəetmə/müəllim səviyyəli aktiv üzvlər."""
+    return head_candidate_rows(head_candidate_memberships(organization))
 
 
 def _clean_sort(raw_sort):

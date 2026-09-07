@@ -27,7 +27,7 @@ from core.constants import OrgUnitType
 from ..scoping import get_permission_scope
 from ..unit_types import UNIT_TYPES_BY_ORG
 from ..views import _has_org_permission, _visible_units_queryset
-from ._shared import _head_candidates, _unit_permission_flags
+from ._shared import _unit_permission_flags
 from .constants import KAFEDRA_UNIT_TYPES
 from .unit_detail import build_unit_detail_context
 
@@ -164,8 +164,15 @@ def build_structure_tree_context(request, organization) -> dict:
 
     units = []
     if can_view:
+        # ``is_service_unit=True`` — köçürmədən gələn texniki/status konteyneri
+        # (bax ``OrgUnit.is_service_unit``) — ağacda GÖSTƏRİLMİR. Digər
+        # istehlakçılar (qrup reyestri, struktur əməlləri) bu filtri
+        # DAŞIMIR — orada bölmə hələ də tapılıb idarə oluna bilər.
         units = list(
-            _visible_units_queryset(organization, scope).select_related("head", "parent").order_by("path", "order")
+            _visible_units_queryset(organization, scope)
+            .filter(is_service_unit=False)
+            .select_related("head", "parent")
+            .order_by("path", "order")
         )
 
     if type_filter:
@@ -284,7 +291,13 @@ def build_structure_tree_context(request, organization) -> dict:
         "unit_kind_choices": unit_kind_choices(organization),
         "selected_unit_id": selected_id,
         "detail": detail,
-        "head_candidates": _head_candidates(organization) if can_assign_head else [],
+        # Namizəd siyahısı ARTIQ səhifə ilə gəlmir — axtarışlı seçici onu
+        # `structure_head_candidates` lookup-undan səhifə-səhifə alır.
+        "head_lookup_url": (
+            reverse("organizations:structure_head_candidates", kwargs={"slug": organization.slug})
+            if can_assign_head
+            else ""
+        ),
         "can_manage_tree": can_manage_tree,
         "can_assign_head": can_assign_head,
         "action_url": reverse("organizations:structure_tree_action", kwargs={"slug": organization.slug}),

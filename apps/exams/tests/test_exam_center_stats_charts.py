@@ -30,7 +30,7 @@ class ExamCenterStatsChartsTests(TestCase):
             is_active=True,
         )
         cls.center = User.objects.create_user("ecsc_center", "ecsc_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.center, cls.org, ProfileRole.MEMBER, "exam_center_head")
 
         cls.student = User.objects.create_user("ecsc_student", "ecsc_student@test.az", PASSWORD)
         _assign_user_to_org(cls.student, cls.org, ProfileRole.STUDENT, "student")

@@ -73,7 +73,7 @@
 .syl-note {
     margin: 4px 0 0;
     font-size: 0.76rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* Qərar səlahiyyəti olmayan aktorun (dekan) «yalnız oxunur» qeydi — sahibin
@@ -100,7 +100,7 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.7rem;
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-version {
@@ -304,7 +304,7 @@
 .syl-btn:disabled {
     border-color: var(--ems-neutral-300);
     background: var(--ems-neutral-200);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: not-allowed;
 }
 
@@ -317,7 +317,7 @@
     border-radius: var(--syl-radius-ctl);
     border: 1px solid var(--ems-border);
     background: var(--ems-bg);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 1.05rem;
     cursor: pointer;
 }
@@ -345,7 +345,7 @@
     font-weight: 800;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-input,
@@ -425,7 +425,7 @@
 .syl-counter {
     margin: 5px 0 0;
     font-size: 0.74rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-counter.is-bad {
@@ -506,5 +506,5 @@
 }
 
 .syl-toast__icon {
-    color: var(--ems-success);
+    color: var(--ems-success-700);
 }

@@ -43,6 +43,10 @@ class WorkloadAmendment(UUIDModel, TimeStampedModel):
     reason = models.CharField(max_length=32, choices=AmendmentReason.choices)
     note = models.TextField(help_text="Səbəbin açıqlaması — MƏCBURİ.")
     old_values = models.JSONField(default=dict, blank=True)
+    #: Çağıranın NİYYƏT etdiyi dəyər — yalnız audit/informativ snapshot-dur.
+    #: `services.amendments.open_amendment` bunu sətrə/bölgüyə TƏTBİQ ETMİR;
+    #: faktiki dəyişiklik ayrı yazma çağırışı ilə edilir (bax həmin funksiyanın
+    #: docstring-i).
     new_values = models.JSONField(default=dict, blank=True)
     document = models.FileField(
         upload_to=amendment_document_path,

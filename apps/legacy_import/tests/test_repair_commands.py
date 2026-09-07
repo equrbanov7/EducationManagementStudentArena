@@ -201,9 +201,12 @@ def archived_cohort(organization, actor, run):
 
 
 @pytest.mark.django_db
-def test_apply_is_refused_without_the_disposable_marker(organization):
+def test_apply_is_refused_without_the_disposable_marker(organization, monkeypatch):
     """Fail-closed: markersiz bazada yazmaq üçün açıq bayraq lazımdır."""
 
+    # SQLite qəsdən həmişə disposable test target-i sayılır. Burada yoxlanan
+    # branch real PostgreSQL markerinin OLMADIĞI haldır, onu açıq modelləşdir.
+    monkeypatch.setattr(repair_support, "database_is_disposable_target", lambda: False)
     with pytest.raises(CommandError) as refusal:
         call_command("legacy_repair_archive_status", "--organization", _SLUG, "--apply")
     assert "legacy_repair_target_not_disposable" in str(refusal.value)

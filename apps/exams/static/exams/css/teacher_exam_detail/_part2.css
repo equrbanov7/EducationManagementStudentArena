@@ -11,7 +11,7 @@
 }
 
 .success-btn { /* Aktiv et düyməsi */
-    background-color: var(--ems-success);
+    background-color: var(--ems-success-700);
     color: white;
     box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
 }
@@ -164,7 +164,7 @@
 }
 
 .option-item.correct .option-indicator i {
-    color: var(--ems-success); /* Düzgün cavab yaşıl */
+    color: var(--ems-success-700); /* Düzgün cavab yaşıl */
 }
 
 .option-item.correct .option-text {
@@ -206,7 +206,7 @@
 }
 
 .question-lazy-button:hover {
-    border-color: var(--ems-neutral-400);
+    border-color: var(--ems-neutral-500);
     background: var(--ems-neutral-50);
     color: var(--ems-neutral-900);
 }

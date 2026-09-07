@@ -136,7 +136,7 @@ class DashboardSectionBase(TestCase):
                 "chair_head",
                 "program_coordinator",
                 "ikt_rehber",
-                "exam_center",
+                "exam_center_head",
                 "rector",
                 "dean",
                 "teaching_office_head",
@@ -261,7 +261,7 @@ class DashboardWidgetVisibilityTest(DashboardSectionBase):
         self.assertIn("corrections", keys)
 
     def test_exam_center_sees_kollokvium_and_appeals(self):
-        keys = self.widget_keys(self.open_dashboard("exam_center"))
+        keys = self.widget_keys(self.open_dashboard("exam_center_head"))
         self.assertIn("kollokvium-windows", keys)
         self.assertIn("appeals", keys)
         self.assertNotIn("student-intake", keys)
@@ -335,7 +335,7 @@ class DashboardQueryBudgetTest(DashboardSectionBase):
             "chair_head",
             "program_coordinator",
             "ikt_rehber",
-            "exam_center",
+            "exam_center_head",
             "rector",
         ):
             with self.subTest(role=role_name):

@@ -272,6 +272,7 @@ def test_collision_evidence_keeps_exact_loser_and_winner_source_identity():
     )
     assert evidence.normalized_value == "status:present"
     assert evidence.winner_normalized_value == "status:absent"
+    assert evidence.source_lesson_ref == "calendar:03:9:11:30"
     assert evidence.source_row_hash_key == ("journals_dates_points", 205)
     assert evidence.winner_source_row_hash_key == ("journals_dates_points", 101)
     assert result.unresolved_calendar_evidence == []

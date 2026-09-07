@@ -110,3 +110,24 @@ def test_owning_chair_can_copy_within_scope(world):
     _new, version = _copy_as(world, world["chair_a"])
 
     assert version is not None
+
+
+def test_second_copy_does_not_create_a_parallel_dossier(world):
+    """QA 2026-09-05 P2-20 — sahib qərarı: paralel dosye yaranmır.
+
+    Əvvəl hər «kopyala» eyni fənn/dövr üçün açılışsız YENİ dosye yaradırdı,
+    yəni bir fənnin iki sillabusu olurdu və kafedra müdiri hansına qərar
+    verəcəyini bilmirdi. İndi hədəf dosye tapılır: açıq qaralaması varsa
+    köçürmə aydın səbəblə RƏDD olunur (işin üstündən yazılmır).
+    """
+    source = world["syllabus"]
+    scope = {"organization": source.organization, "subject": source.subject, "period": source.period}
+
+    target, version = _copy_as(world, world["teacher_a"])
+    after_first = Syllabus.objects.filter(**scope).count()
+    assert version.syllabus_id == target.pk
+
+    with pytest.raises(TransitionDenied) as excinfo:
+        _copy_as(world, world["teacher_a"])
+    assert excinfo.value.code == "copy.target_has_open_version"
+    assert Syllabus.objects.filter(**scope).count() == after_first, "ikinci köçürmə YENİ dosye yaratmamalıdır"

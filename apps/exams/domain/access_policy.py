@@ -9,6 +9,16 @@ from core.roles import ProfileRole
 User = get_user_model()
 
 
+def _user_can_manage_groups(user, organization) -> bool:
+    """Aktiv üzvlüklərin rol icazələrində `group.manage` (wildcard daxil) varmı."""
+    from core.permissions import has_permission
+
+    permissions: set[str] = set()
+    for membership in user.memberships.filter(organization=organization, is_active=True).select_related("role"):
+        permissions.update(getattr(membership.role, "permissions", None) or [])
+    return has_permission(list(permissions), "group.manage")
+
+
 class StudentGroup(models.Model):
     """
     Müəllimin yaratdığı tələbə qrupu.
@@ -92,6 +102,11 @@ class StudentGroup(models.Model):
                     self.organization,
                     {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
                 )
+            # SAHİBİN QƏRARI (2026-09-07): qrup «əsas müəllim» seçilmədən yaradılır —
+            # sahib (`teacher`) qrupu yaradan koordinator/dekanlıq ola bilər. Belə
+            # sahib müəllim rolunda deyil, amma `group.manage` daşıyır.
+            if not teacher_is_allowed and self.organization_id:
+                teacher_is_allowed = _user_can_manage_groups(self.teacher, self.organization)
 
             if not teacher_is_allowed:
                 errors["teacher"] = pgettext("exams.model.error", "group_primary_teacher_role_required")

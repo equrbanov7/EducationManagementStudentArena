@@ -58,6 +58,12 @@ from .identity_archive import (
     archive_staged_account,
     restore_archived_account,
 )
+from .identity_reinstate import (
+    REINSTATEMENT_REASON_CODE,
+    ReinstateResult,
+    order_evidence_digest,
+    reinstate_student_access,
+)
 from .organization_requests import (
     activate_verified_membership,
     activate_verified_student_membership,
@@ -134,4 +140,8 @@ __all__ = [
     "user_has_any_role",
     "verify_email_otp",
     "verify_otp_code",
+    "REINSTATEMENT_REASON_CODE",
+    "ReinstateResult",
+    "order_evidence_digest",
+    "reinstate_student_access",
 ]

@@ -318,6 +318,13 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     }
     section["dialog_hidden"] = [{"name": "action"}, {"name": "id"}]
     section["reason_hidden"] = [{"name": "action"}, {"name": "id"}]
+    # Tələbə çekmecəsinin dialoqları («qrupdan çıxar» = başqa qrupa köçür, «dondur»,
+    # «uzaqlaşdır») tələbə-hərəkət endpoint-inə gedir (əmr № + tarix + səbəb ≥20).
+    # Qrup dəyişikliyi DB qapısı ilə yalnız rəsmi köçürmə xidmətinə buraxılır.
+    section["movement_action_url"] = reverse("accounts:student_registry_action")
+    section["group_options"] = payload.get("group_options", [])
+    section["movement_form_data"] = {"data-tof-form": "1", "data-tof-url": section["movement_action_url"]}
+    section["movement_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
     # Toplu əməlin formu AYRICA işarələnir: seçilmiş sətir id-ləri ora GÖNDƏRMƏ
     # anında əlavə olunur (dialoq doldurulması gizli sahələri sıfırlayır, ona
     # görə açılışda yazmaq işləmir) — bax `teaching_office_bulk.js`.
@@ -430,7 +437,10 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
             "options": [{"value": "", "label": pgettext(_CTX_SEM, "Hamısı")}] + payload.get("chair_options", []),
         },
     ]
-    section["filter_count_label"] = pgettext(_CTX_SEM, "Nəticə: %(count)d açılış") % {"count": len(payload["rows"])}
+    section["filter_count_label"] = pgettext(_CTX_SEM, "Nəticə: %(count)d açılış") % {
+        "count": payload.get("rows_total", len(payload["rows"]))
+    }
+    section["pagination_query"] = urlencode({k: v for k, v in base_params.items() if v not in ("", None)})
     section["dialog_hidden"] = [{"name": "action"}, {"name": "period"}, {"name": "id"}]
     section["reason_hidden"] = [{"name": "action"}, {"name": "period"}, {"name": "id"}]
 

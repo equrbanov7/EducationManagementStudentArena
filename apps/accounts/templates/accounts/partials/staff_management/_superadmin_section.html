@@ -22,7 +22,7 @@
                    placeholder="{% trans 'Search organizations...' context 'staff.management' %}"
                    class="form-control role-assignment-search-input"
                    autocomplete="off"
-                   data-standard-search-input>
+                   data-standard-search-input aria-label="{% trans 'Search organizations...' context 'staff.management' %}">
             <button type="button"
                     class="role-assignment-search-clear"
                     data-standard-search-clear
@@ -32,7 +32,7 @@
             </button>
         </div>
         <div class="bootstrap-single-select org-management-select">
-            <select name="organization_status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+            <select name="organization_status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select aria-label="{% trans 'Status' context 'staff.management' %}">
                 <option value="">{% trans "All statuses" context "staff.management" %}</option>
                 <option value="active" {% if organization_status_filter == "active" %}selected{% endif %}>{% trans "Active" context "staff.management" %}</option>
                 <option value="pending" {% if organization_status_filter == "pending" %}selected{% endif %}>{% trans "Pending" context "staff.management" %}</option>
@@ -41,7 +41,7 @@
             </select>
         </div>
         <div class="bootstrap-single-select org-management-select">
-            <select name="organization_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+            <select name="organization_type" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select aria-label="{% trans 'Type' context 'staff.management' %}">
                 <option value="">{% trans "All types" context "staff.management" %}</option>
                 <option value="school" {% if organization_type_filter == "school" %}selected{% endif %}>{% trans "School" context "staff.management" %}</option>
                 <option value="university" {% if organization_type_filter == "university" %}selected{% endif %}>{% trans "University" context "staff.management" %}</option>
@@ -102,7 +102,7 @@
                                     <i class="fas fa-check"></i> {% trans "Approve" context "staff.management" %}
                                 </button>
                                 <div class="input-group input-group-sm">
-                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}">
+                                    <input type="text" class="form-control" name="reason" placeholder="{% trans 'Reject reason (optional)' context 'staff.management' %}" aria-label="{% trans 'Reject reason (optional)' context 'staff.management' %}">
                                     <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
                                         <i class="fas fa-times"></i> {% trans "Reject" context "staff.management" %}
                                     </button>
@@ -112,7 +112,7 @@
                             <button type="submit" name="action" value="unsuspend" class="btn btn-success btn-sm">{% trans "Unsuspend" context "staff.management" %}</button>
                             {% else %}
                             <div class="d-flex flex-column gap-2">
-                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}">
+                                <input type="text" class="form-control form-control-sm" name="reason" placeholder="{% trans 'Suspension reason' context 'staff.management' %}" aria-label="{% trans 'Suspension reason' context 'staff.management' %}">
                                 <button type="submit" name="action" value="suspend" class="btn btn-danger btn-sm">{% trans "Suspend" context "staff.management" %}</button>
                             </div>
                             {% endif %}

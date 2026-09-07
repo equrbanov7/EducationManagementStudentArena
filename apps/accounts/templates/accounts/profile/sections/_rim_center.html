@@ -36,10 +36,33 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
     {% else %}
 
     <div class="rim-head">
-      <h2 class="rim-title">
-        <i class="fas fa-id-card-alt"></i>
-        {% trans "RİM mərkəzi" context "profile.rim" %}
-      </h2>
+      <div class="rim-head__bar">
+        <h2 class="rim-title">
+          <i class="fas fa-id-card-alt"></i>
+          {% trans "RİM mərkəzi" context "profile.rim" %}
+        </h2>
+        {% comment %}
+          Yaratma səlahiyyətləri AYRICA açarlardır: axtarış/parol səlahiyyəti olan
+          hər operator yeni kimlik yarada bilməz (`user.import`), inzibati bölmə
+          isə struktur ağacının açarındandır (`unit.tree_manage`). Düymənin
+          görünməsi UI rahatlığıdır — FAKTİKİ qapı serverdədir
+          (services/rim/create.py::require_create,
+          organizations/structure_actions.py::structure_tree_action).
+        {% endcomment %}
+        {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
+        <button type="button" class="ems-btn ems-btn--primary rim-head__cta"
+                data-ems-overlay-open="rimc-chooser">
+          <i class="fas fa-plus" aria-hidden="true"></i>
+          {% if rim_center_section.can_create and rim_center_section.can_create_unit %}
+            {% trans "Yeni yarat" context "profile.rim" %}
+          {% elif rim_center_section.can_create %}
+            {% trans "Yeni hesab" context "profile.rim" %}
+          {% else %}
+            {% trans "Yeni bölmə" context "profile.rim" %}
+          {% endif %}
+        </button>
+        {% endif %}
+      </div>
       <p class="rim-lead">
         {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" %}
       </p>
@@ -88,6 +111,16 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
         </button>
       </div>
     </div>
+
+    {% comment %}
+      Yaratma axını (hesab: tək-tək form + toplu idxal; inzibati bölmə: struktur
+      ağacı əməli) — dialoqlar PANELİN İÇİNDƏDİR ki, AJAX swap-dan sonra itməsin.
+      Markup ayrı partial-dadır: bu fayl axtarış/idarəetmə səthidir, o isə
+      yaratma səthi. Hər seçim ÖZ açarına görə ayrıca gizlənir.
+    {% endcomment %}
+    {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
+      {% include "accounts/profile/sections/partials/_rim_create.html" %}
+    {% endif %}
 
     <div class="rim-results" data-rim-results aria-live="polite">
       <div class="rim-state">
