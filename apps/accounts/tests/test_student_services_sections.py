@@ -364,6 +364,8 @@ class MovementStateMachineTest(StudentServicesBase):
         self.record.refresh_from_db()
         self.assertEqual(self.record.status, AcademicStatus.ENROLLED)
         self.assertEqual(self.record.group_id, self.group_b.pk)
+        # Akademik qeyd qayıdır və giriş də sübutlu səthdən açılır → xəbərdarlıq yoxdur.
+        self.assertEqual(response.json()["movement"]["access_notice"], "")
 
     def test_form_change_updates_education_form(self):
         response = self._post_movement(
@@ -667,6 +669,15 @@ class AtisAdmissionTest(StudentServicesBase):
         self.assertEqual(created.parent_id, self.specialty.pk)
         self.assertEqual(created.settings["capacity"], 25)
 
+    def test_non_uuid_specialty_is_a_404_not_a_500(self):
+        """QA 2026-09-05 STUDENT-MGMT-01: `specialty=x` `filter(pk=...)`-də ValidationError → 500 verirdi."""
+        response = self._client("student_services").post(
+            reverse("accounts:student_admission_create_group"),
+            {"specialty": "x", "name": "QA-x", "capacity": "25"},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["error"], "specialty_not_found")
+
     def test_duplicate_group_name_is_rejected(self):
         response = self._client("student_services").post(
             reverse("accounts:student_admission_create_group"),
@@ -757,3 +768,84 @@ class ContractTest(StudentServicesBase):
         catalog_keys = set(status_catalog.keys("student_movement"))
         self.assertEqual(catalog_keys, set(RULES))
         self.assertEqual(len(catalog_keys), 6)
+
+
+class MovementGuardsTest(StudentServicesBase):
+    """QA 2026-09-05 STUDENT-MGMT-04/05/06/07/08 — hərəkət əmrinin giriş qapıları və giriş vəziyyəti."""
+
+    def test_unknown_kind_is_a_json_400_not_a_500(self):
+        response = self._post_movement(kind="nope")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.json())
+
+    def test_non_uuid_record_or_group_is_a_404(self):
+        self.assertEqual(self._post_movement(record_id="x").status_code, 404)
+        self.assertEqual(self._post_movement(target_group="x").status_code, 404)
+
+    def test_transfer_to_the_current_group_is_refused(self):
+        response = self._post_movement(target_group=str(self.group_a.pk))
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["error"], "same_group")
+
+    def test_academic_leave_with_a_past_end_date_is_refused(self):
+        response = self._post_movement(kind="academic_leave", target_group="", effective_until="01.01.2020")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "effective_until_past")
+
+    def test_expulsion_archives_access_and_reinstatement_reopens_it(self):
+        """Xaric → giriş bağlanır; bərpa əmri → giriş SÜBUTLA yenidən açılır.
+
+        `archived → active` keçidi Postgres trigger-i ilə qorunur (sübut sətri
+        olmadan `42501`); bərpa əmri üçün sanksiyalanmış səth accounts 0021-dədir
+        (`accounts_reinstate_student_identity`). Sübutun barmaq izi əmrin özüdür,
+        ona görə cavabda xəbərdarlıq OLMAMALIDIR.
+        """
+        from apps.accounts.identity_models import AccountRestoreEvidence
+        from apps.accounts.models import UserProfile
+
+        # İstehsal forması: profil sətri təşkilata bağlıdır (klonda 8634-dən 8-i istisna).
+        profile = UserProfile.objects.get(user=self.record.student)
+        profile.organization = self.org
+        profile.save(update_fields=["organization"])
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ACTIVE)
+        response = self._post_movement(kind="expulsion", target_group="")
+        self.assertEqual(response.status_code, 200, response.content)
+        profile.refresh_from_db()
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ARCHIVED)
+
+        response = self._post_movement(kind="reinstatement", order_number="R-141")
+        self.assertEqual(response.status_code, 200, response.content)
+        profile.refresh_from_db()
+        self.assertEqual(profile.access_state, UserProfile.AccessState.ACTIVE)
+        self.assertEqual(response.json()["movement"]["access_notice"], "")
+
+        evidence = AccountRestoreEvidence.objects.filter(user_ref=str(self.record.student_id)).first()
+        self.assertIsNotNone(evidence, "bərpa sübutu yazılmalıdır")
+        self.assertEqual(evidence.reason_code, "student_reinstatement_order")
+        self.assertIsNotNone(evidence.consumed_at)
+
+    def test_reinstating_a_never_archived_account_writes_no_evidence(self):
+        """İdempotentlik: girişi onsuz da AÇIQ olan hesab üçün sübut sətri yaranmır.
+
+        Akademik məzuniyyət girişi BAĞLAMIR (yalnız xaric/məzun bağlayır), ona görə
+        oradan qayıdan bərpa əmri kimlik səthinə heç toxunmamalıdır.
+        """
+        from apps.accounts.identity_models import AccountRestoreEvidence
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.filter(user=self.record.student).update(organization=self.org)
+        leave = self._post_movement(
+            kind="academic_leave",
+            target_group="",
+            order_number="R-160",
+            effective_until="2027-06-30",
+        )
+        self.assertEqual(leave.status_code, 200, leave.content)
+        response = self._post_movement(kind="reinstatement", order_number="R-161", target_group=str(self.group_b.pk))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["movement"]["access_notice"], "")
+        self.assertEqual(
+            UserProfile.objects.get(user=self.record.student).access_state,
+            UserProfile.AccessState.ACTIVE,
+        )
+        self.assertFalse(AccountRestoreEvidence.objects.filter(user_ref=str(self.record.student_id)).exists())

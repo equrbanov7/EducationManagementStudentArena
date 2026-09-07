@@ -94,6 +94,51 @@
         row.appendChild(cell);
     }
 
+    /* QA 2026-09-05 (UX-17): "Şəxs"/"Kafedra"/"Qrup" başlıqları `data-people-sort-*`
+     * ilə mövcud "Sıralama" select-inin (name="sort") dəyərlərinə bağlanır.
+     * Sıralama MƏNTİQİ dəyişmir — düymə yalnız select-i dəyişib "change" hadisəsi
+     * göndərir, cədvəl `load()` mövcud axını ilə yenilənir. `<button>` olduğu üçün
+     * Tab ilə çatır, Enter/Space native click kimi işləyir (əlavə keydown lazım deyil). */
+    function initSortHeaders(root, form) {
+        var sortSelect = form && form.querySelector('select[name="sort"]');
+        var headers = root.querySelectorAll("[data-people-sort-asc]");
+        if (!sortSelect || !headers.length) {
+            return;
+        }
+
+        function refresh() {
+            Array.prototype.forEach.call(headers, function (th) {
+                var asc = th.dataset.peopleSortAsc;
+                var desc = th.dataset.peopleSortDesc;
+                if (sortSelect.value === asc) {
+                    th.setAttribute("aria-sort", "ascending");
+                } else if (desc && sortSelect.value === desc) {
+                    th.setAttribute("aria-sort", "descending");
+                } else {
+                    th.setAttribute("aria-sort", "none");
+                }
+            });
+        }
+
+        Array.prototype.forEach.call(headers, function (th) {
+            var button = th.querySelector(".people__th-sort");
+            if (!button) {
+                return;
+            }
+            button.addEventListener("click", function () {
+                var asc = th.dataset.peopleSortAsc;
+                var desc = th.dataset.peopleSortDesc;
+                var next = sortSelect.value === asc && desc ? desc : asc;
+                sortSelect.value = next;
+                sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                refresh();
+            });
+        });
+
+        sortSelect.addEventListener("change", refresh);
+        refresh();
+    }
+
     function boot() {
         var roots = document.querySelectorAll("[data-people-root]");
         Array.prototype.forEach.call(roots, function (root) {
@@ -258,10 +303,37 @@
             }
         }
 
+        // QA 2026-09-05 (UX-11): yüklənərkən boş başlıq sətri + pager görünürdü.
+        // İndi cədvəl `aria-busy` olur və skelet sətirlər yerini tutur.
+        function setBusy(busy) {
+            var table = tbody.closest("table") || tbody.parentElement;
+            if (table) {
+                table.setAttribute("aria-busy", busy ? "true" : "false");
+            }
+            if (!busy) {
+                return;
+            }
+            if (empty) {
+                empty.hidden = true;
+            }
+            var columns = (table && table.querySelectorAll("thead th").length) || 1;
+            var html = "";
+            for (var row = 0; row < 6; row += 1) {
+                html += '<tr class="people__row--skeleton" aria-hidden="true">';
+                for (var col = 0; col < columns; col += 1) {
+                    html += '<td><span class="skeleton skeleton-line skeleton-line--sm"></span></td>';
+                }
+                html += "</tr>";
+            }
+            tbody.innerHTML = html;
+        }
+
         function load() {
             publishFilters();
+            setBusy(true);
             window.EMSCore.fetchJSON(urls.list + "?" + params().toString())
                 .then(function (payload) {
+                    setBusy(false);
                     if (!payload || !payload.has_access) {
                         tbody.textContent = "";
                         if (empty) {
@@ -272,6 +344,7 @@
                     render(payload);
                 })
                 .catch(function () {
+                    setBusy(false);
                     tbody.textContent = "";
                 });
         }
@@ -342,11 +415,26 @@
             load();
         });
 
+        initSortHeaders(root, form);
         loadOptions();
         load();
     }
 
     function openDetail(root, urls, userId) {
+        // Şəxs kartı — tam render `people_detail.js`-dədir (QA 2026-09-05 P1-2);
+        // əməllər (block/unblock/grant/revoke) buradakı `runAction` ilə icra olunur
+        // və siyahı `people:refresh` ilə yenilənir.
+        if (window.EMSPeopleDetail && typeof window.EMSPeopleDetail.open === "function") {
+            window.EMSPeopleDetail.open(root, urls, userId, {
+                runAction: function (action, id, onDone) {
+                    runAction(root, urls, action, id, function () {
+                        root.dispatchEvent(new CustomEvent("people:refresh"));
+                        onDone();
+                    });
+                }
+            });
+            return;
+        }
         var modal = root.querySelector("[data-people-detail-modal]");
         var body = root.querySelector("[data-people-detail-body]");
         if (!modal || !body) {
@@ -362,23 +450,12 @@
                 var title = document.createElement("h3");
                 title.textContent = [person.full_name, person.patronymic].filter(Boolean).join(" ");
                 body.appendChild(title);
-                var link = document.createElement("a");
-                link.href = person.profile_url;
-                link.textContent = "Profil səhifəsi";
-                body.appendChild(link);
                 modal.hidden = false;
                 body.focus();
             })
             .catch(function () {
                 /* səssiz — sətir cədvəldə qalır */
             });
-        var close = root.querySelector("[data-people-detail-close]");
-        if (close && !close.dataset.bound) {
-            close.dataset.bound = "1";
-            close.addEventListener("click", function () {
-                modal.hidden = true;
-            });
-        }
     }
 
     function runAction(root, urls, action, userId, onDone) {

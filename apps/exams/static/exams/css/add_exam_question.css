@@ -330,8 +330,8 @@ textarea {
 
 /* Checkbox SEÇİLƏNDƏ (.checkmark stili) */
 .custom-checkbox-container input:checked ~ .checkmark {
-    background-color: var(--ems-success); /* Yaşıl rəng */
-    border-color: var(--ems-success);
+    background-color: var(--ems-success-700); /* Yaşıl rəng */
+    border-color: var(--ems-success-700);
 }
 
 /* Seçiləndə içindəki "tick" işarəsi */

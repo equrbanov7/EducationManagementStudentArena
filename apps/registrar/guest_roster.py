@@ -425,6 +425,25 @@ def add_guest_student(*, offering, student, by_user, source_group=None, reason="
     return enrollment
 
 
+def guest_document_map(enrollment_ids) -> dict:
+    """enrollment_id → (ən son :class:`GuestRosterDocument`, qorunan URL).
+
+    Jurnal modalındakı «alt qrupdan əlavə olunanlar» siyahısı sənədi link + kim/nə
+    vaxt ilə göstərir (sahib 2026-09-07: «alt qrupa yazılıbsa tarixçəsi qalsın»).
+    """
+    from core.media_urls import protected_media_url
+
+    from .models import GuestRosterDocument
+
+    ids = [pk for pk in enrollment_ids if pk]
+    if not ids:
+        return {}
+    mapping: dict = {}
+    for doc in GuestRosterDocument.objects.filter(enrollment_id__in=ids).order_by("created_at"):
+        mapping[doc.enrollment_id] = (doc, protected_media_url(doc.document))
+    return mapping
+
+
 # ── Geri götürmə ─────────────────────────────────────────────────────────────
 
 

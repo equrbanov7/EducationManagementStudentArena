@@ -9,6 +9,11 @@ Vəziyyətlər (``entry_state`` → ``status``):
     scheduled      — aktivdir, amma açılış tarixi hələ gəlməyib
     open           — açıqdır (müəllim SƏRBƏST yaza/dəyişə bilər)
     closed         — son tarix keçib (kilidli)
+
+``validate_window_save`` isə İmtahan Mərkəzi kabinetinin YARADILIŞ/REDAKTƏ
+tərəfini qoruyur (QA 2026-09-05 P3-21) — pəncərə tarixlərinin keçmişə/yalan
+sıraya düşməsinin qarşısını server-side alır (bax aşağıdakı funksiyanın
+docstring-i).
 """
 
 import datetime
@@ -91,3 +96,52 @@ def entry_state(offering, k_index, today):
 def is_open(offering, k_index, today):
     """Müəllim indi bu K-ya bal yaza/dəyişə bilərmi?"""
     return entry_state(offering, k_index, today)["status"] == "open"
+
+
+class KollokviumWindowRuleError(Exception):
+    """Pəncərə tarix qaydası pozuntusu — istifadəçiyə göstərilə bilən mesaj daşıyır.
+
+    ``gradebook.LessonRuleError`` ilə eyni naxış: sadə AZ mətn, gettext YOXDUR
+    (bu modul artıq plain AZ mesajlarla işləyir — ``entry_state`` statusları da
+    tərcümə olunmur, çağıran tərəf UI mətnini özü seçir).
+    """
+
+
+def validate_window_save(*, organization, period, k_index, opens_on, closes_on, is_new, today):
+    """Pəncərə yaradılışı/redaktəsi üçün tarix qaydalarını yoxlayır (QA P3-21).
+
+    Qaydalar:
+
+    1. **Keçmiş bağlanış — yalnız YARADILIŞDA qadağan.** Bağlanış tarixi
+       bugündən əvvəldirsə və bu YENİ sətirdirsə (``is_new``), rədd et. Artıq
+       mövcud (işləyən/bitmiş) pəncərəni UZATMAQ (redaktə) sərbətdir —
+       İmtahan Mərkəzi səhv yazılmış köhnə pəncərəni düzəldə bilməlidir.
+    2. **K-sırası / toqquşma.** Eyni (organization, period) əhatəsində
+       fərqli ``k_index``-li pəncərələr üst-üstə düşə bilməz: kiçik K böyük K
+       başlamazdan ƏVVƏL bitməlidir (``closes_on`` bərabər ola bilər — eyni
+       gün keçid normaldır). ``(organization, period, k_index)`` unikallığı
+       artıq EYNİ K-nin iki sətrini DB səviyyəsində qadağan edir — bura yalnız
+       FƏRQLİ K-lər arasındakı toqquşmanı yoxlayır.
+
+    ``KollokviumWindowRuleError`` qaldırır (view bunu forma xətasına çevirir).
+    """
+    KollokviumWindow = django_apps.get_model("registrar", "KollokviumWindow")
+
+    if is_new and closes_on < today:
+        raise KollokviumWindowRuleError(
+            "Bağlanış tarixi keçmişdə ola bilməz — yeni pəncərə üçün gələcək tarix seçin "
+            "(artıq mövcud pəncərəni uzatmaq üçün onun tarixini redaktə edin)."
+        )
+
+    siblings = KollokviumWindow.objects.filter(organization=organization, period=period).exclude(k_index=k_index)
+    for sibling in siblings:
+        if sibling.k_index < k_index and opens_on < sibling.closes_on:
+            raise KollokviumWindowRuleError(
+                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} bitmədən "
+                f"({sibling.closes_on:%d.%m.%Y}) əvvəl başlaya bilməz."
+            )
+        if sibling.k_index > k_index and closes_on > sibling.opens_on:
+            raise KollokviumWindowRuleError(
+                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} başlamazdan "
+                f"({sibling.opens_on:%d.%m.%Y}) əvvəl bitməlidir."
+            )

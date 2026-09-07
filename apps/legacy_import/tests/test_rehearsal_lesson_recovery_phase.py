@@ -403,10 +403,8 @@ def test_an_impossible_date_is_quarantined_rather_than_guessed(actor):
     assert "legacy_lesson_synth_date_invalid" in codes
 
 
-def test_a_divergent_target_collision_stores_the_losing_value(actor):
-    """İki jurnal bir açılışa birləşir; uduzan dəyər sübut qatına düşür."""
-
-    rows = harness.tables(
+def _divergent_target_collision_rows():
+    return harness.tables(
         journals=[
             harness.journal_row(2, harness.UNIQID),
             harness.journal_row(3, harness.OTHER_UNIQID),
@@ -417,7 +415,10 @@ def test_a_divergent_target_collision_stores_the_losing_value(actor):
             harness.point_row(2, uniqid=harness.OTHER_UNIQID, point="3"),
         ],
     )
-    org = harness.organization(actor, "recover-conflict")
+
+
+def _run_divergent_target_collision(actor, slug, rows):
+    org = harness.organization(actor, slug)
     run = harness.running_run(org, actor, table_plan=harness.plan(rows))
     offering, _enrollments, _lessons_seeded = harness.seed_journal_target(
         org,
@@ -441,9 +442,19 @@ def test_a_divergent_target_collision_stores_the_losing_value(actor):
     harness.authorize_import_actor(org, actor)
     try:
         JournalMarksPhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
-        JournalLessonRecoveryPhase().run(harness.context(rows_by_table=rows, run=run, organization=org, actor=actor))
+        report = JournalLessonRecoveryPhase().run(
+            harness.context(rows_by_table=rows, run=run, organization=org, actor=actor)
+        )
     finally:
         harness.clear_import_actor()
+    return org, run, report, _enrollments[harness.STUDENT_A]
+
+
+def test_a_divergent_target_collision_stores_the_losing_value(actor):
+    """İki jurnal bir açılışa birləşir; uduzan dəyər sübut qatına düşür."""
+
+    rows = _divergent_target_collision_rows()
+    org, run, _report, _enrollment = _run_divergent_target_collision(actor, "recover-conflict", rows)
 
     # Qalib DƏYİŞMƏYİB.
     assert _marks(org).get().score == Decimal("8.00")
@@ -453,6 +464,9 @@ def test_a_divergent_target_collision_stores_the_losing_value(actor):
     assert fact.mapping_status == "conflict"
     assert fact.raw_score_text == "3"  # uduzan dəyər saxlanıldı
     assert fact.source_journal_ref == harness.OTHER_UNIQID
+    # Mənbə xanasının stabil slot locator-u qalır; disposable target Lesson
+    # UUID-si ``source_*`` sahəsinə yazılmır və cross-run möhürünü dəyişmir.
+    assert fact.source_lesson_ref == "calendar:12:30:14:00"
     # ``registrar_guard_legacy_grade_fact_insert`` bu kodu BAĞLAYIR; domen kodu
     # ledger issue-sunda qalır, ona görə heç bir məlumat itmir.
     assert fact.mapping_issue_code == "legacy_grade_fact_conflict"
@@ -463,6 +477,31 @@ def test_a_divergent_target_collision_stores_the_losing_value(actor):
         )
     )
     assert codes == {"legacy_mark_conflict_evidence", "legacy_journal_mark_recovered_target_conflict"}
+
+
+def test_calendar_conflict_digest_is_stable_across_independent_targets(actor):
+    """Eyni source iki təmiz target UUID dəstində eyni J12 möhürünü verməlidir."""
+
+    rows = _divergent_target_collision_rows()
+    first = _run_divergent_target_collision(actor, "recover-conflict-a", rows)
+    second = _run_divergent_target_collision(actor, "recover-conflict-b", rows)
+
+    first_org, _first_run, first_report, first_enrollment = first
+    second_org, _second_run, second_report, second_enrollment = second
+    first_lesson_pk = _lessons(first_org).get().pk
+    second_lesson_pk = _lessons(second_org).get().pk
+    assert first_enrollment.pk != second_enrollment.pk
+    assert first_lesson_pk != second_lesson_pk
+    assert first_report.phase_digest == second_report.phase_digest
+
+    facts = django_apps.get_model("registrar", "LegacyGradeFact").objects.filter(
+        organization__in=(first_org, second_org),
+        source_table="journals_dates_points",
+        source_pk=2,
+    )
+    assert facts.count() == 2
+    assert len({fact.materialization_digest for fact in facts}) == 1
+    assert {fact.source_lesson_ref for fact in facts} == {"calendar:12:30:14:00"}
 
 
 def test_a_divergent_component_collision_stores_the_losing_value(actor):

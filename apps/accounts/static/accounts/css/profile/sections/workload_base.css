@@ -114,6 +114,23 @@
   color: var(--ems-neutral-900, #1b2733);
 }
 
+/* `bootstrap-single-select` görünən toggle-u BUTTON-dur — yuxarıdakı
+   input/select qaydası ona toxunmur (native `select` gizlədilib). UX-08:
+   Kafedra/Tədris ili/Semestr eyni sətirdə axtarış input-u ilə eyni
+   hündürlükdə/radiuslu olsun deyə eyni ölçüləri təkrarlayırıq. */
+.wl-filters .bootstrap-single-select__toggle,
+.wlm-field .bootstrap-single-select__toggle,
+.wl-form__field .bootstrap-single-select__toggle {
+  min-height: 38px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  background: #fff;
+  border-color: var(--ems-neutral-300, #cbd5e1);
+  box-shadow: none;
+}
+
 .wl-form__field textarea {
   min-height: 84px;
   resize: vertical;

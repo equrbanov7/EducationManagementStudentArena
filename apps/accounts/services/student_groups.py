@@ -70,7 +70,14 @@ def group_sector(unit) -> str:
 
 
 def groups_under(organization, specialty_unit):
-    """İxtisasın altındakı AKTİV akademik qruplar (materiallaşdırılmış yol)."""
+    """İxtisasın altındakı AKTİV akademik qruplar (materiallaşdırılmış yol).
+
+    ``is_service_unit=True`` qruplar (köçürmədən gələn dil-kursu koqortası,
+    status konteyneri və s. — bax ``OrgUnit.is_service_unit``) BURADA
+    süzülür: onlar həqiqi akademik qrup deyil, seçicidə göstərilmir. Mövcud
+    ``StudentAcademicRecord.group`` istinadları toxunulmur — yalnız YENİ
+    seçim üçün gizlədilir.
+    """
     from apps.organizations.models import OrgUnit
 
     if specialty_unit is None:
@@ -80,6 +87,7 @@ def groups_under(organization, specialty_unit):
         organization=organization,
         unit_type=OrgUnitType.GROUP,
         is_active=True,
+        is_service_unit=False,
     ).filter(path__startswith=prefix)
 
 

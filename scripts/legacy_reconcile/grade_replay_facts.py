@@ -73,7 +73,7 @@ def replay_grade_fact_rows(replay) -> list[list]:
                 is_archive=evidence.is_archive,
                 student_ref=evidence.student_ref,
                 journal_ref=evidence.journal_uniqid,
-                lesson_ref=evidence.target_ref if evidence.domain == DOMAIN_MARKS else "",
+                lesson_ref=evidence.source_lesson_ref if evidence.domain == DOMAIN_MARKS else "",
                 score_code=evidence.month_id,
                 raw_value=evidence.raw_value,
             )

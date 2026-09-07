@@ -30,7 +30,7 @@
                 <div class="course-card-content">
                     <h4 class="course-card-title">{{ course.title }}</h4>
                     <div class="course-card-meta">
-                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ course.created_at|date:"d M Y" }}</span>
+                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ course.created_at|date:"d.m.Y" }}</span>
                         <span class="meta-divider">•</span>
                         <span class="meta-item badge-status">{{ course.get_status_display }}</span>
                     </div>

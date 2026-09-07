@@ -417,7 +417,7 @@ class AppealExamCenterRoutingTests(TestCase):
         )
         _assign_user_to_org(self.teacher, self.org, ProfileRole.TEACHER, "teacher")
         _assign_user_to_org(self.student, self.org, ProfileRole.STUDENT, "student")
-        _assign_user_to_org(self.exam_center, self.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(self.exam_center, self.org, ProfileRole.MEMBER, "exam_center_head")
         self.exam = Exam.objects.create(
             title="Route Appeal Exam",
             author=self.teacher,

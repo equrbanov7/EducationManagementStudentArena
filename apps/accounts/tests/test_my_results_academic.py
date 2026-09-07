@@ -259,7 +259,10 @@ class MyResultsAcademicTest(TestCase):
         self.assertContains(resp, str(LEGACY_RESULT_CHECK_NOTICE))
         # Hər göstərilən xam Giriş/Çıxış/Yekun/Təkrar dəyəri qırmızı
         # İmtahan Mərkəzi qeydi daşıyır (bu fikstürdə 7 dəyər).
-        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=7)
+        # Panel bağlı olanda da summary-də 1 daimi qeyd görünür; açıldıqda
+        # 7 xam dəyərin hər biri eyni qırmızı qeydi ayrıca daşıyır.
+        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=8)
+        self.assertContains(resp, 'class="result-legacy-grade__summary-warning"', count=1)
         self.assertContains(resp, 'class="result-legacy-fact__score-warning"', count=7)
         self.assertContains(resp, ">117<")
         self.assertContains(resp, ">37<")
@@ -316,7 +319,9 @@ class MyResultsAcademicTest(TestCase):
         self.assertContains(resp, "Cəhd tipi")
         self.assertContains(resp, "2022-04-01 09:00:00")
         self.assertContains(resp, str(LEGACY_RESULT_CHECK_NOTICE))
-        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=2)
+        self.assertContains(resp, str(LEGACY_EXAM_CENTER_WARNING), count=3)
+        self.assertContains(resp, 'class="result-legacy-grade__summary-warning"', count=1)
+        self.assertContains(resp, 'class="result-legacy-fact__score-warning"', count=2)
 
     # ── İl / semestr süzgəci ────────────────────────────────────────────────
     def test_filter_options_come_from_the_builder(self):

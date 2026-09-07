@@ -260,7 +260,7 @@
 }
 
 .fxc-session-meta span { display: inline-flex; align-items: center; gap: 6px; }
-.fxc-session-meta i { color: #94A3B8; }
+.fxc-session-meta i { color: var(--ems-neutral-500); }
 .fxc-session-meta code {
     background: #F1F4F9;
     color: #475569;
@@ -339,10 +339,10 @@
 }
 
 .fxc-room-stats span { display: inline-flex; align-items: center; gap: 6px; }
-.fxc-room-stats i { color: #94A3B8; }
+.fxc-room-stats i { color: var(--ems-neutral-500); }
 .fxc-room-exams { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 26px; }
-.fxc-room-exams-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #94A3B8; margin-right: 2px; }
-.fxc-room-exams-empty { font-size: .82rem; color: #94A3B8; display: inline-flex; align-items: center; gap: 6px; }
+.fxc-room-exams-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ems-neutral-500); margin-right: 2px; }
+.fxc-room-exams-empty { font-size: .82rem; color: var(--ems-neutral-500); display: inline-flex; align-items: center; gap: 6px; }
 .fxc-room-card-actions { display: flex; gap: 8px; margin-top: 2px; }
 .fxc-room-card-actions .fxc-btn { flex: 1; justify-content: center; }
 
@@ -382,7 +382,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .05em;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     padding: 12px 14px;
     border-bottom: 1px solid #E2E8F0;
     white-space: nowrap;
@@ -401,7 +401,7 @@
 .fxc-num { text-align: right; font-variant-numeric: tabular-nums; }
 .fxc-table .fxc-num { text-align: right; }
 .fxc-strong { font-weight: 700; color: #0F172A; }
-.fxc-muted { color: #94A3B8; font-weight: 400; }
+.fxc-muted { color: var(--ems-neutral-500); font-weight: 400; }
 .fxc-center { text-align: center; padding: 26px 0; }
 .fxc-row-actions { text-align: right; white-space: nowrap; }
 .fxc-row-actions .fxc-inline-form { display: inline-flex; }
@@ -424,7 +424,7 @@
 .fxc-pill--ok { background: #DCFCE7; color: #15803D; }
 .fxc-pill--warn { background: #FEF3C7; color: #92400E; }
 .fxc-pill--live { background: #FCE7EE; color: #9F1239; }
-.fxc-pill--muted { background: #F1F4F9; color: #94A3B8; }
+.fxc-pill--muted { background: #F1F4F9; color: var(--ems-neutral-500); }
 .fxc-pill--score { background: #DBEAFE; color: #1D4ED8; }
 /* Canlı bal: keçid həddindən (17) aşağı qırmızı, ondan yuxarı yaşıl. */
 .fxc-pill--score-low { background: #FEE2E2; color: #B91C1C; }
@@ -521,7 +521,7 @@
 
 .fxc-check input { margin-top: 3px; accent-color: #2C5BFF; }
 
-.fxc-hint { font-size: .8rem; color: #94A3B8; margin: 6px 0 0; }
+.fxc-hint { font-size: .8rem; color: var(--ems-neutral-500); margin: 6px 0 0; }
 
 .fxc-actions {
     display: flex;
@@ -542,7 +542,7 @@
 
 .fxc-empty {
     text-align: center;
-    color: #94A3B8;
+    color: var(--ems-neutral-500);
     padding: 46px 0;
     display: flex;
     flex-direction: column;

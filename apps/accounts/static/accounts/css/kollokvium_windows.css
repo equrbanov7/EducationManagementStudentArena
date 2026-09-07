@@ -34,7 +34,7 @@
 .kw-chip--closed { background: #fee2e2; color: #b91c1c; }
 .kw-chip--scheduled { background: #dbeafe; color: #1d4ed8; }
 .kw-chip--inactive { background: #f1f5f9; color: #64748b; }
-.kw-chip--not-set { background: #f8fafc; color: #94a3b8; border: 1px dashed #cbd5e1; }
+.kw-chip--not-set { background: #f8fafc; color: var(--ems-neutral-500); border: 1px dashed #cbd5e1; }
 
 .kw-dates { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-bottom: .55rem; }
 .kw-dates .kw-field > input { min-width: 0; }

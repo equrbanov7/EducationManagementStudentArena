@@ -90,6 +90,7 @@
                                    class="sent-invite-checkbox form-check-input"
                                    name="selected_sent_invite_user_ids"
                                    value="{{ invite.user.id }}"
+                                   aria-label="{{ invite.user.get_full_name|default:invite.user.username }} — {% trans 'Seç' context 'accounts.a11y' %}"
                                    {% if not can_manage_students %}disabled{% endif %}>
                         </td>
                         <td>{{ invite.user.get_full_name|default:invite.user.username }}</td>

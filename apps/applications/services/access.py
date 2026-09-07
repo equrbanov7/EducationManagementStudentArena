@@ -57,6 +57,28 @@ def active_memberships(user, organization):
     return memberships
 
 
+def active_units(organization) -> list:
+    """Təşkilatın aktiv ``ApplicationUnit`` kataloqu — request daxilində keşlənir.
+
+    ``handled_unit_ids`` (bir kontekst qurulmasında 7-8 dəfə: ``is_handler_anywhere``,
+    tab sayğacları, KPI-lar, ``handled_unit_names``) və marşrutlaşdırma
+    (``routing.unit_by_code``) eyni kataloqu dəfələrlə sorğulayırdı — keş olmadan
+    hər çağırış ayrı SELECT idi (QA P2-26/P2-6: bölmə açılışında 80+ sorğu, 37-42
+    dublikat). ``active_memberships``-dəki eyni keş naxışı (obyekt-atributu).
+    """
+    if organization is None:
+        return []
+    cached = getattr(organization, "_applications_units_cache", None)
+    if cached is not None:
+        return cached
+    units = list(ApplicationUnit.objects.filter(organization=organization, is_active=True).order_by("order", "name"))
+    try:
+        organization._applications_units_cache = units
+    except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
+        pass
+    return units
+
+
 def user_permissions(user, organization) -> list:
     permissions = set()
     for membership in active_memberships(user, organization):
@@ -118,8 +140,7 @@ def handled_unit_ids(user, organization) -> set:
     role_names = {membership.role.name for membership in active_memberships(user, organization)}
     if not role_names:
         return set()
-    units = ApplicationUnit.objects.filter(organization=organization, is_active=True)
-    return {unit.pk for unit in units if role_names & set(unit.role_names)}
+    return {unit.pk for unit in active_units(organization) if role_names & set(unit.role_names)}
 
 
 def is_handler_anywhere(user, organization) -> bool:
@@ -156,6 +177,26 @@ def can_act(user, application) -> bool:
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     return handles_unit(user, application.organization, application.current_unit, application.current_scope_unit)
+
+
+def can_see_internal(user, application) -> bool:
+    """Daxili qeydləri GÖRMƏ hüququ — statusdan ASILI DEYİL (QA 2026-09-05 APPLICATIONS-08).
+
+    ``can_act`` (qərar hüququ) müraciət bağlananda/yönləndiriləndə False olur və
+    emalçı ÖZ yazdığı daxili qeydi də görmürdü. Görmə: superuser, `application.manage`
+    daşıyıcısı, cari şöbənin emalçısı və ya izləyən (watch) şöbənin emalçısı.
+    """
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    organization = application.organization
+    if has_app_permission(user, organization, PERM_MANAGE):
+        return True
+    if handles_unit(user, organization, application.current_unit, application.current_scope_unit):
+        return True
+    for watch in application.watches.select_related("unit", "scope_unit"):
+        if handles_unit(user, organization, watch.unit, watch.scope_unit):
+            return True
+    return False
 
 
 def is_sender(user, application) -> bool:
@@ -204,6 +245,7 @@ def visible_q(user, organization) -> Q:
 
 __all__ = [
     "active_memberships",
+    "active_units",
     "can_act",
     "can_view",
     "handled_unit_ids",

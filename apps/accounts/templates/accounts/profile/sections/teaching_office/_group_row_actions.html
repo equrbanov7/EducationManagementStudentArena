@@ -2,11 +2,33 @@
 {% comment %}Qrup sətrinin əməlləri + TOPLU SEÇİM xanası.
 
 Seçim xanası burada saxlanılır ki, ortaq `_data_table.html` komponentinə sütun
-əlavə etmək lazım gəlməsin (komponent bütün ekranlarda paylaşılır).{% endcomment %}
+əlavə etmək lazım gəlməsin (komponent bütün ekranlarda paylaşılır).
+
+«Tələbələr» qrupun tələbə çekmecəsini açır (siyahı JSON-dan gəlir), DOCX isə
+bütöv qrupun rəsmi «Fərdi tədris planı» sənədini yükləyir — hər ikisi OXU
+səlahiyyəti (`unit.view`) ilə görünür; idarə düymələri `can_manage` ilə.{% endcomment %}
+{% if groups_registry_section.can_manage %}
 <label class="tof-bulk__check">
     <input type="checkbox" data-tof-bulk-item="{{ row.data.id }}"
            aria-label="{% blocktrans context 'accounts.groups' with name=row.data.name %}{{ name }} qrupunu seç{% endblocktrans %}">
 </label>
+{% endif %}
+<button type="button" class="ems-btn ems-btn--sm tof-row-students"
+        data-tof-students-open
+        data-url="{{ row.data.students_url }}"
+        data-plan-url="{{ row.data.plan_url }}"
+        data-group-id="{{ row.data.id }}"
+        data-name="{{ row.data.name }}">
+    <i class="fas fa-users" aria-hidden="true"></i>
+    {% trans "Tələbələr" context "accounts.groups" %}
+    <span class="tof-row-students__count">{{ row.data.students }}</span>
+</button>
+<a class="ems-btn ems-btn--sm ems-btn--icon" href="{{ row.data.plan_url }}" download
+   title="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}"
+   aria-label="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}">
+    <i class="fas fa-file-word" aria-hidden="true"></i>
+</a>
+{% if groups_registry_section.can_manage %}
 <button type="button" class="ems-btn ems-btn--sm"
         data-tof-open="tofGroupDialog"
         data-tof-prefill='{"action": "save_group", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "specialty": "{{ row.data.specialty_id }}", "course_year": "{{ row.data.course_year }}", "language_sector": "{{ row.data.language_sector|escapejs }}", "admission_year": "{{ row.data.admission_year }}", "capacity": "{{ row.data.capacity }}", "tutor": "{{ row.data.tutor_id }}"}'>
@@ -24,4 +46,5 @@ Seçim xanası burada saxlanılır ki, ortaq `_data_table.html` komponentinə s�
         data-tof-prefill='{"action": "restore", "id": "{{ row.data.id }}"}'>
     {% trans "Arxivdən qaytar" context "accounts.groups" %}
 </button>
+{% endif %}
 {% endif %}

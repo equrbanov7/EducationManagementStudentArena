@@ -161,7 +161,7 @@
                                         max="{{ submission.assignment.max_score|default:100 }}"
                                         step="0.01"
                                         required
-                                    >
+                                     aria-label="{% trans 'score_placeholder' context 'accounts.grading_queue_page' %}">
                                     <span class="grading-queue-1">/ {{ submission.assignment.max_score|default:100 }}</span>
                                 </div>
                                 <textarea 
@@ -169,7 +169,7 @@
                                     name="feedback" 
                                     placeholder="{% trans 'feedback_placeholder' context 'accounts.grading_queue_page' %}"
                                     rows="2"
-                                ></textarea>
+                                 aria-label="{% trans 'feedback_placeholder' context 'accounts.grading_queue_page' %}"></textarea>
                                 <div class="grade-actions">
                                     <button type="submit" class="grade-btn grade-btn-submit">
                                         <i class="fas fa-check"></i> {% trans "submit_grade" context "accounts.grading_queue_page" %}

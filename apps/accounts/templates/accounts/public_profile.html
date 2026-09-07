@@ -1,113 +1,209 @@
 {% extends "base.html" %}
 {% load static i18n %}
+{% comment %}Açıq profil (və «Önizləmə» rejimi) — 2026-09-07 yenidən dizayn.
 
-{% block title %}{{ display_name }} | Profil{% endblock %}
+ƏVVƏLKİ PROBLEMLƏR
+* İstifadəçiyə DAXİLİ jarqon göstərilirdi: «Search və pagination yalnız bu
+  istifadəçinin published postları üzərində işləyir», «Bu səhifədə yalnız açıq
+  postlar … göstərilmir». Bunlar developer qeydidir, səhifə mətni deyil.
+* Eyni məlumat iki yerdə: istifadəçi adı və qoşulma tarixi həm hero-da, həm də
+  «Açıq məlumatlar» yan kartında.
+* «0 / 0» statistika kartları ekranın ən böyük rəqəmləri idi.
+* Axtarış paneli boşluqda üzürdü, halbuki YALNIZ paylaşımları süzür.
+
+İNDİ: hero (kim?) → məzmun sütunu (nə paylaşıb?) → yan sütun (necə əlaqə?).
+Axtarış paylaşımlar kartının BAŞLIĞINDADIR; sayğaclar yalnız sıfırdan böyük
+olanda görünür.
+{% endcomment %}
+
+{% block title %}{{ display_name }} | {% trans 'Profil' %}{% endblock %}
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/public_profile.css' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/public_profile_academic.css' %}?v=20260816-1">
+    {% comment %}Kaskad sırası MƏNALIDIR: `_panels` `--ppx-*` və kart qaydalarını
+    əsas fayldan miras alır (ölçü büdcəsinə görə ikiyə bölünüb).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/public_profile.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/public_profile_panels.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/public_profile_academic.css' %}?v=20260907-redesign">
 {% endblock %}
 
 {% block content %}
-<section class="public-profile-shell">
-    <div class="public-profile-container">
+<div class="ppx">
+    <div class="ppx-shell">
         {% if is_self_preview %}
-        <div class="public-preview-banner" role="status">
-            <i class="fas fa-eye"></i>
-            {% trans 'Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür.' context 'accounts.public_profile' %}
-            <a href="{% url 'accounts:profile' %}?section=edit-profile">
+        <div class="ppx-preview" role="status">
+            <span class="ppx-preview__icon"><i class="fas fa-eye" aria-hidden="true"></i></span>
+            <span class="ppx-preview__text">{% trans 'Önizləmə rejimi: profiliniz kənar baxana məhz belə görünür.' context 'accounts.public_profile' %}</span>
+            <a class="ppx-preview__link" href="{% url 'accounts:profile' %}?section=edit-profile">
                 {% trans 'Redaktəyə qayıt' context 'accounts.public_profile' %}
             </a>
         </div>
         {% endif %}
 
-        <header class="public-profile-hero public-profile-hero--modern">
-            <div class="public-profile-hero__identity">
-                <div class="public-profile-avatar">
-                    {% if request.user.is_authenticated and profile.avatar %}
-                        <img
-                            src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|date:'U' }}"
-                            alt="{{ display_name }}"
-                            class="public-profile-avatar__image"
-                        >
-                    {% else %}
-                        <span class="public-profile-avatar__fallback">{{ display_name|slice:":1"|upper }}</span>
-                    {% endif %}
-                </div>
-
-                <div class="public-profile-hero__copy">
-                    <span class="public-profile-eyebrow">{% trans 'Açıq profil' %}</span>
-                    <h1 class="public-profile-title">{{ display_name }}</h1>
-                    {% if profile.academic_title_display %}
-                    <p class="public-profile-academic-title">
-                        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-                        {{ profile.academic_title_display }}
-                    </p>
-                    {% endif %}
-                    <p class="public-profile-subtitle">
-                        {% trans 'Bu səhifədə yalnız açıq postlar və təhlükəsiz ümumi məlumatlar görünür.' %}
-                        {% trans 'Kurslar, imtahanlar və daxili hesab bölmələri göstərilmir.' %}
-                    </p>
-
-                    <div class="public-profile-meta">
-                        <span class="public-profile-meta__item">
-                            <i class="fas fa-at" aria-hidden="true"></i>
-                            {{ profile_user.username }}
-                        </span>
-                        <span class="public-profile-meta__item">
-                            <i class="far fa-calendar-alt" aria-hidden="true"></i>
-                            {{ profile_user.date_joined|date:"d M Y" }}
-                        </span>
-                        {% if profile_location %}
-                            <span class="public-profile-meta__item">
-                                <i class="fas fa-location-dot" aria-hidden="true"></i>
-                                {{ profile_location }}
-                            </span>
-                        {% endif %}
-                    </div>
-                </div>
+        {# ── Kimlik ──────────────────────────────────────────────────────── #}
+        <header class="ppx-hero">
+            <div class="ppx-hero__avatar">
+                {% if request.user.is_authenticated and profile.avatar %}
+                <img src="{% url 'accounts:profile_avatar' profile_user.id %}?v={{ profile.updated_at|date:'U' }}"
+                     alt="" class="ppx-hero__img">
+                {% else %}
+                <span class="ppx-hero__initials">{{ display_name|slice:":1"|upper }}</span>
+                {% endif %}
             </div>
 
-            <div class="public-profile-hero__stats">
-                <article class="public-stat-card">
-                    <span class="public-stat-card__label">{% trans 'Açıq postlar' %}</span>
-                    <strong class="public-stat-card__value">{{ published_posts_count }}</strong>
-                </article>
-                <article class="public-stat-card">
-                    <span class="public-stat-card__label">Kateqoriyalar</span>
-                    <strong class="public-stat-card__value">{{ category_count }}</strong>
-                </article>
+            <div class="ppx-hero__id">
+                <h1 class="ppx-hero__name">{{ display_name }}</h1>
+                {% if profile.academic_title_display %}
+                <p class="ppx-hero__role">{{ profile.academic_title_display }}</p>
+                {% elif admin_position_label %}
+                <p class="ppx-hero__role">{{ admin_position_label }}</p>
+                {% endif %}
+                <div class="ppx-hero__meta">
+                    <span><i class="fas fa-at" aria-hidden="true"></i>{{ profile_user.username }}</span>
+                    {% if profile_location %}
+                    <span><i class="fas fa-location-dot" aria-hidden="true"></i>{{ profile_location }}</span>
+                    {% endif %}
+                    <span><i class="far fa-calendar" aria-hidden="true"></i>{% blocktrans with joined=profile_user.date_joined|date:"d.m.Y" %}{{ joined }}-dan bəri{% endblocktrans %}</span>
+                </div>
+                {% comment %}Sayğac YALNIZ sıfırdan böyük olanda: «0 açıq post» heç
+                nə demir, amma ekranın ən iri rəqəmi olurdu.{% endcomment %}
+                {% if published_posts_count or category_count %}
+                <div class="ppx-hero__stats">
+                    {% if published_posts_count %}
+                    <span class="ppx-stat"><strong>{{ published_posts_count }}</strong>{% trans 'açıq paylaşım' context 'accounts.public_profile' %}</span>
+                    {% endif %}
+                    {% if category_count %}
+                    <span class="ppx-stat"><strong>{{ category_count }}</strong>{% trans 'kateqoriya' context 'accounts.public_profile' %}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </header>
 
-        {# ── Şəxs haqqında əsas məlumat bandı: Haqqında + Əlaqə/Struktur ── #}
-        {% if profile_bio or contact_phones or admin_membership %}
-        <div class="public-info-band">
-            {% if profile_bio %}
-            <section class="public-section-card public-info-band__main">
-                <div class="public-section-card__header">
-                    <h2><i class="fas fa-align-left" aria-hidden="true"></i> {% trans 'Haqqında' %}</h2>
-                </div>
-                <div class="public-profile-bio">{{ profile_bio|linebreaksbr }}</div>
-            </section>
-            {% endif %}
+        <div class="ppx-grid">
+            <main class="ppx-col">
+                {% if profile_bio %}
+                <section class="ppx-card">
+                    <h2 class="ppx-card__title"><i class="fas fa-align-left" aria-hidden="true"></i>{% trans 'Haqqında' %}</h2>
+                    <div class="ppx-bio">{{ profile_bio|linebreaksbr }}</div>
+                </section>
+                {% endif %}
 
-            <div class="public-info-band__side">
-                {% if contact_phones %}
-                <section class="public-section-card">
-                    <div class="public-section-card__header">
-                        <h2><i class="fas fa-phone" aria-hidden="true"></i> {% trans 'Əlaqə' context 'accounts.public_profile' %}</h2>
+                {% if academic_display_groups %}
+                <section class="ppx-card">
+                    <h2 class="ppx-card__title"><i class="fas fa-award" aria-hidden="true"></i>{% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}</h2>
+                    <div class="public-academic-groups public-academic-groups--band">
+                        {% for group in academic_display_groups %}
+                        <div class="public-academic-group">
+                            <div class="public-academic-group__label">
+                                <i class="fas {{ group.icon }}" aria-hidden="true"></i>
+                                {{ group.label }}
+                                <span class="public-academic-group__count">{{ group.items|length }}</span>
+                            </div>
+                            <ul class="public-academic-list">
+                                {% for item in group.items %}
+                                <li class="public-academic-item">
+                                    <span class="public-academic-item__title">
+                                        {% if item.link %}
+                                        <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">{{ item.title }}
+                                            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                                        {% else %}{{ item.title }}{% endif %}
+                                    </span>
+                                    {% if item.detail or item.year %}
+                                    <span class="public-academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <dl class="public-profile-facts">
+                </section>
+                {% endif %}
+
+                {# ── Paylaşımlar: axtarış BAŞLIQDA, çünki yalnız bunu süzür ── #}
+                <section class="ppx-card">
+                    <div class="ppx-card__bar">
+                        <h2 class="ppx-card__title"><i class="far fa-newspaper" aria-hidden="true"></i>{% trans 'Paylaşımlar' %}</h2>
+                        <form method="get" class="ppx-search" role="search">
+                            {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                            <i class="fas fa-magnifying-glass ppx-search__icon" aria-hidden="true"></i>
+                            <input type="search" name="q" value="{{ search_query }}" class="ppx-search__input"
+                                   placeholder="{% trans 'Məqalə axtar...' %}" aria-label="{% trans 'Məqalə axtar' %}">
+                            <button type="submit" class="ppx-search__submit" aria-label="{% trans 'Axtar' %}">
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    {% if search_query or selected_category %}
+                    <div class="ppx-filters">
+                        {% if search_query %}
+                        <span class="ppx-filter">{% blocktrans with query=search_query %}Sorğu: {{ query }}{% endblocktrans %}</span>
+                        {% endif %}
+                        {% if selected_category %}
+                        <span class="ppx-filter">{% blocktrans with category=selected_category %}Kateqoriya: {{ category }}{% endblocktrans %}</span>
+                        {% endif %}
+                        <a href="{% url 'accounts:public_profile' profile_user.username %}" class="ppx-filter__reset">
+                            {% trans 'Filtrləri sıfırla' %}
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if posts %}
+                    <div class="ppx-posts">
+                        {% for post in posts %}
+                        <article class="ppx-post">
+                            <a href="{% url 'article_detail' post.slug %}" class="ppx-post__media" aria-label="{{ post.title }}">
+                                <img src="{{ post.get_image }}" alt="" loading="lazy"
+                                     data-fallback-src="{% static 'images/tech-placeholder.svg' %}">
+                                {% if post.category %}<span class="ppx-post__badge">{{ post.category.localized_name }}</span>{% endif %}
+                            </a>
+                            <div class="ppx-post__body">
+                                <h3 class="ppx-post__title">
+                                    <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
+                                </h3>
+                                <p class="ppx-post__excerpt">
+                                    {% if post.excerpt %}{{ post.excerpt|truncatechars:130 }}{% else %}{{ post.content|striptags|truncatechars:130 }}{% endif %}
+                                </p>
+                                <div class="ppx-post__meta">
+                                    <span><i class="far fa-calendar" aria-hidden="true"></i>{{ post.created_at|date:"d.m.Y" }}</span>
+                                    {% if post.average_rating %}
+                                    <span><i class="fas fa-star" aria-hidden="true"></i>{{ post.average_rating|floatformat:1 }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+
+                    {% include "partials/_pagination.html" with page_obj=posts extra_query=extra_query %}
+                    {% else %}
+                    <div class="ppx-empty">
+                        <span class="ppx-empty__icon"><i class="far fa-newspaper" aria-hidden="true"></i></span>
+                        <p class="ppx-empty__title">{% trans 'Göstəriləcək açıq paylaşım tapılmadı' %}</p>
+                        <p class="ppx-empty__note">
+                            {% if search_query or selected_category %}{% trans 'Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın.' %}
+                            {% else %}{% trans 'Bu istifadəçi hələ açıq post paylaşmayıb.' %}{% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                </section>
+            </main>
+
+            <aside class="ppx-col ppx-col--side">
+                {% if contact_phones %}
+                <section class="ppx-card">
+                    <h2 class="ppx-card__title"><i class="fas fa-phone" aria-hidden="true"></i>{% trans 'Əlaqə' context 'accounts.public_profile' %}</h2>
+                    <dl class="ppx-facts">
                         {% for phone_number in contact_phones %}
-                        <div class="public-profile-facts__row">
+                        <div class="ppx-fact">
                             <dt>{% trans 'Telefon' context 'accounts.public_profile' %}{% if not forloop.first %} 2{% endif %}</dt>
                             <dd>{{ phone_number }}</dd>
                         </div>
                         {% endfor %}
                     </dl>
-                    <p class="public-contact-note">
+                    <p class="ppx-note">
                         <i class="fas fa-lock" aria-hidden="true"></i>
                         {% trans 'Nömrələr yalnız əməkdaş səviyyəli istifadəçilərə görünür.' context 'accounts.public_profile' %}
                     </p>
@@ -115,228 +211,38 @@
                 {% endif %}
 
                 {% if admin_membership %}
-                <section class="public-section-card">
-                    <div class="public-section-card__header">
-                        <h2><i class="fas fa-sitemap" aria-hidden="true"></i> {% trans 'Struktur məlumatı' %}</h2>
-                    </div>
-                    <dl class="public-profile-facts">
+                <section class="ppx-card">
+                    <h2 class="ppx-card__title"><i class="fas fa-sitemap" aria-hidden="true"></i>{% trans 'Struktur məlumatı' %}</h2>
+                    <dl class="ppx-facts">
                         {% if admin_position_label %}
-                        <div class="public-profile-facts__row">
-                            <dt>{% trans 'Vəzifə' context 'profile.public' %}</dt>
-                            <dd>{{ admin_position_label }}</dd>
-                        </div>
+                        <div class="ppx-fact"><dt>{% trans 'Vəzifə' context 'profile.public' %}</dt><dd>{{ admin_position_label }}</dd></div>
                         {% endif %}
-                        <div class="public-profile-facts__row">
+                        <div class="ppx-fact">
                             <dt>{% trans 'Bölmə' %}</dt>
                             <dd>{% if admin_membership.scope_unit %}{{ admin_membership.scope_unit.name }}{% else %}{% trans 'Hamısı' %}{% endif %}</dd>
                         </div>
-                        <div class="public-profile-facts__row">
-                            <dt>{% trans 'Email' %}</dt>
-                            <dd>{{ profile_user.email }}</dd>
-                        </div>
-                        <div class="public-profile-facts__row">
-                            <dt>{% trans 'Üzvlüyə qoşulma' %}</dt>
-                            <dd>{{ admin_membership.created_at|date:"d M Y" }}</dd>
-                        </div>
+                        <div class="ppx-fact"><dt>{% trans 'Email' %}</dt><dd>{{ profile_user.email }}</dd></div>
+                        <div class="ppx-fact"><dt>{% trans 'Üzvlüyə qoşulma' %}</dt><dd>{{ admin_membership.created_at|date:"d.m.Y" }}</dd></div>
                     </dl>
                 </section>
                 {% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        {# ── Akademik fəaliyyət — tam enli, ön planda ── #}
-        {% if academic_display_groups %}
-        <section class="public-section-card public-academic-band">
-            <div class="public-section-card__header">
-                <h2><i class="fas fa-award" aria-hidden="true"></i> {% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}</h2>
-            </div>
-            <div class="public-academic-groups public-academic-groups--band">
-                {% for group in academic_display_groups %}
-                <div class="public-academic-group">
-                    <div class="public-academic-group__label">
-                        <i class="fas {{ group.icon }}" aria-hidden="true"></i>
-                        {{ group.label }}
-                        <span class="public-academic-group__count">{{ group.items|length }}</span>
-                    </div>
-                    <ul class="public-academic-list">
-                        {% for item in group.items %}
-                        <li class="public-academic-item">
-                            <span class="public-academic-item__title">
-                                {% if item.link %}
-                                <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">{{ item.title }}
-                                    <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
-                                {% else %}
-                                {{ item.title }}
-                                {% endif %}
-                            </span>
-                            {% if item.detail or item.year %}
-                            <span class="public-academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-        {% endif %}
-
-        <section class="public-search-panel">
-            <form method="get" class="public-search-form" role="search">
-                {% if selected_category %}
-                    <input type="hidden" name="category" value="{{ selected_category }}">
-                {% endif %}
-                <label class="public-search-form__field">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                    <input
-                        type="search"
-                        name="q"
-                        value="{{ search_query }}"
-                        placeholder="{% trans 'Məqalə axtar...' %}"
-                        aria-label="{% trans 'Məqalə axtar' %}"
-                    >
-                </label>
-                <button type="submit" class="public-search-form__button">{% trans 'Axtar' %}</button>
-            </form>
-
-            {% if search_query or selected_category %}
-                <div class="public-active-filters">
-                    {% if search_query %}
-                        <span class="public-chip">{% blocktrans with query=search_query %}Sorğu: {{ query }}{% endblocktrans %}</span>
-                    {% endif %}
-                    {% if selected_category %}
-                        <span class="public-chip">{% blocktrans with category=selected_category %}Kateqoriya: {{ category }}{% endblocktrans %}</span>
-                    {% endif %}
-                    <a href="{% url 'accounts:public_profile' profile_user.username %}" class="public-reset-link">
-                        {% trans 'Filtrləri sıfırla' %}
-                    </a>
-                </div>
-            {% endif %}
-        </section>
-
-        <div class="public-profile-layout">
-            <main class="public-profile-main">
-                <section class="public-section-card">
-                    <div class="public-section-card__header">
-                        <div>
-                            <h2>{% trans 'Paylaşımlar' %}</h2>
-                            <p>{% trans 'Search və pagination yalnız bu istifadəçinin published postları üzərində işləyir.' %}</p>
-                        </div>
-                    </div>
-
-                    {% if posts %}
-                        <div class="public-post-grid">
-                            {% for post in posts %}
-                                <article class="public-post-card">
-                                    <a href="{% url 'article_detail' post.slug %}" class="public-post-card__media-link" aria-label="{{ post.title }}">
-                                        <div class="public-post-card__media">
-                                            <img
-                                                src="{{ post.get_image }}"
-                                                alt="{{ post.title }}"
-                                                loading="lazy"
-                                                data-fallback-src="{% static 'images/tech-placeholder.svg' %}"
-                                            >
-                                            {% if post.category %}
-                                                <span class="public-post-card__badge">{{ post.category.localized_name }}</span>
-                                            {% endif %}
-                                        </div>
-                                    </a>
-
-                                    <div class="public-post-card__body">
-                                        <div class="public-post-card__meta">
-                                            <span><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ post.created_at|date:"d M Y" }}</span>
-                                            {% if post.average_rating %}
-                                                <span><i class="fas fa-star" aria-hidden="true"></i> {{ post.average_rating|floatformat:1 }}</span>
-                                            {% endif %}
-                                        </div>
-
-                                        <h3 class="public-post-card__title">
-                                            <a href="{% url 'article_detail' post.slug %}">{{ post.title }}</a>
-                                        </h3>
-
-                                        {% if post.excerpt %}
-                                            <p class="public-post-card__excerpt">{{ post.excerpt|truncatechars:160 }}</p>
-                                        {% else %}
-                                            <p class="public-post-card__excerpt">{{ post.content|striptags|truncatechars:160 }}</p>
-                                        {% endif %}
-
-                                        <div class="public-post-card__footer">
-                                            <span class="public-post-card__author">
-                                                <i class="fas fa-user-circle" aria-hidden="true"></i>
-                                                {{ profile_user.username }}
-                                            </span>
-                                            <a href="{% url 'article_detail' post.slug %}" class="public-post-card__link">
-                                                {% trans 'Oxumağa davam et' %}
-                                            </a>
-                                        </div>
-                                    </div>
-                                </article>
-                            {% endfor %}
-                        </div>
-
-                        {% include "partials/_pagination.html" with page_obj=posts extra_query=extra_query %}
-                    {% else %}
-                        <div class="public-empty-state">
-                            <div class="public-empty-state__icon">
-                                <i class="far fa-newspaper" aria-hidden="true"></i>
-                            </div>
-                            <h3>{% trans 'Göstəriləcək açıq paylaşım tapılmadı' %}</h3>
-                            <p>
-                                {% if search_query or selected_category %}
-                                    {% trans 'Filtrləri dəyişin və ya sıfırlayıb yenidən yoxlayın.' %}
-                                {% else %}
-                                    {% trans 'Bu istifadəçi hələ açıq post paylaşmayıb.' %}
-                                {% endif %}
-                            </p>
-                        </div>
-                    {% endif %}
-                </section>
-            </main>
-
-            <aside class="public-profile-sidebar">
-                <section class="public-section-card public-section-card--sidebar">
-                    <div class="public-section-card__header">
-                        <h2>{% trans 'Açıq məlumatlar' %}</h2>
-                    </div>
-                    <dl class="public-profile-facts">
-                        <div class="public-profile-facts__row">
-                            <dt>{% trans 'İstifadəçi adı' %}</dt>
-                            <dd>@{{ profile_user.username }}</dd>
-                        </div>
-                        <div class="public-profile-facts__row">
-                            <dt>{% trans 'Qoşulma tarixi' %}</dt>
-                            <dd>{{ profile_user.date_joined|date:"d M Y" }}</dd>
-                        </div>
-                        {% if profile_location %}
-                            <div class="public-profile-facts__row">
-                                <dt>Lokasiya</dt>
-                                <dd>{{ profile_location }}</dd>
-                            </div>
-                        {% endif %}
-                    </dl>
-                </section>
 
                 {% if category_items %}
-                    <section class="public-section-card public-section-card--sidebar">
-                        <div class="public-section-card__header">
-                            <h2>Kateqoriyalar</h2>
-                        </div>
-                        <nav class="public-category-list" aria-label="Kateqoriyalar">
-                            {% for item in category_items %}
-                                <a
-                                    href="{% url 'accounts:public_profile' profile_user.username %}{% if selected_category == item.slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% else %}?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}category={{ item.slug|urlencode }}{% endif %}"
-                                    class="public-category-list__item public-category-list__item--depth-{{ item.tree_depth }}{% if selected_category == item.slug %} is-active{% endif %}"
-                                >
-                                    <span>{{ item.display_name }}</span>
-                                    <strong>{{ item.post_count }}</strong>
-                                </a>
-                            {% endfor %}
-                        </nav>
-                    </section>
+                <section class="ppx-card">
+                    <h2 class="ppx-card__title"><i class="fas fa-folder-tree" aria-hidden="true"></i>{% trans 'Kateqoriyalar' %}</h2>
+                    <nav class="ppx-cats" aria-label="{% trans 'Kateqoriyalar' %}">
+                        {% for item in category_items %}
+                        <a href="{% url 'accounts:public_profile' profile_user.username %}{% if selected_category == item.slug %}{% if search_query %}?q={{ search_query|urlencode }}{% endif %}{% else %}?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}category={{ item.slug|urlencode }}{% endif %}"
+                           class="ppx-cat ppx-cat--depth-{{ item.tree_depth }}{% if selected_category == item.slug %} is-active{% endif %}">
+                            <span>{{ item.display_name }}</span>
+                            <strong>{{ item.post_count }}</strong>
+                        </a>
+                        {% endfor %}
+                    </nav>
+                </section>
                 {% endif %}
             </aside>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

@@ -98,10 +98,23 @@ def ensure_assignable_teacher(organization, chair, teacher) -> None:
         )
 
 
+def parse_uuid(raw):
+    """Qeyri-UUID id `filter(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 WORKLOAD-SCHEDULE-01)."""
+    import uuid
+
+    try:
+        return uuid.UUID(str(raw or "").strip())
+    except ValueError:
+        return None
+
+
 def resolve_chair(organization, chair_id):
     """Kafedra ``OrgUnit``-i — tapılmasa ``WorkloadDenied``."""
     from core.constants import OrgUnitType
 
+    chair_id = parse_uuid(chair_id)
+    if chair_id is None:
+        raise WorkloadDenied("workload.chair_not_found", "Kafedra tapılmadı.")
     unit = (
         _org_unit_model()
         .objects.filter(

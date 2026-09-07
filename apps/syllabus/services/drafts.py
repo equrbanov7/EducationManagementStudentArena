@@ -28,7 +28,9 @@ from ..constants import (
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..policy import assessment_weights
 from ..state_machine import TransitionDenied
+from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .scoping import is_author
+from .section_shape import normalize_section_data
 from .units import ensure_chair_unit, resolve_syllabus_chair_unit
 
 #: Bölmələrin BOŞ məzmun sxemi — autosave müqaviləsinin (public.py) əsasıdır.
@@ -316,46 +318,6 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
     return version
 
 
-@transaction.atomic
-def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, request=None):
-    """«Keçən ildən köçür» — nəticə HƏR ZAMAN QARALAMADIR, avtomatik təsdiqlənmir.
-
-    ƏHATƏ QAPISI ``create_next_version`` ilə EYNİDİR (2026-09-02 audit, P1-2):
-    əvvəl bu funksiya MƏNBƏ sillabusu heç yoxlamırdı, ona görə istənilən müəllim
-    ``{"action": "copy", "syllabus": <yad id>}`` göndərib başqasının məzmununu
-    öz adına klonlaya bilirdi (auditor bunu canlı klonda icra etdi).
-    """
-    if not actor.has(PERM_EDIT):
-        raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
-    if not is_author(actor, source_syllabus) and not actor.covers_unit(source_syllabus.chair_unit_id, PERM_EDIT):
-        raise TransitionDenied("transition.out_of_scope", params={"transition": "copy"})
-
-    ensure_chair_unit(source_syllabus)
-    base = source_syllabus.approved_version or source_syllabus.versions.order_by("-major", "-minor").first()
-    if base is None:
-        raise TransitionDenied("version.base_missing")
-
-    syllabus, version = create_draft(
-        organization=source_syllabus.organization,
-        subject=source_syllabus.subject,
-        period=target_period,
-        actor=actor,
-        offering=offering,
-        program=source_syllabus.program,
-        chair_unit=source_syllabus.chair_unit,
-        author=actor.user,
-        plan_hours=base.plan_hours,
-        request=request,
-    )
-    SyllabusVersion.objects.filter(pk=version.pk).update(change_kind=ChangeKind.COPIED, source_version=base)
-    version.change_kind = ChangeKind.COPIED
-    version.source_version = base
-    SyllabusSection.objects.filter(version=version).delete()
-    _create_sections(version, source=base, actor_user=actor.user)
-    recompute_completion(version)
-    return syllabus, version
-
-
 class SectionConflict(TransitionDenied):
     """Bölmə başqa sessiyada dəyişilib (redaktorun ``conflict`` vəziyyəti)."""
 
@@ -407,6 +369,9 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         raise TransitionDenied("transition.author_only", params={"transition": "save_section"})
     if section_id not in SECTION_ORDER:
         raise TransitionDenied("section.unknown", params={"section": section_id})
+    # Forma/uzunluq yoxlaması — ixtiyari JSON redaktoru 500 ilə kilidləyirdi
+    # (QA 2026-09-05 SYLLABUS-02/03).
+    data = normalize_section_data(section_id, data or {})
     if section_id == SectionKey.SELF.value:
         option = (data or {}).get("option") or ""
         if option and option not in SELFWORK_OPTIONS:
@@ -567,11 +532,11 @@ def import_migrated_version(
 
 
 __all__ = [
+    "copy_from_previous",
     "BLANK_SECTION_DATA",
     "SectionConflict",
     "assess_split_is_valid",
     "blank_section_data",
-    "copy_from_previous",
     "create_draft",
     "create_next_version",
     "default_assess_data",

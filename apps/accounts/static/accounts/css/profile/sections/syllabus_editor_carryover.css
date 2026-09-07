@@ -102,7 +102,7 @@
    müəllim «Geri qaytar» ilə fikrini dəyişə bilir. */
 .syl-method--custom:not(.is-on) .syl-method__text {
     text-decoration: line-through;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* Köçürülmüş mətn çox sətirli ola bilər («1. mühazirə\A 2. …»). */
@@ -156,7 +156,7 @@
 .syl-carrynote > i {
     flex: none;
     font-size: 0.62rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .syl-carrynote > span {

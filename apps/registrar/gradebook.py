@@ -18,7 +18,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.registrar import exam_eligibility, grade_audit, services
+from apps.registrar import exam_eligibility, grade_audit, journal_window, services
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -115,7 +115,7 @@ def absence_limit_percent_for(offering) -> int:
 
 
 @transaction.atomic
-def save_marks(*, offering, entries, by_user=None, enforce_day=True):
+def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False, request=None):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
     ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
@@ -124,9 +124,14 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     (locked cells are skipped) and the lesson type (lecture cells never store a
     score). Blocked entirely when the journal is locked. Returns cells written.
     ``enforce_day=False`` YALNIZ seed/test üçündür — HTTP qatı heç vaxt ötürmür.
+    ``report=True`` → ``{"written", "rejected"}`` (yazılmayan xanaların sayı ilə;
+    çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10).
     """
     if journal_is_locked(offering):
-        return 0
+        return {"written": 0, "rejected": 0} if report else 0
+
+    # Çağırış vaxtı idxal: `gradebook_lessons` bu moduldan idxal edir (dövr).
+    from apps.registrar.gradebook_lessons import parse_lesson_score as _parse_score
 
     lessons = {str(latt.id): latt for latt in offering.lessons.all()}
     enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
@@ -144,6 +149,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
     prior_hours = {e.id: e.absence_hours for e in enrollments.values()}
 
     written = 0
+    rejected = 0
     touched = set()
     audit_changes = []
     notify_events = []
@@ -166,9 +172,14 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
         if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
             status = AttendanceStatus.PRESENT
         score = None
-        if lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
-            # Seminar/lab balı: min 0, max 10 (sərt tavan).
-            score = min(max(Decimal("0"), _to_decimal(entry.get("score"))), LESSON_SCORE_MAX)
+        if status != AttendanceStatus.ABSENT and lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
+            # Seminar/lab balı: tam ədəd, 0..10. Qayıb tələbəyə bal yazılmır —
+            # «q/b + 8 bal» xanası mümkün idi (QA 2026-09-05 JOURNAL-TEACHER-09).
+            score = _parse_score(entry.get("score"))
+            if score is None:
+                # Səhv dəyər SƏSSİZ 0-a çevrilmir — xana toxunulmadan qalır (P3-10).
+                rejected += 1
+                continue
 
         old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
         old_status = mark.status if mark is not None and mark.pk else None
@@ -215,7 +226,10 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
             elif prev < warn_at <= cur <= allowed:
                 notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_LIMIT_WARNING, "hours": new_hours})
 
-    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=audit_changes)
+    # `request` → audit sətrinə «kim impersonasiya edib» möhürü (sahib qərarı).
+    grade_audit.log_grade_changes(
+        offering=offering, by_user=by_user, kind="mark", changes=audit_changes, request=request
+    )
 
     if notify_events:
         from django.db import transaction as _tx
@@ -223,7 +237,7 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True):
         from apps.registrar import journal_notifications as jn
 
         _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
-    return written
+    return {"written": written, "rejected": rejected} if report else written
 
 
 def _mark_repr(status, score) -> str:
@@ -285,18 +299,32 @@ def _allowed_absence_hours(offering, lessons, *, limit_percent=None):
     return Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
 
 
-def get_offering_journal(*, offering, newest_first=False):
+def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, lesson_offset=0, lesson_kind=""):
     """Full journal grid: lessons (columns) × enrolled students (rows) + summary.
 
     One pass over the marks (no per-cell query). Each row carries the running
     absence hours, the accumulated entry score (giriş balı, capped) and the
     barred / warning status used to grey or redden the row.
     ``newest_first=True`` → sütun sırası tərs (ən yeni dərs adların yanında) —
-    müəllim grid-i üçün; export xronoloji qalır."""
+    müəllim grid-i üçün; export xronoloji qalır.
+
+    DƏRS PƏNCƏRƏSİ (QA 2026-09-05 P1-8): ``lesson_limit``/``lesson_offset`` YALNIZ
+    göstərilən SÜTUNLARI kəsir — qayıb saatı, giriş balı və buraxılış qərarı
+    HƏMİŞƏ bütün dərslər üzrədir; ``lesson_window`` şablona naviqasiya metası verir.
+
+    ``lesson_limit=None`` → bütün dərslər (export, düzəliş rejimi, «hamısını göstər»).
+
+    ``lesson_kind`` — dərs tipi süzgəci: pəncərə kimi YALNIZ SÜTUNLARA aiddir.
+    """
     scheme = ensure_assessment_scheme(offering=offering)
-    lessons = list(offering.lessons.order_by("date", "created_at"))
+    all_lessons = list(offering.lessons.order_by("date", "created_at"))
+    lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
     if newest_first:
         lessons.reverse()
+    total_lessons = len(lessons)
+    window_size, window_offset = journal_window.resolve_window(total_lessons, limit=lesson_limit, offset=lesson_offset)
+    if lesson_limit:
+        lessons = lessons[window_offset : window_offset + window_size]
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
@@ -320,6 +348,7 @@ def get_offering_journal(*, offering, newest_first=False):
     )
     # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
     carry_map = guest_merge.carry_over_map(guest_ids)
+    guest_docs = guest_roster.guest_document_map(guest_ids)  # alt-qrup sənədi (təqdimat)
     # Rəsmi düzəliş almış xanalar (sarı + kilidli göstəriş üçün).
     from .models import JournalCorrection
 
@@ -332,43 +361,22 @@ def get_offering_journal(*, offering, newest_first=False):
     now = timezone.now()
     today = timezone.localdate()
     limit_percent = absence_limit_percent_for(offering)
-    allowed_absence = _allowed_absence_hours(offering, lessons, limit_percent=limit_percent)
+    # Hədd BÜTÜN dərslər üzrədir — pəncərə onu dəyişməməlidir.
+    allowed_absence = _allowed_absence_hours(offering, all_lessons, limit_percent=limit_percent)
     # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`): qrid buraxılış
     # qaydasını təkrar yazmır. Açılış üzrə bir dəfə həll olunur — sətir başına
     # yoxlama N+1 olardı.
     frozen = exam_eligibility.is_frozen(offering)
     # Məxrəc + idmançı istisnası da TƏK mənbədən; istisna toplu oxunur (tək
     # sorğu), sətir-sətir N+1 olardı (2026-08-31 düşmən baxışı, 3-cü bloker).
-    total_hours = exam_eligibility.lesson_hours_for(offering, lessons)
+    # Məxrəc də BÜTÜN dərslər üzrədir — pəncərə buraxılış faizini dəyişməməlidir.
+    total_hours = exam_eligibility.lesson_hours_for(offering, all_lessons)
     exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
     warn_at = allowed_absence * _WARN_RATIO
 
-    # Per-lesson özət (müəllim: redaktə pəncərəsi keçmiş sütun başlığına klik →
-    # oxu-rejimi gün özəti). Əlavə sorğu yox — mark_map yaddaşdadır.
+    # Per-lesson özət (sütun başlığındakı gün özəti) — `journal_window`-dadır.
     total_students = len(enrollments)
-    lesson_summary: dict = {}
-    for lesson in lessons:
-        ie = qb = uq = scored = 0
-        for enrollment in enrollments:
-            m = mark_map.get((enrollment.id, lesson.id))
-            if m is None:
-                continue
-            if m.status == AttendanceStatus.ABSENT:
-                qb += 1
-            elif m.status == AttendanceStatus.EXCUSED:
-                uq += 1
-            else:
-                ie += 1
-            if m.score is not None:
-                scored += 1
-        lesson_summary[lesson.id] = {
-            "ie": ie,
-            "qb": qb,
-            "uq": uq,
-            "scored": scored,
-            "total": total_students,
-            "marked": ie + qb + uq,
-        }
+    lesson_summary = journal_window.lesson_summaries(lessons, enrollments, mark_map, total_students)
 
     lesson_meta = [
         {
@@ -377,7 +385,7 @@ def get_offering_journal(*, offering, newest_first=False):
             "editable": can_edit_lesson(lesson, now=now),  # sütun redaktə/silmə (2 saat)
             "markable": lesson.date == today,  # yeni işarə yalnız bu gün
             # xronoloji nömrə (köhnədən yeniyə) — sıra tərs olsa da nömrə sabitdir
-            "seq": (len(lessons) - idx) if newest_first else (idx + 1),
+            "seq": (total_lessons - (window_offset + idx)) if newest_first else (window_offset + idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
             "summary": lesson_summary.get(lesson.id, {}),
         }
@@ -389,11 +397,14 @@ def get_offering_journal(*, offering, newest_first=False):
         cells = []
         absence_hours = 0
         absence_count = 0
-        for lesson in lessons:
+        # Qayıb BÜTÜN dərslər üzrə (pəncərədən asılı deyil).
+        for lesson in all_lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             if mark is not None and mark.status == AttendanceStatus.ABSENT:
                 absence_hours += lesson.hours
                 absence_count += 1
+        for lesson in lessons:
+            mark = mark_map.get((enrollment.id, lesson.id))
             corrected = mark is not None and mark.id in corrected_mark_ids
             locked = corrected or (mark is not None and not can_edit_mark(mark, now=now))
             cells.append(
@@ -450,6 +461,7 @@ def get_offering_journal(*, offering, newest_first=False):
                     current_group_id=current_groups.get(enrollment.student_id),
                 ),
                 "source_group": enrollment.source_group,
+                "guest_document": guest_docs.get(enrollment.id),  # (sənəd, qorunan URL) və ya None
                 # Birləşmədən gələn əvvəlki jurnal işi (yoxdursa None).
                 "carry_over": carry,
                 "own_absence_hours": own_absence_hours,
@@ -470,6 +482,14 @@ def get_offering_journal(*, offering, newest_first=False):
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
         "limit_qb": int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0,
         "entry_score_max": scheme.entry_score_max,
+        # Dərs pəncərəsi (P1-8) — şablondakı naviqasiya zolağı üçün.
+        "lesson_window": journal_window.window_meta(
+            total=total_lessons,
+            shown=len(lessons),
+            size=window_size,
+            offset=window_offset,
+            newest_first=newest_first,
+        ),
     }
 
 

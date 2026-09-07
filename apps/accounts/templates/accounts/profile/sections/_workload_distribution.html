@@ -70,32 +70,38 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   <form class="wl-filters" data-wl-filters novalidate>
     <div class="wl-field">
       <label for="wl-chair">{% trans "Kafedra" context "accounts.workload" %}</label>
-      <select id="wl-chair" name="chair" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-chair>
-        {% for chair in workload_distribution_section.chairs %}
-        <option value="{{ chair.id }}" {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
-        {% empty %}
-        <option value="">{% trans "Əhatənizdə kafedra yoxdur" context "accounts.workload" %}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select">
+        <select id="wl-chair" name="chair" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-chair>
+          {% for chair in workload_distribution_section.chairs %}
+          <option value="{{ chair.id }}" {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
+          {% empty %}
+          <option value="">{% trans "Əhatənizdə kafedra yoxdur" context "accounts.workload" %}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
     <div class="wl-field">
       <label for="wl-year">{% trans "Tədris ili" context "accounts.workload" %}</label>
-      <input type="text" id="wl-year" name="year" autocomplete="off" inputmode="numeric"
-             list="wl-year-options"
-             value="{{ workload_distribution_section.academic_year }}"
-             placeholder="2026/2027" data-wl-year>
-      <datalist id="wl-year-options">
-        {% for year in workload_distribution_section.years %}<option value="{{ year }}"></option>{% endfor %}
-      </datalist>
+      <div class="bootstrap-single-select">
+        <select id="wl-year" name="year" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-year>
+          {% for year in workload_distribution_section.years %}
+          <option value="{{ year }}" {% if year == workload_distribution_section.academic_year %}selected{% endif %}>{{ year }}</option>
+          {% empty %}
+          <option value="">{% trans "Məlumat yoxdur" context "accounts.workload" %}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
     <div class="wl-field">
       <label for="wl-season">{% trans "Semestr" context "accounts.workload" %}</label>
-      <select id="wl-season" name="season" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-season>
-        <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
-        {% for season in workload_distribution_section.seasons %}
-        <option value="{{ season.key }}">{{ season.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select">
+        <select id="wl-season" name="season" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-season>
+          <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+          {% for season in workload_distribution_section.seasons %}
+          <option value="{{ season.key }}">{{ season.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
     <div class="wl-field wl-field--search">
       <label for="wl-q">{% trans "Axtarış" context "accounts.workload" %}</label>
@@ -154,9 +160,11 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
             <div class="wl-form__grid">
               <label class="wl-form__field">
                 <span>{% trans "Fənn (kataloq)" context "accounts.workload" %}</span>
-                <select name="subject_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="subjects">
-                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
-                </select>
+                <div class="bootstrap-single-select">
+                  <select name="subject_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-option="subjects">
+                    <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                  </select>
+                </div>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Fənn adı (sərbəst)" context "accounts.workload" %}</span>
@@ -164,23 +172,31 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Semestr (dövr)" context "accounts.workload" %}</span>
-                <select name="period_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="periods">
-                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
-                </select>
+                <div class="bootstrap-single-select">
+                  <select name="period_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-option="periods">
+                    <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                  </select>
+                </div>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Fəsil" context "accounts.workload" %}</span>
-                <select name="season" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="seasons"></select>
+                <div class="bootstrap-single-select">
+                  <select name="season" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="seasons"></select>
+                </div>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Sətir növü" context "accounts.workload" %}</span>
-                <select name="row_kind" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="row_kinds"></select>
+                <div class="bootstrap-single-select">
+                  <select name="row_kind" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="row_kinds"></select>
+                </div>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "İxtisas" context "accounts.workload" %}</span>
-                <select name="specialty_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-option="specialties">
-                  <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
-                </select>
+                <div class="bootstrap-single-select">
+                  <select name="specialty_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-option="specialties">
+                    <option value="">{% trans "Seçilməyib" context "accounts.workload" %}</option>
+                  </select>
+                </div>
               </label>
               <label class="wl-form__field wl-form__field--wide">
                 <span>{% trans "Qruplar" context "accounts.workload" %}</span>
@@ -188,11 +204,15 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Təhsil forması" context "accounts.workload" %}</span>
-                <select name="education_form" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="education_forms"></select>
+                <div class="bootstrap-single-select">
+                  <select name="education_form" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="education_forms"></select>
+                </div>
               </label>
               <label class="wl-form__field">
                 <span>{% trans "Səviyyə" context "accounts.workload" %}</span>
-                <select name="degree_level" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="degree_levels"></select>
+                <div class="bootstrap-single-select">
+                  <select name="degree_level" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="degree_levels"></select>
+                </div>
               </label>
               <label class="wl-form__field"><span>{% trans "Tələbə sayı" context "accounts.workload" %}</span><input type="number" name="student_count" min="0" value="0"></label>
               <label class="wl-form__field"><span>{% trans "Birləşmə sayı" context "accounts.workload" %}</span><input type="number" name="union_count" min="0" value="1"></label>
@@ -243,14 +263,18 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
             <input type="hidden" name="assignment_id" data-wl-assign-id>
             <label class="wl-form__field">
               <span>{% trans "Fəaliyyət növü" context "accounts.workload" %}</span>
-              <select name="activity" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-assign-activity></select>
+              <div class="bootstrap-single-select">
+                <select name="activity" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-assign-activity></select>
+              </div>
             </label>
             <p class="wl-assign__remaining" data-wl-assign-remaining></p>
             <label class="wl-form__field">
               <span>{% trans "Müəllim" context "accounts.workload" %}</span>
-              <select name="teacher_id" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-assign-teacher>
-                <option value="">{% trans "Vakant (müəllim təyin edilməyib)" context "accounts.workload" %}</option>
-              </select>
+              <div class="bootstrap-single-select">
+                <select name="teacher_id" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-assign-teacher>
+                  <option value="">{% trans "Vakant (müəllim təyin edilməyib)" context "accounts.workload" %}</option>
+                </select>
+              </div>
             </label>
             <label class="wl-form__field">
               <span>{% trans "Saat" context "accounts.workload" %}</span>
@@ -349,7 +373,9 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
             <input type="hidden" name="target_id" data-wl-amend-target-id>
             <label class="wl-form__field">
               <span>{% trans "Səbəb" context "accounts.workload" %}</span>
-              <select name="reason" class="form-select bootstrap-single-select js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="amendment_reasons"></select>
+              <div class="bootstrap-single-select">
+                <select name="reason" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-catalog="amendment_reasons"></select>
+              </div>
             </label>
             <label class="wl-form__field">
               <span>{% trans "Qeyd" context "accounts.workload" %}</span>

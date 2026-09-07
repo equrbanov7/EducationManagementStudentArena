@@ -1,0 +1,386 @@
+/* «Müraciətlərim» — DETAL MODALI və YAZIŞMA (thread).
+ *
+ * Detal əvvəl siyahının sağında yapışqan sütun idi: mətn ~420 px-də sıxılırdı,
+ * cavablar isə nazik boz zaman xəttində itirdi. İndi modal: siyahı tam eni
+ * tutur, yazışma oxunaqlı ölçüdə gedir.
+ *
+ * `applications.css` və `applications_detail.css`-dən SONRA yüklənməlidir —
+ * `--apx-*` custom property-lərini və `.apx-files` / `.apx-act` qaydalarını
+ * onlardan miras alır. Dialoqlar (`.apx-dlg`, z-index 1090) BU modalın
+ * ÜSTÜNDƏDİR: yönləndir/təyin et/təsdiq modalın içindən açılır.
+ */
+
+/* Arxa fon scroll kilidi — modal açıq ikən səhifə tərpənmir. Qlobal
+   `html.ems-modal-open` Bootstrap modallarına bağlıdır (öz sinfimiz olmasa
+   `syncLock()` kilidi bizdən xəbərsiz açardı), ona görə AYRI sinif. */
+html.apx-modal-open,
+html.apx-modal-open body {
+    overflow: hidden !important;
+}
+
+/* ── Siyahı indi tək sütundur ────────────────────────────────────────────── */
+.apx-body {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── Modal qabığı ────────────────────────────────────────────────────────── */
+.apx-modal[hidden] {
+    display: none !important;
+}
+
+.apx-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1075;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.46);
+    animation: apx-modal-in 0.14s ease-out;
+}
+
+.apx-modal__panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 780px;
+    max-height: min(88vh, 900px);
+    overflow: hidden;
+    background: var(--ems-neutral-0);
+    border-radius: 18px;
+    box-shadow: 0 26px 64px rgba(15, 23, 42, 0.3);
+}
+
+.apx-modal__head {
+    flex: none;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.apx-modal__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+
+.apx-modal__close {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    padding: 5px 11px;
+    border-radius: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-500);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.apx-modal__close:hover {
+    border-color: var(--ems-neutral-300);
+    color: var(--ems-neutral-900);
+    background: var(--ems-neutral-50);
+}
+
+.apx-modal__title {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+
+.apx-modal__from {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 12px;
+    margin-top: 8px;
+    font-size: 0.78rem;
+    color: var(--ems-neutral-500);
+}
+
+.apx-modal__body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: var(--ems-neutral-50);
+}
+
+.apx-modal__foot {
+    flex: none;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-0);
+}
+
+/* Ayaqdakı cavab qutusu fonu ilə deyil, sərhədi ilə ayrılır — modal içində
+   iki-qat boz qutu ağır görünürdü. */
+.apx-modal__foot .apx-act {
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+/* ── Yazışma ─────────────────────────────────────────────────────────────── */
+.apx-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.apx-msg {
+    display: flex;
+    gap: 11px;
+    padding: 13px 15px;
+    border: 1px solid var(--ems-neutral-200);
+    border-left: 3px solid var(--ems-neutral-300);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+
+/* Müraciət sahibinin sözü boz, şöbənin cavabı mavi vurğulu — kim danışır,
+   bir baxışda görünsün. */
+.apx-msg--staff {
+    border-left-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.apx-msg.is-latest {
+    box-shadow: 0 0 0 3px var(--ems-primary-100);
+}
+
+.apx-msg__avatar {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.apx-msg--staff .apx-msg__avatar {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.apx-msg__main {
+    flex: 1;
+    min-width: 0;
+}
+
+.apx-msg__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 9px;
+}
+
+.apx-msg__who {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+
+.apx-msg__role {
+    font-size: 0.73rem;
+    color: var(--ems-neutral-500);
+}
+
+.apx-msg__when {
+    margin-left: auto;
+    font-size: 0.73rem;
+    color: var(--ems-neutral-500);
+    white-space: nowrap;
+}
+
+.apx-msg__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 7px;
+}
+
+/* Mətn ƏSAS məzmundur: kart ölçüsündə deyil, oxu ölçüsündə. */
+.apx-msg__text {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--ems-neutral-900);
+    white-space: pre-wrap;
+    text-wrap: pretty;
+    word-break: break-word;
+}
+
+.apx-msg .apx-files--msg {
+    margin-top: 10px;
+}
+
+.apx-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.69rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.apx-tag--primary {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.apx-tag--success {
+    background: var(--ems-success-bg);
+    color: var(--apx-success-fg);
+}
+
+.apx-tag--warning {
+    background: var(--ems-warning-bg);
+    color: var(--apx-warn-fg);
+}
+
+.apx-tag--danger {
+    background: var(--ems-danger-bg);
+    color: var(--apx-danger-fg);
+}
+
+/* Prosedur addımı — mesaj deyil, nazik sətir (baxıldı, təyin edildi, …). */
+.apx-step {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 0 4px;
+}
+
+.apx-step__text {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.77rem;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+    text-wrap: pretty;
+}
+
+.apx-step__note {
+    font-weight: 400;
+}
+
+.apx-step__when {
+    font-size: 0.72rem;
+    color: var(--ems-neutral-400);
+    white-space: nowrap;
+}
+
+.apx-step .apx-files--step {
+    flex-basis: 100%;
+    margin-left: 30px;
+}
+
+/* ── Modal skeleti (detal sorğusu gedərkən) ──────────────────────────────── */
+.apx-mskel {
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-50) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: apx-shimmer 1.3s ease-in-out infinite;
+}
+
+.apx-mskel--chips {
+    width: 55%;
+    height: 20px;
+    margin-bottom: 10px;
+}
+
+.apx-mskel--title {
+    width: 72%;
+    height: 22px;
+    margin-bottom: 9px;
+}
+
+.apx-mskel--line {
+    width: 40%;
+    height: 13px;
+}
+
+.apx-mskel--msg {
+    height: 108px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+}
+
+.apx-mskel--short {
+    height: 74px;
+    width: 88%;
+}
+
+.apx-mskel--foot {
+    height: 92px;
+}
+
+@keyframes apx-modal-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .apx-modal {
+        animation: none;
+    }
+
+    .apx-mskel {
+        animation: none;
+    }
+}
+
+/* ── Dar ekran: modal aşağıdan tam gəlir ─────────────────────────────────── */
+@media (max-width: 720px) {
+    .apx-modal {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .apx-modal__panel {
+        max-width: none;
+        max-height: 94vh;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .apx-modal__head,
+    .apx-modal__body,
+    .apx-modal__foot {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .apx-modal__closetext {
+        display: none;
+    }
+
+    .apx-msg__when {
+        margin-left: 0;
+    }
+}

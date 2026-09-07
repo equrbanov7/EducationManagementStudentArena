@@ -54,7 +54,29 @@ def search_q(text: str) -> Q:
     )
 
 
-def list_applications(*, organization, user, tab="mine", stat="open", kind_code="", search=""):
+def date_q(date_from=None, date_to=None) -> Q:
+    """GÖNDƏRİLMƏ tarixi üzrə aralıq (hər iki uc DAXİLDİR).
+
+    Meyar ``submitted_at``-dır, ``last_activity_at`` deyil: istifadəçi «filan
+    tarixlərdə göndərdiyim müraciətlər» axtarır — sonrakı yazışma sətri onu
+    aralıqdan çıxarmamalıdır.
+
+    Uclar səhv sıra ilə gəlsə (başlanğıc > son) YER DƏYİŞİR: boş nəticə əvəzinə
+    istifadəçinin nəzərdə tutduğu aralıq qaytarılır.
+    """
+    if date_from and date_to and date_from > date_to:
+        date_from, date_to = date_to, date_from
+    query = Q()
+    if date_from:
+        query &= Q(submitted_at__date__gte=date_from)
+    if date_to:
+        query &= Q(submitted_at__date__lte=date_to)
+    return query
+
+
+def list_applications(
+    *, organization, user, tab="mine", stat="open", kind_code="", search="", date_from=None, date_to=None
+):
     """Filtrlənmiş siyahı. Görünüş qapısı HƏMİŞƏ tətbiq olunur."""
     tab = tab if tab in TABS else "mine"
     stat = stat if stat in STATS else "open"
@@ -63,7 +85,7 @@ def list_applications(*, organization, user, tab="mine", stat="open", kind_code=
         queryset = queryset.filter(_stat_q(stat))
     if kind_code:
         queryset = queryset.filter(kind__code=kind_code)
-    queryset = queryset.filter(search_q(search))
+    queryset = queryset.filter(search_q(search)).filter(date_q(date_from, date_to))
     return queryset.distinct()
 
 
@@ -112,6 +134,7 @@ __all__ = [
     "STATS",
     "TABS",
     "base_queryset",
+    "date_q",
     "handler_kpis",
     "list_applications",
     "search_q",

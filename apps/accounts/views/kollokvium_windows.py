@@ -18,11 +18,13 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
 from apps.exams.public import is_exam_center_user
 from apps.registrar import kollokvium_notifications
+from apps.registrar import kollokvium_windows as kollokvium_window_rules
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
 from core.audit import log_action
 from core.constants import AuditAction
@@ -40,6 +42,18 @@ logger = logging.getLogger(__name__)
 
 class KollokviumAdminError(Exception):
     """Pəncərə/grant əməliyyatının istifadəçi-üzlü xətası (yuxarıda tutulur)."""
+
+
+def _uuid_or_404(raw):
+    """Qeyri-UUID id `get_object_or_404(pk=...)`-də ValidationError → 500 verirdi (QA 2026-09-05 EXAMS-02)."""
+    import uuid
+
+    from django.http import Http404
+
+    try:
+        return uuid.UUID(str(raw or "").strip())
+    except ValueError:
+        raise Http404 from None
 
 
 def _reject_if_period_past(period, user=None):
@@ -144,6 +158,20 @@ def _dispatch_action(request, action, organization):
                 pgettext("accounts.kollokvium_windows", "Əvvəlcə K%(n)s təyin edilməlidir.") % {"n": k_index}
             )
         existing = KollokviumWindow.objects.filter(organization=organization, period=period, k_index=k_index).first()
+        # Tarix qaydaları (keçmiş bağlanış YALNIZ yaradılışda + K-sırası/toqquşma) —
+        # domen qaydası servis qatındadır (QA 2026-09-05 P3-21), view yalnız çevirir.
+        try:
+            kollokvium_window_rules.validate_window_save(
+                organization=organization,
+                period=period,
+                k_index=k_index,
+                opens_on=form.cleaned_data["opens_on"],
+                closes_on=form.cleaned_data["closes_on"],
+                is_new=existing is None,
+                today=timezone.localdate(),
+            )
+        except kollokvium_window_rules.KollokviumWindowRuleError as exc:
+            raise KollokviumAdminError(str(exc)) from exc
         window, created = KollokviumWindow.objects.update_or_create(
             organization=organization,
             period=period,
@@ -178,7 +206,9 @@ def _dispatch_action(request, action, organization):
         return
 
     if action == "toggle_window_active":
-        window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
+        window = get_object_or_404(
+            KollokviumWindow, pk=_uuid_or_404(request.POST.get("window_id")), organization=organization
+        )
         _reject_if_period_past(window.period, user)
         window.is_active = not window.is_active
         window.save(update_fields=["is_active", "updated_at"])
@@ -200,7 +230,9 @@ def _dispatch_action(request, action, organization):
         return
 
     if action == "delete_window":
-        window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
+        window = get_object_or_404(
+            KollokviumWindow, pk=_uuid_or_404(request.POST.get("window_id")), organization=organization
+        )
         _reject_if_period_past(window.period, user)
         window.delete()
         messages.success(request, pgettext("accounts.kollokvium_windows", "Pəncərə silindi."))
@@ -211,7 +243,9 @@ def _dispatch_action(request, action, organization):
             raise KollokviumAdminError(
                 pgettext("accounts.kollokvium_windows", "Əlavə gün yalnız İmtahan Mərkəzi rəhbərinə məxsusdur.")
             )
-        window = get_object_or_404(KollokviumWindow, pk=request.POST.get("window_id"), organization=organization)
+        window = get_object_or_404(
+            KollokviumWindow, pk=_uuid_or_404(request.POST.get("window_id")), organization=organization
+        )
         _reject_if_period_past(window.period, user)
         form = KollokviumExtraGrantForm(request.POST, organization=organization, window=window)
         if not form.is_valid():
@@ -247,7 +281,7 @@ def _dispatch_action(request, action, organization):
             )
         grant = get_object_or_404(
             KollokviumExtraGrant.objects.select_related("window__period"),
-            pk=request.POST.get("grant_id"),
+            pk=_uuid_or_404(request.POST.get("grant_id")),
             organization=organization,
         )
         _reject_if_period_past(grant.window.period, user)
@@ -298,7 +332,7 @@ def _dispatch_action(request, action, organization):
             )
         grant = get_object_or_404(
             KollokviumExtraGrant.objects.select_related("window__period"),
-            pk=request.POST.get("grant_id"),
+            pk=_uuid_or_404(request.POST.get("grant_id")),
             organization=organization,
         )
         _reject_if_period_past(grant.window.period, user)

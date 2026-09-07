@@ -501,11 +501,23 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(VIEW_AS_SESSION_KEY, self.client.session)
 
-    def test_ikt_write_allowlist_is_empty_by_design(self):
-        """İKT üçün heç bir sistem əməliyyatı hələ açıq şəkildə icazəli deyil."""
+    def test_ikt_allowlist_holds_only_journal_routes(self):
+        """Sahib qərarı (2026-09-06): RİM başqasının adından JURNAL yaza bilər.
+
+        Siyahı əvvəl boş idi — RİM baxış rejimində heç bir düymə işləmirdi. İndi
+        yalnız jurnalın gündəlik yazma marşrutları açıqdır; imtahan/hesab/rol
+        səthləri QƏSDƏN kənardadır. İz isə hər halda RİM-in adına düşür
+        (middleware auditi + `impersonated_by` möhürü).
+        """
         from apps.accounts.services.view_as import actor_limited_write_url_names
 
-        self.assertEqual(actor_limited_write_url_names(self.ikt, self.org), frozenset())
+        allowed = actor_limited_write_url_names(self.ikt, self.org)
+
+        self.assertTrue(allowed)
+        self.assertTrue(all(name.startswith("registrar:journal") for name in allowed), sorted(allowed)[:5])
+        self.assertIn("registrar:journal_detail", allowed)
+        # Sənədli düzəliş axını RİM-in ÖZ kimliyi ilə qalır — impersonasiya altında yox.
+        self.assertNotIn("registrar:correction_apply", allowed)
 
     def test_exam_center_allowlist_holds_only_exam_routes(self):
         from apps.accounts.services.view_as import actor_limited_write_url_names

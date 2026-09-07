@@ -257,6 +257,27 @@ def check_exam_score_evidence_access(user, path: str) -> bool:
     return _is_correction_reviewer(user, entry.organization)
 
 
+def check_guest_roster_document_access(user, path: str) -> bool:
+    """``guest_roster_documents/`` — alt qrupdan əlavənin təqdimatı/sərəncamı.
+
+    Aid olduğu tələbə, açılışın müəllimi, yaxud inzibati aktor (``journal.correct``
+    / org-admin səviyyəsi). Koordinator/dekanlıq sənədi jurnal səthindən görür."""
+    GuestRosterDocument = django_apps.get_model("registrar", "GuestRosterDocument")
+    document = _get_single(
+        GuestRosterDocument.objects.select_related("organization", "enrollment__offering"),
+        document=path,
+    )
+    if document is None:
+        return False
+    if getattr(document.enrollment, "student_id", None) == user.id:
+        return True
+    if _is_offering_instructor(user, getattr(document.enrollment, "offering", None)):
+        return True
+    if user_has_org_permission(user, document.organization, "journal.roster"):
+        return True
+    return _is_correction_reviewer(user, document.organization)
+
+
 def check_legacy_excuse_document_access(user, path: str) -> bool:
     """``legacy_excuse_documents/`` — köhnə sistemdən gələn üzrlü qayıb aktı.
 
@@ -342,6 +363,7 @@ PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_coursework_corrections/",
     "journal_component_corrections/",
     "exam_score_entries/",
+    "guest_roster_documents/",
     "legacy_excuse_documents/",
     "student_movements/",
     "applications/",
@@ -356,6 +378,7 @@ ACCESS_CHECKERS: dict[str, object] = {
     "journal_coursework_corrections/": check_coursework_correction_access,
     "journal_component_corrections/": check_component_correction_access,
     "exam_score_entries/": check_exam_score_evidence_access,
+    "guest_roster_documents/": check_guest_roster_document_access,
     "legacy_excuse_documents/": check_legacy_excuse_document_access,
     "applications/": check_application_attachment_access,
 }

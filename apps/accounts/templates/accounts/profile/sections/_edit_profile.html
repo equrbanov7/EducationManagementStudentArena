@@ -167,7 +167,7 @@
             </div>
             <div class="info-item info-item--borderless">
                 <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="2000"
-                          placeholder="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
+                          placeholder="{% trans 'placeholder_about' context 'profile.edit' %}" aria-label="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
             </div>
         </div>
 

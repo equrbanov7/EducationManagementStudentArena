@@ -514,7 +514,7 @@
 .journal-result-card .jr-part-label { font-size: 0.72rem; color: #64748b; font-weight: 600; }
 .journal-result-card .jr-part-value { font-size: 1.35rem; font-weight: 800; color: #1e293b; }
 .journal-result-card .jr-plus,
-.journal-result-card .jr-eq { font-size: 1.25rem; font-weight: 700; color: #94a3b8; }
+.journal-result-card .jr-eq { font-size: 1.25rem; font-weight: 700; color: var(--ems-neutral-500); }
 .journal-result-card .jr-letter {
     margin-left: auto;
     display: inline-flex;

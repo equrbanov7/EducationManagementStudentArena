@@ -91,9 +91,19 @@ TRANSITION_MESSAGES = {
     ),
     "version.locked": pgettext_lazy(_CTX, "Versiya kilidlidir — redaktə bağlıdır."),
     "version.open_version_exists": pgettext_lazy(_CTX, "Bu sillabusda artıq açıq versiya var: %(version)s"),
+    # P2-20 — köçürmə mövcud dosyeyə yazır; iş gedirsə və ya təsdiqlənibsə rədd olunur.
+    "copy.target_has_open_version": pgettext_lazy(
+        _CTX, "Bu fənn/dövr üçün dosyedə açıq qaralama var (%(version)s) — köçürmək əvəzinə onu redaktə edin."
+    ),
+    "copy.target_approved": pgettext_lazy(
+        _CTX, "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
+    ),
     "version.base_missing": pgettext_lazy(_CTX, "Mənbə versiya tapılmadı."),
     "version.kind_unknown": pgettext_lazy(_CTX, "Versiya növü tanınmır."),
     "section.unknown": pgettext_lazy(_CTX, "Bölmə tanınmır."),
+    "section.invalid_shape": pgettext_lazy(_CTX, "Bölmə məzmununun formatı düzgün deyil (%(field)s)."),
+    "section.too_long": pgettext_lazy(_CTX, "Məzmun həddindən böyükdür — ən çox %(max)s (%(field)s)."),
+    "syllabus.exists": pgettext_lazy(_CTX, "Bu açılış üçün sillabus artıq mövcuddur — siyahıdan açın."),
     "section.conflict": pgettext_lazy(_CTX, "Bu bölmə başqa sessiyada dəyişdirilib — dəyişikliklər göndərilmədi."),
     "self.option_not_allowed": pgettext_lazy(_CTX, "Seçilmiş sərbəst iş strukturu universitet siyasətinə uyğun deyil."),
     "assess.split_mismatch": pgettext_lazy(

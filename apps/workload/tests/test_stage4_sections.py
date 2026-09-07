@@ -15,7 +15,7 @@ from core.constants import RoleScopeType
 
 from ..constants import SliceStatus, TaskStatus
 from ..models import TaskFacultySlice
-from ..services import approve_slice, assign_teacher, build_overview, resolve_actor, submit_task
+from ..services import approve_slice, assign_teacher, build_overview, resolve_actor, review_all, submit_task
 from ..services.overview import load_band
 from .factories import TEACHER_PERMS, YEAR, activate_member, make_org, make_row, make_structure, make_task
 
@@ -186,6 +186,8 @@ class ActionEndpointGateTest(ChainSectionBase):
         denied = self.client.post(self.url(), {"action": "approve_slice", "slice": str(slice_obj.pk)})
         self.assertEqual(denied.status_code, 403)
 
+        # Koordinator vizası (P2-36) — bunsuz dekan təsdiqi `visa_missing` ilə bağlıdır.
+        review_all(actor=resolve_actor(self.coordinator, self.org))
         self.client.force_login(self.dean)
         ok = self.client.post(self.url(), {"action": "approve_slice", "slice": str(slice_obj.pk)})
         self.assertEqual(ok.status_code, 200, ok.content)
@@ -236,6 +238,8 @@ class OverviewAggregationTest(ChainSectionBase):
         self.row = make_row(self.task, self.stack, lecture_total=30, seminar_total=30)
         submit_task(task=self.task, actor=resolve_actor(self.office, self.org))
         self.task.refresh_from_db()
+        # Koordinator vizası (P2-36) — bunsuz dekan təsdiqi `visa_missing` ilə bağlıdır.
+        review_all(actor=resolve_actor(self.coordinator, self.org))
         approve_slice(slice_obj=TaskFacultySlice.objects.get(task=self.task), actor=resolve_actor(self.dean, self.org))
         self.task.refresh_from_db()
         self.row.refresh_from_db()

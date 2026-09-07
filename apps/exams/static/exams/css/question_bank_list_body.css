@@ -14,9 +14,9 @@
 .qb-chip--kind-midterm { background:#ecfeff; color:#0e7490; border-color:#a5f3fc; }
 .qb-chip--kind-quiz { background:#fefce8; color:#a16207; border-color:#fde68a; }
 .qb-card__teacher { display:flex; align-items:center; gap:.45rem; margin-top:6px; color:var(--ems-neutral-600); font-size:.84rem; }
-.qb-card__teacher i { color:var(--ems-neutral-400); font-size:.8rem; }
+.qb-card__teacher i { color: var(--ems-neutral-500); font-size:.8rem; }
 
 /* ── Yaratma kartı: alt qeyd (paylaşım gizlədilib) ── */
 .qb-form__footer-note { display:inline-flex; align-items:center; gap:.5rem; color:var(--ems-neutral-500); font-size:.84rem; }
-.qb-form__footer-note i { color:var(--ems-neutral-400); }
+.qb-form__footer-note i { color: var(--ems-neutral-500); }
 

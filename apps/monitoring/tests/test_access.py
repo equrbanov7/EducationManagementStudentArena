@@ -22,7 +22,7 @@ User = get_user_model()
 ROLE_MATRIX = [
     ("mon_rector", "rector", ProfileRole.MEMBER),
     ("mon_vice", "vice_rector", ProfileRole.MEMBER),
-    ("mon_center", "exam_center", ProfileRole.MEMBER),
+    ("mon_center", "exam_center_head", ProfileRole.MEMBER),
     ("mon_hr", "hr", ProfileRole.MEMBER),
     ("mon_dean", "dean", ProfileRole.MEMBER),
     ("mon_chair", "chair_head", ProfileRole.MEMBER),

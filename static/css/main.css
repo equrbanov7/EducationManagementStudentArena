@@ -35,6 +35,16 @@
         max-width: 100%;
     }
 
+    /* QA UX-07 (2026-09): AI köməkçi FAB-ı (sağ-alt, sabit, 70px + 24px boşluq)
+       səhifənin lap dibindəki cədvəl sətirlərini/pagination-u örtürdü — orada
+       artıq aşağı sürüşmək mümkün olmadığı üçün "Əməllər"/status sütunu həmişə
+       gizli qalırdı. Hər səhifənin altına FAB-ın en/hündürlüyünə uyğun boş
+       sahə qoyulur ki, son sətir/pager ondan yuxarı çıxa bilsin (FAB özü isə
+       silinmir, sadəcə üst-üstə düşmür). */
+    #main-content {
+        padding-bottom: 110px;
+    }
+
     a {
         text-decoration: none;
         color: inherit;

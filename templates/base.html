@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="{% static 'css/footer.css' %}?v=20260618-1">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'css/toast.css' %}?v=20260618-1">
+    {# UX-15: qlobal təsdiq dialoqu (EMSConfirm) — native confirm() əvəzi #}
+    <link rel="stylesheet" href="{% static 'css/ems_confirm.css' %}?v=20260906-1">
     {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
     <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260815-1">
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
@@ -73,6 +75,10 @@
       fayl `create()` içində `window.EMSSearchableSelectKeys`-i axtarır, tapmasa
       komponent səssizcə yalnız-siçan rejiminə düşərdi.
     {% endcomment %}
+    {% comment %}ems_early.js — EMSReady/EMSDelegate növbə stub-u. Bölmə partial-larının
+      skriptləri content içində, ems_ajax_init.js isə body sonunda yüklənir; stub
+      olmasa tam-səhifə açılışda `EMSReady is not a function` (QA 2026-09-05 P1-1).{% endcomment %}
+    <script src="{% static 'js/ems_early.js' %}?v=20260905-1"></script>
     <script src="{% static 'js/searchable_select_keys.js' %}?v=20260831-1"></script>
     <script src="{% static 'js/searchable_select.js' %}?v=20260831-2"></script>
 </head>
@@ -142,6 +148,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
     {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
 
+    {# UX-15: qlobal təsdiq dialoqu markup-ı — bax static/js/ems_ui/confirm.js #}
+    {% include "partials/_ems_confirm_modal.html" %}
+
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
@@ -153,7 +162,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     {# Faza 6.3: EMSCore (getCookie/fetchJSON) — bütün custom JS-dən əvvəl. #}
     <script src="{% static 'js/core/csrf.js' %}?v=20260702-1"></script>
     <script src="{% static 'js/core/http.js' %}?v=20260702-1"></script>
-    <script src="{% static 'js/ems_ajax_init.js' %}?v=20260604-ajaxinit"></script>
+    <script src="{% static 'js/ems_ajax_init.js' %}?v=20260905-earlyq"></script>
     <script src="{% static 'js/modal_scroll_lock.js' %}?v=20260815-1"></script>
     <script src="{% static 'js/burgerMenu.js' %}?v=20260617-1"></script>
     <script src="{% static 'js/pagination.js' %}"></script>
@@ -181,6 +190,8 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>
+    {# UX-15: qlobal təsdiq dialoqu (EMSConfirm) — native confirm() əvəzi #}
+    <script src="{% static 'js/ems_confirm.js' %}?v=20260906-1"></script>
 
     {% block extraJs %}{% endblock %}
 </body>

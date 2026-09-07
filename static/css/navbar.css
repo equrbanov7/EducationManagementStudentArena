@@ -310,7 +310,7 @@
 
 .blog-header__user-caret {
     font-size: 0.72rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     transition: transform 0.18s ease, color 0.18s ease;
 }
 

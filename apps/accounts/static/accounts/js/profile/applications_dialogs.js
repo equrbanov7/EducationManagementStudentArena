@@ -12,15 +12,12 @@
 
     var NS = (window.EMSApplications = window.EMSApplications || {});
 
-    var MAX_FILES = 5;
-    var MAX_MB = 10;
-    var EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png", ".docx"];
-
     //: Əməl → reason dialoqunun başlıq/etiket açarları + fayl qəbulu.
     var REASON = {
         return_for_correction: ["dlgReturnTitle", "dlgReturnLabel", false, "note"],
         cancel: ["dlgCancelTitle", "dlgCancelLabel", false, "free"],
         provide_info: ["dlgProvideTitle", "dlgProvideLabel", true, "note"],
+        reopen: ["dlgReopenTitle", "dlgReopenLabel", true, "note"],
     };
 
     function dialog(name) {
@@ -105,24 +102,32 @@
             .join("");
     }
 
+    /* Hədlər SERVER-dən gəlir (`rules_payload` → `data-*` → `NS.rules`) —
+     * uzantı/ölçü/say siyahısı UI-da TƏKRAR yazılmır. `box` istənilən fayl
+     * sahəsidir: dialoq da, detal modalının cavab qutusu da eyni naxışdır
+     * (`[data-apx-files-scope]`). */
     function addFiles(box, fileList) {
         box.__files = box.__files || [];
+        var rules = NS.rules || {};
+        var extensions = rules.accept || [];
+        var maxFiles = rules.maxFiles || 5;
+        var maxMb = rules.maxMb || 10;
         var errors = [];
         Array.prototype.forEach.call(fileList, function (file) {
             var lower = file.name.toLowerCase();
-            var okExt = EXTENSIONS.some(function (extension) {
+            var okExt = extensions.some(function (extension) {
                 return lower.slice(-extension.length) === extension;
             });
             if (!okExt) {
-                errors.push(NS.t("fileBadType", { name: file.name }));
+                errors.push(NS.t("fileBadType", { name: file.name, list: extensions.join(", ") }));
                 return;
             }
-            if (file.size > MAX_MB * 1024 * 1024) {
-                errors.push(NS.t("fileTooBig", { name: file.name }));
+            if (file.size > maxMb * 1024 * 1024) {
+                errors.push(NS.t("fileTooBig", { name: file.name, mb: maxMb }));
                 return;
             }
-            if (box.__files.length >= MAX_FILES) {
-                errors.push(NS.t("tooManyFiles"));
+            if (box.__files.length >= maxFiles) {
+                errors.push(NS.t("tooManyFiles", { n: maxFiles }));
                 return;
             }
             box.__files.push(file);
@@ -416,6 +421,7 @@
     }
 
     NS.dialogs = {
+        showErrors: showErrors,
         open: open,
         close: close,
         closeTop: closeTop,
@@ -474,17 +480,18 @@
             }
         });
         window.EMSDelegate.on("click", "[data-apx-pick-files]", function (event, node) {
-            var input = node.closest("[data-apx-dialog]").querySelector("[data-apx-files]");
+            var scope = node.closest("[data-apx-files-scope]");
+            var input = scope && scope.querySelector("[data-apx-files]");
             if (input) {
                 input.click();
             }
         });
         window.EMSDelegate.on("change", "[data-apx-files]", function (event, node) {
-            addFiles(node.closest("[data-apx-dialog]"), node.files);
+            addFiles(node.closest("[data-apx-files-scope]"), node.files);
             node.value = "";
         });
         window.EMSDelegate.on("click", "[data-apx-drop-file]", function (event, node) {
-            var box = node.closest("[data-apx-dialog]");
+            var box = node.closest("[data-apx-files-scope]");
             box.__files.splice(Number(node.getAttribute("data-apx-drop-file")), 1);
             renderPicked(box);
         });

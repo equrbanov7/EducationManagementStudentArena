@@ -65,7 +65,7 @@ class _Base(TestCase):
         _assign_user_to_org(cls.teacher, cls.org, ProfileRole.TEACHER, "teacher")
 
         cls.exam_center = User.objects.create_user("qs_center", "qs_center@test.az", PASSWORD)
-        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(cls.exam_center, cls.org, ProfileRole.MEMBER, "exam_center_head")
 
         # ── Kafedra strukturu: müəllim kafedraya bağlıdır, kafedranın müdiri var ──
         from apps.organizations.models import Membership, OrgUnit
@@ -807,7 +807,7 @@ class QuestionBankCatalogTests(_Base):
         # Mərkəz bank hovuzunun idarəçisidir: başqa mərkəz üzvünün yaratdığı
         # (paylaşılmamış) org bankı da açılmalıdır — əvvəl 404 idi.
         other_center = User.objects.create_user("qs_center2", "qs_center2@test.az", PASSWORD)
-        _assign_user_to_org(other_center, self.org, ProfileRole.MEMBER, "exam_center")
+        _assign_user_to_org(other_center, self.org, ProfileRole.MEMBER, "exam_center_head")
         bank = QuestionBank.objects.create(
             name="Kolleqa bankı QBX", organization=self.org, created_by=other_center, is_shared=False
         )

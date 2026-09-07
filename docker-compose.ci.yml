@@ -43,16 +43,24 @@ services:
       piston:
         condition: service_started
         required: false
-    # Override healthcheck to be more aggressive in CI so nginx starts sooner
-    # and the /ping/ poll can succeed within the timeout window.
+    # CI-də sadə TCP yoxlaması (prod-dakı HTTP /ping/ əvəzinə) — nginx tez
+    # başlasın deyə.
+    #
+    # BÜDCƏ NİYƏ BÖYÜKDÜR (2026-09-06): konteyner portu açmazdan ƏVVƏL
+    # `prod-entrypoint.sh` bütün miqrasiyaları SIFIRDAN tətbiq edir və
+    # `collectstatic` işlədir. Miqrasiya sayı artdıqca bu vaxt uzanır; köhnə
+    # büdcə (15s + 10×10s ≈ 115s) yavaş runner-də çatmırdı və STACK QALXMIRDI
+    # («app is unhealthy» → `depends_on: service_healthy` düşür). Eyni commit
+    # sürətli runner-də keçir, yavaşda düşürdü — yəni kod deyil, büdcə problemi.
+    # Prod-a təsiri YOXDUR: orada miqrasiyalar artımlıdır, bu fayl yalnız CI-dədir.
     healthcheck:
       test:
         - "CMD-SHELL"
         - "python -c \"import socket; s=socket.socket(); s.settimeout(3); s.connect(('localhost', 8000)); s.close()\""
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 15s
+      retries: 30
+      start_period: 90s
 
   # CI runs only over http://localhost. The production nginx config also
   # requires private origin TLS certificate files for port 443, which are not

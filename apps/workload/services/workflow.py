@@ -22,10 +22,12 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
+from .. import policy
 from .. import state_machine as sm
 from ..constants import (
     DEAN_SECOND_APPROVAL_ENABLED,
     PERM_APPROVE,
+    PERM_REVIEW,
     PERM_SUBMIT,
     REASON_MIN_LENGTH,
     RowReviewStatus,
@@ -148,6 +150,14 @@ def submit_task(*, task: TeachingTask, actor, request=None) -> dict:
         )
     if not locked.rows.exists():
         raise WorkloadDenied("workload.no_rows", "Boş sənəd göndərilmir.")
+    # QA 2026-09-05 (P2-35): saatı 0 olan sətir dekanlığa gedib təsdiqlənirdi —
+    # sonra bölünə bilməyən «approved» sətirə çevrilirdi. Göndəriş qapısı.
+    zero_hour_rows = locked.rows.filter(total_hours=0).count()
+    if zero_hour_rows:
+        raise WorkloadDenied(
+            "workload.rows_zero_hours",
+            f"{zero_hour_rows} sətirdə yekun saat 0-dır — göndərişdən əvvəl doldurun və ya sətri silin.",
+        )
 
     was_returned = locked.status == TaskStatus.RETURNED
     if was_returned:
@@ -212,6 +222,50 @@ def _ensure_current_revision(locked: TaskFacultySlice, task) -> None:
         )
 
 
+def _ensure_slice_reviewed(slice_obj, task) -> None:
+    """Dilim təsdiqindən əvvəl koordinator baxışı (QA 2026-09-05 P2-36).
+
+    * İradlı (`flagged`) sətir varsa təsdiq HƏMİŞƏ bağlıdır — əvvəl irad
+      həll olunmalı və ya sətir geri qaytarılmalıdır.
+    * Baxılmamış (`pending`) sətir qapısı org açarına tabedir
+      (`workload.visa_required`, default AÇIQ — bax `apps/workload/policy.py`).
+    """
+    rows = TeachingTaskRow.objects.filter(task=task, faculty_id=slice_obj.faculty_id)
+    flagged = rows.filter(review_status=RowReviewStatus.FLAGGED).count()
+    if flagged:
+        raise WorkloadDenied(
+            "workload.rows_flagged",
+            f"{flagged} sətirdə koordinator iradı var — təsdiqdən əvvəl həll olunmalıdır.",
+        )
+    if not policy.visa_required(slice_obj.organization):
+        return
+    # ƏHATƏ QAYDASI (P1-9 ilə eyni prinsip): yalnız BAXA BİLƏN adamı olan
+    # ixtisasların sətirləri viza tələb edir. Koordinatoru olmayan ixtisas
+    # dekanı kilidləməməlidir — əks halda dilim heç vaxt təsdiqlənməzdi.
+    pending_rows = list(rows.filter(review_status=RowReviewStatus.PENDING).select_related("specialty"))
+    blocked = 0
+    covered: dict = {}
+    for row in pending_rows:
+        specialty = row.specialty
+        if specialty is None:
+            continue
+        if specialty.pk not in covered:
+            covered[specialty.pk] = bool(
+                _unit_role_users(
+                    slice_obj.organization,
+                    [specialty],
+                    COORDINATOR_ROLES,
+                    permission=PERM_REVIEW,
+                )
+            )
+        blocked += int(covered[specialty.pk])
+    if blocked:
+        raise WorkloadDenied(
+            "workload.visa_missing",
+            f"{blocked} sətrə koordinator vizası yoxdur — təsdiqdən əvvəl baxış tamamlanmalıdır.",
+        )
+
+
 @transaction.atomic
 def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", request=None) -> dict:
     """Dekan fakültə dilimini bütöv təsdiqləyir."""
@@ -223,6 +277,7 @@ def approve_slice(*, slice_obj: TaskFacultySlice, actor, comment: str = "", requ
     _ensure_current_revision(locked, task)
     if locked.status == SliceStatus.APPROVED:
         raise WorkloadDenied("workload.slice_already_approved", "Dilim artıq təsdiqlənib.")
+    _ensure_slice_reviewed(locked, task)
 
     locked.status = SliceStatus.APPROVED
     locked.decided_by = getattr(actor, "user", None)
@@ -339,6 +394,34 @@ def _recipients(queryset):
     return [user for user in queryset if user is not None]
 
 
+def _unit_role_users(organization, units, role_names, permission=None):
+    """Vahid(lər)i əhatə edən, verilmiş rolları daşıyan AKTİV üzvlərin istifadəçiləri.
+
+    Əvvəl alıcı yalnız ``OrgUnit.head`` idi — klonda fakültə/kafedraların çoxu
+    rəhbərsizdir, ona görə dekan/kafedra müdiri bildiriş almırdı (QA 2026-09-05
+    WORKLOAD-SCHEDULE-09). İndi rol üzvlüyü də alıcıdır (rəhbər + rol daşıyıcıları).
+    """
+    from apps.organizations.unit_heads import members_covering_unit
+
+    users: dict = {}
+    for unit in units:
+        if unit is None:
+            continue
+        for membership in members_covering_unit(organization, unit, role_names=role_names, permission=permission):
+            users.setdefault(membership.user_id, membership.user)
+    return list(users.values())
+
+
+#: Viza verə bilən rollar — sətrin ixtisasını əhatə edən koordinator/dekanlıq.
+#: DİQQƏT: əhatə yoxlanışı bu adlarla YANAŞI `workload.review` icazəsini də
+#: tələb edir (aşağı), əks halda icazəsiz «dekan» rolu «baxan var» sayılıb
+#: dilimi əbədi kilidləyərdi.
+COORDINATOR_ROLES = ("program_coordinator", "tutor", "vice_dean", "dean", "chair_head", "department_head")
+
+FACULTY_ACTOR_ROLES = ("dean", "vice_dean", "program_coordinator")
+CHAIR_ACTOR_ROLES = ("chair_head", "department_head", "section_head")
+
+
 def send_notification(organization, recipients, *, title, body, link, event, metadata=None) -> int:
     recipients = _recipients(recipients)
     if not recipients:
@@ -368,10 +451,12 @@ def _notify_faculty_actors(task, faculty_ids) -> int:
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     faculties = list(OrgUnit.objects.filter(pk__in=list(faculty_ids)).select_related("head"))
-    heads = [unit.head for unit in faculties]
+    unique = {u.pk: u for u in [unit.head for unit in faculties] if u is not None}
+    for user in _unit_role_users(task.organization, faculties, FACULTY_ACTOR_ROLES):
+        unique.setdefault(user.pk, user)
     return send_notification(
         task.organization,
-        heads,
+        list(unique.values()),
         title=f"Dərs yükü dilimi: {task.academic_year}",
         body="Kafedranın tədris tapşırığı fakültənizə göndərildi — təsdiq gözlənilir.",
         link=_SECTION_LINKS["approval"],
@@ -387,6 +472,7 @@ def _notify_office(task, *, title, body) -> int:
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     chair = OrgUnit.objects.filter(pk=task.chair_id).select_related("head").first()
     recipients = [task.submitted_by, task.created_by, getattr(chair, "head", None)]
+    recipients += _unit_role_users(task.organization, [chair], CHAIR_ACTOR_ROLES)
     unique: dict = {}
     for user in recipients:
         if user is not None:
@@ -407,9 +493,12 @@ def _notify_chair(task) -> int:
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     chair = OrgUnit.objects.filter(pk=task.chair_id, unit_type__in=(OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)).first()
+    unique = {u.pk: u for u in [getattr(chair, "head", None)] if u is not None}
+    for user in _unit_role_users(task.organization, [chair], CHAIR_ACTOR_ROLES):
+        unique.setdefault(user.pk, user)
     return send_notification(
         task.organization,
-        [getattr(chair, "head", None)],
+        list(unique.values()),
         title=f"Tədris tapşırığı təsdiqləndi: {task.academic_year}",
         body="Bütün fakültə dilimləri təsdiqləndi — yükü müəllimlərə bölə bilərsiniz.",
         link=_SECTION_LINKS["distribution"],
