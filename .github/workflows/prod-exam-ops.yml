@@ -104,7 +104,7 @@ jobs:
       TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
       - name: 📥 Checkout (skript mənbəyi)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: 🎓 İşlət
         run: |
