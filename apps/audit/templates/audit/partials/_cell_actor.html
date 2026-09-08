@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}İcraçı xanası: inisial nişanı + ad + istifadəçi adı; icraçısız qeyd
+«Anonim / sistem». Ad linki sətir klikini AÇMIR (`data-al-stop`).{% endcomment %}
+{% if row.data.actor_username %}
+<div class="al-actor">
+    <span class="al-avatar" aria-hidden="true">{{ row.data.actor_initials }}</span>
+    <span class="al-actor__main">
+        <a class="al-actor__name" href="{{ row.data.actor_url }}" data-al-stop
+           title="{% trans 'Profilə bax' context 'audit.section' %}">{{ row.data.actor_name }}</a>
+        <span class="al-actor__user ems-mono">@{{ row.data.actor_username }}</span>
+    </span>
+</div>
+{% else %}
+<div class="al-actor al-actor--anon">
+    <span class="al-avatar al-avatar--anon" aria-hidden="true">—</span>
+    <span class="al-actor__main">
+        <span class="al-actor__name">{% trans "Anonim / sistem" context "audit.section" %}</span>
+    </span>
+</div>
+{% endif %}

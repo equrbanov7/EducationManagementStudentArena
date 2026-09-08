@@ -1,0 +1,28 @@
+{% load i18n %}
+{% comment %}«Qrupu dəyiş» — form dialoqunun gövdəsi. Hədəf qrup Bootstrap tərzli,
+daxili axtarışlı select-dir (əhatədəki aktiv qruplar); səbəb qısa mətndir
+(≥3 simvol). Tələbənin adı çekmecədən JS ilə yazılır (`data-tof-movement-name`).{% endcomment %}
+<div class="tof-students__target" data-tof-movement-target>
+    <span class="tof-students__target-label">{% trans "Tələbə" context "accounts.groups" %}</span>
+    <strong data-tof-movement-name></strong>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-target">{% trans "Hədəf qrup" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ form_dialog_id }}-target" name="id"
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.groups' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.groups' %}">
+            <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+            {% for option in groups_registry_section.group_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır." context "accounts.groups" %}</p>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-reason">{% trans "Səbəb" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <textarea class="ems-textarea" id="{{ form_dialog_id }}-reason" name="reason" rows="2" maxlength="500" required
+              placeholder="{% trans 'Məs.: tələbənin ərizəsi ilə qrup dəyişikliyi' context 'accounts.groups' %}"></textarea>
+</div>

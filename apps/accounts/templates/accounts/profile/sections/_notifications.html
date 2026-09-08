@@ -220,6 +220,16 @@ adları — `profile-notif-item(--unread)`, `profile-notif-body.js-notif-open`,
                         {% if notification.metadata.image_url %}
                         <img src="{{ notification.metadata.image_url }}" alt="" class="profile-notif-thumb-img nfx-row__thumb">
                         {% endif %}
+                        {% if notification.metadata.attachments %}
+                        {% comment %}Əlavə fayllar (2026-09-08): sətirdə keçid, modal üçün JSON
+                        (`json_script` — CSP-yə uyğun, icra olunmur).{% endcomment %}
+                        <ul class="nfx-row__files" aria-label="{% trans 'Əlavə fayllar' context 'profile.notifications' %}">
+                            {% for attachment in notification.metadata.attachments %}
+                            <li><a class="nfx-row__file" href="{{ attachment.url }}" target="_blank" rel="noopener" download><i class="fas fa-paperclip" aria-hidden="true"></i> {{ attachment.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% with pkstr=notification.pk|stringformat:"s" %}{% with fid="notifFiles-"|add:pkstr %}{{ notification.metadata.attachments|json_script:fid }}{% endwith %}{% endwith %}
+                        {% endif %}
                         {% if not notification.is_read %}
                         <span class="notif-new-badge nfx-row__dot" title="{% trans 'new_badge' context 'profile.notifications' %}"></span>
                         {% endif %}
@@ -317,6 +327,7 @@ adları — `profile-notif-item(--unread)`, `profile-notif-body.js-notif-open`,
                         <img id="profileNotifModalImageEl" src="" alt="">
                     </div>
                     <div id="profileNotifModalMessage" class="nfx-modal__msg"></div>
+                    <div id="profileNotifModalFiles" class="nfx-modal__files" hidden></div>
                     <div id="profileNotifModalLink" class="nfx-modal__link"></div>
                 </div>
                 <div class="modal-footer nfx-modal__foot">

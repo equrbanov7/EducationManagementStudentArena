@@ -20,7 +20,7 @@ Modul bölgüsü (SOFT_CAP=600 büdcəsi):
 
 from .academic import build_student_card, preview_group_transfer, scoped_groups_qs, scoped_records_qs
 from .academic_actions import set_academic_status, transfer_group
-from .actions import load_target, set_account_status, set_teacher_role
+from .actions import assign_teacher_unit, load_target, set_account_status, set_teacher_role
 from .analytics_ai import build_ai_payload, generate_analytics_summary
 from .analytics_students import build_student_analytics
 from .analytics_teachers import build_teacher_analytics
@@ -28,6 +28,7 @@ from .constants import DEFAULT_PAGE_SIZE, STUDENT_SORT_OPTIONS, TEACHER_ROLE_NAM
 from .detail import build_detail
 from .filters import PeopleFilters, parse_filters
 from .lookups import build_filter_options
+from .page import build_person_page
 from .permissions import (
     PEOPLE_PERMISSIONS,
     PERM_MANAGE_ACADEMIC,
@@ -62,6 +63,7 @@ __all__ = [
     "PeopleFilters",
     "build_ai_payload",
     "build_detail",
+    "build_person_page",
     "build_filter_options",
     "build_student_analytics",
     "build_student_card",
@@ -78,6 +80,7 @@ __all__ = [
     "set_academic_status",
     "set_account_status",
     "set_teacher_role",
+    "assign_teacher_unit",
     "transfer_group",
     "visible_students_qs",
     "visible_teachers_qs",

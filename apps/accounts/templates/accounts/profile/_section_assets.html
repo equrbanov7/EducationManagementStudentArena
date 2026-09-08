@@ -21,7 +21,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
         yükləyirdi (2026-07-31 auditi).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260907-createbtn">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260902-1">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
@@ -32,7 +32,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'superadmin-users' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     {% endif %}
-    {% if 'rim-center' in allowed_sections %}
+    {% if 'rim-center' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
     {% comment %}⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl səth
     (panel/axtarış/siyahı), sonra modallar, ən sonda «Yeni hesab» axını —
     üçüncü fayl ilk ikisinin başlıq və kart qaydalarını qəsdən tamamlayır.{% endcomment %}
@@ -49,9 +49,6 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'my-courses' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
-    {% endif %}
-    {% if 'groups' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'exams/css/profile_group_modal.css' %}?v=20260517-1">
     {% endif %}
     {% if 'my-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
@@ -86,7 +83,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260720-2">
     {% endif %}
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260830-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260908-page">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
     {% endif %}
     {% if 'people-students' in allowed_sections %}
@@ -143,9 +140,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review_panel.css' %}?v=20260830-3">
     {% endif %}
     {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
-    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260715-appeal-batch">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260908-calm">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
     {% if 'my-journal' in allowed_sections or 'journal-close' in allowed_sections %}
@@ -165,7 +162,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     ÜZƏRİNƏ qurulur, ona görə ondan SONRA yüklənməlidir (kaskad).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/schedule_manage.css' %}?v=20260902-1">
     {% endif %}
-    {% if 'student-intake' in allowed_sections %}
+    {% if 'student-intake' in allowed_sections or 'teacher-intake' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260902-1">
     {% endif %}
     {% if 'academic-calendar' in allowed_sections %}
@@ -188,13 +185,13 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}Tədris şöbəsi (ekran 01–04) — YALNIZ düzüm; kart/cədvəl/badge/KPI
     ORTAQ `ems_ui` qatındadır (qabıqda bir dəfə yüklənir).{% endcomment %}
     {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office.css' %}?v=20260903-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office.css' %}?v=20260908-tree">
     {% endif %}
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260907-howto">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20260907-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20260908-move">
     {% endif %}
     {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm
     (kart sırası, yekun zolağı, risk siyahısı); komponentlər `ems_ui`-dədir.{% endcomment %}

@@ -102,9 +102,73 @@
         var menu = document.createElement("div");
         menu.className = "dropdown-menu bootstrap-single-select__menu";
 
+        // Daxili axtarış (`data-live-search="true"`): uzun siyahılarda (məs.
+        // 500 ixtisas) menyunun başında yapışqan axtarış sahəsi görünür və
+        // variantlar müştəri tərəfində süzülür — seçim yenə native `<select>`-ə
+        // yazılır, yəni forma/filtr müqaviləsi dəyişmir.
+        var liveSearch = select.getAttribute("data-live-search") === "true";
+        var searchWrap = null;
+        var searchInput = null;
+        var searchEmpty = null;
+        if (liveSearch) {
+            searchWrap = document.createElement("div");
+            searchWrap.className = "bootstrap-single-select__search";
+            searchInput = document.createElement("input");
+            searchInput.type = "search";
+            searchInput.className = "form-control form-control-sm bootstrap-single-select__search-input";
+            searchInput.autocomplete = "off";
+            searchInput.setAttribute("aria-label", select.getAttribute("data-live-search-placeholder") || "Axtar");
+            searchInput.placeholder = select.getAttribute("data-live-search-placeholder") || "Axtar…";
+            searchWrap.appendChild(searchInput);
+            searchEmpty = document.createElement("div");
+            searchEmpty.className = "bootstrap-single-select__search-empty";
+            searchEmpty.textContent = select.getAttribute("data-live-search-empty") || "Uyğun nəticə yoxdur";
+            searchEmpty.hidden = true;
+            menu.classList.add("bootstrap-single-select__menu--searchable");
+        }
+
         dropdown.appendChild(toggle);
         dropdown.appendChild(menu);
         select.insertAdjacentElement("afterend", dropdown);
+
+        function applyLiveSearch() {
+            if (!searchInput) {
+                return;
+            }
+            var needle = String(searchInput.value || "").trim().toLowerCase();
+            var visible = 0;
+            menu.querySelectorAll(".bootstrap-single-select__option").forEach(function (button) {
+                var text = String(button.textContent || "").toLowerCase();
+                var match = !needle || text.indexOf(needle) !== -1;
+                button.hidden = !match;
+                if (match) {
+                    visible += 1;
+                }
+            });
+            if (searchEmpty) {
+                searchEmpty.hidden = visible > 0;
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("input", applyLiveSearch);
+            searchInput.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    // Enter — ilk görünən variantı seç (klaviatura ilə sürətli seçim).
+                    event.preventDefault();
+                    var first = menu.querySelector(".bootstrap-single-select__option:not([hidden])");
+                    if (first) {
+                        first.click();
+                    }
+                } else if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    var next = menu.querySelector(".bootstrap-single-select__option:not([hidden])");
+                    if (next) {
+                        next.focus();
+                    }
+                }
+            });
+        }
 
         function syncToggleState() {
             var selectedOption = select.options[select.selectedIndex] || select.options[0];
@@ -127,6 +191,14 @@
 
         function buildMenu() {
             menu.innerHTML = "";
+            if (searchWrap) {
+                searchInput.value = "";
+                menu.appendChild(searchWrap);
+                if (searchEmpty) {
+                    searchEmpty.hidden = true;
+                    menu.appendChild(searchEmpty);
+                }
+            }
 
             Array.prototype.forEach.call(select.options, function (option, index) {
                 // Gizli option-ları menyuda göstərmə (native select davranışı) —
@@ -220,6 +292,21 @@
             window.addEventListener("scroll", onScrollWhileOpen, true);
             window.addEventListener("resize", closeDropdown);
         });
+
+        if (searchInput) {
+            toggle.addEventListener("shown.bs.dropdown", function () {
+                searchInput.value = "";
+                applyLiveSearch();
+                // Menyu açılan kimi axtarış sahəsi fokusda olsun — yazmağa hazır.
+                window.setTimeout(function () {
+                    searchInput.focus();
+                }, 0);
+                var selectedButton = menu.querySelector(".bootstrap-single-select__option.is-selected");
+                if (selectedButton && typeof selectedButton.scrollIntoView === "function") {
+                    selectedButton.scrollIntoView({ block: "nearest" });
+                }
+            });
+        }
 
         toggle.addEventListener("hidden.bs.dropdown", function () {
             window.removeEventListener("scroll", onScrollWhileOpen, true);

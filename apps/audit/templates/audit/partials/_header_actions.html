@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Başlıq əməlləri: «Yenilə» (paneli yerində yenidən yükləyir) və cari
+filtrin CSV ixracı (`audit:export`, tavan 10 000 sətir, UTF-8 BOM).{% endcomment %}
+<button type="button" class="ems-btn" data-al-refresh
+        title="{% trans 'Siyahını yenidən yüklə' context 'audit.section' %}">
+    <i class="fas fa-rotate" aria-hidden="true"></i>
+    {% trans "Yenilə" context "audit.section" %}
+</button>
+<a class="ems-btn" href="{{ audit_log_section.export_url }}" data-al-export
+   title="{% trans 'Cari filtrə uyğun qeydləri CSV kimi yüklə (ən çox 10 000 sətir)' context 'audit.section' %}">
+    <i class="fas fa-file-csv" aria-hidden="true"></i>
+    {% trans "CSV ixrac" context "audit.section" %}
+</a>

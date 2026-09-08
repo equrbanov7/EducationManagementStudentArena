@@ -651,4 +651,3 @@ class HeadCandidateLookupTests(StructureViewsTestBase):
         self.assertIn(response.status_code, {302, 403})
         if response.status_code == 403:
             self.assertEqual(response.json()["results"], [])
-

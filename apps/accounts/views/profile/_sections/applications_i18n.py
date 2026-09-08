@@ -41,9 +41,7 @@ def _detail() -> dict:
         "replyLabel": pgettext(_CTX, "Cavab ver"),
         "replyPlaceholder": pgettext(_CTX, "Müraciət sahibinin görəcəyi cavab"),
         # Hədd MƏTNƏ bişirilmir: `{n}` server qaydasından (`rules.min_note_length`) doldurulur.
-        "replyHint": pgettext(
-            _CTX, "Cavab mətni ən azı {n} simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."
-        ),
+        "replyHint": pgettext(_CTX, "Cavab mətni ən azı {n} simvol olmalıdır — müraciət sahibi məhz bu mətni görəcək."),
         "internal": pgettext(_CTX, "daxili qeyd"),
         "closeDetail": pgettext(_CTX, "Bağla"),
         # ── Modal (yazışma + cavab qutusu) ───────────────────────────────
@@ -56,8 +54,7 @@ def _detail() -> dict:
         "closeDirtyTitle": pgettext(_CTX, "Cavab göndərilməyib"),
         "closeDirtyText": pgettext(
             _CTX,
-            "Yazdığınız mətn və seçdiyiniz sənədlər hələ göndərilməyib — pəncərəni bağlasanız itəcək. "
-            "Bağlayaq?",
+            "Yazdığınız mətn və seçdiyiniz sənədlər hələ göndərilməyib — pəncərəni bağlasanız itəcək. " "Bağlayaq?",
         ),
         "slaOntime": pgettext(_CTX, "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"),
         "slaOverdue": pgettext(_CTX, "Cavab müddəti {n} gün keçib (norma {m} iş günü)"),

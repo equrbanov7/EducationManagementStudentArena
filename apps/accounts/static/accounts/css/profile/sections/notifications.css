@@ -580,3 +580,45 @@
         opacity: 1;
     }
 }
+
+
+/* ── Əlavə fayllar (2026-09-08) ─────────────────────────────────────────── */
+.nfx-row__files,
+.nfx-modal__filelist {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.nfx-row__file,
+.nfx-modal__file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 4px 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-800);
+    font-size: var(--ems-fs-xs, 0.78rem);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nfx-row__file:hover,
+.nfx-modal__file:hover {
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
+}
+
+.nfx-modal__files {
+    margin: 10px 0 4px;
+}

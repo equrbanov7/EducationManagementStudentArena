@@ -184,16 +184,45 @@ def _columns_for(kind, actor):
     return visible
 
 
+def _create_block(request, kind: str) -> dict:
+    """«Yeni müəllim / tələbə» + «Toplu idxal» — RİM-in yaratma axını kataloqda
+    (sahib, 2026-09-08). Eyni `user.import` qapısı, eyni servis (`rim.create`);
+    toplu idxal isə ayrıca bölmələrə keçiddir (tələbə / müəllim idxalı)."""
+    from apps.accounts.services.rim import resolve_actor as resolve_rim_actor
+    from apps.accounts.services.rim.create import can_create
+    from apps.accounts.views.rim.section import _create_context
+
+    rim_actor = resolve_rim_actor(request)
+    allowed = bool(getattr(rim_actor, "organization", None) is not None and can_create(rim_actor))
+    if not allowed:
+        return {"can_create": False, "rim_create": None, "intake_section_url": ""}
+    create = _create_context(rim_actor)
+    create.update({"can_create_unit": False, "unit_action_url": "", "unit_tree_url": ""})
+    intake_section = "teacher-intake" if kind == "teachers" else "student-intake"
+    return {
+        "can_create": True,
+        "rim_create": create,
+        "intake_section": intake_section,
+        "intake_section_url": f"{reverse('accounts:profile')}?section={intake_section}",
+    }
+
+
 def build_people_section(request, kind: str) -> dict:
     """``people-teachers`` / ``people-students`` bölməsinin context-i."""
     actor = people.resolve_actor(request)
     has_access = actor.can_view_teachers if kind == "teachers" else actor.can_view_students
+    create_block = (
+        _create_block(request, kind)
+        if has_access
+        else {"can_create": False, "rim_create": None, "intake_section_url": ""}
+    )
 
     return {
         "people_section": {
             "kind": kind,
             "has_access": has_access,
             "access_denied_message": "" if has_access else ACCESS_DENIED,
+            **create_block,
             "organization": actor.organization,
             "can_view_contacts": actor.can_view_contacts,
             "can_view_demographics": actor.can_view_demographics,

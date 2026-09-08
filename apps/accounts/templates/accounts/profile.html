@@ -13,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,groups,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,teacher-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-title-suffix="{% trans 'title' context 'profile.sidebar' %} - {{ user.username }} - {{ site_brand_name }}"
@@ -134,8 +134,8 @@
 hadisəsinə qulaq asır və kataloqun ilk yüklənməsini ötürməməlidir (yenə də
 `dataset.peopleFilterQuery` ilə sıra-müstəqildir).{% endcomment %}
 <script src="{% static 'accounts/js/profile/people_analytics.js' %}?v=20260830-1"></script>
-<script src="{% static 'accounts/js/profile/people_detail.js' %}?v=20260905-1"></script>
-<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260905-1"></script>
+<script src="{% static 'accounts/js/profile/people_detail.js' %}?v=20260908-page"></script>
+<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260907-redesign"></script>
 {% endif %}
 {% if 'people-students' in allowed_sections %}
 {% comment %}Tələbə idarəetmə çekməcəsi. Saf render alt modulu (ön baxış cədvəli)
@@ -153,7 +153,7 @@ yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təs
 idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
 <script src="{% static 'accounts/js/schedule_manage.js' %}?v=20260902-1"></script>
 {% endif %}
-{% if 'student-intake' in allowed_sections or 'student-admission' in allowed_sections %}
+{% if 'student-intake' in allowed_sections or 'student-admission' in allowed_sections or 'teacher-intake' in allowed_sections %}
 {% comment %}Tələbə idxalı / qəbulu — panel server-render-lidir; JS yalnız fayl
 yükləməsini, quru icranı, nəticə cədvəlini (ekran 08-də ATİS sütunları + qrup
 seçicisi) və parol CSV-sinin endirilməsini idarə edir (EMSDelegate,
@@ -253,8 +253,8 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'js/user_profile/delete.js' %}?v=20260604-ajaxinit2"></script>
 <script src="{% static 'js/user_profile/entry.js' %}?v=20260604-ajaxinit2"></script>
 {% endif %}
-{% if 'rim-center' in allowed_sections %}
-    {# RIM merkezi — hesab idareetmesi paneli (AJAX-safe, EMSReady/EMSDelegate) #}
+{% if 'rim-center' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+    {# RIM merkezi — hesab idareetmesi paneli (AJAX-safe, EMSReady/EMSDelegate); «Yeni hesab» axını kataloqlarda da işlənir (2026-09-08) #}
 <script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20260826-1"></script>
 <script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20260826-1"></script>
 <script src="{% static 'accounts/js/rim_center/render.js' %}?v=20260826-1"></script>
@@ -270,13 +270,6 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% if 'my-courses' in allowed_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
-{% endif %}
-{% if 'groups' in allowed_sections %}
-<script src="{% static 'exams/js/profile_group_modal/namespace.js' %}?v=20260907-confirm"></script>
-<script src="{% static 'exams/js/profile_group_modal/checklist.js' %}?v=20260907-confirm"></script>
-<script src="{% static 'exams/js/profile_group_modal/controller.js' %}?v=20260907-confirm"></script>
-<script src="{% static 'exams/js/profile_group_modal/confirm.js' %}?v=20260907-confirm5"></script>
-<script src="{% static 'exams/js/profile_group_modal/entry.js' %}?v=20260907-confirm"></script>
 {% endif %}
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
@@ -300,8 +293,17 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
-{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260907-headpicker"></script>
+{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260908-registry"></script>
+{% endif %}
+{% comment %}Fakültələr / Kafedralar reyestri (2026-09-08) — «Heyət» çekmecəsi və
+dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endcomment %}
+{% if 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/org_units.js' %}?v=20260908-3"></script>
+{% endif %}
+{% if 'org-members' in allowed_sections %}<script src="{% static 'accounts/js/profile/org_members.js' %}?v=20260908-1"></script>{% endif %}
+{% if 'audit-log' in allowed_sections %}
+<script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
 {% endif %}
 {% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
 gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
@@ -309,7 +311,7 @@ gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% 
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
 `data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260907-1"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260908-move2"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq
 `teaching_office.js` urlencoded göndərir, fayl ondan keçmir).{% endcomment %}

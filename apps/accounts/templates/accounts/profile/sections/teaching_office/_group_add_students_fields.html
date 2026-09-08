@@ -1,0 +1,36 @@
+{% load i18n %}
+{% comment %}«Tələbəni qrupa əlavə et» — səbəb dialoqunun ƏLAVƏ sahələri
+(`reason_extra_include`).
+
+Namizədlər SERVER-BACKED axtarışlı seçicidən gəlir (`EMSSearchableSelect`,
+çox-seçim): yalnız hazırda aktiv qrupu OLMAYAN, qeydiyyatlı tələbələr —
+başqa qrupdakı tələbə burada görünmür (sahib, 2026-09-07). Axtarış ad,
+istifadəçi adı, ixtisas şifri və ixtisas adı üzrədir; qrupun öz ixtisasındakı
+tələbələr əvvəl gəlir. Seçilmiş qeyd id-ləri gizli `record_ids` sahəsinə
+vergüllə yazılır (`teaching_office_groups.js`). Səbəb TƏLƏB OLUNMUR (sahib,
+2026-09-08); qrup dəyişikliyi serverdə RƏSMİ köçürmə xidməti ilə aparılır.{% endcomment %}
+<div class="tof-students__target" data-tof-add-target>
+    <span class="tof-students__target-label">{% trans "Qrup" context "accounts.groups" %}</span>
+    <strong data-tof-add-group-name></strong>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ form_dialog_id }}-picker-search">{% trans "Tələbələr" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="tof-add-picker" data-tof-add-picker
+         data-empty="{% trans 'Uyğun qrupsuz tələbə tapılmadı' context 'accounts.groups' %}"
+         data-remove-label="{% trans '%s seçimdən çıxar' context 'accounts.groups' %}">
+        <div class="ems-ss tof-ms js-tof-add-students">
+            <div class="ems-ss__chips tof-ms__chips">
+                <input type="text" id="{{ form_dialog_id }}-picker-search" class="ems-ss__search tof-ms__search"
+                       placeholder="{% trans 'Ad, istifadəçi adı və ya ixtisas kodu ilə axtar…' context 'accounts.groups' %}"
+                       autocomplete="off">
+            </div>
+            <div class="ems-ss__menu tof-ms__menu"></div>
+        </div>
+    </div>
+    <p class="ems-field__hint">
+        {% trans "Yalnız hazırda qrupu olmayan (qeydiyyatlı) tələbələr göstərilir. Başqa qrupdakı tələbəni köçürmək üçün həmin qrupun çekmecəsində tələbənin yanındakı «Qrupu dəyiş» əməlini işlədin." context "accounts.groups" %}
+    </p>
+    <div class="tof-add-picker__summary" data-tof-add-summary aria-live="polite"
+         data-t-count="{% trans '%d tələbə seçilib' context 'accounts.groups' %}"
+         data-t-none="{% trans 'Hələ tələbə seçilməyib' context 'accounts.groups' %}">{% trans "Hələ tələbə seçilməyib" context "accounts.groups" %}</div>
+</div>

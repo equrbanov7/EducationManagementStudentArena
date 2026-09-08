@@ -108,7 +108,7 @@
             if (el.type === "checkbox") {
                 el.checked = false;
             } else if (el.tagName === "SELECT") {
-                el.selectedIndex = 0;
+                resetSelect(el);
             } else {
                 el.value = "";
             }
@@ -117,6 +117,25 @@
             }
         }
         markDirty(form);
+    }
+
+    /** Select-i DEFOLTA qaytarır: `data-ems-default` varsa ora, yoxsa ilk seçimə. */
+    function resetSelect(select) {
+        var preferred = select.getAttribute("data-ems-default");
+        if (preferred !== null) {
+            var found = false;
+            for (var i = 0; i < select.options.length; i += 1) {
+                if (select.options[i].value === preferred) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                select.value = preferred;
+                return;
+            }
+        }
+        select.selectedIndex = 0;
     }
 
     /** Applied dəyərlərdən naviqasiya URL-i qurur. */
@@ -157,7 +176,147 @@
         return url.toString();
     }
 
+    /* ---- AVTO rejim (`data-ems-filters-auto`) ---------------------------
+       «Tətbiq et» düyməsi yoxdur: select dəyişən kimi, axtarış isə debounce-dan
+       sonra tətbiq olunur. Panel SPA ilə yenidən yükləndiyi üçün (a) cədvəl
+       yerində skeleton-a çevrilir, (b) axtarış sahəsinin fokusu və kursor
+       mövqeyi swap-dan sonra bərpa olunur, (c) yükləmə gedərkən yazılmış
+       hərflər itmir — yeni panel gələndə fərq varsa təkrar tətbiq olunur. */
+    var AUTO_SEARCH_DEBOUNCE_MS = 350;
+    var autoFocus = null; // {section, name, value, caret}
+    // Bərpa YALNIZ bizim avto-tətbiqin yaratdığı yükləmədən sonra işləyir —
+    // başqa bölmədən sidebar ilə qayıdanda köhnə axtarış dəyəri geri yazılmasın.
+    var autoPending = false;
+
+    function isAuto(form) {
+        return form.getAttribute("data-ems-filters-auto") === "1";
+    }
+
+    function skeletonFor(form) {
+        var host = form.closest("[data-tof-root]") || form.parentElement || document;
+        // Cədvəlsiz ekranlar (məs. gün-gün kartlar) hədəfi `data-ems-filter-target`
+        // ilə göstərir — məzmun shimmer kartlarla əvəzlənir.
+        var targets = host.querySelectorAll("[data-ems-filter-target]");
+        for (var t = 0; t < targets.length; t += 1) {
+            var cards = "";
+            for (var k = 0; k < 3; k += 1) {
+                cards += '<div class="ems-skelcard" aria-hidden="true">'
+                    + '<span class="skeleton skeleton-line skeleton-line--lg"></span>'
+                    + '<span class="skeleton skeleton-line"></span>'
+                    + '<span class="skeleton skeleton-line skeleton-line--sm"></span>'
+                    + "</div>";
+            }
+            targets[t].setAttribute("aria-busy", "true");
+            targets[t].innerHTML = '<div class="ems-filter-skeleton">' + cards + "</div>";
+        }
+        var wrap = host.querySelector(".ems-tablewrap");
+        if (wrap) {
+            wrap.setAttribute("aria-busy", "true");
+            wrap.classList.add("is-refreshing");
+            var table = wrap.querySelector("table");
+            var tbody = table ? table.querySelector("tbody") : null;
+            if (tbody) {
+                var columns = table.querySelectorAll("thead th").length || 4;
+                var rows = Math.min(Math.max(tbody.querySelectorAll("tr").length, 4), 8);
+                var html = "";
+                for (var r = 0; r < rows; r += 1) {
+                    html += '<tr class="ems-table__skeleton-row" aria-hidden="true">';
+                    for (var c = 0; c < columns; c += 1) {
+                        html += '<td><span class="skeleton skeleton-line' + (c === 0 ? " skeleton-line--lg" : " skeleton-line--sm") + '"></span></td>';
+                    }
+                    html += "</tr>";
+                }
+                tbody.innerHTML = html;
+            }
+        }
+        var tiles = host.querySelectorAll(".ems-kpi");
+        for (var i = 0; i < tiles.length; i += 1) {
+            tiles[i].classList.add("ems-kpi--skeleton");
+        }
+        var count = form.querySelector(".ems-filters__count");
+        if (count) {
+            count.classList.add("is-refreshing");
+        }
+    }
+
+    function rememberFocus(form) {
+        var active = document.activeElement;
+        if (!active || !form.contains(active) || !active.name || !active.hasAttribute("data-ems-filter-search")) {
+            autoFocus = null;
+            return;
+        }
+        autoFocus = {
+            section: form.dataset.section || "",
+            name: active.name,
+            value: active.value || "",
+            caret: typeof active.selectionStart === "number" ? active.selectionStart : (active.value || "").length,
+        };
+    }
+
+    function restoreFocus(panel) {
+        if (!autoPending || !autoFocus) {
+            return;
+        }
+        autoPending = false;
+        var saved = autoFocus;
+        autoFocus = null;
+        var form = (panel || document).querySelector('[data-ems-filters-auto="1"]');
+        if (!form || (saved.section && form.dataset.section !== saved.section)) {
+            return;
+        }
+        var field = form.querySelector('[name="' + saved.name + '"]');
+        if (!field) {
+            return;
+        }
+        var rendered = field.value || "";
+        try {
+            field.focus({ preventScroll: true });
+        } catch (err) {
+            field.focus();
+        }
+        if (rendered !== saved.value) {
+            // Yükləmə gedərkən istifadəçi yazmağa davam edib — itirmirik.
+            field.value = saved.value;
+            try {
+                field.setSelectionRange(saved.value.length, saved.value.length);
+            } catch (err) { /* type=search bəzi brauzerlərdə dəstəkləmir */ }
+            scheduleAuto(form, field);
+            return;
+        }
+        var caret = Math.min(saved.caret, rendered.length);
+        try {
+            field.setSelectionRange(caret, caret);
+        } catch (err) { /* ignore */ }
+    }
+
+    function scheduleAuto(form, field) {
+        var key = "auto:" + (form.dataset.section || form.id || "ems-filters");
+        window.clearTimeout(timers[key]);
+        timers[key] = window.setTimeout(function () {
+            if (!document.contains(form)) {
+                return;
+            }
+            if (!isDirty(form)) {
+                return;
+            }
+            apply(form);
+        }, AUTO_SEARCH_DEBOUNCE_MS);
+        if (field) {
+            autoFocus = {
+                section: form.dataset.section || "",
+                name: field.name,
+                value: field.value || "",
+                caret: typeof field.selectionStart === "number" ? field.selectionStart : (field.value || "").length,
+            };
+        }
+    }
+
     function apply(form) {
+        if (isAuto(form)) {
+            rememberFocus(form);
+            skeletonFor(form);
+            autoPending = true;
+        }
         commit(form);
         var url = buildUrl(form);
         if (window.EMSProfileLoadSection && form.dataset.section) {
@@ -178,19 +337,81 @@
         apply(form);
     });
 
+    /** Avto rejimdə «Sıfırla» = SERVER DEFOLTLARI: panelin bütün prefiksli
+     *  parametrləri URL-dən atılır (boş dəyər = default qaydası). Draft-ı
+     *  index-0 ilə doldurub göndərmək default olmayan seçimi (məs. ən köhnə ili)
+     *  URL-ə yazardı — «Sıfırla işləmir» şikayətinin kökü bu idi. */
+    function resetToDefaults(form) {
+        rememberFocus(form);
+        autoFocus = null;
+        skeletonFor(form);
+        autoPending = true;
+        var base = form.dataset.baseUrl || window.location.pathname;
+        var url = new URL(base, window.location.origin);
+        var current = new URLSearchParams(window.location.search);
+        var prefix = form.dataset.paramPrefix || "";
+        var stale = [];
+        current.forEach(function (_value, key) {
+            if ((prefix && key.indexOf(prefix) === 0) || key === "page") {
+                stale.push(key);
+            }
+        });
+        stale.forEach(function (key) {
+            current.delete(key);
+        });
+        if (form.dataset.section) {
+            current.set("section", form.dataset.section);
+        }
+        url.search = current.toString();
+        var target = url.toString();
+        if (window.EMSProfileLoadSection && form.dataset.section) {
+            window.EMSProfileLoadSection(form.dataset.section, target);
+        } else {
+            window.location.assign(target);
+        }
+    }
+
     window.EMSDelegate.on("click", "[data-ems-filters-reset]", function (event, btn) {
         event.preventDefault();
         var form = btn.closest("[data-ems-filters]");
-        if (form) {
-            clear(form);
-            apply(form);
+        if (!form) {
+            return;
+        }
+        if (isAuto(form)) {
+            resetToDefaults(form);
+            return;
+        }
+        clear(form);
+        apply(form);
+    });
+
+    // Tarix sahəsi dəyişəndə bağlı «dövr» select-i «seçilmiş aralıq» olur.
+    window.EMSDelegate.on("change", "[data-ems-filters] [data-ems-range-select]", function (event, el) {
+        var form = el.closest("[data-ems-filters]");
+        var name = el.getAttribute("data-ems-range-select");
+        if (!form || !name) {
+            return;
+        }
+        var select = form.querySelector('select[name="' + name + '"]');
+        var custom = el.getAttribute("data-ems-range-custom") || "custom";
+        if (select && select.value !== custom) {
+            select.value = custom;
+            if (window.EMSBootstrapSelect) {
+                window.EMSBootstrapSelect.sync(select);
+            }
         }
     });
 
     window.EMSDelegate.on("change", "[data-ems-filters] [data-ems-filter]", function (event, el) {
         var form = el.closest("[data-ems-filters]");
-        if (form) {
-            markDirty(form);
+        if (!form) {
+            return;
+        }
+        markDirty(form);
+        // Avto rejimdə select/checkbox dəyişən kimi tətbiq olunur; axtarış
+        // sahəsinin `change`-i (blur/Enter) isə debounce-u gözləmədən göndərir.
+        if (isAuto(form) && isDirty(form)) {
+            apply(form);
         }
     });
 
@@ -199,11 +420,22 @@
         if (!form) {
             return;
         }
+        if (isAuto(form)) {
+            markDirty(form);
+            scheduleAuto(form, el);
+            return;
+        }
         var key = form.id || "ems-filters";
         window.clearTimeout(timers[key]);
         timers[key] = window.setTimeout(function () {
             markDirty(form);
         }, SEARCH_DEBOUNCE_MS);
+    });
+
+    // Avto rejimdə Enter — debounce-u gözləmədən dərhal tətbiq (submit onsuz da apply edir).
+    document.addEventListener("profile:section:loaded", function (event) {
+        var panel = event && event.detail ? event.detail.panel : null;
+        restoreFocus(panel);
     });
 
     // Tətbiq olunmuş filtr çipinin «×»-i — həmin sahəni boşaldıb dərhal tətbiq edir.
@@ -221,7 +453,7 @@
         if (field.type === "checkbox") {
             field.checked = false;
         } else if (field.tagName === "SELECT") {
-            field.selectedIndex = 0;
+            resetSelect(field);
             if (window.EMSBootstrapSelect) {
                 window.EMSBootstrapSelect.sync(field);
             }
@@ -255,5 +487,6 @@
         appliedValues: appliedValues,
         buildUrl: buildUrl,
         SEARCH_DEBOUNCE_MS: SEARCH_DEBOUNCE_MS,
+        AUTO_SEARCH_DEBOUNCE_MS: AUTO_SEARCH_DEBOUNCE_MS,
     };
 })(window, document);

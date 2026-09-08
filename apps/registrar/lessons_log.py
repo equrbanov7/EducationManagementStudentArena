@@ -30,13 +30,38 @@ from django.db.models import Count, Min, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
-from apps.registrar.journal_scope import permission_scope_q
 from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
+from apps.registrar.models.catalog_meta import EducationForm
 
 _CTX = "registrar.lessons_log"
 
-#: Nəzarət görünüşünün icazə açarı (mövcud — yeni açar YARADILMIR).
+#: Nəzarət görünüşünün icazə açarları.
+#:
+#: * ``journal.roster`` — kafedra müdiri / dekanlıq / RİM (mövcud açar);
+#: * ``journal.lessons_unit`` (2026-09-08, sahib) — LABORANT: öz kafedrasının
+#:   müəllimlərinin dərs izinə OXU-ONLY baxış. Ayrıca açardır ki, siyahı
+#:   idarəsi (`journal.roster`) hüququ verilməsin.
+#:
+#: Hər iki açarın əhatəsi ``Membership.scope_unit`` alt-ağacıdır; aktor iki
+#: açarın da əhatəsini daşıyırsa dərslər BİRLƏŞİR (OR).
 SUPERVISOR_PERMISSION = "journal.roster"
+UNIT_VIEW_PERMISSION = "journal.lessons_unit"
+SUPERVISOR_PERMISSIONS = (SUPERVISOR_PERMISSION, UNIT_VIEW_PERMISSION)
+
+#: Semestr fəsli — `schedule.season_label` ilə EYNİ ay qaydası (tək mənbə
+#: olmalıdır, amma registrar→schedule idxalı dövr yaradardı; qayda sadədir).
+SEASON_AUTUMN = "autumn"
+SEASON_SPRING = "spring"
+SEASON_SUMMER = "summer"
+SEASON_LABELS = (
+    (SEASON_AUTUMN, pgettext_lazy(_CTX, "Payız")),
+    (SEASON_SPRING, pgettext_lazy(_CTX, "Yaz")),
+    (SEASON_SUMMER, pgettext_lazy(_CTX, "Yay")),
+)
+
+#: Filtr seçicilərində «hamısı» — BOŞ dəyər DEYİL: boş dəyər «default (cari
+#: semestr)» deməkdir, `filter_bar.js` boş parametri URL-ə yazmır.
+ALL = "all"
 
 #: «Gec yazılıb» həddi — dizayn: «dərsdən 48 saat sonra».
 LATE_AFTER_HOURS = 48
@@ -72,13 +97,22 @@ NOTE_EMPTY = "empty"
 # --------------------------------------------------------------------------- #
 
 
-def is_supervisor(user, organization) -> bool:
-    """``journal.roster`` aktora struktur əhatəsi verirmi (nəzarət görünüşü)."""
+def _supervision_scopes(user, organization) -> list:
+    """Nəzarət açarlarının struktur əhatələri (yalnız əhatəsi olanlar)."""
     from django.apps import apps as django_apps
 
     org_unit_model = django_apps.get_model("organizations", "OrgUnit")
-    scope = org_unit_model.user_permission_scope(user, organization, SUPERVISOR_PERMISSION)
-    return bool(scope.has_structure_access)
+    scopes = []
+    for permission in SUPERVISOR_PERMISSIONS:
+        scope = org_unit_model.user_permission_scope(user, organization, permission)
+        if scope.has_structure_access:
+            scopes.append(scope)
+    return scopes
+
+
+def is_supervisor(user, organization) -> bool:
+    """Nəzarət açarlarından biri aktora struktur əhatəsi verirmi."""
+    return bool(_supervision_scopes(user, organization))
 
 
 def scoped_lessons(user, organization, *, supervisor: bool):
@@ -86,20 +120,21 @@ def scoped_lessons(user, organization, *, supervisor: bool):
 
     Müəllim: ``instructor=user`` VƏ YA açılışın müəllimi özüdür (dərsin öz
     ``instructor``-u boş ola bilər — o zaman açılışınkı sayılır).
-    Nəzarətçi: ``journal.roster`` alt-ağacı.
+    Nəzarətçi: nəzarət açarlarının alt-ağaclarının BİRLƏŞMƏSİ; org-genişli
+    əhatə varsa bütün təşkilat. Əhatəsiz nəzarətçi BOŞ nəticə alır.
     """
     queryset = Lesson.objects.filter(organization=organization)
     if not supervisor:
         return queryset.filter(Q(instructor=user) | Q(instructor__isnull=True, offering__instructor=user))
-    return queryset.filter(
-        permission_scope_q(
-            user,
-            organization,
-            SUPERVISOR_PERMISSION,
-            path_field="offering__group__path",
-            id_field="offering__group__id",
-        )
-    )
+    scopes = _supervision_scopes(user, organization)
+    if not scopes:
+        return queryset.none()
+    if any(scope.is_org_wide for scope in scopes):
+        return queryset
+    combined = Q()
+    for scope in scopes:
+        combined |= scope.unit_subtree_q(path_field="offering__group__path", id_field="offering__group__id")
+    return queryset.filter(combined)
 
 
 # --------------------------------------------------------------------------- #
@@ -139,6 +174,161 @@ def resolve_range(*, key: str, start_raw: str = "", end_raw: str = "", period=No
     start = getattr(period, "start_date", None) or today - _dt.timedelta(days=120)
     end = getattr(period, "end_date", None) or today
     return {"key": key, "start": start, "end": max(end, start)}
+
+
+# --------------------------------------------------------------------------- #
+# Tədris ili · semestr fəsli · dövr seçimi
+# --------------------------------------------------------------------------- #
+
+
+def season_of(period) -> str:
+    """Dövrün fəsli — başlanğıc ayına görə (`schedule.season_label` qaydası)."""
+    month = period.start_date.month if getattr(period, "start_date", None) else 9
+    if month >= 8 or month == 12:
+        return SEASON_AUTUMN
+    if month <= 5:
+        return SEASON_SPRING
+    return SEASON_SUMMER
+
+
+def period_catalog(organization) -> list:
+    """Təşkilatın bütün akademik dövrləri — ən yenidən köhnəyə (TƏK sorğu)."""
+    from django.apps import apps as django_apps
+
+    academic_period = django_apps.get_model("organizations", "AcademicPeriod")
+    return list(academic_period.objects.filter(organization=organization).order_by("-start_date", "-created_at"))
+
+
+def year_options(periods) -> list:
+    """`{"value": "2025/2026", "label": "2025/2026"}` — təkrarsız, yenidən köhnəyə."""
+    from django.apps import apps as django_apps
+
+    academic_period = django_apps.get_model("organizations", "AcademicPeriod")
+    seen: list = []
+    for period in periods:
+        if period.academic_year and period.academic_year not in seen:
+            seen.append(period.academic_year)
+    return [{"value": year, "label": academic_period.format_year(year)} for year in seen]
+
+
+def select_periods(periods, *, year: str, season: str, current) -> dict:
+    """İl + fəsil seçimindən dövr dəstini qurur.
+
+    Semantika (filtr panelinin «boş = default» qaydası ilə uyğun):
+      * ``year``/``season`` BOŞ → cari dövrün ili/fəsli (default);
+      * :data:`ALL` → həmin ox üzrə süzgəc yoxdur;
+      * konkret dəyər → yalnız uyğun dövrlər.
+    Qaytarır: ``{"periods": [...] | None, "year": <effektiv>, "season": <effektiv>}``.
+    ``periods`` ``None`` olduqda dövr filtri tətbiq olunmur.
+    """
+    current_year = getattr(current, "academic_year", "") or ""
+    current_season = season_of(current) if current is not None else ""
+    year = (year or "").strip()
+    season = (season or "").strip()
+    known_seasons = {key for key, _label in SEASON_LABELS}
+    if not year:
+        year = current_year or ALL
+    if not season or season not in known_seasons | {ALL}:
+        season = current_season or ALL
+    if year == ALL and season == ALL:
+        return {"periods": None, "year": year, "season": season}
+    selected = [
+        period
+        for period in periods
+        if (year == ALL or period.academic_year == year) and (season == ALL or season_of(period) == season)
+    ]
+    return {"periods": selected, "year": year, "season": season}
+
+
+def window_for_periods(periods) -> tuple:
+    """Dövr dəstinin ümumi aralığı — (ilk başlanğıc, son bitmə) və ya (None, None)."""
+    if not periods:
+        return (None, None)
+    return (min(p.start_date for p in periods), max(p.end_date for p in periods))
+
+
+def resolve_selection(
+    organization,
+    *,
+    current,
+    year: str = "",
+    season: str = "",
+    legacy_period: str = "",
+    range_key: str = "",
+    start_raw: str = "",
+    end_raw: str = "",
+    periods=None,
+    today=None,
+) -> dict:
+    """Bölmə VƏ CSV üçün EYNİ dövr/aralıq həlli (tək mənbə).
+
+    Qaytarır::
+
+        {"periods": [...] | None,   # dövr filtri (None → tətbiq olunmur)
+         "year": …, "season": …,    # effektiv seçimlər (filtr paneli göstərir)
+         "window": {"key","start","end"},
+         "apply_period_filter": bool}
+
+    Dövr filtri YALNIZ (a) il/fəsil/köhnə `period` açıq istənildikdə və ya
+    (b) aralıq «Semestr» olduqda tətbiq olunur — «Bu ay»/«İl»/«Seçilmiş aralıq»
+    TARİX aralığıdır (canlı QA: gizli dövr filtri boş ekran verirdi).
+    """
+    periods = period_catalog(organization) if periods is None else periods
+    legacy = next((p for p in periods if legacy_period and str(p.id) == legacy_period), None)
+    if legacy is not None:
+        chosen = {"periods": [legacy], "year": legacy.academic_year, "season": season_of(legacy)}
+    else:
+        chosen = select_periods(periods, year=year, season=season, current=current)
+    key = range_key if range_key in dict(RANGE_LABELS) else RANGE_SEMESTER
+    if key == RANGE_SEMESTER:
+        start, end = window_for_periods(chosen["periods"] or [])
+        if start is None:
+            fallback = resolve_range(key=RANGE_SEMESTER, period=current, today=today)
+            start, end = fallback["start"], fallback["end"]
+        window = {"key": key, "start": start, "end": max(end, start)}
+    else:
+        window = resolve_range(key=key, start_raw=start_raw, end_raw=end_raw, period=current, today=today)
+    explicit = bool((year or "").strip() or (season or "").strip() or legacy is not None)
+    return {
+        "periods": chosen["periods"],
+        "year": chosen["year"],
+        "season": chosen["season"],
+        "window": window,
+        "apply_period_filter": chosen["periods"] is not None and (explicit or key == RANGE_SEMESTER),
+        "catalog": periods,
+        "explicit": explicit,
+    }
+
+
+def education_form_options() -> list:
+    return [{"value": str(value), "label": str(label)} for value, label in EducationForm.choices]
+
+
+def apply_filters(lessons, *, q="", offering="", kind="", group="", teacher="", form="", supervisor=False):
+    """Bölmə VƏ CSV üçün EYNİ süzgəc zənciri (tək mənbə).
+
+    ``teacher`` yalnız nəzarətçidə tətbiq olunur — adi müəllimin sorğusunda
+    parametr SƏSSİZ keçilir (panel), CSV isə onu ayrıca 403 ilə rədd edir.
+    """
+    if q:
+        lessons = lessons.filter(
+            Q(topic__icontains=q)
+            | Q(offering__subject__name__icontains=q)
+            | Q(offering__subject__code__icontains=q)
+            | Q(offering__group__name__icontains=q)
+        )
+    if offering:
+        lessons = lessons.filter(offering_id=offering)
+    if kind:
+        lessons = lessons.filter(kind=kind)
+    if group:
+        lessons = lessons.filter(offering__group__name=group)
+    if form and form in {value for value, _label in EducationForm.choices}:
+        # Təhsil forması qrupun metadatasındadır (`OrgUnit.settings.education_form`).
+        lessons = lessons.filter(offering__group__settings__education_form=form)
+    if teacher and supervisor:
+        lessons = lessons.filter(Q(instructor_id=teacher) | Q(instructor__isnull=True, offering__instructor=teacher))
+    return lessons
 
 
 # --------------------------------------------------------------------------- #
@@ -403,6 +593,7 @@ def offering_totals(lessons_qs) -> list:
 
 
 __all__ = [
+    "ALL",
     "LATE_AFTER_HOURS",
     "NOTE_EMPTY",
     "NOTE_LATE",
@@ -411,15 +602,29 @@ __all__ = [
     "RANGE_LABELS",
     "RANGE_SEMESTER",
     "ROW_CAP",
+    "SEASON_AUTUMN",
+    "SEASON_LABELS",
+    "SEASON_SPRING",
+    "SEASON_SUMMER",
     "SUPERVISOR_PERMISSION",
+    "SUPERVISOR_PERMISSIONS",
+    "UNIT_VIEW_PERMISSION",
+    "apply_filters",
     "build_rows",
     "coverage_for_offering",
     "csv_rows",
+    "education_form_options",
     "is_supervisor",
     "marks_by_lesson",
     "note_state",
     "offering_totals",
+    "period_catalog",
     "range_totals",
     "resolve_range",
+    "resolve_selection",
     "scoped_lessons",
+    "season_of",
+    "select_periods",
+    "window_for_periods",
+    "year_options",
 ]

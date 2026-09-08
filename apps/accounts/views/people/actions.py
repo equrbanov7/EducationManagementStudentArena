@@ -38,6 +38,8 @@ ALLOWED_ACTIONS = frozenset(
         "unblock",
         "grant_teacher",
         "revoke_teacher",
+        # Müəllimi kafedraya təyin et / kafedrasını dəyiş (`people.manage_teacher_role`).
+        "assign_unit",
         # Tələbə idarəetməsi (`people.manage_academic`) — hədəf `record_id`.
         "transfer_group",
         "set_academic_status",
@@ -88,6 +90,14 @@ def people_action(request):
                 actor,
                 target,
                 active=(action == "unblock"),
+                reason=reason,
+                request=request,
+            )
+        elif action == "assign_unit":
+            result = people.assign_teacher_unit(
+                actor,
+                target,
+                unit_id=payload.get("unit_id") or None,
                 reason=reason,
                 request=request,
             )

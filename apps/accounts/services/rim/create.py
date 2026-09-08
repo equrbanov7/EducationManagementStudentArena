@@ -172,6 +172,8 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
             specialization=draft.specialization,
             scope_unit=draft.scope_unit,
             audit_reason=_audit_reason(kind, note),
+            membership_title=draft.values.get("title", "") if kind == intake_create.KIND_TEACHER else "",
+            employee_id=draft.values.get("student_code", "") if kind == intake_create.KIND_TEACHER else "",
         )
 
     record_rate_limit_hit(RATE_LIMIT_SCOPE, rate, *key_parts)

@@ -1,261 +1,326 @@
-/* ── Veriləcək bal sahəsi ── */
-.appeal-review-points {
-    margin-top: 14px;
-    padding: 14px 16px;
-    border: 1px dashed var(--ems-neutral-300);
-    border-radius: 14px;
-    background: var(--ems-neutral-50);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   appeals/_part3.css — cavab analizi (variantlar), müddəti bitmiş baxış,
+   «Yeni apellyasiya» modalı (uyğun cəhdlər), yarımçıq qərar overlay-i (JS
+   qurur), responsiv. (2026-09-08 sakit redizayn — bax _part1.css başlığı.)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.appeal-review-points__field {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.appeal-review-points__input {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.appeal-review-points__input .form-control {
-    width: 110px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.appeal-review-points__max {
-    color: var(--appeal-muted);
-    font-weight: 600;
-    font-size: 0.85rem;
-    white-space: nowrap;
-}
-
-.appeal-review-points__preview {
-    margin-top: 10px;
-    color: var(--appeal-muted);
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.appeal-review-points__preview strong {
-    font-variant-numeric: tabular-nums;
-}
-
-/* ── Kilidli (qərar verilmiş) item ── */
-.appeal-question-card.is-locked {
-    background: var(--ems-neutral-50);
-    border-style: solid;
-}
-
-.appeal-question-card.is-locked .appeal-q-switch {
-    opacity: 0.72;
-}
-
-.appeal-locked-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    width: fit-content;
-    padding: 7px 12px;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-600);
-    font-size: 0.82rem;
-    font-weight: 800;
-}
-
-.appeal-review-panel--locked {
-    background: transparent;
-}
-
-.appeal-locked-note {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-600);
-    font-weight: 600;
-    font-size: 0.82rem;
-}
-
-.appeal-locked-note i {
-    color: var(--ems-neutral-500);
-}
-
-/* Bootstrap-select müraciət panelində native ilə eyni hündürlük */
-.appeal-review-panel .bootstrap-single-select {
-    width: 100%;
-}
-
-.appeal-review-panel .bootstrap-single-select__toggle {
-    width: 100%;
-    justify-content: space-between;
-    background: var(--ems-neutral-0);
-}
-
-/* ── Sual variantları / cavab analizi (review panelində) ── */
+/* ── Sual variantları / tələbənin cavabı / düzgün cavab ───────────────────── */
 .appeal-answer-review {
-    margin: 12px 0 4px;
-    padding: 14px 16px;
+    margin: var(--ems-sp-5) 0 4px;
+    padding: 12px 14px;
     border: 1px solid var(--appeal-border);
-    border-radius: 14px;
-    background: #fbfdff;
+    border-radius: var(--appeal-radius);
+    background: var(--ems-bg-subtle);
+}
+
+.appeal-answer-review--create {
+    margin-top: var(--ems-sp-5);
 }
 
 .appeal-answer-review__label {
-    color: var(--appeal-muted);
-    font-size: 0.74rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
     margin-bottom: 8px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--appeal-muted);
+}
+
+.appeal-answer-review__label--next {
+    margin-top: var(--ems-sp-5);
 }
 
 .appeal-answer-review__text {
     color: var(--appeal-ink);
-    font-weight: 400;
+    line-height: 1.55;
     white-space: pre-wrap;
+    overflow-wrap: anywhere;
 }
 
 .appeal-answer-review__empty {
     margin-top: 8px;
-    color: #b45309;
+    font-size: var(--ems-fs-sm);
     font-weight: 600;
-    font-size: 0.85rem;
+    color: var(--ems-warning-800);
 }
 
 .appeal-options {
-    list-style: none;
+    display: grid;
+    gap: var(--ems-sp-3);
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 8px;
+    list-style: none;
 }
 
 .appeal-option {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 12px;
+    gap: var(--ems-sp-4);
+    padding: 8px 12px;
     border: 1px solid var(--appeal-border);
-    border-radius: 11px;
-    background: var(--ems-neutral-0);
+    border-radius: var(--ems-r-lg);
+    background: var(--appeal-surface);
 }
 
 .appeal-option__icon {
     flex-shrink: 0;
-    color: var(--ems-neutral-500);
+    color: var(--ems-neutral-300);
+}
+
+.appeal-option__icon i {
+    font-size: 0.95em;
 }
 
 .appeal-option__text {
     flex: 1 1 auto;
+    line-height: 1.45;
     color: var(--appeal-ink);
-    font-weight: 400;
-    line-height: 1.4;
+    overflow-wrap: anywhere;
 }
 
 .appeal-option__text b {
-    font-weight: 700;
     margin-right: 2px;
+    font-weight: 700;
+}
+
+.appeal-option__image {
+    max-width: 160px;
+    max-height: 120px;
+    border-radius: var(--ems-r-sm);
+    border: 1px solid var(--appeal-border);
 }
 
 .appeal-option__tags {
     display: inline-flex;
-    gap: 6px;
-    flex-shrink: 0;
     flex-wrap: wrap;
+    flex-shrink: 0;
+    gap: 6px;
 }
 
 .appeal-option__tag {
     display: inline-flex;
     align-items: center;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font-size: 0.72rem;
+    padding: 2px 8px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
     font-weight: 700;
-    background: #e0e7ff;
-    color: #3730a3;
     white-space: nowrap;
 }
 
 .appeal-option__tag--correct {
-    background: var(--ems-success-100);
-    color: #166534;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
 }
 
 .appeal-option.is-correct {
-    border-color: #86efac;
-    background: #f0fdf4;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
 }
 
 .appeal-option.is-correct .appeal-option__icon {
-    color: #22c55e;
+    color: var(--ems-success-700);
 }
 
 .appeal-option.is-wrong {
-    border-color: #fca5a5;
-    background: #fef2f2;
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
 }
 
 .appeal-option.is-wrong .appeal-option__icon {
-    color: var(--ems-danger-500);
+    color: var(--ems-danger-strong);
 }
 
-/* ── 5 dəqiqəlik redaktə pəncərəsi qeydi ── */
-.appeal-edit-window {
+/* ── Apellyasiya müddəti bitib — read-only baxış ──────────────────────────── */
+.appeal-closed-appeals {
+    margin-top: var(--ems-sp-6);
+}
+
+.appeal-section-title {
+    margin: 0 0 var(--ems-sp-4);
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--appeal-ink);
+}
+
+.appeal-closed-list {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0 0 var(--ems-sp-6);
+    padding: 0;
+    list-style: none;
+}
+
+.appeal-closed-list__item {
+    padding: 12px 14px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--appeal-radius);
+    background: var(--appeal-surface);
+}
+
+.appeal-closed-list__head {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding: 8px 13px;
-    border-radius: 11px;
-    background: #fffbeb;
-    border: 1px solid #fcd34d;
-    color: var(--ems-warning-800);
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    margin-bottom: 4px;
+}
+
+.appeal-closed-list__date {
+    font-size: var(--ems-fs-sm);
+    color: var(--appeal-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.appeal-closed-list__meta {
+    font-size: var(--ems-fs-base);
+    color: var(--appeal-muted);
+}
+
+.appeal-closed-actions {
+    margin-top: var(--ems-sp-6);
+}
+
+/* ── «Yeni apellyasiya müraciəti» modalı — uyğun cəhdlər ─────────────────── */
+.appeal-eligible-list {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.appeal-eligible-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: 12px 14px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--appeal-radius);
+    background: var(--appeal-surface);
+    transition: border-color 0.12s ease;
+}
+
+.appeal-eligible-item:hover {
+    border-color: var(--ems-neutral-300);
+}
+
+.appeal-eligible-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.appeal-eligible-item__title {
     font-weight: 600;
-    font-size: 0.85rem;
+    color: var(--appeal-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.appeal-option__icon i,
-.appeal-edit-window i {
-    font-size: 0.95em;
+.appeal-eligible-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    font-size: var(--ems-fs-sm);
+    color: var(--appeal-muted);
 }
 
-.appeal-list-edit-window {
+.appeal-eligible-item__meta i {
+    margin-right: 4px;
+}
+
+/* ── Yarımçıq qərar xəbərdarlığı — JS (appeals_review.js) qurur ──────────── */
+.appeal-incomplete-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000; /* Bootstrap modal (~1055) üstündə */
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-top: 8px;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.45);
+    animation: appeal-incomplete-fade 0.15s ease-out;
+}
+
+@keyframes appeal-incomplete-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.appeal-incomplete__box {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 24px 20px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-dialog);
+    text-align: center;
+}
+
+.appeal-incomplete__icon {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ems-warning-bg);
     color: var(--ems-warning-800);
-    font-size: 0.78rem;
+    font-size: var(--ems-fs-2xl);
+}
+
+.appeal-incomplete__title {
+    margin: 0 0 6px;
+    font-size: var(--ems-fs-xl);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.appeal-incomplete__body {
+    margin: 0 0 12px;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+}
+
+.appeal-incomplete__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.appeal-incomplete__chip {
+    min-width: 28px;
+    padding: 3px 9px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
     font-weight: 700;
 }
 
-.appeal-list-edit-window.is-expired {
-    display: none;
+.appeal-incomplete__ok {
+    min-width: 140px;
+    border-radius: var(--ems-r-lg);
+    font-weight: 700;
 }
 
-@media (max-width: 640px) {
-    .appeal-option {
-        flex-wrap: wrap;
-    }
-
-    .appeal-option__tags {
-        width: 100%;
-        padding-left: 26px;
-    }
-}
-
+/* ── Responsiv ────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .appeal-shell {
-        padding: 20px 12px 24px;
+        padding: 16px 12px 24px;
     }
 
     .appeal-modal__dialog {
@@ -267,377 +332,79 @@
         padding: 14px;
     }
 
-    /* Manage cədvəli → mobil kart görünüşü */
-    .appeal-manage-table thead {
-        display: none;
+    .appeal-question-card {
+        padding: 14px;
     }
 
-    .appeal-manage-table,
-    .appeal-manage-table tbody,
-    .appeal-manage-table tr,
-    .appeal-manage-table td {
-        display: block;
-        width: 100%;
-    }
-
-    .appeal-manage-table tr {
-        margin-bottom: 12px;
-        border: 1px solid var(--appeal-border);
-        border-radius: 14px;
-        padding: 6px 12px;
-    }
-
-    .appeal-manage-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        border: 0;
-        padding: 8px 0;
-        text-align: right;
-    }
-
-    .appeal-manage-table td::before {
-        content: attr(data-label);
-        color: var(--appeal-muted);
-        font-size: 0.76rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
-
-    .appeal-manage-table td.text-end {
-        justify-content: flex-end;
-    }
-
-    .appeal-manage-table td.text-end::before {
-        content: "";
-    }
-
-    .appeal-hero {
-        flex-direction: column;
-        padding: 20px;
-        border-radius: 18px;
-    }
-
-    .appeal-hero__actions {
-        justify-content: stretch;
-        min-width: 0;
-    }
-
-    .appeal-hero__actions .btn,
-    .appeal-sticky-actions .btn {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .appeal-case-card__head,
     .appeal-question-card__top {
         flex-direction: column;
+        align-items: stretch;
     }
 
-    .appeal-detail-grid {
+    .appeal-head {
+        flex-direction: column;
+    }
+
+    .appeal-detail-grid,
+    .appeal-decision-grid {
         grid-template-columns: 1fr;
+    }
+
+    .appeal-review-panel.is-decided {
+        margin-left: -14px;
+        margin-right: -14px;
+        margin-bottom: -14px;
+        padding-left: 14px;
+        padding-right: 14px;
     }
 
     .appeal-sticky-actions__inner {
-        display: grid;
-        grid-template-columns: 1fr;
+        flex-wrap: wrap;
+    }
+
+    .appeal-sticky-actions__buttons {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .appeal-sticky-actions__buttons .ems-btn {
+        flex: 1 1 auto;
+    }
+
+    .appeal-row {
+        flex-wrap: wrap;
+    }
+
+    .appeal-row__main {
+        flex-basis: 100%;
     }
 }
 
-/* ── Apellyasiya müddəti bitib — read-only baxış (UX) ─────────────────────── */
-.appeal-info-card--warning {
-    border-color: var(--ems-warning-300, #fcd34d);
-    background: var(--ems-warning-50, #fffbeb);
-}
-.appeal-info-card--warning > i {
-    color: var(--ems-warning-600, #d97706);
-}
-.appeal-closed-appeals {
-    margin-top: 1.25rem;
-}
-.appeal-section-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--ems-neutral-800, #1f2937);
-    margin-bottom: 0.75rem;
-}
-.appeal-closed-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.6rem;
-}
-.appeal-closed-list__item {
-    border: 1px solid var(--ems-neutral-200, #e5e7eb);
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    background: var(--ems-neutral-0, #fff);
-}
-.appeal-closed-list__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.25rem;
-}
-.appeal-closed-list__meta {
-    color: var(--ems-neutral-500, #6b7280);
-    font-size: 0.9rem;
-}
-.appeal-status-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2rem 0.7rem;
-    border-radius: 999px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    background: var(--ems-neutral-100, #f3f4f6);
-    color: var(--ems-neutral-700, #374151);
-}
-.appeal-status-chip--accepted,
-.appeal-status-chip--partially_accepted {
-    background: var(--ems-success-50, #ecfdf5);
-    color: var(--ems-success-700, #047857);
-}
-.appeal-status-chip--rejected {
-    background: var(--ems-danger-50, #fef2f2);
-    color: var(--ems-danger-700, #b91c1c);
-}
-.appeal-status-chip--pending,
-.appeal-status-chip--under_review {
-    background: var(--ems-warning-50, #fffbeb);
-    color: var(--ems-warning-700, #b45309);
-}
-.appeal-closed-actions {
-    margin-top: 1.25rem;
-}
+@media (max-width: 640px) {
+    .appeal-option {
+        flex-wrap: wrap;
+    }
 
-/* ============================================================
-   Yeni apellyasiya müraciəti — toolbar düyməsi + modal (Part B)
-   ============================================================ */
-.appeal-body-toolbar {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
-}
+    .appeal-option__tags {
+        width: 100%;
+        padding-left: 24px;
+    }
 
-.appeal-new-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.15rem;
-    border: none;
-    border-radius: 0.75rem;
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #fff;
-    background: linear-gradient(135deg, var(--ems-primary-600), var(--ems-primary-700));
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-.appeal-new-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.28);
-    filter: brightness(1.03);
-}
-.appeal-new-btn:focus-visible {
-    outline: 3px solid var(--ems-primary-200);
-    outline-offset: 2px;
-}
-.appeal-new-btn i {
-    font-size: 0.9em;
-}
-
-.appeal-new-modal .modal-content {
-    border: none;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
-}
-.appeal-new-modal .modal-header {
-    align-items: flex-start;
-    gap: 1rem;
-    background: var(--ems-primary-50);
-    border-bottom: 1px solid var(--ems-primary-100);
-    padding: 1.15rem 1.35rem;
-}
-.appeal-new-modal__subtitle {
-    font-size: 0.85rem;
-    color: var(--ems-neutral-600);
-}
-.appeal-new-modal .modal-body {
-    padding: 1.1rem 1.35rem 1.35rem;
-}
-
-.appeal-eligible-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-.appeal-eligible-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.9rem 1.1rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 0.85rem;
-    background: var(--ems-neutral-0);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.appeal-eligible-item:hover {
-    border-color: var(--ems-primary-200);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
-}
-.appeal-eligible-item__info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    min-width: 0;
-}
-.appeal-eligible-item__title {
-    font-weight: 600;
-    color: var(--ems-neutral-800);
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.appeal-eligible-item__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem 1rem;
-    font-size: 0.82rem;
-    color: var(--ems-neutral-500);
-}
-.appeal-eligible-item__deadline {
-    color: var(--ems-warning-700, #b45309);
-    font-weight: 600;
-}
-.appeal-eligible-item__cta {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 1.05rem;
-    border-radius: 0.7rem;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    color: var(--ems-primary-700);
-    background: var(--ems-primary-50);
-    border: 1px solid var(--ems-primary-200);
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
-}
-.appeal-eligible-item__cta:hover {
-    background: var(--ems-primary-600);
-    color: #fff;
-    transform: translateY(-1px);
-}
-.appeal-empty--modal {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: var(--ems-neutral-500);
-}
-.appeal-empty--modal i {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-    color: var(--ems-neutral-500);
-}
-
-@media (max-width: 576px) {
     .appeal-eligible-item {
         flex-direction: column;
         align-items: stretch;
     }
-    .appeal-eligible-item__cta {
+
+    .appeal-eligible-item .ems-btn {
         justify-content: center;
     }
 }
 
-/* ── Yarımçıq qərar xəbərdarlığı (bütün suallara qərar verilməlidir) ─────── */
-.appeal-question-card.is-undecided {
-    border-color: var(--ems-warning-400, #fbbf24);
-    box-shadow: 0 12px 30px rgba(217, 119, 6, 0.14);
-}
-
-.appeal-incomplete-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;               /* Bootstrap modal (~1055) üstündə */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: rgba(15, 23, 42, 0.55);
-    animation: appeal-incomplete-fade 0.15s ease-out;
-}
-
-@keyframes appeal-incomplete-fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.appeal-incomplete__box {
-    background: #fff;
-    border-radius: 18px;
-    padding: 1.75rem 1.75rem 1.5rem;
-    max-width: 440px;
-    width: 100%;
-    text-align: center;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-}
-
-.appeal-incomplete__icon {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--ems-warning-100, #fef3c7);
-    color: var(--ems-warning-700, #b45309);
-    font-size: 1.5rem;
-}
-
-.appeal-incomplete__title {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--ems-neutral-900, #0f172a);
-    margin: 0 0 0.5rem;
-}
-
-.appeal-incomplete__body {
-    font-size: 0.9rem;
-    color: var(--ems-neutral-600, #475569);
-    margin: 0 0 1rem;
-}
-
-.appeal-incomplete__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-    margin-bottom: 1.25rem;
-}
-
-.appeal-incomplete__chip {
-    min-width: 30px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--ems-warning-50, #fffbeb);
-    border: 1px solid var(--ems-warning-300, #fcd34d);
-    color: var(--ems-warning-800, #92400e);
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-.appeal-incomplete__ok {
-    min-width: 140px;
+@media (prefers-reduced-motion: reduce) {
+    .appeal-skeleton__row,
+    .appeal-incomplete-overlay,
+    [data-manage-body][aria-busy="true"]::before,
+    [data-manage-body][aria-busy="true"]::after {
+        animation: none;
+    }
 }

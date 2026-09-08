@@ -1,9 +1,13 @@
 {
-  "cycles": [],
+  "cycles": [
+    "exams<->registrar",
+    "organizations<->registrar"
+  ],
   "core_to_apps": [],
   "edges": {
     "accounts": [
       "appeals",
+      "applications",
       "assignments",
       "audit",
       "contact",
@@ -13,8 +17,11 @@
       "notifications",
       "organizations",
       "projects",
+      "registrar",
+      "syllabus",
       "task_submission_core",
-      "trial_exams"
+      "trial_exams",
+      "workload"
     ],
     "ai_assistant": [
       "courses",
@@ -24,7 +31,12 @@
     "appeals": [
       "audit",
       "exams",
-      "notifications"
+      "notifications",
+      "organizations"
+    ],
+    "applications": [
+      "notifications",
+      "organizations"
     ],
     "assignments": [
       "courses",
@@ -46,34 +58,61 @@
     "exams": [
       "audit",
       "notifications",
-      "organizations"
+      "organizations",
+      "registrar"
     ],
     "labs": [
       "courses",
       "notifications",
       "task_submission_core"
     ],
+    "legacy_import": [
+      "accounts",
+      "audit",
+      "organizations",
+      "registrar",
+      "syllabus"
+    ],
     "live_exam": [
       "accounts",
       "audit",
       "exams"
     ],
+    "monitoring": [
+      "exams",
+      "notifications"
+    ],
     "notifications": [
       "organizations"
     ],
     "organizations": [
-      "audit"
+      "audit",
+      "registrar"
     ],
     "projects": [
       "courses",
       "notifications",
       "task_submission_core"
     ],
+    "registrar": [
+      "exams",
+      "notifications",
+      "organizations",
+      "syllabus"
+    ],
+    "syllabus": [
+      "notifications",
+      "organizations"
+    ],
     "task_submission_core": [
       "courses"
     ],
     "trial_exams": [
       "notifications"
+    ],
+    "workload": [
+      "notifications",
+      "organizations"
     ]
   }
 }

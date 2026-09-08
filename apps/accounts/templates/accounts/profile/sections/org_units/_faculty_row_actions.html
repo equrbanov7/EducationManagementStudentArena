@@ -1,0 +1,44 @@
+{% load i18n %}
+{% comment %}Fakültə sətrinin əməlləri. «Heyət» hər kəsə (oxu); təyinat düymələri
+səlahiyyətə görə. Dialoqlar ORTAQ `teaching_office.js` mexanizmi ilə açılır
+(`data-tof-open` + `data-tof-prefill`); seçicilər `org_units.js`-də qurulur.
+Müavin / koordinator əlavəsi sətri sıxmamaq üçün «Heyət» çekmecəsinin öz
+qruplarındadır («+ Əlavə et»); ixtisas siyahısı (koordinator əhatəsi) düymə
+atributu ilə çekmecəyə ötürülür.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm ou-row-staff"
+        data-ou-staff-open
+        data-url="{{ row.data.staff_url }}"
+        data-unit-id="{{ row.data.id }}"
+        data-unit-name="{{ row.data.name }}"
+        data-ou-specialties="{{ row.data.specialties_json }}">
+    <i class="fas fa-users" aria-hidden="true"></i>
+    {% trans "Heyət" context "organizations.registry" %}
+</button>
+{% if org_faculties_section.can_assign_head %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="ouHeadDialog"
+        data-tof-title="{% trans 'Dekan təyin et' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "assign_head", "id": "{{ row.data.id }}", "head": "{{ row.data.head_id }}", "head_label": "{{ row.data.head_name|escapejs }}", "reason": ""}'
+        data-ou-unit-name="{{ row.data.name }}">
+    {% trans "Dekan" context "organizations.registry" %}
+</button>
+{% endif %}
+{% if org_faculties_section.can_edit %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--icon"
+        data-tof-open="ouUnitDialog"
+        data-tof-title="{% trans 'Fakültəni redaktə et' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "save_unit", "kind": "faculty", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}"}'
+        title="{% trans 'Redaktə' context 'organizations.registry' %}"
+        aria-label="{% blocktrans context 'organizations.registry' with name=row.data.name %}{{ name }} — redaktə{% endblocktrans %}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+</button>
+{% endif %}
+{% if org_faculties_section.can_delete %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--icon ems-btn--danger"
+        data-tof-open="ouArchiveDialog"
+        data-tof-prefill='{"action": "archive_unit", "id": "{{ row.data.id }}"}'
+        title="{% trans 'Arxivlə' context 'organizations.registry' %}"
+        aria-label="{% blocktrans context 'organizations.registry' with name=row.data.name %}{{ name }} — arxivlə{% endblocktrans %}">
+    <i class="fas fa-box-archive" aria-hidden="true"></i>
+</button>
+{% endif %}
