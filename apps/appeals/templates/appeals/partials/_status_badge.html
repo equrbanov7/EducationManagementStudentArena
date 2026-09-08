@@ -1,12 +1,13 @@
-{% comment %}Apellyasiya status nişanı. Parametrlər: status (kod), label (göstəriş){% endcomment %}
-{% if status == "accepted" %}
-<span class="badge appeal-status-badge bg-success">{{ label }}</span>
-{% elif status == "rejected" %}
-<span class="badge appeal-status-badge bg-danger">{{ label }}</span>
-{% elif status == "partially_accepted" %}
-<span class="badge appeal-status-badge bg-info text-dark">{{ label }}</span>
-{% elif status == "under_review" %}
-<span class="badge appeal-status-badge bg-warning text-dark">{{ label }}</span>
-{% else %}
-<span class="badge appeal-status-badge bg-secondary">{{ label }}</span>
-{% endif %}
+{% load ems_ui %}{% comment %}
+Apellyasiya status nişanı — paylaşılan `ems-badge` komponenti (static/css/ems_ui/badge.css).
+
+Parametrlər:
+  status — status açarı (pending / under_review / accepted / rejected / partially_accepted)
+  label  — göstərilən mətn (model `choices` etiketi — artıq tərcümə olunub)
+  family — opsional; default "appeal", sual üzrə qərar üçün "appeal_item"
+
+Niyə etiket kataloqdan yox, çağırandan gəlir? Etiketlərin tərcümə mənbəyi
+`apps/appeals/constants.py` choices-idir (4 dil kataloqunda mövcuddur);
+`core/ui/status_catalog.py` isə TONU verir (rəng `ems-badge--<ton>` class-ından).
+Status yalnız rənglə deyil, həmişə mətnlə verilir (handoff §7).
+{% endcomment %}{% with fam=family|default:"appeal" %}<span class="{{ status|ems_status_class:fam }}">{{ label|default:status }}</span>{% endwith %}

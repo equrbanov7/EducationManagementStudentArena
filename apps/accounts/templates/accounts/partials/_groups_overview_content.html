@@ -328,15 +328,12 @@
                     {% comment %}SAHİBİN QƏRARI (2026-09-07): «əsas müəllim» seçimi YIĞIŞDIRILDI —
                     qrup müəllimsiz yaradılır; server sahibi aktor / mövcud müəllim kimi
                     saxlayır (`StudentGroupForm.clean`). Sahə göndərilmir.{% endcomment %}
-                    {% if can_multi_assign_group_teachers %}
-                        <div class="group-modal-section">
-                            {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.assigned_teachers label=groups_label_assigned_teachers search_placeholder=groups_search_teacher container_id="profileGroupTeacherSelector" help_text=groups_help_assigned_teachers %}
-                        </div>
-                    {% else %}
-                        <div hidden>
-                            {{ group_form.assigned_teachers }}
-                        </div>
-                    {% endif %}
+                    {% comment %}SAHİBİN QƏRARI (2026-09-07): «Təyin olunmuş müəllimlər» bloku
+                    YIĞIŞDIRILDI — bu formada ehtiyac yoxdur. Sahə gizli qalır ki, forma
+                    müqaviləsi (`assigned_teachers`) və redaktədə mövcud təyinatlar pozulmasın.{% endcomment %}
+                    <div hidden>
+                        {{ group_form.assigned_teachers }}
+                    </div>
 
                     <div class="group-modal-section group-modal-section--last">
                         {% include "accounts/partials/_checkbox_multi_select.html" with field=group_form.students label=groups_label_group_students search_placeholder=groups_search_student container_id="profileGroupStudentSelector" show_student_group_number=True %}

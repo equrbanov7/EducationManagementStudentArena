@@ -70,7 +70,6 @@ SECTION_PARTIALS: dict[str, str] = {
     "my-transcript": "accounts/profile/sections/_my_transcript.html",
     "overall-academic": "accounts/profile/sections/_overall_academic.html",
     "pending-answers": "accounts/profile/sections/_pending_answers.html",
-    "groups": "accounts/profile/sections/_groups.html",
     "pending-post-approvals": "accounts/profile/sections/_pending_post_approvals.html",
     "pending-review": "accounts/profile/sections/_pending_review.html",
     "review-results": "accounts/profile/sections/_review_results.html",
@@ -128,6 +127,7 @@ SECTION_PARTIALS: dict[str, str] = {
     # yüklənməsi, quru icra və tətbiq ayrıca JSON endpoint-lərinə gedir →
     # AJAX swap təhlükəsizdir.
     "student-intake": "accounts/profile/sections/_student_intake.html",
+    "teacher-intake": "accounts/profile/sections/_teacher_intake.html",
     # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
     # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
     "applications": "accounts/profile/sections/_applications.html",
@@ -195,7 +195,6 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "my-transcript",
         "overall-academic",
         "pending-answers",
-        "groups",
         "pending-review",
         "review-results",
         "statistics",
@@ -222,6 +221,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "my-schedule",
         "schedule-manage",
         "student-intake",
+        "teacher-intake",
         "applications",
         "academic-calendar",
         "my-journal",

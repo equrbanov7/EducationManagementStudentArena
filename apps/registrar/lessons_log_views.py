@@ -45,36 +45,36 @@ def lessons_log_csv(request):
     if teacher_id and not supervisor:
         return HttpResponseForbidden("teacher_filter_forbidden", content_type="text/plain; charset=utf-8")
 
-    period_view = schedule_service.resolve_display_period(organization, requested=_param(request, "period"))
-    period = period_view["period"]
-    window = service.resolve_range(
-        key=_param(request, "range", service.RANGE_SEMESTER),
+    legacy_period = _param(request, "period")
+    period_view = schedule_service.resolve_display_period(organization, requested=legacy_period)
+    # Bölmə ilə EYNİ dövr/aralıq həlli və EYNİ süzgəc zənciri (tək mənbə:
+    # `lessons_log.resolve_selection` + `apply_filters`) — ixrac panelə uyğun gəlsin.
+    selection = service.resolve_selection(
+        organization,
+        current=period_view["period"],
+        year=_param(request, "year"),
+        season=_param(request, "season"),
+        legacy_period=legacy_period,
+        range_key=_param(request, "range", service.RANGE_SEMESTER),
         start_raw=_param(request, "from"),
         end_raw=_param(request, "to"),
-        period=period,
     )
+    window = selection["window"]
 
     lessons = service.scoped_lessons(request.user, organization, supervisor=supervisor)
     lessons = lessons.filter(date__gte=window["start"], date__lte=window["end"])
-    # Bölmə ilə EYNİ qayda: semestr filtri yalnız istənildikdə (bax
-    # `_sections/lessons_log.py` şərhi) — əks halda ixrac panelə uyğun gəlməzdi.
-    if period is not None and (_param(request, "period") or window["key"] == service.RANGE_SEMESTER):
-        lessons = lessons.filter(offering__period=period)
-    offering_id = _param(request, "offering")
-    if offering_id:
-        lessons = lessons.filter(offering_id=offering_id)
-    kind = _param(request, "kind")
-    if kind:
-        lessons = lessons.filter(kind=kind)
-    group = _param(request, "group")
-    if group:
-        lessons = lessons.filter(offering__group__name=group)
-    if teacher_id:
-        from django.db.models import Q
-
-        lessons = lessons.filter(
-            Q(instructor_id=teacher_id) | Q(instructor__isnull=True, offering__instructor=teacher_id)
-        )
+    if selection["apply_period_filter"]:
+        lessons = lessons.filter(offering__period__in=selection["periods"])
+    lessons = service.apply_filters(
+        lessons,
+        q=_param(request, "q"),
+        offering=_param(request, "offering"),
+        kind=_param(request, "kind"),
+        group=_param(request, "group"),
+        teacher=teacher_id,
+        form=_param(request, "form"),
+        supervisor=supervisor,
+    )
 
     rows = service.build_rows(lessons, limit=EXPORT_CAP)
     if _param(request, "flagged") == "1":

@@ -30,6 +30,9 @@ from apps.organizations.services import (  # noqa: F401
     user_has_org_role,
 )
 from apps.organizations.structure_views import (  # noqa: F401
+    build_faculties_section,
+    build_kafedras_section,
+    build_members_section,
     build_organization_faculties_context,
     build_organization_kafedras_context,
 )
@@ -51,6 +54,9 @@ __all__ = [
     "PERMISSION_CATEGORIES",
     "PERMISSION_LABELS",
     "ancestor_paths",
+    "build_faculties_section",
+    "build_kafedras_section",
+    "build_members_section",
     "build_organization_faculties_context",
     "build_organization_kafedras_context",
     "build_organization_members_context",

@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}«Apellyasiya statistikası» başlıq əməli — bütün filtrləri sıfırlayır
+(`appeal_stats.js` `.js-aps-reset` çəngəlini dinləyir; sinif adı SAXLANILIR).
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
+<button type="button" class="ems-btn js-aps-reset">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Sıfırla" %}
+</button>

@@ -131,7 +131,8 @@ class RbacPermissionScopeQueryCacheTest(TestCase):
         self.assertTrue(capabilities["can_manage_journal_roster"])
         self.assertTrue(capabilities["can_enter_exam_scores"])
         self.assertTrue(capabilities["can_search_directory"])
-        self.assertIn("groups", capabilities["allowed_sections"])
+        # Köhnə imtahan-kohortu «Qruplar» bölməsi kabinetdən çıxarılıb (2026-09-08).
+        self.assertNotIn("groups", capabilities["allowed_sections"])
 
     def test_repeated_get_permission_scope_calls_do_not_requery_memberships(self):
         """Direct proof the membership fetch is memoized: 6 distinct-permission

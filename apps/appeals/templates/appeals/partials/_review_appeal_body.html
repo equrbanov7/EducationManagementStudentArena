@@ -1,25 +1,29 @@
 {% load i18n get_item l10n %}
 {% comment %}
-  Ortaq müəllim qərar gövdəsi (DRY) — standalone review_appeal və dashboard
-  daxili AJAX fraqmenti eyni formanı paylaşır.
+  Ortaq reviewer qərar gövdəsi (DRY) — kabinet modalında AJAX fraqmenti kimi açılır.
   Kontekst: appeal, items (is_locked/is_decided/max_points/current_decision/
             awarded_value/edit_minutes_left/selected_option_ids), is_test,
-            review_current_score, review_max_score, marked_question_by_qid
+            review_current_score, review_max_score, review_can_decide,
+            review_has_editable, marked_question_by_qid
+
+  Görünüş (2026-09-08 sakit redizayn): hero əvəzinə yığcam başlıq, bal
+  xülasəsi tək neytral kart, qərar sahələri `ems-field` / `ems-select` /
+  `ems-textarea`, düymələr `ems-btn`, status `ems-badge`.
+  JS müqaviləsi (`appeals_review.js` + `appeals_sections.js`) OLDUĞU KİMİ:
+  `data-review-*`, `data-appeal-countdown`, `.appeal-question-number`,
+  `.appeal-review-panel` (is-decided / is-expired), `has-error`, `is-undecided`.
 {% endcomment %}
 
-<header class="appeal-hero appeal-hero--icon">
-    <div class="appeal-hero__lead">
-        <span class="appeal-hero__badge"><i class="fas fa-gavel"></i></span>
-        <div>
-            <span class="appeal-hero__eyebrow">{% trans "Qərar paneli" context "appeals.template" %}</span>
-            <h1>{{ appeal.exam.title }}</h1>
-            <p>
-                {% trans "Tələbə" context "appeals.template" %}: {{ appeal.student.get_full_name|default:appeal.student.username }}
-                · {% trans "Göndərilib" context "appeals.template" %}: {{ appeal.created_at|date:"d.m.Y H:i" }}
-            </p>
-        </div>
+<header class="appeal-head">
+    <div class="appeal-head__main">
+        <p class="appeal-head__title">{{ appeal.exam.title }}</p>
+        <p class="appeal-head__meta">
+            {% trans "Tələbə" context "appeals.template" %}: {{ appeal.student.get_full_name|default:appeal.student.username }}
+            <span class="appeal-head__sep" aria-hidden="true">·</span>
+            {% trans "Göndərilib" context "appeals.template" %}: {{ appeal.created_at|date:"d.m.Y H:i" }}
+        </p>
     </div>
-    <div class="appeal-hero__actions">
+    <div class="appeal-head__aside">
         {% include "appeals/partials/_status_badge.html" with status=appeal.status label=appeal.get_status_display %}
     </div>
 </header>
@@ -36,21 +40,19 @@
     {% csrf_token %}
 
     {% if not review_can_decide %}
-    <div class="alert alert-info d-flex align-items-start gap-2" role="status">
-        <i class="fas fa-eye mt-1"></i>
+    <div class="ems-banner ems-banner--info appeal-banner" role="status">
+        <i class="fas fa-eye appeal-banner__icon" aria-hidden="true"></i>
         <div>
-            <strong>{% trans "Yalnız baxış rejimi" context "appeals.template" %}.</strong>
-            {% trans "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz." context "appeals.template" %}
+            <div class="ems-banner__title">{% trans "Yalnız baxış rejimi" context "appeals.template" %}</div>
+            <div class="ems-banner__body">{% trans "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz." context "appeals.template" %}</div>
         </div>
     </div>
     {% endif %}
 
     {# Bal xülasəsi: imtahan balı (açıq qərar verildikcə canlı yenilənir) #}
-    <div class="appeal-score-summary appeal-score-summary--single">
-        <div class="appeal-score-summary__item appeal-score-summary__item--result">
-            <span><i class="fas fa-chart-line me-1"></i>{% trans "İmtahan balı" context "appeals.template" %}</span>
-            <strong data-review-new-score>{{ review_current_score }}{% if review_max_score %} / {{ review_max_score }}{% endif %}</strong>
-        </div>
+    <div class="appeal-score">
+        <span class="appeal-score__label"><i class="fas fa-chart-line" aria-hidden="true"></i>{% trans "İmtahan balı" context "appeals.template" %}</span>
+        <strong class="appeal-score__value" data-review-new-score>{{ review_current_score }}{% if review_max_score %} / {{ review_max_score }}{% endif %}</strong>
     </div>
 
     <div class="appeal-list">
@@ -66,19 +68,19 @@
                 <div class="appeal-question-card__main">
                     <p class="appeal-question-title">
                         <span class="appeal-question-number">{{ forloop.counter }}</span>
-                        {{ item.question.text|striptags }}
+                        <span>{{ item.question.text|striptags }}</span>
                     </p>
                     <div class="appeal-meta">
                         <span class="appeal-chip">{{ item.get_appeal_type_display }}</span>
-                        <span class="appeal-chip appeal-chip--soft"><i class="fas fa-star me-1"></i>{{ item.max_points }} {% trans "bal" context "appeals.template" %}</span>
+                        <span class="appeal-chip appeal-chip--soft"><i class="fas fa-star" aria-hidden="true"></i>{{ item.max_points }} {% trans "bal" context "appeals.template" %}</span>
                         {% if is_marked %}
-                        <span class="appeal-marked-chip">
-                            <i class="fas fa-bookmark"></i>{% trans "İmtahanda işarələnmişdi" context "appeals.template" %}
+                        <span class="appeal-chip appeal-chip--marked">
+                            <i class="fas fa-bookmark" aria-hidden="true"></i>{% trans "İmtahanda işarələnmişdi" context "appeals.template" %}
                         </span>
                         {% endif %}
                     </div>
                 </div>
-                {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display %}
+                {% include "appeals/partials/_status_badge.html" with status=item.status label=item.get_status_display family="appeal_item" %}
             </div>
 
             {# ── Sual variantları + tələbənin cavabı + düzgün cavab ── #}
@@ -89,9 +91,9 @@
                     {% for opt in item.question.options.all %}
                     <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt.id in item.selected_option_ids and not opt.is_correct %} is-wrong{% endif %}">
                         <span class="appeal-option__icon">
-                            {% if opt.is_correct %}<i class="fas fa-check-circle"></i>
-                            {% elif opt.id in item.selected_option_ids %}<i class="fas fa-times-circle"></i>
-                            {% else %}<i class="far fa-circle"></i>{% endif %}
+                            {% if opt.is_correct %}<i class="fas fa-check-circle" aria-hidden="true"></i>
+                            {% elif opt.id in item.selected_option_ids %}<i class="fas fa-times-circle" aria-hidden="true"></i>
+                            {% else %}<i class="far fa-circle" aria-hidden="true"></i>{% endif %}
                         </span>
                         <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
                         <span class="appeal-option__tags">
@@ -112,34 +114,32 @@
             </div>
             {% endif %}
 
-            <div class="appeal-detail-grid">
-                <div class="appeal-detail-label">{% trans "Tələbənin şərhi" context "appeals.template" %}</div>
-                <div class="appeal-detail-value">{{ item.comment|linebreaksbr }}</div>
-            </div>
+            <dl class="appeal-detail-grid">
+                <dt>{% trans "Tələbənin şərhi" context "appeals.template" %}</dt>
+                <dd>{{ item.comment|linebreaksbr }}</dd>
+            </dl>
 
             {% if item.is_locked %}
             {# ── Kilidli: 5 dəq keçib, dəyişdirilə bilməz ── #}
             <div class="appeal-review-panel appeal-review-panel--locked">
-                <div class="appeal-detail-grid">
+                <dl class="appeal-detail-grid">
                     {% if item.reviewer_response %}
-                    <div class="appeal-detail-label">{% trans "Cavab" context "appeals.template" %}</div>
-                    <div class="appeal-detail-value">{{ item.reviewer_response|linebreaksbr }}</div>
+                    <dt>{% trans "Cavab" context "appeals.template" %}</dt>
+                    <dd>{{ item.reviewer_response|linebreaksbr }}</dd>
                     {% endif %}
                     {% if item.status == "accepted" and item.score_adjustment and item.score_adjustment.delta_points and not item.score_adjustment.reverted %}
-                    <div class="appeal-detail-label">{% trans "Verilən bal" context "appeals.template" %}</div>
-                    <div class="appeal-detail-value text-success fw-bold">
-                        +{{ item.score_adjustment.delta_points }} {% trans "bal" context "appeals.template" %}
-                    </div>
+                    <dt>{% trans "Verilən bal" context "appeals.template" %}</dt>
+                    <dd class="appeal-detail-grid__gain">+{{ item.score_adjustment.delta_points }} {% trans "bal" context "appeals.template" %}</dd>
                     {% endif %}
-                </div>
+                </dl>
                 <div class="appeal-locked-note">
-                    <i class="fas fa-lock"></i>{% trans "Qərar verilib — dəyişdirilə bilməz" context "appeals.template" %}
+                    <i class="fas fa-lock" aria-hidden="true"></i>{% trans "Qərar verilib — dəyişdirilə bilməz" context "appeals.template" %}
                 </div>
             </div>
             {% elif not review_can_decide %}
             <div class="appeal-review-panel">
                 <div class="appeal-locked-note">
-                    <i class="fas fa-hourglass-half"></i>{% trans "Qərar gözlənilir — imtahan mərkəzi baxacaq" context "appeals.template" %}
+                    <i class="fas fa-hourglass-half" aria-hidden="true"></i>{% trans "Qərar gözlənilir — imtahan mərkəzi baxacaq" context "appeals.template" %}
                 </div>
             </div>
             {% else %}
@@ -147,18 +147,18 @@
             <div class="appeal-review-panel">
                 {% if item.is_decided %}
                 <div class="appeal-edit-window" data-review-window>
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
                     <span>{% trans "Dəyişmək üçün qalan vaxt" context "appeals.template" %}:</span>
                     <strong class="appeal-edit-window__time" data-appeal-countdown="{{ item.edit_seconds_left }}">--:--</strong>
                 </div>
                 {% endif %}
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label small text-muted fw-bold" for="decision_{{ item.id }}">
+                <div class="appeal-decision-grid">
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="decision_{{ item.id }}">
                             {% trans "Qərar" context "appeals.template" %}
                         </label>
-                        <div class="bootstrap-single-select">
-                            <select class="form-select bootstrap-single-select__native"
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select class="ems-select bootstrap-single-select__native"
                                     data-review-decision data-bootstrap-select
                                     name="decision_{{ item.id }}" id="decision_{{ item.id }}">
                                 <option value="" {% if not item.current_decision %}selected{% endif %}>{% trans "Toxunma" context "appeals.template" %}</option>
@@ -167,11 +167,11 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <label class="form-label small text-muted fw-bold" for="response_{{ item.id }}">
+                    <div class="ems-field">
+                        <label class="ems-field__label" for="response_{{ item.id }}">
                             {% trans "İzah / cavab" context "appeals.template" %}<span class="appeal-required-star" data-review-required hidden>*</span>
                         </label>
-                        <textarea class="form-control" data-review-response name="response_{{ item.id }}"
+                        <textarea class="ems-textarea" data-review-response name="response_{{ item.id }}"
                                   id="response_{{ item.id }}" rows="3"
                                   placeholder="{% trans 'Balın niyə artırıldığını və ya artırılmadığını izah edin' context 'appeals.template' %}">{{ item.reviewer_response }}</textarea>
                         <p class="appeal-q-error" data-review-error hidden role="alert"></p>
@@ -181,17 +181,17 @@
                 {# Bal — qəbulda SABİT +1 (reviewer dəyişə bilməz); yalnız "Qəbul et"də görünür #}
                 <div class="appeal-review-points" data-review-points hidden>
                     <div class="appeal-review-points__fixed">
-                        <i class="fas fa-plus-circle text-success"></i>
+                        <i class="fas fa-plus-circle" aria-hidden="true"></i>
                         {% trans "Qəbul olunanda tələbəyə" context "appeals.template" %}
-                        <strong class="text-success">+1 {% trans "bal" context "appeals.template" %}</strong>
+                        <strong>+1 {% trans "bal" context "appeals.template" %}</strong>
                         {% trans "əlavə olunur." context "appeals.template" %}
                     </div>
                     <div class="appeal-review-points__preview">
                         {% trans "Hazırkı bal" context "appeals.template" %}:
                         <strong>{{ review_current_score }}</strong>
-                        <i class="fas fa-arrow-right mx-1"></i>
+                        <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         {% trans "Yeni bal" context "appeals.template" %}:
-                        <strong class="text-success" data-review-card-next>{{ review_current_score }}</strong>
+                        <strong data-review-card-next>{{ review_current_score }}</strong>
                     </div>
                 </div>
             </div>
@@ -202,11 +202,11 @@
     </div>
 
     {% if review_has_editable %}
-    <section class="appeal-note-card p-3 mt-3">
-        <label class="form-label small text-muted fw-bold" for="reviewer_note">
+    <section class="appeal-note appeal-note--form">
+        <label class="ems-field__label" for="reviewer_note">
             {% trans "Ümumi qeyd" context "appeals.template" %}
         </label>
-        <textarea class="form-control" name="reviewer_note" id="reviewer_note" rows="3"
+        <textarea class="ems-textarea" name="reviewer_note" id="reviewer_note" rows="3"
                   placeholder="{% trans 'Opsional daxili qeyd' context 'appeals.template' %}">{{ appeal.reviewer_note }}</textarea>
     </section>
     {% endif %}
@@ -215,16 +215,16 @@
         <div class="appeal-sticky-actions__inner">
             {% if review_has_editable %}
             <div class="appeal-sticky-actions__status">
-                <span class="appeal-review-decisions-pill" data-review-decisions-count>{% trans "0 qərar verildi" context "appeals.template" %}</span>
+                <span class="ems-badge ems-badge--info" data-review-decisions-count>{% trans "0 qərar verildi" context "appeals.template" %}</span>
             </div>
             {% endif %}
             <div class="appeal-sticky-actions__buttons">
-                <a href="{% url 'appeals:manage_appeals' %}" class="btn btn-outline-secondary" data-review-cancel>
-                    <i class="fas fa-arrow-left me-2"></i>{% trans "Siyahıya qayıt" context "appeals.template" %}
+                <a href="{% url 'appeals:manage_appeals' %}" class="ems-btn" data-review-cancel>
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>{% trans "Siyahıya qayıt" context "appeals.template" %}
                 </a>
                 {% if review_has_editable %}
-                <button type="submit" class="btn btn-primary" data-review-submit>
-                    <i class="fas fa-save me-2"></i>{% trans "Qərarları yadda saxla" context "appeals.template" %}
+                <button type="submit" class="ems-btn ems-btn--primary" data-review-submit>
+                    <i class="fas fa-save" aria-hidden="true"></i>{% trans "Qərarları yadda saxla" context "appeals.template" %}
                 </button>
                 {% endif %}
             </div>

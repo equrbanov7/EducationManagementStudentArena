@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Üzv sətrinin əməlləri — «Profil» (açıq profil səhifəsi) və «Ətraflı»
+(«Üzv kartı» çekmecəsi; JSON URL data-atributdadır, `org_members.js` açır).
+Seçici `[data-om-detail-open]` bölməyə xasdır — başqa faylın EMSDelegate
+açarını əvəz etmir.{% endcomment %}
+<a class="ems-btn ems-btn--sm" href="{{ row.data.profile_url }}" target="_blank" rel="noopener"
+   title="{% trans 'Açıq profil səhifəsi' context 'organizations.members' %}">
+    <i class="fas fa-user" aria-hidden="true"></i>
+    {% trans "Profil" context "organizations.members" %}
+</a>
+<button type="button" class="ems-btn ems-btn--sm om-row-detail"
+        data-om-detail-open
+        data-url="{{ row.data.detail_url }}"
+        data-name="{{ row.data.name }}"
+        aria-label="{% blocktrans context 'organizations.members' with name=row.data.name %}{{ name }} — ətraflı{% endblocktrans %}">
+    <i class="fas fa-id-card" aria-hidden="true"></i>
+    {% trans "Ətraflı" context "organizations.members" %}
+</button>

@@ -45,8 +45,13 @@ class _Stage3Mixin:
             "profile_base_url": reverse("accounts:profile"),
             "embedded_in_profile": True,
         }
+        # Fakültələr / Kafedralar (2026-09-08): yeni reyestr builder-ləri
+        # (`structure_views.registry`) — bölmə aktiv deyilsə yalnız «əhatə yoxdur»
+        # qabığı; şablon `has_access` ilə qorunur.
         self.org_faculties_section = {
             **self._empty_structure_section_base,
+            "has_access": False,
+            "access_denied_message": "",
             "faculties": [],
             "faculties_page_obj": None,
             "faculty_total_count": 0,
@@ -55,6 +60,8 @@ class _Stage3Mixin:
         }
         self.org_kafedras_section = {
             **self._empty_structure_section_base,
+            "has_access": False,
+            "access_denied_message": "",
             "kafedras": [],
             "kafedras_page_obj": None,
             "kafedra_total_count": 0,
@@ -66,15 +73,17 @@ class _Stage3Mixin:
             "unassigned_teacher_count": 0,
             "can_assign_teachers": False,
         }
+        # Struktur üzvləri (2026-09-08): yeni reyestr builder-i
+        # (`structure_views.members`) — bölmə aktiv deyilsə yalnız «əhatə yoxdur»
+        # qabığı; şablon `has_access` ilə qorunur. Köhnə
+        # `build_organization_members_context` yalnız müstəqil səhifədə qalır.
         self.org_members_section = {
             "organization": self.active_organization,
-            "members": [],
-            "members_page_obj": None,
-            "roles": [],
-            "current_role": "",
-            "search_query": "",
-            "can_view": False,
-            "members_pagination_query": "section=org-members",
+            "has_access": False,
+            "access_denied_message": "",
+            "rows": [],
+            "page_obj": None,
+            "pagination_query": "section=org-members",
             "profile_base_url": reverse("accounts:profile"),
             "embedded_in_profile": True,
         }
@@ -210,27 +219,27 @@ class _Stage3Mixin:
             and "org-faculties" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.public import build_organization_faculties_context
+            from apps.organizations.public import build_faculties_section
 
-            self.org_faculties_section = build_organization_faculties_context(self.request, self.active_organization)
+            self.org_faculties_section = build_faculties_section(self.request, self.active_organization)
             self.org_faculties_section["embedded_in_profile"] = True
         if (
             self.active_section == "org-kafedras"
             and "org-kafedras" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.public import build_organization_kafedras_context
+            from apps.organizations.public import build_kafedras_section
 
-            self.org_kafedras_section = build_organization_kafedras_context(self.request, self.active_organization)
+            self.org_kafedras_section = build_kafedras_section(self.request, self.active_organization)
             self.org_kafedras_section["embedded_in_profile"] = True
         if (
             self.active_section == "org-members"
             and "org-members" in self.allowed_sections
             and (self.active_organization is not None)
         ):
-            from apps.organizations.public import build_organization_members_context
+            from apps.organizations.public import build_members_section
 
-            self.org_members_section = build_organization_members_context(self.request, self.active_organization)
+            self.org_members_section = build_members_section(self.request, self.active_organization)
             self.org_members_section["embedded_in_profile"] = True
         if (
             self.active_section == "org-roles"
@@ -423,6 +432,16 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "teacher-intake" in self.allowed_sections and self.active_section == "teacher-intake":
+            from .._sections.teacher_intake import build_teacher_intake_section
+
+            build_teacher_intake_section(
+                self.request,
+                self.teacher_intake_section,
+                active_organization=self.active_organization,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "applications" in self.allowed_sections and self.active_section == "applications":
             from .._sections.applications import build_applications_section
 
@@ -471,7 +490,9 @@ class _Stage3Mixin:
         self.in_app_notifications_page = self._notif_ctx["in_app_notifications_page"]
         self.publish_notification_targets = []
         if "publish-notification" in self.allowed_sections and self.active_section == "publish-notification":
-            self.publish_notification_targets = _get_publish_notification_targets(self.request.user, self.capabilities)
+            self.publish_notification_targets = _get_publish_notification_targets(
+                self.request.user, self.capabilities, organization=self.active_organization
+            )
         self.category_management_page = None
         self.category_management_create_parent_options = []
         self.category_management_create_selected_parent_id = ""

@@ -13,22 +13,43 @@ KONTEKST MÜQAVİLƏSİ
   filter_count_label — opsional «Nəticə: N sətir» mətni
   filter_applied     — opsional [{name, label, value_label}] — tətbiq olunmuş çiplər
   filter_dirty_note  — opsional xəbərdarlıq mətni
+  filter_auto        — opsional; True olduqda «Tətbiq et» YOXDUR: select dəyişən
+                       kimi, axtarış isə debounce-dan sonra AVTOMATİK tətbiq olunur,
+                       cədvəl yüklənənə qədər skeleton görünür (filter_bar.js).
+  filter_bootstrap   — opsional; select sahələri Bootstrap tərzli açılan menyu ilə
+                       göstərilir (`bootstrap_select.js`); `field.searchable` olan
+                       sahədə menyunun içində axtarış sətri də olur.
+  field.kind="date"  — tarix sahəsi; `range_select` (+ `range_custom`) verilsə,
+                       dəyişəndə həmin select «seçilmiş aralıq» dəyərinə keçir.
+  Avto rejimdə «Sıfırla» bütün prefiksli parametrləri ATIB bölməni SERVER
+  DEFOLTLARI ilə yükləyir (boş dəyər = default qaydası).
 {% endcomment %}
 {% load i18n %}
-<form class="ems-filters" data-ems-filters
+<form class="ems-filters{% if filter_auto %} ems-filters--auto{% endif %}" data-ems-filters
       data-section="{{ filter_section }}"
       data-param-prefix="{{ filter_prefix }}"
       {% if filter_base_url %}data-base-url="{{ filter_base_url }}"{% endif %}
+      {% if filter_auto %}data-ems-filters-auto="1"{% endif %}
       role="search">
     {% for field in filter_fields %}
         <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
             <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
             {% if field.kind == "select" %}
-                <select class="ems-select" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter>
+                {% if filter_bootstrap %}<div class="bootstrap-single-select bootstrap-single-select--ems">{% endif %}
+                <select class="ems-select{% if filter_bootstrap %} bootstrap-single-select__native{% endif %}" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter{% if field.default is not None and field.default != "" %} data-ems-default="{{ field.default }}"{% endif %}{% if filter_bootstrap %} data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}{% endif %}>
                     {% for option in field.options %}
                         <option value="{{ option.value }}"{% if option.value|stringformat:'s' == field.value|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
                     {% endfor %}
                 </select>
+                {% if filter_bootstrap %}</div>{% endif %}
+            {% elif field.kind == "date" %}
+                {% comment %}Tarix aralığı sahəsi. `range_select` verilibsə, tarix
+                dəyişən kimi həmin select `range_custom` («Seçilmiş aralıq») dəyərinə
+                keçir — istifadəçi ayrıca «custom» seçməyə məcbur qalmır (filter_bar.js).{% endcomment %}
+                <input class="ems-input ems-input--date" type="date" id="f-{{ field.name }}" name="{{ field.name }}"
+                       value="{{ field.value|default_if_none:'' }}"
+                       {% if field.min %}min="{{ field.min }}"{% endif %} {% if field.max %}max="{{ field.max }}"{% endif %}
+                       data-ems-filter{% if field.range_select %} data-ems-range-select="{{ field.range_select }}" data-ems-range-custom="{{ field.range_custom|default:'custom' }}"{% endif %}>
             {% else %}
                 <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}"
                        value="{{ field.value|default_if_none:'' }}"
@@ -48,7 +69,7 @@ KONTEKST MÜQAVİLƏSİ
         görünürdü və səhifənin əsl əməl düyməsi ilə (məs. «Yeni fənn») rəqabət
         edirdi (subject-catalog-da 2 primary düymə).
         {% endcomment %}
-        <button type="submit" class="ems-btn ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>
+        {% if not filter_auto %}<button type="submit" class="ems-btn ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>{% endif %}
         <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
     </div>
 
@@ -56,7 +77,7 @@ KONTEKST MÜQAVİLƏSİ
         <div class="ems-filters__count" aria-live="polite">{{ filter_count_label }}</div>
     {% endif %}
 
-    <p class="ems-filters__dirty-note">{% if filter_dirty_note %}{{ filter_dirty_note }}{% else %}{% trans "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın." context "ui.filters" %}{% endif %}</p>
+    {% if not filter_auto %}<p class="ems-filters__dirty-note">{% if filter_dirty_note %}{{ filter_dirty_note }}{% else %}{% trans "Dəyişiklik tətbiq edilməyib — «Tətbiq et» düyməsini basın." context "ui.filters" %}{% endif %}</p>{% endif %}
 </form>
 
 {% if filter_applied %}

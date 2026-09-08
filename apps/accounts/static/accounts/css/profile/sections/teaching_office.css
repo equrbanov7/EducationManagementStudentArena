@@ -188,3 +188,154 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* ---- Ekran 01 (2026-09-08): ağac paneli başlığı, legend, yol, detal ----- */
+
+.tof-pane__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tof-pane__head .tof-pane__title {
+    margin: 0;
+}
+
+.tof-pane__tools {
+    display: flex;
+    gap: 4px;
+}
+
+.tof-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+}
+
+.tof-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 600;
+    color: var(--ems-neutral-600, #475569);
+}
+
+.tof-legend__item b {
+    color: var(--ems-neutral-800, #1e293b);
+}
+
+.tof-pane__hint {
+    margin: 0 0 10px;
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    color: var(--ems-neutral-500, #64748b);
+}
+
+/* Ağacın öz sürüşməsi — başlıq, legend və düymələr yerində qalır. */
+.tof-pane--tree {
+    max-height: none;
+    overflow: visible;
+}
+
+.tof-tree-scroll {
+    max-height: 560px;
+    overflow: auto;
+    padding-right: 4px;
+}
+
+/* Detal paneli yüklənərkən (fraqment) — məzmun solğunlaşır, kart yerində qalır. */
+.tof-pane--detail[aria-busy="true"] {
+    position: relative;
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.tof-crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm, 0.8rem);
+    color: var(--ems-neutral-500, #64748b);
+}
+
+.tof-crumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tof-crumbs__item.is-current {
+    font-weight: 700;
+    color: var(--ems-neutral-800, #1e293b);
+}
+
+.tof-crumbs__link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ems-primary-700, #1d4ed8);
+    font: inherit;
+    cursor: pointer;
+}
+
+.tof-crumbs__link:hover {
+    text-decoration: underline;
+}
+
+.tof-detail__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.tof-detail__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+}
+
+.tof-detail__code {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-700, #334155);
+    font-size: var(--ems-fs-sm, 0.8rem);
+}
+
+.tof-detail__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -4px 0 14px;
+    font-size: var(--ems-fs-sm, 0.85rem);
+    color: var(--ems-neutral-600, #475569);
+}
+
+.tof-detail__summary i {
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.tof-fact__label i {
+    margin-right: 4px;
+    color: var(--ems-neutral-400, #94a3b8);
+}
+
+.tof-fact--head {
+    grid-column: 1 / -1;
+    background: var(--ems-neutral-0, #fff);
+}
+
+.tof-fact__value--name {
+    font-size: 1rem;
+}

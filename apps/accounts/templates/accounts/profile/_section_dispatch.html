@@ -64,6 +64,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_schedule_manage.html" %}
             {% elif active_section == "student-intake" and 'student-intake' in allowed_sections %}
                 {% include "accounts/profile/sections/_student_intake.html" %}
+            {% elif active_section == "teacher-intake" and 'teacher-intake' in allowed_sections %}
+                {% include "accounts/profile/sections/_teacher_intake.html" %}
             {% elif active_section == "applications" and 'applications' in allowed_sections %}
                 {% include "accounts/profile/sections/_applications.html" %}
             {% elif active_section == "academic-calendar" %}
@@ -128,8 +130,6 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_manage_appeals.html" %}
             {% elif active_section == "pending-answers" %}
                 {% include "accounts/profile/sections/_pending_answers.html" %}
-            {% elif active_section == "groups" %}
-                {% include "accounts/profile/sections/_groups.html" %}
             {% elif active_section == "pending-post-approvals" %}
                 {% include "accounts/profile/sections/_pending_post_approvals.html" %}
             {% elif active_section == "pending-review" %}

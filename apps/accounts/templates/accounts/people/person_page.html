@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}Şəxs səhifəsi — müəllim / tələbə «Ətraflı» (yeni tab). Kontekst
+`apps/accounts/services/people/page.py::build_person_page`. Komponentlər ems_ui
+qatındandır; CSS xarici fayldadır (CSP). Əlaqə/demoqrafiya sahələri yalnız
+icazə varsa gəlir (`page.capabilities`).{% endcomment %}
+{% block title %}{{ page.person.full_name }} · {% if page.kind == 'student' %}{% trans "Tələbə" context "accounts.people.page" %}{% else %}{% trans "Müəllim" context "accounts.people.page" %}{% endif %}{% endblock %}
+
+{% block extraCss %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'accounts/css/people_person_page.css' %}?v=20260908-1">
+{% endblock %}
+
+{% block content %}
+{% with person=page.person structure=page.structure %}
+<div class="pp">
+    <nav class="pp-crumbs" aria-label="{% trans 'Naviqasiya' context 'accounts.people.page' %}">
+        <a class="pp-crumbs__link" href="{{ page.catalog_url }}">{% if page.kind == 'student' %}{% trans "Tələbələr" context "accounts.people.page" %}{% else %}{% trans "Müəllimlər" context "accounts.people.page" %}{% endif %}</a>
+        <span class="pp-crumbs__sep" aria-hidden="true">/</span>
+        <span aria-current="page">{{ person.full_name }}</span>
+    </nav>
+
+    <header class="ems-card pp-hero">
+        <div class="pp-hero__id">
+            <span class="pp-avatar" aria-hidden="true">
+                {% if person.avatar_url %}<img src="{{ person.avatar_url }}" alt="">{% else %}{{ person.initials }}{% endif %}
+            </span>
+            <div class="pp-hero__text">
+                <h1 class="pp-hero__name">{{ person.full_name }}{% if person.patronymic %} <span class="pp-hero__patronymic">{{ person.patronymic }}</span>{% endif %}</h1>
+                <div class="pp-hero__badges">
+                    <span class="ems-badge ems-badge--primary">{% if page.kind == 'student' %}{% trans "Tələbə" context "accounts.people.page" %}{% else %}{% trans "Müəllim" context "accounts.people.page" %}{% endif %}</span>
+                    {% if person.status == 'active' %}<span class="ems-badge ems-badge--success">{% trans "Aktiv" context "accounts.people.page" %}</span>{% elif person.status == 'blocked' %}<span class="ems-badge ems-badge--danger">{% trans "Dayandırılıb" context "accounts.people.page" %}</span>{% else %}<span class="ems-badge">{{ person.status }}</span>{% endif %}
+                    {% if page.academic.current %}
+                        <span class="ems-badge">{{ page.academic.current.education_form_label }}</span>
+                        <span class="ems-badge {% if page.academic.current.funding_type == 'paid' %}ems-badge--warning{% else %}ems-badge--success{% endif %}">{{ page.academic.current.funding_label }}</span>
+                        <span class="ems-badge ems-badge--{{ page.academic.current.status_tone }}">{{ page.academic.current.status_label }}</span>
+                    {% endif %}
+                </div>
+                <p class="pp-hero__chain">
+                    <span class="ems-mono">@{{ person.username }}</span>
+                    {% if page.academic.current %}
+                        {% if page.academic.current.program_code %}<span>· {{ page.academic.current.program_code }}</span>{% endif %}
+                        {% if page.academic.current.program %}<span>· {{ page.academic.current.program }}</span>{% endif %}
+                        {% if page.academic.current.group %}<span>· {% trans "Qrup" context "accounts.people.page" %} {{ page.academic.current.group }}</span>{% endif %}
+                        {% if page.academic.current.faculty %}<span>· {{ page.academic.current.faculty }}</span>{% endif %}
+                    {% else %}
+                        {% if structure.title %}<span>· {{ structure.title }}</span>{% endif %}
+                        {% if structure.kafedra %}<span>· {{ structure.kafedra }}</span>{% endif %}
+                        {% if structure.faculty %}<span>· {{ structure.faculty }}</span>{% endif %}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="pp-hero__actions">
+            <a class="ems-btn" href="{{ person.profile_url }}">{% trans "Açıq profil" context "accounts.people.page" %}</a>
+            <a class="ems-btn ems-btn--primary" href="{{ page.catalog_url }}">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                {% trans "Kataloqa qayıt" context "accounts.people.page" %}
+            </a>
+        </div>
+    </header>
+
+    {% if page.kpis %}
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=page.kpis kpi_variant="5" %}
+    {% endif %}
+
+    <div class="pp-grid">
+        <main class="pp-main">
+            {% if page.kind == 'student' %}
+                {% include "accounts/people/_person_academic.html" with academic=page.academic %}
+            {% endif %}
+            {% if page.teaching %}
+                {% include "accounts/people/_person_teaching.html" with teaching=page.teaching %}
+            {% endif %}
+        </main>
+        <aside class="pp-side">
+            {% include "accounts/people/_person_sidebar.html" with person=person structure=structure caps=page.capabilities %}
+        </aside>
+    </div>
+</div>
+{% endwith %}
+{% endblock %}

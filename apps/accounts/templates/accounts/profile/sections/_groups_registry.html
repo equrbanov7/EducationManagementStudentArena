@@ -35,6 +35,12 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 {% trans "Tələbəni uzaqlaşdır (xaric)" context "accounts.groups" as gr_expel_title %}
 {% trans "Status «xaric edilib» olur. Əmr nömrəsi və tarixi məcburidir; bərpa ayrıca əməldir və yenə səbəblə audit olunur." context "accounts.groups" as gr_expel_sub %}
 {% trans "Uzaqlaşdır" context "accounts.groups" as gr_expel_btn %}
+{% trans "Tələbəni qrupa əlavə et" context "accounts.groups" as gr_add_title %}
+{% trans "Yalnız hazırda qrupu olmayan qeydiyyatlı tələbələr seçilir. Əlavə rəsmi köçürmə kimi yazılır — tarixçə silinmir." context "accounts.groups" as gr_add_sub %}
+{% trans "Qrupa əlavə et" context "accounts.groups" as gr_add_btn %}
+{% trans "Tələbənin qrupunu dəyiş" context "accounts.groups" as gr_move_title %}
+{% trans "Tələbə seçilmiş qrupa köçürülür; köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Səbəb audit jurnalına yazılır." context "accounts.groups" as gr_move_sub %}
+{% trans "Qrupu dəyiş" context "accounts.groups" as gr_move_btn %}
 <section class="profile-section-panel profile-section--tof {% if active_section == 'groups-registry' %}is-active{% endif %}"
          data-profile-section-panel="groups-registry"
          data-source-url="{{ profile_base_url }}?section=groups-registry">
@@ -52,7 +58,10 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=groups_registry_section.kpi_tiles kpi_variant="5" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="groups-registry" filter_prefix="gr_" filter_fields=groups_registry_section.filter_fields filter_count_label=groups_registry_section.filter_count_label %}
+    {% comment %}Filtr AVTO rejimdədir (sahib, 2026-09-07): «Tətbiq et» yoxdur —
+    select dəyişən kimi, axtarış debounce ilə tətbiq olunur, cədvəl skeleton
+    göstərir. Select-lər Bootstrap tərzli menyudur; ixtisasda daxili axtarış var.{% endcomment %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="groups-registry" filter_prefix="gr_" filter_fields=groups_registry_section.filter_fields filter_count_label=groups_registry_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if groups_registry_section.can_manage %}
     <div class="tof__toolbar">
@@ -69,7 +78,7 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
         </button>
         <button type="button" class="ems-btn ems-btn--primary"
                 data-tof-open="tofGroupDialog"
-                data-tof-prefill='{"action": "save_group", "id": "", "name": "", "code": "", "specialty": "", "course_year": "1", "language_sector": "", "admission_year": "", "capacity": "", "tutor": ""}'>
+                data-tof-prefill='{"action": "save_group", "id": "", "name": "", "code": "", "specialty": "", "course_year": "1", "language_sector": "", "education_form": "{{ groups_registry_section.default_education_form }}", "admission_year": "{{ groups_registry_section.current_year }}", "capacity": "", "tutor": ""}'>
             {% trans "Yeni qrup" context "accounts.groups" %}
         </button>
     </div>
@@ -92,6 +101,10 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupArchiveDialog" reason_title=gr_arch_title reason_subtitle=gr_arch_sub reason_submit_label=gr_arch_btn reason_submit_tone="danger" reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.reason_hidden reason_form_data=groups_registry_section.form_data %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupRestoreDialog" reason_title=gr_restore_title reason_subtitle=gr_restore_sub reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.reason_hidden reason_form_data=groups_registry_section.form_data %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupPromoteDialog" reason_title=gr_promote_title reason_subtitle=gr_promote_sub reason_submit_label=gr_promote_btn reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.dialog_hidden reason_form_data=groups_registry_section.bulk_form_data %}
+        {% comment %}Səbəbsiz əlavə (sahib, 2026-09-08) — adi form dialoqu; hədəf qrup
+        `data-tof-prefill` ilə, seçilmiş qeyd id-ləri gizli `record_ids` ilə gedir.{% endcomment %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupAddStudentsDialog" form_dialog_title=gr_add_title form_dialog_subtitle=gr_add_sub form_dialog_submit_label=gr_add_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_add_students_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.add_students_hidden form_dialog_data=groups_registry_section.form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupMoveDialog" form_dialog_title=gr_move_title form_dialog_subtitle=gr_move_sub form_dialog_submit_label=gr_move_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_move_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.move_hidden form_dialog_data=groups_registry_section.form_data %}
     {% endif %}
 </div>
 {% endif %}

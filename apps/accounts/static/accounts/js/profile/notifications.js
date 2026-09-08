@@ -189,6 +189,41 @@
                 imgEl.src = '';
             }
 
+            // Əlavə fayllar — sətrin `json_script` blokundan (createElement ilə, XSS-siz)
+            var filesWrap = document.getElementById('profileNotifModalFiles');
+            if (filesWrap) {
+                while (filesWrap.firstChild) { filesWrap.removeChild(filesWrap.firstChild); }
+                var filesNode = document.getElementById('notifFiles-' + (body.getAttribute('data-notif-id') || ''));
+                var files = [];
+                if (filesNode) {
+                    try { files = JSON.parse(filesNode.textContent) || []; } catch (err) { files = []; }
+                }
+                if (files.length) {
+                    var ul = document.createElement('ul');
+                    ul.className = 'nfx-modal__filelist';
+                    files.forEach(function (file) {
+                        var li = document.createElement('li');
+                        var fa = document.createElement('a');
+                        fa.href = file.url || '#';
+                        fa.className = 'nfx-modal__file';
+                        fa.target = '_blank';
+                        fa.rel = 'noopener noreferrer';
+                        fa.setAttribute('download', '');
+                        var fi = document.createElement('i');
+                        fi.className = 'fas fa-paperclip me-1';
+                        fi.setAttribute('aria-hidden', 'true');
+                        fa.appendChild(fi);
+                        fa.appendChild(document.createTextNode(file.name || 'fayl'));
+                        li.appendChild(fa);
+                        ul.appendChild(li);
+                    });
+                    filesWrap.appendChild(ul);
+                    filesWrap.hidden = false;
+                } else {
+                    filesWrap.hidden = true;
+                }
+            }
+
             // Link (built with createElement for XSS safety)
             var linkEl = document.getElementById('profileNotifModalLink');
             while (linkEl.firstChild) { linkEl.removeChild(linkEl.firstChild); }

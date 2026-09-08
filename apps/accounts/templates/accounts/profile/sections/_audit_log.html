@@ -1,4 +1,17 @@
+{% load static %}
+{% comment %}
+«Audit jurnalı» — kabinet bölməsi (2026-09-08 yenidən qurulub).
+
+Kontekst `apps/audit/views.py::build_audit_log_context` (`audit_log_section`).
+Məzmun ORTAQ partial-dadır (`audit/partials/_audit_log_content.html`) — eyni
+partial müstəqil `/audit/` səhifəsini də verir. ⚠️ `<h1>` yazılmır — qabıq
+verir. CSS xarici fayldadır (CSP); JS `profile.html`-də bir sətirlə yüklənir.
+{% endcomment %}
+{% if 'audit-log' in allowed_sections %}
 <section class="profile-section-panel profile-section--audit-log {% if active_section == 'audit-log' %}is-active{% endif %}"
-         data-profile-section-panel="audit-log">
-    {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section %}
+         data-profile-section-panel="audit-log"
+         data-source-url="{{ profile_base_url }}?section=audit-log">
+<link rel="stylesheet" href="{% static 'audit/css/audit_log.css' %}?v=20260908-1">
+{% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section filter_base_url=profile_base_url %}
 </section>
+{% endif %}

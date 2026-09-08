@@ -4,6 +4,7 @@ from .academic import people_academic_groups, people_student_card, people_transf
 from .actions import people_action
 from .analytics import people_analytics, people_analytics_ai
 from .api import people_detail, people_list, people_options
+from .page import people_person_page
 from .section import build_people_section, build_people_students_section, build_people_teachers_section
 
 __all__ = [
@@ -17,6 +18,7 @@ __all__ = [
     "people_detail",
     "people_list",
     "people_options",
+    "people_person_page",
     "people_student_card",
     "people_transfer_preview",
 ]

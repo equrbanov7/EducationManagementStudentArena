@@ -73,8 +73,15 @@ def _restore_profile_org_context(request, profile, active_section):
     )
 
 
-def _get_publish_notification_targets(user, capabilities):
-    """Return list of target options for notification publishing based on role."""
+def _get_publish_notification_targets(user, capabilities, organization=None):
+    """Return list of target options for notification publishing based on role.
+
+    2026-09-08: hər hədəfdə `category` / `icon` var (şablon kateqoriya başlıqları
+    ilə qruplaşdırır); `organization` verilibsə struktur bölmələri (fakültə /
+    kafedra / qrup) və şöbə-heyət hədəfləri (imtahan mərkəzi, tədris şöbəsi…)
+    əlavə olunur — bax `services.notification_scopes`.
+    """
+    from apps.accounts.services.notification_scopes import CATEGORY_LABELS, organization_targets
     from apps.exams.models import StudentGroup
     from apps.organizations.models import Membership
 
@@ -90,6 +97,9 @@ def _get_publish_notification_targets(user, capabilities):
                 "value": "all",
                 "label": _("target_all_users"),
                 "is_exclusive": True,
+                "category": "org",
+                "category_label": CATEGORY_LABELS["org"],
+                "icon": "fa-globe",
             }
         )
         from apps.organizations.models import Organization
@@ -103,8 +113,12 @@ def _get_publish_notification_targets(user, capabilities):
                     "value": f"org_{org.pk}",
                     "label": f"{org_prefix_label}: {org.name}",
                     "is_exclusive": False,
+                    "category": "org",
+                    "category_label": CATEGORY_LABELS["org"],
+                    "icon": "fa-building",
                 }
             )
+        targets.extend(organization_targets(user, capabilities, organization))
         return targets
 
     # Non-superadmin targets are cumulative: a user can be both an organization
@@ -129,6 +143,9 @@ def _get_publish_notification_targets(user, capabilities):
                     "value": f"org_{membership.organization_id}",
                     "label": f"{org_prefix_label}: {membership.organization.name} ({all_members_label})",
                     "is_exclusive": False,
+                    "category": "org",
+                    "category_label": CATEGORY_LABELS["org"],
+                    "icon": "fa-building",
                 }
             )
 
@@ -141,8 +158,12 @@ def _get_publish_notification_targets(user, capabilities):
                     "value": f"group_{group.pk}",
                     "label": f"{group_prefix_label}: {group.name}",
                     "is_exclusive": False,
+                    "category": "exam_group",
+                    "category_label": CATEGORY_LABELS["exam_group"],
+                    "icon": "fa-users-rectangle",
                 }
             )
+    targets.extend(organization_targets(user, capabilities, organization))
     return targets
 
 

@@ -54,9 +54,11 @@ COMMON_FIELDS = (
     "email",
     "phone",
     "code",
+    # Sahib istəyi (2026-09-08): ünvan hər iki növdə; sonra lazım olan datalar.
+    "address",
 )
-STUDENT_FIELDS = ("group", "admission_year")
-TEACHER_FIELDS = ("unit",)
+STUDENT_FIELDS = ("group", "admission_year", "education_form", "funding_type")
+TEACHER_FIELDS = ("unit", "title", "academic_degree", "academic_title")
 
 #: Müəllim üzvlüyünün scope bölməsi kimi qəbul edilən tiplər.
 CHAIR_UNIT_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
@@ -157,7 +159,13 @@ def _validate_person(draft: AccountDraft, data: dict) -> None:
     if not known:
         draft.warnings.append(pgettext(_CTX, "Cins tanınmadı — «təyin edilməyib» qalır."))
 
-    draft.values.update({"birth_date": birth_date, "gender": gender})
+    draft.values.update(
+        {
+            "birth_date": birth_date,
+            "gender": gender,
+            "address": normalize_text(data.get("address"))[:255],
+        }
+    )
 
 
 def _resolve_unit(organization, raw, unit_types):
@@ -217,6 +225,22 @@ def _validate_student_structure(draft: AccountDraft, data: dict, context: Intake
         }
     )
     draft.values.update({"admission_year": admission_year})
+    # Təhsil forması / maliyyələşmə — reyestr seçimlərindən (boş → default).
+    from apps.registrar.models.admission_meta import FundingType
+    from apps.registrar.models.catalog_meta import EducationForm
+
+    education_form = normalize_text(data.get("education_form"))
+    if education_form and education_form not in EducationForm.values:
+        _fail(draft, "education_form", pgettext(_CTX, "Təhsil forması tanınmadı."))
+    funding = normalize_text(data.get("funding_type"))
+    if funding and funding not in FundingType.values:
+        _fail(draft, "funding_type", pgettext(_CTX, "Maliyyələşmə növü tanınmadı."))
+    draft.values.update(
+        {
+            "education_form": education_form or EducationForm.FULL_TIME,
+            "funding_type": funding or FundingType.PAID,
+        }
+    )
 
 
 def _validate_admission_year(draft: AccountDraft, data: dict):
@@ -240,6 +264,13 @@ def _validate_admission_year(draft: AccountDraft, data: dict):
 
 
 def _validate_teacher_structure(draft: AccountDraft, data: dict, context: IntakeContext) -> None:
+    draft.values.update(
+        {
+            "title": normalize_text(data.get("title"))[:100],
+            "academic_degree": normalize_text(data.get("academic_degree"))[:150],
+            "academic_title": normalize_text(data.get("academic_title"))[:150],
+        }
+    )
     raw = normalize_text(data.get("unit"))
     if not raw:
         # Kafedra OPSİONALDIR: org-səviyyə müəllim (kafedrası sonradan təyin
@@ -251,6 +282,7 @@ def _validate_teacher_structure(draft: AccountDraft, data: dict, context: Intake
         return
     draft.scope_unit = unit
     draft.specialization = ""
+    draft.values["department"] = unit.name
 
 
 def _validate_credentials(draft: AccountDraft, data: dict, context: IntakeContext) -> None:

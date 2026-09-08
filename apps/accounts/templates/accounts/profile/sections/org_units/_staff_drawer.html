@@ -1,0 +1,36 @@
+{% load i18n %}
+{% comment %}«Heyət» çekmecəsinin gövdəsi — məzmun JSON-dan
+(`organizations:structure_unit_staff`) gəlir, `org_units.js` render edir. Burada
+karkas, skeleton, mətnlər (data-atributla JS-ə) və boş vəziyyət var. Silmə
+düymələri `member.edit` ilə gəlir və təsdiq soruşur. Hər rol qrupunun başında
+«+ Əlavə et» (müavin / koordinator / müəllim) və rəhbər blokunda «Təyin et /
+Dəyiş» düymələri var — onlar bölmədəki mövcud dialoqları (`data-tof-open`)
+açır; dialoq yoxdursa (səlahiyyət yoxdur) düymə render olunmur.{% endcomment %}
+<div class="ou-staff" data-ou-staff
+     data-t-loading="{% trans 'Heyət yüklənir…' context 'organizations.registry' %}"
+     data-t-error="{% trans 'Siyahı yüklənmədi — yenidən cəhd edin.' context 'organizations.registry' %}"
+     data-t-empty="{% trans 'Bu qrupda təyinat yoxdur.' context 'organizations.registry' %}"
+     data-t-no-head="{% trans 'Rəhbər təyin edilməyib' context 'organizations.registry' %}"
+     data-t-remove="{% trans 'Təyinatı sil' context 'organizations.registry' %}"
+     data-t-profile="{% trans 'Profilə bax' context 'organizations.registry' %}"
+     data-t-confirm="{% trans '%s üçün «%s» təyinatı silinsin? Əməl audit jurnalına yazılır.' context 'organizations.registry' %}"
+     data-t-scope="{% trans 'Əhatə' context 'organizations.registry' %}"
+     data-t-children-empty="{% trans 'Alt bölmə yoxdur' context 'organizations.registry' %}"
+     data-t-count="{% trans '%d nəfər' context 'organizations.registry' %}"
+     data-t-add="{% trans 'Əlavə et' context 'organizations.registry' %}"
+     data-t-add-vice-dean="{% trans 'Dekan müavini əlavə et' context 'organizations.registry' %}"
+     data-t-add-coordinator="{% trans 'Proqram koordinatoru əlavə et' context 'organizations.registry' %}"
+     data-t-add-teacher="{% trans 'Kafedraya müəllim əlavə et' context 'organizations.registry' %}"
+     data-t-assign-head="{% trans 'Təyin et' context 'organizations.registry' %}"
+     data-t-change-head="{% trans 'Dəyiş' context 'organizations.registry' %}"
+     data-t-assign-dean="{% trans 'Dekan təyin et' context 'organizations.registry' %}"
+     data-t-assign-chair-head="{% trans 'Kafedra müdiri təyin et' context 'organizations.registry' %}">
+    <div class="ou-staff__unit" data-ou-staff-unit aria-live="polite"></div>
+    <p class="ems-msg ems-msg--error" data-ou-staff-error role="alert" hidden></p>
+    <div class="ou-staff__skeleton" data-ou-staff-skeleton aria-hidden="true">
+        <span class="ou-skel"></span>
+        <span class="ou-skel ou-skel--short"></span>
+        <span class="ou-skel"></span>
+    </div>
+    <div class="ou-staff__body" data-ou-staff-body></div>
+</div>

@@ -306,7 +306,6 @@ def _role_capabilities(user, profile):
             "courses",
             "assigned-exams",
             "assigned-courses",
-            "groups",
             "pending-review",
             "review-results",
             "role-assignment",
@@ -372,7 +371,6 @@ def _role_capabilities(user, profile):
                 {
                     "my-exams",
                     "my-courses",
-                    "groups",
                     "role-assignment",
                     "student-organization-management",
                     "permission-editor",
@@ -383,7 +381,7 @@ def _role_capabilities(user, profile):
 
         if is_teacher:
             allowed_sections.update(
-                {"my-exams", "my-courses", "groups", "pending-review", "review-results", "publish-notification"}
+                {"my-exams", "my-courses", "pending-review", "review-results", "publish-notification"}
             )
             if teacher_has_student_org_access:
                 allowed_sections.add("student-organization-management")
@@ -394,7 +392,6 @@ def _role_capabilities(user, profile):
             allowed_sections.update(
                 {
                     "my-exams",
-                    "groups",
                     "publish-notification",
                     "exam-center-pins",
                     "exam-center-stats",
@@ -448,21 +445,12 @@ def _role_capabilities(user, profile):
         # (bax ``test_student_profile_keeps_single_assigned_courses_sidebar_entry``).
         # Matris: ``apps/accounts/tests/test_sidebar_role_matrix.py``.
         if _user_has_any_role(user, {ProfileRole.MEMBER}):
-            allowed_sections.update({"courses", "assigned-exams", "assigned-courses", "groups"})
+            allowed_sections.update({"courses", "assigned-exams", "assigned-courses"})
 
-    # «Qruplar» bölməsi — permission-əsaslı görünürlük (rol bayraqlarına ƏLAVƏ,
-    # mövcud is_org_admin/is_teacher qolları qalır). Permission-editordan hər
-    # hansı rola verilmiş `group.view` / `group.manage` bölməni açır; faktiki
-    # icazə view qatında (`exams.views.teacher.groups`) yenidən yoxlanılır.
-    if "groups" not in allowed_sections and active_organization is not None:
-        from core.permissions import has_permission as _groups_has_permission
-
-        _groups_actor_perms, _ = _collect_actor_permissions(user, active_organization)
-        _groups_perm_list = list(_groups_actor_perms)
-        if _groups_has_permission(_groups_perm_list, "group.view") or _groups_has_permission(
-            _groups_perm_list, "group.manage"
-        ):
-            allowed_sections.add("groups")
+    # «Qruplar» (imtahan kohortu) kabinet bölməsi 2026-09-08-də SAHİBİN QƏRARI ilə
+    # yığışdırıldı — akademik qrup reyestri (`groups-registry`) tək səthdir.
+    # `exams.StudentGroup` modeli və /exams/groups/ səhifəsi imtahan yaratma axını
+    # üçün qalır; kabinetdə ayrıca menyu yoxdur.
 
     has_admin_control_role = (
         _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org

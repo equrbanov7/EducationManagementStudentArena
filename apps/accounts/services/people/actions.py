@@ -195,6 +195,105 @@ def _resolve_grant_unit(actor, organization, unit_id, *, request=None):
     return unit
 
 
+def _assert_not_student(organization, target) -> None:
+    """TƏLƏBƏ hesabına müəllim statusu verilmir (sahib, 2026-09-07).
+
+    Meyar: təşkilatda AKTİV akademik qeyd (StudentAcademicRecord) və ya aktiv
+    tələbə rolu — hər ikisi «bu şəxs tələbədir» deməkdir. 409 qaytarılır ki, UI
+    anlaşılan mesaj göstərsin (500 deyil).
+    """
+    from apps.organizations.models import Membership
+    from apps.registrar.models import StudentAcademicRecord
+    from core.roles import ProfileRole
+
+    is_student = (
+        StudentAcademicRecord.objects.filter(organization=organization, student=target, is_active=True).exists()
+        or Membership.objects.filter(
+            organization=organization,
+            user=target,
+            is_active=True,
+            role__is_active=True,
+            role__name__in=(ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT),
+        ).exists()
+    )
+    if is_student:
+        raise RimAccessError(
+            "target_is_student",
+            "Tələbə hesabına müəllim statusu verilə bilməz.",
+            status=409,
+        )
+
+
+@transaction.atomic
+def assign_teacher_unit(actor, target, *, unit_id, reason: str = "", request=None) -> dict:
+    """Müəllimi kafedraya TƏYİN ET / kafedrasını DƏYİŞ (``Membership.scope_unit``).
+
+    Yeni üzvlük yaradılmır: aktorun scope-undakı aktiv müəllim üzvlükləri seçilmiş
+    kafedraya köçürülür (sətir silinmir — tarixi jurnal/qiymət izi qalır). Kafedra
+    aktorun görünüş sahəsində olmalıdır (`_resolve_grant_unit`). Səbəb opsionaldır,
+    verilibsə auditə düşür.
+    """
+    _require(actor, PERM_MANAGE_TEACHER_ROLE)
+    organization = actor.organization
+    if organization is None:
+        raise RimAccessError("no_organization_context", "Aktiv təşkilat konteksti yoxdur.")
+    if not unit_id:
+        raise RimAccessError("unit_required", "Kafedra seçilməlidir.", status=400)
+
+    reason = rim_lifecycle.normalize_reason(reason, required=False)
+    rim = _rim_actor(actor, request, extra_permissions=set())
+    rim_policy.assert_can_manage(rim, target)
+
+    unit = _resolve_grant_unit(actor, organization, unit_id, request=request)
+    if unit is None:  # org-wide aktor boş unit göndərib — yuxarıda tutulur, ehtiyat
+        raise RimAccessError("unit_required", "Kafedra seçilməlidir.", status=400)
+
+    from apps.organizations.models import Membership
+    from apps.organizations.scoping import scope_memberships_by_unit
+
+    scope = actor.scope_for(PERM_MANAGE_TEACHER_ROLE, request=request)
+    memberships = Membership.objects.filter(
+        organization=organization,
+        user=target,
+        is_active=True,
+        role__name__in=TEACHER_ROLE_NAMES,
+    )
+    memberships = scope_memberships_by_unit(memberships, scope, organization=organization)
+    rows = list(memberships.select_related("scope_unit"))
+    if not rows:
+        raise RimAccessError(
+            "no_teacher_membership",
+            "Bu hesabın sizin sahənizdə aktiv müəllim təyinatı yoxdur.",
+            status=409,
+        )
+    previous = sorted({str(getattr(row.scope_unit, "name", "") or "") for row in rows})
+    changed = 0
+    for membership in rows:
+        if membership.scope_unit_id == unit.pk:
+            continue
+        membership.scope_unit = unit
+        membership.save(update_fields=["scope_unit", "updated_at"])
+        changed += 1
+    if not changed:
+        raise RimAccessError("unit_unchanged", "Müəllim onsuz da bu kafedradadır.", status=409)
+
+    log_action(
+        AuditAction.UPDATE,
+        user=actor.user,
+        organization=organization,
+        obj=target,
+        reason=reason,
+        request=request,
+        resource_type=_AUDIT_RESOURCE,
+        resource_id=str(target.pk),
+        resource_repr=target.get_full_name() or target.username,
+        old_values={"scope_unit": previous},
+        new_values={"scope_unit": unit.name, "unit_id": str(unit.pk)},
+        changes={"action": "people.teacher_unit_assigned", "memberships_changed": changed},
+    )
+    return {"unit_id": str(unit.pk), "unit_name": unit.name, "memberships_changed": changed, "reason": reason}
+
+
 @transaction.atomic
 def set_teacher_role(actor, target, *, grant: bool, reason: str, unit_id=None, request=None) -> dict:
     """Müəllim statusunu verir və ya çıxarır (``Membership`` üzərindən).
@@ -217,6 +316,7 @@ def set_teacher_role(actor, target, *, grant: bool, reason: str, unit_id=None, r
     from apps.organizations.models import Membership
 
     if grant:
+        _assert_not_student(organization, target)
         unit = _resolve_grant_unit(actor, organization, unit_id, request=request)
         role = _teacher_role(organization)
         membership, created = Membership.objects.get_or_create(
@@ -273,6 +373,7 @@ __all__ = [
     "MIN_REASON_LENGTH",
     "RimAccessError",
     "assert_in_catalog_scope",
+    "assign_teacher_unit",
     "load_target",
     "set_account_status",
     "set_teacher_role",
