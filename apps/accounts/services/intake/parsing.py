@@ -51,17 +51,19 @@ def _blank(values) -> bool:
     return not any(str(value or "").strip() for value in values)
 
 
-def _map_headers(raw_headers) -> dict:
+def _map_headers(raw_headers, *, index=None, required=None) -> dict:
     """Başlıq sətri → ``{sütun indeksi: açar}``. Tanınan açar yoxdursa xəta."""
+    # `index` / `required` verilməyəndə TƏLƏBƏ spesifikasiyası; müəllim idxalı
+    # (`teachers.py`) öz indeksini və məcburi sütunlarını ötürür.
 
-    index = header_index()
+    index = index if index is not None else header_index()
     mapping: dict = {}
     for position, raw in enumerate(raw_headers):
         key = index.get(normalize_header(raw))
         if key and key not in mapping.values():
             mapping[position] = key
     present = set(mapping.values())
-    required = {column.key for column in columns() if column.required}
+    required = set(required) if required is not None else {column.key for column in columns() if column.required}
     # ⚠️ ATİS yolu (ekran 08): qəbul faylında QRUP SÜTUNU OLMAYA BİLƏR — qrup
     # məhz idxal addımında ixtisas kodundan təyin olunur. Ona görə «qrup»
     # tələbi «qrup VƏ YA ixtisas kodu» şəklindədir; köhnə 16 sütunlu fayl
@@ -94,7 +96,7 @@ def _rows_from_values(row_iterable, *, mapping) -> list:
     return rows
 
 
-def _read_xlsx(payload: bytes) -> list:
+def _read_xlsx(payload: bytes, *, index=None, required=None, sheet_name=None) -> list:
     try:
         from openpyxl import load_workbook
     except Exception:  # pragma: no cover — paket olmayan mühit
@@ -109,7 +111,8 @@ def _read_xlsx(payload: bytes) -> list:
             "intake_file_unreadable",
             pgettext(_CTX, "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."),
         ) from None
-    sheet = workbook[SHEET_NAME] if SHEET_NAME in workbook.sheetnames else workbook[workbook.sheetnames[0]]
+    wanted_sheet = sheet_name or SHEET_NAME
+    sheet = workbook[wanted_sheet] if wanted_sheet in workbook.sheetnames else workbook[workbook.sheetnames[0]]
 
     mapping = None
     rows_source: list = []
@@ -118,7 +121,7 @@ def _read_xlsx(payload: bytes) -> list:
         if mapping is None:
             if _blank(values):
                 continue
-            mapping = _map_headers(values)
+            mapping = _map_headers(values, index=index, required=required)
             continue
         rows_source.append((number, values))
         if len(rows_source) > MAX_ROWS + 8:
@@ -128,7 +131,7 @@ def _read_xlsx(payload: bytes) -> list:
     return _rows_from_values(_strip_hint_row(rows_source, mapping), mapping=mapping)
 
 
-def _read_csv(payload: bytes) -> list:
+def _read_csv(payload: bytes, *, index=None, required=None) -> list:
     for encoding in ("utf-8-sig", "utf-8", "cp1254", "latin-1"):
         try:
             text = payload.decode(encoding)
@@ -151,7 +154,7 @@ def _read_csv(payload: bytes) -> list:
         if mapping is None:
             if _blank(values):
                 continue
-            mapping = _map_headers(values)
+            mapping = _map_headers(values, index=index, required=required)
             continue
         rows_source.append((number, values))
         if len(rows_source) > MAX_ROWS + 8:
@@ -179,7 +182,7 @@ def _strip_hint_row(rows_source, mapping):
     return result
 
 
-def read_rows(uploaded_file) -> list:
+def read_rows(uploaded_file, *, index=None, required=None, sheet_name=None) -> list:
     """Yüklənmiş faylı sətir siyahısına çevirir (`_row` = fayldakı sətir nömrəsi)."""
 
     if uploaded_file is None:
@@ -201,7 +204,11 @@ def read_rows(uploaded_file) -> list:
         raise IntakeFileError("intake_file_empty", pgettext(_CTX, "Fayl boşdur."))
     if len(payload) > MAX_UPLOAD_BYTES:
         raise IntakeFileError("intake_file_too_large", pgettext(_CTX, "Fayl çox böyükdür (maksimum 5 MB)."))
-    rows = _read_csv(payload) if suffix == ".csv" else _read_xlsx(payload)
+    rows = (
+        _read_csv(payload, index=index, required=required)
+        if suffix == ".csv"
+        else _read_xlsx(payload, index=index, required=required, sheet_name=sheet_name)
+    )
     if not rows:
         raise IntakeFileError("intake_no_rows", pgettext(_CTX, "Faylda tələbə sətri tapılmadı."))
     return rows

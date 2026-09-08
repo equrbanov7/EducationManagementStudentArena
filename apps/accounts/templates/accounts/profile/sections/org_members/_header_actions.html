@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Üzvlər başlıq əməlləri — struktur reyestrlərinə SPA keçidlər
+(yalnız aktorun icazəsi olan bölmələr). Yazı əməli yoxdur: üzv/rol təyinatı
+Fakültələr / Kafedralar reyestrindən və rol təyinatı bölməsindən aparılır.{% endcomment %}
+{% if 'org-faculties' in allowed_sections %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-faculties"
+   data-section="org-faculties" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Fakültələr' context 'profile.sidebar' %}">
+    <i class="fas fa-building-columns" aria-hidden="true"></i>
+    {% trans "Fakültələr" context "organizations.members" %}
+</a>
+{% endif %}
+{% if 'org-kafedras' in allowed_sections %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-kafedras"
+   data-section="org-kafedras" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Kafedralar' context 'profile.sidebar' %}">
+    <i class="fas fa-landmark" aria-hidden="true"></i>
+    {% trans "Kafedralar" context "organizations.members" %}
+</a>
+{% endif %}

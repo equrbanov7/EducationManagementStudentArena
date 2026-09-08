@@ -7,6 +7,8 @@ from .endpoints import (  # noqa: F401
     organization_unit_detail,
 )
 from .head_lookup import structure_head_candidates  # noqa: F401
+from .members import build_members_section, resolve_members_access  # noqa: F401
+from .registry import build_faculties_section, build_kafedras_section  # noqa: F401
 from .tree import (  # noqa: F401
     build_structure_tree_context,
     chair_detail_context,
@@ -15,6 +17,10 @@ from .tree import (  # noqa: F401
 from .unit_detail import build_unit_detail_context  # noqa: F401
 
 __all__ = [
+    "build_faculties_section",
+    "build_kafedras_section",
+    "build_members_section",
+    "resolve_members_access",
     "build_organization_faculties_context",
     "build_organization_kafedras_context",
     "build_structure_tree_context",

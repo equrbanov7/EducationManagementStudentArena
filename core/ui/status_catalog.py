@@ -310,6 +310,31 @@ JOURNAL_NOTE: tuple[Status, ...] = (
 )
 
 # --------------------------------------------------------------------------- #
+# 6b. Apellyasiya — müraciət başlığı və sual üzrə qərar (2026-09-08 redizayn)
+#    Açarlar `apps/appeals/constants.py`-dəki enum-larla EYNİDİR. Etiketin
+#    tərcümə mənbəyi həmin modulun `choices`-idir (4 kataloqda artıq tərcümə
+#    olunub): `appeals/partials/_status_badge.html` etiketi ORADAN, tonu isə
+#    BURADAN alır — rəng bir yerdə, mətn bir yerdə. Buradakı etiket ehtiyat
+#    (fallback) və `{% ems_status_badge %}` çağırışları üçündür.
+#    Ton məntiqi: gözləyir → neytral (əməl hələ yoxdur), baxılır → info
+#    (prosesdə), qismən qəbul → primary (yekun, qarışıq), qəbul → success,
+#    rədd → danger. Status YALNIZ rənglə deyil, həmişə MƏTNlə verilir.
+# --------------------------------------------------------------------------- #
+APPEAL: tuple[Status, ...] = (
+    _s("pending", _t("Gözləyir"), "neutral", order=0),
+    _s("under_review", _t("Baxılır"), "info", order=1),
+    _s("partially_accepted", _t("Qismən qəbul edildi"), "primary", order=2),
+    _s("accepted", _t("Qəbul edildi"), "success", order=3),
+    _s("rejected", _t("Rədd edildi"), "danger", order=4),
+)
+
+APPEAL_ITEM: tuple[Status, ...] = (
+    _s("pending", _t("Gözləyir"), "neutral", order=0),
+    _s("accepted", _t("Qəbul edildi"), "success", order=1),
+    _s("rejected", _t("Rədd edildi"), "danger", order=2),
+)
+
+# --------------------------------------------------------------------------- #
 # 7. Redaktor autosave vəziyyəti — ekran 19 (`saveState`, 6 vəziyyət)
 # --------------------------------------------------------------------------- #
 SAVE_STATE: tuple[Status, ...] = (
@@ -327,6 +352,25 @@ SAVE_STATE: tuple[Status, ...] = (
 ARCHIVE_MODE: tuple[Status, ...] = (
     _s("open", _t("mərhələ açıqdır"), "info", order=0),
     _s("archived", _t("arxiv — yalnız oxunuş"), "warning", order=1),
+)
+
+# --------------------------------------------------------------------------- #
+# 9. Audit jurnalı — `core.constants.AuditAction` açarları (2026-09-08).
+#    Ton məna daşıyır: yaradılma yaşıl, dəyişiklik mavi, silinmə qırmızı,
+#    baxış neytral, giriş/çıxış info, rədd qırmızı, yoxlama sorğusu sarı.
+#    Açarlar `AuditAction.CHOICES` ilə BİRƏBİR eynidir (test qoruyur).
+# --------------------------------------------------------------------------- #
+AUDIT_ACTION: tuple[Status, ...] = (
+    _s("create", _t("Yaradılma"), "success", order=0),
+    _s("update", _t("Dəyişiklik"), "primary", order=1),
+    _s("delete", _t("Silinmə"), "danger", order=2),
+    _s("view", _t("Baxış"), "neutral", order=3),
+    _s("login", _t("Giriş"), "info", order=4),
+    _s("logout", _t("Çıxış"), "info", order=5),
+    _s("export", _t("İxrac"), "warning", order=6),
+    _s("verify", _t("Təsdiqləmə"), "success", order=7),
+    _s("deny", _t("Rədd"), "danger", order=8),
+    _s("challenge", _t("Yoxlama sorğusu"), "warning", order=9),
 )
 
 
@@ -350,8 +394,11 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "student_movement": STUDENT_MOVEMENT,
     "student_status": STUDENT_STATUS,
     "journal_note": JOURNAL_NOTE,
+    "appeal": APPEAL,
+    "appeal_item": APPEAL_ITEM,
     "save_state": SAVE_STATE,
     "archive_mode": ARCHIVE_MODE,
+    "audit_action": AUDIT_ACTION,
 }
 
 

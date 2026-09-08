@@ -105,12 +105,32 @@ def build_detail(*, actor, user_id, request=None, today=None) -> dict:
     unit_ids = [membership for membership in row["memberships"] if membership.get("scope_unit")]
     row["units"] = [membership["scope_unit"] for membership in unit_ids]
 
+    # «Ətraflı» səhifəsi (yeni tab) + çekmecə xülasələri (sahib, 2026-09-08):
+    # tələbədə ÜOMG/kredit/kəsr/forma/maliyyə, müəllimdə fakültə-kafedra, staj,
+    # fənn/qrup/saat. Hesablama `page.py`-dədir — səhifə ilə eyni rəqəmlər.
+    from .page import academic_summary, page_url_for, teaching_summary
+
+    row["page_url"] = page_url_for(target.pk)
+    row["academic_summary"] = (
+        academic_summary(target, actor, organization, request=request)
+        if (organization and catalog == "student")
+        else None
+    )
+    row["teaching_summary"] = (
+        teaching_summary(target, actor, organization, request=request, today=today)
+        if (organization and is_teacher)
+        else None
+    )
+
     status = row["status"]
     row["actions"] = {
         "block": actor.can_manage_status and status == STATUS_ACTIVE,
         "unblock": actor.can_manage_status and status == STATUS_BLOCKED,
-        "grant_teacher": actor.can_manage_teacher_role and not is_teacher,
+        # Sahib (2026-09-07): TƏLƏBƏYƏ müəllim statusu ÜMUMİYYƏTLƏ verilmir —
+        # tələbə kataloqundakı şəxs üçün düymə çıxmır; servis də rədd edir.
+        "grant_teacher": actor.can_manage_teacher_role and not is_teacher and catalog != "student",
         "revoke_teacher": actor.can_manage_teacher_role and is_teacher,
+        "assign_unit": actor.can_manage_teacher_role and is_teacher,
     }
     return {"has_access": True, "person": row}
 

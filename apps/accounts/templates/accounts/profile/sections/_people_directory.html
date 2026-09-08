@@ -11,10 +11,18 @@ URL-ləri), data JSON-la gəlir. CSS/JS XARİCİ fayllardadır (CSP: unsafe-inli
 yoxdur) və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları
 ilə ötürülür — bax CLAUDE.md.
 
+REDİZAYN (sahib, 2026-09-07):
+* hero (say + səlahiyyət), kart-filtr paneli («Əlavə filtrlər» açılır), sətirdə
+  status nişanları, əlaqə linkləri, ikon-əməllər;
+* TOPLU SEÇİM: tələbə → «Qrupa köçür» (rəsmi köçürmə, səbəb məcburi), müəllim →
+  «Kafedraya təyin et»; seçim sayı alt zolaqda görünür;
+* `window.prompt`/`alert` YOXDUR — səbəb dialoqu və toast (`people_directory.js`);
+* tələbəyə «müəllim statusu ver» düyməsi ÜMUMİYYƏTLƏ yoxdur (server də rədd edir).
+
 ⚠️ UI agenti üçün: context müqaviləsi `apps/accounts/views/people/section.py`
 başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykənir.
 {% endcomment %}
-<div class="people"
+<div class="people people--{{ people_section.kind }}"
      data-people-root
      data-kind="{{ people_section.kind }}"
      data-list-url="{{ people_section.list_url }}"
@@ -22,6 +30,7 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
      data-ai-url="{{ people_section.analytics_ai_url }}"
      data-options-url="{{ people_section.options_url }}"
      data-action-url="{{ people_section.action_url }}"
+     data-groups-url="{{ people_section.groups_url }}"
      data-detail-url-template="{{ people_section.detail_url_template }}"
      data-page-size="{{ people_section.default_page_size }}"
      data-min-reason-length="{{ people_section.min_reason_length }}"
@@ -32,22 +41,68 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
      data-can-manage-status="{% if people_section.can_manage_status %}1{% else %}0{% endif %}"
      data-can-manage-teacher-role="{% if people_section.can_manage_teacher_role %}1{% else %}0{% endif %}"
      data-can-manage-academic="{% if people_section.can_manage_academic %}1{% else %}0{% endif %}"
-     data-i18n-manage="{% trans 'İdarə et' context 'accounts.people' %}">
+     data-i18n-manage="{% trans 'İdarə et' context 'accounts.people' %}"
+     data-i18n-change-group="{% trans 'Qrupu dəyiş' context 'accounts.people' %}"
+     data-i18n-assign-unit="{% trans 'Kafedra' context 'accounts.people' %}"
+     data-i18n-block="{% trans 'Hesabı dayandır' context 'accounts.people' %}"
+     data-i18n-unblock="{% trans 'Hesabı bərpa et' context 'accounts.people' %}"
+     data-i18n-revoke-teacher="{% trans 'Müəllim statusunu çıxar' context 'accounts.people' %}"
+     data-i18n-open-card="{% trans 'Kartı aç' context 'accounts.people' %}"
+     data-i18n-select-row="{% trans 'Sətri seç' context 'accounts.people' %}"
+     data-i18n-selected="{% trans '%d nəfər seçilib' context 'accounts.people' %}"
+     data-i18n-total="{% trans '%d nəfər' context 'accounts.people' %}"
+     data-i18n-page="{% trans 'Səhifə %a / %b' context 'accounts.people' %}"
+     data-i18n-male="{% trans 'Kişi' context 'accounts.people' %}"
+     data-i18n-female="{% trans 'Qadın' context 'accounts.people' %}"
+     data-i18n-age="{% trans 'yaş' context 'accounts.people' %}"
+     data-i18n-admission="{% trans 'Qəbul' context 'accounts.people' %}"
+     data-i18n-no-group="{% trans 'Qrupsuz' context 'accounts.people' %}"
+     data-i18n-reason-required="{% trans 'Səbəb ən azı %d simvol olmalıdır.' context 'accounts.people' %}"
+     data-i18n-done="{% trans '%a / %b əməl uğurla tamamlandı.' context 'accounts.people' %}"
+     data-i18n-failed="{% trans 'Əməliyyat alınmadı.' context 'accounts.people' %}"
+     data-i18n-pick-group="{% trans 'Hədəf qrup seçilməlidir.' context 'accounts.people' %}"
+     data-i18n-pick-unit="{% trans 'Kafedra seçilməlidir.' context 'accounts.people' %}"
+     data-i18n-no-record="{% trans 'Seçilmiş sətirlərdə akademik qeyd yoxdur.' context 'accounts.people' %}"
+     data-i18n-confirm-block="{% trans 'Hesab dayandırılacaq — şəxs sistemə daxil ola bilməyəcək. Səbəb audit jurnalına yazılır.' context 'accounts.people' %}"
+     data-i18n-confirm-unblock="{% trans 'Hesab bərpa olunacaq və şəxs yenidən daxil ola biləcək.' context 'accounts.people' %}"
+     data-i18n-confirm-revoke="{% trans 'Aktiv müəllim təyinatı deaktiv ediləcək (sətir silinmir, tarixçə qalır).' context 'accounts.people' %}"
+     data-i18n-demographics="{% trans 'Demoqrafiya: cins %a/%c, doğum tarixi %b/%c' context 'accounts.people' %}">
 
-  <div class="people__head">
-    <p class="people__intro">
-      {% if people_section.kind == 'teachers' %}
-        {% trans "Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
-      {% else %}
-        {% trans "Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
-      {% endif %}
-    </p>
+  <header class="people__hero">
+    <div class="people__hero-main">
+      <p class="people__intro">
+        {% if people_section.kind == 'teachers' %}
+          {% trans "Görünüş sahənizdəki müəllimlər. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
+        {% else %}
+          {% trans "Görünüş sahənizdəki tələbələr. Hər kəs yalnız öz strukturunun altını görür." context "accounts.people" %}
+        {% endif %}
+      </p>
+      <div class="people__stats" aria-live="polite">
+        <span class="people__stat"><i class="fas {% if people_section.kind == 'teachers' %}fa-chalkboard-user{% else %}fa-user-graduate{% endif %}" aria-hidden="true"></i> <b data-people-total>—</b></span>
+        <span class="people__stat people__stat--muted" data-people-page-info></span>
+      </div>
+    </div>
+    {% if people_section.can_create %}
+    {% comment %}Yaratma (sahib, 2026-09-08): tək-tək forma RİM-in `_rim_create.html`
+    dialoqudur (aşağıda daxil edilir, eyni `user.import` qapısı); toplu idxal
+    ayrıca bölmədir (Excel şablonu → quru icra → tətbiq).{% endcomment %}
+    <div class="people__create" role="group" aria-label="{% trans 'Yeni hesab' context 'accounts.people' %}">
+      <button type="button" class="ems-btn ems-btn--primary" data-rimc-open="{% if people_section.kind == 'teachers' %}teacher{% else %}student{% endif %}">
+        <i class="fas fa-user-plus" aria-hidden="true"></i>
+        {% if people_section.kind == 'teachers' %}{% trans "Yeni müəllim" context "accounts.people" %}{% else %}{% trans "Yeni tələbə" context "accounts.people" %}{% endif %}
+      </button>
+      <a class="ems-btn js-profile-section-link" href="{{ people_section.intake_section_url }}"
+         data-section="{{ people_section.intake_section }}" data-source-url="{{ profile_base_url }}"
+         data-title="{% if people_section.kind == 'teachers' %}{% trans 'Müəllim idxalı' context 'profile.sidebar' %}{% else %}{% trans 'Tələbə idxalı' context 'profile.sidebar' %}{% endif %}">
+        <i class="fas fa-file-excel" aria-hidden="true"></i>
+        {% trans "Toplu idxal (Excel)" context "accounts.people" %}
+      </a>
+    </div>
+    {% endif %}
     {% if people_section.granted_permissions %}
-    {% comment %}QA 2026-09-05 (P3-7): 6–7 icazə çipi başlığı doldururdu və
-    istifadəçiyə heç bir əməl vermirdi. İndi tək açılan yığcam blokdur —
-    məlumat itmir, səs-küy itir. `<details>` native-dir: JS lazım deyil (CSP).{% endcomment %}
     <details class="people__perms-box">
       <summary class="people__perms-toggle">
+        <i class="fas fa-shield-halved" aria-hidden="true"></i>
         {{ people_section.granted_permissions|length }} {% trans "səlahiyyət" context "accounts.people" %}
       </summary>
       <ul class="people__perms" aria-label="{% trans 'Bu bölmədəki səlahiyyətləriniz' context 'accounts.people' %}">
@@ -57,130 +112,171 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
       </ul>
     </details>
     {% endif %}
-  </div>
+  </header>
 
-  <form class="people__filters" data-people-filters novalidate>
-    <div class="people__field people__field--search">
-      <label for="people-q-{{ people_section.kind }}">{% trans "Axtarış" context "accounts.people" %}</label>
-      <input type="search"
-             id="people-q-{{ people_section.kind }}"
-             name="q"
-             autocomplete="off"
-             placeholder="{% trans 'ad, soyad, ata adı, istifadəçi adı və ya FİN' context 'accounts.people' %}">
-    </div>
+  {% if people_section.can_create %}
+    {% include "accounts/profile/sections/partials/_rim_create.html" with rim_center_section=people_section.rim_create %}
+  {% endif %}
 
-    <div class="people__field">
-      <label for="people-faculty-{{ people_section.kind }}">{% trans "Fakültə" context "accounts.people" %}</label>
-      <select id="people-faculty-{{ people_section.kind }}" name="faculty" data-people-option="faculties">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-
-    {% comment %}Tələbə qrupları kafedra altında deyil (fakültə→ixtisas→qrup) —
-    kafedra filtri tələbə kataloqunda həmişə 0 verirdi (QA 2026-09-05 PEOPLE-RBAC-02).{% endcomment %}
-    {% if people_section.kind == 'teachers' %}
-    <div class="people__field">
-      <label for="people-kafedra-{{ people_section.kind }}">{% trans "Kafedra" context "accounts.people" %}</label>
-      <select id="people-kafedra-{{ people_section.kind }}" name="kafedra" data-people-option="kafedras">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-    {% endif %}
-
-    {% if people_section.kind == 'students' %}
-    <div class="people__field">
-      <label for="people-group-{{ people_section.kind }}">{% trans "Qrup" context "accounts.people" %}</label>
-      <select id="people-group-{{ people_section.kind }}" name="group" data-people-option="groups">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-    <div class="people__field">
-      <label for="people-program-{{ people_section.kind }}">{% trans "İxtisas" context "accounts.people" %}</label>
-      <select id="people-program-{{ people_section.kind }}" name="program" data-people-option="programs">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-    {% endif %}
-
-    <div class="people__field">
-      <label for="people-subject-{{ people_section.kind }}">
-        {% if people_section.kind == 'teachers' %}
-          {% trans "Dərs dediyi fənn" context "accounts.people" %}
-        {% else %}
-          {% trans "Keçdiyi fənn" context "accounts.people" %}
-        {% endif %}
-      </label>
-      <select id="people-subject-{{ people_section.kind }}" name="subject" data-people-option="subjects">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-
-    <div class="people__field">
-      <label for="people-year-{{ people_section.kind }}">{% trans "Tədris ili" context "accounts.people" %}</label>
-      <select id="people-year-{{ people_section.kind }}" name="year" data-people-option="years">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-
-    <div class="people__field">
-      <label for="people-season-{{ people_section.kind }}">{% trans "Semestr" context "accounts.people" %}</label>
-      <select id="people-season-{{ people_section.kind }}" name="season" data-people-option="seasons">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-      </select>
-    </div>
-
-    <div class="people__field">
-      <label for="people-status-{{ people_section.kind }}">{% trans "Status" context "accounts.people" %}</label>
-      <select id="people-status-{{ people_section.kind }}" name="status">
-        {% for option in people_section.status_options %}
-          <option value="{{ option.key }}">{{ option.label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    {% if people_section.can_view_demographics %}
-    <div class="people__field">
-      <label for="people-gender-{{ people_section.kind }}">{% trans "Cins" context "accounts.people" %}</label>
-      <select id="people-gender-{{ people_section.kind }}" name="gender">
-        <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
-        {% for option in people_section.gender_options %}
-          <option value="{{ option.key }}" data-people-facet="gender:{{ option.key }}">{{ option.label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="people__field people__field--age">
-      <span class="people__field-label" id="people-age-label-{{ people_section.kind }}">{% trans "Yaş" context "accounts.people" %}</span>
-      <div class="people__age-inputs" role="group" aria-labelledby="people-age-label-{{ people_section.kind }}">
-        <input type="number" name="age_min" min="0" max="120" inputmode="numeric"
-               aria-label="{% trans 'Minimum yaş' context 'accounts.people' %}"
-               placeholder="{% trans 'min' context 'accounts.people' %}">
-        <span aria-hidden="true">–</span>
-        <input type="number" name="age_max" min="0" max="120" inputmode="numeric"
-               aria-label="{% trans 'Maksimum yaş' context 'accounts.people' %}"
-               placeholder="{% trans 'maks' context 'accounts.people' %}">
+  <form class="people__filters" data-people-filters novalidate role="search">
+    <div class="people__filters-main">
+      <div class="people__field people__field--search">
+        <label for="people-q-{{ people_section.kind }}">{% trans "Axtarış" context "accounts.people" %}</label>
+        <div class="people__search">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search"
+                 id="people-q-{{ people_section.kind }}"
+                 name="q"
+                 autocomplete="off"
+                 placeholder="{% trans 'ad, soyad, ata adı, istifadəçi adı və ya FİN' context 'accounts.people' %}">
+        </div>
       </div>
-      <label class="people__checkbox">
-        <input type="checkbox" name="age" value="{{ people_section.age_unknown_key }}">
-        <span>{{ people_section.age_unknown_label }}</span>
-      </label>
-    </div>
-    {% endif %}
 
-    <div class="people__field">
-      <label for="people-sort-{{ people_section.kind }}">{% trans "Sıralama" context "accounts.people" %}</label>
-      <select id="people-sort-{{ people_section.kind }}" name="sort">
-        {% for option in people_section.sort_options %}
-          <option value="{{ option.key }}">{{ option.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="people__field">
+        <label for="people-faculty-{{ people_section.kind }}">{% trans "Fakültə" context "accounts.people" %}</label>
+        <select id="people-faculty-{{ people_section.kind }}" name="faculty" data-people-option="faculties">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+        </select>
+      </div>
+
+      {% if people_section.kind == 'teachers' %}
+      <div class="people__field">
+        <label for="people-kafedra-{{ people_section.kind }}">{% trans "Kafedra" context "accounts.people" %}</label>
+        <select id="people-kafedra-{{ people_section.kind }}" name="kafedra" data-people-option="kafedras">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+        </select>
+      </div>
+      {% else %}
+      {% comment %}Tələbə qrupları kafedra altında deyil (fakültə→ixtisas→qrup) —
+      kafedra filtri tələbə kataloqunda həmişə 0 verirdi (QA 2026-09-05 PEOPLE-RBAC-02).{% endcomment %}
+      <div class="people__field">
+        <label for="people-group-{{ people_section.kind }}">{% trans "Qrup" context "accounts.people" %}</label>
+        <select id="people-group-{{ people_section.kind }}" name="group" data-people-option="groups">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+        </select>
+      </div>
+      <div class="people__field">
+        <label for="people-program-{{ people_section.kind }}">{% trans "İxtisas" context "accounts.people" %}</label>
+        <select id="people-program-{{ people_section.kind }}" name="program" data-people-option="programs">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+        </select>
+      </div>
+      {% endif %}
+
+      <div class="people__field">
+        <label for="people-status-{{ people_section.kind }}">{% trans "Status" context "accounts.people" %}</label>
+        <select id="people-status-{{ people_section.kind }}" name="status">
+          {% for option in people_section.status_options %}
+            <option value="{{ option.key }}">{{ option.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
 
-    <div class="people__field people__field--actions">
-      <button type="reset" class="people__reset">{% trans "Filtrləri sıfırla" context "accounts.people" %}</button>
+    <details class="people__filters-more" data-people-filters-more>
+      <summary>
+        <i class="fas fa-sliders" aria-hidden="true"></i>
+        {% trans "Əlavə filtrlər" context "accounts.people" %}
+        <span class="people__filters-badge" data-people-filters-badge hidden></span>
+      </summary>
+      <div class="people__filters-grid">
+        <div class="people__field">
+          <label for="people-subject-{{ people_section.kind }}">
+            {% if people_section.kind == 'teachers' %}
+              {% trans "Dərs dediyi fənn" context "accounts.people" %}
+            {% else %}
+              {% trans "Keçdiyi fənn" context "accounts.people" %}
+            {% endif %}
+          </label>
+          <select id="people-subject-{{ people_section.kind }}" name="subject" data-people-option="subjects">
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+
+        <div class="people__field">
+          <label for="people-year-{{ people_section.kind }}">{% trans "Tədris ili" context "accounts.people" %}</label>
+          <select id="people-year-{{ people_section.kind }}" name="year" data-people-option="years">
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+
+        <div class="people__field">
+          <label for="people-season-{{ people_section.kind }}">{% trans "Semestr" context "accounts.people" %}</label>
+          <select id="people-season-{{ people_section.kind }}" name="season" data-people-option="seasons">
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+
+        {% if people_section.can_view_demographics %}
+        <div class="people__field">
+          <label for="people-gender-{{ people_section.kind }}">{% trans "Cins" context "accounts.people" %}</label>
+          <select id="people-gender-{{ people_section.kind }}" name="gender">
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            {% for option in people_section.gender_options %}
+              <option value="{{ option.key }}" data-people-facet="gender:{{ option.key }}">{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="people__field people__field--age">
+          <span class="people__field-label" id="people-age-label-{{ people_section.kind }}">{% trans "Yaş" context "accounts.people" %}</span>
+          <div class="people__age-inputs" role="group" aria-labelledby="people-age-label-{{ people_section.kind }}">
+            <input type="number" name="age_min" min="0" max="120" inputmode="numeric"
+                   aria-label="{% trans 'Minimum yaş' context 'accounts.people' %}"
+                   placeholder="{% trans 'min' context 'accounts.people' %}">
+            <span aria-hidden="true">–</span>
+            <input type="number" name="age_max" min="0" max="120" inputmode="numeric"
+                   aria-label="{% trans 'Maksimum yaş' context 'accounts.people' %}"
+                   placeholder="{% trans 'maks' context 'accounts.people' %}">
+          </div>
+          <label class="people__checkbox">
+            <input type="checkbox" name="age" value="{{ people_section.age_unknown_key }}">
+            <span>{{ people_section.age_unknown_label }}</span>
+          </label>
+        </div>
+        {% endif %}
+
+        <div class="people__field">
+          <label for="people-sort-{{ people_section.kind }}">{% trans "Sıralama" context "accounts.people" %}</label>
+          <select id="people-sort-{{ people_section.kind }}" name="sort">
+            {% for option in people_section.sort_options %}
+              <option value="{{ option.key }}">{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <div class="people__filters-foot">
+      <p class="people__coverage" data-people-coverage aria-live="polite"></p>
+      <button type="reset" class="people__reset">
+        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+        {% trans "Filtrləri sıfırla" context "accounts.people" %}
+      </button>
     </div>
   </form>
 
-  <p class="people__coverage" data-people-coverage aria-live="polite"></p>
+  {% if people_section.can_manage_academic or people_section.can_manage_teacher_role or people_section.can_manage_status %}
+  <div class="people__bulkbar" data-people-bulkbar hidden role="region" aria-label="{% trans 'Toplu əməllər' context 'accounts.people' %}">
+    <span class="people__bulkbar-count" data-people-bulk-count aria-live="polite"></span>
+    <span class="people__bulkbar-spacer"></span>
+    {% if people_section.kind == 'students' and people_section.can_manage_academic %}
+    <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-people-bulk="transfer_group">
+      <i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Qrupa köçür" context "accounts.people" %}
+    </button>
+    {% endif %}
+    {% if people_section.kind == 'teachers' and people_section.can_manage_teacher_role %}
+    <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-people-bulk="assign_unit">
+      <i class="fas fa-building-columns" aria-hidden="true"></i> {% trans "Kafedraya təyin et" context "accounts.people" %}
+    </button>
+    {% endif %}
+    {% if people_section.can_manage_status %}
+    <button type="button" class="ems-btn ems-btn--danger ems-btn--sm" data-people-bulk="block">
+      <i class="fas fa-user-slash" aria-hidden="true"></i> {% trans "Dayandır" context "accounts.people" %}
+    </button>
+    {% endif %}
+    <button type="button" class="ems-btn ems-btn--sm" data-people-bulk-clear>{% trans "Seçimi təmizlə" context "accounts.people" %}</button>
+  </div>
+  {% endif %}
 
   <div class="people__table-wrap">
     <table class="people__table" data-people-table>
@@ -193,6 +289,11 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
       </caption>
       <thead>
         <tr>
+          {% if people_section.can_manage_academic or people_section.can_manage_teacher_role or people_section.can_manage_status %}
+          <th scope="col" class="people__th-check">
+            <input type="checkbox" data-people-select-all aria-label="{% trans 'Səhifədəki hamısını seç' context 'accounts.people' %}">
+          </th>
+          {% endif %}
           {% comment %}QA 2026-09-05 (UX-17): "Şəxs"/"Kafedra"/"Qrup" başlıqları
           `people-sort-{{ kind }}` select-i ilə eyni sıralama meyarlarına
           uyğundur — düymə klaviatura ilə select-i dəyişir, aria-sort JS-də
@@ -220,7 +321,7 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
           {% endif %}
           <th scope="col">{% trans "Status" context "accounts.people" %}</th>
           {% if people_section.can_manage_status or people_section.can_manage_teacher_role or people_section.can_manage_academic %}
-            <th scope="col">{% trans "Əməllər" context "accounts.people" %}</th>
+            <th scope="col" class="people__th-actions">{% trans "Əməllər" context "accounts.people" %}</th>
           {% endif %}
         </tr>
       </thead>
@@ -228,13 +329,136 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
     </table>
   </div>
 
-  <p class="people__empty" data-people-empty hidden>{% trans "Nəticə tapılmadı." context "accounts.people" %}</p>
+  <div class="people__empty" data-people-empty hidden>
+    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+    <p>{% trans "Nəticə tapılmadı." context "accounts.people" %}</p>
+    <button type="button" class="ems-btn ems-btn--sm" data-people-empty-reset>{% trans "Filtrləri sıfırla" context "accounts.people" %}</button>
+  </div>
 
   <nav class="people__pager" data-people-pager aria-label="{% trans 'Səhifələmə' context 'accounts.people' %}">
-    <button type="button" data-people-prev>{% trans "Əvvəlki" context "accounts.people" %}</button>
-    <span data-people-page-info aria-live="polite"></span>
-    <button type="button" data-people-next>{% trans "Sonrakı" context "accounts.people" %}</button>
+    <button type="button" class="ems-btn ems-btn--sm" data-people-prev><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.people" %}</button>
+    <span class="people__pager-info" data-people-pager-info aria-live="polite"></span>
+    <button type="button" class="ems-btn ems-btn--sm" data-people-next>{% trans "Sonrakı" context "accounts.people" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></button>
   </nav>
+
+  {% comment %}
+  ── ƏMƏL DİALOQLARI ─────────────────────────────────────────────────────────
+  Hamısı ems_ui overlay naxışındadır (fokus tələsi / Escape / scrim —
+  `ems_ui/overlay.js`); açılış/bağlanış və göndəriş `people_directory.js`-dədir.
+  Dialoqlar HƏM tək sətir, HƏM toplu seçim üçün eynidir — hədəflər gizli
+  vəziyyətdə saxlanılır və ardıcıl göndərilir.
+  {% endcomment %}
+  <div class="ems-overlay ems-overlay--dialog" id="people-reason-dialog-{{ people_section.kind }}" data-people-dialog="reason" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="people-reason-dialog-{{ people_section.kind }}-title">
+      <form novalidate data-people-dialog-form>
+        <div class="ems-dialog__head">
+          <div>
+            <h2 class="ems-dialog__title" id="people-reason-dialog-{{ people_section.kind }}-title" data-people-dialog-title></h2>
+            <p class="ems-dialog__sub" data-people-dialog-sub></p>
+          </div>
+          <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'accounts.people' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+          <p class="ems-msg ems-msg--error" data-people-dialog-error role="alert" hidden></p>
+          <div class="people-dialog__targets" data-people-dialog-targets></div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="people-reason-dialog-{{ people_section.kind }}-text">{% trans "Səbəb" context "accounts.people" %} <span class="ems-field__req" data-people-dialog-req aria-hidden="true">*</span></label>
+            <textarea class="ems-textarea" id="people-reason-dialog-{{ people_section.kind }}-text" name="reason" rows="3" maxlength="{{ people_section.max_reason_length }}"></textarea>
+            <p class="ems-field__hint" data-people-dialog-hint></p>
+          </div>
+        </div>
+        <div class="ems-dialog__foot">
+          <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "accounts.people" %}</button>
+          <button type="submit" class="ems-btn ems-btn--danger" data-people-dialog-submit></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if people_section.kind == 'teachers' and people_section.can_manage_teacher_role %}
+  <div class="ems-overlay ems-overlay--dialog" id="people-unit-dialog-{{ people_section.kind }}" data-people-dialog="unit" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="people-unit-dialog-{{ people_section.kind }}-title">
+      <form novalidate data-people-dialog-form>
+        <div class="ems-dialog__head">
+          <div>
+            <h2 class="ems-dialog__title" id="people-unit-dialog-{{ people_section.kind }}-title">{% trans "Kafedraya təyin et" context "accounts.people" %}</h2>
+            <p class="ems-dialog__sub">{% trans "Müəllimin aktiv təyinatı seçilmiş kafedraya köçürülür — üzvlük silinmir, tarixçə qalır. Dəyişiklik audit jurnalına yazılır." context "accounts.people" %}</p>
+          </div>
+          <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'accounts.people' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+          <p class="ems-msg ems-msg--error" data-people-dialog-error role="alert" hidden></p>
+          <div class="people-dialog__targets" data-people-dialog-targets></div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="people-unit-dialog-{{ people_section.kind }}-select">{% trans "Kafedra" context "accounts.people" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+              <select class="ems-select bootstrap-single-select__native" id="people-unit-dialog-{{ people_section.kind }}-select" name="unit_id"
+                      data-people-option="kafedras" data-people-option-all="1"
+                      data-bootstrap-select data-live-search="true"
+                      data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.people' %}"
+                      data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.people' %}">
+                <option value="">{% trans "Seçin" context "accounts.people" %}</option>
+              </select>
+            </div>
+          </div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="people-unit-dialog-{{ people_section.kind }}-reason">{% trans "Qeyd" context "accounts.people" %}</label>
+            <textarea class="ems-textarea" id="people-unit-dialog-{{ people_section.kind }}-reason" name="reason" rows="2" maxlength="{{ people_section.max_reason_length }}"
+                      placeholder="{% trans 'Opsional — auditə yazılır' context 'accounts.people' %}"></textarea>
+          </div>
+        </div>
+        <div class="ems-dialog__foot">
+          <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "accounts.people" %}</button>
+          <button type="submit" class="ems-btn ems-btn--primary" data-people-dialog-submit>{% trans "Təyin et" context "accounts.people" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if people_section.kind == 'students' and people_section.can_manage_academic %}
+  <div class="ems-overlay ems-overlay--dialog" id="people-group-dialog-{{ people_section.kind }}" data-people-dialog="group" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="people-group-dialog-{{ people_section.kind }}-title">
+      <form novalidate data-people-dialog-form>
+        <div class="ems-dialog__head">
+          <div>
+            <h2 class="ems-dialog__title" id="people-group-dialog-{{ people_section.kind }}-title">{% trans "Qrupa köçür" context "accounts.people" %}</h2>
+            <p class="ems-dialog__sub">{% trans "Rəsmi köçürmə: köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Səbəb məcburidir və audit jurnalında görünür. Ətraflı ön baxış üçün sətirdəki «İdarə et»i açın." context "accounts.people" %}</p>
+          </div>
+          <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'accounts.people' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+          <p class="ems-msg ems-msg--error" data-people-dialog-error role="alert" hidden></p>
+          <div class="people-dialog__targets" data-people-dialog-targets></div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="people-group-dialog-{{ people_section.kind }}-search">{% trans "Hədəf qrup" context "accounts.people" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <div class="people-dialog__picker" data-people-group-picker
+                 data-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.people' %}">
+              <div class="ems-ss pp-ms js-people-group-picker">
+                <div class="ems-ss__chips pp-ms__chips">
+                  <input type="text" id="people-group-dialog-{{ people_section.kind }}-search" class="ems-ss__search pp-ms__search"
+                         placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.people' %}" autocomplete="off">
+                </div>
+                <div class="ems-ss__menu pp-ms__menu"></div>
+              </div>
+            </div>
+            <input type="hidden" name="group_id" value="">
+          </div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="people-group-dialog-{{ people_section.kind }}-reason">{% trans "Səbəb" context "accounts.people" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+            <textarea class="ems-textarea" id="people-group-dialog-{{ people_section.kind }}-reason" name="reason" rows="3" maxlength="{{ people_section.max_reason_length }}"
+                      placeholder="{% trans 'Məs.: dekanlığın 12/T saylı əmri ilə qrup dəyişikliyi' context 'accounts.people' %}"></textarea>
+            <p class="ems-field__hint" data-people-dialog-hint></p>
+          </div>
+        </div>
+        <div class="ems-dialog__foot">
+          <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "accounts.people" %}</button>
+          <button type="submit" class="ems-btn ems-btn--primary" data-people-dialog-submit>{% trans "Köçür" context "accounts.people" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
   {% comment %}
   ── ANALİTİKA ────────────────────────────────────────────────────────────────
@@ -331,6 +555,21 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
     "admission_year": "{% trans 'Qəbul ili' context 'accounts.people.detail' %}",
     "teaching": "{% trans 'Tədris' context 'accounts.people.detail' %}",
     "no_teaching": "{% trans 'Cari dövrdə açılış yoxdur' context 'accounts.people.detail' %}",
+    "summary_academic": "{% trans 'Akademik xülasə' context 'accounts.people.detail' %}",
+    "summary_teaching": "{% trans 'Tədris xülasəsi' context 'accounts.people.detail' %}",
+    "program": "{% trans 'İxtisas' context 'accounts.people.detail' %}",
+    "structure": "{% trans 'Fakültə / kafedra' context 'accounts.people.detail' %}",
+    "education_form": "{% trans 'Təhsil forması' context 'accounts.people.detail' %}",
+    "uomg": "{% trans 'ÜOMG' context 'accounts.people.detail' %}",
+    "credits": "{% trans 'Kredit (qazanılıb / qəti)' context 'accounts.people.detail' %}",
+    "failed": "{% trans 'Kəsr' context 'accounts.people.detail' %}",
+    "position": "{% trans 'Vəzifə' context 'accounts.people.detail' %}",
+    "service_since": "{% trans 'İş stajı' context 'accounts.people.detail' %}",
+    "years_suffix": "{% trans 'il' context 'accounts.people.detail' %}",
+    "subjects_groups": "{% trans 'Fənn / qrup / açılış' context 'accounts.people.detail' %}",
+    "hours_current": "{% trans 'Saat (cari il)' context 'accounts.people.detail' %}",
+    "heads": "{% trans 'Rəhbərlik' context 'accounts.people.detail' %}",
+    "page_link": "{% trans 'Ətraflı səhifə' context 'accounts.people.detail' %}",
     "profile_page": "{% trans 'Profil səhifəsi' context 'accounts.people.detail' %}",
     "loading": "{% trans 'Yüklənir…' context 'accounts.people.detail' %}",
     "error": "{% trans 'Məlumat yüklənmədi.' context 'accounts.people.detail' %}",
@@ -339,7 +578,7 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
     "status_tone": {"active": "success", "blocked": "danger", "inactive": "muted", "archived": "muted", "staged": "warning"},
     "academic_status": {"enrolled": "{% trans 'Oxuyur' context 'accounts.people.detail' %}", "academic_leave": "{% trans 'Akademik məzuniyyət' context 'accounts.people.detail' %}", "expelled": "{% trans 'Xaric edilib' context 'accounts.people.detail' %}", "graduated": "{% trans 'Məzun' context 'accounts.people.detail' %}", "transferred": "{% trans 'Köçürülüb' context 'accounts.people.detail' %}", "suspended": "{% trans 'Dayandırılıb' context 'accounts.people.detail' %}"},
     "academic_status_tone": {"enrolled": "success", "academic_leave": "warning", "expelled": "danger", "graduated": "info", "transferred": "info", "suspended": "warning"},
-    "actions": {"block": "{% trans 'Hesabı dayandır' context 'accounts.people.detail' %}", "unblock": "{% trans 'Hesabı bərpa et' context 'accounts.people.detail' %}", "grant_teacher": "{% trans 'Müəllim statusu ver' context 'accounts.people.detail' %}", "revoke_teacher": "{% trans 'Müəllim statusunu çıxar' context 'accounts.people.detail' %}"}
+    "actions": {"block": "{% trans 'Hesabı dayandır' context 'accounts.people.detail' %}", "unblock": "{% trans 'Hesabı bərpa et' context 'accounts.people.detail' %}", "grant_teacher": "{% trans 'Müəllim statusu ver' context 'accounts.people.detail' %}", "revoke_teacher": "{% trans 'Müəllim statusunu çıxar' context 'accounts.people.detail' %}", "assign_unit": "{% trans 'Kafedraya təyin et' context 'accounts.people.detail' %}"}
   }</script>
 
   {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ `people.manage_academic`

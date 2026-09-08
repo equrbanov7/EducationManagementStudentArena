@@ -37,6 +37,15 @@
         "cd /Users/elvin/Developer/EMSArena && STAGING_POSTGRES_DB=emsarena_rehearsal_a0d170000901 exec scripts/staging_inspect.sh serve"
       ],
       "port": 8100
+    },
+    {
+      "name": "emsarena-dev-clone",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "DATABASE_URL=postgres://emsarena_app:emsarena_staging_app_password@127.0.0.1:55433/emsarena_rehearsal_a0d170000901 EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 8011 --noreload"
+      ],
+      "port": 8011
     }
   ]
 }

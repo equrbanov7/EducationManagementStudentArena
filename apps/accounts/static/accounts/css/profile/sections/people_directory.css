@@ -1,12 +1,11 @@
-/* «Müəllimlər» / «Tələbələr» kataloqu — BAZA üslubu (iskelet).
+/* «Müəllimlər» / «Tələbələr» kataloqu — REDİZAYN (sahib, 2026-09-07).
  *
- * Bu fayl son dizayn DEYİL: növbəti (UI) agent onu genişləndirəcək. Burada
- * yalnız oxunaqlı və responsiv baza var ki, backend müqaviləsi brauzerdə
- * yoxlana bilsin.
+ * Prinsiplər: bir səthdə bir vurğu (primary yalnız toplu əməldə), skan
+ * edilə bilən sətir (avatar + ad + ikinci sətir meta), status rənglə DEYİL
+ * nişanla (ems-badge), toxunma hədəfləri ≥40px, klaviatura fokusu görünür.
  *
  * Qaydalar (CLAUDE.md + MEMORY): yalnız İŞIQLI tema — `prefers-color-scheme:
- * dark` İŞLƏDİLMİR; rənglər `--ems-*` tokenlərindən gəlir; mövcud olmayan
- * `--ems-primary-300/400` tokenlərinə istinad YOXDUR.
+ * dark` İŞLƏDİLMİR; rənglər `--ems-*` tokenlərindən gəlir.
  */
 
 .people {
@@ -15,16 +14,100 @@
     gap: 16px;
 }
 
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.people__hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.people__hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
 .people__intro {
     margin: 0;
     color: var(--ems-text-muted, #5b6472);
     font-size: 0.95rem;
+    text-wrap: pretty;
+}
+
+.people__stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+}
+
+.people__stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eef4ff);
+    color: var(--ems-primary-800, #1e3a8a);
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.people__stat b {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.people__stat--muted {
+    background: transparent;
+    color: var(--ems-text-muted, #5b6472);
+    padding-inline: 0;
+    font-weight: 500;
+}
+
+.people__stat--muted:empty {
+    display: none;
+}
+
+/* ── Səlahiyyət çipləri — yığcam açılan blok ────────────────────────────── */
+.people__perms-box {
+    margin: 0;
+}
+
+.people__perms-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 999px;
+    background: var(--ems-surface, #fff);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ems-neutral-600, #4b5563);
+    list-style: none;
+}
+
+.people__perms-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.people__perms-box[open] .people__perms-toggle {
+    border-color: var(--ems-primary-200, #c7d7fe);
+    color: var(--ems-primary-700, #1d4ed8);
 }
 
 .people__perms {
     display: flex;
     flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 6px;
+    max-width: 480px;
     margin: 8px 0 0;
     padding: 0;
     list-style: none;
@@ -38,45 +121,100 @@
     font-size: 0.78rem;
 }
 
+/* ── Filtr paneli ───────────────────────────────────────────────────────── */
 .people__filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 12px;
+    padding: 14px 16px;
+    background: var(--ems-surface, #fff);
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 14px;
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.people__filters-main,
+.people__filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+}
+
+.people__filters-main .people__field--search {
+    grid-column: span 2;
 }
 
 .people__field {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     min-width: 0;
 }
 
 .people__field label,
 .people__field-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--ems-text, #1f2937);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500, #6b7280);
 }
 
 .people__field input,
 .people__field select {
-    /* Toxunma hədəfi ≥ 44px (a11y) və bütün sahələr eyni hündürlükdə. */
-    min-height: 44px;
+    min-height: 42px;
     border: 1px solid var(--ems-border, #d5dbe5);
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 10px;
+    padding: 8px 11px;
     background: var(--ems-surface, #ffffff);
     color: var(--ems-text, #1f2937);
     font: inherit;
+    font-size: 0.93rem;
     max-width: 100%;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.people__field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.people__field input:hover,
+.people__field select:hover {
+    border-color: var(--ems-primary-300, #9dbaf5);
 }
 
 .people__field input:focus-visible,
 .people__field select:focus-visible,
 .people__name:focus-visible,
-.people__action:focus-visible {
+.people__action:focus-visible,
+.people__th-sort:focus-visible,
+.people__reset:focus-visible {
     outline: 2px solid var(--ems-primary-600, #2563eb);
     outline-offset: 2px;
+}
+
+.people__search {
+    position: relative;
+}
+
+.people__search > i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-400, #9ca3af);
+    font-size: 13px;
+    pointer-events: none;
+}
+
+.people__search input {
+    width: 100%;
+    padding-left: 34px;
 }
 
 .people__age-inputs {
@@ -96,14 +234,69 @@
     gap: 6px;
     font-size: 0.8rem;
     font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ems-text, #1f2937);
 }
 
-.people__reset {
-    min-height: 44px;
-    border: 1px solid var(--ems-border, #d5dbe5);
-    border-radius: 8px;
-    background: var(--ems-surface, #ffffff);
+/* «Əlavə filtrlər» — native details, JS lazım deyil. */
+.people__filters-more {
+    border-top: 1px dashed var(--ems-border, #e2e8f0);
+    padding-top: 10px;
+}
+
+.people__filters-more > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
     cursor: pointer;
+    list-style: none;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__filters-more > summary::-webkit-details-marker {
+    display: none;
+}
+
+.people__filters-more > summary::after {
+    content: "›";
+    display: inline-block;
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: transform 0.12s ease;
+}
+
+.people__filters-more[open] > summary::after {
+    transform: rotate(90deg);
+}
+
+.people__filters-more[open] .people__filters-grid {
+    margin-top: 12px;
+}
+
+.people__filters-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ems-primary-600, #2563eb);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.people__filters-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .people__coverage {
@@ -112,23 +305,88 @@
     color: var(--ems-text-muted, #5b6472);
 }
 
-/* Geniş cədvəl ÖZ konteynerində sürüşür — səhifə gövdəsi üfüqi sürüşməməlidir. */
+.people__reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 10px;
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.people__reset:hover {
+    border-color: var(--ems-primary-300, #9dbaf5);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+/* ── Toplu əməl zolağı ──────────────────────────────────────────────────── */
+.people__bulkbar {
+    position: sticky;
+    top: 8px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--ems-primary-800, #1e3a8a);
+    color: #fff;
+    box-shadow: 0 12px 28px rgba(30, 58, 138, 0.28);
+}
+
+.people__bulkbar-count {
+    font-weight: 800;
+    font-size: 0.92rem;
+}
+
+.people__bulkbar-spacer {
+    flex: 1 1 auto;
+}
+
+.people__bulkbar .ems-btn {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.people__bulkbar .ems-btn--primary {
+    background: #fff;
+    color: var(--ems-primary-800, #1e3a8a);
+    border-color: #fff;
+}
+
+.people__bulkbar .ems-btn--danger {
+    background: var(--ems-danger, #dc2626);
+    border-color: var(--ems-danger, #dc2626);
+}
+
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
 .people__table-wrap {
     overflow-x: auto;
     border: 1px solid var(--ems-border, #d5dbe5);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--ems-surface, #ffffff);
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
 .people__table {
     width: 100%;
-    border-collapse: collapse;
-    min-width: 720px;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 760px;
 }
 
 .people__table th,
 .people__table td {
-    padding: 10px 12px;
+    padding: 11px 12px;
     text-align: start;
     border-bottom: 1px solid var(--ems-border-subtle, #eef1f6);
     vertical-align: middle;
@@ -136,14 +394,56 @@
 }
 
 .people__table thead th {
-    background: var(--ems-primary-50, #eef4ff);
-    font-size: 0.82rem;
-    color: var(--ems-primary-800, #1e3a8a);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ems-bg-subtle, #f8fafc);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500, #6b7280);
 }
 
-/* QA 2026-09-05 (UX-17): sıralana bilən başlıq düyməsi — `<button>` başlığın
-   bütün kliklənən sahəsini tutur (mouse + klaviatura Tab/Enter/Space). Ox
-   göstəricisi `aria-sort` dəyərinə görə göstərilir (people_directory.js). */
+.people__table tbody tr {
+    transition: background-color 0.12s ease;
+}
+
+.people__table tbody tr:hover {
+    background: var(--ems-primary-50, #f3f7ff);
+}
+
+.people__table tbody tr.is-selected {
+    background: var(--ems-primary-50, #eef4ff);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600, #2563eb);
+}
+
+.people__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.people__table td.is-muted {
+    color: var(--ems-neutral-400, #9ca3af);
+}
+
+.people__th-check,
+.people__cell-check {
+    width: 40px;
+    padding-inline-end: 0;
+}
+
+.people__th-check input,
+.people__cell-check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600, #2563eb);
+    cursor: pointer;
+}
+
+.people__th-actions {
+    text-align: end;
+}
+
 .people__th-sort {
     display: inline-flex;
     align-items: center;
@@ -153,22 +453,28 @@
     background: transparent;
     font: inherit;
     font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
     color: inherit;
     cursor: pointer;
 }
+
 .people__th-sort:hover {
     color: var(--ems-primary-600, #2563eb);
 }
+
 .people__th-sort-icon::after {
     content: "⇅";
     font-size: 0.7rem;
     opacity: 0.5;
 }
+
 th[aria-sort="ascending"] .people__th-sort-icon::after {
     content: "↑";
     opacity: 1;
     color: var(--ems-primary-600, #2563eb);
 }
+
 th[aria-sort="descending"] .people__th-sort-icon::after {
     content: "↓";
     opacity: 1;
@@ -178,22 +484,24 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
 .people__cell-person {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    min-width: 220px;
 }
 
 .people__avatar {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 12px;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: var(--ems-primary-100, #dbe7ff);
+    background: linear-gradient(135deg, var(--ems-primary-100, #dbe7ff), var(--ems-primary-50, #eef4ff));
     color: var(--ems-primary-700, #1d4ed8);
     font-size: 0.8rem;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
 .people__avatar img {
@@ -206,6 +514,8 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: 1px;
+    min-width: 0;
 }
 
 .people__name {
@@ -213,51 +523,240 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     border: 0;
     padding: 0;
     font: inherit;
-    font-weight: 600;
-    color: var(--ems-primary-700, #1d4ed8);
+    font-weight: 700;
+    color: var(--ems-text, #1f2937);
     cursor: pointer;
     text-align: start;
+    border-radius: 4px;
 }
 
-.people__username {
+.people__name:hover {
+    color: var(--ems-primary-700, #1d4ed8);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.people__username,
+.people__meta {
     font-size: 0.76rem;
     color: var(--ems-text-muted, #5b6472);
 }
 
-.people__action {
-    min-height: 44px;
-    margin-inline-end: 6px;
-    padding: 6px 10px;
-    border: 1px solid var(--ems-border, #d5dbe5);
-    border-radius: 8px;
-    background: var(--ems-surface, #ffffff);
-    cursor: pointer;
-    font-size: 0.82rem;
-}
-
-.people__pager {
+.people__cell-contact {
     display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.people__contact {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: var(--ems-text, #1f2937);
+    text-decoration: none;
 }
 
-.people__pager button {
-    min-height: 44px;
-    padding: 6px 14px;
+.people__contact i {
+    color: var(--ems-neutral-400, #9ca3af);
+    font-size: 11px;
+}
+
+.people__contact:hover {
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__cell-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.people__cell-status .ems-badge,
+.people__cell-group .ems-badge {
+    white-space: nowrap;
+}
+
+.people__cell-actions {
+    text-align: end;
+}
+
+.people__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    margin-inline-start: 4px;
+    padding: 0 10px;
     border: 1px solid var(--ems-border, #d5dbe5);
-    border-radius: 8px;
+    border-radius: 9px;
     background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
     cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
 }
 
-.people__empty,
+.people__action i {
+    font-size: 12px;
+    color: var(--ems-neutral-500, #6b7280);
+}
+
+.people__action:hover {
+    border-color: var(--ems-primary-300, #9dbaf5);
+    background: var(--ems-primary-50, #eef4ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__action:hover i {
+    color: inherit;
+}
+
+.people__action--manage {
+    border-color: var(--ems-primary-200, #c7d7fe);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__action--manage i {
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.people__action--icon {
+    width: 34px;
+    padding: 0;
+    justify-content: center;
+}
+
+.people__action--danger:hover {
+    border-color: var(--ems-danger, #dc2626);
+    background: #fef2f2;
+    color: var(--ems-danger-strong, #b91c1c);
+}
+
+.people__action--ok:hover {
+    border-color: #34d399;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+/* ── Boş vəziyyət / səhifələmə ──────────────────────────────────────────── */
+.people__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 36px 16px;
+    border: 1px dashed var(--ems-border, #d5dbe5);
+    border-radius: 14px;
+    color: var(--ems-text-muted, #5b6472);
+    text-align: center;
+}
+
+.people__empty > i {
+    font-size: 26px;
+    opacity: 0.45;
+}
+
+.people__empty p {
+    margin: 0;
+}
+
 .people__denied,
 .people__placeholder {
     margin: 0;
     color: var(--ems-text-muted, #5b6472);
 }
 
-/* Şəxs kartı (drawer gövdəsi) — konteyner ems_ui overlay.css-dəndir. */
+.people__pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.people__pager[hidden] {
+    display: none;
+}
+
+.people__pager-info {
+    font-size: 0.86rem;
+    color: var(--ems-text-muted, #5b6472);
+    font-weight: 600;
+}
+
+/* ── Əməl dialoqları ────────────────────────────────────────────────────── */
+.people-dialog__targets {
+    margin-bottom: 12px;
+}
+
+.people-dialog__list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.people-dialog__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    background: var(--ems-bg-subtle, #f8fafc);
+    border: 1px solid var(--ems-border-subtle, #eef1f6);
+    font-size: 0.88rem;
+}
+
+.people-dialog__item--more {
+    justify-content: center;
+    color: var(--ems-text-muted, #5b6472);
+    font-weight: 700;
+}
+
+.people-dialog__avatar {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ems-primary-100, #dbe7ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.people-dialog__name {
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.people-dialog__meta {
+    margin-left: auto;
+    color: var(--ems-text-muted, #5b6472);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.people-dialog__picker .ems-ss {
+    width: 100%;
+    max-width: none;
+}
+
+.people-dialog__picker .ems-ss__chips {
+    min-height: 42px;
+}
+
+/* ── Şəxs kartı (drawer gövdəsi) — konteyner ems_ui overlay.css-dəndir ──── */
 .people-detail__loading,
 .people-detail__error,
 .people-detail__empty {
@@ -371,28 +870,9 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     border-top: 1px solid var(--ems-border, #e2e8f0);
 }
 
-@media (max-width: 480px) {
-    .people-detail__facts {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-@media (max-width: 640px) {
-    .people__filters {
-        grid-template-columns: 1fr;
-    }
-
-    /* 375px-də daşma olmasın: cədvəl öz konteynerində sürüşür. */
-    .people__table {
-        min-width: 560px;
-    }
-}
-
-/* ── Yüklənmə vəziyyəti (QA 2026-09-05 UX-11) ─────────────────────────────
-   `people_directory.js` sorğu gedərkən cədvələ `aria-busy="true"` qoyur və
-   skelet sətirlər əlavə edir — əvvəl boş başlıq sətri + pager görünürdü. */
+/* ── Yüklənmə vəziyyəti ─────────────────────────────────────────────────── */
 .people__row--skeleton td {
-    padding: 12px 10px;
+    padding: 14px 12px;
 }
 
 .people__row--skeleton .skeleton-line {
@@ -404,36 +884,73 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
     display: none;
 }
 
-/* ── İcazə çipləri: yığcam açılan blok (QA 2026-09-05 P3-7) ─────────────── */
-.people__perms-box {
-    margin-top: 6px;
+/* ── Responsiv ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .people__filters-main .people__field--search {
+        grid-column: 1 / -1;
+    }
 }
 
-.people__perms-toggle {
+@media (max-width: 640px) {
+    .people__filters-main,
+    .people__filters-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .people__hero {
+        flex-direction: column;
+    }
+
+    .people__perms {
+        justify-content: flex-start;
+    }
+
+    /* 375px-də daşma olmasın: cədvəl öz konteynerində sürüşür. */
+    .people__table {
+        min-width: 600px;
+    }
+
+    .people__bulkbar {
+        position: static;
+    }
+}
+
+@media (max-width: 480px) {
+    .people-detail__facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+
+/* ── Çekmecə xülasəsi (2026-09-08) ───────────────────────────────────────── */
+.people-detail__facts--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 14px;
+}
+
+@media (max-width: 640px) {
+    .people-detail__facts--grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.people-detail__pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--ems-neutral-600);
-    list-style: none;
+    padding: 1px 9px;
+    border-radius: var(--ems-r-pill, 999px);
+    font-weight: 700;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
 }
 
-.people__perms-toggle::-webkit-details-marker {
-    display: none;
-}
+.people-detail__pill.is-ok { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.people-detail__pill.is-warn { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 
-.people__perms-toggle::before {
-    content: "›";
-    display: inline-block;
-    transition: transform 0.12s ease;
-}
-
-.people__perms-box[open] .people__perms-toggle::before {
-    transform: rotate(90deg);
-}
-
-.people__perms-box[open] .people__perms {
-    margin-top: 6px;
+/* ── Yaratma düymələri (hero) — 2026-09-08 ─────────────────────────────── */
+.people__create {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
 }

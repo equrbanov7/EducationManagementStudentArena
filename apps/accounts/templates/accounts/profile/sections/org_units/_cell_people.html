@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}Fakültə heyəti xanası — dekan müavinləri və proqram koordinatorları
+çip kimi (ilk 3 + «+N»). Tam siyahı «Heyət» çekmecəsindədir.{% endcomment %}
+<div class="ou-people">
+    {% if row.data.vice_deans or row.data.coordinators %}
+        <div class="ou-people__group">
+            <span class="ou-people__label">{% trans "Müavin" context "organizations.registry" %}</span>
+            {% for person in row.data.vice_deans|slice:":3" %}
+                <span class="ou-chip" title="{{ person.name }}">{{ person.name }}</span>
+            {% empty %}
+                <span class="ou-people__none">—</span>
+            {% endfor %}
+            {% if row.data.vice_deans|length > 3 %}<span class="ou-chip ou-chip--more">+{{ row.data.vice_deans|length|add:"-3" }}</span>{% endif %}
+        </div>
+        <div class="ou-people__group">
+            <span class="ou-people__label">{% trans "Koordinator" context "organizations.registry" %}</span>
+            {% for person in row.data.coordinators|slice:":3" %}
+                <span class="ou-chip" title="{{ person.name }}{% if person.scope %} · {{ person.scope }}{% endif %}">{{ person.name }}</span>
+            {% empty %}
+                <span class="ou-people__none">—</span>
+            {% endfor %}
+            {% if row.data.coordinators|length > 3 %}<span class="ou-chip ou-chip--more">+{{ row.data.coordinators|length|add:"-3" }}</span>{% endif %}
+        </div>
+    {% else %}
+        <span class="ou-missing ou-missing--soft">{% trans "Heyət təyin edilməyib" context "organizations.registry" %}</span>
+    {% endif %}
+</div>

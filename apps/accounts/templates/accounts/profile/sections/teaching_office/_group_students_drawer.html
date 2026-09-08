@@ -14,8 +14,11 @@ səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR
      data-t-error="{% trans 'Siyahı yüklənmədi — yenidən cəhd edin.' context 'accounts.groups' %}"
      data-t-count="{% trans '%d tələbə' context 'accounts.groups' %}"
      data-t-admission="{% trans 'Qəbul' context 'accounts.groups' %}"
+     data-t-form="{% trans 'Forma' context 'accounts.groups' %}"
      data-t-plan="{% trans 'Fərdi plan (DOCX)' context 'accounts.groups' %}"
      data-t-detach="{% trans 'Qrupdan çıxar' context 'accounts.groups' %}"
+     data-t-move="{% trans 'Qrupu dəyiş' context 'accounts.groups' %}"
+     data-t-profile="{% trans 'Profilə bax' context 'accounts.groups' %}"
      data-t-freeze="{% trans 'Dondur' context 'accounts.groups' %}"
      data-t-expel="{% trans 'Uzaqlaşdır' context 'accounts.groups' %}"
      data-t-status-enrolled="{% trans 'Qeydiyyatlı' context 'accounts.groups' %}"
@@ -24,7 +27,22 @@ səbəb dialoqlarını açır — səbəb ≥20 simvol və təsdiq MƏCBURİDİR
      data-t-status-graduated="{% trans 'Məzun' context 'accounts.groups' %}">
 
     <div class="tof-students__head">
-        <div class="tof-students__meta" data-tof-students-meta aria-live="polite"></div>
+        <div class="tof-students__topline">
+            <div class="tof-students__meta" data-tof-students-meta aria-live="polite"></div>
+            {% if groups_registry_section.can_manage %}
+            {% comment %}Prefill (`id`) və namizəd URL-i çekmecə açılanda JS ilə
+            qoyulur — düymə hansı qrup açıqdırsa ona işləyir.{% endcomment %}
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+                    data-tof-open="tofGroupAddStudentsDialog"
+                    data-tof-add-students
+                    data-tof-students-add
+                    data-tof-prefill='{"action": "add_students", "id": ""}'
+                    hidden>
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                {% trans "Tələbə əlavə et" context "accounts.groups" %}
+            </button>
+            {% endif %}
+        </div>
         <label class="tof-students__search">
             <i class="fas fa-search" aria-hidden="true"></i>
             <input type="search" class="ems-input" data-tof-students-search

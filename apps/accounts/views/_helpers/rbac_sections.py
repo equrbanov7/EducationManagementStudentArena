@@ -227,7 +227,13 @@ def apply_permission_section_gates(
     #     öz struktur alt-ağacı + «Müəllim» filtri. Konkret dərsin əhatəyə
     #     düşməsi `apps/registrar/lessons_log.py`-da fail-closed yenidən
     #     yoxlanılır (əhatəsiz aktor boş nəticə alır — §8/8).
-    can_supervise_lessons = privileged or has_permission(permissions, "journal.roster")
+    #   `journal.lessons_unit` (2026-09-08) → LABORANT: öz kafedrasının müəllimlərinin
+    #     dərs izinə OXU-ONLY baxış — eyni nəzarət görünüşü, siyahı idarəsi yox.
+    can_supervise_lessons = (
+        privileged
+        or has_permission(permissions, "journal.roster")
+        or has_permission(permissions, "journal.lessons_unit")
+    )
 
     for enabled, section in (
         (can_view_audit, "audit-log"),
@@ -241,6 +247,7 @@ def apply_permission_section_gates(
         (can_reassign_teaching, "teaching-handover"),
         (can_manage_schedule, "schedule-manage"),
         (can_import_students, "student-intake"),
+        (can_import_students, "teacher-intake"),
         (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
         (can_manage_workload, "workload-distribution"),
@@ -251,6 +258,11 @@ def apply_permission_section_gates(
         (can_report_workload, "workload-overview"),
         (can_view_structure_tree, "org-structure-tree"),
         (can_view_structure_tree, "chair-profile"),
+        # Fakültələr / Kafedralar reyestri (2026-09-08): ağac ilə EYNİ açar —
+        # `unit.view` əhatəsi olan hər aktor (Tədris şöbəsi, RİM, prorektor…)
+        # siyahıları görür; yazı düymələri bölmə bayraqları ilə gizlənir.
+        (can_view_structure_tree, "org-faculties"),
+        (can_view_structure_tree, "org-kafedras"),
         (can_view_catalog, "programs-registry"),
         (can_view_catalog, "subject-catalog"),
         (can_view_plan, "curriculum-editor"),

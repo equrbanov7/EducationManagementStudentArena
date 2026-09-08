@@ -127,9 +127,7 @@ def head_candidate_memberships(organization, *, search: str = ""):
     term = (search or "").strip()
     if term:
         memberships = memberships.filter(
-            Q(user__first_name__icontains=term)
-            | Q(user__last_name__icontains=term)
-            | Q(user__username__icontains=term)
+            Q(user__first_name__icontains=term) | Q(user__last_name__icontains=term) | Q(user__username__icontains=term)
         )
     return memberships
 

@@ -3,9 +3,16 @@
 GLUE qatı: domen məntiqi ``apps.registrar.lessons_log``-dadır, bura yalnız
 kontekst yığımı düşür (mövcud `teaching_office.py` naxışı).
 
-SCOPE (README §8/8): müəllim YALNIZ öz dərslərini görür; ``journal.roster``
-daşıyan aktor (kafedra müdiri / dekanlıq / RİM) öz alt-ağacını görür və
-«Müəllim» filtri ona AÇILIR. Əhatəsiz aktor boş vəziyyət alır.
+SCOPE (README §8/8): müəllim YALNIZ öz dərslərini görür; nəzarət açarı
+(``journal.roster`` — kafedra müdiri / dekanlıq / RİM, ``journal.lessons_unit``
+— laborant) daşıyan aktor öz alt-ağacını görür və «Müəllim» filtri ona AÇILIR.
+Əhatəsiz aktor boş vəziyyət alır.
+
+FİLTR PANELİ (sahib, 2026-09-08): «Tətbiq et» YOXDUR — avto rejim (debounce +
+skeleton); select-lər Bootstrap tərzli, uzun siyahılarda daxili axtarış;
+tədris ili + semestr fəsli (Payız/Yaz/Yay); başlanğıc/son tarix; təhsil forması
+(əyani/qiyabi). BOŞ dəyər = default (cari semestr), «hamısı» ayrıca `all`
+dəyəridir — ona görə «Sıfırla» hər zaman cari semestrə qayıdır.
 
 CONTEXT MÜQAVİLƏSİ (`lessons_log_section`)
     has_access   bool          — aktiv təşkilat konteksti var
@@ -13,8 +20,7 @@ CONTEXT MÜQAVİLƏSİ (`lessons_log_section`)
     range        dict          — {key, start, end, chips}
     kpi_tiles    list          — `ems_ui/_kpi_row.html` müqaviləsi
     days         list          — [{date, weekday, summary, rows}]
-    coverage     list          — açılış üzrə sillabus mövzu əhatəsi
-    filter_*     …             — `ems_ui/_filter_bar.html` müqaviləsi
+    filters      dict          — {fields, applied} `ems_ui/_filter_bar.html` müqaviləsi
     export_url   str           — CSV
     state_*      …             — boş / əhatəsiz vəziyyət
 """
@@ -28,11 +34,11 @@ from apps.registrar import lessons_log as service
 
 _CTX = "accounts.lessons_log"
 
-#: Sillabus əhatəsi hesablanan maksimum açılış (hər biri 3 sorğu — büdcə qapısı).
-COVERAGE_CAP = 4
-
 #: Filtr parametrlərinin ad fəzası (`ems_ui/_filter_bar.html` müqaviləsi).
 PREFIX = "ll_"
+
+#: Seçici siyahılarının tavanı (fənn / qrup / müəllim) — menyunun daxili axtarışı var.
+OPTION_CAP = 300
 
 
 def _weekday_labels() -> tuple:
@@ -86,55 +92,49 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
     section["has_access"] = True
     section["is_supervisor"] = supervisor
 
-    period_view = schedule_service.resolve_display_period(active_organization, requested=_param(request, "period"))
-    period = period_view["period"]
+    legacy_period = _param(request, "period")
+    period_view = schedule_service.resolve_display_period(active_organization, requested=legacy_period)
+    current = period_view["period"]
 
-    window = service.resolve_range(
-        key=_param(request, "range", service.RANGE_SEMESTER),
+    selection = service.resolve_selection(
+        active_organization,
+        current=current,
+        year=_param(request, "year"),
+        season=_param(request, "season"),
+        legacy_period=legacy_period,
+        range_key=_param(request, "range", service.RANGE_SEMESTER),
         start_raw=_param(request, "from"),
         end_raw=_param(request, "to"),
-        period=period,
     )
+    window = selection["window"]
 
-    lessons = service.scoped_lessons(request.user, active_organization, supervisor=supervisor)
-    lessons = lessons.filter(date__gte=window["start"], date__lte=window["end"])
-    # SEMESTR FİLTRİ yalnız İSTƏNİLƏNDƏ tətbiq olunur.  «Semestr» dövrü onsuz da
-    # semestrin tarixlərindən doğur; «Bu ay» / «İl» / «Seçilmiş aralıq» isə
-    # TARİX aralığıdır — ora gizli semestr filtri qoysaq istifadəçi seçdiyi
-    # aralıqda dərs görməyib boş ekran alır (canlı QA-da ölçüldü).
-    period_filter = period if (_param(request, "period") or window["key"] == service.RANGE_SEMESTER) else None
-    if period_filter is not None:
-        lessons = lessons.filter(offering__period=period_filter)
+    lessons_all = service.scoped_lessons(request.user, active_organization, supervisor=supervisor)
+    lessons = lessons_all.filter(date__gte=window["start"], date__lte=window["end"])
+    if selection["apply_period_filter"]:
+        lessons = lessons.filter(offering__period__in=selection["periods"])
 
-    # ── Filtrlər (draft ≠ applied — `EMSFilterBar` URL-ə yazır) ──────────────
-    search = _param(request, "q")
-    offering_id = _param(request, "offering")
-    kind = _param(request, "kind")
-    group = _param(request, "group")
-    teacher_id = _param(request, "teacher") if supervisor else ""
+    values = {
+        "q": _param(request, "q"),
+        "offering": _param(request, "offering"),
+        "kind": _param(request, "kind"),
+        "group": _param(request, "group"),
+        "teacher": _param(request, "teacher") if supervisor else "",
+        "form": _param(request, "form"),
+        "range": window["key"],
+        "year": selection["year"],
+        "season": selection["season"],
+    }
     only_flagged = _param(request, "flagged") == "1"
-
-    if search:
-        from django.db.models import Q
-
-        lessons = lessons.filter(
-            Q(topic__icontains=search)
-            | Q(offering__subject__name__icontains=search)
-            | Q(offering__subject__code__icontains=search)
-            | Q(offering__group__name__icontains=search)
-        )
-    if offering_id:
-        lessons = lessons.filter(offering_id=offering_id)
-    if kind:
-        lessons = lessons.filter(kind=kind)
-    if group:
-        lessons = lessons.filter(offering__group__name=group)
-    if teacher_id:
-        from django.db.models import Q
-
-        lessons = lessons.filter(
-            Q(instructor_id=teacher_id) | Q(instructor__isnull=True, offering__instructor=teacher_id)
-        )
+    lessons = service.apply_filters(
+        lessons,
+        q=values["q"],
+        offering=values["offering"],
+        kind=values["kind"],
+        group=values["group"],
+        teacher=values["teacher"],
+        form=values["form"],
+        supervisor=supervisor,
+    )
 
     totals = service.range_totals(lessons)
     rows = service.build_rows(lessons)
@@ -154,7 +154,7 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
                 "from": window["start"].isoformat(),
                 "to": window["end"].isoformat(),
             },
-            "period": period,
+            "period": current,
             "totals": totals,
             "rows": rows,
             "days": _group_by_day(rows),
@@ -165,21 +165,16 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         }
     )
     section["kpi_tiles"] = _kpi_tiles(totals)
-    section["coverage"] = _coverage(lessons, totals)
+    # Seçici siyahıları SEÇİLMİŞ dövrlərə görə daralır (yoxsa bütün əhatə).
+    option_source = lessons_all
+    if selection["periods"] is not None:
+        option_source = option_source.filter(offering__period__in=selection["periods"])
     section["filters"] = _filter_fields(
-        request,
-        lessons_all=service.scoped_lessons(request.user, active_organization, supervisor=supervisor),
-        period=period_filter,
-        period_view=period_view,
+        option_source,
+        selection=selection,
+        current=current,
         supervisor=supervisor,
-        values={
-            "q": search,
-            "offering": offering_id,
-            "kind": kind,
-            "group": group,
-            "teacher": teacher_id,
-            "range": window["key"],
-        },
+        values=values,
     )
     section["export_url"] = "%s?%s" % (
         reverse("registrar:lessons_log_csv"),
@@ -189,7 +184,7 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
     section["header_subtitle"] = (
         pgettext(
             _CTX,
-            "Kafedranın müəllimləri hansı dərsi, hansı qrupa, hansı mövzu ilə keçib. Jurnalı "
+            "Əhatənizdəki müəllimlər hansı dərsi, hansı qrupa, hansı mövzu ilə keçib. Jurnalı "
             "vaxtında doldurulmayan dərslər ayrıca işarələnir.",
         )
         if supervisor
@@ -269,75 +264,43 @@ def _kpi_tiles(totals) -> list:
     ]
 
 
-def _coverage(lessons, totals) -> list:
-    """Açılış üzrə sillabus mövzu əhatəsi (ən çox dərsi olan `COVERAGE_CAP` açılış)."""
-    if not totals["lessons"]:
-        return []
-    summary = service.offering_totals(lessons)
-    summary = sorted(summary, key=lambda row: row["lessons"], reverse=True)[:COVERAGE_CAP]
-    if not summary:
-        return []
-    offering_ids = [row["offering_id"] for row in summary]
-    held: dict = {}
-    for offering_id, topic in lessons.filter(offering_id__in=offering_ids).values_list("offering_id", "topic"):
-        held.setdefault(offering_id, set()).add((topic or "").strip())
+def _filter_fields(option_source, *, selection, current, supervisor, values) -> dict:
+    """`ems_ui/_filter_bar.html` sahələri — seçicilər TƏK aqreqat sorğudan.
 
-    from apps.registrar.journal_policy import syllabus_gate
-    from apps.registrar.models import CourseOffering
+    Hər select-in `default`-u var: filtr çipinin «×»-i və «Sıfırla» ora qayıdır
+    (index-0 seçimə deyil). Uzun siyahılar `searchable` — menyuda axtarış sətri.
+    """
+    from django.apps import apps as django_apps
 
-    offerings = {
-        offering.id: offering
-        for offering in CourseOffering.objects.filter(id__in=offering_ids).select_related(
-            "subject", "group", "period", "organization"
-        )
-    }
-    out = []
-    for row in summary:
-        offering = offerings.get(row["offering_id"])
-        if offering is None:
-            continue
-        stats = service.coverage_for_offering(offering, held_topics=held.get(offering.id, set()))
-        gate = syllabus_gate(offering)
-        out.append(
-            {
-                "offering_id": str(offering.id),
-                "subject_code": row["offering__subject__code"] or "",
-                "subject_name": row["offering__subject__name"] or "",
-                "group": row["offering__group__name"] or "",
-                "lessons": row["lessons"],
-                "hours": int(row["hours"] or 0),
-                "journal_url": reverse("registrar:journal_detail", args=[offering.id]),
-                "can_add_lesson": not gate["locked"],
-                "lock_title": gate["title"],
-                "lock_message": gate["message"],
-                "lock_action_label": gate["action_label"],
-                "lock_action_url": gate["action_url"],
-                **stats,
-            }
-        )
-    return out
-
-
-def _filter_fields(request, *, lessons_all, period, period_view, supervisor, values) -> dict:
-    """`ems_ui/_filter_bar.html` sahələri — seçicilər TƏK aqreqat sorğudan."""
     from apps.registrar.models import LessonKind
 
-    scoped = lessons_all
-    if period is not None:
-        scoped = scoped.filter(offering__period=period)
+    academic_period = django_apps.get_model("organizations", "AcademicPeriod")
+
     options = list(
-        scoped.values_list(
+        option_source.values_list(
             "offering_id", "offering__subject__code", "offering__subject__name", "offering__group__name"
-        ).distinct()[:200]
+        ).distinct()[:OPTION_CAP]
     )
     offering_options = [{"value": "", "label": pgettext(_CTX, "Bütün fənlər")}]
-    group_names = []
+    offering_labels: dict = {}
+    group_names: list = []
     for offering_id, code, name, group_name in options:
-        offering_options.append(
-            {"value": str(offering_id), "label": "%s · %s — %s" % (code or "", name or "", group_name or "")}
-        )
+        label = "%s · %s — %s" % (code or "", name or "", group_name or "")
+        offering_options.append({"value": str(offering_id), "label": label})
+        offering_labels[str(offering_id)] = label
         if group_name and group_name not in group_names:
             group_names.append(group_name)
+    group_names.sort(key=str.casefold)
+
+    current_year = getattr(current, "academic_year", "") or ""
+    current_season = service.season_of(current) if current is not None else ""
+    years = service.year_options(selection["catalog"])
+    all_years = pgettext(_CTX, "Bütün illər")
+    all_seasons = pgettext(_CTX, "Bütün semestrlər")
+    season_labels = {key: str(label) for key, label in service.SEASON_LABELS}
+    form_options = service.education_form_options()
+    kind_labels = {key: str(label) for key, label in LessonKind.choices}
+    range_labels = {key: str(label) for key, label in service.RANGE_LABELS}
 
     fields = [
         {
@@ -349,17 +312,63 @@ def _filter_fields(request, *, lessons_all, period, period_view, supervisor, val
             "wide": True,
         },
         {
+            "name": PREFIX + "year",
+            "label": pgettext(_CTX, "Tədris ili"),
+            "kind": "select",
+            "value": values["year"],
+            "default": current_year or service.ALL,
+            "searchable": len(years) > 8,
+            "options": years + [{"value": service.ALL, "label": all_years}],
+        },
+        {
+            "name": PREFIX + "season",
+            "label": pgettext(_CTX, "Semestr"),
+            "kind": "select",
+            "value": values["season"],
+            "default": current_season or service.ALL,
+            "options": [{"value": key, "label": label} for key, label in service.SEASON_LABELS]
+            + [{"value": service.ALL, "label": all_seasons}],
+        },
+        {
             "name": PREFIX + "range",
-            "label": pgettext(_CTX, "Dövr"),
+            "label": pgettext(_CTX, "Tarix aralığı"),
             "kind": "select",
             "value": values["range"],
+            "default": service.RANGE_SEMESTER,
             "options": [{"value": key, "label": label} for key, label in service.RANGE_LABELS],
+        },
+        {
+            "name": PREFIX + "from",
+            "label": pgettext(_CTX, "Başlanğıc"),
+            "kind": "date",
+            "value": selection["window"]["start"].isoformat(),
+            "range_select": PREFIX + "range",
+            "range_custom": service.RANGE_CUSTOM,
+        },
+        {
+            "name": PREFIX + "to",
+            "label": pgettext(_CTX, "Son"),
+            "kind": "date",
+            "value": selection["window"]["end"].isoformat(),
+            "range_select": PREFIX + "range",
+            "range_custom": service.RANGE_CUSTOM,
+        },
+        {
+            "name": PREFIX + "form",
+            "label": pgettext(_CTX, "Təhsil forması"),
+            "kind": "select",
+            "value": values["form"],
+            "default": "",
+            "options": [{"value": "", "label": pgettext(_CTX, "Hamısı")}] + form_options,
         },
         {
             "name": PREFIX + "offering",
             "label": pgettext(_CTX, "Fənn"),
             "kind": "select",
             "value": values["offering"],
+            "default": "",
+            "searchable": True,
+            "wide": True,
             "options": offering_options,
         },
         {
@@ -367,6 +376,8 @@ def _filter_fields(request, *, lessons_all, period, period_view, supervisor, val
             "label": pgettext(_CTX, "Qrup"),
             "kind": "select",
             "value": values["group"],
+            "default": "",
+            "searchable": len(group_names) > 8,
             "options": [{"value": "", "label": pgettext(_CTX, "Bütün qruplar")}]
             + [{"value": name, "label": name} for name in group_names],
         },
@@ -375,44 +386,96 @@ def _filter_fields(request, *, lessons_all, period, period_view, supervisor, val
             "label": pgettext(_CTX, "Dərsin tipi"),
             "kind": "select",
             "value": values["kind"],
+            "default": "",
             "options": [{"value": "", "label": pgettext(_CTX, "Bütün tiplər")}]
             + [{"value": key, "label": label} for key, label in LessonKind.choices],
         },
     ]
-    if period_view["choices"]:
-        fields.append(
-            {
-                "name": PREFIX + "period",
-                "label": pgettext(_CTX, "Semestr"),
-                "kind": "select",
-                "value": period_view["selected_id"] or "",
-                "options": [{"value": str(item["id"]), "label": item["label"]} for item in period_view["choices"]],
-            }
-        )
+    teacher_labels: dict = {}
     if supervisor:
         teachers = []
-        seen = set()
-        for teacher_id, first, last, username in scoped.values_list(
-            "offering__instructor_id",
-            "offering__instructor__first_name",
-            "offering__instructor__last_name",
-            "offering__instructor__username",
-        ).distinct()[:200]:
-            if not teacher_id or teacher_id in seen:
+        for teacher_id, first, last, username in (
+            option_source.exclude(offering__instructor__isnull=True)
+            .values_list(
+                "offering__instructor_id",
+                "offering__instructor__first_name",
+                "offering__instructor__last_name",
+                "offering__instructor__username",
+            )
+            .distinct()[:OPTION_CAP]
+        ):
+            key = str(teacher_id)
+            if key in teacher_labels:
                 continue
-            seen.add(teacher_id)
-            label = ("%s %s" % (first or "", last or "")).strip() or username or str(teacher_id)
-            teachers.append({"value": str(teacher_id), "label": label})
+            label = ("%s %s" % (first or "", last or "")).strip() or username or key
+            teacher_labels[key] = label
+            teachers.append({"value": key, "label": label})
+        teachers.sort(key=lambda item: item["label"].casefold())
         fields.append(
             {
                 "name": PREFIX + "teacher",
                 "label": pgettext(_CTX, "Müəllim"),
                 "kind": "select",
                 "value": values["teacher"],
+                "default": "",
+                "searchable": True,
                 "options": [{"value": "", "label": pgettext(_CTX, "Bütün müəllimlər")}] + teachers,
             }
         )
-    return {"fields": fields, "section": "lessons-log", "prefix": PREFIX}
+
+    # Tətbiq olunmuş (default olmayan) filtrlər — çip kimi, «×» ilə geri qaytarılır.
+    applied = []
+    if values["year"] != (current_year or service.ALL):
+        applied.append(
+            {
+                "name": PREFIX + "year",
+                "label": pgettext(_CTX, "Tədris ili"),
+                "value_label": (
+                    all_years if values["year"] == service.ALL else academic_period.format_year(values["year"])
+                ),
+            }
+        )
+    if values["season"] != (current_season or service.ALL):
+        applied.append(
+            {
+                "name": PREFIX + "season",
+                "label": pgettext(_CTX, "Semestr"),
+                "value_label": (
+                    all_seasons
+                    if values["season"] == service.ALL
+                    else season_labels.get(values["season"], values["season"])
+                ),
+            }
+        )
+    if values["range"] != service.RANGE_SEMESTER:
+        applied.append(
+            {
+                "name": PREFIX + "range",
+                "label": pgettext(_CTX, "Tarix aralığı"),
+                "value_label": "%s (%s — %s)"
+                % (
+                    range_labels.get(values["range"], values["range"]),
+                    selection["window"]["start"].isoformat(),
+                    selection["window"]["end"].isoformat(),
+                ),
+            }
+        )
+    for key, label, value_label in (
+        (
+            "form",
+            pgettext(_CTX, "Təhsil forması"),
+            {o["value"]: o["label"] for o in form_options}.get(values["form"], ""),
+        ),
+        ("offering", pgettext(_CTX, "Fənn"), offering_labels.get(values["offering"], values["offering"])),
+        ("group", pgettext(_CTX, "Qrup"), values["group"]),
+        ("kind", pgettext(_CTX, "Dərsin tipi"), kind_labels.get(values["kind"], values["kind"])),
+        ("teacher", pgettext(_CTX, "Müəllim"), teacher_labels.get(values["teacher"], values["teacher"])),
+        ("q", pgettext(_CTX, "Axtarış"), values["q"]),
+    ):
+        if values[key]:
+            applied.append({"name": PREFIX + key, "label": label, "value_label": value_label or values[key]})
+
+    return {"fields": fields, "applied": applied, "section": "lessons-log", "prefix": PREFIX}
 
 
-__all__ = ["COVERAGE_CAP", "PREFIX", "build_lessons_log_section"]
+__all__ = ["OPTION_CAP", "PREFIX", "build_lessons_log_section"]

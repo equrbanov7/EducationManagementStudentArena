@@ -1,14 +1,23 @@
 {% extends "base.html" %}
 {% load static i18n %}
+{% comment %}Müstəqil (qabıqsız) audit jurnalı — `/audit/`. Kabinet bölməsi ilə
+EYNİ partial və EYNİ kontekst qurucusu; burada `ems_ui` asset qatı və bölmə
+CSS/JS-i ayrıca yüklənir (qabıq yoxdur), başlıq (`header_title`) isə
+göstərilir. Filtr paneli SPA olmadan tam səhifə naviqasiyası ilə işləyir.{% endcomment %}
 
-{% block title %}{% trans "title" context "audit.list" %}{% endblock %}
+{% block title %}{% trans "Audit jurnalı" context "audit.section" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_management.css' %}">
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'audit/css/audit_log.css' %}?v=20260908-1">
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section %}
+<div class="container py-4 al-standalone">
+    {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section header_title=page_title filter_base_url=audit_log_section.list_url %}
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
 {% endblock %}

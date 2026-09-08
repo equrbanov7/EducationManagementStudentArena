@@ -1,38 +1,82 @@
 {% load i18n %}
 {% comment %}Qrup yaratma/redaktə sahələri — `_form_dialog.html` gövdəsi.
 
-Dil sektoru SƏRBƏST MƏTNDİR (seçici deyil): layihə qərarına görə sektor
-tenant-konfiqurasiya olunandır və hardcode edilmir; süzgəcdəki siyahı mövcud
-datadan yığılır.{% endcomment %}
+Seçicilər Bootstrap tərzli açılan menyudur (`bootstrap_select.js`,
+`data-bootstrap-select`): ixtisas siyahısı uzun olduğu üçün onun menyusunda
+daxili axtarış var (`data-live-search`). Dəyər yenə native `<select>`-də qalır —
+`teaching_office.js` prefill + `EMSBootstrapSelect.sync` ilə doldurur.
+
+Dil sektoru: standart AZ/EN/RU + tenantın öz dəyərləri (sahib, 2026-09-07).
+Qəbul ili: cari il default (yeni qrup üçün prefill `current_year`).
+Təhsil forması: əyani / qiyabi / distant — registrar-ın seçimlərindən.{% endcomment %}
 <div class="tof-form">
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-name">{% trans "Qrupun adı" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input class="ems-input" type="text" id="tof-gr-name" name="name" maxlength="255" required>
+        <input class="ems-input" type="text" id="tof-gr-name" name="name" maxlength="255" required autocomplete="off"
+               placeholder="{% trans 'Məs.: 582A1' context 'accounts.groups' %}">
+        <p class="ems-field__hint">{% trans "Ad unikal olmalıdır — eyni adda ikinci qrup yaradılmır." context "accounts.groups" %}</p>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-code">{% trans "Qrup kodu" context "accounts.groups" %}</label>
-        <input class="ems-input" type="text" id="tof-gr-code" name="code" maxlength="50">
+        <input class="ems-input" type="text" id="tof-gr-code" name="code" maxlength="50" autocomplete="off">
+        <p class="ems-field__hint">{% trans "Kod da unikaldır (boş buraxıla bilər)." context "accounts.groups" %}</p>
     </div>
     <div class="ems-field tof-form__full">
         <label class="ems-field__label" for="tof-gr-specialty">{% trans "İxtisas / kafedra" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-gr-specialty" name="specialty" data-live-search="true">
-            <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
-            {% for option in groups_registry_section.specialty_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-specialty" name="specialty"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'İxtisas adı ilə axtar…' context 'accounts.groups' %}"
+                    data-live-search-empty="{% trans 'Uyğun ixtisas tapılmadı' context 'accounts.groups' %}">
+                <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+                {% for option in groups_registry_section.specialty_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-course">{% trans "Kurs" context "accounts.groups" %}</label>
-        <input class="ems-input" type="number" id="tof-gr-course" name="course_year" min="1" max="6" step="1">
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-course" name="course_year" data-bootstrap-select>
+                {% for number in "123456" %}
+                    <option value="{{ number }}">{{ number }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-form">{% trans "Təhsil forması" context "accounts.groups" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-form" name="education_form" data-bootstrap-select>
+                <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+                {% for option in groups_registry_section.education_form_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-lang">{% trans "Dil sektoru" context "accounts.groups" %}</label>
-        <input class="ems-input" type="text" id="tof-gr-lang" name="language_sector" maxlength="16">
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-lang" name="language_sector" data-bootstrap-select>
+                <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+                {% for option in groups_registry_section.language_form_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-admission">{% trans "Qəbul ili" context "accounts.groups" %}</label>
-        <input class="ems-input" type="number" id="tof-gr-admission" name="admission_year" min="0" max="2100" step="1">
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-admission" name="admission_year" data-bootstrap-select>
+                <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+                {% for option in groups_registry_section.admission_year_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-capacity">{% trans "Plan üzrə yer sayı" context "accounts.groups" %}</label>

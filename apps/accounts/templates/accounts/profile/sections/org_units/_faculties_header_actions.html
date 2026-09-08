@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Fakültələr başlıq əməlləri — ağaca keçid (SPA) və «Yeni fakültə».{% endcomment %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-structure-tree"
+   data-section="org-structure-tree" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Universitet strukturu' context 'profile.sidebar' %}">
+    <i class="fas fa-sitemap" aria-hidden="true"></i>
+    {% trans "Struktur ağacı" context "organizations.registry" %}
+</a>
+{% if org_faculties_section.can_create and org_faculties_section.is_org_wide %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-open="ouUnitDialog"
+        data-tof-title="{% trans 'Yeni fakültə' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "save_unit", "kind": "faculty", "id": "", "name": "", "code": ""}'>
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni fakültə" context "organizations.registry" %}
+</button>
+{% endif %}

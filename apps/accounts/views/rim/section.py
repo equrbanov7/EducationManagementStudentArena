@@ -61,7 +61,17 @@ def _create_context(actor) -> dict:
         ],
         "admission_years": _admission_years(),
         "max_note_length": MAX_NOTE_LENGTH,
+        # Tələbə forması: təhsil forması / maliyyələşmə seçimləri (2026-09-08).
+        "education_forms": _choices("catalog_meta", "EducationForm"),
+        "funding_types": _choices("admission_meta", "FundingType"),
     }
+
+
+def _choices(module: str, name: str) -> list:
+    import importlib
+
+    enum = getattr(importlib.import_module("apps.registrar.models.%s" % module), name)
+    return [{"value": value, "label": str(label)} for value, label in enum.choices]
 
 
 def _unit_context(actor) -> dict:
