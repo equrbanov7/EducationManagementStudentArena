@@ -301,3 +301,77 @@
         overflow-x: auto;
     }
 }
+
+/* ── Ağac: tip rəngi + uşaq sayı (2026-09-08) ─────────────────────────────
+   Rəng YALNIZ köməkçi işarədir — tip mətnlə də yazılır (a11y: rənglə tək
+   məlumat verilmir). Tokenlər light-only temadan gəlir.                     */
+.ems-tree__dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    flex: none;
+    border-radius: 3px;
+    background: var(--ems-neutral-400);
+}
+
+.ems-tree__dot--rectorate,
+.ems-tree__dot--vice_rectorate { background: var(--ems-neutral-800); }
+.ems-tree__dot--faculty,
+.ems-tree__dot--deanery { background: var(--ems-primary-600); }
+.ems-tree__dot--chair,
+.ems-tree__dot--department { background: var(--ems-sky-800); }
+.ems-tree__dot--specialty { background: var(--ems-success-strong); }
+.ems-tree__dot--group { background: var(--ems-warning-600); }
+.ems-tree__dot--center,
+.ems-tree__dot--institute,
+.ems-tree__dot--lab { background: var(--ems-neutral-500); }
+
+.ems-tree__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 18px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    font-weight: 800;
+}
+
+.ems-tree__row[aria-selected="true"] .ems-tree__count {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.ems-tree__type {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.ems-tree__type--faculty,
+.ems-tree__type--deanery { background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.ems-tree__type--chair,
+.ems-tree__type--department { background: var(--ems-blue-100-soft); color: var(--ems-sky-800); }
+.ems-tree__type--specialty { background: var(--ems-emerald-100); color: var(--ems-success-strong); }
+.ems-tree__type--group { background: var(--ems-warning-100); color: var(--ems-warning-700); }
+.ems-tree__type--rectorate,
+.ems-tree__type--vice_rectorate { background: var(--ems-neutral-800); color: var(--ems-neutral-0); }
+
+.ems-tree__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ems-tree__row:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+}

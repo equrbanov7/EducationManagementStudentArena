@@ -212,8 +212,21 @@ def _write_profile(user, *, organization, kind, values, group_name, specializati
     profile.student_specialization = specialization
     profile.password_change_required = True
     profile.email_verified = False
+    # Əlavə sahələr (2026-09-08, sahib istəyi: «bizə sonra lazım olan datalar»):
+    # ünvan hər iki növdə; vəzifə / elmi dərəcə / elmi ad / kafedra adı müəllimdə.
+    profile.location = str(values.get("address") or "")[:255]
+    if kind == KIND_TEACHER:
+        profile.staff_position = str(values.get("title") or "")[:150]
+        profile.academic_degree = str(values.get("academic_degree") or "")[:150]
+        profile.academic_title = str(values.get("academic_title") or "")[:150]
+        profile.department = str(values.get("department") or "")[:150]
     profile.save(
         update_fields=[
+            "location",
+            "staff_position",
+            "academic_degree",
+            "academic_title",
+            "department",
             "organization",
             "organization_type",
             "role",
@@ -301,6 +314,8 @@ def create_account(
     specialization="",
     scope_unit=None,
     audit_reason="student_intake_created",
+    membership_title="",
+    employee_id="",
 ):
     """Bir hesab yaradır və ``(user, birdəfəlik parol)`` qaytarır.
 
@@ -337,6 +352,8 @@ def create_account(
         assigned_by=actor,
         is_primary=True,
         is_active=True,
+        title=str(membership_title or "")[:100],
+        employee_id=str(employee_id or "")[:50],
     )
 
     if kind == KIND_STUDENT:

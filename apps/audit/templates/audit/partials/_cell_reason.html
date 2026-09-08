@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Səbəb xanası: qısaldılmış mətn (tam mətn `title`-da və çekmecədə);
+səbəb tələb edən əməliyyatda (dəyişiklik/silinmə) boşluq sakit xəbərdarlıqla
+işarələnir — rəng tək başına məna daşımır, mətn də var.{% endcomment %}
+{% if row.data.reason %}
+<span class="al-reason" title="{{ row.data.reason }}">{{ row.data.reason|truncatechars:96 }}</span>
+{% elif row.data.reason_missing %}
+<span class="al-reason al-reason--missing">
+    <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+    {% trans "Səbəb göstərilməyib" context "audit.section" %}
+</span>
+{% else %}
+<span class="al-muted">—</span>
+{% endif %}

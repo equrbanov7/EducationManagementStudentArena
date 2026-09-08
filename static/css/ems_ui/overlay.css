@@ -28,6 +28,10 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
+    /* Dialoq HƏMİŞƏ çekmecənin üstündədir: çekmecədən açılan təsdiq/forma
+       dialoqu (məs. «Kafedraya təyin et») DOM sırasından asılı olmayaraq
+       görünür — əvvəl eyni z-index-lə sonrakı çekmecə onu örtürdü (2026-09-08). */
+    z-index: 1052;
 }
 
 .ems-dialog {

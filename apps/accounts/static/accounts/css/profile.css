@@ -6,7 +6,7 @@
 @import url("profile/sections/profile_info.css");
 @import url("profile/sections/profile_identity.css?v=20260907-redesign");
 @import url("profile/sections/profile_identity_aside.css?v=20260907-redesign");
-@import url("profile/sections/list_cards.css");
+@import url("profile/sections/list_cards.css?v=20260907-createbtn");
 @import url("profile/sections/posts/_part1.css");
 @import url("profile/sections/posts/_part2.css");
 @import url("profile/sections/my_exams.css?v=20260616-2");
@@ -24,9 +24,9 @@
 @import url("profile/sections/org_management.css");
 @import url("profile/sections/org_unit_detail.css");
 @import url("profile/sections/student_org_management.css");
-@import url("profile/sections/notifications.css?v=20260907-redesign");
+@import url("profile/sections/notifications.css?v=20260908-files");
 @import url("profile/sections/notifications_modal.css?v=20260907-redesign");
-@import url("profile/sections/publish_notification.css?v=20260907-1");
+@import url("profile/sections/publish_notification.css?v=20260908-scopes");
 @import url("profile/sections/edit_profile.css");
 @import url("profile/sections/shortcut_sections.css");
 @import url("profile/sections/contact_messages/_part1.css");

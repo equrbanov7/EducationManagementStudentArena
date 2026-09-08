@@ -372,16 +372,23 @@ UNIVERSITY_ROLES = [
         # tapşırıqlarını görür və qiymətləndirməyə kömək edir; imtahan
         # yaratmır, üzv idarə etmir. RBAC-də ASSISTANT_TEACHER-ə map olunur
         # (bax core/roles.py MEMBERSHIP_ROLE_ALIASES / map_org_role_to_profile_role).
+        #
+        # 2026-09-08 (sahib): laborant ÖZ KAFEDRASININ müəllimlərinin dərs izinə
+        # («Keçilmiş dərslər») baxa bilsin — `journal.lessons_unit` (oxu-only).
+        # Bunun üçün rol UNIT-əhatəlidir: üzvlüyün `scope_unit`-i (kafedra)
+        # alt-ağacı görünüş sahəsidir; unit-siz üzvlük struktur əhatəsi VERMİR.
+        # Miqrasiya 0048 mövcud tenantların rolunu eyni şəkildə yeniləyir.
         "name": "lab_assistant",
         "display_name": "Lab Assistant",
         "level": 40,
-        "scope_type": RoleScopeType.COURSE,
+        "scope_type": RoleScopeType.UNIT,
         "permissions": [
             "course.view",
             "grade.view",
             "grade.input",
             "exam.view",
             "analytics.view_own",
+            "journal.lessons_unit",
         ],
         "description": "Laboratory assistant supporting lab work and grading within their course",
     },

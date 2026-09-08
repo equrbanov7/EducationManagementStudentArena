@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Sətir əməli: qeydi çekmecədə aç (`audit:detail` JSON). Sətrin özünə
+klik də eyni düyməni işə salır (bax `audit_log.js`). Dəyər fərqi olan qeyd
+kiçik «± fərq» nişanı daşıyır.{% endcomment %}
+{% if row.data.has_changes %}
+<span class="al-diffchip" title="{% trans 'Bu qeyddə əvvəl → sonra fərqi var' context 'audit.section' %}">±</span>
+{% endif %}
+<button type="button" class="ems-btn ems-btn--sm al-row-open"
+        data-al-open data-url="{{ row.data.detail_url }}" data-al-id="{{ row.data.id }}"
+        aria-label="{% blocktrans context 'audit.section' with action=row.data.action_label %}{{ action }} — qeydi aç{% endblocktrans %}">
+    <i class="fas fa-eye" aria-hidden="true"></i>
+    {% trans "Detal" context "audit.section" %}
+</button>

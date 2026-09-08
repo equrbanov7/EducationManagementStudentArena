@@ -192,10 +192,33 @@ class PeopleActionScopeTest(TestCase):
         self.assertTrue(entries, "Kataloq əməli audit jurnalına düşmədi.")
         self.assertEqual(entries[-1].changes.get("action"), "people.account_blocked")
 
+    def _future_teacher(self, username, *, last):
+        """Müəllim statusu ALACAQ hədəf — TƏLƏBƏ DEYİL (sahib, 2026-09-07: tələbəyə
+        müəllim statusu verilmir), təşkilatın adi (icazəsiz) əməkdaş üzvüdür."""
+        from core.constants import RoleScopeType
+
+        from .people_fixture import add_membership, make_role, make_user
+
+        role = make_role(self.fx.org, "staff", level=20, scope_type=RoleScopeType.ORGANIZATION, permissions=[])
+        user = make_user(username, first="Gələcək", last=last)
+        add_membership(self.fx.org, user, role)
+        return user
+
+    def test_grant_to_student_is_rejected(self):
+        actor = self._actor(self.fx.dean_a)
+        with bypass_rls():
+            target = self.fx.add_student("ppl_student_no_teacher", faculty="a", last="Tələbəyev")
+            with self.assertRaises(RimAccessError) as ctx:
+                people.set_teacher_role(
+                    actor, target, grant=True, reason="Kafedraya təyinat", unit_id=str(self.fx.kafedra_a1.pk)
+                )
+        self.assertEqual(ctx.exception.reason_code, "target_is_student")
+        self.assertEqual(ctx.exception.status, 409)
+
     def test_grant_and_revoke_teacher_role(self):
         actor = self._actor(self.fx.dean_a)
         with bypass_rls():
-            target = self.fx.add_student("ppl_future_teacher", faculty="a", last="Yeniyev")
+            target = self._future_teacher("ppl_future_teacher", last="Yeniyev")
             people.set_teacher_role(
                 actor, target, grant=True, reason="Kafedraya təyinat", unit_id=str(self.fx.kafedra_a1.pk)
             )
@@ -210,7 +233,7 @@ class PeopleActionScopeTest(TestCase):
     def test_grant_rejects_unit_outside_scope(self):
         actor = self._actor(self.fx.dean_a)
         with bypass_rls():
-            target = self.fx.add_student("ppl_future_teacher_b", faculty="a", last="Kənarov")
+            target = self._future_teacher("ppl_future_teacher_b", last="Kənarov")
             with self.assertRaises(RimAccessError) as ctx:
                 people.set_teacher_role(actor, target, grant=True, reason="Səbəb", unit_id=str(self.fx.kafedra_b1.pk))
         self.assertEqual(ctx.exception.reason_code, "unit_outside_scope")
@@ -218,7 +241,7 @@ class PeopleActionScopeTest(TestCase):
     def test_unit_scoped_actor_must_pick_a_unit_when_granting(self):
         actor = self._actor(self.fx.dean_a)
         with bypass_rls():
-            target = self.fx.add_student("ppl_future_teacher_c", faculty="a", last="Unitsiz")
+            target = self._future_teacher("ppl_future_teacher_c", last="Unitsiz")
             with self.assertRaises(RimAccessError) as ctx:
                 people.set_teacher_role(actor, target, grant=True, reason="Səbəb", unit_id=None)
         self.assertEqual(ctx.exception.reason_code, "unit_required")

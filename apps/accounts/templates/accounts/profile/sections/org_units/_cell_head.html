@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Rəhbər xanası (dekan / kafedra müdiri): inisial nişanı + ad, yoxdursa
+sakit xəbərdarlıq çipi. Rəng tək başına məna daşımır — mətn də var.{% endcomment %}
+{% if row.data.head_name %}
+<div class="ou-person">
+    <span class="ou-avatar" aria-hidden="true">{{ row.data.head_initials }}</span>
+    <span class="ou-person__name">{{ row.data.head_name }}</span>
+</div>
+{% else %}
+<span class="ou-missing">
+    <i class="fas fa-user-slash" aria-hidden="true"></i>
+    {% trans "Təyin edilməyib" context "organizations.registry" %}
+</span>
+{% endif %}

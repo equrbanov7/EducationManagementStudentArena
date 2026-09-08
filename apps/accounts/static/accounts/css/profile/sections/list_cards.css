@@ -358,3 +358,25 @@
         justify-content: center;
     }
 }
+
+/* «Yeni qrup yarat» — sahib (2026-09-07): düymənin rəngi/hover-i yox idi (common.css
+   yalnız kölgə verir). Əsas əməl kimi primary tonda, hover-də tündləşir. */
+.profile-group-section-actions .btn-create-new {
+    background: var(--ems-primary-600, #2563eb);
+    border: 1px solid var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #fff);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+}
+
+.profile-group-section-actions .btn-create-new:hover,
+.profile-group-section-actions .btn-create-new:focus-visible {
+    background: var(--ems-primary-700, #1d4ed8);
+    border-color: var(--ems-primary-700, #1d4ed8);
+    color: var(--ems-neutral-0, #fff);
+    box-shadow: 0 10px 22px rgba(29, 78, 216, 0.28);
+}
+
+.profile-group-section-actions .btn-create-new:focus-visible {
+    outline: 2px solid var(--ems-primary-300, #9dbaf5);
+    outline-offset: 2px;
+}

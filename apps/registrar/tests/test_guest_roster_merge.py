@@ -41,12 +41,14 @@ from .test_guest_roster import _GuestRosterBase
 REASON = "Dekanlıq sərəncamı №77 — alt qrup birləşməsi"
 
 
-
 def _doc():
     """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+    return SimpleUploadedFile(
+        "teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf"
+    )
+
 
 class _MergeBase(_GuestRosterBase):
     """Alt qrupun ÖZ Tarix jurnalında real iz (dərs + qayıb + bal) yaradır."""

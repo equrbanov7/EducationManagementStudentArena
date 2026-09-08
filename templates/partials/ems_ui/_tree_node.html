@@ -1,13 +1,21 @@
-{% comment %}Ağac qovşağı — `_tree.html` tərəfindən rekursiv çağırılır.{% endcomment %}
+{% comment %}Ağac qovşağı — `_tree.html` tərəfindən rekursiv çağırılır.
+
+2026-09-08: tip nişanı rənglidir (`ems-tree__type--<unit_type>`), uşaq sayı
+göstərilir (`node.count`), rəhbər adı `title`-da. Klik davranışı `nav.js`-dədir:
+etiketə klik = seç (+ bağlıdırsa aç), oxa klik = yalnız aç/bağla.{% endcomment %}
 <li role="none">
     <button type="button" class="ems-tree__row{% if node.flagged %} ems-tree__row--flagged{% endif %}"
             role="treeitem"
             data-ems-tree-node="{{ node.id }}"
+            data-ems-tree-type="{{ node.type }}"
             aria-selected="{% if node.selected %}true{% else %}false{% endif %}"
-            {% if node.children %}aria-expanded="{% if node.expanded %}true{% else %}false{% endif %}"{% endif %}>
+            {% if node.children %}aria-expanded="{% if node.expanded %}true{% else %}false{% endif %}"{% endif %}
+            {% if node.head_name %}title="{{ node.type_label }} · {{ node.head_name }}"{% elif node.flagged %}title="{{ node.type_label }} · rəhbəri yoxdur"{% endif %}>
         <span class="ems-tree__twisty{% if not node.children %} ems-tree__twisty--leaf{% endif %}" aria-hidden="true">›</span>
+        <span class="ems-tree__dot ems-tree__dot--{{ node.type }}" aria-hidden="true"></span>
         <span class="ems-tree__label">{{ node.label }}</span>
-        {% if node.type_label %}<span class="ems-tree__type">{{ node.type_label }}</span>{% endif %}
+        {% if node.count %}<span class="ems-tree__count" aria-label="{{ node.count }} alt bölmə">{{ node.count }}</span>{% endif %}
+        {% if node.type_label %}<span class="ems-tree__type ems-tree__type--{{ node.type }}">{{ node.type_label }}</span>{% endif %}
     </button>
     {% if node.children %}
         <ul class="ems-tree__group" role="group"{% if not node.expanded %} hidden{% endif %}>

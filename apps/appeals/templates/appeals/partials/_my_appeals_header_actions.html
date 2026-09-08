@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}
+«Apellyasiyalarım» başlıq əməli — «Yeni apellyasiya müraciəti» modalını açır.
+Modalın özü (`#newAppealModal`) gövdə partial-ındadır (`_my_appeals_body.html`);
+`partials/ems_ui/_content_header.html` bu faylı `header_actions_include` ilə gətirir.
+{% endcomment %}
+<button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#newAppealModal">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}
+</button>

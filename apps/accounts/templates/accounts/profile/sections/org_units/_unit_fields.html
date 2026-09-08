@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Fakültə / kafedra yaratma-redaktə sahələri — `_form_dialog.html` gövdəsi.
+`ou_section` = cari bölmənin context-i (`org_faculties_section` və ya
+`org_kafedras_section`, `{% include … with ou_section=… %}` ilə ötürülür).
+Kafedrada fakültə seçimi Bootstrap tərzli, daxili axtarışlı menyudur.{% endcomment %}
+<div class="tof-form">
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-unit-name">{% trans "Ad" context "organizations.registry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="ou-unit-name" name="name" maxlength="255" required autocomplete="off"
+               placeholder="{% if ou_section.kind == 'faculty' %}{% trans 'Məs.: İqtisadiyyat və idarəetmə fakültəsi' context 'organizations.registry' %}{% else %}{% trans 'Məs.: İnformasiya texnologiyaları kafedrası' context 'organizations.registry' %}{% endif %}">
+        <p class="ems-field__hint">{% trans "Ad eyni növ bölmələr arasında unikaldır." context "organizations.registry" %}</p>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="ou-unit-code">{% trans "Kod" context "organizations.registry" %}</label>
+        <input class="ems-input" type="text" id="ou-unit-code" name="code" maxlength="50" autocomplete="off"
+               placeholder="{% trans 'Məs.: İİF' context 'organizations.registry' %}">
+        <p class="ems-field__hint">{% trans "Qısa kod — sənədlərdə və filtrdə işlənir (boş buraxıla bilər)." context "organizations.registry" %}</p>
+    </div>
+    {% if ou_section.kind == "kafedra" %}
+    <div class="ems-field">
+        <label class="ems-field__label" for="ou-unit-parent">{% trans "Fakültə" context "organizations.registry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="ou-unit-parent" name="parent"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Fakültə adı ilə axtar…' context 'organizations.registry' %}"
+                    data-live-search-empty="{% trans 'Uyğun fakültə tapılmadı' context 'organizations.registry' %}">
+                <option value="">{% trans "Seçin" context "organizations.registry" %}</option>
+                {% for option in ou_section.faculty_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endif %}
+</div>

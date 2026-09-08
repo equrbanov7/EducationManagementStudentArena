@@ -180,3 +180,17 @@ class AppealStatisticsTests(TestCase):
         response = self._client(self.center).get(self.ai_url)
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json()["ok"])
+
+    def test_stats_section_renders_calm_markup(self):
+        # Kabinet bölməsi (2026-09-08 sakit redizayn): hero lent və ikinci h1 yoxdur,
+        # başlıq `ems-header` alt yazısı ilə, filtr `ems-filters`, JS çəngəlləri yerindədir.
+        response = self._client(self.center).get(reverse("accounts:profile") + "?section=appeal-stats")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-profile-section-panel="appeal-stats"', html=False)
+        self.assertContains(response, "ems-header__subtitle", html=False)
+        self.assertContains(response, "ems-filters ems-filters--auto aps-filters", html=False)
+        self.assertContains(response, "js-aps-cards", html=False)
+        self.assertContains(response, "js-aps-reset", html=False)
+        self.assertContains(response, "data-manage-review-modal", html=False)
+        self.assertNotContains(response, "appeal-hero", html=False)
+        self.assertNotContains(response, "<style", html=False)

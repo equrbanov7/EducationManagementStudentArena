@@ -84,6 +84,19 @@ def _type_labels(organization) -> dict:
     return {code: label for code, label in UNIT_TYPES_BY_ORG.get(organization.org_type, [])}
 
 
+def _type_legend(units, labels) -> list:
+    """Ağac başlığındakı tip legendası — görünən bölmələrdə RAST GƏLİNƏN tiplər,
+    kataloq sırası ilə, hər tipin sayı ilə (`{code, label, count}`)."""
+    counts = {}
+    for unit in units:
+        counts[unit.unit_type] = counts.get(unit.unit_type, 0) + 1
+    return [
+        {"code": code, "label": labels.get(code) or code.replace("_", " ").title(), "count": counts[code]}
+        for code in TREE_TYPE_ORDER
+        if code in counts
+    ]
+
+
 def unit_kind_choices(organization) -> list:
     """Yeni alt bölmə üçün icazəli tiplər — handoff-un 8 tipi.
 
@@ -263,6 +276,7 @@ def build_structure_tree_context(request, organization) -> dict:
 
     return {
         "has_access": can_view,
+        "type_legend": _type_legend(units, labels),
         "filter_fields": filter_fields,
         "filter_count_label": pgettext(_CTX, "Nəticə: %(count)d bölmə") % {"count": len(units)},
         # Dialoq gizli sahələri — dəyərlər JS-in `data-tof-prefill` JSON-undan gəlir

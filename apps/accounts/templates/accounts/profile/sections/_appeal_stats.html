@@ -1,12 +1,25 @@
 {% load static i18n %}
+{% comment %}
+«Apellyasiya statistikası» (imtahan mərkəzi) — filtr + cədvəl + qrafiklər + AI xülasə.
+Bütün məlumat AJAX ilə gəlir (`accounts/js/profile/appeal_stats.js`): URL-lər və
+i18n `.aps` kökündəki data-* atributları ilə ötürülür; JS `.js-aps-*` çəngəlləri
+və `.aps-card/.aps-badge/.aps-view/.aps-state/.aps-skel` siniflərini render edir —
+həmin adlar SAXLANILIR (görünüş `appeal_stats.css`-də tokenlərə bağlanıb).
+
+2026-09-08 sakit redizayn: başlıq `ems_ui/_content_header` (alt yazı + «Sıfırla»
+əməli; h1 qabıqdan gəlir), filtr `ems-filters` (yalnız üslub — `data-ems-filters`
+qəsdən YOXDUR, dəyişiklikləri appeal_stats.js özü tutur), KPI kartları və cədvəl
+`ems-kpis`/`ems-table` dili ilə, rəngli sol konturlar yığışdırıldı. CSP: inline yoxdur.
+{% endcomment %}
 {% if 'appeal-stats' in allowed_sections %}
+{% trans "Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status və dövr üzrə süzün; sütun başlığı sıralayır." as aps_subtitle %}
 <section class="profile-section-panel profile-section--appeal-stats {% if active_section == 'appeal-stats' %}is-active{% endif %}"
          data-profile-section-panel="appeal-stats"
          data-source-url="{{ profile_base_url }}?section=appeal-stats"
          data-i18n-load-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/appeal_stats.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/appeal_stats.css' %}?v=20260908-calm">
 
-<div class="aps"
+<div class="aps appeal-embedded"
      data-data-url="{% url 'appeals:appeal_stats_data' %}"
      data-charts-url="{% url 'appeals:appeal_stats_charts' %}"
      data-filters-url="{% url 'appeals:appeal_stats_filters' %}"
@@ -31,109 +44,108 @@
      data-i18n-ai-quota="{% trans 'Qalan AI limiti' %}"
      data-i18n-ai-cached="{% trans 'keşdən' %}"
      data-i18n-hint="{% trans 'Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır.' %}">
-  <div class="aps-head">
-    <div>
-      <p>{% trans "Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status, semestr və tədris ili üzrə süzün. Sütun başlığına klik = sırala. Yüksək qəbul faizi qiymətləndirmə/cavab açarı problemlərinə işarə ola bilər." %}</p>
-    </div>
-    <button type="button" class="aps-btn js-aps-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" %}</button>
-  </div>
 
-  <div class="aps-filters">
-    <div class="aps-field">
-      <label for="aps-search">{% trans "Axtarış" %}</label>
-      <input type="search" id="aps-search" class="js-aps-q" placeholder="{% trans 'Tələbə və ya imtahan adı…' %}" autocomplete="off">
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=aps_subtitle header_actions_include="accounts/profile/sections/_appeal_stats_actions.html" %}
+
+  <div class="ems-filters ems-filters--auto aps-filters" role="search">
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="aps-search">{% trans "Axtarış" %}</label>
+      <input type="search" id="aps-search" class="ems-input js-aps-q" placeholder="{% trans 'Tələbə və ya imtahan adı…' %}" autocomplete="off">
     </div>
-    <div class="aps-field" role="group" aria-labelledby="aps-subject-label">
-      <label id="aps-subject-label">{% trans "Fənn" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="aps-subject-label">
+      <label class="ems-field__label" id="aps-subject-label">{% trans "Fənn" %}</label>
       {% trans "fənn axtar…" as aps_subject_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-subject" placeholder=aps_subject_ph %}
     </div>
-    <div class="aps-field" role="group" aria-labelledby="aps-group-label">
-      <label id="aps-group-label">{% trans "Qrup" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="aps-group-label">
+      <label class="ems-field__label" id="aps-group-label">{% trans "Qrup" %}</label>
       {% trans "qrup axtar…" as aps_group_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-group" placeholder=aps_group_ph %}
     </div>
-    <div class="aps-field" role="group" aria-labelledby="aps-faculty-label">
-      <label id="aps-faculty-label">{% trans "Fakültə" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="aps-faculty-label">
+      <label class="ems-field__label" id="aps-faculty-label">{% trans "Fakültə" %}</label>
       {% trans "fakültə axtar…" as aps_faculty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-faculty" placeholder=aps_faculty_ph %}
     </div>
-    <div class="aps-field" role="group" aria-labelledby="aps-department-label">
-      <label id="aps-department-label">{% trans "Kafedra" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="aps-department-label">
+      <label class="ems-field__label" id="aps-department-label">{% trans "Kafedra" %}</label>
       {% trans "kafedra axtar…" as aps_dept_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-department" placeholder=aps_dept_ph %}
     </div>
-    <div class="aps-field" role="group" aria-labelledby="aps-teacher-label">
-      <label id="aps-teacher-label">{% trans "Müəllim" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="aps-teacher-label">
+      <label class="ems-field__label" id="aps-teacher-label">{% trans "Müəllim" %}</label>
       {% trans "müəllim axtar…" as aps_teacher_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="aps" hook="aps-teacher" placeholder=aps_teacher_ph %}
     </div>
-    <div class="aps-field">
-      <label for="aps-exam-type-filter">{% trans "İmtahan tipi" %}</label>
-      <div class="bootstrap-single-select"><select id="aps-exam-type-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="aps-exam-type-filter">{% trans "İmtahan tipi" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems"><select id="aps-exam-type-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-aps-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
-    <div class="aps-field">
-      <label for="aps-exam-format-filter">{% trans "İmtahan forması" %}</label>
-      <div class="bootstrap-single-select"><select id="aps-exam-format-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="aps-exam-format-filter">{% trans "İmtahan forması" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems"><select id="aps-exam-format-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-aps-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
-    <div class="aps-field">
-      <label for="aps-appeal-status-filter">{% trans "Status" %}</label>
-      <div class="bootstrap-single-select"><select id="aps-appeal-status-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="aps-appeal-status-filter">{% trans "Status" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems"><select id="aps-appeal-status-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-aps-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
-    <div class="aps-field">
-      <label for="aps-semester-filter">{% trans "Semestr" %}</label>
-      <div class="bootstrap-single-select"><select id="aps-semester-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="aps-semester-filter">{% trans "Semestr" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems"><select id="aps-semester-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-aps-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
-    <div class="aps-field">
-      <label for="aps-academic-year-filter">{% trans "Tədris ili" %}</label>
-      <div class="bootstrap-single-select"><select id="aps-academic-year-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="aps-academic-year-filter">{% trans "Tədris ili" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems"><select id="aps-academic-year-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-aps-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select></div>
     </div>
   </div>
 
-  <div class="aps-cards js-aps-cards"></div>
-  <div class="aps-tablewrap">
-    <table class="aps-table">
-      <thead><tr class="js-aps-thead">
-        <th class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th>{% trans "Qrup" %}</th>
-        <th>{% trans "Müəllim" %}</th>
-        <th class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th>{% trans "Sual" %}</th>
-        <th class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort aps-arrow"></i></th>
-        <th>{% trans "Detal" %}</th>
-      </tr></thead>
-      <tbody class="js-aps-rows"></tbody>
-    </table>
+  <div class="ems-kpis aps-cards js-aps-cards"></div>
+
+  <div class="ems-tablewrap aps-tablewrap">
+    <div class="ems-tablescroll">
+      <table class="ems-table ems-table--zebra aps-table">
+        <thead><tr class="js-aps-thead">
+          <th scope="col" class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col">{% trans "Qrup" %}</th>
+          <th scope="col">{% trans "Müəllim" %}</th>
+          <th scope="col" class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col" class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col" class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col">{% trans "Sual" %}</th>
+          <th scope="col" class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col" class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort aps-arrow" aria-hidden="true"></i></th>
+          <th scope="col">{% trans "Detal" %}</th>
+        </tr></thead>
+        <tbody class="js-aps-rows"></tbody>
+      </table>
+    </div>
   </div>
   <div class="aps-pager js-aps-pager"></div>
 
   <div class="aps-charts">
     <div class="aps-charts__head">
-      <h3><i class="fas fa-chart-pie"></i> {% trans "Analitik qrafiklər" %}</h3>
+      <h3><i class="fas fa-chart-pie" aria-hidden="true"></i> {% trans "Analitik qrafiklər" %}</h3>
       <p>{% trans "Qrafiklər cədvəl səhifələnməsindən asılı olmayaraq bütün filtrlənmiş apellyasiyalar üzrə hesablanır." %}</p>
     </div>
     <div class="aps-charts__grid">
       <div class="aps-chartbox">
-        <div class="aps-chartbox__title"><i class="fas fa-circle-half-stroke"></i> {% trans "Status üzrə bölgü" %}</div>
+        <div class="aps-chartbox__title"><i class="fas fa-circle-half-stroke" aria-hidden="true"></i> {% trans "Status üzrə bölgü" %}</div>
         <div class="aps-chartbox__wrap"><canvas class="js-aps-c-status"></canvas></div>
       </div>
       <div class="aps-chartbox">
-        <div class="aps-chartbox__title"><i class="fas fa-layer-group"></i> {% trans "İmtahan tipi üzrə" %}</div>
+        <div class="aps-chartbox__title"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "İmtahan tipi üzrə" %}</div>
         <div class="aps-chartbox__wrap"><canvas class="js-aps-c-type"></canvas></div>
       </div>
       <div class="aps-chartbox aps-chartbox--wide">
-        <div class="aps-chartbox__title"><i class="fas fa-chart-line"></i> {% trans "Aylıq dinamika" %}</div>
+        <div class="aps-chartbox__title"><i class="fas fa-chart-line" aria-hidden="true"></i> {% trans "Aylıq dinamika" %}</div>
         <div class="aps-chartbox__wrap"><canvas class="js-aps-c-monthly"></canvas></div>
       </div>
       <div class="aps-chartbox">
-        <div class="aps-chartbox__title"><i class="fas fa-book"></i> {% trans "Fənn üzrə (ən çox 10)" %}</div>
+        <div class="aps-chartbox__title"><i class="fas fa-book" aria-hidden="true"></i> {% trans "Fənn üzrə (ən çox 10)" %}</div>
         <div class="aps-chartbox__wrap"><canvas class="js-aps-c-subject"></canvas></div>
       </div>
       <div class="aps-chartbox">
-        <div class="aps-chartbox__title"><i class="fas fa-chalkboard-user"></i> {% trans "Müəllim üzrə (ən çox 10)" %}</div>
+        <div class="aps-chartbox__title"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim üzrə (ən çox 10)" %}</div>
         <div class="aps-chartbox__wrap"><canvas class="js-aps-c-teacher"></canvas></div>
       </div>
     </div>
@@ -141,10 +153,10 @@
     <div class="aps-ai">
       <div class="aps-ai__head">
         <div>
-          <h3><i class="fas fa-robot"></i> {% trans "AI xülasə" %}</h3>
+          <h3><i class="fas fa-robot" aria-hidden="true"></i> {% trans "AI xülasə" %}</h3>
           <p>{% trans "Filtrə uyğun bütün apellyasiyaları süni intellekt ümumiləşdirir — harada cəmləşir, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir, limit sərf olunmur." %}</p>
         </div>
-        <button type="button" class="aps-btn aps-btn--primary js-aps-ai-btn"><i class="fas fa-magic"></i> {% trans "AI ilə analiz et" %}</button>
+        <button type="button" class="ems-btn ems-btn--primary js-aps-ai-btn"><i class="fas fa-magic" aria-hidden="true"></i> {% trans "AI ilə analiz et" %}</button>
       </div>
       <div class="aps-ai__out js-aps-ai-out">
         <div class="aps-ai__hint">{% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." %}</div>

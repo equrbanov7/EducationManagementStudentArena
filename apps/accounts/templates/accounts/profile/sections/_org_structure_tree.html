@@ -9,6 +9,11 @@ endpoint-ində (`organizations.structure_actions`) fail-closed yenidən yoxlanı
 ⚠️ BAŞLIQ (`<h1>`) BURADA YAZILMIR: kabinet qabığı bölmə adını
 `#profileSectionTitle` kimi artıq verir (əks halda səhifədə iki h1 olar).
 
+2026-09-08 (sahib): qovşaq seçiləndə panel BÜTÖV yenilənmir — yalnız detal
+paneli (`[data-tof-detail]`) fraqmentdən dəyişdirilir, ağacın açıq/bağlı
+vəziyyəti qalır (teaching_office.js). Ağacda tip rəngi + uşaq sayı, detalda
+yol (breadcrumb) və alt bölmə xülasəsi var; filtr avto rejimdədir.
+
 CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
 `teaching_office.js`, ikisi də `profile.html`-dən yüklənir. Dinamik dəyərlər
 `data-*` atributları ilə ötürülür.
@@ -40,60 +45,109 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
 <div class="tof"
      data-tof-root
      data-tof-section="org-structure-tree"
-     data-tof-action-url="{{ structure_tree_section.action_url }}">
+     data-tof-action-url="{{ structure_tree_section.action_url }}"
+     data-tof-tree-detail-url="{% url 'accounts:profile_section_fragment' section='org-structure-tree' %}"
+     data-tof-tree-error="{% trans 'Bölmə məlumatı yüklənmədi — yenidən cəhd edin.' context 'accounts.structure_tree' %}">
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=tof_subtitle header_note=structure_tree_section.archive_hint %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=structure_tree_section.kpi_tiles kpi_variant="4" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-structure-tree" filter_prefix="st_" filter_fields=structure_tree_section.filter_fields filter_count_label=structure_tree_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-structure-tree" filter_prefix="st_" filter_fields=structure_tree_section.filter_fields filter_count_label=structure_tree_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     <div class="tof-split">
         <div class="tof-pane tof-pane--tree">
-            <h2 class="tof-pane__title">{% trans "Struktur ağacı" context "accounts.structure_tree" %}</h2>
+            <div class="tof-pane__head">
+                <h2 class="tof-pane__title">{% trans "Struktur ağacı" context "accounts.structure_tree" %}</h2>
+                <div class="tof-pane__tools">
+                    <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-ems-tree-expand-all>
+                        <i class="fas fa-angles-down" aria-hidden="true"></i> {% trans "Hamısını aç" context "accounts.structure_tree" %}
+                    </button>
+                    <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-ems-tree-collapse-all>
+                        <i class="fas fa-angles-up" aria-hidden="true"></i> {% trans "Bağla" context "accounts.structure_tree" %}
+                    </button>
+                </div>
+            </div>
+            {% if structure_tree_section.type_legend %}
+            <ul class="tof-legend" aria-label="{% trans 'Bölmə tipləri' context 'accounts.structure_tree' %}">
+                {% for item in structure_tree_section.type_legend %}
+                <li class="tof-legend__item"><span class="ems-tree__dot ems-tree__dot--{{ item.code }}" aria-hidden="true"></span>{{ item.label }} <b>{{ item.count }}</b></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            <p class="tof-pane__hint">{% trans "Ada klik — bölməni açır və sağda göstərir; oxa klik — yalnız aç/bağla." context "accounts.structure_tree" %}</p>
+            <div class="tof-tree-scroll">
             {% if structure_tree_section.tree_state == "empty" %}
                 {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-sitemap" state_title=tof_empty_title state_body=tof_empty_body %}
             {% else %}
                 {% include "partials/ems_ui/_tree.html" with tree_nodes=structure_tree_section.tree_nodes tree_label=structure_tree_section.tree_label %}
             {% endif %}
+            </div>
         </div>
 
-        <div class="tof-pane tof-pane--detail">
+        <div class="tof-pane tof-pane--detail" data-tof-detail aria-live="polite">
             {% if not structure_tree_section.detail %}
                 {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-hand-pointer" state_title=tof_pick_title state_body=tof_pick_body %}
             {% else %}
             {% with detail=structure_tree_section.detail unit=structure_tree_section.detail.unit %}
             <div class="tof-detail">
+                {% if detail.breadcrumbs|length > 1 %}
+                <ol class="tof-crumbs" aria-label="{% trans 'Struktur yolu' context 'accounts.structure_tree' %}">
+                    {% for crumb in detail.breadcrumbs %}
+                    <li class="tof-crumbs__item{% if forloop.last %} is-current{% endif %}">
+                        {% if not forloop.last %}
+                        <button type="button" class="tof-crumbs__link" data-tof-tree-jump="{{ crumb.id }}">{{ crumb.label }}</button>
+                        <span class="tof-crumbs__sep" aria-hidden="true">›</span>
+                        {% else %}{{ crumb.label }}{% endif %}
+                    </li>
+                    {% endfor %}
+                </ol>
+                {% endif %}
                 <div class="tof-detail__head">
-                    <h2 class="tof-detail__name">{{ unit.name }}</h2>
+                    <div class="tof-detail__title">
+                        <span class="ems-tree__dot ems-tree__dot--{{ detail.unit_type }} tof-detail__dot" aria-hidden="true"></span>
+                        <h2 class="tof-detail__name">{{ unit.name }}</h2>
+                        {% if detail.code %}<span class="ems-mono tof-detail__code">{{ detail.code }}</span>{% endif %}
+                    </div>
                     <span class="ems-badge ems-badge--info">{{ detail.unit_type_label }}</span>
                 </div>
+                {% if detail.children_summary %}
+                <p class="tof-detail__summary">
+                    <i class="fas fa-sitemap" aria-hidden="true"></i>
+                    {% trans "Alt bölmələr:" context "accounts.structure_tree" %} {{ detail.children_summary }}
+                </p>
+                {% endif %}
 
                 <div class="tof-facts">
-                    <div class="tof-fact">
-                        <span class="tof-fact__label">{% trans "Rəhbər" context "accounts.structure_tree" %}</span>
+                    <div class="tof-fact tof-fact--head">
+                        <span class="tof-fact__label"><i class="fas fa-user-tie" aria-hidden="true"></i> {% trans "Rəhbər" context "accounts.structure_tree" %}</span>
                         {% if unit.head %}
-                            <span class="tof-fact__value tof-fact__value--muted">{{ unit.head.get_full_name|default:unit.head.username }}</span>
+                            <span class="tof-fact__value tof-fact__value--name">{{ unit.head.get_full_name|default:unit.head.username }}</span>
                         {% else %}
                             <span class="tof-fact__value tof-fact__value--muted">{% trans "Təyin edilməyib" context "accounts.structure_tree" %}</span>
                         {% endif %}
                     </div>
                     {% if not detail.is_light %}
                     <div class="tof-fact">
-                        <span class="tof-fact__label">{% trans "Müəllim" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__label"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim" context "accounts.structure_tree" %}</span>
                         <span class="tof-fact__value">{{ detail.total_teacher_count }}</span>
                     </div>
                     <div class="tof-fact">
-                        <span class="tof-fact__label">{% trans "Tələbə" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__label"><i class="fas fa-user-graduate" aria-hidden="true"></i> {% trans "Tələbə" context "accounts.structure_tree" %}</span>
                         <span class="tof-fact__value">{{ detail.student_count }}</span>
                     </div>
                     <div class="tof-fact">
-                        <span class="tof-fact__label">{% trans "Qrup" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__label"><i class="fas fa-users-rectangle" aria-hidden="true"></i> {% trans "Qrup" context "accounts.structure_tree" %}</span>
                         <span class="tof-fact__value">{{ detail.group_count }}</span>
                     </div>
                     <div class="tof-fact">
-                        <span class="tof-fact__label">{% trans "İxtisas" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__label"><i class="fas fa-graduation-cap" aria-hidden="true"></i> {% trans "İxtisas" context "accounts.structure_tree" %}</span>
                         <span class="tof-fact__value">{{ detail.program_count }}</span>
+                    </div>
+                    {% elif detail.children_count %}
+                    <div class="tof-fact">
+                        <span class="tof-fact__label"><i class="fas fa-sitemap" aria-hidden="true"></i> {% trans "Alt bölmə" context "accounts.structure_tree" %}</span>
+                        <span class="tof-fact__value">{{ detail.children_count }}</span>
                     </div>
                     {% endif %}
                 </div>
@@ -103,7 +157,7 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                     <button type="button" class="ems-btn ems-btn--primary"
                             data-tof-open="tofUnitDialog"
                             data-tof-prefill='{"action": "create_child", "parent": "{{ unit.id }}", "name": "", "code": "", "unit_type": ""}'>
-                        {% trans "Alt bölmə əlavə et" context "accounts.structure_tree" %}
+                        <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Alt bölmə əlavə et" context "accounts.structure_tree" %}
                     </button>
                     <button type="button" class="ems-btn"
                             data-tof-open="tofRenameDialog"

@@ -1,0 +1,41 @@
+{% load i18n %}
+<section class="ems-card pp-card">
+    <div class="pp-card__head">
+        <h2 class="pp-card__title">{% trans "Tədris" context "accounts.people.page" %}</h2>
+        <span class="pp-card__meta">{{ teaching.totals.offerings }} {% trans "açılış" context "accounts.people.page" %} · {{ teaching.totals.subjects }} {% trans "fənn" context "accounts.people.page" %} · {{ teaching.totals.groups }} {% trans "qrup" context "accounts.people.page" %} · {{ teaching.totals.hours }} {% trans "saat" context "accounts.people.page" %}</span>
+    </div>
+    {% if teaching.restricted %}
+        <p class="pp-empty">{% trans "Tədris siyahısına baxış üçün struktur əhatəniz yoxdur." context "accounts.people.page" %}</p>
+    {% elif not teaching.years %}
+        <p class="pp-empty">{% trans "Açılış tapılmadı." context "accounts.people.page" %}</p>
+    {% else %}
+    {% for year in teaching.years %}
+    <details class="pp-sem" {% if forloop.first %}open{% endif %}>
+        <summary class="pp-sem__head">
+            <span class="pp-sem__title">{{ year.label }}{% if year.is_current %} <span class="ems-badge ems-badge--primary">{% trans "cari" context "accounts.people.page" %}</span>{% endif %}</span>
+            <span class="pp-sem__meta">{{ year.offerings }} {% trans "açılış" context "accounts.people.page" %} · {{ year.subjects }} {% trans "fənn" context "accounts.people.page" %} · {{ year.groups }} {% trans "qrup" context "accounts.people.page" %} · {{ year.hours }} {% trans "saat" context "accounts.people.page" %}</span>
+        </summary>
+        <div class="ems-tablewrap"><div class="ems-tablescroll">
+            <table class="ems-table pp-table">
+                <thead><tr>
+                    <th scope="col">{% trans "Fənn" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Qrup" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Dövr" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Saat" context "accounts.people.page" %}</th>
+                </tr></thead>
+                <tbody>
+                {% for row in year.rows %}
+                <tr>
+                    <th scope="row"><span class="pp-strong">{{ row.subject }}</span>{% if row.subject_code %}<span class="pp-sub ems-mono">{{ row.subject_code }}</span>{% endif %}</th>
+                    <td>{{ row.group|default:"—" }}</td>
+                    <td>{{ row.period }}</td>
+                    <td class="ems-table__num">{{ row.hours }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </details>
+    {% endfor %}
+    {% endif %}
+</section>

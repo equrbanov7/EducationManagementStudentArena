@@ -1,11 +1,17 @@
 {% load i18n %}
 {% comment %}
-  "Apellyasiyalar" (müəllim/reviewer) profil bölməsi — dashboard sağ content
-  hissəsində AJAX ilə açılır. Qərar (review) Bootstrap modalında açılır və
-  AJAX ilə yadda saxlanılır.
-  Bütün JS davranışı static appeals/js/appeals_sections.js-dədir (EMSDelegate,
-  document-level) — AJAX section swap-larından sonra da işlək qalır.
+  «Apellyasiyalar» (imtahan mərkəzi / reviewer) kabinet bölməsi — sağ content
+  hissəsində AJAX ilə açılır. Qərar (review) Bootstrap modalında açılır və AJAX
+  ilə yadda saxlanılır.
+
+  2026-09-08 sakit redizayn: hero lent («Reviewer workspace») və rəngli KPI
+  konturları yığışdırıldı. Başlıq `ems_ui/_content_header` (YALNIZ alt yazı —
+  h1 kabinet qabığından gəlir, ikinci h1 yazılmır), KPI-lar `ems-kpi`, filtr
+  `ems-filters`, cədvəl `ems-table`, status `ems-badge`.
+  Bütün JS davranışı `appeals/js/appeals_sections.js`-dədir (EMSDelegate,
+  document-level) — `data-*` çəngəlləri DƏYİŞMƏYİB. CSS xarici fayldadır (CSP).
 {% endcomment %}
+{% trans "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar «Bax» ilə açılan paneldə verilir." context "appeals.template" as appeal_manage_subtitle %}
 <section class="profile-section-panel profile-section--manage-appeals {% if active_section == 'manage-appeals' %}is-active{% endif %}"
          data-profile-section-panel="manage-appeals"
          data-manage-url="{% url 'appeals:manage_appeals' %}"
@@ -13,15 +19,7 @@
          data-i18n-load-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}">
     <div class="appeal-embedded">
         <div data-manage-list-view>
-            <header class="appeal-hero appeal-hero--icon">
-                <div class="appeal-hero__lead">
-                    <span class="appeal-hero__badge"><i class="fas fa-scale-balanced"></i></span>
-                    <div>
-                        <span class="appeal-hero__eyebrow">{% trans "Reviewer workspace" context "appeals.template" %}</span>
-                        <p>{% trans "Müraciətləri status, imtahan, səbəb tipi və tarix üzrə süzün; qərar üçün detal səhifəsinə keçin." context "appeals.template" %}</p>
-                    </div>
-                </div>
-            </header>
+            {% include "partials/ems_ui/_content_header.html" with header_subtitle=appeal_manage_subtitle %}
 
             <div data-manage-body>
                 {% include "appeals/partials/_manage_appeals_body.html" %}

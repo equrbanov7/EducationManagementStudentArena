@@ -111,6 +111,16 @@ def resolve_notification_recipients(user, capabilities, target: str):
         member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
         return User.objects.filter(pk__in=member_user_ids, is_active=True)
 
+    if target.startswith("unit_"):
+        from .notification_scopes import resolve_unit_target
+
+        return resolve_unit_target(user, capabilities, target)
+
+    if target.startswith("role_"):
+        from .notification_scopes import resolve_role_target
+
+        return resolve_role_target(user, capabilities, target)
+
     if target.startswith("group_"):
         try:
             grp_id = int(target[6:])
@@ -136,8 +146,60 @@ PUBLISH_NOTIFICATION_IMAGE_TOO_LARGE = "notif_image_too_large"
 PUBLISH_NOTIFICATION_IMAGE_INVALID = "notif_image_invalid"
 PUBLISH_NOTIFICATION_SENT = "notif_sent_success"
 PUBLISH_NOTIFICATION_NO_RECIPIENTS = "notif_no_recipients"
+# Əlavə fayllar (2026-09-08) — açar mətnin özüdür (tərcümə cədvəlində yoxdur).
+PUBLISH_NOTIFICATION_FILE_TOO_LARGE = "Əlavə edilən faylın ölçüsü 10 MB limitini keçir."
+PUBLISH_NOTIFICATION_FILE_INVALID = (
+    "Əlavə edilən fayl tipi dəstəklənmir (PDF, Word, Excel, PowerPoint, mətn, ZIP və şəkil olar)."
+)
+PUBLISH_NOTIFICATION_TOO_MANY_FILES = "Bir bildirişə ən çox 5 fayl əlavə etmək olar."
 
 _NOTIFICATION_IMAGE_MAX_MB = 5
+_NOTIFICATION_FILE_MAX_MB = 10
+_NOTIFICATION_FILES_MAX = 5
+NOTIFICATION_FILE_ALLOWED_EXTENSIONS = {
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".txt",
+    ".csv",
+    ".zip",
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+}
+
+
+def _store_notification_files(files) -> tuple[list, str]:
+    """Əlavə faylları yoxlayıb saxlayır → (`attachments`, xəta açarı)."""
+    if len(files) > _NOTIFICATION_FILES_MAX:
+        return [], PUBLISH_NOTIFICATION_TOO_MANY_FILES
+    attachments = []
+    for uploaded in files:
+        if getattr(uploaded, "size", 0) > _NOTIFICATION_FILE_MAX_MB * 1024 * 1024:
+            return [], PUBLISH_NOTIFICATION_FILE_TOO_LARGE
+        try:
+            validate_uploaded_file(
+                uploaded,
+                allowed_extensions=NOTIFICATION_FILE_ALLOWED_EXTENSIONS,
+                max_size_mb=_NOTIFICATION_FILE_MAX_MB,
+                allowed_mime_types=set(),
+                allowed_mime_prefixes=("image/", "text/", "application/"),
+            )
+        except ValidationError:
+            return [], PUBLISH_NOTIFICATION_FILE_INVALID
+        original_name = os.path.basename(getattr(uploaded, "name", "") or "fayl")[:120]
+        randomize_uploaded_filename(uploaded)
+        saved_path = default_storage.save(os.path.join("notifications", "files", uploaded.name), uploaded)
+        attachments.append(
+            {"name": original_name, "url": default_storage.url(saved_path), "size": int(getattr(uploaded, "size", 0))}
+        )
+    return attachments, ""
 
 
 def publish_system_notification(*, request, capabilities) -> tuple[bool, str]:
@@ -201,6 +263,15 @@ def publish_system_notification(*, request, capabilities) -> tuple[bool, str]:
         notif_image_url = default_storage.url(saved_path)
 
     metadata = {"image_url": notif_image_url} if notif_image_url else {}
+
+    # Əlavə fayllar (sahib, 2026-09-08): `notif_files` (çoxlu). Metadata-da
+    # `attachments: [{name, url, size}]` — bildiriş siyahısı və modal göstərir.
+    notif_files = [f for f in request.FILES.getlist("notif_files") if f]
+    if notif_files:
+        attachments, error_key = _store_notification_files(notif_files)
+        if error_key:
+            return False, error_key
+        metadata["attachments"] = attachments
 
     # Resolve each selected target and collect unique recipients.
     User = get_user_model()

@@ -176,6 +176,74 @@
 
     /* ---- Ağac seçimi (ekran 01) ------------------------------------------ */
 
+    /* Qovşaq seçiləndə YALNIZ detal paneli yenilənir (2026-09-08, sahib şikayəti
+     * «klik edirəm açılır, sonra bağlanır»): fraqment endpoint-indən eyni bölmə
+     * HTML-i alınır, ondan `[data-tof-detail]` çıxarılıb yerində əvəzlənir. Ağac
+     * DOM-u toxunulmaz qalır → açıq/bağlı vəziyyət itmir. URL `replaceState` ilə
+     * `st_unit`-i daşıyır ki, yeniləmə/paylaşma seçimi saxlasın. Fraqment
+     * alınmasa köhnə yol (bütöv panel) işə düşür. */
+    var treeDetailRequest = 0;
+
+    function loadTreeDetail(host, unitId) {
+        var pane = host.querySelector("[data-tof-detail]");
+        var fragmentBase = host.getAttribute("data-tof-tree-detail-url");
+        var section = host.getAttribute("data-tof-section");
+        var pageUrl = sectionUrl(section, { st_unit: unitId });
+        if (!pane || !fragmentBase || typeof window.fetch !== "function") {
+            reload(section, pageUrl);
+            return;
+        }
+        var request = ++treeDetailRequest;
+        var url = new URL(fragmentBase, window.location.origin);
+        var params = new URLSearchParams(window.location.search);
+        params.delete("section");
+        params.set("st_unit", unitId);
+        url.search = params.toString();
+        pane.setAttribute("aria-busy", "true");
+        window
+            .fetch(url.toString(), {
+                credentials: "same-origin",
+                headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("http_" + response.status);
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                if (request !== treeDetailRequest) {
+                    return;
+                }
+                var html = payload && payload.html;
+                if (!html) {
+                    throw new Error("bad_payload");
+                }
+                var doc = new window.DOMParser().parseFromString(html, "text/html");
+                var next = doc.querySelector("[data-tof-detail]");
+                if (!next) {
+                    throw new Error("detail_missing");
+                }
+                pane.innerHTML = next.innerHTML;
+                pane.removeAttribute("aria-busy");
+                if (window.EMSBootstrapSelect) {
+                    window.EMSBootstrapSelect.init(pane);
+                }
+                if (window.history && window.history.replaceState) {
+                    window.history.replaceState({ section: section, ajax: true }, "", pageUrl);
+                }
+                pane.dispatchEvent(new CustomEvent("tof:detail-loaded", { bubbles: true, detail: { unit: unitId } }));
+            })
+            .catch(function () {
+                if (request !== treeDetailRequest) {
+                    return;
+                }
+                pane.removeAttribute("aria-busy");
+                toast(host.getAttribute("data-tof-tree-error") || "", "error");
+                reload(section, pageUrl);
+            });
+    }
+
     document.addEventListener("ems:tree-select", function (event) {
         var host = root();
         if (!host || !event.detail || !event.detail.node) {
@@ -185,7 +253,38 @@
         if (section !== "org-structure-tree") {
             return;
         }
-        reload(section, sectionUrl(section, { st_unit: event.detail.node }));
+        loadTreeDetail(host, event.detail.node);
+    });
+
+    /* Yol (breadcrumb) düyməsi: ağacda həmin qovşağı seç (+ onu görünürə gətir). */
+    window.EMSDelegate.on("click", "[data-tof-tree-jump]", function (event, btn) {
+        event.preventDefault();
+        var host = root();
+        if (!host) {
+            return;
+        }
+        var row = host.querySelector('.ems-tree__row[data-ems-tree-node="' + btn.getAttribute("data-tof-tree-jump") + '"]');
+        if (!row) {
+            return;
+        }
+        // Valideyn qrupları aç ki, sətir görünsün.
+        var group = row.closest(".ems-tree__group");
+        while (group) {
+            group.hidden = false;
+            var parentRow = group.parentElement ? group.parentElement.querySelector(".ems-tree__row") : null;
+            if (parentRow) {
+                parentRow.setAttribute("aria-expanded", "true");
+            }
+            group = group.parentElement ? group.parentElement.closest(".ems-tree__group") : null;
+        }
+        if (window.EMSNav && typeof window.EMSNav.selectTreeRow === "function") {
+            window.EMSNav.selectTreeRow(row);
+        }
+        try {
+            row.scrollIntoView({ block: "nearest" });
+        } catch (e) {
+            row.scrollIntoView(false);
+        }
     });
 
     /* ---- Rəhbər seçicisi (axtarışlı, server-backed) ---------------------- */
@@ -313,11 +412,13 @@
             submit.disabled = true;
         }
         post(url, fieldsOf(form), form)
-            .then(function () {
+            .then(function (payload) {
                 if (window.EMSOverlay) {
                     window.EMSOverlay.close(form.closest(".ems-overlay"));
                 }
-                toast(form.getAttribute("data-tof-success") || "", "success");
+                // Şablon mətni yoxdursa serverin öz mesajı göstərilir (məs.
+                // «X «Y» fakültəsinə dekan təyin edildi») — səssiz uğur olmasın.
+                toast(form.getAttribute("data-tof-success") || (payload && payload.message) || "", "success");
                 reload(section, sectionUrl(section, {}));
             })
             .catch(function (err) {

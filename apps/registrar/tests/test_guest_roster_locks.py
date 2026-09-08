@@ -44,12 +44,14 @@ def _transcript_row_count(student, organization) -> int:
     return sum(len(bucket["rows"]) for bucket in data["semesters"])
 
 
-
 def _doc():
     """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+    return SimpleUploadedFile(
+        "teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf"
+    )
+
 
 class _FrozenRosterBase(_GuestRosterBase):
     """Baza fixtura + RİM (jurnal bağlayan) + KÖÇÜRÜLMÜŞ 2019/2020 semestri."""

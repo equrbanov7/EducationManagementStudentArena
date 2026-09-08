@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}«Üzv kartı» çekmecəsinin gövdəsi — məzmun JSON-dan
+(`organizations:structure_member_detail`) gəlir, `org_members.js` DOM ilə render
+edir (innerHTML-ə istifadəçi mətni yazılmır). Burada karkas, skeleton, xəta
+vəziyyəti və mətnlər (data-atributla JS-ə — xarici JS şablondan keçmir).{% endcomment %}
+<div class="om-detail" data-om-detail
+     data-t-loading="{% trans 'Üzv kartı yüklənir…' context 'organizations.members' %}"
+     data-t-error="{% trans 'Məlumat yüklənmədi — yenidən cəhd edin.' context 'organizations.members' %}"
+     data-t-username="{% trans 'İstifadəçi adı' context 'organizations.members' %}"
+     data-t-email="{% trans 'E-poçt' context 'organizations.members' %}"
+     data-t-joined="{% trans 'Qoşulma' context 'organizations.members' %}"
+     data-t-roles="{% trans 'Rollar' context 'organizations.members' %}"
+     data-t-roles-empty="{% trans 'Aktiv rol yoxdur.' context 'organizations.members' %}"
+     data-t-heads="{% trans 'Rəhbərlik etdiyi bölmələr' context 'organizations.members' %}"
+     data-t-heads-empty="{% trans 'Rəhbərlik etdiyi bölmə yoxdur.' context 'organizations.members' %}"
+     data-t-title="{% trans 'Vəzifə' context 'organizations.members' %}"
+     data-t-employee="{% trans 'Tabel №' context 'organizations.members' %}"
+     data-t-primary="{% trans 'Əsas rol' context 'organizations.members' %}"
+     data-t-since="{% trans 'Təyinat' context 'organizations.members' %}"
+     data-t-scope-all="{% trans 'Bütün təşkilat' context 'organizations.members' %}"
+     data-t-scope-missing="{% trans 'Bölmə təyin edilməyib' context 'organizations.members' %}"
+     data-t-inactive="{% trans 'Hesab dayandırılıb' context 'organizations.members' %}"
+     data-t-leader="{% trans 'Rəhbər heyət' context 'organizations.members' %}">
+    <p class="ems-msg ems-msg--error" data-om-detail-error role="alert" hidden></p>
+    <div class="om-detail__skeleton" data-om-detail-skeleton aria-hidden="true">
+        <span class="om-skel om-skel--avatar"></span>
+        <span class="om-skel"></span>
+        <span class="om-skel om-skel--short"></span>
+        <span class="om-skel"></span>
+    </div>
+    <div class="om-detail__body" data-om-detail-body aria-live="polite"></div>
+</div>

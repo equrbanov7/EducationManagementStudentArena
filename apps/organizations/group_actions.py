@@ -27,6 +27,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
@@ -35,7 +36,7 @@ from django.views.decorators.http import require_POST
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
-from .groups_registry import can_manage_groups, can_view_groups, group_meta, group_scope
+from .groups_registry import can_manage_groups, can_view_groups, education_form_choices, group_meta, group_scope
 from .models import Organization, OrgUnit
 from .scoping import scope_org_units
 from .views.shared._helpers import _unique_unit_slug
@@ -93,6 +94,10 @@ def _apply_meta(unit, request):
     settings_blob["course_year"] = _int_or(request.POST.get("course_year"), 1, low=1, high=MAX_COURSE_YEAR)
     settings_blob["admission_year"] = _int_or(request.POST.get("admission_year"), 0, low=0, high=2100)
     settings_blob["capacity"] = _int_or(request.POST.get("capacity"), 0, low=0, high=500)
+    # Təhsil forması (əyani/qiyabi/distant) — yalnız registrar-ın tanıdığı dəyər.
+    education_form = (request.POST.get("education_form") or "").strip()
+    allowed_forms = {option["value"] for option in education_form_choices()}
+    settings_blob["education_form"] = education_form if education_form in allowed_forms else ""
     curriculum_id = (request.POST.get("curriculum_id") or "").strip()
     if curriculum_id:
         Curriculum = django_apps.get_model("registrar", "Curriculum")
@@ -114,6 +119,25 @@ def _save_group(request, organization, scope):
     name = (request.POST.get("name") or "").strip()[:255]
     if not name:
         return _error(pgettext(_CTX, "Qrupun adı boş ola bilməz."), code="name_required", field="name")
+    code = (request.POST.get("code") or "").strip()[:50]
+
+    # UNİKALLIQ (sahib, 2026-09-07): eyni adda / eyni kodda ikinci qrup olmasın —
+    # arxivdəkilər də sayılır (bərpa olunanda toqquşma yaranmasın).
+    siblings = OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
+    if instance is not None:
+        siblings = siblings.exclude(pk=instance.pk)
+    if siblings.filter(name__iexact=name).exists():
+        return _error(
+            pgettext(_CTX, "Bu adda qrup artıq mövcuddur — qrup adı unikal olmalıdır."),
+            code="name_taken",
+            field="name",
+        )
+    if code and siblings.filter(code__iexact=code).exists():
+        return _error(
+            pgettext(_CTX, "Bu kodla qrup artıq mövcuddur — qrup kodu unikal olmalıdır."),
+            code="code_taken",
+            field="code",
+        )
 
     specialty = None
     specialty_id = (request.POST.get("specialty") or "").strip()
@@ -149,7 +173,7 @@ def _save_group(request, organization, scope):
     )
 
     instance.name = name
-    instance.code = (request.POST.get("code") or "").strip()[:50]
+    instance.code = code
     if specialty is not None:
         instance.parent = specialty
     _apply_meta(instance, request)
@@ -258,8 +282,145 @@ def _promote(request, organization, scope):
     return JsonResponse({"ok": True, "promoted": promoted, "graduated": graduated, "requested": len(ids)})
 
 
+def _record_ids(request) -> list:
+    """`record_ids` — həm təkrarlanan sahə, həm vergüllü sətir kimi qəbul olunur."""
+    raw = []
+    for value in request.POST.getlist("record_ids"):
+        raw.extend(str(value).split(","))
+    return [value.strip() for value in raw if value and value.strip()][:MAX_BULK]
+
+
+@transaction.atomic
+def _add_students(request, organization, scope):
+    """Qrupsuz tələbələri qrupa əlavə et — RƏSMİ köçürmə xidməti ilə.
+
+    Qrup dəyişikliyi DB qapısı ilə yalnız `transfer_student_group`-a buraxılır
+    (bax apps/registrar/reference_identity.py); ona görə burada sadə FK yazısı
+    YOXDUR — hər tələbə üçün köçürmə çağırılır (audit + jurnal tarixçəsi qorunur).
+    Namizədlər YALNIZ hazırda aktiv qrupu olmayan (`group` boş və ya qrupu
+    arxivlənmiş) qeydiyyatlı tələbələrdir — başqa qrupda olan tələbə buradan
+    köçürülmür (onun üçün çekmecədəki əmrli «Qrupdan çıxar» axını var).
+    """
+    unit = _visible_group(organization, scope, request.POST.get("id"))
+    if unit is None:
+        return _error(pgettext(_CTX, "Qrup tapılmadı."), status=404, code="not_found")
+
+    # Sahib (2026-09-08): əlavə üçün səbəb yazmaq TƏLƏB OLUNMUR — audit sətri
+    # aktor + vaxt + qrup ilə onsuz da düşür; yazılıbsa auditə əlavə olunur.
+    reason = (request.POST.get("reason") or "").strip()[:500] or pgettext(_CTX, "Qrup reyestrindən tələbə əlavə edildi")
+
+    ids = _record_ids(request)
+    if not ids:
+        return _error(pgettext(_CTX, "Tələbə seçilməyib."), code="students_required", field="record_ids")
+
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    records = list(
+        StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
+        .filter(Q(group__isnull=True) | Q(group__is_active=False))
+        .select_related("student", "program", "organization", "group")
+    )
+    if not records:
+        return _error(
+            pgettext(_CTX, "Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qrupsuz, qeydiyyatlı) tələbə yoxdur."),
+            code="no_candidates",
+            field="record_ids",
+        )
+
+    from django.core.exceptions import ValidationError
+
+    from apps.registrar import transfer as group_transfer
+
+    period = organization.academic_periods.filter(is_current=True, is_active=True).first()
+    added = []
+    try:
+        for record in records:
+            group_transfer.transfer_student_group(
+                record=record, new_group=unit, period=period, by_user=request.user, reason=reason
+            )
+            added.append(record)
+    except ValidationError as exc:
+        messages = getattr(exc, "messages", None) or [str(exc)]
+        return _error(" ".join(str(message) for message in messages), status=409, code="transfer_rejected")
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=unit,
+        request=request,
+        reason=f"groups: students added to group — {reason}",
+        new_values={
+            "added": [str(record.pk) for record in added],
+            "students": [record.student.username for record in added],
+            "reason": reason,
+        },
+    )
+    return JsonResponse({"ok": True, "id": str(unit.id), "added": len(added), "requested": len(ids)})
+
+
+@transaction.atomic
+def _move_student(request, organization, scope):
+    """«Qrupu dəyiş» — tələbəni BAŞQA qrupa köçür (səbəb ilə, əmr sənədsiz).
+
+    Sahib (2026-09-07/08): qrupu dəyişərkən sadəcə səbəb yazılsın. Rəsmi əmrli
+    hərəkət («Tələbə reyestri» → köçürmə) ayrıca qalır; burada isə eyni DB-qapılı
+    köçürmə xidməti (`transfer_student_group`) çağırılır — jurnal tarixçəsi qorunur.
+    Hər iki qrup (cari və hədəf) aktorun əhatəsində olmalıdır.
+    """
+    target = _visible_group(organization, scope, request.POST.get("id"))
+    if target is None:
+        return _error(pgettext(_CTX, "Hədəf qrup tapılmadı."), status=404, code="not_found", field="id")
+
+    reason = (request.POST.get("reason") or "").strip()
+    if len(reason) < 3:
+        return _error(pgettext(_CTX, "Səbəb yazılmalıdır (ən azı 3 simvol)."), code="reason_required", field="reason")
+
+    record_id = (request.POST.get("record_id") or "").strip()
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    record = (
+        StudentAcademicRecord.objects.filter(organization=organization, is_active=True, pk=record_id)
+        .select_related("student", "program", "organization", "group")
+        .first()
+        if record_id
+        else None
+    )
+    if record is None:
+        return _error(pgettext(_CTX, "Tələbə qeydi tapılmadı."), status=404, code="not_found", field="record_id")
+    if record.group_id and _visible_group(organization, scope, str(record.group_id), include_archived=True) is None:
+        return _error(pgettext(_CTX, "Tələbənin cari qrupu sizin əhatənizdə deyil."), status=404, code="not_found")
+    if str(record.group_id or "") == str(target.pk):
+        return _error(pgettext(_CTX, "Tələbə onsuz da bu qrupdadır."), code="same_group", field="id")
+
+    from django.core.exceptions import ValidationError
+
+    from apps.registrar import transfer as group_transfer
+
+    period = organization.academic_periods.filter(is_current=True, is_active=True).first()
+    try:
+        result = group_transfer.transfer_student_group(
+            record=record, new_group=target, period=period, by_user=request.user, reason=reason
+        )
+    except ValidationError as exc:
+        messages = getattr(exc, "messages", None) or [str(exc)]
+        return _error(" ".join(str(message) for message in messages), status=409, code="transfer_rejected")
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=target,
+        request=request,
+        reason=f"groups: student moved between groups — {reason}",
+        old_values={"group": str(getattr(record, "group_id", "") or "")},
+        new_values={"group": str(target.pk), "student": record.student.username, "moved": result.get("moved", 0)},
+    )
+    return JsonResponse({"ok": True, "id": str(target.id), "moved": result.get("moved", 0)})
+
+
 _HANDLERS = {
     "save_group": lambda request, organization, scope: _save_group(request, organization, scope),
+    "add_students": lambda request, organization, scope: _add_students(request, organization, scope),
+    "move_student": lambda request, organization, scope: _move_student(request, organization, scope),
     "archive": lambda request, organization, scope: _archive(request, organization, scope, restore=False),
     "restore": lambda request, organization, scope: _archive(request, organization, scope, restore=True),
     "promote": lambda request, organization, scope: _promote(request, organization, scope),
