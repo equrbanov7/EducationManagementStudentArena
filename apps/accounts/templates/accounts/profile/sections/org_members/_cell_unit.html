@@ -1,0 +1,21 @@
+{% load i18n %}
+{% comment %}Bölmə xanası — üzvlüyün əhatə vahidi + əcdad zənciri
+(«İnformatika kafedrası» / «Kafedra · Mühəndislik»). Əhatəsiz ORGANIZATION rolu
+«Bütün təşkilat»; bölmə rolu olub bölməsi olmayan üzvlük xəbərdarlıq çipidir
+(data-keyfiyyət siqnalı — KPI «Bölməsiz» ilə eyni meyar).{% endcomment %}
+{% if row.data.unit_name %}
+<div class="om-unit" title="{{ row.data.unit_chain }}">
+    <span class="om-unit__name">{{ row.data.unit_name }}</span>
+    <span class="om-unit__trail">{{ row.data.unit_type_label }}{% if row.data.unit_trail %} · {{ row.data.unit_trail }}{% endif %}</span>
+</div>
+{% elif row.data.scope_missing %}
+<span class="om-missing">
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    {% trans "Bölmə təyin edilməyib" context "organizations.members" %}
+</span>
+{% else %}
+<span class="om-muted">
+    <i class="fas fa-building" aria-hidden="true"></i>
+    {% trans "Bütün təşkilat" context "organizations.members" %}
+</span>
+{% endif %}

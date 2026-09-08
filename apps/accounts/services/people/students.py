@@ -98,6 +98,9 @@ def visible_students_qs(actor, *, request=None, filters=None, records=_UNSET):
         .exclude(is_superuser=True)
         .select_related("profile")
         .annotate(
+            # Akademik QEYD id-si — sətirdən birbaşa qrup köçürməsi (toplu əməl)
+            # üçün: `transfer_group` hədəfi user deyil, record-dur.
+            record_id=Subquery(picked.values("id")[:1]),
             group_id=Subquery(picked.values("group_id")[:1]),
             group_name=Subquery(picked.values("group__name")[:1]),
             program_name=Subquery(picked.values("program__name")[:1]),
@@ -218,6 +221,7 @@ def build_students_page(*, actor, filters, request=None, today=None) -> dict:
         row.update(
             {
                 "kind": "student",
+                "record_id": str(getattr(user, "record_id", "") or ""),
                 "group_name": getattr(user, "group_name", "") or "",
                 "program_name": program_name,
                 # Etiket ƏL İLƏ birləşdirilmir — ``Program.display_label`` ilə eyni

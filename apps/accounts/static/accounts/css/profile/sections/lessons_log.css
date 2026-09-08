@@ -3,84 +3,27 @@
 
    Kart / cədvəl / badge / KPI / filtr TƏKRAR TƏRİF OLUNMUR: onlar
    `static/css/ems_ui/*.css` komponent qatındadır və qabıqdan yüklənir.
-   Burada yalnız gün qruplaşdırması, əhatə zolağı və sətir vurğusu var.
+   Burada yalnız gün qruplaşdırması və sətir vurğusu var («Sillabus mövzu
+   əhatəsi» bloku 2026-09-08-də sahibin qərarı ilə yığışdırıldı).
 
    Rəng birbaşa YAZILMIR — hamısı `--ems-*` tokenlərindən (light-only tema).
    ========================================================================= */
 
-.profile-section--lessons-log .llog-coverage {
-    margin: var(--ems-sp-4, 14px) 0;
-    padding: var(--ems-pad-card, 15px 17px);
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: var(--ems-r-lg, 14px);
-}
-
-.llog-coverage__title {
-    margin: 0 0 10px;
-    font-size: var(--ems-fs-sm, 0.93rem);
-    font-weight: 800;
-    color: var(--ems-neutral-900);
-}
-
-.llog-coverage__list {
+.profile-section--lessons-log .llog {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    gap: 0;
 }
 
-.llog-cov__head,
-.llog-cov__foot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 10px;
+/* Filtr paneli: tarix sahələri select-lərlə eyni sırada, yığcam en. */
+.profile-section--lessons-log .ems-filters .ems-field:has(.ems-input--date) {
+    min-width: 150px;
+    flex: 0 0 auto;
 }
 
-.llog-cov__name {
-    font-weight: 700;
-    color: var(--ems-neutral-900);
-}
-
-.llog-cov__group,
-.llog-cov__meta {
-    font-size: var(--ems-fs-xs, 0.75rem);
-    color: var(--ems-neutral-600);
-}
-
-.llog-cov__figures {
-    margin-inline-start: auto;
-    font-size: var(--ems-fs-xs, 0.78rem);
-    font-weight: 700;
-    color: var(--ems-neutral-700);
-}
-
-.llog-cov__bar {
-    margin: 8px 0;
-}
-
-.llog-cov__foot {
-    margin-top: 6px;
-}
-
-.llog-cov__lock {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 10px;
-    border-radius: var(--ems-r-sm, 8px);
-    background: var(--ems-warning-bg);
-    color: var(--ems-warning-800, #92400e);
-    font-size: var(--ems-fs-xs, 0.75rem);
-    font-weight: 700;
-}
-
-.llog-cov__lockcta {
-    color: var(--ems-primary-700);
-    text-decoration: underline;
+/* Yüklənmə vəziyyəti: gövdə skeleton kartlarla əvəzlənir (filter_bar.js). */
+.llog-body[aria-busy="true"] {
+    min-height: 240px;
 }
 
 /* ── Gün qruplaşdırması ───────────────────────────────────────────────── */
@@ -96,6 +39,7 @@
     border: 1px solid var(--ems-neutral-200);
     border-radius: var(--ems-r-lg, 14px);
     overflow: hidden;
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
 .llog-day__head {
@@ -117,6 +61,14 @@
 .llog-day__total {
     font-size: var(--ems-fs-xs, 0.77rem);
     color: var(--ems-neutral-600);
+}
+
+.llog-day__weekday {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    font-weight: 700;
 }
 
 .llog-day__total {
@@ -180,7 +132,6 @@
 }
 
 @media (max-width: 640px) {
-    .llog-cov__figures,
     .llog-day__total {
         margin-inline-start: 0;
         width: 100%;

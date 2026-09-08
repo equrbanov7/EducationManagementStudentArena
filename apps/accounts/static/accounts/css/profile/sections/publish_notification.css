@@ -1,22 +1,305 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   Profil — «Bildiriş yayımla» bölməsi (hədəf seçimi + göndər).
+   Profil — «Bildiriş göndər» bölməsi (compose & send).
    ──────────────────────────────────────────────────────────────────────────
-   `notifications.css`-dən AYRILIB (2026-09-07): həmin fayl oxucu inbox-udur,
-   bu isə yazıcı formasıdır — iki fərqli ekran, iki fərqli fayl. Sinif adları
-   və davranış DƏYİŞMİR (`_publish_notification.html` + `publish_notification.js`);
-   yalnız hardcode rənglər `--ems-*` token-lərinə çevrilib.
+   YENİDƏN DİZAYN (2026-09-08): iki sütun (forma + yapışqan önizləmə),
+   çip-lə alıcı seçimi, sayğaclar, yapışqan əməl paneli. Düymə/sahə/kart/
+   çip bazası `static/css/ems_ui/controls.css`-dədir — burada TƏKRAR
+   TƏRİF OLUNMUR; yalnız bölmə düzümü və bölməyə xas hissələr var.
+
+   Rəng birbaşa YAZILMIR — hamısı `--ems-*` tokenlərindən (light-only tema).
+   Boşluq şkalası: 8 / 12 / 16 / 20px. Kart radiusu 14px.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Hədəf seçimi (çoxseçimli siyahı) ────────────────────────────────────── */
-.pn-target-list {
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 11px;
+.profile-section--publish-notification [hidden] {
+    display: none !important;
+}
+
+/* ── Düzüm: forma + önizləmə ─────────────────────────────────────────────── */
+.pn {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+@media (min-width: 1100px) {
+    .pn {
+        grid-template-columns: minmax(0, 1fr) 340px;
+    }
+
+    .pn-preview {
+        position: sticky;
+        top: 16px;
+    }
+}
+
+/* ── Forma kartı ─────────────────────────────────────────────────────────── */
+.pn-form {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-radius: 14px;
+    border-color: var(--ems-neutral-200);
+}
+
+/* ── Blok (fieldset) — kiçik-kapital etiket + nömrə ─────────────────────── */
+.pn-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 20px;
+    border: 0;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    min-width: 0;
+}
+
+.pn-block__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    float: none;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-700);
+}
+
+.pn-block__num {
+    font-family: var(--ems-ff-mono);
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+    letter-spacing: 0;
+}
+
+.pn-label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pn-optional {
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ems-neutral-400);
+}
+
+/* Sayğac: mətnlə verilir («12 / 120»), rəng yalnız köməkçidir. */
+.pn-counter {
+    font-size: var(--ems-fs-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-neutral-400);
+    white-space: nowrap;
+}
+
+.pn-counter.is-near {
+    color: var(--ems-warning-700);
+    font-weight: 700;
+}
+
+.pn-counter.is-full {
+    color: var(--ems-danger-strong);
+    font-weight: 700;
+}
+
+.pn-textarea {
+    min-height: 92px;
+    max-height: 360px;
+    overflow-y: auto;
+    resize: none;
+}
+
+/* Mətn tipli kiçik düymə (çip-ləri təmizlə, şəkli sil). */
+.pn-linkbtn {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-link);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.pn-linkbtn:hover {
+    color: var(--ems-link-hover);
+}
+
+.pn-linkbtn:focus-visible {
+    outline: none;
+    border-radius: var(--ems-r-xs);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.pn-linkbtn--danger {
+    color: var(--ems-danger);
+}
+
+.pn-linkbtn--danger:hover {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Seçilmiş alıcılar — çiplər ──────────────────────────────────────────── */
+.pn-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pn-chip {
+    max-width: 100%;
+    padding-right: 4px;
+    cursor: default;
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.pn-chip__text {
     overflow: hidden;
-    /* Sürüşən sahə `.pn-target-scroll`-dadır, siyahının özündə deyil. */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pn-chip__x {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: transparent;
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm);
+    cursor: pointer;
+}
+
+.pn-chip__x:hover {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.pn-chip__x:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* ── Alıcı siyahısı (axtarış + çekbox) ──────────────────────────────────── */
+.pn-target-list {
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    overflow: hidden;
+}
+
+.pn-target-list:focus-within {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.pn-target-search-wrap {
+    position: relative;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+}
+
+.pn-target-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-400);
+    pointer-events: none;
+}
+
+/* Spesifiklik `.ems-input`-un `padding: 9px 12px`-indən yüksəkdir — ikon
+   yer tutucu mətnin üstünə düşmür (sahib şikayəti, 2026-09-08). */
+.pn-target-search-wrap .pn-target-search {
+    min-height: 40px;
+    padding: 9px 12px 9px 40px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+/* Kateqoriya başlığı (seçilmir) */
+.pn-target-cat {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 6px 14px 4px;
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.pn-target-cat__label {
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+/* Əlavə fayl siyahısı (forma və önizləmə) */
+.pn-files,
+.pn-preview__files {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pn-files li,
+.pn-preview__files li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-800);
+}
+
+.pn-files li .fa-paperclip,
+.pn-preview__files li .fa-paperclip {
+    color: var(--ems-neutral-500);
+}
+
+.pn-files__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pn-files__size {
+    flex: 0 0 auto;
+    color: var(--ems-neutral-500);
+    font-variant-numeric: tabular-nums;
+}
+
+.pn-target-search:focus {
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .pn-target-scroll {
-    max-height: 224px; /* ~4 element × ~56px */
+    max-height: 240px;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -24,52 +307,64 @@
 .pn-target-item {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.55rem 0.85rem;
-    cursor: pointer;
-    transition: background 0.14s;
-    border-bottom: 1px solid var(--ems-neutral-100);
-    user-select: none;
-    font-size: 0.88rem;
+    gap: 10px;
+    min-height: 40px;
     margin: 0;
+    padding: 6px 14px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.12s ease;
 }
 
-.pn-target-item:last-child {
-    border-bottom: none;
+.pn-target-item:last-of-type {
+    border-bottom: 0;
 }
 
 .pn-target-item:hover {
-    background-color: var(--ems-primary-50);
+    background: var(--ems-neutral-50);
 }
 
-.pn-target-item input[type="checkbox"] {
-    flex-shrink: 0;
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-    accent-color: var(--ems-primary-600);
+.pn-target-item:has(.pn-target-cb:checked) {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
 }
 
-/* «Hamıya» kimi eksklüziv hədəf — digərlərini söndürdüyü üçün fərqli tonda. */
+.pn-target-item:has(.pn-target-cb:focus-visible) {
+    box-shadow: inset 0 0 0 2px var(--ems-primary-200);
+}
+
+/* «Hamıya» kimi eksklüziv hədəf — digərlərini söndürür; qalın ayırıcı ilə. */
 .pn-target-item.is-exclusive {
-    background-color: #fffbeb;
-    border-bottom-color: var(--ems-warning-100);
+    border-bottom: 2px solid var(--ems-neutral-200);
 }
 
-.pn-target-item.is-exclusive:hover {
-    background-color: var(--ems-warning-100);
-}
-
-.pn-target-item.is-exclusive:last-child {
-    border-bottom: none;
+.pn-target-cb {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
 }
 
 .pn-target-icon {
-    width: 1.3rem;
-    text-align: center;
-    flex-shrink: 0;
-    font-size: 0.9rem;
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-100);
     color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm);
+}
+
+.pn-target-item:has(.pn-target-cb:checked) .pn-target-icon {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
 }
 
 .pn-target-label {
@@ -80,45 +375,320 @@
     white-space: nowrap;
 }
 
-.pn-target-search-wrap {
-    border-bottom: 1px solid var(--ems-neutral-200);
-    padding: 0.4rem 0.85rem;
-    background: var(--ems-neutral-50);
+.pn-target-check {
+    flex: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-primary-600);
+    visibility: hidden;
 }
 
-.pn-target-search-wrap .form-control {
-    font-size: 0.85rem;
-    border-radius: 8px;
+.pn-target-item:has(.pn-target-cb:checked) .pn-target-check {
+    visibility: visible;
 }
 
 .pn-target-no-results {
-    padding: 0.5rem 0.85rem;
-    color: var(--ems-neutral-500);
-    font-size: 0.85rem;
+    margin: 0;
+    padding: 14px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    text-align: center;
 }
 
-/* ── Göndər düyməsi ──────────────────────────────────────────────────────── */
-.btn-send-notif {
+.pn-target-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pn-count {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.pn-count.is-empty {
+    font-weight: 600;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Şəkil seçimi ────────────────────────────────────────────────────────── */
+.pn-file {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Native input vizual olaraq gizlədilir; fokus halqası düyməyə keçir. */
+.pn-file__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.pn-file__btn {
+    margin: 0;
+}
+
+.pn-file__input:focus-visible + .pn-file__btn {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.pn-file__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+/* ── Yapışqan əməl paneli ────────────────────────────────────────────────── */
+.pn-form__foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+    border-radius: 0 0 14px 14px;
+    background: var(--ems-bg);
+}
+
+.pn-form__summary {
+    flex: 1 1 200px;
+    min-width: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+}
+
+.pn-form__summary.is-ready {
+    color: var(--ems-success-700);
+    font-weight: 700;
+}
+
+.pn-submit {
+    min-height: var(--ems-h-action);
+    padding: 0 18px;
+}
+
+.pn-submit__count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-0);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.pn-submit:disabled .pn-submit__count {
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-500);
+}
+
+/* ── Önizləmə kartı — alıcının bildiriş qutusundakı sətrin eynisi ──────── */
+.pn-preview__card {
+    border-radius: 14px;
+    border-color: var(--ems-neutral-200);
+    overflow: hidden;
+}
+
+.pn-preview__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+}
+
+.pn-preview__note {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.pn-preview__row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.pn-preview__icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 10px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-md);
+}
+
+.pn-preview__main {
+    flex: 1;
+    min-width: 0;
+    padding-right: 14px;
+}
+
+.pn-preview__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pn-preview__title {
+    min-width: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.pn-preview__time {
+    flex: none;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-400);
+    white-space: nowrap;
+}
+
+.pn-preview__message {
+    margin: 3px 0 0;
+    font-size: var(--ems-fs-base);
+    line-height: 1.5;
+    color: var(--ems-neutral-500);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pn-preview__title.is-placeholder,
+.pn-preview__message.is-placeholder {
+    color: var(--ems-neutral-400);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.pn-preview__image {
+    display: block;
+    max-width: 100%;
+    max-height: 160px;
+    margin-top: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+    object-fit: contain;
+}
+
+.pn-preview__link {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: var(--ems-success-600);
-    border: 1px solid var(--ems-success-600);
-    color: var(--ems-neutral-0);
+    gap: 6px;
+    max-width: 100%;
+    margin-top: 8px;
+    font-size: var(--ems-fs-sm);
     font-weight: 700;
-    padding: 0.5rem 1.2rem;
-    border-radius: 9px;
-    transition: background 0.16s, border-color 0.16s;
+    color: var(--ems-link);
+    text-decoration: none;
 }
 
-.btn-send-notif:hover {
-    background: var(--ems-success-strong);
-    border-color: var(--ems-success-strong);
-    color: var(--ems-neutral-0);
+.pn-preview__link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-@media (max-width: 576px) {
+.pn-preview__link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+/* Oxunmamışlıq nöqtəsi — inbox-dakı `nfx-row__dot` ilə eyni məna. */
+.pn-preview__dot {
+    position: absolute;
+    top: 20px;
+    right: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ems-primary-600);
+}
+
+.pn-preview__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 12px 16px;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+}
+
+.pn-preview__kv {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: var(--ems-fs-sm);
+}
+
+.pn-preview__kv dt {
+    flex: none;
+    min-width: 64px;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
+.pn-preview__kv dd {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
+
+/* ── Dar ekran ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .pn-block {
+        padding: 16px;
+    }
+
+    .pn-form__foot {
+        padding: 10px 16px;
+    }
+
+    .pn-form__summary {
+        flex-basis: 100%;
+    }
+
+    .pn-form__foot .ems-btn {
+        flex: 1 1 auto;
+    }
+
     .pn-target-scroll {
-        max-height: 180px; /* ~3 element */
+        max-height: 200px;
     }
 }

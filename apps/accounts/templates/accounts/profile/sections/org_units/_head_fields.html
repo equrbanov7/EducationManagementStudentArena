@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Rəhbər (dekan / kafedra müdiri) təyinatı — `_form_dialog.html` gövdəsi.
+Seçici ORTAQ `teaching_office.js` `headPickerFor` mexanizmi ilə qurulur:
+`[data-tof-head-picker][data-url]` + gizli `#tof-head-user[name=head]`; prefill-də
+`head` / `head_label` cari rəhbəri çip kimi göstərir. Boş göndərilərsə təyinat
+silinir. Səbəb OPSİONALDIR (auditə düşür).{% endcomment %}
+<div class="tof-form">
+    <div class="ou-target tof-form__full" data-ou-target>
+        <span class="ou-target__label">{% trans "Bölmə" context "organizations.registry" %}</span>
+        <strong data-ou-target-name></strong>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="tof-head-search">{% trans "Rəhbər" context "organizations.registry" %}</label>
+        <input type="hidden" name="head" id="tof-head-user">
+        <div class="ems-ss ems-ss--single" data-tof-head-picker
+             data-url="{{ ou_section.candidates_url }}?kind=staff"
+             data-empty="{% trans 'Uyğun namizəd tapılmadı' context 'organizations.registry' %}">
+            <div class="ems-ss__chips">
+                <input type="text" id="tof-head-search" class="ems-ss__search" autocomplete="off"
+                       placeholder="{% trans 'Ad və ya istifadəçi adı ilə axtar…' context 'organizations.registry' %}">
+            </div>
+            <div class="ems-ss__menu"></div>
+        </div>
+        <p class="ems-field__hint">{% trans "Namizədlər idarəetmə/müəllim səviyyəli aktiv üzvlərdir; tələbə hesabı seçilə bilməz. Boş saxlayıb yadda saxlasanız cari təyinat silinir." context "organizations.registry" %}</p>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-head-reason">{% trans "Qeyd" context "organizations.registry" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "organizations.registry" %}</span></label>
+        <textarea class="ems-input ems-textarea" id="ou-head-reason" name="reason" rows="2" maxlength="500"
+                  placeholder="{% trans 'Əmr nömrəsi, tarix və ya səbəb — audit jurnalına yazılır' context 'organizations.registry' %}"></textarea>
+    </div>
+    <p class="ems-field__hint tof-form__full ou-note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% trans "Rəhbər təyinatı həmin bölməyə əhatəli «Dekan» / «Kafedra müdiri» rol üzvlüyünü də yaradır; əvvəlki rəhbərin eyni bölmədəki rolu bağlanır." context "organizations.registry" %}
+    </p>
+</div>

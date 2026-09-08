@@ -14,8 +14,13 @@
     "use strict";
 
     var DRAWER_ID = "tofGroupStudentsDrawer";
-    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog"];
-    var state = { url: "", name: "", planUrl: "", rows: [], canManage: false, canMove: false, status: "", reopen: "" };
+    var ADD_DIALOG_ID = "tofGroupAddStudentsDialog";
+    var MOVE_DIALOG_ID = "tofGroupMoveDialog";
+    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", ADD_DIALOG_ID, MOVE_DIALOG_ID];
+    var state = {
+        url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
+        rows: [], canManage: false, canMove: false, status: "", reopen: ""
+    };
 
     function drawer() { return document.getElementById(DRAWER_ID); }
     function root() { var d = drawer(); return d ? d.querySelector("[data-tof-students]") : null; }
@@ -38,10 +43,13 @@
         if (state.planUrl) {
             out.push('<a class="ems-btn ems-btn--sm" href="' + esc(withStudent(state.planUrl, row.id)) + '" download title="' + esc(t("plan")) + '"><i class="fas fa-file-word" aria-hidden="true"></i><span class="tof-students__btn-label">DOCX</span></a>');
         }
-        // «Qrupdan çıxar» = başqa qrupa RƏSMİ köçürmə (DB qapısı qrup dəyişikliyini
-        // yalnız köçürmə xidmətinə buraxır) — əmr № + tarix + hədəf qrup + səbəb.
+        // «Qrupu dəyiş» (sahib, 2026-09-08): səbəbli sadə köçürmə — qrup əməli
+        // (`move_student`, `unit.group_manage`). Əmrli rəsmi hərəkət «Tələbə
+        // reyestri»ndə qalır; dondur/uzaqlaşdır isə `student.movement` açarı ilə.
+        if (state.canManage && row.status === "enrolled") {
+            out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + MOVE_DIALOG_ID + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ action: "move_student", record_id: row.id, id: "", reason: "" })) + '\'><i class="fas fa-people-arrows" aria-hidden="true"></i> ' + esc(t("move")) + "</button>");
+        }
         if (state.canMove && row.status === "enrolled") {
-            out.push('<button type="button" class="ems-btn ems-btn--sm" data-tof-open="tofStudentTransferDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "group_transfer" })) + '\'>' + esc(t("detach")) + "</button>");
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-tof-open="tofStudentFreezeDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "academic_leave" })) + '\'>' + esc(t("freeze")) + "</button>");
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-tof-open="tofStudentExpelDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "expulsion" })) + '\'>' + esc(t("expel")) + "</button>");
         }
@@ -49,14 +57,21 @@
     }
 
     function rowHtml(row) {
+        // Sahib (2026-09-07): «qeydiyyat qrupu» yox — ixtisas ŞİFRİ + qısa adı vacibdir.
         var meta = ["@" + row.username];
+        var program = [row.program_code, row.program_name || row.program].filter(Boolean).join(" · ");
+        if (program) { meta.push(program); }
+        if (row.education_form_label) { meta.push(row.education_form_label); }
         if (row.admission_year) { meta.push(t("admission") + " " + row.admission_year); }
-        if (row.program) { meta.push(row.program); }
         return (
             '<li class="tof-students__row tof-students__row--' + esc(row.status) + '" data-tof-student-row data-status="' + esc(row.status) + '" data-search="' + esc((row.name + " " + row.username).toLowerCase()) + '">' +
             '<span class="tof-students__avatar" aria-hidden="true">' + esc(initials(row.name)) + "</span>" +
             '<div class="tof-students__main">' +
-            '<div class="tof-students__name">' + esc(row.name) + ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span></div>" +
+            '<div class="tof-students__name">' +
+            (row.profile_url
+                ? '<a class="tof-students__link" href="' + esc(row.profile_url) + '" target="_blank" rel="noopener" title="' + esc(t("profile")) + '">' + esc(row.name) + "</a>"
+                : esc(row.name)) +
+            ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span></div>" +
             '<div class="tof-students__sub">' + esc(meta.join(" · ")) + "</div>" +
             "</div>" +
             '<div class="tof-students__actions">' + actionButtons(row) + "</div>" +
@@ -136,6 +151,82 @@
             plan.hidden = !state.planUrl;
             plan.setAttribute("href", state.planUrl || "#");
         }
+        // «Tələbə əlavə et» — açıq qrupa görə prefill/namizəd URL-i qoyulur;
+        // arxiv qrupa əlavə yoxdur (server də rədd edir).
+        var add = d.querySelector("[data-tof-students-add]");
+        if (add) {
+            add.hidden = !(state.groupActive && state.candidatesUrl);
+            add.setAttribute("data-candidates-url", state.candidatesUrl || "");
+            add.setAttribute("data-group-name", state.name || "");
+            add.setAttribute("data-tof-prefill", prefill({ action: "add_students", id: state.groupId || "" }));
+        }
+    }
+
+    /* ---- «Tələbə əlavə et» seçicisi ---------------------------------------
+       Namizəd URL-i QRUPA görə dəyişir, `EMSSearchableSelect` isə URL-i
+       yaradılanda bağlayır — ona görə hər açılışda seçici sıfırdan qurulur
+       (təmiz markup klonu). Seçilmiş id-lər gizli `record_ids` sahəsinə
+       vergüllə yazılır; `teaching_office.js` formanı olduğu kimi göndərir. */
+    var pickerTemplate = null;
+
+    function addDialog() { return document.getElementById(ADD_DIALOG_ID); }
+
+    function pickerHost(dialog) { return dialog ? dialog.querySelector("[data-tof-add-picker]") : null; }
+
+    function freshPickerRoot(host) {
+        if (!pickerTemplate) {
+            var seed = host.querySelector(".js-tof-add-students");
+            pickerTemplate = seed ? seed.cloneNode(true) : null;
+        }
+        if (!pickerTemplate) { return null; }
+        host.innerHTML = "";
+        var node = pickerTemplate.cloneNode(true);
+        node.classList.remove("ems-ss--multi", "ems-ss--single", "has-value", "is-open");
+        host.appendChild(node);
+        return node;
+    }
+
+    function syncAddSummary(dialog, count) {
+        var summary = dialog.querySelector("[data-tof-add-summary]");
+        if (!summary) { return; }
+        summary.textContent = count
+            ? (summary.getAttribute("data-t-count") || "%d").replace("%d", String(count))
+            : (summary.getAttribute("data-t-none") || "");
+        summary.classList.toggle("has-selection", count > 0);
+    }
+
+    function buildAddPicker(button) {
+        var dialog = addDialog();
+        var host = pickerHost(dialog);
+        if (!dialog || !host || !window.EMSSearchableSelect) { return; }
+        var url = button.getAttribute("data-candidates-url") || "";
+        var groupName = button.getAttribute("data-group-name") || "";
+        var nameEl = dialog.querySelector("[data-tof-add-group-name]");
+        if (nameEl) { nameEl.textContent = groupName; }
+        var hidden = dialog.querySelector('input[name="record_ids"]');
+        if (hidden) { hidden.value = ""; }
+        syncAddSummary(dialog, 0);
+        var rootEl = freshPickerRoot(host);
+        if (!rootEl || !url) { return; }
+        var picker = window.EMSSearchableSelect.create(rootEl, {
+            url: url,
+            multi: true,
+            skeleton: true,
+            pageSize: 20,
+            emptyText: host.getAttribute("data-empty") || "",
+            removeLabel: host.getAttribute("data-remove-label") || "",
+            onChange: function () {
+                var ids = picker && typeof picker.ids === "function" ? picker.ids() : [];
+                if (hidden) { hidden.value = ids.join(","); }
+                syncAddSummary(dialog, ids.length);
+            }
+        });
+        host._tofPicker = picker;
+        // Dialoq görünəndən sonra fokus axtarış sahəsinə — dərhal yazmağa hazır.
+        window.setTimeout(function () {
+            var input = rootEl.querySelector("input");
+            if (input && !dialog.hidden) { input.focus(); }
+        }, 30);
     }
 
     function open(button) {
@@ -144,6 +235,8 @@
         state.url = button.getAttribute("data-url") || "";
         state.name = button.getAttribute("data-name") || "";
         state.planUrl = button.getAttribute("data-plan-url") || "";
+        state.candidatesUrl = button.getAttribute("data-candidates-url") || "";
+        state.groupActive = button.getAttribute("data-group-active") !== "0";
         state.groupId = button.getAttribute("data-group-id") || "";
         state.rows = [];
         resetDrawer(state.name);
@@ -194,10 +287,43 @@
             var target = dialog ? dialog.querySelector("[data-tof-movement-name]") : null;
             if (target) { target.textContent = button.getAttribute("data-tof-student-name") || ""; }
         });
+        // «Tələbə əlavə et» — ortaq prefill-dən SONRA (bubble sırası) seçici qurulur.
+        window.EMSDelegate.on("click", "[data-tof-add-students]", function (event, button) {
+            buildAddPicker(button);
+        });
+        // Tələbə seçilməyibsə göndərmə — ortaq handler-dən ƏVVƏL (capture) kəsilir.
+        document.addEventListener("submit", function (event) {
+            var form = event.target;
+            if (!form || !form.closest) { return; }
+            var overlay = form.closest("#" + ADD_DIALOG_ID);
+            if (!overlay) { return; }
+            var hidden = form.querySelector('input[name="record_ids"]');
+            if (hidden && hidden.value) { return; }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var box = form.querySelector("[data-ems-form-error]");
+            var host = pickerHost(overlay);
+            if (box) {
+                box.textContent = host ? (host.getAttribute("data-empty") || "") : "";
+                box.hidden = false;
+            }
+            var input = host ? host.querySelector("input") : null;
+            if (input) { input.focus(); }
+        }, true);
         // Çekmecədən açılan dialoq göndəriləndə bölmə yenilənəcək — sonra çekmecəni eyni qrup üçün qaytar.
-        window.EMSDelegate.on("submit", "form[data-tof-form]", function (event, form) {
+        // ⚠️ SEÇİCİ QƏSDƏN FƏRQLİDİR: `EMSDelegate.on` eyni «hadisə|seçici» açarını
+        // ƏVƏZ EDİR — çılpaq `form[data-tof-form]` yazılsa `teaching_office.js`-in
+        // JSON göndəriş dinləyicisi silinir və dialoqlar adi (tam səhifə) POST edir
+        // (2026-09-08 reqressiyası). Bu, yalnız «yenidən aç» qeydidir.
+        window.EMSDelegate.on("submit", ".ems-overlay form[data-tof-form]", function (event, form) {
             var overlay = form.closest(".ems-overlay");
-            if (overlay && DIALOG_IDS.indexOf(overlay.id) !== -1 && state.url) { state.reopen = state.url; }
+            if (!overlay || DIALOG_IDS.indexOf(overlay.id) === -1 || !state.url) { return; }
+            // Sətirdən («+») açılan əlavə dialoqu çekmecəsizdir — köhnə qrupun çekmecəsini qaytarma.
+            if (overlay.id === ADD_DIALOG_ID) {
+                var d = drawer();
+                if (!d || d.hidden) { return; }
+            }
+            state.reopen = state.url;
         });
         document.addEventListener("profile:section:loaded", function (event) {
             var section = event && event.detail ? event.detail.section : "";

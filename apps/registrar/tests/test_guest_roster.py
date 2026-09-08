@@ -42,12 +42,14 @@ from core.rls import bypass_rls
 User = get_user_model()
 
 
-
 def _doc():
     """Alt qrupdan əlavə üçün MƏCBURİ sənəd (təqdimat) — hər POST-a təzə fayl."""
     from django.core.files.uploadedfile import SimpleUploadedFile
 
-    return SimpleUploadedFile("teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf")
+    return SimpleUploadedFile(
+        "teqdimat.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf"
+    )
+
 
 class _GuestRosterBase(TestCase):
     """Bir fakültə · bir kafedra · İKİ qrup (G1 hədəf, G2 alt qrup) + kənar fakültə."""

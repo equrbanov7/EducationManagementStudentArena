@@ -106,6 +106,7 @@ from .people import (
     people_detail,
     people_list,
     people_options,
+    people_person_page,
     people_student_card,
     people_transfer_preview,
 )
@@ -177,6 +178,7 @@ from .syllabus import (
     syllabus_review_open,
     syllabus_section_save,
 )
+from .teacher_intake import teacher_intake_apply, teacher_intake_preview, teacher_intake_template
 
 __all__ = [
     # Authentication
@@ -242,6 +244,7 @@ __all__ = [
     "people_list",
     "people_options",
     "people_detail",
+    "people_person_page",
     "people_action",
     "people_analytics",
     "people_analytics_ai",
@@ -258,6 +261,9 @@ __all__ = [
     "schedule_manage_check",
     "schedule_manage_action",
     "student_intake_template",
+    "teacher_intake_apply",
+    "teacher_intake_preview",
+    "teacher_intake_template",
     "student_intake_preview",
     "student_intake_apply",
     "student_admission_create_group",

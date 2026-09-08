@@ -129,19 +129,12 @@
         textNode.textContent = option.textContent || "";
         contentNode.appendChild(textNode);
 
-        var groupLabels = optionGroupLabels(option);
-        if (groupLabels) {
-          var groupBadge = document.createElement("span");
-          groupBadge.className = "group-checklist__badge";
-          groupBadge.textContent = ctx.studentGroupLabel + ": " + groupLabels;
-          contentNode.appendChild(groupBadge);
-        }
-        // İxtisas şifri / adı + akademik qrup — seçim zamanı kimin kim olduğu görünsün.
+        // SAHİBİN QƏRARI (2026-09-07): «qeydiyyatdan keçdiyi qrup» / qrup nişanları
+        // YOX — yalnız ixtisas ŞİFRİ + qısa adı (qrup nömrəsi axtarışda yenə işləyir).
         if (showStudentGroupNumber) {
           var specialtyText = [
             option.getAttribute("data-specialty-code") || "",
-            option.getAttribute("data-specialty") || "",
-            option.getAttribute("data-academic-group") || ""
+            option.getAttribute("data-specialty") || ""
           ].filter(Boolean).join(" · ");
           if (specialtyText) {
             var specialtyBadge = document.createElement("span");

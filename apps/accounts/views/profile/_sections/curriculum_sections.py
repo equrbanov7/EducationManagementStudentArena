@@ -192,11 +192,16 @@ def _group_row(row, *, can_manage):
             {"text": " / ".join(part for part in (row["chair_name"], row["faculty_name"]) if part) or "—"},
             {"text": row["course_year"] or "—", "num": True},
             {"text": row["language_sector"] or "—"},
+            {"text": row["education_form_label"] or "—"},
+            {"text": row["admission_year"] or "—", "num": True},
             {"text": row["students"], "num": True},
             {"text": row["tutor"] or "—"},
             {"badge_family": "catalog_entry", "badge_key": row["status_key"]},
         ],
-        "actions_include": "accounts/profile/sections/teaching_office/_group_row_actions.html" if can_manage else "",
+        # Əməl sütunu HƏR KƏSƏ görünür: «Tələbələr» çekmecəsi və DOCX oxu
+        # səlahiyyəti ilə işləyir; idarə düymələri partial-ın içində `can_manage`
+        # ilə qapılıdır (bax `_group_row_actions.html`).
+        "actions_include": "accounts/profile/sections/teaching_office/_group_row_actions.html",
         "data": row,
     }
 
@@ -224,6 +229,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         "gr_specialty": filters["specialty"],
         "gr_lang": filters["language"],
         "gr_course": filters["course"],
+        "gr_form": filters["education_form"],
+        "gr_year": filters["admission_year"],
         "gr_arch": "1" if filters["show_archived"] else "",
     }
     specs = [
@@ -233,18 +240,22 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         ("", pgettext(_CTX_GROUPS, "Kafedra / fakültə")),
         ("", pgettext(_CTX_GROUPS, "Kurs")),
         ("", pgettext(_CTX_GROUPS, "Dil sektoru")),
+        ("", pgettext(_CTX_GROUPS, "Forma")),
+        ("", pgettext(_CTX_GROUPS, "Qəbul")),
         ("", pgettext(_CTX_GROUPS, "Tələbə")),
         ("", pgettext(_CTX_GROUPS, "Kurator")),
         ("", pgettext(_CTX_GROUPS, "Vəziyyət")),
+        ("", pgettext(_CTX_GROUPS, "Əməllər")),
     ]
-    if payload["can_manage"]:
-        specs.append(("", pgettext(_CTX_GROUPS, "Əməllər")))
     section["columns"] = _columns(specs, base_params, param="gr_sort", current=filters["sort"])
     section["base_params"] = base_params
     section["action_url"] = reverse("organizations:group_action", kwargs={"slug": active_organization.slug})
     section["form_data"] = {"data-tof-form": "1", "data-tof-url": section["action_url"]}
     section["schedule_url"] = f"{reverse('accounts:profile')}?section=schedule-manage"
-    section["exam_groups_url"] = f"{reverse('accounts:profile')}?section=groups"
+    # İmtahan kohortları (`exams.StudentGroup`) kabinetdən çıxarıldı (2026-09-08);
+    # keçid yoxdur — reyestr TƏK qrup səthidir.
+    section["current_year"] = payload["current_year"]
+    section["default_education_form"] = "full_time"
     section["table_rows"] = [_group_row(row, can_manage=payload["can_manage"]) for row in payload["rows"]]
     section["state_title"] = pgettext(_CTX_GROUPS, "Qrup tapılmadı")
     section["state_body"] = pgettext(_CTX_GROUPS, "Süzgəcləri dəyişin və ya yeni qrup əlavə edin.")
@@ -286,6 +297,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
             "kind": "select",
             "value": filters["specialty"],
             "options": [{"value": "", "label": pgettext(_CTX_GROUPS, "Hamısı")}] + payload["specialty_options"],
+            "searchable": True,
+            "wide": True,
         },
         {
             "name": "gr_lang",
@@ -303,6 +316,20 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
             + [{"value": str(number), "label": str(number)} for number in range(1, 7)],
         },
         {
+            "name": "gr_form",
+            "label": pgettext(_CTX_GROUPS, "Təhsil forması"),
+            "kind": "select",
+            "value": filters["education_form"],
+            "options": [{"value": "", "label": pgettext(_CTX_GROUPS, "Hamısı")}] + payload["education_form_options"],
+        },
+        {
+            "name": "gr_year",
+            "label": pgettext(_CTX_GROUPS, "Qəbul ili"),
+            "kind": "select",
+            "value": filters["admission_year"],
+            "options": [{"value": "", "label": pgettext(_CTX_GROUPS, "Hamısı")}] + payload["admission_year_options"],
+        },
+        {
             "name": "gr_arch",
             "label": pgettext(_CTX_GROUPS, "Arxiv"),
             "kind": "select",
@@ -318,6 +345,11 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     }
     section["dialog_hidden"] = [{"name": "action"}, {"name": "id"}]
     section["reason_hidden"] = [{"name": "action"}, {"name": "id"}]
+    # «Tələbə əlavə et» — seçilmiş qeyd id-ləri JS-in doldurduğu gizli `record_ids`
+    # sahəsindən gedir (bax `_group_add_students_fields.html`).
+    section["add_students_hidden"] = [{"name": "action"}, {"name": "id"}, {"name": "record_ids"}]
+    # «Qrupu dəyiş» — tələbə qeydi (`record_id`) + hədəf qrup (`id`) + səbəb.
+    section["move_hidden"] = [{"name": "action"}, {"name": "record_id"}]
     # Tələbə çekmecəsinin dialoqları («qrupdan çıxar» = başqa qrupa köçür, «dondur»,
     # «uzaqlaşdır») tələbə-hərəkət endpoint-inə gedir (əmr № + tarix + səbəb ≥20).
     # Qrup dəyişikliyi DB qapısı ilə yalnız rəsmi köçürmə xidmətinə buraxılır.

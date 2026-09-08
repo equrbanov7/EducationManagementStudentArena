@@ -140,3 +140,60 @@
         margin-left: 0;
     }
 }
+
+/* ── AVTO rejim (`filter_auto`) ─────────────────────────────────────────────
+   «Tətbiq et» yoxdur — dəyişiklik dərhal (select) və ya debounce ilə
+   (axtarış) tətbiq olunur; yüklənənə qədər cədvəl skeleton-a çevrilir.   */
+.ems-filters--auto .ems-filters__apply,
+.ems-filters--auto .ems-filters__dirty-note {
+    display: none;
+}
+
+.ems-filters__count.is-refreshing {
+    opacity: 0.45;
+}
+
+.ems-tablewrap.is-refreshing {
+    position: relative;
+}
+
+.ems-tablewrap.is-refreshing .ems-table__skeleton-row td {
+    padding-top: 13px;
+    padding-bottom: 13px;
+}
+
+.ems-tablewrap.is-refreshing .ems-table__skeleton-row .skeleton-line {
+    height: 12px;
+    margin: 0;
+}
+
+/* Bootstrap tərzli select filtr panelində sahə eni ilə düzlənsin. */
+.ems-filters .bootstrap-single-select {
+    min-width: 0;
+}
+
+/* Tarix sahəsi filtr panelində select-lərlə eyni hündürlükdə. */
+.ems-filters .ems-input--date {
+    min-width: 150px;
+}
+
+/* Cədvəlsiz ekranların skeleton kartları (`data-ems-filter-target`). */
+.ems-filter-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ems-skelcard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-border);
+    border-radius: 14px;
+}
+
+.ems-skelcard .skeleton-line {
+    margin: 0;
+}

@@ -7,7 +7,8 @@ from django.db.models import Count, Q
 from django.urls import reverse
 
 from ..models import OrgUnit
-from ..views import _can_view_structure, _get_structure_scope
+from ..scoping import get_permission_scope
+from ..views import _can_view_structure
 from ._shared import (
     _active_teacher_user_ids,
     _clean_sort,
@@ -27,8 +28,19 @@ from .constants import (
 )
 
 
+def _structure_scope(request, organization):
+    """Fakültə/kafedra səthlərinin əhatəsi — `unit.view` açarına GÖRƏ.
+
+    2026-09-08 fix: əvvəl ümumi `get_unit_scope` işlənirdi; o, ORGANIZATION
+    rollarına yalnız `level >= 90` olduqda org-wide verir → RİM rəhbəri (88),
+    Tədris şöbəsi (85) BOŞ əhatə alırdı və ekranda «0 fakültə / 0 kafedra»
+    görünürdü (data var idi). Ağac ekranı ilə EYNİ resolver işlədilir.
+    """
+    return get_permission_scope(request.user, organization, "unit.view", request=request)
+
+
 def build_organization_faculties_context(request, organization, *, form_errors=None, form_values=None, notice=""):
-    scope = _get_structure_scope(request, organization)
+    scope = _structure_scope(request, organization)
     can_view = _can_view_structure(request, organization, scope)
     flags = _unit_permission_flags(request, organization)
 
@@ -123,7 +135,7 @@ def build_organization_faculties_context(request, organization, *, form_errors=N
 
 
 def build_organization_kafedras_context(request, organization, *, form_errors=None, form_values=None, notice=""):
-    scope = _get_structure_scope(request, organization)
+    scope = _structure_scope(request, organization)
     can_view = _can_view_structure(request, organization, scope)
     flags = _unit_permission_flags(request, organization)
 

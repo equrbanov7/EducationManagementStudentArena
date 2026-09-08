@@ -133,11 +133,45 @@
         emit(row, "ems:tree-select", { node: row.getAttribute("data-ems-tree-node") });
     }
 
+    /* Klik semantikası (2026-09-08, sahib şikayəti «açılır, sonra bağlanır»):
+     *   • OXA (twisty) klik → YALNIZ aç/bağla — seçim və detal yüklənməsi yox;
+     *   • etiketə klik → seç; qovşaq bağlıdırsa AÇ (heç vaxt bağlamır).
+     * Əvvəl hər klik seçirdi VƏ oxda idi-sə toggle edirdi: seçim paneli yenidən
+     * yükləyir, server isə yalnız valideynləri açıq verirdi → uşaqlar gizlənirdi. */
     window.EMSDelegate.on("click", ".ems-tree__row", function (event, row) {
         event.preventDefault();
-        selectRow(row);
         if (event.target.closest(".ems-tree__twisty")) {
             setExpanded(row, row.getAttribute("aria-expanded") !== "true");
+            return;
+        }
+        var alreadySelected = row.getAttribute("aria-selected") === "true";
+        if (row.getAttribute("aria-expanded") === "false") {
+            setExpanded(row, true);
+        }
+        if (!alreadySelected) {
+            selectRow(row);
+        }
+    });
+
+    /* «Hamısını aç» / «Hamısını bağla» — ağacın yanındakı düymələr. */
+    window.EMSDelegate.on("click", "[data-ems-tree-expand-all]", function (event, btn) {
+        event.preventDefault();
+        var scope = btn.closest("[data-profile-section-panel]") || document;
+        var rows = scope.querySelectorAll('.ems-tree__row[aria-expanded="false"]');
+        for (var i = 0; i < rows.length; i += 1) {
+            setExpanded(rows[i], true);
+        }
+    });
+
+    window.EMSDelegate.on("click", "[data-ems-tree-collapse-all]", function (event, btn) {
+        event.preventDefault();
+        var scope = btn.closest("[data-profile-section-panel]") || document;
+        var rows = scope.querySelectorAll('.ems-tree__row[aria-expanded="true"]');
+        for (var i = 0; i < rows.length; i += 1) {
+            // Kök qovşaqlar açıq qalır ki, ağac tamamilə boş görünməsin.
+            if (rows[i].closest(".ems-tree__group")) {
+                setExpanded(rows[i], false);
+            }
         }
     });
 

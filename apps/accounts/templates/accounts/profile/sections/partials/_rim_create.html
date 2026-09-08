@@ -185,6 +185,13 @@ Django şablon mühərrikindən keçmir).
                        autocomplete="off" data-rimc-field="phone">
                 <p class="ems-msg ems-msg--error" data-rimc-error="phone" role="alert" hidden></p>
               </div>
+              <div class="ems-field rimc-field--full">
+                <label class="ems-field__label" for="rimc-address">{% trans "Ünvan" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-address" type="text" name="address" maxlength="255"
+                       autocomplete="off" data-rimc-field="address"
+                       placeholder="{% trans 'Şəhər, küçə, ev (istəyə bağlı)' context 'profile.rim' %}">
+                <p class="ems-msg ems-msg--error" data-rimc-error="address" role="alert" hidden></p>
+              </div>
             </div>
           </fieldset>
 
@@ -219,6 +226,24 @@ Django şablon mühərrikindən keçmir).
                 </select>
                 <p class="ems-msg ems-msg--error" data-rimc-error="admission_year" role="alert" hidden></p>
               </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-education-form">{% trans "Təhsil forması" context "profile.rim" %}</label>
+                <select class="ems-select" id="rimc-education-form" name="education_form" data-rimc-field="education_form">
+                  {% for option in rim_center_section.education_forms %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                  {% endfor %}
+                </select>
+                <p class="ems-msg ems-msg--error" data-rimc-error="education_form" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-funding">{% trans "Maliyyələşmə" context "profile.rim" %}</label>
+                <select class="ems-select" id="rimc-funding" name="funding_type" data-rimc-field="funding_type">
+                  {% for option in rim_center_section.funding_types %}
+                    <option value="{{ option.value }}"{% if option.value == 'paid' %} selected{% endif %}>{{ option.label }}</option>
+                  {% endfor %}
+                </select>
+                <p class="ems-msg ems-msg--error" data-rimc-error="funding_type" role="alert" hidden></p>
+              </div>
 
               <div class="ems-field rimc-combo" data-rimc-only="teacher" data-rimc-combo="unit">
                 <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra" context "profile.rim" %}</label>
@@ -231,6 +256,27 @@ Django şablon mühərrikindən keçmir).
                     aria-label="{% trans 'Kafedra nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
                 <p class="ems-field__hint" id="rimc-unit-hint" data-rimc-combo-hint>{% trans "Boş qala bilər — kafedra sonradan da təyin edilə bilər." context "profile.rim" %}</p>
                 <p class="ems-msg ems-msg--error" data-rimc-error="unit" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="teacher">
+                <label class="ems-field__label" for="rimc-title">{% trans "Vəzifə" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-title" type="text" name="title" maxlength="100"
+                       autocomplete="off" data-rimc-field="title"
+                       placeholder="{% trans 'Məs.: baş müəllim, dosent' context 'profile.rim' %}">
+                <p class="ems-msg ems-msg--error" data-rimc-error="title" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="teacher">
+                <label class="ems-field__label" for="rimc-degree">{% trans "Elmi dərəcə" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-degree" type="text" name="academic_degree" maxlength="150"
+                       autocomplete="off" data-rimc-field="academic_degree"
+                       placeholder="{% trans 'Məs.: fəlsəfə doktoru' context 'profile.rim' %}">
+                <p class="ems-msg ems-msg--error" data-rimc-error="academic_degree" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="teacher">
+                <label class="ems-field__label" for="rimc-academic-title">{% trans "Elmi ad" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-academic-title" type="text" name="academic_title" maxlength="150"
+                       autocomplete="off" data-rimc-field="academic_title"
+                       placeholder="{% trans 'Məs.: dosent, professor' context 'profile.rim' %}">
+                <p class="ems-msg ems-msg--error" data-rimc-error="academic_title" role="alert" hidden></p>
               </div>
 
               <div class="ems-field">

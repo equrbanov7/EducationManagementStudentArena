@@ -212,6 +212,8 @@ urlpatterns = [
     path("people/<str:kind>/list/", views.people_list, name="people_list"),
     path("people/<str:kind>/options/", views.people_options, name="people_options"),
     path("people/person/<int:user_id>/", views.people_detail, name="people_detail"),
+    # «Ətraflı» — tam səhifə (yeni tabda), eyni kataloq qapısı ilə (2026-09-08).
+    path("people/person/<int:user_id>/page/", views.people_person_page, name="people_person_page"),
     path("people/action/", views.people_action, name="people_action"),
     # Tələbə idarəetməsi (`people.manage_academic`) — kataloqun ÜSTÜNDƏ oturur,
     # paralel ikinci siyahı yaratmır. Hədəf: kart → user id, ön baxış → akademik
@@ -249,6 +251,10 @@ urlpatterns = [
     path("student-intake/template/", views.student_intake_template, name="student_intake_template"),
     path("student-intake/preview/", views.student_intake_preview, name="student_intake_preview"),
     path("student-intake/apply/", views.student_intake_apply, name="student_intake_apply"),
+    # Müəllim idxalı (toplu Excel) — eyni `user.import` qapısı (2026-09-08).
+    path("teacher-intake/template/", views.teacher_intake_template, name="teacher_intake_template"),
+    path("teacher-intake/preview/", views.teacher_intake_preview, name="teacher_intake_preview"),
+    path("teacher-intake/apply/", views.teacher_intake_apply, name="teacher_intake_apply"),
     # «Tələbə qəbulu» (ekran 08) — idxal endpoint-lərini TƏKRAR İSTİFADƏ edir;
     # yalnız qrup yaratma ayrıca açardır (`student.assign_group`).
     path(

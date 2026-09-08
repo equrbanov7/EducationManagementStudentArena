@@ -1,0 +1,9 @@
+{% comment %}Birinci sütun — vaxt (th scope="row"). Mütləq tarix+saat serverdən
+(yerli vaxt), nisbi ipucu («2 saat əvvəl») JS-lə `datetime`-dan hesablanır.{% endcomment %}
+<div class="al-time">
+    <time class="al-time__abs" datetime="{{ row.data.created_at|date:'c' }}" data-al-time>
+        <span class="al-time__date">{{ row.data.created_at|date:"d.m.Y" }}</span>
+        <span class="al-time__clock ems-mono">{{ row.data.created_at|time:"H:i:s" }}</span>
+    </time>
+    <span class="al-time__rel" data-al-rel hidden></span>
+</div>

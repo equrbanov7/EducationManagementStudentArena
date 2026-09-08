@@ -1,0 +1,124 @@
+{% load i18n %}
+{% comment %}Tələbənin akademik bloku: qeyd(lər) → kəsrlər → transkript (semestr üzrə).{% endcomment %}
+<section class="ems-card pp-card">
+    <h2 class="pp-card__title">{% trans "Akademik qeydlər" context "accounts.people.page" %}</h2>
+    {% if academic.restricted %}
+        <p class="pp-empty">{% trans "Akademik qeydlərə baxış səlahiyyətiniz yoxdur." context "accounts.people.page" %}</p>
+    {% elif not academic.records %}
+        <p class="pp-empty">{% trans "Bu təşkilatda akademik qeyd yoxdur." context "accounts.people.page" %}</p>
+    {% else %}
+    <div class="ems-tablewrap"><div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra pp-table">
+            <thead><tr>
+                <th scope="col">{% trans "İxtisas" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Qrup" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Fakültə / kafedra" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Qəbul" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Kurs" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Forma" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Maliyyə" context "accounts.people.page" %}</th>
+                <th scope="col">{% trans "Status" context "accounts.people.page" %}</th>
+            </tr></thead>
+            <tbody>
+            {% for r in academic.records %}
+            <tr class="{% if not r.is_active %}pp-row--muted{% endif %}">
+                <th scope="row"><span class="pp-strong">{{ r.program }}</span>{% if r.program_code %}<span class="pp-sub ems-mono">{{ r.program_code }}</span>{% endif %}</th>
+                <td>{{ r.group|default:"—" }}</td>
+                <td>{{ r.faculty|default:"—" }}{% if r.kafedra %}<span class="pp-sub">{{ r.kafedra }}</span>{% endif %}</td>
+                <td class="ems-table__num">{{ r.admission_year }}</td>
+                <td>{{ r.course_label|default:"—" }}</td>
+                <td>{{ r.education_form_label }}</td>
+                <td><span class="ems-badge {% if r.funding_type == 'paid' %}ems-badge--warning{% else %}ems-badge--success{% endif %}">{{ r.funding_label }}</span></td>
+                <td><span class="ems-badge ems-badge--{{ r.status_tone }}">{{ r.status_label }}</span>{% if r.athlete_exemption %} <span class="ems-badge">{% trans "idmançı" context "accounts.people.page" %}</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div></div>
+    {% endif %}
+</section>
+
+{% if academic.transcript %}
+{% with tr=academic.transcript %}
+<section class="ems-card pp-card">
+    <div class="pp-card__head">
+        <h2 class="pp-card__title">{% trans "Kəsrlər" context "accounts.people.page" %}</h2>
+        <span class="pp-card__meta">{% blocktrans count n=tr.failed context "accounts.people.page" %}{{ n }} fənn{% plural %}{{ n }} fənn{% endblocktrans %}</span>
+    </div>
+    {% if tr.failures %}
+    <ul class="pp-list pp-list--fail">
+        {% for f in tr.failures %}
+        <li class="pp-list__item">
+            <div class="pp-list__main">
+                <strong>{{ f.subject }}</strong>{% if f.subject_code %} <span class="ems-mono pp-sub-inline">{{ f.subject_code }}</span>{% endif %}
+                <span class="pp-list__sub">{{ f.period }} · {{ f.credit }} {% trans "kredit" context "accounts.people.page" %}{% if f.teacher %} · {{ f.teacher }}{% endif %}</span>
+            </div>
+            <span class="pp-list__aside">
+                <span class="ems-badge ems-badge--danger">{% if f.fail_reason_label %}{{ f.fail_reason_label }}{% else %}{% trans "Kəsilib" context "accounts.people.page" %}{% endif %}</span>
+                {% if f.total is not None %}<span class="pp-score">{{ f.total }}</span>{% endif %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="pp-empty pp-empty--ok"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Kəsilmiş fənn yoxdur." context "accounts.people.page" %}</p>
+    {% endif %}
+</section>
+
+<section class="ems-card pp-card">
+    <div class="pp-card__head">
+        <h2 class="pp-card__title">{% trans "Transkript" context "accounts.people.page" %}</h2>
+        <span class="pp-card__meta">
+            {% trans "ÜOMG" context "accounts.people.page" %}: <strong>{% if tr.uomg_available and tr.uomg is not None %}{{ tr.uomg }}{% else %}{{ tr.uomg_label|default:"—" }}{% endif %}</strong>
+            · {% trans "kredit" context "accounts.people.page" %}: <strong>{{ tr.credits_earned }}</strong> / {{ tr.credits_gpa }}
+        </span>
+    </div>
+    {% if not tr.has_record or not tr.semesters %}
+        <p class="pp-empty">{% trans "Hələ fənn qeydiyyatı yoxdur." context "accounts.people.page" %}</p>
+    {% else %}
+    {% for sem in tr.semesters %}
+    <details class="pp-sem" {% if forloop.first %}open{% endif %}>
+        <summary class="pp-sem__head">
+            <span class="pp-sem__title">{{ sem.period }}</span>
+            <span class="pp-sem__meta">
+                {{ sem.rows|length }} {% trans "fənn" context "accounts.people.page" %}
+                · {% trans "kredit" context "accounts.people.page" %} {{ sem.credits_earned }}
+                · {% trans "ÜOMG" context "accounts.people.page" %} {% if sem.uomg_available and sem.gpa is not None %}{{ sem.gpa }}{% else %}—{% endif %}
+            </span>
+        </summary>
+        {% if sem.legacy_notice %}<p class="pp-note">{{ sem.legacy_notice }}</p>{% endif %}
+        <div class="ems-tablewrap"><div class="ems-tablescroll">
+            <table class="ems-table pp-table">
+                <thead><tr>
+                    <th scope="col">{% trans "Fənn" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Kredit" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Müəllim" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Yekun bal" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Hərf" context "accounts.people.page" %}</th>
+                    <th scope="col">{% trans "Nəticə" context "accounts.people.page" %}</th>
+                </tr></thead>
+                <tbody>
+                {% for row in sem.rows %}
+                <tr class="pp-row--{{ row.status }}">
+                    <th scope="row"><span class="pp-strong">{{ row.subject }}</span>{% if row.subject_code %}<span class="pp-sub ems-mono">{{ row.subject_code }}</span>{% endif %}</th>
+                    <td class="ems-table__num">{{ row.credit }}</td>
+                    <td>{{ row.teacher|default:"—" }}</td>
+                    <td class="ems-table__num">{% if row.total is not None %}{{ row.total }}{% else %}—{% endif %}</td>
+                    <td>{{ row.letter|default:"—" }}</td>
+                    <td>
+                        {% if row.status == 'passed' %}<span class="ems-badge ems-badge--success">{% trans "Keçib" context "accounts.people.page" %}</span>
+                        {% elif row.status == 'failed' %}<span class="ems-badge ems-badge--danger">{% if row.fail_reason_label %}{{ row.fail_reason_label }}{% else %}{% trans "Kəsilib" context "accounts.people.page" %}{% endif %}</span>
+                        {% else %}<span class="ems-badge">{% trans "Davam edir" context "accounts.people.page" %}</span>{% endif %}
+                        {% if row.legacy %}<span class="ems-badge">{% trans "köçürülüb" context "accounts.people.page" %}</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </details>
+    {% endfor %}
+    {% endif %}
+</section>
+{% endwith %}
+{% endif %}

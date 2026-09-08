@@ -9,8 +9,11 @@ KONTEKST MÜQAVİLƏSİ
   table_columns  — [{key, label, align, sortable, sort_url, sort_dir}]
                    `sort_dir` ∈ "ascending"|"descending"|None
   table_rows     — [{cells: [{text, mono, muted, num, badge_family, badge_key,
-                    html_include}], actions_include, row_head}]
-                   `row_head` birinci sütunun məzmunudur (th scope="row")
+                    include}], actions_include, row_head, head_include}]
+                   `row_head` birinci sütunun məzmunudur (th scope="row");
+                   `head_include` verilsə birinci sütun həmin şablonla render
+                   olunur (kontekstdə `row` var); `cell.include` də eyni qayda
+                   ilə xananı şablona verir (kontekstdə `row` və `cell` var).
   table_state    — "ready" | "empty" | "error" | "loading"
   table_sticky   — birinci sütun sticky olsun
   table_zebra    — zebra zolaqlar
@@ -46,10 +49,12 @@ KONTEKST MÜQAVİLƏSİ
                 <tbody>
                     {% for row in table_rows %}
                         <tr>
-                            <th scope="row">{{ row.row_head }}</th>
+                            <th scope="row">{% if row.head_include %}{% include row.head_include %}{% else %}{{ row.row_head }}{% endif %}</th>
                             {% for cell in row.cells %}
-                                <td class="{% if cell.num %}ems-table__num{% endif %}{% if cell.nowrap %} ems-table__nowrap{% endif %}">
-                                    {% if cell.badge_family %}
+                                <td class="{% if cell.num %}ems-table__num{% endif %}{% if cell.nowrap %} ems-table__nowrap{% endif %}{% if cell.muted %} ems-table__muted{% endif %}">
+                                    {% if cell.include %}
+                                        {% include cell.include %}
+                                    {% elif cell.badge_family %}
                                         {% ems_status_badge cell.badge_family cell.badge_key %}
                                     {% elif cell.mono %}
                                         <span class="ems-mono">{{ cell.text }}</span>

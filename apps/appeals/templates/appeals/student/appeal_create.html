@@ -14,53 +14,43 @@
 {% block ai_assistant_js %}{% if not is_final_exam %}{{ block.super }}{% endif %}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260710-appeals-ux">
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260710-appeals-ux">
-<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260612-modal">
+{% comment %}Müstəqil səhifə kabinet qabığından kənardadır — paylaşılan `ems_ui`
+komponent qatının lazım olan hissələri burada linklənir (CSP: xarici fayl).
+Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% endcomment %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/validation.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260908-calm">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
+<link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
 {% endblock %}
 
 {% block content %}
+{% trans "Apellyasiya göndər" context "appeals.template" as appeal_page_title %}
 <div class="appeal-shell appeal-shell--narrow">
-    <header class="appeal-hero appeal-hero--icon">
-        <div class="appeal-hero__lead">
-            <span class="appeal-hero__badge"><i class="fas fa-gavel"></i></span>
-            <div>
-                <span class="appeal-hero__eyebrow">{% trans "Apellyasiya mərkəzi" context "appeals.template" %}</span>
-                <h1>{% trans "Apellyasiya göndər" context "appeals.template" %}</h1>
-                <p>{{ exam.title }}</p>
-            </div>
-        </div>
-        <div class="appeal-hero__actions">
-            <a href="{{ result_url }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-2"></i>{% trans "Nəticəyə qayıt" context "appeals.template" %}
-            </a>
-            {% if not is_final_exam %}
-            <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary">
-                <i class="fas fa-list-ul me-2"></i>{% trans "Apellyasiyalarım" context "appeals.template" %}
-            </a>
-            {% endif %}
-        </div>
-    </header>
+    {% include "partials/ems_ui/_content_header.html" with header_title=appeal_page_title header_subtitle=exam.title header_actions_include="appeals/partials/_create_header_actions.html" %}
 
     {% if appeal_window_closed %}
     {# ── Apellyasiya müddəti bitib — read-only baxış (UX) ──────────────── #}
-    <div class="appeal-info-card appeal-info-card--warning" role="status">
-        <i class="fas fa-hourglass-end"></i>
+    <div class="ems-banner ems-banner--warning appeal-banner" role="status">
+        <i class="fas fa-hourglass-end appeal-banner__icon" aria-hidden="true"></i>
         <div>
-            <strong>{% trans "Apellyasiya müddəti bitib" context "appeals.template" %}</strong>
-            <p>
+            <div class="ems-banner__title">{% trans "Apellyasiya müddəti bitib" context "appeals.template" %}</div>
+            <div class="ems-banner__body">
                 {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
                     Apellyasiya yalnız imtahan bitdikdən sonra {{ days }} gün ərzində göndərilə bilər.
                     Bu müddət keçdiyi üçün yeni apellyasiya göndərmək mümkün deyil.
                 {% endblocktrans %}
                 {% if appeal_deadline %}
-                <span class="d-block mt-1 text-muted">
+                <span class="appeal-banner__note">
                     {% blocktrans trimmed context "appeals.template" with deadline=appeal_deadline|date:"d.m.Y" %}
                         Son tarix: {{ deadline }}.
                     {% endblocktrans %}
                 </span>
                 {% endif %}
-            </p>
+            </div>
         </div>
     </div>
 
@@ -71,10 +61,8 @@
             {% for appeal in attempt_appeals %}
             <li class="appeal-closed-list__item">
                 <div class="appeal-closed-list__head">
-                    <span class="appeal-status-chip appeal-status-chip--{{ appeal.student_display_status }}">
-                        {{ appeal.student_display_status_label }}
-                    </span>
-                    <span class="text-muted">{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
+                    {% include "appeals/partials/_status_badge.html" with status=appeal.student_display_status label=appeal.student_display_status_label %}
+                    <span class="appeal-closed-list__date">{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
                 </div>
                 <div class="appeal-closed-list__meta">
                     {% blocktrans trimmed context "appeals.template" with count=appeal.items.count %}
@@ -84,60 +72,60 @@
             </li>
             {% endfor %}
         </ul>
-        <a href="{% url 'accounts:profile' %}?section=my-appeals" class="btn btn-outline-primary mt-2">
-            <i class="fas fa-list-ul me-2"></i>{% trans "Bütün apellyasiyalarım" context "appeals.template" %}
+        <a href="{% url 'accounts:profile' %}?section=my-appeals" class="ems-btn">
+            <i class="fas fa-list-ul" aria-hidden="true"></i>{% trans "Bütün apellyasiyalarım" context "appeals.template" %}
         </a>
     </section>
     {% else %}
-    <div class="appeal-info-card">
-        <i class="fas fa-circle-info"></i>
+    <div class="ems-banner ems-banner--info appeal-banner" role="status">
+        <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>
         <div>
-            <strong>{% trans "Bu imtahan üçün apellyasiya göndərməmisiniz" context "appeals.template" %}</strong>
-            <p>{% trans "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz." context "appeals.template" %}</p>
+            <div class="ems-banner__title">{% trans "Bu imtahan üçün apellyasiya göndərməmisiniz" context "appeals.template" %}</div>
+            <div class="ems-banner__body">{% trans "Nəticənizi aşağıdakı düymə ilə yenidən görə bilərsiniz." context "appeals.template" %}</div>
         </div>
     </div>
     {% endif %}
 
     <div class="appeal-closed-actions">
-        <a href="{{ result_url }}" class="btn btn-primary">
-            <i class="fas fa-clipboard-check me-2"></i>{% trans "Nəticəyə bax" context "appeals.template" %}
+        <a href="{{ result_url }}" class="ems-btn ems-btn--primary">
+            <i class="fas fa-clipboard-check" aria-hidden="true"></i>{% trans "Nəticəyə bax" context "appeals.template" %}
         </a>
     </div>
     {% else %}
 
     {# Necə işləyir — qısa addımlar #}
-    <div class="appeal-steps">
-        <div class="appeal-step">
+    <ol class="appeal-steps">
+        <li class="appeal-step">
             <span class="appeal-step__num">1</span>
             <span class="appeal-step__text">{% trans "Sualı seçin" context "appeals.template" %}</span>
-        </div>
-        <div class="appeal-step">
+        </li>
+        <li class="appeal-step">
             <span class="appeal-step__num">2</span>
             <span class="appeal-step__text">{% trans "Səbəbi seçin və izah yazın" context "appeals.template" %}</span>
-        </div>
-        <div class="appeal-step">
+        </li>
+        <li class="appeal-step">
             <span class="appeal-step__num">3</span>
             <span class="appeal-step__text">{% trans "Göndərin" context "appeals.template" %}</span>
-        </div>
-    </div>
+        </li>
+    </ol>
 
-    <div class="appeal-info-card">
-        <i class="fas fa-circle-info"></i>
+    <div class="ems-banner ems-banner--info appeal-banner" role="note">
+        <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>
         <div>
-            <strong>{% trans "Şərhə yazmağa başlayan kimi sual avtomatik seçilir" context "appeals.template" %}</strong>
-            <p>
+            <div class="ems-banner__title">{% trans "Şərhə yazmağa başlayan kimi sual avtomatik seçilir" context "appeals.template" %}</div>
+            <div class="ems-banner__body">
                 {% blocktrans trimmed context "appeals.template" with min=min_comment_length %}
                     Apellyasiya etmək istədiyiniz sualları işarələyin, səbəb tipini seçin və ən azı {{ min }} simvol izah yazın.
                 {% endblocktrans %}
-            </p>
+            </div>
         </div>
     </div>
 
     {% if answers %}
     <div class="appeal-toolbar">
         <div class="appeal-toolbar__search">
-            <i class="fas fa-search"></i>
-            <input type="search" class="form-control" data-appeal-search
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <input type="search" class="ems-input" data-appeal-search
                    placeholder="{% trans 'Sualları axtar' context 'appeals.template' %}" aria-label="{% trans 'Sualları axtar' context 'appeals.template' %}">
         </div>
     </div>
@@ -171,30 +159,28 @@
                     <div class="appeal-question-card__main">
                         <p class="appeal-question-title">
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
-                            {{ delivered.text|striptags|truncatechars:190 }}
+                            <span>{{ delivered.text|striptags|truncatechars:190 }}</span>
                         </p>
                         {% if hide_answer_details and not answers_release_locked and exam.exam_type == "test" %}
                         <div class="appeal-meta">
-                            <span class="appeal-chip">
-                                {% if answer.is_correct %}
-                                <i class="fas fa-check-circle"></i>{% trans "Cavabınız: düzgün" context "appeals.template" %}
-                                {% else %}
-                                <i class="fas fa-times-circle"></i>{% trans "Cavabınız: səhv" context "appeals.template" %}
-                                {% endif %}
-                            </span>
+                            {% if answer.is_correct %}
+                            <span class="appeal-chip appeal-chip--ok"><i class="fas fa-check-circle" aria-hidden="true"></i>{% trans "Cavabınız: düzgün" context "appeals.template" %}</span>
+                            {% else %}
+                            <span class="appeal-chip appeal-chip--bad"><i class="fas fa-times-circle" aria-hidden="true"></i>{% trans "Cavabınız: səhv" context "appeals.template" %}</span>
+                            {% endif %}
                         </div>
                         {% endif %}
                         {% if is_marked %}
                         <div class="appeal-meta">
-                            <span class="appeal-marked-chip">
-                                <i class="fas fa-bookmark"></i>{% trans "Tələbənin işarələdiyi sual" context "appeals.template" %}
+                            <span class="appeal-chip appeal-chip--marked">
+                                <i class="fas fa-bookmark" aria-hidden="true"></i>{% trans "Tələbənin işarələdiyi sual" context "appeals.template" %}
                             </span>
                         </div>
                         {% endif %}
                         {% if already_appealed %}
                         <div class="appeal-meta">
-                            <span class="appeal-locked-chip">
-                                <i class="fas fa-circle-check"></i>{% trans "Bu sual üzrə apellyasiya artıq göndərilib" context "appeals.template" %}
+                            <span class="appeal-chip appeal-chip--soft">
+                                <i class="fas fa-circle-check" aria-hidden="true"></i>{% trans "Bu sual üzrə apellyasiya artıq göndərilib" context "appeals.template" %}
                             </span>
                         </div>
                         {% endif %}
@@ -223,16 +209,16 @@
                         <li class="appeal-option{% if opt.is_correct %} is-correct{% endif %}{% if opt.is_selected and not opt.is_correct %} is-wrong{% endif %}">
                             <span class="appeal-option__icon">
                                 {% if opt.is_correct %}
-                                <i class="fas fa-check-circle"></i>
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
                                 {% elif opt.is_selected %}
-                                <i class="fas fa-times-circle"></i>
+                                <i class="fas fa-times-circle" aria-hidden="true"></i>
                                 {% else %}
-                                <i class="far fa-circle"></i>
+                                <i class="far fa-circle" aria-hidden="true"></i>
                                 {% endif %}
                             </span>
                             <span class="appeal-option__text">{% if opt.label %}<b>{{ opt.label }}.</b> {% endif %}{{ opt.text }}</span>
                             {% if opt.image_url %}
-                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="img-fluid mt-2">
+                            <img src="{{ opt.image_url }}" alt="" loading="lazy" class="appeal-option__image">
                             {% endif %}
                             <span class="appeal-option__tags">
                                 {% if opt.is_selected %}<span class="appeal-option__tag">{% trans "Tələbənin cavabı" context "appeals.template" %}</span>{% endif %}
@@ -252,7 +238,7 @@
                     <div class="appeal-answer-review__empty">{% trans "Cavab yazılmayıb" context "appeals.template" %}</div>
                     {% endif %}
                     {% if delivered.correct_answer %}
-                    <div class="appeal-answer-review__label mt-3">{% trans "Düzgün cavab" context "appeals.template" %}</div>
+                    <div class="appeal-answer-review__label appeal-answer-review__label--next">{% trans "Düzgün cavab" context "appeals.template" %}</div>
                     <div class="appeal-answer-review__text">{{ delivered.correct_answer|linebreaksbr }}</div>
                     {% endif %}
                     {% endif %}
@@ -260,13 +246,13 @@
                 {% endif %}
 
                 <div class="appeal-q-body" data-appeal-body>
-                    <div class="row g-3">
-                        <div class="col-md-5">
-                            <label class="form-label small text-muted fw-bold" for="appeal_type_{{ q.id }}">
+                    <div class="appeal-decision-grid appeal-decision-grid--create">
+                        <div class="ems-field">
+                            <label class="ems-field__label" for="appeal_type_{{ q.id }}">
                                 {% trans "Səbəb tipi" context "appeals.template" %}<span class="appeal-required-star">*</span>
                             </label>
-                            <div class="bootstrap-single-select">
-                                <select class="form-select bootstrap-single-select__native" data-appeal-type data-bootstrap-select
+                            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                                <select class="ems-select bootstrap-single-select__native" data-appeal-type data-bootstrap-select
                                         name="appeal_type_{{ q.id }}" id="appeal_type_{{ q.id }}"
                                         {% if already_appealed %}disabled{% endif %}>
                                     <option value="">{% trans "Səbəb seçin" context "appeals.template" %}</option>
@@ -276,9 +262,9 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-7">
+                        <div class="ems-field">
                             <div class="appeal-q-label-row">
-                                <label class="form-label small text-muted fw-bold mb-0" for="comment_{{ q.id }}">
+                                <label class="ems-field__label" for="comment_{{ q.id }}">
                                     {% trans "İzahınız" context "appeals.template" %}<span class="appeal-required-star">*</span>
                                 </label>
                                 <span class="appeal-q-counter" data-appeal-counter>
@@ -286,7 +272,7 @@
                                     <span class="appeal-q-counter__unit">{% trans "simvol" context "appeals.template" %}</span>
                                 </span>
                             </div>
-                            <textarea class="form-control" data-appeal-comment name="comment_{{ q.id }}"
+                            <textarea class="ems-textarea" data-appeal-comment name="comment_{{ q.id }}"
                                       id="comment_{{ q.id }}" rows="3"
                                       placeholder="{% blocktrans trimmed context 'appeals.template' with min=min_comment_length %}Səbəbinizi ən azı {{ min }} simvol ilə izah edin{% endblocktrans %}"
                                       {% if already_appealed %}disabled{% endif %}></textarea>
@@ -300,9 +286,9 @@
             {% endwith %}
             {% endwith %}
             {% empty %}
-            <div class="appeal-empty">
-                <i class="fas fa-inbox"></i>
-                <p>{% trans "Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı." context "appeals.template" %}</p>
+            <div class="ems-state" role="status">
+                <i class="fas fa-inbox ems-state__icon" aria-hidden="true"></i>
+                <p class="ems-state__title">{% trans "Bu cəhd üçün apellyasiya edilə bilən sual tapılmadı." context "appeals.template" %}</p>
             </div>
             {% endfor %}
         </div>
@@ -311,18 +297,18 @@
         <div class="appeal-sticky-actions">
             <div class="appeal-sticky-actions__inner">
                 <div class="appeal-sticky-actions__status">
-                    <span class="appeal-selected-pill" data-appeal-selected-count>{% trans "0 sual seçildi" context "appeals.template" %}</span>
+                    <span class="ems-badge ems-badge--info" data-appeal-selected-count>{% trans "0 sual seçildi" context "appeals.template" %}</span>
                     <span class="appeal-empty-hint" data-appeal-empty-hint hidden>
-                        <i class="fas fa-circle-exclamation me-1"></i>{% trans "Ən azı bir sual seçin." context "appeals.template" %}
+                        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>{% trans "Ən azı bir sual seçin." context "appeals.template" %}
                     </span>
                     <span class="appeal-submit-hint" data-appeal-submit-hint hidden role="alert"></span>
                 </div>
                 <div class="appeal-sticky-actions__buttons">
-                    <a href="{{ result_url }}" class="btn btn-outline-secondary">
+                    <a href="{{ result_url }}" class="ems-btn">
                         {% trans "Ləğv et" context "appeals.template" %}
                     </a>
-                    <button type="submit" class="btn btn-primary" data-appeal-submit aria-disabled="true">
-                        <i class="fas fa-paper-plane me-2"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
+                    <button type="submit" class="ems-btn ems-btn--primary" data-appeal-submit aria-disabled="true">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
                     </button>
                 </div>
             </div>
@@ -333,26 +319,26 @@
 
     {% if answers %}
     {# Göndərməzdən əvvəl təsdiq modalı (Bootstrap). #}
-    <div class="modal fade" id="appealConfirmModal" tabindex="-1" aria-hidden="true"
+    <div class="modal fade appeal-modal" id="appealConfirmModal" tabindex="-1" aria-hidden="true"
          aria-labelledby="appealConfirmTitle" data-appeal-confirm-modal>
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content appeal-modal__content">
+                <div class="modal-header appeal-modal__header">
                     <h5 class="modal-title" id="appealConfirmTitle">
-                        <i class="fas fa-gavel me-2" aria-hidden="true"></i>{% trans "Apellyasiyanı göndər" context "appeals.template" %}
+                        {% trans "Apellyasiyanı göndər" context "appeals.template" %}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="mb-0">{% trans "Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra dəyişiklik edə bilməyəcəksiniz." context "appeals.template" %}</p>
+                <div class="modal-body appeal-modal__body appeal-modal__body--plain">
+                    <p class="appeal-modal__text">{% trans "Seçdiyiniz suallar üçün apellyasiya göndərilsin? Göndərişdən sonra dəyişiklik edə bilməyəcəksiniz." context "appeals.template" %}</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer appeal-modal__footer">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">
                         {% trans "Ləğv et" context "appeals.template" %}
                     </button>
-                    <button type="button" class="btn btn-primary" data-appeal-confirm-submit>
-                        <i class="fas fa-paper-plane me-2" aria-hidden="true"></i>{% trans "Bəli, göndər" context "appeals.template" %}
+                    <button type="button" class="ems-btn ems-btn--primary" data-appeal-confirm-submit>
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>{% trans "Bəli, göndər" context "appeals.template" %}
                     </button>
                 </div>
             </div>

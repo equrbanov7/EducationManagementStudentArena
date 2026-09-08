@@ -1,0 +1,484 @@
+/* =========================================================================
+   «Struktur üzvləri» reyestri — YALNIZ bölmə-xüsusi düzüm (2026-09-08).
+
+   KPI / filtr / cədvəl / çekmecə `static/css/ems_ui/*.css` komponent
+   qatındadır və qabıqdan yüklənir. Burada: üzv xanası (inisial nişanı, ad,
+   e-poçt), rol nişanı (rəhbər heyət — tac + isti ton), rəhbərlik sətirləri,
+   vəzifə, bölmə zənciri, «Üzv kartı» çekmecəsinin düzümü və skeleton.
+   Rəng birbaşa yazılmır — yalnız `--ems-*` tokenləri; qradiyent yoxdur.
+   ========================================================================= */
+
+.om {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-7);
+}
+
+.om-body[aria-busy="true"] {
+    min-height: 240px;
+}
+
+/* KPI kartları klik edilə bilən filtrdir (nav.js `ems:kpi-filter`). */
+.om .ems-kpi[data-ems-kpi-filter] {
+    cursor: pointer;
+    text-align: left;
+}
+
+/* ── Üzv xanası: inisial nişanı + ad + e-poçt ────────────────────────── */
+
+.om-member {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    min-width: 220px;
+}
+
+.om-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-100);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.om-avatar--lead {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    border-color: var(--ems-warning-bd);
+}
+
+.om-avatar--lg {
+    width: 56px;
+    height: 56px;
+    font-size: var(--ems-fs-lg);
+}
+
+.om-member__main {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.om-member__name {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    line-height: 1.3;
+}
+
+.om-member__inactive {
+    min-height: 18px;
+    padding: 0 7px;
+    font-size: var(--ems-fs-2xs);
+}
+
+.om-member__sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px var(--ems-sp-3);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.om-member__email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.om-member__username {
+    color: var(--ems-neutral-500);
+}
+
+/* ── Rol nişanı + rəhbərlik sətirləri ────────────────────────────────── */
+
+.om-role {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ems-sp-1);
+}
+
+.om-role__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    border: 1px solid var(--ems-neutral-300);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+.om-role__badge--lead {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    border-color: var(--ems-warning-bd);
+}
+
+.om-role__badge--lead .fa-crown {
+    font-size: 0.78em;
+    color: var(--ems-warning-600);
+}
+
+.om-role__badge--student {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    border-color: var(--ems-primary-200);
+}
+
+.om-role__lines {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.om-role__line {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    white-space: nowrap;
+}
+
+.om-role__line .fa-star {
+    font-size: 0.68em;
+    color: var(--ems-warning-600);
+}
+
+.om-role__line--more {
+    color: var(--ems-neutral-500);
+}
+
+/* ── Vəzifə ──────────────────────────────────────────────────────────── */
+
+.om-position {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 120px;
+}
+
+.om-title {
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.om-employee {
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-neutral-500);
+    letter-spacing: 0.02em;
+}
+
+.om-muted {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-base);
+}
+
+/* ── Bölmə zənciri ───────────────────────────────────────────────────── */
+
+.om-unit {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 180px;
+}
+
+.om-unit__name {
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    line-height: 1.3;
+}
+
+.om-unit__trail {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+}
+
+.om-missing {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: 3px 9px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ── Sətir əməlləri — BİR sətirdə qalır (dar ekranda cədvəl sürüşür) ── */
+
+.om .ems-rowactions {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-1);
+    white-space: nowrap;
+}
+
+.om-row-detail .fa-id-card {
+    color: var(--ems-primary-600);
+}
+
+/* ── «Üzv kartı» çekmecəsi ───────────────────────────────────────────── */
+
+.om-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.om-detail__identity {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-6);
+    padding-bottom: var(--ems-sp-6);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.om-detail__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.om-detail__name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.om-detail__namelink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.om-detail__namelink:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.om-detail__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-3) var(--ems-sp-6);
+    margin: 0;
+}
+
+.om-detail__fact {
+    min-width: 0;
+}
+
+.om-detail__label {
+    margin: 0;
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.om-detail__value {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+.om-detail__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.om-detail__heading {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.om-detail__count {
+    display: inline-block;
+    padding: 0 7px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-2xs);
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.om-detail__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    overflow: hidden;
+    background: var(--ems-neutral-0);
+}
+
+.om-detail__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+}
+
+.om-detail__item + .om-detail__item {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.om-detail__item--head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+}
+
+.om-detail__itemhead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.om-detail__itemsub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-1) var(--ems-sp-2);
+}
+
+.om-detail__chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+}
+
+.om-detail__chip--warn {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+    font-weight: 700;
+}
+
+.om-detail__headlabel {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.om-detail__headlabel .fa-crown {
+    font-size: 0.8em;
+    color: var(--ems-warning-600);
+}
+
+.om-detail__headunit {
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
+}
+
+.om-detail__empty {
+    margin: 0;
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+    border: 1px dashed var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm);
+}
+
+/* `.ems-btn` inline-flex-dir — `hidden` atributu onu gizlətməzdi. */
+.om-detail__profile[hidden] {
+    display: none;
+}
+
+/* ── Skeleton (qradiyentsiz — sadə nəbz) ─────────────────────────────── */
+
+.om-detail__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.om-skel {
+    display: block;
+    height: 14px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-neutral-100);
+    animation: om-pulse 1.2s ease-in-out infinite;
+}
+
+.om-skel--short {
+    width: 60%;
+}
+
+.om-skel--avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+}
+
+@keyframes om-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .om-skel { animation: none; }
+}
+
+@media (max-width: 760px) {
+    .om-member,
+    .om-unit,
+    .om-position { min-width: 0; }
+    .om-member__email { max-width: 180px; }
+    .om-detail__identity { flex-wrap: wrap; }
+    .om-detail__facts { grid-template-columns: 1fr; }
+}

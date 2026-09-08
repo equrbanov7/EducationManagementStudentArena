@@ -114,10 +114,7 @@ def fill(lang):
                 # Kontekstsiz giriş BLOK səviyyəsində axtarılır: eyni msgid
                 # başqa kontekstdə ola bilər (məs. «Rollar» → `profile.rim`),
                 # sadə alt-sətir axtarışı onu səhvən «var» sayırdı.
-                exists = any(
-                    block.lstrip("#\n").startswith(f'msgid "{esc(msgid)}"\n')
-                    for block in text.split("\n\n")
-                )
+                exists = any(block.lstrip("#\n").startswith(f'msgid "{esc(msgid)}"\n') for block in text.split("\n\n"))
             if exists:
                 continue
             header = "" if not ctx else f'msgctxt "{esc(ctx)}"\n'

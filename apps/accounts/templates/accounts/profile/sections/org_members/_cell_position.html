@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Vəzifə xanası — `Membership.title` (sərbəst mətn) + tabel nömrəsi.
+Boşdursa «—» (doldurucu mətn UYDURULMUR — bax `core/staff_position.py`).{% endcomment %}
+<div class="om-position">
+    {% if row.data.title %}<span class="om-title">{{ row.data.title }}</span>{% else %}<span class="om-muted">—</span>{% endif %}
+    {% if row.data.employee_id %}<span class="om-employee ems-mono" title="{% trans 'Tabel nömrəsi' context 'organizations.members' %}">{{ row.data.employee_id }}</span>{% endif %}
+</div>

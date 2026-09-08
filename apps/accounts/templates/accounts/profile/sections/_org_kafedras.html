@@ -1,4 +1,62 @@
-<section class="profile-section-panel profile-section--org-kafedras {% if active_section == 'org-kafedras' %}is-active{% endif %}"
-         data-profile-section-panel="org-kafedras">
-    {% include "organizations/partials/_kafedras_content.html" with org_kafedras_section=org_kafedras_section embedded_in_shell=True %}
+{% load i18n static %}
+{% comment %}
+«Kafedralar» — kabinet reyestri (2026-09-08 yenidən qurulub). Bax `_org_faculties.html`
+qeydi; kontekst `build_kafedras_section`. Təyinatlar: kafedra müdiri · müəllim.
+Fakültə filtri seçilibsə «Yeni kafedra» həmin fakültəyə prefill olunur.
+⚠️ `<h1>` yazılmır — qabıq verir (köhnə şablonda ikinci «Kafedralar» başlığı var idi).
+{% endcomment %}
+{% if 'org-kafedras' in allowed_sections %}
+{% trans "Kafedra" context "organizations.registry" as ou_unit_title %}
+{% trans "Ad eyni növ bölmələr arasında unikaldır; kafedra mütləq bir fakültəyə bağlanır." context "organizations.registry" as ou_unit_sub %}
+{% trans "Kafedra müdiri təyin et" context "organizations.registry" as ou_head_title %}
+{% trans "Seçilmiş şəxs kafedranın rəhbəri olur; əməl audit jurnalına yazılır." context "organizations.registry" as ou_head_sub %}
+{% trans "Təyin et" context "organizations.registry" as ou_head_btn %}
+{% trans "Kafedraya müəllim əlavə et" context "organizations.registry" as ou_teacher_title %}
+{% trans "Mövcud müəllim üzvlüyü bu kafedraya bağlanır (başqa kafedradadırsa köçürülür); jurnal və qiymət izi qalır." context "organizations.registry" as ou_teacher_sub %}
+{% trans "Əlavə et" context "organizations.registry" as ou_teacher_btn %}
+{% trans "Kafedranı arxivlə" context "organizations.registry" as ou_arch_title %}
+{% trans "Kafedra SİLİNMİR — arxivlənir. Təyinatlı müəllimi/üzvü və ya aktiv alt bölməsi olan kafedra arxivlənə bilməz." context "organizations.registry" as ou_arch_sub %}
+{% trans "Arxivlə" context "organizations.registry" as ou_arch_btn %}
+{% trans "Heyət" context "organizations.registry" as ou_staff_title %}
+{% trans "Müdir, müəllimlər və ixtisaslar. Təyinatı silmək təsdiq tələb edir və auditə düşür." context "organizations.registry" as ou_staff_sub %}
+<section class="profile-section-panel profile-section--tof profile-section--org-units {% if active_section == 'org-kafedras' %}is-active{% endif %}"
+         data-profile-section-panel="org-kafedras"
+         data-source-url="{{ profile_base_url }}?section=org-kafedras">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_units.css' %}?v=20260908-3">
+{% if not org_kafedras_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=org_kafedras_section.access_denied_message %}
+{% else %}
+<div class="tof ou"
+     data-tof-root
+     data-tof-section="org-kafedras"
+     data-tof-action-url="{{ org_kafedras_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=org_kafedras_section.subtitle header_actions_include="accounts/profile/sections/org_units/_kafedras_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=org_kafedras_section.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-kafedras" filter_prefix="kf_" filter_fields=org_kafedras_section.filter_fields filter_count_label=org_kafedras_section.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="ou-body" data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=org_kafedras_section.columns table_rows=org_kafedras_section.table_rows table_state=org_kafedras_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-landmark" state_title=org_kafedras_section.state_title state_body=org_kafedras_section.state_body %}
+        {% include "partials/_pagination.html" with page_obj=org_kafedras_section.page_obj page_param="kf_page" extra_query=org_kafedras_section.pagination_query %}
+    </div>
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="ouStaffDrawer" drawer_title=ou_staff_title drawer_subtitle=ou_staff_sub drawer_body_include="accounts/profile/sections/org_units/_staff_drawer.html" drawer_foot_include="accounts/profile/sections/org_units/_staff_foot.html" %}
+
+    {% if org_kafedras_section.can_create or org_kafedras_section.can_edit %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_kafedras_section form_dialog_id="ouUnitDialog" form_dialog_title=ou_unit_title form_dialog_subtitle=ou_unit_sub form_dialog_body_include="accounts/profile/sections/org_units/_unit_fields.html" form_dialog_action=org_kafedras_section.action_url form_dialog_hidden=org_kafedras_section.unit_hidden form_dialog_data=org_kafedras_section.form_data %}
+    {% endif %}
+    {% if org_kafedras_section.can_assign_head %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_kafedras_section form_dialog_id="ouHeadDialog" form_dialog_title=ou_head_title form_dialog_subtitle=ou_head_sub form_dialog_submit_label=ou_head_btn form_dialog_body_include="accounts/profile/sections/org_units/_head_fields.html" form_dialog_action=org_kafedras_section.action_url form_dialog_hidden=org_kafedras_section.head_hidden form_dialog_data=org_kafedras_section.form_data %}
+    {% endif %}
+    {% if org_kafedras_section.can_assign_members %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_kafedras_section form_dialog_id="ouTeacherDialog" form_dialog_title=ou_teacher_title form_dialog_subtitle=ou_teacher_sub form_dialog_submit_label=ou_teacher_btn form_dialog_body_include="accounts/profile/sections/org_units/_teacher_fields.html" form_dialog_action=org_kafedras_section.action_url form_dialog_hidden=org_kafedras_section.teacher_hidden form_dialog_data=org_kafedras_section.form_data %}
+    {% endif %}
+    {% if org_kafedras_section.can_delete %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="ouArchiveDialog" reason_title=ou_arch_title reason_subtitle=ou_arch_sub reason_submit_label=ou_arch_btn reason_submit_tone="danger" reason_action=org_kafedras_section.action_url reason_hidden=org_kafedras_section.archive_hidden reason_form_data=org_kafedras_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
 </section>
+{% endif %}

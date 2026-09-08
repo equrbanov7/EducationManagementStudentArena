@@ -183,6 +183,7 @@ def build_teachers_page(*, actor, filters, request=None, today=None) -> dict:
         row.update(
             {
                 "kind": "teacher",
+                "unit_id": str(getattr(user, "unit_id", "") or ""),
                 "role_name": getattr(user, "role_name", "") or "",
                 # ⚠️ Doldurucu «Üzv» rolu etiket kimi ÖTÜRÜLMÜR — vəzifəsiz
                 # müəllimdə sütun boş qalır (bax core/staff_position.py).
