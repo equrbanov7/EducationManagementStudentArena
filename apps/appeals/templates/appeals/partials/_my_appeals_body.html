@@ -1,104 +1,113 @@
 {% load i18n %}
 {% comment %}
-  Ortaq apellyasiya siyahısı gövdəsi (DRY).
-  Gözlənilən kontekst:
-    appeal_list          — cari səhifədəki apellyasiyalar
-    appeal_page_obj      — Paginator page obyekti
-    appeal_status_choices, appeal_status_filter, appeal_search_query
-    appeal_list_action   — filtr GET formunun action URL-i
-    appeal_section       — (opsional) dashboard bölmə adı, məs. "my-appeals"
+  Ortaq tələbə apellyasiya siyahısı gövdəsi (DRY).
+  Kontekst: appeal_list, appeal_page_obj, appeal_status_choices, appeal_status_filter,
+    appeal_search_query, appeal_list_action, appeal_section (opsional, "my-appeals"),
+    appeal_eligible_attempts, appeal_window_days
+
+  Görünüş (2026-09-08 sakit redizayn): filtr `ems-filters` (profil AJAX formu —
+  `data-profile-ajax-form` müqaviləsi və `q`/`status` adları olduğu kimi),
+  siyahı `ems-tablewrap` içində sakit sətirlər (`data-appeal-detail-url` →
+  detal modalı), status `ems-badge`. «Yeni apellyasiya» düyməsi başlıq
+  əməlindədir (`_my_appeals_header_actions.html`); modalın özü burada qalır.
 {% endcomment %}
+{% trans "Hələ apellyasiya yoxdur" context "appeals.template" as appeal_empty_title %}
+{% trans "Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada görünəcək." context "appeals.template" as appeal_empty_body %}
+{% trans "Hazırda apellyasiya verə biləcəyiniz final və ya midterm imtahanı yoxdur." context "appeals.template" as appeal_no_eligible %}
 
-<div class="appeal-body-toolbar">
-    <button type="button" class="appeal-new-btn" data-bs-toggle="modal" data-bs-target="#newAppealModal">
-        <i class="fas fa-gavel" aria-hidden="true"></i>
-        <span>{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</span>
-    </button>
-</div>
-
-<form method="get" action="{{ appeal_list_action }}" class="appeal-filter-card"
+<form method="get" action="{{ appeal_list_action }}" class="ems-filters ems-filters--auto appeal-filters" role="search"
       {% if appeal_section %}data-profile-ajax-form data-section="{{ appeal_section }}"{% endif %}>
     {% if appeal_section %}<input type="hidden" name="section" value="{{ appeal_section }}">{% endif %}
-    <div class="row g-3 align-items-end">
-        <div class="col-md-6">
-            <label class="form-label small text-muted fw-bold" for="appealQ">{% trans "Axtarış" context "appeals.template" %}</label>
-            <input type="text" class="form-control" id="appealQ" name="q"
-                   value="{{ appeal_search_query }}" placeholder="{% trans 'İmtahan adı üzrə axtar' context 'appeals.template' %}"
-                   data-appeal-auto-search>
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="appealQ">{% trans "Axtarış" context "appeals.template" %}</label>
+        <input type="search" class="ems-input" id="appealQ" name="q"
+               value="{{ appeal_search_query }}" placeholder="{% trans 'İmtahan adı üzrə axtar' context 'appeals.template' %}"
+               autocomplete="off"
+               data-appeal-auto-search>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="appealStatus">{% trans "Status" context "appeals.template" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="appealStatus" name="status" data-bootstrap-select data-appeal-auto-field>
+                <option value="">{% trans "Bütün statuslar" context "appeals.template" %}</option>
+                {% for value, label in appeal_status_choices %}
+                <option value="{{ value }}" {% if appeal_status_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <div class="col-md-6">
-            <label class="form-label small text-muted fw-bold" for="appealStatus">{% trans "Status" context "appeals.template" %}</label>
-            <div class="bootstrap-single-select">
-                <select class="form-select bootstrap-single-select__native" id="appealStatus" name="status" data-bootstrap-select data-appeal-auto-field>
-                    <option value="">{% trans "Bütün statuslar" context "appeals.template" %}</option>
-                    {% for value, label in appeal_status_choices %}
-                    <option value="{{ value }}" {% if appeal_status_filter == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        
+    </div>
+    <div class="ems-filters__actions">
+        <a href="{{ appeal_list_action }}{% if appeal_section %}?section={{ appeal_section }}{% endif %}" class="ems-btn">
+            <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Sıfırla" context "ui.filters" %}
+        </a>
     </div>
 </form>
 
 {% if appeal_list %}
-<div class="appeal-list">
-    {% for appeal in appeal_list %}
-    <a href="{% url 'appeals:appeal_detail' appeal.id %}"
-       class="appeal-case-card"
-       data-no-route-loading
-       data-appeal-detail-url="{% url 'appeals:appeal_detail' appeal.id %}">
-        <div class="appeal-case-card__head">
-            <div>
-                <h2>{{ appeal.exam.title }}</h2>
-                <div class="appeal-meta">
-                    <span class="appeal-chip"><i class="fas fa-list-check"></i>{{ appeal.items.all|length }} {% trans "sual" context "appeals.template" %}</span>
-                    <span><i class="far fa-calendar me-1"></i>{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
-                </div>
-            </div>
-            {% include "appeals/partials/_status_badge.html" with status=appeal.student_display_status label=appeal.student_display_status_label %}
-        </div>
-    </a>
-    {% endfor %}
-</div>
-
-{% if appeal_page_obj.has_other_pages %}
-<nav class="mt-4" aria-label="{% trans 'Səhifələmə' context 'appeals.template' %}">
-    <ul class="pagination justify-content-center">
-        {% if appeal_page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="{{ appeal_list_action }}?page={{ appeal_page_obj.previous_page_number }}{% if appeal_section %}&section={{ appeal_section }}{% endif %}&q={{ appeal_search_query }}&status={{ appeal_status_filter }}">&laquo;</a></li>
-        {% endif %}
-        <li class="page-item disabled"><span class="page-link">{{ appeal_page_obj.number }} / {{ appeal_page_obj.paginator.num_pages }}</span></li>
-        {% if appeal_page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="{{ appeal_list_action }}?page={{ appeal_page_obj.next_page_number }}{% if appeal_section %}&section={{ appeal_section }}{% endif %}&q={{ appeal_search_query }}&status={{ appeal_status_filter }}">&raquo;</a></li>
-        {% endif %}
+<div class="ems-tablewrap appeal-rows">
+    <ul class="appeal-rowlist">
+        {% for appeal in appeal_list %}
+        <li>
+            <a href="{% url 'appeals:appeal_detail' appeal.id %}"
+               class="appeal-row"
+               data-no-route-loading
+               data-appeal-detail-url="{% url 'appeals:appeal_detail' appeal.id %}">
+                <span class="appeal-row__main">
+                    <span class="appeal-row__title">{{ appeal.exam.title }}</span>
+                    <span class="appeal-row__meta">
+                        <span>{{ appeal.items.all|length }} {% trans "sual" context "appeals.template" %}</span>
+                        <span class="appeal-row__sep" aria-hidden="true">·</span>
+                        <span>{{ appeal.created_at|date:"d.m.Y H:i" }}</span>
+                    </span>
+                </span>
+                {% include "appeals/partials/_status_badge.html" with status=appeal.student_display_status label=appeal.student_display_status_label %}
+                <i class="fas fa-chevron-right appeal-row__chev" aria-hidden="true"></i>
+            </a>
+        </li>
+        {% endfor %}
     </ul>
-</nav>
-{% endif %}
 
+    {% if appeal_page_obj.has_other_pages %}
+    <div class="ems-tablefoot appeal-tablefoot">
+        <div class="appeal-tablefoot__page">{{ appeal_page_obj.number }} / {{ appeal_page_obj.paginator.num_pages }}</div>
+        <nav class="ems-rowactions" aria-label="{% trans 'Səhifələmə' context 'appeals.template' %}">
+            {% if appeal_page_obj.has_previous %}
+            <a class="ems-btn ems-btn--sm"
+               href="{{ appeal_list_action }}?page={{ appeal_page_obj.previous_page_number }}{% if appeal_section %}&amp;section={{ appeal_section }}{% endif %}&amp;q={{ appeal_search_query|urlencode }}&amp;status={{ appeal_status_filter }}">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>{% trans "action_prev" context "partials.pagination" %}
+            </a>
+            {% endif %}
+            {% if appeal_page_obj.has_next %}
+            <a class="ems-btn ems-btn--sm"
+               href="{{ appeal_list_action }}?page={{ appeal_page_obj.next_page_number }}{% if appeal_section %}&amp;section={{ appeal_section }}{% endif %}&amp;q={{ appeal_search_query|urlencode }}&amp;status={{ appeal_status_filter }}">
+                {% trans "action_next" context "partials.pagination" %}<i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
 {% else %}
-<div class="appeal-empty">
-    <i class="fas fa-inbox"></i>
-    <h2 class="h5">{% trans "Hələ apellyasiya yoxdur" context "appeals.template" %}</h2>
-    <p class="mb-0">{% trans "Nəticə səhifəsindən apellyasiya göndərdikdən sonra müraciətləriniz burada görünəcək." context "appeals.template" %}</p>
+<div class="ems-tablewrap">
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-inbox" state_title=appeal_empty_title state_body=appeal_empty_body %}
 </div>
 {% endif %}
 
 {# Yeni apellyasiya müraciəti modalı — 3-günlük pəncərəsi açıq final/midterm cəhdləri #}
-<div class="modal fade appeal-new-modal" id="newAppealModal" tabindex="-1"
+<div class="modal fade appeal-modal appeal-new-modal" id="newAppealModal" tabindex="-1"
      aria-labelledby="newAppealModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content appeal-modal__content">
+            <div class="modal-header appeal-modal__header">
                 <div>
-                    <h2 class="modal-title h5 mb-1" id="newAppealModalLabel">{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</h2>
-                    <p class="appeal-new-modal__subtitle mb-0">
+                    <h5 class="modal-title" id="newAppealModalLabel">{% trans "Yeni apellyasiya müraciəti" context "appeals.template" %}</h5>
+                    <p class="appeal-modal__sub">
                         {% blocktrans context "appeals.template" with days=appeal_window_days %}İmtahan bitdikdən sonra {{ days }} gün ərzində apellyasiya verə bilərsiniz.{% endblocktrans %}
                     </p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'appeals.template' %}"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body appeal-modal__body">
                 {% if appeal_eligible_attempts %}
                 <ul class="appeal-eligible-list">
                     {% for attempt in appeal_eligible_attempts %}
@@ -107,13 +116,13 @@
                             <span class="appeal-eligible-item__title">{{ attempt.exam.title }}</span>
                             <span class="appeal-eligible-item__meta">
                                 <span><i class="far fa-calendar" aria-hidden="true"></i> {{ attempt.finished_at|date:"d.m.Y H:i" }}</span>
-                                <span class="appeal-eligible-item__deadline">
+                                <span class="ems-badge ems-badge--warning">
                                     <i class="fas fa-hourglass-half" aria-hidden="true"></i>
                                     {% blocktrans context "appeals.template" with deadline=attempt.appeal_deadline|date:"d.m.Y" %}son tarix: {{ deadline }}{% endblocktrans %}
                                 </span>
                             </span>
                         </div>
-                        <a href="{{ attempt.appeal_create_url }}" class="appeal-eligible-item__cta" data-no-route-loading>
+                        <a href="{{ attempt.appeal_create_url }}" class="ems-btn ems-btn--primary ems-btn--sm" data-no-route-loading>
                             <i class="fas fa-gavel" aria-hidden="true"></i>
                             <span>{% trans "Apellyasiyaya ver" context "appeals.template" %}</span>
                         </a>
@@ -121,10 +130,7 @@
                     {% endfor %}
                 </ul>
                 {% else %}
-                <div class="appeal-empty appeal-empty--modal">
-                    <i class="fas fa-inbox"></i>
-                    <p class="mb-0">{% trans "Hazırda apellyasiya verə biləcəyiniz final və ya midterm imtahanı yoxdur." context "appeals.template" %}</p>
-                </div>
+                {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-inbox" state_title=appeal_no_eligible %}
                 {% endif %}
             </div>
         </div>

@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}Kafedraya müəllim əlavəsi — `_form_dialog.html` gövdəsi. Namizədlər
+təşkilatın aktiv MÜƏLLİM üzvlükləridir (`kind=teacher`, cari kafedradakılar
+çıxılır); seçim gizli `membership` sahəsinə yazılır. Üzvlük yenidən yaradılmır —
+mövcud müəllim üzvlüyünün kafedrası dəyişir (jurnal/qiymət izi qalır).{% endcomment %}
+<div class="tof-form">
+    <div class="ou-target tof-form__full" data-ou-target>
+        <span class="ou-target__label">{% trans "Kafedra" context "organizations.registry" %}</span>
+        <strong data-ou-target-name></strong>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-teacher-search">{% trans "Müəllim" context "organizations.registry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="hidden" name="membership" data-ou-picker-value>
+        <div class="ems-ss ems-ss--single" data-ou-picker data-kind="teacher"
+             data-url="{{ ou_section.candidates_url }}"
+             data-empty="{% trans 'Uyğun müəllim tapılmadı' context 'organizations.registry' %}">
+            <div class="ems-ss__chips">
+                <input type="text" id="ou-teacher-search" class="ems-ss__search" autocomplete="off"
+                       placeholder="{% trans 'Ad və ya istifadəçi adı ilə axtar…' context 'organizations.registry' %}">
+            </div>
+            <div class="ems-ss__menu"></div>
+        </div>
+        <p class="ems-field__hint">{% trans "Siyahıda müəllimin hazırkı kafedrası görünür; başqa kafedradan seçsəniz oraya köçürülür." context "organizations.registry" %}</p>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-teacher-reason">{% trans "Qeyd" context "organizations.registry" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "organizations.registry" %}</span></label>
+        <textarea class="ems-input ems-textarea" id="ou-teacher-reason" name="reason" rows="2" maxlength="500"
+                  placeholder="{% trans 'Əmr nömrəsi, tarix və ya səbəb — audit jurnalına yazılır' context 'organizations.registry' %}"></textarea>
+    </div>
+</div>

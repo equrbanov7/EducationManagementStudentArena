@@ -1,4 +1,69 @@
-<section class="profile-section-panel profile-section--org-faculties {% if active_section == 'org-faculties' %}is-active{% endif %}"
-         data-profile-section-panel="org-faculties">
-    {% include "organizations/partials/_faculties_content.html" with org_faculties_section=org_faculties_section embedded_in_shell=True %}
+{% load i18n static %}
+{% comment %}
+«Fakültələr» — kabinet reyestri (2026-09-08 yenidən qurulub).
+
+Kontekst `apps/organizations/structure_views/registry.py::build_faculties_section`
+(əhatə `unit.view`; RİM/Tədris şöbəsi tam siyahı alır — köhnə «0 fakültə» səhvi
+bax `context.py`). Komponentlər `ems_ui`-dəndir: KPI, AVTO filtr (Bootstrap
+select, «Tətbiq et» yoxdur, «Sıfırla» qalır), cədvəl, «Heyət» çekmecəsi,
+təyinat dialoqları (dekan · müavin · koordinator), redaktə və arxivləmə.
+
+Dialoq açılışı/prefill/POST ORTAQ `teaching_office.js`-dədir; seçicilər və
+çekmecə `org_units.js`-dədir. ⚠️ `<h1>` yazılmır — qabıq verir (tək başlıq).
+CSS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'org-faculties' in allowed_sections %}
+{% trans "Fakültə" context "organizations.registry" as ou_unit_title %}
+{% trans "Ad eyni növ bölmələr arasında unikaldır; kod sənədlərdə və filtrdə işlənir." context "organizations.registry" as ou_unit_sub %}
+{% trans "Dekan təyin et" context "organizations.registry" as ou_head_title %}
+{% trans "Seçilmiş şəxs fakültənin rəhbəri olur; əməl audit jurnalına yazılır." context "organizations.registry" as ou_head_sub %}
+{% trans "Təyin et" context "organizations.registry" as ou_head_btn %}
+{% trans "Heyət üzvü əlavə et" context "organizations.registry" as ou_role_title %}
+{% trans "Şəxsə bu fakültəyə (və ya seçilmiş ixtisasa) əhatəli rol üzvlüyü yaradılır." context "organizations.registry" as ou_role_sub %}
+{% trans "Əlavə et" context "organizations.registry" as ou_role_btn %}
+{% trans "Fakültəni arxivlə" context "organizations.registry" as ou_arch_title %}
+{% trans "Fakültə SİLİNMİR — arxivlənir. Aktiv kafedrası və ya təyinatlı üzvü olan fakültə arxivlənə bilməz." context "organizations.registry" as ou_arch_sub %}
+{% trans "Arxivlə" context "organizations.registry" as ou_arch_btn %}
+{% trans "Heyət" context "organizations.registry" as ou_staff_title %}
+{% trans "Rəhbər, dekanlıq heyəti və kafedralar. Təyinatı silmək təsdiq tələb edir və auditə düşür." context "organizations.registry" as ou_staff_sub %}
+<section class="profile-section-panel profile-section--tof profile-section--org-units {% if active_section == 'org-faculties' %}is-active{% endif %}"
+         data-profile-section-panel="org-faculties"
+         data-source-url="{{ profile_base_url }}?section=org-faculties">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_units.css' %}?v=20260908-3">
+{% if not org_faculties_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=org_faculties_section.access_denied_message %}
+{% else %}
+<div class="tof ou"
+     data-tof-root
+     data-tof-section="org-faculties"
+     data-tof-action-url="{{ org_faculties_section.action_url }}">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=org_faculties_section.subtitle header_actions_include="accounts/profile/sections/org_units/_faculties_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=org_faculties_section.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-faculties" filter_prefix="fc_" filter_fields=org_faculties_section.filter_fields filter_count_label=org_faculties_section.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="ou-body" data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=org_faculties_section.columns table_rows=org_faculties_section.table_rows table_state=org_faculties_section.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-building-columns" state_title=org_faculties_section.state_title state_body=org_faculties_section.state_body %}
+        {% include "partials/_pagination.html" with page_obj=org_faculties_section.page_obj page_param="fc_page" extra_query=org_faculties_section.pagination_query %}
+    </div>
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="ouStaffDrawer" drawer_title=ou_staff_title drawer_subtitle=ou_staff_sub drawer_body_include="accounts/profile/sections/org_units/_staff_drawer.html" drawer_foot_include="accounts/profile/sections/org_units/_staff_foot.html" %}
+
+    {% if org_faculties_section.can_create or org_faculties_section.can_edit %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_faculties_section form_dialog_id="ouUnitDialog" form_dialog_title=ou_unit_title form_dialog_subtitle=ou_unit_sub form_dialog_body_include="accounts/profile/sections/org_units/_unit_fields.html" form_dialog_action=org_faculties_section.action_url form_dialog_hidden=org_faculties_section.unit_hidden form_dialog_data=org_faculties_section.form_data %}
+    {% endif %}
+    {% if org_faculties_section.can_assign_head %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_faculties_section form_dialog_id="ouHeadDialog" form_dialog_title=ou_head_title form_dialog_subtitle=ou_head_sub form_dialog_submit_label=ou_head_btn form_dialog_body_include="accounts/profile/sections/org_units/_head_fields.html" form_dialog_action=org_faculties_section.action_url form_dialog_hidden=org_faculties_section.head_hidden form_dialog_data=org_faculties_section.form_data %}
+    {% endif %}
+    {% if org_faculties_section.can_assign_members %}
+        {% include "partials/ems_ui/_form_dialog.html" with ou_section=org_faculties_section form_dialog_id="ouRoleDialog" form_dialog_title=ou_role_title form_dialog_subtitle=ou_role_sub form_dialog_submit_label=ou_role_btn form_dialog_body_include="accounts/profile/sections/org_units/_role_fields.html" form_dialog_action=org_faculties_section.action_url form_dialog_hidden=org_faculties_section.role_hidden form_dialog_data=org_faculties_section.form_data %}
+    {% endif %}
+    {% if org_faculties_section.can_delete %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="ouArchiveDialog" reason_title=ou_arch_title reason_subtitle=ou_arch_sub reason_submit_label=ou_arch_btn reason_submit_tone="danger" reason_action=org_faculties_section.action_url reason_hidden=org_faculties_section.archive_hidden reason_form_data=org_faculties_section.form_data %}
+    {% endif %}
+</div>
+{% endif %}
 </section>
+{% endif %}

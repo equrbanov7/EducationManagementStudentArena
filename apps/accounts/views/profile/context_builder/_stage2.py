@@ -359,6 +359,8 @@ class _Stage2Mixin:
             "max_upload_mb": 0,
             "scope_label": "",
         }
+        # Müəllim idxalı — eyni çərçivə (2026-09-08).
+        self.teacher_intake_section = dict(self.student_intake_section)
         # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
         # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
         # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.

@@ -1,0 +1,53 @@
+{% load i18n %}
+{% comment %}«Hadisə qeydi» çekmecəsinin gövdəsi — məzmun JSON-dan (`audit:detail`)
+gəlir, `audit_log.js` render edir. Burada karkas, skeleton, xəta sahəsi və
+mətnlər (data-atributla JS-ə) var. Fərq cədvəli: sahə · əvvəl · sonra ·
+vəziyyət (əlavə / silinib / dəyişib / dəyişməyib); dəyişməyənlər yığılır;
+iç-içə dəyərlər JSON kimi göstərilir; «Xam JSON» bölməsi ayrıca açılır.{% endcomment %}
+<div class="al-detail" data-al-detail
+     data-t-error="{% trans 'Qeyd yüklənmədi — yenidən cəhd edin.' context 'audit.section' %}"
+     data-t-actor="{% trans 'İcraçı' context 'audit.section' %}"
+     data-t-anon="{% trans 'Anonim / sistem' context 'audit.section' %}"
+     data-t-org="{% trans 'Təşkilat' context 'audit.section' %}"
+     data-t-time="{% trans 'Vaxt' context 'audit.section' %}"
+     data-t-ip="{% trans 'IP ünvanı' context 'audit.section' %}"
+     data-t-request="{% trans 'Sorğu ID' context 'audit.section' %}"
+     data-t-agent="{% trans 'Brauzer / cihaz' context 'audit.section' %}"
+     data-t-resource="{% trans 'Resurs' context 'audit.section' %}"
+     data-t-type="{% trans 'Resurs tipi' context 'audit.section' %}"
+     data-t-object="{% trans 'Obyekt' context 'audit.section' %}"
+     data-t-record="{% trans 'Qeyd ID' context 'audit.section' %}"
+     data-t-reason="{% trans 'Səbəb' context 'audit.section' %}"
+     data-t-no-reason="{% trans 'Səbəb göstərilməyib' context 'audit.section' %}"
+     data-t-reason-required="{% trans 'Bu əməliyyat növü üçün səbəb tələb olunur.' context 'audit.section' %}"
+     data-t-changes="{% trans 'Dəyişikliklər' context 'audit.section' %}"
+     data-t-changed-count="{% trans '%d sahə dəyişib' context 'audit.section' %}"
+     data-t-no-changes="{% trans 'Bu qeyddə dəyər dəyişikliyi yoxdur.' context 'audit.section' %}"
+     data-t-field="{% trans 'Sahə' context 'audit.section' %}"
+     data-t-before="{% trans 'Əvvəl' context 'audit.section' %}"
+     data-t-after="{% trans 'Sonra' context 'audit.section' %}"
+     data-t-state="{% trans 'Vəziyyət' context 'audit.section' %}"
+     data-t-added="{% trans 'əlavə' context 'audit.section' %}"
+     data-t-removed="{% trans 'silinib' context 'audit.section' %}"
+     data-t-changed="{% trans 'dəyişib' context 'audit.section' %}"
+     data-t-same="{% trans 'dəyişməyib' context 'audit.section' %}"
+     data-t-show-same="{% trans '%d dəyişməyən sahəni göstər' context 'audit.section' %}"
+     data-t-hide-same="{% trans 'Dəyişməyənləri gizlət' context 'audit.section' %}"
+     data-t-raw="{% trans 'Xam JSON' context 'audit.section' %}"
+     data-t-empty="{% trans 'boş' context 'audit.section' %}"
+     data-t-empty-string="{% trans 'boş sətir' context 'audit.section' %}"
+     data-t-yes="{% trans 'bəli' context 'audit.section' %}"
+     data-t-no="{% trans 'xeyr' context 'audit.section' %}"
+     data-t-copy="{% trans 'Kopyala' context 'audit.section' %}"
+     data-t-copied="{% trans 'Kopyalandı' context 'audit.section' %}"
+     data-t-filter-actor="{% trans 'Bu icraçının hadisələri' context 'audit.section' %}"
+     data-t-filter-request="{% trans 'Eyni sorğunun hadisələri' context 'audit.section' %}">
+    <p class="ems-msg ems-msg--error" data-al-detail-error role="alert" hidden></p>
+    <div class="al-detail__skeleton skeleton" data-al-detail-skeleton aria-hidden="true">
+        <span class="skeleton-line skeleton-line--lg"></span>
+        <span class="skeleton-line"></span>
+        <span class="skeleton-line skeleton-line--sm"></span>
+        <span class="skeleton-line"></span>
+    </div>
+    <div class="al-detail__body" data-al-detail-body aria-live="polite"></div>
+</div>

@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Rol xanası: rol nişanı (rəhbər heyət — tac ikonu + isti ton) və
+`OrgUnit.head`-dən gələn rəhbərlik sətirləri («Dekan · İqtisadiyyat fakültəsi»).
+İlk 2 sətir + «+N». Rəng tək başına məna daşımır — ikon və mətn də var.{% endcomment %}
+<div class="om-role">
+    <span class="om-role__badge{% if row.data.is_leader %} om-role__badge--lead{% elif row.data.is_student %} om-role__badge--student{% endif %}">
+        {% if row.data.is_leader %}<i class="fas fa-crown" aria-hidden="true"></i>{% endif %}{{ row.data.role_label }}
+    </span>
+    {% if row.data.head_preview %}
+    <span class="om-role__lines">
+        {% for line in row.data.head_preview %}
+        <span class="om-role__line"><i class="fas fa-star" aria-hidden="true"></i>{{ line.label }} · {{ line.unit }}</span>
+        {% endfor %}
+        {% if row.data.head_more %}<span class="om-role__line om-role__line--more">+{{ row.data.head_more }}</span>{% endif %}
+    </span>
+    {% endif %}
+</div>

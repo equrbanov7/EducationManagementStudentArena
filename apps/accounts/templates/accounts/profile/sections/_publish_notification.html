@@ -1,138 +1,295 @@
 {% load i18n static %}
+{% comment %}«Bildiriş göndər» — yazıcı forması (compose & send).
+
+YENİDƏN DİZAYN (2026-09-08, sahib: «pisdi dizaynı və 2 title var»):
+  • `<h1>` BURADA YAZILMIR — kabinet qabığı bölmə adını `#profileSectionTitle`
+    kimi artıq render edir; kartın içindəki ikon+başlıq sətri ikinci h1 idi.
+    İndi yalnız bir cümləlik alt başlıq var (`ems_ui/_content_header.html`).
+  • Düzüm: ≥1100px-də iki sütun — solda forma, sağda yapışqan «Önizləmə»
+    kartı (alıcının bildiriş qutusundakı sətrin eynisi, canlı yenilənir).
+  • Alıcılar: axtarış + çekbox siyahısı, seçilənlər çip kimi yuxarıda,
+    canlı sayğac. Sahə adları / dəyərləri DƏYİŞMİR (`notif_targets`,
+    `notif_title`, `notif_message`, `notif_link`, `notif_image`) — POST
+    müqaviləsi `services/profile_actions.publish_system_notification` ilə eynidir.
+  • Nəticə mesajı (uğur/xəta) qabığın Django `messages` toast-u ilə göstərilir
+    (`templates/base.html`) — burada təkrar render olunmur.
+
+CSP: inline CSS/JS YOXDUR. Komponent qatı (`ems_ui/*.css`) qabıqdan gəlir;
+bölmə düzümü `accounts/css/profile/sections/publish_notification.css`
+(`profile.css` @import). JS-ə lazım olan mətnlər `data-*` ilə ötürülür.
+Test müqaviləsi: `#pnTargetSearch` və `.pn-target-scroll` saxlanılır.{% endcomment %}
 {% if 'publish-notification' in allowed_sections %}
+{% trans "Seçdiyiniz qruplara sistem bildirişi göndərin — alıcılar onu bildiriş qutusunda görəcək." context "profile.publish_notification" as pn_subtitle %}
 <section class="profile-section-panel profile-section--publish-notification {% if active_section == 'publish-notification' %}is-active{% endif %}"
          data-profile-section-panel="publish-notification"
          data-source-url="{{ profile_base_url }}">
-    <div class="section-card">
-        <div class="section-title">
-            <i class="fas fa-paper-plane"></i>
-            <span>{% trans "title" context "profile.publish_notification" %}</span>
-        </div>
 
-        <p class="text-muted mb-4">{% trans "description" context "profile.publish_notification" %}</p>
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=pn_subtitle %}
 
-        {% if publish_notification_targets %}
+    {% if publish_notification_targets %}
+    <div class="pn" id="pnRoot" data-pn-root
+         data-i18n-count-empty="{% trans 'Qrup seçilməyib' context 'profile.publish_notification' %}"
+         data-i18n-count="{% trans '%d qrup seçilib' context 'profile.publish_notification' %}"
+         data-i18n-need-target="{% trans 'Ən azı bir alıcı qrup seçin' context 'profile.publish_notification' %}"
+         data-i18n-need-title="{% trans 'Bildiriş başlığını yazın' context 'profile.publish_notification' %}"
+         data-i18n-link-invalid="{% trans 'Keçid http:// və ya https:// ilə başlamalıdır' context 'profile.publish_notification' %}"
+         data-i18n-image-too-large="{% trans 'Şəkil 5 MB-dan böyükdür' context 'profile.publish_notification' %}"
+         data-i18n-image-invalid="{% trans 'Yalnız şəkil faylı seçilə bilər' context 'profile.publish_notification' %}"
+         data-i18n-chip-remove="{% trans '%s — seçimdən çıxar' context 'profile.publish_notification' %}"
+         data-i18n-sending="{% trans 'Göndərilir…' context 'profile.publish_notification' %}"
+         data-i18n-files-too-large="{% trans 'Fayl 10 MB-dan böyükdür: %s' context 'profile.publish_notification' %}"
+         data-i18n-files-invalid="{% trans 'Bu fayl tipi dəstəklənmir: %s' context 'profile.publish_notification' %}"
+         data-i18n-files-too-many="{% trans 'Ən çox 5 fayl əlavə etmək olar' context 'profile.publish_notification' %}"
+         data-i18n-files-count="{% trans '%d fayl seçilib' context 'profile.publish_notification' %}"
+         data-i18n-ready="{% trans 'Göndərməyə hazırdır' context 'profile.publish_notification' %}">
+
         <form method="post" action="{{ profile_base_url }}"
-              class="publish-notif-form"
+              class="publish-notif-form pn-form ems-card"
+              id="pnForm"
               enctype="multipart/form-data"
               novalidate>
             {% csrf_token %}
             <input type="hidden" name="profile_form" value="publish-notification">
             <input type="hidden" name="section" value="publish-notification">
 
-            {# Target group — multi-select checkboxes #}
-            <div class="mb-4">
-                <label class="form-label fw-semibold mb-2" id="pnTargetGroupLabel">
-                    <i class="fas fa-users me-1 text-primary"></i>{% trans "target_group_label" context "profile.publish_notification" %} <span class="text-danger">*</span>
-                </label>
+            {# ── 01 · Alıcılar ─────────────────────────────────────────── #}
+            <fieldset class="pn-block">
+                <legend class="pn-block__label">
+                    <span class="pn-block__num" aria-hidden="true">01</span>
+                    {% trans "Alıcılar" context "profile.publish_notification" %}
+                </legend>
 
-                <div class="pn-target-list" id="pnTargetList"
-                     role="group" aria-labelledby="pnTargetGroupLabel">
-                    {# Search bar — always visible so users can quickly filter targets #}
-                    <div class="pn-target-search-wrap">
-                        <input type="text" class="form-control form-control-sm"
-                               id="pnTargetSearch"
-                               placeholder="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
-                               autocomplete="off" aria-label="{% trans 'search_placeholder' context 'profile.publish_notification' %}">
+                <div class="ems-field">
+                    <span class="ems-field__label" id="pnTargetGroupLabel">
+                        {% trans "target_group_label" context "profile.publish_notification" %}
+                        <span class="ems-field__req" aria-hidden="true">*</span>
+                    </span>
+
+                    <div class="pn-chips" id="pnTargetChips" hidden></div>
+
+                    <div class="pn-target-list" id="pnTargetList"
+                         role="group" aria-labelledby="pnTargetGroupLabel">
+                        <div class="pn-target-search-wrap">
+                            <i class="fas fa-magnifying-glass pn-target-search-icon" aria-hidden="true"></i>
+                            <input type="search" class="ems-input pn-target-search"
+                                   id="pnTargetSearch"
+                                   placeholder="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
+                                   autocomplete="off"
+                                   aria-label="{% trans 'search_placeholder' context 'profile.publish_notification' %}"
+                                   aria-controls="pnTargetOptions">
+                        </div>
+
+                        <div class="pn-target-scroll" id="pnTargetOptions">
+                            {% comment %}Hədəflər KATEQORİYA ilə qruplaşdırılır (təşkilat · şöbələr
+                            və heyət · fakültələr · kafedralar · qruplar · imtahan qrupları) —
+                            başlıq sətri seçilmir, axtarışda boş qalan kateqoriya gizlənir (JS).{% endcomment %}
+                            {% for target in publish_notification_targets %}
+                            {% ifchanged target.category %}
+                            <div class="pn-target-cat" data-pn-cat="{{ target.category }}" aria-hidden="true">
+                                <span class="pn-target-cat__label">{{ target.category_label|default:"" }}</span>
+                            </div>
+                            {% endifchanged %}
+                            <label class="pn-target-item {% if target.is_exclusive %}is-exclusive{% endif %}"
+                                   for="pnTarget{{ forloop.counter }}"
+                                   data-pn-cat="{{ target.category }}"
+                                   data-label="{{ target.label|lower }} {{ target.category_label|default:''|lower }}">
+                                <input type="checkbox"
+                                       name="notif_targets"
+                                       value="{{ target.value }}"
+                                       id="pnTarget{{ forloop.counter }}"
+                                       class="pn-target-cb {% if target.is_exclusive %}pn-target-cb--exclusive{% endif %}"
+                                       data-target-label="{{ target.label }}"
+                                       {% if forloop.first %}checked{% endif %}>
+                                <span class="pn-target-icon" aria-hidden="true">
+                                    <i class="fas {{ target.icon|default:'fa-building' }}"></i>
+                                </span>
+                                <span class="pn-target-label">{{ target.label }}</span>
+                                <i class="fas fa-check pn-target-check" aria-hidden="true"></i>
+                            </label>
+                            {% endfor %}
+                            <p class="pn-target-no-results" id="pnTargetNoResults" hidden>
+                                {% trans "search_no_results" context "profile.publish_notification" %}
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="pn-target-scroll">
-                    {% for target in publish_notification_targets %}
-                    <label class="pn-target-item {% if target.is_exclusive %}is-exclusive{% endif %}"
-                           data-label="{{ target.label|lower }}">
-                        <input type="checkbox"
-                               name="notif_targets"
-                               value="{{ target.value }}"
-                               class="pn-target-cb {% if target.is_exclusive %}pn-target-cb--exclusive{% endif %}"
-                               {% if forloop.first %}checked{% endif %}>
-                        <span class="pn-target-icon">
-                            {% if target.value == 'all' %}
-                                <i class="fas fa-globe-americas text-primary"></i>
-                            {% elif target.value|slice:":6" == 'group_' %}
-                                <i class="fas fa-users text-info"></i>
-                            {% else %}
-                                <i class="fas fa-building text-success"></i>
-                            {% endif %}
-                        </span>
-                        <span class="pn-target-label">{{ target.label }}</span>
+                    <div class="pn-target-meta">
+                        <span class="pn-count" id="pnTargetCount" role="status" aria-live="polite"></span>
+                        <button type="button" class="pn-linkbtn" id="pnClearTargets" data-pn-clear-targets hidden>
+                            {% trans "Seçimi təmizlə" context "profile.publish_notification" %}
+                        </button>
+                    </div>
+                    <p class="ems-field__hint">{% trans "target_group_hint" context "profile.publish_notification" %}</p>
+                </div>
+            </fieldset>
+
+            {# ── 02 · Məzmun ──────────────────────────────────────────── #}
+            <fieldset class="pn-block">
+                <legend class="pn-block__label">
+                    <span class="pn-block__num" aria-hidden="true">02</span>
+                    {% trans "Məzmun" context "profile.publish_notification" %}
+                </legend>
+
+                <div class="ems-field">
+                    <div class="pn-label-row">
+                        <label class="ems-field__label" for="notifTitle">
+                            {% trans "notif_title_label" context "profile.publish_notification" %}
+                            <span class="ems-field__req" aria-hidden="true">*</span>
+                        </label>
+                        <span class="pn-counter" id="notifTitleCounter" aria-live="polite" aria-label="{% trans 'Simvol sayı' context 'profile.publish_notification' %}"></span>
+                    </div>
+                    <input type="text" class="ems-input" id="notifTitle"
+                           name="notif_title" maxlength="120" required
+                           autocomplete="off"
+                           aria-describedby="notifTitleCounter"
+                           placeholder="{% trans 'notif_title_placeholder' context 'profile.publish_notification' %}">
+                </div>
+
+                <div class="ems-field">
+                    <div class="pn-label-row">
+                        <label class="ems-field__label" for="notifMessage">
+                            {% trans "notif_message_label" context "profile.publish_notification" %}
+                        </label>
+                        <span class="pn-counter" id="notifMessageCounter" aria-live="polite" aria-label="{% trans 'Simvol sayı' context 'profile.publish_notification' %}"></span>
+                    </div>
+                    <textarea class="ems-textarea pn-textarea" id="notifMessage" name="notif_message"
+                              rows="4" maxlength="1000"
+                              aria-describedby="notifMessageCounter"
+                              placeholder="{% trans 'notif_message_placeholder' context 'profile.publish_notification' %}"></textarea>
+                </div>
+
+                <div class="ems-field">
+                    <label class="ems-field__label" for="notifLink">
+                        {% trans "notif_link_label" context "profile.publish_notification" %}
+                        <span class="pn-optional">({% trans "optional" context "profile.publish_notification" %})</span>
                     </label>
-                    {% endfor %}
-                    <div class="pn-target-no-results" id="pnTargetNoResults" style="display:none;">
-                        <p class="text-muted small px-3 py-2 mb-0">{% trans "search_no_results" context "profile.publish_notification" %}</p>
+                    <input type="url" class="ems-input" id="notifLink" name="notif_link"
+                           maxlength="500" inputmode="url" autocomplete="off" spellcheck="false"
+                           aria-describedby="notifLinkHint notifLinkError"
+                           placeholder="https://">
+                    <p class="ems-msg ems-msg--error" id="notifLinkError" role="alert" hidden>
+                        <span class="ems-msg__icon" aria-hidden="true">!</span>
+                        <span data-pn-link-error-text></span>
+                    </p>
+                    <p class="ems-field__hint" id="notifLinkHint">{% trans "notif_link_hint" context "profile.publish_notification" %}</p>
+                </div>
+
+                <div class="ems-field">
+                    <span class="ems-field__label" id="notifImageLabel">
+                        {% trans "notif_image_label" context "profile.publish_notification" %}
+                        <span class="pn-optional">({% trans "optional" context "profile.publish_notification" %}, {% trans "max_5mb" context "profile.publish_notification" %})</span>
+                    </span>
+                    <div class="pn-file" id="notifImageWrap">
+                        <input type="file" class="pn-file__input" id="notifImage" name="notif_image"
+                               accept="image/*" aria-labelledby="notifImageLabel" aria-describedby="notifImageHint notifImageError">
+                        <label class="ems-btn pn-file__btn" for="notifImage">
+                            <i class="fas fa-image" aria-hidden="true"></i>
+                            {% trans "Şəkil seç" context "profile.publish_notification" %}
+                        </label>
+                        <span class="pn-file__name" id="notifImageName" aria-live="polite"></span>
+                        <button type="button" class="pn-linkbtn pn-linkbtn--danger" id="notifImageClear" hidden>
+                            {% trans "remove_image" context "profile.publish_notification" %}
+                        </button>
                     </div>
-                    </div>{# /pn-target-scroll #}
+                    <p class="ems-msg ems-msg--error" id="notifImageError" role="alert" hidden>
+                        <span class="ems-msg__icon" aria-hidden="true">!</span>
+                        <span data-pn-image-error-text></span>
+                    </p>
+                    <p class="ems-field__hint" id="notifImageHint">{% trans "notif_image_hint" context "profile.publish_notification" %}</p>
                 </div>
-                <div class="form-text mt-1">{% trans "target_group_hint" context "profile.publish_notification" %}</div>
-            </div>
 
-            {# Title #}
-            <div class="mb-3">
-                <label for="notifTitle" class="form-label fw-semibold">
-                    <i class="fas fa-heading me-1 text-primary"></i>{% trans "notif_title_label" context "profile.publish_notification" %} <span class="text-danger">*</span>
-                </label>
-                <input type="text" class="form-control form-control-lg" id="notifTitle"
-                       name="notif_title" maxlength="255" required
-                       placeholder="{% trans 'notif_title_placeholder' context 'profile.publish_notification' %}">
-            </div>
-
-            {# Message #}
-            <div class="mb-3">
-                <label for="notifMessage" class="form-label fw-semibold">
-                    <i class="fas fa-align-left me-1 text-primary"></i>{% trans "notif_message_label" context "profile.publish_notification" %}
-                </label>
-                <textarea class="form-control" id="notifMessage" name="notif_message"
-                          rows="4" placeholder="{% trans 'notif_message_placeholder' context 'profile.publish_notification' %}"></textarea>
-            </div>
-
-            {# Optional link #}
-            <div class="mb-3">
-                <label for="notifLink" class="form-label fw-semibold">
-                    <i class="fas fa-link me-1 text-primary"></i>{% trans "notif_link_label" context "profile.publish_notification" %}
-                    <span class="text-muted fw-normal small">({% trans "optional" context "profile.publish_notification" %})</span>
-                </label>
-                <input type="url" class="form-control" id="notifLink" name="notif_link"
-                       maxlength="500" placeholder="https://example.com">
-                <div class="form-text">{% trans "notif_link_hint" context "profile.publish_notification" %}</div>
-            </div>
-
-            {# Optional image upload #}
-            <div class="mb-4">
-                <label for="notifImage" class="form-label fw-semibold">
-                    <i class="fas fa-image me-1 text-primary"></i>{% trans "notif_image_label" context "profile.publish_notification" %}
-                    <span class="text-muted fw-normal small">({% trans "optional" context "profile.publish_notification" %}, {% trans "max_5mb" context "profile.publish_notification" %})</span>
-                </label>
-                <input type="file" class="form-control" id="notifImage" name="notif_image" accept="image/*">
-                <div class="form-text">{% trans "notif_image_hint" context "profile.publish_notification" %}</div>
-                <div id="notifImagePreviewWrap" class="mt-2" style="display:none;">
-                    <img id="notifImagePreview" src="" alt="{% trans 'preview' context 'profile.publish_notification' %}"
-                         class="img-thumbnail" style="max-width:100%;max-height:180px;object-fit:contain;display:block;">
-                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="notifImageClear">
-                        <i class="fas fa-times"></i> {% trans "remove_image" context "profile.publish_notification" %}
-                    </button>
+                {# ── Əlavə fayllar (sahib, 2026-09-08) ─────────────────────── #}
+                <div class="ems-field">
+                    <span class="ems-field__label" id="notifFilesLabel">
+                        {% trans "Əlavə fayllar" context "profile.publish_notification" %}
+                        <span class="pn-optional">({% trans "optional" context "profile.publish_notification" %}, {% trans "ən çox 5 fayl, hər biri 10 MB" context "profile.publish_notification" %})</span>
+                    </span>
+                    <div class="pn-file" id="notifFilesWrap">
+                        <input type="file" class="pn-file__input" id="notifFiles" name="notif_files" multiple
+                               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,image/*"
+                               aria-labelledby="notifFilesLabel" aria-describedby="notifFilesHint notifFilesError">
+                        <label class="ems-btn pn-file__btn" for="notifFiles">
+                            <i class="fas fa-paperclip" aria-hidden="true"></i>
+                            {% trans "Fayl əlavə et" context "profile.publish_notification" %}
+                        </label>
+                        <span class="pn-file__name" id="notifFilesSummary" aria-live="polite"></span>
+                        <button type="button" class="pn-linkbtn pn-linkbtn--danger" id="notifFilesClear" hidden>
+                            {% trans "Faylları sil" context "profile.publish_notification" %}
+                        </button>
+                    </div>
+                    <ul class="pn-files" id="notifFilesList" hidden></ul>
+                    <p class="ems-msg ems-msg--error" id="notifFilesError" role="alert" hidden>
+                        <span class="ems-msg__icon" aria-hidden="true">!</span>
+                        <span data-pn-files-error-text></span>
+                    </p>
+                    <p class="ems-field__hint" id="notifFilesHint">{% trans "PDF, Word, Excel, PowerPoint, mətn, ZIP və şəkil faylları. Alıcılar faylları bildirişin detalından yükləyəcək." context "profile.publish_notification" %}</p>
                 </div>
-            </div>
+            </fieldset>
 
-            <div class="d-flex gap-2 flex-wrap">
-                <button type="submit" class="btn btn-send-notif">
-                    <i class="fas fa-paper-plane me-1"></i>{% trans "send_btn" context "profile.publish_notification" %}
+            {# ── Yapışqan əməl paneli ─────────────────────────────────── #}
+            <div class="pn-form__foot">
+                <span class="pn-form__summary" id="pnFootSummary" role="status" aria-live="polite"></span>
+                <button type="reset" class="ems-btn" id="notifResetBtn">
+                    {% trans "reset_btn" context "profile.publish_notification" %}
                 </button>
-                <button type="reset" class="btn btn-outline-secondary" id="notifResetBtn">
-                    <i class="fas fa-undo me-1"></i>{% trans "reset_btn" context "profile.publish_notification" %}
+                <button type="submit" class="ems-btn ems-btn--primary pn-submit" id="pnSubmitBtn"
+                        disabled aria-disabled="true"
+                        data-label-default="{% trans 'send_btn' context 'profile.publish_notification' %}">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    <span data-pn-submit-label>{% trans "send_btn" context "profile.publish_notification" %}</span>
+                    <span class="pn-submit__count" id="pnSubmitCount" hidden></span>
                 </button>
             </div>
         </form>
 
-        {% else %}
-        <div class="empty-state py-5 text-center">
-            <i class="fas fa-exclamation-circle fa-2x text-muted mb-2"></i>
-            <p class="text-muted fw-semibold mb-1">{% trans "no_targets" context "profile.publish_notification" %}</p>
-            {% if is_teacher %}
-            <p class="text-muted small">{% trans "no_targets_teacher_hint" context "profile.publish_notification" %}</p>
-            {% endif %}
-        </div>
-        {% endif %}
+        {# ── Canlı önizləmə ────────────────────────────────────────────── #}
+        <aside class="pn-preview" aria-labelledby="pnPreviewLabel">
+            <div class="ems-card pn-preview__card">
+                <div class="pn-preview__head">
+                    <span class="pn-block__label" id="pnPreviewLabel">{% trans "preview" context "profile.publish_notification" %}</span>
+                    <span class="pn-preview__note">{% trans "Alıcının bildiriş qutusunda belə görünəcək" context "profile.publish_notification" %}</span>
+                </div>
+
+                <div class="pn-preview__row">
+                    <span class="pn-preview__icon" aria-hidden="true"><i class="fas fa-gear"></i></span>
+                    <div class="pn-preview__main">
+                        <div class="pn-preview__top">
+                            <strong class="pn-preview__title is-placeholder" id="pnPreviewTitle"
+                                    data-placeholder="{% trans 'notif_title_label' context 'profile.publish_notification' %}"></strong>
+                            <time class="pn-preview__time">{% trans "indi" context "profile.publish_notification" %}</time>
+                        </div>
+                        <p class="pn-preview__message is-placeholder" id="pnPreviewMessage"
+                           data-placeholder="{% trans 'Mətn yazılmayıb' context 'profile.publish_notification' %}"></p>
+                        <img class="pn-preview__image" id="pnPreviewImage" src="" alt="" hidden>
+                        <ul class="pn-preview__files" id="pnPreviewFiles" hidden></ul>
+                        <a class="pn-preview__link" id="pnPreviewLink" href="#" target="_blank" rel="noopener noreferrer" hidden>
+                            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                            <span data-pn-link-host></span>
+                        </a>
+                        <span class="pn-preview__dot" aria-hidden="true"></span>
+                    </div>
+                </div>
+
+                <dl class="pn-preview__foot">
+                    <div class="pn-preview__kv">
+                        <dt>{% trans "Göndərən" context "profile.publish_notification" %}</dt>
+                        <dd>{{ user.get_full_name|default:user.username }}{% if current_organization %} · {{ current_organization.name }}{% endif %}</dd>
+                    </div>
+                    <div class="pn-preview__kv">
+                        <dt>{% trans "Alıcılar" context "profile.publish_notification" %}</dt>
+                        <dd id="pnPreviewRecipients" aria-live="polite"></dd>
+                    </div>
+                </dl>
+            </div>
+        </aside>
     </div>
 
-    <script defer src="{% static 'accounts/js/profile/publish_notification.js' %}"></script>
+    {% else %}
+        {% trans "no_targets" context "profile.publish_notification" as pn_empty_title %}
+        {% if is_teacher %}{% trans "no_targets_teacher_hint" context "profile.publish_notification" as pn_empty_body %}{% endif %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-paper-plane" state_title=pn_empty_title state_body=pn_empty_body %}
+    {% endif %}
+
+    <script defer src="{% static 'accounts/js/profile/publish_notification.js' %}?v=20260908-scopes"></script>
 </section>
 {% endif %}

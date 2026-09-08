@@ -118,18 +118,15 @@ class SidebarRoleMatrixTest(TestCase):
 
         self.assertEqual(leaked, set(), f"tələbə idarəetmə bölməsi alır: {sorted(leaked)}")
 
-    def test_member_keeps_group_navigation_but_no_role_management(self):
-        """Adi üzvün `groups` görməsi QƏSDƏNDİR (mövcud davranış).
-
-        `test_member_profile_shows_group_navigation` bunu sənədləşdirir: məktəb
-        tipli təşkilatda adi üzv qrup naviqasiyasını görür. Auditin şikayəti
-        üzvə deyil, ƏMƏKDAŞ rollarına (HR, imtahan mərkəzi, dekan, tyutor)
-        aid idi — onlar üçün `groups` sidebar-da «Müəllim» başlığını açırdı.
-        Rol/icazə idarəetməsi isə üzvdə olmamalıdır.
+    def test_member_has_no_groups_and_no_role_management(self):
+        """Köhnə imtahan-kohortu «Qruplar» (`groups`) bölməsi 2026-09-08-də
+        kabinetdən ÇIXARILDI (sahib: «2 dənə qruplara ehtiyac yoxdu») — qrup işi
+        yalnız akademik reyestrdə (`groups-registry`) gedir. Adi üzv nə onu, nə
+        də rol/icazə idarəetməsini görməməlidir.
         """
         sections = self._sections("member")
 
-        self.assertIn("groups", sections)
+        self.assertNotIn("groups", sections)
         self.assertNotIn("role-assignment", sections)
         self.assertNotIn("manage-roles", sections)
         self.assertNotIn("permission-editor", sections)
@@ -155,9 +152,9 @@ class SidebarRoleMatrixTest(TestCase):
 
     def test_each_role_keeps_its_core_sections(self):
         expected = {
-            "org_admin": {"my-exams", "my-courses", "groups", "role-assignment", "manage-roles"},
-            "teacher": {"my-exams", "my-courses", "groups", "pending-review", "review-results"},
-            "exam_center_head": {"my-exams", "groups", "exam-center-pins", "exam-center-stats", "academic-records"},
+            "org_admin": {"my-exams", "my-courses", "role-assignment", "manage-roles"},
+            "teacher": {"my-exams", "my-courses", "pending-review", "review-results"},
+            "exam_center_head": {"my-exams", "exam-center-pins", "exam-center-stats", "academic-records"},
             "student": {"assigned-exams", "assigned-courses", "my-results"},
             "hr": {"role-assignment", "manage-roles", "student-organization-management"},
         }
@@ -186,32 +183,24 @@ class SidebarRoleMatrixTest(TestCase):
             with self.subTest(role=role):
                 self.assertTrue(common <= self._sections(role), role)
 
-    # ── Permission-əsaslı «Qruplar» görünürlüyü (2026-08) ───────────────────
+    # ── Köhnə «Qruplar» (`groups`) bölməsi ÇIXARILIB (2026-09-08) ───────────
 
-    def test_group_permission_opens_groups_section(self):
-        """`group.view` / `group.manage` icazəsi olan rol «Qruplar» bölməsini görür.
-
-        Rol bayraqları (org_admin/teacher/exam_center/member) toxunulmazdır —
-        bu, permission-editordan verilən açarın ƏLAVƏ qoludur.
-        """
-        # Tyutor default-da qrup bölməsini görmür.
+    def test_group_permission_no_longer_opens_the_removed_groups_section(self):
+        """`group.view` / `group.manage` açarı köhnə imtahan-kohortu bölməsini
+        AÇMIR — o bölmə kabinetdən silinib; qrup işi `groups-registry`-dədir."""
         self.assertNotIn("groups", self._sections("tutor"))
 
         tutor_role = Role.objects.get(organization=self.org, name="tutor")
-        tutor_role.permissions = ["group.view"]
+        tutor_role.permissions = ["group.view", "group.manage"]
         tutor_role.save(update_fields=["permissions", "updated_at"])
-        self.assertIn("groups", self._sections("tutor"))
+        self.assertNotIn("groups", self._sections("tutor"))
 
-        # `group.manage` də bölməni açır (məs. yalnız idarə açarı verilibsə).
-        tutor_role.permissions = ["group.manage"]
-        tutor_role.save(update_fields=["permissions", "updated_at"])
-        self.assertIn("groups", self._sections("tutor"))
-
-    def test_role_flag_based_groups_visibility_is_preserved(self):
-        """Mövcud qollar qalır: org_admin/teacher/exam_center/member `groups` görür."""
+    def test_no_role_gets_the_removed_groups_section(self):
+        """Heç bir rol bayrağı (org_admin/teacher/exam_center/member/dekan/…) köhnə
+        `groups` bölməsini qaytarmır."""
         for role in ("org_admin", "teacher", "exam_center_head", "member", "dean", "department_head"):
             with self.subTest(role=role):
-                self.assertIn("groups", self._sections(role))
+                self.assertNotIn("groups", self._sections(role))
 
 
 class SidebarGroupHeadingTest(TestCase):

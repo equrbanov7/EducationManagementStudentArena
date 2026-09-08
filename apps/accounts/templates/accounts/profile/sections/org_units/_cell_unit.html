@@ -1,0 +1,6 @@
+{% comment %}Reyestr sətrinin birinci sütunu — vahidin adı + kodu (th scope="row").
+Kontekst: `row.data` (bax `structure_views/registry.py`).{% endcomment %}
+<div class="ou-unit">
+    <span class="ou-unit__name">{{ row.data.name }}</span>
+    {% if row.data.code %}<span class="ou-unit__code ems-mono">{{ row.data.code }}</span>{% endif %}
+</div>

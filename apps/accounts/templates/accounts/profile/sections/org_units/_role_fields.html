@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Dekan müavini / proqram koordinatoru əlavəsi — `_form_dialog.html` gövdəsi.
+Şəxs seçicisi `org_units.js`-də hər açılışda qurulur (`[data-ou-picker]`,
+`kind=staff`); seçim gizli `user` sahəsinə yazılır. Koordinator üçün əhatə
+seçimi (fakültənin ixtisasları) sətrin `data-ou-specialties` JSON-undan doldurulur;
+müavin üçün gizlədilir.{% endcomment %}
+<div class="tof-form">
+    <div class="ou-target tof-form__full" data-ou-target>
+        <span class="ou-target__label">{% trans "Bölmə" context "organizations.registry" %}</span>
+        <strong data-ou-target-name></strong>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-role-search">{% trans "Şəxs" context "organizations.registry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="hidden" name="user" data-ou-picker-value>
+        <div class="ems-ss ems-ss--single" data-ou-picker data-kind="staff"
+             data-url="{{ ou_section.candidates_url }}"
+             data-empty="{% trans 'Uyğun namizəd tapılmadı' context 'organizations.registry' %}">
+            <div class="ems-ss__chips">
+                <input type="text" id="ou-role-search" class="ems-ss__search" autocomplete="off"
+                       placeholder="{% trans 'Ad və ya istifadəçi adı ilə axtar…' context 'organizations.registry' %}">
+            </div>
+            <div class="ems-ss__menu"></div>
+        </div>
+        <p class="ems-field__hint">{% trans "Yalnız təşkilatın aktiv, idarəetmə/müəllim səviyyəli üzvləri; tələbə hesabına heyət rolu verilmir." context "organizations.registry" %}</p>
+    </div>
+    <div class="ems-field tof-form__full" data-ou-scope-wrap hidden>
+        <label class="ems-field__label" for="ou-role-scope">{% trans "Əhatə" context "organizations.registry" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="ou-role-scope" name="scope" data-bootstrap-select data-ou-scope-select
+                    data-all-label="{% trans 'Bütün bölmə' context 'organizations.registry' %}">
+                <option value="">{% trans "Bütün bölmə" context "organizations.registry" %}</option>
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Koordinator adətən bir ixtisasa bağlanır — onun qrupları və tələbələri onun əhatəsinə düşür." context "organizations.registry" %}</p>
+    </div>
+    <div class="ems-field tof-form__full">
+        <label class="ems-field__label" for="ou-role-reason">{% trans "Qeyd" context "organizations.registry" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "organizations.registry" %}</span></label>
+        <textarea class="ems-input ems-textarea" id="ou-role-reason" name="reason" rows="2" maxlength="500"
+                  placeholder="{% trans 'Əmr nömrəsi, tarix və ya səbəb — audit jurnalına yazılır' context 'organizations.registry' %}"></textarea>
+    </div>
+</div>

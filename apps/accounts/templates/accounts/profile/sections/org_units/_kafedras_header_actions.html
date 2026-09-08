@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Kafedralar başlıq əməlləri — fakültələrə keçid (SPA) və «Yeni kafedra».
+Fakültə filtri seçilibsə yeni kafedra o fakültəyə prefill olunur.{% endcomment %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-faculties"
+   data-section="org-faculties" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Fakültələr' context 'profile.sidebar' %}">
+    <i class="fas fa-building-columns" aria-hidden="true"></i>
+    {% trans "Fakültələr" context "organizations.registry" %}
+</a>
+{% if org_kafedras_section.can_create %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-open="ouUnitDialog"
+        data-tof-title="{% trans 'Yeni kafedra' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "save_unit", "kind": "kafedra", "id": "", "name": "", "code": "", "parent": "{{ org_kafedras_section.default_faculty }}"}'>
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni kafedra" context "organizations.registry" %}
+</button>
+{% endif %}

@@ -1,0 +1,8 @@
+{% load i18n %}
+{% comment %}Çekmecə altlığı — «Açıq profil» linkinin ünvanı JSON gələndən sonra
+`org_members.js` tərəfindən yazılır (o vaxta qədər gizlidir).{% endcomment %}
+<a class="ems-btn om-detail__profile" data-om-detail-profile href="#" target="_blank" rel="noopener" hidden>
+    <i class="fas fa-user" aria-hidden="true"></i>
+    {% trans "Açıq profil" context "organizations.members" %}
+</a>
+<button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>

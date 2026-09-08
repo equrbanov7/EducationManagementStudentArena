@@ -34,7 +34,6 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "assigned-courses",
     "my-results",
     "pending-answers",
-    "groups",
     "my-courses",
     "my-exams",
     "pending-post-approvals",
@@ -56,7 +55,6 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
 
 # Sections where a multi-org profile may fall back to the profile organization.
 PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
-    "groups",
     "my-courses",
     "my-exams",
     "courses",
@@ -79,7 +77,6 @@ PROFILE_SECTIONS_ALLOWING_MULTI_ORG_PROFILE_FALLBACK = {
 
 # Sections that should highlight the "exams" main-nav item.
 PROFILE_EXAM_NAV_SECTIONS = {
-    "groups",
     "my-exams",
     "assigned-exams",
     "my-results",

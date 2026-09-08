@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Üzv sütunu (th scope="row"): inisial nişanı + ad + e-poçt / istifadəçi adı.
+Rəhbər heyətin nişanı isti tondadır (rəng tək başına məna daşımır — rol xanasında
+tac + mətn də var). Dayandırılmış hesab sakit nişanla işarələnir.
+Kontekst: `row.data` (bax `structure_views/members.py`).{% endcomment %}
+<div class="om-member">
+    <span class="om-avatar{% if row.data.is_leader %} om-avatar--lead{% endif %}" aria-hidden="true">{{ row.data.initials }}</span>
+    <span class="om-member__main">
+        <span class="om-member__name">
+            {{ row.data.name }}
+            {% if not row.data.is_user_active %}<span class="ems-badge ems-badge--muted om-member__inactive">{% trans "Dayandırılıb" context "organizations.members" %}</span>{% endif %}
+        </span>
+        <span class="om-member__sub">
+            {% if row.data.email %}<span class="om-member__email">{{ row.data.email }}</span>{% endif %}
+            <span class="om-member__username ems-mono">@{{ row.data.username }}</span>
+        </span>
+    </span>
+</div>

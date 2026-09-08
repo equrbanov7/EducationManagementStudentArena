@@ -40,7 +40,8 @@
     padding: 0.25rem 0.5rem;
 }
 .ems-ss:focus-within {
-    border-color: var(--ems-primary-500);
+    /* 2026-09-08 (sahib): qalın göy daxili haşiyə pis görünürdü — yumşaq ton. */
+    border-color: var(--ems-neutral-400, #94a3b8);
     box-shadow: 0 0 0 3px var(--ems-primary-100);
 }
 

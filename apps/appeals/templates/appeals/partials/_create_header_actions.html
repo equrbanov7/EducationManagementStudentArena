@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}
+«Apellyasiya göndər» səhifəsinin başlıq əməlləri — nəticəyə qayıt + (final
+imtahan deyilsə) «Apellyasiyalarım». `partials/ems_ui/_content_header.html`
+bunu `header_actions_include` ilə gətirir. Kontekst: result_url, is_final_exam.
+{% endcomment %}
+<a href="{{ result_url }}" class="ems-btn">
+    <i class="fas fa-arrow-left" aria-hidden="true"></i>{% trans "Nəticəyə qayıt" context "appeals.template" %}
+</a>
+{% if not is_final_exam %}
+<a href="{% url 'accounts:profile' %}?section=my-appeals" class="ems-btn">
+    <i class="fas fa-list-ul" aria-hidden="true"></i>{% trans "Apellyasiyalarım" context "appeals.template" %}
+</a>
+{% endif %}

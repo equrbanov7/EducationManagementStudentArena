@@ -1,0 +1,50 @@
+{% load i18n %}
+<section class="ems-card pp-card">
+    <h2 class="pp-card__title">{% trans "Əlaqə və hesab" context "accounts.people.page" %}</h2>
+    <dl class="pp-facts">
+        <div><dt>{% trans "İstifadəçi adı" context "accounts.people.page" %}</dt><dd class="ems-mono">{{ person.username }}</dd></div>
+        {% if caps.can_view_contacts %}
+            <div><dt>{% trans "E-poçt" context "accounts.people.page" %}</dt><dd>{{ person.email|default:"—" }}</dd></div>
+            <div><dt>{% trans "Telefon" context "accounts.people.page" %}</dt><dd>{{ person.phone|default:"—" }}</dd></div>
+            <div><dt>{% trans "FİN" context "accounts.people.page" %}</dt><dd class="ems-mono">{{ person.fin|default:"—" }}</dd></div>
+        {% endif %}
+        {% if caps.can_view_demographics %}
+            <div><dt>{% trans "Doğum tarixi" context "accounts.people.page" %}</dt><dd>{{ person.birth_date|default:"—" }}{% if person.age %} · {{ person.age }} {% trans "yaş" context "accounts.people.page" %}{% endif %}</dd></div>
+        {% endif %}
+        <div><dt>{% trans "Son giriş" context "accounts.people.page" %}</dt><dd>{{ person.last_login|slice:":10"|default:"—" }}</dd></div>
+        <div><dt>{% trans "Qeydiyyat" context "accounts.people.page" %}</dt><dd>{{ person.date_joined|slice:":10"|default:"—" }}</dd></div>
+    </dl>
+</section>
+
+<section class="ems-card pp-card">
+    <h2 class="pp-card__title">{% trans "Üzvlüklər və vəzifə" context "accounts.people.page" %}</h2>
+    {% if structure.memberships %}
+    <ul class="pp-list">
+        {% for m in structure.memberships %}
+        <li class="pp-list__item">
+            <div class="pp-list__main">
+                <strong>{{ m.role_label }}</strong>{% if m.is_primary %} <span class="ems-badge ems-badge--primary">{% trans "əsas" context "accounts.people.page" %}</span>{% endif %}
+                {% if m.title %}<span class="pp-list__sub">{{ m.title }}</span>{% endif %}
+                {% if m.unit %}<span class="pp-list__sub">{{ m.unit_type_label }}: {{ m.unit }}{% if m.faculty %} · {{ m.faculty }}{% endif %}</span>{% endif %}
+                {% if m.employee_id %}<span class="pp-list__sub ems-mono">{% trans "Tabel №" context "accounts.people.page" %} {{ m.employee_id }}</span>{% endif %}
+            </div>
+            {% if m.since %}<span class="pp-list__aside">{{ m.since|date:"d.m.Y" }}</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}<p class="pp-empty">{% trans "Aktiv üzvlük yoxdur" context "accounts.people.page" %}</p>{% endif %}
+    {% if structure.since %}
+    <p class="pp-card__foot">{% trans "İlk üzvlük" context "accounts.people.page" %}: {{ structure.since|date:"d.m.Y" }}{% if structure.years is not None %} · <strong>{{ structure.years|floatformat:1 }}</strong> {% trans "il" context "accounts.people.page" %}{% endif %}</p>
+    {% endif %}
+</section>
+
+{% if structure.heads %}
+<section class="ems-card pp-card">
+    <h2 class="pp-card__title">{% trans "Rəhbərlik etdiyi bölmələr" context "accounts.people.page" %}</h2>
+    <ul class="pp-list">
+        {% for h in structure.heads %}
+        <li class="pp-list__item"><div class="pp-list__main"><strong>{{ h.name }}</strong><span class="pp-list__sub">{{ h.type_label }}{% if h.parent %} · {{ h.parent }}{% endif %}</span></div></li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}

@@ -105,12 +105,18 @@ PERMISSION_CATEGORIES = {
     # ailəsində DEYİL: bal yazmaqla heç bir əlaqəsi yoxdur, əksinə — KİMİN bal
     # yazacağını təyin edir. Ayrı açar olmasaydı, `grade.*` wildcard-ı daşıyan
     # hər müəllim öz jurnalını başqasının üstünə ata bilərdi.
+    # `journal.lessons_unit` (2026-09-08): «Keçilmiş dərslər» ekranının NƏZARƏT
+    # görünüşü — aktorun struktur alt-ağacındakı (kafedra) müəllimlərin dərs izinə
+    # BAXMAQ. Sahib qərarı: laborant öz kafedrasının müəllim yükünü görsün. Bu açar
+    # OXU-ONLYdır və `journal.roster`-dən QƏSDƏN AYRIDIR: siyahı idarəsi (alt qrupdan
+    # tələbə əlavə etmək) vermir. Əhatə `Membership.scope_unit` alt-ağacıdır.
     "journal": [
         "journal.view",
         "journal.correct",
         "journal.close",
         "journal.roster",
         "journal.reassign",
+        "journal.lessons_unit",
     ],
     # Dərs cədvəli (timetable, U4) — `schedule.manage` cədvəl slotlarını
     # YARATMAQ/SİLMƏK açarıdır. QƏSDƏN `course.*` və `grade.*` ailələrindən
@@ -370,6 +376,7 @@ PERMISSION_LABELS = {
     "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
     "journal.roster": pgettext_lazy(_PERM_CTX, "Jurnala alt qrupdan tələbə əlavə etmək/çıxarmaq"),
     "journal.reassign": pgettext_lazy(_PERM_CTX, "Fənni başqa müəllimə təhvil vermək"),
+    "journal.lessons_unit": pgettext_lazy(_PERM_CTX, "Kafedranın keçilmiş dərslərinə baxmaq"),
     # schedule (dərs cədvəli)
     "schedule.view": pgettext_lazy(_PERM_CTX, "Dərs cədvəlinə baxış"),
     "schedule.manage": pgettext_lazy(_PERM_CTX, "Dərs cədvəlini idarə etmək (slot əlavə/sil)"),

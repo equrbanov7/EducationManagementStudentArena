@@ -1,0 +1,49 @@
+{% load i18n %}
+{% comment %}Kafedra sətrinin əməlləri — bax `_faculty_row_actions.html` qeydi.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm ou-row-staff"
+        data-ou-staff-open
+        data-url="{{ row.data.staff_url }}"
+        data-unit-id="{{ row.data.id }}"
+        data-unit-name="{{ row.data.name }}"
+        data-ou-specialties="{{ row.data.specialties_json }}">
+    <i class="fas fa-users" aria-hidden="true"></i>
+    {% trans "Heyət" context "organizations.registry" %}
+</button>
+{% if org_kafedras_section.can_assign_head %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="ouHeadDialog"
+        data-tof-title="{% trans 'Kafedra müdiri təyin et' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "assign_head", "id": "{{ row.data.id }}", "head": "{{ row.data.head_id }}", "head_label": "{{ row.data.head_name|escapejs }}", "reason": ""}'
+        data-ou-unit-name="{{ row.data.name }}">
+    {% trans "Müdir" context "organizations.registry" %}
+</button>
+{% endif %}
+{% if org_kafedras_section.can_assign_members %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-tof-open="ouTeacherDialog"
+        data-tof-prefill='{"action": "add_teacher", "id": "{{ row.data.id }}", "membership": "", "reason": ""}'
+        data-ou-unit-name="{{ row.data.name }}"
+        data-ou-unit-id="{{ row.data.id }}">
+    <i class="fas fa-user-plus" aria-hidden="true"></i>
+    {% trans "Müəllim" context "organizations.registry" %}
+</button>
+{% endif %}
+{% if org_kafedras_section.can_edit %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--icon"
+        data-tof-open="ouUnitDialog"
+        data-tof-title="{% trans 'Kafedranı redaktə et' context 'organizations.registry' %}"
+        data-tof-prefill='{"action": "save_unit", "kind": "kafedra", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "parent": "{{ row.data.faculty_id }}"}'
+        title="{% trans 'Redaktə' context 'organizations.registry' %}"
+        aria-label="{% blocktrans context 'organizations.registry' with name=row.data.name %}{{ name }} — redaktə{% endblocktrans %}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+</button>
+{% endif %}
+{% if org_kafedras_section.can_delete %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--icon ems-btn--danger"
+        data-tof-open="ouArchiveDialog"
+        data-tof-prefill='{"action": "archive_unit", "id": "{{ row.data.id }}"}'
+        title="{% trans 'Arxivlə' context 'organizations.registry' %}"
+        aria-label="{% blocktrans context 'organizations.registry' with name=row.data.name %}{{ name }} — arxivlə{% endblocktrans %}">
+    <i class="fas fa-box-archive" aria-hidden="true"></i>
+</button>
+{% endif %}

@@ -1,0 +1,13 @@
+{% comment %}Resurs xanası: tip etiketi (kiçik), göstəriş (`resource_repr`) və mono
+identifikator. Heç biri yoxdursa «—».{% endcomment %}
+{% if row.data.resource_label or row.data.resource_type or row.data.resource_id %}
+<div class="al-res">
+    {% if row.data.resource_label %}<span class="al-res__label">{{ row.data.resource_label|truncatechars:90 }}</span>{% endif %}
+    <span class="al-res__meta">
+        {% if row.data.resource_type %}<span class="al-res__type">{{ row.data.resource_type }}</span>{% endif %}
+        {% if row.data.resource_id %}<span class="al-res__id ems-mono">#{{ row.data.resource_id|truncatechars:26 }}</span>{% endif %}
+    </span>
+</div>
+{% else %}
+<span class="al-muted">—</span>
+{% endif %}

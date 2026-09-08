@@ -1760,7 +1760,7 @@ class ProfileViewTest(TestCase):
         _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, reverse("exams:teacher_group_list"))
+        self.assertNotContains(response, reverse("exams:teacher_group_list"))
         self.assertContains(response, reverse("accounts:pending_review"))
         self.assertNotContains(response, reverse("accounts:superadmin_organizations"))
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
@@ -1958,7 +1958,7 @@ class ProfileViewTest(TestCase):
         self.assertTrue(invite_membership.is_active)
         self.assertEqual(invite_membership.title, "")
 
-    def test_member_profile_shows_group_navigation(self):
+    def test_member_profile_has_no_legacy_group_navigation(self):
         owner = User.objects.create_user(
             username="member_nav_owner",
             email="member_nav_owner@example.com",
@@ -1976,64 +1976,14 @@ class ProfileViewTest(TestCase):
         _login_with_org(self.client, self.user, organization)
         response = self.client.get(reverse("accounts:profile"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, reverse("exams:teacher_group_list"))
+        # Köhnə imtahan-kohortu «Qruplar» bölməsi kabinetdən çıxarılıb (2026-09-08) —
+        # sidebar-da onun mənbə URL-i (`exams:teacher_group_list`) daha görünmür.
+        self.assertNotContains(response, reverse("exams:teacher_group_list"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
         self.assertNotContains(response, reverse("accounts:student_organization_request"))
         # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
         self.assertNotContains(response, reverse("accounts:student_leave_organization"))
-
-    def test_groups_section_supports_search_detail_and_student_pagination(self):
-        from apps.exams.models import StudentGroup
-
-        organization = Organization.objects.create(
-            name="Groups Detail Org",
-            org_type=OrganizationType.SCHOOL,
-            owner=self.user,
-            status="active",
-            is_active=True,
-        )
-        _assign_user_to_org(self.user, organization, ProfileRole.TEACHER)
-
-        alpha_group = StudentGroup.objects.create(
-            teacher=self.user,
-            organization=organization,
-            name="Alpha Detail Group",
-        )
-        StudentGroup.objects.create(
-            teacher=self.user,
-            organization=organization,
-            name="Beta Hidden Group",
-        )
-        for idx in range(15):
-            student = User.objects.create_user(
-                username=f"group_student_{idx:02d}",
-                email=f"group_student_{idx:02d}@example.com",
-                password="testpass123",
-            )
-            _assign_user_to_org(student, organization, ProfileRole.STUDENT)
-            alpha_group.students.add(student)
-
-        _login_with_org(self.client, self.user, organization)
-        response = self.client.get(
-            reverse("accounts:profile"),
-            {
-                "section": "groups",
-                "group_q": "Alpha",
-                "group": str(alpha_group.id),
-                "students_page": "2",
-            },
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["teacher_groups_filtered_count"], 1)
-        self.assertEqual(response.context["selected_teacher_group"], alpha_group)
-        self.assertEqual(response.context["selected_group_students_count"], 15)
-        self.assertEqual(response.context["selected_group_students_page"].number, 2)
-        self.assertEqual([group.name for group in response.context["teacher_groups"]], ["Alpha Detail Group"])
-        self.assertContains(response, "Qrup detalları")
-        self.assertContains(response, "Alpha Detail Group")
-        self.assertContains(response, "group_student_12")
 
     def test_org_admin_profile_shows_groups_and_management_navigation(self):
         organization = Organization.objects.create(
@@ -2052,7 +2002,7 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:student_organization_management"))
         self.assertContains(response, reverse("accounts:permission_editor"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
-        self.assertContains(response, reverse("exams:teacher_group_list"))
+        self.assertNotContains(response, reverse("exams:teacher_group_list"))
         # Management-section CONTENT is delivered lazily by the AJAX section
         # loader (the base profile page only renders the active section plus
         # empty placeholders), so assert the navigation entries here and verify

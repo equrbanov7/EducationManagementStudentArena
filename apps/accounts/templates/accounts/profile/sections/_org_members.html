@@ -1,4 +1,44 @@
+{% load i18n static %}
+{% comment %}
+«Struktur üzvləri» — kabinet reyestri (2026-09-08 yenidən qurulub).
+
+Kontekst `apps/organizations/structure_views/members.py::build_members_section`
+(giriş: idarəetmə rolu və ya `member.view`; əhatə `get_unit_scope` — dekan
+yalnız öz alt-ağacını görür, əhatəsiz unit-rolu heç nə). Komponentlər
+`ems_ui`-dəndir: KPI (klik = `om_kind` filtri), AVTO filtr («Tətbiq et» yoxdur,
+«Sıfırla» qalır), cədvəl (üzv · rol · vəzifə · bölmə · qoşulma) və «Üzv kartı»
+çekmecəsi (JSON `organizations:structure_member_detail`, render `org_members.js`).
+
+Rəhbər heyət tac nişanı + mətn ilə seçilir («Dekan · İqtisadiyyat fakültəsi»
+`OrgUnit.head`-dən gəlir). Köhnə `organizations/partials/_members_content.html`
+YALNIZ müstəqil `/organizations/<slug>/members/` səhifəsində qalır.
+⚠️ `<h1>` yazılmır — qabıq verir (tək başlıq). CSS xarici fayldadır (CSP).
+{% endcomment %}
+{% if 'org-members' in allowed_sections %}
+{% trans "Üzv kartı" context "organizations.members" as om_drawer_title %}
+{% trans "Şəxsin bu təşkilatdakı bütün rolları, rəhbərlik etdiyi bölmələr və əlaqə." context "organizations.members" as om_drawer_sub %}
 <section class="profile-section-panel profile-section--org-members {% if active_section == 'org-members' %}is-active{% endif %}"
-         data-profile-section-panel="org-members">
-    {% include "organizations/partials/_members_content.html" with org_members_section=org_members_section %}
+         data-profile-section-panel="org-members"
+         data-source-url="{{ profile_base_url }}?section=org-members">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_members.css' %}?v=20260908-1">
+{% if not org_members_section.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=org_members_section.access_denied_message %}
+{% else %}
+<div class="om" data-om-root data-om-section="org-members">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=org_members_section.subtitle header_actions_include="accounts/profile/sections/org_members/_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=org_members_section.kpi_tiles %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-members" filter_prefix="om_" filter_fields=org_members_section.filter_fields filter_count_label=org_members_section.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="om-body" data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=org_members_section.columns table_rows=org_members_section.table_rows table_state=org_members_section.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-users" state_title=org_members_section.state_title state_body=org_members_section.state_body %}
+        {% include "partials/_pagination.html" with page_obj=org_members_section.page_obj page_param="om_page" extra_query=org_members_section.pagination_query %}
+    </div>
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="omMemberDrawer" drawer_title=om_drawer_title drawer_subtitle=om_drawer_sub drawer_body_include="accounts/profile/sections/org_members/_detail_drawer.html" drawer_foot_include="accounts/profile/sections/org_members/_detail_foot.html" %}
+</div>
+{% endif %}
 </section>
+{% endif %}

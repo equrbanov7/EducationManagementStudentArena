@@ -28,6 +28,7 @@ from django.apps import apps as django_apps
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from .scoping import get_permission_scope
@@ -44,7 +45,15 @@ PERM_STUDENT_MOVEMENT = "student.movement"
 PAGE_SIZE = 25
 
 #: `OrgUnit.settings` JSON açarları — TƏK MƏNBƏ (yazı tərəfi də bunu işlədir).
-SETTING_KEYS = ("language_sector", "course_year", "admission_year", "curriculum_id", "capacity")
+SETTING_KEYS = ("language_sector", "course_year", "admission_year", "curriculum_id", "capacity", "education_form")
+
+#: Dil sektoru seçicisinin STANDART variantları — tenant datasında olmasa da
+#: formada görünür (sahib, 2026-09-07: «az, eng sektorlara görə də olsun»).
+#: Universitetin öz datasındakı əlavə dəyərlər bunların ARDINCA gəlir.
+DEFAULT_LANGUAGE_SECTORS = ("AZ", "EN", "RU")
+
+#: Qəbul ili seçicisi: cari ildən neçə il geriyə (forma + filtr).
+ADMISSION_YEAR_SPAN = 10
 
 GROUP_SORTS: dict[str, tuple[str, ...]] = {
     "name": ("name",),
@@ -83,7 +92,26 @@ def group_meta(unit) -> dict:
         meta["admission_year"] = int(meta["admission_year"]) if meta["admission_year"] not in ("", None) else 0
     except (TypeError, ValueError):
         meta["admission_year"] = 0
+    meta["education_form"] = str(meta["education_form"] or "").strip()
     return meta
+
+
+def education_form_choices() -> list:
+    """Təhsil forması (əyani/qiyabi/distant) — registrar-ın TƏK mənbəyindən.
+
+    Statik import YOXDUR (modul sərhədi): seçimlər `StudentAcademicRecord`
+    sahəsinin `choices`-indən oxunur — yeni forma əlavə olunsa burada da görünür.
+    """
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    field = StudentAcademicRecord._meta.get_field("education_form")
+    return [{"value": str(value), "label": str(label)} for value, label in field.choices if value]
+
+
+def education_form_label(value: str) -> str:
+    for option in education_form_choices():
+        if option["value"] == value:
+            return option["label"]
+    return ""
 
 
 def _specialty_chain(unit):
@@ -114,6 +142,33 @@ def language_options(organization) -> list:
     return [{"value": value, "label": value} for value in sorted(values)]
 
 
+def language_form_options(organization) -> list:
+    """Forma üçün dil sektoru seçimləri: standart AZ/EN/RU + tenantın öz dəyərləri."""
+    seen = []
+    for value in DEFAULT_LANGUAGE_SECTORS:
+        seen.append(value)
+    for option in language_options(organization):
+        if option["value"].upper() not in seen and option["value"] not in seen:
+            seen.append(option["value"])
+    return [{"value": value, "label": value} for value in seen]
+
+
+def admission_year_options(organization, *, current_year: int) -> list:
+    """Qəbul ili seçimləri — cari il + geriyə `ADMISSION_YEAR_SPAN` il, tenant
+    datasındakı kənar illər də (məs. köçürülmüş köhnə qruplar) əlavə olunur."""
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    years = set(range(current_year + 1, current_year - ADMISSION_YEAR_SPAN, -1))
+    for raw in OrgUnit.objects.filter(organization=organization, unit_type="group").values_list("settings", flat=True):
+        if isinstance(raw, dict):
+            try:
+                year = int(raw.get("admission_year") or 0)
+            except (TypeError, ValueError):
+                continue
+            if year:
+                years.add(year)
+    return [{"value": str(year), "label": str(year)} for year in sorted(years, reverse=True)]
+
+
 def build_groups_registry(request, organization) -> dict:
     """«Qruplar» reyestri: filtr + sıralama + səhifələmə (hamısı serverdə)."""
     if not can_view_groups(request):
@@ -127,12 +182,15 @@ def build_groups_registry(request, organization) -> dict:
     scope = group_scope(request, organization)
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    current_year = timezone.localdate().year
 
     search = (request.GET.get("gr_q") or "").strip()[:120]
     faculty = (request.GET.get("gr_faculty") or "").strip()
     specialty = (request.GET.get("gr_specialty") or "").strip()
     language = (request.GET.get("gr_lang") or "").strip()
     course = (request.GET.get("gr_course") or "").strip()
+    education_form = (request.GET.get("gr_form") or "").strip()
+    admission_year = (request.GET.get("gr_year") or "").strip()
     show_archived = (request.GET.get("gr_arch") or "") == "1"
     sort = (request.GET.get("gr_sort") or "").strip()
     sort = sort if sort in GROUP_SORTS else "name"
@@ -168,6 +226,10 @@ def build_groups_registry(request, organization) -> dict:
         units = [unit for unit in units if group_meta(unit)["language_sector"] == language]
     if course.isdigit():
         units = [unit for unit in units if group_meta(unit)["course_year"] == int(course)]
+    if education_form:
+        units = [unit for unit in units if group_meta(unit)["education_form"] == education_form]
+    if admission_year.isdigit():
+        units = [unit for unit in units if group_meta(unit)["admission_year"] == int(admission_year)]
 
     page_obj = Paginator(units, PAGE_SIZE).get_page(request.GET.get("gr_page"))
 
@@ -193,6 +255,7 @@ def build_groups_registry(request, organization) -> dict:
         .annotate(total=Count("id"))
     )
 
+    form_labels = {option["value"]: option["label"] for option in education_form_choices()}
     rows = []
     for unit in page_obj.object_list:
         meta = group_meta(unit)
@@ -211,6 +274,10 @@ def build_groups_registry(request, organization) -> dict:
                 "admission_year": meta["admission_year"],
                 "capacity": meta["capacity"],
                 "curriculum_id": meta["curriculum_id"],
+                "education_form": meta["education_form"],
+                "education_form_label": form_labels.get(meta["education_form"], ""),
+                # «Tələbə əlavə et» dialoqunun namizəd axtarışı (qrupsuz tələbələr).
+                "candidates_url": reverse("organizations:group_student_candidates", args=[organization.slug, unit.id]),
                 "students": student_counts.get(unit.id, 0),
                 "tutor": (unit.head.get_full_name() or unit.head.username) if unit.head_id else "",
                 "tutor_id": str(unit.head_id) if unit.head_id else "",
@@ -243,6 +310,8 @@ def build_groups_registry(request, organization) -> dict:
             "specialty": specialty,
             "language": language,
             "course": course,
+            "education_form": education_form,
+            "admission_year": admission_year,
             "show_archived": show_archived,
             "sort": sort,
         },
@@ -259,6 +328,10 @@ def build_groups_registry(request, organization) -> dict:
             ).order_by("name")[:500]
         ],
         "language_options": language_options(organization),
+        "language_form_options": language_form_options(organization),
+        "education_form_options": education_form_choices(),
+        "current_year": current_year,
+        "admission_year_options": admission_year_options(organization, current_year=current_year),
         # Köçürmə dialoqunun hədəf qrupları — əhatədəki AKTİV qruplar (səhifədən asılı deyil).
         "group_options": [
             {"value": str(unit.id), "label": unit.name}
@@ -270,16 +343,22 @@ def build_groups_registry(request, organization) -> dict:
 
 
 __all__ = [
+    "ADMISSION_YEAR_SPAN",
+    "DEFAULT_LANGUAGE_SECTORS",
     "PAGE_SIZE",
     "PERM_MANAGE",
     "PERM_STUDENT_MOVEMENT",
     "PERM_VIEW",
     "SETTING_KEYS",
+    "admission_year_options",
     "build_groups_registry",
     "can_manage_groups",
     "can_move_students",
     "can_view_groups",
+    "education_form_choices",
+    "education_form_label",
     "group_meta",
     "group_scope",
+    "language_form_options",
     "language_options",
 ]

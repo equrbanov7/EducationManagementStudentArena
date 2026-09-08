@@ -1,25 +1,22 @@
 {% load i18n %}
 {% comment %}
-  "Apellyasiyalarım" profil bölməsi — dashboard sağ content hissəsində AJAX ilə
-  açılır (sidebar sabit qalır). Detal Bootstrap modalında açılır.
-  Bütün JS davranışı static appeals/js/appeals_sections.js-dədir (EMSDelegate,
-  document-level) — AJAX section swap-larından sonra da işlək qalır.
+  «Apellyasiyalarım» kabinet bölməsi — sağ content hissəsində AJAX ilə açılır
+  (sidebar sabit qalır). Detal Bootstrap modalında açılır.
+
+  2026-09-08 sakit redizayn: hero lent yığışdırıldı; başlıq `ems_ui/_content_header`
+  (YALNIZ alt yazı + sağda «Yeni apellyasiya müraciəti» əməli — h1 qabıqdan gəlir),
+  filtr `ems-filters`, siyahı sakit sətirlər, status `ems-badge`.
+  Bütün JS davranışı `appeals/js/appeals_sections.js`-dədir (EMSDelegate,
+  document-level) — `data-*` çəngəlləri DƏYİŞMƏYİB. CSS xarici fayldadır (CSP).
 {% endcomment %}
+{% trans "Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal dəyişikliklərini buradan izləyin." context "appeals.template" as appeal_my_subtitle %}
 <section class="profile-section-panel profile-section--my-appeals {% if active_section == 'my-appeals' %}is-active{% endif %}"
          data-profile-section-panel="my-appeals"
          data-source-url="{{ profile_base_url }}?section=my-appeals"
          data-i18n-load-error="{% trans 'Yüklənmə alınmadı, yenidən cəhd edin.' context 'appeals.template' %}">
     <div class="appeal-embedded">
         <div data-appeal-list-view>
-            <header class="appeal-hero appeal-hero--icon">
-                <div class="appeal-hero__lead">
-                    <span class="appeal-hero__badge"><i class="fas fa-gavel"></i></span>
-                    <div>
-                        <span class="appeal-hero__eyebrow">{% trans "Apellyasiya tarixçəsi" context "appeals.template" %}</span>
-                        <p>{% trans "Göndərdiyiniz müraciətlərin statusunu, müəllim cavabını və bal dəyişikliklərini buradan izləyin." context "appeals.template" %}</p>
-                    </div>
-                </div>
-            </header>
+            {% include "partials/ems_ui/_content_header.html" with header_subtitle=appeal_my_subtitle header_actions_include="appeals/partials/_my_appeals_header_actions.html" %}
 
             {% include "appeals/partials/_my_appeals_body.html" %}
         </div>

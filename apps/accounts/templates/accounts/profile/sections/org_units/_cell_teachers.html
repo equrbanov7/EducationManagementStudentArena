@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}Kafedra müəllimləri xanası — inisial sırası (ilk 3) + say.{% endcomment %}
+{% if row.data.teachers %}
+<div class="ou-stack" title="{% for t in row.data.teacher_preview %}{{ t.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if row.data.teacher_more %} …{% endif %}">
+    <span class="ou-stack__avatars" aria-hidden="true">
+        {% for t in row.data.teacher_preview %}<span class="ou-avatar ou-avatar--sm">{{ t.initials }}</span>{% endfor %}
+    </span>
+    <span class="ou-stack__count">{% blocktrans count n=row.data.teachers context "organizations.registry" %}{{ n }} müəllim{% plural %}{{ n }} müəllim{% endblocktrans %}</span>
+</div>
+{% else %}
+<span class="ou-missing ou-missing--soft">{% trans "Müəllim yoxdur" context "organizations.registry" %}</span>
+{% endif %}

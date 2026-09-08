@@ -1,0 +1,191 @@
+/* =========================================================================
+   Şəxs səhifəsi (müəllim / tələbə «Ətraflı») — düzüm (2026-09-08).
+   Komponentlər ems_ui-dandır; burada yalnız səhifə skeleti, hero kart,
+   fakt siyahıları, semestr açılan blokları. Rənglər tokenlərdən.
+   ========================================================================= */
+
+.pp {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pp-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-600);
+}
+
+.pp-crumbs__link { color: var(--ems-link, var(--ems-primary-700)); text-decoration: none; }
+.pp-crumbs__link:hover { text-decoration: underline; }
+.pp-crumbs__sep { color: var(--ems-neutral-400); }
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+
+.pp-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 22px;
+}
+
+.pp-hero__id { display: flex; align-items: center; gap: 16px; min-width: 0; }
+
+.pp-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-100);
+    font-size: var(--ems-fs-lg, 1.1rem);
+    font-weight: 800;
+    overflow: hidden;
+}
+
+.pp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.pp-hero__name {
+    margin: 0 0 6px;
+    font-size: var(--ems-fs-2xl, 1.5rem);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+    line-height: 1.2;
+}
+
+.pp-hero__patronymic { font-weight: 500; color: var(--ems-neutral-600); }
+
+.pp-hero__badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+
+.pp-hero__chain {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: var(--ems-fs-xs, 0.8rem);
+    color: var(--ems-neutral-600);
+}
+
+.pp-hero__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Grid ────────────────────────────────────────────────────────────────── */
+
+.pp-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+    align-items: start;
+}
+
+.pp-main, .pp-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+@media (max-width: 960px) {
+    .pp-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ── Kartlar ─────────────────────────────────────────────────────────────── */
+
+.pp-card { padding: 18px 20px; }
+
+.pp-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.pp-card__title {
+    margin: 0 0 12px;
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.pp-card__head .pp-card__title { margin-bottom: 0; }
+
+.pp-card__meta { font-size: var(--ems-fs-xs, 0.78rem); color: var(--ems-neutral-600); }
+.pp-card__meta strong { color: var(--ems-neutral-900); }
+
+.pp-card__foot {
+    margin: 12px 0 0;
+    padding-top: 10px;
+    border-top: 1px solid var(--ems-neutral-100);
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-600);
+}
+
+.pp-empty {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 10px);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs, 0.78rem);
+}
+
+.pp-empty--ok {
+    border-style: solid;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.pp-note {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-xs, 0.78rem);
+}
+
+/* ── Faktlar / siyahılar ─────────────────────────────────────────────────── */
+
+.pp-facts { margin: 0; display: grid; gap: 8px; }
+.pp-facts > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px; font-size: var(--ems-fs-xs, 0.8rem); }
+.pp-facts dt { color: var(--ems-neutral-500); font-weight: 600; }
+.pp-facts dd { margin: 0; color: var(--ems-neutral-900); word-break: break-word; }
+
+.pp-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pp-list__item { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--ems-neutral-100); }
+.pp-list__item:first-child { border-top: 0; padding-top: 0; }
+.pp-list__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--ems-fs-sm, 0.86rem); color: var(--ems-neutral-900); }
+.pp-list__sub { font-size: var(--ems-fs-2xs, 0.72rem); color: var(--ems-neutral-600); }
+.pp-sub-inline { font-size: var(--ems-fs-2xs, 0.72rem); color: var(--ems-neutral-600); }
+.pp-list__aside { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: var(--ems-fs-2xs, 0.72rem); color: var(--ems-neutral-600); }
+.pp-score { font-weight: 800; color: var(--ems-neutral-900); font-variant-numeric: tabular-nums; }
+
+/* ── Cədvəllər ───────────────────────────────────────────────────────────── */
+
+.pp-table th[scope="row"] { font-weight: 600; }
+.pp-strong { display: block; color: var(--ems-neutral-900); }
+.pp-sub { display: block; font-size: var(--ems-fs-2xs, 0.72rem); color: var(--ems-neutral-600); font-weight: 500; }
+.pp-row--muted > th, .pp-row--muted > td { color: var(--ems-neutral-500); }
+.pp-row--failed > th, .pp-row--failed > td { background: var(--ems-danger-bg); }
+
+/* ── Semestr / il açılan blokları ────────────────────────────────────────── */
+
+.pp-sem { border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-md, 10px); background: var(--ems-neutral-0); margin-top: 8px; overflow: hidden; }
+.pp-sem[open] { box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04)); }
+.pp-sem__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; cursor: pointer; list-style: none; background: var(--ems-neutral-50); }
+.pp-sem__head::-webkit-details-marker { display: none; }
+.pp-sem__head::before { content: "›"; display: inline-block; margin-inline-end: 8px; color: var(--ems-neutral-500); transition: transform 0.15s ease; }
+.pp-sem[open] > .pp-sem__head::before { transform: rotate(90deg); }
+.pp-sem__title { font-weight: 800; color: var(--ems-neutral-900); flex: 1 1 auto; }
+.pp-sem__meta { font-size: var(--ems-fs-2xs, 0.72rem); color: var(--ems-neutral-600); }
+.pp-sem .ems-tablewrap { border: 0; border-radius: 0; }
