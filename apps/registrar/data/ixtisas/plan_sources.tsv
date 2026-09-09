@@ -1,0 +1,31 @@
+# «Tədris planı» PDF mənbələri — wcu.edu.az/az/page/undergraduate-programs (2026-09-09).
+# `proqram` sütunu HƏLL EDİLMİŞ uyğunluqdur və idxal YALNIZ ondan istifadə edir.
+# ⚠️ Fayl adındakı 050XXX şifri İŞLƏDİLMİR: saytdakı şifrlərin bir hissəsi
+#    səhvdir (bax `_program_official_codes.py`) və Psixologiya planını
+#    Regionşünaslığa bağlayırdı. Uyğunluq AD üzrədir, «əl ilə» sətirlər boşdur.
+proqram	ad	uygunluq	senet	url	qeyd
+Beynəlxalq münasibətlər	Beynəlxalq münasibətlər	exact	050201 Beynəlxalq münasibətlər (8) (1).pdf	https://wcu.edu.az/uploads/files/050201 Beynəlxalq münasibətlər (8) (1).pdf	
+Biologiya	Biologiya	exact	050501 Biologiya 2023.pdf	https://wcu.edu.az/uploads/files/050501%20Biologiya%202023.pdf	
+Cihaz Mühəndisliyi	Cihaz mühəndisliyi	exact	050604 - Cihaz Mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050604 - Cihaz Mühəndisliyi.pdf	
+	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)		050306 Dizayn(interyer dizaynı) 2023.pdf	https://wcu.edu.az/uploads/files/050306%20Dizayn(interyer%20dizayn%C4%B1)%202023.pdf	əl ilə həll edilməlidir
+Ekologiya	Ekologiya	exact	050504 - Ekologiya.pdf	https://wcu.edu.az/uploads/files/050504 - Ekologiya.pdf	
+	Filologiya (Azərbaycan dili və ədəbiyyatı)		Filologiya (Azərbaycan dili  və ədəbiyyatı) 2023.pdf	https://wcu.edu.az/uploads/files/Filologiya%20(Az%C9%99rbaycan%20dili%20%20v%C9%99%20%C9%99d%C9%99biyyat%C4%B1)%202023.pdf	əl ilə həll edilməlidir
+Filologiya (İngilis dili və ədəbiyyatı)	Filologiya (ingilis dili və ədəbiyyatı)	exact	050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf	https://wcu.edu.az/uploads/files/050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf	
+Fəlsəfə	Fəlsəfə	exact	050204 Fəlsəfə + (1).pdf	https://wcu.edu.az/uploads/files/050204 Fəlsəfə + (1).pdf	
+Kompüter Mühəndisliyi	Kompüter mühəndisliyi	exact	050620 - Kompüter Mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050620 - Kompüter Mühəndisliyi.pdf	
+Maliyyə	Maliyyə	exact	050406 Maliyyə 2023.pdf	https://wcu.edu.az/uploads/files/050406%20Maliyy%C9%99%202023.pdf	
+Marketinq	Marketinq	exact	MARKETİNG 2023.pdf	https://wcu.edu.az/uploads/files/MARKETİNG 2023.pdf	
+Mexatronika və robototexnika mühəndisliyi	Mexatronika və robototexnika mühəndisliyi	exact	050629 - Mexatronika və robototexnika mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050629 - Mexatronika və robototexnika mühəndisliyi.pdf	
+Mühasibat	Mühasibat	exact	050409 Mühasibat 2023.pdf	https://wcu.edu.az/uploads/files/050409%20M%C3%BChasibat%202023.pdf	
+Psixologiya	Psixologiya	exact	050211 Psixologiya +.pdf	https://wcu.edu.az/uploads/files/050211 Psixologiya +.pdf	
+Regionşünaslıq	Regionşünaslıq	exact	050212 Regionşünaslıq.pdf	https://wcu.edu.az/uploads/files/050212 Regionşünaslıq.pdf	
+Sosial Iş	Sosial iş	exact	050807 Sosial iş + (1).pdf	https://wcu.edu.az/uploads/files/050807 Sosial iş + (1).pdf	
+Su Bioehtiyyatları və Akvakultura	Su bioehtiyatları və akvakultura	fuzzy	050708 - Su bioehtiyatları və akvakultura.pdf	https://wcu.edu.az/uploads/files/050708 - Su bioehtiyatları və akvakultura.pdf	təxmini ad uyğunluğu
+Tarix	Tarix	exact	050214 Tarix 2023.pdf	https://wcu.edu.az/uploads/files/050214%20Tarix%202023.pdf	
+Turizm bələdçiliyi	Turizm bələdçiliyi	exact	050809 Turizm bələdçiliyi 2023.pdf	https://wcu.edu.az/uploads/files/050809%20Turizm%20b%C9%99l%C9%99d%C3%A7iliyi%202023.pdf	
+Turizm işinin təşkili	Turizm işinin təşkili	exact	050810 Turizm işinin təşkili 2023.pdf	https://wcu.edu.az/uploads/files/050810%20Turizm%20i%C5%9Finin%20t%C9%99%C5%9Fkili%202023.pdf	
+Təhsildə sosial psixoloji xidmət	Təhsildə sosial psixoloji xidmət	exact	050116 TSPX.pdf	https://wcu.edu.az/uploads/files/050116 TSPX.pdf	
+	Tərcümə (ingilis)		050215 Tərcümə 2023.pdf	https://wcu.edu.az/uploads/files/050215%20T%C9%99rc%C3%BCm%C9%99%202023.pdf	əl ilə həll edilməlidir
+İnformasiya Texnologiyaları	İnformasiya texnologiyaları	exact	050616 - İnformasiya Texnologiyaları.pdf	https://wcu.edu.az/uploads/files/050616 - İnformasiya Texnologiyaları.pdf	
+İnformasiya Təhlükəsizliyi	İnformasiya təhlükəsizliyi	exact	050615 - İnformasiya Təhlükəsiz.pdf	https://wcu.edu.az/uploads/files/050615 - İnformasiya Təhlükəsiz.pdf	
+İqtisadiyyat	İqtisadiyyat	exact	050405 İqtisadiyyat 2023.pdf	https://wcu.edu.az/uploads/files/050405%20%C4%B0qtisadiyyat%202023.pdf	

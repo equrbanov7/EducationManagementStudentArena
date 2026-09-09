@@ -45,7 +45,7 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — yazma düymələri render OLUNMU
         {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=wc_arch_title banner_body=wc_arch_body %}
     {% endif %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-center" filter_prefix="wc_" filter_fields=workload_center_section.filter_fields filter_count_label=workload_center_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-center" filter_prefix="wc_" filter_fields=workload_center_section.filter_fields filter_count_label=workload_center_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if workload_center_section.view == "dashboard" %}
         {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_center_section.kpi_tiles %}

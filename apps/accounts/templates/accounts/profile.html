@@ -116,7 +116,7 @@
 </script>
 <script src="{% static 'accounts/js/profile/modal_i18n.js' %}?v=20260725-csp"></script>
 <script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
-<script src="{% static 'accounts/js/profile/ui.js' %}?v=20260612-org-ajax"></script>
+<script src="{% static 'accounts/js/profile/ui.js' %}?v=20260909-active"></script>
 <script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260713-spa-progress"></script>
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260709-access-fix"></script>
@@ -235,7 +235,7 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 təsdiq axını və imzalı əməliyyat tokeni. `EMSDelegate`/`EMSOverlay` üzərində
 qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% if 'role-assignment' in allowed_sections or 'manage-roles' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/roles_ui.js' %}?v=20260909-2"></script>
+<script src="{% static 'accounts/js/profile/roles_ui.js' %}?v=20260909-3"></script>
 {% endif %}
 {% if 'permission-editor' in allowed_sections %}
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
@@ -304,6 +304,10 @@ seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDele
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
 {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections or 'teaching-handover' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260908-registry"></script>
+{% endif %}
+{% if 'programs-registry' in allowed_sections %}
+{% comment %}«İxtisas haqqında» çekmecəsi — YALNIZ oxu (registrar:program_detail).{% endcomment %}
+<script src="{% static 'accounts/js/profile/programs_detail.js' %}?v=20260909-1"></script>
 {% endif %}
 {% comment %}Fakültələr / Kafedralar reyestri (2026-09-08) — «Heyət» çekmecəsi və
 dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endcomment %}

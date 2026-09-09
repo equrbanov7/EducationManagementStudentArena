@@ -45,7 +45,7 @@ SƏHİFƏLƏNİR (`sm_page`, 25/səhifə) — əvvəl ilk 400 sətir bir səhif�
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=sm_subtitle header_actions_include="accounts/profile/sections/teaching_office/_semester_header_actions.html" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="semester-opening" filter_prefix="sm_" filter_fields=semester_opening_section.filter_fields filter_count_label=semester_opening_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="semester-opening" filter_prefix="sm_" filter_fields=semester_opening_section.filter_fields filter_count_label=semester_opening_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if not semester_opening_section.period %}
         {% trans "Tədris dövrü yoxdur" context "accounts.semester" as sm_none_title %}

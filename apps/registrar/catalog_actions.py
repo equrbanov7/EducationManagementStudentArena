@@ -24,12 +24,13 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.translation import pgettext
-from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_POST
 
 from core.audit import log_action
 from core.constants import AuditAction
 
-from .catalog_registry import can_manage_catalog
+from .catalog_registry import can_manage_catalog, can_view_catalog
 from .models import Program, Subject
 from .models.academic import DegreeLevel
 from .models.catalog_meta import ARCHIVE_REASON_MIN_LENGTH, EducationForm, SubjectKind
@@ -281,4 +282,28 @@ def catalog_action(request):
     return handler(request, organization)
 
 
-__all__ = ["catalog_action"]
+__all__ = ["catalog_action", "program_detail"]
+
+
+@login_required
+@never_cache
+@require_GET
+def program_detail(request):
+    """İxtisasın «Ətraflı» çekmecəsi — OXU (`catalog.view` qapısı).
+
+    Sahib (2026-09-09): «ixtisasın üzərinə vuranda … o ixtisasda aktiv oxuyan
+    qrupları, qruplardan həmin ixtisasdakı tələbələri … görmək olsun».
+    Yazma YOXDUR; məntiq `apps/registrar/program_detail.py`-dədir.
+    """
+    from apps.registrar.program_detail import build_program_detail
+
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        return _error(pgettext(_CTX, "Aktiv təşkilat konteksti yoxdur."), status=403, code="no_org")
+    if not can_view_catalog(request):
+        return _error(pgettext(_CTX, "Kataloqu görmək səlahiyyətiniz yoxdur."), status=403, code="forbidden")
+
+    payload = build_program_detail(organization, (request.GET.get("id") or "").strip())
+    if payload is None:
+        return _error(pgettext(_CTX, "İxtisas tapılmadı."), status=404, code="not_found")
+    return JsonResponse({"ok": True, "program": payload})

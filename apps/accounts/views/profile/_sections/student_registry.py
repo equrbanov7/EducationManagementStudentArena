@@ -188,6 +188,7 @@ def _filter_fields(values, options) -> list:
         },
         {
             "name": "sr_faculty",
+            "searchable": True,
             "label": pgettext(_CTX, "Fakültə"),
             "kind": "select",
             "value": values["faculty"],
@@ -195,6 +196,7 @@ def _filter_fields(values, options) -> list:
         },
         {
             "name": "sr_program",
+            "searchable": True,
             "label": pgettext(_CTX, "İxtisas"),
             "kind": "select",
             "value": values["program"],
@@ -202,6 +204,7 @@ def _filter_fields(values, options) -> list:
         },
         {
             "name": "sr_group",
+            "searchable": True,
             "label": pgettext(_CTX, "Qrup"),
             "kind": "select",
             "value": values["group"],

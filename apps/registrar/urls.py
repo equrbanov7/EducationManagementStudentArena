@@ -32,6 +32,8 @@ urlpatterns = [
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
     # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
     path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
+    # İxtisasın «Ətraflı» çekmecəsi — OXU (`catalog.view`), 2026-09-09.
+    path("kataloq/ixtisas/", catalog_actions.program_detail, name="program_detail"),
     # Ekran 05 — tədris planı əməlləri (JSON POST, `plan.*` + state maşını).
     path("tedris-plani/emel/", curriculum_actions.curriculum_action, name="curriculum_action"),
     # Ekran 07 — semestr açılışı əməlləri (JSON POST, `semester.*`).

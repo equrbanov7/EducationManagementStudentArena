@@ -37,7 +37,7 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_registry_section.kpi_tiles kpi_variant="5" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="student-registry" filter_prefix="sr_" filter_fields=student_registry_section.filter_fields filter_count_label=student_registry_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="student-registry" filter_prefix="sr_" filter_fields=student_registry_section.filter_fields filter_count_label=student_registry_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% include "partials/ems_ui/_data_table.html" with table_columns=student_registry_section.columns table_rows=student_registry_section.table_rows table_state=student_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-user-graduate" state_title=student_registry_section.state_title state_body=student_registry_section.state_body %}
 

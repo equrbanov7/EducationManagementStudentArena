@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Bir pəncərə sətri (tədris dövrü / qeydiyyat / imtahan sessiyası).
+
+Parametrlər: `w_icon`, `w_kind` (term|reg|exam), `w_start`, `w_end`, `w_state`
+(`open` | `upcoming` | `closed` | `term` | None).
+
+Vəziyyət həm RƏNGLƏ, həm də MƏTNLƏ verilir — rəng tək başına məna daşımır.{% endcomment %}
+<div class="acal-win acal-win--{{ w_kind }}">
+    <span class="acal-win__icon" aria-hidden="true"><i class="fas {{ w_icon }}"></i></span>
+    <div class="acal-win__body">
+        <dt class="acal-win__label">
+            {% if w_kind == 'term' %}{% trans "Tədris dövrü" context "registrar.calendar" %}
+            {% elif w_kind == 'reg' %}{% trans "Qeydiyyat / seçmə fənn pəncərəsi" context "registrar.calendar" %}
+            {% else %}{% trans "İmtahan sessiyası" context "registrar.calendar" %}{% endif %}
+        </dt>
+        {% if w_start and w_end %}
+        <dd class="acal-win__dates">{{ w_start|date:"d.m.Y" }} — {{ w_end|date:"d.m.Y" }}</dd>
+        {% else %}
+        <dd class="acal-win__dates acal-win__dates--none">{% trans "Müəyyən edilməyib" context "registrar.calendar" %}</dd>
+        {% endif %}
+    </div>
+    {% if w_state and w_state != 'term' %}
+    <span class="acal-state acal-state--{{ w_state }}">
+        {% if w_state == 'open' %}{% trans "Açıqdır" context "registrar.calendar" %}
+        {% elif w_state == 'upcoming' %}{% trans "Gözlənilir" context "registrar.calendar" %}
+        {% else %}{% trans "Bağlıdır" context "registrar.calendar" %}{% endif %}
+    </span>
+    {% endif %}
+</div>

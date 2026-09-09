@@ -51,18 +51,14 @@
 .acr-field .ems-ss {
     min-height: 38px;
 }
+/* ⚠️ 2026-09-09 (sahib: «içəridəki border/outline olmasın — o search içindəki
+   yerlərdə»). Bu blok əvvəl axtarış-seçicinin İÇİNDƏKİ `<input>`-a ayrıca
+   çərçivə, fon və fokus kölgəsi verirdi. Çərçivəni komponentin özü (`.ems-ss`)
+   çəkir, ona görə xarici çərçivənin İÇİNDƏ ikinci kontur görünürdü. İndi
+   yalnız ölçü/tipoqrafiya qalır; görünüşü komponent idarə edir. */
 .acr-field input {
     width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 10px;
-    background: #fff;
     font-size: 0.86rem;
-}
-.acr-field input:focus {
-    outline: none;
-    border-color: var(--ems-primary-500);
-    box-shadow: 0 0 0 3px var(--ems-primary-100);
 }
 .acr-filters .bootstrap-single-select__toggle {
     display: flex;

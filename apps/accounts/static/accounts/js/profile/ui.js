@@ -199,6 +199,21 @@
         }
 
         function updateSidebarActiveState(section) {
+            /* ⚠️ 2026-09-09 (sahib: «2 hissə eyni anda aktiv göstərir»).
+               `ctx.sidebarSectionLinks` YALNIZ `.js-profile-section-link`-ləri
+               toplayır. Sidebar-da SPA olmayan bölmə linkləri də var (məs.
+               «Jurnal bağlama») — onların `active` sinfini server render edir və
+               SPA keçidi onu SİLƏ BİLMİRDİ, nəticədə iki bölmə eyni anda mavi
+               qalırdı. Ona görə əvvəlcə sidebar-dakı BÜTÜN bölmə linklərindən
+               `active` götürülür, sonra uyğun olan yenidən qoyulur. */
+            if (ctx.sidebar) {
+                ctx.sidebar.querySelectorAll(".sidebar-menu-link[data-section]").forEach(function (link) {
+                    if (link.getAttribute("data-section") !== section) {
+                        link.classList.remove("active");
+                        link.removeAttribute("aria-current");
+                    }
+                });
+            }
             ctx.sidebarSectionLinks.forEach(function (link) {
                 var isMatch = link.getAttribute("data-section") === section;
                 link.classList.toggle("active", isMatch);

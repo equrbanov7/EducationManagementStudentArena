@@ -128,12 +128,12 @@ def calendar_view(request):
     Read-only and open to every authenticated member of the active organization
     (students plan around these dates as much as staff). Window editing lives in
     the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
-    from apps.registrar import page_contexts
+    from apps.registrar.calendar_context import calendar_context
 
     organization = getattr(request, "organization", None)
     if organization is None:
         return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
 
-    context = page_contexts.calendar_context(organization)
+    context = calendar_context(organization, year=(request.GET.get("ac_year") or "").strip())
     context["active_main_nav"] = "calendar"
     return render(request, "registrar/calendar.html", context)
