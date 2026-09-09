@@ -16,8 +16,8 @@
     "apps/exams/static/exams/js/testQuestionBank.js": 613,
     "apps/organizations/structure_registry_actions.py": 776,
     "apps/organizations/structure_views/members.py": 651,
-    "apps/organizations/structure_views/registry.py": 713,
-    "apps/registrar/lessons_log.py": 630,
+    "apps/organizations/structure_views/registry.py": 710,
+    "apps/registrar/lessons_log.py": 634,
     "apps/registrar/static/registrar/js/journal_grid.js": 669,
     "static/css/ai_assistant.css": 635,
     "static/css/navbar.css": 983
