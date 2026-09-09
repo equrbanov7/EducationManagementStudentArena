@@ -47,7 +47,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from apps.organizations.models import Organization
 from apps.registrar.models import Curriculum, CurriculumSubject, PlanStatus, Program, Subject
-from apps.registrar.plan_import import extract_rows, match_rows, normalize
+from apps.registrar.plan_import import extract_any, match_rows, normalize
 from core.rls_pooling import rls_worker_atomic
 
 SOURCES = Path(__file__).resolve().parents[2] / "data" / "ixtisas" / "plan_sources.tsv"
@@ -59,10 +59,6 @@ HEADERS = {
     ),
     "Accept": "text/html,application/xhtml+xml,application/pdf,*/*;q=0.8",
 }
-
-
-def _safe_name(value: str) -> str:
-    return re.sub(r"[^A-Za-z0-9]+", "_", value)[:40] + ".pdf"
 
 
 def _quote(url: str) -> str:
@@ -107,22 +103,23 @@ class Command(BaseCommand):
         # Psixologiya planını Regionşünaslığa, İqtisadiyyatı «Sənayenin təşkili»nə
         # bağlayırdı. Mənbə cədvəlindəki HƏLL EDİLMİŞ `proqram` sütunu işlədilir.
         programs = {
-            normalize(program.name): program
-            for program in Program.objects.filter(organization=organization, degree_level="bachelor")
+            (program.degree_level, normalize(program.name)): program
+            for program in Program.objects.filter(organization=organization)
         }
 
         totals = {"rows": 0, "matched": 0, "electives": 0, "unknown": 0, "written": 0, "plans": 0}
         unmatched_names: list[str] = []
 
         for source in sources:
-            path = directory / _safe_name(source["ad"])
+            path = directory / (source.get("senet") or "").strip()
             if not path.exists():
-                self.stdout.write(self.style.WARNING(f"  fayl yoxdur: {source['ad']} → {path.name}"))
+                self.stdout.write(self.style.WARNING(f"  fayl yoxdur: {source['sayt_adi']} → {path.name}"))
                 continue
             try:
-                rows = extract_rows(str(path))
+                # Düzüm ÖZÜ seçilir: bakalavr cədvəli, alınmasa magistr cədvəli.
+                rows, layout = extract_any(str(path))
             except Exception as exc:  # noqa: BLE001 — pozuq PDF axını dayandırmasın
-                self.stdout.write(self.style.ERROR(f"  oxunmadı: {source['ad']} ({exc.__class__.__name__})"))
+                self.stdout.write(self.style.ERROR(f"  oxunmadı: {source['sayt_adi']} ({exc.__class__.__name__})"))
                 continue
 
             result = match_rows(rows, catalogue)
@@ -133,13 +130,13 @@ class Command(BaseCommand):
             unmatched_names.extend(row["name"] for row in result["unknown"])
 
             resolved = (source.get("proqram") or "").strip()
-            program = programs.get(normalize(resolved)) if resolved else None
+            program = programs.get((source.get("seviyye") or "", normalize(resolved))) if resolved else None
             flag = " ⚠ az sətir" if result["low_yield"] else ""
             target = program.name if program else self.style.WARNING("ixtisas ƏL İLƏ həll edilməlidir")
             self.stdout.write(
                 f"  {len(rows):3d} sətir → {len(result['matched']):3d} uyğun · "
                 f"{len(result['electives']):2d} blok · {len(result['unknown']):3d} tapılmadı{flag}  "
-                f"{source['ad'][:32]:34} → {target}"
+                f"{source['sayt_adi'][:32]:34} → {target}"
             )
 
             if options["apply"] and program is not None and result["matched"]:
@@ -176,7 +173,7 @@ class Command(BaseCommand):
     def _fetch(self, sources, directory):
         done = 0
         for source in sources:
-            path = directory / _safe_name(source["ad"])
+            path = directory / (source.get("senet") or "").strip()
             if path.exists() and path.stat().st_size > 1000:
                 continue
             try:
@@ -184,7 +181,7 @@ class Command(BaseCommand):
                 path.write_bytes(urllib.request.urlopen(request, timeout=60).read())
                 done += 1
             except Exception as exc:  # noqa: BLE001 — bir fayl bütün axını dayandırmasın
-                self.stdout.write(self.style.ERROR(f"  endirilmədi: {source['ad'][:34]} ({exc})"))
+                self.stdout.write(self.style.ERROR(f"  endirilmədi: {source['sayt_adi'][:34]} ({exc})"))
         self.stdout.write(self.style.SUCCESS(f"Endirildi: {done} fayl → {directory}"))
 
     def _write_plan(self, organization, program, matched, *, year, force):
