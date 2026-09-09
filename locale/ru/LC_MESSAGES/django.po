@@ -71383,3 +71383,33 @@ msgstr "О специальности"
 msgctxt "accounts.catalog"
 msgid "Ətraflı: qruplar və tələbələr"
 msgstr "Подробно: группы и студенты"
+
+msgctxt "accounts.student_admission"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm или .csv"
+
+msgctxt "accounts.student_admission"
+msgid "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir."
+msgstr ""
+"Файл не хранится на сервере — он отправляется заново при каждом запросе."
+
+msgctxt "accounts.student_admission"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Перетащите файл сюда или нажмите, чтобы выбрать"
+
+msgctxt "accounts.student_admission"
+msgid "Faylı yükləyin və yoxlayın"
+msgstr "Загрузите файл и проверьте его"
+
+msgctxt "accounts.student_admission"
+msgid "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır."
+msgstr ""
+"Проверьте результат построчно; учётные записи создаются после подтверждения."
+
+msgctxt "accounts.student_admission"
+msgid ""
+"Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni "
+"görürsünüz."
+msgstr ""
+"Загрузка ничего не записывает: сначала выполняется пробный прогон, и вы "
+"видите результат построчно."

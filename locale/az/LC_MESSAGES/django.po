@@ -70957,3 +70957,31 @@ msgstr "İxtisas haqqında"
 msgctxt "accounts.catalog"
 msgid "Ətraflı: qruplar və tələbələr"
 msgstr "Ətraflı: qruplar və tələbələr"
+
+msgctxt "accounts.student_admission"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm və ya .csv"
+
+msgctxt "accounts.student_admission"
+msgid "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir."
+msgstr "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir."
+
+msgctxt "accounts.student_admission"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+
+msgctxt "accounts.student_admission"
+msgid "Faylı yükləyin və yoxlayın"
+msgstr "Faylı yükləyin və yoxlayın"
+
+msgctxt "accounts.student_admission"
+msgid "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır."
+msgstr "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır."
+
+msgctxt "accounts.student_admission"
+msgid ""
+"Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni "
+"görürsünüz."
+msgstr ""
+"Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni "
+"görürsünüz."

@@ -73,24 +73,48 @@ dinamik dəyərlər `data-*` atributları ilə ötürülür.
     </div>
 
     {# ── 2. Yükləmə + validasiya ──────────────────────────────────────── #}
-    <div class="stsvc__panel">
-        <h3 class="stsvc__panel-title">{% trans "2 · Faylı yükləyin və yoxlayın" context "accounts.student_admission" %}</h3>
-        <form class="stsvc__toolbar" data-six-form novalidate>
-            <label class="ems-field">
-                <span class="ems-field__label">{% trans "ATİS qəbul faylı" context "accounts.student_admission" %}</span>
-                <input class="ems-input" type="file" name="file" accept=".xlsx,.xlsm,.csv" data-six-file>
+    <div class="stsvc__panel six-card">
+        <div class="six-card__head">
+            <span class="six-card__no" aria-hidden="true">2</span>
+            <div>
+                <h3 class="six-card__title">{% trans "Faylı yükləyin və yoxlayın" context "accounts.student_admission" %}</h3>
+                <p class="six-card__hint">{% trans "Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni görürsünüz." context "accounts.student_admission" %}</p>
+            </div>
+        </div>
+        {% comment %}⚠️ 2026-09-10 (sahib: «dizayn dağılıb, toplu müəllim əlavəsindəki
+        formata oxşasın»). Əvvəl burada XAM `<input type="file">` var idi («Choose
+        File / No file chosen»), toplu müəllim/tələbə əlavəsində isə sürüşdür-burax
+        zolağı (`six-drop`). İndi hər üç ekran EYNİ komponentdədir — JS çəngəlləri
+        (`data-six-file`, `data-six-file-label`) dəyişmir.{% endcomment %}
+        <form data-six-form novalidate>
+            <label class="six-drop" data-six-drop>
+                <input type="file" class="six-drop__input" name="file" accept=".xlsx,.xlsm,.csv"
+                       data-six-file aria-describedby="six-drop-hint-admission">
+                <i class="fas fa-cloud-arrow-up six-drop__icon" aria-hidden="true"></i>
+                <span class="six-drop__title" data-six-file-label
+                      data-six-empty="{% trans 'Faylı bura sürüşdürün və ya seçmək üçün klikləyin' context 'accounts.student_admission' %}">{% trans "Faylı bura sürüşdürün və ya seçmək üçün klikləyin" context "accounts.student_admission" %}</span>
+                <span class="six-drop__hint" id="six-drop-hint-admission">{% trans ".xlsx, .xlsm və ya .csv" context "accounts.student_admission" %}</span>
             </label>
-            <span class="stsvc__toolbar-spacer" data-six-file-label>{% trans "Fayl seçilməyib" context "accounts.student_admission" %}</span>
-            <button type="button" class="ems-btn ems-btn--primary" data-six-preview>
-                {% trans "Yoxla (quru icra)" context "accounts.student_admission" %}
-            </button>
+            <div class="six-upload__foot">
+                <p class="six-upload__note">{% trans "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir." context "accounts.student_admission" %}</p>
+                <button type="button" class="ems-btn ems-btn--primary ems-btn--lg" data-six-preview>
+                    <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i>
+                    {% trans "Yoxla (quru icra)" context "accounts.student_admission" %}
+                </button>
+            </div>
         </form>
         <p class="ems-msg ems-msg--error" role="alert" data-six-error hidden></p>
     </div>
 
     {# ── 3. Nəticə + qrup təyinatı ────────────────────────────────────── #}
-    <div class="stsvc__panel" data-six-result hidden>
-        <h3 class="stsvc__panel-title"><span data-six-result-title></span></h3>
+    <div class="stsvc__panel six-card six-result" data-six-result hidden>
+        <div class="six-card__head">
+            <span class="six-card__no" aria-hidden="true">3</span>
+            <div>
+                <h3 class="six-card__title"><span data-six-result-title></span></h3>
+                <p class="six-card__hint">{% trans "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır." context "accounts.student_admission" %}</p>
+            </div>
+        </div>
         <div class="stsvc__toolbar" data-six-counts></div>
         <div class="ems-tablewrap">
             <div class="ems-tablescroll">
