@@ -70854,3 +70854,31 @@ msgstr "Program hakkında"
 msgctxt "accounts.catalog"
 msgid "Ətraflı: qruplar və tələbələr"
 msgstr "Ayrıntı: gruplar ve öğrenciler"
+
+msgctxt "accounts.student_admission"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm veya .csv"
+
+msgctxt "accounts.student_admission"
+msgid "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir."
+msgstr "Dosya sunucuda saklanmaz — her istekte yeniden gönderilir."
+
+msgctxt "accounts.student_admission"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Dosyayı buraya sürükleyin ya da seçmek için tıklayın"
+
+msgctxt "accounts.student_admission"
+msgid "Faylı yükləyin və yoxlayın"
+msgstr "Dosyayı yükleyin ve doğrulayın"
+
+msgctxt "accounts.student_admission"
+msgid "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır."
+msgstr "Sonucu satır satır kontrol edin; onaydan sonra hesaplar oluşturulur."
+
+msgctxt "accounts.student_admission"
+msgid ""
+"Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni "
+"görürsünüz."
+msgstr ""
+"Yükleme hiçbir şey yazmaz: önce kuru çalışma yapılır ve sonucu satır satır "
+"görürsünüz."

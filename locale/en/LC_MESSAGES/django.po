@@ -71234,3 +71234,32 @@ msgstr "About the programme"
 msgctxt "accounts.catalog"
 msgid "Ətraflı: qruplar və tələbələr"
 msgstr "Details: groups and students"
+
+msgctxt "accounts.student_admission"
+msgid ".xlsx, .xlsm və ya .csv"
+msgstr ".xlsx, .xlsm or .csv"
+
+msgctxt "accounts.student_admission"
+msgid "Fayl serverdə saxlanılmır — hər sorğuda yenidən göndərilir."
+msgstr ""
+"The file is not stored on the server — it is re-sent with every request."
+
+msgctxt "accounts.student_admission"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Drag the file here, or click to choose one"
+
+msgctxt "accounts.student_admission"
+msgid "Faylı yükləyin və yoxlayın"
+msgstr "Upload the file and validate it"
+
+msgctxt "accounts.student_admission"
+msgid "Sətir-sətir nəticəni yoxlayın; təsdiqdən sonra hesablar yaradılır."
+msgstr "Check the result row by row; accounts are created after you confirm."
+
+msgctxt "accounts.student_admission"
+msgid ""
+"Yükləmə heç nə yazmır: əvvəlcə quru icra gedir, sətir-sətir nəticəni "
+"görürsünüz."
+msgstr ""
+"Uploading writes nothing: a dry run happens first and you see the result row"
+" by row."
