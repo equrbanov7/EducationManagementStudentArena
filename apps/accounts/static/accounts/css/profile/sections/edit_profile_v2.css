@@ -248,38 +248,36 @@
     font-size: 0.72rem;
 }
 
-/* Üzən əməliyyat paneli: .profile-main overflow:auto olduğundan sticky
-   window-a görə işləmir — fixed + mərkəzləşmiş pill (modern floating bar).
-   Bölmə gizli olanda (display:none valideyn) fixed element də gizlənir. */
+/* ⚠️ 2026-09-10 (sahib: «aşağıdakı Önizləmə / Ləğv et / Yadda Saxla … görünüş
+   stabillik»). Panel əvvəl `position: fixed` üzən pill idi və ekranın ortasında
+   məzmunun ÜSTÜNƏ düşürdü — «Akademik məlumatlar» kartının başlığı onun altında
+   qalırdı. İndi panel formanın SONUNDA, axının içindədir: heç nəyi örtmür,
+   səhifə sürüşəndə yerindən tərpənmir. */
 .edit-profile-savebar {
-    position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 40; /* modal (1055) və backdrop-dan aşağı */
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 14px;
     flex-wrap: wrap;
-    /* Məzmuna görə daralır: sabit 760px-də «Yadda saxlanmamış dəyişikliklər»
-       nişanı gizli olanda pilləkin sol yarısı BOŞ ağ zolaq kimi qalırdı.
-       max-width uzun status mətnində əvvəlki tavanı saxlayır. */
-    width: auto;
-    max-width: min(760px, calc(100vw - 32px));
+    margin-top: 18px;
+    padding: 14px 18px;
     box-sizing: border-box;
-    padding: 12px 18px;
-    background: rgba(255, 255, 255, 0.94);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: #fff;
     border: 1px solid var(--profile-border);
-    border-radius: 999px;
-    box-shadow: 0 10px 34px rgba(15, 23, 42, 0.18);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-/* Fixed panel son kartı örtməsin deyə bölmənin sonunda nəfəslik. */
-.profile-section--edit-profile {
-    padding-bottom: 96px;
+/* Status nişanı olmayanda düymələr sağa yığılır. */
+.edit-profile-savebar__status[hidden] + .edit-profile-savebar__actions {
+    margin-inline-start: auto;
+}
+
+.edit-profile-savebar__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .edit-profile-savebar .btn {
@@ -289,11 +287,6 @@
 @media (max-width: 575px) {
     .edit-profile-savebar {
         justify-content: stretch;
-        border-radius: 16px;
-        bottom: 8px;
-        /* Mobil davranış DƏYİŞMİR: burada düymələr 3 sütunlu grid ilə tam eni
-           tutur, ona görə desktop-dakı «məzmuna görə daral» qaydası ləğv olunur. */
-        width: min(760px, calc(100vw - 32px));
     }
 
     .edit-profile-savebar__actions {
@@ -411,4 +404,95 @@
 .academic-items-nomatch[hidden],
 .edit-profile-savebar__status[hidden] {
     display: none !important;
+}
+
+
+/* ── Avatar seçicisi (2026-09-10) ─────────────────────────────────────────
+   Çılpaq fayl input-u brauzerdən-brauzerə başqa cür görünürdü; indi cari şəkil
+   önizləməsi + layihənin öz düymə üslubu. Davranış: edit_profile_avatar.js. */
+.info-item--avatar {
+    grid-column: 1 / -1;
+}
+
+.edit-profile-avatar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.edit-profile-avatar__thumb {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--ems-neutral-100, #f1f5f9);
+    border: 1px solid var(--profile-border);
+    color: var(--profile-muted);
+    font-size: 1.4rem;
+}
+
+.edit-profile-avatar__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-profile-avatar__body {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* Native input gizlədilir, `<label for>` düymə rolunu oynayır — klaviatura ilə
+   çatım input-un öz fokusundan gəlir, ona görə o `display:none` EDİLMİR. */
+.edit-profile-avatar__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.edit-profile-avatar__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: start;
+    padding: 8px 16px;
+    border: 1px solid var(--profile-border);
+    border-radius: 10px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-fg, #0f172a);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.edit-profile-avatar__btn:hover {
+    border-color: var(--ems-primary, #2563eb);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+/* Fokus native input-dadır (o, gizlədilib) — halqa görünən düymədə çəkilir.
+   `<label>` input-dan ƏVVƏL gəldiyi üçün qardaş selektoru işləmir. */
+.edit-profile-avatar__body:has(.edit-profile-avatar__input:focus-visible) .edit-profile-avatar__btn {
+    outline: 2px solid var(--ems-primary, #2563eb);
+    outline-offset: 2px;
+}
+
+.edit-profile-avatar__hint {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--profile-muted);
+    overflow-wrap: anywhere;
 }

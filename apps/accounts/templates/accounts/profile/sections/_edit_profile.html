@@ -9,10 +9,26 @@
    rollar üçün bootstrap-single-select ilə seçilir.
  * «Akademik fəaliyyət» (fənn/sertifikat/məqalə/konfrans) ayrıca AJAX
    idarəetməsidir — bax _academic_items_manage.html + academic_items.js.
+
+2026-09-10 REDİZAYN (sahib: «aşağıdakı Önizləmə / Ləğv et / Yadda Saxla …
+görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
+ * ⚠️ `<h1>` BURADA YAZILMIR — qabıq bölmə adını `#profileSectionTitle` kimi
+   verir. Kontekst `ems_ui/_content_header.html` altbaşlığı ilə ötürülür.
+ * Əməliyyat paneli artıq üzən (`position: fixed`) pill DEYİL: o, formanın
+   SONUNDA, axının içindədir. Üzən variant ekranın ortasında «Akademik
+   məlumatlar» kartının başlığını örtürdü və sürüşdürəndə tərpənirdi.
+ * Panel formanın İÇİNDƏdir: «Yadda saxla» məhz onun üstündəki sahələri
+   saxlayır. «Akademik fəaliyyət» kartı ayrıca AJAX-la işlədiyi üçün panelin
+   ARDINCA gəlir — ona ayrıca saxlama düyməsi lazım deyil.
+ * Avatar sahəsi çılpaq `<input type="file">` deyil: cari şəkil önizləməsi +
+   adlandırılmış seçim düyməsi (bax edit_profile_avatar.js).
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260827-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260910-1">
+
+    {% trans 'Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur.' context 'profile.edit_v2' as edit_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=edit_subtitle %}
 
     <form method="post" enctype="multipart/form-data" id="editProfileForm" class="edit-profile-form">
         {% csrf_token %}
@@ -63,9 +79,31 @@
                            value="{{ profile.location|default:'' }}" maxlength="100"
                            placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
                 </div>
-                <div class="info-item">
-                    <label class="info-label" for="avatar">{% trans "avatar" context "profile.edit" %}</label>
-                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                <div class="info-item info-item--avatar">
+                    <span class="info-label">{% trans "avatar" context "profile.edit" %}</span>
+                    <div class="edit-profile-avatar" data-avatar-picker>
+                        <span class="edit-profile-avatar__thumb">
+                            {% if profile.avatar %}
+                            <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
+                                 alt="" data-avatar-preview>
+                            {% else %}
+                            <i class="fas fa-user" aria-hidden="true" data-avatar-placeholder></i>
+                            <img src="" alt="" hidden data-avatar-preview>
+                            {% endif %}
+                        </span>
+                        <div class="edit-profile-avatar__body">
+                            <label class="edit-profile-avatar__btn" for="avatar">
+                                <i class="fas fa-image" aria-hidden="true"></i>
+                                {% trans 'Şəkil seç' context 'profile.edit_v2' %}
+                            </label>
+                            <input type="file" class="edit-profile-avatar__input" id="avatar" name="avatar" accept="image/*"
+                                   data-avatar-input
+                                   data-label-empty="{% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}">
+                            <p class="edit-profile-avatar__hint" data-avatar-name>
+                                {% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -171,6 +209,25 @@
             </div>
         </div>
 
+        <div class="edit-profile-savebar" id="editProfileSavebar">
+            <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
+                <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
+            </span>
+            <div class="edit-profile-savebar__actions">
+                <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
+                   class="btn btn-outline-primary" target="_blank" rel="noopener">
+                    <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
+                </a>
+                <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
+                   data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
+                    <i class="fas fa-times" aria-hidden="true"></i> {% trans "cancel" context "profile.edit" %}
+                </a>
+                <button type="submit" form="editProfileForm" class="btn btn-primary">
+                    <i class="fas fa-save" aria-hidden="true"></i> {% trans "save" context "profile.edit" %}
+                </button>
+            </div>
+        </div>
     </form>
 
     <div class="section-card" id="academicItemsManager"
@@ -195,26 +252,6 @@
              data-label-show-less="{% trans 'Daha az göstər' context 'profile.academic_items' %}"
              data-label-no-match="{% trans 'Axtarışa uyğun qeyd tapılmadı.' context 'profile.academic_items' %}">
             {% include "accounts/profile/sections/_academic_items_manage.html" %}
-        </div>
-    </div>
-
-    <div class="edit-profile-savebar" id="editProfileSavebar">
-        <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
-            <i class="fas fa-circle-exclamation"></i>
-            {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
-        </span>
-        <div class="edit-profile-savebar__actions">
-            <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
-               class="btn btn-outline-primary" target="_blank" rel="noopener">
-                <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
-            </a>
-            <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
-               data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
-                <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
-            </a>
-            <button type="submit" form="editProfileForm" class="btn btn-primary">
-                <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
-            </button>
         </div>
     </div>
 
@@ -327,5 +364,6 @@
     {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
     <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260827-1" defer></script>
     <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260815-1" defer></script>
+    <script src="{% static 'accounts/js/profile/edit_profile_avatar.js' %}?v=20260910-1" defer></script>
 </section>
 {% endif %}

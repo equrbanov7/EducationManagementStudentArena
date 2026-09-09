@@ -1,7 +1,7 @@
 /* Profil redaktəsi — yadda saxlanmamış dəyişiklik qoruyucusu.
  *
  * Forma ilk vəziyyətlə müqayisə olunur (dirty-check). Dəyişiklik varkən:
- *  - sticky paneldə status nişanı görünür;
+ *  - formanın sonundakı əməliyyat panelində status nişanı görünür;
  *  - səhifədaxili keçidlər (sidebar, bölmə linkləri) capture fazasında tutulub
  *    #editProfileLeaveModal təsdiqi göstərilir (Yadda saxla / Saxlamadan çıx /
  *    Ləğv et);

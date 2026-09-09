@@ -71263,3 +71263,79 @@ msgid ""
 msgstr ""
 "Uploading writes nothing: a dry run happens first and you see the result row"
 " by row."
+
+msgctxt "profile.password"
+msgid "Şifrəni ya mövcud şifrənizlə, ya da e-poçtunuza gələn birdəfəlik kodla dəyişə bilərsiniz. Dəyişiklikdən sonra digər cihazlardakı sessiyalar qüvvədə qalır."
+msgstr "You can change your password either with your current password or with a one-time code sent to your e-mail. Sessions on your other devices stay signed in."
+
+msgctxt "profile.password"
+msgid "Şifrəni göstər / gizlət"
+msgstr "Show / hide password"
+
+msgctxt "profile.password"
+msgid "Caps Lock açıqdır."
+msgstr "Caps Lock is on."
+
+msgctxt "profile.password"
+msgid "Şifrələr uyğundur."
+msgstr "The passwords match."
+
+msgctxt "profile.password"
+msgid "Şifrələr eyni deyil."
+msgstr "The passwords do not match."
+
+msgctxt "profile.password"
+msgid "Şifrə hələ yazılmayıb"
+msgstr "No password entered yet"
+
+msgctxt "profile.password"
+msgid "Zəif"
+msgstr "Weak"
+
+msgctxt "profile.password"
+msgid "Orta"
+msgstr "Fair"
+
+msgctxt "profile.password"
+msgid "Yaxşı"
+msgstr "Good"
+
+msgctxt "profile.password"
+msgid "Güclü"
+msgstr "Strong"
+
+msgctxt "profile.password"
+msgid "Şifrə tələbləri"
+msgstr "Password requirements"
+
+msgctxt "profile.password"
+msgid "Ən azı 8 simvol"
+msgstr "At least 8 characters"
+
+msgctxt "profile.password"
+msgid "Yalnız rəqəmlərdən ibarət olmasın"
+msgstr "Must not be entirely numeric"
+
+msgctxt "profile.password"
+msgid "Ad, soyad, istifadəçi adı və ya e-poçtla oxşar olmasın"
+msgstr "Must not resemble your name, surname, username or e-mail"
+
+msgctxt "profile.password"
+msgid "Böyük/kiçik hərf, rəqəm və simvol qarışığı tövsiyə olunur"
+msgstr "A mix of upper/lower case, digits and symbols is recommended"
+
+msgctxt "profile.password"
+msgid "Geniş yayılmış şifrələr (məsələn «12345678», «password») server tərəfindən rədd edilir."
+msgstr "Common passwords (for example “12345678”, “password”) are rejected by the server."
+
+msgctxt "profile.edit_v2"
+msgid "Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur."
+msgstr "Update your personal contact details and academic profile here. Structural data assigned by the university is read-only."
+
+msgctxt "profile.edit_v2"
+msgid "Şəkil seç"
+msgstr "Choose image"
+
+msgctxt "profile.edit_v2"
+msgid "PNG və ya JPG · maksimum 5 MB"
+msgstr "PNG or JPG · 5 MB maximum"
