@@ -37,7 +37,7 @@ düymə GİZLƏNMİR, `disabled` olur (§4).
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=cu_subtitle header_actions_include="accounts/profile/sections/teaching_office/_plan_header_actions.html" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="curriculum-editor" filter_prefix="cu_" filter_fields=curriculum_editor_section.filter_fields filter_count_label=curriculum_editor_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="curriculum-editor" filter_prefix="cu_" filter_fields=curriculum_editor_section.filter_fields filter_count_label=curriculum_editor_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if not curriculum_editor_section.plan %}
         {% trans "Tədris planı seçilməyib" context "accounts.curriculum" as cu_none_title %}

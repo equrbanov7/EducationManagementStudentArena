@@ -21,12 +21,22 @@ CSS xarici fayldadır, JS qabıqda (`roles_ui.js`) — CSP inline qadağandır.
 <section class="profile-section-panel profile-section--manage-roles {% if active_section == 'manage-roles' %}is-active{% endif %}"
          data-profile-section-panel="manage-roles"
          data-source-url="{% url 'accounts:manage_roles' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-3">
 
     {% if not sec.has_access %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}
     {% else %}
     <div class="rls" data-roles-root data-roles-section="manage-roles">
+    {% if sec.grant_prefill %}
+        {% comment %}«Rol təyin et»dən gələn dərin keçid — dialoq özü açılır.
+        Ayrıca JS axını qurulmur: eyni `[data-roles-open]` müqaviləsi işlədilir.{% endcomment %}
+        <button type="button" class="sr-only" data-roles-autogrant
+                data-roles-open="mrGrantDialog"
+                data-roles-person="{{ sec.grant_prefill.name }}"
+                data-roles-prefill='{"user_id": "{{ sec.grant_prefill.user_id }}", "role_id": "", "scope_unit": "", "reason": ""}'>
+            {% trans "Rol ver" context "accounts.manage_roles" %}
+        </button>
+    {% endif %}
 
         {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle header_actions_include="accounts/profile/sections/roles/_manage_header_actions.html" %}
 

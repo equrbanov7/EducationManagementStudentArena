@@ -165,6 +165,7 @@ def build_workload_center_section(request, section, *, active_organization, allo
         },
         {
             "name": "wc_faculty",
+            "searchable": True,
             "label": pgettext(_CTX, "Fakültə"),
             "kind": "select",
             "value": payload["filters"]["faculty"],

@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}İxtisasın adı — KLİK EDİLƏNDİR: «Ətraflı» çekmecəsini açır (qruplar,
+tələbələr, plan, semestr açılışları). Sahib, 2026-09-09.
+
+Link deyil, DÜYMƏDİR: heç yerə naviqasiya etmir, panel yerində qalır.{% endcomment %}
+<button type="button" class="tof-progname" data-pgd-open="{{ row.data.id }}"
+        title="{% trans 'Ətraflı: qruplar və tələbələr' context 'accounts.catalog' %}">
+    {{ row.data.name }}
+</button>
