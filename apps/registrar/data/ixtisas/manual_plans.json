@@ -1,0 +1,159 @@
+[
+  {
+    "seviyye": "bachelor",
+    "proqram": "Ekologiya Mühəndisliyi",
+    "sayt_adi": "Ekologiya mühəndisliyi",
+    "senet": "B_Ekologiya_m_h_ndisliyi.pdf",
+    "url": "https://wcu.edu.az/uploads/files/050607 Ekologiya mühəndisliyi 2023.pdf",
+    "niye_elle": "Saytdakı PDF SKAN şəklidir — mətn qatı yoxdur (23 səhifə, hər səhifədə 0 simvol), ona görə `extract_rows` 0 sətir qaytarır. Cədvəl (səh. 6–16, «Cədvəl 1») əl ilə oxunub köçürülüb.",
+    "semestr_yoxdur": true,
+    "yekun_kredit": 240,
+    "rows": [
+      {
+        "no": 1,
+        "code": "",
+        "name": "Azərbaycan tarixi",
+        "credits": 5
+      },
+      {
+        "no": 2,
+        "code": "",
+        "name": "Azərbaycan dilində işgüzar və akademik kommunikasiya",
+        "credits": 4
+      },
+      {
+        "no": 3,
+        "code": "",
+        "name": "Xarici dildə işgüzar və akademik kommunikasiya",
+        "credits": 15
+      },
+      {
+        "no": 6,
+        "code": "",
+        "name": "Riyaziyyat",
+        "credits": 10
+      },
+      {
+        "no": 7,
+        "code": "",
+        "name": "Tətbiqi riyaziyyat",
+        "credits": 6
+      },
+      {
+        "no": 8,
+        "code": "",
+        "name": "Fizikanın əsasları",
+        "credits": 7
+      },
+      {
+        "no": 9,
+        "code": "",
+        "name": "Ekologiya mühəndisliyi",
+        "credits": 6
+      },
+      {
+        "no": 10,
+        "code": "",
+        "name": "Ümumi kimya",
+        "credits": 8
+      },
+      {
+        "no": 11,
+        "code": "",
+        "name": "Analitik kimya və instrumental analiz",
+        "credits": 4
+      },
+      {
+        "no": 12,
+        "code": "",
+        "name": "Ətraf mühitin kimyası və toksikologiyanın əsasları",
+        "credits": 5
+      },
+      {
+        "no": 13,
+        "code": "",
+        "name": "Mühəndis qrafikası",
+        "credits": 6
+      },
+      {
+        "no": 14,
+        "code": "",
+        "name": "Məsafədən zondlanmanın fiziki əsasları",
+        "credits": 7
+      },
+      {
+        "no": 15,
+        "code": "",
+        "name": "Hidrologiya",
+        "credits": 6
+      },
+      {
+        "no": 16,
+        "code": "",
+        "name": "Ümumi ekologiya",
+        "credits": 7
+      },
+      {
+        "no": 17,
+        "code": "",
+        "name": "Ətraf mühitə təsirin qiymətləndirilməsi",
+        "credits": 6
+      },
+      {
+        "no": 18,
+        "code": "",
+        "name": "Ekoloji sistemlərin modelləşdirilməsi",
+        "credits": 5
+      },
+      {
+        "no": 19,
+        "code": "",
+        "name": "Ekoloji monitorinq",
+        "credits": 5
+      },
+      {
+        "no": 20,
+        "code": "",
+        "name": "Ətraf mühitin idarə olunması (Ekoloji menecment)",
+        "credits": 6
+      },
+      {
+        "no": 21,
+        "code": "",
+        "name": "Tullantısız istehsal prosesləri və tullantıların təkrar emalı",
+        "credits": 6
+      },
+      {
+        "no": 22,
+        "code": "",
+        "name": "Su ehtiyatlarının inteqrasiyalı idarə edilməsi",
+        "credits": 6
+      },
+      {
+        "no": 23,
+        "code": "",
+        "name": "İqlim dəyişmələri və qlobal istiləşmə",
+        "credits": 5
+      },
+      {
+        "no": 24,
+        "code": "",
+        "name": "Torpaqların meliorasiyası, rekultivasiyası və ekoloji əsasları",
+        "credits": 6
+      },
+      {
+        "no": 25,
+        "code": "",
+        "name": "Mülki müdafiə",
+        "credits": 3
+      }
+    ],
+    "yazilmayan": [
+      "4-cü sətir SEÇMƏ BLOK (3 kredit): Fəlsəfə / Sosiologiya / AR Konstitusiyası və hüququn əsasları / Məntiq / Etika və estetika / Multikulturalizmə giriş",
+      "5-ci sətir SEÇMƏ BLOK (3 kredit): İnformasiya texnologiyaları (ixtisas üzrə) / İnformasiyanın idarə edilməsi / Sahibkarlığın əsasları və biznesə giriş / Politologiya",
+      "«Ali təhsil müəssisəsi tərəfindən müəyyən edilən fənlər» (60 kredit) — YER TUTUCU, sənəddə fənn adı yoxdur",
+      "26-cı sətir «Təcrübə və buraxılış işi» (30 kredit) — fənn deyil, buraxılış mərhələsidir"
+    ],
+    "kredit_yoxlamasi": "144 (23 fənn) + 3 + 3 (iki seçmə blok) + 60 (ali təhsil müəssisəsinin fənləri) + 30 (təcrübə və buraxılış işi) = 240 — sənədin öz «240 AKTS» yekunu ilə üst-üstə düşür."
+  }
+]

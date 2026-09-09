@@ -25,13 +25,25 @@ NƏ YAZILMIR (qəsdən)
 --------------------
 * **seçmə bloklar** — «I blok: 1. Sosiologiya 2. AR Konstitusiyası …» bir xanada
   bir neçə fənndir; tək `CurriculumSubject` deyil (planın ~34%-i);
-* **kataloqda tapılmayan fənn** — sistem fənn UYDURMUR, siyahı ilə göstərir;
+* **kataloqda tapılmayan fənn** — sistem fənn UYDURMUR, siyahı ilə göstərir
+  (`--create-subjects` ilə şüurlu şəkildə kataloqa yazıla bilər);
 * planı onsuz da olan ixtisas — `--force` olmadan toxunulmur.
+
+İKİ ƏLAVƏ REJİM
+---------------
+* ``--manual``          — saytda SKAN şəklində dərc olunmuş (mətn qatı olmayan)
+                          planları da idxal edir; onların cədvəli əl ilə oxunub
+                          ``data/ixtisas/manual_plans.json``-a köçürülüb.
+* ``--create-subjects`` — kataloqda tapılmayan fənləri kataloqa yazır. Seçmə
+                          bloklar və yer tutucular YARADILMIR.
+
+Hər ikisinin məntiqi: ``apps/registrar/plan_manual.py``.
 
 İstifadə::
 
     python manage.py import_curriculum_plans --fetch --dir /tmp/plans
     python manage.py import_curriculum_plans --dir /tmp/plans            # hesabat
+    python manage.py import_curriculum_plans --dir /tmp/plans --manual   # + skan
     python manage.py import_curriculum_plans --dir /tmp/plans --apply --year 2023
 """
 
@@ -49,6 +61,7 @@ from django.core.management.base import BaseCommand, CommandError
 from apps.organizations.models import Organization
 from apps.registrar.models import Curriculum, CurriculumSubject, PlanStatus, Program, Subject
 from apps.registrar.plan_import import extract_any, match_rows, normalize
+from apps.registrar.plan_manual import SITE_CODE_PREFIX, SubjectCreator, load_manual_plans
 from core.rls_pooling import rls_worker_atomic
 
 SOURCES = Path(__file__).resolve().parents[2] / "data" / "ixtisas" / "plan_sources.tsv"
@@ -109,6 +122,17 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Qaralama plan YARAT.")
         parser.add_argument("--year", type=int, default=2023, help="Qəbul ili (defolt 2023).")
         parser.add_argument("--force", action="store_true", help="Planı olan ixtisası da idxal et.")
+        parser.add_argument(
+            "--manual",
+            action="store_true",
+            help="Əl ilə köçürülmüş (skan PDF) planları da idxal et.",
+        )
+        parser.add_argument(
+            "--create-subjects",
+            action="store_true",
+            dest="create_subjects",
+            help="Kataloqda tapılmayan fənləri kataloqa YARAT (yazma yalnız `--apply` ilə).",
+        )
 
     def handle(self, *args, **options):
         sources = load_sources()
@@ -119,21 +143,7 @@ class Command(BaseCommand):
             self._fetch(sources, directory)
             return
 
-        organization = self._organization(options.get("org_slug"))
-        catalogue = {}
-        for subject in Subject.objects.filter(organization=organization):
-            catalogue.setdefault(normalize(subject.name), subject)
-        # ⚠️ Uyğunluq fayl adındakı 050XXX şifri ilə QURULMUR. Saytdakı şifrlərin
-        # bir hissəsi səhvdir (bax `_program_official_codes.py`) — sınaqda o yol
-        # Psixologiya planını Regionşünaslığa, İqtisadiyyatı «Sənayenin təşkili»nə
-        # bağlayırdı. Mənbə cədvəlindəki HƏLL EDİLMİŞ `proqram` sütunu işlədilir.
-        programs = {
-            (program.degree_level, normalize(program.name)): program
-            for program in Program.objects.filter(organization=organization)
-        }
-
-        totals = {"rows": 0, "matched": 0, "electives": 0, "unknown": 0, "written": 0, "plans": 0}
-        unmatched_names: list[str] = []
+        self._prepare(options)
 
         for source in sources:
             path = directory / (source.get("senet") or "").strip()
@@ -146,48 +156,106 @@ class Command(BaseCommand):
             except Exception as exc:  # noqa: BLE001 — pozuq PDF axını dayandırmasın
                 self.stdout.write(self.style.ERROR(f"  oxunmadı: {source['sayt_adi']} ({exc.__class__.__name__})"))
                 continue
+            self._process(rows, source, options)
 
-            result = match_rows(rows, catalogue)
-            totals["rows"] += len(rows)
-            totals["matched"] += len(result["matched"])
-            totals["electives"] += len(result["electives"])
-            totals["unknown"] += len(result["unknown"])
-            unmatched_names.extend(row["name"] for row in result["unknown"])
+        if options["manual"]:
+            self.stdout.write(self.style.MIGRATE_HEADING("\nƏL İLƏ KÖÇÜRÜLMÜŞ PLANLAR (skan sənəd)"))
+            try:
+                entries = load_manual_plans()
+            except (OSError, ValueError) as exc:
+                raise CommandError(f"Əl ilə köçürülmüş planlar oxunmadı: {exc}") from exc
+            for entry in entries:
+                self._process(entry["rows"], entry, options)
 
-            resolved = (source.get("proqram") or "").strip()
-            program = programs.get((source.get("seviyye") or "", normalize(resolved))) if resolved else None
-            flag = " ⚠ az sətir" if result["low_yield"] else ""
-            target = program.name if program else self.style.WARNING("ixtisas ƏL İLƏ həll edilməlidir")
-            self.stdout.write(
-                f"  {len(rows):3d} sətir → {len(result['matched']):3d} uyğun · "
-                f"{len(result['electives']):2d} blok · {len(result['unknown']):3d} tapılmadı{flag}  "
-                f"{source['sayt_adi'][:32]:34} → {target}"
+        self._summary(options)
+
+    # ── icra vəziyyəti ──────────────────────────────────────────────────────
+    def _prepare(self, options):
+        """İcra boyu paylaşılan vəziyyəti qurur (kataloq, ixtisaslar, sayğaclar)."""
+        self.organization = self._organization(options.get("org_slug"))
+        self.catalogue = {}
+        for subject in Subject.objects.filter(organization=self.organization):
+            self.catalogue.setdefault(normalize(subject.name), subject)
+        # ⚠️ Uyğunluq fayl adındakı 050XXX şifri ilə QURULMUR. Saytdakı şifrlərin
+        # bir hissəsi səhvdir (bax `_program_official_codes.py`) — sınaqda o yol
+        # Psixologiya planını Regionşünaslığa, İqtisadiyyatı «Sənayenin təşkili»nə
+        # bağlayırdı. Mənbə cədvəlindəki HƏLL EDİLMİŞ `proqram` sütunu işlədilir.
+        self.programs = {
+            (program.degree_level, normalize(program.name)): program
+            for program in Program.objects.filter(organization=self.organization)
+        }
+        # `--create-subjects` bazaya YALNIZ `--apply` ilə yazır; hesabat rejimində
+        # eyni hesablama quru işləyir ki, neçə fənn yaradılacağı görünsün.
+        self.creator = (
+            SubjectCreator(self.organization, self.catalogue, dry_run=not options["apply"])
+            if options["create_subjects"]
+            else None
+        )
+        self.totals = {
+            "rows": 0,
+            "matched": 0,
+            "electives": 0,
+            "unknown": 0,
+            "written": 0,
+            "plans": 0,
+            "subjects": 0,
+        }
+        self.unmatched_names: list[str] = []
+
+    def _process(self, rows, source, options):
+        """Bir mənbənin (PDF və ya əl ilə köçürülmüş) sətirlərini emal edir."""
+        result = match_rows(rows, self.catalogue)
+        # ⚠️ Fənn yaradılması hesabatdan ƏVVƏL gəlir: yaradılan sətirlər artıq
+        # `matched`-dədir, ona görə sətirdəki «tapılmadı» sayı REAL qalığı verir.
+        created = self.creator.absorb(result, source) if self.creator else 0
+
+        self.totals["rows"] += len(rows)
+        self.totals["matched"] += len(result["matched"])
+        self.totals["electives"] += len(result["electives"])
+        self.totals["unknown"] += len(result["unknown"])
+        self.totals["subjects"] += created
+        self.unmatched_names.extend(row["name"] for row in result["unknown"])
+
+        resolved = (source.get("proqram") or "").strip()
+        program = self.programs.get((source.get("seviyye") or "", normalize(resolved))) if resolved else None
+        flag = " ⚠ az sətir" if result["low_yield"] else ""
+        fresh = f" · {created:3d} yeni fənn" if created else ""
+        target = program.name if program else self.style.WARNING("ixtisas ƏL İLƏ həll edilməlidir")
+        self.stdout.write(
+            f"  {len(rows):3d} sətir → {len(result['matched']):3d} uyğun · "
+            f"{len(result['electives']):2d} blok · {len(result['unknown']):3d} tapılmadı{flag}{fresh}  "
+            f"{source['sayt_adi'][:32]:34} → {target}"
+        )
+
+        if options["apply"] and program is not None and result["matched"]:
+            written = self._write_plan(
+                self.organization,
+                program,
+                result["matched"],
+                year=options["year"],
+                force=options["force"],
+                source=source,
             )
+            self.totals["written"] += written
+            self.totals["plans"] += 1 if written else 0
 
-            if options["apply"] and program is not None and result["matched"]:
-                written = self._write_plan(
-                    organization,
-                    program,
-                    result["matched"],
-                    year=options["year"],
-                    force=options["force"],
-                    source=source,
-                )
-                totals["written"] += written
-                totals["plans"] += 1 if written else 0
-
+    def _summary(self, options):
+        totals = self.totals
         self.stdout.write(self.style.MIGRATE_HEADING("\nYEKUN"))
         self.stdout.write(
             f"  sətir {totals['rows']} · uyğun {totals['matched']} · seçmə blok "
             f"{totals['electives']} · tapılmadı {totals['unknown']}"
         )
+        if self.creator is not None:
+            verb = "yaradıldı" if options["apply"] else "yaradılacaq"
+            self.stdout.write(f"  kataloqa {verb}: {totals['subjects']} yeni fənn ({SITE_CODE_PREFIX}-…)")
         if options["apply"]:
             self.stdout.write(f"  yazıldı: {totals['written']} sətir / {totals['plans']} qaralama plan")
         else:
             self.stdout.write(self.style.NOTICE("  HESABAT rejimi — heç nə yazılmadı (`--apply` ilə yazılır)."))
-        if unmatched_names:
+        if self.unmatched_names:
             self.stdout.write("\n  Kataloqda tapılmayan fənn adları (ilk 25):")
-            for name in sorted(set(unmatched_names))[:25]:
+            for name in sorted(set(self.unmatched_names))[:25]:
                 self.stdout.write(f"    · {name[:88]}")
 
     # ── köməkçilər ──────────────────────────────────────────────────────────
@@ -293,9 +361,15 @@ class Command(BaseCommand):
             f"URL: {source.get('url', '—')}",
             f"Tanınmış sətir: {total} · yazıldı: {written} · krediti oxunmadığı üçün buraxıldı: {skipped}",
         ]
-        if (source.get("seviyye") or "") == "master":
+        # Əl ilə köçürülmüş plan: təsdiq edən NİYƏ əl ilə oxunduğunu görməlidir.
+        if source.get("niye_elle"):
+            parts.append(f"⚠️ Sənəd ƏL İLƏ köçürülüb. Səbəb: {source['niye_elle']}")
+        for line in source.get("yazilmayan") or []:
+            parts.append(f"  · plana YAZILMAYAN: {line}")
+        # Semestr bölgüsü olmayan mənbələr: magistr cədvəlləri və skan sənədlər.
+        if (source.get("seviyye") or "") == "master" or source.get("semestr_yoxdur"):
             parts.append(
-                "⚠️ Magistr sənədində semestr bölgüsü YOXDUR — bütün sətirlər 1-ci "
+                "⚠️ Mənbə sənəddə semestr bölgüsü YOXDUR — bütün sətirlər 1-ci "
                 "semestrə qoyulub, təsdiqdən əvvəl əl ilə bölünməlidir."
             )
         return "\n".join(parts)
