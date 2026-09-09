@@ -128,6 +128,7 @@ SECTION_PARTIALS: dict[str, str] = {
     # AJAX swap təhlükəsizdir.
     "student-intake": "accounts/profile/sections/_student_intake.html",
     "teacher-intake": "accounts/profile/sections/_teacher_intake.html",
+    "registrar-catalog": "accounts/profile/sections/_registrar_catalog.html",
     # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
     # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
     "applications": "accounts/profile/sections/_applications.html",
@@ -238,6 +239,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "schedule-manage",
         "student-intake",
         "teacher-intake",
+        "registrar-catalog",
         "applications",
         "academic-calendar",
         "my-journal",

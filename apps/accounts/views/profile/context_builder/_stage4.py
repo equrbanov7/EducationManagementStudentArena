@@ -261,6 +261,7 @@ class _Stage4Mixin:
             "dashboard_section": self.dashboard_section,
             "student_intake_section": self.student_intake_section,
             "teacher_intake_section": self.teacher_intake_section,
+            "registrar_catalog_section": self.registrar_catalog_section,
             "applications_section": self.applications_section,
             "workload_distribution_section": self.workload_distribution_section,
             "my_workload_section": self.my_workload_section,

@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}Rol sətrinin birinci sütunu (th scope="row") — ad + izah + nişanlar.
+Kontekst: `row` (bax `roles_ui._row`).{% endcomment %}
+{% with e=row.entry %}
+<div class="rolreg-cell">
+  <button type="button" class="rolreg-cell__name" data-rolreg-open="{{ e.id }}">{{ e.label }}</button>
+  <div class="rolreg-cell__tags">
+    <code class="rolreg-cell__slug">{{ e.name }}</code>
+    {% if e.is_system %}<span class="rolreg-tag rolreg-tag--system">{% trans "Sistem" context "organizations.roles_registry" %}</span>{% endif %}
+    {% if not e.is_active %}<span class="rolreg-tag rolreg-tag--off">{% trans "Deaktiv" context "organizations.roles_registry" %}</span>{% endif %}
+    {% if e.wildcard %}<span class="rolreg-tag rolreg-tag--all">{% trans "Bütün icazələr" context "organizations.roles_registry" %}</span>{% endif %}
+  </div>
+  {% if e.description %}<p class="rolreg-cell__desc">{{ e.description }}</p>{% endif %}
+</div>
+{% endwith %}

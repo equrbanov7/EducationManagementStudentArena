@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}Sətir əməlləri — silmə YOXDUR. Kataloq sətri «Aktiv» bayrağı ilə
+deaktiv edilir (yumşaq silmə): səhvən silinən sətir bərpa oluna bilər.{% endcomment %}
+{% if registrar_catalog_section.readonly_tab %}
+<a class="ems-btn ems-btn--sm js-profile-section-link" href="{{ registrar_catalog_section.registry_url }}"
+   data-section="student-registry" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}">
+  <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+  {% trans "Reyestrdə aç" context "registrar.catalog" %}
+</a>
+{% else %}
+<button type="button" class="ems-btn ems-btn--sm" data-rcat-edit="{{ row.data.id }}">
+  <i class="fas fa-pen" aria-hidden="true"></i>
+  {% trans "Redaktə et" context "registrar.catalog" %}
+</button>
+{% endif %}

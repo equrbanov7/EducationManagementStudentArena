@@ -32,7 +32,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'superadmin-users' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     {% endif %}
-    {% if 'rim-center' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+    {% if 'rim-center' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-intake' in allowed_sections or 'student-admission' in allowed_sections %}
     {% comment %}⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl səth
     (panel/axtarış/siyahı), sonra modallar, ən sonda «Yeni hesab» axını —
     üçüncü fayl ilk ikisinin başlıq və kart qaydalarını qəsdən tamamlayır.{% endcomment %}
