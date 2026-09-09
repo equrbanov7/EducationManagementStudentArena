@@ -248,74 +248,102 @@
     font-size: 0.72rem;
 }
 
-/* ⚠️ 2026-09-10 (sahib: «aşağıdakı Önizləmə / Ləğv et / Yadda Saxla … görünüş
-   stabillik»). Panel əvvəl `position: fixed` üzən pill idi və ekranın ortasında
-   məzmunun ÜSTÜNƏ düşürdü — «Akademik məlumatlar» kartının başlığı onun altında
-   qalırdı. İndi panel formanın SONUNDA, axının içindədir: heç nəyi örtmür,
-   səhifə sürüşəndə yerindən tərpənmir. */
+/* ═══ Əməliyyat paneli (2026-09-10, ikinci keçid) ═══════════════════════════
+   Sahib: «önizləmə / yadda saxla / ləğv olan hissə aşağıda qalması daha
+   vacibdir — FIXED olaraq, amma daha yaxşı formada, rənglər və s.»
+
+   Birinci cəhddə panel üzən PILL idi və məzmunun üstünə düşürdü; ikinci
+   cəhddə axına salındı, amma uzun formada düymə gözdən itdi. İndi:
+   * panel EKRANIN ALTINA yapışıb (fixed), amma PILL deyil — məzmun sütununun
+     tam eni boyunca uzanan zolaqdır, üst kənarında saç xətti və yumşaq yuxarı
+     kölgə var: səhifənin üstündəki QAT kimi oxunur, üzən ada kimi yox;
+   * sidebar-ın ALTINA girmir — sol kənar sidebar-ın eninə bağlıdır və
+     yığcam rejimdə (`.collapsed`) avtomatik daralır;
+   * bölməyə panel hündürlüyü qədər nəfəslik verilir → heç bir kart panelin
+     altında GİZLƏNMİR (əvvəlki şikayət məhz bu idi);
+   * status HƏMİŞƏ görünür (iki vəziyyət: «saxlanılıb» / «saxlanmayıb») —
+     nişan peyda olub-yox olmadığı üçün düymələr yerini DƏYİŞMİR (görünüş
+     stabilliyi).
+   ═══════════════════════════════════════════════════════════════════════════ */
 .edit-profile-savebar {
+    --savebar-h: 72px;
+    position: fixed;
+    inset-inline-start: var(--sidebar-width, 300px);
+    inset-inline-end: 0;
+    bottom: 0;
+    z-index: 40; /* modal (1055) və sidebar (1050) altında qalır */
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 16px;
     flex-wrap: wrap;
-    margin-top: 18px;
-    padding: 14px 18px;
+    min-height: var(--savebar-h);
+    padding: 12px 2.5rem;
     box-sizing: border-box;
-    background: #fff;
-    border: 1px solid var(--profile-border);
-    border-radius: 16px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    background: color-mix(in srgb, var(--card-bg, #fff) 92%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.07);
 }
 
-/* Status nişanı olmayanda düymələr sağa yığılır. */
-.edit-profile-savebar__status[hidden] + .edit-profile-savebar__actions {
-    margin-inline-start: auto;
+/* Sidebar yığcam rejimə keçəndə panel də onunla birlikdə daralır.
+   `.collapsed` class-ı sidebar-ın ÖZÜNDƏDİR (qardaş element), ona görə
+   valideyndən `:has()` ilə oxunur. */
+.profile-page:has(.profile-sidebar.collapsed) .edit-profile-savebar {
+    inset-inline-start: var(--sidebar-collapsed-width, 80px);
+}
+
+/* Panel son kartı örtməsin deyə bölmənin sonunda nəfəslik. */
+.profile-section--edit-profile {
+    padding-bottom: calc(var(--savebar-h, 72px) + 24px);
 }
 
 .edit-profile-savebar__actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
+    margin-inline-start: auto;
 }
 
-.edit-profile-savebar .btn {
-    white-space: nowrap;
+/* Saxlanmamış dəyişiklik varkən panel bir az da qabarır — rəng TƏK siqnal
+   deyil, yanında mətn də var (əlçatanlıq). */
+.edit-profile-savebar[data-dirty="1"] {
+    border-top-color: var(--ems-warning-300, #fcd34d);
+    box-shadow: 0 -6px 24px rgba(180, 83, 9, 0.12);
 }
 
-@media (max-width: 575px) {
-    .edit-profile-savebar {
-        justify-content: stretch;
-    }
-
-    .edit-profile-savebar__actions {
-        width: 100%;
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 8px;
-    }
-}
-
-.edit-profile-savebar__status {
+.edit-profile-savebar__status,
+.edit-profile-savebar__saved {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-right: auto;
     font-size: 0.88rem;
     font-weight: 600;
-    color: #92400e;
+    white-space: nowrap;
+}
+
+.edit-profile-savebar__status {
+    color: var(--ems-warning-800, #92400e);
+}
+
+.edit-profile-savebar__saved {
+    color: var(--text-muted);
+}
+
+/* İki vəziyyət bir-birini əvəz edir; yeri həmişə tutulduğu üçün düymələr
+   sürüşmür. */
+.edit-profile-savebar[data-dirty="1"] .edit-profile-savebar__saved {
+    display: none;
 }
 
 .edit-profile-savebar__status i {
-    color: #f59e0b;
+    color: var(--ems-warning-500, #f59e0b);
 }
 
-.edit-profile-savebar__actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+.edit-profile-savebar__saved i {
+    color: var(--ems-success, #16a34a);
 }
 
 /* Qəşəng «Əlavə et» düyməsi */
@@ -495,4 +523,15 @@
     font-size: 0.82rem;
     color: var(--profile-muted);
     overflow-wrap: anywhere;
+}
+
+/* ── AI köməkçi düyməsi ilə toqquşma (2026-09-10) ─────────────────────────
+   `#ai-bot-btn` ekranın sağ-alt küncündə, `z-index: 40` ilə oturur — yəni
+   əməliyyat paneli ilə EYNİ qatda, DOM-da isə ondan sonra. Nəticədə balon
+   «Yadda saxla» düyməsinin üstünə düşürdü (brauzerdə görüldü).
+   Bölmə aktiv olanda köməkçi panelin hündürlüyü qədər yuxarı qalxır.
+   72px panel + 16px boşluq = 88px. */
+body:has(.profile-section--edit-profile.is-active) #ai-bot-btn,
+body:has(.profile-section--edit-profile.is-active) #ai-bot-tooltip {
+    bottom: 88px;
 }

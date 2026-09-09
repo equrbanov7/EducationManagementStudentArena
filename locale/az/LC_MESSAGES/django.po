@@ -71061,3 +71061,44 @@ msgstr "Şəkil seç"
 msgctxt "profile.edit_v2"
 msgid "PNG və ya JPG · maksimum 5 MB"
 msgstr "PNG və ya JPG · maksimum 5 MB"
+
+#: templates/partials/_global_search.html:54
+msgctxt "search"
+msgid "Başqa açar söz yoxlayın: ad, soyad, fənn adı və ya kod."
+msgstr "Başqa açar söz yoxlayın: ad, soyad, fənn adı və ya kod."
+
+msgctxt "profile.edit_v2"
+msgid "Bütün dəyişikliklər yadda saxlanılıb"
+msgstr "Bütün dəyişikliklər yadda saxlanılıb"
+
+msgctxt "accounts.student_registry"
+msgid "Transkript yüklə"
+msgstr "Transkript yüklə"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi akademik transkripti PDF olaraq yüklə"
+msgstr "Rəsmi akademik transkripti PDF olaraq yüklə"
+
+msgctxt "registrar.catalog"
+msgid "Rəsmi akademik transkripti PDF olaraq yüklə"
+msgstr "Rəsmi akademik transkripti PDF olaraq yüklə"
+
+msgctxt "registrar.pdf"
+msgid "Sənəd №"
+msgstr "Sənəd №"
+
+msgctxt "registrar.pdf"
+msgid "Möhür yeri"
+msgstr "Möhür yeri"
+
+msgctxt "registrar.pdf"
+msgid "(imza, soyad və ad)"
+msgstr "(imza, soyad və ad)"
+
+msgctxt "registrar.pdf"
+msgid "Səhifə %(page)s / %(total)s"
+msgstr "Səhifə %(page)s / %(total)s"
+
+msgctxt "registrar.catalog"
+msgid "Transkript yüklə"
+msgstr "Transkript yüklə"
