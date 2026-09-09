@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}«Veriləcək rol» xanası — təşkilata hələ daxil olmayan şəxs üçün rol
+seçici + «Təşkilata əlavə et». Təsdiq dialoqu `roles_ui.js`-dədir.{% endcomment %}
+<div class="rls-picker">
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" name="role_id"
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"
+                data-role-assignment-role-select
+                aria-label="{% blocktrans context 'accounts.role_assignment' with person=row.data.name %}{{ person }} — veriləcək rol{% endblocktrans %}"
+                {% if not role_assignment_section.can_assign_roles %}disabled{% endif %}>
+            {% for option in role_assignment_section.role_choices %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="button"
+            class="ems-btn ems-btn--sm ems-btn--success js-role-assignment-action-confirm"
+            data-target-action="attach_user"
+            data-target-user-id="{{ row.data.user_id }}"
+            data-user-full-name="{{ row.data.name }}"
+            data-user-username="{{ row.data.username }}"
+            data-user-email="{{ row.data.email }}"
+            data-organization-name="{{ row.data.organization_name }}"
+            data-old-role="{% trans 'Üzvlük yoxdur' context 'accounts.role_assignment' %}"
+            {% if not role_assignment_section.can_assign_roles %}disabled{% endif %}>
+        {% trans "Təşkilata əlavə et" context "accounts.role_assignment" %}
+    </button>
+</div>

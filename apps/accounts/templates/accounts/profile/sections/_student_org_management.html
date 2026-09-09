@@ -1,7 +1,62 @@
+{% load i18n static %}
+{% comment %}
+«Heyət idarəetməsi» — kabinet üzv reyestri (2026-09-09 yenidən qurulub).
+
+SAHİB TAPŞIRIĞI: dəvət və müraciət panelləri BURADAN ÇIXARILDI — «təsdiq
+gözləyən tələbələr», «təşkilata bağlı olmayan tələbə/müəllim/heyət»,
+«göndərilmiş dəvətlər (tələbə · müəllim · heyət)», «müəllim/heyət müraciətləri»
+və onların çipləri. Bu tenantda heç kim dəvətlə gəlmir: şəxs HƏMİŞƏ təşkilat
+tərəfindən «Tələbə əlavəsi» / «Müəllim əlavəsi» bölmələrindən əlavə olunur.
+`StudentOrganizationRequest` modeli və POST əməlləri TOXUNULMAYIB.
+
+Kontekst: `apps/accounts/views/_helpers/org_sections/management.py`.
+Komponentlər `ems_ui`-dəndir: KPI (klik = `hm_kind` filtri), AVTO filtr
+(«Tətbiq et» yoxdur, «Sıfırla» qalır, yüklənənə qədər SKELETON), cədvəl,
+«Üzv kartı» çekmecəsi və səbəbli («≥20 simvol») çıxarma dialoqu.
+
+⚠️ `<h1>` YAZILMIR — bölmə adını qabıq (`#profileSectionTitle`) verir.
+CSP: inline CSS/JS YOXDUR; dinamik dəyər yalnız `data-*` atributu ilə gedir.
+UZAQLAŞDIRMA SOFT-DUR: üzvlük deaktiv edilir, sətir bazada qalır, audit yazılır.
+{% endcomment %}
 {% if 'student-organization-management' in allowed_sections %}
-<section class="profile-section-panel profile-section--student-organization-management {% if active_section == 'student-organization-management' %}is-active{% endif %}"
+{% with sec=student_org_management_section %}
+{% trans "Üzv kartı" context "accounts.staff_management" as hm_drawer_title %}
+{% trans "Şəxsin bu təşkilatdakı bütün rolları, bölməsi və əlaqə məlumatı." context "accounts.staff_management" as hm_drawer_sub %}
+{% trans "Təşkilatdan çıxar" context "accounts.staff_management" as hm_remove_title %}
+{% trans "Üzvlük DEAKTİV edilir — hesab silinmir və bərpa oluna bilər. Səbəb audit jurnalına yazılır." context "accounts.staff_management" as hm_remove_sub %}
+{% trans "Çıxar" context "accounts.staff_management" as hm_remove_btn %}
+{% trans "Səbəb" context "accounts.staff_management" as hm_remove_label %}
+{% trans "Nə üçün uzaqlaşdırılır? (məs. təhsilini başqa universitetdə davam etdirir)" context "accounts.staff_management" as hm_remove_ph %}
+<section class="profile-section-panel profile-section--staff-management {% if active_section == 'student-organization-management' %}is-active{% endif %}"
          data-profile-section-panel="student-organization-management"
-         data-source-url="{% url 'accounts:student_organization_management' %}">
-    {% include "accounts/partials/_staff_management_content.html" with organization=student_org_management_section.organization is_superadmin=student_org_management_section.is_superadmin teacher_student_only=student_org_management_section.teacher_student_only active_management_view=student_org_management_section.active_management_view active_student_tab=student_org_management_section.active_student_tab active_teacher_tab=student_org_management_section.active_teacher_tab active_staff_tab=student_org_management_section.active_staff_tab management_view_options=student_org_management_section.management_view_options student_tab_options=student_org_management_section.student_tab_options teacher_tab_options=student_org_management_section.teacher_tab_options staff_tab_options=student_org_management_section.staff_tab_options students=student_org_management_section.students pending_requested_students=student_org_management_section.pending_requested_students unassigned_students=student_org_management_section.unassigned_students sent_student_invites=student_org_management_section.sent_student_invites teacher_members=student_org_management_section.teacher_members staff_members=student_org_management_section.staff_members unassigned_teachers=student_org_management_section.unassigned_teachers sent_teacher_invites=student_org_management_section.sent_teacher_invites unassigned_staff=student_org_management_section.unassigned_staff sent_staff_invites=student_org_management_section.sent_staff_invites pending_teacher_requests=student_org_management_section.pending_teacher_requests pending_staff_requests=student_org_management_section.pending_staff_requests students_total_count=student_org_management_section.students_total_count pending_requested_students_total_count=student_org_management_section.pending_requested_students_total_count unassigned_students_total_count=student_org_management_section.unassigned_students_total_count sent_student_invites_total_count=student_org_management_section.sent_student_invites_total_count teacher_members_total_count=student_org_management_section.teacher_members_total_count pending_teacher_requests_total_count=student_org_management_section.pending_teacher_requests_total_count unassigned_teachers_total_count=student_org_management_section.unassigned_teachers_total_count sent_teacher_invites_total_count=student_org_management_section.sent_teacher_invites_total_count staff_members_total_count=student_org_management_section.staff_members_total_count pending_staff_requests_total_count=student_org_management_section.pending_staff_requests_total_count unassigned_staff_total_count=student_org_management_section.unassigned_staff_total_count sent_staff_invites_total_count=student_org_management_section.sent_staff_invites_total_count organization_records=student_org_management_section.organization_records teacher_staff_search_query=student_org_management_section.teacher_staff_search_query organization_search_query=student_org_management_section.organization_search_query organization_status_filter=student_org_management_section.organization_status_filter organization_type_filter=student_org_management_section.organization_type_filter teacher_members_page_param=student_org_management_section.teacher_members_page_param teacher_members_pagination_query=student_org_management_section.teacher_members_pagination_query staff_members_page_param=student_org_management_section.staff_members_page_param staff_members_pagination_query=student_org_management_section.staff_members_pagination_query teacher_requests_page_param=student_org_management_section.teacher_requests_page_param teacher_requests_pagination_query=student_org_management_section.teacher_requests_pagination_query teacher_unassigned_page_param=student_org_management_section.teacher_unassigned_page_param teacher_unassigned_pagination_query=student_org_management_section.teacher_unassigned_pagination_query teacher_invites_page_param=student_org_management_section.teacher_invites_page_param teacher_invites_pagination_query=student_org_management_section.teacher_invites_pagination_query staff_requests_page_param=student_org_management_section.staff_requests_page_param staff_requests_pagination_query=student_org_management_section.staff_requests_pagination_query staff_unassigned_page_param=student_org_management_section.staff_unassigned_page_param staff_unassigned_pagination_query=student_org_management_section.staff_unassigned_pagination_query staff_invites_page_param=student_org_management_section.staff_invites_page_param staff_invites_pagination_query=student_org_management_section.staff_invites_pagination_query organizations_page_param=student_org_management_section.organizations_page_param organizations_pagination_query=student_org_management_section.organizations_pagination_query student_search_query=student_org_management_section.student_search_query pending_search_query=student_org_management_section.pending_search_query unassigned_search_query=student_org_management_section.unassigned_search_query sent_invite_search_query=student_org_management_section.sent_invite_search_query can_manage_students=student_org_management_section.can_manage_students can_invite_members=student_org_management_section.can_invite_members access_denied_message=student_org_management_section.access_denied_message students_page_param=student_org_management_section.students_page_param students_pagination_query=student_org_management_section.students_pagination_query pending_page_param=student_org_management_section.pending_page_param pending_pagination_query=student_org_management_section.pending_pagination_query unassigned_page_param=student_org_management_section.unassigned_page_param unassigned_pagination_query=student_org_management_section.unassigned_pagination_query sent_invites_page_param=student_org_management_section.sent_invites_page_param sent_invites_pagination_query=student_org_management_section.sent_invites_pagination_query pending_org_count=student_org_management_section.pending_org_count post_next_url=student_org_management_section.post_next_url embedded_in_profile=True profile_base_url=profile_base_url %}
+         data-source-url="{{ profile_base_url }}?section=student-organization-management">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/staff_management.css' %}?v=20260909-1">
+{% if sec.access_denied_message %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}
+{% elif sec.active_management_view == "organizations" %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle %}
+    {% include "accounts/profile/sections/staff_management/_organizations.html" %}
+{% else %}
+<div class="hm" data-hm-root data-hm-section="student-organization-management">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle header_note=sec.header_note header_actions_include="accounts/profile/sections/staff_management/_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="student-organization-management" filter_prefix="hm_" filter_fields=sec.filter_fields filter_count_label=sec.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+    <div class="hm-body" data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=sec.columns table_rows=sec.table_rows table_state=sec.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-users" state_title=sec.state_title state_body=sec.state_body %}
+        {% include "partials/_pagination.html" with page_obj=sec.page_obj page_param=sec.page_param extra_query=sec.pagination_query %}
+    </div>
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="hmMemberDrawer" drawer_title=hm_drawer_title drawer_subtitle=hm_drawer_sub drawer_body_include="accounts/profile/sections/staff_management/_member_drawer.html" drawer_foot_include="accounts/profile/sections/staff_management/_member_drawer_foot.html" %}
+
+    {% if sec.can_remove_members %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="hmRemoveDialog" reason_title=hm_remove_title reason_subtitle=hm_remove_sub reason_submit_label=hm_remove_btn reason_submit_tone="danger" reason_label=hm_remove_label reason_placeholder=hm_remove_ph reason_field_name="remove_reason" reason_action=sec.action_url reason_hidden=sec.remove_hidden reason_extra_include="accounts/profile/sections/staff_management/_remove_target.html" %}
+    {% endif %}
+</div>
+{% endif %}
 </section>
+{% endwith %}
 {% endif %}

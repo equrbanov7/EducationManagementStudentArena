@@ -1,17 +1,25 @@
-"""
-Manage-roles view.
+"""«Rolları idarə et» — bölmənin POST giriş nöqtəsi.
 
-Organization-scoped multi-role assignment: effective roles are derived from
-memberships in the active organization. Behavior is identical to the
-pre-refactor single-file implementation.
+İKİ YAZI AXINI bir URL-dədir:
+
+* YENİ (2026-09-09) — `grant_role` / `revoke_role`: təşkilatın öz `Role`
+  kataloqundan bir rol verilir/geri alınır və şəxsin digər üzvlükləri
+  toxunulmadan qalır. Məntiq `_multi_role.py`-dədir; ekran da bunu işlədir.
+* KÖHNƏ — `assign` / `remove` + `role_names[]`: `ProfileRole` enum-u üzrə
+  checkbox dəsti. Səth artıq render olunmur, amma endpoint SAXLANILIR (köhnə
+  inteqrasiyalar + `tests/test_manage_roles_scope.py` reqressiya qapısı).
+
+Hər iki axın EYNİ qapılardan keçir (`_gates.py`): `role.assign` /
+`org.manage_members`, struktur əhatəsi və səviyyə müqayisəsi.
+
+GET yalnız qabığı render edir — panelin məzmunu
+`views/profile/_sections/manage_roles.py`-dədir.
 """
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
@@ -25,7 +33,6 @@ from .._helpers import (
     PROFILE_ROLE_NAMES,
     _assignable_profile_roles_for_user,
     _bind_active_role_context,
-    _decorate_manage_role_profiles,
     _extract_profile_roles_for_user,
     _get_active_organization,
     _is_superadmin_user,
@@ -33,73 +40,18 @@ from .._helpers import (
     _resolve_next_url,
     _sync_user_role_memberships,
 )
+from ._gates import ORG_WIDE_STAFF_ROLES, actor_is_unit_scoped, manage_roles_gate_error
+from ._multi_role import handle_org_role_action
 
 User = get_user_model()
 
 
-#: Təşkilat-səviyyəli heyət rolları — vahid-əhatəli aktor (dekan, kafedra müdiri) verə bilməz.
-ORG_WIDE_STAFF_ROLES = frozenset(
-    {
-        ProfileRole.HR,
-        # `EXAM_CENTER` QƏSDƏN yoxdur: rol `exam_center_head`-ə birləşdirildi
-        # (miqrasiya 0046) və artıq təyin üçün TƏKLİF OLUNMUR.
-        ProfileRole.EXAM_CENTER_HEAD,
-        ProfileRole.EXAM_CENTER_STAFF,
-        ProfileRole.IKT_REHBER,
-        ProfileRole.ORG_ADMIN,
-        ProfileRole.ORG_OWNER,
-        ProfileRole.SUPERADMIN,
-    }
-)
-
-
-def _assign_scope(user, organization):
-    from apps.organizations.public import get_permission_scope
-
-    scope = get_permission_scope(user, organization, "role.assign")
-    if not scope.has_structure_access:
-        scope = get_permission_scope(user, organization, "org.manage_members")
-    return scope
-
-
-def _actor_is_unit_scoped(user, organization) -> bool:
-    return _assign_scope(user, organization).is_unit_scoped
-
-
-def _target_in_unit_scope(organization, scope, target_user) -> bool:
-    """Hədəf aktorun alt-ağacındadır? — vahidli üzvlük və ya akademik qeydin qrupu ilə."""
-    from apps.organizations.models import OrgUnit
-
-    subtree = OrgUnit.objects.filter(scope.unit_subtree_q()).filter(organization=organization).values("pk")
-    if Membership.objects.filter(
-        user=target_user, organization=organization, is_active=True, scope_unit__in=subtree
-    ).exists():
-        return True
-    from apps.registrar.models import StudentAcademicRecord
-
-    return StudentAcademicRecord.objects.filter(
-        organization=organization, student=target_user, group__in=subtree
-    ).exists()
-
-
-def _manage_roles_gate_error(request, organization, target_user, *, is_superadmin):
-    """`None` = icazə var; əks halda istifadəçiyə göstəriləcək mesaj."""
-    if is_superadmin or getattr(organization, "owner_id", None) == request.user.id:
-        return None
-    from core.permissions import has_permission
-
-    from .._helpers.rbac import _collect_actor_permissions
-
-    actor_permissions, _ = _collect_actor_permissions(request.user, organization)
-    permission_list = list(actor_permissions)
-    if not (has_permission(permission_list, "role.assign") or has_permission(permission_list, "org.manage_members")):
-        return pgettext_lazy("accounts.manage_roles.message", "missing_member_management_permission")
-    scope = _assign_scope(request.user, organization)
-    if scope.is_org_wide:
-        return None
-    if not scope.is_unit_scoped or not _target_in_unit_scope(organization, scope, target_user):
-        return pgettext_lazy("accounts.manage_roles.message", "target_outside_structure_scope")
-    return None
+# Qapılar (`role.assign`/`org.manage_members` + struktur əhatəsi, org-əhatəli
+# rol siyahısı) ORTAQ `_gates` modulundadır — köhnə checkbox axını ilə yeni
+# «rol ver / geri al» axını EYNİ qapıdan keçir. Adlar geriyə uyğunluq üçün
+# burada da görünür (köhnə import yolları qırılmasın).
+_actor_is_unit_scoped = actor_is_unit_scoped
+_manage_roles_gate_error = manage_roles_gate_error
 
 
 @login_required
@@ -133,6 +85,18 @@ def manage_roles(request):
         user_id = request.POST.get("user_id")
         action = request.POST.get("action")  # "assign" or "remove"
         next_url = _resolve_next_url(request, reverse("accounts:manage_roles"))
+
+        # Yeni səth: TƏŞKİLAT rolunun verilməsi / geri alınması (`organizations.Role`).
+        # Köhnə checkbox axını (`assign`/`remove`) aşağıda olduğu kimi qalır.
+        org_role_response = handle_org_role_action(
+            request,
+            organization=user_org,
+            is_superadmin=is_superadmin,
+            actor_level=actor_level,
+            next_url=next_url,
+        )
+        if org_role_response is not None:
+            return org_role_response
 
         if not user_id:
             messages.error(request, pgettext_lazy("accounts.manage_roles.message", "user_not_selected"))
@@ -261,44 +225,9 @@ def manage_roles(request):
         )
         return redirect(next_url)
 
-    profiles = (
-        UserProfile.objects.filter(
-            user__memberships__organization=user_org,
-            user__memberships__is_active=True,
-        )
-        .select_related("user")
-        .prefetch_related("user__memberships__role")
-        .distinct()
-    )
-
-    # Include the requesting superadmin's own profile even if they have no formal membership
-    if is_superadmin and not profiles.filter(user=request.user).exists():
-        own_profile_qs = (
-            UserProfile.objects.filter(user=request.user)
-            .select_related("user")
-            .prefetch_related("user__memberships__role")
-            .distinct()
-        )
-        profiles = (profiles | own_profile_qs).distinct()
-
-    # Search
-    search = request.GET.get("search", "")
-    if search:
-        profiles = profiles.filter(
-            Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
-
-    profiles_page = request.GET.get("manage_roles_page")
-    profiles_page_obj = Paginator(profiles.order_by("user__username"), 12).get_page(profiles_page)
-    _decorate_manage_role_profiles(
-        profiles_page_obj.object_list,
-        actor_level=actor_level,
-        is_superadmin=is_superadmin,
-        organization=user_org,
-        actor_user=request.user,
-    )
-
+    # GET: panelin BÜTÜN məzmununu bölmə qurucusu qurur
+    # (`views/profile/_sections/manage_roles.py`) — reyestr, KPI, filtr və
+    # dialoqlar. Əvvəl burada ikinci, PARALEL siyahı (köhnə `UserProfile`
+    # səhifələməsi + `_decorate_manage_role_profiles`) da qurulurdu; yeni
+    # şablon ondan heç nə oxumur, ona görə həmin sorğular ÇIXARILDI.
     return _render_profile_section(request, "manage-roles")

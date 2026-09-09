@@ -595,7 +595,8 @@ class ProfileSectionTests(_Base):
         response = client.get(f"{reverse('accounts:profile')}?section=question-submissions")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Bölmə testi")
-        self.assertContains(response, "qsubf-bar")
+        # 2026-09-09: köhnə `qsubf-bar` sətri ORTAQ `ems_ui` filtr paneli oldu.
+        self.assertContains(response, "data-ems-filters")
         self.assertContains(response, 'name="qsub_faculty"')
         self.assertContains(response, 'name="qsub_lang"')
         self.assertNotContains(response, "Qutunu aç")

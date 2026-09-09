@@ -1,0 +1,5 @@
+{% comment %}Tarixçə sətrinin başlığı — fənn + qrup/semestr alt sətri.{% endcomment %}
+<span class="thx-subject">
+    <span class="thx-subject__name">{{ row.data.subject }}</span>
+    <span class="thx-subject__code">{{ row.data.group }}{% if row.data.period %} · {{ row.data.period }}{% endif %}</span>
+</span>

@@ -18,10 +18,29 @@
     // İxtisasa görə süzgəc (yalnız tələbə siyahısında) — variantların
     // `data-specialty` atributundan qurulur (sahib, 2026-09-07).
     var specialtySelect = root.querySelector(".js-select-specialty");
+    // `bootstrap-single-select` sarğısı: görünüşü (hidden) və stilli düyməni O
+    // daşıyır — native element qoşulandan sonra gizlidir.
+    var specialtyWrap = specialtySelect
+      ? specialtySelect.closest(".bootstrap-single-select") || specialtySelect
+      : null;
     var specialtyBuilt = "";
 
     function currentSpecialty() {
       return specialtySelect ? String(specialtySelect.value || "") : "";
+    }
+
+    // Variantlar JS-də dəyişdiyi üçün stilli menyu YENİDƏN qurulmalıdır;
+    // yalnız dəyər dəyişəndə `sync` kifayətdir (menyu eyni qalır).
+    function syncSpecialtyControl(rebuild) {
+      var api = window.EMSBootstrapSelect;
+      if (!specialtySelect || !api) {
+        return;
+      }
+      if (rebuild) {
+        api.refresh(specialtySelect);
+      } else {
+        api.sync(specialtySelect);
+      }
     }
 
     function buildSpecialtyOptions() {
@@ -55,7 +74,10 @@
         specialtySelect.appendChild(opt);
       });
       specialtySelect.value = keys.indexOf(previous) !== -1 ? previous : "";
-      specialtySelect.hidden = !keys.length;
+      if (specialtyWrap) {
+        specialtyWrap.hidden = !keys.length;
+      }
+      syncSpecialtyControl(true);
     }
 
     function normalize(text) {
@@ -204,6 +226,7 @@
       }
       if (specialtySelect) {
         specialtySelect.value = "";
+        syncSpecialtyControl(false);
       }
       render();
     }

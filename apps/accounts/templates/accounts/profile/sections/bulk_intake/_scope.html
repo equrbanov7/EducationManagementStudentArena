@@ -1,0 +1,10 @@
+{% comment %}Başlığın sağındakı əhatə nişanı — «hesablar hansı təşkilatda yaranır».
+
+`_content_header.html`-in `header_actions_include` yuvasına verilir; hər iki
+toplu əlavə bölməsi (tələbə · müəllim) EYNİ nişanı işlədir, ona görə `sec`
+dəyişəni şablondan (`{% with sec=... %}`) gəlir.
+{% endcomment %}
+<span class="six-scope" title="{{ sec.scope_hint }}">
+    <i class="fas fa-building-columns" aria-hidden="true"></i>
+    <span class="six-scope__text">{{ sec.scope_label }}</span>
+</span>

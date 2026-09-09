@@ -1,9 +1,12 @@
-{% comment %}
-Cədvəl skeleton-u — `skeleton_rows` (int, default 6), `skeleton_cols` (int, default 4).
-Qlobal `skeleton.css` animasiyasını təkrar yazmır, yalnız sətir düzümünü verir.
+{% comment %}Cədvəl skeleton-u. Sətir sayı `skeleton_range` (list/range) ilə verilir.
+
+⚠️ 2026-09-09: `_data_table.html` bu partial-ı `skeleton_range` OLMADAN çağırır və
+dövr heç nə render etmirdi — skeleton bütün bölmələrdə BOŞ görünürdü. Django
+şablonunda `range()` yoxdur, ona görə fallback 6 simvollu sətri siyahıya çevirir
+(`make_list`); çağıran öz `skeleton_range`-ini versə, o üstün gəlir.
 {% endcomment %}
 <div class="skeleton" aria-hidden="true">
-    {% for _ in skeleton_range %}
+    {% for _ in skeleton_range|default:"XXXXXX"|make_list %}
         <div class="ems-skelrow">
             <div class="skeleton-line skeleton-line--lg"></div>
             <div class="skeleton-line"></div>

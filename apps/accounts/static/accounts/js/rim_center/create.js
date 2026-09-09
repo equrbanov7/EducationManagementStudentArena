@@ -182,10 +182,22 @@
         });
     }
 
+    function syncSelects(root) {
+        if (!root || !window.EMSBootstrapSelect) {
+            return;
+        }
+        root.querySelectorAll("select[data-bootstrap-select]").forEach(function (sel) {
+            window.EMSBootstrapSelect.sync(sel);
+        });
+    }
+
     function resetForm() {
         var node = document.querySelector("[data-rimc-form]");
         if (node) {
             node.reset();
+            // `form.reset()` «change» hadisəsi buraxmır — bootstrap select-in
+            // düyməsindəki etiket köhnə dəyərdə ilişib qalır. Sinxronlaşdır.
+            syncSelects(node);
         }
         if (ns.combo && ns.combo.reset) {
             ns.combo.reset(document);

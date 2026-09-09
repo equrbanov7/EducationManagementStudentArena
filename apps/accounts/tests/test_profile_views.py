@@ -729,9 +729,13 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Staff Management")
-        self.assertContains(response, "Organization students")
-        self.assertContains(response, "Student requests")
+        # Bölmə adı qabıqdan gəlir: `profile.section|staff_management`.
+        self.assertContains(response, "Staff management")
+        # Bölmənin öz mətnləri — `accounts.staff_management` konteksti.
+        # («Organization students» / «Student requests» köhnə dəvət-müraciət
+        # panellərinin başlıqları idi; panellər 2026-09-09-da silinib.)
+        self.assertContains(response, "Member card")
+        self.assertContains(response, "Organization role")
 
     def test_profile_notification_modal_keeps_real_newlines_and_internal_link_query(self):
         self.client.login(username="testuser", password="testpass123")
@@ -2017,7 +2021,18 @@ class ProfileViewTest(TestCase):
         self.assertEqual(manage_roles_response.status_code, 200)
         self.assertContains(manage_roles_response, "Profil rolları (multi-role / checkbox)")
 
-    def test_org_admin_profile_staff_management_marks_all_invite_forms_for_frontend(self):
+    def test_staff_management_section_no_longer_renders_invite_or_request_panels(self):
+        """Sahib qərarı (2026-09-09): bu ekranda DƏVƏT/MÜRACİƏT paneli YOXDUR.
+
+        Bu test əvvəllər dəvət formalarının frontend üçün işarələndiyini
+        yoxlayırdı (`test_org_admin_profile_staff_management_marks_all_invite_
+        forms_for_frontend`). Bu tenantda heç kim dəvətlə qoşulmur — şəxsi
+        təşkilat özü «Tələbə əlavəsi» / «Müəllim əlavəsi» bölmələrindən əlavə
+        edir, ona görə «təsdiq gözləyən tələbələr», «təşkilata bağlı olmayan
+        hesablar» və «göndərilmiş dəvətlər» panelləri bütünlüklə silindi.
+        Test indi ƏKS istiqamətdə qoruyucudur: panellər geri qayıtmamalı,
+        üzv reyestri isə qalmalıdır.
+        """
         organization = Organization.objects.create(
             name="Org Admin Invite Binding Org",
             org_type=OrganizationType.SCHOOL,
@@ -2032,18 +2047,24 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         content = response.content.decode("utf-8")
-        self.assertRegex(
-            content,
-            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedStudents"',
-        )
-        self.assertRegex(
-            content,
-            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedTeachers"',
-        )
-        self.assertRegex(
-            content,
-            r'<form[^>]*data-unassigned-form[^>]*>[\s\S]*?id="selectAllUnassignedStaff"',
-        )
+        for marker in (
+            "data-unassigned-form",
+            "data-sent-invites-form",
+            "data-select-all-unassigned",
+            "data-select-all-sent-invites",
+            "data-invite-action",
+            "data-single-invite-user-id",
+            "selectAllUnassignedStudents",
+            "selectAllUnassignedTeachers",
+            "selectAllUnassignedStaff",
+            "selectAllPendingStudents",
+            "selectAllSentInvites",
+            "selectAllTeacherInvites",
+            "selectAllStaffInvites",
+        ):
+            self.assertNotIn(marker, content, f"Silinmiş dəvət paneli geri qayıdıb: {marker}")
+        # Ekranın YEGANƏ məqsədi — mövcud üzvlərin reyestri — qalır.
+        self.assertIn("data-hm-root", content)
 
     def test_manage_roles_table_shows_username(self):
         superuser = User.objects.create_superuser(

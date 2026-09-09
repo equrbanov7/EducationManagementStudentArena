@@ -32,7 +32,7 @@ def _gate(request):
             {
                 "ok": False,
                 "error": "permission_denied",
-                "message": pgettext(_CTX, "Müəllim idxalı üçün icazəniz yoxdur."),
+                "message": pgettext(_CTX, "Toplu müəllim əlavəsi üçün icazəniz yoxdur."),
             },
             status=403,
         )

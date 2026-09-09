@@ -1,0 +1,8 @@
+{% load i18n %}
+{% comment %}Çekmecədən birbaşa təhvil: sətri seçib təsdiq pəncərəsini açır.
+Bloklanmış sətirdə düymə gizlədilir (JS `hidden` qoyur).{% endcomment %}
+<button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "accounts.handover" %}</button>
+<button type="button" class="ems-btn ems-btn--primary" data-thx-drawer-transfer hidden>
+    <i class="fas fa-right-left" aria-hidden="true"></i>
+    {% trans "Bu fənni təhvil ver" context "accounts.handover" %}
+</button>

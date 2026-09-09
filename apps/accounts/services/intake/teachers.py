@@ -33,7 +33,7 @@ from .validate import PLACEHOLDER_DOMAIN, IntakeContext, RowPlan, _parse_date, _
 _CTX = "teacher_intake"
 
 SHEET_NAME = "Müəllimlər"
-TEMPLATE_FILENAME = "muellim_idxal_sablonu.xlsx"
+TEMPLATE_FILENAME = "muellim_elave_sablonu.xlsx"
 
 
 def columns() -> tuple:
@@ -103,7 +103,7 @@ def build_template() -> tuple[bytes, str, str]:
         writer = csv.writer(buffer)
         writer.writerow(headers)
         writer.writerow(hints)
-        return ("﻿" + buffer.getvalue()).encode("utf-8"), "text/csv; charset=utf-8", "muellim_idxal_sablonu.csv"
+        return ("﻿" + buffer.getvalue()).encode("utf-8"), "text/csv; charset=utf-8", "muellim_elave_sablonu.csv"
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = SHEET_NAME

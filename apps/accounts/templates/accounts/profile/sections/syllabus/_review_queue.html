@@ -25,35 +25,46 @@ Birinci sütun `th scope="row"`, başlıqlar `th scope="col"` (§6 a11y).
     </div>
     <div class="syl-field">
       <label for="syl-rv-status">{% trans "Status" context "accounts.syllabus" %}</label>
-      <select id="syl-rv-status" class="syl-select" data-syl-filter="status">
-        {% for option in sr.filter_options.statuses %}
-        <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+          <select id="syl-rv-status" class="syl-select bootstrap-single-select__native" data-syl-filter="status" data-bootstrap-select>
+            {% for option in sr.filter_options.statuses %}
+            <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+      </div>
     </div>
     <div class="syl-field">
       <label for="syl-rv-unit">{{ sr.filter_options.unit_label }}</label>
-      <select id="syl-rv-unit" class="syl-select" data-syl-filter="unit">
-        {% for option in sr.filter_options.units %}
-        <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+          <select id="syl-rv-unit" class="syl-select bootstrap-single-select__native" data-syl-filter="unit"
+                  data-bootstrap-select data-live-search="true"
+                  data-live-search-placeholder="{% trans 'Ad ilə axtar…' context 'accounts.syllabus' %}"
+                  data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.syllabus' %}">
+            {% for option in sr.filter_options.units %}
+            <option value="{{ option.key }}" {% if option.active %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+      </div>
     </div>
     <div class="syl-field">
       <label for="syl-rv-year">{% trans "Akademik il" context "accounts.syllabus" %}</label>
-      <select id="syl-rv-year" class="syl-select" data-syl-filter="year">
-        {% for option in sr.filter_options.years %}
-        <option value="{{ option.key }}" {% if option.key == sr.filters.year %}selected{% endif %}>{{ option.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+          <select id="syl-rv-year" class="syl-select bootstrap-single-select__native" data-syl-filter="year" data-bootstrap-select>
+            {% for option in sr.filter_options.years %}
+            <option value="{{ option.key }}" {% if option.key == sr.filters.year %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+      </div>
     </div>
     <div class="syl-field">
       <label for="syl-rv-sort">{% trans "Sıralama" context "accounts.syllabus" %}</label>
-      <select id="syl-rv-sort" class="syl-select" data-syl-filter="sort">
-        {% for option in sr.filter_options.sorts %}
-        <option value="{{ option.key }}" {% if option.key == sr.filters.sort %}selected{% endif %}>{{ option.label }}</option>
-        {% endfor %}
-      </select>
+      <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+          <select id="syl-rv-sort" class="syl-select bootstrap-single-select__native" data-syl-filter="sort" data-bootstrap-select>
+            {% for option in sr.filter_options.sorts %}
+            <option value="{{ option.key }}" {% if option.key == sr.filters.sort %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+          </select>
+      </div>
     </div>
     <button type="button" class="syl-btn syl-btn--ghost" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
   </div>

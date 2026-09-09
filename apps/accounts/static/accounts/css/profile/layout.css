@@ -63,6 +63,17 @@
     transform: translateX(2px);
 }
 
+@media (max-width: 768px) {
+    /* Mobil: başlıq və əməl düymələri ALT-ALTA. Əvvəl `flex-direction: row`
+       qaldığı üçün uzun bölmə adı (məs. «Staff management») iki sətrə düşür və
+       ikinci sətir `.profile-mobile-sidebar-trigger`-in (fixed, top: 132px)
+       altında qalırdı — QA 09.09, 375px. */
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
 @media (min-width: 769px) {
     .profile-mobile-sidebar-trigger {
         display: none;

@@ -1,0 +1,350 @@
+/* ═══ «Cədvəl idarəetməsi» redaktoru — panel xromu ══════════════════════════
+   Grid-in özü ORTAQ fayldadır (registrar/css/schedule_matrix.css); burada
+   yalnız redaktora məxsus hissələr var: həftə pillələri, legend, dialoq
+   sahələri, toqquşma siyahısı, tövsiyələr və «yenidən yerləşdirilməli» siyahı.
+   Rənglər YALNIZ `--ems-*` tokenlərindən. */
+
+.sedit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4, 10px);
+}
+
+.sedit__note {
+    margin: 0;
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-left: 3px solid var(--ems-primary-500);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Həftə pilləri + sağ tərəf ──────────────────────────────────────────── */
+.sedit__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4, 10px);
+    flex-wrap: wrap;
+}
+
+.sedit__pills {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.sedit__pill {
+    padding: 5px 12px;
+    border-radius: var(--ems-r-sm);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.sedit__pill.is-active {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.sedit__pill-sub {
+    margin-left: 6px;
+    font-size: var(--ems-fs-2xs);
+    opacity: 0.85;
+}
+
+.sedit__bar-right {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.sedit__owner {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+/* ── Legend ─────────────────────────────────────────────────────────────── */
+.sedit__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-4, 10px);
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.sedit__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sedit__swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--ems-r-xs);
+    border: 1px solid var(--ems-border);
+}
+
+.sedit__swatch--lecture {
+    background: var(--ems-primary-50);
+    border-left: 3px solid var(--ems-primary-600);
+}
+
+.sedit__swatch--seminar {
+    background: var(--ems-emerald-50);
+    border-left: 3px solid var(--ems-teal-500);
+}
+
+.sedit__swatch--lab {
+    background: var(--ems-warning-100);
+    border-left: 3px solid var(--ems-warning-600);
+}
+
+/* ── Dialoq sahələri ────────────────────────────────────────────────────── */
+.sedit-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-4, 10px);
+}
+
+.sedit-form .ems-field--wide {
+    grid-column: 1 / -1;
+}
+
+.sedit-form__extra {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3, 8px);
+    margin-top: var(--ems-sp-4, 10px);
+}
+
+.sedit-verdict {
+    margin-top: var(--ems-sp-4, 10px);
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border-radius: var(--ems-r-md);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.sedit-verdict.is-clean {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-strong);
+}
+
+.sedit-verdict.is-busy {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text-muted);
+}
+
+.sedit-verdict.is-clash {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Toqquşma siyahısı ──────────────────────────────────────────────────── */
+.sedit-conflicts {
+    list-style: none;
+    margin: var(--ems-sp-3, 8px) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sedit-conflicts__item {
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-danger-bd);
+    border-left: 3px solid var(--ems-danger);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-danger-bg);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-danger-strong);
+}
+
+.sedit-conflicts__kind {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-danger);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+/* ── Tövsiyələr ─────────────────────────────────────────────────────────── */
+.sedit-suggest {
+    margin-top: var(--ems-sp-4, 10px);
+}
+
+.sedit-suggest__title {
+    margin: 0 0 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: var(--ems-text-muted);
+    text-transform: uppercase;
+}
+
+.sedit-suggest__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sedit-suggest__btn {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 5px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font: inherit;
+    font-size: var(--ems-fs-sm);
+    cursor: pointer;
+    text-align: left;
+}
+
+.sedit-suggest__btn:hover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.sedit-suggest__btn:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+}
+
+.sedit-suggest__when {
+    font-weight: 700;
+}
+
+.sedit-suggest__shift {
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+}
+
+.sedit-suggest__empty {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Məcburi dəyişiklik ─────────────────────────────────────────────────── */
+.sedit-force {
+    margin-top: var(--ems-sp-4, 10px);
+    padding: var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-warning-bg);
+}
+
+.sedit-force__reason {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.sedit-force__note {
+    margin: 6px 0 8px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-warning-800);
+}
+
+.sedit-move__summary {
+    margin: 0 0 var(--ems-sp-3, 8px);
+    font-size: var(--ems-fs-md);
+}
+
+/* ── Ümumi təsdiq dialoqu ───────────────────────────────────────────────── */
+/* Yaratma / redaktə / silmə əməllərinin kiçik təsdiqi (sahib, 2026-09-09).
+   Xülasə sətri xanadan yığılır; qeyd sətri əməldən asılı olaraq dəyişir. */
+.sedit-confirm__lead {
+    margin: 0 0 var(--ems-sp-2, 6px);
+    font-weight: 600;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-fg);
+}
+
+.sedit-confirm__summary {
+    margin: 0;
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 12px);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-fg);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+.sedit-confirm__note {
+    margin: var(--ems-sp-3, 8px) 0 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── «Yenidən yerləşdirilməli» çekmecəsi ────────────────────────────────── */
+.sedit-parked {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.sedit-parked__item {
+    padding: var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-left: 3px solid var(--ems-warning-500);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+}
+
+.sedit-parked__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.sedit-parked__subject {
+    font-weight: 700;
+    font-size: var(--ems-fs-md);
+}
+
+.sedit-parked__meta {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.sedit-parked__reason {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-warning-800);
+}
+
+.sedit-parked__actions {
+    margin-top: var(--ems-sp-3, 8px);
+}
+
+@media (max-width: 640px) {
+    .sedit-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sedit__bar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

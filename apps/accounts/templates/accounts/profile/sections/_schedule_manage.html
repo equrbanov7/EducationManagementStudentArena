@@ -1,285 +1,115 @@
 {% load static i18n %}
-{% comment %}«Cədvəl idarəetməsi» bölməsi — həftəlik dərs cədvəlinin qurulması.
+{% comment %}«Cədvəl idarəetməsi» — həftəlik dərs cədvəlinin İNTERAKTİV redaktoru.
 
-İcazə: `schedule.manage` (proqram koordinatoru öz ixtisası, RİM org-wide, dekan
-fakültəsi, kafedra müdiri kafedrası). Menyu görünürlüyü `rbac_sections.py`-dadır;
-KONKRET açılışın idarə oluna bilməsi `apps/registrar/schedule_manage.py`-da
-struktur əhatəsi ilə fail-closed yenidən yoxlanılır.
+İcazə: `schedule.manage` (proqram koordinatoru, tyutor — 2026-09-09-dan eyni
+dəst, RİM org-wide, dekan, kafedra müdiri). Menyu görünürlüyü
+`rbac_sections.py`-dadır; KONKRET açılışın idarə oluna bilməsi
+`apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə fail-closed
+yenidən yoxlanılır.
 
-Panel SERVER-RENDER-lidir: dövr/qrup/müəllim seçimi bölmə fraqmentini yenidən
-yükləyir (`EMSProfileLoadSection`), yalnız konflikt yoxlaması, slot əlavəsi və
-silmə JSON POST ilə gedir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) və
-`profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları ilə ötürülür.
-{% endcomment %}
+QURULUŞ (ems_ui komponent qatı):
+  başlıq (yalnız subtitle — h1 qabıqdadır) → KPI → filtr paneli (avto) →
+  həftə pilləri → HƏMİŞƏ görünən matris → legend; dialoqlar sonda.
+
+Panel SERVER-RENDER-lidir: filtr dəyişikliyi fraqmenti yenidən yükləyir;
+hüceyrə dialoqu, sürüklə-burax, park və tövsiyələr TƏK JSON endpoint-ə gedir
+(`accounts:schedule_editor_action`). CSS/JS XARİCİ fayllardadır (CSP: inline
+yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomment %}
 {% if 'schedule-manage' in allowed_sections %}
+{% with sec=schedule_manage_section %}
 <section class="profile-section-panel profile-section--schedule-manage {% if active_section == 'schedule-manage' %}is-active{% endif %}"
          data-profile-section-panel="schedule-manage"
          data-source-url="{{ profile_base_url }}?section=schedule-manage">
 
-{% if not schedule_manage_section.has_access %}
-  <p class="smx__denied" role="status">{{ schedule_manage_section.access_denied_message }}</p>
+{% if not sec.has_access %}
+  {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=sec.state_title state_body=sec.state_body %}
 {% else %}
-<div class="smx"
-     data-smx-root
-     data-check-url="{{ schedule_manage_section.check_url }}"
-     data-action-url="{{ schedule_manage_section.action_url }}"
-     data-reload-url="{{ schedule_manage_section.reload_url }}">
+<div class="sedit"
+     data-sedit-root
+     data-editor-url="{{ sec.editor_url }}"
+     data-reload-url="{{ sec.reload_url }}"
+     data-group-id="{% if sec.group %}{{ sec.group.id }}{% endif %}"
+     data-period-id="{% if sec.period %}{{ sec.period.id }}{% endif %}"
+     data-can-edit="{{ sec.can_edit|yesno:'1,0' }}">
 
-  {# ── Başlıq + əhatə ──────────────────────────────────────────────────── #}
-  <header class="smx__head">
-    <div>
-      {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
-      <p class="smx__intro">
-        {% trans "Qrupun həftəlik dərs cədvəlini qurun: slot əlavə edin, konflikti saxlamadan əvvəl görün, lazımsız slotu silin. Dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir." context "accounts.schedule_manage" %}
-      </p>
-    </div>
-    <span class="smx__scope" title="{% trans 'Səlahiyyət sahəniz' context 'accounts.schedule_manage' %}">
-      <i class="fas fa-sitemap" aria-hidden="true"></i> {{ schedule_manage_section.scope_label }}
-    </span>
-  </header>
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.header_subtitle header_note=sec.scope_label %}
 
-  {# ── Seçicilər: tədris ili → semestr → görünüş → qrup/müəllim ─────────── #}
-  <form class="smx-filters" data-smx-filters novalidate>
-    <div class="smx-field">
-      <label for="smx-year">{% trans "Tədris ili" context "accounts.schedule_manage" %}</label>
-      <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-year" name="sm_year" data-smx-reload data-bootstrap-select>
-          {% for year in schedule_manage_section.years %}
-          <option value="{{ year }}" {% if year == schedule_manage_section.selected_year %}selected{% endif %}>{{ year }}</option>
-          {% endfor %}
-        
-        </select>
-      </div>
-    </div>
-    <div class="smx-field">
-      <label for="smx-period">{% trans "Semestr" context "accounts.schedule_manage" %}</label>
-      <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-period" name="sm_period" data-smx-reload data-bootstrap-select>
-          {% for period in schedule_manage_section.periods %}
-          <option value="{{ period.id }}" {% if schedule_manage_section.period and period.id == schedule_manage_section.period.id %}selected{% endif %}>{{ period.season_label }}</option>
-          {% endfor %}
-        
-        </select>
-      </div>
-    </div>
-    <div class="smx-field">
-      <label for="smx-view">{% trans "Görünüş" context "accounts.schedule_manage" %}</label>
-      <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-view" name="sm_view" data-smx-reload data-bootstrap-select>
-          <option value="group" {% if schedule_manage_section.view_mode == 'group' %}selected{% endif %}>{% trans "Qrup cədvəli" context "accounts.schedule_manage" %}</option>
-          <option value="teacher" {% if schedule_manage_section.view_mode == 'teacher' %}selected{% endif %}>{% trans "Müəllim cədvəli" context "accounts.schedule_manage" %}</option>
-        
-        </select>
-      </div>
-    </div>
-    <div class="smx-field" {% if schedule_manage_section.view_mode == 'teacher' %}hidden{% endif %}>
-      <label for="smx-group">{% trans "Qrup" context "accounts.schedule_manage" %}</label>
-      <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-group" name="sm_group" data-smx-reload data-bootstrap-select data-live-search="true">
-          {% for row in schedule_manage_section.groups %}
-          <option value="{{ row.id }}" {% if schedule_manage_section.group and row.id == schedule_manage_section.group.id %}selected{% endif %}>{{ row.name }}</option>
-          {% endfor %}
-        
-        </select>
-      </div>
-    </div>
-    <div class="smx-field" {% if schedule_manage_section.view_mode != 'teacher' %}hidden{% endif %}>
-      <label for="smx-teacher">{% trans "Müəllim" context "accounts.schedule_manage" %}</label>
-      <div class="bootstrap-single-select">
-        <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-teacher" name="sm_teacher" data-smx-reload data-bootstrap-select data-live-search="true">
-          <option value="">{% trans "Seçin…" context "accounts.schedule_manage" %}</option>
-          {% for row in schedule_manage_section.teachers %}
-          <option value="{{ row.id }}" {% if schedule_manage_section.teacher and row.id == schedule_manage_section.teacher.id|stringformat:'s' %}selected{% endif %}>{{ row.name }}</option>
-          {% endfor %}
-        
-        </select>
-      </div>
-    </div>
-  </form>
+  {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles %}
 
-  {% if not schedule_manage_section.groups %}
-  <p class="smx-empty" role="status">
-    {% trans "Səlahiyyət sahənizdə qrup yoxdur. Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə siyahı boş qalır." context "accounts.schedule_manage" %}
-  </p>
-  {% elif not schedule_manage_section.period %}
-  <p class="smx-empty" role="status">
-    {% trans "Bu təşkilatda akademik semestr yoxdur — əvvəlcə semestr yaradılmalıdır." context "accounts.schedule_manage" %}
-  </p>
+  {% include "partials/ems_ui/_filter_bar.html" with filter_section="schedule-manage" filter_prefix=sec.filters.prefix filter_fields=sec.filters.fields filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+  {% if not sec.groups %}
+    {% trans "Səlahiyyət sahənizdə qrup yoxdur" context "accounts.schedule_manage" as no_group_title %}
+    {% trans "Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə qrup siyahısı boş qalır." context "accounts.schedule_manage" as no_group_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-sitemap" state_title=no_group_title state_body=no_group_body %}
+  {% elif not sec.period %}
+    {% trans "Akademik semestr yoxdur" context "accounts.schedule_manage" as no_period_title %}
+    {% trans "Bu təşkilatda semestr yaradılmayıb — cədvəl qurmaq üçün əvvəlcə semestr açılmalıdır." context "accounts.schedule_manage" as no_period_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-calendar-xmark" state_title=no_period_title state_body=no_period_body %}
   {% else %}
 
-  {# ── Həftə grid-i (registrar partial-ı yenidən istifadə olunur) ───────── #}
-  <div class="smx-grid">
-    {% include "registrar/partials/_schedule_content.html" with has_context=True role="manage" owner_label=schedule_manage_section.owner_label period=schedule_manage_section.period week=schedule_manage_section.week time_grid=schedule_manage_section.time_grid schedule_can_manage=False schedule_nav_prefix=schedule_manage_section.week_nav_prefix only %}
-  </div>
-
-  {# ── Slot siyahısı + silmə ───────────────────────────────────────────── #}
-  <div class="smx-slots">
-    <h3 class="smx-subtitle">{% trans "Slotlar" context "accounts.schedule_manage" %}</h3>
-    {% if schedule_manage_section.slots %}
-    <div class="smx-table__wrap">
-      <table class="smx-table">
-        <thead>
-          <tr>
-            <th scope="col">{% trans "Gün" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Saat" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Fənn" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Növ" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Müəllim" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Otaq" context "accounts.schedule_manage" %}</th>
-            <th scope="col">{% trans "Həftə" context "accounts.schedule_manage" %}</th>
-            <th scope="col"><span class="smx-sr">{% trans "Əməliyyat" context "accounts.schedule_manage" %}</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for slot in schedule_manage_section.slots %}
-          <tr>
-            <td>{{ slot.weekday_label }}</td>
-            <td>{{ slot.start_time|time:"H:i" }}–{{ slot.end_time|time:"H:i" }}</td>
-            <td>{{ slot.offering.subject.code }} — {{ slot.offering.subject.name }}</td>
-            <td>{{ slot.get_kind_display }}</td>
-            <td>{% if slot.offering.instructor %}{{ slot.offering.instructor.get_full_name|default:slot.offering.instructor.username }}{% else %}—{% endif %}</td>
-            <td>{{ slot.room|default:"—" }}</td>
-            <td>{{ slot.get_week_type_display }}</td>
-            <td class="smx-col-act">
-              <button type="button" class="smx-btn smx-btn--danger" data-smx-delete="{{ slot.id }}"
-                      data-label="{{ slot.offering.subject.code }} · {{ slot.start_time|time:'H:i' }}">
-                <i class="fas fa-trash-can" aria-hidden="true"></i>
-                <span class="smx-sr">{% trans "Slotu sil" context "accounts.schedule_manage" %}</span>
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  {# ── Həftə pilləri + parklanmış slotlar ─────────────────────────────────── #}
+  <div class="sedit__bar">
+    <div class="sedit__pills">
+      <a class="sedit__pill {% if sec.week.offset == 0 %}is-active{% endif %}" href="{{ sec.week_nav_prefix }}w=0">
+        {% trans "Bu həftə" context "accounts.schedule_manage" %}
+        <span class="sedit__pill-sub">{% if sec.week.parity == 'odd' %}{% trans "ÜST" context "accounts.schedule_manage" %}{% else %}{% trans "ALT" context "accounts.schedule_manage" %}{% endif %}</span>
+      </a>
+      <a class="sedit__pill {% if sec.week.offset == 1 %}is-active{% endif %}" href="{{ sec.week_nav_prefix }}w=1">
+        {% trans "Gələn həftə" context "accounts.schedule_manage" %}
+        <span class="sedit__pill-sub">{% if sec.week.parity == 'odd' %}{% trans "ALT" context "accounts.schedule_manage" %}{% else %}{% trans "ÜST" context "accounts.schedule_manage" %}{% endif %}</span>
+      </a>
     </div>
-    {% else %}
-    <p class="smx-empty" role="status">{% trans "Bu görünüşdə hələ slot yoxdur." context "accounts.schedule_manage" %}</p>
-    {% endif %}
-  </div>
-
-  {# ── Slot əlavə et ───────────────────────────────────────────────────── #}
-  {% if schedule_manage_section.view_mode == 'group' %}
-  <div class="smx-add">
-    <h3 class="smx-subtitle">{% trans "Slot əlavə et" context "accounts.schedule_manage" %}</h3>
-    {% if schedule_manage_section.offerings %}
-    <form class="smx-add__form" data-smx-add novalidate>
-      <div class="smx-add__grid">
-        <div class="smx-field smx-field--wide">
-          <label for="smx-offering">{% trans "Fənn" context "accounts.schedule_manage" %}</label>
-          <div class="bootstrap-single-select">
-            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-offering" name="offering_id" data-bootstrap-select data-live-search="true" required>
-              {% for off in schedule_manage_section.offerings %}
-              <option value="{{ off.id }}">{{ off.subject.code }} — {{ off.subject.name }}{% if off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% endif %}</option>
-              {% endfor %}
-            
-            </select>
-          </div>
-        </div>
-        <div class="smx-field">
-          <label for="smx-kind">{% trans "Dərs növü" context "accounts.schedule_manage" %}</label>
-          <div class="bootstrap-single-select">
-            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-kind" name="slot_kind" data-bootstrap-select>
-              {% for value, label in schedule_manage_section.slot_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-            
-            </select>
-          </div>
-        </div>
-        <div class="smx-field">
-          <label for="smx-weekday">{% trans "Gün" context "accounts.schedule_manage" %}</label>
-          <div class="bootstrap-single-select">
-            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-weekday" name="weekday" data-bootstrap-select>
-              {% for num, label in schedule_manage_section.weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
-            
-            </select>
-          </div>
-        </div>
-        <div class="smx-field">
-          <label for="smx-time">{% trans "Dərs saatı" context "accounts.schedule_manage" %}</label>
-          <div class="bootstrap-single-select">
-            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-time" name="time_slot" data-smx-time data-bootstrap-select>
-              {% for start, end in schedule_manage_section.standard_times %}
-              <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
-              {% endfor %}
-              <option value="">{% trans "Sərbəst vaxt…" context "accounts.schedule_manage" %}</option>
-            
-            </select>
-          </div>
-        </div>
-        <div class="smx-field smx-field--custom" data-smx-custom hidden>
-          <label for="smx-start">{% trans "Başlama" context "accounts.schedule_manage" %}</label>
-          <input type="time" id="smx-start" name="start_time">
-        </div>
-        <div class="smx-field smx-field--custom" data-smx-custom hidden>
-          <label for="smx-end">{% trans "Bitmə" context "accounts.schedule_manage" %}</label>
-          <input type="time" id="smx-end" name="end_time">
-        </div>
-        <div class="smx-field">
-          <label for="smx-room">{% trans "Otaq" context "accounts.schedule_manage" %}</label>
-          <input type="text" id="smx-room" name="room" maxlength="64" list="smx-rooms"
-                 placeholder="{% trans 'məs. Otaq 304 · II korpus' context 'accounts.schedule_manage' %}">
-          <datalist id="smx-rooms">
-            {% for room in schedule_manage_section.rooms %}<option value="{{ room }}"></option>{% endfor %}
-          </datalist>
-        </div>
-        <div class="smx-field">
-          <label for="smx-week-type">{% trans "Həftə" context "accounts.schedule_manage" %}</label>
-          <div class="bootstrap-single-select">
-            <select class="form-select bootstrap-single-select__native js-bootstrap-single-select" id="smx-week-type" name="week_type" data-bootstrap-select>
-              {% for value, label in schedule_manage_section.week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-            
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <p class="smx-error" data-smx-error role="alert" hidden></p>
-      <div class="smx-conflict" data-smx-conflict role="status" hidden></div>
-
-      <div class="smx-add__actions">
-        <button type="button" class="smx-btn smx-btn--ghost" data-smx-check>
-          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-          {% trans "Konflikti yoxla" context "accounts.schedule_manage" %}
-        </button>
-        <button type="submit" class="smx-btn smx-btn--primary" data-smx-submit>
-          <i class="fas fa-plus" aria-hidden="true"></i>
-          {% trans "Slot əlavə et" context "accounts.schedule_manage" %}
-        </button>
-      </div>
-    </form>
-    {% else %}
-    <p class="smx-empty" role="status">
-      {% trans "Bu qrup üçün seçilmiş semestrdə dərs açılışı yoxdur — əvvəlcə fənn açılışı yaradılmalıdır." context "accounts.schedule_manage" %}
-    </p>
-    {% endif %}
-  </div>
-  {% endif %}
-  {% endif %}
-
-  {# ── Silmə təsdiqi ───────────────────────────────────────────────────── #}
-  <div class="smx-dialog" data-smx-dialog hidden>
-    <div class="smx-dialog__backdrop" data-smx-dialog-close></div>
-    <div class="smx-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="smx-dialog-title">
-      <h3 class="smx-dialog__title" id="smx-dialog-title">{% trans "Slotu silmək?" context "accounts.schedule_manage" %}</h3>
-      <p class="smx-dialog__body" data-smx-dialog-body></p>
-      <p class="smx-dialog__note">
-        {% trans "Silinmə müəllimə və qrupun tələbələrinə bildiriş kimi gedir və audit jurnalına yazılır." context "accounts.schedule_manage" %}
-      </p>
-      <div class="smx-dialog__actions">
-        <button type="button" class="smx-btn smx-btn--ghost" data-smx-dialog-close>{% trans "İmtina" context "accounts.schedule_manage" %}</button>
-        <button type="button" class="smx-btn smx-btn--danger" data-smx-dialog-confirm>{% trans "Sil" context "accounts.schedule_manage" %}</button>
-      </div>
+    <div class="sedit__bar-right">
+      <span class="sedit__owner">{{ sec.owner_label }}</span>
+      <button type="button" class="ems-btn {% if sec.parked %}ems-btn--warning{% endif %}" data-ems-overlay-open="seditParked">
+        <i class="fas fa-inbox" aria-hidden="true"></i>
+        {% trans "Yenidən yerləşdirilməli" context "accounts.schedule_manage" %} ({{ sec.parked|length }})
+      </button>
     </div>
   </div>
 
-  {# ── JS üçün mətn kataloqu (xarici fayl Django template-dən keçmir) ──── #}
-  <div class="smx-i18n" data-smx-i18n hidden
+  {% if not sec.can_edit %}
+  <p class="sedit__note" role="status">
+    {% trans "Müəllim görünüşü yalnız-oxudur — dərs qoymaq üçün «Qrup cədvəli» görünüşünə keçin." context "accounts.schedule_manage" %}
+  </p>
+  {% endif %}
+
+  {% include "registrar/partials/_schedule_matrix.html" with matrix=sec.matrix matrix_role="manage" matrix_editable=sec.can_edit week=sec.week %}
+
+  <div class="sedit__legend">
+    <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lecture"></span> {% trans "Mühazirə" context "accounts.schedule_manage" %}</span>
+    <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--seminar"></span> {% trans "Məşğələ" context "accounts.schedule_manage" %}</span>
+    <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lab"></span> {% trans "Laboratoriya" context "accounts.schedule_manage" %}</span>
+    <span class="sedit__legend-item">{% trans "Dərsi sürüşdürüb başqa xanaya buraxın — təsdiq soruşulacaq." context "accounts.schedule_manage" %}</span>
+  </div>
+  {% endif %}
+
+  {# ── JS mətn kataloqu (xarici fayl Django template-dən keçmir) ─────────── #}
+  <div class="sedit__i18n" data-sedit-i18n hidden
        data-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.schedule_manage' %}"
-       data-added="{% trans 'Slot əlavə edildi.' context 'accounts.schedule_manage' %}"
-       data-removed="{% trans 'Slot silindi.' context 'accounts.schedule_manage' %}"
-       data-clean="{% trans 'Konflikt yoxdur — slot əlavə edilə bilər.' context 'accounts.schedule_manage' %}"
-       data-conflict="{% trans 'Konflikt' context 'accounts.schedule_manage' %}"
-       data-checking="{% trans 'Yoxlanılır…' context 'accounts.schedule_manage' %}"></div>
+       data-clean="{% trans 'Toqquşma yoxdur — dərs bu xanaya qoyula bilər.' context 'accounts.schedule_manage' %}"
+       data-checking="{% trans 'Yoxlanılır…' context 'accounts.schedule_manage' %}"
+       data-new-title="{% trans 'Xanaya dərs qoy' context 'accounts.schedule_manage' %}"
+       data-edit-title="{% trans 'Dərsi redaktə et' context 'accounts.schedule_manage' %}"
+       data-move-summary="{% trans 'Dərs bu xanaya köçürülsün?' context 'accounts.schedule_manage' %}"
+       data-no-suggestions="{% trans 'Uyğun boş xana tapılmadı.' context 'accounts.schedule_manage' %}"
+       data-place-here="{% trans 'Bura qoy' context 'accounts.schedule_manage' %}"></div>
 </div>
+
+{# ── Hüceyrə dialoqu (yarat / redaktə et) ────────────────────────────────── #}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="seditCell" form_dialog_wide=True form_dialog_title=sec.dialog_title form_dialog_subtitle=sec.dialog_subtitle form_dialog_body_include="accounts/profile/sections/schedule/_cell_fields.html" form_dialog_submit_label=sec.dialog_submit_label form_dialog_data=sec.dialog_data %}
+
+{# ── Köçürmə təsdiqi (drag & drop) ───────────────────────────────────────── #}
+{% include "partials/ems_ui/_dialog.html" with dialog_id="seditMove" dialog_title=sec.move_title dialog_body_include="accounts/profile/sections/schedule/_move_body.html" dialog_foot_include="accounts/profile/sections/schedule/_move_foot.html" %}
+
+{# ── Ümumi təsdiq (yaratma / redaktə / silmə) ────────────────────────────── #}
+{% trans "Dəyişikliyi təsdiqləyin" context "accounts.schedule_manage" as sedit_confirm_title %}
+{% include "partials/ems_ui/_dialog.html" with dialog_id="seditConfirm" dialog_static=True dialog_title=sedit_confirm_title dialog_body_include="accounts/profile/sections/schedule/_confirm_body.html" dialog_foot_include="accounts/profile/sections/schedule/_confirm_foot.html" %}
+
+{# ── «Yenidən yerləşdirilməli» çekmecəsi ─────────────────────────────────── #}
+{% include "partials/ems_ui/_drawer.html" with drawer_id="seditParked" drawer_title=sec.parked_title drawer_subtitle=sec.parked_subtitle drawer_body_include="accounts/profile/sections/schedule/_parked_body.html" %}
 {% endif %}
 </section>
+{% endwith %}
 {% endif %}

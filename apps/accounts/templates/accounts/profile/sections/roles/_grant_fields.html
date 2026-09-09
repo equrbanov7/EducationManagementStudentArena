@@ -1,0 +1,45 @@
+{% load i18n %}
+{% comment %}«Rol ver» dialoqunun gövdəsi (`_form_dialog.html`). Şəxs sətirdən
+gəlir və gizli `user_id` sahəsinə yazılır; rol siyahısı təşkilat kataloqudur
+(axtarışlı Bootstrap select). Əhatə vahidi opsionaldır — koordinator/dekan kimi
+vahid-əhatəli rollar üçün.{% endcomment %}
+<div class="rls-form">
+    <div class="rls-target rls-form__full">
+        <span class="rls-target__label">{% trans "Şəxs" context "accounts.manage_roles" %}</span>
+        <strong data-roles-target-person></strong>
+    </div>
+    <div class="ems-field rls-form__full">
+        <label class="ems-field__label" for="mr-grant-role">{% trans "Rol" context "accounts.manage_roles" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="mr-grant-role" name="role_id" required
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                    data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}">
+                <option value="">{% trans "Rol seçin" context "accounts.manage_roles" %}</option>
+                {% for option in manage_roles_section.grantable_roles %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Yalnız öz səviyyənizdən aşağı rollar siyahıdadır; mövcud rollar toxunulmadan qalır." context "accounts.manage_roles" %}</p>
+    </div>
+    <div class="ems-field rls-form__full">
+        <label class="ems-field__label" for="mr-grant-scope">{% trans "Əhatə" context "accounts.manage_roles" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.manage_roles" %}</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="mr-grant-scope" name="scope_unit"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                    data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}">
+                {% for option in manage_roles_section.unit_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Bölmə seçilsə rol yalnız həmin bölmənin alt-ağacında işləyir." context "accounts.manage_roles" %}</p>
+    </div>
+    <div class="ems-field rls-form__full">
+        <label class="ems-field__label" for="mr-grant-reason">{% trans "Qeyd" context "accounts.manage_roles" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.manage_roles" %}</span></label>
+        <textarea class="ems-input ems-textarea" id="mr-grant-reason" name="reason" rows="2" maxlength="500"
+                  placeholder="{% trans 'Əmr nömrəsi, tarix və ya səbəb — audit jurnalına yazılır' context 'accounts.manage_roles' %}"></textarea>
+    </div>
+</div>

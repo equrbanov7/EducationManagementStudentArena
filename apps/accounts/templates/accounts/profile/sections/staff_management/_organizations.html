@@ -1,0 +1,53 @@
+{% comment %}Superadmin, aktiv təşkilat SEÇİLMƏDİKDƏ: idarə ediləcək heyət yoxdur,
+ona görə sistemdəki təşkilatlar sadalanır. Bu, köhnə «Təşkilatlar» tabının
+yerinə qalan YEGANƏ hissədir — dəvət/müraciət panelləri ilə əlaqəsi yoxdur.
+{% endcomment %}
+{% load i18n %}
+{% with sec=student_org_management_section %}
+{% if sec.organization_records %}
+<div class="ems-tablewrap hm-orgs">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ems-table--sticky">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Təşkilat" context "accounts.staff_management" %}</th>
+                    <th scope="col">{% trans "Növ" context "accounts.staff_management" %}</th>
+                    <th scope="col">{% trans "Vəziyyət" context "accounts.staff_management" %}</th>
+                    <th scope="col">{% trans "Sahib" context "accounts.staff_management" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Üzv" context "accounts.staff_management" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in sec.organization_records %}
+                <tr>
+                    <th scope="row">
+                        <span class="hm-org__name">{{ record.name }}</span>
+                        <span class="hm-org__slug">{{ record.slug }}</span>
+                    </th>
+                    <td>{{ record.get_org_type_display }}</td>
+                    <td>
+                        {% if record.is_active and record.status == "active" %}
+                            <span class="ems-badge ems-badge--success">{% trans "Aktiv" context "accounts.staff_management" %}</span>
+                        {% elif record.status == "pending" %}
+                            <span class="ems-badge ems-badge--warning">{% trans "Gözləyir" context "accounts.staff_management" %}</span>
+                        {% elif record.status == "suspended" %}
+                            <span class="ems-badge ems-badge--danger">{% trans "Dayandırılıb" context "accounts.staff_management" %}</span>
+                        {% else %}
+                            <span class="ems-badge ems-badge--muted">{% trans "Deaktiv" context "accounts.staff_management" %}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ record.owner.get_full_name|default:record.owner.username|default:"—" }}</td>
+                    <td class="ems-table__num">{{ record.active_member_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "partials/_pagination.html" with page_obj=sec.organization_records page_param=sec.organizations_page_param extra_query=sec.organizations_pagination_query %}
+{% else %}
+{% trans "Təşkilat tapılmadı" context "accounts.staff_management" as hm_orgs_empty %}
+{% trans "Sistemdə hələ təşkilat yoxdur və ya axtarışa uyğun nəticə tapılmadı." context "accounts.staff_management" as hm_orgs_empty_body %}
+{% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=hm_orgs_empty state_body=hm_orgs_empty_body %}
+{% endif %}
+{% endwith %}

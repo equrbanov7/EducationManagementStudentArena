@@ -177,6 +177,15 @@
         });
     }
 
+    function syncSelects(root) {
+        if (!root || !window.EMSBootstrapSelect) {
+            return;
+        }
+        root.querySelectorAll("select[data-bootstrap-select]").forEach(function (sel) {
+            window.EMSBootstrapSelect.sync(sel);
+        });
+    }
+
     function reset() {
         var host = dialog();
         if (!host) {
@@ -185,6 +194,9 @@
         var form = host.querySelector("[data-rimu-form]");
         if (form) {
             form.reset();
+            // `form.reset()` «change» buraxmadığı üçün select düymələri
+            // sinxronlaşdırılır (bax: static/js/bootstrap_select.js).
+            syncSelects(form);
         }
         if (ns.combo && ns.combo.reset) {
             // YALNIZ bu dialoqun seçicisi — hesab formunun seçiciləri toxunulmur.

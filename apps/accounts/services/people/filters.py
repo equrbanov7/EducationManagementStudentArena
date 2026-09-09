@@ -42,6 +42,55 @@ SEARCH_FIELDS = (
 MAX_AGE = 120
 
 
+def _registrar_choices(module: str, name: str):
+    """Registrar seçimləri — modul səviyyəsində import ETMİRİK.
+
+    `people` paketi `registrar`-a birbaşa asılı olmasın deyə (modul-sərhəd
+    qapısı) dəyərlər ilk çağırışda oxunub keşlənir.
+    """
+    import importlib
+
+    enum = getattr(importlib.import_module("apps.registrar.models.%s" % module), name)
+    return [{"key": value, "label": str(label)} for value, label in enum.choices]
+
+
+def funding_options() -> list:
+    """«Ödəniş forması» filtri: dövlət sifarişi / ödənişli."""
+    return _registrar_choices("admission_meta", "FundingType")
+
+
+def education_form_options() -> list:
+    """«Təhsil forması» filtri: əyani / qiyabi / distant."""
+    return _registrar_choices("catalog_meta", "EducationForm")
+
+
+def _values(options) -> frozenset:
+    return frozenset(option["key"] for option in options)
+
+
+class _LazyValues:
+    """Django tətbiqləri yüklənməmiş import olunanda çökməsin deyə gec oxuma."""
+
+    def __init__(self, loader):
+        self._loader = loader
+        self._cache = None
+
+    def _resolve(self):
+        if self._cache is None:
+            self._cache = _values(self._loader())
+        return self._cache
+
+    def __contains__(self, item):
+        return item in self._resolve()
+
+    def __iter__(self):
+        return iter(self._resolve())
+
+
+FUNDING_VALUES = _LazyValues(funding_options)
+EDUCATION_FORM_VALUES = _LazyValues(education_form_options)
+
+
 @dataclass(frozen=True)
 class PeopleFilters:
     """Normallaşdırılmış filtr dəsti — xam GET heç vaxt aşağı qata düşmür."""
@@ -56,6 +105,10 @@ class PeopleFilters:
     season: str = ""
     status: str = STATUS_ALL
     gender: str = ""
+    # Ödəniş (maliyyələşmə) və təhsil forması — YALNIZ tələbə kataloqunda mənalıdır
+    # (akademik qeydin sahələri, sahib istəyi 2026-09-09).
+    funding: str = ""
+    education_form: str = ""
     age_min: int | None = None
     age_max: int | None = None
     age_unknown: bool = False
@@ -76,6 +129,8 @@ class PeopleFilters:
             "season": self.season,
             "status": self.status,
             "gender": self.gender,
+            "funding": self.funding,
+            "education_form": self.education_form,
             "age_min": self.age_min,
             "age_max": self.age_max,
             "age_unknown": self.age_unknown,
@@ -119,6 +174,13 @@ def parse_filters(params, *, sort_options, default_page_size) -> PeopleFilters:
     if gender not in GENDER_BUCKETS:
         gender = ""
 
+    funding = _clean_text(get("funding"), 16).lower()
+    if funding not in FUNDING_VALUES:
+        funding = ""
+    education_form = _clean_text(get("education_form"), 16).lower()
+    if education_form not in EDUCATION_FORM_VALUES:
+        education_form = ""
+
     sort = _clean_text(get("sort"), 24)
     if sort not in sort_options:
         sort = "name"
@@ -141,6 +203,8 @@ def parse_filters(params, *, sort_options, default_page_size) -> PeopleFilters:
         season=_clean_text(get("season"), 32),
         status=status,
         gender=gender,
+        funding=funding,
+        education_form=education_form,
         age_min=age_min,
         age_max=age_max,
         age_unknown=str(get("age") or "").strip().lower() == AGE_UNKNOWN,

@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}Şəxsin BÜTÜN aktiv təşkilat rolları — nişan kimi (əhatə vahidi ilə).
+İlk üçü göstərilir, qalanı «+N». Redaktə hüququ varsa hər nişanın yanında geri
+alma (×) düyməsi olur və `mrRevokeDialog` dialoqunu açır.{% endcomment %}
+<div class="rls-chips">
+    {% for chip in row.data.visible_roles %}
+    <span class="rls-chip{% if chip.is_primary %} rls-chip--primary{% endif %}{% if chip.is_admin %} rls-chip--admin{% endif %}">
+        <span class="rls-chip__label">{{ chip.label }}</span>
+        {% if chip.scope %}<span class="rls-chip__scope">{{ chip.scope }}</span>{% endif %}
+        {% if row.data.can_edit and manage_roles_section.can_grant %}
+        <button type="button" class="rls-chip__x"
+                data-roles-open="mrRevokeDialog"
+                data-roles-person="{{ row.data.name }}"
+                data-roles-role="{{ chip.label }}"
+                data-roles-prefill='{"membership_id": "{{ chip.membership_id }}", "reason": ""}'
+                title="{% trans 'Rolu geri al' context 'accounts.manage_roles' %}"
+                aria-label="{% blocktrans context 'accounts.manage_roles' with person=row.data.name role=chip.label %}{{ person }} — «{{ role }}» rolunu geri al{% endblocktrans %}">×</button>
+        {% endif %}
+    </span>
+    {% empty %}
+    <span class="rls-missing">{% trans "Rol yoxdur" context "accounts.manage_roles" %}</span>
+    {% endfor %}
+    {% if row.data.extra_roles %}
+    <span class="rls-chip rls-chip--more" title="{{ row.data.role_count }}">+{{ row.data.extra_roles }}</span>
+    {% endif %}
+</div>

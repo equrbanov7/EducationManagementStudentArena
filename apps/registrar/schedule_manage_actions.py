@@ -59,21 +59,30 @@ def _weekday_label(weekday) -> str:
 
 
 def slot_row(slot) -> dict:
-    """Slotun UI/audit müqaviləsi (JSON) — açar adları dəyişməz."""
+    """Slotun UI/audit müqaviləsi (JSON) — açar adları dəyişməz (yalnız artır)."""
     offering = slot.offering
+    instructor = getattr(offering, "instructor", None)
     return {
         "id": str(slot.pk),
         "offering_id": str(slot.offering_id),
+        "subject_id": str(offering.subject_id or ""),
         "subject_code": getattr(offering.subject, "code", "") or "",
         "subject_name": getattr(offering.subject, "name", "") or "",
         "group": getattr(offering.group, "name", "") or "",
+        "group_id": str(offering.group_id or ""),
+        "instructor_id": str(offering.instructor_id or ""),
+        "instructor": (getattr(instructor, "get_full_name", lambda: "")() or "").strip()
+        or str(getattr(instructor, "username", "") or ""),
         "weekday": slot.weekday,
         "weekday_label": _weekday_label(slot.weekday),
         "start_time": slot.start_time.strftime("%H:%M"),
         "end_time": slot.end_time.strftime("%H:%M"),
+        "time_slot": "%s|%s" % (slot.start_time.strftime("%H:%M"), slot.end_time.strftime("%H:%M")),
         "room": slot.room or "",
         "week_type": slot.week_type,
         "kind": slot.kind,
+        "is_parked": bool(slot.is_parked),
+        "park_reason": slot.park_reason or "",
     }
 
 
@@ -199,7 +208,15 @@ def create_slot(*, actor, organization, offering, data, request=None) -> dict:
 
 
 def delete_slot(*, actor, organization, slot, request=None) -> dict:
-    """Slotu sil — icazə + audit + bildiriş."""
+    """Slotu sil — icazə + audit + bildiriş.
+
+    ⚠️ SİLMƏ YUMŞAQDIR (layihə qaydası, 2026-09-09): sətir bazadan getmir,
+    ``is_deleted`` qaldırılır. Default menecer (``SoftDeleteModel``) onu
+    süzgəclədiyi üçün cədvəl, konflikt hesabı və bütün mövcud sorğular
+    dəyişmədən təmiz qalır; sətir isə audit/bərpa üçün ``all_objects``-də durur.
+    """
+    from django.utils import timezone
+
     from core.audit import log_action
     from core.constants import AuditAction
 
@@ -217,7 +234,10 @@ def delete_slot(*, actor, organization, slot, request=None) -> dict:
             resource_id=str(slot.pk),
             resource_repr=str(slot),
         )
-        slot.delete()
+        slot.is_deleted = True
+        slot.deleted_at = timezone.now()
+        slot.is_parked = False
+        slot.save(update_fields=["is_deleted", "deleted_at", "is_parked", "updated_at"])
         _schedule_notification(offering, row, removed=True)
     return row
 

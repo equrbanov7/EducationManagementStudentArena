@@ -100,9 +100,16 @@
 }
 
 .lgr-chip {
+    /* 2026-09-09 (sahib: «bəzi buttonlar böyükdür»): uzun kateqoriya adı çipi
+       188px hündürlüyünə qədər açırdı. Çip indi TƏK sətirdir, mətn kəsilir və
+       tam adı `title` atributunda qalır. */
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     padding: 6px 12px;
     border: 1px solid var(--ems-border, #e2e8f0);
     border-radius: 999px;

@@ -1,0 +1,15 @@
+{% load i18n %}
+{% comment %}Sürüklə-burax köçürməsinin TƏSDİQİ (sahibin tələbi: «başqa yerə
+keçəndə xanaya dərs təsdiq istəsin»). Xülasə mətni və toqquşma siyahısı JS ilə
+doldurulur — inline script YOXDUR.{% endcomment %}
+<p class="sedit-move__summary" data-sedit-move-summary></p>
+<ul class="sedit-conflicts" data-sedit-move-conflicts hidden></ul>
+<div class="sedit-force" data-sedit-move-force hidden>
+  <label class="ems-field__label" for="sedit-move-reason">{% trans "Məcburi dəyişikliyin səbəbi" context "accounts.schedule_manage" %}</label>
+  <textarea class="ems-input sedit-force__reason" id="sedit-move-reason" rows="2" data-sedit-move-reason
+            placeholder="{% trans 'Səbəb auditə yazılır (ən azı 10 simvol)' context 'accounts.schedule_manage' %}"></textarea>
+  <p class="sedit-force__note">
+    {% trans "Toqquşan dərs SİLİNMİR — «Yenidən yerləşdirilməli» siyahısına düşür." context "accounts.schedule_manage" %}
+  </p>
+</div>
+<p class="ems-msg ems-msg--error" data-sedit-move-error role="alert" hidden></p>

@@ -31,13 +31,20 @@ ALLOWED_ACTIONS = frozenset({"reassign", "revert"})
 
 
 def _read_payload(request) -> dict:
+    """Gövdəni sözlüyə çevirir — JSON və forma kodlaşdırması üçün EYNİ forma.
+
+    ⚠️ ``request.POST.items()`` təkrarlanan sahənin YALNIZ SONUNCU dəyərini
+    verir. Kabinet paneli seçilmiş fənləri məhz təkrarlanan ``offering_ids``
+    sahələri ilə göndərir (ortaq dialoq mexanizmi formanı olduğu kimi POST edir),
+    ona görə çoxdəyərli açarlar SİYAHI kimi oxunur.
+    """
     if "application/json" in (request.content_type or "").lower():
         try:
             data = json.loads(request.body.decode("utf-8") or "{}")
         except ValueError:
             return {}
         return data if isinstance(data, dict) else {}
-    return {key: value for key, value in request.POST.items()}
+    return {key: (values[0] if len(values) == 1 else values) for key, values in request.POST.lists()}
 
 
 def _error(code, message, status=400, codes=()):
@@ -100,13 +107,24 @@ def handover_action(request):
 
 
 def _normalize_items(payload) -> list:
-    """``items`` girişini normallaşdırır — həm JSON siyahısı, həm də sadə forma.
+    """Girişi ``[{offering_id, new_instructor_id}, …]`` formasına gətirir.
 
-    Sadə forma (``offering_id`` + ``new_instructor_id``) qəsdən dəstəklənir:
-    jurnal səhifəsindən gələcək «bu fənni təhvil ver» düyməsi tək sətir göndərir
-    və JS-in ayrıca kodu olmasın.
+    ÜÇ forma dəstəklənir və hər birinin öz səbəbi var:
+
+    * ``items`` (JSON siyahısı) — hər sətrə AYRI müəllim; servisin əsl müqaviləsi;
+    * ``offering_ids`` (təkrarlanan sahə) + ``new_instructor_id`` — kabinet
+      panelinin toplu təsdiqi: seçilmiş fənlərin HAMISI eyni müəllimə gedir
+      (ən tez-tez rast gəlinən hal: «müəllim işdən çıxdı»). Sətir-sətir fərqli
+      müəllim lazımdırsa sətrin öz «Təhvil ver» düyməsi ilə ayrıca aparılır —
+      hər əməl onsuz da atomik və auditlidir;
+    * ``offering_id`` (tək) — jurnal səhifəsindən gələcək tək-sətir düyməsi.
     """
     items = payload.get("items")
+    if isinstance(items, str) and items.strip():
+        try:
+            items = json.loads(items)
+        except ValueError:
+            items = None
     if isinstance(items, list):
         rows = []
         for row in items:
@@ -117,14 +135,23 @@ def _normalize_items(payload) -> list:
             if offering_id:
                 rows.append({"offering_id": offering_id, "new_instructor_id": target_id})
         return rows
+
+    target = str(payload.get("new_instructor_id") or "").strip()
+    bulk = payload.get("offering_ids")
+    if isinstance(bulk, str):
+        bulk = [bulk]
+    if isinstance(bulk, (list, tuple)):
+        rows = [
+            {"offering_id": str(value).strip(), "new_instructor_id": target}
+            for value in bulk
+            if str(value or "").strip()
+        ]
+        if rows:
+            return rows
+
     offering_id = str(payload.get("offering_id") or "").strip()
     if offering_id:
-        return [
-            {
-                "offering_id": offering_id,
-                "new_instructor_id": str(payload.get("new_instructor_id") or "").strip(),
-            }
-        ]
+        return [{"offering_id": offering_id, "new_instructor_id": target}]
     return []
 
 

@@ -97,6 +97,8 @@ class _Stage4Mixin:
             "question_bank_kind_filter": self.question_bank_kind_filter,
             "question_bank_kind_pills": self.question_bank_kind_pills,
             "question_bank_can_create": self.question_bank_can_create,
+            "question_bank_is_center": self.question_bank_is_center,
+            "question_bank_section": self.question_bank_section,
             **self._qsub_ctx,
             **self._qchair_ctx,
             "unit_exams_page_obj": self.unit_exams_page_obj,
@@ -335,7 +337,17 @@ class _Stage4Mixin:
                 "selected_role": self.permission_editor_section.get("selected_role"),
             }
         )
-        self.context.update(self.student_org_management_section)
+        # «Heyət idarəetməsi» (2026-09-09): bölmə context-i ARTIQ TAM
+        # düzləşdirilmir — şablon `student_org_management_section.*` işlədir.
+        # Yalnız köhnə səth müqaviləsi olan iki açar qlobal qalır (superadmin
+        # təşkilat siyahısı: `?section=` olmadan açılan tam səhifə yolu).
+        self.context.update(
+            {
+                "active_management_view": self.student_org_management_section.get("active_management_view", ""),
+                "organization_records": self.student_org_management_section.get("organization_records", []),
+                "post_next_url": self.student_org_management_section.get("post_next_url", ""),
+            }
+        )
         self.context.update(
             build_contact_inbox_context(
                 self.request, capabilities=self.capabilities, active_section=self.active_section

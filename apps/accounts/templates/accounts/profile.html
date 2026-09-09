@@ -13,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,teacher-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,student-organization-management,role-assignment,manage-roles,permission-editor,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,teacher-intake,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-title-suffix="{% trans 'title' context 'profile.sidebar' %} - {{ user.username }} - {{ site_brand_name }}"
@@ -151,7 +151,8 @@ istifadəçidə markup onsuz da render olunmur.{% endcomment %}
 {% comment %}Cədvəl idarəetməsi — panel server-render-lidir; JS yalnız seçici
 yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təsdiqini
 idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
-<script src="{% static 'accounts/js/schedule_manage.js' %}?v=20260902-1"></script>
+<script src="{% static 'accounts/js/schedule_editor_confirm.js' %}?v=20260909-confirm"></script>
+<script src="{% static 'accounts/js/schedule_editor.js' %}?v=20260909-confirm"></script>
 {% endif %}
 {% if 'student-intake' in allowed_sections or 'student-admission' in allowed_sections or 'teacher-intake' in allowed_sections %}
 {% comment %}Tələbə idxalı / qəbulu — panel server-render-lidir; JS yalnız fayl
@@ -159,20 +160,23 @@ yükləməsini, quru icranı, nəticə cədvəlini (ekran 08-də ATİS sütunlar
 seçicisi) və parol CSV-sinin endirilməsini idarə edir (EMSDelegate,
 `[data-six-root]` yoxdursa heç nə etmir). TƏK fayl — «Tətbiq et» məntiqi iki
 yerdə saxlanılmasın deyə.{% endcomment %}
-<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260903-3"></script>
+{% comment %}Fayl seçimi səthi (sürüşdür-at, ad, «doldu» tonu) AYRI modul-dur və
+əsas moduldan ƏVVƏL yüklənir: əsas modul onu `window.EMSIntakeFile` üzərindən
+null-safe oxuyur, ona görə sıra pozulsa da səhifə çökmür.{% endcomment %}
+<script src="{% static 'accounts/js/profile/intake_file.js' %}?v=20260909-bulkadd"></script>
+<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260909-bulkadd"></script>
 {% endif %}
 {% if 'student-registry' in allowed_sections %}
 {% comment %}Tələbə reyestri — cədvəl server-render-lidir; JS yalnız çekmecəni
 (kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
 (EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
-<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20260903-3"></script>
+<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20260909-select"></script>
 {% endif %}
 {% if 'teaching-handover' in allowed_sections %}
-{% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
-`window.EMSHandoverRender` üzərindən null-safe oxuyur, ona görə sıra pozulsa da
-səhifə çökmür — sadəcə bölmə init olunmur.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_handover_render.js' %}?v=20260831-1"></script>
-<script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260831-1"></script>
+{% comment %}Fənn təhvili — server-render panel (2026-09-09). Cədvəli JS ÇƏKMİR,
+ona görə köhnə `…_render.js` alt modulu ləğv edildi: burada yalnız seçim,
+xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-dədir.{% endcomment %}
+<script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260909-1"></script>
 {% endif %}
 {% if 'workload-distribution' in allowed_sections %}
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
@@ -227,8 +231,11 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
 {% endif %}
-{% if 'role-assignment' in allowed_sections %}
-<script src="{% static 'accounts/js/role_assignment_search.js' %}"></script>
+{% comment %}Rol / icazə bölmələri (2026-09-09 redizayn) — dialoq prefill-i,
+təsdiq axını və imzalı əməliyyat tokeni. `EMSDelegate`/`EMSOverlay` üzərində
+qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
+{% if 'role-assignment' in allowed_sections or 'manage-roles' in allowed_sections %}
+<script src="{% static 'accounts/js/profile/roles_ui.js' %}?v=20260909-2"></script>
 {% endif %}
 {% if 'permission-editor' in allowed_sections %}
 <script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
@@ -237,9 +244,6 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'accounts/js/permission_editor/interactions.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/save_state.js' %}"></script>
 <script src="{% static 'accounts/js/permission_editor/permission_editor.entry.js' %}"></script>
-{% endif %}
-{% if 'manage-roles' in allowed_sections %}
-<script src="{% static 'accounts/js/manage_roles.js' %}"></script>
 {% endif %}
 {% if 'superadmin-users' in allowed_sections %}
     {# istifadəçi CRUD modalı superadmin idarəetməsinə aiddir #}
@@ -281,7 +285,12 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_wizard.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260618-1"></script>
-<script src="{% static 'exams/js/questionBankList.js' %}?v=20260607-profile-link"></script>
+{% endif %}
+{% if 'question-bank' in allowed_sections %}
+{% comment %}«Sual Bankı» bölməsinin dialoqları — əvvəl SƏHVƏN `my-exams`
+blokunda idi: bankı olan, amma «İmtahanlarım» bölməsi olmayan istifadəçi
+yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
+<script src="{% static 'exams/js/questionBankList.js' %}?v=20260909-ems"></script>
 {% endif %}
 {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
 <script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
@@ -293,7 +302,7 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
 `[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
-{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
+{% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections or 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections or 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections or 'teaching-handover' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20260908-registry"></script>
 {% endif %}
 {% comment %}Fakültələr / Kafedralar reyestri (2026-09-08) — «Heyət» çekmecəsi və
@@ -302,6 +311,10 @@ dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endc
 <script src="{% static 'accounts/js/profile/org_units.js' %}?v=20260908-3"></script>
 {% endif %}
 {% if 'org-members' in allowed_sections %}<script src="{% static 'accounts/js/profile/org_members.js' %}?v=20260908-1"></script>{% endif %}
+{% comment %}«Heyət idarəetməsi» (2026-09-09) — «Üzv kartı» çekmecəsi, səbəbli
+çıxarma dialoqu və KPI→filtr körpüsü. Filtr/səhifələmə serverdədir; fayl
+`[data-hm-root]` yoxdursa heç nə etmir (AJAX-safe).{% endcomment %}
+{% if 'student-organization-management' in allowed_sections %}<script src="{% static 'accounts/js/profile/staff_management.js' %}?v=20260909-1"></script>{% endif %}
 {% if 'audit-log' in allowed_sections %}
 <script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
 {% endif %}

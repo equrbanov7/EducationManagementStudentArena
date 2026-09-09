@@ -1,0 +1,43 @@
+{% load i18n %}
+{% comment %}Bank sətrinin əməlləri.
+
+«Aç» və Word ixracı — bankı görə bilən hər kəs üçün (oxu əməli).
+Redaktə/silmə YALNIZ sahibə görünür (`row.data.can_manage`) — server də eyni
+qaydanı tətbiq edir.  Redaktə dialoqu `questionBankList.js` ilə doldurulur;
+silmə forması `EMSConfirm` təsdiqindən sonra POST edir (ayrıca modal yoxdur).
+{% endcomment %}
+<a class="ems-btn ems-btn--sm" href="{{ row.data.detail_url }}">
+    <i class="fas fa-list-check" aria-hidden="true"></i>
+    {% trans "Suallar" context "accounts.profile.question_bank" %}
+</a>
+<a class="ems-iconbtn" href="{{ row.data.word_url }}"
+   title="{% trans 'Sualları Word kimi yüklə' %}"
+   aria-label="{% blocktrans with name=row.data.name context "accounts.profile.question_bank" %}«{{ name }}» — Word ixracı{% endblocktrans %}">
+    <i class="fas fa-file-word" aria-hidden="true"></i>
+</a>
+{% if row.data.can_manage %}
+<button type="button" class="ems-iconbtn" data-qb-edit
+        data-update-url="{{ row.data.update_url }}"
+        data-name="{{ row.data.name }}"
+        data-subject-id="{{ row.data.subject_id }}"
+        data-subject-label="{{ row.data.subject_label }}"
+        data-teacher-id="{{ row.data.teacher_id }}"
+        data-teacher-label="{{ row.data.teacher_name }}"
+        data-kind="{{ row.data.kind }}"
+        data-language="{{ row.data.language }}"
+        data-format="{{ row.data.format }}"
+        title="{% trans 'Redaktə et' %}"
+        aria-label="{% blocktrans with name=row.data.name context "accounts.profile.question_bank" %}«{{ name }}» — redaktə{% endblocktrans %}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+</button>
+<form method="post" action="{{ row.data.delete_url }}" class="qbank-delete" data-qb-delete-form
+      data-confirm="{% blocktrans with name=row.data.name context "accounts.profile.question_bank" %}«{{ name }}» bankı və içindəki bütün suallar həmişəlik silinəcək. Davam edilsin?{% endblocktrans %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ row.data.back_url }}">
+    <button type="submit" class="ems-iconbtn ems-iconbtn--danger"
+            title="{% trans 'Sil' %}"
+            aria-label="{% blocktrans with name=row.data.name context "accounts.profile.question_bank" %}«{{ name }}» — sil{% endblocktrans %}">
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
+    </button>
+</form>
+{% endif %}

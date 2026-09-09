@@ -367,22 +367,23 @@ class UnitScopedStudentManagementSectionTest(TestCase):
             user_level=user_level,
         )
 
+    # 2026-09-09: bölmə «Heyət idarəetməsi» kimi yenidən quruldu — üzvlər
+    # `section["students"]` (profil siyahısı) yerinə `section["rows"]` (cədvəl
+    # sətirləri) ilə gəlir, dəvət/müraciət sayğacları isə tamamilə silindi.
+    # Bölmə əhatəsinin (unit scope) zəmanəti dəyişməyib və burada qorunur.
     def test_dean_sees_only_own_faculty_students(self):
         section = self._build_section(self.dean, user_level=90)
         self.assertTrue(section.get("unit_scope_active"))
-        student_user_ids = {profile.user_id for profile in section["students"]}
-        self.assertIn(self.student_a.id, student_user_ids)
-        self.assertNotIn(self.student_b.id, student_user_ids)
-        # Org-səviyyəli intake siyahıları dekan üçün boşdur.
-        self.assertEqual(section["pending_requested_students_total_count"], 0)
-        self.assertEqual(section["unassigned_students_total_count"], 0)
+        member_user_ids = {row["user_id"] for row in section["rows"]}
+        self.assertIn(self.student_a.id, member_user_ids)
+        self.assertNotIn(self.student_b.id, member_user_ids)
 
     def test_owner_sees_all_students(self):
         section = self._build_section(self.owner, user_level=100)
         self.assertFalse(section.get("unit_scope_active"))
-        student_user_ids = {profile.user_id for profile in section["students"]}
-        self.assertIn(self.student_a.id, student_user_ids)
-        self.assertIn(self.student_b.id, student_user_ids)
+        member_user_ids = {row["user_id"] for row in section["rows"]}
+        self.assertIn(self.student_a.id, member_user_ids)
+        self.assertIn(self.student_b.id, member_user_ids)
 
 
 class UnitExamsSectionTest(TestCase):

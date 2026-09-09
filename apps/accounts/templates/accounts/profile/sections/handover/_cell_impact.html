@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}«Təhvil nəyə toxunur» — tələbə / dərs / bal xanası sayı.
+
+Rəqəmlər İDDİA deyil, ölçüdür: istifadəçi təsdiqdən əvvəl əməlin miqyasını
+görməlidir (2 tələbəlik seçmə fənn ilə 120 tələbəlik ümumi fənn eyni deyil).{% endcomment %}
+<span class="thx-impact">
+    <span class="thx-impact__item"><b>{{ row.data.students }}</b> {% trans "tələbə" context "accounts.handover" %}</span>
+    <span class="thx-impact__item"><b>{{ row.data.lessons }}</b> {% trans "dərs" context "accounts.handover" %}</span>
+    <span class="thx-impact__item"><b>{{ row.data.marks }}</b> {% trans "bal xanası" context "accounts.handover" %}</span>
+</span>
