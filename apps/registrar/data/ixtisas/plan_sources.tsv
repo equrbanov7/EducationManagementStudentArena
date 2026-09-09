@@ -2,57 +2,79 @@
 # bakalavr: /az/page/undergraduate-programs · magistr: /az/page/tehsil-praqramlari-s
 # `proqram` sutunu HELL EDILMIS uygunluqdur; idxal YALNIZ ondan istifade edir.
 # 2026-09-10: 6 uygunluq hell edildi (`uygunluq` sutununda esas yazilib).
-# Bosh qalan 2 sened — «Dilsunasliq (Ingilis dili)» ve «Texniki dizayn» —
-# bazamizda UYGUN PROQRAM YOXDUR (magistr siyahisinda hec biri mövcud deyil).
+# 2026-09-10 (TAM SUPURGE): sayt bastan-basa taranib, 7 setir elave edilib ve
+# «Tehsilde sosial psixoloji xidmet» URL-i duzeldilib (fayl adinda IKI bosluq
+# var: `050116  TSPX.pdf`; bir bosluqla sayt 200 ile HTML sehv sehifesi verir).
+# ⚠️ SUPURGE NECE APARILIR: siyahi sehifelerinde (undergraduate-programs /
+#    tehsil-praqramlari-s) PDF KECIDI YOXDUR ve onlar ixtisaslarin YALNIZ bir
+#    hissesini verir (47). Tam siyahi 7 mekteb sehifesindedir:
+#    /az/faculties → /az/faculties/<mekteb> → /az/faculties/<ixtisas> (97 sehife).
+#    Sened tipleri: `<sifr> <Ad> <il>.pdf` = TEDRIS PLANI (parser oxuyur) ·
+#    `PLAN_<Ad>.docx.pdf` ve `00_<Ad>.pdf` = ISCI TEDRIS PLANI, 3 sutunlu
+#    (sifr/ad/ECTS) duzum — parser HELE oxumur, 0 setir verir ·
+#    `Matrix|Matris|PTN|… tedris grafiki|… tehsil programi|wcu-NN.pdf` = plan
+#    DEYIL (tehsil proqrami/matris/qrafik), siyahiya SALINMIR.
+# Bosh qalan 4 sened — «Dilsunasliq (Ingilis dili)», «Texniki dizayn»,
+# «Tetbiqi proqram teminati» ve «Edebiyyatsunasliq» — bazamizda UYGUN PROQRAM
+# YOXDUR (magistr siyahisinda hec biri mövcud deyil).
+# Saytda plani OLMAYAN 2 ixtisas: «Qida muhendisliyi» ve «Davamli inkisafin
+# idare edilmesi» — orada yalniz skan edilmis TEHSIL PROQRAMI var, plan yoxdur.
 # Dizayn senedi 3 ixtisasi birlikde verir → hem «Dizayn (Qrafik)», hem
 # «Dizayn (Interyer)» sətri var (eyni PDF, ayri qaralama plan).
 # WARN: fayl adindaki 050XXX/060XXX sifri ISLENMIR — saytdaki sifrlerin bir
 #       hissesi sehvdir (bax `_program_official_codes.py`).
 # Bos `proqram` = el ile hell edilmelidir; sistem ozunden baglamir.
 seviyye	proqram	uygunluq	sayt_adi	senet	url
-bachelor	Beynəlxalq münasibətlər	exact	Beynəlxalq münasibətlər	B_Beyn_lxalq_m_nasib_tl_r.pdf	https://wcu.edu.az/uploads/files/050201 Beynəlxalq münasibətlər (8) (1).pdf
-bachelor	Biologiya	exact	Biologiya	B_Biologiya.pdf	https://wcu.edu.az/uploads/files/050501 - Biologiya.pdf
-bachelor	Biznesin idarə edilməsi	exact	Biznesin idarə edilməsi	B_Biznesin_idar_edilm_si.pdf	https://wcu.edu.az/uploads/files/050402%20%20Biznesin%20idar%D0%B3%C9%99%20edilm%C9%99si%202023.pdf
-bachelor	Cihaz Mühəndisliyi	exact	Cihaz mühəndisliyi	B_Cihaz_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050604 - Cihaz Mühəndisliyi.pdf
-bachelor	Dizayn (Qrafik)	sayt senedi 3 dizayn ixtisasini birlikde verir	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)	B_Dizayn_interyer_diyazn_qrafiq_dizayn_v_s_naye_.pdf	https://wcu.edu.az/uploads/files/050306 Dizayn (qrafik dizayn).pdf
-bachelor	Dizayn (İnteryer)	eyni sened; qaralama plan tesdiq gozleyir	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)	B_Dizayn_interyer_diyazn_qrafiq_dizayn_v_s_naye_.pdf	https://wcu.edu.az/uploads/files/050306 Dizayn (qrafik dizayn).pdf
-bachelor	Ekologiya	exact	Ekologiya	B_Ekologiya.pdf	https://wcu.edu.az/uploads/files/050504 - Ekologiya.pdf
+bachelor	Beynəlxalq münasibətlər	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Beynəlxalq münasibətlər	B_Beynelxalqmunasibetler_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050201/PLAN_Beynəlxalqmünasibətlər.docx.pdf
+bachelor	Biologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Biologiya	B_Biologiya_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050501/PLAN_Biologiya.docx.pdf
+bachelor	Biznesin idarə edilməsi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Biznesin idarə edilməsi	B_Biznesinidareedilmesi_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050402/PLAN_Biznesinidarəedilməsi.docx.pdf
+bachelor	Cihaz Mühəndisliyi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Cihaz mühəndisliyi	B_Cihazmuhendisliyi_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050604/PLAN_Cihazmühəndisliyi.docx.pdf
+bachelor	Dizayn (Qrafik)	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)	B_Dizayn_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050306/PLAN_Dizayn.docx.pdf
+bachelor	Dizayn (İnteryer)	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi · eyni sened hem Qrafik, hem Interyer ucundur	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)	B_Dizayn.pdf	https://wcu.edu.az/uploads/files/sillabus/050306/PLAN_Dizayn.docx.pdf
+bachelor	Dövlət və bələdiyyə idarəetməsi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Dövlət və bələdiyyə idarəetməsi	B_Dovletvebelediyyeidareetmesi_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050404/PLAN_Dövlətvəbələdiyyəidarəetməsi.docx.pdf
+bachelor	Ekologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Ekologiya	B_Ekologiya_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050504/PLAN_Ekologiya.docx.pdf
 bachelor	Ekologiya Mühəndisliyi	exact	Ekologiya mühəndisliyi	B_Ekologiya_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050606 - Ekologiya Mühəndisliyi.pdf
-bachelor	Azərbaycan dili və ədəbiyyatı	ad uygunlugu (sayt: Filologiya (Az dili))	Filologiya (Azərbaycan dili və ədəbiyyatı)	B_Filologiya_Az_rbaycan_dili_v_d_biyyat_.pdf	https://wcu.edu.az/uploads/files/Filologiya%20(Az%C9%99rbaycan%20dili%20%20v%C9%99%20%C9%99d%C9%99biyyat%C4%B1)%202023.pdf
-bachelor	Filologiya (İngilis dili və ədəbiyyatı)	exact	Filologiya (ingilis dili və ədəbiyyatı)	B_Filologiya_ingilis_dili_v_d_biyyat_.pdf	https://wcu.edu.az/uploads/files/050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf
-bachelor	Fəlsəfə	exact	Fəlsəfə	B_F_ls_f_.pdf	https://wcu.edu.az/uploads/files/050204 Fəlsəfə + (1).pdf
+bachelor	Azərbaycan dili və ədəbiyyatı	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Filologiya (Azərbaycan dili və ədəbiyyatı)	B_Azerbaycandiliveedebiyyati_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050205/PLAN_Azərbaycandilivəədəbiyyatı.docx.pdf
+bachelor	Filologiya (İngilis dili və ədəbiyyatı)	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Filologiya (ingilis dili və ədəbiyyatı)	B_FilologiyaIngilisdiliveedebiyyati_docx_pdf.pdf	http://wcu.edu.az/uploads/files/sillabus/050205i/PLAN_Filologiyaİngilisdilivəədəbiyyatı.docx.pdf
+bachelor	Fəlsəfə	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Fəlsəfə	B_Felsefe_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050204/PLAN_Fəlsəfə.docx.pdf
 bachelor	Kompüter elmləri	exact	Kompüter elmləri	B_Komp_ter_elml_ri.pdf	https://wcu.edu.az/uploads/files/050509 - Kompüter Elmləri - QİYABİ.pdf
-bachelor	Kompüter Mühəndisliyi	exact	Kompüter mühəndisliyi	B_Komp_ter_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050620 - Kompüter Mühəndisliyi.pdf
-bachelor	Maliyyə	exact	Maliyyə	B_Maliyy_.pdf	https://wcu.edu.az/uploads/files/050406%20Maliyy%C9%99%202023.pdf
-bachelor	Marketinq	exact	Marketinq	B_Marketinq.pdf	https://wcu.edu.az/uploads/files/MARKETİNG 2023.pdf
-bachelor	Mexatronika və robototexnika mühəndisliyi	exact	Mexatronika və robototexnika mühəndisliyi	B_Mexatronika_v_robototexnika_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050629 - Mexatronika və robototexnika mühəndisliyi.pdf
-bachelor	Meşəçilik	exact	Meşəçilik	B_Me_ilik.pdf	https://wcu.edu.az/uploads/files/050706 - Meşəçilik.pdf
-bachelor	Mühasibat	exact	Mühasibat	B_M_hasibat.pdf	https://wcu.edu.az/uploads/files/050409%20M%C3%BChasibat%202023.pdf
-bachelor	Psixologiya	exact	Psixologiya	B_Psixologiya.pdf	https://wcu.edu.az/uploads/files/050211 Psixologiya +.pdf
-bachelor	Regionşünaslıq	exact	Regionşünaslıq	B_Region_nasl_q.pdf	https://wcu.edu.az/uploads/files/050212 Regionşünaslıq.pdf
-bachelor	Sosial Iş	exact	Sosial iş	B_Sosial_i_.pdf	https://wcu.edu.az/uploads/files/050807 Sosial iş + (1).pdf
-bachelor	Su Bioehtiyyatları və Akvakultura	fuzzy	Su bioehtiyatları və akvakultura	B_Su_bioehtiyatlar_v_akvakultura.pdf	https://wcu.edu.az/uploads/files/050708 - Su bioehtiyatları və akvakultura.pdf
-bachelor	Tarix	exact	Tarix	B_Tarix.pdf	https://wcu.edu.az/uploads/files/050214%20Tarix%202023.pdf
+bachelor	Kompüter Mühəndisliyi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Kompüter mühəndisliyi	B_Komputermuhendisliyi_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050620/PLAN_Kompütermühəndisliyi.docx.pdf
+bachelor	Maliyyə	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Maliyyə	B_Maliyye_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050406/PLAN_Maliyyə.docx.pdf
+bachelor	Marketinq	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Marketinq	B_Marketinq_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050407/PLAN_Marketinq.docx.pdf
+bachelor	Menecment	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Menecment	B_Menecment_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050408/PLAN_Menecment.docx.pdf
+bachelor	Mexanika mühəndisliyi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Mexanika mühəndisliyi	B_Mexanikamuhendisliyi_docx_pdf.pdf	http://wcu.edu.az/uploads/files/sillabus/050628/PLAN_Mexanikamühəndisliyi.docx.pdf
+bachelor	Mexatronika və robototexnika mühəndisliyi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Mexatronika və robototexnika mühəndisliyi	B_Mexatronikaverobototexnikamuhendisliyi_docx_pdf.pdf	http://wcu.edu.az/uploads/files/sillabus/050629/PLAN_Mexatronikavərobototexnikamühəndisliyi.docx.pdf
+bachelor	Meşəçilik	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Meşəçilik	B_Mesecilik_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050706/PLAN_Meşəçilik.docx.pdf
+bachelor	Mühasibat	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Mühasibat	B_Muhasibat_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050409/PLAN_Mühasibat.docx.pdf
+bachelor	Politologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Politologiya	B_Politologiya_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050210/PLAN_Politologiya.docx.pdf
+bachelor	Psixologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Psixologiya	B_Psixologiya_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050211/PLAN_Psixologiya.docx.pdf
+bachelor	Regionşünaslıq	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Regionşünaslıq	B_Regionsunasliq_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050212/PLAN_Regionşünaslıq.docx.pdf
+bachelor	Sosial Iş	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Sosial iş	B_Sosialis_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050807/PLAN_Sosialiş.docx.pdf
+bachelor	Su Bioehtiyyatları və Akvakultura	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Su bioehtiyatları və akvakultura	B_Subioehtiyatlariveakvakultura_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050708/PLAN_Subioehtiyatlarıvəakvakultura.docx.pdf
+bachelor	Tarix	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Tarix	B_Tarix_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050214/PLAN_Tarix.docx.pdf
 bachelor	Turizm bələdçiliyi	exact	Turizm bələdçiliyi	B_Turizm_b_l_d_iliyi.pdf	https://wcu.edu.az/uploads/files/050809%20Turizm%20b%C9%99l%C9%99d%C3%A7iliyi%202023.pdf
-bachelor	Turizm işinin təşkili	exact	Turizm işinin təşkili	B_Turizm_i_inin_t_kili.pdf	https://wcu.edu.az/uploads/files/050810%20Turizm%20i%C5%9Finin%20t%C9%99%C5%9Fkili%202023.pdf
-bachelor	Təhsildə sosial psixoloji xidmət	exact	Təhsildə sosial psixoloji xidmət	B_T_hsild_sosial_psixoloji_xidm_t.pdf	https://wcu.edu.az/uploads/files/050116 TSPX.pdf
-bachelor	Tərcümə	220 akademik qeyd; (Dillər üzrə) variantinda cemi 15	Tərcümə (ingilis)	B_T_rc_m_ingilis_.pdf	https://wcu.edu.az/uploads/files/050215%20T%C9%99rc%C3%BCm%C9%99%202023.pdf
-bachelor	İnformasiya Texnologiyaları	exact	İnformasiya texnologiyaları	B__nformasiya_texnologiyalar_.pdf	https://wcu.edu.az/uploads/files/050616 - İnformasiya Texnologiyaları.pdf
-bachelor	İnformasiya Təhlükəsizliyi	exact	İnformasiya təhlükəsizliyi	B__nformasiya_t_hl_k_sizliyi.pdf	https://wcu.edu.az/uploads/files/050615 - İnformasiya Təhlükəsiz.pdf
-bachelor	İqtisadiyyat	exact	İqtisadiyyat	B__qtisadiyyat.pdf	https://wcu.edu.az/uploads/files/050405%20%C4%B0qtisadiyyat%202023.pdf
+bachelor	Turizm işinin təşkili	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Turizm işinin təşkili	B_Turizmisininteskili_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050810/PLAN_Turizmişinintəşkili.docx.pdf
+bachelor	Təhsildə sosial psixoloji xidmət	exact	Təhsildə sosial psixoloji xidmət	B_T_hsild_sosial_psixoloji_xidm_t.pdf	https://wcu.edu.az/uploads/files/050116  TSPX.pdf
+bachelor	Tərcümə	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Tərcümə (ingilis)	B_Tercume_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050215/PLAN_Tərcümə.docx.pdf
+bachelor	İnformasiya Texnologiyaları	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	İnformasiya texnologiyaları	B_Informasiyatexnologiyalari_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050616/PLAN_İnformasiyatexnologiyaları.docx.pdf
+bachelor	İnformasiya Təhlükəsizliyi	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	İnformasiya təhlükəsizliyi	B_Informasiyatehlukesizliyi_docx_pdf.pdf	http://wcu.edu.az/uploads/files/sillabus/050615/PLAN_İnformasiyatəhlükəsizliyi.docx.pdf
+bachelor	İqtisadiyyat	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	İqtisadiyyat	B_Iqtisadiyyat_docx_pdf.pdf	https://wcu.edu.az/uploads/files/sillabus/050405/PLAN_İqtisadiyyat.docx.pdf
 master	Akvabioresurslar	exact	Akvabioresurslar	M_7005013_Akvabioresurslar.pdf	https://wcu.edu.az/uploads/files/060709 - Su bioehtiyatları (magistr).pdf
-master	Beynəlxalq münasibətlər və diplomatiya	exact	Beynəlxalq münasibətlər və diplomatiya	M_7002001_Beyn_lxalq_m_nasib_tl_r_v_diplomatiya.pdf	https://wcu.edu.az/uploads/files/060213 - Beynelxalq munasibetler.pdf
+master	Beynəlxalq münasibətlər və diplomatiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Beynəlxalq münasibətlər və diplomatiya	M_Beynelxalq_munasibetler_ve_diplomatiya_pdf.pdf	https://wcu.edu.az/uploads/files/00_Beyn%C9%99lxalq_m%C3%BCnasib%C9%99tl%C9%99r_v%C9%99_diplomatiya.pdf
 master	Beynəlxalq turizm	exact	Beynəlxalq turizm	M_7008004_Beyn_lxalq_turizm.pdf	https://wcu.edu.az/uploads/files/060803_Turizm_ve_otelcilik.pdf
 master	Ekologiya	resmi sifr 7005004 = magistr Ekologiya; sayt adi Bioekologiya	Bioekologiya	M_7005004_Bioekologiya.pdf	https://wcu.edu.az/uploads/files/060510 - Bioekologiya.pdf
 master			Dilşünaslıq (İngilis dili)	M_7002006_Dil_nasl_q_ngilis_dili_.pdf	https://wcu.edu.az/uploads/files/060201-Filologiya.pdf
 master	Genetika	exact	Genetika	M_7005001_Genetika.pdf	https://wcu.edu.az/uploads/files/060505 - Genetika.pdf
-master	Klinik psixologiya	resmi sifr 7002013 uygun	Klinik (tibbi) psixologiya	M_7002013_Klinik_tibbi_psixologiya.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
-master	Maliyyə nəzarəti və auidit	fuzzy	Maliyyə nəzarəti və audit	M_7004006_Maliyy_n_zar_ti_v_audit.pdf	https://wcu.edu.az/uploads/files/060403-Maliyyə.pdf
+master	Klinik psixologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Klinik (tibbi) psixologiya	M_Klinik_tibbi_psixologiya_pdf.pdf	https://wcu.edu.az/uploads/files/00_Klinik_(tibbi)_psixologiya.pdf
+master	Maliyyə nəzarəti və auidit	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Maliyyə nəzarəti və audit	M_Maliyye_nezareti_ve_audit_pdf_pdf.pdf	https://wcu.edu.az/uploads/files/00_Maliyye_nezareti_ve_audit.pdf.pdf
 master	Malekulyar biologiya	fuzzy	Molekulyar biologiya	M_7005001_Molekulyar_biologiya.pdf	https://wcu.edu.az/uploads/files/060505-Biologiya.pdf
-master	Məhkəmə psixologiyası	exact	Məhkəmə Psixologiyası	M_7002013_M_hk_m_Psixologiyas_.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
+master	Məhkəmə psixologiyası	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Məhkəmə Psixologiyası	M_Huquq_psixologiyasi_pdf.pdf	https://wcu.edu.az/uploads/files/00_H%C3%BCquq_psixologiyas%C4%B1.pdf
 master	Qafqaz xalqlarının tarixi	exact	Qafqaz xalqlarının tarixi	M_7002016_Qafqaz_xalqlar_n_n_tarixi.pdf	https://wcu.edu.az/uploads/files/060206 - Tarix.pdf
-master	Sosial psixologiya	exact	Sosial psixologiya	M_7002013_Sosial_psixologiya.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
+master	Sosial psixologiya	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	Sosial psixologiya	M_Sosial_psixologiya_pdf.pdf	https://wcu.edu.az/uploads/files/00_Sosial_psixologiya.pdf
 master			Texniki dizayn	M_7003005_Texniki_dizayn.pdf	https://wcu.edu.az/uploads/files/060321 - Dizayn.pdf
 master	Turizm və hotelçiliyin idarə edilməsi	exact	Turizm və hotelçiliyin idarə edilməsi	M_7004003_Turizm_v_hotel_iliyin_idar_edilm_si.pdf	https://wcu.edu.az/uploads/files/060409-Biznesin İdarəedilməsi.pdf
-master	İdarəetmədə informasiya sistemləri və şəbəkələri	resmi sifr 7006016 uygun	İdarəetmədə informasiya sistemləri	M_7006016__dar_etm_d_informasiya_sisteml_ri.pdf	https://wcu.edu.az/uploads/files/060632-informasiya_texnologiyalari_ve_sistemleri_muhendisliyi.pdf
+master		bazada uygun magistr proqrami YOXDUR (sayt sifri 060632)	Tətbiqi proqram təminatı	M_T_tbiqi_proqram_t_minat_.pdf	https://wcu.edu.az/uploads/files/060632 - Tətbiqi proqram təminatı.pdf
+master	İdarəetmədə informasiya sistemləri və şəbəkələri	isci tedris plani (semestr bolgusu var) — 2026-09-10 supurgesi	İdarəetmədə informasiya sistemləri	M_Idareetmede_informasiya_sistemleri_pdf.pdf	https://wcu.edu.az/uploads/files/00_%C4%B0dar%C9%99etm%C9%99d%C9%99_informasiya_sisteml%C9%99ri.pdf
 master	İqtisadiyyatın tənzimlənməsi	exact	İqtisadiyyatın tənzimlənməsi	M_7004005__qtisadiyyat_n_t_nziml_nm_si.pdf	https://wcu.edu.az/uploads/files/060404-İqtisadiyyat.pdf
+master		bazada uygun magistr proqrami YOXDUR (sayt sifri 060201)	Ədəbiyyatşünaslıq (Amerika və Böyük Britaniya)	M__d_biyyat_nasl_q_Amerika_v_B_y_k_Britaniya_.pdf	https://wcu.edu.az/uploads/files/00_Ədəbiyyatşünaslıq.pdf
+master	Ətraf mühitin mühafizə və bərpa metodları	resmi sifr 7005004 uygun (sayt adi: ...mühafizəsi və bərpası metodları)	Ətraf mühitin mühafizəsi və bərpası metodları	M_7005004__traf_m_hitin_m_hafiz_si_v_b_rpas_metodlar_.pdf	https://wcu.edu.az/uploads/files/7005004_Ətraf_mühitin_mühafizəsi_və_bərpası_metodları_TİP_2025-2026.pdf

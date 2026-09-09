@@ -64,8 +64,18 @@ _HOMOGLYPHS = str.maketrans(
 #: ⚠️ Bəzi planlar (məs. Regionşünaslıq) İNGİLİS dilində dərc olunub — orada
 #: eyni sətir «I block 1. Philosophy …» şəklindədir; əks halda seçmə blok
 #: «tapılmayan fənn» kimi görünürdü.
+#: ⚠️ 2026-09-10: blok sözü hər sənəddə eyni yazılmır — «I Seçmə fənn bloku:
+#: 1.Bioloji müxtəliflik …» və «ÜFS I blok 1.Fəlsəfə …» nə rum rəqəmi ilə
+#: BAŞLAYIR, nə də «blok»dan dərhal sonra iki nöqtə gəlir. Ona görə üçüncü
+#: qayda əlavə edilib: «blok/bloku» sözündən sonra NÖMRƏLƏNMİŞ siyahı («1.»)
+#: gəlirsə, xana tərifinə görə bir neçə fənndir. Bu 6 sətir əvvəl `unknown`
+#: səbətinə düşürdü — `--create-subjects` onları kataloqa UYDURMA fənn kimi
+#: yazardı.
 _ELECTIVE = re.compile(
-    r"^\s*[IVX]+\s*blo[kc]k?\b|blo[kc]k?\s*:|^\s*(birinci|ikinci|üçüncü|dördüncü|beşinci)\s+blok",
+    r"^\s*[IVX]+\s*blo[kc]k?\b"
+    r"|blo[kc]k?\s*:"
+    r"|blo[kc]k?u?\b\s*:?\s*\d\s*[.)]"
+    r"|^\s*(birinci|ikinci|üçüncü|dördüncü|beşinci)\s+blok",
     re.I,
 )
 
@@ -79,7 +89,18 @@ def normalize(value: str) -> str:
 
 
 def is_elective_block(name: str) -> bool:
-    return bool(_ELECTIVE.search(name or ""))
+    """Sətir TƏK fənn deyil, seçmə blokdur?
+
+    İki naxış birləşir:
+    * söz-əsaslı («I blok:», «I block 1. …») — `_ELECTIVE`;
+    * NÖMRƏLƏNMİŞ siyahı («1 Membranologiya 2. Nanobiotexnologiya 3. Gen
+      mühəndisliyi») — işçi tədris planı düzümündə bloklar məhz belə yazılır,
+      «blok» sözü ÜMUMİYYƏTLƏ olmaya bilər. Bu naxış olmadan `--create-subjects`
+      belə sətirləri kataloqa UYDURMA fənn kimi yazardı (430 sətir).
+    """
+    from apps.registrar.plan_import_work import is_enumerated_block
+
+    return bool(_ELECTIVE.search(name or "")) or is_enumerated_block(name)
 
 
 def _to_int(value: str):
@@ -123,15 +144,44 @@ def extract_rows(pdf_path: str) -> list[dict]:
     return rows
 
 
+def is_placeholder(name: str) -> bool:
+    """«Ali məktəb tərəfindən müəyyən edilən fənn» kimi YER TUTUCU sətir?
+
+    Belə sətirlər konkret fənn deyil — sonradan universitetin doldurduğu yerdir.
+    Onları `unknown` səbətinə atmaq təhlükəlidir: `--create-subjects` rejimi
+    onları kataloqa UYDURMA fənn kimi yazardı.
+    """
+    return bool(_PLACEHOLDER.match((name or "").strip()))
+
+
+#: «AMTSF: Biotexnologiya…», «ATMF: Su bioehtiyatları…» — addan ƏVVƏL gələn
+#: bölüm kodu. Kataloqda fənn TƏMİZ adla saxlanılır, ona görə prefiks atılır;
+#: əks halda eyni fənn həm «Biotexnologiya», həm «AMTSF: Biotexnologiya» kimi
+#: kataloqa İKİ dəfə düşərdi.
+_ROW_PREFIX = re.compile(r"^[A-ZƏÖÜĞİŞÇ]{2,6}\s*[:—–-]\s+")
+
+
+def clean_subject_name(name: str) -> str:
+    """Sətir adını kataloq üçün təmizləyir (bölüm prefiksi + artıq boşluq)."""
+    text = _ROW_PREFIX.sub("", (name or "").strip())
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def match_rows(rows: list[dict], subjects_by_name: dict) -> dict:
     """Sətirləri fənn kataloqu ilə tutuşdurur; heç nə yazmır.
 
-    ``subjects_by_name`` — ``{normalize(ad): Subject}``.
+    ``subjects_by_name`` — ``{normalize(ad): Subject}``. Səbətlər:
+    ``matched`` (kataloqda var) · ``electives`` (seçmə blok) ·
+    ``placeholders`` (yer tutucu) · ``unknown`` (əsl fənn, kataloqda yoxdur).
     """
-    matched, electives, unknown = [], [], []
-    for row in rows:
+    matched, electives, placeholders, unknown = [], [], [], []
+    for raw in rows:
+        row = {**raw, "name": clean_subject_name(raw["name"])}
         if is_elective_block(row["name"]):
             electives.append(row)
+            continue
+        if is_placeholder(row["name"]):
+            placeholders.append(row)
             continue
         subject = subjects_by_name.get(normalize(row["name"]))
         if subject is None:
@@ -142,6 +192,7 @@ def match_rows(rows: list[dict], subjects_by_name: dict) -> dict:
         "rows": rows,
         "matched": matched,
         "electives": electives,
+        "placeholders": placeholders,
         "unknown": unknown,
         "low_yield": len(rows) < LOW_YIELD,
     }
@@ -165,9 +216,18 @@ _MASTER_CODE = re.compile(r"^[A-ZƏÖÜĞİŞÇ]{2,6}\s*[–—-]\s*[A-ZƏ]?\d{1
 #: Magistr planlarında ixtisas hissəsi məhz belə verilir («İxtisaslaşmaya
 #: ayrılan fənlər** — 42 kredit»); bunları `CurriculumSubject` kimi yazmaq
 #: planı uydurma fənnlə doldurardı.
+#:
+#: ⚠️ 2026-09-10: sənədlər eyni yer tutucunu ÜÇ cür yazır və köhnə qayda
+#: yalnız birini tuturdu:
+#:   * «Ali məktəbin müəyyən **etdiyi** fənn» — `ed` deyil, `et` ilə;
+#:   * «Ali **təhsil müəssisəsi** tərəfindən müəyyən edilən fənlər»;
+#:   * «Seçmə **fənlər**\*» — tək «n» ilə.
+#: Hər üçü `unknown` səbətinə düşürdü; `--create-subjects` onları kataloqa
+#: uydurma fənn kimi yazardı.
 _PLACEHOLDER = re.compile(
-    r"^\s*(seçmə\s+fənn"
-    r"|ali\s+məktəb(in)?\s+(tərəfindən\s+)?müəyyən\s+ed"
+    r"^\s*(seçmə\s+fən(n|lər)"
+    r"|ali\s+(məktəb(in)?|təhsil\s+müəssisəsi(nin)?)\s+(tərəfindən\s+)?"
+    r"(müəyyən\s+(ed|et)|seçilən|seçilmiş|seçdiyi)"
     r"|ixtisaslaşmaya\s+ayrılan"
     r"|ixtisas(laşma)?\s+fənləri\s*\**\s*$)",
     re.I,
@@ -237,21 +297,32 @@ def extract_master_rows(pdf_path: str) -> list[dict]:
 
 
 def extract_any(pdf_path: str) -> tuple[list[dict], str]:
-    """Düzümü ÖZÜ seçir: əvvəlcə bakalavr, sətir çıxmasa magistr.
+    """Düzümü ÖZÜ seçir: bakalavr → magistr → işçi tədris planı.
 
-    Qaytarır ``(sətirlər, düzüm)`` — düzüm ``"bachelor"`` və ya ``"master"``.
+    Qaytarır ``(sətirlər, düzüm)`` — ``"bachelor"`` / ``"master"`` / ``"work"``.
+
+    ⚠️ Saytda ÜÇ ayrı cədvəl düzümü var. Üçüncüsü — «İŞÇİ TƏDRİS PLANI»
+    (`PLAN_<ad>.docx.pdf`, `00_<ad>.pdf`) — 2026-09-10 süpürgəsində üzə çıxdı və
+    əvvəlki iki parserin heç biri onu oxumurdu (0 sətir). O düzüm ən qiymətlisidir:
+    semestr bölgüsünü SAXLAYIR. Bax `plan_import_work.py`.
     """
+    from apps.registrar.plan_import_work import extract_work_rows
+
     rows = extract_rows(pdf_path)
     if len(rows) >= LOW_YIELD:
         return rows, "bachelor"
     master = extract_master_rows(pdf_path)
-    if len(master) > len(rows):
-        return master, "master"
-    return rows, "bachelor"
+    best, layout = (master, "master") if len(master) > len(rows) else (rows, "bachelor")
+    if len(best) >= LOW_YIELD:
+        return best, layout
+    work = extract_work_rows(pdf_path)
+    return (work, "work") if len(work) > len(best) else (best, layout)
 
 
 __all__ = [
     "extract_rows",
+    "is_placeholder",
+    "clean_subject_name",
     "extract_master_rows",
     "extract_any",
     "match_rows",
