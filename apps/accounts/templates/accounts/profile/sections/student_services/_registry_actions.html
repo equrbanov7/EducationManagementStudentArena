@@ -3,10 +3,23 @@
 Sətir əməlləri — «Kart» (çekmecə) hər zaman; «Hərəkət əmri» yalnız
 `student.movement` + `people.manage_academic` daşıyan aktorda (server qapısı
 `can_move`; endpoint də fail-closed yenidən yoxlayır).
+
+«Transkript» rəsmi sənəddir: qapı `can_transcript` — `registrar:student_transcript_pdf`
+görünüşünün öz qapısı ilə eyni (təşkilat üzrə `course.edit`). Fayl endirməsidir,
+ona görə SPA yükləyicisi tutmasın deyə `js-profile-section-link` sinfi YOXDUR.
 {% endcomment %}
 <button type="button" class="ems-btn ems-btn--sm" data-sr-card="{{ row.data.record_id }}">
     {% trans "Kart" context "accounts.student_registry" %}
 </button>
+{% if student_registry_section.can_transcript %}
+<a class="ems-btn ems-btn--sm" target="_blank" rel="noopener"
+   href="{% url 'registrar:student_transcript_pdf' row.data.record_id %}"
+   title="{% trans 'Rəsmi akademik transkripti PDF olaraq yüklə' context 'accounts.student_registry' %}">
+    <i class="fas fa-file-pdf" aria-hidden="true"></i>
+    {% trans "Transkript yüklə" context "accounts.student_registry" %}
+</a>
+{% endif %}
+{% if student_registry_section.can_move %}
 <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
         data-sr-move="{{ row.data.record_id }}"
         data-sr-name="{{ row.data.name }}"
@@ -14,3 +27,4 @@ Sətir əməlləri — «Kart» (çekmecə) hər zaman; «Hərəkət əmri» yal
         data-sr-group="{{ row.data.group_name }}">
     {% trans "Hərəkət əmri" context "accounts.student_registry" %}
 </button>
+{% endif %}

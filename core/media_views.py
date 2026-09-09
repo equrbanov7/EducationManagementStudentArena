@@ -66,9 +66,9 @@ _check_journal_correction_access = media_policies.check_journal_correction_acces
 # əlavə etmək ŞÜURLU addım tələb edir; unutmaq isə səhv istiqamətdə — faylın
 # bağlanması ilə — nəticələnir.
 _PUBLIC_PREFIXES: tuple[str, ...] = (
-    "post_images/",     # bloq şəkilləri — ictimai səhifədə görünür
-    "course_covers/",   # kurs örtüyü — kataloqda görünür
-    "org_logos/",       # təşkilat loqosu — giriş səhifəsində və PDF blankında
+    "post_images/",  # bloq şəkilləri — ictimai səhifədə görünür
+    "course_covers/",  # kurs örtüyü — kataloqda görünür
+    "org_logos/",  # təşkilat loqosu — giriş səhifəsində və PDF blankında
 )
 
 # Paths that always require authentication.

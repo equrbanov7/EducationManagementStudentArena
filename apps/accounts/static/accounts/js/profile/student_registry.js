@@ -105,7 +105,25 @@
                 .join("")
                 .toUpperCase();
         }
+        fillTranscriptLink(body, payload.record_id);
         fillHistory(body, payload.movements || []);
+    }
+
+    /* Rəsmi transkript linki — düymə yalnız `course.edit` daşıyan aktorda
+       render olunur, ona görə tapılmaması normal haldır (null-safe). */
+    function fillTranscriptLink(body, recordId) {
+        var link = body.querySelector("[data-sr-transcript]");
+        if (!link) {
+            return;
+        }
+        var host = root();
+        var base = host ? host.getAttribute("data-sr-transcript-url") : "";
+        if (!base || !recordId) {
+            link.hidden = true;
+            return;
+        }
+        link.href = urlFor(base, recordId);
+        link.hidden = false;
     }
 
     function fillHistory(body, rows) {

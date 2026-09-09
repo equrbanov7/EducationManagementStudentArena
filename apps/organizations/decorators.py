@@ -182,13 +182,22 @@ class PermissionRequiredMixin(OrganizationRequiredMixin):
             return response
 
         # Then check the required permission.
-        if self.permission_required:
-            if not has_permission(request.org_permissions, self.permission_required):
-                return HttpResponseForbidden(
-                    pgettext("organizations.decorators.error", "missing_permission").format(
-                        permission=self.permission_required
-                    )
+        #
+        # ⚠️ 2026-09-10 auditi (P2-7): şərt əvvəl `if self.permission_required:`
+        # idi — yəni alt sinif açarı təyin etməyi UNUTSA, heç bir icazə
+        # yoxlanmır və təşkilatın İSTƏNİLƏN üzvü görünüşə keçirdi. Susmaq
+        # fail-open olmamalıdır: açarsız mixin indi konfiqurasiya səhvidir.
+        if not self.permission_required:
+            raise ImproperlyConfigured(
+                f"{type(self).__name__} must define `permission_required` "
+                "(PermissionRequiredMixin never passes silently)."
+            )
+        if not has_permission(request.org_permissions, self.permission_required):
+            return HttpResponseForbidden(
+                pgettext("organizations.decorators.error", "missing_permission").format(
+                    permission=self.permission_required
                 )
+            )
 
         # Bypass OrganizationRequiredMixin.dispatch() — its checks are already
         # done above — and call the next class in MRO exactly once.

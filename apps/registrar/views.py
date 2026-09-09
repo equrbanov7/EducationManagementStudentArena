@@ -592,7 +592,9 @@ def _handle_save_marks(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
-# The registrar console (K3) views live in ``apps.registrar.console_views`` to
-# keep this module focused (journal + gradebook) and under the size budget;
-# the weekly timetable (U4) and the academic calendar (U11) live in
-# ``apps.registrar.schedule_views`` for the same reason.
+# Akademik kataloqun idarəetməsi ARTIQ registrar səhifəsi DEYİL: köhnə
+# «Registrar idarəetməsi» konsolu (`console_views.py`) 2026-09-10-da silindi,
+# yerini kabinet bölməsi tutdu — məntiq ``apps.registrar.catalog_console``-da,
+# səth isə ``accounts:profile?section=registrar-catalog``-dadır.
+# Həftəlik cədvəl (U4) və akademik təqvim (U11) modul ölçü büdcəsinə görə
+# ``apps.registrar.schedule_views``-dadır.

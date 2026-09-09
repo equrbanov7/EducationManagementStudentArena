@@ -3,35 +3,66 @@
   PIN axtarışının paylaşılan gövdəsi — həm profil SPA bölməsində (sidebar qalır),
   həm ayrıca səhifədə istifadə olunur. İki sütun (master-detail):
   solda axtarış+nəticələr, sağda seçilən tələbənin PIN/imtahan detalı (modal YOX).
+
+  2026-09-10 sakit redizayn (imtahan mərkəzi ailəsi ilə eyni dil):
+  ⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını `#profileSectionTitle`
+  kimi render edir. Alt yazı `ems_ui/_content_header`-dədir; KPI `ems-kpis`
+  (dəyərləri `pin_lookup.js` `[data-ems-kpi-key]` üzərindən doldurur), panellər
+  `ems-card`, axtarış `ems-input`. `pl2-*` sinifləri SAXLANILIR — JS onları
+  render edir. CSP: inline yoxdur.
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/pin_lookup.css' %}">
+<link rel="stylesheet" href="{% static 'exams/css/pin_lookup.css' %}?v=20260910-1">
+
+{% trans "Soldan tələbəni tapıb seçin — təyin olunmuş imtahan, PIN və fənn məlumatları sağda görünür. Nəticələr yazdıqca dərhal gəlir." as pl2_subtitle %}
 
 <div class="pl2"
      data-search-url="{% url 'exams:exam_center_pin_search' %}"
      data-detail-url-template="{% url 'exams:exam_center_student_pins' student_id=0 %}">
-  <div class="pl2-head">
+  {% include "partials/ems_ui/_content_header.html" with header_title=standalone_title header_subtitle=pl2_subtitle %}
 
-    <p>{% trans "Soldan tələbəni tapıb seçin — təyin olunmuş imtahan, PIN və fənn məlumatları sağda görünür. Nəticələr yazdıqca dərhal gəlir." %}</p>
+  {% comment %}KPI — soldakı «tapıldı» sayını `renderResults`, sağdakı üç rəqəmi
+  isə seçilən tələbənin biletlərindən `renderDetail` doldurur.{% endcomment %}
+  <div class="ems-kpis ems-kpis--4 pl2-kpis">
+    <div class="ems-kpi" data-ems-kpi-key="found">
+      <div class="ems-kpi__label">{% trans "Tapılan tələbə" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "cari axtarışda" %}</div>
+    </div>
+    <div class="ems-kpi" data-ems-kpi-key="tickets">
+      <div class="ems-kpi__label">{% trans "Təyin olunmuş imtahan" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "seçilən tələbədə" %}</div>
+    </div>
+    <div class="ems-kpi" data-ems-kpi-key="withpin">
+      <div class="ems-kpi__label">{% trans "PIN verilib" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "giriş hazırdır" %}</div>
+    </div>
+    <div class="ems-kpi" data-ems-kpi-key="nopin">
+      <div class="ems-kpi__label">{% trans "PIN yoxdur" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "hələ yaradılmayıb" %}</div>
+    </div>
   </div>
 
   <div class="pl2-grid">
     {# ── SOL: axtarış + nəticələr ── #}
-    <div class="pl2-panel">
+    <div class="ems-card pl2-panel">
       <div class="pl2-searchbar">
-        <i class="fas fa-magnifying-glass"></i>
-        <input type="search" class="js-pl2-search" autocomplete="off"
+        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" class="ems-input js-pl2-search" autocomplete="off"
                placeholder="{% trans 'Ad, soyad və ya istifadəçi adı…' %}"
                aria-label="{% trans 'Tələbə axtarışı' %}">
       </div>
       <div class="pl2-results js-pl2-results" role="listbox" aria-live="polite">
-        <div class="pl2-state"><i class="fas fa-keyboard"></i>{% trans "Axtarmağa başlayın." %}</div>
+        <div class="pl2-state"><i class="fas fa-keyboard" aria-hidden="true"></i>{% trans "Axtarmağa başlayın." %}</div>
       </div>
     </div>
 
     {# ── SAĞ: seçilən tələbənin detalı (modal YOX) ── #}
-    <div class="pl2-panel">
+    <div class="ems-card pl2-panel">
       <div class="pl2-detail js-pl2-detail">
-        <div class="pl2-state"><i class="fas fa-user-magnifying-glass"></i>{% trans "Detalları görmək üçün soldan tələbə seçin." %}</div>
+        <div class="pl2-state"><i class="fas fa-user-magnifying-glass" aria-hidden="true"></i>{% trans "Detalları görmək üçün soldan tələbə seçin." %}</div>
       </div>
     </div>
   </div>
@@ -53,4 +84,4 @@
   "pick": "{% filter escapejs %}{% trans 'Detalları görmək üçün soldan tələbə seçin.' %}{% endfilter %}"
 }
 </script>
-<script src="{% static 'exams/js/pin_lookup.js' %}"></script>
+<script defer src="{% static 'exams/js/pin_lookup.js' %}?v=20260910-1"></script>

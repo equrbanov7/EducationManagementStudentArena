@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -165,6 +166,10 @@ class StaticFilesStorageTest(TestCase):
             "ALLOWED_HOSTS": "example.com",
             "ADMIN_ALLOWED_IPS": "127.0.0.1",
             "SECURE_SSL_REDIRECT": "False",
+            # `production.py` TLS məcburiyyəti söndürüləndə qalxmır (2026-09-10
+            # təhlükəsizlik qapısı). Bu test statik fayl anbarını yoxlayır, ona
+            # görə istisna AÇIQ bildirilir — həqiqi prod-da belə sətir olmamalıdır.
+            "INSECURE_TRANSPORT_OK": "1",
         }
         with patch.dict(os.environ, env):
             import config.settings.production as production_settings
@@ -260,6 +265,11 @@ class ProductionAdminAllowlistSettingsTest(TestCase):
             "ADMIN_URL_PREFIX": "manage/",
             "ADMIN_2FA_REQUIRED": "True",
             "SITE_URL": "https://example.com",
+            # Repo kökündəki iş `.env`-i TLS bayraqlarını söndürür; bu testlər
+            # isə HƏQİQİ prod konfiqurasiyasını yükləməlidir (2026-09-10 qapısı).
+            "SECURE_SSL_REDIRECT": "True",
+            "SESSION_COOKIE_SECURE": "True",
+            "CSRF_COOKIE_SECURE": "True",
         }
 
         with patch.dict(os.environ, {**base_env, **env_overrides}, clear=False):
@@ -322,3 +332,66 @@ class ProductionSettingsImportListTest(TestCase):
         view_source = (ROOT / "apps" / "monitoring" / "views.py").read_text(encoding="utf-8")
         self.assertIn('getattr(settings, "ALERTMANAGER_WEBHOOK_TOKEN"', view_source)
         self.assertIn("ALERTMANAGER_WEBHOOK_TOKEN", self._production_source())
+
+
+class ProductionTlsGuardTest(TestCase):
+    """TLS məcburiyyəti söndürülübsə, prod settings modulu QALXMIR.
+
+    2026-09-10 auditi: kod default-ları doğru idi, amma `production.py`
+    `BASE_DIR/.env`-i yükləyir — həmin faylda `SECURE_SSL_REDIRECT=False`,
+    `SESSION_COOKIE_SECURE=False`, `CSRF_COOKIE_SECURE=False` yazılıbsa prod
+    SÜKUTLA düz HTTP-yə enirdi. Qapı `ADMIN_2FA_REQUIRED` ilə eyni naxışdadır.
+    """
+
+    BASE_ENV = {
+        "SECRET_KEY": "test-secret-key-for-production-imports-only",
+        "DATABASE_URL": "sqlite:////tmp/emsarena-production-settings-test.sqlite3",
+        "ALLOWED_HOSTS": "example.com",
+        "ADMIN_URL_PREFIX": "manage/",
+        "ADMIN_2FA_REQUIRED": "True",
+        "SITE_URL": "https://example.com",
+    }
+
+    def _import(self, **overrides):
+        module_name = "config.settings.production"
+        with patch.dict(os.environ, {**self.BASE_ENV, **overrides}, clear=False):
+            sys.modules.pop(module_name, None)
+            try:
+                return importlib.import_module(module_name)
+            finally:
+                sys.modules.pop(module_name, None)
+
+    def test_insecure_cookies_block_the_import(self):
+        with self.assertRaises(ImproperlyConfigured):
+            self._import(
+                SECURE_SSL_REDIRECT="True",
+                SESSION_COOKIE_SECURE="False",
+                CSRF_COOKIE_SECURE="True",
+            )
+
+    def test_disabled_ssl_redirect_blocks_the_import(self):
+        with self.assertRaises(ImproperlyConfigured):
+            self._import(
+                SECURE_SSL_REDIRECT="False",
+                SESSION_COOKIE_SECURE="True",
+                CSRF_COOKIE_SECURE="True",
+            )
+
+    def test_explicit_opt_out_is_honoured(self):
+        """Düz HTTP test yığını üçün TƏK, adı özünü izah edən çıxış yolu."""
+        module = self._import(
+            SECURE_SSL_REDIRECT="False",
+            SESSION_COOKIE_SECURE="False",
+            CSRF_COOKIE_SECURE="False",
+            INSECURE_TRANSPORT_OK="1",
+        )
+        self.assertFalse(module.SECURE_SSL_REDIRECT)
+
+    def test_secure_configuration_imports_cleanly(self):
+        module = self._import(
+            SECURE_SSL_REDIRECT="True",
+            SESSION_COOKIE_SECURE="True",
+            CSRF_COOKIE_SECURE="True",
+        )
+        self.assertTrue(module.SESSION_COOKIE_SECURE)
+        self.assertTrue(module.CSRF_COOKIE_SECURE)

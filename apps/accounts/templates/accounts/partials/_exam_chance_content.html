@@ -5,109 +5,136 @@ siyahısını tədris ili / semestr / fakültə / kafedra / ad axtarışı ilə 
 (kafedra seçimləri seçilmiş fakültənin uşaqlarıdır); tələbə axtarışı qrup adı,
 istifadəçi adı və ya ad-soyad üzrə tapır — nəticələr grant formunda checkbox
 kimi seçilir. Grant + yeni PIN + final bileti sıfırlanması auditə yazılır.
+
+2026-09-10 sakit redizayn (apellyasiya statistikası ilə eyni dil):
+⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını `#profileSectionTitle`
+kimi render edir; əvvəl buradakı `<h2>` ilə səhifədə İKİ eyni başlıq olurdu
+(sahib şikayəti). İndi yalnız `ems_ui/_content_header` alt yazısı var.
+KPI `ems-kpis`, filtr `ems-filters` (avto-submit `exam_chance.js`-dədir —
+`data-ems-filters` qəsdən YOXDUR), kartlar `ems-card`, cədvəl `ems-table`,
+boş vəziyyət `ems-state`. CSP: inline yoxdur.
 {% endcomment %}
 
-<link rel="stylesheet" href="{% static 'accounts/css/exam_chance.css' %}?v=20260717b">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_chance.css' %}?v=20260910-1">
+
+{% trans "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür." context "accounts.exam_chance" as exch_subtitle %}
 
 <div class="exch">
-  <div class="exch-head">
-    <h2><i class="fas fa-rotate-right"></i> {% trans "İmtahan şansı ver" context "accounts.exam_chance" %}</h2>
-    <p class="exch-sub">{% trans "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür." context "accounts.exam_chance" %}</p>
-  </div>
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=exch_subtitle %}
 
   {% if not s.selected_org %}
-    <div class="exch-empty">
-      <i class="far fa-building"></i>
-      <p>{% trans "Aktiv təşkilat tapılmadı." context "accounts.exam_chance" %}</p>
-    </div>
+    {% trans "Aktiv təşkilat tapılmadı." context "accounts.exam_chance" as exch_no_org %}
+    {% trans "Şans vermək üçün əvvəlcə aktiv təşkilat seçilməlidir." context "accounts.exam_chance" as exch_no_org_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-building" state_title=exch_no_org state_body=exch_no_org_body %}
   {% else %}
 
-  {# ── Filtr paneli: imtahan siyahısını daraldır ── #}
-  <form method="get" action="{{ profile_base_url }}" class="exch-card exch-filter js-exch-filter" role="search">
+  {# ── KPI: filtrə uyğun imtahan + verilmiş şansların mənzərəsi ──────────── #}
+  <div class="ems-kpis ems-kpis--4">
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Uyğun imtahan" context "accounts.exam_chance" %}</div>
+      <div class="ems-kpi__value">{{ s.exam_count }}</div>
+      <div class="ems-kpi__note">{% trans "cari süzgəclə" context "accounts.exam_chance" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Verilən şans" context "accounts.exam_chance" %}</div>
+      <div class="ems-kpi__value">{{ s.grant_count }}</div>
+      <div class="ems-kpi__note">{% trans "cəmi qeyd" context "accounts.exam_chance" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Faydalanan tələbə" context "accounts.exam_chance" %}</div>
+      <div class="ems-kpi__value">{{ s.grant_students }}</div>
+      <div class="ems-kpi__note">{% trans "fərqli tələbə" context "accounts.exam_chance" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Əlavə cəhd" context "accounts.exam_chance" %}</div>
+      <div class="ems-kpi__value">{{ s.grant_attempts }}</div>
+      <div class="ems-kpi__note">{% trans "cəmi verilib" context "accounts.exam_chance" %}</div>
+    </div>
+  </div>
+
+  {# ── Filtr paneli: imtahan siyahısını daraldır (avto — «Tətbiq et» yoxdur) ── #}
+  <form method="get" action="{{ profile_base_url }}" class="ems-filters ems-filters--auto exch-filters js-exch-filter" role="search">
     <input type="hidden" name="section" value="exam-chance">
-    <h3><i class="fas fa-filter"></i> {% trans "İmtahan filtri" context "accounts.exam_chance" %}</h3>
-    <div class="exch-filter-row">
-      <div class="exch-field">
-        <label for="chance-year">{% trans "Tədris ili" context "accounts.exam_chance" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="chance-year" name="chance_year" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-            <option value="">{% trans "Bütün illər" context "accounts.exam_chance" %}</option>
-            {% for year in s.years %}
-            <option value="{{ year }}" {% if s.filters.year == year %}selected{% endif %}>{{ year }}</option>
-            {% endfor %}
-          </select>
-        </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="chance-year">{% trans "Tədris ili" context "accounts.exam_chance" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="chance-year" name="chance_year" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+          <option value="">{% trans "Bütün illər" context "accounts.exam_chance" %}</option>
+          {% for year in s.years %}
+          <option value="{{ year }}" {% if s.filters.year == year %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="exch-field">
-        <label for="chance-period">{% trans "Semestr" context "accounts.exam_chance" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="chance-period" name="chance_period" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-            <option value="">{% trans "Bütün semestrlər" context "accounts.exam_chance" %}</option>
-            {% for p in s.periods %}
-            <option value="{{ p.pk }}" {% if s.filters.period == p.pk|stringformat:'s' %}selected{% endif %}>{{ p.name }}{% if not s.filters.year %} · {{ p.academic_year }}{% endif %}</option>
-            {% endfor %}
-          </select>
-        </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="chance-period">{% trans "Semestr" context "accounts.exam_chance" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="chance-period" name="chance_period" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+          <option value="">{% trans "Bütün semestrlər" context "accounts.exam_chance" %}</option>
+          {% for p in s.periods %}
+          <option value="{{ p.pk }}" {% if s.filters.period == p.pk|stringformat:'s' %}selected{% endif %}>{{ p.name }}{% if not s.filters.year %} · {{ p.academic_year }}{% endif %}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="exch-field">
-        <label for="chance-faculty">{% trans "Fakültə" context "accounts.exam_chance" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="chance-faculty" name="chance_faculty" class="form-select bootstrap-single-select__native js-exch-faculty" data-bootstrap-select>
-            <option value="">{% trans "Bütün fakültələr" context "accounts.exam_chance" %}</option>
-            {% for unit in s.faculties %}
-            <option value="{{ unit.pk }}" {% if s.filters.faculty == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="chance-faculty">{% trans "Fakültə" context "accounts.exam_chance" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="chance-faculty" name="chance_faculty" class="ems-select bootstrap-single-select__native js-exch-faculty" data-bootstrap-select data-live-search="true">
+          <option value="">{% trans "Bütün fakültələr" context "accounts.exam_chance" %}</option>
+          {% for unit in s.faculties %}
+          <option value="{{ unit.pk }}" {% if s.filters.faculty == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="exch-field">
-        <label for="chance-kafedra">{% trans "Kafedra" context "accounts.exam_chance" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="chance-kafedra" name="chance_kafedra" class="form-select bootstrap-single-select__native" data-bootstrap-select>
-            <option value="">{% trans "Bütün kafedralar" context "accounts.exam_chance" %}</option>
-            {% for unit in s.kafedras %}
-            <option value="{{ unit.pk }}" {% if s.filters.kafedra == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="chance-kafedra">{% trans "Kafedra" context "accounts.exam_chance" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="chance-kafedra" name="chance_kafedra" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true">
+          <option value="">{% trans "Bütün kafedralar" context "accounts.exam_chance" %}</option>
+          {% for unit in s.kafedras %}
+          <option value="{{ unit.pk }}" {% if s.filters.kafedra == unit.pk|stringformat:'s' %}selected{% endif %}>{{ unit.name }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="exch-field exch-field--grow">
-        <label for="chance-exam-q">{% trans "İmtahan axtarışı" context "accounts.exam_chance" %}</label>
-        <div class="exch-search">
-          <i class="fas fa-search" aria-hidden="true"></i>
-          <input type="search" id="chance-exam-q" name="chance_exam_q" value="{{ s.filters.exam_q }}" data-exch-debounce
-                 placeholder="{% trans 'İmtahan adı ilə axtar…' context 'accounts.exam_chance' %}"
-                 aria-label="{% trans 'İmtahan axtarışı' context 'accounts.exam_chance' %}" autocomplete="off">
-        </div>
-      </div>
-      <div class="exch-field exch-field--grow">
-        <label for="chance-student-q">{% trans "Tələbə axtarışı" context "accounts.exam_chance" %}</label>
-        <div class="exch-search">
-          <i class="fas fa-user-graduate" aria-hidden="true"></i>
-          <input type="search" id="chance-student-q" name="chance_student_q" value="{{ s.filters.student_q }}" data-exch-debounce
-                 placeholder="{% trans 'Qrup, istifadəçi adı və ya ad-soyad…' context 'accounts.exam_chance' %}"
-                 aria-label="{% trans 'Tələbə axtarışı' context 'accounts.exam_chance' %}" autocomplete="off">
-        </div>
-      </div>
+    </div>
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="chance-exam-q">{% trans "İmtahan axtarışı" context "accounts.exam_chance" %}</label>
+      <input type="search" id="chance-exam-q" name="chance_exam_q" class="ems-input" value="{{ s.filters.exam_q }}" data-exch-debounce
+             placeholder="{% trans 'İmtahan adı ilə axtar…' context 'accounts.exam_chance' %}" autocomplete="off">
+    </div>
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="chance-student-q">{% trans "Tələbə axtarışı" context "accounts.exam_chance" %}</label>
+      <input type="search" id="chance-student-q" name="chance_student_q" class="ems-input" value="{{ s.filters.student_q }}" data-exch-debounce
+             placeholder="{% trans 'Qrup, istifadəçi adı və ya ad-soyad…' context 'accounts.exam_chance' %}" autocomplete="off">
+    </div>
+    <div class="ems-filters__actions">
+      <a class="ems-btn" href="{{ profile_base_url }}?section=exam-chance">{% trans "Sıfırla" context "ui.filters" %}</a>
     </div>
   </form>
 
   {% if not s.exams %}
-    <div class="exch-empty">
-      <i class="far fa-folder-open"></i>
-      <p>{% trans "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı." context "accounts.exam_chance" %}</p>
-    </div>
+    {% trans "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı." context "accounts.exam_chance" as exch_no_exam %}
+    {% trans "Süzgəcləri genişləndirin — tədris ilini, semestri və ya fakültəni dəyişin." context "accounts.exam_chance" as exch_no_exam_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=exch_no_exam state_body=exch_no_exam_body %}
   {% else %}
 
-  <div class="exch-card">
-    <h3><i class="fas fa-user-clock"></i> {% trans "Yenidən cəhd hüququ" context "accounts.exam_chance" %}</h3>
+  <section class="ems-card exch-card">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title">{% trans "Yenidən cəhd hüququ" context "accounts.exam_chance" %}</h2>
+        <p class="ems-card__sub">{% trans "İmtahanı seçin, sonra qrupu və/və ya tələbələri işarələyin." context "accounts.exam_chance" %}</p>
+      </div>
+    </div>
+    <div class="ems-card__body">
     <form method="post" action="{% url 'accounts:exam_chance' %}" class="exch-form">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ s.post_next_url }}">
-      <div class="exch-field exch-field--full">
-        <label for="exchExam">{% trans "İmtahan" context "accounts.exam_chance" %} <span class="exch-req">*</span></label>
-        <div class="bootstrap-single-select">
-          <select id="exchExam" name="exam_id" required class="form-select bootstrap-single-select__native" data-bootstrap-select>
+      <div class="ems-field exch-field--full">
+        <label class="ems-field__label" for="exchExam">{% trans "İmtahan" context "accounts.exam_chance" %} <span class="ems-field__req">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="exchExam" name="exam_id" required class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true">
             <option value="">{% trans "İmtahanı seçin…" context "accounts.exam_chance" %}</option>
             {% for exam in s.exams %}
             <option value="{{ exam.pk }}" {% if s.selected_exam_id == exam.pk|stringformat:'s' %}selected{% endif %}>
@@ -117,10 +144,10 @@ kimi seçilir. Grant + yeni PIN + final bileti sıfırlanması auditə yazılır
           </select>
         </div>
       </div>
-      <div class="exch-field">
-        <label for="exchGroup">{% trans "Qrup" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(bütöv qrupa vermək üçün)" context "accounts.exam_chance" %}</span></label>
-        <div class="bootstrap-single-select">
-          <select id="exchGroup" name="group_id" class="form-select bootstrap-single-select__native" data-bootstrap-select>
+      <div class="ems-field">
+        <label class="ems-field__label" for="exchGroup">{% trans "Qrup" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(bütöv qrupa vermək üçün)" context "accounts.exam_chance" %}</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="exchGroup" name="group_id" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true">
             <option value="">{% trans "— Qrup seçilməyib —" context "accounts.exam_chance" %}</option>
             {% for group in s.groups %}
             <option value="{{ group.pk }}">{{ group.name }}</option>
@@ -128,15 +155,15 @@ kimi seçilir. Grant + yeni PIN + final bileti sıfırlanması auditə yazılır
           </select>
         </div>
       </div>
-      <div class="exch-field">
-        <label for="exchExtra">{% trans "Əlavə cəhd sayı" context "accounts.exam_chance" %}</label>
-        <input type="number" id="exchExtra" name="extra_attempts" min="1" max="10" value="1">
-        <span class="exch-hint">{% trans "Adətən 1 — tələbə imtahana bir dəfə də girə bilər." context "accounts.exam_chance" %}</span>
+      <div class="ems-field">
+        <label class="ems-field__label" for="exchExtra">{% trans "Əlavə cəhd sayı" context "accounts.exam_chance" %}</label>
+        <input type="number" id="exchExtra" name="extra_attempts" class="ems-input" min="1" max="10" value="1">
+        <span class="ems-field__hint">{% trans "Adətən 1 — tələbə imtahana bir dəfə də girə bilər." context "accounts.exam_chance" %}</span>
       </div>
 
       {% if s.filters.student_q %}
-      <div class="exch-field exch-field--full" role="group" aria-labelledby="exch-student-results-label">
-        <label id="exch-student-results-label">{% trans "Axtarış nəticəsi" context "accounts.exam_chance" %} <span class="exch-optional">«{{ s.filters.student_q }}» — {% trans "işarələdiklərinizə şans veriləcək" context "accounts.exam_chance" %}</span></label>
+      <div class="ems-field exch-field--full" role="group" aria-labelledby="exch-student-results-label">
+        <label class="ems-field__label" id="exch-student-results-label">{% trans "Axtarış nəticəsi" context "accounts.exam_chance" %} <span class="exch-optional">«{{ s.filters.student_q }}» — {% trans "işarələdiklərinizə şans veriləcək" context "accounts.exam_chance" %}</span></label>
         {% if s.student_results %}
         <div class="exch-students">
           {% for student in s.student_results %}
@@ -149,64 +176,73 @@ kimi seçilir. Grant + yeni PIN + final bileti sıfırlanması auditə yazılır
           {% endfor %}
         </div>
         {% else %}
-        <p class="exch-hint">{% trans "Nəticə tapılmadı — axtarışı dəyişin." context "accounts.exam_chance" %}</p>
+        <p class="ems-field__hint">{% trans "Nəticə tapılmadı — axtarışı dəyişin." context "accounts.exam_chance" %}</p>
         {% endif %}
       </div>
       {% endif %}
 
-      <div class="exch-field exch-field--full">
-        <label for="exchUsernames">{% trans "Əlavə tələbələr" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(istifadəçi adı və ya email — vergül/yeni sətirlə; qrupla birlikdə də olar)" context "accounts.exam_chance" %}</span></label>
-        <textarea id="exchUsernames" name="usernames" rows="2" placeholder="student1, student2@uni.edu"></textarea>
+      <div class="ems-field exch-field--full">
+        <label class="ems-field__label" for="exchUsernames">{% trans "Əlavə tələbələr" context "accounts.exam_chance" %} <span class="exch-optional">{% trans "(istifadəçi adı və ya email — vergül/yeni sətirlə; qrupla birlikdə də olar)" context "accounts.exam_chance" %}</span></label>
+        <textarea id="exchUsernames" name="usernames" class="ems-textarea exch-textarea" rows="2" placeholder="student1, student2@uni.edu"></textarea>
       </div>
-      <div class="exch-field exch-field--full">
+      <div class="exch-field--full">
+        <div class="ems-msg ems-msg--info exch-note">
+          <i class="fas fa-circle-info ems-msg__icon" aria-hidden="true"></i>
+          <div>{% trans "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır." context "accounts.exam_chance" %}</div>
+        </div>
         <div class="exch-actions">
-          <button type="submit" class="exch-btn"><i class="fas fa-rotate-right"></i> {% trans "Şans ver" context "accounts.exam_chance" %}</button>
+          <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Şans ver" context "accounts.exam_chance" %}</button>
         </div>
       </div>
     </form>
-    <div class="exch-note">
-      <i class="fas fa-circle-info"></i>
-      <div>{% trans "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır." context "accounts.exam_chance" %}</div>
     </div>
-  </div>
+  </section>
   {% endif %}
 
-  <div class="exch-card">
-    <h3><i class="fas fa-clock-rotate-left"></i> {% trans "Son verilən şanslar" context "accounts.exam_chance" %}</h3>
+  <section class="ems-card exch-card">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title">{% trans "Son verilən şanslar" context "accounts.exam_chance" %}</h2>
+        <p class="ems-card__sub">{% trans "Görünən jurnal — tam tarixçə audit jurnalındadır." context "accounts.exam_chance" %}</p>
+      </div>
+    </div>
     {% if s.recent_grants %}
-    <div class="exch-tablewrap">
-      <table class="exch-table">
+    <div class="ems-tablewrap exch-tablewrap">
+      <div class="ems-tablescroll">
+      <table class="ems-table ems-table--zebra exch-table">
         <thead>
           <tr>
-            <th>{% trans "Tarix" context "accounts.exam_chance" %}</th>
-            <th>{% trans "İmtahan" context "accounts.exam_chance" %}</th>
-            <th>{% trans "Tələbə" context "accounts.exam_chance" %}</th>
-            <th>{% trans "Cəmi əlavə cəhd" context "accounts.exam_chance" %}</th>
-            <th>{% trans "Verən" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "Tələbə" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "İmtahan" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "Cəmi əlavə cəhd" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "Verən" context "accounts.exam_chance" %}</th>
+            <th scope="col">{% trans "Tarix" context "accounts.exam_chance" %}</th>
           </tr>
         </thead>
         <tbody>
           {% for grant in s.recent_grants %}
           <tr>
-            <td>{{ grant.updated_at|date:"d.m.Y H:i" }}</td>
+            <th scope="row">{{ grant.student.get_full_name|default:grant.student.username }}</th>
             <td>
               {{ grant.exam.title|truncatechars:44 }}
-              {% if grant.exam.exam_type_extended == 'final' %}<span class="exch-pill exch-pill--final">{% trans "Final" context "accounts.exam_chance" %}</span>
-              {% elif grant.exam.exam_type_extended == 'midterm' %}<span class="exch-pill exch-pill--midterm">{% trans "Kollokvium" context "accounts.exam_chance" %}</span>{% endif %}
+              {% if grant.exam.exam_type_extended == 'final' %}<span class="ems-badge ems-badge--danger">{% trans "Final" context "accounts.exam_chance" %}</span>
+              {% elif grant.exam.exam_type_extended == 'midterm' %}<span class="ems-badge ems-badge--warning">{% trans "Kollokvium" context "accounts.exam_chance" %}</span>{% endif %}
             </td>
-            <td>{{ grant.student.get_full_name|default:grant.student.username }}</td>
-            <td><span class="exch-pill exch-pill--extra">+{{ grant.extra_attempts }}</span></td>
+            <td class="ems-table__num"><span class="ems-badge ems-badge--success">+{{ grant.extra_attempts }}</span></td>
             <td>{{ grant.granted_by.get_full_name|default:grant.granted_by.username|default:"—" }}</td>
+            <td class="ems-table__nowrap">{{ grant.updated_at|date:"d.m.Y H:i" }}</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+      </div>
     </div>
     {% else %}
-    <p class="exch-hint">{% trans "Hələ şans verilməyib." context "accounts.exam_chance" %}</p>
+    {% trans "Hələ şans verilməyib." context "accounts.exam_chance" as exch_no_grant %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-clock-rotate-left" state_title=exch_no_grant state_body="" %}
     {% endif %}
-  </div>
+  </section>
 
   {% endif %}
 </div>
-<script src="{% static 'accounts/js/exam_chance.js' %}?v=20260717a" defer></script>
+<script src="{% static 'accounts/js/exam_chance.js' %}?v=20260910-1" defer></script>

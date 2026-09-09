@@ -1,0 +1,117 @@
+{% load i18n %}
+{% comment %}«İmtahan və qiymətləndirmə» qrupu — köhnə «Tədris işi» qrupunun
+qiymətləndirmə nüvəsi: müəllimin imtahanları/kursları, yoxlama növbəsi,
+dəyərləndirilmiş nəticələr və apellyasiya idarəetməsi.
+
+Sual bankı/göndərişləri buradan «Sillabus və sual» qrupuna köçdü (2026-09-10) —
+onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri DƏYİŞMƏYİB.{% endcomment %}
+{% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'pending-review' in allowed_sections or 'review-results' in allowed_sections or role_capabilities.can_manage_appeals or 'courses' in allowed_sections and not university_mode %}
+<li class="sidebar-menu-group" data-sidebar-group="assessment">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-exams|my-courses|courses|pending-review|review-results|manage-appeals|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% if 'my-exams' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-exams"
+                   data-section="my-exams"
+                   data-title="{% trans 'my_exams' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-exams' %}active{% endif %}">
+                    <i class="fas fa-file-alt sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "my_exams" context "profile.sidebar" %}</span>
+                    {% if my_exams_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_exams_count">{{ my_exams_count }}</span>{% endif %}
+                </a>
+            </li>
+            {% comment %}
+            Köhnə "İmtahan Nəzarəti" (supervision_monitor) linki gizlədildi —
+            yeni "İmtahan Nəzarət Sistemi" (final imtahan mərkəzi) onu əvəz edir.
+            {% endcomment %}
+            {% endif %}
+
+            {% if 'my-courses' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-courses"
+                   data-section="my-courses"
+                   data-title="{% if university_mode and role_capabilities.is_teacher %}{% trans 'my_courses' context 'profile.section' %}{% else %}{% trans 'my_created_courses' context 'profile.section' %}{% endif %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
+                    <i class="fas fa-book sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% if university_mode and role_capabilities.is_teacher %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "my_created_courses" context "profile.sidebar" %}{% endif %}</span>
+                    {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_created_courses_count">{{ my_created_courses_count }}</span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            {% comment %}Universitet rejimi: LMS kurs-marketplace bölməsi gizlədilir — akademik
+               fənlər registrar (Fənlərim/offering) üzərindən gəlir.{% endcomment %}
+            {% if 'courses' in allowed_sections and not university_mode %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=courses"
+                   data-section="courses"
+                   data-title="{% trans 'my_courses' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'courses' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "my_courses" context "profile.sidebar" %}</span>
+                    {% if courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="courses_count">{{ courses_count }}</span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            {% if 'pending-review' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=pending-review"
+                   data-section="pending-review"
+                   data-title="{% trans 'pending_review' context 'profile.section' %}"
+                   data-source-url="{% url 'accounts:pending_review' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-review' %}active{% endif %}">
+                    <i class="fas fa-tasks sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
+                    {% if pending_review_count > 0 %}
+                    <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_review_count">{{ pending_review_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            {% if 'review-results' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=review-results"
+                   data-section="review-results"
+                   data-title="{% trans 'review_results' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'review-results' %}active{% endif %}">
+                    <i class="fas fa-table sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "review_results" context "profile.sidebar" %}</span>
+                    {% if evaluated_review_count > 0 %}
+                    <span class="sidebar-menu-badge" data-badge-key="evaluated_review_count">{{ evaluated_review_count }}</span>
+                    {% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            {% if role_capabilities.can_manage_appeals %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=manage-appeals"
+                   data-section="manage-appeals"
+                   data-title="{% trans 'Apellyasiyalar' context 'appeals.template' %}"
+                   data-source-url="{% url 'appeals:manage_appeals' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-appeals' %}active{% endif %}">
+                    <i class="fas fa-gavel sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Apellyasiyalar" context "appeals.template" %}</span>
+                    {% comment %}Boş badge CSS-lə gizlənir (`.sidebar-menu-badge:empty`) —
+                    inline `style` ATRİBUTU CSP hədəfinə görə yazılmır; sayğac boruları
+                    (section_loader.refreshBadges) düyünü sonradan doldurur.{% endcomment %}
+                    <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse"
+                          data-badge-key="pending_appeals_count">{% if pending_appeals_count %}{{ pending_appeals_count }}{% endif %}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

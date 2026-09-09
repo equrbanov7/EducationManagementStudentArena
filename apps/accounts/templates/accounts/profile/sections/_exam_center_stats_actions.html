@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}«İmtahan statistikaları» başlıq əməlləri — süzgəcləri sıfırlayır və
+Excel ixracını başladır (`exam_center_stats_boot.js` `.js-ecs-reset` / `.js-ecs-export`
+çəngəllərini dinləyir; sinif adları SAXLANILIR).
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
+<button type="button" class="ems-btn js-ecs-reset">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Sıfırla" %}
+</button>
+<button type="button" class="ems-btn ems-btn--primary js-ecs-export">
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel yüklə" %}
+</button>

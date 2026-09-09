@@ -74,7 +74,7 @@ def registrar_catalog_action(request):
             return JsonResponse({"ok": False, "error": "bad_request"}, status=400)
         return JsonResponse({"ok": True, "values": console.entity_values(organization, tab=tab, pk=pk)})
 
-    obj, errors = console.save(organization, tab=tab, pk=pk or None, data=data)
+    obj, errors = console.save(organization, tab=tab, pk=pk or None, data=data, actor=request.user)
     if errors:
         return JsonResponse({"ok": False, "error": "invalid", "errors": errors}, status=400)
     return JsonResponse({"ok": True, "id": str(obj.pk)})

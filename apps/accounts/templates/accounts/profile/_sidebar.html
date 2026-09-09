@@ -1,4 +1,45 @@
 {% load i18n %}
+{% comment %}
+Kabinet sol menyusu — QRUP-ƏSASLI quruluş (2026-09-10 redizaynı).
+
+NİYƏ BELƏDİR
+------------
+1. Qruplar SERVER tərəfdə nativ `<details>` kimi render olunur. Əvvəllər
+   `ui.js` düz siyahını yükləndikdən SONRA akkordeona çevirirdi:
+   • yüklənəndə «hamısı açıq» sıçrayışı görünürdü,
+   • JS işləməyəndə (və ya `initSidebarAccordionMenu` çağırılmayanda) menyu
+     düz siyahı kimi qalırdı,
+   • qrup başlığından SONRA gələn, amma heç bir qrupa aid olmayan bəndlər
+     (məs. «Bildiriş göndər») təsadüfən qonşu qrupun içinə düşürdü.
+   `<details>` bunların hamısını həll edir: JS-siz açılır-bağlanır, klaviatura
+   və ekran oxuyucu dəstəyi nativdir.
+
+2. `sidebar_menu_size` — menyunun «çəkisi». AZ BƏNDLİ rolda (tələbə, müəllim,
+   tyutor, məzun) bütün qruplar AÇIQ gəlir ki, menyu boş/yarımçıq görünməsin;
+   ÇOX BƏNDLİ rolda (dekan, kafedra müdiri, RİM, rektor) yalnız AKTİV bölmənin
+   qrupu açıq olur ki, 60 bəndlik divar yaranmasın.
+   Ölçü `allowed_sections` sayından götürülür — o, render olunan bənd sayı ilə
+   ±3 fərqlə üst-üstə düşür (tələbə 20/18, müəllim 24/21, dekan 48/45,
+   RİM 65/62), ona görə şablonda ayrıca saymağa ehtiyac yoxdur.
+   HƏDD: `sidebar_menu_size < 32` (hər qrup faylında təkrarlanır — Django
+   şablonunda dəyişənə mənimsətmə yoxdur). Bu həddə görə tələbə, məzun, tyutor,
+   müəllim, tələbə xidmətləri, tədris şöbəsi və koordinator menyusu TAM AÇIQ,
+   imtahan mərkəzi/dekan/kafedra/prorektor/rektor/RİM menyusu isə AKKORDEON
+   olur.
+
+3. `sidebar_active_key` — qrupun «içimdə aktiv bölmə var?» yoxlaması üçün
+   `|bölmə|` formatlı açar. Sərhəd simvolları qismən uyğunluğun qarşısını alır
+   (`|posts|` açarı `|pending-post-approvals|` sətrinə düşmür).
+
+GÖRÜNÜRLÜK MƏNTİQİ BURADA DEYİL — `views/_helpers/rbac.py` → `allowed_sections`.
+Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada durur.
+
+Qruplar (hər biri ayrı fayl — modul ölçü büdcəsi + məsuliyyət ayrımı):
+  Ümumi · Tədrisim · Dərs və cədvəl · Dərs yükü · Sillabus və sual ·
+  İmtahan və qiymətləndirmə · İmtahan mərkəzi · Tədris şöbəsi ·
+  Tələbə və heyət · Universitet idarəetməsi · İdarəetmə · Sistem ·
+  Bloq və məzmun · (alt blok) Dil + Hesab
+{% endcomment %}
 
 <aside class="profile-sidebar" id="profileSidebar">
     <div class="sidebar-header">
@@ -13,571 +54,27 @@
         </button>
     </div>
 
+    {% comment %}`default_if_none` vacibdir: `active_section` None olsa `add` filtri
+    boş sətir qaytarır və açar tək «|» olurdu — o isə HƏR qrupun açar sətrinə
+    düşür, yəni menyu həmişə tam açıq qalardı.{% endcomment %}
+    {% with sidebar_section=active_section|default_if_none:"" %}
+    {% with sidebar_menu_size=allowed_sections|length sidebar_active_key="|"|add:sidebar_section|add:"|" %}
     <ul class="sidebar-menu">
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_general" context "profile.sidebar" %}</span></li>
-        {% include "accounts/profile/sidebar/_home_menu_item.html" %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=profile-info"
-               data-section="profile-info"
-               data-title="{% trans 'profile_info' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'profile-info' %}active{% endif %}">
-                <i class="fas fa-user sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "profile_info" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% if 'notifications' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=notifications"
-               data-section="notifications"
-               data-title="{% trans 'notifications' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'notifications' %}active{% endif %}">
-                <i class="fas fa-bell sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "notifications" context "profile.section" %}</span>
-                {% if notifications_unread_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="notifications_unread_count">{{ notifications_unread_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% endif %}
-        {% comment %}«Müraciətlərim» — universal bənd: AKTİV ÜZVLÜYÜ olan HƏR rol
-        (tələbə, müəllim, əməkdaş, dekan, koordinator, RİM …) onu görür. Qapı
-        `application.create` / `.handle` / `.manage` açarlarındadır (rol adına
-        baxılmır). Panel içəridə ailəyə/emalçı bayrağına görə budaqlanır.{% endcomment %}
-        {% if 'applications' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=applications"
-               data-section="applications"
-               data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'applications' %}active{% endif %}">
-                <i class="fas fa-comment-dots sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Müraciətlərim" context "profile.sidebar" %}</span>
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="applications_pending_count">{% if applications_pending_count %}{{ applications_pending_count }}{% endif %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% comment %} `data-source-url`-də dedicated server-side view-ləri qoyuruq:
-           - JS tərəfindən istifadə edilmir (hələ də `?section=` formu fəaldır)
-           - testlərin reverse() ilə axtardığı URL-lər HTML-də mövcud olur
-           - no-JS user-lər üçün progresiv fallback potensialı təmin edir {% endcomment %}
-        {% comment %}"Təşkilata qoşul" (student-organization-request) sidebar bəndi
-        GİZLƏDİLİB (istifadəçi tələbi): sistemə istifadəçilər yalnız admin tərəfindən
-        icazə ilə əlavə olunur — özləri qoşulmur. Bölmə/route hələ mövcuddur (birbaşa
-        URL ilə əlçatandır), yalnız menyu linki göstərilmir.{% endcomment %}
-        {% if 'statistics' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=statistics"
-               data-section="statistics"
-               data-title="{% trans 'statistics' context 'profile.section' %}"
-               data-force-navigation="true"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'statistics' %}active{% endif %}">
-                <i class="fas fa-chart-bar sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "statistics" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if can_view_student_assignments or 'my-subjects' in allowed_sections or 'my-transcript' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_my_studies" context "profile.sidebar" %}</span></li>
-        {% endif %}
-
-        {% if "my-subjects" in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-subjects"
-               data-section="my-subjects"
-               data-title="{% trans 'my_subjects' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-subjects' %}active{% endif %}">
-                <i class="fas fa-book-open sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_subjects" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if "my-transcript" in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-transcript"
-               data-section="my-transcript"
-               data-title="{% trans 'my_transcript' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-transcript' %}active{% endif %}">
-                <i class="fas fa-scroll sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_transcript" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if can_view_student_assignments %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=assigned-exams"
-               data-section="assigned-exams"
-               data-title="{% trans 'assigned_tasks' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
-                <i class="fas fa-tasks sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "assigned_tasks" context "profile.sidebar" %}</span>
-                {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_tasks_count">{{ assigned_tasks_count }}</span>{% endif %}
-            </a>
-        </li>
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=assigned-courses"
-               data-section="assigned-courses"
-               data-title="{% trans 'assigned_courses' context 'profile.section' %}"
-               data-source-url="{% url 'accounts:assigned_courses' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-courses' %}active{% endif %}">
-                <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% if role_capabilities.is_student %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "assigned_courses" context "profile.sidebar" %}{% endif %}</span>
-                {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_courses_count">{{ assigned_courses_count }}</span>{% endif %}
-            </a>
-        </li>
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-results"
-               data-section="my-results"
-               data-title="{% trans 'my_results' context 'profile.section' %}"
-               data-source-url="{% url 'accounts:my_results' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-results' %}active{% endif %}">
-                <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_results" context "profile.sidebar" %}</span>
-                {% if my_results_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_results_count">{{ my_results_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% if role_capabilities.can_view_my_appeals %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-appeals"
-               data-section="my-appeals"
-               data-title="{% trans 'Apellyasiyalarım' context 'appeals.template' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-appeals' %}active{% endif %}">
-                <i class="fas fa-gavel sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Apellyasiyalarım" context "appeals.template" %}</span>
-            </a>
-        </li>
-        {% endif %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=pending-answers"
-               data-section="pending-answers"
-               data-title="{% trans 'section_title' context 'accounts.pending_answers' %}"
-               data-source-url="{% url 'accounts:pending_answers' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-answers' %}active{% endif %}">
-                <i class="fas fa-hourglass-half sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "section_title" context "accounts.pending_answers" %}</span>
-                {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="pending_answers_count">{{ pending_answers_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% include "accounts/profile/sidebar/_teaching_office_group.html" %}
-        {% include "accounts/profile/sidebar/_student_services_group.html" %}
-        {% include "accounts/profile/_sidebar_university.html" %}
-        {% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'pending-review' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_teaching" context "profile.sidebar" %}</span></li>
-        {% endif %}
-
-        {% if 'my-exams' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-exams"
-               data-section="my-exams"
-               data-title="{% trans 'my_exams' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-exams' %}active{% endif %}">
-                <i class="fas fa-file-alt sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_exams" context "profile.sidebar" %}</span>
-                {% if my_exams_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_exams_count">{{ my_exams_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% comment %}
-        Köhnə "İmtahan Nəzarəti" (supervision_monitor) linki gizlədildi —
-        yeni "İmtahan Nəzarət Sistemi" (final imtahan mərkəzi) onu əvəz edir.
-        {% endcomment %}
-        {% endif %}
-
-        {% if 'my-courses' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=my-courses"
-               data-section="my-courses"
-               data-title="{% if university_mode and role_capabilities.is_teacher %}{% trans 'my_courses' context 'profile.section' %}{% else %}{% trans 'my_created_courses' context 'profile.section' %}{% endif %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-courses' %}active{% endif %}">
-                <i class="fas fa-book sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% if university_mode and role_capabilities.is_teacher %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "my_created_courses" context "profile.sidebar" %}{% endif %}</span>
-                {% if my_created_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_created_courses_count">{{ my_created_courses_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% comment %}Universitet rejimi: LMS kurs-marketplace bölməsi gizlədilir — akademik
-           fənlər registrar (Fənlərim/offering) üzərindən gəlir.{% endcomment %}
-        {% if 'courses' in allowed_sections and not university_mode %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=courses"
-               data-section="courses"
-               data-title="{% trans 'my_courses' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'courses' %}active{% endif %}">
-                <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "my_courses" context "profile.sidebar" %}</span>
-                {% if courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="courses_count">{{ courses_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'question-bank' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=question-bank"
-               data-section="question-bank"
-               data-title="{% trans 'Sual Bankı' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-bank' %}active{% endif %}">
-                <i class="fas fa-layer-group sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Sual Bankı' %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'question-submissions' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=question-submissions"
-               data-section="question-submissions"
-               data-title="{% trans 'Sual göndərişləri' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-submissions' %}active{% endif %}">
-                <i class="fas fa-paper-plane sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Sual göndərişləri' %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'pending-review' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=pending-review"
-               data-section="pending-review"
-               data-title="{% trans 'pending_review' context 'profile.section' %}"
-               data-source-url="{% url 'accounts:pending_review' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-review' %}active{% endif %}">
-                <i class="fas fa-tasks sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
-                {% if pending_review_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_review_count">{{ pending_review_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'review-results' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=review-results"
-               data-section="review-results"
-               data-title="{% trans 'review_results' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'review-results' %}active{% endif %}">
-                <i class="fas fa-table sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "review_results" context "profile.sidebar" %}</span>
-                {% if evaluated_review_count > 0 %}
-                <span class="sidebar-menu-badge" data-badge-key="evaluated_review_count">{{ evaluated_review_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% if role_capabilities.can_manage_appeals %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=manage-appeals"
-               data-section="manage-appeals"
-               data-title="{% trans 'Apellyasiyalar' context 'appeals.template' %}"
-               data-source-url="{% url 'appeals:manage_appeals' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-appeals' %}active{% endif %}">
-                <i class="fas fa-gavel sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Apellyasiyalar" context "appeals.template" %}</span>
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse"
-                      data-badge-key="pending_appeals_count"
-                      {% if not pending_appeals_count %}style="display:none"{% endif %}>{{ pending_appeals_count }}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if role_capabilities.can_access_final_center or 'exam-center-pins' in allowed_sections or 'exam-center-stats' in allowed_sections or 'exam-score-entry' in allowed_sections or 'legacy-grade-review' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_exam_center" context "profile.sidebar" %}</span></li>
-        {% endif %}
-
-        {% comment %}
-        İmtahan Nəzarət Sistemi — zallar/oturumlar + canlı otaq nəzarəti.
-        İmtahan mərkəzi HƏMİŞƏ, müəllim-nəzarətçi yalnız təyin olunmuş oturumu
-        olduqda görür (bax role_capabilities.can_access_final_center).
-        {% endcomment %}
-        {% if role_capabilities.can_access_final_center %}
-        <li class="sidebar-menu-item">
-            <a href="{% url 'exams:exam_center_room_list' %}"
-               class="sidebar-menu-link">
-                <i class="fas fa-tower-observation sidebar-menu-icon sidebar-menu-icon--danger"></i>
-                <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% include "accounts/profile/_sidebar_exam_center.html" %}
-
-        {% if current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections or current_organization and role_capabilities.can_manage_registrar %}
-        {% comment %}
-        Universitet strukturu — rektor/admin bütün təşkilatı, dekan/kafedra müdürü
-        yalnız öz alt-ağacını görür (backend-də unit scoping tətbiq olunur).
-        Fakültələr və kafedralar ayrı bölmələrdə idarə olunur.
-        {% endcomment %}
-        {% comment %}
-            Qrup başlığı yalnız içində ən azı bir bənd olanda render olunur.
-            Əvvəllər şərtsiz idi — tələbə də boş «Universitet idarəetməsi»
-            başlığı görürdü (2026-07-31 auditi).
-        {% endcomment %}
-        {% if role_capabilities.can_manage_registrar or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections or 'org-members' in allowed_sections or 'unit-exams' in allowed_sections or 'org-roles' in allowed_sections or 'audit-log' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_university_management" context "profile.sidebar" %}</span></li>
-        {% endif %}
-        {% if 'registrar-catalog' in allowed_sections %}
-        {% comment %}Akademik kataloq — 2026-09-09-dan MÜSTƏQİL səhifə DEYİL.
-        Sahib: «registrar kataloq yeni səhifəyə atmamalıdı, sidebar solda qalıb
-        sağda bu açmalıdı» → SPA bölmə keçidi (`js-profile-section-link`).{% endcomment %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=registrar-catalog"
-               data-section="registrar-catalog"
-               data-source-url="{{ profile_base_url }}?section=registrar-catalog"
-               data-title="{% trans 'Registrar (kataloq)' context 'profile.sidebar' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'registrar-catalog' %}active{% endif %}">
-                <i class="fas fa-sitemap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Registrar (kataloq)" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% comment %}"Qiymət təsdiqləri" + "Akademik analitika" U12-də yuxarıdakı "Universitet"
-           qrupuna SPA-bölmə kimi köçürüldü (analytics / journal-close section-ları).{% endcomment %}
-        {% if 'org-faculties' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=org-faculties"
-               data-section="org-faculties"
-               data-title="{% trans 'Fakültələr' %}"
-               data-source-url="{% url 'organizations:structure_faculties' current_organization.slug %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-faculties' %}active{% endif %}">
-                <i class="fas fa-university sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Fakültələr' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if 'org-kafedras' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=org-kafedras"
-               data-section="org-kafedras"
-               data-title="Kafedralar"
-               data-source-url="{% url 'organizations:structure_kafedras' current_organization.slug %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-kafedras' %}active{% endif %}">
-                <i class="fas fa-sitemap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">Kafedralar</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if 'org-members' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=org-members"
-               data-section="org-members"
-               data-title="{% trans 'Struktur üzvləri' %}"
-               data-source-url="{% url 'organizations:members' current_organization.slug %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-members' %}active{% endif %}">
-                <i class="fas fa-id-badge sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Struktur üzvləri' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if 'unit-exams' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=unit-exams"
-               data-section="unit-exams"
-               data-title="{% trans 'Bölmə imtahanları' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'unit-exams' %}active{% endif %}">
-                <i class="fas fa-university sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Bölmə imtahanları' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if 'org-roles' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=org-roles"
-               data-section="org-roles"
-               data-title="{% trans 'Təşkilat rolları' %}"
-               data-source-url="{% url 'organizations:roles' current_organization.slug %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-roles' %}active{% endif %}">
-                <i class="fas fa-layer-group sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Təşkilat rolları' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% if 'audit-log' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=audit-log"
-               data-section="audit-log"
-               data-title="{% trans 'Audit jurnalı' %}"
-               data-source-url="{% url 'audit:list' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'audit-log' %}active{% endif %}">
-                <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Audit jurnalı' %}</span>
-            </a>
-        </li>
-        {% endif %}
-        {% endif %}
-
-{% include "accounts/profile/sidebar/_org_menu_group.html" %}
-
-        {% if 'publish-notification' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=publish-notification"
-               data-section="publish-notification"
-               data-title="{% trans 'title' context 'profile.publish_notification' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'publish-notification' %}active{% endif %}">
-                <i class="fas fa-paper-plane sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "title" context "profile.publish_notification" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'superadmin-contact-messages' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=superadmin-contact-messages"
-               data-section="superadmin-contact-messages"
-               data-title="{% trans 'Contact Messages' %}"
-               data-force-navigation="true"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-contact-messages' %}active{% endif %}">
-                <i class="fas fa-inbox sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Contact Messages" %}</span>
-                {% if contact_unhandled_count and contact_unhandled_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="contact_unhandled_count">{{ contact_unhandled_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% endif %}
-        {% comment %}
-            Başlığın şərti bəndlərin ÖZ şərtlərinin birləşməsidir. `posts` /
-            `create-post` universitet rejimində tələbə üçün gizlədilir, ona görə
-            sadəcə `in allowed_sections` yoxlamaq boş başlıq yaradırdı.
-        {% endcomment %}
-        {% if 'posts' in allowed_sections and not university_mode or 'posts' in allowed_sections and not role_capabilities.is_student or 'create-post' in allowed_sections and not university_mode or 'create-post' in allowed_sections and not role_capabilities.is_student or 'create-category' in allowed_sections or 'category-management' in allowed_sections or 'pending-post-approvals' in allowed_sections %}
-        <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_blog" context "profile.sidebar" %}</span></li>
-        {% endif %}
-        {% comment %}Universitet rejimində tələbə üçün bloq (Postlar / Post yarat) gizlədilir —
-           xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
-        {% if 'posts' in allowed_sections and not university_mode or 'posts' in allowed_sections and not role_capabilities.is_student %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=posts"
-               data-section="posts"
-               data-title="{% trans 'posts' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'posts' %}active{% endif %}">
-                <i class="fas fa-newspaper sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "posts" context "profile.sidebar" %}</span>
-                {% if posts_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="posts_count">{{ posts_count }}</span>{% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'create-post' in allowed_sections and not university_mode or 'create-post' in allowed_sections and not role_capabilities.is_student %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=create-post"
-               data-section="create-post"
-               data-title="{% trans 'create_post' context 'profile.section' %}"
-               data-source-url="{% url 'create_post' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-post' %}active{% endif %}">
-                <i class="fas fa-plus-circle sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "create_post" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'create-category' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=create-category"
-               data-section="create-category"
-               data-title="{% trans 'Create category' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-category' %}active{% endif %}">
-                <i class="fas fa-folder-plus sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Create category" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'category-management' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=category-management"
-               data-section="category-management"
-               data-title="{% trans 'Categories' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'category-management' %}active{% endif %}">
-                <i class="fas fa-sitemap sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Categories" %}</span>
-            </a>
-        </li>
-        {% endif %}
-
-        {% if 'pending-post-approvals' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=pending-post-approvals"
-               data-section="pending-post-approvals"
-               data-title="{% trans 'post_management' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-post-approvals' %}active{% endif %}">
-                <i class="fas fa-user-check sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "post_management" context "profile.sidebar" %}</span>
-                {% if pending_post_approval_count > 0 %}
-                <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_post_approval_count">{{ pending_post_approval_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% endif %}
-
-        {% comment %} {% if can_view_blog %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=blog"
-               data-section="blog"
-               data-title="{% trans 'blog' context 'profile.section' %}"
-               data-source-url="{% url 'home' %}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'blog' %}active{% endif %}">
-                <i class="fas fa-blog sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "blog" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %} {% endcomment %}
-
-        <li class="sidebar-menu-group-label" data-sidebar-static-group="1"><span class="sidebar-menu-text">{% trans "group_language" context "profile.sidebar" %}</span></li>
-        <li class="sidebar-menu-item sidebar-language">
-            {% include "partials/_language_switcher.html" with switcher_variant="sidebar" %}
-        </li>
-
-        <li class="sidebar-menu-group-label sidebar-menu-group-label--bottom" data-sidebar-static-group="1"><span class="sidebar-menu-text">{% trans "group_account" context "profile.sidebar" %}</span></li>
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=edit-profile"
-               data-section="edit-profile"
-               data-title="{% trans 'edit_profile' context 'profile.section' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'edit-profile' %}active{% endif %}">
-                <i class="fas fa-user-edit sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "edit_profile" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=change-password"
-               data-section="change-password"
-               data-title="{% trans 'Şifrəni dəyiş' %}"
-               data-source-url="{{ profile_base_url }}"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'change-password' %}active{% endif %}">
-                <i class="fas fa-lock sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans 'Şifrəni dəyiş' %}</span>
-            </a>
-        </li>
-        <li class="sidebar-menu-item">
-            <form method="post" action="{% url 'accounts:logout' %}" class="sidebar-logout-form">
-                {% csrf_token %}
-                <button type="submit" class="sidebar-menu-link sidebar-menu-link--logout">
-                    <i class="fas fa-sign-out-alt sidebar-menu-icon"></i>
-                    <span class="sidebar-menu-text">{% trans "logout" context "profile.sidebar" %}</span>
-                </button>
-            </form>
-        </li>
+        {% include "accounts/profile/sidebar/_group_general.html" %}
+        {% include "accounts/profile/sidebar/_group_my_studies.html" %}
+        {% include "accounts/profile/sidebar/_group_lessons.html" %}
+        {% include "accounts/profile/sidebar/_group_workload.html" %}
+        {% include "accounts/profile/sidebar/_group_syllabus.html" %}
+        {% include "accounts/profile/sidebar/_group_assessment.html" %}
+        {% include "accounts/profile/sidebar/_group_exam_center.html" %}
+        {% include "accounts/profile/sidebar/_group_teaching_office.html" %}
+        {% include "accounts/profile/sidebar/_group_people.html" %}
+        {% include "accounts/profile/sidebar/_group_university_admin.html" %}
+        {% include "accounts/profile/sidebar/_group_management.html" %}
+        {% include "accounts/profile/sidebar/_group_system.html" %}
+        {% include "accounts/profile/sidebar/_group_content.html" %}
+        {% include "accounts/profile/sidebar/_group_account.html" %}
     </ul>
+    {% endwith %}
+    {% endwith %}
 </aside>

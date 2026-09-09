@@ -55,6 +55,15 @@ amma model obyekti yaradılmır və birləşmə açarları SQL-də mətnə çevr
 (ölçülüb: 7.2 s → 1.8 s, ``qa.rector``, 148 634 yazılış).  Cədvəl yolu
 (:func:`build_records_page`) dəyişməyib — orada sətir sayı onsuz da ~25-dir və
 ``_row`` hərf/etiket sahələrini oxuyur.
+
+**Səhifə sayğacı və dövrlər (2026-09-10 redizaynı).** Üç lazımsız sorğu atıldı:
+(1) ``COUNT(DISTINCT student_id)`` artıq hər səhifə çevrilişində işləmir —
+``has_more`` ``limit + 1`` zondundan çıxır, say isə yalnız istənəndə
+(``with_total``) hesablanıb box-larla EYNİ açarla keşlənir
+(:mod:`apps.accounts.academic_records_cache`); (2) ``sort="fails"`` yolunda say
+onsuz da yaddaşdadır → orada sayğac sorğusu ümumiyyətlə getmir;
+(3) ``AcademicPeriod`` çağırış başına BİR dəfə oxunur (əvvəl
+:func:`_period_ids_for` və :func:`_year_options` ayrı-ayrı sorğulayırdı).
 """
 
 from __future__ import annotations
@@ -63,6 +72,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.db.models import Q
 
+from apps.accounts import academic_records_cache as records_cache
 from apps.accounts import academic_summary
 from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.organizations.scoping import UnitScope
@@ -162,18 +172,21 @@ def _org_periods(organization):
     )
 
 
-def _period_ids_for(organization, year, season):
+def _period_ids_for(organization, year, season, *, periods=None):
     """(tədris ili, semestr) süzgəcinə uyğun dövr id-ləri; süzgəc yoxdursa ``None``.
 
     Süzgəci SQL-ə çevirmək üçündür: ``year_display`` Python xüsusiyyətidir
     (``format_year``), semestr isə başlanğıc ayından hesablanır — ikisi də SQL-də
     ifadə olunmur. Amma dövrlərin sayı azdır, ona görə uyğun dövr id-lərini
     əvvəlcədən tapıb enrollment-ləri ``offering__period_id__in`` ilə süzürük.
-    Beləcə süzgəc seçiləndə DB-dən AZ sətir gəlir (Python-da süzmək əvəzinə)."""
+    Beləcə süzgəc seçiləndə DB-dən AZ sətir gəlir (Python-da süzmək əvəzinə).
+
+    ``periods`` verilibsə cədvəl YENİDƏN oxunmur — box endpoint-i onu
+    :func:`_year_options` ilə paylaşır (əvvəl eyni SELECT iki dəfə gedirdi)."""
     if not year and not season:
         return None
     ids = []
-    for period in _org_periods(organization):
+    for period in _org_periods(organization) if periods is None else periods:
         if year and period.year_display != year:
             continue
         if season and transcript._season_of(period) != season:
@@ -203,12 +216,13 @@ def _distinct_student_count(records) -> int:
     return records.order_by().values("student_id").distinct().count()
 
 
-def _year_options(organization) -> list:
+def _year_options(periods) -> list:
     """Dropdown üçün tədris ili seçimləri — ən yeni öndə.
 
     Əvvəllər bu siyahı BÜTÜN enrollment-ləri gəzərək qurulurdu; indi birbaşa
-    dövrlər cədvəlindən gəlir (onluqlarla sətir)."""
-    return sorted({p.year_display for p in _org_periods(organization) if p.year_display}, reverse=True)
+    dövrlər cədvəlindən gəlir (onluqlarla sətir) və siyahı ÇAĞIRANDAN gəlir —
+    yəni bir icmal sorğusunda ``AcademicPeriod`` cəmi bir dəfə oxunur."""
+    return sorted({p.year_display for p in periods if p.year_display}, reverse=True)
 
 
 # ── Yüngül enrollment yükləməsi ──────────────────────────────────────────────
@@ -331,6 +345,10 @@ def _row(record, acc) -> dict:
         # kimi, ``program_code_full`` isə hər iki nəsil kimi ayrıca qalır.
         # Daxili ``Program.code`` (``MYEDU-*``) heç birində iştirak etmir.
         "program": record.program.display_label if record.program_id else "—",
+        # ⚠️ 2026-09-10: ad AYRICA da göndərilir. Cədvəl xanası iki sətirlidir
+        # (ad + şifr); ``display_label`` isə şifri ONSUZ DA daşıyır, ona görə
+        # UI-da şifr iki dəfə görünürdü («… · 050631» üstündə yenə «050631»).
+        "program_name": record.program.name if record.program_id else "—",
         "program_code": record.program.display_code if record.program_id else "",
         # Tooltip üçün TAM etiket — ad + HƏR İKİ nəslin şifri.
         "program_full": record.program.display_label_full if record.program_id else "",
@@ -348,9 +366,28 @@ def _rows_for(records, student_ids, per_student) -> list:
 
     Tələbənin birdən çox aktiv qeydi olduqda ilki götürülür (cədvəl tələbə-başına
     bir sətirdir); ``_scoped_records`` artıq ``select_related`` etdiyi üçün
-    qrup/ixtisas adları əlavə sorğu vermir."""
+    qrup/ixtisas adları əlavə sorğu vermir.
+
+    ``.only(...)`` sətrin OXUNAN sahələri ilə məhdudlaşır (bax :func:`_row`):
+    üç cədvəlin bütün sütunlarını çəkmək əvəzinə yalnız ad/qrup/ixtisas
+    sahələri gəlir. Siyahı :func:`_row`-un toxunduğu sahələrlə TAM üst-üstə
+    düşməlidir — əks halda Django təxirə salınmış sahəni sətir-sətir yükləyər
+    (N+1)."""
     by_student: dict = {}
-    for record in records.filter(student_id__in=student_ids):
+    page_records = records.filter(student_id__in=student_ids).only(
+        "id",
+        "student_id",
+        "group_id",
+        "program_id",
+        "student__first_name",
+        "student__last_name",
+        "student__username",
+        "group__name",
+        "program__name",
+        "program__official_code",
+        "program__legacy_official_code",
+    )
+    for record in page_records:
         by_student.setdefault(record.student_id, record)
     rows = []
     for sid in student_ids:
@@ -358,6 +395,15 @@ def _rows_for(records, student_ids, per_student) -> list:
         if record is not None:
             rows.append(_row(record, per_student.get(sid) or _new_acc()))
     return rows
+
+
+def _student_total(organization, scope, filters, records) -> int:
+    """Süzgəc sahəsindəki TƏKRARSIZ tələbə sayı — box-larla EYNİ keş açarı ilə.
+
+    ``COUNT(DISTINCT student_id)`` scope-un ölçüsü ilə böyüyür, halbuki səhifə
+    çevrilişində dəyişmir. Açar qaydası :mod:`apps.accounts.academic_records_cache`
+    -dədir ki, pager-dəki yekun ilə «Tələbə» qutusu heç vaxt ayrılmasın."""
+    return records_cache.student_total(organization, scope, filters, lambda: _distinct_student_count(records))
 
 
 def _empty_summary() -> dict:
@@ -401,13 +447,20 @@ def _no_access_payload() -> dict:
 # ── Public API ───────────────────────────────────────────────────────────────
 
 
-def build_records_page(*, organization, scope: UnitScope, filters=None, offset=0, limit=DEFAULT_PAGE_SIZE, sort=None):
+def build_records_page(
+    *, organization, scope: UnitScope, filters=None, offset=0, limit=DEFAULT_PAGE_SIZE, sort=None, with_total=True
+):
     """Cədvəlin BİR səhifəsi — scope-un ümumi ölçüsündən (demək olar) asılı deyil.
 
     Standart sıralamada (``sort="name"``) tələbələr **bazada** səhifələnir və
     yalnız görünən ~25 tələbənin enrollment-ləri qiymətləndirilir. ``sort="fails"``
     seçiləndə (kəsri çox olan öndə) sıralama tərifən bütün scope-u tələb edir —
     o zaman tam keçid edilir və səhifə Python-da kəsilir.
+
+    ``with_total=False`` sayğac sorğusunu ATIR (``total`` → ``None``). Səhifə
+    çevrilişində süzgəc dəyişmir, yəni yekun say da dəyişmir — UI onu ilk
+    səhifədən saxlayır. ``has_more`` sayğacdan ASILI DEYİL: bir sətir artıq
+    çəkilir (``limit + 1`` zondu) və artıq gəldisə növbəti səhifə var.
     """
     filters = filters or {}
     limit = max(1, min(int(limit or DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE))
@@ -418,11 +471,11 @@ def build_records_page(*, organization, scope: UnitScope, filters=None, offset=0
 
     records = _scoped_records(organization, scope, filters)
     period_ids = _period_ids_for(organization, filters.get("year"), filters.get("season"))
-    total = _distinct_student_count(records)
 
     if sort == SORT_FAILS:
         # Bahalı yol: «kəsri çox olan öndə» sıralaması tərifən bütün scope-un
         # qiymətləndirilməsini tələb edir (kəsr sayı bazada mövcud sütun deyil).
+        # Say ONSUZ DA yaddaşdadır → burada sayğac sorğusu ümumiyyətlə getmir.
         student_ids = list(_distinct_student_ids(records))
         per_student = _per_student(organization, student_ids, period_ids)
         rows = _rows_for(records, student_ids, per_student)
@@ -430,20 +483,26 @@ def build_records_page(*, organization, scope: UnitScope, filters=None, offset=0
         return {
             "has_access": True,
             "results": rows[offset : offset + limit],
-            "has_more": offset + limit < total,
-            "total": total,
+            "has_more": offset + limit < len(rows),
+            "total": len(rows) if with_total else None,
+            "sort": SORT_FAILS,
         }
 
     # Sürətli yol: səhifə BAZADA kəsilir, sonra yalnız onun tələbələri hesablanır.
-    student_ids = list(_distinct_student_ids(records)[offset : offset + limit])
+    # Zond: `limit + 1` id çəkilir — artıq gəldisə növbəti səhifə var.
+    window = list(_distinct_student_ids(records)[offset : offset + limit + 1])
+    has_more = len(window) > limit
+    student_ids = window[:limit]
+    total = _student_total(organization, scope, filters, records) if with_total else None
     if not student_ids:
-        return {"has_access": True, "results": [], "has_more": False, "total": total}
+        return {"has_access": True, "results": [], "has_more": False, "total": total, "sort": SORT_NAME}
     per_student = _per_student(organization, student_ids, period_ids)
     return {
         "has_access": True,
         "results": _rows_for(records, student_ids, per_student),
-        "has_more": offset + limit < total,
+        "has_more": has_more,
         "total": total,
+        "sort": SORT_NAME,
     }
 
 
@@ -456,21 +515,20 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
     if not scope.has_structure_access:
         return {"has_access": False, "summary": _public_summary(_empty_summary()), "year_options": []}
 
-    # Org-səviyyəli aktor üçün 7 800 tələbənin bütün yazılışları qiymətləndirilir
-    # (7.8–9.5 s, QA 2026-09-05 P2-19). Box-lar səhifəyə görə dəyişmir → qısa TTL keş;
-    # açar aktorun əhatəsi + süzgəclərdir, istifadəçi adı deyil (eyni əhatə eyni rəqəm).
-    from django.core.cache import cache
-
-    cache_key = _summary_cache_key(organization, scope, filters)
-    cached = cache.get(cache_key) if cache_key else None
+    # Box-lar səhifəyə görə dəyişmir → qısa TTL keş (bax academic_records_cache).
+    cached = records_cache.get_summary(organization, scope, filters)
     if cached is not None:
         return cached
 
     records = _scoped_records(organization, scope, filters)
-    period_ids = _period_ids_for(organization, filters.get("year"), filters.get("season"))
+    # Dövrlər BİR dəfə oxunur: süzgəc id-ləri və tədris ili seçimləri eyni
+    # siyahıdan çıxır (əvvəl iki eyni ``AcademicPeriod`` SELECT-i gedirdi).
+    periods = _org_periods(organization)
+    period_ids = _period_ids_for(organization, filters.get("year"), filters.get("season"), periods=periods)
 
     box = _empty_summary()
-    box["students"] = _distinct_student_count(records)
+    # Cədvəlin pager-i ilə EYNİ (keşlənən) sayğac — iki səth heç vaxt ayrılmır.
+    box["students"] = _student_total(organization, scope, filters, records)
     # SÜRƏTLİ YOL (2026-09 QA P2-19): box-lar per-enrollment nəticənin yalnız
     # altı sahəsini oxuyur, ona görə burada model obyekti / hərf qiyməti /
     # eligibility dicti qurulmur — bax :mod:`apps.accounts.academic_summary`.
@@ -481,33 +539,10 @@ def build_records_summary(*, organization, scope: UnitScope, filters=None):
     payload = {
         "has_access": True,
         "summary": _public_summary(box),
-        "year_options": _year_options(organization),
+        "year_options": _year_options(periods),
     }
-    if cache_key:
-        cache.set(cache_key, payload, SUMMARY_CACHE_TTL)
+    records_cache.set_summary(organization, scope, filters, payload)
     return payload
-
-
-#: Xülasə box-larının keş müddəti (saniyə) — bal yazıları bir neçə dəqiqə gecikə bilər.
-SUMMARY_CACHE_TTL = 300
-
-
-def _summary_cache_key(organization, scope, filters) -> str:
-    import hashlib
-    import json
-
-    try:
-        raw = json.dumps(
-            {
-                "org": str(getattr(organization, "pk", "")),
-                "scope": [scope.scope_type, sorted(str(u) for u in (scope.unit_ids or ()))],
-                "filters": {k: str(v) for k, v in sorted((filters or {}).items()) if v},
-            },
-            sort_keys=True,
-        )
-    except (TypeError, ValueError):
-        return ""
-    return "academic_records:summary:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
 
 
 def build_records_overview(
@@ -517,12 +552,15 @@ def build_records_overview(
 
     UI artıq ikisini ayrı-ayrı çağırır (cədvəl dərhal, box-lar gecikmiş); bu
     funksiya isə tək çağırışla tam mənzərə istəyən yerlər (testlər, ixrac,
-    skriptlər) üçün saxlanılıb — qiyməti tam keçid qədərdir."""
+    skriptlər) üçün saxlanılıb — qiyməti tam keçid qədərdir.
+
+    Sayğac YALNIZ box-lardan gəlir (``with_total=False``): «Tələbə» qutusu ilə
+    pager-in yekunu tərifən eyni rəqəmdir, iki dəfə saymağın mənası yoxdur."""
     filters = filters or {}
     if not scope.has_structure_access:
         return _no_access_payload()
     page = build_records_page(
-        organization=organization, scope=scope, filters=filters, offset=offset, limit=limit, sort=sort
+        organization=organization, scope=scope, filters=filters, offset=offset, limit=limit, sort=sort, with_total=False
     )
     summary = build_records_summary(organization=organization, scope=scope, filters=filters)
     return {
@@ -530,15 +568,32 @@ def build_records_overview(
         "summary": summary["summary"],
         "results": page["results"],
         "has_more": page["has_more"],
-        "total": page["total"],
+        "total": summary["summary"]["students"],
         "year_options": summary["year_options"],
     }
+
+
+def _scoped_student_records(organization, scope: UnitScope, student_id):
+    """Verilmiş tələbənin scope daxilindəki aktiv qeydləri (queryset)."""
+    qs = StudentAcademicRecord.objects.filter(organization=organization, is_active=True, student_id=student_id)
+    return qs.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
 
 
 def student_is_in_scope(*, organization, scope: UnitScope, student_id) -> bool:
     """Verilmiş tələbə istifadəçinin görünüş sahəsindədirmi (drill-down mühafizəsi)."""
     if not scope.has_structure_access:
         return False
-    qs = StudentAcademicRecord.objects.filter(organization=organization, is_active=True, student_id=student_id)
-    qs = qs.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
-    return qs.exists()
+    return _scoped_student_records(organization, scope, student_id).exists()
+
+
+def student_in_scope(*, organization, scope: UnitScope, student_id):
+    """Scope daxilindəki tələbənin ÖZÜ — yoxdursa ``None``. **Tək sorğu.**
+
+    Drill-down əvvəl iki sorğu edirdi: ``EXISTS`` mühafizəsi, sonra ayrıca
+    ``User`` oxuması. Qeyd onsuz da tələbəyə FK ilə bağlıdır, ona görə
+    ``select_related("student")`` ikisini birləşdirir — mühafizə eynidir
+    (qeyd tapılmırsa tələbə də qaytarılmır)."""
+    if not scope.has_structure_access or not student_id:
+        return None
+    record = _scoped_student_records(organization, scope, student_id).select_related("student").first()
+    return record.student if record is not None else None

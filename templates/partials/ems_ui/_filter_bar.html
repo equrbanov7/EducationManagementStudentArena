@@ -6,7 +6,12 @@ vəziyyəti yeniləyir, URL-i sinxronlaşdırır və paneli yenidən yükləyir.
 
 KONTEKST MÜQAVİLƏSİ
   filter_section     — kabinet bölmə açarı (`?section=`), məcburi
-  filter_prefix      — parametr ad fəzası, məs. "wl_" (toqquşmanın qarşısını alır)
+  filter_prefix      — parametr ad fəzası, məs. "wl_" (toqquşmanın qarşısını alır).
+                       DİQQƏT: forma YALNIZ öz `filter_fields` adlarını URL-dən
+                       silir. Panelin vəziyyət parametrləri — aktiv tab
+                       (`rc_tab`), görünüş (`wc_view`), sıralama (`sr_sort`) —
+                       eyni prefiksli olsalar da TOXUNULMUR (filter_bar.js);
+                       əks halda axtarış istifadəçini birinci taba atırdı.
   filter_base_url    — opsional; boşdursa cari yol
   filter_fields      — [{name, label, kind: select|search|text, options, value,
                         wide, placeholder}]
@@ -21,8 +26,9 @@ KONTEKST MÜQAVİLƏSİ
                        sahədə menyunun içində axtarış sətri də olur.
   field.kind="date"  — tarix sahəsi; `range_select` (+ `range_custom`) verilsə,
                        dəyişəndə həmin select «seçilmiş aralıq» dəyərinə keçir.
-  Avto rejimdə «Sıfırla» bütün prefiksli parametrləri ATIB bölməni SERVER
-  DEFOLTLARI ilə yükləyir (boş dəyər = default qaydası).
+  Avto rejimdə «Sıfırla» formanın ÖZ sahələrini (+ səhifə) URL-dən ATIB
+  bölməni SERVER DEFOLTLARI ilə yükləyir (boş dəyər = default qaydası);
+  aktiv tab / görünüş yerində qalır.
 {% endcomment %}
 {% load i18n %}
 <form class="ems-filters{% if filter_auto %} ems-filters--auto{% endif %}" data-ems-filters

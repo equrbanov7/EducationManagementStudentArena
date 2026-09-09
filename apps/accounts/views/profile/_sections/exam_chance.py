@@ -66,7 +66,7 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     if "exam-chance" not in allowed_sections or active_section != "exam-chance":
         return
 
-    from django.db.models import Q
+    from django.db.models import Count, Q, Sum
 
     from apps.exams.models import Exam, StudentExamAttemptGrant, StudentGroup
     from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
@@ -141,11 +141,23 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     section["student_results"] = _search_students(organization, filters["student_q"]) if filters["student_q"] else []
 
     # ── Son verilən şanslar (görünən jurnal; tam tarixçə auditdədir) ───────
+    grants_qs = StudentExamAttemptGrant.objects.filter(exam__organization=organization)
     section["recent_grants"] = list(
-        StudentExamAttemptGrant.objects.filter(exam__organization=organization)
-        .select_related("exam", "student", "granted_by")
-        .order_by("-updated_at")[:RECENT_GRANT_LIMIT]
+        grants_qs.select_related("exam", "student", "granted_by").order_by("-updated_at")[:RECENT_GRANT_LIMIT]
     )
+
+    # ── KPI: bölmənin yuxarısındakı rəqəmlər (tək aqreqat sorğu) ───────────
+    # `exam_count` — filtrə uyğun imtahanların ƏSL sayı: `section["exams"]`
+    # 300-lə kəsilib, ona görə ayrıca count() alınır.
+    section["exam_count"] = exams_qs.distinct().count()
+    totals = grants_qs.aggregate(
+        n=Count("id"),
+        students=Count("student_id", distinct=True),
+        attempts=Sum("extra_attempts"),
+    )
+    section["grant_count"] = totals["n"] or 0
+    section["grant_students"] = totals["students"] or 0
+    section["grant_attempts"] = totals["attempts"] or 0
 
     section["filters"] = filters
     section["years"] = years

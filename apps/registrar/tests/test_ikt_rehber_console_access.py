@@ -1,9 +1,14 @@
-"""İKT Rəhbəri üçün Registrar (kataloq) konsolu 404 verməməlidir.
+"""İKT Rəhbəri üçün «Registrar (kataloq)» bölməsi bağlı olmamalıdır.
 
-Şikayət (2026-07-29): sidebar-da "Registrar (kataloq)" linki görünürdü, açanda
+Şikayət (2026-07-29): sidebar-da «Registrar (kataloq)» linki görünürdü, açanda
 404 gəlirdi. Səbəb: sidebar `role_capabilities.can_manage_registrar` ilə
 qərar verirdi, view isə ayrıca `_REGISTRAR_ADMIN_ROLES` siyahısına baxırdı və
 `ikt_rehber` orada yox idi — iki fərqli predikat.
+
+2026-09-10: köhnə müstəqil konsol (`registrar:console`) silindi — səth kabinet
+bölməsidir (`?section=registrar-catalog`) + JSON son nöqtəsi
+(`accounts:registrar_catalog_action`). Testin MƏNASI dəyişmir: sidebar-ın
+predikatı ilə səthin qapısı EYNİ olmalıdır — İKT Rəhbəri girir, adi müəllim yox.
 """
 
 from django.contrib.auth import get_user_model
@@ -43,13 +48,24 @@ class IktRehberRegistrarConsoleAccessTests(TestCase):
         session.save()
         return client
 
-    def test_ikt_rehber_opens_registrar_console(self):
-        response = self._client_for(self.ikt).get(reverse("registrar:console"))
+    def _section(self, user):
+        response = self._client_for(user).get(f"{reverse('accounts:profile')}?section=registrar-catalog")
+        self.assertEqual(response.status_code, 200)
+        return response.context["registrar_catalog_section"]
 
-        self.assertEqual(response.status_code, 200, msg="İKT Rəhbəri hələ də 404 alır")
+    def _action_status(self, user):
+        """Naməlum `action` — icazəsi olan 400, olmayan 403 alır (fail-closed)."""
+        return (
+            self._client_for(user)
+            .post(reverse("accounts:registrar_catalog_action"), data={"action": "", "tab": "programs"})
+            .status_code
+        )
 
-    def test_plain_teacher_still_gets_404(self):
-        """Reqressiya qoruması: konsol hamıya açılmayıb."""
-        response = self._client_for(self.teacher).get(reverse("registrar:console"))
+    def test_ikt_rehber_opens_registrar_catalog_section(self):
+        self.assertTrue(self._section(self.ikt)["has_access"], msg="İKT Rəhbəri hələ də bağlı qapı görür")
+        self.assertEqual(self._action_status(self.ikt), 400)
 
-        self.assertEqual(response.status_code, 404)
+    def test_plain_teacher_still_gets_no_access(self):
+        """Reqressiya qoruması: kataloq hamıya açılmayıb."""
+        self.assertFalse(self._section(self.teacher)["has_access"])
+        self.assertEqual(self._action_status(self.teacher), 403)

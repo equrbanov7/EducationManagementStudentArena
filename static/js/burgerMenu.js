@@ -46,6 +46,7 @@ function initMobileNav() {
         mobileNavPanel.classList.add('is-open');
         mobileNavOverlay.classList.add('is-open');
         navToggle.classList.add('is-open');
+        navToggle.setAttribute('aria-expanded', 'true');
         body.style.overflow = 'hidden';
     }
 
@@ -53,7 +54,16 @@ function initMobileNav() {
         mobileNavPanel.classList.remove('is-open');
         mobileNavOverlay.classList.remove('is-open');
         navToggle.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded', 'false');
         body.style.overflow = '';
+    }
+
+    // Panelin öz «×» düyməsi — delegasiya ilə (açar bu faylda təkdir).
+    if (window.EMSDelegate) {
+        window.EMSDelegate.on('click', '[data-mobile-nav-close]', function () {
+            closeMobileNav();
+            navToggle.focus();
+        });
     }
 
     navToggle.addEventListener('click', function () {

@@ -4,6 +4,8 @@
 {% block title %}{% trans "PIN axtarışı" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur.{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
 {% endblock %}
 
@@ -12,6 +14,9 @@
   {% url 'exams:exam_center_room_list' as sessions_url %}
   {% trans "PIN axtarışı" as cur_label %}
   {% include "exams/exam_center/_breadcrumb.html" with back_url=sessions_url current_label=cur_label %}
-  {% include "exams/exam_center/_pin_lookup_body.html" %}
+  {% comment %}Müstəqil səhifə: burada kabinet qabığı YOXDUR, ona görə başlıq
+  gövdəyə ötürülür (kabinet bölməsində bu dəyişən boşdur → ikinci h1 yaranmır).{% endcomment %}
+  {% trans "PIN axtarışı" as pl2_page_title %}
+  {% include "exams/exam_center/_pin_lookup_body.html" with standalone_title=pl2_page_title %}
 </div>
 {% endblock %}

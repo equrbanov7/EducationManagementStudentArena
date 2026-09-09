@@ -47,20 +47,75 @@
             }
             ctx.sidebar.classList.toggle("collapsed", isCollapsed);
             localStorage.setItem("profileSidebarCollapsed", isCollapsed ? "true" : "false");
+            applySidebarCollapsedGroups(isCollapsed);
             syncSidebarToggleState();
         }
 
+        /* ── Sidebar qrupları (nativ <details>) ──────────────────────────────
+           2026-09-10: qruplar artıq SERVER tərəfdə render olunur. Əvvəllər bu
+           funksiyalar düz siyahını yükləndikdən sonra akkordeona çevirirdi —
+           yüklənmə sıçrayışı, JS-siz düz siyahı və qrupa aid olmayan bəndlərin
+           yanlış qrupa düşməsi problemləri yaranırdı. İndi JS yalnız:
+             • qrup başlığındakı sayğac/xəbərdarlıq nöqtəsini doldurur,
+             • istifadəçinin açıb-bağladığını yadda saxlayır,
+             • SPA keçidində aktiv bölmənin qrupunu açır,
+             • yığcam rejimə keçəndə hamısını açır (bağlı `<details>`-in
+               məzmununu CSS ilə göstərmək mümkün deyil), qayıdanda bərpa edir.
+        */
+
+        var SIDEBAR_GROUP_STATE_KEY = "profileSidebarGroups";
+
+        function readSidebarGroupState() {
+            try {
+                var raw = localStorage.getItem(SIDEBAR_GROUP_STATE_KEY);
+                var parsed = raw ? JSON.parse(raw) : null;
+                return parsed && typeof parsed === "object" ? parsed : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function writeSidebarGroupState(key, isOpen) {
+            if (!key) {
+                return;
+            }
+            try {
+                var state = readSidebarGroupState();
+                state[key] = isOpen;
+                localStorage.setItem(SIDEBAR_GROUP_STATE_KEY, JSON.stringify(state));
+            } catch (e) {
+                /* fail-soft: private mode / dolu kvota */
+            }
+        }
+
+        function sidebarGroupDetails(group) {
+            return group ? group.querySelector("details.sidebar-group") : null;
+        }
+
+        /* Başlıqdakı meta: bənd sayı + (bağlı ikən) gözləyən nişan nöqtəsi. */
         function syncSidebarMenuGroupLayout(group) {
             if (!group) {
                 return;
             }
 
-            var items = group.querySelector(".sidebar-menu-group-items");
-            if (!items) {
+            var meta = group.querySelector(".sidebar-menu-group-meta");
+            if (!meta) {
                 return;
             }
 
-            group.style.setProperty("--sidebar-group-open-height", String(items.scrollHeight) + "px");
+            var links = group.querySelectorAll(".sidebar-menu-group-items .sidebar-menu-link");
+            var details = sidebarGroupDetails(group);
+            var isOpen = Boolean(details && details.open);
+            var hasAlert = false;
+
+            group.querySelectorAll(".sidebar-menu-badge").forEach(function (badge) {
+                if ((badge.textContent || "").trim() !== "") {
+                    hasAlert = true;
+                }
+            });
+
+            meta.textContent = isOpen ? "" : String(links.length);
+            meta.classList.toggle("sidebar-menu-group-meta--alert", !isOpen && hasAlert);
         }
 
         function syncAllSidebarMenuGroupLayouts() {
@@ -68,133 +123,136 @@
         }
 
         function setSidebarMenuGroupState(group, isOpen) {
-            if (!group) {
+            var details = sidebarGroupDetails(group);
+            if (!details) {
                 return;
             }
+            details.open = Boolean(isOpen);
             syncSidebarMenuGroupLayout(group);
-            group.classList.toggle("is-open", isOpen);
-            var toggle = group.querySelector(".sidebar-menu-group-toggle");
-            if (toggle) {
-                toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-            }
-            window.requestAnimationFrame(function () {
-                syncSidebarMenuGroupLayout(group);
-            });
         }
 
         function openSidebarMenuGroupForSection(section) {
-            if (!section || !ctx.sidebarMenuGroups.length) {
+            if (!ctx.sidebarMenuGroups.length) {
                 return;
             }
-            var sectionLink = ctx.sidebar
-                ? ctx.sidebar.querySelector('.js-profile-section-link[data-section="' + section + '"]')
+
+            var sectionLink = section && ctx.sidebar
+                ? ctx.sidebar.querySelector('.sidebar-menu-link[data-section="' + section + '"]')
                 : null;
-            if (!sectionLink) {
+            var targetGroup = sectionLink ? sectionLink.closest(".sidebar-menu-group") : null;
+
+            ctx.sidebarMenuGroups.forEach(function (group) {
+                group.classList.toggle("has-active", group === targetGroup);
+            });
+
+            if (targetGroup) {
+                setSidebarMenuGroupState(targetGroup, true);
+            }
+        }
+
+        /* Uzun menyuda (RİM/rektor: 59 bənd, yığcam rejimdə 59 nişan) aktiv bənd
+           görünən sahədən kənarda qala bilir. Sidebar öz sürüşmə sahəsi olduğuna
+           görə YALNIZ onu sürüşdürürük — səhifə yerində qalır. */
+        function scrollActiveSidebarLinkIntoView() {
+            if (!ctx.sidebar) {
+                return;
+            }
+            var activeLink = ctx.sidebar.querySelector(".sidebar-menu-link.active");
+            if (!activeLink) {
+                return;
+            }
+            window.requestAnimationFrame(function () {
+                var box = activeLink.getBoundingClientRect();
+                var frame = ctx.sidebar.getBoundingClientRect();
+                if (box.top >= frame.top && box.bottom <= frame.bottom) {
+                    return;
+                }
+                ctx.sidebar.scrollTop += box.top - frame.top - frame.height / 3;
+            });
+        }
+
+        /* Yığcam rejim: bağlı `<details>` nişanlarını da gizlədir, ona görə
+           keçiddə hamısı açılır və geri qayıdanda əvvəlki vəziyyət bərpa olunur. */
+        function applySidebarCollapsedGroups(isCollapsed) {
+            if (!ctx.sidebarMenuGroups.length) {
                 return;
             }
 
-            var targetGroup = sectionLink.closest(".sidebar-menu-group");
-            if (!targetGroup) {
-                return;
-            }
-
-            setSidebarMenuGroupState(targetGroup, true);
+            ctx.sidebarMenuGroups.forEach(function (group) {
+                var details = sidebarGroupDetails(group);
+                if (!details) {
+                    return;
+                }
+                if (isCollapsed) {
+                    if (details.getAttribute("data-open-before-collapse") === null) {
+                        details.setAttribute("data-open-before-collapse", details.open ? "1" : "0");
+                    }
+                    details.open = true;
+                    return;
+                }
+                var previous = details.getAttribute("data-open-before-collapse");
+                if (previous !== null) {
+                    details.open = previous === "1";
+                    details.removeAttribute("data-open-before-collapse");
+                }
+            });
+            syncAllSidebarMenuGroupLayouts();
+            scrollActiveSidebarLinkIntoView();
         }
 
         function initSidebarAccordionMenu() {
             if (!ctx.sidebar || ctx.sidebar.getAttribute("data-accordion-ready") === "1") {
                 return;
             }
-            var menu = ctx.sidebar.querySelector(".sidebar-menu");
-            if (!menu) {
-                return;
-            }
 
-            var originalChildren = Array.from(menu.children);
-            if (!originalChildren.length) {
-                return;
-            }
-
-            menu.innerHTML = "";
-            var currentGroupItems = null;
-            var groupIndex = 0;
-
-            originalChildren.forEach(function (node) {
-                if (node.classList && node.classList.contains("sidebar-menu-group-label")) {
-                    var isStaticGroup = node.getAttribute("data-sidebar-static-group") === "1";
-                    if (isStaticGroup) {
-                        currentGroupItems = null;
-                        menu.appendChild(node);
-                        return;
-                    }
-
-                    groupIndex += 1;
-                    var group = document.createElement("li");
-                    group.className = "sidebar-menu-group";
-                    if (node.classList.contains("sidebar-menu-group-label--bottom")) {
-                        group.classList.add("sidebar-menu-group--bottom");
-                    }
-
-                    var toggle = document.createElement("button");
-                    toggle.type = "button";
-                    toggle.className = "sidebar-menu-group-toggle";
-                    toggle.innerHTML =
-                        '<span class="sidebar-menu-group-title"></span>' +
-                        '<i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>';
-
-                    var titleNode = toggle.querySelector(".sidebar-menu-group-title");
-                    if (titleNode) {
-                        titleNode.textContent = (node.textContent || "").trim();
-                    }
-
-                    var groupItems = document.createElement("ul");
-                    groupItems.className = "sidebar-menu-group-items";
-                    groupItems.id = "profileSidebarGroup" + String(groupIndex);
-
-                    toggle.setAttribute("aria-controls", groupItems.id);
-                    toggle.setAttribute("aria-expanded", "false");
-
-                    group.appendChild(toggle);
-                    group.appendChild(groupItems);
-                    menu.appendChild(group);
-
-                    currentGroupItems = groupItems;
-                    return;
-                }
-
-                if (currentGroupItems) {
-                    currentGroupItems.appendChild(node);
-                } else {
-                    menu.appendChild(node);
-                }
-            });
-
-            ctx.sidebarMenuGroups = Array.from(menu.querySelectorAll(".sidebar-menu-group"));
+            ctx.sidebarMenuGroups = Array.from(ctx.sidebar.querySelectorAll(".sidebar-menu-group"));
             if (!ctx.sidebarMenuGroups.length) {
                 ctx.sidebar.setAttribute("data-accordion-ready", "1");
                 return;
             }
 
-            var hasOpenGroup = false;
-            ctx.sidebarMenuGroups.forEach(function (group) {
-                var hasActiveLink = Boolean(group.querySelector(".js-profile-section-link.active"));
-                setSidebarMenuGroupState(group, hasActiveLink);
-                hasOpenGroup = hasOpenGroup || hasActiveLink;
+            var storedState = readSidebarGroupState();
 
-                var toggle = group.querySelector(".sidebar-menu-group-toggle");
-                if (!toggle) {
+            ctx.sidebarMenuGroups.forEach(function (group) {
+                var details = sidebarGroupDetails(group);
+                if (!details) {
                     return;
                 }
-                toggle.addEventListener("click", function () {
-                    setSidebarMenuGroupState(group, !group.classList.contains("is-open"));
+
+                // Server DEFAULT-u yalnız istifadəçi həmin qrupu ƏVVƏLLƏR özü
+                // açıb-bağlayıbsa əzilir (`storedState`-də açar var).
+                var key = group.getAttribute("data-sidebar-group");
+                if (key && Object.prototype.hasOwnProperty.call(storedState, key)) {
+                    details.open = storedState[key] === true;
+                }
+
+                // Yaddaşa YALNIZ istifadəçinin öz kliki yazılır. `toggle` hadisəsi
+                // proqram dəyişikliyində də atəşlənir (yığcam rejim bütün qrupları
+                // məcburi açır) — ona qulaq assaq, istifadəçinin seçimi silinərdi.
+                // `click` anında `details.open` HƏLƏ köhnə dəyərdir → tərsini yazırıq.
+                var summary = details.querySelector(".sidebar-menu-group-toggle");
+                if (summary) {
+                    summary.addEventListener("click", function () {
+                        writeSidebarGroupState(key, !details.open);
+                    });
+                }
+                details.addEventListener("toggle", function () {
+                    syncSidebarMenuGroupLayout(group);
                 });
             });
 
-            if (!hasOpenGroup) {
-                setSidebarMenuGroupState(ctx.sidebarMenuGroups[0], true);
+            // «Harada olduğun» yaddaşdan asılı olmamalıdır: aktiv bölmənin
+            // qrupu ilk yükləmədə də açılır (server `active` sinfini verir).
+            var activeLink = ctx.sidebar.querySelector(".sidebar-menu-link.active[data-section]");
+            openSidebarMenuGroupForSection(activeLink ? activeLink.getAttribute("data-section") : null);
+            syncAllSidebarMenuGroupLayouts();
+
+            if (ctx.sidebar.classList.contains("collapsed")) {
+                applySidebarCollapsedGroups(true);
             }
 
-            syncAllSidebarMenuGroupLayouts();
+            scrollActiveSidebarLinkIntoView();
+
             ctx.sidebar.setAttribute("data-accordion-ready", "1");
         }
 
@@ -413,8 +471,6 @@
         } else if (typeof ctx.mobileMediaQuery.addListener === "function") {
             ctx.mobileMediaQuery.addListener(syncSidebarToggleState);
         }
-
-        window.addEventListener("resize", syncAllSidebarMenuGroupLayouts);
 
         if (backdrop) {
             backdrop.addEventListener("click", function (event) {

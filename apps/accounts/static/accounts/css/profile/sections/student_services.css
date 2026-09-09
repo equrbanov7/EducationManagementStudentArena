@@ -160,6 +160,19 @@
     color: var(--ems-neutral-600);
 }
 
+/* Kartın rəsmi sənəd zolağı — çekmecədən transkript yükləmə. */
+.stsvc-card__docs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+/* ⚠️ `.ems-btn` `display:inline-flex` verir və brauzerin `[hidden]` qaydasını
+   ÜSTƏLƏYİR — link JS `href`-i qurana qədər gizli qalsın deyə açıq yazılır. */
+.stsvc-card__docs .ems-btn[hidden] {
+    display: none;
+}
+
 .stsvc__doclink {
     display: inline-block;
     margin-top: 4px;

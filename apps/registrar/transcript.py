@@ -208,14 +208,16 @@ def build_student_transcript(*, student, organization, program=None):
         .values_list("national_athlete_exemption", flat=True)
         .first()
     )
-    # Məxrəc fallback-ı da tələbə üzrə BİR sorğu (``lesson_hours=0`` olan
-    # köçürülmüş açılışlarda sətir-sətir oxumaq N+1 olardı).
-    hours_map = exam_eligibility.lesson_hours_map({e.offering_id for e in enrollments})
-    # Qalan sətir-sətir oxumalar (komponent balları, sərbəst iş sayğacı,
-    # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi) da BİR dəfə:
-    # 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
+    # Sətir-sətir oxumalar (komponent balları, sərbəst iş sayğacı,
+    # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi, məxrəc fallback-ı)
+    # BİR dəfə: 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
     batch = finals_batch.build(enrollments)
-    rows = [_build_row(e, organization, exempt=exempt, hours_map=hours_map, batch=batch) for e in enrollments]
+    # ⚠️ 2026-09-10: ``hours_map`` ayrıca OXUNMUR. ``finals_batch.build`` eyni
+    # açılış id-ləri üçün onsuz da ``lesson_hours_map``-i qurur və
+    # ``compute_final_result`` ``hours_map=None`` olduqda ``batch.hours_map``-a
+    # geri çəkilir — əvvəl eyni ``SUM(lesson.hours)`` sorğusu İKİ dəfə gedirdi
+    # (transkript, transkript PDF-i və akademik-qeyd drill-down-u üçün).
+    rows = [_build_row(e, organization, exempt=exempt, batch=batch) for e in enrollments]
     # Köçürülmüş qiymət nişanı BURADA qoşulur — transkript ekranı, transkript
     # PDF-i və «Ümumi tədris məlumatı» üçün TƏK mənbə.  Hər səth özü qoşsaydı
     # eyni sətir bir ekranda nişanlı, digərində nişansız görünərdi (məhz bu

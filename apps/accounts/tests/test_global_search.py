@@ -131,6 +131,26 @@ class GlobalSearchTest(TestCase):
         self.assertNotIn("students", groups)
         self.assertNotIn("subjects", groups)
 
+    def test_results_open_inside_the_cabinet_not_the_deleted_console(self):
+        """Sahib (2026-09-10): «header-dəki axtarış bu yerə atır, bunu sil, bu köhnədi».
+
+        Köhnə müstəqil «Registrar idarəetməsi» səhifəsi (`/jurnal/idareetme/…`)
+        silindi — HƏR nəticə kabinet qabığının içində açılır."""
+        # Kataloq keçidi org-wide `course.edit` tələb edir — org sahibi.
+        nav = self._search(self.owner, "registrar")["nav"]["items"]
+        catalog = next(item for item in nav if item["title"].startswith("Registrar"))
+        self.assertIn("?section=registrar-catalog", catalog["url"])
+
+        subject = self._search(self.dean, "CS101")["subjects"]["items"][0]
+        self.assertIn("section=registrar-catalog", subject["url"])
+        self.assertIn("rc_tab=subjects", subject["url"])
+
+        student = self._search(self.dean, "Məmmədov")["students"]["items"][0]
+        self.assertIn("section=student-registry", student["url"])
+
+        for url in (catalog["url"], subject["url"], student["url"]):
+            self.assertNotIn("idareetme", url)
+
     def test_nav_filtered_by_query(self):
         groups = self._search(self.student, "cədvəl")
         titles = [i["title"] for i in groups.get("nav", {"items": []})["items"]]

@@ -1,9 +1,25 @@
 {% load static i18n %}
+{% comment %}
+«İmtahan statistikaları» (imtahan mərkəzi) — filtr + KPI + cədvəl + qrafiklər + AI.
+Bütün məlumat AJAX ilə gəlir (`accounts/js/profile/exam_center_stats_boot.js`):
+URL-lər `.ecs` kökündəki data-* atributları ilə, i18n `#ecs-boot-i18n` bloku ilə
+ötürülür. JS `.js-ecs-*` çəngəllərini və `.ecs-card/.ecs-state/.ecs-skel/.ecs-view/
+.ecs-clip/.ecs-uname/.ecs-pct/.ecs-arrow/.ecs-pager > button` siniflərini özü
+render edir — həmin adlar SAXLANILIR (görünüş `exam_center_stats.css`-də tokenlərə
+bağlanıb).
+
+2026-09-10 sakit redizayn (apellyasiya statistikası ilə eyni dil): başlıq
+`ems_ui/_content_header` (alt yazı + «Sıfırla»/«Excel yüklə» əməlləri; h1 qabıqdan
+gəlir), filtr `ems-filters` (yalnız üslub — `data-ems-filters` qəsdən YOXDUR,
+dəyişiklikləri boot skripti özü tutur), KPI `ems-kpis`, cədvəl `ems-table`.
+CSP: inline yoxdur.
+{% endcomment %}
 {% if 'exam-center-stats' in allowed_sections %}
+{% trans "Bütün imtahan nəticələri — fənn, qrup, kafedra, müəllim, tip və tədris ili üzrə süzün; sütun başlığı sıralayır. «Bax» tələbənin tam nəticəsini (apellyasiya düzəlişləri daxil) açır." as ecs_subtitle %}
 <section class="profile-section-panel profile-section--exam-center-stats {% if active_section == 'exam-center-stats' %}is-active{% endif %}"
          data-profile-section-panel="exam-center-stats"
          data-source-url="{{ profile_base_url }}?section=exam-center-stats">
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/exam_center_stats.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/exam_center_stats.css' %}?v=20260910-1">
 
 <div class="ecs"
      data-data-url="{% url 'exams:exam_center_stats_data' %}"
@@ -15,96 +31,93 @@
      data-department-url="{% url 'exams:stats_department_search' %}"
      data-teacher-url="{% url 'exams:stats_teacher_search' %}"
      data-view-url-template="{% url 'exams:teacher_view_attempt' slug='__SLUG__' attempt_id=0 %}">
-  <div class="ecs-head">
-    <div>
-      <p>{% trans "Bütün imtahan nəticələri — fənn, qrup, kafedra, tip və tədris ili üzrə süzün. Sütun başlığına klik = sırala. «Bax» ilə tələbənin tam nəticəsi (apellyasiya düzəlişləri daxil) açılır." %}</p>
-    </div>
-    <a href="#" class="ecs-btn js-ecs-export"><i class="fas fa-file-excel"></i> {% trans "Excel yüklə" %}</a>
-  </div>
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=ecs_subtitle header_actions_include="accounts/profile/sections/_exam_center_stats_actions.html" %}
 
-  <div class="ecs-filters">
-    <div class="ecs-field">
-      <label for="ecs-student-search">{% trans "Axtarış (tələbə)" %}</label>
-      <input type="search" id="ecs-student-search" class="js-ecs-q" placeholder="{% trans 'Ad, soyad, istifadəçi adı…' %}" autocomplete="off">
+  <div class="ems-filters ems-filters--auto ecs-filters" role="search">
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="ecs-student-search">{% trans "Axtarış (tələbə)" %}</label>
+      <input type="search" id="ecs-student-search" class="ems-input js-ecs-q" placeholder="{% trans 'Ad, soyad, istifadəçi adı…' %}" autocomplete="off">
     </div>
-    <div class="ecs-field" role="group" aria-labelledby="ecs-subject-label">
-      <label id="ecs-subject-label">{% trans "Fənn" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="ecs-subject-label">
+      <label class="ems-field__label" id="ecs-subject-label">{% trans "Fənn" %}</label>
       {% trans "fənn axtar…" as ecs_subject_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-subject" placeholder=ecs_subject_ph %}
     </div>
-    <div class="ecs-field" role="group" aria-labelledby="ecs-group-label">
-      <label id="ecs-group-label">{% trans "Qrup" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="ecs-group-label">
+      <label class="ems-field__label" id="ecs-group-label">{% trans "Qrup" %}</label>
       {% trans "qrup axtar…" as ecs_group_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-group" placeholder=ecs_group_ph %}
     </div>
-    <div class="ecs-field" role="group" aria-labelledby="ecs-faculty-label">
-      <label id="ecs-faculty-label">{% trans "Fakültə" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="ecs-faculty-label">
+      <label class="ems-field__label" id="ecs-faculty-label">{% trans "Fakültə" %}</label>
       {% trans "fakültə axtar…" as ecs_faculty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-faculty" placeholder=ecs_faculty_ph %}
     </div>
-    <div class="ecs-field" role="group" aria-labelledby="ecs-department-label">
-      <label id="ecs-department-label">{% trans "Kafedra" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="ecs-department-label">
+      <label class="ems-field__label" id="ecs-department-label">{% trans "Kafedra" %}</label>
       {% trans "kafedra axtar…" as ecs_dept_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-department" placeholder=ecs_dept_ph %}
     </div>
-    <div class="ecs-field" role="group" aria-labelledby="ecs-teacher-label">
-      <label id="ecs-teacher-label">{% trans "Müəllim" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="ecs-teacher-label">
+      <label class="ems-field__label" id="ecs-teacher-label">{% trans "Müəllim" %}</label>
       {% trans "müəllim axtar…" as ecs_teacher_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="ecs" hook="ecs-teacher" placeholder=ecs_teacher_ph %}
     </div>
-    <div class="ecs-field">
-      <label for="ecs-type">{% trans "İmtahan tipi" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="ecs-type" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ecs-type">{% trans "İmtahan tipi" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="ecs-type" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-type" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
     {% comment %}Apellyasiya statistikası ilə paritet: forma / status / semestr.{% endcomment %}
-    <div class="ecs-field">
-      <label for="ecs-format">{% trans "İmtahan forması" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="ecs-format" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ecs-format">{% trans "İmtahan forması" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="ecs-format" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-format" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
-    <div class="ecs-field">
-      <label for="ecs-status">{% trans "Status" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="ecs-status" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ecs-status">{% trans "Status" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="ecs-status" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-status" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
-    <div class="ecs-field">
-      <label for="ecs-semester">{% trans "Semestr" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="ecs-semester" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ecs-semester">{% trans "Semestr" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="ecs-semester" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-semester" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
-    <div class="ecs-field">
-      <label for="ecs-year">{% trans "Tədris ili" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="ecs-year" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ecs-year">{% trans "Tədris ili" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="ecs-year" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-ecs-year" data-bootstrap-select><option value="">{% trans "Hamısı" %}</option></select>
       </div>
     </div>
   </div>
 
-  <div class="ecs-cards js-ecs-cards"></div>
-  <div class="ecs-tablewrap">
-    <table class="ecs-table">
+  <div class="ems-kpis ecs-cards js-ecs-cards"></div>
+  <div class="ems-tablewrap ecs-tablewrap">
+    <div class="ems-tablescroll">
+    <table class="ems-table ems-table--zebra ecs-table">
       <thead><tr class="js-ecs-thead">
-        <th class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th>{% trans "Qrup" %}</th>
-        <th>{% trans "Kafedra" %}</th>
-        <th>{% trans "Fakültə / dekanlıq" %}</th>
-        <th>{% trans "Müəllim" %}</th>
-        <th class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="score">{% trans "Bal" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="score">{% trans "Faiz" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort ecs-arrow"></i></th>
-        <th>{% trans "Nəticə" %}</th>
+        <th scope="col" class="is-sortable" data-sort="student">{% trans "Tələbə" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col">{% trans "Qrup" %}</th>
+        <th scope="col">{% trans "Kafedra" %}</th>
+        <th scope="col">{% trans "Fakültə / dekanlıq" %}</th>
+        <th scope="col">{% trans "Müəllim" %}</th>
+        <th scope="col" class="is-sortable" data-sort="exam">{% trans "İmtahan" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="subject">{% trans "Fənn" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="type">{% trans "Tip" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="score">{% trans "Bal" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="score">{% trans "Faiz" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="status">{% trans "Status" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col" class="is-sortable" data-sort="date">{% trans "Tarix" %}<i class="fas fa-sort ecs-arrow"></i></th>
+        <th scope="col">{% trans "Nəticə" %}</th>
       </tr></thead>
       <tbody class="js-ecs-rows"><tr><td colspan="13"><div class="ecs-state"><i class="fas fa-spinner fa-spin"></i>{% trans "Yüklənir…" %}</div></td></tr></tbody>
     </table>
+    </div>
   </div>
   <div class="ecs-pager js-ecs-pager"></div>
 
@@ -155,7 +168,7 @@
           <h3><i class="fas fa-robot"></i> {% trans "AI analizi" context "exams.center.stats" %}</h3>
           <p>{% trans "Filtrə uyğun bütün nəticələri süni intellekt ümumiləşdirir — güclü və zəif sahələr, meyllər və tövsiyələr. Eyni məlumat üçün cavab keşdən gəlir və limit sərf olunmur." context "exams.center.stats" %}</p>
         </div>
-        <button type="button" class="ecs-btn js-ecs-ai-btn"><i class="fas fa-magic"></i> {% trans "AI ilə analiz et" context "exams.center.stats" %}</button>
+        <button type="button" class="ems-btn ems-btn--primary js-ecs-ai-btn"><i class="fas fa-magic"></i> {% trans "AI ilə analiz et" context "exams.center.stats" %}</button>
       </div>
       <div class="ecs-ai__out js-ecs-ai-out">
         <div class="ecs-ai__hint">{% trans "Analiz üçün düyməni sıxın — nəticə bir neçə saniyəyə hazırlanır." context "exams.center.stats" %}</div>
@@ -176,7 +189,7 @@
   "view": "{% trans 'Bax'|escapejs %}",
   "removed": "{% trans 'İmtahandan uzaqlaşdırılıb'|escapejs %}"
 }</script>
-<script defer src="{% static 'accounts/js/profile/exam_center_stats_boot.js' %}?v=20260725-csp"></script>
+<script defer src="{% static 'accounts/js/profile/exam_center_stats_boot.js' %}?v=20260910-1"></script>
 <script defer src="{% static 'exams/js/exam_center_stats_charts.js' %}?v=20260710-1"></script>
 </section>
 {% endif %}

@@ -1,4 +1,8 @@
-"""Registrar console forms (K3) — web management of the academic catalogue.
+"""Akademik kataloq formaları — kabinetin «Registrar (kataloq)» bölməsi üçün.
+
+Bu formalar 2026-09-10-a qədər köhnə `console_views.py` səhifələrini yedirdi;
+konsol silinəndən sonra tək istifadəçi ``apps.registrar.catalog_console``-dur
+(dialoq → TƏK JSON son nöqtəsi). Validasiya qaydaları DƏYİŞMƏYİB.
 
 ``ProgramForm`` / ``SubjectForm`` are tenant-aware: the caller passes the active
 ``organization`` so the per-org unique ``code`` constraint is validated with a
@@ -22,7 +26,6 @@ from apps.registrar.integrity import (
 from apps.registrar.models import (
     CourseOffering,
     Curriculum,
-    CurriculumSubject,
     Program,
     StudentAcademicRecord,
     Subject,
@@ -202,49 +205,6 @@ class CurriculumForm(_OrgScopedModelForm):
         return cleaned
 
 
-class CurriculumSubjectForm(forms.ModelForm):
-    """A plan row. Bound to a curriculum (for the org + duplicate check)."""
-
-    class Meta:
-        model = CurriculumSubject
-        fields = ["subject", "semester_number", "is_elective", "elective_group", "required_choices"]
-        labels = {
-            "subject": pgettext_lazy("registrar.console", "Fənn"),
-            "semester_number": pgettext_lazy("registrar.console", "Semestr"),
-            "is_elective": pgettext_lazy("registrar.console", "Seçmə fənn"),
-            "elective_group": pgettext_lazy("registrar.console", "Seçmə blok adı"),
-            "required_choices": pgettext_lazy("registrar.console", "Seçim sayı"),
-        }
-
-    def __init__(self, *args, curriculum=None, **kwargs):
-        self.curriculum = curriculum
-        super().__init__(*args, **kwargs)
-        org = getattr(curriculum, "organization_id", None)
-        self.fields["subject"].queryset = (
-            Subject.objects.filter(organization_id=org, is_active=True).order_by("code")
-            if org
-            else Subject.objects.none()
-        )
-        self.fields["elective_group"].required = False
-
-    def clean(self):
-        cleaned = super().clean()
-        subject = cleaned.get("subject")
-        semester = cleaned.get("semester_number")
-        if subject and semester and self.curriculum is not None:
-            exists = CurriculumSubject.objects.filter(
-                organization=self.curriculum.organization,
-                curriculum=self.curriculum,
-                subject=subject,
-                semester_number=semester,
-            ).exists()
-            if exists:
-                raise forms.ValidationError(
-                    pgettext_lazy("registrar.console", "Bu fənn həmin semestrdə plana artıq əlavə olunub.")
-                )
-        return cleaned
-
-
 class OfferingForm(_OrgScopedModelForm):
     """Open a subject for a semester + group, with an instructor (semestr fənni)."""
 
@@ -405,26 +365,3 @@ class StudentRecordForm(_OrgScopedModelForm):
                     pgettext_lazy("registrar.console", "Bu tələbə həmin ixtisasa artıq təyin olunub.")
                 )
         return cleaned
-
-
-class StudentTransferForm(forms.Form):
-    """Move a student to another group (U6.1). Scoped to the org's groups."""
-
-    new_group = forms.ModelChoiceField(queryset=None, label=pgettext_lazy("registrar.console", "Yeni qrup"))
-    reason = forms.CharField(
-        required=False,
-        widget=forms.Textarea(attrs={"rows": 2}),
-        label=pgettext_lazy("registrar.console", "Səbəb (opsional)"),
-    )
-
-    def __init__(self, *args, organization=None, current_group=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        org_unit = django_apps.get_model("organizations", "OrgUnit")
-        qs = (
-            org_unit.objects.filter(organization=organization, unit_type="group")
-            if organization
-            else org_unit.objects.none()
-        )
-        if current_group is not None:
-            qs = qs.exclude(pk=current_group.pk)
-        self.fields["new_group"].queryset = qs.order_by("name")

@@ -1,10 +1,12 @@
 """Tests for the official transcript PDF export (U9)."""
 
+from datetime import timedelta
 from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import finals
@@ -179,7 +181,7 @@ class TranscriptPdfTest(TestCase):
             resp = self._client(self.student).get(reverse("registrar:my_transcript_pdf"))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp["Content-Type"], "application/pdf")
-        self.assertIn("transkript-tp_student.pdf", resp["Content-Disposition"])
+        self.assertIn("Transkript_Eli_Sixlinski_", resp["Content-Disposition"])
         self.assertTrue(resp.content.startswith(b"%PDF"))
 
     def test_student_without_enrollments_gets_404(self):
@@ -192,6 +194,44 @@ class TranscriptPdfTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.content.startswith(b"%PDF"))
         self.assertIn("Əli Şıxlınski", self._extract_text(resp.content))
+
+    def test_download_filename_is_readable(self):
+        """Rəsmi sənədin fayl adı tələbənin adını daşıyır (arxivdə qarışmasın).
+
+        Başlıq İKİ addan ibarətdir: ASCII geri dönüşü (köhnə müştəri) və
+        RFC 5987 UTF-8 adı — sonuncuda AZ hərfləri olduğu kimi qalır."""
+        resp = self._client(self.owner).get(reverse("registrar:student_transcript_pdf", args=[self.record.id]))
+        disposition = resp["Content-Disposition"]
+        self.assertTrue(disposition.startswith("attachment;"))
+        self.assertIn(f"Transkript_Eli_Sixlinski_{timezone.localdate():%Y-%m-%d}.pdf", disposition)
+        self.assertIn("filename*=UTF-8''Transkript_%C6%8Fli_", disposition)
+
+    def test_official_document_requisites_are_printed(self):
+        """«Rəsmi sənəd kimi» tələbi: rekvizitlər sənədin ÜZƏRİNDƏ olmalıdır.
+
+        Sənəd nömrəsi, verilmə tarixi, dekan imzası + altyazısı, möhür yeri və
+        «Səhifə N / M» altlığı — biri düşsə transkript sadəcə cədvəl çapıdır."""
+        with bypass_rls():
+            text = self._extract_text(self._render())
+        self.assertIn("AKADEMİK TRANSKRİPT", text)
+        self.assertIn("Sənəd №", text)
+        self.assertIn("Verilmə tarixi", text)
+        self.assertIn("Fakültə dekanı", text)
+        self.assertIn("(imza, soyad və ad)", text)
+        self.assertIn("Möhür yeri", text)
+        self.assertIn("Səhifə 1 / 1", text)
+        self.assertRegex(text, r"AT-\d{8}-[0-9A-F]{8}")
+
+    def test_document_number_is_stable_per_issuance(self):
+        """Nömrə «qeyd + buraxılış anı» cütündən determinist çıxır."""
+        issued = timezone.localtime()
+        first = transcript_pdf.build_document_number(record=self.record, student=self.student, issued_at=issued)
+        again = transcript_pdf.build_document_number(record=self.record, student=self.student, issued_at=issued)
+        self.assertEqual(first, again)
+        later = transcript_pdf.build_document_number(
+            record=self.record, student=self.student, issued_at=issued + timedelta(seconds=1)
+        )
+        self.assertNotEqual(first, later)
 
     def test_plain_student_cannot_use_console_endpoint(self):
         resp = self._client(self.other_student).get(reverse("registrar:student_transcript_pdf", args=[self.record.id]))

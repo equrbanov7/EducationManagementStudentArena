@@ -1,0 +1,83 @@
+{% load i18n %}
+{% comment %}«Dərs yükü» qrupu — Mərhələ 4 yük ZƏNCİRİ: tədris şöbəsi mərkəzi (12),
+kafedra bölgüsü, koordinator vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi
+baxışı (17). Hər biri ÖZ icazə açarındadır; panellər server-render OXU-ONLYdir.
+
+Müəllimin şəxsi «Dərs yüküm» sətri QƏSDƏN burada deyil — o, gündəlik iş səthidir
+və «Dərs və cədvəl» qrupundadır.{% endcomment %}
+{% if "workload-center" in allowed_sections or "workload-visa" in allowed_sections or "workload-approval" in allowed_sections or "workload-overview" in allowed_sections or "workload-distribution" in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="workload">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|workload-center|workload-visa|workload-approval|workload-overview|workload-distribution|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "Dərs yükü" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% if "workload-center" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=workload-center"
+                   data-section="workload-center"
+                   data-title="{% trans 'Dərs yükü mərkəzi' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-center' %}active{% endif %}">
+                    <i class="fas fa-diagram-project sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Dərs yükü mərkəzi" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% comment %}Yük bölgüsü — kafedra müdirinin bölgü ekranı (`workload.manage` /
+            `workload.distribute`). SPA bölməsidir: sətirlər JSON-la gəlir, bölgü/təsdiq
+            ayrıca POST-la.{% endcomment %}
+            {% if "workload-distribution" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=workload-distribution"
+                   data-section="workload-distribution"
+                   data-title="{% trans 'Yük bölgüsü' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-distribution' %}active{% endif %}">
+                    <i class="fas fa-scale-balanced sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Yük bölgüsü" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "workload-visa" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=workload-visa"
+                   data-section="workload-visa"
+                   data-title="{% trans 'Yük vizası' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-visa' %}active{% endif %}">
+                    <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Yük vizası" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "workload-approval" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=workload-approval"
+                   data-section="workload-approval"
+                   data-title="{% trans 'Yük təsdiqi' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-approval' %}active{% endif %}">
+                    <i class="fas fa-stamp sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Yük təsdiqi" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "workload-overview" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=workload-overview"
+                   data-section="workload-overview"
+                   data-title="{% trans 'Yük — ümumi baxış' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-overview' %}active{% endif %}">
+                    <i class="fas fa-chart-pie sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Yük — ümumi baxış" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

@@ -130,10 +130,12 @@
 
     function syncScope() {
       var v = grantScope.value;
+      // CSP/redizayn: görünüş `hidden` atributu ilə idarə olunur (inline
+      // `style="display:none"` şablondan çıxarıldı).
       if (v === "organization") {
-        grantUnitWrap.style.display = "none";
+        grantUnitWrap.hidden = true;
       } else {
-        grantUnitWrap.style.display = "";
+        grantUnitWrap.hidden = false;
         if (v === "faculty") {
           grantUnitLabel.textContent = kwT("data-faculty");
           fillUnit(faculties);

@@ -1,0 +1,314 @@
+/* ==========================================================================
+   navbar_brand.css — üst panelin brend kilidi + ritm/fokus cilası.
+   ──────────────────────────────────────────────────────────────────────────
+   `navbar.css` ölçü büdcəsində dondurulub (bax scripts/module_size_budget.json),
+   ona görə başlığın YENİ qatı bu ayrıca fayldadır. base.html-də `navbar.css`-dən
+   SONRA yüklənir — burada verilən qaydalar köhnə qaydaların üstünə düşür.
+
+   Rənglər yalnız `--ems-*` tokenlərindən (bax static/css/design-tokens.css).
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. Başlığın ümumi ritmi
+   ────────────────────────────────────────────────────────────────────────── */
+
+.blog-header {
+    /* Sərhəd kölgə ilə deyil, real xətlə — sticky vəziyyətdə daha səliqəli. */
+    border-bottom: 1px solid var(--ems-neutral-200);
+    box-shadow: none;
+}
+
+.blog-header--scrolled {
+    border-bottom-color: var(--ems-neutral-300);
+    box-shadow: 0 8px 24px -14px rgba(15, 23, 42, 0.28);
+}
+
+.blog-header__nav {
+    /* Loqo solda, naviqasiya ortada, əməliyyatlar sağda. */
+    gap: 20px;
+}
+
+/* Sağdakı əməliyyat qrupu: bərabər hündürlüklü (40px) idarəedicilər. */
+.blog-header__auth {
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+/* Dil seçici ilə istifadəçi menyusu arasında incə ayırıcı — iki fərqli
+   məntiq qrupu (alət / hesab) gözlə ayrılsın. */
+.blog-header__auth > .blog-header__user::before,
+.blog-header__auth > .blog-header__guest-actions::before {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 22px;
+    margin-right: 10px;
+    background: var(--ems-neutral-200);
+}
+
+.blog-header__auth > .blog-header__user,
+.blog-header__auth > .blog-header__guest-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Klaviatura fokusu HƏR başlıq idarəedicisində görünsün. */
+.blog-header__logo:focus-visible,
+.blog-header__search:focus-visible,
+.blog-header__user-toggle:focus-visible,
+.blog-header__toggle:focus-visible,
+.mobile-nav-panel__close:focus-visible,
+.blog-header__auth .language-switcher__trigger:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+    border-radius: 12px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. Brend kilidi — nişan + universitetin adı
+   ──────────────────────────────────────────────────────────────────────────
+   `wcu-logo-horizontal.svg` bütöv bir kilid faylıdır (emblem + söz-nişan), amma
+   onun söz-nişanı `<text>` ilə çəkilib: şrift hər sistemdə fərqli ölçüləndiyi
+   üçün hərflər arası boşluq başlıqda pozulurdu. Ona görə SVG-nin yalnız EMBLEM
+   hissəsi göstərilir: `.blog-header__logo-mark` sabit ölçülü «pəncərə»dir,
+   şəkil isə onun içində dəqiq şkalalanır.
+
+   Həndəsə (SVG viewBox 290×52): emblem (2, 4) nöqtəsindən başlayır, ölçüsü
+   44×44-dür. Aşağıdakı nisbətlər buradan gəlir:
+       52 / 44 = 1.1818…   (şəklin hündürlüyü / emblem ölçüsü)
+        4 / 44 = 0.09090…  (yuxarıdan sürüşmə)
+        2 / 44 = 0.04545…  (soldan sürüşmə)
+   Yalnız `--logo-mark-size`-i dəyişmək kifayətdir — qalanı özü hesablanır.
+   `--logo-mark-inset` mənfidir ki, emblemin nazik boz çərçivəsi kəsilsin və
+   künclər təmiz rəngli qalsın.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.blog-header__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 4px;
+    margin-left: -4px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: background 0.18s ease;
+}
+
+.blog-header__logo:hover {
+    background: var(--ems-neutral-100);
+}
+
+.blog-header__logo-mark {
+    --logo-mark-size: 40px;
+    --logo-mark-inset: -0.5px;
+    --logo-mark-emblem: calc(var(--logo-mark-size) - 2 * var(--logo-mark-inset));
+
+    position: relative;
+    flex: 0 0 auto;
+    display: block;
+    width: var(--logo-mark-size);
+    height: var(--logo-mark-size);
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--ems-neutral-0);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+}
+
+.blog-header__logo-mark-img {
+    position: absolute;
+    top: calc(var(--logo-mark-inset) - var(--logo-mark-emblem) * 0.0909091);
+    left: calc(var(--logo-mark-inset) - var(--logo-mark-emblem) * 0.0454545);
+    height: calc(var(--logo-mark-emblem) * 1.1818182);
+    width: auto;
+    max-width: none;
+    display: block;
+}
+
+/* Universitetin adı — bir sətir, kəsilmir, söz-nişanla təkrarlanmır. */
+.blog-header__logo-text {
+    min-width: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    color: var(--ems-neutral-900);
+    white-space: nowrap;
+}
+
+/* Köhnə (universitet olmayan) rejimdə loqo bütöv şəkil qalır. */
+.blog-header__logo-img {
+    height: 38px;
+    max-width: 190px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. Qlobal axtarışın açarı — geniş ekranda «axtarış sahəsi» görünüşü
+   ────────────────────────────────────────────────────────────────────────── */
+
+.blog-header__search {
+    height: 40px;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.blog-header__search-text {
+    /* Yalnız geniş ekranda görünür (aşağıdakı media sorğusu açır). */
+    display: none;
+}
+
+@media (min-width: 1100px) {
+    .blog-header__search {
+        width: 232px;
+        justify-content: flex-start;
+    }
+    .blog-header__search-text {
+        display: block;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. Bərabər hündürlüklü idarəedicilər (40px) və istifadəçi düyməsi
+   ────────────────────────────────────────────────────────────────────────── */
+
+.blog-header__create-toggle,
+.blog-header__auth .language-switcher--navbar .language-switcher__trigger,
+.blog-header__user-toggle {
+    height: 40px;
+}
+
+.blog-header__user-toggle {
+    gap: 10px;
+    padding: 0 10px 0 6px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+}
+
+.blog-header__user-toggle:hover {
+    background: var(--ems-neutral-100);
+    border-color: var(--ems-neutral-200);
+    box-shadow: none;
+}
+
+.blog-header__user-toggle[aria-expanded="true"] {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+}
+
+.blog-header__user-avatar {
+    width: 30px;
+    height: 30px;
+}
+
+.blog-header__user-name {
+    max-width: 150px;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. Mobil şkaf (drawer) — öz bağlama düyməsi + təhlükəsiz sahə
+   ────────────────────────────────────────────────────────────────────────── */
+
+.mobile-nav-panel {
+    width: min(320px, 88vw);
+    right: calc(-1 * min(320px, 88vw));
+    padding-top: 16px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.mobile-nav-panel.is-open {
+    right: 0;
+}
+
+.mobile-nav-panel__close {
+    align-self: flex-end;
+    width: 38px;
+    height: 38px;
+    margin: 0 16px 8px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-600);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-nav-panel__close:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-900);
+}
+
+/* UNIVERSITY_MODE-da siyahının marketinq bloku boş qalır və ayırıcı ən başa
+   düşür — profil başlığının altındakı xətlə ikiqatlaşmasın. */
+.mobile-nav-panel__list > .blog-header__nav-item--divider:first-child {
+    display: none;
+}
+
+@media (min-width: 769px) {
+    .mobile-nav-panel__close {
+        display: none;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. Adaptivlik — ad kiçilir, sonra gizlənir (nişan həmişə qalır)
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1099px) {
+    .blog-header__logo-text {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .blog-header__nav {
+        gap: 10px;
+    }
+    .blog-header__auth {
+        gap: 6px;
+    }
+    .blog-header__auth > .blog-header__user::before,
+    .blog-header__auth > .blog-header__guest-actions::before {
+        display: none;
+    }
+    .blog-header__logo-mark {
+        --logo-mark-size: 36px;
+    }
+    .blog-header__logo-text {
+        font-size: 0.9rem;
+    }
+    .blog-header__logo-img {
+        height: 34px;
+        max-width: 150px;
+    }
+}
+
+/* Dar ekranda ad gizlənir — yalnız nişan qalır ki, burger və axtarış sığsın. */
+@media (max-width: 560px) {
+    .blog-header__logo-text {
+        display: none;
+    }
+    .blog-header__logo {
+        padding: 4px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blog-header__logo,
+    .blog-header__search,
+    .blog-header__user-toggle,
+    .mobile-nav-panel__close {
+        transition: none !important;
+    }
+}

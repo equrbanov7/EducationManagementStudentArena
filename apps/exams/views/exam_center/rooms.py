@@ -135,6 +135,11 @@ def exam_center_room_list(request):
         live_scope = live_scope.filter(pk__in=visible_room_ids)
     live_exams = _live_exam_rows(live_scope)
 
+    # KPI — səhifənin başındakı rəqəmlər. Süzgəcdən ASILI DEYİL (canlı mənzərə
+    # ilə eyni əhatə): iki ucuz aqreqat sorğu.
+    kpi_rooms = live_scope.count()
+    kpi_live_rooms = live_scope.filter(sessions__state__in=_LIVE_STATES).distinct().count()
+
     page_obj = Paginator(rooms, 20).get_page(request.GET.get("page"))
     return render(
         request,
@@ -147,6 +152,10 @@ def exam_center_room_list(request):
             "organization": organization,
             "can_manage": can_manage,
             "can_manage_rooms": can_manage_rooms,
+            "kpi_rooms": kpi_rooms,
+            "kpi_live_rooms": kpi_live_rooms,
+            "kpi_live_exams": len(live_exams),
+            "kpi_live_students": sum(row["students"] for row in live_exams),
         },
     )
 

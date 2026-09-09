@@ -143,6 +143,19 @@ def build_exam_score_entry_section(
     section["rows"] = roster["rows"]
     section["exam_score_max"] = roster["exam_score_max"]
     section["journal_locked"] = _journal_locked(offering)
+    section.update(_roster_kpis(roster["rows"]))
+
+
+def _roster_kpis(rows) -> dict:
+    """Bölmə başındakı KPI rəqəmləri — siyahı ARTIQ yaddaşdadır, əlavə sorğu yoxdur."""
+    recorded = [row for row in rows if row.get("has_score")]
+    scores = [row["exam_score"] for row in recorded if row.get("exam_score") is not None]
+    return {
+        "kpi_students": len(rows),
+        "kpi_recorded": len(recorded),
+        "kpi_pending": len(rows) - len(recorded),
+        "kpi_avg": round(sum(scores) / len(scores), 1) if scores else None,
+    }
 
 
 def _journal_locked(offering) -> bool:
