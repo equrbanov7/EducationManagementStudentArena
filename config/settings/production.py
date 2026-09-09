@@ -336,6 +336,29 @@ SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
 
+# ⚠️ 2026-09-10 auditi: kod default-ları DOĞRU idi (hamısı `True`), amma
+# `production.py` `BASE_DIR/.env`-i yükləyir və repodakı iş faylı
+# `SECURE_SSL_REDIRECT=False`, `SESSION_COOKIE_SECURE=False`,
+# `CSRF_COOKIE_SECURE=False`, `SECURE_HSTS_SECONDS=0` qoyur. Yəni prod hostda
+# unudulmuş bir `.env` sükutla TLS məcburiyyətini SÖNDÜRÜR: sessiya və CSRF
+# kukiləri şifrələnməmiş kanalla gedir.
+#
+# Qapı `ADMIN_2FA_REQUIRED` ilə EYNİ naxışdadır (yuxarıda): prod-da açıq
+# qalmalı olan parametr bağlanırsa, tətbiq SÜKUTLA zəifləmir — açılmır.
+# Kuki bayraqlarının prod-da söndürülməsi üçün qanuni səbəb yoxdur, ona görə
+# onlarda çıxış yolu da yoxdur.
+# Çıxış yolu TƏKDİR və adı özünü izah edir. Onu prod `.env`-ə yazan adam nə
+# etdiyini bilir; unudulmuş bayraq isə tətbiqi qaldırmır. CI-nin `prod-smoke`
+# işi prod yığınını DÜZ HTTP üzərində qaldırdığı üçün məhz bunu qoyur.
+INSECURE_TRANSPORT_OK = _env_bool("INSECURE_TRANSPORT_OK", False)
+if not INSECURE_TRANSPORT_OK and not (SESSION_COOKIE_SECURE and CSRF_COOKIE_SECURE and SECURE_SSL_REDIRECT):
+    raise ImproperlyConfigured(
+        "TLS enforcement is disabled in production "
+        "(SECURE_SSL_REDIRECT / SESSION_COOKIE_SECURE / CSRF_COOKIE_SECURE). "
+        "Check the .env on this host. If this is a plain-HTTP test stack, set "
+        "INSECURE_TRANSPORT_OK=1 explicitly."
+    )
+
 # Session timeout — tighter values in production for security.
 # Absolute cookie lifetime: 1 day (overrides base.py default of 7 days).
 SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(1 * 24 * 60 * 60)))
