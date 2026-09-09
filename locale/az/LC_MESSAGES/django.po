@@ -70197,3 +70197,635 @@ msgstr "Dərs cədvəldəki xanaya yazılacaq."
 msgctxt "accounts.schedule_manage"
 msgid "Dərs cədvəldən götürülür. Qeyd silinmir — sonradan bərpa oluna bilər."
 msgstr "Dərs cədvəldən götürülür. Qeyd silinmir — sonradan bərpa oluna bilər."
+
+msgctxt "organizations.roles_registry"
+msgid "%(n)s açar"
+msgstr "%(n)s açar"
+
+msgctxt "organizations.roles_registry"
+msgid "Ad (A→Z)"
+msgstr "Ad (A→Z)"
+
+msgctxt "organizations.roles_registry"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Aktiv təşkilat tapılmadı."
+
+msgctxt "organizations.roles_registry"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rol bütün icazələri daşıyır (*) — ayrıca açar siyahısı saxlanmır."
+msgstr "Bu rol bütün icazələri daşıyır (*) — ayrıca açar siyahısı saxlanmır."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rola heç bir icazə açarı verilməyib."
+msgstr "Bu rola heç bir icazə açarı verilməyib."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rolu daşıyan üzv"
+msgstr "Bu rolu daşıyan üzv"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Bu rəqəm kataloqun öz səviyyəsidir. Konkret şəxsin RBAC səviyyəsi "
+"üzvlüyündən asılı olaraq fərqlənə bilər — «Rolları idarə et» ekranında "
+"görünən rəqəm odur."
+msgstr ""
+"Bu rəqəm kataloqun öz səviyyəsidir. Konkret şəxsin RBAC səviyyəsi "
+"üzvlüyündən asılı olaraq fərqlənə bilər — «Rolları idarə et» ekranında "
+"görünən rəqəm odur."
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr"
+msgstr "Bütün icazələr"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr (*)"
+msgstr "Bütün icazələr (*)"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün kateqoriyalar"
+msgstr "Bütün kateqoriyalar"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün təşkilat"
+msgstr "Bütün təşkilat"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün əhatələr"
+msgstr "Bütün əhatələr"
+
+msgctxt "organizations.roles_registry"
+msgid "Deaktiv"
+msgstr "Deaktiv"
+
+msgctxt "organizations.roles_registry"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "organizations.roles_registry"
+msgid "Dərs"
+msgstr "Dərs"
+
+msgctxt "organizations.roles_registry"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "organizations.roles_registry"
+msgid "Heç kimə verilməyib"
+msgstr "Heç kimə verilməyib"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloq səviyyəsi"
+msgstr "Kataloq səviyyəsi"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloqda hələ rol yoxdur"
+msgstr "Kataloqda hələ rol yoxdur"
+
+msgctxt "organizations.roles_registry"
+msgid "Nəticə: %(n)s rol"
+msgstr "Nəticə: %(n)s rol"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol"
+msgstr "Rol"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol adı, izah və ya icazə"
+msgstr "Rol adı, izah və ya icazə"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol haqqında"
+msgstr "Rol haqqında"
+
+msgctxt "organizations.roles_registry"
+msgid "Rollar universitet şablonundan miqrasiya ilə gəlir."
+msgstr "Rollar universitet şablonundan miqrasiya ilə gəlir."
+
+msgctxt "organizations.roles_registry"
+msgid "Rolları idarə et"
+msgstr "Rolları idarə et"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem"
+msgstr "Sistem"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem rolu"
+msgstr "Sistem rolu"
+
+msgctxt "organizations.roles_registry"
+msgid "Struktur bölməsi"
+msgstr "Struktur bölməsi"
+
+msgctxt "organizations.roles_registry"
+msgid "Süzgəcləri sıfırlayıb yenidən yoxlayın."
+msgstr "Süzgəcləri sıfırlayıb yenidən yoxlayın."
+
+msgctxt "organizations.roles_registry"
+msgid "Sıralama"
+msgstr "Sıralama"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (aşağıdan)"
+msgstr "Səviyyə (aşağıdan)"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (yuxarıdan)"
+msgstr "Səviyyə (yuxarıdan)"
+
+msgctxt "organizations.roles_registry"
+msgid "Təyinat"
+msgstr "Təyinat"
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilat rolları"
+msgstr "Təşkilat rolları"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Təşkilatın rol kataloqu: hər rolun səviyyəsi, əhatəsi, neçə nəfərdə olduğu "
+"və hansı icazələri daşıdığı. Rola klik edib icazələri kateqoriya üzrə açın."
+msgstr ""
+"Təşkilatın rol kataloqu: hər rolun səviyyəsi, əhatəsi, neçə nəfərdə olduğu "
+"və hansı icazələri daşıdığı. Rola klik edib icazələri kateqoriya üzrə açın."
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilatın öz rolu"
+msgstr "Təşkilatın öz rolu"
+
+msgctxt "organizations.roles_registry"
+msgid "Uyğun rol tapılmadı"
+msgstr "Uyğun rol tapılmadı"
+
+msgctxt "organizations.roles_registry"
+msgid "Verilməyib"
+msgstr "Verilməyib"
+
+msgctxt "organizations.roles_registry"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "organizations.roles_registry"
+msgid "aktiv üzvlük (bir nəfər bir neçə dəfə sayıla bilər)"
+msgstr "aktiv üzvlük (bir nəfər bir neçə dəfə sayıla bilər)"
+
+msgctxt "organizations.roles_registry"
+msgid "heç bir üzvdə yoxdur"
+msgstr "heç bir üzvdə yoxdur"
+
+msgctxt "organizations.roles_registry"
+msgid "kataloqda, süzgəcdən asılı deyil"
+msgstr "kataloqda, süzgəcdən asılı deyil"
+
+msgctxt "organizations.roles_registry"
+msgid "miqrasiya ilə gəlir, silinmir"
+msgstr "miqrasiya ilə gəlir, silinmir"
+
+msgctxt "organizations.roles_registry"
+msgid "rol var, açar yoxdur"
+msgstr "rol var, açar yoxdur"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv"
+msgstr "Üzv"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv sayı"
+msgstr "Üzv sayı"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə kateqoriyası"
+msgstr "İcazə kateqoriyası"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə verilməyib"
+msgstr "İcazə verilməyib"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr"
+msgstr "İcazələr"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr kateqoriya üzrə qruplaşdırılıb."
+msgstr "İcazələr kateqoriya üzrə qruplaşdırılıb."
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələri redaktə et"
+msgstr "İcazələri redaktə et"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsi yoxdur"
+msgstr "İcazəsi yoxdur"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsiz"
+msgstr "İcazəsiz"
+
+msgctxt "organizations.roles_registry"
+msgid "Əhatə"
+msgstr "Əhatə"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "organizations.roles_registry"
+msgid "Ətraflı"
+msgstr "Ətraflı"
+
+msgctxt "registrar.catalog"
+msgid "%(n)s-i boşdur"
+msgstr "%(n)s-i boşdur"
+
+msgctxt "registrar.catalog"
+msgid "7 rəqəm, məsələn 6006004. İxtisas yeni təsnifatda yoxdursa boş qalır."
+msgstr "7 rəqəm, məsələn 6006004. İxtisas yeni təsnifatda yoxdursa boş qalır."
+
+msgctxt "registrar.catalog"
+msgid "Ad, kod və ya şifr"
+msgstr "Ad, kod və ya şifr"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
+"qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
+"dialoqda aparılır — kabinetdən çıxmır."
+msgstr ""
+"Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
+"qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
+"dialoqda aparılır — kabinetdən çıxmır."
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloqu idarə etmək üçün icazəniz yoxdur — bu bölmə təşkilat üzrə "
+"`course.edit` açarı olan rollar üçündür."
+msgstr ""
+"Akademik kataloqu idarə etmək üçün icazəniz yoxdur — bu bölmə təşkilat üzrə "
+"`course.edit` açarı olan rollar üçündür."
+
+msgctxt "registrar.catalog"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv semestr yoxdur"
+msgstr "Aktiv semestr yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv — siyahılarda və seçicilərdə görünür"
+msgstr "Aktiv — siyahılarda və seçicilərdə görünür"
+
+msgctxt "registrar.catalog"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "registrar.catalog"
+msgid "Boş qalsa ixtisasın adı işlədilir."
+msgstr "Boş qalsa ixtisasın adı işlədilir."
+
+msgctxt "registrar.catalog"
+msgid "Bu siyahıda sətir yoxdur"
+msgstr "Bu siyahıda sətir yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Bütün ixtisaslar"
+msgstr "Bütün ixtisaslar"
+
+msgctxt "registrar.catalog"
+msgid "Bütün statuslar"
+msgstr "Bütün statuslar"
+
+msgctxt "registrar.catalog"
+msgid "Daxili kod"
+msgstr "Daxili kod"
+
+msgctxt "registrar.catalog"
+msgid "Deaktiv"
+msgstr "Deaktiv"
+
+msgctxt "registrar.catalog"
+msgid "Dərs saatı"
+msgstr "Dərs saatı"
+
+msgctxt "registrar.catalog"
+msgid "ECTS"
+msgstr "ECTS"
+
+msgctxt "registrar.catalog"
+msgid "ECTS krediti"
+msgstr "ECTS krediti"
+
+msgctxt "registrar.catalog"
+msgid "Fənlər"
+msgstr "Fənlər"
+
+msgctxt "registrar.catalog"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "registrar.catalog"
+msgid "Fənn axtar…"
+msgstr "Fənn axtar…"
+
+msgctxt "registrar.catalog"
+msgid "Fənn aç"
+msgstr "Fənn aç"
+
+msgctxt "registrar.catalog"
+msgid "Fənn kodu"
+msgstr "Fənn kodu"
+
+msgctxt "registrar.catalog"
+msgid "Fənn sətri"
+msgstr "Fənn sətri"
+
+msgctxt "registrar.catalog"
+msgid "Fənnin adı"
+msgstr "Fənnin adı"
+
+msgctxt "registrar.catalog"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Hər sətir bir meyardır: «ad: bal». Mövcud meyarların balı ad dəyişmədikcə "
+"qorunur."
+msgstr ""
+"Hər sətir bir meyardır: «ad: bal». Mövcud meyarların balı ad dəyişmədikcə "
+"qorunur."
+
+msgctxt "registrar.catalog"
+msgid "Kataloq bölmələri"
+msgstr "Kataloq bölmələri"
+
+msgctxt "registrar.catalog"
+msgid "Köhnə şifr (050/060)"
+msgstr "Köhnə şifr (050/060)"
+
+msgctxt "registrar.catalog"
+msgid "Meyar"
+msgstr "Meyar"
+
+msgctxt "registrar.catalog"
+msgid "Meyarlar"
+msgstr "Meyarlar"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim axtar…"
+msgstr "Müəllim axtar…"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Müəllim jurnalın sahibidir. Sonradan dəyişmək «Fənn təhvili» bölməsindən "
+"aparılır."
+msgstr ""
+"Müəllim jurnalın sahibidir. Sonradan dəyişmək «Fənn təhvili» bölməsindən "
+"aparılır."
+
+msgctxt "registrar.catalog"
+msgid "Müəllim təyin edilməyib"
+msgstr "Müəllim təyin edilməyib"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimi var"
+msgstr "Müəllimi var"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimsiz açılış"
+msgstr "Müəllimsiz açılış"
+
+msgctxt "registrar.catalog"
+msgid "Nəticə: %(n)s sətir"
+msgstr "Nəticə: %(n)s sətir"
+
+msgctxt "registrar.catalog"
+msgid "Planın adı"
+msgstr "Planın adı"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti"
+msgstr "Qayıb limiti"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti (%%)"
+msgstr "Qayıb limiti (%%)"
+
+msgctxt "registrar.catalog"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "registrar.catalog"
+msgid "Qrup axtar…"
+msgstr "Qrup axtar…"
+
+msgctxt "registrar.catalog"
+msgid "Qəbul ili"
+msgstr "Qəbul ili"
+
+msgctxt "registrar.catalog"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "registrar.catalog"
+msgid "Reyestrdə aç"
+msgstr "Reyestrdə aç"
+
+msgctxt "registrar.catalog"
+msgid "Rubrik"
+msgstr "Rubrik"
+
+msgctxt "registrar.catalog"
+msgid "Rubrikin adı"
+msgstr "Rubrikin adı"
+
+msgctxt "registrar.catalog"
+msgid "Rubriklər"
+msgstr "Rubriklər"
+
+msgctxt "registrar.catalog"
+msgid "Rəsmi şifr (NK 503)"
+msgstr "Rəsmi şifr (NK 503)"
+
+msgctxt "registrar.catalog"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "registrar.catalog"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışları"
+msgstr "Semestr açılışları"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışı"
+msgstr "Semestr açılışı"
+
+msgctxt "registrar.catalog"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "registrar.catalog"
+msgid "Süzgəci sıfırlayın və ya sağ yuxarıdakı düymə ilə yenisini əlavə edin."
+msgstr ""
+"Süzgəci sıfırlayın və ya sağ yuxarıdakı düymə ilə yenisini əlavə edin."
+
+msgctxt "registrar.catalog"
+msgid "Səviyyə"
+msgstr "Səviyyə"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planları"
+msgstr "Tədris planları"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planı"
+msgstr "Tədris planı"
+
+msgctxt "registrar.catalog"
+msgid "Təhsil səviyyəsi"
+msgstr "Təhsil səviyyəsi"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə reyestrinə keç"
+msgstr "Tələbə reyestrinə keç"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyin et"
+msgstr "Tələbə təyin et"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyinatları"
+msgstr "Tələbə təyinatları"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Tələbə təyinatları burada YALNIZ oxunur. Yeni təyinat və köçürmə «Tələbə "
+"reyestri» bölməsindən aparılır — orada axtarışlı tələbə seçicisi var."
+msgstr ""
+"Tələbə təyinatları burada YALNIZ oxunur. Yeni təyinat və köçürmə «Tələbə "
+"reyestri» bölməsindən aparılır — orada axtarışlı tələbə seçicisi var."
+
+msgctxt "registrar.catalog"
+msgid "Təsvir"
+msgstr "Təsvir"
+
+msgctxt "registrar.catalog"
+msgid "Təyin edilməyib"
+msgstr "Təyin edilməyib"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun fənn yoxdur"
+msgstr "Uyğun fənn yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun ixtisas yoxdur"
+msgstr "Uyğun ixtisas yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun müəllim yoxdur"
+msgstr "Uyğun müəllim yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun qrup yoxdur"
+msgstr "Uyğun qrup yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "registrar.catalog"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "registrar.catalog"
+msgid "Yeni fənn"
+msgstr "Yeni fənn"
+
+msgctxt "registrar.catalog"
+msgid "Yeni ixtisas"
+msgstr "Yeni ixtisas"
+
+msgctxt "registrar.catalog"
+msgid "Yeni rubrik"
+msgstr "Yeni rubrik"
+
+msgctxt "registrar.catalog"
+msgid "Yeni tədris planı"
+msgstr "Yeni tədris planı"
+
+msgctxt "registrar.catalog"
+msgid "aktiv semestr yoxdur"
+msgstr "aktiv semestr yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "jurnal sahibi yoxdur"
+msgstr "jurnal sahibi yoxdur"
+
+msgctxt "registrar.catalog"
+msgid "Ümumi ECTS"
+msgstr "Ümumi ECTS"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas axtar…"
+msgstr "İxtisas axtar…"
+
+msgctxt "registrar.catalog"
+msgid "İxtisaslar"
+msgstr "İxtisaslar"
+
+msgctxt "registrar.catalog"
+msgid "İxtisasın adı"
+msgstr "İxtisasın adı"
+
+msgctxt "registrar.catalog"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "registrar.catalog"
+msgid "Məzmun: 40&#10;Struktur: 30&#10;Təqdimat: 30"
+msgstr "Məzmun: 40&#10;Struktur: 30&#10;Təqdimat: 30"
+
+msgctxt "profile.rim"
+msgid "Tək müəllim əlavə et"
+msgstr "Tək müəllim əlavə et"
+
+msgctxt "profile.rim"
+msgid "Tək tələbə əlavə et"
+msgstr "Tək tələbə əlavə et"
+
+msgctxt "profile.sidebar"
+msgid "Rolları idarə et"
+msgstr "Rolları idarə et"
+
+msgctxt "profile.sidebar"
+msgid "İcazələr"
+msgstr "İcazələr"
+
+msgid ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status "
+"və dövr üzrə süzün; sütun başlığı sıralayır."
+msgstr ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status "
+"və dövr üzrə süzün; sütun başlığı sıralayır."

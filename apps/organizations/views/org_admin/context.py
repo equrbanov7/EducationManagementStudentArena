@@ -258,13 +258,35 @@ def build_organization_members_context(request, organization):
 
 
 def build_organization_roles_context(request, organization):
-    from ...permissions import PERMISSION_CATEGORIES
+    """«Təşkilat rolları» — rol kataloqu reyestri.
 
+    2026-09-09 (sahib: «qaydasına sal yenidən») ekran kart torundan `ems_ui`
+    reyestrinə keçdi; görünüş modeli `roles_ui.build_roles_ui`-dadır (KPI,
+    süzgəc, cədvəl sətirləri, çekmecə datası). Köhnə açarlar (`roles`,
+    `permission_categories`) SAXLANILIR — onlardan asılı testlər və müstəqil
+    səhifə kontekstinin müqaviləsi pozulmasın.
+    """
+    from ...permissions import PERMISSION_CATEGORIES
+    from .roles_ui import build_roles_ui
+
+    if organization is None:
+        return {
+            "organization": None,
+            "roles": [],
+            "permission_categories": PERMISSION_CATEGORIES,
+            "can_view": False,
+            "profile_base_url": reverse("accounts:profile"),
+            "embedded_in_profile": False,
+            "ui": {},
+        }
+
+    roles = list(organization.roles.all().order_by("-level", "name"))
     return {
         "organization": organization,
-        "roles": organization.roles.all().order_by("-level", "name"),
+        "roles": roles,
         "permission_categories": PERMISSION_CATEGORIES,
         "can_view": _can_manage_organization(request.user, organization),
         "profile_base_url": reverse("accounts:profile"),
         "embedded_in_profile": False,
+        "ui": build_roles_ui(request, organization, roles),
     }

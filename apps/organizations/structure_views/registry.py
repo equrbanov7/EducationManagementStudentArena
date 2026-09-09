@@ -32,7 +32,7 @@ from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
 
-from ..models import Membership, OrgUnit
+from ..models import OrgUnit
 from ..views import _can_manage_organization, _has_org_permission, _visible_units_queryset
 from ._shared import (
     _active_teacher_user_ids,
@@ -41,6 +41,14 @@ from ._shared import (
     _unit_permission_flags,
 )
 from .constants import KAFEDRA_UNIT_TYPES
+from .registry_people import catalog_user_ids as _catalog_user_ids
+from .registry_people import display_name as _display_name
+from .registry_people import head_of as _head_of
+from .registry_people import initials as _initials
+from .registry_people import person as _person
+from .registry_people import person_url as _person_url
+from .registry_people import role_heads as _role_heads
+from .registry_people import staff_by_root as _staff_by_root
 from .tree import tree_scope
 
 _CTX = "organizations.registry"
@@ -115,19 +123,6 @@ def _owner_lookup(index: dict):
     return owner
 
 
-def _initials(name: str) -> str:
-    parts = [p for p in (name or "").split() if p]
-    if not parts:
-        return "—"
-    if len(parts) == 1:
-        return parts[0][:2].upper()
-    return (parts[0][0] + parts[-1][0]).upper()
-
-
-def _display_name(user):
-    return user.get_full_name() or user.username
-
-
 def _collect(organization, roots):
     """Kök vahidlər (fakültələr və ya kafedralar) üzrə say və alt siyahılar.
 
@@ -187,40 +182,6 @@ def _collect(organization, roots):
     return per, path_by_id, owner
 
 
-def _staff_by_root(organization, owner, role_names):
-    """Heyət üzvlükləri (müavin/koordinator) → kök vahid → rol → [membership]."""
-    rows = (
-        Membership.objects.filter(
-            organization=organization,
-            is_active=True,
-            user__is_active=True,
-            role__name__in=role_names,
-            scope_unit__isnull=False,
-        )
-        .select_related("user", "role", "scope_unit")
-        .order_by("user__first_name", "user__last_name", "user__username")
-    )
-    out = defaultdict(lambda: defaultdict(list))
-    for membership in rows:
-        root = owner(membership.scope_unit.path)
-        if root is not None:
-            out[root][membership.role.name].append(membership)
-    return out
-
-
-def _person(membership, *, root_id):
-    scope = membership.scope_unit
-    return {
-        "membership_id": str(membership.id),
-        "name": _display_name(membership.user),
-        "initials": _initials(_display_name(membership.user)),
-        "scope": scope.name if scope is not None and scope.id != root_id else "",
-    }
-
-
-# ─── Filtr köməkçiləri ──────────────────────────────────────────────────────
-
-
 def _head_options():
     return [
         {"value": "", "label": pgettext(_CTX, "Hamısı")},
@@ -238,13 +199,21 @@ def _sort_options():
     ]
 
 
-def _apply_common_filters(queryset, *, search, head):
+def _apply_common_filters(queryset, *, search, head, with_head_ids=None):
+    """Ad/kod axtarışı + «rəhbəri var/yox» süzgəci.
+
+    Rəhbər süzgəci `head__isnull` ilə DEYİL, ƏVVƏLCƏDƏN hesablanmış effektiv
+    rəhbər dəsti ilə tətbiq olunur (`_role_heads`): rəhbər rol üzvlüyü ilə də
+    verilə bilər, FK isə boş qalır — əks halda süzgəc KPI ilə ziddiyyət yaradır.
+    """
     if search:
         queryset = queryset.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    if with_head_ids is None:
+        return queryset
     if head == "with":
-        queryset = queryset.filter(head__isnull=False)
+        queryset = queryset.filter(pk__in=with_head_ids)
     elif head == "without":
-        queryset = queryset.filter(head__isnull=True)
+        queryset = queryset.exclude(pk__in=with_head_ids)
     return queryset
 
 
@@ -332,21 +301,31 @@ def build_faculties_section(request, organization) -> dict:
     total_count = len(all_faculties)
     per, _paths, owner = _collect(organization, all_faculties)
     staff = _staff_by_root(organization, owner, (VICE_DEAN_ROLE, COORDINATOR_ROLE))
+    role_heads = _role_heads(organization, all_faculties, DEAN_ROLE)
+    with_head_ids = {unit.id for unit in all_faculties if unit.head_id or unit.id in role_heads}
+    linkable_heads = _catalog_user_ids(
+        organization,
+        [unit.head_id for unit in all_faculties] + [m.user_id for m in role_heads.values()],
+    )
 
-    queryset = _apply_common_filters(base_qs, search=search, head=head).order_by(*SORTS[sort])
+    queryset = _apply_common_filters(base_qs, search=search, head=head, with_head_ids=with_head_ids).order_by(
+        *SORTS[sort]
+    )
     page_obj = Paginator(queryset, PAGE_SIZE).get_page(request.GET.get("fc_page"))
 
     rows = []
     for unit in page_obj.object_list:
         bucket = per[unit.id]
         people = staff.get(unit.id, {})
-        head_name = _display_name(unit.head) if unit.head_id else ""
+        head_name, head_user_id = _head_of(unit, role_heads)
         rows.append(
             {
                 "id": str(unit.id),
                 "name": unit.name,
                 "code": unit.code or "",
                 "head_id": str(unit.head_id) if unit.head_id else "",
+                "head_user_id": str(head_user_id or ""),
+                "head_url": _person_url(head_user_id if head_user_id in linkable_heads else None),
                 "head_name": head_name,
                 "head_initials": _initials(head_name) if head_name else "",
                 "vice_deans": [_person(m, root_id=unit.id) for m in people.get(VICE_DEAN_ROLE, [])],
@@ -362,12 +341,18 @@ def build_faculties_section(request, organization) -> dict:
             }
         )
 
+    # ⚠️ BİRİNCİ sütun sətir başlığıdır (`th scope="row"`), SONUNCU isə əməllər
+    # xanasıdır. 2026-09-09-a qədər hər ikisinin başlığı buraxılmışdı — nəticədə
+    # başlıqlar bir xana SOLA sürüşürdü («Fakültə» sütununun üstündə «Dekan»
+    # yazırdı; sahib şikayəti).
     columns = [
+        {"key": "faculty", "label": pgettext(_CTX, "Fakültə")},
         {"key": "head", "label": pgettext(_CTX, "Dekan")},
         {"key": "staff", "label": pgettext(_CTX, "Müavinlər · Koordinatorlar")},
         {"key": "chairs", "label": pgettext(_CTX, "Kafedra"), "align": "num"},
         {"key": "teachers", "label": pgettext(_CTX, "Müəllim"), "align": "num"},
         {"key": "students", "label": pgettext(_CTX, "Tələbə"), "align": "num"},
+        {"key": "actions", "label": pgettext(_CTX, "Əməllər"), "align": "end"},
     ]
     cell_dir = "accounts/profile/sections/org_units/"
     table_rows = [
@@ -387,7 +372,7 @@ def build_faculties_section(request, organization) -> dict:
         for row in rows
     ]
 
-    no_head = sum(1 for unit in all_faculties if not unit.head_id)
+    no_head = sum(1 for unit in all_faculties if unit.id not in with_head_ids)
     kpi_tiles = [
         {"label": pgettext(_CTX, "Fakültə"), "value": total_count, "tone": "primary"},
         {"label": pgettext(_CTX, "Kafedra"), "value": sum(per[u.id]["chairs"] for u in all_faculties)},
@@ -491,8 +476,14 @@ def build_kafedras_section(request, organization) -> dict:
     all_chairs = list(base_qs.order_by("name"))
     total_count = len(all_chairs)
     per, _paths, owner = _collect(organization, all_chairs)
+    role_heads = _role_heads(organization, all_chairs, CHAIR_HEAD_ROLE)
+    with_head_ids = {unit.id for unit in all_chairs if unit.head_id or unit.id in role_heads}
+    linkable_heads = _catalog_user_ids(
+        organization,
+        [unit.head_id for unit in all_chairs] + [m.user_id for m in role_heads.values()],
+    )
 
-    queryset = _apply_common_filters(base_qs, search=search, head=head)
+    queryset = _apply_common_filters(base_qs, search=search, head=head, with_head_ids=with_head_ids)
     if faculty:
         queryset = queryset.filter(parent_id=faculty)
     queryset = queryset.order_by(*SORTS[sort])
@@ -548,7 +539,7 @@ def build_kafedras_section(request, organization) -> dict:
             preview.append(
                 {"name": _display_name(membership.user), "initials": _initials(_display_name(membership.user))}
             )
-        head_name = _display_name(unit.head) if unit.head_id else ""
+        head_name, head_user_id = _head_of(unit, role_heads)
         rows.append(
             {
                 "id": str(unit.id),
@@ -559,6 +550,8 @@ def build_kafedras_section(request, organization) -> dict:
                 "faculty_id": str(unit.parent_id) if unit.parent_id else "",
                 "faculty_name": unit.parent.name if unit.parent_id else "",
                 "head_id": str(unit.head_id) if unit.head_id else "",
+                "head_user_id": str(head_user_id or ""),
+                "head_url": _person_url(head_user_id if head_user_id in linkable_heads else None),
                 "head_name": head_name,
                 "head_initials": _initials(head_name) if head_name else "",
                 "teacher_preview": preview[:TEACHER_PREVIEW],
@@ -574,12 +567,16 @@ def build_kafedras_section(request, organization) -> dict:
             }
         )
 
+    # Bax fakültə cədvəlindəki qeyd: birinci sütun sətir başlığı, sonuncu isə
+    # əməllər xanasıdır — hər ikisinin başlığı OLMALIDIR, yoxsa başlıqlar sürüşür.
     columns = [
+        {"key": "kafedra", "label": pgettext(_CTX, "Kafedra")},
         {"key": "faculty", "label": pgettext(_CTX, "Fakültə")},
         {"key": "head", "label": pgettext(_CTX, "Kafedra müdiri")},
         {"key": "teachers", "label": pgettext(_CTX, "Müəllimlər")},
         {"key": "active", "label": pgettext(_CTX, "Bu il aktiv"), "align": "num"},
         {"key": "offerings", "label": pgettext(_CTX, "Açılış (cari il)"), "align": "num"},
+        {"key": "actions", "label": pgettext(_CTX, "Əməllər"), "align": "end"},
     ]
     cell_dir = "accounts/profile/sections/org_units/"
     table_rows = [
@@ -599,7 +596,7 @@ def build_kafedras_section(request, organization) -> dict:
         for row in rows
     ]
 
-    no_head = sum(1 for unit in all_chairs if not unit.head_id)
+    no_head = sum(1 for unit in all_chairs if unit.id not in with_head_ids)
     kpi_tiles = [
         {"label": pgettext(_CTX, "Kafedra"), "value": total_count, "tone": "primary"},
         {

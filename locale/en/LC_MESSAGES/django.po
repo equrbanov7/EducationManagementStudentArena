@@ -70472,3 +70472,638 @@ msgid "Dərs cədvəldən götürülür. Qeyd silinmir — sonradan bərpa oluna
 msgstr ""
 "The lesson is removed from the timetable. The record is kept and can be "
 "restored later."
+
+msgctxt "organizations.roles_registry"
+msgid "%(n)s açar"
+msgstr "%(n)s key(s)"
+
+msgctxt "organizations.roles_registry"
+msgid "Ad (A→Z)"
+msgstr "Name (A→Z)"
+
+msgctxt "organizations.roles_registry"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "No active organization found."
+
+msgctxt "organizations.roles_registry"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rol bütün icazələri daşıyır (*) — ayrıca açar siyahısı saxlanmır."
+msgstr ""
+"This role carries every permission (*) — no separate key list is stored."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rola heç bir icazə açarı verilməyib."
+msgstr "No permission key has been granted to this role."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rolu daşıyan üzv"
+msgstr "People holding this role"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Bu rəqəm kataloqun öz səviyyəsidir. Konkret şəxsin RBAC səviyyəsi "
+"üzvlüyündən asılı olaraq fərqlənə bilər — «Rolları idarə et» ekranında "
+"görünən rəqəm odur."
+msgstr ""
+"This number is the catalogue's own level. A given person's RBAC level may "
+"differ depending on their membership — that is the number shown on the "
+"«Manage roles» screen."
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr"
+msgstr "All permissions"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr (*)"
+msgstr "All permissions (*)"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün kateqoriyalar"
+msgstr "All categories"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün təşkilat"
+msgstr "Organization-wide"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün əhatələr"
+msgstr "All scopes"
+
+msgctxt "organizations.roles_registry"
+msgid "Deaktiv"
+msgstr "Inactive"
+
+msgctxt "organizations.roles_registry"
+msgid "Digər"
+msgstr "Other"
+
+msgctxt "organizations.roles_registry"
+msgid "Dərs"
+msgstr "Course"
+
+msgctxt "organizations.roles_registry"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "organizations.roles_registry"
+msgid "Heç kimə verilməyib"
+msgstr "Granted to nobody"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloq səviyyəsi"
+msgstr "Catalogue level"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloqda hələ rol yoxdur"
+msgstr "There are no roles in the catalogue yet"
+
+msgctxt "organizations.roles_registry"
+msgid "Nəticə: %(n)s rol"
+msgstr "Result: %(n)s role(s)"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol"
+msgstr "Role"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol adı, izah və ya icazə"
+msgstr "Role name, description or permission"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol haqqında"
+msgstr "About the role"
+
+msgctxt "organizations.roles_registry"
+msgid "Rollar universitet şablonundan miqrasiya ilə gəlir."
+msgstr "Roles arrive by migration from the university template."
+
+msgctxt "organizations.roles_registry"
+msgid "Rolları idarə et"
+msgstr "Manage roles"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem"
+msgstr "System"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem rolu"
+msgstr "System role"
+
+msgctxt "organizations.roles_registry"
+msgid "Struktur bölməsi"
+msgstr "Structural unit"
+
+msgctxt "organizations.roles_registry"
+msgid "Süzgəcləri sıfırlayıb yenidən yoxlayın."
+msgstr "Reset the filters and try again."
+
+msgctxt "organizations.roles_registry"
+msgid "Sıralama"
+msgstr "Sorting"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (aşağıdan)"
+msgstr "Level (lowest first)"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (yuxarıdan)"
+msgstr "Level (highest first)"
+
+msgctxt "organizations.roles_registry"
+msgid "Təyinat"
+msgstr "Assignments"
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilat rolları"
+msgstr "Organization roles"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Təşkilatın rol kataloqu: hər rolun səviyyəsi, əhatəsi, neçə nəfərdə olduğu "
+"və hansı icazələri daşıdığı. Rola klik edib icazələri kateqoriya üzrə açın."
+msgstr ""
+"The organization's role catalogue: each role's level, scope, how many people"
+" hold it and which permissions it carries. Click a role to open its "
+"permissions by category."
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilatın öz rolu"
+msgstr "Organization's own role"
+
+msgctxt "organizations.roles_registry"
+msgid "Uyğun rol tapılmadı"
+msgstr "No matching role found"
+
+msgctxt "organizations.roles_registry"
+msgid "Verilməyib"
+msgstr "Not granted"
+
+msgctxt "organizations.roles_registry"
+msgid "Vəziyyət"
+msgstr "State"
+
+msgctxt "organizations.roles_registry"
+msgid "aktiv üzvlük (bir nəfər bir neçə dəfə sayıla bilər)"
+msgstr "active memberships (one person may be counted more than once)"
+
+msgctxt "organizations.roles_registry"
+msgid "heç bir üzvdə yoxdur"
+msgstr "held by nobody"
+
+msgctxt "organizations.roles_registry"
+msgid "kataloqda, süzgəcdən asılı deyil"
+msgstr "in the catalogue, regardless of filters"
+
+msgctxt "organizations.roles_registry"
+msgid "miqrasiya ilə gəlir, silinmir"
+msgstr "arrives by migration, cannot be deleted"
+
+msgctxt "organizations.roles_registry"
+msgid "rol var, açar yoxdur"
+msgstr "the role exists but has no keys"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv"
+msgstr "Members"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv sayı"
+msgstr "Member count"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə kateqoriyası"
+msgstr "Permission category"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə verilməyib"
+msgstr "No permission granted"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr"
+msgstr "Permissions"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr kateqoriya üzrə qruplaşdırılıb."
+msgstr "Permissions are grouped by category."
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələri redaktə et"
+msgstr "Edit permissions"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsi yoxdur"
+msgstr "Has no permissions"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsiz"
+msgstr "Without permissions"
+
+msgctxt "organizations.roles_registry"
+msgid "Əhatə"
+msgstr "Scope"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməl"
+msgstr "Action"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməllər"
+msgstr "Actions"
+
+msgctxt "organizations.roles_registry"
+msgid "Ətraflı"
+msgstr "Details"
+
+msgctxt "registrar.catalog"
+msgid "%(n)s-i boşdur"
+msgstr "%(n)s of them are empty"
+
+msgctxt "registrar.catalog"
+msgid "7 rəqəm, məsələn 6006004. İxtisas yeni təsnifatda yoxdursa boş qalır."
+msgstr ""
+"7 digits, e.g. 6006004. Left empty if the programme is absent from the new "
+"classification."
+
+msgctxt "registrar.catalog"
+msgid "Ad, kod və ya şifr"
+msgstr "Name, code or cipher"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
+"qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
+"dialoqda aparılır — kabinetdən çıxmır."
+msgstr ""
+"The academic catalogue: programmes, subjects, curricula, semester offerings,"
+" grading rubrics and student assignments. Every action happens on this page,"
+" in a dialog — you never leave the cabinet."
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloqu idarə etmək üçün icazəniz yoxdur — bu bölmə təşkilat üzrə "
+"`course.edit` açarı olan rollar üçündür."
+msgstr ""
+"You have no permission to manage the academic catalogue — this section is "
+"for roles holding the organization-wide `course.edit` key."
+
+msgctxt "registrar.catalog"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv semestr yoxdur"
+msgstr "There is no active semester"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv — siyahılarda və seçicilərdə görünür"
+msgstr "Active — appears in lists and pickers"
+
+msgctxt "registrar.catalog"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "registrar.catalog"
+msgid "Boş qalsa ixtisasın adı işlədilir."
+msgstr "If left empty the programme name is used."
+
+msgctxt "registrar.catalog"
+msgid "Bu siyahıda sətir yoxdur"
+msgstr "This list has no rows"
+
+msgctxt "registrar.catalog"
+msgid "Bütün ixtisaslar"
+msgstr "All programmes"
+
+msgctxt "registrar.catalog"
+msgid "Bütün statuslar"
+msgstr "All statuses"
+
+msgctxt "registrar.catalog"
+msgid "Daxili kod"
+msgstr "Internal code"
+
+msgctxt "registrar.catalog"
+msgid "Deaktiv"
+msgstr "Inactive"
+
+msgctxt "registrar.catalog"
+msgid "Dərs saatı"
+msgstr "Lesson hours"
+
+msgctxt "registrar.catalog"
+msgid "ECTS"
+msgstr "ECTS credits"
+
+msgctxt "registrar.catalog"
+msgid "ECTS krediti"
+msgstr "ECTS credit"
+
+msgctxt "registrar.catalog"
+msgid "Fənlər"
+msgstr "Subjects"
+
+msgctxt "registrar.catalog"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "registrar.catalog"
+msgid "Fənn axtar…"
+msgstr "Search a subject…"
+
+msgctxt "registrar.catalog"
+msgid "Fənn aç"
+msgstr "Open a subject"
+
+msgctxt "registrar.catalog"
+msgid "Fənn kodu"
+msgstr "Subject code"
+
+msgctxt "registrar.catalog"
+msgid "Fənn sətri"
+msgstr "Subject rows"
+
+msgctxt "registrar.catalog"
+msgid "Fənnin adı"
+msgstr "Subject name"
+
+msgctxt "registrar.catalog"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Hər sətir bir meyardır: «ad: bal». Mövcud meyarların balı ad dəyişmədikcə "
+"qorunur."
+msgstr ""
+"One criterion per line: «name: score». Existing criteria keep their score "
+"while the name is unchanged."
+
+msgctxt "registrar.catalog"
+msgid "Kataloq bölmələri"
+msgstr "Catalogue sections"
+
+msgctxt "registrar.catalog"
+msgid "Köhnə şifr (050/060)"
+msgstr "Legacy cipher (050/060)"
+
+msgctxt "registrar.catalog"
+msgid "Meyar"
+msgstr "Criteria"
+
+msgctxt "registrar.catalog"
+msgid "Meyarlar"
+msgstr "Criteria"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim axtar…"
+msgstr "Search a teacher…"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Müəllim jurnalın sahibidir. Sonradan dəyişmək «Fənn təhvili» bölməsindən "
+"aparılır."
+msgstr ""
+"The teacher owns the gradebook. Changing it later is done from the «Subject "
+"handover» section."
+
+msgctxt "registrar.catalog"
+msgid "Müəllim təyin edilməyib"
+msgstr "No teacher assigned"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimi var"
+msgstr "Has a teacher"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimsiz açılış"
+msgstr "Offerings without a teacher"
+
+msgctxt "registrar.catalog"
+msgid "Nəticə: %(n)s sətir"
+msgstr "Result: %(n)s row(s)"
+
+msgctxt "registrar.catalog"
+msgid "Planın adı"
+msgstr "Curriculum name"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti"
+msgstr "Absence limit"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti (%%)"
+msgstr "Absence limit (%%)"
+
+msgctxt "registrar.catalog"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "registrar.catalog"
+msgid "Qrup axtar…"
+msgstr "Search a group…"
+
+msgctxt "registrar.catalog"
+msgid "Qəbul ili"
+msgstr "Admission year"
+
+msgctxt "registrar.catalog"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "registrar.catalog"
+msgid "Reyestrdə aç"
+msgstr "Open in the registry"
+
+msgctxt "registrar.catalog"
+msgid "Rubrik"
+msgstr "Rubric"
+
+msgctxt "registrar.catalog"
+msgid "Rubrikin adı"
+msgstr "Rubric name"
+
+msgctxt "registrar.catalog"
+msgid "Rubriklər"
+msgstr "Rubrics"
+
+msgctxt "registrar.catalog"
+msgid "Rəsmi şifr (NK 503)"
+msgstr "Official cipher (CM 503)"
+
+msgctxt "registrar.catalog"
+msgid "Saat"
+msgstr "Hours"
+
+msgctxt "registrar.catalog"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışları"
+msgstr "Semester offerings"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışı"
+msgstr "Semester offerings"
+
+msgctxt "registrar.catalog"
+msgid "Status"
+msgstr "Academic status"
+
+msgctxt "registrar.catalog"
+msgid "Süzgəci sıfırlayın və ya sağ yuxarıdakı düymə ilə yenisini əlavə edin."
+msgstr "Reset the filter, or add a new one with the button at the top right."
+
+msgctxt "registrar.catalog"
+msgid "Səviyyə"
+msgstr "Level"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planları"
+msgstr "Curricula"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planı"
+msgstr "Curriculum"
+
+msgctxt "registrar.catalog"
+msgid "Təhsil səviyyəsi"
+msgstr "Degree level"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə reyestrinə keç"
+msgstr "Go to the student registry"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyin et"
+msgstr "Assign a student"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyinatları"
+msgstr "Student assignments"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Tələbə təyinatları burada YALNIZ oxunur. Yeni təyinat və köçürmə «Tələbə "
+"reyestri» bölməsindən aparılır — orada axtarışlı tələbə seçicisi var."
+msgstr ""
+"Student assignments are READ-ONLY here. New assignments and transfers are "
+"done in the «Student registry» section — it has a searchable student picker."
+
+msgctxt "registrar.catalog"
+msgid "Təsvir"
+msgstr "Description"
+
+msgctxt "registrar.catalog"
+msgid "Təyin edilməyib"
+msgstr "Not assigned"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun fənn yoxdur"
+msgstr "No matching subject"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun ixtisas yoxdur"
+msgstr "No matching programme"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun müəllim yoxdur"
+msgstr "No matching teacher"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun qrup yoxdur"
+msgstr "No matching group"
+
+msgctxt "registrar.catalog"
+msgid "Vəziyyət"
+msgstr "State"
+
+msgctxt "registrar.catalog"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "registrar.catalog"
+msgid "Yeni fənn"
+msgstr "New subject"
+
+msgctxt "registrar.catalog"
+msgid "Yeni ixtisas"
+msgstr "New programme"
+
+msgctxt "registrar.catalog"
+msgid "Yeni rubrik"
+msgstr "New rubric"
+
+msgctxt "registrar.catalog"
+msgid "Yeni tədris planı"
+msgstr "New curriculum"
+
+msgctxt "registrar.catalog"
+msgid "aktiv semestr yoxdur"
+msgstr "no active semester"
+
+msgctxt "registrar.catalog"
+msgid "jurnal sahibi yoxdur"
+msgstr "no gradebook owner"
+
+msgctxt "registrar.catalog"
+msgid "Ümumi ECTS"
+msgstr "Total ECTS"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas"
+msgstr "Programme"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas axtar…"
+msgstr "Search a programme…"
+
+msgctxt "registrar.catalog"
+msgid "İxtisaslar"
+msgstr "Programmes"
+
+msgctxt "registrar.catalog"
+msgid "İxtisasın adı"
+msgstr "Programme name"
+
+msgctxt "registrar.catalog"
+msgid "Əməl"
+msgstr "Action"
+
+msgctxt "registrar.catalog"
+msgid "Məzmun: 40&#10;Struktur: 30&#10;Təqdimat: 30"
+msgstr "Content: 40&#10;Structure: 30&#10;Delivery: 30"
+
+msgctxt "profile.rim"
+msgid "Tək müəllim əlavə et"
+msgstr "Add a single teacher"
+
+msgctxt "profile.rim"
+msgid "Tək tələbə əlavə et"
+msgstr "Add a single student"
+
+msgctxt "profile.sidebar"
+msgid "Rolları idarə et"
+msgstr "Manage roles"
+
+msgctxt "profile.sidebar"
+msgid "İcazələr"
+msgstr "Permissions"
+
+msgid ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status "
+"və dövr üzrə süzün; sütun başlığı sıralayır."
+msgstr ""
+"All appeal requests — filter by subject, teacher, group, exam type, status "
+"and period; the column header sorts."

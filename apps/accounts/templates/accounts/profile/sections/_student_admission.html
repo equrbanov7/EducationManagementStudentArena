@@ -33,7 +33,17 @@ dinamik dəyərlər `data-*` atributları ilə ötürülür.
      data-can-create-group="{% if student_admission_section.can_assign_groups %}1{% else %}0{% endif %}"
      data-max-rows="{{ student_admission_section.max_rows }}">
 
-    {% include "partials/ems_ui/_content_header.html" with header_subtitle=student_admission_section.intro %}
+    {% comment %}Başlıq keçidləri: TƏK tələbə əlavəsi (dialoq) + əhatə nişanı.
+    Sahib (2026-09-09): «2 yerdə tələbə əlavə et var, onu vahidləşdir — bir yerdə
+    olsun, Tələbə xidmətlərinə aid». Köhnə «Tələbə əlavəsi (toplu)» girişi
+    sidebar-dan çıxarıldı; bu ekran onun GENİŞLƏNMİŞ variantıdır (eyni açar,
+    eyni endpoint) və artıq tək əlavəni də daşıyır.{% endcomment %}
+    {% with sec=student_admission_section %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=student_admission_section.intro header_actions_include="accounts/profile/sections/bulk_intake/_scope.html" %}
+    {% if sec.single_create.can_create %}
+      {% include "accounts/profile/sections/partials/_rim_create.html" with rim_center_section=sec.single_create.rim_create %}
+    {% endif %}
+    {% endwith %}
 
     {% include "partials/ems_ui/_stepper.html" with steps=student_admission_section.steps steps_label=student_admission_section.steps_label %}
 

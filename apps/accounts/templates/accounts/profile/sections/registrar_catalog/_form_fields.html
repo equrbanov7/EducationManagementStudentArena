@@ -1,0 +1,157 @@
+{% load i18n %}
+{% comment %}Kataloq dialoqunun sahələri — AKTİV tab üzrə.
+
+Panel tab dəyişəndə serverdən yenidən gəlir, ona görə burada yalnız bir tabın
+sahələri render olunur (ölü markup yığılmır). Validasiya serverdədir: eyni
+`registrar/forms.py` sinifləri (`ProgramForm`, `SubjectForm` …) — burada paralel
+qayda yazılmır, xəta mesajları sahə-sahə JS ilə göstərilir.
+
+⚠️ Layihə qaydası: XAM `<select>` YOXDUR — hər seçim `bootstrap-single-select`
+sarğısındadır, uzun siyahılarda menyu daxili axtarışla.{% endcomment %}
+{% with sec=registrar_catalog_section %}
+<input type="hidden" data-rcat-field="id" value="">
+<p class="ems-msg ems-msg--error" data-rcat-error role="alert" hidden></p>
+
+{% if sec.tab == "programs" %}
+  <div class="rcat-grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-name">{% trans "İxtisasın adı" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <input class="ems-input" id="rcat-name" type="text" maxlength="255" data-rcat-field="name" required>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-code">{% trans "Daxili kod" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <input class="ems-input" id="rcat-code" type="text" maxlength="32" data-rcat-field="code" required>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-official">{% trans "Rəsmi şifr (NK 503)" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-official" type="text" maxlength="32" inputmode="numeric" data-rcat-field="official_code">
+      <p class="ems-field__hint">{% trans "7 rəqəm, məsələn 6006004. İxtisas yeni təsnifatda yoxdursa boş qalır." context "registrar.catalog" %}</p>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-legacy">{% trans "Köhnə şifr (050/060)" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-legacy" type="text" maxlength="32" inputmode="numeric" data-rcat-field="legacy_official_code">
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-degree">{% trans "Təhsil səviyyəsi" context "registrar.catalog" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rcat-degree" data-rcat-field="degree_level" data-rcat-options="degrees"></select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-ects">{% trans "Ümumi ECTS" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-ects" type="number" min="0" step="1" data-rcat-field="ects_total">
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-absence">{% trans "Qayıb limiti (%)" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-absence" type="number" min="0" max="100" step="1" data-rcat-field="absence_limit_percent">
+    </div>
+  </div>
+
+{% elif sec.tab == "subjects" %}
+  <div class="rcat-grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-name">{% trans "Fənnin adı" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <input class="ems-input" id="rcat-name" type="text" maxlength="255" data-rcat-field="name" required>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-code">{% trans "Fənn kodu" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <input class="ems-input" id="rcat-code" type="text" maxlength="32" data-rcat-field="code" required>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-ects">{% trans "ECTS krediti" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-ects" type="number" min="0" step="1" data-rcat-field="ects">
+    </div>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="rcat-desc">{% trans "Təsvir" context "registrar.catalog" %}</label>
+    <textarea class="ems-input" id="rcat-desc" rows="3" data-rcat-field="description"></textarea>
+  </div>
+
+{% elif sec.tab == "curricula" %}
+  <div class="rcat-grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-program">{% trans "İxtisas" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'İxtisas axtar…' context 'registrar.catalog' %}"
+                data-live-search-empty="{% trans 'Uyğun ixtisas yoxdur' context 'registrar.catalog' %}"
+                id="rcat-program" data-rcat-field="program" data-rcat-options="programs" required></select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-year">{% trans "Qəbul ili" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <input class="ems-input" id="rcat-year" type="number" min="1990" max="2100" step="1" data-rcat-field="admission_year" required>
+    </div>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="rcat-name">{% trans "Planın adı" context "registrar.catalog" %}</label>
+    <input class="ems-input" id="rcat-name" type="text" maxlength="255" data-rcat-field="name">
+    <p class="ems-field__hint">{% trans "Boş qalsa ixtisasın adı işlədilir." context "registrar.catalog" %}</p>
+  </div>
+
+{% elif sec.tab == "offerings" %}
+  <div class="rcat-grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-subject">{% trans "Fənn" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Fənn axtar…' context 'registrar.catalog' %}"
+                data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'registrar.catalog' %}"
+                id="rcat-subject" data-rcat-field="subject" data-rcat-options="subjects" required></select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-period">{% trans "Semestr" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rcat-period" data-rcat-field="period" data-rcat-options="periods" required></select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-group">{% trans "Qrup" context "registrar.catalog" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Qrup axtar…' context 'registrar.catalog' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup yoxdur' context 'registrar.catalog' %}"
+                id="rcat-group" data-rcat-field="group" data-rcat-options="groups" data-rcat-blank="1"></select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-instructor">{% trans "Müəllim" context "registrar.catalog" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Müəllim axtar…' context 'registrar.catalog' %}"
+                data-live-search-empty="{% trans 'Uyğun müəllim yoxdur' context 'registrar.catalog' %}"
+                id="rcat-instructor" data-rcat-field="instructor" data-rcat-options="instructors" data-rcat-blank="1"></select>
+      </div>
+      <p class="ems-field__hint">{% trans "Müəllim jurnalın sahibidir. Sonradan dəyişmək «Fənn təhvili» bölməsindən aparılır." context "registrar.catalog" %}</p>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="rcat-hours">{% trans "Dərs saatı" context "registrar.catalog" %}</label>
+      <input class="ems-input" id="rcat-hours" type="number" min="0" step="1" data-rcat-field="lesson_hours">
+    </div>
+  </div>
+
+{% elif sec.tab == "rubrics" %}
+  <div class="ems-field">
+    <label class="ems-field__label" for="rcat-name">{% trans "Rubrikin adı" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" id="rcat-name" type="text" maxlength="255" data-rcat-field="name" required>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="rcat-desc">{% trans "Təsvir" context "registrar.catalog" %}</label>
+    <textarea class="ems-input" id="rcat-desc" rows="2" data-rcat-field="description"></textarea>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="rcat-criteria">{% trans "Meyarlar" context "registrar.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <textarea class="ems-input rcat-criteria" id="rcat-criteria" rows="6" data-rcat-field="criteria_text" required
+              placeholder="{% trans 'Məzmun: 40&#10;Struktur: 30&#10;Təqdimat: 30' context 'registrar.catalog' %}"></textarea>
+    <p class="ems-field__hint">{% trans "Hər sətir bir meyardır: «ad: bal». Mövcud meyarların balı ad dəyişmədikcə qorunur." context "registrar.catalog" %}</p>
+  </div>
+{% endif %}
+
+{% if sec.tab != "rubrics" %}
+<label class="rcat-check">
+  <input type="checkbox" data-rcat-field="is_active" checked>
+  <span>{% trans "Aktiv — siyahılarda və seçicilərdə görünür" context "registrar.catalog" %}</span>
+</label>
+{% endif %}
+{% endwith %}
