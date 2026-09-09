@@ -1,31 +1,52 @@
-# «Tədris planı» PDF mənbələri — wcu.edu.az/az/page/undergraduate-programs (2026-09-09).
-# `proqram` sütunu HƏLL EDİLMİŞ uyğunluqdur və idxal YALNIZ ondan istifadə edir.
-# ⚠️ Fayl adındakı 050XXX şifri İŞLƏDİLMİR: saytdakı şifrlərin bir hissəsi
-#    səhvdir (bax `_program_official_codes.py`) və Psixologiya planını
-#    Regionşünaslığa bağlayırdı. Uyğunluq AD üzrədir, «əl ilə» sətirlər boşdur.
-proqram	ad	uygunluq	senet	url	qeyd
-Beynəlxalq münasibətlər	Beynəlxalq münasibətlər	exact	050201 Beynəlxalq münasibətlər (8) (1).pdf	https://wcu.edu.az/uploads/files/050201 Beynəlxalq münasibətlər (8) (1).pdf	
-Biologiya	Biologiya	exact	050501 Biologiya 2023.pdf	https://wcu.edu.az/uploads/files/050501%20Biologiya%202023.pdf	
-Cihaz Mühəndisliyi	Cihaz mühəndisliyi	exact	050604 - Cihaz Mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050604 - Cihaz Mühəndisliyi.pdf	
-	Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)		050306 Dizayn(interyer dizaynı) 2023.pdf	https://wcu.edu.az/uploads/files/050306%20Dizayn(interyer%20dizayn%C4%B1)%202023.pdf	əl ilə həll edilməlidir
-Ekologiya	Ekologiya	exact	050504 - Ekologiya.pdf	https://wcu.edu.az/uploads/files/050504 - Ekologiya.pdf	
-	Filologiya (Azərbaycan dili və ədəbiyyatı)		Filologiya (Azərbaycan dili  və ədəbiyyatı) 2023.pdf	https://wcu.edu.az/uploads/files/Filologiya%20(Az%C9%99rbaycan%20dili%20%20v%C9%99%20%C9%99d%C9%99biyyat%C4%B1)%202023.pdf	əl ilə həll edilməlidir
-Filologiya (İngilis dili və ədəbiyyatı)	Filologiya (ingilis dili və ədəbiyyatı)	exact	050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf	https://wcu.edu.az/uploads/files/050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf	
-Fəlsəfə	Fəlsəfə	exact	050204 Fəlsəfə + (1).pdf	https://wcu.edu.az/uploads/files/050204 Fəlsəfə + (1).pdf	
-Kompüter Mühəndisliyi	Kompüter mühəndisliyi	exact	050620 - Kompüter Mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050620 - Kompüter Mühəndisliyi.pdf	
-Maliyyə	Maliyyə	exact	050406 Maliyyə 2023.pdf	https://wcu.edu.az/uploads/files/050406%20Maliyy%C9%99%202023.pdf	
-Marketinq	Marketinq	exact	MARKETİNG 2023.pdf	https://wcu.edu.az/uploads/files/MARKETİNG 2023.pdf	
-Mexatronika və robototexnika mühəndisliyi	Mexatronika və robototexnika mühəndisliyi	exact	050629 - Mexatronika və robototexnika mühəndisliyi.pdf	https://wcu.edu.az/uploads/files/050629 - Mexatronika və robototexnika mühəndisliyi.pdf	
-Mühasibat	Mühasibat	exact	050409 Mühasibat 2023.pdf	https://wcu.edu.az/uploads/files/050409%20M%C3%BChasibat%202023.pdf	
-Psixologiya	Psixologiya	exact	050211 Psixologiya +.pdf	https://wcu.edu.az/uploads/files/050211 Psixologiya +.pdf	
-Regionşünaslıq	Regionşünaslıq	exact	050212 Regionşünaslıq.pdf	https://wcu.edu.az/uploads/files/050212 Regionşünaslıq.pdf	
-Sosial Iş	Sosial iş	exact	050807 Sosial iş + (1).pdf	https://wcu.edu.az/uploads/files/050807 Sosial iş + (1).pdf	
-Su Bioehtiyyatları və Akvakultura	Su bioehtiyatları və akvakultura	fuzzy	050708 - Su bioehtiyatları və akvakultura.pdf	https://wcu.edu.az/uploads/files/050708 - Su bioehtiyatları və akvakultura.pdf	təxmini ad uyğunluğu
-Tarix	Tarix	exact	050214 Tarix 2023.pdf	https://wcu.edu.az/uploads/files/050214%20Tarix%202023.pdf	
-Turizm bələdçiliyi	Turizm bələdçiliyi	exact	050809 Turizm bələdçiliyi 2023.pdf	https://wcu.edu.az/uploads/files/050809%20Turizm%20b%C9%99l%C9%99d%C3%A7iliyi%202023.pdf	
-Turizm işinin təşkili	Turizm işinin təşkili	exact	050810 Turizm işinin təşkili 2023.pdf	https://wcu.edu.az/uploads/files/050810%20Turizm%20i%C5%9Finin%20t%C9%99%C5%9Fkili%202023.pdf	
-Təhsildə sosial psixoloji xidmət	Təhsildə sosial psixoloji xidmət	exact	050116 TSPX.pdf	https://wcu.edu.az/uploads/files/050116 TSPX.pdf	
-	Tərcümə (ingilis)		050215 Tərcümə 2023.pdf	https://wcu.edu.az/uploads/files/050215%20T%C9%99rc%C3%BCm%C9%99%202023.pdf	əl ilə həll edilməlidir
-İnformasiya Texnologiyaları	İnformasiya texnologiyaları	exact	050616 - İnformasiya Texnologiyaları.pdf	https://wcu.edu.az/uploads/files/050616 - İnformasiya Texnologiyaları.pdf	
-İnformasiya Təhlükəsizliyi	İnformasiya təhlükəsizliyi	exact	050615 - İnformasiya Təhlükəsiz.pdf	https://wcu.edu.az/uploads/files/050615 - İnformasiya Təhlükəsiz.pdf	
-İqtisadiyyat	İqtisadiyyat	exact	050405 İqtisadiyyat 2023.pdf	https://wcu.edu.az/uploads/files/050405%20%C4%B0qtisadiyyat%202023.pdf	
+# «Tədris planı» PDF menbeleri — wcu.edu.az (2026-09-10 yigilib).
+# bakalavr: /az/page/undergraduate-programs · magistr: /az/page/tehsil-praqramlari-s
+# `proqram` sutunu HELL EDILMIS uygunluqdur; idxal YALNIZ ondan istifade edir.
+# WARN: fayl adindaki 050XXX/060XXX sifri ISLENMIR — saytdaki sifrlerin bir
+#       hissesi sehvdir (bax `_program_official_codes.py`).
+# Bos `proqram` = el ile hell edilmelidir; sistem ozunden baglamir.
+seviyye	proqram	uygunluq	sayt_adi	senet	url
+bachelor	Beynəlxalq münasibətlər	exact	Beynəlxalq münasibətlər	B_Beyn_lxalq_m_nasib_tl_r.pdf	https://wcu.edu.az/uploads/files/050201 Beynəlxalq münasibətlər (8) (1).pdf
+bachelor	Biologiya	exact	Biologiya	B_Biologiya.pdf	https://wcu.edu.az/uploads/files/050501 - Biologiya.pdf
+bachelor	Biznesin idarə edilməsi	exact	Biznesin idarə edilməsi	B_Biznesin_idar_edilm_si.pdf	https://wcu.edu.az/uploads/files/050402%20%20Biznesin%20idar%D0%B3%C9%99%20edilm%C9%99si%202023.pdf
+bachelor	Cihaz Mühəndisliyi	exact	Cihaz mühəndisliyi	B_Cihaz_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050604 - Cihaz Mühəndisliyi.pdf
+bachelor			Dizayn (interyer diyaznı, qrafiq dizayn və sənaye dizaynı)	B_Dizayn_interyer_diyazn_qrafiq_dizayn_v_s_naye_.pdf	https://wcu.edu.az/uploads/files/050306 Dizayn (qrafik dizayn).pdf
+bachelor	Ekologiya	exact	Ekologiya	B_Ekologiya.pdf	https://wcu.edu.az/uploads/files/050504 - Ekologiya.pdf
+bachelor	Ekologiya Mühəndisliyi	exact	Ekologiya mühəndisliyi	B_Ekologiya_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050606 - Ekologiya Mühəndisliyi.pdf
+bachelor			Filologiya (Azərbaycan dili və ədəbiyyatı)	B_Filologiya_Az_rbaycan_dili_v_d_biyyat_.pdf	https://wcu.edu.az/uploads/files/Filologiya%20(Az%C9%99rbaycan%20dili%20%20v%C9%99%20%C9%99d%C9%99biyyat%C4%B1)%202023.pdf
+bachelor	Filologiya (İngilis dili və ədəbiyyatı)	exact	Filologiya (ingilis dili və ədəbiyyatı)	B_Filologiya_ingilis_dili_v_d_biyyat_.pdf	https://wcu.edu.az/uploads/files/050205 Filologiya (ingilis dili və ədəbiyyatı) (1) (1).pdf
+bachelor	Fəlsəfə	exact	Fəlsəfə	B_F_ls_f_.pdf	https://wcu.edu.az/uploads/files/050204 Fəlsəfə + (1).pdf
+bachelor	Kompüter elmləri	exact	Kompüter elmləri	B_Komp_ter_elml_ri.pdf	https://wcu.edu.az/uploads/files/050509 - Kompüter Elmləri - QİYABİ.pdf
+bachelor	Kompüter Mühəndisliyi	exact	Kompüter mühəndisliyi	B_Komp_ter_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050620 - Kompüter Mühəndisliyi.pdf
+bachelor	Maliyyə	exact	Maliyyə	B_Maliyy_.pdf	https://wcu.edu.az/uploads/files/050406%20Maliyy%C9%99%202023.pdf
+bachelor	Marketinq	exact	Marketinq	B_Marketinq.pdf	https://wcu.edu.az/uploads/files/MARKETİNG 2023.pdf
+bachelor	Mexatronika və robototexnika mühəndisliyi	exact	Mexatronika və robototexnika mühəndisliyi	B_Mexatronika_v_robototexnika_m_h_ndisliyi.pdf	https://wcu.edu.az/uploads/files/050629 - Mexatronika və robototexnika mühəndisliyi.pdf
+bachelor	Meşəçilik	exact	Meşəçilik	B_Me_ilik.pdf	https://wcu.edu.az/uploads/files/050706 - Meşəçilik.pdf
+bachelor	Mühasibat	exact	Mühasibat	B_M_hasibat.pdf	https://wcu.edu.az/uploads/files/050409%20M%C3%BChasibat%202023.pdf
+bachelor	Psixologiya	exact	Psixologiya	B_Psixologiya.pdf	https://wcu.edu.az/uploads/files/050211 Psixologiya +.pdf
+bachelor	Regionşünaslıq	exact	Regionşünaslıq	B_Region_nasl_q.pdf	https://wcu.edu.az/uploads/files/050212 Regionşünaslıq.pdf
+bachelor	Sosial Iş	exact	Sosial iş	B_Sosial_i_.pdf	https://wcu.edu.az/uploads/files/050807 Sosial iş + (1).pdf
+bachelor	Su Bioehtiyyatları və Akvakultura	fuzzy	Su bioehtiyatları və akvakultura	B_Su_bioehtiyatlar_v_akvakultura.pdf	https://wcu.edu.az/uploads/files/050708 - Su bioehtiyatları və akvakultura.pdf
+bachelor	Tarix	exact	Tarix	B_Tarix.pdf	https://wcu.edu.az/uploads/files/050214%20Tarix%202023.pdf
+bachelor	Turizm bələdçiliyi	exact	Turizm bələdçiliyi	B_Turizm_b_l_d_iliyi.pdf	https://wcu.edu.az/uploads/files/050809%20Turizm%20b%C9%99l%C9%99d%C3%A7iliyi%202023.pdf
+bachelor	Turizm işinin təşkili	exact	Turizm işinin təşkili	B_Turizm_i_inin_t_kili.pdf	https://wcu.edu.az/uploads/files/050810%20Turizm%20i%C5%9Finin%20t%C9%99%C5%9Fkili%202023.pdf
+bachelor	Təhsildə sosial psixoloji xidmət	exact	Təhsildə sosial psixoloji xidmət	B_T_hsild_sosial_psixoloji_xidm_t.pdf	https://wcu.edu.az/uploads/files/050116 TSPX.pdf
+bachelor			Tərcümə (ingilis)	B_T_rc_m_ingilis_.pdf	https://wcu.edu.az/uploads/files/050215%20T%C9%99rc%C3%BCm%C9%99%202023.pdf
+bachelor	İnformasiya Texnologiyaları	exact	İnformasiya texnologiyaları	B__nformasiya_texnologiyalar_.pdf	https://wcu.edu.az/uploads/files/050616 - İnformasiya Texnologiyaları.pdf
+bachelor	İnformasiya Təhlükəsizliyi	exact	İnformasiya təhlükəsizliyi	B__nformasiya_t_hl_k_sizliyi.pdf	https://wcu.edu.az/uploads/files/050615 - İnformasiya Təhlükəsiz.pdf
+bachelor	İqtisadiyyat	exact	İqtisadiyyat	B__qtisadiyyat.pdf	https://wcu.edu.az/uploads/files/050405%20%C4%B0qtisadiyyat%202023.pdf
+master	Akvabioresurslar	exact	Akvabioresurslar	M_7005013_Akvabioresurslar.pdf	https://wcu.edu.az/uploads/files/060709 - Su bioehtiyatları (magistr).pdf
+master	Beynəlxalq münasibətlər və diplomatiya	exact	Beynəlxalq münasibətlər və diplomatiya	M_7002001_Beyn_lxalq_m_nasib_tl_r_v_diplomatiya.pdf	https://wcu.edu.az/uploads/files/060213 - Beynelxalq munasibetler.pdf
+master	Beynəlxalq turizm	exact	Beynəlxalq turizm	M_7008004_Beyn_lxalq_turizm.pdf	https://wcu.edu.az/uploads/files/060803_Turizm_ve_otelcilik.pdf
+master			Bioekologiya	M_7005004_Bioekologiya.pdf	https://wcu.edu.az/uploads/files/060510 - Bioekologiya.pdf
+master			Dilşünaslıq (İngilis dili)	M_7002006_Dil_nasl_q_ngilis_dili_.pdf	https://wcu.edu.az/uploads/files/060201-Filologiya.pdf
+master	Genetika	exact	Genetika	M_7005001_Genetika.pdf	https://wcu.edu.az/uploads/files/060505 - Genetika.pdf
+master			Klinik (tibbi) psixologiya	M_7002013_Klinik_tibbi_psixologiya.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
+master	Maliyyə nəzarəti və auidit	fuzzy	Maliyyə nəzarəti və audit	M_7004006_Maliyy_n_zar_ti_v_audit.pdf	https://wcu.edu.az/uploads/files/060403-Maliyyə.pdf
+master	Malekulyar biologiya	fuzzy	Molekulyar biologiya	M_7005001_Molekulyar_biologiya.pdf	https://wcu.edu.az/uploads/files/060505-Biologiya.pdf
+master	Məhkəmə psixologiyası	exact	Məhkəmə Psixologiyası	M_7002013_M_hk_m_Psixologiyas_.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
+master	Qafqaz xalqlarının tarixi	exact	Qafqaz xalqlarının tarixi	M_7002016_Qafqaz_xalqlar_n_n_tarixi.pdf	https://wcu.edu.az/uploads/files/060206 - Tarix.pdf
+master	Sosial psixologiya	exact	Sosial psixologiya	M_7002013_Sosial_psixologiya.pdf	https://wcu.edu.az/uploads/files/060209 - Psixologiya.pdf
+master			Texniki dizayn	M_7003005_Texniki_dizayn.pdf	https://wcu.edu.az/uploads/files/060321 - Dizayn.pdf
+master	Turizm və hotelçiliyin idarə edilməsi	exact	Turizm və hotelçiliyin idarə edilməsi	M_7004003_Turizm_v_hotel_iliyin_idar_edilm_si.pdf	https://wcu.edu.az/uploads/files/060409-Biznesin İdarəedilməsi.pdf
+master			İdarəetmədə informasiya sistemləri	M_7006016__dar_etm_d_informasiya_sisteml_ri.pdf	https://wcu.edu.az/uploads/files/060632-informasiya_texnologiyalari_ve_sistemleri_muhendisliyi.pdf
+master	İqtisadiyyatın tənzimlənməsi	exact	İqtisadiyyatın tənzimlənməsi	M_7004005__qtisadiyyat_n_t_nziml_nm_si.pdf	https://wcu.edu.az/uploads/files/060404-İqtisadiyyat.pdf
