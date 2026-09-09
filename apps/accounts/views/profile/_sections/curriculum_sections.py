@@ -165,6 +165,7 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
         },
         {
             "name": "cu_plan",
+            "searchable": True,
             "label": pgettext(_CTX_PLAN, "Plan"),
             "kind": "select",
             "value": plan["id"] if plan else "",
@@ -457,6 +458,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
     section["filter_fields"] = [
         {
             "name": "sm_period",
+            "searchable": True,
             "label": pgettext(_CTX_SEM, "Tədris dövrü"),
             "kind": "select",
             "value": payload["filters"]["period"],

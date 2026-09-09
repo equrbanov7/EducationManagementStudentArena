@@ -71117,3 +71117,120 @@ msgstr ""
 "There is no application type open to you. The application catalogue has not "
 "been populated for this organization yet — ask an administrator to run "
 "«seed_application_catalog»."
+
+msgctxt "registrar.calendar"
+msgid "Bağlıdır"
+msgstr "Closed"
+
+msgctxt "registrar.calendar"
+msgid "Bu tədris ilində semestr yoxdur."
+msgstr "There is no semester in this academic year."
+
+msgctxt "registrar.calendar"
+msgid "Gözlənilir"
+msgstr "Upcoming"
+
+msgctxt "registrar.calendar"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "registrar.calendar"
+msgid "Semestrlər «Akademik dövr» kataloqundan gəlir."
+msgstr "Semesters come from the «Academic period» catalogue."
+
+msgctxt "registrar.calendar"
+msgid ""
+"Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları — tədris ili üzrə."
+msgstr "Semesters, registration windows and exam sessions — by academic year."
+
+msgctxt "registrar.calendar"
+msgid "Tədris ili"
+msgstr "Academic year"
+
+msgctxt "registrar.calendar"
+msgid "Semestr"
+msgstr "Semesters"
+
+msgctxt "registrar.calendar"
+msgid "təqvimdə, süzgəcdən asılı deyil"
+msgstr "in the calendar, regardless of filters"
+
+msgctxt "registrar.calendar"
+msgid "bugünkü tarix dövrün içindədir"
+msgstr "today falls inside the period"
+
+msgctxt "registrar.calendar"
+msgid "Pəncərəsi yoxdur"
+msgstr "No window set"
+
+msgctxt "registrar.calendar"
+msgid "qeydiyyat və ya imtahan tarixi qurulmayıb"
+msgstr "registration or exam dates are not configured"
+
+msgctxt "accounts.role_assignment"
+msgid "Əlavə rol ver"
+msgstr "Grant an extra role"
+
+msgctxt "accounts.role_assignment"
+msgid "Mövcud rollara toxunmadan ikinci/üçüncü rol verir"
+msgstr "Grants a second or third role without touching the existing ones"
+
+msgctxt "accounts.catalog"
+msgid "Aktiv qruplar"
+msgstr "Active groups"
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda aktiv qrup yoxdur."
+msgstr "This programme has no active group."
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda tələbə qeydi yoxdur."
+msgstr "This programme has no student record."
+
+msgctxt "accounts.catalog"
+msgid "Cari semestr açılışı"
+msgstr "Current semester offerings"
+
+msgctxt "accounts.catalog"
+msgid "Məlumat yüklənmədi."
+msgstr "The data could not be loaded."
+
+msgctxt "accounts.catalog"
+msgid "Qruplar, tələbələr və tədris planının vəziyyəti."
+msgstr "Groups, students and the state of the curriculum."
+
+msgctxt "accounts.catalog"
+msgid "Qrupsuz"
+msgstr "Without a group"
+
+msgctxt "accounts.catalog"
+msgid "Status paylanması"
+msgstr "Status breakdown"
+
+msgctxt "accounts.catalog"
+msgid "Tədris planı sətri"
+msgstr "Curriculum rows"
+
+msgctxt "accounts.catalog"
+msgid "Tələbə (cəmi)"
+msgstr "Students (total)"
+
+msgctxt "accounts.catalog"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "accounts.catalog"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "accounts.catalog"
+msgid "və daha %%s tələbə — tam siyahı «Tələbə reyestri»ndədir"
+msgstr "and %%s more students — the full list is in the «Student registry»"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas haqqında"
+msgstr "About the programme"
+
+msgctxt "accounts.catalog"
+msgid "Ətraflı: qruplar və tələbələr"
+msgstr "Details: groups and students"

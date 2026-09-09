@@ -70736,3 +70736,121 @@ msgstr ""
 "Size açık bir başvuru türü yok. Başvuru katalogu bu kurumda henüz "
 "doldurulmamış — yöneticiden «seed_application_catalog» komutunu "
 "çalıştırmasını isteyin."
+
+msgctxt "registrar.calendar"
+msgid "Bağlıdır"
+msgstr "Kapalı"
+
+msgctxt "registrar.calendar"
+msgid "Bu tədris ilində semestr yoxdur."
+msgstr "Bu öğretim yılında dönem yok."
+
+msgctxt "registrar.calendar"
+msgid "Gözlənilir"
+msgstr "Bekleniyor"
+
+msgctxt "registrar.calendar"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "registrar.calendar"
+msgid "Semestrlər «Akademik dövr» kataloqundan gəlir."
+msgstr "Dönemler «Akademik dönem» katalogundan gelir."
+
+msgctxt "registrar.calendar"
+msgid ""
+"Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları — tədris ili üzrə."
+msgstr ""
+"Dönemler, kayıt pencereleri ve sınav oturumları — öğretim yılına göre."
+
+msgctxt "registrar.calendar"
+msgid "Tədris ili"
+msgstr "Öğretim yılı"
+
+msgctxt "registrar.calendar"
+msgid "Semestr"
+msgstr "Dönemler"
+
+msgctxt "registrar.calendar"
+msgid "təqvimdə, süzgəcdən asılı deyil"
+msgstr "takvimde, filtreden bağımsız"
+
+msgctxt "registrar.calendar"
+msgid "bugünkü tarix dövrün içindədir"
+msgstr "bugünkü tarih dönemin içinde"
+
+msgctxt "registrar.calendar"
+msgid "Pəncərəsi yoxdur"
+msgstr "Penceresi yok"
+
+msgctxt "registrar.calendar"
+msgid "qeydiyyat və ya imtahan tarixi qurulmayıb"
+msgstr "kayıt veya sınav tarihleri ayarlanmamış"
+
+msgctxt "accounts.role_assignment"
+msgid "Əlavə rol ver"
+msgstr "Ek rol ver"
+
+msgctxt "accounts.role_assignment"
+msgid "Mövcud rollara toxunmadan ikinci/üçüncü rol verir"
+msgstr "Mevcut rollere dokunmadan ikinci/üçüncü rol verir"
+
+msgctxt "accounts.catalog"
+msgid "Aktiv qruplar"
+msgstr "Etkin gruplar"
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda aktiv qrup yoxdur."
+msgstr "Bu programda etkin grup yok."
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda tələbə qeydi yoxdur."
+msgstr "Bu programda öğrenci kaydı yok."
+
+msgctxt "accounts.catalog"
+msgid "Cari semestr açılışı"
+msgstr "Güncel dönem açılışları"
+
+msgctxt "accounts.catalog"
+msgid "Məlumat yüklənmədi."
+msgstr "Veriler yüklenemedi."
+
+msgctxt "accounts.catalog"
+msgid "Qruplar, tələbələr və tədris planının vəziyyəti."
+msgstr "Gruplar, öğrenciler ve öğretim planının durumu."
+
+msgctxt "accounts.catalog"
+msgid "Qrupsuz"
+msgstr "Grupsuz"
+
+msgctxt "accounts.catalog"
+msgid "Status paylanması"
+msgstr "Durum dağılımı"
+
+msgctxt "accounts.catalog"
+msgid "Tədris planı sətri"
+msgstr "Öğretim planı satırı"
+
+msgctxt "accounts.catalog"
+msgid "Tələbə (cəmi)"
+msgstr "Öğrenci (toplam)"
+
+msgctxt "accounts.catalog"
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "accounts.catalog"
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgctxt "accounts.catalog"
+msgid "və daha %%s tələbə — tam siyahı «Tələbə reyestri»ndədir"
+msgstr "ve %%s öğrenci daha — tam liste «Öğrenci kaydı»ndadır"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas haqqında"
+msgstr "Program hakkında"
+
+msgctxt "accounts.catalog"
+msgid "Ətraflı: qruplar və tələbələr"
+msgstr "Ayrıntı: gruplar ve öğrenciler"

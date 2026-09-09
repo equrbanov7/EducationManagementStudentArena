@@ -199,6 +199,7 @@ def filter_fields(*, filters, is_reviewer, sources) -> list:
         },
         {
             "name": "qsub_period",
+            "searchable": True,
             "label": pgettext("accounts.profile.question_submissions", "Semestr"),
             "kind": "select",
             "options": _options(

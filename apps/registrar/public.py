@@ -174,12 +174,12 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     Access is already gated by ``allowed_sections`` (rbac) + the AJAX-safe section
     whitelist; data scoping stays in the registrar service layer (RLS/tenant).
 
-    QEYD: köhnə «grade-approvals» (qiymət təsdiqləri) bölməsi LƏĞV edilib —
-    təsdiq zənciri yoxdur; onun yerini RİM-in «journal-close» bölməsi tutur
-    (apps/accounts/views/journal_close.py).
+    QEYD: köhnə «grade-approvals» bölməsi LƏĞV edilib; yerini «journal-close»
+    tutur (apps/accounts/views/journal_close.py).
 
     Built lazily — only for the ACTIVE section (performance: no wasted queries)."""
     from apps.registrar import page_contexts
+    from apps.registrar.calendar_context import calendar_context as calendar_ctx
 
     if section in ("my-schedule", "academic-calendar", "analytics") and organization is None:
         return {"has_context": False}
@@ -187,7 +187,7 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     if section == "my-schedule":
         return page_contexts.schedule_context(request, organization, embedded=True)
     if section == "academic-calendar":
-        return page_contexts.calendar_context(organization)
+        return calendar_ctx(organization, year=(request.GET.get("ac_year") or "").strip())
     if section == "my-journal":
         # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu, bu günün dərsi gizli);
         # müəllim/admin → qrup seçimi (iş sahəsi ayrıca URL-də olsa da fallback qalır).

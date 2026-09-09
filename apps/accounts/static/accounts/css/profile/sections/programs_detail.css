@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   programs_detail.css — «İxtisas haqqında» çekmecəsi (2026-09-09)
+   Yalnız `--ems-*` tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* İxtisasın adı cədvəldə düymədir — link kimi görünür, naviqasiya etmir. */
+.tof-progname {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ems-fg);
+    text-align: start;
+    cursor: pointer;
+}
+
+.tof-progname:hover,
+.tof-progname:focus-visible {
+    color: var(--ems-primary);
+    text-decoration: underline;
+}
+
+.pgd {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 16px);
+}
+
+.pgd-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.pgd-meta__dot {
+    opacity: 0.5;
+}
+
+.pgd-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--ems-sp-4, 12px);
+}
+
+.pgd-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 12px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg-subtle);
+}
+
+.pgd-stat__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--ems-fg-muted);
+}
+
+.pgd-stat__value {
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-fg);
+}
+
+.pgd-stat__note {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-fg-muted);
+}
+
+.pgd-sectionhead {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-3, 8px);
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.pgd-sectionhead__title {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-fg);
+}
+
+.pgd-sectionhead__count {
+    color: var(--ems-fg-muted);
+    font-weight: 600;
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Qruplar ────────────────────────────────────────────────────────────── */
+.pgd-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pgd-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3, 8px);
+    padding: 7px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+}
+
+.pgd-group__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-fg);
+}
+
+.pgd-group__count {
+    flex: 0 0 auto;
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: var(--ems-primary-soft, var(--ems-bg-subtle));
+    color: var(--ems-primary);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+}
+
+/* ── Status çipləri ─────────────────────────────────────────────────────── */
+.pgd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pgd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 11px;
+    border-radius: 999px;
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-xs);
+}
+
+.pgd-chip__label {
+    color: var(--ems-fg-muted);
+}
+
+.pgd-chip__count {
+    font-weight: 700;
+    color: var(--ems-fg);
+}
+
+/* ── Tələbə önizləməsi ──────────────────────────────────────────────────── */
+.pgd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ems-fs-sm);
+}
+
+.pgd-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--ems-border);
+    vertical-align: top;
+}
+
+.pgd-student__name {
+    display: block;
+    font-weight: 600;
+    color: var(--ems-fg);
+}
+
+.pgd-student__login {
+    display: block;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.pgd-td-muted {
+    color: var(--ems-fg-muted);
+}
+
+.pgd-td-num {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+.pgd-empty,
+.pgd-more {
+    margin: 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+}

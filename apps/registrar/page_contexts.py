@@ -326,22 +326,6 @@ def _current_semester(periods):
     return matching[0] if matching else periods[0]
 
 
-def calendar_context(organization) -> dict:
-    """Semesters with registration/exam-session window states."""
-    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    today = timezone.localdate()
-    periods = [
-        {
-            "period": period,
-            "is_running": period.start_date <= today <= period.end_date,
-            "registration_state": period.registration_state,
-            "exam_session_state": period.exam_session_state,
-        }
-        for period in AcademicPeriod.objects.filter(organization=organization).order_by("-start_date")
-    ]
-    return {"has_context": True, "periods": periods, "today": today}
-
-
 def analytics_context(request, organization, *, embedded=False) -> dict:
     """Analytics dashboard: period picker + batched aggregation."""
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")

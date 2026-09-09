@@ -126,6 +126,17 @@
         }
     });
 
+    /* «Rol təyin et»dən gələn dərin keçid (`?mr_grant=`) — dialoqu ÖZÜ açır.
+       Şablon gizli tetikleyici düymə render edir, burada sadəcə bir dəfə
+       klikləyirik: beləliklə prefill/validasiya axını TƏK yerdə qalır. */
+    window.EMSReady(function () {
+        var trigger = document.querySelector("[data-roles-autogrant]");
+        if (trigger && !trigger.dataset.rolesFired) {
+            trigger.dataset.rolesFired = "1";
+            trigger.click();
+        }
+    });
+
     /* ---- 2. «Rol təyin et» təsdiqi -------------------------------------- */
 
     function selectedRole(button) {

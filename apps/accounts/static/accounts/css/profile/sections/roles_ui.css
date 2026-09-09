@@ -190,6 +190,12 @@
     min-width: 200px;
 }
 
+/* «Əlavə rol ver» — əsas rolu ƏVƏZ edən düymədən vizual olaraq ayrılır
+   (ikincil üslub), sətir daralanda alta düşür. */
+.rls-picker__add {
+    white-space: nowrap;
+}
+
 .rls-picker .bootstrap-single-select {
     flex: 1 1 160px;
     min-width: 0;
