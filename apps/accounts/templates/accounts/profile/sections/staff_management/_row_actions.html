@@ -1,0 +1,23 @@
+{% comment %}Sətir əməlləri. «Kart» ƏLAVƏ SORĞU ATMIR — sətrin JSON-u data
+atributunda gəlir (`staff_management.js` çekmecəni DOM ilə qurur). «Çıxar»
+səbəb dialoqunu açır: uzaqlaşdırma SOFT-dur (üzvlük deaktiv olur, hesab qalır).
+Seçicilər BU EKRANA XASDIR (`data-hm-…`) — `EMSDelegate.on` eyni açarı əvəz
+etdiyi üçün başqa faylın seçicisi işlədilmir.{% endcomment %}
+{% load i18n %}
+<button type="button" class="ems-btn ems-btn--sm"
+        data-hm-card
+        data-hm-payload="{{ row.data.detail_json }}">
+    <i class="fas fa-id-card" aria-hidden="true"></i>
+    {% trans "Kart" context "accounts.staff_management" %}
+</button>
+{% if row.data.can_remove %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--danger"
+        data-hm-remove
+        data-hm-user="{{ row.data.user_id }}"
+        data-hm-name="{{ row.data.name }}"
+        data-hm-username="{{ row.data.username }}"
+        aria-label="{% blocktrans context 'accounts.staff_management' with name=row.data.name %}{{ name }} — təşkilatdan çıxar{% endblocktrans %}">
+    <i class="fas fa-user-minus" aria-hidden="true"></i>
+    {% trans "Çıxar" context "accounts.staff_management" %}
+</button>
+{% endif %}

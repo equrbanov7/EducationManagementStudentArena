@@ -199,6 +199,8 @@ class _Stage1Mixin:
         self.question_bank_kind_filter = ""
         self.question_bank_kind_pills = []
         self.question_bank_can_create = False
+        self.question_bank_is_center = False
+        self.question_bank_section = {}
         if self.capabilities["can_view_owned_learning"]:
             self.my_created_courses_count = self.created_courses_qs.count()
             if self.active_section == "my-courses":
@@ -243,6 +245,10 @@ class _Stage1Mixin:
         self.question_bank_kind_filter = self._qb_ctx["question_bank_kind_filter"]
         self.question_bank_kind_pills = self._qb_ctx["question_bank_kind_pills"]
         self.question_bank_can_create = self._qb_ctx["question_bank_can_create"]
+        # ⚠️ `is_center` əvvəl context-ə ÇATMIRDI — mərkəzə xas sahələr (mənbə
+        # müəllim, Final/Midterm təyinatı) heç vaxt render olunmurdu.
+        self.question_bank_is_center = self._qb_ctx["question_bank_is_center"]
+        self.question_bank_section = self._qb_ctx["question_bank_section"]
         self._posts_ctx = profile_hooks.posts_section(
             self.request, capabilities=self.capabilities, active_section=self.active_section
         )

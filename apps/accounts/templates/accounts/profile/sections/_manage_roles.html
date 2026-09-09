@@ -1,7 +1,52 @@
+{% load i18n static %}
+{% comment %}«Rolları idarə et» — təşkilat rolları reyestri (2026-09-09 yenidən qurulub).
+
+Kontekst: `apps/accounts/views/profile/_sections/manage_roles.py`. Rol siyahısı
+təşkilatın `organizations.Role` kataloqundan gəlir — «Rol təyin et» ekranı ilə
+EYNİ mənbə (əvvəl bu bölmə köhnə `ProfileRole` enum-undan oxuyurdu və məsələn
+«Proqram koordinatoru» rolunu nə göstərirdi, nə də verirdi).
+
+Komponentlər `ems_ui`-dəndir: KPI, AVTO filtr (Bootstrap select), cədvəl,
+«Rol ver» / «Rolu geri al» dialoqları. ⚠️ `<h1>` YAZILMIR — qabıq verir.
+CSS xarici fayldadır, JS qabıqda (`roles_ui.js`) — CSP inline qadağandır.
+{% endcomment %}
 {% if 'manage-roles' in allowed_sections %}
+{% with sec=manage_roles_section %}
+{% trans "Rol ver" context "accounts.manage_roles" as mr_grant_title %}
+{% trans "Mövcud rollara toxunulmur — seçilmiş rol əlavə olunur." context "accounts.manage_roles" as mr_grant_sub %}
+{% trans "Rolu geri al" context "accounts.manage_roles" as mr_revoke_title %}
+{% trans "Yalnız seçilmiş üzvlük söndürülür." context "accounts.manage_roles" as mr_revoke_sub %}
+{% trans "Geri al" context "accounts.manage_roles" as mr_revoke_btn %}
+{% trans "Rollar necə işləyir?" context "accounts.manage_roles" as mr_help_title %}
 <section class="profile-section-panel profile-section--manage-roles {% if active_section == 'manage-roles' %}is-active{% endif %}"
          data-profile-section-panel="manage-roles"
          data-source-url="{% url 'accounts:manage_roles' %}">
-    {% include "accounts/partials/_manage_roles_content.html" with organization=manage_roles_section.organization profiles=manage_roles_section.profiles assignable_roles=manage_roles_section.assignable_roles search_query=manage_roles_section.search_query access_denied_message=manage_roles_section.access_denied_message profiles_page_param=manage_roles_section.profiles_page_param profiles_pagination_query=manage_roles_section.profiles_pagination_query post_next_url=manage_roles_section.post_next_url embedded_in_profile=True profile_base_url=profile_base_url %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-2">
+
+    {% if not sec.has_access %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}
+    {% else %}
+    <div class="rls" data-roles-root data-roles-section="manage-roles">
+
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle header_actions_include="accounts/profile/sections/roles/_manage_header_actions.html" %}
+
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+        {% include "partials/ems_ui/_filter_bar.html" with filter_section="manage-roles" filter_prefix="mr_" filter_fields=sec.filter_fields filter_count_label=sec.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+        <div class="rls-body" data-ems-filter-target>
+            {% include "partials/ems_ui/_data_table.html" with table_columns=sec.columns table_rows=sec.table_rows table_state=sec.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-users-slash" state_title=sec.state_title state_body=sec.state_body %}
+            {% include "partials/_pagination.html" with page_obj=sec.page_obj page_param="mr_page" extra_query=sec.pagination_query %}
+        </div>
+
+        {% if sec.can_grant %}
+            {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="mrGrantDialog" form_dialog_title=mr_grant_title form_dialog_subtitle=mr_grant_sub form_dialog_submit_label=mr_grant_title form_dialog_body_include="accounts/profile/sections/roles/_grant_fields.html" form_dialog_action=sec.action_url form_dialog_hidden=sec.grant_hidden %}
+            {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="mrRevokeDialog" form_dialog_title=mr_revoke_title form_dialog_subtitle=mr_revoke_sub form_dialog_submit_label=mr_revoke_btn form_dialog_submit_tone="danger" form_dialog_body_include="accounts/profile/sections/roles/_revoke_fields.html" form_dialog_action=sec.action_url form_dialog_hidden=sec.revoke_hidden %}
+        {% endif %}
+
+        {% include "partials/ems_ui/_dialog.html" with dialog_id="mrHelpDialog" dialog_title=mr_help_title dialog_body_include="accounts/profile/sections/roles/_manage_help.html" dialog_wide=True %}
+    </div>
+    {% endif %}
 </section>
+{% endwith %}
 {% endif %}

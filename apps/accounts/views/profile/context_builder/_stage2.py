@@ -5,6 +5,7 @@ from django.urls import reverse
 from apps.accounts import profile_hooks
 
 from ..._helpers import STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH
+from ..._helpers.org_sections.management import _empty_section as _empty_management_section
 from .._sections.review_queue import build_pending_review_context, build_review_results_context
 
 
@@ -101,28 +102,11 @@ class _Stage2Mixin:
             "unassigned_pagination_query": "",
             "post_next_url": "",
         }
-        self.student_org_management_section = {
-            "organization": None,
-            "students": [],
-            "pending_requested_students": [],
-            "unassigned_students": [],
-            "sent_student_invites": [],
-            "student_search_query": "",
-            "pending_search_query": "",
-            "unassigned_search_query": "",
-            "sent_invite_search_query": "",
-            "access_denied_message": "",
-            "can_manage_students": False,
-            "students_page_param": "student_org_members_page",
-            "students_pagination_query": "",
-            "pending_page_param": "student_org_pending_page",
-            "pending_pagination_query": "",
-            "unassigned_page_param": "student_org_unassigned_page",
-            "unassigned_pagination_query": "",
-            "sent_invites_page_param": "student_org_sent_invites_page",
-            "sent_invites_pagination_query": "",
-            "post_next_url": "",
-        }
+        # «Heyət idarəetməsi» (2026-09-09 yenidən qurulub) — dəvət/müraciət
+        # panelləri çıxarılıb; bölmə YALNIZ mövcud üzvləri idarə edir. Defolt
+        # dəst `org_sections.management._empty_section()`-dən gəlir ki, açar
+        # siyahısı iki yerdə saxlanılmasın.
+        self.student_org_management_section = _empty_management_section()
         self.student_org_request_section = {
             "organizations": [],
             "search_query": "",
@@ -290,11 +274,14 @@ class _Stage2Mixin:
             "notices": [],
             "post_next_url": "",
         }
-        # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — SPA çərçivəsi.
+        # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — server-render panel
+        # (2026-09-09). JSON endpoint URL-ləri müqavilə kimi qalır.
         self.handover_section = {
             "has_access": False,
             "access_denied_message": "",
             "scope_label": "",
+            "header_subtitle": "",
+            "header_note": "",
             "teachers_url": "",
             "offerings_url": "",
             "options_url": "",
@@ -304,6 +291,20 @@ class _Stage2Mixin:
             "min_reason_length": 3,
             "max_reason_length": 1000,
             "max_bulk_rows": 100,
+            "tab": "transfer",
+            "tabs": [],
+            "steps": [],
+            "kpi_tiles": [],
+            "filter_fields": [],
+            "columns": [],
+            "table_rows": [],
+            "table_state": "empty",
+            "history_columns": [],
+            "history_rows": [],
+            "history_state": "empty",
+            "target_options": [],
+            "page_obj": None,
+            "pagination_query": "",
         }
         # Cədvəl idarəetməsi (`schedule.manage`) — server-render panel çərçivəsi.
         self.schedule_manage_section = {
@@ -329,6 +330,29 @@ class _Stage2Mixin:
             "owner_label": "",
             "week": None,
             "time_grid": None,
+            # Redaktor müqaviləsi (2026-09-09): matris + park siyahısı + dialoq
+            # etiketləri. Bölmə AKTİV olmayanda bunlar boş qalır — şablon
+            # `has_access` ilə onsuz da boş-hala düşür, amma açar oxunuşu
+            # təhlükəsiz olsun deyə hamısı burada sadalanır.
+            "state_title": "",
+            "state_body": "",
+            "header_subtitle": "",
+            "filters": {"fields": [], "applied": [], "section": "schedule-manage", "prefix": "sm_"},
+            "kpi_tiles": [],
+            "matrix": None,
+            "parked": [],
+            "subjects": [],
+            "lesson_periods": [],
+            "shifts": [],
+            "can_edit": False,
+            "dialog_title": "",
+            "dialog_subtitle": "",
+            "dialog_submit_label": "",
+            "dialog_data": {},
+            "move_title": "",
+            "parked_title": "",
+            "parked_subtitle": "",
+            "editor_url": "",
             "check_url": "",
             "action_url": "",
             "reload_url": "",
@@ -344,6 +368,11 @@ class _Stage2Mixin:
             "period_label": "",
             "widgets": [],
             "empty_text": "",
+            # Təqdimat sahələri (`_sections/dashboard_layout.py`) — bölmə aktiv
+            # olmayanda boş qalır, şablon onları şərtsiz oxuya bilsin deyə var.
+            "kpi_tiles": [],
+            "data_count": 0,
+            "link_count": 0,
         }
         # Tələbə idxalı (`user.import`) — server yalnız ÇƏRÇİVƏNİ verir: icazə
         # bayrağı, endpoint URL-ləri, sütun kataloqu və hədd rəqəmləri. Fayl

@@ -67,7 +67,7 @@ class ProfileRole:
         ORG_ADMIN: 80,
         EXAM_CENTER_HEAD: 85,
         EXAM_CENTER: 85,
-        IKT_REHBER: 88,
+        IKT_REHBER: 95,
         RIM_STAFF: 60,
         MEMBER: 20,
         HR: 65,

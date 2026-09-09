@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="rls-help">
+    <p>{% trans "«Rol təyin et» şəxsin ƏSAS təşkilat rolunu dəyişir və yeni şəxsi təşkilata əlavə edir." context "accounts.role_assignment" %}</p>
+    <p>{% trans "Əlavə rollar («həm koordinator, həm müəllim») «Rolları idarə et» bölməsindən verilir — hər iki siyahı eyni rol kataloqundan gəlir." context "accounts.role_assignment" %}</p>
+    <ul class="rls-help__list">
+        <li>{% trans "Yalnız öz səviyyənizdən aşağı şəxs və rollar görünür." context "accounts.role_assignment" %}</li>
+        <li>{% trans "Hər dəyişiklik təsdiq tələb edir və audit jurnalına yazılır." context "accounts.role_assignment" %}</li>
+    </ul>
+</div>

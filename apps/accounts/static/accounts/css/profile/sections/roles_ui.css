@@ -1,0 +1,324 @@
+/* =========================================================================
+   Rol / icazə kabinet bölmələri — «Rol təyin et», «Rolları idarə et»,
+   «İcazələr» (2026-09-09 yenidən qurulub).
+
+   BURADA YALNIZ bölmə-xüsusi düzüm var. KPI, filtr paneli, cədvəl, dialoq və
+   düymələr ORTAQ komponent qatındadır (`static/css/ems_ui/*.css`) və kabinet
+   qabığından yüklənir. Rəng hardcode edilmir — yalnız `--ems-*` tokenləri.
+
+   Responsivlik: cədvəl `ems-tablescroll` içində üfüqi sürüşür; nişanlar və
+   filtr sahələri sarılır; 380px-də heç bir sabit piksel eni sətri sındırmır.
+   ========================================================================= */
+
+.rls {
+    display: block;
+}
+
+.rls-body[aria-busy="true"] {
+    min-height: 240px;
+}
+
+/* ── Şəxs xanası ─────────────────────────────────────────────────────── */
+
+.rls-person {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 170px;
+}
+
+.rls-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-100);
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.rls-person__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.rls-person__name {
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    line-height: 1.25;
+}
+
+.rls-person__meta {
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    color: var(--ems-neutral-600);
+    overflow-wrap: anywhere;
+}
+
+.rls-person__meta--mail {
+    color: var(--ems-neutral-500);
+}
+
+/* ── Rol nişanları ───────────────────────────────────────────────────── */
+
+.rls-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 160px;
+}
+
+.rls-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill, 999px);
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-800);
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 600;
+    line-height: 1.7;
+}
+
+.rls-chip--primary {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.rls-chip--admin {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.rls-chip--soft {
+    border-style: dashed;
+    font-weight: 500;
+}
+
+.rls-chip--more {
+    color: var(--ems-neutral-600);
+}
+
+.rls-chip__label {
+    overflow-wrap: anywhere;
+}
+
+.rls-chip__scope {
+    padding-left: 6px;
+    border-left: 1px solid var(--ems-neutral-300);
+    color: var(--ems-neutral-600);
+    font-weight: 500;
+}
+
+.rls-chip__x {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ems-neutral-600);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.rls-chip__x:hover,
+.rls-chip__x:focus-visible {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Əsas rol / boş vəziyyət / kilid ─────────────────────────────────── */
+
+.rls-primary {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 120px;
+}
+
+.rls-primary__tag {
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rls-primary__value {
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+.rls-missing {
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-2xs, 0.72rem);
+}
+
+.rls-locked {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-2xs, 0.72rem);
+}
+
+/* ── Sətir içi rol seçici (Rol təyin et) ─────────────────────────────── */
+
+.rls-picker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.rls-picker .bootstrap-single-select {
+    flex: 1 1 160px;
+    min-width: 0;
+}
+
+/* ── Gözləyən müraciətlər bloku ──────────────────────────────────────── */
+
+.rls-pending {
+    margin-top: var(--ems-sp-6, 24px);
+    padding-top: var(--ems-sp-5, 20px);
+    border-top: 1px solid var(--ems-border);
+}
+
+.rls-pending__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    font-size: var(--ems-fs-lg, 1.05rem);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.rls-pending__lead {
+    margin: 0 0 var(--ems-sp-4, 16px);
+    max-width: var(--ems-w-text, 68ch);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm, 0.86rem);
+}
+
+/* ── Dialoq formu ────────────────────────────────────────────────────── */
+
+.rls-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ems-sp-4, 16px);
+}
+
+.rls-form__full {
+    grid-column: 1 / -1;
+}
+
+.rls-target {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md, 8px);
+    background: var(--ems-bg-subtle);
+}
+
+.rls-target__label {
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rls-csrf {
+    display: none;
+}
+
+/* ── Təsdiq dialoqu ──────────────────────────────────────────────────── */
+
+.rls-confirm__lead {
+    margin: 0 0 var(--ems-sp-4, 16px);
+    color: var(--ems-text);
+}
+
+.rls-confirm {
+    display: grid;
+    grid-template-columns: minmax(110px, auto) 1fr;
+    gap: 6px 14px;
+    margin: 0;
+}
+
+.rls-confirm dt {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm, 0.86rem);
+    font-weight: 600;
+}
+
+.rls-confirm dd {
+    margin: 0;
+    color: var(--ems-neutral-900);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* ── İzah dialoqu ────────────────────────────────────────────────────── */
+
+.rls-help p {
+    margin: 0 0 10px;
+    color: var(--ems-text);
+}
+
+.rls-help__legacy {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm, 0.86rem);
+}
+
+.rls-help__list {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+    color: var(--ems-text);
+}
+
+/* ── Dar ekran (rol reyestrləri) ─────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .rls-picker {
+        min-width: 0;
+    }
+
+    .rls-picker .bootstrap-single-select {
+        flex: 1 1 100%;
+    }
+
+    .rls-confirm {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .rls-confirm dd {
+        margin-bottom: 8px;
+    }
+}

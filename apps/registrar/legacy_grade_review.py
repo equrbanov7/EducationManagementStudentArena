@@ -312,11 +312,23 @@ def _is_superadmin(user) -> bool:
 
 
 def actor_scope(user, organization):
-    """``final_score.entry`` üzrə struktur əhatəsi (model qatı ilə EYNİ açar)."""
+    """Növbəni GÖRMƏK üçün struktur əhatəsi (2026-09-09 düzəlişi).
+
+    Bölmənin qapısı İKİ açarlıdır (bax ``views/legacy_review/policy.py``): yazma
+    ``final_score.entry``, oxu ``journal.correct``. Əvvəl əhatə yalnız yazma
+    açarı ilə həll olunurdu — müşahidəçidə siyahı ``none()``-a düşür və ekran
+    boş görünürdü. İndi yazma açarı əhatə vermirsə oxu açarı yoxlanılır; qərar
+    qapısı dəyişmir (``can_review``).
+    """
     from django.apps import apps as django_apps
 
+    from .corrections import CORRECT_PERMISSION
+
     org_unit = django_apps.get_model("organizations", "OrgUnit")
-    return org_unit.user_permission_scope(user, organization, LEGACY_GRADE_REVIEW_PERMISSION)
+    scope = org_unit.user_permission_scope(user, organization, LEGACY_GRADE_REVIEW_PERMISSION)
+    if scope.has_structure_access:
+        return scope
+    return org_unit.user_permission_scope(user, organization, CORRECT_PERMISSION)
 
 
 def can_review(user, organization) -> bool:

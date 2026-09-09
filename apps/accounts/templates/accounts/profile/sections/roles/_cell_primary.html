@@ -1,0 +1,10 @@
+{% comment %}Əsas (ən yüksək səviyyəli) rol. «Primary:» texniki termindir və
+kabinetdə əvvəldən bu formada göstərilir.{% endcomment %}
+{% if row.data.primary_label %}
+<div class="rls-primary">
+    <span class="rls-primary__tag">Primary:</span>
+    <span class="rls-primary__value">{{ row.data.primary_label }} ({{ row.data.primary_level }})</span>
+</div>
+{% else %}
+<span class="rls-missing">—</span>
+{% endif %}

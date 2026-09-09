@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}Parser siqnalları: xəta / xəbərdarlıq sayı.  Sayı sıfırdırsa xana
+boş qalmır — «təmiz» yazılır (status yalnız rənglə bildirilmir).{% endcomment %}
+{% if row.data.error_count or row.data.warning_count %}
+<span class="qsub-signals">
+    {% if row.data.error_count %}
+    <span class="ems-badge ems-badge--danger" title="{% trans 'Xəta' context 'accounts.profile.question_submissions' %}">
+        <i class="fas fa-circle-xmark" aria-hidden="true"></i> {{ row.data.error_count }}
+    </span>
+    {% endif %}
+    {% if row.data.warning_count %}
+    <span class="ems-badge ems-badge--warning" title="{% trans 'Xəbərdarlıq' context 'accounts.profile.question_submissions' %}">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ row.data.warning_count }}
+    </span>
+    {% endif %}
+</span>
+{% else %}
+<span class="qsub-signals qsub-signals--clean">{% trans "Təmiz" context "accounts.profile.question_submissions" %}</span>
+{% endif %}

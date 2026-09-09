@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}Başlıq əməlləri — «Rolları idarə et» bölməsinə keçid (SPA) və izah dialoqu.{% endcomment %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=manage-roles"
+   data-section="manage-roles" data-source-url="{% url 'accounts:manage_roles' %}"
+   data-title="{% trans 'manage_roles' context 'profile.section' %}">
+    <i class="fas fa-user-gear" aria-hidden="true"></i>
+    {% trans "Rolları idarə et" context "accounts.role_assignment" %}
+</a>
+<button type="button" class="ems-btn" data-ems-overlay-open="raHelpDialog">
+    <i class="fas fa-circle-question" aria-hidden="true"></i>
+    {% trans "Bu bölmə nə edir?" context "accounts.role_assignment" %}
+</button>

@@ -6,13 +6,21 @@ Müəllim: öz göndərişləri — axtarış + status filtri + səhifələmə.
 subtree), müəllim, tədris ili/semestr (AcademicPeriod tarix aralığı —
 göndərişdə dövr FK-sı yoxdur, ona görə ``created_at`` aralığa salınır) və dil.
 
+2026-09-09 (sahib: «sual göndərişləri … modern UX/UI»): ekran `ems_ui`
+komponentlərinə keçdi — KPI kartları klik edilə bilən status filtrləridir,
+filtrlər AVTO panelə köçdü, siyahı cədvəl + status badge-dir, sətrin «yolu»
+isə çekmecədə açılır.  Təqdimat modeli ``question_submissions_ui.py``-dədir.
+
 Bütün GET parametrləri ``qsub_`` prefikslidir ki, digər profil bölmələrinin
-parametrləri ilə toqquşmasın. Stat kartlar həm də status-filtr linkləridir.
+parametrləri ilə toqquşmasın və filtr panelinin «Sıfırla»-sı yalnız bu bölməni
+sıfırlasın.
 """
 
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import pgettext
+
+from . import question_submissions_ui as ui
 
 PAGE_SIZE = 10
 
@@ -43,27 +51,11 @@ def _inactive_defaults() -> dict:
         "question_submissions_page": None,
         "question_submissions_is_reviewer": False,
         "question_submissions_total_count": 0,
-        "question_submissions_pending_count": 0,
-        "question_submissions_chair_count": 0,
-        "question_submissions_accepted_count": 0,
         "question_submissions_rejected_count": 0,
         "question_submissions_create_url": "",
-        "question_submissions_search": "",
-        "question_submissions_status": "",
-        "question_submissions_filters": {},
-        "question_submissions_faculties": [],
-        "question_submissions_kafedras": [],
-        "question_submissions_teachers": [],
-        "question_submissions_selected_labels": {"faculty": "", "kafedra": "", "teacher": ""},
-        "question_submissions_years": [],
-        "question_submissions_periods": [],
-        "question_submissions_languages": [],
-        "question_submissions_status_cards": [],
-        "question_submissions_active_chips": [],
         "question_submissions_clear_url": "",
-        "question_submissions_base_query": "",
         "question_submissions_pagination_query": "",
-        "question_submissions_has_filters": False,
+        "question_submissions_section": {},
     }
 
 
@@ -124,85 +116,204 @@ def _apply_reviewer_filters(filtered, filters, *, faculty, kafedra, periods, yea
     return filtered
 
 
-def _status_cards(counts, filters, active_params, *, is_reviewer: bool) -> list:
-    """Stat kartlar = status filtr linkləri (aktiv kart təkrar klikdə sıfırlanır)."""
-    ctx = "accounts.profile.question_submissions"
-    rejected_label = pgettext(ctx, "Rədd edilmiş") if is_reviewer else pgettext(ctx, "Düzəliş gözləyən")
-    cards = [
-        ("", pgettext(ctx, "Ümumi göndəriş"), counts["total"], "fa-paper-plane", "blue"),
-    ]
-    if not is_reviewer:
-        # Müəllim zəncirin HƏR İKİ dayanacağını ayrıca görür.
-        cards.append(("at_chair", pgettext(ctx, "Kafedrada"), counts["at_chair"], "fa-user-tie", "amber"))
-    cards += [
-        ("at_center", pgettext(ctx, "Baxılır"), counts["at_center"], "fa-hourglass-half", "amber"),
-        ("accepted", pgettext(ctx, "Qəbul edilmiş"), counts["accepted"], "fa-check", "green"),
-        ("returned", rejected_label, counts["returned"], "fa-rotate-left", "red"),
-    ]
-    result = []
-    for status, label, value, icon, tone in cards:
-        is_active = filters["status"] == status
-        params = dict(active_params)
-        # Aktiv karta təkrar klik → "hamısı"; kartlar səhifəni sıfırlayır.
-        params["qsub_status"] = "" if is_active else status
-        result.append(
-            {
-                "status": status,
-                "label": label,
-                "value": value or 0,
-                "icon": icon,
-                "tone": tone,
-                "is_active": is_active,
-                "query": _profile_query(params),
-            }
-        )
-    return result
-
-
-def _active_chips(filters, active_params, *, faculty, kafedra, teacher, period, languages) -> list:
-    """Seçilmiş reviewer filtrləri üçün silinə bilən çiplər."""
-    ctx = "accounts.profile.question_submissions"
+def _applied_chips(filters, *, faculty, kafedra, teacher, period, languages) -> list:
+    """Tətbiq olunmuş reviewer filtrləri — panelin «×» ilə silinən çipləri."""
     lang_map = dict(languages)
     labels = {
-        "faculty": (pgettext(ctx, "Fakültə"), faculty.name if faculty else ""),
-        "kafedra": (pgettext(ctx, "Kafedra"), kafedra.name if kafedra else ""),
+        "faculty": (pgettext("accounts.profile.question_submissions", "Fakültə"), faculty.name if faculty else ""),
+        "kafedra": (pgettext("accounts.profile.question_submissions", "Kafedra"), kafedra.name if kafedra else ""),
         "teacher": (
-            pgettext(ctx, "Müəllim"),
+            pgettext("accounts.profile.question_submissions", "Müəllim"),
             (teacher.get_full_name() or teacher.username) if teacher else "",
         ),
-        "year": (pgettext(ctx, "Tədris ili"), filters["year"]),
-        "period": (pgettext(ctx, "Semestr"), period.name if period else ""),
-        "lang": (pgettext(ctx, "Dil"), lang_map.get(filters["lang"], "")),
+        "year": (pgettext("accounts.profile.question_submissions", "Tədris ili"), filters["year"]),
+        "period": (pgettext("accounts.profile.question_submissions", "Semestr"), period.name if period else ""),
+        "lang": (pgettext("accounts.profile.question_submissions", "Dil"), lang_map.get(filters["lang"], "")),
     }
     chips = []
     for key, param in _FILTER_PARAMS.items():
         if not filters[key]:
             continue
         title, value = labels[key]
-        params = dict(active_params)
-        params[param] = ""
-        if key == "faculty":
-            params["qsub_kafedra"] = ""  # fakültə silinəndə kafedra da sıfırlanır
-        if key == "year":
-            params["qsub_period"] = ""
-        chips.append({"title": title, "value": value or "—", "query": _profile_query(params)})
+        chips.append({"name": param, "label": title, "value_label": value or "—"})
     return chips
+
+
+#: Hadisə növü → timeline nöqtəsinin tonu (`ems_ui/timeline.css`).
+_EVENT_TONES = {
+    "chair_approved": "success",
+    "center_accepted": "success",
+    "chair_revision": "warning",
+    "center_revision": "warning",
+    "chair_rejected": "danger",
+    "center_rejected": "danger",
+    "center_opened": "info",
+}
+
+
+def _events(submission) -> list:
+    return [
+        {
+            "action": str(event.get_action_display()),
+            "actor": event.actor_label or "—",
+            "date": event.created_at.strftime("%d.%m.%Y %H:%M"),
+            "reason": event.reason or "",
+            "tone": _EVENT_TONES.get(event.action, "neutral"),
+        }
+        for event in submission.events.all()
+    ]
+
+
+def _meta(submission, *, is_reviewer: bool) -> list:
+    """Çekmecədəki «kim / nə / harada» sətirləri."""
+    rows = [
+        (pgettext("accounts.profile.question_submissions", "Fənn"), submission.subject or "—"),
+        (pgettext("accounts.profile.question_submissions", "Qrup"), submission.group_label or "—"),
+        (pgettext("accounts.profile.question_submissions", "Dil"), str(submission.get_language_display())),
+    ]
+    if submission.exam_kind:
+        rows.insert(
+            1,
+            (
+                pgettext("accounts.profile.question_submissions", "İmtahan növü"),
+                str(submission.get_exam_kind_display()),
+            ),
+        )
+    if is_reviewer:
+        rows.insert(
+            0,
+            (
+                pgettext("accounts.profile.question_submissions", "Müəllim"),
+                submission.teacher.get_full_name() or submission.teacher.username,
+            ),
+        )
+    if submission.resubmission_count:
+        rows.append(
+            (pgettext("accounts.profile.question_submissions", "Təkrar göndəriş"), f"×{submission.resubmission_count}")
+        )
+    if submission.chair_note:
+        rows.append((pgettext("accounts.profile.question_submissions", "Kafedra qeydi"), submission.chair_note))
+    if submission.reviewer_note:
+        rows.append((pgettext("accounts.profile.question_submissions", "Mərkəzin qeydi"), submission.reviewer_note))
+    return [{"label": label, "value": value} for label, value in rows]
+
+
+def _bank_note(submission, *, is_reviewer: bool):
+    """Qəbul olunmuş göndərişin yazıldığı bank (mətn + opsional keçid)."""
+    bank = submission.accepted_bank
+    if submission.status != "accepted" or bank is None:
+        return None
+    text = pgettext("accounts.profile.question_submissions", "Suallar «%(bank)s» bankına əlavə olunub") % {
+        "bank": bank.name
+    }
+    url = ""
+    if is_reviewer and bank.is_active:
+        url = reverse("exams:question_bank_detail", args=[submission.accepted_bank_id])
+    return {"text": text, "url": url}
+
+
+def _row(submission, *, is_reviewer: bool) -> dict:
+    teacher = submission.teacher
+    open_url = reverse(
+        "exams:question_submission_review" if is_reviewer else "exams:question_submission_detail",
+        args=[submission.id],
+    )
+    can_edit = not is_reviewer and submission.can_be_edited_by_teacher
+    return {
+        "id": str(submission.id),
+        "title": submission.title,
+        "subject": submission.subject or "—",
+        "group": submission.group_label or "—",
+        "teacher": teacher.get_full_name() or teacher.username,
+        "status": submission.status,
+        "status_badge": ui.status_badge(submission.status, is_reviewer=is_reviewer),
+        "question_count": submission.question_count,
+        "error_count": submission.error_count,
+        "warning_count": submission.warning_count,
+        "created": submission.created_at.strftime("%d.%m.%Y %H:%M"),
+        "open_url": open_url,
+        "can_edit": can_edit,
+        "edit_url": reverse("exams:question_submission_detail", args=[submission.id]) if can_edit else "",
+        "delete_url": reverse("exams:question_submission_delete", args=[submission.id]) if can_edit else "",
+        "bank_note": _bank_note(submission, is_reviewer=is_reviewer),
+        "drawer_meta": _meta(submission, is_reviewer=is_reviewer),
+        "events": _events(submission),
+    }
+
+
+def _reviewer_sources(organization, filters, scoped):
+    """Mərkəz filtrlərinin mənbələri + seçilmiş obyektlər (tək yerdə)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.organizations.models import AcademicPeriod, OrgUnit
+    from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES
+    from core.constants import OrgUnitType
+
+    faculties = list(OrgUnit.active.filter(organization=organization, unit_type=OrgUnitType.FACULTY).order_by("name"))
+    faculty = _pick(faculties, filters["faculty"])
+    kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=KAFEDRA_UNIT_TYPES)
+    if faculty is not None:
+        kafedra_qs = kafedra_qs.filter(parent=faculty)
+    kafedras = list(kafedra_qs.order_by("name"))
+    kafedra = _pick(kafedras, filters["kafedra"])
+    if kafedra is None:
+        filters["kafedra"] = ""
+
+    User = get_user_model()
+    teacher_ids = scoped.values_list("teacher_id", flat=True).distinct()
+    teachers = list(User.objects.filter(id__in=teacher_ids).order_by("first_name", "last_name", "username"))
+    teacher = _pick(teachers, filters["teacher"])
+
+    all_periods = list(AcademicPeriod.active.filter(organization=organization).order_by("-start_date"))
+    years = sorted({p.academic_year for p in all_periods}, reverse=True)
+    if filters["year"] not in years:
+        filters["year"] = ""
+    year_periods = [p for p in all_periods if p.academic_year == filters["year"]]
+    periods = year_periods if filters["year"] else all_periods
+    period = _pick(periods, filters["period"])
+    if period is None:
+        filters["period"] = ""
+    return {
+        "faculties": faculties,
+        "kafedras": kafedras,
+        "teachers": teachers,
+        "periods": periods,
+        "year_periods": year_periods,
+        "years": years,
+        "selected": {"faculty": faculty, "kafedra": kafedra, "teacher": teacher, "period": period},
+    }
+
+
+def _option_pairs(sources, *, languages, filters) -> dict:
+    """Filtr paneli üçün (value, label) cütləri."""
+    if not sources:
+        return {}
+    return {
+        "faculties": [(str(unit.pk), unit.name) for unit in sources["faculties"]],
+        "kafedras": [(str(unit.pk), unit.name) for unit in sources["kafedras"]],
+        "teachers": [(str(user.pk), user.get_full_name() or user.username) for user in sources["teachers"]],
+        "years": [(year, year) for year in sources["years"]],
+        "periods": [
+            (
+                str(period.pk),
+                period.name if filters["year"] else f"{period.name} · {period.academic_year}",
+            )
+            for period in sources["periods"]
+        ],
+        "languages": list(languages),
+    }
 
 
 def build_question_submissions_context(request, *, allowed_sections, active_section) -> dict:
     if not (active_section == "question-submissions" and "question-submissions" in allowed_sections):
         return _inactive_defaults()
 
-    from django.contrib.auth import get_user_model
     from django.core.paginator import Paginator
     from django.db.models import Count, Q
 
     from apps.exams.constants import EXAM_LANGUAGE_CHOICES
     from apps.exams.models import QuestionSubmission
     from apps.exams.public import is_exam_center_user
-    from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES
-    from core.constants import OrgUnitType
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
@@ -218,7 +329,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     else:
         scoped = scoped.filter(teacher=request.user)
 
-    # Stat kartlar üçün saylar — filtrsiz skop, TƏK aqreqat sorğu.
+    # KPI kartları üçün saylar — filtrsiz skop, TƏK aqreqat sorğu.
     counts = scoped.aggregate(
         total=Count("id"),
         at_chair=Count("id", filter=Q(status__in=_STATUS_GROUPS["at_chair"])),
@@ -226,40 +337,10 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         accepted=Count("id", filter=Q(status__in=_STATUS_GROUPS["accepted"])),
         returned=Count("id", filter=Q(status__in=_STATUS_GROUPS["returned"])),
     )
+    counts = {key: value or 0 for key, value in counts.items()}
 
     filters = _read_filters(request, is_reviewer=is_reviewer)
-
-    # ── Reviewer filtr mənbələri (yalnız mərkəz üçün sorğulanır) ──
-    faculties, kafedras, teachers, periods, years, year_periods = [], [], [], [], [], []
-    faculty = kafedra = teacher = period = None
-    if is_reviewer:
-        faculties = list(
-            OrgUnit.active.filter(organization=organization, unit_type=OrgUnitType.FACULTY).order_by("name")
-        )
-        faculty = _pick(faculties, filters["faculty"])
-        kafedra_qs = OrgUnit.active.filter(organization=organization, unit_type__in=KAFEDRA_UNIT_TYPES)
-        if faculty is not None:
-            kafedra_qs = kafedra_qs.filter(parent=faculty)
-        kafedras = list(kafedra_qs.order_by("name"))
-        kafedra = _pick(kafedras, filters["kafedra"])
-        if kafedra is None:
-            filters["kafedra"] = ""
-
-        User = get_user_model()
-        teacher_ids = scoped.values_list("teacher_id", flat=True).distinct()
-        teachers = list(User.objects.filter(id__in=teacher_ids).order_by("first_name", "last_name", "username"))
-        teacher = _pick(teachers, filters["teacher"])
-
-        all_periods = list(AcademicPeriod.active.filter(organization=organization).order_by("-start_date"))
-        years = sorted({p.academic_year for p in all_periods}, reverse=True)
-        if filters["year"] not in years:
-            filters["year"] = ""
-        year_periods = [p for p in all_periods if p.academic_year == filters["year"]]
-        periods = year_periods if filters["year"] else all_periods
-        period = _pick(periods, filters["period"])
-        if period is None:
-            filters["period"] = ""
-
+    sources = _reviewer_sources(organization, filters, scoped) if is_reviewer else None
     if filters["lang"] and filters["lang"] not in {code for code, _ in EXAM_LANGUAGE_CHOICES}:
         filters["lang"] = ""
 
@@ -281,64 +362,84 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
             )
         filtered = filtered.filter(condition)
     if is_reviewer:
+        selected = sources["selected"]
         filtered = _apply_reviewer_filters(
-            filtered, filters, faculty=faculty, kafedra=kafedra, periods=periods, year_periods=year_periods
+            filtered,
+            filters,
+            faculty=selected["faculty"],
+            kafedra=selected["kafedra"],
+            periods=sources["periods"],
+            year_periods=sources["year_periods"],
         )
 
     filtered = (
         filtered.select_related("teacher", "accepted_bank", "chair_unit", "chair_reviewer")
-        # Sətir-daxili «yol» draweri hadisə lentini göstərir — N+1 olmasın.
+        # Çekmecə hadisə lentini göstərir — N+1 olmasın.
         .prefetch_related("events__actor")
         .distinct()
         .order_by("-created_at", "-id")
     )
     page = Paginator(filtered, PAGE_SIZE).get_page(request.GET.get("qsub_page"))
+    rows = [_row(item, is_reviewer=is_reviewer) for item in page.object_list]
 
     # ── Query string-lər: aktiv parametrlər (page-siz) ──
     active_params = {"qsub_q": filters["q"], "qsub_status": filters["status"]}
     for key, param in _FILTER_PARAMS.items():
         active_params[param] = filters[key] if is_reviewer else ""
-    has_filters = any(filters[key] for key in _FILTER_PARAMS)
+    has_filters = any(filters[key] for key in _FILTER_PARAMS) or bool(filters["q"] or filters["status"])
+    selected = sources["selected"] if sources else {}
+    state_title, state_body = ui.states(has_filters=has_filters, is_reviewer=is_reviewer)
+
+    section = {
+        "subtitle": ui.subtitle(is_reviewer=is_reviewer),
+        "is_reviewer": is_reviewer,
+        # Mərkəz göndəriş yaratmır — başlıq əməli qutusu boş render olunmasın.
+        "header_actions": ("" if is_reviewer else "exams/teacher/partials/question_submissions/_header_actions.html"),
+        "kpi_tiles": ui.kpi_tiles(counts, active_status=filters["status"], is_reviewer=is_reviewer),
+        "filter_fields": ui.filter_fields(
+            filters=filters,
+            is_reviewer=is_reviewer,
+            sources=_option_pairs(sources, languages=EXAM_LANGUAGE_CHOICES, filters=filters),
+        ),
+        "filter_applied": (
+            _applied_chips(
+                filters,
+                faculty=selected.get("faculty"),
+                kafedra=selected.get("kafedra"),
+                teacher=selected.get("teacher"),
+                period=selected.get("period"),
+                languages=EXAM_LANGUAGE_CHOICES,
+            )
+            if is_reviewer
+            else []
+        ),
+        "filter_count_label": pgettext("accounts.profile.question_submissions", "Nəticə: %(n)d göndəriş")
+        % {"n": page.paginator.count},
+        "columns": ui.columns(is_reviewer=is_reviewer),
+        "table_rows": ui.table_rows(rows, is_reviewer=is_reviewer),
+        "table_state": "ready" if rows else "empty",
+        "drawer_data": ui.drawer_data(rows),
+        "state_title": state_title,
+        "state_body": state_body,
+        # Boş ekranda əsas addım düymə kimi görünür (müəllim, filtrsiz hal).
+        "state_action_label": (
+            pgettext("accounts.profile.question_submissions", "Yeni göndəriş")
+            if not (is_reviewer or has_filters or counts["total"])
+            else ""
+        ),
+        "state_action_url": reverse("exams:question_submission_create"),
+        "returned_count": counts["returned"],
+    }
 
     return {
-        "question_submissions_items": list(page.object_list),
+        "question_submissions_items": rows,
         "question_submissions_page": page,
         "question_submissions_is_reviewer": is_reviewer,
-        "question_submissions_total_count": counts["total"] or 0,
-        "question_submissions_pending_count": counts["at_center"] or 0,
-        "question_submissions_chair_count": counts["at_chair"] or 0,
-        "question_submissions_accepted_count": counts["accepted"] or 0,
+        "question_submissions_total_count": counts["total"],
         # Müəllim üçün "düzəliş gözləyən", mərkəz üçün "rədd edilmiş" mənasında.
-        "question_submissions_rejected_count": counts["returned"] or 0,
+        "question_submissions_rejected_count": counts["returned"],
         "question_submissions_create_url": reverse("exams:question_submission_create"),
-        "question_submissions_search": filters["q"],
-        "question_submissions_status": filters["status"],
-        "question_submissions_filters": filters,
-        "question_submissions_faculties": faculties,
-        "question_submissions_kafedras": kafedras,
-        "question_submissions_teachers": teachers,
-        # Axtarışlı filtr seçicilərinin ilkin çipləri (id hidden inputda, etiket
-        # data-label-də) — siyahılar artıq template-də render olunmur.
-        "question_submissions_selected_labels": {
-            "faculty": faculty.name if faculty else "",
-            "kafedra": kafedra.name if kafedra else "",
-            "teacher": (teacher.get_full_name() or teacher.username) if teacher else "",
-        },
-        "question_submissions_years": years,
-        "question_submissions_periods": periods,
-        "question_submissions_languages": EXAM_LANGUAGE_CHOICES,
-        "question_submissions_status_cards": _status_cards(counts, filters, active_params, is_reviewer=is_reviewer),
-        "question_submissions_active_chips": _active_chips(
-            filters,
-            active_params,
-            faculty=faculty,
-            kafedra=kafedra,
-            teacher=teacher,
-            period=period,
-            languages=EXAM_LANGUAGE_CHOICES,
-        ),
         "question_submissions_clear_url": f"{reverse('accounts:profile')}?section=question-submissions",
-        "question_submissions_base_query": _profile_query(active_params),
         "question_submissions_pagination_query": _profile_query(active_params),
-        "question_submissions_has_filters": has_filters,
+        "question_submissions_section": section,
     }

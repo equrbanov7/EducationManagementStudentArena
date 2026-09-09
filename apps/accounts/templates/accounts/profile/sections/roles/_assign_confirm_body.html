@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Təsdiq dialoqunun gövdəsi — dəyərləri `roles_ui.js` sətirdən doldurur.{% endcomment %}
+<p class="rls-confirm__lead" id="roleAssignmentConfirmLeadText"></p>
+<dl class="rls-confirm">
+    <dt>{% trans "Ad" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmFullName"></dd>
+    <dt>{% trans "İstifadəçi adı" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmUsername"></dd>
+    <dt>{% trans "E-poçt" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmEmail"></dd>
+    <dt>{% trans "Təşkilat" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmOrg"></dd>
+    <dt>{% trans "Cari rol" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmOldRole"></dd>
+    <dt>{% trans "Dəyişəcək rol" context "accounts.role_assignment" %}</dt>
+    <dd id="roleAssignmentConfirmRole"></dd>
+</dl>
+<p class="ems-msg ems-msg--error" data-roles-confirm-error role="alert" hidden></p>

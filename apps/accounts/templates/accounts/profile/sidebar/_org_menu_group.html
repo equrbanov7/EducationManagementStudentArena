@@ -35,11 +35,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=student-intake"
                data-section="student-intake"
-               data-title="{% trans 'Tələbə idxalı' context 'profile.sidebar' %}"
+               data-title="{% trans 'Tələbə əlavəsi (toplu)' context 'profile.sidebar' %}"
                data-source-url="{{ profile_base_url }}?section=student-intake"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-intake' %}active{% endif %}">
                 <i class="fas fa-file-import sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Tələbə idxalı" context "profile.sidebar" %}</span>
+                <span class="sidebar-menu-text">{% trans "Tələbə əlavəsi (toplu)" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}
@@ -48,11 +48,11 @@
         <li class="sidebar-menu-item">
             <a href="{{ profile_base_url }}?section=teacher-intake"
                data-section="teacher-intake"
-               data-title="{% trans 'Müəllim idxalı' context 'profile.sidebar' %}"
+               data-title="{% trans 'Müəllim əlavəsi (toplu)' context 'profile.sidebar' %}"
                data-source-url="{{ profile_base_url }}?section=teacher-intake"
                class="sidebar-menu-link js-profile-section-link {% if active_section == 'teacher-intake' %}active{% endif %}">
                 <i class="fas fa-file-import sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Müəllim idxalı" context "profile.sidebar" %}</span>
+                <span class="sidebar-menu-text">{% trans "Müəllim əlavəsi (toplu)" context "profile.sidebar" %}</span>
             </a>
         </li>
         {% endif %}

@@ -1,0 +1,16 @@
+{% comment %}Başlıq əməlləri. Bu ekran ARTIQ DƏVƏT GÖNDƏRMİR — yeni şəxs
+«Tələbə əlavəsi» / «Müəllim əlavəsi» (intake) bölmələrindən əlavə olunur, ona
+görə düymələr həmin bölmələrə keçid verir (yalnız icazə varsa).{% endcomment %}
+{% load i18n %}
+{% if 'student-intake' in allowed_sections %}
+<a class="ems-btn ems-btn--sm js-profile-section-link" href="{{ profile_base_url }}?section=student-intake" data-section="student-intake">
+    <i class="fas fa-user-graduate" aria-hidden="true"></i>
+    {% trans "Tələbə əlavə et" context "accounts.staff_management" %}
+</a>
+{% endif %}
+{% if 'teacher-intake' in allowed_sections %}
+<a class="ems-btn ems-btn--sm js-profile-section-link" href="{{ profile_base_url }}?section=teacher-intake" data-section="teacher-intake">
+    <i class="fas fa-chalkboard-user" aria-hidden="true"></i>
+    {% trans "Müəllim əlavə et" context "accounts.staff_management" %}
+</a>
+{% endif %}

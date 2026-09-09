@@ -1,0 +1,11 @@
+{% comment %}Rol nişanları — ilk ikisi görünür, qalanı «+N» çipidir; tam siyahı
+«Üzv kartı» çekmecəsindədir. Vəzifəsiz rolda etiket boş qalmasın deyə növ
+(«Tələbə» / «Müəllim» / «Heyət») yazılır.{% endcomment %}
+<span class="hm-roles">
+    {% for role in row.data.roles_preview %}
+        <span class="ems-badge ems-badge--neutral hm-role">{% if role.is_primary %}<i class="fas fa-star hm-role__primary" aria-hidden="true"></i> {% endif %}{{ role.label|default:row.data.kind_label }}</span>
+    {% empty %}
+        <span class="ems-badge ems-badge--muted hm-role">{{ row.data.kind_label }}</span>
+    {% endfor %}
+    {% if row.data.roles_more %}<span class="hm-role hm-role--more">+{{ row.data.roles_more }}</span>{% endif %}
+</span>

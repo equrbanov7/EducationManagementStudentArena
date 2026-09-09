@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Cədvəlin birinci sütunu (th scope="row") — bankın adı + fənni.
+Kontekst: `row.data` (bax `accounts/views/profile/_sections/question_bank.py`).{% endcomment %}
+<div class="qbank-name">
+    <a class="qbank-name__link" href="{{ row.data.detail_url }}">{{ row.data.name }}</a>
+    <span class="qbank-name__meta">
+        {% if row.data.subject_label %}
+            {{ row.data.subject_label }}
+        {% else %}
+            <span class="qbank-name__muted">{% trans "Fənn seçilməyib" context "accounts.profile.question_bank" %}</span>
+        {% endif %}
+        {% if row.data.is_shared %}<span class="ems-badge ems-badge--muted">{% trans "Paylaşılıb" %}</span>{% endif %}
+    </span>
+</div>

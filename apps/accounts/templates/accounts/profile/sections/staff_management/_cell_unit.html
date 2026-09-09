@@ -1,0 +1,10 @@
+{% comment %}Bölmə — üzvlüyün əhatə vahidi və onun zənciri («Kafedra › Fakültə»).
+Bölməsi olmayan üzvlükdə tire yazılır (boşluq qalmır).{% endcomment %}
+{% if row.data.unit_name %}
+    <span class="hm-unit">{{ row.data.unit_name }}</span>
+    {% if row.data.unit_chain and row.data.unit_chain != row.data.unit_name %}
+        <span class="hm-unit__trail">{{ row.data.unit_chain }}</span>
+    {% endif %}
+{% else %}
+    <span class="hm-dash">—</span>
+{% endif %}

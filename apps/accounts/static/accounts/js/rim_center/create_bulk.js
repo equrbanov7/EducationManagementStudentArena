@@ -223,7 +223,7 @@
         var url = window.URL.createObjectURL(blob);
         var link = document.createElement("a");
         link.href = url;
-        link.download = "telebe_idxal_parollari.csv";
+        link.download = "toplu_elave_parollari.csv";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

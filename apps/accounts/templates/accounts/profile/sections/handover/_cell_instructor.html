@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}Cari müəllim — boşdursa «təyin edilməyib» (boş xana yox).{% endcomment %}
+{% if row.data.instructor %}
+    <span class="thx-person">{{ row.data.instructor }}</span>
+{% else %}
+    <span class="thx-person thx-person--none">{% trans "Müəllim təyin edilməyib" context "accounts.handover" %}</span>
+{% endif %}

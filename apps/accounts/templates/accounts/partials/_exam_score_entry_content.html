@@ -175,12 +175,14 @@ Səhifə açıq-mənbəli (light-only) — --ems-* token. Select-lər bootstrap-
               <div class="ese-just" data-ese-just>
                 <div class="ese-just__field ese-just__field--reason" data-ese-reason-wrap>
                   <label for="ese-reason-{{ row.enrollment.id }}">{% trans "Səbəb" context "registrar.exam_score_entry" %}</label>
-                  <select id="ese-reason-{{ row.enrollment.id }}" name="reason__{{ row.enrollment.id }}" class="ese-select">
-                    <option value="">—</option>
-                    {% for reason in s.reasons %}
-                    <option value="{{ reason.value }}">{{ reason.label }}</option>
-                    {% endfor %}
-                  </select>
+                  <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+                      <select id="ese-reason-{{ row.enrollment.id }}" name="reason__{{ row.enrollment.id }}" class="ese-select bootstrap-single-select__native" data-bootstrap-select>
+                        <option value="">—</option>
+                        {% for reason in s.reasons %}
+                        <option value="{{ reason.value }}">{{ reason.label }}</option>
+                        {% endfor %}
+                      </select>
+                  </div>
                 </div>
                 <div class="ese-just__field">
                   <label for="ese-note-{{ row.enrollment.id }}">{% trans "Qeyd" context "registrar.exam_score_entry" %}</label>

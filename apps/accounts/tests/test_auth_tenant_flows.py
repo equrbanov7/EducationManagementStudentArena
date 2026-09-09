@@ -1172,18 +1172,9 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         free_profile.requested_organization_name = self.org_a.name
         free_profile.save()
 
-        pending_url = (
-            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
-        )
-        response = self.client.get(pending_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.unassigned_user.username)
-        self.assertContains(response, "Təşkilata əlavə et")
-        self.assertContains(response, "removeStudentConfirmModal")
-        self.assertContains(response, "pendingAddConfirmModal")
-        self.assertContains(response, "inviteConfirmModal")
-        self.assertContains(response, "Dəyişəcək rol")
-        self.assertContains(response, "Təşkilat")
+        # «Təsdiq gözləyən tələbələr» paneli və onun modalları 2026-09-09-da
+        # ekrandan silindi; TOPLU TƏSDİQ ƏMƏLİ (POST) isə işləməyə davam edir.
+        pending_url = reverse("accounts:student_organization_management")
 
         response = self.client.post(
             reverse("accounts:student_organization_management"),
@@ -1196,8 +1187,13 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         )
         self.assertRedirects(response, pending_url)
         self.assertContains(response, "Uğurla əlavə edildi: 1 tələbə əlavə edildi.")
-        pending_user_ids = {item.user_id for item in response.context["pending_requested_students"].object_list}
-        self.assertNotIn(self.unassigned_user.id, pending_user_ids)
+        self.assertFalse(
+            StudentOrganizationRequest.objects.filter(
+                user=self.unassigned_user,
+                organization=self.org_a,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
 
         self.assertTrue(
             Membership.objects.filter(
@@ -1212,108 +1208,35 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(self.unassigned_user.profile.organization, self.org_a)
         self.assertEqual(self.unassigned_user.profile.role, ProfileRole.STUDENT)
 
-    def test_pending_students_empty_state_outside_table_and_bulk_disabled(self):
-        self.unassigned_user.profile.requested_organization = None
-        self.unassigned_user.profile.requested_organization_name = ""
-        self.unassigned_user.profile.save(
-            update_fields=["requested_organization", "requested_organization_name", "updated_at"]
-        )
+    # SİLİNMİŞ TEST — `test_pending_students_empty_state_outside_table_and_bulk_disabled`.
+    # Yalnız «Təsdiq gözləyən tələbələr» panelinin UI detallarını (boş vəziyyət
+    # mətni, `js-pending-add-bulk-label` toplu düyməsi, `data-disabled-tooltip`,
+    # `selectAllPendingStudents` seç-hamısı xanası) yoxlayırdı. Həmin panel
+    # 2026-09-09 sahib qərarı ilə bütünlüklə silindi (bu tenantda heç kim
+    # dəvətlə qoşulmur), ona görə testin yoxladığı davranış artıq MÖVCUD DEYİL —
+    # köçürüləsi zəmanət qalmadığı üçün test saxlanılmadı. Panelin geri
+    # qayıtmadığını `test_profile_views.py::…_no_longer_renders_invite_or_request_panels`
+    # qoruyur; boş vəziyyət mətni isə indi `ems_ui/_empty.html` komponentindədir.
 
-        StudentOrganizationRequest.objects.filter(
-            user=self.unassigned_user,
-            organization=self.org_a,
-        ).delete()
-
-        response = self.client.get(
-            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Təsdiq gözləyən tələbə yoxdur.")
-        self.assertNotContains(response, '<td colspan="8" class="text-center">Təsdiq gözləyən tələbə yoxdur.</td>')
-        self.assertContains(response, "js-pending-add-bulk-label")
-        self.assertContains(
-            response, 'data-selected-label="Seçilən istifadəçiləri təşkilata əlavə et ({count} seçildi)"'
-        )
-        self.assertContains(response, 'data-disabled-tooltip="Ən azı 1 tələbə seçin"')
-        self.assertContains(response, 'id="selectAllPendingStudents"')
-
-    def test_student_org_management_defaults_to_all_filters_and_hides_superadmins(self):
-        hidden_unassigned_super = User.objects.create_superuser(
-            username="hidden_unassigned_super",
-            email="hidden_unassigned_super@example.com",
-            password="StrongPass123!",
-        )
-        hidden_invited_super = User.objects.create_superuser(
-            username="hidden_invited_super",
-            email="hidden_invited_super@example.com",
-            password="StrongPass123!",
-        )
+    # ------------------------------------------------------------------
+    # 2026-09-09 — «Heyət idarəetməsi» yenidən quruldu: dəvət / müraciət /
+    # «təşkilata bağlı olmayan hesab» panelləri və onların `data-management-*`
+    # tabları SİLİNDİ (bu tenantda heç kim dəvətlə qoşulmur). Aşağıdakı üç
+    # test həmin panellərin UI-ını deyil, YAŞAYAN reyestr zəmanətlərini
+    # yoxlayır: superadmin gizlədilir, KPI sayğacları axtarışdan asılı deyil,
+    # yalnız üzvlüyü olan tələbə də siyahıdadır.
+    # ------------------------------------------------------------------
+    def test_staff_management_hides_superadmins_from_member_registry(self):
         hidden_staff_super = User.objects.create_superuser(
             username="hidden_staff_super",
             email="hidden_staff_super@example.com",
             password="StrongPass123!",
         )
-        hidden_teacher_request_super = User.objects.create_superuser(
-            username="hidden_teacher_request_super",
-            email="hidden_teacher_request_super@example.com",
-            password="StrongPass123!",
-        )
-
-        hidden_unassigned_profile = hidden_unassigned_super.profile
-        hidden_unassigned_profile.organization = None
-        hidden_unassigned_profile.organization_type = OrganizationType.INDIVIDUAL
-        hidden_unassigned_profile.role = ProfileRole.MEMBER
-        hidden_unassigned_profile.requested_organization = None
-        hidden_unassigned_profile.requested_organization_name = ""
-        hidden_unassigned_profile.save(
-            update_fields=[
-                "organization",
-                "organization_type",
-                "role",
-                "requested_organization",
-                "requested_organization_name",
-                "updated_at",
-            ]
-        )
-
-        hidden_invited_profile = hidden_invited_super.profile
-        hidden_invited_profile.organization = None
-        hidden_invited_profile.organization_type = OrganizationType.INDIVIDUAL
-        hidden_invited_profile.role = ProfileRole.MEMBER
-        hidden_invited_profile.requested_organization = self.org_a
-        hidden_invited_profile.requested_organization_name = self.org_a.name
-        hidden_invited_profile.save(
-            update_fields=[
-                "organization",
-                "organization_type",
-                "role",
-                "requested_organization",
-                "requested_organization_name",
-                "updated_at",
-            ]
-        )
-        Membership.objects.create(
-            user=hidden_invited_super,
-            organization=self.org_a,
-            role=self.org_a_student_role,
-            assigned_by=self.admin_user,
-            is_primary=False,
-            is_active=False,
-            title="__student_pending_invite__",
-        )
-
-        hidden_staff_profile = hidden_staff_super.profile
-        hidden_staff_profile.organization = self.org_a
-        hidden_staff_profile.organization_type = self.org_a.org_type
-        hidden_staff_profile.role = ProfileRole.MEMBER
-        hidden_staff_profile.save(
-            update_fields=[
-                "organization",
-                "organization_type",
-                "role",
-                "updated_at",
-            ]
-        )
+        hidden_profile = hidden_staff_super.profile
+        hidden_profile.organization = self.org_a
+        hidden_profile.organization_type = self.org_a.org_type
+        hidden_profile.role = ProfileRole.MEMBER
+        hidden_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
         Membership.objects.create(
             user=hidden_staff_super,
             organization=self.org_a,
@@ -1322,58 +1245,17 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             is_active=True,
         )
 
-        hidden_teacher_request_profile = hidden_teacher_request_super.profile
-        hidden_teacher_request_profile.organization = None
-        hidden_teacher_request_profile.organization_type = OrganizationType.INDIVIDUAL
-        hidden_teacher_request_profile.role = ProfileRole.MEMBER
-        hidden_teacher_request_profile.requested_organization = self.org_a
-        hidden_teacher_request_profile.requested_organization_name = self.org_a.name
-        hidden_teacher_request_profile.save(
-            update_fields=[
-                "organization",
-                "organization_type",
-                "role",
-                "requested_organization",
-                "requested_organization_name",
-                "updated_at",
-            ]
-        )
-        StudentOrganizationRequest.objects.create(
-            user=hidden_teacher_request_super,
-            organization=self.org_a,
-            status=StudentOrganizationRequestStatus.PENDING,
-            role_type=MembershipRequestRoleType.TEACHER,
-            message="Superadmin request should stay hidden.",
-        )
-
         response = self.client.get(reverse("accounts:student_organization_management"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Hamısı")
-        self.assertContains(response, "data-management-all", html=False)
-        self.assertContains(response, 'data-management-chip="student-members"', html=False)
-        self.assertContains(response, 'data-management-panel="student-members"', html=False)
-        self.assertContains(response, 'data-management-panel="teacher-members"', html=False)
-        self.assertContains(response, 'data-management-panel="staff-members"', html=False)
-        self.assertContains(response, "Təşkilat tələbələri")
-        self.assertContains(response, "Təşkilat müəllimləri")
-        self.assertContains(response, "Təşkilat staff siyahısı")
-
-        unassigned_ids = {item.user_id for item in response.context["unassigned_students"].object_list}
-        sent_invite_ids = {item.user_id for item in response.context["sent_student_invites"].object_list}
-        staff_member_ids = {item.user_id for item in response.context["staff_members"].object_list}
-        pending_teacher_ids = {item.user_id for item in response.context["pending_teacher_requests"].object_list}
-
-        self.assertNotIn(hidden_unassigned_super.id, unassigned_ids)
-        self.assertNotIn(hidden_invited_super.id, sent_invite_ids)
-        self.assertNotIn(hidden_staff_super.id, staff_member_ids)
-        self.assertNotIn(hidden_teacher_request_super.id, pending_teacher_ids)
-        self.assertNotContains(response, hidden_unassigned_super.username)
-        self.assertNotContains(response, hidden_invited_super.username)
+        section = response.context["student_org_management_section"]
+        member_ids = {row["user_id"] for row in section["rows"]}
+        self.assertNotIn(hidden_staff_super.id, member_ids)
         self.assertNotContains(response, hidden_staff_super.username)
-        self.assertNotContains(response, hidden_teacher_request_super.username)
+        # Növ filtri «Hamısı» defolt seçimi ilə açılır.
+        self.assertContains(response, "Hamısı")
 
-    def test_student_org_management_badge_counts_ignore_active_search(self):
+    def test_staff_management_kpi_totals_ignore_active_search(self):
         student_user = User.objects.create_user(
             username="visible_student",
             email="visible_student@example.com",
@@ -1392,22 +1274,27 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             is_active=True,
         )
 
+        baseline = self.client.get(reverse("accounts:profile"), {"section": "student-organization-management"})
+        self.assertEqual(baseline.status_code, 200)
+        baseline_section = baseline.context["student_org_management_section"]
+        expected_members = baseline_section["member_total_count"]
+        expected_students = baseline_section["students_total_count"]
+        self.assertGreaterEqual(expected_students, 1)
+
         response = self.client.get(
             reverse("accounts:profile"),
-            {
-                "section": "student-organization-management",
-                "student_org_search": "does-not-match",
-            },
+            {"section": "student-organization-management", "hm_q": "does-not-match"},
         )
 
         self.assertEqual(response.status_code, 200)
         section = response.context["student_org_management_section"]
-        self.assertEqual(section["students"].paginator.count, 0)
-        self.assertEqual(section["students_total_count"], 1)
-        self.assertEqual(section["student_tab_options"][0]["count"], 1)
-        self.assertEqual(section["management_view_options"][0]["count"], 1)
+        # Axtarış YALNIZ cədvəli daraldır — KPI sayğacları bütöv qalır.
+        self.assertEqual(section["page_obj"].paginator.count, 0)
+        self.assertEqual(section["rows"], [])
+        self.assertEqual(section["member_total_count"], expected_members)
+        self.assertEqual(section["students_total_count"], expected_students)
 
-    def test_student_org_management_includes_membership_only_students(self):
+    def test_staff_management_includes_membership_only_students(self):
         student_user = User.objects.create_user(
             username="membership_only_student",
             email="membership_only_student@example.com",
@@ -1426,18 +1313,13 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             is_active=True,
         )
 
-        response = self.client.get(
-            reverse("accounts:profile"),
-            {
-                "section": "student-organization-management",
-            },
-        )
+        response = self.client.get(reverse("accounts:profile"), {"section": "student-organization-management"})
 
         self.assertEqual(response.status_code, 200)
         section = response.context["student_org_management_section"]
-        student_ids = {profile.user_id for profile in section["students"].object_list}
-        self.assertIn(student_user.id, student_ids)
-        self.assertEqual(section["students_total_count"], 1)
+        member_ids = {row["user_id"] for row in section["rows"]}
+        self.assertIn(student_user.id, member_ids)
+        self.assertGreaterEqual(section["students_total_count"], 1)
 
     def test_org_admin_can_approve_teacher_request_from_requests_tab(self):
         teacher_user = User.objects.create_user(
@@ -1468,13 +1350,11 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             message="Müəllim kimi qoşulmaq istəyirəm.",
         )
 
-        next_url = (
-            f"{reverse('accounts:student_organization_management')}?management_view=teachers&teacher_tab=requests"
-        )
+        # «Müəllim müraciətləri» TAB-ı 2026-09-09-da ekrandan silindi, amma
+        # TƏSDİQ ƏMƏLİ (POST) toxunulmayıb — burada məhz o yoxlanılır.
+        next_url = reverse("accounts:student_organization_management")
         response = self.client.get(next_url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, teacher_user.username)
-        self.assertContains(response, "Müəllim müraciəti axtar...")
 
         response = self.client.post(
             reverse("accounts:student_organization_management"),
@@ -1555,8 +1435,8 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertIsNone(teacher_profile.requested_organization)
         self.assertEqual(teacher_profile.requested_organization_name, "")
         self.assertEqual(teacher_profile.requested_organization_message, "")
-        pending_teacher_ids = {item.user_id for item in reject_response.context["pending_teacher_requests"].object_list}
-        self.assertNotIn(teacher_user.id, pending_teacher_ids)
+        # («pending_teacher_requests» paneli silinib — rədd nəticəsi artıq
+        # yalnız modeldə yoxlanılır, yuxarıdakı status/profil assert-ləri ilə.)
 
         self.client.force_login(teacher_user)
         resubmit_response = self.client.post(
@@ -1579,7 +1459,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
-    def test_org_owner_without_membership_still_sees_teacher_requests(self):
+    def test_org_owner_without_membership_still_reaches_staff_management(self):
         teacher_user = User.objects.create_user(
             username="teacher_request_for_owner",
             email="teacher_request_for_owner@example.com",
@@ -1617,13 +1497,23 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         admin_profile.save(update_fields=["organization", "organization_type", "role", "updated_at"])
 
         self._activate_org_session(self.admin_user, self.org_a)
-        response = self.client.get(
-            f"{reverse('accounts:student_organization_management')}?management_view=teachers&teacher_tab=requests"
-        )
+        response = self.client.get(reverse("accounts:student_organization_management"))
 
+        # ÜZVLÜYÜ OLMAYAN SAHİB bölməyə girə bilir — bu zəmanət qalır.
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, teacher_user.username)
-        self.assertContains(response, "Owner görməlidir.")
+        section = response.context["student_org_management_section"]
+        self.assertTrue(section["has_access"])
+        self.assertEqual(section["access_denied_message"], "")
+        # Müraciət MODELDƏ durur (axın sağdır), amma bu ekranda GÖSTƏRİLMİR:
+        # «Müəllim müraciətləri» paneli 2026-09-09-da silindi.
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=teacher_user,
+                organization=self.org_a,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
+        self.assertNotContains(response, "Owner görməlidir.")
 
     def test_org_admin_can_reject_pending_student_request(self):
         free_profile = self.unassigned_user.profile
@@ -1708,10 +1598,17 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
+        # «Təsdiq gözləyən tələbələr» paneli silinib — zəmanət indi MODELDƏ
+        # yoxlanılır: uzaqlaşdırılan tələbə yenidən gözləyən müraciətə düşmür.
+        self.assertFalse(
+            StudentOrganizationRequest.objects.filter(
+                user=self.unassigned_user,
+                organization=self.org_a,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists()
+        )
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(response.status_code, 200)
-        pending_user_ids = {item.user_id for item in response.context["pending_requested_students"].object_list}
-        self.assertNotIn(self.unassigned_user.id, pending_user_ids)
 
     def test_org_admin_can_bulk_invite_unassigned_students(self):
         invite_candidate_1 = User.objects.create_user(
@@ -1801,17 +1698,22 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 user__in=[revoke_candidate_1, revoke_candidate_2],
             ).exists()
         )
+        # «Göndərilmiş dəvətlər» / «bağlı olmayan tələbələr» panelləri silinib —
+        # geri çəkmənin nəticəsi indi MODELDƏ yoxlanılır: nə aktiv üzvlük, nə də
+        # gözləyən müraciət qalır (yəni şəxs təşkilata bağlanmır).
+        for candidate in (revoke_candidate_1, revoke_candidate_2):
+            self.assertFalse(
+                Membership.objects.filter(user=candidate, organization=self.org_a, is_active=True).exists()
+            )
+            self.assertFalse(
+                StudentOrganizationRequest.objects.filter(
+                    user=candidate,
+                    organization=self.org_a,
+                    status=StudentOrganizationRequestStatus.PENDING,
+                ).exists()
+            )
         response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(response.status_code, 200)
-        unassigned_ids = {item.user_id for item in response.context["unassigned_students"].object_list}
-        pending_request_ids = {item.user_id for item in response.context["pending_requested_students"].object_list}
-        sent_invite_ids = {item.user_id for item in response.context["sent_student_invites"].object_list}
-        self.assertIn(revoke_candidate_1.id, unassigned_ids)
-        self.assertIn(revoke_candidate_2.id, unassigned_ids)
-        self.assertNotIn(revoke_candidate_1.id, pending_request_ids)
-        self.assertNotIn(revoke_candidate_2.id, pending_request_ids)
-        self.assertNotIn(revoke_candidate_1.id, sent_invite_ids)
-        self.assertNotIn(revoke_candidate_2.id, sent_invite_ids)
 
     def test_unassigned_student_gets_invite_then_can_accept_and_leave_with_reason(self):
         free_profile = self.unassigned_user.profile
@@ -2299,7 +2201,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
-    def test_org_admin_can_invite_teacher_and_revoke_to_restore_unassigned_list(self):
+    def test_org_admin_can_invite_teacher_and_revoke_the_invite(self):
         teacher_user = User.objects.create_user(
             username="teacher_invite_candidate",
             email="teacher_invite_candidate@example.com",
@@ -2362,9 +2264,12 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
                 title="__student_pending_invite__",
             ).exists()
         )
-        self.assertContains(revoke_response, "Təşkilata bağlı olmayan müəllimlər")
-        unassigned_teacher_ids = {item.user_id for item in revoke_response.context["unassigned_teachers"].object_list}
-        self.assertIn(teacher_user.id, unassigned_teacher_ids)
+        # «Təşkilata bağlı olmayan müəllimlər» paneli silinib — geri çəkilən
+        # dəvətdən sonra müəllim təşkilata bağlanmamış qalır (model yoxlaması).
+        self.assertNotContains(revoke_response, "Təşkilata bağlı olmayan müəllimlər")
+        self.assertFalse(Membership.objects.filter(user=teacher_user, organization=self.org_a, is_active=True).exists())
+        teacher_user.profile.refresh_from_db()
+        self.assertIsNone(teacher_user.profile.organization)
 
     def test_org_admin_can_invite_staff_and_staff_can_accept(self):
         staff_user = User.objects.create_user(
@@ -2434,7 +2339,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             ).exists()
         )
 
-    def test_student_can_send_join_request_with_message_and_org_admin_sees_it(self):
+    def test_student_can_send_join_request_with_message(self):
         student_user = User.objects.create_user(
             username="request_student",
             email="request_student@example.com",
@@ -2465,12 +2370,21 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(student_profile.requested_organization_name, self.org_a.name)
         self.assertEqual(student_profile.requested_organization_message, "Mən bu təşkilata qoşulmaq istəyirəm.")
 
-        self._activate_org_session(self.admin_user, self.org_a)
-        response = self.client.get(
-            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
+        # Müraciət sətri (mesajı ilə birlikdə) MODELDƏ yaranır — tələbənin
+        # «Təşkilata qoşul» axını toxunulmayıb.
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=student_user,
+                organization=self.org_a,
+                status=StudentOrganizationRequestStatus.PENDING,
+                message="Mən bu təşkilata qoşulmaq istəyirəm.",
+            ).exists()
         )
+        # «Heyət idarəetməsi» ekranı isə onu ARTIQ göstərmir (panel silinib).
+        self._activate_org_session(self.admin_user, self.org_a)
+        response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Mən bu təşkilata qoşulmaq istəyirəm.")
+        self.assertNotContains(response, "Mən bu təşkilata qoşulmaq istəyirəm.")
 
     def test_student_join_request_message_has_max_length_limit(self):
         student_user = User.objects.create_user(
@@ -2614,31 +2528,10 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self.assertEqual(request_b.status, StudentOrganizationRequestStatus.AUTO_CLOSED)
         self.assertIn(self.org_a.name, request_b.resolution_note)
 
-        org_b_admin = User.objects.create_user(
-            username="org_b_admin_viewer",
-            email="org_b_admin_viewer@example.com",
-            password="StrongPass123!",
-        )
-        org_b_admin_role = self.org_b.roles.order_by("-level").first()
-        Membership.objects.create(
-            user=org_b_admin,
-            organization=self.org_b,
-            role=org_b_admin_role,
-            is_primary=True,
-            is_active=True,
-        )
-        org_b_admin_profile = org_b_admin.profile
-        org_b_admin_profile.organization = self.org_b
-        org_b_admin_profile.organization_type = self.org_b.org_type
-        org_b_admin_profile.role = ProfileRole.ORG_ADMIN
-        org_b_admin_profile.save()
-
-        self._activate_org_session(org_b_admin, self.org_b)
-        management_response = self.client.get(
-            f"{reverse('accounts:student_organization_management')}?management_view=students&student_tab=pending"
-        )
-        self.assertEqual(management_response.status_code, 200)
-        self.assertContains(management_response, f"İstifadəçi artıq {self.org_a.name} təşkilatının üzvüdür.")
+        # (Əvvəllər burada org_b admini yaradılıb «təsdiq gözləyən tələbələr»
+        # panelində «İstifadəçi artıq … üzvüdür» xəbərdarlığı yoxlanılırdı.
+        # Panel 2026-09-09-da silindi; avto-bağlanmanın özü yuxarıda
+        # `AUTO_CLOSED` statusu və `resolution_note` ilə yoxlanılır.)
 
     def test_teacher_cannot_access_student_org_management(self):
         teacher_user = User.objects.create_user(
@@ -2722,7 +2615,8 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
         self._activate_org_session(teacher_user, self.org_a)
         page_response = self.client.get(reverse("accounts:student_organization_management"))
         self.assertEqual(page_response.status_code, 200)
-        self.assertContains(page_response, invited_student.username)
+        # («Təşkilata bağlı olmayan tələbələr» paneli silindiyi üçün namizəd
+        # ekranda sadalanmır — DƏVƏT ƏMƏLİ isə aşağıda olduğu kimi işləyir.)
 
         invite_response = self.client.post(
             reverse("accounts:student_organization_management"),

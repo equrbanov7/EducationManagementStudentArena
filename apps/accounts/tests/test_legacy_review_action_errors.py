@@ -67,3 +67,57 @@ class LegacyReviewActionErrorTests(TestCase):
             self._client().post(reverse("accounts:legacy_review_action"), {"action": "verify", "fact_id": "42"})
         # Yalnız allow-list-dəki `action` loglanır və o, təmizlənmiş dəyərdir.
         self.assertIn("action=verify", captured.records[0].getMessage())
+
+
+class LegacyReviewObserverScopeTest(TestCase):
+    """Oxu rejimindəki aktor növbəni GÖRMƏLİDİR (sahib şikayəti, 2026-09-09).
+
+    Regressiya: `annotated_facts` əhatəni YALNIZ `final_score.entry` (yazma)
+    açarı ilə həll edirdi. `journal.correct` daşıyan müşahidəçidə
+    `has_structure_access` False çıxıb siyahı `none()`-a düşürdü — QA klonunda
+    növbədə 22 759 sətir olduğu halda ekran boş görünürdü.
+    """
+
+    def test_observer_scope_falls_back_to_the_read_permission(self):
+        from unittest.mock import patch
+
+        from apps.registrar import legacy_grade_review as review
+
+        class _Scope:
+            def __init__(self, ok):
+                self.has_structure_access = ok
+                self.is_org_wide = ok
+
+        calls = []
+
+        def fake_scope(user, organization, permission):
+            calls.append(permission)
+            # Yazma açarı əhatə vermir, oxu açarı verir.
+            return _Scope(permission == "journal.correct")
+
+        with patch("apps.organizations.models.OrgUnit.user_permission_scope", staticmethod(fake_scope)):
+            scope = review.actor_scope(object(), object())
+
+        self.assertEqual(calls, ["final_score.entry", "journal.correct"])
+        self.assertTrue(scope.has_structure_access)
+
+    def test_write_permission_scope_wins_when_present(self):
+        from unittest.mock import patch
+
+        from apps.registrar import legacy_grade_review as review
+
+        class _Scope:
+            has_structure_access = True
+            is_org_wide = True
+
+        calls = []
+
+        def fake_scope(user, organization, permission):
+            calls.append(permission)
+            return _Scope()
+
+        with patch("apps.organizations.models.OrgUnit.user_permission_scope", staticmethod(fake_scope)):
+            review.actor_scope(object(), object())
+
+        # Yazma açarı əhatə verirsə ikinci sorğu ATILMIR.
+        self.assertEqual(calls, ["final_score.entry"])

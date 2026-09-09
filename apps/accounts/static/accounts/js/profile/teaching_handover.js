@@ -1,599 +1,459 @@
 /**
- * «Fənn təhvili» bölməsi — dərs açılışının başqa müəllimə verilməsi.
+ * «Fənn təhvili» — seçim, xülasə və təsdiq axını.
  *
- * AJAX-safe (docs/frontend/AJAX_SAFE_JS_PATTERN.md): `window.EMSReady` sarğısı,
- * null-safe element axtarışları, idempotent init (kök elementə bayraq qoyulur).
- * Bölmə SPA panelidir — swap-dan sonra init təzə kök üzərində yenidən işə düşür.
+ * 2026-09-09: bölmə SPA-dan `ems_ui` server-render panelinə keçdi, ona görə bu
+ * fayl ARTIQ cədvəl çəkmir. Serverin verdiyi markup üzərində yalnız dörd iş var:
  *
- * Server müqaviləsi: `apps/accounts/views/handover/api.py` + `actions.py`.
- * Bütün dinamik dəyərlər `data-*` atributlarından oxunur (CSP: inline JS yoxdur).
+ *   1. SEÇİM      — hansı fənlər seçilib (səhifələr arasında saxlanılır);
+ *   2. GÖSTƏRİCİ  — sabit zolaq, KPI kartları və mərhələ zolağı seçimlə yenilənir;
+ *   3. XÜLASƏ     — təsdiqdən əvvəl NƏ KÖÇÜR / NƏ DƏYİŞMİR açıq yazılır;
+ *   4. ÇEKMECƏ    — sətir detalı (paylaşılan tək çekmecə sətirlə doldurulur).
  *
- * DİZAYN QƏRARI — sətir-səviyyəli hədəf PAYLAŞILAN modal seçici ilə verilir.
- * 25 sətir × 25 ayrı `EMSSearchableSelect` həm ağır olardı, həm də klaviatura
- * naviqasiyasını dolaşdırardı. Toplu tətbiq («seçilənlərə tətbiq et») eyni
- * məlumat modelini yazır — iki yol bir-birini əvəz edir, ayrılmır.
+ * GÖNDƏRİŞ BU FAYLDA DEYİL: təsdiq forması ortaq `teaching_office.js`
+ * mexanizmindədir (`form[data-tof-form]` → JSON POST → bölməni yenidən yüklə).
+ * Ona görə forma göndərilən anda əlavə JS lazım deyil — seçilmiş sətirlər
+ * dialoq açılanda GİZLİ `offering_ids` sahələri kimi formaya yazılır və
+ * «Yeni müəllim» seçicisinin adı birbaşa `new_instructor_id`-dir.
  *
- * Saf render funksiyaları `teaching_handover_render.js`-dədir.
+ * AJAX-safe (docs/frontend/AJAX_SAFE_JS_PATTERN.md): `EMSDelegate` + `EMSReady`,
+ * null-safe axtarışlar. Dinamik dəyərlər yalnız `data-*` atributlarından oxunur
+ * (CSP: inline JS yoxdur).
  */
-(function () {
+(function (window, document) {
     "use strict";
 
-    function init() {
-        var root = document.querySelector("[data-thx-root]");
-        var R = window.EMSHandoverRender;
-        if (!root || root._thxReady || !R) {
-            return;
+    var STORE_KEY = "ems.handover.selection";
+    var SECTION = "teaching-handover";
+
+    /* ---- Seçim yaddaşı ---------------------------------------------------
+       Seçim SƏHİFƏLƏR ARASINDA saxlanılır: toplu təhvildə 2-ci səhifəyə keçib
+       qayıdanda seçimin itməsi ən əsəb pozucu haldır. Yaddaş sessiyalıqdır —
+       brauzer bağlananda qalmır (köhnə seçim başqa gün «sürpriz» olmasın). */
+
+    function readStore() {
+        try {
+            return JSON.parse(window.sessionStorage.getItem(STORE_KEY) || "{}") || {};
+        } catch (err) {
+            return {};
         }
-        root._thxReady = true;
-
-        var i18nNode = root.querySelector("[data-thx-i18n]");
-        var D = i18nNode ? i18nNode.dataset : {};
-        var labels = {
-            students: D.students || "",
-            lessons: D.lessons || "",
-            marks: D.marks || "",
-            noInstructor: D.noInstructor || "—",
-            choose: D.choose || "",
-            change: D.change || "",
-            blocked: D.blocked || "",
-            revert: D.revert || "",
-            reverted: D.reverted || "",
-            revertBlocked: D.revertBlocked || "",
-            prev: D.prev || "",
-            next: D.next || "",
-            page: D.page || ""
-        };
-
-        var rowsBody = root.querySelector("[data-thx-rows]");
-        var historyBody = root.querySelector("[data-thx-history]");
-        var pagerHost = root.querySelector("[data-thx-pager]");
-        var historyPagerHost = root.querySelector("[data-thx-history-pager]");
-        var bar = root.querySelector("[data-thx-bar]");
-        var barText = root.querySelector("[data-thx-bar-text]");
-        var submitBtn = root.querySelector("[data-thx-submit]");
-        var applyAllBtn = root.querySelector("[data-thx-apply-all]");
-        var checkAll = root.querySelector("[data-thx-check-all]");
-        var pickerDialog = root.querySelector("[data-thx-picker]");
-        var confirmDialog = root.querySelector("[data-thx-dialog]");
-
-        // Seçim və hədəflər SƏHİFƏLƏR ARASI saxlanılır: 2-ci səhifəyə keçib
-        // qayıdanda seçimin itməsi toplu təhvildə ən əsəb pozucu haldır.
-        var targets = {};
-        var selected = {};
-        var pageRows = {};
-        var state = { page: 1, historyPage: 1, source: "", pickerRow: "", pending: null, lastFocus: null };
-
-        function fetchJSON(url, options) {
-            if (window.EMSCore && window.EMSCore.fetchJSON) {
-                return window.EMSCore.fetchJSON(url, options);
-            }
-            return fetch(url, { headers: { "X-Requested-With": "XMLHttpRequest" } }).then(function (response) {
-                return response.json();
-            });
-        }
-
-        function toast(text) {
-            if (window.EMSToast && window.EMSToast.show) {
-                window.EMSToast.show(text, "success");
-            }
-        }
-
-        // ── Süzgəclər ───────────────────────────────────────────────────────
-        function filterParams() {
-            var form = root.querySelector("[data-thx-filters]");
-            var params = new URLSearchParams();
-            if (form) {
-                var search = form.querySelector('input[name="q"]');
-                if (search && search.value.trim()) {
-                    params.set("q", search.value.trim());
-                }
-                ["period", "faculty", "kafedra"].forEach(function (name) {
-                    var node = form.querySelector('[name="' + name + '"]');
-                    if (node && node.value) {
-                        params.set(name, node.value);
-                    }
-                });
-                var onlyOpen = form.querySelector("[data-thx-only-open]");
-                if (onlyOpen && onlyOpen.checked) {
-                    params.set("scope", "open");
-                }
-            }
-            if (state.source) {
-                params.set("teacher", state.source);
-            }
-            params.set("page", String(state.page));
-            params.set("page_size", root.dataset.pageSize || "25");
-            return params;
-        }
-
-        // ── Cədvəl ──────────────────────────────────────────────────────────
-        function loadOfferings() {
-            if (!rowsBody) {
-                return;
-            }
-            R.skeleton(rowsBody, 7);
-            fetchJSON(root.dataset.offeringsUrl + "?" + filterParams().toString())
-                .then(function (data) {
-                    if (!data || !data.has_access) {
-                        R.message(rowsBody, 7, D.empty);
-                        R.pager(pagerHost, null, labels, function () {});
-                        return;
-                    }
-                    renderRows(data.results || []);
-                    R.pager(pagerHost, data, labels, function (page) {
-                        state.page = page;
-                        loadOfferings();
-                    });
-                })
-                .catch(function () {
-                    R.message(rowsBody, 7, D.error);
-                });
-        }
-
-        function renderRows(rows) {
-            pageRows = {};
-            rowsBody.innerHTML = "";
-            if (!rows.length) {
-                R.message(rowsBody, 7, D.empty);
-                syncBar();
-                return;
-            }
-            rows.forEach(function (row) {
-                pageRows[row.id] = row;
-                rowsBody.appendChild(
-                    R.offeringRow(row, { labels: labels, isSelected: !!selected[row.id], chosen: targets[row.id] })
-                );
-            });
-            syncCheckAll();
-            syncBar();
-        }
-
-        function refreshTargetCell(id) {
-            var row = pageRows[id];
-            var tr = rowsBody ? rowsBody.querySelector('[data-thx-row="' + id + '"]') : null;
-            if (row && tr && tr.lastElementChild) {
-                tr.replaceChild(R.targetCell(row, targets[id], labels), tr.lastElementChild);
-            }
-        }
-
-        // ── Seçim vəziyyəti ─────────────────────────────────────────────────
-        function selectedIds() {
-            return Object.keys(selected).filter(function (id) {
-                return selected[id];
-            });
-        }
-
-        function setRowSelected(id, on) {
-            if (on) {
-                selected[id] = true;
-            } else {
-                delete selected[id];
-            }
-            var tr = rowsBody ? rowsBody.querySelector('[data-thx-row="' + id + '"]') : null;
-            if (tr && !tr.classList.contains("is-blocked")) {
-                tr.classList.toggle("is-selected", !!on);
-            }
-        }
-
-        function syncCheckAll() {
-            if (!checkAll || !rowsBody) {
-                return;
-            }
-            var boxes = rowsBody.querySelectorAll("[data-thx-check]:not(:disabled)");
-            var checked = rowsBody.querySelectorAll("[data-thx-check]:not(:disabled):checked");
-            checkAll.checked = boxes.length > 0 && boxes.length === checked.length;
-            checkAll.indeterminate = checked.length > 0 && checked.length < boxes.length;
-        }
-
-        function syncBar() {
-            var ids = selectedIds();
-            var missingTarget = ids.some(function (id) {
-                return !targets[id];
-            });
-            if (bar) {
-                bar.hidden = ids.length === 0;
-            }
-            if (barText) {
-                // Xəbərdarlıq MƏTNLƏ verilir — düymənin sönük olması tək izah deyil.
-                barText.textContent =
-                    ids.length + " " + (D.selectedOne || "") + (missingTarget ? " · " + (D.needsTarget || "") : "");
-            }
-            if (applyAllBtn) {
-                applyAllBtn.disabled = ids.length === 0;
-            }
-            if (submitBtn) {
-                submitBtn.disabled = ids.length === 0 || missingTarget;
-            }
-        }
-
-        // ── Seçicilər (axtarışlı, debounce-lu, lazy səhifələnən) ────────────
-        function makePicker(hook, role, onChange) {
-            var host = root.querySelector(".js-" + hook);
-            if (!host || !window.EMSSearchableSelect) {
-                return null;
-            }
-            return window.EMSSearchableSelect.create(host, {
-                url: root.dataset.teachersUrl + "?role=" + role,
-                multi: false,
-                skeleton: true,
-                emptyText: D.pickerEmpty || "",
-                onChange: onChange || function () {}
-            });
-        }
-
-        var sourcePicker = makePicker("thx-source", "source", function () {
-            state.source = sourcePicker ? sourcePicker.value() : "";
-            state.page = 1;
-            loadOfferings();
-        });
-        var bulkPicker = makePicker("thx-bulk", "target");
-        var rowPicker = makePicker("thx-row", "target");
-
-        // ── Modal idarəsi ───────────────────────────────────────────────────
-        function openDialog(node) {
-            if (!node) {
-                return;
-            }
-            state.lastFocus = document.activeElement;
-            node.hidden = false;
-            var focusable = node.querySelector("button, textarea, input");
-            if (focusable) {
-                focusable.focus();
-            }
-        }
-
-        function closeDialog(node) {
-            if (!node) {
-                return;
-            }
-            node.hidden = true;
-            if (state.lastFocus && typeof state.lastFocus.focus === "function") {
-                state.lastFocus.focus();
-            }
-        }
-
-        function openRowPicker(id) {
-            var row = pageRows[id];
-            if (!row) {
-                return;
-            }
-            state.pickerRow = id;
-            var subject = root.querySelector("[data-thx-picker-subject]");
-            if (subject) {
-                subject.textContent = (row.subject_name || row.subject_code || "") + " · " + (row.group || "");
-            }
-            if (rowPicker) {
-                rowPicker.reset();
-            }
-            openDialog(pickerDialog);
-        }
-
-        function confirmRowPicker() {
-            if (!rowPicker || !state.pickerRow) {
-                return;
-            }
-            var id = rowPicker.value();
-            if (!id) {
-                return;
-            }
-            targets[state.pickerRow] = { id: id, name: rowPicker.text() };
-            setRowSelected(state.pickerRow, true);
-            var box = rowsBody.querySelector('[data-thx-check="' + state.pickerRow + '"]');
-            if (box) {
-                box.checked = true;
-            }
-            refreshTargetCell(state.pickerRow);
-            syncCheckAll();
-            syncBar();
-            closeDialog(pickerDialog);
-        }
-
-        function applyBulkTarget() {
-            if (!bulkPicker) {
-                return;
-            }
-            var id = bulkPicker.value();
-            if (!id) {
-                return;
-            }
-            selectedIds().forEach(function (offeringId) {
-                targets[offeringId] = { id: id, name: bulkPicker.text() };
-                refreshTargetCell(offeringId);
-            });
-            syncBar();
-        }
-
-        // ── Təsdiq + göndərmə ───────────────────────────────────────────────
-        function openConfirm(intent) {
-            if (!intent || !intent.summary.length) {
-                return;
-            }
-            state.pending = intent;
-            var title = root.querySelector("[data-thx-dialog-title]");
-            var reason = root.querySelector("[data-thx-reason]");
-            var error = root.querySelector("[data-thx-dialog-error]");
-            if (title) {
-                title.textContent = intent.title;
-            }
-            R.summaryCards(root.querySelector("[data-thx-dialog-body]"), intent.summary);
-            if (reason) {
-                reason.value = "";
-            }
-            if (error) {
-                error.hidden = true;
-            }
-            openDialog(confirmDialog);
-        }
-
-        function transferIntent() {
-            var ids = selectedIds().filter(function (id) {
-                return targets[id];
-            });
-            return {
-                title: D.confirmTitle || "",
-                summary: ids.map(function (id) {
-                    var row = pageRows[id] || {};
-                    var from = (row.instructor && row.instructor.name) || labels.noInstructor;
-                    return {
-                        head: (row.subject_name || row.subject_code || "") + " · " + (row.group || ""),
-                        meta:
-                            (row.period || "") +
-                            " · " +
-                            (row.students || 0) +
-                            " " +
-                            labels.students +
-                            " · " +
-                            (row.marks || 0) +
-                            " " +
-                            labels.marks,
-                        move: from + "  →  " + targets[id].name
-                    };
-                }),
-                payload: {
-                    action: "reassign",
-                    items: ids.map(function (id) {
-                        return { offering_id: id, new_instructor_id: targets[id].id };
-                    })
-                },
-                done: D.done || ""
-            };
-        }
-
-        function submitPending() {
-            if (!state.pending) {
-                return;
-            }
-            var reason = root.querySelector("[data-thx-reason]");
-            var error = root.querySelector("[data-thx-dialog-error]");
-            var confirmBtn = root.querySelector("[data-thx-dialog-confirm]");
-            var text = reason ? reason.value.trim() : "";
-            if (text.length < Number(root.dataset.minReason || 3)) {
-                showDialogError(error, D.reasonShort);
-                if (reason) {
-                    reason.focus();
-                }
-                return;
-            }
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-            }
-            var done = state.pending.done;
-            var payload = Object.assign({}, state.pending.payload, { reason: text });
-            fetchJSON(root.dataset.actionUrl, { method: "POST", data: payload })
-                .then(function () {
-                    closeDialog(confirmDialog);
-                    toast(done);
-                    targets = {};
-                    selected = {};
-                    state.pending = null;
-                    loadOfferings();
-                    loadHistory();
-                })
-                .catch(function (err) {
-                    var body = err && err.payload;
-                    showDialogError(error, (body && body.message) || D.error);
-                })
-                .finally(function () {
-                    if (confirmBtn) {
-                        confirmBtn.disabled = false;
-                    }
-                });
-        }
-
-        function showDialogError(node, text) {
-            if (node) {
-                node.textContent = text || "";
-                node.hidden = false;
-            }
-        }
-
-        // ── Tarixçə ─────────────────────────────────────────────────────────
-        function loadHistory() {
-            if (!historyBody) {
-                return;
-            }
-            R.skeleton(historyBody, 5, 3);
-            fetchJSON(root.dataset.historyUrl + "?page=" + state.historyPage)
-                .then(function (data) {
-                    if (!data || !data.has_access || !(data.results || []).length) {
-                        R.message(historyBody, 5, D.emptyHistory);
-                        R.pager(historyPagerHost, null, labels, function () {});
-                        return;
-                    }
-                    historyBody.innerHTML = "";
-                    data.results.forEach(function (row) {
-                        historyBody.appendChild(R.historyRow(row, labels));
-                    });
-                    R.pager(historyPagerHost, data, labels, function (page) {
-                        state.historyPage = page;
-                        loadHistory();
-                    });
-                })
-                .catch(function () {
-                    R.message(historyBody, 5, D.error);
-                });
-        }
-
-        // ── Tablar ──────────────────────────────────────────────────────────
-        function switchTab(name, focus) {
-            Array.prototype.forEach.call(root.querySelectorAll("[data-thx-tab]"), function (button) {
-                var on = button.dataset.thxTab === name;
-                button.classList.toggle("is-active", on);
-                button.setAttribute("aria-selected", on ? "true" : "false");
-                button.tabIndex = on ? 0 : -1;
-                if (on && focus) {
-                    button.focus();
-                }
-            });
-            Array.prototype.forEach.call(root.querySelectorAll("[data-thx-panel]"), function (panel) {
-                panel.hidden = panel.dataset.thxPanel !== name;
-            });
-            if (name === "history") {
-                loadHistory();
-            }
-        }
-
-        // ── Hadisələr ───────────────────────────────────────────────────────
-        root.addEventListener("click", function (event) {
-            var target = event.target;
-            var tab = target.closest("[data-thx-tab]");
-            if (tab) {
-                switchTab(tab.dataset.thxTab);
-                return;
-            }
-            if (target.closest("[data-thx-clear-source]")) {
-                if (sourcePicker) {
-                    sourcePicker.reset();
-                }
-                state.source = "";
-                state.page = 1;
-                loadOfferings();
-                return;
-            }
-            if (target.closest("[data-thx-apply-all]")) {
-                applyBulkTarget();
-                return;
-            }
-            var pick = target.closest("[data-thx-pick]");
-            if (pick) {
-                openRowPicker(pick.dataset.thxPick);
-                return;
-            }
-            if (target.closest("[data-thx-picker-confirm]")) {
-                confirmRowPicker();
-                return;
-            }
-            if (target.closest("[data-thx-picker-close]")) {
-                closeDialog(pickerDialog);
-                return;
-            }
-            if (target.closest("[data-thx-dialog-close]")) {
-                state.pending = null;
-                closeDialog(confirmDialog);
-                return;
-            }
-            if (target.closest("[data-thx-dialog-confirm]")) {
-                submitPending();
-                return;
-            }
-            if (target.closest("[data-thx-submit]")) {
-                openConfirm(transferIntent());
-                return;
-            }
-            var revert = target.closest("[data-thx-revert]");
-            if (revert) {
-                openConfirm({
-                    title: D.revertTitle || "",
-                    summary: [
-                        { head: revert.dataset.thxRevertLabel || "", meta: "", move: revert.dataset.thxRevertMove || "" }
-                    ],
-                    payload: { action: "revert", handover_id: revert.dataset.thxRevert },
-                    done: D.revertDone || ""
-                });
-            }
-        });
-
-        root.addEventListener("change", function (event) {
-            var box = event.target.closest("[data-thx-check]");
-            if (box) {
-                setRowSelected(box.dataset.thxCheck, box.checked);
-                syncCheckAll();
-                syncBar();
-                return;
-            }
-            if (event.target === checkAll && rowsBody) {
-                Array.prototype.forEach.call(
-                    rowsBody.querySelectorAll("[data-thx-check]:not(:disabled)"),
-                    function (node) {
-                        node.checked = checkAll.checked;
-                        setRowSelected(node.dataset.thxCheck, checkAll.checked);
-                    }
-                );
-                syncBar();
-                return;
-            }
-            if (event.target.closest("[data-thx-filters]")) {
-                state.page = 1;
-                loadOfferings();
-            }
-        });
-
-        var searchTimer = null;
-        root.addEventListener("input", function (event) {
-            if (!event.target.matches('[data-thx-filters] input[name="q"]')) {
-                return;
-            }
-            window.clearTimeout(searchTimer);
-            searchTimer = window.setTimeout(function () {
-                state.page = 1;
-                loadOfferings();
-            }, 300);
-        });
-
-        root.addEventListener("keydown", function (event) {
-            if (event.key === "Escape") {
-                if (pickerDialog && !pickerDialog.hidden) {
-                    closeDialog(pickerDialog);
-                } else if (confirmDialog && !confirmDialog.hidden) {
-                    state.pending = null;
-                    closeDialog(confirmDialog);
-                }
-                return;
-            }
-            var tab = event.target.closest("[data-thx-tab]");
-            if (tab && (event.key === "ArrowRight" || event.key === "ArrowLeft")) {
-                event.preventDefault();
-                switchTab(tab.dataset.thxTab === "transfer" ? "history" : "transfer", true);
-            }
-        });
-
-        // ── Süzgəc açılışları + ilk yükləmə ─────────────────────────────────
-        fetchJSON(root.dataset.optionsUrl)
-            .then(function (data) {
-                if (!data || !data.has_access) {
-                    return;
-                }
-                [
-                    ["periods", data.periods],
-                    ["faculties", data.faculties],
-                    ["kafedras", data.kafedras]
-                ].forEach(function (pair) {
-                    var select = root.querySelector('[data-thx-option="' + pair[0] + '"]');
-                    if (!select) {
-                        return;
-                    }
-                    (pair[1] || []).forEach(function (option) {
-                        var node = document.createElement("option");
-                        node.value = option.id;
-                        node.textContent = option.label;
-                        select.appendChild(node);
-                    });
-                });
-            })
-            .catch(function () {});
-
-        loadOfferings();
     }
 
-    window.EMSReady(init);
-})();
+    function writeStore(value) {
+        try {
+            window.sessionStorage.setItem(STORE_KEY, JSON.stringify(value));
+        } catch (err) {
+            /* private mode / kvota — seçim yalnız bu səhifədə yaşayır */
+        }
+    }
+
+    function clearStore() {
+        try {
+            window.sessionStorage.removeItem(STORE_KEY);
+        } catch (err) {
+            /* yuxarıdakı ilə eyni səbəb */
+        }
+    }
+
+    function root() {
+        return document.querySelector("[data-thx-root]");
+    }
+
+    function labels(host) {
+        var node = host ? host.querySelector("[data-thx-i18n]") : null;
+        return node ? node.dataset : {};
+    }
+
+    function num(value) {
+        var parsed = parseInt(value, 10);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    /* ---- Göstəricilər ---------------------------------------------------- */
+
+    function totals(store) {
+        var sum = { count: 0, students: 0, lessons: 0, marks: 0 };
+        Object.keys(store).forEach(function (id) {
+            var row = store[id] || {};
+            sum.count += 1;
+            sum.students += num(row.students);
+            sum.lessons += num(row.lessons);
+            sum.marks += num(row.marks);
+        });
+        return sum;
+    }
+
+    function setKpi(host, key, value) {
+        var tile = host.querySelector('[data-ems-kpi-key="' + key + '"] .ems-kpi__value');
+        if (tile) {
+            tile.textContent = String(value);
+        }
+    }
+
+    /** Mərhələ zolağı seçimlə birlikdə irəliləyir — «hansı addımdayam» sualı
+     *  cavabsız qalmasın. 2-ci addım seçim varsa «done», 3-cü isə «current». */
+    function paintSteps(host, count) {
+        var steps = host.querySelectorAll(".ems-steps .ems-step");
+        if (steps.length < 4) {
+            return;
+        }
+        setStep(steps[1], count ? "done" : "current");
+        setStep(steps[2], count ? "current" : "todo");
+        setStep(steps[3], "todo");
+    }
+
+    function setStep(el, state) {
+        el.className = "ems-step ems-step--" + state;
+    }
+
+    function refresh(host) {
+        host = host || root();
+        if (!host) {
+            return;
+        }
+        var store = readStore();
+        var sum = totals(store);
+        var text = labels(host);
+        var bar = host.querySelector("[data-thx-bar]");
+        var barText = host.querySelector("[data-thx-bar-text]");
+
+        if (barText) {
+            barText.textContent = sum.count + " " + (text.selectedOne || "");
+        }
+        if (bar) {
+            bar.hidden = sum.count === 0;
+        }
+        setKpi(host, "selected", sum.count);
+        setKpi(host, "students", sum.students);
+        paintSteps(host, sum.count);
+
+        var boxes = host.querySelectorAll("[data-thx-select]");
+        for (var i = 0; i < boxes.length; i += 1) {
+            boxes[i].checked = Object.prototype.hasOwnProperty.call(store, boxes[i].value);
+        }
+        var all = host.querySelector("[data-thx-select-all]");
+        if (all) {
+            var open = host.querySelectorAll("[data-thx-select]:not([disabled])");
+            var picked = host.querySelectorAll("[data-thx-select]:not([disabled]):checked");
+            all.checked = open.length > 0 && open.length === picked.length;
+            all.indeterminate = picked.length > 0 && picked.length < open.length;
+        }
+    }
+
+    function rowInfo(box) {
+        return {
+            name: box.getAttribute("data-thx-name") || "",
+            group: box.getAttribute("data-thx-group") || "",
+            students: num(box.getAttribute("data-thx-students")),
+            lessons: num(box.getAttribute("data-thx-lessons")),
+            marks: num(box.getAttribute("data-thx-marks")),
+        };
+    }
+
+    function maxBulk(host) {
+        var limit = num(host && host.getAttribute("data-thx-max-bulk"));
+        return limit > 0 ? limit : 100;
+    }
+
+    function toast(message, kind) {
+        if (message && window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, kind || "info");
+        }
+    }
+
+    /** Seçimi dəyişir; `false` qaytarırsa hədd səbəbindən qəbul edilmədi.
+     *
+     *  Toplu həddi (`MAX_BULK_ROWS`) SERVERDƏ də var və 400 verir — amma
+     *  istifadəçi 120 sətir seçib «Təhvil ver» basandan SONRA xəta almamalıdır;
+     *  hədd elə seçim anında deyilir. */
+    function toggle(host, box, on) {
+        var store = readStore();
+        if (on) {
+            if (!Object.prototype.hasOwnProperty.call(store, box.value)) {
+                if (Object.keys(store).length >= maxBulk(host)) {
+                    box.checked = false;
+                    return false;
+                }
+            }
+            store[box.value] = rowInfo(box);
+        } else {
+            delete store[box.value];
+        }
+        writeStore(store);
+        return true;
+    }
+
+    /* ---- Təsdiq pəncərəsi ------------------------------------------------ */
+
+    /** Seçilmiş sətirləri GİZLİ sahələr kimi formaya yazır.
+     *
+     *  Server müqaviləsi: `offering_ids` (təkrarlanan) + `new_instructor_id`.
+     *  Beləcə göndəriş anında JS lazım olmur — ortaq `teaching_office.js`
+     *  formanı olduğu kimi POST edir (bir dinləyici, bir yol). */
+    function fillForm(form, store) {
+        var old = form.querySelectorAll("[data-thx-item]");
+        for (var i = 0; i < old.length; i += 1) {
+            old[i].parentNode.removeChild(old[i]);
+        }
+        var anchor = form.querySelector(".ems-dialog__body") || form;
+        Object.keys(store).forEach(function (id) {
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "offering_ids";
+            input.value = id;
+            input.setAttribute("data-thx-item", "1");
+            anchor.appendChild(input);
+        });
+    }
+
+    function paintSummary(host, form, store) {
+        var list = form.querySelector("[data-thx-summary-list]");
+        var total = form.querySelector("[data-thx-summary-total]");
+        var text = labels(host);
+        var sum = totals(store);
+        if (list) {
+            list.textContent = "";
+            Object.keys(store).forEach(function (id) {
+                var row = store[id] || {};
+                var li = document.createElement("li");
+                var name = document.createElement("b");
+                name.textContent = row.name || id;
+                li.appendChild(name);
+                li.appendChild(
+                    document.createTextNode(
+                        (row.group ? " · " + row.group : "") +
+                            " — " +
+                            num(row.students) + " " + (text.students || "") + " · " +
+                            num(row.lessons) + " " + (text.lessons || "") + " · " +
+                            num(row.marks) + " " + (text.marks || "")
+                    )
+                );
+                list.appendChild(li);
+            });
+        }
+        if (total) {
+            total.textContent =
+                sum.count + " " + (text.selectedOne || "") + " — " +
+                sum.students + " " + (text.students || "") + " · " +
+                sum.lessons + " " + (text.lessons || "") + " · " +
+                sum.marks + " " + (text.marks || "");
+        }
+    }
+
+    function openConfirm(host) {
+        var dialog = document.getElementById("thxConfirmDialog");
+        var form = dialog ? dialog.querySelector("form") : null;
+        if (!dialog || !form) {
+            return;
+        }
+        var store = readStore();
+        if (!Object.keys(store).length) {
+            toast(labels(host).needsSelection, "warning");
+            return;
+        }
+        var error = form.querySelector("[data-ems-form-error]");
+        if (error) {
+            error.hidden = true;
+            error.textContent = "";
+        }
+        fillForm(form, store);
+        paintSummary(host, form, store);
+        if (window.EMSOverlay) {
+            window.EMSOverlay.open(dialog);
+        }
+    }
+
+    /* ---- Sətir çekmecəsi -------------------------------------------------- */
+
+    function fillDrawer(host, payload) {
+        var drawer = document.getElementById("thxRowDrawer");
+        if (!drawer) {
+            return null;
+        }
+        var map = {
+            subject: payload.subject_name || "",
+            group: payload.group || "—",
+            period: payload.period || "—",
+            instructor: payload.instructor || (labels(host).none || "—"),
+            students: payload.students,
+            lessons: payload.lessons,
+            marks: payload.marks,
+        };
+        Object.keys(map).forEach(function (key) {
+            var node = drawer.querySelector("[data-thx-d-" + key + "]");
+            if (node) {
+                node.textContent = String(map[key] === undefined || map[key] === "" ? "—" : map[key]);
+            }
+        });
+        var why = drawer.querySelector("[data-thx-d-why]");
+        var whyText = drawer.querySelector("[data-thx-d-why-text]");
+        if (why && whyText) {
+            whyText.textContent = payload.blocker_text || "";
+            why.hidden = !payload.blocker_text;
+        }
+        var action = drawer.querySelector("[data-thx-drawer-transfer]");
+        if (action) {
+            action.hidden = !payload.can_transfer;
+            action.value = payload.id || "";
+        }
+        return drawer;
+    }
+
+    function readPayload(btn) {
+        try {
+            return JSON.parse(btn.getAttribute("data-thx-payload") || "{}") || {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    /** Tək sətri seçib təsdiq pəncərəsini açır (seçimi ƏVƏZ edir, üstünə
+     *  yığmır — «bu fənni ver» düyməsi məhz BU fənni nəzərdə tutur). */
+    function transferOnly(host, id) {
+        var box = host.querySelector('[data-thx-select][value="' + id + '"]');
+        if (!box || box.disabled) {
+            return;
+        }
+        clearStore();
+        toggle(host, box, true);
+        refresh(host);
+        openConfirm(host);
+    }
+
+    /* ---- Hadisələr -------------------------------------------------------- */
+
+    window.EMSDelegate.on("change", "[data-thx-select]", function (event, box) {
+        var host = box.closest("[data-thx-root]");
+        if (!toggle(host, box, box.checked)) {
+            toast(labels(host).maxBulk, "warning");
+        }
+        refresh(host);
+    });
+
+    /* «Bu səhifədə təhvilə açıq olanların hamısını seç» — BLOKLANMIŞ sətirlər
+       qəsdən kənarda qalır (onların qutusu `disabled`-dır) və istifadəçiyə
+       neçəsinin buraxıldığı deyilir; səssiz atlama «niyə 25 yox, 22 seçildi»
+       sualını doğurardı. */
+    window.EMSDelegate.on("change", "[data-thx-select-all]", function (event, box) {
+        var host = box.closest("[data-thx-root]");
+        if (!host) {
+            return;
+        }
+        var open = host.querySelectorAll("[data-thx-select]:not([disabled])");
+        var blocked = host.querySelectorAll("[data-thx-select][disabled]").length;
+        var refused = false;
+        for (var i = 0; i < open.length; i += 1) {
+            if (!toggle(host, open[i], box.checked)) {
+                refused = true;
+            }
+        }
+        var text = labels(host);
+        if (refused) {
+            toast(text.maxBulk, "warning");
+        } else if (box.checked && blocked) {
+            toast(text.blockedSkip, "info");
+        }
+        refresh(host);
+    });
+
+    window.EMSDelegate.on("click", "[data-thx-clear-selection]", function (event, btn) {
+        event.preventDefault();
+        clearStore();
+        refresh(btn.closest("[data-thx-root]"));
+    });
+
+    window.EMSDelegate.on("click", "[data-thx-confirm-open]", function (event, btn) {
+        event.preventDefault();
+        openConfirm(btn.closest("[data-thx-root]"));
+    });
+
+    window.EMSDelegate.on("click", "[data-thx-detail]", function (event, btn) {
+        event.preventDefault();
+        var host = btn.closest("[data-thx-root]");
+        var drawer = fillDrawer(host, readPayload(btn));
+        if (drawer && window.EMSOverlay) {
+            window.EMSOverlay.open(drawer);
+        }
+    });
+
+    window.EMSDelegate.on("click", "[data-thx-row-transfer]", function (event, btn) {
+        event.preventDefault();
+        transferOnly(btn.closest("[data-thx-root]"), btn.value);
+    });
+
+    window.EMSDelegate.on("click", "[data-thx-drawer-transfer]", function (event, btn) {
+        event.preventDefault();
+        var host = root();
+        if (!host) {
+            return;
+        }
+        if (window.EMSOverlay) {
+            window.EMSOverlay.close(document.getElementById("thxRowDrawer"));
+        }
+        transferOnly(host, btn.value);
+    });
+
+    /* Tab keçidi SERVER tərəfdədir (lazy): «Tarixçə» açılana qədər tarixçə
+       heç hesablanmır. `ems_ui/nav.js` panelləri dərhal dəyişir (skeleton
+       görünür), biz isə bölməni doğru tabla yenidən yükləyirik. */
+    document.addEventListener("ems:tab", function (event) {
+        var host = root();
+        var detail = event && event.detail ? event.detail : {};
+        if (!host || !detail.tab || !host.contains(event.target)) {
+            return;
+        }
+        if ((host.getAttribute("data-thx-tab") || "") === detail.tab) {
+            return;
+        }
+        var param = host.getAttribute("data-thx-tab-param") || "handover_tab";
+        var url = new URL(window.location.pathname, window.location.origin);
+        var search = new URLSearchParams(window.location.search);
+        search.set("section", SECTION);
+        search.delete("th_page");
+        if (detail.tab === "history") {
+            search.set(param, "history");
+        } else {
+            search.delete(param);
+        }
+        url.search = search.toString();
+        if (window.EMSProfileLoadSection) {
+            window.EMSProfileLoadSection(SECTION, url.toString());
+        } else {
+            window.location.assign(url.toString());
+        }
+    });
+
+    /* Təhvil BAŞ TUTANDAN sonra seçim yaddaşı təmizlənməlidir — əks halda
+       bölmə yenidən yüklənəndə sabit zolaq artıq KÖÇMÜŞ fənləri «seçilib» kimi
+       göstərərdi.
+
+       Göndərişin özü ortaq `teaching_office.js`-dədir və uğur callback-i bizə
+       görünmür; ona görə bayraq qoyulur və bölmə yenidən YÜKLƏNƏNDƏ (yalnız
+       uğurlu POST bunu edir) yaddaş boşaldılır. Uğursuz göndərişdə dialoq açıq
+       qalır, gizli `offering_ids` sahələri yerindədir — təkrar cəhd işləyir. */
+    var pendingSubmit = false;
+
+    window.EMSDelegate.on("submit", "#thxConfirmDialog form", function () {
+        pendingSubmit = true;
+    });
+
+    document.addEventListener("profile:section:loaded", function (event) {
+        var detail = (event && event.detail) || {};
+        if (detail.section && detail.section !== SECTION) {
+            return;
+        }
+        if (pendingSubmit) {
+            pendingSubmit = false;
+            clearStore();
+        }
+    });
+
+    window.EMSReady(function () {
+        var host = root();
+        if (!host) {
+            return;
+        }
+        // Seçim səhifələr arasında saxlanılır (bax yuxarıdakı «Seçim yaddaşı»);
+        // swap-dan sonra qutular yaddaşdan geri işarələnir.
+        refresh(host);
+    });
+})(window, document);

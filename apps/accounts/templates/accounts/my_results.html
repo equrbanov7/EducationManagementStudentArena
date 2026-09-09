@@ -76,21 +76,25 @@
                 <div class="results-academic-filters">
                     <div class="results-academic-filter">
                         <label class="results-academic-filter__label" for="myResultsPageYear">{% trans "Tədris ili" context "profile.results.academic" %}</label>
-                        <select id="myResultsPageYear" name="year" class="form-control" data-my-results-filter>
-                            <option value="">{% trans "Bütün illər" context "profile.results.academic" %}</option>
-                            {% for year in year_options %}
-                            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="myResultsPageYear" name="year" class="form-control bootstrap-single-select__native" data-my-results-filter data-bootstrap-select>
+                                <option value="">{% trans "Bütün illər" context "profile.results.academic" %}</option>
+                                {% for year in year_options %}
+                                <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     <div class="results-academic-filter">
                         <label class="results-academic-filter__label" for="myResultsPageSeason">{% trans "Semestr" context "profile.results.academic" %}</label>
-                        <select id="myResultsPageSeason" name="season" class="form-control" data-my-results-filter>
-                            <option value="">{% trans "Bütün semestrlər" context "profile.results.academic" %}</option>
-                            {% for season in season_options %}
-                            <option value="{{ season }}" {% if season == selected_season %}selected{% endif %}>{{ season }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="myResultsPageSeason" name="season" class="form-control bootstrap-single-select__native" data-my-results-filter data-bootstrap-select>
+                                <option value="">{% trans "Bütün semestrlər" context "profile.results.academic" %}</option>
+                                {% for season in season_options %}
+                                <option value="{{ season }}" {% if season == selected_season %}selected{% endif %}>{{ season }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                     <p class="results-academic-filters__hint">
                         {% trans "İl və semestr süzgəci yalnız akademik (jurnal) fənn nəticələrinə aiddir." context "profile.results.academic" %}
