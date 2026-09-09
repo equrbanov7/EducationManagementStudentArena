@@ -44,7 +44,7 @@ TƏXİRƏ SALINANLAR (hesabatda sənədləşdirilib):
         {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=sb_dup_title banner_body=subject_catalog_section.duplicate_note %}
     {% endif %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-catalog" filter_prefix="sb_" filter_fields=subject_catalog_section.filter_fields filter_count_label=subject_catalog_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-catalog" filter_prefix="sb_" filter_fields=subject_catalog_section.filter_fields filter_count_label=subject_catalog_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if subject_catalog_section.can_manage %}
     <div class="tof__toolbar">

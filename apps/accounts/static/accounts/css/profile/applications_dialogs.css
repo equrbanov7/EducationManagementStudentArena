@@ -124,6 +124,18 @@
     gap: 5px;
 }
 
+/* Kataloq boş olduqda göstərilən izah — sahə səssizcə boş qalmır. */
+.apx-options__empty {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px dashed var(--ems-warning-bd, #fde68a);
+    border-radius: 10px;
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
 .apx-option {
     display: flex;
     align-items: center;

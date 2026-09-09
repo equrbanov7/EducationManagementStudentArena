@@ -243,6 +243,7 @@ def build_workload_approval_section(request, section, *, active_organization, al
         _year_field("wa_year", pgettext(_CTX_APPROVAL, "Tədris ili"), payload["year"], payload["years"]),
         {
             "name": "wa_faculty",
+            "searchable": True,
             "label": pgettext(_CTX_APPROVAL, "Fakültə"),
             "kind": "select",
             "value": payload["faculty_id"],
@@ -381,6 +382,7 @@ def build_workload_overview_section(request, section, *, active_organization, al
         _year_field("wo_year", pgettext(_CTX_OVERVIEW, "Tədris ili"), payload["year"], payload["years"]),
         {
             "name": "wo_faculty",
+            "searchable": True,
             "label": pgettext(_CTX_OVERVIEW, "Fakültə"),
             "kind": "select",
             "value": payload["faculty_id"],

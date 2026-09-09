@@ -156,6 +156,7 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
     section["filter_fields"] = [
         {
             "name": "cu_program",
+            "searchable": True,
             "label": pgettext(_CTX_PLAN, "İxtisas"),
             "kind": "select",
             "value": payload["filters"]["program"],
@@ -286,6 +287,7 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         },
         {
             "name": "gr_faculty",
+            "searchable": True,
             "label": pgettext(_CTX_GROUPS, "Fakültə"),
             "kind": "select",
             "value": filters["faculty"],
@@ -463,6 +465,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         },
         {
             "name": "sm_chair",
+            "searchable": True,
             "label": pgettext(_CTX_SEM, "Kafedra"),
             "kind": "select",
             "value": payload["filters"]["chair"],

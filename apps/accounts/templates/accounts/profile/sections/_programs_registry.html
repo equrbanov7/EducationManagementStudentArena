@@ -36,7 +36,7 @@ saxlanılmır, hər sorğuda hesablanır.
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=programs_registry_section.kpi_tiles kpi_variant="4" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="programs-registry" filter_prefix="pg_" filter_fields=programs_registry_section.filter_fields filter_count_label=programs_registry_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="programs-registry" filter_prefix="pg_" filter_fields=programs_registry_section.filter_fields filter_count_label=programs_registry_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if programs_registry_section.can_manage %}
     <div class="tof__toolbar">
