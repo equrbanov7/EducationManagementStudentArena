@@ -40,9 +40,10 @@
     padding: 0.25rem 0.5rem;
 }
 .ems-ss:focus-within {
-    /* 2026-09-08 (sahib): qalın göy daxili haşiyə pis görünürdü — yumşaq ton. */
-    border-color: var(--ems-neutral-400, #94a3b8);
-    box-shadow: 0 0 0 3px var(--ems-primary-100);
+    /* 2026-09-09 (sahib): «inputların içində göy border olmasın». 3px açıq-göy
+       halqa daxili haşiyə kimi oxunurdu — nazik neytral kontur qalır. */
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
 }
 
 /* ── Çip zolağı ─────────────────────────────────────────────────────────── */

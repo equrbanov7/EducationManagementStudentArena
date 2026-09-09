@@ -45,28 +45,40 @@ məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
 
 <div class="ems-field" data-sr-need="group" hidden>
     <label class="ems-field__label" for="srTargetGroup">{% trans "Yeni qrup" context "accounts.student_registry" %}</label>
-    <select class="ems-select" id="srTargetGroup" name="target_group" data-sr-group-select>
-        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="srTargetGroup" name="target_group" data-sr-group-select
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.student_registry' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.student_registry' %}">
+            <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+        </select>
+    </div>
     <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki, boş yeri olan qruplar." context "accounts.student_registry" %}</p>
 </div>
 
 <div class="ems-field" data-sr-need="program" hidden>
     <label class="ems-field__label" for="srTargetProgram">{% trans "Yeni ixtisas" context "accounts.student_registry" %}</label>
-    <select class="ems-select" id="srTargetProgram" name="target_program" data-sr-program-select>
-        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="srTargetProgram" name="target_program" data-sr-program-select
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'İxtisas adı ilə axtar…' context 'accounts.student_registry' %}"
+                data-live-search-empty="{% trans 'Uyğun ixtisas tapılmadı' context 'accounts.student_registry' %}">
+            <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+        </select>
+    </div>
     <p class="ems-field__hint">{% trans "Yeni ixtisasın həmin qəbul ili üçün tədris planı olmalıdır." context "accounts.student_registry" %}</p>
 </div>
 
 <div class="ems-field" data-sr-need="form" hidden>
     <label class="ems-field__label" for="srTargetForm">{% trans "Yeni təhsil forması" context "accounts.student_registry" %}</label>
-    <select class="ems-select" id="srTargetForm" name="target_form">
-        <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
-        {% for option in student_registry_section.form_options %}
-            <option value="{{ option.value }}">{{ option.label }}</option>
-        {% endfor %}
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="srTargetForm" name="target_form" data-bootstrap-select>
+            <option value="">{% trans "Seçin" context "accounts.student_registry" %}</option>
+            {% for option in student_registry_section.form_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
 </div>
 
 <div class="ems-field" data-sr-need="until" hidden>

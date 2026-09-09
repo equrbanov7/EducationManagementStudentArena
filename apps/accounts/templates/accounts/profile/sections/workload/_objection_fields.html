@@ -6,19 +6,26 @@ kataloqdan gəlir, şablonda təkrar yazılmır. Səbəb məcburiyyəti (≥20 s
 ORTAQ `_reason_dialog.html` qatındadır.{% endcomment %}
 <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="wlm-obj-assignment">{% trans "Fənn / iş" context "accounts.workload" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-    <select class="ems-select" id="wlm-obj-assignment" name="assignment" required>
-        <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
-        {% for target in my_workload_section.objection_targets %}
-        <option value="{{ target.id }}">{{ target.label }}</option>
-        {% endfor %}
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="wlm-obj-assignment" name="assignment" required
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Fənn adı ilə axtar…' context 'accounts.workload' %}"
+                data-live-search-empty="{% trans 'Uyğun fənn tapılmadı' context 'accounts.workload' %}">
+            <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
+            {% for target in my_workload_section.objection_targets %}
+            <option value="{{ target.id }}">{{ target.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
 </div>
 <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="wlm-obj-reason">{% trans "Səbəb" context "accounts.workload" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-    <select class="ems-select" id="wlm-obj-reason" name="reason_key" required>
-        <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
-        {% for reason in my_workload_section.objection_reasons %}
-        <option value="{{ reason.key }}">{{ reason.label }}</option>
-        {% endfor %}
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="wlm-obj-reason" name="reason_key" required data-bootstrap-select>
+            <option value="">{% trans "Seçin" context "accounts.workload" %}</option>
+            {% for reason in my_workload_section.objection_reasons %}
+            <option value="{{ reason.key }}">{{ reason.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
 </div>

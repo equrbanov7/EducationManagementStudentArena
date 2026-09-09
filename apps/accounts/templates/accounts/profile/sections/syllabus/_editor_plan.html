@@ -94,26 +94,37 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
             </p>
             {% endif %}
           </td>
+          {% comment %}Seçicilər `bootstrap-single-select` ilə verilir (layihə qaydası:
+          xam native `<select>` göndərilmir). Native element `data-week` açarını və
+          dəyəri OLDUĞU KİMİ saxlayır — toplayıcı (`syllabus_editor_fields.js`) onu
+          `tr.querySelector("[data-week='…']").value` ilə oxuyur, `change` isə
+          delegasiya ilə tutulur (enhancer `bubbles: true` göndərir).{% endcomment %}
           {% for cell in row.cells %}
           <td class="syl-weeks__cell">
-            <select class="syl-select syl-select--xs" data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
-                    aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
-              {% comment %}Seçimlər SƏTİR-SƏTİR gəlir: mənbədəki saat 4-dən böyük
-              ola bilər, siyahıda olmasa `<select>` onu itirər və autosave 0 yazardı.{% endcomment %}
-              {% for value in cell.choices %}
-              <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
-              {% endfor %}
-            </select>
+            <div class="bootstrap-single-select bootstrap-single-select--ems syl-cellselect">
+              <select class="syl-select syl-select--xs bootstrap-single-select__native"
+                      data-bootstrap-select data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
+                      aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
+                {% comment %}Seçimlər SƏTİR-SƏTİR gəlir: mənbədəki saat 4-dən böyük
+                ola bilər, siyahıda olmasa `<select>` onu itirər və autosave 0 yazardı.{% endcomment %}
+                {% for value in cell.choices %}
+                <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
+                {% endfor %}
+              </select>
+            </div>
           </td>
           {% endfor %}
           <td>
-            <select class="syl-select syl-select--sm" data-week="outcome" {% if se.readonly %}disabled{% endif %}
-                    aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
-              <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
-              {% for tag in row.outcome_choices %}
-              <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
-              {% endfor %}
-            </select>
+            <div class="bootstrap-single-select bootstrap-single-select--ems syl-outcomeselect">
+              <select class="syl-select syl-select--sm bootstrap-single-select__native"
+                      data-bootstrap-select data-week="outcome" {% if se.readonly %}disabled{% endif %}
+                      aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
+                <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
+                {% for tag in row.outcome_choices %}
+                <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </td>
         </tr>
         {% endfor %}

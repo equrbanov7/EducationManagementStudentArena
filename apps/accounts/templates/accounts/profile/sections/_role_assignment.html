@@ -1,7 +1,67 @@
+{% load i18n static %}
+{% comment %}«Rol təyin et» — təşkilat daxili ƏSAS rol (2026-09-09 yenidən qurulub).
+
+Kontekst: `apps/accounts/views/profile/_sections/role_assignment.py`. Siyahı
+ŞƏXS üzrədir (əvvəl üzvlük sətirləri idi və eyni adam bir neçə dəfə görünürdü);
+şəxsin bütün rolları nişan kimi göstərilir. Rol kataloqu «Rolları idarə et»
+bölməsi ilə EYNİ mənbədəndir.
+
+Göndəriş axını dəyişməyib: düymə təsdiq dialoqunu açır → `prepare_operation`
+imzalı token alır → əsl POST həmin tokenlə gedir (`roles_ui.js`).
+⚠️ `<h1>` YAZILMIR — qabıq verir. CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
 {% if 'role-assignment' in allowed_sections %}
+{% with sec=role_assignment_section %}
+{% trans "Əməliyyatı təsdiqlə" context "accounts.role_assignment" as ra_confirm_title %}
+{% trans "Rol dəyişikliyi audit jurnalına yazılır — məlumatları yoxlayın." context "accounts.role_assignment" as ra_confirm_sub %}
+{% trans "Bu bölmə nə edir?" context "accounts.role_assignment" as ra_help_title %}
 <section class="profile-section-panel profile-section--role-assignment {% if active_section == 'role-assignment' %}is-active{% endif %}"
          data-profile-section-panel="role-assignment"
          data-source-url="{{ profile_base_url }}?section=role-assignment">
-    {% include "accounts/partials/_role_assignment_content.html" with organization=role_assignment_section.organization members=role_assignment_section.members assignable_roles=role_assignment_section.assignable_roles search_query=role_assignment_section.search_query unassigned_search_query=role_assignment_section.unassigned_search_query unassigned_users=role_assignment_section.unassigned_users can_assign_roles=role_assignment_section.can_assign_roles access_denied_message=role_assignment_section.access_denied_message members_page_param=role_assignment_section.members_page_param members_pagination_query=role_assignment_section.members_pagination_query unassigned_page_param=role_assignment_section.unassigned_page_param unassigned_pagination_query=role_assignment_section.unassigned_pagination_query post_next_url=role_assignment_section.post_next_url embedded_in_profile=True profile_base_url=profile_base_url %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-2">
+
+    {% if not sec.has_access %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}
+    {% else %}
+    <div class="rls" data-roles-root data-roles-section="role-assignment"
+         data-roles-action-url="{{ sec.action_url }}"
+         data-roles-next="{{ sec.post_next_url }}"
+         data-t-attach="{% trans 'İstifadəçini təşkilata əlavə etməyi təsdiqləyin.' context 'accounts.role_assignment' %}"
+         data-t-update="{% trans 'İstifadəçinin rolunu yeniləməyi təsdiqləyin.' context 'accounts.role_assignment' %}"
+         data-t-error="{% trans 'Əməliyyat tamamlanmadı. Yenidən cəhd edin.' context 'accounts.role_assignment' %}"
+         data-t-working="{% trans 'Göndərilir…' context 'accounts.role_assignment' %}"
+         data-t-confirm="{% trans 'Təsdiqlə' context 'accounts.role_assignment' %}">
+
+        <form id="roleAssignmentActionForm" class="rls-csrf" hidden>{% csrf_token %}</form>
+
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle header_actions_include="accounts/profile/sections/roles/_assign_header_actions.html" %}
+
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+        {% include "partials/ems_ui/_filter_bar.html" with filter_section="role-assignment" filter_prefix="ra_" filter_fields=sec.filter_fields filter_count_label=sec.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+        <div class="rls-body" data-ems-filter-target>
+            {% include "partials/ems_ui/_data_table.html" with table_columns=sec.columns table_rows=sec.table_rows table_state=sec.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-users-slash" state_title=sec.state_title state_body=sec.state_body %}
+            {% include "partials/_pagination.html" with page_obj=sec.page_obj page_param="ra_page" extra_query=sec.pagination_query %}
+        </div>
+
+        <div class="rls-pending">
+            <h2 class="rls-pending__title">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                {% trans "Gözləyən müraciətlər" context "accounts.role_assignment" %}
+            </h2>
+            <p class="rls-pending__lead">
+                {% trans "Təşkilata qoşulmaq istəyən, hələ üzvlüyü olmayan şəxslər. Rol seçib «Təşkilata əlavə et» ilə qəbul edin." context "accounts.role_assignment" %}
+            </p>
+            {% include "partials/ems_ui/_data_table.html" with table_columns=sec.pending_columns table_rows=sec.pending_rows table_state=sec.pending_state table_zebra=True state_kind="empty" state_icon="fa-user-clock" state_title=sec.pending_state_title state_body=sec.pending_state_body %}
+            {% include "partials/_pagination.html" with page_obj=sec.pending_page_obj page_param="ra_pending_page" extra_query=sec.pending_pagination_query %}
+        </div>
+
+        {% include "partials/ems_ui/_dialog.html" with dialog_id="roleAssignmentActionConfirmModal" dialog_title=ra_confirm_title dialog_subtitle=ra_confirm_sub dialog_body_include="accounts/profile/sections/roles/_assign_confirm_body.html" dialog_foot_include="accounts/profile/sections/roles/_assign_confirm_foot.html" dialog_wide=True dialog_static=True %}
+
+        {% include "partials/ems_ui/_dialog.html" with dialog_id="raHelpDialog" dialog_title=ra_help_title dialog_body_include="accounts/profile/sections/roles/_assign_help.html" dialog_wide=True %}
+    </div>
+    {% endif %}
 </section>
+{% endwith %}
 {% endif %}

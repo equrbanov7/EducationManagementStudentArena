@@ -1,0 +1,12 @@
+{% load i18n %}
+{% comment %}Başlıq əməlləri — «Rol təyin et» bölməsinə keçid (SPA) və izah dialoqu.{% endcomment %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=role-assignment"
+   data-section="role-assignment" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'role_assignment' context 'profile.section' %}">
+    <i class="fas fa-user-shield" aria-hidden="true"></i>
+    {% trans "Rol təyin et" context "accounts.manage_roles" %}
+</a>
+<button type="button" class="ems-btn" data-ems-overlay-open="mrHelpDialog">
+    <i class="fas fa-circle-question" aria-hidden="true"></i>
+    {% trans "Bu bölmə nə edir?" context "accounts.manage_roles" %}
+</button>

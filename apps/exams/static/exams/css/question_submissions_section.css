@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Sual göndərişləri» kabinet bölməsi — YALNIZ düzüm.
+
+   Komponent qatı (`ems_ui/*.css`: düymə, sahə, KPI, filtr, cədvəl, badge,
+   timeline, çekmecə) kabinet qabığından gəlir.  Bu fayl həmin komponentləri
+   bir-birinə bağlayan bölmə-xüsusi qaydalardır.  Rəng YALNIZ `--ems-*`
+   tokenlərindən — xam hex yoxdur.
+
+   Köhnə `qsubs-*` / `qsubf-*` üslub dəstləri bu bölmədən çıxarıldı; onlar
+   «Sual təsdiqi» (kafedra) bölməsində qalır və öz fayllarından yüklənir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.qsub {
+    display: block;
+}
+
+.qsub__body {
+    margin-top: var(--ems-sp-5);
+}
+
+/* ── Qaytarılmış göndəriş xəbərdarlığı ──────────────────────────────────── */
+.qsub-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-5) 0 0;
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+}
+
+.qsub-alert i {
+    margin-top: 2px;
+}
+
+/* ── Cədvəl: birinci sütun ─────────────────────────────────────────────── */
+.qsub-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.qsub-title__link {
+    color: var(--ems-text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.qsub-title__link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.qsub-title__meta {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 400;
+}
+
+.qsub-title__bank {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    color: var(--ems-success-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 400;
+}
+
+.qsub-title__bank a {
+    color: inherit;
+}
+
+/* ── Siqnal xanası ─────────────────────────────────────────────────────── */
+.qsub-signals {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.qsub-signals--clean {
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm);
+}
+
+/* Sətir əməlləri eyni hündürlükdə (cədvəl içi kontrol = 30px). */
+.qsub .ems-rowactions .ems-iconbtn {
+    width: var(--ems-h-cell);
+    height: var(--ems-h-cell);
+}
+
+.qsub-delete {
+    display: inline-flex;
+    margin: 0;
+}
+
+/* ── «Yol» çekmecəsi ───────────────────────────────────────────────────── */
+.qsub-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-4);
+}
+
+.qsub-drawer__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.qsub-drawer__bank {
+    margin: 0 0 var(--ems-sp-4);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-success-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+    font-size: var(--ems-fs-sm);
+}
+
+.qsub-drawer__meta {
+    display: grid;
+    grid-template-columns: minmax(120px, 34%) 1fr;
+    gap: var(--ems-sp-2) var(--ems-sp-4);
+    margin: 0 0 var(--ems-sp-5);
+    padding: 0 0 var(--ems-sp-4);
+    border-bottom: 1px solid var(--ems-border);
+    font-size: var(--ems-fs-sm);
+}
+
+.qsub-drawer__meta dt {
+    color: var(--ems-neutral-500);
+    font-weight: 700;
+}
+
+.qsub-drawer__meta dd {
+    margin: 0;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.qsub-drawer__placeholder {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.qsub-drawer__open {
+    margin-top: var(--ems-sp-5);
+}
+
+@media (max-width: 640px) {
+    .qsub-drawer__meta {
+        grid-template-columns: 1fr;
+        gap: 0 0;
+    }
+
+    .qsub-drawer__meta dd {
+        margin-bottom: var(--ems-sp-3);
+    }
+}

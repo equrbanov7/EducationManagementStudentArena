@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}Təsdiq pəncərəsinin SƏBƏBDƏN ƏVVƏLKİ hissəsi: «kimə» seçicisi +
+«nə köçür / nə dəyişmir» xülasəsi.
+
+Xülasə serverdə DEYİL, seçimdən qurulur (`teaching_handover.js`): seçim
+təsdiqdən bir an əvvəl dəyişə bilər və server sətri köhnə qala bilər. Rəqəmlər
+cədvəl sətirlərinin `data-thx-*` atributlarından toplanır — yəni ekranda görünən
+rəqəmlə eynidir.
+
+⚠️ Seçici XAM `<select>` DEYİL — layihə qaydası (2026-09-09): bootstrap
+komponenti + daxili axtarış.{% endcomment %}
+<div class="ems-field">
+    <label class="ems-field__label" for="thx-target">
+        {% trans "Yeni müəllim" context "accounts.handover" %} <span class="ems-field__req" aria-hidden="true">*</span>
+    </label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="thx-target" name="new_instructor_id"
+                data-thx-target data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Müəllim axtarın' context 'accounts.handover' %}"
+                data-live-search-empty="{% trans 'Uyğun müəllim tapılmadı.' context 'accounts.handover' %}">
+            {% for option in handover_section.target_options %}
+                <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Siyahıda yalnız bu təşkilatda bal yazma səlahiyyəti olan aktiv müəllimlər var." context "accounts.handover" %}</p>
+</div>
+
+<div class="thx-summary" data-thx-summary>
+    <h3 class="thx-h3">{% trans "Nə köçür" context "accounts.handover" %}</h3>
+    <ul class="thx-list thx-list--move" data-thx-summary-list></ul>
+    <p class="thx-summary__total" data-thx-summary-total role="status" aria-live="polite"></p>
+
+    <div class="thx-keep">
+        <i class="fas fa-shield-halved" aria-hidden="true"></i>
+        <span>{% trans "Yazılmış bal, davamiyyət və keçmiş dərslərin müəllimi DƏYİŞMİR. Köhnə müəllim jurnalı yalnız-oxu rejimində görməyə davam edir, amma bal yaza bilməz." context "accounts.handover" %}</span>
+    </div>
+</div>

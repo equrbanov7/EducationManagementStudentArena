@@ -1,0 +1,201 @@
+{% load i18n %}
+{% comment %}«İnsanlar» kataloqunun süzgəc paneli — `_people_directory.html`-dən
+ayrıldı (modul ölçüsü limiti). Kontekst valideyndən miras qalır: `people_section`.
+Bütün seçimlər bootstrap select komponentindədir (native `<select>` YOXDUR),
+uzun siyahılarda `data-live-search="true"`.{% endcomment %}
+  <form class="people__filters" data-people-filters novalidate role="search">
+    <div class="people__filters-main">
+      <div class="people__field people__field--search">
+        <label for="people-q-{{ people_section.kind }}">{% trans "Axtarış" context "accounts.people" %}</label>
+        <div class="people__search">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search"
+                 id="people-q-{{ people_section.kind }}"
+                 name="q"
+                 autocomplete="off"
+                 placeholder="{% trans 'ad, soyad, ata adı, istifadəçi adı və ya FİN' context 'accounts.people' %}">
+        </div>
+      </div>
+
+      <div class="people__field">
+        <label for="people-faculty-{{ people_section.kind }}">{% trans "Fakültə" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-faculty-{{ people_section.kind }}" name="faculty" data-people-option="faculties" data-bootstrap-select data-live-search="true"
+                  data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.people' %}"
+                  data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.people' %}">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+      </div>
+
+      {% if people_section.kind == 'teachers' %}
+      <div class="people__field">
+        <label for="people-kafedra-{{ people_section.kind }}">{% trans "Kafedra" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-kafedra-{{ people_section.kind }}" name="kafedra" data-people-option="kafedras" data-bootstrap-select data-live-search="true"
+                  data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.people' %}"
+                  data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.people' %}">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+      </div>
+      {% else %}
+      {% comment %}Tələbə qrupları kafedra altında deyil (fakültə→ixtisas→qrup) —
+      kafedra filtri tələbə kataloqunda həmişə 0 verirdi (QA 2026-09-05 PEOPLE-RBAC-02).{% endcomment %}
+      <div class="people__field">
+        <label for="people-group-{{ people_section.kind }}">{% trans "Qrup" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-group-{{ people_section.kind }}" name="group" data-people-option="groups" data-bootstrap-select data-live-search="true"
+                  data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.people' %}"
+                  data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.people' %}">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="people__field">
+        <label for="people-program-{{ people_section.kind }}">{% trans "İxtisas" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-program-{{ people_section.kind }}" name="program" data-people-option="programs" data-bootstrap-select data-live-search="true"
+                  data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.people' %}"
+                  data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.people' %}">
+          <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+          </select>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if people_section.kind == 'students' %}
+      {% comment %}Ödəniş forması (maliyyələşmə) — akademik qeydin sahəsi; sahib
+      istəyi 2026-09-09. Yalnız tələbə kataloqunda mənalıdır.{% endcomment %}
+      <div class="people__field">
+        <label for="people-funding-{{ people_section.kind }}">{% trans "Ödəniş forması" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-funding-{{ people_section.kind }}" name="funding" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            {% for option in people_section.funding_options %}
+              <option value="{{ option.key }}">{{ option.label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="people__field">
+        <label for="people-status-{{ people_section.kind }}">{% trans "Status" context "accounts.people" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select class="bootstrap-single-select__native" id="people-status-{{ people_section.kind }}" name="status" data-bootstrap-select>
+          {% for option in people_section.status_options %}
+            <option value="{{ option.key }}">{{ option.label }}</option>
+          {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <details class="people__filters-more" data-people-filters-more>
+      <summary>
+        <i class="fas fa-sliders" aria-hidden="true"></i>
+        {% trans "Əlavə filtrlər" context "accounts.people" %}
+        <span class="people__filters-badge" data-people-filters-badge hidden></span>
+      </summary>
+      <div class="people__filters-grid">
+        <div class="people__field">
+          <label for="people-subject-{{ people_section.kind }}">
+            {% if people_section.kind == 'teachers' %}
+              {% trans "Dərs dediyi fənn" context "accounts.people" %}
+            {% else %}
+              {% trans "Keçdiyi fənn" context "accounts.people" %}
+            {% endif %}
+          </label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-subject-{{ people_section.kind }}" name="subject" data-people-option="subjects" data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.people' %}"
+                    data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.people' %}">
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="people__field">
+          <label for="people-year-{{ people_section.kind }}">{% trans "Tədris ili" context "accounts.people" %}</label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-year-{{ people_section.kind }}" name="year" data-people-option="years" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="people__field">
+          <label for="people-season-{{ people_section.kind }}">{% trans "Semestr" context "accounts.people" %}</label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-season-{{ people_section.kind }}" name="season" data-people-option="seasons" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            </select>
+          </div>
+        </div>
+
+        {% if people_section.kind == 'students' %}
+        <div class="people__field">
+          <label for="people-education-form-{{ people_section.kind }}">{% trans "Təhsil forması" context "accounts.people" %}</label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-education-form-{{ people_section.kind }}" name="education_form" data-bootstrap-select>
+              <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+              {% for option in people_section.education_form_options %}
+                <option value="{{ option.key }}">{{ option.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if people_section.can_view_demographics %}
+        <div class="people__field">
+          <label for="people-gender-{{ people_section.kind }}">{% trans "Cins" context "accounts.people" %}</label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-gender-{{ people_section.kind }}" name="gender" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "accounts.people" %}</option>
+            {% for option in people_section.gender_options %}
+              <option value="{{ option.key }}" data-people-facet="gender:{{ option.key }}">{{ option.label }}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="people__field people__field--age">
+          <span class="people__field-label" id="people-age-label-{{ people_section.kind }}">{% trans "Yaş" context "accounts.people" %}</span>
+          <div class="people__age-inputs" role="group" aria-labelledby="people-age-label-{{ people_section.kind }}">
+            <input type="number" name="age_min" min="0" max="120" inputmode="numeric"
+                   aria-label="{% trans 'Minimum yaş' context 'accounts.people' %}"
+                   placeholder="{% trans 'min' context 'accounts.people' %}">
+            <span aria-hidden="true">–</span>
+            <input type="number" name="age_max" min="0" max="120" inputmode="numeric"
+                   aria-label="{% trans 'Maksimum yaş' context 'accounts.people' %}"
+                   placeholder="{% trans 'maks' context 'accounts.people' %}">
+          </div>
+          <label class="people__checkbox">
+            <input type="checkbox" name="age" value="{{ people_section.age_unknown_key }}">
+            <span>{{ people_section.age_unknown_label }}</span>
+          </label>
+        </div>
+        {% endif %}
+
+        <div class="people__field">
+          <label for="people-sort-{{ people_section.kind }}">{% trans "Sıralama" context "accounts.people" %}</label>
+          <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="bootstrap-single-select__native" id="people-sort-{{ people_section.kind }}" name="sort" data-bootstrap-select>
+            {% for option in people_section.sort_options %}
+              <option value="{{ option.key }}">{{ option.label }}</option>
+            {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="people__filters-foot">
+      <p class="people__coverage" data-people-coverage aria-live="polite"></p>
+      <button type="reset" class="people__reset">
+        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+        {% trans "Filtrləri sıfırla" context "accounts.people" %}
+      </button>
+    </div>
+  </form>

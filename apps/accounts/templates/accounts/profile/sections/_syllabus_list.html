@@ -59,30 +59,39 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
         </div>
         <div class="syl-field">
           <label for="syl-year">{% trans "Akademik il" context "accounts.syllabus" %}</label>
-          <select id="syl-year" class="syl-select" data-syl-filter="year">
-            <option value="">{% trans "Bütün illər" context "accounts.syllabus" %}</option>
-            {% for option in sl.filter_options.years %}
-            <option value="{{ option.key }}" {% if option.key == sl.filters.year %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+              <select id="syl-year" class="syl-select bootstrap-single-select__native" data-syl-filter="year" data-bootstrap-select>
+                <option value="">{% trans "Bütün illər" context "accounts.syllabus" %}</option>
+                {% for option in sl.filter_options.years %}
+                <option value="{{ option.key }}" {% if option.key == sl.filters.year %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+              </select>
+          </div>
         </div>
         <div class="syl-field">
           <label for="syl-semester">{% trans "Semestr" context "accounts.syllabus" %}</label>
-          <select id="syl-semester" class="syl-select" data-syl-filter="semester">
-            <option value="">{% trans "Bütün semestrlər" context "accounts.syllabus" %}</option>
-            {% for option in sl.filter_options.semesters %}
-            <option value="{{ option.key }}" {% if option.key == sl.filters.semester %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+              <select id="syl-semester" class="syl-select bootstrap-single-select__native" data-syl-filter="semester" data-bootstrap-select>
+                <option value="">{% trans "Bütün semestrlər" context "accounts.syllabus" %}</option>
+                {% for option in sl.filter_options.semesters %}
+                <option value="{{ option.key }}" {% if option.key == sl.filters.semester %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+              </select>
+          </div>
         </div>
         <div class="syl-field">
           <label for="syl-unit">{% trans "Kafedra" context "accounts.syllabus" %}</label>
-          <select id="syl-unit" class="syl-select" data-syl-filter="unit">
-            <option value="">{% trans "Bütün kafedralar" context "accounts.syllabus" %}</option>
-            {% for option in sl.filter_options.units %}
-            <option value="{{ option.key }}" {% if option.key == sl.filters.unit %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+              <select id="syl-unit" class="syl-select bootstrap-single-select__native" data-syl-filter="unit"
+                      data-bootstrap-select data-live-search="true"
+                      data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.syllabus' %}"
+                      data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.syllabus' %}">
+                <option value="">{% trans "Bütün kafedralar" context "accounts.syllabus" %}</option>
+                {% for option in sl.filter_options.units %}
+                <option value="{{ option.key }}" {% if option.key == sl.filters.unit %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+              </select>
+          </div>
         </div>
         <button type="button" class="syl-btn syl-btn--ghost" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
       </div>
@@ -101,11 +110,13 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
         </div>
         <div class="syl-filters__tail">
           <label for="syl-sort" class="syl-filters__legend">{% trans "Sıralama" context "accounts.syllabus" %}</label>
-          <select id="syl-sort" class="syl-select syl-select--sm" data-syl-filter="sort">
-            {% for option in sl.filter_options.sorts %}
-            <option value="{{ option.key }}" {% if option.key == sl.filters.sort %}selected{% endif %}>{{ option.label }}</option>
-            {% endfor %}
-          </select>
+          <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap syl-selectwrap--sm">
+              <select id="syl-sort" class="syl-select syl-select--sm bootstrap-single-select__native" data-syl-filter="sort" data-bootstrap-select>
+                {% for option in sl.filter_options.sorts %}
+                <option value="{{ option.key }}" {% if option.key == sl.filters.sort %}selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+              </select>
+          </div>
           <span class="syl-viewtoggle" role="group" aria-label="{% trans 'Görünüş' context 'accounts.syllabus' %}">
             <button type="button" class="syl-viewtoggle__btn{% if sl.filters.view == 'table' %} is-on{% endif %}"
                     data-syl-view="table" aria-pressed="{% if sl.filters.view == 'table' %}true{% else %}false{% endif %}">{% trans "Cədvəl" context "accounts.syllabus" %}</button>

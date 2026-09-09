@@ -238,8 +238,10 @@
             option.textContent = row.text;
             select.appendChild(option);
         });
+        // Variantlar tam əvəzləndiyi üçün `refresh` (menyunu yenidən qurur);
+        // `sync` yalnız seçili vəziyyəti yeniləyir və köhnə menyu qalırdı.
         if (window.EMSBootstrapSelect) {
-            window.EMSBootstrapSelect.sync(select);
+            window.EMSBootstrapSelect.refresh(select);
         }
     }
 

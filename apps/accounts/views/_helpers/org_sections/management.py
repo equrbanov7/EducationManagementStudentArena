@@ -1,55 +1,96 @@
-"""student-org management section — public builder (setup + guard + orkestrasiya, FAZA 3.5)."""
+"""«Heyət idarəetməsi» bölməsi — kabinet context-i (2026-09-09 yenidən qurulub).
+
+SAHİB TAPŞIRIĞI: ekran YALNIZ təşkilatın MÖVCUD ÜZVLƏRİNİ idarə edir. Dəvət və
+müraciət səthləri — «təsdiq gözləyən tələbələr», «təşkilata bağlı olmayan
+tələbə/müəllim/heyət», «göndərilmiş dəvətlər», «müəllim/heyət müraciətləri» —
+BURADAN ÇIXARILDI (bu tenantda heç kim dəvətlə gəlmir; şəxsi təşkilat özü
+«Tələbə əlavəsi» / «Müəllim əlavəsi» bölmələrindən əlavə edir).
+
+⚠️ `StudentOrganizationRequest` modeli, tələbənin «Təşkilata qoşul» axını və
+`student_organization_management` POST əməlləri (dəvət göndər/geri çək, müraciət
+təsdiq/rədd) TOXUNULMAYIB — yalnız BU EKRANIN UI-ı və context-i sadələşdi.
+
+Komponentlər `ems_ui`-dəndir (KPI · AVTO filtr · cədvəl · çekmecə · səbəb
+dialoqu); sorğular `_members_registry.py`-dədir.
+"""
 
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from ....models import ProfileRole
 from ..constants import STUDENT_ORG_MANAGEMENT_MIN_LEVEL
-from ._pagination import _mgmt_section_pagination
-from ._queries import _mgmt_section_queries
+from ..formatting import _append_query_params, _query_string
+from . import _members_ui as ui
+from ._members_registry import PAGE_SIZE, build_members_registry
 
 User = get_user_model()
 
+CELL_DIR = "accounts/profile/sections/staff_management/"
+PAGE_PARAM = f"{ui.PREFIX}page"
 
-def _staff_management_script_data():
+
+def _empty_section(*, organization=None, is_superadmin=False, teacher_student_only=False):
+    """Bütün açarların DEFOLT dəyəri — şablon heç bir halda sınmır."""
     return {
-        "i18n": {
-            "addSelectedUsers": pgettext("staff.management", "Add selected users to the organization"),
-            "addSelectedUsersCount": pgettext(
-                "staff.management",
-                "Add selected users to the organization ({count} selected)",
-            ),
-            "selectAtLeastOneStudent": pgettext("staff.management", "Select at least 1 student"),
-            "selectAtLeastOneUser": pgettext("staff.management", "Select at least 1 user"),
-            "studentRole": pgettext("membership_request.role", "Student"),
-            "thisUser": pgettext("staff.management", "This user"),
-            "withdrawSelectedInvites": pgettext(
-                "staff.management",
-                "Please confirm that you want to withdraw the selected invites.",
-            ),
-            "selectedInvites": pgettext("staff.management", "Selected invites:"),
-            "selectInviteFirst": pgettext("staff.management", "Please select at least one invite first."),
-            "confirmButtonDisabled": pgettext(
-                "staff.management",
-                "The confirm button is disabled in this state.",
-            ),
-            "confirmAddSelected": pgettext(
-                "staff.management",
-                "Please confirm that you want to add the selected user(s) to the organization.",
-            ),
-            "confirmAddSingle": pgettext(
-                "staff.management",
-                "Please confirm that you want to add this user to the organization.",
-            ),
-            "selectedUsers": pgettext("staff.management", "Selected users:"),
-            "confirmInviteSelected": pgettext(
-                "staff.management",
-                "Please confirm that you want to invite the selected user(s).",
-            ),
-            "confirmInviteSingle": pgettext("staff.management", "Please confirm that you want to invite this user."),
-        },
+        "has_access": False,
+        "access_denied_message": "",
+        "organization": organization,
+        "is_superadmin": is_superadmin,
+        "teacher_student_only": teacher_student_only,
+        "active_management_view": "members",
+        "subtitle": "",
+        "header_note": "",
+        "kpi_tiles": [],
+        "filter_fields": [],
+        "filter_count_label": "",
+        "columns": [],
+        "table_rows": [],
+        "table_state": "empty",
+        "rows": [],
+        "page_obj": None,
+        "page_param": PAGE_PARAM,
+        "pagination_query": "",
+        "state_title": "",
+        "state_body": "",
+        "member_total_count": 0,
+        "students_total_count": 0,
+        "teacher_members_total_count": 0,
+        "staff_members_total_count": 0,
+        "leader_total_count": 0,
+        "unit_scope_active": False,
+        "can_manage_students": False,
+        "can_remove_members": False,
+        "action_url": reverse("accounts:student_organization_management"),
+        "post_next_url": "",
+        "remove_hidden": [],
+        "organization_records": [],
+        "organizations_page_param": "organization_page",
+        "organizations_pagination_query": "",
+        "organization_search_query": "",
+        "organization_status_filter": "",
+        "organization_type_filter": "",
+        "pending_org_count": 0,
     }
+
+
+def _table_rows(rows):
+    return [
+        {
+            "row_head": row["name"],
+            "head_include": f"{CELL_DIR}_cell_member.html",
+            "cells": [
+                {"include": f"{CELL_DIR}_cell_roles.html"},
+                {"text": row["position"] or "—", "muted": not row["position"]},
+                {"include": f"{CELL_DIR}_cell_unit.html"},
+                {"text": row["joined"] or "—", "nowrap": True, "muted": not row["joined"]},
+            ],
+            "actions_include": f"{CELL_DIR}_row_actions.html",
+            "data": row,
+        }
+        for row in rows
+    ]
 
 
 def _build_student_org_management_section(
@@ -58,187 +99,127 @@ def _build_student_org_management_section(
     organization,
     is_superadmin,
     user_level,
-    default_view=None,
     teacher_student_only=False,
     can_manage_students=True,
-    can_invite_members=True,
 ):
-    student_search = request.GET.get("student_org_search", "")
-    pending_search = request.GET.get("student_org_pending_search", "")
-    unassigned_search = request.GET.get("student_org_unassigned_search", "")
-    sent_invite_search = request.GET.get("student_org_sent_invite_search", "")
-    teacher_staff_search = request.GET.get("student_org_ts_search", "")
-    organization_search = request.GET.get("organization_search", "")
+    # `default_view` və `can_invite_members` parametrləri 2026-09-09-da
+    # SİLİNDİ: birincisi köhnə tab-larla (tələbə/müəllim/heyət) birlikdə,
+    # ikincisi isə dəvət panelləri ilə birlikdə mənasını itirdi.
+    section = _empty_section(
+        organization=organization,
+        is_superadmin=is_superadmin,
+        teacher_student_only=teacher_student_only,
+    )
+    organization_search = (request.GET.get("organization_search") or "").strip()
     organization_status_filter = (request.GET.get("organization_status", "") or "").strip().lower()
     organization_type_filter = (request.GET.get("organization_type", "") or "").strip().lower()
-    superadmin_user_ids = list(
-        User.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN)).values_list("id", flat=True)
-    )
-
-    allowed_management_views = {"students", "teachers", "staff"}
-    if teacher_student_only:
-        allowed_management_views = {"students"}
-    if is_superadmin:
-        allowed_management_views.add("organizations")
-
-    fallback_management_view = default_view or (
-        "organizations" if is_superadmin and organization is None else "students"
-    )
-    management_view = (request.GET.get("management_view") or fallback_management_view).strip().lower()
-    if management_view not in allowed_management_views:
-        management_view = (
-            fallback_management_view if fallback_management_view in allowed_management_views else "students"
-        )
-
-    student_tab = (request.GET.get("student_tab") or "members").strip().lower()
-    if student_tab not in {"members", "pending", "unassigned", "invites"}:
-        student_tab = "members"
-
-    teacher_tab = (request.GET.get("teacher_tab") or "members").strip().lower()
-    if teacher_tab not in {"members", "requests", "unassigned", "invites"}:
-        teacher_tab = "members"
-
-    staff_tab = (request.GET.get("staff_tab") or "members").strip().lower()
-    if staff_tab not in {"members", "requests", "unassigned", "invites"}:
-        staff_tab = "members"
-
-    section = {
-        "organization": organization,
-        "is_superadmin": is_superadmin,
-        "teacher_student_only": teacher_student_only,
-        "active_management_view": management_view,
-        "active_student_tab": student_tab,
-        "active_teacher_tab": teacher_tab,
-        "active_staff_tab": staff_tab,
-        "management_view_options": [],
-        "student_tab_options": [],
-        "teacher_tab_options": [],
-        "staff_tab_options": [],
-        "students": [],
-        "pending_requested_students": [],
-        "unassigned_students": [],
-        "sent_student_invites": [],
-        "teacher_members": [],
-        "staff_members": [],
-        "unassigned_teachers": [],
-        "sent_teacher_invites": [],
-        "unassigned_staff": [],
-        "sent_staff_invites": [],
-        "pending_teacher_requests": [],
-        "pending_staff_requests": [],
-        "pending_teacher_staff_requests": [],
-        "students_total_count": 0,
-        "pending_requested_students_total_count": 0,
-        "unassigned_students_total_count": 0,
-        "sent_student_invites_total_count": 0,
-        "teacher_members_total_count": 0,
-        "pending_teacher_requests_total_count": 0,
-        "unassigned_teachers_total_count": 0,
-        "sent_teacher_invites_total_count": 0,
-        "staff_members_total_count": 0,
-        "pending_staff_requests_total_count": 0,
-        "unassigned_staff_total_count": 0,
-        "sent_staff_invites_total_count": 0,
-        "organization_records": [],
-        "student_search_query": student_search,
-        "pending_search_query": pending_search,
-        "unassigned_search_query": unassigned_search,
-        "sent_invite_search_query": sent_invite_search,
-        "teacher_staff_search_query": teacher_staff_search,
-        "organization_search_query": organization_search,
-        "organization_status_filter": organization_status_filter,
-        "organization_type_filter": organization_type_filter,
-        "post_next_url": "",
-        "access_denied_message": "",
-        "can_manage_students": False,
-        "can_invite_members": False,
-        "pending_org_count": 0,
-        "students_page_param": "student_org_members_page",
-        "students_pagination_query": "",
-        "pending_page_param": "student_org_pending_page",
-        "pending_pagination_query": "",
-        "unassigned_page_param": "student_org_unassigned_page",
-        "unassigned_pagination_query": "",
-        "sent_invites_page_param": "student_org_sent_invites_page",
-        "sent_invites_pagination_query": "",
-        "teacher_staff_page_param": "student_org_ts_page",
-        "teacher_staff_pagination_query": "",
-        "teacher_members_page_param": "teacher_members_page",
-        "teacher_members_pagination_query": "",
-        "staff_members_page_param": "staff_members_page",
-        "staff_members_pagination_query": "",
-        "teacher_requests_page_param": "teacher_requests_page",
-        "teacher_requests_pagination_query": "",
-        "teacher_unassigned_page_param": "teacher_unassigned_page",
-        "teacher_unassigned_pagination_query": "",
-        "teacher_invites_page_param": "teacher_invites_page",
-        "teacher_invites_pagination_query": "",
-        "staff_requests_page_param": "staff_requests_page",
-        "staff_requests_pagination_query": "",
-        "staff_unassigned_page_param": "staff_unassigned_page",
-        "staff_unassigned_pagination_query": "",
-        "staff_invites_page_param": "staff_invites_page",
-        "staff_invites_pagination_query": "",
-        "organizations_page_param": "organization_page",
-        "organizations_pagination_query": "",
-        "staff_management_script_data": _staff_management_script_data(),
-    }
+    section["organization_search_query"] = organization_search
+    section["organization_status_filter"] = organization_status_filter
+    section["organization_type_filter"] = organization_type_filter
 
     if organization is None:
-        if is_superadmin and management_view == "organizations":
-            # Superadmin "organizations" view — extracted to a dedicated,
-            # unit-testable service (FAZA 9). Lazy import keeps the
-            # _helpers <-> services dependency one-directional.
+        if is_superadmin:
+            # Aktiv təşkilatı olmayan superadmin: idarə ediləcək üzv yoxdur,
+            # ona görə təşkilat siyahısı göstərilir (bölmə seçimi üçün).
             from ....services.org_management import build_superadmin_organizations_view
 
-            return build_superadmin_organizations_view(
+            section["active_management_view"] = "organizations"
+            section["has_access"] = True
+            section["subtitle"] = pgettext(
+                ui.CTX,
+                "Aktiv təşkilat seçilməyib. Heyəti idarə etmək üçün əvvəlcə təşkilatı seçin — "
+                "aşağıdakı siyahıda sistemdəki bütün təşkilatlar var.",
+            )
+            section = build_superadmin_organizations_view(
                 request=request,
                 section=section,
                 organization_search=organization_search,
                 organization_status_filter=organization_status_filter,
                 organization_type_filter=organization_type_filter,
             )
+            section["organizations_pagination_query"] = _query_string(
+                section="student-organization-management",
+                organization_search=organization_search,
+                organization_status=organization_status_filter,
+                organization_type=organization_type_filter,
+            )
+            return section
 
-        section["access_denied_message"] = "Aktiv təşkilat tapılmadı."
+        section["access_denied_message"] = pgettext(ui.CTX, "Aktiv təşkilat tapılmadı.")
         return section
 
     if not is_superadmin and not teacher_student_only and user_level < STUDENT_ORG_MANAGEMENT_MIN_LEVEL:
-        section["access_denied_message"] = (
-            "Bu bölmə üçün minimum HR, təşkilat admini və ya daha yüksək səviyyə tələb olunur."
+        section["access_denied_message"] = pgettext(
+            ui.CTX, "Bu bölmə üçün minimum HR, təşkilat admini və ya daha yüksək səviyyə tələb olunur."
         )
         return section
 
-    teacher_members, staff_members = _mgmt_section_queries(
-        section=section,
+    superadmin_user_ids = list(
+        User.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN)).values_list("id", flat=True)
+    )
+    registry = build_members_registry(
         request=request,
         organization=organization,
         is_superadmin=is_superadmin,
+        actor_level=user_level,
         superadmin_user_ids=superadmin_user_ids,
-        student_search=student_search,
-        pending_search=pending_search,
-        unassigned_search=unassigned_search,
-        sent_invite_search=sent_invite_search,
-        teacher_staff_search=teacher_staff_search,
+        can_remove_members=bool(can_manage_students),
     )
-    return _mgmt_section_pagination(
-        section=section,
-        request=request,
-        organization=organization,
-        is_superadmin=is_superadmin,
-        management_view=management_view,
-        student_tab=student_tab,
-        teacher_tab=teacher_tab,
-        staff_tab=staff_tab,
-        can_manage_students=can_manage_students,
-        can_invite_members=can_invite_members,
-        organization_search=organization_search,
-        organization_status_filter=organization_status_filter,
-        organization_type_filter=organization_type_filter,
-        student_search=student_search,
-        pending_search=pending_search,
-        unassigned_search=unassigned_search,
-        sent_invite_search=sent_invite_search,
-        teacher_staff_search=teacher_staff_search,
-        teacher_members=teacher_members,
-        staff_members=staff_members,
+    filters = registry["filters"]
+    totals = registry["totals"]
+    page_obj = registry["page_obj"]
+    state_title, state_body = ui.empty_state(filtered=filters["is_filtered"], scope_active=registry["scope_active"])
+    base_params = {
+        "section": "student-organization-management",
+        f"{ui.PREFIX}q": filters["search"],
+        f"{ui.PREFIX}kind": filters["kind"],
+        f"{ui.PREFIX}role": filters["role"],
+        f"{ui.PREFIX}unit": filters["unit_id"],
+        f"{ui.PREFIX}sort": filters["sort"] if filters["sort"] != ui.DEFAULT_SORT else "",
+    }
+    # Uzaqlaşdırma adi POST-dur (JSON deyil) — server `next` ilə eyni filtrli
+    # görünüşə qaytarır, ona görə `next` gizli sahə kimi dialoqa yazılır.
+    post_next_url = _append_query_params(reverse("accounts:profile"), **base_params)
+    section.update(
+        {
+            "has_access": True,
+            "active_management_view": "members",
+            "subtitle": ui.subtitle(scope_active=registry["scope_active"]),
+            "header_note": organization.name,
+            "kpi_tiles": ui.kpi_tiles(totals=totals, kind=filters["kind"]),
+            "filter_fields": ui.filter_fields(
+                search=filters["search"],
+                kind=filters["kind"],
+                role=filters["role"],
+                unit_id=filters["unit_id"],
+                sort=filters["sort"],
+                role_options=filters["role_options"],
+                unit_options=filters["unit_options"],
+            ),
+            "filter_count_label": ui.count_label(page_obj.paginator.count),
+            "columns": ui.columns(),
+            "table_rows": _table_rows(registry["rows"]),
+            "table_state": "ready" if registry["rows"] else "empty",
+            "rows": registry["rows"],
+            "page_obj": page_obj,
+            "pagination_query": _query_string(**base_params),
+            "state_title": state_title,
+            "state_body": state_body,
+            "member_total_count": totals["members"],
+            "students_total_count": totals["students"],
+            "teacher_members_total_count": totals["teachers"],
+            "staff_members_total_count": totals["staff"],
+            "leader_total_count": totals["leaders"],
+            "unit_scope_active": registry["scope_active"],
+            "can_manage_students": bool(can_manage_students),
+            "can_remove_members": bool(can_manage_students),
+            "page_size": PAGE_SIZE,
+            "post_next_url": post_next_url,
+            "remove_hidden": [
+                {"name": "action", "value": "remove_org_member", "keep": True},
+                {"name": "next", "value": post_next_url, "keep": True},
+                {"name": "user_id", "value": ""},
+            ],
+        }
     )
+    return section

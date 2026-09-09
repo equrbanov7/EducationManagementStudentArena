@@ -1,285 +1,373 @@
-/* «Tələbə idxalı» (student-intake) paneli.
+/* «Tələbə/Müəllim əlavəsi (toplu)» panelləri — 3 addımlı axının DÜZÜMÜ.
  *
- * Yalnız `--ems-*` dizayn tokenləri işlədilir (light-only tema — layihə qaydası);
- * prefers-color-scheme YOXDUR. Sinif prefiksi `six-` (Student Intake eXtension)
- * digər panellərlə toqquşmasın deyə.
+ * Kart, cədvəl, badge, KPI, düymə, sahə ORTAQ `ems_ui` qatındadır (qabıqda bir
+ * dəfə yüklənir) və BURADA TƏKRAR TƏRİF OLUNMUR — bu fayl yalnız axına məxsus
+ * səthi verir: addım kartı, fayl sürüşdürmə sahəsi, nəticə sətrinin tonu və
+ * birdəfəlik parol lövhəsi.
+ *
+ * Rənglər YALNIZ `--ems-*` tokenlərindən (light-only tema — layihə qaydası);
+ * `prefers-color-scheme` YOXDUR. Sinif prefiksi `six-` (Student Intake
+ * eXtension) — JS çəngəlləri ilə eyni ad fəzasıdır, ona görə saxlanılır.
+ *
+ * ⚠️ KASKAD: bu fayl `profile.html`-də ORTAQ `ems_ui/_assets.html`-dən ƏVVƏL
+ * yüklənir, yəni bərabər spesifiklikdə `ems_ui` UDUR. `ems-table` sətirlərini
+ * üstələyən qaydalar ona görə `.ems-table …` ilə başlayır (zebra fonu
+ * `.ems-table--zebra tbody tr:nth-child(odd)` = 0-2-2 verir).
+ *
+ * ⚠️ Bu fayl ekran 08 «Tələbə qəbulu» (`_student_admission.html`) tərəfindən DƏ
+ * yüklənir: ora ORTAQ `student_intake.js` ilə render olunur, yəni `.six`,
+ * `.six-row`, `.six-status*` və `.six-chip*` qaydaları HƏR İKİ
+ * ekranın müqaviləsidir — silinmir.
  */
 
-.profile-section--student-intake {
+.profile-section--student-intake,
+.profile-section--teacher-intake {
     display: block;
 }
+
+/* ── Kök ─────────────────────────────────────────────────────────────────── */
 
 .six {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: var(--ems-sp-6);
 }
 
-.six__denied {
-    padding: 16px 18px;
-    border: 1px solid var(--ems-border, #e2e8f0);
-    border-radius: var(--ems-radius-md, 10px);
-    background: var(--ems-surface-muted, #f8fafc);
-    color: var(--ems-text-muted, #64748b);
-}
-
-.six__head {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-start;
-    justify-content: space-between;
-}
-
-.six__title {
-    margin: 0 0 6px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--ems-text, #0f172a);
-}
-
-.six__intro {
-    margin: 0;
-    max-width: 70ch;
-    color: var(--ems-text-muted, #64748b);
-    font-size: 0.92rem;
-    line-height: 1.55;
-}
-
-.six__scope {
+/* Başlığın sağındakı «hesablar bu təşkilatda yaranır» nişanı. */
+.six-scope {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: var(--ems-primary-soft, #eff6ff);
-    color: var(--ems-primary, #2563eb);
-    font-size: 0.82rem;
-    font-weight: 600;
+    gap: var(--ems-sp-2);
+    max-width: 320px;
+    padding: var(--ems-sp-2) var(--ems-sp-5);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.six-scope__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.six-step {
-    padding: 16px 18px;
-    border: 1px solid var(--ems-border, #e2e8f0);
-    border-radius: var(--ems-radius-md, 10px);
-    background: var(--ems-surface, #ffffff);
+/* ── Addım zolağı (ems_ui `_stepper.html`) ───────────────────────────────── */
+/* Kök artıq `gap` verir — lentin öz alt boşluğu ikiqat aralıq yaradardı. */
+.six > .ems-steps {
+    margin-bottom: 0;
 }
 
-.six-subtitle {
+/* ── Addım kartı ─────────────────────────────────────────────────────────── */
+
+.six-card {
+    padding: var(--ems-sp-6) var(--ems-sp-7);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-card);
+}
+
+.six-card__head {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 10px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ems-text, #0f172a);
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-5);
 }
 
-.six-step__no {
+.six-card__no {
     display: inline-flex;
+    flex: none;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 999px;
-    background: var(--ems-primary, #2563eb);
-    color: #ffffff;
-    font-size: 0.8rem;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.six-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
     font-weight: 700;
+    line-height: 1.35;
+    color: var(--ems-text);
 }
 
-.six-hint,
-.six-note {
-    margin: 0 0 12px;
-    color: var(--ems-text-muted, #64748b);
-    font-size: 0.86rem;
-    line-height: 1.5;
-}
-
-.six-note {
-    margin: 12px 0 0;
-    padding: 10px 12px;
-    border-left: 3px solid var(--ems-warning, #f59e0b);
-    background: var(--ems-warning-soft, #fffbeb);
-    border-radius: 0 var(--ems-radius-sm, 6px) var(--ems-radius-sm, 6px) 0;
-}
-
-.six-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    height: 40px;
-    padding: 0 16px;
-    border-radius: var(--ems-radius-sm, 8px);
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.six-columns {
-    margin-top: 14px;
-}
-
-.six-columns > summary {
-    cursor: pointer;
-    color: var(--ems-primary, #2563eb);
-    font-size: 0.88rem;
-    font-weight: 600;
-}
-
-.six-upload {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-}
-
-.six-file {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 40px;
-    padding: 0 14px;
-    border: 1px dashed var(--ems-border-strong, #cbd5e1);
-    border-radius: var(--ems-radius-sm, 8px);
-    background: var(--ems-surface-muted, #f8fafc);
-    cursor: pointer;
-}
-
-.six-file input[type="file"] {
-    max-width: 240px;
-    font-size: 0.85rem;
-}
-
-.six-file__label {
-    color: var(--ems-text-muted, #64748b);
-    font-size: 0.85rem;
-}
-
-.six-error {
-    margin: 12px 0 0;
-    padding: 10px 12px;
-    border-radius: var(--ems-radius-sm, 6px);
-    background: var(--ems-danger-soft, #fef2f2);
-    color: var(--ems-danger, #dc2626);
-    font-size: 0.87rem;
-}
-
-.six-counts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.six-chip {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.six-chip--info {
-    background: var(--ems-primary-soft, #eff6ff);
-    color: var(--ems-primary, #2563eb);
-}
-
-.six-chip--ok {
-    background: var(--ems-success-soft, #ecfdf5);
-    color: var(--ems-success, #059669);
-}
-
-.six-chip--warn {
-    background: var(--ems-warning-soft, #fffbeb);
-    color: var(--ems-warning-strong, #b45309);
-}
-
-.six-chip--danger {
-    background: var(--ems-danger-soft, #fef2f2);
-    color: var(--ems-danger, #dc2626);
-}
-
-.six-table__wrap {
-    overflow-x: auto;
-    border: 1px solid var(--ems-border, #e2e8f0);
-    border-radius: var(--ems-radius-sm, 8px);
-}
-
-.six-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.86rem;
-}
-
-.six-table th,
-.six-table td {
-    padding: 8px 12px;
-    text-align: start;
-    border-bottom: 1px solid var(--ems-border, #e2e8f0);
-    vertical-align: top;
-}
-
-.six-table thead th {
-    background: var(--ems-surface-muted, #f8fafc);
-    color: var(--ems-text-muted, #64748b);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.six-table tbody tr:last-child td {
-    border-bottom: 0;
-}
-
-.six-muted {
-    color: var(--ems-text-muted, #64748b);
-}
-
-.six-req {
-    color: var(--ems-danger, #dc2626);
-    font-weight: 700;
-}
-
-.six-status {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.six-status--ok {
-    color: var(--ems-success, #059669);
-}
-
-.six-status--info {
-    color: var(--ems-primary, #2563eb);
-}
-
-.six-status--warn {
-    color: var(--ems-warning-strong, #b45309);
-}
-
-.six-status--danger {
-    color: var(--ems-danger, #dc2626);
-}
-
-.six-row.is-danger {
-    background: var(--ems-danger-soft, #fef2f2);
+.six-card__hint {
+    margin: 3px 0 0;
+    max-width: var(--ems-w-text);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.55;
+    color: var(--ems-neutral-600);
+    text-wrap: pretty;
 }
 
 .six-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 14px;
+    align-items: center;
+    gap: var(--ems-sp-3);
 }
 
-@media (max-width: 640px) {
-    .six__head {
-        flex-direction: column;
+/* ── Sütun kataloqu (açılan) ─────────────────────────────────────────────── */
+
+.six-columns {
+    margin-top: var(--ems-sp-5);
+    padding-top: var(--ems-sp-5);
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.six-columns__summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    cursor: pointer;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+}
+
+.six-columns__summary:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 3px;
+    border-radius: var(--ems-r-xs);
+}
+
+.six-columns[open] > .six-columns__summary {
+    margin-bottom: var(--ems-sp-4);
+}
+
+.ems-table td.six-muted {
+    color: var(--ems-neutral-600);
+}
+
+.six-req {
+    color: var(--ems-danger-strong);
+    font-weight: 700;
+}
+
+/* ── Fayl sürüşdürmə sahəsi ──────────────────────────────────────────────── */
+
+.six-drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-8) var(--ems-sp-6);
+    border: 2px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-neutral-50);
+    text-align: center;
+    cursor: pointer;
+    transition:
+        background-color 0.12s ease,
+        border-color 0.12s ease;
+}
+
+.six-drop:hover {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.six-drop.is-over {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-100);
+}
+
+.six-drop.is-filled {
+    border-style: solid;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+/* Seçici görünmür, amma FOKUSLANA bilir (klaviatura ilə açılır). */
+.six-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.six-drop__input:focus-visible + .six-drop__icon {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 4px;
+    border-radius: var(--ems-r-xs);
+}
+
+.six-drop__icon {
+    font-size: 1.55rem;
+    color: var(--ems-primary-600);
+}
+
+.six-drop.is-filled .six-drop__icon {
+    color: var(--ems-success-600);
+}
+
+.six-drop__title {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+    word-break: break-word;
+}
+
+.six-drop__hint {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.six-upload__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    margin-top: var(--ems-sp-5);
+}
+
+.six-upload__note {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+/* `.ems-msg` sahə altı mesajdır — burada blok kimi durur. */
+.six-error.ems-msg {
+    margin-top: var(--ems-sp-5);
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-danger-bg);
+}
+
+/* ── Nəticə ──────────────────────────────────────────────────────────────── */
+
+.six-result[hidden] {
+    display: none;
+}
+
+/* Nəticə kartının əməl zolağı — əsas əməl SAĞDA (yükləmə kartı ilə eyni ritm). */
+.six-result__actions {
+    justify-content: flex-end;
+    margin-top: var(--ems-sp-6);
+}
+
+.six-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    margin: var(--ems-sp-6) 0 0;
+    padding: var(--ems-sp-5) var(--ems-sp-6);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.six-note__icon {
+    flex: none;
+    margin-top: 2px;
+}
+
+/* ── Sətir tonu (JS qurur — ekran 08 ilə ORTAQ müqavilə) ─────────────────── */
+
+.ems-table tbody tr.six-row.is-danger {
+    background: var(--ems-danger-bg);
+}
+
+.six-status {
+    white-space: nowrap;
+}
+
+.six-status__note {
+    display: block;
+    margin-top: 3px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+    white-space: normal;
+}
+
+/* Mətn tonu — badge itsə belə vəziyyət rəngsiz qalmasın (ehtiyat qat). */
+.ems-table td.six-status--ok {
+    color: var(--ems-success-700);
+}
+
+.ems-table td.six-status--info {
+    color: var(--ems-primary-800);
+}
+
+.ems-table td.six-status--warn {
+    color: var(--ems-warning-800);
+}
+
+.ems-table td.six-status--danger {
+    color: var(--ems-danger-strong);
+}
+
+/* ── Çip sayğacı (ekran 08 «Tələbə qəbulu» hələ çipləri işlədir) ─────────── */
+
+.six-chip {
+    display: inline-flex;
+    align-items: center;
+    height: var(--ems-h-chip);
+    padding: 0 var(--ems-sp-4);
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.six-chip--info {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.six-chip--ok {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.six-chip--warn {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.six-chip--danger {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Dar ekran ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .six-card {
+        padding: var(--ems-sp-5);
     }
 
-    .six-upload {
+    .six-upload__foot {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .six-upload__foot .ems-btn,
+    .six-result__actions .ems-btn {
+        width: 100%;
+    }
+
+    .six-result__actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .six-scope {
+        max-width: 100%;
     }
 }

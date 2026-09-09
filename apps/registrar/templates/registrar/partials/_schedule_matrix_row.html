@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}Matrisin bir saat sətri (`row`) — vaxt sütunu + hər günün xanası.
+`matrix_editable` True olanda hər xana həm buraxma hədəfidir (drag & drop), həm
+də boş olduqda «+» düyməsi ilə dialoq açır.{% endcomment %}
+<tr class="smtx__row smtx__row--{{ row.shift }}{% if row.is_extra %} smtx__row--extra{% endif %}">
+    <th scope="row" class="smtx__time">
+        <span class="smtx__no">{{ row.no }}</span>
+        <span class="smtx__hours"><b>{{ row.start_text }}</b><small>{{ row.end_text }}</small></span>
+    </th>
+    {% for cell in row.cells %}
+    <td class="smtx__cell{% if cell.is_today %} is-today{% endif %}{% if cell.is_empty %} is-empty{% endif %}"
+        {% if matrix_editable %}data-sedit-drop data-weekday="{{ cell.weekday }}" data-time-slot="{{ row.key }}"{% endif %}>
+        {% for item in cell.items %}
+        {% include "registrar/partials/_schedule_matrix_card.html" %}
+        {% endfor %}
+        {% if matrix_editable %}
+        <button type="button" class="smtx__add" data-sedit-new
+                data-weekday="{{ cell.weekday }}" data-time-slot="{{ row.key }}"
+                data-cell-label="{{ row.start_text }}–{{ row.end_text }}"
+                title="{% trans 'Bu xanaya dərs əlavə et' context 'registrar.schedule_grid' %}">
+            <i class="fas fa-plus" aria-hidden="true"></i>
+            <span class="smtx__sr">{% trans "Bu xanaya dərs əlavə et" context "registrar.schedule_grid" %}</span>
+        </button>
+        {% endif %}
+    </td>
+    {% endfor %}
+</tr>

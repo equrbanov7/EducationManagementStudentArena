@@ -27,12 +27,16 @@ CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
     period_label str    — cari tədris ili + semestr (varsa)
     widgets      list   — bax ``dashboard_widgets.widget()`` müqaviləsi
     empty_text   str    — heç bir vidjet yığılmayanda göstərilən mətn
+    kpi_tiles    list   — hero zolağının 2–4 kartı (``dashboard_layout``)
+    data_count   int    — rəqəm/siyahı daşıyan vidjetlərin sayı
+    link_count   int    — yığcam keçid kartlarının sayı
 """
 
 from __future__ import annotations
 
 from django.utils.translation import pgettext
 
+from . import dashboard_layout as layout
 from . import dashboard_staff_widgets as staff
 from . import dashboard_widgets as personal
 
@@ -229,8 +233,13 @@ def build_dashboard_section(
     kpi = widgets.pop()
     widgets.extend(staff.design_link_cards(allowed_sections=allowed_sections))
     widgets.append(kpi)
-    section["widgets"] = [item for item in widgets if item is not None]
+    # Təqdimat qatı: sıralama + hero zolağı `dashboard_layout`-dadır (bu fayl
+    # NƏYİN yığıldığını, o fayl NECƏ göstərildiyini bilir).
+    section["widgets"] = layout.decorate([item for item in widgets if item is not None])
     _finalise_links(section["widgets"], allowed_sections)
+    section["kpi_tiles"] = layout.hero_tiles(section["widgets"])
+    section["data_count"] = layout.count_variant(section["widgets"], "data")
+    section["link_count"] = layout.count_variant(section["widgets"], "link")
     return section
 
 

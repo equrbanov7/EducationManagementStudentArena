@@ -130,7 +130,12 @@ panel fokuslanır (§7).{% endcomment %}
       <ul class="apx-errors" data-apx-errors hidden></ul>
       <div>
         <label class="apx-field__label" for="apx-assignee">{% trans "Məsul şəxs" context "applications" %} <span class="apx-req">*</span></label>
-        <select id="apx-assignee" class="apx-select" data-apx-assignee></select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select id="apx-assignee" class="apx-select bootstrap-single-select__native" data-apx-assignee
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Ad ilə axtar…' context 'applications' %}"
+                    data-live-search-empty="{% trans 'Uyğun şəxs tapılmadı' context 'applications' %}"></select>
+        </div>
       </div>
       <div>
         <label class="apx-field__label" for="apx-assign-note">{% trans "Qeyd" context "applications" %}</label>

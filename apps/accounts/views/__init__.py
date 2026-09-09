@@ -143,6 +143,7 @@ from .roles import (
 )
 
 # Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
+from .schedule_editor import schedule_editor_action
 from .schedule_manage import schedule_manage_action, schedule_manage_check
 
 # Global search (⌘K command palette)
@@ -260,6 +261,7 @@ __all__ = [
     "applications_assignees",
     "schedule_manage_check",
     "schedule_manage_action",
+    "schedule_editor_action",
     "student_intake_template",
     "teacher_intake_apply",
     "teacher_intake_preview",

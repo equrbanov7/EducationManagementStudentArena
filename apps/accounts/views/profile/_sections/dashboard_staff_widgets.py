@@ -214,9 +214,9 @@ def student_intake(*, allowed_sections) -> dict | None:
         return None
     return widget(
         "student-intake",
-        pgettext(_CTX, "Tələbə idxalı"),
+        pgettext(_CTX, "Tələbə əlavəsi (toplu)"),
         "fa-user-plus",
-        link=section_link("student-intake", pgettext(_CTX, "İdxala keç")),
+        link=section_link("student-intake", pgettext(_CTX, "Siyahı ilə əlavə et")),
         empty=pgettext(_CTX, "CSV ilə toplu tələbə hesabı yaradın."),
     )
 

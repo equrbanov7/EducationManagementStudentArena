@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Slot dəyişikliyinin ÜMUMİ təsdiqi (sahib, 2026-09-09: «slot dəyişəndə
+hər zaman təsdiq istəsin kiçik bir modalda, problem olmasa belə»).
+
+Sürüklə-buraxın öz təsdiqi «seditMove» dialoqundadır; bu dialoq YARATMA / REDAKTƏ
+və SİLMƏ əməllərini qapayır. Xülasə mətni JS ilə doldurulur (inline script YOXDUR);
+sabit mətnlər isə burada tərcümə olunur və `data-t-*` atributları ilə ötürülür.{% endcomment %}
+<div class="sedit-confirm" data-sedit-confirm-texts
+     data-t-save="{% trans 'Dərs cədvəldəki xanaya yazılacaq.' context 'accounts.schedule_manage' %}"
+     data-t-delete="{% trans 'Dərs cədvəldən götürülür. Qeyd silinmir — sonradan bərpa oluna bilər.' context 'accounts.schedule_manage' %}">
+  <p class="sedit-confirm__lead">{% trans "Bu dəyişikliyi təsdiqləyirsiniz?" context "accounts.schedule_manage" %}</p>
+  <p class="sedit-confirm__summary" data-sedit-confirm-summary></p>
+  <p class="sedit-confirm__note" data-sedit-confirm-note hidden></p>
+</div>

@@ -9,12 +9,14 @@ Gizli `action` və `parent` sahələri dialoqun özündədir; dəyərləri JS-in
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-unit-type">{% trans "Bölmə tipi" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-unit-type" name="unit_type" required>
-            <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
-            {% for option in structure_tree_section.unit_kind_choices %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-unit-type" name="unit_type" required data-bootstrap-select>
+                <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
+                {% for option in structure_tree_section.unit_kind_choices %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-unit-code">{% trans "Kod" context "accounts.structure_tree" %}</label>

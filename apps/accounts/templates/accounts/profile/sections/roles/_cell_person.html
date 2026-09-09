@@ -1,0 +1,10 @@
+{% comment %}Şəxs xanası (cədvəlin sətir başlığı) — inisial nişanı, ad, istifadəçi
+adı və e-poçt. Kontekst: `row.data` (bax `_sections/manage_roles.py`).{% endcomment %}
+<div class="rls-person">
+    <span class="rls-avatar" aria-hidden="true">{{ row.data.initials }}</span>
+    <span class="rls-person__text">
+        <span class="rls-person__name">{{ row.data.name }}</span>
+        <span class="rls-person__meta">@{{ row.data.username }}</span>
+        {% if row.data.email %}<span class="rls-person__meta rls-person__meta--mail">{{ row.data.email }}</span>{% endif %}
+    </span>
+</div>

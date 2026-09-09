@@ -1,0 +1,12 @@
+{% comment %}Cədvəlin birinci sütunu — şəxsin adı, istifadəçi adı və e-poçtu.
+Rəhbər heyət avatarda tac ilə seçilir (rəng TƏK GÖSTƏRİCİ deyil — mətn də var).
+{% endcomment %}
+{% load i18n %}
+<span class="hm-member">
+    <span class="hm-avatar{% if row.data.is_leader %} hm-avatar--lead{% endif %}" aria-hidden="true">{{ row.data.initials }}</span>
+    <span class="hm-member__meta">
+        <a class="hm-member__name" href="{{ row.data.profile_url }}" target="_blank" rel="noopener">{{ row.data.name }}</a>
+        <span class="hm-member__sub">@{{ row.data.username }}{% if row.data.email %} · {{ row.data.email }}{% endif %}</span>
+        {% if row.data.is_leader %}<span class="ems-badge ems-badge--warning hm-lead"><i class="fas fa-crown" aria-hidden="true"></i> {% trans "Rəhbər" context "accounts.staff_management" %}</span>{% endif %}
+    </span>
+</span>

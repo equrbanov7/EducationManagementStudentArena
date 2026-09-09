@@ -210,6 +210,22 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-members",
         "org-roles",
         "audit-log",
+        # «Heyət idarəetməsi» (2026-09-09 yenidən qurulub) — panel OXU-ONLY
+        # render olunur; yeganə mutasiya (üzvün səbəblə çıxarılması) ayrıca
+        # POST endpoint-inə gedir və `next` ilə qabığa qayıdır → AJAX swap
+        # təhlükəsizdir. Bu qeydiyyat olmasa AVTO filtr panelini yeniləyə
+        # bilmir (`section_loader.js` bölməni tanımır və heç nə etmir).
+        "student-organization-management",
+        # Rol / icazə səthləri (2026-09-09 yenidən qurulub) — panel OXU-ONLY
+        # render olunur; bütün mutasiyalar ayrıca POST endpoint-lərinə gedir
+        # (`accounts:role_assignment` JSON + imzalı token, `accounts:manage_roles`
+        # və `accounts:permission_editor` isə `next` ilə qabığa qayıdan adi POST)
+        # → AJAX swap təhlükəsizdir. Bu qeydiyyat olmasa AVTO filtr paneli və
+        # bölmələr arası «Rol təyin et ↔ Rolları idarə et» keçidi işləmir
+        # (`section_loader.js` bölməni tanımır və heç nə etmir).
+        "role-assignment",
+        "manage-roles",
+        "permission-editor",
         # Hər ikisi OXU-ONLY siyahıdır (form/admin vəziyyəti daşımır) — AJAX-safe.
         "unit-exams",
         "superadmin-org-inspector",

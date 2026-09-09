@@ -14,28 +14,37 @@ Gizli `action` və `id` dialoqun özündədir; dəyərləri `data-tof-prefill`-d
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pg-degree">{% trans "Təhsil pilləsi" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-pg-degree" name="degree_level" required>
-            {% for option in programs_registry_section.degree_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pg-degree" name="degree_level" required data-bootstrap-select>
+                {% for option in programs_registry_section.degree_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pg-form">{% trans "Təhsil forması" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-pg-form" name="education_form" required>
-            {% for option in programs_registry_section.form_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pg-form" name="education_form" required data-bootstrap-select>
+                {% for option in programs_registry_section.form_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pg-chair">{% trans "Tabe olduğu kafedra" context "accounts.catalog" %}</label>
-        <select class="ems-select" id="tof-pg-chair" name="specialty_unit">
-            <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
-            {% for option in programs_registry_section.chair_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pg-chair" name="specialty_unit"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.catalog' %}"
+                    data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.catalog' %}">
+                <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
+                {% for option in programs_registry_section.chair_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pg-ects">{% trans "Məzuniyyət üçün ECTS" context "accounts.catalog" %}</label>

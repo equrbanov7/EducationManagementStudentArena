@@ -40,6 +40,10 @@
         box.hidden = !message;
     }
 
+    //: `statusLabel` tonu → `ems_ui` badge variantı. Vəziyyət YALNIZ rənglə
+    //: verilmir: badge həmişə MƏTN daşıyır (handoff §7 a11y).
+    var BADGE_TONE = { ok: "success", info: "primary", warn: "warning", danger: "danger" };
+
     function statusLabel(status, t) {
         if (status === "created") {
             return { text: t.tCreated || "created", tone: "ok" };
@@ -51,6 +55,31 @@
             return { text: t.tSkip || "skip", tone: "warn" };
         }
         return { text: t.tError || "error", tone: "danger" };
+    }
+
+    function textCell(tr, value) {
+        var td = document.createElement("td");
+        td.textContent = value;
+        tr.appendChild(td);
+        return td;
+    }
+
+    /* Vəziyyət xanası — badge + (ekran 08-də) altında sətrin izahı. */
+    function statusCell(tr, label, note) {
+        var td = document.createElement("td");
+        td.className = "six-status six-status--" + label.tone;
+        var badge = document.createElement("span");
+        badge.className = "ems-badge ems-badge--" + (BADGE_TONE[label.tone] || "neutral");
+        badge.textContent = label.text;
+        td.appendChild(badge);
+        if (note) {
+            var extra = document.createElement("span");
+            extra.className = "six-status__note";
+            extra.textContent = note;
+            td.appendChild(extra);
+        }
+        tr.appendChild(td);
+        return td;
     }
 
     /* ---- Ekran 08 (ATİS) əlavələri --------------------------------------
@@ -158,27 +187,80 @@
     function renderAtisRow(host, row, label, t) {
         var tr = document.createElement("tr");
         tr.className = "six-row is-" + label.tone;
+        textCell(tr, String(row.row || ""));
+        statusCell(tr, label, row.message || "");
         [
-            String(row.row || ""),
-            label.text + " · " + (row.message || ""),
             row.full_name || "",
             row.program_label || "",
             row.admission_score || "",
             row.funding_type || "",
             [row.education_form || "", row.group || ""].filter(Boolean).join(" / ")
-        ].forEach(function (value, index) {
-            var td = document.createElement("td");
-            td.textContent = value;
-            if (index === 1) {
-                td.className = "six-status six-status--" + label.tone;
-            }
-            tr.appendChild(td);
+        ].forEach(function (value) {
+            textCell(tr, value);
         });
         tr.appendChild(groupCell(host, row, t));
         var note = document.createElement("td");
         note.textContent = (row.warnings || []).join(" · ");
         tr.appendChild(note);
         return tr;
+    }
+
+    /* Nəticə sayğacı. Toplu əlavə panelləri KPI kartı (`data-six-counts="kpi"`),
+     * ekran 08 isə köhnə çip zolağını işlədir — markup fərqi tək yerdədir. */
+    function kpiTile(label, value, tone) {
+        var tile = document.createElement("div");
+        tile.className = "ems-kpi ems-kpi--" + tone;
+        var head = document.createElement("div");
+        head.className = "ems-kpi__label";
+        head.textContent = label;
+        var num = document.createElement("div");
+        num.className = "ems-kpi__value";
+        num.textContent = String(value);
+        tile.appendChild(head);
+        tile.appendChild(num);
+        return tile;
+    }
+
+    function renderCounts(box, summary, t) {
+        var asKpi = box.getAttribute("data-six-counts") === "kpi";
+        box.textContent = "";
+        [
+            [t.tTotal || "total", summary.total || 0, "info", "accent-primary"],
+            [t.tCreated || "created", summary.created, "ok", "accent-success"],
+            [t.tCreate || "create", summary.create, "info", "accent-success"],
+            [t.tSkip || "skip", summary.skip || 0, "warn", "accent-warning"],
+            [t.tError || "error", summary.error || 0, "danger", "accent-danger"],
+        ].forEach(function (item) {
+            if (item[1] === undefined || item[1] === null) {
+                return;
+            }
+            if (asKpi) {
+                box.appendChild(kpiTile(item[0], item[1], item[3]));
+                return;
+            }
+            var chip = document.createElement("span");
+            chip.className = "six-chip six-chip--" + item[2];
+            chip.textContent = item[0] + ": " + item[1];
+            box.appendChild(chip);
+        });
+    }
+
+    /* Toplu əlavənin 3 addımlı lenti (ekran 08-in 4 addımı `updateSteps`-dədir:
+     * uzunluq fərqi iki axını bir-birindən ayırır — səhv panelə toxunmuruq). */
+    function updateIntakeSteps(host, summary, applied) {
+        var steps = host.querySelectorAll(".ems-step");
+        if (steps.length !== 3) {
+            return;
+        }
+        var blocking = Number(summary && summary.error) || 0;
+        var states = ["done", blocking ? "error" : "done", applied ? "done" : "current"];
+        for (var i = 0; i < steps.length; i += 1) {
+            steps[i].className = "ems-step ems-step--" + states[i];
+            var mark = steps[i].querySelector(".ems-step__mark");
+            if (mark) {
+                mark.textContent = states[i] === "done" ? "\u2713" : states[i] === "error" ? "!" : String(i + 1);
+            }
+        }
     }
 
     function renderRows(host, payload, title) {
@@ -200,43 +282,23 @@
             }
             var tr = document.createElement("tr");
             tr.className = "six-row is-" + label.tone;
+            textCell(tr, String(row.row || ""));
+            statusCell(tr, label);
             [
-                String(row.row || ""),
-                label.text,
                 row.fin || "",
                 row.full_name || "",
                 row.group || "",
                 row.username || "",
                 [row.message || ""].concat(row.warnings || []).filter(Boolean).join(" · "),
-            ].forEach(function (value, index) {
-                var td = document.createElement("td");
-                td.textContent = value;
-                if (index === 1) {
-                    td.className = "six-status six-status--" + label.tone;
-                }
-                tr.appendChild(td);
+            ].forEach(function (value) {
+                textCell(tr, value);
             });
             body.appendChild(tr);
         });
 
         var summary = payload.summary || {};
         if (counts) {
-            counts.textContent = "";
-            [
-                [t.tTotal || "total", summary.total || 0, "info"],
-                [t.tCreated || "created", summary.created, "ok"],
-                [t.tCreate || "create", summary.create, "info"],
-                [t.tSkip || "skip", summary.skip || 0, "warn"],
-                [t.tError || "error", summary.error || 0, "danger"],
-            ].forEach(function (item) {
-                if (item[1] === undefined || item[1] === null) {
-                    return;
-                }
-                var chip = document.createElement("span");
-                chip.className = "six-chip six-chip--" + item[2];
-                chip.textContent = item[0] + ": " + item[1];
-                counts.appendChild(chip);
-            });
+            renderCounts(counts, summary, t);
         }
         if (heading) {
             heading.textContent = title || "";
@@ -250,12 +312,16 @@
             return;
         }
         if (busy) {
-            button.dataset.sixLabel = button.dataset.sixLabel || button.textContent;
+            // İkonlu düymə: `textContent` ikonu udardı, ona görə öz markup-ımız
+            // (kənar giriş YOX) olduğu kimi saxlanılıb bərpa olunur.
+            if (button.dataset.sixLabel === undefined) {
+                button.dataset.sixLabel = button.innerHTML;
+            }
             button.textContent = busyText || "…";
             button.disabled = true;
         } else {
-            if (button.dataset.sixLabel) {
-                button.textContent = button.dataset.sixLabel;
+            if (button.dataset.sixLabel !== undefined) {
+                button.innerHTML = button.dataset.sixLabel;
             }
             button.disabled = false;
         }
@@ -307,6 +373,8 @@
                 var summary = renderRows(host, payload, isApply ? t.tApplied : t.tPreview);
                 if (isAtis(host)) {
                     updateSteps(host, updateKpis(host, payload), isApply);
+                } else {
+                    updateIntakeSteps(host, summary, isApply);
                 }
                 var applyButton = host.querySelector("[data-six-apply]");
                 var downloadButton = host.querySelector("[data-six-download]");
@@ -323,12 +391,12 @@
                 }
                 if (isApply) {
                     var input = host.querySelector("[data-six-file]");
-                    var label = host.querySelector("[data-six-file-label]");
                     if (input) {
                         input.value = "";
                     }
-                    if (label) {
-                        label.textContent = label.dataset.sixEmpty || label.textContent;
+                    // Ad/«doldu» tonu `intake_file.js`-dədir (fayl səthinin sahibi).
+                    if (window.EMSIntakeFile) {
+                        window.EMSIntakeFile.sync(host);
                     }
                 }
             })
@@ -359,7 +427,7 @@
         var url = window.URL.createObjectURL(blob);
         var link = document.createElement("a");
         link.href = url;
-        link.download = "telebe_idxal_parollari.csv";
+        link.download = "toplu_elave_parollari.csv";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -367,19 +435,6 @@
             window.URL.revokeObjectURL(url);
         }, 1000);
     }
-
-    DELEGATE.on("change", "[data-six-file]", function (event, input) {
-        var host = root();
-        if (!host) {
-            return;
-        }
-        var label = host.querySelector("[data-six-file-label]");
-        if (label) {
-            label.dataset.sixEmpty = label.dataset.sixEmpty || label.textContent;
-            label.textContent = input.files && input.files.length ? input.files[0].name : label.dataset.sixEmpty;
-        }
-        showError(host, "");
-    });
 
     DELEGATE.on("click", "[data-six-preview]", function (event) {
         var host = root();
