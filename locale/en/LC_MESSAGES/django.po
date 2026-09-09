@@ -71339,3 +71339,44 @@ msgstr "Choose image"
 msgctxt "profile.edit_v2"
 msgid "PNG və ya JPG · maksimum 5 MB"
 msgstr "PNG or JPG · 5 MB maximum"
+
+#: templates/partials/_global_search.html:54
+msgctxt "search"
+msgid "Başqa açar söz yoxlayın: ad, soyad, fənn adı və ya kod."
+msgstr "Try another keyword: a name, surname, subject title or code."
+
+msgctxt "profile.edit_v2"
+msgid "Bütün dəyişikliklər yadda saxlanılıb"
+msgstr "All changes are saved"
+
+msgctxt "accounts.student_registry"
+msgid "Transkript yüklə"
+msgstr "Download transcript"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi akademik transkripti PDF olaraq yüklə"
+msgstr "Download the official academic transcript as PDF"
+
+msgctxt "registrar.catalog"
+msgid "Rəsmi akademik transkripti PDF olaraq yüklə"
+msgstr "Download the official academic transcript as PDF"
+
+msgctxt "registrar.pdf"
+msgid "Sənəd №"
+msgstr "Document No."
+
+msgctxt "registrar.pdf"
+msgid "Möhür yeri"
+msgstr "Seal"
+
+msgctxt "registrar.pdf"
+msgid "(imza, soyad və ad)"
+msgstr "(signature, surname and name)"
+
+msgctxt "registrar.pdf"
+msgid "Səhifə %(page)s / %(total)s"
+msgstr "Page %(page)s / %(total)s"
+
+msgctxt "registrar.catalog"
+msgid "Transkript yüklə"
+msgstr "Download transcript"

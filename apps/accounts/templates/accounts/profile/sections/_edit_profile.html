@@ -25,7 +25,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260910-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260910-3">
 
     {% trans 'Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur.' context 'profile.edit_v2' as edit_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=edit_subtitle %}
@@ -209,21 +209,27 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
             </div>
         </div>
 
-        <div class="edit-profile-savebar" id="editProfileSavebar">
+        {# Status İKİ vəziyyətlidir və yeri həmişə tutulur — nişan peyda olub
+           yox olduqda düymələr sürüşməsin (görünüş stabilliyi). #}
+        <div class="edit-profile-savebar" id="editProfileSavebar" data-dirty="0">
+            <span class="edit-profile-savebar__saved">
+                <i class="fas fa-circle-check" aria-hidden="true"></i>
+                {% trans 'Bütün dəyişikliklər yadda saxlanılıb' context 'profile.edit_v2' %}
+            </span>
             <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
                 <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
                 {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
             </span>
             <div class="edit-profile-savebar__actions">
                 <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
-                   class="btn btn-outline-primary" target="_blank" rel="noopener">
+                   class="ems-btn ems-btn--ghost" target="_blank" rel="noopener">
                     <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
                 </a>
-                <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
+                <a href="{{ profile_base_url }}?section=profile-info" class="ems-btn js-profile-section-link"
                    data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
-                    <i class="fas fa-times" aria-hidden="true"></i> {% trans "cancel" context "profile.edit" %}
+                    {% trans "cancel" context "profile.edit" %}
                 </a>
-                <button type="submit" form="editProfileForm" class="btn btn-primary">
+                <button type="submit" form="editProfileForm" class="ems-btn ems-btn--primary">
                     <i class="fas fa-save" aria-hidden="true"></i> {% trans "save" context "profile.edit" %}
                 </button>
             </div>
@@ -363,7 +369,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
 
     {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
     <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260827-1" defer></script>
-    <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260815-1" defer></script>
+    <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260910-1" defer></script>
     <script src="{% static 'accounts/js/profile/edit_profile_avatar.js' %}?v=20260910-1" defer></script>
 </section>
 {% endif %}
