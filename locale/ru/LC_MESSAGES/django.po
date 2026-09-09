@@ -70620,3 +70620,638 @@ msgid "Dərs cədvəldən götürülür. Qeyd silinmir — sonradan bərpa oluna
 msgstr ""
 "Занятие убирается из расписания. Запись сохраняется и может быть "
 "восстановлена."
+
+msgctxt "organizations.roles_registry"
+msgid "%(n)s açar"
+msgstr "ключей: %(n)s"
+
+msgctxt "organizations.roles_registry"
+msgid "Ad (A→Z)"
+msgstr "Название (А→Я)"
+
+msgctxt "organizations.roles_registry"
+msgid "Aktiv təşkilat tapılmadı."
+msgstr "Активная организация не найдена."
+
+msgctxt "organizations.roles_registry"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rol bütün icazələri daşıyır (*) — ayrıca açar siyahısı saxlanmır."
+msgstr "Эта роль имеет все права (*) — отдельный список ключей не хранится."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rola heç bir icazə açarı verilməyib."
+msgstr "Этой роли не выдано ни одного ключа прав."
+
+msgctxt "organizations.roles_registry"
+msgid "Bu rolu daşıyan üzv"
+msgstr "Участники с этой ролью"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Bu rəqəm kataloqun öz səviyyəsidir. Konkret şəxsin RBAC səviyyəsi "
+"üzvlüyündən asılı olaraq fərqlənə bilər — «Rolları idarə et» ekranında "
+"görünən rəqəm odur."
+msgstr ""
+"Это собственный уровень каталога. Уровень RBAC конкретного человека может "
+"отличаться в зависимости от его членства — именно он показан на экране "
+"«Управление ролями»."
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr"
+msgstr "Все права"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün icazələr (*)"
+msgstr "Все права (*)"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün kateqoriyalar"
+msgstr "Все категории"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün təşkilat"
+msgstr "Вся организация"
+
+msgctxt "organizations.roles_registry"
+msgid "Bütün əhatələr"
+msgstr "Все области"
+
+msgctxt "organizations.roles_registry"
+msgid "Deaktiv"
+msgstr "Неактивна"
+
+msgctxt "organizations.roles_registry"
+msgid "Digər"
+msgstr "Прочее"
+
+msgctxt "organizations.roles_registry"
+msgid "Dərs"
+msgstr "Курс"
+
+msgctxt "organizations.roles_registry"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "organizations.roles_registry"
+msgid "Heç kimə verilməyib"
+msgstr "Никому не назначена"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloq səviyyəsi"
+msgstr "Уровень каталога"
+
+msgctxt "organizations.roles_registry"
+msgid "Kataloqda hələ rol yoxdur"
+msgstr "В каталоге пока нет ролей"
+
+msgctxt "organizations.roles_registry"
+msgid "Nəticə: %(n)s rol"
+msgstr "Результат: ролей — %(n)s"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol"
+msgstr "Роль"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol adı, izah və ya icazə"
+msgstr "Название роли, описание или право"
+
+msgctxt "organizations.roles_registry"
+msgid "Rol haqqında"
+msgstr "О роли"
+
+msgctxt "organizations.roles_registry"
+msgid "Rollar universitet şablonundan miqrasiya ilə gəlir."
+msgstr "Роли поступают миграцией из университетского шаблона."
+
+msgctxt "organizations.roles_registry"
+msgid "Rolları idarə et"
+msgstr "Управление ролями"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem"
+msgstr "Системная"
+
+msgctxt "organizations.roles_registry"
+msgid "Sistem rolu"
+msgstr "Системная роль"
+
+msgctxt "organizations.roles_registry"
+msgid "Struktur bölməsi"
+msgstr "Структурное подразделение"
+
+msgctxt "organizations.roles_registry"
+msgid "Süzgəcləri sıfırlayıb yenidən yoxlayın."
+msgstr "Сбросьте фильтры и попробуйте снова."
+
+msgctxt "organizations.roles_registry"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (aşağıdan)"
+msgstr "Уровень (по возрастанию)"
+
+msgctxt "organizations.roles_registry"
+msgid "Səviyyə (yuxarıdan)"
+msgstr "Уровень (по убыванию)"
+
+msgctxt "organizations.roles_registry"
+msgid "Təyinat"
+msgstr "Назначения"
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilat rolları"
+msgstr "Роли организации"
+
+msgctxt "organizations.roles_registry"
+msgid ""
+"Təşkilatın rol kataloqu: hər rolun səviyyəsi, əhatəsi, neçə nəfərdə olduğu "
+"və hansı icazələri daşıdığı. Rola klik edib icazələri kateqoriya üzrə açın."
+msgstr ""
+"Каталог ролей организации: уровень и область каждой роли, сколько человек её"
+" имеют и какие права она несёт. Нажмите на роль, чтобы раскрыть права по "
+"категориям."
+
+msgctxt "organizations.roles_registry"
+msgid "Təşkilatın öz rolu"
+msgstr "Собственная роль организации"
+
+msgctxt "organizations.roles_registry"
+msgid "Uyğun rol tapılmadı"
+msgstr "Подходящая роль не найдена"
+
+msgctxt "organizations.roles_registry"
+msgid "Verilməyib"
+msgstr "Не назначена"
+
+msgctxt "organizations.roles_registry"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "organizations.roles_registry"
+msgid "aktiv üzvlük (bir nəfər bir neçə dəfə sayıla bilər)"
+msgstr "активные членства (один человек может считаться несколько раз)"
+
+msgctxt "organizations.roles_registry"
+msgid "heç bir üzvdə yoxdur"
+msgstr "нет ни у одного участника"
+
+msgctxt "organizations.roles_registry"
+msgid "kataloqda, süzgəcdən asılı deyil"
+msgstr "в каталоге, независимо от фильтров"
+
+msgctxt "organizations.roles_registry"
+msgid "miqrasiya ilə gəlir, silinmir"
+msgstr "поступает миграцией, не удаляется"
+
+msgctxt "organizations.roles_registry"
+msgid "rol var, açar yoxdur"
+msgstr "роль есть, ключей нет"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv"
+msgstr "Участники"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzv sayı"
+msgstr "Число участников"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə kateqoriyası"
+msgstr "Категория прав"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə verilməyib"
+msgstr "Права не выданы"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr"
+msgstr "Права"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələr kateqoriya üzrə qruplaşdırılıb."
+msgstr "Права сгруппированы по категориям."
+
+msgctxt "organizations.roles_registry"
+msgid "İcazələri redaktə et"
+msgstr "Редактировать права"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsi yoxdur"
+msgstr "Без прав"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazəsiz"
+msgstr "Без прав"
+
+msgctxt "organizations.roles_registry"
+msgid "Əhatə"
+msgstr "Область"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "organizations.roles_registry"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "organizations.roles_registry"
+msgid "Ətraflı"
+msgstr "Подробно"
+
+msgctxt "registrar.catalog"
+msgid "%(n)s-i boşdur"
+msgstr "из них пустых: %(n)s"
+
+msgctxt "registrar.catalog"
+msgid "7 rəqəm, məsələn 6006004. İxtisas yeni təsnifatda yoxdursa boş qalır."
+msgstr ""
+"7 цифр, например 6006004. Остаётся пустым, если специальности нет в новой "
+"классификации."
+
+msgctxt "registrar.catalog"
+msgid "Ad, kod və ya şifr"
+msgstr "Название, код или шифр"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
+"qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
+"dialoqda aparılır — kabinetdən çıxmır."
+msgstr ""
+"Академический каталог: специальности, предметы, учебные планы, открытия "
+"семестра, рубрики оценивания и назначения студентов. Каждое действие "
+"выполняется на этой странице, в диалоге — не покидая кабинет."
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloqu idarə etmək üçün icazəniz yoxdur — bu bölmə təşkilat üzrə "
+"`course.edit` açarı olan rollar üçündür."
+msgstr ""
+"У вас нет прав на управление академическим каталогом — этот раздел для ролей"
+" с ключом `course.edit` на уровне организации."
+
+msgctxt "registrar.catalog"
+msgid "Aktiv"
+msgstr "Активна"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv semestr yoxdur"
+msgstr "Нет активного семестра"
+
+msgctxt "registrar.catalog"
+msgid "Aktiv — siyahılarda və seçicilərdə görünür"
+msgstr "Активна — видна в списках и выборе"
+
+msgctxt "registrar.catalog"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "registrar.catalog"
+msgid "Boş qalsa ixtisasın adı işlədilir."
+msgstr "Если оставить пустым, используется название специальности."
+
+msgctxt "registrar.catalog"
+msgid "Bu siyahıda sətir yoxdur"
+msgstr "В этом списке нет строк"
+
+msgctxt "registrar.catalog"
+msgid "Bütün ixtisaslar"
+msgstr "Все специальности"
+
+msgctxt "registrar.catalog"
+msgid "Bütün statuslar"
+msgstr "Все статусы"
+
+msgctxt "registrar.catalog"
+msgid "Daxili kod"
+msgstr "Внутренний код"
+
+msgctxt "registrar.catalog"
+msgid "Deaktiv"
+msgstr "Неактивна"
+
+msgctxt "registrar.catalog"
+msgid "Dərs saatı"
+msgstr "Учебных часов"
+
+msgctxt "registrar.catalog"
+msgid "ECTS"
+msgstr "Кредиты ECTS"
+
+msgctxt "registrar.catalog"
+msgid "ECTS krediti"
+msgstr "Кредит ECTS"
+
+msgctxt "registrar.catalog"
+msgid "Fənlər"
+msgstr "Предметы"
+
+msgctxt "registrar.catalog"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "registrar.catalog"
+msgid "Fənn axtar…"
+msgstr "Найти предмет…"
+
+msgctxt "registrar.catalog"
+msgid "Fənn aç"
+msgstr "Открыть предмет"
+
+msgctxt "registrar.catalog"
+msgid "Fənn kodu"
+msgstr "Код предмета"
+
+msgctxt "registrar.catalog"
+msgid "Fənn sətri"
+msgstr "Строк предметов"
+
+msgctxt "registrar.catalog"
+msgid "Fənnin adı"
+msgstr "Название предмета"
+
+msgctxt "registrar.catalog"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Hər sətir bir meyardır: «ad: bal». Mövcud meyarların balı ad dəyişmədikcə "
+"qorunur."
+msgstr ""
+"По одному критерию в строке: «название: балл». Существующие критерии "
+"сохраняют балл, пока не изменено название."
+
+msgctxt "registrar.catalog"
+msgid "Kataloq bölmələri"
+msgstr "Разделы каталога"
+
+msgctxt "registrar.catalog"
+msgid "Köhnə şifr (050/060)"
+msgstr "Прежний шифр (050/060)"
+
+msgctxt "registrar.catalog"
+msgid "Meyar"
+msgstr "Критериев"
+
+msgctxt "registrar.catalog"
+msgid "Meyarlar"
+msgstr "Критерии"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "registrar.catalog"
+msgid "Müəllim axtar…"
+msgstr "Найти преподавателя…"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Müəllim jurnalın sahibidir. Sonradan dəyişmək «Fənn təhvili» bölməsindən "
+"aparılır."
+msgstr ""
+"Преподаватель — владелец журнала. Последующая смена выполняется в разделе "
+"«Передача предмета»."
+
+msgctxt "registrar.catalog"
+msgid "Müəllim təyin edilməyib"
+msgstr "Преподаватель не назначен"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimi var"
+msgstr "Преподаватель назначен"
+
+msgctxt "registrar.catalog"
+msgid "Müəllimsiz açılış"
+msgstr "Открытия без преподавателя"
+
+msgctxt "registrar.catalog"
+msgid "Nəticə: %(n)s sətir"
+msgstr "Результат: строк — %(n)s"
+
+msgctxt "registrar.catalog"
+msgid "Planın adı"
+msgstr "Название плана"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti"
+msgstr "Лимит пропусков"
+
+msgctxt "registrar.catalog"
+msgid "Qayıb limiti (%%)"
+msgstr "Лимит пропусков (%%)"
+
+msgctxt "registrar.catalog"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "registrar.catalog"
+msgid "Qrup axtar…"
+msgstr "Найти группу…"
+
+msgctxt "registrar.catalog"
+msgid "Qəbul ili"
+msgstr "Год приёма"
+
+msgctxt "registrar.catalog"
+msgid "Redaktə et"
+msgstr "Редактировать"
+
+msgctxt "registrar.catalog"
+msgid "Reyestrdə aç"
+msgstr "Открыть в реестре"
+
+msgctxt "registrar.catalog"
+msgid "Rubrik"
+msgstr "Рубрика"
+
+msgctxt "registrar.catalog"
+msgid "Rubrikin adı"
+msgstr "Название рубрики"
+
+msgctxt "registrar.catalog"
+msgid "Rubriklər"
+msgstr "Рубрики"
+
+msgctxt "registrar.catalog"
+msgid "Rəsmi şifr (NK 503)"
+msgstr "Официальный шифр (КМ 503)"
+
+msgctxt "registrar.catalog"
+msgid "Saat"
+msgstr "Часов"
+
+msgctxt "registrar.catalog"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışları"
+msgstr "Открытия семестра"
+
+msgctxt "registrar.catalog"
+msgid "Semestr açılışı"
+msgstr "Открытий семестра"
+
+msgctxt "registrar.catalog"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "registrar.catalog"
+msgid "Süzgəci sıfırlayın və ya sağ yuxarıdakı düymə ilə yenisini əlavə edin."
+msgstr "Сбросьте фильтр или добавьте новую запись кнопкой справа вверху."
+
+msgctxt "registrar.catalog"
+msgid "Səviyyə"
+msgstr "Уровень"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planları"
+msgstr "Учебные планы"
+
+msgctxt "registrar.catalog"
+msgid "Tədris planı"
+msgstr "Учебный план"
+
+msgctxt "registrar.catalog"
+msgid "Təhsil səviyyəsi"
+msgstr "Уровень образования"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə reyestrinə keç"
+msgstr "Перейти в реестр студентов"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyin et"
+msgstr "Назначить студента"
+
+msgctxt "registrar.catalog"
+msgid "Tələbə təyinatları"
+msgstr "Назначения студентов"
+
+msgctxt "registrar.catalog"
+msgid ""
+"Tələbə təyinatları burada YALNIZ oxunur. Yeni təyinat və köçürmə «Tələbə "
+"reyestri» bölməsindən aparılır — orada axtarışlı tələbə seçicisi var."
+msgstr ""
+"Назначения студентов здесь ТОЛЬКО для чтения. Новые назначения и переводы "
+"выполняются в разделе «Реестр студентов» — там есть выбор студента с "
+"поиском."
+
+msgctxt "registrar.catalog"
+msgid "Təsvir"
+msgstr "Описание"
+
+msgctxt "registrar.catalog"
+msgid "Təyin edilməyib"
+msgstr "Не назначен"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun fənn yoxdur"
+msgstr "Подходящих предметов нет"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun ixtisas yoxdur"
+msgstr "Подходящих специальностей нет"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun müəllim yoxdur"
+msgstr "Подходящих преподавателей нет"
+
+msgctxt "registrar.catalog"
+msgid "Uyğun qrup yoxdur"
+msgstr "Подходящих групп нет"
+
+msgctxt "registrar.catalog"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "registrar.catalog"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "registrar.catalog"
+msgid "Yeni fənn"
+msgstr "Новый предмет"
+
+msgctxt "registrar.catalog"
+msgid "Yeni ixtisas"
+msgstr "Новая специальность"
+
+msgctxt "registrar.catalog"
+msgid "Yeni rubrik"
+msgstr "Новая рубрика"
+
+msgctxt "registrar.catalog"
+msgid "Yeni tədris planı"
+msgstr "Новый учебный план"
+
+msgctxt "registrar.catalog"
+msgid "aktiv semestr yoxdur"
+msgstr "нет активного семестра"
+
+msgctxt "registrar.catalog"
+msgid "jurnal sahibi yoxdur"
+msgstr "нет владельца журнала"
+
+msgctxt "registrar.catalog"
+msgid "Ümumi ECTS"
+msgstr "Всего ECTS"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "registrar.catalog"
+msgid "İxtisas axtar…"
+msgstr "Найти специальность…"
+
+msgctxt "registrar.catalog"
+msgid "İxtisaslar"
+msgstr "Специальности"
+
+msgctxt "registrar.catalog"
+msgid "İxtisasın adı"
+msgstr "Название специальности"
+
+msgctxt "registrar.catalog"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "registrar.catalog"
+msgid "Məzmun: 40&#10;Struktur: 30&#10;Təqdimat: 30"
+msgstr "Содержание: 40&#10;Структура: 30&#10;Подача: 30"
+
+msgctxt "profile.rim"
+msgid "Tək müəllim əlavə et"
+msgstr "Добавить одного преподавателя"
+
+msgctxt "profile.rim"
+msgid "Tək tələbə əlavə et"
+msgstr "Добавить одного студента"
+
+msgctxt "profile.sidebar"
+msgid "Rolları idarə et"
+msgstr "Управление ролями"
+
+msgctxt "profile.sidebar"
+msgid "İcazələr"
+msgstr "Права"
+
+msgid ""
+"Bütün apellyasiya müraciətləri — fənn, müəllim, qrup, imtahan tipi, status "
+"və dövr üzrə süzün; sütun başlığı sıralayır."
+msgstr ""
+"Все апелляции — фильтруйте по предмету, преподавателю, группе, типу "
+"экзамена, статусу и периоду; заголовок столбца сортирует."

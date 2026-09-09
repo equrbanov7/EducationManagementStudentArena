@@ -1,10 +1,22 @@
 {% load i18n %}
-{% comment %}Rəhbər xanası (dekan / kafedra müdiri): inisial nişanı + ad, yoxdursa
-sakit xəbərdarlıq çipi. Rəng tək başına məna daşımır — mətn də var.{% endcomment %}
+{% comment %}Rəhbər xanası (dekan / kafedra müdiri): inisial nişanı + AD SOYAD.
+
+Ad KLİK EDİLƏNDİR — şəxsin açıq profil səhifəsini AYRI tabda açır (sahib,
+2026-09-09: «müəllimin ad soyadı görünməlidi, üzərinə klik edəndə keçmək
+olsun»). Rəhbər həm rəsmi `OrgUnit.head` FK-sından, həm də rol üzvlüyündən
+(`dean` / `chair_head`) həll olunur — bax `registry_people.head_of`.
+
+Rəhbər yoxdursa sakit xəbərdarlıq çipi; rəng tək başına məna daşımır, mətn də var.{% endcomment %}
 {% if row.data.head_name %}
 <div class="ou-person">
     <span class="ou-avatar" aria-hidden="true">{{ row.data.head_initials }}</span>
-    <span class="ou-person__name">{{ row.data.head_name }}</span>
+    {% if row.data.head_url %}
+        <a class="ou-person__name" href="{{ row.data.head_url }}" target="_blank" rel="noopener">
+            {{ row.data.head_name }}
+        </a>
+    {% else %}
+        <span class="ou-person__name">{{ row.data.head_name }}</span>
+    {% endif %}
 </div>
 {% else %}
 <span class="ou-missing">

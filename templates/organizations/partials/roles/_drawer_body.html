@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Çekmecənin gövdəsi — məzmun JS ilə doldurulur (`roles_registry.js`),
+mənbə isə eyni səhifədəki `application/json` blokudur. Serverə ikinci sorğu
+GETMİR: rol kataloqu onsuz da tam yüklənib.{% endcomment %}
+<div class="rolreg-drawer" data-rolreg-drawer-body
+     data-t-level="{% trans 'Kataloq səviyyəsi' context 'organizations.roles_registry' %}"
+     data-t-scope="{% trans 'Əhatə' context 'organizations.roles_registry' %}"
+     data-t-members="{% trans 'Bu rolu daşıyan üzv' context 'organizations.roles_registry' %}"
+     data-t-perms="{% trans 'İcazələr' context 'organizations.roles_registry' %}"
+     data-t-none="{% trans 'Bu rola heç bir icazə açarı verilməyib.' context 'organizations.roles_registry' %}"
+     data-t-all="{% trans 'Bu rol bütün icazələri daşıyır (*) — ayrıca açar siyahısı saxlanmır.' context 'organizations.roles_registry' %}"
+     data-t-levelnote="{% trans 'Bu rəqəm kataloqun öz səviyyəsidir. Konkret şəxsin RBAC səviyyəsi üzvlüyündən asılı olaraq fərqlənə bilər — «Rolları idarə et» ekranında görünən rəqəm odur.' context 'organizations.roles_registry' %}">
+</div>

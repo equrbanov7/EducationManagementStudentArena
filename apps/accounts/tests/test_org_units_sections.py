@@ -82,7 +82,12 @@ class FragmentTest(_OrgUnitsBase):
         self.assertEqual(names, {self.faculty.name, self.other_faculty.name})
         row = next(r for r in section["rows"] if r["name"] == self.faculty.name)
         self.assertEqual(row["chairs"], 1)
-        self.assertEqual(row["head_name"], "")
+        # ⚠️ 2026-09-09: əvvəl burada `head_name == ""` gözlənilirdi — həmin
+        # gözlənti SƏHVİ kodlaşdırırdı. Fiksturda dekan ROL ÜZVLÜYÜ ilə təyin
+        # olunub (`OrgUnit.head` FK-sı boş), reyestr isə yalnız FK-ya baxırdı və
+        # bütün fakültələr «rəhbəri yoxdur» görünürdü (sahib şikayəti).
+        self.assertTrue(row["head_name"])
+        self.assertTrue(row["head_user_id"])
         html = response.json()["html"]
         self.assertNotIn("<h1", html)
         self.assertIn('data-tof-section="org-faculties"', html)
@@ -123,6 +128,78 @@ class FragmentTest(_OrgUnitsBase):
         sections = self._sections("student")
         self.assertNotIn("org-faculties", sections)
         self.assertNotIn("org-kafedras", sections)
+
+
+class ColumnAlignmentAndHeadResolutionTest(_OrgUnitsBase):
+    """Sahibin 2026-09-09 şikayətlərinin reqressiya qapısı.
+
+    1) «Sütun adları ilə altındakı infolar düz gəlmir» — `ems_ui/_data_table.html`
+       birinci xananı `th scope="row"`, sonuncunu isə əməllər xanası kimi verir;
+       hər ikisinin BAŞLIĞI olmalıdır, yoxsa başlıqlar bir xana sürüşür.
+    2) «Kafedra müdiri altında kafedranın adı görünür, müəllimin ad-soyadı
+       görünməlidi» — rəhbər `OrgUnit.head` FK-sı boş olanda ROL ÜZVLÜYÜNDƏN
+       (`dean` / `chair_head`) həll olunmalıdır.
+    """
+
+    def _section(self, name, key):
+        return self._fragment("teaching_office_head", name).context[key]
+
+    def test_faculty_table_headers_match_the_row_cells(self):
+        section = self._section("org-faculties", "org_faculties_section")
+        row = section["table_rows"][0]
+        self.assertEqual(len(section["columns"]), len(row["cells"]) + 2)  # +sətir başlığı +əməllər
+        self.assertEqual(section["columns"][0]["key"], "faculty")
+        self.assertEqual(section["columns"][-1]["key"], "actions")
+
+    def test_kafedra_table_headers_match_the_row_cells(self):
+        section = self._section("org-kafedras", "org_kafedras_section")
+        row = section["table_rows"][0]
+        self.assertEqual(len(section["columns"]), len(row["cells"]) + 2)
+        self.assertEqual(section["columns"][0]["key"], "kafedra")
+        self.assertEqual(section["columns"][1]["key"], "faculty")
+        self.assertEqual(section["columns"][-1]["key"], "actions")
+
+    def test_dean_membership_fills_the_head_column_without_the_fk(self):
+        """Rəhbər FK boş olsa da rol üzvlüyündən tapılır və şəxs səhifəsinə linklənir."""
+        dean_role, _ = Role.objects.update_or_create(
+            organization=self.org,
+            name="dean",
+            defaults={
+                "display_name": "Dean",
+                "level": 80,
+                "scope_type": RoleScopeType.UNIT,
+                "permissions": ["unit.view"],
+            },
+        )
+        # `other_faculty`-də dekan YOXDUR — ona müəllim üzvlüyü OLAN şəxsi təyin
+        # edirik ki, həm ad, həm də şəxs səhifəsinin linki yoxlana bilsin.
+        teacher = self.users["teacher"]
+        Membership.objects.create(
+            user=teacher,
+            organization=self.org,
+            role=dean_role,
+            scope_unit=self.other_faculty,
+            is_active=True,
+        )
+        self.other_faculty.refresh_from_db()
+        self.assertIsNone(self.other_faculty.head_id)  # FK BOŞ qalır
+
+        section = self._section("org-faculties", "org_faculties_section")
+        row = next(r for r in section["rows"] if r["name"] == self.other_faculty.name)
+        self.assertTrue(row["head_name"], "rəhbər rol üzvlüyündən həll olunmalıdır")
+        self.assertEqual(row["head_user_id"], str(teacher.pk))
+        self.assertIn("/people/person/", row["head_url"])
+
+    def test_head_without_a_catalog_record_is_not_linked(self):
+        """Kataloqda olmayan rəhbərin adı LİNK olmur — ölü keçid yaranmasın.
+
+        Şəxs səhifəsi kataloq əhatəsi ilə qorunur; müəllim üzvlüyü olmayan
+        hesab (məs. yalnız `chair_head` daşıyan xidməti hesab) orada 404 verir.
+        """
+        section = self._section("org-faculties", "org_faculties_section")
+        row = next(r for r in section["rows"] if r["name"] == self.faculty.name)
+        self.assertTrue(row["head_name"])  # fiksturun dekanı (`ds2_dean`)
+        self.assertEqual(row["head_url"], "")  # müəllim üzvlüyü yoxdur
 
 
 class UnitActionsTest(_OrgUnitsBase):

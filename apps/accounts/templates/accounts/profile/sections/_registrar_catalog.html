@@ -1,0 +1,53 @@
+{% load i18n static %}
+{% comment %}«Registrar (kataloq)» — akademik kataloqun idarəetməsi KABİNET İÇİNDƏ.
+
+2026-09-09 (sahib): «registrar kataloq yeni səhifəyə atmamalıdı, sidebar solda
+qalıb sağda bu açmalıdı». Əvvəl bu ekran `registrar:console` müstəqil səhifəsi
+idi və hər yaratma/redaktə ayrıca səhifəyə tullayırdı.
+
+QURULUŞ — başlıq → KPI → tab-lar → süzgəc → cədvəl → dialoq.
+Tab-lar LAZY: yalnız `?rc_tab=` ilə seçilmiş tabın sətirləri hesablanır.
+Yaratma/redaktə TƏK JSON son nöqtəsinə gedir (`accounts:registrar_catalog_action`),
+sonra panel yenidən yüklənir — səhifə dəyişmir.
+
+⚠️ Başlıq (h1) BURADA YAZILMIR — onu qabıq verir (`#profileSectionTitle`).
+CSP: inline üslub/skript bloku YOXDUR; dinamik dəyərlər `data-*` atributlarındadır.
+Silmə yoxdur — sətir «Aktiv» bayrağı ilə deaktiv edilir (yumşaq silmə).{% endcomment %}
+{% if 'registrar-catalog' in allowed_sections %}
+{% with sec=registrar_catalog_section %}
+<section class="profile-section-panel profile-section--registrar-catalog {% if active_section == 'registrar-catalog' %}is-active{% endif %}"
+         data-profile-section-panel="registrar-catalog"
+         data-source-url="{{ profile_base_url }}?section=registrar-catalog">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/registrar_catalog.css' %}?v=20260909-1">
+
+{% if not sec.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=sec.access_denied_message %}
+{% else %}
+<div class="rcat"
+     data-rcat-root
+     data-rcat-tab="{{ sec.tab }}"
+     data-rcat-tab-param="{{ sec.tab_param }}"
+     data-rcat-action-url="{{ sec.action_url }}"
+     data-rcat-section-url="{{ profile_base_url }}?section=registrar-catalog">
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.header_subtitle header_note=sec.header_note header_actions_include="accounts/profile/sections/registrar_catalog/_header_actions.html" %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_tabs.html" with tabs=sec.tabs tabs_label=sec.tabs_label %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="registrar-catalog" filter_prefix=sec.prefix filter_fields=sec.filter_fields filter_count_label=sec.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+    <div data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=sec.columns table_rows=sec.table_rows table_state=sec.table_state table_zebra=True table_wide=True state_kind="empty" state_icon=sec.state_icon state_title=sec.state_title state_body=sec.state_body %}
+    </div>
+
+    {{ sec.options|json_script:"rcat-options" }}
+
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="rcatForm" form_dialog_wide=True form_dialog_title=sec.dialog_title form_dialog_body_include="accounts/profile/sections/registrar_catalog/_form_fields.html" form_dialog_submit_label=sec.dialog_submit_label %}
+</div>
+{% endif %}
+<script defer src="{% static 'accounts/js/profile/registrar_catalog.js' %}?v=20260909-2"></script>
+</section>
+{% endwith %}
+{% endif %}
