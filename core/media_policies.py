@@ -355,6 +355,33 @@ def check_student_movement_access(user, path: str) -> bool:
     return user_has_org_permission(user, movement.organization, REGISTRY_VIEW_PERMISSION)
 
 
+# ---------------------------------------------------------------------------
+
+#: Dərs yükünə baxış açarı (``apps.workload.constants.PERM_VIEW`` ilə eyni
+#: sətir; ``core`` app modullarını import etmir).
+WORKLOAD_VIEW_PERMISSION = "workload.view"
+
+
+def check_workload_amendment_access(user, path: str) -> bool:
+    """``workload_amendments/`` — dərs yükü düzəlişinin RƏSMİ sənədi (PDF).
+
+    2026-09-10 auditinin P0 tapıntısı: prefiks nə ``PRIVATE_PREFIXES``-də, nə
+    də reyestrdə yox idi, yəni ``/media/workload_amendments/<org>/<task>/<fayl>``
+    AUTENTİFİKASİYASIZ və ``Cache-Control: public`` ilə verilirdi. Fayl adı
+    təsadüfiləşdirilmir (``əmr.pdf`` kimi ola bilir); məzmun isə kafedra
+    yükünün rəsmi düzəliş əsasıdır.
+
+    İcazəlilər: sənədin aid olduğu TƏŞKİLATDA ``workload.view`` açarını daşıyan
+    aktor. Düzəliş qeydi append-only reyestrdir — sənəd yükün auditinin bir
+    hissəsidir, ona görə yükü görə bilən onu da görür.
+    """
+    WorkloadAmendment = django_apps.get_model("workload", "WorkloadAmendment")
+    amendment = _get_single(WorkloadAmendment.objects.select_related("organization"), document=path)
+    if amendment is None:
+        return False
+    return user_has_org_permission(user, amendment.organization, WORKLOAD_VIEW_PERMISSION)
+
+
 #: ``media_views._PRIVATE_PREFIXES``-ə qatılan prefikslər.
 PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_corrections/",
@@ -367,6 +394,7 @@ PRIVATE_PREFIXES: tuple[str, ...] = (
     "legacy_excuse_documents/",
     "student_movements/",
     "applications/",
+    "workload_amendments/",
 )
 
 #: ``media_views._ACCESS_CHECKERS``-ə qatılan checker-lər (eyni açarlarla).
@@ -381,4 +409,5 @@ ACCESS_CHECKERS: dict[str, object] = {
     "guest_roster_documents/": check_guest_roster_document_access,
     "legacy_excuse_documents/": check_legacy_excuse_document_access,
     "applications/": check_application_attachment_access,
+    "workload_amendments/": check_workload_amendment_access,
 }

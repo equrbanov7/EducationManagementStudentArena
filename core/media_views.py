@@ -55,11 +55,20 @@ from core import media_policies
 # ad (testlər/monkeypatch) eyni funksiyaya işarə edir.
 _check_journal_correction_access = media_policies.check_journal_correction_access
 
-# Paths that are considered public and do not require authentication.
-# These are served openly (blog images, course covers, etc.).
+# ⚠️ AĞ SİYAHI — yeganə İCTİMAİ səthlərin TAM siyahısı.
+#
+# 2026-09-10 (üçüncü eyni tipli P0-dan sonra): sinif təyini AĞ SİYAHIYA
+# çevrildi. Əvvəl qayda «tanınmayan prefiks = ictimai» idi və bu, üç dəfə eyni
+# nəticəni verdi — yeni model fayl sahəsi əlavə edən adam siyahını yeniləməyi
+# unudurdu və sənəd autentifikasiyasız açılırdı (2026-09-02 imtahan yükləmələri,
+# 2026-09-03 `student_movements/`, 2026-09-10 `workload_amendments/`).
+# İndi əksinədir: BURADA olmayan HƏR prefiks məxfidir. Yeni ictimai səth
+# əlavə etmək ŞÜURLU addım tələb edir; unutmaq isə səhv istiqamətdə — faylın
+# bağlanması ilə — nəticələnir.
 _PUBLIC_PREFIXES: tuple[str, ...] = (
-    "post_images/",
-    "course_covers/",
+    "post_images/",     # bloq şəkilləri — ictimai səhifədə görünür
+    "course_covers/",   # kurs örtüyü — kataloqda görünür
+    "org_logos/",       # təşkilat loqosu — giriş səhifəsində və PDF blankında
 )
 
 # Paths that always require authentication.
@@ -83,13 +92,21 @@ _TEACHER_MIN_LEVEL = 50
 
 
 def _is_private(path: str) -> bool:
-    """Return True if the path prefix belongs to sensitive private storage."""
+    """Yol məxfidirmi? — DEFAULT **BƏLİ** (deny-by-default).
+
+    ⚠️ Bu funksiya əvvəl əks istiqamətdə işləyirdi: yalnız `_PRIVATE_PREFIXES`
+    və reyestrdəki prefikslər məxfi sayılırdı, QALANI isə ictimai. Nəticədə hər
+    yeni fayl sahəsi siyahıya əlavə edilməyəndə sənəd sükutla açıq qalırdı — bu,
+    üç ayrı P0 verdi (2026-09-02, 2026-09-03, 2026-09-10).
+
+    İndi qayda tərsdir: yalnız `_PUBLIC_PREFIXES` ağ siyahısındakı yollar
+    ictimaidir. `_PRIVATE_PREFIXES` və reyestr artıq təsnifat üçün deyil —
+    onlar `_ACCESS_CHECKERS` ilə birlikdə KİMİN görəcəyini təyin edir; siyahıda
+    olmayan məxfi yol isə `_check_private_media_access`-in son bəndində onsuz
+    da RƏDD olunur.
+    """
     clean = path.lstrip("/")
-    if clean.startswith(_PRIVATE_PREFIXES):
-        return True
-    # App-ların `AppConfig.ready()`-dən qeyd etdiyi prefikslər (registry).
-    registered = media_policies.registered_prefixes()
-    return bool(registered) and clean.startswith(registered)
+    return not clean.startswith(_PUBLIC_PREFIXES)
 
 
 def _user_has_org_membership(user, organization, *, min_level: int = 0) -> bool:
