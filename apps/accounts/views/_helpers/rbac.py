@@ -526,6 +526,13 @@ def _role_capabilities(user, profile):
         is_owner=is_owner_of_active_org,
     )
 
+    # «Registrar (kataloq)» — 2026-09-09-a qədər `registrar:console` MÜSTƏQİL
+    # səhifəsi idi və sidebar itirdi (sahib: «yeni səhifəyə atmamalıdı»). İndi
+    # kabinet bölməsidir; qapı DƏYİŞMİR — eyni `can_manage_registrar`
+    # (org-wide `course.edit`) bayrağı.
+    if can_manage_registrar:
+        allowed_sections.add("registrar-catalog")
+
     # "Sual Bankı" profil sidebar bölməsi (sağda AJAX açılır) — görünürlük flag-ı ilə eyni şərt.
     if can_use_question_bank:
         allowed_sections.add("question-bank")

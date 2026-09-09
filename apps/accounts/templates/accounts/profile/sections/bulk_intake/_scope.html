@@ -1,9 +1,20 @@
-{% comment %}Başlığın sağındakı əhatə nişanı — «hesablar hansı təşkilatda yaranır».
+{% load i18n %}
+{% comment %}Başlığın sağı — «TƏK hesab əlavə et» düyməsi + əhatə nişanı.
+
+Düymə sahibin 2026-09-09 tələbəsidir: «toplu əlavəsində button qoy, tək müəllim
+ya da tələbə əlavə etmək də olsun». Dialoq kataloqdakı «Yeni müəllim/tələbə» ilə
+EYNİ-dir (`_rim_create.html` + `rim_center/create.js`), ona görə ikinci forma
+qurulmur — `data-rimc-open` çəngəli həmin dialoqu açır.
 
 `_content_header.html`-in `header_actions_include` yuvasına verilir; hər iki
-toplu əlavə bölməsi (tələbə · müəllim) EYNİ nişanı işlədir, ona görə `sec`
-dəyişəni şablondan (`{% with sec=... %}`) gəlir.
-{% endcomment %}
+toplu əlavə bölməsi (tələbə · müəllim) EYNİ partial-ı işlədir, `sec` dəyişəni
+şablondan (`{% with sec=... %}`) gəlir.{% endcomment %}
+{% if sec.single_create.can_create %}
+<button type="button" class="ems-btn ems-btn--primary" data-rimc-open="{{ sec.single_create_kind }}">
+    <i class="fas fa-user-plus" aria-hidden="true"></i>
+    {% if sec.single_create_kind == 'teacher' %}{% trans "Tək müəllim əlavə et" context "profile.rim" %}{% else %}{% trans "Tək tələbə əlavə et" context "profile.rim" %}{% endif %}
+</button>
+{% endif %}
 <span class="six-scope" title="{{ sec.scope_hint }}">
     <i class="fas fa-building-columns" aria-hidden="true"></i>
     <span class="six-scope__text">{{ sec.scope_label }}</span>

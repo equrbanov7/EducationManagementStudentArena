@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -214,7 +215,13 @@ class CatalogCreateButtonsTest(_IntakeBase):
     def test_bulk_section_renders_the_three_step_ems_ui_surface(self):
         """Redizayn müqaviləsi: qabıq başlığı + lent + dropzone + KPI yuvası."""
         html = self._fragment("teaching_office_head", "student-intake").json()["html"]
-        self.assertNotIn("<h2", html)  # başlıq YALNIZ qabıqdan
+        # Başlıq YALNIZ qabıqdan gəlir — panelin ÖZ gövdəsində sərbəst h1/h2
+        # olmamalıdır. Dialoqların (`ems-overlay`) öz `<h2>` başlığı a11y üçün
+        # məcburidir (`aria-labelledby`), ona görə overlay blokları çıxarılır:
+        # 2026-09-09-dan panelə «Tək müəllim/tələbə əlavə et» dialoqu da daxildir.
+        body = re.sub(r'<div class="ems-overlay.*', "", html, flags=re.S)
+        self.assertNotIn("<h1", body)
+        self.assertNotIn("<h2", body)
         self.assertIn('class="ems-header__subtitle"', html)
         self.assertIn("six-scope__text", html)  # əhatə nişanı (başlıq əməli)
         self.assertEqual(html.count('class="ems-step ems-step--'), 3)

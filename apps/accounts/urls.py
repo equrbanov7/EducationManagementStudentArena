@@ -250,6 +250,8 @@ urlpatterns = [
     # Köhnə iki marşrut toxunulmur (registrar səthi hələ onları işlədir);
     # redaktorun bütün əməlləri allow-list ilə TƏK giriş nöqtəsindədir.
     path("schedule-manage/editor/", views.schedule_editor_action, name="schedule_editor_action"),
+    # «Registrar (kataloq)» — kabinet bölməsinin dialoq əməlləri (2026-09-09).
+    path("registrar-catalog/action/", views.registrar_catalog_action, name="registrar_catalog_action"),
     # «Tələbə idxalı» (`user.import`) — şablon + quru icra + tətbiq. Panel
     # server-render-lidir; bu üç marşrut yalnız fayl/JSON səthidir.
     path("student-intake/template/", views.student_intake_template, name="student_intake_template"),

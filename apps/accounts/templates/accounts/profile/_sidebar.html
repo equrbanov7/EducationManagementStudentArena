@@ -330,10 +330,16 @@
         {% if role_capabilities.can_manage_registrar or 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections or 'org-members' in allowed_sections or 'unit-exams' in allowed_sections or 'org-roles' in allowed_sections or 'audit-log' in allowed_sections %}
         <li class="sidebar-menu-group-label"><span class="sidebar-menu-text">{% trans "group_university_management" context "profile.sidebar" %}</span></li>
         {% endif %}
-        {% if role_capabilities.can_manage_registrar %}
+        {% if 'registrar-catalog' in allowed_sections %}
+        {% comment %}Akademik kataloq — 2026-09-09-dan MÜSTƏQİL səhifə DEYİL.
+        Sahib: «registrar kataloq yeni səhifəyə atmamalıdı, sidebar solda qalıb
+        sağda bu açmalıdı» → SPA bölmə keçidi (`js-profile-section-link`).{% endcomment %}
         <li class="sidebar-menu-item">
-            <a href="{% url 'registrar:console' %}"
-               class="sidebar-menu-link {% if active_main_nav == 'registrar_console' %}active{% endif %}">
+            <a href="{{ profile_base_url }}?section=registrar-catalog"
+               data-section="registrar-catalog"
+               data-source-url="{{ profile_base_url }}?section=registrar-catalog"
+               data-title="{% trans 'Registrar (kataloq)' context 'profile.sidebar' %}"
+               class="sidebar-menu-link js-profile-section-link {% if active_section == 'registrar-catalog' %}active{% endif %}">
                 <i class="fas fa-sitemap sidebar-menu-icon"></i>
                 <span class="sidebar-menu-text">{% trans "Registrar (kataloq)" context "profile.sidebar" %}</span>
             </a>

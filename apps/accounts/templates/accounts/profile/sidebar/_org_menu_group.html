@@ -31,18 +31,12 @@
         {% comment %}Tələbə idxalı — `user.import` (RİM, HR, rektor). RİM mərkəzinin
         YANINDA dayanır: biri MÖVCUD hesabı idarə edir, digəri YENİ hesab gətirir.
         Panel AJAX-safe-dir (sidebar itmir).{% endcomment %}
-        {% if 'student-intake' in allowed_sections %}
-        <li class="sidebar-menu-item">
-            <a href="{{ profile_base_url }}?section=student-intake"
-               data-section="student-intake"
-               data-title="{% trans 'Tələbə əlavəsi (toplu)' context 'profile.sidebar' %}"
-               data-source-url="{{ profile_base_url }}?section=student-intake"
-               class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-intake' %}active{% endif %}">
-                <i class="fas fa-file-import sidebar-menu-icon"></i>
-                <span class="sidebar-menu-text">{% trans "Tələbə əlavəsi (toplu)" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        {% endif %}
+        {% comment %}«Tələbə əlavəsi (toplu)» girişi 2026-09-09-da SİDEBAR-dan çıxarıldı.
+Sahib: «2 yerdə tələbə əlavə et var, onu vahidləşdir — bir yerdə olsun, Tələbə
+xidmətlərinə aid olacaq». Tələbə xidmətlərindəki «Tələbə qəbulu»
+(`student-admission`) həmin maşının GENİŞLƏNMİŞ görünüşüdür: eyni `user.import`
+açarı, eyni endpoint-lər, üstəlik ATİS sütunları və qrup təyinatı. Bölmə açarı
+özü SAXLANILIR — köhnə linklər və testlər qırılmır.{% endcomment %}
 
         {% if 'teacher-intake' in allowed_sections %}
         <li class="sidebar-menu-item">
