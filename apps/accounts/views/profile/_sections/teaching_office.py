@@ -162,6 +162,7 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
     section["filter_fields"] = [
         {
             "name": "cp_chair",
+            "searchable": True,
             "label": pgettext(_CTX, "Kafedra"),
             "kind": "select",
             "value": str(chair.id),

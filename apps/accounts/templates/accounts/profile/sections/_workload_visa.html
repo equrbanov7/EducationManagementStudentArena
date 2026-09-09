@@ -42,7 +42,7 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — sətir əməlləri render OLUNMU
     {% endif %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_visa_section.kpi_tiles %}
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-visa" filter_prefix="wv_" filter_fields=workload_visa_section.filter_fields filter_count_label=workload_visa_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-visa" filter_prefix="wv_" filter_fields=workload_visa_section.filter_fields filter_count_label=workload_visa_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if workload_visa_section.view == "history" %}
         <h3 class="tof-pane__title">{% trans "Mənim hərəkətlərim" context "accounts.workload_visa" %}</h3>

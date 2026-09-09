@@ -187,6 +187,7 @@ def build_programs_section(request, section, *, active_organization, allowed_sec
         },
         {
             "name": "pg_chair",
+            "searchable": True,
             "label": pgettext(_CTX, "Kafedra"),
             "kind": "select",
             "value": filters["chair"],
@@ -285,6 +286,7 @@ def build_subjects_section(request, section, *, active_organization, allowed_sec
         },
         {
             "name": "sb_chair",
+            "searchable": True,
             "label": pgettext(_CTX, "Sahibi kafedra"),
             "kind": "select",
             "value": filters["chair"],

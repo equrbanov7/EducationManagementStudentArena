@@ -41,7 +41,7 @@ Dekan dilimi BÜTÖV təsdiqləyir, ya da SEÇİLMİŞ sətirləri səbəblə qa
     {% endif %}
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_approval_section.kpi_tiles %}
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-approval" filter_prefix="wa_" filter_fields=workload_approval_section.filter_fields filter_count_label=workload_approval_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-approval" filter_prefix="wa_" filter_fields=workload_approval_section.filter_fields filter_count_label=workload_approval_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if workload_approval_section.view == "summary" %}
         <h3 class="tof-pane__title">{% trans "Kafedralar üzrə yekun" context "accounts.workload_approval" %}</h3>
