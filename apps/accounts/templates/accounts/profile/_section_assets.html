@@ -186,6 +186,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office.css' %}?v=20260908-tree">
     {% endif %}
+    {% comment %}«İxtisas haqqında» çekmecəsi (2026-09-09) — ad klikləndikdə açılır.{% endcomment %}
+    {% if 'programs-registry' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/programs_detail.css' %}?v=20260909-1">
+    {% endif %}
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}

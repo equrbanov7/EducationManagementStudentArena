@@ -71265,3 +71265,121 @@ msgstr ""
 "Для вас нет доступных типов обращений. Каталог обращений в этой организации "
 "ещё не заполнен — попросите администратора выполнить "
 "«seed_application_catalog»."
+
+msgctxt "registrar.calendar"
+msgid "Bağlıdır"
+msgstr "Закрыто"
+
+msgctxt "registrar.calendar"
+msgid "Bu tədris ilində semestr yoxdur."
+msgstr "В этом учебном году нет семестров."
+
+msgctxt "registrar.calendar"
+msgid "Gözlənilir"
+msgstr "Ожидается"
+
+msgctxt "registrar.calendar"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "registrar.calendar"
+msgid "Semestrlər «Akademik dövr» kataloqundan gəlir."
+msgstr "Семестры поступают из каталога «Академический период»."
+
+msgctxt "registrar.calendar"
+msgid ""
+"Semestrlər, qeydiyyat pəncərələri və imtahan sessiyaları — tədris ili üzrə."
+msgstr ""
+"Семестры, окна регистрации и экзаменационные сессии — по учебному году."
+
+msgctxt "registrar.calendar"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "registrar.calendar"
+msgid "Semestr"
+msgstr "Семестры"
+
+msgctxt "registrar.calendar"
+msgid "təqvimdə, süzgəcdən asılı deyil"
+msgstr "в календаре, независимо от фильтров"
+
+msgctxt "registrar.calendar"
+msgid "bugünkü tarix dövrün içindədir"
+msgstr "сегодняшняя дата внутри периода"
+
+msgctxt "registrar.calendar"
+msgid "Pəncərəsi yoxdur"
+msgstr "Окно не задано"
+
+msgctxt "registrar.calendar"
+msgid "qeydiyyat və ya imtahan tarixi qurulmayıb"
+msgstr "даты регистрации или экзаменов не заданы"
+
+msgctxt "accounts.role_assignment"
+msgid "Əlavə rol ver"
+msgstr "Назначить дополнительную роль"
+
+msgctxt "accounts.role_assignment"
+msgid "Mövcud rollara toxunmadan ikinci/üçüncü rol verir"
+msgstr "Назначает вторую или третью роль, не затрагивая существующие"
+
+msgctxt "accounts.catalog"
+msgid "Aktiv qruplar"
+msgstr "Активные группы"
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda aktiv qrup yoxdur."
+msgstr "У этой специальности нет активных групп."
+
+msgctxt "accounts.catalog"
+msgid "Bu ixtisasda tələbə qeydi yoxdur."
+msgstr "У этой специальности нет записей студентов."
+
+msgctxt "accounts.catalog"
+msgid "Cari semestr açılışı"
+msgstr "Открытия текущего семестра"
+
+msgctxt "accounts.catalog"
+msgid "Məlumat yüklənmədi."
+msgstr "Данные не загрузились."
+
+msgctxt "accounts.catalog"
+msgid "Qruplar, tələbələr və tədris planının vəziyyəti."
+msgstr "Группы, студенты и состояние учебного плана."
+
+msgctxt "accounts.catalog"
+msgid "Qrupsuz"
+msgstr "Без группы"
+
+msgctxt "accounts.catalog"
+msgid "Status paylanması"
+msgstr "Распределение по статусам"
+
+msgctxt "accounts.catalog"
+msgid "Tədris planı sətri"
+msgstr "Строк учебного плана"
+
+msgctxt "accounts.catalog"
+msgid "Tələbə (cəmi)"
+msgstr "Студентов (всего)"
+
+msgctxt "accounts.catalog"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "accounts.catalog"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.catalog"
+msgid "və daha %%s tələbə — tam siyahı «Tələbə reyestri»ndədir"
+msgstr "и ещё %%s студентов — полный список в «Реестре студентов»"
+
+msgctxt "accounts.catalog"
+msgid "İxtisas haqqında"
+msgstr "О специальности"
+
+msgctxt "accounts.catalog"
+msgid "Ətraflı: qruplar və tələbələr"
+msgstr "Подробно: группы и студенты"

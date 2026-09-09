@@ -30,7 +30,8 @@ saxlanılmır, hər sorğuda hesablanır.
 <div class="tof"
      data-tof-root
      data-tof-section="programs-registry"
-     data-tof-action-url="{{ programs_registry_section.action_url }}">
+     data-tof-action-url="{{ programs_registry_section.action_url }}"
+     data-pgd-url="{{ programs_registry_section.detail_url }}">
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=pg_subtitle %}
 
@@ -52,6 +53,13 @@ saxlanılmır, hər sorğuda hesablanır.
     {% include "partials/ems_ui/_data_table.html" with table_columns=programs_registry_section.columns table_rows=programs_registry_section.table_rows table_state=programs_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-graduation-cap" state_title=programs_registry_section.state_title state_body=programs_registry_section.state_body %}
 
     {% include "partials/_pagination.html" with page_obj=programs_registry_section.page_obj page_param="pg_page" extra_query=programs_registry_section.pagination_query %}
+
+    {% comment %}«Ətraflı» çekmecəsi — ixtisasın adına klikləndikdə açılır və
+    həmin ixtisasda aktiv oxuyan qrupları, tələbələri, plan sətirlərini və cari
+    semestr açılışlarını göstərir (sahib, 2026-09-09). Məzmun JSON ilə gəlir.{% endcomment %}
+    {% trans "İxtisas haqqında" context "accounts.catalog" as pg_detail_title %}
+    {% trans "Qruplar, tələbələr və tədris planının vəziyyəti." context "accounts.catalog" as pg_detail_sub %}
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="pgdDetail" drawer_xl=True drawer_title=pg_detail_title drawer_subtitle=pg_detail_sub drawer_body_include="accounts/profile/sections/teaching_office/_program_detail_body.html" %}
 
     {% if programs_registry_section.can_manage %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofProgramDialog" form_dialog_title=pg_new_title form_dialog_subtitle=pg_new_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_program_fields.html" form_dialog_action=programs_registry_section.action_url form_dialog_hidden=programs_registry_section.dialog_hidden form_dialog_data=programs_registry_section.form_data %}

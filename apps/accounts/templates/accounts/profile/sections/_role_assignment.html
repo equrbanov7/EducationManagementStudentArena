@@ -18,7 +18,7 @@ imzalı token alır → əsl POST həmin tokenlə gedir (`roles_ui.js`).
 <section class="profile-section-panel profile-section--role-assignment {% if active_section == 'role-assignment' %}is-active{% endif %}"
          data-profile-section-panel="role-assignment"
          data-source-url="{{ profile_base_url }}?section=role-assignment">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-3">
 
     {% if not sec.has_access %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}

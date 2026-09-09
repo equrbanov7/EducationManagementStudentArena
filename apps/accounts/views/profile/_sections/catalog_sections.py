@@ -67,7 +67,8 @@ def _program_row(row, *, can_manage):
     return {
         "row_head": row["official_code"] or "—",
         "cells": [
-            {"text": row["name"]},
+            # Ad KLİK EDİLƏNDİR — «Ətraflı» çekmecəsini açır (sahib, 2026-09-09).
+            {"include": "accounts/profile/sections/teaching_office/_cell_program_name.html"},
             {"text": row["degree_label"]},
             {"text": row["form_label"]},
             {"text": " / ".join(part for part in (row["chair_name"], row["faculty_name"]) if part) or "—"},
@@ -136,6 +137,7 @@ def build_programs_section(request, section, *, active_organization, allowed_sec
     section["columns"] = _columns(program_specs, base_params, param="pg_sort", current=filters["sort"])
     section["base_params"] = base_params
     section["action_url"] = reverse("registrar:catalog_action")
+    section["detail_url"] = reverse("registrar:program_detail")
     section["kpi_tiles"] = [
         {"label": pgettext(_CTX, "İXTİSAS"), "value": payload["filtered_count"]},
         {
