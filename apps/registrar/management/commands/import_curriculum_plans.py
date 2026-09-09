@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import csv
 import re
+import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -61,9 +62,33 @@ HEADERS = {
 }
 
 
+#: Ardıcıl sorğular arasında fasilə — sayt sürətli seriyada HTML səhv səhifəsi verir.
+FETCH_PAUSE = 0.8
+RETRY_PAUSE = 3.0
+RETRIES = 3
+
+
+def _is_pdf(path: Path) -> bool:
+    """Fayl həqiqətən PDF-dir? (HTML səhv səhifəsi də 200 ilə gəlir.)"""
+    try:
+        with path.open("rb") as handle:
+            return handle.read(4) == b"%PDF"
+    except OSError:  # pragma: no cover — oxunmayan fayl onsuz da yenidən endirilir
+        return False
+
+
 def _quote(url: str) -> str:
+    """URL yolunu təhlükəsiz kodlaşdırır — İDEMPOTENT.
+
+    ⚠️ Mənbə cədvəlindəki URL-lərin bir hissəsi saytdan ARTIQ faiz-kodlanmış
+    şəkildə yığılıb (`…/050405%20%C4%B0qtisadiyyat%202023.pdf`). Sadə `quote`
+    onları İKİNCİ dəfə kodlayır (`%20` → `%2520`) və sayt 200 ilə HTML səhv
+    səhifəsi qaytarır — 11 plan məhz buna görə «PDF deyil» olurdu. Ona görə
+    əvvəlcə `unquote`, sonra `quote`.
+    """
     parts = urllib.parse.urlsplit(url)
-    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, urllib.parse.quote(parts.path), parts.query, ""))
+    path = urllib.parse.quote(urllib.parse.unquote(parts.path))
+    return urllib.parse.urlunsplit((parts.scheme, parts.netloc, path, parts.query, ""))
 
 
 def load_sources() -> list[dict]:
@@ -141,7 +166,12 @@ class Command(BaseCommand):
 
             if options["apply"] and program is not None and result["matched"]:
                 written = self._write_plan(
-                    organization, program, result["matched"], year=options["year"], force=options["force"]
+                    organization,
+                    program,
+                    result["matched"],
+                    year=options["year"],
+                    force=options["force"],
+                    source=source,
                 )
                 totals["written"] += written
                 totals["plans"] += 1 if written else 0
@@ -171,24 +201,59 @@ class Command(BaseCommand):
         return organization
 
     def _fetch(self, sources, directory):
-        done = 0
+        """PDF-ləri endirir. ⚠️ Yalnız HTTP 200 YETƏRLİ DEYİL.
+
+        Sayt ardıcıl sorğuda bəzən 200 ilə HTML səhv səhifəsi qaytarır (~48 KB).
+        Köhnə yoxlama «fayl var və >1000 bayt» idi, ona görə həmin HTML «endirilmiş»
+        sayılır, `--fetch` onu bir daha çəkmir və parser 11 planda `FileDataError`
+        verirdi. İndi məzmun `%PDF` imzası ilə yoxlanılır, alınmayan fayl SİLİNİR
+        və sorğular arasında qısa fasilə verilir.
+        """
+        done, failed = 0, []
         for source in sources:
             path = directory / (source.get("senet") or "").strip()
-            if path.exists() and path.stat().st_size > 1000:
+            if path.exists() and _is_pdf(path):
                 continue
-            try:
-                request = urllib.request.Request(_quote(source["url"]), headers=HEADERS)
-                path.write_bytes(urllib.request.urlopen(request, timeout=60).read())
+            for attempt in range(RETRIES):
+                if attempt:
+                    time.sleep(RETRY_PAUSE)
+                try:
+                    request = urllib.request.Request(_quote(source["url"]), headers=HEADERS)
+                    payload = urllib.request.urlopen(request, timeout=60).read()
+                except Exception as exc:  # noqa: BLE001 — bir fayl bütün axını dayandırmasın
+                    error = str(exc)
+                    continue
+                if not payload.startswith(b"%PDF"):
+                    error = f"PDF deyil ({len(payload)} bayt)"
+                    continue
+                path.write_bytes(payload)
                 done += 1
-            except Exception as exc:  # noqa: BLE001 — bir fayl bütün axını dayandırmasın
-                self.stdout.write(self.style.ERROR(f"  endirilmədi: {source['sayt_adi'][:34]} ({exc})"))
-        self.stdout.write(self.style.SUCCESS(f"Endirildi: {done} fayl → {directory}"))
+                break
+            else:
+                path.unlink(missing_ok=True)  # yalançı «endirilmiş» qalmasın
+                failed.append(f"{source['sayt_adi'][:40]} ({error})")
+            time.sleep(FETCH_PAUSE)
 
-    def _write_plan(self, organization, program, matched, *, year, force):
-        """QARALAMA plan yaradır və tanınmış sətirləri yazır; sətir sayını qaytarır."""
+        self.stdout.write(self.style.SUCCESS(f"Endirildi: {done} fayl → {directory}"))
+        for line in failed:
+            self.stdout.write(self.style.ERROR(f"  endirilmədi: {line}"))
+
+    def _write_plan(self, organization, program, matched, *, year, force, source=None):
+        """QARALAMA plan yaradır və tanınmış sətirləri yazır; sətir sayını qaytarır.
+
+        ⚠️ KREDİTSİZ sətir YAZILMIR. Magistr cədvəlində kredit sütunu ad sütunu
+        ilə həmişə üst-üstə düşmür; parser belə halda krediti `None` saxlayır
+        (taxmin etmir). `credits or 0` yazsaydıq, planda 0 kreditli fənn qalar
+        və məzuniyyət yoxlaması sükutla səhv işləyərdi.
+        """
+        rows = [row for row in matched if row.get("credits")]
+        if not rows:
+            return 0
         existing = Curriculum.objects.filter(organization=organization, program=program, admission_year=year).first()
         if existing is not None and not force:
             return 0
+        skipped = len(matched) - len(rows)
+        note = self._provenance(source, total=len(matched), written=len(rows), skipped=skipped)
         with rls_worker_atomic():
             plan = Curriculum.objects.create(
                 organization=organization,
@@ -198,6 +263,7 @@ class Command(BaseCommand):
                 status=PlanStatus.DRAFT,
                 version=(existing.version + 1) if existing else 1,
                 previous_version=existing,
+                last_reason=note,
             )
             CurriculumSubject.objects.bulk_create(
                 [
@@ -206,14 +272,33 @@ class Command(BaseCommand):
                         curriculum=plan,
                         subject=row["subject"],
                         semester_number=self._semester(row["semester"]),
-                        credits=row["credits"] or 0,
+                        credits=row["credits"],
                         total_hours=row["total_hours"] or 0,
+                        row_code=(row.get("code") or "")[:32],
                         order=index,
                     )
-                    for index, row in enumerate(matched, start=1)
+                    for index, row in enumerate(rows, start=1)
                 ]
             )
-        return len(matched)
+        return len(rows)
+
+    @staticmethod
+    def _provenance(source, *, total, written, skipped):
+        """Planın haradan gəldiyini plan qeydində saxlayır (təsdiq edən görsün)."""
+        source = source or {}
+        parts = [
+            "Universitet saytındakı rəsmi «Tədris planı» sənədindən AVTOMATİK "
+            "qaralama kimi idxal edildi (insan təsdiqi tələb olunur).",
+            f"Mənbə: {source.get('sayt_adi', '—')} · {source.get('senet', '—')}",
+            f"URL: {source.get('url', '—')}",
+            f"Tanınmış sətir: {total} · yazıldı: {written} · krediti oxunmadığı üçün buraxıldı: {skipped}",
+        ]
+        if (source.get("seviyye") or "") == "master":
+            parts.append(
+                "⚠️ Magistr sənədində semestr bölgüsü YOXDUR — bütün sətirlər 1-ci "
+                "semestrə qoyulub, təsdiqdən əvvəl əl ilə bölünməlidir."
+            )
+        return "\n".join(parts)
 
     @staticmethod
     def _semester(value: str) -> int:

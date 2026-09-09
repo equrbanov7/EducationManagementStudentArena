@@ -61,7 +61,13 @@ _HOMOGLYPHS = str.maketrans(
 )
 
 #: «I blok: 1. … 2. …» kimi seçmə blok sətirləri.
-_ELECTIVE = re.compile(r"^\s*[IVX]+\s*blok|blok\s*:|^\s*(birinci|ikinci|üçüncü|dördüncü|beşinci)\s+blok", re.I)
+#: ⚠️ Bəzi planlar (məs. Regionşünaslıq) İNGİLİS dilində dərc olunub — orada
+#: eyni sətir «I block 1. Philosophy …» şəklindədir; əks halda seçmə blok
+#: «tapılmayan fənn» kimi görünürdü.
+_ELECTIVE = re.compile(
+    r"^\s*[IVX]+\s*blo[kc]k?\b|blo[kc]k?\s*:|^\s*(birinci|ikinci|üçüncü|dördüncü|beşinci)\s+blok",
+    re.I,
+)
 
 
 def normalize(value: str) -> str:
@@ -155,15 +161,54 @@ def match_rows(rows: list[dict], subjects_by_name: dict) -> dict:
 #: «MHF – B01», «İXF-B12», «PF – B3» kimi fənn kodu sətri.
 _MASTER_CODE = re.compile(r"^[A-ZƏÖÜĞİŞÇ]{2,6}\s*[–—-]\s*[A-ZƏ]?\d{1,3}\*?$")
 
-#: Seçmə fənn yer tutucusu — konkret fənn deyil.
-_PLACEHOLDER = re.compile(r"^seçmə\s+fənn", re.I)
+#: Yer tutucu sətirlər — konkret fənn DEYİL, sonradan doldurulan yer.
+#: Magistr planlarında ixtisas hissəsi məhz belə verilir («İxtisaslaşmaya
+#: ayrılan fənlər** — 42 kredit»); bunları `CurriculumSubject` kimi yazmaq
+#: planı uydurma fənnlə doldurardı.
+_PLACEHOLDER = re.compile(
+    r"^\s*(seçmə\s+fənn"
+    r"|ali\s+məktəb(in)?\s+(tərəfindən\s+)?müəyyən\s+ed"
+    r"|ixtisaslaşmaya\s+ayrılan"
+    r"|ixtisas(laşma)?\s+fənləri\s*\**\s*$)",
+    re.I,
+)
 
 
 def extract_master_rows(pdf_path: str) -> list[dict]:
-    """Magistr planından fənn sətirləri (kod + ad + kredit)."""
+    """Magistr planından fənn sətirləri (kod + ad + kredit).
+
+    ⚠️ Fənn adı SƏHİFƏ SƏRHƏDİNİ keçir. Səh. 8-də xana «Psixologiya⏎MHF – B04…»
+    ilə başlayır — yəni ilk sətir əvvəlki fənnin ADININ DAVAMIdır, kod deyil.
+    Əvvəlki versiya xananın İLK sətrinin kod olmasını tələb edirdi və belə
+    xanaları TAM atırdı; magistr planlarından cəmi 3–8 fənn çıxırdı (real say
+    15–25). İndi vəziyyət SƏNƏD SƏVİYYƏSİNDƏ saxlanılır: kod yeni fənni açır,
+    qalan sətirlər (səhifə keçidindən sonra belə) cari adın davamı sayılır.
+
+    Kredit uyğunluğu: xanada AÇILAN kod sayı ilə kredit sayı üst-üstə düşməsə,
+    kredit `None` qalır — TAXMİN EDİLMİR. Yanlış kredit planı sükutla korlayır;
+    `--apply` kreditsiz sətri yazmır.
+    """
     import fitz
 
     rows: list[dict] = []
+    state = {"code": "", "parts": [], "credit": None}
+
+    def close():
+        """Açıq fənni siyahıya yazır (adı artıq tam toplanıb)."""
+        name = " ".join(state["parts"]).strip()
+        if state["code"] and name and not _PLACEHOLDER.match(name):
+            rows.append(
+                {
+                    "no": len(rows) + 1,
+                    "code": state["code"],
+                    "name": name,
+                    "credits": state["credit"],
+                    "total_hours": None,
+                    "semester": "",
+                }
+            )
+        state["code"], state["parts"], state["credit"] = "", [], None
+
     with fitz.open(pdf_path) as document:
         for page in document:
             found = page.find_tables()
@@ -171,35 +216,23 @@ def extract_master_rows(pdf_path: str) -> list[dict]:
                 for raw in table.extract():
                     if len(raw) < 5:
                         continue
-                    names_cell, credits_cell = raw[3] or "", raw[4] or ""
-                    if not _MASTER_CODE.match((names_cell.split("\n")[0] or "").strip()):
-                        continue
-                    credits = [c.strip() for c in credits_cell.split("\n") if c.strip()]
-                    current_code, parts, collected = "", [], []
-                    for line in (part.strip() for part in names_cell.split("\n")):
-                        if not line:
-                            continue
+                    lines = [part.strip() for part in (raw[3] or "").split("\n") if part.strip()]
+                    codes = [line for line in lines if _MASTER_CODE.match(line)]
+                    if not codes and not state["code"]:
+                        continue  # başlıq / xülasə sətri
+                    credits = [c.strip() for c in (raw[4] or "").split("\n") if c.strip()]
+                    # Kredit YALNIZ say üst-üstə düşəndə bağlanır.
+                    aligned = credits if len(credits) == len(codes) else [None] * len(codes)
+                    index = 0
+                    for line in lines:
                         if _MASTER_CODE.match(line):
-                            if current_code:
-                                collected.append((current_code, " ".join(parts)))
-                            current_code, parts = line, []
+                            close()
+                            state["code"] = line
+                            state["credit"] = _to_int(aligned[index])
+                            index += 1
                         else:
-                            parts.append(line)
-                    if current_code:
-                        collected.append((current_code, " ".join(parts)))
-                    for index, (code, name) in enumerate(collected):
-                        if not name or _PLACEHOLDER.match(name):
-                            continue
-                        rows.append(
-                            {
-                                "no": len(rows) + 1,
-                                "code": code,
-                                "name": name,
-                                "credits": _to_int(credits[index]) if index < len(credits) else None,
-                                "total_hours": None,
-                                "semester": "",
-                            }
-                        )
+                            state["parts"].append(line)
+        close()
     return rows
 
 
