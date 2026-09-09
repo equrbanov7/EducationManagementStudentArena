@@ -1,7 +1,18 @@
 {% load i18n %}
 {% comment %}Sətir əməlləri — silmə YOXDUR. Kataloq sətri «Aktiv» bayrağı ilə
-deaktiv edilir (yumşaq silmə): səhvən silinən sətir bərpa oluna bilər.{% endcomment %}
+deaktiv edilir (yumşaq silmə): səhvən silinən sətir bərpa oluna bilər.
+
+«Tələbə təyinatları» tabında sətir StudentAcademicRecord-dur (`row.data.id`),
+ona görə rəsmi transkript birbaşa buradan yüklənir. Əlavə icazə qapısı lazım
+deyil: bölmənin öz qapısı (`course.edit`, təşkilat üzrə) transkript görünüşünün
+qapısı ilə eynidir. Fayl endirməsidir → `js-profile-section-link` sinfi YOXDUR.{% endcomment %}
 {% if registrar_catalog_section.readonly_tab %}
+<a class="ems-btn ems-btn--sm" target="_blank" rel="noopener"
+   href="{% url 'registrar:student_transcript_pdf' row.data.id %}"
+   title="{% trans 'Rəsmi akademik transkripti PDF olaraq yüklə' context 'registrar.catalog' %}">
+  <i class="fas fa-file-pdf" aria-hidden="true"></i>
+  {% trans "Transkript yüklə" context "registrar.catalog" %}
+</a>
 <a class="ems-btn ems-btn--sm js-profile-section-link" href="{{ registrar_catalog_section.registry_url }}"
    data-section="student-registry" data-source-url="{{ profile_base_url }}"
    data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}">

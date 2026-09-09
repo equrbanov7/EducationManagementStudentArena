@@ -145,13 +145,18 @@ def records_overview_data(request):
     if organization is None or scope is None or not scope.has_structure_access:
         return JsonResponse({"has_access": False, "results": [], "has_more": False, "total": 0})
 
+    offset = _int_param(request, "offset", 0)
     payload = academic_records.build_records_page(
         organization=organization,
         scope=scope,
         filters=_filters(request),
-        offset=_int_param(request, "offset", 0),
+        offset=offset,
         limit=_int_param(request, "limit", academic_records.DEFAULT_PAGE_SIZE),
         sort=(request.GET.get("sort") or "").strip() or None,
+        # Yekun say YALNIZ ilk səhifədə hesablanır: süzgəc dəyişməyibsə rəqəm də
+        # dəyişmir və UI onu saxlayır. Beləcə səhifə çevrilişində
+        # ``COUNT(DISTINCT student_id)`` ümumiyyətlə getmir (bax academic_records).
+        with_total=offset <= 0,
     )
     return JsonResponse(payload)
 
@@ -217,10 +222,10 @@ def records_student_detail(request):
     student_id = (request.GET.get("student") or "").strip()
     if organization is None or scope is None or not student_id:
         return JsonResponse({"has_access": False, "semesters": []})
-    if not academic_records.student_is_in_scope(organization=organization, scope=scope, student_id=student_id):
-        return JsonResponse({"has_access": False, "semesters": []})
 
-    student = get_user_model().objects.filter(pk=student_id).first()
+    # Mühafizə + tələbə obyekti BİR sorğuda (əvvəl ``EXISTS`` + ayrıca ``User``
+    # oxuması idi) — scope xaricindəki tələbə üçün nəticə eynidir: ``None``.
+    student = academic_records.student_in_scope(organization=organization, scope=scope, student_id=student_id)
     if student is None:
         return JsonResponse({"has_access": False, "semesters": []})
 

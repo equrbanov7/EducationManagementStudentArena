@@ -1,76 +1,248 @@
-/* exam_score_entry.css — İmtahan Mərkəzi: kağız imtahan balının daxil edilməsi.
- * Light-only (--ems-* token); journal_close.css ilə eyni vizual dil.
- */
-.ese { max-width: 1180px; }
-.ese-sub { color: var(--ems-neutral-500); font-size: .82rem; margin: .3rem 0 1rem; }
-.ese-sub--lead { margin-top: 0; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   exam_score_entry.css — İmtahan Mərkəzi: kağız imtahan balının daxil edilməsi
+   (2026-09-10 sakit redizayn).
 
-.ese-toolbar { display: flex; flex-wrap: wrap; gap: .9rem; align-items: flex-end; margin-bottom: 1.2rem; }
-.ese-toolbar form { margin: 0; }
-.ese-field label { display: block; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: var(--ems-neutral-500); margin-bottom: .3rem; }
-.ese-toolbar .ese-field { min-width: 190px; }
-.ese-field--wide { min-width: 300px; }
+   Baza ems_ui-dandır (`ems-header`, `ems-kpis`, `ems-filters`, `ems-card`,
+   `ems-table`, `ems-msg`, `ems-state`, `ems-btn`, `ems-badge`). Burada YALNIZ
+   bu bölməyə xas düzəlişlər — hamısı `--ems-*` tokenləri ilə.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ese {
+    max-width: 1180px;
+    color: var(--ems-text);
+}
 
-/* Kompakt bootstrap-select (global toggle böyükdür — kartlara sığdırırıq) */
-.ese .bootstrap-single-select { width: 100%; }
-.ese .bootstrap-single-select__toggle { min-height: 2.6rem; padding: .5rem .75rem; border-radius: 10px; font-size: .85rem; font-weight: 600; background: #fff; border-color: var(--ems-neutral-300); }
-.ese .bootstrap-single-select__menu { font-size: .85rem; }
+/* ── Seçicilər sırası ─────────────────────────────────────────────────────
+   Hər seçici ÖZ GET forması olaraq qalır (kaskad: il dəyişəndə semestr
+   parametri düşür). `display: contents` sayəsində formalar tək `ems-filters`
+   flex sırasına düzülür — markup semantikası dəyişmir. */
+.ese-toolbar > form {
+    display: contents;
+}
 
-.ese-btn { border: 1px solid transparent; border-radius: 10px; padding: .55rem 1rem; font-weight: 700; font-size: .82rem; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem; }
-.ese-btn--primary { background: var(--ems-primary-600); color: #fff; }
-.ese-btn:disabled { opacity: .55; cursor: not-allowed; }
+.ese-toolbar .ems-field {
+    min-width: 180px;
+    flex: 1 1 190px;
+}
 
-.ese-card { border: 1px solid var(--ems-neutral-200); border-radius: 16px; background: #fff; padding: 1rem 1.1rem; box-shadow: 0 6px 22px rgba(18, 39, 78, .05); margin-bottom: 1.1rem; }
-.ese-card__head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .5rem; }
-.ese-card__title { font-size: 1rem; font-weight: 800; color: var(--ems-neutral-900); margin: 0; display: inline-flex; align-items: center; gap: .4rem; }
-.ese-card__title i { color: var(--ems-primary-600); }
-.ese-card__meta { font-size: .75rem; font-weight: 700; color: var(--ems-neutral-500); }
+.ese-toolbar .ems-field--wide {
+    flex: 1 1 280px;
+}
 
-.ese-tablewrap { overflow-x: auto; }
-.ese-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
-.ese-table th { text-align: left; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .02em; color: var(--ems-neutral-500); padding: .5rem .6rem; border-bottom: 2px solid var(--ems-neutral-200); white-space: nowrap; }
-.ese-table td { padding: .55rem .6rem; border-bottom: 1px solid var(--ems-neutral-200); vertical-align: top; }
-.ese-th--num, .ese-td--num { text-align: center; white-space: nowrap; }
-.ese-row.is-recorded { background: var(--ems-neutral-50); }
-.ese-student { font-weight: 700; color: var(--ems-neutral-800); display: block; }
-.ese-letter { font-weight: 800; color: var(--ems-primary-600); }
+.ese .bootstrap-single-select {
+    width: 100%;
+}
+
+.ese .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* ── Kart + qeydlər ───────────────────────────────────────────────────────── */
+.ese-card {
+    margin-top: var(--ems-sp-5);
+}
+
+.ese-card > .ems-tablewrap,
+.ese-card > form > .ems-tablewrap {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.ese-msg {
+    margin: var(--ems-sp-5) 18px;
+}
+
+.ese-card > .ems-state,
+.ese-card > form > .ems-state {
+    margin: var(--ems-sp-6) 18px;
+}
+
+.ese-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-4);
+    padding: 0 18px var(--ems-sp-6);
+}
+
+/* ── Cədvəl ───────────────────────────────────────────────────────────────── */
+.ese-table {
+    min-width: 940px;
+}
+
+.ese-table th[scope="row"] {
+    min-width: 220px;
+}
+
+.ese-th--num,
+.ese-td--num {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.ese-row.is-recorded {
+    background: var(--ems-bg-subtle);
+}
+
+.ese-idx {
+    margin-right: 6px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.ese-student {
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.ese-letter {
+    font-weight: 700;
+    color: var(--ems-primary-700);
+}
 
 /* Çox cəhd — əvvəlki bal itmir, açıq görünür (sahibin qərarı M2). */
-.ese-attempts { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .25rem; }
-.ese-attempt { font-size: .68rem; font-weight: 700; padding: .16rem .5rem; border-radius: 999px; }
-.ese-attempt.is-official { background: #dcfce7; color: #15803d; }
-.ese-attempt.is-superseded { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
+.ese-attempts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+}
 
-.ese-score { width: 5.2rem; padding: .4rem .5rem; border: 1px solid var(--ems-neutral-300); border-radius: 9px; font-size: .88rem; font-weight: 700; text-align: center; }
-.ese-score.is-dirty { border-color: #b45309; background: #fffbeb; }
+.ese-attempt {
+    font-size: var(--ems-fs-xs);
+}
 
-.ese-just { display: flex; flex-wrap: wrap; gap: .45rem; }
-.ese-just__field { display: flex; flex-direction: column; gap: .15rem; }
-.ese-just__field label { font-size: .62rem; font-weight: 700; text-transform: uppercase; color: var(--ems-neutral-500); }
-.ese-select, .ese-text { padding: .34rem .5rem; border: 1px solid var(--ems-neutral-300); border-radius: 9px; font-size: .78rem; background: #fff; }
-.ese-text { min-width: 180px; }
-.ese-file { font-size: .72rem; max-width: 190px; }
-.ese-just.is-required .ese-select,
+.ese-attempt.is-superseded {
+    text-decoration: line-through;
+}
+
+.ese-score {
+    width: 5.4rem;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.ese-score.is-dirty {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+/* ── Sübut / qeyd sahələri ────────────────────────────────────────────────── */
+.ese-just {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+}
+
+.ese-just__field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ese-just__field .ems-field__label {
+    font-size: 10px;
+}
+
+.ese-selectwrap {
+    min-width: 150px;
+}
+
+.ese-text {
+    min-width: 180px;
+}
+
+.ese-file {
+    max-width: 190px;
+    font-size: var(--ems-fs-xs);
+}
+
+.ese-just.is-required .bootstrap-single-select__toggle,
 .ese-just.is-required .ese-text,
-.ese-just.is-required .ese-file { border-color: #b45309; }
+.ese-just.is-required .ese-file {
+    border-color: var(--ems-warning-bd);
+}
 
-.ese-history { margin-top: .4rem; }
-.ese-history summary { font-size: .72rem; font-weight: 700; color: var(--ems-primary-600); cursor: pointer; }
-.ese-history__list { list-style: none; margin: .35rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .3rem; }
-.ese-history__item { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; font-size: .72rem; padding: .3rem .5rem; border-radius: 8px; background: var(--ems-neutral-50); }
-.ese-history__item.is-correction { background: #fffbeb; }
-.ese-history__date { color: var(--ems-neutral-500); }
-.ese-history__delta { font-weight: 700; color: var(--ems-neutral-800); }
-.ese-history__reason { color: #b45309; font-weight: 700; }
-.ese-history__note { color: var(--ems-neutral-600); font-style: italic; }
-.ese-history__by { margin-left: auto; color: var(--ems-neutral-500); }
-.ese-history__doc { font-weight: 700; color: var(--ems-primary-600); }
+/* ── Daxiletmə tarixçəsi ──────────────────────────────────────────────────── */
+.ese-history {
+    margin-top: var(--ems-sp-3);
+}
 
-.ese-actions { display: flex; flex-wrap: wrap; gap: .8rem; align-items: center; margin-top: .9rem; }
-.ese-note { font-size: .76rem; color: var(--ems-neutral-500); margin: .75rem 0 0; }
-.ese-note i { color: var(--ems-primary-600); margin-right: .25rem; }
-.ese-note--ok { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; border-radius: 10px; padding: .5rem .7rem; margin: 0 0 .8rem; }
-.ese-note--ok i { color: #059669; }
+.ese-history summary {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    cursor: pointer;
+}
 
-.ese-empty { padding: 1.1rem; border: 1px dashed var(--ems-neutral-300); border-radius: 12px; color: var(--ems-neutral-500); font-size: .85rem; text-align: center; }
-.ese-empty--soft { border-style: solid; background: var(--ems-neutral-50); }
+.ese-history__list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ese-history__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 5px 8px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-xs);
+}
+
+.ese-history__item.is-correction {
+    background: var(--ems-warning-bg);
+}
+
+.ese-history__date {
+    color: var(--ems-text-muted);
+}
+
+.ese-history__delta {
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.ese-history__reason {
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.ese-history__note {
+    font-style: italic;
+    color: var(--ems-neutral-700);
+}
+
+.ese-history__by {
+    margin-left: auto;
+    color: var(--ems-text-muted);
+}
+
+.ese-history__doc {
+    font-weight: 700;
+    color: var(--ems-primary-700);
+}
+
+@media (max-width: 768px) {
+    .ese-msg,
+    .ese-actions,
+    .ese-card > .ems-state,
+    .ese-card > form > .ems-state {
+        margin-inline: var(--ems-sp-5);
+        padding-inline: 0;
+    }
+
+    .ese-actions .ems-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}

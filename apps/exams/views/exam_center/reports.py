@@ -72,8 +72,44 @@ def exam_center_reports(request):
             "params": request.GET,
             "extra_query": query_string.urlencode(),
             "has_filters": has_filters,
+            "kpis": _report_kpis(tab, queryset),
         },
     )
+
+
+def _report_kpis(tab, queryset) -> dict:
+    """Səhifə başındakı rəqəmlər — cari filtr üzrə TƏK aqreqat sorğu.
+
+    Oturum tabında sətirlər onsuz da bilet sayğaclarını daşıyır
+    (``session_list_annotations``), bilet tabında isə status üzrə sayılır.
+    """
+    from django.db.models import Count, Q, Sum
+
+    if tab == "sessions":
+        totals = queryset.aggregate(
+            students=Sum("ticket_total"),
+            completed=Sum("ticket_completed"),
+            removed=Sum("ticket_removed"),
+            absent=Sum("ticket_absent"),
+        )
+        return {
+            "total": queryset.count(),
+            "students": totals["students"] or 0,
+            "completed": totals["completed"] or 0,
+            "problem": (totals["removed"] or 0) + (totals["absent"] or 0),
+        }
+    totals = queryset.aggregate(
+        total=Count("id"),
+        completed=Count("id", filter=Q(status="completed")),
+        removed=Count("id", filter=Q(status="removed")),
+        absent=Count("id", filter=Q(status="absent")),
+    )
+    return {
+        "total": totals["total"] or 0,
+        "students": totals["total"] or 0,
+        "completed": totals["completed"] or 0,
+        "problem": (totals["removed"] or 0) + (totals["absent"] or 0),
+    }
 
 
 def _filter_summary(params, organization):

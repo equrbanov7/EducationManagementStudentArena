@@ -4,6 +4,10 @@
 {% block title %}{% trans "Oturum tarixçəsi" %} — {{ session.room.name }}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur
+    (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor_filters.css' %}?v=20260910-1">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/history.css' %}">
@@ -33,9 +37,12 @@
     <div class="fxc-stat"><div class="fxc-stat-value">{{ summary.total }}</div><div class="fxc-stat-label">{% trans "Ümumi hadisə" %}</div></div>
   </section>
 
-  <div class="fxc-toolbar">
-    <input type="search" id="fxc-hist-filter" class="fxc-input fxc-input--grow"
-           placeholder="{% trans 'Tələbə adı üzrə süz…' %}" aria-label="{% trans 'Tələbə üzrə axtarış' %}">
+  <div class="ems-filters fxc-monitorfilters" role="search">
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="fxc-hist-filter">{% trans "Tələbə üzrə axtarış" %}</label>
+      <input type="search" id="fxc-hist-filter" class="ems-input"
+             placeholder="{% trans 'Tələbə adı üzrə süz…' %}" autocomplete="off">
+    </div>
   </div>
 
   {% if events %}
@@ -63,10 +70,9 @@
   </ol>
   <p class="fxc-tl-empty" id="fxc-hist-noresult" hidden>{% trans "Axtarışa uyğun qeyd yoxdur." %}</p>
   {% else %}
-  <div class="fxc-empty">
-    <i class="far fa-clock"></i>
-    <p>{% trans "Hələ əməliyyat qeydi yoxdur." %}</p>
-  </div>
+  {% trans "Hələ əməliyyat qeydi yoxdur." as hist_empty %}
+  {% trans "Oturum başlayanda giriş, yer dəyişmə və pozuntu qeydləri burada görünəcək." as hist_empty_body %}
+  {% include "partials/ems_ui/_empty.html" with state_icon="fa-clock-rotate-left" state_title=hist_empty state_body=hist_empty_body %}
   {% endif %}
 </div>
 {% endblock %}

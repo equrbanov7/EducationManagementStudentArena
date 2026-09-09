@@ -216,6 +216,16 @@ def roster_for_offering(*, offering):
     from . import finals_batch
 
     batch = finals_batch.build(enrollments)
+
+    # Cəhd tarixçəsi də TOPLU oxunur: əvvəl hər sətir üçün ayrıca
+    # `attempt_rows_for_enrollment` çağırılırdı (29 tələbəli açılışda ≈ 70 əlavə
+    # sorğu — 2026-09-10 ölçməsi 120 → 63). Toplu güzgü onsuz da mövcud idi.
+    attempts_by_student = exam_attempt_history.attempt_rows_by_student(
+        student_ids=[enrollment.student_id for enrollment in enrollments],
+        subject_id=offering.subject_id,
+        organization=offering.organization,
+    )
+
     rows = []
     for enrollment in enrollments:
         result = finals.compute_final_result(enrollment=enrollment, scheme=scheme, batch=batch)
@@ -232,7 +242,7 @@ def roster_for_offering(*, offering):
                 "letter": result["letter"],
                 "graded": result["graded"],
                 "entries": [_entry_row(entry) for entry in history],
-                "attempts": exam_attempt_history.attempt_rows_for_enrollment(enrollment),
+                "attempts": attempts_by_student.get(enrollment.student_id, []),
             }
         )
     return {"offering": offering, "scheme": scheme, "rows": rows, "exam_score_max": finals.exam_score_max(scheme)}

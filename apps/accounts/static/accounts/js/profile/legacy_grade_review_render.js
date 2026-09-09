@@ -56,6 +56,14 @@
         body.appendChild(tr);
     }
 
+    /** KPI kartına dəyər yaz — kart yoxdursa səssizcə keç. */
+    function setKpi(key, value) {
+        var host = document.querySelector('.lgr [data-ems-kpi-key="' + key + '"] .ems-kpi__value');
+        if (host) {
+            host.textContent = String(value);
+        }
+    }
+
     /** Kateqoriya çipləri — say + şiddət rəngi; klik süzgəci dəyişir. */
     function categories(host, rows, active, onToggle) {
         if (!host) {
@@ -85,13 +93,24 @@
         });
     }
 
-    /** İrəliləyiş — «N / M baxılıb» + zolaq. */
+    /** İrəliləyiş — KPI rəqəmləri + «N / M baxılıb» + zolaq.
+     *
+     * 2026-09-10 redizayn: rəqəmlər bölmənin başındakı `ems-kpi` kartlarına da
+     * yazılır (`[data-ems-kpi-key]`). Kartlar YOXDURSA (köhnə markup) heç nə
+     * baş vermir — funksiya geriyə uyğundur. */
     function progress(fill, text, data, labels) {
         if (!data) {
             return;
         }
+        var total = Number(data.total || 0);
+        var reviewed = Number(data.reviewed || 0);
+        var pct = Number(data.percent || 0);
+        setKpi("total", total);
+        setKpi("reviewed", reviewed);
+        setKpi("pending", Math.max(total - reviewed, 0));
+        setKpi("percent", pct + "%");
         if (fill) {
-            fill.style.width = String(data.percent || 0) + "%";
+            fill.style.width = String(pct) + "%";
         }
         if (text) {
             text.textContent =

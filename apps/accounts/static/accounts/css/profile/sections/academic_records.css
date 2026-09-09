@@ -1,511 +1,587 @@
-/* Staff hierarchical academic-records ("Akademik qeydlər") — açıq (ağ + göy)
-   dizayn tokenləri ilə (--ems-*), TÜND rejim yox. Qiymət hərf çipləri
-   (.grade-A … .grade-F) my_subjects.css/transcript.css ilə paylaşılır. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Akademik qeydlər» (staff hierarchical academic records) — bölmə üslubu.
+
+   2026-09-10 YENİDƏN DİZAYN (sahib: «çox oxunaqlı və yaxşı olsun»).
+   ƏSAS QAYDA: bu fayl artıq öz komponentlərini QURMUR. Qutu, cədvəl, boş
+   vəziyyət, düymə, çekməcə və çip ORTAQ `ems_ui` qatındandır
+   (`static/css/ems_ui/*.css`, qabıqda bir dəfə yüklənir); burada yalnız
+   BU EKRANA MƏXSUS olan qalır — düzüm, rəqəm sütunlarının oxunaqlığı,
+   sətir relsi, mobil kart görünüşü və çekməcədəki semestr blokları.
+
+   Rəng heç yerdə TƏK məna daşımır: hər rəngli xanada ya rəqəm, ya mətn var
+   (a11y). Sıfırlar tire ilə soluqlaşdırılır ki, gözə YALNIZ əsl siqnal dəysin.
+
+   Bütün rənglər `--ems-*` tokenlərindəndir; hərf çipləri (.grade-A … .grade-F)
+   BURADA da təyin olunur — `my_subjects.css` / `transcript.css` yalnız tələbə
+   bölmələri açıq olanda yüklənir, dekan/imtahan mərkəzi isə onları almır və
+   çekməcədəki hərflər üslubsuz qalırdı.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .acr {
-    color: var(--ems-neutral-900);
-}
-.acr-head p {
-    margin: 0 0 0.4rem;
-    max-width: 70ch;
-    color: var(--ems-neutral-500);
-    font-size: 0.9rem;
-    line-height: 1.5;
+    color: var(--ems-text);
 }
 
-/* ── Filtrlər ─────────────────────────────────────────────────────────────── */
-.acr-filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0.85rem 0.75rem;
-    align-items: start;
-    margin: 1.1rem 0;
-    padding: 1.1rem 1.15rem;
-    border: 1px solid var(--ems-primary-200);
-    border-radius: 14px;
-    background: var(--ems-primary-50, var(--ems-neutral-50));
+/* Qabıq başlığı ilə altyazı arasında nəfəs — `ems-header` özü margin vermir. */
+.acr .ems-header {
+    margin-bottom: var(--ems-sp-6);
 }
-.acr-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 0;
+
+/* ── Qutular (ems-kpi) ───────────────────────────────────────────────────── */
+
+/* Yeddi qutu var; `--5` variantı 170 px minimumla onları iki sətrə səliqəli
+   yığır. Sıxlıq qəsdəndir: qutular başlıq deyil, ANİ mənzərədir. */
+.acr-kpis {
+    gap: var(--ems-sp-5);
 }
-.acr-field label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--ems-neutral-500);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
+
+.acr-kpis .ems-kpi {
+    padding: 13px 15px;
 }
-/* Bütün filtr elementləri eyni hündürlükdə (input, axtarış-seçici, bootstrap-select). */
-.acr-filters .bootstrap-single-select__toggle,
-.acr-field input {
-    min-height: 38px;
-    height: 38px;
-    box-sizing: border-box;
+
+.acr-kpis .ems-kpi__value {
+    font-size: var(--ems-fs-2xl);
+    /* Rəqəm sütunları «tullanmasın» — eyni enli rəqəmlər. */
+    font-variant-numeric: tabular-nums;
 }
-/* Axtarış-seçiciyə SABİT `height` VERİLMİR — yalnız `min-height`. Sabit hündürlük
-   çox-seçimdə çiplər sətri sındıranda daşmaya səbəb olurdu (bax
-   static/css/searchable_select.css). */
-.acr-field .ems-ss {
-    min-height: 38px;
-}
-/* ⚠️ 2026-09-09 (sahib: «içəridəki border/outline olmasın — o search içindəki
-   yerlərdə»). Bu blok əvvəl axtarış-seçicinin İÇİNDƏKİ `<input>`-a ayrıca
-   çərçivə, fon və fokus kölgəsi verirdi. Çərçivəni komponentin özü (`.ems-ss`)
-   çəkir, ona görə xarici çərçivənin İÇİNDƏ ikinci kontur görünürdü. İndi
-   yalnız ölçü/tipoqrafiya qalır; görünüşü komponent idarə edir. */
-.acr-field input {
-    width: 100%;
-    font-size: 0.86rem;
-}
-.acr-filters .bootstrap-single-select__toggle {
+
+/* Yüklənərkən qutu yerini SAXLAYIR — süzgəc dəyişəndə tərtibat sıçramır. */
+.acr-kpi--loading {
     display: flex;
     align-items: center;
-    border-radius: 10px;
-    font-size: 0.86rem;
-    background: #fff;
-    border-color: var(--ems-neutral-300);
-    box-shadow: none;
+    min-height: 78px;
 }
-/* Tələbə axtarışı sahəsi bir az geniş (ən vacib süzgəc). */
+
+/* ── Süzgəc paneli ──────────────────────────────────────────────────────── */
+.acr-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    align-items: end;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-6);
+    padding: var(--ems-sp-6);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg-subtle);
+}
+
+/* Bütün süzgəc kontrolları EYNİ hündürlükdə olsun (axtarış-seçici, select). */
+.acr-filters .bootstrap-single-select__toggle {
+    min-height: var(--ems-h-field);
+}
+
+/* ⚠️ Axtarış-seçiciyə SABİT `height` VERİLMİR — yalnız `min-height`. Sabit
+   hündürlük çox-seçimdə çiplər sətri sındıranda daşmaya səbəb olurdu
+   (bax static/css/searchable_select.css). Çərçivəni komponentin özü çəkir;
+   burada yalnız ölçü var, əks halda «border içində border» görünürdü. */
+.acr-field .ems-ss {
+    min-height: var(--ems-h-field);
+}
+
+.acr-field input {
+    width: 100%;
+    font-size: var(--ems-fs-base);
+}
+
+/* Tələbə axtarışı ən vacib süzgəcdir — iki sütun tutur. */
 .acr-field--student {
     grid-column: span 2;
 }
-.acr-field--reset {
-    justify-content: flex-end;
+
+.acr-field--size {
+    max-width: 130px;
 }
-.acr-field--reset {
+
+.acr-filters__actions {
     display: flex;
-    align-items: flex-end;
+    align-items: end;
+    justify-content: flex-start;
 }
-.acr-reset {
+
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
+.acr-tablewrap {
+    margin-bottom: var(--ems-sp-6);
+}
+
+.acr-table {
+    min-width: 940px;
+}
+
+/* `.ems-table th[scope="col"]` sola düzləyir (element seçicisi güclüdür) —
+   rəqəm sütunlarının başlığı sütunun ÖZÜ ilə eyni tərəfdə olmalıdır. */
+.acr-table th[scope="col"].ems-table__num {
+    text-align: right;
+}
+
+.acr-table th[scope="row"],
+.acr-table td {
+    padding: 9px 12px;
+    vertical-align: middle;
+}
+
+/* Sətir başlığı = tələbə. Sticky olduğu üçün üfüqi sürüşmədə ad itmir. */
+.acr-who {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-3);
+}
+
+.acr-idx {
+    min-width: 2ch;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-neutral-400);
+    font-variant-numeric: tabular-nums;
+}
+
+.acr-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.acr-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-1) var(--ems-sp-2);
+    margin-top: 2px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 400;
+    color: var(--ems-text-muted);
+}
+
+.acr-grp {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    height: 2.6rem;
-    padding: 0 1rem;
-    border-radius: 10px;
-    border: 1px solid var(--ems-neutral-300);
-    background: #fff;
-    color: var(--ems-neutral-600);
-    font-weight: 700;
-    font-size: 0.85rem;
-    cursor: pointer;
-}
-.acr-reset:hover {
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-800);
-}
-
-/* ── Axtarışlı seçici (searchable_select.js, prefix "acr") ─────────────────── */
-
-/* ── Xülasə box-ları ─────────────────────────────────────────────────────── */
-.acr-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-.acr-card {
-    border: 1px solid var(--ems-neutral-200);
-    border-left: 4px solid var(--ems-primary-600);
-    border-radius: 12px;
-    background: #fff;
-    padding: 0.9rem 1.05rem;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-.acr-card--ok {
-    border-left-color: var(--ems-success-600, #059669);
-}
-.acr-card--bad {
-    border-left-color: var(--ems-danger-strong, #dc2626);
-}
-.acr-card--warn {
-    border-left-color: var(--ems-warning-700, #b45309);
-}
-/* Qiymətləndirilməyib — nə keçib, nə kəsilib (imtahan çıxış balı yoxdur).
-   Neytral rəng qəsdəndir: bu bir problem siqnalıdır, kəsr deyil. */
-.acr-card--muted {
-    border-left-color: var(--ems-neutral-400, #94a3b8);
-}
-.acr-card__n {
-    font-size: 1.7rem;
-    font-weight: 800;
-    color: var(--ems-primary-700);
-    line-height: 1.05;
-}
-.acr-card--bad .acr-card__n {
-    color: var(--ems-danger-strong, #dc2626);
-}
-.acr-card--warn .acr-card__n {
-    color: var(--ems-warning-700, #b45309);
-}
-.acr-card--muted .acr-card__n {
-    color: var(--ems-neutral-600);
-}
-.acr-card__l {
-    color: var(--ems-neutral-500);
-    font-size: 0.74rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 700;
-    margin-top: 0.1rem;
-}
-
-/* ── Cədvəl ───────────────────────────────────────────────────────────────── */
-.acr-tablewrap {
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    overflow-x: auto;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-.acr-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.86rem;
-    min-width: 820px;
-}
-.acr-table th,
-.acr-table td {
-    padding: 0.65rem 0.85rem;
-    text-align: left;
-    border-bottom: 1px solid var(--ems-neutral-200);
-    white-space: nowrap;
-}
-.acr-table thead th {
+    height: var(--ems-h-chip);
+    padding: 0 8px;
+    border-radius: var(--ems-r-pill);
     background: var(--ems-primary-50);
     color: var(--ems-primary-800);
-    font-weight: 800;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    border-bottom: 2px solid var(--ems-primary-200);
-}
-.acr-th-no,
-.acr-td-no {
-    width: 2.5rem;
-    text-align: center;
-    color: var(--ems-neutral-500);
-}
-.acr-num {
-    text-align: center;
-}
-.acr-strong {
-    font-weight: 800;
-    color: var(--ems-primary-700);
-}
-.acr-bad {
-    color: var(--ems-danger-strong, #dc2626);
-    font-weight: 800;
-}
-.acr-warn {
-    color: var(--ems-warning-700, #b45309);
-    font-weight: 800;
-}
-.acr-muted {
-    color: var(--ems-neutral-500);
     font-weight: 700;
+    font-size: var(--ems-fs-xs);
 }
-.acr-clip {
-    max-width: 220px;
+
+/* İxtisas: ad + RƏSMİ dövlət şifri (daxili `Program.code` heç vaxt görünmür). */
+.acr-prog__name {
+    display: block;
+    max-width: 26ch;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
-.acr-table tbody tr:nth-child(even) {
-    background: var(--ems-neutral-50);
-}
-.acr-table tbody tr:hover {
-    background: var(--ems-primary-50);
-}
-.acr-row--fail td {
-    background: var(--ems-danger-100, #fee2e2);
-}
-.acr-table tr:last-child td {
-    border-bottom: 0;
-}
-.acr-uname {
-    color: var(--ems-neutral-500);
-    font-size: 0.76rem;
-}
-.acr-view {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.32rem 0.7rem;
-    border-radius: 8px;
-    border: 0;
-    background: var(--ems-primary-600);
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.78rem;
-    cursor: pointer;
-}
-.acr-view:hover {
-    background: var(--ems-primary-700);
-}
-.acr-state {
-    padding: 2.4rem 1rem;
-    text-align: center;
-    color: var(--ems-neutral-500);
-}
-.acr-state i {
-    font-size: 1.8rem;
+
+.acr-prog__code {
     display: block;
-    margin-bottom: 0.5rem;
-    opacity: 0.55;
+    margin-top: 2px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
 }
-/* Box-lar cədvəldən AYRICA (gecikmiş sorğu ilə) dolur — gələnə qədər eyni
-   ölçüdə skeleton dayanır ki, süzgəc dəyişəndə tərtibat sıçramasın. */
-.acr-card--loading {
-    border-left-color: var(--ems-neutral-200);
-    display: flex;
-    align-items: center;
+
+/* Rəqəm xanaları — eyni enli rəqəmlər sütunu «düz» saxlayır. */
+.acr-table .ems-table__num {
+    font-variant-numeric: tabular-nums;
 }
-.acr-skel--card {
-    height: 1.9rem;
-    width: 100%;
+
+/* SIFIR = siqnal deyil. Tire soluq, rəqəmlər isə seçilir — cədvəlin oxunaqlığı
+   məhz buradan gəlir (əvvəl 4 sütun sıfırla dolu idi və göz onları «görürdü»). */
+.acr-zero {
+    color: var(--ems-neutral-300);
+    font-weight: 400;
 }
-.acr-skel {
-    height: 0.95rem;
-    border-radius: 6px;
-    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
-    background-size: 400% 100%;
-    animation: acr-shimmer 1.3s ease infinite;
+
+.acr-n--bad {
+    color: var(--ems-danger-strong);
 }
-@keyframes acr-shimmer {
-    0% {
-        background-position: 100% 0;
-    }
-    100% {
-        background-position: 0 0;
-    }
+
+.acr-n--warn {
+    color: var(--ems-warning-800);
 }
+
+.acr-n--muted {
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+}
+
+.acr-credit {
+    color: var(--ems-primary-700);
+}
+
+.acr-gpa {
+    font-size: var(--ems-fs-md);
+}
+
+/* ÜOMG hesablana bilmir (köhnə sistemdə nəticə yoxdur) — SIFIR göstərmək
+   «sıfır bal aldı» iddiası olardı, ona görə tire + izahlı başlıq. */
+.acr-gpa--na {
+    color: var(--ems-neutral-300);
+    font-weight: 400;
+}
+
+/* Kəsri olan sətir: bütün sətir qırmızıya BOYANMIR (real universitetdə cədvəlin
+   yarısı qırmızı çıxırdı) — sol kənarda 3 px rels. Rəng tək məna daşımır:
+   «Kəsr» sütununda onsuz da rəqəm var. */
+.acr-table tbody tr.acr-row--fail th[scope="row"] {
+    box-shadow: inset 3px 0 0 var(--ems-danger-500);
+}
+
+.acr-th-act,
+.acr-td-act {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right;
+}
+
+/* ── Alt zolaq + səhifələmə ─────────────────────────────────────────────── */
+.acr-foot__count {
+    font-variant-numeric: tabular-nums;
+}
+
 .acr-pager {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-    color: var(--ems-neutral-500);
-    font-size: 0.88rem;
+    gap: var(--ems-sp-3);
 }
-.acr-pager button {
-    padding: 0.46rem 0.95rem;
-    border-radius: 8px;
-    border: 1px solid var(--ems-neutral-300);
-    background: #fff;
-    color: var(--ems-primary-700);
-    font-weight: 700;
-    cursor: pointer;
+
+.acr-pager .ems-btn {
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
 }
-.acr-pager button:hover:not(:disabled) {
-    background: var(--ems-primary-50);
-    border-color: var(--ems-primary-300);
-}
-.acr-pager button:disabled {
+
+.acr-pager .ems-btn:disabled {
     opacity: 0.45;
     cursor: default;
 }
 
-/* ── Tələbə detalı modalı ─────────────────────────────────────────────────── */
-.acr-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1080;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-}
-.acr-modal[hidden] {
-    display: none;
-}
-.acr-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-}
-.acr-modal__box {
-    position: relative;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-    width: min(920px, 100%);
-    max-height: 88vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.acr-modal__head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid var(--ems-neutral-200);
-    background: var(--ems-primary-50);
-}
-.acr-modal__head h3 {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: var(--ems-primary-700);
-}
-.acr-modal__x {
-    border: 0;
-    background: transparent;
-    font-size: 1.6rem;
-    line-height: 1;
-    color: var(--ems-neutral-500);
-    cursor: pointer;
-}
-.acr-modal__x:hover {
-    color: var(--ems-neutral-800);
-}
-.acr-modal__body {
-    padding: 1.15rem 1.25rem;
-    overflow-y: auto;
+/* ── Skeleton ───────────────────────────────────────────────────────────── */
+.acr-skel {
+    height: 0.95rem;
+    border-radius: var(--ems-r-sm);
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: acr-shimmer 1.3s ease infinite;
 }
 
-/* Modaldakı semestr blokları */
+.acr-skel--card {
+    height: 1.9rem;
+    width: 100%;
+}
+
+@keyframes acr-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .acr-skel {
+        animation: none;
+    }
+}
+
+/* ── Çekməcə: semestr blokları ──────────────────────────────────────────── */
 .acr-sem {
-    margin-bottom: 1.35rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
+    margin-bottom: var(--ems-sp-6);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
     overflow: hidden;
 }
+
 .acr-sem-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.7rem 1rem;
-    background: var(--ems-neutral-50);
-    border-bottom: 1px solid var(--ems-neutral-200);
+    gap: var(--ems-sp-3);
+    padding: 10px 14px;
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-border);
 }
+
 .acr-sem-title {
-    font-weight: 700;
-    color: var(--ems-neutral-800);
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--ems-sp-2);
+    font-weight: 700;
+    color: var(--ems-text);
 }
+
 .acr-sem-title i {
     color: var(--ems-primary-500);
 }
+
 .acr-sem-meta {
     display: inline-flex;
-    gap: 0.5rem;
     flex-wrap: wrap;
+    gap: var(--ems-sp-2);
 }
-.acr-sem-credit,
-.acr-sem-gpa {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.12rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.76rem;
-    font-weight: 700;
-}
-.acr-sem-credit {
-    background: var(--ems-primary-50, #eff6ff);
-    color: var(--ems-primary-700, #1d4ed8);
-}
-.acr-sem-gpa {
-    background: var(--ems-neutral-100, #f1f5f9);
-    color: var(--ems-neutral-600, #475569);
-}
+
 .acr-sem-tablewrap {
     overflow-x: auto;
 }
+
 .acr-sem-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.83rem;
+    font-size: var(--ems-fs-base);
 }
+
 .acr-sem-table th {
-    padding: 0.5rem 0.6rem;
+    padding: 8px 10px;
     text-align: center;
-    font-size: 0.7rem;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--ems-neutral-500);
-    border-bottom: 1px solid var(--ems-neutral-200);
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-600);
+    border-bottom: 1px solid var(--ems-border);
     white-space: nowrap;
 }
+
 .acr-sem-table td {
-    padding: 0.5rem 0.6rem;
+    padding: 8px 10px;
     text-align: center;
     border-bottom: 1px solid var(--ems-neutral-100);
     color: var(--ems-neutral-700);
     vertical-align: middle;
+    font-variant-numeric: tabular-nums;
 }
-.acr-ta-left {
-    text-align: left !important;
+
+/* ⚠️ `.acr-sem-table td/th` mərkəzə düzləyir və element seçicisi ilə DAHA
+   spesifikdir — sola düzləmə eyni spesifikliklə yazılmalıdır, əks halda fənn
+   kodu/müəllim sütunu mərkəzdə qalırdı (`!important` əvəzinə əhatələmə). */
+.acr-sem-table th.acr-ta-left,
+.acr-sem-table td.acr-ta-left {
+    text-align: left;
 }
-.acr-sem-table .acr-row--fail td {
-    background: var(--ems-danger-100, #fee2e2);
+
+/* Fənnin adı — kodun altındakı ikinci sətir. Cədvəlin `.acr-sub`-u FLEX-dir
+   (ad + qrup çipi yan-yana); burada sadə blok lazımdır. */
+.acr-sem-subject {
+    display: block;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
 }
-.acr-letter {
-    display: inline-block;
-    min-width: 1.6rem;
-    padding: 0.1rem 0.45rem;
-    border-radius: 6px;
+
+/* Kəsilmiş fənn — burada relsi bütün sətrə vermək OLAR: çekməcədə sətir azdır
+   və səbəb nişanı elə həmin sətirdədir. */
+.acr-sem-table .acr-row--fail td:first-child {
+    box-shadow: inset 3px 0 0 var(--ems-danger-500);
+}
+
+.acr-sem-table .acr-muted {
+    color: var(--ems-neutral-400);
+}
+
+/* Kəsr/qiymətləndirilməmə səbəbi — RƏNG + MƏTN (rəng tək məna daşımır). */
+.acr-reason {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    margin-top: var(--ems-sp-1);
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-xs);
     font-weight: 700;
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+    white-space: nowrap;
 }
+
+.acr-reason.is-qb {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.acr-reason.is-ungraded {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
 .acr-status {
     display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.74rem;
-    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    white-space: nowrap;
 }
+
 .acr-status.is-pass {
-    background: var(--ems-success-100, #d1fae5);
-    color: var(--ems-success-600, #059669);
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
 }
+
 .acr-status.is-fail,
 .acr-status.is-barred {
-    background: var(--ems-danger-100, #fee2e2);
-    color: var(--ems-danger-strong, #dc2626);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
 }
+
 .acr-status.is-progress {
     background: var(--ems-neutral-100);
     color: var(--ems-neutral-600);
 }
+
 .acr-status.is-ungraded {
     background: var(--ems-neutral-100);
-    color: var(--ems-neutral-700, #334155);
-    border: 1px dashed var(--ems-neutral-400, #94a3b8);
-}
-.acr-reason {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    margin-top: 0.3rem;
-    padding: 0.1rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 600;
-    background: var(--ems-danger-100, #fee2e2);
-    color: var(--ems-danger-strong, #dc2626);
-    white-space: nowrap;
-}
-.acr-reason.is-qb {
-    background: var(--ems-warning-100, #fef3c7);
-    color: var(--ems-warning-700, #b45309);
-}
-.acr-reason.is-ungraded {
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-700, #334155);
+    color: var(--ems-neutral-700);
+    border: 1px dashed var(--ems-neutral-400);
 }
 
-@media (max-width: 640px) {
-    .acr-filters {
-        grid-template-columns: 1fr;
+/* Hərf çipləri — bax fayl başlığı (staff bölməsində paylaşılan fayl yüklənmir). */
+.acr-letter {
+    display: inline-block;
+    min-width: 1.7rem;
+    padding: 2px 7px;
+    border-radius: var(--ems-r-sm);
+    font-weight: 800;
+}
+
+.grade-A,
+.grade-B {
+    background: var(--ems-success-100);
+    color: var(--ems-success-700);
+}
+
+.grade-C,
+.grade-D {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+
+.grade-E {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.grade-F {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Mobil: cədvəl → kart siyahısı ──────────────────────────────────────── */
+
+/* 940 px-lik cədvəl telefonda oxunmurdu (yalnız üfüqi sürüşmə qalırdı).
+   Hər xana öz `data-label`-i ilə etiketlənir — sütun başlığı sətrin İÇİNƏ
+   köçür, cədvəl isə kart yığınına çevrilir; etiketləri JS qoyur (bax
+   academic_records.js).
+
+   Sətir İKİ SÜTUNLU qrid-dir: altı rəqəm xanası yan-yana düşür, ona görə kart
+   ~330 px əvəzinə ~200 px olur (25 sətirlik səhifədə 3 000+ px fərq). Uzun
+   xanalar (tələbə, ixtisas, əməliyyat) tam eni tutur. */
+@media (max-width: 720px) {
+    .acr-table,
+    .acr-table thead,
+    .acr-table tbody,
+    .acr-table tr,
+    .acr-table th,
+    .acr-table td {
+        display: block;
+        min-width: 0;
+    }
+
+    .acr-table thead {
+        display: none;
+    }
+
+    .acr-table tbody tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-bottom: var(--ems-sp-5);
+        border: 1px solid var(--ems-border);
+        border-radius: var(--ems-r-xl);
+        background: var(--ems-bg);
+        overflow: hidden;
+    }
+
+    .acr-table th[scope="row"],
+    .acr-table .acr-td-prog,
+    .acr-table td:not([data-label]) {
+        grid-column: 1 / -1;
+    }
+
+    /* Rəqəm xanaları arasında incə ayırıcı — kart «divar kağızı» olmasın. */
+    .acr-table td[data-label] {
+        border-top: 1px solid var(--ems-neutral-100);
+    }
+
+    /* Qutular telefonda da İKİ sütunda — yeddi tam enli kart çox uzun idi. */
+    .acr-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .acr-kpis .ems-kpi__value {
+        font-size: var(--ems-fs-xl);
+    }
+
+    .acr-table th[scope="row"] {
+        position: static;
+        padding: 10px 12px;
+        background: var(--ems-bg-subtle);
+        border-bottom: 1px solid var(--ems-border);
+    }
+
+    .acr-table td {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--ems-sp-3);
+        padding: 7px 10px;
+        text-align: right;
+    }
+
+    /* Etiket UZUN ola bilər («Qiymətləndirilməyib») — kiçik şrift + sınma,
+       əks halda dəyər kartın kənarına sıxışırdı. */
+    .acr-table td::before {
+        content: attr(data-label);
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: var(--ems-fs-2xs);
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        line-height: 1.3;
+        text-transform: uppercase;
+        color: var(--ems-neutral-500);
+        text-align: left;
+    }
+
+    .acr-table td[data-label] > * {
+        flex: 0 0 auto;
+    }
+
+    /* Etiketi olmayan xanalar (əməliyyat, boş/xəta vəziyyəti) tam en tutur —
+       flex sətri deyil, adi blok: içindəki düymə/vəziyyət qutusu yayılsın. */
+    .acr-table td:not([data-label]) {
+        display: block;
+        text-align: center;
+    }
+
+    .acr-table td:not([data-label])::before {
+        content: none;
+    }
+
+    .acr-td-act {
+        width: auto;
+    }
+
+    .acr-td-act .ems-btn {
+        width: 100%;
+    }
+
+    .acr-prog__name {
+        max-width: none;
+        white-space: normal;
+    }
+
+    .acr-field--student,
+    .acr-field--size {
+        grid-column: auto;
+        max-width: none;
     }
 }

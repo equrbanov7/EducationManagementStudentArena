@@ -1,0 +1,8 @@
+{% load i18n %}
+{% comment %}«Köçürülmüş nəticələr» başlıq əməli — bütün süzgəcləri sıfırlayır
+(`legacy_grade_review.js` `[data-lgr-reset]` çəngəlini dinləyir; atribut adı
+SAXLANILIR). `partials/ems_ui/_content_header.html` bunu `header_actions_include`
+ilə gətirir.{% endcomment %}
+<button type="button" class="ems-btn" data-lgr-reset>
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Süzgəcləri sıfırla" context "accounts.legacy_review" %}
+</button>

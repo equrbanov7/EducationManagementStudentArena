@@ -28,15 +28,18 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.audit.models import AuditLog
-from apps.organizations.models import Membership, Organization, OrgUnit, Role
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
+from apps.registrar import services as registrar_services
 from apps.registrar.models import (
     AcademicStatus,
     Curriculum,
+    CurriculumSubject,
     Program,
     StudentAcademicRecord,
     StudentMovement,
+    Subject,
 )
-from core.constants import OrganizationType, OrgUnitType, RoleScopeType
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, RoleScopeType
 
 User = get_user_model()
 
@@ -287,6 +290,110 @@ class SectionGateTest(StudentServicesBase):
         """Köhnə bölmə açarı qırılmır (link/test uyğunluğu)."""
         self.assertIn("student-intake", self._sections("student_services"))
         self.assertEqual(self._fragment("student_services", "student-intake").status_code, 200)
+
+
+class TranscriptButtonGateTest(StudentServicesBase):
+    """«Transkript yüklə» əməli — sahibin 2026-09-10 tələbi.
+
+    Rəsmi sənəddir, ona görə düymənin qapısı `registrar:student_transcript_pdf`
+    görünüşünün ÖZ qapısı ilə eynidir (təşkilat üzrə `course.edit`). Reyestri
+    GÖRƏN, amma həmin açarı daşımayan aktor (dekan) düyməni GÖRMÜR — əks halda
+    UI 404-ə aparan düymə göstərərdi.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.period = AcademicPeriod.objects.create(
+            organization=cls.org,
+            name="QA-DS3 2025/2026 Payız",
+            period_type=AcademicPeriodType.SEMESTER,
+            academic_year="2025/2026",
+            start_date=date(2025, 9, 1),
+            end_date=date(2026, 1, 31),
+            is_current=True,
+        )
+        cls.subject = Subject.objects.create(organization=cls.org, code="QA-DS3-101", name="Proqramlaşdırma", ects=6)
+        CurriculumSubject.objects.create(
+            organization=cls.org, curriculum=cls.curriculum, subject=cls.subject, semester_number=1
+        )
+        # Transkript boş qeyd üçün 404-dür — bir yazılış lazımdır.
+        registrar_services.enroll_mandatory_subjects(record=cls.record, period=cls.period, semester_number=1)
+
+        # Reyestri görən + `course.edit` daşıyan aktor (RİM/registrar naxışı).
+        role = Role.objects.create(
+            organization=cls.org,
+            name="qa_registrar_manager",
+            display_name="QA Registrar",
+            level=80,
+            scope_type=RoleScopeType.ORGANIZATION,
+            permissions=["unit.view", "course.edit", "student.registry_view", "people.view_students"],
+            is_system=True,
+            is_active=True,
+        )
+        cls.manager = User.objects.create_user("ss_rmanager", "ss_rmanager@qku.edu.az", PASSWORD)
+        Membership.objects.create(user=cls.manager, organization=cls.org, role=role, is_primary=True, is_active=True)
+
+    def _login(self, user):
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        return client
+
+    def _registry_html(self, client):
+        """Bölmə fraqmenti JSON-la gəlir — cədvəl HTML-i `html` açarındadır."""
+        url = reverse("accounts:profile_section_fragment", kwargs={"section": "student-registry"})
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        return response.json()["html"]
+
+    @property
+    def _pdf_url(self):
+        return reverse("registrar:student_transcript_pdf", args=[self.record.pk])
+
+    def test_button_is_hidden_from_actor_without_course_edit(self):
+        html = self._registry_html(self._login(self.users["dean"]))
+        self.assertIn("data-sr-root", html)  # reyestr həqiqətən render olunub
+        self.assertIn(str(self.record.admission_year), html)
+        self.assertNotIn(self._pdf_url, html)
+        self.assertNotIn("Transkript yüklə", html)
+        # Dekanda nə `student.movement`, nə `course.edit` var → əməl sütunu yoxdur.
+        self.assertNotIn("Əməllər", html)
+
+    def test_endpoint_stays_closed_for_that_actor(self):
+        """Düymə gizlətmək kifayət deyil — birbaşa URL də bağlı olmalıdır."""
+        self.assertEqual(self._login(self.users["dean"]).get(self._pdf_url).status_code, 404)
+
+    def test_student_role_sees_neither_section_nor_button(self):
+        response = self._login(self.users["student"]).get(reverse("accounts:profile"))
+        self.assertNotIn("student-registry", set(response.context["allowed_sections"]))
+        self.assertEqual(self._login(self.users["student"]).get(self._pdf_url).status_code, 404)
+
+    def test_authorised_actor_gets_the_button_and_a_pdf(self):
+        client = self._login(self.manager)
+        html = self._registry_html(client)
+        self.assertIn(self._pdf_url, html)
+        self.assertIn("Transkript yüklə", html)
+        # Fayl endirməsidir: SPA yükləyicisinin sinfi bu linkdə OLMAMALIDIR.
+        self.assertNotIn(f'js-profile-section-link" href="{self._pdf_url}"', html)
+
+        response = client.get(self._pdf_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("Transkript_", response["Content-Disposition"])
+        self.assertTrue(response.content.startswith(b"%PDF"))
+
+    def test_action_column_header_matches_the_row_cells(self):
+        """`_data_table.html` müqaviləsi: əməl sütunu başlığı ilə xanası eyni sayda.
+
+        Başlıq buraxılsa bütün başlıqlar bir xana sürüşür — reyestrlərdə bir
+        dəfə baş vermiş səhvdir, ona görə invariant kilidlənir."""
+        html = self._registry_html(self._login(self.manager))
+        head = html.split("<thead>")[1].split("</thead>")[0]
+        first_row = html.split("<tbody>")[1].split("</tr>")[0]
+        self.assertEqual(head.count('<th scope="col"'), first_row.count("<td") + first_row.count('<th scope="row"'))
 
 
 class MovementStateMachineTest(StudentServicesBase):

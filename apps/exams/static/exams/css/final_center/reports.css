@@ -40,3 +40,64 @@
     .fxc-col-action .fxc-btn i { margin: 0; }
     .fxc-col-action .fxc-btn span { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2026-09-10 sakit redizayn — tablar `ems-tabs`, KPI `ems-kpis`, süzgəc
+   `ems-filters`, cədvəl `ems-table`, boş vəziyyət `ems-state`.
+   Burada yalnız yerləşdirmə düzəlişləri var (rənglər ems tokenlərindəndir).
+   ═══════════════════════════════════════════════════════════════════════════ */
+.rpt-tabs {
+    margin: 14px 0;
+}
+
+/* Tablar burada <a>-dır (server-tərəf naviqasiya) — alt xətt komponentdəndir. */
+.rpt-tabs .ems-tabs__btn {
+    text-decoration: none;
+}
+
+.rpt-kpis {
+    margin-bottom: 14px;
+}
+
+.rpt-filters {
+    margin-bottom: 14px;
+}
+
+.rpt-filters .ems-field {
+    min-width: 170px;
+    flex: 1 1 180px;
+}
+
+.rpt-filters .bootstrap-single-select {
+    width: 100%;
+}
+
+.rpt-filters .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.rpt-table {
+    min-width: 1080px;
+}
+
+.rpt-table td,
+.rpt-table th[scope="row"] {
+    white-space: nowrap;
+}
+
+.rpt-table .fxc-reason {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rpt-table .fxc-col-action {
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .rpt-kpis.ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

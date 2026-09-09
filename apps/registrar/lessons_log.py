@@ -489,6 +489,13 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
             "offering__subject",
             "offering__group",
             "offering__period",
+            # ⚠️ 2026-09-10 auditi (P1-5): `offering__instructor` siyahıdan
+            # düşmüşdü. Aşağıdakı sətir `lesson.instructor` boş olanda ona
+            # geri çəkilir, `Lesson.instructor` isə YALNIZ fənn iki müəllim
+            # arasında bölünəndə dolur — yəni geri çəkilmə NORMAL yoldur.
+            # Nəticədə hər sətir üçün bir sorğu gedirdi: kabinet panelində 90,
+            # CSV eksportunda (EXPORT_CAP=5000) beş minə qədər.
+            "offering__instructor",
             "instructor",
             "room",
         ).order_by("-date", "-start_time", "-created_at")[:limit]

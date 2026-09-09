@@ -96,6 +96,6 @@ class IktRehberRegistrarConsoleTests(SimpleTestCase):
     """Sidebar linki ilə view icazəsi uyğunlaşmalıdır (əks halda link 404 verir)."""
 
     def test_console_uses_canonical_course_permission(self):
-        from apps.registrar.console_views import REGISTRAR_MANAGE_PERMISSION
+        from apps.registrar.catalog_console import MANAGE_PERMISSION as REGISTRAR_MANAGE_PERMISSION
 
         self.assertEqual(REGISTRAR_MANAGE_PERMISSION, "course.edit")

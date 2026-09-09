@@ -100,3 +100,40 @@
 @media (max-width: 640px) {
     .fxc-live-exam__go { margin-left: 0; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2026-09-10 sakit redizayn — səhifə başındakı KPI sırası və zal süzgəci
+   ems_ui komponentləri ilə (`ems-kpis`, `ems-filters`). Burada yalnız
+   yerləşdirmə düzəlişləri var; rənglər ems tokenlərindəndir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fxc-kpis {
+    margin: 14px 0;
+}
+
+.fxc-roomfilters {
+    margin-bottom: 14px;
+}
+
+.fxc-roomfilters .ems-field {
+    min-width: 180px;
+    flex: 1 1 200px;
+}
+
+.fxc-roomfilters .ems-field--wide {
+    flex: 1 1 280px;
+}
+
+.fxc-roomfilters .bootstrap-single-select {
+    width: 100%;
+}
+
+.fxc-roomfilters .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+    .fxc-kpis.ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

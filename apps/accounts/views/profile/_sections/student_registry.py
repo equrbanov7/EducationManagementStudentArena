@@ -23,6 +23,7 @@ from django.utils.translation import pgettext
 from apps.accounts.services import people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
+from apps.registrar import catalog_console
 
 _CTX = "accounts.student_registry"
 
@@ -42,8 +43,12 @@ def _sort_dir(current: str, key: str):
     return None
 
 
-def _columns(base_params, current, *, can_move):
+def _columns(base_params, current, *, can_actions):
+    # ⚠️ BİRİNCİ spec sətir başlığıdır (`row_head` = tələbə kodu). Onsuz bütün
+    # başlıqlar bir xana SÜRÜŞÜRDÜ: «Tələbə» kodun üstündə, «Əməllər» isə əmr
+    # sayğacının üstündə oturur, əməl sütunu isə başlıqsız qalırdı.
     specs = [
+        ("", pgettext(_CTX, "Tələbə kodu")),
         ("name", pgettext(_CTX, "Tələbə")),
         ("program", pgettext(_CTX, "İxtisas və qrup")),
         ("", pgettext(_CTX, "Kurs")),
@@ -53,7 +58,10 @@ def _columns(base_params, current, *, can_move):
         ("status", pgettext(_CTX, "Statusu")),
         ("", pgettext(_CTX, "Əmr")),
     ]
-    if can_move:
+    # ⚠️ Əməl sütunu ƏN SONDA — `_data_table.html` müqaviləsi (sətir başlığı ən
+    # əvvəl). Başlıq sətir əməlləri ilə birlikdə görünməlidir: yalnız «Transkript»
+    # daşıyan aktorda da sütun var, əks halda başlıqlar bir xana sürüşür.
+    if can_actions:
         specs.append(("", pgettext(_CTX, "Əməllər")))
     return [
         {
@@ -67,7 +75,7 @@ def _columns(base_params, current, *, can_move):
     ]
 
 
-def _table_row(row, *, can_move):
+def _table_row(row, *, can_actions):
     """`_data_table.html` müqaviləsi — birinci sütun `th scope="row"`."""
     return {
         "row_head": row["student_code"] or "—",
@@ -81,7 +89,7 @@ def _table_row(row, *, can_move):
             {"badge_family": "student_status", "badge_key": row["status"]},
             {"text": row["movement_count"], "num": True},
         ],
-        "actions_include": ("accounts/profile/sections/student_services/_registry_actions.html" if can_move else ""),
+        "actions_include": ("accounts/profile/sections/student_services/_registry_actions.html" if can_actions else ""),
         "data": row,
     }
 
@@ -106,6 +114,12 @@ def build_student_registry_section(request, section, *, active_organization, all
 
     can_move = bool(actor.can_move_students and actor.can_manage_academic)
     section["can_move"] = can_move
+    # «Transkript yüklə» — rəsmi sənəd. Qapı `registrar:student_transcript_pdf`
+    # görünüşünün öz qapısı ilə EYNİDİR (təşkilat üzrə `course.edit`), ona görə
+    # düymə ancaq faylı onsuz da ala bilən aktora görünür; tələbə rolunda bu
+    # bölmə də, açar da yoxdur. Görünüşün icazə yoxlaması DƏYİŞMİR.
+    can_transcript = catalog_console.can_manage(request.user, active_organization)
+    section["can_transcript"] = can_transcript
     section["options"] = registry_service.registry_options(actor, request=request)
     section["movement_kinds"] = movement_service.movement_kinds()
 
@@ -122,8 +136,9 @@ def build_student_registry_section(request, section, *, active_organization, all
         "sr_status": values["status"],
     }
     section["base_params"] = base_params
-    section["columns"] = _columns(base_params, values["sort"], can_move=can_move)
-    section["table_rows"] = [_table_row(row, can_move=can_move) for row in payload["rows"]]
+    can_actions = can_move or can_transcript
+    section["columns"] = _columns(base_params, values["sort"], can_actions=can_actions)
+    section["table_rows"] = [_table_row(row, can_actions=can_actions) for row in payload["rows"]]
     section["table_state"] = "ready" if payload["rows"] else "empty"
     section["pagination_query"] = urlencode(
         {key: value for key, value in base_params.items() if value not in ("", None)}
@@ -138,6 +153,12 @@ def build_student_registry_section(request, section, *, active_organization, all
     section["groups_url"] = reverse("accounts:people_academic_groups")
     section["document_url_base"] = reverse(
         "accounts:student_registry_document", args=["00000000-0000-0000-0000-000000000000"]
+    )
+    # Çekmecə linki JS-dən qurulur (kart JSON-la gəlir) — şablona yalnız baza URL.
+    section["transcript_url_base"] = (
+        reverse("registrar:student_transcript_pdf", args=["00000000-0000-0000-0000-000000000000"])
+        if can_transcript
+        else ""
     )
 
     kpis = payload["kpis"]

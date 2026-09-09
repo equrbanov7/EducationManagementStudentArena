@@ -103,10 +103,22 @@ class PlaceholderRowTest(SimpleTestCase):
 
     def test_placeholders_never_reach_the_catalogue_match(self):
         rows = [
-            {"no": 1, "code": "MİF – B03", "name": "Ali məktəb tərəfindən müəyyən edilən fənn",
-             "credits": 4, "total_hours": None, "semester": ""},
-            {"no": 2, "code": "MİF – B04", "name": "İxtisaslaşmaya ayrılan fənlər**",
-             "credits": 42, "total_hours": None, "semester": ""},
+            {
+                "no": 1,
+                "code": "MİF – B03",
+                "name": "Ali məktəb tərəfindən müəyyən edilən fənn",
+                "credits": 4,
+                "total_hours": None,
+                "semester": "",
+            },
+            {
+                "no": 2,
+                "code": "MİF – B04",
+                "name": "İxtisaslaşmaya ayrılan fənlər**",
+                "credits": 42,
+                "total_hours": None,
+                "semester": "",
+            },
         ]
         result = match_rows(rows, {})
         # Kataloqda yoxdur → uydurulmur, hesabata düşür; `--apply` onları yazmır.
@@ -190,9 +202,7 @@ class ManualPlanFileTest(SimpleTestCase):
             for key in ("seviyye", "proqram", "sayt_adi", "senet", "url", "niye_elle"):
                 self.assertIn(key, entry)
             for row in entry["rows"]:
-                self.assertEqual(
-                    {"no", "code", "name", "credits", "total_hours", "semester"} - set(row), set()
-                )
+                self.assertEqual({"no", "code", "name", "credits", "total_hours", "semester"} - set(row), set())
 
 
 class CreateSubjectsSafetyTest(TestCase):

@@ -11,6 +11,10 @@ Bu modul həmin konsolun MƏNTİQİNİ səhifədən ayırır ki, kabinet bölmə
 (`accounts/.../_sections/registrar_catalog.py`) onu server-render panel kimi
 göstərə, dialoqlardan isə TƏK JSON son nöqtəsi ilə yaza bilsin.
 
+2026-09-10 (sahib: «bu köhnədi, bunu sil»): köhnə səhifə (`console_views.py` +
+`idareetme/…` yolları) TAMAMİLƏ SİLİNDİ — bu modul kataloqun YEGANƏ yazı
+qapısıdır.
+
 Nə DƏYİŞMİR
 -----------
 * İcazə: org-wide ``course.edit`` (``can_manage``) — köhnə konsolun eyni qapısı.
@@ -30,6 +34,7 @@ from django.shortcuts import get_object_or_404
 
 from core.constants import OrgUnitType
 
+from . import status as academic_status
 from .forms import CurriculumForm, OfferingForm, ProgramForm, StudentRecordForm, SubjectForm
 from .models import (
     CourseOffering,
@@ -64,8 +69,8 @@ def can_manage(user, organization) -> bool:
 
     Vahid-əhatəli (unit) aktor buraxılmır: kataloq CRUD-u hələ obyekt səviyyəsində
     əhatələnmir, ona görə vahid aktoruna açsaq bütün təşkilatın sətirlərini
-    görər/dəyişər. Bu, köhnə `console_views._can_manage_registrar` ilə EYNİ
-    qaydadır (fail-closed).
+    görər/dəyişər. Bu, silinmiş `console_views._can_manage_registrar` ilə EYNİ
+    qaydadır (fail-closed) — transkript PDF görünüşü də bu funksiyanı işlədir.
     """
     if not getattr(user, "is_authenticated", False) or organization is None:
         return False
@@ -386,7 +391,7 @@ def _instance(model, organization, pk):
     return get_object_or_404(model, pk=pk, organization=organization)
 
 
-def save(organization, *, tab, pk, data):
+def save(organization, *, tab, pk, data, actor=None):
     """Kataloq sətrini yarat/yenilə. Qaytarır ``(obj, errors)``.
 
     Validasiya mövcud ``forms.py`` sinifləridir — burada paralel qayda yoxdur.
@@ -399,18 +404,48 @@ def save(organization, *, tab, pk, data):
         return None, {"__all__": ["unknown_tab"]}
     model, form_class = entry
     instance = _instance(model, organization, pk)
+    previous_status = getattr(instance, "status", None) if tab == "students" else None
     form = form_class(data, instance=instance, organization=organization)
     if not form.is_valid():
         return None, {field: [str(msg) for msg in msgs] for field, msgs in form.errors.items()}
     obj = form.save(commit=False)
     obj.organization = organization
+    if tab == "students":
+        # Köhnə `is_active` bayrağı akademik statusla SİNXRON qalmalıdır —
+        # köhnə konsolun (silinib) etdiyi iş; onsuz «xaric» sətir akademik
+        # cəhətdən aktiv görünürdü.
+        obj.is_active = academic_status.is_active_for(obj.status)
     try:
         obj.save()
         if hasattr(form, "save_m2m"):
             form.save_m2m()
     except IntegrityError as exc:
         return None, {"__all__": [str(exc)]}
+    if tab == "students":
+        academic_status.audit_status_change(record=obj, previous=previous_status, by_user=actor)
+        _auto_enroll(obj, form)
     return obj, {}
+
+
+def _auto_enroll(record, form) -> None:
+    """`auto_enroll` seçilibsə semestrin MƏCBURİ fənlərinə yazılış (idempotent).
+
+    Köhnə konsolun tələbə formasında bu qutu vardı; konsol silinəndə əməl
+    İTMƏSİN deyə buraya köçürüldü — eyni ``services.enroll_mandatory_subjects``
+    xidməti çağırılır, aktiv semestr yoxdursa səssizcə atlanılır.
+    """
+    if not form.cleaned_data.get("auto_enroll"):
+        return
+    period = _current_period(record.organization)
+    if period is None:
+        return
+    from . import services
+
+    services.enroll_mandatory_subjects(
+        record=record,
+        period=period,
+        semester_number=form.cleaned_data.get("enroll_semester") or 1,
+    )
 
 
 def _save_rubric(organization, *, pk, data):
