@@ -71413,3 +71413,79 @@ msgid ""
 msgstr ""
 "Загрузка ничего не записывает: сначала выполняется пробный прогон, и вы "
 "видите результат построчно."
+
+msgctxt "profile.password"
+msgid "Şifrəni ya mövcud şifrənizlə, ya da e-poçtunuza gələn birdəfəlik kodla dəyişə bilərsiniz. Dəyişiklikdən sonra digər cihazlardakı sessiyalar qüvvədə qalır."
+msgstr "Пароль можно изменить с помощью текущего пароля или одноразового кода, отправленного на вашу почту. Сессии на других устройствах останутся активными."
+
+msgctxt "profile.password"
+msgid "Şifrəni göstər / gizlət"
+msgstr "Показать / скрыть пароль"
+
+msgctxt "profile.password"
+msgid "Caps Lock açıqdır."
+msgstr "Включён Caps Lock."
+
+msgctxt "profile.password"
+msgid "Şifrələr uyğundur."
+msgstr "Пароли совпадают."
+
+msgctxt "profile.password"
+msgid "Şifrələr eyni deyil."
+msgstr "Пароли не совпадают."
+
+msgctxt "profile.password"
+msgid "Şifrə hələ yazılmayıb"
+msgstr "Пароль ещё не введён"
+
+msgctxt "profile.password"
+msgid "Zəif"
+msgstr "Слабый"
+
+msgctxt "profile.password"
+msgid "Orta"
+msgstr "Средний"
+
+msgctxt "profile.password"
+msgid "Yaxşı"
+msgstr "Хороший"
+
+msgctxt "profile.password"
+msgid "Güclü"
+msgstr "Надёжный"
+
+msgctxt "profile.password"
+msgid "Şifrə tələbləri"
+msgstr "Требования к паролю"
+
+msgctxt "profile.password"
+msgid "Ən azı 8 simvol"
+msgstr "Не менее 8 символов"
+
+msgctxt "profile.password"
+msgid "Yalnız rəqəmlərdən ibarət olmasın"
+msgstr "Не должен состоять только из цифр"
+
+msgctxt "profile.password"
+msgid "Ad, soyad, istifadəçi adı və ya e-poçtla oxşar olmasın"
+msgstr "Не должен быть похож на имя, фамилию, логин или почту"
+
+msgctxt "profile.password"
+msgid "Böyük/kiçik hərf, rəqəm və simvol qarışığı tövsiyə olunur"
+msgstr "Рекомендуется сочетание строчных и прописных букв, цифр и символов"
+
+msgctxt "profile.password"
+msgid "Geniş yayılmış şifrələr (məsələn «12345678», «password») server tərəfindən rədd edilir."
+msgstr "Распространённые пароли (например «12345678», «password») отклоняются сервером."
+
+msgctxt "profile.edit_v2"
+msgid "Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur."
+msgstr "Здесь можно обновить личные контактные данные и академический профиль. Структурные данные, заданные университетом, доступны только для чтения."
+
+msgctxt "profile.edit_v2"
+msgid "Şəkil seç"
+msgstr "Выбрать изображение"
+
+msgctxt "profile.edit_v2"
+msgid "PNG və ya JPG · maksimum 5 MB"
+msgstr "PNG или JPG · максимум 5 МБ"

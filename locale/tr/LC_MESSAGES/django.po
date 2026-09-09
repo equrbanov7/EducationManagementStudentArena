@@ -70882,3 +70882,79 @@ msgid ""
 msgstr ""
 "Yükleme hiçbir şey yazmaz: önce kuru çalışma yapılır ve sonucu satır satır "
 "görürsünüz."
+
+msgctxt "profile.password"
+msgid "Şifrəni ya mövcud şifrənizlə, ya da e-poçtunuza gələn birdəfəlik kodla dəyişə bilərsiniz. Dəyişiklikdən sonra digər cihazlardakı sessiyalar qüvvədə qalır."
+msgstr "Şifrenizi mevcut şifrenizle ya da e-postanıza gelen tek kullanımlık kodla değiştirebilirsiniz. Diğer cihazlardaki oturumlar açık kalır."
+
+msgctxt "profile.password"
+msgid "Şifrəni göstər / gizlət"
+msgstr "Şifreyi göster / gizle"
+
+msgctxt "profile.password"
+msgid "Caps Lock açıqdır."
+msgstr "Caps Lock açık."
+
+msgctxt "profile.password"
+msgid "Şifrələr uyğundur."
+msgstr "Şifreler eşleşiyor."
+
+msgctxt "profile.password"
+msgid "Şifrələr eyni deyil."
+msgstr "Şifreler aynı değil."
+
+msgctxt "profile.password"
+msgid "Şifrə hələ yazılmayıb"
+msgstr "Henüz şifre girilmedi"
+
+msgctxt "profile.password"
+msgid "Zəif"
+msgstr "Zayıf"
+
+msgctxt "profile.password"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "profile.password"
+msgid "Yaxşı"
+msgstr "İyi"
+
+msgctxt "profile.password"
+msgid "Güclü"
+msgstr "Güçlü"
+
+msgctxt "profile.password"
+msgid "Şifrə tələbləri"
+msgstr "Şifre gereksinimleri"
+
+msgctxt "profile.password"
+msgid "Ən azı 8 simvol"
+msgstr "En az 8 karakter"
+
+msgctxt "profile.password"
+msgid "Yalnız rəqəmlərdən ibarət olmasın"
+msgstr "Yalnızca rakamlardan oluşmamalı"
+
+msgctxt "profile.password"
+msgid "Ad, soyad, istifadəçi adı və ya e-poçtla oxşar olmasın"
+msgstr "Ad, soyad, kullanıcı adı veya e-posta ile benzer olmamalı"
+
+msgctxt "profile.password"
+msgid "Böyük/kiçik hərf, rəqəm və simvol qarışığı tövsiyə olunur"
+msgstr "Büyük/küçük harf, rakam ve sembol karışımı önerilir"
+
+msgctxt "profile.password"
+msgid "Geniş yayılmış şifrələr (məsələn «12345678», «password») server tərəfindən rədd edilir."
+msgstr "Yaygın şifreler (örneğin “12345678”, “password”) sunucu tarafından reddedilir."
+
+msgctxt "profile.edit_v2"
+msgid "Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur."
+msgstr "Kişisel iletişim bilgilerinizi ve akademik profilinizi buradan güncelleyin. Üniversitenin belirlediği yapısal bilgiler yalnızca okunabilir."
+
+msgctxt "profile.edit_v2"
+msgid "Şəkil seç"
+msgstr "Görsel seç"
+
+msgctxt "profile.edit_v2"
+msgid "PNG və ya JPG · maksimum 5 MB"
+msgstr "PNG veya JPG · en fazla 5 MB"
