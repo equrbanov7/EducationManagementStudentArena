@@ -436,7 +436,7 @@ PERMISSION_LABELS = {
     "user.soft_delete": pgettext_lazy(_PERM_CTX, "Hesabı silmək / bərpa etmək"),
     "user.edit": pgettext_lazy(_PERM_CTX, "Şəxsi məlumatların redaktəsi"),
     "user.grant_privileged": pgettext_lazy(_PERM_CTX, "İmtiyazlı (administrator) səlahiyyət vermək"),
-    "user.import": pgettext_lazy(_PERM_CTX, "Tələbə idxalı (siyahıdan toplu hesab yaratmaq)"),
+    "user.import": pgettext_lazy(_PERM_CTX, "Toplu hesab əlavəsi (siyahıdan tələbə/müəllim yaratmaq)"),
     # people (müəllim/tələbə kataloqu — struktur scope-una tabe)
     "people.view_teachers": pgettext_lazy(_PERM_CTX, "Müəllim kataloquna baxış"),
     "people.view_students": pgettext_lazy(_PERM_CTX, "Tələbə kataloquna baxış"),

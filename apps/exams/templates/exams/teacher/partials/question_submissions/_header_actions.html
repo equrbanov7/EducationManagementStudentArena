@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}Başlıq əməli — müəllim üçün «Yeni göndəriş».  Mərkəz göndəriş
+yaratmır (yalnız baxır), ona görə düymə göstərilmir.{% endcomment %}
+{% if not question_submissions_is_reviewer %}
+<a class="ems-btn ems-btn--primary" href="{{ question_submissions_create_url }}">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni göndəriş" context "accounts.profile.question_submissions" %}
+</a>
+{% endif %}

@@ -1,0 +1,8 @@
+{% comment %}Səbəb dialoqunun başında hədəf şəxs göstərilir — «səhvən əl dəydi»
+halının qarşısını alır. Dəyər `staff_management.js` tərəfindən doldurulur.
+{% endcomment %}
+{% load i18n %}
+<p class="hm-remove-target">
+    <span class="hm-remove-target__label">{% trans "Uzaqlaşdırılan" context "accounts.staff_management" %}:</span>
+    <strong data-hm-remove-name>—</strong>
+</p>

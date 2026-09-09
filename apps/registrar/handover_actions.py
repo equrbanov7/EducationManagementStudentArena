@@ -80,11 +80,21 @@ def _require_permission(actor, organization):
         raise PermissionDenied("Fənni başqa müəllimə təhvil vermək üçün icazəniz yoxdur.")
 
 
-def _resolve_target(organization, user_id):
+def _resolve_target(organization, user_id, *, eligible_ids=None):
+    """Hədəf müəllimi həll edir; boş dəyər AYRICA, aydın xəta verir.
+
+    ⚠️ Boş `user_id` filtrə OLDUĞU KİMİ ötürülməməlidir: `User.pk` tam ədəddir və
+    ``filter(pk="")`` Django-da ``ValueError`` atır — yəni «müəllim seçilməyib»
+    kimi adi istifadəçi səhvi 500 ilə bitərdi. Kod `no_target`-dır və HTTP səthi
+    onu «Yeni müəllim seçilməyib» kimi tərcümə edir.
+    """
     from django.contrib.auth import get_user_model
 
+    if not str(user_id or "").strip():
+        raise HandoverError("no_target", "Yeni müəllim seçilməyib.", status=400)
+
     target = get_user_model().objects.filter(pk=user_id, is_active=True).first()
-    if target is None or not handover_read.is_eligible_target(organization, user_id):
+    if target is None or not handover_read.is_eligible_target(organization, user_id, eligible_ids=eligible_ids):
         raise HandoverError(
             "target_not_eligible",
             "Seçilmiş müəllim bu təşkilatda bal yazma səlahiyyətinə malik aktiv üzv deyil.",
@@ -110,7 +120,7 @@ def _locked_offering(offering_id, organization):
 # ── Tək təhvil (toplu axının da vahididir) ───────────────────────────────────
 
 
-def _apply_one(*, offering, target, actor, organization, reason, request, closed_ids, today):
+def _apply_one(*, offering, target, actor, organization, reason, request, closed_ids, today, eligible_ids=None):
     codes = handover_read.blockers(
         offering,
         actor=actor,
@@ -118,6 +128,7 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
         closed_ids=closed_ids,
         today=today,
         new_instructor_id=getattr(target, "pk", None),
+        eligible_ids=eligible_ids,
     )
     if codes:
         raise HandoverError("blocked", blocker_message(codes), status=409, codes=codes)
@@ -187,12 +198,15 @@ def bulk_reassign(*, actor, organization, items, reason, request=None) -> dict:
     today = timezone.localdate()
     offering_ids = [row["offering_id"] for row in rows]
     closed_ids = handover_read.closed_offering_ids(offering_ids)
+    # «Bal yaza bilənlər» dəsti sətir başına İKİ dəfə oxunurdu (hədəfin həlli +
+    # bloker yoxlaması). Dəst bütün toplu üçün eynidir — bir dəfə oxunur.
+    eligible_ids = handover_read.eligible_target_ids(organization)
 
     results = []
     with transaction.atomic():
         for row in rows:
             offering = _locked_offering(row["offering_id"], organization)
-            target = _resolve_target(organization, row.get("new_instructor_id"))
+            target = _resolve_target(organization, row.get("new_instructor_id"), eligible_ids=eligible_ids)
             record = _apply_one(
                 offering=offering,
                 target=target,
@@ -202,6 +216,7 @@ def bulk_reassign(*, actor, organization, items, reason, request=None) -> dict:
                 request=request,
                 closed_ids=closed_ids,
                 today=today,
+                eligible_ids=eligible_ids,
             )
             results.append(record)
 

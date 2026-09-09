@@ -41,7 +41,7 @@ ROLE_LEVELS = {
     "department_head": 70,
     "tutor": 40,
     "member": 20,
-    "ikt_rehber": 88,
+    "ikt_rehber": 95,
 }
 
 #: TƏLƏBƏ səthləri — yalnız tələbədə olmalıdır.

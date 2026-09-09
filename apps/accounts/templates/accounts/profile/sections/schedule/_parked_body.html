@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}«Yenidən yerləşdirilməli» çekmecəsi — məcburi dəyişiklik zamanı
+yerindən çıxarılmış (parklanmış) dərslər. Sahibin tələbi: «digər qrupdan
+müəllimin dərsi donsun, ya da haradasa qalsın ki onu başqa yerə dəyişmək mümkün
+olsun». Sətir SİLİNMİR: bazada qalır, cədvəldə görünmür, buradan bir kliklə
+yeni xanaya qoyulur.{% endcomment %}
+{% with sec=schedule_manage_section %}
+{% if not sec.parked %}
+  {% trans "Yenidən yerləşdiriləcək dərs yoxdur" context "accounts.schedule_manage" as parked_empty_title %}
+  {% trans "Məcburi dəyişiklik edilməyib — bütün dərslər öz yerindədir." context "accounts.schedule_manage" as parked_empty_body %}
+  {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-inbox" state_title=parked_empty_title state_body=parked_empty_body %}
+{% else %}
+<ul class="sedit-parked">
+  {% for row in sec.parked %}
+  <li class="sedit-parked__item" data-sedit-parked-item="{{ row.id }}">
+    <div class="sedit-parked__head">
+      <span class="sedit-parked__subject">{{ row.subject_code }} — {{ row.subject_name }}</span>
+      <span class="ems-badge ems-badge--warning">{% trans "Yerləşdirilməyib" context "accounts.schedule_manage" %}</span>
+    </div>
+    <p class="sedit-parked__meta">
+      {{ row.group }}{% if row.instructor %} · {{ row.instructor }}{% endif %} ·
+      {{ row.weekday_label }} {{ row.start_time }}–{{ row.end_time }}{% if row.room %} · {{ row.room }}{% endif %}
+    </p>
+    {% if row.park_reason %}<p class="sedit-parked__reason">{{ row.park_reason }}</p>{% endif %}
+    <div class="sedit-parked__actions">
+      <button type="button" class="ems-btn ems-btn--primary" data-sedit-place="{{ row.id }}">
+        <i class="fas fa-location-crosshairs" aria-hidden="true"></i>
+        {% trans "Boş yer təklif et" context "accounts.schedule_manage" %}
+      </button>
+    </div>
+    <div class="sedit-suggest sedit-parked__suggest" data-sedit-parked-suggest="{{ row.id }}" hidden>
+      <div class="sedit-suggest__list" data-sedit-suggest-list></div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}

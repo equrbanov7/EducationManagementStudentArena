@@ -67,7 +67,7 @@ Django şablon mühərrikindən keçmir).
           <button type="button" class="rimc-choice" data-rimc-open="bulk">
             <span class="rimc-choice__icon rimc-choice__icon--bulk" aria-hidden="true"><i class="fas fa-file-arrow-up"></i></span>
             <span class="rimc-choice__text">
-              <span class="rimc-choice__title">{% trans "Toplu idxal (tələbə siyahısı)" context "profile.rim" %}</span>
+              <span class="rimc-choice__title">{% trans "Toplu əlavə (tələbə siyahısı)" context "profile.rim" %}</span>
               <span class="rimc-choice__note">{% blocktrans context "profile.rim" with limit=rim_center_section.intake_max_rows %}Qəbul faylını yükləyin: əvvəlcə quru icra, sonra tətbiq. Bir faylda ən çox {{ limit }} sətir.{% endblocktrans %}</span>
             </span>
             <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
@@ -164,11 +164,13 @@ Django şablon mühərrikindən keçmir).
 
               <div class="ems-field">
                 <label class="ems-field__label" for="rimc-gender">{% trans "Cins" context "profile.rim" %}</label>
-                <select class="ems-select" id="rimc-gender" name="gender" data-rimc-field="gender">
-                  <option value="">{% trans "Təyin edilməyib" context "profile.rim" %}</option>
-                  <option value="kişi">{% trans "Kişi" context "profile.rim" %}</option>
-                  <option value="qadın">{% trans "Qadın" context "profile.rim" %}</option>
-                </select>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-gender" name="gender" data-rimc-field="gender">
+                    <option value="">{% trans "Təyin edilməyib" context "profile.rim" %}</option>
+                    <option value="kişi">{% trans "Kişi" context "profile.rim" %}</option>
+                    <option value="qadın">{% trans "Qadın" context "profile.rim" %}</option>
+                  </select>
+                </div>
               </div>
 
               <div class="ems-field">
@@ -218,30 +220,36 @@ Django şablon mühərrikindən keçmir).
                 <label class="ems-field__label" for="rimc-admission-year">
                   {% trans "Qəbul ili" context "profile.rim" %} <span class="ems-field__req" aria-hidden="true">*</span>
                 </label>
-                <select class="ems-select" id="rimc-admission-year" name="admission_year" required
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-admission-year" name="admission_year" required
                         data-rimc-field="admission_year">
-                  {% for year in rim_center_section.admission_years %}
-                    <option value="{{ year }}"{% if forloop.counter == 2 %} selected{% endif %}>{{ year }}</option>
-                  {% endfor %}
-                </select>
+                    {% for year in rim_center_section.admission_years %}
+                      <option value="{{ year }}"{% if forloop.counter == 2 %} selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
                 <p class="ems-msg ems-msg--error" data-rimc-error="admission_year" role="alert" hidden></p>
               </div>
               <div class="ems-field" data-rimc-only="student">
                 <label class="ems-field__label" for="rimc-education-form">{% trans "Təhsil forması" context "profile.rim" %}</label>
-                <select class="ems-select" id="rimc-education-form" name="education_form" data-rimc-field="education_form">
-                  {% for option in rim_center_section.education_forms %}
-                    <option value="{{ option.value }}">{{ option.label }}</option>
-                  {% endfor %}
-                </select>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-education-form" name="education_form" data-rimc-field="education_form">
+                    {% for option in rim_center_section.education_forms %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
                 <p class="ems-msg ems-msg--error" data-rimc-error="education_form" role="alert" hidden></p>
               </div>
               <div class="ems-field" data-rimc-only="student">
                 <label class="ems-field__label" for="rimc-funding">{% trans "Maliyyələşmə" context "profile.rim" %}</label>
-                <select class="ems-select" id="rimc-funding" name="funding_type" data-rimc-field="funding_type">
-                  {% for option in rim_center_section.funding_types %}
-                    <option value="{{ option.value }}"{% if option.value == 'paid' %} selected{% endif %}>{{ option.label }}</option>
-                  {% endfor %}
-                </select>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-funding" name="funding_type" data-rimc-field="funding_type">
+                    {% for option in rim_center_section.funding_types %}
+                      <option value="{{ option.value }}"{% if option.value == 'paid' %} selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
                 <p class="ems-msg ems-msg--error" data-rimc-error="funding_type" role="alert" hidden></p>
               </div>
 
@@ -355,7 +363,7 @@ Django şablon mühərrikindən keçmir).
     <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="rimc-bulk-title">
       <div class="ems-dialog__head">
         <div>
-          <h2 class="ems-dialog__title" id="rimc-bulk-title">{% trans "Toplu idxal — tələbə siyahısı" context "profile.rim" %}</h2>
+          <h2 class="ems-dialog__title" id="rimc-bulk-title">{% trans "Toplu əlavə — tələbə siyahısı" context "profile.rim" %}</h2>
           <p class="ems-dialog__sub">{% trans "Əvvəlcə QURU İCRA: heç nə yazılmır, nəyin yaranacağı sətir-sətir göstərilir." context "profile.rim" %}</p>
         </div>
         <button type="button" class="ems-dialog__x" data-ems-overlay-close

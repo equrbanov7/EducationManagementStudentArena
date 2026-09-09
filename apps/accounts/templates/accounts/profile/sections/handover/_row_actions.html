@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Sətir əməlləri: detal çekmecəsi + «yalnız bunu təhvil ver».
+Tək sətir düyməsi seçimi HƏMİN sətirlə əvəz edib təsdiq pəncərəsini açır —
+istifadəçi əvvəlcə qutuları yığmağa məcbur qalmır.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm" data-thx-detail
+        data-thx-payload="{{ row.data.payload }}">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    {% trans "Ətraflı" context "accounts.handover" %}
+</button>
+{% if row.data.can_transfer %}
+{% comment %}Payload TƏKRARLANMIR — «Təhvil ver» yalnız sətir id-sinə ehtiyac
+duyur (seçimi həmin sətirlə əvəz edir); JSON blokunu ikinci dəfə yazmaq 25
+sətirlik səhifədə boş yer tutardı.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-thx-row-transfer
+        value="{{ row.data.id }}">
+    {% trans "Təhvil ver" context "accounts.handover" %}
+</button>
+{% endif %}

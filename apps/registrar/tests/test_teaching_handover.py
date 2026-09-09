@@ -660,13 +660,19 @@ class SectionRegistryTest(HandoverBase):
 class SectionRenderTest(HandoverBase):
     """Bölmə HƏQİQƏTƏN render olunur — şablon + kontekst + AJAX fraqmenti."""
 
-    def test_full_page_section_renders_the_spa_frame(self):
+    def test_full_page_section_renders_the_table_server_side(self):
+        """2026-09-09: panel SERVER-render-dir — sətirlər cavabın İÇİNDƏDİR.
+
+        Əvvəl bura yalnız boş çərçivə gəlirdi və cədvəl ayrıca JSON sorğusu ilə
+        çəkilirdi; test də məhz `handover_offerings` URL-inin markup-da olmasını
+        yoxlayırdı. İndi müqavilə tərsinədir: fənn adı ilk cavabda görünməlidir,
+        POST marşrutu isə (mutasiya) yenə markup-dadır.
+        """
         response = self._login(self.rim).get(reverse("accounts:profile") + "?section=teaching-handover")
         self.assertEqual(response.status_code, 200)
         body = response.content.decode()
         self.assertIn("data-thx-root", body)
-        # Endpoint URL-ləri data-atributla ötürülür (CSP: inline JS yoxdur).
-        self.assertIn(reverse("accounts:handover_offerings"), body)
+        self.assertIn(self.offering_a.subject.name, body)
         self.assertIn(reverse("accounts:handover_action"), body)
         # Sidebar keçidi yalnız icazəsi olana görünür.
         self.assertIn("?section=teaching-handover", body)

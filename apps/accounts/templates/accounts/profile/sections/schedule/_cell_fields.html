@@ -1,0 +1,133 @@
+{% load i18n %}
+{% comment %}Hüceyrə dialoqunun sahələri — «xanaya klik → dərs qoy/redaktə et».
+
+Sahibin tələbi: müəllim seçilsin, fənn seçilsin, mühazirə/məşğələ seçilsin,
+üst/alt həftə seçilsin, opsional otaq seçilsin. Gün + dərs saatı da buradadır:
+sürüklə-buraxın KLAVİATURA ilə əlçatan qarşılığı məhz bu iki sahədir.
+
+⚠️ Layihə qaydası: xam `<select>` YAZILMIR — hər biri
+`bootstrap-single-select--ems` sarğısındadır; uzun siyahılarda `data-live-search`.
+Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağırılır.{% endcomment %}
+{% with sec=schedule_manage_section %}
+<input type="hidden" name="slot_id" value="" data-sedit-field="slot_id">
+<input type="hidden" name="force" value="" data-sedit-field="force">
+
+<div class="sedit-form">
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-subject">{% trans "Fənn" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-subject" name="subject_id"
+              data-sedit-field="subject_id" data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Fənn axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'accounts.schedule_manage' %}" required>
+        {% for row in sec.subjects %}
+        <option value="{{ row.id }}">{{ row.code }} — {{ row.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Siyahı qrupun tədris planı və açıq fənn açılışları ilə məhduddur." context "accounts.schedule_manage" %}</p>
+  </div>
+
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-teacher">{% trans "Müəllim" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-teacher" name="instructor_id"
+              data-sedit-field="instructor_id" data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Müəllim axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Uyğun müəllim yoxdur' context 'accounts.schedule_manage' %}">
+        <option value="">{% trans "Seçilməyib" context "accounts.schedule_manage" %}</option>
+        {% for row in sec.teachers %}
+        <option value="{{ row.id }}">{{ row.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Fənn artıq başqa müəllimə bağlıdırsa müəllim burada dəyişmir — «Fənn təhvili» bölməsindən istifadə edin." context "accounts.schedule_manage" %}</p>
+  </div>
+
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-kind">{% trans "Dərs növü" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-kind" name="slot_kind"
+              data-sedit-field="slot_kind" data-bootstrap-select>
+        {% for value, label in sec.slot_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-week-type">{% trans "Həftə" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-week-type" name="week_type"
+              data-sedit-field="week_type" data-bootstrap-select>
+        {% for value, label in sec.week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-weekday">{% trans "Gün" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-weekday" name="weekday"
+              data-sedit-field="weekday" data-bootstrap-select>
+        {% for num, label in sec.weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="ems-field">
+    <label class="ems-field__label" for="sedit-time">{% trans "Dərs saatı" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-time" name="time_slot"
+              data-sedit-field="time_slot" data-bootstrap-select>
+        {% for row in sec.lesson_periods %}
+        <option value="{{ row.key }}">{{ row.no }}. {{ row.start_text }}–{{ row.end_text }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-room">{% trans "Otaq (opsional)" context "accounts.schedule_manage" %}</label>
+    <input class="ems-input" type="text" id="sedit-room" name="room" maxlength="64" list="sedit-rooms"
+           data-sedit-field="room"
+           placeholder="{% trans 'məs. Otaq 304 · II korpus' context 'accounts.schedule_manage' %}">
+    <datalist id="sedit-rooms">
+      {% for room in sec.rooms %}<option value="{{ room }}"></option>{% endfor %}
+    </datalist>
+  </div>
+</div>
+
+{# ── Server cavabı: toqquşmalar + tövsiyələr + məcburi dəyişiklik ───────── #}
+<div class="sedit-verdict" data-sedit-verdict role="status" hidden></div>
+<ul class="sedit-conflicts" data-sedit-conflicts hidden></ul>
+
+<div class="sedit-suggest" data-sedit-suggest hidden>
+  <p class="sedit-suggest__title">{% trans "Boş xanalar (həm müəllim, həm qrup boşdur)" context "accounts.schedule_manage" %}</p>
+  <div class="sedit-suggest__list" data-sedit-suggest-list></div>
+</div>
+
+<div class="sedit-force" data-sedit-force hidden>
+  <label class="ems-field__label" for="sedit-reason">{% trans "Məcburi dəyişikliyin səbəbi" context "accounts.schedule_manage" %}</label>
+  <textarea class="ems-input sedit-force__reason" id="sedit-reason" name="reason" rows="2"
+            data-sedit-field="reason"
+            placeholder="{% trans 'Səbəb auditə yazılır (ən azı 10 simvol)' context 'accounts.schedule_manage' %}"></textarea>
+  <p class="sedit-force__note">
+    {% trans "Toqquşan dərs SİLİNMİR — «Yenidən yerləşdirilməli» siyahısına düşür və oradan başqa xanaya qoyula bilər." context "accounts.schedule_manage" %}
+  </p>
+  <button type="button" class="ems-btn ems-btn--warning" data-sedit-force-save>
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    {% trans "Yenə də yerləşdir" context "accounts.schedule_manage" %}
+  </button>
+</div>
+
+<div class="sedit-form__extra">
+  <button type="button" class="ems-btn" data-sedit-suggest-open>
+    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+    {% trans "Boş yer təklif et" context "accounts.schedule_manage" %}
+  </button>
+  <button type="button" class="ems-btn ems-btn--danger" data-sedit-delete hidden>
+    <i class="fas fa-trash-can" aria-hidden="true"></i>
+    {% trans "Dərsi cədvəldən çıxar" context "accounts.schedule_manage" %}
+  </button>
+</div>
+{% endwith %}

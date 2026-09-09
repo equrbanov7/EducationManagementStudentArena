@@ -19,11 +19,22 @@
     </div>
     {% if show_student_group_number %}
     {% comment %}İxtisasa görə süzgəc — variantlar JS-də tələbələrin `data-specialty`
-    atributundan qurulur; ixtisas məlumatı yoxdursa seçici gizli qalır.{% endcomment %}
-    <select class="form-select group-checklist__specialty js-select-specialty"
-            id="{{ container_id }}_specialty"
-            aria-label="{% trans 'filter_by_specialty' context 'profile.checkbox_select' %}"
-            data-all-label="{% trans 'all_specialties' context 'profile.checkbox_select' %}" hidden></select>
+    atributundan qurulur; ixtisas məlumatı yoxdursa seçici gizli qalır.
+
+    `hidden` SARĞIDADIR, native `<select>`-də yox: komponent qoşulanda native
+    element gizlədilir və görünən düymə (`__toggle`) sarğının içində qurulur —
+    `hidden`-i select-də saxlasaq boş düymə görünərdi. Variantlar dəyişəndən
+    sonra `checklist.js` `EMSBootstrapSelect.refresh()` çağırır.{% endcomment %}
+    <div class="bootstrap-single-select bootstrap-single-select--ems group-checklist__specialty-wrap"
+         data-specialty-wrap hidden>
+        <select class="form-select group-checklist__specialty js-select-specialty bootstrap-single-select__native"
+                id="{{ container_id }}_specialty" data-bootstrap-select
+                data-live-search="true"
+                data-live-search-placeholder="{% trans 'specialty_search_placeholder' context 'profile.checkbox_select' %}"
+                data-live-search-empty="{% trans 'specialty_search_empty' context 'profile.checkbox_select' %}"
+                aria-label="{% trans 'filter_by_specialty' context 'profile.checkbox_select' %}"
+                data-all-label="{% trans 'all_specialties' context 'profile.checkbox_select' %}"></select>
+    </div>
     {% endif %}
 
     <div class="group-checklist__list js-select-list" id="{{ container_id }}_list"

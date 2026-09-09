@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Sətir əməlləri — «Rol ver» dialoqu. Geri alma nişanın öz × düyməsindədir.
+Redaktə hüququ yoxdursa səbəb mətnlə göstərilir (yalnız rənglə deyil).{% endcomment %}
+{% if row.data.can_edit and manage_roles_section.can_grant %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+        data-roles-open="mrGrantDialog"
+        data-roles-person="{{ row.data.name }}"
+        data-roles-prefill='{"user_id": "{{ row.data.user_id }}", "role_id": "", "scope_unit": "", "reason": ""}'>
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Rol ver" context "accounts.manage_roles" %}
+</button>
+{% else %}
+<span class="rls-locked" title="{% trans 'level_limit' context 'profile.manage_roles' %}">
+    <i class="fas fa-lock" aria-hidden="true"></i>
+    {% trans "level_limit" context "profile.manage_roles" %}
+</span>
+{% endif %}

@@ -353,6 +353,32 @@
 .sgx-field select:focus,
 .sgx-field input:focus { outline: 2px solid #c4d4f0; border-color: #3b82f6; }
 
+/* Slot formundakı seçicilər `bootstrap-single-select` ilə gedir (2026-09-09):
+   native element gizlənir, görünən düymə `__toggle`-dır — ona görə ölçü/kontur
+   burada TƏKRARLANIR (`jd2.css`-dəki eyni qayda bu səhifədə yüklənmir).
+   Fokus nazik NEYTRAL konturla verilir (göy halqa yoxdur — sahib qərarı). */
+.sgx-field .bootstrap-single-select__toggle {
+    min-height: 0;
+    padding: 9px 11px;
+    border: 1px solid var(--sgx-line);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--sgx-navy);
+}
+
+.sgx-field .bootstrap-single-select__toggle:hover { border-color: #c4d4f0; }
+
+.sgx-field .bootstrap-single-select__toggle:focus,
+.sgx-field .bootstrap-single-select__toggle.show {
+    outline: none;
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
+}
+
 /* Responsiv */
 @media (max-width: 768px) {
     .sgx-topbar { flex-direction: column; align-items: flex-start; }

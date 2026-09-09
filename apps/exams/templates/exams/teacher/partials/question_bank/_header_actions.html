@@ -1,0 +1,10 @@
+{% load i18n %}
+{% comment %}Başlıq əməlləri — «Yeni bank» dialoqu (`_form_dialog.html`).
+Yaratma forması artıq siyahının üstündəki nəhəng kart deyil: əsas məzmun
+siyahıdır, yaratma isə bir düymə arxasındadır.{% endcomment %}
+{% if qbl_can_create %}
+<button type="button" class="ems-btn ems-btn--primary" data-ems-overlay-open="qbCreateDialog">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni bank" context "accounts.profile.question_bank" %}
+</button>
+{% endif %}

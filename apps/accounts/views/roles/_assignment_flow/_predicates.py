@@ -5,7 +5,7 @@ from uuid import UUID
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.db.models import Q
 
-from ....models import ProfileRole
+from ....services.role_catalog import is_admin_role, is_owner_role
 from ..._helpers import ROLE_ASSIGNMENT_OPERATION_TOKEN_MAX_AGE_SECONDS, ROLE_ASSIGNMENT_OPERATION_TOKEN_SALT
 
 
@@ -19,20 +19,12 @@ class _PredicatesMixin:
             return None
 
     def _is_owner_role(self, role):
-        if role is None:
-            return False
-        role_name = (role.name or "").strip().lower()
-        return role.level >= 100 or "owner" in role_name or role_name in {"rector", "director", "manager"}
+        # Tərif ORTAQ kataloqdadır (`services/role_catalog.py`) — çoxlu-rol
+        # axını («Rolları idarə et») eyni qapıdan keçsin deyə.
+        return is_owner_role(role)
 
     def _is_admin_role(self, role):
-        if role is None:
-            return False
-        role_name = (role.name or "").strip().lower()
-        return (
-            self._is_owner_role(role)
-            or role.level >= ProfileRole.LEVELS.get(ProfileRole.ORG_ADMIN, 80)
-            or "admin" in role_name
-        )
+        return is_admin_role(role)
 
     def _owner_membership_queryset(self):
         return self.Membership.objects.filter(organization=self.org, is_active=True, role__is_active=True).filter(

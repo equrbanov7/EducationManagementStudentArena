@@ -155,12 +155,14 @@
     resize: vertical;
 }
 
+/* 2026-09-09 (sahib): fokusda qalın göy halqa yoxdur — nazik neytral kontur.
+   Əlçatanlıq qorunur: sərhəd rəngi kontrastlı tona keçir. */
 .ems-input:focus,
 .ems-select:focus,
 .ems-textarea:focus {
     outline: none;
     border-color: var(--ems-primary-500);
-    box-shadow: var(--ems-sh-focus);
+    box-shadow: none;
 }
 
 .ems-input[readonly],

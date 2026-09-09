@@ -17,19 +17,26 @@ sətrindədir, çünki kredit ixtisasa görə dəyişir (Mərhələ 2).{% endcom
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-sb-kind">{% trans "Fənn növü" context "accounts.catalog" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-sb-kind" name="kind" required>
-            {% for option in subject_catalog_section.kind_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-sb-kind" name="kind" required data-bootstrap-select>
+                {% for option in subject_catalog_section.kind_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-sb-chair">{% trans "Sahibi kafedra" context "accounts.catalog" %}</label>
-        <select class="ems-select" id="tof-sb-chair" name="chair_unit">
-            <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
-            {% for option in subject_catalog_section.chair_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-sb-chair" name="chair_unit"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.catalog' %}"
+                    data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.catalog' %}">
+                <option value="">{% trans "Təyin edilməyib" context "accounts.catalog" %}</option>
+                {% for option in subject_catalog_section.chair_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 </div>

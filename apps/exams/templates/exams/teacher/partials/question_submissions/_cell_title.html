@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Cədvəlin birinci sütunu — göndərişin adı, fənn/qrup və qəbul
+olunubsa hansı banka yazıldığı.  Kontekst: `row.data`
+(bax `accounts/views/profile/_sections/question_submissions.py`).{% endcomment %}
+<div class="qsub-title">
+    <a class="qsub-title__link" href="{{ row.data.open_url }}">{{ row.data.title }}</a>
+    <span class="qsub-title__meta">{{ row.data.subject }} · {{ row.data.group }}</span>
+    {% if row.data.bank_note %}
+    <span class="qsub-title__bank">
+        <i class="fas fa-layer-group" aria-hidden="true"></i>
+        {% if row.data.bank_note.url %}
+            <a href="{{ row.data.bank_note.url }}">{{ row.data.bank_note.text }}</a>
+        {% else %}
+            {{ row.data.bank_note.text }}
+        {% endif %}
+    </span>
+    {% endif %}
+</div>

@@ -1,22 +1,99 @@
-/* Source: exams/teacher/partials/_question_bank_list_body.html
-   Extracted from an inline <style> for CSP (no unsafe-inline). */
-.question-bank-list-body-1 { color:var(--danger,#e74c3c); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Sual Bankı» kabinet bölməsi — YALNIZ düzüm.
 
-/* ── İmtahan növü filtr pilləri ── */
-.qb-kind-pills { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 4px; }
-.qb-kind-pill { display:inline-flex; align-items:center; padding:.35rem .9rem; border-radius:999px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-neutral-700); font-size:.85rem; font-weight:600; text-decoration:none; transition:all .15s ease; }
-.qb-kind-pill:hover { border-color:var(--ems-primary-400); color:var(--ems-primary-700); background:var(--ems-primary-50); }
-.qb-kind-pill.is-active { background:var(--ems-primary-600); border-color:var(--ems-primary-600); color:#fff; }
+   Komponent qatı (`ems_ui/*.css`: düymə, sahə, KPI, filtr, cədvəl, dialoq)
+   kabinet qabığından gəlir; bu fayl həmin komponentləri bir-birinə bağlayan
+   bölmə-xüsusi boşluq/sıra qaydalarıdır.  Rəng YALNIZ `--ems-*` tokenlərindən
+   (bax `static/css/design-tokens.css`) — xam hex yoxdur.
 
-/* ── Kart: imtahan növü çipi + mənbə müəllim sətri ── */
-.qb-chip--kind { background:var(--ems-primary-50); color:var(--ems-primary-700); border:1px solid var(--ems-primary-200); }
-.qb-chip--kind-final { background:#eef2ff; color:#4338ca; border-color:#c7d2fe; }
-.qb-chip--kind-midterm { background:#ecfeff; color:#0e7490; border-color:#a5f3fc; }
-.qb-chip--kind-quiz { background:#fefce8; color:#a16207; border-color:#fde68a; }
-.qb-card__teacher { display:flex; align-items:center; gap:.45rem; margin-top:6px; color:var(--ems-neutral-600); font-size:.84rem; }
-.qb-card__teacher i { color: var(--ems-neutral-500); font-size:.8rem; }
+   2026-09-09: köhnə `.qb-*` yaratma kartı / kart şəbəkəsi / pill üslubları
+   silindi — ekran `ems_ui` cədvəli + dialoqu üzərində qurulur.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Yaratma kartı: alt qeyd (paylaşım gizlədilib) ── */
-.qb-form__footer-note { display:inline-flex; align-items:center; gap:.5rem; color:var(--ems-neutral-500); font-size:.84rem; }
-.qb-form__footer-note i { color: var(--ems-neutral-500); }
+.qbank {
+    display: block;
+}
 
+.qbank__body {
+    margin-top: var(--ems-sp-5);
+}
+
+/* ── Cədvəl: birinci sütun (bank adı + fənn) ────────────────────────────── */
+.qbank-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.qbank-name__link {
+    color: var(--ems-text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.qbank-name__link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.qbank-name__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 400;
+}
+
+.qbank-name__muted {
+    color: var(--ems-neutral-500);
+    font-style: italic;
+}
+
+/* Sətir əməlləri eyni hündürlükdə olsun: cədvəl içi kontrol = 30px.
+   (Sahib şikayəti: «bəzi düymələr həddindən böyükdür».) */
+.qbank .ems-rowactions .ems-iconbtn {
+    width: var(--ems-h-cell);
+    height: var(--ems-h-cell);
+}
+
+.qbank-delete {
+    display: inline-flex;
+    margin: 0;
+}
+
+/* ── Dialoq forması ─────────────────────────────────────────────────────── */
+.qbank-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.qbank-form__full {
+    grid-column: 1 / -1;
+}
+
+.qbank-form__note {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.qbank-form__note i {
+    color: var(--ems-neutral-500);
+}
+
+@media (max-width: 640px) {
+    .qbank-form {
+        grid-template-columns: 1fr;
+    }
+}

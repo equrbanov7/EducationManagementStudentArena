@@ -1,0 +1,18 @@
+{% comment %}«Üzv kartı» çekmecəsinin gövdəsi. Məzmun `staff_management.js`
+tərəfindən SƏTRİN data-atributundakı JSON-dan DOM ilə qurulur (innerHTML-ə
+istifadəçi mətni yazılmır, əlavə sorğu yoxdur). Etiketlər data-atributla
+ötürülür — xarici JS Django şablonundan keçmir.{% endcomment %}
+{% load i18n %}
+<div class="hm-detail"
+     data-hm-detail
+     data-t-username="{% trans 'İstifadəçi adı' context 'accounts.staff_management' %}"
+     data-t-email="{% trans 'E-poçt' context 'accounts.staff_management' %}"
+     data-t-joined="{% trans 'Qoşulma' context 'accounts.staff_management' %}"
+     data-t-position="{% trans 'Vəzifə' context 'accounts.staff_management' %}"
+     data-t-unit="{% trans 'Bölmə' context 'accounts.staff_management' %}"
+     data-t-roles="{% trans 'Rollar' context 'accounts.staff_management' %}"
+     data-t-roles-empty="{% trans 'Aktiv rol yoxdur' context 'accounts.staff_management' %}"
+     data-t-primary="{% trans 'Əsas' context 'accounts.staff_management' %}"
+     data-t-leader="{% trans 'Rəhbər' context 'accounts.staff_management' %}">
+    <div class="hm-detail__body" data-hm-detail-body></div>
+</div>
