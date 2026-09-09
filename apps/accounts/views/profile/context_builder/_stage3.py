@@ -156,27 +156,9 @@ class _Stage3Mixin:
                 or self.capabilities["is_org_admin"]
                 or self.management_user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
                 or self.capabilities.get("teacher_can_manage_students", False),
-                can_invite_members=self.capabilities["is_superadmin"]
-                or self.capabilities["is_org_admin"]
-                or self.management_user_level >= STUDENT_ORG_MANAGEMENT_MIN_LEVEL
-                or self.capabilities.get("teacher_can_invite_members", False),
             )
-            self.student_org_management_section["post_next_url"] = _append_query_params(
-                reverse("accounts:profile"),
-                section="student-organization-management",
-                management_view=self.student_org_management_section["active_management_view"],
-                student_tab=self.student_org_management_section["active_student_tab"],
-                teacher_tab=self.student_org_management_section["active_teacher_tab"],
-                staff_tab=self.student_org_management_section["active_staff_tab"],
-                student_org_search=self.student_org_management_section["student_search_query"],
-                student_org_pending_search=self.student_org_management_section["pending_search_query"],
-                student_org_unassigned_search=self.student_org_management_section["unassigned_search_query"],
-                student_org_sent_invite_search=self.student_org_management_section["sent_invite_search_query"],
-                student_org_ts_search=self.student_org_management_section["teacher_staff_search_query"],
-                organization_search=self.student_org_management_section["organization_search_query"],
-                organization_status=self.student_org_management_section["organization_status_filter"],
-                organization_type=self.student_org_management_section["organization_type_filter"],
-            )
+            # `post_next_url` bölmə qurucusunun ÖZÜNDƏ hesablanır (filtr
+            # parametrləri orada tanınır) — burada təkrarlanmır.
         if "student-organization-request" in self.allowed_sections and self.active_section in {
             "student-organization-request",
             "profile-info",

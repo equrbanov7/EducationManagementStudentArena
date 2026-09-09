@@ -298,6 +298,19 @@
 .group-checklist__specialty { margin: 8px 0 0; font-size: 13px; }
 .group-checklist__badge--specialty { background: #eef2ff; color: #3730a3; }
 
+/* Süzgəc `bootstrap-single-select`-dir (2026-09-09): boşluğu artıq SARĞI verir,
+   çünki native element qoşulandan sonra gizlənir. Düymə axtarış sahəsi ilə eyni
+   ölçüdə qalsın deyə `--ems` variantı bir az da yığcamlaşdırılır. */
+.group-checklist__specialty-wrap { margin: 8px 0 0; }
+
+.group-checklist__specialty-wrap .bootstrap-single-select__toggle {
+    min-height: 34px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
 .group-confirm__facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font-size: 14px; }
 .group-confirm__facts dt { color: #64748b; font-weight: 500; }
 .group-confirm__facts dd { margin: 0; font-weight: 600; }

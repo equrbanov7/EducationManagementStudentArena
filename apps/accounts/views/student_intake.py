@@ -41,7 +41,7 @@ def _denied():
         {
             "ok": False,
             "error": "permission_denied",
-            "message": pgettext(_CTX, "Tələbə idxalı üçün icazəniz yoxdur."),
+            "message": pgettext(_CTX, "Toplu tələbə əlavəsi üçün icazəniz yoxdur."),
         },
         status=403,
     )

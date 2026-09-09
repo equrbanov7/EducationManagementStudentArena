@@ -72,6 +72,10 @@ def scoped_student_records(actor, *, request=None, filters=None):
             records = records.filter(group_id=filters.group)
         if filters.program:
             records = records.filter(program_id=filters.program)
+        if filters.funding:
+            records = records.filter(funding_type=filters.funding)
+        if filters.education_form:
+            records = records.filter(education_form=filters.education_form)
     return records
 
 

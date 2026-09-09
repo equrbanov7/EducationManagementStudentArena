@@ -1,7 +1,196 @@
+{% load i18n static permission_extras %}
+{% comment %}«İcazələr» — rol × icazə redaktoru (2026-09-09 yenidən qurulub).
+
+Kontekst: `apps/accounts/views/profile/_sections/permission_editor.py`.
+Yeni qabıq `ems_ui`-dəndir (başlıq, KPI, axtarışlı rol seçicisi olan filtr
+paneli); icazə siyahısının markup-ı və `data-permission-*` çəngəlləri QƏSDƏN
+saxlanılıb — `accounts/js/permission_editor/*` modulları (AZ/EN/RU/TR etiket və
+izahlar, toplu seçim, sətir vəziyyəti) onların üzərində işləyir.
+
+Yazma axını dəyişməyib: `add` / `remove` / `bulk_add` / `bulk_remove` /
+`grant_delegation` / `revoke_delegation` → `accounts:permission_editor`.
+⚠️ `<h1>` YAZILMIR — qabıq verir. Inline CSS/JS yoxdur (CSP).
+{% endcomment %}
 {% if 'permission-editor' in allowed_sections %}
+{% with sec=permission_editor_section %}
 <section class="profile-section-panel profile-section--permission-editor {% if active_section == 'permission-editor' %}is-active{% endif %}"
          data-profile-section-panel="permission-editor"
          data-source-url="{% url 'accounts:permission_editor' %}">
-    {% include "accounts/partials/_permission_editor_content.html" with organization=permission_editor_section.organization roles=permission_editor_section.roles selected_role=permission_editor_section.selected_role permission_categories=permission_editor_section.permission_categories actor_permissions=permission_editor_section.actor_permissions grantable_permissions=permission_editor_section.grantable_permissions can_manage_permissions=permission_editor_section.can_manage_permissions access_denied_message=permission_editor_section.access_denied_message embedded_in_profile=True profile_base_url=profile_base_url %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/permission_editor_ui.css' %}?v=20260909-2">
+
+    {% if sec.access_denied_message %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}
+    {% elif sec.selected_role %}
+    <div class="rls rls--perm" data-roles-root data-roles-section="permission-editor">
+
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.subtitle %}
+
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="5" %}
+
+        {% include "partials/ems_ui/_filter_bar.html" with filter_section="permission-editor" filter_prefix="pe_" filter_fields=sec.filter_fields filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+        <div class="rls-body" data-ems-filter-target>
+        <div class="perm js-permission-editor" data-permission-editor>
+
+            <div class="perm-toolbar">
+                <div class="perm-search">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <label class="ems-visually-hidden" for="permission-search">{% trans "İcazə axtar" context "accounts.permission_editor" %}</label>
+                    <input type="search" id="permission-search" class="ems-input"
+                           placeholder="{% trans 'Açar, ad və ya izah üzrə axtar (məs: view, üzv)' context 'accounts.permission_editor' %}"
+                           autocomplete="off" data-permission-search>
+                    <button type="button" class="perm-search__x" data-permission-search-clear
+                            aria-label="{% trans 'Axtarışı təmizlə' context 'accounts.permission_editor' %}" hidden>
+                        <i class="fas fa-times" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <button type="button" class="ems-btn ems-btn--sm" data-permission-search-submit>
+                    <i class="fas fa-search" aria-hidden="true"></i> {% trans "Axtar" context "accounts.permission_editor" %}
+                </button>
+                <span class="perm-count" data-permission-active-count data-count="{{ sec.active_count }}">
+                    {% blocktrans context "accounts.permission_editor" with count=sec.active_count total=sec.total_keys %}Aktiv: {{ count }} / {{ total }}{% endblocktrans %}
+                </span>
+            </div>
+
+            <div class="perm-legend" role="note" aria-label="{% trans 'Qısa izah' context 'accounts.permission_editor' %}">
+                <span class="perm-legend__title" data-permission-guide-title>{% trans "Bu bölmə nə üçündür?" context "accounts.permission_editor" %}</span>
+                <span class="perm-legend__text" data-permission-guide-text>{% trans "Seçilmiş rola hansı funksiyaların açıq olacağını buradan idarə edirsiniz." context "accounts.permission_editor" %}</span>
+                <span class="perm-legend__item perm-legend__item--on">
+                    <i class="fas fa-check-circle" aria-hidden="true"></i>
+                    <span data-permission-legend="active">{% trans "Aktiv: icazə açıqdır." context "accounts.permission_editor" %}</span>
+                </span>
+                <span class="perm-legend__item perm-legend__item--off">
+                    <i class="fas fa-minus-circle" aria-hidden="true"></i>
+                    <span data-permission-legend="inactive">{% trans "Deaktiv: icazə bağlıdır." context "accounts.permission_editor" %}</span>
+                </span>
+                <span class="perm-legend__item perm-legend__item--bulk">
+                    <i class="fas fa-layer-group" aria-hidden="true"></i>
+                    <span data-permission-legend="bulk">{% trans "Toplu: seçilənləri bir anda dəyişir." context "accounts.permission_editor" %}</span>
+                </span>
+            </div>
+
+            <p class="perm-empty" data-permission-empty hidden>{% trans "Nəticə tapılmadı." context "accounts.permission_editor" %}</p>
+
+            <div class="perm-modules" data-permission-modules>
+                {% for module in sec.modules %}
+                <details class="permission-module perm-module" data-permission-module data-permission-category="{{ module.key|lower }}">
+                    <summary class="permission-module-summary perm-module__summary">
+                        <span class="perm-module__main">
+                            <i class="fas fa-folder" aria-hidden="true"></i>
+                            <span class="perm-module__text">
+                                <span class="permission-module-title" data-permission-module-title>{{ module.title }}</span>
+                                <span class="permission-module-subtitle" data-permission-module-subtitle>{{ module.subtitle }}</span>
+                            </span>
+                        </span>
+                        <span class="perm-module__meta">
+                            <span class="perm-module__count">{{ module.active_count }} / {{ module.total }}</span>
+                            <i class="fas fa-chevron-down permission-module-caret" aria-hidden="true"></i>
+                        </span>
+                    </summary>
+
+                    <div class="permission-module-body perm-module__body">
+                        <div class="perm-module__bulk">
+                            <button type="button" class="ems-btn ems-btn--sm" data-module-select-all>{% trans "Hamısını seç" context "accounts.permission_editor" %}</button>
+                            <button type="button" class="ems-btn ems-btn--sm" data-module-deselect-all>{% trans "Seçimi sıfırla" context "accounts.permission_editor" %}</button>
+                            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-module-bulk-add disabled>{% trans "Seçilənləri əlavə et" context "accounts.permission_editor" %}</button>
+                            <button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-module-bulk-remove disabled>{% trans "Seçilənləri sil" context "accounts.permission_editor" %}</button>
+                        </div>
+
+                        <form method="post" action="{% url 'accounts:permission_editor' %}" class="permission-bulk-form" data-permission-bulk-form>
+                            {% csrf_token %}
+                            <input type="hidden" name="role_id" value="{{ sec.selected_role.id }}">
+                            <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ sec.selected_role.id }}">
+                            <input type="hidden" name="action" value="" data-permission-bulk-action>
+                            <div data-permission-bulk-values></div>
+                        </form>
+
+                        <div class="perm-list">
+                            {% for perm in module.rows %}
+                            <div class="permission-row perm-row {% if perm.is_active %}is-active{% else %}is-inactive{% endif %}"
+                                 data-permission-row
+                                 data-permission-active="{% if perm.is_active %}1{% else %}0{% endif %}"
+                                 data-permission-key="{{ perm.key|lower }}">
+                                <div class="perm-row__main">
+                                    <label class="perm-row__select">
+                                        <input type="checkbox" value="{{ perm.key }}" data-permission-select
+                                               aria-label="{% blocktrans context 'accounts.permission_editor' with key=perm.key %}{{ key }} seç{% endblocktrans %}">
+                                    </label>
+                                    <div class="perm-row__text">
+                                        {% with perm_az_label=perm.key|permission_label %}
+                                        {% if perm_az_label %}
+                                        <div class="permission-label perm-row__label" data-permission-label data-permission-label-explicit="1">{{ perm_az_label }}</div>
+                                        {% else %}
+                                        <div class="permission-label perm-row__label" data-permission-label>{{ perm.key }}</div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        <div class="permission-key perm-row__key ems-mono">{{ perm.key }}</div>
+                                        <div class="permission-description perm-row__desc" data-permission-description></div>
+                                        {% if perm.holders %}
+                                        <div class="perm-row__holders">
+                                            <span class="perm-row__holders-label">{% trans "Digər rollarda:" context "accounts.permission_editor" %}</span>
+                                            {% for holder in perm.holders|slice:":4" %}<span class="rls-chip rls-chip--soft">{{ holder }}</span>{% endfor %}
+                                            {% if perm.holders|length > 4 %}<span class="rls-chip rls-chip--more">+{{ perm.holders|length|add:"-4" }}</span>{% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="perm-row__actions">
+                                    <span class="permission-status-badge perm-row__status {% if perm.is_active %}is-active{% else %}is-inactive{% endif %}" data-permission-status>
+                                        {% if perm.is_active %}{% trans "Aktiv" context "accounts.permission_editor" %}{% else %}{% trans "Deaktiv" context "accounts.permission_editor" %}{% endif %}
+                                    </span>
+
+                                    <form method="post" action="{% url 'accounts:permission_editor' %}" class="permission-toggle-form" data-permission-toggle-form>
+                                        {% csrf_token %}
+                                        <input type="hidden" name="role_id" value="{{ sec.selected_role.id }}">
+                                        <input type="hidden" name="permission" value="{{ perm.key }}">
+                                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ sec.selected_role.id }}">
+                                        <input type="hidden" name="action" value="{% if perm.is_active %}remove{% else %}add{% endif %}" data-permission-action>
+                                        <button type="button" class="ems-btn ems-btn--sm {% if perm.is_active %}ems-btn--danger{% else %}ems-btn--primary{% endif %} permission-action-btn" data-permission-action-btn>
+                                            {% if perm.is_active %}
+                                            <i class="fas fa-minus-circle" aria-hidden="true"></i> {% trans "Sil" context "accounts.permission_editor" %}
+                                            {% else %}
+                                            <i class="fas fa-plus-circle" aria-hidden="true"></i> {% trans "Əlavə et" context "accounts.permission_editor" %}
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+                                    {% if perm.is_active %}
+                                    <form method="post" action="{% url 'accounts:permission_editor' %}" class="permission-delegation-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="role_id" value="{{ sec.selected_role.id }}">
+                                        <input type="hidden" name="permission" value="{{ perm.key }}">
+                                        <input type="hidden" name="next" value="{{ profile_base_url }}?section=permission-editor&role={{ sec.selected_role.id }}">
+                                        {% if perm.is_delegated %}
+                                        <input type="hidden" name="action" value="revoke_delegation">
+                                        <button type="submit" class="ems-btn ems-btn--sm ems-btn--warning"
+                                                title="{% trans 'Bu rol hazırda icazəni başqalarına paylaya bilir. Delegasiyanı geri al.' context 'accounts.permission_editor' %}">
+                                            <i class="fas fa-share-alt" aria-hidden="true"></i> {% trans "Delegasiyanı al" context "accounts.permission_editor" %}
+                                        </button>
+                                        {% else %}
+                                        <input type="hidden" name="action" value="grant_delegation">
+                                        <button type="submit" class="ems-btn ems-btn--sm"
+                                                title="{% trans 'Bu rola icazəni daha aşağı rollara paylamaq hüququ ver.' context 'accounts.permission_editor' %}">
+                                            <i class="fas fa-share-alt" aria-hidden="true"></i> {% trans "Delegasiya et" context "accounts.permission_editor" %}
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </div>
+        </div>
+    </div>
+    {% else %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-shield-halved" state_title=sec.access_denied_message %}
+    {% endif %}
 </section>
+{% endwith %}
 {% endif %}

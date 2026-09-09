@@ -190,5 +190,42 @@ class CatalogCreateButtonsTest(_IntakeBase):
         response = self._fragment("teaching_office_head", "teacher-intake")
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["teacher_intake_section"]["has_access"])
-        self.assertIn("Müəllim idxalı", response.json()["html"])
+        html = response.json()["html"]
+        # Başlıq QABIQDAN gəlir (panel `<h1>/<h2>` yazmır) — panel öz
+        # çəngəlləri və 3 addımlı lenti ilə tanınır.
+        self.assertIn("data-six-root", html)
+        self.assertIn("Toplu əlavənin mərhələləri", html)
         self.assertNotIn("teacher-intake", self._sections("teacher"))
+
+    def test_bulk_sections_never_say_idxal(self):
+        """Sahib qərarı (2026-09): «idxal» səhv anlayışdır — «əlavə» işlədilir.
+
+        Yalnız GÖRÜNƏN mətnə baxılır; daxili adlar (`student-intake`,
+        `data-six-*`, `user.import`) qəsdən olduğu kimi qalır.
+        """
+        for section in ("teacher-intake", "student-intake"):
+            with self.subTest(section=section):
+                html = self._fragment("teaching_office_head", section).json()["html"]
+                # Panel həqiqətən açılıb (icazə rəddi səhifəsi deyil).
+                self.assertIn("data-six-root", html)
+                self.assertNotIn("idxal", html.lower())
+                self.assertIn("əlavə", html.lower())
+
+    def test_bulk_section_renders_the_three_step_ems_ui_surface(self):
+        """Redizayn müqaviləsi: qabıq başlığı + lent + dropzone + KPI yuvası."""
+        html = self._fragment("teaching_office_head", "student-intake").json()["html"]
+        self.assertNotIn("<h2", html)  # başlıq YALNIZ qabıqdan
+        self.assertIn('class="ems-header__subtitle"', html)
+        self.assertIn("six-scope__text", html)  # əhatə nişanı (başlıq əməli)
+        self.assertEqual(html.count('class="ems-step ems-step--'), 3)
+        self.assertIn("data-six-drop", html)
+        self.assertIn('data-six-counts="kpi"', html)
+        self.assertIn("ems-table--zebra", html)
+        # CSP: inline üslub/skript yoxdur.
+        self.assertNotIn("<style", html)
+        self.assertNotIn('style="', html)
+
+    def test_sidebar_and_catalog_use_the_new_wording(self):
+        html = self._fragment("teaching_office_head", "people-teachers").json()["html"]
+        self.assertIn("Toplu əlavə (Excel)", html)
+        self.assertNotIn("Toplu idxal", html)

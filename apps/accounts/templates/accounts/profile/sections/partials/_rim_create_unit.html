@@ -65,12 +65,14 @@ tərcümə; RİM-ə xas mətnlər isə `profile.rim` kontekstindədir.
             <label class="ems-field__label" for="rimu-type">
               {% trans "Bölmə tipi" context "accounts.structure_tree" %} <span class="ems-field__req" aria-hidden="true">*</span>
             </label>
-            <select class="ems-select" id="rimu-type" name="unit_type" required data-rimu-field="unit_type">
-              <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
-              {% for option in rim_center_section.unit_type_choices %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-              {% endfor %}
-            </select>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+              <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimu-type" name="unit_type" required data-rimu-field="unit_type">
+                <option value="">{% trans "Seçin…" context "accounts.structure_tree" %}</option>
+                {% for option in rim_center_section.unit_type_choices %}
+                  <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
             <p class="ems-field__hint">{% trans "Fakültə, kafedra və ixtisas akademik ağacdadır — «Universitet strukturu» ekranından qurulur." context "profile.rim" %}</p>
             <p class="ems-msg ems-msg--error" data-rimu-error="unit_type" role="alert" hidden></p>
           </div>

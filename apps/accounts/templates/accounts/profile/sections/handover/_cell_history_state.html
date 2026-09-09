@@ -1,0 +1,6 @@
+{% load i18n %}
+{% include "partials/ems_ui/_status_badge.html" with status=row.data.status wrap=True %}
+{% if row.data.blocker_text %}<span class="thx-why">{{ row.data.blocker_text }}</span>{% endif %}
+{% if row.data.is_reverted and row.data.revert_reason %}
+    <span class="thx-why">{% trans "Səbəb" context "accounts.handover" %}: {{ row.data.revert_reason }}</span>
+{% endif %}

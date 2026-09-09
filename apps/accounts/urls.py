@@ -246,6 +246,10 @@ urlpatterns = [
     path("applications/assignees/", views.applications_assignees, name="applications_assignees"),
     path("schedule-manage/check/", views.schedule_manage_check, name="schedule_manage_check"),
     path("schedule-manage/action/", views.schedule_manage_action, name="schedule_manage_action"),
+    # Cədvəl REDAKTORU (matris + hüceyrə dialoqu + drag&drop + park + tövsiyə).
+    # Köhnə iki marşrut toxunulmur (registrar səthi hələ onları işlədir);
+    # redaktorun bütün əməlləri allow-list ilə TƏK giriş nöqtəsindədir.
+    path("schedule-manage/editor/", views.schedule_editor_action, name="schedule_editor_action"),
     # «Tələbə idxalı» (`user.import`) — şablon + quru icra + tətbiq. Panel
     # server-render-lidir; bu üç marşrut yalnız fayl/JSON səthidir.
     path("student-intake/template/", views.student_intake_template, name="student_intake_template"),

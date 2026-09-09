@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}«Göndərişin yolu» çekmecəsinin gövdəsi.
+
+Məzmun BOŞDUR: sətir düyməsinə klik edəndə `question_submission_section.js`
+onu bölmənin JSON yükündən (`#qsubDrawerData`) qurur — hər sətir üçün ayrıca
+çekmecə render etmək əvəzinə tək çekmecə yenidən doldurulur.
+
+Tərcümə olunan mətnlər xarici JS-ə `data-*` atributları ilə ötürülür (xarici
+fayl Django şablon mühərrikindən keçmir — bax CLAUDE.md).{% endcomment %}
+<div class="qsub-drawer" data-qsub-drawer-body
+     data-empty-text="{% trans 'Bu göndəriş üçün hələ hadisə yazılmayıb.' context 'accounts.profile.question_submissions' %}"
+     data-open-text="{% trans 'Göndərişi aç' context 'accounts.profile.question_submissions' %}">
+    <p class="qsub-drawer__placeholder">{% trans "Sətri seçin." context "accounts.profile.question_submissions" %}</p>
+</div>

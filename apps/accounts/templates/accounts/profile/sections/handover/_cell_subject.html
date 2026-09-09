@@ -1,0 +1,25 @@
+{% load i18n %}
+{% comment %}Birinci sütun (th scope="row") — seçim qutusu + fənnin adı/kodu.
+
+Seçim qutusu məhz BURADADIR (ayrıca sütunda deyil): sətrin başlığı ilə eyni
+xanada olanda «nəyi seçirəm» sualı tək baxışla cavablanır və ekran daralanda
+qutu ilə ad ayrılmır. Bloklanmış sətrin qutusu `disabled`-dır — seçilib sonra
+serverdən 409 almaq ən pis təcrübədir (səbəb onsuz da yanındaca yazılıb).
+
+Bütün sətir datası `data-thx-payload` JSON-undadır — çekmecə və təsdiq xülasəsi
+onu oxuyur (xarici JS Django şablonundan keçmir, CLAUDE.md).{% endcomment %}
+<label class="thx-pick{% if not row.data.can_transfer %} is-blocked{% endif %}">
+    <input type="checkbox" class="thx-pick__box" data-thx-select
+           value="{{ row.data.id }}"
+           data-thx-students="{{ row.data.students }}"
+           data-thx-lessons="{{ row.data.lessons }}"
+           data-thx-marks="{{ row.data.marks }}"
+           data-thx-name="{{ row.data.subject_name }}"
+           data-thx-group="{{ row.data.group }}"
+           {% if not row.data.can_transfer %}disabled aria-describedby="thx-b-{{ row.data.id }}"{% endif %}
+           aria-label="{% blocktrans context 'accounts.handover' with name=row.data.subject_name %}{{ name }} — seç{% endblocktrans %}">
+    <span class="thx-subject">
+        <span class="thx-subject__name">{{ row.data.subject_name }}</span>
+        {% if row.data.subject_code %}<span class="thx-subject__code ems-mono">{{ row.data.subject_code }}</span>{% endif %}
+    </span>
+</label>

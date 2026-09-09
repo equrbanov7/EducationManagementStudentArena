@@ -19,6 +19,38 @@ from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_studen
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 from .default_roles_vice_dean import VICE_DEAN_ROLES
 
+#: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
+#:
+#: SAHİBİN QƏRARI (2026-09-09): «Cədvəl idarəetməsi hissəsi proqram
+#: koordinatoru və tyutorda olacaq — onlar 2-si eyni rol özəlliklərinə malik
+#: olmalıdır». Əvvəl tyutorda yalnız 5 baxış açarı vardı və `schedule.manage`
+#: yox idi, ona görə bölmə ona açılmırdı. FƏRQ indi yalnız `level` (40 / 45) və
+#: göstərilən addır; əhatə hər ikisində UNIT (`Membership.scope_unit` alt-ağacı).
+#: Bir yerdə saxlanılır ki, dəyişiklik bir blokda edilib digərində unudulmasın
+#: (parity testi: `test_unit_scoping.py`). MÖVCUD tenantlar üçün eyni dəsti
+#: `0050_tutor_coordinator_parity` migrasiyası əkir.
+_COORDINATOR_PERMISSIONS = (
+    "member.view",
+    "course.view",
+    "exam.view",
+    # Kataloq: öz alt-ağacındakı TƏLƏBƏLƏRİ görür (müəllimləri yox).
+    "people.view_students",
+    # Öz ixtisasının qrupları arasında tələbə köçürür, akademik statusu qeyd edir.
+    "people.manage_academic",
+    # SAHİBİN QƏRARI (2026-09-07): YENİ QRUP yaradır və ona tələbə əlavə edir —
+    # imtahan kohortu (`group.manage`) + akademik qrup reyestri (`unit.view` +
+    # Mərhələ 2 `unit.group_manage`, `student.assign_group`).
+    "group.manage",
+    "unit.view",
+    # Öz ixtisasının jurnallarına alt qrupdan tələbə əlavə/geri (audited, scope-lu).
+    "journal.roster",
+    # Dərs cədvəlinin ƏSAS sahibi (sahibin qərarı, 2026-09) — slot yazır/silir.
+    # Adi MÜƏLLİMDƏ bu açar QƏSDƏN YOXDUR: müəllim öz cədvəlini yalnız GÖRÜR.
+    "schedule.view",
+    "schedule.manage",
+    "analytics.view_unit",
+)
+
 UNIVERSITY_ROLES = [
     {
         "name": "rector",
@@ -109,7 +141,11 @@ UNIVERSITY_ROLES = [
         # Slug QƏSDƏN `ikt_rehber` qalır (kodda 20+ hardcoded istinad var);
         # yalnız görünən ad RİM-ə dəyişib.
         "display_name": "Rəqəmsal İnkişaf Mərkəzi (RİM) rəhbəri",
-        "level": 88,
+        # SAHİBİN QƏRARI (2026-09-09): səviyyə 88 → 95 — superadmindən (100) bir
+        # pillə aşağı, prorektordan (90) yuxarı. Praktik nəticə: `ORG_WIDE_MIN_LEVEL`
+        # (90) keçildiyi üçün RİM ümumi scope resolverindən də ORG-WIDE əhatə alır
+        # (əvvəl yalnız `unit.view` açarına görə həll olunurdu).
+        "level": 95,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": [
             "org.view",
@@ -119,7 +155,7 @@ UNIVERSITY_ROLES = [
             "course.*",
             "exam.*",
             "grade.*",
-            # org_admin-alias davranış qorunması (level 88 >= 80).
+            # org_admin-alias davranış qorunması (level 95 >= 80).
             "group.view",
             "group.manage",
             "journal.correct",
@@ -394,21 +430,14 @@ UNIVERSITY_ROLES = [
     },
     {
         # Tyutor — tələbə qruplarına akademik dəstək/kurasiya rolu.
-        # Öz scope_unit alt-ağacındakı tələbələri, kursları, imtahan
-        # cədvəlini və qrup statistikasını görür; imtahan yaratmır,
-        # qiymət vermir, üzv idarə etmir.
+        #
+        # 2026-09-09-dan açar dəsti koordinatorunkunun EYNİSİDİR
+        # (`_COORDINATOR_PERMISSIONS`); fərq yalnız `level` və addadır.
         "name": "tutor",
         "display_name": "Tutor",
         "level": 40,
         "scope_type": RoleScopeType.UNIT,
-        "permissions": [
-            "member.view",
-            "course.view",
-            "exam.view",
-            # Kataloq: tyutor öz alt-ağacındakı TƏLƏBƏLƏRİ görür (müəllimləri yox).
-            "people.view_students",
-            "analytics.view_unit",
-        ],
+        "permissions": list(_COORDINATOR_PERMISSIONS),
         "description": "Tutor providing academic guidance to student groups within their unit",
     },
     {
@@ -420,30 +449,7 @@ UNIVERSITY_ROLES = [
         "display_name": "Program Coordinator",
         "level": 45,
         "scope_type": RoleScopeType.UNIT,
-        "permissions": [
-            "member.view",
-            "course.view",
-            "exam.view",
-            "people.view_students",
-            # Koordinator öz ixtisasının qrupları arasında tələbə köçürür və
-            # akademik statusu qeyd edir (əhatə ixtisas alt-ağacı ilə məhduddur).
-            "people.manage_academic",
-            # SAHİBİN QƏRARI (2026-09-07): koordinator YENİ QRUP yaradır və ona
-            # tələbə əlavə edir — həm imtahan kohortu (`group.manage`), həm də
-            # akademik qrup reyestri (`unit.view` + Mərhələ 2 `unit.group_manage`,
-            # `student.assign_group` — bax default_roles_student_services).
-            "group.manage",
-            "unit.view",
-            # Proqram koordinatorunun ƏSAS əməli: öz ixtisasının jurnallarına
-            # alt qrupdan tələbə əlavə etmək / geri götürmək (audited, scope-lu).
-            "journal.roster",
-            # Dərs cədvəlinin ƏSAS sahibi (sahibin qərarı, 2026-09): koordinator
-            # öz ixtisasının qruplarına slot yazır/silir. Adi MÜƏLLİMDƏ bu açar
-            # QƏSDƏN YOXDUR — müəllim öz cədvəlini yalnız GÖRÜR.
-            "schedule.view",
-            "schedule.manage",
-            "analytics.view_unit",
-        ],
+        "permissions": list(_COORDINATOR_PERMISSIONS),
         "description": "Program coordinator curating a specialty/program (tutor-equivalent scope)",
     },
     {

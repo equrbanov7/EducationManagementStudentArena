@@ -8,7 +8,7 @@ axtarışlı, DEBOUNCE-lu, LAZY səhifələnən, kaskadlı (fakültə → kafedr
 → qrup). Cədvəl və kartlar üçün SKELETON yükləyici var — «boş cədvəl» təəssüratı
 yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/legacy_grade_review.css' %}?v=20260831-1">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/legacy_grade_review.css' %}?v=20260909-fix">
 
 {% if not s.has_access %}
   <p class="lgr__denied" role="status">{{ s.access_denied_message }}</p>
@@ -31,7 +31,9 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 
   <header class="lgr__head">
     <div>
-      <h2 class="lgr__title">{% trans "Köçürülmüş nəticələrin dəqiqləşdirilməsi" context "accounts.legacy_review" %}</h2>
+      {% comment %}⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını
+      `#profileSectionTitle` kimi render edir; ikisi birlikdə səhifədə İKİ eyni
+      başlıq verirdi (sahib şikayəti, 2026-09-09).{% endcomment %}
       <p class="lgr__intro">
         {% trans "Köhnə sistemdən gətirilmiş imtahan nəticələri arasında yoxlanmalı olanlar burada toplanır. Siyahı hər dəfə sübut qatından yenidən hesablanır — dondurulmuş fayl deyil. Dəyər doğrudursa təsdiqləyin; səhvdirsə sənədli düzəliş yazın. Köhnə mənbə sətri heç bir halda üzərindən yazılmır." context "accounts.legacy_review" %}
       </p>
@@ -163,12 +165,16 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
       <input type="number" id="lgr-correct-score" class="lgr-input" min="0" step="1" inputmode="numeric" required>
 
       <label class="lgr-dialog__label" for="lgr-correct-reason">{% trans "Səbəb" context "accounts.legacy_review" %}</label>
-      <select id="lgr-correct-reason" class="lgr-input" required>
-        <option value="">—</option>
-        {% for reason in s.reasons %}
-        <option value="{{ reason.value }}">{{ reason.label }}</option>
-        {% endfor %}
-      </select>
+      {% comment %}Native select işlədilmir (sahib qaydası, 2026-09-09) — layihənin
+      öz Bootstrap tərzli seçicisi; siyahı qısadır, daxili axtarış lazım deyil.{% endcomment %}
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="lgr-correct-reason" class="lgr-input bootstrap-single-select__native" data-bootstrap-select required>
+          <option value="">—</option>
+          {% for reason in s.reasons %}
+          <option value="{{ reason.value }}">{{ reason.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
       <label class="lgr-dialog__label" for="lgr-correct-note">{% trans "Qeyd" context "accounts.legacy_review" %}</label>
       <textarea id="lgr-correct-note" class="lgr-input lgr-textarea" rows="3"
@@ -231,6 +237,6 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 </div>
 {% endif %}
 
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review_render.js' %}?v=20260831-1"></script>
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review_actions.js' %}?v=20260831-1"></script>
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review.js' %}?v=20260831-1"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review_render.js' %}?v=20260909-fix"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review_actions.js' %}?v=20260909-fix"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review.js' %}?v=20260909-fix"></script>

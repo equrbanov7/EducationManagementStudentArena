@@ -163,7 +163,7 @@ def build_template() -> tuple[bytes, str, str]:
     return (
         buffer.getvalue(),
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "telebe_idxal_sablonu.xlsx",
+        "telebe_elave_sablonu.xlsx",
     )
 
 
@@ -175,7 +175,7 @@ def _build_csv_template() -> tuple[bytes, str, str]:
     return (
         buffer.getvalue().encode("utf-8-sig"),
         "text/csv; charset=utf-8",
-        "telebe_idxal_sablonu.csv",
+        "telebe_elave_sablonu.csv",
     )
 
 

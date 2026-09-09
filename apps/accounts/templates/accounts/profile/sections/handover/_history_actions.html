@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Geri qaytarma düyməsi YALNIZ serverin qəbul edəcəyi sətirdə çıxır
+(`can_revert`). Səbəb dialoqu ORTAQ `teaching_office.js` mexanizmi ilə açılır.{% endcomment %}
+{% if row.data.can_revert %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--warning"
+        data-tof-open="thxRevertDialog"
+        data-tof-prefill='{"action": "revert", "handover_id": "{{ row.data.id }}", "reason": ""}'>
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>
+    {% trans "Geri qaytar" context "accounts.handover" %}
+</button>
+{% else %}
+<span class="thx-why">—</span>
+{% endif %}

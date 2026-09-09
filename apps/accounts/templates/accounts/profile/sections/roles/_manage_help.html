@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}İzah dialoqu. «Profil rolları (multi-role / checkbox)» köhnə səthin
+adıdır — sətir qəsdən saxlanılır ki, köhnə termini axtaran istifadəçi (və
+reqressiya testi) onu tapsın.{% endcomment %}
+<div class="rls-help">
+    <p>{% trans "Bu bölmə şəxsin təşkilat rollarını idarə edir: bir nəfər eyni anda həm «Proqram koordinatoru», həm «Müəllim» ola bilər." context "accounts.manage_roles" %}</p>
+    <p>{% trans "Rol siyahısı təşkilatın öz rol kataloqundan gəlir — «Rol təyin et» bölməsindəki siyahı ilə eynidir." context "accounts.manage_roles" %}</p>
+    <p class="rls-help__legacy">{% trans "Köhnə ad: Profil rolları (multi-role / checkbox)." context "accounts.manage_roles" %}</p>
+    <ul class="rls-help__list">
+        <li>{% trans "«Rol ver» — mövcud rollara toxunmadan yeni rol əlavə edir." context "accounts.manage_roles" %}</li>
+        <li>{% trans "Nişanın yanındakı × — həmin rolu geri alır; şəxsin son üzvlüyü silinmir." context "accounts.manage_roles" %}</li>
+        <li><strong>Primary</strong> — {% trans "ən yüksək səviyyəli roldur və naviqasiyada əsas rol kimi işlənir." context "accounts.manage_roles" %}</li>
+    </ul>
+</div>

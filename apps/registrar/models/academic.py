@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
-from core.models import ActiveManager, TimeStampedModel, UUIDModel
+from core.models import ActiveManager, SoftDeleteModel, TimeStampedModel, UUIDModel
 
 from ..reference_identity import ReferenceIdentityValidationMixin
 from ._program_codes import (
@@ -488,8 +488,23 @@ class SlotKind(models.TextChoices):
     LAB = "lab", pgettext_lazy("registrar.slot_kind", "Laboratory")
 
 
-class ScheduleSlot(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
-    """One weekly recurring class slot (a timetable row)."""
+class ScheduleSlot(ReferenceIdentityValidationMixin, SoftDeleteModel, UUIDModel, TimeStampedModel):
+    """One weekly recurring class slot (a timetable row).
+
+    ── YUMŞAQ SİLMƏ + «PARK» (2026-09-09, cədvəl redaktoru) ──────────────────
+    Slot artıq HEÇ VAXT bazadan silinmir (layihə qaydası: soft delete).
+    ``SoftDeleteModel`` default `objects` menecerini süzgəcləyir, ona görə
+    mövcud sorğular (`get_group_schedule`, `find_conflict`, …) avtomatik
+    təmiz qalır; audit/bərpa üçün `all_objects` var.
+
+    ``is_parked`` isə AYRI vəziyyətdir: slot silinməyib, sadəcə MƏCBURİ
+    dəyişiklik (forced move) zamanı yerindən çıxarılıb və yenidən
+    yerləşdirilməyi gözləyir. Parklanmış slot cədvəldə GÖRÜNMÜR (nə müəllimdə,
+    nə tələbədə) və konflikt hesablamasına DA girmir, amma redaktorun «yenidən
+    yerləşdirilməli» siyahısında qalır — sahibin tələbi: «digər qrupdan
+    müəllimin dərsi donsun, ya da haradasa qalsın ki, onu başqa yerə dəyişmək
+    mümkün olsun». Gün/saat dəyərləri ƏVVƏLKİ yerini saxlayır (kontekst üçün).
+    """
 
     organization = models.ForeignKey(
         "organizations.Organization", on_delete=models.CASCADE, related_name="schedule_slots"
@@ -509,14 +524,25 @@ class ScheduleSlot(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
-
-    objects = models.Manager()
+    is_parked = models.BooleanField(
+        default=False,
+        db_index=True,
+        help_text="Məcburi dəyişiklik nəticəsində yerindən çıxarılıb — yenidən yerləşdirilməlidir.",
+    )
+    parked_at = models.DateTimeField(null=True, blank=True)
+    parked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    park_reason = models.TextField(blank=True, help_text="Parklama səbəbi (audit + redaktorda görünür).")
 
     class Meta:
         ordering = ["weekday", "start_time"]
         verbose_name = pgettext_lazy("registrar.model.slot.meta", "schedule slot")
         verbose_name_plural = pgettext_lazy("registrar.model.slot.meta", "schedule slots")
-        indexes = [models.Index(fields=["organization", "offering", "weekday"])]
+        indexes = [
+            models.Index(fields=["organization", "offering", "weekday"]),
+            models.Index(fields=["organization", "is_parked", "weekday"]),
+        ]
 
     def __str__(self):
         return f"{self.offering_id} · gün {self.weekday} {self.start_time}-{self.end_time}"

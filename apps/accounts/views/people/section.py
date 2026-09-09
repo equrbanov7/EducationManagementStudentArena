@@ -122,6 +122,7 @@ from apps.accounts.services import people
 from apps.accounts.services.people.academic import STATUS_LABELS as ACADEMIC_STATUS_LABELS
 from apps.accounts.services.people.actions import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.people.constants import AGE_UNKNOWN, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
+from apps.accounts.services.people.filters import education_form_options, funding_options
 from apps.organizations.permissions import get_permission_label as permission_label
 
 _CTX = "accounts.people"
@@ -233,6 +234,10 @@ def build_people_section(request, kind: str) -> dict:
             # False-dur (düymə render edilmir, endpoint onsuz da 404 verir).
             "can_manage_academic": actor.can_manage_academic and kind == "students",
             "granted_permissions": [{"key": key, "label": permission_label(key)} for key in actor.granted_permissions],
+            # Ödəniş / təhsil forması — statik seçimlər, şablonda birbaşa render
+            # olunur (uzun siyahı deyil, options endpoint-inə ehtiyac yoxdur).
+            "funding_options": funding_options() if kind == "students" else [],
+            "education_form_options": education_form_options() if kind == "students" else [],
             "list_url": reverse("accounts:people_list", kwargs={"kind": kind}),
             "analytics_url": reverse("accounts:people_analytics", kwargs={"kind": kind}),
             "analytics_ai_url": reverse("accounts:people_analytics_ai", kwargs={"kind": kind}),

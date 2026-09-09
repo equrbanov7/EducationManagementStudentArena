@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}«Rolu geri al» dialoqunun gövdəsi. Üzvlük sətirdəki nişandan gəlir və
+gizli `membership_id` sahəsinə yazılır. Şəxsin SON üzvlüyü buradan silinmir —
+server onu rədd edir və izah mesajı qaytarır.{% endcomment %}
+<div class="rls-form">
+    <div class="rls-target rls-form__full">
+        <span class="rls-target__label">{% trans "Şəxs" context "accounts.manage_roles" %}</span>
+        <strong data-roles-target-person></strong>
+    </div>
+    <div class="rls-target rls-form__full">
+        <span class="rls-target__label">{% trans "Geri alınacaq rol" context "accounts.manage_roles" %}</span>
+        <strong data-roles-target-role></strong>
+    </div>
+    <p class="ems-msg ems-msg--warning">{% trans "Şəxsin digər rolları toxunulmadan qalır. Əməl audit jurnalına yazılır." context "accounts.manage_roles" %}</p>
+    <div class="ems-field rls-form__full">
+        <label class="ems-field__label" for="mr-revoke-reason">{% trans "Qeyd" context "accounts.manage_roles" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.manage_roles" %}</span></label>
+        <textarea class="ems-input ems-textarea" id="mr-revoke-reason" name="reason" rows="2" maxlength="500"
+                  placeholder="{% trans 'Əmr nömrəsi, tarix və ya səbəb — audit jurnalına yazılır' context 'accounts.manage_roles' %}"></textarea>
+    </div>
+</div>

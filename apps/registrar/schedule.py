@@ -116,10 +116,15 @@ def create_slot(
 
 
 def find_conflict(*, organization, offering, weekday, start_time, end_time, week_type, room, exclude_id=None):
-    """Return the first clashing slot (same group / instructor / room), or None."""
+    """Return the first clashing slot (same group / instructor / room), or None.
+
+    PARKLANMIŞ slotlar (``is_parked``) cədvəldə DEYİL — onlar məcburi
+    dəyişiklikdə yerindən çıxarılıb yenidən yerləşdirilməyi gözləyir, ona görə
+    heç kimin vaxtını tutmurlar. Yumşaq silinmişlər onsuz da default menecerdən
+    kənardadır (``SoftDeleteModel``)."""
     room_norm = (room or "").strip().lower()
     candidates = (
-        ScheduleSlot.objects.filter(organization=organization, weekday=weekday)
+        ScheduleSlot.objects.filter(organization=organization, weekday=weekday, is_parked=False)
         .exclude(pk=exclude_id)
         .select_related("offering")
     )
@@ -137,10 +142,11 @@ def find_conflict(*, organization, offering, weekday, start_time, end_time, week
 
 
 def _slots_for(queryset):
+    """Cədvəldə DURAN slotlar — parklanmışlar (yenidən yerləşdirilməli) xaric."""
     return list(
-        queryset.select_related("offering", "offering__subject", "offering__group", "offering__instructor").order_by(
-            "weekday", "start_time"
-        )
+        queryset.filter(is_parked=False)
+        .select_related("offering", "offering__subject", "offering__group", "offering__instructor")
+        .order_by("weekday", "start_time")
     )
 
 
@@ -365,7 +371,7 @@ def _period_ids_with_slots(organization) -> set:
     """Ən azı bir cədvəl slotu olan dövrlərin id-ləri (mətn formasında)."""
     return {
         str(period_id)
-        for period_id in ScheduleSlot.objects.filter(organization=organization)
+        for period_id in ScheduleSlot.objects.filter(organization=organization, is_parked=False)
         .values_list("offering__period_id", flat=True)
         .distinct()
         if period_id

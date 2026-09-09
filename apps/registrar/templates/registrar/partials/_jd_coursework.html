@@ -79,12 +79,17 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
             {% csrf_token %}
             <div class="jd2-field">
                 <span class="jd2-field-label">{% trans "TƏLƏBƏ" context "registrar.journal" %}</span>
-                <select name="cw_enrollment" required data-jd-cw-student data-bootstrap-select>
-                    <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
-                    {% for row in coursework_rows %}
-                    <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
-                    {% endfor %}
-                </select>
+                <div class="bootstrap-single-select">
+                    <select name="cw_enrollment" required class="bootstrap-single-select__native"
+                            data-jd-cw-student data-bootstrap-select data-live-search="true"
+                            data-live-search-placeholder="{% trans 'Tələbə axtar…' context 'registrar.journal' %}"
+                            data-live-search-empty="{% trans 'Uyğun tələbə yoxdur' context 'registrar.journal' %}">
+                        <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
+                        {% for row in coursework_rows %}
+                        <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="jd2-field">
                 <span class="jd2-field-label">{% trans "MÖVZU" context "registrar.journal" %}</span>

@@ -23,6 +23,8 @@ from .filters import (
     STATUS_ARCHIVED,
     STATUS_BLOCKED,
     STATUS_DELETED,
+    education_form_options,
+    funding_options,
     status_q,
 )
 from .permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
@@ -164,6 +166,8 @@ def build_filter_options(*, actor, kind: str, filters=None, request=None) -> dic
         "subjects": [],
         "years": [],
         "seasons": [],
+        "funding": [],
+        "education_forms": [],
         "gender_facets": {},
         "status_facets": {},
         "demographics_coverage": {"total": 0, "gender_known": 0, "birth_date_known": 0},
@@ -208,6 +212,13 @@ def build_filter_options(*, actor, kind: str, filters=None, request=None) -> dic
         "subjects": _subject_options(organization, scope),
         "years": years,
         "seasons": seasons,
+        # Ödəniş / təhsil forması — akademik qeyd sahələri, yalnız tələbədə.
+        # Şablon bu siyahıları `people_section`-dan alır; endpoint isə digər
+        # açılışlarla EYNİ formanı ({id, text}) qaytarsın deyə çevrilir.
+        "funding": [{"id": o["key"], "text": o["label"]} for o in funding_options()] if kind == "students" else [],
+        "education_forms": (
+            [{"id": o["key"], "text": o["label"]} for o in education_form_options()] if kind == "students" else []
+        ),
         "gender_facets": _gender_facets(base, include=demographics),
         "status_facets": _status_facets(base),
         "demographics_coverage": _demographics_coverage(base, include=demographics),

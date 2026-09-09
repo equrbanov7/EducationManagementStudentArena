@@ -1,0 +1,47 @@
+{% load i18n %}
+{% comment %}Sətir detalı — çekmecə PAYLAŞILANDIR (tək element, sətirlə dolur).
+Dəyərləri `teaching_handover.js` sətrin `data-thx-payload` JSON-undan yazır;
+25 sətrə 25 çekmecə render etmək həm ağır, həm də klaviatura üçün pisdir.
+
+⚠️ «Nə DƏYİŞMİR» bloku QƏSDƏN çekmecədədir: istifadəçi təsdiqdən əvvəl deyil,
+məhz fənni araşdırarkən də bunu görməlidir — «bal itəcək?» sualı bu ekranın ən
+tez-tez verilən sualıdır.{% endcomment %}
+<dl class="thx-dl">
+    <div class="thx-dl__row">
+        <dt>{% trans "Fənn" context "accounts.handover" %}</dt>
+        <dd data-thx-d-subject>—</dd>
+    </div>
+    <div class="thx-dl__row">
+        <dt>{% trans "Qrup" context "accounts.handover" %}</dt>
+        <dd data-thx-d-group>—</dd>
+    </div>
+    <div class="thx-dl__row">
+        <dt>{% trans "Semestr" context "accounts.handover" %}</dt>
+        <dd data-thx-d-period>—</dd>
+    </div>
+    <div class="thx-dl__row">
+        <dt>{% trans "Cari müəllim" context "accounts.handover" %}</dt>
+        <dd data-thx-d-instructor>—</dd>
+    </div>
+</dl>
+
+<h3 class="thx-h3">{% trans "Təhvildə nə köçür" context "accounts.handover" %}</h3>
+<ul class="thx-list thx-list--move">
+    <li>{% trans "Elektron jurnalın sahibliyi — bal yazma hüququ yeni müəllimə keçir." context "accounts.handover" %}</li>
+    <li><span data-thx-d-students>0</span> {% trans "tələbə" context "accounts.handover" %} ·
+        <span data-thx-d-lessons>0</span> {% trans "dərs" context "accounts.handover" %} ·
+        <span data-thx-d-marks>0</span> {% trans "bal xanası" context "accounts.handover" %}</li>
+</ul>
+
+<h3 class="thx-h3">{% trans "Nə DƏYİŞMİR" context "accounts.handover" %}</h3>
+<ul class="thx-list thx-list--keep">
+    <li>{% trans "Yazılmış bal və davamiyyət olduğu kimi qalır." context "accounts.handover" %}</li>
+    <li>{% trans "Keçmiş dərslərin müəllimi dəyişmir — kim keçibsə, o qalır." context "accounts.handover" %}</li>
+    <li>{% trans "Köhnə müəllim jurnalı yalnız-oxu rejimində görməyə davam edir." context "accounts.handover" %}</li>
+    <li>{% trans "Sillabus müəllifinə bağlıdır — avtomatik köçürülmür." context "accounts.handover" %}</li>
+</ul>
+
+<div class="thx-why-box" data-thx-d-why hidden>
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    <span data-thx-d-why-text></span>
+</div>

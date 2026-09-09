@@ -37,7 +37,7 @@ def build_student_intake_section(request, section, *, active_organization, allow
 
     section["access_denied_message"] = pgettext(
         _CTX,
-        "Tələbə idxalı üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür.",
+        "Toplu tələbə əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import` açarı olan rollar üçündür.",
     )
     has_access = bool(active_organization is not None and intake.can_import(request.user, active_organization))
     section["has_access"] = has_access
@@ -54,6 +54,19 @@ def build_student_intake_section(request, section, *, active_organization, allow
     section["max_rows"] = intake.MAX_ROWS
     section["max_upload_mb"] = intake.MAX_UPLOAD_BYTES // (1024 * 1024)
     section["scope_label"] = getattr(active_organization, "name", "") or ""
+    section["scope_hint"] = pgettext(_CTX, "Hesablar bu təşkilatda yaranır")
+    section["intro"] = pgettext(
+        _CTX,
+        "Tələbə siyahısını yükləyin: sistem əvvəlcə QURU İCRA edir (heç nə yazılmır) və "
+        "sətir-sətir nəyin yaranacağını göstərir; siz təsdiq edəndən sonra hesab + üzvlük "
+        "+ akademik qeyd yaradılır. Tələbə ilk girişdə e-poçtunu təsdiqləyib öz parolunu qoyur.",
+    )
+    section["steps_label"] = pgettext(_CTX, "Toplu əlavənin mərhələləri")
+    section["steps"] = [
+        {"label": pgettext(_CTX, "Şablon"), "note": pgettext(_CTX, "Boş faylı endirin"), "state": "current"},
+        {"label": pgettext(_CTX, "Fayl"), "note": pgettext(_CTX, "Yükləyin və yoxlayın"), "state": "todo"},
+        {"label": pgettext(_CTX, "Nəticə"), "note": pgettext(_CTX, "Hesabları əlavə edin"), "state": "todo"},
+    ]
 
 
 __all__ = ["build_student_intake_section"]

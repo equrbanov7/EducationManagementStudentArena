@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}Sətir əməlləri: «Bax» (mərkəz üçün qərar səhifəsi, müəllim üçün
+detal), «Yol» çekmecəsi (hadisə lentı) və müəllim üçün düzəlt/sil.
+
+Silmə köhnə çəngəli (`js-qsub-delete-form`) saxlayır — təsdiq modalı
+`exams/js/question_submission_list.js`-dədir, davranış dəyişmir.{% endcomment %}
+<a class="ems-btn ems-btn--sm" href="{{ row.data.open_url }}">
+    <i class="fas fa-eye" aria-hidden="true"></i>
+    {% trans "Bax" context "accounts.profile.question_submissions" %}
+</a>
+<button type="button" class="ems-iconbtn" data-qsub-drawer="{{ row.data.id }}"
+        title="{% trans 'Yolu izlə' context 'accounts.profile.question_submissions' %}"
+        aria-label="{% blocktrans with title=row.data.title context "accounts.profile.question_submissions" %}«{{ title }}» — yolu izlə{% endblocktrans %}">
+    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+</button>
+{% if row.data.can_edit %}
+<a class="ems-iconbtn" href="{{ row.data.edit_url }}"
+   title="{% trans 'Düzəlt' context 'accounts.profile.question_submissions' %}"
+   aria-label="{% blocktrans with title=row.data.title context "accounts.profile.question_submissions" %}«{{ title }}» göndərişini düzəlt{% endblocktrans %}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+</a>
+<form method="post" action="{{ row.data.delete_url }}" class="qsub-delete js-qsub-delete-form"
+      data-confirm="{% trans 'Bu göndəriş həmişəlik silinəcək. Davam edilsin?' context 'accounts.profile.question_submissions' %}">
+    {% csrf_token %}
+    <button type="submit" class="ems-iconbtn ems-iconbtn--danger"
+            title="{% trans 'Sil' context 'accounts.profile.question_submissions' %}"
+            aria-label="{% blocktrans with title=row.data.title context "accounts.profile.question_submissions" %}«{{ title }}» göndərişini sil{% endblocktrans %}">
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
+    </button>
+</form>
+{% endif %}

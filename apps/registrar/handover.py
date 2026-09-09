@@ -176,11 +176,31 @@ def _as_date(value):
         return None
 
 
-def blockers(offering, *, actor=None, organization=None, closed_ids=None, today=None, new_instructor_id=None) -> list:
+def blockers(
+    offering,
+    *,
+    actor=None,
+    organization=None,
+    closed_ids=None,
+    today=None,
+    new_instructor_id=None,
+    in_scope=None,
+    eligible_ids=None,
+) -> list:
     """Bu açılışın təhvilinə mane olan kodların siyahısı (boş = mümkündür).
 
     Toplu səth üçün ``closed_ids`` və ``today`` xaricdən verilir ki, hər sətir
     üçün ayrıca sorğu getməsin (N+1 qarşısı).
+
+    ``in_scope`` / ``eligible_ids`` — HESABLANMIŞ cavabların ötürülməsi
+    (:mod:`apps.registrar.handover_query`). Qayda DƏYİŞMİR: verilməsə funksiya
+    özü soruşur, verilsə eyni sualı təkrar soruşmur.
+
+    ⚠️ ``in_scope=True`` yalnız çağıran həqiqətən BİLDİKDƏ ötürülməlidir (məs.
+    sətir ``scoped_offerings`` queryset-indən gəlir və ya
+    :func:`~apps.registrar.handover_query.in_scope_offering_ids` toplu
+    hesablanıb). ``None`` = «bilmirəm» → tək-sətir yoxlaması işə düşür, yəni
+    unudulmuş çağırış fail-closed qalır.
     """
     from django.utils import timezone
 
@@ -188,8 +208,10 @@ def blockers(offering, *, actor=None, organization=None, closed_ids=None, today=
     organization = organization or offering.organization
     codes = []
 
-    if actor is not None and not offering_in_scope(actor, organization, offering):
-        codes.append("outside_scope")
+    if actor is not None:
+        covered = in_scope if in_scope is not None else offering_in_scope(actor, organization, offering)
+        if not covered:
+            codes.append("outside_scope")
     if not offering.is_active:
         codes.append("offering_inactive")
 
@@ -208,7 +230,7 @@ def blockers(offering, *, actor=None, organization=None, closed_ids=None, today=
             codes.append("no_target")
         elif str(new_instructor_id) == str(offering.instructor_id or ""):
             codes.append("same_instructor")
-        elif not is_eligible_target(organization, new_instructor_id):
+        elif not is_eligible_target(organization, new_instructor_id, eligible_ids=eligible_ids):
             codes.append("target_not_eligible")
     return codes
 
@@ -228,10 +250,16 @@ def eligible_target_ids(organization) -> set:
     return eligible_instructor_user_ids(organization=organization)
 
 
-def is_eligible_target(organization, user_id) -> bool:
+def is_eligible_target(organization, user_id, *, eligible_ids=None) -> bool:
+    """Hədəf müəllim bal yaza bilirmi.
+
+    ``eligible_ids`` verildikdə siyahı TƏKRAR sorğulanmır — toplu təhvildə
+    (``bulk_reassign``) eyni dəst sətir başına iki dəfə oxunurdu.
+    """
     if not user_id:
         return False
-    return str(user_id) in {str(pk) for pk in eligible_target_ids(organization)}
+    ids = eligible_target_ids(organization) if eligible_ids is None else eligible_ids
+    return str(user_id) in {str(pk) for pk in ids}
 
 
 def target_queryset(organization, *, search="", exclude_ids=()):

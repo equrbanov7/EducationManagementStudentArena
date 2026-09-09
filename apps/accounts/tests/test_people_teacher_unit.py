@@ -156,3 +156,69 @@ class RowIdentifiersTest(_Base):
         # Tələbə kataloqunda qrup dialoqu YALNIZ manage_academic ilə (dekan A-da yoxdur).
         self.assertNotIn('id="people-group-dialog-students"', html_s)
         self.assertNotIn("window.prompt", html_s)
+
+
+class PeopleFundingFilterTest(_Base):
+    """«Ödəniş forması» / «Təhsil forması» filtri (sahib istəyi, 2026-09-09).
+
+    Filtr AKADEMİK QEYDİN sahələrinə (`funding_type`, `education_form`) düşür və
+    yalnız tələbə kataloqunda mənalıdır — müəllim siyahısına təsir etmir.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        from apps.registrar.models import StudentAcademicRecord
+
+        with bypass_rls():
+            paid = StudentAcademicRecord.objects.filter(student=cls.fx.student_a)
+            paid.update(funding_type="paid", education_form="full_time")
+            StudentAcademicRecord.objects.filter(student=cls.fx.student_b).update(
+                funding_type="state", education_form="part_time"
+            )
+
+    def _list(self, user, **params):
+        self._login(user)
+        with bypass_rls():
+            return self.client.get(reverse("accounts:people_list", kwargs={"kind": "students"}), params).json()
+
+    def test_funding_filter_narrows_students(self):
+        paid = self._list(self.fx.rector, funding="paid")
+        self.assertEqual({row["id"] for row in paid["results"]}, {str(self.fx.student_a.pk)})
+
+        state = self._list(self.fx.rector, funding="state")
+        self.assertEqual({row["id"] for row in state["results"]}, {str(self.fx.student_b.pk)})
+
+    def test_education_form_filter_narrows_students(self):
+        payload = self._list(self.fx.rector, education_form="part_time")
+        self.assertEqual({row["id"] for row in payload["results"]}, {str(self.fx.student_b.pk)})
+
+    def test_unknown_funding_value_is_ignored_not_rejected(self):
+        payload = self._list(self.fx.rector, funding="zzz")
+        self.assertEqual(payload["filters"]["funding"], "")
+        self.assertGreaterEqual(len(payload["results"]), 2)
+
+    def test_student_section_exposes_options_and_searchable_selects(self):
+        self._login(self.fx.rector)
+        with bypass_rls():
+            response = self.client.get(
+                reverse("accounts:profile_section_fragment", kwargs={"section": "people-students"})
+            )
+        section = response.context["people_section"]
+        self.assertEqual([o["key"] for o in section["funding_options"]], ["state", "paid"])
+        self.assertEqual([o["key"] for o in section["education_form_options"]], ["full_time", "part_time", "distance"])
+        html = response.json()["html"]
+        self.assertIn('name="funding"', html)
+        self.assertIn('name="education_form"', html)
+        # Uzun siyahılarda menyu içi axtarış (Bootstrap select) olmalıdır.
+        self.assertIn('data-live-search="true"', html)
+        self.assertIn("bootstrap-single-select__native", html)
+
+    def test_teacher_section_has_no_funding_filter(self):
+        self._login(self.fx.rector)
+        with bypass_rls():
+            response = self.client.get(
+                reverse("accounts:profile_section_fragment", kwargs={"section": "people-teachers"})
+            )
+        self.assertEqual(response.context["people_section"]["funding_options"], [])
+        self.assertNotIn('name="funding"', response.json()["html"])

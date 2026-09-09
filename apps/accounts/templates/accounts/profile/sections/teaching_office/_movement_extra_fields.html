@@ -20,12 +20,17 @@ etdiyi audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
 {% if movement_target_group %}
 <div class="ems-field">
     <label class="ems-field__label" for="{{ reason_id }}-target">{% trans "Hədəf qrup" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-    <select class="ems-select" id="{{ reason_id }}-target" name="target_group" data-live-search="true">
-        <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
-        {% for option in groups_registry_section.group_options %}
-        <option value="{{ option.value }}">{{ option.label }}</option>
-        {% endfor %}
-    </select>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ reason_id }}-target" name="target_group" data-live-search="true"
+                data-bootstrap-select
+                data-live-search-placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.groups' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.groups' %}">
+            <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+            {% for option in groups_registry_section.group_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
     <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır." context "accounts.groups" %}</p>
 </div>
 {% endif %}

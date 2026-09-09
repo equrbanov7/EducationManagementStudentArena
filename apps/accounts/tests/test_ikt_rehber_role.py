@@ -13,15 +13,23 @@ from core.roles import ProfileRole
 
 class IktRehberAliasTests(SimpleTestCase):
     def test_ikt_rehber_gets_admin_and_exam_center_head_aliases(self):
-        aliases = ProfileRole.aliases_for_membership_role("ikt_rehber", level=88)
+        aliases = ProfileRole.aliases_for_membership_role("ikt_rehber", level=95)
         # Öz adı + imtahan mərkəzi rəhbəri (is_exam_center/head) + org_admin (level≥80).
         self.assertIn("ikt_rehber", aliases)
         self.assertIn(ProfileRole.EXAM_CENTER_HEAD, aliases)
         self.assertIn(ProfileRole.ORG_ADMIN, aliases)
 
-    def test_ikt_rehber_level_is_high_operator(self):
-        # exam-center (85) üstündə, prorektor (90) altında — yüksək operator.
-        self.assertEqual(ProfileRole.LEVELS[ProfileRole.IKT_REHBER], 88)
+    def test_ikt_rehber_level_is_one_step_below_superadmin(self):
+        """Sahib qərarı (2026-09-09): 88 → 95 — superadmindən (100) bir pillə aşağı,
+        prorektordan (90) yuxarı. 95 > `scoping.ORG_WIDE_MIN_LEVEL` (90) olduğu üçün
+        RİM ümumi resolverdən də org-wide əhatə alır."""
+        from apps.organizations.scoping import ORG_WIDE_MIN_LEVEL
+
+        level = ProfileRole.LEVELS[ProfileRole.IKT_REHBER]
+        self.assertEqual(level, 95)
+        self.assertGreater(level, ProfileRole.LEVELS[ProfileRole.ORG_OWNER])
+        self.assertLess(level, ProfileRole.LEVELS[ProfileRole.SUPERADMIN])
+        self.assertGreaterEqual(level, ORG_WIDE_MIN_LEVEL)
 
 
 class KollokviumPastBypassTests(SimpleTestCase):
