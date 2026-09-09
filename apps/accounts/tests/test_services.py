@@ -473,15 +473,38 @@ class TeacherStaffRequestFlowTest(TestCase):
             ).exists()
         )
 
-    def test_pending_teacher_appears_in_management_section(self):
-        """pending_teacher_staff_requests in the management section must include teacher requests."""
+    def test_pending_teacher_request_survives_but_is_not_shown_in_management_section(self):
+        """Müraciət MODELDƏ qalır, «Heyət idarəetməsi» ekranında GÖSTƏRİLMİR.
+
+        Bu test əvvəllər `pending_teacher_staff_requests` panelinin müraciəti
+        siyahıladığını yoxlayırdı. 2026-09-09 sahib qərarı ilə həmin ekrandan
+        BÜTÜN dəvət/müraciət panelləri çıxarıldı (bu tenantda heç kim dəvətlə
+        qoşulmur). Müraciət AXINI isə toxunulmayıb — qeydiyyat
+        `StudentOrganizationRequest` yaradır, sahibə bildiriş gedir və POST
+        əməlləri (təsdiq/rədd) işləməyə davam edir. Test indi hər iki tərəfi
+        birlikdə kilidləyir: axın sağdır, ekran isə onu daşımır.
+        """
         from django.test import RequestFactory
 
         from apps.accounts.views._helpers import _build_student_org_management_section
+        from apps.notifications.models import (
+            StudentOrganizationRequest,
+            StudentOrganizationRequestStatus,
+        )
 
         user, _, _, _ = self._register_teacher()
         user.is_active = True
         user.save()
+
+        # 1) Qoşulma axını SAĞDIR — müraciət sətri bazadadır.
+        self.assertTrue(
+            StudentOrganizationRequest.objects.filter(
+                user=user,
+                organization=self.org,
+                status=StudentOrganizationRequestStatus.PENDING,
+            ).exists(),
+            "Müəllim müraciəti yaradılmayıb — qoşulma axını sınıb",
+        )
 
         factory = RequestFactory()
         request = factory.get("/")
@@ -494,11 +517,17 @@ class TeacherStaffRequestFlowTest(TestCase):
             is_superadmin=False,
             user_level=999,
         )
-        ts_requests = list(context["pending_teacher_staff_requests"].object_list)
-        self.assertTrue(
-            any(r.user_id == user.pk for r in ts_requests),
-            "Teacher's pending request not found in management section",
-        )
+        # 2) Ekran onu ARTIQ daşımır — panel açarları və sayğacları silinib,
+        #    yəni hər sorğuda ölü iş görülmür.
+        for removed_key in (
+            "pending_teacher_staff_requests",
+            "pending_requested_students",
+            "pending_requested_students_total_count",
+            "unassigned_students",
+            "unassigned_students_total_count",
+            "sent_invites",
+        ):
+            self.assertNotIn(removed_key, context, f"Silinmiş panel açarı geri qayıdıb: {removed_key}")
 
 
 class ProfileActionsServiceTest(TestCase):

@@ -16,13 +16,15 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from apps.registrar import handover as handover_read
+from apps.registrar import handover_query
 
+from . import filters
 from .labels import REVERT, blocker_labels
 from .policy import offering_row, period_label, person_name, resolve_actor
 
@@ -168,14 +170,7 @@ def handover_offerings(request):
 
     queryset = handover_read.scoped_offerings(actor.user, actor.organization)
     queryset = _apply_filters(queryset, request, actor)
-    queryset = (
-        queryset.select_related("subject", "period", "group", "instructor")
-        .annotate(
-            student_count=Count("enrollments", filter=Q(enrollments__status="enrolled"), distinct=True),
-            lesson_count=Count("lessons", distinct=True),
-        )
-        .order_by("-period__start_date", "subject__code", "group__name")
-    )
+    queryset = handover_query.list_queryset(queryset)
 
     page, paginator = _page(queryset, request)
     offerings = list(page.object_list)
@@ -185,100 +180,46 @@ def handover_offerings(request):
 
 
 def _apply_filters(queryset, request, actor):
-    teacher = (request.GET.get("teacher") or "").strip()
-    if teacher == "__none__":
-        queryset = queryset.filter(instructor__isnull=True)
-    elif teacher:
-        queryset = queryset.filter(instructor_id=teacher)
+    """Sorğu parametrlərini ORTAQ süzgəc qatına ötürür (`filters.apply_filters`).
 
-    period = (request.GET.get("period") or "").strip()
-    if period:
-        queryset = queryset.filter(period_id=period)
-
-    for param, field in (("faculty", "group"), ("kafedra", "group")):
-        unit_id = (request.GET.get(param) or "").strip()
-        if unit_id:
-            queryset = queryset.filter(**{f"{field}__in": _unit_subtree_ids(actor.organization, unit_id)})
-
-    term = (request.GET.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(subject__name__icontains=term) | Q(subject__code__icontains=term) | Q(group__name__icontains=term)
-        )
-
+    Köhnə müqavilə saxlanılır: ``?scope=open`` hələ də «yalnız təhvil oluna
+    bilənlər» deməkdir, sadəcə artıq TƏXMİNİ deyil — blokerlərin öz tərifi ilə
+    süzülür (bax `filters` modulunun başlığı).
+    """
+    values = {key: (request.GET.get(key) or "").strip() for key in ("teacher", "period", "faculty", "kafedra", "q")}
     if (request.GET.get("scope") or "").strip() == "open":
-        # «Yalnız təhvil oluna bilənlər» — cari dövr süzgəci (ucuz ön-daraltma;
-        # dəqiq bloker hesablaması onsuz da sətir səviyyəsində aparılır).
-        queryset = queryset.filter(period__is_current=True, is_active=True)
-    return queryset
-
-
-def _unit_subtree_ids(organization, unit_id):
-    """Fakültə/kafedra alt-ağacındakı OrgUnit id-ləri (tanınmayan id → boş)."""
-    from django.apps import apps as django_apps
-
-    org_unit = django_apps.get_model("organizations", "OrgUnit")
-    unit = org_unit.objects.filter(organization=organization, pk=unit_id).only("id", "path").first()
-    if unit is None:
-        return []
-    condition = Q(pk=unit.pk)
-    if unit.path:
-        condition |= Q(path__startswith=f"{unit.path}/")
-    return list(org_unit.objects.filter(organization=organization).filter(condition).values_list("pk", flat=True))
+        values["state"] = filters.STATE_OPEN
+    return filters.apply_filters(queryset, values, organization=actor.organization, actor=actor.user)
 
 
 def _serialize_offerings(offerings, actor):
-    """Sətirləri N+1-siz serializasiya edir (bloker + sayğaclar toplu hesablanır)."""
-    from django.utils import timezone
+    """Sətirləri N+1-siz serializasiya edir (bloker + sayğaclar toplu hesablanır).
 
+    ⚠️ Blokerlər ARTIQ sətir-sətir sorğu etmir: əhatə yoxlaması
+    (``offering_in_scope``) dekan/kafedra müdiri aktorunda hər sətir üçün ayrıca
+    ``OrgUnit … exists()`` göndərirdi — 50 sətirlik səhifədə 50 əlavə sorğu
+    (ölçülmüş: 24 → 69). ``handover_query.bulk_blockers`` eyni qaydaları hazır
+    dəstlərlə tətbiq edir, sorğu sayı sətir sayından ASILI DEYİL.
+    """
     if not offerings:
         return []
     ids = [offering.pk for offering in offerings]
-    closed_ids = handover_read.closed_offering_ids(ids)
-    today = timezone.localdate()
     labels = blocker_labels()
-    counts = _impact_counts(offerings, ids)
-
-    rows = []
-    for offering in offerings:
-        codes = handover_read.blockers(
+    counts = handover_query.impact_counts(ids)
+    codes_by_id = handover_query.bulk_blockers(
+        offerings,
+        actor=actor.user,
+        organization=actor.organization,
+    )
+    return [
+        offering_row(
             offering,
-            actor=actor.user,
-            organization=actor.organization,
-            closed_ids=closed_ids,
-            today=today,
+            blocker_codes=codes_by_id.get(offering.pk, []),
+            blocker_labels=labels,
+            counts=counts,
         )
-        rows.append(offering_row(offering, blocker_codes=codes, blocker_labels=labels, counts=counts))
-    return rows
-
-
-def _impact_counts(offerings, ids) -> dict:
-    """«Neçə tələbə / dərs / bal təsirlənir» — təsdiq xülasəsinin rəqəmləri.
-
-    Tələbə və dərs sayı cədvəl sorğusunda annotasiya ilə gəlir; bal və yekun
-    qiymət sayı isə AYRICA iki aqreqatdır (join partlamasın deyə).
-    """
-    from apps.registrar.models import FinalGrade, LessonMark
-
-    marks = dict(
-        LessonMark.objects.filter(lesson__offering_id__in=ids)
-        .values_list("lesson__offering_id")
-        .annotate(total=Count("id"))
-    )
-    finals = dict(
-        FinalGrade.objects.filter(enrollment__offering_id__in=ids)
-        .values_list("enrollment__offering_id")
-        .annotate(total=Count("id"))
-    )
-    return {
-        offering.pk: {
-            "students": getattr(offering, "student_count", 0) or 0,
-            "lessons": getattr(offering, "lesson_count", 0) or 0,
-            "marks": marks.get(offering.pk, 0),
-            "finals": finals.get(offering.pk, 0),
-        }
         for offering in offerings
-    }
+    ]
 
 
 # ── Süzgəc açılışları ────────────────────────────────────────────────────────

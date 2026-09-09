@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}HƏMİŞƏ görünən həftəlik matris — nömrələnmiş dərs saatı × gün.
+
+Sahibin qaydası (2026-09-09): «Cədvəl olmasa da burada həmişə, boş da olsa,
+cədvəl görünsün». Sətirlər slotlardan YOX, təşkilatın dərs saatlarından gəlir
+(`apps/registrar/schedule_grid.py`), ona görə slot sıfır olanda da grid tam
+render olunur.
+
+ORTAQ PARTIAL: redaktor («Cədvəl idarəetməsi») və yalnız-oxu «Dərs cədvəli»
+(müəllim/tələbə) eyni markup + eyni CSS-i işlədir.
+
+KONTEKST MÜQAVİLƏSİ
+  matrix           — `schedule_grid.build_matrix` nəticəsi (məcburi)
+  matrix_role      — "student" | "teacher" | "manage" (kart məzmunu)
+  matrix_editable  — True: boş xana «+» düyməsi, kartlar sürüklənə bilir
+  week             — həftə konteksti (üst/alt paritet, tarixlər)
+
+CSP: inline CSS/JS yoxdur; davranış `accounts/js/schedule_editor.js` və
+`registrar/js/schedule_grid.js` xarici fayllarındadır.{% endcomment %}
+<div class="smtx{% if matrix_editable %} smtx--editable{% endif %}" data-schedule-matrix>
+    <div class="smtx__scroll" tabindex="0" role="region"
+         aria-label="{% trans 'Həftəlik dərs cədvəli' context 'registrar.schedule_grid' %}">
+        <table class="smtx__table">
+            <caption class="smtx__caption">
+                {% trans "Sətirlər — nömrələnmiş dərs saatları, sütunlar — həftənin günləri." context "registrar.schedule_grid" %}
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col" class="smtx__corner">{% trans "SAAT" context "registrar.schedule_grid" %}</th>
+                    {% for day in matrix.day_headers %}
+                    <th scope="col" class="smtx__day{% if day.is_today %} is-today{% endif %}">
+                        <span class="smtx__day-name">{{ day.label }}</span>
+                        <span class="smtx__day-sub">{% if day.date %}{{ day.date|date:"d.m" }}{% else %}{{ day.roman }}{% endif %}{% if day.is_today %} · {% trans "bu gün" context "registrar.schedule_grid" %}{% endif %}</span>
+                        {% for ex in day.exams %}
+                        <span class="smtx__day-exam" title="{{ ex.exam.title }}"><i class="fas fa-file-signature" aria-hidden="true"></i> {{ ex.start|time:"H:i" }}</span>
+                        {% endfor %}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix.rows %}
+                {% include "registrar/partials/_schedule_matrix_row.html" %}
+                {% endfor %}
+                {% if matrix.extra_rows %}
+                <tr class="smtx__band">
+                    <td colspan="{{ matrix.day_headers|length|add:1 }}">
+                        <span class="smtx__band-badge">{% trans "Standart zəngdən kənar" context "registrar.schedule_grid" %}</span>
+                        <span class="smtx__band-hint">{% trans "Bu saatlar təşkilatın zəng cədvəlində yoxdur — köçürülmüş və ya əl ilə yazılmış dərslərdir." context "registrar.schedule_grid" %}</span>
+                    </td>
+                </tr>
+                {% for row in matrix.extra_rows %}
+                {% include "registrar/partials/_schedule_matrix_row.html" %}
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% if not matrix.has_slots %}
+    <p class="smtx__hint" role="status">
+        {% if matrix_editable %}
+        {% trans "Bu qrupun bu semestrdə hələ dərsi yoxdur — boş xanaya klikləyib ilk dərsi qoyun." context "registrar.schedule_grid" %}
+        {% else %}
+        {% trans "Bu semestr üçün hələ dərs qeyd edilməyib — cədvəl boş görünür." context "registrar.schedule_grid" %}
+        {% endif %}
+    </p>
+    {% endif %}
+</div>

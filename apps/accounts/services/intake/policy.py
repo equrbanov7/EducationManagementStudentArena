@@ -70,7 +70,7 @@ def require_import(user, organization) -> None:
     if not can_import(user, organization):
         raise IntakeAccessError(
             "permission_denied",
-            "Tələbə idxalı üçün icazəniz yoxdur.",
+            "Toplu tələbə əlavəsi üçün icazəniz yoxdur.",
         )
 
 

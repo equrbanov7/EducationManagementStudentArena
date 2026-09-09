@@ -446,9 +446,17 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         author=exam_author,
     )
 
+    # HƏMİŞƏ görünən matris (sahib, 2026-09-09): sətirlər slotlardan yox,
+    # təşkilatın nömrələnmiş dərs saatlarından gəlir — cədvəl boş olanda da tam
+    # render olunur. Redaktor («Cədvəl idarəetməsi») ilə EYNİ partial + CSS.
+    from apps.registrar import schedule_grid
+
     time_grid = schedule.build_time_grid(slots, week_context=week_context, exams_by_day=exams_by_day)
-    _attach_slot_extras(
-        time_grid,
+    matrix = schedule_grid.build_matrix(
+        slots=slots, organization=organization, week_context=week_context, exams_by_day=exams_by_day
+    )
+    schedule_grid.attach_slot_extras(
+        matrix,
         stats_map=_student_offering_stats(request.user, organization, record, period) if role == "student" else None,
         counts_map=_offering_student_counts(teacher_offerings) if role == "teacher" else None,
     )
@@ -475,6 +483,8 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         "period": period,
         "week": week_context,
         "time_grid": time_grid,
+        "matrix": matrix,
+        "matrix_role": role,
         "teacher_offerings": teacher_offerings,
         "weekdays": schedule.WEEKDAYS,
         "week_types": WeekType.choices,
@@ -500,20 +510,6 @@ def _course_number(record, period) -> str:
     years = start.year - record.admission_year + (1 if start.month >= 8 else 0)
     romans = {1: "I", 2: "II", 3: "III", 4: "IV", 5: "V", 6: "VI"}
     return romans.get(max(1, years), "")
-
-
-def _attach_slot_extras(grid, *, stats_map=None, counts_map=None):
-    """Modal üçün hər slot elementinə rol-spesifik əlavələr bağlanır:
-    tələbəyə öz jurnal statusu (qayıb/giriş balı), müəllimə qrupun tələbə sayı."""
-    for rows in (grid["rows"], grid["evening_rows"]):
-        for row in rows:
-            for cell in row["cells"]:
-                for item in cell["slots"]:
-                    offering_id = item["slot"].offering_id
-                    if stats_map is not None:
-                        item["stats"] = stats_map.get(offering_id)
-                    if counts_map is not None:
-                        item["student_count"] = counts_map.get(offering_id, 0)
 
 
 def _student_offering_stats(user, organization, record, period) -> dict:

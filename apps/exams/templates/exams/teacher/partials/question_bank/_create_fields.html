@@ -1,0 +1,89 @@
+{% load i18n %}
+{% comment %}«Yeni sual bankı» dialoqunun sahələri — `_form_dialog.html` gövdəsi.
+
+⚠️ SAHƏ ADLARI DƏYİŞMİR: `name`, `subject_id`, `source_teacher_id`,
+`exam_kind`, `default_question_type`, `language` — POST hədəfi
+`exams:question_bank_list` (`action=create_bank`) olduğu kimi qalır.
+Axtarışlı seçicilər (`qbk-subject` / `qbk-teacher`) `questionBankList.js`-də
+`.js-qb-create-card` + `.js-qb-create-form` çəngəlləri ilə qurulur.
+{% endcomment %}
+<div class="qbank-form">
+    <div class="ems-field qbank-form__full">
+        <label class="ems-field__label" for="bankName">{% trans "Bankın adı" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="text" class="ems-input" id="bankName" name="name" required maxlength="255" autocomplete="off"
+               placeholder="{% trans 'məs. Verilənlər strukturu — 1-ci kurs' %}">
+        <p class="ems-field__hint">{% trans "Bankı tanımaq üçün ad. İmtahan adı deyil." %}</p>
+    </div>
+
+    <div class="ems-field qbank-form__full" role="group" aria-labelledby="qb-subject-label">
+        <span class="ems-field__label" id="qb-subject-label">{% trans "Fənn" context "exams.template.question_bank_list" %}</span>
+        <input type="hidden" name="subject_id" data-qbk-subject-input>
+        {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_subject_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-subject" placeholder=qbk_subject_ph %}
+        <p class="ems-field__hint">{% trans "Kataloqdakı fənlərdən axtarıb seçin (opsional)." context "exams.template.question_bank_list" %}</p>
+    </div>
+
+    {% if qbl_is_center %}
+    <div class="ems-field qbank-form__full" role="group" aria-labelledby="qb-teacher-label">
+        <span class="ems-field__label" id="qb-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</span>
+        <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
+        {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_teacher_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-teacher" placeholder=qbk_teacher_ph %}
+        <p class="ems-field__hint">{% trans "Bank hansı müəllimin suallarından yaranır (opsional)." context "exams.template.question_bank_list" %}</p>
+    </div>
+    {% endif %}
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="bankKind">{% trans "İmtahan növü" context "exams.template.question_bank_list" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="bankKind" name="exam_kind" data-bootstrap-select>
+                {% for value, label in exam_kind_choices %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+                {% if qbl_is_center %}
+                <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
+                {% endif %}
+            </select>
+        </div>
+        <p class="ems-field__hint">
+            {% if qbl_is_center %}
+            {% trans "Bank hansı imtahan üçün toplanır: Final, Midterm və ya Quiz." context "exams.template.question_bank_list" %}
+            {% else %}
+            {% trans "Şəxsi müəllim bankı yalnız Quiz təyinatı ilə yaradılır." context "exams.template.question_bank_list" %}
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="bankFormat">{% trans "Sual formatı" context "exams.template.question_bank_list" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="bankFormat" name="default_question_type" data-bootstrap-select>
+                {% for value, label in default_type_choices %}
+                <option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı (sərbəst cavab)" %}{% else %}{% trans "Test (variantlı)" %}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Standart sual formatı (sual əlavə edərkən dəyişə bilərsiniz)." %}</p>
+    </div>
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="bankLanguage">{% trans "Əsas dil" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="bankLanguage" name="language" data-bootstrap-select>
+                {% for code, label in language_choices %}
+                <option value="{{ code }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Sualların standart dili (sonra dəyişə bilərsiniz)." %}</p>
+    </div>
+
+    <p class="qbank-form__note qbank-form__full">
+        <i class="fas fa-lock" aria-hidden="true"></i>
+        {% if qbl_is_center %}
+        {% trans "Bank yalnız imtahan mərkəzinə görünür." context "exams.template.question_bank_list" %}
+        {% else %}
+        {% trans "Bank digər müəllimlərə görünmür — yalnız siz və imtahan mərkəzi görə bilir." context "exams.template.question_bank_list" %}
+        {% endif %}
+    </p>
+</div>

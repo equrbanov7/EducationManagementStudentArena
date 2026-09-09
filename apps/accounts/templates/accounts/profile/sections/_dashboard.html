@@ -1,40 +1,65 @@
-{% load i18n %}
+{% load i18n static %}
 {% comment %}
-«Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+«Ana səhifə» — kabinetin default bölməsi (2026-09-09 yenidən qurulub).
+
+DÜZÜM (rola görə özü uyğunlaşır, sərt rol cədvəli YOXDUR):
+  1. Qabıq başlığı «Ana səhifə» + alt sətir = salamlama.  ⚠️ `<h1>` BURADA
+     YAZILMIR — qabıq (`accounts/profile/_header.html`) onu artıq
+     `#profileSectionTitle` kimi verir; ikinci h1 olmamalıdır.
+  2. Meta zolağı — rol nişanı + cari tədris dövrü.
+  3. Hero KPI zolağı — rolun ƏN VACİB 2–4 rəqəmi (`ems_ui/_kpi_row.html`).
+  4. Məlumat kartları — rəqəm/siyahı daşıyan vidjetlər (hərəkət gözləyənlər
+     əvvəldə).
+  5. «Bölmələrə keçid» — rəqəmi olmayan vidjetlər yığcam keçid kartı kimi
+     (əvvəl onlar da böyük boş kart idi: RİM-də 12 ədəd «sıfırlar divarı»).
 
 Panel TAM SERVER-RENDER-lidir və JS TƏLƏB ETMİR: keçidlər sidebar linkləri ilə
 eyni `js-profile-section-link` müqaviləsini daşıyır, ona görə SPA deleqasiyası
 onları özü tutur (səhifə yenilənmir).  Vidjet siyahısı
-`apps/accounts/views/profile/_sections/dashboard.py`-dan gəlir; şablon YALNIZ
-`widget()` müqaviləsinin açarlarını oxuyur — yeni vidjet üçün BU FAYL
-DƏYİŞMİR.
+`apps/accounts/views/profile/_sections/dashboard.py`-dan, sıralama və hero
+zolağı `dashboard_layout.py`-dan gəlir; şablon YALNIZ `widget()` müqaviləsinin
+açarlarını oxuyur — yeni vidjet üçün BU FAYL DƏYİŞMİR.
 
-CSS xarici fayldadır (`accounts/css/profile/dashboard.css`, `profile.html`-dən
-yüklənir) — inline üslub YOXDUR (CLAUDE.md / CSP).
+CSS xarici fayldadır (`accounts/css/profile/dashboard.css`, `_section_assets`-dən
+yüklənir) — inline üslub/skript YOXDUR (CLAUDE.md / CSP).
 {% endcomment %}
 {% if 'dashboard' in allowed_sections %}
+{% with sec=dashboard_section %}
 <section class="profile-section-panel profile-section--dashboard {% if active_section == 'dashboard' %}is-active{% endif %}"
          data-profile-section-panel="dashboard"
          data-source-url="{{ profile_base_url }}?section=dashboard">
 
-  <header class="dash__head">
-    <div class="dash__head-text">
-      <p class="dash__greeting">{{ dashboard_section.greeting }}</p>
-      <p class="dash__meta">
-        {% if dashboard_section.role_label %}<span class="dash__pill">{{ dashboard_section.role_label }}</span>{% endif %}
-        {% if dashboard_section.period_label %}<span class="dash__period">{{ dashboard_section.period_label }}</span>{% endif %}
-      </p>
-    </div>
-  </header>
+  <div class="dash-top">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.greeting %}
+    {% if sec.role_label or sec.period_label %}
+    <p class="dash-meta">
+      {% if sec.role_label %}<span class="ems-badge ems-badge--info">{{ sec.role_label }}</span>{% endif %}
+      {% if sec.period_label %}
+      <span class="dash-meta__period">
+        <i class="fas fa-calendar-days" aria-hidden="true"></i>{{ sec.period_label }}
+      </span>
+      {% endif %}
+    </p>
+    {% endif %}
+  </div>
 
-  {% if dashboard_section.widgets %}
+  {% if sec.kpi_tiles %}
+  <div class="dash-kpis">
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="4" %}
+  </div>
+  {% endif %}
+
+  {% if sec.widgets %}
+
+  {% if sec.data_count %}
   <div class="dash-grid">
-    {% for w in dashboard_section.widgets %}
-    <article class="dash-card {% if w.tone %}dash-card--{{ w.tone }}{% endif %}" data-dash-widget="{{ w.key }}">
-      <h3 class="dash-card__title">
-        <i class="fas {{ w.icon }} dash-card__icon" aria-hidden="true"></i>
-        <span>{{ w.title }}</span>
-      </h3>
+    {% for w in sec.widgets %}{% if w.variant == 'data' %}
+    <article class="dash-card{% if w.tone %} dash-card--{{ w.tone }}{% endif %}{% if w.is_empty %} dash-card--quiet{% endif %}"
+             data-dash-widget="{{ w.key }}">
+      <div class="dash-card__head">
+        <span class="dash-card__icon" aria-hidden="true"><i class="fas {{ w.icon }}"></i></span>
+        <h3 class="dash-card__title">{{ w.title }}</h3>
+      </div>
 
       {% if w.stats %}
       <div class="dash-card__stats">
@@ -57,8 +82,13 @@ yüklənir) — inline üslub YOXDUR (CLAUDE.md / CSP).
         </li>
         {% endfor %}
       </ul>
+      {% if w.more_count %}
+      <p class="dash-card__more">{% blocktrans context "accounts.dashboard" with count=w.more_count %}+{{ count }} daha{% endblocktrans %}</p>
+      {% endif %}
       {% elif w.is_empty and w.empty %}
-      <p class="dash-card__empty">{{ w.empty }}</p>
+      <p class="dash-card__empty">
+        <i class="fas fa-circle-check" aria-hidden="true"></i><span>{{ w.empty }}</span>
+      </p>
       {% endif %}
 
       {% if w.link %}
@@ -72,14 +102,45 @@ yüklənir) — inline üslub YOXDUR (CLAUDE.md / CSP).
       </a>
       {% endif %}
     </article>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="ems-empty dash__empty">
-    <i class="fas fa-house ems-empty-icon" aria-hidden="true"></i>
-    <p class="ems-empty-title">{% trans "Xülasə hazır deyil" context "accounts.dashboard" %}</p>
-    <p class="ems-empty-hint">{{ dashboard_section.empty_text }}</p>
+    {% endif %}{% endfor %}
   </div>
   {% endif %}
+
+  {% if sec.link_count %}
+  <h2 class="dash-subhead">{% trans "Bölmələrə keçid" context "accounts.dashboard" %}</h2>
+  <div class="dash-links">
+    {% for w in sec.widgets %}{% if w.variant == 'link' %}
+    {% if w.link %}
+    <a class="dash-link js-profile-section-link"
+       href="{{ w.link.url }}"
+       data-dash-widget="{{ w.key }}"
+       data-section="{{ w.link.section }}"
+       data-title="{{ w.link.title }}"
+       data-source-url="{{ profile_base_url }}">
+      <span class="dash-link__icon" aria-hidden="true"><i class="fas {{ w.icon }}"></i></span>
+      <span class="dash-link__body">
+        <span class="dash-link__title">{{ w.title }}</span>
+        {% if w.empty %}<span class="dash-link__hint">{{ w.empty }}</span>{% endif %}
+      </span>
+      <i class="fas fa-arrow-right dash-link__go" aria-hidden="true"></i>
+    </a>
+    {% else %}
+    <div class="dash-link dash-link--static" data-dash-widget="{{ w.key }}">
+      <span class="dash-link__icon" aria-hidden="true"><i class="fas {{ w.icon }}"></i></span>
+      <span class="dash-link__body">
+        <span class="dash-link__title">{{ w.title }}</span>
+        {% if w.empty %}<span class="dash-link__hint">{{ w.empty }}</span>{% endif %}
+      </span>
+    </div>
+    {% endif %}
+    {% endif %}{% endfor %}
+  </div>
+  {% endif %}
+
+  {% else %}
+  {% trans "Xülasə hazır deyil" context "accounts.dashboard" as dash_empty_title %}
+  {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-house" state_title=dash_empty_title state_body=sec.empty_text %}
+  {% endif %}
 </section>
+{% endwith %}
 {% endif %}

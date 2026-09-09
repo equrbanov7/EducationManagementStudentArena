@@ -69,48 +69,11 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
         </div>
     </div>
 
-    {% if time_grid.is_empty %}
-    <div class="sgx-empty">
-        <i class="fas fa-calendar-plus"></i>
-        <p>{% trans "Bu semestr üçün hələ cədvəl slotu yoxdur." context "registrar.schedule" %}</p>
-        {% if schedule_can_manage and teacher_offerings %}<p class="sgx-empty-hint">{% trans "Yuxarıdan slot əlavə edin." context "registrar.schedule" %}</p>{% endif %}
-    </div>
-    {% else %}
-
-    <div class="sgx-grid-wrap">
-        <table class="sgx-grid">
-            <thead>
-                <tr>
-                    <th class="sgx-col-time">{% trans "SAAT" context "registrar.schedule" %}</th>
-                    {% for day in time_grid.day_headers %}
-                    <th class="sgx-col-day {% if day.is_today %}is-today{% endif %}">
-                        <span class="sgx-day-name">{{ day.label }}</span>
-                        <span class="sgx-day-sub">{{ day.roman }} {% trans "gün" context "registrar.schedule" %}{% if day.is_today %} · {% trans "bu gün" context "registrar.schedule" %}{% endif %}</span>
-                        {% for ex in day.exams %}
-                        <span class="sgx-day-exam" title="{{ ex.exam.title }}"><i class="fas fa-file-signature"></i> {{ ex.start|time:"H:i" }} {% trans "İmtahan" context "registrar.schedule" %}</span>
-                        {% endfor %}
-                    </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in time_grid.rows %}
-                {% include "registrar/partials/_schedule_row.html" with row=row %}
-                {% endfor %}
-                {% if time_grid.evening_rows %}
-                <tr class="sgx-band-row">
-                    <td colspan="{{ time_grid.day_headers|length|add:1 }}">
-                        <span class="sgx-band-badge">{% trans "Magistratura" context "registrar.schedule" %}</span>
-                        <span class="sgx-band-hint">{% trans "Axşam təhsili — dərslər 21:30-da bitir" context "registrar.schedule" %}</span>
-                    </td>
-                </tr>
-                {% for row in time_grid.evening_rows %}
-                {% include "registrar/partials/_schedule_row.html" with row=row %}
-                {% endfor %}
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
+    {% comment %}HƏMİŞƏ görünən matris (sahib, 2026-09-09): «Cədvəl olmasa da
+    burada həmişə, boş da olsa, cədvəl görünsün». Grid partial-ı «Cədvəl
+    idarəetməsi» redaktoru ilə ORTAQDIR (eyni markup + eyni CSS); burada yalnız
+    yalnız-oxu rejimdədir (`matrix_editable` verilmir).{% endcomment %}
+    {% include "registrar/partials/_schedule_matrix.html" with matrix_role=role %}
 
     <div class="sgx-legend">
         <span class="sgx-legend-item"><span class="sgx-swatch sgx-swatch--lecture"></span> {% trans "Mühazirə" context "registrar.schedule" %}</span>
@@ -119,7 +82,6 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
         <span class="sgx-legend-sep"></span>
         <span class="sgx-legend-item"><span class="sgx-mini-badge sgx-mini-badge--odd">ÜST</span> / <span class="sgx-mini-badge sgx-mini-badge--even">ALT</span> {% trans "həftə fərqi olan dərslər hüceyrədə bölünmüş göstərilir" context "registrar.schedule" %}</span>
     </div>
-    {% endif %}
 
     {# ── Fənn detalı modalı (klik) — JS data-atributlardan doldurur ────────── #}
     <div class="sgx-modal" data-sgx-modal hidden>
@@ -184,29 +146,40 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                 <div class="sgx-add-grid">
                     <label class="sgx-field sgx-field--wide">
                         <span>{% trans "Fənn" context "registrar.schedule" %}</span>
-                        <select name="offering_id" required data-bootstrap-select>
-                            {% for off in teacher_offerings %}<option value="{{ off.id }}">{{ off.subject.code }} — {{ off.subject.name }}{% if off.group %} · {{ off.group.name }}{% endif %}</option>{% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="offering_id" required class="bootstrap-single-select__native"
+                                    data-bootstrap-select data-live-search="true"
+                                    data-live-search-placeholder="{% trans 'Fənn axtar…' context 'registrar.schedule' %}"
+                                    data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'registrar.schedule' %}">
+                                {% for off in teacher_offerings %}<option value="{{ off.id }}">{{ off.subject.code }} — {{ off.subject.name }}{% if off.group %} · {{ off.group.name }}{% endif %}</option>{% endfor %}
+                            </select>
+                        </div>
                     </label>
                     <label class="sgx-field">
                         <span>{% trans "Dərs növü" context "registrar.schedule" %}</span>
-                        <select name="slot_kind" data-bootstrap-select>
-                            {% for value, label in slot_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="slot_kind" class="bootstrap-single-select__native" data-bootstrap-select>
+                                {% for value, label in slot_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
                     </label>
                     <label class="sgx-field">
                         <span>{% trans "Gün" context "registrar.schedule" %}</span>
-                        <select name="weekday" data-bootstrap-select>
-                            {% for num, label in weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="weekday" class="bootstrap-single-select__native" data-bootstrap-select>
+                                {% for num, label in weekdays %}<option value="{{ num }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
                     </label>
                     <label class="sgx-field">
                         <span>{% trans "Dərs saatı" context "registrar.schedule" %}</span>
-                        <select name="time_slot" required data-bootstrap-select>
-                            {% for start, end in standard_times %}
-                            <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
-                            {% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="time_slot" required class="bootstrap-single-select__native" data-bootstrap-select>
+                                {% for start, end in standard_times %}
+                                <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </label>
                     <label class="sgx-field">
                         <span>{% trans "Otaq" context "registrar.schedule" %}</span>
@@ -214,9 +187,11 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                     </label>
                     <label class="sgx-field">
                         <span>{% trans "Həftə" context "registrar.schedule" %}</span>
-                        <select name="week_type" data-bootstrap-select>
-                            {% for value, label in week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-                        </select>
+                        <div class="bootstrap-single-select">
+                            <select name="week_type" class="bootstrap-single-select__native" data-bootstrap-select>
+                                {% for value, label in week_types %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                            </select>
+                        </div>
                     </label>
                 </div>
                 <div class="sgx-modal-foot">

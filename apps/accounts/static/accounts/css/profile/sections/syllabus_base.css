@@ -417,6 +417,48 @@
     box-shadow: 0 0 0 3px var(--ems-primary-100);
 }
 
+/* ── Həftə cədvəlindəki seçicilər (`bootstrap-single-select`) ────────────────
+   Native `<select>` gizlənir (`.is-enhanced`), görünən element `__toggle`-dır —
+   ona görə `.syl-select--xs/--sm` ölçüləri toggle üçün TƏKRAR verilir, əks halda
+   sıx cədvəl komponentin standart 4.05rem hündürlüyü ilə dağılır.
+   Fokus: nazik neytral kontur (2026-09-09 sahib qərarı — göy halqa yoxdur). */
+.syl-cellselect {
+    width: 70px;
+}
+
+.syl-cellselect .bootstrap-single-select__toggle {
+    min-height: 34px;
+    padding: 2px 6px;
+    gap: 0.3rem;
+    border-radius: var(--syl-radius-ctl);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.syl-cellselect .bootstrap-single-select__caret {
+    font-size: 0.62rem;
+}
+
+/* Saat siyahısı qısadır (0–4, köçürmədə bir az uzun) — menyu dar qalsın,
+   amma rəqəm ilə ✓ işarəsi bir-birinə dəyməsin. */
+.syl-cellselect .bootstrap-single-select__menu {
+    min-width: 84px;
+}
+
+.syl-outcomeselect .bootstrap-single-select__toggle {
+    min-height: 34px;
+    padding: 4px 10px;
+    border-radius: var(--syl-radius-ctl);
+    font-size: 0.81rem;
+    font-weight: 500;
+}
+
+.syl-cellselect .bootstrap-single-select__option,
+.syl-outcomeselect .bootstrap-single-select__option {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.82rem;
+}
+
 .syl-input.is-bad,
 .syl-textarea.is-bad {
     border-color: var(--ems-warning);

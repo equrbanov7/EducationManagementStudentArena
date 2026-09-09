@@ -8,12 +8,17 @@ təsdiqə göndərməni bloklayır (§8 qayda 11).{% endcomment %}
 <div class="tof-form">
     <div class="ems-field tof-form__full">
         <label class="ems-field__label" for="tof-pr-subject">{% trans "Fənn" context "accounts.curriculum" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <select class="ems-select" id="tof-pr-subject" name="subject" required data-live-search="true">
-            <option value="">{% trans "Kataloqdan seçin" context "accounts.curriculum" %}</option>
-            {% for option in curriculum_editor_section.subject_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pr-subject" name="subject" required data-live-search="true"
+                    data-bootstrap-select
+                    data-live-search-placeholder="{% trans 'Fənn adı və ya kodu ilə axtar…' context 'accounts.curriculum' %}"
+                    data-live-search-empty="{% trans 'Uyğun fənn tapılmadı' context 'accounts.curriculum' %}">
+                <option value="">{% trans "Kataloqdan seçin" context "accounts.curriculum" %}</option>
+                {% for option in curriculum_editor_section.subject_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pr-code">{% trans "Plan şifri" context "accounts.curriculum" %}</label>
@@ -53,11 +58,13 @@ təsdiqə göndərməni bloklayır (§8 qayda 11).{% endcomment %}
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pr-assess">{% trans "Qiymətləndirmə forması" context "accounts.curriculum" %}</label>
-        <select class="ems-select" id="tof-pr-assess" name="assessment_form">
-            {% for option in curriculum_editor_section.assessment_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pr-assess" name="assessment_form" data-bootstrap-select>
+                {% for option in curriculum_editor_section.assessment_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pr-lang">{% trans "Tədris dili" context "accounts.curriculum" %}</label>
@@ -65,11 +72,16 @@ təsdiqə göndərməni bloklayır (§8 qayda 11).{% endcomment %}
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-pr-chair">{% trans "Tədris edən kafedra" context "accounts.curriculum" %}</label>
-        <select class="ems-select" id="tof-pr-chair" name="teaching_chair">
-            <option value="">{% trans "Təyin edilməyib" context "accounts.curriculum" %}</option>
-            {% for option in curriculum_editor_section.chair_options %}
-                <option value="{{ option.value }}">{{ option.label }}</option>
-            {% endfor %}
-        </select>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-pr-chair" name="teaching_chair"
+                    data-bootstrap-select data-live-search="true"
+                    data-live-search-placeholder="{% trans 'Kafedra adı ilə axtar…' context 'accounts.curriculum' %}"
+                    data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.curriculum' %}">
+                <option value="">{% trans "Təyin edilməyib" context "accounts.curriculum" %}</option>
+                {% for option in curriculum_editor_section.chair_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
 </div>

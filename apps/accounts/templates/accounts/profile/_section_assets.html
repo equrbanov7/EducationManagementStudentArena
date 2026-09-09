@@ -21,9 +21,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
         yükləyirdi (2026-07-31 auditi).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260907-createbtn">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260909-mobilehead">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260902-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260909-hero">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     {% if 'statistics' in allowed_sections %}
@@ -98,14 +98,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic.css' %}?v=20260831-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_academic_actions.css' %}?v=20260831-1">
     {% endif %}
-    {% if 'teaching-handover' in allowed_sections %}
-    {% comment %}Fənn təhvili — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
-    görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
-    əvvəl səth (addım kartları, süzgəclər, cədvəl), sonra üst qatlar (düymələr,
-    modallar, mobil override-lar).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260831-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover_dialog.css' %}?v=20260831-1">
-    {% endif %}
+    {% comment %}Fənn təhvili — 2026-09-09-dan `ems_ui` komponentləri üzərindədir;
+    bölmə-xüsusi düzüm TƏK fayldadır və şablonun ÖZÜ onu yükləyir (AJAX swap-da
+    da gəlsin deyə). Köhnə ikinci fayl (`…_dialog.css`) ləğv edildi — dialoq
+    üslubu artıq `ems_ui/overlay.css`-dədir.{% endcomment %}
     {% if 'workload-distribution' in allowed_sections or 'my-workload' in allowed_sections %}
     {% comment %}Dərs yükü — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
     görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
@@ -121,7 +117,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     ⚠️ `syllabus_list.css` ortaq primitivləri (KPI kartı, filtr paneli, cədvəl,
     səhifələmə) da daşıyır — təsdiq ekranı onları TƏKRAR TƏRİF ETMİR, ona görə
     kafedra müdiri «Sillabuslar» bölməsini görməsə də bu fayl yüklənir.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_base.css' %}?v=20260909-select">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_dialog.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
@@ -155,15 +151,18 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     {% endif %}
     {% if 'my-schedule' in allowed_sections or 'schedule-manage' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260712-3">
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260909-select">
+    {% comment %}Həftəlik matris — «Dərs cədvəli» (yalnız-oxu) ilə «Cədvəl
+    idarəetməsi» (redaktor) ARASINDA ORTAQ grid stili.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'registrar/css/schedule_matrix.css' %}?v=20260909-matrix">
     {% endif %}
     {% if 'schedule-manage' in allowed_sections %}
-    {% comment %}Cədvəl idarəetməsi paneli — `registrar/css/schedule.css` (grid)
-    ÜZƏRİNƏ qurulur, ona görə ondan SONRA yüklənməlidir (kaskad).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/schedule_manage.css' %}?v=20260902-1">
+    {% comment %}Redaktorun öz xromu (həftə pilləri, dialoq sahələri, park
+    siyahısı) — matris CSS-indən SONRA yüklənir (kaskad).{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor.css' %}?v=20260909-confirm">
     {% endif %}
     {% if 'student-intake' in allowed_sections or 'teacher-intake' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260902-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260909-bulkadd">
     {% endif %}
     {% if 'academic-calendar' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
@@ -203,7 +202,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     əlavə olaraq mövcud `student_intake.css` fayl-yükləmə üslubunu işlədir,
     ona görə o fayl ondan ƏVVƏL yüklənməlidir (kaskad).{% endcomment %}
     {% if 'student-admission' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260909-bulkadd">
     {% endif %}
     {% if 'student-admission' in allowed_sections or 'student-registry' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_services.css' %}?v=20260903-3">

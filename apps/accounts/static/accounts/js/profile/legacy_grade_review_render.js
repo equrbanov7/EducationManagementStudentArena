@@ -5,8 +5,8 @@
  * vəziyyət (state) və şəbəkə çağırışı YOXDUR. Əsas modul onu null-safe çağırır,
  * ona görə yüklənmə sırası pozulsa da bölmə çökmür.
  *
- * Niyə ayrı fayl? Modul ölçü büdcəsi (SOFT_CAP = 600 sətir) + iş bölgüsü —
- * `teaching_handover_render.js` ilə eyni naxış.
+ * Niyə ayrı fayl? Modul ölçü büdcəsi (SOFT_CAP = 600 sətir) + iş bölgüsü:
+ * saf render ayrıca test edilir, əsas modul isə vəziyyəti saxlayır.
  *
  * ⚠️ MƏTN HƏMİŞƏ `textContent` ilə yazılır. Sətirlərdə tələbə adı, köhnə jurnal
  * referansı və operator qeydi var — `innerHTML` burada XSS qapısı olardı.
@@ -64,6 +64,9 @@
         host.innerHTML = "";
         (rows || []).forEach(function (row) {
             var chip = el("button", "lgr-chip is-" + row.severity);
+            // Uzun kateqoriya adı çipi bir neçə sətrə açırdı (sahib, 2026-09-09):
+            // mətn tək sətirdə kəsilir, tam adı tooltip-də qalır.
+            chip.title = row.label + (row.hint ? " — " + row.hint : "");
             chip.type = "button";
             chip.title = row.hint || "";
             chip.setAttribute("aria-pressed", active.indexOf(row.code) === -1 ? "false" : "true");

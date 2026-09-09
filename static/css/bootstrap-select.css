@@ -48,12 +48,14 @@
     color: #17233b;
 }
 
+/* 2026-09-09 (sahib): «inputların içində göy border olmasın» — 4px göy halqa
+   daxili haşiyə kimi oxunurdu. Fokus indi nazik neytral konturla verilir. */
 .bootstrap-single-select__toggle:focus,
 .bootstrap-single-select__toggle.show {
-    border-color: #4b7cf0;
+    border-color: var(--ems-neutral-500, #64748b);
     background: var(--ems-neutral-0);
     color: #17233b;
-    box-shadow: 0 0 0 4px rgba(75, 124, 240, 0.14);
+    box-shadow: none;
 }
 
 .bootstrap-single-select__toggle.is-placeholder {
@@ -268,8 +270,8 @@
 
 .bootstrap-single-select--ems .bootstrap-single-select__toggle:focus,
 .bootstrap-single-select--ems .bootstrap-single-select__toggle.show {
-    border-color: var(--ems-primary-500, #4b7cf0);
-    box-shadow: var(--ems-sh-focus, 0 0 0 3px rgba(75, 124, 240, 0.14));
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
 }
 
 .bootstrap-single-select--ems .bootstrap-single-select__menu {

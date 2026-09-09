@@ -361,3 +361,188 @@ class DashboardQueryBudgetTest(DashboardSectionBase):
                     MAX_DASHBOARD_QUERIES,
                     "%s: %s sorğu — büdcə %s" % (role_name, len(captured), MAX_DASHBOARD_QUERIES),
                 )
+
+
+class DashboardRenderTest(DashboardSectionBase):
+    """Panelin RENDER müqaviləsi (2026-09-09 redizaynı).
+
+    Nəyi qoruyur:
+      * qabıq başlığı TƏKDİR — panelin öz `<h1>`-i yoxdur (`ems_ui` başlığına
+        yalnız `header_subtitle` ötürülür);
+      * CSP: panel fraqmentində inline `style="…"` və `<style>`/`<script>` gövdəsi
+        YOXDUR (CLAUDE.md);
+      * vidjet açarları və keçid linkləri markup-da olduğu kimi qalır;
+      * boş vidjet «bomboş qutu» deyil — sakit boş-hal mətni göstərir.
+    """
+
+    #: Render yoxlaması ən azı bu üç nöqteyi-nəzəri əhatə etməlidir.
+    RENDERED_ROLES = ("student", "teacher", "ikt_rehber", "exam_center_head", "rector")
+
+    def panel_html(self, role_name) -> str:
+        """Yalnız bölmə panelinin HTML-i (AJAX fraqmenti) — qabıq daxil deyil."""
+        url = reverse("accounts:profile_section_fragment", kwargs={"section": "dashboard"})
+        response = self.client_for(self.actors[role_name]).get(url)
+        self.assertEqual(response.status_code, 200, role_name)
+        payload = response.json()
+        self.assertTrue(payload["ok"], role_name)
+        return payload["html"]
+
+    def test_panel_has_no_heading_of_its_own(self):
+        for role_name in self.RENDERED_ROLES:
+            with self.subTest(role=role_name):
+                self.assertNotIn("<h1", self.panel_html(role_name))
+
+    def test_panel_has_no_inline_style_or_script(self):
+        for role_name in self.RENDERED_ROLES:
+            with self.subTest(role=role_name):
+                html = self.panel_html(role_name)
+                self.assertNotIn('style="', html)
+                self.assertNotIn("<style", html)
+                self.assertNotIn("<script", html)
+
+    def test_widget_keys_and_links_survive_the_redesign(self):
+        for role_name in self.RENDERED_ROLES:
+            with self.subTest(role=role_name):
+                response = self.open_dashboard(role_name)
+                html = self.panel_html(role_name)
+                widgets = response.context["dashboard_section"]["widgets"]
+                self.assertTrue(widgets, role_name)
+                for item in widgets:
+                    self.assertIn('data-dash-widget="%s"' % item["key"], html)
+                    if item["link"]:
+                        self.assertIn('data-section="%s"' % item["link"]["section"], html)
+                        self.assertIn("js-profile-section-link", html)
+
+    def test_empty_widget_renders_a_calm_empty_state(self):
+        """Rəqəmi sıfır olan vidjet boş qutu deyil — izah mətni görünür."""
+        seen = 0
+        for role_name in self.RENDERED_ROLES:
+            response = self.open_dashboard(role_name)
+            html = self.panel_html(role_name)
+            for item in response.context["dashboard_section"]["widgets"]:
+                if not (item["is_empty"] and item["empty"]):
+                    continue
+                seen += 1
+                self.assertIn(str(item["empty"]), html, "%s → %s" % (role_name, item["key"]))
+        self.assertGreater(seen, 0, "boş vidjet nümunəsi tapılmadı — test mənasızdır")
+
+    def test_hero_strip_is_capped_and_well_formed(self):
+        from apps.accounts.views.profile._sections.dashboard_layout import MAX_HERO_TILES, MIN_HERO_TILES
+
+        for role_name in self.RENDERED_ROLES:
+            with self.subTest(role=role_name):
+                tiles = self.open_dashboard(role_name).context["dashboard_section"]["kpi_tiles"]
+                self.assertLessEqual(len(tiles), MAX_HERO_TILES)
+                if tiles:
+                    self.assertGreaterEqual(len(tiles), MIN_HERO_TILES)
+                for tile in tiles:
+                    self.assertTrue(str(tile["label"]).strip())
+                    self.assertNotIn(str(tile["value"]).strip(), ("", "0", "0%"))
+
+    def test_actionable_widgets_are_sorted_before_link_cards(self):
+        """Sıralama: hərəkət gözləyən → dolu → boş → keçid kartı."""
+        for role_name in self.RENDERED_ROLES:
+            with self.subTest(role=role_name):
+                widgets = self.open_dashboard(role_name).context["dashboard_section"]["widgets"]
+                variants = [item["variant"] for item in widgets]
+                self.assertEqual(variants, sorted(variants, key=lambda value: value == "link"))
+
+    def test_link_cards_are_rendered_as_compact_shortcuts(self):
+        """Rəqəmsiz vidjet böyük boş kart deyil — yığcam keçid kartıdır."""
+        response = self.open_dashboard("ikt_rehber")
+        html = self.panel_html("ikt_rehber")
+        section = response.context["dashboard_section"]
+        self.assertGreater(section["link_count"], 0)
+        self.assertIn("dash-link", html)
+        self.assertIn("Bölmələrə keçid", html)
+
+
+class DashboardLayoutUnitTest(TestCase):
+    """`dashboard_layout` — sıralama, «+N daha» və hero seçimi (bazasız)."""
+
+    @staticmethod
+    def _widget(key, **kwargs):
+        from apps.accounts.views.profile._sections.dashboard_widgets import widget
+
+        return widget(key, key.title(), "fa-circle", **kwargs)
+
+    def test_widget_without_numbers_or_rows_becomes_a_link_card(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate(
+            [
+                self._widget("nav", empty="Bölməyə keçid."),
+                self._widget("data", stats=[{"label": "Gözləyən", "value": 2, "note": ""}]),
+            ]
+        )
+        self.assertEqual({item["key"]: item["variant"] for item in cards}, {"nav": "link", "data": "data"})
+        self.assertEqual(layout.count_variant(cards, "link"), 1)
+
+    def test_order_is_attention_then_filled_then_empty_then_links(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate(
+            [
+                self._widget("nav", empty="Keçid."),
+                self._widget("zero", stats=[{"label": "Gözləyən", "value": 0, "note": ""}]),
+                self._widget("filled", stats=[{"label": "Cəmi", "value": 12, "note": ""}]),
+                self._widget("urgent", tone="warning", stats=[{"label": "Növbədə", "value": 4, "note": ""}]),
+            ]
+        )
+        self.assertEqual([item["key"] for item in cards], ["urgent", "filled", "zero", "nav"])
+        self.assertTrue(cards[0]["attention"])
+
+    def test_more_count_reports_rows_hidden_by_the_row_limit(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate(
+            [
+                self._widget(
+                    "queue",
+                    stats=[{"label": "Növbədə", "value": 9, "note": ""}],
+                    rows=[{"title": "x", "meta": ""}] * 5,
+                ),
+                # Rəqəm mətndirsə fərq hesablanmır (yanlış «+N» göstərməkdənsə heç nə).
+                self._widget(
+                    "textual",
+                    stats=[{"label": "Status", "value": "planlanıb", "note": ""}],
+                    rows=[{"title": "x", "meta": ""}],
+                ),
+            ]
+        )
+        self.assertEqual({item["key"]: item["more_count"] for item in cards}, {"queue": 4, "textual": 0})
+
+    def test_hero_takes_the_first_numeric_stat_only(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate(
+            [
+                self._widget("a", stats=[{"label": "Növbədə", "value": 4, "note": "sillabus"}]),
+                self._widget("b", stats=[{"label": "Cəmi", "value": 12, "note": ""}]),
+                # Sıfır rəqəm hero-ya çıxmır — İKİNCİ rəqəm (proqram limiti) də yox.
+                self._widget(
+                    "c",
+                    stats=[{"label": "Qayıb", "value": 0, "note": ""}, {"label": "Limit", "value": "25%", "note": ""}],
+                ),
+                # Status mətni rəqəm deyil — zolaqda yeri yoxdur.
+                self._widget("d", stats=[{"label": "Status", "value": "tapşırıq yoxdur", "note": ""}]),
+                self._widget("e", empty="Keçid."),
+            ]
+        )
+        tiles = layout.hero_tiles(cards)
+        self.assertEqual([tile["value"] for tile in tiles], [4, 12])
+        self.assertEqual(tiles[0]["note"], "Növbədə · sillabus")
+
+    def test_hero_is_hidden_when_there_is_only_one_number(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate([self._widget("solo", stats=[{"label": "Cəmi", "value": 3, "note": ""}])])
+        self.assertEqual(layout.hero_tiles(cards), [])
+
+    def test_hero_is_capped_at_four_tiles(self):
+        from apps.accounts.views.profile._sections import dashboard_layout as layout
+
+        cards = layout.decorate(
+            [self._widget("w%s" % i, stats=[{"label": "Cəmi", "value": i + 1, "note": ""}]) for i in range(7)]
+        )
+        self.assertEqual(len(layout.hero_tiles(cards)), layout.MAX_HERO_TILES)

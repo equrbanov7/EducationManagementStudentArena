@@ -1,0 +1,60 @@
+{% load i18n %}
+{% comment %}«Bankı redaktə et» dialoqunun sahələri.
+
+Sahə ID-ləri (`editBankName2`, `editBankKind2`, `editBankFormat2`,
+`editBankLanguage2`) və seçici çəngəlləri DƏYİŞMİR — `questionBankList.js`
+dialoqu məhz bu ID-lərlə doldurur; forma action-ı da JS-dən gəlir
+(`exams:question_bank_update`).
+{% endcomment %}
+<div class="qbank-form">
+    <div class="ems-field qbank-form__full">
+        <label class="ems-field__label" for="editBankName2">{% trans "Bankın adı" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input type="text" class="ems-input" id="editBankName2" name="name" required maxlength="255" autocomplete="off">
+    </div>
+
+    <div class="ems-field qbank-form__full" role="group" aria-labelledby="qb-edit-subject-label">
+        <span class="ems-field__label" id="qb-edit-subject-label">{% trans "Fənn" context "exams.template.question_bank_list" %}</span>
+        <input type="hidden" name="subject_id" data-qbk-subject-input>
+        {% trans "fənn axtar…" context "exams.template.question_bank_list" as qbk_edit_subject_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-subject" placeholder=qbk_edit_subject_ph %}
+    </div>
+
+    {% if qbl_is_center %}
+    <div class="ems-field qbank-form__full" role="group" aria-labelledby="qb-edit-teacher-label">
+        <span class="ems-field__label" id="qb-edit-teacher-label">{% trans "Sualı göndərən müəllim" context "exams.template.question_bank_list" %}</span>
+        <input type="hidden" name="source_teacher_id" data-qbk-teacher-input>
+        {% trans "müəllim axtar…" context "exams.template.question_bank_list" as qbk_edit_teacher_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="qbk" hook="qbk-edit-teacher" placeholder=qbk_edit_teacher_ph %}
+    </div>
+    {% endif %}
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="editBankKind2">{% trans "İmtahan növü" context "exams.template.question_bank_list" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="editBankKind2" name="exam_kind" data-bootstrap-select>
+                {% for value, label in exam_kind_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                {% if qbl_is_center %}
+                <option value="">{% trans "Ümumi (təyinatsız)" context "exams.template.question_bank_list" %}</option>
+                {% endif %}
+            </select>
+        </div>
+    </div>
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="editBankFormat2">{% trans "Standart format" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="editBankFormat2" name="default_question_type" data-bootstrap-select>
+                {% for value, label in default_type_choices %}<option value="{{ value }}">{% if value == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="ems-field">
+        <label class="ems-field__label" for="editBankLanguage2">{% trans "Əsas dil" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="editBankLanguage2" name="language" data-bootstrap-select>
+                {% for code, label in language_choices %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+</div>

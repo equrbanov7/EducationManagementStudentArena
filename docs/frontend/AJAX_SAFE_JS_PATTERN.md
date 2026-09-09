@@ -74,7 +74,6 @@ problemini verə bilər — lazım olduqca eyni qaydada (`EMSReady` sarğısı +
 `EMSDelegate.on`) keçirin:
 
 - `apps/accounts/static/accounts/js/category_management.js`
-- `apps/accounts/static/accounts/js/role_assignment_search.js`
 - `apps/accounts/static/accounts/js/permission_editor_ui.js`
 - `apps/accounts/static/accounts/js/manage_roles.js`
 - `apps/accounts/static/accounts/js/superadmin_user_management.js`

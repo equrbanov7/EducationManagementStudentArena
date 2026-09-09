@@ -1,0 +1,7 @@
+{% comment %}Vəziyyət — badge + SƏBƏB (yalnız rəng deyil, mətn; a11y §7).
+Səbəb sətrin YANINDA, qırmızı divar şəklində deyil: aqreqat say yuxarıdakı
+lentdədir, burada isə məhz bu sətrin niyəsi yazılır.{% endcomment %}
+{% include "partials/ems_ui/_status_badge.html" with status=row.data.status wrap=True %}
+{% if row.data.blocker_text %}
+    <span class="thx-why" id="thx-b-{{ row.data.id }}">{{ row.data.blocker_text }}</span>
+{% endif %}

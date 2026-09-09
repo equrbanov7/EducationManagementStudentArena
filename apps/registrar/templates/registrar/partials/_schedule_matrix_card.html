@@ -1,0 +1,61 @@
+{% load i18n %}
+{% comment %}Matris xanasındakı BİR dərs kartı (`item.slot`).
+
+İKİ İSTEHLAKÇI, BİR MARKUP:
+  · yalnız-oxu «Dərs cədvəli» — `data-sgx-slot` + `data-*` sahələri detal
+    modalını doldurur (`registrar/js/schedule_grid.js`, dəyişmir);
+  · redaktor — `data-sedit-slot` + `draggable` (`accounts/js/schedule_editor.js`).
+    Redaktorda `data-sgx-slot` QƏSDƏN YAZILMIR: əks halda bir klik həm detal
+    modalını, həm redaktə dialoqunu açardı. Inline handler YOXDUR (CSP).
+
+Klaviatura ilə köçürmə: kart Enter/Space ilə açılan dialoqda «Yerini dəyiş»
+sahələri var — sürüklə-buraxın əlçatan qarşılığı.{% endcomment %}
+{% with slot=item.slot off=item.slot.offering %}
+<button type="button"
+        class="smtx-card smtx-card--{{ slot.kind }}{% if not item.this_week %} is-offweek{% endif %}"
+        {% if not matrix_editable %}data-sgx-slot{% endif %}
+        {% if matrix_editable %}
+        data-sedit-slot="{{ slot.id }}"
+        draggable="true"
+        data-subject-id="{{ off.subject_id }}"
+        data-instructor-id="{{ off.instructor_id|default_if_none:'' }}"
+        data-slot-kind="{{ slot.kind }}"
+        data-week-type="{{ slot.week_type }}"
+        data-weekday="{{ slot.weekday }}"
+        data-time-slot="{{ slot.start_time|time:'H:i' }}|{{ slot.end_time|time:'H:i' }}"
+        {% endif %}
+        data-code="{{ off.subject.code }}"
+        data-name="{{ off.subject.name }}"
+        data-kind="{{ slot.kind }}"
+        data-kind-label="{{ slot.get_kind_display }}"
+        data-when="{% if cell.date %}{{ cell.date|date:'d.m.Y' }} · {% endif %}{{ row.start_text }}–{{ row.end_text }}"
+        data-parity="{{ slot.week_type }}"
+        data-parity-label="{% if slot.week_type == 'odd' %}{% trans 'Üst həftə' context 'registrar.schedule' %}{% elif slot.week_type == 'even' %}{% trans 'Alt həftə' context 'registrar.schedule' %}{% else %}{% trans 'Hər həftə' context 'registrar.schedule' %}{% endif %}{% if not item.this_week %} · {% trans 'bu həftə yox' context 'registrar.schedule' %}{% endif %}"
+        data-room="{{ slot.room }}"
+        data-ects="{{ off.subject.ects }}"
+        {% if matrix_role == 'student' and off.instructor %}data-teacher="{{ off.instructor.get_full_name|default:off.instructor.username }}"{% endif %}
+        {% if matrix_role == 'teacher' %}
+        data-group="{% if off.group %}{{ off.group.name }}{% endif %}"
+        data-count="{{ item.student_count|default:0 }}"
+        data-journal-url="{% url 'registrar:journal_detail' off.id %}"
+        {% endif %}
+        {% if matrix_role == 'manage' %}
+        data-group="{% if off.group %}{{ off.group.name }}{% endif %}"
+        {% if off.instructor %}data-teacher="{{ off.instructor.get_full_name|default:off.instructor.username }}"{% endif %}
+        {% endif %}
+        {% if item.stats %}
+        data-abs="{{ item.stats.absence_hours }}"
+        data-abs-limit="{{ item.stats.allowed_absence|floatformat:0 }}"
+        data-entry="{{ item.stats.entry_score|floatformat:'-2' }}"
+        data-entry-max="{{ item.stats.entry_score_max }}"
+        data-barred="{{ item.stats.barred|yesno:'1,0' }}"
+        {% endif %}>
+    <span class="smtx-card__top">
+        {% if slot.week_type == 'odd' %}<span class="smtx-chip smtx-chip--odd">{% trans "ÜST" context "registrar.schedule_grid" %}</span>
+        {% elif slot.week_type == 'even' %}<span class="smtx-chip smtx-chip--even">{% trans "ALT" context "registrar.schedule_grid" %}</span>{% endif %}
+        <span class="smtx-card__title">{{ off.subject.name|default:off.subject.code }}</span>
+    </span>
+    <span class="smtx-card__meta">{{ slot.get_kind_display }}{% if matrix_role == 'teacher' and off.group %} · {{ off.group.name }}{% elif off.instructor %} · {{ off.instructor.get_full_name|default:off.instructor.username }}{% endif %}</span>
+    {% if slot.room %}<span class="smtx-card__room"><i class="fas fa-location-dot" aria-hidden="true"></i> {{ slot.room }}</span>{% endif %}
+</button>
+{% endwith %}

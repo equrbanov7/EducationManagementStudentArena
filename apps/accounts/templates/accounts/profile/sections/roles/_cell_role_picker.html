@@ -1,0 +1,32 @@
+{% load i18n %}
+{% comment %}«Dəyişəcək rol» xanası — şəxsin ƏSAS üzvlüyünə yeni rol seçici +
+«Rolu yenilə» düyməsi. Düymə təsdiq dialoqunu açır (`roles_ui.js`), dialoq isə
+əməliyyat tokeni ilə göndərir (bax `roles/_assignment_flow`).{% endcomment %}
+<div class="rls-picker">
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" name="role_id"
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"
+                data-role-assignment-role-select
+                aria-label="{% blocktrans context 'accounts.role_assignment' with person=row.data.name %}{{ person }} — yeni rol{% endblocktrans %}"
+                {% if not role_assignment_section.can_assign_roles %}disabled{% endif %}>
+            {% for option in role_assignment_section.role_choices %}
+            <option value="{{ option.value }}" {% if option.value == row.data.role_id %}selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="button"
+            class="ems-btn ems-btn--sm ems-btn--primary js-role-assignment-action-confirm"
+            data-target-action="update_member"
+            data-target-membership-id="{{ row.data.membership_id }}"
+            data-target-user-id="{{ row.data.user_id }}"
+            data-user-full-name="{{ row.data.name }}"
+            data-user-username="{{ row.data.username }}"
+            data-user-email="{{ row.data.email }}"
+            data-organization-name="{{ row.data.organization_name }}"
+            data-old-role="{{ row.data.old_role }}"
+            {% if not role_assignment_section.can_assign_roles %}disabled{% endif %}>
+        {% trans "Rolu yenilə" context "accounts.role_assignment" %}
+    </button>
+</div>

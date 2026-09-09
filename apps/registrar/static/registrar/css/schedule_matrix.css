@@ -1,0 +1,356 @@
+/* ═══ Həftəlik cədvəl matrisi — ORTAQ grid (redaktor + yalnız-oxu) ══════════
+   Partial: registrar/partials/_schedule_matrix*.html
+   Rənglər YALNIZ `--ems-*` tokenlərindəndir (design-tokens.css).
+   Kiçik ekranda (375px) cədvəl ÖZ konteynerində üfüqi sürüşür; səhifə gövdəsi
+   heç vaxt yana sürüşmür. Saat sütunu sticky qalır ki, sürüşəndə itməsin. */
+
+.smtx {
+    margin: var(--ems-sp-5, 12px) 0;
+}
+
+.smtx__scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    -webkit-overflow-scrolling: touch;
+}
+
+.smtx__scroll:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 2px;
+}
+
+.smtx__table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.smtx__caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.smtx__sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ── Başlıqlar ──────────────────────────────────────────────────────────── */
+.smtx__corner,
+.smtx__day {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-border);
+    padding: var(--ems-sp-3, 8px);
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.smtx__corner {
+    left: 0;
+    z-index: 4;
+    width: 84px;
+    min-width: 84px;
+}
+
+.smtx__day.is-today {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.smtx__day-name {
+    display: block;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text);
+}
+
+.smtx__day-sub {
+    display: block;
+    font-weight: 600;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+}
+
+.smtx__day-exam {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 700;
+}
+
+/* ── Saat sütunu ────────────────────────────────────────────────────────── */
+.smtx__time {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    width: 84px;
+    min-width: 84px;
+    background: var(--ems-bg-subtle);
+    border-right: 1px solid var(--ems-border);
+    border-bottom: 1px solid var(--ems-border);
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-2, 6px);
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 700;
+}
+
+.smtx__no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+}
+
+.smtx__hours {
+    display: block;
+    margin-top: 3px;
+    line-height: 1.25;
+}
+
+.smtx__hours b {
+    display: block;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text);
+}
+
+.smtx__hours small {
+    display: block;
+    font-size: var(--ems-fs-2xs);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.smtx__row--afternoon .smtx__no {
+    background: var(--ems-emerald-100);
+    color: var(--ems-success-strong);
+}
+
+.smtx__row--evening .smtx__no {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+/* ── Xanalar ────────────────────────────────────────────────────────────── */
+.smtx__cell {
+    position: relative;
+    border-right: 1px solid var(--ems-border);
+    border-bottom: 1px solid var(--ems-border);
+    padding: var(--ems-sp-2, 6px);
+    vertical-align: top;
+    min-width: 116px;
+    height: 74px;
+}
+
+.smtx__cell.is-today {
+    background: var(--ems-primary-50);
+}
+
+.smtx--editable .smtx__cell.is-drop-target {
+    background: var(--ems-emerald-50);
+    box-shadow: inset 0 0 0 2px var(--ems-success);
+}
+
+.smtx__band td {
+    padding: var(--ems-sp-3, 8px);
+    background: var(--ems-neutral-100);
+    border-bottom: 1px solid var(--ems-border);
+    font-size: var(--ems-fs-xs);
+}
+
+.smtx__band-badge {
+    display: inline-block;
+    margin-right: var(--ems-sp-3, 8px);
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-700);
+    color: var(--ems-neutral-0);
+    font-weight: 700;
+}
+
+.smtx__band-hint {
+    color: var(--ems-text-muted);
+}
+
+/* «+» — boş xanaya dərs qoymaq (yalnız redaktor). */
+.smtx__add {
+    display: none;
+    width: 100%;
+    min-height: 56px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-md);
+    background: transparent;
+    color: var(--ems-neutral-400);
+    cursor: pointer;
+}
+
+.smtx--editable .smtx__add {
+    display: block;
+}
+
+.smtx--editable .smtx__cell:not(.is-empty) .smtx__add {
+    min-height: 22px;
+    margin-top: 4px;
+    opacity: 0;
+}
+
+.smtx--editable .smtx__cell:hover .smtx__add,
+.smtx--editable .smtx__add:focus-visible {
+    opacity: 1;
+    border-color: var(--ems-primary-500);
+    color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.smtx__add:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+}
+
+/* ── Dərs kartı ─────────────────────────────────────────────────────────── */
+.smtx-card {
+    display: block;
+    width: 100%;
+    margin-bottom: 4px;
+    padding: 6px 8px;
+    border: 1px solid var(--ems-border);
+    border-left: 3px solid var(--ems-neutral-400);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-50);
+    color: var(--ems-text);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+
+.smtx-card:last-child {
+    margin-bottom: 0;
+}
+
+.smtx-card:hover {
+    box-shadow: var(--ems-sh-card);
+}
+
+.smtx-card:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 1px;
+}
+
+.smtx-card.is-offweek {
+    opacity: 0.55;
+}
+
+.smtx-card.is-dragging {
+    opacity: 0.4;
+}
+
+.smtx-card--lecture {
+    background: var(--ems-primary-50);
+    border-left-color: var(--ems-primary-600);
+}
+
+.smtx-card--seminar {
+    background: var(--ems-emerald-50);
+    border-left-color: var(--ems-teal-500);
+}
+
+.smtx-card--lab {
+    background: var(--ems-warning-100);
+    border-left-color: var(--ems-warning-600);
+}
+
+.smtx-card__top {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.smtx-card__title {
+    display: block;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.smtx-card__meta,
+.smtx-card__room {
+    display: block;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.smtx-chip {
+    flex: 0 0 auto;
+    padding: 0 5px;
+    border-radius: var(--ems-r-xs);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.smtx-chip--odd {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.smtx-chip--even {
+    background: var(--ems-warning-600);
+    color: var(--ems-neutral-0);
+}
+
+.smtx__hint {
+    margin: var(--ems-sp-3, 8px) 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Dar ekran ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .smtx__table {
+        min-width: 680px;
+    }
+
+    .smtx__cell {
+        min-width: 104px;
+        height: 68px;
+    }
+
+    .smtx__corner,
+    .smtx__time {
+        width: 66px;
+        min-width: 66px;
+    }
+}
