@@ -53,6 +53,12 @@ x-app-env: &app-env
   DJANGO_SETTINGS_MODULE: config.settings.production
   APP_ENV: ${APP_ENV:-production}
   APP_VERSION: ${APP_VERSION:-unknown}
+  # `production.py` TLS məcburiyyəti söndürülübsə QALXMIR (2026-09-10
+  # təhlükəsizlik qapısı). Defolt `False`-dur — yəni prod yığını qorunur.
+  # Yalnız CI-nin düz-HTTP `prod-smoke` yığını bunu `1` ilə örtür; bayraq
+  # ANCHOR-dadır ki, prod settings-i yükləyən HƏR xidmət (app, celery, beat)
+  # eyni dəyəri alsın.
+  INSECURE_TRANSPORT_OK: ${INSECURE_TRANSPORT_OK:-False}
   # EXAM-P0-01: runtime ayrıca NOSUPERUSER NOBYPASSRLS rolu ilə qoşulur —
   # superuser FORCE RLS-i belə yan keçir. APP_DATABASE_USER verilməyibsə
   # köhnə davranışa (bootstrap user) düşür ki, mövcud deploy qırılmasın;
