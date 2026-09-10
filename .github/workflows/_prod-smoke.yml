@@ -24,6 +24,11 @@ jobs:
       APP_DATABASE_USER: emsarena_app
       APP_DATABASE_PASSWORD: ci-smoke-app-role-password
       EMS_DB_ROLE_ENFORCE: error
+      # `production.py` TLS məcburiyyəti söndürüləndə qalxmır (2026-09-10
+      # təhlükəsizlik qapısı). Bu yığın CI-də DÜZ HTTP üzərindədir, ona görə
+      # istisna AÇIQ bildirilir — prod hostda belə bir sətir olmamalıdır.
+      # İŞ səviyyəsindədir ki, yığını qaldıran hər addım onu görsün.
+      INSECURE_TRANSPORT_OK: "1"
 
     steps:
       - name: 📥 Checkout code
@@ -66,10 +71,6 @@ jobs:
           SECURE_SSL_REDIRECT: "False"
           SESSION_COOKIE_SECURE: "False"
           CSRF_COOKIE_SECURE: "False"
-          # `production.py` TLS məcburiyyəti söndürüləndə qalxmır (2026-09-10
-          # audit qapısı). Bu yığın CI-də DÜZ HTTP üzərindədir, ona görə istisna
-          # AÇIQ şəkildə bildirilir — prod hostda belə bir sətir olmamalıdır.
-          INSECURE_TRANSPORT_OK: "1"
         run: |
           # Docker Hub anonim pull-lar paylaşılan CI IP-sində rate-limit-ə (toomanyrequests)
           # və ya keçici "unknown" manifest xətasına düşə bilir. Stack-i 3 dəfəyə qədər
