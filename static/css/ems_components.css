@@ -93,6 +93,27 @@ textarea:focus-visible,
     outline-offset: 2px;
 }
 
+/* ⚠️ 2026-09-11 (sahib: «bir çox belə input search-də DAXİLİ outline border
+   var — harada işlənibsə kəs»). Yuxarıdakı qlobal halqa `input:focus-visible`
+   (0,1,1) sinif-yalnız komponent selektorunu (`.ems-ss__search` = 0,1,0)
+   ÜSTƏLƏYİR, ona görə sarğısı ÖZ fokus vəziyyətini göstərən input-lar
+   (axtarış-seçici, qlobal axtarış, select-in daxili axtarışı …) ikinci —
+   daxili — göy halqa alırdı: xaricdə sarğı konturu, içəridə outline. Belə
+   input-larda halqa sarğınındır; daxili outline burada söndürülür. Yeni
+   sarğı-əsaslı axtarış qutusu yaranırsa, onu bu siyahıya əlavə edin. */
+.ems-ss__search:focus-visible,
+.gsearch__input:focus-visible,
+.bootstrap-single-select__search-input:focus-visible,
+.search-field__input:focus-visible,
+.nfx-search input:focus-visible,
+.ppx-search input:focus-visible,
+.qsubq-search input:focus-visible,
+.filter-toolbar__search input:focus-visible,
+.pin-entry-input-wrap input:focus-visible,
+.stsvc__kind input:focus-visible {
+    outline: none;
+}
+
 /* ── Reusable search input (partials/_search_input.html) ──────────────────────
    Sağda kiçik axtarış ikonu + təmizlə (×). WCU tokens → light/dark avtomatik. */
 .search-field {

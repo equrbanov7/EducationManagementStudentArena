@@ -6,8 +6,8 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'trial_exams/css/trial_exam.css' %}?v=20260616">
-    {# No-JS fallback: never trap the user behind a skeleton. External stylesheet
-       loaded only inside <noscript> so it never affects JS-enabled users. #}
+    {% comment %}No-JS fallback: never trap the user behind a skeleton. External
+    stylesheet loaded only inside <noscript> so it never affects JS-enabled users.{% endcomment %}
     <noscript>
         <link rel="stylesheet" href="{% static 'trial_exams/css/trial_exam_noscript.css' %}">
     </noscript>

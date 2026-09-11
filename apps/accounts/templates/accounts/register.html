@@ -238,8 +238,8 @@
 <script src="{% static 'accounts/js/register_wizard/register_wizard.entry.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/auth_visibility_toggle.js' %}"></script>
 {{ lookup_payload|json_script:"signup-lookup-data" }}
-{# i18n strings for the register wizard — data block (CSP-safe, not executed);
-   read by register_globals.js into window.REGISTER_I18N. #}
+{% comment %}i18n strings for the register wizard — data block (CSP-safe, not
+executed); read by register_globals.js into window.REGISTER_I18N.{% endcomment %}
 <script type="application/json" id="register-i18n-data">
 {
     "auto_role_info_owner": "{% trans 'auto_role_info_owner' context 'accounts.register' %}",

@@ -25,7 +25,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260910-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_modals.css' %}?v=20260911-1">
 
     {% trans 'Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur.' context 'profile.edit_v2' as edit_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=edit_subtitle %}
@@ -209,8 +210,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
             </div>
         </div>
 
-        {# Status İKİ vəziyyətlidir və yeri həmişə tutulur — nişan peyda olub
-           yox olduqda düymələr sürüşməsin (görünüş stabilliyi). #}
+        {% comment %}Status İKİ vəziyyətlidir və yeri həmişə tutulur — nişan peyda
+        olub yox olduqda düymələr sürüşməsin (görünüş stabilliyi).{% endcomment %}
         <div class="edit-profile-savebar" id="editProfileSavebar" data-dirty="0">
             <span class="edit-profile-savebar__saved">
                 <i class="fas fa-circle-check" aria-hidden="true"></i>
@@ -267,7 +268,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
          data-label-edit="{% trans 'Qeydi redaktə et' context 'profile.academic_items' %}"
          data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <form id="academicItemForm" novalidate>
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="item_id" value="">
@@ -303,8 +304,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                        <button type="submit" class="btn btn-primary" id="academicItemSubmitBtn">
+                        <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                        <button type="submit" class="ems-btn ems-btn--primary" id="academicItemSubmitBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
                             <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.academic_items' %}
                         </button>
@@ -318,7 +319,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
     <div class="modal fade" id="academicItemDeleteModal" tabindex="-1" aria-hidden="true"
          data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">{% trans 'Qeydi sil' context 'profile.academic_items' %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.academic_items' %}"></button>
@@ -329,8 +330,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                     <p class="fw-semibold mb-0" id="academicItemDeleteTitle"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                    <button type="button" class="btn btn-danger" id="academicItemDeleteConfirmBtn" data-item-id="">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                    <button type="button" class="ems-btn ems-btn--danger" id="academicItemDeleteConfirmBtn" data-item-id="">
                         <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
                         <i class="fas fa-trash"></i> {% trans 'Sil' context 'profile.academic_items' %}
                     </button>
@@ -342,7 +343,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
     {# ── Saxlanmamış dəyişikliklə çıxış xəbərdarlığı ── #}
     <div class="modal fade" id="editProfileLeaveModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-circle-exclamation me-2"></i>{% trans 'Dəyişikliklər yadda saxlanmayıb' context 'profile.edit_v2' %}
@@ -353,13 +354,13 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                     <p class="mb-0">{% trans 'Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?' context 'profile.edit_v2' %}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">
                         {% trans 'Ləğv et' %}
                     </button>
-                    <button type="button" class="btn btn-outline-danger" id="editProfileLeaveWithoutSaving">
+                    <button type="button" class="ems-btn ems-btn--danger-ghost" id="editProfileLeaveWithoutSaving">
                         {% trans 'Saxlamadan çıx' context 'profile.edit_v2' %}
                     </button>
-                    <button type="button" class="btn btn-primary" id="editProfileSaveAndLeave">
+                    <button type="button" class="ems-btn ems-btn--primary" id="editProfileSaveAndLeave">
                         <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.edit_v2' %}
                     </button>
                 </div>

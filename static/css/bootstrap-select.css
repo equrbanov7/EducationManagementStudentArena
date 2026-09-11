@@ -239,9 +239,12 @@
     font-weight: 500;
 }
 
+/* Menyu-daxili axtarış: fokusda yalnız kontur tündləşir — göy parıltı və
+   daxili halqa YOX (sahib 2026-09-09/11); axtarış-seçici `.ems-ss` ilə eyni dil. */
 .bootstrap-single-select__search-input:focus {
-    border-color: #4b7cf0;
-    box-shadow: 0 0 0 3px rgba(75, 124, 240, 0.14);
+    outline: none;
+    border-color: var(--ems-neutral-500, #64748b);
+    box-shadow: none;
 }
 
 .bootstrap-single-select__search-empty {

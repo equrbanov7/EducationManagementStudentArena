@@ -196,11 +196,21 @@
     padding: 0.62rem 0.72rem;
 }
 
-.language-switcher--sidebar .language-switcher__menu {
-    left: 0;
-    right: auto;
+/* Menyu düymənin ÜSTÜNDƏ açılır — sürüşən sidebar-ın dibi onu kəsirdi
+   («altda dil itir, kəsilir»). ⚠️ Bootstrap açılanda menyuya
+   `data-bs-popper="static"` yazır və `.dropdown-menu[data-bs-popper]
+   { top: 100% }` ilə mövqeyi geri alır; ona görə atributlu variant da
+   burada, daha yüksək spesifiklikdə verilir. */
+.language-switcher--sidebar .language-switcher__menu,
+.language-switcher--sidebar .language-switcher__menu[data-bs-popper] {
+    /* `!important` — çünki yuxarıdakı ümumi `[data-bs-popper]` qaydası
+       Popper-i məğlub etmək üçün `inset … !important` işlədir; sidebar
+       variantı onu ancaq eyni gücdə, daha sonra gələn qayda ilə əvəz edə bilər. */
+    inset: auto auto calc(100% + 0.4rem) 0 !important;
     width: 100%;
     min-width: 0;
+    margin-top: 0 !important;
+    margin-bottom: 0;
 }
 
 .language-switcher--floating {

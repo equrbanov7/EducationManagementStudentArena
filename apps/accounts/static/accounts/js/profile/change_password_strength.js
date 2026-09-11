@@ -182,9 +182,12 @@
         var shown = input.getAttribute("type") === "text";
         input.setAttribute("type", shown ? "password" : "text");
         button.classList.toggle("is-on", !shown);
+        // İkon CARİ VƏZİYYƏTİ göstərir (sahib 2026-09-11): şifrə gizlidirsə
+        // üstündən xətt çəkilmiş göz, görünürsə açıq göz. Əvvəl əksinə —
+        // «əməl» ikonu — idi və sahibə tərs gəlirdi.
         var icon = button.querySelector("i");
         if (icon) {
-            icon.className = shown ? "fas fa-eye" : "fas fa-eye-slash";
+            icon.className = shown ? "fas fa-eye-slash" : "fas fa-eye";
         }
         // Fokus sahədə qalsın: göz düyməsi yazı axınını kəsməməlidir.
         input.focus();
