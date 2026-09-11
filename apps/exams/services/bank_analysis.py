@@ -280,15 +280,98 @@ def _run_analysis(questions) -> QuestionBankAnalysis:
     )
 
 
-def analyze_question_bank(exam, *, language=None) -> QuestionBankAnalysis:
-    """İmtahan bankını analiz edir (yalnız ``exam_type == "test"``)."""
-    if getattr(exam, "exam_type", None) != "test":
-        return _empty_analysis()
-    queryset = exam.questions.prefetch_related("options")
+def _cached_analysis(scope: str, *, language, fingerprint: str, compute) -> QuestionBankAnalysis:
+    """Analiz nəticəsini məzmun barmaq izi ilə keşləyən ortaq sarğı (hər iki əkiz üçün).
+
+    ``scope`` — «bank:<id>» / «exam:<id>»; iki cədvəlin pk-ları üst-üstə düşə
+    bilər, ona görə açar prefiksi ilə ayrılır. Nəticədəki xəbərdarlıq mətnləri
+    hesab anında ``pgettext`` ilə tərcümə olunur — açara UI dili də daxil
+    edilir ki, bir dildə hesablanmış nəticə başqa dildə açan müəllimə
+    göstərilməsin (P1-6, 2026-09-12).
+    """
+    from django.utils.translation import get_language
+
+    from core.cache import get_or_set_cached_bank_analysis
+
+    return get_or_set_cached_bank_analysis(
+        bank_id=f"{scope}:{get_language() or 'az'}",
+        language=language or "",
+        fingerprint=fingerprint,
+        compute=compute,
+    )
+
+
+def _exam_analysis_fingerprint(exam, language) -> str:
+    """İmtahan bankının MƏZMUN barmaq izi — Postgres-in içində hesablanan digest.
+
+    Müstəqil bank əkizi (``_analysis_fingerprint``) «say + ən son updated_at»
+    ilə kifayətlənir; burada bu mümkün deyil: ``ExamQuestion``-da yalnız
+    ``created_at`` var, ``ExamQuestionOption``-da isə heç bir vaxt möhürü yoxdur.
+    Üstəlik sual idxalı və dil variantları ``bulk_create``, yenidən sıralama
+    ``bulk_update``, toplu redaktələr ``update()`` ilə yazır — siqnal əsaslı
+    sayğac da onları görməzdi. Ona görə analizin oxuduğu BÜTÜN sütunlar
+    (sual: id/order/language/text; variant: id/label/is_correct/text) tək
+    ``md5(string_agg(...))`` ilə DB tərəfində sıxılır: sətirlər Python-a
+    daşınmır, amma istənilən əlavə/silmə/redaktə/sıra dəyişikliyi barmaq izini
+    dəyişir və köhnə açar sadəcə istifadəsiz qalır (audit P1-6, 2026-09-12).
+    Variantı olmayan sual da sayılsın deyə birləşmə LEFT JOIN-dur.
+    """
+    from django.contrib.postgres.aggregates import StringAgg
+    from django.db.models import Count, F, TextField, Value
+    from django.db.models.functions import MD5, Coalesce, Concat
+
+    queryset = exam.questions.all()
     if language:
         queryset = queryset.filter(language=language)
-    questions = list(queryset.order_by("order", "id"))
-    return _run_analysis(questions)
+    separator = Value("\x1f")
+    row = Concat(
+        F("id"),
+        separator,
+        F("order"),
+        separator,
+        F("language"),
+        separator,
+        F("text"),
+        separator,
+        Coalesce(F("options__id"), Value(0)),
+        separator,
+        Coalesce(F("options__label"), Value(""), output_field=TextField()),
+        separator,
+        Coalesce(F("options__is_correct"), Value(False)),
+        separator,
+        Coalesce(F("options__text"), Value(""), output_field=TextField()),
+        output_field=TextField(),
+    )
+    stamp = queryset.aggregate(
+        total=Count("id", distinct=True),
+        digest=MD5(StringAgg(row, "\x1e", order_by=("id", "options__id"))),
+    )
+    return f"{stamp['total'] or 0}:{stamp['digest'] or 'empty'}"
+
+
+def analyze_question_bank(exam, *, language=None) -> QuestionBankAnalysis:
+    """İmtahan bankını analiz edir (yalnız ``exam_type == "test"``).
+
+    Nəticə məzmun barmaq izi ilə keşlənir — müstəqil bank əkizindəki eyni
+    müalicə: əvvəllər bank səhifəsinin HƏR GET-ində (səhifələmə, filtr, dil,
+    sıralama) imtahanın bütün sualları variantları ilə yaddaşa yüklənib analiz
+    yenidən hesablanırdı (audit P1-6, 2026-09-12).
+    """
+    if getattr(exam, "exam_type", None) != "test":
+        return _empty_analysis()
+
+    def _compute():
+        queryset = exam.questions.prefetch_related("options")
+        if language:
+            queryset = queryset.filter(language=language)
+        return _run_analysis(list(queryset.order_by("order", "id")))
+
+    return _cached_analysis(
+        f"exam:{exam.pk}",
+        language=language,
+        fingerprint=_exam_analysis_fingerprint(exam, language),
+        compute=_compute,
+    )
 
 
 def _analysis_fingerprint(bank, language) -> str:
@@ -316,7 +399,6 @@ def analyze_bank_questions(bank, *, language=None) -> QuestionBankAnalysis:
     dil dəyişmə, sıralama) təkrarlanırdı — halbuki sual dəsti dəyişməyibsə
     nəticə eynidir (2026-07-31 auditi).
     """
-    from core.cache import get_or_set_cached_bank_analysis
 
     def _compute():
         queryset = bank.library_questions.filter(question_type="test").prefetch_related("options")
@@ -324,9 +406,9 @@ def analyze_bank_questions(bank, *, language=None) -> QuestionBankAnalysis:
             queryset = queryset.filter(language=language)
         return _run_analysis(list(queryset.order_by("-created_at", "id")))
 
-    return get_or_set_cached_bank_analysis(
-        bank_id=bank.pk,
-        language=language or "",
+    return _cached_analysis(
+        f"bank:{bank.pk}",
+        language=language,
         fingerprint=_analysis_fingerprint(bank, language),
         compute=_compute,
     )
