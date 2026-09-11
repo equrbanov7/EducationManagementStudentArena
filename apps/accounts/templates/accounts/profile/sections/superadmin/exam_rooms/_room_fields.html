@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}Zal dialoqunun sahələri (`_form_dialog.html` gövdəsi) — YENİ və REDAKTƏ
+üçün EYNİ forma: `action`/`room_id` gizli sahələri və dəyərlər açan düymənin
+`data-tof-prefill` JSON-undan gəlir (`teaching_office.js`). `ExamRoomForm`
+sahələri ilə birəbir. `is_active` checkbox-u «1» göndərir (BooleanField).{% endcomment %}
+<div class="sar-formgrid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-name">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="ems-field__req">*</span></label>
+        <input class="ems-input" type="text" id="sar-room-name" name="name" required maxlength="120" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-code">{% trans "Kod" context "accounts.superadmin_exam_rooms" %} <span class="ems-field__req">*</span></label>
+        <input class="ems-input sar-mono" type="text" id="sar-room-code" name="code" required maxlength="32" placeholder="ZAL-101" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-building">{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="text" id="sar-room-building" name="building" maxlength="120" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-floor">{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="text" id="sar-room-floor" name="floor" maxlength="32" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-capacity">{% trans "Tutum (yer)" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="number" id="sar-room-capacity" name="capacity" min="0" inputmode="numeric">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-room-computer-count">{% trans "Planlaşdırılan kompüter" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="number" id="sar-room-computer-count" name="computer_count" min="0" inputmode="numeric">
+        <span class="ems-field__hint">{% trans "Qeydiyyatdakı say plandan fərqlənəndə sətirdə xəbərdarlıq görünür." context "accounts.superadmin_exam_rooms" %}</span>
+    </div>
+    <div class="ems-field sar-formgrid__full">
+        <label class="ems-field__label" for="sar-room-notes">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label>
+        <textarea class="ems-textarea sar-textarea--short" id="sar-room-notes" name="notes" rows="2"></textarea>
+    </div>
+    <label class="sar-check sar-formgrid__full">
+        <input type="checkbox" name="is_active" value="1">
+        <span>{% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</span>
+    </label>
+</div>

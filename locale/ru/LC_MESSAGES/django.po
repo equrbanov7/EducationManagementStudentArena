@@ -65618,3 +65618,131 @@ msgstr "Заголовок"
 msgctxt "accounts.student_admission"
 msgid "Məcburi sütun"
 msgstr "Обязательный столбец"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(ip)d IP ilə"
+msgstr "с IP: %(ip)d"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(ip)d IP ilə · plan %(plan)d"
+msgstr "с IP: %(ip)d · план %(plan)d"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "%(n)d deaktiv"
+msgstr "неактивных: %(n)d"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Aktiv zal"
+msgstr "Активные залы"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Axtarışı dəyişin və ya «Sıfırla» ilə bütün siyahıya qayıdın."
+msgstr "Измените поиск или нажмите «Сбросить», чтобы вернуться к полному списку."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Bu təşkilatda hələ zal yoxdur"
+msgstr "В этой организации пока нет залов"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Canlı oturum"
+msgstr "Идущие сеансы"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Filtrə uyğun zal yoxdur"
+msgstr "Нет залов, соответствующих фильтру"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ kompüter əlavə edilməyib"
+msgstr "Компьютеры ещё не добавлены"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kod təşkilat daxilində unikaldır; tutum və planlaşdırılan kompüter sayı hesabatlarda görünür."
+msgstr "Код уникален в пределах организации; вместимость и плановое число компьютеров видны в отчётах."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüter"
+msgstr "Компьютеры"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Kompüterlər"
+msgstr "Компьютеры"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Nəticə: %(n)d zal"
+msgstr "Результат: залов — %(n)d"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Nəzarətçi"
+msgstr "Наблюдатели"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Qeydiyyatdakı say plandan fərqlənəndə sətirdə xəbərdarlıq görünür."
+msgstr "Если число зарегистрированных отличается от плана, в строке появляется предупреждение."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Söndürülmüş kompüterin IP-si giriş yoxlamasında nəzərə alınmır."
+msgstr "IP отключённого компьютера не учитывается при проверке входа."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal"
+msgstr "Зал"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Zal adı və ya kodu"
+msgstr "Название или код зала"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "aktiv zallarda %(n)d"
+msgstr "в активных залах: %(n)d"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "hamısı aktivdir"
+msgstr "все активны"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "hazırda imtahan gedən zal"
+msgstr "залы, где сейчас идёт экзамен"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«Kompüter əlavə et» ilə tək-tək, «Toplu əlavə» ilə MAC siyahısından əlavə edin."
+msgstr "Добавляйте по одному через «Добавить компьютер» или списком MAC через «Массовое добавление»."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«Yeni zal» ilə ilk zalı yaradın; kompüterlər zalın çekmecəsindən əlavə olunur."
+msgstr "Создайте первый зал через «Новый зал»; компьютеры добавляются из панели зала."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "«%(name)s» zalını redaktə et"
+msgstr "Редактировать зал «%(name)s»"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Ümumi yer"
+msgstr "Всего мест"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtahan mərkəzinə giriş bu IP üzərindən yoxlanılır."
+msgstr "Вход в экзаменационный центр проверяется по этому IP."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Ətraflı"
+msgstr "Подробнее"
+
+msgctxt "ui.status"
+msgid "Deaktiv"
+msgstr "Неактивен"
+
+msgctxt "ui.status"
+msgid "Söndürülüb"
+msgstr "Отключён"
