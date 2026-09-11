@@ -168,7 +168,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/core/http.js' %}?v=20260702-1"></script>
     <script src="{% static 'js/ems_ajax_init.js' %}?v=20260905-earlyq"></script>
     <script src="{% static 'js/modal_scroll_lock.js' %}?v=20260815-1"></script>
-    <script src="{% static 'js/burgerMenu.js' %}?v=20260910-1"></script>
+    <script src="{% static 'js/burgerMenu.js' %}?v=20260911-1"></script>
     <script defer src="{% static 'js/pagination.js' %}?v=20260909-spa"></script>
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20260604-ajaxhook"></script>
     <script src="{% static 'js/search_controls.js' %}"></script>
@@ -180,7 +180,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script src="{% static 'js/route_loading.js' %}?v=20260713-spa-progress"></script>
     {% block global_search_js %}
         {% if request.user.is_authenticated %}
-        <script src="{% static 'js/global_search.js' %}?v=20260910-1"></script>
+        <script src="{% static 'js/global_search.js' %}?v=20260911-1"></script>
         {% endif %}
     {% endblock %}
     {% if view_as.can_use and not view_as.active %}

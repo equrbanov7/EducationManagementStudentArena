@@ -120,6 +120,18 @@ function initHeaderDropdowns() {
         return;
     }
 
+    /* ⚠️ 2026-09-11 (sahib: «header-ə klik edərək search və s. vururam —
+       açılmır, ilişir»). Başlıqda ÜÇ ayrı açılan mexanizm var və bir-birini
+       tanımırdı: dil menyusu Bootstrap dropdown-dur, istifadəçi/«Yarat»
+       menyuları bu kontrollerdir, axtarış isə ayrıca örtükdür. Toggle-lar
+       `stopPropagation()` çağırırdı — Bootstrap-ın sənəd səviyyəli bağlama
+       dinləyicisi kliki heç görmürdü → dil menyusu AÇIQ qalırkən istifadəçi
+       menyusu da açılırdı (ikisi üst-üstə), dil menyusu isə z-index 1200 ilə
+       axtarış panelinin (1100) üstündə üzürdü. İndi qayda TƏKDİR: başlıqda
+       eyni anda yalnız BİR açılan ola bilər. Hər mexanizm açılanda
+       `ems:popover:open` hadisəsi yayır, digərləri onu eşidib bağlanır. */
+    const POPOVER_EVENT = 'ems:popover:open';
+
     function close(d) {
         if (d.menu.classList.contains(d.openClass)) {
             d.menu.classList.remove(d.openClass);
@@ -135,29 +147,63 @@ function initHeaderDropdowns() {
         });
     }
 
+    /* Bootstrap dil menyusu — açıqdırsa onun öz API-si ilə bağlanır. */
+    function closeBootstrapDropdowns() {
+        const api = window.bootstrap && window.bootstrap.Dropdown;
+        document.querySelectorAll('.blog-header [data-bs-toggle="dropdown"]').forEach(function (toggle) {
+            const instance = api ? api.getInstance(toggle) : null;
+            if (instance && toggle.getAttribute('aria-expanded') === 'true') {
+                instance.hide();
+            }
+        });
+    }
+
+    function announceOpen(source) {
+        document.dispatchEvent(new CustomEvent(POPOVER_EVENT, { detail: { source: source } }));
+    }
+
     dropdowns.forEach(function (d) {
-        d.toggle.addEventListener('click', function (event) {
-            event.stopPropagation();
+        d.toggle.addEventListener('click', function () {
+            // `stopPropagation` YOXDUR: klik sənədə çatır ki, Bootstrap dil
+            // menyusunu bağlaya bilsin; özümüzü isə aşağıdakı sənəd
+            // dinləyicisində `closest` ilə tanıyırıq.
             const isOpen = d.menu.classList.contains(d.openClass);
             closeAll(d);
             if (isOpen) {
                 close(d);
-            } else {
-                d.menu.classList.add(d.openClass);
-                d.toggle.setAttribute('aria-expanded', 'true');
+                return;
             }
-        });
-
-        // Keep the menu open when interacting inside it; links/forms still work.
-        d.menu.addEventListener('click', function (event) {
-            event.stopPropagation();
+            closeBootstrapDropdowns();
+            announceOpen('header-dropdown');
+            d.menu.classList.add(d.openClass);
+            d.toggle.setAttribute('aria-expanded', 'true');
         });
     });
 
-    document.addEventListener('click', function () { closeAll(null); });
+    document.addEventListener('click', function (event) {
+        const inside = dropdowns.some(function (d) {
+            return d.toggle.contains(event.target) || d.menu.contains(event.target);
+        });
+        if (!inside) {
+            closeAll(null);
+        }
+    });
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             closeAll(null);
+        }
+    });
+
+    /* Başqa mexanizm (dil menyusu, axtarış) açılanda biz bağlanırıq. */
+    document.addEventListener(POPOVER_EVENT, function (event) {
+        if (!event.detail || event.detail.source !== 'header-dropdown') {
+            closeAll(null);
+        }
+    });
+    document.addEventListener('show.bs.dropdown', function (event) {
+        if (event.target && event.target.closest && event.target.closest('.blog-header')) {
+            closeAll(null);
+            announceOpen('bootstrap-dropdown');
         }
     });
 }
