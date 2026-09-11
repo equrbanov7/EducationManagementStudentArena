@@ -1,9 +1,17 @@
 {% load i18n %}
 {% comment %}
   Yeni imtahan sehrbazı (4 addım). Sahə adları/ID-ləri DƏYİŞMİR — mövcud
-  exam_create_edit_modal.js (tip seçici, giriş/nəzarət toggle, axtarışlı select,
+  exam_create_edit_modal/*.js (tip seçici, giriş/nəzarət toggle, axtarışlı select,
   Bootstrap select) olduğu kimi işləyir. Addım naviqasiyası + addım-əsaslı
   validasiya + aydın xəta xülasəsi exam_wizard.js-dədir.
+
+  2026-09-11 (sahib: «rəngləri, digər hissələri düzəlt, təkmilləşdir ki qəşəng
+  olsun»): rel açıq fona və `ems_ui` stepper dilinə keçdi (aktiv = dolu brend
+  dairə, keçilmiş = yaşıl işarə, gələcək = neytral kontur), serif başlıq və
+  «EMSARENA · MÜƏLLİM» etiketi getdi; etiketlər `label_tag` (iki nöqtəli) əvəzinə
+  `ems-field__label` ritmində əl ilə yazılır; `is_active` (forma tərəfindən
+  söndürülmüş gizli sahə) saxta toggle kimi deyil, oxunan status kimi göstərilir;
+  nəzarət bloklarının `style="display:…"` atributları `hidden`-ə keçdi (CSP).
 {% endcomment %}
 <form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate data-exam-wizard
       data-editing="{% if is_editing %}1{% else %}0{% endif %}"
@@ -15,39 +23,47 @@
     {% endif %}
 
     <div class="exam-wizard">
-        {# ───────────────────────── LEFT RAIL ───────────────────────── #}
-        <aside class="ew-rail">
+        {# ───────────────────────── SOL REL — addımlar ───────────────────────── #}
+        <aside class="ew-rail" aria-label="{% trans 'Sehrbaz addımları' context 'exams.wizard' %}">
             <div class="ew-rail-head">
-                <div class="ew-rail-kicker">{% trans "rail_kicker" context "exams.wizard" %}</div>
                 <h2 class="ew-rail-title">
                     {% if is_editing %}{% trans "heading_edit_exam" context "exams.template.create_edit_exam" %}{% else %}{% trans "heading_create_exam" context "exams.template.create_edit_exam" %}{% endif %}
                 </h2>
             </div>
-            <div class="ew-steps" data-ew-steps>
-                <button type="button" class="ew-step is-active" data-ew-step-nav="0">
-                    <span class="ew-sn">1</span>
-                    <span class="ew-stx"><span class="ew-st">{% trans "step_basics" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_basics_sub" context "exams.wizard" %}</span></span>
-                </button>
-                <button type="button" class="ew-step" data-ew-step-nav="1">
-                    <span class="ew-sn">2</span>
-                    <span class="ew-stx"><span class="ew-st">{% trans "step_timing" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_timing_sub" context "exams.wizard" %}</span></span>
-                </button>
-                <button type="button" class="ew-step" data-ew-step-nav="2">
-                    <span class="ew-sn">3</span>
-                    <span class="ew-stx"><span class="ew-st">{% trans "step_access" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_access_sub" context "exams.wizard" %}</span></span>
-                </button>
-                <button type="button" class="ew-step" data-ew-step-nav="3">
-                    <span class="ew-sn">4</span>
-                    <span class="ew-stx"><span class="ew-st">{% trans "step_proctor" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_proctor_sub" context "exams.wizard" %}</span></span>
-                </button>
-            </div>
+            <ol class="ew-steps" data-ew-steps>
+                {# Hər addım: nömrə (gələcək/aktiv) və işarə (keçilmiş) — CSS is-done ilə dəyişir. #}
+                <li class="ew-step-item">
+                    <button type="button" class="ew-step is-active" data-ew-step-nav="0" aria-current="step">
+                        <span class="ew-sn" aria-hidden="true"><span class="ew-sn-num">1</span><svg class="ew-sn-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <span class="ew-stx"><span class="ew-st">{% trans "step_basics" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_basics_sub" context "exams.wizard" %}</span></span>
+                    </button>
+                </li>
+                <li class="ew-step-item">
+                    <button type="button" class="ew-step" data-ew-step-nav="1">
+                        <span class="ew-sn" aria-hidden="true"><span class="ew-sn-num">2</span><svg class="ew-sn-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <span class="ew-stx"><span class="ew-st">{% trans "step_timing" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_timing_sub" context "exams.wizard" %}</span></span>
+                    </button>
+                </li>
+                <li class="ew-step-item">
+                    <button type="button" class="ew-step" data-ew-step-nav="2">
+                        <span class="ew-sn" aria-hidden="true"><span class="ew-sn-num">3</span><svg class="ew-sn-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <span class="ew-stx"><span class="ew-st">{% trans "step_access" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_access_sub" context "exams.wizard" %}</span></span>
+                    </button>
+                </li>
+                <li class="ew-step-item">
+                    <button type="button" class="ew-step" data-ew-step-nav="3">
+                        <span class="ew-sn" aria-hidden="true"><span class="ew-sn-num">4</span><svg class="ew-sn-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                        <span class="ew-stx"><span class="ew-st">{% trans "step_proctor" context "exams.wizard" %}</span><span class="ew-ss">{% trans "step_proctor_sub" context "exams.wizard" %}</span></span>
+                    </button>
+                </li>
+            </ol>
             <div class="ew-rail-foot">
                 <i class="fas fa-circle-info" aria-hidden="true"></i>
-                <span>{% trans "rail_hint" context "exams.wizard" %}</span>
+                <span>{% trans "Ulduzlu (*) sahələr mütləqdir. Qalan parametrləri sonra «Redaktə» ilə də dəyişə bilərsiniz." context "exams.wizard" %}</span>
             </div>
         </aside>
 
-        {# ───────────────────────── RIGHT PANE ───────────────────────── #}
+        {# ───────────────────────── SAĞ PANEL ───────────────────────── #}
         <div class="ew-pane">
             <div class="ew-mstep" data-ew-mstep aria-hidden="true">
                 <span class="ew-msdot is-on"></span><span class="ew-msdot"></span><span class="ew-msdot"></span><span class="ew-msdot"></span>
@@ -59,7 +75,7 @@
                     <p data-ew-desc>{% trans "step_basics_desc" context "exams.wizard" %}</p>
                 </div>
                 <button type="button" class="ew-x" data-bs-dismiss="modal" aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
                 </button>
             </div>
 
@@ -74,35 +90,37 @@
                     <div class="create-exam-form-errors ew-nonfield">{{ form.non_field_errors }}</div>
                 {% endif %}
 
-                {# ===================== STEP 1 — ƏSASLAR ===================== #}
+                {# ===================== ADDIM 1 — ƏSASLAR ===================== #}
                 <section class="ew-panel is-active" data-ew-panel="0"
                          data-ew-step-title="{% trans 'step_basics_title' context 'exams.wizard' %}"
                          data-ew-step-desc="{% trans 'step_basics_desc' context 'exams.wizard' %}">
                     <div class="create-exam-form-grid">
                         {% if form.organization %}
                             <div class="form-group form-group-full">
-                                {{ form.organization.label_tag }}
-                                {{ form.organization }}
+                                <label class="ew-label" for="{{ form.organization.id_for_label }}">{{ form.organization.label }} <span class="ew-req" aria-hidden="true">*</span></label>
+                                <div class="bootstrap-single-select">
+                                    {{ form.organization }}
+                                </div>
                                 {% if form.organization.errors %}<div class="field-error">{{ form.organization.errors.0 }}</div>{% endif %}
                             </div>
                         {% endif %}
 
                         <div class="form-group form-group-full">
-                            {{ form.title.label_tag }}
+                            <label class="ew-label" for="{{ form.title.id_for_label }}">{{ form.title.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             {{ form.title }}
                             {% if form.title.errors %}<div class="field-error">{{ form.title.errors.0 }}</div>{% endif %}
                         </div>
 
                         <div class="form-group form-group-full">
-                            {{ form.description.label_tag }}
+                            <label class="ew-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
                             {{ form.description }}
                             {% if form.description.errors %}<div class="field-error">{{ form.description.errors.0 }}</div>{% endif %}
                         </div>
 
-                        <div class="form-group">
-                            {{ form.exam_type.label_tag }}
+                        <div class="form-group form-group-full">
+                            <span class="ew-label" id="ew-type-label">{{ form.exam_type.label }}</span>
                             {% with selected_exam_type=form.exam_type.value|default:"test" %}
-                                <div class="create-exam-type-picker ew-typesel" data-create-exam-type-picker>
+                                <div class="create-exam-type-picker ew-typesel" data-create-exam-type-picker role="radiogroup" aria-labelledby="ew-type-label">
                                     {% for value, label in form.exam_type.field.choices %}
                                         <input type="radio"
                                                class="btn-check js-create-exam-type-option"
@@ -111,22 +129,21 @@
                                                autocomplete="off"
                                                value="{{ value }}"
                                                {% if selected_exam_type == value %}checked{% endif %}>
-                                        <label class="ew-typecard {% if value == "test" %}ew-tc--test{% elif value == "coding" %}ew-tc--coding{% else %}ew-tc--written{% endif %}"
-                                               for="createExamTypeOption_{{ forloop.counter }}">
-                                            <span class="ew-tc-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-                                            {% if value == "test" %}
-                                                <span class="ew-tc-ic ew-tc-ic--sky"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
+                                        <label class="ew-typecard" for="createExamTypeOption_{{ forloop.counter }}">
+                                            <span class="ew-tc-check" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+                                            <span class="ew-tc-head">
+                                                {% if value == "test" %}
+                                                    <span class="ew-tc-ic ew-tc-ic--test"><i class="fas fa-list-ul" aria-hidden="true"></i></span>
+                                                {% elif value == "coding" %}
+                                                    <span class="ew-tc-ic ew-tc-ic--coding"><i class="fas fa-code" aria-hidden="true"></i></span>
+                                                {% else %}
+                                                    <span class="ew-tc-ic ew-tc-ic--written"><i class="fas fa-pen-fancy" aria-hidden="true"></i></span>
+                                                {% endif %}
                                                 <span class="ew-tc-name">{{ label|capfirst }}</span>
-                                                <span class="ew-tc-desc">{% trans "type_desc_test" context "exams.wizard" %}</span>
-                                            {% elif value == "coding" %}
-                                                <span class="ew-tc-ic ew-tc-ic--violet"><i class="fas fa-code" aria-hidden="true"></i></span>
-                                                <span class="ew-tc-name">{{ label|capfirst }}</span>
-                                                <span class="ew-tc-desc">{% trans "type_desc_coding" context "exams.wizard" %}</span>
-                                            {% else %}
-                                                <span class="ew-tc-ic ew-tc-ic--rose"><i class="fas fa-pen-fancy" aria-hidden="true"></i></span>
-                                                <span class="ew-tc-name">{{ label|capfirst }}</span>
-                                                <span class="ew-tc-desc">{% trans "type_desc_written" context "exams.wizard" %}</span>
-                                            {% endif %}
+                                            </span>
+                                            <span class="ew-tc-desc">
+                                                {% if value == "test" %}{% trans "type_desc_test" context "exams.wizard" %}{% elif value == "coding" %}{% trans "type_desc_coding" context "exams.wizard" %}{% else %}{% trans "type_desc_written" context "exams.wizard" %}{% endif %}
+                                            </span>
                                         </label>
                                     {% endfor %}
                                     <div class="d-none">
@@ -137,22 +154,22 @@
                             {% if form.exam_type.errors %}<div class="field-error">{{ form.exam_type.errors.0 }}</div>{% endif %}
                         </div>
 
-                        <div class="form-group">
-                            {{ form.exam_type_extended.label_tag }}
+                        <div class="form-group form-group-full">
+                            <label class="ew-label" for="{{ form.exam_type_extended.id_for_label }}">{{ form.exam_type_extended.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             <div class="bootstrap-single-select">
                                 {{ form.exam_type_extended }}
                             </div>
-                            <small class="form-text text-muted">{% trans "exam_type_extended_help" context "exams.template.create_exam_modal_form" %}</small>
+                            <small class="form-text">{% trans "exam_type_extended_help" context "exams.template.create_exam_modal_form" %}</small>
                             {% if form.exam_type_extended.errors %}<div class="field-error">{{ form.exam_type_extended.errors.0 }}</div>{% endif %}
                         </div>
 
                         {# Fənn — tək seçimli axtarışlı siyahı (qrup/tələbə axtarışı ilə eyni üslub). Final/midterm-də məcburidir. #}
                         <div class="form-group form-group-full" data-ew-subject-group>
-                            <label class="create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }}</label>
+                            <label class="ew-label create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             <div class="create-exam-searchable-select create-exam-subject-select" data-exam-subject-control
                                  data-search-url="{% url 'exams:subject_search' %}">
                                 <div class="create-exam-search-wrap">
-                                    <i class="fas fa-search"></i>
+                                    <i class="fas fa-search" aria-hidden="true"></i>
                                     <input type="text" id="createExamSubjectSearch" class="create-exam-search-input"
                                            placeholder="{% trans 'subject_search_placeholder' context 'exams.template.create_exam_modal_form' %}"
                                            autocomplete="off">
@@ -175,48 +192,48 @@
                     </div>
                 </section>
 
-                {# ===================== STEP 2 — VAXT & SUALLAR ===================== #}
+                {# ===================== ADDIM 2 — VAXT VƏ SUALLAR ===================== #}
                 <section class="ew-panel" data-ew-panel="1"
                          data-ew-step-title="{% trans 'step_timing_title' context 'exams.wizard' %}"
                          data-ew-step-desc="{% trans 'step_timing_desc' context 'exams.wizard' %}">
                     <div class="create-exam-form-grid">
                         <div class="form-group form-group-full" data-random-question-group data-test-random-question-group>
-                            {{ form.random_question_count.label_tag }}
+                            <label class="ew-label" for="{{ form.random_question_count.id_for_label }}">{{ form.random_question_count.label }}</label>
                             {{ form.random_question_count }}
                             {% if form.random_question_count.help_text %}
-                                <small class="form-text text-muted">{{ form.random_question_count.help_text }}</small>
+                                <small class="form-text">{{ form.random_question_count.help_text }}</small>
                             {% endif %}
                             {% if form.random_question_count.errors %}<div class="field-error">{{ form.random_question_count.errors.0 }}</div>{% endif %}
                         </div>
 
                         <div class="form-group form-group-full">
                             <div class="ew-fsec">
-                                <span class="ew-fs-ic ew-fs-ic--indigo"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
+                                <span class="ew-fs-ic ew-fs-ic--primary"><i class="fas fa-calendar-days" aria-hidden="true"></i></span>
                                 <h4>{% trans "section_schedule" context "exams.wizard" %}</h4>
                                 <span class="ew-fs-rule"></span>
                             </div>
                         </div>
 
                         <div class="form-group">
-                            {{ form.start_datetime.label_tag }}
+                            <label class="ew-label" for="{{ form.start_datetime.id_for_label }}">{{ form.start_datetime.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             {{ form.start_datetime }}
                             {% if form.start_datetime.errors %}<div class="field-error">{{ form.start_datetime.errors.0 }}</div>{% endif %}
                         </div>
 
                         <div class="form-group">
-                            {{ form.end_datetime.label_tag }}
+                            <label class="ew-label" for="{{ form.end_datetime.id_for_label }}">{{ form.end_datetime.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             {{ form.end_datetime }}
                             {% if form.end_datetime.errors %}<div class="field-error">{{ form.end_datetime.errors.0 }}</div>{% endif %}
                         </div>
 
                         <div class="form-group">
-                            {{ form.total_duration_minutes.label_tag }}
+                            <label class="ew-label" for="{{ form.total_duration_minutes.id_for_label }}">{{ form.total_duration_minutes.label }} <span class="ew-req" aria-hidden="true">*</span></label>
                             {{ form.total_duration_minutes }}
                             {% if form.total_duration_minutes.errors %}<div class="field-error">{{ form.total_duration_minutes.errors.0 }}</div>{% endif %}
                         </div>
 
                         <div class="form-group" data-ew-qtime-group>
-                            {{ form.default_question_time_seconds.label_tag }}
+                            <label class="ew-label" for="{{ form.default_question_time_seconds.id_for_label }}">{{ form.default_question_time_seconds.label }}</label>
                             {{ form.default_question_time_seconds }}
                             {% if form.default_question_time_seconds.errors %}<div class="field-error">{{ form.default_question_time_seconds.errors.0 }}</div>{% endif %}
                         </div>
@@ -252,25 +269,36 @@
                         </div>
 
                         <div class="form-group">
-                            {{ form.max_attempts_per_user.label_tag }}
+                            <label class="ew-label" for="{{ form.max_attempts_per_user.id_for_label }}">{{ form.max_attempts_per_user.label }}</label>
                             {{ form.max_attempts_per_user }}
                             {% if form.max_attempts_per_user.errors %}<div class="field-error">{{ form.max_attempts_per_user.errors.0 }}</div>{% endif %}
                         </div>
                     </div>
                 </section>
 
-                {# ===================== STEP 3 — GİRİŞ ===================== #}
+                {# ===================== ADDIM 3 — GİRİŞ ===================== #}
                 <section class="ew-panel" data-ew-panel="2"
                          data-ew-step-title="{% trans 'step_access_title' context 'exams.wizard' %}"
                          data-ew-step-desc="{% trans 'step_access_desc' context 'exams.wizard' %}">
                     <div class="create-exam-form-grid">
+                        {% comment %}Dərc statusu: `is_active` forma tərəfindən söndürülüb (HiddenInput) —
+                           publish yalnız lifecycle servisi ilə, imtahan səhifəsindən edilir. Ona görə
+                           burada toggle deyil, oxunan status göstərilir; gizli sahə POST üçün DOM-da
+                           qalır.{% endcomment %}
                         <div class="form-group form-group-full">
-                            <label class="modal-check-label modal-check-label--active">
-                                {{ form.is_active }}
-                                <span class="modal-check-label-text">{{ form.is_active.label }}
-                                    <span class="ew-switch-desc">{% trans "desc_is_active" context "exams.wizard" %}</span>
+                            {{ form.is_active }}
+                            <div class="ew-status {% if is_editing and exam and exam.is_active %}ew-status--on{% endif %}">
+                                <span class="ew-status-dot" aria-hidden="true"></span>
+                                <span class="ew-status-tx">
+                                    <span class="ew-status-title">
+                                        {% trans "Dərc statusu" context "exams.wizard" %}:
+                                        <b>{% if is_editing and exam and exam.is_active %}{% trans "Aktiv" context "exams.wizard" %}{% else %}{% trans "Qaralama" context "exams.wizard" %}{% endif %}</b>
+                                    </span>
+                                    <span class="ew-status-desc">
+                                        {% if is_editing %}{% trans "Status bu formadan dəyişmir — imtahan səhifəsindəki «Aktiv et» / «Deaktiv et» düyməsi ilə idarə olunur." context "exams.wizard" %}{% else %}{% trans "İmtahan qaralama kimi yaradılır. Suallar əlavə edildikdən sonra imtahan səhifəsindəki «Aktiv et» düyməsi ilə tələbələrə açılır." context "exams.wizard" %}{% endif %}
+                                    </span>
                                 </span>
-                            </label>
+                            </div>
                             {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors.0 }}</div>{% endif %}
                         </div>
 
@@ -295,9 +323,11 @@
                         </div>
 
                         <div class="form-group form-group-full">
-                            <div class="create-exam-modal-section-title">
-                                <h4><i class="fas fa-users ew-icon-green"></i> {% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
-                                <p>{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
+                            <div class="ew-fsec ew-fsec--stack">
+                                <span class="ew-fs-ic ew-fs-ic--success"><i class="fas fa-users" aria-hidden="true"></i></span>
+                                <h4>{% trans "access_rights" context "exams.template.create_exam_modal_form" %}</h4>
+                                <span class="ew-fs-rule"></span>
+                                <p class="ew-fs-desc">{% trans "access_rights_description" context "exams.template.create_exam_modal_form" %}</p>
                             </div>
                         </div>
 
@@ -305,9 +335,9 @@
                             <div class="create-exam-access-grid">
                                 <div class="create-exam-searchable-select" data-target-select-name="allowed_groups"
                                      data-search-url="{% url 'exams:group_search' %}">
-                                    <label class="create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
+                                    <label class="ew-label create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="create-exam-search-wrap">
-                                        <i class="fas fa-search"></i>
+                                        <i class="fas fa-search" aria-hidden="true"></i>
                                         <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
                                     </div>
                                     <div id="createExamGroupsList" class="create-exam-search-list"></div>
@@ -327,9 +357,9 @@
 
                                 <div class="create-exam-searchable-select" data-target-select-name="allowed_users"
                                      data-search-url="{% url 'exams:user_search' %}">
-                                    <label class="create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
+                                    <label class="ew-label create-exam-searchable-label" for="createExamUsersSearch">{% trans "allowed_users_individual" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="create-exam-search-wrap">
-                                        <i class="fas fa-search"></i>
+                                        <i class="fas fa-search" aria-hidden="true"></i>
                                         <input type="text" id="createExamUsersSearch" class="create-exam-search-input" placeholder="{% trans 'search_name_or_username' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
                                     </div>
                                     <div id="createExamUsersList" class="create-exam-search-list"></div>
@@ -357,27 +387,29 @@
                     </div>
                 </section>
 
-                {# ===================== STEP 4 — NƏZARƏT ===================== #}
+                {# ===================== ADDIM 4 — NƏZARƏT ===================== #}
                 <section class="ew-panel" data-ew-panel="3"
                          data-ew-step-title="{% trans 'step_proctor_title' context 'exams.wizard' %}"
                          data-ew-step-desc="{% trans 'step_proctor_desc' context 'exams.wizard' %}">
                     {% if form.exam_supervision_enabled %}
+                    {% with supervision_on=supervision_config.enabled|default:False %}
                     <div class="create-exam-form-grid">
                         <div class="form-group form-group-full">
                             <label class="modal-check-label modal-check-label--supervision">
                                 <input type="checkbox" name="supervision_enabled" id="modalSupervisionEnabled"
                                        class="form-check-input"
-                                       {% if not is_editing or supervision_config and supervision_config.enabled %}checked{% endif %}>
+                                       {% if not is_editing or supervision_on %}checked{% endif %}>
                                 <span class="modal-check-label-text">{% trans "supervision_enable_label" context "exams.template.create_exam_modal_form" %}
                                     <span class="ew-switch-desc">{% trans "desc_supervision" context "exams.wizard" %}</span>
                                 </span>
                             </label>
                         </div>
 
-                        <div id="modalSupervisionSettings" class="form-group form-group-full" style="display: {% if not is_editing or supervision_config and supervision_config.enabled %}block{% else %}none{% endif %};">
+                        {# Görünürlük `hidden` atributu ilə (toggles.js sinxron edir) — inline style yox (CSP). #}
+                        <div id="modalSupervisionSettings" class="form-group form-group-full" {% if is_editing and not supervision_on %}hidden{% endif %}>
                             <div class="create-exam-form-grid">
                                 <div class="form-group">
-                                    <label for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
+                                    <label class="ew-label" for="modalSupervisionTemplate">{% trans "supervision_template_label" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="bootstrap-single-select">
                                         <select name="supervision_template" id="modalSupervisionTemplate" class="form-select bootstrap-single-select__native" data-bootstrap-select>
                                             <option value="custom" {% if not supervision_config or supervision_config.template == 'custom' %}selected{% endif %}>{% trans "supervision_template_custom" context "exams.template.create_exam_modal_form" %}</option>
@@ -388,14 +420,14 @@
                                     </div>
                                 </div>
 
-                                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" style="display: none;">
+                                <div id="modalSupervisionTemplateInfo" class="supervision-template-info" hidden>
                                     <h4 id="modalSupervisionTemplateInfoTitle"></h4>
                                     <p id="modalSupervisionTemplateInfoDesc"></p>
                                     <ul id="modalSupervisionTemplateInfoFeatures"></ul>
                                 </div>
 
-                                <div id="modalSupervisionCustomSettings" style="display: {% if not supervision_config or supervision_config.template == 'custom' %}block{% else %}none{% endif %};">
-                                    <span class="ew-checks-label" id="ew-measures-label">{% trans "section_measures" context "exams.wizard" %}</span>
+                                <div id="modalSupervisionCustomSettings" {% if supervision_config and supervision_config.template != 'custom' %}hidden{% endif %}>
+                                    <span class="ew-label ew-checks-label" id="ew-measures-label">{% trans "section_measures" context "exams.wizard" %}</span>
                                     <div class="ew-checks" role="group" aria-labelledby="ew-measures-label">
                                     <div class="form-group">
                                         <label class="modal-check-label">
@@ -449,7 +481,7 @@
 
                                     <div class="ew-grid2">
                                     <div class="form-group">
-                                        <label for="modalSupervisionGracePeriod">{% trans "supervision_grace_period_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <label class="ew-label" for="modalSupervisionGracePeriod">{% trans "supervision_grace_period_label" context "exams.template.create_exam_modal_form" %}</label>
                                         <input type="number" name="supervision_grace_period"
                                                id="modalSupervisionGracePeriod" class="form-control"
                                                min="5" max="60"
@@ -457,7 +489,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="modalSupervisionMaxViolations">{% trans "supervision_max_violations_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <label class="ew-label" for="modalSupervisionMaxViolations">{% trans "supervision_max_violations_label" context "exams.template.create_exam_modal_form" %}</label>
                                         <input type="number" name="supervision_max_violations"
                                                id="modalSupervisionMaxViolations" class="form-control"
                                                min="1" max="20"
@@ -465,7 +497,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <label class="ew-label" for="modalSupervisionViolationAction">{% trans "supervision_violation_action_label" context "exams.template.create_exam_modal_form" %}</label>
                                         <div class="bootstrap-single-select">
                                             <select name="supervision_violation_action" id="modalSupervisionViolationAction" class="form-select bootstrap-single-select__native" data-bootstrap-select>
                                                 <option value="auto_submit" {% if supervision_config and supervision_config.violation_action == 'auto_submit' %}selected{% endif %}>{% trans "supervision_action_auto_submit" context "exams.template.create_exam_modal_form" %}</option>
@@ -477,7 +509,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
+                                        <label class="ew-label" for="modalSupervisionRecoveryPolicy">{% trans "supervision_recovery_policy_label" context "exams.template.create_exam_modal_form" %}</label>
                                         <div class="bootstrap-single-select">
                                             <select name="supervision_recovery_policy" id="modalSupervisionRecoveryPolicy" class="form-select bootstrap-single-select__native" data-bootstrap-select>
                                                 <option value="no_second_chance" {% if supervision_config and supervision_config.recovery_policy == 'no_second_chance' %}selected{% endif %}>{% trans "supervision_recovery_no_second_chance" context "exams.template.create_exam_modal_form" %}</option>
@@ -491,6 +523,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endwith %}
                     {% else %}
                     <div class="ew-callout ew-callout--warn">
                         <i class="fas fa-shield-halved" aria-hidden="true"></i>
@@ -502,23 +535,23 @@
                 </section>
             </div>
 
-            {# ───────────────────────── FOOTER ───────────────────────── #}
+            {# ───────────────────────── ALTLIQ ───────────────────────── #}
             <div class="ew-pane-foot">
                 <button type="button" class="ew-btn ew-btn--ghost" data-ew-back hidden>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
                     {% trans "nav_back" context "exams.wizard" %}
                 </button>
                 <button type="button" class="ew-btn ew-btn--ghost js-close-create-exam" data-ew-cancel>
                     {% trans "action_cancel" context "exams.template.create_exam_modal_form" %}
                 </button>
-                <span class="ew-prog" data-ew-prog>{% trans "nav_step" context "exams.wizard" %} 1 / 4</span>
+                <span class="ew-prog" data-ew-prog aria-live="polite">{% trans "nav_step" context "exams.wizard" %} 1 / 4</span>
                 <div class="ew-foot-right">
                     <button type="button" class="ew-btn ew-btn--primary" data-ew-next>
                         {% trans "nav_next" context "exams.wizard" %}
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ew-arrow-flip"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="ew-arrow-flip"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
                     </button>
                     <button type="submit" class="ew-btn ew-btn--primary modal-confirm-btn" data-ew-submit hidden>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
                         {% if is_editing %}{% trans "action_save" context "exams.template.create_exam_modal_form" %}{% else %}{% trans "action_create" context "exams.template.create_exam_modal_form" %}{% endif %}
                     </button>
                 </div>

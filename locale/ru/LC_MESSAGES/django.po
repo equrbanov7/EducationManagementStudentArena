@@ -6167,17 +6167,17 @@ msgstr "⚙️ Максимум 2 нарушения, автоматическа
 #: apps/accounts/templates/accounts/profile.html:371 apps/exams/templates/exams/components/_exam_modals.html:30 apps/exams/templates/exams/components/_exam_modals.html:116 apps/exams/templates/exams/teacher/partials/_create_edit_exam_bs_modal.html:8 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:13 apps/exams/templates/exams/teacher/partials/_question_form_bs_modal.html:18 apps/exams/templates/exams/teacher/question_bank_detail.html:43 apps/exams/templates/exams/teacher/teacher_exam_detail.html:428 apps/exams/templates/exams/teacher/teacher_exam_detail.html:441 apps/exams/templates/exams/teacher/teacher_questions_bank.html:43
 msgctxt "exams.template.create_exam_modal"
 msgid "loading_form"
-msgstr "Loading"
+msgstr "Форма загружается…"
 
 #: apps/accounts/templates/accounts/profile.html:372 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:23 apps/exams/templates/exams/teacher/teacher_exam_detail.html:429
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Создать новый экзамен"
 
 #: apps/accounts/templates/accounts/profile.html:373 apps/exams/templates/exams/components/_exam_modals.html:29 apps/exams/templates/exams/teacher/exam_section.html:117 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:23 apps/exams/templates/exams/teacher/teacher_exam_detail.html:430
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
-msgstr "Внештатная работа"
+msgstr "Редактировать экзамен"
 
 #: apps/accounts/templates/accounts/profile.html:374 apps/courses/templates/courses/partials/_courses_assets_js.html:6 apps/exams/templates/exams/teacher/question_bank_detail.html:46 apps/exams/templates/exams/teacher/teacher_exam_detail.html:431 apps/exams/templates/exams/teacher/teacher_exam_detail.html:444 apps/exams/templates/exams/teacher/teacher_questions_bank.html:46
 msgctxt "courses.common.js"
@@ -11883,7 +11883,7 @@ msgstr "Удалить экзамен"
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:15 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:61 apps/exams/templates/exams/teacher/partials/_question_form_bs_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "aria_close"
-msgstr "Закрой это"
+msgstr "Закрыть"
 
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:18
 msgctxt "exams.dashboard"
@@ -11898,7 +11898,7 @@ msgstr "Результаты не удаляются — экзамен пере
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:27 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:512
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отменить"
 
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:32
 msgctxt "exams.dashboard"
@@ -21858,7 +21858,7 @@ msgstr "Вступительный"
 #: apps/exams/domain/exam_definition.py:33
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "practice"
-msgstr "Активный"
+msgstr "Практика"
 
 #: apps/exams/domain/exam_definition.py:36
 msgctxt "exams.model.exam.choice.mode"
@@ -24013,7 +24013,7 @@ msgstr "Сколько вопросов увидит студент"
 #: apps/exams/forms/exam.py:203
 msgctxt "exams.form.exam.label"
 msgid "Sual təkrarını azalt"
-msgstr "Удалить банк вопросов"
+msgstr "Уменьшить повторение вопросов"
 
 #: apps/exams/forms/exam.py:207
 msgctxt "exams.form.exam.label"
@@ -24963,7 +24963,7 @@ msgstr "Отменить это"
 #: apps/exams/templates/exams/components/_exam_modals.html:28 apps/exams/templates/exams/components/_exam_modals.html:81 apps/exams/templates/exams/teacher/exam_section.html:35 apps/exams/templates/exams/teacher/exam_section.html:145 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:6
 msgctxt "exams.template.create_exam_modal"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Создать новый экзамен"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:31
 msgid "Form yüklənmədi. Yenidən cəhd edin."
@@ -28611,7 +28611,7 @@ msgstr "Разрешенные группы"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:311
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_group"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы…"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:315 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:337
 msgctxt "exams.template.create_exam_modal_form"
@@ -28626,7 +28626,7 @@ msgstr "Индивидуально разрешенные пользовател
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:333
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_name_or_username"
-msgstr "Username or email"
+msgstr "Имя пользователя или e-mail"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:362
 msgctxt "exams.wizard"
@@ -28786,7 +28786,7 @@ msgstr "Сохранить"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:522
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
-msgstr "Создать курс"
+msgstr "Создать экзамен"
 
 #: apps/exams/templates/exams/teacher/partials/_create_question_bank_scripts.html:28
 msgctxt "exams.template.create_question_bank"
@@ -65746,3 +65746,131 @@ msgstr "Неактивен"
 msgctxt "ui.status"
 msgid "Söndürülüb"
 msgstr "Отключён"
+
+msgctxt "exams.wizard"
+msgid "Sehrbaz addımları"
+msgstr "Шаги мастера"
+
+msgctxt "exams.wizard"
+msgid "Ulduzlu (*) sahələr mütləqdir. Qalan parametrləri sonra «Redaktə» ilə də dəyişə bilərsiniz."
+msgstr "Поля со звёздочкой (*) обязательны. Остальные параметры можно изменить и позже через «Редактировать»."
+
+msgctxt "exams.wizard"
+msgid "Dərc statusu"
+msgstr "Статус публикации"
+
+msgctxt "exams.wizard"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "exams.wizard"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "exams.wizard"
+msgid "Status bu formadan dəyişmir — imtahan səhifəsindəki «Aktiv et» / «Deaktiv et» düyməsi ilə idarə olunur."
+msgstr "Статус из этой формы не меняется — используйте кнопку «Активировать» / «Деактивировать» на странице экзамена."
+
+msgctxt "exams.wizard"
+msgid "İmtahan qaralama kimi yaradılır. Suallar əlavə edildikdən sonra imtahan səhifəsindəki «Aktiv et» düyməsi ilə tələbələrə açılır."
+msgstr "Экзамен создаётся как черновик. После добавления вопросов откройте его студентам кнопкой «Активировать» на странице экзамена."
+
+msgctxt "exams.wizard"
+msgid "Kateqoriyanı seçin."
+msgstr "Выберите категорию."
+
+msgctxt "exams.wizard"
+msgid "Fənn seçilməlidir."
+msgstr "Нужно выбрать предмет."
+
+msgctxt "exams.wizard"
+msgid "Başlama vaxtını seçin."
+msgstr "Укажите время начала."
+
+msgctxt "exams.wizard"
+msgid "Bitmə vaxtını seçin."
+msgstr "Укажите время окончания."
+
+msgctxt "exams.wizard"
+msgid "İmtahanın ümumi müddətini yazın."
+msgstr "Укажите общую длительность экзамена."
+
+msgctxt "exams.wizard"
+msgid "İmtahanı təsdiqlə"
+msgstr "Подтвердите экзамен"
+
+msgctxt "exams.wizard"
+msgid "İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq."
+msgstr "Экзамен будет создан и назначен с указанными ниже данными."
+
+msgctxt "exams.wizard"
+msgid "Təsdiqlə və yarat"
+msgstr "Подтвердить и создать"
+
+msgctxt "exams.wizard"
+msgid "hesablanır…"
+msgstr "подсчёт…"
+
+msgctxt "exams.wizard"
+msgid "İmtahan adı"
+msgstr "Название экзамена"
+
+msgctxt "exams.wizard"
+msgid "Tip"
+msgstr "Тип"
+
+msgctxt "exams.wizard"
+msgid "Kateqoriya"
+msgstr "Категория"
+
+msgctxt "exams.wizard"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "exams.wizard"
+msgid "Başlama"
+msgstr "Начало"
+
+msgctxt "exams.wizard"
+msgid "Bitmə"
+msgstr "Окончание"
+
+msgctxt "exams.wizard"
+msgid "Müddət (dəq)"
+msgstr "Длительность (мин)"
+
+msgctxt "exams.wizard"
+msgid "Sual sayı"
+msgstr "Число вопросов"
+
+msgctxt "exams.wizard"
+msgid "Nəzarət"
+msgstr "Контроль"
+
+msgctxt "exams.wizard"
+msgid "Deaktiv"
+msgstr "Выключен"
+
+msgctxt "exams.wizard"
+msgid "Alıcılar"
+msgstr "Получатели"
+
+msgctxt "exams.wizard"
+msgid "Hamıya açıq"
+msgstr "Открыт для всех"
+
+msgctxt "exams.wizard"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "exams.wizard"
+msgid "Fərdi tələbələr"
+msgstr "Отдельные студенты"
+
+msgctxt "exams.wizard"
+msgid "Seçilməyib"
+msgstr "Не выбрано"
+
+msgctxt "exams.wizard"
+msgid "Tələbə sayı (ümumi)"
+msgstr "Студентов (всего)"

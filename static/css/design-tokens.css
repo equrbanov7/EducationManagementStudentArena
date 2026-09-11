@@ -204,3 +204,22 @@
     --ems-w-dialog: 560px;
     --ems-w-drawer: 720px; /* handoff §4/7: 720–940px */
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   İmtahan tipi palitrası (2026-09-11, add-only) — `apps/exams/constants.py`
+   `EXAM_TYPE_META` ilə EYNİ dəyərlər (test = sky, yazılı = rose, praktiki =
+   violet). Kabinet kartları/nöqtələri bu hex-ləri Python-dan alır; sehrbazın
+   tip kartları isə CSS-dən — iki mənbə eyni qalsın deyə burada token kimi
+   verilir. Dəyərlərdən biri dəyişərsə, digəri də dəyişməlidir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+    --ems-sky-100: #e0f2fe;
+    --ems-sky-600: #0284c7;
+    --ems-sky-900: #075985;
+    --ems-rose-100: #fce7ee;
+    --ems-rose-600: #be3455;
+    --ems-rose-800: #9f1239;
+    --ems-violet-100: #f2ecfe;
+    --ems-violet-600: #7c3aed;
+    --ems-violet-800: #5b21b6;
+}

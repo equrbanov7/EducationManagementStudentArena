@@ -102,7 +102,29 @@
         "editTitle": "{% filter escapejs %}{% trans 'heading_edit_exam' context 'exams.template.create_edit_exam' %}{% endfilter %}",
         "submitError": "{% filter escapejs %}{% trans 'retry_error' context 'courses.common.js' %}{% endfilter %}",
         "saving": "{% filter escapejs %}{% trans 'saving' context 'exams.wizard' %}{% endfilter %}",
-        "saved": "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}"
+        "saved": "{% filter escapejs %}{% trans 'saved' context 'exams.wizard' %}{% endfilter %}",
+        "confirmTitle": "{% filter escapejs %}{% trans 'İmtahanı təsdiqlə' context 'exams.wizard' %}{% endfilter %}",
+        "confirmBody": "{% filter escapejs %}{% trans 'İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq.' context 'exams.wizard' %}{% endfilter %}",
+        "confirmBack": "{% filter escapejs %}{% trans 'nav_back' context 'exams.wizard' %}{% endfilter %}",
+        "confirmOk": "{% filter escapejs %}{% trans 'Təsdiqlə və yarat' context 'exams.wizard' %}{% endfilter %}",
+        "calculating": "{% filter escapejs %}{% trans 'hesablanır…' context 'exams.wizard' %}{% endfilter %}",
+        "rowTitle": "{% filter escapejs %}{% trans 'İmtahan adı' context 'exams.wizard' %}{% endfilter %}",
+        "rowType": "{% filter escapejs %}{% trans 'Tip' context 'exams.wizard' %}{% endfilter %}",
+        "rowCategory": "{% filter escapejs %}{% trans 'Kateqoriya' context 'exams.wizard' %}{% endfilter %}",
+        "rowSubject": "{% filter escapejs %}{% trans 'Fənn' context 'exams.wizard' %}{% endfilter %}",
+        "rowStart": "{% filter escapejs %}{% trans 'Başlama' context 'exams.wizard' %}{% endfilter %}",
+        "rowEnd": "{% filter escapejs %}{% trans 'Bitmə' context 'exams.wizard' %}{% endfilter %}",
+        "rowDuration": "{% filter escapejs %}{% trans 'Müddət (dəq)' context 'exams.wizard' %}{% endfilter %}",
+        "rowQuestions": "{% filter escapejs %}{% trans 'Sual sayı' context 'exams.wizard' %}{% endfilter %}",
+        "rowSupervision": "{% filter escapejs %}{% trans 'Nəzarət' context 'exams.wizard' %}{% endfilter %}",
+        "on": "{% filter escapejs %}{% trans 'Aktiv' context 'exams.wizard' %}{% endfilter %}",
+        "off": "{% filter escapejs %}{% trans 'Deaktiv' context 'exams.wizard' %}{% endfilter %}",
+        "rowRecipients": "{% filter escapejs %}{% trans 'Alıcılar' context 'exams.wizard' %}{% endfilter %}",
+        "publicAll": "{% filter escapejs %}{% trans 'Hamıya açıq' context 'exams.wizard' %}{% endfilter %}",
+        "rowGroups": "{% filter escapejs %}{% trans 'Qruplar' context 'exams.wizard' %}{% endfilter %}",
+        "rowStudents": "{% filter escapejs %}{% trans 'Fərdi tələbələr' context 'exams.wizard' %}{% endfilter %}",
+        "notSelected": "{% filter escapejs %}{% trans 'Seçilməyib' context 'exams.wizard' %}{% endfilter %}",
+        "rowTotal": "{% filter escapejs %}{% trans 'Tələbə sayı (ümumi)' context 'exams.wizard' %}{% endfilter %}"
     },
     "MY_EXAMS_I18N": {
         "codeCopied": "{% filter escapejs %}{% trans 'code_copied' context 'exams.dashboard' %}{% endfilter %}"
@@ -110,7 +132,12 @@
     "EXAM_WIZARD_I18N": {
         "step": "{% filter escapejs %}{% trans 'nav_step' context 'exams.wizard' %}{% endfilter %}",
         "errorsTitle": "{% filter escapejs %}{% trans 'errors_title' context 'exams.wizard' %}{% endfilter %}",
-        "titleRequired": "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}"
+        "titleRequired": "{% filter escapejs %}{% trans 'title_required' context 'exams.wizard' %}{% endfilter %}",
+        "categoryRequired": "{% filter escapejs %}{% trans 'Kateqoriyanı seçin.' context 'exams.wizard' %}{% endfilter %}",
+        "subjectRequired": "{% filter escapejs %}{% trans 'Fənn seçilməlidir.' context 'exams.wizard' %}{% endfilter %}",
+        "startRequired": "{% filter escapejs %}{% trans 'Başlama vaxtını seçin.' context 'exams.wizard' %}{% endfilter %}",
+        "endRequired": "{% filter escapejs %}{% trans 'Bitmə vaxtını seçin.' context 'exams.wizard' %}{% endfilter %}",
+        "durationRequired": "{% filter escapejs %}{% trans 'İmtahanın ümumi müddətini yazın.' context 'exams.wizard' %}{% endfilter %}"
     }
 }
 </script>
@@ -280,14 +307,14 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
 {% endif %}
 {% if 'my-exams' in allowed_sections %}
-<script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20260709-access-fix"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260709-access-fix"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260707-wizard2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260911-1"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260618-1"></script>
 {% endif %}
 {% if 'question-bank' in allowed_sections %}
