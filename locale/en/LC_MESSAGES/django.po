@@ -65540,3 +65540,23 @@ msgstr "Extra days"
 msgctxt "registrar.kollokvium_window"
 msgid "Əvvəlcə Akademik təqvimdə semestr yaradın."
 msgstr "Create a semester in the Academic calendar first."
+
+msgctxt "accounts.student_admission"
+msgid "ATİS şablonunu endirin"
+msgstr "Download the ATİS template"
+
+msgctxt "accounts.student_admission"
+msgid "Şablonun sütunları"
+msgstr "Template columns"
+
+msgctxt "accounts.student_admission"
+msgid "Əsas sütunlar"
+msgstr "Core columns"
+
+msgctxt "accounts.student_admission"
+msgid "Başlıq"
+msgstr "Header"
+
+msgctxt "accounts.student_admission"
+msgid "Məcburi sütun"
+msgstr "Required column"

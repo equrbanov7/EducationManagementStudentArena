@@ -27,6 +27,9 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.registrar import exam_eligibility
+
+# ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
+from apps.registrar.transcript_pdf_text import ROW_LINE_H, ROW_SIZE, line_height, row_height, wrap_lines
 from core.constants import OrgUnitType
 
 # Every label below is looked up under the "registrar.pdf" context: short words
@@ -37,7 +40,7 @@ from core.constants import OrgUnitType
 # context-free. Half of them therefore had no "registrar.pdf" catalog entry and
 # the EN/RU/TR transcript silently fell back to the Azerbaijani msgid.
 
-# ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
+
 _PAGE_W, _PAGE_H = 595, 842
 _MARGIN = 46
 _CONTENT_W = _PAGE_W - 2 * _MARGIN
@@ -190,11 +193,6 @@ def build_document_number(*, record, student, issued_at) -> str:
     return f"{_DOC_PREFIX}-{issued_at:%Y%m%d}-{digest[:8].upper()}"
 
 
-def _truncate(value: str, limit: int) -> str:
-    value = str(value)
-    return value if len(value) <= limit else value[: limit - 1] + "…"
-
-
 def _fmt_score(value) -> str:
     if value is None:
         return "—"
@@ -321,14 +319,24 @@ def _draw_student_info(sheet, record, student, document_number):
     # Rəsmi rekvizit — sənədin unikal nömrəsi altlıqda da təkrarlanır.
     pairs.append((pgettext("registrar.pdf", "Sənəd №"), document_number))
 
+    # Dəyər sığmırsa alt sətrə keçir — kəsilmir, qonşu sütuna minmir.
     col_w = _CONTENT_W / 2
+    label_w, size = 92, 8.7
+    value_w = col_w - label_w - 10
+    step = line_height(size)
     for i in range(0, len(pairs), 2):
-        sheet.ensure(16)
-        for col, (label, value) in enumerate(pairs[i : i + 2]):
+        cells = [
+            (label, wrap_lines(value, width=value_w, measure=lambda t, s_=size: _text_width(t, size=s_, bold=True)))
+            for label, value in pairs[i : i + 2]
+        ]
+        tallest = max(len(lines) for _label, lines in cells)
+        sheet.ensure(15 + (tallest - 1) * step)
+        for col, (label, lines) in enumerate(cells):
             x = _MARGIN + col * col_w
-            sheet.text_at(x, sheet.y, f"{label}:", size=8.7, color=_MUTED)
-            sheet.text_at(x + 92, sheet.y, _truncate(value, 40), size=8.7, bold=True)
-        sheet.y += 15
+            sheet.text_at(x, sheet.y, f"{label}:", size=size, color=_MUTED)
+            for offset, line in enumerate(lines):
+                sheet.text_at(x + label_w, sheet.y + offset * step, line, size=size, bold=True)
+        sheet.y += 15 + (tallest - 1) * step
 
     sheet.y += 6
     sheet.rule()
@@ -347,6 +355,27 @@ def _has_legacy_rows(data) -> bool:
                 if row.get("legacy"):
                     return True
     return False
+
+
+def _row_name_lines(row, *, width: float) -> list[str]:
+    """«ŞİFR  Ad [*]» — sütunun eninə ÖLÇÜLƏRƏK bölünmüş sətirlər (kəsilmir).
+
+    «*» köçürülmüş qiymət nişanıdır — ekrandakı ``_legacy_grade_mark.html``
+    qlifi ilə eyni ``row["legacy"]`` mənbəyindən çıxır, sürüşə bilməz.
+    """
+    code_name = f"{row['subject'].code}  {row['subject'].name}"
+    if row.get("legacy"):
+        code_name = f"{code_name} {_LEGACY_MARK}"
+    return wrap_lines(code_name, width=width, measure=lambda t: _text_width(t, size=ROW_SIZE))
+
+
+def _semester_height(semester, *, width: float) -> float:
+    """Semestr sütununun REAL hündürlüyü — səhifə keçidi bununla hesablanır."""
+    if semester is None:
+        return 0
+    name_w = _mini_cols(width)[0][3] - 6
+    rows = sum(row_height(len(_row_name_lines(row, width=name_w))) for row in semester["rows"])
+    return 13 + 11 + rows + 4 + 10 + 16
 
 
 def _mini_cols(width):
@@ -385,22 +414,18 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
             sheet.text_at(x + offset, y, label, size=6.6, bold=True, color=_MUTED)
     y += 11
 
-    name_limit = max(10, int(width / 4.4))
+    name_w = cols[0][3] - 6  # «Kredit» sütununa 6pt nəfəslik
     for index, row in enumerate(semester["rows"]):
         if y > _BOTTOM_LIMIT - 24:
             break  # safety valve — a real semester never has enough rows to hit this
+        lines = _row_name_lines(row, width=name_w)
+        row_h = row_height(len(lines))
         if index % 2 == 1:
-            sheet.fill_rect(x - 3, y - 9, x + width + 3, y - 9 + 12, _ROW_ALT)
+            sheet.fill_rect(x - 3, y - 9, x + width + 3, y - 9 + row_h, _ROW_ALT)
         result = row["result"]
         definite = result["passed"] or result["failed"]
-        code_name = f"{row['subject'].code}  {_truncate(row['subject'].name, name_limit)}"
-        # Köçürülmüş qiymət nişanı.  Rəsmi sənəddə bal-sütununa toxunmuruq —
-        # oxucu «*» görüb altdakı qeydə baxır.  Ekran versiyasında bunun
-        # qarşılığı ``_legacy_grade_mark.html`` qlifidir; hər ikisi eyni
-        # ``row["legacy"]`` mənbəyindən çıxır, ona görə sürüşə bilməz.
-        if row.get("legacy"):
-            code_name = f"{code_name} {_LEGACY_MARK}"
-        sheet.text_at(x, y, code_name, size=7.6)
+        for offset, line in enumerate(lines):  # rəqəm sütunları 1-ci xətdə qalır
+            sheet.text_at(x, y + offset * ROW_LINE_H, line, size=ROW_SIZE)
         values = {
             "credit": str(row["credit"]),
             "bal": _fmt_score(result["total"]) if definite else "—",
@@ -408,8 +433,8 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
         }
         for key, _label, offset, colw, _right in cols[1:]:
             bold = key == "bal" and definite
-            sheet.text_at(0, y, values[key], size=7.6, bold=bold, right_edge=x + offset + colw)
-        y += 12
+            sheet.text_at(0, y, values[key], size=ROW_SIZE, bold=bold, right_edge=x + offset + colw)
+        y += row_h
 
     y += 4
     sheet.rule_at(x, x + width, y)
@@ -432,8 +457,10 @@ def _draw_year(sheet, year):
     right = semesters[1] if len(semesters) >= 2 else None
     extra = semesters[2:]
 
-    max_rows = max((len(s["rows"]) for s in (left, right) if s), default=0)
-    estimated = 34 + max_rows * 12 + 40
+    # Sətirlər çox-xəttli ola bildiyi üçün hündürlük təxminlə deyil, çəkmə
+    # ilə EYNİ funksiyadan ölçülür — sütunun sonu altlığın üstünə düşməsin.
+    col_w = (_CONTENT_W - _COL_GAP) / 2
+    estimated = 16 + max(_semester_height(left, width=col_w), _semester_height(right, width=col_w)) + 26
     sheet.ensure(min(estimated, _BOTTOM_LIMIT - _MARGIN - 10))
 
     sheet.text(
@@ -445,7 +472,6 @@ def _draw_year(sheet, year):
     )
     sheet.y += 16
     top = sheet.y
-    col_w = (_CONTENT_W - _COL_GAP) / 2
     left_bottom = _draw_semester_column(sheet, left, x=_MARGIN, width=col_w, top=top)
     right_bottom = _draw_semester_column(sheet, right, x=_MARGIN + col_w + _COL_GAP, width=col_w, top=top)
     sheet.y = max(left_bottom, right_bottom, top)

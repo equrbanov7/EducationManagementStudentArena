@@ -65598,3 +65598,23 @@ msgstr "Доп. дни"
 msgctxt "registrar.kollokvium_window"
 msgid "Əvvəlcə Akademik təqvimdə semestr yaradın."
 msgstr "Сначала создайте семестр в Академическом календаре."
+
+msgctxt "accounts.student_admission"
+msgid "ATİS şablonunu endirin"
+msgstr "Скачайте шаблон ATİS"
+
+msgctxt "accounts.student_admission"
+msgid "Şablonun sütunları"
+msgstr "Столбцы шаблона"
+
+msgctxt "accounts.student_admission"
+msgid "Əsas sütunlar"
+msgstr "Основные столбцы"
+
+msgctxt "accounts.student_admission"
+msgid "Başlıq"
+msgstr "Заголовок"
+
+msgctxt "accounts.student_admission"
+msgid "Məcburi sütun"
+msgstr "Обязательный столбец"

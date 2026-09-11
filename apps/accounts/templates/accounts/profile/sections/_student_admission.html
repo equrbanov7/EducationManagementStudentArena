@@ -50,25 +50,59 @@ dinamik dəyərlər `data-*` atributları ilə ötürülür.
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_admission_section.kpi_tiles kpi_variant="4" %}
 
     {# ── 1. Şablon ────────────────────────────────────────────────────── #}
-    <div class="stsvc__panel">
-        <h3 class="stsvc__panel-title">{% trans "1 · ATİS şablonunu endirin" context "accounts.student_admission" %}</h3>
-        <p class="stsvc__step-note">
-            {% blocktrans context "accounts.student_admission" with limit=student_admission_section.max_rows size=student_admission_section.max_upload_mb %}Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox {{ limit }} sətir, ölçü limiti {{ size }} MB.{% endblocktrans %}
-        </p>
-        <a class="ems-btn" href="{{ student_admission_section.template_url }}" download>
-            <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
-            {% trans "Boş şablonu endir" context "accounts.student_admission" %}
-        </a>
-        <details class="stsvc__columns">
-            <summary>{% trans "ATİS sütunları" context "accounts.student_admission" %}</summary>
-            <ul class="stsvc__grouplist">
-                {% for column in student_admission_section.atis_columns %}
-                    <li class="stsvc__grouprow">
-                        <span>{{ column.header }}</span>
-                        <span class="stsvc__groupmeta">{{ column.hint }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
+    {% comment %}⚠️ 2026-09-11 (sahib: «ATİS şablonu olan yer dizaynı yaxşı deyil,
+    rənglər və s.»). Əvvəl bu kart `stsvc__panel-title` (kiçik BÖYÜK HƏRFLİ
+    etiket) + stilsiz `<details>` (brauzerin defolt üçbucağı) işlədirdi — 2/3-cü
+    addım kartlarının `six-card` dili ilə uyğun gəlmirdi. İndi üç kart da EYNİ
+    komponentdədir; sütun kataloqu toplu əlavə ekranındakı kimi `ems-table`-dır
+    və şablonun HƏR İKİ qrupunu (əsas + ATİS) göstərir.{% endcomment %}
+    <div class="stsvc__panel six-card">
+        <div class="six-card__head">
+            <span class="six-card__no" aria-hidden="true">1</span>
+            <div>
+                <h3 class="six-card__title">{% trans "ATİS şablonunu endirin" context "accounts.student_admission" %}</h3>
+                <p class="six-card__hint">
+                    {% blocktrans context "accounts.student_admission" with limit=student_admission_section.max_rows size=student_admission_section.max_upload_mb %}Sütunların sırası sərbəstdir — başlıq adına görə tanınır. Bir faylda ən çox {{ limit }} sətir, ölçü limiti {{ size }} MB.{% endblocktrans %}
+                </p>
+            </div>
+        </div>
+        <div class="six-actions">
+            <a class="ems-btn" href="{{ student_admission_section.template_url }}" download>
+                <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
+                {% trans "Boş şablonu endir" context "accounts.student_admission" %}
+            </a>
+        </div>
+        <details class="six-columns">
+            <summary class="six-columns__summary">
+                <i class="fas fa-table-columns" aria-hidden="true"></i>
+                {% trans "Şablonun sütunları" context "accounts.student_admission" %}
+                <i class="fas fa-chevron-down six-columns__chev" aria-hidden="true"></i>
+            </summary>
+            <div class="ems-tablewrap">
+                <div class="ems-tablescroll">
+                    <table class="ems-table ems-table--zebra">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% trans "Başlıq" context "accounts.student_admission" %}</th>
+                                <th scope="col">{% trans "İzah" context "accounts.student_admission" %}</th>
+                            </tr>
+                        </thead>
+                        {% for group in student_admission_section.column_groups %}
+                        <tbody>
+                            <tr class="six-colgroup">
+                                <th scope="rowgroup" colspan="2">{{ group.label }}</th>
+                            </tr>
+                            {% for column in group.columns %}
+                            <tr>
+                                <th scope="row">{{ column.header }}{% if column.required %} <span class="six-req" title="{% trans 'Məcburi sütun' context 'accounts.student_admission' %}">*</span>{% endif %}</th>
+                                <td class="six-muted">{{ column.hint }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
         </details>
     </div>
 

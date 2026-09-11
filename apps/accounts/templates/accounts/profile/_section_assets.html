@@ -162,7 +162,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor.css' %}?v=20260909-confirm">
     {% endif %}
     {% if 'student-intake' in allowed_sections or 'teacher-intake' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260909-bulkadd">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260911-1">
     {% endif %}
     {% if 'academic-calendar' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
@@ -206,8 +206,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     əlavə olaraq mövcud `student_intake.css` fayl-yükləmə üslubunu işlədir,
     ona görə o fayl ondan ƏVVƏL yüklənməlidir (kaskad).{% endcomment %}
     {% if 'student-admission' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260909-bulkadd">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260911-1">
     {% endif %}
     {% if 'student-admission' in allowed_sections or 'student-registry' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_services.css' %}?v=20260910-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_services.css' %}?v=20260911-1">
     {% endif %}
