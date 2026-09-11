@@ -103,6 +103,21 @@
     --ems-bg-subtle: var(--ems-neutral-50);
     --ems-link: var(--ems-primary-600);
     --ems-link-hover: var(--ems-primary-700);
+
+    /* ── Çatışmayan tokenlər (2026-09-11) ──────────────────────────────────
+       Tarama göstərdi ki, 7 token TƏYİN OLUNMADAN, fallback-sız işlənir
+       (`var(--ems-primary)`, `var(--ems-fg)` …) — 14 CSS faylında. Təyin
+       olunmamış token qayda-nı SÜKUTLA ləğv edir: «Akademik təqvim»də aktiv
+       «Hamısı» çipi ağ mətn + ağ fon = GÖRÜNMƏZ olmuşdu. Alias-lar burada
+       təyin olunur ki, istifadə yerləri dəyişməsin və gələcəkdə eyni ad
+       yenidən yaransa da işləsin. */
+    --ems-primary: var(--ems-primary-600);          /* brend mavi — çılpaq alias */
+    --ems-primary-300: #93c5fd;                     /* şkalada boşluq: 200 ↔ 500 */
+    --ems-primary-400: #60a5fa;
+    --ems-fg: var(--ems-neutral-900);               /* mətn — `--ems-text` ilə eyni */
+    --ems-fg-muted: var(--ems-neutral-500);
+    --ems-danger-600: #dc2626;                      /* = --ems-danger */
+    --ems-danger-700: #b91c1c;                      /* = --ems-danger-strong */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

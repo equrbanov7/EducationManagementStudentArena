@@ -13,6 +13,16 @@
         padding: 0;
         box-sizing: border-box;
     }
+
+    /* ⚠️ Yuxarıdakı universal sıfırlama brauzerin `dialog { margin: auto }`
+       qaydasını da silir — native `<dialog>` `showModal()` ilə açılanda
+       mərkəzdə deyil, SOL-YUXARI küncdə qalırdı (2026-09-11, «Köçürülmüş
+       nəticələr» dialoqu). Element selektoru `*`-dan güclüdür, ona görə
+       mərkəzləmə burada geri qaytarılır; `padding: 0` qalır — komponent
+       öz boşluğunu verir. */
+    dialog {
+        margin: auto;
+    }
     html{
         scroll-behavior: smooth;
         overflow-x: hidden;
