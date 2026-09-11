@@ -1,31 +1,35 @@
 /* ===========================================================================
-   EMSArena — Yeni imtahan sehrbazı (4-addımlı modal chrome).
-   Dizayn: Claude Design "EMSArena Müəllim Paneli" — rail + pane wizard.
-   Sahə daxili stillər exam_create_edit_modal.css-də qalır; bu fayl yalnız
-   sehrbaz karkasını (rail, addımlar, pane, footer) verir.
+   EMSArena — Yeni imtahan sehrbazı (4-addımlı modal chrome + sahə ritmi).
+   2026-09-11 redizayn (sahib: «rəngləri, digər hissələri düzəlt, təkmilləşdir
+   ki qəşəng olsun; heç bir sorun da olmasın»):
+     • sol rel açıq fondadır (`--ems-bg-subtle`), başlıq sans-serif; addım
+       nişanları `ems_ui` stepper dilində — aktiv: dolu brend dairə, keçilmiş:
+       yaşıl işarə, gələcək: neytral kontur;
+     • sahələr `ems-field__label` / `ems-input` ritmində (11px CAPS etiket,
+       40px r9 sahə, fokusda nazik neytral kontur — sahib qaydası 2026-09-09);
+     • altlıq düymələri `ems-btn` reseptindədir (`.ew-btn` adı saxlanılır —
+       kurs səhifəsi `ems_ui/controls.css`-i yükləmir, ona görə resept burada
+       təkrarlanır);
+     • bütün rənglər `design-tokens.css`-dəndir (sabit hex yoxdur).
+   Sahə daxili köhnə (pre-wizard) stillər exam_create_edit_modal.css-də qalır;
+   bu fayl onların üstünə wizard-a məxsus ritmi yazır.
    =========================================================================== */
 
-/* Bootstrap-ın xarici `.modal` konteyneri default olaraq `overflow-y: auto`-dur
-   (dialoq viewport-dan hündür olsa BÜTÖV kartı sürüşdürmək üçün). Sehrbazın
-   `.exam-wizard { height: min(680px, 86vh) }` qaydası dialoqun HEÇ VAXT
-   viewport-dan hündür olmayacağını zəmanətləndirir, ona görə bu xarici scroll
-   heç vaxt lazım deyil — amma mövcud olduğu üçün TƏSADÜFƏN işə düşə bilər
-   (məs. sub-piksel yuvarlaqlaşdırma) və `.ew-pane-body`-nin daxili scroll-u
-   ilə İKİNCİ, TOQQUŞAN scroll qatı yaradır: siçan responsuz sahə (rail,
-   pane-head) üzərindəykən fərqli davranış göstərir. Söndürülür ki, modalda
-   YALNIZ BİR scroll konteyner (`.ew-pane-body`) qalsın.
-   (2026-08-01: istifadəçi «çöldən scroll edəndə fərqli gəlir» şikayəti.) */
-.exam-wizard-modal.modal { overflow-y: hidden; }
+/* Bootstrap-ın xarici `.modal` konteyneri default `overflow-y:auto`-dur. Sehrbaz
+   `height: min(680px, 86vh)` ilə heç vaxt viewport-dan hündür olmur, ona görə
+   bu xarici scroll lazımsızdır və `.ew-pane-body`-nin daxili scroll-u ilə İKİNCİ
+   scroll qatı yaradırdı. Söndürülür ki, modalda YALNIZ BİR scroll konteyner
+   qalsın. `html.ems-modal-open .modal` (modal_scroll_lock.css, 0,3,0) bu qaydanı
+   üstələyirdi — ona görə eyni prefiksli seçici də verilir. */
+.exam-wizard-modal.modal,
+html.ems-modal-open .exam-wizard-modal.modal { overflow-y: hidden; }
 
 .exam-wizard-modal .modal-content {
-  --ew-ink: #0B1437; --ew-accent: #2C5BFF; --ew-accent-deep: var(--ems-primary-800); --ew-accent-soft: #EEF2FF;
-  --ew-teal: #14B8A6; --ew-border: #E5E8F0; --ew-border-soft: #EFF1F5;
-  --ew-text: var(--ems-neutral-800); --ew-muted: var(--ems-gray-500); --ew-subtle: #9CA3AF; --ew-surface: var(--ems-neutral-0);
-  --ew-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  position: relative;
   border: none;
-  border-radius: 22px;
+  border-radius: var(--ems-r-2xl);
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(11, 20, 55, 0.28);
+  box-shadow: var(--ems-sh-dialog);
 }
 .exam-wizard-modal .modal-body.p-0 { padding: 0; }
 
@@ -38,425 +42,410 @@
 }
 
 .exam-wizard {
-  --ew-ink: #0B1437; --ew-accent: #2C5BFF; --ew-accent-deep: var(--ems-primary-800); --ew-accent-soft: #EEF2FF;
-  --ew-teal: #14B8A6; --ew-border: #E5E8F0; --ew-border-soft: #EFF1F5;
-  --ew-text: var(--ems-neutral-800); --ew-muted: var(--ems-gray-500); --ew-subtle: #9CA3AF; --ew-surface: var(--ems-neutral-0);
-  --ew-serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
   display: grid;
-  grid-template-columns: 256px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   /* minmax(0, 1fr): sətir konteynerin hündürlüyünü aşmasın (scroll içəridə qalsın). */
   grid-template-rows: minmax(0, 1fr);
   height: min(680px, 86vh);
-  background: var(--ew-surface);
   width: 100%;
+  background: var(--ems-bg);
+  color: var(--ems-text);
+  font-size: var(--ems-fs-base);
 }
 
-/* ── left rail ── */
+/* ── Sol rel ─────────────────────────────────────────────────────────────── */
 .exam-wizard .ew-rail {
-  background: linear-gradient(180deg, #0B1437, #111B45 60%, #16205A);
-  color: var(--ems-neutral-0); padding: 26px 22px; display: flex; flex-direction: column;
-  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; min-height: 0;
+  padding: 22px 16px 18px;
+  background: var(--ems-bg-subtle);
+  border-right: 1px solid var(--ems-border);
 }
-.exam-wizard .ew-rail::before {
-  content: ''; position: absolute; inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px);
-  background-size: 20px 20px; opacity: .5; pointer-events: none;
+.exam-wizard .ew-rail-head { padding: 0 6px; margin-bottom: 18px; }
+.exam-wizard .ew-rail-title {
+  margin: 0; font-size: var(--ems-fs-xl); font-weight: 800; line-height: 1.25;
+  letter-spacing: -0.01em; color: var(--ems-text); text-wrap: pretty;
 }
-.exam-wizard .ew-rail-head { position: relative; margin-bottom: 24px; }
-.exam-wizard .ew-rail-kicker { font-size: 11px; font-weight: 700; letter-spacing: .16em; color: rgba(255, 255, 255, .55); }
-.exam-wizard .ew-rail-title { font-family: var(--ew-serif); font-weight: 500; font-size: 22px; letter-spacing: -.01em; margin: 8px 0 0; line-height: 1.12; }
-.exam-wizard .ew-steps { position: relative; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.exam-wizard .ew-steps { flex: 1; display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.exam-wizard .ew-step-item { position: relative; }
+/* Nişanlar arası fasiləsiz bağlayıcı xətt: hər elementin dairəsindən altına
+   (::after) + növbəti elementin üstündən dairəsinə (::before); düymə (z-index 1)
+   aktiv addımın dolğun fonu ilə xətti öz qutusunun içində örtür. */
+.exam-wizard .ew-step-item:not(:last-child)::after,
+.exam-wizard .ew-step-item + .ew-step-item::before {
+  content: ""; position: absolute; left: 22px; width: 2px; background: var(--ems-border); z-index: 0;
+}
+.exam-wizard .ew-step-item:not(:last-child)::after { top: 37px; bottom: -2px; }
+.exam-wizard .ew-step-item + .ew-step-item::before { top: 0; height: 9px; }
 .exam-wizard .ew-step {
-  display: flex; align-items: center; gap: 13px; padding: 11px 12px; border-radius: 12px;
-  text-align: left; transition: .15s; color: rgba(255, 255, 255, .62);
-  background: none; border: none; cursor: pointer; width: 100%; font-family: inherit;
+  position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 10px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: var(--ems-r-xl); background: none;
+  color: var(--ems-neutral-600); font: inherit; text-align: left; cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
-.exam-wizard .ew-step:hover:not(.is-active) { background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .85); }
-.exam-wizard .ew-step.is-active { background: rgba(255, 255, 255, .12); color: var(--ems-neutral-0); }
-.exam-wizard .ew-step.is-done { color: rgba(255, 255, 255, .85); }
+.exam-wizard .ew-step:hover:not(.is-active) { background: var(--ems-neutral-100); color: var(--ems-text); }
+.exam-wizard .ew-step:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 1px; }
+.exam-wizard .ew-step.is-active { background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.exam-wizard .ew-step.is-done { color: var(--ems-text); }
 .exam-wizard .ew-sn {
-  width: 28px; height: 28px; border-radius: 9px; border: 1.5px solid rgba(255, 255, 255, .25);
-  display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; transition: .15s;
+  position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; flex: none; border-radius: 50%;
+  border: 1.5px solid var(--ems-neutral-300); background: var(--ems-bg); color: var(--ems-neutral-500);
+  font-size: var(--ems-fs-sm); font-weight: 800; transition: background-color 0.12s ease, border-color 0.12s ease;
 }
-.exam-wizard .ew-step.is-active .ew-sn { background: var(--ems-neutral-0); color: var(--ew-ink); border-color: var(--ems-neutral-0); }
-.exam-wizard .ew-step.is-done .ew-sn { background: var(--ew-teal); border-color: var(--ew-teal); color: var(--ems-neutral-0); }
-.exam-wizard .ew-stx { min-width: 0; display: flex; flex-direction: column; }
-.exam-wizard .ew-st { font-size: 14px; font-weight: 600; }
-.exam-wizard .ew-ss { font-size: 11.5px; opacity: .7; margin-top: 1px; }
+.exam-wizard .ew-sn-check { display: none; }
+.exam-wizard .ew-step.is-active .ew-sn { border-color: var(--ems-primary-600); background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.exam-wizard .ew-step.is-done .ew-sn { border-color: var(--ems-success-700); background: var(--ems-success-700); color: var(--ems-neutral-0); }
+.exam-wizard .ew-step.is-done .ew-sn-num { display: none; }
+.exam-wizard .ew-step.is-done .ew-sn-check { display: block; }
+.exam-wizard .ew-stx { display: flex; flex-direction: column; min-width: 0; padding-top: 3px; }
+.exam-wizard .ew-st { font-size: var(--ems-fs-base); font-weight: 700; line-height: 1.3; }
+.exam-wizard .ew-step.is-active .ew-st { font-weight: 800; }
+.exam-wizard .ew-ss { margin-top: 2px; font-size: var(--ems-fs-sm); line-height: 1.4; color: var(--ems-text-muted); text-wrap: pretty; }
+.exam-wizard .ew-step.is-active .ew-ss { color: var(--ems-primary-700); }
 .exam-wizard .ew-rail-foot {
-  position: relative; margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, .12);
-  font-size: 12px; color: rgba(255, 255, 255, .55); line-height: 1.5; display: flex; gap: 9px;
+  display: flex; gap: 8px; margin-top: 14px; padding: 12px 6px 0; border-top: 1px solid var(--ems-border);
+  font-size: var(--ems-fs-sm); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty;
 }
-.exam-wizard .ew-rail-foot i { flex-shrink: 0; margin-top: 2px; color: var(--ew-teal); }
+.exam-wizard .ew-rail-foot i { flex: none; margin-top: 3px; color: var(--ems-primary-500); }
 
-/* ── right pane ── */
-/* min-height:0 vacibdir: grid/flex elementinin öz məzmunundan kiçilməsinə icazə
-   verir ki, .ew-pane-body-nin overflow:auto scroll-u işə düşsün (yoxsa pane
-   məzmun boyu uzanır və modal-content overflow:hidden onu kəsir → scroll işləmir). */
+/* ── Sağ panel ───────────────────────────────────────────────────────────── */
+/* min-height:0 vacibdir: grid/flex elementi öz məzmunundan kiçilə bilsin ki,
+   .ew-pane-body-nin overflow:auto scroll-u işə düşsün. */
 .exam-wizard .ew-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; width: 100%; }
-.exam-wizard .ew-rail { min-height: 0; }
 .exam-wizard .ew-mstep { display: none; }
 .exam-wizard .ew-pane-head {
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
-  padding: 22px 26px 14px; border-bottom: 1px solid var(--ew-border-soft);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--ems-border);
 }
-.exam-wizard .ew-pane-head-tx h3 { font-size: 19px; font-weight: 700; letter-spacing: -.015em; color: var(--ew-ink); margin: 0; }
-.exam-wizard .ew-pane-head-tx p { font-size: 13px; color: var(--ew-muted); margin: 5px 0 0; line-height: 1.45; max-width: 460px; }
-.exam-wizard .ew-x { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--ew-subtle); background: none; border: none; cursor: pointer; transition: .14s; flex-shrink: 0; }
-.exam-wizard .ew-x:hover { background: #F6F7FB; color: var(--ew-ink); }
+.exam-wizard .ew-pane-head-tx { min-width: 0; }
+.exam-wizard .ew-pane-head-tx h3 { margin: 0; font-size: var(--ems-fs-xl); font-weight: 800; letter-spacing: -0.01em; color: var(--ems-text); }
+.exam-wizard .ew-pane-head-tx p { margin: 4px 0 0; max-width: 520px; font-size: var(--ems-fs-base); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
+.exam-wizard .ew-x {
+  display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none;
+  border: 0; border-radius: var(--ems-r-lg); background: none; color: var(--ems-neutral-500); cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.exam-wizard .ew-x:hover { background: var(--ems-neutral-100); color: var(--ems-text); }
+.exam-wizard .ew-x:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 1px; }
 
-/* ── error summary (server 400) ── */
-.exam-wizard .ew-errsummary { margin: 14px 26px 0; background: #FEECEC; border: 1px solid #F5C2C2; border-radius: 13px; padding: 12px 15px; }
-.exam-wizard .ew-errsummary-head { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; color: var(--ems-danger-strong); }
-.exam-wizard .ew-errsummary ul { margin: 8px 0 0; padding-left: 30px; font-size: 12.5px; color: #92272D; line-height: 1.5; }
+/* ── Xəta xülasəsi (server 400) ──────────────────────────────────────────── */
+.exam-wizard .ew-errsummary {
+  margin: 12px 22px 0; padding: 10px 14px; border: 1px solid var(--ems-danger-bd);
+  border-radius: var(--ems-r-xl); background: var(--ems-danger-bg);
+}
+.exam-wizard .ew-errsummary-head { display: flex; align-items: center; gap: 8px; font-size: var(--ems-fs-base); font-weight: 800; color: var(--ems-danger-strong); }
+.exam-wizard .ew-errsummary ul { margin: 6px 0 0; padding-left: 26px; font-size: var(--ems-fs-sm); line-height: 1.55; color: var(--ems-danger-strong); }
 .exam-wizard .ew-errsummary a { color: var(--ems-danger-strong); text-decoration: underline; cursor: pointer; }
 
-/* ── body + panels ── */
-/* overscroll-behavior: modal daxilində sürüşdürəndə fon (profil səhifəsi)
-   hərəkət etməsin — sürüşmə modaldan kənara "zəncirlənməsin". */
-.exam-wizard .ew-pane-body { flex: 1; overflow-y: auto; padding: 20px 26px; scrollbar-width: thin; overscroll-behavior: contain; }
+/* ── Gövdə + panellər ────────────────────────────────────────────────────── */
+/* overscroll-behavior: modal daxilində sürüşdürəndə fon hərəkət etməsin. */
+.exam-wizard .ew-pane-body { flex: 1; overflow-y: auto; padding: 18px 22px 22px; scrollbar-width: thin; overscroll-behavior: contain; }
 .exam-wizard-modal .modal-content,
 .exam-wizard { overscroll-behavior: contain; }
 /* Modal açıq olarkən fon sürüşməsini bloklayan yardımçı sinif (entry.js). */
 html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-pane-body::-webkit-scrollbar { width: 8px; }
-.exam-wizard .ew-pane-body::-webkit-scrollbar-thumb { background: var(--ew-border); border-radius: 8px; }
+.exam-wizard .ew-pane-body::-webkit-scrollbar-thumb { background: var(--ems-neutral-300); border-radius: 8px; }
 .exam-wizard .ew-nonfield { margin-bottom: 14px; }
 .exam-wizard .ew-panel { display: none; }
-.exam-wizard .ew-panel.is-active { display: block; animation: ewFade .18s ease; }
+.exam-wizard .ew-panel.is-active { display: block; animation: ewFade 0.18s ease; }
 @keyframes ewFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* invalid field highlight after server round-trip */
-.exam-wizard .form-group.is-invalid .field-error,
-.exam-wizard .field-error { color: var(--ems-danger); font-size: 12px; margin-top: 6px; }
-.exam-wizard .form-group.is-invalid input,
-.exam-wizard .form-group.is-invalid textarea,
-.exam-wizard .form-group.is-invalid select { border-color: var(--ems-danger) !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, .12) !important; }
+/* ── Validasiya (ems_ui/validation.css dili) ─────────────────────────────── */
+.exam-wizard .field-error { display: flex; gap: 6px; margin-top: 5px; font-size: var(--ems-fs-sm); line-height: 1.5; color: var(--ems-danger-strong); }
+.exam-wizard .field-error::before { content: "!"; flex: none; width: 15px; height: 15px; margin-top: 1px; border-radius: 50%; background: var(--ems-danger); color: var(--ems-neutral-0); font-size: 10px; font-weight: 800; text-align: center; line-height: 15px; }
+.exam-wizard .form-group.is-invalid .form-control,
+.exam-wizard .form-group.is-invalid .create-exam-search-input,
+.exam-wizard .form-group.is-invalid .bootstrap-single-select__toggle { border-color: var(--ems-danger); }
+.exam-wizard .form-group.is-invalid .ew-label { color: var(--ems-danger-strong); }
 
-/* callout (proctor unavailable) */
-.exam-wizard .ew-callout { display: flex; gap: 12px; padding: 14px 16px; border-radius: 13px; background: #FEF6E7; border: 1px solid #FCE9C2; color: var(--ems-warning-800); font-size: 13px; line-height: 1.5; }
-.exam-wizard .ew-callout i { flex-shrink: 0; margin-top: 2px; }
+/* Xəbərdarlıq lenti (nəzarət əlçatan deyil) */
+.exam-wizard .ew-callout { display: flex; gap: 10px; padding: 12px 14px; border: 1px solid var(--ems-warning-bd); border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); color: var(--ems-warning-800); font-size: var(--ems-fs-base); line-height: 1.5; }
+.exam-wizard .ew-callout i { flex: none; margin-top: 2px; }
 
-/* ── footer ── */
-/* `sticky` — flex-sibling mövqeyi normalda kifayətdir (.ew-pane-body scroll
-   olanda .ew-pane-foot ondan kənarda qalıb yerində durur), amma bu, əlavə
-   müdafiə xəttidir: .exam-wizard-modal sinfi olmayan konteksdə (məs.
-   `.ew-pane`-in flex/height zənciri hardasa qırılarsa) footer yenə də ÖZ
-   scroll konteynerinin (`.ew-pane`) altına "yapışıq" qalır və itmir.
-   (2026-08-01: kurs modalında məhz bu zəncir qırılmışdı — bax _exam_modals.html.) */
-.exam-wizard .ew-pane-foot { display: flex; align-items: center; gap: 12px; padding: 14px 26px; border-top: 1px solid var(--ew-border-soft); background: var(--ew-surface); position: sticky; bottom: 0; z-index: 3; }
-.exam-wizard .ew-prog { font-size: 12.5px; color: var(--ew-subtle); font-weight: 600; }
-.exam-wizard .ew-foot-right { margin-left: auto; display: flex; gap: 10px; }
+/* ── Altlıq ──────────────────────────────────────────────────────────────── */
+/* `sticky` — flex-sibling mövqeyi normalda kifayətdir; bu əlavə müdafiə xəttidir:
+   `.ew-pane` flex zənciri hardasa qırılarsa footer yenə öz konteynerinin altına
+   yapışıq qalır (2026-08-01: kurs modalında məhz bu zəncir qırılmışdı). */
+.exam-wizard .ew-pane-foot {
+  position: sticky; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 10px;
+  padding: 12px 22px; border-top: 1px solid var(--ems-border); background: var(--ems-bg);
+}
+.exam-wizard .ew-prog { font-size: var(--ems-fs-sm); font-weight: 700; color: var(--ems-text-muted); white-space: nowrap; }
+.exam-wizard .ew-foot-right { margin-left: auto; display: flex; gap: 8px; }
+
+/* `.ew-btn` = `ems-btn` resepti (controls.css) — 40px r9 13px/700, primary
+   = primary-600 → hover primary-700; ghost = ağ fon + neutral-300 kontur. */
 .exam-wizard .ew-btn,
 .exam-wizard-modal .ew-confirm .ew-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px;
-  padding: 0 18px; border: 1px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 600;
-  cursor: pointer; transition: .15s; font-family: inherit; white-space: nowrap; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: var(--ems-h-field);
+  padding: 0 16px; border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg); background: var(--ems-bg);
+  color: var(--ems-neutral-700); font: inherit; font-size: var(--ems-fs-base); font-weight: 700; line-height: 1.2;
+  white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
 }
-.exam-wizard .ew-btn--ghost,
-.exam-wizard-modal .ew-confirm .ew-btn--ghost { background: var(--ew-surface); color: var(--ew-ink); border-color: var(--ew-border); }
-.exam-wizard .ew-btn--ghost:hover,
-.exam-wizard-modal .ew-confirm .ew-btn--ghost:hover { border-color: var(--ew-subtle); background: #F6F7FB; }
+.exam-wizard .ew-btn:hover:not(:disabled),
+.exam-wizard-modal .ew-confirm .ew-btn:hover:not(:disabled) { background: var(--ems-bg-subtle); }
+.exam-wizard .ew-btn:focus-visible,
+.exam-wizard-modal .ew-confirm .ew-btn:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 1px; }
 .exam-wizard .ew-btn--primary,
-.exam-wizard-modal .ew-confirm .ew-btn--primary { background: var(--ew-accent); color: var(--ems-neutral-0); box-shadow: 0 8px 18px rgba(44, 91, 255, .24); }
-.exam-wizard .ew-btn--primary:hover,
-.exam-wizard-modal .ew-confirm .ew-btn--primary:hover { background: var(--ew-accent-deep); }
-.exam-wizard .ew-btn[disabled],
-.exam-wizard-modal .ew-confirm .ew-btn[disabled] { opacity: .5; cursor: not-allowed; }
+.exam-wizard-modal .ew-confirm .ew-btn--primary { min-height: var(--ems-h-action); border-color: var(--ems-primary-600); background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.exam-wizard .ew-btn--primary:hover:not(:disabled),
+.exam-wizard-modal .ew-confirm .ew-btn--primary:hover:not(:disabled) { border-color: var(--ems-primary-700); background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.exam-wizard .ew-btn:disabled,
+.exam-wizard-modal .ew-confirm .ew-btn:disabled { background: var(--ems-neutral-100); border-color: var(--ems-border); color: var(--ems-neutral-500); cursor: not-allowed; }
+.exam-wizard .ew-arrow-flip { transform: rotate(180deg); }
 
 /* ════════════════════════════════════════════════════════════════════════
-   INNER FORM — sahələri dizayna uyğunlaşdırır (sahə adları/ID-ləri dəyişmir,
-   yalnız görünüş). Toggle switch-lər, checkbox kartları, bölmə başlıqları.
+   DAXİLİ FORMA — sahə ritmi (sahə adları/ID-ləri dəyişmir, yalnız görünüş).
    ════════════════════════════════════════════════════════════════════════ */
-.exam-wizard .ew-panel .form-group { margin-bottom: 18px; }
+.exam-wizard .ew-panel .form-group { margin-bottom: 16px; }
 .exam-wizard .ew-panel .form-group:last-child { margin-bottom: 0; }
-.exam-wizard .ew-panel .create-exam-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.exam-wizard .ew-panel .create-exam-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
 .exam-wizard .ew-panel .create-exam-form-grid > .form-group { margin-bottom: 0; }
 .exam-wizard .ew-panel .form-group-full { grid-column: 1 / -1; }
+.exam-wizard .ew-panel .form-group[hidden] { display: none; }
 
-.exam-wizard .ew-panel label,
-.exam-wizard .ew-panel .create-exam-searchable-label {
-  display: block; font-size: 13px; font-weight: 600; color: var(--ew-ink); margin-bottom: 8px;
+/* Etiket = ems-field__label (11px CAPS, 800, neutral-500 — AA). */
+.exam-wizard .ew-label {
+  display: block; margin: 0 0 5px; font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ems-neutral-500); line-height: 1.4;
 }
-.exam-wizard .ew-panel .form-text { display: block; font-size: 12px; color: var(--ew-subtle); margin-top: 7px; line-height: 1.45; }
+.exam-wizard .ew-req { color: var(--ems-danger); font-weight: 800; }
+.exam-wizard .ew-panel .form-text { display: block; margin-top: 5px; font-size: var(--ems-fs-sm); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
 
-/* text / number / datetime / textarea / raw selects */
+/* Mətn / rəqəm / tarix / textarea = ems-input */
 .exam-wizard .ew-panel .form-control,
-.exam-wizard .ew-panel select.form-select:not(.bootstrap-single-select__native) {
-  width: 100%; min-height: 46px; padding: 0 14px; border-radius: 12px;
-  border: 1px solid var(--ew-border); background: var(--ems-neutral-0); font-size: 14.5px; color: var(--ew-text);
-  outline: none; transition: .15s; box-shadow: none;
+.exam-wizard .ew-panel .create-exam-search-input {
+  width: 100%; min-height: var(--ems-h-field); padding: 8px 12px; border: 1px solid var(--ems-neutral-300);
+  border-radius: var(--ems-r-lg); background: var(--ems-bg); color: var(--ems-text); font: inherit;
+  font-size: var(--ems-fs-base); line-height: 1.45; outline: none; box-shadow: none; transition: border-color 0.12s ease;
 }
-.exam-wizard .ew-panel textarea.form-control { min-height: 84px; padding: 12px 14px; line-height: 1.55; resize: vertical; }
+.exam-wizard .ew-panel textarea.form-control { min-height: 84px; resize: vertical; }
 .exam-wizard .ew-panel .form-control:focus,
-.exam-wizard .ew-panel select.form-select:not(.bootstrap-single-select__native):focus {
-  border-color: var(--ew-accent); box-shadow: 0 0 0 4px var(--ew-accent-soft);
-}
-.exam-wizard .ew-panel .form-control::placeholder { color: #AAB2C0; }
-.exam-wizard .ew-panel input[name="access_code"] { letter-spacing: .28em; font-weight: 700; font-size: 16px; }
-.exam-wizard .ew-panel input[name="access_code"]::placeholder { letter-spacing: .28em; }
+.exam-wizard .ew-panel .create-exam-search-input:focus { border-color: var(--ems-primary-500); box-shadow: none; }
+/* Xətalı sahə fokusda da qırmızı qalır (ems_ui/validation.css dili). */
+.exam-wizard .ew-panel .form-group.is-invalid .form-control:focus,
+.exam-wizard .ew-panel .form-group.is-invalid .create-exam-search-input:focus { border-color: var(--ems-danger); box-shadow: 0 0 0 3px var(--ems-danger-100); }
+.exam-wizard .ew-panel .form-control::placeholder,
+.exam-wizard .ew-panel .create-exam-search-input::placeholder { color: var(--ems-neutral-400); }
+.exam-wizard .ew-panel .form-control:disabled { background: var(--ems-neutral-100); color: var(--ems-neutral-500); cursor: not-allowed; }
 
-/* exam type selector → selectable cards (design) */
-.exam-wizard .ew-panel .ew-typesel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; }
+/* Layihə select komponenti (bootstrap-single-select) — eyni 40px r9 ritmi. */
+.exam-wizard .ew-panel .bootstrap-single-select { width: 100%; }
+.exam-wizard .ew-panel .bootstrap-single-select__toggle {
+  min-height: var(--ems-h-field); padding: 6px 12px; border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg);
+  background: var(--ems-bg); color: var(--ems-text); font-size: var(--ems-fs-base); font-weight: 600; line-height: 1.45; box-shadow: none;
+}
+.exam-wizard .ew-panel .bootstrap-single-select__toggle:hover { border-color: var(--ems-neutral-400); background: var(--ems-bg); }
+.exam-wizard .ew-panel .bootstrap-single-select__toggle:focus,
+.exam-wizard .ew-panel .bootstrap-single-select__toggle.show { border-color: var(--ems-primary-500); box-shadow: none; }
+.exam-wizard .ew-panel .bootstrap-single-select__toggle.is-placeholder { color: var(--ems-neutral-500); font-weight: 500; }
+.exam-wizard .ew-panel .bootstrap-single-select__caret { color: var(--ems-neutral-500); font-size: var(--ems-fs-xs); }
+.exam-wizard .ew-panel .bootstrap-single-select__menu { padding: 6px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); box-shadow: var(--ems-sh-raised); }
+.exam-wizard .ew-panel .bootstrap-single-select__option { padding: 8px 10px; border-radius: var(--ems-r-md); font-size: var(--ems-fs-base); }
+
+/* İmtahan tipi → seçilə bilən kartlar (bərabər hündürlük: grid stretch +
+   ikon və ad bir sətirdə, izah altda — «Praktiki imtahan» iki sətrə düşmür). */
+.exam-wizard .ew-panel .ew-typesel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .exam-wizard .ew-typesel .btn-check { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 .exam-wizard .ew-panel .ew-typecard {
-  position: relative; display: block; margin: 0; padding: 15px 14px; cursor: pointer;
-  border: 1.5px solid var(--ew-border); border-radius: 14px; background: var(--ems-neutral-0); transition: .16s;
+  position: relative; display: flex; flex-direction: column; gap: 8px; height: 100%; margin: 0; padding: 12px 34px 12px 12px;
+  border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg); cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
 }
-.exam-wizard .ew-panel .ew-typecard:hover { border-color: var(--ew-subtle); }
-.exam-wizard .ew-typesel .btn-check:checked + .ew-typecard { border-color: var(--tc); background: var(--tc-soft); box-shadow: 0 0 0 3px var(--tc-soft); }
-.exam-wizard .ew-typesel .btn-check:focus-visible + .ew-typecard { box-shadow: 0 0 0 4px var(--ew-accent-soft); }
-.exam-wizard .ew-tc-ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; margin-bottom: 11px; font-size: 15px; }
-.exam-wizard .ew-tc-name { display: block; font-size: 14.5px; font-weight: 700; color: var(--ew-ink); }
-.exam-wizard .ew-tc-desc { display: block; font-size: 11.5px; color: var(--ew-muted); margin-top: 4px; line-height: 1.4; font-weight: 400; }
-.exam-wizard .ew-tc-check { position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--tc); display: grid; place-items: center; opacity: 0; transform: scale(.6); transition: .16s; }
+.exam-wizard .ew-panel .ew-typecard:hover { border-color: var(--ems-neutral-400); }
+.exam-wizard .ew-typesel .btn-check:checked + .ew-typecard { border-color: var(--ems-primary-600); background: var(--ems-primary-50); }
+.exam-wizard .ew-typesel .btn-check:focus-visible + .ew-typecard { outline: 2px solid var(--ems-primary-500); outline-offset: 1px; }
+.exam-wizard .ew-tc-head { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.exam-wizard .ew-tc-ic { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; border-radius: var(--ems-r-lg); font-size: 13px; }
+.exam-wizard .ew-tc-ic--test { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+.exam-wizard .ew-tc-ic--written { background: var(--ems-rose-100); color: var(--ems-rose-800); }
+.exam-wizard .ew-tc-ic--coding { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.exam-wizard .ew-tc-name { font-size: var(--ems-fs-md); font-weight: 800; line-height: 1.25; color: var(--ems-text); text-wrap: balance; }
+.exam-wizard .ew-tc-desc { font-size: var(--ems-fs-sm); line-height: 1.45; color: var(--ems-text-muted); text-wrap: pretty; }
+.exam-wizard .ew-tc-check {
+  position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; background: var(--ems-primary-600); color: var(--ems-neutral-0);
+  opacity: 0; transform: scale(0.6); transition: opacity 0.12s ease, transform 0.12s ease;
+}
 .exam-wizard .ew-typesel .btn-check:checked + .ew-typecard .ew-tc-check { opacity: 1; transform: none; }
 
-/* code + generate button row */
-.exam-wizard .ew-code-row { display: flex; gap: 8px; }
-.exam-wizard .ew-code-row .form-control { flex: 1; min-width: 0; }
-.exam-wizard .ew-gencode {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; height: 46px; padding: 0 15px;
-  border-radius: 12px; border: 1px solid var(--ew-border); background: #F6F7FB; color: var(--ew-ink);
-  font-size: 13.5px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap;
-}
-.exam-wizard .ew-gencode:hover { background: #ECEFF6; border-color: var(--ew-subtle); }
+/* Bölmə ayırıcıları */
+.exam-wizard .ew-fsec { display: flex; align-items: center; gap: 9px; margin: 2px 0 0; }
+.exam-wizard .ew-fsec--stack { flex-wrap: wrap; }
+.exam-wizard .ew-fsec .ew-fs-ic { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; border-radius: var(--ems-r-md); font-size: var(--ems-fs-sm); }
+.exam-wizard .ew-fs-ic--primary { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.exam-wizard .ew-fs-ic--violet { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.exam-wizard .ew-fs-ic--success { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.exam-wizard .ew-fsec h4 { margin: 0; font-size: var(--ems-fs-md); font-weight: 800; color: var(--ems-text); }
+.exam-wizard .ew-fsec .ew-fs-rule { flex: 1; height: 1px; background: var(--ems-border); }
+.exam-wizard .ew-fsec .ew-fs-desc { flex-basis: 100%; margin: 2px 0 0; font-size: var(--ems-fs-sm); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
 
-/* section dividers */
-.exam-wizard .ew-fsec { display: flex; align-items: center; gap: 10px; margin: 4px 0 2px; }
-.exam-wizard .ew-fsec .ew-fs-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; font-size: 13px; }
-.exam-wizard .ew-fsec h4 { font-size: 13.5px; font-weight: 700; color: var(--ew-ink); margin: 0; }
-.exam-wizard .ew-fsec .ew-fs-rule { flex: 1; height: 1px; background: var(--ew-border-soft); }
-.exam-wizard .create-exam-modal-section-title { margin: 4px 0 0; }
-.exam-wizard .create-exam-modal-section-title h4 { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 700; color: var(--ew-ink); margin: 0; }
-.exam-wizard .create-exam-modal-section-title p { font-size: 12.5px; color: var(--ew-muted); margin: 5px 0 0; line-height: 1.45; }
+/* Dərc statusu (oxunan, toggle deyil) */
+.exam-wizard .ew-status { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); }
+.exam-wizard .ew-status-dot { width: 9px; height: 9px; flex: none; margin-top: 5px; border-radius: 50%; background: var(--ems-neutral-400); }
+.exam-wizard .ew-status--on { border-color: var(--ems-success-bd); background: var(--ems-success-bg); }
+.exam-wizard .ew-status--on .ew-status-dot { background: var(--ems-success); }
+.exam-wizard .ew-status-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.exam-wizard .ew-status-title { font-size: var(--ems-fs-base); font-weight: 600; color: var(--ems-neutral-700); }
+.exam-wizard .ew-status-title b { font-weight: 800; color: var(--ems-text); }
+.exam-wizard .ew-status--on .ew-status-title b { color: var(--ems-success-700); }
+.exam-wizard .ew-status-desc { font-size: var(--ems-fs-sm); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
 
-/* boolean → toggle switch row */
-.exam-wizard .modal-check-label {
-  display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; margin: 0;
-  border: 1px solid var(--ew-border); border-radius: 14px; cursor: pointer; transition: .15s;
+/* Boolean → toggle switch sətri (switch SAĞDA; `display:flex` etiket qaydasından
+   ayrı yazılır — əvvəl `.ew-panel label {display:block}` bunu sındırırdı). */
+.exam-wizard .ew-panel .modal-check-label {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; margin: 0; padding: 11px 14px;
+  border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg); color: var(--ems-text);
+  font-weight: 600; cursor: pointer; transition: border-color 0.12s ease, background-color 0.12s ease;
 }
-.exam-wizard .modal-check-label:has(input[type="checkbox"]:checked) { border-color: var(--ew-accent); background: var(--ew-accent-soft); }
-.exam-wizard .modal-check-label.is-disabled { opacity: .5; pointer-events: none; }
-.exam-wizard .modal-check-label .modal-check-label-text { flex: 1; order: 1; font-size: 14px; font-weight: 600; color: var(--ew-ink); }
-.exam-wizard .modal-check-label .ew-switch-desc { display: block; font-size: 12px; font-weight: 400; color: var(--ew-muted); margin-top: 4px; line-height: 1.45; }
-.exam-wizard .modal-check-label input[type="checkbox"],
-.exam-wizard .modal-check-label input.form-check-input[type="checkbox"] {
-  appearance: none; -webkit-appearance: none; order: 2; flex-shrink: 0; margin: 2px 0 0; float: none;
-  width: 44px; height: 26px; border-radius: 999px; background: #CBD2DE; border: none; background-image: none;
-  position: relative; cursor: pointer; transition: .18s;
+.exam-wizard .ew-panel .modal-check-label:hover { border-color: var(--ems-neutral-400); }
+.exam-wizard .ew-panel .modal-check-label:has(input[type="checkbox"]:checked) { border-color: var(--ems-primary-200); background: var(--ems-primary-50); }
+.exam-wizard .ew-panel .modal-check-label:has(input[type="checkbox"]:focus-visible) { outline: 2px solid var(--ems-primary-500); outline-offset: 1px; }
+.exam-wizard .ew-panel .modal-check-label.is-disabled { opacity: 0.55; pointer-events: none; filter: none; }
+.exam-wizard .ew-panel .modal-check-label .modal-check-label-text { order: 1; flex: 1; min-width: 0; font-size: var(--ems-fs-base); font-weight: 700; line-height: 1.4; color: var(--ems-text); }
+.exam-wizard .ew-panel .modal-check-label .ew-switch-desc { display: block; margin-top: 3px; font-size: var(--ems-fs-sm); font-weight: 400; line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
+.exam-wizard .ew-panel .modal-check-label input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; order: 2; flex: none; float: none; position: relative; margin: 0;
+  width: 38px; height: 22px; border: 0; border-radius: var(--ems-r-pill); background: var(--ems-neutral-300);
+  background-image: none; cursor: pointer; transition: background-color 0.15s ease;
 }
-.exam-wizard .modal-check-label input[type="checkbox"]::after {
-  content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
-  background: var(--ems-neutral-0); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: .18s;
+.exam-wizard .ew-panel .modal-check-label input[type="checkbox"]::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--ems-neutral-0); box-shadow: var(--ems-sh-card); transition: transform 0.15s ease;
 }
-.exam-wizard .modal-check-label input[type="checkbox"]:checked { background: var(--ew-accent); }
-.exam-wizard .modal-check-label input[type="checkbox"]:checked::after { transform: translateX(18px); }
+.exam-wizard .ew-panel .modal-check-label input[type="checkbox"]:checked { background: var(--ems-primary-600); }
+.exam-wizard .ew-panel .modal-check-label input[type="checkbox"]:checked::after { transform: translateX(16px); }
+/* Köhnə (pre-wizard) rəng modifikatorları wizard-da neytrallaşır. */
+.exam-wizard .ew-panel .modal-check-label--public,
+.exam-wizard .ew-panel .modal-check-label--paint,
+.exam-wizard .ew-panel .modal-check-label--supervision { background: var(--ems-bg); border-color: var(--ems-border); }
+.exam-wizard .ew-panel .modal-check-label--public:has(input:checked),
+.exam-wizard .ew-panel .modal-check-label--paint:has(input:checked),
+.exam-wizard .ew-panel .modal-check-label--supervision:has(input:checked) { border-color: var(--ems-primary-200); background: var(--ems-primary-50); }
 
-/* proctoring measures → checkbox cards */
-.exam-wizard .ew-checks-label { display: block; font-size: 13px; font-weight: 600; color: var(--ew-ink); margin: 4px 0 9px; }
-.exam-wizard .ew-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-bottom: 18px; }
+/* Nəzarət tədbirləri → checkbox kartları */
+.exam-wizard .ew-checks-label { margin-bottom: 8px; }
+.exam-wizard .ew-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 .exam-wizard .ew-checks .form-group { margin: 0; }
-.exam-wizard .ew-checks .modal-check-label { align-items: center; gap: 11px; padding: 12px 13px; border-radius: 11px; }
-.exam-wizard .ew-checks .modal-check-label .modal-check-label-text { order: 1; font-size: 13.5px; }
-.exam-wizard .ew-checks .modal-check-label input[type="checkbox"] {
-  order: 0; width: 20px; height: 20px; border-radius: 6px; background: var(--ems-neutral-0); border: 1.5px solid var(--ew-subtle); margin: 0;
+.exam-wizard .ew-panel .ew-checks .modal-check-label { align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--ems-r-lg); }
+.exam-wizard .ew-panel .ew-checks .modal-check-label .modal-check-label-text { font-weight: 600; }
+.exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"] {
+  order: 0; width: 18px; height: 18px; border-radius: var(--ems-r-xs); border: 1.5px solid var(--ems-neutral-400); background: var(--ems-bg);
 }
-.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]::after {
-  top: 1px; left: 6px; width: 6px; height: 11px; border-radius: 0; background: transparent;
-  border: solid var(--ems-neutral-0); border-width: 0 2px 2px 0; transform: rotate(45deg); box-shadow: none; opacity: 0;
+.exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"]::after {
+  top: 1px; left: 5px; width: 5px; height: 10px; border-radius: 0; background: transparent; box-shadow: none; opacity: 0;
+  border: solid var(--ems-neutral-0); border-width: 0 2px 2px 0; transform: rotate(45deg);
 }
-.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]:checked { background: var(--ew-accent); border-color: var(--ew-accent); }
-.exam-wizard .ew-checks .modal-check-label input[type="checkbox"]:checked::after { transform: rotate(45deg); opacity: 1; }
+.exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"]:checked { border-color: var(--ems-primary-600); background: var(--ems-primary-600); }
+.exam-wizard .ew-panel .ew-checks .modal-check-label input[type="checkbox"]:checked::after { opacity: 1; transform: rotate(45deg); }
 
-/* grace/max + action/recovery 2-col */
-.exam-wizard .ew-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+/* Möhlət/limit + hərəkət/siyasət 2 sütun */
+.exam-wizard .ew-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
 .exam-wizard .ew-grid2 .form-group { margin: 0; }
+/* Nəzarət ayarları daxili grid tək sütun (şablon → tədbirlər → parametrlər). */
+.exam-wizard #modalSupervisionSettings .create-exam-form-grid { grid-template-columns: 1fr; gap: 16px; }
+.exam-wizard #modalSupervisionSettings[hidden],
+.exam-wizard #modalSupervisionCustomSettings[hidden],
+.exam-wizard #modalSupervisionTemplateInfo[hidden] { display: none; }
 
-/* bootstrap-single-select fits the design width inside panels */
-.exam-wizard .ew-panel .bootstrap-single-select { width: 100%; }
+/* Nəzarət şablonu izahı — sol zolağın rəngi şablon sinfi ilə (toggles.js). */
+.supervision-template-info { padding: 12px 14px; border: 1px solid var(--ems-border); border-left: 4px solid var(--ems-neutral-500); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); }
+.supervision-template-info--light { border-left-color: var(--ems-success-600); }
+.supervision-template-info--medium { border-left-color: var(--ems-warning-500); }
+.supervision-template-info--strict { border-left-color: var(--ems-danger); }
+.supervision-template-info h4 { margin: 0 0 4px; font-size: var(--ems-fs-md); font-weight: 800; color: var(--ems-text); }
+.supervision-template-info p { margin: 0 0 8px; font-size: var(--ems-fs-base); line-height: 1.5; color: var(--ems-neutral-700); }
+.supervision-template-info ul { margin: 0; padding-left: 18px; font-size: var(--ems-fs-base); line-height: 1.6; color: var(--ems-neutral-700); }
 
-/* nəzarət ayarları daxili grid tək sütun (şablon + tədbirlər + parametrlər
-   şaquli düzülür; tədbirlər öz 2-sütunlu .ew-checks grid-ində qalır) */
-.exam-wizard #modalSupervisionSettings .create-exam-form-grid { grid-template-columns: 1fr; gap: 18px; }
+/* Axtarışlı siyahılar (fənn / qrup / tələbə) */
+.exam-wizard .ew-panel .create-exam-search-wrap { margin-bottom: 6px; }
+.exam-wizard .ew-panel .create-exam-search-wrap i { left: 12px; color: var(--ems-neutral-400); }
+.exam-wizard .ew-panel .create-exam-search-input { padding-left: 34px; }
+.exam-wizard .ew-panel .create-exam-search-list { min-height: 160px; max-height: 200px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); background: var(--ems-bg-subtle); }
+.exam-wizard .ew-panel .create-exam-list-item { padding: 8px 12px; border-bottom: 1px solid var(--ems-border); }
+.exam-wizard .ew-panel .create-exam-list-item:hover,
+.exam-wizard .ew-panel .create-exam-list-item.is-active { background: var(--ems-primary-50); }
+.exam-wizard .ew-panel .create-exam-item-label { font-size: var(--ems-fs-base); color: var(--ems-text); }
+.exam-wizard .ew-panel .create-exam-search-empty { padding: 10px 12px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
+.exam-wizard .ew-panel .create-exam-selection-counter { margin-top: 5px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
+.exam-wizard .ew-panel .create-exam-access-grid { gap: 14px 16px; }
+.exam-wizard .ew-panel .create-exam-access-block.is-hidden { margin: 0; }
 
-/* saxlanılır spinner (submit düyməsi) */
-.ew-spin { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.45); border-top-color: var(--ems-neutral-0); border-radius: 50%; animation: ewSpin .7s linear infinite; vertical-align: -2px; }
+/* Saxlanılır spinner (submit düyməsi) */
+.ew-spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255, 255, 255, 0.45); border-top-color: var(--ems-neutral-0); border-radius: 50%; animation: ewSpin 0.7s linear infinite; vertical-align: -2px; }
 @keyframes ewSpin { to { transform: rotate(360deg); } }
 
-/* yadda saxlanmamış dəyişiklik təsdiqi (overlay) */
-.exam-wizard-modal .modal-content { position: relative; }
-.ew-confirm { position: absolute; inset: 0; z-index: 20; background: rgba(11,20,55,.5); display: grid; place-items: center; padding: 24px; }
-.ew-confirm-box { background: var(--ems-neutral-0); border-radius: 18px; padding: 26px 26px 22px; max-width: 430px; text-align: center; box-shadow: 0 24px 60px rgba(11,20,55,.3); animation: ewFade .18s ease; }
-.ew-confirm-ic { width: 48px; height: 48px; border-radius: 14px; background: #FEF6E7; color: #B45309; display: grid; place-items: center; font-size: 20px; margin: 0 auto 14px; }
-.ew-confirm-box h4 { font-size: 18px; font-weight: 700; color: var(--ew-ink); margin: 0 0 8px; }
-.ew-confirm-box p { font-size: 13.5px; color: var(--ew-muted); margin: 0 0 20px; line-height: 1.5; }
-.ew-confirm-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.ew-confirm-actions .ew-btn { min-width: 118px; }
-.ew-confirm-discardbtn { color: var(--ems-danger) !important; border-color: #F5C2C2 !important; }
-.ew-confirm-discardbtn:hover { background: #FEECEC !important; }
+/* ── Təsdiq overlay-ləri (yadda saxlanmamış dəyişiklik / yaratma icmalı) ── */
+.ew-confirm { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 24px; background: rgba(15, 23, 42, 0.45); }
+.ew-confirm-box { width: 100%; max-width: 430px; padding: 24px 24px 20px; border-radius: var(--ems-r-2xl); background: var(--ems-bg); text-align: center; box-shadow: var(--ems-sh-dialog); animation: ewFade 0.18s ease; }
+.ew-confirm-ic { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0 auto 12px; border-radius: var(--ems-r-xl); background: var(--ems-warning-bg); color: var(--ems-warning-700); font-size: 18px; }
+.ew-confirm-ic--ok { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.ew-confirm-box h4 { margin: 0 0 6px; font-size: var(--ems-fs-xl); font-weight: 800; color: var(--ems-text); }
+.ew-confirm-box p { margin: 0 0 18px; font-size: var(--ems-fs-base); line-height: 1.5; color: var(--ems-text-muted); text-wrap: pretty; }
+.ew-confirm-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.ew-confirm-actions .ew-btn { min-width: 112px; }
+.exam-wizard-modal .ew-confirm .ew-confirm-discardbtn { border-color: var(--ems-danger-bd); color: var(--ems-danger-strong); }
+.exam-wizard-modal .ew-confirm .ew-confirm-discardbtn:hover:not(:disabled) { background: var(--ems-danger-bg); }
+/* İcmal qutusu: düymələr HƏMİŞƏ görünür — yalnız cədvəl (dl) daxildə sürüşür. */
+.ew-confirm-box--review { display: flex; flex-direction: column; max-width: 520px; max-height: 92%; }
+.ew-confirm-box--review .ew-confirm-actions { flex: none; }
+.ew-confirm-summary { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 7px 14px; flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 2px 0 16px; padding: 12px 14px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); text-align: left; font-size: var(--ems-fs-base); }
+.ew-confirm-summary dt { color: var(--ems-text-muted); font-weight: 600; }
+.ew-confirm-summary dd { margin: 0; color: var(--ems-text); font-weight: 700; word-break: break-word; }
 
-/* yaratma təsdiqi (ətraflı icmal) */
-.ew-confirm-box--review { max-width: 500px; width: 100%; max-height: 86%; overflow-y: auto; }
-.ew-confirm-ic--ok { background: #E7F6EF; color: #0F9D58; }
-.ew-confirm-summary { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 9px 16px; margin: 4px 0 22px; padding: 14px 16px; text-align: left; font-size: 13.5px; border: 1px solid var(--ew-border); border-radius: 12px; background: var(--ew-surface); }
-.ew-confirm-summary dt { color: var(--ew-muted); font-weight: 600; }
-.ew-confirm-summary dd { margin: 0; color: var(--ew-ink); font-weight: 600; word-break: break-word; }
-
-/* ── responsive: rail → top progress, full-screen on phones ── */
+/* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ─────────── */
 @media (max-width: 860px) {
   .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); }
   .exam-wizard .ew-rail { display: none; }
-  .exam-wizard .ew-mstep { display: flex; align-items: center; gap: 7px; padding: 14px 20px 0; }
-  .exam-wizard .ew-msdot { flex: 1; height: 5px; border-radius: 999px; background: var(--ew-border); transition: .2s; }
-  .exam-wizard .ew-msdot.is-done { background: var(--ew-teal); }
-  .exam-wizard .ew-msdot.is-on { background: var(--ew-accent); }
-  .exam-wizard .ew-pane-head { padding: 14px 20px 12px; }
-  .exam-wizard .ew-pane-body { padding: 16px 20px; }
-  .exam-wizard .ew-errsummary { margin: 12px 20px 0; }
-  .exam-wizard .ew-pane-foot { padding: 12px 20px; flex-wrap: wrap; }
+  .exam-wizard .ew-mstep { display: flex; align-items: center; gap: 6px; padding: 12px 18px 0; }
+  .exam-wizard .ew-msdot { flex: 1; height: 5px; border-radius: var(--ems-r-pill); background: var(--ems-neutral-200); transition: background-color 0.2s ease; }
+  .exam-wizard .ew-msdot.is-done { background: var(--ems-success); }
+  .exam-wizard .ew-msdot.is-on { background: var(--ems-primary-600); }
+  .exam-wizard .ew-pane-head { padding: 12px 18px 12px; }
+  .exam-wizard .ew-pane-body { padding: 16px 18px 20px; }
+  .exam-wizard .ew-errsummary { margin: 12px 18px 0; }
+  .exam-wizard .ew-pane-foot { flex-wrap: wrap; padding: 10px 18px; }
   .exam-wizard .ew-prog { width: 100%; order: -1; }
-  /* inner grids stack on mobile */
   .exam-wizard .ew-panel .create-exam-form-grid,
   .exam-wizard .ew-panel .ew-typesel,
   .exam-wizard .ew-checks,
-  .exam-wizard .ew-grid2 { grid-template-columns: 1fr; }
+  .exam-wizard .ew-grid2,
   .exam-wizard .ew-panel .create-exam-access-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 575.98px) {
-  .exam-wizard .ew-code-row { flex-direction: column; }
-  .exam-wizard .ew-gencode { height: 44px; justify-content: center; }
-  .exam-wizard .ew-pane-foot .ew-foot-right { width: 100%; }
+  /* Telefonda: «Addım n/4» öz sətrində, düymələr bir sətirdə (əsas əməl uzanır). */
+  .exam-wizard .ew-pane-foot { gap: 8px; }
+  .exam-wizard .ew-pane-foot .ew-btn { padding: 0 12px; }
+  .exam-wizard .ew-pane-foot .ew-foot-right { flex: 1 1 auto; min-width: 0; }
   .exam-wizard .ew-pane-foot .ew-foot-right .ew-btn { flex: 1; }
-}
-@media (max-width: 575.98px) {
-  .exam-wizard-modal {
-    padding: 0 !important;
-    overflow: hidden;
-  }
-  .exam-wizard-modal .modal-dialog {
-    position: fixed;
-    inset: 0;
-    margin: 0;
-    max-width: none;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    transform: none !important;
-  }
-  .exam-wizard-modal .modal-content {
-    border-radius: 0;
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    display: flex;
-    flex-direction: column;
-  }
-  .exam-create-edit-modal.exam-wizard-modal .modal-body {
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: none;
-    overflow: hidden;
-  }
-  .exam-create-edit-modal.exam-wizard-modal .modal-body > #createExamModalForm {
-    flex: 1 1 auto;
-    height: 100%;
-  }
-  .exam-wizard,
-  .exam-wizard .ew-pane {
-    height: 100%;
-    min-height: 0;
-  }
-  .exam-wizard {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-  .exam-wizard .ew-pane {
-    flex: 1 1 auto;
-    overflow: hidden;
-  }
+  .exam-wizard-modal { padding: 0 !important; overflow: hidden; }
+  .exam-wizard-modal .modal-dialog { position: fixed; inset: 0; margin: 0; max-width: none; width: 100%; height: auto; min-height: 0; transform: none !important; }
+  .exam-wizard-modal .modal-content { display: flex; flex-direction: column; width: 100%; height: 100%; max-height: none; border-radius: 0; }
+  .exam-create-edit-modal.exam-wizard-modal .modal-body { display: flex; flex: 1 1 auto; min-height: 0; max-height: none; overflow: hidden; }
+  .exam-create-edit-modal.exam-wizard-modal .modal-body > #createExamModalForm { flex: 1 1 auto; height: 100%; }
+  .exam-wizard { flex: 1 1 auto; width: 100%; height: 100%; min-height: 0; }
+  .exam-wizard .ew-pane { flex: 1 1 auto; height: 100%; min-height: 0; overflow: hidden; }
   .exam-wizard .ew-mstep,
   .exam-wizard .ew-pane-head,
-  .exam-wizard .ew-pane-foot {
-    flex: 0 0 auto;
-  }
+  .exam-wizard .ew-pane-foot { flex: 0 0 auto; }
   .exam-wizard .ew-pane-body {
-    flex: 1 1 0;
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
+    flex: 1 1 0; min-height: 0; overflow-x: hidden; overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y;
     padding-bottom: calc(24px + env(safe-area-inset-bottom));
   }
-  .exam-wizard .ew-pane-foot {
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-  }
+  .exam-wizard .ew-pane-foot { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .ew-confirm { padding: 16px; }
 
-  #createExamModal.modal-overlay.active {
-    align-items: stretch;
-    justify-content: stretch;
-    overflow: hidden;
-  }
-  #createExamModal .modal-create-exam {
-    width: 100%;
-    max-width: none;
-    height: 100vh;
-    height: 100dvh;
-    max-height: none;
-    border-radius: 0;
-    padding: 0;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  #createExamModal .modal-header {
-    flex: 0 0 auto;
-    padding: 12px 16px;
-    margin: 0;
-  }
-  #createExamModal .create-exam-modal-body {
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-  }
-  #createExamModal .create-exam-modal-body > #createExamModalForm {
-    flex: 1 1 auto;
-    height: 100%;
-  }
+  /* Köhnə (pre-Bootstrap) `#createExamModal` qabığı — hələ DOM-dadır. */
+  #createExamModal.modal-overlay.active { align-items: stretch; justify-content: stretch; overflow: hidden; }
+  #createExamModal .modal-create-exam { display: flex; flex-direction: column; width: 100%; max-width: none; height: 100vh; height: 100dvh; max-height: none; padding: 0; border-radius: 0; overflow: hidden; }
+  #createExamModal .modal-header { flex: 0 0 auto; margin: 0; padding: 12px 16px; }
+  #createExamModal .create-exam-modal-body { display: flex; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  #createExamModal .create-exam-modal-body > #createExamModalForm { flex: 1 1 auto; height: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .exam-wizard .ew-panel.is-active { animation: none; }
+  .exam-wizard .ew-panel.is-active,
+  .ew-confirm-box { animation: none; }
 }
-
-/* ═══ Faza 6.4 Sprint-2 (2026-07-02): _create_exam_modal_form inline → klass ═══ */
-/* İmtahan tipi kartlarının rəng qamması (əvvəl inline --tc custom-props idi) */
-.ew-tc--test { --tc: #0284C7; --tc-soft: #E0F2FE; }
-.ew-tc--coding { --tc: #7C3AED; --tc-soft: #F2ECFE; }
-.ew-tc--written { --tc: #BE3455; --tc-soft: #FCE7EE; }
-.ew-tc-ic--sky { background: #E0F2FE; color: #075985; }
-.ew-tc-ic--violet { background: #F2ECFE; color: #5B21B6; }
-.ew-tc-ic--rose { background: #FCE7EE; color: #9F1239; }
-.ew-fs-ic--indigo { background: #EEF2FF; color: var(--ems-primary-800); }
-.ew-fs-ic--violet { background: #F2ECFE; color: #5B21B6; }
-.ew-icon-green { color: #198754; }
-.ew-callout--teal { background: rgba(15, 118, 110, 0.07); border-color: rgba(15, 118, 110, 0.22); }
-.ew-callout--teal > i { color: var(--ems-success-strong); }
-.ew-arrow-flip { transform: rotate(180deg); }
-/* Supervision şablon-info paneli: atributlardakı statik stillər descendant-larla */
-.supervision-template-info { background: #f8f9fa; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid #007bff; }
-.supervision-template-info h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
-.supervision-template-info p { font-size: 0.85rem; color: #555; margin-bottom: 0.75rem; }
-.supervision-template-info ul { font-size: 0.85rem; color: #444; padding-left: 1.25rem; margin: 0; }
-
-/* ── yekun icmal (son addım) ── */
-.exam-wizard .ew-review { margin-top: 18px; border: 1px solid var(--ew-border); border-radius: 13px; padding: 14px 16px; background: var(--ew-surface); }
-.exam-wizard .ew-review-head { display: flex; align-items: center; gap: 9px; font-weight: 700; color: var(--ew-ink); margin-bottom: 10px; }
-.exam-wizard .ew-review-head i { color: var(--ew-teal); }
-.exam-wizard .ew-review-grid { display: grid; grid-template-columns: minmax(120px, auto) 1fr; gap: 6px 16px; margin: 0; font-size: 13px; }
-.exam-wizard .ew-review-grid dt { color: var(--ew-muted); font-weight: 600; }
-.exam-wizard .ew-review-grid dd { margin: 0; color: var(--ew-text); word-break: break-word; }
-.exam-wizard .ew-review-warn { margin-top: 12px; padding: 9px 12px; border-radius: 10px; background: #FEECEC; border: 1px solid #F5C2C2; color: #92272D; font-size: 12.5px; }

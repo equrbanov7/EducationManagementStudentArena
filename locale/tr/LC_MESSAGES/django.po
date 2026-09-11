@@ -6168,17 +6168,17 @@ msgstr "⚙️ Maksimum 2 ihlal, otomatik teslim, ikinci şans yok"
 #: apps/accounts/templates/accounts/profile.html:371 apps/exams/templates/exams/components/_exam_modals.html:30 apps/exams/templates/exams/components/_exam_modals.html:116 apps/exams/templates/exams/teacher/partials/_create_edit_exam_bs_modal.html:8 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:13 apps/exams/templates/exams/teacher/partials/_question_form_bs_modal.html:18 apps/exams/templates/exams/teacher/question_bank_detail.html:43 apps/exams/templates/exams/teacher/teacher_exam_detail.html:428 apps/exams/templates/exams/teacher/teacher_exam_detail.html:441 apps/exams/templates/exams/teacher/teacher_questions_bank.html:43
 msgctxt "exams.template.create_exam_modal"
 msgid "loading_form"
-msgstr "Loading"
+msgstr "Form yükleniyor…"
 
 #: apps/accounts/templates/accounts/profile.html:372 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:23 apps/exams/templates/exams/teacher/teacher_exam_detail.html:429
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Yeni sınav oluştur"
 
 #: apps/accounts/templates/accounts/profile.html:373 apps/exams/templates/exams/components/_exam_modals.html:29 apps/exams/templates/exams/teacher/exam_section.html:117 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:23 apps/exams/templates/exams/teacher/teacher_exam_detail.html:430
 msgctxt "exams.template.create_edit_exam"
 msgid "heading_edit_exam"
-msgstr "Serbest Meslekler"
+msgstr "Sınavı düzenle"
 
 #: apps/accounts/templates/accounts/profile.html:374 apps/courses/templates/courses/partials/_courses_assets_js.html:6 apps/exams/templates/exams/teacher/question_bank_detail.html:46 apps/exams/templates/exams/teacher/teacher_exam_detail.html:431 apps/exams/templates/exams/teacher/teacher_exam_detail.html:444 apps/exams/templates/exams/teacher/teacher_questions_bank.html:46
 msgctxt "courses.common.js"
@@ -11878,7 +11878,7 @@ msgstr "Sınavı sil"
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:15 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:7 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:61 apps/exams/templates/exams/teacher/partials/_question_form_bs_modal.html:13
 msgctxt "exams.template.create_exam_modal"
 msgid "aria_close"
-msgstr "Kapat onu"
+msgstr "Kapat"
 
 #: apps/accounts/templates/accounts/profile/sections/partials/_delete_exam_modal.html:18
 msgctxt "exams.dashboard"
@@ -21829,7 +21829,7 @@ msgstr "Pratik sınav"
 #: apps/exams/domain/exam_definition.py:29
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "quiz"
-msgstr "Sınav"
+msgstr "Quiz"
 
 #: apps/exams/domain/exam_definition.py:30
 msgctxt "exams.model.exam.choice.exam_type_extended"
@@ -21849,7 +21849,7 @@ msgstr "Seviye belirleme"
 #: apps/exams/domain/exam_definition.py:33
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "practice"
-msgstr "Aktif"
+msgstr "Alıştırma"
 
 #: apps/exams/domain/exam_definition.py:36
 msgctxt "exams.model.exam.choice.mode"
@@ -24004,7 +24004,7 @@ msgstr "Öğrenciye gösterilecek soru sayısı"
 #: apps/exams/forms/exam.py:203
 msgctxt "exams.form.exam.label"
 msgid "Sual təkrarını azalt"
-msgstr "Soru bankasını sil"
+msgstr "Soru tekrarını azalt"
 
 #: apps/exams/forms/exam.py:207
 msgctxt "exams.form.exam.label"
@@ -24958,7 +24958,7 @@ msgstr "Bağlantıyı kaldır"
 #: apps/exams/templates/exams/components/_exam_modals.html:28 apps/exams/templates/exams/components/_exam_modals.html:81 apps/exams/templates/exams/teacher/exam_section.html:35 apps/exams/templates/exams/teacher/exam_section.html:145 apps/exams/templates/exams/teacher/partials/_create_exam_modal.html:6
 msgctxt "exams.template.create_exam_modal"
 msgid "heading_create_exam"
-msgstr "Meta created at"
+msgstr "Yeni sınav oluştur"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:31
 msgid "Form yüklənmədi. Yenidən cəhd edin."
@@ -28620,7 +28620,7 @@ msgstr "Bireysel izinli kullanıcılar"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:333
 msgctxt "exams.template.create_exam_modal_form"
 msgid "search_name_or_username"
-msgstr "Username or email"
+msgstr "Kullanıcı adı veya e-posta"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:362
 msgctxt "exams.wizard"
@@ -28780,7 +28780,7 @@ msgstr "Kaydet"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:522
 msgctxt "exams.template.create_exam_modal_form"
 msgid "action_create"
-msgstr "Kurs Oluştur"
+msgstr "Sınav oluştur"
 
 #: apps/exams/templates/exams/teacher/partials/_create_question_bank_scripts.html:28
 msgctxt "exams.template.create_question_bank"
@@ -65594,3 +65594,131 @@ msgstr "Devre dışı"
 msgctxt "ui.status"
 msgid "Söndürülüb"
 msgstr "Kapalı"
+
+msgctxt "exams.wizard"
+msgid "Sehrbaz addımları"
+msgstr "Sihirbaz adımları"
+
+msgctxt "exams.wizard"
+msgid "Ulduzlu (*) sahələr mütləqdir. Qalan parametrləri sonra «Redaktə» ilə də dəyişə bilərsiniz."
+msgstr "Yıldızlı (*) alanlar zorunludur. Diğer ayarları daha sonra «Düzenle» ile de değiştirebilirsiniz."
+
+msgctxt "exams.wizard"
+msgid "Dərc statusu"
+msgstr "Yayın durumu"
+
+msgctxt "exams.wizard"
+msgid "Aktiv"
+msgstr "Etkin"
+
+msgctxt "exams.wizard"
+msgid "Qaralama"
+msgstr "Taslak"
+
+msgctxt "exams.wizard"
+msgid "Status bu formadan dəyişmir — imtahan səhifəsindəki «Aktiv et» / «Deaktiv et» düyməsi ilə idarə olunur."
+msgstr "Durum bu formdan değişmez — sınav sayfasındaki «Aktifleştir» / «Devre dışı bırak» düğmesiyle yönetilir."
+
+msgctxt "exams.wizard"
+msgid "İmtahan qaralama kimi yaradılır. Suallar əlavə edildikdən sonra imtahan səhifəsindəki «Aktiv et» düyməsi ilə tələbələrə açılır."
+msgstr "Sınav taslak olarak oluşturulur. Sorular eklendikten sonra sınav sayfasındaki «Aktifleştir» düğmesiyle öğrencilere açılır."
+
+msgctxt "exams.wizard"
+msgid "Kateqoriyanı seçin."
+msgstr "Kategori seçin."
+
+msgctxt "exams.wizard"
+msgid "Fənn seçilməlidir."
+msgstr "Ders seçilmelidir."
+
+msgctxt "exams.wizard"
+msgid "Başlama vaxtını seçin."
+msgstr "Başlangıç zamanını seçin."
+
+msgctxt "exams.wizard"
+msgid "Bitmə vaxtını seçin."
+msgstr "Bitiş zamanını seçin."
+
+msgctxt "exams.wizard"
+msgid "İmtahanın ümumi müddətini yazın."
+msgstr "Sınavın toplam süresini yazın."
+
+msgctxt "exams.wizard"
+msgid "İmtahanı təsdiqlə"
+msgstr "Sınavı onayla"
+
+msgctxt "exams.wizard"
+msgid "İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq."
+msgstr "Sınav aşağıdaki bilgilerle oluşturulup atanacak."
+
+msgctxt "exams.wizard"
+msgid "Təsdiqlə və yarat"
+msgstr "Onayla ve oluştur"
+
+msgctxt "exams.wizard"
+msgid "hesablanır…"
+msgstr "hesaplanıyor…"
+
+msgctxt "exams.wizard"
+msgid "İmtahan adı"
+msgstr "Sınav adı"
+
+msgctxt "exams.wizard"
+msgid "Tip"
+msgstr "Tür"
+
+msgctxt "exams.wizard"
+msgid "Kateqoriya"
+msgstr "Kategori"
+
+msgctxt "exams.wizard"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "exams.wizard"
+msgid "Başlama"
+msgstr "Başlangıç"
+
+msgctxt "exams.wizard"
+msgid "Bitmə"
+msgstr "Bitiş"
+
+msgctxt "exams.wizard"
+msgid "Müddət (dəq)"
+msgstr "Süre (dk)"
+
+msgctxt "exams.wizard"
+msgid "Sual sayı"
+msgstr "Soru sayısı"
+
+msgctxt "exams.wizard"
+msgid "Nəzarət"
+msgstr "Gözetim"
+
+msgctxt "exams.wizard"
+msgid "Deaktiv"
+msgstr "Kapalı"
+
+msgctxt "exams.wizard"
+msgid "Alıcılar"
+msgstr "Atananlar"
+
+msgctxt "exams.wizard"
+msgid "Hamıya açıq"
+msgstr "Herkese açık"
+
+msgctxt "exams.wizard"
+msgid "Qruplar"
+msgstr "Gruplar"
+
+msgctxt "exams.wizard"
+msgid "Fərdi tələbələr"
+msgstr "Bireysel öğrenciler"
+
+msgctxt "exams.wizard"
+msgid "Seçilməyib"
+msgstr "Seçilmedi"
+
+msgctxt "exams.wizard"
+msgid "Tələbə sayı (ümumi)"
+msgstr "Öğrenci sayısı (toplam)"

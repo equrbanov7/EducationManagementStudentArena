@@ -279,9 +279,13 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
                 else Organization.objects.filter(is_active=True, status="active").order_by("name")
             )
             self.fields["organization"].required = True
+            # Layihə select komponenti (native select qadağandır — sahib qaydası
+            # 2026-09-09); uzun siyahı üçün menyu-daxili axtarış.
             self.fields["organization"].widget.attrs.update(
                 {
-                    "class": "form-select",
+                    "class": "form-select bootstrap-single-select__native",
+                    "data-bootstrap-select": "",
+                    "data-live-search": "true",
                 }
             )
             if initial_organization is not None:

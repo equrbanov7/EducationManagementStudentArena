@@ -88,6 +88,12 @@
             steps.forEach(function (step, i) {
                 step.classList.toggle("is-active", i === current);
                 step.classList.toggle("is-done", i < current);
+                // Ekran oxuyucu üçün cari addım (ems_ui stepnav dili).
+                if (i === current) {
+                    step.setAttribute("aria-current", "step");
+                } else {
+                    step.removeAttribute("aria-current");
+                }
             });
             dots.forEach(function (dot, i) {
                 dot.classList.toggle("is-on", i === current);
@@ -244,7 +250,7 @@
                 );
                 requireField(
                     form.querySelector('[name="exam_type_extended"]'),
-                    i18n("categoryRequired", gettext("İmtahan növünü seçin."))
+                    i18n("categoryRequired", gettext("Kateqoriyanı seçin."))
                 );
                 requireField(
                     form.querySelector("[data-exam-subject-native]"),
@@ -258,7 +264,7 @@
                 );
                 requireField(
                     form.querySelector('[name="end_datetime"]'),
-                    i18n("endRequired", gettext("Son təhvil vaxtını seçin."))
+                    i18n("endRequired", gettext("Bitmə vaxtını seçin."))
                 );
                 requireField(
                     form.querySelector('[name="total_duration_minutes"]'),
@@ -284,6 +290,30 @@
                 }
             });
         }
+
+        /* ── sahə düzəldilən kimi keçici xəta silinir (növbəti klikini gözləmir);
+           serverdən gələn (transient olmayan) xəta isə qalır. Fənn/kateqoriya
+           dəyəri gizli select-ə yazılıb `change` ilə bildirilir — o da tutulur. */
+        function clearOnFix(event) {
+            var field = event.target;
+            if (!field || !field.closest) {
+                return;
+            }
+            var group = field.closest(".form-group.is-invalid");
+            if (!group) {
+                return;
+            }
+            if (group.querySelector(".field-error:not([data-ew-transient])")) {
+                return; // server xətası — yalnız yenidən göndərəndə təsdiqlənir
+            }
+            var control = group.querySelector("input:not([type=hidden]), select, textarea");
+            var native = group.querySelector("[data-exam-subject-native]") || control;
+            if (native && (native.value || "").trim()) {
+                clearTransientError(group);
+            }
+        }
+        form.addEventListener("input", clearOnFix);
+        form.addEventListener("change", clearOnFix);
         if (backBtn) {
             backBtn.addEventListener("click", function () {
                 goTo(current - 1);

@@ -58,6 +58,18 @@
         // imtahan yaradılır, Geri → redaktəyə qayıdır. Yalnız yaratma rejimində.
         var createConfirmed = false;
 
+        // Mətnlər `EXAM_CREATE_EDIT_MODAL_I18N` (profile.html json_script)
+        // lüğətindən gəlir; `gettext` yalnız ehtiyat (djangojs kataloqunda yoxdur).
+        function t(key, fallback) {
+            return ctx.i18n[key] || fallback;
+        }
+
+        // datetime-local dəyəri (YYYY-MM-DDTHH:MM) icmalda "DD.MM.YYYY HH:MM" kimi.
+        function formatDateTimeLocal(value) {
+            var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || "");
+            return m ? m[3] + "." + m[2] + "." + m[1] + " " + m[4] + ":" + m[5] : (value || "");
+        }
+
         function confirmFieldText(selector) {
             var el = form.querySelector(selector);
             if (!el) {
@@ -67,48 +79,51 @@
                 var opt = el.options[el.selectedIndex];
                 return opt ? (opt.textContent || "").trim() : "";
             }
+            if (el.type === "datetime-local") {
+                return formatDateTimeLocal((el.value || "").trim());
+            }
             return (el.value || "").trim();
         }
 
         function buildConfirmRows(totalText) {
             var dash = "—";
             var rows = [];
-            rows.push([gettext("İmtahan adı"), confirmFieldText('[name="title"]') || dash]);
+            rows.push([t("rowTitle", gettext("İmtahan adı")), confirmFieldText('[name="title"]') || dash]);
 
             var typeOption = form.querySelector(".js-create-exam-type-option:checked");
             var typeLabel = typeOption ? form.querySelector('label[for="' + typeOption.id + '"] .ew-tc-name') : null;
-            rows.push([gettext("Tip"), (typeLabel ? typeLabel.textContent.trim() : "") || dash]);
-            rows.push([gettext("Kateqoriya"), confirmFieldText('[name="exam_type_extended"]') || dash]);
+            rows.push([t("rowType", gettext("Tip")), (typeLabel ? typeLabel.textContent.trim() : "") || dash]);
+            rows.push([t("rowCategory", gettext("Kateqoriya")), confirmFieldText('[name="exam_type_extended"]') || dash]);
 
             var subjectSel = form.querySelector("[data-exam-subject-native]");
             var subjectOpt = subjectSel ? subjectSel.querySelector("option[value]") : null;
-            rows.push([gettext("Fənn"), (subjectOpt ? (subjectOpt.textContent || "").trim() : "") || dash]);
+            rows.push([t("rowSubject", gettext("Fənn")), (subjectOpt ? (subjectOpt.textContent || "").trim() : "") || dash]);
 
-            rows.push([gettext("Başlama"), confirmFieldText('[name="start_datetime"]') || dash]);
-            rows.push([gettext("Bitmə"), confirmFieldText('[name="end_datetime"]') || dash]);
-            rows.push([gettext("Müddət (dəq)"), confirmFieldText('[name="total_duration_minutes"]') || dash]);
-            rows.push([gettext("Sual sayı"), confirmFieldText('[name="random_question_count"]') || dash]);
+            rows.push([t("rowStart", gettext("Başlama")), confirmFieldText('[name="start_datetime"]') || dash]);
+            rows.push([t("rowEnd", gettext("Bitmə")), confirmFieldText('[name="end_datetime"]') || dash]);
+            rows.push([t("rowDuration", gettext("Müddət (dəq)")), confirmFieldText('[name="total_duration_minutes"]') || dash]);
+            rows.push([t("rowQuestions", gettext("Sual sayı")), confirmFieldText('[name="random_question_count"]') || dash]);
 
             var supervision = form.querySelector('[name="supervision_enabled"]');
-            rows.push([gettext("Nəzarət"), (supervision && supervision.checked) ? gettext("Aktiv") : gettext("Deaktiv")]);
+            rows.push([t("rowSupervision", gettext("Nəzarət")), (supervision && supervision.checked) ? t("on", gettext("Aktiv")) : t("off", gettext("Deaktiv"))]);
 
             var isPublic = form.querySelector('[name="is_public"]');
             if (isPublic && isPublic.checked) {
-                rows.push([gettext("Alıcılar"), gettext("Hamıya açıq")]);
+                rows.push([t("rowRecipients", gettext("Alıcılar")), t("publicAll", gettext("Hamıya açıq"))]);
                 return rows;
             }
             var groupItems = groupSelector ? groupSelector.getSelectedItems() : [];
             var userCount = userSelector ? userSelector.getSelectedValues().length : 0;
             if (groupItems.length) {
-                rows.push([gettext("Qruplar"), groupItems.map(function (i) { return i.text; }).join(", ")]);
+                rows.push([t("rowGroups", gettext("Qruplar")), groupItems.map(function (i) { return i.text; }).join(", ")]);
             }
             if (userCount) {
-                rows.push([gettext("Fərdi tələbələr"), String(userCount)]);
+                rows.push([t("rowStudents", gettext("Fərdi tələbələr")), String(userCount)]);
             }
             if (!groupItems.length && !userCount) {
-                rows.push([gettext("Alıcılar"), gettext("Seçilməyib")]);
+                rows.push([t("rowRecipients", gettext("Alıcılar")), t("notSelected", gettext("Seçilməyib"))]);
             }
-            rows.push([gettext("Tələbə sayı (ümumi)"), totalText]);
+            rows.push([t("rowTotal", gettext("Tələbə sayı (ümumi)")), totalText]);
             return rows;
         }
 
@@ -169,16 +184,16 @@
             overlay.innerHTML =
                 '<div class="ew-confirm-box ew-confirm-box--review" role="alertdialog" aria-modal="true">' +
                 '<span class="ew-confirm-ic ew-confirm-ic--ok"><i class="fas fa-clipboard-check" aria-hidden="true"></i></span>' +
-                '<h4>' + gettext("İmtahanı təsdiqlə") + "</h4>" +
-                "<p>" + gettext("İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq.") + "</p>" +
+                '<h4>' + t("confirmTitle", gettext("İmtahanı təsdiqlə")) + "</h4>" +
+                "<p>" + t("confirmBody", gettext("İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq.")) + "</p>" +
                 '<dl class="ew-confirm-summary" data-cc-summary></dl>' +
                 '<div class="ew-confirm-actions">' +
-                '<button type="button" class="ew-btn ew-btn--ghost" data-cc-back>' + gettext("Geri") + "</button>" +
-                '<button type="button" class="ew-btn ew-btn--primary" data-cc-ok>' + gettext("Təsdiqlə və yarat") + "</button>" +
+                '<button type="button" class="ew-btn ew-btn--ghost" data-cc-back>' + t("confirmBack", gettext("Geri")) + "</button>" +
+                '<button type="button" class="ew-btn ew-btn--primary" data-cc-ok>' + t("confirmOk", gettext("Təsdiqlə və yarat")) + "</button>" +
                 "</div></div>";
             content.appendChild(overlay);
 
-            renderConfirmSummary(overlay, gettext("hesablanır…"));
+            renderConfirmSummary(overlay, t("calculating", gettext("hesablanır…")));
             fetchConfirmTotal(overlay);
 
             function close() {
