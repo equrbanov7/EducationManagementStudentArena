@@ -200,9 +200,52 @@
     border-color: var(--ems-primary-200);
 }
 
+/* ── Hərf-avatarı (2026-09-11) ──────────────────────────────────────────────
+   Sahib: «profil şəkli qoyanda göy rəngi düzəlt, bu yaxşı görünmür — best
+   practice ilə əvəz et». Əvvəl toggle-dakı avatar DOLU brend mavi dairə +
+   ağ hərf, menyudakı isə mavi qradiyent + mavi halqa idi — iki fərqli dil,
+   ikisi də ağ başlıqda «düymə» kimi bağırırdı.
+   İndi hər ikisi layihənin ÖZ şəxs-avatarı naxışındadır (`.ou-avatar`,
+   `.rls-avatar`, `.psm__avatar`): yumşaq açıq-mavi fon, tünd-mavi hərf,
+   incə kontur. GitHub / Linear / Notion-un hərf-avatar dili budur — parlaq
+   blokdan çox, sakit «kimlik nişanı» kimi oxunur və şəkil qoyulanda
+   (`--image`) eyni həndəsədə fotoya keçir. */
+.blog-header__user-avatar,
+.blog-header__user-head-avatar {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    border: 1px solid var(--ems-primary-200);
+    box-shadow: none;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+}
+
 .blog-header__user-avatar {
     width: 30px;
     height: 30px;
+}
+
+.blog-header__user-avatar-initials {
+    font-size: 0.8rem;
+}
+
+.blog-header__user-head-avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1.05rem;
+}
+
+/* Foto qoyulanda kontur neytral qalır — mavi halqa fotonun rəngi ilə
+   toqquşmasın. */
+.blog-header__user-avatar--image {
+    background: var(--ems-neutral-0);
+    border-color: var(--ems-neutral-200);
+}
+
+/* Toggle açıq ikən avatar da açıq vəziyyəti işıqlandırır. */
+.blog-header__user-toggle[aria-expanded="true"] .blog-header__user-avatar {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-100);
 }
 
 .blog-header__user-name {
