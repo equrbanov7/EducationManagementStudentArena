@@ -1,7 +1,79 @@
+{% load static i18n %}
+{% comment %}
+«İmtahan zalları» — superadmin / zal idarəçisi: zal + kompüter (MAC/IP) reyestri.
+
+2026-09-11 redizayn (sahib: «yenidən, daha təkmil formada; iki başlıq olmasın»),
+`ems_ui` dili: KPI sırası → avto filtr (ad/kod, status, bina) → zallar CƏDVƏLİ
+(server sıralama + səhifələmə) → sətirdən açılan zal ÇEKMECƏSİ (kompüterlər +
+bütün zal əməlləri). Kontekst `build_exam_rooms_section` (`_sections/exam_rooms.py`).
+
+⚠️ `<h1>` YAZILMIR — qabıq `#profileSectionTitle` ilə verir; köhnə şablon bölmənin
+içində ikinci «İmtahan zalları» başlığı yazırdı (sahib şikayəti). İzah yalnız
+`header_subtitle`, «Yeni zal» isə `header_actions_include` ilədir.
+
+Davranış: çekmecə/dialoq ortaq `ems_ui/overlay.js`; dialoq sahələrinin sətir
+dəyərləri ilə doldurulması qabıqdan yüklənən `teaching_office.js`-in
+`data-tof-open` + `data-tof-prefill` mexanizmidir (JSON viewda qurulur). Formalar
+ADİ POST-dur (`accounts:superadmin_exam_rooms` → mesaj + `next` ilə geri) —
+`data-tof-form` QƏSDƏN yoxdur. Bölmə-xas kiçik davranışlar (org seçici, MAC
+formatı, kopyalama, təsdiq, POST-dan sonra vurğu/çekmecənin yenidən açılması)
+`superadmin_exam_rooms.js`-dədir. CSS/JS xarici fayldadır (CSP).
+{% endcomment %}
 {% if 'superadmin-exam-rooms' in allowed_sections %}
+{% trans "Zal" context "accounts.superadmin_exam_rooms" as xr_room_title %}
+{% trans "Kod təşkilat daxilində unikaldır; tutum və planlaşdırılan kompüter sayı hesabatlarda görünür." context "accounts.superadmin_exam_rooms" as xr_room_sub %}
+{% trans "Kompüter" context "accounts.superadmin_exam_rooms" as xr_comp_title %}
+{% trans "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)." context "accounts.superadmin_exam_rooms" as xr_comp_sub %}
+{% trans "Toplu əlavə (MAC siyahısı)" context "accounts.superadmin_exam_rooms" as xr_bulk_title %}
+{% trans "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)." context "accounts.superadmin_exam_rooms" as xr_bulk_sub %}
+{% trans "Toplu əlavə et" context "accounts.superadmin_exam_rooms" as xr_bulk_btn %}
+{% trans "Zal idarəçiləri" context "accounts.superadmin_exam_rooms" as xr_managers_title %}
+{% trans "Bu istifadəçilər superadmin olmadan da öz təşkilatlarının zallarını idarə edə bilər." context "accounts.superadmin_exam_rooms" as xr_managers_sub %}
+{% trans "Aktiv təşkilat tapılmadı. Zal yaratmaq üçün əvvəlcə təşkilat seçin." context "accounts.superadmin_exam_rooms" as xr_no_org %}
 <section class="profile-section-panel profile-section--superadmin-exam-rooms {% if active_section == 'superadmin-exam-rooms' %}is-active{% endif %}"
          data-profile-section-panel="superadmin-exam-rooms"
          data-source-url="{{ profile_base_url }}?section=superadmin-exam-rooms">
-    {% include "accounts/partials/_superadmin_exam_rooms_content.html" with s=exam_rooms_section %}
+<link rel="stylesheet" href="{% static 'accounts/css/superadmin_exam_rooms.css' %}?v=20260911-1">
+{% with s=exam_rooms_section %}
+<div class="sar" data-sar-root>
+
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=s.subtitle header_actions_include="accounts/profile/sections/superadmin/exam_rooms/_header_actions.html" %}
+
+    {% if not s.selected_org %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=xr_no_org %}
+    {% else %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=s.kpi_tiles kpi_variant="5" %}
+
+    {% comment %}Avto rejim: select dəyişən kimi, axtarış debounce ilə tətbiq olunur;
+    bölmə `AJAX_SAFE_SECTIONS`-dadır ki, panel yerində yenilənsin.{% endcomment %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="superadmin-exam-rooms" filter_prefix="xr_" filter_fields=s.filter_fields filter_count_label=s.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    {% include "partials/ems_ui/_data_table.html" with table_columns=s.columns table_rows=s.table_rows table_state=s.table_state table_zebra=True table_sticky=True state_kind="empty" state_icon="fa-door-open" state_title=s.state_title state_body=s.state_body %}
+
+    {% include "partials/_pagination.html" with page_obj=s.page_obj page_param="xr_page" extra_query=s.pagination_query %}
+
+    {% comment %}Zal çekmecələri — səhifədəki hər zal üçün bir dənə (server-render;
+    kompüter cədvəli və zal əməlləri buradadır). «Ətraflı» `data-ems-overlay-open`
+    ilə açır; POST-dan sonra JS `hl_comp` / `#sar-room-<id>` ilə yenidən açır.{% endcomment %}
+    {% for room in s.rooms %}
+        {% include "partials/ems_ui/_drawer.html" with drawer_id=room.drawer_id drawer_title=room.name drawer_subtitle=room.drawer_subtitle drawer_body_include="accounts/profile/sections/superadmin/exam_rooms/_room_drawer_body.html" drawer_foot_include="accounts/profile/sections/superadmin/exam_rooms/_room_drawer_foot.html" %}
+    {% endfor %}
+
+    {% if s.is_superadmin %}
+        {% include "partials/ems_ui/_drawer.html" with drawer_id="sarManagersDrawer" drawer_title=xr_managers_title drawer_subtitle=xr_managers_sub drawer_body_include="accounts/profile/sections/superadmin/exam_rooms/_managers_drawer_body.html" drawer_foot_include="accounts/profile/sections/superadmin/exam_rooms/_close_foot.html" %}
+    {% endif %}
+
+    {% comment %}Dialoqlar çekmecələrdən SONRA gəlir: `overlay.js` fokus tələsi və
+    Escape üçün DOM-da SONUNCU açıq overlay-i «üst» sayır — çekmecədən açılan
+    dialoq onun üstündə olmalıdır.{% endcomment %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sarRoomDialog" form_dialog_title=xr_room_title form_dialog_subtitle=xr_room_sub form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/superadmin/exam_rooms/_room_fields.html" form_dialog_action=s.action_url form_dialog_hidden=s.room_hidden form_dialog_data=s.form_data %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sarComputerDialog" form_dialog_title=xr_comp_title form_dialog_subtitle=xr_comp_sub form_dialog_body_include="accounts/profile/sections/superadmin/exam_rooms/_computer_fields.html" form_dialog_action=s.action_url form_dialog_hidden=s.computer_hidden form_dialog_data=s.form_data %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sarBulkDialog" form_dialog_title=xr_bulk_title form_dialog_subtitle=xr_bulk_sub form_dialog_submit_label=xr_bulk_btn form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/superadmin/exam_rooms/_bulk_fields.html" form_dialog_action=s.action_url form_dialog_hidden=s.bulk_hidden form_dialog_data=s.form_data %}
+
+    {% endif %}
+</div>
+{% endwith %}
+<script src="{% static 'accounts/js/superadmin_exam_rooms.js' %}?v=20260911-1" defer></script>
 </section>
 {% endif %}

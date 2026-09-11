@@ -1,0 +1,137 @@
+{% load i18n ems_ui %}
+{% comment %}Zal çekmecəsinin gövdəsi — status/canlı çipləri, 4 fakt (yer · kompüter ·
+IP ilə · nəzarətçi), qeyd, sonra KOMPÜTERLƏR: başlıq sətri («Toplu əlavə»,
+«Kompüter əlavə et») + cədvəl (Ad · Yer · MAC · IP · Status · əməllər).
+Kompüter silmə adi POST formadır, təsdiq `js-sar-confirm` ilə; redaktə/əlavə
+ortaq `sarComputerDialog`-u prefill ilə açır. Kontekst: `room`, `s`.{% endcomment %}
+<div class="sar-room" data-sar-room="{{ room.id }}">
+    <div class="sar-room__chips">
+        {% ems_status_badge "exam_room" room.status_key dot=True %}
+        {% if room.live_session_count %}
+        <span class="ems-badge ems-badge--danger sar-live">
+            <span class="ems-badge__dot sar-live__dot" aria-hidden="true"></span>
+            {{ room.live_session_count }} {% trans "canlı" context "accounts.superadmin_exam_rooms" %}
+        </span>
+        {% endif %}
+        {% if room.plan_mismatch %}
+        <span class="ems-badge ems-badge--warning" title="{% trans 'Qeydiyyatdan keçən kompüter sayı planla üst-üstə düşmür' context 'accounts.superadmin_exam_rooms' %}">
+            <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+            {% trans "plan:" context "accounts.superadmin_exam_rooms" %} {{ room.computer_count }}
+        </span>
+        {% endif %}
+    </div>
+
+    <dl class="sar-facts">
+        <div class="sar-fact"><dt>{% trans "Yer" context "accounts.superadmin_exam_rooms" %}</dt><dd>{{ room.capacity }}</dd></div>
+        <div class="sar-fact"><dt>{% trans "Kompüter" context "accounts.superadmin_exam_rooms" %}</dt><dd>{{ room.computer_registered }}</dd></div>
+        <div class="sar-fact"><dt>{% trans "IP ilə" context "accounts.superadmin_exam_rooms" %}</dt><dd>{{ room.computer_with_ip }}</dd></div>
+        <div class="sar-fact"><dt>{% trans "Nəzarətçi" context "accounts.superadmin_exam_rooms" %}</dt><dd>{{ room.invigilator_count }}</dd></div>
+    </dl>
+
+    {% if room.notes %}
+    <p class="sar-room__notes"><i class="fas fa-note-sticky" aria-hidden="true"></i> {{ room.notes }}</p>
+    {% endif %}
+
+    <div class="sar-subhead">
+        <h3 class="sar-subhead__title">
+            {% trans "Kompüterlər" context "accounts.superadmin_exam_rooms" %}
+            <span class="sar-count">{{ room.computer_registered }}</span>
+        </h3>
+        <div class="sar-subhead__actions">
+            <button type="button" class="ems-btn ems-btn--sm"
+                    data-tof-open="sarBulkDialog"
+                    data-tof-prefill='{{ room.bulk_prefill }}'
+                    data-sar-subtitle="{{ room.name }} · {{ room.code }}">
+                <i class="fas fa-list" aria-hidden="true"></i>
+                {% trans "Toplu əlavə" context "accounts.superadmin_exam_rooms" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary"
+                    data-tof-open="sarComputerDialog"
+                    data-tof-title="{% trans 'Kompüter əlavə et' context 'accounts.superadmin_exam_rooms' %}"
+                    data-tof-prefill='{{ room.computer_add_prefill }}'
+                    data-sar-subtitle="{{ room.name }} · {{ room.code }}"
+                    data-sar-submit="{% trans 'Əlavə et' context 'accounts.superadmin_exam_rooms' %}">
+                <i class="fas fa-plus" aria-hidden="true"></i>
+                {% trans "Kompüter əlavə et" context "accounts.superadmin_exam_rooms" %}
+            </button>
+        </div>
+    </div>
+
+    {% if room.computer_rows %}
+    <div class="ems-tablewrap sar-comptable">
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Ad" context "accounts.superadmin_exam_rooms" %}</th>
+                        <th scope="col">{% trans "Yer" context "accounts.superadmin_exam_rooms" %}</th>
+                        <th scope="col">MAC</th>
+                        <th scope="col">IP</th>
+                        <th scope="col">{% trans "Status" context "accounts.superadmin_exam_rooms" %}</th>
+                        <th scope="col">{% trans "Əməllər" context "accounts.superadmin_exam_rooms" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in room.computer_rows %}
+                    <tr data-comp-row="{{ c.id }}">
+                        <th scope="row">
+                            {{ c.label }}
+                            {% if c.notes %}<i class="fas fa-note-sticky sar-note-icon" title="{{ c.notes }}" aria-label="{{ c.notes }}"></i>{% endif %}
+                        </th>
+                        <td class="ems-table__num">{{ c.seat_number|default:"—" }}</td>
+                        <td class="ems-table__nowrap">
+                            <span class="ems-mono">{{ c.mac_address }}</span>
+                            <button type="button" class="sar-copy js-sar-copy" data-copy="{{ c.mac_address }}"
+                                    title="{% trans 'MAC-ı kopyala' context 'accounts.superadmin_exam_rooms' %}"
+                                    aria-label="{% trans 'MAC-ı kopyala' context 'accounts.superadmin_exam_rooms' %}">
+                                <i class="fas fa-copy" aria-hidden="true"></i>
+                            </button>
+                        </td>
+                        <td class="ems-table__nowrap">{% if c.ip_address %}<span class="ems-mono">{{ c.ip_address }}</span>{% else %}<span class="ems-table__muted">—</span>{% endif %}</td>
+                        <td>{% ems_status_badge "exam_room_computer" c.status_key %}</td>
+                        <td>
+                            <div class="ems-rowactions">
+                                <button type="button" class="ems-iconbtn"
+                                        data-tof-open="sarComputerDialog"
+                                        data-tof-title="{% trans 'Kompüteri redaktə et' context 'accounts.superadmin_exam_rooms' %}"
+                                        data-tof-prefill='{{ c.edit_prefill }}'
+                                        data-sar-subtitle="{{ c.label }} · {{ c.mac_address }} · {{ room.name }}"
+                                        title="{% trans 'Redaktə et' context 'accounts.superadmin_exam_rooms' %}"
+                                        aria-label="{% blocktrans with label=c.label context 'accounts.superadmin_exam_rooms' %}«{{ label }}» kompüterini redaktə et{% endblocktrans %}">
+                                    <i class="fas fa-pen" aria-hidden="true"></i>
+                                </button>
+                                <form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_computer">
+                                    <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+                                    <input type="hidden" name="room_id" value="{{ room.id }}">
+                                    <input type="hidden" name="computer_id" value="{{ c.id }}">
+                                    <input type="hidden" name="next" value="{{ s.post_next_url }}">
+                                    <button type="submit" class="ems-iconbtn ems-iconbtn--danger js-sar-confirm"
+                                            data-confirm="{% blocktrans with label=c.label mac=c.mac_address context 'accounts.superadmin_exam_rooms' %}«{{ label }}» ({{ mac }}) silinsin?{% endblocktrans %}"
+                                            title="{% trans 'Sil' context 'accounts.superadmin_exam_rooms' %}"
+                                            aria-label="{% blocktrans with label=c.label context 'accounts.superadmin_exam_rooms' %}«{{ label }}» kompüterini sil{% endblocktrans %}">
+                                        <i class="fas fa-trash-can" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="sar-comptable sar-comptable--empty">
+        {% trans "Hələ kompüter əlavə edilməyib" context "accounts.superadmin_exam_rooms" as xr_empty_title %}
+        {% trans "«Kompüter əlavə et» ilə tək-tək, «Toplu əlavə» ilə MAC siyahısından əlavə edin." context "accounts.superadmin_exam_rooms" as xr_empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-desktop" state_title=xr_empty_title state_body=xr_empty_body %}
+    </div>
+    {% endif %}
+
+    <p class="ems-field__hint sar-room__hint">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% trans "MAC identifikasiya üçün saxlanır; girişə icazə IP üzərindən verilir (brauzer MAC-ı serverə göndərə bilmir)." context "accounts.superadmin_exam_rooms" %}
+    </p>
+</div>

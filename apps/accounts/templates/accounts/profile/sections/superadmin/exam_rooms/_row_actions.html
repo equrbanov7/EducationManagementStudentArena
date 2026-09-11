@@ -1,0 +1,17 @@
+{% load i18n %}
+{% comment %}Zal sətrinin əməlləri: «Ətraflı» zalın çekmecəsini (kompüterlər + bütün
+əməllər) açır; qələm birbaşa ortaq zal dialoqunu sətir dəyərləri ilə açır
+(`data-tof-prefill` JSON-u viewda qurulub). Kontekst: `row.room`.{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm sar-row-open" data-ems-overlay-open="{{ row.room.drawer_id }}">
+    <i class="fas fa-desktop" aria-hidden="true"></i>
+    {% trans "Ətraflı" context "accounts.superadmin_exam_rooms" %}
+</button>
+<button type="button" class="ems-iconbtn"
+        data-tof-open="sarRoomDialog"
+        data-tof-title="{% trans 'Zalı redaktə et' context 'accounts.superadmin_exam_rooms' %}"
+        data-tof-prefill='{{ row.room.edit_prefill }}'
+        data-sar-subtitle="{{ row.room.name }} · {{ row.room.code }}"
+        title="{% trans 'Zalı redaktə et' context 'accounts.superadmin_exam_rooms' %}"
+        aria-label="{% blocktrans with name=row.room.name context 'accounts.superadmin_exam_rooms' %}«{{ name }}» zalını redaktə et{% endblocktrans %}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+</button>

@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}«Kompüter» xanası — qeydiyyatdakı say; planla (`computer_count`) uyğunsuzluq
+varsa xəbərdarlıq çipi (rəng + MƏTN). Kontekst: `row.room`.{% endcomment %}
+{{ row.room.computer_registered }}
+{% if row.room.plan_mismatch %}
+<span class="ems-badge ems-badge--warning sar-plan"
+      title="{% trans 'Qeydiyyatdan keçən kompüter sayı planla üst-üstə düşmür' context 'accounts.superadmin_exam_rooms' %}">
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    {% trans "plan:" context "accounts.superadmin_exam_rooms" %} {{ row.room.computer_count }}
+</span>
+{% endif %}

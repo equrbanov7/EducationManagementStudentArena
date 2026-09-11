@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}Toplu əlavə dialoqunun sahəsi — hər sətir «Ad, MAC[, Yer][, IP]»; yer və IP
+sıradan asılı olmayaraq tanınır (`bulk_add_computers`). `room_id` prefill-dən.{% endcomment %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sar-bulk-text">{% trans "Hər sətir: Ad, MAC[, Yer][, IP]" context "accounts.superadmin_exam_rooms" %}</label>
+    <textarea class="ems-textarea sar-mono" id="sar-bulk-text" name="bulk_text" rows="8" required spellcheck="false"
+              placeholder="PC-01, AA:BB:CC:DD:EE:01, 1&#10;PC-02, AA:BB:CC:DD:EE:02, 2, 10.0.0.12"></textarea>
+    <span class="ems-field__hint">{% trans "Uğursuz sətirlər atlanır və səbəbi mesajla bildirilir (qismən uğur)." context "accounts.superadmin_exam_rooms" %}</span>
+</div>

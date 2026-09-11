@@ -373,6 +373,22 @@ AUDIT_ACTION: tuple[Status, ...] = (
     _s("challenge", _t("Yoxlama sorğusu"), "warning", order=9),
 )
 
+# --------------------------------------------------------------------------- #
+# 8. İmtahan zalları (kabinet → «Sistem idarəetməsi → İmtahan zalları»)
+#    Zal `is_active` bayrağıdır — SAXLANILMIR, açar viewda hesablanır.
+#    Kompüterin söndürülməsi ayrıca ailədir: etiketi «Söndürülüb»dür (IP
+#    yoxlamasında nəzərə alınmır), «Deaktiv» deyil.
+# --------------------------------------------------------------------------- #
+EXAM_ROOM: tuple[Status, ...] = (
+    _s("active", _t("Aktiv"), "success", order=0),
+    _s("inactive", _t("Deaktiv"), "muted", order=1),
+)
+
+EXAM_ROOM_COMPUTER: tuple[Status, ...] = (
+    _s("active", _t("Aktiv"), "success", order=0),
+    _s("off", _t("Söndürülüb"), "muted", order=1),
+)
+
 
 #: Ailə adı → statuslar. Şablon tag-i yalnız bu xəritədən oxuyur.
 FAMILIES: dict[str, tuple[Status, ...]] = {
@@ -399,6 +415,8 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "save_state": SAVE_STATE,
     "archive_mode": ARCHIVE_MODE,
     "audit_action": AUDIT_ACTION,
+    "exam_room": EXAM_ROOM,
+    "exam_room_computer": EXAM_ROOM_COMPUTER,
 }
 
 

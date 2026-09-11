@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}Zal idarəçiləri çekmecəsi (YALNIZ superadmin) — `can_manage_exam_rooms`
+bayrağı olan istifadəçilər: siyahı + «Geri al» (təsdiqli POST) və altda
+«İdarəçi təyin et» forması (istifadəçi adı və ya email). Kontekst: `s`.{% endcomment %}
+<div class="sar-managers">
+    <form method="post" action="{{ s.action_url }}" class="sar-grant">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="grant_room_manager">
+        <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+        <input type="hidden" name="next" value="{{ s.post_next_url }}">
+        <div class="ems-field sar-grant__field">
+            <label class="ems-field__label" for="sar-grant-username">{% trans "İstifadəçi adı və ya email" context "accounts.superadmin_exam_rooms" %}</label>
+            <input class="ems-input" type="text" id="sar-grant-username" name="username" required autocomplete="off"
+                   placeholder="{% trans 'İstifadəçi adı və ya email' context 'accounts.superadmin_exam_rooms' %}">
+        </div>
+        <button type="submit" class="ems-btn ems-btn--primary">
+            <i class="fas fa-user-plus" aria-hidden="true"></i>
+            {% trans "İdarəçi təyin et" context "accounts.superadmin_exam_rooms" %}
+        </button>
+    </form>
+
+    {% if s.room_managers %}
+    <ul class="sar-managerlist">
+        {% for m in s.room_managers %}
+        <li class="sar-manager">
+            <span class="sar-avatar" aria-hidden="true">{{ m.username|slice:":2"|upper }}</span>
+            <span class="sar-manager__who">
+                <span class="sar-manager__name">{{ m.username }}{% if m.first_name or m.last_name %} — {{ m.first_name }} {{ m.last_name }}{% endif %}</span>
+                {% if m.email %}<span class="sar-manager__email">{{ m.email }}</span>{% endif %}
+            </span>
+            <form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="revoke_room_manager">
+                <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+                <input type="hidden" name="user_id" value="{{ m.id }}">
+                <input type="hidden" name="next" value="{{ s.post_next_url }}">
+                <button type="submit" class="ems-btn ems-btn--sm js-sar-confirm"
+                        data-confirm="{% trans 'İcazə geri alınsın?' context 'accounts.superadmin_exam_rooms' %}">
+                    <i class="fas fa-user-minus" aria-hidden="true"></i>
+                    {% trans "Geri al" context "accounts.superadmin_exam_rooms" %}
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    {% trans "Hələ təyin olunmuş idarəçi yoxdur." context "accounts.superadmin_exam_rooms" as xr_no_managers %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-gear" state_title=xr_no_managers %}
+    {% endif %}
+</div>

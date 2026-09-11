@@ -291,6 +291,13 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "student-registry",
         # Ekran 21 — tam OXU-ONLY hesabat paneli (mutasiya yoxdur) → AJAX-safe.
         "lessons-log",
+        # «İmtahan zalları» (2026-09-11 yenidən qurulub) — panel OXU-ONLY render
+        # olunur; bütün mutasiyalar (zal/kompüter yarat-redaktə-sil, idarəçi
+        # icazəsi) `accounts:superadmin_exam_rooms` POST-una gedir və `next` ilə
+        # qabığa qayıdır → AJAX swap təhlükəsizdir. Bu qeydiyyat olmasa AVTO
+        # filtr paneli və səhifələmə işləmir (`section_loader.js` bölməni
+        # tanımır və heç nə etmir).
+        "superadmin-exam-rooms",
     }
 )
 

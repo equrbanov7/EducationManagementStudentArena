@@ -153,7 +153,8 @@ def _dispatch_action(request, action, organization):
         room.is_active = not room.is_active
         room.save(update_fields=["is_active", "updated_at"])
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Zal statusu dəyişdirildi."))
-        return
+        # Fraqment → kabinet JS-i həmin zalın çekmecəsini yenidən açır (əməl oradan edilir).
+        return {"_fragment": f"sar-room-{room.pk}"}
 
     if action == "add_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
@@ -189,7 +190,7 @@ def _dispatch_action(request, action, organization):
         computer = get_object_or_404(ExamRoomComputer, pk=request.POST.get("computer_id"), room=room)
         computer.delete()
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Kompüter silindi."))
-        return
+        return {"_fragment": f"sar-room-{room.pk}"}
 
     if action == "delete_room":
         room = _get_org_room(organization, request.POST.get("room_id"))
