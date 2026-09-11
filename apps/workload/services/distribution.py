@@ -10,7 +10,7 @@ import logging
 
 from django.apps import apps as django_apps
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Prefetch, Sum
 from django.utils import timezone
 
 from core.audit import log_action
@@ -55,20 +55,43 @@ def distribution_readiness(task) -> dict:
 
 
 def _syncable_rows(rows) -> list:
-    """Offering sinxronuna düşən sətirlər: fənn + semestr + qrup + kontakt saatı."""
+    """Offering sinxronuna düşən sətirlər: fənn + semestr + qrup + kontakt saatı.
+
+    Audit 2026-09-10 P1-7 (düzəliş 2026-09-12): sətirlər ``prefetch_related("groups")``
+    ilə gəlir. Ölçmə göstərdi ki, Django 5.2-də ``row.groups.exists()`` də prefetch
+    keşini oxuyur (1 və 5 sətir → eyni 4 sorğu); ``row.groups.all()`` isə keşdən
+    oxumanın AÇIQ və versiyadan asılı olmayan formasıdır — ona görə bu yazılıb.
+    """
     result = []
     for row in rows:
         if not (row.subject_id and row.period_id):
             continue
-        if not row.groups.exists():
+        if not row.groups.all():
             continue
         result.append(row)
     return result
 
 
+def _assignments_prefetch() -> Prefetch:
+    """``sync_offerings`` üçün təyinat prefetch-i — müəllim ``select_related``, sıra sabit.
+
+    P1-7: ``_instructor_for_row`` əvvəl ``row.assignments.select_related(...).order_by(...)``
+    ilə TƏZƏ queryset qurub prefetch keşini keçirdi (sətir başına 1 SELECT). Sıra
+    (fəaliyyət, yaradılma) burada — prefetch sorğusunda — verilir; sətir isə
+    ``row.assignments.all()`` ilə keşdən oxuyur.
+    """
+    return Prefetch(
+        "assignments",
+        queryset=TeacherAssignment.objects.select_related("teacher").order_by("activity", "created_at"),
+    )
+
+
 def _instructor_for_row(row):
-    """Jurnal sahibi: MÜHAZİRƏÇİ, yoxdursa ilk (vakant olmayan) təyinat (spec §11.3)."""
-    assignments = list(row.assignments.select_related("teacher").order_by("activity", "created_at"))
+    """Jurnal sahibi: MÜHAZİRƏÇİ, yoxdursa ilk (vakant olmayan) təyinat (spec §11.3).
+
+    Sətir :func:`_assignments_prefetch` ilə yüklənməlidir — onda burada sorğu yoxdur.
+    """
+    assignments = list(row.assignments.all())
     lecture = [a for a in assignments if a.activity == Activity.LECTURE and a.teacher_id]
     if lecture:
         return lecture[0].teacher
@@ -155,7 +178,7 @@ def sync_offerings(task, *, actor=None, request=None) -> dict:
     CourseOffering = django_apps.get_model("registrar", "CourseOffering")
     counters = {"created": 0, "updated": 0, "skipped": 0, "instructor_blocked": 0}
     offering_ids: list[str] = []
-    rows = list(task.rows.all().prefetch_related("groups", "assignments__teacher"))
+    rows = list(task.rows.all().prefetch_related("groups", _assignments_prefetch()))
     for row in rows:
         if not (row.subject_id and row.period_id):
             counters["skipped"] += 1
