@@ -369,6 +369,26 @@ def _has_active_student_membership(organization, user) -> bool:
 STUDENT_FAMILY_ROLE_NAMES = ("student", "lead_student", "alumni")
 
 
+def is_student_family_user(organization, user) -> bool:
+    """Tələbə ailəsindəndirmi — bu orqda; org yoxdursa İSTƏNİLƏN aktiv orqda.
+
+    2026-09-12 (sahib: «tələbə ancaq özünə aid jurnalı görsün»): org konteksti
+    itəndə `_has_active_student_membership(None, user)` False verirdi və tələbə
+    MÜƏLLİM qrup siyahısına (`journal_list_context`) düşürdü. Üzvlük
+    `bypass_rls` ilə oxunur — tenant konteksti məhz itmiş ola bilər; sorğu
+    `user` ilə süzülür, kirayəçi sızması yoxdur.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if organization is not None:
+        return _has_active_student_membership(organization, user)
+    from core.rls import bypass_rls
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    with bypass_rls():
+        return Membership.objects.filter(user=user, is_active=True, role__name__in=STUDENT_FAMILY_ROLE_NAMES).exists()
+
+
 def schedule_context(request, organization, *, embedded=False) -> dict:
     """Role-aware weekly timetable context (student group / teacher own slots)."""
     from apps.registrar.models import WeekType

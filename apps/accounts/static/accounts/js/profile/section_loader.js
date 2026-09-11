@@ -284,6 +284,21 @@
             }
         }
 
+        function handleViewAsEnded(payload) {
+            // Server (ViewAsMiddleware) view-as sessiyasının bitdiyini bildirib:
+            // `{view_as_ended: true, redirect: "/accounts/profile/"}`. Fallback
+            // naviqasiyası bunu əzməsin deyə burada yönləndirib `true` qaytarırıq.
+            if (!payload || payload.view_as_ended !== true || !payload.redirect) {
+                return false;
+            }
+            var target = new URL(payload.redirect, window.location.origin);
+            if (target.origin !== window.location.origin) {
+                return false;
+            }
+            window.location.href = target.pathname + target.search;
+            return true;
+        }
+
         function tryAjaxLoadSection(section, options) {
             options = options || {};
             if (!isAjaxSafeSection(section)) {
@@ -310,11 +325,23 @@
             return fetch(buildSectionFragmentUrl(section, options.sourceUrl), fetchOpts)
                 .then(function (response) {
                     if (!response.ok) {
-                        throw new Error("http_" + response.status);
+                        // View-as sessiyası məhz bu sorğuda bitibsə server 409 +
+                        // `view_as_ended` qaytarır: istifadəçini öz panelinə aparırıq.
+                        // Əks halda `?section=` ilə tam səhifəyə düşür və artıq ƏSL
+                        // istifadəçi kimi «icazəniz yoxdur» görürdü (sahib, 2026-09-12).
+                        return response.json().catch(function () { return null; }).then(function (payload) {
+                            if (handleViewAsEnded(payload)) {
+                                return null;
+                            }
+                            throw new Error("http_" + response.status);
+                        });
                     }
                     return response.json();
                 })
                 .then(function (payload) {
+                    if (payload === null) {
+                        return true; // view-as bitdi — yönləndirmə başlayıb
+                    }
                     if (!payload || payload.ok !== true || !payload.html) {
                         throw new Error("bad_payload");
                     }
@@ -378,6 +405,7 @@
         ctx.isAjaxSafeSection = isAjaxSafeSection;
         ctx.copySourceQueryToTarget = copySourceQueryToTarget;
         ctx.tryAjaxLoadSection = tryAjaxLoadSection;
+        ctx.handleViewAsEnded = handleViewAsEnded;
         ctx.setActiveSection = setActiveSection;
         ctx.replaceSectionHtml = replaceSectionHtml;
 

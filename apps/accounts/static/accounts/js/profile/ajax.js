@@ -152,6 +152,11 @@
                     var contentType = response.headers.get("content-type") || "";
                     if (contentType.indexOf("application/json") !== -1) {
                         return response.json().then(function (payload) {
+                            // View-as bitdi: formanı native submit ilə TƏKRARLAMIRIQ —
+                            // sessiya artıq yoxdur və POST əsl istifadəçi kimi icra olunardı.
+                            if (ctx.handleViewAsEnded && ctx.handleViewAsEnded(payload)) {
+                                return true;
+                            }
                             if (payload && payload.html && ctx.replaceSectionHtml(section, payload.html, {
                                 updateUrl: true,
                                 sourceUrl: ctx.profileBaseUrl + "?section=" + encodeURIComponent(section)

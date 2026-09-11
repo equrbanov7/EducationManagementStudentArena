@@ -403,6 +403,35 @@ class ViewAsMiddleware:
             return redirect(request.path)
         return redirect(reverse("accounts:profile"))
 
+    def _after_session_ended(self, request):
+        """View-as sessiyası MƏHZ BU sorğuda bitdi — sorğunu əsl istifadəçi kimi DAVAM ETDİRMİRİK.
+
+        Əvvəl `self.get_response(request)` ilə davam edirdi və nəticə (sahib,
+        2026-09-12): hədəfin bölməsi (`?section=my-transcript` və s.) əsl
+        istifadəçi üçün icazəsiz olduğundan qabıq «Bu bölməyə icazəniz yoxdur»
+        yazır, istifadəçi isə nəyin baş verdiyini anlamırdı. Daha pisi — yazma
+        sorğusu (POST) hədəfin konteksti üçün nəzərdə tutulduğu halda əsl
+        istifadəçinin adından icra olunurdu.
+
+        İndi: JSON/AJAX → 409 + `view_as_ended` (kabinet JS-i öz panelinə
+        yönləndirir); tam səhifə → öz panelinə redirect (`session_ended`
+        mesajı orada göstərilir). Yalnız bölməsiz `accounts:profile` GET-i
+        (artıq panel) olduğu kimi render olunur — dövr yaranmasın.
+        """
+        from django.http import JsonResponse
+        from django.shortcuts import redirect
+        from django.urls import reverse
+
+        profile_url = reverse("accounts:profile")
+        if self._wants_json(request):
+            return JsonResponse(
+                {"ok": False, "detail": "view_as_ended", "view_as_ended": True, "redirect": profile_url},
+                status=409,
+            )
+        if request.method in self.SAFE_METHODS and request.path == profile_url and not request.GET.get("section"):
+            return self.get_response(request)
+        return redirect(profile_url)
+
     def __call__(self, request):
         request.real_user = request.user
         request.is_view_as = False
@@ -446,7 +475,7 @@ class ViewAsMiddleware:
                 request,
                 pgettext("accounts.view_as", "session_ended"),
             )
-            return self.get_response(request)
+            return self._after_session_ended(request)
 
         # Django admin view-as altında TAM bağlıdır (GET daxil). Admin-də həm
         # `password_change`, həm admin 2FA təsdiqi, həm də bütün modellərin CRUD

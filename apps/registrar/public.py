@@ -189,14 +189,14 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     if section == "academic-calendar":
         return calendar_ctx(organization, year=(request.GET.get("ac_year") or "").strip())
     if section == "my-journal":
-        # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu, bu günün dərsi gizli);
-        # müəllim/admin → qrup seçimi (iş sahəsi ayrıca URL-də olsa da fallback qalır).
+        # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin → qrup
+        # seçimi. Tələbə ailəsi HEÇ VAXT müəllim siyahısına düşmür — org konteksti
+        # itəndə də (QA 2026-09-05 P2-31; sahib 2026-09-12: «tələbə ancaq özünə
+        # aid jurnalı görsün»). Boş-hal göstərilir, kimlik tələbə qalır.
         student_context = build_student_journal_context(request, organization=organization)
         if student_context is not None:
             return student_context
-        if page_contexts._has_active_student_membership(organization, request.user):
-            # Akademik qeydi olmayan tələbə/məzun — MÜƏLLİM siyahısına düşməsin
-            # (QA 2026-09-05 P2-31): boş-hal göstərilir, kimlik tələbə qalır.
+        if page_contexts.is_student_family_user(organization, request.user):
             return {"journal_student_missing": True}
         return page_contexts.journal_list_context(request.user, request=request)
     if section == "analytics":
