@@ -146,9 +146,7 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(n)d zal") % {"n": page_obj.paginator.count}
     section["kpi_tiles"] = _kpi_tiles(org_rooms, ExamRoomComputer.objects.filter(organization=selected_org))
     section["state_title"] = (
-        pgettext(_CTX, "Filtrə uyğun zal yoxdur")
-        if is_filtered
-        else pgettext(_CTX, "Bu təşkilatda hələ zal yoxdur")
+        pgettext(_CTX, "Filtrə uyğun zal yoxdur") if is_filtered else pgettext(_CTX, "Bu təşkilatda hələ zal yoxdur")
     )
     section["state_body"] = (
         pgettext(_CTX, "Axtarışı dəyişin və ya «Sıfırla» ilə bütün siyahıya qayıdın.")
@@ -411,9 +409,7 @@ def _kpi_tiles(org_rooms, org_computers):
             "value": rooms["active"] or 0,
             "tone": "accent-success",
             "note": (
-                pgettext(_CTX, "%(n)d deaktiv") % {"n": inactive}
-                if inactive
-                else pgettext(_CTX, "hamısı aktivdir")
+                pgettext(_CTX, "%(n)d deaktiv") % {"n": inactive} if inactive else pgettext(_CTX, "hamısı aktivdir")
             ),
         },
         {

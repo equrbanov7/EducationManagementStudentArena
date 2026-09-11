@@ -67,7 +67,11 @@ ENTRIES = {
         },
         "Kompüter": {"en": "Computers", "ru": "Компьютеры", "tr": "Bilgisayar"},
         "Kompüterlər": {"en": "Computers", "ru": "Компьютеры", "tr": "Bilgisayarlar"},
-        "Nəticə: %(n)d zal": {"en": "Result: %(n)d rooms", "ru": "Результат: залов — %(n)d", "tr": "Sonuç: %(n)d salon"},
+        "Nəticə: %(n)d zal": {
+            "en": "Result: %(n)d rooms",
+            "ru": "Результат: залов — %(n)d",
+            "tr": "Sonuç: %(n)d salon",
+        },
         "Nəzarətçi": {"en": "Invigilators", "ru": "Наблюдатели", "tr": "Gözetmen"},
         "Qeydiyyatdakı say plandan fərqlənəndə sətirdə xəbərdarlıq görünür.": {
             "en": "A warning appears on the row when the registered count differs from the plan.",
@@ -81,7 +85,11 @@ ENTRIES = {
         },
         "Zal": {"en": "Room", "ru": "Зал", "tr": "Salon"},
         "Zal adı və ya kodu": {"en": "Room name or code", "ru": "Название или код зала", "tr": "Salon adı veya kodu"},
-        "aktiv zallarda %(n)d": {"en": "%(n)d in active rooms", "ru": "в активных залах: %(n)d", "tr": "etkin salonlarda %(n)d"},
+        "aktiv zallarda %(n)d": {
+            "en": "%(n)d in active rooms",
+            "ru": "в активных залах: %(n)d",
+            "tr": "etkin salonlarda %(n)d",
+        },
         "hamısı aktivdir": {"en": "all active", "ru": "все активны", "tr": "tümü etkin"},
         "hazırda imtahan gedən zal": {
             "en": "rooms with an exam in progress",
