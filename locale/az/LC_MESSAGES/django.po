@@ -65499,3 +65499,23 @@ msgstr "Əlavə gün"
 msgctxt "registrar.kollokvium_window"
 msgid "Əvvəlcə Akademik təqvimdə semestr yaradın."
 msgstr "Əvvəlcə Akademik təqvimdə semestr yaradın."
+
+msgctxt "accounts.student_admission"
+msgid "ATİS şablonunu endirin"
+msgstr "ATİS şablonunu endirin"
+
+msgctxt "accounts.student_admission"
+msgid "Şablonun sütunları"
+msgstr "Şablonun sütunları"
+
+msgctxt "accounts.student_admission"
+msgid "Əsas sütunlar"
+msgstr "Əsas sütunlar"
+
+msgctxt "accounts.student_admission"
+msgid "Başlıq"
+msgstr "Başlıq"
+
+msgctxt "accounts.student_admission"
+msgid "Məcburi sütun"
+msgstr "Məcburi sütun"

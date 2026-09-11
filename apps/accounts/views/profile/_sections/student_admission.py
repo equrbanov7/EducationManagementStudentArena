@@ -78,8 +78,22 @@ def build_student_admission_section(request, section, *, active_organization, al
     section["create_group_url"] = reverse("accounts:student_admission_create_group")
     section["steps"] = _steps()
     section["steps_label"] = pgettext(_CTX, "Qəbul axınının addımları")
-    section["atis_columns"] = [column for column in section.get("columns", []) if column["key"] in ATIS_COLUMN_KEYS]
-    section["base_columns"] = [column for column in section.get("columns", []) if column["key"] not in ATIS_COLUMN_KEYS]
+    # Sütun kataloqu (1-ci addım kartındakı açılış) — İKİ qrup: şablonun əsas
+    # sütunları (məcburilər buradadır) + ATİS ixracına məxsus olanlar. Köhnə
+    # «Tələbə əlavəsi (toplu)» girişi sidebar-dan çıxarıldığı üçün istifadəçi
+    # şablonun TAM sütun siyahısını yalnız burada görür — ona görə əsas qrup
+    # gizlədilmir (2026-09-11, sahib: «ATİS şablonu olan yer dizaynı yaxşı deyil»).
+    columns = section.get("columns", [])
+    section["column_groups"] = [
+        {
+            "label": pgettext(_CTX, "Əsas sütunlar"),
+            "columns": [column for column in columns if column["key"] not in ATIS_COLUMN_KEYS],
+        },
+        {
+            "label": pgettext(_CTX, "ATİS sütunları"),
+            "columns": [column for column in columns if column["key"] in ATIS_COLUMN_KEYS],
+        },
+    ]
     section["kpi_tiles"] = [
         {"label": pgettext(_CTX, "CƏMİ SƏTİR"), "value": 0, "key": "total"},
         {"label": pgettext(_CTX, "YOXLAMADAN KEÇDİ"), "value": 0, "key": "ok"},
