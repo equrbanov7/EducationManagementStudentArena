@@ -43,14 +43,14 @@ from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
 
 @login_required
 def journal_list(request):
-    """The teacher's own offerings — entry points into each journal."""
-    from apps.registrar import corrections as corrections_service
-    from apps.registrar import page_contexts
+    """Müəllimin öz offering-ləri; tələbə ailəsi öz kabinet jurnalına yönlənir (2026-09-12)."""
+    from apps.registrar import corrections, page_contexts
 
+    if page_contexts.is_student_family_user(getattr(request, "organization", None), request.user):
+        return redirect(f"{reverse('accounts:profile')}?section=my-journal")
     context = page_contexts.journal_list_context(request.user, request=request)
     context["active_main_nav"] = "journal"
-    # Korrektorlara (superadmin / journal.correct) düzəliş interfeysinə keçid göstər.
-    context["can_correct_journal"] = corrections_service.can_correct_journal(request)
+    context["can_correct_journal"] = corrections.can_correct_journal(request)  # korrektor keçidi
     return render(request, "registrar/journal_list.html", context)
 
 

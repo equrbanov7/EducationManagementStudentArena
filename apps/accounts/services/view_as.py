@@ -123,14 +123,25 @@ def _is_superadmin(user) -> bool:
 
 
 def _active_memberships(user, organization):
-    """Aktorun org daxilindəki aktiv üzvlükləri (role ilə birgə)."""
+    """Aktorun org daxilindəki aktiv üzvlükləri (role ilə birgə).
+
+    ``bypass_rls`` ŞƏRTDİR (2026-09-12, sahib: «1-2 iş görən kimi məni öz
+    səhifəmə atır»). Bu funksiya ``ViewAsMiddleware``-dən — yəni
+    ``OrganizationMiddleware``-dən ƏVVƏL, tenant konteksti hələ boş ikən —
+    çağırılır (60 saniyəlik yenidən yoxlama və LIMITED yazma siyahısı).
+    ``organizations_membership`` RLS ilə qorunur: kontekst boşdursa sorğu
+    SIFIR sətir qaytarırdı → aktor «icazəsiz» sayılıb view-as sessiyası
+    ``view_as_permission_revoked`` ilə bitirilirdi. Sorğu ``user`` + ``organization``
+    ilə açıq süzülür, ona görə bypass kirayəçi sızması yaratmır.
+    """
     from apps.organizations.models import Membership
 
-    return list(
-        Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
-            "role", "scope_unit"
+    with bypass_rls():
+        return list(
+            Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
+                "role", "scope_unit"
+            )
         )
-    )
 
 
 def _normalized_role_names(memberships):
@@ -348,18 +359,18 @@ def validate_target(actor, organization, target_user_id):
         return None, None
 
     try:
-        qs = build_target_queryset(
-            actor,
-            organization,
-            mode=mode,
-            actor_level=actor_level,
-            memberships=memberships,
-        ).filter(pk=target_user_id)
-
-        if actor_level >= 999:
-            with bypass_rls():
-                target = qs.first()
-        else:
+        # Bütün hədəf sorğusu `organization` ilə açıq süzülür (üzvlük, səviyyə,
+        # unit-scope, admin-ekvivalent istisnası) — ona görə RLS bypass-ı kirayəçi
+        # sızması vermir. Bypass MÜTLƏQDİR: yenidən yoxlama middleware-də,
+        # tenant konteksti qurulmamış işləyir (bax `_active_memberships`).
+        with bypass_rls():
+            qs = build_target_queryset(
+                actor,
+                organization,
+                mode=mode,
+                actor_level=actor_level,
+                memberships=memberships,
+            ).filter(pk=target_user_id)
             target = qs.first()
     except (TypeError, ValueError):
         # Yanlış formatlı pk (məs. int pk üçün qeyri-rəqəm) → icazə yoxdur.
