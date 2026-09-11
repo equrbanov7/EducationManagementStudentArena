@@ -273,6 +273,9 @@
             if (isOpen()) {
                 return;
             }
+            // Başlıqda eyni anda yalnız BİR açılan: dil/istifadəçi/«Yarat»
+            // menyuları bu hadisəni eşidib bağlanır (bax burgerMenu.js).
+            document.dispatchEvent(new CustomEvent("ems:popover:open", { detail: { source: "global-search" } }));
             lastFocused = document.activeElement;
             root.removeAttribute("hidden");
             document.body.classList.add("gsearch-open");
@@ -371,6 +374,13 @@
                 runQuery("");
             });
         }
+
+        // Başqa açılan (dil/istifadəçi menyusu) açılanda axtarış bağlanır.
+        document.addEventListener("ems:popover:open", function (event) {
+            if (!event.detail || event.detail.source !== "global-search") {
+                close();
+            }
+        });
 
         document.addEventListener("keydown", function (event) {
             var key = event.key ? event.key.toLowerCase() : "";
