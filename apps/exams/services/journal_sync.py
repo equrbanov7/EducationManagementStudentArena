@@ -173,3 +173,45 @@ def registrar_block_reason(request, exam):
         logger.exception("journal_sync: eligibility check failed for exam %s", getattr(exam, "id", "?"))
         return None
     return elig.get("reason") if elig.get("barred") else None
+
+
+def registrar_block_reasons(request, exams):
+    """``registrar_block_reason``-un səhifə üzrə TOPLU variantı: ``{exam.id: səbəb | None}``.
+
+    P1-3 (2026-09-10 auditi, 2026-09-12): tələbə imtahan siyahısı hər kart üçün
+    qapını ayrıca çağırırdı (kart başına 5–8 sorğu).  Burada səhifənin fənləri
+    təşkilat üzrə qruplaşdırılır və ``exam_eligibility_batch`` bir dəfə çağırılır;
+    hər imtahan üçün cavab tək variantla eynidir (fənnsiz imtahan → ``None``,
+    xəta → loglanıb ``None``).  Fasad qaydası qorunur: registrar tərəfi çağırış
+    anında (lazy) import edilir.
+    """
+    exams = list(exams)
+    reasons = {getattr(exam, "id", None): None for exam in exams}
+    user = getattr(request, "user", None)
+    if user is None or not user.is_authenticated:
+        return reasons
+
+    by_organization = {}
+    for exam in exams:
+        subject_id = getattr(exam, "subject_id", None)
+        organization = getattr(exam, "organization", None)
+        if not subject_id or organization is None:
+            continue
+        by_organization.setdefault(organization.pk, (organization, set()))[1].add(subject_id)
+
+    for organization, subject_ids in by_organization.values():
+        try:
+            from apps.registrar.exam_bridge import exam_eligibility_batch
+
+            eligibility = exam_eligibility_batch(student=user, subject_ids=subject_ids, organization=organization)
+        except Exception:
+            logger.exception("journal_sync: batch eligibility check failed for organization %s", organization.pk)
+            continue
+        for exam in exams:
+            if getattr(exam, "organization_id", None) != organization.pk:
+                continue
+            elig = eligibility.get(getattr(exam, "subject_id", None))
+            if elig is None:
+                continue
+            reasons[exam.id] = elig.get("reason") if elig.get("barred") else None
+    return reasons

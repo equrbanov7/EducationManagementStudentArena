@@ -13,7 +13,7 @@ from apps.exams.constants import (
     get_live_session_model,
 )
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.services.language_variants import available_language_options
+from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.tenancy import get_request_organization
 
@@ -241,13 +241,14 @@ def _build_type_tabs(counts, *, include_final_midterm=True):
     return tabs
 
 
-def _build_language_modal_context(exam):
+def _build_language_modal_context(exam, language_options):
+    """``language_options`` — ``available_language_options(exam)`` forması (toplu qatdan gəlir)."""
     options = [
         {
             "language": option["language"],
             "display_name": option["display_name"],
         }
-        for option in available_language_options(exam)
+        for option in language_options
     ]
     codes = {option["language"] for option in options}
     default_language = ""
@@ -281,14 +282,23 @@ def _annotate_exam_list_base(queryset, user):
 
 
 def _build_exam_items(page_object_list, user, request, live_map):
-    """Səhifədəki imtahanları template üçün zəngin item-lərə çevirir."""
+    """Səhifədəki imtahanları template üçün zəngin item-lərə çevirir.
+
+    P1-3 (2026-09-10 auditi, 2026-09-12): icazə/cəhd/kod/jurnal/dil yoxlamaları
+    əvvəl hər kart üçün ayrıca DB-yə gedirdi (9 kartda 130+ sorğu).  İndi
+    ``StudentExamListBatch`` səhifə üçün məlumatı BİR DƏFƏ sabit sayda sorğu ilə
+    yükləyir; aşağıdakı dövr yalnız onun saf güzgü metodlarını çağırır — nəticə
+    model metodları ilə eynidir (bax test_student_list_query_budget).
+    """
+    exams = list(page_object_list)
+    batch = StudentExamListBatch(exams, user, request=request)
     exam_items = []
-    for exam in page_object_list:
+    for exam in exams:
         # SECURITY GUARD: baza sorğusu yalnız icazəli imtahanları gətirir,
         # bu yoxlama son sədd kimi qalır (normal halda heç vaxt işə düşmür).
         if exam.is_after_end():
             continue
-        if not exam.can_user_see(user):
+        if not batch.can_user_see(exam):
             continue
 
         is_live = bool(getattr(exam, "is_live_now", False)) and exam.id in live_map
@@ -299,9 +309,9 @@ def _build_exam_items(page_object_list, user, request, live_map):
 
         # Yalnız göstərmək üçün hesablanır (lazy expiry daxil) — limit filtri
         # artıq SQL-də tətbiq olunub, burada kart atılmır.
-        left = exam.attempts_left_for(user)
+        left = batch.attempts_left_for(exam)
 
-        can_without_code, _ = exam.can_user_start(user, code=None)
+        can_without_code, _ = batch.can_user_start(exam, code=None)
         requires_code = bool(exam.access_code and not can_without_code)
 
         if exam.access_code:
@@ -313,9 +323,7 @@ def _build_exam_items(page_object_list, user, request, live_map):
 
         # Elektron jurnal buraxılış statusu: fənn üzrə qayıb limiti keçilibsə
         # kartda "imtahana buraxılmırsınız + səbəb" göstərilir (start da bloklanır).
-        from apps.exams.services.journal_sync import registrar_block_reason
-
-        journal_block_reason = registrar_block_reason(request, exam)
+        journal_block_reason = batch.journal_block_reason(exam)
 
         exam_items.append(
             {
@@ -334,7 +342,7 @@ def _build_exam_items(page_object_list, user, request, live_map):
                 "is_live": is_live,
                 "live": live_info,
                 "history_url": build_exam_history_url(exam, return_to=request.get_full_path()),
-                **_build_language_modal_context(exam),
+                **_build_language_modal_context(exam, batch.available_language_options(exam)),
             }
         )
     return exam_items
