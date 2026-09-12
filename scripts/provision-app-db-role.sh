@@ -31,6 +31,26 @@ docker exec -i \
   "$CONTAINER" sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
     -v app_role="$APP_ROLE" -v app_password="$APP_PASSWORD" \
     -v owner_role="$POSTGRES_USER" -v db_name="$POSTGRES_DB"' <<'SQL'
+BEGIN;
+
+-- Refuse to repurpose an owner, privileged account, or role with memberships.
+-- A dedicated runtime account must not inherit another role or own objects.
+SELECT (
+    :'app_role' = :'owner_role'
+    OR EXISTS (SELECT FROM pg_roles WHERE rolname = :'app_role'
+               AND (rolsuper OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication))
+    OR EXISTS (SELECT FROM pg_auth_members m JOIN pg_roles r ON r.oid = m.member
+               WHERE r.rolname = :'app_role')
+    OR EXISTS (SELECT FROM pg_shdepend d JOIN pg_roles r ON r.oid = d.refobjid
+               WHERE d.refclassid = 'pg_authid'::regclass AND d.deptype = 'o'
+                 AND r.rolname = :'app_role')
+) AS unsafe_existing_role \gset
+\if :unsafe_existing_role
+    \echo 'ERROR: app role must be a dedicated unprivileged non-owner account.'
+    -- ON_ERROR_STOP makes PostgreSQL 16 psql exit nonzero and rolls back.
+    DO $$ BEGIN RAISE EXCEPTION 'Refusing unsafe app role'; END $$;
+\endif
+
 -- Rol yoxdursa yarat (psql var-ları dollar-quote daxilində açılmadığı üçün \gexec).
 SELECT format('CREATE ROLE %I LOGIN', :'app_role')
 WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'app_role')
@@ -117,6 +137,7 @@ WHERE to_regprocedure(
 -- Yoxlama: atributlar gözlənildiyi kimidirmi?
 SELECT rolname, rolsuper, rolbypassrls, rolcanlogin
 FROM pg_roles WHERE rolname = :'app_role';
+COMMIT;
 SQL
 
 echo "✓ Hazır. .env-də APP_DATABASE_USER/APP_DATABASE_PASSWORD təyin edib app/worker/beat-i yenidən başladın."

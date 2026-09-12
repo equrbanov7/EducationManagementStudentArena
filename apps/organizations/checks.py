@@ -38,7 +38,7 @@ def _current_role_bypasses_rls():
         cursor.execute("SELECT current_user, rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = current_user")
         row = cursor.fetchone()
     if not row:
-        return False, ""
+        raise RuntimeError("Current database role was not returned")
     return bool(row[1]), row[0]
 
 
@@ -55,6 +55,8 @@ def check_db_role_not_superuser(app_configs, databases=None, **kwargs):
 
     mode = getattr(settings, "EMS_DB_ROLE_ENFORCE", None) or os.environ.get("EMS_DB_ROLE_ENFORCE") or "warn"
     mode = str(mode).strip().lower()
+    if mode not in {"off", "warn", "error"}:
+        return [Error("EMS_DB_ROLE_ENFORCE off, warn və ya error olmalıdır.", id="organizations.E012")]
     if mode == "off":
         return []
     if connection.vendor != "postgresql":
@@ -62,8 +64,11 @@ def check_db_role_not_superuser(app_configs, databases=None, **kwargs):
 
     try:
         bypasses, rolname = _current_role_bypasses_rls()
-    except Exception:  # pragma: no cover — DB hələ hazır deyilsə check bloklamasın
-        return []
+    except Exception:
+        # Do not expose connection exceptions (they may contain credentials).
+        check_class = Error if mode == "error" else CheckWarning
+        check_id = "organizations.E013" if mode == "error" else "organizations.W013"
+        return [check_class("Tətbiq DB rolunun təhlükəsizliyi yoxlanıla bilmədi.", hint=_HINT, id=check_id)]
 
     if not bypasses:
         return []
