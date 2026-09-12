@@ -41,6 +41,16 @@ class _OrgMembersBase(Stage2BaseTest):
     def setUpTestData(cls):
         super().setUpTestData()
 
+        # P1-11 (2026-09-12): üzv reyestrinin əhatəsi artıq `member.view` daşıyan
+        # üzvlükdən çıxır (`get_permission_scope`; köhnə ümumi `get_unit_scope`
+        # silinib). Real kataloqda dekan və kafedra müdiri bu açarı daşıyır;
+        # Mərhələ 2 fiksturu (plan testləri üçün qısaldılmış dəst) onu vermirdi —
+        # burada kataloqla uyğunlaşdırılır, əks halda dekan «əhatəsiz» sayılır.
+        for name in ("dean", "chair_head"):
+            unit_manager_role = cls.roles[name]
+            unit_manager_role.permissions = [*unit_manager_role.permissions, "member.view"]
+            unit_manager_role.save(update_fields=["permissions"])
+
         def role(name, level, scope_type, permissions):
             obj, _ = Role.objects.update_or_create(
                 organization=cls.org,

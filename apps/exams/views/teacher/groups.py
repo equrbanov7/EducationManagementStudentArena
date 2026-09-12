@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
-from apps.organizations.public import get_unit_scope
+from apps.organizations.public import get_permission_scope
 from core.permissions import request_has_permission
 from core.roles import ProfileRole
 from core.tenancy import request_has_active_organization_context
@@ -110,6 +110,24 @@ def _get_required_organization(request):
     return organization
 
 
+def _actor_group_scope(request, organization):
+    """Qrup səthinin struktur əhatəsi — `group.manage`, olmasa `group.view` açarına görə.
+
+    2026-09-12 (P1-11): köhnə ümumi `get_unit_scope` HƏR aktiv üzvlüyün
+    `scope_unit`-ini toplayırdı — dekanın başqa fakültənin kafedrasına müəllim
+    təyinatı həmin kafedranın qruplarını da onun siyahısına (və redaktəsinə)
+    salırdı. İndi əhatə yalnız qrup açarını DAŞIYAN üzvlükdən çıxır. Səhifə
+    qapısı (`_ensure_group_manager`) `group.view` VƏ YA `group.manage` tanıyır;
+    dəyişmə qapısı (`_ensure_group_creator`) yalnız `group.manage`. Ona görə
+    əvvəl `group.manage` (tyutor/koordinator/dekan), o əhatə verməsə `group.view`
+    (dekan müavini — yalnız oxu) yoxlanır; ikisi də yoxdursa `EMPTY_SCOPE`.
+    """
+    scope = get_permission_scope(request.user, organization, "group.manage", request=request)
+    if scope.has_structure_access:
+        return scope
+    return get_permission_scope(request.user, organization, "group.view", request=request)
+
+
 def _group_queryset_for_actor(request, organization):
     queryset = (
         StudentGroup.objects.filter(organization=organization)
@@ -121,7 +139,7 @@ def _group_queryset_for_actor(request, organization):
     #   org-geniş rol (rektor/prorektor/org-admin/owner/superadmin) → bütün qruplar;
     #   unit-scoped (dekan/kafedra müdiri) → öz alt-ağacındakı qruplar (+ öz qrupları);
     #   qalan (adi müəllim) → yalnız öz qrupları (teacher / teachers).
-    scope = get_unit_scope(request.user, organization, request)
+    scope = _actor_group_scope(request, organization)
     if scope.is_org_wide:
         return queryset
     own_q = Q(teacher=request.user) | Q(teachers=request.user)

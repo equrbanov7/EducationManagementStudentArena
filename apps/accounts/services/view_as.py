@@ -219,15 +219,24 @@ def actor_can_use_view_as(user, organization) -> bool:
 
 
 def _unit_scope_user_ids(user, organization, memberships):
-    """Unit-scoped rollar üçün icazəli hədəf user id-ləri (yoxdursa None)."""
+    """Unit-scoped rollar üçün icazəli hədəf user id-ləri (yoxdursa None).
+
+    Əhatə `member.view` açarını DAŞIYAN üzvlükdən çıxır (P1-11, 2026-09-12):
+    tyutor / dekan / dekan müavini / kafedra müdiri kataloqda məhz bu açarla
+    UNIT rolundadır → öz alt-ağacındakı üzvlər; ORGANIZATION daşıyıcısı (HR,
+    prorektor) → məhdudiyyət yoxdur (`None`); `scope_unit`-siz unit-rolu →
+    `EMPTY_SCOPE` → `scope_memberships_by_unit` boş qaytarır (fail-closed).
+    Köhnə `get_unit_scope` HƏR üzvlüyün unitini toplayırdı — dekanın əlaqəsiz
+    müəllim təyinatı başqa kafedranın tələbələrini «view-as» hədəfi edirdi.
+    """
     role_names = _normalized_role_names(memberships)
     if not (role_names & UNIT_SCOPED_ROLE_NAMES):
         return None
 
     from apps.organizations.models import Membership
-    from apps.organizations.public import get_unit_scope, scope_memberships_by_unit
+    from apps.organizations.public import get_permission_scope, scope_memberships_by_unit
 
-    scope = get_unit_scope(user, organization)
+    scope = get_permission_scope(user, organization, "member.view")
     if scope.is_org_wide:
         return None
     scoped = scope_memberships_by_unit(

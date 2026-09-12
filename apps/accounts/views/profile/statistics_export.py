@@ -12,6 +12,7 @@ from django.utils.translation import pgettext_lazy
 
 from ...models import UserProfile
 from .._helpers import _get_active_organization, _role_capabilities
+from ._sections.statistics import statistics_scope
 
 
 @login_required
@@ -61,15 +62,21 @@ def statistics_export_csv(request):
     elif capabilities["is_org_admin"] and org:
         # Unit scoping (Faza 2): dekan/kafedra müdürü export-da da yalnız öz
         # alt-ağacının datasını görür — dashboard ilə eyni cache açarı işlədilir.
+        # Əhatə dashboard ilə EYNİ resolverdən (`statistics_scope`, P1-11):
+        # `analytics.view_all` → org-wide, `analytics.view_unit` → alt-ağac,
+        # heç biri → BOŞ alt-ağac (fail-closed; köhnə kod org-wide verirdi).
         from apps.organizations.models import OrgUnit
-        from apps.organizations.public import get_unit_scope
 
-        unit_scope = get_unit_scope(request.user, org, request=request)
-        if unit_scope.is_unit_scoped:
-            scoped_unit_ids = list(
-                OrgUnit.objects.filter(organization=org)
-                .filter(unit_scope.unit_subtree_q())
-                .values_list("pk", flat=True)
+        unit_scope = statistics_scope(request, org)
+        if not unit_scope.is_org_wide:
+            scoped_unit_ids = (
+                list(
+                    OrgUnit.objects.filter(organization=org)
+                    .filter(unit_scope.unit_subtree_q())
+                    .values_list("pk", flat=True)
+                )
+                if unit_scope.is_unit_scoped
+                else []
             )
             stats = get_or_set_cached_statistics(
                 role="unit_manager",
@@ -98,9 +105,8 @@ def statistics_export_csv(request):
         tutor_scoped_ids = None
         if capabilities.get("is_tutor") and org:
             from apps.organizations.models import OrgUnit
-            from apps.organizations.public import get_unit_scope
 
-            unit_scope = get_unit_scope(request.user, org, request=request)
+            unit_scope = statistics_scope(request, org)
             if unit_scope.is_unit_scoped:
                 tutor_scoped_ids = list(
                     OrgUnit.objects.filter(organization=org)

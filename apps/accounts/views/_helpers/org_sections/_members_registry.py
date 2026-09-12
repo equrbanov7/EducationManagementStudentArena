@@ -445,10 +445,19 @@ def build_members_registry(
     superadmin_user_ids,
     can_remove_members,
 ):
-    """Üzv reyestrinin bütün context-i (KPI · filtr · cədvəl · səhifə)."""
-    from apps.organizations.public import get_unit_scope
+    """Üzv reyestrinin bütün context-i (KPI · filtr · cədvəl · səhifə).
 
-    unit_scope = get_unit_scope(request.user, organization, request=request)
+    ƏHATƏ (2026-09-12, P1-11): `member.view` açarını DAŞIYAN üzvlükdən
+    (`get_permission_scope`): HR/rektorat (ORGANIZATION) → bütün təşkilat,
+    dekan/kafedra müdiri (UNIT + `scope_unit`) → öz alt-ağacı, əhatəsiz →
+    HEÇ KİM (fail-closed). Köhnə `get_unit_scope` (a) dekanın əlaqəsiz
+    müəllim/tələbə üzvlüyünün unitini də siyahıya salırdı, (b) əhatəsiz
+    aktora filtrsiz BÜTÜN təşkilatı göstərirdi — hər ikisi bağlandı.
+    Superadmin əhatədən keçmir (əvvəlki kimi).
+    """
+    from apps.organizations.public import get_permission_scope
+
+    unit_scope = get_permission_scope(request.user, organization, "member.view", request=request)
     scoped_unit_ids = None
     if not is_superadmin and unit_scope.is_unit_scoped:
         scoped_unit_ids = list(
@@ -456,6 +465,8 @@ def build_members_registry(
             .filter(unit_scope.unit_subtree_q())
             .values_list("pk", flat=True)
         )
+    elif not is_superadmin and not unit_scope.is_org_wide:
+        scoped_unit_ids = []
 
     search = (request.GET.get(f"{PREFIX}q") or "").strip()[:120]
     kind = (request.GET.get(f"{PREFIX}kind") or "").strip().lower()

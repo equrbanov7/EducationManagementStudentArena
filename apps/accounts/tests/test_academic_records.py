@@ -21,7 +21,7 @@ from django.urls import reverse
 
 from apps.accounts import academic_records as records_overview
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope
+from apps.organizations.scoping import ORG_WIDE_SCOPE, get_permission_scope
 from apps.registrar import finals, gradebook, services, transcript
 from apps.registrar.models import (
     Curriculum,
@@ -369,9 +369,11 @@ class RecordsAggregationTest(_RecordsBase):
 
 
 class RecordsScopingTest(_RecordsBase):
+    # 2026-09-12 (P1-11): endpoint əhatəsi `grade.view` açarına görə çıxarılır
+    # (`academic_records.RECORDS_SCOPE_PERMISSION`); köhnə `get_unit_scope` silinib.
     def test_dean_sees_only_own_faculty(self):
         with bypass_rls():
-            scope = get_unit_scope(self.dean, self.org)
+            scope = get_permission_scope(self.dean, self.org, "grade.view")
             data = records_overview.build_records_overview(
                 organization=self.org, scope=scope, filters={}, offset=0, limit=100
             )
@@ -381,7 +383,7 @@ class RecordsScopingTest(_RecordsBase):
 
     def test_teacher_has_no_structure_access(self):
         with bypass_rls():
-            scope = get_unit_scope(self.teacher, self.org)
+            scope = get_permission_scope(self.teacher, self.org, "grade.view")
             data = records_overview.build_records_overview(
                 organization=self.org, scope=scope, filters={}, offset=0, limit=100
             )
@@ -391,7 +393,7 @@ class RecordsScopingTest(_RecordsBase):
 
     def test_student_in_scope_respects_boundary(self):
         with bypass_rls():
-            scope = get_unit_scope(self.dean, self.org)
+            scope = get_permission_scope(self.dean, self.org, "grade.view")
             in_a = records_overview.student_is_in_scope(
                 organization=self.org, scope=scope, student_id=self.students_a[0].id
             )
@@ -583,11 +585,11 @@ class RecordsRoleGateTest(_RecordsBase):
     """Endpoint-lər rol qapısından keçməlidir — scope tək başına hüquq deyil.
 
     2026-07-31 auditi: `_scope()` yalnız `scope.has_structure_access` yoxlayırdı,
-    `_resolve_unit_scope` isə rolun adına baxmadan HƏR üzvlüyün `scope_unit`-ini
-    scope-a əlavə edir. «Müəllimi kafedraya təyin et» əməliyyatı məhz onu
-    doldurur — yəni adi müəllim öz kafedra alt-ağacındakı bütün tələbələrin GPA
-    və transkriptini oxuya bilirdi. Sidebar ona bu bölməni vermir, yəni endpoint
-    UI-dan geniş idi.
+    köhnə ümumi resolver (`get_unit_scope`, 2026-09-12 P1-11 ilə silinib) isə
+    rolun adına baxmadan HƏR üzvlüyün `scope_unit`-ini scope-a əlavə edirdi.
+    «Müəllimi kafedraya təyin et» əməliyyatı məhz onu doldurur — yəni adi
+    müəllim öz kafedra alt-ağacındakı bütün tələbələrin GPA və transkriptini
+    oxuya bilirdi. Sidebar ona bu bölməni vermir, yəni endpoint UI-dan geniş idi.
     """
 
     def _client(self, user):
