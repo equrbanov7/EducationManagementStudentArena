@@ -53,7 +53,6 @@ _ALLOWED_STYLE = re.compile(r'style="--pct:(?:\{\{[^}]*\}\}|\{%\s*widthratio [^%
 #: Açıq allow-list — fayl (sections/ kökünə nisbətən) → icazəli `--pct` sayı.
 #: _my_subjects: kredit tərəqqisi + giriş balı + qayıb zolağı; _semester_opening: kafedra hazırlıq faizi.
 ALLOWED_PCT_STYLES = {
-    "_my_subjects.html": 3,
     "_semester_opening.html": 1,
 }
 

@@ -125,6 +125,8 @@ class TranscriptTemplateContractTest(TestCase):
 
         path = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/sections/_my_subjects.html"
         body = path.read_text(encoding="utf-8")
-        self.assertIn("row.syllabus_available", body)
-        self.assertIn("sec.assessment_weights", body)
-        self.assertIn("row.teacher", body)
+        self.assertIn("_my_subjects_card.html", body)
+        card = (path.parent / "_my_subjects_card.html").read_text(encoding="utf-8")
+        self.assertIn("row.syllabus_available", card)
+        self.assertIn("sec.assessment_weights", body + card)
+        self.assertIn("row.teacher", card)

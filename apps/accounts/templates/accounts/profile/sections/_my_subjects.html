@@ -1,233 +1,144 @@
-{% load i18n %}
+{% load i18n ems_ui %}
+{% comment %}«Fənlərim» — tələbə kabineti, ekran 10 «Cari semestr» (redizayn 2026-09-12,
+audit bəndi 7/1; sahib: «modern UX/UI prinsipləri əsasında… tələbə üçün aydın olsun»).
+
+Quruluş (yuxarıdan aşağı): kontekst zolağı → KPI sırası → ECTS tərəqqisi →
+qiymətləndirmə strukturu + legend → fənn kartları → seçmə blokları.  Başlıq
+qabıqdan (`#profileSectionTitle`) gəlir — burada yalnız altbaşlıq və əməl
+(`_content_header.html` müqaviləsi, audit P2-1).
+
+Görünüş açarları (status, KPI, legend) `apps.registrar.student_subjects_context`-də
+BİR dəfə hesablanır; şablon yalnız oxuyur.  Tərəqqi zolaqları semantik
+`<progress value max>` elementidir — inline `style` YOXDUR (CSP: unsafe-inline
+yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
 {% with sec=student_subjects_section %}
 <section class="profile-section-panel profile-section--my-subjects {% if active_section == 'my-subjects' %}is-active{% endif %}"
          data-profile-section-panel="my-subjects"
          data-source-url="{{ profile_base_url }}?section=my-subjects">
-    {% comment %}2026-09-12 (audit P2-1): «Fənlərim» başlığı qabıqdan
-    (`#profileSectionTitle`) gəlir — köhnə `.section-header-flex > .section-title`
-    onu təkrarlayırdı. «Dərs cədvəli» keçidi başlığın əməl yuvasındadır;
-    ixtisas/qrup/dövr zolağı isə kartın ilk sətri kimi qalır.{% endcomment %}
-    {% include "partials/ems_ui/_content_header.html" with header_actions_include="accounts/profile/sections/_my_subjects_header_actions.html" %}
-    <div class="section-card">
-        {% if sec.record %}
-        <div class="my-subjects-meta">
-            <span class="my-subjects-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
-            {% if sec.record.group %}<span class="my-subjects-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
-            {% if sec.period %}<span class="my-subjects-meta-item"><i class="fas fa-calendar-alt"></i> {{ sec.period.name }}</span>{% endif %}
+    {% trans "Bu semestr qeydiyyatda olduğunuz fənlər — giriş balı, davamiyyət və imtahana buraxılış vəziyyəti bir yerdə." context "profile.subjects" as msx_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=msx_subtitle header_actions_include="accounts/profile/sections/_my_subjects_header_actions.html" %}
+
+    <div class="msx">
+    {% if not sec.has_record %}
+        {% trans "Akademik qeydiniz hələ yaradılmayıb" context "profile.subjects" as msx_no_record_title %}
+        {% trans "Sizə hələ akademik qeyd (ixtisas/qrup) təyin olunmayıb. Zəhmət olmasa dekanlıq/registrar ilə əlaqə saxlayın." context "profile.subjects" as msx_no_record_body %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-graduation-cap" state_title=msx_no_record_title state_body=msx_no_record_body %}
+    {% else %}
+
+        {# ── Kontekst zolağı: ixtisas · qrup · dövr · semestr ─────────────────── #}
+        <div class="msx-ctx" role="group" aria-label="{% trans 'Akademik kontekst' context 'profile.subjects' %}">
+            <span class="msx-ctx__item"><i class="fas fa-graduation-cap" aria-hidden="true"></i> {{ sec.record.program.display_label }}</span>
+            {% if sec.record.group %}<span class="msx-ctx__item"><i class="fas fa-users" aria-hidden="true"></i> {{ sec.record.group.name }}</span>{% endif %}
+            {% if sec.period %}<span class="msx-ctx__item"><i class="fas fa-calendar-alt" aria-hidden="true"></i> {{ sec.period.name }}</span>{% endif %}
+            <span class="msx-ctx__item"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "Semestr" context "profile.subjects" %} {{ sec.semester_number }}</span>
         </div>
+
+        {# ── KPI sırası (prototip: toplanmış bal · kredit · buraxılmayan · yekun) ── #}
+        {% if sec.kpi_tiles %}
+        {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sec.kpi_tiles kpi_variant="4" %}
         {% endif %}
 
-        {% if not sec.has_record %}
-        <div class="my-subjects-empty">
-            <i class="fas fa-folder-open"></i>
-            <p>{% trans "Sizə hələ akademik qeyd (ixtisas/qrup) təyin olunmayıb. Zəhmət olmasa dekanlıq/registrar ilə əlaqə saxlayın." context "profile.subjects" %}</p>
-        </div>
-        {% else %}
-
+        {# ── Boloniya kredit tərəqqisi (ECTS) ────────────────────────────────── #}
         {% with cs=sec.credit_summary %}
         {% if cs %}
-        <div class="credit-progress-card {% if cs.can_graduate %}is-complete{% endif %}">
-            <div class="credit-progress-head">
-                <div class="credit-progress-title">
-                    <i class="fas fa-award"></i>
-                    <span>{% trans "Boloniya kredit tərəqqisi (ECTS)" context "profile.subjects" %}</span>
-                </div>
-                <div class="credit-progress-figures">
-                    <strong>{{ cs.earned }}</strong> / {{ cs.required }} {% trans "kredit" context "profile.subjects" %}
-                </div>
+        <section class="credit-progress-card msx-credit {% if cs.can_graduate %}is-complete{% endif %}" aria-labelledby="msx-credit-title">
+            <div class="msx-credit__head">
+                <h2 class="msx-credit__title" id="msx-credit-title">
+                    <i class="fas fa-award" aria-hidden="true"></i>
+                    {% trans "Boloniya kredit tərəqqisi (ECTS)" context "profile.subjects" %}
+                </h2>
+                <p class="msx-credit__figure"><strong>{{ cs.earned }}</strong> / {{ cs.required }} {% trans "kredit" context "profile.subjects" %} · {{ cs.percent|floatformat:"-1" }}%</p>
             </div>
-            {% comment %}2026-09-12 (audit P2-9): tərəqqi eni fasiləsiz faizdir (0–100) —
-            CLAUDE.md-nin icazə verdiyi yeganə inline forma: `--pct` custom property,
-            eni CSS verir (`width: var(--pct)`). Test allow-list-i məhz bu formadır.{% endcomment %}
-            <div class="credit-progress-bar" role="progressbar"
-                 aria-valuenow="{{ cs.percent }}" aria-valuemin="0" aria-valuemax="100">
-                <div class="credit-progress-fill" style="--pct:{{ cs.percent }}%"></div>
-            </div>
-            <div class="credit-progress-legend">
-                <span class="credit-chip credit-chip--earned">{% trans "Toplanmış" context "profile.subjects" %}: {{ cs.earned }}</span>
-                <span class="credit-chip credit-chip--progress">{% trans "Davam edən" context "profile.subjects" %}: {{ cs.in_progress }}</span>
-                <span class="credit-chip credit-chip--remaining">{% trans "Qalan" context "profile.subjects" %}: {{ cs.remaining }}</span>
+            <progress class="msx-bar msx-bar--credit" value="{{ cs.earned }}" max="{{ cs.required|default:1 }}"
+                      aria-label="{% trans 'Boloniya kredit tərəqqisi (ECTS)' context 'profile.subjects' %}"></progress>
+            <ul class="msx-credit__legend">
+                <li class="msx-pill msx-pill--earned">{% trans "Toplanmış" context "profile.subjects" %}: <strong>{{ cs.earned }}</strong></li>
+                <li class="msx-pill msx-pill--progress">{% trans "Davam edən" context "profile.subjects" %}: <strong>{{ cs.in_progress }}</strong></li>
+                <li class="msx-pill msx-pill--remaining">{% trans "Qalan" context "profile.subjects" %}: <strong>{{ cs.remaining }}</strong></li>
                 {% if cs.can_graduate %}
-                <span class="credit-chip credit-chip--ok"><i class="fas fa-check-circle"></i> {% trans "Məzuniyyət yükü tamamlandı" context "profile.subjects" %}</span>
+                <li class="msx-pill msx-pill--ok"><i class="fas fa-check-circle" aria-hidden="true"></i> {% trans "Məzuniyyət yükü tamamlandı" context "profile.subjects" %}</li>
                 {% endif %}
-            </div>
-        </div>
+            </ul>
+            <p class="msx-credit__hint">{% trans "Kredit yalnız keçilmiş fənlərdən toplanır; «davam edən» — hələ yekunlaşmamış cari fənlərin krediti." context "profile.subjects" %}</p>
+        </section>
         {% endif %}
         {% endwith %}
 
-        {% if sec.assessment_weights %}
-        {% comment %}Qiymətləndirmə strukturu — universitet siyasəti ilə KİLİDLİ
-        (README §8/4). Dəyərlər `apps.syllabus.policy`-dən gəlir, şablonda
-        hardcode edilmir.{% endcomment %}
-        <div class="assess-weights">
-            <span class="assess-weights__title">{% trans "Qiymətləndirmə strukturu" context "profile.subjects" %}</span>
+        {# ── Qiymətləndirmə strukturu (kilidli siyasət) + legend ─────────────── #}
+        <div class="msx-guide">
+            {% if sec.assessment_weights %}
+            {% comment %}README §8/4: dəyərlər `apps.syllabus.policy`-dən gəlir, şablonda
+            hardcode edilmir.{% endcomment %}
             {% with w=sec.assessment_weights %}
-            <span class="assess-weight">{% trans "Davamiyyət" context "profile.subjects" %} <b>{{ w.attendance }}</b></span>
-            <span class="assess-weight">{% trans "Sərbəst iş" context "profile.subjects" %} <b>{{ w.selfwork }}</b></span>
-            <span class="assess-weight">{% trans "Cari qiymətləndirmə" context "profile.subjects" %} <b>{{ w.current }}</b></span>
-            <span class="assess-weight">{% trans "Yekun imtahan" context "profile.subjects" %} <b>{{ w.final }}</b></span>
-            <span class="assess-weights__total">{% trans "Cəmi" context "profile.subjects" %} {{ w.total }}</span>
+            <section class="msx-guide__box" aria-labelledby="msx-weights-title">
+                <h2 class="msx-guide__title" id="msx-weights-title">{% trans "Qiymətləndirmə strukturu" context "profile.subjects" %}</h2>
+                <ul class="msx-weights">
+                    <li class="msx-weight"><span>{% trans "Davamiyyət" context "profile.subjects" %}</span><b>{{ w.attendance }}</b></li>
+                    <li class="msx-weight"><span>{% trans "Sərbəst iş" context "profile.subjects" %}</span><b>{{ w.selfwork }}</b></li>
+                    <li class="msx-weight"><span>{% trans "Cari qiymətləndirmə" context "profile.subjects" %}</span><b>{{ w.current }}</b></li>
+                    <li class="msx-weight msx-weight--final"><span>{% trans "Yekun imtahan" context "profile.subjects" %}</span><b>{{ w.final }}</b></li>
+                    <li class="msx-weight msx-weight--total"><span>{% trans "Cəmi" context "profile.subjects" %}</span><b>{{ w.total }}</b></li>
+                </ul>
+                <p class="msx-guide__hint">{% trans "Giriş balı = davamiyyət + sərbəst iş + cari qiymətləndirmə (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan." context "profile.subjects" %}</p>
+            </section>
             {% endwith %}
+            {% endif %}
+            <section class="msx-guide__box" aria-labelledby="msx-legend-title">
+                <h2 class="msx-guide__title" id="msx-legend-title">{% trans "Status nişanları" context "profile.subjects" %}</h2>
+                <ul class="msx-legend">
+                    {% for item in sec.legend %}
+                    <li class="msx-legend__item">
+                        {% ems_status_badge "exam_eligibility" item.status dot=True %}
+                        <span class="msx-legend__hint">{{ item.hint }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
         </div>
-        {% endif %}
 
+        {# ── Fənn kartları ───────────────────────────────────────────────────── #}
         {% if sec.subjects %}
-        <div class="my-subjects-grid">
+        <div class="msx-grid">
             {% for row in sec.subjects %}
-            <article class="subject-card {% if row.eligibility.barred %}subject-card--barred{% endif %}">
-                <header class="subject-card-head">
-                    <span class="subject-code">{{ row.subject.code }}</span>
-                    {% if row.kind == "elective" %}
-                    <span class="subject-kind subject-kind--elective">{% trans "Seçmə" context "profile.subjects" %}</span>
-                    {% elif row.kind == "retake" %}
-                    <span class="subject-kind subject-kind--retake">{% trans "Təkrar" context "profile.subjects" %}</span>
-                    {% else %}
-                    <span class="subject-kind subject-kind--mandatory">{% trans "Məcburi" context "profile.subjects" %}</span>
-                    {% endif %}
-                </header>
-                <h4 class="subject-name">{{ row.subject.name }}</h4>
-                <div class="subject-card-meta">
-                    <span class="subject-ects"><i class="fas fa-coins"></i> {{ row.ects }} {% trans "ECTS" context "profile.subjects" %}</span>
-                    {% if row.teacher %}
-                    <span class="subject-teacher"><i class="fas fa-chalkboard-user"></i> {{ row.teacher.get_full_name|default:row.teacher.username }}</span>
-                    {% endif %}
-                    {% with elig=row.eligibility %}
-                    {% if elig.lesson_hours %}
-                    <span class="subject-absence {% if elig.barred %}is-barred{% endif %}"
-                          title="{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}">
-                        <i class="fas fa-user-clock"></i>
-                        {{ elig.absence_hours }}{% trans "s" context "profile.subjects" %} / {{ elig.allowed_hours|floatformat:0 }}{% trans "s" context "profile.subjects" %}
-                        ({% trans "limit" context "profile.subjects" %} {{ elig.limit_percent }}%)
-                    </span>
-                    {% endif %}
-                    {% endwith %}
-                </div>
-                {% if row.journal %}
-                <div class="subject-grade">
-                    <div class="subject-grade-head">
-                        <span class="subject-grade-total">{{ row.journal.entry_score|floatformat:'-2' }}<span class="subject-grade-max">/{{ row.journal.entry_score_max }}</span></span>
-                        <span class="subject-grade-label">{% trans "giriş balı" context "profile.subjects" %}</span>
-                        {% if row.journal.barred %}
-                        <span class="subject-grade-status is-barred">{% trans "Kəsilir" context "profile.subjects" %}</span>
-                        {% endif %}
-                    </div>
-                    {# U13 — giriş balı tərəqqi barı (kredit-barı ilə eyni pattern) #}
-                    <div class="subject-grade-bar" role="progressbar"
-                         aria-valuenow="{{ row.journal.entry_score|floatformat:0 }}" aria-valuemin="0" aria-valuemax="{{ row.journal.entry_score_max }}">
-                        <div class="subject-grade-fill" style="--pct:{% widthratio row.journal.entry_score row.journal.entry_score_max 100 %}%"></div>
-                    </div>
-                    <div class="subject-grade-components">
-                        <span class="grade-comp">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ row.journal.lessons_held }}</strong></span>
-                        <span class="grade-comp">{% trans "Qayıb" context "profile.subjects" %}: <strong>{{ row.journal.absence_hours }}</strong> {% trans "saat" context "profile.subjects" %} / {{ row.journal.allowed_absence|floatformat:0 }}</span>
-                    </div>
-                    {% if row.journal.allowed_absence %}
-                    <div class="subject-absence-bar" role="progressbar"
-                         aria-valuenow="{{ row.journal.absence_hours }}" aria-valuemin="0" aria-valuemax="{{ row.journal.allowed_absence|floatformat:0 }}">
-                        <div class="subject-absence-fill {% if row.journal.barred %}is-over{% elif row.eligibility.barred %}is-over{% endif %}" style="--pct:{% widthratio row.journal.absence_hours row.journal.allowed_absence 100 %}%"></div>
-                    </div>
-                    {% endif %}
-                    {% if row.components %}
-                    <div class="subject-components">
-                        {% for comp in row.components %}
-                        <span class="subject-comp-chip">{{ comp.name }}: <strong>{% if comp.score is not None %}{{ comp.score|floatformat:'-2' }}{% else %}—{% endif %}</strong>/{{ comp.max }}</span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if row.attempts %}
-                    {% comment %}Çox cəhd — rəsmi SONUNCU cəhddir, əvvəlkilər ləğv olunub,
-                    amma balı itmir və burada açıq görünür (sahibin qərarı M2).{% endcomment %}
-                    <div class="subject-attempts">
-                        {% for attempt in row.attempts %}
-                        <span class="subject-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
-                            {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}:
-                            <strong>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</strong>
-                            · {% if attempt.is_official %}{% trans "rəsmi" context "profile.subjects" %}{% else %}{% trans "ləğv olundu" context "profile.subjects" %}{% endif %}
-                        </span>
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% if row.final.graded or row.final.resit %}
-                    <div class="subject-final">
-                        {% if row.final.graded %}
-                        <span class="subject-final-total">{% trans "Yekun" context "profile.subjects" %}: <strong>{{ row.final.total|floatformat:'-2' }}</strong>/100 <span class="grade-{{ row.final.letter }} subject-final-letter">{{ row.final.letter }}</span></span>
-                        {% if row.final.passed %}<span class="subject-grade-status is-pass">{% trans "Keçdi" context "profile.subjects" %}</span>
-                        {% elif row.final.failed %}<span class="subject-grade-status is-fail">{% trans "Kəsildi" context "profile.subjects" %}</span>{% endif %}
-                        {% endif %}
-                        {% if row.final.resit %}
-                        <span class="subject-resit"><i class="fas fa-redo"></i> {% trans "Təkrar imtahan hüququ" context "profile.subjects" %}{% if row.final.resit.resit_score is not None %}: {{ row.final.resit.resit_score|floatformat:'-2' }}{% endif %}</span>
-                        {% endif %}
-                        {% if row.final.bonus %}
-                        <span class="subject-bonus {% if row.final.bonus < 0 %}is-penalty{% endif %}"><i class="fas fa-plus-minus"></i> {% trans "Bonus" context "profile.subjects" %}: {{ row.final.bonus|floatformat:'-2' }}</span>
-                        {% endif %}
-                    </div>
-                    {% if row.final.comment %}
-                    <p class="subject-final-comment"><i class="fas fa-comment-dots"></i> {{ row.final.comment }}</p>
-                    {% endif %}
-                    {% endif %}
-                </div>
-                {% endif %}
-                <footer class="subject-card-foot">
-                    {% if row.eligibility.frozen %}
-                    <span class="exam-status exam-status--legacy" title="{{ row.eligibility.notice }}"><i class="fas fa-clock-rotate-left"></i> {{ row.eligibility.frozen_badge }}</span>
-                    {% elif row.eligibility.barred %}
-                    <span class="exam-status exam-status--barred"><i class="fas fa-ban"></i> {% trans "İmtahana buraxılmır (qayıb həddi keçilib)" context "profile.subjects" %}</span>
-                    {% else %}
-                    <span class="exam-status exam-status--ok"><i class="fas fa-check"></i> {% trans "İmtahana buraxılır" context "profile.subjects" %}</span>
-                    {% endif %}
-                    {% comment %}«Sillabusa bax» — YALNIZ təsdiqlənmiş versiya (README §8/9).
-                    Baxışdakı yeni versiya tələbəyə göstərilmir; endpoint eyni qaydanı
-                    fail-closed təkrar yoxlayır.{% endcomment %}
-                    {% if row.syllabus_available %}
-                    <a class="subject-syllabus-link" href="{{ row.syllabus_pdf_url }}" target="_blank" rel="noopener">
-                        <i class="fas fa-file-lines"></i> {% trans "Sillabus (təsdiqlənmiş)" context "profile.subjects" %}
-                    </a>
-                    {% endif %}
-                    {% if row.course %}
-                    <a class="subject-content-link" href="{% url 'courses:course_dashboard' row.course.id %}">
-                        <i class="fas fa-arrow-right"></i> {% trans "Kurs materialı" context "profile.subjects" %}
-                    </a>
-                    {% endif %}
-                </footer>
-            </article>
+            {% include "accounts/profile/sections/_my_subjects_card.html" with row=row %}
             {% endfor %}
         </div>
         {% else %}
-        <div class="my-subjects-empty">
-            <i class="fas fa-inbox"></i>
-            <p>{% trans "Bu semestr üçün hələ fənn qeydiyyatı yoxdur." context "profile.subjects" %}</p>
-        </div>
+        {% trans "Bu semestr üçün hələ fənn qeydiyyatı yoxdur." context "profile.subjects" as msx_no_subjects %}
+        {% trans "Qeydiyyat semestr açılışında dekanlıq tərəfindən aparılır. Fənləriniz görünmürsə, tyutor və ya dekanlığa müraciət edin." context "profile.subjects" as msx_no_subjects_body %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-book-open" state_title=msx_no_subjects state_body=msx_no_subjects_body %}
         {% endif %}
 
+        {# ── Seçmə blokları (qrup qərarı) ─────────────────────────────────────── #}
         {% if sec.elective_blocks %}
-        <div class="elective-blocks">
-            <h5 class="elective-blocks-title"><i class="fas fa-list-check"></i> {% trans "Seçmə blokları" context "profile.subjects" %}</h5>
+        <section class="msx-electives" aria-labelledby="msx-electives-title">
+            <h2 class="msx-electives__title" id="msx-electives-title"><i class="fas fa-list-check" aria-hidden="true"></i> {% trans "Seçmə blokları" context "profile.subjects" %}</h2>
             {% for block in sec.elective_blocks %}
-            <div class="elective-block">
-                <div class="elective-block-head">
-                    <span class="elective-block-name">{{ block.name }}</span>
-                    <span class="elective-block-req">{{ block.required_choices }} {% trans "seçim" context "profile.subjects" %}</span>
+            <div class="msx-elective">
+                <div class="msx-elective__head">
+                    <span class="msx-elective__name">{{ block.name }}</span>
+                    <span class="msx-elective__req">{{ block.required_choices }} {% trans "seçim" context "profile.subjects" %}</span>
                 </div>
-                <div class="elective-options">
+                <ul class="msx-elective__options">
                     {% for opt in block.options %}
-                    <span class="elective-option {% if block.chosen and block.chosen.id == opt.id %}is-chosen{% endif %}">
-                        {% if block.chosen and block.chosen.id == opt.id %}<i class="fas fa-check-circle"></i>{% endif %}
+                    <li class="msx-elective__option {% if block.chosen and block.chosen.id == opt.id %}is-chosen{% endif %}">
+                        {% if block.chosen and block.chosen.id == opt.id %}<i class="fas fa-check-circle" aria-hidden="true"></i>{% endif %}
                         {{ opt.name }}
-                    </span>
+                    </li>
                     {% endfor %}
-                </div>
-                <p class="elective-block-note">
+                </ul>
+                <p class="msx-elective__note">
                     {% if block.chosen %}
-                        <i class="fas fa-users"></i> {% blocktrans context "profile.subjects" with subject=block.chosen.name %}Qrup qərarı: {{ subject }} (bütün qrup üzvləri qeydiyyatdan keçirilib){% endblocktrans %}
+                        <i class="fas fa-users" aria-hidden="true"></i> {% blocktrans context "profile.subjects" with subject=block.chosen.name %}Qrup qərarı: {{ subject }} (bütün qrup üzvləri qeydiyyatdan keçirilib){% endblocktrans %}
                     {% else %}
-                        <i class="fas fa-hourglass-half"></i> {% trans "Bu blok üzrə qrup hələ seçim etməyib." context "profile.subjects" %}
+                        <i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Bu blok üzrə qrup hələ seçim etməyib." context "profile.subjects" %}
                     {% endif %}
                 </p>
             </div>
             {% endfor %}
-        </div>
+        </section>
         {% endif %}
-
-        {% endif %}
+    {% endif %}
     </div>
 </section>
 {% endwith %}
