@@ -344,15 +344,15 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
         return self.level
 
     @classmethod
-    def user_scope_subtree_q(cls, user, organization, *, path_field, id_field, permission=None):
-        """App-registry-safe scope query facade for cross-module consumers."""
+    def user_scope_subtree_q(cls, user, organization, *, path_field, id_field, permission):
+        """App-registry-safe scope query facade; `permission` məcburidir (P1-11, 2026-09-12)."""
         from apps.organizations.scoping import user_scope_subtree_q
 
         return user_scope_subtree_q(user, organization, path_field=path_field, id_field=id_field, permission=permission)
 
     @classmethod
-    def user_scope_covers(cls, user, organization, unit_id, permission=None) -> bool:
-        """App-registry-safe single-unit scope facade."""
+    def user_scope_covers(cls, user, organization, unit_id, permission) -> bool:
+        """App-registry-safe single-unit scope facade (`permission` məcburidir)."""
         from .scoping import user_scope_covers_unit
 
         return user_scope_covers_unit(user, organization, unit_id, permission=permission)

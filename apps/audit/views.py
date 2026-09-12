@@ -673,7 +673,7 @@ def build_audit_log_context(request) -> dict:
     ]
     if is_superadmin:
         columns.append({"key": "org", "label": pgettext(_CTX, "Təşkilat")})
-    columns.append({"key": "actions", "label": ""})
+    columns.append({"key": "actions", "label": pgettext("accounts.people", "Əməllər"), "sr_only": True})  # P2-8 a11y
 
     cell_dir = "audit/partials/"
     table_rows = []
