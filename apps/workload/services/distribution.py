@@ -176,6 +176,9 @@ def sync_offerings(task, *, actor=None, request=None) -> dict:
     Jurnal sahibi: MÜHAZİRƏÇİ, yoxdursa ilk vakant-olmayan təyinat (spec §11.3).
     """
     CourseOffering = django_apps.get_model("registrar", "CourseOffering")
+    from apps.registrar.public import eligible_instructor_user_ids
+
+    eligible_ids = eligible_instructor_user_ids(organization=task.organization)
     counters = {"created": 0, "updated": 0, "skipped": 0, "instructor_blocked": 0}
     offering_ids: list[str] = []
     rows = list(task.rows.all().prefetch_related("groups", _assignments_prefetch()))
@@ -188,6 +191,9 @@ def sync_offerings(task, *, actor=None, request=None) -> dict:
             counters["skipped"] += 1
             continue
         instructor = _instructor_for_row(row)
+        rejected_instructor = instructor is not None and instructor.pk not in eligible_ids
+        if rejected_instructor:
+            instructor = None
         lesson_hours = sum(int(getattr(row, field, 0) or 0) for field in CONTACT_TOTAL_FIELDS)
         for group in groups:
             outcome, offering, blocked = _write_offering(
@@ -199,7 +205,7 @@ def sync_offerings(task, *, actor=None, request=None) -> dict:
                 lesson_hours=lesson_hours,
             )
             counters[outcome] += 1
-            if blocked:
+            if blocked or rejected_instructor:
                 counters["instructor_blocked"] += 1
             if offering is not None:
                 offering_ids.append(str(offering.pk))

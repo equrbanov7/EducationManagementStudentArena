@@ -323,6 +323,12 @@ def _exam_analysis_fingerprint(exam, language) -> str:
     queryset = exam.questions.all()
     if language:
         queryset = queryset.filter(language=language)
+    from django.db import connections
+
+    if connections[queryset.db].vendor == "sqlite":
+        from .bank_fingerprint import sqlite_exam_fingerprint
+
+        return sqlite_exam_fingerprint(queryset)
     separator = Value("\x1f")
     row = Concat(
         F("id"),
