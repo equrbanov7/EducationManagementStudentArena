@@ -1,0 +1,5 @@
+{% load i18n %}
+{% comment %}«Postların idarəetməsi» başlıq yuvası — cari filtrə düşən postların
+ümumi sayı (sol menyu yalnız təsdiq gözləyənləri göstərir).
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
+<span class="ems-badge ems-badge--neutral" title="{% trans 'Postların idarəetməsi (' %}{{ pending_post_approval_total_count|default:pending_post_approval_count }})">{{ pending_post_approval_total_count|default:pending_post_approval_count }}</span>

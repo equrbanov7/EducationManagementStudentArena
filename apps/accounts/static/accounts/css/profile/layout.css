@@ -101,7 +101,8 @@ body.modal-open .profile-mobile-sidebar-trigger {
     border: 1px solid var(--border-color);
 }
 
-.section-title {
+.section-title,
+.section-card__title {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-main);
@@ -111,4 +112,14 @@ body.modal-open .profile-mobile-sidebar-trigger {
     gap: 0.75rem;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
+}
+
+/* 2026-09-12 (audit P2-1): `.section-card__title` — kart İÇİNDƏKİ həqiqi
+   alt-başlıq (`<h2>`/`<h3>`), görünüşü `.section-title` ilə eynidir. Ayrı ad
+   ona görədir ki, `.section-title` kabinet bölmələrində bölmə adını (qabıqdakı
+   `#profileSectionTitle`) təkrarlayan köhnə nümunə idi və indi QADAĞANDIR
+   (`test_cabinet_no_duplicate_titles.py`). Başlıq elementinin UA üst boşluğu
+   sıfırlanır ki, köhnə `<div>` ilə eyni yerdə dursun. */
+.section-card__title {
+    margin-top: 0;
 }

@@ -1,0 +1,6 @@
+{% load i18n %}
+{% comment %}«Fənlərim» başlıq əməli — tələbənin dərs cədvəlinə keçid.
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
+<a class="my-subjects-schedule-link" href="{% url 'registrar:schedule' %}">
+    <i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "profile.subjects" %}
+</a>

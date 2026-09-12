@@ -11,30 +11,9 @@
     min-width: 0;
 }
 
-.smx-head {
-    align-items: flex-end;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    justify-content: space-between;
-}
-
-.smx-title {
-    color: var(--smx-navy);
-    font-size: 20px;
-    margin: 0;
-}
-
-.smx-title i {
-    color: var(--smx-blue);
-    margin-right: 6px;
-}
-
-.smx-sub {
-    color: #5b6b82;
-    font-size: 13px;
-    margin: 2px 0 0;
-}
+/* 2026-09-12 (audit P2-1): `.smx-head` / `.smx-title` / `.smx-sub` ləğv edildi —
+   bölmə adını qabıq verir, izah və idarə paneli `ems_ui/_content_header.html`
+   içindədir (`_system_monitoring_header_actions.html`). */
 
 .smx-controls {
     align-items: center;
@@ -399,10 +378,6 @@
 }
 
 @media (max-width: 700px) {
-    .smx-head {
-        align-items: stretch;
-    }
-
     .smx-controls {
         width: 100%;
     }

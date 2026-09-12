@@ -3,40 +3,20 @@
 <section class="profile-section-panel profile-section--transcript {% if active_section == 'my-transcript' %}is-active{% endif %}"
          data-profile-section-panel="my-transcript"
          data-source-url="{{ profile_base_url }}?section=my-transcript">
+    {% comment %}2026-09-12 (audit P2-1): «Transkript» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `.section-header-flex > .section-title`
+    onu təkrarlayırdı. PDF / sorğu keçidi başlığın əməl yuvasındadır
+    (`_my_transcript_header_actions.html`); ixtisas/qrup zolağı kartın ilk
+    sətri kimi qalır.{% endcomment %}
+    {% include "partials/ems_ui/_content_header.html" with header_actions_include="accounts/profile/sections/_my_transcript_header_actions.html" %}
     <div class="section-card">
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-scroll text-teal"></i>
-                    <span>{% trans "Transkript" context "profile.transcript" %}</span>
-                </div>
-            </div>
-            {% comment %}Transkript siyasəti (dizayn README §10.1): DEFAULT `request`.
-            Öz-özünə xidmət bağlıdırsa «PDF yüklə» GÖSTƏRİLMİR (endpoint 404 verir) —
-            əvəzinə «Transkript sorğusu» müraciəti öncədən seçilmiş halda açılır.{% endcomment %}
-            {% if sec.has_record %}
-              {% if sec.self_service %}
-              <a class="transcript-pdf-link" href="{% url 'registrar:my_transcript_pdf' %}"
-                 title="{% trans 'Rəsmi transkripti PDF olaraq yüklə' context 'profile.transcript' %}">
-                  <i class="fas fa-file-pdf"></i> {% trans "PDF yüklə" context "profile.transcript" %}
-              </a>
-              {% elif 'applications' in allowed_sections %}
-              <a class="transcript-pdf-link js-profile-section-link" href="{{ sec.request_url }}"
-                 data-section="applications"
-                 data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
-                 data-source-url="{{ profile_base_url }}"
-                 title="{% trans 'Rəsmi transkript Tələbə Xidmətləri Mərkəzindən sorğu ilə verilir (3 iş günü).' context 'profile.transcript' %}">
-                  <i class="fas fa-file-signature"></i> {% trans "Transkript sorğusu göndər" context "profile.transcript" %}
-              </a>
-              {% endif %}
-            {% endif %}
-            {% if sec.record %}
-            <div class="transcript-meta">
-                <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
-                {% if sec.record.group %}<span class="transcript-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
-            </div>
-            {% endif %}
+        {% if sec.record %}
+        <div class="transcript-meta">
+            <span class="transcript-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
+            {% if sec.record.group %}<span class="transcript-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
         </div>
+        {% endif %}
+
 
         {% if sec.has_record and not sec.self_service %}
         <p class="transcript-policy-note" role="status">
@@ -79,7 +59,10 @@
                 </div>
             </div>
 
-            <h1 class="transcript-doc-title">{% trans "AKADEMİK TRANSKRİPT" context "profile.transcript" %}</h1>
+            {% comment %}2026-09-12 (audit P2-1): sənədin öz başlığıdır, amma səhifədə
+            İKİNCİ `<h1>` ola bilməz (qabıq `#profileSectionTitle`-ı verir) — görünüş
+            eyni qalmaqla `<h2>`.{% endcomment %}
+            <h2 class="transcript-doc-title">{% trans "AKADEMİK TRANSKRİPT" context "profile.transcript" %}</h2>
 
             <!-- ── Tələbə məlumat bloku ─────────────────────────────────────── -->
             <div class="transcript-student-info">

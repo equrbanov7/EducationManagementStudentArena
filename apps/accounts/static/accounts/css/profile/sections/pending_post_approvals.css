@@ -1,7 +1,5 @@
-.profile-section--pending-post-approvals .section-title i {
-    color: var(--primary-green);
-}
-
+/* 2026-09-12 (audit P2-1): `.section-title i` qaydası ləğv edildi — kart bölmə
+   adını artıq təkrarlamır (qabıq verir). */
 .pending-post-approvals-card {
     border: 1px solid #cae6ff;
     background: linear-gradient(180deg, #f7fbff 0%, #f3fbf7 100%);

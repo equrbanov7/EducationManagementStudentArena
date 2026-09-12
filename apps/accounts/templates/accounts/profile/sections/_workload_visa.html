@@ -46,28 +46,31 @@ Arxiv: keçmiş tədris ili yalnız oxunuş — sətir əməlləri render OLUNMU
 
     {% if workload_visa_section.view == "history" %}
         <h3 class="tof-pane__title">{% trans "Mənim hərəkətlərim" context "accounts.workload_visa" %}</h3>
-        <table class="ems-table ems-table--zebra">
-            <thead>
-                <tr>
-                    <th scope="col">{% trans "Fənn" context "accounts.workload_visa" %}</th>
-                    <th scope="col">{% trans "Qərar" context "accounts.workload_visa" %}</th>
-                    <th scope="col">{% trans "Şərh" context "accounts.workload_visa" %}</th>
-                    <th scope="col">{% trans "Tarix" context "accounts.workload_visa" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in workload_visa_section.history %}
-                <tr>
-                    <th scope="row">{{ item.subject }}</th>
-                    <td>{% if item.status == "flagged" %}{% trans "İrad" context "accounts.workload_visa" %}{% else %}{% trans "Viza" context "accounts.workload_visa" %}{% endif %}</td>
-                    <td>{{ item.comment|default:"—" }}</td>
-                    <td>{{ item.when|date:"d.m.Y H:i" }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">{% trans "Hələ heç bir viza verməmisiniz." context "accounts.workload_visa" %}</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% comment %}2026-09-12 (audit P2-3): əl ilə yazılmış cədvəl `.ems-tablescroll` sarğısındadır — `.ems-table` min-eni (900px) mobil ekranda səhifə gövdəsini deyil, yalnız bu sarğını üfüqi sürüşdürür (`_data_table.html` ilə eyni qayda).{% endcomment %}
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Fənn" context "accounts.workload_visa" %}</th>
+                        <th scope="col">{% trans "Qərar" context "accounts.workload_visa" %}</th>
+                        <th scope="col">{% trans "Şərh" context "accounts.workload_visa" %}</th>
+                        <th scope="col">{% trans "Tarix" context "accounts.workload_visa" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in workload_visa_section.history %}
+                    <tr>
+                        <th scope="row">{{ item.subject }}</th>
+                        <td>{% if item.status == "flagged" %}{% trans "İrad" context "accounts.workload_visa" %}{% else %}{% trans "Viza" context "accounts.workload_visa" %}{% endif %}</td>
+                        <td>{{ item.comment|default:"—" }}</td>
+                        <td>{{ item.when|date:"d.m.Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">{% trans "Hələ heç bir viza verməmisiniz." context "accounts.workload_visa" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
         {% include "partials/ems_ui/_data_table.html" with table_columns=workload_visa_section.columns table_rows=workload_visa_section.table_rows table_state=workload_visa_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-clipboard-check" state_title=workload_visa_section.state_title state_body=workload_visa_section.state_body %}
     {% endif %}

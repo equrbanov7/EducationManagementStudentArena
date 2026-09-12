@@ -1,13 +1,15 @@
 {% load i18n %}
-{% comment %} Status bölməsi (qatlanan). Arxiv default qatlanmış başlayır. {% endcomment %}
-<section class="tx-section{% if group.key == 'archived' %} is-collapsed{% endif %}"
+{% comment %} Status bölməsi (qatlanan). Arxiv default qatlanmış başlayır.
+2026-09-12 (audit P2-9): status rəngi inline `style` ilə deyil, `is-status-<key>`
+modifikatoru ilə (my_exams.css palitrası = EXAM_STATUS_META). {% endcomment %}
+<section class="tx-section is-status-{{ group.key }}{% if group.key == 'archived' %} is-collapsed{% endif %}"
          data-tx-section
          data-status="{{ group.key }}">
   <div class="tx-section-head" data-tx-section-toggle role="button" tabindex="0"
        aria-expanded="{% if group.key == 'archived' %}false{% else %}true{% endif %}">
-    <span class="tx-section-dot" style="background:{{ group.color }};"></span>
+    <span class="tx-section-dot"></span>
     <h2 class="tx-section-title">{{ group.label }}</h2>
-    <span class="tx-section-count" style="background:{{ group.soft }};color:{{ group.deep }};">{{ group.count }}</span>
+    <span class="tx-section-count">{{ group.count }}</span>
     <span class="tx-section-hint">{{ group.hint }}</span>
     <span class="tx-section-rule"></span>
     <span class="tx-section-chev" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>

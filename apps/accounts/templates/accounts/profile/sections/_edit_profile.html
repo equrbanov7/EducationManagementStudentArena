@@ -37,10 +37,10 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
         <input type="hidden" name="section" value="edit-profile">
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-id-card"></i>
                 {% trans 'Şəxsi məlumatlar' context 'profile.edit_v2' %}
-            </div>
+            </h2>
 
             <div class="info-grid profile-form-grid">
                 <div class="info-item">
@@ -110,10 +110,10 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
         </div>
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-graduation-cap"></i>
                 {% trans 'Akademik məlumat' context 'profile.edit_v2' %}
-            </div>
+            </h2>
 
             {% if profile.is_academics_locked %}
             <p class="edit-profile-locked-note">
@@ -200,10 +200,10 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
         </div>
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-align-left"></i>
                 {% trans "about" context "profile.edit" %}
-            </div>
+            </h2>
             <div class="info-item info-item--borderless">
                 <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="2000"
                           placeholder="{% trans 'placeholder_about' context 'profile.edit' %}" aria-label="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
@@ -239,10 +239,10 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
 
     <div class="section-card" id="academicItemsManager"
          data-api-url="{% url 'accounts:academic_items_api' %}">
-        <div class="section-title">
+        <h2 class="section-card__title">
             <i class="fas fa-award"></i>
             {% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}
-        </div>
+        </h2>
         <p class="settings-note">
             <i class="fas fa-circle-info"></i>
             {% trans 'Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək.' context 'profile.edit_v2' %}

@@ -1,10 +1,6 @@
 /* --- Rəng Dəyişənləri və Klasslar (Narıncı/Kəhrəba) --- */
-.text-orange { color: var(--ems-warning-600) !important; }
-
-.badge-orange {
-    background: var(--ems-warning-100) !important;
-    color: var(--ems-warning-600) !important;
-}
+/* 2026-09-12 (audit P2-1): `.text-orange` / `.badge-orange` yalnız kartdakı
+   təkrar başlıq + say nişanında işlənirdi — başlıq çıxarıldı, qaydalar ölü idi. */
 
 .btn-orange {
     background-color: var(--ems-warning-600) !important;

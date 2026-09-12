@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}«Sistem Monitorinqi» başlıq əməlləri — vaxt aralığı, əl ilə yeniləmə,
+avto-yeniləmə və son yenilənmə vaxtı. `partials/ems_ui/_content_header.html`
+bunu `header_actions_include` ilə gətirir. ID-lər (`smx-range`, `smx-refresh`,
+`smx-auto`, `smx-updated`) `js/monitoring/system_monitoring.js` müqaviləsidir —
+dəyişməyin.{% endcomment %}
+<div class="smx-controls">
+  <div class="bootstrap-single-select">
+    <select id="smx-range" class="smx-select bootstrap-single-select__native js-bootstrap-single-select"
+            data-bootstrap-select
+            aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
+      <option value="300">5 dəq</option>
+      <option value="900">15 dəq</option>
+      <option value="3600" selected>1 saat</option>
+      <option value="21600">6 saat</option>
+      <option value="86400">24 saat</option>
+      <option value="604800">7 gün</option>
+      <option value="2592000">30 gün</option>
+    </select>
+  </div>
+  <button type="button" id="smx-refresh" class="smx-btn"
+          title="{% trans 'Yenilə' context 'monitoring' %}">
+    <i class="fas fa-rotate"></i>
+  </button>
+  <label class="smx-auto">
+    <input type="checkbox" id="smx-auto" checked>
+    {% trans "Avto" context "monitoring" %}
+  </label>
+  <span class="smx-updated" id="smx-updated">—</span>
+</div>

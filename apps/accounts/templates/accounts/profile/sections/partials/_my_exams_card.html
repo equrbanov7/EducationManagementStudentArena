@@ -1,20 +1,21 @@
 {% load i18n exams_ui %}
+{% comment %}2026-09-12 (audit P2-9): növ/status rəngləri inline `style` ilə deyil,
+kartdakı `is-type-<key>` / `is-status-<key>` modifikatorları ilə (my_exams.css
+palitrası = EXAM_TYPE_META / EXAM_STATUS_META); `exam_type_meta` yalnız ikon üçün qalır.{% endcomment %}
 {% exam_type_meta exam.exam_type as tmeta %}
-{% exam_status_meta exam.lifecycle_status as smeta %}
-<article class="tx-card"
+<article class="tx-card is-type-{{ exam.exam_type }} is-status-{{ exam.lifecycle_status }}"
          data-exam-card
          data-card-href="{% url 'exams:teacher_exam_detail' exam.slug %}?from_section=my-exams&return_to={{ request.get_full_path|urlencode }}"
          data-status="{{ exam.lifecycle_status }}"
          data-type="{{ exam.exam_type }}"
          data-category="{{ exam.exam_type_extended|default:'' }}"
-         data-name="{{ exam.title|lower }} {{ exam.description|lower }}"
-         style="--type-color:{{ tmeta.color }};--type-soft:{{ tmeta.soft }};--type-deep:{{ tmeta.deep }};">
+         data-name="{{ exam.title|lower }} {{ exam.description|lower }}">
 
-  <span class="tx-type-tile" style="background:{{ tmeta.soft }};color:{{ tmeta.deep }};">
+  <span class="tx-type-tile">
     <i class="fas {{ tmeta.icon }}" aria-hidden="true"></i>
   </span>
-  <span class="tx-status-pill" style="background:{{ smeta.soft }};color:{{ smeta.deep }};">
-    <span class="tx-pd" style="background:{{ smeta.color }};"></span> {{ status_label }}
+  <span class="tx-status-pill">
+    <span class="tx-pd"></span> {{ status_label }}
   </span>
 
   <a class="tx-card-link"
@@ -24,7 +25,7 @@
   </a>
 
   <div class="tx-card-tags">
-    <span class="tx-tag tx-tag--type" style="background:{{ tmeta.soft }};color:{{ tmeta.deep }};">
+    <span class="tx-tag tx-tag--type">
       <i class="fas {{ tmeta.icon }}" aria-hidden="true"></i> {{ exam.get_exam_type_display }}
     </span>
     {% if exam.exam_type_extended %}

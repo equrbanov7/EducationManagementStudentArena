@@ -52,10 +52,11 @@
           {% trans "filter_all" context "exams.dashboard" %}
           <span class="tx-cat-n">{{ my_exams_count }}</span>
         </button>
+        {% comment %}2026-09-12 (audit P2-9): kateqoriya rəngi inline `style` ilə deyil,
+        `is-cat-<key>` modifikatoru ilə (my_exams.css palitrası = EXAM_CATEGORY_META).{% endcomment %}
         {% for cat in my_exams_dashboard.category_filters %}
-        <button type="button" class="tx-cat-chip" data-cat="{{ cat.key }}"
-                style="--cat-color:{{ cat.color }};--cat-soft:{{ cat.soft }};--cat-deep:{{ cat.deep }};">
-          <span class="tx-cat-dot" style="background:{{ cat.color }};"></span>
+        <button type="button" class="tx-cat-chip is-cat-{{ cat.key }}" data-cat="{{ cat.key }}">
+          <span class="tx-cat-dot"></span>
           {{ cat.label }}
           <span class="tx-cat-n">{{ cat.count }}</span>
         </button>

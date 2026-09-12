@@ -2,17 +2,11 @@
 <section class="profile-section-panel profile-section--shortcut-{{ item.section }} {% if active_section == item.section %}is-active{% endif %}"
          data-profile-section-panel="{{ item.section }}"
          data-source-url="{{ item.source_url }}">
+    {% comment %}2026-09-12 (audit P2-1): `item.title` qabıqdakı bölmə adının
+    EYNİSİDİR (`build_section_titles`) — köhnə `.section-title` onu təkrarlayırdı.
+    İzah `ems_ui/_content_header.html` altbaşlığı ilə verilir.{% endcomment %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=item.description %}
     <div class="section-card">
-        <div class="section-title">
-            <i class="{{ item.icon }}"></i>
-            {{ item.title }}
-        </div>
-
-        <p class="settings-note">
-            <i class="fas fa-circle-info"></i>
-            {{ item.description }}
-        </p>
-
         <div class="profile-edit-link">
             {% if item.section == 'create-post' %}
                 <button type="button" class="btn profile-action-btn profile-action-btn--ocean js-open-create-post">

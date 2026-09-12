@@ -7,19 +7,9 @@
    QƏSDƏN yoxdur; rənglər `static/css/design-tokens.css`-dəki --ems-* tokenləri.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Bölmə başlığındakı yeganə giriş nöqtəsi ───────────────────────────── */
-
-.rim-head__bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ems-sp-5);
-}
-
-.rim-head__cta {
-    flex: none;
-}
+/* 2026-09-12 (audit P2-1): «Yeni …» düyməsi (`.rim-head__bar` / `.rim-head__cta`)
+   artıq `ems_ui/_content_header.html`-in əməl yuvasındadır — öz düzüm qaydası
+   lazım deyil (mobil override də daxil). */
 
 /* ── 1. Növ seçimi (üç kart) ───────────────────────────────────────────── */
 
@@ -488,15 +478,6 @@
 /* ── Mobil (kabinet bölməsi 375 px-də də işlək olmalıdır) ──────────────── */
 
 @media (max-width: 640px) {
-    .rim-head__bar {
-        align-items: stretch;
-    }
-
-    .rim-head__cta {
-        width: 100%;
-        justify-content: center;
-    }
-
     .rimc-grid {
         grid-template-columns: 1fr;
     }

@@ -7,14 +7,8 @@
 }
 
 /* --- Xüsusi Rəng Klassları --- */
-.text-orange {
-    color: var(--course-primary) !important;
-}
-
-.badge-orange {
-    background: var(--course-light) !important;
-    color: var(--course-primary) !important;
-}
+/* 2026-09-12 (audit P2-1): `.text-orange` / `.badge-orange` yalnız kartdakı
+   təkrar başlıq + say nişanında işlənirdi — başlıq çıxarıldı, qaydalar ölü idi. */
 
 .btn-orange {
     background-color: var(--course-primary) !important;
