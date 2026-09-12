@@ -21,9 +21,7 @@ from django.utils import timezone
 from django.utils.translation import get_language, pgettext
 from django.views.decorators.http import require_GET
 
-from apps.exams.public import is_exam_center_user
-from apps.exams.services.ai_summary import generate_appeal_statistics_summary
-from apps.exams.views.exam_center._shared import supervisor_org_or_403
+from apps.exams.public import generate_appeal_statistics_summary, is_exam_center_user, supervisor_org_or_403
 
 from ...constants import APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES
 from ...models import Appeal

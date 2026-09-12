@@ -410,14 +410,21 @@ class StatisticsScopeTest(_WorldMixin, TestCase):
         self.assertFalse(self._statistics_scope(self.teacher_a).has_structure_access)
 
     def _captured_scoped_ids(self, run):
+        from apps.accounts.services.statistics_metrics.org import org_metrics
+
         calls = []
 
         def fake_org_admin_statistics(*, organization, filters=None, scoped_unit_ids=None):
             calls.append(scoped_unit_ids)
             return {"summary": {}}
 
+        def capture_metrics(**kwargs):
+            calls.append(kwargs.get("scoped_unit_ids"))
+            return org_metrics(**kwargs)
+
         with (
             mock.patch("core.cache.get_or_set_cached_statistics", side_effect=lambda **kw: kw["compute"]()),
+            mock.patch("apps.accounts.services.statistics_metrics.org_metrics", side_effect=capture_metrics),
             mock.patch(
                 "apps.accounts.services.statistics_selectors.get_org_admin_statistics",
                 side_effect=fake_org_admin_statistics,
