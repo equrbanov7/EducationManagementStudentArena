@@ -130,3 +130,10 @@ __all__ = [
     "user_supervises_final_sessions",
     "without_disabled_practical_exams",
 ]
+
+
+# Explicit exports keep external callers out of implementation modules.
+from .public_exports import *  # noqa: E402,F401,F403
+from .public_exports import __all__ as _api_exports  # noqa: E402
+
+__all__ += [name for name in _api_exports if name not in __all__]

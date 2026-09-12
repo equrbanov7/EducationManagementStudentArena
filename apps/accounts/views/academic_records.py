@@ -21,9 +21,9 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts import academic_records
 from apps.organizations.models import OrgUnit
-from apps.organizations.scoping import ORG_WIDE_SCOPE, get_permission_scope, scope_org_units
-from apps.registrar import transcript
+from apps.organizations.public import ORG_WIDE_SCOPE, get_permission_scope, scope_org_units
 from apps.registrar.models import Program, StudentAcademicRecord
+from apps.registrar.public import transcript
 from core.program_codes import program_code_search_q
 from core.roles import user_has_any_role
 

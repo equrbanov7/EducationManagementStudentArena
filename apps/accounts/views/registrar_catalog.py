@@ -23,7 +23,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import catalog_console as console
+from apps.registrar.public import catalog_console as console
 
 _CTX = "registrar.catalog"
 

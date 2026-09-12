@@ -28,9 +28,8 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
-from apps.syllabus import services
-from apps.syllabus.document import build_document
 from apps.syllabus.models import Syllabus, SyllabusVersion
+from apps.syllabus.public import build_document, services
 
 from .._helpers import _get_active_organization
 from .detail_context import MODE_STAFF, MODE_STUDENT, build_detail_context
@@ -146,7 +145,7 @@ def syllabus_detail_pdf(request, syllabus_id):
     idi, burada isə sillabusun öz əhatəsi yoxlanılır — kafedra müdiri başqasının
     jurnalını aça bilmədiyi halda da öz kafedrasının sənədini yükləyə bilir.
     """
-    from apps.registrar.syllabus_pdf import render_syllabus_pdf
+    from apps.registrar.public import render_syllabus_pdf
 
     organization, syllabus, version, _mode = resolve_access(
         request, syllabus_id, version_id=(request.GET.get("version") or "").strip()

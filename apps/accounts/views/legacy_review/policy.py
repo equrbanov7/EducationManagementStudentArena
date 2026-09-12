@@ -19,8 +19,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.registrar import legacy_grade_review as review_read
-from apps.registrar.corrections import CORRECT_PERMISSION
+from apps.registrar.public import CORRECT_PERMISSION
+from apps.registrar.public import legacy_grade_review as review_read
 
 
 @dataclass(frozen=True)

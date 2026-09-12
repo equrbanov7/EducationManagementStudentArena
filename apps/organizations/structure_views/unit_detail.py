@@ -10,6 +10,7 @@ ona görə burada "vahid sayı ilə artmayan sorğu" tələbi tətbiq olunmur (l
 context builder-lərindəki kimi). Yenə də hər əlaqə üçün AYRI-AYRI yüngül
 sorğular işlədilir (N+1-in özü yoxdur, çünki N=1 vahiddir)."""
 
+from django.apps import apps as django_apps
 from django.db.models import Count, Q
 from django.urls import reverse
 
@@ -44,7 +45,9 @@ def _parent_chain(unit):
 
 def build_unit_detail_context(request, organization, scope, unit):
     """Tək vahid (fakültə/kafedra) üçün "ətraflı görünüş" context-i."""
-    from apps.registrar.models import CourseOffering, Program, StudentAcademicRecord
+    CourseOffering = django_apps.get_model("registrar", "CourseOffering")
+    Program = django_apps.get_model("registrar", "Program")
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
 
     flags = _unit_permission_flags(request, organization)
     is_faculty = unit.unit_type == OrgUnitType.FACULTY

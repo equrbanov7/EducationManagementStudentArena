@@ -23,7 +23,7 @@ from django.utils.translation import pgettext
 from apps.accounts.services import people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
-from apps.registrar import catalog_console
+from apps.registrar.public import catalog_console
 
 _CTX = "accounts.student_registry"
 

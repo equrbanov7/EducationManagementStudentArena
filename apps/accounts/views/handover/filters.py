@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from apps.registrar import handover_query
+from apps.registrar.public import handover_query
 
 #: «Vəziyyət» süzgəcinin dəyərləri.
 STATE_ALL = ""

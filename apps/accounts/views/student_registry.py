@@ -64,7 +64,7 @@ def student_registry_card(request, record_id):
     except RimAccessError as exc:
         return _error(exc)
 
-    from apps.registrar import transcript as transcript_service
+    from apps.registrar.public import transcript as transcript_service
 
     # GPA YALNIZ burada hesablanır (bir tələbə) — siyahıda QƏSDƏN yoxdur.
     transcript = transcript_service.build_student_transcript(

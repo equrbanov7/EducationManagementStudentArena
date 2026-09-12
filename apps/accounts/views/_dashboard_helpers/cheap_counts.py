@@ -310,7 +310,7 @@ def count_question_chair_pending(request, user) -> int:
     0 qaytarır (fail-closed).
     """
     from apps.accounts.views._helpers.tenant import _get_active_organization
-    from apps.exams.services.question_chair_review import pending_chair_review_count
+    from apps.exams.public import pending_chair_review_count
 
     organization = _get_active_organization(request)
     if organization is None:

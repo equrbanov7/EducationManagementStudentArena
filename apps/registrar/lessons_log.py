@@ -421,8 +421,8 @@ def _approved_week_topics(offering) -> list:
 
     README §8/9: yalnız APPROVED versiya — baxışdakı yeni versiya SAYILMIR.
     """
-    from apps.syllabus import services as syllabus_services
-    from apps.syllabus.constants import SectionKey
+    from apps.syllabus import public as syllabus_services
+    from apps.syllabus.public import SectionKey
 
     syllabus = syllabus_services.syllabus_for_offering(
         organization=offering.organization,

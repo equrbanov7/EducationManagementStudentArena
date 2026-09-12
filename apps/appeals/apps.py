@@ -9,7 +9,7 @@ class AppealsConfig(AppConfig):
         # M2 (2026-07-02): exams-ın score-adjustment genişlənmə nöqtəsinə
         # apellyasiya implementasiyalarını qoş (dependency inversion —
         # exams artıq appeals-i import etmir; bax apps/exams/score_adjustments.py).
-        from apps.exams import score_adjustments
+        from apps.exams.public import score_adjustments
 
         from .services import (
             appeal_bonus_map,

@@ -40,9 +40,9 @@ def build_superadmin_orgs_sections(
         superadmin_org_features_page = Paginator(superadmin_organizations_queryset, 12).get_page(
             superadmin_feature_org_page
         )
-        from apps.organizations.cabinet_modules import module_items as _cabinet_module_items
-        from apps.registrar.grading_scale import bands_text as _bands_text
-        from apps.registrar.grading_scale import is_custom as _bands_is_custom
+        from apps.organizations.public import module_items as _cabinet_module_items
+        from apps.registrar.public import bands_text as _bands_text
+        from apps.registrar.public import is_custom as _bands_is_custom
 
         for organization in superadmin_org_features_page.object_list:
             organization.cabinet_module_items = _cabinet_module_items(organization)

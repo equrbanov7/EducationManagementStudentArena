@@ -14,8 +14,7 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import SyllabusStatus
-from apps.syllabus.document import BLOCK_TITLES, build_preview_blocks  # noqa: F401  (geriyə-uyğun ad)
+from apps.syllabus.public import BLOCK_TITLES, SyllabusStatus, build_preview_blocks  # noqa: F401  (geriyə-uyğun ad)
 
 from .labels import STATUS_TONES
 
@@ -47,7 +46,7 @@ BANNERS = {
 
 def build_preview_payload(syllabus) -> dict:
     """Siyahının baxış paneli üçün JSON gövdəsi."""
-    from apps.syllabus.services import section_data_map, version_timeline
+    from apps.syllabus.public import section_data_map, version_timeline
 
     version = syllabus.current_version
     status = version.status if version is not None else SyllabusStatus.DRAFT.value

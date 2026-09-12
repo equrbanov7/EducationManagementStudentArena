@@ -82,7 +82,7 @@ def admin_unit_type_choices(organization) -> list:
     tipində olmayan kod siyahıya DÜŞMÜR və server qatı onu onsuz da rədd edir.
     """
 
-    from apps.organizations.unit_types import UNIT_TYPES_BY_ORG
+    from apps.organizations.public import UNIT_TYPES_BY_ORG
 
     labels = dict(UNIT_TYPES_BY_ORG.get(getattr(organization, "org_type", ""), []))
     return [{"value": code, "label": labels[code]} for code in ADMIN_UNIT_TYPES if code in labels]
@@ -100,8 +100,8 @@ def parent_units_queryset(actor: RimActor, request=None):
     """
 
     from apps.organizations.models import OrgUnit
-    from apps.organizations.scoping import get_permission_scope
-    from apps.organizations.views import _visible_units_queryset
+    from apps.organizations.public import get_permission_scope
+    from apps.organizations.public import visible_units_queryset as _visible_units_queryset
 
     organization = getattr(actor, "organization", None)
     if organization is None:

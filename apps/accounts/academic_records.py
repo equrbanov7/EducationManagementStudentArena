@@ -40,10 +40,9 @@ Tam keçidin üç qaydası — hamısı ölçülüb (5 213 tələbə / 106 870 e
 3. Tədris ili / semestr süzgəci Python-da deyil, **SQL-də** (``period_id__in``)
    tətbiq olunur — süzgəc seçiləndə DB-dən az sətir gəlir.
 
-Per-enrollment riyaziyyat dəyişməyib: :func:`analytics.evaluate_enrollment` +
-:func:`analytics.build_evaluation_maps_for` — yəni ``compute_final_result``
-N dəfə çağırılmır və q/b vs 25% ayrımı :func:`transcript._fail_reason_code`
-semantikası ilə eynidir.
+Per-enrollment hesabı :func:`analytics.evaluate_enrollment` və
+:func:`analytics.build_evaluation_maps_for` ilə saxlanılır; ``compute_final_result``
+N dəfə çağırılmır, q/b vs 25% ayrımı :func:`transcript._fail_reason_code` ilə eynidir.
 
 **Box-ların sürətli yolu (2026-09 QA P2-19).** Sorğu sayı sabit olsa da, ilk
 yüklənmə org-səviyyəli aktorda 7–13 s çəkirdi: vaxt SQL-də deyil, **Python
@@ -75,9 +74,11 @@ from django.db.models import Q
 from apps.accounts import academic_records_cache as records_cache
 from apps.accounts import academic_summary
 from apps.organizations.models import AcademicPeriod, OrgUnit
-from apps.organizations.scoping import UnitScope
-from apps.registrar import analytics, exam_eligibility, transcript
+from apps.organizations.public import UnitScope
 from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
+from apps.registrar.public import analytics
+from apps.registrar.public import eligibility_rules as exam_eligibility
+from apps.registrar.public import transcript
 
 _TWO = Decimal("0.01")
 DEFAULT_PAGE_SIZE = 25

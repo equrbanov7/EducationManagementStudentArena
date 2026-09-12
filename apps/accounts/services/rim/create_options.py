@@ -74,7 +74,7 @@ def _parent_labels(units) -> dict:
 def _type_labels(actor) -> dict:
     """``{unit_type: etiket}`` — təşkilat tipinin öz kataloqundan (tərcümə orada)."""
 
-    from apps.organizations.unit_types import UNIT_TYPES_BY_ORG
+    from apps.organizations.public import UNIT_TYPES_BY_ORG
 
     return dict(UNIT_TYPES_BY_ORG.get(getattr(actor.organization, "org_type", ""), []))
 

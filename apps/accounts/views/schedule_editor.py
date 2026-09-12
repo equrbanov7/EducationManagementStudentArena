@@ -26,10 +26,10 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import schedule_editor
-from apps.registrar import schedule_editor_actions as editor
-from apps.registrar import schedule_manage
-from apps.registrar import schedule_manage_actions as base
+from apps.registrar.public import schedule_editor
+from apps.registrar.public import schedule_editor_actions as editor
+from apps.registrar.public import schedule_manage
+from apps.registrar.public import schedule_manage_actions as base
 
 _CTX = "accounts.schedule_editor"
 

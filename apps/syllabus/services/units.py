@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.organizations.unit_heads import ancestor_unit_ids, resolve_ancestor
+from apps.organizations.public import ancestor_unit_ids, resolve_ancestor
 from core.constants import OrgUnitType
 
 #: Kafedra rolunu daşıyan bölmə tipləri.  ``department`` tarixi sinonimdir —

@@ -223,7 +223,6 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
 
     # ── Registrar journal (2024/2025 — köhnə davranış, dəyişməz) ────────────────
     def _seed_journal(self, org, teacher, students, opts):
-        from apps.registrar import services
         from apps.registrar.models import (
             AttendanceStatus,
             Curriculum,
@@ -235,6 +234,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             StudentAcademicRecord,
             Subject,
         )
+        from apps.registrar.public import services
 
         period = AcademicPeriod.objects.filter(
             organization=org, is_current=True
@@ -316,7 +316,6 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         (``CurriculumSubject``, semester_number=2) və yeni ``AcademicPeriod`` əlavə
         olunur. Qaytarır: ``{subject_code: CourseOffering}``.
         """
-        from apps.registrar import services
         from apps.registrar.models import (
             CourseOffering,
             Curriculum,
@@ -325,6 +324,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             StudentAcademicRecord,
             Subject,
         )
+        from apps.registrar.public import services
 
         program = Program.objects.filter(organization=org, code="STR").first()
         curriculum = Curriculum.objects.filter(organization=org, program=program).first() if program else None
@@ -449,7 +449,6 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
 
     # ── İmtahan Mərkəzi düzəlişləri (sarı xanalar) ───────────────────────────
     def _seed_corrections(self, org, teacher, offerings, roles) -> list:
-        from apps.registrar.corrections import apply_correction
         from apps.registrar.models import (
             AttendanceStatus,
             CorrectionField,
@@ -458,6 +457,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             LessonKind,
             LessonMark,
         )
+        from apps.registrar.public import apply_correction
 
         offering = offerings.get("STR102")
         if offering is None:
@@ -533,9 +533,8 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
 
     # ── Kəsilən tələbələr (davamiyyət + imtahan) ─────────────────────────────
     def _seed_failures(self, org, teacher, offerings, roles) -> dict:
-        from apps.registrar.gradebook import recompute_absence_hours
         from apps.registrar.models import AttendanceStatus, LessonMark, Program
-        from apps.registrar.public import record_exam_result
+        from apps.registrar.public import recompute_absence_hours, record_exam_result
 
         result: dict = {"attendance": [], "exam": []}
         program = Program.objects.filter(organization=org, code="STR").first()

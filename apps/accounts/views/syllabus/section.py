@@ -31,9 +31,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import QUEUE_STATUSES, STATUS_SORT_INDEX, SyllabusStatus
-from apps.syllabus.policy import sla_days
-from apps.syllabus.public import build_syllabus_list_context
+from apps.syllabus.public import (
+    QUEUE_STATUSES,
+    STATUS_SORT_INDEX,
+    SyllabusStatus,
+    build_syllabus_list_context,
+    sla_days,
+)
 
 from .labels import STATUS_TONES
 from .rows import build_missing_row, build_row

@@ -20,8 +20,8 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import SyllabusStatus
 from apps.syllabus.models import ChangeKind
+from apps.syllabus.public import SyllabusStatus
 
 from .labels import STATUS_TONES
 from .rows import DETAIL_LABEL, detail_urls
@@ -41,7 +41,7 @@ WARN_DAYS = 5
 
 def thresholds(organization=None) -> tuple:
     """``(warn, late)`` — SLA həddi və eskalasiya həddi (siyasətdən)."""
-    from apps.syllabus.policy import escalation_days, sla_days
+    from apps.syllabus.public import escalation_days, sla_days
 
     return sla_days(organization), escalation_days(organization)
 

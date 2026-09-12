@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext
 
-from apps.registrar import handover as handover_read
+from apps.registrar.public import handover as handover_read
 
 _CTX = "accounts.handover"
 
