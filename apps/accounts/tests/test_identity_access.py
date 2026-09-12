@@ -608,6 +608,16 @@ class StagedAuthenticationFlowTests(TestCase):
 
 
 class IdentitySchemaSQLiteTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        migration_modules = getattr(settings, "MIGRATION_MODULES", {})
+        if connection.vendor == "sqlite" and "accounts" in migration_modules and migration_modules["accounts"] is None:
+            # --no-migrations omits raw SQL guards. Exercise their actual
+            # installer inside this TestCase's rolled-back schema transaction.
+            # Normal migration-enabled runs must detect missing guards unaided.
+            migration = import_module("apps.accounts.migrations.0013_identity_staging_and_canonical_guards")
+            migration.install_identity_schema(None, connection.schema_editor())
+
     def test_normal_accounts_default_to_active_access(self):
         user = User.objects.create_user("normal_default_identity", email="normal-default@example.com")
         self.assertEqual(user.profile.access_state, UserProfile.AccessState.ACTIVE)

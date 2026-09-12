@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}Yadda saxlama təsdiqi — icmal + (dəyişiklik varsa) səbəb/qeyd.
+`_dialog.html` gövdəsi; siyahı formasının İÇİNDƏ render olunur, ona görə
+`reason` / `note` sahələri eyni POST-la gedir. Skan sahəsi vərəq kartındadır
+(`sheet_evidence`) — burada yalnız vəziyyəti göstərilir.{% endcomment %}
+<p class="ems-msg ems-msg--error" data-ese-dialog-error role="alert" hidden></p>
+<ul class="ese-summary" data-ese-dialog-summary aria-live="polite"></ul>
+
+<div class="ese-just" data-ese-just hidden>
+  <p class="ems-msg ems-msg--warning ese-just__note">
+    <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
+    <span>{% trans "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur." context "registrar.exam_score_entry" %}</span>
+  </p>
+  <div class="ems-field">
+    <label class="ems-field__label" for="ese-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+      <select id="ese-reason" name="reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-ese-reason>
+        <option value="">—</option>
+        {% for reason in s.reasons %}
+        <option value="{{ reason.value }}">{{ reason.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <textarea id="ese-note" name="note" class="ems-textarea" rows="3" maxlength="500" data-ese-note></textarea>
+  </div>
+  <p class="ese-just__scan" data-ese-scan-status></p>
+</div>

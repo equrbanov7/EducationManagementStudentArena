@@ -257,6 +257,46 @@ def check_exam_score_evidence_access(user, path: str) -> bool:
     return _is_correction_reviewer(user, entry.organization)
 
 
+#: Yazılı imtahan balı köçürməsi — vərəq/protokol skanına baxış açarı
+#: (``apps.registrar.exam_score_entry.ENTRY_PERMISSION`` ilə eyni sətir;
+#: ``core`` app modullarını import etmir).
+EXAM_SCORE_ENTRY_PERMISSION = "final_score.entry"
+
+
+def check_exam_score_sheet_access(user, path: str) -> bool:
+    """``exam_score_sheets/`` — köçürmə partiyasının skan edilmiş protokolu/vərəqi.
+
+    2026-09-12 (imtahan balı köçürmə paneli): partiya sənədi BÜTÜN qrupun
+    ballarını daşıyır, ona görə «aid tələbə» qapısı YOXDUR — tələbə öz balının
+    sətrini görür, qrup yoldaşlarının vərəqini yox. İcazəlilər: sənədin
+    təşkilatında aktiv üzvlüklə ``final_score.entry`` daşıyan aktor (imtahan
+    mərkəzi), açılışın müəllimi, yaxud düzəliş səlahiyyətli inzibati aktor
+    (``journal.correct`` / org-admin səviyyəsi). Media qatı onsuz da deny-by-
+    default-dur — bu checker icazəli girişin AÇIQ qaydasıdır (fail-closed).
+    """
+    ExamScoreSheet = django_apps.get_model("registrar", "ExamScoreSheet")
+    sheet = _get_single(ExamScoreSheet.objects.select_related("organization", "offering"), evidence=path)
+    if sheet is None:
+        return False
+    if _is_offering_instructor(user, sheet.offering) and user_has_org_membership(user, sheet.organization):
+        return True
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    for permission in (EXAM_SCORE_ENTRY_PERMISSION, CORRECT_PERMISSION):
+        scope = OrgUnit.user_permission_scope(user, sheet.organization, permission)
+        if not scope.has_structure_access:
+            continue
+        if scope.is_org_wide:
+            return True
+        if (
+            sheet.offering.group_id
+            and OrgUnit.objects.filter(organization=sheet.organization, pk=sheet.offering.group_id)
+            .filter(scope.unit_subtree_q())
+            .exists()
+        ):
+            return True
+    return False
+
+
 def check_guest_roster_document_access(user, path: str) -> bool:
     """``guest_roster_documents/`` — alt qrupdan əlavənin təqdimatı/sərəncamı.
 
@@ -390,6 +430,7 @@ PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_coursework_corrections/",
     "journal_component_corrections/",
     "exam_score_entries/",
+    "exam_score_sheets/",
     "guest_roster_documents/",
     "legacy_excuse_documents/",
     "student_movements/",
@@ -406,6 +447,7 @@ ACCESS_CHECKERS: dict[str, object] = {
     "journal_coursework_corrections/": check_coursework_correction_access,
     "journal_component_corrections/": check_component_correction_access,
     "exam_score_entries/": check_exam_score_evidence_access,
+    "exam_score_sheets/": check_exam_score_sheet_access,
     "guest_roster_documents/": check_guest_roster_document_access,
     "legacy_excuse_documents/": check_legacy_excuse_document_access,
     "applications/": check_application_attachment_access,

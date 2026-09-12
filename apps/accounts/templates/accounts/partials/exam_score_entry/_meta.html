@@ -1,0 +1,57 @@
+{% load i18n %}
+{% comment %}Seçilmiş açılışın kartı: fənn · qrup · müəllim · semestr · maksimum bal
++ KÖÇÜRMƏ VƏRƏQİ məlumatları (imtahan tarixi, yoxlayan müəllim, nəzarətçi,
+protokol №, qeyd, skan). Sahib (2026-09-12): «müəllim, tarix və s. lazımlı nə
+info varsa».
+
+Sahələr `form="ese-roster-form"` ilə siyahı formasına bağlıdır (kart formanın
+KƏNARINDADIR ki, idxal paneli də eyni sahələri oxusun — `exam_score_import.js`
+FormData-ya `data-ese-meta` içindəki dəyərləri əlavə edir). İlkin dəyərlər
+sonuncu partiyadan gəlir (`sheet_defaults`) — bir vərəq bir neçə oturuşda
+köçürüləndə metadata təkrar yazılmır.{% endcomment %}
+<section class="ems-card ese-meta" data-ese-meta>
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title">{{ s.offering_meta.subject_code }} — {{ s.offering_meta.subject_name }}</h2>
+      <p class="ems-card__sub">
+        <span class="ese-meta__chip"><i class="fas fa-users" aria-hidden="true"></i> {{ s.offering_meta.group_label }}</span>
+        <span class="ese-meta__chip"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim" context "registrar.exam_score_entry" %}: <b>{{ s.offering_meta.instructor }}</b></span>
+        <span class="ese-meta__chip"><i class="fas fa-calendar" aria-hidden="true"></i> {{ s.offering_meta.period_label }}</span>
+        <span class="ese-meta__chip"><i class="fas fa-gauge-high" aria-hidden="true"></i> {% trans "maksimum" context "registrar.exam_score_entry" %} <b>{{ s.exam_score_max }}</b></span>
+      </p>
+    </div>
+  </div>
+  <div class="ems-card__body ese-meta__grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-exam-date">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</label>
+      <input type="date" id="ese-exam-date" name="exam_date" form="ese-roster-form" class="ems-input ems-input--date"
+             value="{{ s.sheet_defaults.exam_date }}" data-ese-meta-field>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-examiner">{% trans "Yoxlayan müəllim" context "registrar.exam_score_entry" %}</label>
+      <input type="text" id="ese-examiner" name="examiner_name" form="ese-roster-form" class="ems-input" maxlength="200"
+             value="{{ s.sheet_defaults.examiner_name }}" data-ese-meta-field>
+      <span class="ems-field__hint">{% trans "Default: açılışın müəllimi; fərqlidirsə dəyişin." context "registrar.exam_score_entry" %}</span>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-invigilator">{% trans "Nəzarətçi" context "registrar.exam_score_entry" %}</label>
+      <input type="text" id="ese-invigilator" name="invigilator_name" form="ese-roster-form" class="ems-input" maxlength="200"
+             value="{{ s.sheet_defaults.invigilator_name }}" data-ese-meta-field>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-protocol">{% trans "Protokol / vərəq №" context "registrar.exam_score_entry" %}</label>
+      <input type="text" id="ese-protocol" name="protocol_number" form="ese-roster-form" class="ems-input" maxlength="64"
+             value="{{ s.sheet_defaults.protocol_number }}" data-ese-meta-field>
+    </div>
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="ese-sheet-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}</label>
+      <input type="text" id="ese-sheet-note" name="sheet_note" form="ese-roster-form" class="ems-input" maxlength="500" data-ese-meta-field>
+    </div>
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="ese-sheet-evidence">{% trans "Skan edilmiş protokol / vərəq (PDF və ya şəkil)" context "registrar.exam_score_entry" %}</label>
+      <input type="file" id="ese-sheet-evidence" name="sheet_evidence" form="ese-roster-form" class="ese-file"
+             accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" data-ese-meta-file>
+      <span class="ems-field__hint">{% trans "İlk daxiletmədə opsionaldır; artıq yazılmış balı dəyişəndə MƏCBURİDİR (səbəb və qeydlə birlikdə). Bir partiyanın bütün dəyişikliklərinə eyni skan aiddir." context "registrar.exam_score_entry" %}</span>
+    </div>
+  </div>
+</section>

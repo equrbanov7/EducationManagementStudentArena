@@ -21,6 +21,14 @@ Qaydalar:
   (``apps/registrar/corrections.py`` ilə eyni müqavilə).
 
 Sübut sətirləri append-only ``ExamScoreEntry`` jurnalındadır.
+
+2026-09-12 (sahibin tələbi — «qrup seçilsin, müəllim, tarix… balları sistemə
+yüklənsin»): hər toplu yazı bir KÖÇÜRMƏ VƏRƏQİNƏ (``ExamScoreSheet`` partiyası:
+imtahan tarixi, yoxlayan müəllim, nəzarətçi, protokol №, skan) bağlanır —
+``sheet`` parametri. Partiyanın skanı düzəliş üçün SƏNƏD sayılır: sətir-səviyyə
+fayl olmasa da ``sheet.evidence`` təqdimat tələbini ödəyir. Qrup-əvvəl seçim və
+partiya köməkçiləri ``exam_score_sheets``-də, fayl idxalı ``exam_score_import``-da
+— hər ikisi YALNIZ buradakı ``record_exam_score`` ilə yazır (tək yazı yolu).
 """
 
 from __future__ import annotations
@@ -172,7 +180,23 @@ def offering_label(offering) -> str:
     return pgettext(_CTX, "(qrupsuz açılış)")
 
 
+def _file_url(field) -> str:
+    """FileField URL-i — storage yoxdursa səth sınmasın."""
+    if not field:
+        return ""
+    try:
+        return field.url
+    except ValueError:
+        return ""
+
+
 def _entry_row(entry) -> dict:
+    """Tarixçə sətri — partiya (vərəq) metadatası ilə (2026-09-12).
+
+    ``sheet`` select_related ilə gəlir; sətrin öz sənədi yoxdursa partiyanın
+    skanı göstərilir (düzəliş sübutu partiya səviyyəsində də ola bilər).
+    """
+    sheet = entry.sheet if entry.sheet_id else None
     data = {
         "id": str(entry.id),
         "date": entry.created_at.strftime("%d.%m.%Y %H:%M"),
@@ -183,13 +207,14 @@ def _entry_row(entry) -> dict:
         "reason": entry.get_reason_display() if entry.reason else "",
         "note": entry.note,
         "by": entry.entered_by_name,
-        "evidence_url": "",
+        "evidence_url": _file_url(entry.evidence),
+        "sheet_id": str(sheet.id) if sheet is not None else "",
+        "sheet_exam_date": sheet.exam_date.strftime("%d.%m.%Y") if sheet is not None and sheet.exam_date else "",
+        "sheet_protocol": sheet.protocol_number if sheet is not None else "",
+        "sheet_examiner": sheet.examiner_name if sheet is not None else "",
+        "sheet_source": sheet.source if sheet is not None else "",
+        "sheet_evidence_url": _file_url(sheet.evidence) if sheet is not None else "",
     }
-    if entry.evidence:
-        try:
-            data["evidence_url"] = entry.evidence.url
-        except ValueError:  # storage yoxdursa səth sınmasın
-            data["evidence_url"] = ""
     return data
 
 
@@ -204,11 +229,11 @@ def roster_for_offering(*, offering):
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "offering", "offering__subject")
+        .select_related("student", "student__profile", "offering", "offering__subject")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
     entries_by_enrollment: dict[str, list] = {}
-    for entry in ExamScoreEntry.objects.filter(enrollment__in=enrollments).select_related("entered_by"):
+    for entry in ExamScoreEntry.objects.filter(enrollment__in=enrollments).select_related("entered_by", "sheet"):
         entries_by_enrollment.setdefault(str(entry.enrollment_id), []).append(entry)
 
     # Komponent/bal/FinalGrade/ResitRecord oxumaları BİR dəfə toplu (əvvəl hər
@@ -262,7 +287,7 @@ def _clean_score(raw, cap):
         value = Decimal(text)
     except (InvalidOperation, TypeError, ValueError):
         raise ValidationError(pgettext(_CTX, "Bal rəqəm olmalıdır."))
-    if value != value.to_integral_value():
+    if not value.is_finite() or value != value.to_integral_value():
         raise ValidationError(pgettext(_CTX, "Bal tam ədəd olmalıdır."))
     value = value.to_integral_value()
     if value < 0 or value > Decimal(int(cap)):
@@ -276,23 +301,38 @@ def _same_score(old, new) -> bool:
     return Decimal(old) == Decimal(new)
 
 
-def _require_justification(*, reason, note, evidence):
-    """Sonrakı dəyişiklik = TƏQDİMAT: səbəb + qeyd + sənəd (üçü də məcburi)."""
+def _require_justification(*, reason, note, evidence, sheet=None):
+    """Sonrakı dəyişiklik = TƏQDİMAT: səbəb + qeyd + sənəd (üçü də məcburi).
+
+    2026-09-12: sənəd sətrin öz faylı VƏ YA partiyanın (vərəqin) skanı ola
+    bilər — toplu köçürmədə bir protokol bütün dəyişiklikləri əsaslandırır,
+    hər sətir üçün eyni faylı təkrar saxlamağa ehtiyac yoxdur.
+    """
     if reason not in CorrectionReason.values:
         raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün səbəb seçilməlidir."))
     if not (note or "").strip():
         raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün izahat qeydi məcburidir."))
-    if not evidence:
+    if not evidence and not (sheet is not None and sheet.evidence):
         raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün təsdiqedici sənəd əlavə olunmalıdır."))
 
 
 @transaction.atomic
-def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidence=None, request=None):
+def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidence=None, request=None, sheet=None):
     """Bir tələbənin imtahan balını yaz (ilkin daxiletmə və ya sənədli düzəliş).
 
     Nəticə: yaradılan :class:`ExamScoreEntry` (bal dəyişibsə) və ya ``None``
     (dəyişiklik yoxdur — İDEMPOTENT təkrar daxiletmə).
+
+    ``sheet`` — sətrin aid olduğu köçürmə partiyası (``ExamScoreSheet``);
+    verilərsə sətir ona bağlanır və partiyanın skanı düzəliş sübutu sayılır.
     """
+    # Lock the durable parent even when no FinalGrade exists yet. Concurrent
+    # first writes must re-read the score and require correction evidence.
+    enrollment = (
+        Enrollment.objects.select_for_update(of=("self",))
+        .select_related("offering", "organization")
+        .get(pk=enrollment.pk, organization_id=enrollment.organization_id)
+    )
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     cap = finals.exam_score_max(scheme)
     new_score = _clean_score(score, cap)
@@ -306,7 +346,12 @@ def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidenc
 
     is_correction = old_score is not None
     if is_correction:
-        _require_justification(reason=reason, note=note, evidence=evidence)
+        _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
+    if sheet is not None and (
+        sheet.offering_id != enrollment.offering_id or sheet.organization_id != enrollment.organization_id
+    ):
+        # Partiya başqa açılışa aiddirsə sətir ona bağlana bilməz (fail-closed).
+        raise ValidationError(pgettext(_CTX, "Köçürmə vərəqi bu açılışa aid deyil."))
 
     entry = ExamScoreEntry(
         organization=enrollment.organization,
@@ -319,9 +364,10 @@ def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidenc
         evidence=evidence or "",
         entered_by=by_user,
         entered_by_name=correction_author_name(by_user, request),
+        sheet=sheet,
     )
     # Fayl (şəkil/PDF) ölçü + tip validatorları BAL YAZILMAMIŞDAN ƏVVƏL işləsin.
-    entry.full_clean(exclude=["entered_by"])
+    entry.full_clean(exclude=["entered_by", "sheet"])
 
     final_grade = finals.set_exam_score(
         enrollment=enrollment, score=new_score, by_user=by_user, source_note=SOURCE_NOTE
@@ -351,7 +397,7 @@ def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidenc
     return entry
 
 
-def save_roster_scores(*, offering, rows, by_user, request=None):
+def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None):
     """Formadan gələn sətirləri toplu yaz.
 
     ``rows`` — ``{"enrollment_id", "score", "reason", "note", "evidence"}``
@@ -359,7 +405,12 @@ def save_roster_scores(*, offering, rows, by_user, request=None):
     (məs. sənədsiz dəyişiklik) digərlərinin yazılmasını dayandırmır; xətalar
     toplanıb geri qaytarılır.
 
-    Nəticə: ``{"written": int, "skipped": int, "errors": [(ad, mesaj), …]}``
+    ``sheet`` — bütün sətirlərin bağlandığı köçürmə partiyası (2026-09-12);
+    sayğacları çağıran tərəf ``exam_score_sheets.finalize_sheet`` ilə yazır.
+
+    Nəticə: ``{"written", "skipped", "failed", "total", "errors": [(ad, mesaj), …],
+    "failed_by_enrollment": {enrollment_id: mesaj}}`` (sonuncu — eyni adlı iki
+    tələbənin xətası qarışmasın deyə, fayl idxalı üçün).
     """
     enrollments = {
         str(enrollment.id): enrollment
@@ -367,10 +418,16 @@ def save_roster_scores(*, offering, rows, by_user, request=None):
             "student", "offering"
         )
     }
-    written, skipped, errors = 0, 0, []
+    written, skipped, total, errors, failed_by_enrollment = 0, 0, 0, [], {}
+    written_ids = []
     for row in rows:
-        enrollment = enrollments.get(str(row.get("enrollment_id") or ""))
+        enrollment_id = str(row.get("enrollment_id") or "")
+        enrollment = enrollments.get(enrollment_id)
+        total += 1
         if enrollment is None:
+            message = pgettext(_CTX, "Bu qeydiyyat aktiv deyil — bal yazılmadı.")
+            errors.append((enrollment_id, message))
+            failed_by_enrollment[enrollment_id] = message
             continue
         try:
             with transaction.atomic():
@@ -382,15 +439,27 @@ def save_roster_scores(*, offering, rows, by_user, request=None):
                     note=row.get("note") or "",
                     evidence=row.get("evidence"),
                     request=request,
+                    sheet=sheet,
                 )
         except ValidationError as exc:
-            errors.append((_student_label(enrollment), " ".join(exc.messages)))
+            message = " ".join(exc.messages)
+            errors.append((_student_label(enrollment), message))
+            failed_by_enrollment[str(enrollment.id)] = message
             continue
         if entry is None:
             skipped += 1
         else:
             written += 1
-    return {"written": written, "skipped": skipped, "errors": errors}
+            written_ids.append(str(enrollment.id))
+    return {
+        "written": written,
+        "skipped": skipped,
+        "failed": len(errors),
+        "total": total,
+        "errors": errors,
+        "failed_by_enrollment": failed_by_enrollment,
+        "written_ids": written_ids,
+    }
 
 
 def _student_label(enrollment) -> str:
@@ -402,6 +471,6 @@ def entries_for_offering(*, offering):
     """Açılış üzrə bütün daxiletmə tarixçəsi (ən yenidən köhnəyə)."""
     return list(
         ExamScoreEntry.objects.filter(enrollment__offering=offering)
-        .select_related("enrollment", "enrollment__student", "entered_by")
+        .select_related("enrollment", "enrollment__student", "entered_by", "sheet")
         .order_by("-created_at")
     )

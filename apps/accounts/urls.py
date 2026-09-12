@@ -7,6 +7,7 @@ from django.urls import path
 
 from . import views
 from .views import academic_records as academic_records_views
+from .views import exam_score_import as exam_score_import_views
 
 app_name = "accounts"
 
@@ -191,6 +192,23 @@ urlpatterns = [
     path("exam-chance/", views.exam_chance, name="exam_chance"),
     # İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi
     path("imtahan-bali/", views.exam_score_entry, name="exam_score_entry"),
+    # 2026-09-12 — balların FAYLDAN (XLSX/CSV) köçürülməsi: doldurulmuş şablon,
+    # quru icra (heç nə yazmır) və tətbiq (yazı yalnız registrar servisindən).
+    path(
+        "imtahan-bali/sablon/",
+        exam_score_import_views.exam_score_import_template,
+        name="exam_score_import_template",
+    ),
+    path(
+        "imtahan-bali/idxal/yoxla/",
+        exam_score_import_views.exam_score_import_preview,
+        name="exam_score_import_preview",
+    ),
+    path(
+        "imtahan-bali/idxal/tetbiq/",
+        exam_score_import_views.exam_score_import_apply,
+        name="exam_score_import_apply",
+    ),
     # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
     path("jurnal-baglama/", views.journal_close, name="journal_close"),
     # Account management
