@@ -1,0 +1,1 @@
+./apps/accounts/services/statistics_metrics/presenter_org.py:319:9: B007 Loop control variable 'key' not used within the loop body. If this is intended, start the name with an underscore.

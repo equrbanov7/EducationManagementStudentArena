@@ -1,0 +1,3206 @@
+[
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 20,
+    "route": "select/",
+    "view": "views.select_organization"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 21,
+    "route": "switch/<slug:slug>/",
+    "view": "views.switch_organization"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 23,
+    "route": "<slug:slug>/",
+    "view": "views.organization_dashboard"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 24,
+    "route": "<slug:slug>/structure/",
+    "view": "views.organization_structure"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 26,
+    "route": "<slug:slug>/structure/faculties/",
+    "view": "structure_views.organization_faculties"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 27,
+    "route": "<slug:slug>/structure/kafedras/",
+    "view": "structure_views.organization_kafedras"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 29,
+    "route": "<slug:slug>/structure/units/<uuid:unit_id>/",
+    "view": "structure_views.organization_unit_detail"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 35,
+    "route": "<slug:slug>/structure/tree/action/",
+    "view": "structure_actions.structure_tree_action"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 43,
+    "route": "<slug:slug>/structure/registry/action/",
+    "view": "structure_registry_actions.structure_unit_action"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 48,
+    "route": "<slug:slug>/structure/registry/candidates/",
+    "view": "structure_registry_actions.structure_role_candidates"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 53,
+    "route": "<slug:slug>/structure/registry/units/<uuid:unit_id>/staff/",
+    "view": "structure_registry_actions.structure_unit_staff"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 60,
+    "route": "<slug:slug>/structure/registry/members/<int:user_id>/",
+    "view": "members_registry_actions.structure_member_detail"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 65,
+    "route": "<slug:slug>/structure/tree/head-candidates/",
+    "view": "structure_views.structure_head_candidates"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 71,
+    "route": "<slug:slug>/groups/action/",
+    "view": "group_actions.group_action"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 73,
+    "route": "<slug:slug>/groups/<uuid:unit_id>/students/",
+    "view": "group_students.group_students"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 74,
+    "route": "<slug:slug>/groups/<uuid:unit_id>/students/candidates/",
+    "view": "group_students.group_student_candidates"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 79,
+    "route": "<slug:slug>/members/",
+    "view": "views.organization_members"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 80,
+    "route": "<slug:slug>/roles/",
+    "view": "views.organization_roles"
+  },
+  {
+    "file": "apps/organizations/urls.py",
+    "line": 81,
+    "route": "<slug:slug>/settings/",
+    "view": "views.organization_settings"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 11,
+    "route": "create/<int:course_id>/",
+    "view": "views.create_lab"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 12,
+    "route": "<int:pk>/edit/",
+    "view": "views.edit_lab"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 13,
+    "route": "<int:pk>/delete/",
+    "view": "views.delete_lab"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 14,
+    "route": "<int:pk>/publish/",
+    "view": "views.publish_lab"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 18,
+    "route": "<int:pk>/blocks/",
+    "view": "views.manage_blocks"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 19,
+    "route": "<int:pk>/questions-per-student/",
+    "view": "views.update_questions_per_student"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 24,
+    "route": "<int:pk>/blocks/create/",
+    "view": "views.create_block"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 25,
+    "route": "blocks/<int:pk>/edit/",
+    "view": "views.edit_block"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 26,
+    "route": "blocks/<int:pk>/delete/",
+    "view": "views.delete_block"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 30,
+    "route": "blocks/<int:block_id>/questions/create/",
+    "view": "views.create_question"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 35,
+    "route": "questions/<int:pk>/edit/",
+    "view": "views.edit_question"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 36,
+    "route": "questions/<int:pk>/delete/",
+    "view": "views.delete_question"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 37,
+    "route": "blocks/<int:block_id>/questions/import/",
+    "view": "views.import_questions"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 45,
+    "route": "<int:pk>/submissions/",
+    "view": "views.lab_submissions"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 46,
+    "route": "<int:pk>/submissions/delete/",
+    "view": "views.delete_submissions"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 51,
+    "route": "submissions/<int:pk>/grade-page/",
+    "view": "views.grade_submission_page"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 59,
+    "route": "<int:pk>/preview/",
+    "view": "views.preview_randomization"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 63,
+    "route": "<int:pk>/",
+    "view": "views.lab_detail"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 64,
+    "route": "<int:pk>/submit/",
+    "view": "views.submit_lab"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 65,
+    "route": "<int:pk>/auto-save/",
+    "view": "views.auto_save_answer"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 66,
+    "route": "<int:pk>/my-answers/",
+    "view": "views.my_lab_answers"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 70,
+    "route": "api/groups/<int:course_id>/",
+    "view": "views.api_get_groups"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 71,
+    "route": "api/students/<int:course_id>/",
+    "view": "views.api_get_students"
+  },
+  {
+    "file": "apps/labs/urls.py",
+    "line": 72,
+    "route": "submissions/<int:pk>/answers/",
+    "view": "views.submission_answers"
+  },
+  {
+    "file": "apps/contact/admin.py",
+    "line": 93,
+    "route": "<int:pk>/reply/",
+    "view": "self.admin_site.admin_view(reply_to_contact_message)"
+  },
+  {
+    "file": "apps/contact/urls.py",
+    "line": 6,
+    "route": "contact/",
+    "view": "contact_page"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 9,
+    "route": "create/<int:course_id>/",
+    "view": "views.create_assignment"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 10,
+    "route": "<int:pk>/edit/",
+    "view": "views.edit_assignment"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 11,
+    "route": "<int:pk>/delete/",
+    "view": "views.delete_assignment"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 12,
+    "route": "<int:pk>/detail/",
+    "view": "views.assignment_detail"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 14,
+    "route": "<int:pk>/submit/",
+    "view": "views.submit_assignment"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 15,
+    "route": "<int:pk>/submissions/",
+    "view": "views.review_submissions"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 20,
+    "route": "<int:pk>/submissions/delete/",
+    "view": "views.delete_submissions"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 25,
+    "route": "submission/<int:pk>/grade/",
+    "view": "views.grade_submission"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 26,
+    "route": "<int:pk>/my-submissions/",
+    "view": "views.my_submissions"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 28,
+    "route": "search-students/",
+    "view": "views.search_students"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 29,
+    "route": "search-groups/",
+    "view": "views.search_groups"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 30,
+    "route": "students-by-groups/",
+    "view": "views.students_by_groups"
+  },
+  {
+    "file": "apps/assignments/urls.py",
+    "line": 31,
+    "route": "<int:pk>/remove-student/",
+    "view": "views.remove_student_from_assignment"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 11,
+    "route": "create/<int:course_id>/",
+    "view": "views.create_project"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 12,
+    "route": "<int:pk>/edit/",
+    "view": "views.edit_project"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 13,
+    "route": "<int:pk>/delete/",
+    "view": "views.delete_project"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 17,
+    "route": "<int:pk>/",
+    "view": "views.project_detail"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 18,
+    "route": "<int:pk>/submit/",
+    "view": "views.submit_project"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 19,
+    "route": "<int:pk>/my-submissions/",
+    "view": "views.my_submissions"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 23,
+    "route": "<int:pk>/submissions/",
+    "view": "views.review_submissions"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 28,
+    "route": "<int:pk>/submissions/delete/",
+    "view": "views.delete_submissions"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 33,
+    "route": "submission/<int:pk>/grade/",
+    "view": "views.grade_submission"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 37,
+    "route": "api/groups/",
+    "view": "views.api_get_groups"
+  },
+  {
+    "file": "apps/projects/urls.py",
+    "line": 38,
+    "route": "api/students/",
+    "view": "views.api_get_students"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 29,
+    "route": "",
+    "view": "views.journal_list"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 32,
+    "route": "duzelis/",
+    "view": "correction_views.correction_offering_list"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 33,
+    "route": "duzelis/<uuid:offering_id>/",
+    "view": "correction_views.correction_journal"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 34,
+    "route": "duzelis/<uuid:offering_id>/tetbiq/",
+    "view": "correction_views.correction_apply"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 35,
+    "route": "duzelis/<uuid:offering_id>/sil/",
+    "view": "correction_views.correction_delete"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 37,
+    "route": "kataloq/emel/",
+    "view": "catalog_actions.catalog_action"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 39,
+    "route": "kataloq/ixtisas/",
+    "view": "catalog_actions.program_detail"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 41,
+    "route": "tedris-plani/emel/",
+    "view": "curriculum_actions.curriculum_action"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 43,
+    "route": "semestr/emel/",
+    "view": "semester_actions.semester_action"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 45,
+    "route": "qrup/<uuid:group_id>/ferdi-plan.docx",
+    "view": "individual_plan_views.group_individual_plan"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 50,
+    "route": "analitika/",
+    "view": "analytics_views.analytics_dashboard"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 52,
+    "route": "kecilmis-dersler/export.csv",
+    "view": "lessons_log_views.lessons_log_csv"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 53,
+    "route": "transkript.pdf",
+    "view": "pdf_views.my_transcript_pdf"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 54,
+    "route": "teqvim/",
+    "view": "schedule_views.calendar_view"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 55,
+    "route": "cedvel/",
+    "view": "schedule_views.schedule_view"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 56,
+    "route": "cedvel/export.ics",
+    "view": "pdf_views.schedule_ics"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 57,
+    "route": "cedvel/slot/<uuid:slot_id>/sil/",
+    "view": "schedule_views.schedule_slot_delete"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 63,
+    "route": "telebe/<uuid:pk>/transkript.pdf",
+    "view": "pdf_views.student_transcript_pdf"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 64,
+    "route": "<uuid:offering_id>/rubrik/<uuid:component_id>/",
+    "view": "views.rubric_grade_view"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 65,
+    "route": "<uuid:offering_id>/export.xlsx",
+    "view": "pdf_views.journal_xlsx"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 67,
+    "route": "<uuid:offering_id>/sillabus.json",
+    "view": "syllabus_views.offering_syllabus_json"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 72,
+    "route": "<uuid:offering_id>/sillabus.pdf",
+    "view": "syllabus_views.offering_syllabus_pdf"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 78,
+    "route": "<uuid:offering_id>/alt-qrup/qruplar/",
+    "view": "guest_roster_views.guest_group_search"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 83,
+    "route": "<uuid:offering_id>/alt-qrup/telebeler/",
+    "view": "guest_roster_views.guest_student_search"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 88,
+    "route": "<uuid:offering_id>/alt-qrup/onbaxis/",
+    "view": "guest_roster_views.guest_add_preview"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 93,
+    "route": "<uuid:offering_id>/alt-qrup/elave/",
+    "view": "guest_roster_views.guest_add"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 94,
+    "route": "<uuid:offering_id>/alt-qrup/cixar/",
+    "view": "guest_roster_views.guest_remove"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 97,
+    "route": "<uuid:offering_id>/ders-muellimleri/axtar/",
+    "view": "journal_lesson_lookup.lesson_teacher_search"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 102,
+    "route": "<uuid:offering_id>/ders-otaqlari/",
+    "view": "journal_lesson_lookup.lesson_room_data"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 107,
+    "route": "<uuid:offering_id>/ders/<uuid:lesson_id>/",
+    "view": "journal_actions.lesson_action"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 108,
+    "route": "<uuid:offering_id>/kollokvium/",
+    "view": "journal_actions.kollokvium_save"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 109,
+    "route": "<uuid:offering_id>/serbest/",
+    "view": "journal_actions.selfwork_action"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 110,
+    "route": "<uuid:offering_id>/kurs-isi/",
+    "view": "journal_actions.coursework_save"
+  },
+  {
+    "file": "apps/registrar/urls.py",
+    "line": 111,
+    "route": "<uuid:offering_id>/",
+    "view": "views.journal_detail"
+  },
+  {
+    "file": "apps/live_exam/routing.py",
+    "line": 6,
+    "route": "ws/live/<str:pin>/lobby/",
+    "view": "consumers.LiveLobbyConsumer.as_asgi()"
+  },
+  {
+    "file": "apps/live_exam/routing.py",
+    "line": 7,
+    "route": "ws/live/<str:pin>/play/",
+    "view": "consumers.LivePlayConsumer.as_asgi()"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 9,
+    "route": "live/create/<slug:slug>/",
+    "view": "views.live_create_session_by_slug"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 14,
+    "route": "live/",
+    "view": "views.live_pin_entry"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 16,
+    "route": "live/host/<str:pin>/",
+    "view": "views.live_host_lobby"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 17,
+    "route": "live/host/<str:pin>/presentation/",
+    "view": "views.live_host_presentation"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 18,
+    "route": "live/host/<str:pin>/start/",
+    "view": "views.host_start_game"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 19,
+    "route": "live/host/<str:pin>/next/",
+    "view": "views.host_next_question"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 20,
+    "route": "live/host/<str:pin>/skip-intro/",
+    "view": "views.host_skip_question_intro"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 21,
+    "route": "live/host/<str:pin>/reveal/",
+    "view": "views.host_reveal"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 22,
+    "route": "live/host/<str:pin>/finish/",
+    "view": "views.host_finish"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 23,
+    "route": "live/host/<str:pin>/lock/",
+    "view": "views.host_toggle_lock"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 24,
+    "route": "live/host/<str:pin>/settings/",
+    "view": "views.host_update_settings"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 25,
+    "route": "live/host/<str:pin>/players/remove/",
+    "view": "views.host_remove_player"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 27,
+    "route": "live/results/<slug:slug>/",
+    "view": "views.teacher_live_exam_results"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 32,
+    "route": "live/results/<slug:slug>/<str:pin>/",
+    "view": "views.teacher_live_session_detail"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 38,
+    "route": "live/join/<str:pin>/",
+    "view": "views.live_join_page"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 39,
+    "route": "live/join/<str:pin>/enter/",
+    "view": "views.live_join_enter"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 40,
+    "route": "live/play/<str:pin>/",
+    "view": "views.live_player_screen"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 41,
+    "route": "live/play/<str:pin>/answer/",
+    "view": "views.live_answer_submit"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 42,
+    "route": "live/wait/<str:pin>/",
+    "view": "views.live_wait_room"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 43,
+    "route": "live/wait/<str:pin>/profile/",
+    "view": "views.live_wait_profile_update"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 44,
+    "route": "live/wait/<str:pin>/reaction/",
+    "view": "views.live_wait_reaction"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 46,
+    "route": "live/qr/<str:pin>.png",
+    "view": "views.live_qr_png"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 48,
+    "route": "live/state/<str:pin>/",
+    "view": "views.live_state_json"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 49,
+    "route": "live/<str:pin>/start/",
+    "view": "views.host_start_game"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 50,
+    "route": "live/<str:pin>/next/",
+    "view": "views.host_next_question"
+  },
+  {
+    "file": "apps/live_exam/urls.py",
+    "line": 51,
+    "route": "live/<str:pin>/finish/",
+    "view": "views.host_finish"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 40,
+    "route": "",
+    "view": "legacy_home"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 41,
+    "route": "about/",
+    "view": "legacy_about"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 42,
+    "route": "technology/",
+    "view": "legacy_technology"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 43,
+    "route": "subscribe/",
+    "view": "legacy_subscribe"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 44,
+    "route": "users/<str:username>/",
+    "view": "_legacy_user_profile"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 45,
+    "route": "posts/create/",
+    "view": "legacy_create_post"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 46,
+    "route": "posts/<slug:slug>/",
+    "view": "legacy_article_detail"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 47,
+    "route": "post/<int:pk>/edit/",
+    "view": "post_edit_ajax"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 48,
+    "route": "post/<int:post_id>/review/",
+    "view": "review_post"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 49,
+    "route": "post/<int:post_id>/delete/",
+    "view": "delete_post"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 50,
+    "route": "category/<slug:slug>/",
+    "view": "legacy_category_detail"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 51,
+    "route": "questions/create/",
+    "view": "create_question"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 52,
+    "route": "questions/my/",
+    "view": "my_questions"
+  },
+  {
+    "file": "apps/blog/legacy_urls.py",
+    "line": 53,
+    "route": "questions/",
+    "view": "questions_i_can_see"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 7,
+    "route": "",
+    "view": "views.home"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 8,
+    "route": "about/",
+    "view": "views.about"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 9,
+    "route": "technology/",
+    "view": "views.technology"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 10,
+    "route": "subscribe/",
+    "view": "views.subscribe_page"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 12,
+    "route": "posts/create/",
+    "view": "views.create_post"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 13,
+    "route": "articles/<slug:slug>/",
+    "view": "views.post_detail"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 14,
+    "route": "posts/<int:pk>/edit/",
+    "view": "views.post_edit_ajax"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 15,
+    "route": "posts/<int:post_id>/review/",
+    "view": "views.review_post"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 16,
+    "route": "posts/<int:post_id>/delete/",
+    "view": "views.delete_post"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 17,
+    "route": "posts/<int:post_id>/moderate/",
+    "view": "views.teacher_moderate_post"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 19,
+    "route": "categories/<slug:slug>/",
+    "view": "views.category_detail"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 21,
+    "route": "questions/create/",
+    "view": "views.create_question"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 22,
+    "route": "questions/my/",
+    "view": "views.my_questions"
+  },
+  {
+    "file": "apps/blog/urls.py",
+    "line": 23,
+    "route": "questions/",
+    "view": "views.questions_i_can_see"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 30,
+    "route": "create_course/",
+    "view": "views.CreateCourseView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 31,
+    "route": "my-courses/",
+    "view": "views.MyCoursesListView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 33,
+    "route": "<int:course_id>/dashboard/",
+    "view": "views.CourseDashboardView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 39,
+    "route": "<int:course_id>/edit/",
+    "view": "views.EditCourseView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 41,
+    "route": "<int:course_id>/delete/",
+    "view": "views.DeleteCourseView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 46,
+    "route": "<int:course_id>/status/update/",
+    "view": "views.update_course_status"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 56,
+    "route": "<int:course_id>/topic/add/",
+    "view": "views.AddTopicView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 58,
+    "route": "topic/<int:topic_id>/edit/",
+    "view": "views.EditTopicView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 61,
+    "route": "<int:course_id>/topic/<int:topic_id>/delete/",
+    "view": "views.DeleteTopicView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 71,
+    "route": "<int:course_id>/resource/add/",
+    "view": "views.AddResourceView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 78,
+    "route": "<int:course_id>/resource/<int:resource_id>/delete/",
+    "view": "views.DeleteResourceView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 87,
+    "route": "<int:course_id>/members/",
+    "view": "views.CourseMembersView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 92,
+    "route": "<int:course_id>/available-students/",
+    "view": "views.AvailableStudentsView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 98,
+    "route": "<int:course_id>/members/add/",
+    "view": "views.AddMemberView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 100,
+    "route": "<int:course_id>/members/add-bulk/",
+    "view": "views.AddMembersBulkView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 106,
+    "route": "<int:course_id>/members/<int:member_id>/delete/",
+    "view": "views.DeleteMemberView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 111,
+    "route": "<int:course_id>/members/delete-group/",
+    "view": "views.DeleteGroupFromCourseView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 117,
+    "route": "my-enrolled/",
+    "view": "views.StudentCoursesView.as_view()"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 121,
+    "route": "<int:pk>/link-exam/",
+    "view": "views.link_exam_to_course"
+  },
+  {
+    "file": "apps/courses/urls.py",
+    "line": 122,
+    "route": "<int:pk>/unlink-exam/",
+    "view": "views.unlink_exam_from_course"
+  },
+  {
+    "file": "apps/ai_assistant/urls.py",
+    "line": 8,
+    "route": "quota/",
+    "view": "views.quota_view"
+  },
+  {
+    "file": "apps/ai_assistant/urls.py",
+    "line": 9,
+    "route": "chat/",
+    "view": "views.chat_view"
+  },
+  {
+    "file": "apps/audit/urls.py",
+    "line": 12,
+    "route": "",
+    "view": "views.audit_log_list"
+  },
+  {
+    "file": "apps/audit/urls.py",
+    "line": 15,
+    "route": "export.csv",
+    "view": "views.audit_log_export"
+  },
+  {
+    "file": "apps/audit/urls.py",
+    "line": 16,
+    "route": "<uuid:pk>/detail.json",
+    "view": "views.audit_log_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 16,
+    "route": "register/",
+    "view": "views.register_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 17,
+    "route": "verify-code/",
+    "view": "views.verify_code_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 18,
+    "route": "verify-email/",
+    "view": "views.verify_email_link_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 19,
+    "route": "resend-code/",
+    "view": "views.resend_code_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 20,
+    "route": "send-otp/",
+    "view": "views.send_otp_api_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 21,
+    "route": "verify-otp/",
+    "view": "views.verify_otp_api_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 22,
+    "route": "resend-otp/",
+    "view": "views.resend_otp_api_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 24,
+    "route": "set-password/",
+    "view": "views.set_initial_password_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 27,
+    "route": "login/",
+    "view": "views.login_portal"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 32,
+    "route": "login/muellim/",
+    "view": "views.CustomLoginView.as_view(audience='staff')"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 37,
+    "route": "login/telebe/",
+    "view": "views.CustomLoginView.as_view(audience='student')"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 42,
+    "route": "logout/",
+    "view": "views.logout_view"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 44,
+    "route": "password-reset/",
+    "view": "views.NamespacedPasswordResetView.as_view()"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 49,
+    "route": "password-reset/done/",
+    "view": "views.NamespacedPasswordResetDoneView.as_view()"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 54,
+    "route": "reset/<uidb64>/<token>/",
+    "view": "views.NamespacedPasswordResetConfirmView.as_view()"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 59,
+    "route": "reset/done/",
+    "view": "auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html')"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 65,
+    "route": "kabinet/",
+    "view": "views.cabinet_entry"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 66,
+    "route": "kabinet/telebe/",
+    "view": "views.student_cabinet_entry"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 67,
+    "route": "kabinet/muellim/",
+    "view": "views.staff_cabinet_entry"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 69,
+    "route": "dashboard/",
+    "view": "views.dashboard"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 70,
+    "route": "dashboard/student/",
+    "view": "views.student_dashboard"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 71,
+    "route": "dashboard/teacher/",
+    "view": "views.teacher_dashboard"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 73,
+    "route": "search/",
+    "view": "views.global_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 75,
+    "route": "profile/",
+    "view": "views.user_profile"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 76,
+    "route": "profile/statistics/export-csv/",
+    "view": "views.statistics_export_csv"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 80,
+    "route": "profile/academic-records/data/",
+    "view": "academic_records_views.records_overview_data"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 81,
+    "route": "profile/academic-records/summary/",
+    "view": "academic_records_views.records_overview_summary"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 86,
+    "route": "profile/academic-records/student/",
+    "view": "academic_records_views.records_student_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 91,
+    "route": "profile/academic-records/search/faculty/",
+    "view": "academic_records_views.faculty_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 94,
+    "route": "profile/academic-records/search/department/",
+    "view": "academic_records_views.department_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 99,
+    "route": "profile/academic-records/search/program/",
+    "view": "academic_records_views.program_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 102,
+    "route": "profile/academic-records/search/group/",
+    "view": "academic_records_views.group_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 103,
+    "route": "profile/academic-records/search/student/",
+    "view": "academic_records_views.student_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 107,
+    "route": "profile/academic-records/search/teacher/",
+    "view": "academic_records_views.journal_teacher_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 114,
+    "route": "profile/api/sections/<str:section>/",
+    "view": "views.profile_section_fragment"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 119,
+    "route": "profile/api/badges/",
+    "view": "views.profile_badges_api"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 125,
+    "route": "profile/api/academic-items/",
+    "view": "views.academic_items_api"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 130,
+    "route": "profile/api/password-otp/",
+    "view": "views.change_password_otp_request"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 135,
+    "route": "profile-avatar/<int:user_id>/",
+    "view": "views.profile_avatar"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 137,
+    "route": "view-as/search/",
+    "view": "views.view_as_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 138,
+    "route": "view-as/start/",
+    "view": "views.view_as_start"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 139,
+    "route": "view-as/stop/",
+    "view": "views.view_as_stop"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 140,
+    "route": "users/<str:username>/",
+    "view": "views.public_user_profile"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 142,
+    "route": "manage-roles/",
+    "view": "views.manage_roles"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 144,
+    "route": "grading-queue/",
+    "view": "views.grading_queue"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 146,
+    "route": "assigned-exams/",
+    "view": "views.assigned_exams"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 147,
+    "route": "assigned-courses/",
+    "view": "views.assigned_courses"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 148,
+    "route": "my-results/",
+    "view": "views.my_results"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 149,
+    "route": "pending-answers/",
+    "view": "views.pending_answers"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 150,
+    "route": "my-results/<str:item_type>/<int:item_id>/",
+    "view": "views.my_result_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 152,
+    "route": "pending-review/",
+    "view": "views.pending_review"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 153,
+    "route": "pending-review/<str:item_type>/<int:item_id>/",
+    "view": "views.pending_review_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 158,
+    "route": "review-results/",
+    "view": "views.review_results"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 159,
+    "route": "review-results/<str:item_type>/<int:item_id>/",
+    "view": "views.review_result_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 165,
+    "route": "role-assignment/",
+    "view": "views.role_assignment"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 166,
+    "route": "student-organization-management/",
+    "view": "views.student_organization_management"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 171,
+    "route": "student-organization-request/",
+    "view": "views.student_organization_request"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 176,
+    "route": "student-organization-invitation/",
+    "view": "views.student_org_invitation_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 181,
+    "route": "student-leave-organization/",
+    "view": "views.student_leave_organization"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 186,
+    "route": "permission-editor/",
+    "view": "views.permission_editor"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 188,
+    "route": "superadmin/organizations/",
+    "view": "views.superadmin_organizations"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 189,
+    "route": "superadmin/ai-settings/",
+    "view": "views.superadmin_ai_settings"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 190,
+    "route": "superadmin/exam-rooms/",
+    "view": "views.superadmin_exam_rooms"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 191,
+    "route": "kollokvium-windows/",
+    "view": "views.kollokvium_windows"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 192,
+    "route": "exam-chance/",
+    "view": "views.exam_chance"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 194,
+    "route": "imtahan-bali/",
+    "view": "views.exam_score_entry"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 197,
+    "route": "imtahan-bali/sablon/",
+    "view": "exam_score_import_views.exam_score_import_template"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 202,
+    "route": "imtahan-bali/idxal/yoxla/",
+    "view": "exam_score_import_views.exam_score_import_preview"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 207,
+    "route": "imtahan-bali/idxal/tetbiq/",
+    "view": "exam_score_import_views.exam_score_import_apply"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 213,
+    "route": "jurnal-baglama/",
+    "view": "views.journal_close"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 215,
+    "route": "delete-account/",
+    "view": "views.delete_account"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 216,
+    "route": "superadmin/users/",
+    "view": "views.superadmin_user_management"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 220,
+    "route": "rim/search/",
+    "view": "views.rim_user_search"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 221,
+    "route": "rim/user/<int:user_id>/",
+    "view": "views.rim_user_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 222,
+    "route": "rim/action/",
+    "view": "views.rim_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 225,
+    "route": "rim/create/",
+    "view": "views.rim_create_account"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 226,
+    "route": "rim/create/catalog/",
+    "view": "views.rim_create_catalog"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 230,
+    "route": "people/<str:kind>/list/",
+    "view": "views.people_list"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 231,
+    "route": "people/<str:kind>/options/",
+    "view": "views.people_options"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 232,
+    "route": "people/person/<int:user_id>/",
+    "view": "views.people_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 234,
+    "route": "people/person/<int:user_id>/page/",
+    "view": "views.people_person_page"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 235,
+    "route": "people/action/",
+    "view": "views.people_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 239,
+    "route": "people/student/<int:user_id>/card/",
+    "view": "views.people_student_card"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 240,
+    "route": "people/academic/groups/",
+    "view": "views.people_academic_groups"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 241,
+    "route": "people/academic/<uuid:record_id>/transfer-preview/",
+    "view": "views.people_transfer_preview"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 247,
+    "route": "people/<str:kind>/analytics/",
+    "view": "views.people_analytics"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 248,
+    "route": "people/<str:kind>/analytics/ai/",
+    "view": "views.people_analytics_ai"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 253,
+    "route": "handover/teachers/",
+    "view": "views.handover_teachers"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 254,
+    "route": "handover/offerings/",
+    "view": "views.handover_offerings"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 255,
+    "route": "handover/options/",
+    "view": "views.handover_options"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 256,
+    "route": "handover/history/",
+    "view": "views.handover_history"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 257,
+    "route": "handover/action/",
+    "view": "views.handover_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 264,
+    "route": "applications/assignees/",
+    "view": "views.applications_assignees"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 265,
+    "route": "schedule-manage/check/",
+    "view": "views.schedule_manage_check"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 266,
+    "route": "schedule-manage/action/",
+    "view": "views.schedule_manage_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 270,
+    "route": "schedule-manage/editor/",
+    "view": "views.schedule_editor_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 272,
+    "route": "registrar-catalog/action/",
+    "view": "views.registrar_catalog_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 275,
+    "route": "student-intake/template/",
+    "view": "views.student_intake_template"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 276,
+    "route": "student-intake/preview/",
+    "view": "views.student_intake_preview"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 277,
+    "route": "student-intake/apply/",
+    "view": "views.student_intake_apply"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 279,
+    "route": "teacher-intake/template/",
+    "view": "views.teacher_intake_template"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 280,
+    "route": "teacher-intake/preview/",
+    "view": "views.teacher_intake_preview"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 281,
+    "route": "teacher-intake/apply/",
+    "view": "views.teacher_intake_apply"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 284,
+    "route": "student-admission/groups/create/",
+    "view": "views.student_admission_create_group"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 291,
+    "route": "student-registry/card/<uuid:record_id>/",
+    "view": "views.student_registry_card"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 292,
+    "route": "student-registry/programs/",
+    "view": "views.student_registry_programs"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 293,
+    "route": "student-registry/action/",
+    "view": "views.student_registry_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 294,
+    "route": "student-registry/export/",
+    "view": "views.student_registry_export"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 295,
+    "route": "student-registry/document/<uuid:movement_id>/",
+    "view": "views.student_registry_document"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 304,
+    "route": "legacy-review/queue/",
+    "view": "views.legacy_review_queue"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 305,
+    "route": "legacy-review/options/",
+    "view": "views.legacy_review_options"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 306,
+    "route": "legacy-review/units/<str:kind>/",
+    "view": "views.legacy_review_units"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 307,
+    "route": "legacy-review/groups/",
+    "view": "views.legacy_review_groups"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 308,
+    "route": "legacy-review/subjects/",
+    "view": "views.legacy_review_subjects"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 309,
+    "route": "legacy-review/teachers/",
+    "view": "views.legacy_review_teachers"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 310,
+    "route": "legacy-review/action/",
+    "view": "views.legacy_review_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 314,
+    "route": "profile/syllabus/action/",
+    "view": "views.syllabus_action"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 315,
+    "route": "profile/syllabus/version/<uuid:version_id>/section/",
+    "view": "views.syllabus_section_save"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 320,
+    "route": "profile/syllabus/<uuid:syllabus_id>/preview/",
+    "view": "views.syllabus_preview"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 324,
+    "route": "syllabus/<uuid:syllabus_id>/",
+    "view": "views.syllabus_detail"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 325,
+    "route": "syllabus/<uuid:syllabus_id>/pdf/",
+    "view": "views.syllabus_detail_pdf"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 327,
+    "route": "profile/syllabus/version/<uuid:version_id>/review/",
+    "view": "views.syllabus_review_open"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 332,
+    "route": "profile/syllabus/version/<uuid:version_id>/decision/",
+    "view": "views.syllabus_decision"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 338,
+    "route": "superadmin/post-management/",
+    "view": "views.superadmin_post_management"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 339,
+    "route": "superadmin/post-management/<int:post_id>/delete/",
+    "view": "views.superadmin_delete_post"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 344,
+    "route": "org-post-management/",
+    "view": "views.org_post_management"
+  },
+  {
+    "file": "apps/accounts/urls.py",
+    "line": 345,
+    "route": "org-post-management/<int:post_id>/moderate/",
+    "view": "views.org_moderate_post"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 9,
+    "route": "my/",
+    "view": "views.my_appeals"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 10,
+    "route": "create/<int:attempt_id>/",
+    "view": "views.appeal_create"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 12,
+    "route": "manage/",
+    "view": "views.manage_appeals"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 13,
+    "route": "manage/<int:appeal_id>/",
+    "view": "views.review_appeal"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 15,
+    "route": "stats/data/",
+    "view": "views.appeal_stats_data"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 16,
+    "route": "stats/charts/",
+    "view": "views.appeal_stats_charts"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 17,
+    "route": "stats/filters/",
+    "view": "views.appeal_stats_filters"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 18,
+    "route": "stats/ai/",
+    "view": "views.appeal_stats_ai"
+  },
+  {
+    "file": "apps/appeals/urls.py",
+    "line": 20,
+    "route": "<int:appeal_id>/",
+    "view": "views.appeal_detail"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 14,
+    "route": "api/list/",
+    "view": "views.application_list"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 15,
+    "route": "api/catalog/",
+    "view": "views.application_catalog"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 16,
+    "route": "api/kpis/",
+    "view": "views.application_kpis"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 17,
+    "route": "api/create/",
+    "view": "views.application_create"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 18,
+    "route": "api/<uuid:application_id>/",
+    "view": "views.application_detail"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 19,
+    "route": "api/<uuid:application_id>/action/",
+    "view": "views.application_action"
+  },
+  {
+    "file": "apps/applications/urls.py",
+    "line": 20,
+    "route": "api/<uuid:application_id>/attachments/<uuid:attachment_id>/download/",
+    "view": "views.attachment_download"
+  },
+  {
+    "file": "apps/exams/routing.py",
+    "line": 6,
+    "route": "ws/exams/supervision/<int:attempt_id>/",
+    "view": "consumers.ExamSupervisionConsumer.as_asgi()"
+  },
+  {
+    "file": "apps/exams/routing.py",
+    "line": 8,
+    "route": "ws/exams/final/room/<int:session_id>/",
+    "view": "consumers.FinalExamRoomConsumer.as_asgi()"
+  },
+  {
+    "file": "apps/exams/routing.py",
+    "line": 9,
+    "route": "ws/exams/final/wait/<int:ticket_id>/",
+    "view": "consumers.FinalExamWaitConsumer.as_asgi()"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 12,
+    "route": "available/",
+    "view": "views.student_exam_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 16,
+    "route": "final/",
+    "view": "views.final_exam_entry"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 17,
+    "route": "final/waiting/<int:ticket_id>/",
+    "view": "views.final_exam_waiting"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 18,
+    "route": "final/waiting/<int:ticket_id>/cancel/",
+    "view": "views.final_exam_cancel"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 19,
+    "route": "final/waiting/<int:ticket_id>/begin/",
+    "view": "views.final_exam_begin"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 20,
+    "route": "final/waiting/<int:ticket_id>/state/",
+    "view": "views.final_ticket_state"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 21,
+    "route": "assigned/",
+    "view": "views.assigned_student_exam_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 22,
+    "route": "my-history/",
+    "view": "views.student_exam_history"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 23,
+    "route": "code-check/",
+    "view": "views.exam_code_check"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 27,
+    "route": "center/rooms/",
+    "view": "views.exam_center_room_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 29,
+    "route": "center/rooms/<int:room_id>/monitor/",
+    "view": "views.exam_center_room_monitor"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 31,
+    "route": "center/rooms/<int:room_id>/invigilators/",
+    "view": "views.exam_center_room_assign_invigilators"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 36,
+    "route": "center/rooms/<int:room_id>/api/snapshot/",
+    "view": "views.exam_center_room_snapshot"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 41,
+    "route": "center/rooms/<int:room_id>/api/attempts/<int:attempt_id>/violations/",
+    "view": "views.exam_center_attempt_violations"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 46,
+    "route": "center/rooms/<int:room_id>/start-all/",
+    "view": "views.exam_center_room_start_all"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 47,
+    "route": "center/rooms/<int:room_id>/end-all/",
+    "view": "views.exam_center_room_end_all"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 48,
+    "route": "center/rooms/<int:room_id>/open-all/",
+    "view": "views.exam_center_room_open_all"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 49,
+    "route": "center/sessions/<int:session_id>/",
+    "view": "views.exam_center_session_detail"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 50,
+    "route": "center/sessions/<int:session_id>/history/",
+    "view": "views.exam_center_session_history"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 56,
+    "route": "center/sessions/<int:session_id>/monitor/",
+    "view": "views.exam_center_session_monitor"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 61,
+    "route": "center/sessions/<int:session_id>/api/snapshot/",
+    "view": "views.exam_center_session_snapshot"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 66,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/snapshot/",
+    "view": "views.exam_center_ticket_snapshot"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 71,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/resume/",
+    "view": "views.exam_center_ticket_resume"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 76,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/reentry/",
+    "view": "views.exam_center_ticket_reentry"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 81,
+    "route": "center/sessions/<int:session_id>/open-entry/",
+    "view": "views.exam_center_session_open_entry"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 86,
+    "route": "center/sessions/<int:session_id>/start/",
+    "view": "views.exam_center_session_start"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 87,
+    "route": "center/sessions/<int:session_id>/end/",
+    "view": "views.exam_center_session_end"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 88,
+    "route": "center/sessions/<int:session_id>/cancel/",
+    "view": "views.exam_center_session_cancel"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 93,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/remove/",
+    "view": "views.exam_center_ticket_remove"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 98,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/seat/",
+    "view": "views.exam_center_ticket_seat"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 103,
+    "route": "center/sessions/<int:session_id>/tickets/<int:ticket_id>/readmit/",
+    "view": "views.exam_center_ticket_readmit"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 108,
+    "route": "center/reports/",
+    "view": "views.exam_center_reports"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 109,
+    "route": "center/stats/data/",
+    "view": "views.exam_center_stats_data"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 110,
+    "route": "center/stats/export/",
+    "view": "views.exam_center_stats_export"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 111,
+    "route": "center/stats/filters/",
+    "view": "views.exam_center_stats_filters"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 112,
+    "route": "center/stats/charts/",
+    "view": "views.exam_center_stats_charts"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 113,
+    "route": "center/stats/ai/",
+    "view": "views.exam_center_stats_ai"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 114,
+    "route": "center/pin-lookup/",
+    "view": "views.exam_center_pin_lookup"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 115,
+    "route": "center/pin-lookup/search/",
+    "view": "views.exam_center_pin_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 116,
+    "route": "center/pin-lookup/student/<int:student_id>/",
+    "view": "views.exam_center_student_pins"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 124,
+    "route": "",
+    "view": "views.teacher_exam_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 125,
+    "route": "create/",
+    "view": "views.createAndEditExamView"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 127,
+    "route": "lookups/subjects/",
+    "view": "views.subject_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 128,
+    "route": "lookups/bank-teachers/",
+    "view": "views.bank_teacher_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 129,
+    "route": "lookups/groups/",
+    "view": "views.group_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 130,
+    "route": "lookups/faculties/",
+    "view": "views.stats_faculty_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 131,
+    "route": "lookups/departments/",
+    "view": "views.stats_department_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 132,
+    "route": "lookups/teachers/",
+    "view": "views.stats_teacher_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 133,
+    "route": "lookups/users/",
+    "view": "views.user_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 134,
+    "route": "lookups/invigilators/",
+    "view": "views.invigilator_search"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 135,
+    "route": "lookups/assigned-count/",
+    "view": "views.assigned_student_count"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 136,
+    "route": "<slug:slug>/available-question-count/",
+    "view": "views.exam_available_question_count"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 141,
+    "route": "<slug:slug>/grant-extra-attempt/",
+    "view": "views.grant_extra_attempt"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 146,
+    "route": "<slug:slug>/grant-extra-attempt-group/",
+    "view": "views.grant_extra_attempt_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 151,
+    "route": "pending-work/",
+    "view": "views.teacher_pending_attempts"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 156,
+    "route": "import/extract-jobs/",
+    "view": "views.start_text_extraction"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 157,
+    "route": "import/extract-jobs/<uuid:job_id>/",
+    "view": "views.text_extraction_status"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 158,
+    "route": "question-imports/<str:token>/visual/<int:source_index>.png",
+    "view": "views.question_import_visual_preview"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 163,
+    "route": "export-jobs/<uuid:job_id>/waiting/",
+    "view": "views.export_job_waiting"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 164,
+    "route": "export-jobs/<uuid:job_id>/download/",
+    "view": "views.export_job_download"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 166,
+    "route": "question-submissions/new/",
+    "view": "views.question_submission_create"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 167,
+    "route": "question-submissions/ai-generate/",
+    "view": "views.ai_generate_submission_questions"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 172,
+    "route": "question-submissions/inbox/",
+    "view": "views.question_submission_inbox"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 173,
+    "route": "question-submissions/<int:submission_id>/",
+    "view": "views.question_submission_detail"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 178,
+    "route": "question-submissions/<int:submission_id>/delete/",
+    "view": "views.question_submission_delete"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 183,
+    "route": "question-submissions/<int:submission_id>/review/",
+    "view": "views.question_submission_review"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 188,
+    "route": "question-submissions/<int:submission_id>/questions/",
+    "view": "views.question_submission_questions"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 193,
+    "route": "question-submissions/<int:submission_id>/visual/<int:source_index>.png",
+    "view": "views.question_submission_visual_preview"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 198,
+    "route": "question-submissions/<int:submission_id>/decide/",
+    "view": "views.question_submission_decide"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 204,
+    "route": "question-submissions/<int:submission_id>/chair-review/",
+    "view": "views.question_submission_chair_review"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 209,
+    "route": "question-submissions/<int:submission_id>/chair-decide/",
+    "view": "views.question_submission_chair_decide"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 214,
+    "route": "question-bank/",
+    "view": "views.question_bank_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 215,
+    "route": "question-bank/<int:bank_id>/",
+    "view": "views.question_bank_detail"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 216,
+    "route": "question-bank/<int:bank_id>/update/",
+    "view": "views.question_bank_update"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 217,
+    "route": "question-bank/<int:bank_id>/delete/",
+    "view": "views.question_bank_delete"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 218,
+    "route": "question-bank/<int:bank_id>/bulk-add/",
+    "view": "views.question_bank_bulk_add"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 219,
+    "route": "question-bank/<int:bank_id>/bulk-add/template-download/",
+    "view": "views.question_bank_template_download"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 224,
+    "route": "question-bank/<int:bank_id>/ai-generate/",
+    "view": "views.ai_generate_bank_questions"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 229,
+    "route": "question-bank/<int:bank_id>/export.docx",
+    "view": "views.question_bank_word_export"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 234,
+    "route": "question-bank/<int:bank_id>/questions/add/",
+    "view": "views.bank_question_add"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 235,
+    "route": "question-bank/<int:bank_id>/questions/<int:question_id>/edit/",
+    "view": "views.bank_question_edit"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 243,
+    "route": "groups/",
+    "view": "views.teacher_group_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 244,
+    "route": "groups/create/form/",
+    "view": "views.create_student_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 245,
+    "route": "groups/create/",
+    "view": "views.teacher_create_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 247,
+    "route": "groups/namizedler/",
+    "view": "views.teacher_group_candidates"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 248,
+    "route": "groups/<int:group_id>/update/",
+    "view": "views.teacher_update_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 253,
+    "route": "groups/<int:group_id>/delete/",
+    "view": "views.teacher_delete_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 258,
+    "route": "groups/<int:group_id>/students/<int:student_id>/remove/",
+    "view": "views.teacher_remove_student_from_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 263,
+    "route": "groups/<int:group_id>/students/<int:student_id>/add/",
+    "view": "views.teacher_add_student_to_group"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 271,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/check/",
+    "view": "views.teacher_check_attempt"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 276,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/ai-grade/",
+    "view": "views.ai_grade_answer"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 281,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/view/",
+    "view": "views.teacher_view_attempt"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 289,
+    "route": "<slug:slug>/start/",
+    "view": "views.start_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 290,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/result/",
+    "view": "views.exam_result"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 295,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/coding/autosave/",
+    "view": "views.coding_autosave"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 300,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/coding/run/",
+    "view": "views.coding_run"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 305,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/coding/submit/",
+    "view": "views.coding_submit"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 310,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/coding/submissions/<int:submission_id>/download/",
+    "view": "views.coding_submission_download"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 315,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/",
+    "view": "views.take_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 316,
+    "route": "<slug:slug>/attempt/<int:attempt_id>/question-seen/",
+    "view": "views.question_seen"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 324,
+    "route": "<slug:slug>/question-bank/ai-generate/",
+    "view": "views.ai_generate_question_bank"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 329,
+    "route": "<slug:slug>/test-bank/",
+    "view": "views.test_question_bank"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 330,
+    "route": "<slug:slug>/questions/export.docx",
+    "view": "views.exam_questions_word_export"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 335,
+    "route": "<slug:slug>/test-bank/template-download/",
+    "view": "views.test_question_bank_template_download"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 340,
+    "route": "<slug:slug>/create-bank/",
+    "view": "views.create_question_bank"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 345,
+    "route": "<slug:slug>/process-bank/",
+    "view": "views.process_question_bank"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 353,
+    "route": "<slug:slug>/add-question/",
+    "view": "views.add_exam_question"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 354,
+    "route": "<slug:slug>/questions-bank/",
+    "view": "views.teacher_questions_bank"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 355,
+    "route": "<slug:slug>/questions/<int:question_id>/edit/",
+    "view": "views.edit_exam_question"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 360,
+    "route": "<slug:slug>/questions/<int:question_id>/delete/",
+    "view": "views.delete_exam_question"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 365,
+    "route": "<slug:slug>/questions/page/",
+    "view": "views.teacher_exam_detail_questions_page"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 373,
+    "route": "<slug:slug>/results/",
+    "view": "views.teacher_exam_results"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 374,
+    "route": "<slug:slug>/statistics/",
+    "view": "views.teacher_exam_statistics"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 376,
+    "route": "<slug:slug>/languages/",
+    "view": "views.exam_language_manager"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 378,
+    "route": "<slug:slug>/bank-picker/",
+    "view": "views.exam_bank_picker"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 379,
+    "route": "<slug:slug>/results/delete-attempts/",
+    "view": "views.delete_exam_attempts"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 384,
+    "route": "<slug:slug>/results/export.xlsx",
+    "view": "views.export_exam_results_xlsx"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 389,
+    "route": "<slug:slug>/toggle-active/",
+    "view": "views.toggle_exam_active"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 394,
+    "route": "<slug:slug>/toggle-results-visibility/",
+    "view": "views.toggle_exam_results_visibility"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 399,
+    "route": "<slug:slug>/edit/",
+    "view": "views.createAndEditExamView"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 400,
+    "route": "<slug:slug>/delete/",
+    "view": "views.delete_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 401,
+    "route": "deleted/",
+    "view": "views.deleted_exams_list"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 402,
+    "route": "<slug:slug>/restore/",
+    "view": "views.restore_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 403,
+    "route": "<slug:slug>/permanent-delete/",
+    "view": "views.permanent_delete_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 404,
+    "route": "<slug:slug>/archive/",
+    "view": "views.toggle_exam_archive"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 405,
+    "route": "<slug:slug>/duplicate/",
+    "view": "views.duplicate_exam"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 409,
+    "route": "supervision/api/log/<int:attempt_id>/",
+    "view": "views.log_incident_api"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 414,
+    "route": "supervision/api/status/<int:attempt_id>/",
+    "view": "views.supervision_status_api"
+  },
+  {
+    "file": "apps/exams/urls.py",
+    "line": 420,
+    "route": "<slug:slug>/",
+    "view": "views.teacher_exam_detail"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 16,
+    "route": "setirler/",
+    "view": "views.rows"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 17,
+    "route": "kafedralar/",
+    "view": "views.chairs"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 18,
+    "route": "muellimler/",
+    "view": "views.teachers"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 19,
+    "route": "secimler/",
+    "view": "views.options"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 20,
+    "route": "tedris-plani/",
+    "view": "views.curriculum"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 22,
+    "route": "tapsiriq/",
+    "view": "views.task"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 23,
+    "route": "setir/yadda-saxla/",
+    "view": "views.row_save"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 24,
+    "route": "setir/sil/",
+    "view": "views.row_delete"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 25,
+    "route": "bolgu/",
+    "view": "views.assign"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 26,
+    "route": "bolgu/sil/",
+    "view": "views.unassign_view"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 27,
+    "route": "bolgu/tesdiq/",
+    "view": "views.confirm"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 28,
+    "route": "duzelis/",
+    "view": "views.amend"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 30,
+    "route": "emel/",
+    "view": "workload_action"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 32,
+    "route": "mene/setirler/",
+    "view": "views.my_rows"
+  },
+  {
+    "file": "apps/workload/urls.py",
+    "line": 33,
+    "route": "mene/ixrac/",
+    "view": "views.my_export"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 10,
+    "route": "overview/",
+    "view": "views.overview_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 11,
+    "route": "server/",
+    "view": "views.server_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 12,
+    "route": "containers/",
+    "view": "views.containers_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 13,
+    "route": "application/",
+    "view": "views.application_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 14,
+    "route": "database/",
+    "view": "views.database_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 15,
+    "route": "redis-celery/",
+    "view": "views.redis_celery_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 16,
+    "route": "exams/",
+    "view": "views.exams_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 17,
+    "route": "alerts/",
+    "view": "views.alerts_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 18,
+    "route": "logs/",
+    "view": "views.logs_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 19,
+    "route": "incidents/",
+    "view": "views.incidents_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 20,
+    "route": "incidents/<int:incident_id>/action/",
+    "view": "views.incident_action_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 21,
+    "route": "security-events/",
+    "view": "views.security_events_api"
+  },
+  {
+    "file": "apps/monitoring/urls.py",
+    "line": 22,
+    "route": "alertmanager-webhook/",
+    "view": "views.alertmanager_webhook"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 9,
+    "route": "",
+    "view": "views.notification_list"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 11,
+    "route": "<int:pk>/",
+    "view": "views.notification_detail"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 13,
+    "route": "<int:pk>/read/",
+    "view": "views.notification_mark_read"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 14,
+    "route": "<int:pk>/unread/",
+    "view": "views.notification_mark_unread"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 15,
+    "route": "read-all/",
+    "view": "views.notification_mark_all_read"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 17,
+    "route": "<int:pk>/delete/",
+    "view": "views.notification_delete"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 18,
+    "route": "bulk-delete/",
+    "view": "views.notification_bulk_delete"
+  },
+  {
+    "file": "apps/notifications/urls.py",
+    "line": 20,
+    "route": "unread-count/",
+    "view": "views.unread_count"
+  },
+  {
+    "file": "apps/trial_exams/admin.py",
+    "line": 90,
+    "route": "<int:pk>/reply/",
+    "view": "self.admin_site.admin_view(reply_to_trial_request)"
+  },
+  {
+    "file": "apps/trial_exams/urls.py",
+    "line": 8,
+    "route": "trial-exam/",
+    "view": "trial_exam_request_page"
+  },
+  {
+    "file": "apps/accounts/tests/test_security_controls.py",
+    "line": 19,
+    "route": "boom/",
+    "view": "boom_view"
+  },
+  {
+    "file": "apps/accounts/tests/test_security_controls.py",
+    "line": 20,
+    "route": "ok/",
+    "view": "ok_view"
+  },
+  {
+    "file": "apps/live_exam/api/v1/urls.py",
+    "line": 14,
+    "route": "live/<str:pin>/state/",
+    "view": "views.live_state_json_v1"
+  },
+  {
+    "file": "core/admin_site.py",
+    "line": 91,
+    "route": "verify-otp/",
+    "view": "self.verify_otp_view"
+  },
+  {
+    "file": "core/admin_site.py",
+    "line": 92,
+    "route": "resend-otp/",
+    "view": "self.resend_otp_view"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 61,
+    "route": "i18n/",
+    "view": "include('django.conf.urls.i18n')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 62,
+    "route": "jsi18n/",
+    "view": "JavaScriptCatalog.as_view()"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 64,
+    "route": "blog/",
+    "view": "include('apps.blog.legacy_urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 66,
+    "route": "",
+    "view": "include('apps.contact.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 69,
+    "route": "",
+    "view": "include(('apps.trial_exams.urls', 'trial_exams'), namespace='trial_exams')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 70,
+    "route": "",
+    "view": "include('apps.blog.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 71,
+    "route": "",
+    "view": "include('apps.live_exam.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 72,
+    "route": "courses/",
+    "view": "include('apps.courses.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 73,
+    "route": "assignments/",
+    "view": "include('apps.assignments.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 74,
+    "route": "projects/",
+    "view": "include('apps.projects.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 75,
+    "route": "labs/",
+    "view": "include('apps.labs.urls')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 77,
+    "route": "accounts/",
+    "view": "include(('apps.accounts.urls', 'accounts'), namespace='accounts')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 79,
+    "route": "jurnal/",
+    "view": "include(('apps.registrar.urls', 'registrar'), namespace='registrar')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 81,
+    "route": "^exmas/?$",
+    "view": "legacy_exmas_redirect"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 82,
+    "route": "^exmas/(?P<path>.*)$",
+    "view": "legacy_exmas_redirect"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 83,
+    "route": "exams/",
+    "view": "include(('apps.exams.urls', 'exams'), namespace='exams')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 85,
+    "route": "ders-yuku/",
+    "view": "include(('apps.workload.urls', 'workload'), namespace='workload')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 87,
+    "route": "appeals/",
+    "view": "include(('apps.appeals.urls', 'appeals'), namespace='appeals')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 89,
+    "route": "muracietler/",
+    "view": "include(('apps.applications.urls', 'applications'), namespace='applications')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 91,
+    "route": "organizations/",
+    "view": "include(('apps.organizations.urls', 'organizations'), namespace='organizations')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 96,
+    "route": "audit/",
+    "view": "include(('apps.audit.urls', 'audit'), namespace='audit')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 98,
+    "route": "notifications/",
+    "view": "include(('apps.notifications.urls', 'notifications'), namespace='notifications')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 103,
+    "route": "api/ai-assistant/",
+    "view": "include(('apps.ai_assistant.urls', 'ai_assistant'), namespace='ai_assistant')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 105,
+    "route": "api/superadmin/monitoring/",
+    "view": "include(('apps.monitoring.urls', 'monitoring'), namespace='monitoring')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 107,
+    "route": "api/v1/",
+    "view": "include(('apps.live_exam.api.v1.urls', 'live_exam_api_v1'), namespace='live_exam_api_v1')"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 108,
+    "route": "health/",
+    "view": "health_check"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 109,
+    "route": "ping/",
+    "view": "ping"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 110,
+    "route": "metrics/",
+    "view": "metrics_view"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 51,
+    "route": "robots.txt",
+    "view": "robots_txt"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 52,
+    "route": "sitemap.xml",
+    "view": "sitemap_xml"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 53,
+    "route": "site.webmanifest",
+    "view": "site_webmanifest"
+  },
+  {
+    "file": "config/urls.py",
+    "line": 117,
+    "route": "test-error/",
+    "view": "test_error"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "DEBUG": false,
+  "SESSION_COOKIE_SECURE": false,
+  "CSRF_COOKIE_SECURE": false,
+  "SESSION_COOKIE_HTTPONLY": true,
+  "CSRF_COOKIE_HTTPONLY": false,
+  "SECURE_SSL_REDIRECT": false,
+  "SECURE_HSTS_SECONDS": 0,
+  "SECURE_HSTS_INCLUDE_SUBDOMAINS": false,
+  "SECURE_HSTS_PRELOAD": false,
+  "X_FRAME_OPTIONS": "DENY",
+  "EMS_DB_ROLE_ENFORCE": null,
+  "PUBLIC_SIGNUP_ENABLED": null,
+  "MICROSOFT_CLARITY_PROJECT_ID": true,
+  "versions": {
+    "redis": "7.1.0",
+    "celery": "5.5.2",
+    "Django": "5.2.15",
+    "daphne": "4.2.2",
+    "setuptools": "83.0.0"
+  }
+}

@@ -1,0 +1,73 @@
+ current_database | pg_size_pretty 
+------------------+----------------
+ emsarena_db      | 2796 MB
+(1 row)
+
+               relname                | n_live_tup 
+--------------------------------------+------------
+ registrar_curriculumsubject          |       5604
+ registrar_curriculum                 |        255
+ registrar_program                    |        101
+ registrar_subject                    |         96
+ audit_auditlog                       |         94
+ django_session                       |          8
+ django_migrations                    |          4
+ monitoring_securityevent             |          1
+ registrar_componentscorecorrection   |          0
+ applications_applicationcounter      |          0
+ monitoring_incident                  |          0
+ auth_permission                      |          0
+ legacy_import_legacyentitymapversion |          0
+ exams_bankquestionoption             |          0
+ exams_finalexamticket                |          0
+ organizations_organization           |          0
+ blog_post                            |          0
+ applications_applicationwatch        |          0
+ syllabus_syllabusversion             |          0
+ legacy_import_legacyentitymap        |          0
+(20 rows)
+
+    rolname    | rolsuper | rolbypassrls 
+---------------+----------+--------------
+ emsarena_user | t        | t
+(1 row)
+
+ tables | rls_tables | forced_rls_tables 
+--------+------------+-------------------
+    171 |        141 |               139
+(1 row)
+
+      app      |                          latest_name                           | count 
+---------------+----------------------------------------------------------------+-------
+ accounts      | 0022_evidence_reason_student_reinstatement                     |    22
+ admin         | 0003_logentry_add_action_flag_choices                          |     3
+ ai_assistant  | 0003_rls_aiassistantlog                                        |     3
+ appeals       | 0003_alter_appeal_status_alter_appealitem_appeal_type_and_more |     3
+ applications  | 0005_reopened_event_kind                                       |     5
+ assignments   | 0001_initial                                                   |     1
+ audit         | 0003_rls_auditlog                                              |     3
+ auth          | 0012_alter_user_first_name_max_length                          |    12
+ blog          | 0005_post_indexes                                              |     5
+ contact       | 0004_reply_delivery_status                                     |     5
+ contenttypes  | 0002_remove_content_type_name                                  |     2
+ courses       | 0001_initial                                                   |     1
+ exams         | 0065_question_submission_event_append_only                     |    65
+ labs          | 0002_labsubmission_index                                       |     2
+ legacy_import | 0007_legacy_map_lookup_index                                   |     7
+ live_exam     | 0002_liveanswer_liveans_session_question_idx                   |     2
+ monitoring    | 0002_rls_securityevent                                         |     2
+ notifications | 0004_alter_inappnotification_notification_type                 |     4
+ organizations | 0050_tutor_coordinator_parity                                  |    50
+ projects      | 0002_project_indexes                                           |     2
+ registrar     | 0070_schedule_slot_soft_delete_parking                         |    70
+ sessions      | 0001_initial                                                   |     1
+ syllabus      | 0003_normalize_open_assessment_split                           |     3
+ trial_exams   | 0001_initial                                                   |     1
+ workload      | 0006_seed_stage4_permissions                                   |     6
+(25 rows)
+
+ unvalidated_constraints 
+-------------------------
+                       0
+(1 row)
+

@@ -1,0 +1,42 @@
+ M apps/accounts/static/accounts/css/exam_score_entry.css
+ M apps/accounts/static/accounts/css/profile.css
+ M apps/accounts/static/accounts/css/profile/sections/my_subjects.css
+ M apps/accounts/static/accounts/js/exam_score_entry.js
+ M apps/accounts/templates/accounts/partials/_exam_score_entry_content.html
+ M apps/accounts/templates/accounts/partials/_pending_answers_content.html
+ M apps/accounts/templates/accounts/profile/sections/_my_subjects.html
+ M apps/accounts/templates/accounts/profile/sections/_my_subjects_header_actions.html
+ M apps/accounts/templates/accounts/profile/sections/_pending_answers.html
+ M apps/accounts/templates/accounts/profile/sections/_statistics.html
+ D apps/accounts/templates/accounts/profile/sections/statistics/_filter_bar.html
+ D apps/accounts/templates/accounts/profile/sections/statistics/_summary_cards.html
+ M apps/accounts/urls.py
+ M apps/accounts/views/exam_score_entry.py
+ M apps/accounts/views/profile/_sections/exam_score_entry.py
+ M apps/accounts/views/profile/_sections/statistics.py
+ M apps/monitoring/tests/test_incidents.py
+ M apps/monitoring/views.py
+ M apps/registrar/exam_attempt_history.py
+ M apps/registrar/exam_score_entry.py
+ M apps/registrar/models/__init__.py
+ M apps/registrar/models/exam_score_entry.py
+ M apps/registrar/public.py
+ M core/media_policies.py
+ M core/ui/status_catalog.py
+ M docker/alertmanager/alertmanager.tmpl.yml
+ M docs/operations/SISTEM_MONITORINQI.md
+ M scripts/deploy/remote_deploy.sh
+?? apps/accounts/services/statistics_metrics/
+?? apps/accounts/static/accounts/css/profile/sections/pending_answers.css
+?? apps/accounts/templates/accounts/partials/_pending_answers_header_actions.html
+?? apps/accounts/templates/accounts/partials/exam_score_entry/
+?? apps/accounts/templates/accounts/profile/sections/_my_subjects_card.html
+?? apps/accounts/views/exam_score_import.py
+?? apps/registrar/exam_score_import.py
+?? apps/registrar/exam_score_sheets.py
+?? apps/registrar/migrations/0071_exam_score_sheet.py
+?? apps/registrar/migrations/0072_rls_exam_score_sheet.py
+?? apps/registrar/student_journal_context.py
+?? apps/registrar/student_subjects_context.py
+?? apps/registrar/tests/test_student_sections_redesign.py
+?? docs/audits/2026-09-12-codex/

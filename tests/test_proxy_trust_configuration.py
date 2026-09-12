@@ -64,6 +64,25 @@ def test_obsolete_cloudflare_runtime_assets_are_absent():
     assert not (ROOT / "scripts/deploy/sync_cloudflare_networks.py").exists()
 
 
+def _openssl_supports_checkhost() -> bool:
+    """`validate_direct_tls.sh` OpenSSL 1.1+ `-checkhost/-checkip` seçimlərini işlədir.
+
+    macOS-un sistem `openssl`-i LibreSSL-dir və bu seçimləri tanımır («unknown
+    option -checkhost») — deploy hədəfi Linux/OpenSSL 3-dür, ona görə bu iki
+    test uyğun olmayan lokal OpenSSL-də SƏHV deyil, KEÇİRİLİR (2026-09-13).
+    """
+    if shutil.which("openssl") is None:
+        return False
+    probe = subprocess.run(["openssl", "x509", "-help"], capture_output=True, text=True)
+    return "-checkhost" in (probe.stdout + probe.stderr)
+
+
+_CHECKHOST_SKIP = pytest.mark.skipif(
+    not _openssl_supports_checkhost(),
+    reason="openssl with -checkhost/-checkip (OpenSSL ≥ 1.1) is required; LibreSSL lacks it",
+)
+
+
 def _openssl(*args, cwd=None):
     subprocess.run(
         ["openssl", *args],
@@ -74,7 +93,7 @@ def _openssl(*args, cwd=None):
     )
 
 
-@pytest.mark.skipif(shutil.which("openssl") is None, reason="openssl is required")
+@_CHECKHOST_SKIP
 def test_tls_validator_accepts_matching_leaf_and_intermediate_fullchain(tmp_path):
     root_key = tmp_path / "root.key"
     root_cert = tmp_path / "root.crt"
@@ -194,7 +213,7 @@ def test_tls_validator_accepts_matching_leaf_and_intermediate_fullchain(tmp_path
     assert "validated" in result.stdout
 
 
-@pytest.mark.skipif(shutil.which("openssl") is None, reason="openssl is required")
+@_CHECKHOST_SKIP
 def test_tls_validator_rejects_self_signed_production_certificate(tmp_path):
     key = tmp_path / "self.key"
     cert = tmp_path / "self.crt"

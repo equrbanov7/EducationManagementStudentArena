@@ -204,3 +204,6 @@ QKU_Stress_Test_Hesabat_*.docx
 
 # Böyük dizayn-handoff arxivləri GitHub-a getmir (100MB limit)
 docs/design/*.zip
+
+# Audit sübut qovluğundakı coverage JSON-ları (9 MB+, generasiya olunan artefakt)
+docs/audits/*/evidence/coverage*.json

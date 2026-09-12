@@ -1,0 +1,48 @@
+{
+  "environment": "disposable synthetic PostgreSQL + local Django runserver; telemetry disabled",
+  "browser": "Playwright Chromium headed",
+  "observations": [
+    {
+      "role": "student",
+      "section": "my-subjects",
+      "desktop": "rendered; console errors 0",
+      "mobile": {
+        "viewport_width": 390,
+        "document_width": 390,
+        "screenshot": "output/playwright/codex-student-mobile-final.png"
+      }
+    },
+    {
+      "role": "student",
+      "section": "statistics",
+      "render": "success; personal academic blocks",
+      "viewport_width": 390,
+      "document_width": 390
+    },
+    {
+      "role": "teacher",
+      "section": "statistics",
+      "render": "success; console errors 0",
+      "screenshot": "output/playwright/codex-teacher-statistics.png"
+    },
+    {
+      "role": "exam_center",
+      "section": "exam-score-entry",
+      "preview": "one new score, 32",
+      "apply": "written, 32; console errors 0",
+      "repeat_drag_drop": {
+        "filename": "CODEX_TEST_drag.csv",
+        "score": "32",
+        "status": "unchanged",
+        "apply_hidden": true
+      },
+      "screenshot": "output/playwright/codex-import-applied.png"
+    }
+  ],
+  "not_tested": [
+    "real AI invocation",
+    "all roles all mutations in browser",
+    "screen reader certification",
+    "large concurrent exam workload"
+  ]
+}

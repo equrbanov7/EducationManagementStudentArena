@@ -1,0 +1,9 @@
+{
+  "file": "/Users/elvin/Desktop/Programming Folders/EMSArena/EMSArena/backups/postgres/monthly/emsarena_db-202609.sql.gz",
+  "compressed_bytes": 708503750,
+  "expanded_bytes": 2456665751,
+  "sha256": "b3f3083268ec7f5f72d2be11aeda2c0634719cfdb433a8a204c2789270848bf7",
+  "gzip_integrity": "PASS",
+  "elapsed_seconds": 4.06,
+  "restore": "NOT TESTED"
+}

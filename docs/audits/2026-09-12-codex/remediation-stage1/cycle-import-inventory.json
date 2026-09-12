@@ -1,0 +1,380 @@
+[
+  {
+    "file": "apps/organizations/structure_registry_actions.py",
+    "line": 119,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import StudentAcademicRecord"
+  },
+  {
+    "file": "apps/organizations/group_actions.py",
+    "line": 331,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.registrar import transfer as group_transfer"
+  },
+  {
+    "file": "apps/organizations/group_actions.py",
+    "line": 396,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.registrar import transfer as group_transfer"
+  },
+  {
+    "file": "apps/organizations/structure_views/unit_detail.py",
+    "line": 47,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import CourseOffering, Program, StudentAcademicRecord"
+  },
+  {
+    "file": "apps/organizations/structure_views/registry.py",
+    "line": 132,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import StudentAcademicRecord"
+  },
+  {
+    "file": "apps/organizations/structure_views/registry.py",
+    "line": 506,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import CourseOffering"
+  },
+  {
+    "file": "apps/organizations/structure_views/_shared.py",
+    "line": 12,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import CourseOffering"
+  },
+  {
+    "file": "apps/organizations/management/commands/seed_western_caspian.py",
+    "line": 25,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import finals as registrar_finals"
+  },
+  {
+    "file": "apps/organizations/management/commands/seed_western_caspian.py",
+    "line": 26,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import gradebook as registrar_gradebook"
+  },
+  {
+    "file": "apps/organizations/management/commands/seed_western_caspian.py",
+    "line": 27,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import schedule as registrar_schedule"
+  },
+  {
+    "file": "apps/organizations/management/commands/seed_western_caspian.py",
+    "line": 28,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import services as registrar_services"
+  },
+  {
+    "file": "apps/organizations/management/commands/seed_western_caspian.py",
+    "line": 29,
+    "source": "organizations",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import (\n    CourseOffering,\n    Curriculum,\n    CurriculumSubject,\n    Enrollment,\n    Program,\n    SlotKind,\n    StudentAcademicRecord,\n    Subject,\n)"
+  },
+  {
+    "file": "apps/exams/forms/exam.py",
+    "line": 372,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import Subject"
+  },
+  {
+    "file": "apps/exams/services/journal_sync.py",
+    "line": 132,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": false,
+    "import": "from apps.registrar.public import record_exam_result"
+  },
+  {
+    "file": "apps/exams/services/journal_sync.py",
+    "line": 169,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": false,
+    "import": "from apps.registrar.public import exam_eligibility"
+  },
+  {
+    "file": "apps/exams/services/journal_sync.py",
+    "line": 204,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": false,
+    "import": "from apps.registrar.public import exam_eligibility_batch"
+  },
+  {
+    "file": "apps/exams/services/final_center/xlsx_report.py",
+    "line": 29,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import StudentAcademicRecord"
+  },
+  {
+    "file": "apps/exams/views/student/results.py",
+    "line": 322,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": false,
+    "import": "from apps.registrar.public import exam_result_summary"
+  },
+  {
+    "file": "apps/exams/views/teacher/submission_meta.py",
+    "line": 58,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import Subject"
+  },
+  {
+    "file": "apps/exams/views/teacher/question_library/crud.py",
+    "line": 46,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import Subject"
+  },
+  {
+    "file": "apps/exams/views/teacher/exams/lookups.py",
+    "line": 61,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": false,
+    "import": "from apps.registrar.models import Subject"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 226,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import services"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 227,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import (\n            AttendanceStatus,\n            Curriculum,\n            CurriculumSubject,\n            Lesson,\n            LessonKind,\n            LessonMark,\n            Program,\n            StudentAcademicRecord,\n            Subject,\n        )"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 319,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import services"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 320,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import (\n            CourseOffering,\n            Curriculum,\n            CurriculumSubject,\n            Program,\n            StudentAcademicRecord,\n            Subject,\n        )"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 409,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 452,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar.corrections import apply_correction"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 453,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import (\n            AttendanceStatus,\n            CorrectionField,\n            CorrectionReason,\n            JournalCorrection,\n            LessonKind,\n            LessonMark,\n        )"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 536,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar.gradebook import recompute_absence_hours"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 537,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import AttendanceStatus, LessonMark, Program"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 538,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": true,
+    "import": "from apps.registrar.public import record_exam_result"
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 81,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar.gradebook import recompute_absence_hours"
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 82,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark"
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 83,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "public",
+    "management_command": true,
+    "import": "from apps.registrar.public import record_exam_result"
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 136,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "internal",
+    "management_command": true,
+    "import": "from apps.registrar import services"
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 137,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import (\n        CourseOffering,\n        Curriculum,\n        CurriculumSubject,\n        Program,\n        StudentAcademicRecord,\n        Subject,\n    )"
+  },
+  {
+    "file": "apps/exams/management/commands/seed_demo_hierarchy.py",
+    "line": 370,
+    "source": "exams",
+    "target": "registrar",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.registrar.models import Subject"
+  },
+  {
+    "file": "apps/registrar/individual_plan_views.py",
+    "line": 19,
+    "source": "registrar",
+    "target": "exams",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.exams.views.shared.tenant import get_active_organization"
+  },
+  {
+    "file": "apps/registrar/individual_plan_views.py",
+    "line": 20,
+    "source": "registrar",
+    "target": "organizations",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.organizations.group_actions import _visible_group"
+  },
+  {
+    "file": "apps/registrar/individual_plan_views.py",
+    "line": 21,
+    "source": "registrar",
+    "target": "organizations",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.organizations.groups_registry import can_view_groups, group_scope"
+  },
+  {
+    "file": "apps/registrar/individual_plan.py",
+    "line": 38,
+    "source": "registrar",
+    "target": "organizations",
+    "surface": "internal",
+    "management_command": false,
+    "import": "from apps.organizations.groups_registry import group_meta"
+  },
+  {
+    "file": "apps/registrar/management/commands/import_curriculum_plans.py",
+    "line": 61,
+    "source": "registrar",
+    "target": "organizations",
+    "surface": "models",
+    "management_command": true,
+    "import": "from apps.organizations.models import Organization"
+  }
+]

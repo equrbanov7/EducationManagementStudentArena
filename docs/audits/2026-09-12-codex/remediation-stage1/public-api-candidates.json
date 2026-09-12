@@ -1,0 +1,1674 @@
+[
+  {
+    "file": "apps/labs/apps.py",
+    "line": 11,
+    "module": "apps.courses",
+    "names": [
+      "dashboard_sources"
+    ]
+  },
+  {
+    "file": "apps/assignments/apps.py",
+    "line": 13,
+    "module": "apps.courses",
+    "names": [
+      "dashboard_sources"
+    ]
+  },
+  {
+    "file": "apps/legacy_import/services/rehearsal_identity_phase.py",
+    "line": 141,
+    "module": "apps.accounts.services.identity_access",
+    "names": [
+      "IdentityAccessError"
+    ]
+  },
+  {
+    "file": "apps/legacy_import/services/rehearsal_sar_targets.py",
+    "line": 155,
+    "module": "apps.accounts.services.identity_access",
+    "names": [
+      "IdentityAccessError"
+    ]
+  },
+  {
+    "file": "apps/legacy_import/services/repair_pseudo_groups.py",
+    "line": 285,
+    "module": "apps.registrar",
+    "names": [
+      "movements"
+    ]
+  },
+  {
+    "file": "apps/legacy_import/services/rehearsal_worker_targets.py",
+    "line": 133,
+    "module": "apps.accounts.services.identity_access",
+    "names": [
+      "IdentityAccessError"
+    ]
+  },
+  {
+    "file": "apps/legacy_import/services/rehearsal_structure_phase.py",
+    "line": 84,
+    "module": "apps.organizations.unit_types",
+    "names": [
+      "validate_unit_type_for_org"
+    ]
+  },
+  {
+    "file": "apps/projects/apps.py",
+    "line": 11,
+    "module": "apps.courses",
+    "names": [
+      "dashboard_sources"
+    ]
+  },
+  {
+    "file": "apps/registrar/cabinet_policy.py",
+    "line": 53,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/registrar/cabinet_policy.py",
+    "line": 144,
+    "module": "apps.syllabus.policy",
+    "names": [
+      "assessment_weights"
+    ]
+  },
+  {
+    "file": "apps/registrar/public.py",
+    "line": 456,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/syllabus_notice.py",
+    "line": 24,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/syllabus_notice.py",
+    "line": 25,
+    "module": "apps.syllabus.services.offerings",
+    "names": [
+      "STATE_APPROVED",
+      "STATE_ARCHIVED",
+      "STATE_DRAFT",
+      "STATE_MISSING",
+      "STATE_PENDING",
+      "STATE_REJECTED",
+      "STATE_REVISION"
+    ]
+  },
+  {
+    "file": "apps/registrar/journal_topics.py",
+    "line": 35,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/syllabus_pdf.py",
+    "line": 167,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/registrar/lessons_log.py",
+    "line": 424,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/lessons_log.py",
+    "line": 425,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SectionKey"
+    ]
+  },
+  {
+    "file": "apps/registrar/syllabus_views.py",
+    "line": 25,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/syllabus_views.py",
+    "line": 26,
+    "module": "apps.syllabus.document",
+    "names": [
+      "build_document"
+    ]
+  },
+  {
+    "file": "apps/registrar/journal_policy.py",
+    "line": 102,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/registrar/journal_notifications.py",
+    "line": 52,
+    "module": "apps.notifications.services.crud",
+    "names": [
+      "create_notification"
+    ]
+  },
+  {
+    "file": "apps/blog/profile_sections.py",
+    "line": 127,
+    "module": "apps.accounts.views._helpers.formatting",
+    "names": [
+      "_query_string"
+    ]
+  },
+  {
+    "file": "apps/blog/profile_sections.py",
+    "line": 128,
+    "module": "apps.accounts.views.profile.search",
+    "names": [
+      "_normalize_public_profile_query_value"
+    ]
+  },
+  {
+    "file": "apps/blog/profile_sections.py",
+    "line": 277,
+    "module": "apps.accounts.views.profile.search",
+    "names": [
+      "_parse_public_profile_page_number",
+      "_sanitize_public_profile_search_query",
+      "_validate_public_profile_category"
+    ]
+  },
+  {
+    "file": "apps/blog/profile_sections.py",
+    "line": 458,
+    "module": "apps.accounts",
+    "names": [
+      "profile_hooks"
+    ]
+  },
+  {
+    "file": "apps/blog/views/shared/module_gate.py",
+    "line": 24,
+    "module": "apps.organizations.cabinet_modules",
+    "names": [
+      "is_module_enabled"
+    ]
+  },
+  {
+    "file": "apps/syllabus/services/units.py",
+    "line": 24,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "ancestor_unit_ids",
+      "resolve_ancestor"
+    ]
+  },
+  {
+    "file": "apps/syllabus/services/scoping.py",
+    "line": 18,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "get_permission_scope",
+      "user_scope_covers_unit"
+    ]
+  },
+  {
+    "file": "apps/syllabus/services/scoping.py",
+    "line": 70,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "ORG_WIDE_SCOPE"
+    ]
+  },
+  {
+    "file": "apps/syllabus/services/scoping.py",
+    "line": 88,
+    "module": "apps.organizations.services",
+    "names": [
+      "get_active_memberships"
+    ]
+  },
+  {
+    "file": "apps/ai_assistant/context_builder.py",
+    "line": 325,
+    "module": "apps.exams.domain.attempts",
+    "names": [
+      "ExamAttempt"
+    ]
+  },
+  {
+    "file": "apps/ai_assistant/context_builder.py",
+    "line": 326,
+    "module": "apps.exams.domain.exam_definition",
+    "names": [
+      "Exam"
+    ]
+  },
+  {
+    "file": "apps/ai_assistant/context_builder.py",
+    "line": 383,
+    "module": "apps.organizations.permissions",
+    "names": [
+      "has_permission"
+    ]
+  },
+  {
+    "file": "apps/accounts/academic_summary.py",
+    "line": 49,
+    "module": "apps.registrar",
+    "names": [
+      "analytics",
+      "exam_eligibility"
+    ]
+  },
+  {
+    "file": "apps/accounts/academic_records.py",
+    "line": 78,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "UnitScope"
+    ]
+  },
+  {
+    "file": "apps/accounts/academic_records.py",
+    "line": 79,
+    "module": "apps.registrar",
+    "names": [
+      "analytics",
+      "exam_eligibility",
+      "transcript"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_editor.py",
+    "line": 29,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_editor"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_editor.py",
+    "line": 30,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_editor_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_editor.py",
+    "line": 31,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_manage"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_editor.py",
+    "line": 32,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_manage_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_manage.py",
+    "line": 25,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_manage"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/schedule_manage.py",
+    "line": 26,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_manage_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/registrar_catalog.py",
+    "line": 26,
+    "module": "apps.registrar",
+    "names": [
+      "catalog_console"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/journal_close.py",
+    "line": 29,
+    "module": "apps.registrar",
+    "names": [
+      "journal_close"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/journal_close.py",
+    "line": 30,
+    "module": "apps.registrar",
+    "names": [
+      "journal_scope"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/academic_records.py",
+    "line": 24,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "ORG_WIDE_SCOPE",
+      "get_permission_scope",
+      "scope_org_units"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/academic_records.py",
+    "line": 25,
+    "module": "apps.registrar",
+    "names": [
+      "transcript"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/student_registry.py",
+    "line": 67,
+    "module": "apps.registrar",
+    "names": [
+      "transcript"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/exam_chance.py",
+    "line": 21,
+    "module": "apps.exams.services.access_policy",
+    "names": [
+      "SECURE_EXAM_CATEGORIES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/kollokvium_windows.py",
+    "line": 26,
+    "module": "apps.registrar",
+    "names": [
+      "kollokvium_notifications"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/kollokvium_windows.py",
+    "line": 27,
+    "module": "apps.registrar",
+    "names": [
+      "kollokvium_windows"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/notification_scopes.py",
+    "line": 31,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "get_permission_scope"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/notification_scopes.py",
+    "line": 32,
+    "module": "apps.organizations.structure_views.constants",
+    "names": [
+      "KAFEDRA_UNIT_TYPES",
+      "TEACHER_ROLE_NAMES"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/notification_scopes.py",
+    "line": 33,
+    "module": "apps.organizations.views",
+    "names": [
+      "_visible_units_queryset"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/rim/create_options.py",
+    "line": 77,
+    "module": "apps.organizations.unit_types",
+    "names": [
+      "UNIT_TYPES_BY_ORG"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/rim/create_unit.py",
+    "line": 85,
+    "module": "apps.organizations.unit_types",
+    "names": [
+      "UNIT_TYPES_BY_ORG"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/rim/create_unit.py",
+    "line": 103,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "get_permission_scope"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/rim/create_unit.py",
+    "line": 104,
+    "module": "apps.organizations.views",
+    "names": [
+      "_visible_units_queryset"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/statistics_metrics/org.py",
+    "line": 32,
+    "module": "apps.appeals.constants",
+    "names": [
+      "APPEAL_STATUS_PENDING",
+      "APPEAL_STATUS_UNDER_REVIEW"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/statistics_metrics/exam_center.py",
+    "line": 20,
+    "module": "apps.appeals.constants",
+    "names": [
+      "APPEAL_STATUS_ACCEPTED",
+      "APPEAL_STATUS_PARTIALLY_ACCEPTED",
+      "APPEAL_STATUS_PENDING",
+      "APPEAL_STATUS_REJECTED",
+      "APPEAL_STATUS_UNDER_REVIEW"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/statistics_metrics/student.py",
+    "line": 151,
+    "module": "apps.appeals.constants",
+    "names": [
+      "APPEAL_STATUS_PENDING",
+      "APPEAL_STATUS_UNDER_REVIEW"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/movements.py",
+    "line": 117,
+    "module": "apps.registrar.movements",
+    "names": [
+      "RULES"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/movements.py",
+    "line": 315,
+    "module": "apps.registrar",
+    "names": [
+      "movements"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/movements.py",
+    "line": 421,
+    "module": "apps.registrar",
+    "names": [
+      "movements"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/teachers.py",
+    "line": 20,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "scope_memberships_by_unit"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/actions.py",
+    "line": 252,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "scope_memberships_by_unit"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/actions.py",
+    "line": 337,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "scope_memberships_by_unit"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/page.py",
+    "line": 51,
+    "module": "apps.organizations.structure_views.registry",
+    "names": [
+      "unit_type_label"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/page.py",
+    "line": 244,
+    "module": "apps.registrar",
+    "names": [
+      "transcript"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/lookups.py",
+    "line": 17,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "scope_org_units"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/academic.py",
+    "line": 286,
+    "module": "apps.registrar.attendance",
+    "names": [
+      "DEFAULT_ABSENCE_LIMIT_PERCENT"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/academic.py",
+    "line": 345,
+    "module": "apps.registrar.attendance",
+    "names": [
+      "attendance_score"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/academic_actions.py",
+    "line": 88,
+    "module": "apps.registrar",
+    "names": [
+      "transfer"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/academic_actions.py",
+    "line": 163,
+    "module": "apps.registrar",
+    "names": [
+      "status"
+    ]
+  },
+  {
+    "file": "apps/accounts/services/people/permissions.py",
+    "line": 26,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "EMPTY_SCOPE",
+      "ORG_WIDE_SCOPE",
+      "UnitScope",
+      "get_permission_scope"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_helpers/rbac.py",
+    "line": 503,
+    "module": "apps.organizations.cabinet_modules",
+    "names": [
+      "disabled_sections"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_helpers/rbac.py",
+    "line": 508,
+    "module": "apps.organizations.cabinet_modules",
+    "names": [
+      "default_disabled_sections"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_helpers/rbac.py",
+    "line": 418,
+    "module": "apps.registrar",
+    "names": [
+      "public"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_helpers/rbac_university_sections.py",
+    "line": 103,
+    "module": "apps.registrar",
+    "names": [
+      "public"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/rim/section.py",
+    "line": 29,
+    "module": "apps.organizations.permissions",
+    "names": [
+      "get_permission_label"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_dashboard_helpers/cheap_counts.py",
+    "line": 313,
+    "module": "apps.exams.services.question_chair_review",
+    "names": [
+      "pending_chair_review_count"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_dashboard_helpers/assigned_tasks.py",
+    "line": 14,
+    "module": "apps.exams.constants",
+    "names": [
+      "ATTEMPT_FINISHED_STATUSES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_dashboard_helpers/assigned_tasks.py",
+    "line": 220,
+    "module": "apps.exams.services.student_pins",
+    "names": [
+      "student_visible_pin"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/_dashboard_helpers/academic_results.py",
+    "line": 34,
+    "module": "apps.registrar",
+    "names": [
+      "exam_eligibility"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/auth/login.py",
+    "line": 69,
+    "module": "apps.organizations.services",
+    "names": [
+      "get_active_memberships"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/policy.py",
+    "line": 14,
+    "module": "apps.registrar",
+    "names": [
+      "handover"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/actions.py",
+    "line": 22,
+    "module": "apps.registrar",
+    "names": [
+      "handover_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/api.py",
+    "line": 24,
+    "module": "apps.registrar",
+    "names": [
+      "handover"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/api.py",
+    "line": 25,
+    "module": "apps.registrar",
+    "names": [
+      "handover_query"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/api.py",
+    "line": 327,
+    "module": "apps.registrar.handover_actions",
+    "names": [
+      "REVERT_BLOCKER_CODES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/handover/filters.py",
+    "line": 18,
+    "module": "apps.registrar",
+    "names": [
+      "handover_query"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/policy.py",
+    "line": 22,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/policy.py",
+    "line": 23,
+    "module": "apps.registrar.corrections",
+    "names": [
+      "CORRECT_PERMISSION"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/actions.py",
+    "line": 24,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/api.py",
+    "line": 22,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/api.py",
+    "line": 23,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review_counts"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/legacy_review/api.py",
+    "line": 24,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review_rows"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/superadmin/exam_rooms.py",
+    "line": 21,
+    "module": "apps.exams.forms",
+    "names": [
+      "ExamRoomForm"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/superadmin/endpoints.py",
+    "line": 232,
+    "module": "apps.organizations.cabinet_modules",
+    "names": [
+      "CABINET_MODULES",
+      "set_module_enabled"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/superadmin/endpoints.py",
+    "line": 257,
+    "module": "apps.registrar",
+    "names": [
+      "grading_scale"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/superadmin/endpoints.py",
+    "line": 273,
+    "module": "apps.registrar",
+    "names": [
+      "grading_scale"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/preview.py",
+    "line": 17,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/preview.py",
+    "line": 18,
+    "module": "apps.syllabus.document",
+    "names": [
+      "BLOCK_TITLES",
+      "build_preview_blocks"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/preview.py",
+    "line": 50,
+    "module": "apps.syllabus.services",
+    "names": [
+      "section_data_map",
+      "version_timeline"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/labels.py",
+    "line": 17,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_rows.py",
+    "line": 23,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_rows.py",
+    "line": 44,
+    "module": "apps.syllabus.policy",
+    "names": [
+      "escalation_days",
+      "sla_days"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/detail_context.py",
+    "line": 44,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "RULE_SECTIONS",
+      "SectionKey",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/detail_context.py",
+    "line": 45,
+    "module": "apps.syllabus.services",
+    "names": [
+      "section_data_map",
+      "version_timeline"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_api.py",
+    "line": 26,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_api.py",
+    "line": 27,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "RULE_SECTIONS",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_api.py",
+    "line": 29,
+    "module": "apps.syllabus.state_machine",
+    "names": [
+      "Transition",
+      "TransitionDenied"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/section.py",
+    "line": 34,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "QUEUE_STATUSES",
+      "STATUS_SORT_INDEX",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/section.py",
+    "line": 35,
+    "module": "apps.syllabus.policy",
+    "names": [
+      "sla_days"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review.py",
+    "line": 38,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "PERM_REVIEW",
+      "QUEUE_STATUSES",
+      "SELFWORK_OPTIONS",
+      "SectionKey",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/api.py",
+    "line": 22,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/api.py",
+    "line": 23,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "PERM_EDIT",
+      "SECTION_ORDER",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/api.py",
+    "line": 25,
+    "module": "apps.syllabus.state_machine",
+    "names": [
+      "TransitionDenied"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/api.py",
+    "line": 182,
+    "module": "apps.registrar.plan_hours",
+    "names": [
+      "plan_hours_for_offering",
+      "program_for_offering"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/detail.py",
+    "line": 31,
+    "module": "apps.syllabus",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/detail.py",
+    "line": 32,
+    "module": "apps.syllabus.document",
+    "names": [
+      "build_document"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/detail.py",
+    "line": 149,
+    "module": "apps.registrar.syllabus_pdf",
+    "names": [
+      "render_syllabus_pdf"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/editor_panels.py",
+    "line": 45,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "LESSON_HOUR_KINDS",
+      "SELFWORK_DISALLOWED",
+      "SELFWORK_OPTIONS",
+      "SELFWORK_TOTAL_SCORE",
+      "WEEK_ROWS"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/editor.py",
+    "line": 32,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "MIN_DESCRIPTION_CHARS",
+      "MIN_GOAL_CHARS",
+      "MIN_OUTCOMES",
+      "RULE_SECTIONS",
+      "SELFWORK_TOTAL_SCORE",
+      "WEEK_ROWS",
+      "SectionKey",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_panel.py",
+    "line": 19,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "RULE_SECTIONS",
+      "SectionKey",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/review_panel.py",
+    "line": 209,
+    "module": "apps.syllabus.services",
+    "names": [
+      "section_data_map",
+      "version_diff",
+      "version_timeline"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/syllabus/rows.py",
+    "line": 19,
+    "module": "apps.syllabus.constants",
+    "names": [
+      "STATUS_NEXT_STEP",
+      "SyllabusStatus"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/public.py",
+    "line": 43,
+    "module": "apps.organizations.views.shared._helpers",
+    "names": [
+      "_can_manage_organization",
+      "_has_org_permission"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/people/section.py",
+    "line": 126,
+    "module": "apps.organizations.permissions",
+    "names": [
+      "get_permission_label"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/context_builder/_stage4.py",
+    "line": 21,
+    "module": "apps.registrar.cabinet_policy",
+    "names": [
+      "transcript_policy"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/workload_chain.py",
+    "line": 69,
+    "module": "apps.workload.review_registry",
+    "names": [
+      "build_visa"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/workload_chain.py",
+    "line": 197,
+    "module": "apps.workload.approval_registry",
+    "names": [
+      "build_approval"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/workload_chain.py",
+    "line": 325,
+    "module": "apps.workload.overview_registry",
+    "names": [
+      "build_overview_section"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/teaching_office.py",
+    "line": 19,
+    "module": "apps.organizations.structure_views",
+    "names": [
+      "build_structure_tree_context",
+      "chair_detail_context",
+      "visible_chairs"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/catalog_sections.py",
+    "line": 20,
+    "module": "apps.registrar.catalog_registry",
+    "names": [
+      "build_programs_registry",
+      "build_subject_catalog"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover_ui.py",
+    "line": 16,
+    "module": "apps.registrar",
+    "names": [
+      "handover"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/exam_score_entry.py",
+    "line": 313,
+    "module": "apps.registrar",
+    "names": [
+      "journal_scope"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/exam_score_entry.py",
+    "line": 449,
+    "module": "apps.registrar",
+    "names": [
+      "gradebook"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/workload_center.py",
+    "line": 98,
+    "module": "apps.workload.center_registry",
+    "names": [
+      "build_center"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/legacy_grade_review.py",
+    "line": 44,
+    "module": "apps.registrar",
+    "names": [
+      "legacy_grade_review_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/superadmin_orgs.py",
+    "line": 43,
+    "module": "apps.organizations.cabinet_modules",
+    "names": [
+      "module_items"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/superadmin_orgs.py",
+    "line": 44,
+    "module": "apps.registrar.grading_scale",
+    "names": [
+      "bands_text"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/superadmin_orgs.py",
+    "line": 45,
+    "module": "apps.registrar.grading_scale",
+    "names": [
+      "is_custom"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover.py",
+    "line": 43,
+    "module": "apps.registrar",
+    "names": [
+      "handover"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover.py",
+    "line": 44,
+    "module": "apps.registrar",
+    "names": [
+      "handover_query"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover.py",
+    "line": 116,
+    "module": "apps.registrar",
+    "names": [
+      "handover_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_submissions.py",
+    "line": 249,
+    "module": "apps.organizations.structure_views.constants",
+    "names": [
+      "KAFEDRA_UNIT_TYPES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_submissions.py",
+    "line": 314,
+    "module": "apps.exams.constants",
+    "names": [
+      "EXAM_LANGUAGE_CHOICES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/schedule_manage.py",
+    "line": 33,
+    "module": "apps.registrar",
+    "names": [
+      "schedule"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/schedule_manage.py",
+    "line": 34,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_conflicts",
+      "schedule_editor"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/schedule_manage.py",
+    "line": 35,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_editor_actions"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/schedule_manage.py",
+    "line": 36,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_grid",
+      "schedule_manage"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/registrar_catalog.py",
+    "line": 23,
+    "module": "apps.registrar",
+    "names": [
+      "catalog_console"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/curriculum_sections.py",
+    "line": 89,
+    "module": "apps.registrar.curriculum_registry",
+    "names": [
+      "build_curriculum_editor"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/curriculum_sections.py",
+    "line": 219,
+    "module": "apps.organizations.groups_registry",
+    "names": [
+      "build_groups_registry"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/curriculum_sections.py",
+    "line": 400,
+    "module": "apps.registrar.semester_open",
+    "names": [
+      "build_semester_opening",
+      "offering_counts_by_chair"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/lessons_log.py",
+    "line": 33,
+    "module": "apps.registrar",
+    "names": [
+      "lessons_log"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/lessons_log.py",
+    "line": 89,
+    "module": "apps.registrar",
+    "names": [
+      "schedule"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_bank.py",
+    "line": 108,
+    "module": "apps.exams.constants",
+    "names": [
+      "QUESTION_EXAM_KIND_VALUES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_bank.py",
+    "line": 155,
+    "module": "apps.exams.constants",
+    "names": [
+      "QUESTION_EXAM_KIND_CHOICES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/exams.py",
+    "line": 74,
+    "module": "apps.exams.services.access_policy",
+    "names": [
+      "is_exam_center_user"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/dashboard.py",
+    "line": 66,
+    "module": "apps.registrar.page_contexts",
+    "names": [
+      "_season_label"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/journal_close.py",
+    "line": 67,
+    "module": "apps.registrar",
+    "names": [
+      "journal_close"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_chair_review.py",
+    "line": 94,
+    "module": "apps.exams.constants",
+    "names": [
+      "QUESTION_EXAM_KIND_CHOICES",
+      "QUESTION_EXAM_KIND_VALUES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/question_chair_review.py",
+    "line": 96,
+    "module": "apps.exams.services.question_chair_review",
+    "names": [
+      "chair_queue_queryset"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/student_registry.py",
+    "line": 26,
+    "module": "apps.registrar",
+    "names": [
+      "catalog_console"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/exam_chance.py",
+    "line": 72,
+    "module": "apps.exams.services.access_policy",
+    "names": [
+      "SECURE_EXAM_CATEGORIES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/exam_chance.py",
+    "line": 74,
+    "module": "apps.organizations.structure_views.constants",
+    "names": [
+      "KAFEDRA_UNIT_TYPES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover_rows.py",
+    "line": 19,
+    "module": "apps.registrar",
+    "names": [
+      "handover_query"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover_rows.py",
+    "line": 127,
+    "module": "apps.registrar",
+    "names": [
+      "handover"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/handover_rows.py",
+    "line": 128,
+    "module": "apps.registrar.handover_actions",
+    "names": [
+      "REVERT_BLOCKER_CODES"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/dashboard_staff_widgets.py",
+    "line": 147,
+    "module": "apps.registrar",
+    "names": [
+      "schedule_manage"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/dashboard_widgets.py",
+    "line": 123,
+    "module": "apps.registrar",
+    "names": [
+      "schedule"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/dashboard_widgets.py",
+    "line": 158,
+    "module": "apps.registrar",
+    "names": [
+      "schedule"
+    ]
+  },
+  {
+    "file": "apps/accounts/views/profile/_sections/dashboard_widgets.py",
+    "line": 270,
+    "module": "apps.registrar",
+    "names": [
+      "schedule"
+    ]
+  },
+  {
+    "file": "apps/appeals/apps.py",
+    "line": 12,
+    "module": "apps.exams",
+    "names": [
+      "score_adjustments"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/student/endpoints.py",
+    "line": 12,
+    "module": "apps.exams.navigation",
+    "names": [
+      "append_query_params",
+      "current_return_to"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/student/endpoints.py",
+    "line": 14,
+    "module": "apps.exams.services.question_snapshot",
+    "names": [
+      "delivered_question_render"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/student/endpoints.py",
+    "line": 15,
+    "module": "apps.exams.views.student._helpers",
+    "names": [
+      "ensure_student_exam_tenant_context"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/student/endpoints.py",
+    "line": 242,
+    "module": "apps.exams.constants",
+    "names": [
+      "ATTEMPT_FINISHED_STATUSES"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/student/endpoints.py",
+    "line": 188,
+    "module": "apps.exams.services.final_center",
+    "names": [
+      "clear_entry_session"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/teacher/statistics.py",
+    "line": 25,
+    "module": "apps.exams.services.ai_summary",
+    "names": [
+      "generate_appeal_statistics_summary"
+    ]
+  },
+  {
+    "file": "apps/appeals/views/teacher/statistics.py",
+    "line": 26,
+    "module": "apps.exams.views.exam_center._shared",
+    "names": [
+      "supervisor_org_or_403"
+    ]
+  },
+  {
+    "file": "apps/applications/services/submit.py",
+    "line": 12,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "members_covering_unit"
+    ]
+  },
+  {
+    "file": "apps/applications/services/access.py",
+    "line": 20,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "ancestor_unit_ids"
+    ]
+  },
+  {
+    "file": "apps/applications/services/notify.py",
+    "line": 18,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "members_covering_unit"
+    ]
+  },
+  {
+    "file": "apps/applications/services/routing.py",
+    "line": 15,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "resolve_ancestor"
+    ]
+  },
+  {
+    "file": "apps/exams/services/question_chair_units.py",
+    "line": 31,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "ancestor_unit_ids",
+      "chair_head_memberships_for_unit",
+      "dean_memberships_for_unit",
+      "resolve_ancestor"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 226,
+    "module": "apps.registrar",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 319,
+    "module": "apps.registrar",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 452,
+    "module": "apps.registrar.corrections",
+    "names": [
+      "apply_correction"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_exam_journal.py",
+    "line": 536,
+    "module": "apps.registrar.gradebook",
+    "names": [
+      "recompute_absence_hours"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 81,
+    "module": "apps.registrar.gradebook",
+    "names": [
+      "recompute_absence_hours"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/_stress_past_years_data.py",
+    "line": 136,
+    "module": "apps.registrar",
+    "names": [
+      "services"
+    ]
+  },
+  {
+    "file": "apps/exams/management/commands/seed_stress_test.py",
+    "line": 26,
+    "module": "apps.organizations.default_roles",
+    "names": [
+      "get_default_roles_for_org_type"
+    ]
+  },
+  {
+    "file": "apps/workload/services/scoping.py",
+    "line": 13,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "get_permission_scope",
+      "user_scope_covers_unit"
+    ]
+  },
+  {
+    "file": "apps/workload/services/scoping.py",
+    "line": 58,
+    "module": "apps.organizations.scoping",
+    "names": [
+      "ORG_WIDE_SCOPE"
+    ]
+  },
+  {
+    "file": "apps/workload/services/scoping.py",
+    "line": 72,
+    "module": "apps.organizations.services",
+    "names": [
+      "get_active_memberships"
+    ]
+  },
+  {
+    "file": "apps/workload/services/workflow.py",
+    "line": 404,
+    "module": "apps.organizations.unit_heads",
+    "names": [
+      "members_covering_unit"
+    ]
+  },
+  {
+    "file": "apps/monitoring/incidents.py",
+    "line": 48,
+    "module": "apps.notifications.services.crud",
+    "names": [
+      "create_notification"
+    ]
+  }
+]
