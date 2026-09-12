@@ -33,14 +33,22 @@ receivers:
   # E-poçt + EMSArena in-app insident axını (Sistem Monitorinqi mərkəzi).
   # Webhook Django-nun daxili endpoint-inə gedir; token .env-dən gəlir və
   # start zamanı compose sed-i ilə doldurulur (sirr git-ə düşmür).
+  # Token `Authorization: Bearer` başlığı ilə göndərilir (2026-09-12, audit
+  # P2-6) — URL-də olsa nginx/proxy access log-una düşürdü. Django tərəfi
+  # `?token=` formasını artıq qəbul etmir; bu şablon dəyişəndə konteyner
+  # yenidən yaradılmalıdır (sed start zamanı işləyir — bax remote_deploy.sh).
   - name: ops-all
     email_configs:
       - to: "__ALERT_TO__"
         send_resolved: true
     webhook_configs:
-      - url: "http://app:8000/api/superadmin/monitoring/alertmanager-webhook/?token=__WEBHOOK_TOKEN__"
+      - url: "http://app:8000/api/superadmin/monitoring/alertmanager-webhook/"
         send_resolved: true
         max_alerts: 20
+        http_config:
+          authorization:
+            type: Bearer
+            credentials: "__WEBHOOK_TOKEN__"
 
 inhibit_rules:
   # Hədəf tamamilə əlçatmaz olanda (TargetDown) həmin job-un digər
