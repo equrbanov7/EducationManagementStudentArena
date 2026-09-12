@@ -3,25 +3,19 @@
 <section class="profile-section-panel profile-section--my-subjects {% if active_section == 'my-subjects' %}is-active{% endif %}"
          data-profile-section-panel="my-subjects"
          data-source-url="{{ profile_base_url }}?section=my-subjects">
+    {% comment %}2026-09-12 (audit P2-1): «Fənlərim» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `.section-header-flex > .section-title`
+    onu təkrarlayırdı. «Dərs cədvəli» keçidi başlığın əməl yuvasındadır;
+    ixtisas/qrup/dövr zolağı isə kartın ilk sətri kimi qalır.{% endcomment %}
+    {% include "partials/ems_ui/_content_header.html" with header_actions_include="accounts/profile/sections/_my_subjects_header_actions.html" %}
     <div class="section-card">
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-book-open text-teal"></i>
-                    <span>{% trans "Fənlərim" context "profile.subjects" %}</span>
-                </div>
-            </div>
-            <a class="my-subjects-schedule-link" href="{% url 'registrar:schedule' %}">
-                <i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "profile.subjects" %}
-            </a>
-            {% if sec.record %}
-            <div class="my-subjects-meta">
-                <span class="my-subjects-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
-                {% if sec.record.group %}<span class="my-subjects-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
-                {% if sec.period %}<span class="my-subjects-meta-item"><i class="fas fa-calendar-alt"></i> {{ sec.period.name }}</span>{% endif %}
-            </div>
-            {% endif %}
+        {% if sec.record %}
+        <div class="my-subjects-meta">
+            <span class="my-subjects-meta-item"><i class="fas fa-graduation-cap"></i> {{ sec.record.program.display_label }}</span>
+            {% if sec.record.group %}<span class="my-subjects-meta-item"><i class="fas fa-users"></i> {{ sec.record.group.name }}</span>{% endif %}
+            {% if sec.period %}<span class="my-subjects-meta-item"><i class="fas fa-calendar-alt"></i> {{ sec.period.name }}</span>{% endif %}
         </div>
+        {% endif %}
 
         {% if not sec.has_record %}
         <div class="my-subjects-empty">
@@ -42,9 +36,12 @@
                     <strong>{{ cs.earned }}</strong> / {{ cs.required }} {% trans "kredit" context "profile.subjects" %}
                 </div>
             </div>
+            {% comment %}2026-09-12 (audit P2-9): tərəqqi eni fasiləsiz faizdir (0–100) —
+            CLAUDE.md-nin icazə verdiyi yeganə inline forma: `--pct` custom property,
+            eni CSS verir (`width: var(--pct)`). Test allow-list-i məhz bu formadır.{% endcomment %}
             <div class="credit-progress-bar" role="progressbar"
                  aria-valuenow="{{ cs.percent }}" aria-valuemin="0" aria-valuemax="100">
-                <div class="credit-progress-fill" style="width: {{ cs.percent }}%;"></div>
+                <div class="credit-progress-fill" style="--pct:{{ cs.percent }}%"></div>
             </div>
             <div class="credit-progress-legend">
                 <span class="credit-chip credit-chip--earned">{% trans "Toplanmış" context "profile.subjects" %}: {{ cs.earned }}</span>
@@ -117,7 +114,7 @@
                     {# U13 — giriş balı tərəqqi barı (kredit-barı ilə eyni pattern) #}
                     <div class="subject-grade-bar" role="progressbar"
                          aria-valuenow="{{ row.journal.entry_score|floatformat:0 }}" aria-valuemin="0" aria-valuemax="{{ row.journal.entry_score_max }}">
-                        <div class="subject-grade-fill" style="width: {% widthratio row.journal.entry_score row.journal.entry_score_max 100 %}%;"></div>
+                        <div class="subject-grade-fill" style="--pct:{% widthratio row.journal.entry_score row.journal.entry_score_max 100 %}%"></div>
                     </div>
                     <div class="subject-grade-components">
                         <span class="grade-comp">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ row.journal.lessons_held }}</strong></span>
@@ -126,7 +123,7 @@
                     {% if row.journal.allowed_absence %}
                     <div class="subject-absence-bar" role="progressbar"
                          aria-valuenow="{{ row.journal.absence_hours }}" aria-valuemin="0" aria-valuemax="{{ row.journal.allowed_absence|floatformat:0 }}">
-                        <div class="subject-absence-fill {% if row.journal.barred %}is-over{% elif row.eligibility.barred %}is-over{% endif %}" style="width: {% widthratio row.journal.absence_hours row.journal.allowed_absence 100 %}%;"></div>
+                        <div class="subject-absence-fill {% if row.journal.barred %}is-over{% elif row.eligibility.barred %}is-over{% endif %}" style="--pct:{% widthratio row.journal.absence_hours row.journal.allowed_absence 100 %}%"></div>
                     </div>
                     {% endif %}
                     {% if row.components %}

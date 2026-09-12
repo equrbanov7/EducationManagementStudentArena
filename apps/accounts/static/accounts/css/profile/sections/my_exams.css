@@ -26,6 +26,30 @@
 .profile-section--my-exams .tx-shell * { box-sizing: border-box; }
 .profile-section--my-exams .tx-shell { color: var(--tx-text); }
 
+/* ─────────────────── status / növ / kateqoriya palitrası ─────────────────── */
+/* 2026-09-12 (audit P2-9): KPI, bölmə başlığı, kart, çip və nöqtə rəngləri
+   əvvəl `style="--kpi-color:…"` / `style="background:…"` inline atributları ilə
+   Python-dan gəlirdi (CSP hədəfi: sıfır inline style, bax CLAUDE.md). Açarlar
+   SABİT enum olduğu üçün rəng modifikator sinfə köçürülüb:
+     `.is-status-<key>` → --st-*,  `.is-type-<key>` → --type-*,
+     `.is-cat-<key>`    → --cat-*
+   Dəyərlər `apps/exams/constants.py` EXAM_STATUS_META / EXAM_TYPE_META /
+   EXAM_CATEGORY_META ilə EYNİDİR (token varsa token, yoxdursa eyni hex) —
+   biri dəyişərsə, digəri də dəyişməlidir. Naməlum açar → istehlakçı qaydanın
+   `var(…, fallback)` neytral dəyəri (`_FALLBACK_META` ilə eyni). */
+.profile-section--my-exams .is-status-active    { --st-color: var(--ems-emerald-600); --st-soft: var(--ems-success-100); --st-deep: var(--ems-success-700); }
+.profile-section--my-exams .is-status-scheduled { --st-color: #2C5BFF; --st-soft: #EEF2FF; --st-deep: var(--ems-primary-800); }
+.profile-section--my-exams .is-status-draft     { --st-color: var(--ems-neutral-500); --st-soft: #F1F4F9; --st-deep: var(--ems-neutral-600); }
+.profile-section--my-exams .is-status-archived  { --st-color: var(--ems-warning-700); --st-soft: var(--ems-warning-100); --st-deep: var(--ems-warning-800); }
+.profile-section--my-exams .is-type-test    { --type-color: var(--ems-sky-600); --type-soft: var(--ems-sky-100); --type-deep: var(--ems-sky-900); }
+.profile-section--my-exams .is-type-written { --type-color: var(--ems-rose-600); --type-soft: var(--ems-rose-100); --type-deep: var(--ems-rose-800); }
+.profile-section--my-exams .is-type-coding  { --type-color: var(--ems-violet-600); --type-soft: var(--ems-violet-100); --type-deep: var(--ems-violet-800); }
+.profile-section--my-exams .is-cat-final     { --cat-color: var(--ems-rose-600); --cat-soft: var(--ems-rose-100); --cat-deep: var(--ems-rose-800); }
+.profile-section--my-exams .is-cat-midterm   { --cat-color: #2C5BFF; --cat-soft: #EEF2FF; --cat-deep: var(--ems-primary-800); }
+.profile-section--my-exams .is-cat-quiz      { --cat-color: var(--ems-success-strong); --cat-soft: #E6FBF7; --cat-deep: #0B544E; }
+.profile-section--my-exams .is-cat-placement { --cat-color: var(--ems-warning-700); --cat-soft: var(--ems-warning-100); --cat-deep: var(--ems-warning-800); }
+.profile-section--my-exams .is-cat-practice  { --cat-color: #0891B2; --cat-soft: #E0F7FB; --cat-deep: #155E63; }
+
 /* ─────────────────────────── header ─────────────────────────── */
 .profile-section--my-exams .tx-head {
   display: flex; align-items: flex-end; justify-content: space-between;
@@ -66,12 +90,12 @@
   transition: .16s cubic-bezier(.2,.7,.3,1); font-family: inherit;
 }
 .profile-section--my-exams .tx-kpi:hover { border-color: #D4D9E6; box-shadow: var(--tx-sh-md); transform: translateY(-2px); }
-.profile-section--my-exams .tx-kpi.is-on { border-color: transparent; box-shadow: 0 0 0 2px var(--kpi-color, var(--tx-accent)), 0 10px 26px rgba(11,20,55,.14); }
-.profile-section--my-exams .tx-kpi-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 0 4px 4px 0; background: var(--kpi-color); }
+.profile-section--my-exams .tx-kpi.is-on { border-color: transparent; box-shadow: 0 0 0 2px var(--st-color, var(--tx-accent)), 0 10px 26px rgba(11,20,55,.14); }
+.profile-section--my-exams .tx-kpi-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 0 4px 4px 0; background: var(--st-color, var(--ems-neutral-500)); }
 .profile-section--my-exams .tx-kpi-num { display: block; font-size: 28px; font-weight: 750; letter-spacing: -.03em; color: var(--tx-ink); line-height: 1; }
 .profile-section--my-exams .tx-kpi-label { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 13px; font-weight: 600; color: var(--tx-muted); }
 .profile-section--my-exams .tx-kpi.is-on .tx-kpi-label { color: var(--tx-ink); }
-.profile-section--my-exams .tx-kpi-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--kpi-color); flex-shrink: 0; }
+.profile-section--my-exams .tx-kpi-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--st-color, var(--ems-neutral-500)); flex-shrink: 0; }
 .profile-section--my-exams .tx-kpi-hint { display: block; margin-top: 3px; font-size: 11.5px; color: var(--tx-subtle); }
 
 /* ─────────────────────────── toolbar ─────────────────────────── */
@@ -96,7 +120,7 @@
 }
 .profile-section--my-exams .tx-typeseg-btn:hover { color: var(--tx-ink); }
 .profile-section--my-exams .tx-typeseg-btn.is-on { background: var(--tx-ink); color: var(--ems-neutral-0); }
-.profile-section--my-exams .tx-tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.profile-section--my-exams .tx-tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--type-color, var(--ems-neutral-500)); }
 .profile-section--my-exams .tx-typeseg-btn.is-on .tx-tdot { box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
 
 .profile-section--my-exams .tx-viewtoggle {
@@ -118,7 +142,7 @@
 }
 .profile-section--my-exams .tx-cat-chip:hover { color: var(--tx-ink); border-color: var(--cat-color, var(--tx-subtle)); }
 .profile-section--my-exams .tx-cat-chip.is-on { font-weight: 700; border-color: var(--cat-color); background: var(--cat-soft); color: var(--cat-deep); }
-.profile-section--my-exams .tx-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.profile-section--my-exams .tx-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--cat-color, var(--ems-neutral-500)); }
 .profile-section--my-exams .tx-cat-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--tx-paper); color: var(--tx-muted); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
 .profile-section--my-exams .tx-cat-chip.is-on .tx-cat-n { background: var(--cat-color); color: var(--ems-neutral-0); }
 .profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on { border-color: var(--tx-ink); background: var(--tx-ink); color: var(--ems-neutral-0); }
@@ -127,9 +151,9 @@
 /* ─────────────────────────── status section ─────────────────────────── */
 .profile-section--my-exams .tx-section { margin-bottom: 28px; }
 .profile-section--my-exams .tx-section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; }
-.profile-section--my-exams .tx-section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.profile-section--my-exams .tx-section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--st-color, var(--ems-neutral-500)); }
 .profile-section--my-exams .tx-section-title { font-size: 16px; font-weight: 700; letter-spacing: -.01em; color: var(--tx-ink); margin: 0; }
-.profile-section--my-exams .tx-section-count { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.profile-section--my-exams .tx-section-count { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--st-soft, #F1F4F9); color: var(--st-deep, var(--ems-neutral-600)); }
 .profile-section--my-exams .tx-section-hint { font-size: 12px; color: var(--tx-subtle); font-weight: 500; }
 .profile-section--my-exams .tx-section-rule { flex: 1; height: 1px; background: var(--tx-border); }
 .profile-section--my-exams .tx-section-chev { color: var(--tx-subtle); transition: .2s; }
@@ -159,9 +183,9 @@
 .profile-section--my-exams .tx-showmore:hover { color: var(--tx-ink); border-color: var(--tx-subtle); background: var(--tx-paper); }
 
 /* grid mode: tile in flow (top-left), status pill absolute (top-right) */
-.profile-section--my-exams .tx-type-tile { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; font-size: 17px; margin-bottom: 14px; }
-.profile-section--my-exams .tx-status-pill { position: absolute; top: var(--tx-card-pad); right: var(--tx-card-pad); display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
-.profile-section--my-exams .tx-pd { width: 7px; height: 7px; border-radius: 50%; }
+.profile-section--my-exams .tx-type-tile { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; font-size: 17px; margin-bottom: 14px; background: var(--type-soft, #F1F4F9); color: var(--type-deep, var(--ems-neutral-600)); }
+.profile-section--my-exams .tx-status-pill { position: absolute; top: var(--tx-card-pad); right: var(--tx-card-pad); display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; background: var(--st-soft, #F1F4F9); color: var(--st-deep, var(--ems-neutral-600)); }
+.profile-section--my-exams .tx-pd { width: 7px; height: 7px; border-radius: 50%; background: var(--st-color, var(--ems-neutral-500)); }
 
 .profile-section--my-exams .tx-card-link { display: block; color: inherit; text-decoration: none; }
 .profile-section--my-exams .tx-card-title { font-size: 17px; font-weight: 700; letter-spacing: -.015em; color: var(--tx-ink); margin: 0; line-height: 1.3; }
@@ -170,6 +194,7 @@
 
 .profile-section--my-exams .tx-card-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
 .profile-section--my-exams .tx-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 8px; background: var(--tx-paper); font-size: 12px; font-weight: 600; color: var(--tx-muted); }
+.profile-section--my-exams .tx-tag--type { background: var(--type-soft, #F1F4F9); color: var(--type-deep, var(--ems-neutral-600)); }
 .profile-section--my-exams .tx-tag--lang { background: #F2ECFE; color: #5B21B6; letter-spacing: .04em; }
 
 .profile-section--my-exams .tx-card-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 13px; font-size: 12.5px; color: var(--tx-muted); }

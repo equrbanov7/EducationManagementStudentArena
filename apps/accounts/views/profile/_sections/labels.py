@@ -141,6 +141,9 @@ def build_section_titles() -> dict:
         "org-roles": "Təşkilat rolları",
         "audit-log": "Audit jurnalı",
         "superadmin-org-inspector": "Təşkilat məlumatları",
+        # 2026-09-12: bölmənin öz in-panel <h2>-si silindi (P2-1) — birbaşa
+        # `?section=system-monitoring` açılışında qabıq h1-i «Profil»-ə düşməsin.
+        "system-monitoring": pgettext_lazy("profile.sidebar", "Sistem Monitorinqi"),
         "people-teachers": pgettext_lazy("profile.sidebar", "Müəllimlər"),
         "people-students": pgettext_lazy("profile.sidebar", "Tələbələr"),
         "syllabus-list": pgettext_lazy("profile.sidebar", "Sillabuslar"),

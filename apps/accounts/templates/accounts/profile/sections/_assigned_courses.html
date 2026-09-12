@@ -1,17 +1,10 @@
 {% load i18n %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-courses {% if active_section == 'assigned-courses' %}is-active{% endif %}" data-profile-section-panel="assigned-courses" data-source-url="{% url 'accounts:assigned_courses' %}">
+    {% comment %}2026-09-12 (audit P2-1): «Təyin olunmuş kurslar» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `.section-header-flex > .section-title`
+    onu təkrarlayırdı.{% endcomment %}
     <div class="section-card">
-        
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-user-graduate text-emerald"></i>
-                    <span>{% trans "title" context "profile.assigned_courses" %}</span>
-                </div>
-            </div>
-        </div>
-
         <form method="get" class="assigned-courses-search-form js-profile-debounce-search" data-debounce-ms="1000">
             <input type="hidden" name="section" value="assigned-courses">
             <div class="assigned-courses-search-input-wrap">

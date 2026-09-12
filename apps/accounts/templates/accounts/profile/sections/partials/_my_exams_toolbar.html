@@ -1,4 +1,4 @@
-{% load i18n exams_ui %}
+{% load i18n %}
 {% comment %}
   Axtarış + növ filtri (seqment, dizayn) + görünüş keçidi.
 
@@ -10,9 +10,9 @@
   Ona görə bu, əsl `<form method="get">`-dir: JS-siz də işləyir, `exam_q`,
   `exam_type` və `exam_status` server filtrlərinə birbaşa uyğun gəlir.
 {% endcomment %}
-{% exam_type_meta 'test' as m_test %}
-{% exam_type_meta 'written' as m_written %}
-{% exam_type_meta 'coding' as m_coding %}
+{% comment %}2026-09-12 (audit P2-9): növ nöqtələrinin rəngi inline `style` ilə deyil,
+`is-type-<key>` modifikatoru ilə (my_exams.css palitrası = EXAM_TYPE_META) —
+`exam_type_meta` tag-ı burada artıq lazım deyil.{% endcomment %}
 <form method="get" class="tx-toolbar" data-tx-toolbar>
   <input type="hidden" name="section" value="my-exams">
   {# Status filtri KPI kartına klikdən gəlir; formda saxlanılır ki, axtarış onu sıfırlamasın. #}
@@ -34,13 +34,13 @@
       {% trans "filter_all_types" context "profile.my_exams" %}
     </button>
     <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'test' %} is-on{% endif %}" data-type="test">
-      <span class="tx-tdot" style="background:{{ m_test.color }};"></span> {% trans "filter_test" context "profile.my_exams" %}
+      <span class="tx-tdot is-type-test"></span> {% trans "filter_test" context "profile.my_exams" %}
     </button>
     <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'written' %} is-on{% endif %}" data-type="written">
-      <span class="tx-tdot" style="background:{{ m_written.color }};"></span> {% trans "filter_written" context "profile.my_exams" %}
+      <span class="tx-tdot is-type-written"></span> {% trans "filter_written" context "profile.my_exams" %}
     </button>
     <button type="button" class="tx-typeseg-btn{% if my_exams_filter_type == 'coding' %} is-on{% endif %}" data-type="coding">
-      <span class="tx-tdot" style="background:{{ m_coding.color }};"></span> {% trans "filter_practical" context "profile.my_exams" %}
+      <span class="tx-tdot is-type-coding"></span> {% trans "filter_practical" context "profile.my_exams" %}
     </button>
   </div>
 

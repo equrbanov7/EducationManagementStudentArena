@@ -2,11 +2,15 @@
    Bologna ECTS credit progress + per-subject absence/exam eligibility + group
    elective blocks. Uses shared --ems-* design tokens (no hard-coded colors). */
 
+/* 2026-09-12 (audit P2-1): ixtisas/qrup/dövr zolağı köhnə `.section-header-flex`
+   başlıq sətrindən (o, bölmə adını təkrarlayırdı) kartın ilk sətrinə köçüb —
+   alt boşluğu artıq özü verir. */
 .profile-section--my-subjects .my-subjects-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
+    margin-bottom: 1rem;
 }
 
 .profile-section--my-subjects .my-subjects-meta-item {
@@ -74,8 +78,13 @@
     overflow: hidden;
 }
 
+/* 2026-09-12 (audit P2-9): tərəqqi zolaqlarının eni şablondan `style="--pct:N%"`
+   custom property ilə gəlir (`style="width:N%"` əvəzinə) — CLAUDE.md-nin
+   dinamik dəyər üçün nəzərdə tutduğu forma; `semester_opening`-dəki
+   `.tof-progress__bar` ilə eyni nümunə. */
 .credit-progress-fill {
     height: 100%;
+    width: var(--pct, 0%);
     border-radius: 999px;
     background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
     transition: width 0.4s ease;
@@ -426,6 +435,7 @@
 }
 .subject-grade-fill {
     height: 100%;
+    width: var(--pct, 0%);
     max-width: 100%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
@@ -433,6 +443,7 @@
 .subject-absence-bar { height: 4px; margin-top: 0.35rem; }
 .subject-absence-fill {
     height: 100%;
+    width: var(--pct, 0%);
     max-width: 100%;
     border-radius: 999px;
     background: var(--ems-warning-500);

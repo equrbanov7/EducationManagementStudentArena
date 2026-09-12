@@ -121,29 +121,10 @@
     border-bottom: 1px solid var(--border-color);
 }
 
-.section-header-flex > .section-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin-bottom: 0 !important;
-    padding-bottom: 0;
-    border-bottom: 0;
-}
-
-.title-left {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.65rem;
-    min-width: 0;
-    flex-wrap: wrap;
-}
-
-.title-left > i {
-    font-size: 1.05rem;
-}
-
-.title-left > span:not(.count-badge) {
-    min-width: 0;
-}
+/* 2026-09-12 (audit P2-1): `.section-header-flex > .section-title` və `.title-left*`
+   ləğv edildi — kabinet bölmələri bölmə adını artıq kartda təkrarlamır (qabıq
+   `#profileSectionTitle` verir); `.section-header-flex` yalnız altbaşlıq + əməl
+   sətri kimi qalır (`_overall_academic.html`). */
 
 .count-badge {
     display: inline-flex;

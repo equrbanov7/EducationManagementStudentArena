@@ -64,7 +64,10 @@ Tələb olunan kontekst: post_category_root_options, post_category_subcategory_o
                 <label id="editCurrentImageLabel">{% trans "label_current_image" context "profile.posts" %}</label>
                 <div id="editImagePreviewWrapper" class="image-preview-wrapper"
                      role="group" aria-labelledby="editCurrentImageLabel">
-                    <img id="editImagePreview" src="" alt="{% trans 'post_image_alt' context 'profile.posts' %}" class="image-preview" style="display:none;">
+                    {% comment %}2026-09-12 (audit P2-9): inline `display:none` üslubu yox —
+                    boş `src` ikən şəkil CSS ilə gizlənir (`.image-preview[src=""]`,
+                    posts/_part1.css); `user_profile/edit.js` `src`-i doldurub göstərir.{% endcomment %}
+                    <img id="editImagePreview" src="" alt="{% trans 'post_image_alt' context 'profile.posts' %}" class="image-preview">
                     <p id="noImageText" class="no-image-text">{% trans "no_image" context "profile.posts" %}</p>
                 </div>
             </div>

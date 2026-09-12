@@ -22,6 +22,8 @@ DÖRD yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "options_url", "curriculum_url", "task_url",
     "activities": [{"key", "label"}], "seasons": [{"key", "label"}],
     "education_forms": […], "degree_levels": […], "amendment_reasons": […],
+    "catalog": {activities, seasons, education_forms, degree_levels,
+                row_kinds, amendment_reasons},   # `json_script` üçün (P2-4)
 }``
 
 2. MÜƏLLİM CONTEXT-i — ``build_my_workload_context``
@@ -46,8 +48,6 @@ XƏTA KODLARI (``WorkloadDenied.code``) — UI mətni bu kodlara görə yazılı
 """
 
 from __future__ import annotations
-
-import json
 
 from django.urls import reverse
 
@@ -120,20 +120,23 @@ def build_distribution_context(request, *, organization, chair_id=None, academic
     }
     # Xarici JS Django template engine-dən KEÇMİR (bax CLAUDE.md) — kataloqlar
     # JSON blokla ötürülür, JS onu `JSON.parse` ilə oxuyur.
-    base["catalog_json"] = json.dumps(
-        {
-            key: base[key]
-            for key in (
-                "activities",
-                "seasons",
-                "education_forms",
-                "degree_levels",
-                "row_kinds",
-                "amendment_reasons",
-            )
-        },
-        ensure_ascii=False,
-    )
+    # 2026-09-12 (audit P2-4): əvvəl burada `json.dumps` ilə hazır sətir
+    # (`catalog_json`) qurulub şablonda `|safe` ilə xam `<script>` gövdəsinə
+    # yazılırdı. İndi Python obyekti (`catalog`) ötürülür — şablon onu
+    # `{{ catalog|json_script:"wl-catalog" }}` ilə render edir (Django `</script>`
+    # / `<`, `>`, `&` qaçırmasını özü edir; `_choice_payload` etiketləri `str()`
+    # ilə hazırladığı üçün lazy tərcümə qalığı yoxdur).
+    base["catalog"] = {
+        key: base[key]
+        for key in (
+            "activities",
+            "seasons",
+            "education_forms",
+            "degree_levels",
+            "row_kinds",
+            "amendment_reasons",
+        )
+    }
     if not base["has_access"]:
         return base
 

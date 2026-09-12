@@ -21,7 +21,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
         yükləyirdi (2026-07-31 auditi).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260912-1">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260909-hero">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
@@ -36,9 +36,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl səth
     (panel/axtarış/siyahı), sonra modallar, ən sonda «Yeni hesab» axını —
     üçüncü fayl ilk ikisinin başlıq və kart qaydalarını qəsdən tamamlayır.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part1.css' %}?v=20260826-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part1.css' %}?v=20260912-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part2.css' %}?v=20260826-1">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part3.css' %}?v=20260906-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part3.css' %}?v=20260912-1">
     {% endif %}
     {% if 'superadmin-ai' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
@@ -71,10 +71,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260901-notice">
     {% endif %}
     {% if 'my-subjects' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260912-1">
     {% endif %}
     {% if 'my-transcript' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260704-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260912-1">
     {% endif %}
     {% if 'overall-academic' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
@@ -172,7 +172,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     əsas fayldan SONRA gəlir (eyni `--apx-*` custom property-lərini işlədir).
     `applications_modal.css` `_detail`-dən də SONRA olmalıdır: detal panelinin
     `.apx-body` sütun qaydasını və cavab qutusunun fonunu QƏSDƏN üstələyir.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20260912-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_filters.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_modal.css' %}?v=20260907-modal">

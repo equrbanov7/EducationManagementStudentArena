@@ -102,28 +102,31 @@ düymə GİZLƏNMİR, `disabled` olur (§4).
     <div class="tof-split">
         <div class="tof-pane">
             <h3 class="tof-pane__title">{% trans "Balans — semestr üzrə" context "accounts.curriculum" %}</h3>
-            <table class="ems-table ems-table--zebra">
-                <thead>
-                    <tr>
-                        <th scope="col">{% trans "Semestr" context "accounts.curriculum" %}</th>
-                        <th scope="col">{% trans "Kredit" context "accounts.curriculum" %}</th>
-                        <th scope="col">{% trans "Ümumi" context "accounts.curriculum" %}</th>
-                        <th scope="col">{% trans "Auditoriya" context "accounts.curriculum" %}</th>
-                        <th scope="col">{% trans "Sərbəst" context "accounts.curriculum" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for bucket in curriculum_editor_section.balance.semesters %}
-                    <tr>
-                        <th scope="row">{{ bucket.semester_number }}</th>
-                        <td class="ems-table__num{% if bucket.credit_warning %} is-warning{% endif %}">{{ bucket.credits }}</td>
-                        <td class="ems-table__num">{{ bucket.total_hours }}</td>
-                        <td class="ems-table__num">{{ bucket.contact_hours }}</td>
-                        <td class="ems-table__num">{{ bucket.selfwork_hours }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% comment %}2026-09-12 (audit P2-3): əl ilə yazılmış cədvəl `.ems-tablescroll` sarğısındadır — `.ems-table` min-eni (900px) mobil ekranda səhifə gövdəsini deyil, yalnız bu sarğını üfüqi sürüşdürür (`_data_table.html` ilə eyni qayda).{% endcomment %}
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Semestr" context "accounts.curriculum" %}</th>
+                            <th scope="col">{% trans "Kredit" context "accounts.curriculum" %}</th>
+                            <th scope="col">{% trans "Ümumi" context "accounts.curriculum" %}</th>
+                            <th scope="col">{% trans "Auditoriya" context "accounts.curriculum" %}</th>
+                            <th scope="col">{% trans "Sərbəst" context "accounts.curriculum" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bucket in curriculum_editor_section.balance.semesters %}
+                        <tr>
+                            <th scope="row">{{ bucket.semester_number }}</th>
+                            <td class="ems-table__num{% if bucket.credit_warning %} is-warning{% endif %}">{{ bucket.credits }}</td>
+                            <td class="ems-table__num">{{ bucket.total_hours }}</td>
+                            <td class="ems-table__num">{{ bucket.contact_hours }}</td>
+                            <td class="ems-table__num">{{ bucket.selfwork_hours }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             <p class="tof__intro">{% blocktrans context "accounts.curriculum" with target=curriculum_editor_section.balance.credit_target %}Semestr hədəfi: {{ target }} kredit (NK 348 b. 3.2.2). Fərq açıq xəbərdarlıq sayılır.{% endblocktrans %}</p>
         </div>
         <div class="tof-pane">
