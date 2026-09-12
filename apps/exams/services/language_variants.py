@@ -13,11 +13,11 @@ varsa, axın köhnə (tək-dilli) davranışla eyni qalır.
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Count, Max
 from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
-from apps.exams.models import ExamQuestion, ExamQuestionOption
+from apps.exams.models import ExamLanguageVariant, ExamQuestion, ExamQuestionOption
 from apps.exams.services.utils import _effective_needed_count
 
 EXAM_LANGUAGE_LABELS = dict(EXAM_LANGUAGE_CHOICES)
@@ -50,6 +50,17 @@ def scoped_active_questions(exam, language=None):
     return qs
 
 
+def _language_option(variant, count):
+    """Tək dil seçimi dicti — tək və toplu yol üçün ORTAQ forma."""
+    return {
+        "language": variant.language,
+        "label": language_label(variant.language),
+        "display_name": variant.display_name or language_label(variant.language),
+        "count": count,
+        "variant_id": variant.id,
+    }
+
+
 def available_language_options(exam):
     """
     Student-ə təqdim oluna bilən dillərin siyahısı.
@@ -62,16 +73,67 @@ def available_language_options(exam):
         count = exam.questions.filter(is_active=True, language=variant.language).count()
         if count <= 0:
             continue
-        options.append(
-            {
-                "language": variant.language,
-                "label": language_label(variant.language),
-                "display_name": variant.display_name or language_label(variant.language),
-                "count": count,
-                "variant_id": variant.id,
-            }
-        )
+        options.append(_language_option(variant, count))
     return options
+
+
+# ---------------------------------------------------------------------------
+# Toplu (səhifə üzrə) variantlar — P1-3 (2026-09-10 auditi, 2026-09-12)
+# ---------------------------------------------------------------------------
+# Tələbə imtahan siyahısı hər kart üçün ``available_language_options`` çağırırdı:
+# variant sorğusu + hər variant üçün COUNT.  Aşağıdakı iki primitiv səhifənin
+# bütün imtahanları üçün eyni məlumatı 2 sorğu ilə gətirir; sıralama və
+# «boş dil təklif edilmir» qaydası tək variantla eynidir.
+
+
+def active_variants_for_exams(exam_ids):
+    """``{exam_id: [aktiv variantlar]}`` — dil kodu (sonra id) üzrə sıralı, TƏK sorğu."""
+    exam_ids = [eid for eid in exam_ids if eid is not None]
+    result = {eid: [] for eid in exam_ids}
+    if not exam_ids:
+        return result
+    variants = ExamLanguageVariant.objects.filter(exam_id__in=exam_ids, is_active=True).order_by(
+        "exam_id", "language", "id"
+    )
+    for variant in variants:
+        result.setdefault(variant.exam_id, []).append(variant)
+    return result
+
+
+def active_question_counts_for_exams(exam_ids):
+    """``{(exam_id, dil): aktiv sual sayı}`` — TƏK aqreqat sorğu.
+
+    Sual dili ``ExamQuestion.language`` sahəsidir (variant FK-sı deyil) —
+    ``available_language_options`` ilə eyni meyar.
+    """
+    exam_ids = [eid for eid in exam_ids if eid is not None]
+    if not exam_ids:
+        return {}
+    rows = (
+        ExamQuestion.objects.filter(exam_id__in=exam_ids, is_active=True)
+        .values("exam_id", "language")
+        .annotate(cnt=Count("id"))
+    )
+    return {(row["exam_id"], row["language"]): row["cnt"] for row in rows}
+
+
+def build_language_options(variants, question_counts, exam_id):
+    """Saf qurucu: prefetch edilmiş variantlar + say xəritəsi → seçim siyahısı."""
+    options = []
+    for variant in variants:
+        count = question_counts.get((exam_id, variant.language), 0)
+        if count <= 0:
+            continue
+        options.append(_language_option(variant, count))
+    return options
+
+
+def available_language_options_for_exams(exams):
+    """``available_language_options``-un toplu variantı: ``{exam.id: options}`` (2 sorğu)."""
+    exam_ids = [exam.id for exam in exams]
+    variants_by_exam = active_variants_for_exams(exam_ids)
+    counts = active_question_counts_for_exams(exam_ids)
+    return {eid: build_language_options(variants_by_exam.get(eid, []), counts, eid) for eid in exam_ids}
 
 
 def exam_is_multilingual(exam):
@@ -252,9 +314,13 @@ def create_questions_for_variant(
 
 __all__ = [
     "EXAM_LANGUAGE_LABELS",
+    "active_question_counts_for_exams",
     "active_variants",
+    "active_variants_for_exams",
     "auto_language_for_attempt",
     "available_language_options",
+    "available_language_options_for_exams",
+    "build_language_options",
     "create_questions_for_variant",
     "create_variant",
     "effective_needed_count_for_attempt",

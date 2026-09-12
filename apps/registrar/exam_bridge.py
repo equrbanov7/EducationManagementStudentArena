@@ -21,8 +21,11 @@ from __future__ import annotations
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.db.models import Q
+
+from apps.registrar import exam_eligibility as eligibility_gate
 from apps.registrar import finals, gradebook, services
-from apps.registrar.models import Enrollment
+from apps.registrar.models import Enrollment, StudentAcademicRecord
 
 logger = logging.getLogger(__name__)
 
@@ -79,6 +82,14 @@ def exam_eligibility(*, student, subject_id, organization):
         limit_percent=limit_percent,
         exempt=finals.athlete_exemption(enrollment),
     )
+    return _eligibility_payload(elig)
+
+
+_UNLINKED_ELIGIBILITY = {"linked": False, "barred": False, "reason": ""}
+
+
+def _eligibility_payload(elig):
+    """``resolve()`` nəticəsi → ``exam_eligibility`` cavab dicti (tək və toplu yol ÜÇÜN ORTAQ)."""
     from django.utils.translation import pgettext
 
     reason = ""
@@ -95,6 +106,139 @@ def exam_eligibility(*, student, subject_id, organization):
         "allowed_hours": elig["allowed_hours"],
         "limit_percent": elig["limit_percent"],
     }
+
+
+# ── Toplu buraxılış qapısı (P1-3, 2026-09-12) ────────────────────────────────
+# Tələbə imtahan siyahısı hər kart üçün ``exam_eligibility``-ni ayrıca çağırırdı
+# (kart başına 5–8 sorğu: dövr, yazılış, təşkilat, qrup, qayıb həddi, istisna,
+# donma).  Aşağıdakı toplu variant EYNİ qərarı səhifənin bütün fənləri üçün
+# sabit sayda sorğu ilə verir.  Tək-fənn funksiyaları toxunulmaz qalır — onlar
+# start/attempt axınının qapısıdır; burada yalnız «.first()» seçim qaydaları
+# birə-bir güzgülənir ki, siyahı ilə start eyni cavabı versin.
+
+
+def _resolve_enrollments_batch(*, student, subject_ids, organization):
+    """``resolve_enrollment``-in toplu güzgüsü: ``{subject_id: Enrollment}`` (2 sorğu).
+
+    Seçim qaydası tək variantla eynidir: cari dövrün açılışı (pk üzrə ilk),
+    yoxdursa ən son dövr (``-start_date``; bərabərlikdə kiçik pk).
+    """
+    period = _current_period(organization)
+    rows = list(
+        Enrollment.objects.filter(
+            student=student,
+            offering__subject_id__in=list(subject_ids),
+            offering__organization=organization,
+            status=Enrollment.Status.ENROLLED,
+        )
+        .select_related("offering", "offering__period")
+        .order_by("pk")
+    )
+    by_subject: dict = {}
+    for enrollment in rows:
+        by_subject.setdefault(enrollment.offering.subject_id, []).append(enrollment)
+
+    resolved = {}
+    for subject_id, candidates in by_subject.items():
+        chosen = None
+        if period is not None:
+            chosen = next((e for e in candidates if e.offering.period_id == period.pk), None)
+        if chosen is None:
+            chosen = max(candidates, key=lambda e: (e.offering.period.start_date, -e.pk))
+        resolved[subject_id] = chosen
+    return resolved
+
+
+def _absence_limit_percent_map(offerings) -> dict:
+    """``gradebook.absence_limit_percent_for``-un toplu güzgüsü: ``{offering_id: limit}`` (1 sorğu).
+
+    Tək variant açılışın (təşkilat, qrup) cütü üzrə İLK (pk) akademik qeydin
+    proqram həddini götürür; qeyd yoxdursa defolt.  ``group`` NULL ola bilər —
+    o halda tək variantdakı ``group=None`` → ``IS NULL`` şərti güzgülənir.
+    """
+    offerings = list(offerings)
+    if not offerings:
+        return {}
+    org_ids = {o.organization_id for o in offerings}
+    group_ids = {o.group_id for o in offerings if o.group_id is not None}
+    group_q = Q(group_id__in=list(group_ids)) if group_ids else Q(pk__in=[])
+    if any(o.group_id is None for o in offerings):
+        group_q = group_q | Q(group_id__isnull=True)
+    records = (
+        StudentAcademicRecord.objects.filter(group_q, organization_id__in=list(org_ids))
+        .select_related("program")
+        .order_by("pk")
+    )
+    first_by_key = {}
+    for record in records:
+        first_by_key.setdefault((record.organization_id, record.group_id), record)
+    result = {}
+    for offering in offerings:
+        record = first_by_key.get((offering.organization_id, offering.group_id))
+        if record is not None and record.program:
+            result[offering.id] = record.program.absence_limit_percent
+        else:
+            # Tək variantla eyni fallback (gradebook-un öz sabiti) — dəyər ayrılmasın.
+            result[offering.id] = gradebook._DEFAULT_ABSENCE_LIMIT
+    return result
+
+
+def _athlete_exemption_map(enrollments) -> dict:
+    """``finals.athlete_exemption``-un toplu güzgüsü: ``{(organization_id, student_id): bool}`` (1 sorğu).
+
+    Tək variant (təşkilat, tələbə) üzrə İLK (pk) qeydin bayrağını qaytarır —
+    burada da eyni sıra ilə ilk qeyd götürülür (``exempt_student_ids`` fərqli
+    semantikadır: «hər hansı qeyddə True» — ona görə işlədilmir).
+    """
+    keys = {(e.organization_id, e.student_id) for e in enrollments}
+    if not keys:
+        return {}
+    rows = (
+        StudentAcademicRecord.objects.filter(
+            organization_id__in=[k[0] for k in keys], student_id__in=[k[1] for k in keys]
+        )
+        .order_by("pk")
+        .values_list("organization_id", "student_id", "national_athlete_exemption")
+    )
+    first_flag = {}
+    for org_id, student_id, flag in rows:
+        first_flag.setdefault((org_id, student_id), bool(flag))
+    return {key: first_flag.get(key, False) for key in keys}
+
+
+def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
+    """``exam_eligibility``-nin toplu variantı: ``{subject_id: dict}``.
+
+    Fənn sayından asılı olmayan sabit sorğu dəsti: dövr (1–2), yazılışlar (1),
+    qayıb həddi (1), idmançı istisnası (1), donma (1–2), dərs saatı fallback-i
+    (0–1; yalnız ``lesson_hours`` boş açılışlar üçün).  Hər fənn üçün nəticə
+    tək variantla EYNİ dictdir (``_eligibility_payload``); yazılışı olmayan fənn
+    → ``linked=False``.
+    """
+    wanted = {sid for sid in subject_ids if sid}
+    result = {sid: dict(_UNLINKED_ELIGIBILITY) for sid in wanted}
+    if not wanted or student is None or organization is None:
+        return result
+    enrollments = _resolve_enrollments_batch(student=student, subject_ids=wanted, organization=organization)
+    if not enrollments:
+        return result
+    offerings = {e.offering_id: e.offering for e in enrollments.values()}
+    limit_by_offering = _absence_limit_percent_map(offerings.values())
+    exempt_by_key = _athlete_exemption_map(enrollments.values())
+    hours_map = eligibility_gate.lesson_hours_map(
+        [oid for oid, offering in offerings.items() if not (getattr(offering, "lesson_hours", 0) or 0)]
+    )
+    frozen_ids = eligibility_gate.frozen_offering_ids(list(offerings))
+    for subject_id, enrollment in enrollments.items():
+        elig = services.get_exam_eligibility(
+            enrollment=enrollment,
+            limit_percent=limit_by_offering.get(enrollment.offering_id, gradebook._DEFAULT_ABSENCE_LIMIT),
+            exempt=exempt_by_key.get((enrollment.organization_id, enrollment.student_id), False),
+            frozen=enrollment.offering_id in frozen_ids,
+            hours_map=hours_map,
+        )
+        result[subject_id] = _eligibility_payload(elig)
+    return result
 
 
 def _to_exam_scale(percent, scheme) -> int:
