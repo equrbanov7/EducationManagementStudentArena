@@ -163,7 +163,12 @@ API-ları üzərindən əlçatandır.
    yoxlayır).
 4. **Webhook:** `alertmanager-webhook` CSRF-exempt (maşın-maşın), amma
    `ALERTMANAGER_WEBHOOK_TOKEN` ilə `hmac.compare_digest`; token boşdursa
-   endpoint bağlıdır; nginx bu path-i publik marşruta çıxarmır.
+   endpoint bağlıdır; nginx bu path-i publik marşruta çıxarmır. Token
+   **yalnız** `Authorization: Bearer <token>` başlığında qəbul edilir
+   (2026-09-12, audit P2-6 — `?token=` forması access log-lara sızırdı və
+   artıq 403 qaytarır). Alertmanager şablonu `http_config.authorization` ilə
+   göndərir; şablon start zamanı render olunduğu üçün deploy skripti
+   `alertmanager` konteynerini `--force-recreate` edir.
 5. **Rate-limit:** monitorinq API-larına per-user `240/1m`.
 6. **Testlər:** `test_access.py` — superadmin 200, 8 org rolu + owner + is_staff
    403, anonim 401, icazəsiz cəhd SecurityEvent-ə yazılır.

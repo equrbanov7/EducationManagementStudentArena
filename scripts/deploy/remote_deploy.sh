@@ -211,6 +211,18 @@ reload_prometheus_config() {
   docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate prometheus
 }
 
+recreate_alertmanager() {
+  # alertmanager.tmpl.yml is rendered by `sed` in the container ENTRYPOINT into
+  # /tmp/alertmanager.yml, so neither a bind-mount content change nor SIGHUP
+  # picks up a new template — only a recreate re-runs the render. Without this
+  # a deploy that changes the webhook contract (2026-09-12: token moved from
+  # `?token=` to the `Authorization: Bearer` header) would leave Alertmanager
+  # posting the old form and every notification would 403 silently.
+  echo "Recreating alertmanager (config template is rendered at container start)..."
+  docker compose -f "$COMPOSE_FILE" up -d --no-deps --force-recreate alertmanager \
+    || echo "Alertmanager recreate failed; incident webhook may be stale." >&2
+}
+
 legacy_deploy() {
   if [ ! -x "${VENV_DIR}/bin/python" ]; then
     echo "Missing virtualenv at ${VENV_DIR}." >&2
@@ -423,6 +435,7 @@ docker_deploy() {
 
   refresh_nginx_upstream
   reload_prometheus_config
+  recreate_alertmanager
 
   wait_for_http "${APP_BASE_URL}${PING_PATH}" "200" "$PING_JSON" || {
     docker compose -f "$COMPOSE_FILE" ps >&2 || true
