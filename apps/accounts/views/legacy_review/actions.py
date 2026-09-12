@@ -21,7 +21,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import legacy_grade_review_actions as review_write
+from apps.registrar.public import legacy_grade_review_actions as review_write
 from core.logging_utils import safe_log_value
 
 from .policy import resolve_actor

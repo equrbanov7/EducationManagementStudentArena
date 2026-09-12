@@ -37,6 +37,7 @@ from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
 from .groups_registry import can_manage_groups, can_view_groups, education_form_choices, group_meta, group_scope
+from .groups_registry import visible_group as _visible_group
 from .models import Organization, OrgUnit
 from .scoping import scope_org_units
 from .views.shared._helpers import _unique_unit_slug
@@ -70,13 +71,6 @@ def _reason_or_none(request):
             field="reason",
         )
     return reason, None
-
-
-def _visible_group(organization, scope, unit_id, *, include_archived=False):
-    queryset = OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
-    if not include_archived:
-        queryset = queryset.filter(is_active=True)
-    return scope_org_units(queryset, scope).filter(pk=(unit_id or "").strip()).select_related("parent", "head").first()
 
 
 def _int_or(value, default, *, low, high):
@@ -328,7 +322,7 @@ def _add_students(request, organization, scope):
 
     from django.core.exceptions import ValidationError
 
-    from apps.registrar import transfer as group_transfer
+    from . import student_transfer as group_transfer
 
     period = organization.academic_periods.filter(is_current=True, is_active=True).first()
     added = []
@@ -393,7 +387,7 @@ def _move_student(request, organization, scope):
 
     from django.core.exceptions import ValidationError
 
-    from apps.registrar import transfer as group_transfer
+    from . import student_transfer as group_transfer
 
     period = organization.academic_periods.filter(is_current=True, is_active=True).first()
     try:

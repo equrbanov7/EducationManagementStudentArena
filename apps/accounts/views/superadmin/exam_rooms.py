@@ -18,10 +18,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.exams.forms import ExamRoomForm
 from apps.exams.public import (
     ExamRoom,
     ExamRoomComputer,
+    ExamRoomForm,
     RoomAdminError,
     add_computer,
     bulk_add_computers,

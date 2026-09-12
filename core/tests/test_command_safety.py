@@ -21,7 +21,7 @@ _PROTECTED_COMMAND_MODULES = (
     "apps.organizations.management.commands.create_sample_orgs",
     "apps.organizations.management.commands.seed_ci_e2e_scenario",
     "apps.organizations.management.commands.seed_ci_e2e_user",
-    "apps.organizations.management.commands.seed_western_caspian",
+    "apps.registrar.management.commands.seed_western_caspian",
 )
 
 _SENSITIVE_VALUE = "RealCredential-Do-Not-Log!"

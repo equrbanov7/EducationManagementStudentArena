@@ -34,6 +34,7 @@ fakültə üzərində icazə saxlamasın. Hər əməl auditə düşür.
 
 from __future__ import annotations
 
+from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -49,6 +50,7 @@ from core.roles import ProfileRole
 from core.staff_position import visible_role_label
 
 from .models import Membership, Organization, OrgUnit, Role
+from .name_matching import name_exists
 from .structure_views._shared import (
     _teacher_memberships_qs,
     head_candidate_memberships,
@@ -116,8 +118,7 @@ def _display_name(user):
 
 def _is_student(organization, user) -> bool:
     """`apps.accounts.services.people.actions._assert_not_student` ilə EYNİ meyar."""
-    from apps.registrar.models import StudentAcademicRecord
-
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     return (
         StudentAcademicRecord.objects.filter(organization=organization, student=user, is_active=True).exists()
         or Membership.objects.filter(
@@ -206,7 +207,6 @@ def _save_unit(request, organization, scope, flags):
         return _error(pgettext(_CTX, "Ad boş ola bilməz."), code="name_required", field="name")
     if len(name) > 255:
         return _error(pgettext(_CTX, "Ad maksimum 255 simvol ola bilər."), code="name_too_long", field="name")
-
     parent = None
     if not is_faculty:
         parent_id = (request.POST.get("parent") or "").strip()
@@ -222,7 +222,7 @@ def _save_unit(request, organization, scope, flags):
     siblings = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=unit_types)
     if unit is not None:
         siblings = siblings.exclude(pk=unit.pk)
-    if siblings.filter(name__iexact=name).exists():
+    if name_exists(siblings, name):
         return _error(pgettext(_CTX, "Bu adda bölmə artıq var."), code="name_taken", field="name")
     if code and siblings.filter(code__iexact=code).exists():
         return _error(pgettext(_CTX, "Bu kodda bölmə artıq var."), code="code_taken", field="code")

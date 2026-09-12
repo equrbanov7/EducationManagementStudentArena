@@ -322,8 +322,7 @@ def _courses_section(user, organization, memberships, permissions) -> str:
 
 def _exams_section(user, organization, memberships, permissions) -> str:
     """Summarise the user's exam data (results for students, created exams for teachers)."""
-    from apps.exams.domain.attempts import ExamAttempt
-    from apps.exams.domain.exam_definition import Exam
+    from apps.exams.models import Exam, ExamAttempt
 
     lines = ["[My Exams]"]
 
@@ -380,6 +379,6 @@ def request_has_permission_from_list(permissions: list, permission: str) -> bool
 
     Supports wildcard matching consistent with the RBAC permission system.
     """
-    from apps.organizations.permissions import has_permission
+    from core.permissions import has_permission
 
     return has_permission(permissions, permission)

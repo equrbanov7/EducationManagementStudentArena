@@ -32,7 +32,7 @@ def syllabus_topic_rows(offering):
     oxunur (§8/9 və §6.5) — qaralama versiyanın mövzuları jurnala sızmır.
     Sillabus yoxdursa BOŞ siyahı (çağıran LMS kursuna geri çəkilir).
     """
-    from apps.syllabus import services as syllabus_services
+    from apps.syllabus import public as syllabus_services
 
     syllabus = syllabus_services.syllabus_for_offering(
         organization=offering.organization,

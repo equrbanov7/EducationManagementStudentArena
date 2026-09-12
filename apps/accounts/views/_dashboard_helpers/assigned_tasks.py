@@ -11,9 +11,8 @@ from django.utils.translation import pgettext
 
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
-from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
-from apps.exams.public import student_final_exam_context
+from apps.exams.public import ATTEMPT_FINISHED_STATUSES, student_final_exam_context
 from apps.labs.models import Lab
 from apps.projects.models import Project
 
@@ -217,7 +216,7 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             # isə yalnız məlumat olaraq (PIN blokunda) göstərir.
             student_pin = None
             if category in {"final", "midterm"}:
-                from apps.exams.services.student_pins import student_visible_pin
+                from apps.exams.public import student_visible_pin
 
                 student_pin = student_visible_pin(exam, user)
 

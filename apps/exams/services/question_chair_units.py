@@ -28,7 +28,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.db.models import Q
 
-from apps.organizations.unit_heads import (
+from apps.organizations.public import (
     ancestor_unit_ids,
     chair_head_memberships_for_unit,
     dean_memberships_for_unit,

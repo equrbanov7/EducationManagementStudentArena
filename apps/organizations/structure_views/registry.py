@@ -25,6 +25,7 @@ import json
 from collections import defaultdict
 from urllib.parse import urlencode
 
+from django.apps import apps as django_apps
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.urls import reverse
@@ -129,8 +130,7 @@ def _collect(organization, roots):
     Qaytarır ``(per_root, path_by_id, owner)``:
     ``per_root[id] = {"chairs", "specialties", "groups", "students", "teachers", "specialty_list"}``.
     """
-    from apps.registrar.models import StudentAcademicRecord
-
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     owner = _owner_lookup({unit.path: unit.id for unit in roots})
     path_by_id = {}
     per = defaultdict(
@@ -503,7 +503,7 @@ def build_kafedras_section(request, organization) -> dict:
     active_ids = _active_teacher_user_ids(organization, period_ids)
     offerings_by_user = {}
     if period_ids:
-        from apps.registrar.models import CourseOffering
+        CourseOffering = django_apps.get_model("registrar", "CourseOffering")
 
         offerings_by_user = dict(
             CourseOffering.objects.filter(

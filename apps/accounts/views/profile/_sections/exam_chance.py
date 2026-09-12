@@ -69,9 +69,9 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     from django.db.models import Count, Q, Sum
 
     from apps.exams.models import Exam, StudentExamAttemptGrant, StudentGroup
-    from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
+    from apps.exams.public import SECURE_EXAM_CATEGORIES
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES
+    from apps.organizations.public import KAFEDRA_UNIT_TYPES
     from core.constants import OrgUnitType
 
     organization = active_organization

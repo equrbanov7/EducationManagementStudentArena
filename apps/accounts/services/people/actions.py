@@ -249,7 +249,7 @@ def assign_teacher_unit(actor, target, *, unit_id, reason: str = "", request=Non
         raise RimAccessError("unit_required", "Kafedra seçilməlidir.", status=400)
 
     from apps.organizations.models import Membership
-    from apps.organizations.scoping import scope_memberships_by_unit
+    from apps.organizations.public import scope_memberships_by_unit
 
     scope = actor.scope_for(PERM_MANAGE_TEACHER_ROLE, request=request)
     memberships = Membership.objects.filter(
@@ -334,7 +334,7 @@ def set_teacher_role(actor, target, *, grant: bool, reason: str, unit_id=None, r
         action_name = "people.teacher_role_granted"
     else:
         # ÇIXARMA scope-ludur: dekan yalnız öz alt-ağacındakı təyinatı söndürür.
-        from apps.organizations.scoping import scope_memberships_by_unit
+        from apps.organizations.public import scope_memberships_by_unit
 
         scope = actor.scope_for(PERM_MANAGE_TEACHER_ROLE, request=request)
         memberships = Membership.objects.filter(

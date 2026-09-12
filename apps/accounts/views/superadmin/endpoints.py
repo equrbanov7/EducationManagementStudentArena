@@ -229,7 +229,7 @@ def superadmin_organizations(request):
             )
         elif action == "set_cabinet_module":
             # U16 — kabinet modul görünürlüyü (superadmin aç/bağla paneli).
-            from apps.organizations.cabinet_modules import CABINET_MODULES, set_module_enabled
+            from apps.organizations.public import CABINET_MODULES, set_module_enabled
 
             module_key = (request.POST.get("module_key") or "").strip()
             if module_key not in CABINET_MODULES:
@@ -254,7 +254,7 @@ def superadmin_organizations(request):
             messages.success(request, module_msg % {"organization_name": organization.name, "module": module_label})
         elif action == "set_letter_bands":
             # U17 — tenant hərf qiyməti şkalası (hədd:hərf:gpa siyahısı).
-            from apps.registrar import grading_scale
+            from apps.registrar.public import grading_scale
 
             try:
                 bands = grading_scale.parse_bands_text(request.POST.get("letter_bands") or "")
@@ -270,7 +270,7 @@ def superadmin_organizations(request):
             messages.success(request, bands_ok % {"organization_name": organization.name})
         elif action == "reset_letter_bands":
             # U17 — şkalanı AZ Boloniya default-una qaytar.
-            from apps.registrar import grading_scale
+            from apps.registrar.public import grading_scale
 
             grading_scale.reset_bands(organization)
             bands_reset = pgettext_lazy(

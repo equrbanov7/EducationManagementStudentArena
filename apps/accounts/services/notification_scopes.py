@@ -28,9 +28,8 @@ from django.db.models import Q
 from django.utils.translation import pgettext
 
 from apps.organizations.models import Membership, Organization, OrgUnit
-from apps.organizations.scoping import get_permission_scope
-from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES, TEACHER_ROLE_NAMES
-from apps.organizations.views import _visible_units_queryset
+from apps.organizations.public import KAFEDRA_UNIT_TYPES, TEACHER_ROLE_NAMES, get_permission_scope
+from apps.organizations.public import visible_units_queryset as _visible_units_queryset
 from core.constants import OrgUnitType
 
 _CTX = "profile.publish_notification"

@@ -35,7 +35,7 @@ from xml.sax.saxutils import escape
 
 from django.apps import apps as django_apps
 
-from apps.organizations.groups_registry import group_meta
+from apps.organizations.public import group_meta
 
 TEMPLATE_PATH = Path(__file__).resolve().parent / "docx_templates" / "individual_plan.docx"
 

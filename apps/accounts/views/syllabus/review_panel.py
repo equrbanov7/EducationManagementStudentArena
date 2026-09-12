@@ -16,8 +16,8 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import RULE_SECTIONS, SectionKey, SyllabusStatus
 from apps.syllabus.models import ReviewDecision, SyllabusReview
+from apps.syllabus.public import RULE_SECTIONS, SectionKey, SyllabusStatus
 
 from .labels import STATUS_TONES
 from .preview import build_preview_blocks
@@ -206,7 +206,7 @@ def _existing_notes(version) -> dict:
 
 def build_review_payload(version, *, now) -> dict:
     """Baxış panelinin JSON gövdəsi (dizayn §3.3 sağ panel)."""
-    from apps.syllabus.services import section_data_map, version_diff, version_timeline
+    from apps.syllabus.public import section_data_map, version_diff, version_timeline
 
     syllabus = version.syllabus
     approved = syllabus.approved_version

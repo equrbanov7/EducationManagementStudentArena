@@ -105,7 +105,7 @@ def _row(bank, *, user_id, back_url, format_labels, kind_labels) -> dict:
 
 def _read_params(request, *, is_center, exam_kind_choices, language_values, format_values) -> dict:
     """GET filtrlərini oxuyub təmizləyir (yad dəyər → boş)."""
-    from apps.exams.constants import QUESTION_EXAM_KIND_VALUES
+    from apps.exams.public import QUESTION_EXAM_KIND_VALUES
 
     allowed_kinds = {value for value, _label in exam_kind_choices}
     kind = (request.GET.get("bank_kind") or "").strip().lower()
@@ -152,10 +152,10 @@ def build_question_bank_context(request, *, allowed_sections, active_section) ->
     if not (active_section == "question-bank" and "question-bank" in allowed_sections):
         return _inactive_defaults()
 
-    from apps.exams.constants import QUESTION_EXAM_KIND_CHOICES
     from apps.exams.models import QuestionBank
     from apps.exams.public import (
         EXAM_LANGUAGE_CHOICES,
+        QUESTION_EXAM_KIND_CHOICES,
         accessible_banks,
         can_create_question_bank,
         is_exam_center_user,

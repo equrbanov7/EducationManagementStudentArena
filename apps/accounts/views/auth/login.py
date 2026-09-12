@@ -66,7 +66,7 @@ def _portal_role_pairs(user):
     buraxırdı (QA Y-1, «Əlavə 2»).
     """
     from apps.organizations.models import Membership
-    from apps.organizations.services import get_active_memberships
+    from apps.organizations.public import get_active_memberships
     from core.rls import bypass_rls
 
     with bypass_rls():

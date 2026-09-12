@@ -41,8 +41,8 @@ def build_legacy_grade_review_section(request, section, *, allowed_sections, act
     if SECTION not in allowed_sections or active_section != SECTION:
         return
 
-    from apps.registrar import legacy_grade_review_actions as review_write
     from apps.registrar.models import CorrectionReason
+    from apps.registrar.public import legacy_grade_review_actions as review_write
 
     from ...legacy_review.api import DEFAULT_PAGE_SIZE
     from ...legacy_review.policy import resolve_actor

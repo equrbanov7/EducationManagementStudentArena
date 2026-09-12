@@ -201,7 +201,7 @@ def registrar_block_reasons(request, exams):
 
     for organization, subject_ids in by_organization.values():
         try:
-            from apps.registrar.exam_bridge import exam_eligibility_batch
+            from apps.registrar.public import exam_eligibility_batch
 
             eligibility = exam_eligibility_batch(student=user, subject_ids=subject_ids, organization=organization)
         except Exception:

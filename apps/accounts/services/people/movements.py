@@ -114,7 +114,7 @@ def load_registry_record(actor, record_id, *, request=None):
 
 def movement_kinds() -> list:
     """Dialoqun «Əməliyyatın növü» radio kartları (kataloqdan — TƏK mənbə)."""
-    from apps.registrar.movements import RULES
+    from apps.registrar.public import RULES
     from core.ui import status_catalog
 
     rows = []
@@ -312,7 +312,7 @@ def create_movement(
     document=None,
 ) -> dict:
     """Hərəkət əmrini yazır və nəticəni UI müqaviləsində qaytarır."""
-    from apps.registrar import movements as domain
+    from apps.registrar.public import movements as domain
 
     _require(actor)
     record = load_record(actor, record_id, request=request)
@@ -418,7 +418,7 @@ def student_movements(actor, *, record_id, request=None) -> list:
     """Bir tələbənin hərəkət tarixçəsi (drawer «Hərəkət tarixçəsi» bloku)."""
     if not actor.can_view_registry:
         raise RimAccessError("permission_denied", "Tələbə reyestrinə baxış icazəniz yoxdur.")
-    from apps.registrar import movements as domain
+    from apps.registrar.public import movements as domain
 
     record = load_registry_record(actor, record_id, request=request)
     return [movement_row(movement) for movement in domain.movements_for(record).select_related("record__student")]

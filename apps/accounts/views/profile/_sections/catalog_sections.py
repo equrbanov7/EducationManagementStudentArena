@@ -17,7 +17,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.registrar.catalog_registry import build_programs_registry, build_subject_catalog
+from apps.registrar.public import build_programs_registry, build_subject_catalog
 
 _CTX = "accounts.catalog"
 

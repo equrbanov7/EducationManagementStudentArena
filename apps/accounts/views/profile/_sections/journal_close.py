@@ -64,8 +64,8 @@ def build_journal_close_section(
         return
 
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.registrar import journal_close as journal_close_service
     from apps.registrar.models import JournalCloseNotice
+    from apps.registrar.public import journal_close as journal_close_service
     from core.constants import OrgUnitType
 
     org_options, selected_org = _selected_org(

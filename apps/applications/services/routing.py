@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.organizations.unit_heads import resolve_ancestor
+from apps.organizations.public import resolve_ancestor
 from core.constants import RoleScopeType
 
 from ..constants import RESOLVE_BY_FALLBACK_UNIT_TYPES, ResolveBy, SenderFamily

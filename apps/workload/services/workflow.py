@@ -401,7 +401,7 @@ def _unit_role_users(organization, units, role_names, permission=None):
     rəhbərsizdir, ona görə dekan/kafedra müdiri bildiriş almırdı (QA 2026-09-05
     WORKLOAD-SCHEDULE-09). İndi rol üzvlüyü də alıcıdır (rəhbər + rol daşıyıcıları).
     """
-    from apps.organizations.unit_heads import members_covering_unit
+    from apps.organizations.public import members_covering_unit
 
     users: dict = {}
     for unit in units:

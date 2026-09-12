@@ -31,7 +31,10 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from .scoping import get_permission_scope
+from core.constants import OrgUnitType
+
+from .models import OrgUnit
+from .scoping import get_permission_scope, scope_org_units
 from .views.shared._helpers import _has_org_permission, _visible_units_queryset
 
 _CTX = "accounts.groups"
@@ -362,3 +365,10 @@ __all__ = [
     "language_form_options",
     "language_options",
 ]
+
+
+def visible_group(organization, scope, unit_id, *, include_archived=False):
+    queryset = OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP)
+    if not include_archived:
+        queryset = queryset.filter(is_active=True)
+    return scope_org_units(queryset, scope).filter(pk=(unit_id or "").strip()).select_related("parent", "head").first()
