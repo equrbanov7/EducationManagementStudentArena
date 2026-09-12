@@ -1,99 +1,169 @@
-{% load i18n static %}
-<div class="section-card pending-answers-card">
-    <div class="section-title">
-        <i class="fas fa-hourglass-half"></i>
-        {% trans "section_title" context "accounts.pending_answers" %} ({{ pending_answers_total_count|default:pending_answer_counts.all|default:0 }})
-    </div>
-    {% if not embedded_in_profile or direct_profile_section == "pending-answers" %}
-        <div class="profile-edit-link mb-3">
-            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                {% trans "back_to_profile" context "accounts.pending_answers" %}
-            </a>
+{% load i18n static ems_ui %}
+{% comment %}«Gözləmədə olan cavablar» — tələbə kabineti (redizayn 2026-09-12, audit bəndi 7/2).
+
+Nə səhv idi: kart başlığı bölmə adını (qabıq `#profileSectionTitle`) təkrarlayırdı,
+«← Profilə qayıt» düyməsi kabinetin İÇİNDƏ mənasız idi (bu partial yalnız qabıqda
+render olunur — `_render_profile_section` həmişə tam profili qaytarır), filtr və
+siyahı Bootstrap `card/btn` qalıqları ilə idi, boş vəziyyət «nə edim?» demirdi.
+
+İndi: altbaşlıq (`_content_header`) → KPI sırası (növ üzrə say — hər kart eyni
+zamanda filtr keçididir) → avto filtr paneli (`ems-filters` müqaviləsi,
+filter_bar.js) → status badge-li iş siyahısı (`pending_answer` ailəsi) → boş
+vəziyyət + status izahı.  Bütün asset-lər partial-ın içindədir (AJAX swap-dan
+sonra da işləsin — docs/frontend/AJAX_SAFE_JS_PATTERN.md); inline CSS/JS YOXDUR.
+
+Kontekst: `pending_answer_items`, `pending_answer_counts`, `pending_answers_active_filter`,
+`pending_answers_search_query` (context_builder `_stage1` / `_stage4`).{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_answers.css' %}?v=20260912-1">
+{% with active=pending_answers_active_filter|default:"all" counts=pending_answer_counts %}
+<div class="pax" data-pax-root>
+    {% trans "Təhvil verdiyiniz, lakin nəticəsi hələ açılmamış işlər. Müəllim yoxlayıb təsdiqləyəndən sonra nəticə «Nəticələrim» bölməsində görünür." context "accounts.pending_answers" as pax_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=pax_subtitle header_actions_include="accounts/partials/_pending_answers_header_actions.html" %}
+
+    {# ── KPI sırası — növ üzrə say; hər kart həmin növə süzən keçiddir ─────── #}
+    <nav class="ems-kpis ems-kpis--5 pax-kpis" aria-label="{% trans 'Növ üzrə süz' context 'accounts.pending_answers' %}">
+        <a class="ems-kpi pax-kpi{% if active == 'all' %} is-active{% endif %}"
+           href="{{ profile_base_url }}?section=pending-answers{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
+           {% if active == 'all' %}aria-current="true"{% endif %}>
+            <span class="ems-kpi__label">{% trans "kpi_total" context "accounts.pending_answers" %}</span>
+            <span class="ems-kpi__value">{{ counts.all|default:0 }}</span>
+            <span class="ems-kpi__note">{% trans "kpi_total_note" context "accounts.pending_answers" %}</span>
+        </a>
+        <a class="ems-kpi pax-kpi{% if active == 'exams' %} is-active{% endif %}"
+           href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=exams{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
+           {% if active == 'exams' %}aria-current="true"{% endif %}>
+            <span class="ems-kpi__label">{% trans "type_exam" context "accounts.pending_answers" %}</span>
+            <span class="ems-kpi__value">{{ counts.exams|default:0 }}</span>
+            <span class="ems-kpi__note">{% trans "filter_written" context "accounts.pending_answers" %} {{ counts.written_exams|default:0 }} · {% trans "filter_practical" context "accounts.pending_answers" %} {{ counts.practical_exams|default:0 }}</span>
+        </a>
+        <a class="ems-kpi pax-kpi{% if active == 'courses' %} is-active{% endif %}"
+           href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=courses{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
+           {% if active == 'courses' %}aria-current="true"{% endif %}>
+            <span class="ems-kpi__label">{% trans "filter_free_work" context "accounts.pending_answers" %}</span>
+            <span class="ems-kpi__value">{{ counts.courses|default:0 }}</span>
+            <span class="ems-kpi__note">{% trans "kpi_free_work_note" context "accounts.pending_answers" %}</span>
+        </a>
+        <a class="ems-kpi pax-kpi{% if active == 'labs' %} is-active{% endif %}"
+           href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=labs{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
+           {% if active == 'labs' %}aria-current="true"{% endif %}>
+            <span class="ems-kpi__label">{% trans "filter_lab_work" context "accounts.pending_answers" %}</span>
+            <span class="ems-kpi__value">{{ counts.labs|default:0 }}</span>
+            <span class="ems-kpi__note">{% trans "kpi_lab_note" context "accounts.pending_answers" %}</span>
+        </a>
+        <a class="ems-kpi pax-kpi{% if active == 'independent' %} is-active{% endif %}"
+           href="{{ profile_base_url }}?section=pending-answers&amp;pending_type=independent{% if pending_answers_search_query %}&amp;pending_search={{ pending_answers_search_query|urlencode }}{% endif %}"
+           {% if active == 'independent' %}aria-current="true"{% endif %}>
+            <span class="ems-kpi__label">{% trans "filter_coursework" context "accounts.pending_answers" %}</span>
+            <span class="ems-kpi__value">{{ counts.independent|default:0 }}</span>
+            <span class="ems-kpi__note">{% trans "kpi_coursework_note" context "accounts.pending_answers" %}</span>
+        </a>
+    </nav>
+
+    {# ── Avto filtr paneli — `ems_ui/_filter_bar.html` markup müqaviləsi ────── #}
+    {% comment %}Sahələr sabit olduğu üçün komponent include edilmir (o, Python-dan
+    `filter_fields` siyahısı gözləyir); markup müqaviləsi eynidir — `filter_bar.js`
+    select dəyişən kimi, axtarışı isə debounce ilə bölməni yenidən yükləyir
+    (`EMSProfileLoadSection`). «Sıfırla» server defoltlarına qaytarır.{% endcomment %}
+    <form class="ems-filters ems-filters--auto pax-filters" data-ems-filters data-ems-filters-auto="1"
+          data-section="pending-answers" data-param-prefix="pending_"
+          data-base-url="{{ profile_base_url }}" role="search">
+        <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="f-pending_search">{% trans "action_search" context "accounts.pending_answers" %}</label>
+            <input class="ems-input" type="search" id="f-pending_search" name="pending_search"
+                   value="{{ pending_answers_search_query|default_if_none:'' }}"
+                   placeholder="{% trans 'search_placeholder' context 'accounts.pending_answers' %}"
+                   autocomplete="off" data-ems-filter data-ems-filter-search>
         </div>
-    {% endif %}
-
-    <form method="get"
-          class="search-form js-auto-filter-form pending-answers-filters"
-          data-auto-filter-form>
-        {% if embedded_in_profile %}
-            <input type="hidden" name="section" value="pending-answers">
-        {% endif %}
-
-        <div class="pending-answers-filter-grid">
-            <input
-                type="search"
-                name="pending_search"
-                value="{{ pending_answers_search_query }}"
-                placeholder="{% trans 'search_placeholder' context 'accounts.pending_answers' %}"
-                class="pr-form-control pending-answers-search-input"
-             aria-label="{% trans 'search_placeholder' context 'accounts.pending_answers' %}">
-
-            <div class="bootstrap-single-select pending-answers-select-wrap">
-                <select name="pending_type"
-                        class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-                        data-bootstrap-select>
-                    <option value="all" {% if pending_answers_active_filter == 'all' %}selected{% endif %}>{% trans "filter_all_types" context "accounts.pending_answers" %}</option>
-                    <option value="exams" {% if pending_answers_active_filter == 'exams' %}selected{% endif %}>{% trans "filter_all_exams" context "accounts.pending_answers" %}</option>
-                    <option value="written_exams" {% if pending_answers_active_filter == 'written_exams' %}selected{% endif %}>{% trans "filter_written" context "accounts.pending_answers" %}</option>
-                    <option value="practical_exams" {% if pending_answers_active_filter == 'practical_exams' %}selected{% endif %}>{% trans "filter_practical" context "accounts.pending_answers" %}</option>
-                    <option value="courses" {% if pending_answers_active_filter == 'courses' %}selected{% endif %}>{% trans "filter_free_work" context "accounts.pending_answers" %}</option>
-                    <option value="labs" {% if pending_answers_active_filter == 'labs' %}selected{% endif %}>{% trans "filter_lab_work" context "accounts.pending_answers" %}</option>
-                    <option value="independent" {% if pending_answers_active_filter == 'independent' %}selected{% endif %}>{% trans "filter_coursework" context "accounts.pending_answers" %}</option>
+        <div class="ems-field">
+            <label class="ems-field__label" for="f-pending_type">{% trans "filter_label_type" context "accounts.pending_answers" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="f-pending_type" name="pending_type"
+                        data-ems-filter data-ems-default="all" data-bootstrap-select>
+                    <option value="all" {% if active == 'all' %}selected{% endif %}>{% trans "filter_all_types" context "accounts.pending_answers" %}</option>
+                    <option value="exams" {% if active == 'exams' %}selected{% endif %}>{% trans "filter_all_exams" context "accounts.pending_answers" %}</option>
+                    <option value="written_exams" {% if active == 'written_exams' %}selected{% endif %}>{% trans "filter_written" context "accounts.pending_answers" %}</option>
+                    <option value="practical_exams" {% if active == 'practical_exams' %}selected{% endif %}>{% trans "filter_practical" context "accounts.pending_answers" %}</option>
+                    <option value="courses" {% if active == 'courses' %}selected{% endif %}>{% trans "filter_free_work" context "accounts.pending_answers" %}</option>
+                    <option value="labs" {% if active == 'labs' %}selected{% endif %}>{% trans "filter_lab_work" context "accounts.pending_answers" %}</option>
+                    <option value="independent" {% if active == 'independent' %}selected{% endif %}>{% trans "filter_coursework" context "accounts.pending_answers" %}</option>
                 </select>
             </div>
-
-            <noscript>
-                <button type="submit" class="btn btn-primary pending-answers-search-btn">
-                    <i class="fas fa-search"></i> {% trans "action_search" context "accounts.pending_answers" %}
-                </button>
-            </noscript>
+        </div>
+        <div class="ems-filters__actions">
+            <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
+        </div>
+        <div class="ems-filters__count" aria-live="polite">
+            {% blocktrans context "accounts.pending_answers" with count=pending_answer_items|length %}Göstərilir: <strong>{{ count }}</strong> iş{% endblocktrans %}
         </div>
     </form>
 
+    {# ── Siyahı ─────────────────────────────────────────────────────────────── #}
+    <div class="pax-list" data-ems-filter-target>
     {% if pending_answer_items %}
-        <div class="pending-answers-list">
+        <ol class="pax-items" aria-label="{% trans 'section_title' context 'accounts.pending_answers' %}">
             {% for item in pending_answer_items %}
-                <article class="post-item pending-answer-item">
-                    <div class="post-icon {% if item.category == 'exams' %}stat-icon--blue{% elif item.category == 'courses' %}stat-icon--green{% elif item.category == 'labs' %}stat-icon--orange{% else %}stat-icon--sky{% endif %}">
-                        <i class="{{ item.icon }}"></i>
+            <li class="pax-item pax-item--{{ item.category }}">
+                <span class="pax-item__icon" aria-hidden="true"><i class="{{ item.icon }}"></i></span>
+                <div class="pax-item__main">
+                    <div class="pax-item__top">
+                        <span class="pax-type pax-type--{{ item.category }}">
+                            {% if item.category == 'exams' %}{% trans "type_exam" context "accounts.pending_answers" %}{% elif item.category == 'courses' %}{% trans "filter_free_work" context "accounts.pending_answers" %}{% elif item.category == 'labs' %}{% trans "filter_lab_work" context "accounts.pending_answers" %}{% else %}{% trans "filter_coursework" context "accounts.pending_answers" %}{% endif %}
+                        </span>
+                        {% if item.kind %}<span class="pax-item__kind">{{ item.kind }}</span>{% endif %}
                     </div>
-                    <div class="post-info">
-                        <div class="post-title">{{ item.title }}</div>
-                        <div class="post-date">
-                            <span class="kind-badge">{{ item.type_label }}</span>
-                            {{ item.kind }}
-                            {% if item.submitted_at %}· {{ item.submitted_at|date:"d.m.Y H:i" }}{% endif %}
-                            <span class="pending-answer-status pending-answer-status--{{ item.status_class }}">{{ item.status_label }}</span>
-                        </div>
+                    <h3 class="pax-item__title">{{ item.title }}</h3>
+                    <div class="pax-item__meta">
+                        {% if item.submitted_at %}
+                        <span class="pax-item__when"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "meta_submitted" context "accounts.pending_answers" %} {{ item.submitted_at|date:"d.m.Y H:i" }}</span>
+                        {% endif %}
                         {% if item.review_window_seconds_left > 0 %}
-                            <div class="pending-item-review-window">
-                                <span class="pending-item-timer"
-                                      data-pending-answer-countdown
-                                      data-seconds="{{ item.review_window_seconds_left }}">
-                                    {% trans 'Qalan vaxt hesablanır...' %}
-                                </span>
-                            </div>
+                        <span class="pax-item__timer"><i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                            <span data-pending-answer-countdown data-seconds="{{ item.review_window_seconds_left }}">{% trans "Qalan vaxt hesablanır..." %}</span>
+                        </span>
                         {% endif %}
                     </div>
-                    <div class="ms-auto">
-                        <a href="{{ item.detail_url }}" class="btn btn-review-view btn-sm">Bax</a>
-                    </div>
-                </article>
+                </div>
+                <div class="pax-item__side">
+                    {% ems_status_badge "pending_answer" item.status_class dot=True %}
+                    {% comment %}Detal AYRI səhifədir (`accounts:my_result_detail`), amma URL-i geri
+                    qayıtmaq üçün `?section=pending-answers` daşıyır — kabinetin AJAX qatı
+                    (ajax.js) belə linki bölmə keçidi sayıb panelə yükləyərdi; `data-force-navigation`
+                    onu adi keçid kimi saxlayır.{% endcomment %}
+                    <a class="ems-btn ems-btn--sm" href="{{ item.detail_url }}" data-force-navigation="true">
+                        {% trans "Bax" context "profile.pending_review.action" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </li>
             {% endfor %}
-        </div>
+        </ol>
+    {% elif active != 'all' or pending_answers_search_query %}
+        {% trans "empty_filtered_title" context "accounts.pending_answers" as pax_empty_f_title %}
+        {% trans "empty_filtered_body" context "accounts.pending_answers" as pax_empty_f_body %}
+        {% trans "empty_filtered_action" context "accounts.pending_answers" as pax_empty_f_action %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter" state_title=pax_empty_f_title state_body=pax_empty_f_body state_action_label=pax_empty_f_action state_action_url=profile_base_url|add:"?section=pending-answers" %}
     {% else %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>{% trans "empty_no_pending_answers" context "accounts.pending_answers" %}</p>
-        </div>
+        {% trans "empty_no_pending_answers" context "accounts.pending_answers" as pax_empty_title %}
+        {% trans "empty_all_checked_body" context "accounts.pending_answers" as pax_empty_body %}
+        {% if 'my-results' in allowed_sections %}
+        {% trans "action_open_results" context "accounts.pending_answers" as pax_empty_action %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-circle-check" state_title=pax_empty_title state_body=pax_empty_body state_action_label=pax_empty_action state_action_url=profile_base_url|add:"?section=my-results" %}
+        {% else %}
+        {% include "partials/ems_ui/_empty.html" with state_icon="fa-circle-check" state_title=pax_empty_title state_body=pax_empty_body %}
+        {% endif %}
     {% endif %}
-</div>
+    </div>
 
-<div id="pendingAnswersCountdownI18n" class="d-none"
+    {# ── Status izahı (rəng yalnız köməkçi siqnaldır — handoff §7) ──────────── #}
+    <ul class="pax-legend" aria-label="{% trans 'legend_title' context 'accounts.pending_answers' %}">
+        <li class="pax-legend__item">{% ems_status_badge "pending_answer" "pending" dot=True %}<span>{% trans "legend_pending" context "accounts.pending_answers" %}</span></li>
+        <li class="pax-legend__item">{% ems_status_badge "pending_answer" "reviewing" dot=True %}<span>{% trans "legend_reviewing" context "accounts.pending_answers" %}</span></li>
+    </ul>
+</div>
+{% endwith %}
+
+<div id="pendingAnswersCountdownI18n" class="pax-sr"
      data-not-ready="{% trans 'Yoxlama yekunlaşmaq üzrədir.' %}"
      data-result-prefix="{% trans 'Nəticə' %}"
      data-min="{% trans 'dəq' %}"
      data-sec-suffix="{% trans 'san sonra açılacaq.' %}"></div>
-<script defer src="{% static 'accounts/js/profile_auto_filter_form.js' %}"></script>
-<script defer src="{% static 'accounts/js/pending_answers_countdown.js' %}"></script>
+<script defer src="{% static 'accounts/js/pending_answers_countdown.js' %}?v=20260912-1"></script>

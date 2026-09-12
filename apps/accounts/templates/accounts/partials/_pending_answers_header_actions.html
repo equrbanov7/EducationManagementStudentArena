@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}«Gözləmədə olan cavablar» başlıq əməli — yoxlanılmış işlərin olduğu
+«Nəticələrim» bölməsinə keçid (`_content_header.html` → header_actions_include).
+`?section=` daşıdığı üçün kabinet qabığı linki AJAX ilə açır (ajax.js).{% endcomment %}
+{% if 'my-results' in allowed_sections %}
+<a class="ems-btn" href="{{ profile_base_url }}?section=my-results" data-section="my-results">
+    <i class="fas fa-clipboard-check" aria-hidden="true"></i> {% trans "action_open_results" context "accounts.pending_answers" %}
+</a>
+{% endif %}

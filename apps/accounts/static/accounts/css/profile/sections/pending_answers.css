@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tələbə kabineti — «Gözləmədə olan cavablar» · redizayn 2026-09-12 (audit 7/2)
+
+   Əvvəl bu bölmənin stili `pending_review.css`-in quyruğunda (Bootstrap `card`,
+   `post-item`, `btn`) idi.  İndi ayrıca fayl: KPI keçidləri, avto filtr paneli,
+   iş siyahısı, status legend-i.  Rəng YALNIZ `--ems-*` tokenlərindən; kölgə
+   yoxdur (kontur + subtle fon); status badge-i `ems_ui/badge.css`-dən gəlir.
+   Partial öz `<link>`-ini yükləyir (AJAX swap-dan sonra da işləsin).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pax {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.pax .ems-kpis,
+.pax .ems-filters {
+    margin-bottom: 0;
+}
+
+/* ── KPI kartı KEÇİD kimi — hər kart bir növə süzür (aria-current + 2px kontur) ── */
+.pax-kpi {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: border-color 0.12s ease;
+}
+
+.pax-kpi:hover {
+    border-color: var(--ems-primary-300);
+    text-decoration: none;
+    color: inherit;
+}
+
+.pax-kpi .ems-kpi__label,
+.pax-kpi .ems-kpi__value,
+.pax-kpi .ems-kpi__note {
+    display: block;
+}
+
+.pax-kpi.is-active {
+    border: 2px solid var(--ems-primary-600);
+    padding: 16px 18px; /* 2px kontur layout-u sürüşdürməsin (kpi.css ilə eyni) */
+    background: var(--ems-primary-50);
+}
+
+.pax-kpi.is-active .ems-kpi__label,
+.pax-kpi.is-active .ems-kpi__value {
+    color: var(--ems-primary-800);
+}
+
+/* ── İş siyahısı ─────────────────────────────────────────────────────────── */
+.pax-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.pax-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: 13px 15px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    transition: border-color 0.12s ease;
+}
+
+.pax-item:hover {
+    border-color: var(--ems-primary-200);
+}
+
+/* Növ ikonu — növün rəngi (imtahan mavi, sərbəst iş yaşıl, lab sarı, kurs işi bənövşəyi). */
+.pax-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 15px;
+}
+
+.pax-item--courses .pax-item__icon {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.pax-item--labs .pax-item__icon {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.pax-item--independent .pax-item__icon {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+.pax-item__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.pax-item__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2) var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-1);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.pax-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.pax-type--courses {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.pax-type--labs {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.pax-type--independent {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+.pax-item__kind {
+    text-wrap: pretty;
+}
+
+.pax-item__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: var(--ems-text);
+    text-wrap: pretty;
+}
+
+.pax-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2) var(--ems-sp-5);
+    margin-top: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.pax-item__when,
+.pax-item__timer {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.pax-item__when i,
+.pax-item__timer i {
+    color: var(--ems-neutral-400);
+}
+
+/* Geri sayım — nəticə hələ açılmayıb, «N dəq sonra açılacaq». */
+.pax-item__timer {
+    color: var(--ems-primary-800);
+    font-weight: 600;
+}
+
+.pax-item__timer i {
+    color: var(--ems-primary-500);
+}
+
+/* Sağ sütun: status badge + «Bax». */
+.pax-item__side {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--ems-sp-3);
+}
+
+/* ── Status legend-i ─────────────────────────────────────────────────────── */
+.pax-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3) var(--ems-sp-7);
+    margin: 0;
+    padding: 12px 14px;
+    list-style: none;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
+}
+
+.pax-legend__item {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+/* Geri sayımın i18n körpüsü — yalnız JS oxuyur. */
+.pax-sr {
+    display: none;
+}
+
+/* ── Mobil ───────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .pax-item {
+        flex-wrap: wrap;
+    }
+
+    .pax-item__side {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+}

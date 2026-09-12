@@ -1,6 +1,14 @@
 {% load i18n %}
-{% comment %}«Fənlərim» başlıq əməli — tələbənin dərs cədvəlinə keçid.
-`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
-<a class="my-subjects-schedule-link" href="{% url 'registrar:schedule' %}">
-    <i class="fas fa-calendar-week"></i> {% trans "Dərs cədvəli" context "profile.subjects" %}
+{% comment %}«Fənlərim» başlıq əməlləri — tələbənin dərs cədvəlinə və elektron jurnalına
+keçid. `partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə
+gətirir. 2026-09-12 redizaynı: çılpaq link əvəzinə `ems-btn` (handoff §3 «sağ
+tərəfdə ikinci dərəcəli düymələr»). Jurnal keçidi `?section=` daşıdığı üçün
+kabinet qabığı onu AJAX ilə açır (ajax.js: panel içindəki `a[href]`).{% endcomment %}
+{% if 'my-journal' in allowed_sections %}
+<a class="ems-btn" href="{{ profile_base_url }}?section=my-journal" data-section="my-journal">
+    <i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Elektron jurnal" context "registrar.journal" %}
+</a>
+{% endif %}
+<a class="ems-btn" href="{% url 'registrar:schedule' %}">
+    <i class="fas fa-calendar-week" aria-hidden="true"></i> {% trans "Dərs cədvəli" context "profile.subjects" %}
 </a>
