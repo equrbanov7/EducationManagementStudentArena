@@ -1,0 +1,130 @@
+{
+  "groups": [
+    {
+      "category": "Təhlükəsizlik",
+      "weight": 15,
+      "before": 53.0,
+      "after": 64.0,
+      "inputs": [
+        "Security"
+      ]
+    },
+    {
+      "category": "Baza və məlumat bütövlüyü",
+      "weight": 12,
+      "before": 73.0,
+      "after": 77.0,
+      "inputs": [
+        "Database Design",
+        "Database Integrity"
+      ]
+    },
+    {
+      "category": "Backend/biznes məntiqi",
+      "weight": 12,
+      "before": 71.0,
+      "after": 80.0,
+      "inputs": [
+        "Backend"
+      ]
+    },
+    {
+      "category": "İmtahan",
+      "weight": 10,
+      "before": 76.0,
+      "after": 84.0,
+      "inputs": [
+        "Exam System"
+      ]
+    },
+    {
+      "category": "Arxitektura",
+      "weight": 8,
+      "before": 76.0,
+      "after": 79.0,
+      "inputs": [
+        "Architecture"
+      ]
+    },
+    {
+      "category": "Performans/miqyas",
+      "weight": 8,
+      "before": 59.5,
+      "after": 62.5,
+      "inputs": [
+        "Performance",
+        "Scalability"
+      ]
+    },
+    {
+      "category": "İcazələr/tenant",
+      "weight": 8,
+      "before": 64.5,
+      "after": 75.5,
+      "inputs": [
+        "Authorization / RBAC",
+        "Multi-Tenancy Isolation"
+      ]
+    },
+    {
+      "category": "Frontend",
+      "weight": 6,
+      "before": 48.0,
+      "after": 73.0,
+      "inputs": [
+        "Frontend"
+      ]
+    },
+    {
+      "category": "Testlər",
+      "weight": 6,
+      "before": 76.0,
+      "after": 85.0,
+      "inputs": [
+        "Automated Tests"
+      ]
+    },
+    {
+      "category": "DevOps/etibarlılıq",
+      "weight": 5,
+      "before": 60.0,
+      "after": 62.0,
+      "inputs": [
+        "DevOps",
+        "Reliability"
+      ]
+    },
+    {
+      "category": "Digər kateqoriyalar",
+      "weight": 10,
+      "before": 66.4,
+      "after": 69.6,
+      "inputs": [
+        "Legacy Data Migration",
+        "Authentication",
+        "Electronic Journal",
+        "Teaching Workload",
+        "Schedule System",
+        "Syllabus Workflow",
+        "Student Management",
+        "API Design",
+        "Celery / Background Jobs",
+        "Redis / Caching",
+        "WebSocket / Realtime",
+        "Deployment",
+        "Monitoring / Observability",
+        "Logging",
+        "Code Quality",
+        "Maintainability",
+        "UX/UI",
+        "Accessibility",
+        "Localization",
+        "Documentation"
+      ]
+    }
+  ],
+  "before": 65.91,
+  "after": 73.74,
+  "production_before": 40,
+  "production_after": 40
+}

@@ -1,0 +1,4 @@
+
+❌ YENİ fayllar SOFT_CAP=600 sətir limitini keçir:
+     715  apps/accounts/static/accounts/css/profile/sections/my_subjects.css
+   → Məntiqi alt-modullara bölün (servis/helper/view) və ya paketə çevirin.

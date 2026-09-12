@@ -1,0 +1,14 @@
+would reformat /Users/elvin/Developer/EMSArena/apps/accounts/services/statistics_metrics/superadmin.py
+would reformat /Users/elvin/Developer/EMSArena/apps/accounts/services/statistics_metrics/teacher.py
+would reformat /Users/elvin/Developer/EMSArena/apps/accounts/views/exam_score_import.py
+would reformat /Users/elvin/Developer/EMSArena/apps/accounts/services/statistics_metrics/student.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/models/exam_score_entry.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/student_journal_context.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/tests/test_student_sections_redesign.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/exam_score_sheets.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/student_subjects_context.py
+would reformat /Users/elvin/Developer/EMSArena/apps/accounts/views/profile/_sections/exam_score_entry.py
+would reformat /Users/elvin/Developer/EMSArena/apps/registrar/exam_score_import.py
+
+Oh no! 💥 💔 💥
+11 files would be reformatted, 1930 files would be left unchanged.

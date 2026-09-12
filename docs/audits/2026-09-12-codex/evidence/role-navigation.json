@@ -1,0 +1,3992 @@
+[
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 85
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 106
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 82
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 74
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 88
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=exam-score-entry",
+    "status": 200,
+    "ms": 89
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 80
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=journal-close",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=legacy-grade-review",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 89
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 77
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 85
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 85
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 119
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=question-chair-review",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=registrar-catalog",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=rim-center",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 80
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=student-admission",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=student-intake",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 84
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 84
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 116
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 84
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=teacher-intake",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=teaching-handover",
+    "status": 200,
+    "ms": 80
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=workload-approval",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rector",
+    "url": "/accounts/profile/?section=workload-visa",
+    "status": 200,
+    "ms": 85
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=appeal-stats",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 95
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=exam-center-pins",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=exam-center-stats",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=exam-chance",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 78
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=journal-close",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=kollokvium-windows",
+    "status": 200,
+    "ms": 80
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=legacy-grade-review",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=manage-appeals",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 82
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=registrar-catalog",
+    "status": 200,
+    "ms": 78
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=rim-center",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 78
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=student-admission",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=student-intake",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=superadmin-exam-rooms",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=teacher-intake",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=teaching-handover",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=workload-approval",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "ikt_rehber",
+    "url": "/accounts/profile/?section=workload-visa",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 77
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=registrar-catalog",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=rim-center",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 127
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=teaching-handover",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=workload-approval",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "vice_rector",
+    "url": "/accounts/profile/?section=workload-visa",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=appeal-stats",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=exam-center-pins",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=exam-center-stats",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=exam-chance",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=exam-score-entry",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=kollokvium-windows",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=legacy-grade-review",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=manage-appeals",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "exam_center_head",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "teaching_office_head",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 72
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 88
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=question-chair-review",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=teaching-handover",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=unit-exams",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=workload-approval",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "dean",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 45
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "trustee",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 90
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=unit-exams",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "vice_dean",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=org-roles",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=permission-editor",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=question-chair-review",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 82
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=syllabus-review",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=teaching-handover",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=unit-exams",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "chair_head",
+    "url": "/accounts/profile/?section=workload-overview",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 45
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 44
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 45
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 45
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 45
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 74
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "admin_unit_head",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 44
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=manage-roles",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=rim-center",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=role-assignment",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 85
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=student-admission",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=student-intake",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=student-organization-management",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "hr",
+    "url": "/accounts/profile/?section=teacher-intake",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=appeal-stats",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 124
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=exam-center-pins",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=exam-center-stats",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=exam-chance",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=kollokvium-windows",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=manage-appeals",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "exam_center_staff",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=academic-records",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=appeal-stats",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=audit-log",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=exam-center-pins",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=exam-center-stats",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=exam-chance",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=kollokvium-windows",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=manage-appeals",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "rim_staff",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 44
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=student-admission",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=student-intake",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "student_services",
+    "url": "/accounts/profile/?section=teacher-intake",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=analytics",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 86
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=people-teachers",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=workload-center",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "teaching_office_staff",
+    "url": "/accounts/profile/?section=workload-distribution",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=pending-review",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=review-results",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "teacher",
+    "url": "/accounts/profile/?section=syllabus-list",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=curriculum-editor",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 48
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 46
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=programs-registry",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 44
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=semester-opening",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 47
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=student-registry",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=subject-catalog",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "program_coordinator",
+    "url": "/accounts/profile/?section=workload-visa",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=pending-review",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=review-results",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "assistant",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 89
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 74
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=my-courses",
+    "status": 200,
+    "ms": 53
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=my-exams",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 88
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=my-workload",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 55
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=pending-review",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=publish-notification",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=question-bank",
+    "status": 200,
+    "ms": 60
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=question-submissions",
+    "status": 200,
+    "ms": 56
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=review-results",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "lab_assistant",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=chair-profile",
+    "status": 200,
+    "ms": 52
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=groups-registry",
+    "status": 200,
+    "ms": 74
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=lessons-log",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=org-faculties",
+    "status": 200,
+    "ms": 50
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=org-kafedras",
+    "status": 200,
+    "ms": 51
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=org-members",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=org-structure-tree",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=people-students",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 57
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=schedule-manage",
+    "status": 200,
+    "ms": 49
+  },
+  {
+    "role": "tutor",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 54
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 81
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=assigned-courses",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=assigned-exams",
+    "status": 200,
+    "ms": 86
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=my-appeals",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=my-results",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=my-subjects",
+    "status": 200,
+    "ms": 74
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=overall-academic",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=pending-answers",
+    "status": 200,
+    "ms": 79
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 73
+  },
+  {
+    "role": "lead_student",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 76
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=assigned-courses",
+    "status": 200,
+    "ms": 77
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=assigned-exams",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 59
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=my-appeals",
+    "status": 200,
+    "ms": 58
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=my-results",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 63
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=pending-answers",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 62
+  },
+  {
+    "role": "member",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 68
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 65
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=applications",
+    "status": 200,
+    "ms": 75
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=assigned-courses",
+    "status": 200,
+    "ms": 66
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=assigned-exams",
+    "status": 200,
+    "ms": 82
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 61
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=my-appeals",
+    "status": 200,
+    "ms": 162
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=my-journal",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=my-results",
+    "status": 200,
+    "ms": 70
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 81
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=my-subjects",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 64
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=overall-academic",
+    "status": 200,
+    "ms": 67
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=pending-answers",
+    "status": 200,
+    "ms": 71
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 69
+  },
+  {
+    "role": "student",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 87
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=academic-calendar",
+    "status": 200,
+    "ms": 38
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=change-password",
+    "status": 200,
+    "ms": 38
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=dashboard",
+    "status": 200,
+    "ms": 40
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=edit-profile",
+    "status": 200,
+    "ms": 39
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=my-schedule",
+    "status": 200,
+    "ms": 43
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=notifications",
+    "status": 200,
+    "ms": 39
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=overall-academic",
+    "status": 200,
+    "ms": 38
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=profile-info",
+    "status": 200,
+    "ms": 42
+  },
+  {
+    "role": "alumni",
+    "url": "/accounts/profile/?section=statistics",
+    "status": 200,
+    "ms": 39
+  }
+]
