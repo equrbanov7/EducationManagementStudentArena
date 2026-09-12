@@ -3,8 +3,8 @@
 «Struktur üzvləri» — kabinet reyestri (2026-09-08 yenidən qurulub).
 
 Kontekst `apps/organizations/structure_views/members.py::build_members_section`
-(giriş: idarəetmə rolu və ya `member.view`; əhatə `get_unit_scope` — dekan
-yalnız öz alt-ağacını görür, əhatəsiz unit-rolu heç nə). Komponentlər
+(giriş: idarəetmə rolu və ya `member.view`; əhatə `get_permission_scope(…, "member.view")`
+— dekan yalnız öz alt-ağacını görür, əhatəsiz unit-rolu heç nə; P1-11 2026-09-12). Komponentlər
 `ems_ui`-dəndir: KPI (klik = `om_kind` filtri), AVTO filtr («Tətbiq et» yoxdur,
 «Sıfırla» qalır), cədvəl (üzv · rol · vəzifə · bölmə · qoşulma) və «Üzv kartı»
 çekmecəsi (JSON `organizations:structure_member_detail`, render `org_members.js`).

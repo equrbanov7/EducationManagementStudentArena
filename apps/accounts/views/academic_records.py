@@ -21,7 +21,7 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts import academic_records
 from apps.organizations.models import OrgUnit
-from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope, scope_org_units
+from apps.organizations.scoping import ORG_WIDE_SCOPE, get_permission_scope, scope_org_units
 from apps.registrar import transcript
 from apps.registrar.models import Program, StudentAcademicRecord
 from core.program_codes import program_code_search_q
@@ -46,14 +46,15 @@ _ORG_ADMIN_ROLES = frozenset({"org_admin", "org_owner"})
 #:
 #: TƏHLÜKƏSİZLİK (2026-07-31 auditi): əvvəllər burada rol qapısı ÜMUMİYYƏTLƏ yox
 #: idi — endpoint-lər yalnız ``scope.has_structure_access`` yoxlayırdı.
-#: ``_resolve_unit_scope`` isə rolun adına/səviyyəsinə baxmadan HƏR üzvlüyün
-#: ``scope_unit_id``-sini scope-a əlavə edir, «Müəllimi kafedraya təyin et»
-#: əməliyyatı isə məhz onu doldurur. Nəticədə adi müəllim öz kafedra
-#: alt-ağacındakı BÜTÜN tələbələrin GPA, semestr detalı və transkriptini oxuya
-#: bilirdi. Sidebar ona ``academic-records`` bölməsini vermirdi — yəni endpoint
-#: UI-dan geniş idi (gizli PII sızması). Siyahı sidebar qapısı ilə eyni
-#: saxlanılır (``views/_helpers/rbac.py``: is_superadmin / is_org_admin /
-#: is_unit_manager / is_exam_center).
+#: Köhnə ümumi resolver (``get_unit_scope``, 2026-09-12 P1-11 ilə silinib) isə
+#: rolun adına/səviyyəsinə baxmadan HƏR üzvlüyün ``scope_unit_id``-sini scope-a
+#: əlavə edirdi, «Müəllimi kafedraya təyin et» əməliyyatı isə məhz onu
+#: doldurur. Nəticədə adi müəllim öz kafedra alt-ağacındakı BÜTÜN tələbələrin
+#: GPA, semestr detalı və transkriptini oxuya bilirdi. Sidebar ona
+#: ``academic-records`` bölməsini vermirdi — yəni endpoint UI-dan geniş idi
+#: (gizli PII sızması). Siyahı sidebar qapısı ilə eyni saxlanılır
+#: (``views/_helpers/rbac.py``: is_superadmin / is_org_admin / is_unit_manager /
+#: is_exam_center).
 ACADEMIC_RECORDS_ROLES = _CENTRAL_ROLES | _UNIT_MANAGER_ROLES | _ORG_ADMIN_ROLES
 
 
@@ -75,12 +76,24 @@ def can_view_academic_records(user, organization) -> bool:
     return user_has_any_role(user, ACADEMIC_RECORDS_ROLES)
 
 
+#: Əhatənin çıxarıldığı icazə açarı. Endpoint-lər tələbənin QİYMƏT izini (ÜOMG,
+#: semestr detalı, transkript) açır — rol qapısından keçən hər rol (dekan, dekan
+#: müavini, kafedra müdiri, rektorat, imtahan mərkəzi, RİM) məhz ``grade.view``
+#: daşıyır; UNIT rollarda o, ``scope_unit`` alt-ağacına bağlanır.
+RECORDS_SCOPE_PERMISSION = "grade.view"
+
+
 def _scope(request):
     """(organization, scope) — aktiv təşkilat + istifadəçinin görünüş sahəsi.
 
-    Superadmin/owner/rektorat org-wide, dekan/kafedra müdiri unit-subtree
-    (:func:`get_unit_scope`). Mərkəzi rollar (imtahan mərkəzi / İKT rəhbəri) unit
-    scope-ları olmadığından org-wide-a yüksəldilir — beləcə bütün tələbələri görürlər.
+    Rol qapısı (``can_view_academic_records``) ƏVVƏL, əhatə SONRA. Əhatə
+    ``get_permission_scope(…, "grade.view")`` ilə: superadmin/owner/rektorat
+    org-wide, dekan/kafedra müdiri öz alt-ağacı. 2026-09-12 (P1-11): köhnə
+    ``get_unit_scope`` dekanın əlaqəsiz üzvlüyünün (məs. başqa fakültənin
+    kafedrasına müəllim təyinatı) unitini də əhatəyə salırdı — sərt resolver
+    yalnız ``grade.view`` daşıyan üzvlüyün unitini sayır. Mərkəzi rollar
+    (imtahan mərkəzi / İKT rəhbəri) ORGANIZATION rolu ilə org-wide alır;
+    aşağıdakı yüksəltmə yalnız köhnə ``exam_center`` sətirləri üçün qalır.
 
     Rol qapısından keçməyən istifadəçi üçün ``(None, None)`` qaytarılır: bütün
     çağıran endpoint-lər ``organization is None`` şərtini yoxlayır, yəni cavab
@@ -91,7 +104,7 @@ def _scope(request):
         return None, None
     if not can_view_academic_records(request.user, organization):
         return None, None
-    scope = get_unit_scope(request.user, organization, request=request)
+    scope = get_permission_scope(request.user, organization, RECORDS_SCOPE_PERMISSION, request=request)
     if not scope.has_structure_access and user_has_any_role(request.user, _CENTRAL_ROLES):
         scope = ORG_WIDE_SCOPE
     return organization, scope

@@ -18,7 +18,7 @@ from apps.accounts.models import ProfileRole
 from core.constants import OrganizationType, OrgUnitType
 
 from ..models import Membership, Organization, OrgUnit
-from ..scoping import get_permission_scope, get_unit_scope
+from ..scoping import get_permission_scope
 
 User = get_user_model()
 
@@ -128,7 +128,9 @@ class UnitScopingTest(TestCase):
         )
 
     def test_dean_scope_is_unit_scoped_subtree(self):
-        scope = get_unit_scope(self.dean_a, self.org)
+        # 2026-09-12 (P1-11): köhnə ümumi `get_unit_scope` silindi — əhatə
+        # həmişə konkret açara görə çıxarılır (burada struktur: `unit.view`).
+        scope = get_permission_scope(self.dean_a, self.org, "unit.view")
         self.assertTrue(scope.is_unit_scoped)
         self.assertIn(self.faculty_a.pk, scope.unit_ids)
 
@@ -162,7 +164,7 @@ class UnitScopingTest(TestCase):
         self.assertFalse(scope.has_structure_access)
 
     def test_owner_scope_is_org_wide(self):
-        scope = get_unit_scope(self.owner, self.org)
+        scope = get_permission_scope(self.owner, self.org, "unit.view")
         self.assertTrue(scope.is_org_wide)
 
     def test_dean_members_page_scoped_to_own_faculty(self):
@@ -272,7 +274,7 @@ class TutorRoleTest(TestCase):
         self.assertIn("tutor", aliases)
 
     def test_tutor_scope_is_unit_scoped(self):
-        scope = get_unit_scope(self.tutor, self.org)
+        scope = get_permission_scope(self.tutor, self.org, "member.view")
         self.assertTrue(scope.is_unit_scoped)
         self.assertIn(self.faculty.pk, scope.unit_ids)
 

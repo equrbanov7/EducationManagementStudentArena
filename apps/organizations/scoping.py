@@ -12,6 +12,16 @@ Dizayn prinsipləri:
   sidebar + dashboard + siyahı sorğuları eyni request-də təkrar DB-yə getməsin.
 - Cross-request cache QƏSDƏN yoxdur: rol/scope dəyişiklikləri dərhal
   qüvvəyə minməlidir (tenant izolyasiyası > mikro-performans).
+
+TƏK HƏLLEDİCİ (2026-09-12 audit, P1-11). Əvvəl burada İKİ paralel resolver
+var idi: köhnə ``get_unit_scope`` (icazəyə baxmadan HƏR aktiv üzvlüyün
+``scope_unit``-ini toplayır, ORGANIZATION rolunu yalnız ``level >= 90``
+olduqda org-wide sayırdı) və ``get_permission_scope`` (yalnız tələb olunan
+açarı DAŞIYAN üzvlükdən əhatə çıxarır). Köhnəsi 14 yerdə işlənirdi və
+əlaqəsiz üzvlük (məs. müəllim kimi kafedraya təyinat, tələbə qrupu) öz
+unitini imtiyazlı rola «borc verirdi» — 2026-07-31 auditindəki PII sızması
+məhz bundan idi. İndi yalnız ``get_permission_scope`` var; hər çağıran
+qoruduğu məlumata uyğun icazə açarını AÇIQ verir.
 """
 
 from dataclasses import dataclass, field
@@ -21,10 +31,9 @@ from django.db.models import Q, QuerySet
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
-# from typing import Optional
-
-
-# Org-wide görünüş üçün minimal idarəetmə levli (rector/vice_rector/org_admin/owner).
+#: Köhnə (silinmiş) ümumi resolverin org-wide həddi. Kodda artıq İŞLƏNMİR —
+#: yalnız rol kataloqu şərhləri / `test_ikt_rehber_role.py` sənəd kimi istinad
+#: edir (RİM rəhbərinin 95 səviyyəsi məhz bu həddə görə seçilib).
 ORG_WIDE_MIN_LEVEL = 90
 
 
@@ -75,76 +84,6 @@ class UnitScope:
 
 ORG_WIDE_SCOPE = UnitScope(scope_type="org")
 EMPTY_SCOPE = UnitScope(scope_type="none")
-
-
-def _resolve_unit_scope(user, organization) -> UnitScope:
-    from apps.organizations.models import OrgUnit
-    from apps.organizations.services import get_active_memberships
-
-    if not user or not getattr(user, "is_authenticated", False) or organization is None:
-        return EMPTY_SCOPE
-
-    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
-        return ORG_WIDE_SCOPE
-
-    if getattr(organization, "owner_id", None) == user.id:
-        return ORG_WIDE_SCOPE
-
-    memberships = list(get_active_memberships(user, organization))
-    if not memberships:
-        return EMPTY_SCOPE
-
-    scoped_unit_ids = set()
-    for membership in memberships:
-        role = membership.role
-        # ORGANIZATION scope-lu yüksək idarəetmə rolu → bütün təşkilat.
-        if role.scope_type == RoleScopeType.ORGANIZATION and role.level >= ORG_WIDE_MIN_LEVEL:
-            return ORG_WIDE_SCOPE
-        # UNIT scope-lu rol konkret unitə bağlanıbsa → həmin alt-ağac.
-        if membership.scope_unit_id:
-            scoped_unit_ids.add(membership.scope_unit_id)
-
-    if not scoped_unit_ids:
-        return EMPTY_SCOPE
-
-    # Tək sorğu ilə path-ləri götürürük (subtree filtrləri üçün lazımdır).
-    unit_rows = OrgUnit.objects.filter(organization=organization, pk__in=scoped_unit_ids, is_active=True).values_list(
-        "pk", "path"
-    )
-    unit_ids = frozenset(pk for pk, _ in unit_rows)
-    unit_paths = tuple(path for _, path in unit_rows if path)
-    if not unit_ids:
-        return EMPTY_SCOPE
-    return UnitScope(scope_type="unit", unit_ids=unit_ids, unit_paths=unit_paths)
-
-
-def get_unit_scope(user, organization, request=None) -> UnitScope:
-    """
-    İstifadəçinin təşkilatdakı unit scope-unu qaytarır (per-request cache ilə).
-    """
-    user_id = getattr(user, "pk", None)
-    org_id = getattr(organization, "pk", None)
-    cache_key = (user_id, org_id)
-
-    if request is not None and user_id is not None and org_id is not None:
-        cache = getattr(request, "_unit_scope_cache", None)
-        if cache is None:
-            cache = {}
-            try:
-                request._unit_scope_cache = cache
-            except Exception:  # noqa: BLE001 — bəzi request obyektləri immutable ola bilər
-                cache = None
-        if cache is not None and cache_key in cache:
-            return cache[cache_key]
-
-    scope = _resolve_unit_scope(user, organization)
-
-    if request is not None and user_id is not None and org_id is not None:
-        cache = getattr(request, "_unit_scope_cache", None)
-        if cache is not None:
-            cache[cache_key] = scope
-
-    return scope
 
 
 def _permission_scope_memberships(user, organization) -> list:
@@ -231,9 +170,9 @@ def invalidate_permission_scope_cache(user) -> None:
 
     Call this immediately after a code path mutates ``user``'s Membership/Role
     rows (role assignment, membership create/update) so a later
-    ``get_permission_scope``/``get_unit_scope`` read in the SAME request never
-    returns pre-mutation data. A stale permission cache is a security bug, not
-    a perf detail — see the module docstring.
+    ``get_permission_scope`` read in the SAME request never returns
+    pre-mutation data. A stale permission cache is a security bug, not a perf
+    detail — see the module docstring.
     """
     for attr in ("_org_scope_memberships_cache", "_org_scope_unit_paths_cache"):
         try:
@@ -247,9 +186,23 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
     """Resolve structural scope only from memberships granting ``permission``.
 
     A UNIT-scoped role without a valid ``scope_unit`` grants no structural
-    access.  This deliberately differs from the legacy generic scope resolver:
-    an unrelated membership must never lend its unit to a privileged role.
+    access.  An unrelated membership must never lend its unit to a privileged
+    role — the legacy generic resolver that did so was removed (P1-11,
+    2026-09-12), so this is now the ONLY scope resolver.
+
+    Müqavilə (çağıranlar üçün):
+      * superadmin / təşkilat sahibi → ``ORG_WIDE_SCOPE`` (açardan asılı deyil);
+      * açarı daşıyan ORGANIZATION rolu → ``ORG_WIDE_SCOPE`` (səviyyə YOX);
+      * açarı daşıyan UNIT rolu + etibarlı ``scope_unit`` → həmin alt-ağac(lar);
+      * COURSE rolu, açarsız rol, ``scope_unit``-siz UNIT rolu → ``EMPTY_SCOPE``
+        (fail-closed). ``permission`` boş ola BİLMƏZ.
+    ``request`` verilərsə nəticə ``request._unit_scope_cache``-də açar üzrə
+    saxlanılır; üzvlük sətirləri isə ``user`` obyektində memoizasiya olunur.
     """
+    if not permission:
+        # Boş açar «hər şeyə icazə» kimi oxuna bilməz — səssiz ORG_WIDE əvəzinə
+        # proqramçı xətası kimi dərhal partlayır (fail-closed).
+        raise ValueError("get_permission_scope: `permission` açarı boş ola bilməz")
     user_id = getattr(user, "pk", None)
     org_id = getattr(organization, "pk", None)
     cache_key = ("permission", user_id, org_id, permission)
@@ -329,16 +282,17 @@ __all__ = [
     "ORG_WIDE_SCOPE",
     "ORG_WIDE_MIN_LEVEL",
     "UnitScope",
-    "get_unit_scope",
     "get_permission_scope",
     "invalidate_permission_scope_cache",
     "scope_memberships_by_unit",
     "scope_org_units",
+    "user_scope_covers_unit",
+    "user_scope_subtree_q",
 ]
 
 
-def user_scope_subtree_q(user, organization, *, path_field, id_field, permission=None):
-    """İstifadəçinin unit alt-ağacı üçün filtr Q-su — ixtiyari sahə prefiksi ilə.
+def user_scope_subtree_q(user, organization, *, path_field, id_field, permission):
+    """İstifadəçinin ``permission`` əhatəsi üçün filtr Q-su — ixtiyari sahə prefiksi ilə.
 
     `user_scope_covers_unit` bir unit üçün bool qaytarır; siyahı/aqreqat
     sorğularını daraltmaq üçünsə QUERYSET filtri lazımdır. Məsələn analitika
@@ -346,32 +300,23 @@ def user_scope_subtree_q(user, organization, *, path_field, id_field, permission
 
         user_scope_subtree_q(u, org,
                              path_field="offering__group__path",
-                             id_field="offering__group__id")
+                             id_field="offering__group__id",
+                             permission="analytics.view_unit")
 
-    ``None`` qaytarılır = «filtr tətbiq etmə». Bu, İKİ halda baş verir və hər
-    ikisi ``user_scope_covers_unit`` ilə EYNİ semantikadır — fərqli davransalar
-    eyni istifadəçi bir yerdə hər şeyi görər, başqa yerdə heç nə:
+    Nəticə ``UnitScope.unit_subtree_q`` ilə eynidir: org-wide → boş ``Q()``
+    (filtr yoxdur), alt-ağac → subtree filtri, əhatəsiz → ``Q(pk__in=[])``
+    (fail-closed, heç nə uyğun gəlmir).
 
-      1. Scope org-səviyyəlidir (rektor, admin, org sahibi).
-      2. Scope ÜMUMİYYƏTLƏ təyin olunmayıb (``has_structure_access`` yalan) —
-         strukturu hələ qurmamış təşkilatlar. Burada bağlı davransaq, heç bir
-         ``Membership.scope_unit`` təyin etməmiş hər universitetdə dekan BOŞ
-         analitika paneli görərdi; yəni məhdudiyyət deyil, sıradan çıxma olardı.
-
-    Boş ``Q()`` əvəzinə ``None`` seçilib ki, çağıran niyyəti açıq yazsın və bu,
-    təsadüfən «heç nə uyğun gəlmir» (``Q(pk__in=[])``) ilə qarışmasın.
+    2026-09-12 (P1-11): ``permission`` artıq MƏCBURİDİR. Əvvəlki açarsız qol
+    köhnə ümumi resolveri işlədib ``None`` («filtr tətbiq etmə») qaytarırdı;
+    layihədə o qolun heç bir çağıranı qalmamışdı və resolver silindi.
     """
-    if permission:
-        scope = get_permission_scope(user, organization, permission)
-        return scope.unit_subtree_q(path_field=path_field, id_field=id_field)
-    scope = get_unit_scope(user, organization)
-    if scope.is_org_wide or not scope.has_structure_access:
-        return None
+    scope = get_permission_scope(user, organization, permission)
     return scope.unit_subtree_q(path_field=path_field, id_field=id_field)
 
 
-def user_scope_covers_unit(user, organization, unit_id, permission=None) -> bool:
-    """İstifadəçinin unit alt-ağacı verilmiş bölməni əhatə edirmi.
+def user_scope_covers_unit(user, organization, unit_id, permission) -> bool:
+    """İstifadəçinin ``permission`` əhatəsi verilmiş bölməni əhatə edirmi (fail-closed).
 
     MODUL SƏRHƏDİ: bu yoxlama registrar-dan (jurnal təsdiqi) lazımdır, lakin
     registrar ``apps.organizations``-u Python səviyyəsində İMPORT ETMİR — əks
@@ -380,18 +325,21 @@ def user_scope_covers_unit(user, organization, unit_id, permission=None) -> bool
     registry ilə həll edir (bax ``apps/registrar/public.py`` şərhinə), ona görə
     məntiq burada, öz modulunda qalır və modeldən nazik delegator ilə çağırılır.
 
-    ``unit_id`` ``None``-dursa ``False`` — unit-scope istifadəçi üçün aidiyyəti
-    müəyyən deyil, org-wide səlahiyyət tələb olunur.
+    * əhatə yoxdursa (``has_structure_access`` yalan) → ``False``;
+    * org-wide → ``True``;
+    * ``unit_id`` ``None``-dursa ``False`` — unit-scope istifadəçi üçün
+      aidiyyəti müəyyən deyil, org-wide səlahiyyət tələb olunur.
 
-    Scope ÜMUMİYYƏTLƏ təyin edilməyibsə ``True`` qaytarılır: qərar çağırana
-    qalır. Bu, strukturu hələ qurmamış təşkilatlarda mövcud davranışı saxlayır.
+    2026-09-12 (P1-11): ``permission`` MƏCBURİDİR; köhnə açarsız qol («scope
+    təyin edilməyibsə True») ümumi resolverlə birlikdə silindi — çağıranı
+    qalmamışdı (syllabus/workload/registrar hamısı açar ötürür).
     """
     from .models import OrgUnit
 
-    scope = get_permission_scope(user, organization, permission) if permission else get_unit_scope(user, organization)
-    if permission and not scope.has_structure_access:
+    scope = get_permission_scope(user, organization, permission)
+    if not scope.has_structure_access:
         return False
-    if scope.is_org_wide or not scope.has_structure_access:
+    if scope.is_org_wide:
         return True
     if unit_id is None:
         return False

@@ -14,6 +14,31 @@ from apps.accounts.views._helpers.tenant import _get_active_organization
 from apps.courses.models import Course
 
 
+def statistics_scope(request, organization):
+    """Statistika bölməsinin (və CSV ixracının) struktur ƏHATƏSİ.
+
+    2026-09-12 (P1-11): köhnə ümumi `get_unit_scope` HƏR aktiv üzvlüyün
+    `scope_unit`-ini toplayırdı — dekanın başqa fakültənin kafedrasına müəllim
+    təyinatı statistikaya həmin kafedranı da qatırdı. İndi əhatə YALNIZ
+    analitika açarını daşıyan üzvlükdən çıxır, iki pillə ilə:
+
+      1. `analytics.view_all` — ORGANIZATION rolu (rektor, prorektor, RİM,
+         imtahan mərkəzi) → bütün təşkilat;
+      2. əks halda `analytics.view_unit` — dekan / kafedra müdiri / tyutor /
+         koordinator (UNIT + `scope_unit`) → öz alt-ağacı; HR kimi
+         ORGANIZATION daşıyıcısı → bütün təşkilat.
+
+    Heç biri yoxdursa `EMPTY_SCOPE` (fail-closed). Prorektorda YALNIZ
+    `view_all` var — tək açarla getsək o, boş əhatə alardı; ona görə iki pillə.
+    """
+    from apps.organizations.public import get_permission_scope
+
+    scope = get_permission_scope(request.user, organization, "analytics.view_all", request=request)
+    if scope.is_org_wide:
+        return scope
+    return get_permission_scope(request.user, organization, "analytics.view_unit", request=request)
+
+
 def build_statistics_section(request, *, capabilities):
     statistics_courses = []
     statistics_groups = []
@@ -82,18 +107,23 @@ def build_statistics_section(request, *, capabilities):
     # Unit scoping (Faza 2): dekan/kafedra müdürü statistikaları yalnız öz
     # fakültə/kafedra alt-ağacı üzrə görür. Alt-ağac id-ləri bir dəfə
     # hesablanır və həm filtr seçimlərinə, həm selector-a ötürülür.
+    # `statistics_scope_denied` — idarəetmə (org_admin) qolunda əhatəsi
+    # olmayan aktor (məs. `scope_unit`-siz dekan) org-wide ƏVƏZİNƏ boş
+    # statistika alır (fail-closed, P1-11); müəllim/tələbə qollarına aid deyil.
     statistics_scoped_unit_ids = None
+    statistics_scope_denied = False
     if stat_org and not capabilities["is_superadmin"]:
         from apps.organizations.models import OrgUnit as _StatOrgUnit
-        from apps.organizations.public import get_unit_scope as _get_unit_scope
 
-        _stat_unit_scope = _get_unit_scope(request.user, stat_org, request=request)
+        _stat_unit_scope = statistics_scope(request, stat_org)
         if _stat_unit_scope.is_unit_scoped:
             statistics_scoped_unit_ids = list(
                 _StatOrgUnit.objects.filter(organization=stat_org)
                 .filter(_stat_unit_scope.unit_subtree_q())
                 .values_list("pk", flat=True)
             )
+        elif not _stat_unit_scope.is_org_wide:
+            statistics_scope_denied = True
 
     statistics_uses_personal_scope = not (
         capabilities["is_superadmin"]
@@ -167,11 +197,13 @@ def build_statistics_section(request, *, capabilities):
         )
     elif capabilities["is_org_admin"]:
         if stat_org:
-            if statistics_scoped_unit_ids is not None:
+            if statistics_scoped_unit_ids is not None or statistics_scope_denied:
                 # Dekan/kafedra müdürü — unit-scoped statistika. Cache açarı
                 # istifadəçinin alt-ağacına görə ayrılır ki, rektorun org-wide
-                # nəticəsi ilə qarışmasın (data sızması olmasın).
-                _scoped_ids = statistics_scoped_unit_ids
+                # nəticəsi ilə qarışmasın (data sızması olmasın). Əhatəsiz
+                # idarəçi (`statistics_scope_denied`) boş alt-ağac alır — köhnə
+                # kod onu org-wide qola buraxırdı (P1-11, fail-closed).
+                _scoped_ids = statistics_scoped_unit_ids if statistics_scoped_unit_ids is not None else []
                 statistics_data = get_or_set_cached_statistics(
                     role="unit_manager",
                     scope_id=f"{stat_org.pk}:{request.user.pk}",

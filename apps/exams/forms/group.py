@@ -11,7 +11,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import StudentGroup
 from apps.organizations.public import (
-    get_unit_scope,
+    get_permission_scope,
     organization_role_user_queryset,
     organization_user_queryset,
     user_has_org_role,
@@ -241,10 +241,14 @@ class StudentGroupForm(forms.ModelForm):
 
         # Akademik vahid (OrgUnit) — aktoru öz scope-una görə: org-geniş rol bütün
         # vahidləri, unit-scoped (dekan/kafedra) yalnız öz alt-ağacını təyin edə
-        # bilər. `get_unit_scope` yalnız istifadəçi + təşkilat tələb edir.
+        # bilər. Əhatə `group.manage` açarını DAŞIYAN üzvlükdən çıxır (P1-11,
+        # 2026-09-12): forma yalnız `group.manage` qapısından (view-dakı
+        # `_ensure_group_creator`) keçəndə POST olunur; köhnə `get_unit_scope`
+        # dekanın əlaqəsiz müəllim təyinatının kafedrasını da seçimə salırdı.
+        # `request` yoxdur — üzvlük sətirləri `actor` obyektində memoizasiya olunur.
         if self.organization is not None and self.actor is not None:
             units_qs = self.organization.units.filter(is_active=True).order_by("path", "name")
-            scope = get_unit_scope(self.actor, self.organization)
+            scope = get_permission_scope(self.actor, self.organization, "group.manage")
             if scope.is_org_wide:
                 self.fields["org_unit"].queryset = units_qs
             elif scope.is_unit_scoped:

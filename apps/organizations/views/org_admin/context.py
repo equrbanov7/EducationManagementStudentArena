@@ -51,12 +51,19 @@ def build_organization_structure_context(
             .prefetch_related("children")
             .order_by("order", "name")
         )
-    else:
+    elif scope.is_org_wide:
         units = list(
             organization.units.filter(parent=None, is_active=True)
             .prefetch_related("children", "children__children")
             .order_by("order", "name")
         )
+    else:
+        # 2026-09-12 (P1-11): əhatəsiz aktor (məs. `scope_unit`-i təyin
+        # edilməmiş dekan) əvvəl bu qolda BÜTÜN kök vahidləri görürdü —
+        # `_visible_units_queryset` ilə (fail-closed) ziddiyyət idi. Köhnə
+        # resolver belə dekana əlaqəsiz üzvlüyün unitini «borc verirdi»;
+        # sərt resolver `EMPTY_SCOPE` qaytarır, ona görə qol bağlı olmalıdır.
+        units = []
 
     visible_units = _visible_units_queryset(organization, scope)
     faculties = list(
@@ -196,10 +203,14 @@ def _has_org_wide_membership(user, organization) -> bool:
 
 
 def build_organization_members_context(request, organization):
-    from ...scoping import get_unit_scope, scope_memberships_by_unit
+    from ...scoping import get_permission_scope, scope_memberships_by_unit
     from ...services import get_user_org_role_level
 
-    scope = get_unit_scope(request.user, organization, request=request)
+    # 2026-09-12 (P1-11): əhatə YALNIZ `member.view` daşıyan üzvlükdən —
+    # köhnə `get_unit_scope` dekanın əlaqəsiz müəllim/tələbə üzvlüyünün
+    # unitini də üzv siyahısına əlavə edirdi. ORGANIZATION rolu (HR, RİM…)
+    # açarı daşıyırsa org-wide; `member.view`-suz üzvlük əhatə vermir.
+    scope = get_permission_scope(request.user, organization, "member.view", request=request)
     can_view_members = _can_manage_organization(request.user, organization) or (
         _has_org_permission(request, "member.view")
         and (scope.is_unit_scoped or get_user_org_role_level(request.user, organization) >= 65)
