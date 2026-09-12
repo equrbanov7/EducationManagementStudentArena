@@ -22,6 +22,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
+from core.models import TimeStampedModel, UUIDModel
 from core.upload_security import FileUploadValidator
 
 from .corrections import CorrectionReason, ImmutableCorrectionEvidence
@@ -77,6 +78,18 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="exam_score_entries"
     )
     entered_by_name = models.CharField(max_length=200, editable=False)
+    # 2026-09-12: sətir hansı köçürmə partiyasına (vərəqə) aiddir — opsional,
+    # köhnə sətirlər üçün NULL. Partiya sənədi (skan) ``sheet.evidence``-dədir;
+    # sətir-səviyyə ``evidence`` boş olsa da partiya sənədi düzəlişin sübutu
+    # sayılır (servis: ``_require_justification``).
+    sheet = models.ForeignKey(
+        "registrar.ExamScoreSheet",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="entries",
+        help_text="Köçürmə partiyası (vərəq/protokol) — varsa.",
+    )
 
     objects = models.Manager()
 
@@ -91,3 +104,89 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
 
     def __str__(self):
         return f"exam-score-entry<{self.enrollment_id}> {self.old_score}→{self.new_score}"
+
+
+# ── Köçürmə vərəqi (batch) — 2026-09-12, sahibin tələbi ──────────────────────
+#
+# Sahib (2026-09-12): «yazılı imtahan verən tələbələrin imtahan ballarını
+# sistemə köçürmək üçün panel olsun. Orada qrup seçilsin, müəllim, tarix və s.
+# lazımlı nə info varsa; tələbələrin balları sistemə yüklənsin.»
+#
+# Mövcud modellərin heç birində KAĞIZ imtahanın tarixi/nəzarətçisi/protokol
+# nömrəsi yoxdur (``CourseOffering``-də yalnız müəllim var; ``exams.Exam``
+# rəqəmsal imtahandır və registrar onu statik import etmir). Bu metadata
+# ``FinalGrade``-ə YOX, köçürmə PARTİYASINA aiddir: bir vərəq/protokol =
+# bir batch. Ona görə kiçik ``ExamScoreSheet`` modeli yaradılır; hər
+# ``ExamScoreEntry`` sətri (opsional) öz vərəqinə bağlanır.
+
+
+class ExamScoreSheetSource(models.TextChoices):
+    """Partiyanın mənbəyi — əl ilə siyahı forması, yoxsa fayl idxalı."""
+
+    MANUAL = "manual", pgettext_lazy("registrar.exam_score_sheet_source", "Manual roster entry")
+    IMPORT = "import", pgettext_lazy("registrar.exam_score_sheet_source", "File import (XLSX/CSV)")
+
+
+def exam_score_sheet_path(instance, filename: str) -> str:
+    """Skan edilmiş protokol/vərəq — qorunan media altında org-scoped yol."""
+    return f"exam_score_sheets/{instance.organization_id}/{filename}"
+
+
+class ExamScoreSheet(UUIDModel, TimeStampedModel):
+    """Bir köçürmə partiyası: açılış + imtahan metadatası + nəticə sayğacları.
+
+    Sətirlərin özü (köhnə → yeni bal, kim, nə vaxt) ``ExamScoreEntry``-dədir;
+    burada yalnız partiya-səviyyəli məlumat saxlanılır — imtahan tarixi,
+    yoxlayan müəllim, nəzarətçi, protokol nömrəsi, skan (opsional) və
+    «neçə sətir yazıldı / ötürüldü / rədd olundu» xülasəsi. Sayğaclar
+    partiya bitəndə YENİLƏNİR, ona görə model append-only deyil (sətirlər
+    isə append-only qalır).
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.PROTECT, related_name="exam_score_sheets"
+    )
+    offering = models.ForeignKey("registrar.CourseOffering", on_delete=models.PROTECT, related_name="exam_score_sheets")
+    source = models.CharField(max_length=12, choices=ExamScoreSheetSource.choices, default=ExamScoreSheetSource.MANUAL)
+    exam_date = models.DateField(null=True, blank=True, help_text="Kağız imtahanın keçirildiyi tarix.")
+    examiner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="examined_score_sheets",
+        help_text="Vərəqi yoxlayan müəllim (default: açılışın müəllimi).",
+    )
+    examiner_name = models.CharField(max_length=200, blank=True, help_text="Yoxlayan müəllimin adı (snapshot).")
+    invigilator_name = models.CharField(max_length=200, blank=True, help_text="Nəzarətçi (sərbəst mətn).")
+    protocol_number = models.CharField(max_length=64, blank=True, help_text="Protokol / vərəq nömrəsi.")
+    note = models.TextField(blank=True, help_text="Partiya qeydi (opsional).")
+    evidence = models.FileField(
+        upload_to=exam_score_sheet_path,
+        blank=True,
+        validators=[FileUploadValidator(allowed_extensions=EVIDENCE_EXTENSIONS, max_size_mb=_MAX_EVIDENCE_MB)],
+        help_text="Skan edilmiş protokol / vərəq (PDF və ya şəkil) — opsional.",
+    )
+    original_filename = models.CharField(max_length=255, blank=True, help_text="İdxal faylının adı (varsa).")
+    rows_total = models.PositiveIntegerField(default=0)
+    rows_written = models.PositiveIntegerField(default=0)
+    rows_skipped = models.PositiveIntegerField(default=0)
+    rows_failed = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="exam_score_sheets"
+    )
+    created_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.exam_score_sheet.meta", "exam score sheet")
+        verbose_name_plural = pgettext_lazy("registrar.model.exam_score_sheet.meta", "exam score sheets")
+        indexes = [
+            models.Index(fields=["organization", "offering", "-created_at"], name="reg_ess_org_off_created_idx"),
+            models.Index(fields=["organization", "-created_at"], name="reg_ess_org_created_idx"),
+        ]
+
+    def __str__(self):
+        return f"exam-score-sheet<{self.offering_id}> {self.source} {self.exam_date or '—'}"

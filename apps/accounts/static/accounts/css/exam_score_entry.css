@@ -1,31 +1,44 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   exam_score_entry.css — İmtahan Mərkəzi: kağız imtahan balının daxil edilməsi
-   (2026-09-10 sakit redizayn).
+   exam_score_entry.css — İmtahan Mərkəzi: yazılı imtahan ballarının köçürülməsi
+   (2026-09-12 — qrup-əvvəl seçim, vərəq məlumatları, fayl idxalı, tarixçə çekmecəsi).
 
-   Baza ems_ui-dandır (`ems-header`, `ems-kpis`, `ems-filters`, `ems-card`,
-   `ems-table`, `ems-msg`, `ems-state`, `ems-btn`, `ems-badge`). Burada YALNIZ
-   bu bölməyə xas düzəlişlər — hamısı `--ems-*` tokenləri ilə.
+   Baza ems_ui-dandır (`ems-header`, `ems-steps`, `ems-filters`, `ems-kpis`,
+   `ems-card`, `ems-table`, `ems-tabs`, `ems-msg`, `ems-state`, `ems-btn`,
+   `ems-badge`, `ems-drawer`, `ems-dialog`). Burada YALNIZ bu bölməyə xas
+   düzəlişlər — hamısı `--ems-*` tokenləri ilə; inline stil yoxdur (CSP).
    ═══════════════════════════════════════════════════════════════════════════ */
 .ese {
-    max-width: 1180px;
+    max-width: 1240px;
     color: var(--ems-text);
 }
 
-/* ── Seçicilər sırası ─────────────────────────────────────────────────────
-   Hər seçici ÖZ GET forması olaraq qalır (kaskad: il dəyişəndə semestr
-   parametri düşür). `display: contents` sayəsində formalar tək `ems-filters`
-   flex sırasına düzülür — markup semantikası dəyişmir. */
-.ese-toolbar > form {
-    display: contents;
+.ese .ems-steps {
+    margin-bottom: var(--ems-sp-5);
 }
 
-.ese-toolbar .ems-field {
+/* ── Seçim: sıra açarı + filtr paneli ─────────────────────────────────────── */
+.ese-select {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.ese-mode {
+    align-self: flex-start;
+}
+
+.ese-mode .ems-viewtoggle__btn {
+    text-decoration: none;
+}
+
+.ese .ems-filters .ems-field {
     min-width: 180px;
-    flex: 1 1 190px;
+    flex: 1 1 200px;
 }
 
-.ese-toolbar .ems-field--wide {
-    flex: 1 1 280px;
+.ese .ems-filters .ems-field--wide {
+    flex: 2 1 320px;
 }
 
 .ese .bootstrap-single-select {
@@ -37,9 +50,15 @@
     justify-content: space-between;
 }
 
-/* ── Kart + qeydlər ───────────────────────────────────────────────────────── */
-.ese-card {
-    margin-top: var(--ems-sp-5);
+/* ── Gövdə ────────────────────────────────────────────────────────────────── */
+.ese-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+}
+
+.ese-body > .ems-tabs {
+    margin-bottom: 0;
 }
 
 .ese-card > .ems-tablewrap,
@@ -50,7 +69,7 @@
 }
 
 .ese-msg {
-    margin: var(--ems-sp-5) 18px;
+    margin: 0;
 }
 
 .ese-card > .ems-state,
@@ -58,21 +77,60 @@
     margin: var(--ems-sp-6) 18px;
 }
 
-.ese-actions {
+/* ── Açılış kartı + vərəq məlumatları ─────────────────────────────────────── */
+.ese-meta .ems-card__sub {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    gap: var(--ems-sp-2) var(--ems-sp-4);
+}
+
+.ese-meta__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ese-meta__chip b {
+    color: var(--ems-text);
+}
+
+.ese-meta__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--ems-sp-4);
-    padding: 0 18px var(--ems-sp-6);
+}
+
+.ese-meta__grid .ems-field--wide {
+    grid-column: 1 / -1;
+}
+
+.ese-file {
+    max-width: 100%;
+    font-size: var(--ems-fs-sm);
 }
 
 /* ── Cədvəl ───────────────────────────────────────────────────────────────── */
+.ese-tablescroll {
+    max-height: 70vh;
+    overflow: auto;
+}
+
 .ese-table {
-    min-width: 940px;
+    min-width: 860px;
+}
+
+/* Başlıq sürüşmədə yapışır — uzun siyahıda sütun adları itmir. */
+.ese-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ems-bg-subtle);
 }
 
 .ese-table th[scope="row"] {
-    min-width: 220px;
+    min-width: 240px;
 }
 
 .ese-th--num,
@@ -81,8 +139,17 @@
     white-space: nowrap;
 }
 
-.ese-row.is-recorded {
-    background: var(--ems-bg-subtle);
+.ese-th__max {
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+.ese-row.is-recorded th[scope="row"] {
+    border-left: 3px solid var(--ems-success);
+}
+
+.ese-row.is-dirty {
+    background: var(--ems-warning-bg);
 }
 
 .ese-idx {
@@ -98,25 +165,21 @@
     color: var(--ems-text);
 }
 
+.ese-username {
+    display: block;
+    margin-left: 22px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+    font-family: var(--ems-ff-mono);
+}
+
+.ese-guest {
+    margin-left: 6px;
+}
+
 .ese-letter {
     font-weight: 700;
     color: var(--ems-primary-700);
-}
-
-/* Çox cəhd — əvvəlki bal itmir, açıq görünür (sahibin qərarı M2). */
-.ese-attempts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 5px;
-}
-
-.ese-attempt {
-    font-size: var(--ems-fs-xs);
-}
-
-.ese-attempt.is-superseded {
-    text-decoration: line-through;
 }
 
 .ese-score {
@@ -131,59 +194,140 @@
     background: var(--ems-warning-bg);
 }
 
-/* ── Sübut / qeyd sahələri ────────────────────────────────────────────────── */
-.ese-just {
+.ese-score.is-invalid {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+.ese-history-btn__count {
+    min-width: 1.2em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Əməllər + icmal ──────────────────────────────────────────────────────── */
+.ese-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: var(--ems-sp-5) 18px var(--ems-sp-6);
+}
+
+.ese-actions__summary {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.ese-actions__summary.is-dirty {
+    color: var(--ems-warning-800);
+    font-weight: 600;
+}
+
+.ese-actions__btns {
     display: flex;
     flex-wrap: wrap;
     gap: var(--ems-sp-3);
 }
 
-.ese-just__field {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+/* ── Təsdiq dialoqu ───────────────────────────────────────────────────────── */
+.ese-summary {
+    margin: 0 0 var(--ems-sp-4);
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
 }
 
-.ese-just__field .ems-field__label {
-    font-size: 10px;
+.ese-summary li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-3);
+    padding: 8px 12px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+}
+
+.ese-summary li b {
+    min-width: 2.4em;
+    font-size: var(--ems-fs-lg);
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-primary-800);
+}
+
+.ese-summary li.is-warning {
+    background: var(--ems-warning-bg);
+}
+
+.ese-summary li.is-warning b {
+    color: var(--ems-warning-800);
+}
+
+.ese-just {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.ese-just__note {
+    margin: 0;
+}
+
+.ese-just__scan {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.ese-just__scan.is-ok {
+    color: var(--ems-success-700);
+}
+
+.ese-just__scan.is-missing {
+    color: var(--ems-danger-700);
 }
 
 .ese-selectwrap {
-    min-width: 150px;
+    min-width: 200px;
 }
 
-.ese-text {
-    min-width: 180px;
+/* ── Tarixçə (çekmecə + siyahılar) ────────────────────────────────────────── */
+.ese-hist__head {
+    margin-bottom: var(--ems-sp-4);
 }
 
-.ese-file {
-    max-width: 190px;
-    font-size: var(--ems-fs-xs);
-}
-
-.ese-just.is-required .bootstrap-single-select__toggle,
-.ese-just.is-required .ese-text,
-.ese-just.is-required .ese-file {
-    border-color: var(--ems-warning-bd);
-}
-
-/* ── Daxiletmə tarixçəsi ──────────────────────────────────────────────────── */
-.ese-history {
-    margin-top: var(--ems-sp-3);
-}
-
-.ese-history summary {
-    font-size: var(--ems-fs-xs);
+.ese-hist__student {
+    font-size: var(--ems-fs-lg);
     font-weight: 700;
-    color: var(--ems-primary-700);
-    cursor: pointer;
+}
+
+.ese-hist__meta {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.ese-hist__title {
+    margin: var(--ems-sp-5) 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-text-muted);
+}
+
+.ese-hist__empty {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
 }
 
 .ese-history__list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin: 6px 0 0;
+    gap: 6px;
+    margin: 0;
     padding: 0;
     list-style: none;
 }
@@ -193,18 +337,24 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--ems-sp-3);
-    padding: 5px 8px;
+    padding: 8px 10px;
     border-radius: var(--ems-r-md);
     background: var(--ems-bg-subtle);
-    font-size: var(--ems-fs-xs);
+    font-size: var(--ems-fs-sm);
 }
 
 .ese-history__item.is-correction {
     background: var(--ems-warning-bg);
 }
 
+.ese-history__item.is-superseded .ese-history__delta {
+    text-decoration: line-through;
+    color: var(--ems-text-muted);
+}
+
 .ese-history__date {
     color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
 .ese-history__delta {
@@ -222,6 +372,11 @@
     color: var(--ems-neutral-700);
 }
 
+.ese-history__sheet {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
 .ese-history__by {
     margin-left: auto;
     color: var(--ems-text-muted);
@@ -232,8 +387,155 @@
     color: var(--ems-primary-700);
 }
 
+/* ── Fayl idxalı ──────────────────────────────────────────────────────────── */
+.ese-import__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.ese-import__step {
+    display: flex;
+    gap: var(--ems-sp-4);
+}
+
+.ese-import__no {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 700;
+    font-size: var(--ems-fs-sm);
+}
+
+.ese-import__content {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.ese-import__title {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.ese-import__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.ese-import__col {
+    margin-right: 4px;
+    padding: 1px 6px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-bg-subtle);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs);
+}
+
+.ese-drop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: var(--ems-sp-6);
+    border: 2px dashed var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+    text-align: center;
+    cursor: pointer;
+}
+
+.ese-drop.is-over {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.ese-drop.is-filled {
+    border-style: solid;
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.ese-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.ese-drop__icon {
+    font-size: 24px;
+    color: var(--ems-primary-600);
+}
+
+.ese-drop__title {
+    font-weight: 600;
+}
+
+.ese-drop__hint {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.ese-import__counts {
+    margin: 0;
+}
+
+.ese-import__justgrid {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 2fr;
+    gap: var(--ems-sp-4);
+}
+
+.ese-import__table {
+    min-width: 760px;
+}
+
+.ese-import__row.is-danger {
+    background: var(--ems-danger-bg);
+}
+
+.ese-import__row.is-warning {
+    background: var(--ems-warning-bg);
+}
+
+.ese-import__row.is-success td:first-child {
+    border-left: 3px solid var(--ems-success);
+}
+
+.ese-import__note {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+/* ── Partiyalar ───────────────────────────────────────────────────────────── */
+.ese-sheets__table {
+    min-width: 900px;
+}
+
+.ese-failed {
+    color: var(--ems-danger-700);
+    font-weight: 700;
+}
+
+/* ── Mobil ────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .ese-msg,
     .ese-actions,
     .ese-card > .ems-state,
     .ese-card > form > .ems-state {
@@ -241,8 +543,25 @@
         padding-inline: 0;
     }
 
+    .ese-actions__btns,
     .ese-actions .ems-btn {
         width: 100%;
+    }
+
+    .ese-actions .ems-btn {
         justify-content: center;
     }
+
+    .ese-tablescroll {
+        max-height: none;
+    }
+
+    .ese-import__justgrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.ese-drop:focus-within {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 2px;
 }

@@ -1,0 +1,127 @@
+{% load i18n %}
+{% comment %}«Fayldan yüklə» paneli — sahib (2026-09-12): «tələbələrin balları sistemə yüklənsin».
+
+Axın (student-intake ilə eyni naxış): doldurulmuş şablonu endir → «Bal»
+sütununu doldur → yüklə → QURU İCRA (heç nə yazılmır, sətir-sətir vəziyyət) →
+«Tətbiq et» → nəticə. Tətbiq EYNİ faylı yenidən göndərir (server saxlamır).
+Vərəq məlumatları (`data-ese-meta` kartı) və dəyişikliklər üçün səbəb/qeyd
+FormData-ya JS-də əlavə olunur (`exam_score_import.js`).{% endcomment %}
+<section class="ems-card ese-card ese-import"
+         data-esi-root
+         data-preview-url="{{ s.import_preview_url }}"
+         data-apply-url="{{ s.import_apply_url }}"
+         data-offering-id="{{ s.offering.id }}"
+         data-org-id="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}">
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title">{% trans "Balları fayldan yüklə" context "registrar.exam_score_entry" %}</h2>
+      <p class="ems-card__sub">
+        {% blocktrans context "registrar.exam_score_entry" with limit=s.import_max_rows size=s.import_max_upload_mb %}Şablon bu qrupun siyahısı ilə doludur — yalnız «Bal» sütununu doldurun. Sütunların sırası sərbəstdir (başlığa görə tanınır). Ən çox {{ limit }} sətir, {{ size }} MB.{% endblocktrans %}
+      </p>
+    </div>
+  </div>
+
+  <div class="ems-card__body ese-import__body">
+    {# ── 1. Şablon ─────────────────────────────────────────────────────── #}
+    <div class="ese-import__step">
+      <span class="ese-import__no" aria-hidden="true">1</span>
+      <div class="ese-import__content">
+        <h3 class="ese-import__title">{% trans "Doldurulmuş şablonu endirin" context "registrar.exam_score_entry" %}</h3>
+        <div class="ese-import__actions">
+          <a class="ems-btn" href="{{ s.import_template_url }}" download>
+            <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "XLSX şablon" context "registrar.exam_score_entry" %}
+          </a>
+          <a class="ems-btn ems-btn--ghost" href="{{ s.import_template_csv_url }}" download>
+            <i class="fas fa-file-csv" aria-hidden="true"></i> {% trans "CSV şablon" context "registrar.exam_score_entry" %}
+          </a>
+        </div>
+        <p class="ems-field__hint">
+          {% trans "Sütunlar" context "registrar.exam_score_entry" %}:
+          {% for column in s.import_columns %}<code class="ese-import__col">{{ column }}</code>{% endfor %}
+          — {% trans "tələbə Tələbə № (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır." context "registrar.exam_score_entry" %}
+        </p>
+      </div>
+    </div>
+
+    {# ── 2. Fayl + quru icra ───────────────────────────────────────────── #}
+    <div class="ese-import__step">
+      <span class="ese-import__no" aria-hidden="true">2</span>
+      <div class="ese-import__content">
+        <h3 class="ese-import__title">{% trans "Doldurulmuş faylı yükləyib yoxlayın" context "registrar.exam_score_entry" %}</h3>
+        <label class="ese-drop" data-esi-drop>
+          <input type="file" class="ese-drop__input" name="file" accept=".xlsx,.xlsm,.csv" data-esi-file>
+          <i class="fas fa-cloud-arrow-up ese-drop__icon" aria-hidden="true"></i>
+          <span class="ese-drop__title" data-esi-file-label data-esi-empty="{% trans 'Faylı bura sürüşdürün və ya seçmək üçün klikləyin' context 'registrar.exam_score_entry' %}">{% trans "Faylı bura sürüşdürün və ya seçmək üçün klikləyin" context "registrar.exam_score_entry" %}</span>
+          <span class="ese-drop__hint">.xlsx · .xlsm · .csv</span>
+        </label>
+        <div class="ese-import__actions">
+          <button type="button" class="ems-btn ems-btn--primary" data-esi-preview>
+            <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i> {% trans "Yoxla (quru icra)" context "registrar.exam_score_entry" %}
+          </button>
+          <span class="ems-field__hint">{% trans "Yoxlama heç nə yazmır — nəticəni sətir-sətir görürsünüz." context "registrar.exam_score_entry" %}</span>
+        </div>
+        <p class="ems-msg ems-msg--error" role="alert" data-esi-error hidden></p>
+      </div>
+    </div>
+
+    {# ── 3. Nəticə + tətbiq ────────────────────────────────────────────── #}
+    <div class="ese-import__step" data-esi-result hidden>
+      <span class="ese-import__no" aria-hidden="true">3</span>
+      <div class="ese-import__content">
+        <h3 class="ese-import__title" data-esi-result-title></h3>
+        <div class="ems-kpis ems-kpis--5 ese-import__counts" data-esi-counts role="status" aria-live="polite"></div>
+
+        <div class="ese-just ese-import__just" data-esi-just hidden>
+          <p class="ems-msg ems-msg--warning ese-just__note">
+            <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
+            <span>{% trans "Faylda artıq yazılmış balı dəyişən sətirlər var — səbəb, qeyd və skan (vərəq məlumatlarında) tələb olunur." context "registrar.exam_score_entry" %}</span>
+          </p>
+          <div class="ese-import__justgrid">
+            <div class="ems-field">
+              <label class="ems-field__label" for="esi-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+              <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+                <select id="esi-reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-esi-reason>
+                  <option value="">—</option>
+                  {% for reason in s.reasons %}
+                  <option value="{{ reason.value }}">{{ reason.label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="ems-field ems-field--wide">
+              <label class="ems-field__label" for="esi-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+              <input type="text" id="esi-note" class="ems-input" maxlength="500" data-esi-note>
+            </div>
+          </div>
+        </div>
+
+        <div class="ems-tablewrap">
+          <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra ese-import__table">
+              <thead>
+                <tr>
+                  <th scope="col">{% trans "Sətir" context "registrar.exam_score_entry" %}</th>
+                  <th scope="col">{% trans "Vəziyyət" context "registrar.exam_score_entry" %}</th>
+                  <th scope="col">{% trans "Tələbə" context "registrar.exam_score_entry" %}</th>
+                  <th scope="col" class="ese-th--num">{% trans "Cari bal" context "registrar.exam_score_entry" %}</th>
+                  <th scope="col" class="ese-th--num">{% trans "Yeni bal" context "registrar.exam_score_entry" %}</th>
+                  <th scope="col">{% trans "İzah" context "registrar.exam_score_entry" %}</th>
+                </tr>
+              </thead>
+              <tbody data-esi-rows></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="ese-import__actions">
+          <button type="button" class="ems-btn ems-btn--primary" data-esi-apply hidden>
+            <i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Tətbiq et — balları sistemə yaz" context "registrar.exam_score_entry" %}
+          </button>
+          <button type="button" class="ems-btn" data-esi-reload hidden>
+            <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Siyahını yenilə" context "registrar.exam_score_entry" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,57 @@
+{% load i18n %}
+{% comment %}Bir tələbənin bal tarixçəsi — `<template>` içində server-render olunur,
+`exam_score_entry.js` klik anında çekmecəyə KLONLAYIR (əlavə sorğu yoxdur:
+`roster_for_offering` daxiletmələri və cəhdləri onsuz da toplu oxuyur).
+Kontekst: `row` (siyahı sətri).{% endcomment %}
+<div class="ese-hist">
+  <div class="ese-hist__head">
+    <div class="ese-hist__student">{{ row.student.get_full_name|default:row.student.username }}</div>
+    <div class="ese-hist__meta">
+      <span>{{ row.student.username }}</span>
+      {% if row.student.fin %}<span>· FİN {{ row.student.fin }}</span>{% endif %}
+      <span>· {% trans "cari imtahan balı" context "registrar.exam_score_entry" %}: <b>{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% else %}—{% endif %}</b> / {{ row.exam_score_max }}</span>
+    </div>
+  </div>
+
+  <h3 class="ese-hist__title">{% trans "Daxiletmələr" context "registrar.exam_score_entry" %} ({{ row.entries|length }})</h3>
+  {% if row.entries %}
+  <ul class="ese-history__list">
+    {% for entry in row.entries %}
+    <li class="ese-history__item {% if entry.is_correction %}is-correction{% endif %}">
+      <span class="ese-history__date">{{ entry.date }}</span>
+      <span class="ese-history__delta">{{ entry.old }} → <b>{{ entry.new }}</b></span>
+      <span class="ems-badge {% if entry.is_correction %}ems-badge--warning{% else %}ems-badge--success{% endif %}">{% if entry.is_correction %}{% trans "sənədli düzəliş" context "registrar.exam_score_entry" %}{% else %}{% trans "ilkin daxiletmə" context "registrar.exam_score_entry" %}{% endif %}</span>
+      {% if entry.reason %}<span class="ese-history__reason">{{ entry.reason }}</span>{% endif %}
+      {% if entry.note %}<span class="ese-history__note">{{ entry.note }}</span>{% endif %}
+      {% if entry.sheet_id %}
+      <span class="ese-history__sheet">
+        <i class="fas fa-file-lines" aria-hidden="true"></i>
+        {% if entry.sheet_exam_date %}{% trans "imtahan" context "registrar.exam_score_entry" %} {{ entry.sheet_exam_date }}{% endif %}
+        {% if entry.sheet_protocol %}· № {{ entry.sheet_protocol }}{% endif %}
+        {% if entry.sheet_examiner %}· {{ entry.sheet_examiner }}{% endif %}
+        {% if entry.sheet_source == "import" %}· {% trans "fayldan" context "registrar.exam_score_entry" %}{% endif %}
+      </span>
+      {% endif %}
+      <span class="ese-history__by">{{ entry.by }}</span>
+      {% if entry.evidence_url %}<a class="ese-history__doc" href="{{ entry.evidence_url }}" target="_blank" rel="noopener">{% trans "sənəd" context "registrar.exam_score_entry" %}</a>{% elif entry.sheet_evidence_url %}<a class="ese-history__doc" href="{{ entry.sheet_evidence_url }}" target="_blank" rel="noopener">{% trans "vərəq skanı" context "registrar.exam_score_entry" %}</a>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ese-hist__empty">{% trans "Hələ daxiletmə yoxdur." context "registrar.exam_score_entry" %}</p>
+  {% endif %}
+
+  {% if row.attempts %}
+  <h3 class="ese-hist__title">{% trans "Rəqəmsal cəhdlər" context "registrar.exam_score_entry" %} ({{ row.attempts|length }})</h3>
+  <ul class="ese-history__list">
+    {% for attempt in row.attempts %}
+    <li class="ese-history__item {% if not attempt.is_official %}is-superseded{% endif %}">
+      <span class="ese-history__date">{{ attempt.finished_at|date:"d.m.Y H:i" }}</span>
+      <span class="ese-history__delta">{{ attempt.label }} {% trans "cəhd" context "registrar.exam_score_entry" %}: <b>{% if attempt.percent is not None %}{{ attempt.percent }}%{% else %}—{% endif %}</b></span>
+      <span class="ems-badge {% if attempt.is_official %}ems-badge--success{% else %}ems-badge--muted{% endif %}">{% if attempt.is_official %}{% trans "rəsmi" context "registrar.exam_score_entry" %}{% else %}{% trans "ləğv olundu" context "registrar.exam_score_entry" %}{% endif %}</span>
+      {% if attempt.exam_title %}<span class="ese-history__note">{{ attempt.exam_title }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
