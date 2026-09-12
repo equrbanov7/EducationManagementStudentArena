@@ -148,27 +148,21 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, 'data-section="statistics"', html=False)
         self.assertContains(response, 'data-force-navigation="true"', html=False)
 
-    def test_statistics_section_places_ai_panel_above_filters_and_uses_bootstrap_select(self):
+    def test_student_statistics_has_accessible_ai_panel_and_personal_metrics(self):
         self.client.login(username="testuser", password="testpass123")
-
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
-
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="statsAiSummaryCard"', html=False)
-        self.assertContains(response, 'id="statsFilterForm"', html=False)
-        self.assertContains(response, "data-bootstrap-select", html=False)
+        self.assertContains(response, 'id="statistics-ai-panel"', html=False)
+        self.assertContains(response, 'aria-controls="statistics-ai-panel"', html=False)
+        self.assertEqual(response.context["statistics_data"]["profile"], "student")
+        self.assertEqual(response.context["statistics_data"]["filter_fields"], [])
 
-        content = response.content.decode("utf-8")
-        self.assertLess(content.index('id="statsAiSummaryCard"'), content.index('id="statsFilterForm"'))
-
-    def test_statistics_section_uses_auto_submit_and_hides_reset_without_filters(self):
+    def test_student_statistics_hides_filters_that_do_not_apply_to_academic_totals(self):
         self.client.login(username="testuser", password="testpass123")
-
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
-
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'data-stats-auto-submit="true"', html=False)
-        self.assertNotContains(response, 'id="statsFilterReset"', html=False)
+        self.assertNotContains(response, "data-ems-filters", html=False)
+        self.assertNotContains(response, "data-ems-filters-reset", html=False)
 
     def test_superadmin_statistics_shows_org_select_and_reset_when_filter_active(self):
         superuser = User.objects.create_superuser(
@@ -192,7 +186,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'name="stat_organization"', html=False)
         self.assertContains(response, "data-bootstrap-select", html=False)
-        self.assertContains(response, 'id="statsFilterReset"', html=False)
+        self.assertContains(response, "data-ems-filters-reset", html=False)
+        self.assertContains(response, "data-ems-filters", html=False)
 
     def test_superadmin_statistics_org_table_uses_pagination(self):
         superuser = User.objects.create_superuser(
@@ -214,7 +209,8 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="statsOrgTable"', html=False)
+        self.assertEqual(len(response.context["statistics_org_rows"]), 8)
+        self.assertTrue(response.context["statistics_org_page"].has_next())
         self.assertContains(response, "stats_org_page=2")
 
     def test_student_statistics_filters_are_scoped_to_current_student(self):
@@ -269,10 +265,11 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([row["id"] for row in response.context["statistics_courses"]], [own_course.id])
-        self.assertEqual([row["id"] for row in response.context["statistics_groups"]], [own_group.id])
+        self.assertEqual(response.context["statistics_courses"], [])
+        self.assertEqual(response.context["statistics_data"]["profile"], "student")
+        self.assertEqual(response.context["statistics_groups"], [])
         self.assertIsNone(response.context["statistics_filters"]["course"])
-        self.assertIsNone(response.context["statistics_filters"]["group"])
+        self.assertIsNone(response.context["statistics_filters"].get("group"))
         self.assertIsNone(response.context["statistics_filters"]["organization"])
         self.assertNotContains(response, "Other Course")
         self.assertNotContains(response, "Other Group")
@@ -318,10 +315,10 @@ class ProfileViewTest(TestCase):
         response = self.client.get(reverse("accounts:profile") + "?section=statistics")
 
         self.assertEqual(response.status_code, 200)
-        summary = response.context["statistics_data"]["summary"]
-        self.assertEqual(summary["live_total"], 0)
-        self.assertEqual(summary["live_correct"], 0)
-        self.assertEqual(summary["live_accuracy"], 0)
+        data = response.context["statistics_data"]
+        self.assertEqual(data["profile"], "student")
+        self.assertFalse(any(tile["key"].startswith("live") for tile in data["kpis"]))
+        self.assertNotContains(response, "Live Exam")
         self.assertNotContains(response, "live_total_answers", html=False)
 
     def test_profile_edit_section(self):
@@ -4349,7 +4346,7 @@ class PendingAnswersViewTest(TestCase):
         response = self.client.get(reverse("accounts:pending_answers"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Gözləmədə olan cavablar")
-        self.assertContains(response, "Profilə qayıt")
+        self.assertContains(response, "data-pax-root", html=False)
         self.assertContains(response, "data-bootstrap-select", html=False)
         self.assertContains(response, "Tapşırıq, imtahan və kurs üzrə axtar")
         self.assertNotContains(response, "Pending cavablar")

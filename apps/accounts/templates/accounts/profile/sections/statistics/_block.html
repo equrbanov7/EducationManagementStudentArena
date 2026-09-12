@@ -1,0 +1,13 @@
+<section class="ems-card stx-block" data-stx-block="{{ block.key }}">
+  <div class="ems-card__head"><div>
+    <h2 class="ems-card__title">{{ block.title }}</h2>
+    {% if block.sub %}<p class="ems-card__sub">{{ block.sub }}</p>{% endif %}
+  </div></div>
+  <div class="ems-card__body">
+    {% if block.kind == "bars" %}
+      {% include "accounts/profile/sections/statistics/_bar_list.html" %}
+    {% else %}
+      {% include "partials/ems_ui/_data_table.html" with table_columns=block.columns table_rows=block.rows table_state=block.state state_title=block.empty table_zebra=True %}
+    {% endif %}
+  </div>
+</section>

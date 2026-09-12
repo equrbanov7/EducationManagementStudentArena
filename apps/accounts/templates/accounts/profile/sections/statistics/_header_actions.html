@@ -1,0 +1,7 @@
+{% load i18n %}
+<a class="ems-btn" href="{% url 'accounts:statistics_export_csv' %}?{{ statistics_data.query_string }}">
+  <i class="fas fa-download" aria-hidden="true"></i> {% trans "Göndərişlər (CSV)" context "profile.statistics" %}
+</a>
+<button type="button" class="ems-btn" data-stx-ai-toggle aria-expanded="false" aria-controls="statistics-ai-panel">
+  {% trans "AI xülasəsi" context "profile.statistics" %}
+</button>
