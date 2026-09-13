@@ -6,9 +6,11 @@ köçürüldü (davranış dəyişməyib; EX-07 düzəlişi `_save_written_answe
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Q
+from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.exams.models import ExamAnswerFile
+from apps.exams.models import ExamAnswer, ExamAnswerFile
 from apps.exams.services.utils import _clear_paint_from_answer, _save_paint_png_to_answer
 from apps.exams.validators import ALLOWED_EXTENSIONS as EXAM_ALLOWED_EXTENSIONS
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
@@ -22,12 +24,73 @@ def _correct_question_option_ids(question):
     return {option.id for option in question.options.all() if option.is_correct}
 
 
-def _save_test_answer_if_changed(answer, question, selected_option_ids, current_selected_option_ids):
+class TestAnswerWriteBatch:
+    """Test cavablarının yazılarını TOPLU edir (perf auditi 2026-09-13 F-05).
+
+    Əvvəl finish/autosave döngüsündə HƏR dəyişən cavab üçün 3 sorğu gedirdi:
+    `selected_options.set()` → mövcud id-lərin SELECT-i (prefetch keşi
+    `set()`-də işlənmir) + through INSERT, sonra `answer.save()` UPDATE —
+    40 suallıq finaldə ~120 sorğu/tələbə, 5 000 tələbə eyni pəncərədə →
+    DB-yə 10⁵–10⁶ kiçik sorğu. İndi:
+
+    * mövcud seçim `answers_by_qid`-dəki PREFETCH-dən götürülür (SELECT yox);
+    * silinəcək through sətirləri TƏK DELETE, əlavə olunacaqlar TƏK
+      `bulk_create(ignore_conflicts=True)`;
+    * cavab sahələri (`is_correct`, snapshot, …) `bulk_update` ilə
+      (`updated_at` `auto_now`-dur — `bulk_update` `pre_save` çağırmır, ona
+      görə əl ilə damğalanır).
+
+    `flush()` döngüdən sonra, `recalculate_score`-dan ƏVVƏL çağırılır —
+    eyni `transaction.atomic()` daxilindədir, OCC (`bump_autosave_revision`)
+    və kilid semantikası dəyişmir. `ExamAnswer.selected_options`-da
+    `m2m_changed` dinləyicisi yoxdur (2026-09-13 yoxlanılıb) — `set()`
+    siqnalları atlanmır.
+    """
+
+    def __init__(self):
+        self._remove = []  # (answer_id, {option_id, …})
+        self._add = []  # through sətirləri
+        self._updates = {}  # tuple(fields) → [answer, …]
+
+    def set_options(self, answer, option_ids, current_option_ids):
+        to_remove = set(current_option_ids) - set(option_ids)
+        to_add = set(option_ids) - set(current_option_ids)
+        if to_remove:
+            self._remove.append((answer.pk, to_remove))
+        through = ExamAnswer.selected_options.through
+        for option_id in sorted(to_add):
+            self._add.append(through(examanswer_id=answer.pk, examquestionoption_id=option_id))
+
+    def save(self, answer, update_fields):
+        fields = tuple(dict.fromkeys(list(update_fields) + ["updated_at"]))
+        answer.updated_at = timezone.now()
+        self._updates.setdefault(fields, []).append(answer)
+
+    def flush(self):
+        through = ExamAnswer.selected_options.through
+        if self._remove:
+            condition = Q()
+            for answer_id, option_ids in self._remove:
+                condition |= Q(examanswer_id=answer_id, examquestionoption_id__in=sorted(option_ids))
+            through.objects.filter(condition).delete()
+            self._remove = []
+        if self._add:
+            through.objects.bulk_create(self._add, ignore_conflicts=True)
+            self._add = []
+        for fields, answers in self._updates.items():
+            ExamAnswer.objects.bulk_update(answers, list(fields))
+        self._updates = {}
+
+
+def _save_test_answer_if_changed(answer, question, selected_option_ids, current_selected_option_ids, *, batch=None):
     valid_option_ids = _valid_question_option_ids(question)
     selected_option_ids = selected_option_ids & valid_option_ids
 
     if current_selected_option_ids != selected_option_ids:
-        answer.selected_options.set(selected_option_ids)
+        if batch is not None:
+            batch.set_options(answer, selected_option_ids, current_selected_option_ids)
+        else:
+            answer.selected_options.set(selected_option_ids)
 
     correct_option_ids = _correct_question_option_ids(question)
     next_is_correct = bool(correct_option_ids and selected_option_ids == correct_option_ids)
@@ -58,7 +121,10 @@ def _save_test_answer_if_changed(answer, question, selected_option_ids, current_
         update_fields.extend(["has_paint", "paint_image", "paint_data_url", "paint_updated_at"])
 
     if update_fields:
-        answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
+        if batch is not None:
+            batch.save(answer, update_fields)
+        else:
+            answer.save(update_fields=list(dict.fromkeys(update_fields + ["updated_at"])))
 
 
 def _save_written_answer_if_changed(request, answer, question, *, allow_binary_uploads=True):

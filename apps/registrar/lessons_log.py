@@ -30,6 +30,12 @@ from django.db.models import Count, Min, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re-export
+    LATE_AFTER_HOURS,
+    TOTALS_CACHE_TTL,
+    range_totals,
+    totals_cache_key,
+)
 from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
 
@@ -63,8 +69,8 @@ SEASON_LABELS = (
 #: semestr)» deməkdir, `filter_bar.js` boş parametri URL-ə yazmır.
 ALL = "all"
 
-#: «Gec yazılıb» həddi — dizayn: «dərsdən 48 saat sonra».
-LATE_AFTER_HOURS = 48
+#: «Gec yazılıb» həddi (48 saat) — `lessons_log_totals`-da təyin olunur
+#: (F-13 üçün KPI aqreqatı ayrıca modula çıxarılıb, modul-ölçü qapısı).
 
 #: Bir səhifədə göstərilən maksimum dərs (dizayn: «İlk 90 dərs göstərilir»).
 ROW_CAP = 90
@@ -351,45 +357,6 @@ def note_state(*, lesson_date, marks_count: int, first_mark) -> str:
 # --------------------------------------------------------------------------- #
 # Aqreqatlar (KPI) — SAXLANILMIR, hər dəfə hesablanır
 # --------------------------------------------------------------------------- #
-
-
-def range_totals(lessons_qs) -> dict:
-    """Dövr üzrə KPI-lar — İKİ sorğu (dərs sətirləri + xana aqreqatı)."""
-    rows = list(
-        lessons_qs.annotate(marks_count=Count("marks"), first_mark=Min("marks__created_at")).values_list(
-            "id", "date", "hours", "marks_count", "first_mark"
-        )
-    )
-    total = len(rows)
-    hours = sum(int(row[2] or 0) for row in rows)
-    empty = 0
-    late = 0
-    for _pk, lesson_date, _hours, marks_count, first_mark in rows:
-        state = note_state(lesson_date=lesson_date, marks_count=marks_count, first_mark=first_mark)
-        if state == NOTE_EMPTY:
-            empty += 1
-        elif state == NOTE_LATE:
-            late += 1
-
-    attendance = LessonMark.objects.filter(lesson__in=lessons_qs.values("id")).aggregate(
-        present=Count("id", filter=Q(status=AttendanceStatus.PRESENT)),
-        absent=Count("id", filter=Q(status=AttendanceStatus.ABSENT)),
-        excused=Count("id", filter=Q(status=AttendanceStatus.EXCUSED)),
-        graded=Count("id", filter=Q(score__isnull=False)),
-    )
-    marked = int(attendance["present"] or 0) + int(attendance["absent"] or 0) + int(attendance["excused"] or 0)
-    rate = int(round(int(attendance["present"] or 0) * 100 / marked)) if marked else 0
-    return {
-        "lessons": total,
-        "hours": hours,
-        "empty": empty,
-        "late": late,
-        "present": int(attendance["present"] or 0),
-        "absent": int(attendance["absent"] or 0),
-        "excused": int(attendance["excused"] or 0),
-        "graded": int(attendance["graded"] or 0),
-        "attendance_rate": rate,
-    }
 
 
 def marks_by_lesson(lesson_ids) -> dict:

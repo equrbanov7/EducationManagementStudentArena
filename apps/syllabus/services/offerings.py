@@ -17,6 +17,8 @@ açılmır (``scripts/module_deps.py``).
 
 from __future__ import annotations
 
+from django.db.models import Case, IntegerField, Q, Value, When
+
 from ..constants import OPEN_STATUSES, SyllabusStatus
 from ..models import Syllabus
 
@@ -65,26 +67,40 @@ def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, pe
     """
     if organization is None:
         return None
-    base = Syllabus.objects.filter(organization=organization, is_active=True).select_related(*_RELATED)
 
+    # Perf auditi 2026-09-13 F-04: üç pillə əvvəl üç ayrı `.first()` idi —
+    # sillabusu OLMAYAN açılışda hər çağırış 3 sorğu (jurnal detalı 4 çağıran ×
+    # 3 = 12 eyni SELECT, hər biri 9 cədvəllik JOIN). İndi pillələr TƏK sorğuda
+    # OR-lanır, `_tier` rütbəsi eyni prioriteti saxlayır (0 → 1 → 2), hər pillə
+    # daxilində əvvəlki kimi `Meta.ordering` (`subject__code`) + `pk`.
+    tiers = []
     if offering_id is not None:
-        found = base.filter(offering_id=offering_id).first()
-        if found is not None:
-            return found
-    if subject_id is None:
+        tiers.append(Q(offering_id=offering_id))
+    if subject_id is not None and period_id is not None:
+        tiers.append(Q(subject_id=subject_id, period_id=period_id, offering__isnull=True))
+    if subject_id is not None and instructor_id is not None:
+        tiers.append(
+            Q(subject_id=subject_id, author_id=instructor_id, offering__isnull=True, period__isnull=True),
+        )
+    if not tiers:
         return None
-    if period_id is not None:
-        found = base.filter(subject_id=subject_id, period_id=period_id, offering__isnull=True).first()
-        if found is not None:
-            return found
-    if instructor_id is None:
-        return None
-    return base.filter(
-        subject_id=subject_id,
-        author_id=instructor_id,
-        offering__isnull=True,
-        period__isnull=True,
-    ).first()
+
+    combined = tiers[0]
+    for tier in tiers[1:]:
+        combined = combined | tier
+    rank = Case(
+        *[When(tier, then=Value(index)) for index, tier in enumerate(tiers)],
+        default=Value(len(tiers)),
+        output_field=IntegerField(),
+    )
+    return (
+        Syllabus.objects.filter(organization=organization, is_active=True)
+        .filter(combined)
+        .select_related(*_RELATED)
+        .annotate(_tier=rank)
+        .order_by("_tier", "subject__code", "pk")
+        .first()
+    )
 
 
 def approved_version_for(syllabus):

@@ -78,7 +78,7 @@ def journal_list_context(user, request=None) -> dict:
     2026-09-05 P2-18 — bax :mod:`apps.registrar.journal_list_query`): əvvəllər
     BÜTÜN offering-lər (11 124-ə qədər) model instansiyası kimi yüklənib
     Python-da süzülürdü (İKT rəhbəri görünüşündə 1.96 s / 32 sorğu)."""
-    from django.db.models import Count, Q
+    from django.db.models import Q
 
     from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_list_query as jlq
@@ -220,9 +220,10 @@ def journal_list_context(user, request=None) -> dict:
     # səhifələnəndə (bu P2-18 düzəlişi) isə sorğu planı dəyişəndə fərqli ola
     # bilərdi (sətir təkrarı/itməsi riski). `pk` yalnız bu NİZAMSIZ hallarda
     # işə düşür — elan olunmuş iki açarın (dövr, fənn kodu) sırasını DƏYİŞMİR.
-    qs = qs.annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled"))).order_by(
-        "-period__start_date", "subject__code", "pk"
-    )
+    # Perf auditi 2026-09-13 F-14: `student_count` annotasiyası paginasiyadan
+    # ƏVVƏL idi (org-geniş: 150k enrollment JOIN + 11 115 GROUP BY, sonra LIMIT 20
+    # — 296 ms; COUNT da eyni JOIN ilə) → indi yalnız səhifənin açılışları üçün.
+    qs = qs.order_by("-period__start_date", "subject__code", "pk")
 
     def _sel_label(choices, val, *, kind=""):
         """Seçilmiş dəyərin ADI — əvvəl hazır siyahıdan, tapılmasa BAZADAN.
@@ -260,10 +261,14 @@ def journal_list_context(user, request=None) -> dict:
     paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
+    page_offerings = page_obj.object_list = list(page_obj.object_list)  # F-14: say yalnız səhifə üçün
+    counts_map = _offering_student_counts(page_offerings)
+    for offering in page_offerings:
+        offering.student_count = counts_map.get(offering.pk, 0)
     # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
-    attach_kind_labels(page_obj.object_list, selected_kind)
+    attach_kind_labels(page_offerings, selected_kind)
     querystring = ""
     if request is not None:
         params = request.GET.copy()
@@ -271,7 +276,7 @@ def journal_list_context(user, request=None) -> dict:
         querystring = params.urlencode()
 
     return {
-        "offerings": list(page_obj),
+        "offerings": page_offerings,
         "page_obj": page_obj,
         "is_paginated": page_obj.has_other_pages(),
         "row_offset": row_offset,

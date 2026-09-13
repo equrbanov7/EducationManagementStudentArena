@@ -192,6 +192,8 @@ def _row(appeal):
     exam = appeal.exam
     subject = getattr(exam, "subject", None)
     groups = list(exam.allowed_groups.all())
+    # F-06: səhifələnən sorğuda annotasiya var; başqa çağıran üçün geri-düşmə.
+    item_count = getattr(appeal, "item_count", None)
     teacher = ""
     if exam.author_id:
         teacher = exam.author.get_full_name() or exam.author.username
@@ -204,7 +206,7 @@ def _row(appeal):
         "exam": exam.title,
         "subject": (f"{subject.code} — {subject.name}" if subject else ""),
         "type": exam.get_exam_type_extended_display() if exam.exam_type_extended else "",
-        "items": appeal.items.count(),
+        "items": appeal.items.count() if item_count is None else int(item_count),
         "status": appeal.get_status_display(),
         "status_code": appeal.status,
         "date": timezone.localtime(appeal.created_at).strftime("%d.%m.%Y %H:%M"),
@@ -232,7 +234,17 @@ def _summary(qs):
 def appeal_stats_data(request):
     organization = _stats_org(request)
     appeals = _filtered_appeals(request, organization)
-    page_obj = Paginator(_sorted(appeals, request), _PAGE_SIZE).get_page(request.GET.get("page"))
+    # Perf auditi 2026-09-13 F-06: `_row` hər apellyasiya üçün
+    # `exam.allowed_groups.all()` + `items.count()` atırdı (səhifədə 15 sətir →
+    # +30 sorğu). Qruplar prefetch, bənd sayı annotasiya ilə gəlir — YALNIZ
+    # səhifələnən sorğuda (`_summary` öz GROUP BY-larını `appeals` üzərində
+    # qurur; annotasiya ora düşsə qruplaşmanı pozardı).
+    listed = (
+        _sorted(appeals, request)
+        .prefetch_related("exam__allowed_groups")
+        .annotate(item_count=Count("items", distinct=True))
+    )
+    page_obj = Paginator(listed, _PAGE_SIZE).get_page(request.GET.get("page"))
     return JsonResponse(
         {
             "results": [_row(a) for a in page_obj.object_list],
