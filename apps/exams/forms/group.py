@@ -188,9 +188,13 @@ class StudentGroupForm(forms.ModelForm):
 
         group_memberships_qs = StudentGroup.objects.none()
         if self.organization is not None:
+            # Perf auditi 2026-09-13 F-02: `student_groups` TƏRS-FK prefetch-inin
+            # uyğunlaşdırma açarı `teacher_id`-dir — `.only()`-də olmayanda Django
+            # hər qrup üçün `refresh_from_db(fields=["teacher_id"])` atırdı
+            # (`teacher_group_list` 38→48 sorğu; klonda qrup sayı × 2).
             group_memberships_qs = (
                 StudentGroup.objects.filter(organization=self.organization)
-                .only("id", "name", "organization_id")
+                .only("id", "name", "organization_id", "teacher_id")
                 .order_by("name")
             )
 

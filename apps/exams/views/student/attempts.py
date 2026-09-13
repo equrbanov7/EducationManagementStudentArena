@@ -25,7 +25,7 @@ from apps.exams.services.attempts import (
 from apps.exams.services.question_timer import question_timer_expired
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
-from ._answer_writes import _save_test_answer_if_changed, _save_written_answer_if_changed
+from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
@@ -261,6 +261,12 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
         autosave_changed_question_ids = posted_autosave_question_ids(request, action=action)
         form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
 
+        # Perf auditi 2026-09-13 F-05: test cavablarının yazıları döngüdə
+        # deyil, sonda TOPLU gedir (bax `TestAnswerWriteBatch`) — sorğu sayı
+        # sual sayından asılı olmur. Erkən `return`-lardan əvvəl də `flush()`
+        # çağırılır ki, əvvəlki sualların yazısı (köhnə davranış) itməsin.
+        write_batch = TestAnswerWriteBatch()
+
         for q in questions:
             if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
                 continue
@@ -272,6 +278,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                 request, attempt, q, exam_type=exam.exam_type, action=action, is_ajax=is_ajax
             )
             if timer_guard is not None:
+                write_batch.flush()
                 return timer_guard
             # Server deadline keçmiş sualın yazısı saxlanmır.
             if question_timer_expired(attempt, q):
@@ -280,6 +287,8 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
             answer_data = answers_by_qid.get(q.id) or {}
             ans = answer_data.get("answer")
             if ans is None:
+                # Müdafiə qolu: `questions` elə `answers`-dən çıxarılır, yəni
+                # praktikada bura düşülmür (F-05 ölçüsündə 0 dəfə).
                 ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
                 answer_data = {"answer": ans, "selected_option_ids": set()}
 
@@ -289,6 +298,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                     q,
                     selected_option_ids_from_request(request, q),
                     answer_data.get("selected_option_ids", set()),
+                    batch=write_batch,
                 )
             else:
                 try:
@@ -299,6 +309,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                         allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
                     )
                 except ValidationError as exc:
+                    write_batch.flush()
                     if is_ajax:
                         return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
                     messages.error(request, exc.messages[0])
@@ -308,6 +319,8 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
                             return_to,
                         )
                     )
+
+        write_batch.flush()
 
         if exam.exam_type == "test" and (action != "autosave" or is_time_up):
             attempt.recalculate_score()

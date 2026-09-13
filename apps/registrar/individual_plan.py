@@ -188,8 +188,24 @@ def _semester_block(title: str, rows, season: str, teachers) -> SemesterBlock:
     return block
 
 
-def build_student_plan(organization, record, *, period, teachers_cache: dict | None = None) -> StudentPlan:
-    """Bir tələbənin fərdi planı — sənədin bir səhifəsi."""
+def build_student_plan(
+    organization,
+    record,
+    *,
+    period,
+    teachers_cache: dict | None = None,
+    seasons_cache: dict | None = None,
+    rows_cache: dict | None = None,
+) -> StudentPlan:
+    """Bir tələbənin fərdi planı — sənədin bir səhifəsi.
+
+    Perf auditi 2026-09-13 F-03: qrup sənədində hər tələbə üçün
+    `_season_periods` (dövrlər) + `CurriculumSubject` sorğusu gedirdi
+    (25 tələbə → 19→65 sorğu), halbuki eyni qrup/kurikulum/kurs üçün nəticə
+    eynidir. `teachers_cache` kimi çağıran `seasons_cache` (tədris ili üzrə)
+    və `rows_cache` (`(curriculum_id, kurs)` sətirləri + `(qrup, proqram)`
+    struktur adları) ötürür.
+    """
     CurriculumSubject = django_apps.get_model("registrar", "CurriculumSubject")
     academic_year = getattr(period, "year_display", None) or getattr(period, "academic_year", "") or ""
     raw_year = getattr(period, "academic_year", "") or ""
@@ -197,7 +213,11 @@ def build_student_plan(organization, record, *, period, teachers_cache: dict | N
     course = _course_year(group, record, raw_year)
     fall_no, spring_no = 2 * course - 1, 2 * course
 
-    seasons = _season_periods(organization, raw_year)
+    if seasons_cache is None:
+        seasons_cache = {}
+    if raw_year not in seasons_cache:
+        seasons_cache[raw_year] = _season_periods(organization, raw_year)
+    seasons = seasons_cache[raw_year]
     if teachers_cache is None:
         teachers_cache = {}
     key = getattr(group, "id", None)
@@ -205,23 +225,35 @@ def build_student_plan(organization, record, *, period, teachers_cache: dict | N
         teachers_cache[key] = _teacher_map(organization, group, seasons)
     teachers = teachers_cache[key]
 
-    rows = list(
-        CurriculumSubject.objects.filter(curriculum=record.curriculum, semester_number__in=(fall_no, spring_no))
-        .select_related("subject", "subject__chair_unit", "teaching_chair")
-        .order_by("semester_number", "order", "row_code", "subject__name")
-    )
+    if rows_cache is None:
+        rows_cache = {}
+    rows_key = ("rows", record.curriculum_id, course)
+    if rows_key not in rows_cache:
+        rows_cache[rows_key] = list(
+            CurriculumSubject.objects.filter(curriculum=record.curriculum, semester_number__in=(fall_no, spring_no))
+            .select_related("subject", "subject__chair_unit", "teaching_chair")
+            .order_by("semester_number", "order", "row_code", "subject__name")
+        )
+    rows = rows_cache[rows_key]
     fall_rows = [row for row in rows if row.semester_number == fall_no]
     spring_rows = [row for row in rows if row.semester_number == spring_no]
 
     program = record.program
-    specialty = _ancestor_named(group, "specialty") if group is not None else ""
-    if not specialty:
-        specialty_unit = getattr(program, "specialty_unit", None)
-        specialty = (getattr(specialty_unit, "name", "") or "").strip() or (program.name or "")
-    faculty = _ancestor_named(group, "faculty") if group is not None else ""
-    if not faculty:
-        specialty_unit = getattr(program, "specialty_unit", None)
-        faculty = _ancestor_named(specialty_unit, "faculty") if specialty_unit is not None else ""
+    # Struktur adları (ixtisas/fakültə) `parent` zənciri ilə tapılır — zəncirin
+    # `select_related`-dən kənar pillələri hər tələbə üçün təkrar sorğu olardı;
+    # (qrup, proqram) cütü üzrə bir dəfə hesablanır (F-03).
+    names_key = ("names", getattr(group, "id", None), getattr(program, "id", None))
+    if names_key not in rows_cache:
+        specialty = _ancestor_named(group, "specialty") if group is not None else ""
+        if not specialty:
+            specialty_unit = getattr(program, "specialty_unit", None)
+            specialty = (getattr(specialty_unit, "name", "") or "").strip() or (program.name or "")
+        faculty = _ancestor_named(group, "faculty") if group is not None else ""
+        if not faculty:
+            specialty_unit = getattr(program, "specialty_unit", None)
+            faculty = _ancestor_named(specialty_unit, "faculty") if specialty_unit is not None else ""
+        rows_cache[names_key] = (specialty, faculty)
+    specialty, faculty = rows_cache[names_key]
 
     student = record.student
     student_name = (student.get_full_name() or "").strip() or student.username
@@ -333,8 +365,20 @@ def build_group_document(organization, group, *, record_id=None) -> tuple[str, b
     """(fayl adı, DOCX baytları, tələbə sayı) — bütöv qrup və ya tək tələbə üçün."""
     period = current_period(organization)
     records = group_records(organization, group, record_id=record_id)
-    cache: dict = {}
-    plans = [build_student_plan(organization, record, period=period, teachers_cache=cache) for record in records]
+    teachers_cache: dict = {}
+    seasons_cache: dict = {}
+    rows_cache: dict = {}
+    plans = [
+        build_student_plan(
+            organization,
+            record,
+            period=period,
+            teachers_cache=teachers_cache,
+            seasons_cache=seasons_cache,
+            rows_cache=rows_cache,
+        )
+        for record in records
+    ]
     safe_group = re.sub(r"[^\w\-]+", "-", group.name or "qrup", flags=re.U).strip("-") or "qrup"
     if record_id and plans:
         safe_student = re.sub(r"[^\w\-]+", "-", plans[0].student, flags=re.U).strip("-")
