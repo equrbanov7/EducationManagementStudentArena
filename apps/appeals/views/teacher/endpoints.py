@@ -345,7 +345,9 @@ def review_appeal(request, appeal_id):
 
         # Validasiya səhvi
         if is_fragment:
-            return JsonResponse({"ok": False, "error": str(error_message)}, status=200)
+            # F-10 (2026-09-13): validasiya xətası 400 (əvvəl açıq `status=200`);
+            # `appeals_sections.js` cavabı statusdan asılı olmayaraq `r.json()` oxuyur.
+            return JsonResponse({"ok": False, "error": str(error_message)}, status=400)
         messages.error(request, error_message)
         return redirect(dashboard_url)
 

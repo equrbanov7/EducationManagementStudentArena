@@ -98,7 +98,14 @@ def _check(request, organization, data):
     period = _period(organization, data)
     cleaned, errors = schedule_editor.parse_cell(data, organization=organization)
     if errors:
-        return JsonResponse({"ok": False, "errors": errors, "conflicts": [], "suggestions": []})
+        # F-10 (2026-09-13): validasiya xətası 400. `schedule_editor.js` `runCheck`
+        # reject-də `body.message` göstərir — ona görə ilk sahə xətası `message`
+        # kimi də ötürülür (`errors` lüğəti olduğu kimi qalır).
+        first_error = next((text for text in errors.values() if isinstance(text, str)), "")
+        return JsonResponse(
+            {"ok": False, "errors": errors, "message": first_error, "conflicts": [], "suggestions": []},
+            status=400,
+        )
     from django.contrib.auth import get_user_model
 
     from apps.registrar.models import Subject

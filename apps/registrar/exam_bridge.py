@@ -21,8 +21,7 @@ from __future__ import annotations
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db.models import Q
-
+from apps.registrar import absence_limit
 from apps.registrar import exam_eligibility as eligibility_gate
 from apps.registrar import finals, gradebook, services
 from apps.registrar.models import Enrollment, StudentAcademicRecord
@@ -71,7 +70,9 @@ def exam_eligibility(*, student, subject_id, organization):
     enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
     if enrollment is None:
         return {"linked": False, "barred": False, "reason": ""}
-    limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
+    # F-06 (2026-09-13): hədd tələbənin ÖZ proqramından — kabinetlə EYNİ mənbə
+    # (əvvəl açılış qrupunun ilk qeydi idi; qonaq tələbədə qapı ≠ kabinet).
+    limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
     # İdmançı-tələbə istisnası BURADA da ötürülür (2026-08-31 düşmən baxışı,
     # 3-cü bloker).  Bu, statusun sadəcə göstərildiyi ekran deyil — imtahana
     # start-ı BLOKLAYAN qapıdır (``exams.journal_sync.registrar_block_reason``).
@@ -149,38 +150,21 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
     return resolved
 
 
-def _absence_limit_percent_map(offerings) -> dict:
-    """``gradebook.absence_limit_percent_for``-un toplu güzgüsü: ``{offering_id: limit}`` (1 sorğu).
+def _absence_limit_percent_map(offerings, *, student=None, organization=None) -> dict:
+    """``absence_limit.limit_percent_for_enrollment``-in toplu güzgüsü: ``{offering_id: limit}`` (1 sorğu).
 
-    Tək variant açılışın (təşkilat, qrup) cütü üzrə İLK (pk) akademik qeydin
-    proqram həddini götürür; qeyd yoxdursa defolt.  ``group`` NULL ola bilər —
-    o halda tək variantdakı ``group=None`` → ``IS NULL`` şərti güzgülənir.
+    F-06 (2026-09-13): əvvəl açılışın (təşkilat, qrup) cütü üzrə İLK akademik
+    qeydin proqram həddi götürülürdü (qapı ≠ kabinet).  Toplu yol TƏK tələbə
+    üçündür, ona görə hədd tələbənin öz qeydindən bir dəfə oxunur və hər
+    açılışa eyni dəyər verilir — tək variantla (``exam_eligibility``) birə-bir.
     """
     offerings = list(offerings)
     if not offerings:
         return {}
-    org_ids = {o.organization_id for o in offerings}
-    group_ids = {o.group_id for o in offerings if o.group_id is not None}
-    group_q = Q(group_id__in=list(group_ids)) if group_ids else Q(pk__in=[])
-    if any(o.group_id is None for o in offerings):
-        group_q = group_q | Q(group_id__isnull=True)
-    records = (
-        StudentAcademicRecord.objects.filter(group_q, organization_id__in=list(org_ids))
-        .select_related("program")
-        .order_by("pk")
+    limit = absence_limit.limit_percent_for_student(
+        organization_id=getattr(organization, "pk", None), student_id=getattr(student, "pk", None)
     )
-    first_by_key = {}
-    for record in records:
-        first_by_key.setdefault((record.organization_id, record.group_id), record)
-    result = {}
-    for offering in offerings:
-        record = first_by_key.get((offering.organization_id, offering.group_id))
-        if record is not None and record.program:
-            result[offering.id] = record.program.absence_limit_percent
-        else:
-            # Tək variantla eyni fallback (gradebook-un öz sabiti) — dəyər ayrılmasın.
-            result[offering.id] = gradebook._DEFAULT_ABSENCE_LIMIT
-    return result
+    return {offering.id: limit for offering in offerings}
 
 
 def _athlete_exemption_map(enrollments) -> dict:
@@ -223,7 +207,7 @@ def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
     if not enrollments:
         return result
     offerings = {e.offering_id: e.offering for e in enrollments.values()}
-    limit_by_offering = _absence_limit_percent_map(offerings.values())
+    limit_by_offering = _absence_limit_percent_map(offerings.values(), student=student, organization=organization)
     exempt_by_key = _athlete_exemption_map(enrollments.values())
     hours_map = eligibility_gate.lesson_hours_map(
         [oid for oid, offering in offerings.items() if not (getattr(offering, "lesson_hours", 0) or 0)]
@@ -232,7 +216,7 @@ def exam_eligibility_batch(*, student, subject_ids, organization) -> dict:
     for subject_id, enrollment in enrollments.items():
         elig = services.get_exam_eligibility(
             enrollment=enrollment,
-            limit_percent=limit_by_offering.get(enrollment.offering_id, gradebook._DEFAULT_ABSENCE_LIMIT),
+            limit_percent=limit_by_offering.get(enrollment.offering_id, eligibility_gate.DEFAULT_LIMIT_PERCENT),
             exempt=exempt_by_key.get((enrollment.organization_id, enrollment.student_id), False),
             frozen=enrollment.offering_id in frozen_ids,
             hours_map=hours_map,

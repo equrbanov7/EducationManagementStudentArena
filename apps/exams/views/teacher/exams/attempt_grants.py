@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -12,7 +13,10 @@ from django.views.decorators.http import require_POST
 
 from apps.exams.models import StudentExamAttemptGrant, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.organizations.models import Membership
+from core.audit import log_action
 from core.cache import invalidate_profile_badge_counts_cache
+from core.constants import AuditAction
 
 from ._shared import (
     _get_editable_exam_or_404,
@@ -58,26 +62,19 @@ def grant_extra_attempt(request, slug):
     if not raw_student_id.isdigit():
         return _fail("invalid_student", 400)
 
-    student = User.objects.filter(id=int(raw_student_id), is_active=True).first()
+    # Giriş auditi 2026-09-13, F-10: əvvəl İSTƏNİLƏN aktiv ``User.id`` qəbul
+    # olunurdu — müəllim başqa tenantın istifadəçisinə grant yaza bilirdi.
+    # İndi tələbə imtahanın təşkilatının AKTİV üzvü olmalıdır; kənar id
+    # «tapılmadı» kimi cavablanır (mövcudluq sızmır).
+    student = _organization_student(exam, int(raw_student_id))
     if student is None:
         return _fail("student_not_found", 404)
 
-    try:
-        extra = int(request.POST.get("extra_attempts", 1))
-    except (TypeError, ValueError):
-        extra = 1
-    extra = max(1, min(extra, 10))
+    extra = _grant_amount(request)
 
-    grant, created = StudentExamAttemptGrant.objects.get_or_create(
-        exam=exam,
-        student=student,
-        defaults={"extra_attempts": extra, "granted_by": request.user},
-    )
-    if not created:
-        # Mövcud grant-a əlavə et (təkrar "ikinci şans" verilə bilər).
-        grant.extra_attempts = grant.extra_attempts + extra
-        grant.granted_by = request.user
-        grant.save(update_fields=["extra_attempts", "granted_by", "updated_at"])
+    # F-07: grant + audit bir tranzaksiyada (``ATOMIC_REQUESTS`` söndürülüdür).
+    with transaction.atomic():
+        grant = _upsert_grant(exam, student, extra, request.user, request=request)
 
     if _is_ajax(request):
         return JsonResponse(
@@ -104,17 +101,58 @@ def _grant_amount(request):
     return max(1, min(extra, 10))
 
 
-def _upsert_grant(exam, student, extra, granted_by):
-    """Bir tələbə üçün grant yarat/artır (individual endpoint ilə eyni semantika)."""
+def _organization_student(exam, student_id):
+    """İmtahanın təşkilatında AKTİV üzvlüyü olan aktiv istifadəçi, yoxsa ``None``."""
+    return (
+        User.objects.filter(id=student_id, is_active=True)
+        .filter(
+            Exists(
+                Membership.objects.filter(
+                    user_id=OuterRef("pk"),
+                    organization_id=exam.organization_id,
+                    is_active=True,
+                )
+            )
+        )
+        .first()
+    )
+
+
+def _upsert_grant(exam, student, extra, granted_by, *, request=None):
+    """Bir tələbə üçün grant yarat/artır (individual endpoint ilə eyni semantika) + audit.
+
+    Backend auditi 2026-09-13, F-03: əlavə cəhd hüququ (limitdən artıq cəhd)
+    heç bir audit izi buraxmırdı. İndi hər yaratma/artırma ``AuditLog``-a
+    yazılır (köhnə → yeni ``extra_attempts``, verən müəllim, imtahan, tələbə).
+    """
     grant, created = StudentExamAttemptGrant.objects.get_or_create(
         exam=exam,
         student=student,
         defaults={"extra_attempts": extra, "granted_by": granted_by},
     )
+    previous = 0 if created else grant.extra_attempts
     if not created:
         grant.extra_attempts = grant.extra_attempts + extra
         grant.granted_by = granted_by
         grant.save(update_fields=["extra_attempts", "granted_by", "updated_at"])
+    log_action(
+        AuditAction.CREATE if created else AuditAction.UPDATE,
+        user=granted_by,
+        organization=exam.organization,
+        obj=grant,
+        request=request,
+        resource_type="StudentExamAttemptGrant",
+        resource_id=str(grant.pk),
+        resource_repr=f"{exam.title} · {getattr(student, 'username', student.pk)}",
+        old_values={"extra_attempts": previous},
+        new_values={"extra_attempts": grant.extra_attempts},
+        changes={
+            "action": "exam_attempt_grant",
+            "exam_id": str(exam.pk),
+            "student_id": str(student.pk),
+            "granted": extra,
+        },
+    )
     return grant
 
 
@@ -158,7 +196,7 @@ def grant_extra_attempt_group(request, slug):
 
     with transaction.atomic():
         for student in students:
-            _upsert_grant(exam, student, extra, request.user)
+            _upsert_grant(exam, student, extra, request.user, request=request)
 
     # Badge sayğacını təzələ (qısa TTL onsuz da var; anlıq yenilənmə üçün best-effort).
     for student in students:

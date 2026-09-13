@@ -238,7 +238,9 @@ def _ai_summary_response(request, *, profile, presented):
     if not presented.get("has_data"):
         from django.utils.translation import pgettext
 
-        return JsonResponse({"ok": False, "error": pgettext("profile.statistics", "no_data_found")})
+        # F-10 (2026-09-13): «məlumat yoxdur» 200 deyil, 404 — JS (`ai_summary.js`)
+        # cavabı statusdan asılı olmayaraq `response.json()` ilə oxuyur.
+        return JsonResponse({"ok": False, "error": pgettext("profile.statistics", "no_data_found")}, status=404)
     payload = {
         "role": profile,
         "scope": presented.get("scope_label") or "",

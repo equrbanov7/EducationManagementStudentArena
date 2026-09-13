@@ -5,6 +5,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -41,49 +42,52 @@ def review_post(request, post_id):
         messages.error(request, pgettext("blog.moderation.message", "Düzəliş istəyi üçün feedback yazın."))
         return redirect(f"{reverse('accounts:profile')}?section=pending-post-approvals")
 
+    # F-07 (2026-09-13): status + qərar jurnalı bir tranzaksiyada.
     if action == "approve":
-        post.approval_status = Post.ApprovalStatus.APPROVED
-        post.is_published = True
-        post.approved_by = request.user
-        post.approved_at = timezone.now()
-        post.approval_feedback = feedback
-        post.save(
-            update_fields=[
-                "approval_status",
-                "is_published",
-                "approved_by",
-                "approved_at",
-                "approval_feedback",
-                "updated_at",
-            ]
-        )
-        PostApprovalLog.objects.create(
-            post=post,
-            reviewer=request.user,
-            action=PostApprovalLog.Action.APPROVED,
-            feedback=feedback,
-        )
+        with transaction.atomic():
+            post.approval_status = Post.ApprovalStatus.APPROVED
+            post.is_published = True
+            post.approved_by = request.user
+            post.approved_at = timezone.now()
+            post.approval_feedback = feedback
+            post.save(
+                update_fields=[
+                    "approval_status",
+                    "is_published",
+                    "approved_by",
+                    "approved_at",
+                    "approval_feedback",
+                    "updated_at",
+                ]
+            )
+            PostApprovalLog.objects.create(
+                post=post,
+                reviewer=request.user,
+                action=PostApprovalLog.Action.APPROVED,
+                feedback=feedback,
+            )
         messages.success(request, pgettext("blog.moderation.message", "Post təsdiqləndi və paylaşıldı."))
     else:
-        post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
-        post.is_published = False
-        post.approval_feedback = feedback
-        post.save(
-            update_fields=[
-                "approval_status",
-                "is_published",
-                "approved_by",
-                "approved_at",
-                "approval_feedback",
-                "updated_at",
-            ]
-        )
-        PostApprovalLog.objects.create(
-            post=post,
-            reviewer=request.user,
-            action=PostApprovalLog.Action.NEEDS_CHANGES,
-            feedback=feedback,
-        )
+        with transaction.atomic():
+            post.approval_status = Post.ApprovalStatus.NEEDS_CHANGES
+            post.is_published = False
+            post.approval_feedback = feedback
+            post.save(
+                update_fields=[
+                    "approval_status",
+                    "is_published",
+                    "approved_by",
+                    "approved_at",
+                    "approval_feedback",
+                    "updated_at",
+                ]
+            )
+            PostApprovalLog.objects.create(
+                post=post,
+                reviewer=request.user,
+                action=PostApprovalLog.Action.NEEDS_CHANGES,
+                feedback=feedback,
+            )
         messages.info(request, pgettext("blog.moderation.message", "Feedback göndərildi. Post düzəliş gözləyir."))
 
     next_url = (request.POST.get("next") or "").strip()
@@ -211,15 +215,19 @@ def teacher_moderate_post(request, post_id):
         return _redirect_next()
 
     if action == "reactivate":
-        post.is_published = True
-        post.save(update_fields=["is_published", "updated_at"])
+        # Backend auditi 2026-09-13, F-07: post statusu + qərar jurnalı bir
+        # tranzaksiyada (``ATOMIC_REQUESTS`` söndürülüdür; yarımçıq yazı olmasın).
+        # Bildiriş best-effort olduğu üçün QƏSDƏN blokdan kənardadır.
+        with transaction.atomic():
+            post.is_published = True
+            post.save(update_fields=["is_published", "updated_at"])
 
-        PostApprovalLog.objects.create(
-            post=post,
-            reviewer=request.user,
-            action=PostApprovalLog.Action.APPROVED,
-            feedback=feedback or "Post yenidən aktiv edildi.",
-        )
+            PostApprovalLog.objects.create(
+                post=post,
+                reviewer=request.user,
+                action=PostApprovalLog.Action.APPROVED,
+                feedback=feedback or "Post yenidən aktiv edildi.",
+            )
 
         try:
             from apps.notifications.models import NotificationType
@@ -258,16 +266,17 @@ def teacher_moderate_post(request, post_id):
         return _redirect_next()
 
     # action == "deactivate": postu gizlət, tələbəyə rəy göndər
-    post.is_published = False
-    post.approval_feedback = feedback
-    post.save(update_fields=["is_published", "approval_feedback", "updated_at"])
+    with transaction.atomic():  # F-07 (2026-09-13) — bax "reactivate" şərhi
+        post.is_published = False
+        post.approval_feedback = feedback
+        post.save(update_fields=["is_published", "approval_feedback", "updated_at"])
 
-    PostApprovalLog.objects.create(
-        post=post,
-        reviewer=request.user,
-        action=PostApprovalLog.Action.FEEDBACK,
-        feedback=feedback,
-    )
+        PostApprovalLog.objects.create(
+            post=post,
+            reviewer=request.user,
+            action=PostApprovalLog.Action.FEEDBACK,
+            feedback=feedback,
+        )
 
     try:
         from apps.notifications.models import NotificationType

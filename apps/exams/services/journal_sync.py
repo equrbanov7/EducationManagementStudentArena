@@ -25,7 +25,33 @@ from __future__ import annotations
 
 import logging
 
+from prometheus_client import Counter
+
 logger = logging.getLogger(__name__)
+
+# Backend auditi 2026-09-13, F-08: bal tavanı / faiz hesabında istisna SƏSSİZ
+# ``[]``/``0``/``None``-a çevrilirdi → cəhd jurnala YAZILMIR və heç bir iz
+# qalmırdı (Codex «bal itkisi» remediasiyası bu yolu əhatə etmirdi). Fail-soft
+# davranış QALIR (körpü imtahanı sındırmır), amma hər atlanan cəhd indi
+# ``logger.exception``/``warning`` + sayğacla görünür ki, monitorinq tutsun.
+journal_sync_skips_total = Counter(
+    "ems_journal_sync_skips_total",
+    "İmtahan cəhdinin jurnala yazılmadığı hallar (səbəb üzrə)",
+    ["reason"],
+)
+
+#: ``sync_attempt_to_journal``-ın sayılan atlama səbəbləri (sayğac etiketi).
+SKIP_NO_ORGANIZATION = "no_organization"
+SKIP_PERCENT_UNAVAILABLE = "percent_unavailable"
+SKIP_WRITE_FAILED = "write_failed"
+
+
+def _skip(reason, attempt, *, level=logging.WARNING):
+    """Atlamanı sayğaca və loga yaz; çağıran ``None`` qaytarır (fail-soft)."""
+    journal_sync_skips_total.labels(reason=reason).inc()
+    if level is not None:
+        logger.log(level, "journal_sync: attempt %s skipped (%s)", getattr(attempt, "id", "?"), reason)
+    return None
 
 
 def _test_attempt_percent(attempt):
@@ -60,32 +86,44 @@ def _written_attempt_max_score(attempt, exam):
 
     try:
         answers = list(attempt.answers.select_related("question"))
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 — F-08: fail-soft qalır, amma artıq səssiz deyil
+        logger.exception("journal_sync: answers could not be read for attempt %s", getattr(attempt, "id", "?"))
         answers = []
     if answers:
         return sum(answer_max_points(answer) for answer in answers)
     try:
         return sum(q.points for q in exam.questions.all()) or 0
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 — F-08
+        logger.exception("journal_sync: max score could not be computed for attempt %s", getattr(attempt, "id", "?"))
         return 0
+
+
+#: Yazılı cəhd hələ yoxlanmayıb — normal gözləmə (xəta deyil, sayılmır).
+PERCENT_PENDING = object()
 
 
 def _attempt_percent(attempt):
     """İmtahan cəhdinin normallaşdırılmış faizi (0–100) — test və ya yazılı.
 
-    Yazılı imtahan hələ yoxlanmayıbsa ``None`` (körpü gözləyir; manual-grading
-    bitəndə yenidən çağırılır)."""
+    Yazılı imtahan hələ yoxlanmayıbsa ``PERCENT_PENDING`` (körpü gözləyir;
+    manual-grading bitəndə yenidən çağırılır); faiz HESABLANA BİLMƏYƏNDƏ
+    ``None`` (F-08 — çağıran bunu sayğaca yazır)."""
     exam = attempt.exam
     if getattr(exam, "exam_type", None) == "test":
         try:
             return _test_attempt_percent(attempt)
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001 — F-08
+            logger.exception("journal_sync: test percent failed for attempt %s", getattr(attempt, "id", "?"))
             return None
     teacher_score = getattr(attempt, "teacher_score", None)
     if teacher_score is None:
-        return None
+        return PERCENT_PENDING
     max_score = _written_attempt_max_score(attempt, exam)
     if not max_score:
+        logger.warning(
+            "journal_sync: written attempt %s has no max score (delivered answers/bank empty) — not synced",
+            getattr(attempt, "id", "?"),
+        )
         return None
     return round(float(teacher_score) * 100.0 / float(max_score), 1)
 
@@ -115,17 +153,19 @@ def sync_attempt_to_journal(attempt, *, actor=None):
     exam = getattr(attempt, "exam", None)
     subject_id = getattr(exam, "subject_id", None)
     if not exam or not subject_id:
-        return None
+        return None  # jurnal fənninə bağlı deyil — gözlənilən no-op, sayılmır
     if getattr(attempt, "is_trial", False):
         return None  # müəllimin "Sınaq keç" cəhdi nəticələrə sayılmır
     organization = getattr(exam, "organization", None)
     if organization is None:
-        return None
+        return _skip(SKIP_NO_ORGANIZATION, attempt)
 
     is_expelled = getattr(attempt, "supervision_status", "") == "removed"
     percent = 0 if is_expelled else _attempt_percent(attempt)
+    if percent is PERCENT_PENDING:
+        return None  # yazılı imtahan hələ yoxlanılmayıb — körpü sonra yenidən çağırılır
     if percent is None:
-        return None  # yazılı imtahan hələ yoxlanılmayıb
+        return _skip(SKIP_PERCENT_UNAVAILABLE, attempt)  # F-08: faiz alınmadı → görünən atlama
 
     by_user = _resolve_actor(attempt, actor)
     try:
@@ -141,7 +181,7 @@ def sync_attempt_to_journal(attempt, *, actor=None):
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("journal_sync: failed to write attempt %s to FinalGrade", getattr(attempt, "id", "?"))
-        return None
+        return _skip(SKIP_WRITE_FAILED, attempt, level=None)
 
 
 def schedule_journal_sync(attempt, *, actor=None):

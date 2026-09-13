@@ -213,7 +213,13 @@ def present_student(m: dict) -> dict:
             delta = graded_periods[0]["avg_total"] - graded_periods[1]["avg_total"]
             sign = "+" if delta >= 0 else "−"
             note += " · " + t("əvvəlki semestrə görə %(delta)s bal") % {"delta": sign + fmt_dec(abs(delta), 1)}
-        tiles.append(tile("gpa", t("ÜOMG (GPA)"), fmt_dec(academic["gpa"], 2), note=note))
+        # Backend auditi 2026-09-13, F-05: bu kart 4.0 şkalalı, kredit-çəkili
+        # GPA-dır (`student.py`: Σ(GPA nöqtəsi×kredit)/Σkredit); transkriptdəki
+        # «Kumulyativ ÜOMG» isə 100 ballıq ortadır (`exam_eligibility.uomg_from`).
+        # Eyni «ÜOMG» adı ilə iki fərqli rəqəm göstərilirdi (3.50 vs 78.40) —
+        # düsturlar dəyişmir, ETİKET fərqləndirilir.
+        note = t("4.0 şkalası") + " · " + note
+        tiles.append(tile("gpa", t("Orta GPA (4.0)"), fmt_dec(academic["gpa"], 2), note=note))
     if academic["lesson_hours"]:
         tiles.append(
             tile(

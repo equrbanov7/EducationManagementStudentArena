@@ -22,6 +22,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from core.http_ids import parse_uuid
+
 from . import schedule_manage, schedule_manage_actions
 from .journal_access import schedule_slot_or_404 as _schedule_slot_or_404
 from .models import CourseOffering
@@ -69,8 +71,13 @@ def _handle_add_slot(request, organization, period):
     Sahə xətaları (gün, vaxt, təkrar slot, konflikt) SAXLAMADAN ƏVVƏL tutulur və
     `messages` ilə geri qaytarılır; heç bir yarımçıq slot yazılmır.
     """
+    # Backend auditi 2026-09-13, F-01: ``offering_id="abc"`` ``filter(pk=...)``-də
+    # ValidationError → 500 verirdi; pozuq UUID = «açılış tapılmadı» (404).
+    offering_pk = parse_uuid(request.POST.get("offering_id"))
+    if offering_pk is None:
+        raise Http404
     offering = (
-        CourseOffering.objects.filter(pk=request.POST.get("offering_id"), organization=organization)
+        CourseOffering.objects.filter(pk=offering_pk, organization=organization)
         .select_related("organization", "subject", "group", "period", "instructor")
         .first()
     )

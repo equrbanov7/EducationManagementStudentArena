@@ -66176,3 +66176,11 @@ msgstr "Этот адрес электронной почты использов
 
 msgid "delete_account_academic_history"
 msgstr "У этой учётной записи есть академическая история (зачисления, оценки, попытки экзаменов) — её нельзя удалить полностью, только архивировать."
+
+msgctxt "profile.statistics"
+msgid "Orta GPA (4.0)"
+msgstr "Средний GPA (4.0)"
+
+msgctxt "profile.statistics"
+msgid "4.0 şkalası"
+msgstr "шкала 4.0"

@@ -66122,3 +66122,11 @@ msgstr "This e-mail address cannot be used. Enter a different address."
 
 msgid "delete_account_academic_history"
 msgstr "This account has academic history (enrolments, grades, exam attempts) — it cannot be hard-deleted, only archived."
+
+msgctxt "profile.statistics"
+msgid "Orta GPA (4.0)"
+msgstr "Average GPA (4.0)"
+
+msgctxt "profile.statistics"
+msgid "4.0 şkalası"
+msgstr "4.0 scale"
