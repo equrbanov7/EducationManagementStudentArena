@@ -16,6 +16,19 @@ from ._sections.statistics import statistics_scope
 
 
 @login_required
+def _require_own_analytics(request, org):
+    """Şəxsi (müəllim/tələbə) statistika ixracı — dashboard ilə eyni qapı
+    (`analytics.view_own`, F-06 2026-09-14); açar yoxdursa 403."""
+    if org is None:
+        return
+    from django.core.exceptions import PermissionDenied
+
+    from core.permissions import request_has_permission
+
+    if not request_has_permission(request, "analytics.view_own"):
+        raise PermissionDenied
+
+
 def statistics_export_csv(request):
     """Export current statistics data as CSV."""
     import io
@@ -94,6 +107,7 @@ def statistics_export_csv(request):
                 compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
             )
     elif capabilities["is_teacher"]:
+        _require_own_analytics(request, org)
         stats = get_or_set_cached_statistics(
             role="teacher",
             scope_id=request.user.pk,
@@ -124,6 +138,7 @@ def statistics_export_csv(request):
                 ),
             )
         else:
+            _require_own_analytics(request, org)
             stats = get_or_set_cached_statistics(
                 role="student",
                 scope_id=request.user.pk,
