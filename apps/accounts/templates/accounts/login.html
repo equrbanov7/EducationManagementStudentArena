@@ -51,7 +51,7 @@
             </div>
         {% endif %}
 
-        <form method="post" class="auth-form" novalidate>
+        <form method="post" class="auth-form" novalidate data-clarity-mask="True">
             {% csrf_token %}
             {% if next %}
                 <input type="hidden" name="next" value="{{ next }}">

@@ -8,6 +8,7 @@ from django.urls import path
 from . import views
 from .views import academic_records as academic_records_views
 from .views import exam_score_import as exam_score_import_views
+from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
 app_name = "accounts"
 
@@ -74,6 +75,13 @@ urlpatterns = [
     # Profile
     path("profile/", views.user_profile, name="profile"),
     path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),
+    # Codex audit §7 (2026-09-13): ekranda görünən rol-aware göstəricilərin CSV-si
+    # (köhnə «Göndərişlər (CSV)» köhnə selector xülasəsini verir — ikisi də qalır).
+    path(
+        "profile/statistics/export-metrics-csv/",
+        statistics_export_metrics_views.statistics_export_metrics_csv,
+        name="statistics_export_metrics_csv",
+    ),
     # Staff iyerarxik akademik-qeyd icmalı ("Akademik qeydlər" profil bölməsi) —
     # cross-domain (registrar nəticələr + organizations strukturu) inteqrasiya
     # endpoint-ləri accounts-dadır (modul-sərhəd dövrünü önləmək üçün).
