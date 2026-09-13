@@ -323,9 +323,11 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         request,
         organization=organization,
         academic_year=academic_year or None,
-        # «sla» REAL status deyil — sorğuya ötürülsə heç nə uyğun gəlməzdi;
-        # süzgəc aşağıda, gözləmə müddəti hesablandıqdan sonra tətbiq olunur.
-        statuses=[status] if status and status != "sla" else None,
+        # «sla»/«missing» REAL status deyil — sorğuya ötürülsə heç nə uyğun
+        # gəlməzdi; süzgəc aşağıda tətbiq olunur. Audit 2026-09-13 (perf F-12
+        # yan tapıntısı): «missing» ötürüləndə dəst boşalır və sillabusu OLAN
+        # açılışlar da «sillabussuz» görünürdü, KPI-lar sıfırlanırdı.
+        statuses=[status] if status and status not in VIRTUAL_STATUS_KEYS else None,
         search=search,
         sort=sort if sort in SORT_LABELS else "recent",
     )
