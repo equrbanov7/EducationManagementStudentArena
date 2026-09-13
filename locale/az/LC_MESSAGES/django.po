@@ -65871,8 +65871,8 @@ msgid "tələbə"
 msgstr "tələbə"
 
 msgctxt "registrar.exam_score_entry"
-msgid "tələbə Tələbə № (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır."
-msgstr "tələbə Tələbə № (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır."
+msgid "tələbə «Tələbə №» (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır."
+msgstr "tələbə «Tələbə №» (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır."
 
 msgctxt "registrar.exam_score_entry"
 msgid "vərəq skanı"
