@@ -267,6 +267,11 @@ def _notify_teachers(task) -> int:
 def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None) -> dict:
     """Bölgünü təsdiqlə → ``distributed`` + offering sinxronu + bildirişlər."""
     ensure_can_distribute(actor, task.chair_id)
+    # Audit 2026-09-13 tests F-T1: təsdiq də eyni zəncir qapısından keçir —
+    # göndərilməmiş TŞ qaralaması burada da «distributed» ola bilməz.
+    from .workflow import ensure_distribution_stage
+
+    ensure_distribution_stage(task)
     # `APPROVED` — F2 zəncirinin çıxışı: dekanlıq təsdiqindən sonra kafedra
     # bölgüyə başlayır; heç bir təyinat edilməyibsə status hələ `approved`-dur.
     if task.status not in (

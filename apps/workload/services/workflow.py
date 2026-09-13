@@ -19,6 +19,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 
+from apps.organizations.public import user_scope_covers_unit
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
@@ -27,6 +28,7 @@ from .. import state_machine as sm
 from ..constants import (
     DEAN_SECOND_APPROVAL_ENABLED,
     PERM_APPROVE,
+    PERM_DISTRIBUTE,
     PERM_REVIEW,
     PERM_SUBMIT,
     REASON_MIN_LENGTH,
@@ -71,6 +73,17 @@ def ensure_can_approve(actor, faculty_id) -> None:
         raise WorkloadDenied("workload.approve_denied", "Bu fakültənin dilimini təsdiqləmək səlahiyyətiniz yoxdur.")
 
 
+def _draft_created_by_chair(task) -> bool:
+    """Qaralamanı kafedranın özü (yaradanın kafedra üzərində `workload.distribute`
+    əhatəsi var) yaradıbmı — F1-dən əvvəlki sənəd istisnası yalnız bu halda."""
+    creator = getattr(task, "created_by", None)
+    if creator is None or task.chair_id is None:
+        return False
+    if getattr(creator, "is_superuser", False):
+        return True
+    return bool(user_scope_covers_unit(creator, task.organization, task.chair_id, permission=PERM_DISTRIBUTE))
+
+
 def ensure_distribution_stage(task) -> None:
     """Kafedra bölgüsü YALNIZ zəncir keçiləndən sonra (plan §2/14).
 
@@ -78,7 +91,13 @@ def ensure_distribution_stage(task) -> None:
     yaratmışsa (``submitted_at`` boşdur) bölgü açıqdır. Sənəd bir dəfə
     göndərilibsə, ``approved``-dan əvvəl bölgü BAĞLIDIR.
     """
-    if task.status == TaskStatus.DRAFT and task.submitted_at is not None:
+    if task.status == TaskStatus.DRAFT and (task.submitted_at is not None or not _draft_created_by_chair(task)):
+        # Audit 2026-09-13 tests F-T1 (P1): istisna yalnız `submitted_at`-a
+        # baxırdı — tədris şöbəsinin yaratdığı, hələ GÖNDƏRİLMƏMİŞ qaralamanı
+        # kafedra müdiri bölüb «distributed» edir, `sync_offerings` açılış
+        # yaradırdı; koordinator vizası və dekan təsdiqi tam ötürülürdü.
+        # İndi «kafedra özü yaratmışsa» yaradanın kafedra üzərində
+        # `workload.distribute` əhatəsi ilə yoxlanır (fail-closed).
         raise WorkloadDenied(
             "workload.not_approved_yet",
             "Tapşırıq dekanlıq təsdiqindən keçməyib — bölgü açılmır.",
