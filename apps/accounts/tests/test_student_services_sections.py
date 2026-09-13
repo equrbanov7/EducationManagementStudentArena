@@ -474,6 +474,17 @@ class MovementStateMachineTest(StudentServicesBase):
         # Akademik qeyd qayıdır və giriş də sübutlu səthdən açılır → xəbərdarlıq yoxdur.
         self.assertEqual(response.json()["movement"]["access_notice"], "")
 
+    def test_reinstatement_into_the_same_group_is_allowed(self):
+        """Audit 2026-09-13 F-T2: xaric edilmiş tələbə öz köhnə qrupuna bərpa olunur."""
+        self._post_movement(kind="expulsion", target_group="", order_number="R-147")
+        self.record.refresh_from_db()
+        same_group = self.record.group_id
+        response = self._post_movement(kind="reinstatement", target_group=str(same_group), order_number="R-148")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, AcademicStatus.ENROLLED)
+        self.assertEqual(self.record.group_id, same_group)
+
     def test_form_change_updates_education_form(self):
         response = self._post_movement(
             kind="form_change", target_group="", target_form="part_time", order_number="R-146"
