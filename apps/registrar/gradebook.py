@@ -130,6 +130,15 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     if journal_is_locked(offering):
         return {"written": 0, "rejected": 0} if report else 0
 
+    # Codex audit §14 (2026-09-13): grid yazısı «oxu → yaz» naxışıdır (`existing`
+    # xəritəsi əvvəlcədən yüklənir). İki paralel yazı eyni xanaya gələndə ikinci
+    # `LessonMark` INSERT-i `uniq_lesson_enrollment_mark`-a çırpılıb bütün
+    # partiyanı 500 ilə çökdürürdü, eyni tələbənin qayıb saatı isə köhnə
+    # görüntüdən hesablanırdı. Açılış sətri `FOR UPDATE` ilə kilidlənir — eyni
+    # açılışın yazıları tranzaksiya səviyyəsində ardıcıllaşır (kilid sırası:
+    # açılış → qeydiyyat → xana; bax `correction_target_locks`).
+    type(offering).objects.select_for_update().filter(pk=offering.pk).exists()
+
     # Çağırış vaxtı idxal: `gradebook_lessons` bu moduldan idxal edir (dövr).
     from apps.registrar.gradebook_lessons import parse_lesson_score as _parse_score
 
@@ -181,12 +190,12 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
                 rejected += 1
                 continue
 
-        old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
+        old = grade_audit.mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
         old_status = mark.status if mark is not None and mark.pk else None
         old_score = mark.score if mark is not None and mark.pk else None
         if mark is None:
             mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
-        new = _mark_repr(status, score)
+        new = grade_audit.mark_repr(status, score)
         mark.status = status
         mark.score = score
         mark.entered_by = by_user
@@ -238,17 +247,6 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
 
         _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
     return {"written": written, "rejected": rejected} if report else written
-
-
-def _mark_repr(status, score) -> str:
-    """Compact attendance+score label for the audit trail (e.g. ``qb`` / ``iə 8``)."""
-    if status == AttendanceStatus.ABSENT:
-        att = "qb"
-    elif status == AttendanceStatus.EXCUSED:
-        att = "üq"  # üzrlü qayıb (rəsmi düzəliş yolu ilə)
-    else:
-        att = "iə"
-    return f"{att} {grade_audit.score_repr(score)}" if score is not None else att
 
 
 def recompute_absence_hours(*, enrollment):
