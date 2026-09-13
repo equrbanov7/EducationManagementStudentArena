@@ -4,7 +4,8 @@
 
 * :func:`can_edit_journal` — GİRİŞ + korrektor səlahiyyəti. Müəllim / org sahibi /
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
-* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim.
+* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim
+  VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14).
   Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
   is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
 * :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: YALNIZ müəllim,
@@ -98,8 +99,18 @@ def can_edit_journal(user, offering) -> bool:
     return offering.organization.owner_id == user.id
 
 
+#: Əhatəli YALNIZ-OXU jurnal girişi (audit 2026-09-13 `access` F-06, 2026-09-14).
+#: Açar reyestrdə var idi, amma kodda heç yerdə yoxlanmırdı — icazə redaktorunda
+#: «yalançı düymə». İndi: bu açarı daşıyan (ORGANIZATION rolu → org-wide, UNIT
+#: rolu → ``scope_unit`` alt-ağacı) aktor əhatəsindəki açılışın jurnalını OXUYA
+#: bilir; yazma hüququ vermir (``is_direct_editor`` dəyişməyib). Heç bir default
+#: şablona əlavə edilmir — tenant istəsə redaktordan verir (fail-closed).
+VIEW_PERMISSION = "journal.view"
+
+
 def can_observe_journal(user, offering) -> bool:
-    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim.
+    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim və ya
+    əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı.
 
     QƏSDƏN ``can_edit_journal``-dan AYRIDIR. Onu genişləndirsəydik köhnə müəllim
     ``is_direct_editor`` olmadan da POST səthlərinə (dərs əlavəsi, bal yazma)
@@ -111,7 +122,11 @@ def can_observe_journal(user, offering) -> bool:
 
     from .handover import is_handover_observer
 
-    return is_handover_observer(user, offering)
+    if is_handover_observer(user, offering):
+        return True
+    from .journal_scope import offering_in_actor_scope
+
+    return offering_in_actor_scope(user, offering.organization, offering, permission=VIEW_PERMISSION)
 
 
 def is_direct_editor(user, offering) -> bool:

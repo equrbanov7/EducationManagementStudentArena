@@ -2,6 +2,7 @@
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
@@ -19,10 +20,12 @@ def create_question(request):
     if request.method == "POST":
         form = QuestionForm(request.POST)
         if form.is_valid():
-            question = form.save(commit=False)
-            question.author = request.user
-            question.save()
-            form.save_m2m()  # visible_users üçün lazımdır
+            # Audit 2026-09-13 backend F-07 (2026-09-14): sual + `visible_users` M2M birlikdə.
+            with transaction.atomic():
+                question = form.save(commit=False)
+                question.author = request.user
+                question.save()
+                form.save_m2m()  # visible_users üçün lazımdır
             return redirect("my_questions")
     else:
         form = QuestionForm()

@@ -7,6 +7,7 @@ from django.urls import path
 
 from . import views
 from .views import academic_records as academic_records_views
+from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
@@ -216,6 +217,13 @@ urlpatterns = [
         "imtahan-bali/idxal/tetbiq/",
         exam_score_import_views.exam_score_import_apply,
         name="exam_score_import_apply",
+    ),
+    # 2026-09-14 (W2 `w2paper`) — «Dəyişən nəticələr» (apellyasiya / sənədli
+    # düzəliş) CSV ixracı; bölmənin `?ese_view=changes` cədvəli ilə eyni filtrlər.
+    path(
+        "imtahan-bali/deyisen-neticeler.csv",
+        exam_score_changes_views.exam_score_changes_export,
+        name="exam_score_changes_export",
     ),
     # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
     path("jurnal-baglama/", views.journal_close, name="journal_close"),

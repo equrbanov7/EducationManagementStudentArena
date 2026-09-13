@@ -68356,3 +68356,7 @@ msgstr "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil."
 msgctxt "upload.security.error"
 msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
 msgstr "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
+
+msgctxt "core.rate_limit"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."

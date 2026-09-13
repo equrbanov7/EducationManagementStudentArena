@@ -38,6 +38,9 @@ DEFAULT_ROLES = {
                 "exam.*",
                 *RIM_ACCOUNT_PERMISSIONS,
                 "analytics.view_all",
+                # Audit 2026-09-13 F-06 (2026-09-14): ayarlar səhifəsi səviyyə (≥90)
+                # əvəzinə `org.settings` açarı ilə qapılanır — bu rol (90) əvvəl də girirdi.
+                "org.settings",
             ],
             "description": "Deputy director with broad permissions",
         },

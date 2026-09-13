@@ -21,6 +21,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -246,12 +247,17 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         added_count = 0
 
         owner_org = get_request_organization(request)
-        for uid in user_ids:
-            try:
-                user_qs = User.objects.filter(id=uid)
-                if owner_org is not None:
-                    user_qs = user_qs.filter(profile__organization=owner_org)
-                user = user_qs.get()
+        # Audit 2026-09-13 backend F-07 (2026-09-14): toplu üzvlük + bildirişlər bir
+        # tranzaksiyada — ortada sınsa yarım siyahı qalmasın (hamısı və ya heç biri).
+        with transaction.atomic():
+            for uid in user_ids:
+                try:
+                    user_qs = User.objects.filter(id=uid)
+                    if owner_org is not None:
+                        user_qs = user_qs.filter(profile__organization=owner_org)
+                    user = user_qs.get()
+                except User.DoesNotExist:
+                    continue
                 membership, created = CourseMembership.objects.get_or_create(
                     course=course,
                     user=user,
@@ -267,8 +273,6 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                     created=created,
                     previous_group_name=previous_group_name,
                 )
-            except User.DoesNotExist:
-                continue
 
         return JsonResponse(
             {
@@ -320,25 +324,25 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
 
             added_count = 0
 
-            for group in groups:
-                students = group.students.all()
-
-                for student in students:
-                    membership, created = CourseMembership.objects.get_or_create(
-                        course=course,
-                        user=student,
-                        defaults={"role": "student", "group_name": group.name},
-                    )
-                    previous_group_name = membership.group_name or ""
-                    if created:
-                        added_count += 1
-                        notify_course_membership_assigned(
-                            membership=membership,
-                            created=True,
-                            previous_group_name=previous_group_name,
+            # Audit 2026-09-13 backend F-07 (2026-09-14): qrupların toplu əlavəsi bir
+            # tranzaksiyada — ortada sınsa yarım qrup qalmasın (istisna `except`-ə çıxır → 500).
+            with transaction.atomic():
+                for group in groups:
+                    for student in group.students.all():
+                        membership, created = CourseMembership.objects.get_or_create(
+                            course=course,
+                            user=student,
+                            defaults={"role": "student", "group_name": group.name},
                         )
-                    else:
-                        if not (membership.group_name or "").strip():
+                        previous_group_name = membership.group_name or ""
+                        if created:
+                            added_count += 1
+                            notify_course_membership_assigned(
+                                membership=membership,
+                                created=True,
+                                previous_group_name=previous_group_name,
+                            )
+                        elif not (membership.group_name or "").strip():
                             membership.group_name = group.name
                             membership.save(update_fields=["group_name"])
                             notify_course_membership_assigned(

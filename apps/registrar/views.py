@@ -12,9 +12,11 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from . import finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
@@ -114,8 +116,6 @@ def journal_detail(request, offering_id):
 
     import datetime as _dt
 
-    from django.utils import timezone as _tz
-
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
@@ -146,8 +146,7 @@ def journal_detail(request, offering_id):
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
-    needs_coursework = active_tab in {"kurs-isi", "yekun"}
-    needs_finals = active_tab == "yekun"
+    needs_coursework, needs_finals = active_tab in {"kurs-isi", "yekun"}, active_tab == "yekun"
     coursework_rows = journal_extras.get_course_work_rows(offering) if needs_coursework else []
     finals_data = finals.get_offering_results(offering=offering) if needs_finals else {"rows": []}
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
@@ -169,7 +168,7 @@ def journal_detail(request, offering_id):
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
         row["attempts"] = attempts_map.get(row["enrollment"].id, [])
 
-    today = _tz.localdate()
+    today = timezone.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
     rooms = lesson_rooms.lesson_room_choices(offering)
     syllabus_gate = journal_policy.syllabus_gate(offering)
@@ -299,10 +298,8 @@ def rubric_grade_view(request, offering_id, component_id):
             if not key.startswith("rpoints__"):
                 continue
             parts = key.split("__")
-            if len(parts) != 3:
-                continue
-            _prefix, criterion_id, enrollment_id = parts
-            entries.append({"criterion_id": criterion_id, "enrollment_id": enrollment_id, "points": raw})
+            if len(parts) == 3:
+                entries.append({"criterion_id": parts[1], "enrollment_id": parts[2], "points": raw})
         try:
             written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
         except ValidationError as exc:
@@ -374,6 +371,7 @@ def _can_write_finals(user, offering) -> bool:
     return scope.has_structure_access
 
 
+@transaction.atomic  # F-07 (2026-09-14): sətir-sətir servis çağırışları BİR tranzaksiyada — yarımçıq toplu yazı olmasın
 def _handle_save_finals(request, offering):
     """Yekun imtahan/təkrar balı (exam__/resit__) + bonus-rəy (bonus__/fcomment__).
 

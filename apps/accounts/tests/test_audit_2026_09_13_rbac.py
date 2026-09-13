@@ -213,27 +213,14 @@ class MemberRemovalGateTest(_Base):
 _KEY_PATTERN = re.compile(r"""["']([a-z_]+\.[a-z_]+(?:\.[a-z_]+)?)["']""")
 _SKIP_DIRS = {"tests", "migrations", "__pycache__", "node_modules", "static", "venv", ".venv", "locale", "docs"}
 
-# F-06 — reyestrdə olub kodda HEÇ YERDƏ istinad olunmayan açarlar (2026-09-13
-# vəziyyəti). İcazə redaktoru bu açarları göstərir, amma verib/almaq heç nəyi
-# dəyişmir. Siyahı RATCHET-dir: yeni «ölü» açar → test qırılır (ya qapıya bağla,
-# ya bura səbəblə əlavə et); açar qapıya bağlananda buradan SİLİNMƏLİDİR.
-KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset(
-    {
-        "analytics.view_own",
-        "audit.export",
-        "grade.override",
-        "journal.view",
-        "org.delete",
-        "org.edit",
-        "org.settings",
-        "qa.flag",
-        "qa.review",
-        "qa.view",
-        "role.create",
-        "role.delete",
-        "role.edit",
-    }
-)
+# F-06 — reyestrdə olub kodda HEÇ YERDƏ istinad olunmayan açarlar. Siyahı
+# RATCHET-dir: yeni «ölü» açar → test qırılır (ya qapıya bağla, ya bura səbəblə
+# əlavə et); açar qapıya bağlananda buradan SİLİNMƏLİDİR. 2026-09-14 (dalğa 2,
+# hesabat §27): 13 açarın hamısı ya qapıya bağlandı (`org.edit`, `org.settings`,
+# `role.edit`, `audit.export`, `journal.view`, `analytics.view_own`), ya da
+# kataloqdan çıxarıldı (`org.delete`, `role.create`, `role.delete`,
+# `grade.override`, `qa.*` — miqrasiya organizations.0051) → siyahı BOŞDUR.
+KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset()
 
 
 def _referenced_permission_keys(root, catalog):

@@ -12,6 +12,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from core.http_ids import parse_uuid
+from core.write_rate_limit import score_write_rate_limited
 
 from ..constants import TaskStatus
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
@@ -309,6 +310,7 @@ def row_delete(request) -> JsonResponse:
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("workload_assign")  # F-15 (2026-09-14): istifadəçi başına yazı vedrəsi
 def assign(request) -> JsonResponse:
     organization = active_organization(request)
     if organization is None:

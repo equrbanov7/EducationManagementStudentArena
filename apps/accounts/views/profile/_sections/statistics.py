@@ -68,7 +68,7 @@ def _read_filters(request, *, is_superadmin: bool) -> dict:
     return filters
 
 
-def _resolve_profile(capabilities, *, organization, scope) -> str:
+def _resolve_profile(capabilities, *, organization, scope, has_own: bool = True) -> str:
     """Rol → statistika profili (prioritet sırası ilə).
 
     * superadmin → platforma;
@@ -81,6 +81,11 @@ def _resolve_profile(capabilities, *, organization, scope) -> str:
     * analitika əhatəsi olan digər heyət (HR) → `org_admin`;
     * tələbə / adi üzv / məzun → `student` (şəxsi mənzərə);
     * əhatəsiz heyət → `restricted` (boş vəziyyət; tələbə rəqəmi GÖSTƏRİLMİR).
+
+    ŞƏXSİ profillər (`teacher`, `student`) təşkilat kontekstində `analytics.view_own`
+    açarını TƏLƏB EDİR (`has_own`; audit 2026-09-13 `access` F-06, 2026-09-14) —
+    açar reyestrdə var idi, kodda yoxlanmırdı. Bütün şablonlarda müəllim / assistent /
+    tələbə / baş tələbə / üzv dəsti bu açarı daşıyır; alınarsa profil `restricted`.
     """
     if capabilities["is_superadmin"]:
         return "superadmin"
@@ -93,9 +98,9 @@ def _resolve_profile(capabilities, *, organization, scope) -> str:
     if capabilities.get("is_tutor") and scope.is_unit_scoped:
         return "unit_manager"
     if capabilities["is_teacher"]:
-        return "teacher"
+        return "teacher" if has_own else "restricted"
     if capabilities["is_student"] or capabilities.get("can_view_student_assignments"):
-        return "student"
+        return "student" if has_own else "restricted"
     if scope.is_org_wide:
         return "org_admin"
     if scope.is_unit_scoped:
@@ -278,9 +283,14 @@ def build_statistics_section(request, *, capabilities):
     filters = _read_filters(request, is_superadmin=capabilities["is_superadmin"])
 
     scope = None
+    has_own = True
     if stat_org is not None and not capabilities["is_superadmin"]:
+        from core.permissions import request_has_permission
+
         scope = statistics_scope(request, stat_org)
-    profile = _resolve_profile(capabilities, organization=stat_org, scope=scope)
+        # Şəxsi profil açarı — bax `_resolve_profile` (F-06, 2026-09-14).
+        has_own = request_has_permission(request, "analytics.view_own")
+    profile = _resolve_profile(capabilities, organization=stat_org, scope=scope, has_own=has_own)
 
     presented, courses_options, org_options = _compute_dashboard(
         request,

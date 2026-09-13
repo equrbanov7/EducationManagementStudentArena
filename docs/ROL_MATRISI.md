@@ -69,7 +69,7 @@ menyuda görünmür, ya da açılanda 500 verir.  Süpürgə həmin fərqi bir k
 | `exam-center-pins` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
 | `exam-center-stats` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
 | `exam-chance` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `exam-score-entry` | · | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
+| `exam-score-entry` | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
 | `groups` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | ✅ | · | · |
 | `journal-close` | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · |
 | `kollokvium-windows` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
@@ -191,6 +191,31 @@ heç bir rol üzvlüyünə bağlı deyil. Bu, gözlənilən haldır — nasazlı
   `workload-distribution` / `my-workload`** — bu ölçmədə bütün müvafiq
   rollarda gözlənilən şəkildə görünür (bax cədvəl); bunlar sabit, öncədən
   mövcud bölmələrdir.
+
+## Açar-qapı dəyişiklikləri — 2026-09-14 (audit 2026-09-13 `access` F-06)
+
+Cədvəl bölmə GÖRÜNÜRLÜYÜNÜ ölçür; aşağıdakı dəyişikliklər bölmə siyahısını
+dəyişmir, bölmənin İÇİNDƏKİ əməlləri açarla qapıya bağlayır (əvvəl bu açarlar
+icazə redaktorunda «yalançı düymə» idi — verib/almaq heç nəyi dəyişmirdi):
+
+* **`permission-editor`** (`ikt_rehber`, `rector`, `chair_head`, `dean` görür) —
+  rolun icazə dəstini DƏYİŞMƏK (POST) üçün artıq `role.edit` lazımdır (`role.*`
+  və `*` əhatə edir); baxış `role.assign`-da qalır. `hr` bölməni onsuz da
+  görmürdü; URL ilə POST-u indi rədd olunur.
+* **`audit-log`** — «CSV ixrac» düyməsi və `audit:export` üçün `audit.export`
+  lazımdır; `audit.view` daşıyan bütün şablonlara (prorektor, imtahan mərkəzi
+  rəhbəri/işçisi, RİM rəhbəri/əməkdaşı, HR, Tədris şöbəsi rəhbəri, qəyyum) cüt
+  verilib, mövcud rollara miqrasiya 0051 əkir.
+* **Təşkilat ayarları** (`organizations:settings`, kabinet bölməsi deyil) —
+  səviyyə (≥90) + `org.settings`; POST üçün əlavə `org.edit`.
+* **`my-journal` / jurnal detalı** — `journal.view` daşıyan rol əhatəsindəki
+  jurnalları YALNIZ-OXU açır və siyahıda görür (heç bir şablona default verilmir).
+* **`statistics`** — müəllim/tələbə şəxsi profili `analytics.view_own` tələb edir
+  (bütün şablonlarda var); alınarsa `restricted` boş vəziyyət.
+* Kataloqdan ÇIXARILDI (funksiya yoxdur): `org.delete`, `role.create`,
+  `role.delete`, `grade.override` (= `journal.correct`), `qa.view/review/flag`.
+  RİM əməkdaşı, imtahan mərkəzi rəhbəri/işçisi və RİM rəhbəri şablonlarından
+  `qa.*` silindi — bu rolların gördüyü bölmələr dəyişmir (QA bölməsi yox idi).
 
 ## Tələlər (skriptdə həll olunub — silməyin)
 

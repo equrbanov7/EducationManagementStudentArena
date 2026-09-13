@@ -15,6 +15,7 @@ from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from core.http_ids import parse_int
 
 from ._helpers import (
     _append_navigation_query,
@@ -164,10 +165,10 @@ def _apply_question_bank_post(request, exam, navigation_query):
     işlədir və xəta cavabında geri alır (F-07).
     """
     # 1. Silinməli olan blokları silirik
-    deleted_ids = request.POST.get("deleted_block_ids", "").split(",")
-    for d_id in deleted_ids:
-        if d_id.strip():
-            QuestionBlock.objects.filter(id=d_id, exam=exam).delete()
+    # F-01 (2026-09-14): pozuq id («abc») sadəcə ötürülür (əvvəl `ValueError` → 500, atomic geri alırdı).
+    deleted_ids = [parse_int(d_id) for d_id in request.POST.get("deleted_block_ids", "").split(",")]
+    if any(d_id is not None for d_id in deleted_ids):
+        QuestionBlock.objects.filter(id__in=[d_id for d_id in deleted_ids if d_id is not None], exam=exam).delete()
 
     # 2. Ümumi sual sayını yenilə
     random_count = _optional_non_negative_int(request.POST.get("random_question_count"))

@@ -56,6 +56,8 @@ TEACHING_OFFICE_ROLES = [
             # Rəhbərə xas: bölmə rəhbərinin təyini (səbəb audit-ə yazılır).
             "unit.assign_head",
             "audit.view",
+            # CSV ixracı `audit.export` ilə (audit 2026-09-13 F-06 / 2026-09-14).
+            "audit.export",
         ],
         "description": "Teaching office head — owner of the structure tree and the academic catalogue",
     },

@@ -57,7 +57,8 @@ class AuditLogSectionBaseTest(Stage2BaseTest):
     def setUpTestData(cls):
         super().setUpTestData()
         role = cls.roles[VIEWER]
-        role.permissions = [*role.permissions, "audit.view"]
+        # `audit.export` (2026-09-14, audit F-06): CSV ixracı artıq ayrıca açarla qapılanır.
+        role.permissions = [*role.permissions, "audit.view", "audit.export"]
         role.save(update_fields=["permissions"])
 
         cls.other_owner = User.objects.create_user("ds2_other_owner", "ds2_other_owner@qku.edu.az", PASSWORD)

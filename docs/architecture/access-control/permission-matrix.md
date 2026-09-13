@@ -33,15 +33,36 @@ Qeyd: `superadmin`, `org_owner`, `org_admin`, `assistant_teacher` sütunları `P
 
 | Category | Permissions |
 | --- | --- |
-| organization | org.view, org.edit, org.settings, org.manage_members, org.admin.assign, org.owner.assign, org.delete |
+| organization | org.view, org.edit, org.settings, org.manage_members, org.admin.assign, org.owner.assign |
 | structure | unit.view, unit.create, unit.edit, unit.delete |
 | members | member.view, member.invite, member.edit, member.remove, member.student_manage |
-| roles | role.view, role.create, role.edit, role.assign, role.delete |
+| roles | role.view, role.edit, role.assign |
 | courses | course.view, course.create, course.edit, course.delete, assignment.delete, project.delete, lab.delete |
-| grading | grade.view, grade.input, grade.publish, grade.override |
+| grading | grade.view, grade.input, grade.publish |
 | exams | exam.view, exam.create, exam.edit, exam.manage, exam.host, exam.delete |
 | appeal | appeal.create, appeal.respond, appeal.decide |
 | analytics | analytics.view_own, analytics.view_unit, analytics.view_all |
-| qa | qa.view, qa.review, qa.flag |
 | audit | audit.view, audit.export |
 
+## Kataloq drift-i — 2026-09-14 (audit 2026-09-13 `access` F-06, hesabat §27)
+
+Reyestrdə olub kodda heç yerdə yoxlanmayan 13 açar («yalançı düymələr»):
+
+| Açar | Qərar | Qapı / mənbə |
+| --- | --- | --- |
+| `org.settings` | bağlandı | `organizations:settings` səhifəsi — səviyyə (≥90) + açar (`views/shared/_helpers._can_manage_org_settings`) |
+| `org.edit` | bağlandı | eyni səhifənin POST-u (məlumat dəyişikliyi) |
+| `role.edit` | bağlandı | icazə redaktoru POST-u (`accounts/views/roles/permissions.py`); baxış `role.assign`-da qalır |
+| `audit.export` | bağlandı | `audit:export` CSV (`audit/views.can_export_audit`); açar yoxdursa düymə gizlənir |
+| `journal.view` | bağlandı | əhatəli YALNIZ-OXU jurnal girişi (`registrar/journal_access.can_observe_journal`, siyahı `journal_scope.journal_view_q`) |
+| `analytics.view_own` | bağlandı | «Statistika» şəxsi profili (`teacher` / `student`), yoxdursa `restricted` |
+| `org.delete` | çıxarıldı | tenant səviyyəsində təşkilat silmə/arxiv əməli yoxdur (superadmin paneli açarsızdır) |
+| `role.create`, `role.delete` | çıxarıldı | xüsusi rol CRUD-u yoxdur (rollar şablondan seed olunur) |
+| `grade.override` | çıxarıldı | `journal.correct`-in dublikatı (sahibin qərarı: sənədli düzəliş açarı təkdir) |
+| `qa.view`, `qa.review`, `qa.flag` | çıxarıldı | keyfiyyət modulu / modeli / view-u yoxdur (`qa.*` wildcard-ı da şablonlardan silindi) |
+
+Miqrasiya `organizations.0051_permission_catalog_drift`: çıxarılan açarları saxlanılan rollardan silir;
+`audit.view` daşıyan hər rola `audit.export`, `level ≥ 90` (wildcard-sız) rollara `org.settings` + `org.edit` əkir —
+mövcud tenantlarda heç bir rol kilidlənmir. Şablonlar: `vice_rector` / `ikt_rehber` / `deputy_director` → `org.settings`;
+`audit.view` daşıyan 8 şablon → `audit.export`. CI qoruyucusu: `apps/accounts/tests/test_audit_2026_09_13_rbac.py::PermissionCatalogDriftTest`
+(pin siyahısı boşdur), `apps/organizations/tests/test_w2_rbac_catalog.py`.

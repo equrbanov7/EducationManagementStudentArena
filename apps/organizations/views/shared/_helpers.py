@@ -90,12 +90,22 @@ def _can_view_role_matrix(user, organization) -> bool:
     İndi tələb konkret açardır: ``role.view`` (HR, rektor/owner wildcard ilə).
     Superadmin və təşkilat sahibi istisnadır.
     """
-    from core.permissions import has_permission
-
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     if getattr(organization, "owner_id", None) == getattr(user, "id", None):
         return True
+
+    return _user_holds_org_permission(user, organization, "role.view")
+
+
+def _user_holds_org_permission(user, organization, permission) -> bool:
+    """URL-dəki `organization`-da aktiv üzvlüklərin BİRLƏŞMİŞ dəstində açar varmı.
+
+    QƏSDƏN `request.org_permissions`-dan DEYİL: o, AKTİV təşkilata aiddir, slug-lu
+    səhifələr isə URL-dəki təşkilata (audit `access` F-07 dərsi). Superadmin və
+    sahib istisnası çağıranın öhdəsindədir (`_can_view_role_matrix` naxışı).
+    """
+    from core.permissions import has_permission
 
     permissions: set[str] = set()
     for membership in user.memberships.filter(
@@ -104,7 +114,30 @@ def _can_view_role_matrix(user, organization) -> bool:
         role__is_active=True,
     ).select_related("role"):
         permissions.update(membership.role.permissions or [])
-    return has_permission(list(permissions), "role.view")
+    return has_permission(list(permissions), permission)
+
+
+def _can_manage_org_settings(user, organization, *, write: bool = False) -> bool:
+    """Təşkilat ayarları səhifəsi — audit 2026-09-13 `access` F-06 (2026-09-14).
+
+    Əvvəl qapı yalnız SƏVİYYƏ idi (superadmin / sahib / `role.level >= 90`), yəni
+    reyestrdəki `org.settings` və `org.edit` açarları icazə redaktorunda «yalançı
+    düymə» idi. İndi səviyyə qapısı QALIR və üstünə açar tələb olunur: səhifəni
+    açmaq üçün `org.settings`, POST (məlumatı dəyişmək) üçün əlavə `org.edit`.
+    Şablonlar (`vice_rector`, `ikt_rehber`, `deputy_director`) hər iki açarı
+    daşıyır, miqrasiya 0051 mövcud ≥90 rollara əkir — heç kim kilidlənmir;
+    tenant istəsə redaktordan geri alır (fail-closed).
+    """
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    if getattr(organization, "owner_id", None) == getattr(user, "id", None):
+        return True
+    has_admin = user.memberships.filter(
+        organization=organization, organization__status="active", role__level__gte=90, is_active=True
+    ).exists()
+    if not has_admin or not _user_holds_org_permission(user, organization, "org.settings"):
+        return False
+    return not write or _user_holds_org_permission(user, organization, "org.edit")
 
 
 def _has_org_permission(request, permission):

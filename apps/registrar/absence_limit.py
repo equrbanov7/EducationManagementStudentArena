@@ -18,13 +18,21 @@ Bu modul hər iki tərəfin çağırdığı ORTAQ resolver-dir: hədd YALNIZ tə
 öz qeydindən gəlir. Kabinetlə eyni seçim qaydası saxlanılır — (təşkilat,
 tələbə) üzrə İLK (pk) qeyd (``public.py``-dakı ``.first()`` ilə birə-bir).
 
-``gradebook.absence_limit_percent_for(offering)`` müəllim qridi üçün qalır
-(açılış-səviyyəli «icazəli saat» sütunu); imtahan qapısı və tələbə
-səthləri artıq onu çağırmır.
+Dalğa 2 (2026-09-14, hesabat §27 / backend F-06 qalıqları): qalan dörd səth də
+buraya bağlandı — ``finals.compute_final_result`` (tək və toplu yol),
+``journal_extras.get_final_breakdown`` («Yekun» tabı) və müəllim qridi
+(``gradebook.get_offering_journal``) sətir-sətir TƏLƏBƏNİN ÖZ həddi ilə qərar
+verir (:func:`row_limits`, tək toplu sorğu). Açılış-səviyyəli
+:func:`limit_percent_for_offering` (qrupun ilk qeydi) YALNIZ başlıq sütunu
+(«limit N q/b») üçün qalır — buraxılış qərarı artıq ondan çıxmır.
 """
 
 from __future__ import annotations
 
+from decimal import Decimal
+from typing import NamedTuple
+
+from apps.registrar import exam_eligibility
 from apps.registrar.exam_eligibility import DEFAULT_LIMIT_PERCENT
 from apps.registrar.models import StudentAcademicRecord
 
@@ -57,4 +65,84 @@ def limit_percent_for_enrollment(enrollment) -> int:
     )
 
 
-__all__ = ["limit_percent_for_enrollment", "limit_percent_for_record", "limit_percent_for_student"]
+def limit_percent_map_for_students(*, organization_id, student_ids) -> dict:
+    """``student_id → hədd`` — TƏK sorğu; qeydsiz tələbə lüğətdə YOXDUR (çağıran defoltu tətbiq edir).
+
+    Seçim qaydası :func:`limit_percent_for_student` ilə birə-bir (İLK pk qeyd).
+    """
+    ids = {sid for sid in student_ids if sid is not None}
+    if organization_id is None or not ids:
+        return {}
+    result: dict = {}
+    rows = (
+        StudentAcademicRecord.objects.filter(organization_id=organization_id, student_id__in=ids)
+        .select_related("program")
+        .order_by("pk")
+    )
+    for record in rows:
+        result.setdefault(record.student_id, limit_percent_for_record(record))
+    return result
+
+
+#: Həddin bu payına çatanda «limitə yaxın» xəbərdarlığı (qrid + «Yekun» tabı eyni nisbət).
+WARN_RATIO = Decimal("0.75")
+
+
+class RowLimit(NamedTuple):
+    percent: int
+    allowed_hours: Decimal
+
+
+def near_limit(absence_hours, row_limit: RowLimit, *, frozen: bool, barred: bool) -> bool:
+    """«Həddə yaxınlaşır» zolağı — donmuş dilimdə və artıq kəsilmiş sətirdə susur."""
+    if frozen or barred or row_limit.allowed_hours <= 0:
+        return False
+    return Decimal(absence_hours) >= row_limit.allowed_hours * WARN_RATIO
+
+
+def row_limits(*, organization_id, enrollments, total_hours) -> dict:
+    """``student_id → RowLimit`` — qrid / «Yekun» sətirləri üçün (tək sorğu, sətir sayından asılı deyil)."""
+    limits = limit_percent_map_for_students(
+        organization_id=organization_id, student_ids=[e.student_id for e in enrollments]
+    )
+    result: dict = {}
+    for enrollment in enrollments:
+        percent = limits.get(enrollment.student_id, DEFAULT_LIMIT_PERCENT)
+        result[enrollment.student_id] = RowLimit(percent, Decimal(total_hours) * Decimal(percent) / Decimal(100))
+    return result
+
+
+def limit_percent_for_offering(offering) -> int:
+    """AÇILIŞ-səviyyəli hədd — qrupun İLK (pk) akademik qeydinin proqramı.
+
+    Yalnız başlıq/etiket üçün (müəllim qridinin «limit N q/b» sütunu); tələbə
+    üzrə qərar :func:`row_limits` / :func:`limit_percent_for_enrollment`-dədir.
+    """
+    record = (
+        StudentAcademicRecord.objects.filter(organization=offering.organization, group=offering.group)
+        .select_related("program")
+        .first()
+    )
+    return limit_percent_for_record(record)
+
+
+def allowed_absence_hours(offering, lessons, *, limit_percent=None) -> Decimal:
+    """Açılış üzrə icazəli qayıb saatı (başlıq); ``limit_percent`` verilibsə təkrar sorğu yoxdur."""
+    total_hours = exam_eligibility.lesson_hours_for(offering, lessons)
+    if limit_percent is None:
+        limit_percent = limit_percent_for_offering(offering)
+    return Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
+
+
+__all__ = [
+    "WARN_RATIO",
+    "RowLimit",
+    "near_limit",
+    "allowed_absence_hours",
+    "limit_percent_for_enrollment",
+    "limit_percent_for_offering",
+    "limit_percent_for_record",
+    "limit_percent_for_student",
+    "limit_percent_map_for_students",
+    "row_limits",
+]

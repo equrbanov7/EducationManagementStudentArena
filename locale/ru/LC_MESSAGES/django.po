@@ -68448,3 +68448,7 @@ msgstr "Содержимое файла не соответствует заяв
 msgctxt "upload.security.error"
 msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
 msgstr "Содержимое файла не соответствует заявленному типу файла."
+
+msgctxt "core.rate_limit"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Слишком много запросов — повторите попытку чуть позже."

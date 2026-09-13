@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -227,9 +228,12 @@ def bank_question_add(request, bank_id):
             question.fingerprint = _question_fingerprint(question.text)
             if q_format == "test":
                 question.answer_mode = form.cleaned_data.get("answer_mode", "single")
-            question.save()
-            if q_format == "test":
-                form.create_options(question)
+            # Audit 2026-09-13 backend F-07 (2026-09-14): sual + variantları birlikdə
+            # (variant yazısı sınsa variantsız test sualı qalmasın).
+            with transaction.atomic():
+                question.save()
+                if q_format == "test":
+                    form.create_options(question)
             if is_modal:
                 return JsonResponse({"success": True, "question_id": question.id})
             return redirect("exams:question_bank_detail", bank_id=bank.id)
@@ -270,9 +274,10 @@ def bank_question_edit(request, bank_id, question_id):
             updated.fingerprint = _question_fingerprint(updated.text)
             if q_format == "test":
                 updated.answer_mode = form.cleaned_data.get("answer_mode", "single")
-            updated.save()
-            if q_format == "test":
-                form.save_options(updated)
+            with transaction.atomic():  # F-07 (2026-09-14) — bax `bank_question_add`
+                updated.save()
+                if q_format == "test":
+                    form.save_options(updated)
             if is_modal:
                 return JsonResponse({"success": True, "question_id": updated.id})
             return redirect("exams:question_bank_detail", bank_id=bank.id)

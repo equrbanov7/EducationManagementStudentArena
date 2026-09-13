@@ -97,25 +97,25 @@ def journal_list_context(user, request=None) -> dict:
     can_roster = bool(
         request is not None and organization is not None and guest_roster.can_manage_roster(user, organization)
     )
+    # `journal.view` (audit F-06, 2026-09-14): əhatəli YALNIZ-OXU jurnallar siyahıya da düşür.
+    view_q = journal_scope.journal_view_q(user, organization) if organization is not None else None
     if can_correct and organization is not None:
         base_qs = base_qs.filter(organization=organization)
         is_broad = True
-    elif can_roster:
+    elif can_roster or view_q is not None:
         # Əhatə üzrə görünən jurnallar YALNIZ aktiv cari dövrdən gəlir: köçürülmüş
         # tarixi semestrlərin jurnalı koordinatorun siyahısında ÇIXMAMALIDIR (əks
         # halda düymə oradadır və köhnə transkript dəyişər — bax guest_roster.
         # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
         # tarixçəsi dövr süzgəcindən keçmir.
-        scoped_groups = guest_roster.scoped_group_queryset(user, organization)
-        rosterable = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True)
-        base_qs = base_qs.filter(organization=organization).filter(Q(instructor=user) | rosterable)
+        scoped_groups = guest_roster.scoped_group_queryset(user, organization) if can_roster else []
+        visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | Q(instructor=user)
+        base_qs = base_qs.filter(organization=organization).filter(visible | (view_q or Q(pk__in=[])))
         is_broad = True
     else:
-        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir
-        # (bax apps/registrar/handover.is_handover_observer). Siyahıda sətir
-        # olmasaydı, ona gedən yeganə keçid itərdi və «bal yazan mən idim, indi
-        # görə bilmirəm» vəziyyəti yaranardı. Yazma hüququ onsuz da
-        # `is_direct_editor`-dədir və təhvildən sonra False-dur.
+        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir (bax
+        # apps/registrar/handover.is_handover_observer) — siyahıda sətir olmasaydı, ona gedən
+        # yeganə keçid itərdi. Yazma hüququ `is_direct_editor`-dədir, təhvildən sonra False.
         from apps.registrar.handover import observer_offering_ids
 
         observed = observer_offering_ids(user, organization) if organization is not None else set()

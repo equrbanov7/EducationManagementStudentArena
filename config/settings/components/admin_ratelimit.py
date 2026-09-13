@@ -95,6 +95,12 @@ EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip()
 # Post management delete endpoints
 POST_DELETE_RATE_LIMIT = os.getenv("POST_DELETE_RATE_LIMIT", "10/5m")
 
+# Bal yazan / idxal edən JSON endpoint-lər (2026-09-13 backend auditi, F-15 — 2026-09-14):
+# `workload:assign`, `student_registry_action`, `exam_score_import_apply`, `rim_action`.
+# İstifadəçi başına, QƏSDƏN geniş — toplu bal daxiletməsi (bir dəqiqədə onlarla sətir)
+# toxunulmur, yalnız skriptlə «spray» kəsilir (bax `core/write_rate_limit.py`).
+SCORE_WRITE_RATE_LIMIT = os.getenv("SCORE_WRITE_RATE_LIMIT", "120/1m")
+
 
 # ---------------------------------------------------------------------------
 # FAIL-CLOSED konfiqurasiya yoxlaması (2026-09-02 audit, P2-5)
