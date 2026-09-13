@@ -252,7 +252,7 @@
     border: 0;
     border-radius: var(--ems-r-md);
     background: transparent;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: pointer;
     vertical-align: middle;
 }

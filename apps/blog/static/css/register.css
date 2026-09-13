@@ -120,7 +120,7 @@
 
 /* Forma Sahəsinin Xətası */
 .register-field-error {
-    color: var(--ems-danger-500); /* Qırmızı xəta mətni */
+    color: var(--ems-danger-600); /* Qırmızı xəta mətni */
     font-size: 0.85rem;
     margin-top: 5px;
 }

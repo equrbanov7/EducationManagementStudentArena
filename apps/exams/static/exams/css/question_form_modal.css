@@ -427,7 +427,7 @@
 }
 
 .question-form-shell--modal .custom-checkbox-container input:checked ~ .label-text {
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
     font-weight: 700;
 }
 

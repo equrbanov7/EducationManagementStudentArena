@@ -3015,3 +3015,54 @@ msgstr "İşaretlenenlerin seçimini kaldır"
 
 msgid "İşarələnmişləri seç"
 msgstr "İşaretlenenleri seç"
+
+msgid "Əməliyyat alınmadı."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgid "Əvvəlcə tapşırıq yaradılmalıdır."
+msgstr "Önce görev oluşturulmalıdır."
+
+msgid "Sətir silinsin?"
+msgstr "Satır silinsin mi?"
+
+msgid "Bölgü silinsin?"
+msgstr "Dağıtım silinsin mi?"
+
+msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+msgstr "Dağıtım onaylandı. Defter açılışı: %(created)s yeni, %(updated)s güncellendi. Bildirim: %(notified)s"
+
+msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+msgstr "Bu bölümün programları için aktif öğretim planı satırı bulunamadı."
+
+msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr "Planda %(count)s öneri bulundu; ilki dolduruldu. Saatler öğretim planında saklanmaz — elle yazın (öneri: %(hours)s saat)."
+
+msgid "Qalıq: %(remaining)s / %(total)s saat"
+msgstr "Kalan: %(remaining)s / %(total)s saat"
+
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Boş (öğretim elemanı atanmamış)"
+
+msgid "(kafedraya bağlanmamış)"
+msgstr "(bölüme bağlı değil)"
+
+msgid "Bu sətirdə bölünəcək saat yoxdur."
+msgstr "Bu satırda dağıtılacak saat yok."
+
+msgid "Bölüşdür"
+msgstr "Dağıt"
+
+msgid "Bölgünü sil"
+msgstr "Dağıtımı sil"
+
+msgid "Hələ bölgü yoxdur."
+msgstr "Henüz dağıtım yok."
+
+msgid "Jurnal açılışı"
+msgstr "Defter açılışı"
+
+msgid "Yarımçıq sətir"
+msgstr "Eksik satır"
+
+msgid "Aç"
+msgstr "Görüntüle"

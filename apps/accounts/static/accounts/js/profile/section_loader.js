@@ -209,6 +209,43 @@
             try { rebindCommonControls(panel); } catch (e) { /* ignore */ }
         }
 
+        /* Frontend auditi 2026-09-13 F5 (WCAG 2.4.3 / 4.1.3): AJAX keçidindən sonra
+           fokus `body`-də qalırdı — klaviatura/ekran oxuyucu istifadəçisi yeni
+           bölmənin yükləndiyini bilmirdi (7 rol × 100+ swap-da `activeElement=BODY`).
+           İndi swap-dan sonra fokus `#profileSectionTitle`-a (h1) aparılır
+           (`tabIndex=-1` — yalnız proqram fokusu, Tab sırasına düşmür) və
+           JS ilə yaradılan gizli `aria-live` sahəsi başlığı elan edir. Başlıq
+           mətni `updateSidebarActiveState`-də yenilənir, ona görə həmişə ondan
+           SONRA çağırılır. */
+        function getSectionAnnouncer() {
+            var el = document.getElementById("profileSectionAnnouncer");
+            if (el) { return el; }
+            el = document.createElement("div");
+            el.id = "profileSectionAnnouncer";
+            el.className = "sr-only";
+            el.setAttribute("role", "status");
+            el.setAttribute("aria-live", "polite");
+            el.setAttribute("aria-atomic", "true");
+            document.body.appendChild(el);
+            return el;
+        }
+
+        function focusSectionTitle() {
+            var title = ctx.sectionTitle || document.getElementById("profileSectionTitle");
+            if (!title) { return; }
+            try {
+                title.tabIndex = -1;
+                title.focus({ preventScroll: false });
+            } catch (e) { /* köhnə brauzer: fokus opsiyalarını dəstəkləmir */ }
+            try {
+                var announcer = getSectionAnnouncer();
+                var text = (title.textContent || "").trim();
+                // Eyni mətn ardıcıl iki dəfə yazılsa live region elan etmir — əvvəl boşalt.
+                announcer.textContent = "";
+                window.setTimeout(function () { announcer.textContent = text; }, 50);
+            } catch (e) { /* ignore */ }
+        }
+
         function replaceSectionHtml(section, html, options) {
             options = options || {};
             var node = extractSectionFromHtml(html, section);
@@ -249,6 +286,7 @@
             try { executeInlineScripts(node); } catch (e) { /* ignore */ }
             try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
             ctx.updateSidebarActiveState(section);
+            focusSectionTitle();
             if (options.updateUrl !== false) {
                 pushSectionUrl(section, options.sourceUrl);
             }
@@ -390,6 +428,11 @@
             });
 
             ctx.updateSidebarActiveState(section);
+            // İlkin yükləmə (`init.js`, updateUrl=false) fokusu oğurlamamalıdır —
+            // yalnız istifadəçi naviqasiyasında (updateUrl=true) başlığa fokus.
+            if (updateUrl) {
+                focusSectionTitle();
+            }
 
             if (updateUrl && window.history && window.history.pushState) {
                 var nextUrl = new URL(ctx.profileBaseUrl, window.location.origin);
@@ -408,6 +451,7 @@
         ctx.handleViewAsEnded = handleViewAsEnded;
         ctx.setActiveSection = setActiveSection;
         ctx.replaceSectionHtml = replaceSectionHtml;
+        ctx.focusSectionTitle = focusSectionTitle;
 
         window.EMSProfileLoadSection = function (section, sourceUrl, options) {
             options = options || {};

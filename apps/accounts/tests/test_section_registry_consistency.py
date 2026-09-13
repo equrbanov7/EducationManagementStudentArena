@@ -71,3 +71,20 @@ class SectionRegistryConsistencyTest(SimpleTestCase):
             if not any((directory / template_name).is_file() for directory in template_dirs):
                 missing.append(f"{section} → {template_name}")
         self.assertEqual(missing, [], "Qeydiyyatda olan, amma diskdə tapılmayan şablonlar: " + ", ".join(missing))
+
+    def test_every_ajax_safe_section_is_listed_in_template(self):
+        """Əks istiqamət (frontend auditi 2026-09-13, F14): server ⊆ şablon.
+
+        `rim-center` `AJAX_SAFE_SECTIONS`-da idi, amma `data-ajax-sections`-da YOX —
+        nəticədə həmin bölmə həmişə tam səhifə yüklənirdi (SPA keçidi itirdi) və
+        heç bir test bunu görmürdü, çünki yalnız şablon ⊆ server yoxlanılırdı.
+        Qəsdən tam səhifə qalan bölmə `data-force-navigation` ilə işarələnir və
+        `AJAX_SAFE_SECTIONS`-dan çıxarılmalıdır — siyahılar EYNİ olmalıdır.
+        """
+        missing = sorted(set(AJAX_SAFE_SECTIONS) - _template_ajax_sections())
+        self.assertEqual(
+            missing,
+            [],
+            "Bu bölmələr `AJAX_SAFE_SECTIONS`-dadır, amma `profile.html` `data-ajax-sections`-da yoxdur — "
+            "klient onları həmişə tam səhifə yükləyəcək: " + ", ".join(missing),
+        )

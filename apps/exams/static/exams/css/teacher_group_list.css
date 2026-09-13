@@ -205,7 +205,7 @@
 
 .btn-edit-custom:hover {
     background-color: var(--ems-neutral-100);
-    color: var(--ems-primary-500);
+    color: var(--ems-primary-600);
     border-color: var(--ems-primary-500);
 }
 

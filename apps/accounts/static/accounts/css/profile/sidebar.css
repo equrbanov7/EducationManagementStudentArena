@@ -189,7 +189,7 @@
 /* Yeni tabda açılan link (elektron jurnal, imtahan nəzarət sistemi). */
 .sidebar-menu-ext {
     font-size: 0.62rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     flex-shrink: 0;
     margin-left: 0.15rem;
 }
@@ -328,7 +328,7 @@
     flex-shrink: 0;
     font-size: 0.66rem;
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-variant-numeric: tabular-nums;
 }
 
@@ -428,7 +428,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .collapsed .sidebar-menu-group-label--inline {
@@ -448,7 +448,7 @@
 }
 
 .sidebar-menu-link--logout {
-    color: var(--ems-danger-500);
+    color: var(--ems-danger-600);
 }
 
 .sidebar-menu-link--logout .sidebar-menu-icon {

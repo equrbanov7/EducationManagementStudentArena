@@ -317,7 +317,7 @@ body.auth-body {
     transform: translateY(-50%);
     border: 0;
     background: transparent;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     cursor: pointer;
     line-height: 1;
     padding: 6px;
@@ -484,7 +484,7 @@ body.auth-body {
     gap: 8px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 .auth-step__num {
     width: 26px;

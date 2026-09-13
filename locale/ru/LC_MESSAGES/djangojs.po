@@ -3020,3 +3020,54 @@ msgstr "Отменить выбор отмеченных"
 
 msgid "İşarələnmişləri seç"
 msgstr "Выбрать отмеченные"
+
+msgid "Əməliyyat alınmadı."
+msgstr "Операция не выполнена."
+
+msgid "Əvvəlcə tapşırıq yaradılmalıdır."
+msgstr "Сначала нужно создать задание."
+
+msgid "Sətir silinsin?"
+msgstr "Удалить строку?"
+
+msgid "Bölgü silinsin?"
+msgstr "Удалить распределение?"
+
+msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+msgstr "Распределение подтверждено. Открытия журнала: новых %(created)s, обновлено %(updated)s. Уведомлено: %(notified)s"
+
+msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+msgstr "Для специальностей этой кафедры не найдено активных строк учебного плана."
+
+msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr "В плане найдено предложений: %(count)s; первое подставлено. Часы в учебном плане не хранятся — введите вручную (предложение: %(hours)s ч.)."
+
+msgid "Qalıq: %(remaining)s / %(total)s saat"
+msgstr "Остаток: %(remaining)s / %(total)s ч."
+
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Вакансия (преподаватель не назначен)"
+
+msgid "(kafedraya bağlanmamış)"
+msgstr "(не привязан к кафедре)"
+
+msgid "Bu sətirdə bölünəcək saat yoxdur."
+msgstr "В этой строке нет часов для распределения."
+
+msgid "Bölüşdür"
+msgstr "Распределить"
+
+msgid "Bölgünü sil"
+msgstr "Удалить распределение"
+
+msgid "Hələ bölgü yoxdur."
+msgstr "Распределений пока нет."
+
+msgid "Jurnal açılışı"
+msgstr "Открытий журнала"
+
+msgid "Yarımçıq sətir"
+msgstr "Незавершённых строк"
+
+msgid "Aç"
+msgstr "Открыть"
