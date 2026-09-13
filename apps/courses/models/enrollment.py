@@ -207,10 +207,8 @@ class CourseGroup(models.Model):
         verbose_name = "Kurs Qrupu"
         verbose_name_plural = "Kurs Qrupları"
         unique_together = ("course", "name")
-        indexes = [
-            models.Index(fields=["course"]),
-            models.Index(fields=["instructor"]),
-        ]
+        # `course` / `instructor` Meta indeksləri silindi (2026-09-14): hər iki FK-nın
+        # avtomatik indeksi var idi (data auditi 2026-09-13 §6.2, miqrasiya 0002).
 
     def __str__(self):
         return f"{self.course.title} - {self.name}"

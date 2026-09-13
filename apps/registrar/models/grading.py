@@ -172,7 +172,20 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         ordering = ["date", "created_at"]
         verbose_name = pgettext_lazy("registrar.model.lesson.meta", "lesson")
         verbose_name_plural = pgettext_lazy("registrar.model.lesson.meta", "lessons")
-        indexes = [models.Index(fields=["organization", "offering", "date"])]
+        indexes = [
+            models.Index(fields=["organization", "offering", "date"]),
+            # Perf auditi 2026-09-13 §6 Q3/Q5/Q8 (2026-09-14): dövr üzrə seçimlər
+            # (`lessons-log`, açılış/fənn DISTINCT-ləri) `(organization, date)`
+            # aralığı ilə gəlir — mövcud `(organization, offering, date)` bu
+            # şərti örtmür (klonda 305 k sətirdə Parallel Seq Scan, 141 ms).
+            # INCLUDE (offering, hours): siyahı/`SUM(hours)` sorğuları index-only.
+            # Miqrasiya 0076 `CREATE INDEX CONCURRENTLY` ilə qurur.
+            models.Index(
+                fields=["organization", "date"],
+                include=["offering", "hours"],
+                name="registrar_lesson_org_date_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.offering_id} · {self.date} ({self.kind})"
@@ -542,7 +555,10 @@ class ResitRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel)
     result is recomputed with it in place of the original exam score."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="resits")
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="resit_records")
+    # `db_index=False`: `uniq_resit_per_enrollment` unikal indeksi eyni sütunu
+    # onsuz da örtür — FK-nın avtomatik indeksi dublikat idi (data auditi
+    # 2026-09-13 §6.2; miqrasiya 0076 `DROP INDEX CONCURRENTLY`).
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="resit_records", db_index=False)
     reason = models.CharField(max_length=12, choices=ResitReason.choices)
     status = models.CharField(max_length=12, choices=ResitStatus.choices, default=ResitStatus.ELIGIBLE)
     resit_score = models.DecimalField(

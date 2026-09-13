@@ -6,6 +6,12 @@
  * assigned teachers, primary-teacher search), unsaved-changes guard, delete.
  * URLs + flags come from data-* on #groupModal; i18n from the #tgl-i18n JSON
  * island; the auto-open target from #groupModal[data-edit-group-id].
+ *
+ * Namizəd siyahıları (tələbələr/müəllimlər) səhifə ilə RENDER OLUNMUR —
+ * `#groupModal[data-candidates-url]` doludursa modal ilk dəfə açılanda oradan
+ * (JSON: students / primary_teacher / assigned_teachers — serverdə eyni
+ * widget) çəkilir (perf auditi 2026-09-13 F-10: tam səhifə 2 008 ms / 2,5 MB).
+ * URL boşdursa (POST xətası re-render-i) mövcud `<option>`-larla işlənir.
  */
 (function () {
   "use strict";
@@ -180,7 +186,7 @@
 
   function tryCloseModal() {
     const currentDataString = new URLSearchParams(new FormData(groupForm)).toString();
-    if (initialFormData !== currentDataString) {
+    if (initialFormData !== null && initialFormData !== currentDataString) {
       warningModal.style.display = "flex";
       setTimeout(() => warningModal.classList.add("active"), 10);
     } else {
@@ -203,6 +209,47 @@
     }
   }
 
+  let candidatesPromise = null;
+
+  function injectOptions(select, markup) {
+    if (!select || !markup) return;
+    const holder = document.createElement("div");
+    holder.innerHTML = markup;
+    const parsed = holder.querySelector("select");
+    if (parsed) {
+      select.innerHTML = parsed.innerHTML;
+    }
+  }
+
+  function ensureCandidates() {
+    if (candidatesPromise) return candidatesPromise;
+    const candidatesUrl = groupModal.dataset.candidatesUrl || "";
+    if (!candidatesUrl || typeof window.fetch !== "function") {
+      candidatesPromise = Promise.resolve(false);
+      return candidatesPromise;
+    }
+    candidatesPromise = window
+      .fetch(candidatesUrl, {
+        credentials: "same-origin",
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      })
+      .then((response) => {
+        if (!response.ok) throw new Error("candidates_unavailable");
+        return response.json();
+      })
+      .then((data) => {
+        injectOptions(hiddenStudentsSelect, data.students);
+        injectOptions(primaryTeacherSelect, data.primary_teacher);
+        injectOptions(hiddenTeachersSelect, data.assigned_teachers);
+        return true;
+      })
+      .catch(() => {
+        candidatesPromise = null; // növbəti açılışda yenidən cəhd
+        return false;
+      });
+    return candidatesPromise;
+  }
+
   function openModalEdit(groupId, groupName, studentIds, teacherIds, primaryTeacherId, subjectIds, orgUnitId) {
     groupForm.reset();
     modalTitle.innerText = I18N_TEACHER_GROUP_LIST.modalTitleEditGroup;
@@ -214,6 +261,18 @@
     groupForm.action = updateTpl.replace("/0/", `/${groupId}/`);
     groupDeleteForm.action = deleteTpl.replace("/0/", `/${groupId}/`);
 
+    // Modal dərhal açılır (skeleton «Yüklənir…» mətni ilə); seçimlər namizədlər
+    // gələndən SONRA tətbiq olunur ki, `saveInitialState` tam vəziyyəti tutsun.
+    groupModal.style.display = "flex";
+    setTimeout(() => groupModal.classList.add("active"), 10);
+    initialFormData = null;
+
+    ensureCandidates().then(() => {
+      applyEditSelection(studentIds, teacherIds, primaryTeacherId, subjectIds, orgUnitId);
+    });
+  }
+
+  function applyEditSelection(studentIds, teacherIds, primaryTeacherId, subjectIds, orgUnitId) {
     if (primaryTeacherSelect && primaryTeacherId) {
       primaryTeacherSelect.value = String(primaryTeacherId);
       if (!canMultiAssignTeachers) {
@@ -248,9 +307,6 @@
     studentsChecklist?.build();
     teachersChecklist?.build();
     clearTeacherFilters();
-
-    groupModal.style.display = "flex";
-    setTimeout(() => groupModal.classList.add("active"), 10);
     saveInitialState();
   }
 
@@ -349,8 +405,10 @@
     selectedTeacherCountSpan,
     teacherSearchInput,
   );
-  studentsChecklist?.build();
-  teachersChecklist?.build();
+  if (!(groupModal.dataset.candidatesUrl || "")) {
+    studentsChecklist?.build();
+    teachersChecklist?.build();
+  }
   applyPrimaryTeacherSearch();
 
   const editGroupId = groupModal.dataset.editGroupId || "";

@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
@@ -149,7 +150,7 @@ def _group_queryset_for_actor(request, organization):
     return queryset.filter(own_q).distinct()
 
 
-def _group_form_for_request(request, organization, data=None, instance=None):
+def _group_form_for_request(request, organization, data=None, instance=None, *, defer_choices=False):
     return StudentGroupForm(
         data,
         instance=instance,
@@ -157,7 +158,25 @@ def _group_form_for_request(request, organization, data=None, instance=None):
         organization=organization,
         can_multi_assign_teachers=_can_multi_assign_teachers(request.user),
         is_superadmin=_is_superadmin(request.user),
+        defer_choices=defer_choices,
     )
+
+
+def _candidates_url_for(form):
+    """Lazy namizəd endpoint-i — yalnız variantlar həqiqətən TƏXİRƏ SALINANDA.
+
+    2026-09-14 (perf auditi 2026-09-13, F-10): `/exams/groups/` və
+    `create_student_group` tam səhifələri formanı `defer_choices`-siz qururdu →
+    təşkilatın BÜTÜN tələbə/müəllim `<option>`-ları hər açılışda render olunurdu
+    (klonda 2 008 ms / 2,5 MB). İndi GET-də forma boş widget-lə gəlir, JS isə
+    modal/səhifə açılanda variantları `exams:teacher_group_candidates`-dən
+    (kabinet bölməsinin 2026-09-02 F4 nümunəsi) çəkir. Bound (POST xətası)
+    re-render-də forma variantları özü render edir (seçim qorunur) → URL boş,
+    JS mövcud `<option>`-larla işləyir.
+    """
+    if getattr(form, "choices_deferred", False):
+        return reverse("exams:teacher_group_candidates")
+    return ""
 
 
 def _create_group_template_context(request, organization, form):
@@ -166,8 +185,10 @@ def _create_group_template_context(request, organization, form):
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
         "max_multi_teachers": getattr(form, "MAX_MULTI_TEACHERS", 3),
+        # `.count()` — sətir sayından asılı olmayan 2 COUNT sorğusu (variantlar deyil).
         "student_count": form.fields["students"].queryset.count(),
         "teacher_count": form.fields["primary_teacher"].queryset.count(),
+        "candidates_url": _candidates_url_for(form),
         "is_editing": False,
     }
 
@@ -180,7 +201,8 @@ def teacher_group_list(request):
         return redirect("accounts:profile")
 
     groups = _group_queryset_for_actor(request, organization)
-    form = _group_form_for_request(request, organization)
+    # F-10 (2026-09-14): variantlar lazy — bax `_candidates_url_for`.
+    form = _group_form_for_request(request, organization, defer_choices=True)
 
     context = {
         "groups": groups,
@@ -188,6 +210,7 @@ def teacher_group_list(request):
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
         "can_create_group": _user_can_create_group(request),
+        "candidates_url": _candidates_url_for(form),
     }
     return render(request, "exams/teacher/teacher_group_list.html", context)
 
@@ -319,7 +342,9 @@ def teacher_update_group(request, group_id):
             "form": form,
             "organization": organization,
             "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
+            "can_create_group": True,
             "edit_group_id": group.id,
+            "candidates_url": _candidates_url_for(form),
         },
         status=400,
     )
@@ -431,7 +456,8 @@ def create_student_group(request):
     if organization is None:
         return redirect("accounts:profile")
 
-    form = _group_form_for_request(request, organization)
+    # F-10 (2026-09-14): variantlar lazy — bax `_candidates_url_for`.
+    form = _group_form_for_request(request, organization, defer_choices=True)
     return render(
         request,
         "exams/teacher/create_student_group.html",
