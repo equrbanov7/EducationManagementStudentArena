@@ -201,13 +201,29 @@ def _current_page_section(current_page: str, organization, memberships, permissi
     return "\n".join(lines)
 
 
+def mask_email(email: str) -> str:
+    """E-poçtu `***@domain` şəklinə salır — provayderə yalnız domen gedir.
+
+    2026-09-14 (audit F-08, §27 «AI PII/retention»): əvvəl hər sorğuda tam
+    e-poçt Gemini-yə göndərilirdi. Persona üçün domen (universitet/şəxsi) kifayət
+    edir; lokal hissə üçüncü tərəfə lazım deyil.
+    """
+    email = (email or "").strip()
+    if "@" not in email:
+        return ""
+    domain = email.rsplit("@", 1)[1]
+    return f"***@{domain}" if domain else ""
+
+
 def _user_identity_section(user, organization, memberships) -> str:
     lines = [
         "[User Identity]",
         f"Name: {user.get_full_name() or user.username}",
         f"Username: {user.username}",
-        f"Email: {user.email}",
     ]
+    masked_email = mask_email(getattr(user, "email", ""))
+    if masked_email:
+        lines.append(f"Email: {masked_email}")
 
     if is_superadmin_user(user):
         lines.append("Role: Platform Superadmin")

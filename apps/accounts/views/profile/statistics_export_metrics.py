@@ -21,7 +21,6 @@ bölmə icazəsi (`allowed_sections`) → 404.
 
 from __future__ import annotations
 
-import csv
 import io
 
 from django.contrib.auth.decorators import login_required
@@ -29,6 +28,7 @@ from django.http import Http404, HttpResponse
 from django.utils.translation import pgettext
 
 from apps.registrar.public import exam_score_import
+from core.export_safety import safe_csv_writer
 
 from ...models import UserProfile
 from .._helpers import _get_active_organization, _role_capabilities
@@ -150,7 +150,8 @@ def statistics_export_metrics_csv(request):
 
     output = io.StringIO()
     output.write(UTF8_BOM)
-    writer = csv.writer(output)
+    # 2026-09-14 (audit F-07): kurs/qrup adları və sərbəst mətn xanaları neytrallaşdırılır.
+    writer = safe_csv_writer(output)
     writer.writerows(build_metrics_csv_rows(profile, presented))
 
     response = HttpResponse(output.getvalue(), content_type="text/csv; charset=utf-8")

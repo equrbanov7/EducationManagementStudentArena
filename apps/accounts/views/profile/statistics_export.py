@@ -18,7 +18,6 @@ from ._sections.statistics import statistics_scope
 @login_required
 def statistics_export_csv(request):
     """Export current statistics data as CSV."""
-    import csv
     import io
 
     from apps.accounts.services.statistics_selectors import (
@@ -27,6 +26,7 @@ def statistics_export_csv(request):
         get_superadmin_statistics,
         get_teacher_statistics,
     )
+    from core.export_safety import safe_csv_writer
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
@@ -132,7 +132,8 @@ def statistics_export_csv(request):
             )
 
     output = io.StringIO()
-    writer = csv.writer(output)
+    # 2026-09-14 (audit F-07): xülasə dəyərləri mətn ola bilər → formula neytrallaşdırması.
+    writer = safe_csv_writer(output)
     summary = stats.get("summary", {})
     writer.writerow(
         [

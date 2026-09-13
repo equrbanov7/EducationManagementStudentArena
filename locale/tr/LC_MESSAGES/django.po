@@ -68295,3 +68295,11 @@ msgstr "Personel kodu"
 msgctxt "teacher_intake"
 msgid "Şablon"
 msgstr "Dosya şablonu"
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil."
+msgstr "Dosya içeriği bildirilen görsel biçimiyle eşleşmiyor."
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
+msgstr "Dosya içeriği bildirilen dosya türüyle eşleşmiyor."

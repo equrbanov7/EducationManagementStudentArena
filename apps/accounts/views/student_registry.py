@@ -20,8 +20,6 @@ məlumat sızmasın deyə 403 DEYİL).
 
 from __future__ import annotations
 
-import csv
-
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.utils.translation import pgettext
@@ -32,6 +30,7 @@ from apps.accounts.services import people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.accounts.services.rim.policy import RimAccessError
+from core.export_safety import safe_csv_writer
 
 _CTX = "accounts.student_registry"
 
@@ -181,7 +180,9 @@ def student_registry_export(request):
     response["Cache-Control"] = "private, no-store"
     # BOM — Excel AZ hərflərini düzgün açsın deyə (şablon faylı ilə eyni qayda).
     response.write("﻿")
-    writer = csv.writer(response)
+    # 2026-09-14 (audit F-07, §27 «6 ixracda formula neytrallaşdırma»): ad/qrup
+    # kimi mətn xanaları `=`/`+`/`-`/`@` ilə başlaya bilər → Excel-də formula.
+    writer = safe_csv_writer(response)
     writer.writerow(
         [
             pgettext(_CTX, "Tələbə kodu"),

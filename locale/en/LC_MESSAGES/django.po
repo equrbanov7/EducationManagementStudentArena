@@ -68386,3 +68386,11 @@ msgstr "Employee code"
 msgctxt "teacher_intake"
 msgid "Şablon"
 msgstr "Template"
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil."
+msgstr "The file content does not match the declared image format."
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
+msgstr "The file content does not match the declared file type."
