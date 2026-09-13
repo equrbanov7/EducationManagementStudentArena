@@ -9,7 +9,7 @@ Bu fayl auditdə işləyən HƏR agent üçün ortaq kontekstdir. Oxumadan işə
 | Kanonik repo | `/Users/elvin/Developer/EMSArena` (branch `audit/full-qa-2026-09-05`, Develop-dən) |
 | Python | `/Users/elvin/Developer/EMSArena/venv/bin/python` (3.11, bütün asılılıqlar + playwright) |
 | Canlı QA serveri | `http://127.0.0.1:8100` — `runserver --noreload`, yəni **kod dəyişikliyi restart-sız görünmür** (restart-ı yalnız orkestrator edir) |
-| Baza | QA klonu `emsarena_rehearsal_a0d170000901` (Postgres 127.0.0.1:55433, owner `emsarena_staging`/`emsarena_staging_password`, tətbiq rolu `emsarena_app` NOBYPASSRLS). **Sərbəst yaz** — klon birdəfəlikdir. |
+| Baza | QA klonu `emsarena_rehearsal_a0d170000901` (Postgres 127.0.0.1:55433, owner `emsarena_staging` (parol: `.claude/staging.env`), tətbiq rolu `emsarena_app` NOBYPASSRLS). **Sərbəst yaz** — klon birdəfəlikdir. |
 | Qorunan baza | lokal `emsarena_db` (:5432) — **ASLA toxunma** (real köçürülmüş data) |
 | Test hesabları | `scripts/qa_live/accounts.py` (29 hesab); parol `~/EMSArena-backups/TEST_HESABLARI.md`-dən oxunur (repo-dan kənar, commit ETMƏ) |
 | Tələbə portalı | `/accounts/login/telebe/` · heyət portalı `/accounts/login/muellim/` |

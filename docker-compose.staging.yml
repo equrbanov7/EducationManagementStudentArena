@@ -21,7 +21,7 @@ services:
     environment:
       POSTGRES_DB: ${STAGING_POSTGRES_DB:-emsarena_staging}
       POSTGRES_USER: ${STAGING_POSTGRES_USER:-emsarena_staging}
-      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:-emsarena_staging_password}
+      POSTGRES_PASSWORD: ${STAGING_POSTGRES_PASSWORD:?STAGING_POSTGRES_PASSWORD təyin edilməyib (.claude/staging.env)}
     ports:
       - "127.0.0.1:${STAGING_POSTGRES_PORT:-55433}:5432"
     volumes:

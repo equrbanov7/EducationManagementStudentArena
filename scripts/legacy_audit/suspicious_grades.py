@@ -41,10 +41,10 @@ MYSQL = dict(
     database=os.environ.get("LEGACY_MYSQL_DB", "myedudb"),
     charset="utf8mb4",
 )
-PG_DSN = os.environ.get(
-    "QA_PG_DSN",
-    "postgres://emsarena_staging:emsarena_staging_password" "@127.0.0.1:55433/emsarena_rehearsal_d44526b97cbc",
-)
+# Audit 2026-09-13 (security F-03): DSN parolu tracked skriptdə saxlanmır.
+PG_DSN = os.environ["QA_PG_DSN"] if "QA_PG_DSN" in os.environ else None
+if not PG_DSN:
+    raise SystemExit("QA_PG_DSN env dəyişəni tələb olunur (postgres://emsarena_staging:<parol>@127.0.0.1:55433/<db>)")
 
 # Bal şkalası — docs/migration/LEGACY_GIRISH_FORMULA.md §1 ilə təsdiqlənib.
 MAX_GIRIS = 50  # davamiyyət 10 + sərbəst iş 10 + seminar 30
