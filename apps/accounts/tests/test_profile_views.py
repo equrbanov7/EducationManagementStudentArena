@@ -1025,7 +1025,8 @@ class ProfileViewTest(TestCase):
         self.assertIn("my-exams", response.context["allowed_sections"])
         self.assertTrue(response.context["can_view_owned_learning"])
         self.assertContains(response, 'data-profile-section-panel="my-exams"')
-        self.assertContains(response, 'class="tx-btn tx-btn--primary js-open-exam-form-modal"', html=False)
+        # 2026-09-13 redizayn: primary düymə ems_ui resepti ilə (`ems-btn`); JS çəngəli dəyişmir.
+        self.assertContains(response, 'class="ems-btn ems-btn--primary js-open-exam-form-modal"', html=False)
         self.assertContains(response, f'data-exam-modal-url="{reverse("exams:create_exam")}"')
 
     def test_profile_my_exams_filters_practical_separately_from_written(self):
