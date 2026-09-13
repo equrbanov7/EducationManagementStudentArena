@@ -66173,3 +66173,6 @@ msgstr "Войти на итоговый экзамен можно только 
 msgctxt "accounts.first_login"
 msgid "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
 msgstr "Этот адрес электронной почты использовать нельзя. Введите другой адрес."
+
+msgid "delete_account_academic_history"
+msgstr "У этой учётной записи есть академическая история (зачисления, оценки, попытки экзаменов) — её нельзя удалить полностью, только архивировать."

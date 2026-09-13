@@ -66119,3 +66119,6 @@ msgstr "A final exam can only be entered from the exam-centre entry page (userna
 msgctxt "accounts.first_login"
 msgid "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
 msgstr "This e-mail address cannot be used. Enter a different address."
+
+msgid "delete_account_academic_history"
+msgstr "This account has academic history (enrolments, grades, exam attempts) — it cannot be hard-deleted, only archived."

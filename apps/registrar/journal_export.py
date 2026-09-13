@@ -17,6 +17,8 @@ from io import BytesIO
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core.export_safety import neutralise_cell, sheet_append
+
 
 def _(text):
     return pgettext("registrar.pdf", text)  # PDF ilə eyni kontekst — etiketlər üst-üstə düşür
@@ -71,7 +73,9 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     # Başlıq zolağı (birləşmiş): fənn + qrup + semestr.
     org_name = getattr(getattr(offering, "organization", None), "name", "") or ""
     ws.merge_cells(f"A1:{last_col}1")
-    tcell = ws.cell(row=1, column=1, value=f"{offering.subject.code} — {offering.subject.name}")
+    # 2026-09-13 audit F-07: fənn/qrup/tələbə adları və rəy mətni xanaya YALNIZ
+    # neytrallaşdırılaraq düşür (openpyxl "=…" sətrini formula kimi yazır).
+    tcell = ws.cell(row=1, column=1, value=neutralise_cell(f"{offering.subject.code} — {offering.subject.name}"))
     tcell.fill = navy_fill
     tcell.font = title_font
     tcell.alignment = center
@@ -87,7 +91,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         if p
     ]
     ws.merge_cells(f"A2:{last_col}2")
-    scell = ws.cell(row=2, column=1, value="  ·  ".join(sub_parts))
+    scell = ws.cell(row=2, column=1, value=neutralise_cell("  ·  ".join(sub_parts)))
     scell.fill = navy_fill
     scell.font = sub_font
     scell.alignment = center
@@ -98,7 +102,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     head = [pgettext("registrar.journal", "Soyad, ad")]
     head += [f"{i + 1}\n{lesson.date.strftime('%d.%m')}" for i, lesson in enumerate(lessons)]
     head += [pgettext("registrar.journal", "Qayıb (q/b)"), pgettext("registrar.journal", "Giriş balı")]
-    ws.append(head)
+    sheet_append(ws, head)
     header_row = ws.max_row
     for col in range(1, len(head) + 1):
         cell = ws.cell(row=header_row, column=col)
@@ -122,7 +126,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
                 values.append("i/e")
         values.append(int(row.get("absence_count", 0)))
         values.append(float(row["entry_score"]))
-        ws.append(values)
+        sheet_append(ws, values)
         excel_row = ws.max_row
         row_fill = zebra if r_idx % 2 else None
         for col in range(1, len(values) + 1):
@@ -179,13 +183,13 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     ]
     last2 = get_column_letter(len(head2))
     ws2.merge_cells(f"A1:{last2}1")
-    t2 = ws2.cell(row=1, column=1, value=f"{offering.subject.code} — {_('Yekun nəticə')}")
+    t2 = ws2.cell(row=1, column=1, value=neutralise_cell(f"{offering.subject.code} — {_('Yekun nəticə')}"))
     t2.fill = navy_fill
     t2.font = title_font
     t2.alignment = center
     ws2.row_dimensions[1].height = 26
     ws2.append([])
-    ws2.append(head2)
+    sheet_append(ws2, head2)
     head2_row = ws2.max_row
     for col in range(1, len(head2) + 1):
         cell = ws2.cell(row=head2_row, column=col)
@@ -203,7 +207,8 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         else:
             outcome = _("Davam edir")
         resit = result.get("resit")
-        ws2.append(
+        sheet_append(
+            ws2,
             [
                 row["student"].get_full_name() or row["student"].username,
                 float(result["entry_score"]),
@@ -214,7 +219,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
                 str(outcome),
                 float(resit.resit_score) if resit is not None and resit.resit_score is not None else "",
                 result.get("comment", ""),
-            ]
+            ],
         )
         excel_row = ws2.max_row
         row_fill = zebra if r_idx % 2 else None

@@ -427,6 +427,10 @@ def superadmin_user_management(request):
                 except AccountDeletionError as exc:
                     if str(exc) == "last_org_admin":
                         messages.error(request, _("delete_account_last_admin"))
+                    elif str(exc) == "hard_delete_academic_history":
+                        # Audit 2026-09-13 data F2: akademik tarixçəli hesab
+                        # yalnız arxivlənir — səbəb açıq deyilməlidir.
+                        messages.error(request, _("delete_account_academic_history"))
                     else:
                         messages.error(request, _("delete_account_error"))
                 else:
