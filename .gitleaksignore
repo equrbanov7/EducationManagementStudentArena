@@ -6,3 +6,15 @@ b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:14
 b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:gcp-api-key:47
 b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:sendinblue-api-token:63
 b083fdf657c2928d21bc15e92e160e31ecbb2d08:.env.example:generic-api-key:93
+
+# Audit 2026-09-13 (security F-03): yeni `ems-postgres-dsn-password` qaydası tarixi
+# nümunə DSN-ləri tutur (.env.example/README/docs — placeholder parollar) və 2026-02
+# tarixli commit-də səhvən yığılmış lokal `.env`-i (b09cb19d, dev docker parolu).
+# Fingerprint-lər dəqiq pinlənir ki, yeni sızma yenə CI-ni qırsın.
+0e66520f91e2488359505162095b5ebc879cf5bd:README.md:ems-postgres-dsn-password:163
+3b91b69c4142c444b0baff81ee25b031c03feb3a:.env.example:ems-postgres-dsn-password:41
+3b91b69c4142c444b0baff81ee25b031c03feb3a:.env.example:ems-postgres-dsn-password:43
+57f58687042ddf976e3c70769604215ab49d87a6:.env.example:ems-postgres-dsn-password:12
+98a10b59c6fe5caca85e561e4304583edb396f32:docs/deployment.md:ems-postgres-dsn-password:36
+b09cb19d25181f387c74d4b31204ee9931cc02f4:.env:ems-postgres-dsn-password:16
+b09cb19d25181f387c74d4b31204ee9931cc02f4:.env:ems-postgres-dsn-password:19
