@@ -383,6 +383,8 @@ UNIVERSITY_ROLES = [
             # Dərs yükü: müəllim YALNIZ ÖZ bölgü sətirlərini görür («Dərs yüküm»);
             # sorğu qatı `teacher=request.user` ilə daraldılıb (fail-closed).
             "workload.view",
+            # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
+            "assignment.edit",
             "assignment.delete",
             "project.delete",
             "lab.delete",

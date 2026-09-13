@@ -141,7 +141,28 @@ def _get_structure_scope(request, organization):
 
 
 def _can_view_structure(request, organization, scope):
-    return scope.is_org_wide or _has_org_permission(request, "unit.view")
+    """Struktur səthini (fakültə/kafedra/ağac) kim GÖRƏ bilər.
+
+    Audit `access` F-07 (2026-09-13): `request.org_permissions` AKTİV
+    təşkilata aiddir; slug-lu struktur səhifəsi isə URL-dəki `organization`-a.
+    B tenantının rektoru `/organizations/<A-slug>/structure/faculties/` açanda
+    A üçün əhatə `EMPTY_SCOPE` idi (data sızmırdı), amma `unit.view` aktiv org
+    B-dən oxunub 200 «boş qabıq» verirdi — dashboard/members/roles eyni halda
+    `organizations:select`-ə yönləndirir. İndi aktiv-org icazəsi YALNIZ
+    `organization` aktiv təşkilat olanda sayılır; org-wide əhatə (superadmin,
+    sahib, açarı daşıyan ORGANIZATION rolu) `organization`-ın özündən çıxdığı
+    üçün dəyişmir.
+    """
+    if scope.is_org_wide:
+        return True
+    if not _has_org_permission(request, "unit.view"):
+        return False
+    from core.tenancy import get_request_organization
+
+    active_organization = get_request_organization(request)
+    return active_organization is not None and getattr(active_organization, "pk", None) == getattr(
+        organization, "pk", None
+    )
 
 
 def _visible_units_queryset(organization, scope):
