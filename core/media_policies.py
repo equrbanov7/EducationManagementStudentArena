@@ -422,6 +422,89 @@ def check_workload_amendment_access(user, path: str) -> bool:
     return user_has_org_permission(user, amendment.organization, WORKLOAD_VIEW_PERMISSION)
 
 
+# ---------------------------------------------------------------------------
+# Kurs tapşırığı təhvili və sistem bildirişinin qoşması (2026-09-13, audit F-02)
+# ---------------------------------------------------------------------------
+#
+# Hər iki prefiks model ``FileField`` ilə deyil, ``default_storage.save`` ilə
+# yazılır (``assignments.models.Submission.attach_uploaded_file`` → JSON
+# ``files[].path``; ``accounts.services.profile_actions`` → bildiriş
+# ``metadata.image_url`` / ``metadata.attachments[].url``). Ona görə heç bir
+# ``upload_to`` inventarında görünmür və reyestrə düşməmişdi: deny-by-default
+# (2026-09-10 ağ siyahı qaydası) sayəsində sızma YOX idi, amma qiymətləndirmə
+# növbəsindəki ``/media/assignments/submissions/…`` linki və bildiriş qoşması
+# superadmin-dən başqa HƏR KƏSƏ 404 verirdi (funksional, fail-closed).
+
+#: Kurs üzvlüyündə təhvili görə bilən rollar (``task_submission_core.access``
+#: ``can_user_access_course_roster`` ilə eyni siyahı; ``core`` app import etmir).
+_COURSE_STAFF_ROLES: tuple[str, ...] = ("teacher", "assistant")
+
+
+def check_assignment_submission_access(user, path: str) -> bool:
+    """``assignments/submissions/`` — tapşırıq təhvilinin yüklənmiş faylı.
+
+    İcazəlilər: təhvili GÖNDƏRƏN tələbə, kursun sahibi (``Course.owner``), yaxud
+    kursda ``teacher``/``assistant`` üzvlüyü olan aktor. Fayl yolu JSON
+    ``files[].path`` sahəsindədir — ``contains`` axtarışı ilə tapılır; eyni
+    yol bir neçə təhvildə görünsə (nəzəri) hər biri ayrıca yoxlanır."""
+    from django.db.models import Q
+
+    Submission = django_apps.get_model("assignments", "Submission")
+    # Köhnə sətirlərdə açar ``url`` ola bilər (``Submission.file`` xüsusiyyəti hər ikisini oxuyur).
+    lookup = Q(files__contains=[{"path": path}]) | Q(files__contains=[{"url": f"/media/{path}"}])
+    submissions = Submission.objects.filter(lookup).select_related("assignment__course")
+    if not submissions:
+        return False
+    CourseMembership = django_apps.get_model("courses", "CourseMembership")
+    for submission in submissions:
+        if submission.user_id == user.id:
+            return True
+        course = submission.assignment.course
+        if course.owner_id == user.id:
+            return True
+        if CourseMembership.objects.filter(course=course, user=user, role__in=_COURSE_STAFF_ROLES).exists():
+            return True
+    return False
+
+
+def _notification_file_urls(path: str) -> list[str]:
+    """Bildiriş metadata-sında saxlanılan URL formaları (``default_storage.url`` + ``/media/``)."""
+    from django.core.files.storage import default_storage
+
+    candidates = [f"/media/{path}"]
+    try:
+        storage_url = default_storage.url(path)
+    except Exception:  # storage URL qura bilmirsə — yalnız yerli forma
+        storage_url = ""
+    if storage_url and storage_url not in candidates:
+        candidates.insert(0, storage_url)
+    return candidates
+
+
+def check_notification_file_access(user, path: str) -> bool:
+    """``notifications/files/`` və ``notifications/images/`` — sistem bildirişinin qoşması.
+
+    Fayl bildirişin ÖZÜNDƏ (``InAppNotification.metadata``) URL kimi saxlanılır;
+    eyni fayl bütün alıcıların sətirlərində təkrarlanır. İcazəlilər: bildirişin
+    ALICISI (silinmiş/oxunmuş olsa da — qoşma onun poçtudur), yaxud bildirişin
+    təşkilatında müəllim səviyyəli (≥50) aktiv üzv — dərc edən şəxs ayrıca
+    saxlanmır, dərc səlahiyyəti isə müəllim/əməkdaş səviyyəsindən başlayır.
+    Təşkilatsız (qlobal) bildirişdə yalnız alıcı qapısı işləyir."""
+    from django.db.models import Q
+
+    InAppNotification = django_apps.get_model("notifications", "InAppNotification")
+    lookup = Q()
+    for url in _notification_file_urls(path):
+        lookup |= Q(metadata__image_url=url) | Q(metadata__attachments__contains=[{"url": url}])
+    matching = InAppNotification.objects.filter(lookup)
+    if not matching.exists():
+        return False
+    if matching.filter(recipient_id=user.id).exists():
+        return True
+    organization_ids = set(matching.exclude(organization_id=None).values_list("organization_id", flat=True))
+    return any(user_has_org_membership(user, org_id, min_level=TEACHER_MIN_LEVEL) for org_id in organization_ids)
+
+
 #: ``media_views._PRIVATE_PREFIXES``-ə qatılan prefikslər.
 PRIVATE_PREFIXES: tuple[str, ...] = (
     "journal_corrections/",
@@ -436,6 +519,9 @@ PRIVATE_PREFIXES: tuple[str, ...] = (
     "student_movements/",
     "applications/",
     "workload_amendments/",
+    "assignments/submissions/",
+    "notifications/files/",
+    "notifications/images/",
 )
 
 #: ``media_views._ACCESS_CHECKERS``-ə qatılan checker-lər (eyni açarlarla).
@@ -452,4 +538,7 @@ ACCESS_CHECKERS: dict[str, object] = {
     "legacy_excuse_documents/": check_legacy_excuse_document_access,
     "applications/": check_application_attachment_access,
     "workload_amendments/": check_workload_amendment_access,
+    "assignments/submissions/": check_assignment_submission_access,
+    "notifications/files/": check_notification_file_access,
+    "notifications/images/": check_notification_file_access,
 }

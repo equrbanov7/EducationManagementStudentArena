@@ -66081,3 +66081,6 @@ msgstr "Final imtahanına yalnız imtahan mərkəzinin giriş səhifəsindən (i
 msgctxt "accounts.first_login"
 msgid "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
 msgstr "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
+
+msgid "delete_account_academic_history"
+msgstr "Bu hesabın akademik tarixçəsi (qeydiyyat, qiymət, imtahan cəhdi) var — tam silinə bilməz, yalnız arxivlənə bilər."

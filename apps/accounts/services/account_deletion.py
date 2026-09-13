@@ -507,10 +507,38 @@ def unblock_account(user, *, request=None, actor=None, reason=""):
     )
 
 
+def _has_academic_history(user) -> bool:
+    """İstifadəçinin akademik tarixçəsi varmı (SAR / qeydiyyat / imtahan cəhdi).
+
+    2026-09-13 məlumat auditi, F2 (P1): ``StudentAcademicRecord.student`` və
+    ``Enrollment.student`` ``CASCADE``-dir, DB-də isə bütün FK-lar ``NO ACTION``
+    olduğu üçün kaskad YALNIZ Django-dadır — ``user.delete()`` qeydiyyatla
+    birlikdə ``LessonMark``/``ComponentScore``/``FinalGrade``/``ResitRecord``
+    zəncirini səssiz aparır (klonda 875 tələbə heç bir ``LegacyGradeFact``
+    PROTECT-inə düşmür; 504-ünün 40 763 dərs qiyməti var). Qiymətlər və
+    imtahan cəhdləri hesab deyil, AKADEMİK SƏNƏDDİR — hesabla birlikdə
+    silinmir. Bal daşıyan cədvəllər qeydiyyata bağlı olduğundan ``Enrollment``
+    yoxlaması onların hamısını əhatə edir; ``ExamAttempt`` isə birbaşa
+    istifadəçiyə bağlıdır və ayrıca yoxlanır.
+    """
+    from apps.exams.models import ExamAttempt
+    from apps.registrar.models import Enrollment, StudentAcademicRecord
+
+    return (
+        StudentAcademicRecord.objects.filter(student=user).exists()
+        or Enrollment.objects.filter(student=user).exists()
+        or ExamAttempt.objects.filter(user=user).exists()
+    )
+
+
 def hard_delete_account(user, *, request=None):
     """
     Permanently delete a user account from the database.
     Should only be used by superadmins.
+
+    Akademik tarixçəsi olan hesab üçün ``AccountDeletionError("hard_delete_academic_history")``
+    atılır — belə hesab yalnız ``soft_delete_account`` (anonimləşdirmə/arxiv) yolu ilə
+    bağlanır (2026-09-13 audit F2).
 
     Args:
         user: The User instance to permanently delete
@@ -519,6 +547,14 @@ def hard_delete_account(user, *, request=None):
     username = user.username
     email = user.email
     user_pk = user.pk
+
+    if _has_academic_history(user):
+        logger.warning(
+            "Hard delete refused for user %s (pk=%s): academic history present; use soft delete",
+            username,
+            user_pk,
+        )
+        raise AccountDeletionError("hard_delete_academic_history")
 
     # Log before deletion (since user will be gone)
     log_action(

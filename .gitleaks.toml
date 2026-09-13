@@ -80,3 +80,47 @@ paths = [
     # dəyərlər), real credential daşımır; tək-tək regex əvəzinə yol səviyyəsində.
     '''docs/architecture/AKADEMIK_OS_ANALIZI\.md$''',
 ]
+
+# ── Layihə qaydası: parollu PostgreSQL DSN (audit 2026-09-13, F-03) ─────────
+# gitleaks-in default qayda dəsti `postgres://user:<parol>@host` formasını TUTMUR;
+# QA klonunun (real istifadəçi məlumatının kopyası) iki işlək parolu məhz bu
+# formada tracked fayllara düşmüşdü. Qayda parolu (2-ci qrup) sirr kimi tutur.
+# Şablonlar (`${VAR}`, `$VAR`, `<parol>`, `%s`, `…`) simvol sinfi ilə istisna
+# olunur; CI/sənəd placeholder-ləri və yerli birdəfəlik agent sandbox DSN-i
+# (`emsarena_agent:emsarena_agent_password@127.0.0.1:55432`) aşağıda allow-list-dədir.
+[[rules]]
+id = "ems-postgres-dsn-password"
+description = "PostgreSQL DSN with an embedded password (postgres://user:<pw>@host)"
+regex = '''postgres(?:ql)?://([A-Za-z0-9_.\-]+):([^@\s"'<>$%{}`…]{8,})@[A-Za-z0-9_.\-]+(?::[0-9]+)?'''
+secretGroup = 2
+keywords = ["postgres://", "postgresql://"]
+
+[[rules.allowlists]]
+description = "Placeholder DSN parolları (CI, sənəd nümunələri, yerli agent sandbox-u)"
+# Yerli birdəfəlik agent sandbox-u (docker-compose.agent.yml, docs/operations/CLAUDE_POSTGRES_SANDBOX.md)
+# — real məlumat yoxdur, parol brifdə açıq verilir.
+regexes = [
+    '''^emsarena_agent_password$''',
+    # CI workflow-larının smoke/test bazaları
+    '''^(build|test|security|security_app|rls_ci)_password$''',
+    # .env.example / README / test fixture nümunələri
+    '''^CHANGE_ME$''',
+    '''^replace-with-a-strong-postgres-password$''',
+    '''^secretpw$''',
+    '''^raw-password$''',
+]
+# Tarixi commit-lər: QA klon parolları bu commit-lərdə əlavə olunub və 2026-09-13
+# (F-03) tracked fayllardan çıxarılıb; parollar rotasiya olunur (ops), tarix
+# yenidən yazılmır (auditin qərarı: «rotasiya kifayətdir»). Yeni commit-lərdə
+# qayda tam qüvvədədir.
+commits = [
+    "200fd86e0bad91b4e0417b701d81b11e5ed20998",
+    "250efa18316f6e97f031d67aa6a636ab7f11d290",
+    "6c028efeec28a427714c93443ebac060dc1d8921",
+    "7ce4000471e76616f84c8f6ec1efd07e8c8a1ba8",
+    "864e47e477c6aad1900feb4d5b2f69ae1f48d16b",
+    "92ade45a2d527ee9d0ecf942c10e0612c9c59b29",
+    "97db34a0558579f71f19eec4eedbbdbaa96003f1",
+    "ebb44efa518ced09ed1c1e8c4b5c5c5e3f6437e9",
+    "fb46a934db0db4de7df66b7ec80b5ddfc45d0582",
+]

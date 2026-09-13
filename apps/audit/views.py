@@ -22,7 +22,6 @@ sahəsi dəyişəndə filtr paneli select-i avtomatik `custom`-a keçirir.
 
 from __future__ import annotations
 
-import csv
 import json
 import uuid
 from datetime import date, datetime, time, timedelta
@@ -43,6 +42,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from core.constants import AuditAction
+from core.export_safety import safe_csv_writer
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import get_request_organization
 from core.ui import status_catalog
@@ -921,7 +921,7 @@ def audit_log_detail(request, pk):
 
 
 class _Echo:
-    """`csv.writer` üçün yazılanı olduğu kimi qaytaran bufer (Django sənəd naxışı)."""
+    """CSV yazıcısı üçün olduğu kimi qaytaran bufer; `reason` istifadəçi mətnidir → F-07 (2026-09-13) neytrallaşdırma."""
 
     def write(self, value):
         return value
@@ -1003,7 +1003,7 @@ def audit_log_export(request):
         return rows, truncated
 
     rows, truncated = _run_scoped(is_superadmin, _materialize)
-    writer = csv.writer(_Echo())
+    writer = safe_csv_writer(_Echo())
 
     def _stream():
         yield "\ufeff"  # BOM — Excel UTF-8 Azərbaycan hərflərini düzgün oxusun

@@ -34,10 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const color = isPdf ? "#e74c3c" : (isImage ? "#0f9f8f" : "#4361ee");
   
       display.classList.add("show");
-      display.innerHTML = `
-      <i class="bi ${icon}" style="color:${color}"></i>
-      <span title="${String(fileName).replace(/"/g, "&quot;")}">${fileName}</span>
-    `;
+      // 2026-09-13 audit F-04: fayl adı istifadəçi girişidir — textContent ilə yazılır (self-XSS gigiyenası).
+      display.innerHTML = `<i class="bi ${icon}" style="color:${color}"></i> <span></span>`;
+      const nameEl = display.querySelector("span");
+      nameEl.title = nameEl.textContent = String(fileName);
       uploadZone.style.borderColor = color;
       uploadZone.style.background = "#f8faff";
     }
