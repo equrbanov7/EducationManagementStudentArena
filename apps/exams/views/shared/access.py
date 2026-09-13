@@ -56,6 +56,13 @@ def _json_redirect_response(response):
     return JsonResponse({"success": True, "redirect_url": redirect_url})
 
 
+def _code_check_failure(request, message, *, status=400):
+    if _is_ajax_request(request):
+        return JsonResponse({"success": False, "error": message}, status=status)
+    messages.error(request, message)
+    return redirect(_resolve_exam_failure_redirect(request))
+
+
 @login_required
 @require_POST
 def exam_code_check(request):
@@ -64,6 +71,33 @@ def exam_code_check(request):
     code = (request.POST.get("access_code") or "").strip()
 
     exam = get_object_or_404(tenant_scoped_exams(request, Exam.objects.filter(is_active=True)), slug=slug)
+
+    # Audit 2026-09-13 EX-03 (P1): PIN/kod brute-force — `/exams/final/`-dəki
+    # istifadəçi-adı əsaslı sürüşən pəncərə limiti (EXAM-SEC-002) bu yolda
+    # tətbiq olunmurdu (30 səhv PIN → 30×400, hər biri PBKDF2). Eyni açar
+    # işlədilir ki, iki yol bir-birinin limitini yan keçə bilməsin.
+    if code:
+        from apps.exams.services.student_pins import student_pin_login_rate_limited
+
+        if student_pin_login_rate_limited(request.user.get_username()):
+            return _code_check_failure(
+                request,
+                pgettext("exams.final_center.entry", "Çox sayda cəhd — bir dəqiqə sonra yenidən yoxlayın."),
+                status=429,
+            )
+
+    # Audit 2026-09-13 EX-02 (P1): final imtahanı YALNIZ imtahan mərkəzi axını
+    # ilə (`/exams/final/` — zal kompüteri qapısı, bilet/gözləmə otağı,
+    # nəzarətçi start-ı) başlaya bilər; kabinet modalı final üçün kod xanası
+    # göstərmir (`assigned_tasks.py`). Bu endpoint isə kabinetdə görünən PIN
+    # ilə həmin qapıların hamısını keçib istənilən IP-dən cəhd yaradırdı.
+    # Müəllif «Sınaq keç» yolu (is_trial) `start_exam`-dan gedir — burada
+    # istisna lazım deyil.
+    if getattr(exam, "exam_type_extended", None) == "final" and request.user != exam.author:
+        return _code_check_failure(
+            request,
+            pgettext("exams.view.access.message", "final_exam_requires_center_entry"),
+        )
 
     can_start, reason = exam.can_user_start(request.user, code=code)
     if not can_start:

@@ -66111,3 +66111,7 @@ msgstr "Audit log"
 msgctxt "profile.sidebar"
 msgid "Təşkilat məlumatları"
 msgstr "Organization details"
+
+msgctxt "exams.view.access.message"
+msgid "final_exam_requires_center_entry"
+msgstr "A final exam can only be entered from the exam-centre entry page (username + PIN)."

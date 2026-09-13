@@ -2,7 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.db.models.functions import Lower
@@ -27,6 +27,7 @@ from core.tenancy import get_request_organization
 from ._shared import (
     _ALLOWED_SORTS,
     _ALLOWED_STATUSES,
+    _ensure_bank_mutation_allowed,
     _normalize_format,
 )
 
@@ -222,43 +223,6 @@ def question_bank_delete(request, bank_id):
             return redirect(next_url)
         return redirect(f"{reverse('accounts:profile')}?section=question-bank")
     return redirect("exams:question_bank_detail", bank_id=bank.id)
-
-
-def _can_mutate_bank(user, bank) -> bool:
-    """Bankın MƏZMUNUNU dəyişməyə kimin haqqı var.
-
-    2026-09-02 audit, P0-2: ``question_bank_detail`` POST budağı yalnız OXU
-    görünürlüyünə (``accessible_banks``) söykənirdi.  Həmin köməkçi imtahan
-    mərkəzi rollarına başqa müəllimin bankını GÖSTƏRİR — nəticədə
-    ``bulk_action=delete`` ilə yad müəllimin sualları HARD-DELETE olunurdu
-    (audit sətri də yazılmırdı).  Mutasiya artıq sahibliyə bağlıdır.
-    """
-    if user is None or not getattr(user, "is_authenticated", False):
-        return False
-    if bank.created_by_id == user.id:
-        return True
-    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
-        return True
-    organization = getattr(bank, "organization", None)
-    return organization is not None and getattr(organization, "owner_id", None) == user.id
-
-
-def _ensure_bank_mutation_allowed(request, bank, action: str):
-    """Sahib deyilsə: rədd et + audit yaz (səssiz keçid YOXDUR)."""
-    if _can_mutate_bank(request.user, bank):
-        return
-    log_action(
-        AuditAction.DENY,
-        user=request.user,
-        organization=getattr(bank, "organization", None),
-        obj=bank,
-        reason=f"question bank mutation refused (not owner): bulk_action={action or '-'}",
-        request=request,
-        resource_type="exams.QuestionBank",
-        resource_id=str(bank.pk),
-        resource_repr=bank.name[:500],
-    )
-    raise PermissionDenied(pgettext("exams.view.bank.message", "Yalnız bankın sahibi bu əməliyyatı edə bilər."))
 
 
 @login_required

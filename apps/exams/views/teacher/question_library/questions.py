@@ -25,6 +25,7 @@ from core.tenancy import get_request_organization
 
 from ._shared import (
     _empty_analysis,
+    _ensure_bank_mutation_allowed,
     _is_modal_request,
     _normalize_format,
     _render_bank_question_form_html,
@@ -34,9 +35,14 @@ from ._shared import (
 
 @login_required
 def question_bank_bulk_add(request, bank_id):
+    # Audit 2026-09-13 EX-10 (P1): bank məzmununu YAZAN dörd view yalnız oxu
+    # görünürlüyü ilə işləyirdi — imtahan mərkəzi rəhbəri yad müəllimin
+    # paylaşılmamış bankının sualını, müəllim isə paylaşılan bankın sualını
+    # auditsiz dəyişə bilirdi. `question_bank_detail` POST ilə eyni qapı.
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "bulk_add")
 
     raw_text = ""
     parsed = []
@@ -168,6 +174,7 @@ def ai_generate_bank_questions(request, bank_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "ai_generate")
 
     # Format: AI kartından (q_format) gəlir, yoxsa bankın default tipi.
     q_format = _normalize_format(request.POST.get("q_format") or bank.default_question_type)
@@ -202,6 +209,7 @@ def bank_question_add(request, bank_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "question_add")
     is_modal = _is_modal_request(request)
     q_format = _normalize_format(
         request.POST.get("q_format") or request.GET.get("format") or bank.default_question_type
@@ -248,6 +256,7 @@ def bank_question_edit(request, bank_id, question_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "question_edit")
     question = get_object_or_404(bank.library_questions, id=question_id)
     is_modal = _is_modal_request(request)
     q_format = question.question_type if question.question_type in ("test", "written") else "test"

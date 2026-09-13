@@ -3,6 +3,7 @@
 import logging
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Count
 from django.template.loader import render_to_string
@@ -12,6 +13,8 @@ from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.models import BankQuestion, BankQuestionOption, QuestionBlock
 from apps.exams.services.import_media import attach_import_media_batch
 from apps.exams.services.question_bank_attach import _question_fingerprint, bank_questions_queryset
+from core.audit import log_action
+from core.constants import AuditAction
 
 logger = logging.getLogger(__name__)
 
@@ -229,3 +232,44 @@ def _bank_language_stats(bank, *, question_type=None):
         total += count
         stats.append({"code": code, "label": labels.get(code, code), "count": count})
     return stats, total, len(stats)
+
+
+def _can_mutate_bank(user, bank) -> bool:
+    """Bankın MƏZMUNUNU dəyişməyə kimin haqqı var.
+
+    Audit 2026-09-13 EX-10: `crud.py`-dən bura köçürüldü ki, `questions.py`-dəki
+    dörd yazı view-u (tək/toplu əlavə, redaktə, AI generasiya) da eyni qapıdan
+    keçsin — onlar hələ də yalnız oxu görünürlüyü ilə yazırdı.
+
+    2026-09-02 audit, P0-2: ``question_bank_detail`` POST budağı yalnız OXU
+    görünürlüyünə (``accessible_banks``) söykənirdi.  Həmin köməkçi imtahan
+    mərkəzi rollarına başqa müəllimin bankını GÖSTƏRİR — nəticədə
+    ``bulk_action=delete`` ilə yad müəllimin sualları HARD-DELETE olunurdu
+    (audit sətri də yazılmırdı).  Mutasiya artıq sahibliyə bağlıdır.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if bank.created_by_id == user.id:
+        return True
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    organization = getattr(bank, "organization", None)
+    return organization is not None and getattr(organization, "owner_id", None) == user.id
+
+
+def _ensure_bank_mutation_allowed(request, bank, action: str):
+    """Sahib deyilsə: rədd et + audit yaz (səssiz keçid YOXDUR)."""
+    if _can_mutate_bank(request.user, bank):
+        return
+    log_action(
+        AuditAction.DENY,
+        user=request.user,
+        organization=getattr(bank, "organization", None),
+        obj=bank,
+        reason=f"question bank mutation refused (not owner): bulk_action={action or '-'}",
+        request=request,
+        resource_type="exams.QuestionBank",
+        resource_id=str(bank.pk),
+        resource_repr=bank.name[:500],
+    )
+    raise PermissionDenied(pgettext("exams.view.bank.message", "Yalnız bankın sahibi bu əməliyyatı edə bilər."))
