@@ -31,6 +31,7 @@ from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.accounts.services.rim.policy import RimAccessError
 from core.export_safety import safe_csv_writer
+from core.write_rate_limit import score_write_rate_limited
 
 _CTX = "accounts.student_registry"
 
@@ -138,6 +139,7 @@ def _name_contains(query: str):
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("student_registry_action")  # F-15 (2026-09-14)
 def student_registry_action(request):
     """Hərəkət əmri — səbəb ≥20 simvol, əmr nömrəsi + tarix məcburi."""
     actor = people.resolve_actor(request)

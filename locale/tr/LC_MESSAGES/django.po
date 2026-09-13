@@ -68303,3 +68303,7 @@ msgstr "Dosya içeriği bildirilen görsel biçimiyle eşleşmiyor."
 msgctxt "upload.security.error"
 msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
 msgstr "Dosya içeriği bildirilen dosya türüyle eşleşmiyor."
+
+msgctxt "core.rate_limit"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Çok sık istek gönderiliyor — biraz sonra yeniden deneyin."

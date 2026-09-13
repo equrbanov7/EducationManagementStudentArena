@@ -26,6 +26,19 @@ from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 
 # Permission definitions by category
+#
+# Audit 2026-09-13 `access` F-06 / hesabat §27 (2026-09-14): reyestrdə olub kodda
+# HEÇ YERDƏ yoxlanmayan açarlar («yalançı düymələr») ya qapıya bağlandı, ya da
+# kataloqdan ÇIXARILDI. Çıxarılanlar (funksiya YOXDUR, miqrasiya 0051 saxlanılan
+# rollardan da silir): `org.delete` (tenant səviyyəsində təşkilat silmə/arxiv əməli
+# yoxdur — status dəyişikliyi yalnız superadmin panelindədir və açarla qapılanmır),
+# `role.create` / `role.delete` (xüsusi rol CRUD-u yoxdur — rollar şablondan
+# seed olunur), `grade.override` (`journal.correct`-in dublikatı — sahibin
+# qərarı ilə sənədli düzəliş açarı TƏKDİR, bax `registrar/corrections.py`),
+# `qa.*` (keyfiyyət modulu / modeli / view-u mövcud deyil). Bağlananlar:
+# `org.settings` + `org.edit` → təşkilat ayarları səhifəsi, `role.edit` → icazə
+# redaktoru POST-u, `audit.export` → CSV ixracı, `journal.view` → əhatəli
+# yalnız-oxu jurnal girişi, `analytics.view_own` → «Statistika» şəxsi profili.
 PERMISSION_CATEGORIES = {
     "organization": [
         "org.view",
@@ -34,7 +47,6 @@ PERMISSION_CATEGORIES = {
         "org.manage_members",
         "org.admin.assign",
         "org.owner.assign",
-        "org.delete",
     ],
     "structure": [
         "unit.view",
@@ -66,10 +78,8 @@ PERMISSION_CATEGORIES = {
     ],
     "roles": [
         "role.view",
-        "role.create",
         "role.edit",
         "role.assign",
-        "role.delete",
     ],
     "courses": [
         "course.view",
@@ -90,7 +100,6 @@ PERMISSION_CATEGORIES = {
         "grade.view",
         "grade.input",
         "grade.publish",
-        "grade.override",
     ],
     # Jurnal düzəlişi (correction) — 2 saat/bitmiş-semestr limitlərini sənədli
     # (PDF + audit) keçmə hüququ. İKT Rəhbəri rolunun açar icazəsi.
@@ -222,11 +231,6 @@ PERMISSION_CATEGORIES = {
         "analytics.view_unit",
         "analytics.view_all",
     ],
-    "qa": [
-        "qa.view",
-        "qa.review",
-        "qa.flag",
-    ],
     "audit": [
         "audit.view",
         "audit.export",
@@ -315,7 +319,6 @@ PERMISSION_CATEGORY_LABELS = {
     "exams": "İmtahanlar",
     "appeal": "Apellyasiya",
     "analytics": "Analitika",
-    "qa": "Keyfiyyət",
     "audit": "Audit jurnalı",
     "users": "Hesab idarəetməsi (RİM)",
     "people": "Müəllim və tələbə kataloqu",
@@ -340,7 +343,6 @@ PERMISSION_LABELS = {
     "org.manage_members": pgettext_lazy(_PERM_CTX, "Təşkilat üzvlərini idarə etmək"),
     "org.admin.assign": pgettext_lazy(_PERM_CTX, "Təşkilat administratoru təyin etmək"),
     "org.owner.assign": pgettext_lazy(_PERM_CTX, "Təşkilat sahibi təyin etmək"),
-    "org.delete": pgettext_lazy(_PERM_CTX, "Təşkilatı silmək"),
     # structure
     "unit.view": pgettext_lazy(_PERM_CTX, "Struktur vahidlərinə baxış"),
     "unit.create": pgettext_lazy(_PERM_CTX, "Struktur vahidi yaratmaq"),
@@ -359,10 +361,8 @@ PERMISSION_LABELS = {
     "member.student_manage": pgettext_lazy(_PERM_CTX, "Tələbə üzvlüyünü idarə etmək"),
     # roles
     "role.view": pgettext_lazy(_PERM_CTX, "Rollara baxış"),
-    "role.create": pgettext_lazy(_PERM_CTX, "Rol yaratmaq"),
     "role.edit": pgettext_lazy(_PERM_CTX, "Rolu redaktə etmək"),
     "role.assign": pgettext_lazy(_PERM_CTX, "Rol təyin etmək"),
-    "role.delete": pgettext_lazy(_PERM_CTX, "Rolu silmək"),
     # courses
     "course.view": pgettext_lazy(_PERM_CTX, "Kurslara baxış"),
     "course.create": pgettext_lazy(_PERM_CTX, "Kurs yaratmaq"),
@@ -376,7 +376,6 @@ PERMISSION_LABELS = {
     "grade.view": pgettext_lazy(_PERM_CTX, "Qiymətlərə baxış"),
     "grade.input": pgettext_lazy(_PERM_CTX, "Qiymət yazmaq"),
     "grade.publish": pgettext_lazy(_PERM_CTX, "Qiymətləri dərc etmək"),
-    "grade.override": pgettext_lazy(_PERM_CTX, "Qiyməti məcburi dəyişmək"),
     # journal
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
@@ -429,10 +428,6 @@ PERMISSION_LABELS = {
     "analytics.view_own": pgettext_lazy(_PERM_CTX, "Öz analitikasına baxış"),
     "analytics.view_unit": pgettext_lazy(_PERM_CTX, "Struktur üzrə analitikaya baxış"),
     "analytics.view_all": pgettext_lazy(_PERM_CTX, "Bütün analitikaya baxış"),
-    # qa
-    "qa.view": pgettext_lazy(_PERM_CTX, "Keyfiyyət yoxlamalarına baxış"),
-    "qa.review": pgettext_lazy(_PERM_CTX, "Keyfiyyət rəyi vermək"),
-    "qa.flag": pgettext_lazy(_PERM_CTX, "Keyfiyyət işarəsi qoymaq"),
     # audit
     "audit.view": pgettext_lazy(_PERM_CTX, "Audit jurnalına baxış"),
     "audit.export": pgettext_lazy(_PERM_CTX, "Audit jurnalını ixrac etmək"),

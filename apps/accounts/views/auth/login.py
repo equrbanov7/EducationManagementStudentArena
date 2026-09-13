@@ -4,6 +4,7 @@ from urllib.parse import urlencode, urlsplit
 
 from django.conf import settings
 from django.contrib.auth.views import LoginView, PasswordResetConfirmView, PasswordResetView
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext
@@ -403,7 +404,11 @@ class NamespacedPasswordResetDoneView(FormView):
         return context
 
     def form_valid(self, form):
-        user = form.save()
+        # Audit 2026-09-13 backend F-07 (2026-09-14): parol + `mark_self_service_password_set`
+        # + OTP «istifadə olundu» işarələri bir tranzaksiyada — yarımçıq halda OTP
+        # təkrar işlənə və ya parol dəyişməmiş qalıb OTP «yanmış» ola bilərdi.
+        with transaction.atomic():
+            user = form.save()
         _clear_login_rate_limits_after_password_reset(self.request, user)
         self.request.session.pop(PASSWORD_RESET_EMAIL_SESSION_KEY, None)
         return super().form_valid(form)

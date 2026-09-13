@@ -55,9 +55,11 @@ _TRUSTEE_PERMISSIONS = [
     "schedule.view",
     "syllabus.view",
     "workload.view",
-    # Nəzarət orqanının əsas iki səthi: aqreqat hesabatlar və audit izi.
+    # Nəzarət orqanının əsas iki səthi: aqreqat hesabatlar və audit izi
+    # (CSV ixracı da — `audit.export`, audit 2026-09-13 F-06 / 2026-09-14).
     "analytics.view_all",
     "audit.view",
+    "audit.export",
 ]
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.

@@ -32,6 +32,7 @@ from apps.exams.services.language_variants import (
 )
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from core.http_ids import parse_int
 
 
 def _manager_url(exam):
@@ -113,7 +114,8 @@ def exam_language_manager(request, slug):
             return redirect(_manager_url(exam))
 
         if action == "toggle_variant":
-            variant = exam.language_variants.filter(id=request.POST.get("variant_id")).first()
+            # F-01 (2026-09-14): pozuq id → `None` → tapılmır (əvvəl `ValueError` → 500).
+            variant = exam.language_variants.filter(id=parse_int(request.POST.get("variant_id"))).first()
             if variant is not None:
                 set_variant_active(variant, not variant.is_active)
                 messages.success(request, pgettext("exams.view.language.message", "Dil variantı yeniləndi."))

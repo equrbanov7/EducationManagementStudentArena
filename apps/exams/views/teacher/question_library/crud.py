@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Q
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
@@ -244,18 +245,20 @@ def question_bank_detail(request, bank_id):
             if lang:
                 qs = qs.filter(language=lang)
             deleted = qs.count()
-            qs.delete()
-            log_action(
-                AuditAction.DELETE,
-                user=request.user,
-                organization=getattr(bank, "organization", None),
-                obj=bank,
-                reason=f"question bank bulk delete_language: language={lang or 'all'}, count={deleted}",
-                request=request,
-                resource_type="exams.QuestionBank",
-                resource_id=str(bank.pk),
-                resource_repr=bank.name[:500],
-            )
+            # Audit 2026-09-13 backend F-07 (2026-09-14): silmə + audit izi birlikdə.
+            with transaction.atomic():
+                qs.delete()
+                log_action(
+                    AuditAction.DELETE,
+                    user=request.user,
+                    organization=getattr(bank, "organization", None),
+                    obj=bank,
+                    reason=f"question bank bulk delete_language: language={lang or 'all'}, count={deleted}",
+                    request=request,
+                    resource_type="exams.QuestionBank",
+                    resource_id=str(bank.pk),
+                    resource_repr=bank.name[:500],
+                )
             messages.success(
                 request, pgettext("exams.view.bank.message", "{count} sual silindi.").format(count=deleted)
             )
@@ -286,19 +289,20 @@ def question_bank_detail(request, bank_id):
             )
         elif action == "delete":
             deleted_ids = sorted(selected_qs.values_list("id", flat=True))
-            selected_qs.delete()
-            log_action(
-                AuditAction.DELETE,
-                user=request.user,
-                organization=getattr(bank, "organization", None),
-                obj=bank,
-                changes={"deleted_question_ids": deleted_ids},
-                reason=f"question bank bulk delete: count={count}",
-                request=request,
-                resource_type="exams.QuestionBank",
-                resource_id=str(bank.pk),
-                resource_repr=bank.name[:500],
-            )
+            with transaction.atomic():  # F-07 (2026-09-14) — bax `delete_language` şərhi
+                selected_qs.delete()
+                log_action(
+                    AuditAction.DELETE,
+                    user=request.user,
+                    organization=getattr(bank, "organization", None),
+                    obj=bank,
+                    changes={"deleted_question_ids": deleted_ids},
+                    reason=f"question bank bulk delete: count={count}",
+                    request=request,
+                    resource_type="exams.QuestionBank",
+                    resource_id=str(bank.pk),
+                    resource_repr=bank.name[:500],
+                )
             messages.success(request, pgettext("exams.view.bank.message", "{count} sual silindi.").format(count=count))
         else:
             messages.error(request, pgettext("exams.view.bank.message", "Yanlış əməliyyat."))

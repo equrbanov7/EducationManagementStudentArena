@@ -1,8 +1,5 @@
-"""Universitet tipli təşkilatların default rol şablonları.
-
-``default_roles`` modulundan modul ölçü budcəsinə (SOFT_CAP=600) görə
-ayrılıb — MƏZMUN DƏYİŞMƏYİB, yalnız yer dəyişib.
-"""
+"""Universitet tipli təşkilatların default rol şablonları (``default_roles``-dan
+modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyişməyib)."""
 
 from core.constants import RoleScopeType
 
@@ -96,6 +93,8 @@ UNIVERSITY_ROLES = [
             "journal.reassign",
             "analytics.view_all",
             "audit.view",
+            "audit.export",  # bax `ikt_rehber` şərhi (F-06, 2026-09-14)
+            "org.settings",
         ],
         "description": "Vice rector with broad administrative permissions",
     },
@@ -123,12 +122,12 @@ UNIVERSITY_ROLES = [
             "grade.publish",
             "appeal.respond",
             "appeal.decide",
-            "qa.*",
             "people.view_teachers",
             "people.view_students",
             "people.view_contacts",
             "analytics.view_all",
             "audit.view",
+            "audit.export",
         ],
         "description": "Exam center head — assigns invigilators and manages the exam centre",
     },
@@ -154,6 +153,7 @@ UNIVERSITY_ROLES = [
             "member.*",
             "course.*",
             "exam.*",
+            "final_score.entry",  # sahibin qərarı 2026-09-14: kağız bal köçürməsi RİM-də də (miqr. 0052)
             "grade.*",
             # org_admin-alias davranış qorunması (level 95 >= 80).
             "group.view",
@@ -193,9 +193,12 @@ UNIVERSITY_ROLES = [
             "people.manage_academic",
             "appeal.respond",
             "appeal.decide",
-            "qa.*",
             "analytics.view_all",
             "audit.view",
+            # F-06 (2026-09-14): `audit.export` = CSV ixracı (hər `audit.view` şablonuna cüt), `org.settings` =
+            # ayarlar səhifəsi (səviyyə ≥90 + açar); miqrasiya 0051 mövcud rollara əkir.
+            "audit.export",
+            "org.settings",
         ],
         "description": "ICT manager — documented journal-correction override (bypasses edit-window & closed semesters), full exam-centre + structure access; every action audited",
     },
@@ -213,9 +216,9 @@ UNIVERSITY_ROLES = [
             "course.view",
             "exam.*",
             "grade.view",
-            "qa.*",
             "analytics.view_all",
             "audit.view",
+            "audit.export",
         ],
         "description": "Exam center staff — live monitoring, PIN lookup and reports (no invigilator assignment)",
     },
@@ -249,6 +252,7 @@ UNIVERSITY_ROLES = [
             "people.manage_teacher_role",
             "analytics.view_unit",
             "audit.view",
+            "audit.export",
         ],
         "description": "HR managing staff, positions and faculty/department assignments",
     },

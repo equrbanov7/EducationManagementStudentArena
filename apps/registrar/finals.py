@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
-from apps.registrar import grade_audit, gradebook, grading_scale, services
+from apps.registrar import absence_limit, grade_audit, gradebook, grading_scale, services
 from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
 from apps.registrar.exam_eligibility import status_code as eligibility_status
 from apps.registrar.exam_eligibility import status_label as eligibility_label
@@ -118,11 +118,12 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
         final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
         resit = ResitRecord.objects.filter(enrollment=enrollment).first()
-        limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
+        # F-06 (2026-09-14): hədd TƏLƏBƏNİN ÖZ proqramından — kabinet/imtahan qapısı ilə eyni mənbə.
+        limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
     else:
         final_grade = batch.final_grade_for(enrollment)
         resit = batch.resit_for(enrollment)
-        limit_percent = batch.limit_percent_for(enrollment.offering)
+        limit_percent = batch.limit_percent_for_enrollment(enrollment)
         frozen = batch.frozen_for(enrollment.offering)
         if exempt is None:
             exempt = batch.exempt_for(enrollment)
