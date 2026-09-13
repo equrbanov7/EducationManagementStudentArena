@@ -303,7 +303,7 @@ black/isort/flake8 + 4 struktur qapısı yaşıl; 23 «ölü kod» namizədi yal
 2. İşləyən image-i yenidən build/deploy etmək (Django 5.2.17 və CVE düzəlişləri, healthcheck-lər, stop_grace, IPAM); deploy-dan əvvəl `docker network inspect` subnet 172.18.0.0/16 təsdiqi.
 3. Prod `.env`: TLS bayraqları (`INSECURE_TRANSPORT_OK` yox), `ALLOWED_HOSTS`-a `localhost` (webhook), Redis `maxmemory 3gb`/`noeviction` drift-i.
 4. Alert çatdırılması: Brevo «Authorised IPs», stack-in qaldırılması, Watchdog heartbeat-in xarici tərəfdə göründüyünü sübut etmək.
-5. Klon/staging DB parollarının rotasiyası (git tarixində qalır) — `ALTER ROLE emsarena_staging/emsarena_app`.
+5. Parol rotasiyası: klon/staging DB parolları git tarixində qalır (`ALTER ROLE emsarena_staging/emsarena_app`); əlavə olaraq yeni gitleaks DSN qaydası 2026-02-02 tarixli `b09cb19d` commit-ində səhvən yığılmış lokal `.env`-i (dev docker DB parolu + 4 sirr sətri) aşkarladı — həmin dəyərlər hər hansı real mühitdə işlədilirsə dəyişdirilməlidir; fingerprint-lər `.gitleaksignore`-da pinlənib ki, yeni sızma CI-ni qırsın.
 6. Real ölçülü backup restore məşqi + off-site nüsxə; RPO qərarı.
 7. 349 `exam_score > 50` sətri və 1 ehtimal ikiqat tələbə üçün İmtahan Mərkəzi/TŞ qərarı; legacy reconciliation/review prosesinin işə salınması.
 
