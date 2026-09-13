@@ -5,7 +5,12 @@ Authentication backends for accounts app.
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
-from .identity import canonical_identity, canonical_identity_queryset, user_access_is_login_blocked
+from .identity import (
+    REQUEST_USER_LOGIN_CHECKED_ATTR,
+    canonical_identity,
+    canonical_identity_queryset,
+    user_access_is_login_blocked,
+)
 
 
 class EmailOrUsernameBackend(ModelBackend):
@@ -65,4 +70,9 @@ class EmailOrUsernameBackend(ModelBackend):
         # süzür (bloklanmış hesab → ``None``); burada ikinci dəfə çağırmaq eyni
         # ``accounts_userprofile`` access_state SELECT-ini hər autentifikasiyalı
         # sorğuda təkrarlayırdı. Semantika dəyişmir — yoxlama super()-dədir.
-        return super().get_user(user_id)
+        user = super().get_user(user_id)
+        if user is not None:
+            # 2026-09-14 (perf F-08): yoxlama keçilib — sorğu daxilində middleware və
+            # view-as köməkçiləri (`request_user_login_blocked`) eyni SELECT-i təkrarlamır.
+            setattr(user, REQUEST_USER_LOGIN_CHECKED_ATTR, True)
+        return user

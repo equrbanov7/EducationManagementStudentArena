@@ -32,7 +32,7 @@ from django.db.models import Max, Q
 
 from core.rls import bypass_rls
 
-from ..identity import user_access_is_login_blocked
+from ..identity import request_user_login_blocked, user_access_is_login_blocked
 from ..models import ProfileRole
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
@@ -161,7 +161,7 @@ def resolve_actor_access(user, organization, *, memberships=None):
         user is None
         or organization is None
         or not getattr(user, "is_authenticated", False)
-        or user_access_is_login_blocked(user)
+        or request_user_login_blocked(user)
     ):
         return None, 0, []
 
@@ -208,7 +208,7 @@ def actor_limited_write_url_names(user, organization) -> frozenset:
 
 def actor_can_use_view_as(user, organization) -> bool:
     """Panelin görünürlüyü üçün ucuz yoxlama (superadmin org-suz da görür)."""
-    if user is None or not getattr(user, "is_authenticated", False) or user_access_is_login_blocked(user):
+    if user is None or not getattr(user, "is_authenticated", False) or request_user_login_blocked(user):
         return False
     if _is_superadmin(user):
         return True
