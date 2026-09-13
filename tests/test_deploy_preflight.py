@@ -47,7 +47,8 @@ def test_deploy_runs_django_check_deploy_inside_image_before_release_and_restart
     assert "python manage.py check --deploy --fail-level" in preflight
     assert "run --rm -T -e RUN_RELEASE_ON_START=false app" in preflight
     assert "exit 1" in preflight
-    assert 'DEPLOY_CHECK_FAIL_LEVEL="${DEPLOY_CHECK_FAIL_LEVEL:-ERROR}"' in _script()
+    # 2026-09-14 infra auditi P3-16: defolt CI ilə eyni — WARNING.
+    assert 'DEPLOY_CHECK_FAIL_LEVEL="${DEPLOY_CHECK_FAIL_LEVEL:-WARNING}"' in _script()
 
 
 def test_deploy_refuses_insecure_transport_flag_in_production_env():
@@ -57,7 +58,10 @@ def test_deploy_refuses_insecure_transport_flag_in_production_env():
 
 
 def test_health_wait_includes_celery_services_and_dumps_their_logs():
-    body = _function_body("docker_deploy")
+    # 2026-09-14 infra auditi P2-5: gözləmə dövrü rollback üçün ayrıca
+    # funksiyaya çıxarıldı; docker_deploy onu çağırır.
+    assert "wait_for_app_and_worker_health || {" in _function_body("docker_deploy")
+    body = _function_body("wait_for_app_and_worker_health")
     assert "app_replicas_ready && worker_services_ready" in body
     assert "logs --tail=200 app nginx celery_worker celery_worker_heavy celery_beat" in body
 

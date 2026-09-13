@@ -71,6 +71,9 @@ jobs:
           SECURE_SSL_REDIRECT: "False"
           SESSION_COOKIE_SECURE: "False"
           CSRF_COOKIE_SECURE: "False"
+          # 2026-09-14 infra auditi (wave 2, P2-1 smoke): eyni token həm app-a
+          # (x-app-env), həm Alertmanager şablonuna (WEBHOOK_TOKEN) gedir.
+          ALERTMANAGER_WEBHOOK_TOKEN: ci-smoke-webhook-token
         run: |
           # Docker Hub anonim pull-lar paylaşılan CI IP-sində rate-limit-ə (toomanyrequests)
           # və ya keçici "unknown" manifest xətasına düşə bilir. Stack-i 3 dəfəyə qədər
@@ -138,6 +141,93 @@ jobs:
             exit 1
           fi
           echo "✅ /health/ returned HTTP $HEALTH — stack is serving traffic."
+
+      # 2026-09-14 infra auditi (wave 2, P2-1 qalığı): Alertmanager → app webhook
+      # yolu. Prod-da nginx-in daxili `location = …/alertmanager-webhook/` bloku
+      # `Host localhost` + `X-Forwarded-Proto https` ötürür; burada həmin
+      # başlıqlarla və Alertmanager konteynerinin özündən (render olunmuş
+      # konfiqdəki eyni URL ilə) POST edilir. Gözlənilən: tokensiz 403,
+      # token ilə 200 — 301 (SSL redirect) və 400 (DisallowedHost) reqressiyadır.
+      # P3-8: konteyner /tmp/alertmanager.yml-i render-template.sh ilə qurub —
+      # URL orada olmalıdır (render pozulsaydı Alertmanager heç qalxmazdı).
+      - name: 🔔 Verify Alertmanager webhook path through nginx
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+          ALERTMANAGER_WEBHOOK_TOKEN: ci-smoke-webhook-token
+        run: |
+          set -euo pipefail
+          WEBHOOK_PATH=/api/superadmin/monitoring/alertmanager-webhook/
+          PAYLOAD='{"alerts":[],"status":"firing"}'
+          probe() {
+            curl -s -o /dev/null -w '%{http_code}' -X POST "http://localhost${WEBHOOK_PATH}" \
+              -H 'Host: localhost' -H 'X-Forwarded-Proto: https' \
+              -H 'Content-Type: application/json' --data "$PAYLOAD" "$@" || echo 000
+          }
+          NO_TOKEN=$(probe)
+          if [ "$NO_TOKEN" != "403" ]; then
+            echo "::error::❌ webhook without token returned HTTP $NO_TOKEN (expected 403; 301/400 = nginx headers/ALLOWED_HOSTS regression)."
+            exit 1
+          fi
+          WITH_TOKEN=$(probe -H "Authorization: Bearer ${ALERTMANAGER_WEBHOOK_TOKEN}")
+          if [ "$WITH_TOKEN" != "200" ]; then
+            echo "::error::❌ webhook with token returned HTTP $WITH_TOKEN (expected 200)."
+            exit 1
+          fi
+          echo "✅ webhook via nginx: no token → 403, token → 200."
+
+          COMPOSE="docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml"
+          $COMPOSE exec -T alertmanager sh -c "grep -q 'http://nginx${WEBHOOK_PATH}' /tmp/alertmanager.yml" || {
+            echo "::error::❌ rendered /tmp/alertmanager.yml does not contain the nginx webhook URL."
+            exit 1
+          }
+          $COMPOSE exec -T alertmanager wget -q -O /dev/null \
+            --header 'Content-Type: application/json' \
+            --header "Authorization: Bearer ${ALERTMANAGER_WEBHOOK_TOKEN}" \
+            --post-data "$PAYLOAD" "http://nginx${WEBHOOK_PATH}" || {
+            echo "::error::❌ POST from the alertmanager container to http://nginx${WEBHOOK_PATH} failed."
+            exit 1
+          }
+          echo "✅ alertmanager container → nginx → app webhook: 200."
+
+      # 2026-09-14 infra auditi P3-3: Redis parolu argv-də olmamalıdır —
+      # entrypoint.sh şablonu /tmp/redis.conf-a render edir; PID 1 komanda
+      # sətrində yalnız `redis-server /tmp/redis.conf` görünməlidir.
+      - name: 🔒 Verify Redis password is not on the process command line
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          set -euo pipefail
+          COMPOSE="docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml"
+          CMDLINE=$($COMPOSE exec -T redis sh -c "tr '\0' ' ' < /proc/1/cmdline")
+          echo "redis PID 1 cmdline: $CMDLINE"
+          case "$CMDLINE" in
+            *"$REDIS_PASSWORD"*|*requirepass*)
+              echo "::error::❌ Redis password / --requirepass is visible on the command line."
+              exit 1
+              ;;
+          esac
+          $COMPOSE exec -T redis sh -c 'redis-cli ping' | grep -q PONG
+          echo "✅ Redis argv is clean and AUTH via REDISCLI_AUTH works."
 
       # Always dump container logs for debugging, then tear down
       - name: 📋 Dump container logs

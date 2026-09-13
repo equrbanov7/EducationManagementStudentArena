@@ -10,7 +10,10 @@ almaqdır.
 
 from __future__ import annotations
 
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -18,6 +21,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPOSE_PATH = ROOT / "docker-compose.prod.yml"
+REDIS_TEMPLATE_PATH = ROOT / "docker/redis/redis.conf.tmpl"
+REDIS_ENTRYPOINT_PATH = ROOT / "docker/redis/entrypoint.sh"
+RENDER_TEMPLATE_PATH = ROOT / "docker/render-template.sh"
 
 _DEFAULT_RE = re.compile(r"^\$\{[A-Z0-9_]+:-(?P<default>[^}]*)\}$")
 _SIZE_RE = re.compile(r"^(?P<num>\d+(?:\.\d+)?)\s*(?P<unit>[a-zA-Z]*)$")
@@ -107,15 +113,18 @@ def test_celery_beat_has_schedule_freshness_healthcheck():
 
 
 def test_redis_maxmemory_default_is_below_container_memory_limit():
+    # 2026-09-14 infra auditi P3-3: seçimlər argv-dən docker/redis/redis.conf.tmpl
+    # şablonuna keçdi; maxmemory dəyəri compose env REDIS_MAXMEMORY-dən gəlir.
     redis = _compose()["services"]["redis"]
-    command = redis["command"]
-    assert "--maxmemory" in command
-    maxmemory = _size_to_bytes(_interpolation_default(command[command.index("--maxmemory") + 1]))
+    template = REDIS_TEMPLATE_PATH.read_text(encoding="utf-8")
+    assert re.search(r"^maxmemory __REDIS_MAXMEMORY__$", template, flags=re.MULTILINE)
+    maxmemory = _size_to_bytes(_interpolation_default(redis["environment"]["REDIS_MAXMEMORY"]))
     mem_limit = _size_to_bytes(_interpolation_default(redis["deploy"]["resources"]["limits"]["memory"]))
 
     assert maxmemory < mem_limit, "REDIS_MAXMEMORY defoltu REDIS_MEM_LIMIT-dən kiçik olmalıdır (OOM-kill riski)"
     # Broker (DB 2) üçün eviction təhlükəlidir — siyasət noeviction qalmalıdır.
-    assert command[command.index("--maxmemory-policy") + 1] == "noeviction"
+    assert re.search(r"^maxmemory-policy noeviction$", template, flags=re.MULTILINE)
+    assert re.search(r"^appendonly yes$", template, flags=re.MULTILINE)
 
 
 def test_redis_section_comment_no_longer_claims_maxmemory_is_unset():
@@ -281,12 +290,123 @@ def test_prometheus_does_not_depend_on_app_health():
 # ── P1-3 — Watchdog təkrar intervalı Alertmanager şablonuna ötürülür ───────
 
 
+def _render_variables(command: str) -> set[str]:
+    """`render-template.sh ŞABLON ÇIXIŞ VAR VAR ...` → {VAR, ...} (2026-09-14 P3-8)."""
+    match = re.search(r"render-template\.sh\s+\S+\s+\S+\s+(.*?)\s*&&", command, flags=re.DOTALL)
+    assert match, "render-template.sh çağırışı tapılmadı"
+    return set(match.group(1).split())
+
+
 def test_alertmanager_renders_watchdog_repeat_placeholder():
     alertmanager = _compose()["services"]["alertmanager"]
     assert "WATCHDOG_REPEAT" in alertmanager["environment"]
     command = " ".join(alertmanager["command"])
-    assert "__WATCHDOG_REPEAT__" in command, "P1-3: sed __WATCHDOG_REPEAT__ əvəzləməsi yoxdur"
+    variables = _render_variables(command)
+    assert "WATCHDOG_REPEAT" in variables, "P1-3: __WATCHDOG_REPEAT__ əvəzləməsi yoxdur"
     template = (ROOT / "docker/alertmanager/alertmanager.tmpl.yml").read_text(encoding="utf-8")
-    placeholders = set(re.findall(r"__[A-Z_]+__", template)) - {"__PLACEHOLDER__"}
-    rendered = set(re.findall(r"s\|(__[A-Z_]+__)\|", command))
-    assert placeholders <= rendered, f"şablondakı placeholder-lar sed ilə doldurulmur: {placeholders - rendered}"
+    placeholders = {name.strip("_") for name in re.findall(r"__[A-Z_]+__", template)} - {"PLACEHOLDER"}
+    assert placeholders <= variables, f"şablondakı placeholder-lar render olunmur: {placeholders - variables}"
+    assert variables <= set(alertmanager["environment"]), "render dəyişənləri compose environment-də olmalıdır"
+
+
+# ── 2026-09-14 infra auditi (wave 2): P3-3 Redis parolu argv-də deyil ──────
+
+
+def test_redis_password_is_not_on_the_command_line_and_healthcheck_keeps_auth_env():
+    redis = _compose()["services"]["redis"]
+    command = " ".join(redis["command"])
+    assert "requirepass" not in command and "REDIS_PASSWORD" not in command, "P3-3: parol argv-də olmamalıdır"
+    assert redis["command"] == ["sh", "/etc/redis/entrypoint.sh"]
+    # Şablon + entrypoint + ortaq render skripti mount olunur.
+    binds = {volume.split(":")[0] for volume in redis["volumes"]}
+    assert {"./docker/redis/redis.conf.tmpl", "./docker/redis/entrypoint.sh", "./docker/render-template.sh"} <= binds
+    template = REDIS_TEMPLATE_PATH.read_text(encoding="utf-8")
+    assert re.search(r'^requirepass "__REDIS_PASSWORD__"$', template, flags=re.MULTILINE)
+    # Healthcheck parolu yenə REDISCLI_AUTH-dan alır (argv-də yox).
+    assert redis["healthcheck"]["test"] == ["CMD", "redis-cli", "ping"]
+    assert "REDISCLI_AUTH" in redis["environment"] and "REDIS_PASSWORD" in redis["environment"]
+    assert (ROOT / "docker/render-template.sh").exists()
+    # Digər servislər eyni renderi işlədir (mount yolu fərqli ola bilər).
+    for service in ("alertmanager", "blackbox_exporter"):
+        volumes = " ".join(_compose()["services"][service]["volumes"])
+        assert "./docker/render-template.sh:" in volumes, service
+
+
+def test_redis_entrypoint_renders_secret_conf_and_hands_off_without_the_password(tmp_path):
+    """Skript real `sh` ilə icra olunur; image entrypoint-i və `chown` stub-lanır."""
+    if shutil.which("sh") is None:
+        pytest.skip("sh yoxdur")
+    conf_dir = tmp_path / "etc-redis"
+    conf_dir.mkdir()
+    shutil.copy(REDIS_TEMPLATE_PATH, conf_dir / "redis.conf.tmpl")
+    shutil.copy(RENDER_TEMPLATE_PATH, conf_dir / "render-template.sh")
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_entrypoint = fake_bin / "docker-entrypoint.sh"
+    fake_entrypoint.write_text(
+        "#!/bin/sh\nprintf 'ARGS:%s\\n' \"$*\"\nprintf 'ENV_PASSWORD:%s\\n' \"${REDIS_PASSWORD:-<unset>}\"\n",
+        encoding="utf-8",
+    )
+    fake_entrypoint.chmod(0o755)
+    rendered = tmp_path / "redis.conf"
+    password = 'p|a&s/s\\w"o$rd'
+    result = subprocess.run(
+        ["sh", str(REDIS_ENTRYPOINT_PATH)],
+        capture_output=True,
+        text=True,
+        check=False,
+        env={
+            "PATH": f"{fake_bin}:{os.environ.get('PATH', '/usr/bin:/bin')}",
+            "REDIS_PASSWORD": password,
+            "REDIS_MAXMEMORY": "512mb",
+            "REDIS_CONF_DIR": str(conf_dir),
+            "REDIS_RENDERED_CONF": str(rendered),
+        },
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"ARGS:redis-server {rendered}" in result.stdout, "argv yalnız konfiq faylı daşımalıdır"
+    assert password not in result.stdout
+    assert "ENV_PASSWORD:<unset>" in result.stdout, "sirr redis-server mühitindən silinməlidir"
+    assert oct(rendered.stat().st_mode & 0o777) == "0o400"
+    text = rendered.read_text(encoding="utf-8")
+    # redis.conf ikiqat dırnaq qaydası: `\\` və `\"` qaçırılır, qalan simvollar hərfidir.
+    assert 'requirepass "p|a&s/s\\\\w\\"o$rd"' in text
+    assert "maxmemory 512mb" in text and "maxmemory-policy noeviction" in text
+
+
+# ── P3-1 / P3-2 — nginx real dinləmə yoxlaması, app healthcheck şərhi ─────
+
+
+def test_nginx_healthcheck_probes_stub_status_listener_instead_of_config_parse():
+    nginx = _compose()["services"]["nginx"]
+    test = nginx["healthcheck"]["test"]
+    assert test[0] == "CMD-SHELL" and "nginx -t" not in test[1], "P3-1: `nginx -t` dinləməni yoxlamır"
+    assert "http://127.0.0.1:8081/stub_status" in test[1]
+    conf = (ROOT / "docker/nginx/nginx.conf").read_text(encoding="utf-8")
+    stub_server = conf[conf.index("listen 8081;") :]
+    assert re.search(r"location = /stub_status \{\s*stub_status;", stub_server)
+    # Port host-a publish olunmur.
+    assert not any(":8081" in str(port) for port in nginx.get("ports", []))
+
+
+def test_app_healthcheck_comment_matches_the_ping_endpoint_it_probes():
+    text = COMPOSE_PATH.read_text(encoding="utf-8")
+    app_section = text[text.index("\n  app:\n") : text.index("\n  celery_worker:\n")]
+    healthcheck_comment = app_section[: app_section.index("    healthcheck:")]
+    healthcheck_comment = healthcheck_comment[healthcheck_comment.rfind("    # Real HTTP yoxlaması") :]
+    assert "/ping/" in healthcheck_comment, "P3-2: şərh yoxlanan endpoint-i adlandırmalıdır"
+    assert "# Real HTTP yoxlaması: /health/ DB-ni yoxlayır" not in healthcheck_comment, "P3-2: köhnə, yanlış şərh"
+    assert "http://localhost:8000/ping/" in app_section
+
+
+# ── P3-12 — Daphne proxy başlıqları ───────────────────────────────────────
+
+
+def test_daphne_parses_proxy_headers_and_nginx_overwrites_them():
+    entrypoint = (ROOT / "docker/prod-entrypoint.sh").read_text(encoding="utf-8")
+    daphne_block = entrypoint[entrypoint.index("exec daphne") :]
+    assert re.search(r"^\s+--proxy-headers \\$", daphne_block, flags=re.MULTILINE), "P3-12"
+    # Daphne XFF-in İLK elementini götürür — nginx onu overwrite etməlidir (append yox).
+    nginx = (ROOT / "docker/nginx/nginx.conf").read_text(encoding="utf-8")
+    assert "$proxy_add_x_forwarded_for" not in nginx
+    assert nginx.count("proxy_set_header X-Forwarded-For   $remote_addr;") >= 2

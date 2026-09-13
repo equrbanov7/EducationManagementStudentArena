@@ -120,7 +120,7 @@ Prometheus/Loki/Alertmanager-ə birbaşa çıxmır — yalnız superadmin API-la
 - `docker/prometheus/alerts.yml` — 21 yeni alert (host/container/redis/nginx/blackbox/celery/backup/TLS)
 - `docker/alertmanager/alertmanager.tmpl.yml` — webhook receiver (`ops-all`)
 - `docker/nginx/nginx.conf` — daxili `:8081 /stub_status` server (yalnız şəbəkədaxili)
-- `docker/blackbox/blackbox.yml`, `docker/loki/loki-config.yml`, `docker/promtail/promtail-config.yml` — YENİ
+- `docker/blackbox/blackbox.tmpl.yml` (2026-09-14 P3-9: `Host` başlığı `.env` `HEALTHCHECK_HOST`-dan `docker/render-template.sh` ilə start-da render olunur), `docker/loki/loki-config.yml`, `docker/promtail/promtail-config.yml` — YENİ
 - `config/settings/components/apps.py` — `apps.monitoring` qeydiyyatı
 - `config/settings/components/integrations.py` — monitorinq URL-ləri + webhook token
 - `config/settings/components/celery_cache.py` — 2 beat task
@@ -248,6 +248,9 @@ docker compose -f docker-compose.prod.yml up -d \
 # 4) Prometheus + Alertmanager konfiqini reload
 docker compose -f docker-compose.prod.yml exec prometheus kill -HUP 1
 docker compose -f docker-compose.prod.yml up -d --force-recreate alertmanager
+#    (2026-09-14 P3-8: şablon start-da docker/render-template.sh ilə render olunur —
+#     SMTP açarında `|`/`&`/`\` ola bilər; blackbox də eyni cür, HEALTHCHECK_HOST
+#     dəyişəndə `up -d --force-recreate blackbox_exporter`.)
 
 # 5) nginx (stub_status :8081 üçün) reload
 docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
