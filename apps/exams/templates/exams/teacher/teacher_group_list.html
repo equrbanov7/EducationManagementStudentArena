@@ -133,6 +133,7 @@
   data-delete-url-template="{% url 'exams:teacher_delete_group' 0 %}"
   data-can-multi-teacher="{{ can_multi_assign_teachers|yesno:'1,0' }}"
   data-edit-group-id="{{ edit_group_id|default:'' }}"
+  data-candidates-url="{{ candidates_url|default:'' }}"
 >
   <div class="custom-modal-content">
 
@@ -293,5 +294,5 @@
   "studentRegisteredGroupNumber": "{% filter escapejs %}{% trans 'student_registered_group_number' context 'profile.groups' %}{% endfilter %}"
 }
 </script>
-<script src="{% static 'exams/js/teacher_group_list.js' %}"></script>
+<script src="{% static 'exams/js/teacher_group_list.js' %}?v=20260914-1"></script>
 {% endblock %}

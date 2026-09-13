@@ -236,9 +236,8 @@ class ScoreAdjustment(models.Model):
         verbose_name = pgettext_lazy("appeals.model.adjustment.meta", "singular")
         verbose_name_plural = pgettext_lazy("appeals.model.adjustment.meta", "plural")
         ordering = ["-applied_at", "id"]
-        indexes = [
-            models.Index(fields=["attempt"], name="score_adj_attempt_idx"),
-        ]
+        # `score_adj_attempt_idx` silindi (2026-09-14): `attempt` FK-nın avtomatik
+        # indeksi eyni sütunu örtür (data auditi 2026-09-13 §6.2, miqrasiya 0004).
 
     def __str__(self):
         return f"ScoreAdjustment#{self.pk} · item={self.appeal_item_id} · Δ{self.delta_points}"

@@ -385,8 +385,9 @@ class UserProfile(models.Model):
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["organization", "created_at"]),
-            models.Index(fields=["role"]),
-            models.Index(fields=["requested_organization"]),
+            # `role` (db_index=True) və `requested_organization` (FK) üçün Django
+            # avtomatik indeks yaradır — buradakı təkrarlar 2026-09-14-də silindi
+            # (data auditi 2026-09-13 §6.2, miqrasiya 0023, CONCURRENTLY).
             models.Index(fields=["is_deleted", "deleted_at"]),
             # RİM axtarışı: FİN ilə birbaşa tapma (dəqiq uyğunluq).
         ]

@@ -229,7 +229,10 @@ class StudentGroupForm(forms.ModelForm):
         self.fields["students"].queryset = students_qs
         self.fields["primary_teacher"].queryset = teachers_qs
         self.fields["assigned_teachers"].queryset = teachers_qs
-        if defer_choices and not self.is_bound:
+        # `choices_deferred` — view-lar (F-10, 2026-09-14) bu bayrağa görə şablona
+        # lazy namizəd URL-ini ötürür; bound formada variantlar özü render olunur.
+        self.choices_deferred = bool(defer_choices and not self.is_bound)
+        if self.choices_deferred:
             # Yalnız WIDGET variantları boşaldılır (``field.queryset`` qalır —
             # ``clean``/``to_python`` onu oxuyur, yəni göndərilən id-lər eyni
             # şəkildə yoxlanılır).
