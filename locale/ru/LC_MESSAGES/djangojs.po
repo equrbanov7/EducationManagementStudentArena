@@ -2864,3 +2864,159 @@ msgstr "Закрыть"
 
 msgid "Yadda saxla"
 msgstr "Сохранить"
+
+msgid "Ad"
+msgstr "Название"
+
+msgid "Alıcılar"
+msgstr "Получатели"
+
+msgid "Anladım"
+msgstr "Понятно"
+
+msgid "Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"
+msgstr "После открытия апелляции ни один вопрос не может остаться без решения. Вопросы без решения:"
+
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgid "Başlama"
+msgstr "Начало"
+
+msgid "Başlama vaxtını seçin."
+msgstr "Укажите время начала."
+
+msgid "Bitmə vaxtını seçin."
+msgstr "Укажите время окончания."
+
+msgid "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
+msgstr "Используйте этот PIN вместе с именем пользователя на странице входа в экзамен."
+
+msgid "Bu dersin atandığı gruplar"
+msgstr "Группы этого предмета"
+
+msgid "Bu fənnin tədris olunduğu qruplar"
+msgstr "Группы этого предмета"
+
+msgid "Bütün suallara qərar verin"
+msgstr "Примите решение по всем вопросам"
+
+msgid "Cari cavablarınız yadda saxlanılıb. Ətraflı nəticəyə keçə bilərsiniz."
+msgstr "Ваши текущие ответы сохранены. Вы можете перейти к подробному результату."
+
+msgid "Deaktiv"
+msgstr "Выключен"
+
+msgid "Düzəlişi geri al"
+msgstr "Отменить исправление"
+
+msgid "Fənn"
+msgstr "Предмет"
+
+msgid "Fənn seçilməlidir."
+msgstr "Нужно выбрать предмет."
+
+msgid "Fənn yoxdur"
+msgstr "Нет предметов"
+
+msgid "Fərdi tələbələr"
+msgstr "Отдельные студенты"
+
+msgid "Geri"
+msgstr "Назад"
+
+msgid "Hamıya açıq"
+msgstr "Открыт для всех"
+
+msgid "Kateqoriya"
+msgstr "Категория"
+
+msgid "Kateqoriyanı seçin."
+msgstr "Выберите категорию."
+
+msgid "Müddət (dəq)"
+msgstr "Длительность (мин)"
+
+msgid "Nəticəyə keç"
+msgstr "Перейти к результату"
+
+msgid "Nəzarət"
+msgstr "Контроль"
+
+msgid "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
+msgstr "PIN появится только ближе ко времени экзамена, либо его можно получить в экзаменационном центре."
+
+msgid "Qruplar"
+msgstr "Группы"
+
+msgid "Salam! Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+msgstr "Здравствуйте! Я готов ответить на ваши вопросы. Чем могу помочь?"
+
+msgid "Seçilmiş qrupla daxildir"
+msgstr "Включён через выбранную группу"
+
+msgid "Seçilməyib"
+msgstr "Не выбрано"
+
+msgid "Sistemdə yalnız {n} sual var."
+msgstr "В системе только {n} вопросов."
+
+msgid "Sual sayı"
+msgstr "Число вопросов"
+
+msgid "Səbəb"
+msgstr "Причина"
+
+msgid "Səbəb tipini seçin və izahı ən azı {min} simvol yazın."
+msgstr "Выберите тип причины и напишите пояснение не короче {min} символов."
+
+msgid "Tip"
+msgstr "Тип"
+
+msgid "Tələbə sayı (ümumi)"
+msgstr "Студентов (всего)"
+
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgid "Təsdiqlə və yarat"
+msgstr "Подтвердить и создать"
+
+msgid "hesablanır…"
+msgstr "подсчёт…"
+
+msgid "{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "Для вопроса {q} нужно написать пояснение не короче {min} символов или выключить переключатель «Подать апелляцию»."
+
+msgid "{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "Для вопроса {q} нужно выбрать тип причины и написать пояснение не короче {min} символов или выключить переключатель «Подать апелляцию»."
+
+msgid "{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "Для вопроса {q} нужно выбрать тип причины или выключить переключатель «Подать апелляцию»."
+
+msgid "İmtahan adı"
+msgstr "Название экзамена"
+
+msgid "İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq."
+msgstr "Экзамен будет создан и назначен с указанными ниже данными."
+
+msgid "İmtahan mərkəzi hələ sizə bilet təyin etməyib."
+msgstr "Экзаменационный центр ещё не назначил вам билет."
+
+msgid "İmtahandan çıxarıldınız"
+msgstr "Вы отстранены от экзамена"
+
+msgid "İmtahanı təsdiqlə"
+msgstr "Подтвердите экзамен"
+
+msgid "İmtahanın ümumi müddətini yazın."
+msgstr "Укажите общую длительность экзамена."
+
+msgid "İmtahanınız texniki səbəblə dayandırıldı"
+msgstr "Ваш экзамен остановлен по технической причине"
+
+msgid "İşarələnmişləri ləğv et"
+msgstr "Отменить выбор отмеченных"
+
+msgid "İşarələnmişləri seç"
+msgstr "Выбрать отмеченные"

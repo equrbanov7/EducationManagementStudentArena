@@ -3258,7 +3258,7 @@ msgstr "Değerlendirme"
 #| msgctxt "registrar.journal"
 #| msgid "Jurnal"
 msgid "Jurnal"
-msgstr "Jurnal"
+msgstr "Yoklama defteri"
 
 #: apps/accounts/templates/accounts/partials/_permission_editor_content.html:157 apps/accounts/templates/accounts/profile/sections/_my_courses.html:39 apps/courses/templates/courses/partials/_course_groups_accordion.html:8
 msgid "Qruplar"
@@ -10650,7 +10650,7 @@ msgstr "Aktif"
 #| msgid "Toplanmış"
 msgctxt "profile.rim"
 msgid "Bloklanmış"
-msgstr "Bloklanmış"
+msgstr "Engellendi"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:84
 #| msgctxt "accounts.people.analytics"
@@ -10847,7 +10847,7 @@ msgstr "Şifre belirle"
 #| msgid "Bloku aç"
 msgctxt "profile.rim"
 msgid "Blokla"
-msgstr "Blokla"
+msgstr "Engelle"
 
 #: apps/accounts/templates/accounts/profile/sections/_rim_center.html:231
 #| msgid "Kafedradan çıxar"
@@ -12254,7 +12254,7 @@ msgstr "Onayla"
 
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_contact_messages.html:317
 msgid "This marks the request as added and emails the student."
-msgstr "This marks the request as added and emails the student."
+msgstr "Bu, talebi eklenmiş olarak işaretler ve öğrenciye e-posta gönderir."
 
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_contact_messages.html:323
 msgid "Send confirmation"
@@ -12270,7 +12270,7 @@ msgstr "Ad, e-posta, mesaj, dosya ara..."
 
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_contact_messages.html:382
 msgid "Trial"
-msgstr "Trial"
+msgstr "Deneme"
 
 #: apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_contact_messages.html:411
 msgid "No contact messages yet."
@@ -19278,7 +19278,7 @@ msgstr "Yanıt"
 
 #: apps/contact/admin.py:71 apps/trial_exams/admin.py:71
 msgid "Metadata"
-msgstr "Metadata"
+msgstr "Üstveri"
 
 #: apps/contact/admin.py:109
 msgid "✓ Cavablandı"
@@ -19474,10 +19474,6 @@ msgstr "[%(brand)s İletişim] %(subject)s — %(name)s"
 #, python-format
 msgid "Re: [%(brand)s] %(subject)s"
 msgstr "Re: [%(brand)s] %(subject)s"
-
-#: apps/contact/templates/admin/contact/contactmessage/reply.html:4 apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:4
-msgid "Django site admin"
-msgstr "Django site admin"
 
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:13 apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:13
 msgid "Home"
@@ -20164,7 +20160,7 @@ msgstr "Organizasyon"
 #: apps/courses/templates/courses/partials/_course_form_fields.html:21
 msgctxt "courses.create_page"
 msgid "Select the organization where this course should be created."
-msgstr "Select the organization where this course should be created."
+msgstr "Bu kursun oluşturulacağı kurumu seçin."
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:34
 msgctxt "courses.create_page"
@@ -26934,7 +26930,7 @@ msgstr "Çıktıyı burada görmek için kodu çalıştırın."
 #: apps/exams/templates/exams/student/take_coding_exam.html:235
 msgctxt "exams.template.coding_exam"
 msgid "Advanced: paste all stdin values manually"
-msgstr "Advanced: paste all stdin values manually"
+msgstr "Gelişmiş: tüm stdin değerlerini elle yapıştırın"
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:247
 msgctxt "exams.template.coding_exam"
@@ -27145,45 +27141,45 @@ msgstr "Program çıktı vermeden tamamlandı."
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
 msgid "Program expects {count} input value(s). Provide them above before running."
-msgstr "Program expects {count} input value(s). Provide them above before running."
+msgstr "Program {count} girdi değeri bekliyor. Çalıştırmadan önce bunları yukarıda girin."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:439
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
 msgid "Stdin ready ({count} line(s))."
-msgstr "Stdin ready ({count} line(s))."
+msgstr "Stdin hazır ({count} satır)."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:440
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
 msgid "{extra} extra input line(s) will be ignored."
-msgstr "{extra} extra input line(s) will be ignored."
+msgstr "{extra} fazladan girdi satırı yok sayılacak."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:441
 #, python-brace-format
 msgctxt "exams.template.coding_exam"
 msgid "Finished in {ms} ms"
-msgstr "Finished in {ms} ms"
+msgstr "{ms} ms içinde tamamlandı"
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:442
 msgctxt "exams.template.coding_exam"
 msgid "Waiting for runner..."
-msgstr "Waiting for runner..."
+msgstr "Çalıştırıcı bekleniyor..."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:443
 msgctxt "exams.template.coding_exam"
 msgid "Console cleared."
-msgstr "Console cleared."
+msgstr "Konsol temizlendi."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:444
 msgctxt "exams.template.coding_exam"
 msgid "Tip: Ctrl+Enter runs · Ctrl+Space autocomplete · Ctrl+/ comment"
-msgstr "Tip: Ctrl+Enter runs · Ctrl+Space autocomplete · Ctrl+/ comment"
+msgstr "İpucu: Ctrl+Enter çalıştırır · Ctrl+Space otomatik tamamlama · Ctrl+/ yorum"
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:445
 msgctxt "exams.template.coding_exam"
 msgid "Type the value here and press Enter."
-msgstr "Type the value here and press Enter."
+msgstr "Değeri buraya yazın ve Enter'a basın."
 
 #: apps/exams/templates/exams/student/take_coding_exam.html:477 apps/exams/templates/exams/student/take_exam.html:404
 msgctxt "exams.template.take_exam"
@@ -32116,7 +32112,7 @@ msgstr "Bitirilemedi."
 #: apps/exams/views/exam_center/room_monitor.py:109
 #| msgid "Bloku aç"
 msgid "Blokla"
-msgstr "Blokla"
+msgstr "Engelle"
 
 #: apps/exams/views/exam_center/room_monitor.py:110
 #| msgctxt "accounts.exam_chance"
@@ -32312,12 +32308,12 @@ msgstr "Bu deneme zaten sonlandırılmış ve geri yüklenemez."
 #: apps/exams/views/student/coding.py:443
 msgctxt "exams.view.coding.error"
 msgid "You are running code too quickly. Please wait a moment and try again."
-msgstr "You are running code too quickly. Please wait a moment and try again."
+msgstr "Kodu çok sık çalıştırıyorsunuz. Lütfen biraz bekleyip tekrar deneyin."
 
 #: apps/exams/views/student/coding.py:448
 msgctxt "exams.view.coding.error"
 msgid "You already have a code run in progress. Wait for it to finish."
-msgstr "You already have a code run in progress. Wait for it to finish."
+msgstr "Zaten devam eden bir kod çalıştırmanız var. Bitmesini bekleyin."
 
 #: apps/exams/views/student/final_center.py:84 apps/exams/views/student/final_center.py:441
 msgctxt "exams.view.final_center.permission"
@@ -35747,7 +35743,7 @@ msgstr "Bu e-posta zaten kullanılıyor."
 #: apps/live_exam/views/host/game.py:415
 msgctxt "live_exam.view.message"
 msgid "Players can only be removed in the lobby."
-msgstr "Players can only be removed in the lobby."
+msgstr "Katılımcılar yalnızca lobide çıkarılabilir."
 
 #: apps/live_exam/views/host/game.py:423 apps/live_exam/views/host/game.py:430
 msgctxt "live_exam.view.message"
@@ -35807,7 +35803,7 @@ msgstr "Geçerli bir aksesuar seç."
 #: apps/live_exam/views/player/wait.py:134
 msgctxt "live_exam.view.message"
 msgid "Reactions are disabled for this live exam."
-msgstr "Reactions are disabled for this live exam."
+msgstr "Bu canlı sınav için tepkiler devre dışı."
 
 #: apps/live_exam/views/player/wait.py:141
 msgctxt "live_exam.view.message"
@@ -39699,7 +39695,7 @@ msgstr "Yeni müfredat"
 #: apps/registrar/templates/registrar/journal_detail.html:4 apps/registrar/templates/registrar/journal_detail.html:85 apps/registrar/templates/registrar/rubric_grade.html:17
 msgctxt "registrar.journal"
 msgid "Jurnal"
-msgstr "Jurnal"
+msgstr "Yoklama defteri"
 
 #: apps/registrar/templates/registrar/journal_detail.html:24 apps/registrar/templates/registrar/journal_list.html:4 apps/registrar/templates/registrar/partials/_journal_list_content.html:10
 msgctxt "registrar.journal"
@@ -39857,7 +39853,7 @@ msgstr "Dikkat"
 #| msgid "Jurnallar"
 msgctxt "registrar.journal_close"
 msgid "Jurnallar"
-msgstr "Jurnallar"
+msgstr "Yoklama defterleri"
 
 #: apps/registrar/templates/registrar/journal_detail.html:173
 msgctxt "registrar.journal_close"
@@ -42277,7 +42273,7 @@ msgstr "Talebiniz alındı! Sorular gün içinde sisteme eklenecek."
 
 #: core/admin_security.py:108
 msgid "Too many login attempts. Please try again later."
-msgstr "Too many login attempts. Please try again later."
+msgstr "Çok fazla giriş denemesi. Lütfen daha sonra tekrar deneyin."
 
 #: core/constants.py:115
 msgctxt "organizations.model.organization_type.choice"
@@ -42307,7 +42303,7 @@ msgstr "Western Caspian University"
 #: core/middleware.py:342
 msgctxt "core.middleware.request_queue.message"
 msgid "Server is busy processing previous requests. Please try again shortly."
-msgstr "Server is busy processing previous requests. Please try again shortly."
+msgstr "Sunucu önceki istekleri işlemekle meşgul. Lütfen kısa süre sonra tekrar deneyin."
 
 #: core/permissions.py:204
 msgctxt "core.permission.error"
@@ -42516,7 +42512,7 @@ msgstr "OTP hataları"
 #, python-format
 msgctxt "admin.verify_otp"
 msgid "Please wait %(seconds)s seconds before trying again."
-msgstr "Please wait %(seconds)s seconds before trying again."
+msgstr "Yeniden denemeden önce %(seconds)s saniye bekleyin."
 
 #: templates/admin/verify_otp.html:57
 msgctxt "admin.verify_otp"
@@ -44394,12 +44390,6 @@ msgstr "[EMSArena İletişim] %(subject)s — %(name)s"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-format
-msgid "Re: [EMSArena] %(subject)s"
-msgstr "Re: [EMSArena] %(subject)s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "EMSArena hansı təşkilatlar üçün uyğundur?"
 msgstr "EMSArena hangi kurumlar için uygundur?"
 
@@ -45126,7 +45116,7 @@ msgstr "Pratik sınav"
 #. saxlanılıb.
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Configure the coding task, starter code, test cases, and execution controls."
-msgstr "Configure the coding task, starter code, test cases, and execution controls."
+msgstr "Kodlama görevini, başlangıç kodunu, test durumlarını ve çalıştırma ayarlarını yapılandırın."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -45552,7 +45542,7 @@ msgstr "AI özeti oluşturuluyor..."
 #. saxlanılıb.
 msgctxt "registrar.journal"
 msgid "Jurnallar"
-msgstr "Jurnallar"
+msgstr "Yoklama defterleri"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -45859,24 +45849,6 @@ msgstr "g"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-brace-format
-msgid "{editor}: Editing failed"
-msgstr "{editor}: Editing failed"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "{editor}: Editing failed: {e}"
-msgstr "{editor}: Editing failed: {e}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Windows error: {error}"
-msgstr "Windows error: {error}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "deprecated"
 msgstr "kullanımdan kaldırıldı"
 
@@ -45895,132 +45867,8 @@ msgstr[1] "Got unexpected extra arguments ({args})"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Aborted!"
-msgstr "Aborted!"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "Commands"
 msgstr "Komutlar"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Missing command."
-msgstr "Missing command."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Value must be an iterable."
-msgstr "Value must be an iterable."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Takes {nargs} values but 1 was given."
-msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] "Takes {nargs} values but 1 was given."
-msgstr[1] "Takes {nargs} values but {len} were given."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Name '{name}' defined twice"
-msgstr "Name '{name}' defined twice"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Boolean option {decl!r} cannot use the same flag for true/false."
-msgstr "Boolean option {decl!r} cannot use the same flag for true/false."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Could not determine name for option with declarations {decls!r}"
-msgstr "Could not determine name for option with declarations {decls!r}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "No options defined but a name was passed ({name}). Did you mean to declare an argument instead? Did you mean to pass '--{name}'?"
-msgstr "No options defined but a name was passed ({name}). Did you mean to declare an argument instead? Did you mean to pass '--{name}'?"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "env var: {var}"
-msgstr "env var: {var}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "(dynamic)"
-msgstr "(dynamic)"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Arguments take exactly one parameter declaration, got {length}: {decls}."
-msgstr "Arguments take exactly one parameter declaration, got {length}: {decls}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Do you want to continue?"
-msgstr "Do you want to continue?"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Confirm the action without prompting."
-msgstr "Confirm the action without prompting."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "%(prog)s, version %(version)s"
-msgstr "%(prog)s, version %(version)s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Show the version and exit."
-msgstr "Show the version and exit."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Show this message and exit."
-msgstr "Show this message and exit."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Did you mean {possibility}?"
-msgid_plural "(Did you mean one of: {possibilities}?)"
-msgstr[0] "Did you mean {possibility}?"
-msgstr[1] "(Did you mean one of: {possibilities}?)"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Try '{command} {option}' for help."
-msgstr "Try '{command} {option}' for help."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Invalid value: {message}"
-msgstr "Invalid value: {message}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Invalid value for {param_hint}: {message}"
-msgstr "Invalid value for {param_hint}: {message}"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46034,40 +45882,8 @@ msgstr "Eksik seçenek"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "Missing parameter"
-msgstr "Missing parameter"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Missing {param_type}"
-msgstr "Missing {param_type}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Missing parameter: {param_name}"
-msgstr "Missing parameter: {param_name}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "No such option {name!r}."
-msgstr "No such option {name!r}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "No such command {name!r}."
-msgstr "No such command {name!r}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "unknown error"
 msgstr "Bilinmeyen hata"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Could not open file {filename!r}: {message}"
-msgstr "Could not open file {filename!r}: {message}"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46076,36 +45892,10 @@ msgstr "Kullanım:"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-brace-format
-msgid "Invalid start character for option ({option})"
-msgstr "Invalid start character for option ({option})"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Argument {name!r} takes {nargs} values."
-msgstr "Argument {name!r} takes {nargs} values."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Option {name!r} does not take a value."
-msgstr "Option {name!r} does not take a value."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "Option {name!r} requires an argument."
 msgid_plural "Option {name!r} requires {nargs} arguments."
 msgstr[0] "Option {name!r} requires an argument."
 msgstr[1] "Option {name!r} requires {nargs} arguments."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr "Shell completion is not supported for Bash versions older than 4.4."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr "Couldn't detect Bash version, shell completion is not supported."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46124,26 +45914,6 @@ msgstr "Hata: geçersiz girdi"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "Unknown color {colour!r}"
-msgstr "Unknown color {colour!r}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Press any key to continue..."
-msgstr "Press any key to continue..."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid ""
-"Choose from:\n"
-"\t{choices}"
-msgstr ""
-"Choose from:\n"
-"\t{choices}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "{value!r} is not {choice}."
 msgid_plural "{value!r} is not one of {choices}."
 msgstr[0] "{value!r} is not {choice}."
@@ -46151,37 +45921,10 @@ msgstr[1] "{value!r} is not one of {choices}."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-brace-format
-msgid "Choice({choices})"
-msgstr "Choice({choices})"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "{value!r} does not match the format {format}."
 msgid_plural "{value!r} does not match the formats {formats}."
 msgstr[0] "{value!r} does not match the format {format}."
 msgstr[1] "{value!r} does not match the formats {formats}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{value!r} is not a valid {number_type}."
-msgstr "{value!r} is not a valid {number_type}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "{value} is not in the range {range}."
-msgstr "{value} is not in the range {range}."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{value!r} is not a valid UUID."
-msgstr "{value!r} is not a valid UUID."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46195,52 +45938,11 @@ msgstr "dizin"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "path"
-msgstr "path"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} does not exist."
-msgstr "{name} {filename!r} does not exist."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} is a file."
-msgstr "{name} {filename!r} is a file."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} is a directory."
-msgstr "{name} {filename!r} is a directory."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} is not readable."
-msgstr "{name} {filename!r} is not readable."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} is not writable."
-msgstr "{name} {filename!r} is not writable."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "{name} {filename!r} is not executable."
-msgstr "{name} {filename!r} is not executable."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 #, python-brace-format
 msgid "{len_type} values are required, but {len_value} was given."
 msgid_plural "{len_type} values are required, but {len_value} were given."
 msgstr[0] "{len_type} values are required, but {len_value} was given."
 msgstr[1] "{len_type} values are required, but {len_value} were given."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Unknown standard stream '{name}'"
-msgstr "Unknown standard stream '{name}'"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46261,11 +45963,6 @@ msgstr "Statik dosyalar"
 #. saxlanılıb.
 msgid "Syndication"
 msgstr "Yayın akışı"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "…"
-msgstr "…"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46322,16 +46019,6 @@ msgstr "Evrensel kod harflerden, sayılardan, altçizgilerden veya tirelerden ol
 #, python-format
 msgid "Enter a valid %(protocol)s address."
 msgstr "Geçerli bir %(protocol)s adresi girin."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "IPv4"
-msgstr "IPv4"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "IPv6"
-msgstr "IPv6"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46677,11 +46364,6 @@ msgstr "Saat"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "URL"
-msgstr "URL"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "Raw binary data"
 msgstr "Ham ikili veri"
 
@@ -46748,11 +46430,6 @@ msgstr "%(from)s-%(to)s ilişkileri"
 #. saxlanılıb.
 msgid "Many-to-many relationship"
 msgstr "Çoka-çok ilişki"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ":?.!"
-msgstr ":?.!"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -46848,11 +46525,6 @@ msgstr "Geçerli bir UUID girin."
 #. saxlanılıb.
 msgid "Enter a valid JSON."
 msgstr "Geçerli bir JSON girin."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ":"
-msgstr ":"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -47376,20 +47048,8 @@ msgstr "Bu, geçerli bir IPv6 adresi değil."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-#, python-format
-msgctxt "String to return when truncating text"
-msgid "%(truncated_text)s…"
-msgstr "%(truncated_text)s…"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "or"
 msgstr "ya da"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid ", "
-msgstr ", "
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -47631,100 +47291,13 @@ msgstr "Şurada ara"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "Haystack"
-msgstr "Haystack"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "Search Queries"
 msgstr "Arama sorguları"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "Query"
-msgstr "Query"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Backend Alias"
-msgstr "Backend Alias"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "Timeline"
 msgstr "Zaman çizelgesi"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Kwargs"
-msgstr "Kwargs"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Content purported to be compressed with %s but failed to decompress."
-msgstr "Content purported to be compressed with %s but failed to decompress."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Unsupported value for qop: %s."
-msgstr "Unsupported value for qop: %s."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Unsupported value for algorithm: %s."
-msgstr "Unsupported value for algorithm: %s."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "The challenge doesn't contain a server nonce, or this one is empty."
-msgstr "The challenge doesn't contain a server nonce, or this one is empty."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Unsupported value for pw-algorithm: %s."
-msgstr "Unsupported value for pw-algorithm: %s."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Redirected but the response is missing a Location: header."
-msgstr "Redirected but the response is missing a Location: header."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "show this help message and exit"
-msgstr "show this help message and exit"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Attempting to connect to qpid with SASL mechanism %s"
-msgstr "Attempting to connect to qpid with SASL mechanism %s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Connected to qpid with SASL mechanism %s"
-msgstr "Connected to qpid with SASL mechanism %s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-format
-msgid "Unable to connect to qpid with SASL mechanism %s"
-msgstr "Unable to connect to qpid with SASL mechanism %s"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "A short code to identify the type of this package. For example: gem for a Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a Maven Jar, deb for a Debian package, etc."
-msgstr "A short code to identify the type of this package. For example: gem for a Rubygem, docker for a container, pypi for a Python Wheel or Egg, maven for a Maven Jar, deb for a Debian package, etc."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Package name prefix, such as Maven groupid, Docker image owner, GitHub user or organization, etc."
-msgstr "Package name prefix, such as Maven groupid, Docker image owner, GitHub user or organization, etc."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -47738,22 +47311,6 @@ msgstr "Paketin sürümü."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "Extra qualifying data for a package such as the name of an OS, architecture, distro, etc."
-msgstr "Extra qualifying data for a package such as the name of an OS, architecture, distro, etc."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Extra subpath within a package, relative to the package root."
-msgstr "Extra subpath within a package, relative to the package root."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Value too long for field \"{field_name}\"."
-msgstr "Value too long for field \"{field_name}\"."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "required"
 msgstr "zorunlu"
 
@@ -47764,18 +47321,8 @@ msgstr "Ödev"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
-msgid "(deprecated) "
-msgstr "(deprecated) "
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
 msgid "[default: {}]"
 msgstr "[varsayılan: {}]"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "[env var: {}]"
-msgstr "[env var: {}]"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -47786,17 +47333,6 @@ msgstr "[zorunlu]"
 #. saxlanılıb.
 msgid "Error"
 msgstr "Hata"
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-msgid "Aborted."
-msgstr "Aborted."
-
-#. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
-#. saxlanılıb.
-#, python-brace-format
-msgid "Try [blue]'{command_path} {help_option}'[/] for help."
-msgstr "Try [blue]'{command_path} {help_option}'[/] for help."
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -48582,7 +48118,7 @@ msgstr "Yeni puan (tam sayı)"
 #. saxlanılıb.
 msgctxt "registrar.correction"
 msgid "№ · SOYAD AD"
-msgstr "№ · SOYAD AD"
+msgstr "No · SOYAD AD"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -53982,7 +53518,7 @@ msgstr "sınav"
 
 msgctxt "accounts.dashboard"
 msgid "sonuncu"
-msgstr "sonuncu"
+msgstr "en son"
 
 msgctxt "accounts.dashboard"
 msgid "cari dövr"
@@ -56517,7 +56053,7 @@ msgstr "Hangi programlar için?"
 
 msgctxt "accounts.semester"
 msgid "Jurnal açıldı"
-msgstr "Jurnal açıldı"
+msgstr "Yoklama defteri açıldı"
 
 msgctxt "accounts.semester"
 msgid "Kafedra"
@@ -56917,7 +56453,7 @@ msgstr "Yeni grup oluştur"
 
 msgctxt "accounts.student_admission"
 msgid "Yer limiti"
-msgstr "Yer limiti"
+msgstr "Kontenjan"
 
 msgctxt "accounts.student_admission"
 msgid "Yoxla (quru icra)"
@@ -57613,7 +57149,7 @@ msgstr "Jurnal kaydı"
 
 msgctxt "accounts.lessons_log"
 msgid "Jurnalı aç"
-msgstr "Jurnalı aç"
+msgstr "Yoklama defterini aç"
 
 msgctxt "accounts.lessons_log"
 msgid "Jurnalı boş dərs"
@@ -65722,3 +65258,765 @@ msgstr "Seçilmedi"
 msgctxt "exams.wizard"
 msgid "Tələbə sayı (ümumi)"
 msgstr "Öğrenci sayısı (toplam)"
+
+msgid "Hələ zal yaradılmayıb."
+msgstr "Henüz salon oluşturulmadı."
+
+msgid "süzgəcə uyğun"
+msgstr "filtreye uyan"
+
+msgctxt "accounts.pending_answers"
+msgid "Göstərilir: <strong>%(count)s</strong> iş"
+msgstr "Gösterilen: <strong>%(count)s</strong> çalışma"
+
+msgctxt "accounts.pending_answers"
+msgid "Növ üzrə süz"
+msgstr "Türe göre filtrele"
+
+msgctxt "accounts.pending_answers"
+msgid "Təhvil verdiyiniz, lakin nəticəsi hələ açılmamış işlər. Müəllim yoxlayıb təsdiqləyəndən sonra nəticə «Nəticələrim» bölməsində görünür."
+msgstr "Teslim ettiğiniz ancak sonucu henüz açıklanmamış çalışmalar. Öğretmen inceleyip onayladıktan sonra sonuç «Sonuçlarım» bölümünde görünür."
+
+msgctxt "accounts.pending_answers"
+msgid "action_open_results"
+msgstr "Sonuçlarımı aç"
+
+msgctxt "accounts.pending_answers"
+msgid "empty_all_checked_body"
+msgstr "Tüm çalışmalarınız incelendi — yeni sonuçlar «Sonuçlarım» bölümünde."
+
+msgctxt "accounts.pending_answers"
+msgid "empty_filtered_action"
+msgstr "Filtreyi sıfırla"
+
+msgctxt "accounts.pending_answers"
+msgid "empty_filtered_body"
+msgstr "Seçilen tür veya aramaya göre bekleyen çalışma yok. Filtreyi değiştirin veya sıfırlayın."
+
+msgctxt "accounts.pending_answers"
+msgid "empty_filtered_title"
+msgstr "Filtreye uyan çalışma bulunamadı"
+
+msgctxt "accounts.pending_answers"
+msgid "filter_label_type"
+msgstr "Tür"
+
+msgctxt "accounts.pending_answers"
+msgid "kpi_coursework_note"
+msgstr "kurs işi teslimleri"
+
+msgctxt "accounts.pending_answers"
+msgid "kpi_free_work_note"
+msgstr "serbest çalışma teslimleri"
+
+msgctxt "accounts.pending_answers"
+msgid "kpi_lab_note"
+msgstr "laboratuvar çalışmaları"
+
+msgctxt "accounts.pending_answers"
+msgid "kpi_total"
+msgstr "Toplam"
+
+msgctxt "accounts.pending_answers"
+msgid "kpi_total_note"
+msgstr "tüm türler genelinde"
+
+msgctxt "accounts.pending_answers"
+msgid "legend_pending"
+msgstr "Bekliyor — öğretmen henüz incelemeye başlamadı"
+
+msgctxt "accounts.pending_answers"
+msgid "legend_reviewing"
+msgstr "İnceleniyor — öğretmen çalışmayı gözden geçiriyor"
+
+msgctxt "accounts.pending_answers"
+msgid "legend_title"
+msgstr "Durum açıklaması"
+
+msgctxt "accounts.pending_answers"
+msgid "meta_submitted"
+msgstr "Teslim edildi:"
+
+msgctxt "accounts.pending_answers"
+msgid "type_exam"
+msgstr "Sınav"
+
+msgctxt "profile.statistics"
+msgid "AI xülasəsi"
+msgstr "AI özeti"
+
+msgctxt "profile.statistics"
+msgid "Bu rol üçün statistika əhatəsi təyin edilməyib."
+msgstr "Bu rol için istatistik kapsamı tanımlanmamış."
+
+msgctxt "profile.statistics"
+msgid "Bütün dövrlər üzrə."
+msgstr "Tüm dönemler genelinde."
+
+msgctxt "profile.statistics"
+msgid "Cari akademik vəziyyətiniz: kredit, ÜOMG, davamiyyət və imtahan nəticələri."
+msgstr "Güncel akademik durumunuz: kredi, GNO, devam ve sınav sonuçları."
+
+msgctxt "profile.statistics"
+msgid "Cari dövrdə fənləriniz, tələbələriniz, jurnal və imtahan göstəriciləriniz."
+msgstr "Güncel dönemde dersleriniz, öğrencileriniz, yoklama defteri ve sınav göstergeleriniz."
+
+msgctxt "profile.statistics"
+msgid "Cəhdlər"
+msgstr "Denemeler"
+
+msgctxt "profile.statistics"
+msgid "Dövr: %(period)s (%(start)s – %(end)s) — fəaliyyət göstəriciləri bu aralığa aiddir."
+msgstr "Dönem: %(period)s (%(start)s – %(end)s) — etkinlik göstergeleri bu aralığa aittir."
+
+msgctxt "profile.statistics"
+msgid "Göndərişlər (CSV)"
+msgstr "Gönderimler (CSV)"
+
+msgctxt "profile.statistics"
+msgid "Göstərilən göstəricilər üzrə xülasə yaradın."
+msgstr "Gösterilen göstergeler için özet oluşturun."
+
+msgctxt "profile.statistics"
+msgid "Növbəti"
+msgstr "Sonraki"
+
+msgctxt "profile.statistics"
+msgid "Platforma üzrə göstəricilər; təşkilat seçərək daraltmaq olar."
+msgstr "Platform genelindeki göstergeler; kurum seçerek daraltabilirsiniz."
+
+msgctxt "profile.statistics"
+msgid "Seçilmiş aralıq: %(start)s – %(end)s."
+msgstr "Seçilen aralık: %(start)s – %(end)s."
+
+msgctxt "profile.statistics"
+msgid "Statistika əhatəsi analitika icazəsi olan rola bağlıdır — rol təyinatınızı təşkilat administratoru ilə dəqiqləşdirin."
+msgstr "İstatistik kapsamı, analitik izni olan bir role bağlıdır — rol atamanızı kurum yöneticisiyle netleştirin."
+
+msgctxt "profile.statistics"
+msgid "Struktur vahidinizin (fakültə / kafedra / qruplar) cari dövr üzrə mənzərəsi."
+msgstr "Yapısal biriminizin (fakülte / bölüm / gruplar) güncel dönem görünümü."
+
+msgctxt "profile.statistics"
+msgid "Səhifələr"
+msgstr "Sayfalar"
+
+msgctxt "profile.statistics"
+msgid "Təşkilat"
+msgstr "Kurum"
+
+msgctxt "profile.statistics"
+msgid "Təşkilatlar"
+msgstr "Kurumlar"
+
+msgctxt "profile.statistics"
+msgid "Təşkilatın cari dövr üzrə mənzərəsi: üzvlər, tələbələr, jurnal, sillabus, dərs yükü, imtahanlar."
+msgstr "Kurumun güncel dönem görünümü: üyeler, öğrenciler, yoklama defteri, ders izlencesi, ders yükü, sınavlar."
+
+msgctxt "profile.statistics"
+msgid "Xülasə alınmadı. Yenidən cəhd edin."
+msgstr "Özet alınamadı. Yeniden deneyin."
+
+msgctxt "profile.statistics"
+msgid "Xülasə yarat"
+msgstr "Özet oluştur"
+
+msgctxt "profile.statistics"
+msgid "Üzvlər"
+msgstr "Üyeler"
+
+msgctxt "profile.statistics"
+msgid "İmtahan mərkəzinin dövr üzrə göstəriciləri: imtahanlar, cəhdlər, apellyasiya, zallar."
+msgstr "Sınav merkezinin dönem göstergeleri: sınavlar, denemeler, itirazlar, salonlar."
+
+msgctxt "profile.statistics"
+msgid "İmtahanlar"
+msgstr "Sınavlar"
+
+msgctxt "profile.statistics"
+msgid "Əvvəlki"
+msgstr "Önceki"
+
+msgctxt "profile.subjects"
+msgid "Akademik kontekst"
+msgstr "Akademik bağlam"
+
+msgctxt "profile.subjects"
+msgid "Akademik qeydiniz hələ yaradılmayıb"
+msgstr "Akademik kaydınız henüz oluşturulmamış"
+
+msgctxt "profile.subjects"
+msgid "Başqa dövrün aktiv qeydiyyatı"
+msgstr "Başka bir dönemin etkin kaydı"
+
+msgctxt "profile.subjects"
+msgid "Bu semestr qeydiyyatda olduğunuz fənlər — giriş balı, davamiyyət və imtahana buraxılış vəziyyəti bir yerdə."
+msgstr "Bu dönem kayıtlı olduğunuz dersler — giriş puanı, devam ve sınava giriş durumu bir arada."
+
+msgctxt "profile.subjects"
+msgid "Giriş balı"
+msgstr "Giriş puanı"
+
+msgctxt "profile.subjects"
+msgid "Giriş balı = davamiyyət + sərbəst iş + cari qiymətləndirmə (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan."
+msgstr "Giriş puanı = devam + serbest çalışma + güncel değerlendirme (sınava kadar toplanan kısım); nihai puan = giriş puanı + final sınavı."
+
+msgctxt "profile.subjects"
+msgid "Kredit yalnız keçilmiş fənlərdən toplanır; «davam edən» — hələ yekunlaşmamış cari fənlərin krediti."
+msgstr "Kredi yalnızca geçilen derslerden toplanır; «devam eden» — henüz sonuçlanmamış güncel derslerin kredisidir."
+
+msgctxt "profile.subjects"
+msgid "Qeydiyyat semestr açılışında dekanlıq tərəfindən aparılır. Fənləriniz görünmürsə, tyutor və ya dekanlığa müraciət edin."
+msgstr "Kayıt, dönem başında dekanlık tarafından yapılır. Dersleriniz görünmüyorsa danışmanınıza veya dekanlığa başvurun."
+
+msgctxt "profile.subjects"
+msgid "Qiymətləndirmə komponentləri"
+msgstr "Değerlendirme bileşenleri"
+
+msgctxt "profile.subjects"
+msgid "Semestr"
+msgstr "Dönem"
+
+msgctxt "profile.subjects"
+msgid "Status nişanları"
+msgstr "Durum rozetleri"
+
+msgctxt "profile.subjects"
+msgid "İmtahan cəhdləri"
+msgstr "Sınav denemeleri"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur."
+msgstr "Zaten girilmiş bir puanı değiştiriyorsunuz — sahibin kuralına göre gerekçe, not ve taranmış belge üçü de zorunludur. Değişen her satır aynı gerekçe ve notla denetlenir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bal daxiletmə üsulu"
+msgstr "Puan giriş yöntemi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bal tarixçəsi"
+msgstr "Puan geçmişi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Ballar sistemə yazılsın? Yeni ballar sərbəst yazılır; dəyişdirilən ballar səbəb, qeyd və skan ilə audit olunur."
+msgstr "Puanlar sisteme yazılsın mı? Yeni puanlar serbestçe yazılır; değiştirilen puanlar gerekçe, not ve taramayla denetlenir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balları fayldan yüklə"
+msgstr "Puanları dosyadan yükle"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Balları sistemə yaz"
+msgstr "Puanları sisteme yaz"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Boş buraxılan sahə toxunulmur. İlk daxiletmə sərbəstdir; artıq yazılmış balı dəyişmək təqdimatlıdır."
+msgstr "Boş bırakılan alana dokunulmaz. İlk giriş serbesttir; zaten girilmiş puanı değiştirmek belge gerektirir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu açılış üzrə hələ köçürmə olmayıb."
+msgstr "Bu açılış için henüz aktarım yapılmadı."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu semestrdə açılışı olan qrup yoxdur."
+msgstr "Bu dönemde açılışı olan grup yok."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu seçim üçün açılış tapılmadı."
+msgstr "Bu seçim için açılış bulunamadı."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu tələbənin imtahan balı üzrə bütün daxiletmələr, köçürmə partiyaları və (varsa) rəqəmsal cəhdləri."
+msgstr "Bu öğrencinin sınav puanına ilişkin tüm girişler, aktarım partileri ve (varsa) dijital denemeleri."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bəli, sistemə yaz"
+msgstr "Evet, sisteme yaz"
+
+msgctxt "registrar.exam_score_entry"
+msgid "CSV şablon"
+msgstr "CSV şablonu"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Cari bal"
+msgstr "Mevcut puan"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Daxiletmələr"
+msgstr "Girişler"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Default: açılışın müəllimi; fərqlidirsə dəyişin."
+msgstr "Varsayılan: açılışın öğretmeni; farklıysa değiştirin."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Doldurulmuş faylı yükləyib yoxlayın"
+msgstr "Doldurulmuş dosyayı yükleyip kontrol edin"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Doldurulmuş şablonu endirin"
+msgstr "Doldurulmuş şablonu indirin"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişdirilmiş bal yoxdur — yadda saxlamağa ehtiyac yoxdur."
+msgstr "Değiştirilen puan yok — kaydetmeye gerek yok."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişdirilən bal üçün səbəb, qeyd və skan edilmiş sənəd (vərəq məlumatlarında) tələb olunur."
+msgstr "Değiştirilen puan için gerekçe, not ve taranmış belge (çizelge bilgilerinde) gereklidir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklikləri sıfırla"
+msgstr "Değişiklikleri sıfırla"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Emal olunur…"
+msgstr "İşleniyor…"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Fayl emal olunmadı — yenidən cəhd edin."
+msgstr "Dosya işlenemedi — yeniden deneyin."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Faylda artıq yazılmış balı dəyişən sətirlər var — səbəb, qeyd və skan (vərəq məlumatlarında) tələb olunur."
+msgstr "Dosyada zaten girilmiş puanı değiştiren satırlar var — gerekçe, not ve tarama (çizelge bilgilerinde) gereklidir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Faylı bura sürüşdürün və ya seçmək üçün klikləyin"
+msgstr "Dosyayı buraya sürükleyin veya seçmek için tıklayın"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Fənn → Qrup"
+msgstr "Ders → Grup"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hələ daxiletmə yoxdur."
+msgstr "Henüz giriş yok."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hər yadda saxlama / fayl tətbiqi bir vərəq kimi qeyd olunur: tarix, müəllim, protokol və nəticə."
+msgstr "Her kaydetme / dosya uygulaması bir çizelge olarak kaydedilir: tarih, öğretmen, tutanak ve sonuç."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Kim"
+msgstr "Kaydeden"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köçürmə"
+msgstr "Aktarım"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köçürmə addımları"
+msgstr "Aktarım adımları"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köçürmə partiyaları"
+msgstr "Aktarım partileri"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Müəllim"
+msgstr "Öğretmen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Mənbə"
+msgstr "Kaynak"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Nəzarətçi"
+msgstr "Gözetmen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Protokol / vərəq №"
+msgstr "Tutanak / çizelge No"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Protokol №"
+msgstr "Tutanak No"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qrup → Fənn"
+msgstr "Grup → Ders"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Qrupsuz açılışlar «Fənn → Qrup» sırasında görünür."
+msgstr "Grupsuz açılışlar «Ders → Grup» sırasında görünür."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Quru icra nəticəsi — heç nə yazılmayıb"
+msgstr "Kuru çalışma sonucu — hiçbir şey yazılmadı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Rəqəmsal cəhdlər"
+msgstr "Dijital denemeler"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Seçim sırası"
+msgstr "Seçim düzeni"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Siyahını yenilə"
+msgstr "Listeyi yenile"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan"
+msgstr "Tarama"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan edilmiş protokol / vərəq (PDF və ya şəkil)"
+msgstr "Taranmış tutanak / çizelge (PDF veya görsel)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan seçilib"
+msgstr "Tarama seçildi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Skan seçilməyib"
+msgstr "Tarama seçilmedi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sütunlar"
+msgstr "Kolonlar"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sətir"
+msgstr "Satır"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sətir seçilməyib."
+msgstr "Satır seçilmedi."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarixçə"
+msgstr "Geçmiş"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tətbiq et — balları sistemə yaz"
+msgstr "Uygula — puanları sisteme yaz"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tətbiq nəticəsi"
+msgstr "Uygulama sonucu"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "registrar.exam_score_entry"
+msgid "XLSX şablon"
+msgstr "XLSX şablonu"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Xətalı bal var — 0 ilə maksimum arasında tam ədəd yazın."
+msgstr "Hatalı puan var — 0 ile maksimum arasında tam sayı yazın."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılacaq balların icmalı. Dəyişdirilən ballar səbəb, qeyd və skan ilə audit olunur."
+msgstr "Yazılacak puanların özeti. Değiştirilen puanlar gerekçe, not ve taramayla denetlenir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazıldı / dəyişmədi / rədd"
+msgstr "Yazıldı / değişmedi / reddedildi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin."
+msgstr "Yazılı sınav kâğıt üzerinde yapılır — sonucu sisteme Sınav Merkezi aktarır. Grubu ve dersi seçin, çizelge bilgilerini (tarih, öğretmen, tutanak) yazın, ardından puanları listede girin veya XLSX/CSV dosyasından yükleyin."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yeni bal"
+msgstr "Yeni puan"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yoxla (quru icra)"
+msgstr "Kontrol et (kuru çalışma)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yoxlama heç nə yazmır — nəticəni sətir-sətir görürsünüz."
+msgstr "Kontrol hiçbir şey yazmaz — sonucu satır satır görürsünüz."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yoxlayan müəllim"
+msgstr "Sınavı yapan öğretmen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "alt qrupdan"
+msgstr "alt gruptan"
+
+msgctxt "registrar.exam_score_entry"
+msgid "bal yazılacaq"
+msgstr "puan yazılacak"
+
+msgctxt "registrar.exam_score_entry"
+msgid "boş"
+msgstr "boş"
+
+msgctxt "registrar.exam_score_entry"
+msgid "cari imtahan balı"
+msgstr "mevcut sınav puanı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişdirilib"
+msgstr "değiştirildi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişiklik"
+msgstr "değişiklik"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişiklik səbəb tələb edir"
+msgstr "değişiklik gerekçe gerektirir"
+
+msgctxt "registrar.exam_score_entry"
+msgid "dəyişiklik · səbəb tələb olunur"
+msgstr "değişiklik · gerekçe gerekli"
+
+msgctxt "registrar.exam_score_entry"
+msgid "eyni bal"
+msgstr "aynı puan"
+
+msgctxt "registrar.exam_score_entry"
+msgid "fayl"
+msgstr "dosya"
+
+msgctxt "registrar.exam_score_entry"
+msgid "faylda olmayan tələbə"
+msgstr "dosyada olmayan öğrenci"
+
+msgctxt "registrar.exam_score_entry"
+msgid "fayldan"
+msgstr "dosyadan"
+
+msgctxt "registrar.exam_score_entry"
+msgid "ilkin daxiletmə"
+msgstr "ilk giriş"
+
+msgctxt "registrar.exam_score_entry"
+msgid "imtahan"
+msgstr "sınav"
+
+msgctxt "registrar.exam_score_entry"
+msgid "nəzarətçi"
+msgstr "gözetmen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "skan"
+msgstr "tarama"
+
+msgctxt "registrar.exam_score_entry"
+msgid "sənədli düzəliş"
+msgstr "belgeli düzeltme"
+
+msgctxt "registrar.exam_score_entry"
+msgid "sətir"
+msgstr "satır"
+
+msgctxt "registrar.exam_score_entry"
+msgid "sətir toxunulmur"
+msgstr "satıra dokunulmaz"
+
+msgctxt "registrar.exam_score_entry"
+msgid "tələbə"
+msgstr "öğrenci"
+
+msgctxt "registrar.exam_score_entry"
+msgid "tələbə Tələbə № (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır."
+msgstr "öğrenci, Öğrenci No (kullanıcı adı), FİN veya Ad Soyad ile tanınır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "vərəq skanı"
+msgstr "çizelge taraması"
+
+msgctxt "registrar.exam_score_entry"
+msgid "xəta"
+msgstr "hata"
+
+msgctxt "registrar.exam_score_entry"
+msgid "yazıldı"
+msgstr "kaydedildi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "yazılıb"
+msgstr "girilmiş"
+
+msgctxt "registrar.exam_score_entry"
+msgid "yeni"
+msgstr "yeni"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İlk daxiletmədə opsionaldır; artıq yazılmış balı dəyişəndə MƏCBURİDİR (səbəb və qeydlə birlikdə). Bir partiyanın bütün dəyişikliklərinə eyni skan aiddir."
+msgstr "İlk girişte isteğe bağlıdır; zaten girilmiş puanı değiştirirken ZORUNLUDUR (gerekçe ve notla birlikte). Bir partinin tüm değişikliklerine aynı tarama aittir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan tarixi"
+msgstr "Sınav tarihi"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İzah"
+msgstr "Açıklama"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Şablon bu qrupun siyahısı ilə doludur — yalnız «Bal» sütununu doldurun. Sütunların sırası sərbəstdir (başlığa görə tanınır). Ən çox %(limit)s sətir, %(size)s MB."
+msgstr "Şablon bu grubun listesiyle doludur — yalnızca «Puan» sütununu doldurun. Sütun sırası serbesttir (başlığa göre tanınır). En fazla %(limit)s satır, %(size)s MB."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Əvvəlcə faylı seçin."
+msgstr "Önce dosyayı seçin."
+
+msgctxt "registrar.exam_score_entry"
+msgid "əl ilə"
+msgstr "elle"
+
+msgctxt "registrar.exam_score_sheet_source"
+msgid "File import (XLSX/CSV)"
+msgstr "Dosya içe aktarma (XLSX/CSV)"
+
+msgctxt "registrar.exam_score_sheet_source"
+msgid "Manual roster entry"
+msgstr "Listeden elle giriş"
+
+msgctxt "registrar.model.exam_score_sheet.meta"
+msgid "exam score sheet"
+msgstr "sınav puan çizelgesi"
+
+msgctxt "registrar.model.exam_score_sheet.meta"
+msgid "exam score sheets"
+msgstr "sınav puan çizelgeleri"
+
+msgctxt "registrar.records"
+msgid "Akademik qeyd süzgəcləri"
+msgstr "Akademik kayıt filtreleri"
+
+msgctxt "registrar.records"
+msgid "Akademik qeydlər yalnız öz strukturunuz üzrə görünür — icazə üçün idarəetməyə müraciət edin."
+msgstr "Akademik kayıtlar yalnızca kendi yapınız için görünür — izin için yönetime başvurun."
+
+msgctxt "registrar.records"
+msgid "Göstərilir"
+msgstr "Gösterilen"
+
+msgctxt "registrar.records"
+msgid "Siyahı yüklənmədi."
+msgstr "Liste yüklenemedi."
+
+msgctxt "registrar.records"
+msgid "Süzgəc üzrə ümumi mənzərə"
+msgstr "Filtreye göre genel görünüm"
+
+msgctxt "registrar.records"
+msgid "Süzgəci genişləndirin və ya «Sıfırla» düyməsini basın."
+msgstr "Filtreyi genişletin veya «Sıfırla» düğmesine basın."
+
+msgctxt "registrar.records"
+msgid "Səhifədə"
+msgstr "Sayfada"
+
+msgctxt "registrar.records"
+msgid "Tələbənin semestr üzrə nəticələrinə bax"
+msgstr "Öğrencinin dönem sonuçlarını görüntüle"
+
+msgctxt "registrar.records"
+msgid "Yoxdur"
+msgstr "Yok"
+
+msgctxt "registrar.records"
+msgid "tələbədən"
+msgstr "öğrenciden"
+
+msgctxt "registrar.records"
+msgid "Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, ixtisas, qrup üzrə süzün və ya tələbə axtarın. Qutular seçilmiş süzgəcin TAMI üzrə, cədvəl isə yalnız görünən səhifə üzrədir."
+msgstr "Kendi yapınızdaki öğrencilerin akademik sonuçları — fakülte, bölüm, program, gruba göre filtreleyin veya öğrenci arayın. Kutular seçilen filtrenin TAMAMINI, tablo ise yalnızca görünen sayfayı kapsar."
+
+msgctxt "registrar.records"
+msgid "Şəbəkə və ya server xətası — bir azdan yenidən cəhd edin."
+msgstr "Ağ veya sunucu hatası — birazdan yeniden deneyin."
+
+msgctxt "registrar.records"
+msgid "Əməliyyat"
+msgstr "İşlem"
+
+msgctxt "profile.statistics"
+msgid "Göstəricilər (CSV)"
+msgstr "Göstergeler (CSV)"
+
+msgctxt "profile.statistics"
+msgid "Bölmə"
+msgstr "Bölüm"
+
+msgctxt "profile.statistics"
+msgid "Sətir"
+msgstr "Satır"
+
+msgctxt "profile.statistics"
+msgid "Göstərici"
+msgstr "Gösterge"
+
+msgctxt "profile.statistics"
+msgid "Dəyər"
+msgstr "Değer"
+
+msgctxt "profile.statistics"
+msgid "Vahid"
+msgstr "Birim"
+
+msgctxt "profile.statistics"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "profile.statistics"
+msgid "Kontekst"
+msgstr "Bağlam"
+
+msgctxt "profile.statistics"
+msgid "Profil"
+msgstr "Profil türü"
+
+msgctxt "profile.statistics"
+msgid "Əhatə"
+msgstr "Kapsam"
+
+msgctxt "profile.statistics"
+msgid "Dövr"
+msgstr "Dönem"
+
+msgctxt "profile.statistics"
+msgid "Əsas göstəricilər"
+msgstr "Temel göstergeler"
+
+msgctxt "profile.sidebar"
+msgid "Postların idarəetməsi"
+msgstr "Gönderi yönetimi"
+
+msgctxt "profile.sidebar"
+msgid "Dəyərləndirilmiş nəticələr"
+msgstr "Değerlendirilmiş sonuçlar"
+
+msgctxt "profile.sidebar"
+msgid "Təşkilat özəllikləri"
+msgstr "Kurum özellikleri"
+
+msgctxt "profile.sidebar"
+msgid "Sual Bankı"
+msgstr "Soru bankası"
+
+msgctxt "profile.sidebar"
+msgid "Bölmə imtahanları"
+msgstr "Birim sınavları"
+
+msgctxt "profile.sidebar"
+msgid "Fakültə və kafedralar"
+msgstr "Fakülteler ve bölümler"
+
+msgctxt "profile.sidebar"
+msgid "Struktur üzvləri"
+msgstr "Yapı üyeleri"
+
+msgctxt "profile.sidebar"
+msgid "Təşkilat rolları"
+msgstr "Kurum rolleri"
+
+msgctxt "profile.sidebar"
+msgid "Audit jurnalı"
+msgstr "Denetim günlüğü"
+
+msgctxt "profile.sidebar"
+msgid "Təşkilat məlumatları"
+msgstr "Kurum bilgileri"
