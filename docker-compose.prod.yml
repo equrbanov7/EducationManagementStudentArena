@@ -45,6 +45,11 @@ x-app-build: &app-build
     APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-https://deb.debian.org/debian-security}
     APT_FALLBACK_MIRROR: ${APT_FALLBACK_MIRROR:-https://ftp.debian.org/debian}
     APT_FALLBACK_SECURITY_MIRROR: ${APT_FALLBACK_SECURITY_MIRROR:-https://security.debian.org/debian-security}
+    # P1-07 (Codex audit, 2026-09-13): image-ə qurulduğu commit-in SHA-sı
+    # yazılır (docker/build-info.sh → /app/build-info.json) və /health/
+    # `build.sha` kimi göstərir. remote_deploy.sh bunu GITHUB_SHA / git-dən
+    # doldurur; əl ilə build-də boş qalırsa "unknown" yazılır.
+    BUILD_GIT_SHA: ${BUILD_GIT_SHA:-unknown}
 
 # ─── app + celery_worker + celery_beat üçün ORTAQ mühit dəyişənləri ─────────
 # Servis-spesifik dəyişənlər (Daphne, admin, cookie, Piston client və s.)
@@ -295,8 +300,14 @@ services:
   # Password enforced via --requirepass; REDISCLI_AUTH is set so the
   # health check can authenticate without passing the password on the
   # command line (which would be visible in process listings).
-  # NOTE: maxmemory QƏSDƏN təyin edilməyib — Celery broker (DB 2) üçün
-  # eviction təhlükəlidir. Host yaddaşı HostMemoryHigh alerti ilə izlənir.
+  # P2-08 (Codex audit, 2026-09-13): köhnə qeyd «maxmemory qəsdən təyin
+  # edilməyib» ilə aşağıdakı `--maxmemory ${REDIS_MAXMEMORY:-3gb}` bir-birinə
+  # zidd idi. Faktiki siyasət: maxmemory TƏYİN OLUNUR, amma `noeviction` ilə —
+  # Celery broker (DB 2) üçün eviction təhlükəlidir, ona görə limitə çatanda
+  # yazma XƏTA verir, data silinmir. REDIS_MAXMEMORY defoltu (3gb) həmişə
+  # REDIS_MEM_LIMIT defoltundan (4096M) kiçik saxlanmalıdır ki, konteyner
+  # OOM-kill olmasın (tests/test_infra_compose_config.py bunu yoxlayır).
+  # Host yaddaşı ayrıca HostMemoryHigh alerti ilə izlənir.
   # ─────────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
@@ -467,6 +478,19 @@ services:
         limits:
           cpus: "${CELERY_CPU_LIMIT:-1.0}"
           memory: ${CELERY_MEM_LIMIT:-1024M}
+    # §22 (Codex audit, 2026-09-13): worker-in «sağlam» olması PID-in
+    # yaşaması deyil — broker-ə qoşulub sorğuya cavab verməsidir. `inspect
+    # ping -d celery@$HOSTNAME` yalnız BU konteynerin node-una ünvanlanır
+    # (defolt node adı `celery@<konteyner-hostname>`); başqa replikanın cavabı
+    # sayılmır. Real prod image-də yoxlanıb: öz node → exit 0, cavabsız →
+    # exit 69. Hər yoxlama Django-nu yükləyən qısa Python prosesidir, ona görə
+    # interval 60s-dən aşağı salınmır; start_period broker qoşulması üçündür.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 10"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
     networks:
       - emsarena-network
 
@@ -495,6 +519,15 @@ services:
       resources:
         limits:
           memory: ${CELERY_HEAVY_MEM_LIMIT:-2048M}
+    # §22 (Codex audit, 2026-09-13): celery_worker ilə eyni məntiq — bax
+    # oradakı şərh. Ağır iş (OCR/AI) node-u bloklasa cavab gecikər; timeout
+    # 30s + 3 retry ilə keçici yüklənmə «unhealthy» sayılmır.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 10"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
     networks:
       - emsarena-network
 
@@ -522,6 +555,20 @@ services:
         limits:
           cpus: "${CELERY_BEAT_CPU_LIMIT:-0.25}"
           memory: ${CELERY_BEAT_MEM_LIMIT:-256M}
+    # §22 (Codex audit, 2026-09-13): beat worker deyil — `inspect ping`-ə
+    # cavab vermir (yoxlanıb: exit 69). Yüngül yoxlama: PersistentScheduler
+    # `--schedule` faylını hər sync-də (defolt 3 dəq) yenidən yazır, deməli
+    # faylın 10 dəqiqədən təzə olması «döngü işləyir» deməkdir. Şəkilçi
+    # üçün glob: dbm backend-dən asılı olaraq `.db`/`.dat` əlavə oluna bilər
+    # (prod image-də dbm.gnu — şəkilçisiz). Proses özü PID 1-dir: ölərsə
+    # konteyner dayanır və restart siyasəti işə düşür; bu yoxlama «asılıb»
+    # halını tutur.
+    healthcheck:
+      test: ["CMD-SHELL", "find /tmp -maxdepth 1 -name 'celerybeat-schedule*' -mmin -10 | grep -q ."]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
     networks:
       - emsarena-network
 
