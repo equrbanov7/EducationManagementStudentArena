@@ -324,7 +324,9 @@ def redis_celery_section(range_seconds: int) -> dict:
     charts = {
         "redis_memory": _series(prom, "redis_memory_used_bytes", range_seconds),
         "redis_ops": _series(prom, "rate(redis_commands_processed_total[5m])", range_seconds),
-        "celery_queue": _series(prom, "emsarena_celery_queue_length", range_seconds),
+        # Audit 2026-09-13 infra P2-8: metrik indi `queue` etiketi ilə çoxseriyalıdır
+        # (celery + heavy) — panel cəmi göstərir.
+        "celery_queue": _series(prom, "sum(emsarena_celery_queue_length)", range_seconds),
     }
     summary = {
         "redis_up": up,
@@ -342,7 +344,7 @@ def redis_celery_section(range_seconds: int) -> dict:
         "celery_workers_online": prom.scalar("emsarena_celery_workers_online"),
         "celery_active_tasks": prom.scalar("emsarena_celery_active_tasks"),
         "celery_reserved_tasks": prom.scalar("emsarena_celery_reserved_tasks"),
-        "celery_queue_length": prom.scalar("emsarena_celery_queue_length"),
+        "celery_queue_length": prom.scalar("sum(emsarena_celery_queue_length)"),
         "celery_stats_age_seconds": None,
     }
     collected = prom.scalar("emsarena_celery_stats_collected_timestamp")

@@ -189,6 +189,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: Docker defoltu 10 s sonra SIGKILL edir —
+    # Postgres üçün bu «crash» deməkdir (checkpoint tamamlanmır, restart-da
+    # WAL bərpası). 60 s smart/fast shutdown-un bitməsinə imkan verir.
+    stop_grace_period: 60s
     logging: *default-logging
     deploy:
       resources:
@@ -354,6 +358,11 @@ services:
   # apps/exams/services/exam_center_gate.py (resolve_client_mac).
   # Build tələb etmir — stdlib skripti bind-mount ilə işləyir.
   # ─────────────────────────────────────────────────────────────────────────
+  # 2026-09-13 infra auditi P2-4: bind ünvanı 172.18.0.1 sabitdir — ona görə
+  # `networks.emsarena-network` IPAM-ı da həmin subnet/gateway-ə pin-lənib
+  # (faylın sonunda). Əvvəl anchor-suz log (limitsiz), limit-siz və
+  # healthcheck-siz idi; agent bind edə bilməsə `resolve_client_mac`
+  # fail-closed olur → imtahan mərkəzi qapısı bütün tələbələri rədd edir.
   arp-agent:
     image: python:3.12-alpine
     command: ["python", "/agent/arp_agent.py"]
@@ -364,6 +373,23 @@ services:
     environment:
       ARP_AGENT_BIND: ${ARP_AGENT_BIND:-172.18.0.1}
       ARP_AGENT_PORT: ${ARP_AGENT_PORT:-8953}
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${ARP_AGENT_CPU_LIMIT:-0.1}"
+          # stdlib http.server ≈ 15 MB RSS; OOM-kill = imtahan qapısı bağlanır,
+          # ona görə 32M deyil, 2× ehtiyatla 64M.
+          memory: ${ARP_AGENT_MEM_LIMIT:-64M}
+    # Agentin yeganə endpoint-i `/mac?ip=` — loopback üçün `{"mac": null}` 200
+    # qaytarır; bind uğursuzdursa (subnet fərqli) bağlantı rədd olunur →
+    # unhealthy → ContainerDown/TargetDown yerinə birbaşa görünür.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$${ARP_AGENT_BIND}:$${ARP_AGENT_PORT}/mac?ip=127.0.0.1\" >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   # ─────────────────────────────────────────────────────────────────────────
   # App — Daphne ASGI server (HTTP + WebSocket)
@@ -420,6 +446,13 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: Docker defoltu SIGTERM-dən 10 s sonra
+    # SIGKILL-dir — Daphne `--application-close-timeout`
+    # (DAPHNE_APPLICATION_CLOSE_TIMEOUT, 120 s) davam edən imtahan
+    # təqdimi/WS-i bağlamağa imkan tapmırdı. Grace ≥ close-timeout + 10 s.
+    # .env-də DAPHNE_APPLICATION_CLOSE_TIMEOUT artırılırsa bunu da artırın
+    # (tests/test_infra_compose_config.py invariantı defoltları yoxlayır).
+    stop_grace_period: ${APP_STOP_GRACE_PERIOD:-130s}
     logging: *default-logging
     deploy:
       resources:
@@ -472,6 +505,10 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: SIGTERM = warm shutdown — worker icradakı
+    # task-ı bitirib çıxır. Grace = CELERY_TASK_TIME_LIMIT (300 s); 10 s-də
+    # SIGKILL olsa acks_late ilə task yenidən çatdırılır (ikiqat e-poçt/sweep).
+    stop_grace_period: 300s
     logging: *default-logging
     deploy:
       resources:
@@ -514,6 +551,10 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: heavy task-ların time_limit-i 900 s (OCR/
+    # AI/export, apps/exams/tasks.py) — deploy zamanı yarımçıq OCR 10 s-də
+    # SIGKILL olub 20 dəq sonra reaper ilə FAILED-ə düşürdü.
+    stop_grace_period: 900s
     logging: *default-logging
     deploy:
       resources:
@@ -642,6 +683,9 @@ services:
       ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
       WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
+      # 2026-09-13 infra auditi P1-3: Watchdog «hələ sağam» e-poçtunun
+      # təkrar intervalı (Alertmanager müddəti: 6h / 24h ...).
+      WATCHDOG_REPEAT: ${WATCHDOG_REPEAT_INTERVAL:-24h}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
@@ -652,6 +696,7 @@ services:
         -e "s|__ALERT_FROM__|$${ALERT_FROM}|g"
         -e "s|__ALERT_TO__|$${ALERT_TO}|g"
         -e "s|__WEBHOOK_TOKEN__|$${WEBHOOK_TOKEN}|g"
+        -e "s|__WATCHDOG_REPEAT__|$${WATCHDOG_REPEAT}|g"
         /etc/alertmanager/alertmanager.tmpl.yml > /tmp/alertmanager.yml
         && exec /bin/alertmanager --config.file=/tmp/alertmanager.yml
         --storage.path=/alertmanager
@@ -698,9 +743,10 @@ services:
       # filename on each open, so the reload step below actually picks up changes.
       - ./docker/prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
+    # 2026-09-13 infra auditi P2-9: `app: service_healthy` asılılığı SİLİNDİ —
+    # monitorinq izlədiyi sistemdən asılı olmamalıdır (app qalxmayanda məhz
+    # Prometheus/TargetDown bunu deməlidir). App hədəfləri dns_sd ilə tapılır.
     depends_on:
-      app:
-        condition: service_healthy
       postgres_exporter:
         condition: service_healthy
     restart: unless-stopped
@@ -1010,6 +1056,17 @@ services:
 networks:
   emsarena-network:
     driver: bridge
+    # 2026-09-13 infra auditi P2-4: arp-agent host-da 172.18.0.1-ə bind olur və
+    # app EXAM_ARP_AGENT_URL ilə oraya gedir — subnet Docker-in «növbəti boş»
+    # seçiminə buraxılsa (başqa sıra ilə yaradılanda 172.19+), agent bind edə
+    # bilmir və imtahan mərkəzi qapısı fail-closed olur. Mövcud prod host artıq
+    # 172.18.0.0/16-dadır → recreate-də dəyişiklik yoxdur. Fərqli subnet-də
+    # olan hostda `docker compose down` + `up` (şəbəkə yenidən yaradılmalıdır)
+    # — bax docs/operations/deployment.md §1.
+    ipam:
+      config:
+        - subnet: ${EMSARENA_NETWORK_SUBNET:-172.18.0.0/16}
+          gateway: ${EMSARENA_NETWORK_GATEWAY:-172.18.0.1}
 
 volumes:
   postgres_data:
