@@ -20,6 +20,7 @@ CSP: inline yoxdur.
          data-profile-section-panel="exam-center-stats"
          data-source-url="{{ profile_base_url }}?section=exam-center-stats">
 <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/exam_center_stats.css' %}?v=20260910-1">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/exam_center_stats_paper.css' %}?v=20260914-1">
 
 <div class="ecs"
      data-data-url="{% url 'exams:exam_center_stats_data' %}"
@@ -97,6 +98,27 @@ CSP: inline yoxdur.
   </div>
 
   <div class="ems-kpis ecs-cards js-ecs-cards"></div>
+
+  {% comment %}2026-09-14 (W2 `w2paper`, addendum): KAĞIZ (yazılı / praktiki) imtahan
+  KPI-ları — İmtahan Mərkəzinin köçürdüyü ballar (vərəq / daxiletmə / dəyişiklik
+  sayı, orta bal) növ üzrə; çiplər `paper_kind` filtri. Məlumat eyni `data-data-url`
+  endpoint-indən `?paper=1` ilə gəlir (`exam_center_stats_paper.js`, boot skriptinin
+  `ecs:filters` hadisəsinə abunə olur — tədris ili / semestr sinxron).{% endcomment %}
+  <section class="ecs-paper js-ecs-paper" data-ecs-paper
+           data-label-sheets="{% trans 'vərəq' context 'exams.center.stats' %}"
+           data-label-entries="{% trans 'daxiletmə' context 'exams.center.stats' %}"
+           data-label-changes="{% trans 'dəyişiklik' context 'exams.center.stats' %}"
+           data-label-students="{% trans 'tələbə' context 'exams.center.stats' %}"
+           data-label-avg="{% trans 'orta imtahan balı' context 'exams.center.stats' %}"
+           data-label-all="{% trans 'Hamısı' context 'exams.center.stats' %}"
+           data-label-empty="{% trans 'Məlumat yoxdur' context 'exams.center.stats' %}">
+    <div class="ecs-paper__head">
+      <h3><i class="fas fa-file-pen" aria-hidden="true"></i> {% trans "Kağız imtahanlar (köçürülmüş nəticələr)" context "exams.center.stats" %}</h3>
+      <div class="ecs-paper__chips" role="group" aria-label="{% trans 'İmtahan növü' context 'exams.center.stats' %}" data-ecs-paper-chips></div>
+    </div>
+    <div class="ems-kpis ecs-cards" data-ecs-paper-cards></div>
+  </section>
+
   <div class="ems-tablewrap ecs-tablewrap">
     <div class="ems-tablescroll">
     <table class="ems-table ems-table--zebra ecs-table">
@@ -191,5 +213,6 @@ CSP: inline yoxdur.
 }</script>
 <script defer src="{% static 'accounts/js/profile/exam_center_stats_boot.js' %}?v=20260910-1"></script>
 <script defer src="{% static 'exams/js/exam_center_stats_charts.js' %}?v=20260710-1"></script>
+<script defer src="{% static 'accounts/js/profile/exam_center_stats_paper.js' %}?v=20260914-1"></script>
 </section>
 {% endif %}

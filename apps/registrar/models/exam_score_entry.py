@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
@@ -43,10 +44,33 @@ def exam_score_evidence_path(instance, filename: str) -> str:
 
 
 class ExamScoreEntryKind(models.TextChoices):
-    """Sətrin növü — ilkin köçürmə, yoxsa sonrakı sənədli düzəliş."""
+    """Sətrin növü — ilkin köçürmə, yoxsa sonrakı sənədli düzəliş / apellyasiya nəticəsi.
+
+    2026-09-14 (W2 `w2paper`, sahib: «apellyasiyadan və ya nədənsə sonra DƏYİŞƏN
+    nəticələrin izlənməsi lazımdır»): ``APPEAL`` — apellyasiya komissiyasının
+    qərarı ilə dəyişən bal. Təqdimat tələbi (səbəb + qeyd + sənəd) ``CORRECTION``
+    ilə EYNİDİR; fərq yalnız izləmə/filtr etiketindədir («Dəyişən nəticələr»
+    alt-görünüşü ``kind != initial`` sətirlərini göstərir).
+    """
 
     INITIAL = "initial", pgettext_lazy("registrar.exam_score_entry_kind", "Initial entry")
     CORRECTION = "correction", pgettext_lazy("registrar.exam_score_entry_kind", "Documented change")
+    APPEAL = "appeal", pgettext_lazy("registrar.exam_score_entry_kind", "Appeal result")
+
+    @classmethod
+    def change_kinds(cls) -> tuple:
+        """İlkin olmayan (dəyişiklik) növləri — dialoqda seçilə bilənlər."""
+        return (cls.CORRECTION, cls.APPEAL)
+
+
+#: Sual sayı üçün yuxarı hədd (sahib 2026-09-14: «hər sualdan max 10»; kağız
+#: imtahanda adətən 5 sual olur — defolt 5). ``0`` = tək yekun bal rejimi
+#: (köhnə vərəqlər / yalnız «Bal» sütunlu idxal).
+QUESTION_COUNT_DEFAULT = 5
+QUESTION_COUNT_MAX = 10
+#: Bir sualın maksimum balı (defolt 10). Cəmin tavanı SXEMDƏN gəlir
+#: (``finals.exam_score_max`` = 100 − giriş tavanı) — burada 50 yazılmır.
+QUESTION_MAX_DEFAULT = 10
 
 
 class ExamScoreEntry(ImmutableCorrectionEvidence):
@@ -90,6 +114,16 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
         on_delete=models.PROTECT,
         related_name="entries",
         help_text="Köçürmə partiyası (vərəq/protokol) — varsa.",
+    )
+    # 2026-09-14 (W2 `w2paper`): sual-sual ballar — ``[s1, s2, …]`` tam ədədlər
+    # (hər biri 0..``sheet.question_max``, cəmi = ``new_score``). ``NULL`` = tək
+    # yekun bal rejimi (köhnə sətirlər, yalnız «Bal» sütunlu idxal). Validasiya
+    # servis qatındadır (``exam_score_questions.clean_question_scores``); sətir
+    # append-only olduğu üçün burada yalnız forma saxlanılır.
+    question_scores = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Sual-sual ballar (siyahı) — tək yekun bal rejimində NULL.",
     )
 
     objects = models.Manager()
@@ -151,6 +185,18 @@ class ExamScoreSheetSource(models.TextChoices):
     IMPORT = "import", pgettext_lazy("registrar.exam_score_sheet_source", "File import (XLSX/CSV)")
 
 
+class ExamScoreSheetKind(models.TextChoices):
+    """Kağız imtahanın NÖVÜ (sahib 2026-09-14, addendum): yazılı, yoxsa praktiki.
+
+    Vərəq səviyyəsindədir — bir protokol bir növ imtahandır; sətir növü
+    vərəqdən oxunur (``entry.sheet.exam_kind``). Köhnə vərəqlər «yazılı» sayılır
+    (migrasiya defoltu).
+    """
+
+    WRITTEN = "written", pgettext_lazy("registrar.exam_score_sheet_kind", "Written")
+    PRACTICAL = "practical", pgettext_lazy("registrar.exam_score_sheet_kind", "Practical")
+
+
 #: Vərəq skanının media prefiksi. ``core.media_policies`` eyni prefiksi öz
 #: checker cədvəlində LİTERAL kimi saxlayır (core registrar-ı import etmir) —
 #: ikisi sinxron qalmalıdır. Org-prefiks invariantı (aşağıda ``clean()`` +
@@ -184,6 +230,12 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
     )
     offering = models.ForeignKey("registrar.CourseOffering", on_delete=models.PROTECT, related_name="exam_score_sheets")
     source = models.CharField(max_length=12, choices=ExamScoreSheetSource.choices, default=ExamScoreSheetSource.MANUAL)
+    exam_kind = models.CharField(
+        max_length=12,
+        choices=ExamScoreSheetKind.choices,
+        default=ExamScoreSheetKind.WRITTEN,
+        help_text="Kağız imtahanın növü — yazılı / praktiki (2026-09-14).",
+    )
     exam_date = models.DateField(null=True, blank=True, help_text="Kağız imtahanın keçirildiyi tarix.")
     examiner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -204,6 +256,19 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
         help_text="Skan edilmiş protokol / vərəq (PDF və ya şəkil) — opsional.",
     )
     original_filename = models.CharField(max_length=255, blank=True, help_text="İdxal faylının adı (varsa).")
+    # 2026-09-14 (W2 `w2paper`, sahib: «hər sualdan max 10, imtahandan max 50»):
+    # vərəqin sual sayı və bir sualın tavanı. ``question_count = 0`` → tək yekun
+    # bal rejimi. Cəmin tavanı sxemdən gəlir (``finals.exam_score_max``).
+    question_count = models.PositiveSmallIntegerField(
+        default=QUESTION_COUNT_DEFAULT,
+        validators=[MaxValueValidator(QUESTION_COUNT_MAX)],
+        help_text="Vərəqdəki sual sayı (0 = tək yekun bal).",
+    )
+    question_max = models.PositiveSmallIntegerField(
+        default=QUESTION_MAX_DEFAULT,
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        help_text="Bir sualın maksimum balı.",
+    )
     rows_total = models.PositiveIntegerField(default=0)
     rows_written = models.PositiveIntegerField(default=0)
     rows_skipped = models.PositiveIntegerField(default=0)

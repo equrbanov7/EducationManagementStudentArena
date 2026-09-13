@@ -29,6 +29,7 @@ from apps.registrar.models import CorrectionReason, ExamScoreSheetSource
 from apps.registrar.public import exam_score_entry as service
 from apps.registrar.public import exam_score_import as importer
 from apps.registrar.public import exam_score_sheets as sheets_service
+from core.write_rate_limit import score_write_rate_limited
 
 from ._helpers import _is_superadmin_user
 from .exam_score_entry import ExamScoreEntryError, _can_manage, _offering_or_error, _resolve_target_org
@@ -155,6 +156,7 @@ def _justification_error(plan, request):
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("exam_score_import_apply")  # F-15 (2026-09-14)
 def exam_score_import_apply(request):
     """Tətbiq — partiya + sətir başına savepoint; bir pis sətir faylı dayandırmır."""
     _organization, offering, error = _gate(request)

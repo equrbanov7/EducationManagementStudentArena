@@ -68360,3 +68360,219 @@ msgstr "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
 msgctxt "core.rate_limit"
 msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
 msgstr "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+
+msgctxt "registrar.exam_score_entry_kind"
+msgid "Appeal result"
+msgstr "Apellyasiya nəticəsi"
+
+msgctxt "registrar.exam_score_sheet_kind"
+msgid "Written"
+msgstr "Yazılı"
+
+msgctxt "registrar.exam_score_sheet_kind"
+msgid "Practical"
+msgstr "Praktiki"
+
+msgctxt "exams.center.stats"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "exams.center.stats"
+msgid "Kağız imtahanlar (köçürülmüş nəticələr)"
+msgstr "Kağız imtahanlar (köçürülmüş nəticələr)"
+
+msgctxt "exams.center.stats"
+msgid "daxiletmə"
+msgstr "daxiletmə"
+
+msgctxt "exams.center.stats"
+msgid "dəyişiklik"
+msgstr "dəyişiklik"
+
+msgctxt "exams.center.stats"
+msgid "orta imtahan balı"
+msgstr "orta imtahan balı"
+
+msgctxt "exams.center.stats"
+msgid "tələbə"
+msgstr "tələbə"
+
+msgctxt "exams.center.stats"
+msgid "vərəq"
+msgstr "vərəq"
+
+msgctxt "exams.center.stats"
+msgid "İmtahan növü"
+msgstr "İmtahan növü"
+
+msgctxt "registrar.exam_score_entry"
+msgid "%(label)s balı 0 ilə %(max)s arasında olmalıdır."
+msgstr "%(label)s balı 0 ilə %(max)s arasında olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "%(label)s balı tam ədəd olmalıdır."
+msgstr "%(label)s balı tam ədəd olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)."
+msgstr "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "0 — yalnız yekun bal"
+msgstr "0 — yalnız yekun bal"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bir sualın maksimum balı 1 ilə 100 arasında olmalıdır."
+msgstr "Bir sualın maksimum balı 1 ilə 100 arasında olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bir sualın maksimumu"
+msgstr "Bir sualın maksimumu"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu dəyişikliyin tam qeydi: köhnə → yeni bal, sual balları, səbəb, qeyd, vərəq və sənəd."
+msgstr "Bu dəyişikliyin tam qeydi: köhnə → yeni bal, sual balları, səbəb, qeyd, vərəq və sənəd."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu filtrə uyğun dəyişiklik yoxdur."
+msgstr "Bu filtrə uyğun dəyişiklik yoxdur."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu filtrə uyğun tələbə yoxdur."
+msgstr "Bu filtrə uyğun tələbə yoxdur."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu vərəq tək yekun bal rejimindədir — sual balı qəbul olunmur."
+msgstr "Bu vərəq tək yekun bal rejimindədir — sual balı qəbul olunmur."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün fənlər"
+msgstr "Bütün fənlər"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün müəllimlər"
+msgstr "Bütün müəllimlər"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün növlər"
+msgstr "Bütün növlər"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün qruplar"
+msgstr "Bütün qruplar"
+
+msgctxt "registrar.exam_score_entry"
+msgid "CSV ixrac"
+msgstr "CSV ixrac"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik"
+msgstr "Dəyişiklik"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişikliyin növü"
+msgstr "Dəyişikliyin növü"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişən nəticələr"
+msgstr "Dəyişən nəticələr"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Fənn / qrup"
+msgstr "Fənn / qrup"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Giriş balı (%(entry)s) + imtahan balı (%(exam)s) 100-dən çox ola bilməz."
+msgstr "Giriş balı (%(entry)s) + imtahan balı (%(exam)s) 100-dən çox ola bilməz."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Görünüş"
+msgstr "Görünüş"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köhnə bal"
+msgstr "Köhnə bal"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köhnə → yeni"
+msgstr "Köhnə → yeni"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "registrar.exam_score_entry"
+msgid "S1..Sn sütunları doludursa bal onların cəmidir. İmtahan növü (yazılı / praktiki) və sual şəbəkəsi vərəq məlumatları kartından götürülür — bütün fayla aiddir."
+msgstr "S1..Sn sütunları doludursa bal onların cəmidir. İmtahan növü (yazılı / praktiki) və sual şəbəkəsi vərəq məlumatları kartından götürülür — bütün fayla aiddir."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual balları"
+msgstr "Sual balları"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı"
+msgstr "Sual sayı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı 0 ilə %(max)s arasında olmalıdır."
+msgstr "Sual sayı 0 ilə %(max)s arasında olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı vərəqin sual sayından (%(count)s) çox ola bilməz."
+msgstr "Sual sayı vərəqin sual sayından (%(count)s) çox ola bilməz."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sualların cəmi (%(total)s) imtahan balının tavanını (%(max)s) aşır."
+msgstr "Sualların cəmi (%(total)s) imtahan balının tavanını (%(max)s) aşır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sualların cəmi imtahan balının tavanını aşa bilməz."
+msgstr "Sualların cəmi imtahan balının tavanını aşa bilməz."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sənəd"
+msgstr "Sənəd"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarixdən"
+msgstr "Tarixdən"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarixədək"
+msgstr "Tarixədək"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tələbə axtarışı"
+msgstr "Tələbə axtarışı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır."
+msgstr "Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılmış imtahan balının hər sonrakı dəyişikliyi (apellyasiya qərarı və ya sənədli düzəliş) burada izlənir: köhnə → yeni bal, səbəb, kim və sənəd."
+msgstr "Yazılmış imtahan balının hər sonrakı dəyişikliyi (apellyasiya qərarı və ya sənədli düzəliş) burada izlənir: köhnə → yeni bal, səbəb, kim və sənəd."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılı və ya praktiki — vərəqin və bütün sətirlərinin növü."
+msgstr "Yazılı və ya praktiki — vərəqin və bütün sətirlərinin növü."
+
+msgctxt "registrar.exam_score_entry"
+msgid "ad · istifadəçi adı · FİN · tələbə №"
+msgstr "ad · istifadəçi adı · FİN · tələbə №"
+
+msgctxt "registrar.exam_score_entry"
+msgid "hamısı"
+msgstr "hamısı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü"
+msgstr "İmtahan növü"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü yazılı və ya praktiki olmalıdır."
+msgstr "İmtahan növü yazılı və ya praktiki olmalıdır."

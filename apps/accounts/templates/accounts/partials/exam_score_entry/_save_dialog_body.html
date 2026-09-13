@@ -2,7 +2,9 @@
 {% comment %}Yadda saxlama təsdiqi — icmal + (dəyişiklik varsa) səbəb/qeyd.
 `_dialog.html` gövdəsi; siyahı formasının İÇİNDƏ render olunur, ona görə
 `reason` / `note` sahələri eyni POST-la gedir. Skan sahəsi vərəq kartındadır
-(`sheet_evidence`) — burada yalnız vəziyyəti göstərilir.{% endcomment %}
+(`sheet_evidence`) — burada yalnız vəziyyəti göstərilir.
+2026-09-14: dəyişiklik NÖVÜ (`kind`: sənədli düzəliş | apellyasiya nəticəsi) —
+sahib: «apellyasiyadan sonra dəyişən nəticələr izlənsin».{% endcomment %}
 <p class="ems-msg ems-msg--error" data-ese-dialog-error role="alert" hidden></p>
 <ul class="ese-summary" data-ese-dialog-summary aria-live="polite"></ul>
 
@@ -11,6 +13,16 @@
     <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
     <span>{% trans "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur." context "registrar.exam_score_entry" %}</span>
   </p>
+  <div class="ems-field">
+    <label class="ems-field__label" for="ese-kind">{% trans "Dəyişikliyin növü" context "registrar.exam_score_entry" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+      <select id="ese-kind" name="kind" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-ese-kind>
+        {% for kind in s.change_kinds %}
+        <option value="{{ kind.value }}">{{ kind.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
   <div class="ems-field">
     <label class="ems-field__label" for="ese-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
     <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">

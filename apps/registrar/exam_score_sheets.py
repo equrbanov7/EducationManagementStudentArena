@@ -31,8 +31,10 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import exam_score_questions as questions
 from .corrections import correction_author_name
 from .models import CourseOffering, ExamScoreSheet, ExamScoreSheetSource
+from .models.exam_score_entry import ExamScoreSheetKind
 
 _CTX = "registrar.exam_score_entry"
 
@@ -115,11 +117,29 @@ def parse_exam_date(raw):
     raise ValidationError(pgettext(_CTX, "İmtahan tarixi düzgün formatda deyil."))
 
 
+def clean_exam_kind(raw) -> str:
+    """İmtahan növü — ``written`` / ``practical``; boş → ``written`` (defolt), yad dəyər → xəta."""
+    value = (raw or "").strip() if isinstance(raw, str) else raw
+    if not value:
+        return ExamScoreSheetKind.WRITTEN
+    if value not in ExamScoreSheetKind.values:
+        raise ValidationError(pgettext(_CTX, "İmtahan növü yazılı və ya praktiki olmalıdır."))
+    return value
+
+
 def sheet_metadata_from_post(post, files, *, offering):
-    """POST/FILES-dən partiya metadatasını çıxar (view-lar üçün ortaq)."""
+    """POST/FILES-dən partiya metadatasını çıxar (view-lar üçün ortaq).
+
+    2026-09-14 (W2 `w2paper`): ``question_count`` / ``question_max`` — vərəqin
+    sual şəbəkəsi (boş → defolt 5 × 10; yanlış → ``ValidationError``).
+    """
     examiner_name = (post.get("examiner_name") or "").strip()
+    question_count, question_max = questions.clean_question_grid(post.get("question_count"), post.get("question_max"))
     return {
         "exam_date": parse_exam_date(post.get("exam_date")),
+        "exam_kind": clean_exam_kind(post.get("exam_kind")),
+        "question_count": question_count,
+        "question_max": question_max,
         "examiner": getattr(offering, "instructor", None),
         "examiner_name": examiner_name or instructor_label(offering),
         "invigilator_name": (post.get("invigilator_name") or "").strip()[:200],
@@ -164,6 +184,9 @@ def create_sheet(
     evidence=None,
     original_filename="",
     request=None,
+    question_count=None,
+    question_max=None,
+    exam_kind=ExamScoreSheetKind.WRITTEN,
 ):
     """Yeni köçürmə partiyası yarat (bal yazılmazdan ƏVVƏL — sətirlər ona bağlanır).
 
@@ -175,10 +198,16 @@ def create_sheet(
     """
     examiner = examiner if examiner is not None else getattr(offering, "instructor", None)
     _assert_examiner_in_organization(examiner, offering)
+    grid = questions.question_defaults()
+    if question_count is not None:
+        grid["question_count"] = int(question_count)
+    if question_max is not None:
+        grid["question_max"] = int(question_max)
     sheet = ExamScoreSheet(
         organization=offering.organization,
         offering=offering,
         source=source,
+        exam_kind=clean_exam_kind(exam_kind),
         exam_date=exam_date,
         examiner=examiner,
         examiner_name=(examiner_name or instructor_label(offering))[:200],
@@ -187,6 +216,8 @@ def create_sheet(
         note=note or "",
         evidence=evidence or "",
         original_filename=(original_filename or "")[:255],
+        question_count=grid["question_count"],
+        question_max=grid["question_max"],
         created_by=by_user,
         created_by_name=correction_author_name(by_user, request),
     )
@@ -251,6 +282,9 @@ def sheet_row(sheet) -> dict:
         "source": sheet.source,
         "source_label": str(sheet.get_source_display()),
         "is_import": sheet.source == ExamScoreSheetSource.IMPORT,
+        "exam_kind": sheet.exam_kind,
+        "exam_kind_label": str(sheet.get_exam_kind_display()),
+        "is_practical": sheet.exam_kind == ExamScoreSheetKind.PRACTICAL,
         "exam_date": sheet.exam_date.strftime("%d.%m.%Y") if sheet.exam_date else "",
         "exam_date_iso": sheet.exam_date.isoformat() if sheet.exam_date else "",
         "examiner_name": sheet.examiner_name,
@@ -262,16 +296,22 @@ def sheet_row(sheet) -> dict:
         "rows_written": sheet.rows_written,
         "rows_skipped": sheet.rows_skipped,
         "rows_failed": sheet.rows_failed,
+        "question_count": sheet.question_count,
+        "question_max": sheet.question_max,
         "by": sheet.created_by_name,
         "evidence_url": _file_url(sheet.evidence),
     }
 
 
-def sheets_for_offering(*, offering, limit=SHEET_HISTORY_LIMIT):
-    """Açılışın son partiyaları (ən yenidən köhnəyə) — tarixçə paneli, TƏK sorğu."""
-    return [
-        sheet_row(sheet) for sheet in ExamScoreSheet.objects.filter(offering=offering).order_by("-created_at")[:limit]
-    ]
+def sheets_for_offering(*, offering, limit=SHEET_HISTORY_LIMIT, exam_kind=""):
+    """Açılışın son partiyaları (ən yenidən köhnəyə) — tarixçə paneli, TƏK sorğu.
+
+    ``exam_kind`` — ``written`` / ``practical`` çipi (boş → hamısı; addendum 2026-09-14).
+    """
+    queryset = ExamScoreSheet.objects.filter(offering=offering)
+    if exam_kind in ExamScoreSheetKind.values:
+        queryset = queryset.filter(exam_kind=exam_kind)
+    return [sheet_row(sheet) for sheet in queryset.order_by("-created_at")[:limit]]
 
 
 def latest_sheet_defaults(sheets) -> dict:
@@ -280,19 +320,31 @@ def latest_sheet_defaults(sheets) -> dict:
     İmtahan mərkəzi bir vərəqi bir neçə oturuşda köçürəndə eyni metadatanı
     təkrar yazmasın; ``sheets`` ``sheets_for_offering`` nəticəsidir (əlavə sorğu yox).
     """
+    grid = questions.question_defaults()
     if not sheets:
-        return {"exam_date": "", "examiner_name": "", "invigilator_name": "", "protocol_number": ""}
+        return {
+            "exam_date": "",
+            "exam_kind": ExamScoreSheetKind.WRITTEN,
+            "examiner_name": "",
+            "invigilator_name": "",
+            "protocol_number": "",
+            **grid,
+        }
     last = sheets[0]
     return {
         "exam_date": last["exam_date_iso"],
+        "exam_kind": last.get("exam_kind", ExamScoreSheetKind.WRITTEN),
         "examiner_name": last["examiner_name"],
         "invigilator_name": last["invigilator_name"],
         "protocol_number": last["protocol_number"],
+        "question_count": last.get("question_count", grid["question_count"]),
+        "question_max": last.get("question_max", grid["question_max"]),
     }
 
 
 __all__ = [
     "SHEET_HISTORY_LIMIT",
+    "clean_exam_kind",
     "create_sheet",
     "finalize_sheet",
     "groups_for_period",

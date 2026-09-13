@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    exam_score_entry.css — İmtahan Mərkəzi: yazılı imtahan ballarının köçürülməsi
-   (2026-09-12 — qrup-əvvəl seçim, vərəq məlumatları, fayl idxalı, tarixçə çekmecəsi).
+   (2026-09-12 — qrup-əvvəl seçim, vərəq məlumatları, fayl idxalı, tarixçə çekmecəsi;
+    2026-09-14 W2 `w2paper` — görünüş açarı, vəziyyət çipləri, S1..Sn sual sütunları,
+    «Dəyişən nəticələr» cədvəli).
 
    Baza ems_ui-dandır (`ems-header`, `ems-steps`, `ems-filters`, `ems-kpis`,
    `ems-card`, `ems-table`, `ems-tabs`, `ems-msg`, `ems-state`, `ems-btn`,
@@ -559,6 +561,7 @@
     .ese-import__justgrid {
         grid-template-columns: 1fr;
     }
+
 }
 
 .ese-drop:focus-within {

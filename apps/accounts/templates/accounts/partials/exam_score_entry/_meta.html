@@ -8,7 +8,12 @@ Sahələr `form="ese-roster-form"` ilə siyahı formasına bağlıdır (kart for
 KƏNARINDADIR ki, idxal paneli də eyni sahələri oxusun — `exam_score_import.js`
 FormData-ya `data-ese-meta` içindəki dəyərləri əlavə edir). İlkin dəyərlər
 sonuncu partiyadan gəlir (`sheet_defaults`) — bir vərəq bir neçə oturuşda
-köçürüləndə metadata təkrar yazılmır.{% endcomment %}
+köçürüləndə metadata təkrar yazılmır.
+
+2026-09-14 (W2 `w2paper`, sahib: «hər sualdan max 10»): sual şəbəkəsi —
+`question_count` (0..10; 0 = yalnız yekun bal) və `question_max`. Sual sayı
+dəyişəndə JS siyahıdakı S-sütunlarını açıb-bağlayır (səhifə yenilənmir);
+server vərəqi bu dəyərlərlə yaradır və hər sətri onunla yoxlayır.{% endcomment %}
 <section class="ems-card ese-meta" data-ese-meta>
   <div class="ems-card__head">
     <div>
@@ -22,6 +27,18 @@ köçürüləndə metadata təkrar yazılmır.{% endcomment %}
     </div>
   </div>
   <div class="ems-card__body ese-meta__grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-exam-kind">{% trans "İmtahan növü" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+        <select id="ese-exam-kind" name="exam_kind" form="ese-roster-form" class="ems-select bootstrap-single-select__native" required
+                data-bootstrap-select data-ese-meta-field data-ese-exam-kind>
+          {% for option in s.exam_kind_options %}
+          <option value="{{ option.value }}"{% if option.value == s.sheet_defaults.exam_kind %} selected{% endif %}>{{ option.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <span class="ems-field__hint">{% trans "Yazılı və ya praktiki — vərəqin və bütün sətirlərinin növü." context "registrar.exam_score_entry" %}</span>
+    </div>
     <div class="ems-field">
       <label class="ems-field__label" for="ese-exam-date">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</label>
       <input type="date" id="ese-exam-date" name="exam_date" form="ese-roster-form" class="ems-input ems-input--date"
@@ -42,6 +59,24 @@ köçürüləndə metadata təkrar yazılmır.{% endcomment %}
       <label class="ems-field__label" for="ese-protocol">{% trans "Protokol / vərəq №" context "registrar.exam_score_entry" %}</label>
       <input type="text" id="ese-protocol" name="protocol_number" form="ese-roster-form" class="ems-input" maxlength="64"
              value="{{ s.sheet_defaults.protocol_number }}" data-ese-meta-field>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-question-count">{% trans "Sual sayı" context "registrar.exam_score_entry" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+        <select id="ese-question-count" name="question_count" form="ese-roster-form" class="ems-select bootstrap-single-select__native"
+                data-bootstrap-select data-ese-meta-field data-ese-question-count>
+          {% for option in s.question_count_options %}
+          <option value="{{ option.value }}"{% if option.value|stringformat:'s' == s.question_count|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <span class="ems-field__hint">{% trans "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)." context "registrar.exam_score_entry" %}</span>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-question-max">{% trans "Bir sualın maksimumu" context "registrar.exam_score_entry" %}</label>
+      <input type="number" id="ese-question-max" name="question_max" form="ese-roster-form" class="ems-input ese-qmax"
+             min="1" max="100" step="1" inputmode="numeric" value="{{ s.question_max }}" data-ese-meta-field data-ese-question-max>
+      <span class="ems-field__hint">{% trans "Sualların cəmi imtahan balının tavanını aşa bilməz." context "registrar.exam_score_entry" %} (<b>{{ s.exam_score_max }}</b>)</span>
     </div>
     <div class="ems-field ems-field--wide">
       <label class="ems-field__label" for="ese-sheet-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}</label>

@@ -17,15 +17,16 @@ Kontekst: `row` (siyahı sətri).{% endcomment %}
   {% if row.entries %}
   <ul class="ese-history__list">
     {% for entry in row.entries %}
-    <li class="ese-history__item {% if entry.is_correction %}is-correction{% endif %}">
+    <li class="ese-history__item {% if entry.is_change %}is-correction{% endif %}">
       <span class="ese-history__date">{{ entry.date }}</span>
-      <span class="ese-history__delta">{{ entry.old }} → <b>{{ entry.new }}</b></span>
-      <span class="ems-badge {% if entry.is_correction %}ems-badge--warning{% else %}ems-badge--success{% endif %}">{% if entry.is_correction %}{% trans "sənədli düzəliş" context "registrar.exam_score_entry" %}{% else %}{% trans "ilkin daxiletmə" context "registrar.exam_score_entry" %}{% endif %}</span>
+      <span class="ese-history__delta">{{ entry.old }} → <b>{{ entry.new }}</b>{% if entry.question_scores %} <span class="ese-history__q">({{ entry.question_scores|join:" + " }})</span>{% endif %}</span>
+      <span class="ems-badge {% if entry.is_appeal %}ems-badge--info{% elif entry.is_correction %}ems-badge--warning{% else %}ems-badge--success{% endif %}">{{ entry.kind_label }}</span>
       {% if entry.reason %}<span class="ese-history__reason">{{ entry.reason }}</span>{% endif %}
       {% if entry.note %}<span class="ese-history__note">{{ entry.note }}</span>{% endif %}
       {% if entry.sheet_id %}
       <span class="ese-history__sheet">
         <i class="fas fa-file-lines" aria-hidden="true"></i>
+        {% if entry.sheet_exam_kind_label %}{{ entry.sheet_exam_kind_label }} ·{% endif %}
         {% if entry.sheet_exam_date %}{% trans "imtahan" context "registrar.exam_score_entry" %} {{ entry.sheet_exam_date }}{% endif %}
         {% if entry.sheet_protocol %}· № {{ entry.sheet_protocol }}{% endif %}
         {% if entry.sheet_examiner %}· {{ entry.sheet_examiner }}{% endif %}
