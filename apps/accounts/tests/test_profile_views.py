@@ -625,11 +625,18 @@ class ProfileViewTest(TestCase):
         )
 
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile"))
+        # 2026-09-13 (Codex audit §14/§21): cədvəl yalnız `profile-info` (kimlik
+        # paneli) və superadmin təşkilat bölməsində render olunur; qalan bölmələrdə
+        # qurulmur (boş siyahı) — ona görə ölçmə həmin bölmədə aparılır.
+        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
 
         self.assertEqual(response.status_code, 200)
         access_rows = response.context["organization_access_rows"]
         self.assertEqual([row["organization"].id for row in access_rows], [active_org.id])
+
+        dashboard = self.client.get(reverse("accounts:profile"))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertEqual(list(dashboard.context["organization_access_rows"]), [])
 
     def test_pending_org_owner_profile_creates_pending_approval_notification(self):
         self.user.profile.role = ProfileRole.ORG_OWNER

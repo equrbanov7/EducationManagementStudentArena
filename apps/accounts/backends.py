@@ -60,7 +60,9 @@ class EmailOrUsernameBackend(ModelBackend):
         return super().user_can_authenticate(user) and not user_access_is_login_blocked(user)
 
     def get_user(self, user_id):
-        user = super().get_user(user_id)
-        if user is None or not self.user_can_authenticate(user):
-            return None
-        return user
+        # 2026-09-13 (Codex audit §14/§21 — kabinet qabığı sorğu büdcəsi):
+        # ``ModelBackend.get_user`` onsuz da ``self.user_can_authenticate`` ilə
+        # süzür (bloklanmış hesab → ``None``); burada ikinci dəfə çağırmaq eyni
+        # ``accounts_userprofile`` access_state SELECT-ini hər autentifikasiyalı
+        # sorğuda təkrarlayırdı. Semantika dəyişmir — yoxlama super()-dədir.
+        return super().get_user(user_id)
