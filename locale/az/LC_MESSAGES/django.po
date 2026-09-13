@@ -66084,3 +66084,11 @@ msgstr "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
 
 msgid "delete_account_academic_history"
 msgstr "Bu hesabın akademik tarixçəsi (qeydiyyat, qiymət, imtahan cəhdi) var — tam silinə bilməz, yalnız arxivlənə bilər."
+
+msgctxt "profile.statistics"
+msgid "Orta GPA (4.0)"
+msgstr "Orta GPA (4.0)"
+
+msgctxt "profile.statistics"
+msgid "4.0 şkalası"
+msgstr "4.0 şkalası"

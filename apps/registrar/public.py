@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.registrar import analytics, exam_score_entry, exam_score_import, exam_score_sheets
+from apps.registrar import absence_limit, analytics, exam_score_entry, exam_score_import, exam_score_sheets
 from apps.registrar.cabinet_policy import TRANSCRIPT_APPLICATION_KIND, transcript_policy
 from apps.registrar.exam_bridge import (
     exam_eligibility,
@@ -374,7 +374,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # işarəsi az olan tələbədə məxrəci kiçildib balı süni qaldırırdı və eyni
     # sətri müəllim ekranından ayırırdı (2026-08-31 düşmən baxışı, 2-ci bloker).
     dav_lesson_hours = exam_eligibility.lesson_hours_for(offering, offering.lessons.all())
-    dav_limit_percent = gradebook.absence_limit_percent_for(offering)
+    # F-06 (2026-09-13): hədd tələbənin ÖZ qeydindən (``record`` artıq əldədir,
+    # əlavə sorğu yoxdur) — imtahan qapısı ilə EYNİ mənbə (``absence_limit``).
+    dav_limit_percent = absence_limit.limit_percent_for_record(record)
     dav_eligibility = exam_eligibility.resolve(
         absence_hours=enrollment.absence_hours,
         lesson_hours=dav_lesson_hours,
