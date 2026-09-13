@@ -191,11 +191,18 @@ def remove_student_from_assignment(request, pk):
 
     assignment = _get_tenant_assignment_or_404(request, pk)
 
-    # The user must own the course AND have the assignment.edit permission.
+    # Kurs sahibi olmaq + redaktə açarı. Audit `access` F-12 (2026-09-13):
+    # `assignment.edit` kataloqda YOX idi → heç bir default rol daşımırdı və
+    # endpoint faktiki yalnız `*`-lı rollara açıq idi (adi müəllim öz
+    # tapşırığından tələbə çıxara bilmirdi). Açar kataloqa + müəllim şablonuna
+    # əlavə edildi; mövcud tenantların köhnə şablondan yaranmış müəllim rolları
+    # üçün isə `course.edit` (FAZA 10-dan hər müəllim şablonundadır) də qapını
+    # açır — `_can_delete_submissions`-dakı `assignment.delete | course.delete`
+    # cütü ilə eyni naxış.
     if (
         not request.user.is_teacher_or_above
         or assignment.course.owner != request.user
-        or not request_has_permission(request, "assignment.edit")
+        or not (request_has_permission(request, "assignment.edit") or request_has_permission(request, "course.edit"))
     ):
         raise PermissionDenied("You do not have permission to modify this assignment.")
 

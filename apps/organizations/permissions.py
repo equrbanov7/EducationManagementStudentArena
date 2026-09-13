@@ -76,6 +76,12 @@ PERMISSION_CATEGORIES = {
         "course.create",
         "course.edit",
         "course.delete",
+        # `assignment.edit` (2026-09-13, audit `access` F-12): tapşırığın siyahısını
+        # (tələbəni tapşırıqdan çıxarmaq) redaktə açarı. Kod bu açarı 2026-dan
+        # yoxlayırdı, amma kataloqda YOX idi → heç bir default rol daşımırdı və
+        # icazə redaktorundan verilə bilmirdi. `assignment.delete` ilə eyni
+        # ailədədir; qapı `course.edit` ilə də açılır (bax assignments/views/shared/api.py).
+        "assignment.edit",
         "assignment.delete",
         "project.delete",
         "lab.delete",
@@ -362,6 +368,7 @@ PERMISSION_LABELS = {
     "course.create": pgettext_lazy(_PERM_CTX, "Kurs yaratmaq"),
     "course.edit": pgettext_lazy(_PERM_CTX, "Kursu redaktə etmək"),
     "course.delete": pgettext_lazy(_PERM_CTX, "Kursu silmək"),
+    "assignment.edit": pgettext_lazy(_PERM_CTX, "Sərbəst işi redaktə etmək"),
     "assignment.delete": pgettext_lazy(_PERM_CTX, "Sərbəst işi silmək"),
     "project.delete": pgettext_lazy(_PERM_CTX, "Kurs işini silmək"),
     "lab.delete": pgettext_lazy(_PERM_CTX, "Lab işini silmək"),

@@ -10,7 +10,7 @@ müvəqqəti söndürür, ona görə qorunan bazaya qarşı ASLA işlədilməmə
 
 ```bash
 EMS_STAGING_INSPECT=1 \
-DATABASE_URL="postgres://emsarena_staging:emsarena_staging_password@127.0.0.1:55433/emsarena_rehearsal_a0d170000901" \
+DATABASE_URL="${QA_CLONE_DATABASE_URL:?QA_CLONE_DATABASE_URL təyin edilməyib — klon DSN-i .claude/staging.env-dən (parol repoya yazılmır, audit 2026-09-13 F-03)}" \
 EMS_STAGING_DB_NAME=emsarena_rehearsal_a0d170000901 \
 EMS_STAGING_DB_PORT=55433 \
 EMS_DB_ROLE_ENFORCE=off DEBUG=True USE_REDIS=False ENABLE_NGROK=False \
@@ -150,6 +150,18 @@ heç bir rol üzvlüyünə bağlı deyil. Bu, gözlənilən haldır — nasazlı
   Sahibin qərarı: `docs/migration/STATUS.md:261` — «hesab girişə bağlı qalsın,
   akademik qeydləri köçsün».  Müqaviləni `apps/accounts/tests/test_account_archive.py`
   (16 test) kilidləyir.
+* **Dayandırılmış (`suspended`) təşkilat → sərt çıxış; `pending` → yalnız
+  bayraq.**  Aktiv üzvlüyü olan təşkilat `status='active'` deyilsə
+  `OrganizationMiddleware` onu `request.blocked_organization` kimi verir
+  (sessiyadakı seçilmiş org VƏ — 2026-09-13 access auditi F-11-dən sonra —
+  yeganə/bütün təşkilatları dayandırılmış istifadəçi üçün də); sonra
+  `SuspendedOrganizationMiddleware` `suspended` (və hər digər qeyri-`pending`)
+  statusda sessiyanı bağlayıb login-ə yönləndirir («Təşkilatınız
+  dayandırılıb»), `pending` statusda isə yalnız `request.org_pending_approval`
+  bayrağını qaldırır.  Bu bayraq **heç bir view-da yazı qapısı deyil** — yalnız
+  kabinet xəbərdarlığı (`accounts/profile/_messages.html`) onu oxuyur; yazı
+  onsuz da mümkün deyil, çünki `pending` təşkilat heç vaxt
+  `request.organization` (aktiv tenant konteksti) olmur.
 * **`ikt_rehber` (46) rektordan (40) çox bölmə görür.**  Bu qəsdəndir: rol
   full-override texniki rəhbərdir (bax `project_ikt_rehber_role`), `rector` isə
   təsdiq/idarəetmə səthlərinə baxır — `superadmin-exam-rooms`,
