@@ -129,6 +129,26 @@ def sheet_metadata_from_post(post, files, *, offering):
     }
 
 
+def _assert_examiner_in_organization(examiner, offering):
+    """I2 (Codex audit P2-09, 2026-09-13): açıq verilən yoxlayan müəllim açılışın təşkilatında AKTİV üzv olmalıdır.
+
+    «Aktiv üzv» tərifi ``0041`` ``registrar_member_has_permission``-la eynidir:
+    üzvlük aktiv VƏ rolu aktiv. QƏSDƏN DB trigger-i yoxdur — üzvlüklər dəyişir,
+    vərəq isə tarixi snapshot-dur (müəllim sonradan təşkilatdan çıxsa köhnə
+    vərəq etibarsız olmamalıdır). Açılışın öz müəllimi yoxlanmır: defolt yoldur
+    və üzvlüyü təyinat anında DB-də (``registrar_active_member_instructor_guard``)
+    təsdiqlənib. Mesaj mövcud kataloq cütüdür (``accounts.groups``) — yeni i18n
+    borcu yaranmır.
+    """
+    if examiner is None or examiner.pk == getattr(offering, "instructor_id", None):
+        return
+    is_member = examiner.memberships.filter(
+        organization_id=offering.organization_id, is_active=True, role__is_active=True
+    ).exists()
+    if not is_member:
+        raise ValidationError(pgettext("accounts.groups", "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."))
+
+
 @transaction.atomic
 def create_sheet(
     *,
@@ -149,13 +169,18 @@ def create_sheet(
 
     Skan faylının ölçü/tip validatoru burada işləyir: yanlış fayl bütün
     partiyanı DAYANDIRIR (heç bir bal yazılmır) — yarımçıq partiya qalmasın.
+    Tenant/əlaqə invariantları (P2-09): vərəq ↔ açılış təşkilatı və skanın
+    org-prefiksi ``ExamScoreSheet.clean()``-də, yoxlayanın üzvlüyü burada,
+    hamısının son səddi ``0073`` trigger-idir.
     """
+    examiner = examiner if examiner is not None else getattr(offering, "instructor", None)
+    _assert_examiner_in_organization(examiner, offering)
     sheet = ExamScoreSheet(
         organization=offering.organization,
         offering=offering,
         source=source,
         exam_date=exam_date,
-        examiner=examiner if examiner is not None else getattr(offering, "instructor", None),
+        examiner=examiner,
         examiner_name=(examiner_name or instructor_label(offering))[:200],
         invigilator_name=(invigilator_name or "")[:200],
         protocol_number=(protocol_number or "")[:64],

@@ -19,6 +19,7 @@ Servis qatı: ``apps/registrar/exam_score_entry.py``.
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
@@ -105,6 +106,29 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
     def __str__(self):
         return f"exam-score-entry<{self.enrollment_id}> {self.old_score}→{self.new_score}"
 
+    def clean(self):
+        """Tenant/əlaqə invariantları Python-da; PostgreSQL eyni qaydanı trigger-də təkrarlayır.
+
+        2026-09-13, Codex audit P2-09: sətir ↔ qeydiyyat ↔ vərəq zənciri yalnız
+        servis qatında qorunurdu. İndi üç qat var — bu ``clean()`` (adi axında
+        xəta ``ValidationError`` kimi üzə çıxır), servis (``record_exam_score``)
+        və ``0073`` migrasiyasının ``registrar_exam_score_entry_sheet_guard``
+        trigger-i (xam SQL / ``QuerySet.update()`` üçün son sədd).
+        """
+        super().clean()
+        errors = {}
+        enrollment = self.enrollment if self.enrollment_id else None
+        if enrollment is not None and self.organization_id and enrollment.organization_id != self.organization_id:
+            errors["enrollment"] = "Qeydiyyat sətrin təşkilatına aid olmalıdır."
+        if self.sheet_id:
+            sheet = self.sheet
+            if self.organization_id and sheet.organization_id != self.organization_id:
+                errors["sheet"] = "Köçürmə vərəqi sətrin təşkilatına aid olmalıdır."
+            elif enrollment is not None and sheet.offering_id != enrollment.offering_id:
+                errors["sheet"] = "Köçürmə vərəqi qeydiyyatın açılışına aid olmalıdır."
+        if errors:
+            raise ValidationError(errors)
+
 
 # ── Köçürmə vərəqi (batch) — 2026-09-12, sahibin tələbi ──────────────────────
 #
@@ -127,9 +151,21 @@ class ExamScoreSheetSource(models.TextChoices):
     IMPORT = "import", pgettext_lazy("registrar.exam_score_sheet_source", "File import (XLSX/CSV)")
 
 
+#: Vərəq skanının media prefiksi. ``core.media_policies`` eyni prefiksi öz
+#: checker cədvəlində LİTERAL kimi saxlayır (core registrar-ı import etmir) —
+#: ikisi sinxron qalmalıdır. Org-prefiks invariantı (aşağıda ``clean()`` +
+#: ``0073`` trigger-i) bu sabitə söykənir.
+EXAM_SCORE_SHEET_MEDIA_PREFIX = "exam_score_sheets/"
+
+
+def exam_score_sheet_evidence_prefix(organization_id) -> str:
+    """``exam_score_sheets/<organization_id>/`` — vərəqin skanının icazəli kök yolu."""
+    return f"{EXAM_SCORE_SHEET_MEDIA_PREFIX}{organization_id}/"
+
+
 def exam_score_sheet_path(instance, filename: str) -> str:
     """Skan edilmiş protokol/vərəq — qorunan media altında org-scoped yol."""
-    return f"exam_score_sheets/{instance.organization_id}/{filename}"
+    return f"{exam_score_sheet_evidence_prefix(instance.organization_id)}{filename}"
 
 
 class ExamScoreSheet(UUIDModel, TimeStampedModel):
@@ -190,3 +226,30 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"exam-score-sheet<{self.offering_id}> {self.source} {self.exam_date or '—'}"
+
+    def clean(self):
+        """Vərəq ↔ açılış tenant uyğunluğu və skanın org-prefiksi (Codex audit P2-09, 2026-09-13).
+
+        PostgreSQL eyni iki qaydanı ``0073`` migrasiyasının
+        ``registrar_exam_score_sheet_integrity_guard`` trigger-ində təkrarlayır;
+        burada məqsəd adi axında xətanın ``ValidationError`` kimi trigger-dən
+        ƏVVƏL görünməsidir. ``examiner``-in aktiv üzvlüyü QƏSDƏN burada deyil —
+        üzvlüklər dəyişir, vərəq isə tarixi snapshot-dur (servis:
+        ``exam_score_sheets.create_sheet``).
+        """
+        super().clean()
+        errors = {}
+        if self.offering_id and self.organization_id and self.offering.organization_id != self.organization_id:
+            errors["offering"] = "Açılış vərəqin təşkilatına aid olmalıdır."
+        # Yeni yüklənən fayl (``_committed`` = False) hələ ``upload_to``-dan
+        # keçməyib — adı prefikssizdir; yol yalnız ``save()``-də qurulur. Yoxlama
+        # artıq saxlanmış (və ya birbaşa sətir kimi verilmiş) ada aiddir.
+        if (
+            self.evidence
+            and self.organization_id
+            and getattr(self.evidence, "_committed", True)
+            and not str(self.evidence.name).startswith(exam_score_sheet_evidence_prefix(self.organization_id))
+        ):
+            errors["evidence"] = "Skan faylı vərəqin öz təşkilat prefiksi altında olmalıdır."
+        if errors:
+            raise ValidationError(errors)

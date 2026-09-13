@@ -316,6 +316,21 @@ def _require_justification(*, reason, note, evidence, sheet=None):
         raise ValidationError(pgettext(_CTX, "Balı dəyişmək üçün təsdiqedici sənəd əlavə olunmalıdır."))
 
 
+def assert_sheet_matches(sheet, *, organization_id, offering_id):
+    """Partiya bu tenanta VƏ açılışa aiddirmi — deyilsə fail-closed ``ValidationError``.
+
+    2026-09-13, Codex audit P2-09 (I3): eyni qayda modeldə
+    (``ExamScoreEntry.clean``) və DB-də (``0073``
+    ``registrar_exam_score_entry_sheet_guard`` trigger-i) təkrarlanır; burada
+    məqsəd xətanın yazıdan ƏVVƏL, oxunaqlı mesajla çıxmasıdır — toplu yazıda
+    bir dəfə (``save_roster_scores``), tək yazıda kilidin ardınca.
+    """
+    if sheet is None:
+        return
+    if sheet.offering_id != offering_id or sheet.organization_id != organization_id:
+        raise ValidationError(pgettext(_CTX, "Köçürmə vərəqi bu açılışa aid deyil."))
+
+
 @transaction.atomic
 def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidence=None, request=None, sheet=None):
     """Bir tələbənin imtahan balını yaz (ilkin daxiletmə və ya sənədli düzəliş).
@@ -333,6 +348,9 @@ def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidenc
         .select_related("offering", "organization")
         .get(pk=enrollment.pk, organization_id=enrollment.organization_id)
     )
+    # Partiya başqa açılışa/tenanta aiddirsə sətir ona bağlana bilməz — hər
+    # şeydən ƏVVƏL (boş və ya eyni bal olsa belə) fail-closed (P2-09, 2026-09-13).
+    assert_sheet_matches(sheet, organization_id=enrollment.organization_id, offering_id=enrollment.offering_id)
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     cap = finals.exam_score_max(scheme)
     new_score = _clean_score(score, cap)
@@ -347,11 +365,6 @@ def record_exam_score(*, enrollment, score, by_user, reason="", note="", evidenc
     is_correction = old_score is not None
     if is_correction:
         _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
-    if sheet is not None and (
-        sheet.offering_id != enrollment.offering_id or sheet.organization_id != enrollment.organization_id
-    ):
-        # Partiya başqa açılışa aiddirsə sətir ona bağlana bilməz (fail-closed).
-        raise ValidationError(pgettext(_CTX, "Köçürmə vərəqi bu açılışa aid deyil."))
 
     entry = ExamScoreEntry(
         organization=enrollment.organization,
@@ -412,6 +425,9 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None):
     "failed_by_enrollment": {enrollment_id: mesaj}}`` (sonuncu — eyni adlı iki
     tələbənin xətası qarışmasın deyə, fayl idxalı üçün).
     """
+    # Yad partiya = bütün toplu yazı DAYANIR (sətir-sətir N eyni xəta əvəzinə
+    # bir aydın xəta; heç bir savepoint açılmır) — P2-09, 2026-09-13.
+    assert_sheet_matches(sheet, organization_id=offering.organization_id, offering_id=offering.pk)
     enrollments = {
         str(enrollment.id): enrollment
         for enrollment in offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related(
