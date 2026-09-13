@@ -229,15 +229,14 @@ class SyllabusListSectionBudgetTest(TestCase):
         self.assertEqual(len(codes), len(set(codes)), "səhifələr arasında təkrar/itmə var")
 
     def test_status_missing_shows_only_offering_rows(self):
-        # Qeyd: «missing» çipi domen sorğusuna `statuses=["missing"]` kimi ötürülür
-        # (mövcud davranış, F-12-dən əvvəl də belə idi) — sillabus dəsti boş olur,
-        # ona görə bütün açılışlar «sillabussuz» görünür; burada yalnız növ və
-        # səhifələmə yoxlanılır (hesabatda ayrıca qeyd edilib).
+        # Audit 2026-09-13: «missing» çipi əvvəl domen sorğusuna `statuses=["missing"]`
+        # kimi ötürülürdü → sillabus dəsti boşalır, sillabusu OLAN açılışlar da
+        # «sillabussuz» görünürdü. İndi yalnız həqiqətən sillabussuz açılış qalır.
         self._make_syllabi(2, "C")
         section = self._section(status="missing")
-        self.assertTrue(section["rows"])
-        self.assertTrue(all(row["kind"] == "missing" for row in section["rows"]))
-        self.assertEqual(section["page"]["total"], len(section["rows"]))
+        self.assertEqual(len(section["rows"]), 1)
+        self.assertEqual(section["rows"][0]["kind"], "missing")
+        self.assertEqual(section["page"]["total"], 1)
         self.assertIn("PF12-MISS", {row["code"] for row in section["rows"]})
 
     def test_chair_filter_runs_in_sql_and_lists_units_of_the_visible_set(self):
