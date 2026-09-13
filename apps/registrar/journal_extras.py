@@ -219,7 +219,12 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, 
     if journal_is_locked(offering):
         return False
     topic = SelfWorkTopic.objects.filter(pk=topic_id, offering=offering).first()
-    enrollment = offering.enrollments.filter(pk=enrollment_id, status=Enrollment.Status.ENROLLED).first()
+    # Codex audit §14 (2026-09-13): «oxu → yaz» — iki paralel toggle eyni tələbə
+    # üçün `uniq_selfwork_topic_enrollment`-ə çırpılırdı; qeydiyyat sətri
+    # kilidlənir (sıra: açılış → qeydiyyat → işarə).
+    enrollment = (
+        offering.enrollments.filter(pk=enrollment_id, status=Enrollment.Status.ENROLLED).select_for_update().first()
+    )
     if topic is None or enrollment is None:
         return False
     mark = SelfWorkMark.objects.filter(topic=topic, enrollment=enrollment).first()
