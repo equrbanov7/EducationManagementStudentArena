@@ -123,6 +123,10 @@ before running any `docker compose` command.  Never commit this file.
 | `ADMIN_2FA_REQUIRED` | `True` | Keep admin OTP-based 2FA enabled in production |
 | `ADMIN_OTP_VERIFY_RATE_LIMIT` | `5/10m` | Rate limit for admin OTP verification attempts |
 | `ADMIN_OTP_RESEND_RATE_LIMIT` | `3/10m` | Rate limit for resending admin OTP codes |
+| `APP_STOP_GRACE_PERIOD` | `130s` | Infra audit 2026-09-13 P2-3: SIGTERM→SIGKILL window for `app`. Must stay ≥ `DAPHNE_APPLICATION_CLOSE_TIMEOUT` + 10 s (Daphne drains in-flight exam submits/WebSockets). Workers use fixed 300 s / 900 s (task hard limits), Postgres 60 s |
+| `EMSARENA_NETWORK_SUBNET` / `EMSARENA_NETWORK_GATEWAY` | `172.18.0.0/16` / `172.18.0.1` | Infra audit P2-4: bridge network IPAM pin. The gateway **must equal** `ARP_AGENT_BIND` (arp-agent binds there with `network_mode: host`) and `EXAM_ARP_AGENT_URL` — otherwise the exam-centre gate fails closed. See §5 note before changing |
+| `ARP_AGENT_CPU_LIMIT` / `ARP_AGENT_MEM_LIMIT` | `0.1` / `64M` | Infra audit P2-4: arp-agent sidecar limits (stdlib http.server ≈ 15 MB RSS) |
+| `WATCHDOG_REPEAT_INTERVAL` | `24h` | Infra audit P1-3: how often the always-firing `Watchdog` alert re-sends its "monitoring chain alive" heartbeat e-mail (`heartbeat` receiver). If the mail stops arriving, Prometheus→Alertmanager→SMTP is broken |
 
 ### Build-time vs. Runtime variables
 
@@ -310,6 +314,37 @@ the production host.
 3. `docker compose -f docker-compose.prod.yml up -d --build`
 4. Wait for `emsarena-app` to become healthy
 5. Verify `/ping/` and `/health/` before considering the rollout complete.
+
+### Network IPAM pin (infra audit 2026-09-13, P2-4) — one-time check
+
+`docker-compose.prod.yml` now pins `emsarena-network` to `172.18.0.0/16`
+(gateway `172.18.0.1`), because `arp-agent` binds to that gateway address and
+`app` calls it at `EXAM_ARP_AGENT_URL`. Before the first deploy that carries
+this change, confirm the existing network already uses that subnet:
+
+```bash
+docker network inspect emsarena_emsarena-network \
+  --format '{{range .IPAM.Config}}{{.Subnet}} gw={{.Gateway}}{{end}}'
+# expected: 172.18.0.0/16 gw=172.18.0.1
+```
+
+- Same subnet → nothing changes on `up -d` (Compose keeps the network).
+- Different subnet → Compose never modifies an existing network in place
+  (the pinned range only applies when the network is created). Outside exam
+  hours run `docker compose -f docker-compose.prod.yml down` (volumes are
+  kept) and `up -d` so the network is recreated with the pinned range, **or**
+  set `EMSARENA_NETWORK_SUBNET` / `EMSARENA_NETWORK_GATEWAY` / `ARP_AGENT_BIND`
+  / `EXAM_ARP_AGENT_URL` in `.env` to the range the host already uses. All
+  four must agree (`tests/test_infra_compose_config.py` checks the defaults).
+
+### Graceful stop windows (infra audit 2026-09-13, P2-3)
+
+`stop_grace_period` is now set per service (`app` 130 s, `celery_worker`
+300 s, `celery_worker_heavy` 900 s, `postgres` 60 s). A redeploy therefore
+waits for in-flight exam submits / WebSockets and running OCR/export tasks
+instead of SIGKILL-ing them after Docker's default 10 s. Expect
+`docker compose up -d` / `stop` to take up to 15 min when a heavy task is
+mid-flight — that is intended; do not shorten it on exam days.
 
 ---
 

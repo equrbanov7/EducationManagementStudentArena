@@ -27,6 +27,13 @@ CACHE_TTL = 15 * 60
 
 BACKUP_DIR = os.environ.get("MONITORING_BACKUP_DIR", "/backups")
 
+#: 2026-09-13 infra auditi P2-8: ölçülən broker növbələri. Əvvəl yalnız
+#: `celery` (defolt) növbəsi `llen` ilə oxunurdu — `heavy` (OCR/AI/export,
+#: ayrıca `celery_worker_heavy`) backlog-u və həmin worker-in ölümü heç bir
+#: metrikdə görünmürdü. Siyahı `CELERY_TASK_ROUTES`-dakı növbələrlə üst-üstə
+#: düşməlidir (config/settings/components/celery_cache.py).
+MONITORED_QUEUES: tuple[str, ...] = ("celery", "heavy")
+
 
 def collect_celery_stats() -> dict:
     """Beat task-ı: worker/queue statistikasını cache-ə yaz (worker prosesində işləyir)."""
@@ -43,20 +50,46 @@ def collect_celery_stats() -> dict:
         stats["active_tasks"] = sum(len(v) for v in active.values())
         stats["reserved_tasks"] = sum(len(v) for v in reserved.values())
         stats["scheduled_tasks"] = sum(len(v) for v in scheduled.values())
+        # P2-8: hansı növbəni neçə worker dinləyir — `workers_online` ümumi
+        # saydır və heavy worker ölsə (defolt worker sağ qalsa) dəyişmir.
+        stats["queue_workers"] = _workers_per_queue(inspect.active_queues() or {})
     except Exception as exc:  # pragma: no cover - broker problemi
         logger.warning("Celery inspect alınmadı: %s", exc)
         stats.update({"workers_online": 0, "active_tasks": 0, "reserved_tasks": 0, "scheduled_tasks": 0})
+        stats["queue_workers"] = {queue: 0 for queue in MONITORED_QUEUES}
 
-    try:
-        with current_app.connection_or_acquire() as connection:
-            queue_length = connection.default_channel.client.llen("celery")
-        stats["queue_length"] = int(queue_length or 0)
-    except Exception as exc:  # pragma: no cover
-        logger.warning("Celery növbə uzunluğu oxunmadı: %s", exc)
-        stats["queue_length"] = 0
+    # P2-8: hər növbənin uzunluğu ayrıca (`emsarena_celery_queue_length{queue}`).
+    # Köhnə skalyar `queue_length` açarı geriyə-uyğunluq üçün defolt növbəyə
+    # bərabər saxlanılır (cache-də köhnə formatlı dəyər qalsa kollektor onu da
+    # oxuyur).
+    stats["queue_lengths"] = _queue_lengths(current_app)
+    stats["queue_length"] = stats["queue_lengths"].get("celery", 0)
 
     cache.set(CACHE_KEY, stats, CACHE_TTL)
     return stats
+
+
+def _workers_per_queue(active_queues: dict) -> dict[str, int]:
+    """`inspect.active_queues()` → {növbə: dinləyən worker sayı} (izlənən növbələr üçün)."""
+    counts = {queue: 0 for queue in MONITORED_QUEUES}
+    for queues in active_queues.values():
+        seen = {item.get("name") for item in (queues or []) if isinstance(item, dict)}
+        for queue in seen & set(MONITORED_QUEUES):
+            counts[queue] += 1
+    return counts
+
+
+def _queue_lengths(current_app) -> dict[str, int]:
+    """Broker-dəki hər izlənən növbənin uzunluğu (Redis `LLEN`); xəta → 0."""
+    lengths = {queue: 0 for queue in MONITORED_QUEUES}
+    try:
+        with current_app.connection_or_acquire() as connection:
+            client = connection.default_channel.client
+            for queue in MONITORED_QUEUES:
+                lengths[queue] = int(client.llen(queue) or 0)
+    except Exception as exc:  # pragma: no cover
+        logger.warning("Celery növbə uzunluğu oxunmadı: %s", exc)
+    return lengths
 
 
 def collect_backup_age() -> float | None:
@@ -99,11 +132,29 @@ class _CacheGaugeCollector:
                 "Reserved task sayı",
                 value=stats.get("reserved_tasks", 0),
             )
-            yield GaugeMetricFamily(
+            # P2-8: növbə etiketli gauge-lar. Köhnə cache formatında (yalnız
+            # `queue_length`) heavy sırası 0 kimi verilir ki, seriya itməsin.
+            lengths = stats.get("queue_lengths") or {"celery": stats.get("queue_length", 0)}
+            queue_length = GaugeMetricFamily(
                 "emsarena_celery_queue_length",
-                "Broker növbəsinin uzunluğu",
-                value=stats.get("queue_length", 0),
+                "Broker növbəsinin uzunluğu (növbə üzrə)",
+                labels=["queue"],
             )
+            for queue in MONITORED_QUEUES:
+                queue_length.add_metric([queue], lengths.get(queue, 0))
+            yield queue_length
+            # Köhnə formatlı cache-də (rollout pəncərəsi) bu açar yoxdur —
+            # seriyanı verməmək yalançı CeleryHeavyWorkerDown-dan qoruyur.
+            workers = stats.get("queue_workers")
+            if workers is not None:
+                queue_workers = GaugeMetricFamily(
+                    "emsarena_celery_queue_workers",
+                    "Növbəni dinləyən onlayn worker sayı (heavy worker ölümü üçün)",
+                    labels=["queue"],
+                )
+                for queue in MONITORED_QUEUES:
+                    queue_workers.add_metric([queue], workers.get(queue, 0))
+                yield queue_workers
             yield GaugeMetricFamily(
                 "emsarena_celery_stats_collected_timestamp",
                 "Statistikanın toplandığı unix vaxtı (beat sağlamlıq siqnalı)",

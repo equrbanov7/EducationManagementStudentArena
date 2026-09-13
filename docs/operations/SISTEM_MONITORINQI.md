@@ -213,10 +213,14 @@ API-ları üzərindən əlçatandır.
 | Redis down | — | 60s | e-poçt + in-app | 1s |
 | Redis mem/eviction | >85% | eviction>0 | e-poçt + in-app | 1s (crit) |
 | Celery worker down | — | 3dəq | e-poçt + in-app | 1s |
+| Celery heavy worker down (P2-8) | — | 3dəq (`queue_workers{heavy}==0`) | e-poçt + in-app | 1s |
+| Celery növbə backlog (P3-14) | `celery` >200 / 2dəq; `heavy` >20 / 10dəq | — | e-poçt + in-app | 4s |
 | Celery beat stale | — | 5dəq | e-poçt + in-app | 1s |
 | Backup köhnə | — | >26 saat | e-poçt + in-app | 1s |
 | TLS bitmə | <30 gün | <7 gün | e-poçt + in-app | 4s |
 | Brute-force login | 10+ uğursuz/15dəq | — | in-app + audit | dedup 15dəq |
+| Alertmanager çatdırılma xətası (P1-3) | — | `notifications_failed_total` artımı / 5dəq | e-poçt + in-app (kanal xarabdırsa yalnız in-app/UI) | 1s |
+| Watchdog / deadman (P1-3) | həmişə yanır (`vector(1)`) | — | YALNIZ `heartbeat` e-poçtu, `WATCHDOG_REPEAT_INTERVAL` (24h) | — |
 
 > **Hədlər:** Prometheus rule-ları `docker/prometheus/alerts.yml`-dədir;
 > dəyişmək üçün faylı redaktə edib prometheus-u reload edin (deploy avtomatik
@@ -254,6 +258,61 @@ docker compose -f docker-compose.prod.yml exec nginx nginx -s reload
 prometheus/alertmanager reload. **Volume-ları SİLMƏ** (`loki_data` və s.).
 Migration geri: `migrate monitoring zero` (yalnız zərurət olsa).
 
+### 8.1 Alert kanalının özünün sağlamlığı (infra auditi 2026-09-13, P1-3 / P2-1 / P2-2)
+
+Lokal prod-like yığında Alertmanager e-poçtu 5+ gün `525 5.7.1 Unauthorized IP
+address` ilə səssiz uğursuz oldu, sonra prometheus/alertmanager/nginx exited
+qaldı — heç kim bilmədi. Bundan sonra üç mexanizm var; hər deploy-dan sonra
+yoxlanılır:
+
+1. **Brevo «Authorised IPs» (owner-only, bir dəfə).** Brevo SMTP relay yalnız
+   ağ siyahıdakı göndərici IP-lərdən qəbul edir. Brevo paneli → *SMTP & API* →
+   *Authorised IPs* → serverin çıxış (public) IP-sini əlavə edin (IP
+   dəyişəndə təkrar). Yoxlama:
+   ```bash
+   docker compose -f docker-compose.prod.yml exec alertmanager \
+     amtool alert add smoke_test severity=critical --alertmanager.url=http://127.0.0.1:9093
+   docker compose -f docker-compose.prod.yml logs --tail 50 alertmanager | grep -i "notify\|smtp"
+   ```
+   E-poçt gəlməli, logda `Unauthorized IP` / `context deadline` olmamalıdır.
+2. **`AlertmanagerNotificationsFailing` (critical).** Alertmanager-in öz
+   metriki `alertmanager_notifications_failed_total` (job
+   `emsarena-alertmanager`) 15 dəqiqədə artıbsa yanır. E-poçt kanalı məhz
+   xarab olduğu üçün bu alert e-poçtla gəlməyə bilər — ona görə **in-app
+   webhook** (Monitorinq Mərkəzi insidenti) və Prometheus UI (*Alerts*) da
+   baxılmalıdır. Prometheus-da birbaşa yoxlama:
+   `sum by (integration) (increase(alertmanager_notifications_failed_total[15m]))` → 0.
+3. **`Watchdog` deadman.** `vector(1)` qaydası həmişə yanır və
+   `alertmanager.tmpl.yml`-dəki ilk marşrutla YALNIZ `heartbeat` receiver-inə
+   (e-poçt, `send_resolved: false`) gedir — in-app webhook-a düşmür ki, daimi
+   «yanan» insident yaranmasın. Təkrar intervalı `.env`
+   `WATCHDOG_REPEAT_INTERVAL` (defolt `24h`). Qayda sadədir: **heartbeat
+   e-poçtu gəlmirsə** Prometheus → Alertmanager → SMTP zəncirinin harasısa
+   ölüb (proses exited, DNS, SMTP icazəsi, parol). Xarici deadman xidməti
+   (healthchecks.io və s.) istənərsə `heartbeat` receiver-inə
+   `webhook_configs` əlavə edin.
+
+**Webhook yolu (P2-1).** Alertmanager artıq `app:8000`-ə deyil,
+`http://nginx/api/superadmin/monitoring/alertmanager-webhook/`-a POST edir:
+nginx-in daxili `location =` bloku yalnız docker bridge-dən (`172.16.0.0/12`)
+qəbul edir, `Host: localhost` + `X-Forwarded-Proto: https` ötürür — birbaşa
+çağırışda Django `DisallowedHost` (400) və ya SSL-redirect (301) qaytarırdı və
+Alertmanager 3xx-i izləmədiyi üçün in-app insident heç vaxt yaranmırdı. Yoxlama
+(`ALERTMANAGER_WEBHOOK_TOKEN` `.env`-dən):
+```bash
+docker compose -f docker-compose.prod.yml exec alertmanager wget -qO- --post-data '{"alerts":[],"status":"firing"}' \
+  --header 'Content-Type: application/json' --header "Authorization: Bearer $ALERTMANAGER_WEBHOOK_TOKEN" \
+  http://nginx/api/superadmin/monitoring/alertmanager-webhook/
+# gözlənilən: {"status": "ok", ...}
+```
+
+**App scrape (P2-2).** `emsarena-app` job-u `dns_sd_configs` ilə hər `app`
+replikasını ayrıca hədəf kimi scrape edir (`instance=<ip>:8000`), başlıqlarla
+`X-Forwarded-Host: localhost` / `X-Forwarded-Proto: https` göndərir.
+Prometheus → *Status → Targets*-də `emsarena-app` altında `APP_REPLICAS`
+qədər `UP` hədəf görünməlidir; `ALLOWED_HOSTS` `localhost` daxil etməlidir
+(app healthcheck də bunu tələb edir).
+
 ---
 
 ## 9. Yoxlama siyahısı
@@ -268,6 +327,11 @@ Migration geri: `migrate monitoring zero` (yalnız zərurət olsa).
 - [ ] Prometheus söndürüləndə UI "degraded" göstərir (imtahan işləyir)
 - [ ] Test alert (`amtool alert add`) → in-app bildiriş + insident yaranır
 - [ ] Resolve → bərpa bildirişi + müddət
+- [ ] (P1-3) Brevo *Authorised IPs*-də server IP-si var; test alert e-poçtu gəlir; `alertmanager_notifications_failed_total` artmır
+- [ ] (P1-3) `Watchdog` Prometheus-da firing, Alertmanager-də `heartbeat` receiver-inə düşür; ilk heartbeat e-poçtu gəlib
+- [ ] (P2-1) Webhook yoxlaması (§8.1) `{"status": "ok"}` qaytarır; kənardan (`curl https://<host>/api/superadmin/monitoring/alertmanager-webhook/`) 403
+- [ ] (P2-2) *Targets* → `emsarena-app` altında `APP_REPLICAS` qədər `UP` hədəf
+- [ ] (P2-8) `emsarena_celery_queue_workers{queue="heavy"}` ≥ 1, `emsarena_celery_queue_length{queue="heavy"}` mövcud
 - [ ] Heç bir exporter portu host-dan əlçatan deyil (`curl host:9100` → refused)
 
 ---

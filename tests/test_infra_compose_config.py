@@ -185,3 +185,108 @@ def test_ci_unit_tests_install_pytest_timeout_plugin():
     requirements = (ROOT / "requirements/test.txt").read_text(encoding="utf-8")
     assert "pip install -r requirements/test.txt" in workflow
     assert re.search(r"^pytest-timeout==", requirements, flags=re.MULTILINE)
+
+
+# ── 2026-09-13 infra auditi — P2-3 stop_grace_period ──────────────────────
+# Docker defoltu SIGTERM-dən 10 s sonra SIGKILL-dir; Daphne close-timeout
+# (120 s), Celery warm shutdown (task time_limit 300/900 s) və Postgres
+# shutdown-u bundan uzundur — deploy zamanı davam edən imtahan təqdimi/OCR
+# kəsilir, Postgres «crash» kimi qalxırdı.
+
+
+def _env_default(mapping: dict, key: str) -> str:
+    return _interpolation_default(str(mapping[key]))
+
+
+def test_app_stop_grace_period_covers_daphne_application_close_timeout():
+    app = _compose()["services"]["app"]
+    close_timeout = float(_env_default(app["environment"], "DAPHNE_APPLICATION_CLOSE_TIMEOUT"))
+    grace = _duration_seconds(_interpolation_default(app["stop_grace_period"]))
+    assert (
+        grace >= close_timeout + 10
+    ), "P2-3: app.stop_grace_period ≥ DAPHNE_APPLICATION_CLOSE_TIMEOUT + 10 s olmalıdır"
+
+
+@pytest.mark.parametrize(
+    ("service", "minimum_seconds", "reason"),
+    [
+        ("celery_worker", 300, "CELERY_TASK_TIME_LIMIT (celery_cache.py) — warm shutdown icradakı task-ı bitirir"),
+        ("celery_worker_heavy", 900, "heavy task time_limit (apps/exams/tasks.py: OCR/AI/export 900 s)"),
+        ("postgres", 60, "smart/fast shutdown checkpoint-i bitirsin — 10 s SIGKILL = WAL bərpası"),
+    ],
+)
+def test_long_running_services_have_stop_grace_period(service, minimum_seconds, reason):
+    definition = _compose()["services"][service]
+    assert "stop_grace_period" in definition, f"P2-3: {service}.stop_grace_period yoxdur ({reason})"
+    assert _duration_seconds(_interpolation_default(definition["stop_grace_period"])) >= minimum_seconds, reason
+
+
+def test_heavy_worker_grace_matches_task_hard_time_limit_in_source():
+    """Heavy task-ların `time_limit` dəyəri dəyişsə compose də dəyişməlidir."""
+    tasks_source = (ROOT / "apps/exams/tasks.py").read_text(encoding="utf-8")
+    limits = [int(value) for value in re.findall(r"time_limit=(\d+)", tasks_source)]
+    assert limits, "apps/exams/tasks.py-də heavy time_limit tapılmadı"
+    grace = _duration_seconds(
+        _interpolation_default(_compose()["services"]["celery_worker_heavy"]["stop_grace_period"])
+    )
+    assert grace >= max(limits)
+
+
+# ── P2-4 — arp-agent gateway ünvanı üçün IPAM pin + sidecar hijyeni ────────
+
+
+def test_network_ipam_is_pinned_to_the_arp_agent_gateway():
+    compose = _compose()
+    ipam = compose["networks"]["emsarena-network"].get("ipam", {}).get("config")
+    assert ipam, "P2-4: emsarena-network IPAM subnet/gateway pin-lənməyib (arp-agent bind ünvanı sabitdir)"
+    gateway = _interpolation_default(ipam[0]["gateway"])
+    subnet = _interpolation_default(ipam[0]["subnet"])
+
+    arp_bind = _env_default(compose["services"]["arp-agent"]["environment"], "ARP_AGENT_BIND")
+    arp_port = _env_default(compose["services"]["arp-agent"]["environment"], "ARP_AGENT_PORT")
+    agent_url = _env_default(compose["services"]["app"]["environment"], "EXAM_ARP_AGENT_URL")
+
+    assert gateway == arp_bind, "arp-agent bind ünvanı şəbəkə gateway-i ilə eyni olmalıdır"
+    assert agent_url == f"http://{arp_bind}:{arp_port}", "app EXAM_ARP_AGENT_URL agentin bind ünvanına getməlidir"
+    import ipaddress
+
+    assert ipaddress.ip_address(gateway) in ipaddress.ip_network(subnet)
+
+
+def test_arp_agent_has_log_rotation_limits_and_healthcheck():
+    compose = _compose()
+    agent = compose["services"]["arp-agent"]
+    assert (
+        agent.get("logging") == compose["services"]["app"]["logging"]
+    ), "P2-4: arp-agent logging anchor-suz (limitsiz log)"
+    limits = agent["deploy"]["resources"]["limits"]
+    assert _size_to_bytes(_interpolation_default(limits["memory"])) <= 128 * 1000**2
+    assert float(_interpolation_default(limits["cpus"])) <= 0.5
+    healthcheck = agent.get("healthcheck")
+    assert healthcheck, "P2-4: arp-agent healthcheck yoxdur"
+    probe = healthcheck["test"][1]
+    # Agentin yeganə endpoint-i — bind uğursuzdursa bağlantı rədd olunur → unhealthy.
+    assert "/mac?ip=" in probe
+    assert "$${ARP_AGENT_BIND}" in probe and "$${ARP_AGENT_PORT}" in probe
+
+
+# ── P2-9 — monitorinq izlədiyi sistemdən asılı olmamalıdır ─────────────────
+
+
+def test_prometheus_does_not_depend_on_app_health():
+    depends_on = _compose()["services"]["prometheus"].get("depends_on", {})
+    assert "app" not in depends_on, "P2-9: prometheus.depends_on.app — app qalxmayanda monitorinq də qalxmır"
+
+
+# ── P1-3 — Watchdog təkrar intervalı Alertmanager şablonuna ötürülür ───────
+
+
+def test_alertmanager_renders_watchdog_repeat_placeholder():
+    alertmanager = _compose()["services"]["alertmanager"]
+    assert "WATCHDOG_REPEAT" in alertmanager["environment"]
+    command = " ".join(alertmanager["command"])
+    assert "__WATCHDOG_REPEAT__" in command, "P1-3: sed __WATCHDOG_REPEAT__ əvəzləməsi yoxdur"
+    template = (ROOT / "docker/alertmanager/alertmanager.tmpl.yml").read_text(encoding="utf-8")
+    placeholders = set(re.findall(r"__[A-Z_]+__", template)) - {"__PLACEHOLDER__"}
+    rendered = set(re.findall(r"s\|(__[A-Z_]+__)\|", command))
+    assert placeholders <= rendered, f"şablondakı placeholder-lar sed ilə doldurulmur: {placeholders - rendered}"
