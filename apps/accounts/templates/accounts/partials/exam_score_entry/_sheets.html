@@ -6,10 +6,17 @@ memosu ilə uyğun: rədd olunan sətirlər də partiyada sayılır.{% endcommen
 <section class="ems-card ese-card ese-sheets">
   <div class="ems-card__head">
     <div>
-      <h2 class="ems-card__title">{% trans "Köçürmə partiyaları" context "registrar.exam_score_entry" %} <span class="ems-badge ems-badge--neutral">{{ s.sheets|length }}</span></h2>
+      <h2 class="ems-card__title">{% trans "Köçürmə partiyaları" context "registrar.exam_score_entry" %} <span class="ems-badge ems-badge--neutral">{{ s.sheets|length }}{% if s.sheet_kind %} / {{ s.sheets_total }}{% endif %}</span></h2>
       <p class="ems-card__sub">{% trans "Hər yadda saxlama / fayl tətbiqi bir vərəq kimi qeyd olunur: tarix, müəllim, protokol və nəticə." context "registrar.exam_score_entry" %}</p>
     </div>
   </div>
+  {% if s.sheet_kind_chips %}
+  <div class="ese-chips" role="group" aria-label="{% trans 'İmtahan növü' context 'registrar.exam_score_entry' %}">
+    {% for chip in s.sheet_kind_chips %}
+    <a class="ems-chip ese-chip" href="{{ chip.url }}" data-ese-nav aria-pressed="{% if chip.current %}true{% else %}false{% endif %}">{{ chip.label }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
   {% if not s.sheets %}
     {% trans "Bu açılış üzrə hələ köçürmə olmayıb." context "registrar.exam_score_entry" as ese_e7 %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-file-lines" state_title=ese_e7 state_body="" %}
@@ -21,6 +28,7 @@ memosu ilə uyğun: rədd olunan sətirlər də partiyada sayılır.{% endcommen
           <tr>
             <th scope="col">{% trans "Köçürmə" context "registrar.exam_score_entry" %}</th>
             <th scope="col">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</th>
+            <th scope="col">{% trans "İmtahan növü" context "registrar.exam_score_entry" %}</th>
             <th scope="col">{% trans "Mənbə" context "registrar.exam_score_entry" %}</th>
             <th scope="col">{% trans "Protokol №" context "registrar.exam_score_entry" %}</th>
             <th scope="col">{% trans "Yoxlayan müəllim" context "registrar.exam_score_entry" %}</th>
@@ -34,6 +42,7 @@ memosu ilə uyğun: rədd olunan sətirlər də partiyada sayılır.{% endcommen
           <tr>
             <th scope="row"><span class="ems-mono">{{ sheet.created }}</span></th>
             <td>{% if sheet.exam_date %}{{ sheet.exam_date }}{% else %}—{% endif %}</td>
+            <td><span class="ems-badge {% if sheet.is_practical %}ems-badge--primary{% else %}ems-badge--neutral{% endif %}">{{ sheet.exam_kind_label }}</span>{% if sheet.question_count %} <span class="ems-table__muted">· {{ sheet.question_count }} × {{ sheet.question_max }}</span>{% endif %}</td>
             <td><span class="ems-badge {% if sheet.is_import %}ems-badge--info{% else %}ems-badge--neutral{% endif %}">{% if sheet.is_import %}{% trans "fayl" context "registrar.exam_score_entry" %}{% if sheet.original_filename %} · {{ sheet.original_filename }}{% endif %}{% else %}{% trans "əl ilə" context "registrar.exam_score_entry" %}{% endif %}</span></td>
             <td>{{ sheet.protocol_number|default:"—" }}</td>
             <td>{{ sheet.examiner_name|default:"—" }}{% if sheet.invigilator_name %} <span class="ems-table__muted">· {% trans "nəzarətçi" context "registrar.exam_score_entry" %}: {{ sheet.invigilator_name }}</span>{% endif %}</td>

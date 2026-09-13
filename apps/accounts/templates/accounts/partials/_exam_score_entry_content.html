@@ -11,13 +11,18 @@ tələbələrin balları sistemə yüklənsin»):
     formasına bağlıdır; idxal JS-i də eyni sahələri oxuyur;
   · iki tab: «Əl ilə daxil et» (siyahı) və «Fayldan yüklə» (şablon → quru icra → tətbiq);
   · sətir tarixçəsi `_drawer`, yadda saxlama təsdiqi `_dialog` (səbəb dialoqu);
-  · köçürmə partiyaları (`ExamScoreSheet`) panelin sonunda.
+  · köçürmə partiyaları (`ExamScoreSheet`) panelin sonunda;
+  · 2026-09-14 (W2 `w2paper`): «Köçürmə / Dəyişən nəticələr» görünüş açarı
+    (`ese_view=changes` — apellyasiya / sənədli düzəliş sətirləri, filtrlər,
+    CSV), müəllim seçici + tələbə axtarışı + vəziyyət çipləri, sual-sual ballar
+    (S1..Sn, `question_count` vərəq kartında).
 
 ⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını `#profileSectionTitle`
 kimi render edir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur); dinamik
 dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel İÇİNDƏ və
 `defer` ilədir (AJAX swap qaydası).{% endcomment %}
-<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260912-1">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-1">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260914-1">
 
 {% trans "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin." context "registrar.exam_score_entry" as ese_subtitle %}
 {% trans "Köçürmə addımları" context "registrar.exam_score_entry" as ese_steps_label %}
@@ -26,15 +31,27 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
      data-ese-root
      data-org="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
      data-superadmin="{% if s.is_superadmin %}1{% else %}0{% endif %}"
-     data-max-score="{{ s.exam_score_max }}">
+     data-max-score="{{ s.exam_score_max }}"
+     data-question-count="{{ s.question_count|default:0 }}"
+     data-question-max="{{ s.question_max|default:10 }}">
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=ese_subtitle %}
 
-  {% include "partials/ems_ui/_stepper.html" with steps=s.steps steps_label=ese_steps_label %}
+  {% if s.steps %}{% include "partials/ems_ui/_stepper.html" with steps=s.steps steps_label=ese_steps_label %}{% endif %}
 
-  {# ── Seçim: sıra açarı + filtr paneli (avto rejim) ───────────────────────── #}
+  {# ── Seçim: görünüş açarı + sıra açarı + filtr paneli (avto rejim) ─────────── #}
   {% if s.selected_org %}
   <div class="ese-select">
-    {% if s.mode_group_url %}
+    {% if s.view_entry_url %}
+    <div class="ems-viewtoggle ese-view" role="group" aria-label="{% trans 'Görünüş' context 'registrar.exam_score_entry' %}">
+      <a class="ems-viewtoggle__btn" href="{{ s.view_entry_url }}" data-ese-nav aria-pressed="{% if s.is_changes_view %}false{% else %}true{% endif %}">
+        <i class="fas fa-pen-to-square" aria-hidden="true"></i> {% trans "Köçürmə" context "registrar.exam_score_entry" %}
+      </a>
+      <a class="ems-viewtoggle__btn" href="{{ s.view_changes_url }}" data-ese-nav aria-pressed="{% if s.is_changes_view %}true{% else %}false{% endif %}">
+        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Dəyişən nəticələr" context "registrar.exam_score_entry" %}
+      </a>
+    </div>
+    {% endif %}
+    {% if s.mode_group_url and not s.is_changes_view %}
     <div class="ems-viewtoggle ese-mode" role="group" aria-label="{% trans 'Seçim sırası' context 'registrar.exam_score_entry' %}">
       <a class="ems-viewtoggle__btn" href="{{ s.mode_group_url }}" data-ese-nav aria-pressed="{% if s.is_group_mode %}true{% else %}false{% endif %}">
         <i class="fas fa-users" aria-hidden="true"></i> {% trans "Qrup → Fənn" context "registrar.exam_score_entry" %}
@@ -56,6 +73,8 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
     {% trans "Bu təşkilat üçün akademik semestr yoxdur." context "registrar.exam_score_entry" as ese_e2 %}
     {% trans "Əvvəlcə Akademik təqvimdə semestr yaradın." context "registrar.exam_score_entry" as ese_e2b %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-calendar-xmark" state_title=ese_e2 state_body=ese_e2b %}
+  {% elif s.is_changes_view %}
+    {% include "accounts/partials/exam_score_entry/_changes.html" %}
   {% elif s.is_group_mode and not s.groups %}
     {% trans "Bu semestrdə açılışı olan qrup yoxdur." context "registrar.exam_score_entry" as ese_e6 %}
     {% trans "Qrupsuz açılışlar «Fənn → Qrup» sırasında görünür." context "registrar.exam_score_entry" as ese_e6b %}
@@ -128,6 +147,7 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
      data-import-error="{% trans 'xəta' context 'registrar.exam_score_entry' %}"
      data-import-written="{% trans 'yazıldı' context 'registrar.exam_score_entry' %}"
      data-import-missing="{% trans 'faylda olmayan tələbə' context 'registrar.exam_score_entry' %}"
-     data-import-total="{% trans 'sətir' context 'registrar.exam_score_entry' %}"></div>
-<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260912-1"></script>
-<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260912-1"></script>
+     data-import-total="{% trans 'sətir' context 'registrar.exam_score_entry' %}"
+     data-question-invalid="{% trans 'Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"></div>
+<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260914-1"></script>
+<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260914-1"></script>

@@ -11,7 +11,15 @@ Yadda saxlama: düymə əvvəlcə TƏSDİQ dialoqunu açır («N tələbə, M ba
 K dəyişiklik səbəb tələb edir»); K>0 olduqda səbəb + qeyd dialoqda, skan isə
 vərəq məlumatları kartında (`sheet_evidence`) tələb olunur. Dialoq formanın
 İÇİNDƏDİR — sahələri kopyalamadan eyni POST ilə gedir (`_dialog.html`-də
-`<form>` yoxdur, ona görə iç-içə forma yaranmır).{% endcomment %}
+`<form>` yoxdur, ona görə iç-içə forma yaranmır).
+
+2026-09-14 (W2 `w2paper`): hər sətirdə S1..S10 sual sahəsi (`q__<enr>__<n>`)
+render olunur; sual sayından artıq olanlar `hidden` + `disabled` (POST-a
+düşmür), JS vərəq kartındakı «Sual sayı» dəyişəndə açıb-bağlayır. Sual rejimində
+«İmtahan balı» sahəsi yalnız-oxunan CƏMDİR (server yenidən hesablayır); sual
+sayı 0 olduqda köhnə tək-bal sahəsi olduğu kimi işləyir. Vəziyyət çipləri
+(hamısı · boş · yazılıb · dəyişdirilib) SERVER tərəfdə süzür — göstərilməyən
+sətir POST-a düşmür, yəni toxunulmur.{% endcomment %}
 <section class="ems-card ese-card">
   <div class="ems-card__head">
     <div>
@@ -20,9 +28,21 @@ vərəq məlumatları kartında (`sheet_evidence`) tələb olunur. Dialoq forman
     </div>
   </div>
 
-  {% if not s.rows %}
+  {% if s.status_chips %}
+  <div class="ese-chips" role="group" aria-label="{% trans 'Vəziyyət' context 'registrar.exam_score_entry' %}">
+    {% for chip in s.status_chips %}
+    <a class="ems-chip ese-chip" href="{{ chip.url }}" data-ese-nav aria-pressed="{% if chip.current %}true{% else %}false{% endif %}">{{ chip.label }} <span class="ese-chip__count">{{ chip.count }}</span></a>
+    {% endfor %}
+    <span class="ese-chips__note" aria-live="polite">{{ s.roster_shown }} / {{ s.roster_total }} {% trans "tələbə" context "registrar.exam_score_entry" %}</span>
+  </div>
+  {% endif %}
+
+  {% if not s.roster_total %}
     {% trans "Bu qrupda qeydiyyatlı tələbə yoxdur." context "registrar.exam_score_entry" as ese_e5 %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-slash" state_title=ese_e5 state_body="" %}
+  {% elif not s.rows %}
+    {% trans "Bu filtrə uyğun tələbə yoxdur." context "registrar.exam_score_entry" as ese_e8 %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter-circle-xmark" state_title=ese_e8 state_body="" %}
   {% else %}
   <form id="ese-roster-form" method="post" action="{% url 'accounts:exam_score_entry' %}" enctype="multipart/form-data" class="ese-form" data-ese-form novalidate>
     {% csrf_token %}
@@ -38,6 +58,9 @@ vərəq məlumatları kartında (`sheet_evidence`) tələb olunur. Dialoq forman
             <tr>
               <th scope="col">{% trans "Tələbə" context "registrar.exam_score_entry" %}</th>
               <th scope="col" class="ese-th--num">{% trans "Giriş balı" context "registrar.exam_score_entry" %}</th>
+              {% for label in s.question_labels %}
+              <th scope="col" class="ese-th--num ese-th--q" data-ese-qcol="{{ forloop.counter }}"{% if forloop.counter > s.question_count %} hidden{% endif %}>{{ label }} <span class="ese-th__max">/ <span data-ese-qmax-label>{{ s.question_max }}</span></span></th>
+              {% endfor %}
               <th scope="col" class="ese-th--num">{% trans "İmtahan balı" context "registrar.exam_score_entry" %} <span class="ese-th__max">/ {{ s.exam_score_max }}</span></th>
               <th scope="col" class="ese-th--num">{% trans "Yekun" context "registrar.exam_score_entry" %}</th>
               <th scope="col">{% trans "Vəziyyət" context "registrar.exam_score_entry" %}</th>
@@ -46,26 +69,39 @@ vərəq məlumatları kartında (`sheet_evidence`) tələb olunur. Dialoq forman
           </thead>
           <tbody>
             {% for row in s.rows %}
-            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}" data-ese-row data-enrollment="{{ row.enrollment.id }}" data-has-score="{% if row.has_score %}1{% else %}0{% endif %}">
+            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}" data-ese-row data-enrollment="{{ row.enrollment.id }}" data-has-score="{% if row.has_score %}1{% else %}0{% endif %}" data-is-changed="{% if row.is_changed %}1{% else %}0{% endif %}">
               <th scope="row">
                 <span class="ese-idx">{{ forloop.counter }}</span>
                 <span class="ese-student">{{ row.student.get_full_name|default:row.student.username }}</span>
                 <span class="ese-username">{{ row.student.username }}</span>
                 {% if row.enrollment.is_guest %}<span class="ems-badge ems-badge--muted ese-guest">{% trans "alt qrupdan" context "registrar.exam_score_entry" %}</span>{% endif %}
               </th>
-              <td class="ems-table__num ese-td--num">{{ row.entry_score }}</td>
+              <td class="ems-table__num ese-td--num" data-ese-entry="{{ row.entry_score|floatformat:0 }}">{{ row.entry_score }}</td>
+              {% for label in s.question_labels %}
+              <td class="ese-td--num ese-td--q" data-ese-qcell="{{ forloop.counter }}"{% if forloop.counter > s.question_count %} hidden{% endif %}>
+                {% with qidx=forloop.counter %}
+                <input type="number" class="ems-input ese-score ese-qscore" name="q__{{ row.enrollment.id }}__{{ qidx }}"
+                       aria-label="{{ label }} — {{ row.student.get_full_name|default:row.student.username }}"
+                       min="0" max="{{ s.question_max }}" step="1" inputmode="numeric" autocomplete="off"
+                       {% if qidx > s.question_count %}disabled{% endif %}
+                       value="{% for q in row.question_scores %}{% if forloop.counter == qidx %}{{ q }}{% endif %}{% endfor %}"
+                       data-ese-q="{{ qidx }}" data-initial="{% for q in row.question_scores %}{% if forloop.counter == qidx %}{{ q }}{% endif %}{% endfor %}">
+                {% endwith %}
+              </td>
+              {% endfor %}
               <td class="ese-td--num">
-                <input type="number" class="ems-input ese-score" name="score__{{ row.enrollment.id }}"
+                <input type="number" class="ems-input ese-score ese-total" name="score__{{ row.enrollment.id }}"
                        aria-label="{% trans 'İmtahan balı' context 'registrar.exam_score_entry' %} — {{ row.student.get_full_name|default:row.student.username }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
+                       {% if s.question_count %}readonly{% endif %}
                        value="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}"
                        data-ese-score data-initial="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}">
               </td>
-              <td class="ems-table__num ese-td--num">
-                {% if row.graded %}<b>{{ row.total|floatformat:0 }}</b> <span class="ese-letter">{{ row.letter }}</span>{% else %}—{% endif %}
+              <td class="ems-table__num ese-td--num" data-ese-total-cell>
+                {% if row.graded %}<b data-ese-total>{{ row.total|floatformat:0 }}</b> <span class="ese-letter">{{ row.letter }}</span>{% else %}<b data-ese-total>—</b>{% endif %}
               </td>
               <td>
-                <span class="ems-badge {% if row.has_score %}ems-badge--success{% else %}ems-badge--muted{% endif %}" data-ese-status>{% if row.has_score %}{% trans "yazılıb" context "registrar.exam_score_entry" %}{% else %}{% trans "boş" context "registrar.exam_score_entry" %}{% endif %}</span>
+                <span class="ems-badge {% if row.is_changed %}ems-badge--warning{% elif row.has_score %}ems-badge--success{% else %}ems-badge--muted{% endif %}" data-ese-status>{% if row.is_changed %}{% trans "dəyişdirilib" context "registrar.exam_score_entry" %}{% elif row.has_score %}{% trans "yazılıb" context "registrar.exam_score_entry" %}{% else %}{% trans "boş" context "registrar.exam_score_entry" %}{% endif %}</span>
               </td>
               <td>
                 <div class="ems-rowactions">

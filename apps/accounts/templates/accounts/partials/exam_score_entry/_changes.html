@@ -1,0 +1,118 @@
+{% load i18n %}
+{% comment %}«Dəyişən nəticələr» (`?ese_view=changes`) — 2026-09-14, W2 `w2paper`.
+Sahib: «apellyasiyadan və ya nədənsə sonra DƏYİŞƏN nəticələrin izlənməsi
+lazımdır». Tenantın bütün `kind != initial` daxiletmələri (sənədli düzəliş +
+apellyasiya nəticəsi): tarix · tələbə · fənn/qrup · köhnə → yeni · növ · səbəb ·
+kim · sənəd / vərəq skanı · «tarixçə» çekmecəsi (sətrin `<template>`-i klonlanır —
+əlavə sorğu yoxdur). Filtrlər (qrup, fənn, müəllim, növ, tarix, axtarış) yuxarıdakı
+`_filter_bar`-dadır; səhifələmə 50; CSV ixracı eyni filtrlərlə.{% endcomment %}
+<div class="ese-body ese-changes" data-ems-filter-target>
+  <section class="ems-card ese-card">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title">{% trans "Dəyişən nəticələr" context "registrar.exam_score_entry" %} <span class="ems-badge ems-badge--neutral">{{ s.changes_total }}</span></h2>
+        <p class="ems-card__sub">{% trans "Yazılmış imtahan balının hər sonrakı dəyişikliyi (apellyasiya qərarı və ya sənədli düzəliş) burada izlənir: köhnə → yeni bal, səbəb, kim və sənəd." context "registrar.exam_score_entry" %}</p>
+      </div>
+      <div class="ems-card__actions">
+        <a class="ems-btn" href="{{ s.changes_export_url }}" download>
+          <i class="fas fa-file-csv" aria-hidden="true"></i> {% trans "CSV ixrac" context "registrar.exam_score_entry" %}
+        </a>
+      </div>
+    </div>
+
+    {% if s.changes_kind_chips %}
+    <div class="ese-chips" role="group" aria-label="{% trans 'İmtahan növü' context 'registrar.exam_score_entry' %}">
+      {% for chip in s.changes_kind_chips %}
+      <a class="ems-chip ese-chip" href="{{ chip.url }}" data-ese-nav aria-pressed="{% if chip.current %}true{% else %}false{% endif %}">{{ chip.label }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not s.changes_rows %}
+      {% trans "Bu filtrə uyğun dəyişiklik yoxdur." context "registrar.exam_score_entry" as ese_e9 %}
+      {% include "partials/ems_ui/_empty.html" with state_icon="fa-clock-rotate-left" state_title=ese_e9 state_body="" %}
+    {% else %}
+    <div class="ems-tablewrap">
+      <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra ese-changes__table">
+          <thead>
+            <tr>
+              {% for col in s.changes_columns %}
+              <th scope="col"{% if col.align == "num" %} class="ese-th--num"{% endif %}>{% if col.sr_only %}<span class="sr-only">{{ col.label }}</span>{% else %}{{ col.label }}{% endif %}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in s.changes_rows %}
+            <tr class="ese-changes__row {% if row.is_appeal %}is-appeal{% endif %}">
+              <th scope="row"><span class="ems-mono">{{ row.date }}</span></th>
+              <td>
+                <span class="ese-student">{{ row.student }}</span>
+                <span class="ese-username">{{ row.username }}{% if row.fin %} · {{ row.fin }}{% endif %}</span>
+              </td>
+              <td>
+                <span class="ese-student">{% if row.subject_code %}{{ row.subject_code }} — {% endif %}{{ row.subject_name }}</span>
+                <span class="ese-username">{{ row.group }}{% if row.instructor %} · {{ row.instructor }}{% endif %}</span>
+              </td>
+              <td><span class="ems-badge {% if row.is_practical %}ems-badge--primary{% else %}ems-badge--neutral{% endif %}">{{ row.exam_kind_label }}</span></td>
+              <td class="ems-table__num ese-td--num"><span class="ese-history__delta">{{ row.old }} → <b>{{ row.new }}</b></span>{% if row.question_scores %} <span class="ese-history__q">({{ row.question_scores|join:" + " }})</span>{% endif %}</td>
+              <td><span class="ems-badge {% if row.is_appeal %}ems-badge--info{% else %}ems-badge--warning{% endif %}">{{ row.kind_label }}</span></td>
+              <td>{{ row.reason|default:"—" }}</td>
+              <td>{{ row.by }}</td>
+              <td>
+                {% if row.evidence_url %}<a class="ems-btn ems-btn--sm ems-btn--ghost" href="{{ row.evidence_url }}" target="_blank" rel="noopener"><i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "sənəd" context "registrar.exam_score_entry" %}</a>
+                {% elif row.sheet_evidence_url %}<a class="ems-btn ems-btn--sm ems-btn--ghost" href="{{ row.sheet_evidence_url }}" target="_blank" rel="noopener"><i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "vərəq skanı" context "registrar.exam_score_entry" %}</a>
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                <div class="ems-rowactions">
+                  <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost ese-history-btn" data-ese-history="{{ row.id }}"
+                          aria-label="{% trans 'Bal tarixçəsi' context 'registrar.exam_score_entry' %} — {{ row.student }}">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <template data-ese-history-tpl="{{ row.id }}">
+                  <div class="ese-hist">
+                    <div class="ese-hist__head">
+                      <div class="ese-hist__student">{{ row.student }}</div>
+                      <div class="ese-hist__meta">
+                        <span>{{ row.username }}</span>
+                        {% if row.fin %}<span>· FİN {{ row.fin }}</span>{% endif %}
+                        <span>· {% if row.subject_code %}{{ row.subject_code }} — {% endif %}{{ row.subject_name }} · {{ row.group }} · {{ row.exam_kind_label }}</span>
+                      </div>
+                    </div>
+                    <ul class="ese-history__list">
+                      <li class="ese-history__item is-correction">
+                        <span class="ese-history__date">{{ row.date }}</span>
+                        <span class="ese-history__delta">{{ row.old }} → <b>{{ row.new }}</b>{% if row.question_scores %} <span class="ese-history__q">({{ row.question_scores|join:" + " }})</span>{% endif %}</span>
+                        <span class="ems-badge {% if row.is_appeal %}ems-badge--info{% else %}ems-badge--warning{% endif %}">{{ row.kind_label }}</span>
+                        {% if row.reason %}<span class="ese-history__reason">{{ row.reason }}</span>{% endif %}
+                        {% if row.note %}<span class="ese-history__note">{{ row.note }}</span>{% endif %}
+                        {% if row.sheet_id %}
+                        <span class="ese-history__sheet">
+                          <i class="fas fa-file-lines" aria-hidden="true"></i>
+                          {% if row.sheet_exam_date %}{% trans "imtahan" context "registrar.exam_score_entry" %} {{ row.sheet_exam_date }}{% endif %}
+                          {% if row.sheet_protocol %}· № {{ row.sheet_protocol }}{% endif %}
+                        </span>
+                        {% endif %}
+                        <span class="ese-history__by">{{ row.by }}</span>
+                        {% if row.evidence_url %}<a class="ese-history__doc" href="{{ row.evidence_url }}" target="_blank" rel="noopener">{% trans "sənəd" context "registrar.exam_score_entry" %}</a>{% elif row.sheet_evidence_url %}<a class="ese-history__doc" href="{{ row.sheet_evidence_url }}" target="_blank" rel="noopener">{% trans "vərəq skanı" context "registrar.exam_score_entry" %}</a>{% endif %}
+                      </li>
+                    </ul>
+                  </div>
+                </template>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% include "partials/_pagination.html" with page_obj=s.changes_page extra_query=s.changes_query page_param=s.changes_page_param %}
+    {% endif %}
+  </section>
+
+  {% trans "Bal tarixçəsi" context "registrar.exam_score_entry" as ese_drawer_title %}
+  {% trans "Bu dəyişikliyin tam qeydi: köhnə → yeni bal, sual balları, səbəb, qeyd, vərəq və sənəd." context "registrar.exam_score_entry" as ese_drawer_sub %}
+  {% include "partials/ems_ui/_drawer.html" with drawer_id="eseHistoryDrawer" drawer_title=ese_drawer_title drawer_subtitle=ese_drawer_sub drawer_body_include="accounts/partials/exam_score_entry/_history_drawer.html" %}
+</div>

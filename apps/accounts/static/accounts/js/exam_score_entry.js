@@ -16,7 +16,13 @@
  *      (vərəq kartındakı fayl) tələb olunur — server qatı eyni qaydanı yenidən
  *      tətbiq edir, bu yalnız erkən UX;
  *   4. sətrin «tarixçə» düyməsi → `<template>` klonu çekmecəyə (əlavə sorğu yox);
- *   5. «Qrup → Fənn» / «Fənn → Qrup» açarı paneli SPA ilə yenidən yükləyir.
+ *   5. «Qrup → Fənn» / «Fənn → Qrup» açarı, görünüş açarı («Köçürmə» /
+ *      «Dəyişən nəticələr») və vəziyyət çipləri paneli SPA ilə yenidən yükləyir;
+ *   6. (2026-09-14, W2 `w2paper`) SUAL-SUAL ballar: hər sətirdə S1..S10 sahəsi;
+ *      «Sual sayı» seçimi artıq sütunları gizlədib `disabled` edir (POST-a
+ *      düşmür), «Bir sualın maksimumu» hər S sahəsinin `max`-ını yeniləyir;
+ *      «İmtahan balı» sual rejimində yalnız-oxunan CANLI CƏMDİR, «Yekun» =
+ *      giriş + cəm (server hər ikisini yenidən hesablayır — bu yalnız UX).
  *
  * Qaydalar (CLAUDE.md + docs/frontend/AJAX_SAFE_JS_PATTERN.md): `EMSDelegate.on`
  * (swap-safe, document səviyyəsində), `EMSReady` (idempotent), null-safe.
@@ -48,6 +54,111 @@
         return row.querySelector("[data-ese-score]");
     }
 
+    /* ---- Sual şəbəkəsi (S1..Sn) --------------------------------------------- */
+
+    function questionCount(host) {
+        var select = host.querySelector("[data-ese-question-count]");
+        var raw = select ? select.value : host.getAttribute("data-question-count");
+        var n = parseInt(raw || "0", 10);
+        return isNaN(n) || n < 0 ? 0 : n;
+    }
+
+    function questionMax(host) {
+        var input = host.querySelector("[data-ese-question-max]");
+        var raw = input ? input.value : host.getAttribute("data-question-max");
+        var n = parseInt(raw || "10", 10);
+        return isNaN(n) || n < 1 ? 10 : n;
+    }
+
+    function questionInputs(row) {
+        return Array.prototype.slice.call(row.querySelectorAll("[data-ese-q]")).filter(function (input) {
+            return !input.disabled;
+        });
+    }
+
+    function isInt(value) {
+        var num = Number(value);
+        return value !== "" && !isNaN(num) && Math.floor(num) === num;
+    }
+
+    /* Sual balları → {sum, filled, invalid, dirty}. Boş sual = 0 (server ilə eyni). */
+    function questionState(row, host) {
+        var inputs = questionInputs(row);
+        var state = { count: inputs.length, sum: 0, filled: 0, invalid: false, dirty: false };
+        var max = questionMax(host);
+        inputs.forEach(function (input) {
+            var value = (input.value || "").trim();
+            var initial = (input.getAttribute("data-initial") || "").trim();
+            if (value !== initial) {
+                state.dirty = true;
+            }
+            if (value === "") {
+                return;
+            }
+            state.filled += 1;
+            if (!isInt(value) || Number(value) < 0 || Number(value) > max) {
+                state.invalid = true;
+                input.classList.add("is-invalid");
+                input.setAttribute("aria-invalid", "true");
+                return;
+            }
+            input.classList.remove("is-invalid");
+            input.setAttribute("aria-invalid", "false");
+            state.sum += Number(value);
+        });
+        return state;
+    }
+
+    /* Sual sayı dəyişəndə: sütunlar açılıb-bağlanır, artıq sahələr `disabled`
+       (brauzer onları göndərmir), yekun sahəsi rejimə görə yalnız-oxunan olur. */
+    function applyQuestionGrid(host) {
+        var count = questionCount(host);
+        var max = questionMax(host);
+        host.querySelectorAll("[data-ese-qcol]").forEach(function (th) {
+            th.hidden = Number(th.getAttribute("data-ese-qcol")) > count;
+        });
+        host.querySelectorAll("[data-ese-qmax-label]").forEach(function (el) {
+            el.textContent = String(max);
+        });
+        host.querySelectorAll("[data-ese-qcell]").forEach(function (td) {
+            var off = Number(td.getAttribute("data-ese-qcell")) > count;
+            td.hidden = off;
+            var input = td.querySelector("[data-ese-q]");
+            if (input) {
+                input.disabled = off;
+                input.setAttribute("max", String(max));
+            }
+        });
+        rows(host).forEach(function (row) {
+            var total = scoreInput(row);
+            if (total) {
+                total.readOnly = count > 0;
+                total.classList.toggle("is-readonly", count > 0);
+            }
+        });
+    }
+
+    /* Sual rejimində yekun sahəsinə canlı cəm yazılır (hamısı boşdursa sahə də
+       boş qalır — server «toxunma» kimi oxuyur). */
+    function syncQuestionTotal(row, host) {
+        var total = scoreInput(row);
+        if (!total || questionCount(host) === 0) {
+            return null;
+        }
+        var state = questionState(row, host);
+        if (state.filled === 0 && !state.dirty) {
+            return state;
+        }
+        total.value = state.filled === 0 ? (total.getAttribute("data-initial") || "") : String(state.sum);
+        var entryCell = row.querySelector("[data-ese-entry]");
+        var totalCell = row.querySelector("[data-ese-total]");
+        if (totalCell && state.filled > 0) {
+            var entry = Number(entryCell ? entryCell.getAttribute("data-ese-entry") : 0) || 0;
+            totalCell.textContent = String(Math.min(100, entry + state.sum));
+        }
+        return state;
+    }
+
     /* ---- Sətir vəziyyəti ------------------------------------------------- */
 
     function rowState(row) {
@@ -55,15 +166,22 @@
         if (!input) {
             return { dirty: false, invalid: false, change: false, value: "" };
         }
+        var host = root();
+        var q = host ? syncQuestionTotal(row, host) : null;
         var initial = (input.getAttribute("data-initial") || "").trim();
         var value = (input.value || "").trim();
         var dirty = value !== "" && value !== initial;
         var max = Number(input.getAttribute("max") || 0);
         var num = value === "" ? null : Number(value);
         var invalid = value !== "" && (isNaN(num) || num < 0 || num > max || Math.floor(num) !== num);
+        if (q) {
+            // Sual bölgüsü dəyişibsə cəm eyni qalsa da DƏYİŞİKLİKDİR (server eyni qaydanı tətbiq edir).
+            dirty = dirty || (q.filled > 0 && q.dirty);
+            invalid = invalid || q.invalid || (q.filled > 0 && q.sum > max);
+        }
         // Sonrakı dəyişiklik = təqdimatlı (sahibin qaydası E7).
         var change = dirty && row.getAttribute("data-has-score") === "1";
-        return { dirty: dirty, invalid: invalid, change: change, value: value };
+        return { dirty: dirty, invalid: invalid, change: change, value: value, questions: q };
     }
 
     var BADGE = "ems-badge";
@@ -149,7 +267,12 @@
     /* ---- Klaviatura naviqasiyası ----------------------------------------- */
 
     function moveFocus(current, delta) {
-        var all = rows(root()).map(scoreInput).filter(Boolean);
+        var column = current.getAttribute("data-ese-q");
+        var all = rows(root()).map(function (row) {
+            return column ? row.querySelector('[data-ese-q="' + column + '"]') : scoreInput(row);
+        }).filter(function (input) {
+            return input && !input.disabled;
+        });
         var index = all.indexOf(current);
         if (index < 0) {
             return;
@@ -163,7 +286,7 @@
         }
     }
 
-    DELEGATE.on("keydown", "[data-ese-score]", function (event, input) {
+    function onScoreKey(event, input) {
         if (event.key === "Enter" || event.key === "ArrowDown") {
             event.preventDefault(); // Enter formanı göndərməsin; ↓ dəyəri azaltmasın.
             moveFocus(input, 1);
@@ -171,9 +294,9 @@
             event.preventDefault();
             moveFocus(input, -1);
         }
-    });
+    }
 
-    DELEGATE.on("input", "[data-ese-score]", function (event, input) {
+    function onScoreInput(event, input) {
         var row = input.closest("[data-ese-row]");
         var host = root();
         if (row) {
@@ -181,6 +304,27 @@
         }
         if (host) {
             syncSummary(host);
+        }
+    }
+
+    DELEGATE.on("keydown", "[data-ese-score]", onScoreKey);
+    DELEGATE.on("keydown", "[data-ese-q]", onScoreKey);
+    DELEGATE.on("input", "[data-ese-score]", onScoreInput);
+    DELEGATE.on("input", "[data-ese-q]", onScoreInput);
+
+    DELEGATE.on("change", "[data-ese-question-count]", function () {
+        var host = root();
+        if (host) {
+            applyQuestionGrid(host);
+            syncAll(host);
+        }
+    });
+
+    DELEGATE.on("input", "[data-ese-question-max]", function () {
+        var host = root();
+        if (host) {
+            applyQuestionGrid(host);
+            syncAll(host);
         }
     });
 
@@ -197,6 +341,10 @@
             if (input) {
                 input.value = input.getAttribute("data-initial") || "";
             }
+            row.querySelectorAll("[data-ese-q]").forEach(function (q) {
+                q.value = q.getAttribute("data-initial") || "";
+                q.classList.remove("is-invalid");
+            });
         });
         syncAll(host);
     });
@@ -255,12 +403,10 @@
         var line = host.querySelector("[data-ese-summary]");
         if (summary.invalid) {
             if (line) {
-                line.textContent = t("invalid");
+                line.textContent = questionCount(host) > 0 ? t("question-invalid") : t("invalid");
                 line.classList.add("is-dirty");
             }
-            var bad = rows(host).map(scoreInput).filter(function (input) {
-                return input && input.classList.contains("is-invalid");
-            })[0];
+            var bad = host.querySelector("[data-ese-q].is-invalid, [data-ese-score].is-invalid");
             if (bad) {
                 bad.focus();
             }
@@ -379,6 +525,7 @@
         if (!host) {
             return;
         }
+        applyQuestionGrid(host);
         syncAll(host);
         syncScanStatus(host);
     });

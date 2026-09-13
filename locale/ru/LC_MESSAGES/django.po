@@ -68452,3 +68452,219 @@ msgstr "Содержимое файла не соответствует заяв
 msgctxt "core.rate_limit"
 msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
 msgstr "Слишком много запросов — повторите попытку чуть позже."
+
+msgctxt "registrar.exam_score_entry_kind"
+msgid "Appeal result"
+msgstr "Результат апелляции"
+
+msgctxt "registrar.exam_score_sheet_kind"
+msgid "Written"
+msgstr "Письменный"
+
+msgctxt "registrar.exam_score_sheet_kind"
+msgid "Practical"
+msgstr "Практический"
+
+msgctxt "exams.center.stats"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.center.stats"
+msgid "Kağız imtahanlar (köçürülmüş nəticələr)"
+msgstr "Бумажные экзамены (перенесённые результаты)"
+
+msgctxt "exams.center.stats"
+msgid "daxiletmə"
+msgstr "записей"
+
+msgctxt "exams.center.stats"
+msgid "dəyişiklik"
+msgstr "изменений"
+
+msgctxt "exams.center.stats"
+msgid "orta imtahan balı"
+msgstr "средний балл экзамена"
+
+msgctxt "exams.center.stats"
+msgid "tələbə"
+msgstr "студентов"
+
+msgctxt "exams.center.stats"
+msgid "vərəq"
+msgstr "ведомостей"
+
+msgctxt "exams.center.stats"
+msgid "İmtahan növü"
+msgstr "Вид экзамена"
+
+msgctxt "registrar.exam_score_entry"
+msgid "%(label)s balı 0 ilə %(max)s arasında olmalıdır."
+msgstr "Балл %(label)s должен быть от 0 до %(max)s."
+
+msgctxt "registrar.exam_score_entry"
+msgid "%(label)s balı tam ədəd olmalıdır."
+msgstr "Балл %(label)s должен быть целым числом."
+
+msgctxt "registrar.exam_score_entry"
+msgid "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)."
+msgstr "Если выбрано 0, вводится только итоговый балл экзамена (старые ведомости)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "0 — yalnız yekun bal"
+msgstr "0 — только итоговый балл"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bir sualın maksimum balı 1 ilə 100 arasında olmalıdır."
+msgstr "Максимальный балл за вопрос должен быть от 1 до 100."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bir sualın maksimumu"
+msgstr "Максимум за вопрос"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu dəyişikliyin tam qeydi: köhnə → yeni bal, sual balları, səbəb, qeyd, vərəq və sənəd."
+msgstr "Полная запись изменения: старый → новый балл, баллы по вопросам, причина, заметка, ведомость и документ."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu filtrə uyğun dəyişiklik yoxdur."
+msgstr "Нет изменений по этому фильтру."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu filtrə uyğun tələbə yoxdur."
+msgstr "Нет студентов по этому фильтру."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bu vərəq tək yekun bal rejimindədir — sual balı qəbul olunmur."
+msgstr "Эта ведомость в режиме итогового балла — баллы по вопросам не принимаются."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün fənlər"
+msgstr "Все предметы"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün müəllimlər"
+msgstr "Все преподаватели"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün növlər"
+msgstr "Все виды"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Bütün qruplar"
+msgstr "Все группы"
+
+msgctxt "registrar.exam_score_entry"
+msgid "CSV ixrac"
+msgstr "Экспорт CSV"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişiklik"
+msgstr "Изменения"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişikliyin növü"
+msgstr "Вид изменения"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Dəyişən nəticələr"
+msgstr "Изменённые результаты"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Fənn / qrup"
+msgstr "Предмет / группа"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Giriş balı (%(entry)s) + imtahan balı (%(exam)s) 100-dən çox ola bilməz."
+msgstr "Балл допуска (%(entry)s) + балл экзамена (%(exam)s) не может превышать 100."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Görünüş"
+msgstr "Вид"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köhnə bal"
+msgstr "Старый балл"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Köhnə → yeni"
+msgstr "Старый → новый"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Növ"
+msgstr "Вид"
+
+msgctxt "registrar.exam_score_entry"
+msgid "S1..Sn sütunları doludursa bal onların cəmidir. İmtahan növü (yazılı / praktiki) və sual şəbəkəsi vərəq məlumatları kartından götürülür — bütün fayla aiddir."
+msgstr "Если заполнены столбцы S1..Sn, балл — их сумма. Вид экзамена (письменный / практический) и сетка вопросов берутся из карточки ведомости и относятся ко всему файлу."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual balları"
+msgstr "Баллы по вопросам"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı"
+msgstr "Количество вопросов"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı 0 ilə %(max)s arasında olmalıdır."
+msgstr "Количество вопросов должно быть от 0 до %(max)s."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sual sayı vərəqin sual sayından (%(count)s) çox ola bilməz."
+msgstr "Количество вопросов не может превышать число вопросов ведомости (%(count)s)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sualların cəmi (%(total)s) imtahan balının tavanını (%(max)s) aşır."
+msgstr "Сумма баллов по вопросам (%(total)s) превышает предел балла экзамена (%(max)s)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sualların cəmi imtahan balının tavanını aşa bilməz."
+msgstr "Сумма баллов по вопросам не может превышать предел балла экзамена."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tarixədək"
+msgstr "По дату"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Tələbə axtarışı"
+msgstr "Поиск студента"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır."
+msgstr "Есть некорректный балл по вопросу — каждый вопрос должен быть целым числом от 0 до максимума."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılmış imtahan balının hər sonrakı dəyişikliyi (apellyasiya qərarı və ya sənədli düzəliş) burada izlənir: köhnə → yeni bal, səbəb, kim və sənəd."
+msgstr "Каждое последующее изменение записанного балла экзамена (решение апелляции или документированная правка) отслеживается здесь: старый → новый балл, причина, кто и документ."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Yazılı və ya praktiki — vərəqin və bütün sətirlərinin növü."
+msgstr "Письменный или практический — вид ведомости и всех её строк."
+
+msgctxt "registrar.exam_score_entry"
+msgid "ad · istifadəçi adı · FİN · tələbə №"
+msgstr "имя · логин · FIN · № студента"
+
+msgctxt "registrar.exam_score_entry"
+msgid "hamısı"
+msgstr "все"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü"
+msgstr "Вид экзамена"
+
+msgctxt "registrar.exam_score_entry"
+msgid "İmtahan növü yazılı və ya praktiki olmalıdır."
+msgstr "Вид экзамена должен быть письменным или практическим."

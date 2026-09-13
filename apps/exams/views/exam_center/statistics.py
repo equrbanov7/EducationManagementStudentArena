@@ -247,9 +247,35 @@ def _row(attempt):
 
 @login_required
 @require_GET
+def _paper_kind_stats(request, organization):
+    """KAĞIZ (yazılı / praktiki) imtahan KPI-ları — növ üzrə (addendum 2026-09-14, W2 `w2paper`).
+
+    Rəqəmsal cəhd cədvəlindən AYRI mənbə: İmtahan Mərkəzinin sistemə köçürdüyü
+    ballar (``registrar.ExamScoreSheet`` / ``ExamScoreEntry``). Yalnız dövr
+    filtri (tədris ili + semestr) tətbiq olunur — fənn/qrup/müəllim filtrləri
+    rəqəmsal imtahana aiddir. ``paper_kind`` = ``written`` / ``practical`` / boş.
+    Sabit sayda sorğu (2) — ``registrar.public.exam_score_entry.exam_score_changes``.
+    """
+    from apps.registrar.public import exam_score_entry as paper_service
+
+    year = (request.GET.get("year") or "").strip()
+    semester = (request.GET.get("semester") or "").strip()
+    kind = (request.GET.get("paper_kind") or "").strip()
+    return paper_service.exam_score_changes.paper_kind_stats(
+        organization=organization,
+        year_start=int(year) if year.isdigit() else None,
+        months=_SEMESTERS.get(semester),
+        exam_kind=kind if kind in ("written", "practical") else "",
+    )
+
+
 def exam_center_stats_data(request):
     """Filtrlənmiş, səhifələnən nəticələr + sayğaclar (JSON)."""
     organization = _stats_org(request)
+    # ``?paper=1`` — yalnız kağız imtahan KPI-ları (növ çipi dəyişəndə cəhd
+    # cədvəli yenidən yüklənmir; `exam_center_stats_paper.js`).
+    if (request.GET.get("paper") or "").strip() == "1":
+        return JsonResponse({"paper": _paper_kind_stats(request, organization)})
     attempts = _filtered_attempts(request, organization)
 
     summary = {
@@ -261,6 +287,7 @@ def exam_center_stats_data(request):
             .order_by("exam__exam_type_extended")
             .annotate(n=Count("id", distinct=True))
         ),
+        "paper": _paper_kind_stats(request, organization),
     }
 
     page_obj = Paginator(_sorted(attempts, request), _PAGE_SIZE).get_page(request.GET.get("page"))

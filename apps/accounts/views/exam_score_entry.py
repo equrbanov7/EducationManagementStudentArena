@@ -18,6 +18,12 @@ render edir (``journal_close`` / ``kollokvium_windows`` pattern-i). Fayl idxalı
 İcazə qapısı: ``final_score.entry`` (bax ``apps/registrar/exam_score_entry.py``).
 Sətir-sətir yazı servis qatındadır — orada ilk daxiletmə sərbəst, SONRAKI
 dəyişiklik isə səbəb + qeyd + sənəd tələb edir.
+
+2026-09-14 (W2 `w2paper`): sətirdə sual-sual ballar ``q__<enr>__<n>``
+(n = 1..sual sayı) — hər hansı biri doludursa imtahan balı onların CƏMİDİR
+(server hesablayır, ``score__<enr>`` nəzərə alınmır); vərəqin sual şəbəkəsi
+``question_count`` / ``question_max``; dəyişiklik növü ``kind``
+(``correction`` | ``appeal``) dialoqdan bir dəfə gəlir.
 """
 
 import logging
@@ -146,6 +152,8 @@ def _collect_rows(request):
     """
     batch_reason = (request.POST.get("reason") or "").strip()
     batch_note = (request.POST.get("note") or "").strip()
+    batch_kind = (request.POST.get("kind") or "").strip()
+    question_count = service.exam_score_questions.QUESTION_COUNT_MAX
     rows = []
     for key, raw in request.POST.items():
         if not key.startswith("score__"):
@@ -155,12 +163,28 @@ def _collect_rows(request):
             {
                 "enrollment_id": enrollment_id,
                 "score": raw,
+                "question_scores": _question_fields(request, enrollment_id, question_count),
+                "kind": batch_kind,
                 "reason": (request.POST.get(f"reason__{enrollment_id}") or "").strip() or batch_reason,
                 "note": (request.POST.get(f"note__{enrollment_id}") or "").strip() or batch_note,
                 "evidence": request.FILES.get(f"evidence__{enrollment_id}"),
             }
         )
     return rows
+
+
+def _question_fields(request, enrollment_id, question_count):
+    """``q__<enr>__1..n`` sahələri → xam siyahı (sonuncu dolu sahəyə qədər); heç biri yoxdursa ``None``.
+
+    Sual sayından artıq (JS-in söndürdüyü) sahələr brauzerdən gəlmir; gəlsə
+    belə servis vərəqin ``question_count``-u ilə rədd edir (fail-closed).
+    """
+    values = [request.POST.get(f"q__{enrollment_id}__{index}") for index in range(1, question_count + 1)]
+    if all(value is None for value in values):
+        return None
+    while values and (values[-1] is None or not str(values[-1]).strip()):
+        values.pop()
+    return [value if value is not None else "" for value in values]
 
 
 def _handle_save(request, organization, next_url):
