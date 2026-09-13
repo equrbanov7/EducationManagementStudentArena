@@ -178,6 +178,11 @@ services:
       - effective_io_concurrency=200
       - -c
       - max_parallel_workers_per_gather=2
+      # 2026-09-14 (perf ölçməsi EX-12): RLS siyasətləri plan qiymətini şişirdir və
+      # `jit_above_cost` (100 000) keçiləndə JIT kompilyasiyası kiçik OLTP sorğusunu
+      # 2,7 ms → 158 ms edir (sandbox, 20 000 cavab). OLTP profili üçün JIT söndürülür.
+      - -c
+      - jit=${POSTGRES_JIT:-off}
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
