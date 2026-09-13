@@ -66169,3 +66169,7 @@ msgstr "Сведения об организации"
 msgctxt "exams.view.access.message"
 msgid "final_exam_requires_center_entry"
 msgstr "Войти на итоговый экзамен можно только со страницы входа экзаменационного центра (имя пользователя + PIN)."
+
+msgctxt "accounts.first_login"
+msgid "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin."
+msgstr "Этот адрес электронной почты использовать нельзя. Введите другой адрес."

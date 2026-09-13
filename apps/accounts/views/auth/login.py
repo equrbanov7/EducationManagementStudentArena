@@ -17,17 +17,22 @@ from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetC
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ...services import get_otp_timer_context
 from ._shared import (
-    _authenticate_superadmin_for_rate_limit_reset,
     _clear_login_rate_limits_after_password_reset,
     _ensure_auth_device_cookie,
     _get_auth_device_id,
+    _ip_rate_limited_and_recorded,
     _login_limit_keys,
     _sanitize_auth_redirect_target,
+    _superadmin_escape_under_login_limit,
 )
 from .constants import (
     AUTH_RATE_LIMIT_MESSAGE,
+    OTP_SEND_IP_LIMIT_SCOPE,
+    OTP_VERIFY_IP_LIMIT_SCOPE,
     PASSWORD_RESET_EMAIL_SESSION_KEY,
     logger,
+    otp_send_ip_rate_limit,
+    otp_verify_ip_rate_limit,
 )
 
 LOGIN_AUDIENCE_STUDENT = "student"
@@ -219,7 +224,9 @@ class CustomLoginView(LoginView):
         for rate_spec, scope, *key_parts in limit_keys:
             is_limited, retry_after = is_rate_limited(scope, rate_spec, *key_parts)
             if is_limited:
-                superadmin_user = _authenticate_superadmin_for_rate_limit_reset(request, username, password)
+                # F-01 (2026-09-13): qaçış yolu ayrıca dar vedrəyə bağlıdır və
+                # uğursuz cəhdlər normal limiterdə də sayılır — bax _shared.py.
+                superadmin_user = _superadmin_escape_under_login_limit(request, username, password, limit_keys)
                 if superadmin_user is not None:
                     for _reset_rate, reset_scope, *reset_key_parts in limit_keys:
                         clear_rate_limit(reset_scope, *reset_key_parts)
@@ -316,6 +323,16 @@ def login_portal(request):
     return _ensure_auth_device_cookie(request, response)
 
 
+def _rate_limited_form_response(view, retry_after):
+    """Form səhifəsini 429 + ``Retry-After`` ilə göstər (login ilə eyni mesaj)."""
+    form = view.get_form()
+    form.add_error(None, AUTH_RATE_LIMIT_MESSAGE)
+    response = view.render_to_response(view.get_context_data(form=form), status=429)
+    if retry_after:
+        response.headers["Retry-After"] = str(retry_after)
+    return response
+
+
 class NamespacedPasswordResetView(PasswordResetView):
     """Password reset view that sends an OTP and keeps the reset on-site."""
 
@@ -330,6 +347,14 @@ class NamespacedPasswordResetView(PasswordResetView):
         context = super().get_context_data(**kwargs)
         context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
         return context
+
+    def post(self, request, *args, **kwargs):
+        # F-09 (2026-09-13): parol-bərpa OTP göndərişi üçün İP qapısı — e-poçt
+        # üzrə saatlıq hədd bir İP-dən fərqli ünvanlara «spray»-i dayandırmırdı.
+        limited, retry_after = _ip_rate_limited_and_recorded(request, OTP_SEND_IP_LIMIT_SCOPE, otp_send_ip_rate_limit())
+        if limited:
+            return _rate_limited_form_response(self, retry_after)
+        return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -354,6 +379,16 @@ class NamespacedPasswordResetDoneView(FormView):
         kwargs = super().get_form_kwargs()
         kwargs["email"] = self.get_reset_email()
         return kwargs
+
+    def post(self, request, *args, **kwargs):
+        # F-09 (2026-09-13): kod yoxlaması üçün İP qapısı (OTP başına 5 cəhd
+        # hədd-i qalır; bu, çoxlu e-poçt üzrə paralel təxmini dayandırır).
+        limited, retry_after = _ip_rate_limited_and_recorded(
+            request, OTP_VERIFY_IP_LIMIT_SCOPE, otp_verify_ip_rate_limit()
+        )
+        if limited:
+            return _rate_limited_form_response(self, retry_after)
+        return super().post(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
