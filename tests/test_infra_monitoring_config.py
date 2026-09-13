@@ -18,7 +18,10 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 from django.test import Client, override_settings
@@ -231,3 +234,127 @@ def test_security_workflow_has_no_advisory_safety_step_and_pip_audit_blocks():
     assert "pip-audit -r requirements/base.txt" in workflow
     pip_audit_block = workflow.split("pip-audit -r requirements/base.txt", 1)[1][:300]
     assert "exit 1" in pip_audit_block
+
+
+# ── 2026-09-14 infra auditi (wave 2): P3-8 / P3-9 şablon renderi ──────────
+
+RENDER_SCRIPT = ROOT / "docker/render-template.sh"
+BLACKBOX_TMPL_PATH = ROOT / "docker/blackbox/blackbox.tmpl.yml"
+PROD_SMOKE_PATH = ROOT / ".github/workflows/_prod-smoke.yml"
+COMPOSE_PATH = ROOT / "docker-compose.prod.yml"
+
+
+def _render(template: Path, tmp_path: Path, variables: dict[str, str]) -> str:
+    if shutil.which("sh") is None:
+        pytest.skip("sh yoxdur")
+    output = tmp_path / (template.name + ".rendered")
+    env = {"PATH": os.environ.get("PATH", "/usr/bin:/bin"), **variables}
+    result = subprocess.run(
+        ["sh", str(RENDER_SCRIPT), str(template), str(output), *variables],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    return output.read_text(encoding="utf-8")
+
+
+_ALERTMANAGER_VARS = {
+    "SMTP_HOST": "smtp-relay.brevo.com",
+    "SMTP_PORT": "587",
+    "SMTP_USER": "user@example.com",
+    "ALERT_FROM": "no-reply@emsarena.com",
+    "ALERT_TO": "ops@example.com",
+    "WATCHDOG_REPEAT": "6h",
+}
+
+
+@pytest.mark.parametrize(
+    "secret",
+    [
+        "xsmtpsib-plain",
+        'p|a&s/s\\w"o$rd',  # P3-8: `|` `&` `/` `\` `"` `$`
+        "&&|||//\\\\",
+    ],
+)
+def test_alertmanager_template_renders_valid_yaml_for_any_smtp_password(tmp_path, secret):
+    rendered = _render(
+        ALERTMANAGER_TMPL_PATH, tmp_path, {**_ALERTMANAGER_VARS, "SMTP_PASS": secret, "WEBHOOK_TOKEN": secret}
+    )
+    config = yaml.safe_load(rendered)
+    assert config["global"]["smtp_auth_password"] == secret
+    assert config["global"]["smtp_smarthost"] == "smtp-relay.brevo.com:587"
+    assert config["route"]["routes"][0]["repeat_interval"] == "6h"
+    receivers = {receiver["name"]: receiver for receiver in config["receivers"]}
+    assert receivers["ops-all"]["webhook_configs"][0]["http_config"]["authorization"]["credentials"] == secret
+    # Şablon başlığındakı izahlı `__PLACEHOLDER__` sözü istisna — real placeholder qalmamalıdır.
+    assert set(re.findall(r"__[A-Z_]+__", rendered)) <= {"__PLACEHOLDER__"}
+
+
+def test_legacy_sed_render_would_have_broken_on_pipe_and_ampersand(tmp_path):
+    """Auditorun iddiasının sübutu: köhnə `sed -e "s|__X__|$X|g"` bu parolla pozulur."""
+    if shutil.which("sed") is None:
+        pytest.skip("sed yoxdur")
+    secret = "p|a&s"
+    legacy = subprocess.run(
+        ["sed", "-e", f"s|__SMTP_PASS__|{secret}|g", str(ALERTMANAGER_TMPL_PATH)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    # `|` sed ayırıcısıdır → ya xəta, ya da parol kəsilir; `&` uyğun mətni qaytarır.
+    assert legacy.returncode != 0 or f'smtp_auth_password: "{secret}"' not in legacy.stdout
+
+
+def test_blackbox_probe_host_header_comes_from_healthcheck_host(tmp_path):
+    template = BLACKBOX_TMPL_PATH.read_text(encoding="utf-8")
+    assert 'Host: "10.0.2.42"' not in template, "P3-9: sabit host git-də qalmamalıdır"
+    assert template.count('Host: "__HEALTHCHECK_HOST__"') == 2
+    rendered = yaml.safe_load(_render(BLACKBOX_TMPL_PATH, tmp_path, {"HEALTHCHECK_HOST": "10.0.9.9"}))
+    for module in ("http_2xx_lan", "http_login_lan"):
+        assert rendered["modules"][module]["http"]["headers"]["Host"] == "10.0.9.9"
+
+    compose = yaml.safe_load(COMPOSE_PATH.read_text(encoding="utf-8"))
+    blackbox = compose["services"]["blackbox_exporter"]
+    assert blackbox["environment"]["HEALTHCHECK_HOST"] == "${HEALTHCHECK_HOST:-10.0.2.42}"
+    command = " ".join(blackbox["command"])
+    assert "render-template.sh" in command and " HEALTHCHECK_HOST " in command + " "
+    assert "--config.file=/tmp/blackbox.yml" in command
+    assert not (ROOT / "docker/blackbox/blackbox.yml").exists(), "köhnə statik fayl silinməlidir (mount şablona baxır)"
+
+
+def test_render_script_rejects_unsafe_variable_names_and_leaves_other_lines_untouched(tmp_path):
+    template = tmp_path / "t.yml"
+    template.write_text('a: "__PW__"\nb: keep \\ literal & | stuff\n', encoding="utf-8")
+    rendered = _render(template, tmp_path, {"PW": "x"})
+    assert rendered == 'a: "x"\nb: keep \\ literal & | stuff\n'
+    bad = subprocess.run(
+        ["sh", str(RENDER_SCRIPT), str(template), str(tmp_path / "o.yml"), "x;y"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert bad.returncode == 2 and "invalid variable name" in bad.stderr
+
+
+# ── prod-smoke: webhook yolu nginx üzərindən (P2-1 qalığı) ────────────────
+
+
+def test_prod_smoke_posts_to_the_webhook_through_nginx_and_checks_redis_argv():
+    workflow = PROD_SMOKE_PATH.read_text(encoding="utf-8")
+    steps = {step["name"]: step for step in yaml.safe_load(workflow)["jobs"]["prod-smoke"]["steps"]}
+    start = next(step for name, step in steps.items() if "Start production stack" in name)
+    assert start["env"]["ALERTMANAGER_WEBHOOK_TOKEN"], "token həm app-a, həm Alertmanager-ə getməlidir"
+
+    webhook = next(step for name, step in steps.items() if "Alertmanager webhook" in name)
+    run = webhook["run"]
+    assert f"WEBHOOK_PATH={WEBHOOK_PATH}" in run
+    assert "-H 'Host: localhost' -H 'X-Forwarded-Proto: https'" in run, "nginx daxili blokunun başlıqları"
+    assert '"$NO_TOKEN" != "403"' in run and '"$WITH_TOKEN" != "200"' in run
+    assert "exec -T alertmanager wget" in run and "--post-data" in run
+    assert "/tmp/alertmanager.yml" in run
+    assert webhook["env"]["ALERTMANAGER_WEBHOOK_TOKEN"] == start["env"]["ALERTMANAGER_WEBHOOK_TOKEN"]
+
+    redis_step = next(step for name, step in steps.items() if "Redis password" in name)
+    assert "/proc/1/cmdline" in redis_step["run"] and "requirepass" in redis_step["run"]

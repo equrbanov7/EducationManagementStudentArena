@@ -23,7 +23,7 @@
 # Faza 1 (audit 2026-07-02):
 #   - Hər serviste log rotasiyası (json-file 10m×3) və resurs limitləri
 #     (env ilə tənzimlənə bilər — deploy.resources.limits).
-#   - app healthcheck TCP əvəzinə real HTTP /health/ yoxlaması.
+#   - app healthcheck TCP əvəzinə real HTTP yoxlaması (indi /ping/ — bax app.healthcheck şərhi).
 #   - celery_beat servisi (CELERY_BEAT_SCHEDULE üçün) əlavə olundu.
 #   - node_exporter + alertmanager + Prometheus alert qaydaları əlavə olundu.
 #   - app/celery env dublikatı x-app-env anchor-una yığıldı.
@@ -301,9 +301,13 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   # Redis — channel layer (DB 0), cache (DB 1) and Celery broker (DB 2)
   # No external port binding; accessible only within emsarena-network.
-  # Password enforced via --requirepass; REDISCLI_AUTH is set so the
-  # health check can authenticate without passing the password on the
-  # command line (which would be visible in process listings).
+  # 2026-09-14 infra auditi P3-3: parol ARTIQ argv-də deyil — əvvəl
+  # `--requirepass ${REDIS_PASSWORD}` konteyner `ps`/`docker inspect`-də
+  # görünürdü. İndi docker/redis/entrypoint.sh şablonu (redis.conf.tmpl)
+  # /tmp/redis.conf-a render edir (0400, redis istifadəçisi) və
+  # `redis-server /tmp/redis.conf` işlədir. REDISCLI_AUTH yenə verilir ki,
+  # healthcheck `redis-cli ping` parolu komanda sətrində göstərmədən
+  # autentifikasiya etsin.
   # P2-08 (Codex audit, 2026-09-13): köhnə qeyd «maxmemory qəsdən təyin
   # edilməyib» ilə aşağıdakı `--maxmemory ${REDIS_MAXMEMORY:-3gb}` bir-birinə
   # zidd idi. Faktiki siyasət: maxmemory TƏYİN OLUNUR, amma `noeviction` ilə —
@@ -318,24 +322,24 @@ services:
     container_name: emsarena-redis
     environment:
       REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
-    volumes:
-      - redis_data:/data
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
+      # entrypoint.sh bunları şablona yazır; sirr yalnız faylda qalır.
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       # maxmemory + noeviction: broker/cache/WS layer must NOT be OOM-killed
       # (that would wipe sessions mid-exam). noeviction errors at the cap instead
       # of evicting broker data; keep the cap below REDIS_MEM_LIMIT. io-threads
       # offloads socket I/O for the 5000-connection WS fan-out (redis 7).
-      - --maxmemory
-      - ${REDIS_MAXMEMORY:-3gb}
-      - --maxmemory-policy
-      - noeviction
-      - --io-threads
-      - "4"
-      - --requirepass
-      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      # Statik seçimlər docker/redis/redis.conf.tmpl-dədir.
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-3gb}
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf.tmpl:/etc/redis/redis.conf.tmpl:ro
+      - ./docker/redis/entrypoint.sh:/etc/redis/entrypoint.sh:ro
+      - ./docker/render-template.sh:/etc/redis/render-template.sh:ro
+    # Image entrypoint-i (docker-entrypoint.sh) ilk arqument `redis-server`
+    # olmadığı üçün skripti root ilə işlədir; skript özü image entrypoint-inə
+    # `redis-server /tmp/redis.conf` ilə qayıdır → gosu ilə `redis`
+    # istifadəçisinə düşmə əvvəlki kimi qalır.
+    command: ["sh", "/etc/redis/entrypoint.sh"]
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -462,8 +466,12 @@ services:
           # is exactly what throttled prod. Let the app use the box; memory stays
           # bounded. (Old APP_CPU_LIMIT env is intentionally no longer applied.)
           memory: ${APP_MEM_LIMIT:-2048M}
-    # Real HTTP yoxlaması: /health/ DB-ni yoxlayır (Redis problemi "degraded"
-    # 207 qaytarır və sağlam sayılır). X-Forwarded-Proto: https başlığı
+    # Real HTTP yoxlaması — /ping/ (2026-09-14 infra auditi P3-2: köhnə şərh
+    # «/health/ DB-ni yoxlayır, 207 sağlamdır» deyirdi, amma yoxlama /ping/-ə
+    # gedir). /ping/ QƏSDƏN seçilib: DB/Redis-siz «Daphne cavab verir» siqnalı;
+    # DB nasazlığında 8 replikanın hamısı unhealthy olub restart-a düşməsin.
+    # DB/Redis vəziyyəti /health/ (deploy health-gate + blackbox probe) və
+    # Prometheus alertləri ilə izlənir. X-Forwarded-Proto: https başlığı
     # SECURE_SSL_REDIRECT yönləndirməsinin qarşısını alır (nginx /metrics/
     # scrape-i ilə eyni pattern). ALLOWED_HOSTS "localhost" daxil etməlidir —
     # server .env-də ALLOWED_HOSTS siyahısına localhost,127.0.0.1 daxil edin.
@@ -686,22 +694,22 @@ services:
       # 2026-09-13 infra auditi P1-3: Watchdog «hələ sağam» e-poçtunun
       # təkrar intervalı (Alertmanager müddəti: 6h / 24h ...).
       WATCHDOG_REPEAT: ${WATCHDOG_REPEAT_INTERVAL:-24h}
+    # 2026-09-14 infra auditi P3-8: şablon `sed` ilə deyil,
+    # docker/render-template.sh (POSIX sh, hərfi əvəzləmə + `"`/`\` qaçırma)
+    # ilə render olunur — SMTP açarında / tokendə `|`, `&`, `\` olsa da
+    # konfiq keçərli qalır. Image busybox-dur (envsubst yoxdur).
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
-        sed -e "s|__SMTP_HOST__|$${SMTP_HOST}|g"
-        -e "s|__SMTP_PORT__|$${SMTP_PORT}|g"
-        -e "s|__SMTP_USER__|$${SMTP_USER}|g"
-        -e "s|__SMTP_PASS__|$${SMTP_PASS}|g"
-        -e "s|__ALERT_FROM__|$${ALERT_FROM}|g"
-        -e "s|__ALERT_TO__|$${ALERT_TO}|g"
-        -e "s|__WEBHOOK_TOKEN__|$${WEBHOOK_TOKEN}|g"
-        -e "s|__WATCHDOG_REPEAT__|$${WATCHDOG_REPEAT}|g"
-        /etc/alertmanager/alertmanager.tmpl.yml > /tmp/alertmanager.yml
+        /bin/sh /etc/alertmanager/render-template.sh
+        /etc/alertmanager/alertmanager.tmpl.yml /tmp/alertmanager.yml
+        SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS ALERT_FROM ALERT_TO
+        WEBHOOK_TOKEN WATCHDOG_REPEAT
         && exec /bin/alertmanager --config.file=/tmp/alertmanager.yml
         --storage.path=/alertmanager
     volumes:
       - ./docker/alertmanager/alertmanager.tmpl.yml:/etc/alertmanager/alertmanager.tmpl.yml:ro
+      - ./docker/render-template.sh:/etc/alertmanager/render-template.sh:ro
       - alertmanager_data:/alertmanager
     restart: unless-stopped
     logging: *default-logging
@@ -895,8 +903,21 @@ services:
     # publik domen YOXDUR (LAN deploy), probe-lar nginx üzərindən gedir.
     image: prom/blackbox-exporter:v0.25.0
     container_name: emsarena-blackbox-exporter
+    # 2026-09-14 infra auditi P3-9: probe `Host` başlığı .env HEALTHCHECK_HOST-dan
+    # gəlir (remote_deploy.sh health-gate ilə eyni mənbə); şablon start-da
+    # docker/render-template.sh ilə /tmp/blackbox.yml-ə render olunur.
+    # Defolt köhnə sabit dəyərdir ki, mövcud host üçün davranış dəyişməsin.
+    environment:
+      HEALTHCHECK_HOST: ${HEALTHCHECK_HOST:-10.0.2.42}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        /bin/sh /etc/blackbox_exporter/render-template.sh
+        /etc/blackbox_exporter/config.tmpl.yml /tmp/blackbox.yml HEALTHCHECK_HOST
+        && exec /bin/blackbox_exporter --config.file=/tmp/blackbox.yml
     volumes:
-      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+      - ./docker/blackbox/blackbox.tmpl.yml:/etc/blackbox_exporter/config.tmpl.yml:ro
+      - ./docker/render-template.sh:/etc/blackbox_exporter/render-template.sh:ro
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -1045,8 +1066,12 @@ services:
         limits:
           cpus: "${NGINX_CPU_LIMIT:-4.0}"
           memory: ${NGINX_MEM_LIMIT:-512M}
+    # 2026-09-14 infra auditi P3-1: `nginx -t` yalnız konfiqi parse edirdi —
+    # worker-lər ölsə/port dinlənməsə də «healthy» qalırdı. İndi daxili
+    # stub_status server-i (:8081, host-a publish olunmur, nginx_exporter də
+    # oradan oxuyur) real HTTP cavabı ilə yoxlanır; upstream app-a getmir.
     healthcheck:
-      test: ["CMD", "nginx", "-t"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/stub_status >/dev/null"]
       interval: 30s
       timeout: 5s
       retries: 3

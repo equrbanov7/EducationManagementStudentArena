@@ -96,7 +96,7 @@ before running any `docker compose` command.  Never commit this file.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
+| `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag used by `app`/`celery_*`. `remote_deploy.sh` exports `emsarena-prod:<git sha>` for the rollout and re-tags `latest` only after the health gate passes (§8); CI uses `emsarena-prod:ci` |
 | `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Email backend class. Override with `anymail` backend for SendGrid/SES |
 | `EMAIL_HOST` | `smtp-relay.brevo.com` | SMTP server hostname |
 | `EMAIL_PORT` | `587` | SMTP server port |
@@ -127,6 +127,11 @@ before running any `docker compose` command.  Never commit this file.
 | `EMSARENA_NETWORK_SUBNET` / `EMSARENA_NETWORK_GATEWAY` | `172.18.0.0/16` / `172.18.0.1` | Infra audit P2-4: bridge network IPAM pin. The gateway **must equal** `ARP_AGENT_BIND` (arp-agent binds there with `network_mode: host`) and `EXAM_ARP_AGENT_URL` — otherwise the exam-centre gate fails closed. See §5 note before changing |
 | `ARP_AGENT_CPU_LIMIT` / `ARP_AGENT_MEM_LIMIT` | `0.1` / `64M` | Infra audit P2-4: arp-agent sidecar limits (stdlib http.server ≈ 15 MB RSS) |
 | `WATCHDOG_REPEAT_INTERVAL` | `24h` | Infra audit P1-3: how often the always-firing `Watchdog` alert re-sends its "monitoring chain alive" heartbeat e-mail (`heartbeat` receiver). If the mail stops arriving, Prometheus→Alertmanager→SMTP is broken |
+| `DEPLOY_CHECK_FAIL_LEVEL` | `WARNING` | Infra audit 2026-09-14 P3-16: level at which the in-image `manage.py check --deploy` preflight aborts the deploy. `WARNING` matches CI (`_security.yml`); set `ERROR` in `.env` only as a documented, temporary relaxation (warnings are still printed loudly) |
+| `SKIP_PREDEPLOY_BACKUP` | `0` | Infra audit 2026-09-14 P2-5: `1` skips the pre-migration `postgres-backup /backup.sh` dump. A failing dump otherwise aborts the deploy before `release.sh` (fail-closed) |
+| `DEPLOY_ROLLBACK_ON_FAILURE` | `true` | Infra audit P2-5: on a failed health/HTTP gate, recreate `app`/`celery_*` from the previously running image tag (captured before the rollout). `false` leaves the failed release running for inspection |
+| `DEPLOY_KEEP_RELEASE_IMAGES` | `3` | Infra audit P2-5: how many older `emsarena-prod:<sha>` tags to keep besides the current and the rollback target; older ones are removed after a successful deploy |
+| `HEALTHCHECK_HOST` | `127.0.0.1` (deploy) / `10.0.2.42` (blackbox) | Host header the deploy health-gate and the blackbox probes send to nginx (must be in `ALLOWED_HOSTS`). Infra audit 2026-09-14 P3-9: the blackbox config is rendered from this variable at container start instead of a hard-coded IP |
 
 ### Build-time vs. Runtime variables
 
@@ -266,8 +271,11 @@ The job:
 2. `rsync -a --delete --exclude-from scripts/deploy/rsync-excludes.txt ./ "$APP_DIR/"`
    — mirrors the code into `APP_DIR` (`/home/wcu/EducationManagementStudentArena`)
    while preserving runtime data (`.env`, `media/`, `docker/nginx/certs/`);
-3. `bash scripts/deploy/remote_deploy.sh` — docker-compose build + release
-   (migrate/collectstatic) + `up -d` + health gate.
+3. `bash scripts/deploy/remote_deploy.sh` — docker-compose build (tagged
+   `emsarena-prod:<sha>`) + `check --deploy` preflight + pre-deploy DB dump +
+   release (migrate/collectstatic) + `up -d` + health gate; on a failed gate
+   it rolls the app/worker containers back to the previous tag, on success it
+   promotes the tag to `latest` (§8).
 
 Prerequisites on the server: the self-hosted runner service must be active, its
 run-as user must be in the `docker` group and own `APP_DIR`, and `APP_DIR/.env`
@@ -345,6 +353,40 @@ waits for in-flight exam submits / WebSockets and running OCR/export tasks
 instead of SIGKILL-ing them after Docker's default 10 s. Expect
 `docker compose up -d` / `stop` to take up to 15 min when a heavy task is
 mid-flight — that is intended; do not shorten it on exam days.
+
+### Daphne proxy headers (infra audit 2026-09-14, P3-12)
+
+`docker/prod-entrypoint.sh` starts Daphne with `--proxy-headers`, so the ASGI
+`scope["client"]` (used by WebSocket consumers, e.g. the live-exam connect
+rate limit in `apps/live_exam/consumers.py:_get_scope_ip`) and
+`scope["scheme"]` are taken from `X-Forwarded-For` / `X-Forwarded-Proto`
+instead of nginx's container IP. This is safe only because:
+
+- nginx **overwrites** `X-Forwarded-For` with `$remote_addr` (never
+  `$proxy_add_x_forwarded_for`; guarded by
+  `tests/test_proxy_trust_configuration.py`) — Daphne takes the *first*
+  element of a comma-separated list, so an appended client value would win;
+- port 8000 is reachable only from the compose network (nginx, Prometheus
+  scrapes, healthcheck). Anything that talks to `app:8000` directly can set
+  those headers — keep it that way and never publish 8000 on the host.
+
+HTTP requests already used `SECURE_PROXY_SSL_HEADER` / `USE_X_FORWARDED_HOST`
+in Django; the flag only aligns the raw ASGI scope with that trust model.
+
+### Secrets off the process command line (infra audit 2026-09-14, P3-3 / P3-8 / P3-9)
+
+- **Redis** no longer receives `--requirepass` on argv (visible in `ps` /
+  `docker inspect`). `docker/redis/entrypoint.sh` renders
+  `docker/redis/redis.conf.tmpl` to `/tmp/redis.conf` (0400, owned by `redis`)
+  and hands off to the image's own `docker-entrypoint.sh redis-server
+  /tmp/redis.conf`, so the `gosu redis` privilege drop is unchanged. The
+  healthcheck still authenticates through `REDISCLI_AUTH`.
+- **Alertmanager** and **blackbox** templates are rendered by
+  `docker/render-template.sh` (POSIX sh; the prom/* busybox images have no
+  `envsubst`). Substitution is literal and `"`/`\` are escaped for
+  double-quoted YAML scalars — SMTP keys or webhook tokens may contain `|`,
+  `&`, `/`, `\` (the old `sed` render broke on them). A template change still
+  needs a container recreate (`remote_deploy.sh` does it for alertmanager).
 
 ---
 
@@ -457,70 +499,95 @@ E2E_PASSWORD=<your-test-password> \
 
 ## 8. Rollback Plan
 
+> Infra audit 2026-09-14 (P2-5): rollback is now built into
+> `scripts/deploy/remote_deploy.sh`. The steps below describe what the script
+> does and how to do the same by hand.
+
+### How a deploy is tagged and gated
+
+1. `resolve_build_git_sha` → `resolve_release_image` exports
+   `APP_IMAGE=emsarena-prod:<sha>` (`manual-<UTC timestamp>` when no SHA is
+   known). `docker compose build` writes **only** that tag — `latest` is
+   untouched until the end.
+2. `capture_previous_app_image` records the image tag of the currently running
+   `app` container (`docker inspect --format '{{.Config.Image}}'`) as the
+   rollback target, provided that tag still exists locally.
+3. `postgres-backup /backup.sh` takes a pre-migration dump into
+   `./backups/postgres/` (skip with `SKIP_PREDEPLOY_BACKUP=1`; a failing dump
+   aborts the deploy before `release.sh`).
+4. `release.sh` (migrate + collectstatic) runs from the new tag, then
+   `app`/`celery_*` are recreated with it.
+5. Health gate (container healthchecks → `/ping/` → `/health/` → `build.sha`
+   drift check). **Any failure** → `rollback_to_previous_image` (unless
+   `DEPLOY_ROLLBACK_ON_FAILURE=false`), then the deploy exits 1.
+6. Success → `docker tag emsarena-prod:<sha> emsarena-prod:latest` and older
+   release tags beyond `DEPLOY_KEEP_RELEASE_IMAGES` are removed (current tag
+   and rollback target are always kept).
+
 ### Identify the previous working image
 
 ```bash
-# List recent Docker images
+# Release tags, newest first (latest always points at the last HEALTHY release)
 docker images emsarena-prod --format "table {{.Tag}}\t{{.CreatedAt}}\t{{.ID}}"
+
+# What is running right now
+docker inspect --format '{{.Config.Image}}' \
+    "$(docker compose -f docker-compose.prod.yml ps -q app | head -n1)"
 ```
 
-Tag your images with the Git commit SHA when building for production:
+### Roll back the application containers (what the script does)
 
 ```bash
-docker compose -f docker-compose.prod.yml build
-docker tag emsarena-prod:latest emsarena-prod:$(git rev-parse --short HEAD)
+# Recreate only the image-bearing services from the previous tag; no migrate.
+APP_IMAGE=emsarena-prod:<previous-sha> RUN_RELEASE_ON_START=false \
+    docker compose -f docker-compose.prod.yml up -d --no-build \
+    --scale app="${APP_REPLICAS:-8}" --scale celery_worker="${CELERY_REPLICAS:-2}" \
+    app celery_worker celery_worker_heavy celery_beat
+
+# nginx resolves upstream IPs at config load — refresh it after the recreate.
+docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
+
+# Verify
+curl -sk -H "Host: ${HEALTHCHECK_HOST}" https://127.0.0.1/health/
 ```
 
-### Roll back the application container
+`RUN_RELEASE_ON_START=false` matters: the entrypoint would otherwise re-run
+migrations from the old code. The automatic rollback **does not revert
+migrations** — the old image runs against the new schema. Additive
+migrations are normally harmless; for a destructive migration restore the
+pre-deploy dump (below) or run the reverse migration first:
 
 ```bash
-# Replace the app container with the previous image tag
-# (substitute <previous-sha> with the tag from the list above)
-APP_IMAGE=emsarena-prod:<previous-sha> \
-    docker compose -f docker-compose.prod.yml up -d --no-deps app
-```
-
-The entrypoint will re-run migrations on startup.  If the rollback involves
-reverting a migration, run the reverse migration first:
-
-```bash
-# Check current migration state
-docker compose -f docker-compose.prod.yml exec app \
-    python manage.py showmigrations
-
-# Revert to a specific migration (example)
-docker compose -f docker-compose.prod.yml exec app \
-    python manage.py migrate <app_label> <migration_name>
+docker compose -f docker-compose.prod.yml exec app python manage.py showmigrations
+docker compose -f docker-compose.prod.yml exec app python manage.py migrate <app_label> <migration_name>
 ```
 
 ### Roll back with git + full rebuild
 
+Only needed when no release tag is available (first deploy after enabling
+tagging, or tags pruned):
+
 ```bash
-# Find the last known-good commit
-git log --oneline -20
-
-# Check out that commit
 git checkout <good-commit-sha>
-
-# Rebuild and redeploy
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
+BUILD_GIT_SHA=<good-commit-sha> bash scripts/deploy/remote_deploy.sh
 ```
 
 ### Database rollback
 
-> ⚠️ **Always back up the database before deploying a migration-heavy release.**
+The deploy script already dumps before every migration via the
+`postgres-backup` sidecar (`./backups/postgres/last/`, plus the rotated
+`daily/weekly/monthly` sets — see §12). Manual equivalent and restore:
 
 ```bash
-# Back up (run before every deployment)
-docker compose -f docker-compose.prod.yml exec postgres \
-    pg_dump -U ${POSTGRES_USER} ${POSTGRES_DB} \
-    > backup-$(date +%Y%m%d-%H%M).sql
+# Manual pre-deploy dump (what remote_deploy.sh runs before release.sh)
+docker compose -f docker-compose.prod.yml exec -T postgres-backup /backup.sh
 
-# Restore
-docker compose -f docker-compose.prod.yml exec -T postgres \
-    psql -U ${POSTGRES_USER} ${POSTGRES_DB} \
-    < backup-<timestamp>.sql
+# Restore the last dump (stops writers first; see §12 "Restore procedure")
+docker compose -f docker-compose.prod.yml stop app celery_worker celery_worker_heavy celery_beat
+gunzip -c backups/postgres/last/<dump-file>.sql.gz | \
+    docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+APP_IMAGE=emsarena-prod:<previous-sha> RUN_RELEASE_ON_START=false \
+    docker compose -f docker-compose.prod.yml up -d --no-build app celery_worker celery_worker_heavy celery_beat
 ```
 
 ---

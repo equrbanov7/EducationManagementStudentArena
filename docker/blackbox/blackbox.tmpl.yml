@@ -5,6 +5,12 @@
 # nginx-ə gedir (self-signed sertifikat → insecure_skip_verify true, çünki
 # etibar zənciri yox, YALNIZ endpoint sağlamlığı yoxlanılır).
 # Hədəflər docker/prometheus/prometheus.yml-dəki blackbox job-undadır.
+#
+# 2026-09-14 infra auditi P3-9: `Host` başlığı git-də sabit IP (10.0.2.42) idi —
+# host dəyişəndə probe-lar səssizcə 400 (DisallowedHost) alırdı. İndi bu fayl
+# ŞABLONDUR: konteyner start-ında docker/render-template.sh `__HEALTHCHECK_HOST__`
+# placeholder-ini .env `HEALTHCHECK_HOST` dəyəri ilə doldurur (deploy skriptinin
+# health-gate-də işlətdiyi eyni dəyişən) və nəticə /tmp/blackbox.yml olur.
 # ═══════════════════════════════════════════════════════════════════════════
 modules:
   http_2xx_lan:
@@ -15,7 +21,7 @@ modules:
       method: GET
       preferred_ip_protocol: ip4
       headers:
-        Host: "10.0.2.42"
+        Host: "__HEALTHCHECK_HOST__"
       fail_if_ssl: false
       fail_if_not_ssl: false
       tls_config:
@@ -31,7 +37,7 @@ modules:
       no_follow_redirects: false
       preferred_ip_protocol: ip4
       headers:
-        Host: "10.0.2.42"
+        Host: "__HEALTHCHECK_HOST__"
       fail_if_not_ssl: false
       tls_config:
         insecure_skip_verify: true
