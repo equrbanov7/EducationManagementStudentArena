@@ -66165,3 +66165,7 @@ msgstr "Журнал аудита"
 msgctxt "profile.sidebar"
 msgid "Təşkilat məlumatları"
 msgstr "Сведения об организации"
+
+msgctxt "exams.view.access.message"
+msgid "final_exam_requires_center_entry"
+msgstr "Войти на итоговый экзамен можно только со страницы входа экзаменационного центра (имя пользователя + PIN)."

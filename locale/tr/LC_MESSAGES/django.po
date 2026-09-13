@@ -66020,3 +66020,7 @@ msgstr "Denetim günlüğü"
 msgctxt "profile.sidebar"
 msgid "Təşkilat məlumatları"
 msgstr "Kurum bilgileri"
+
+msgctxt "exams.view.access.message"
+msgid "final_exam_requires_center_entry"
+msgstr "Final sınavına yalnızca sınav merkezi giriş sayfasından (kullanıcı adı + PIN) girilebilir."

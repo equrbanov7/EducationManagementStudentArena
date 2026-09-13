@@ -66073,3 +66073,7 @@ msgstr "Audit jurnalı"
 msgctxt "profile.sidebar"
 msgid "Təşkilat məlumatları"
 msgstr "Təşkilat məlumatları"
+
+msgctxt "exams.view.access.message"
+msgid "final_exam_requires_center_entry"
+msgstr "Final imtahanına yalnız imtahan mərkəzinin giriş səhifəsindən (istifadəçi adı + PIN) daxil olmaq olar."

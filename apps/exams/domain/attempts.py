@@ -217,9 +217,13 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             # The cache-based _exam_start_actor_lock degrades to "no lock"
             # when Redis is unavailable; these constraints guarantee exam
             # data integrity regardless of the cache state.
+            # Audit 2026-09-13 EX-08: «draft» da açıq cəhddir
+            # (`get_active_attempt_for_user` hər ikisini açıq sayır) — şərt
+            # yalnız «in_progress» ikən tələbə `save_draft`-dan sonra ikinci
+            # açıq cəhd yarada bilirdi (DB son müdafiə xətti işləmirdi).
             models.UniqueConstraint(
                 fields=["user", "exam"],
-                condition=models.Q(status="in_progress"),
+                condition=models.Q(status__in=("draft", "in_progress")),
                 name="uniq_active_attempt_per_user_exam",
             ),
             models.UniqueConstraint(
