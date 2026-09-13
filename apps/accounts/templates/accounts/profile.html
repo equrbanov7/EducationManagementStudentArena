@@ -13,7 +13,7 @@
      data-profile-base-url="{{ profile_base_url }}"
      data-default-section="dashboard"
      data-default-section-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
-     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,student-organization-management,role-assignment,manage-roles,permission-editor,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,teacher-intake,registrar-catalog,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview,superadmin-exam-rooms"
+     data-ajax-sections="dashboard,profile-info,notifications,posts,my-exams,my-courses,courses,assigned-exams,assigned-courses,my-results,my-subjects,my-transcript,overall-academic,pending-answers,pending-review,review-results,statistics,pending-post-approvals,question-bank,question-submissions,my-appeals,manage-appeals,unit-exams,org-structure,org-faculties,org-kafedras,org-members,org-roles,student-organization-management,role-assignment,manage-roles,permission-editor,audit-log,superadmin-org-inspector,my-schedule,schedule-manage,student-intake,teacher-intake,registrar-catalog,applications,academic-calendar,my-journal,analytics,system-monitoring,people-teachers,people-students,syllabus-list,syllabus-editor,syllabus-review,question-chair-review,teaching-handover,workload-distribution,my-workload,legacy-grade-review,org-structure-tree,chair-profile,programs-registry,subject-catalog,curriculum-editor,groups-registry,semester-opening,student-admission,student-registry,lessons-log,workload-center,workload-visa,workload-approval,workload-overview,superadmin-exam-rooms,rim-center"
      data-section-fragment-url="{% url 'accounts:profile_section_fragment' section='__SECTION__' %}"
      data-badges-url="{% url 'accounts:profile_badges_api' %}"
      data-title-suffix="{% trans 'title' context 'profile.sidebar' %} - {{ user.username }} - {{ site_brand_name }}"
@@ -21,7 +21,8 @@
     {% include "accounts/profile/_sidebar.html" %}
     <div class="profile-sidebar-backdrop" id="profileSidebarBackdrop" aria-hidden="true"></div>
 
-    <main class="profile-main">
+    {# 2026-09-13 frontend auditi F10: `base.html` artıq `<main id="main-content">` verir — iç-içə ikinci `<main>` landmark-ı (WCAG 1.3.1) `div`-ə çevrildi; CSS seçicisi sinifdir #}
+    <div class="profile-main">
         {% include "accounts/profile/_messages.html" %}
             {% include "accounts/profile/_header.html" %}
 
@@ -54,7 +55,7 @@
             {% endfor %}
             {% endif %}
         </div>
-    </main>
+    </div>
 </div>
 {% endblock %}
 
@@ -144,7 +145,7 @@
 <script src="{% static 'accounts/js/profile/modal_i18n.js' %}?v=20260725-csp"></script>
 <script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260913-1"></script>
-<script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260912-viewas"></script>
+<script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260913-1"></script>
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260709-access-fix"></script>
 <script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
@@ -213,11 +214,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
 `window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
-<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260902-1"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260902-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260913-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260913-1"></script>
 {% endif %}
 {% if 'my-workload' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260902-1"></script>
+<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260913-1"></script>
 {% endif %}
 {% if 'syllabus-list' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>

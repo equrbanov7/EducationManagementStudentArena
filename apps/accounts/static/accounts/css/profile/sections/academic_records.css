@@ -129,7 +129,7 @@
     min-width: 2ch;
     font-size: var(--ems-fs-xs);
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-variant-numeric: tabular-nums;
 }
 
@@ -374,7 +374,7 @@
 }
 
 .acr-sem-table .acr-muted {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* Kəsr/qiymətləndirilməmə səbəbi — RƏNG + MƏTN (rəng tək məna daşımır). */

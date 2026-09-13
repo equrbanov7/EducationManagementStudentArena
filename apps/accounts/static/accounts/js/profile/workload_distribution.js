@@ -77,9 +77,26 @@
         node.hidden = !message;
     }
 
+    /* 2026-09-13 frontend auditi F7: bu faylın AZ literalları i18n-siz idi —
+       EN/RU/TR-də dərs yükü paneli qarışıq dilli görünürdü. `gettext` /
+       `interpolate` `JavaScriptCatalog`-dan (`base.html`, `/jsi18n/`) gəlir;
+       msgid-lər `djangojs` kataloqundadır (`scripts/i18n_source_scan.py` hərfi
+       `gettext(` çağırışlarını sayır — ona görə ad dəyişdirilmir). Kataloq
+       yüklənməyibsə lokal fallback msgid-in özünü (AZ) qaytarır. */
+    var gettext = window.gettext || function (value) { return value; };
+
+    function fmt(template, params) {
+        if (typeof window.interpolate === "function") {
+            return window.interpolate(template, params, true);
+        }
+        return template.replace(/%\((\w+)\)s/g, function (_, key) {
+            return params[key] == null ? "" : String(params[key]);
+        });
+    }
+
     function messageFor(payload) {
-        if (!payload) return "Əməliyyat alınmadı.";
-        return payload.message || payload.error || "Əməliyyat alınmadı.";
+        if (!payload) return gettext("Əməliyyat alınmadı.");
+        return payload.message || payload.error || gettext("Əməliyyat alınmadı.");
     }
 
     function renderStatus() {
@@ -157,13 +174,13 @@
                 var Render = window.EMSWorkloadRender;
                 if (!Render) return;
                 Render.options(q('[data-wl-option="subjects"]'), payload.subjects, {
-                    placeholder: "Seçilməyib",
+                    placeholder: gettext("Seçilməyib"),
                 });
                 Render.options(q('[data-wl-option="periods"]'), payload.periods, {
-                    placeholder: "Seçilməyib",
+                    placeholder: gettext("Seçilməyib"),
                 });
                 Render.options(q('[data-wl-option="specialties"]'), payload.specialties, {
-                    placeholder: "Seçilməyib",
+                    placeholder: gettext("Seçilməyib"),
                 });
                 Render.options(q('[data-wl-option="groups"]'), payload.groups, {});
             })
@@ -316,7 +333,7 @@
         EMSDelegate.on("click", "[data-wl-save-row]", function () {
             var host = root();
             if (!host || !STATE.task) {
-                showError(q("[data-wl-row-error]"), "Əvvəlcə tapşırıq yaradılmalıdır.");
+                showError(q("[data-wl-row-error]"), gettext("Əvvəlcə tapşırıq yaradılmalıdır."));
                 return;
             }
             var payload = formValues(q("[data-wl-row-form]"));
@@ -336,7 +353,7 @@
         EMSDelegate.on("click", "[data-wl-row-remove]", function (event, btn) {
             var host = root();
             if (!host || !STATE.task) return;
-            if (!window.confirm("Sətir silinsin?")) return;
+            if (!window.confirm(gettext("Sətir silinsin?"))) return;
             window.EMSCore.fetchJSON(host.dataset.deleteRowUrl, {
                 method: "POST",
                 data: { task_id: STATE.task.id, row_id: btn.dataset.rowId },
@@ -397,7 +414,7 @@
         EMSDelegate.on("click", "[data-wl-assign-remove]", function (event, btn) {
             var host = root();
             if (!host) return;
-            if (!window.confirm("Bölgü silinsin?")) return;
+            if (!window.confirm(gettext("Bölgü silinsin?"))) return;
             window.EMSCore.fetchJSON(host.dataset.unassignUrl, {
                 method: "POST",
                 data: { assignment_id: btn.dataset.assignmentId },
@@ -429,12 +446,16 @@
                     if (instance) instance.hide();
                     var sync = payload.sync || {};
                     window.alert(
-                        "Bölgü təsdiqləndi. Jurnal açılışı: " +
-                            (sync.created || 0) +
-                            " yeni, " +
-                            (sync.updated || 0) +
-                            " yeniləndi. Bildiriş: " +
-                            (payload.notified || 0)
+                        fmt(
+                            gettext(
+                                "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+                            ),
+                            {
+                                created: sync.created || 0,
+                                updated: sync.updated || 0,
+                                notified: payload.notified || 0,
+                            }
+                        )
                     );
                     loadRows();
                 })
@@ -474,7 +495,7 @@
                     if (!first || !form) {
                         showError(
                             q("[data-wl-row-error]"),
-                            "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+                            gettext("Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı.")
                         );
                         return;
                     }
@@ -488,11 +509,12 @@
                     if (creditsValue) creditsValue.value = first.credits_value || 0;
                     showError(
                         q("[data-wl-row-error]"),
-                        "Plandan " +
-                            payload.count +
-                            " təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: " +
-                            (first.suggested_total_hours || 0) +
-                            " saat)."
+                        fmt(
+                            gettext(
+                                "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+                            ),
+                            { count: payload.count, hours: first.suggested_total_hours || 0 }
+                        )
                     );
                 })
                 .catch(function (err) {
@@ -513,7 +535,10 @@
             node.classList.remove("is-empty");
             return;
         }
-        node.textContent = "Qalıq: " + info.remaining + " / " + info.total + " saat";
+        node.textContent = fmt(gettext("Qalıq: %(remaining)s / %(total)s saat"), {
+            remaining: info.remaining,
+            total: info.total,
+        });
         node.classList.toggle("is-empty", info.remaining <= 0);
     }
 
@@ -531,10 +556,10 @@
             .then(function (payload) {
                 var select = q("[data-wl-assign-teacher]");
                 if (!select) return;
-                var html = '<option value="">Vakant (müəllim təyin edilməyib)</option>';
+                var html = '<option value="">' + esc(gettext("Vakant (müəllim təyin edilməyib)")) + "</option>";
                 (payload.results || []).forEach(function (item) {
                     var suffix = item.current_hours != null ? " · " + item.current_hours + "s" : "";
-                    var mark = item.is_chair_member ? "" : " (kafedraya bağlanmamış)";
+                    var mark = item.is_chair_member ? "" : " " + gettext("(kafedraya bağlanmamış)");
                     html +=
                         '<option value="' +
                         esc(item.id) +

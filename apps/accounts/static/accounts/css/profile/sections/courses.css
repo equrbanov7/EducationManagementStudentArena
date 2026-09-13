@@ -94,6 +94,6 @@
 }
 
 .modern-course-card:hover .course-card-action {
-    color: var(--ems-warning-600);
+    color: var(--ems-warning-700);
     transform: translateX(4px);
 }

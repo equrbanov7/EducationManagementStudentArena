@@ -395,7 +395,7 @@
     border-radius: 6px;
 }
 .gh-new {
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
     font-weight: 600;
     background: var(--ems-success-100);
     padding: 1px 7px;

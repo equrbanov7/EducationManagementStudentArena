@@ -275,7 +275,10 @@ export function joinUrlLabel(rawUrl) {
 const logs = [];
 
 export function log(message) {
-    console.log("[HOST]", message);
+    // 2026-09-13 frontend auditi F13: `console.log` hər çağırışda, debug
+    // bayrağından ƏVVƏL yazılırdı — istehsal konsolunu zibilləyirdi. İndi yalnız
+    // «Debug» paneli açıq olanda (`debugOn`) konsola da yazılır.
+    if (debugOn) console.log("[HOST]", message);
     if (!UI.debugLog) return;
     logs.unshift(`> ${new Date().toLocaleTimeString()} ${message}`);
     if (logs.length > 100) logs.length = 100;

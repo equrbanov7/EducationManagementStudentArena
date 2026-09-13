@@ -88,7 +88,7 @@
 
 .result-outcome-badge--pass {
     background: var(--ems-success-100);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 
 .result-outcome-badge--fail,
@@ -162,7 +162,7 @@
 .result-letter--A,
 .result-letter--B {
     background: var(--ems-success-100);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 
 .result-letter--C,
@@ -332,7 +332,7 @@
 }
 
 .result-legacy-fact__review--verified {
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 
 /* Akademik kartda detal düyməsi yoxdur (rəsmi sənəd deyil) — gövdə altdan boşluq alsın. */

@@ -44,6 +44,13 @@ window.EMSReady(function () {
         };
 
         updateTimer();
-        setInterval(updateTimer, 1000);
+        // 2026-09-13 frontend auditi F12: bölmə AJAX ilə swap olunanda köhnə node DOM-dan çıxır, interval isə ömürlük detached node-a yazırdı — node ayrılan kimi interval dayandırılır.
+        const intervalId = setInterval(() => {
+            if (!row.isConnected) {
+                clearInterval(intervalId);
+                return;
+            }
+            updateTimer();
+        }, 1000);
     });
 });

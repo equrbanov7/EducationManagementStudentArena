@@ -3004,3 +3004,54 @@ msgstr "İşarələnmişləri ləğv et"
 
 msgid "İşarələnmişləri seç"
 msgstr "İşarələnmişləri seç"
+
+msgid "Əməliyyat alınmadı."
+msgstr "Əməliyyat alınmadı."
+
+msgid "Əvvəlcə tapşırıq yaradılmalıdır."
+msgstr "Əvvəlcə tapşırıq yaradılmalıdır."
+
+msgid "Sətir silinsin?"
+msgstr "Sətir silinsin?"
+
+msgid "Bölgü silinsin?"
+msgstr "Bölgü silinsin?"
+
+msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+msgstr "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+
+msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+msgstr "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+
+msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+
+msgid "Qalıq: %(remaining)s / %(total)s saat"
+msgstr "Qalıq: %(remaining)s / %(total)s saat"
+
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Vakant (müəllim təyin edilməyib)"
+
+msgid "(kafedraya bağlanmamış)"
+msgstr "(kafedraya bağlanmamış)"
+
+msgid "Bu sətirdə bölünəcək saat yoxdur."
+msgstr "Bu sətirdə bölünəcək saat yoxdur."
+
+msgid "Bölüşdür"
+msgstr "Bölüşdür"
+
+msgid "Bölgünü sil"
+msgstr "Bölgünü sil"
+
+msgid "Hələ bölgü yoxdur."
+msgstr "Hələ bölgü yoxdur."
+
+msgid "Jurnal açılışı"
+msgstr "Jurnal açılışı"
+
+msgid "Yarımçıq sətir"
+msgstr "Yarımçıq sətir"
+
+msgid "Aç"
+msgstr "Aç"

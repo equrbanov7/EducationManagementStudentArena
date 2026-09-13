@@ -256,7 +256,7 @@
     justify-content: center;
     border-radius: 10px;
     background-color: var(--ems-danger-100);
-    color: var(--ems-danger-500);
+    color: var(--ems-danger-600);
     text-decoration: none;
     transition: all 0.2s;
     font-size: 1.1rem;
@@ -334,7 +334,7 @@
 
 .btn-discard {
     background: white;
-    color: var(--ems-danger-500);
+    color: var(--ems-danger-600);
     border: 1px solid var(--ems-danger-200);
 }
 .btn-discard:hover {

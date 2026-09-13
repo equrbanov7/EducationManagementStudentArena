@@ -84,11 +84,54 @@ JS_CALL_RE = re.compile(r"\b(npgettext|pgettext|ngettext|gettext)\s*\(")
 # ── ümumi köməkçilər ─────────────────────────────────────────────────────────
 
 
-def _const_str(node):
-    """Yalnız STATİK string sabiti qaytar; dinamikdirsə ``None``."""
+def _const_str(node, constants=None):
+    """Yalnız STATİK string sabiti qaytar; dinamikdirsə ``None``.
+
+    2026-09-13 (frontend auditi F4): ``pgettext(_CTX, "…")`` — kontekst modul
+    səviyyəli sabit (``_CTX = "audit.section"``) olanda ``ast.Name`` gəlir.
+    ``xgettext`` bunu çıxara bilmir, skaner də yalnız literal qəbul edirdi →
+    613 (ctx, msgid) cütü heç bir kataloqa düşmədən qapı yaşıl qalırdı
+    (EN/RU/TR-də audit-log, groups-registry, org-members, registry, intake
+    səhifələri qarışıq dilli). İndi ``constants`` lüğəti (modul sabitləri,
+    bax ``_module_str_constants``) ilə ad → string həll olunur.
+    """
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
         return node.value
+    if constants and isinstance(node, ast.Name):
+        return constants.get(node.id)
     return None
+
+
+def _module_str_constants(tree):
+    """``NAME = "…"`` tapşırıqlarından ``{ad: string}`` lüğəti.
+
+    Əvvəl modul səviyyəsi (``tree.body``), sonra ``ast.walk`` ilə iç-içə
+    (sinif/funksiya) tapşırıqlar. Eyni ad FƏRQLİ string-lərlə təyin olunubsa
+    həll qeyri-müəyyəndir — lüğətdən çıxarılır (yanlış kontekst yazmaqdansa
+    çağırışı buraxmaq üstündür; f-string/dinamik dəyərlər onsuz da keçilir).
+    """
+    constants = {}
+    ambiguous = set()
+
+    def _record(target, value):
+        if not isinstance(target, ast.Name):
+            return
+        text = _const_str(value)
+        if text is None:
+            return
+        if target.id in constants and constants[target.id] != text:
+            ambiguous.add(target.id)
+        constants.setdefault(target.id, text)
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                _record(target, node.value)
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            _record(node.target, node.value)
+    for name in ambiguous:
+        constants.pop(name, None)
+    return constants
 
 
 def _func_name(node):
@@ -99,12 +142,17 @@ def _func_name(node):
     return None
 
 
-def _pair_from_call(name, args):
-    """``(msgctxt, msgid)`` — statik deyilsə ``None``."""
+def _pair_from_call(name, args, constants=None):
+    """``(msgctxt, msgid)`` — statik deyilsə ``None``.
+
+    ``constants`` — modul sabitləri; YALNIZ kontekst arqumenti üçün işlədilir
+    (msgid sabitdən gəlirsə o, adətən lüğət/enum açarıdır və ayrıca yol ilə
+    kataloqa düşür — burada dəyişiklik yoxdur).
+    """
     if name in CTX_FIRST:
         if len(args) < 2:
             return None
-        ctx, msg = _const_str(args[0]), _const_str(args[1])
+        ctx, msg = _const_str(args[0], constants), _const_str(args[1])
     else:
         if not args:
             return None
@@ -157,13 +205,14 @@ def python_msgids(source: str) -> set:
     except SyntaxError:
         return set()
     found = set()
+    constants = _module_str_constants(tree)
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
         name = _func_name(node.func)
         if name not in PY_FUNCS:
             continue
-        pair = _pair_from_call(name, node.args)
+        pair = _pair_from_call(name, node.args, constants)
         if pair and pair[1]:
             found.add(pair)
     return found

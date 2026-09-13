@@ -3019,3 +3019,54 @@ msgstr "Deselect the marked"
 
 msgid "İşarələnmişləri seç"
 msgstr "Select the marked"
+
+msgid "Əməliyyat alınmadı."
+msgstr "The operation failed."
+
+msgid "Əvvəlcə tapşırıq yaradılmalıdır."
+msgstr "A task must be created first."
+
+msgid "Sətir silinsin?"
+msgstr "Delete this row?"
+
+msgid "Bölgü silinsin?"
+msgstr "Delete this allocation?"
+
+msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+msgstr "Allocation confirmed. Journal offerings: %(created)s new, %(updated)s updated. Notified: %(notified)s"
+
+msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+msgstr "No active curriculum plan rows were found for this department's specialties."
+
+msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr "%(count)s suggestions found in the plan; the first one has been filled in. Hours are not stored in the curriculum plan — enter them manually (suggested: %(hours)s hours)."
+
+msgid "Qalıq: %(remaining)s / %(total)s saat"
+msgstr "Remaining: %(remaining)s / %(total)s hours"
+
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Vacant (no teacher assigned)"
+
+msgid "(kafedraya bağlanmamış)"
+msgstr "(not attached to the department)"
+
+msgid "Bu sətirdə bölünəcək saat yoxdur."
+msgstr "There are no hours to allocate in this row."
+
+msgid "Bölüşdür"
+msgstr "Allocate"
+
+msgid "Bölgünü sil"
+msgstr "Delete allocation"
+
+msgid "Hələ bölgü yoxdur."
+msgstr "No allocations yet."
+
+msgid "Jurnal açılışı"
+msgstr "Journal offerings"
+
+msgid "Yarımçıq sətir"
+msgstr "Incomplete rows"
+
+msgid "Aç"
+msgstr "Open"
