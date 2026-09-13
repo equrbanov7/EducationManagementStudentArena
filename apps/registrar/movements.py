@@ -290,8 +290,16 @@ def validate(record, *, kind, new_group=None, new_program=None, new_form=None, e
         )
     if rule.requires_group and new_group is None:
         raise MovementError("target_group_required", "Hədəf qrup seçilməlidir.")
-    if new_group is not None and record.group_id and new_group.pk == record.group_id:
+    if (
+        new_group is not None
+        and record.group_id
+        and new_group.pk == record.group_id
+        and rule.kind != MovementKind.REINSTATEMENT
+    ):
         # «229K → 229K» boş hərəkəti tarixçəyə yazılırdı (QA 2026-09-05 STUDENT-MGMT-06).
+        # Audit 2026-09-13 tests F-T2: BƏRPA istisnadır — xaric edilmiş tələbə
+        # köhnə (cari) qrupuna qaytarılır; qrup dəyişmir, status dəyişir
+        # (`_apply_group` eyni qrupda onsuz da no-op-dur).
         raise MovementError("same_group", "Tələbə onsuz da bu qrupdadır.", status=409)
     if rule.requires_program and new_program is None:
         raise MovementError("target_program_required", "Hədəf ixtisas seçilməlidir.")
