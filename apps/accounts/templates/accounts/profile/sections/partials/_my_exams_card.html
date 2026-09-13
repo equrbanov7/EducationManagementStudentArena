@@ -55,8 +55,10 @@ palitrası = EXAM_TYPE_META / EXAM_STATUS_META); `exam_type_meta` yalnız ikon �
   </div>
 
   <div class="tx-card-foot">
+    {% comment %}2026-09-13: yalnız GİRİŞ KODU mono/dashed çipdir (`--code`); icazə
+    növü etiketləri adi mətn çipidir — əvvəl hamısı mono+tracking ilə 3 sətrə qırılırdı.{% endcomment %}
     {% if exam.access_code %}
-      <span class="tx-codechip"><i class="fas fa-key" aria-hidden="true"></i> {{ exam.access_code }}</span>
+      <span class="tx-codechip tx-codechip--code"><i class="fas fa-key" aria-hidden="true"></i> {{ exam.access_code }}</span>
     {% elif exam.is_public %}
       <span class="tx-codechip tx-codechip--open"><i class="fas fa-globe" aria-hidden="true"></i> {% trans "Hamı üçün açıq" %}</span>
     {% elif exam.card_allowed_group_count %}

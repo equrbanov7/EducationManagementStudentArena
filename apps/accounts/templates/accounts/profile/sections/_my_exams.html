@@ -17,23 +17,26 @@
          data-tx-status="{{ my_exams_filter_status|default:'' }}">
 
   <div class="tx-shell">
-    <header class="tx-head tx-head--compact">
-      <div class="tx-head-main">
-        <p class="tx-sub">
+    {% comment %}2026-09-13 redizayn: başlıq `ems-header` ritmində — qabıq h1-i
+    (`#profileSectionTitle`) artıq verir, burada yalnız alt sətir + əməllər.
+    Əməl iyerarxiyası: «Yeni imtahan» tək primary, «Zibil qutusu» ghost.{% endcomment %}
+    <header class="tx-head ems-header">
+      <div class="ems-header__main">
+        <p class="tx-sub ems-header__subtitle">
           <b>{{ my_exams_count }}</b> {% trans "subtitle_exams" context "exams.dashboard" %}
           {% if my_exams_dashboard %}
             · <b>{{ my_exams_dashboard.status_counts.active }}</b> {% trans "subtitle_active" context "exams.dashboard" %}
           {% endif %}
         </p>
       </div>
-      <div class="tx-head-actions">
+      <div class="tx-head-actions ems-header__actions">
         <a href="{% url 'exams:deleted_exams_list' %}"
-           class="tx-btn tx-btn--ghost"
+           class="ems-btn ems-btn--ghost"
            title="{% trans 'trash_link' context 'profile.my_exams' %}">
           <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "trash_link" context "profile.my_exams" %}
         </a>
         <button type="button"
-                class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                class="ems-btn ems-btn--primary js-open-exam-form-modal"
                 data-exam-modal-mode="create"
                 data-exam-modal-url="{% url 'exams:create_exam' %}">
           <i class="fas fa-plus" aria-hidden="true"></i> {% trans "new_exam" context "profile.my_exams" %}
@@ -96,14 +99,14 @@
         {% if my_exams_search_query or my_exams_filter_type %}
           <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
           <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
-          <a href="{{ profile_base_url }}?section=my-exams" class="tx-btn tx-btn--ghost">
+          <a href="{{ profile_base_url }}?section=my-exams" class="ems-btn">
             <i class="fas fa-times" aria-hidden="true"></i> {% trans "clear_filters" context "profile.my_exams" %}
           </a>
         {% else %}
           <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
           <p>{% trans "empty_description" context "profile.my_exams" %}</p>
           <button type="button"
-                  class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                  class="ems-btn ems-btn--primary js-open-exam-form-modal"
                   data-exam-modal-mode="create"
                   data-exam-modal-url="{% url 'exams:create_exam' %}">
             <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_exam" context "profile.my_exams" %}
