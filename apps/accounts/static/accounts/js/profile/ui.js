@@ -15,16 +15,16 @@
             var icon = ctx.toggleBtn ? ctx.toggleBtn.querySelector("i") : null;
             var isCollapsed = ctx.sidebar.classList.contains("collapsed");
 
-            if (icon && ctx.toggleBtn) {
-                if (isCollapsed) {
-                    icon.classList.remove("fa-chevron-left");
-                    icon.classList.add("fa-chevron-right");
-                    ctx.toggleBtn.title = ctx.sidebarExpandTitle;
-                } else {
-                    icon.classList.remove("fa-chevron-right");
-                    icon.classList.add("fa-chevron-left");
-                    ctx.toggleBtn.title = ctx.sidebarCollapseTitle;
+            if (ctx.toggleBtn) {
+                if (icon) {
+                    icon.classList.toggle("fa-chevron-left", !isCollapsed);
+                    icon.classList.toggle("fa-chevron-right", isCollapsed);
                 }
+                ctx.toggleBtn.title = isCollapsed ? ctx.sidebarExpandTitle : ctx.sidebarCollapseTitle;
+                // A11y (Codex §19, 2026-09-13): ikon-düymənin adı və vəziyyəti
+                // ekran oxuyucuya da çatsın — `title` tək başına oxunmur.
+                ctx.toggleBtn.setAttribute("aria-label", ctx.toggleBtn.title);
+                ctx.toggleBtn.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
             }
 
             if (ctx.mobileSidebarTrigger) {
@@ -41,14 +41,58 @@
             document.body.classList.toggle("profile-sidebar-open-mobile", isMobileViewport() && !isCollapsed);
         }
 
-        function setSidebarCollapsed(isCollapsed) {
+        var SIDEBAR_COLLAPSED_KEY = "profileSidebarCollapsed";
+
+        function readPersistedSidebarCollapsed() {
+            try {
+                return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function writePersistedSidebarCollapsed(isCollapsed) {
+            try {
+                localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isCollapsed ? "true" : "false");
+            } catch (e) {
+                /* fail-soft: private mode / dolu kvota */
+            }
+        }
+
+        /* Codex audit §19 (2026-09-13): «İlk resize zamanı açıq sidebar».
+           Yaddaş (localStorage) YALNIZ desktop seçimini saxlayır. Mobil
+           off-canvas rejimində açıb-bağlamaq (trigger, backdrop, ESC, bölmə
+           keçidi) desktop seçimini əzməməlidir — əvvəllər mobildə «bağla»
+           `true` yazırdı və desktopa qayıdanda sidebar yığcam qalırdı. */
+        function setSidebarCollapsed(isCollapsed, options) {
             if (!ctx.sidebar) {
                 return;
             }
+            var persist = !(options && options.persist === false) && !isMobileViewport();
             ctx.sidebar.classList.toggle("collapsed", isCollapsed);
-            localStorage.setItem("profileSidebarCollapsed", isCollapsed ? "true" : "false");
+            if (persist) {
+                writePersistedSidebarCollapsed(isCollapsed);
+            }
             applySidebarCollapsedGroups(isCollapsed);
             syncSidebarToggleState();
+        }
+
+        /* Desktop ↔ mobil sərhədini keçəndə (matchMedia `change`):
+             • desktopdan mobilə: açıq sidebar overlay kimi məzmunu ÖRTMƏSİN —
+               off-canvas bağlanır, backdrop + body kilidi + aria-expanded
+               sinxron olur (əvvəllər yalnız `syncSidebarToggleState` çağırılırdı
+               və genişlənmiş sidebar backdrop ilə birlikdə açıq qalırdı);
+             • mobildən desktopa: yadda saxlanan yığcam/geniş seçim bərpa olunur.
+           Heç biri yaddaşa yazmır. */
+        function handleViewportChange() {
+            if (!ctx.sidebar) {
+                return;
+            }
+            if (isMobileViewport()) {
+                setSidebarCollapsed(true, { persist: false });
+                return;
+            }
+            setSidebarCollapsed(readPersistedSidebarCollapsed(), { persist: false });
         }
 
         /* ── Sidebar qrupları (nativ <details>) ──────────────────────────────
@@ -440,7 +484,7 @@
                 });
             }
 
-            if (localStorage.getItem("profileSidebarCollapsed") === "true") {
+            if (readPersistedSidebarCollapsed()) {
                 ctx.sidebar.classList.add("collapsed");
             }
             // Mobil görünüşdə ilk yükləmə: sidebar overlay kimi məzmunu örtməsin —
@@ -467,9 +511,9 @@
         }
 
         if (typeof ctx.mobileMediaQuery.addEventListener === "function") {
-            ctx.mobileMediaQuery.addEventListener("change", syncSidebarToggleState);
+            ctx.mobileMediaQuery.addEventListener("change", handleViewportChange);
         } else if (typeof ctx.mobileMediaQuery.addListener === "function") {
-            ctx.mobileMediaQuery.addListener(syncSidebarToggleState);
+            ctx.mobileMediaQuery.addListener(handleViewportChange);
         }
 
         if (backdrop) {

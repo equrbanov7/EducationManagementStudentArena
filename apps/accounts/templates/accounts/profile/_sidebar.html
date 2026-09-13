@@ -44,13 +44,17 @@ Qruplar (hər biri ayrı fayl — modul ölçü büdcəsi + məsuliyyət ayrım�
 <aside class="profile-sidebar" id="profileSidebar">
     <div class="sidebar-header">
         <h2 class="sidebar-title">{% trans "title" context "profile.sidebar" %}</h2>
+        {# A11y (Codex §19, 2026-09-13): ikon-düymə — ad + vəziyyət ekran oxuyucuya; JS (ui.js) sinxron saxlayır #}
         <button type="button"
                 class="sidebar-toggle"
                 id="sidebarToggle"
+                aria-controls="profileSidebar"
+                aria-expanded="true"
+                aria-label="{% trans 'toggle_close' context 'profile.sidebar' %}"
                 title="{% trans 'toggle_close' context 'profile.sidebar' %}"
                 data-title-expand="{% trans 'toggle_open' context 'profile.sidebar' %}"
                 data-title-collapse="{% trans 'toggle_close' context 'profile.sidebar' %}">
-            <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
         </button>
     </div>
 

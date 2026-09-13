@@ -53,7 +53,9 @@
     <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'css/legacy_mark.css' %}?v=20260901-notice">
-    <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260913-1">
+    {# A11y (Codex §19, 2026-09-13): «Əsas məzmuna keç» keçidi — hər iki bazada eyni fayl #}
+    <link rel="stylesheet" href="{% static 'css/skip_link.css' %}?v=20260913-1">
     {% if request.user.is_authenticated %}
     <link rel="stylesheet" href="{% static 'css/global_search.css' %}?v=20260910-1">
     {% endif %}
@@ -133,7 +135,8 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     {% endif %}
 
     {# MAIN CONTENT #}
-    <main id="main-content">
+    {# `tabindex="-1"`: skip-link fokusu məzmuna proqram yolu ilə aparsın (Codex §19) #}
+    <main id="main-content" tabindex="-1">
         {% block content %}{% endblock %}
     </main>
 

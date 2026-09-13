@@ -32,7 +32,7 @@
     </div>
     {% endif %}
 
-    <form method="post" class="auth-form" novalidate>
+    <form method="post" class="auth-form" novalidate data-clarity-mask="True">
       {% csrf_token %}
       <div class="auth-form-field">
         <label for="verify-code-input">{% trans "code_label" context "accounts.verify_code" %}</label>
@@ -43,7 +43,7 @@
       <button class="auth-submit-btn" type="submit">{% trans "submit_verify" context "accounts.verify_code" %}</button>
     </form>
 
-    <form method="post" action="{% url 'accounts:resend_code' %}" class="auth-form auth-form--secondary">
+    <form method="post" action="{% url 'accounts:resend_code' %}" class="auth-form auth-form--secondary" data-clarity-mask="True">
       {% csrf_token %}
       <button class="auth-link-btn" type="submit">{% trans "resend_code" context "accounts.verify_code" %}</button>
     </form>

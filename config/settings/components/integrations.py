@@ -50,6 +50,14 @@ CODING_RUN_MAX_CONCURRENT_PER_USER = os.getenv("CODING_RUN_MAX_CONCURRENT_PER_US
 # overridable so staging/production can use different Clarity projects.
 MICROSOFT_CLARITY_PROJECT_ID = os.getenv("MICROSOFT_CLARITY_PROJECT_ID", "x2xrg3vw2i").strip()
 
+# 2026-09-13 (Codex audit §11): Clarity session-replay AUTENTİFİKASİYALI
+# səhifələrdə (kabinet: tələbə PII, qiymətlər, sənədlər) susmaya görə
+# YÜKLƏNMİR — məxfilik üzrə standart təcrübə. Yalnız açıq (anonim) səhifələr
+# izlənir. Bu bayraq açıq şəkildə `true` olanda kabinet də izlənir (deployment
+# qərarı; saxlanma siyasəti və maskalama Clarity layihəsində ayrıca yoxlanmalıdır).
+# Şablon `microsoft_clarity_enabled` bayrağına baxır (`core.context_processors`).
+MICROSOFT_CLARITY_AUTHENTICATED = _env_bool_setting("MICROSOFT_CLARITY_AUTHENTICATED", False)
+
 MICROSOFT_CLARITY_SCRIPT_SRC = (
     "https://www.clarity.ms",
     "https://*.clarity.ms",

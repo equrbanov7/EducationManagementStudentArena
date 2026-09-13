@@ -95,7 +95,7 @@
                         {% trans "Formadakı bütün məlumatlar konfidensial saxlanılır." %}
                     </p>
 
-                    <form method="post" novalidate class="ems-contact__form">
+                    <form method="post" novalidate class="ems-contact__form" data-clarity-mask="True">
                         {% csrf_token %}
 
                         {# Honeypot — visually & semantically hidden from real users #}
