@@ -29,6 +29,7 @@ Yoxlanan meyarlar
     python scripts/check_i18n_catalogs.py            # yoxla (CI)
     python scripts/check_i18n_catalogs.py --update   # baseline-i sıx
     python scripts/check_i18n_catalogs.py --report   # detallı hesabat
+    python scripts/check_i18n_catalogs.py --list django/az   # bir kataloqun TAM borc siyahıları (JSON)
 """
 
 from __future__ import annotations
@@ -102,6 +103,10 @@ def _measure(domain: str) -> dict:
 
     metrics: dict[str, dict] = {}
     details: dict[str, dict] = {}
+    # 2026-09-13 (Codex audit P2-06): `details` yalnız ilk 20 nümunəni saxlayır,
+    # borcu BAĞLAMAQ üçün isə hər girişi kəsilməmiş görmək lazımdır. `full`
+    # yalnız `--list` diaqnostikası üçündür — qapı semantikasına toxunmur.
+    full: dict[str, dict] = {}
     for lang in LOCALES:
         entries = catalogs[lang]
         missing = sorted(f"{c}|{m}"[:120] for c, m in (source_keys - set(entries)))
@@ -151,6 +156,14 @@ def _measure(domain: str) -> dict:
             "bad_placeholder": [f"{c}|{m}"[:120] for c, m in bad_placeholder[:20]],
             "raw_key_leak": [f"{c}|{m}"[:120] for c, m in raw_keys[:20]],
         }
+        full[lang] = {
+            "missing_vs_source": sorted(source_keys - set(entries)),
+            "extra_vs_source": sorted(set(entries) - source_keys),
+            "untranslated": sorted(untranslated),
+            "identity": sorted(identity),
+            "bad_placeholder": sorted(bad_placeholder),
+            "raw_key_leak": sorted(raw_keys),
+        }
 
     # `source_missing` DİLƏ görə deyil, DOMENƏ görə ölçülür (mətnin kodda olub
     # kataloqda olmaması dildən asılı deyil). Baseline sxemini dəyişməmək üçün
@@ -161,8 +174,9 @@ def _measure(domain: str) -> dict:
         gaps = sorted(source.get(domain, set()) - source_keys)
         metrics[SOURCE_LANG]["source_missing"] = len(gaps)
         details[SOURCE_LANG]["source_missing"] = [f"{c}|{m}"[:120] for c, m in gaps[:20]]
+        full[SOURCE_LANG]["source_missing"] = gaps
 
-    return {"metrics": metrics, "details": details}
+    return {"metrics": metrics, "details": details, "full": full}
 
 
 #: Bu ölçülər ARTA BİLMƏZ (ratchet). Azalma həmişə qəbul olunur.
@@ -223,6 +237,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="EMSArena i18n kataloq qapısı")
     parser.add_argument("--update", action="store_true", help="baseline-i cari vəziyyətlə yenilə")
     parser.add_argument("--report", action="store_true", help="detallı hesabat göstər")
+    parser.add_argument(
+        "--list",
+        metavar="DOMEN/DİL",
+        help="bir kataloqun TAM borc siyahılarını JSON kimi çap et (məs. django/az); yalnız diaqnostika",
+    )
     args = parser.parse_args()
 
     try:
@@ -232,6 +251,15 @@ def main() -> int:
         return 0
 
     current = {domain: _measure(domain) for domain in CATALOGS}
+
+    if args.list:
+        # Yalnız oxuyur: hər ölçü üçün `[msgctxt, msgid]` cütlərinin tam siyahısı.
+        domain, _, lang = args.list.partition("/")
+        if domain not in CATALOGS or lang not in LOCALES:
+            print(f"❌ --list formatı DOMEN/DİL-dir: {'|'.join(CATALOGS)} / {'|'.join(LOCALES)}")
+            return 2
+        print(json.dumps(current[domain]["full"][lang], ensure_ascii=False, indent=1))
+        return 0
 
     if args.update:
         # Skan işləməyəndə baseline-i yazmaq `source_missing`-i sükutla SİLƏRDİ

@@ -6,35 +6,35 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "source_missing": 169,
-   "total": 13612,
+   "source_missing": 0,
+   "total": 13718,
    "untranslated": 0
   },
   "en": {
    "bad_placeholder": 0,
-   "extra_vs_source": 24,
-   "identity": 240,
+   "extra_vs_source": 23,
+   "identity": 69,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13636,
+   "total": 13741,
    "untranslated": 0
   },
   "ru": {
    "bad_placeholder": 0,
-   "extra_vs_source": 24,
-   "identity": 125,
+   "extra_vs_source": 23,
+   "identity": 19,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13636,
+   "total": 13741,
    "untranslated": 0
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 1,
-   "identity": 339,
+   "identity": 225,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13613,
+   "total": 13719,
    "untranslated": 0
   }
  },
@@ -45,17 +45,17 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "source_missing": 52,
-   "total": 722,
+   "source_missing": 0,
+   "total": 774,
    "untranslated": 0
   },
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 0,
-   "identity": 9,
+   "identity": 4,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 722,
+   "total": 774,
    "untranslated": 0
   },
   "ru": {
@@ -64,16 +64,16 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 722,
+   "total": 774,
    "untranslated": 0
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 0,
-   "identity": 106,
+   "identity": 15,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 722,
+   "total": 774,
    "untranslated": 0
   }
  }
