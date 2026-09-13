@@ -9,6 +9,7 @@ effective/grantable permissions. Keep tenant and permission checks strict.
 from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
+from .rbac_memberships import _bound_active_org_memberships, _invalidate_actor_permissions_cache  # noqa: F401
 from .rbac_sections import apply_permission_section_gates
 from .rbac_university_sections import alumni_sections, university_role_sections
 from .tenant import _bind_active_role_context
@@ -150,7 +151,11 @@ def _collect_actor_permissions(user, organization, *, request=None):
     effective_permissions = set()
     grantable_permissions = set()
 
-    memberships = Membership.objects.filter(user=user, organization=organization, is_active=True).select_related("role")
+    memberships = _bound_active_org_memberships(user, org_id)
+    if memberships is None:
+        memberships = Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
+            "role"
+        )
     for membership in memberships:
         for permission in membership.role.permissions or []:
             if permission.startswith("grant:"):
@@ -164,21 +169,6 @@ def _collect_actor_permissions(user, organization, *, request=None):
             cache[cache_key] = (set(effective_permissions), set(grantable_permissions))
 
     return effective_permissions, grantable_permissions
-
-
-def _invalidate_actor_permissions_cache(user) -> None:
-    """Drop the ``_actor_perms_cache`` memoized on ``user`` by ``_collect_actor_permissions``.
-
-    Call this immediately after a code path mutates ``user``'s Membership/Role
-    rows (role assignment, membership create/update) so a later permission
-    read in the SAME request never returns pre-mutation data. A stale
-    permission cache is a security bug, not a perf detail.
-    """
-    try:
-        if hasattr(user, "_actor_perms_cache"):
-            del user._actor_perms_cache
-    except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
-        pass
 
 
 def _role_capabilities(user, profile):

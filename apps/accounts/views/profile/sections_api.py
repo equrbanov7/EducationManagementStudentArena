@@ -36,13 +36,12 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
-from .._helpers import _get_active_organization, _role_capabilities
+from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +320,8 @@ def _ensure_section_allowed(request: HttpRequest, section: str):
         return None
     if section not in AJAX_SAFE_SECTIONS:
         return None
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    # 2026-09-13 (audit §14/§21): profil middleware keşindən (bax `_load_user_profile`).
+    profile, _ = _load_user_profile(request.user)
     capabilities = _role_capabilities(request.user, profile)
     if section not in capabilities["allowed_sections"]:
         return None
@@ -445,7 +445,7 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     P3-extra — `@never_cache` (HTTP) qalır; badge dəyərləri Redis-də ~45s
     eventual-consistent saxlanılır (öz datası, kiçik staleness məqbul).
     """
-    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    profile, _created = _load_user_profile(request.user)
     capabilities = _role_capabilities(request.user, profile)
 
     payload: dict[str, int] = {}
