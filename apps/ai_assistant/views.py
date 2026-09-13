@@ -23,6 +23,7 @@ from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
 from .context_builder import build_user_context
 from .gemini_client import ask_gemini
 from .models import AIAssistantLog
+from .retention import truncate_for_log
 from .security import check_message_safety, sanitize_ai_response
 
 logger = logging.getLogger(__name__)
@@ -99,7 +100,7 @@ def chat_view(request):
             user=user,
             organization=organization,
             memberships=memberships,
-            prompt=message[:500],
+            prompt=message,
             status=AIAssistantLog.Status.BLOCKED,
             block_reason=block_reason,
         )
@@ -118,7 +119,7 @@ def chat_view(request):
             user=user,
             organization=organization,
             memberships=memberships,
-            prompt=message[:500],
+            prompt=message,
             status=AIAssistantLog.Status.RATE_LIMITED,
         )
         return JsonResponse(
@@ -149,7 +150,7 @@ def chat_view(request):
             user=user,
             organization=organization,
             memberships=memberships,
-            prompt=message[:500],
+            prompt=message,
             status=AIAssistantLog.Status.ERROR,
             response_summary=result.get("error", "")[:500],
         )
@@ -177,7 +178,7 @@ def chat_view(request):
         user=user,
         organization=organization,
         memberships=memberships,
-        prompt=message[:500],
+        prompt=message,
         status=AIAssistantLog.Status.SUCCESS,
         response_summary=answer[:500],
         block_reason="response_redacted" if was_redacted else "",
@@ -211,7 +212,14 @@ def _log_request(
     prompt_tokens: int = 0,
     response_tokens: int = 0,
 ):
-    """Write an audit log entry for this AI assistant interaction."""
+    """Write an audit log entry for this AI assistant interaction.
+
+    2026-09-14 (audit F-08): saxlanan prompt/cavab ``AI_ASSISTANT_LOG_MAX_CHARS``
+    ilə kəsilir (tək yerdə); sətirlər ``AI_ASSISTANT_LOG_RETENTION_DAYS``-dən
+    sonra ``ai_assistant.purge_logs`` beat işi ilə silinir.
+    """
+    prompt = truncate_for_log(prompt)
+    response_summary = truncate_for_log(response_summary, limit=500)
     role_names = []
     for m in memberships or []:
         role = getattr(m, "role", None)

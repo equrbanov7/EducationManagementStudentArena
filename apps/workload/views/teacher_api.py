@@ -9,6 +9,8 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from core.export_safety import sheet_append
+
 from ..constants import PERM_VIEW
 from ..services import teacher_workload_rows, teacher_workload_summary, teacher_years
 from ._base import active_organization, actor_for, error, no_org
@@ -70,13 +72,16 @@ def my_export(request):
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = "Dərs yükü"
-    sheet.append(list(_EXPORT_HEADERS))
+    # 2026-09-14 (audit F-07): fənn/qrup adları mətn xanalarıdır → `sheet_append`
+    # formula-bənzər dəyərləri neytrallaşdırır; saat sütunu ədəd olaraq qalır.
+    sheet_append(sheet, list(_EXPORT_HEADERS))
     for cell in sheet[1]:
         cell.font = Font(bold=True)
     total = 0
     for row in rows:
         total += int(row["hours"] or 0)
-        sheet.append(
+        sheet_append(
+            sheet,
             [
                 row["academic_year"],
                 row["season_label"],
@@ -87,9 +92,9 @@ def my_export(request):
                 row["education_form"],
                 row["degree_level"],
                 "Bəli" if row["is_hourly_paid"] else "",
-            ]
+            ],
         )
-    sheet.append(["", "", "", "", "CƏMİ", total, "", "", ""])
+    sheet_append(sheet, ["", "", "", "", "CƏMİ", total, "", "", ""])
     sheet[sheet.max_row][4].font = Font(bold=True)
     sheet[sheet.max_row][5].font = Font(bold=True)
     for column, width in zip("ABCDEFGHI", (12, 10, 40, 26, 20, 8, 12, 12, 12)):

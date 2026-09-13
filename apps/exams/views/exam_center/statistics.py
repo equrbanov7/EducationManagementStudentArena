@@ -22,6 +22,7 @@ from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import is_exam_center_user
 from apps.exams.services.result_calculation import attach_test_result_summaries
 from apps.exams.services.supervision import attach_attempt_interventions
+from core.export_safety import sheet_cell
 
 from ._shared import supervisor_org_or_403
 
@@ -318,13 +319,15 @@ def exam_center_stats_export(request):
     ws = wb.active
     ws.title = "Statistika"
     for col, (title, _key) in enumerate(columns, start=1):
-        cell = ws.cell(row=1, column=col, value=title)
+        cell = sheet_cell(ws, row=1, column=col, value=title)
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="2563EB")
+    # 2026-09-14 (audit F-07): tələbə/qrup/imtahan adı və uzaqlaşdırma səbəbi
+    # istifadəçi mətnidir → formula neytrallaşdırması (`sheet_cell`).
     for r, a in enumerate(attempts, start=2):
         row = _row(a)
         for c, (_title, key) in enumerate(columns, start=1):
-            ws.cell(row=r, column=c, value=row[key])
+            sheet_cell(ws, row=r, column=c, value=row[key])
     for col in range(1, len(columns) + 1):
         ws.column_dimensions[get_column_letter(col)].width = 22
 

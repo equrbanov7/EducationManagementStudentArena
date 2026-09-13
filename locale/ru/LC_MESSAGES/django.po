@@ -68440,3 +68440,11 @@ msgstr "Код сотрудника"
 msgctxt "teacher_intake"
 msgid "Şablon"
 msgstr "Шаблон"
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil."
+msgstr "Содержимое файла не соответствует заявленному формату изображения."
+
+msgctxt "upload.security.error"
+msgid "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil."
+msgstr "Содержимое файла не соответствует заявленному типу файла."
