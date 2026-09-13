@@ -58,6 +58,11 @@ APP_REPLICAS="${APP_REPLICAS:-$(dotenv_value APP_REPLICAS)}"
 APP_REPLICAS="${APP_REPLICAS:-8}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-$(dotenv_value CELERY_REPLICAS)}"
 CELERY_REPLICAS="${CELERY_REPLICAS:-2}"
+# P1-08 (Codex audit, 2026-09-13): image daxilində `manage.py check --deploy`
+# preflight-ının səviyyəsi. ERROR → xətada deploy dayanır, xəbərdarlıqlar
+# (security.W004/W008/W012/W016 …) ucadan çap olunur; WARNING → onlar da
+# dayandırır (CI-nin _security.yml qapısı ilə eyni sərtlik).
+DEPLOY_CHECK_FAIL_LEVEL="${DEPLOY_CHECK_FAIL_LEVEL:-ERROR}"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
 # files owned by a different user (e.g. a previous root deploy) and failed with
@@ -380,6 +385,120 @@ app_replicas_ready() {
   [ "$total" -ge "$APP_REPLICAS" ] && [ "$ready" -eq "$total" ]
 }
 
+worker_services_ready() {
+  # §22 (Codex audit, 2026-09-13): celery_worker / celery_worker_heavy /
+  # celery_beat artıq compose-da healthcheck daşıyır — deploy qapısı yalnız
+  # app replikalarını yox, onları da gözləyir. Gözlənilən say: worker →
+  # CELERY_REPLICAS (0 ola bilər), heavy və beat → 1. Healthcheck-siz
+  # konteyner (məs. override ilə söndürülübsə) «running» ilə keçir.
+  local spec service expected ids id status total=0 ready=0 summary=""
+  for spec in "celery_worker:${CELERY_REPLICAS}" "celery_worker_heavy:1" "celery_beat:1"; do
+    service="${spec%%:*}"
+    expected="${spec##*:}"
+    mapfile -t ids < <(docker compose -f "$COMPOSE_FILE" ps -q "$service" 2>/dev/null || true)
+    local seen=0
+    for id in "${ids[@]}"; do
+      [ -n "$id" ] || continue
+      status="$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}nohc:{{.State.Status}}{{end}}' "$id" 2>/dev/null || true)"
+      seen=$((seen + 1))
+      total=$((total + 1))
+      summary="${summary}${service}/${id:0:12}:${status:-unknown} "
+      if [ "$status" = "healthy" ] || [ "$status" = "nohc:running" ]; then
+        ready=$((ready + 1))
+      fi
+    done
+    if [ "$seen" -lt "$expected" ]; then
+      summary="${summary}${service}:${seen}/${expected}-present "
+      total=$((total + expected - seen))
+    fi
+  done
+
+  WORKER_HEALTH_SUMMARY="${ready}/${total} worker container(s) healthy (${summary:-none})"
+  [ "$ready" -eq "$total" ]
+}
+
+resolve_build_git_sha() {
+  # P1-07 (Codex audit, 2026-09-13): image-ə yazılacaq mənbə commit-i.
+  # Üstünlük: açıq BUILD_GIT_SHA → GITHUB_SHA (CI deploy job-u; kod məhz bu
+  # commit-dən rsync olunub) → APP_DIR-in öz .git-i (əl ilə klon) → unknown.
+  # APP_DIR-in .git-i yoxdursa `git -C` işlədilmir: valideyn qovluqdakı
+  # yad repo-nun HEAD-i götürülməsin.
+  local sha="${BUILD_GIT_SHA:-}"
+  if [ -z "$sha" ]; then
+    sha="${GITHUB_SHA:-}"
+  fi
+  if [ -z "$sha" ] && [ -d "${APP_DIR}/.git" ] && command -v git >/dev/null 2>&1; then
+    sha="$(git -C "$APP_DIR" rev-parse HEAD 2>/dev/null || true)"
+  fi
+  if ! [[ "$sha" =~ ^[0-9a-f]{7,64}$ ]]; then
+    sha="unknown"
+  fi
+  BUILD_GIT_SHA="$sha"
+  export BUILD_GIT_SHA
+  echo "Build source commit: ${BUILD_GIT_SHA}"
+}
+
+preflight_django_deploy_check() {
+  # P1-08 (Codex audit, 2026-09-13): fail-closed deploy preflight. Köhnə
+  # axında TLS bayraqları söndürülmüş .env yalnız konteyner qalxanda
+  # (production.py ImproperlyConfigured) üzə çıxırdı — və INSECURE_TRANSPORT_OK=1
+  # onu da susdururdu. İndi (1) prod hostun .env-ində INSECURE_TRANSPORT_OK
+  # doğru dəyərlə OLA BİLMƏZ (o yalnız CI-nin düz-HTTP prod-smoke yığını
+  # üçündür); (2) qurulmuş image daxilində, real .env ilə `manage.py check
+  # --deploy` işlədilir — xəta → deploy dayanır, xəbərdarlıqlar ucadan çıxır.
+  local insecure_ok report
+  insecure_ok="$(dotenv_value INSECURE_TRANSPORT_OK | tr '[:upper:]' '[:lower:]')"
+  case "$insecure_ok" in
+    1|true|yes|on)
+      echo "INSECURE_TRANSPORT_OK=${insecure_ok} is set in ${APP_DIR}/.env." >&2
+      echo "That flag exists only for the plain-HTTP CI smoke stack; a production host must serve HTTPS" >&2
+      echo "with SECURE_SSL_REDIRECT / SESSION_COOKIE_SECURE / CSRF_COOKIE_SECURE enabled. Remove the flag and redeploy." >&2
+      exit 1
+      ;;
+  esac
+
+  report="${DEPLOY_TMP}/django-check-deploy.log"
+  echo "Running Django deployment preflight (manage.py check --deploy --fail-level ${DEPLOY_CHECK_FAIL_LEVEL}) inside the built image..."
+  if ! docker compose -f "$COMPOSE_FILE" run --rm -T -e RUN_RELEASE_ON_START=false app \
+      python manage.py check --deploy --fail-level "$DEPLOY_CHECK_FAIL_LEVEL" >"$report" 2>&1; then
+    cat "$report" >&2
+    echo "Django deployment preflight FAILED (fail level ${DEPLOY_CHECK_FAIL_LEVEL}); nothing was migrated or restarted." >&2
+    exit 1
+  fi
+
+  if grep -Eq '\([A-Za-z_.]+\.W[0-9]+\)' "$report"; then
+    echo "==================== DJANGO DEPLOY CHECK WARNINGS ====================" >&2
+    grep -E '\([A-Za-z_.]+\.W[0-9]+\)' "$report" >&2
+    echo "Deploy continues (DEPLOY_CHECK_FAIL_LEVEL=${DEPLOY_CHECK_FAIL_LEVEL}); set DEPLOY_CHECK_FAIL_LEVEL=WARNING to block on these." >&2
+    echo "======================================================================" >&2
+  else
+    echo "Django deployment preflight passed with no warnings."
+  fi
+}
+
+verify_running_build_sha() {
+  # P1-07 (Codex audit, 2026-09-13): /health/ `build.sha` bu deploy-un
+  # qurduğu commit ilə eyni olmalıdır — fərq varsa nginx hələ köhnə image-in
+  # replikasına yönləndirir və ya `APP_IMAGE` köhnə teqə baxır (image drift).
+  local running_sha
+  if [ "$BUILD_GIT_SHA" = "unknown" ]; then
+    echo "BUILD_GIT_SHA is unknown; skipping image drift verification." >&2
+    return 0
+  fi
+  if command -v python3 >/dev/null 2>&1; then
+    running_sha="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print((d.get("build") or {}).get("sha") or "missing")' "$HEALTH_JSON" 2>/dev/null || echo unreadable)"
+  else
+    running_sha="$(grep -Eo '"sha": *"[^"]*"' "$HEALTH_JSON" | head -n1 | sed -E 's/.*"sha": *"([^"]*)"/\1/')"
+    running_sha="${running_sha:-missing}"
+  fi
+  if [ "$running_sha" != "$BUILD_GIT_SHA" ]; then
+    echo "Image drift detected: /health/ reports build.sha=${running_sha}, but this deploy built ${BUILD_GIT_SHA}." >&2
+    docker compose -f "$COMPOSE_FILE" ps >&2 || true
+    exit 1
+  fi
+  echo "Running image verified: build.sha=${running_sha}."
+}
+
 docker_deploy() {
   if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Missing ${APP_DIR}/${COMPOSE_FILE}." >&2
@@ -399,9 +518,12 @@ docker_deploy() {
   validate_origin_cert
   remove_legacy_edge_firewall
 
+  resolve_build_git_sha
   docker compose -f "$COMPOSE_FILE" config >"$COMPOSE_CONFIG"
   docker compose -f "$COMPOSE_FILE" build
   docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer
+  # P1-08: konfiqurasiya xətası miqrasiyadan və restart-dan ƏVVƏL tutulur.
+  preflight_django_deploy_check
   docker compose -f "$COMPOSE_FILE" run --rm -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
   RUN_RELEASE_ON_START=false docker compose -f "$COMPOSE_FILE" up -d --remove-orphans \
     --scale app="$APP_REPLICAS" \
@@ -416,19 +538,20 @@ docker_deploy() {
   fi
 
   while true; do
-    if app_replicas_ready; then
+    # §22: app replikaları + celery worker/heavy/beat healthcheck-ləri birlikdə.
+    if app_replicas_ready && worker_services_ready; then
       break
     fi
-    health_status="$APP_HEALTH_SUMMARY"
+    health_status="${APP_HEALTH_SUMMARY}; ${WORKER_HEALTH_SUMMARY:-workers: not checked yet}"
 
     if [ "$attempt" -ge "$max_attempts" ]; then
-      echo "App replicas did not become healthy within ${DEPLOY_TIMEOUT_SECONDS}s. Last status: ${health_status}" >&2
+      echo "App/worker containers did not become healthy within ${DEPLOY_TIMEOUT_SECONDS}s. Last status: ${health_status}" >&2
       docker compose -f "$COMPOSE_FILE" ps >&2 || true
-      docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx >&2 || true
+      docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx celery_worker celery_worker_heavy celery_beat >&2 || true
       exit 1
     fi
 
-    echo "Waiting for app replica health (${attempt}/${max_attempts})... ${health_status:-unknown}"
+    echo "Waiting for app/worker health (${attempt}/${max_attempts})... ${health_status:-unknown}"
     sleep 5
     attempt=$((attempt + 1))
   done
@@ -448,6 +571,8 @@ docker_deploy() {
     docker compose -f "$COMPOSE_FILE" logs --tail=200 app nginx >&2 || true
     exit 1
   }
+
+  verify_running_build_sha
 
   docker compose -f "$COMPOSE_FILE" ps
 }

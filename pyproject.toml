@@ -46,6 +46,12 @@ markers = [
     #   Skip these:      pytest -m "not postgres"
     "postgres: test requires a PostgreSQL database (RLS / DB-engine specific)",
     "mariadb: test requires a disposable MariaDB instance on loopback",
+    # §7 (Codex audit, 2026-09-13): `@pytest.mark.timeout(...)` işarəsini
+    # pytest-timeout plugin-i qeydə alır (requirements/test.txt, CI onu
+    # quraşdırır). Plugin olmayan mühitdə (məs. lokal venv) işarə qeydsiz
+    # qalır və PytestUnknownMarkWarning çıxırdı; burada da qeyd edilir ki,
+    # xəbərdarlıq itsin — plugin varsa eyni ad təkrar qeydə alınır, ziyansız.
+    "timeout(seconds): per-test time limit (enforced only when pytest-timeout is installed)",
 ]
 
 # ── Coverage measurement (FAZA 11) ─────────────────────────────────────────
