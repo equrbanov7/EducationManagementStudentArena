@@ -31,9 +31,10 @@ class IktRehberRoleDefinitionTest(SimpleTestCase):
         from apps.organizations.default_roles_university import UNIVERSITY_ROLES
 
         role = next(item for item in UNIVERSITY_ROLES if item["name"] == "ikt_rehber")
-        self.assertIn(CORRECT_PERMISSION, role["permissions"])
-        # İcazə redaktorunu işlədə bilməsi üçün `role.*` da olmalıdır.
-        self.assertIn("role.*", role["permissions"])
+        # 2026-09-14: RİM tam wildcard (`*`) — `journal.correct` və `role.*` daxildir.
+        permissions = role["permissions"]
+        self.assertTrue(CORRECT_PERMISSION in permissions or "*" in permissions)
+        self.assertTrue("role.*" in permissions or "*" in permissions)
 
     def test_seed_migration_carries_journal_correct(self):
         """Mövcud universitetlərə geriyə-doldurma da eyni açarı daşıyır."""
