@@ -255,6 +255,16 @@ class DebugEnvParsingTest(TestCase):
 class ProductionAdminAllowlistSettingsTest(TestCase):
     """Guard production imports so an empty admin allowlist stays supported."""
 
+    def test_admin_2fa_can_only_be_disabled_with_explicit_ack(self):
+        """Sahibin qərarı 2026-09-15: OTP-ni söndürmək mümkündür, amma yalnız ACK ilə."""
+        with self.assertRaises(ImproperlyConfigured):
+            self._load_production_settings(ADMIN_2FA_REQUIRED="False")
+        settings_module = self._load_production_settings(
+            ADMIN_2FA_REQUIRED="False", ADMIN_2FA_DISABLE_ACK="I_UNDERSTAND"
+        )
+        self.assertFalse(settings_module.ADMIN_2FA_REQUIRED)
+        self.assertTrue(self._load_production_settings(ADMIN_2FA_REQUIRED="True").ADMIN_2FA_REQUIRED)
+
     @staticmethod
     def _load_production_settings(**env_overrides):
         module_name = "config.settings.production"
