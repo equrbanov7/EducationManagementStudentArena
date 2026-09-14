@@ -181,7 +181,7 @@ sual» yapışırdı); sonluq `*` markeri (`B) iki*`, `B) iki *`) `*B)` ilə ekv
 
 ## 7. Məlum məhdudiyyətlər (2026-09-14)
 
-- Pano (clipboard) ilə şəkil yapışdırma iş masasında **yoxdur** — yalnız fayl yükləmə. — **2026-09-14 dalğa 8-də əlavə edildi:** bank toplu əlavədə panodan (Ctrl/Cmd+V) və sürüklə-burax ilə şəkil yapışdırma `[[img:N]]` markeri ilə (eyni validasiya, ≤ 12 MB, ≤ 2000 px, EXIF silinir).
+- Pano (clipboard) ilə şəkil yapışdırma iş masasında **yoxdur** — yalnız fayl yükləmə. — **2026-09-14 dalğa 8-də əlavə edildi:** bank toplu əlavədə panodan (Ctrl/Cmd+V) və sürüklə-burax ilə şəkil yapışdırma `[[img:N]]` markeri ilə (eyni validasiya, ≤ 12 MB, ≤ 2000 px, EXIF silinir). **2026-09-14 səhər:** eyni qol imtahan dil menecerində və kafedra göndərişi yarat/redaktə səhifələrində də işləyir (`apps/exams/views/teacher/workbench_paste.py`).
 - PDF-də çox sütunlu səhifə fərz edilmir (bölgə qaydası tək sütunludur).
 - OMML-dən LaTeX-ə çevirmə tam deyil — naməlum qovşaqlar mətn kimi qalır və nişanla
   göstərilir; müəllim yadda saxlamazdan əvvəl yoxlamalıdır.
