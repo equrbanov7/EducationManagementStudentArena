@@ -106,9 +106,9 @@ _PAGE_CONTEXT_MAP = [
     (
         r"/exams/groups/?$",
         {
-            "name": "İmtahan Qrupları / Exam Groups",
-            "description": "Manage exam groups for organizing and assigning exams.",
-            "hints": "Teachers can create exam groups, add students, assign exams to groups, and track group performance.",
+            "name": "İmtahan Qrupları / Exam Groups (köhnə kohortlar)",
+            "description": "Legacy exam cohorts; exams are now assigned to registry groups (Qruplar reyestri) in the exam wizard.",
+            "hints": "Point users to the exam wizard's registry-group picker; this page only matters for organisations that still keep legacy cohorts.",
         },
     ),
     (
@@ -293,7 +293,9 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
     is_teacher = _has_teacher_role(memberships)
     if is_teacher:
         lines.append("- Pending exam reviews: /exams/pending-work/")
-        lines.append("- Exam groups: /exams/groups/")
+        # 2026-09-14: imtahanlar reyestr qruplarına təyin olunur; köhnə kohort səhifəsi
+        # yalnız kohortu olan tenantlar üçündür — köməkçi reyestrə yönləndirir.
+        lines.append("- Groups registry (exam assignment via wizard): /accounts/profile/?section=groups-registry")
 
     # Superadmin
     if is_superadmin_user(user):
