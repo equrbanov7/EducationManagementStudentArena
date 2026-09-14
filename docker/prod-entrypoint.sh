@@ -22,10 +22,19 @@ if [ -n "${PROMETHEUS_MULTIPROC_DIR:-}" ]; then
   mkdir -p "$PROMETHEUS_MULTIPROC_DIR"
 fi
 
+# 2026-09-14 infra auditi P3-12: `--proxy-headers` ilə Daphne X-Forwarded-For /
+# X-Forwarded-Proto başlıqlarından scope["client"] və scope["scheme"] qurur —
+# WS consumer-ləri (məs. live_exam `_get_scope_ip` rate-limit kimliyi) nginx-in
+# IP-si əvəzinə real müştəri IP-sini görür. Təhlükəsizdir, çünki nginx XFF-i
+# `$remote_addr` ilə OVERWRITE edir (append yox — tests/test_proxy_trust_
+# configuration.py) və :8000 yalnız docker şəbəkəsindən əlçatandır; Daphne
+# vergüllü siyahının İLK elementini götürür. Bax docs/operations/deployment.md
+# «Daphne proxy headers».
 echo "Starting Daphne ASGI server…"
 exec daphne \
   -b 0.0.0.0 \
   -p 8000 \
+  --proxy-headers \
   --http-timeout "${DAPHNE_HTTP_TIMEOUT:-900}" \
   --application-close-timeout "${DAPHNE_APPLICATION_CLOSE_TIMEOUT:-120}" \
   config.asgi:application

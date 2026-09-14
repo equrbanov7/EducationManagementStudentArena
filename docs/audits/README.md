@@ -9,6 +9,7 @@ tarixçəsi (tapıntı → yoxlama → düzəliş → sübut) bir yerdə qalır.
 
 | Tarix | Audit | Mənbə | Əhatə | Yekun | Düzəliş statusu |
 |---|---|---|---|---|---|
+| 2026-09-13 | [Claude tam texniki audit və düzəliş hesabatı](./2026-09-13-claude/FINAL_REPORT_AZ.md) | Claude | 9 sahə (imtahan, auth/RBAC/tenant, məlumat, təhlükəsizlik, backend, infra, testlər, frontend/a11y/i18n, perf) + 7 düzəliş dalğası | Kod 72,8 → 79,4/100 — **PRODUCTION READY WITH CONDITIONS** (mühit şərtləri §27) | Sübutlar `findings/<sahə>.md`; 2026-09-14 gecə dalğaları 2–4: [NIGHT_WAVES_2026_09_14.md](./2026-09-13-claude/NIGHT_WAVES_2026_09_14.md) (24 commit, 46 yeni test faylı, açıq qalanlar) |
 | 2026-07-11 | [Codex tam repozitoriya auditi](./2026-07-11-codex-tam-audit/EMSArena_End_to_End_Audit_AZ_2026-07-11.md) | Codex | İmtahan sistemi (prioritet) + bütün layihə | İmtahan 43/100, layihə 58/100 — **NO-GO** | [Re-audit](./2026-07-11-codex-tam-audit/REAUDIT_REPORT_AZ_2026-07-11.md): düzəlişlər qismən təsdiqləndi; imtahan 54/100, layihə 66/100 — **NO-GO** |
 | 2026-07-04 | [FAZA 4 / Task 1 — request-external DB path auditi](./FAZA4_TASK1_AUDIT.md) | Daxili | Celery/worker DB giriş nöqtələri | 25 entry-point sarınıb | Bağlı — CI gate-i (`_lint.yml`) qoruyur |
 | 2026-07-02 | [Skip/xfail auditi](../qa/SKIP_XFAIL_AUDIT_2026-07-02.md) | Daxili | Test suite skip/xfail inventarı | — | Bağlı |

@@ -20,7 +20,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.registrar import catalog_console as console
+from apps.registrar.public import catalog_console as console
 
 _CTX = "registrar.catalog"
 PREFIX = "rc_"

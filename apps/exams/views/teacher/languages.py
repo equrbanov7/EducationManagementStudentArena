@@ -32,6 +32,8 @@ from apps.exams.services.language_variants import (
 )
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from apps.exams.views.teacher.workbench_paste import paste_context, paste_image_response, requested_paste_action
+from core.http_ids import parse_int
 
 
 def _manager_url(exam):
@@ -98,6 +100,9 @@ def exam_language_manager(request, slug):
     selected = set()
     analysis = _empty_analysis()
     math_token = (request.POST.get("math_token") or "").strip()
+    if requested_paste_action(request):
+        # 2026-09-14: pano/sürükləmə ilə şəkil — bank toplu əlavə ilə eyni JSON qolu.
+        return paste_image_response(request, organization_id=exam.organization_id, math_token=math_token)
 
     if request.method == "POST":
         action = (request.POST.get("action") or "").strip()
@@ -113,7 +118,8 @@ def exam_language_manager(request, slug):
             return redirect(_manager_url(exam))
 
         if action == "toggle_variant":
-            variant = exam.language_variants.filter(id=request.POST.get("variant_id")).first()
+            # F-01 (2026-09-14): pozuq id → `None` → tapılmır (əvvəl `ValueError` → 500).
+            variant = exam.language_variants.filter(id=parse_int(request.POST.get("variant_id"))).first()
             if variant is not None:
                 set_variant_active(variant, not variant.is_active)
                 messages.success(request, pgettext("exams.view.language.message", "Dil variantı yeniləndi."))
@@ -220,5 +226,6 @@ def exam_language_manager(request, slug):
         "dp_value": str(getattr(exam, "default_question_points", None) or 1),
         "math_token": math_token,
         **_language_workbench_context(exam, variant_rows, selected_language),
+        **paste_context(request, organization_id=exam.organization_id, math_token=math_token),
     }
     return render(request, "exams/teacher/exam_language_manager.html", context)

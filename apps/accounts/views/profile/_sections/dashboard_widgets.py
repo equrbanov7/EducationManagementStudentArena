@@ -120,7 +120,7 @@ def upcoming_slots(slots, week_context):
     if not ahead:
         return "", []
     day = min(ahead)
-    from apps.registrar import schedule as schedule_service
+    from apps.registrar.public import schedule as schedule_service
 
     labels = {index: label for index, label in schedule_service.WEEKDAYS}
     return str(labels.get(day, "")), sorted(ahead[day], key=lambda item: item.start_time)
@@ -155,7 +155,7 @@ def student_today(*, organization, record, period, allowed_sections) -> dict | N
     """
     if "my-schedule" not in allowed_sections:
         return None
-    from apps.registrar import schedule as schedule_service
+    from apps.registrar.public import schedule as schedule_service
 
     group = getattr(record, "group", None) if record is not None else None
     if period is None or group is None:
@@ -267,7 +267,7 @@ def student_attendance(*, organization, user, record, period, allowed_sections) 
 def teacher_today(*, organization, user, period, allowed_sections) -> dict | None:
     if "my-schedule" not in allowed_sections or period is None:
         return None
-    from apps.registrar import schedule as schedule_service
+    from apps.registrar.public import schedule as schedule_service
 
     slots = schedule_service.get_teacher_schedule(organization=organization, teacher=user, period=period)
     week_context = schedule_service.build_week_context(period)

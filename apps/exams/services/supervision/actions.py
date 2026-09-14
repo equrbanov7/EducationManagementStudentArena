@@ -259,26 +259,38 @@ def sweep_expired_resume_windows(queryset=None):
     Tenant isolation: callers pass an org-scoped queryset; the unscoped
     default is only intended for the global periodic sweep, and each finished
     attempt records an incident under its own ``exam.organization``.
+
+    2026-09-13 infra auditi P2-6 / P3-14: ``sweep_overdue_attempts`` ilə eyni
+    qoruma — hər cəhd öz tranzaksiyasında ``select_for_update(skip_locked)``
+    altında yenidən oxunur (tələbənin/müəllimin paralel yazısı üstündən
+    yazılmır, ``SupervisionIncident`` ikiqat yaranmır); qlobal icra 55 s
+    overlap kilidi ilə. Bax ``apps/exams/services/sweep_guard.py``.
     """
     if not exam_supervision_enabled():
         return 0
 
-    if queryset is None:
-        queryset = ExamAttempt.objects.all()
+    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
 
-    candidates = (
-        queryset.filter(
+    def _narrow(qs):
+        return qs.filter(
             supervision_status="locked",
             supervision_locked_at__isnull=False,
-        )
-        .exclude(
+        ).exclude(
             status__in=["submitted", "expired"],
         )
-        .select_related("exam", "exam__organization", "exam__supervision_config", "user")
-    )
 
-    expired = 0
-    for attempt in candidates.iterator():
-        if attempt.expire_if_resume_window_expired():
-            expired += 1
-    return expired
+    def _run(qs):
+        return finish_attempts_under_row_lock(
+            qs,
+            narrow=_narrow,
+            select_related=("exam", "exam__organization", "exam__supervision_config", "user"),
+            action=lambda attempt: attempt.expire_if_resume_window_expired(),
+        )
+
+    if queryset is not None:
+        return _run(queryset)
+
+    with sweep_overlap_lock("expired_resume_windows") as acquired:
+        if not acquired:
+            return 0
+        return _run(ExamAttempt.objects.all())

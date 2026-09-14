@@ -7,7 +7,7 @@ Kontekst: questions (annotate_preview_flags [+ annotate_display_numbers]),
 submission (vizual mənbə preview-ları üçün).
 {% endcomment %}
 {% for q in questions %}
-<li class="qsubp-card{% if q.has_error %} qsubp-card--error{% elif q.has_warning %} qsubp-card--warn{% endif %}">
+<li class="qsubp-card{% if q.has_error %} qsubp-card--error{% elif q.has_warning %} qsubp-card--warn{% endif %}" data-ems-math>
     <div class="qsubp-card__head">
         <span class="qsubp-card__num">#{{ q.display_no|default:forloop.counter }}</span>
         <span class="qsubp-card__text{% if submission.import_token and q.has_visual_source %} sr-only{% endif %}">{{ q.text }}</span>

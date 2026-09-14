@@ -1,0 +1,51 @@
+import json, os, subprocess
+from pathlib import Path
+import psycopg2
+
+container='CODEX_TEST_roles_pg_20260912'
+owner=dict(host='127.0.0.1',port=55439,dbname='codex_audit',user='codex_owner',password='codex_test_only')
+conn=psycopg2.connect(**owner);conn.autocommit=True
+out={}
+def sql(query):
+ with conn.cursor() as c:
+  c.execute(query)
+  if c.description:return c.fetchall()
+def provision(role,success):
+ env={**os.environ,'POSTGRES_CONTAINER':container,'APP_DATABASE_USER':role,'APP_DATABASE_PASSWORD':'codex_app_test_only'}
+ r=subprocess.run(['sh','scripts/provision-app-db-role.sh'],env=env,text=True,capture_output=True)
+ assert (r.returncode==0)==success, (role,r.returncode,r.stderr)
+ out['provision_'+role]=r.returncode
+provision('codex_owner',False)
+assert sql("SELECT rolsuper FROM pg_roles WHERE rolname='codex_owner'")==[(True,)]
+sql('CREATE ROLE codex_inherited LOGIN; GRANT codex_owner TO codex_inherited')
+provision('codex_inherited',False)
+sql('CREATE ROLE codex_object_owner LOGIN; CREATE SCHEMA codex_owned AUTHORIZATION codex_object_owner')
+provision('codex_object_owner',False)
+provision('codex_app',True);provision('codex_app',True)
+sql("CREATE TABLE public.codex_tenant_probe (id int PRIMARY KEY, organization_id text NOT NULL); INSERT INTO codex_tenant_probe VALUES (1,'tenant_a'),(2,'tenant_b'); ALTER TABLE codex_tenant_probe ENABLE ROW LEVEL SECURITY; ALTER TABLE codex_tenant_probe FORCE ROW LEVEL SECURITY; CREATE POLICY tenant ON codex_tenant_probe USING (organization_id = current_setting('app.current_org_id',true)) WITH CHECK (organization_id = current_setting('app.current_org_id',true))")
+for port in [55439,55440]:
+ cfg={**owner,'port':port,'user':'codex_app','password':'codex_app_test_only'}
+ with psycopg2.connect(**cfg) as app:
+  with app.cursor() as c:
+   c.execute('SELECT current_user, rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user')
+   assert c.fetchone()==('codex_app',False,False)
+   c.execute('SELECT count(*) FROM codex_tenant_probe');assert c.fetchone()==(0,)
+   c.execute("SELECT set_config('app.current_org_id','tenant_a',true)")
+   c.execute('SELECT id FROM codex_tenant_probe');assert c.fetchall()==[(1,)]
+   c.execute("UPDATE codex_tenant_probe SET id=22 WHERE organization_id='tenant_b'");assert c.rowcount==0
+   c.execute("INSERT INTO codex_tenant_probe VALUES (3,'tenant_a')")
+  app.rollback()
+ with psycopg2.connect(**cfg) as app:
+  with app.cursor() as c:
+   c.execute('SELECT count(*) FROM codex_tenant_probe');assert c.fetchone()==(0,)
+   try:c.execute("INSERT INTO codex_tenant_probe VALUES (4,'tenant_b')")
+   except psycopg2.errors.InsufficientPrivilege:app.rollback()
+   else:raise AssertionError('cross tenant insert accepted')
+ out[str(port)]='role preserved; no-context deny; scope read/write; foreign insert denied; scope reset'
+out['attributes']=sql("SELECT rolsuper,rolbypassrls,rolcreatedb,rolcreaterole,rolreplication FROM pg_roles WHERE rolname='codex_app'")
+out['evidence_grants']=sql("SELECT has_table_privilege('codex_app','accounts_accountactivationevidence','INSERT'),has_table_privilege('codex_app','registrar_grouptransferevidence','UPDATE')")
+assert out['evidence_grants']==[(False,False)]
+Path('docs/audits/2026-09-12-codex/remediation-stage2').mkdir(exist_ok=True)
+Path('docs/audits/2026-09-12-codex/remediation-stage2/role-probe.json').write_text(json.dumps(out,indent=2)+'\n')
+print(json.dumps(out,indent=2))
+conn.close()

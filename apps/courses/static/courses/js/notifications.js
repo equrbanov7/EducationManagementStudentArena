@@ -59,13 +59,16 @@ function notify(message, type = 'info', duration = 3000) {
     const toast = document.createElement('div');
     toast.className = `alert alert-${getBootstrapAlertClass(type)} alert-dismissible fade show`;
     toast.role = 'alert';
+    // 2026-09-13 audit F-05: mesaj mətni innerHTML-ə deyil, textContent-ə yazılır
+    // (bütün çağıranlar sabit/i18n mətn ötürür; HTML dəstəyi nəzərdə tutulmayıb).
     toast.innerHTML = `
         <div class="d-flex align-items-center">
             <i class="fas ${getIconClass(type)} me-3"></i>
-            <div>${message}</div>
+            <div class="js-notify-message"></div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     `;
+    toast.querySelector('.js-notify-message').textContent = message == null ? '' : String(message);
     
     // Add to container
     notificationContainer.appendChild(toast);

@@ -42,7 +42,7 @@ import json
 
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import (
+from apps.syllabus.public import (
     LESSON_HOUR_KINDS,
     SELFWORK_DISALLOWED,
     SELFWORK_OPTIONS,

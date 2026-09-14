@@ -67,8 +67,9 @@
 
 .thx-pick__box {
     flex: 0 0 auto;
-    width: 16px;
-    height: 16px;
+    /* 2026-09-14 (audit FE-F11): 16 → 18 px; sarğı `label.thx-pick` klik sahəsidir. */
+    width: 18px;
+    height: 18px;
     margin-top: 2px;
     accent-color: var(--ems-primary-600);
 }

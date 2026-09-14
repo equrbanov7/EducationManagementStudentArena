@@ -132,7 +132,7 @@
 .syl-hourchip--seminar {
     background: var(--ems-emerald-50);
     border-color: var(--ems-emerald-100);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 
 .syl-hourchip--lab {
@@ -168,7 +168,7 @@
 }
 
 .syl-weeks__h--seminar {
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 
 .syl-weeks__h--lab {

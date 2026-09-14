@@ -4,14 +4,17 @@
 
 * :func:`can_edit_journal` — GİRİŞ + korrektor səlahiyyəti. Müəllim / org sahibi /
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
-* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim.
+* :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim
+  VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14).
   Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
   is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
-* :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: YALNIZ müəllim,
-  org sahibi, superuser. Korrektor (İKT) buraya DAXİL DEYİL — o, dəyişikliyi yalnız
-  «Jurnal düzəlişi» rejimində sənədli (audited, PDF) yolla edir; normal görünüşdə
-  hər şey read-only-dir. views.py + journal_actions.py hər ikisi buradan idxal edir
-  (modul-ölçü limiti üçün ayrıca kiçik modul).
+* :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: müəllim, org
+  sahibi, superuser və — SAHİBİN QƏRARI (2026-09-14) — RİM rəhbəri (İKT). Əvvəl
+  İKT yalnız korrektor idi (normal görünüş read-only, dəyişiklik ancaq «Jurnal
+  düzəlişi» rejimində sənədli); indi başqa müəllimin jurnalında dərs əlavə edir,
+  bal yazır. Kilidli (2 saat / bağlı semestr) hallarda düzəliş rejimi yenə qalır.
+  views.py + journal_actions.py hər ikisi buradan idxal edir (modul-ölçü limiti
+  üçün ayrıca kiçik modul).
 
 Həmçinin :func:`offering_or_404` — offering-in TENANT-SCOPE-lu yüklənməsi.
 """
@@ -98,8 +101,18 @@ def can_edit_journal(user, offering) -> bool:
     return offering.organization.owner_id == user.id
 
 
+#: Əhatəli YALNIZ-OXU jurnal girişi (audit 2026-09-13 `access` F-06, 2026-09-14).
+#: Açar reyestrdə var idi, amma kodda heç yerdə yoxlanmırdı — icazə redaktorunda
+#: «yalançı düymə». İndi: bu açarı daşıyan (ORGANIZATION rolu → org-wide, UNIT
+#: rolu → ``scope_unit`` alt-ağacı) aktor əhatəsindəki açılışın jurnalını OXUYA
+#: bilir; yazma hüququ vermir (``is_direct_editor`` dəyişməyib). Heç bir default
+#: şablona əlavə edilmir — tenant istəsə redaktordan verir (fail-closed).
+VIEW_PERMISSION = "journal.view"
+
+
 def can_observe_journal(user, offering) -> bool:
-    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim.
+    """YALNIZ-OXU giriş: bu açılışı təhvil vermiş KÖHNƏ müəllim və ya
+    əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı.
 
     QƏSDƏN ``can_edit_journal``-dan AYRIDIR. Onu genişləndirsəydik köhnə müəllim
     ``is_direct_editor`` olmadan da POST səthlərinə (dərs əlavəsi, bal yazma)
@@ -111,17 +124,22 @@ def can_observe_journal(user, offering) -> bool:
 
     from .handover import is_handover_observer
 
-    return is_handover_observer(user, offering)
+    if is_handover_observer(user, offering):
+        return True
+    from .journal_scope import offering_in_actor_scope
+
+    return offering_in_actor_scope(user, offering.organization, offering, permission=VIEW_PERMISSION)
 
 
 def is_direct_editor(user, offering) -> bool:
-    """Birbaşa (audit-siz) redaktə — YALNIZ müəllim / org sahibi / superuser.
+    """Birbaşa (audit-siz) redaktə — müəllim / org sahibi / superuser / RİM rəhbəri.
 
-    Korrektor (İKT Rəhbəri) buraya daxil deyil: jurnalı yalnız düzəliş rejimində
-    sənədli dəyişir, normal görünüşdə read-only."""
+    Sahibin qərarı (2026-09-14): RİM rəhbəri («hər şeyin icazəsi») başqa müəllimin
+    jurnalında da birbaşa dərs əlavə edir və bal yazır; əvvəl yalnız korrektor idi.
+    Tenant sərhədi `can_edit_journal`-dakı kimi fetch mərhələsində (`offering_or_404`)."""
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_superuser", False):
+    if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
     if _is_live_assigned_instructor(user, offering):
         return True

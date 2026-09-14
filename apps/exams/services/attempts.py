@@ -210,18 +210,34 @@ def sweep_overdue_attempts(queryset=None):
     Tenant izolyasiyası: çağıran org-skoplu ``queryset`` ötürür; skopsuz
     default yalnız qlobal periodik sweep üçündür və hər cəhd öz imtahanının
     ``organization``-una yazılır.
-    """
-    if queryset is None:
-        queryset = ExamAttempt.objects.all()
 
-    candidates = queryset.filter(status__in=["draft", "in_progress"], is_trial=False).select_related(
-        "exam", "exam__organization", "user"
-    )
-    expired = 0
-    for attempt in candidates.iterator():
-        if attempt.expire_if_time_limit_reached():
-            expired += 1
-    return expired
+    2026-09-13 infra auditi P2-6 / P3-14: əvvəl ``.iterator()`` + kor
+    ``mark_finished`` idi — tələbənin eyni anda verdiyi ``submitted`` təhvili
+    ``expired`` ilə üstündən yazıla bilirdi. İndi hər cəhd öz tranzaksiyasında
+    sətir kilidi (``skip_locked``) altında yenidən oxunur; qlobal icra
+    (``queryset is None``) 55 s overlap kilidi ilə qorunur — bax
+    ``apps/exams/services/sweep_guard.py``.
+    """
+    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
+
+    def _narrow(qs):
+        return qs.filter(status__in=["draft", "in_progress"], is_trial=False)
+
+    def _run(qs):
+        return finish_attempts_under_row_lock(
+            qs,
+            narrow=_narrow,
+            select_related=("exam", "exam__organization", "user"),
+            action=lambda attempt: attempt.expire_if_time_limit_reached(),
+        )
+
+    if queryset is not None:
+        return _run(queryset)
+
+    with sweep_overlap_lock("overdue_attempts") as acquired:
+        if not acquired:
+            return 0
+        return _run(ExamAttempt.objects.all())
 
 
 def can_user_start_new_attempt(exam, user):

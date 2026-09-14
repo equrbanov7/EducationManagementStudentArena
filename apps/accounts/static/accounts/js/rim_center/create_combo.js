@@ -32,7 +32,9 @@
     }
 
     function box(el) {
-        return el ? el.closest("[data-rimc-combo]") : null;
+        // 2026-09-14 (audit FE-F21): `keydown`/`focusin` hədəfi Element olmaya
+        // bilər (text node, document) — `closest` yoxdursa TypeError atırdı.
+        return el && typeof el.closest === "function" ? el.closest("[data-rimc-combo]") : null;
     }
 
     function parts(node) {

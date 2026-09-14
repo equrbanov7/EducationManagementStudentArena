@@ -18,7 +18,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.registrar import exam_eligibility, grade_audit, journal_window, services
+from apps.registrar import absence_limit, exam_eligibility, grade_audit, journal_window, services
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -26,7 +26,6 @@ from apps.registrar.models import (
     Lesson,
     LessonKind,
     LessonMark,
-    StudentAcademicRecord,
 )
 
 # Redaktə pəncərələri (2 saat — sonra toxunulmazdır; DB trigger də qoruyur).
@@ -40,8 +39,8 @@ DEFAULT_LESSON_HOURS = 2
 #: ona görə "dəyişmə" halını ondan ayırmaq lazımdır (gradebook_lessons işlədir).
 UNSET = object()
 LESSON_SCORE_MAX = Decimal("10")  # seminar/lab balı: min 0, max 10
-_DEFAULT_ABSENCE_LIMIT = 25
-_WARN_RATIO = Decimal("0.75")  # limitin bu payına çatanda xəbərdarlıq (bozarır)
+_DEFAULT_ABSENCE_LIMIT = absence_limit.DEFAULT_LIMIT_PERCENT  # tək mənbə (F-06, 2026-09-14)
+_WARN_RATIO = absence_limit.WARN_RATIO  # limitin bu payına çatanda xəbərdarlıq (bozarır)
 
 SCORE_LESSON_KINDS = frozenset({LessonKind.SEMINAR, LessonKind.LAB})
 
@@ -100,15 +99,10 @@ def can_edit_mark(mark, *, now=None) -> bool:
     return (now - mark.created_at) <= MARK_EDIT_WINDOW
 
 
-def absence_limit_percent_for(offering) -> int:
-    record = (
-        StudentAcademicRecord.objects.filter(organization=offering.organization, group=offering.group)
-        .select_related("program")
-        .first()
-    )
-    if record and record.program:
-        return record.program.absence_limit_percent
-    return _DEFAULT_ABSENCE_LIMIT
+# Hədd resolver-ləri TƏK mənbədədir (:mod:`apps.registrar.absence_limit`, F-06 / 2026-09-14);
+# köhnə adlar geriyə-uyğunluq üçün qalır (açılış-səviyyəli başlıq dəyəri).
+absence_limit_percent_for = absence_limit.limit_percent_for_offering
+_allowed_absence_hours = absence_limit.allowed_absence_hours
 
 
 # ── Mark (iştirak/bal) yazma ─────────────────────────────────────────────────
@@ -129,6 +123,15 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     """
     if journal_is_locked(offering):
         return {"written": 0, "rejected": 0} if report else 0
+
+    # Codex audit §14 (2026-09-13): grid yazısı «oxu → yaz» naxışıdır (`existing`
+    # xəritəsi əvvəlcədən yüklənir). İki paralel yazı eyni xanaya gələndə ikinci
+    # `LessonMark` INSERT-i `uniq_lesson_enrollment_mark`-a çırpılıb bütün
+    # partiyanı 500 ilə çökdürürdü, eyni tələbənin qayıb saatı isə köhnə
+    # görüntüdən hesablanırdı. Açılış sətri `FOR UPDATE` ilə kilidlənir — eyni
+    # açılışın yazıları tranzaksiya səviyyəsində ardıcıllaşır (kilid sırası:
+    # açılış → qeydiyyat → xana; bax `correction_target_locks`).
+    type(offering).objects.select_for_update().filter(pk=offering.pk).exists()
 
     # Çağırış vaxtı idxal: `gradebook_lessons` bu moduldan idxal edir (dövr).
     from apps.registrar.gradebook_lessons import parse_lesson_score as _parse_score
@@ -181,12 +184,12 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
                 rejected += 1
                 continue
 
-        old = _mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
+        old = grade_audit.mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
         old_status = mark.status if mark is not None and mark.pk else None
         old_score = mark.score if mark is not None and mark.pk else None
         if mark is None:
             mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
-        new = _mark_repr(status, score)
+        new = grade_audit.mark_repr(status, score)
         mark.status = status
         mark.score = score
         mark.entered_by = by_user
@@ -240,17 +243,6 @@ def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=Fals
     return {"written": written, "rejected": rejected} if report else written
 
 
-def _mark_repr(status, score) -> str:
-    """Compact attendance+score label for the audit trail (e.g. ``qb`` / ``iə 8``)."""
-    if status == AttendanceStatus.ABSENT:
-        att = "qb"
-    elif status == AttendanceStatus.EXCUSED:
-        att = "üq"  # üzrlü qayıb (rəsmi düzəliş yolu ilə)
-    else:
-        att = "iə"
-    return f"{att} {grade_audit.score_repr(score)}" if score is not None else att
-
-
 def recompute_absence_hours(*, enrollment):
     """Recompute Enrollment.absence_hours from the student's lesson marks (qb).
 
@@ -284,19 +276,6 @@ def _lesson_parity(offering, lesson) -> str:
 
 
 # ── Jurnal görünüşü (müəllim grid) ───────────────────────────────────────────
-
-
-def _allowed_absence_hours(offering, lessons, *, limit_percent=None):
-    """İcazəli qayıb saatı.
-
-    ``limit_percent`` verilibsə TƏKRAR sorğu edilmir — çağıran onu artıq
-    oxuyubsa (``get_offering_journal``), ``absence_limit_percent_for`` ikinci
-    dəfə ``StudentAcademicRecord``-a getməməlidir.
-    """
-    total_hours = exam_eligibility.lesson_hours_for(offering, lessons)
-    if limit_percent is None:
-        limit_percent = absence_limit_percent_for(offering)
-    return Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)
 
 
 def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, lesson_offset=0, lesson_kind=""):
@@ -372,7 +351,10 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     # Məxrəc də BÜTÜN dərslər üzrədir — pəncərə buraxılış faizini dəyişməməlidir.
     total_hours = exam_eligibility.lesson_hours_for(offering, all_lessons)
     exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
-    warn_at = allowed_absence * _WARN_RATIO
+    # Sətir üzrə qərar TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — bir toplu sorğu.
+    row_limits = absence_limit.row_limits(
+        organization_id=offering.organization_id, enrollments=enrollments, total_hours=total_hours
+    )
 
     # Per-lesson özət (sütun başlığındakı gün özəti) — `journal_window`-dadır.
     total_students = len(enrollments)
@@ -429,18 +411,19 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
             absence_count += carry["absence_count"]
         # Canonical entry score (component-weighted when defined, else lesson sum).
         entry_score = entry_score_for(enrollment, scheme.entry_score_max, **entry_batch.entry_kwargs(enrollment))
+        row_limit = row_limits[enrollment.student_id]
         eligibility = exam_eligibility.resolve(
             absence_hours=absence_hours,
             lesson_hours=total_hours,
-            allowed_hours=allowed_absence,
-            limit_percent=limit_percent,
+            allowed_hours=row_limit.allowed_hours,
+            limit_percent=row_limit.percent,
             exempt=enrollment.student_id in exempt_ids,
             frozen=frozen,
         )
         barred = eligibility["barred"]
         # Xəbərdarlıq zolağı da donmuş dilimdə susur: «həddə yaxınlaşır» xəbəri
         # yalnız hələ qərar verilə bilən semestrdə mənalıdır.
-        warning = (not frozen) and (not barred) and allowed_absence > 0 and Decimal(absence_hours) >= warn_at
+        warning = absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
         rows.append(
             {
                 "enrollment": enrollment,
@@ -449,6 +432,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
                 "absence_hours": absence_hours,
                 # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).
                 "absence_count": absence_count,
+                "allowed_absence": row_limit.allowed_hours,  # tələbənin ÖZ həddi (F-06)
                 "entry_score": entry_score,
                 "barred": barred,
                 "warning": warning,
@@ -513,7 +497,7 @@ def get_student_journal_summary(*, record, period, semester_number):
     İşarələr yalnız giriş balı üçün oxunur (bal dərsə bağlıdır, sayğac deyil).
     """
     plan = services.get_student_semester_plan(record=record, period=period, semester_number=semester_number)
-    limit_percent = record.program.absence_limit_percent if record.program else _DEFAULT_ABSENCE_LIMIT
+    limit_percent = absence_limit.limit_percent_for_record(record)
     enrollments = plan["enrollments"]
     if not enrollments:
         return {"subjects": []}

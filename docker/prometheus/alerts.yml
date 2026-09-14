@@ -310,14 +310,46 @@ groups:
           summary: "Celery Beat dayanıb və ya gecikir"
           description: "Monitorinq beat task-ı 5+ dəqiqədir statistika yeniləmir."
 
+      # 2026-09-13 infra auditi P3-14: `for` 10m → 2m — imtahan günü 60 s
+      # sweep-ləri (expire_overdue/expire_stale) yığılanda 10 dəqiqə gecdir.
+      # Metrik artıq `queue` etiketlidir (P2-8) — bu qayda yalnız defolt
+      # növbəni, aşağıdakı CeleryHeavyQueueBacklog isə heavy növbəni tutur.
       - alert: CeleryQueueBacklog
-        expr: emsarena_celery_queue_length > 200
-        for: 10m
+        expr: emsarena_celery_queue_length{queue="celery"} > 200
+        for: 2m
         labels:
           severity: warning
         annotations:
           summary: "Celery növbəsi yığılır ({{ $value }} task)"
-          description: "Broker növbəsi 10 dəqiqədir 200-dən çox task saxlayır."
+          description: "Broker `celery` növbəsi 2 dəqiqədir 200-dən çox task saxlayır (60 s sweep-lər gecikir)."
+
+      # 2026-09-13 infra auditi P2-8: heavy növbə (OCR / AI / export) ayrıca
+      # worker-də işləyir (celery_worker_heavy, concurrency 2, task 900 s).
+      # Əvvəl yalnız `celery` növbəsi ölçülürdü — heavy worker ölsə və ya
+      # OCR backlog-u yığılsa heç bir alert yanmırdı. Hədd kiçikdir: hər job
+      # dəqiqələr çəkir, 20 gözləyən job ≈ 1+ saat gecikmə deməkdir.
+      - alert: CeleryHeavyQueueBacklog
+        expr: emsarena_celery_queue_length{queue="heavy"} > 20
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Celery heavy növbəsi yığılır ({{ $value }} job)"
+          description: "OCR/AI/export növbəsi 10 dəqiqədir 20-dən çox job saxlayır — celery_worker_heavy sağlamlığını yoxlayın."
+
+      # 2026-09-13 infra auditi P2-8: `CeleryWorkersDown` ümumi worker sayına
+      # baxır — heavy worker ölsə, defolt worker sağ olduğu üçün heç nə yanmır,
+      # OCR/AI/export job-ları isə növbədə əbədi qalır (20 dəq sonra reaper
+      # FAILED edir). `emsarena_celery_queue_workers{queue}` beat task-ının
+      # `inspect.active_queues()` nəticəsidir (apps/monitoring/collectors.py).
+      - alert: CeleryHeavyWorkerDown
+        expr: emsarena_celery_queue_workers{queue="heavy"} == 0
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Heavy növbəsini dinləyən Celery worker yoxdur"
+          description: "celery_worker_heavy 3+ dəqiqədir onlayn deyil — OCR / AI generasiya / export job-ları icra olunmur."
 
       - alert: BackupTooOld
         expr: emsarena_backup_age_seconds > 26 * 3600
@@ -327,3 +359,37 @@ groups:
         annotations:
           summary: "PostgreSQL backup 26 saatdan köhnədir"
           description: "postgres-backup servisi yoxlanmalıdır (gündəlik cədvəl pozulub)."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # 2026-09-13 infra auditi P1-3 — monitorinqin ÖZ sağlamlığı.
+  # Lokal prod-like yığında Alertmanager e-poçtu «525 5.7.1 Unauthorized IP»
+  # ilə 5+ gün səssiz uğursuz oldu, sonra prometheus/alertmanager/nginx
+  # Exited(127) qaldı — heç kim bilmədi, çünki alert kanalının özünü izləyən
+  # qayda yox idi. İki qayda:
+  #   * AlertmanagerNotificationsFailing — çatdırılma (SMTP/webhook) uğursuzdur.
+  #     Alertmanager öz `/metrics`-ini verir (job emsarena-alertmanager).
+  #     Bu alert e-poçtla çatmaya bilər (kanal elə odur ki, xarabdır) — amma
+  #     in-app webhook (ayrı inteqrasiya) və Grafana/Prometheus UI-da görünür.
+  #   * Watchdog — HƏMİŞƏ yanan alert (deadman). Alertmanager-də ayrıca
+  #     `heartbeat` marşrutu ilə dövri «hələ sağam» e-poçtu göndərilir;
+  #     e-poçt KƏSİLSƏ Prometheus→Alertmanager→SMTP zəncirinin harasısa
+  #     ölüb (prosesin özü, DNS, SMTP icazəsi). Bax SISTEM_MONITORINQI.md §8.1.
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: emsarena-meta
+    rules:
+      - alert: Watchdog
+        expr: vector(1)
+        labels:
+          severity: none
+        annotations:
+          summary: "Watchdog: monitorinq zənciri işləyir (deadman siqnalı)"
+          description: "Bu alert qəsdən həmişə yanır. Dövri heartbeat e-poçtu KƏSİLİBSƏ Prometheus/Alertmanager/SMTP zəncirini yoxlayın."
+
+      - alert: AlertmanagerNotificationsFailing
+        expr: sum by (integration) (increase(alertmanager_notifications_failed_total[15m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alertmanager bildirişləri çatdıra bilmir ({{ $labels.integration }})"
+          description: "Son 15 dəqiqədə {{ $labels.integration }} inteqrasiyasında {{ $value | printf \"%.0f\" }} uğursuz göndəriş. E-poçt üçün Brevo «Authorised IPs», DNS və SMTP parolunu; webhook üçün nginx/app yolunu yoxlayın (SISTEM_MONITORINQI.md §8.1)."

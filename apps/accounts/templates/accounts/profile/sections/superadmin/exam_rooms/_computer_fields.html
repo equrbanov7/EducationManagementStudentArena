@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}Kompüter dialoqunun sahələri — ƏLAVƏ və REDAKTƏ üçün eyni forma
+(`action`/`room_id`/`computer_id` prefill-dən). MAC sahəsi yazdıqca
+`AA:BB:CC:DD:EE:FF` formatına salınır (`data-mac-input`, superadmin_exam_rooms.js).
+«Aktiv» yalnız redaktədə mənalıdır — `data-sar-edit-only` əlavə rejimində gizlənir.{% endcomment %}
+<div class="sar-formgrid">
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-comp-label">{% trans "Ad" context "accounts.superadmin_exam_rooms" %} <span class="ems-field__req">*</span></label>
+        <input class="ems-input" type="text" id="sar-comp-label" name="label" required maxlength="64" placeholder="PC-01" autocomplete="off">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-comp-seat">{% trans "Yer nömrəsi" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="number" id="sar-comp-seat" name="seat_number" min="1" inputmode="numeric">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-comp-mac">MAC <span class="ems-field__req">*</span></label>
+        <input class="ems-input sar-mono" type="text" id="sar-comp-mac" name="mac_address" required maxlength="17" placeholder="AA:BB:CC:DD:EE:FF" data-mac-input autocomplete="off" spellcheck="false">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sar-comp-ip">IP</label>
+        <input class="ems-input sar-mono" type="text" id="sar-comp-ip" name="ip_address" placeholder="10.0.0.11" autocomplete="off" spellcheck="false">
+        <span class="ems-field__hint">{% trans "İmtahan mərkəzinə giriş bu IP üzərindən yoxlanılır." context "accounts.superadmin_exam_rooms" %}</span>
+    </div>
+    <div class="ems-field sar-formgrid__full">
+        <label class="ems-field__label" for="sar-comp-notes">{% trans "Qeyd" context "accounts.superadmin_exam_rooms" %}</label>
+        <input class="ems-input" type="text" id="sar-comp-notes" name="notes" maxlength="255" autocomplete="off">
+    </div>
+    <label class="sar-check sar-formgrid__full" data-sar-edit-only>
+        <input type="checkbox" name="is_active" value="1">
+        <span>{% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</span>
+        <span class="sar-check__hint">{% trans "Söndürülmüş kompüterin IP-si giriş yoxlamasında nəzərə alınmır." context "accounts.superadmin_exam_rooms" %}</span>
+    </label>
+</div>

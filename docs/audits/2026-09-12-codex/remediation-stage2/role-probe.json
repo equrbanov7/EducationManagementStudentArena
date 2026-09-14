@@ -1,0 +1,23 @@
+{
+  "provision_codex_owner": 3,
+  "provision_codex_inherited": 3,
+  "provision_codex_object_owner": 3,
+  "provision_codex_app": 0,
+  "55439": "role preserved; no-context deny; scope read/write; foreign insert denied; scope reset",
+  "55440": "role preserved; no-context deny; scope read/write; foreign insert denied; scope reset",
+  "attributes": [
+    [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  ],
+  "evidence_grants": [
+    [
+      false,
+      false
+    ]
+  ]
+}

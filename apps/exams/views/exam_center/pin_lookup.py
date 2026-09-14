@@ -18,6 +18,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 
+from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED
 from apps.exams.models import ExamStudentPin, FinalExamTicket
 from apps.exams.services.final_center import decrypt_ticket_pin
 from apps.exams.services.student_pins import student_visible_pin
@@ -134,6 +135,28 @@ def exam_center_pin_search(request):
     return JsonResponse({"results": results, "has_more": has_more})
 
 
+def _window_labels(start, end):
+    """Başlanğıc/bitmə etiketləri — bitmə BAŞQA GÜNDƏDİRSƏ tarix də yazılır.
+
+    2026-09-14 (W3 `w3sweep` brauzer süpürgəsi): PIN axtarışında 14.09→30.10
+    pəncərəsi «14.09.2026 00:00–23:00» görünürdü (bitmə həmişə yalnız saat idi).
+    """
+    if not start:
+        return "", ""
+    start_local = timezone.localtime(start)
+    if not end:
+        return start_local.strftime("%d.%m.%Y %H:%M"), ""
+    end_local = timezone.localtime(end)
+    end_fmt = "%H:%M" if end_local.date() == start_local.date() else "%d.%m.%Y %H:%M"
+    return start_local.strftime("%d.%m.%Y %H:%M"), end_local.strftime(end_fmt)
+
+
+def _ticket_status_label(status):
+    """Nişan xam açar («assigned») deyil, tərcümə olunmuş etiket olsun (W3 `w3sweep`)."""
+    labels = dict(FinalExamTicket.STATUS_CHOICES)
+    return str(labels.get(status, status))
+
+
 @login_required
 @require_GET
 def exam_center_student_pins(request, student_id):
@@ -158,17 +181,19 @@ def exam_center_student_pins(request, student_id):
             revealed += 1
         session = ticket.session
         subject = getattr(ticket.exam, "subject", None)
+        scheduled_start, scheduled_end = _window_labels(
+            session.scheduled_start if session else None, session.scheduled_end if session else None
+        )
         items.append(
             {
                 "exam_title": ticket.exam.title,
                 "subject": (f"{subject.code} — {subject.name}" if subject else ""),
                 "room": (session.room.name if session and session.room else ""),
-                "scheduled_start": (
-                    timezone.localtime(session.scheduled_start).strftime("%d.%m.%Y %H:%M") if session else ""
-                ),
-                "scheduled_end": (timezone.localtime(session.scheduled_end).strftime("%H:%M") if session else ""),
+                "scheduled_start": scheduled_start,
+                "scheduled_end": scheduled_end,
                 "session_state": (session.state if session else ""),
-                "status": ticket.status,
+                "status": _ticket_status_label(ticket.status),
+                "status_key": ticket.status,
                 "seat": ticket.seat_number,
                 "language": ticket.get_language_display() if ticket.language else "",
                 "pin": pin or "",
@@ -188,17 +213,17 @@ def exam_center_student_pins(request, student_id):
         if pin:
             revealed += 1
         subject = getattr(exam, "subject", None)
+        scheduled_start, scheduled_end = _window_labels(exam.start_datetime, exam.end_datetime)
         items.append(
             {
                 "exam_title": exam.title,
                 "subject": (f"{subject.code} — {subject.name}" if subject else ""),
                 "room": "",
-                "scheduled_start": (
-                    timezone.localtime(exam.start_datetime).strftime("%d.%m.%Y %H:%M") if exam.start_datetime else ""
-                ),
-                "scheduled_end": (timezone.localtime(exam.end_datetime).strftime("%H:%M") if exam.end_datetime else ""),
+                "scheduled_start": scheduled_start,
+                "scheduled_end": scheduled_end,
                 "session_state": "",
-                "status": "assigned",
+                "status": _ticket_status_label(TICKET_STATUS_ASSIGNED),
+                "status_key": TICKET_STATUS_ASSIGNED,
                 "seat": "",
                 "language": "",
                 "pin": pin or "",

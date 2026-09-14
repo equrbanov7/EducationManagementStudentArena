@@ -9,6 +9,7 @@ identical to the pre-refactor single-file implementation.
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
@@ -55,6 +56,16 @@ def permission_editor(request):
     selected_role = None
     selected_role_id = request.GET.get("role")
     if request.method == "POST":
+        # Rolun icazə DƏSTİNİ dəyişmək = `role.edit` (audit 2026-09-13 `access`
+        # F-06, 2026-09-14). Əvvəl POST da yalnız `role.assign` ilə keçirdi — o
+        # açar «üzvə rol TƏYİN etmək»dir (HR-da var, redaktor bölməsi isə HR-a
+        # göstərilmir — bax ROL_MATRISI). Redaktora BAXIŞ `role.assign`-da qalır;
+        # yazı üçün əlavə `role.edit` tələb olunur (`role.*` və `*` əhatə edir).
+        if not is_superadmin and not has_permission(list(actor_permissions), "role.edit"):
+            messages.error(
+                request, pgettext_lazy("accounts.permission_editor.message", "role_assign_permission_required")
+            )
+            return redirect(request.path)
         selected_role_id = request.POST.get("role_id")
         action = request.POST.get("action")
         selected_role = get_object_or_404(Role, id=selected_role_id, organization=org, is_active=True)
@@ -204,20 +215,22 @@ def permission_editor(request):
             messages.success(request, result_message)
             return _safe_redirect()
 
-        selected_role.permissions = sorted(role_permissions_set)
-        selected_role.save(update_fields=["permissions", "updated_at"])
-
-        create_audit_log(
-            user=request.user,
-            organization=org,
-            action="update",
-            resource_type="role",
-            resource_id=selected_role.id,
-            resource_repr=selected_role.display_name,
-            old_values={"permissions": old_permissions},
-            new_values={"permissions": selected_role.permissions},
-            request=request,
-        )
+        # Audit 2026-09-13 backend F-07 (2026-09-14): icazə dəyişikliyi + audit qeydi
+        # birlikdə — audit sınsa rol da dəyişməsin (icazə dəyişikliyi izsiz qalmasın).
+        with transaction.atomic():
+            selected_role.permissions = sorted(role_permissions_set)
+            selected_role.save(update_fields=["permissions", "updated_at"])
+            create_audit_log(
+                user=request.user,
+                organization=org,
+                action="update",
+                resource_type="role",
+                resource_id=selected_role.id,
+                resource_repr=selected_role.display_name,
+                old_values={"permissions": old_permissions},
+                new_values={"permissions": selected_role.permissions},
+                request=request,
+            )
 
         messages.success(request, result_message)
         return _safe_redirect()

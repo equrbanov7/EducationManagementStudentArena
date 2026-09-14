@@ -238,6 +238,11 @@ def build_kollokvium_windows_section(
             }
         )
     section["k_rows"] = k_rows
+    # KPI — bölmə başındakı rəqəmlər (siyahı yaddaşdadır, əlavə sorğu yoxdur).
+    section["kpi_open"] = sum(1 for row in k_rows if row["status"] == "open")
+    section["kpi_closed"] = sum(1 for row in k_rows if row["status"] == "closed")
+    section["kpi_not_set"] = sum(1 for row in k_rows if row["window"] is None)
+    section["kpi_extra_days"] = sum(g["extra_days"] for row in k_rows for g in row["grants"])
 
     # ── Fakültə / kafedra siyahıları (əlavə gün modalı üçün) ───────────────
     section["faculties"] = list(

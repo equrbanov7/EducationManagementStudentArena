@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.registrar import handover as handover_read
+from apps.registrar.public import handover as handover_read
 
 
 @dataclass(frozen=True)

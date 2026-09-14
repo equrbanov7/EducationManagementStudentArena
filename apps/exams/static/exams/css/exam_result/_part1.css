@@ -99,7 +99,7 @@
 .main-score .stat-value {
     font-size: 3rem;
     font-weight: 800;
-    color: var(--ems-primary-500); /* Brand Blue */
+    color: var(--ems-primary-600); /* Brand Blue */
     line-height: 1;
 }
 

@@ -27,7 +27,7 @@
 | analytics.build_period_analytics | apps/registrar/page_contexts.py:83 |
 | analytics.html | apps/registrar/analytics_views.py:27 |
 | analytics.view_all | apps/organizations/permissions.py:85; apps/organizations/default_roles.py:30; apps/organizations/default_roles.py:54; apps/organizations/default_roles.py:78; apps/organizations/default_roles.py:98; apps/organizations/default_roles.py:310 |
-| analytics.view_own | apps/organizations/permissions.py:83; apps/organizations/default_roles.py:177; apps/organizations/default_roles.py:190; apps/organizations/default_roles.py:208; apps/organizations/default_roles.py:258; apps/organizations/default_roles.py:271 |
+| analytics.view_own | apps/accounts/views/profile/_sections/statistics.py (`build_statistics_section` → `_resolve_profile has_own`, 2026-09-14); default_roles (müəllim/tələbə/üzv şablonları) |
 | analytics.view_unit | apps/organizations/permissions.py:84; apps/organizations/default_roles.py:119; apps/organizations/default_roles.py:138; apps/organizations/default_roles.py:154; apps/organizations/default_roles.py:225; apps/organizations/default_roles.py:242 |
 | appeal.attempt | apps/appeals/views/shared/detail.py:41; apps/appeals/views/shared/detail.py:49; apps/appeals/views/shared/detail.py:50; apps/appeals/views/teacher/endpoints.py:232; apps/appeals/views/teacher/endpoints.py:239; apps/appeals/views/teacher/endpoints.py:290 |
 | appeal.attempt_id | apps/appeals/services/creation.py:152; apps/appeals/services/scoring.py:445 |
@@ -87,7 +87,7 @@
 | assignment.title | apps/assignments/models.py:303; apps/assignments/views/teacher/crud.py:151; apps/assignments/views/teacher/crud.py:176; apps/accounts/views/_dashboard_helpers/results.py:143; apps/accounts/views/_dashboard_helpers/evaluated_review.py:166; apps/accounts/views/_dashboard_helpers/pending_review.py:184 |
 | audit.0003 | apps/audit/models.py:22 |
 | audit.apps | apps/audit/__init__.py:5 |
-| audit.export | apps/organizations/permissions.py:94 |
+| audit.export | apps/audit/views.py `can_export_audit` → `audit_log_export` + `export_url` (2026-09-14); `audit.view` daşıyan 8 şablon |
 | audit.log_action | apps/audit/public.py:3 |
 | audit.models | apps/organizations/services.py:317; apps/organizations/views/org_admin/endpoints.py:30; apps/exams/services/final_center/history.py:80 |
 | audit.public | apps/live_exam/views/host/game.py:15; apps/live_exam/views/host/session.py:11; apps/blog/views/moderator/post_management.py:24; apps/blog/views/author/posts.py:16; apps/accounts/middleware.py:340; apps/accounts/views/profile/post_handler.py:21 |
@@ -253,7 +253,7 @@
 | exams.wizard | apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:20; apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:28; apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:32; apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:36; apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:40; apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html 2.py:45 |
 | grade.input | apps/organizations/permissions.py:65; apps/organizations/default_roles.py:152; apps/organizations/default_roles.py:168; apps/organizations/default_roles.py:206; apps/organizations/default_roles.py:339; apps/organizations/default_roles.py:421 |
 | grade.label | apps/projects/forms.py:127; apps/projects/forms.py:128; apps/projects/forms.py:129 |
-| grade.override | apps/organizations/permissions.py:67 |
+| grade.override | kataloqdan çıxarıldı 2026-09-14 (audit F-06; `journal.correct` dublikatı) |
 | grade.placeholder | apps/projects/forms.py:114; apps/projects/forms.py:121 |
 | grade.publish | apps/organizations/permissions.py:66; apps/organizations/default_roles.py:50; apps/organizations/default_roles.py:74; apps/exams/management/commands/seed_demo_hierarchy.py:51 |
 | grade.view | apps/organizations/permissions.py:64; apps/organizations/default_roles.py:49; apps/organizations/default_roles.py:73; apps/organizations/default_roles.py:96; apps/organizations/default_roles.py:151; apps/organizations/default_roles.py:167 |
@@ -301,8 +301,8 @@
 | members.set | apps/exams/management/commands/_seed_helpers/courses.py:134 |
 | org.admin | apps/organizations/permissions.py:30; apps/accounts/views/roles/_assignment_flow/_resolvers.py:65; apps/accounts/views/roles/_assignment_flow/_resolvers.py:230; apps/accounts/views/roles/_assignment_flow/flow.py:78 |
 | org.admin.assign | default role/category only |
-| org.delete | apps/organizations/permissions.py:32 |
-| org.edit | apps/organizations/permissions.py:27; apps/organizations/default_roles.py:24; apps/organizations/default_roles.py:304 |
+| org.delete | kataloqdan çıxarıldı 2026-09-14 (audit F-06; funksiya yoxdur) |
+| org.edit | apps/organizations/views/shared/_helpers.py `_can_manage_org_settings(write=True)` → `organization_settings` POST (2026-09-14); vice_rector / ikt_rehber / deputy_director şablonları |
 | org.get_org_type_display | apps/accounts/views/superadmin/endpoints.py:106 |
 | org.id | apps/organizations/views/member/selection.py:33; apps/organizations/views/member/selection.py:34; apps/organizations/views/member/selection.py:38; apps/live_exam/views/results.py:32; apps/live_exam/views/host/_shared.py:32; apps/accounts/views/roles/_assignment_flow/_resolvers.py:96 |
 | org.is_active | apps/organizations/management/commands/backfill_admin_memberships.py:195; apps/organizations/views/member/selection.py:32 |
@@ -319,7 +319,7 @@
 | org.pk | apps/accounts/views/superadmin/endpoints.py:87; apps/accounts/views/superadmin/endpoints.py:117; apps/accounts/views/profile/statistics_export.py:76; apps/accounts/views/profile/statistics_export.py:85; apps/accounts/views/profile/statistics_export.py:114; apps/accounts/views/profile/context_builder/_helpers.py:79 |
 | org.roles | apps/accounts/management/commands/import_users_from_excel.py:116; apps/accounts/views/organization/_management_flow/flow.py:340; apps/accounts/views/organization/_management_flow/flow.py:344; apps/accounts/views/organization/_management_flow/flow.py:348 |
 | org.save | apps/organizations/management/commands/seed_western_caspian.py:209 |
-| org.settings | apps/organizations/permissions.py:28 |
+| org.settings | apps/organizations/views/shared/_helpers.py `_can_manage_org_settings` → `organization_settings` GET+POST (2026-09-14); vice_rector / ikt_rehber / deputy_director şablonları |
 | org.slug | apps/organizations/management/commands/seed_western_caspian.py:160; apps/organizations/management/commands/seed_ci_e2e_scenario.py:556; apps/organizations/management/commands/backfill_admin_memberships.py:197 |
 | org.view | apps/organizations/permissions.py:26; apps/organizations/default_roles.py:23; apps/organizations/default_roles.py:44; apps/organizations/default_roles.py:68; apps/organizations/default_roles.py:91; apps/organizations/default_roles.py:111 |
 | project.assigned_students | apps/projects/services.py:229; apps/projects/views/student/endpoints.py:61; apps/projects/views/student/endpoints.py:105; apps/projects/views/student/endpoints.py:177; apps/projects/views/teacher/crud.py:84; apps/projects/views/teacher/crud.py:92 |
@@ -342,15 +342,16 @@
 | project.status | apps/projects/services.py:225; apps/projects/views/teacher/crud.py:94; apps/projects/views/teacher/crud.py:156; apps/projects/views/teacher/crud.py:173; apps/projects/views/teacher/crud.py:181; apps/projects/views/teacher/crud.py:207 |
 | project.submissions | apps/projects/views/student/endpoints.py:68; apps/projects/views/student/endpoints.py:182; apps/projects/views/teacher/endpoints.py:69; apps/projects/views/teacher/endpoints.py:138 |
 | project.title | apps/projects/views/teacher/crud.py:150; apps/projects/views/teacher/crud.py:175; apps/accounts/views/_dashboard_helpers/results.py:229; apps/accounts/views/_dashboard_helpers/evaluated_review.py:207; apps/accounts/views/_dashboard_helpers/pending_review.py:247; apps/accounts/views/_dashboard_helpers/assigned_tasks.py:344 |
-| qa.flag | apps/organizations/permissions.py:90 |
-| qa.review | apps/organizations/permissions.py:89 |
-| qa.view | apps/organizations/permissions.py:88 |
+| qa.flag | kataloqdan çıxarıldı 2026-09-14 (audit F-06; QA modulu yoxdur) |
+| qa.review | kataloqdan çıxarıldı 2026-09-14 (audit F-06; QA modulu yoxdur) |
+| qa.view | kataloqdan çıxarıldı 2026-09-14 (audit F-06; QA modulu yoxdur) |
 | role.assign | apps/organizations/permissions.py:51; apps/organizations/default_roles.py:118; apps/accounts/views/_helpers/membership.py:124; apps/accounts/views/roles/permissions.py:46; apps/accounts/views/roles/_assignment_flow/flow.py:71; apps/accounts/views/roles/_assignment_flow/flow.py:123 |
-| role.create | apps/organizations/permissions.py:49 |
-| role.delete | apps/organizations/permissions.py:52 |
+| role.create | kataloqdan çıxarıldı 2026-09-14 (audit F-06; rol CRUD-u yoxdur) |
+| role.delete | kataloqdan çıxarıldı 2026-09-14 (audit F-06; rol CRUD-u yoxdur) |
 | role.description | templates/organizations/partials/_roles_content.html:21 |
 | role.display_name | apps/organizations/models.py:528; apps/organizations/management/commands/seed_ci_e2e_scenario.py:141; apps/organizations/management/commands/seed_ci_e2e_user.py:141; apps/organizations/structure_views/_shared.py:87; apps/organizations/views/member/selection.py:66; apps/ai_assistant/context_builder.py:215 |
-| role.edit | apps/organizations/permissions.py:50 |
+| journal.view | apps/registrar/journal_access.py `can_observe_journal` (əhatəli yalnız-oxu, 2026-09-14); apps/registrar/journal_scope.py `journal_view_q` (siyahı) |
+| role.edit | apps/accounts/views/roles/permissions.py `permission_editor` POST (2026-09-14); `ikt_rehber` (`role.*`) |
 | role.get | apps/organizations/default_roles.py:528 |
 | role.id | apps/exams/management/commands/_seed_helpers/users.py:149 |
 | role.is_system | templates/organizations/partials/_roles_content.html:25 |

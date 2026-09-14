@@ -43,15 +43,19 @@
             <p class="auth-route-note auth-route-note--{{ login_audience }}">{{ login_portal_message }}</p>
         {% endif %}
 
+        {% comment %}2026-09-14 (audit FE-F15, WCAG 4.1.3): giriş xətası ekran oxuyucuya
+        `role="alert"` ilə elan olunur; sahə xətaları Django 5.2-nin özünün widget-ə
+        yazdığı `aria-invalid="true"` + `aria-describedby="<auto_id>_error"`-a uyğun
+        `id` daşıyır (bax BoundField.aria_describedby).{% endcomment %}
         {% if form.non_field_errors %}
-            <div class="auth-global-errors"> {# auth-errors -> auth-global-errors #}
+            <div class="auth-global-errors" role="alert"> {# auth-errors -> auth-global-errors #}
                 {% for error in form.non_field_errors %}
                     <p>{{ error }}</p>
                 {% endfor %}
             </div>
         {% endif %}
 
-        <form method="post" class="auth-form" novalidate>
+        <form method="post" class="auth-form" novalidate data-clarity-mask="True">
             {% csrf_token %}
             {% if next %}
                 <input type="hidden" name="next" value="{{ next }}">
@@ -61,7 +65,7 @@
                 {{ form.username.label_tag }}
                 {{ form.username }}
                 {% if form.username.errors %}
-                    <div class="auth-field-error">{{ form.username.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                    <div class="auth-field-error" id="{{ form.username.auto_id }}_error">{{ form.username.errors.0 }}</div> {# auth-error -> auth-field-error #}
                 {% endif %}
             </div>
 
@@ -74,7 +78,7 @@
                         class="input-visibility-toggle"
                         data-toggle-visibility
                         data-target="{{ form.password.id_for_label }}"
-                        aria-label="Toggle field visibility"
+                        aria-label="{% trans 'Parolu göstər/gizlət' context 'accounts.first_login' %}"
                     >
                         {% comment %}
                         Inline SVG ikonlar (FontAwesome login-də yüklənmir — audit addım 3).
@@ -85,7 +89,7 @@
                     </button>
                 </div>
                 {% if form.password.errors %}
-                    <div class="auth-field-error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
+                    <div class="auth-field-error" id="{{ form.password.auto_id }}_error">{{ form.password.errors.0 }}</div> {# auth-error -> auth-field-error #}
                 {% endif %}
             </div>
 

@@ -104,6 +104,43 @@ def _clean_sort(value, table):
 # --------------------------------------------------------------------------- #
 
 
+def _group_counts_for_units(organization, units) -> dict:
+    """Səhifədəki ixtisasların AKTİV qrup sayı — TƏK aqreqat sorğu.
+
+    Audit 2026-09-10 P1-8 (düzəliş 2026-09-12): əvvəl hər ixtisas üçün ayrıca
+    ``COUNT`` atılırdı (25-lik səhifə = 25 əlavə sorğu) və yollar üçün də
+    əlavə ``SELECT`` gedirdi — halbuki ixtisas vahidi ``select_related`` ilə
+    onsuz da yüklüdür. ``OrgUnit.path`` materiallaşdırılmış yoldur
+    (``<ata-yol>/<id>``): «ixtisasın altındakı bütün qruplar» = ``path``
+    prefiksi, ona görə dərin yuvalanmış qrup (ixtisas → bölmə → qrup) da
+    sayılır. Bütün prefikslər bir ``WHERE``-də (OR) + hər ixtisas üçün şərti
+    ``Count(filter=…)`` — nəticə səhifə ölçüsündən asılı olmayaraq 1 sorğudur.
+
+    Qaytarır: ``{ixtisas_id(str): say}``; bu təşkilata aid olmayan / yolsuz
+    vahid siyahıya düşmür (çağıran ``.get(…, 0)`` ilə oxuyur).
+    """
+    paths = {
+        str(unit.id): unit.path
+        for unit in units
+        if unit is not None and unit.path and unit.organization_id == organization.id
+    }
+    if not paths:
+        return {}
+    scope = Q()
+    aggregates = {}
+    for index, path in enumerate(paths.values()):
+        prefix = Q(path__startswith=f"{path}/")
+        scope |= prefix
+        aggregates[f"n{index}"] = Count("id", filter=prefix)
+    totals = (
+        _org_unit_model()
+        .objects.filter(organization=organization, is_active=True, unit_type="group")
+        .filter(scope)
+        .aggregate(**aggregates)
+    )
+    return {unit_id: int(totals[f"n{index}"] or 0) for index, unit_id in enumerate(paths)}
+
+
 def build_programs_registry(request, organization) -> dict:
     """«İxtisaslar» reyestri: filtr + sıralama + səhifələmə (hamısı serverdə)."""
     if not can_view_catalog(request):
@@ -153,18 +190,10 @@ def build_programs_registry(request, organization) -> dict:
     queryset = queryset.order_by(*PROGRAM_SORTS[sort])
     page_obj = Paginator(queryset, PAGE_SIZE).get_page(request.GET.get("pg_page"))
 
-    OrgUnit = _org_unit_model()
-    group_counts: dict = {}
-    unit_ids = [row.specialty_unit_id for row in page_obj.object_list if row.specialty_unit_id]
-    if unit_ids:
-        paths = {
-            str(unit.id): unit.path
-            for unit in OrgUnit.objects.filter(organization=organization, pk__in=unit_ids).only("id", "path")
-        }
-        for unit_id, path in paths.items():
-            group_counts[unit_id] = OrgUnit.objects.filter(
-                organization=organization, is_active=True, unit_type="group", path__startswith=f"{path}/"
-            ).count()
+    # Qrup sayları: səhifənin bütün ixtisasları üçün BİR sorğu (P1-8).
+    group_counts = _group_counts_for_units(
+        organization, [program.specialty_unit for program in page_obj.object_list if program.specialty_unit_id]
+    )
 
     rows = []
     for program in page_obj.object_list:
@@ -227,6 +256,45 @@ def build_programs_registry(request, organization) -> dict:
 # --------------------------------------------------------------------------- #
 
 
+def _normalized_subject_name(name) -> str:
+    """Dublikat açarı: boşluqlar sıxılır, ``casefold`` (reqistrsiz)."""
+    return " ".join((name or "").split()).casefold()
+
+
+def subject_name_index(organization) -> tuple[dict, dict]:
+    """Arxivlənməmiş fənn adları — TƏK ``GROUP BY name`` sorğusu ilə dublikat indeksi.
+
+    Audit 2026-09-10 P1-8 (düzəliş 2026-09-12): əvvəl BÜTÜN fənn adları sətir-sətir
+    Python-a çəkilirdi, ``sb_dup=1`` isə eyni cədvəli İKİNCİ dəfə tam skan edirdi.
+    İndi DB xam ad üzrə qruplaşdırır (``values("name").annotate(Count("id"))`` —
+    yalnız fərqli adlar gəlir), Python isə yalnız bu fərqli adları
+    normallaşdırıb toplayır; süzgəc eyni nəticədəki xam variantları işlədir.
+
+    Normallaşdırma QƏSDƏN Python-da qalır: SQL ``LOWER`` Azərbaycan «İ/I»
+    hərflərini eyniləşdirir və Unicode boşluqları (NBSP) sıxmır — DB tərəfinə
+    köçürsək «AD DUBLİKATI» rəqəmi köhnə ilə fərqlənərdi.
+
+    Qaytarır: ``(duplicates, variants)`` — ``duplicates``: normallaşdırılmış ad →
+    say (yalnız >1); ``variants``: həmin açar → DB-dəki xam ad variantları.
+    """
+    counter: dict[str, int] = {}
+    variants: dict[str, list] = {}
+    grouped = (
+        Subject.objects.filter(organization=organization, is_archived=False)
+        .values("name")
+        .annotate(n=Count("id"))
+        .order_by()  # Meta.ordering (`code`) GROUP BY-a düşməsin
+    )
+    for item in grouped:
+        key = _normalized_subject_name(item["name"])
+        if not key:
+            continue
+        counter[key] = counter.get(key, 0) + int(item["n"] or 0)
+        variants.setdefault(key, []).append(item["name"])
+    duplicates = {key: value for key, value in counter.items() if value > 1}
+    return duplicates, {key: variants[key] for key in duplicates}
+
+
 def duplicate_subject_names(organization) -> dict:
     """Ad üzrə dublikatlar: normallaşdırılmış ad → say (yalnız >1).
 
@@ -235,12 +303,7 @@ def duplicate_subject_names(organization) -> dict:
     əməldir, plan sətirlərinin və sillabusların köçürülməsini tələb edir
     (bax hesabatdakı «təxirə salınanlar»).
     """
-    counter: dict = {}
-    for name in Subject.objects.filter(organization=organization, is_archived=False).values_list("name", flat=True):
-        key = " ".join((name or "").split()).casefold()
-        if key:
-            counter[key] = counter.get(key, 0) + 1
-    return {key: value for key, value in counter.items() if value > 1}
+    return subject_name_index(organization)[0]
 
 
 def build_subject_catalog(request, organization) -> dict:
@@ -260,7 +323,8 @@ def build_subject_catalog(request, organization) -> dict:
     show_archived = (request.GET.get("sb_arch") or "") == "1"
     sort = _clean_sort((request.GET.get("sb_sort") or "").strip(), SUBJECT_SORTS)
 
-    duplicates = duplicate_subject_names(organization)
+    # Sorğu başına BİR dəfə: həm KPI, həm sətir bayrağı, həm `sb_dup=1` süzgəci buradan.
+    duplicates, duplicate_variants = subject_name_index(organization)
 
     queryset = Subject.objects.filter(organization=organization).select_related("chair_unit")
     total_count = queryset.count()
@@ -274,13 +338,8 @@ def build_subject_catalog(request, organization) -> dict:
         queryset = queryset.filter(kind=kind)
     if only_duplicates:
         # Dublikat adlar azdır (onluqlarla) — `name__in` sorğusu təhlükəsizdir.
-        duplicate_names = [
-            name
-            for name in Subject.objects.filter(organization=organization, is_archived=False).values_list(
-                "name", flat=True
-            )
-            if " ".join((name or "").split()).casefold() in duplicates
-        ]
+        # Xam variantlar eyni indeksdən gəlir: ikinci tam skan YOXDUR (P1-8).
+        duplicate_names = [name for names in duplicate_variants.values() for name in names]
         queryset = queryset.filter(name__in=duplicate_names)
 
     queryset = queryset.annotate(plan_usage=Count("curriculum_rows", distinct=True))
@@ -289,7 +348,7 @@ def build_subject_catalog(request, organization) -> dict:
 
     rows = []
     for subject in page_obj.object_list:
-        name_key = " ".join((subject.name or "").split()).casefold()
+        name_key = _normalized_subject_name(subject.name)
         rows.append(
             {
                 "id": str(subject.id),
@@ -344,4 +403,5 @@ __all__ = [
     "can_view_catalog",
     "chair_options",
     "duplicate_subject_names",
+    "subject_name_index",
 ]

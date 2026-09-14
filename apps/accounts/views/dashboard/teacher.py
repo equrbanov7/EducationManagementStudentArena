@@ -4,6 +4,7 @@ Teacher dashboard and grading queue views.
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
@@ -12,9 +13,13 @@ from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course
 
 from .._helpers import (
+    _query_string,
     _role_capabilities,
     _tenant_scoped_courses,
 )
+
+#: Növbə səhifəsinin ölçüsü (audit 2026-09-10 P1-10) — hər səhifə 25 təhvil.
+GRADING_QUEUE_PAGE_SIZE = 25
 
 
 @login_required
@@ -66,8 +71,16 @@ def grading_queue(request):
     if assignment_id:
         submissions = submissions.filter(assignment_id=assignment_id)
 
-    # Order by oldest first
-    submissions = submissions.order_by("submitted_at")
+    # Ən köhnə əvvəl; `id` — eyni anlı təhvillərdə səhifələmənin sabit qalması üçün.
+    submissions = submissions.order_by("submitted_at", "id")
+
+    # P1-10 (audit 2026-09-10, düzəliş 2026-09-12): əvvəl queryset şablona
+    # Paginator-suz gedirdi — müəllimin bütün kurslarındakı BÜTÜN gözləyən
+    # təhvillər bir səhifədə render olunurdu, `.count()` isə eyni dəsti ikinci
+    # dəfə (COUNT + tam SELECT) qiymətləndirirdi. İndi 25-lik səhifə (`?page=`),
+    # say `paginator.count`-dan, süzgəclər səhifə linklərində saxlanılır.
+    paginator = Paginator(submissions, GRADING_QUEUE_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get("page"))
 
     graded_submissions = Submission.objects.filter(
         assignment__course__in=teacher_courses,
@@ -86,12 +99,14 @@ def grading_queue(request):
     ]
 
     context = {
-        "submissions": submissions,
+        "submissions": page_obj,
+        "page_obj": page_obj,
+        "pagination_query": _query_string(course=course_id, assignment=assignment_id, sort=request.GET.get("sort")),
         "courses": teacher_courses,
         "assignments": assignments,
         "selected_course": course_id,
         "selected_assignment": assignment_id,
-        "total_pending": submissions.count(),
+        "total_pending": paginator.count,
         "graded_today": graded_submissions.filter(graded_at__date=timezone.localdate()).count(),
         "avg_grading_time": _format_average_grading_time(
             (sum(grading_durations) / len(grading_durations)) if grading_durations else 0

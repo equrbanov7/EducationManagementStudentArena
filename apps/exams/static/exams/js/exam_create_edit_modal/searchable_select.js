@@ -346,23 +346,46 @@
     /* Qrup→tələbə sinxronu: seçilmiş qrup ID-ləri user lookup-a ötürülür.
        Server bütün tələbələri qaytarır, qrup üzvlərini `group_member` ilə
        işarələyir; frontend onları checked göstərib ayrı-ayrı istisna edə bilir. */
-    function initGroupUserSync(form, groupSelector, userSelector) {
-        if (!groupSelector || !userSelector) {
+    function initGroupUserSync(form, groupSelector, userSelector, unitSelector) {
+        // 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu seçicisi (`allowed_units`)
+        // də tələbə siyahısını süzür — `units=` parametri; köhnə kohort seçicisi
+        // şablonda olmaya bilər (null-safe).
+        if (!userSelector || (!groupSelector && !unitSelector)) {
             return;
         }
+        function groupIds() {
+            return groupSelector ? groupSelector.getSelectedValues() : [];
+        }
+        function unitIds() {
+            return unitSelector ? unitSelector.getSelectedValues() : [];
+        }
         userSelector.setExtraParamsProvider(function () {
-            var ids = groupSelector.getSelectedValues();
-            return ids.length ? "&groups=" + encodeURIComponent(ids.join(",")) : "";
+            var extra = "";
+            var gids = groupIds();
+            var uids = unitIds();
+            if (gids.length) {
+                extra += "&groups=" + encodeURIComponent(gids.join(","));
+            }
+            if (uids.length) {
+                extra += "&units=" + encodeURIComponent(uids.join(","));
+            }
+            return extra;
         });
-        groupSelector.setOnSelectionChange(function () {
-            if (!groupSelector.getSelectedValues().length && typeof userSelector.clearExcluded === "function") {
+        function onSelectionChange() {
+            if (!groupIds().length && !unitIds().length && typeof userSelector.clearExcluded === "function") {
                 userSelector.clearExcluded();
             }
             userSelector.reload();
-        });
+        }
+        if (groupSelector) {
+            groupSelector.setOnSelectionChange(onSelectionChange);
+        }
+        if (unitSelector) {
+            unitSelector.setOnSelectionChange(onSelectionChange);
+        }
         // Redaktə rejimi: form açılanda qrup(lar) onsuz da seçilibsə, sağ siyahını
         // dərhal həmin üzvlərlə süz.
-        if (groupSelector.getSelectedValues().length) {
+        if (groupIds().length || unitIds().length) {
             userSelector.reload();
         }
     }

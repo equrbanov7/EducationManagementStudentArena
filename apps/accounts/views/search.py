@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
+from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
 from core.program_codes import program_code_search_q
@@ -34,8 +35,10 @@ def _nav_targets(caps):
 
     "Bir səhifə, bir URL": nəticəyə klik sidebar-ı itirmir — `?section=` shell
     naviqasiyasıdır. Bölmə siyahısı ``allowed_sections``-a bağlıdır, ona görə
-    superadminin söndürdüyü modullar axtarışdan da avtomatik itir. Yeganə tam
-    səhifə istisnası: registrar konsolu (form-ağır admin səthi)."""
+    superadminin söndürdüyü modullar axtarışdan da avtomatik itir. İSTİSNA
+    YOXDUR: 2026-09-10-a qədər «Registrar (kataloq)» köhnə müstəqil
+    `registrar:console` səhifəsinə atırdı (sahib: «bunu sil, bu köhnədi») —
+    həmin səhifə silindi, keçid indi kabinet bölməsidir."""
     profile_url = reverse("accounts:profile")
 
     def shell(section):
@@ -60,16 +63,13 @@ def _nav_targets(caps):
         ("my-exams", _("İmtahanlarım"), "fa-clipboard-check", "imtahan exam test"),
         ("assigned-exams", _("İmtahanlar"), "fa-clipboard-check", "imtahan exam test"),
         ("notifications", _("Bildirişlər"), "fa-bell", "bildiriş notification xəbər"),
+        ("registrar-catalog", _("Registrar (kataloq)"), "fa-sitemap", "registrar program fənn kataloq"),
     ]
     targets = [
         (title, icon, shell(section), keywords)
         for section, title, icon, keywords in candidates
         if section == "profile-info" or section in allowed
     ]
-    if caps.get("can_manage_registrar"):
-        targets.append(
-            (_("Registrar (kataloq)"), "fa-sitemap", reverse("registrar:console"), "registrar program fənn kataloq")
-        )
     return targets
 
 
@@ -101,6 +101,16 @@ def _journal_group(user, organization, query):
     ]
 
 
+def _section_url(section, params=None):
+    """Kabinet bölməsinə keçid — lazım olsa bölmənin ÖZ süzgəc parametri ilə.
+
+    Nəticəyə klik istifadəçini sətrin ÜSTÜNƏ gətirir: kataloq/reyestr sətirləri
+    dialoqda açılır, ona görə birbaşa «sətir URL-i» yoxdur — əvəzinə bölmənin
+    axtarış süzgəci öncədən doldurulur."""
+    query = urlencode({"section": section, **(params or {})})
+    return f"{reverse('accounts:profile')}?{query}"
+
+
 def _subject_group(organization, query):
     Subject = django_apps.get_model("registrar", "Subject")
     qs = Subject.objects.filter(organization=organization).filter(Q(code__icontains=query) | Q(name__icontains=query))[
@@ -111,7 +121,7 @@ def _subject_group(organization, query):
             "title": f"{s.code} — {s.name}",
             "subtitle": "",
             "icon": "fa-atom",
-            "url": reverse("registrar:subject_edit", args=[s.id]),
+            "url": _section_url("registrar-catalog", {"rc_tab": "subjects", "rc_q": s.code}),
         }
         for s in qs
     ]
@@ -152,7 +162,7 @@ def _student_group(organization, query):
                 "title": name,
                 "subtitle": " · ".join(parts),
                 "icon": "fa-user-graduate",
-                "url": reverse("registrar:student_record_edit", args=[r.id]),
+                "url": _section_url("student-registry", {"sr_q": r.student.username}),
             }
         )
     return items

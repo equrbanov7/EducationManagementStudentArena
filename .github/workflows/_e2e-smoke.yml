@@ -49,6 +49,10 @@ jobs:
       SECURE_SSL_REDIRECT: "False"
       SESSION_COOKIE_SECURE: "False"
       CSRF_COOKIE_SECURE: "False"
+      # `production.py` TLS məcburiyyəti söndürüləndə qalxmır (2026-09-10
+      # təhlükəsizlik qapısı). Bu yığın CI-də DÜZ HTTP üzərindədir, ona görə
+      # istisna AÇIQ bildirilir — prod hostda belə bir sətir olmamalıdır.
+      INSECURE_TRANSPORT_OK: "1"
 
     steps:
       - name: 📥 Checkout code

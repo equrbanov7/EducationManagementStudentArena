@@ -101,6 +101,17 @@
     justify-content: center;
     min-width: var(--ems-tap, 44px);
     min-height: var(--ems-tap, 44px);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* 2026-09-14 (audit FE-F11, WCAG 2.5.8): qrup seçimi xanası 13×13 px idi —
+   18 px xana, sarğı etiketi 44 px klik sahəsi verir. */
+.tof-bulk__check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary-600, #2563eb);
     cursor: pointer;
 }
 

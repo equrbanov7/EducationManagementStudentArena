@@ -190,9 +190,12 @@
         url.searchParams.set(host.getAttribute("data-rcat-tab-param"), host.getAttribute("data-rcat-tab"));
         var form = document.querySelector("[data-ems-filters]");
         if (form) {
+            // ⚠️ Parametrin adı sahənin `name`-idir. `data-ems-filter` BOŞ
+            // markerdir — onu açar kimi işlətmək URL-ə adsız `?=dəyər` yazırdı
+            // və süzgəc dialoqdan sonra itirdi.
             form.querySelectorAll("[data-ems-filter]").forEach(function (el) {
-                if (el.value) {
-                    url.searchParams.set(el.getAttribute("data-ems-filter"), el.value);
+                if (el.name && el.value) {
+                    url.searchParams.set(el.name, el.value);
                 }
             });
         }

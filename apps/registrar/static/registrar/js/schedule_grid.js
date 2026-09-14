@@ -125,7 +125,23 @@
         var form = event.target.closest("[data-sgx-delete-form]");
         if (!form) return;
         var question = form.getAttribute("data-sgx-confirm");
-        if (question && !window.confirm(question)) event.preventDefault();
+        if (!question) return;
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        if (form.dataset.emsConfirmed === "1") {
+            delete form.dataset.emsConfirmed;
+            return;
+        }
+        event.preventDefault();
+        var submitter = event.submitter || null;
+        window.EMSConfirm.open({ body: question, danger: true }).then(function (ok) {
+            if (!ok) return;
+            form.dataset.emsConfirmed = "1";
+            if (typeof form.requestSubmit === "function") {
+                form.requestSubmit(submitter && submitter.form === form ? submitter : undefined);
+            } else {
+                form.submit();
+            }
+        });
     });
 
     document.addEventListener("keydown", function (event) {

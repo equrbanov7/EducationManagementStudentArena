@@ -170,6 +170,14 @@ def feature_flags(request):
     return {
         "exam_supervision_enabled": bool(getattr(settings, "EXAM_SUPERVISION_ENABLED", True)),
         "microsoft_clarity_project_id": getattr(settings, "MICROSOFT_CLARITY_PROJECT_ID", ""),
+        # 2026-09-13 (Codex audit §11): session-replay YALNIZ anonim səhifələrdə;
+        # kabinet (PII/qiymət/sənəd) yalnız MICROSOFT_CLARITY_AUTHENTICATED=true
+        # ilə izlənir. Şablon (`partials/_microsoft_clarity.html`) bu bayrağa baxır.
+        "microsoft_clarity_enabled": bool(getattr(settings, "MICROSOFT_CLARITY_PROJECT_ID", ""))
+        and (
+            not getattr(getattr(request, "user", None), "is_authenticated", False)
+            or bool(getattr(settings, "MICROSOFT_CLARITY_AUTHENTICATED", False))
+        ),
         "practical_exams_enabled": bool(getattr(settings, "PRACTICAL_EXAMS_ENABLED", True)),
         # e-university provisioning: public self-signup is off by default, so the
         # login page hides the "register now" link unless a deployment re-opens it.

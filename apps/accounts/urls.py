@@ -7,6 +7,9 @@ from django.urls import path
 
 from . import views
 from .views import academic_records as academic_records_views
+from .views import exam_score_entry_changes as exam_score_changes_views
+from .views import exam_score_import as exam_score_import_views
+from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
 app_name = "accounts"
 
@@ -73,6 +76,13 @@ urlpatterns = [
     # Profile
     path("profile/", views.user_profile, name="profile"),
     path("profile/statistics/export-csv/", views.statistics_export_csv, name="statistics_export_csv"),
+    # Codex audit §7 (2026-09-13): ekranda görünən rol-aware göstəricilərin CSV-si
+    # (köhnə «Göndərişlər (CSV)» köhnə selector xülasəsini verir — ikisi də qalır).
+    path(
+        "profile/statistics/export-metrics-csv/",
+        statistics_export_metrics_views.statistics_export_metrics_csv,
+        name="statistics_export_metrics_csv",
+    ),
     # Staff iyerarxik akademik-qeyd icmalı ("Akademik qeydlər" profil bölməsi) —
     # cross-domain (registrar nəticələr + organizations strukturu) inteqrasiya
     # endpoint-ləri accounts-dadır (modul-sərhəd dövrünü önləmək üçün).
@@ -191,6 +201,30 @@ urlpatterns = [
     path("exam-chance/", views.exam_chance, name="exam_chance"),
     # İmtahan Mərkəzi — kağız (yazılı/praktiki) imtahan balının daxil edilməsi
     path("imtahan-bali/", views.exam_score_entry, name="exam_score_entry"),
+    # 2026-09-12 — balların FAYLDAN (XLSX/CSV) köçürülməsi: doldurulmuş şablon,
+    # quru icra (heç nə yazmır) və tətbiq (yazı yalnız registrar servisindən).
+    path(
+        "imtahan-bali/sablon/",
+        exam_score_import_views.exam_score_import_template,
+        name="exam_score_import_template",
+    ),
+    path(
+        "imtahan-bali/idxal/yoxla/",
+        exam_score_import_views.exam_score_import_preview,
+        name="exam_score_import_preview",
+    ),
+    path(
+        "imtahan-bali/idxal/tetbiq/",
+        exam_score_import_views.exam_score_import_apply,
+        name="exam_score_import_apply",
+    ),
+    # 2026-09-14 (W2 `w2paper`) — «Dəyişən nəticələr» (apellyasiya / sənədli
+    # düzəliş) CSV ixracı; bölmənin `?ese_view=changes` cədvəli ilə eyni filtrlər.
+    path(
+        "imtahan-bali/deyisen-neticeler.csv",
+        exam_score_changes_views.exam_score_changes_export,
+        name="exam_score_changes_export",
+    ),
     # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
     path("jurnal-baglama/", views.journal_close, name="journal_close"),
     # Account management

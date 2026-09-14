@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260716-intervention";
+import { ExamSupervision } from "./state.js?v=20260914-w4r3";
 
 Object.assign(ExamSupervision, {
         _createWarningModal: function () {
@@ -341,38 +341,34 @@ Object.assign(ExamSupervision, {
         },
 
         _startTeacherLockPolling: function () {
-            if (this._teacherLockPoll) return;
-            this._teacherLockPoll = setInterval(function () {
-                ExamSupervision._checkSupervisionStatus(function (data) {
-                    if (!data) return;
-                    if (data.supervision_status === "resumed" || data.supervision_status === "active") {
-                        clearInterval(ExamSupervision._teacherLockPoll);
-                        ExamSupervision._teacherLockPoll = null;
-                        var ov = document.getElementById("supervision-teacher-lock-overlay");
-                        if (ov) ov.remove();
-                        ExamSupervision.isActive = true;
-                        if (data.violation_count !== undefined) {
-                            ExamSupervision.violationCount = data.violation_count;
-                        }
-                        if (data.max_violations !== undefined) {
-                            ExamSupervision.maxViolations = data.max_violations;
-                        }
-                        ExamSupervision._updateBadge();
-                        ExamSupervision._showResumeFullscreenOverlay(null);
-                    } else if (data.is_finished) {
-                        clearInterval(ExamSupervision._teacherLockPoll);
-                        ExamSupervision._teacherLockPoll = null;
-                        if (data.intervention_action || data.intervention_reason) {
-                            ExamSupervision._showRemovalOverlay(
-                                data.intervention_reason,
-                                data.intervention_action
-                            );
-                        } else {
-                            ExamSupervision._leaveToResult();
-                        }
+            this._startLockStatusPolling(function (data) {
+                if (data.supervision_status === "resumed" || data.supervision_status === "active") {
+                    var ov = document.getElementById("supervision-teacher-lock-overlay");
+                    if (ov) ov.remove();
+                    ExamSupervision.isActive = true;
+                    if (data.violation_count !== undefined) {
+                        ExamSupervision.violationCount = data.violation_count;
                     }
-                });
-            }, 1000);
+                    if (data.max_violations !== undefined) {
+                        ExamSupervision.maxViolations = data.max_violations;
+                    }
+                    ExamSupervision._updateBadge();
+                    ExamSupervision._showResumeFullscreenOverlay(null);
+                    return true;
+                }
+                if (data.is_finished) {
+                    if (data.intervention_action || data.intervention_reason) {
+                        ExamSupervision._showRemovalOverlay(
+                            data.intervention_reason,
+                            data.intervention_action
+                        );
+                    } else {
+                        ExamSupervision._leaveToResult();
+                    }
+                    return true;
+                }
+                return false;
+            });
         },
 
         _onLimitExceeded: function () {
@@ -444,33 +440,33 @@ Object.assign(ExamSupervision, {
         },
 
         _startStatusPolling: function () {
-            var poll = setInterval(function () {
-                ExamSupervision._checkSupervisionStatus(function (data) {
-                    if (data.supervision_status === "resumed" || data.supervision_status === "active") {
-                        clearInterval(poll);
-                        if (ExamSupervision._lockCountdownTimer) {
-                            clearInterval(ExamSupervision._lockCountdownTimer);
-                            ExamSupervision._lockCountdownTimer = null;
-                        }
-                        var overlay = document.getElementById("supervision-locked-overlay");
-                        if (overlay) overlay.remove();
-                        ExamSupervision.isActive = true;
-                        ExamSupervision.violationCount = data.violation_count || 0;
-                        ExamSupervision.maxViolations = data.max_violations || ExamSupervision.maxViolations;
-                        ExamSupervision._updateBadge();
-                        // Teacher resumed in time → just bring the student back
-                        // (fullscreen prompt if required). No further countdown.
-                        ExamSupervision._showResumeFullscreenOverlay(null);
-                    } else if (data.is_finished) {
-                        clearInterval(poll);
-                        if (ExamSupervision._lockCountdownTimer) {
-                            clearInterval(ExamSupervision._lockCountdownTimer);
-                            ExamSupervision._lockCountdownTimer = null;
-                        }
-                        ExamSupervision._leaveToResult();
+            this._startLockStatusPolling(function (data) {
+                if (data.supervision_status === "resumed" || data.supervision_status === "active") {
+                    if (ExamSupervision._lockCountdownTimer) {
+                        clearInterval(ExamSupervision._lockCountdownTimer);
+                        ExamSupervision._lockCountdownTimer = null;
                     }
-                });
-            }, 1000);
+                    var overlay = document.getElementById("supervision-locked-overlay");
+                    if (overlay) overlay.remove();
+                    ExamSupervision.isActive = true;
+                    ExamSupervision.violationCount = data.violation_count || 0;
+                    ExamSupervision.maxViolations = data.max_violations || ExamSupervision.maxViolations;
+                    ExamSupervision._updateBadge();
+                    // Teacher resumed in time → just bring the student back
+                    // (fullscreen prompt if required). No further countdown.
+                    ExamSupervision._showResumeFullscreenOverlay(null);
+                    return true;
+                }
+                if (data.is_finished) {
+                    if (ExamSupervision._lockCountdownTimer) {
+                        clearInterval(ExamSupervision._lockCountdownTimer);
+                        ExamSupervision._lockCountdownTimer = null;
+                    }
+                    ExamSupervision._leaveToResult();
+                    return true;
+                }
+                return false;
+            });
         },
 
         // Format seconds as M:SS for the resume countdown.

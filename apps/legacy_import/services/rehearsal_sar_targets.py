@@ -152,7 +152,7 @@ def _refusal_types() -> tuple[type[BaseException], ...]:
 
     global _REFUSAL_TYPES
     if not _REFUSAL_TYPES:
-        from apps.accounts.services.identity_access import IdentityAccessError
+        from apps.accounts.public import IdentityAccessError
 
         # ``IdentityCollisionError`` subclasses ``IdentityAccessError`` and
         # ``IntegrityError`` subclasses ``DatabaseError``; both are covered.

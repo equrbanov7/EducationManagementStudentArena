@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from django.db.models import Count, Q
 
-from apps.organizations.scoping import scope_org_units
+from apps.organizations.public import scope_org_units
 from core.program_codes import program_display_label
 
 from .constants import FACULTY_UNIT_TYPES, GENDER_BUCKETS, GROUP_UNIT_TYPES, KAFEDRA_UNIT_TYPES

@@ -8,6 +8,7 @@ import re
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
@@ -44,16 +45,19 @@ def create_question(request, block_id):
                 max_size_mb=block.lab.max_file_size_mb or 25,
             )
 
-        question = LabQuestion.objects.create(
-            block=block,
-            question_number=block.questions.count() + 1,
-            question_text=request.POST.get("question_text"),
-            points=request.POST.get("points", 0),
-        )
+        # Audit 2026-09-13 backend F-07 (2026-09-14): sual + əlavə faylı birlikdə —
+        # fayl yazısı sınsa faylsız sual qalmasın (istisna `except`-ə çıxır → 500).
+        with transaction.atomic():
+            question = LabQuestion.objects.create(
+                block=block,
+                question_number=block.questions.count() + 1,
+                question_text=request.POST.get("question_text"),
+                points=request.POST.get("points", 0),
+            )
 
-        if attachment is not None:
-            question.attachment = attachment
-            question.save()
+            if attachment is not None:
+                question.attachment = attachment
+                question.save()
 
         return JsonResponse({"success": True, "question_id": question.id})
 

@@ -40,8 +40,8 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.accounts.views.handover import filters as handover_filters
-from apps.registrar import handover as handover_read
-from apps.registrar import handover_query
+from apps.registrar.public import handover as handover_read
+from apps.registrar.public import handover_query
 
 from . import handover_rows as rows_ui
 from . import handover_ui as ui
@@ -113,7 +113,7 @@ def build_handover_section(request, section, *, active_organization, allowed_sec
 
 
 def handover_write_limit() -> int:
-    from apps.registrar import handover_actions as handover_write
+    from apps.registrar.public import handover_actions as handover_write
 
     return handover_write.MAX_BULK_ROWS
 

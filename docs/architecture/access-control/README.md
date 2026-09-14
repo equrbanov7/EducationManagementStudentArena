@@ -2,7 +2,7 @@
 
 Bu paket EMSArena RBAC və authorization davranışını real mənbələrdən sənədləşdirir.
 
-Yaradılma vaxtı: `2026-07-08 14:49:12`
+Yaradılma vaxtı: `2026-07-08 14:49:12` · saylar 2026-09-14-də koddan yenilənib (audit dalğa 2)
 
 ## Fayllar
 
@@ -16,8 +16,8 @@ Yaradılma vaxtı: `2026-07-08 14:49:12`
 
 ## Saylar
 
-- Organization default role template qeydi: **32**
-- Unique role adı: **29**
-- ProfileRole choice: **12**
-- Permission category: **11**
-- Canonical permission kodu: **49**
+- Organization default role template qeydi: **40**
+- Unique role adı: **33**
+- ProfileRole choice: **14**
+- Permission category: **22**
+- Canonical permission kodu: **106**

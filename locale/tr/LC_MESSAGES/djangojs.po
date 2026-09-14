@@ -2859,3 +2859,228 @@ msgstr "Kapat"
 
 msgid "Yadda saxla"
 msgstr "Kaydet"
+
+msgid "Ad"
+msgstr "Adı"
+
+msgid "Alıcılar"
+msgstr "Atananlar"
+
+msgid "Anladım"
+msgstr "Tamam"
+
+msgid "Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"
+msgstr "İtiraz açıldıktan sonra hiçbir soru kararsız kalamaz. Karar verilmemiş sorular:"
+
+msgid "Axtar…"
+msgstr "Ara…"
+
+msgid "Başlama"
+msgstr "Başlangıç"
+
+msgid "Başlama vaxtını seçin."
+msgstr "Başlangıç zamanını seçin."
+
+msgid "Bitmə vaxtını seçin."
+msgstr "Bitiş zamanını seçin."
+
+msgid "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
+msgstr "Bu PIN'i sınav giriş sayfasında kullanıcı adınızla birlikte kullanın."
+
+msgid "Bu dersin atandığı gruplar"
+msgstr "Bu dersin atandığı gruplar"
+
+msgid "Bu fənnin tədris olunduğu qruplar"
+msgstr "Bu dersin atandığı gruplar"
+
+msgid "Bütün suallara qərar verin"
+msgstr "Tüm sorular için karar verin"
+
+msgid "Cari cavablarınız yadda saxlanılıb. Ətraflı nəticəyə keçə bilərsiniz."
+msgstr "Mevcut cevaplarınız kaydedildi. Ayrıntılı sonuca geçebilirsiniz."
+
+msgid "Deaktiv"
+msgstr "Kapalı"
+
+msgid "Düzəlişi geri al"
+msgstr "Düzeltmeyi geri al"
+
+msgid "Fənn"
+msgstr "Ders"
+
+msgid "Fənn seçilməlidir."
+msgstr "Ders seçilmelidir."
+
+msgid "Fənn yoxdur"
+msgstr "Ders yok"
+
+msgid "Fərdi tələbələr"
+msgstr "Bireysel öğrenciler"
+
+msgid "Geri"
+msgstr "Geri dön"
+
+msgid "Hamıya açıq"
+msgstr "Herkese açık"
+
+msgid "Kateqoriya"
+msgstr "Kategori"
+
+msgid "Kateqoriyanı seçin."
+msgstr "Kategori seçin."
+
+msgid "Müddət (dəq)"
+msgstr "Süre (dk)"
+
+msgid "Nəticəyə keç"
+msgstr "Sonuca geç"
+
+msgid "Nəzarət"
+msgstr "Gözetim"
+
+msgid "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
+msgstr "PIN yalnızca sınav saatine yakın görünür veya sınav merkezinden alınır."
+
+msgid "Qruplar"
+msgstr "Gruplar"
+
+msgid "Salam! Suallarınızı cavablandırmağa hazıram. Necə kömək edə bilərəm?"
+msgstr "Merhaba! Sorularınızı yanıtlamaya hazırım. Nasıl yardımcı olabilirim?"
+
+msgid "Seçilmiş qrupla daxildir"
+msgstr "Seçilen grupla dahil"
+
+msgid "Seçilməyib"
+msgstr "Seçilmedi"
+
+msgid "Sistemdə yalnız {n} sual var."
+msgstr "Sistemde yalnızca {n} soru var."
+
+msgid "Sual sayı"
+msgstr "Soru sayısı"
+
+msgid "Səbəb"
+msgstr "Neden"
+
+msgid "Səbəb tipini seçin və izahı ən azı {min} simvol yazın."
+msgstr "Neden türünü seçin ve en az {min} karakterlik açıklama yazın."
+
+msgid "Tip"
+msgstr "Tür"
+
+msgid "Tələbə sayı (ümumi)"
+msgstr "Öğrenci sayısı (toplam)"
+
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgid "Təsdiqlə və yarat"
+msgstr "Onayla ve oluştur"
+
+msgid "hesablanır…"
+msgstr "hesaplanıyor…"
+
+msgid "{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "{q}. soruda en az {min} karakterlik açıklama yazmalı ya da «İtiraz et» düğmesini kapatmalısınız."
+
+msgid "{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "{q}. soruda neden türünü seçip en az {min} karakterlik açıklama yazmalı ya da «İtiraz et» düğmesini kapatmalısınız."
+
+msgid "{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr "{q}. soruda neden türünü seçmeli ya da «İtiraz et» düğmesini kapatmalısınız."
+
+msgid "İmtahan adı"
+msgstr "Sınav adı"
+
+msgid "İmtahan aşağıdakı məlumatlarla yaradılıb təyin olunacaq."
+msgstr "Sınav aşağıdaki bilgilerle oluşturulup atanacak."
+
+msgid "İmtahan mərkəzi hələ sizə bilet təyin etməyib."
+msgstr "Sınav merkezi size henüz bilet atamadı."
+
+msgid "İmtahandan çıxarıldınız"
+msgstr "Sınavdan çıkarıldınız"
+
+msgid "İmtahanı təsdiqlə"
+msgstr "Sınavı onayla"
+
+msgid "İmtahanın ümumi müddətini yazın."
+msgstr "Sınavın toplam süresini yazın."
+
+msgid "İmtahanınız texniki səbəblə dayandırıldı"
+msgstr "Sınavınız teknik bir nedenle durduruldu"
+
+msgid "İşarələnmişləri ləğv et"
+msgstr "İşaretlenenlerin seçimini kaldır"
+
+msgid "İşarələnmişləri seç"
+msgstr "İşaretlenenleri seç"
+
+msgid "Əməliyyat alınmadı."
+msgstr "İşlem gerçekleştirilemedi."
+
+msgid "Əvvəlcə tapşırıq yaradılmalıdır."
+msgstr "Önce görev oluşturulmalıdır."
+
+msgid "Sətir silinsin?"
+msgstr "Satır silinsin mi?"
+
+msgid "Bölgü silinsin?"
+msgstr "Dağıtım silinsin mi?"
+
+msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
+msgstr "Dağıtım onaylandı. Defter açılışı: %(created)s yeni, %(updated)s güncellendi. Bildirim: %(notified)s"
+
+msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
+msgstr "Bu bölümün programları için aktif öğretim planı satırı bulunamadı."
+
+msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr "Planda %(count)s öneri bulundu; ilki dolduruldu. Saatler öğretim planında saklanmaz — elle yazın (öneri: %(hours)s saat)."
+
+msgid "Qalıq: %(remaining)s / %(total)s saat"
+msgstr "Kalan: %(remaining)s / %(total)s saat"
+
+msgid "Vakant (müəllim təyin edilməyib)"
+msgstr "Boş (öğretim elemanı atanmamış)"
+
+msgid "(kafedraya bağlanmamış)"
+msgstr "(bölüme bağlı değil)"
+
+msgid "Bu sətirdə bölünəcək saat yoxdur."
+msgstr "Bu satırda dağıtılacak saat yok."
+
+msgid "Bölüşdür"
+msgstr "Dağıt"
+
+msgid "Bölgünü sil"
+msgstr "Dağıtımı sil"
+
+msgid "Hələ bölgü yoxdur."
+msgstr "Henüz dağıtım yok."
+
+msgid "Jurnal açılışı"
+msgstr "Defter açılışı"
+
+msgid "Yarımçıq sətir"
+msgstr "Eksik satır"
+
+msgid "Aç"
+msgstr "Görüntüle"
+
+msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmiyor. Yalnızca .pdf / .docx / .txt / .png / .jpg yükleyin."
+
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitiş zamanı başlangıç zamanından sonra olmalıdır."
+
+msgid "Müddət 0-dan böyük olmalıdır."
+msgstr "Süre 0'dan büyük olmalıdır."
+
+msgid "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+msgstr "Süre sınav penceresinden ({n} dk) uzun olamaz."
+
+msgid "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+msgstr "Soru sayısı negatif olamaz (0 = tüm sorular)."
+
+msgid "Köhnə kohortlar"
+msgstr "Eski kohortlar"

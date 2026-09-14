@@ -4,6 +4,9 @@
 {% block title %}{{ session.room.name }} — {% trans "Zal oturumu" %}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur
+    (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
 {% endblock %}
 
@@ -92,10 +95,9 @@
       </table>
     </div>
     {% else %}
-    <div class="fxc-empty">
-      <i class="far fa-user"></i>
-      <p>{% trans "Bu oturuma hələ tələbə qoşulmayıb. Tələbə qeydli kompüterdən PIN ilə girəndə burada görünəcək." %}</p>
-    </div>
+    {% trans "Bu oturuma hələ tələbə qoşulmayıb." as sd_empty %}
+    {% trans "Tələbə qeydli kompüterdən PIN ilə girəndə burada görünəcək." as sd_empty_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-clock" state_title=sd_empty state_body=sd_empty_body %}
     {% endif %}
   </section>
 

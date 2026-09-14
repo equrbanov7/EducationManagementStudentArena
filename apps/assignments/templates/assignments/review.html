@@ -18,8 +18,9 @@
         <div class="input-group">
             <input type="text" name="group_search" class="form-control" 
                    placeholder="{% trans 'placeholder_search_group' context 'assignment.legacy.review' %}" value="{{ group_search }}">
-            <button class="btn btn-outline-secondary" type="submit">
-                <i class="fas fa-magnifying-glass"></i>
+            {# 2026-09-14 (audit FE-F17): ikon-only düymələrə əlçatan ad #}
+            <button class="btn btn-outline-secondary" type="submit" aria-label="{% trans 'Axtar' context 'search' %}">
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             </button>
         </div>
     </form>
@@ -79,13 +80,15 @@
                         <td>
                             <button type="button"
                                     class="btn btn-sm btn-warning js-edit-assignment"
-                                    data-url="{% url 'assignments:edit_assignment' assignment.id %}">
-                                <i class="fas fa-pencil"></i>
+                                    data-url="{% url 'assignments:edit_assignment' assignment.id %}"
+                                    aria-label="{% trans 'Tapşırığı redaktə et' context 'assignment.legacy.review' %}">
+                                <i class="fas fa-pencil" aria-hidden="true"></i>
                             </button>
                             <button type="button"
                                     class="btn btn-sm btn-danger js-delete-assignment"
-                                    data-url="{% url 'assignments:delete_assignment' assignment.id %}">
-                                <i class="fas fa-trash"></i>
+                                    data-url="{% url 'assignments:delete_assignment' assignment.id %}"
+                                    aria-label="{% trans 'Tapşırığı sil' context 'assignment.legacy.review' %}">
+                                <i class="fas fa-trash" aria-hidden="true"></i>
                             </button>
                             <a href="{% url 'assignments:review' assignment.id %}" 
                                class="btn btn-sm btn-info">

@@ -209,6 +209,43 @@
             try { rebindCommonControls(panel); } catch (e) { /* ignore */ }
         }
 
+        /* Frontend auditi 2026-09-13 F5 (WCAG 2.4.3 / 4.1.3): AJAX keçidindən sonra
+           fokus `body`-də qalırdı — klaviatura/ekran oxuyucu istifadəçisi yeni
+           bölmənin yükləndiyini bilmirdi (7 rol × 100+ swap-da `activeElement=BODY`).
+           İndi swap-dan sonra fokus `#profileSectionTitle`-a (h1) aparılır
+           (`tabIndex=-1` — yalnız proqram fokusu, Tab sırasına düşmür) və
+           JS ilə yaradılan gizli `aria-live` sahəsi başlığı elan edir. Başlıq
+           mətni `updateSidebarActiveState`-də yenilənir, ona görə həmişə ondan
+           SONRA çağırılır. */
+        function getSectionAnnouncer() {
+            var el = document.getElementById("profileSectionAnnouncer");
+            if (el) { return el; }
+            el = document.createElement("div");
+            el.id = "profileSectionAnnouncer";
+            el.className = "sr-only";
+            el.setAttribute("role", "status");
+            el.setAttribute("aria-live", "polite");
+            el.setAttribute("aria-atomic", "true");
+            document.body.appendChild(el);
+            return el;
+        }
+
+        function focusSectionTitle() {
+            var title = ctx.sectionTitle || document.getElementById("profileSectionTitle");
+            if (!title) { return; }
+            try {
+                title.tabIndex = -1;
+                title.focus({ preventScroll: false });
+            } catch (e) { /* köhnə brauzer: fokus opsiyalarını dəstəkləmir */ }
+            try {
+                var announcer = getSectionAnnouncer();
+                var text = (title.textContent || "").trim();
+                // Eyni mətn ardıcıl iki dəfə yazılsa live region elan etmir — əvvəl boşalt.
+                announcer.textContent = "";
+                window.setTimeout(function () { announcer.textContent = text; }, 50);
+            } catch (e) { /* ignore */ }
+        }
+
         function replaceSectionHtml(section, html, options) {
             options = options || {};
             var node = extractSectionFromHtml(html, section);
@@ -249,6 +286,7 @@
             try { executeInlineScripts(node); } catch (e) { /* ignore */ }
             try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
             ctx.updateSidebarActiveState(section);
+            focusSectionTitle();
             if (options.updateUrl !== false) {
                 pushSectionUrl(section, options.sourceUrl);
             }
@@ -284,6 +322,21 @@
             }
         }
 
+        function handleViewAsEnded(payload) {
+            // Server (ViewAsMiddleware) view-as sessiyasının bitdiyini bildirib:
+            // `{view_as_ended: true, redirect: "/accounts/profile/"}`. Fallback
+            // naviqasiyası bunu əzməsin deyə burada yönləndirib `true` qaytarırıq.
+            if (!payload || payload.view_as_ended !== true || !payload.redirect) {
+                return false;
+            }
+            var target = new URL(payload.redirect, window.location.origin);
+            if (target.origin !== window.location.origin) {
+                return false;
+            }
+            window.location.href = target.pathname + target.search;
+            return true;
+        }
+
         function tryAjaxLoadSection(section, options) {
             options = options || {};
             if (!isAjaxSafeSection(section)) {
@@ -310,11 +363,23 @@
             return fetch(buildSectionFragmentUrl(section, options.sourceUrl), fetchOpts)
                 .then(function (response) {
                     if (!response.ok) {
-                        throw new Error("http_" + response.status);
+                        // View-as sessiyası məhz bu sorğuda bitibsə server 409 +
+                        // `view_as_ended` qaytarır: istifadəçini öz panelinə aparırıq.
+                        // Əks halda `?section=` ilə tam səhifəyə düşür və artıq ƏSL
+                        // istifadəçi kimi «icazəniz yoxdur» görürdü (sahib, 2026-09-12).
+                        return response.json().catch(function () { return null; }).then(function (payload) {
+                            if (handleViewAsEnded(payload)) {
+                                return null;
+                            }
+                            throw new Error("http_" + response.status);
+                        });
                     }
                     return response.json();
                 })
                 .then(function (payload) {
+                    if (payload === null) {
+                        return true; // view-as bitdi — yönləndirmə başlayıb
+                    }
                     if (!payload || payload.ok !== true || !payload.html) {
                         throw new Error("bad_payload");
                     }
@@ -363,6 +428,11 @@
             });
 
             ctx.updateSidebarActiveState(section);
+            // İlkin yükləmə (`init.js`, updateUrl=false) fokusu oğurlamamalıdır —
+            // yalnız istifadəçi naviqasiyasında (updateUrl=true) başlığa fokus.
+            if (updateUrl) {
+                focusSectionTitle();
+            }
 
             if (updateUrl && window.history && window.history.pushState) {
                 var nextUrl = new URL(ctx.profileBaseUrl, window.location.origin);
@@ -378,8 +448,35 @@
         ctx.isAjaxSafeSection = isAjaxSafeSection;
         ctx.copySourceQueryToTarget = copySourceQueryToTarget;
         ctx.tryAjaxLoadSection = tryAjaxLoadSection;
+        ctx.handleViewAsEnded = handleViewAsEnded;
         ctx.setActiveSection = setActiveSection;
         ctx.replaceSectionHtml = replaceSectionHtml;
+        ctx.focusSectionTitle = focusSectionTitle;
+
+        /* 2026-09-14 (W3 `w3sweep` brauzer süpürgəsi): ictimai yükləyicinin
+           çağıranları (`pagination.js`, `ems_ui/filter_bar.js`, bölmə skriptləri)
+           nəticəni YOXLAMIR — bölmə `AJAX_SAFE_SECTIONS`-da deyilsə (məs. səhifələmə
+           olan `superadmin-users`, `category-management`, `student-organization-request`)
+           `tryAjaxLoadSection` sadəcə `false` qaytarırdı və klik SƏSSİZ udulurdu:
+           nə panel dəyişirdi, nə də səhifə. İndi AJAX yolu alınmayanda (safe deyil,
+           HTTP xətası, fraqment cavabda yoxdur) eyni-mənşəli mənbə URL-inə TAM
+           naviqasiya edilir — `ajax.js`-in daxili çağıranları ilə eyni davranış.
+           `options.fallbackNavigation === false` ilə söndürülə bilər (çağıran özü
+           `false`-u emal edəcəksə). */
+        function fallbackNavigate(section, sourceUrl) {
+            var target;
+            try {
+                target = new URL(sourceUrl || ctx.profileBaseUrl, window.location.origin);
+            } catch (e) {
+                return false;
+            }
+            if (target.origin !== window.location.origin) {
+                return false;
+            }
+            target.searchParams.set("section", section);
+            window.location.assign(target.pathname + target.search + target.hash);
+            return true;
+        }
 
         window.EMSProfileLoadSection = function (section, sourceUrl, options) {
             options = options || {};
@@ -387,7 +484,12 @@
             if (typeof options.updateUrl === "undefined") {
                 options.updateUrl = true;
             }
-            return tryAjaxLoadSection(section, options);
+            return tryAjaxLoadSection(section, options).then(function (ok) {
+                if (ok || options.fallbackNavigation === false) {
+                    return ok;
+                }
+                return fallbackNavigate(section, options.sourceUrl);
+            });
         };
     });
 })(window.EMSProfile = window.EMSProfile || {});

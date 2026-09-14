@@ -7,6 +7,8 @@ from io import BytesIO
 from PIL import Image, ImageDraw
 
 from apps.exams.services.import_media import _assert_manifest_scope, _load_manifest, _load_source
+from apps.exams.services.import_media_docx import is_docx_manifest, render_docx_question_preview
+from apps.exams.services.import_media_store import load_raw_manifest
 from apps.exams.services.pdf_layout import render_segments
 
 _GAP = 10
@@ -24,6 +26,14 @@ def render_stashed_question_preview(
 
     if isinstance(source_index, bool) or not isinstance(source_index, int):
         raise ValueError("source_index tam ədəd olmalıdır")
+    if is_docx_manifest(load_raw_manifest(token)):
+        # W3 2026-09-14: DOCX bundle — mətn qalır, yalnız bağlanmış şəkillər göstərilir.
+        return render_docx_question_preview(
+            token,
+            source_index,
+            owner_id=owner_id,
+            organization_id=organization_id,
+        )
     manifest = _load_manifest(token)
     _assert_manifest_scope(
         manifest,

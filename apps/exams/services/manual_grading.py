@@ -53,6 +53,42 @@ def _mark_attempt_graded(attempt, *, grader, total_score, checked, now):
         schedule_journal_sync(attempt, actor=grader)
 
 
+def _log_score_changes(attempt, *, grader, events, request=None):
+    """Bal dəyişikliklərini ``AuditLog``-a da yaz (``ExamGradeEvent`` qalır).
+
+    2026-09-13 təhlükəsizlik auditi, F-11 (P3): imtahan cavabının müəllim balı
+    yalnız ``ExamGradeEvent`` cədvəlinə düşürdü — audit ekranında görünmürdü.
+    ``ExamGradeEvent`` sual-səviyyəli ledger olaraq QALIR (old/new/max_points);
+    burada eyni dəyişiklik cəhd üzrə tək ``UPDATE`` qeydi kimi audit jurnalına
+    əlavə olunur ki, «kim, nə vaxt, hansı balı» sualına audit səhifəsi cavab versin.
+    """
+    if not events:
+        return
+    from apps.audit.public import log_action
+    from core.constants import AuditAction
+
+    changes = {
+        str(event.question_id) if event.question_id is not None else "attempt": {
+            "old": event.old_score,
+            "new": event.new_score,
+            "max": event.max_points,
+        }
+        for event in events
+    }
+    log_action(
+        action=AuditAction.UPDATE,
+        user=grader,
+        organization=attempt.exam.organization,
+        obj=attempt,
+        changes=changes,
+        reason="exam_answer_score_change",
+        request=request,
+        resource_type="ExamAttempt",
+        resource_id=str(attempt.pk),
+        resource_repr=f"attempt<{attempt.pk}> exam<{attempt.exam_id}>",
+    )
+
+
 @transaction.atomic
 def apply_single_answer_grade(*, answer_id, score, grader=None, feedback=None, current_time=None):
     """Grade one answer through the same lock/ledger invariant as the UI."""
@@ -77,7 +113,7 @@ def apply_single_answer_grade(*, answer_id, score, grader=None, feedback=None, c
     answer.teacher_feedback = next_feedback
     answer.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
     if bounded_score != previous_score:
-        ExamGradeEvent.objects.create(
+        event = ExamGradeEvent.objects.create(
             attempt=attempt,
             question=answer.question,
             grader=grader,
@@ -85,6 +121,7 @@ def apply_single_answer_grade(*, answer_id, score, grader=None, feedback=None, c
             new_score=bounded_score,
             max_points=max_points,
         )
+        _log_score_changes(attempt, grader=grader, events=[event])
 
     total_score, any_score = _attempt_score_from_answers(attempt)
     _mark_attempt_graded(
@@ -115,7 +152,7 @@ def apply_attempt_grade(*, attempt_id, score, feedback, grader, max_points=100, 
         return attempt, False
 
     if bounded_score != previous_score:
-        ExamGradeEvent.objects.create(
+        event = ExamGradeEvent.objects.create(
             attempt=attempt,
             question=None,
             grader=grader,
@@ -123,6 +160,7 @@ def apply_attempt_grade(*, attempt_id, score, feedback, grader, max_points=100, 
             new_score=bounded_score,
             max_points=max_points,
         )
+        _log_score_changes(attempt, grader=grader, events=[event])
 
     attempt.teacher_feedback = feedback
     _mark_attempt_graded(
@@ -208,6 +246,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
 
     if grade_events:
         ExamGradeEvent.objects.bulk_create(grade_events)
+        _log_score_changes(attempt, grader=grader, events=grade_events)
 
     if grading_changed:
         # 2026-08 auditi (G8): əsas müəllim yoxlama UI-ı cəhdin xülasəsini

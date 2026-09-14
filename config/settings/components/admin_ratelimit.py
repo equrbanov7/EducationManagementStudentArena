@@ -44,8 +44,27 @@ LOGIN_RATE_LIMIT = os.getenv("LOGIN_RATE_LIMIT", "5/10m")
 # arxasında yüzlərlə istifadəçi eyni İP-dən gəlir, ona görə normal səhv-parol
 # trafiki bloklanmamalı, amma seriyalı hücum dayandırılmalıdır.
 LOGIN_IP_RATE_LIMIT = os.getenv("LOGIN_IP_RATE_LIMIT", "60/10m")
+
+# Superadmin «qaçış yolu» vedrəsi (2026-09-13 access auditi, F-01).
+#
+# Login limiti dolanda superadmin düzgün parolla yenə də girə bilir — bu QƏSDƏN
+# saxlanılır: hücumçu superadmin adına səhv cəhdlərlə vedrəni doldurub yeganə
+# bərpa hesabını kilidləyə bilməməlidir (kilid = DoS). Amma əvvəl bu qaçış
+# yolunun ÖZÜ limitsiz idi — limit dolandan sonra hər cəhd yenə parolu yoxlayırdı,
+# yəni superadmin üçün brute-force sərhədsiz qalırdı. İndi qaçış yolu ayrıca,
+# çox dar vedrəyə bağlıdır: İP + istifadəçi adı üzrə saatda 3 parol yoxlaması.
+LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT = os.getenv("LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT", "3/1h")
 OTP_VERIFY_RATE_LIMIT = os.getenv("OTP_VERIFY_RATE_LIMIT", "5/10m")
 OTP_RESEND_RATE_LIMIT = os.getenv("OTP_RESEND_RATE_LIMIT", "3/10m")
+
+# İP-əsaslı OTP qapıları (2026-09-13 access auditi, F-09).
+#
+# `send/resend/verify-otp` JSON endpoint-ləri və parol-bərpa formaları əvvəl
+# yalnız e-poçt üzrə (saatda 5 göndəriş, OTP başına 5 cəhd) məhdudlaşırdı —
+# bir İP-dən fərqli e-poçtlara sonsuz «spray» mümkün idi. Hədlər kampus NAT-ı
+# nəzərə alınaraq genişdir: göndəriş 40/10dəq, kod yoxlaması 100/10dəq.
+OTP_SEND_IP_RATE_LIMIT = os.getenv("OTP_SEND_IP_RATE_LIMIT", "40/10m")
+OTP_VERIFY_IP_RATE_LIMIT = os.getenv("OTP_VERIFY_IP_RATE_LIMIT", "100/10m")
 SUBSCRIBE_RATE_LIMIT = os.getenv("SUBSCRIBE_RATE_LIMIT", "3/10m")
 LIVE_EXAM_JOIN_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_RATE_LIMIT", "20/5m")
 LIVE_STATE_RATE_LIMIT = os.getenv("LIVE_STATE_RATE_LIMIT", "120/1m")
@@ -75,6 +94,12 @@ EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip()
 }
 # Post management delete endpoints
 POST_DELETE_RATE_LIMIT = os.getenv("POST_DELETE_RATE_LIMIT", "10/5m")
+
+# Bal yazan / idxal edən JSON endpoint-lər (2026-09-13 backend auditi, F-15 — 2026-09-14):
+# `workload:assign`, `student_registry_action`, `exam_score_import_apply`, `rim_action`.
+# İstifadəçi başına, QƏSDƏN geniş — toplu bal daxiletməsi (bir dəqiqədə onlarla sətir)
+# toxunulmur, yalnız skriptlə «spray» kəsilir (bax `core/write_rate_limit.py`).
+SCORE_WRITE_RATE_LIMIT = os.getenv("SCORE_WRITE_RATE_LIMIT", "120/1m")
 
 
 # ---------------------------------------------------------------------------

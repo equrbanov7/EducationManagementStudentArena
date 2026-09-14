@@ -123,7 +123,7 @@
 
 .deadline-badge.soon {
     background: var(--ems-warning-100);
-    color: var(--ems-warning-600);
+    color: var(--ems-warning-700);
 }
 
 .deadline-badge.normal {

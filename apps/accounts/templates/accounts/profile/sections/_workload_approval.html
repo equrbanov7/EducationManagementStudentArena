@@ -45,32 +45,35 @@ Dekan dilimi BÜTÖV təsdiqləyir, ya da SEÇİLMİŞ sətirləri səbəblə qa
 
     {% if workload_approval_section.view == "summary" %}
         <h3 class="tof-pane__title">{% trans "Kafedralar üzrə yekun" context "accounts.workload_approval" %}</h3>
-        <table class="ems-table ems-table--zebra">
-            <thead>
-                <tr>
-                    <th scope="col">{% trans "Kafedra" context "accounts.workload_approval" %}</th>
-                    <th scope="col">{% trans "İxtisas" context "accounts.workload_approval" %}</th>
-                    <th scope="col">{% trans "Sətir" context "accounts.workload_approval" %}</th>
-                    <th scope="col">{% trans "Saat" context "accounts.workload_approval" %}</th>
-                    <th scope="col">{% trans "Kredit" context "accounts.workload_approval" %}</th>
-                    <th scope="col">{% trans "Status" context "accounts.workload_approval" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in workload_approval_section.summary %}
-                <tr>
-                    <th scope="row">{{ item.chair }}</th>
-                    <td class="ems-table__num">{{ item.specialties }}</td>
-                    <td class="ems-table__num">{{ item.rows }}</td>
-                    <td class="ems-table__num">{{ item.hours }}</td>
-                    <td class="ems-table__num">{{ item.credits }}</td>
-                    <td>{% ems_status_badge "workload_task" item.status %}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="6">{% trans "Bu fakültə üçün sətir yoxdur." context "accounts.workload_approval" %}</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% comment %}2026-09-12 (audit P2-3): əl ilə yazılmış cədvəl `.ems-tablescroll` sarğısındadır — `.ems-table` min-eni (900px) mobil ekranda səhifə gövdəsini deyil, yalnız bu sarğını üfüqi sürüşdürür (`_data_table.html` ilə eyni qayda).{% endcomment %}
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Kafedra" context "accounts.workload_approval" %}</th>
+                        <th scope="col">{% trans "İxtisas" context "accounts.workload_approval" %}</th>
+                        <th scope="col">{% trans "Sətir" context "accounts.workload_approval" %}</th>
+                        <th scope="col">{% trans "Saat" context "accounts.workload_approval" %}</th>
+                        <th scope="col">{% trans "Kredit" context "accounts.workload_approval" %}</th>
+                        <th scope="col">{% trans "Status" context "accounts.workload_approval" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in workload_approval_section.summary %}
+                    <tr>
+                        <th scope="row">{{ item.chair }}</th>
+                        <td class="ems-table__num">{{ item.specialties }}</td>
+                        <td class="ems-table__num">{{ item.rows }}</td>
+                        <td class="ems-table__num">{{ item.hours }}</td>
+                        <td class="ems-table__num">{{ item.credits }}</td>
+                        <td>{% ems_status_badge "workload_task" item.status %}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">{% trans "Bu fakültə üçün sətir yoxdur." context "accounts.workload_approval" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
     {% elif workload_approval_section.view == "history" %}
         <h3 class="tof-pane__title">{% trans "Hərəkət jurnalı" context "accounts.workload_approval" %}</h3>

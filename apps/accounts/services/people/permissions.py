@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.organizations.scoping import EMPTY_SCOPE, ORG_WIDE_SCOPE, UnitScope, get_permission_scope
+from apps.organizations.public import EMPTY_SCOPE, ORG_WIDE_SCOPE, UnitScope, get_permission_scope
 from core.permissions import has_permission
 
 # ── İcazə açarları (kataloq: apps/organizations/permissions.py → "people") ────

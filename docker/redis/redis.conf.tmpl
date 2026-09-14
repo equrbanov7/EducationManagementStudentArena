@@ -1,0 +1,23 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS Arena — Redis konfiqurasiya ŞABLONU (docker-compose.prod.yml `redis`)
+# ═══════════════════════════════════════════════════════════════════════════
+# 2026-09-14 infra auditi P3-3: parol əvvəl `redis-server --requirepass <parol>`
+# argv-də idi — konteyner daxilində `ps`, `docker inspect` (Args) və host
+# `/proc/<pid>/cmdline` onu açıq göstərirdi. İndi docker/redis/entrypoint.sh bu
+# şablonu start-da docker/render-template.sh ilə /tmp/redis.conf-a render edir
+# (placeholder-lər .env REDIS_PASSWORD / REDIS_MAXMEMORY-dən), faylı yalnız
+# `redis` istifadəçisinə oxunan edir və `redis-server /tmp/redis.conf` işlədir —
+# argv-də sirr yoxdur. Healthcheck dəyişmir: `redis-cli ping` parolu
+# REDISCLI_AUTH mühit dəyişənindən götürür.
+#
+# Siyasət (Codex P2-08, 2026-09-13): maxmemory TƏYİN OLUNUR, amma noeviction —
+# Celery broker (DB 2) üçün eviction təhlükəlidir; limitə çatanda yazma xəta
+# verir, data silinmir. REDIS_MAXMEMORY defoltu (compose: 3gb) həmişə
+# REDIS_MEM_LIMIT-dən (4096M) kiçik saxlanmalıdır (tests/test_infra_compose_config.py).
+# io-threads: 5000-bağlantılı WS fan-out üçün soket I/O-nu ayrı thread-lərə verir.
+# `dir` verilmir → işçi qovluq /data (image WORKDIR), AOF əvvəlki kimi ora yazılır.
+appendonly yes
+maxmemory __REDIS_MAXMEMORY__
+maxmemory-policy noeviction
+io-threads 4
+requirepass "__REDIS_PASSWORD__"

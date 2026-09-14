@@ -23,7 +23,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import catalog_console as console
+from apps.registrar.public import catalog_console as console
 
 _CTX = "registrar.catalog"
 
@@ -74,7 +74,7 @@ def registrar_catalog_action(request):
             return JsonResponse({"ok": False, "error": "bad_request"}, status=400)
         return JsonResponse({"ok": True, "values": console.entity_values(organization, tab=tab, pk=pk)})
 
-    obj, errors = console.save(organization, tab=tab, pk=pk or None, data=data)
+    obj, errors = console.save(organization, tab=tab, pk=pk or None, data=data, actor=request.user)
     if errors:
         return JsonResponse({"ok": False, "error": "invalid", "errors": errors}, status=400)
     return JsonResponse({"ok": True, "id": str(obj.pk)})

@@ -11,6 +11,7 @@ Verifies that:
 """
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 from django.views import View
@@ -286,3 +287,43 @@ class LevelRequiredMixinDispatchTest(TestCase):
         response = self._dispatch(request)
         self.assertEqual(_CountingLevelView.call_count, 0)
         self.assertEqual(response.status_code, 403)
+
+
+class PermissionRequiredMixinConfigurationTest(TestCase):
+    """Açarsız mixin SƏSSİZCƏ buraxmır (2026-09-10 auditi, P2-7).
+
+    Əvvəl `dispatch()` `if self.permission_required:` yoxlayırdı — açar təyin
+    olunmasa şərt sadəcə atlanırdı və təşkilatın İSTƏNİLƏN üzvü görünüşə
+    keçirdi. Susmaq fail-open olmamalıdır.
+    """
+
+    def test_missing_permission_required_raises(self):
+        class _NoPermView(PermissionRequiredMixin, View):
+            # Təşkilat qapısı bu testin mövzusu deyil — onu keçirik ki, yoxlama
+            # məhz `permission_required`-in yoxluğuna düşsün.
+            def _check_organization_access(self, request):
+                return None
+
+            def get(self, request, *args, **kwargs):  # pragma: no cover — çatılmır
+                return HttpResponse("ok")
+
+        request = RequestFactory().get("/")
+        request.org_permissions = {"course.view"}
+        with self.assertRaises(ImproperlyConfigured):
+            _NoPermView.as_view()(request)
+
+    def test_declared_permission_still_works(self):
+        """Qapı bağlanmayıb — açar təyin olunanda davranış ƏVVƏLKİ kimidir."""
+
+        class _OkView(PermissionRequiredMixin, View):
+            permission_required = "course.view"
+
+            def _check_organization_access(self, request):
+                return None
+
+            def get(self, request, *args, **kwargs):
+                return HttpResponse("ok")
+
+        request = RequestFactory().get("/")
+        request.org_permissions = {"course.view"}
+        self.assertEqual(_OkView.as_view()(request).status_code, 200)

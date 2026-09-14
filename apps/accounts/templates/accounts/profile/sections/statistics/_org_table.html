@@ -1,0 +1,13 @@
+{% load i18n %}
+<section class="ems-card">
+  <div class="ems-card__head"><h2 class="ems-card__title">{% trans "Təşkilatlar" context "profile.statistics" %}</h2></div>
+  <div class="ems-tablescroll"><table class="ems-table">
+    <thead><tr><th scope="col">{% trans "Təşkilat" context "profile.statistics" %}</th><th scope="col">{% trans "Üzvlər" context "profile.statistics" %}</th><th scope="col">{% trans "İmtahanlar" context "profile.statistics" %}</th><th scope="col">{% trans "Cəhdlər" context "profile.statistics" %}</th></tr></thead>
+    <tbody>{% for row in statistics_org_rows %}<tr><th scope="row">{{ row.name }}</th><td>{{ row.members }}</td><td>{{ row.exams }}</td><td>{{ row.attempts }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <nav class="stx-pagination" aria-label="{% trans 'Səhifələr' context 'profile.statistics' %}">
+    {% if statistics_org_page.has_previous %}<a class="ems-btn" href="?{{ statistics_org_pagination_query }}&amp;stats_org_page={{ statistics_org_page.previous_page_number }}">{% trans "Əvvəlki" context "profile.statistics" %}</a>{% endif %}
+    <span>{{ statistics_org_page.number }} / {{ statistics_org_page.paginator.num_pages }}</span>
+    {% if statistics_org_page.has_next %}<a class="ems-btn" href="?{{ statistics_org_pagination_query }}&amp;stats_org_page={{ statistics_org_page.next_page_number }}">{% trans "Növbəti" context "profile.statistics" %}</a>{% endif %}
+  </nav>
+</section>

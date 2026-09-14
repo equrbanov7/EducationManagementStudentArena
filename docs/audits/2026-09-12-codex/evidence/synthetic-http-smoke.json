@@ -1,0 +1,314 @@
+{
+  "summary": {
+    "concurrency": 5,
+    "requests": 60,
+    "success": 60,
+    "elapsed_seconds": 4.4,
+    "p50_ms": 304.0,
+    "p95_ms": 783.2,
+    "p99_ms": 889.2,
+    "note": "Synthetic PostgreSQL fixtures, Django DEBUG runserver, shared laptop running regression tests; not a production capacity benchmark."
+  },
+  "requests": [
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 885.7
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 786.0
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 755.0
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 783.2
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 889.2
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 305.2
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 257.1
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 294.7
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 365.6
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 301.9
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 233.5
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 285.5
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 366.5
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 278.8
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 249.9
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 303.6
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 350.0
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 282.8
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 242.8
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 301.9
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 404.5
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 303.5
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 280.1
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 280.3
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 442.9
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 455.4
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 405.7
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 398.8
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 539.6
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 458.2
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 373.9
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 404.4
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 478.1
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 341.1
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 277.5
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 315.4
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 351.7
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 276.0
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 218.5
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 267.7
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 393.7
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 325.2
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 303.5
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 326.0
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 391.9
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 235.3
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 192.9
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 254.7
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 303.9
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 244.0
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 227.8
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 248.8
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 351.0
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 252.3
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 226.4
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 306.4
+    },
+    {
+      "section": "my-subjects",
+      "status": 200,
+      "ms": 410.7
+    },
+    {
+      "section": "my-journal",
+      "status": 200,
+      "ms": 304.1
+    },
+    {
+      "section": "pending-answers",
+      "status": 200,
+      "ms": 275.1
+    },
+    {
+      "section": "statistics",
+      "status": 200,
+      "ms": 294.3
+    }
+  ]
+}

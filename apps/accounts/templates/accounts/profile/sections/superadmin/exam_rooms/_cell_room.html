@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Zal sətrinin birinci sütunu (th scope="row") — ad + yerləşmə (bina · mərtəbə).
+`id="sar-room-<id>"` POST-dan sonrakı `#sar-room-<id>` fraqmenti və JS
+vurğusu (`hl_room`) üçündür. Kontekst: `row.room` (bax `_sections/exam_rooms.py`).{% endcomment %}
+<div class="sar-cell-room" id="sar-room-{{ row.room.id }}" data-sar-room-row="{{ row.room.id }}">
+    <span class="sar-cell-room__name">{{ row.room.name }}</span>
+    {% if row.room.building or row.room.floor %}
+    <span class="sar-cell-room__loc">
+        {% if row.room.building %}<span title="{% trans 'Bina' context 'accounts.superadmin_exam_rooms' %}"><i class="fas fa-building" aria-hidden="true"></i> {{ row.room.building }}</span>{% endif %}
+        {% if row.room.floor %}<span title="{% trans 'Mərtəbə' context 'accounts.superadmin_exam_rooms' %}"><i class="fas fa-stairs" aria-hidden="true"></i> {{ row.room.floor }}</span>{% endif %}
+    </span>
+    {% endif %}
+</div>

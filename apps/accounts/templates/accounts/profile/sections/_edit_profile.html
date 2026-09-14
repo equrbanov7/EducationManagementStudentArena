@@ -9,10 +9,27 @@
    rollar üçün bootstrap-single-select ilə seçilir.
  * «Akademik fəaliyyət» (fənn/sertifikat/məqalə/konfrans) ayrıca AJAX
    idarəetməsidir — bax _academic_items_manage.html + academic_items.js.
+
+2026-09-10 REDİZAYN (sahib: «aşağıdakı Önizləmə / Ləğv et / Yadda Saxla …
+görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
+ * ⚠️ `<h1>` BURADA YAZILMIR — qabıq bölmə adını `#profileSectionTitle` kimi
+   verir. Kontekst `ems_ui/_content_header.html` altbaşlığı ilə ötürülür.
+ * Əməliyyat paneli artıq üzən (`position: fixed`) pill DEYİL: o, formanın
+   SONUNDA, axının içindədir. Üzən variant ekranın ortasında «Akademik
+   məlumatlar» kartının başlığını örtürdü və sürüşdürəndə tərpənirdi.
+ * Panel formanın İÇİNDƏdir: «Yadda saxla» məhz onun üstündəki sahələri
+   saxlayır. «Akademik fəaliyyət» kartı ayrıca AJAX-la işlədiyi üçün panelin
+   ARDINCA gəlir — ona ayrıca saxlama düyməsi lazım deyil.
+ * Avatar sahəsi çılpaq `<input type="file">` deyil: cari şəkil önizləməsi +
+   adlandırılmış seçim düyməsi (bax edit_profile_avatar.js).
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260827-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_modals.css' %}?v=20260911-1">
+
+    {% trans 'Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur.' context 'profile.edit_v2' as edit_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=edit_subtitle %}
 
     <form method="post" enctype="multipart/form-data" id="editProfileForm" class="edit-profile-form">
         {% csrf_token %}
@@ -20,10 +37,10 @@
         <input type="hidden" name="section" value="edit-profile">
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-id-card"></i>
                 {% trans 'Şəxsi məlumatlar' context 'profile.edit_v2' %}
-            </div>
+            </h2>
 
             <div class="info-grid profile-form-grid">
                 <div class="info-item">
@@ -63,18 +80,40 @@
                            value="{{ profile.location|default:'' }}" maxlength="100"
                            placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
                 </div>
-                <div class="info-item">
-                    <label class="info-label" for="avatar">{% trans "avatar" context "profile.edit" %}</label>
-                    <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                <div class="info-item info-item--avatar">
+                    <span class="info-label">{% trans "avatar" context "profile.edit" %}</span>
+                    <div class="edit-profile-avatar" data-avatar-picker>
+                        <span class="edit-profile-avatar__thumb">
+                            {% if profile.avatar %}
+                            <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
+                                 alt="" data-avatar-preview>
+                            {% else %}
+                            <i class="fas fa-user" aria-hidden="true" data-avatar-placeholder></i>
+                            <img src="" alt="" hidden data-avatar-preview>
+                            {% endif %}
+                        </span>
+                        <div class="edit-profile-avatar__body">
+                            <label class="edit-profile-avatar__btn" for="avatar">
+                                <i class="fas fa-image" aria-hidden="true"></i>
+                                {% trans 'Şəkil seç' context 'profile.edit_v2' %}
+                            </label>
+                            <input type="file" class="edit-profile-avatar__input" id="avatar" name="avatar" accept="image/*"
+                                   data-avatar-input
+                                   data-label-empty="{% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}">
+                            <p class="edit-profile-avatar__hint" data-avatar-name>
+                                {% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-graduation-cap"></i>
                 {% trans 'Akademik məlumat' context 'profile.edit_v2' %}
-            </div>
+            </h2>
 
             {% if profile.is_academics_locked %}
             <p class="edit-profile-locked-note">
@@ -161,24 +200,49 @@
         </div>
 
         <div class="section-card">
-            <div class="section-title">
+            <h2 class="section-card__title">
                 <i class="fas fa-align-left"></i>
                 {% trans "about" context "profile.edit" %}
-            </div>
+            </h2>
             <div class="info-item info-item--borderless">
                 <textarea class="form-control" id="bio" name="bio" rows="4" maxlength="2000"
                           placeholder="{% trans 'placeholder_about' context 'profile.edit' %}" aria-label="{% trans 'placeholder_about' context 'profile.edit' %}">{{ profile.bio|default:'' }}</textarea>
             </div>
         </div>
 
+        {% comment %}Status İKİ vəziyyətlidir və yeri həmişə tutulur — nişan peyda
+        olub yox olduqda düymələr sürüşməsin (görünüş stabilliyi).{% endcomment %}
+        <div class="edit-profile-savebar" id="editProfileSavebar" data-dirty="0">
+            <span class="edit-profile-savebar__saved">
+                <i class="fas fa-circle-check" aria-hidden="true"></i>
+                {% trans 'Bütün dəyişikliklər yadda saxlanılıb' context 'profile.edit_v2' %}
+            </span>
+            <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
+                <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
+            </span>
+            <div class="edit-profile-savebar__actions">
+                <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
+                   class="ems-btn ems-btn--ghost" target="_blank" rel="noopener">
+                    <i class="fas fa-eye" aria-hidden="true"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
+                </a>
+                <a href="{{ profile_base_url }}?section=profile-info" class="ems-btn js-profile-section-link"
+                   data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
+                    {% trans "cancel" context "profile.edit" %}
+                </a>
+                <button type="submit" form="editProfileForm" class="ems-btn ems-btn--primary">
+                    <i class="fas fa-save" aria-hidden="true"></i> {% trans "save" context "profile.edit" %}
+                </button>
+            </div>
+        </div>
     </form>
 
     <div class="section-card" id="academicItemsManager"
          data-api-url="{% url 'accounts:academic_items_api' %}">
-        <div class="section-title">
+        <h2 class="section-card__title">
             <i class="fas fa-award"></i>
             {% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}
-        </div>
+        </h2>
         <p class="settings-note">
             <i class="fas fa-circle-info"></i>
             {% trans 'Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək.' context 'profile.edit_v2' %}
@@ -198,33 +262,13 @@
         </div>
     </div>
 
-    <div class="edit-profile-savebar" id="editProfileSavebar">
-        <span class="edit-profile-savebar__status" id="editProfileDirtyStatus" hidden>
-            <i class="fas fa-circle-exclamation"></i>
-            {% trans 'Yadda saxlanmamış dəyişikliklər var' context 'profile.edit_v2' %}
-        </span>
-        <div class="edit-profile-savebar__actions">
-            <a href="{% url 'accounts:public_profile' user.username %}?preview=1"
-               class="btn btn-outline-primary" target="_blank" rel="noopener">
-                <i class="fas fa-eye"></i> {% trans 'Önizləmə' context 'profile.edit_v2' %}
-            </a>
-            <a href="{{ profile_base_url }}?section=profile-info" class="btn btn-secondary js-profile-section-link"
-               data-section="profile-info" data-title="{% trans 'profile_info' context 'profile.section' %}">
-                <i class="fas fa-times"></i> {% trans "cancel" context "profile.edit" %}
-            </a>
-            <button type="submit" form="editProfileForm" class="btn btn-primary">
-                <i class="fas fa-save"></i> {% trans "save" context "profile.edit" %}
-            </button>
-        </div>
-    </div>
-
     {# ── Qeyd əlavə et / redaktə et modalı (overlay + fon scroll kilidi Bootstrap-dadır) ── #}
     <div class="modal fade" id="academicItemModal" tabindex="-1" aria-hidden="true"
          data-label-create="{% trans 'Yeni qeyd' context 'profile.academic_items' %}"
          data-label-edit="{% trans 'Qeydi redaktə et' context 'profile.academic_items' %}"
          data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <form id="academicItemForm" novalidate>
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="item_id" value="">
@@ -260,8 +304,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                        <button type="submit" class="btn btn-primary" id="academicItemSubmitBtn">
+                        <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                        <button type="submit" class="ems-btn ems-btn--primary" id="academicItemSubmitBtn">
                             <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
                             <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.academic_items' %}
                         </button>
@@ -275,7 +319,7 @@
     <div class="modal fade" id="academicItemDeleteModal" tabindex="-1" aria-hidden="true"
          data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
         <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">{% trans 'Qeydi sil' context 'profile.academic_items' %}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.academic_items' %}"></button>
@@ -286,8 +330,8 @@
                     <p class="fw-semibold mb-0" id="academicItemDeleteTitle"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                    <button type="button" class="btn btn-danger" id="academicItemDeleteConfirmBtn" data-item-id="">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
+                    <button type="button" class="ems-btn ems-btn--danger" id="academicItemDeleteConfirmBtn" data-item-id="">
                         <span class="spinner-border spinner-border-sm me-1 d-none" aria-hidden="true"></span>
                         <i class="fas fa-trash"></i> {% trans 'Sil' context 'profile.academic_items' %}
                     </button>
@@ -299,7 +343,7 @@
     {# ── Saxlanmamış dəyişikliklə çıxış xəbərdarlığı ── #}
     <div class="modal fade" id="editProfileLeaveModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content edit-profile-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-circle-exclamation me-2"></i>{% trans 'Dəyişikliklər yadda saxlanmayıb' context 'profile.edit_v2' %}
@@ -310,13 +354,13 @@
                     <p class="mb-0">{% trans 'Səhifədən çıxsanız, etdiyiniz dəyişikliklər itəcək. Nə etmək istəyirsiniz?' context 'profile.edit_v2' %}</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="ems-btn" data-bs-dismiss="modal">
                         {% trans 'Ləğv et' %}
                     </button>
-                    <button type="button" class="btn btn-outline-danger" id="editProfileLeaveWithoutSaving">
+                    <button type="button" class="ems-btn ems-btn--danger-ghost" id="editProfileLeaveWithoutSaving">
                         {% trans 'Saxlamadan çıx' context 'profile.edit_v2' %}
                     </button>
-                    <button type="button" class="btn btn-primary" id="editProfileSaveAndLeave">
+                    <button type="button" class="ems-btn ems-btn--primary" id="editProfileSaveAndLeave">
                         <i class="fas fa-save"></i> {% trans 'Yadda saxla' context 'profile.edit_v2' %}
                     </button>
                 </div>
@@ -326,6 +370,7 @@
 
     {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
     <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260827-1" defer></script>
-    <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260815-1" defer></script>
+    <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260910-1" defer></script>
+    <script src="{% static 'accounts/js/profile/edit_profile_avatar.js' %}?v=20260910-1" defer></script>
 </section>
 {% endif %}

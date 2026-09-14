@@ -1,0 +1,176 @@
+{
+ "scores": {
+  "Architecture": {
+   "before": 80,
+   "after": 80,
+   "note": "Modul monoliti, 0 dövr / 0 xüsusi import; 23 modul qapı kənarında"
+  },
+  "Backend": {
+   "before": 76,
+   "after": 82,
+   "note": "Audit-log boşluqları, 500-lər, atomic, tək mənbə davamiyyət həddi bağlandı"
+  },
+  "Frontend": {
+   "before": 82,
+   "after": 84,
+   "note": "7 rolda 0 CSP/JS xətası; fokus, kontrast, interval sızması düzəldi"
+  },
+  "Database Design": {
+   "before": 78,
+   "after": 80,
+   "note": "exam_score CHECK, guestrosterdocument RLS; kaskad ORM-də, dublikat indekslər qalır"
+  },
+  "Database Integrity": {
+   "before": 88,
+   "after": 89,
+   "note": "487/487 FK, 0 tenant uyğunsuzluğu; 349 legacy şkala-kənar bal, hard-delete qapısı"
+  },
+  "Legacy Data Migration": {
+   "before": 66,
+   "after": 66,
+   "note": "Transform sadiq, reconciliation 0 %, mənbə müqayisəsi mümkün deyil — dəyişməyib"
+  },
+  "Security": {
+   "before": 78,
+   "after": 84,
+   "note": "LLM→innerHTML, media prefiksləri, DSN sızması, formula, sinks bağlandı; MIME/AI PII açıq"
+  },
+  "Authentication": {
+   "before": 72,
+   "after": 84,
+   "note": "Superadmin qaçış vedrəsi, enumerasiya, İP limitləri, suspended hard logout"
+  },
+  "Authorization / RBAC": {
+   "before": 66,
+   "after": 80,
+   "note": "member.remove real qapı + əhatə, drift testi; 13 açar hələ qapısız"
+  },
+  "Multi-Tenancy Isolation": {
+   "before": 78,
+   "after": 84,
+   "note": "RLS 142/171 + CI testi, WS consumer bypass, attempt_grants tenant; userprofile RLS-siz"
+  },
+  "Exam System": {
+   "before": 58,
+   "after": 82,
+   "note": "P0 açar sızması, final zal qapısı, PIN limiti, bank yazısı, deadline grace, kilidlər; sweep CAS"
+  },
+  "Electronic Journal": {
+   "before": 84,
+   "after": 85,
+   "note": "E2E PASS; davamiyyət həddi tək mənbə (qapı + kabinet); finals/qrid hələ açılış-səviyyəli"
+  },
+  "Teaching Workload": {
+   "before": 68,
+   "after": 78,
+   "note": "Göndərilməmiş qaralama bölgüsü (P1) bağlandı; JS i18n; rows 403"
+  },
+  "Schedule System": {
+   "before": 80,
+   "after": 80,
+   "note": "17 addım PASS; dərc statusu/exclusion constraint yoxdur"
+  },
+  "Syllabus Workflow": {
+   "before": 91,
+   "after": 91,
+   "note": "Tam zəncir PASS; «Sillabussuz» çipi düzəldi; duplication.py 0 % coverage"
+  },
+  "Student Management": {
+   "before": 73,
+   "after": 77,
+   "note": "Bərpa eyni qrupa, hard-delete qapısı; legacy dublikat/boşluqlar qalır"
+  },
+  "API Design": {
+   "before": 72,
+   "after": 78,
+   "note": "Qeyri-UUID pk 400/404, 200-on-failure statusları; OpenAPI yoxdur"
+  },
+  "Performance": {
+   "before": 72,
+   "after": 78,
+   "note": "4 N+1 + 4 ağır səhifə (2 008→? , 1 076→87, 949→245, 365→95 ms); finish 112→42 sorğu; /exams/groups/ açıq"
+  },
+  "Scalability": {
+   "before": 64,
+   "after": 65,
+   "note": "Tək Daphne prosesi/12 thread ≈ 30–45 RPS; APP_REPLICAS defolt 1; dns_sd scrape hazır"
+  },
+  "Reliability": {
+   "before": 58,
+   "after": 64,
+   "note": "stop_grace_period, IPAM pin, sweep kilidləri; rollback yolu yoxdur"
+  },
+  "Celery / Background Jobs": {
+   "before": 70,
+   "after": 76,
+   "note": "Sweep-lər sətir kilidi + overlap kilidi; heavy növbə metrik"
+  },
+  "Redis / Caching": {
+   "before": 67,
+   "after": 68,
+   "note": "Topologiya/açarlar düzgün; işləyən maxmemory 0 (owner), ağır hesablama keşi natamam"
+  },
+  "WebSocket / Realtime": {
+   "before": 52,
+   "after": 72,
+   "note": "NOBYPASSRLS blokeri bağlandı; auth/rate-limit PASS; geniş soket yükü ölçülməyib"
+  },
+  "DevOps": {
+   "before": 62,
+   "after": 66,
+   "note": "CI 11 qapı fail-closed; safety ||true silindi; image teq/rollback yoxdur"
+  },
+  "Deployment": {
+   "before": 55,
+   "after": 57,
+   "note": "İşləyən image 69 gün geridə (owner); deploy rollback təklifi hesabatda"
+  },
+  "Monitoring / Observability": {
+   "before": 48,
+   "after": 62,
+   "note": "Watchdog + notif-failed + heavy worker qaydaları, replika-düzgün scrape; alert çatdırılması sübutsuz"
+  },
+  "Logging": {
+   "before": 76,
+   "after": 82,
+   "note": "Rol sinxronu, qrantlar, org statusu, bal dəyişikliyi audit-də; sirr log-a düşmür"
+  },
+  "Automated Tests": {
+   "before": 74,
+   "after": 80,
+   "note": "8 618 → 8 8xx test; 26 yeni reqressiya faylı; coverage boşluqları qalır"
+  },
+  "Code Quality": {
+   "before": 78,
+   "after": 79,
+   "note": "Gate-lər yaşıl; console.log silindi; geniş except-lər qalır"
+  },
+  "Maintainability": {
+   "before": 74,
+   "after": 76,
+   "note": "attempts.py/lessons_log bölündü; 23 modul qapı kənarında"
+  },
+  "UX/UI": {
+   "before": 74,
+   "after": 76,
+   "note": "ems_ui hakim; 5 BEM sistemi + native confirm() qalır"
+  },
+  "Accessibility": {
+   "before": 67,
+   "after": 73,
+   "note": "Fokus + aria-live, kontrast tokenləri; hədəf ölçüləri, ikon-only düymələr qalır"
+  },
+  "Localization": {
+   "before": 56,
+   "after": 74,
+   "note": "Əks-mənalı tərcümələr, 564+17 kataloqsuz sətir dolduruldu, skaner kor nöqtəsi; EN/RU/TR insan baxışı yoxdur"
+  },
+  "Documentation": {
+   "before": 66,
+   "after": 72,
+   "note": "Monitorinq/deploy sənədləri, RLS_BYPASS_AUDIT yenidən; icazə matrisi sənədləri köhnə"
+  }
+ },
+ "weighted_before": 72.82,
+ "weighted_after": 79.39
+}

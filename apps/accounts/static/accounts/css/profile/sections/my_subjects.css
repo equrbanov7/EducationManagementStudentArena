@@ -1,525 +1,294 @@
-/* Student cabinet — "Fənlərim" (my-subjects) section.
-   Bologna ECTS credit progress + per-subject absence/exam eligibility + group
-   elective blocks. Uses shared --ems-* design tokens (no hard-coded colors). */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tələbə kabineti — «Fənlərim» (my-subjects) · redizayn 2026-09-12 (audit 7/1)
 
-.profile-section--my-subjects .my-subjects-meta {
+   Sahib: «hər səhifəni modern UX/UI prinsipləri əsasında təkmilləşdir… tələbə
+   üçün aydın olsun.»  Mənbə: docs/design/handoff_full — ekran 10 «Cari semestr»
+   (KPI sırası, semestr gedişi kartı, status badge-ləri) + «00 Dizayn konstantları».
+
+   QAYDALAR
+   * Rəng YALNIZ `--ems-*` tokenlərindən (static/css/design-tokens.css) — sıfır hex.
+   * Kartlarda kölgə yoxdur: kontur + subtle fon ilə ayrılır (handoff §2.5).
+   * Status yalnız rənglə deyil, MƏTNlə verilir — badge `ems_ui/badge.css`-dən.
+   * Tərəqqi zolağı semantik `<progress>` elementidir: eni brauzer verir, inline
+     `style` yoxdur (CSP). Track/fill pseudo-elementlərlə stilləşir (WebKit +
+     Gecko ayrı-ayrı yazılır — hər ikisi lazımdır).
+   * Heç bir mətn 0.7rem-dən (≈11px) kiçik deyil; kiçik CAPS etiketlər AA üçün
+     `--ems-neutral-500`/`-600` (handoff §2.3 kontrast düzəlişi).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.msx {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+/* ── Kontekst zolağı: ixtisas · qrup · dövr · semestr ────────────────────── */
+.msx-ctx {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
     align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-6);
+    padding: 10px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-700);
 }
 
-.profile-section--my-subjects .my-subjects-meta-item {
+.msx-ctx__item {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    color: var(--ems-neutral-600);
-}
-
-.profile-section--my-subjects .my-subjects-meta-item i {
-    color: var(--ems-primary-500);
-}
-
-/* ── Credit progress card ─────────────────────────────────────────────── */
-.credit-progress-card {
-    margin: 1rem 0 1.5rem;
-    padding: 1.1rem 1.25rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 14px;
-    background: var(--ems-neutral-0);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.credit-progress-card.is-complete {
-    border-color: var(--ems-success-600);
-    background: var(--ems-success-100);
-}
-
-.credit-progress-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.credit-progress-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
+    gap: var(--ems-sp-2);
     font-weight: 600;
-    color: var(--ems-neutral-800);
 }
 
-.credit-progress-title i {
+.msx-ctx__item i {
+    color: var(--ems-primary-600);
+}
+
+/* KPI sırası komponentin öz boşluğunu verir; kolon boşluğu ilə ikiqat olmasın. */
+.msx .ems-kpis {
+    margin-bottom: 0;
+}
+
+/* ── Boloniya kredit tərəqqisi (ECTS) ────────────────────────────────────── */
+.msx-credit {
+    padding: 15px 17px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+}
+
+.msx-credit.is-complete {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.msx-credit__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.msx-credit__title {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.msx-credit__title i {
     color: var(--ems-warning-600);
 }
 
-.credit-progress-figures {
-    font-size: 0.95rem;
+.msx-credit__figure {
+    margin: 0;
+    font-size: var(--ems-fs-md);
     color: var(--ems-neutral-700);
 }
 
-.credit-progress-figures strong {
-    font-size: 1.25rem;
-    color: var(--ems-primary-600);
-}
-
-.credit-progress-bar {
-    height: 12px;
-    border-radius: 999px;
-    background: var(--ems-neutral-200);
-    overflow: hidden;
-}
-
-.credit-progress-fill {
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
-    transition: width 0.4s ease;
-    min-width: 2px;
-}
-
-.is-complete .credit-progress-fill {
-    background: linear-gradient(90deg, var(--ems-success-600), var(--ems-success-strong));
-}
-
-.credit-progress-legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-}
-
-.credit-chip {
-    font-size: 0.78rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-700);
-}
-
-.credit-chip--earned { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.credit-chip--progress { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-.credit-chip--remaining { background: var(--ems-neutral-100); color: var(--ems-neutral-600); }
-.credit-chip--ok { background: var(--ems-success-100); color: var(--ems-success-600); }
-
-/* ── Subject cards grid ───────────────────────────────────────────────── */
-.my-subjects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.subject-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.55rem;
-    padding: 1rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    background: var(--ems-neutral-0);
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.subject-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    border-color: var(--ems-primary-200);
-}
-
-.subject-card--barred {
-    border-color: var(--ems-danger-200);
-    background: var(--ems-danger-100);
-}
-
-.subject-card-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.subject-code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ems-neutral-600);
-}
-
-.subject-kind {
-    font-size: 0.72rem;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-weight: 600;
-}
-
-.subject-kind--mandatory { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.subject-kind--elective { background: var(--ems-emerald-100); color: var(--ems-success-600); }
-.subject-kind--retake { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-
-.subject-name {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--ems-neutral-900);
-    line-height: 1.3;
-}
-
-.subject-card-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 0.85rem;
-    font-size: 0.82rem;
-    color: var(--ems-neutral-600);
-}
-
-.subject-ects i { color: var(--ems-warning-600); }
-
-.subject-absence {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-.subject-absence.is-barred { color: var(--ems-danger-strong); font-weight: 600; }
-
-.subject-card-foot {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: auto;
-    padding-top: 0.5rem;
-    border-top: 1px dashed var(--ems-neutral-200);
-}
-
-.exam-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-}
-
-.exam-status--ok { color: var(--ems-success-600); }
-.exam-status--barred { color: var(--ems-danger-strong); }
-/* Tarixi (köçürülmüş + bağlı) semestr: status hesablanmır, köhnə sistemin
-   nəticəsi göstərilir. Neytral ton — nə uğur, nə xəbərdarlıq. */
-.exam-status--legacy { color: var(--ems-neutral-600); cursor: help; }
-
-.subject-content-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.8rem;
-    color: var(--ems-primary-600);
-    text-decoration: none;
-}
-
-.subject-content-link:hover { text-decoration: underline; }
-
-/* ── Elective blocks ──────────────────────────────────────────────────── */
-.elective-blocks {
-    margin-top: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--ems-neutral-200);
-}
-
-.elective-blocks-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 0 0.85rem;
-    font-size: 0.95rem;
-    color: var(--ems-neutral-800);
-}
-
-.elective-block {
-    padding: 0.85rem 1rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 10px;
-    background: var(--ems-neutral-50);
-}
-
-.elective-block-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.elective-block-name { font-weight: 700; color: var(--ems-neutral-800); }
-.elective-block-req { font-size: 0.78rem; color: var(--ems-neutral-500); }
-
-.elective-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-bottom: 0.5rem;
-}
-
-.elective-option {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.82rem;
-    padding: 0.25rem 0.65rem;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-600);
-    border: 1px solid transparent;
-}
-
-.elective-option.is-chosen {
-    background: var(--ems-primary-100);
-    color: var(--ems-primary-700);
-    border-color: var(--ems-primary-200);
-    font-weight: 600;
-}
-
-.elective-option.is-chosen i { color: var(--ems-success-600); }
-
-.elective-block-note {
-    margin: 0;
-    font-size: 0.8rem;
-    color: var(--ems-neutral-600);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-/* ── Empty states ─────────────────────────────────────────────────────── */
-.my-subjects-empty {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    color: var(--ems-neutral-500);
-}
-
-.my-subjects-empty i {
-    font-size: 2rem;
-    margin-bottom: 0.6rem;
-    color: var(--ems-neutral-500);
-}
-
-.my-subjects-empty p { margin: 0; }
-
-/* ── Subject grade block (elektron jurnal nəticəsi, W4) ────────────────────── */
-.subject-grade {
-    margin-top: 0.35rem;
-    padding: 0.6rem 0;
-    border-top: 1px dashed var(--ems-neutral-200);
-}
-
-.subject-grade-head {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.subject-grade-total {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--ems-neutral-900);
-}
-.subject-grade-max { font-size: 0.8rem; font-weight: 400; color: var(--ems-neutral-500); }
-
-.subject-grade-letter {
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 2px 9px;
-    border-radius: 6px;
-}
-.grade-A, .grade-B { background: var(--ems-success-100); color: var(--ems-success-600); }
-.grade-C, .grade-D { background: var(--ems-primary-100); color: var(--ems-primary-700); }
-.grade-E { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-.grade-F { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
-
-.subject-grade-status {
-    margin-left: auto;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-.subject-grade-status.is-pass { background: var(--ems-success-100); color: var(--ems-success-600); }
-.subject-grade-status.is-fail { background: var(--ems-warning-100); color: var(--ems-warning-800); }
-.subject-grade-status.is-barred { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
-
-.subject-grade-components {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 8px;
-    margin-top: 0.4rem;
-    font-size: 0.72rem;
-    color: var(--ems-neutral-500);
-}
-.grade-comp strong { color: var(--ems-neutral-800); }
-
-.subject-grade-label { font-size: 0.72rem; color: var(--ems-neutral-500); }
-
-.my-subjects-schedule-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--ems-primary-600);
-    text-decoration: none;
-}
-.my-subjects-schedule-link:hover { text-decoration: underline; }
-
-/* ── Çox cəhd: rəsmi sonuncu, əvvəlkilər ləğv olunub (M2) ─────────────────── */
-.subject-attempts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.4rem;
-}
-.subject-attempt {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-.subject-attempt.is-official { background: #dcfce7; color: #15803d; }
-.subject-attempt.is-superseded { background: var(--ems-neutral-100); color: var(--ems-neutral-500); text-decoration: line-through; }
-
-/* ── Final result + resit (U3+) ───────────────────────────────────────────── */
-.subject-final {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.4rem;
-    padding-top: 0.4rem;
-    border-top: 1px dashed var(--ems-neutral-200);
-    font-size: 0.8rem;
-}
-.subject-final-total { color: var(--ems-neutral-700); }
-.subject-final-total strong { color: var(--ems-neutral-900); }
-.subject-final-letter { font-weight: 700; padding: 1px 7px; border-radius: 5px; }
-.subject-resit {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--ems-warning-800);
-    background: var(--ems-warning-100);
-    padding: 2px 8px;
-    border-radius: 999px;
-}
-
-/* ── U13: jurnal mini-panelində tərəqqi barları ────────────────────────────── */
-.subject-grade-bar,
-.subject-absence-bar {
-    height: 6px;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    overflow: hidden;
-    margin: 0.4rem 0 0.5rem;
-}
-.subject-grade-fill {
-    height: 100%;
-    max-width: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--ems-primary-500), var(--ems-primary-700));
-}
-.subject-absence-bar { height: 4px; margin-top: 0.35rem; }
-.subject-absence-fill {
-    height: 100%;
-    max-width: 100%;
-    border-radius: 999px;
-    background: var(--ems-warning-500);
-}
-.subject-absence-fill.is-over { background: var(--ems-danger-strong); }
-
-/* ── U15: bonus çipi + müəllim rəyi ────────────────────────────────────────── */
-.subject-bonus {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 1px 8px;
-    border-radius: 999px;
-    background: var(--ems-success-100);
-    color: var(--ems-success-600);
-}
-.subject-bonus.is-penalty { background: var(--ems-danger-100); color: var(--ems-danger-strong); }
-.subject-final-comment {
-    margin: 0.35rem 0 0;
-    font-size: 0.8rem;
-    font-style: italic;
-    color: var(--ems-neutral-600);
-}
-.subject-final-comment i { color: var(--ems-primary-400); margin-right: 3px; }
-
-/* ── Ekran 10 əlavələri (dizayn handoff Mərhələ 6) ────────────────────────
-   Qiymətləndirmə strukturu zolağı (README §8/4), müəllim adı və
-   «Sillabus (təsdiqlənmiş)» keçidi. Rənglər yalnız `--ems-*` tokenlərindən. */
-
-.assess-weights {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 12px;
-    margin: 0 0 14px;
-    padding: 10px 13px;
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: var(--ems-r-md, 12px);
-    font-size: var(--ems-fs-xs, 0.78rem);
-}
-
-.assess-weights__title {
+.msx-credit__figure strong {
+    font-size: var(--ems-fs-2xl);
     font-weight: 800;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    font-size: var(--ems-fs-2xs, 0.7rem);
-    color: var(--ems-neutral-600);
+    letter-spacing: -0.02em;
+    color: var(--ems-primary-800);
 }
 
-.assess-weight {
+.msx-credit__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.msx-credit__hint {
+    margin: var(--ems-sp-4) 0 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+/* Pill — kredit legend-i (Toplanmış / Davam edən / Qalan / Tamamlandı). */
+.msx-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.msx-pill--earned {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.msx-pill--progress {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.msx-pill--ok {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+/* ── Tərəqqi zolağı — semantik <progress> ────────────────────────────────── */
+.msx-bar {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 8px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200); /* Gecko: track */
+    overflow: hidden;
+    color: var(--ems-primary-600); /* köhnə mühərriklər: fill rəngi */
+}
+
+.msx-bar::-webkit-progress-bar {
+    background: var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill);
+}
+
+.msx-bar::-webkit-progress-value {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+.msx-bar::-moz-progress-bar {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+.msx-bar--credit {
+    height: 10px;
+}
+
+.msx-credit.is-complete .msx-bar--credit::-webkit-progress-value {
+    background: var(--ems-success);
+}
+
+.msx-credit.is-complete .msx-bar--credit::-moz-progress-bar {
+    background: var(--ems-success);
+}
+
+/* Qayıb zolağı — ton buraxılış statusundan (ok / near / barred / frozen / unknown). */
+.msx-bar--absence {
+    height: 6px;
+}
+
+.msx-bar--absence.is-ok::-webkit-progress-value { background: var(--ems-success); }
+.msx-bar--absence.is-ok::-moz-progress-bar { background: var(--ems-success); }
+.msx-bar--absence.is-near::-webkit-progress-value { background: var(--ems-warning-500); }
+.msx-bar--absence.is-near::-moz-progress-bar { background: var(--ems-warning-500); }
+.msx-bar--absence.is-barred::-webkit-progress-value { background: var(--ems-danger); }
+.msx-bar--absence.is-barred::-moz-progress-bar { background: var(--ems-danger); }
+.msx-bar--absence.is-frozen::-webkit-progress-value,
+.msx-bar--absence.is-unknown::-webkit-progress-value { background: var(--ems-neutral-400); }
+.msx-bar--absence.is-frozen::-moz-progress-bar,
+.msx-bar--absence.is-unknown::-moz-progress-bar { background: var(--ems-neutral-400); }
+
+/* ── Bələdçi: qiymətləndirmə strukturu + status legend-i ─────────────────── */
+.msx-guide {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.msx-guide__box {
+    padding: 13px 15px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.msx-guide__title {
+    margin: 0 0 var(--ems-sp-4);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.msx-guide__hint {
+    margin: var(--ems-sp-4) 0 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.msx-weights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.msx-weight {
     display: inline-flex;
     align-items: baseline;
-    gap: 5px;
-    padding: 2px 9px;
-    border-radius: 999px;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-chip);
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
     background: var(--ems-primary-50);
     color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
     font-weight: 600;
 }
 
-.assess-weights__total {
-    margin-inline-start: auto;
+.msx-weight b {
     font-weight: 800;
-    color: var(--ems-neutral-900);
 }
 
-.subject-teacher {
-    display: inline-flex;
+.msx-weight--final {
+    background: var(--ems-primary-100);
+}
+
+.msx-weight--total {
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-0);
+}
+
+.msx-legend {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.msx-legend__item {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 5px;
-    color: var(--ems-neutral-600);
+    gap: var(--ems-sp-3);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
 }
 
-.subject-syllabus-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--ems-primary-700);
-    font-weight: 600;
+.msx-legend__hint {
+    text-wrap: pretty;
 }
 
-@media (max-width: 640px) {
-    .assess-weights__total {
-        margin-inline-start: 0;
-        width: 100%;
-    }
-}

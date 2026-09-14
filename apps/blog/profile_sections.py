@@ -124,8 +124,8 @@ def create_category_section(create_form) -> dict:
 def category_management_section(request, *, edit_form, edit_item, page_param) -> dict:
     """category-management bölməsi: axtarış, filtrlənmiş kateqoriya ağacı,
     səhifələmə və redaktə formu."""
-    from apps.accounts.views._helpers.formatting import _query_string
-    from apps.accounts.views.profile.search import _normalize_public_profile_query_value
+    from apps.accounts.public import normalize_public_profile_query_value as _normalize_public_profile_query_value
+    from apps.accounts.public import query_string as _query_string
 
     search_query = _normalize_public_profile_query_value(
         request.GET.get("category_search"),
@@ -274,11 +274,9 @@ def pending_posts_section(request, *, have_category_options) -> dict:
 def public_posts_context(request, profile_user) -> dict:
     """Public profil səhifəsinin post siyahısı/filtr konteksti. ``response``
     dolu qayıdarsa view onu dərhal qaytarır (məs. səhv page parametri)."""
-    from apps.accounts.views.profile.search import (
-        _parse_public_profile_page_number,
-        _sanitize_public_profile_search_query,
-        _validate_public_profile_category,
-    )
+    from apps.accounts.public import parse_public_profile_page_number as _parse_public_profile_page_number
+    from apps.accounts.public import sanitize_public_profile_search_query as _sanitize_public_profile_search_query
+    from apps.accounts.public import validate_public_profile_category as _validate_public_profile_category
 
     published_posts = (
         Post.objects.filter(author=profile_user, is_published=True).select_related("category").order_by("-created_at")
@@ -455,7 +453,7 @@ def _post_moderation_views():
 
 def register_all():
     """BlogConfig.ready() → accounts profile_hooks qeydiyyatı."""
-    from apps.accounts import profile_hooks
+    from apps.accounts.public import profile_hooks
 
     profile_hooks.register("posts_section", posts_section)
     profile_hooks.register("create_category_section", create_category_section)

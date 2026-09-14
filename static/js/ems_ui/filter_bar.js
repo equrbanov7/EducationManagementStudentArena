@@ -138,24 +138,50 @@
         select.selectedIndex = 0;
     }
 
+    /** Formanın SAHİBİ olduğu parametr adları — yalnız bunlar təmizlənə bilər.
+     *
+     *  ⚠️ REQRESSİYA QAPISI (sahib, 2026-09-10): «Registrar (kataloq)» →
+     *  «Tələbə təyinatları» tabında ada görə axtaranda ekran BİRİNCİ taba
+     *  («İxtisaslar») atırdı. Səbəb: bu funksiya əvvəllər prefiksli BÜTÜN
+     *  parametrləri «köhnəlmiş» sayıb silirdi, `rc_tab` da prefikslidir —
+     *  yəni aktiv tab URL-dən düşürdü və server defolt tabı qaytarırdı.
+     *  Eyni tələ `wc_view` / `wc_tab` / `th_tab` / sıralama açarlarında da
+     *  vardı. Qayda: forma YALNIZ öz sahələrini idarə edir; panelin vəziyyət
+     *  parametrləri (tab, görünüş, sıralama) TOXUNULMAZ qalır. */
+    function ownedNames(form) {
+        var owned = Object.create(null);
+        var nodes = fields(form);
+        for (var i = 0; i < nodes.length; i += 1) {
+            if (nodes[i].name) {
+                owned[nodes[i].name] = true;
+            }
+        }
+        return owned;
+    }
+
+    /** Formanın sahibi olduğu (və artıq render olunmayan qardaş) süzgəcləri atır. */
+    function dropOwnedParams(current, form) {
+        var owned = ownedNames(form);
+        var stale = [];
+        current.forEach(function (_value, key) {
+            if (owned[key]) {
+                stale.push(key);
+            }
+        });
+        stale.forEach(function (key) {
+            current.delete(key);
+        });
+        current.delete((form.dataset.paramPrefix || "") + "page");
+        current.delete("page");
+    }
+
     /** Applied dəyərlərdən naviqasiya URL-i qurur. */
     function buildUrl(form) {
         var base = form.dataset.baseUrl || window.location.pathname;
         var url = new URL(base, window.location.origin);
-        // Mövcud query-ni saxla, yalnız bu panelin parametrlərini əvəz et.
+        // Mövcud query-ni saxla, yalnız bu panelin ÖZ sahələrini əvəz et.
         var current = new URLSearchParams(window.location.search);
-        var prefix = form.dataset.paramPrefix || "";
-        if (prefix) {
-            var stale = [];
-            current.forEach(function (_value, key) {
-                if (key.indexOf(prefix) === 0) {
-                    stale.push(key);
-                }
-            });
-            stale.forEach(function (key) {
-                current.delete(key);
-            });
-        }
+        dropOwnedParams(current, form);
         if (form.dataset.section) {
             current.set("section", form.dataset.section);
         }
@@ -169,9 +195,8 @@
                 }
             }
         }
-        // Filtr dəyişəndə səhifə 1-ə qayıdır.
-        current.delete((form.dataset.paramPrefix || "") + "page");
-        current.delete("page");
+        // Filtr dəyişəndə səhifə 1-ə qayıdır (`dropOwnedParams` səhifəni onsuz
+        // da atdı; boş dəyər yazılan sahə yuxarıda silinir).
         url.search = current.toString();
         return url.toString();
     }
@@ -349,16 +374,9 @@
         var base = form.dataset.baseUrl || window.location.pathname;
         var url = new URL(base, window.location.origin);
         var current = new URLSearchParams(window.location.search);
-        var prefix = form.dataset.paramPrefix || "";
-        var stale = [];
-        current.forEach(function (_value, key) {
-            if ((prefix && key.indexOf(prefix) === 0) || key === "page") {
-                stale.push(key);
-            }
-        });
-        stale.forEach(function (key) {
-            current.delete(key);
-        });
+        // «Sıfırla» SÜZGƏCLƏRİ sıfırlayır, panelin vəziyyətini yox: aktiv tab /
+        // görünüş yerində qalır (yuxarıdakı `ownedNames` şərhinə bax).
+        dropOwnedParams(current, form);
         if (form.dataset.section) {
             current.set("section", form.dataset.section);
         }
@@ -481,6 +499,7 @@
 
     window.EMSFilterBar = {
         apply: apply,
+        ownedNames: ownedNames,
         clear: clear,
         isDirty: isDirty,
         draftValues: draftValues,

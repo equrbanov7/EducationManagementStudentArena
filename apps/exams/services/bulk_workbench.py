@@ -18,15 +18,13 @@ import json
 
 from django.utils.translation import pgettext
 
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.parsing import parse_bulk_mcq
+from apps.exams.services.parsing.math_text import sanitize_math_text
+from apps.exams.services.parsing.media_markers import extract_media_refs
 from apps.exams.services.utils import _norm
 
 _WARN_CTX = "exams.view.question_bank.warning"
-
-# Hansı warning tipləri hansı kateqoriyaya düşür (filter çipləri üçün)
-_DUP_TYPES = {"duplicate_in_import", "already_in_exam"}
-_STRUCTURE_TYPES = {"missing_option", "option_count_recommend_5", "option_count_too_low", "empty_option_text"}
-_BALANCE_TYPES = {"correct_too_long", "correct_too_short"}
 
 _OPTION_LABELS = ("A", "B", "C", "D", "E")
 
@@ -265,97 +263,8 @@ def analyze_mcq_bulk(raw_text, *, existing_fp_map=None, already_msg_key="already
     # ---- Test miqyasında "yalnız doğru cavab uzun/qısa" pattern-i ----
     test_level_warnings = _detect_length_bias(parsed)
 
-    # ---- Meta + kateqoriya sayğacları ----
-    category_counts = {
-        "errors": 0,
-        "warnings": 0,
-        "duplicates": 0,
-        "structure": 0,
-        "balance": 0,
-        "clean": 0,
-    }
-
-    for question in parsed:
-        warnings = question.get("warnings") or []
-        counts = {"error": 0, "warning": 0, "info": 0}
-        dup_refs = []
-        types = set()
-        for warning in warnings:
-            severity = warning.get("severity", "warning")
-            if severity in counts:
-                counts[severity] += 1
-            types.add(warning.get("type"))
-            if warning.get("type") == "duplicate_in_import" and warning.get("ref"):
-                dup_refs.append({"kind": "import", "index": warning["ref"]})
-            if warning.get("type") == "already_in_exam":
-                dup_refs.append({"kind": "db", "index": warning.get("ref_db_order"), "db_id": warning.get("ref_db_id")})
-
-        top_severity = "none"
-        for severity in ("error", "warning", "info"):
-            if counts[severity]:
-                top_severity = severity
-                break
-
-        has_duplicate = bool(_DUP_TYPES & types)
-        has_structure = bool(_STRUCTURE_TYPES & types)
-        has_balance = bool(_BALANCE_TYPES & types)
-
-        question["meta"] = {
-            "top_severity": top_severity,
-            "error_count": counts["error"],
-            "warning_count": counts["warning"],
-            "info_count": counts["info"],
-            "total_count": counts["error"] + counts["warning"] + counts["info"],
-            "has_duplicate": has_duplicate,
-            "has_structure_issue": has_structure,
-            "has_balance_issue": has_balance,
-            "dup_refs": dup_refs,
-            "flags": " ".join(
-                filter(
-                    None,
-                    [
-                        f"sev-{top_severity}" if top_severity != "none" else "sev-clean",
-                        "has-dup" if has_duplicate else "",
-                        "has-structure" if has_structure else "",
-                        "has-balance" if has_balance else "",
-                        "has-error" if counts["error"] else "",
-                        "has-warning" if counts["warning"] else "",
-                        "has-info" if counts["info"] else "",
-                        "is-clean" if not warnings else "",
-                    ],
-                )
-            ),
-        }
-
-        if counts["error"]:
-            category_counts["errors"] += 1
-        if counts["warning"]:
-            category_counts["warnings"] += 1
-        if has_duplicate:
-            category_counts["duplicates"] += 1
-        if has_structure:
-            category_counts["structure"] += 1
-        if has_balance:
-            category_counts["balance"] += 1
-        if not warnings:
-            category_counts["clean"] += 1
-
-    warning_count = sum(
-        1
-        for question in parsed
-        for warning in question.get("warnings", [])
-        if warning.get("severity", "warning") != "info"
-    )
-    warning_count += sum(1 for warning in test_level_warnings if warning.get("severity", "warning") != "info")
-
-    return {
-        "parsed": parsed,
-        "category_counts": category_counts,
-        "warning_count": warning_count,
-        "duplicate_count": category_counts["duplicates"],
-        "error_count": category_counts["errors"],
-        "test_level_warnings": test_level_warnings,
-    }
+    # ---- Meta + kateqoriya sayğacları (W3 2026-09-14: bulk_confidence, düstur/şəkil inamı) ----
+    return finalize_analysis(parsed, test_level_warnings)
 
 
 def _detect_length_bias(parsed):
@@ -454,16 +363,28 @@ def analyze_written_bulk(raw_text, *, existing_text_map=None):
     parsed = []
     seen_fingerprints = {}
     for body in raw_questions:
-        parsed.append(
-            {
-                "text": body,
-                "options": {},
-                "correct": [],
-                "answer_mode": "single",
-                "question_type": "written",
-                "warnings": [],
-            }
-        )
+        question = {
+            "text": body,
+            "options": {},
+            "correct": [],
+            "answer_mode": "single",
+            "question_type": "written",
+            "warnings": [],
+        }
+        # W3 2026-09-14: DOCX şəkil markerləri → media_refs; LaTeX sanitizasiya.
+        extract_media_refs(question)
+        question["text"], issues = sanitize_math_text(question["text"])
+        for issue in issues:
+            question["warnings"].append(
+                {
+                    "type": issue["type"],
+                    "severity": "warning",
+                    "msg": pgettext("exams.service.parsing.warning", issue["type"]).format(
+                        command=issue.get("command") or "", preview=issue.get("preview") or ""
+                    ),
+                }
+            )
+        parsed.append(question)
 
     # Dublikat: import daxilində
     for index, question in enumerate(parsed, start=1):
@@ -526,70 +447,4 @@ def analyze_written_bulk(raw_text, *, existing_text_map=None):
                 }
             )
 
-    category_counts = {"errors": 0, "warnings": 0, "duplicates": 0, "structure": 0, "balance": 0, "clean": 0}
-    for question in parsed:
-        warnings = question.get("warnings") or []
-        counts = {"error": 0, "warning": 0, "info": 0}
-        types = set()
-        for warning in warnings:
-            severity = warning.get("severity", "warning")
-            if severity in counts:
-                counts[severity] += 1
-            types.add(warning.get("type"))
-        top_severity = "none"
-        for severity in ("error", "warning", "info"):
-            if counts[severity]:
-                top_severity = severity
-                break
-        has_duplicate = bool(_DUP_TYPES & types)
-        has_structure = bool(_STRUCTURE_TYPES & types)
-        question["meta"] = {
-            "top_severity": top_severity,
-            "error_count": counts["error"],
-            "warning_count": counts["warning"],
-            "info_count": counts["info"],
-            "total_count": counts["error"] + counts["warning"] + counts["info"],
-            "has_duplicate": has_duplicate,
-            "has_structure_issue": has_structure,
-            "has_balance_issue": False,
-            "dup_refs": [],
-            "flags": " ".join(
-                filter(
-                    None,
-                    [
-                        f"sev-{top_severity}" if top_severity != "none" else "sev-clean",
-                        "has-dup" if has_duplicate else "",
-                        "has-structure" if has_structure else "",
-                        "has-error" if counts["error"] else "",
-                        "has-warning" if counts["warning"] else "",
-                        "is-clean" if not warnings else "",
-                    ],
-                )
-            ),
-        }
-        if counts["error"]:
-            category_counts["errors"] += 1
-        if counts["warning"]:
-            category_counts["warnings"] += 1
-        if has_duplicate:
-            category_counts["duplicates"] += 1
-        if has_structure:
-            category_counts["structure"] += 1
-        if not warnings:
-            category_counts["clean"] += 1
-
-    warning_count = sum(
-        1
-        for question in parsed
-        for warning in question.get("warnings", [])
-        if warning.get("severity", "warning") != "info"
-    )
-
-    return {
-        "parsed": parsed,
-        "category_counts": category_counts,
-        "warning_count": warning_count,
-        "duplicate_count": category_counts["duplicates"],
-        "error_count": category_counts["errors"],
-        "test_level_warnings": [],
-    }
+    return finalize_analysis(parsed, [])

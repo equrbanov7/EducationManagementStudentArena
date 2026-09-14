@@ -1,0 +1,68 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-9.1.1, pluggy-1.6.0
+django: version: 5.2.17, settings: config.settings.test (from env)
+rootdir: /Users/elvin/Developer/EMSArena
+configfile: pyproject.toml (WARNING: ignoring pytest config in setup.cfg!)
+plugins: locust-2.43.3, xdist-3.8.0, asyncio-1.3.0, django-4.12.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 8679 items / 8400 deselected / 279 selected
+
+apps/accounts/tests/test_account_archive_postgres.py ...                 [  1%]
+apps/accounts/tests/test_identity_access_postgres.py ..........          [  4%]
+apps/accounts/tests/test_identity_reinstate.py ..                        [  5%]
+apps/applications/tests/test_rls.py ....                                 [  6%]
+apps/legacy_import/tests/test_batch_accounting_postgres.py .......       [  9%]
+apps/legacy_import/tests/test_ledger_lifecycle_postgres.py ..........    [ 12%]
+apps/legacy_import/tests/test_ledger_service.py .                        [ 13%]
+apps/legacy_import/tests/test_rehearsal_postgres.py ....s............    [ 19%]
+apps/legacy_import/tests/test_rehearsal_source_integration.py ss         [ 20%]
+apps/legacy_import/tests/test_repair_pseudo_groups.py .                  [ 20%]
+apps/legacy_import/tests/test_rls.py ....................                [ 27%]
+apps/organizations/tests/test_rls.py ................................... [ 40%]
+...........................                                              [ 49%]
+apps/registrar/tests/test_correction_reversal_postgres.py .......        [ 52%]
+apps/registrar/tests/test_guest_roster_postgres.py ...                   [ 53%]
+apps/registrar/tests/test_integrity_postgres.py ...........              [ 57%]
+apps/registrar/tests/test_integrity_remaining_postgres.py .............. [ 62%]
+.                                                                        [ 62%]
+apps/registrar/tests/test_legacy_grade_evidence_postgres.py ............ [ 67%]
+............                                                             [ 71%]
+apps/registrar/tests/test_reference_identity_postgres.py ............... [ 76%]
+........                                                                 [ 79%]
+apps/registrar/tests/test_rls.py ...........                             [ 83%]
+apps/registrar/tests/test_rubric_atomicity_postgres.py .....             [ 85%]
+apps/syllabus/tests/test_rls.py ....                                     [ 86%]
+apps/workload/tests/test_rls.py .....                                    [ 88%]
+apps/workload/tests/test_stage4_rls.py .....                             [ 90%]
+core/tests/test_rls_gate_integrity.py ...                                [ 91%]
+core/tests/test_rls_platform_logs.py ....                                [ 92%]
+apps/exams/tests/test_access_code_migration.py .                         [ 93%]
+apps/legacy_import/tests/test_batch_accounting_migration_postgres.py ... [ 94%]
+                                                                         [ 94%]
+apps/legacy_import/tests/test_rehearsal_postgres.py ..                   [ 94%]
+apps/legacy_import/tests/test_review_migration_postgres.py ...           [ 96%]
+apps/organizations/tests/test_rls_transaction_pooling.py ...........     [100%]
+
+=============================== warnings summary ===============================
+apps/exams/tests/test_access_code_migration.py:18
+  /Users/elvin/Developer/EMSArena/apps/exams/tests/test_access_code_migration.py:18: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = [pytest.mark.postgres, pytest.mark.timeout(1200)]
+
+apps/legacy_import/tests/test_batch_accounting_migration_postgres.py:23
+  /Users/elvin/Developer/EMSArena/apps/legacy_import/tests/test_batch_accounting_migration_postgres.py:23: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = [pytest.mark.postgres, pytest.mark.timeout(1200)]
+
+apps/legacy_import/tests/test_review_migration_postgres.py:19
+  /Users/elvin/Developer/EMSArena/apps/legacy_import/tests/test_review_migration_postgres.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = [pytest.mark.postgres, pytest.mark.timeout(1200)]
+
+apps/registrar/tests/test_reference_identity_migration.py:19
+  /Users/elvin/Developer/EMSArena/apps/registrar/tests/test_reference_identity_migration.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.timeout(1200)
+
+apps/registrar/tests/test_rubric_component_migration.py:19
+  /Users/elvin/Developer/EMSArena/apps/registrar/tests/test_rubric_component_migration.py:19: PytestUnknownMarkWarning: Unknown pytest.mark.timeout - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    pytestmark = pytest.mark.timeout(1200)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=== 276 passed, 3 skipped, 8400 deselected, 5 warnings in 242.20s (0:04:02) ====

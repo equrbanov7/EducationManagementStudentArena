@@ -123,7 +123,7 @@ from apps.accounts.services.people.academic import STATUS_LABELS as ACADEMIC_STA
 from apps.accounts.services.people.actions import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.people.constants import AGE_UNKNOWN, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
 from apps.accounts.services.people.filters import education_form_options, funding_options
-from apps.organizations.permissions import get_permission_label as permission_label
+from apps.organizations.public import get_permission_label as permission_label
 
 _CTX = "accounts.people"
 

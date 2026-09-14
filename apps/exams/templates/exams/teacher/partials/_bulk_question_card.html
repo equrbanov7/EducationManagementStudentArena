@@ -1,0 +1,123 @@
+{% load i18n %}
+{% comment %}
+W3 2026-09-14: toplu sual workbench-inin BİR sual kartı — `_bulk_question_workbench.html`
+600 sətir tavanını keçdiyi üçün ayrıldı. Kontekst: q (parse olunmuş sual), q_index
+(1-based sıra), selected, dp_value, math_token. Düsturlar `data-ems-math` ilə (KaTeX).
+{% endcomment %}
+<div class="q-card{% if q_index in selected %} is-selected{% endif %} q-card--sev-{{ q.meta.top_severity|default:'none' }} {{ q.meta.flags }}"
+     id="qcard-{{ q_index }}" data-q-index="{{ q_index }}" data-q-flags="{{ q.meta.flags }}" data-toggle-row-card>
+    <div class="q-checkbox-wrapper">
+        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ q_index }}"
+               aria-label="#{{ q_index }} — {{ q.text|striptags|truncatechars:60 }}"
+               {% if q_index in selected %}checked{% endif %}>
+    </div>
+
+    <div class="points-mini">
+        <label for="points-input-{{ q_index }}">{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
+        <input type="number" id="points-input-{{ q_index }}" name="points_{{ q_index }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" class="bulk-question-workbench-1">
+    </div>
+
+    <div class="q-content" data-ems-math>
+        <div class="q-header">
+            <span class="q-num">#{{ q_index }}</span>
+            <span class="q-text{% if math_token and q.has_visual_source %} sr-only{% endif %}">{{ q.text }}</span>
+            {% if q.meta.formula_count or q.meta.has_image or q.meta.image_pending %}
+            <span class="q-confidence" data-confidence="{{ q.meta.confidence }}">
+                {% if q.meta.formula_fallback %}<span class="q-badge q-badge--formula-fallback" title="{% trans 'Düstur tam çevrilmədi — mətni yoxlayın' context 'exams.template.test_question_bank' %}"><i class="fas fa-square-root-variable"></i> !</span>
+                {% elif q.meta.formula_count %}<span class="q-badge q-badge--formula" title="{% trans 'LaTeX düstur tanındı' context 'exams.template.test_question_bank' %}"><i class="fas fa-square-root-variable"></i> {{ q.meta.formula_count }}</span>{% endif %}
+                {% if q.meta.has_image %}<span class="q-badge q-badge--image" title="{% trans 'Sənəddən şəkil bağlanacaq' context 'exams.template.test_question_bank' %}"><i class="fas fa-image"></i> {% trans "şəkil bağlı" context "exams.template.test_question_bank" %}</span>
+                {% elif q.meta.image_pending %}<span class="q-badge q-badge--image-pending" title="{% trans 'Şəkil istinadı var, mənbə tapılmadı' context 'exams.template.test_question_bank' %}"><i class="fas fa-image"></i> ?</span>{% endif %}
+            </span>
+            {% endif %}
+
+            {% if q.meta.total_count %}
+            <span class="q-badges">
+                {% if q.meta.error_count %}<span class="q-badge q-badge--error" title="{% trans 'Xəta' context 'exams.template.test_question_bank' %}"><i class="fas fa-circle-xmark"></i> {{ q.meta.error_count }}</span>{% endif %}
+                {% if q.meta.warning_count %}<span class="q-badge q-badge--warning" title="{% trans 'Xəbərdarlıq' context 'exams.template.test_question_bank' %}"><i class="fas fa-triangle-exclamation"></i> {{ q.meta.warning_count }}</span>{% endif %}
+                {% if q.meta.info_count %}<span class="q-badge q-badge--info" title="{% trans 'Qeyd' context 'exams.template.test_question_bank' %}"><i class="fas fa-circle-info"></i> {{ q.meta.info_count }}</span>{% endif %}
+                {% if q.meta.has_duplicate %}<span class="q-badge q-badge--duplicate" title="{% trans 'Dublikat' context 'exams.template.test_question_bank' %}"><i class="fas fa-clone"></i></span>{% endif %}
+            </span>
+            {% else %}
+            <span class="q-badges">
+                <span class="q-badge q-badge--clean" title="{% trans 'Təmiz' context 'exams.template.test_question_bank' %}"><i class="fas fa-check"></i></span>
+            </span>
+            {% endif %}
+        </div>
+
+        {% if math_token and q.has_visual_source %}
+        <img class="q-source-preview"
+             src="{% url 'exams:question_import_visual_preview' math_token q.source_index %}"
+             alt=""
+             aria-hidden="true"
+             loading="lazy">
+        {% elif math_token and q.has_media %}
+        {# W3 2026-09-14: DOCX — mətn qalır, sənəddən çıxarılan şəkil(lər) suala/varianta bağlanacaq #}
+        <figure class="q-media-preview">
+            <img class="q-media-preview__img"
+                 src="{% url 'exams:question_import_visual_preview' math_token q.source_index %}"
+                 alt="{% trans 'Sənəddən şəkil bağlanacaq' context 'exams.template.test_question_bank' %}"
+                 loading="lazy">
+            <figcaption class="q-media-preview__caption">
+                <i class="fas fa-paperclip"></i>
+                {% trans "Sənəddən çıxarılan şəkil — yadda saxlayanda bağlanır:" context "exams.template.test_question_bank" %}
+                {% for slot in q.media_slots %}<span class="q-media-preview__slot">{% if slot == 'stem' %}{% trans "Sual" context "exams.template.test_question_bank" %}{% else %}{{ slot }}{% endif %}</span>{% endfor %}
+            </figcaption>
+        </figure>
+        {% endif %}
+
+        {% if q.options %}
+        {% if math_token and q.has_visual_source %}
+        <div class="q-visual-answer">
+            <span class="q-visual-answer__label">{% trans "Düzgün cavab" context "exams.template.test_question_bank" %}:</span>
+            {% for lab in q.correct %}
+            <span class="q-visual-answer__choice">{{ lab }}</span>
+            {% endfor %}
+            <span class="sr-only">
+                {% for lab, txt in q.options.items %}{{ lab }}: {{ txt }}. {% endfor %}
+            </span>
+        </div>
+        {% else %}
+        <div class="options-grid">
+            {% for lab, txt in q.options.items %}
+            <div class="opt-box {% if lab in q.correct %}correct{% endif %}">
+                <span class="opt-label">{{ lab }}</span>
+                <span class="opt-text">{{ txt }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+        {% if q.warnings %}
+        <details class="warning-box warning-box--{{ q.meta.top_severity|default:'warning' }}" {% if q.meta.error_count or q.meta.has_duplicate %}open{% endif %}>
+            <summary class="warning-box__summary">
+                <span class="warning-box__summary-label"><i class="fas fa-list-check"></i> {% trans "Xəbərdarlıqları göstər" context "exams.template.test_question_bank" %}</span>
+                <span class="warning-box__tags">
+                    {% if q.meta.has_duplicate %}<span class="warning-box__tag warning-box__tag--dup"><i class="fas fa-clone"></i> {% trans "Dublikat" context "exams.template.test_question_bank" %}</span>{% endif %}
+                    {% if q.meta.has_structure_issue %}<span class="warning-box__tag warning-box__tag--struct"><i class="fas fa-list-ol"></i> {% trans "Variant" context "exams.template.test_question_bank" %}</span>{% endif %}
+                    {% if q.meta.has_balance_issue %}<span class="warning-box__tag warning-box__tag--bal"><i class="fas fa-scale-unbalanced"></i> {% trans "Balans" context "exams.template.test_question_bank" %}</span>{% endif %}
+                </span>
+                <span class="warning-box__summary-count">{{ q.meta.total_count }}</span>
+                <i class="fas fa-chevron-down warning-box__chevron"></i>
+            </summary>
+            <div class="warning-box__body">
+                {% for w in q.warnings %}
+                <div class="warning-msg warning-msg--{{ w.severity|default:'warning' }}" data-severity="{{ w.severity|default:'warning' }}">
+                    <span class="warning-msg__badge">
+                        {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
+                    </span>
+                    <span class="warning-msg__text">
+                        {{ w.msg }}
+                        {% if w.type == 'duplicate_in_import' and w.ref %}
+                        <a href="#qcard-{{ w.ref }}" class="warning-msg__jump" data-jump-to="qcard-{{ w.ref }}">
+                            <i class="fas fa-arrow-right-long"></i> {% trans "Aç" context "exams.template.test_question_bank" %} #{{ w.ref }}
+                        </a>
+                        {% endif %}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+    </div>
+</div>

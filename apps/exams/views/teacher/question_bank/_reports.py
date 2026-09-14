@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import pgettext
 
+from core.export_safety import sheet_append
+
 from ._helpers import (
     _format_int_list,
     _question_bank_feedback,
@@ -115,19 +117,22 @@ def _build_question_bank_report_xlsx(
         (_tx("Təmiz sual sayı"), (category_counts or {}).get("clean", 0)),
     ]
 
-    ws_summary.append([_tx("Sahə"), _tx("Dəyər")])
+    # 2026-09-14 (audit F-07): imtahan adı, sual/variant mətnləri müəllim
+    # daxiletməsidir → `sheet_append` formula-bənzər xanaları neytrallaşdırır.
+    sheet_append(ws_summary, [_tx("Sahə"), _tx("Dəyər")])
     for cell in ws_summary[1]:
         cell.fill = header_fill
         cell.font = header_font
     for row in summary_rows:
-        ws_summary.append(row)
+        sheet_append(ws_summary, row)
 
-    ws_summary.append([])
-    ws_summary.append(
+    sheet_append(ws_summary, [])
+    sheet_append(
+        ws_summary,
         [
             _tx("Qeyd"),
             _tx("Feedback sütunu müəllimə göndərmək üçün hazır düzəliş mətnidir."),
-        ]
+        ],
     )
     ws_summary.cell(row=ws_summary.max_row, column=1).font = section_font
 
@@ -153,7 +158,7 @@ def _build_question_bank_report_xlsx(
         "E",
         _tx("Düz cavab"),
     ]
-    ws_problems.append(problem_headers)
+    sheet_append(ws_problems, problem_headers)
     for cell in ws_problems[1]:
         cell.fill = header_fill
         cell.font = header_font
@@ -162,7 +167,8 @@ def _build_question_bank_report_xlsx(
     row_count = 0
     for warning in test_level_warnings:
         warning_type = warning.get("type")
-        ws_problems.append(
+        sheet_append(
+            ws_problems,
             [
                 _tx("Test ümumi"),
                 "",
@@ -178,7 +184,7 @@ def _build_question_bank_report_xlsx(
                 "",
                 "",
                 "",
-            ]
+            ],
         )
         row_count += 1
 
@@ -189,7 +195,8 @@ def _build_question_bank_report_xlsx(
         opts = q.get("options") or {}
         for warning in warnings:
             warning_type = warning.get("type")
-            ws_problems.append(
+            sheet_append(
+                ws_problems,
                 [
                     idx,
                     q.get("q_no", ""),
@@ -205,12 +212,13 @@ def _build_question_bank_report_xlsx(
                     opts.get("D", ""),
                     opts.get("E", ""),
                     ", ".join(q.get("correct") or []),
-                ]
+                ],
             )
             row_count += 1
 
     if row_count == 0:
-        ws_problems.append(
+        sheet_append(
+            ws_problems,
             [
                 "",
                 "",
@@ -226,7 +234,7 @@ def _build_question_bank_report_xlsx(
                 "",
                 "",
                 "",
-            ]
+            ],
         )
 
     widths = [12, 14, 12, 22, 60, 24, 58, 70, 34, 34, 34, 34, 34, 14]

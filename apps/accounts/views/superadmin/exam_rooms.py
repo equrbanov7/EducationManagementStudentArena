@@ -18,10 +18,10 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.exams.forms import ExamRoomForm
 from apps.exams.public import (
     ExamRoom,
     ExamRoomComputer,
+    ExamRoomForm,
     RoomAdminError,
     add_computer,
     bulk_add_computers,
@@ -31,6 +31,7 @@ from apps.exams.public import (
 )
 from core.audit import log_action
 from core.constants import AuditAction
+from core.http_ids import parse_int
 
 from .._helpers import (
     _append_query_params,
@@ -101,7 +102,12 @@ def superadmin_exam_rooms(request):
 
 
 def _get_org_room(organization, room_id):
-    return get_object_or_404(ExamRoom, pk=room_id, organization=organization)
+    # F-01 (2026-09-14): pozuq tam ədəd (`room_id="abc"`) → 404 (əvvəl `ValueError` → 500).
+    return get_object_or_404(ExamRoom, pk=parse_int(room_id), organization=organization)
+
+
+def _get_room_computer(room, computer_id):
+    return get_object_or_404(ExamRoomComputer, pk=parse_int(computer_id), room=room)
 
 
 def _dispatch_action(request, action, organization):
@@ -153,7 +159,8 @@ def _dispatch_action(request, action, organization):
         room.is_active = not room.is_active
         room.save(update_fields=["is_active", "updated_at"])
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Zal statusu dəyişdirildi."))
-        return
+        # Fraqment → kabinet JS-i həmin zalın çekmecəsini yenidən açır (əməl oradan edilir).
+        return {"_fragment": f"sar-room-{room.pk}"}
 
     if action == "add_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
@@ -171,7 +178,7 @@ def _dispatch_action(request, action, organization):
 
     if action == "update_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
-        computer = get_object_or_404(ExamRoomComputer, pk=request.POST.get("computer_id"), room=room)
+        computer = _get_room_computer(room, request.POST.get("computer_id"))
         update_computer(
             computer=computer,
             label=request.POST.get("label", ""),
@@ -186,10 +193,10 @@ def _dispatch_action(request, action, organization):
 
     if action == "delete_computer":
         room = _get_org_room(organization, request.POST.get("room_id"))
-        computer = get_object_or_404(ExamRoomComputer, pk=request.POST.get("computer_id"), room=room)
+        computer = _get_room_computer(room, request.POST.get("computer_id"))
         computer.delete()
         messages.success(request, pgettext("accounts.superadmin_exam_rooms", "Kompüter silindi."))
-        return
+        return {"_fragment": f"sar-room-{room.pk}"}
 
     if action == "delete_room":
         room = _get_org_room(organization, request.POST.get("room_id"))

@@ -13,6 +13,13 @@ Xüsusiyyətlər
 * **İdempotent** — ikinci icra 0 sətir toxunur (kafedraya bağlı sətir seçilmir).
 * **Auditlidir** — hər dəyişiklik ``audit_auditlog``-a köhnə/yeni dəyərlə düşür.
 * Bölmə ağacında kafedra əcdadı OLMAYAN sətrə TOXUNMUR (uydurma bağ yaradılmır).
+* **`chair_unit` BOŞ olan sətirlər də həll edilir** (2026-09-11). Köçürülmüş
+  4 926 sillabusun HAMISI boş idi — nə ixtisasa, nə kafedraya bağlı — ona görə
+  «Sillabuslar» və «Sillabus təsdiqi» ekranlarında kafedra süzgəci boş qalır,
+  kafedra müdirinin növbəsinə isə heç nə düşmürdü. Müəllifin aktiv kafedra
+  üzvlüyü (``author_chair_unit``) burada yeganə real bağdır: klonda 4 885 /
+  4 926 sətir bu yolla həll olunur; qalan 41-in müəllifi kafedrasız
+  işçidir (``myedu.worker.*``) və boş qalır — uydurma bağ yaradılmır.
 
 İstifadə::
 
@@ -28,7 +35,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ...models import Syllabus
-from ...services.units import resolve_syllabus_chair_unit
+from ...services.units import CHAIR_UNIT_TYPES, resolve_syllabus_chair_unit
 
 
 class Command(BaseCommand):
@@ -50,22 +57,31 @@ class Command(BaseCommand):
             self._repair(**options)
 
     def _repair(self, *, org_slug=None, apply=False, **_options):
-        queryset = Syllabus.objects.exclude(chair_unit=None).select_related("chair_unit", "organization", "author")
+        # Kafedraya ARTIQ bağlı olanlar seçilmir (idempotentlik); ixtisasa bağlı
+        # və ya BOŞ olanlar həll edilir.
+        queryset = Syllabus.objects.exclude(chair_unit__unit_type__in=CHAIR_UNIT_TYPES).select_related(
+            "chair_unit", "organization", "author"
+        )
         if org_slug:
             queryset = queryset.filter(organization__slug=org_slug)
 
         planned = []
+        unresolved = 0
         for syllabus in queryset.iterator(chunk_size=500):
             current = syllabus.chair_unit
             target = resolve_syllabus_chair_unit(
                 unit=current, author=syllabus.author, organization=syllabus.organization
             )
-            if target is None or target.pk == current.pk:
+            if target is None or (current is not None and target.pk == current.pk):
+                unresolved += 1
                 continue
             planned.append((syllabus, current, target))
 
         for syllabus, current, target in planned[:20]:
-            self.stdout.write(f"  → {syllabus.pk}: «{current.name}» ({current.unit_type}) ⇒ «{target.name}»")
+            before = f"«{current.name}» ({current.unit_type})" if current is not None else "— boş —"
+            self.stdout.write(f"  → {syllabus.pk}: {before} ⇒ «{target.name}»")
+        if unresolved:
+            self.stdout.write(f"  kafedrası tapılmayan (toxunulmur): {unresolved}")
         if len(planned) > 20:
             self.stdout.write(f"  … və daha {len(planned) - 20} sətir")
 
@@ -80,7 +96,10 @@ class Command(BaseCommand):
                     AuditAction.UPDATE,
                     organization=syllabus.organization,
                     obj=syllabus,
-                    old_values={"chair_unit": str(current.pk), "chair_unit_name": current.name},
+                    old_values={
+                        "chair_unit": str(current.pk) if current is not None else None,
+                        "chair_unit_name": current.name if current is not None else None,
+                    },
                     new_values={"chair_unit": str(target.pk), "chair_unit_name": target.name},
                     reason="syllabus_repair_chair_units (R-2)",
                     resource_type="syllabus.syllabus",

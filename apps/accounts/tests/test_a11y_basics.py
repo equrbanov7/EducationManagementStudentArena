@@ -25,7 +25,8 @@ class A11yBasicsTest(TestCase):
         self.assertLess(page.index('class="skip-link"'), page.index("<nav"))
 
     def test_main_landmark_has_target_id(self):
-        self.assertIn('<main id="main-content">', self._page())
+        # 2026-09-13 (Codex §19): `tabindex="-1"` — skip-link fokusu məzmuna aparsın.
+        self.assertIn('<main id="main-content" tabindex="-1">', self._page())
 
     def test_html_lang_reflects_active_language(self):
         client = Client()

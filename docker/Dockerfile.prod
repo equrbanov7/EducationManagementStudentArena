@@ -71,8 +71,12 @@ RUN groupadd --system appgroup \
     && useradd --system --gid appgroup --no-create-home --shell /usr/sbin/nologin appuser
 
 # Upgrade pip, then install Python dependencies.
+# P2-10 (Codex audit, 2026-09-13): setuptools/wheel də AÇIQ yenilənir — base
+# image-in gətirdiyi köhnə setuptools (<78.1.1, CVE-2025-47273 / <70.0,
+# CVE-2024-6345) image-də qalmasın; requirements/base.txt-dəki floor onu
+# runtime paketi kimi də sabitləyir.
 COPY requirements /app/requirements
-RUN pip install --no-cache-dir --upgrade pip \
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
     && pip install --no-cache-dir -r /app/requirements/production.txt \
     && apt-get purge -y --auto-remove gcc libpq-dev libc6-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -87,9 +91,17 @@ COPY --chown=appuser:appgroup . /app/
 # two runtime mount targets are chowned (non-recursive, cheap): staticfiles
 # and media are named-volume mountpoints — creating them here appuser-owned
 # means FRESH volumes initialise with the correct ownership.
-RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh \
+RUN chmod +x /app/docker/release.sh /app/docker/prod-entrypoint.sh /app/docker/build-info.sh \
     && mkdir -p /app/staticfiles /app/media \
     && chown appuser:appgroup /app /app/staticfiles /app/media
+
+# P1-07 (Codex audit, 2026-09-13): image-ə qurulduğu commit yazılır —
+# /health/ `build.sha` kimi göstərir, remote_deploy.sh deploy sonunda
+# tutuşdurur (image drift aşkarlanması). ARG COPY-dan SONRA gəlir ki, SHA
+# dəyişəndə yalnız bu kiçik lay yenidən qurulsun (pip layı keşdə qalır).
+ARG BUILD_GIT_SHA=unknown
+RUN BUILD_GIT_SHA="${BUILD_GIT_SHA}" /app/docker/build-info.sh /app/build-info.json \
+    && chown appuser:appgroup /app/build-info.json
 
 # Drop privileges: run the application as a non-root user.  collectstatic
 # below then produces appuser-owned files without any recursive chown.

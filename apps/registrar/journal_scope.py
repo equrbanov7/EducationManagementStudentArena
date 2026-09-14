@@ -57,6 +57,27 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
     return org_unit_model.objects.filter(organization=organization, pk=group_id).filter(scope.unit_subtree_q()).exists()
 
 
+def journal_view_q(user, organization):
+    """``journal.view`` əhatəsinin :class:`CourseOffering` Q-su; əhatə yoxdursa ``None``.
+
+    Audit 2026-09-13 `access` F-06 (2026-09-14): açar əvvəl heç yerdə yoxlanmırdı.
+    İndi ORGANIZATION daşıyıcısı bütün təşkilatın, UNIT daşıyıcısı öz alt-ağacındakı
+    qrupların jurnallarını SİYAHIDA görür (detal səhifəsi eyni əhatəni
+    :func:`apps.registrar.journal_access.can_observe_journal` ilə yoxlayır).
+    """
+    from django.apps import apps as django_apps
+    from django.db.models import Q
+
+    scope = _permission_scope(user, organization, "journal.view")
+    if not scope.has_structure_access:
+        return None
+    if scope.is_org_wide:
+        return Q(organization=organization)
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    units = org_unit_model.objects.filter(organization=organization).filter(scope.unit_subtree_q()).values("pk")
+    return Q(group__in=units)
+
+
 def permission_scope_for(user, organization, permission):
     """Aktorun icazə əhatəsi (public sarğı) — toplu filtrlər üçün bir dəfə hesablanır."""
     return _permission_scope(user, organization, permission)

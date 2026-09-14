@@ -47,3 +47,32 @@ class MyJournalEmptyStateTest(TestCase):
         self.assertIn("Akademik qeydiniz hələ yaradılmayıb", html)
         self.assertIn("ems-empty", html)
         self.assertNotIn("Qrup seçimi", html)
+
+    def test_student_never_falls_to_the_teacher_list_when_org_context_is_missing(self):
+        """Org konteksti itəndə də (sahib 2026-09-12: «tələbə ancaq özünə aid jurnalı görsün»).
+
+        Əvvəl `_has_active_student_membership(None, user)` False verirdi və tələbə
+        `journal_list_context`-ə (müəllim qrup siyahısı + «Qrup seçimi» stepper-i)
+        düşürdü.
+        """
+        from django.test import RequestFactory
+
+        from apps.registrar.public import build_profile_registrar_section
+
+        request = RequestFactory().get("/accounts/profile/?section=my-journal")
+        request.user = self.student
+        request.organization = None
+        context = build_profile_registrar_section(request, organization=None, section="my-journal")
+        self.assertTrue(context.get("journal_student_missing"))
+        self.assertNotIn("offerings", context)
+
+    def test_full_page_journal_list_redirects_a_student_to_the_cabinet_section(self):
+        """`/jurnal/` tam səhifəsi tələbə üçün boş müəllim siyahısı deyil — öz jurnalıdır."""
+        client = Client()
+        client.force_login(self.student)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        response = client.get("/jurnal/")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("section=my-journal", response["Location"])

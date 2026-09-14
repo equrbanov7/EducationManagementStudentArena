@@ -250,6 +250,11 @@ def _handle_login(request):
     raw_pin = request.POST.get("pin", "")
     ticket, error_code = validate_entry(request, username, raw_pin)
     if ticket is None:
+        # Audit 2026-09-13 EX-06 (P2): IP+istifadəçi limiteri dolanda bilet
+        # yolu «rate_limited» qaytarır, amma fərdi-PIN yolu yenə işləyirdi —
+        # limit yan keçilirdi. Limit aşımı hər iki yolu bağlayır.
+        if error_code == ERROR_RATE_LIMITED:
+            return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
         # Bilet (otaq-oturum) sistemi olmayan finallar: tələbə username +
         # kabinetdə gördüyü fərdi PIN ilə birbaşa imtahana daxil olur.
         pin_response = _handle_student_pin_login(request, username, raw_pin)
@@ -357,7 +362,8 @@ def _handle_student_pin_login(request, username, raw_pin):
         pin_ticket, ticket_error = ensure_pin_ticket(exam, student, entry_room, entry_computer)
         if pin_ticket is None:
             return _render_login(request, error=ticket_error, username=(username or "").strip())
-        pin_ticket = claim_student_pin_entry(pin_ticket)
+        # W4 R7: claim + giriş audit hadisəsi (tarixçə «Girişlər» KPI-ı).
+        pin_ticket = claim_student_pin_entry(pin_ticket, request=request)
         if pin_ticket is None:
             return _render_login(request, error=_entry_error_message(None), username=(username or "").strip())
 

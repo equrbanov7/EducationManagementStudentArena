@@ -87,11 +87,14 @@ class WebhookEndpointTests(TestCase):
     def setUpTestData(cls):
         User.objects.create_superuser("wh_super", "wh_super@test.az", "Pass123!x")
 
-    def _post(self, token, payload):
+    def _post(self, token, payload, **extra):
+        # Token başlıqdadır (audit P2-6): sorğu sətri log-lara sızırdı.
         return Client().post(
-            reverse("monitoring:alertmanager_webhook") + f"?token={token}",
+            reverse("monitoring:alertmanager_webhook"),
             data=json.dumps(payload),
             content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+            **extra,
         )
 
     def test_valid_token_ingests(self):
@@ -111,11 +114,31 @@ class WebhookEndpointTests(TestCase):
 
     def test_invalid_json_rejected(self):
         response = Client().post(
-            reverse("monitoring:alertmanager_webhook") + f"?token={WEBHOOK_TOKEN}",
+            reverse("monitoring:alertmanager_webhook"),
             data="bu json deyil",
             content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {WEBHOOK_TOKEN}",
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_query_string_token_is_no_longer_accepted(self):
+        """Düzgün token belə sorğu sətrində gəlirsə rədd edilir — sirr URL-də daşınmır."""
+        response = Client().post(
+            reverse("monitoring:alertmanager_webhook") + f"?token={WEBHOOK_TOKEN}",
+            data=json.dumps(_firing_payload()),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(Incident.objects.count(), 0)
+
+    def test_non_bearer_scheme_rejected(self):
+        response = Client().post(
+            reverse("monitoring:alertmanager_webhook"),
+            data=json.dumps(_firing_payload()),
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Basic {WEBHOOK_TOKEN}",
+        )
+        self.assertEqual(response.status_code, 403)
 
 
 class IncidentActionTests(TestCase):

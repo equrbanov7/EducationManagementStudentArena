@@ -138,7 +138,7 @@ def _staging_error_types() -> tuple[type[BaseException], ...]:
 
     global _STAGING_ERRORS
     if not _STAGING_ERRORS:
-        from apps.accounts.services.identity_access import IdentityAccessError
+        from apps.accounts.public import IdentityAccessError
 
         _STAGING_ERRORS = (IdentityAccessError, PermissionDenied, LegacyAccountCutoverError)
     return _STAGING_ERRORS

@@ -45,6 +45,18 @@ BLOCKED_UPLOAD_EXTENSIONS = {
     ".wsf",
     ".ps1",
     ".sh",
+    # 2026-09-14 (audit F-06, §27 «upload MIME sniffing»): brauzerin skript/markup
+    # kimi icra edə biləcəyi əlavə uzantılar — XHTML/SSI/MHTML arxivi, ES-modul,
+    # XML+XSLT (XSLT ilə skript), sıxılmış SVG.
+    ".xhtml",
+    ".shtml",
+    ".mht",
+    ".mhtml",
+    ".mjs",
+    ".xml",
+    ".xsl",
+    ".xslt",
+    ".svgz",
 }
 
 BLOCKED_MIME_TYPES = {
@@ -78,6 +90,89 @@ DEFAULT_ALLOWED_MIME_PREFIXES = ("image/", "video/", "audio/", "text/")
 
 IMAGE_ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".jfif", ".png", ".gif", ".webp"}
 
+# ─── Məzmun imzaları (2026-09-14, audit F-06) ───────────────────────────────
+#
+# Auditor: «`_resolve_mime_type` müştərinin `content_type`-ına etibar edir;
+# magic-bytes yalnız `MZ`/`<?php`; şəkillərdə Pillow yoxlaması yoxdur». Burada
+# üç qat əlavə olunur (üçüncü tərəf `python-magic`/`filetype` requirements-də
+# yoxdur — kiçik imza cədvəli kifayətdir):
+#
+# 1. Şəkil uzantılı HƏR yükləmə üçün magic-bytes (JPEG/PNG/GIF/WEBP) — SVG/HTML
+#    kimi markup «şəkil» adı ilə keçə bilməz.
+# 2. Şəkil SAHƏLƏRİ üçün (çağıran `allowed_extensions` ⊆ şəkil uzantıları verir)
+#    Pillow ilə format identifikasiyası + uzantı ↔ format uyğunluğu.
+# 3. Sənəd allow-list-i verilən çağırışlarda (PDF / ZIP-əsaslı ofis / köhnə OLE
+#    ofis / arxivlər) bəyan edilən tip ↔ məzmun imzası uyğunluğu.
+#
+# Allow-list-siz ümumi çağırış (köhnə davranış) yalnız 1-ci qatı alır ki, mövcud
+# çağıranlar/testlər dəyişməsin; sahə nə gözlədiyini deyəndə məzmun onu təsdiq
+# etməlidir.
+
+#: Şəkil uzantısı → mümkün başlanğıc imzaları (WEBP ayrıca: `RIFF....WEBP`).
+_IMAGE_SIGNATURES = {
+    ".jpg": (b"\xff\xd8\xff",),
+    ".jpeg": (b"\xff\xd8\xff",),
+    ".jfif": (b"\xff\xd8\xff",),
+    ".png": (b"\x89PNG\r\n\x1a\n",),
+    ".gif": (b"GIF87a", b"GIF89a"),
+    ".webp": (b"RIFF",),
+}
+
+#: Uzantı → Pillow `Image.format` dəyərləri (MPO = çox-kadrlı JPEG, kameralar yazır).
+_IMAGE_FORMATS_BY_EXTENSION = {
+    ".jpg": {"JPEG", "MPO"},
+    ".jpeg": {"JPEG", "MPO"},
+    ".jfif": {"JPEG", "MPO"},
+    ".png": {"PNG"},
+    ".gif": {"GIF"},
+    ".webp": {"WEBP"},
+}
+
+_PDF_SIGNATURES = (b"%PDF",)
+_ZIP_SIGNATURES = (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08")
+_OLE_SIGNATURES = (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",)
+_RAR_SIGNATURES = (b"Rar!\x1a\x07",)
+_7Z_SIGNATURES = (b"7z\xbc\xaf\x27\x1c",)
+
+#: Sənəd uzantısı → icazəli imzalar. Köhnə ofis uzantıları həm OLE, həm də PK
+#: qəbul edir (istifadəçilər `.docx`-i `.doc` adlandırır; Excel açır).
+_DOCUMENT_SIGNATURES_BY_EXTENSION = {
+    ".pdf": _PDF_SIGNATURES,
+    ".zip": _ZIP_SIGNATURES,
+    ".docx": _ZIP_SIGNATURES,
+    ".xlsx": _ZIP_SIGNATURES,
+    ".pptx": _ZIP_SIGNATURES,
+    ".doc": _OLE_SIGNATURES + _ZIP_SIGNATURES,
+    ".xls": _OLE_SIGNATURES + _ZIP_SIGNATURES,
+    ".ppt": _OLE_SIGNATURES + _ZIP_SIGNATURES,
+    ".rar": _RAR_SIGNATURES,
+    ".7z": _7Z_SIGNATURES,
+}
+
+#: Bəyan edilən MIME → imzalar (uzantı cədvəldə olmayanda ehtiyat açar).
+_DOCUMENT_SIGNATURES_BY_MIME = {
+    "application/pdf": _PDF_SIGNATURES,
+    "application/zip": _ZIP_SIGNATURES,
+    "application/x-zip-compressed": _ZIP_SIGNATURES,
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": _ZIP_SIGNATURES,
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": _ZIP_SIGNATURES,
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": _ZIP_SIGNATURES,
+    "application/msword": _OLE_SIGNATURES + _ZIP_SIGNATURES,
+    "application/vnd.ms-powerpoint": _OLE_SIGNATURES + _ZIP_SIGNATURES,
+    "application/vnd.rar": _RAR_SIGNATURES,
+    "application/x-rar-compressed": _RAR_SIGNATURES,
+    "application/x-7z-compressed": _7Z_SIGNATURES,
+}
+
+#: PDF başlığı ilk 1024 baytın içində ola bilər (Acrobat toleransı).
+_PDF_HEADER_WINDOW = 1024
+
+#: Şəkil/sənəd adı ilə gələn markup (SVG/HTML/XML) — brauzerdə skript səthi.
+_MARKUP_PREFIXES = (b"<svg", b"<?xml", b"<!doctype", b"<html", b"<script", b"<body", b"<head", b"<iframe")
+
+#: Məzmun yoxlaması üçün oxunan baş hissə.
+_SNIFF_HEAD_SIZE = 2048
+
 
 def _normalized_extension(file_name: str) -> str:
     return PurePosixPath((file_name or "").lower()).suffix
@@ -97,13 +192,17 @@ def _has_dangerous_stem_extension(file_name: str) -> bool:
     return False
 
 
-def _read_head(uploaded_file, size=16):
+def _read_head(uploaded_file, size=16, *, from_start=False):
     try:
         current_pos = uploaded_file.tell()
     except Exception:
         current_pos = None
 
     try:
+        # 2026-09-14 (audit F-06): məzmun imzası faylın ƏVVƏLİNDƏN oxunmalıdır —
+        # çağıran əvvəl oxuyub mövqeyi irəli çəkmiş ola bilər; mövqe geri qaytarılır.
+        if from_start and current_pos:
+            uploaded_file.seek(0)
         chunk = uploaded_file.read(size)
     except Exception:
         chunk = b""
@@ -133,6 +232,77 @@ def _resolve_mime_type(uploaded_file) -> str:
     return (guessed_type or "").lower()
 
 
+def _looks_like_markup(head: bytes) -> bool:
+    """Baş hissə SVG/HTML/XML markup-u ilə başlayırmı (BOM/boşluq nəzərə alınmır)."""
+    stripped = head.lstrip(b"\xef\xbb\xbf\xff\xfe\x00 \t\r\n").lower()
+    return stripped.startswith(_MARKUP_PREFIXES)
+
+
+def _image_signature_ok(extension: str, head: bytes) -> bool:
+    signatures = _IMAGE_SIGNATURES.get(extension)
+    if signatures is None:
+        return True
+    if not head.startswith(signatures):
+        return False
+    if extension == ".webp":
+        return head[8:12] == b"WEBP"
+    return True
+
+
+def _document_signature_ok(extension: str, mime_type: str, head: bytes) -> bool:
+    signatures = _DOCUMENT_SIGNATURES_BY_EXTENSION.get(extension) or _DOCUMENT_SIGNATURES_BY_MIME.get(mime_type)
+    if signatures is None:
+        return True
+    if signatures is _PDF_SIGNATURES:
+        return b"%PDF" in head[:_PDF_HEADER_WINDOW]
+    return head.startswith(signatures)
+
+
+def _is_image_only_allow_list(normalized_allowed_extensions) -> bool:
+    return bool(normalized_allowed_extensions) and normalized_allowed_extensions <= IMAGE_ALLOWED_EXTENSIONS
+
+
+def _verify_image_with_pillow(uploaded_file, extension: str) -> None:
+    """Pillow ilə format identifikasiyası — şəkil sahələri üçün (audit F-06).
+
+    ``Image.open`` başlıq strukturunu oxuyur: markup/zibil «şəkil» kimi keçmir,
+    format uzantı ailəsi ilə üst-üstə düşməlidir (``.png`` içində GIF → rədd).
+    Tam ``verify()`` (chunk CRC-ləri) QƏSDƏN çağırılmır — bu, bütövlük yoxlamasıdır,
+    təhlükəsizlik deyil, və mövcud avatar fikstürləri (kəsik IDAT) onu keçmir.
+    """
+    try:
+        from PIL import Image, UnidentifiedImageError
+    except ImportError:  # pragma: no cover — Pillow requirements/base.txt-dədir
+        return
+
+    try:
+        current_pos = uploaded_file.tell()
+    except Exception:
+        current_pos = None
+    try:
+        try:
+            uploaded_file.seek(0)
+        except Exception:
+            pass
+        try:
+            with Image.open(uploaded_file) as image:
+                detected = (image.format or "").upper()
+        except (UnidentifiedImageError, OSError, ValueError, SyntaxError):
+            detected = ""
+    finally:
+        if current_pos is not None:
+            try:
+                uploaded_file.seek(current_pos)
+            except Exception:
+                pass
+
+    expected = _IMAGE_FORMATS_BY_EXTENSION.get(extension)
+    if not detected or (expected is not None and detected not in expected):
+        raise ValidationError(
+            pgettext("upload.security.error", "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil.")
+        )
+
+
 def validate_uploaded_file(
     uploaded_file,
     *,
@@ -140,10 +310,15 @@ def validate_uploaded_file(
     max_size_mb=None,
     allowed_mime_types=None,
     allowed_mime_prefixes=DEFAULT_ALLOWED_MIME_PREFIXES,
+    verify_image=None,
 ):
     """
-    Validate uploaded file using extension, MIME type, and size checks.
+    Validate uploaded file using extension, MIME type, size and content-signature checks.
     Raises ValidationError on any violation.
+
+    ``verify_image``: ``None`` (default) → Pillow identification runs automatically
+    when ``allowed_extensions`` is an image-only allow-list (an image field);
+    ``True``/``False`` forces it on/off.
     """
     if uploaded_file is None:
         return
@@ -186,6 +361,30 @@ def validate_uploaded_file(
         raise ValidationError(
             pgettext("upload.security.error", "Fayl məzmunu bloklanan icra olunan/script tipinə uyğundur.")
         )
+
+    # 2026-09-14 (audit F-06): məzmun imzası. Şəkil uzantıları HƏR zaman magic-bytes
+    # ilə yoxlanır; markup (SVG/HTML/XML) şəkil/sənəd adı altında rədd edilir;
+    # allow-list verən sahələr üçün sənəd imzası + (şəkil sahələrində) Pillow.
+    head = _read_head(uploaded_file, size=_SNIFF_HEAD_SIZE, from_start=True)
+    is_image_extension = extension in IMAGE_ALLOWED_EXTENSIONS
+    is_document_extension = extension in _DOCUMENT_SIGNATURES_BY_EXTENSION
+    if (is_image_extension or is_document_extension or mime_type.startswith("image/")) and _looks_like_markup(head):
+        raise ValidationError(
+            pgettext("upload.security.error", "Fayl məzmunu bloklanan icra olunan/script tipinə uyğundur.")
+        )
+    if is_image_extension and not _image_signature_ok(extension, head):
+        raise ValidationError(
+            pgettext("upload.security.error", "Fayl məzmunu bəyan edilən şəkil formatına uyğun deyil.")
+        )
+    if normalized_allowed_extensions:
+        if not _document_signature_ok(extension, mime_type, head):
+            raise ValidationError(
+                pgettext("upload.security.error", "Fayl məzmunu bəyan edilən fayl tipinə uyğun deyil.")
+            )
+        if verify_image or (verify_image is None and _is_image_only_allow_list(normalized_allowed_extensions)):
+            _verify_image_with_pillow(uploaded_file, extension)
+    elif verify_image:
+        _verify_image_with_pillow(uploaded_file, extension)
 
     allowed_mime_set = set(allowed_mime_types or DEFAULT_ALLOWED_MIME_TYPES)
     has_allowed_prefix = any(mime_type.startswith(prefix) for prefix in (allowed_mime_prefixes or ()))
@@ -353,9 +552,11 @@ class FileUploadValidator:
         )])
     """
 
-    def __init__(self, *, allowed_extensions=None, max_size_mb=None):
+    def __init__(self, *, allowed_extensions=None, max_size_mb=None, verify_image=None):
         self.allowed_extensions = allowed_extensions
         self.max_size_mb = max_size_mb
+        # 2026-09-14 (audit F-06): şəkil sahələri üçün Pillow identifikasiyasını məcbur et/söndür.
+        self.verify_image = verify_image
 
     def __call__(self, value):
         # value is None or a FieldFile for committed objects – skip those
@@ -367,6 +568,7 @@ class FileUploadValidator:
             value,
             allowed_extensions=self.allowed_extensions,
             max_size_mb=self.max_size_mb,
+            verify_image=self.verify_image,
         )
 
     def __eq__(self, other):
@@ -374,6 +576,7 @@ class FileUploadValidator:
             isinstance(other, FileUploadValidator)
             and self.allowed_extensions == other.allowed_extensions
             and self.max_size_mb == other.max_size_mb
+            and self.verify_image == other.verify_image
         )
 
     def deconstruct(self):
@@ -382,7 +585,11 @@ class FileUploadValidator:
             [],
             {
                 k: v
-                for k, v in (("allowed_extensions", self.allowed_extensions), ("max_size_mb", self.max_size_mb))
+                for k, v in (
+                    ("allowed_extensions", self.allowed_extensions),
+                    ("max_size_mb", self.max_size_mb),
+                    ("verify_image", self.verify_image),
+                )
                 if v is not None
             },
         )

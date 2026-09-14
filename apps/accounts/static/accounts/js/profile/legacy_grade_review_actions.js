@@ -109,13 +109,16 @@
             pending.factId = factId;
 
             if (action === "verify") {
-                if (!window.confirm(ctx.i18n.verifyConfirm || "")) {
-                    return;
-                }
-                var body = new FormData();
-                body.append("action", "verify");
-                body.append("fact_id", factId);
-                post(body, null, null);
+                // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+                window.EMSConfirm.open({ body: ctx.i18n.verifyConfirm || "" }).then(function (ok) {
+                    if (!ok) {
+                        return;
+                    }
+                    var body = new FormData();
+                    body.append("action", "verify");
+                    body.append("fact_id", factId);
+                    post(body, null, null);
+                });
                 return;
             }
             if (action === "dispute") {

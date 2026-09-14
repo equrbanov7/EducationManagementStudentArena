@@ -285,7 +285,7 @@
     border: none;
     border-radius: 6px;
     background: transparent;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-size: 0.75rem;
     cursor: pointer;
 }
@@ -391,7 +391,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     background: var(--ems-neutral-0);
 }
 
@@ -494,7 +494,7 @@
 .nfx-row__time {
     flex: none;
     font-size: 0.73rem;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }

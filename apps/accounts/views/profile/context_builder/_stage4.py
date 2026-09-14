@@ -18,8 +18,7 @@ def _transcript_request_cta() -> dict:
     Bayraq açılanda (`download`) CTA SÖNÜR: tələbə transkripti «Transkript»
     bölməsindən birbaşa alır və sorğuya ehtiyac qalmır.
     """
-    from apps.registrar.cabinet_policy import transcript_policy
-    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE
+    from apps.registrar.public import STUDENT_TRANSCRIPT_SELF_SERVICE, transcript_policy
 
     policy = transcript_policy(self_service=STUDENT_TRANSCRIPT_SELF_SERVICE)
     policy["show"] = not policy["self_service"]

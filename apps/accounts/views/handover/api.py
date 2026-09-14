@@ -21,8 +21,8 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.registrar import handover as handover_read
-from apps.registrar import handover_query
+from apps.registrar.public import handover as handover_read
+from apps.registrar.public import handover_query
 
 from . import filters
 from .labels import REVERT, blocker_labels
@@ -324,7 +324,7 @@ def _revert_blocker_codes(record, *, closed_ids, today, organization) -> list:
     verildikdə mutasiyanın QƏBUL etdiyi kodları da qaytarardı (bax
     ``REVERT_BLOCKER_CODES`` şərhi).
     """
-    from apps.registrar.handover_actions import REVERT_BLOCKER_CODES
+    from apps.registrar.public import REVERT_BLOCKER_CODES
 
     offering = record.offering
     codes = [

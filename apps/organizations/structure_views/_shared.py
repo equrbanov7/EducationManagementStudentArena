@@ -1,5 +1,6 @@
 """structure_views paketi — _shared."""
 
+from django.apps import apps as django_apps
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -9,7 +10,6 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.registrar.models import CourseOffering
 from core.constants import OrgUnitType
 from core.staff_position import visible_role_label
 
@@ -96,6 +96,7 @@ def _active_teacher_user_ids(organization, period_ids):
     DEYİL (bir dəfə hesablanır, sonra hər vahid üçün Python-da yoxlanılır)."""
     if not period_ids:
         return set()
+    CourseOffering = django_apps.get_model("registrar", "CourseOffering")
     return set(
         CourseOffering.objects.filter(
             organization=organization,

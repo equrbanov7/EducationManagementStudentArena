@@ -94,9 +94,12 @@ from .constants import (
     SectionKey,
     SyllabusStatus,
 )
+from .document import build_document  # noqa: F401
+from .policy import assessment_weights  # noqa: F401
 from .services import (
     GROUP_CHAIR,
     GROUP_PROGRAM,
+    approved_version_for,
     available_actions,
     can_view,
     coverage_report,
@@ -104,11 +107,22 @@ from .services import (
     has_review_scope,
     import_migrated_version,
     list_syllabi,
+    offering_syllabus_state,
     resolve_actor,
     review_queue,
     section_data_map,
     status_counts,
+    syllabus_for_offering,
     version_timeline,
+)
+from .services.offerings import (
+    STATE_APPROVED,
+    STATE_ARCHIVED,
+    STATE_DRAFT,
+    STATE_MISSING,
+    STATE_PENDING,
+    STATE_REJECTED,
+    STATE_REVISION,
 )
 
 #: Status kataloqu — şablon bu siyahını olduğu kimi render edir (7 çip).
@@ -278,6 +292,21 @@ def build_review_queue_context(
 
 
 __all__ = [
+    "build_document",
+    "assessment_weights",
+    "approved_version_for",
+    "offering_syllabus_state",
+    "syllabus_for_offering",
+    "section_data_map",
+    "SyllabusStatus",
+    "SectionKey",
+    "STATE_APPROVED",
+    "STATE_ARCHIVED",
+    "STATE_DRAFT",
+    "STATE_MISSING",
+    "STATE_PENDING",
+    "STATE_REJECTED",
+    "STATE_REVISION",
     "STATUS_CATALOG",
     # ⚠️ İDXAL BORUSUNUN girişi — HTTP səthi DEYİL.  ``import_migrated_version``
     # icazə yoxlamır (bax ``services.drafts`` docstring-i), ona görə yalnız
@@ -289,3 +318,10 @@ __all__ = [
     "build_syllabus_editor_context",
     "build_syllabus_list_context",
 ]
+
+
+# Explicit exports keep external callers out of implementation modules.
+from .public_exports import *  # noqa: E402,F401,F403
+from .public_exports import __all__ as _api_exports  # noqa: E402
+
+__all__ += [name for name in _api_exports if name not in __all__]

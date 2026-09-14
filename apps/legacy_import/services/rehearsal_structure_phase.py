@@ -81,7 +81,7 @@ def _chunked(items, size):
 def _assert_university_organization(context: RehearsalContext) -> None:
     """Only a university tenant may own faculty/chair/specialty/group units."""
 
-    from apps.organizations.unit_types import validate_unit_type_for_org
+    from apps.organizations.public import validate_unit_type_for_org
 
     if validate_unit_type_for_org(getattr(context.organization, "org_type", None), OrgUnitType.FACULTY) is not True:
         raise LegacyRehearsalConfigError("legacy_rehearsal_organization_type_unsupported")

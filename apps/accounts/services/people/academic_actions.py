@@ -85,7 +85,7 @@ def transfer_group(actor, *, record_id, new_group_id, reason="", request=None) -
     if new_group is None:  # pragma: no cover — ön baxış onsuz da bloklayır
         raise RimAccessError("target_group_outside_scope", "Hədəf qrup sizin sahənizdə deyil.", status=404)
 
-    from apps.registrar import transfer as group_transfer
+    from apps.registrar.public import transfer as group_transfer
 
     period = record.organization.academic_periods.filter(is_current=True, is_active=True).first()
 
@@ -160,7 +160,7 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
     if previous == status:
         raise RimAccessError("status_unchanged", "Tələbə onsuz da bu statusdadır.", status=409)
 
-    from apps.registrar import status as academic_status
+    from apps.registrar.public import status as academic_status
 
     with transaction.atomic():
         record.status = status

@@ -22,8 +22,8 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
-from apps.syllabus import services as syllabus_services
-from apps.syllabus.document import build_document
+from apps.syllabus import public as syllabus_services
+from apps.syllabus.public import build_document
 
 from . import journal_access
 

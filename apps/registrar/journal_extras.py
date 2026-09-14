@@ -22,7 +22,7 @@ from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from apps.registrar import exam_eligibility, grade_audit
+from apps.registrar import absence_limit, exam_eligibility, grade_audit
 from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
 from apps.registrar.models import (
     AssessmentComponent,
@@ -219,7 +219,12 @@ def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, 
     if journal_is_locked(offering):
         return False
     topic = SelfWorkTopic.objects.filter(pk=topic_id, offering=offering).first()
-    enrollment = offering.enrollments.filter(pk=enrollment_id, status=Enrollment.Status.ENROLLED).first()
+    # Codex audit §14 (2026-09-13): «oxu → yaz» — iki paralel toggle eyni tələbə
+    # üçün `uniq_selfwork_topic_enrollment`-ə çırpılırdı; qeydiyyat sətri
+    # kilidlənir (sıra: açılış → qeydiyyat → işarə).
+    enrollment = (
+        offering.enrollments.filter(pk=enrollment_id, status=Enrollment.Status.ENROLLED).select_for_update().first()
+    )
     if topic is None or enrollment is None:
         return False
     mark = SelfWorkMark.objects.filter(topic=topic, enrollment=enrollment).first()
@@ -368,12 +373,12 @@ def get_final_breakdown(offering):
     selfwork_totals = {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering)["rows"]}
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     lessons_all = list(offering.lessons.all())
-    # Məxrəc də TƏK yerdən (tələbənin öz işarələrindən YOX) — bax
-    # :func:`exam_eligibility.lesson_hours_for`.
+    # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
+    # səviyyəli, SƏTİR qərarı isə TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — tək toplu sorğu.
     allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
-    limit_percent = gradebook.absence_limit_percent_for(offering)
-    allowed_absence = allowed * Decimal(limit_percent) / Decimal(100)
-    warn_at = allowed_absence * Decimal("0.75")
+    allowed_absence = absence_limit.allowed_absence_hours(offering, lessons_all)
+    org_id = offering.organization_id
+    row_limits = absence_limit.row_limits(organization_id=org_id, enrollments=enrollments, total_hours=allowed)
     # TƏK MƏNBƏ (bax :mod:`apps.registrar.exam_eligibility`) — açılış üzrə bir dəfə.
     frozen = exam_eligibility.is_frozen(offering)
     exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
@@ -390,16 +395,17 @@ def get_final_breakdown(offering):
         kvals = [kscore_map.get((e.id, c.id)) for c in kolls]
         entered = [v for v in kvals if v is not None]
         absence_hours = Decimal(e.absence_hours)
+        row_limit = row_limits[e.student_id]
         eligibility = exam_eligibility.resolve(
             absence_hours=absence_hours,
             lesson_hours=allowed,
-            allowed_hours=allowed_absence,
-            limit_percent=limit_percent,
+            allowed_hours=row_limit.allowed_hours,
+            limit_percent=row_limit.percent,
             exempt=e.student_id in exempt_ids,
             frozen=frozen,
         )
         barred = eligibility["barred"]
-        warning = (not frozen) and (not barred) and allowed_absence > 0 and absence_hours >= warn_at
+        warning = absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
         entry = gradebook.entry_score_for(e, scheme.entry_score_max, **entry_batch.entry_kwargs(e))
         rows.append(
             {
@@ -424,6 +430,7 @@ def get_final_breakdown(offering):
                 "eligibility": eligibility,
                 "warning": warning,
                 "absence_hours": e.absence_hours,
+                "allowed_absence": row_limit.allowed_hours,  # tələbənin ÖZ həddi (F-06)
             }
         )
     return {

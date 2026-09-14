@@ -43,9 +43,12 @@ def _search_students(organization, query):
     from django.contrib.auth import get_user_model
     from django.db.models import Q
 
+    from apps.exams.public import unit_student_record_filter
     from apps.organizations.public import organization_user_queryset
 
     User = get_user_model()
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): qrup adı ilə axtarış reyestr qrupunu da
+    # tapır (cari aktiv `StudentAcademicRecord.group` — `unit_assignment` ilə eyni şərt).
     condition = (
         Q(username__icontains=query)
         | Q(first_name__icontains=query)
@@ -53,6 +56,11 @@ def _search_students(organization, query):
         | Q(
             student_groups_as_student__organization=organization,
             student_groups_as_student__name__icontains=query,
+        )
+        | Q(
+            academic_records__organization=organization,
+            academic_records__group__name__icontains=query,
+            **unit_student_record_filter("academic_records__"),
         )
     )
     return list(
@@ -66,12 +74,12 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     if "exam-chance" not in allowed_sections or active_section != "exam-chance":
         return
 
-    from django.db.models import Q
+    from django.db.models import Count, Q, Sum
 
     from apps.exams.models import Exam, StudentExamAttemptGrant, StudentGroup
-    from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
+    from apps.exams.public import SECURE_EXAM_CATEGORIES
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES
+    from apps.organizations.public import KAFEDRA_UNIT_TYPES
     from core.constants import OrgUnitType
 
     organization = active_organization
@@ -117,7 +125,12 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
         exams_qs = exams_qs.filter(title__icontains=filters["exam_q"])
     unit = kafedra or faculty
     if unit is not None:
-        exams_qs = exams_qs.filter(allowed_groups__org_unit__path__startswith=unit.path)
+        # 2026-09-14 (W5 `w5left`, tapşırıq 1): reyestr qrupuna (`allowed_units`,
+        # fakültə/kafedra alt-ağacı) təyin olunmuş imtahanlar da filtrə düşür —
+        # əvvəl yalnız kohortun `org_unit`-i yoxlanırdı. Tək `filter()` → tək JOIN dəsti.
+        exams_qs = exams_qs.filter(
+            Q(allowed_groups__org_unit__path__startswith=unit.path) | Q(allowed_units__path__startswith=f"{unit.path}/")
+        )
     if period is not None:
         exams_qs = exams_qs.filter(start_datetime__date__range=(period.start_date, period.end_date))
     elif filters["year"] and year_periods:
@@ -141,11 +154,23 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     section["student_results"] = _search_students(organization, filters["student_q"]) if filters["student_q"] else []
 
     # ── Son verilən şanslar (görünən jurnal; tam tarixçə auditdədir) ───────
+    grants_qs = StudentExamAttemptGrant.objects.filter(exam__organization=organization)
     section["recent_grants"] = list(
-        StudentExamAttemptGrant.objects.filter(exam__organization=organization)
-        .select_related("exam", "student", "granted_by")
-        .order_by("-updated_at")[:RECENT_GRANT_LIMIT]
+        grants_qs.select_related("exam", "student", "granted_by").order_by("-updated_at")[:RECENT_GRANT_LIMIT]
     )
+
+    # ── KPI: bölmənin yuxarısındakı rəqəmlər (tək aqreqat sorğu) ───────────
+    # `exam_count` — filtrə uyğun imtahanların ƏSL sayı: `section["exams"]`
+    # 300-lə kəsilib, ona görə ayrıca count() alınır.
+    section["exam_count"] = exams_qs.distinct().count()
+    totals = grants_qs.aggregate(
+        n=Count("id"),
+        students=Count("student_id", distinct=True),
+        attempts=Sum("extra_attempts"),
+    )
+    section["grant_count"] = totals["n"] or 0
+    section["grant_students"] = totals["students"] or 0
+    section["grant_attempts"] = totals["attempts"] or 0
 
     section["filters"] = filters
     section["years"] = years

@@ -5,6 +5,7 @@ import random
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -125,56 +126,61 @@ def host_start_game(request, pin):
     session.question_ends_at = None
     clear_question_phase_override(session)
 
-    session.save(
-        update_fields=[
-            "selected_question_ids",
-            "question_limit",
-            "current_index",
-            "current_question_id",
-            "state",
-            "question_started_at",
-            "question_ends_at",
-            "host_settings",
-        ]
-    )
-
-    # 4) Wait room-da olan player-ları player_screen-ə yönləndir
-    broadcast(
-        pin,
-        {
-            "type": "game_started",
-            "redirect": reverse("liveExam:player_screen", kwargs={"pin": pin}),
-        },
-        "lobby",
-    )
-
-    # 5) Start basan kimi 1-ci sualı publish et
-    eq = get_question_by_index(session, 0)
-    if not eq:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "question_not_found")},
-            status=400,
+    # Audit 2026-09-13 backend F-07 (2026-09-14): iki `session.save` + audit qeydi BİR
+    # tranzaksiyada (yarımçıq halda sessiya QUESTION-da, amma sual seçilməmiş qala
+    # bilərdi). Yayımlar `on_commit`-ə keçir: oyunçular yönləndirməni sessiya
+    # həqiqətən yazılandan SONRA alır (autocommit-də dərhal işə düşür).
+    with transaction.atomic():
+        session.save(
+            update_fields=[
+                "selected_question_ids",
+                "question_limit",
+                "current_index",
+                "current_question_id",
+                "state",
+                "question_started_at",
+                "question_ends_at",
+                "host_settings",
+            ]
         )
 
-    total = get_total_questions(session)
-    payload, now, ends = build_question_payload(session, eq, idx=0, total=total)
+        # 4) Wait room-da olan player-ları player_screen-ə yönləndir
+        transaction.on_commit(
+            lambda: broadcast(
+                pin,
+                {"type": "game_started", "redirect": reverse("liveExam:player_screen", kwargs={"pin": pin})},
+                "lobby",
+            )
+        )
 
-    session.current_question_id = eq.id
-    session.question_started_at = now
-    session.question_ends_at = ends
-    session.save(update_fields=["current_question_id", "question_started_at", "question_ends_at"])
+        # 5) Start basan kimi 1-ci sualı publish et
+        eq = get_question_by_index(session, 0)
+        if not eq:
+            transaction.set_rollback(True)
+            return JsonResponse(
+                {"ok": False, "message": pgettext("live_exam.view.message", "question_not_found")},
+                status=400,
+            )
 
-    broadcast_play(pin, payload)
+        total = get_total_questions(session)
+        payload, now, ends = build_question_payload(session, eq, idx=0, total=total)
 
-    log_action(
-        action=AuditAction.UPDATE,
-        user=request.user,
-        organization=session.exam.organization,
-        obj=session,
-        new_values={"state": session.state, "question_count": len(selected_ids)},
-        reason="game_started",
-        request=request,
-    )
+        session.current_question_id = eq.id
+        session.question_started_at = now
+        session.question_ends_at = ends
+        session.save(update_fields=["current_question_id", "question_started_at", "question_ends_at"])
+
+        transaction.on_commit(lambda: broadcast_play(pin, payload))
+
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=session.exam.organization,
+            obj=session,
+            new_values={"state": session.state, "question_count": len(selected_ids)},
+            reason="game_started",
+            request=request,
+        )
 
     return JsonResponse(
         {

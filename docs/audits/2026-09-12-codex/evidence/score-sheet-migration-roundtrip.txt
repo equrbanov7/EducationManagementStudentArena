@@ -1,0 +1,4 @@
+Rollback plan: [('registrar', '0072_rls_exam_score_sheet', True), ('registrar', '0071_exam_score_sheet', True)]
+Rollback completed on disposable synthetic database only.
+Forward completed; existing synthetic final scores and immutable score entries unchanged; sheet RLS enabled and forced.
+Important: reversing 0071 removes the new batch metadata table. This is NOT a data-preserving production downgrade.

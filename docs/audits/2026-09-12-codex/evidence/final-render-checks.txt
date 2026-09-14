@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-9.1.1, pluggy-1.6.0
+django: version: 5.2.17, settings: audit_final_settings (from env)
+rootdir: /Users/elvin/Developer/EMSArena
+configfile: pyproject.toml (WARNING: ignoring pytest config in setup.cfg!)
+plugins: timeout-2.4.0, locust-2.43.3, xdist-3.8.0, asyncio-1.3.0, django-4.12.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 190 items / 120 deselected / 70 selected
+
+apps/accounts/tests/test_statistics_pending_grades.py ...                [  4%]
+tests/integration/test_statistics.py .........................           [ 40%]
+apps/accounts/tests/test_profile_views.py .............................. [ 82%]
+............                                                             [100%]
+
+====================== 70 passed, 120 deselected in 5.78s ======================

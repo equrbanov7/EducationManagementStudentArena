@@ -42,8 +42,6 @@
 
         modalEl.addEventListener("shown.bs.modal", function () {
             if (pendingTopicData) {
-                console.log(d.logModalOpened, pendingTopicData);
-
                 document.getElementById("editTopicId").value = pendingTopicData.id || "";
                 document.getElementById("editTopicTitle").value = pendingTopicData.title || "";
                 document.getElementById("editTopicDescription").value = pendingTopicData.description || "";
@@ -63,8 +61,6 @@
         });
 
         window.editTopic = function (topicId, title, description) {
-            console.log(d.logEditTopicCalled, { topicId: topicId, title: title, description: description });
-
             pendingTopicData = {
                 id: topicId,
                 title: title,
@@ -126,8 +122,6 @@
                     submitBtn.innerHTML = originalText;
                 });
         });
-
-        console.log("✓ Topic Edit Modal initialized");
     }
 
     if (window.EMSReady) { window.EMSReady(init); }

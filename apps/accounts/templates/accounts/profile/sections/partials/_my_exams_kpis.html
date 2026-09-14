@@ -1,13 +1,14 @@
 {% load i18n %}
 {% if my_exams_dashboard %}
 <div class="tx-kpis" data-tx-kpis role="group" aria-label="{% trans 'kpi_group_label' context 'exams.dashboard' %}">
+  {% comment %}2026-09-12 (audit P2-9): KPI rəngi inline `style` ilə deyil,
+  `is-status-<key>` modifikatoru ilə (my_exams.css palitrası = EXAM_STATUS_META).{% endcomment %}
   {% for kpi in my_exams_dashboard.status_kpis %}
   <button type="button"
-          class="tx-kpi"
+          class="tx-kpi is-status-{{ kpi.key }}"
           data-tx-kpi
           data-status="{{ kpi.key }}"
-          aria-pressed="false"
-          style="--kpi-color:{{ kpi.color }};--kpi-soft:{{ kpi.soft }};--kpi-deep:{{ kpi.deep }};">
+          aria-pressed="false">
     <span class="tx-kpi-bar"></span>
     <span class="tx-kpi-num">{{ kpi.count }}</span>
     <span class="tx-kpi-label"><span class="tx-kpi-dot"></span> {{ kpi.label }}</span>

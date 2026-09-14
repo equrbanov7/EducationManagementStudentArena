@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import SyllabusStatus
+from apps.syllabus.public import SyllabusStatus
 
 _CTX = "accounts.syllabus"
 

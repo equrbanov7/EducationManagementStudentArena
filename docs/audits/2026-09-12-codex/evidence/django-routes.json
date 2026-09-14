@@ -1,0 +1,4727 @@
+[
+  {
+    "route": "admin/verify-otp/",
+    "name": "admin:verify-otp",
+    "view": "core.admin_site.EMSArenaAdminSite.verify_otp_view"
+  },
+  {
+    "route": "admin/resend-otp/",
+    "name": "admin:resend-otp",
+    "view": "core.admin_site.EMSArenaAdminSite.resend_otp_view"
+  },
+  {
+    "route": "admin/",
+    "name": "admin:index",
+    "view": "django.contrib.admin.sites.AdminSite.index"
+  },
+  {
+    "route": "admin/login/",
+    "name": "admin:login",
+    "view": "core.admin_site.EMSArenaAdminSite.login"
+  },
+  {
+    "route": "admin/logout/",
+    "name": "admin:logout",
+    "view": "django.contrib.admin.sites.AdminSite.logout"
+  },
+  {
+    "route": "admin/password_change/",
+    "name": "admin:password_change",
+    "view": "django.contrib.admin.sites.AdminSite.password_change"
+  },
+  {
+    "route": "admin/password_change/done/",
+    "name": "admin:password_change_done",
+    "view": "django.contrib.admin.sites.AdminSite.password_change_done"
+  },
+  {
+    "route": "admin/autocomplete/",
+    "name": "admin:autocomplete",
+    "view": "django.contrib.admin.sites.AdminSite.autocomplete_view"
+  },
+  {
+    "route": "admin/jsi18n/",
+    "name": "admin:jsi18n",
+    "view": "django.contrib.admin.sites.AdminSite.i18n_javascript"
+  },
+  {
+    "route": "admin/r/<path:content_type_id>/<path:object_id>/",
+    "name": "admin:view_on_site",
+    "view": "django.contrib.contenttypes.views.shortcut"
+  },
+  {
+    "route": "admin/courses/course/",
+    "name": "admin:courses_course_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/course/add/",
+    "name": "admin:courses_course_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/course/<path:object_id>/history/",
+    "name": "admin:courses_course_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/course/<path:object_id>/delete/",
+    "name": "admin:courses_course_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/course/<path:object_id>/change/",
+    "name": "admin:courses_course_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/course/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/courses/coursetopic/",
+    "name": "admin:courses_coursetopic_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/coursetopic/add/",
+    "name": "admin:courses_coursetopic_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/coursetopic/<path:object_id>/history/",
+    "name": "admin:courses_coursetopic_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/coursetopic/<path:object_id>/delete/",
+    "name": "admin:courses_coursetopic_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/coursetopic/<path:object_id>/change/",
+    "name": "admin:courses_coursetopic_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/coursetopic/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/courses/courseresource/",
+    "name": "admin:courses_courseresource_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/courseresource/add/",
+    "name": "admin:courses_courseresource_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/courseresource/<path:object_id>/history/",
+    "name": "admin:courses_courseresource_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/courseresource/<path:object_id>/delete/",
+    "name": "admin:courses_courseresource_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/courseresource/<path:object_id>/change/",
+    "name": "admin:courses_courseresource_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/courseresource/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/courses/coursemembership/",
+    "name": "admin:courses_coursemembership_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/coursemembership/add/",
+    "name": "admin:courses_coursemembership_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/coursemembership/<path:object_id>/history/",
+    "name": "admin:courses_coursemembership_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/coursemembership/<path:object_id>/delete/",
+    "name": "admin:courses_coursemembership_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/coursemembership/<path:object_id>/change/",
+    "name": "admin:courses_coursemembership_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/coursemembership/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/courses/courseinstructor/",
+    "name": "admin:courses_courseinstructor_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/courseinstructor/add/",
+    "name": "admin:courses_courseinstructor_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/courseinstructor/<path:object_id>/history/",
+    "name": "admin:courses_courseinstructor_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/courseinstructor/<path:object_id>/delete/",
+    "name": "admin:courses_courseinstructor_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/courseinstructor/<path:object_id>/change/",
+    "name": "admin:courses_courseinstructor_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/courseinstructor/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/courses/coursegroup/",
+    "name": "admin:courses_coursegroup_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/courses/coursegroup/add/",
+    "name": "admin:courses_coursegroup_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/courses/coursegroup/<path:object_id>/history/",
+    "name": "admin:courses_coursegroup_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/courses/coursegroup/<path:object_id>/delete/",
+    "name": "admin:courses_coursegroup_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/courses/coursegroup/<path:object_id>/change/",
+    "name": "admin:courses_coursegroup_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/courses/coursegroup/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/blog/category/",
+    "name": "admin:blog_category_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/blog/category/add/",
+    "name": "admin:blog_category_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/blog/category/<path:object_id>/history/",
+    "name": "admin:blog_category_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/blog/category/<path:object_id>/delete/",
+    "name": "admin:blog_category_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/blog/category/<path:object_id>/change/",
+    "name": "admin:blog_category_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/blog/category/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/blog/post/",
+    "name": "admin:blog_post_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/blog/post/add/",
+    "name": "admin:blog_post_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/blog/post/<path:object_id>/history/",
+    "name": "admin:blog_post_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/blog/post/<path:object_id>/delete/",
+    "name": "admin:blog_post_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/blog/post/<path:object_id>/change/",
+    "name": "admin:blog_post_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/blog/post/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/blog/comment/",
+    "name": "admin:blog_comment_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/blog/comment/add/",
+    "name": "admin:blog_comment_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/blog/comment/<path:object_id>/history/",
+    "name": "admin:blog_comment_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/blog/comment/<path:object_id>/delete/",
+    "name": "admin:blog_comment_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/blog/comment/<path:object_id>/change/",
+    "name": "admin:blog_comment_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/blog/comment/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/blog/question/",
+    "name": "admin:blog_question_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/blog/question/add/",
+    "name": "admin:blog_question_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/blog/question/<path:object_id>/history/",
+    "name": "admin:blog_question_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/blog/question/<path:object_id>/delete/",
+    "name": "admin:blog_question_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/blog/question/<path:object_id>/change/",
+    "name": "admin:blog_question_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/blog/question/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/blog/postapprovallog/",
+    "name": "admin:blog_postapprovallog_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/blog/postapprovallog/add/",
+    "name": "admin:blog_postapprovallog_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/blog/postapprovallog/<path:object_id>/history/",
+    "name": "admin:blog_postapprovallog_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/blog/postapprovallog/<path:object_id>/delete/",
+    "name": "admin:blog_postapprovallog_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/blog/postapprovallog/<path:object_id>/change/",
+    "name": "admin:blog_postapprovallog_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/blog/postapprovallog/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/contact/contactmessage/<int:pk>/reply/",
+    "name": "admin:contact_contactmessage_reply",
+    "view": "apps.contact.admin_views.reply_to_contact_message"
+  },
+  {
+    "route": "admin/contact/contactmessage/",
+    "name": "admin:contact_contactmessage_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/contact/contactmessage/add/",
+    "name": "admin:contact_contactmessage_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/contact/contactmessage/<path:object_id>/history/",
+    "name": "admin:contact_contactmessage_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/contact/contactmessage/<path:object_id>/delete/",
+    "name": "admin:contact_contactmessage_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/contact/contactmessage/<path:object_id>/change/",
+    "name": "admin:contact_contactmessage_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/contact/contactmessage/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/assignments/assignment/",
+    "name": "admin:assignments_assignment_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/assignments/assignment/add/",
+    "name": "admin:assignments_assignment_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/assignments/assignment/<path:object_id>/history/",
+    "name": "admin:assignments_assignment_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/assignments/assignment/<path:object_id>/delete/",
+    "name": "admin:assignments_assignment_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/assignments/assignment/<path:object_id>/change/",
+    "name": "admin:assignments_assignment_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/assignments/assignment/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/assignments/submission/",
+    "name": "admin:assignments_submission_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/assignments/submission/add/",
+    "name": "admin:assignments_submission_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/assignments/submission/<path:object_id>/history/",
+    "name": "admin:assignments_submission_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/assignments/submission/<path:object_id>/delete/",
+    "name": "admin:assignments_submission_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/assignments/submission/<path:object_id>/change/",
+    "name": "admin:assignments_submission_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/assignments/submission/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/assignments/notification/",
+    "name": "admin:assignments_notification_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/assignments/notification/add/",
+    "name": "admin:assignments_notification_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/assignments/notification/<path:object_id>/history/",
+    "name": "admin:assignments_notification_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/assignments/notification/<path:object_id>/delete/",
+    "name": "admin:assignments_notification_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/assignments/notification/<path:object_id>/change/",
+    "name": "admin:assignments_notification_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/assignments/notification/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/accounts/emailotp/",
+    "name": "admin:accounts_emailotp_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/accounts/emailotp/add/",
+    "name": "admin:accounts_emailotp_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/accounts/emailotp/<path:object_id>/history/",
+    "name": "admin:accounts_emailotp_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/accounts/emailotp/<path:object_id>/delete/",
+    "name": "admin:accounts_emailotp_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/accounts/emailotp/<path:object_id>/change/",
+    "name": "admin:accounts_emailotp_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/accounts/emailotp/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/accounts/userprofile/",
+    "name": "admin:accounts_userprofile_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/accounts/userprofile/add/",
+    "name": "admin:accounts_userprofile_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/accounts/userprofile/<path:object_id>/history/",
+    "name": "admin:accounts_userprofile_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/accounts/userprofile/<path:object_id>/delete/",
+    "name": "admin:accounts_userprofile_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/accounts/userprofile/<path:object_id>/change/",
+    "name": "admin:accounts_userprofile_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/accounts/userprofile/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/",
+    "name": "admin:notifications_studentorganizationrequest_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/add/",
+    "name": "admin:notifications_studentorganizationrequest_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/<path:object_id>/history/",
+    "name": "admin:notifications_studentorganizationrequest_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/<path:object_id>/delete/",
+    "name": "admin:notifications_studentorganizationrequest_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/<path:object_id>/change/",
+    "name": "admin:notifications_studentorganizationrequest_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/notifications/studentorganizationrequest/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/notifications/inappnotification/",
+    "name": "admin:notifications_inappnotification_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/notifications/inappnotification/add/",
+    "name": "admin:notifications_inappnotification_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/notifications/inappnotification/<path:object_id>/history/",
+    "name": "admin:notifications_inappnotification_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/notifications/inappnotification/<path:object_id>/delete/",
+    "name": "admin:notifications_inappnotification_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/notifications/inappnotification/<path:object_id>/change/",
+    "name": "admin:notifications_inappnotification_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/notifications/inappnotification/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/projects/project/",
+    "name": "admin:projects_project_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/projects/project/add/",
+    "name": "admin:projects_project_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/projects/project/<path:object_id>/history/",
+    "name": "admin:projects_project_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/projects/project/<path:object_id>/delete/",
+    "name": "admin:projects_project_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/projects/project/<path:object_id>/change/",
+    "name": "admin:projects_project_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/projects/project/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/projects/projectsubmission/",
+    "name": "admin:projects_projectsubmission_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/projects/projectsubmission/add/",
+    "name": "admin:projects_projectsubmission_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/projects/projectsubmission/<path:object_id>/history/",
+    "name": "admin:projects_projectsubmission_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/projects/projectsubmission/<path:object_id>/delete/",
+    "name": "admin:projects_projectsubmission_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/projects/projectsubmission/<path:object_id>/change/",
+    "name": "admin:projects_projectsubmission_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/projects/projectsubmission/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/labs/lab/",
+    "name": "admin:labs_lab_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/labs/lab/add/",
+    "name": "admin:labs_lab_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/labs/lab/<path:object_id>/history/",
+    "name": "admin:labs_lab_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/labs/lab/<path:object_id>/delete/",
+    "name": "admin:labs_lab_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/labs/lab/<path:object_id>/change/",
+    "name": "admin:labs_lab_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/labs/lab/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/labs/labblock/",
+    "name": "admin:labs_labblock_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/labs/labblock/add/",
+    "name": "admin:labs_labblock_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/labs/labblock/<path:object_id>/history/",
+    "name": "admin:labs_labblock_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/labs/labblock/<path:object_id>/delete/",
+    "name": "admin:labs_labblock_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/labs/labblock/<path:object_id>/change/",
+    "name": "admin:labs_labblock_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/labs/labblock/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/labs/labquestion/",
+    "name": "admin:labs_labquestion_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/labs/labquestion/add/",
+    "name": "admin:labs_labquestion_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/labs/labquestion/<path:object_id>/history/",
+    "name": "admin:labs_labquestion_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/labs/labquestion/<path:object_id>/delete/",
+    "name": "admin:labs_labquestion_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/labs/labquestion/<path:object_id>/change/",
+    "name": "admin:labs_labquestion_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/labs/labquestion/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/labs/labassignment/",
+    "name": "admin:labs_labassignment_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/labs/labassignment/add/",
+    "name": "admin:labs_labassignment_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/labs/labassignment/<path:object_id>/history/",
+    "name": "admin:labs_labassignment_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/labs/labassignment/<path:object_id>/delete/",
+    "name": "admin:labs_labassignment_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/labs/labassignment/<path:object_id>/change/",
+    "name": "admin:labs_labassignment_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/labs/labassignment/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/labs/labsubmission/",
+    "name": "admin:labs_labsubmission_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/labs/labsubmission/add/",
+    "name": "admin:labs_labsubmission_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/labs/labsubmission/<path:object_id>/history/",
+    "name": "admin:labs_labsubmission_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/labs/labsubmission/<path:object_id>/delete/",
+    "name": "admin:labs_labsubmission_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/labs/labsubmission/<path:object_id>/change/",
+    "name": "admin:labs_labsubmission_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/labs/labsubmission/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/country/",
+    "name": "admin:organizations_country_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/country/add/",
+    "name": "admin:organizations_country_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/country/<path:object_id>/history/",
+    "name": "admin:organizations_country_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/country/<path:object_id>/delete/",
+    "name": "admin:organizations_country_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/country/<path:object_id>/change/",
+    "name": "admin:organizations_country_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/country/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/institution/",
+    "name": "admin:organizations_institution_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/institution/add/",
+    "name": "admin:organizations_institution_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/institution/<path:object_id>/history/",
+    "name": "admin:organizations_institution_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/institution/<path:object_id>/delete/",
+    "name": "admin:organizations_institution_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/institution/<path:object_id>/change/",
+    "name": "admin:organizations_institution_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/institution/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/organization/",
+    "name": "admin:organizations_organization_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/organization/add/",
+    "name": "admin:organizations_organization_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/organization/<path:object_id>/history/",
+    "name": "admin:organizations_organization_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/organization/<path:object_id>/delete/",
+    "name": "admin:organizations_organization_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/organization/<path:object_id>/change/",
+    "name": "admin:organizations_organization_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/organization/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/orgunit/",
+    "name": "admin:organizations_orgunit_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/orgunit/add/",
+    "name": "admin:organizations_orgunit_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/orgunit/<path:object_id>/history/",
+    "name": "admin:organizations_orgunit_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/orgunit/<path:object_id>/delete/",
+    "name": "admin:organizations_orgunit_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/orgunit/<path:object_id>/change/",
+    "name": "admin:organizations_orgunit_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/orgunit/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/academicperiod/",
+    "name": "admin:organizations_academicperiod_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/academicperiod/add/",
+    "name": "admin:organizations_academicperiod_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/academicperiod/<path:object_id>/history/",
+    "name": "admin:organizations_academicperiod_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/academicperiod/<path:object_id>/delete/",
+    "name": "admin:organizations_academicperiod_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/academicperiod/<path:object_id>/change/",
+    "name": "admin:organizations_academicperiod_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/academicperiod/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/role/",
+    "name": "admin:organizations_role_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/role/add/",
+    "name": "admin:organizations_role_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/role/<path:object_id>/history/",
+    "name": "admin:organizations_role_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/role/<path:object_id>/delete/",
+    "name": "admin:organizations_role_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/role/<path:object_id>/change/",
+    "name": "admin:organizations_role_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/role/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/organizations/membership/",
+    "name": "admin:organizations_membership_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/organizations/membership/add/",
+    "name": "admin:organizations_membership_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/organizations/membership/<path:object_id>/history/",
+    "name": "admin:organizations_membership_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/organizations/membership/<path:object_id>/delete/",
+    "name": "admin:organizations_membership_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/organizations/membership/<path:object_id>/change/",
+    "name": "admin:organizations_membership_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/organizations/membership/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/program/",
+    "name": "admin:registrar_program_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/program/add/",
+    "name": "admin:registrar_program_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/program/<path:object_id>/history/",
+    "name": "admin:registrar_program_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/program/<path:object_id>/delete/",
+    "name": "admin:registrar_program_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/program/<path:object_id>/change/",
+    "name": "admin:registrar_program_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/program/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/subject/",
+    "name": "admin:registrar_subject_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/subject/add/",
+    "name": "admin:registrar_subject_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/subject/<path:object_id>/history/",
+    "name": "admin:registrar_subject_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/subject/<path:object_id>/delete/",
+    "name": "admin:registrar_subject_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/subject/<path:object_id>/change/",
+    "name": "admin:registrar_subject_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/subject/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/curriculum/",
+    "name": "admin:registrar_curriculum_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/curriculum/add/",
+    "name": "admin:registrar_curriculum_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/curriculum/<path:object_id>/history/",
+    "name": "admin:registrar_curriculum_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/curriculum/<path:object_id>/delete/",
+    "name": "admin:registrar_curriculum_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/curriculum/<path:object_id>/change/",
+    "name": "admin:registrar_curriculum_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/curriculum/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/",
+    "name": "admin:registrar_studentacademicrecord_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/add/",
+    "name": "admin:registrar_studentacademicrecord_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/<path:object_id>/history/",
+    "name": "admin:registrar_studentacademicrecord_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/<path:object_id>/delete/",
+    "name": "admin:registrar_studentacademicrecord_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/<path:object_id>/change/",
+    "name": "admin:registrar_studentacademicrecord_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/studentacademicrecord/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/courseoffering/",
+    "name": "admin:registrar_courseoffering_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/courseoffering/add/",
+    "name": "admin:registrar_courseoffering_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/courseoffering/<path:object_id>/history/",
+    "name": "admin:registrar_courseoffering_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/courseoffering/<path:object_id>/delete/",
+    "name": "admin:registrar_courseoffering_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/courseoffering/<path:object_id>/change/",
+    "name": "admin:registrar_courseoffering_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/courseoffering/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/enrollment/",
+    "name": "admin:registrar_enrollment_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/enrollment/add/",
+    "name": "admin:registrar_enrollment_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/enrollment/<path:object_id>/history/",
+    "name": "admin:registrar_enrollment_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/enrollment/<path:object_id>/delete/",
+    "name": "admin:registrar_enrollment_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/enrollment/<path:object_id>/change/",
+    "name": "admin:registrar_enrollment_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/enrollment/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/",
+    "name": "admin:registrar_groupelectivechoice_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/add/",
+    "name": "admin:registrar_groupelectivechoice_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/<path:object_id>/history/",
+    "name": "admin:registrar_groupelectivechoice_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/<path:object_id>/delete/",
+    "name": "admin:registrar_groupelectivechoice_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/<path:object_id>/change/",
+    "name": "admin:registrar_groupelectivechoice_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/groupelectivechoice/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/",
+    "name": "admin:registrar_assessmentscheme_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/add/",
+    "name": "admin:registrar_assessmentscheme_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/<path:object_id>/history/",
+    "name": "admin:registrar_assessmentscheme_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/<path:object_id>/delete/",
+    "name": "admin:registrar_assessmentscheme_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/<path:object_id>/change/",
+    "name": "admin:registrar_assessmentscheme_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/assessmentscheme/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/lesson/",
+    "name": "admin:registrar_lesson_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/lesson/add/",
+    "name": "admin:registrar_lesson_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/lesson/<path:object_id>/history/",
+    "name": "admin:registrar_lesson_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/lesson/<path:object_id>/delete/",
+    "name": "admin:registrar_lesson_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/lesson/<path:object_id>/change/",
+    "name": "admin:registrar_lesson_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/lesson/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/lessonmark/",
+    "name": "admin:registrar_lessonmark_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/lessonmark/add/",
+    "name": "admin:registrar_lessonmark_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/lessonmark/<path:object_id>/history/",
+    "name": "admin:registrar_lessonmark_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/lessonmark/<path:object_id>/delete/",
+    "name": "admin:registrar_lessonmark_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/lessonmark/<path:object_id>/change/",
+    "name": "admin:registrar_lessonmark_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/lessonmark/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/",
+    "name": "admin:registrar_scheduleslot_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/add/",
+    "name": "admin:registrar_scheduleslot_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/<path:object_id>/history/",
+    "name": "admin:registrar_scheduleslot_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/<path:object_id>/delete/",
+    "name": "admin:registrar_scheduleslot_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/<path:object_id>/change/",
+    "name": "admin:registrar_scheduleslot_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/scheduleslot/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/finalgrade/",
+    "name": "admin:registrar_finalgrade_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/finalgrade/add/",
+    "name": "admin:registrar_finalgrade_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/finalgrade/<path:object_id>/history/",
+    "name": "admin:registrar_finalgrade_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/finalgrade/<path:object_id>/delete/",
+    "name": "admin:registrar_finalgrade_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/finalgrade/<path:object_id>/change/",
+    "name": "admin:registrar_finalgrade_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/finalgrade/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/registrar/resitrecord/",
+    "name": "admin:registrar_resitrecord_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/registrar/resitrecord/add/",
+    "name": "admin:registrar_resitrecord_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/registrar/resitrecord/<path:object_id>/history/",
+    "name": "admin:registrar_resitrecord_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/registrar/resitrecord/<path:object_id>/delete/",
+    "name": "admin:registrar_resitrecord_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/registrar/resitrecord/<path:object_id>/change/",
+    "name": "admin:registrar_resitrecord_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/registrar/resitrecord/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/audit/auditlog/",
+    "name": "admin:audit_auditlog_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/audit/auditlog/add/",
+    "name": "admin:audit_auditlog_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/audit/auditlog/<path:object_id>/history/",
+    "name": "admin:audit_auditlog_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/audit/auditlog/<path:object_id>/delete/",
+    "name": "admin:audit_auditlog_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/audit/auditlog/<path:object_id>/change/",
+    "name": "admin:audit_auditlog_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/audit/auditlog/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/",
+    "name": "admin:ai_assistant_aiassistantlog_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/add/",
+    "name": "admin:ai_assistant_aiassistantlog_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/<path:object_id>/history/",
+    "name": "admin:ai_assistant_aiassistantlog_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/<path:object_id>/delete/",
+    "name": "admin:ai_assistant_aiassistantlog_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/<path:object_id>/change/",
+    "name": "admin:ai_assistant_aiassistantlog_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/ai_assistant/aiassistantlog/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/exam/",
+    "name": "admin:exams_exam_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/exam/add/",
+    "name": "admin:exams_exam_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/exam/<path:object_id>/history/",
+    "name": "admin:exams_exam_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/exam/<path:object_id>/delete/",
+    "name": "admin:exams_exam_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/exam/<path:object_id>/change/",
+    "name": "admin:exams_exam_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/exam/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examquestion/",
+    "name": "admin:exams_examquestion_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examquestion/add/",
+    "name": "admin:exams_examquestion_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examquestion/<path:object_id>/history/",
+    "name": "admin:exams_examquestion_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examquestion/<path:object_id>/delete/",
+    "name": "admin:exams_examquestion_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examquestion/<path:object_id>/change/",
+    "name": "admin:exams_examquestion_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examquestion/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examattempt/",
+    "name": "admin:exams_examattempt_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examattempt/add/",
+    "name": "admin:exams_examattempt_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examattempt/<path:object_id>/history/",
+    "name": "admin:exams_examattempt_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examattempt/<path:object_id>/delete/",
+    "name": "admin:exams_examattempt_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examattempt/<path:object_id>/change/",
+    "name": "admin:exams_examattempt_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examattempt/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examanswer/",
+    "name": "admin:exams_examanswer_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examanswer/add/",
+    "name": "admin:exams_examanswer_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examanswer/<path:object_id>/history/",
+    "name": "admin:exams_examanswer_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examanswer/<path:object_id>/delete/",
+    "name": "admin:exams_examanswer_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examanswer/<path:object_id>/change/",
+    "name": "admin:exams_examanswer_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examanswer/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/",
+    "name": "admin:exams_codingexamquestion_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/add/",
+    "name": "admin:exams_codingexamquestion_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/<path:object_id>/history/",
+    "name": "admin:exams_codingexamquestion_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/<path:object_id>/delete/",
+    "name": "admin:exams_codingexamquestion_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/<path:object_id>/change/",
+    "name": "admin:exams_codingexamquestion_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/codingexamquestion/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/codingsubmission/",
+    "name": "admin:exams_codingsubmission_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/codingsubmission/add/",
+    "name": "admin:exams_codingsubmission_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/codingsubmission/<path:object_id>/history/",
+    "name": "admin:exams_codingsubmission_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/codingsubmission/<path:object_id>/delete/",
+    "name": "admin:exams_codingsubmission_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/codingsubmission/<path:object_id>/change/",
+    "name": "admin:exams_codingsubmission_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/codingsubmission/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/studentgroup/",
+    "name": "admin:exams_studentgroup_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/studentgroup/add/",
+    "name": "admin:exams_studentgroup_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/studentgroup/<path:object_id>/history/",
+    "name": "admin:exams_studentgroup_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/studentgroup/<path:object_id>/delete/",
+    "name": "admin:exams_studentgroup_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/studentgroup/<path:object_id>/change/",
+    "name": "admin:exams_studentgroup_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/studentgroup/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/questionbank/",
+    "name": "admin:exams_questionbank_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/questionbank/add/",
+    "name": "admin:exams_questionbank_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/questionbank/<path:object_id>/history/",
+    "name": "admin:exams_questionbank_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/questionbank/<path:object_id>/delete/",
+    "name": "admin:exams_questionbank_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/questionbank/<path:object_id>/change/",
+    "name": "admin:exams_questionbank_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/questionbank/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/proctoringlog/",
+    "name": "admin:exams_proctoringlog_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/proctoringlog/add/",
+    "name": "admin:exams_proctoringlog_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/proctoringlog/<path:object_id>/history/",
+    "name": "admin:exams_proctoringlog_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/proctoringlog/<path:object_id>/delete/",
+    "name": "admin:exams_proctoringlog_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/proctoringlog/<path:object_id>/change/",
+    "name": "admin:exams_proctoringlog_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/proctoringlog/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/",
+    "name": "admin:exams_examsupervisionconfig_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/add/",
+    "name": "admin:exams_examsupervisionconfig_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/<path:object_id>/history/",
+    "name": "admin:exams_examsupervisionconfig_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/<path:object_id>/delete/",
+    "name": "admin:exams_examsupervisionconfig_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/<path:object_id>/change/",
+    "name": "admin:exams_examsupervisionconfig_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examsupervisionconfig/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/supervisionincident/",
+    "name": "admin:exams_supervisionincident_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/supervisionincident/add/",
+    "name": "admin:exams_supervisionincident_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/supervisionincident/<path:object_id>/history/",
+    "name": "admin:exams_supervisionincident_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/supervisionincident/<path:object_id>/delete/",
+    "name": "admin:exams_supervisionincident_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/supervisionincident/<path:object_id>/change/",
+    "name": "admin:exams_supervisionincident_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/supervisionincident/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examroom/",
+    "name": "admin:exams_examroom_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examroom/add/",
+    "name": "admin:exams_examroom_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examroom/<path:object_id>/history/",
+    "name": "admin:exams_examroom_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examroom/<path:object_id>/delete/",
+    "name": "admin:exams_examroom_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examroom/<path:object_id>/change/",
+    "name": "admin:exams_examroom_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examroom/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/examroomsession/",
+    "name": "admin:exams_examroomsession_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/examroomsession/add/",
+    "name": "admin:exams_examroomsession_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/examroomsession/<path:object_id>/history/",
+    "name": "admin:exams_examroomsession_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/examroomsession/<path:object_id>/delete/",
+    "name": "admin:exams_examroomsession_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/examroomsession/<path:object_id>/change/",
+    "name": "admin:exams_examroomsession_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/examroomsession/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/exams/finalexamticket/",
+    "name": "admin:exams_finalexamticket_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/exams/finalexamticket/add/",
+    "name": "admin:exams_finalexamticket_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/exams/finalexamticket/<path:object_id>/history/",
+    "name": "admin:exams_finalexamticket_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/exams/finalexamticket/<path:object_id>/delete/",
+    "name": "admin:exams_finalexamticket_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/exams/finalexamticket/<path:object_id>/change/",
+    "name": "admin:exams_finalexamticket_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/exams/finalexamticket/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/applications/applicationunit/",
+    "name": "admin:applications_applicationunit_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/applications/applicationunit/add/",
+    "name": "admin:applications_applicationunit_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/applications/applicationunit/<path:object_id>/history/",
+    "name": "admin:applications_applicationunit_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/applications/applicationunit/<path:object_id>/delete/",
+    "name": "admin:applications_applicationunit_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/applications/applicationunit/<path:object_id>/change/",
+    "name": "admin:applications_applicationunit_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/applications/applicationunit/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/applications/applicationkind/",
+    "name": "admin:applications_applicationkind_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/applications/applicationkind/add/",
+    "name": "admin:applications_applicationkind_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/applications/applicationkind/<path:object_id>/history/",
+    "name": "admin:applications_applicationkind_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/applications/applicationkind/<path:object_id>/delete/",
+    "name": "admin:applications_applicationkind_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/applications/applicationkind/<path:object_id>/change/",
+    "name": "admin:applications_applicationkind_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/applications/applicationkind/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/applications/application/",
+    "name": "admin:applications_application_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/applications/application/add/",
+    "name": "admin:applications_application_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/applications/application/<path:object_id>/history/",
+    "name": "admin:applications_application_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/applications/application/<path:object_id>/delete/",
+    "name": "admin:applications_application_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/applications/application/<path:object_id>/change/",
+    "name": "admin:applications_application_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/applications/application/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/<int:pk>/reply/",
+    "name": "admin:trial_exams_trialexamrequest_reply",
+    "view": "apps.trial_exams.admin_views.reply_to_trial_request"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/",
+    "name": "admin:trial_exams_trialexamrequest_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/add/",
+    "name": "admin:trial_exams_trialexamrequest_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/<path:object_id>/history/",
+    "name": "admin:trial_exams_trialexamrequest_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/<path:object_id>/delete/",
+    "name": "admin:trial_exams_trialexamrequest_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/<path:object_id>/change/",
+    "name": "admin:trial_exams_trialexamrequest_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/trial_exams/trialexamrequest/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/auth/group/",
+    "name": "admin:auth_group_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/auth/group/add/",
+    "name": "admin:auth_group_add",
+    "view": "django.contrib.admin.options.ModelAdmin.add_view"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/history/",
+    "name": "admin:auth_group_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/delete/",
+    "name": "admin:auth_group_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/change/",
+    "name": "admin:auth_group_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/auth/group/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/auth/user/<id>/password/",
+    "name": "admin:auth_user_password_change",
+    "view": "django.contrib.auth.admin.UserAdmin.user_change_password"
+  },
+  {
+    "route": "admin/auth/user/",
+    "name": "admin:auth_user_changelist",
+    "view": "django.contrib.admin.options.ModelAdmin.changelist_view"
+  },
+  {
+    "route": "admin/auth/user/add/",
+    "name": "admin:auth_user_add",
+    "view": "django.contrib.auth.admin.UserAdmin.add_view"
+  },
+  {
+    "route": "admin/auth/user/<path:object_id>/history/",
+    "name": "admin:auth_user_history",
+    "view": "django.contrib.admin.options.ModelAdmin.history_view"
+  },
+  {
+    "route": "admin/auth/user/<path:object_id>/delete/",
+    "name": "admin:auth_user_delete",
+    "view": "django.contrib.admin.options.ModelAdmin.delete_view"
+  },
+  {
+    "route": "admin/auth/user/<path:object_id>/change/",
+    "name": "admin:auth_user_change",
+    "view": "django.contrib.admin.options.ModelAdmin.change_view"
+  },
+  {
+    "route": "admin/auth/user/<path:object_id>/",
+    "name": "admin:",
+    "view": "django.views.generic.base.RedirectView"
+  },
+  {
+    "route": "admin/^(?P<app_label>courses|blog|contact|assignments|accounts|notifications|projects|labs|organizations|registrar|audit|ai_assistant|exams|applications|trial_exams|auth)/$",
+    "name": "admin:app_list",
+    "view": "django.contrib.admin.sites.AdminSite.app_index"
+  },
+  {
+    "route": "admin/(?P<url>.*)$",
+    "name": "admin:",
+    "view": "django.contrib.admin.sites.AdminSite.catch_all_view"
+  },
+  {
+    "route": "i18n/setlang/",
+    "name": "set_language",
+    "view": "django.views.i18n.set_language"
+  },
+  {
+    "route": "jsi18n/",
+    "name": "javascript-catalog",
+    "view": "django.views.i18n.JavaScriptCatalog"
+  },
+  {
+    "route": "google241689ad56ccbec6.html",
+    "name": "google_site_verification",
+    "view": "core.seo_views.google_site_verification"
+  },
+  {
+    "route": "robots.txt",
+    "name": "robots_txt",
+    "view": "core.seo_views.robots_txt"
+  },
+  {
+    "route": "sitemap.xml",
+    "name": "sitemap_xml",
+    "view": "core.seo_views.sitemap_xml"
+  },
+  {
+    "route": "site.webmanifest",
+    "name": "site_webmanifest",
+    "view": "core.seo_views.site_webmanifest"
+  },
+  {
+    "route": "favicon.ico",
+    "name": "root_asset_favicon.ico",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon.svg",
+    "name": "root_asset_favicon.svg",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-16x16.png",
+    "name": "root_asset_favicon-16x16.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-32x32.png",
+    "name": "root_asset_favicon-32x32.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-48x48.png",
+    "name": "root_asset_favicon-48x48.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-96x96.png",
+    "name": "root_asset_favicon-96x96.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-192x192.png",
+    "name": "root_asset_favicon-192x192.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "favicon-512x512.png",
+    "name": "root_asset_favicon-512x512.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "apple-touch-icon.png",
+    "name": "root_asset_apple-touch-icon.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo.png",
+    "name": "root_asset_logo.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-horizontal.png",
+    "name": "root_asset_logo-horizontal.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-stacked.png",
+    "name": "root_asset_logo-stacked.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-mark.png",
+    "name": "root_asset_logo-mark.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-square.png",
+    "name": "root_asset_logo-square.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-horizontal-light.png",
+    "name": "root_asset_logo-horizontal-light.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-stacked-light.png",
+    "name": "root_asset_logo-stacked-light.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "logo-mark-light.png",
+    "name": "root_asset_logo-mark-light.png",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "og-image.jpg",
+    "name": "root_asset_og-image.jpg",
+    "view": "core.seo_views.root_asset"
+  },
+  {
+    "route": "blog/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_home"
+  },
+  {
+    "route": "blog/about/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_about"
+  },
+  {
+    "route": "blog/technology/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_technology"
+  },
+  {
+    "route": "blog/subscribe/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_subscribe"
+  },
+  {
+    "route": "blog/users/<str:username>/",
+    "name": "user_profile",
+    "view": "apps.blog.legacy_urls._legacy_user_profile"
+  },
+  {
+    "route": "blog/posts/create/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_create_post"
+  },
+  {
+    "route": "blog/posts/<slug:slug>/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_article_detail"
+  },
+  {
+    "route": "blog/post/<int:pk>/edit/",
+    "name": "",
+    "view": "apps.blog.views.author.posts.post_edit_ajax"
+  },
+  {
+    "route": "blog/post/<int:post_id>/review/",
+    "name": "",
+    "view": "apps.blog.views.moderator.posts.review_post"
+  },
+  {
+    "route": "blog/post/<int:post_id>/delete/",
+    "name": "",
+    "view": "apps.blog.views.moderator.posts.delete_post"
+  },
+  {
+    "route": "blog/category/<slug:slug>/",
+    "name": "",
+    "view": "apps.blog.views.public.legacy.legacy_category_detail"
+  },
+  {
+    "route": "blog/questions/create/",
+    "name": "",
+    "view": "apps.blog.views.author.questions.create_question"
+  },
+  {
+    "route": "blog/questions/my/",
+    "name": "",
+    "view": "apps.blog.views.author.questions.my_questions"
+  },
+  {
+    "route": "blog/questions/",
+    "name": "",
+    "view": "apps.blog.views.author.questions.questions_i_can_see"
+  },
+  {
+    "route": "contact/",
+    "name": "contact",
+    "view": "apps.contact.views.contact_page"
+  },
+  {
+    "route": "trial-exam/",
+    "name": "trial_exams:request",
+    "view": "apps.trial_exams.views.trial_exam_request_page"
+  },
+  {
+    "route": "",
+    "name": "home",
+    "view": "apps.blog.views.public.pages.home"
+  },
+  {
+    "route": "about/",
+    "name": "about",
+    "view": "apps.blog.views.public.pages.about"
+  },
+  {
+    "route": "technology/",
+    "name": "technology",
+    "view": "apps.blog.views.public.pages.technology"
+  },
+  {
+    "route": "subscribe/",
+    "name": "subscribe",
+    "view": "apps.blog.views.public.subscribe.subscribe_page"
+  },
+  {
+    "route": "posts/create/",
+    "name": "create_post",
+    "view": "apps.blog.views.author.posts.create_post"
+  },
+  {
+    "route": "articles/<slug:slug>/",
+    "name": "article_detail",
+    "view": "apps.blog.views.public.detail.post_detail"
+  },
+  {
+    "route": "posts/<int:pk>/edit/",
+    "name": "post_edit_ajax",
+    "view": "apps.blog.views.author.posts.post_edit_ajax"
+  },
+  {
+    "route": "posts/<int:post_id>/review/",
+    "name": "review_post",
+    "view": "apps.blog.views.moderator.posts.review_post"
+  },
+  {
+    "route": "posts/<int:post_id>/delete/",
+    "name": "delete_post",
+    "view": "apps.blog.views.moderator.posts.delete_post"
+  },
+  {
+    "route": "posts/<int:post_id>/moderate/",
+    "name": "teacher_moderate_post",
+    "view": "apps.blog.views.moderator.posts.teacher_moderate_post"
+  },
+  {
+    "route": "categories/<slug:slug>/",
+    "name": "category_detail",
+    "view": "apps.blog.views.public.categories.category_detail"
+  },
+  {
+    "route": "questions/create/",
+    "name": "create_question",
+    "view": "apps.blog.views.author.questions.create_question"
+  },
+  {
+    "route": "questions/my/",
+    "name": "my_questions",
+    "view": "apps.blog.views.author.questions.my_questions"
+  },
+  {
+    "route": "questions/",
+    "name": "questions_i_can_see",
+    "view": "apps.blog.views.author.questions.questions_i_can_see"
+  },
+  {
+    "route": "live/create/<slug:slug>/",
+    "name": "liveExam:create_session_slug",
+    "view": "apps.live_exam.views.host.session.live_create_session_by_slug"
+  },
+  {
+    "route": "live/",
+    "name": "liveExam:pin_entry",
+    "view": "apps.live_exam.views.player.join.live_pin_entry"
+  },
+  {
+    "route": "live/host/<str:pin>/",
+    "name": "liveExam:host_lobby",
+    "view": "apps.live_exam.views.host.session.live_host_lobby"
+  },
+  {
+    "route": "live/host/<str:pin>/presentation/",
+    "name": "liveExam:host_presentation",
+    "view": "apps.live_exam.views.host.session.live_host_presentation"
+  },
+  {
+    "route": "live/host/<str:pin>/start/",
+    "name": "liveExam:host_start_game",
+    "view": "apps.live_exam.views.host.game.host_start_game"
+  },
+  {
+    "route": "live/host/<str:pin>/next/",
+    "name": "liveExam:host_next_question",
+    "view": "apps.live_exam.views.host.game.host_next_question"
+  },
+  {
+    "route": "live/host/<str:pin>/skip-intro/",
+    "name": "liveExam:host_skip_question_intro",
+    "view": "apps.live_exam.views.host.game.host_skip_question_intro"
+  },
+  {
+    "route": "live/host/<str:pin>/reveal/",
+    "name": "liveExam:host_reveal",
+    "view": "apps.live_exam.views.host.game.host_reveal"
+  },
+  {
+    "route": "live/host/<str:pin>/finish/",
+    "name": "liveExam:host_finish",
+    "view": "apps.live_exam.views.host.game.host_finish"
+  },
+  {
+    "route": "live/host/<str:pin>/lock/",
+    "name": "liveExam:host_toggle_lock",
+    "view": "apps.live_exam.views.host.game.host_toggle_lock"
+  },
+  {
+    "route": "live/host/<str:pin>/settings/",
+    "name": "liveExam:host_update_settings",
+    "view": "apps.live_exam.views.host.game.host_update_settings"
+  },
+  {
+    "route": "live/host/<str:pin>/players/remove/",
+    "name": "liveExam:host_remove_player",
+    "view": "apps.live_exam.views.host.game.host_remove_player"
+  },
+  {
+    "route": "live/results/<slug:slug>/",
+    "name": "liveExam:teacher_live_results",
+    "view": "apps.live_exam.views.results.teacher_live_exam_results"
+  },
+  {
+    "route": "live/results/<slug:slug>/<str:pin>/",
+    "name": "liveExam:teacher_live_session_detail",
+    "view": "apps.live_exam.views.results.teacher_live_session_detail"
+  },
+  {
+    "route": "live/join/<str:pin>/",
+    "name": "liveExam:join_page",
+    "view": "apps.live_exam.views.player.join.live_join_page"
+  },
+  {
+    "route": "live/join/<str:pin>/enter/",
+    "name": "liveExam:join_enter",
+    "view": "apps.live_exam.views.player.join.live_join_enter"
+  },
+  {
+    "route": "live/play/<str:pin>/",
+    "name": "liveExam:player_screen",
+    "view": "apps.live_exam.views.player.wait.live_player_screen"
+  },
+  {
+    "route": "live/play/<str:pin>/answer/",
+    "name": "liveExam:answer_submit",
+    "view": "apps.live_exam.views.api.live_answer_submit"
+  },
+  {
+    "route": "live/wait/<str:pin>/",
+    "name": "liveExam:wait_room",
+    "view": "apps.live_exam.views.player.wait.live_wait_room"
+  },
+  {
+    "route": "live/wait/<str:pin>/profile/",
+    "name": "liveExam:wait_room_profile",
+    "view": "apps.live_exam.views.player.wait.live_wait_profile_update"
+  },
+  {
+    "route": "live/wait/<str:pin>/reaction/",
+    "name": "liveExam:wait_room_reaction",
+    "view": "apps.live_exam.views.player.wait.live_wait_reaction"
+  },
+  {
+    "route": "live/qr/<str:pin>.png",
+    "name": "liveExam:qr_png",
+    "view": "apps.live_exam.views.player.join.live_qr_png"
+  },
+  {
+    "route": "live/state/<str:pin>/",
+    "name": "liveExam:state_json",
+    "view": "apps.live_exam.views.api.live_state_json"
+  },
+  {
+    "route": "live/<str:pin>/start/",
+    "name": "liveExam:start_game",
+    "view": "apps.live_exam.views.host.game.host_start_game"
+  },
+  {
+    "route": "live/<str:pin>/next/",
+    "name": "liveExam:next_question",
+    "view": "apps.live_exam.views.host.game.host_next_question"
+  },
+  {
+    "route": "live/<str:pin>/finish/",
+    "name": "liveExam:finish_game",
+    "view": "apps.live_exam.views.host.game.host_finish"
+  },
+  {
+    "route": "courses/create_course/",
+    "name": "courses:create_course",
+    "view": "apps.courses.views.teacher.crud.CreateCourseView"
+  },
+  {
+    "route": "courses/my-courses/",
+    "name": "courses:my_courses",
+    "view": "apps.courses.views.teacher.crud.MyCoursesListView"
+  },
+  {
+    "route": "courses/<int:course_id>/dashboard/",
+    "name": "courses:course_dashboard",
+    "view": "apps.courses.views.shared.dashboard.CourseDashboardView"
+  },
+  {
+    "route": "courses/<int:course_id>/edit/",
+    "name": "courses:edit_course",
+    "view": "apps.courses.views.teacher.crud.EditCourseView"
+  },
+  {
+    "route": "courses/<int:course_id>/delete/",
+    "name": "courses:delete_course",
+    "view": "apps.courses.views.teacher.crud.DeleteCourseView"
+  },
+  {
+    "route": "courses/<int:course_id>/status/update/",
+    "name": "courses:update_course_status",
+    "view": "apps.courses.views.teacher.crud.update_course_status"
+  },
+  {
+    "route": "courses/<int:course_id>/topic/add/",
+    "name": "courses:add_topic",
+    "view": "apps.courses.views.teacher.topics.AddTopicView"
+  },
+  {
+    "route": "courses/topic/<int:topic_id>/edit/",
+    "name": "courses:edit_topic",
+    "view": "apps.courses.views.teacher.topics.EditTopicView"
+  },
+  {
+    "route": "courses/<int:course_id>/topic/<int:topic_id>/delete/",
+    "name": "courses:delete_topic",
+    "view": "apps.courses.views.teacher.topics.DeleteTopicView"
+  },
+  {
+    "route": "courses/<int:course_id>/resource/add/",
+    "name": "courses:add_resource",
+    "view": "apps.courses.views.teacher.resources.AddResourceView"
+  },
+  {
+    "route": "courses/<int:course_id>/resource/<int:resource_id>/delete/",
+    "name": "courses:delete_resource",
+    "view": "apps.courses.views.teacher.resources.DeleteResourceView"
+  },
+  {
+    "route": "courses/<int:course_id>/members/",
+    "name": "courses:course_members",
+    "view": "apps.courses.views.teacher.membership.CourseMembersView"
+  },
+  {
+    "route": "courses/<int:course_id>/available-students/",
+    "name": "courses:available_students",
+    "view": "apps.courses.views.teacher.membership.AvailableStudentsView"
+  },
+  {
+    "route": "courses/<int:course_id>/members/add/",
+    "name": "courses:add_member",
+    "view": "apps.courses.views.teacher.membership.AddMemberView"
+  },
+  {
+    "route": "courses/<int:course_id>/members/add-bulk/",
+    "name": "courses:add_members_bulk",
+    "view": "apps.courses.views.teacher.membership.AddMembersBulkView"
+  },
+  {
+    "route": "courses/<int:course_id>/members/<int:member_id>/delete/",
+    "name": "courses:delete_member",
+    "view": "apps.courses.views.teacher.membership.DeleteMemberView"
+  },
+  {
+    "route": "courses/<int:course_id>/members/delete-group/",
+    "name": "courses:delete_group_from_course",
+    "view": "apps.courses.views.teacher.membership.DeleteGroupFromCourseView"
+  },
+  {
+    "route": "courses/my-enrolled/",
+    "name": "courses:student_courses",
+    "view": "apps.courses.views.student.courses.StudentCoursesView"
+  },
+  {
+    "route": "courses/<int:pk>/link-exam/",
+    "name": "courses:link_exam",
+    "view": "apps.courses.views.teacher.membership.link_exam_to_course"
+  },
+  {
+    "route": "courses/<int:pk>/unlink-exam/",
+    "name": "courses:unlink_exam",
+    "view": "apps.courses.views.teacher.membership.unlink_exam_from_course"
+  },
+  {
+    "route": "assignments/create/<int:course_id>/",
+    "name": "assignments:create_assignment",
+    "view": "apps.assignments.views.teacher.crud.create_assignment"
+  },
+  {
+    "route": "assignments/<int:pk>/edit/",
+    "name": "assignments:edit_assignment",
+    "view": "apps.assignments.views.teacher.crud.edit_assignment"
+  },
+  {
+    "route": "assignments/<int:pk>/delete/",
+    "name": "assignments:delete_assignment",
+    "view": "apps.assignments.views.teacher.crud.delete_assignment"
+  },
+  {
+    "route": "assignments/<int:pk>/detail/",
+    "name": "assignments:assignment_detail",
+    "view": "apps.assignments.views.student.endpoints.assignment_detail"
+  },
+  {
+    "route": "assignments/<int:pk>/submit/",
+    "name": "assignments:submit_assignment",
+    "view": "apps.assignments.views.student.endpoints.submit_assignment"
+  },
+  {
+    "route": "assignments/<int:pk>/submissions/",
+    "name": "assignments:review_assignment_submissions",
+    "view": "apps.assignments.views.teacher.endpoints.review_submissions"
+  },
+  {
+    "route": "assignments/<int:pk>/submissions/delete/",
+    "name": "assignments:delete_assignment_submissions",
+    "view": "apps.assignments.views.teacher.endpoints.delete_submissions"
+  },
+  {
+    "route": "assignments/submission/<int:pk>/grade/",
+    "name": "assignments:grade_submission",
+    "view": "apps.assignments.views.teacher.endpoints.grade_submission"
+  },
+  {
+    "route": "assignments/<int:pk>/my-submissions/",
+    "name": "assignments:my_submissions",
+    "view": "apps.assignments.views.student.endpoints.my_submissions"
+  },
+  {
+    "route": "assignments/search-students/",
+    "name": "assignments:search_students",
+    "view": "apps.assignments.views.shared.api.search_students"
+  },
+  {
+    "route": "assignments/search-groups/",
+    "name": "assignments:search_groups",
+    "view": "apps.assignments.views.shared.api.search_groups"
+  },
+  {
+    "route": "assignments/students-by-groups/",
+    "name": "assignments:students_by_groups",
+    "view": "apps.assignments.views.shared.api.students_by_groups"
+  },
+  {
+    "route": "assignments/<int:pk>/remove-student/",
+    "name": "assignments:remove_student_from_assignment",
+    "view": "apps.assignments.views.shared.api.remove_student_from_assignment"
+  },
+  {
+    "route": "projects/create/<int:course_id>/",
+    "name": "projects:create_project",
+    "view": "apps.projects.views.teacher.crud.create_project"
+  },
+  {
+    "route": "projects/<int:pk>/edit/",
+    "name": "projects:edit_project",
+    "view": "apps.projects.views.teacher.crud.edit_project"
+  },
+  {
+    "route": "projects/<int:pk>/delete/",
+    "name": "projects:delete_project",
+    "view": "apps.projects.views.teacher.crud.delete_project"
+  },
+  {
+    "route": "projects/<int:pk>/",
+    "name": "projects:project_detail",
+    "view": "apps.projects.views.student.endpoints.project_detail"
+  },
+  {
+    "route": "projects/<int:pk>/submit/",
+    "name": "projects:submit_project",
+    "view": "apps.projects.views.student.endpoints.submit_project"
+  },
+  {
+    "route": "projects/<int:pk>/my-submissions/",
+    "name": "projects:my_submissions",
+    "view": "apps.projects.views.student.endpoints.my_submissions"
+  },
+  {
+    "route": "projects/<int:pk>/submissions/",
+    "name": "projects:review_project_submissions",
+    "view": "apps.projects.views.teacher.endpoints.review_submissions"
+  },
+  {
+    "route": "projects/<int:pk>/submissions/delete/",
+    "name": "projects:delete_project_submissions",
+    "view": "apps.projects.views.teacher.endpoints.delete_submissions"
+  },
+  {
+    "route": "projects/submission/<int:pk>/grade/",
+    "name": "projects:grade_submission",
+    "view": "apps.projects.views.teacher.endpoints.grade_submission"
+  },
+  {
+    "route": "projects/api/groups/",
+    "name": "projects:api_get_groups",
+    "view": "apps.projects.views.shared.api.api_get_groups"
+  },
+  {
+    "route": "projects/api/students/",
+    "name": "projects:api_get_students",
+    "view": "apps.projects.views.shared.api.api_get_students"
+  },
+  {
+    "route": "labs/create/<int:course_id>/",
+    "name": "labs:create_lab",
+    "view": "apps.labs.views.teacher.crud.create_lab"
+  },
+  {
+    "route": "labs/<int:pk>/edit/",
+    "name": "labs:edit_lab",
+    "view": "apps.labs.views.teacher.crud.edit_lab"
+  },
+  {
+    "route": "labs/<int:pk>/delete/",
+    "name": "labs:delete_lab",
+    "view": "apps.labs.views.teacher.crud.delete_lab"
+  },
+  {
+    "route": "labs/<int:pk>/publish/",
+    "name": "labs:publish_lab",
+    "view": "apps.labs.views.teacher.crud.publish_lab"
+  },
+  {
+    "route": "labs/<int:pk>/blocks/",
+    "name": "labs:manage_blocks",
+    "view": "apps.labs.views.teacher.blocks.manage_blocks"
+  },
+  {
+    "route": "labs/<int:pk>/questions-per-student/",
+    "name": "labs:update_questions_per_student",
+    "view": "apps.labs.views.teacher.blocks.update_questions_per_student"
+  },
+  {
+    "route": "labs/<int:pk>/blocks/create/",
+    "name": "labs:create_block",
+    "view": "apps.labs.views.teacher.blocks.create_block"
+  },
+  {
+    "route": "labs/blocks/<int:pk>/edit/",
+    "name": "labs:edit_block",
+    "view": "apps.labs.views.teacher.blocks.edit_block"
+  },
+  {
+    "route": "labs/blocks/<int:pk>/delete/",
+    "name": "labs:delete_block",
+    "view": "apps.labs.views.teacher.blocks.delete_block"
+  },
+  {
+    "route": "labs/blocks/<int:block_id>/questions/create/",
+    "name": "labs:create_question",
+    "view": "apps.labs.views.teacher.questions.create_question"
+  },
+  {
+    "route": "labs/questions/<int:pk>/edit/",
+    "name": "labs:edit_question",
+    "view": "apps.labs.views.teacher.questions.edit_question"
+  },
+  {
+    "route": "labs/questions/<int:pk>/delete/",
+    "name": "labs:delete_question",
+    "view": "apps.labs.views.teacher.questions.delete_question"
+  },
+  {
+    "route": "labs/blocks/<int:block_id>/questions/import/",
+    "name": "labs:import_questions",
+    "view": "apps.labs.views.teacher.questions.import_questions"
+  },
+  {
+    "route": "labs/<int:pk>/submissions/",
+    "name": "labs:lab_submissions",
+    "view": "apps.labs.views.teacher.submissions.lab_submissions"
+  },
+  {
+    "route": "labs/<int:pk>/submissions/delete/",
+    "name": "labs:delete_submissions",
+    "view": "apps.labs.views.teacher.submissions.delete_submissions"
+  },
+  {
+    "route": "labs/submissions/<int:pk>/grade-page/",
+    "name": "labs:grade_submission_page",
+    "view": "apps.labs.views.teacher.submissions.grade_submission_page"
+  },
+  {
+    "route": "labs/<int:pk>/preview/",
+    "name": "labs:preview_randomization",
+    "view": "apps.labs.views.teacher.preview.preview_randomization"
+  },
+  {
+    "route": "labs/<int:pk>/",
+    "name": "labs:lab_detail",
+    "view": "apps.labs.views.student.endpoints.lab_detail"
+  },
+  {
+    "route": "labs/<int:pk>/submit/",
+    "name": "labs:submit_lab",
+    "view": "apps.labs.views.student.submissions.submit_lab"
+  },
+  {
+    "route": "labs/<int:pk>/auto-save/",
+    "name": "labs:auto_save_answer",
+    "view": "apps.labs.views.student.submissions.auto_save_answer"
+  },
+  {
+    "route": "labs/<int:pk>/my-answers/",
+    "name": "labs:my_lab_answers",
+    "view": "apps.labs.views.student.endpoints.my_lab_answers"
+  },
+  {
+    "route": "labs/api/groups/<int:course_id>/",
+    "name": "labs:api_get_groups",
+    "view": "apps.labs.views.shared.api.api_get_groups"
+  },
+  {
+    "route": "labs/api/students/<int:course_id>/",
+    "name": "labs:api_get_students",
+    "view": "apps.labs.views.shared.api.api_get_students"
+  },
+  {
+    "route": "labs/submissions/<int:pk>/answers/",
+    "name": "labs:submission_answers",
+    "view": "apps.labs.views.teacher.submissions.submission_answers"
+  },
+  {
+    "route": "accounts/register/",
+    "name": "accounts:register",
+    "view": "apps.accounts.views.auth.register.register_view"
+  },
+  {
+    "route": "accounts/verify-code/",
+    "name": "accounts:verify_code",
+    "view": "apps.accounts.views.auth.register.verify_code_view"
+  },
+  {
+    "route": "accounts/verify-email/",
+    "name": "accounts:verify_email_link",
+    "view": "apps.accounts.views.auth.register.verify_email_link_view"
+  },
+  {
+    "route": "accounts/resend-code/",
+    "name": "accounts:resend_code",
+    "view": "apps.accounts.views.auth.register.resend_code_view"
+  },
+  {
+    "route": "accounts/send-otp/",
+    "name": "accounts:send_otp_api",
+    "view": "apps.accounts.views.auth.otp_api.send_otp_api_view"
+  },
+  {
+    "route": "accounts/verify-otp/",
+    "name": "accounts:verify_otp_api",
+    "view": "apps.accounts.views.auth.otp_api.verify_otp_api_view"
+  },
+  {
+    "route": "accounts/resend-otp/",
+    "name": "accounts:resend_otp_api",
+    "view": "apps.accounts.views.auth.otp_api.resend_otp_api_view"
+  },
+  {
+    "route": "accounts/set-password/",
+    "name": "accounts:set_initial_password",
+    "view": "apps.accounts.views.auth.first_login.set_initial_password_view"
+  },
+  {
+    "route": "accounts/login/",
+    "name": "accounts:login",
+    "view": "apps.accounts.views.auth.login.login_portal"
+  },
+  {
+    "route": "accounts/login/muellim/",
+    "name": "accounts:staff_login",
+    "view": "apps.accounts.views.auth.login.CustomLoginView"
+  },
+  {
+    "route": "accounts/login/telebe/",
+    "name": "accounts:student_login",
+    "view": "apps.accounts.views.auth.login.CustomLoginView"
+  },
+  {
+    "route": "accounts/logout/",
+    "name": "accounts:logout",
+    "view": "apps.accounts.views.auth.register.logout_view"
+  },
+  {
+    "route": "accounts/password-reset/",
+    "name": "accounts:password_reset",
+    "view": "apps.accounts.views.auth.login.NamespacedPasswordResetView"
+  },
+  {
+    "route": "accounts/password-reset/done/",
+    "name": "accounts:password_reset_done",
+    "view": "apps.accounts.views.auth.login.NamespacedPasswordResetDoneView"
+  },
+  {
+    "route": "accounts/reset/<uidb64>/<token>/",
+    "name": "accounts:password_reset_confirm",
+    "view": "apps.accounts.views.auth.login.NamespacedPasswordResetConfirmView"
+  },
+  {
+    "route": "accounts/reset/done/",
+    "name": "accounts:password_reset_complete",
+    "view": "django.contrib.auth.views.PasswordResetCompleteView"
+  },
+  {
+    "route": "accounts/kabinet/",
+    "name": "accounts:cabinet",
+    "view": "apps.accounts.views.dashboard.dispatch.cabinet_entry"
+  },
+  {
+    "route": "accounts/kabinet/telebe/",
+    "name": "accounts:student_cabinet",
+    "view": "apps.accounts.views.dashboard.dispatch.student_cabinet_entry"
+  },
+  {
+    "route": "accounts/kabinet/muellim/",
+    "name": "accounts:staff_cabinet",
+    "view": "apps.accounts.views.dashboard.dispatch.staff_cabinet_entry"
+  },
+  {
+    "route": "accounts/dashboard/",
+    "name": "accounts:dashboard",
+    "view": "apps.accounts.views.dashboard.dispatch.dashboard"
+  },
+  {
+    "route": "accounts/dashboard/student/",
+    "name": "accounts:student_dashboard",
+    "view": "apps.accounts.views.dashboard.student.student_dashboard"
+  },
+  {
+    "route": "accounts/dashboard/teacher/",
+    "name": "accounts:teacher_dashboard",
+    "view": "apps.accounts.views.dashboard.teacher.teacher_dashboard"
+  },
+  {
+    "route": "accounts/search/",
+    "name": "accounts:global_search",
+    "view": "apps.accounts.views.search.global_search"
+  },
+  {
+    "route": "accounts/profile/",
+    "name": "accounts:profile",
+    "view": "apps.accounts.views.profile.main.user_profile"
+  },
+  {
+    "route": "accounts/profile/statistics/export-csv/",
+    "name": "accounts:statistics_export_csv",
+    "view": "apps.accounts.views.profile.statistics_export.statistics_export_csv"
+  },
+  {
+    "route": "accounts/profile/academic-records/data/",
+    "name": "accounts:records_overview_data",
+    "view": "apps.accounts.views.academic_records.records_overview_data"
+  },
+  {
+    "route": "accounts/profile/academic-records/summary/",
+    "name": "accounts:records_overview_summary",
+    "view": "apps.accounts.views.academic_records.records_overview_summary"
+  },
+  {
+    "route": "accounts/profile/academic-records/student/",
+    "name": "accounts:records_student_detail",
+    "view": "apps.accounts.views.academic_records.records_student_detail"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/faculty/",
+    "name": "accounts:records_faculty_search",
+    "view": "apps.accounts.views.academic_records.faculty_search"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/department/",
+    "name": "accounts:records_department_search",
+    "view": "apps.accounts.views.academic_records.department_search"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/program/",
+    "name": "accounts:records_program_search",
+    "view": "apps.accounts.views.academic_records.program_search"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/group/",
+    "name": "accounts:records_group_search",
+    "view": "apps.accounts.views.academic_records.group_search"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/student/",
+    "name": "accounts:records_student_search",
+    "view": "apps.accounts.views.academic_records.student_search"
+  },
+  {
+    "route": "accounts/profile/academic-records/search/teacher/",
+    "name": "accounts:journal_teacher_search",
+    "view": "apps.accounts.views.academic_records.journal_teacher_search"
+  },
+  {
+    "route": "accounts/profile/api/sections/<str:section>/",
+    "name": "accounts:profile_section_fragment",
+    "view": "apps.accounts.views.profile.sections_api.profile_section_fragment"
+  },
+  {
+    "route": "accounts/profile/api/badges/",
+    "name": "accounts:profile_badges_api",
+    "view": "apps.accounts.views.profile.sections_api.profile_badges_api"
+  },
+  {
+    "route": "accounts/profile/api/academic-items/",
+    "name": "accounts:academic_items_api",
+    "view": "apps.accounts.views.profile.academic_items.academic_items_api"
+  },
+  {
+    "route": "accounts/profile/api/password-otp/",
+    "name": "accounts:change_password_otp_request",
+    "view": "apps.accounts.views.profile.password_otp.change_password_otp_request"
+  },
+  {
+    "route": "accounts/profile-avatar/<int:user_id>/",
+    "name": "accounts:profile_avatar",
+    "view": "apps.accounts.views.profile.avatar.profile_avatar"
+  },
+  {
+    "route": "accounts/view-as/search/",
+    "name": "accounts:view_as_search",
+    "view": "apps.accounts.views.profile.view_as.view_as_search"
+  },
+  {
+    "route": "accounts/view-as/start/",
+    "name": "accounts:view_as_start",
+    "view": "apps.accounts.views.profile.view_as.view_as_start"
+  },
+  {
+    "route": "accounts/view-as/stop/",
+    "name": "accounts:view_as_stop",
+    "view": "apps.accounts.views.profile.view_as.view_as_stop"
+  },
+  {
+    "route": "accounts/users/<str:username>/",
+    "name": "accounts:public_profile",
+    "view": "apps.accounts.views.profile.public.public_user_profile"
+  },
+  {
+    "route": "accounts/manage-roles/",
+    "name": "accounts:manage_roles",
+    "view": "apps.accounts.views.roles.manage.manage_roles"
+  },
+  {
+    "route": "accounts/grading-queue/",
+    "name": "accounts:grading_queue",
+    "view": "apps.accounts.views.dashboard.teacher.grading_queue"
+  },
+  {
+    "route": "accounts/assigned-exams/",
+    "name": "accounts:assigned_exams",
+    "view": "apps.accounts.views.dashboard.student.assigned_exams"
+  },
+  {
+    "route": "accounts/assigned-courses/",
+    "name": "accounts:assigned_courses",
+    "view": "apps.accounts.views.dashboard.student.assigned_courses"
+  },
+  {
+    "route": "accounts/my-results/",
+    "name": "accounts:my_results",
+    "view": "apps.accounts.views.dashboard.student.my_results"
+  },
+  {
+    "route": "accounts/pending-answers/",
+    "name": "accounts:pending_answers",
+    "view": "apps.accounts.views.dashboard.student.pending_answers"
+  },
+  {
+    "route": "accounts/my-results/<str:item_type>/<int:item_id>/",
+    "name": "accounts:my_result_detail",
+    "view": "apps.accounts.views.dashboard.results.my_result_detail"
+  },
+  {
+    "route": "accounts/pending-review/",
+    "name": "accounts:pending_review",
+    "view": "apps.accounts.views.dashboard.review.pending_review"
+  },
+  {
+    "route": "accounts/pending-review/<str:item_type>/<int:item_id>/",
+    "name": "accounts:pending_review_detail",
+    "view": "apps.accounts.views.dashboard.review.pending_review_detail"
+  },
+  {
+    "route": "accounts/review-results/",
+    "name": "accounts:review_results",
+    "view": "apps.accounts.views.dashboard.review.review_results"
+  },
+  {
+    "route": "accounts/review-results/<str:item_type>/<int:item_id>/",
+    "name": "accounts:review_result_detail",
+    "view": "apps.accounts.views.dashboard.review.review_result_detail"
+  },
+  {
+    "route": "accounts/role-assignment/",
+    "name": "accounts:role_assignment",
+    "view": "apps.accounts.views.roles.assignment.role_assignment"
+  },
+  {
+    "route": "accounts/student-organization-management/",
+    "name": "accounts:student_organization_management",
+    "view": "apps.accounts.views.organization.management.student_organization_management"
+  },
+  {
+    "route": "accounts/student-organization-request/",
+    "name": "accounts:student_organization_request",
+    "view": "apps.accounts.views.organization.requests.student_organization_request"
+  },
+  {
+    "route": "accounts/student-organization-invitation/",
+    "name": "accounts:student_org_invitation_action",
+    "view": "apps.accounts.views.organization.invitations.student_org_invitation_action"
+  },
+  {
+    "route": "accounts/student-leave-organization/",
+    "name": "accounts:student_leave_organization",
+    "view": "apps.accounts.views.organization.leave.student_leave_organization"
+  },
+  {
+    "route": "accounts/permission-editor/",
+    "name": "accounts:permission_editor",
+    "view": "apps.accounts.views.roles.permissions.permission_editor"
+  },
+  {
+    "route": "accounts/superadmin/organizations/",
+    "name": "accounts:superadmin_organizations",
+    "view": "apps.accounts.views.superadmin.endpoints.superadmin_organizations"
+  },
+  {
+    "route": "accounts/superadmin/ai-settings/",
+    "name": "accounts:superadmin_ai_settings",
+    "view": "apps.accounts.views.superadmin.endpoints.superadmin_ai_settings"
+  },
+  {
+    "route": "accounts/superadmin/exam-rooms/",
+    "name": "accounts:superadmin_exam_rooms",
+    "view": "apps.accounts.views.superadmin.exam_rooms.superadmin_exam_rooms"
+  },
+  {
+    "route": "accounts/kollokvium-windows/",
+    "name": "accounts:kollokvium_windows",
+    "view": "apps.accounts.views.kollokvium_windows.kollokvium_windows"
+  },
+  {
+    "route": "accounts/exam-chance/",
+    "name": "accounts:exam_chance",
+    "view": "apps.accounts.views.exam_chance.exam_chance"
+  },
+  {
+    "route": "accounts/imtahan-bali/",
+    "name": "accounts:exam_score_entry",
+    "view": "apps.accounts.views.exam_score_entry.exam_score_entry"
+  },
+  {
+    "route": "accounts/imtahan-bali/sablon/",
+    "name": "accounts:exam_score_import_template",
+    "view": "apps.accounts.views.exam_score_import.exam_score_import_template"
+  },
+  {
+    "route": "accounts/imtahan-bali/idxal/yoxla/",
+    "name": "accounts:exam_score_import_preview",
+    "view": "apps.accounts.views.exam_score_import.exam_score_import_preview"
+  },
+  {
+    "route": "accounts/imtahan-bali/idxal/tetbiq/",
+    "name": "accounts:exam_score_import_apply",
+    "view": "apps.accounts.views.exam_score_import.exam_score_import_apply"
+  },
+  {
+    "route": "accounts/jurnal-baglama/",
+    "name": "accounts:journal_close",
+    "view": "apps.accounts.views.journal_close.journal_close"
+  },
+  {
+    "route": "accounts/delete-account/",
+    "name": "accounts:delete_account",
+    "view": "apps.accounts.views.account_management.delete_account"
+  },
+  {
+    "route": "accounts/superadmin/users/",
+    "name": "accounts:superadmin_user_management",
+    "view": "apps.accounts.views.account_management.superadmin_user_management"
+  },
+  {
+    "route": "accounts/rim/search/",
+    "name": "accounts:rim_user_search",
+    "view": "apps.accounts.views.rim.api.rim_user_search"
+  },
+  {
+    "route": "accounts/rim/user/<int:user_id>/",
+    "name": "accounts:rim_user_detail",
+    "view": "apps.accounts.views.rim.api.rim_user_detail"
+  },
+  {
+    "route": "accounts/rim/action/",
+    "name": "accounts:rim_action",
+    "view": "apps.accounts.views.rim.actions.rim_action"
+  },
+  {
+    "route": "accounts/rim/create/",
+    "name": "accounts:rim_create_account",
+    "view": "apps.accounts.views.rim.create.rim_create_account"
+  },
+  {
+    "route": "accounts/rim/create/catalog/",
+    "name": "accounts:rim_create_catalog",
+    "view": "apps.accounts.views.rim.create.rim_create_catalog"
+  },
+  {
+    "route": "accounts/people/<str:kind>/list/",
+    "name": "accounts:people_list",
+    "view": "apps.accounts.views.people.api.people_list"
+  },
+  {
+    "route": "accounts/people/<str:kind>/options/",
+    "name": "accounts:people_options",
+    "view": "apps.accounts.views.people.api.people_options"
+  },
+  {
+    "route": "accounts/people/person/<int:user_id>/",
+    "name": "accounts:people_detail",
+    "view": "apps.accounts.views.people.api.people_detail"
+  },
+  {
+    "route": "accounts/people/person/<int:user_id>/page/",
+    "name": "accounts:people_person_page",
+    "view": "apps.accounts.views.people.page.people_person_page"
+  },
+  {
+    "route": "accounts/people/action/",
+    "name": "accounts:people_action",
+    "view": "apps.accounts.views.people.actions.people_action"
+  },
+  {
+    "route": "accounts/people/student/<int:user_id>/card/",
+    "name": "accounts:people_student_card",
+    "view": "apps.accounts.views.people.academic.people_student_card"
+  },
+  {
+    "route": "accounts/people/academic/groups/",
+    "name": "accounts:people_academic_groups",
+    "view": "apps.accounts.views.people.academic.people_academic_groups"
+  },
+  {
+    "route": "accounts/people/academic/<uuid:record_id>/transfer-preview/",
+    "name": "accounts:people_transfer_preview",
+    "view": "apps.accounts.views.people.academic.people_transfer_preview"
+  },
+  {
+    "route": "accounts/people/<str:kind>/analytics/",
+    "name": "accounts:people_analytics",
+    "view": "apps.accounts.views.people.analytics.people_analytics"
+  },
+  {
+    "route": "accounts/people/<str:kind>/analytics/ai/",
+    "name": "accounts:people_analytics_ai",
+    "view": "apps.accounts.views.people.analytics.people_analytics_ai"
+  },
+  {
+    "route": "accounts/handover/teachers/",
+    "name": "accounts:handover_teachers",
+    "view": "apps.accounts.views.handover.api.handover_teachers"
+  },
+  {
+    "route": "accounts/handover/offerings/",
+    "name": "accounts:handover_offerings",
+    "view": "apps.accounts.views.handover.api.handover_offerings"
+  },
+  {
+    "route": "accounts/handover/options/",
+    "name": "accounts:handover_options",
+    "view": "apps.accounts.views.handover.api.handover_options"
+  },
+  {
+    "route": "accounts/handover/history/",
+    "name": "accounts:handover_history",
+    "view": "apps.accounts.views.handover.api.handover_history"
+  },
+  {
+    "route": "accounts/handover/action/",
+    "name": "accounts:handover_action",
+    "view": "apps.accounts.views.handover.actions.handover_action"
+  },
+  {
+    "route": "accounts/applications/assignees/",
+    "name": "accounts:applications_assignees",
+    "view": "apps.accounts.views.applications.applications_assignees"
+  },
+  {
+    "route": "accounts/schedule-manage/check/",
+    "name": "accounts:schedule_manage_check",
+    "view": "apps.accounts.views.schedule_manage.schedule_manage_check"
+  },
+  {
+    "route": "accounts/schedule-manage/action/",
+    "name": "accounts:schedule_manage_action",
+    "view": "apps.accounts.views.schedule_manage.schedule_manage_action"
+  },
+  {
+    "route": "accounts/schedule-manage/editor/",
+    "name": "accounts:schedule_editor_action",
+    "view": "apps.accounts.views.schedule_editor.schedule_editor_action"
+  },
+  {
+    "route": "accounts/registrar-catalog/action/",
+    "name": "accounts:registrar_catalog_action",
+    "view": "apps.accounts.views.registrar_catalog.registrar_catalog_action"
+  },
+  {
+    "route": "accounts/student-intake/template/",
+    "name": "accounts:student_intake_template",
+    "view": "apps.accounts.views.student_intake.student_intake_template"
+  },
+  {
+    "route": "accounts/student-intake/preview/",
+    "name": "accounts:student_intake_preview",
+    "view": "apps.accounts.views.student_intake.student_intake_preview"
+  },
+  {
+    "route": "accounts/student-intake/apply/",
+    "name": "accounts:student_intake_apply",
+    "view": "apps.accounts.views.student_intake.student_intake_apply"
+  },
+  {
+    "route": "accounts/teacher-intake/template/",
+    "name": "accounts:teacher_intake_template",
+    "view": "apps.accounts.views.teacher_intake.teacher_intake_template"
+  },
+  {
+    "route": "accounts/teacher-intake/preview/",
+    "name": "accounts:teacher_intake_preview",
+    "view": "apps.accounts.views.teacher_intake.teacher_intake_preview"
+  },
+  {
+    "route": "accounts/teacher-intake/apply/",
+    "name": "accounts:teacher_intake_apply",
+    "view": "apps.accounts.views.teacher_intake.teacher_intake_apply"
+  },
+  {
+    "route": "accounts/student-admission/groups/create/",
+    "name": "accounts:student_admission_create_group",
+    "view": "apps.accounts.views.student_intake.student_admission_create_group"
+  },
+  {
+    "route": "accounts/student-registry/card/<uuid:record_id>/",
+    "name": "accounts:student_registry_card",
+    "view": "apps.accounts.views.student_registry.student_registry_card"
+  },
+  {
+    "route": "accounts/student-registry/programs/",
+    "name": "accounts:student_registry_programs",
+    "view": "apps.accounts.views.student_registry.student_registry_programs"
+  },
+  {
+    "route": "accounts/student-registry/action/",
+    "name": "accounts:student_registry_action",
+    "view": "apps.accounts.views.student_registry.student_registry_action"
+  },
+  {
+    "route": "accounts/student-registry/export/",
+    "name": "accounts:student_registry_export",
+    "view": "apps.accounts.views.student_registry.student_registry_export"
+  },
+  {
+    "route": "accounts/student-registry/document/<uuid:movement_id>/",
+    "name": "accounts:student_registry_document",
+    "view": "apps.accounts.views.student_registry.student_registry_document"
+  },
+  {
+    "route": "accounts/legacy-review/queue/",
+    "name": "accounts:legacy_review_queue",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_queue"
+  },
+  {
+    "route": "accounts/legacy-review/options/",
+    "name": "accounts:legacy_review_options",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_options"
+  },
+  {
+    "route": "accounts/legacy-review/units/<str:kind>/",
+    "name": "accounts:legacy_review_units",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_units"
+  },
+  {
+    "route": "accounts/legacy-review/groups/",
+    "name": "accounts:legacy_review_groups",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_groups"
+  },
+  {
+    "route": "accounts/legacy-review/subjects/",
+    "name": "accounts:legacy_review_subjects",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_subjects"
+  },
+  {
+    "route": "accounts/legacy-review/teachers/",
+    "name": "accounts:legacy_review_teachers",
+    "view": "apps.accounts.views.legacy_review.api.legacy_review_teachers"
+  },
+  {
+    "route": "accounts/legacy-review/action/",
+    "name": "accounts:legacy_review_action",
+    "view": "apps.accounts.views.legacy_review.actions.legacy_review_action"
+  },
+  {
+    "route": "accounts/profile/syllabus/action/",
+    "name": "accounts:syllabus_action",
+    "view": "apps.accounts.views.syllabus.api.syllabus_action"
+  },
+  {
+    "route": "accounts/profile/syllabus/version/<uuid:version_id>/section/",
+    "name": "accounts:syllabus_section_save",
+    "view": "apps.accounts.views.syllabus.api.syllabus_section_save"
+  },
+  {
+    "route": "accounts/profile/syllabus/<uuid:syllabus_id>/preview/",
+    "name": "accounts:syllabus_preview",
+    "view": "apps.accounts.views.syllabus.api.syllabus_preview"
+  },
+  {
+    "route": "accounts/syllabus/<uuid:syllabus_id>/",
+    "name": "accounts:syllabus_detail",
+    "view": "apps.accounts.views.syllabus.detail.syllabus_detail"
+  },
+  {
+    "route": "accounts/syllabus/<uuid:syllabus_id>/pdf/",
+    "name": "accounts:syllabus_detail_pdf",
+    "view": "apps.accounts.views.syllabus.detail.syllabus_detail_pdf"
+  },
+  {
+    "route": "accounts/profile/syllabus/version/<uuid:version_id>/review/",
+    "name": "accounts:syllabus_review_open",
+    "view": "apps.accounts.views.syllabus.review_api.syllabus_review_open"
+  },
+  {
+    "route": "accounts/profile/syllabus/version/<uuid:version_id>/decision/",
+    "name": "accounts:syllabus_decision",
+    "view": "apps.accounts.views.syllabus.review_api.syllabus_decision"
+  },
+  {
+    "route": "accounts/superadmin/post-management/",
+    "name": "accounts:superadmin_post_management",
+    "view": "apps.accounts.views.post_management.superadmin_post_management"
+  },
+  {
+    "route": "accounts/superadmin/post-management/<int:post_id>/delete/",
+    "name": "accounts:superadmin_delete_post",
+    "view": "apps.accounts.views.post_management.superadmin_delete_post"
+  },
+  {
+    "route": "accounts/org-post-management/",
+    "name": "accounts:org_post_management",
+    "view": "apps.accounts.views.post_management.org_post_management"
+  },
+  {
+    "route": "accounts/org-post-management/<int:post_id>/moderate/",
+    "name": "accounts:org_moderate_post",
+    "view": "apps.accounts.views.post_management.org_moderate_post"
+  },
+  {
+    "route": "jurnal/",
+    "name": "registrar:journal_list",
+    "view": "apps.registrar.views.journal_list"
+  },
+  {
+    "route": "jurnal/duzelis/",
+    "name": "registrar:correction_list",
+    "view": "apps.registrar.correction_views.correction_offering_list"
+  },
+  {
+    "route": "jurnal/duzelis/<uuid:offering_id>/",
+    "name": "registrar:correction_journal",
+    "view": "apps.registrar.correction_views.correction_journal"
+  },
+  {
+    "route": "jurnal/duzelis/<uuid:offering_id>/tetbiq/",
+    "name": "registrar:correction_apply",
+    "view": "apps.registrar.correction_views.correction_apply"
+  },
+  {
+    "route": "jurnal/duzelis/<uuid:offering_id>/sil/",
+    "name": "registrar:correction_delete",
+    "view": "apps.registrar.correction_views.correction_delete"
+  },
+  {
+    "route": "jurnal/kataloq/emel/",
+    "name": "registrar:catalog_action",
+    "view": "apps.registrar.catalog_actions.catalog_action"
+  },
+  {
+    "route": "jurnal/kataloq/ixtisas/",
+    "name": "registrar:program_detail",
+    "view": "apps.registrar.catalog_actions.program_detail"
+  },
+  {
+    "route": "jurnal/tedris-plani/emel/",
+    "name": "registrar:curriculum_action",
+    "view": "apps.registrar.curriculum_actions.curriculum_action"
+  },
+  {
+    "route": "jurnal/semestr/emel/",
+    "name": "registrar:semester_action",
+    "view": "apps.registrar.semester_actions.semester_action"
+  },
+  {
+    "route": "jurnal/qrup/<uuid:group_id>/ferdi-plan.docx",
+    "name": "registrar:group_individual_plan",
+    "view": "apps.registrar.individual_plan_views.group_individual_plan"
+  },
+  {
+    "route": "jurnal/analitika/",
+    "name": "registrar:analytics",
+    "view": "apps.registrar.analytics_views.analytics_dashboard"
+  },
+  {
+    "route": "jurnal/kecilmis-dersler/export.csv",
+    "name": "registrar:lessons_log_csv",
+    "view": "apps.registrar.lessons_log_views.lessons_log_csv"
+  },
+  {
+    "route": "jurnal/transkript.pdf",
+    "name": "registrar:my_transcript_pdf",
+    "view": "apps.registrar.pdf_views.my_transcript_pdf"
+  },
+  {
+    "route": "jurnal/teqvim/",
+    "name": "registrar:calendar",
+    "view": "apps.registrar.schedule_views.calendar_view"
+  },
+  {
+    "route": "jurnal/cedvel/",
+    "name": "registrar:schedule",
+    "view": "apps.registrar.schedule_views.schedule_view"
+  },
+  {
+    "route": "jurnal/cedvel/export.ics",
+    "name": "registrar:schedule_ics",
+    "view": "apps.registrar.pdf_views.schedule_ics"
+  },
+  {
+    "route": "jurnal/cedvel/slot/<uuid:slot_id>/sil/",
+    "name": "registrar:schedule_slot_delete",
+    "view": "apps.registrar.schedule_views.schedule_slot_delete"
+  },
+  {
+    "route": "jurnal/telebe/<uuid:pk>/transkript.pdf",
+    "name": "registrar:student_transcript_pdf",
+    "view": "apps.registrar.pdf_views.student_transcript_pdf"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/rubrik/<uuid:component_id>/",
+    "name": "registrar:rubric_grade",
+    "view": "apps.registrar.views.rubric_grade_view"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/export.xlsx",
+    "name": "registrar:journal_xlsx",
+    "view": "apps.registrar.pdf_views.journal_xlsx"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/sillabus.json",
+    "name": "registrar:offering_syllabus_json",
+    "view": "apps.registrar.syllabus_views.offering_syllabus_json"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/sillabus.pdf",
+    "name": "registrar:offering_syllabus_pdf",
+    "view": "apps.registrar.syllabus_views.offering_syllabus_pdf"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/alt-qrup/qruplar/",
+    "name": "registrar:journal_guest_group_search",
+    "view": "apps.registrar.guest_roster_views.guest_group_search"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/alt-qrup/telebeler/",
+    "name": "registrar:journal_guest_student_search",
+    "view": "apps.registrar.guest_roster_views.guest_student_search"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/alt-qrup/onbaxis/",
+    "name": "registrar:journal_guest_add_preview",
+    "view": "apps.registrar.guest_roster_views.guest_add_preview"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/alt-qrup/elave/",
+    "name": "registrar:journal_guest_add",
+    "view": "apps.registrar.guest_roster_views.guest_add"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/alt-qrup/cixar/",
+    "name": "registrar:journal_guest_remove",
+    "view": "apps.registrar.guest_roster_views.guest_remove"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/ders-muellimleri/axtar/",
+    "name": "registrar:journal_lesson_teacher_search",
+    "view": "apps.registrar.journal_lesson_lookup.lesson_teacher_search"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/ders-otaqlari/",
+    "name": "registrar:journal_lesson_rooms",
+    "view": "apps.registrar.journal_lesson_lookup.lesson_room_data"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/ders/<uuid:lesson_id>/",
+    "name": "registrar:journal_lesson_action",
+    "view": "apps.registrar.journal_actions.lesson_action"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/kollokvium/",
+    "name": "registrar:journal_kollokvium_save",
+    "view": "apps.registrar.journal_actions.kollokvium_save"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/serbest/",
+    "name": "registrar:journal_selfwork_action",
+    "view": "apps.registrar.journal_actions.selfwork_action"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/kurs-isi/",
+    "name": "registrar:journal_coursework_save",
+    "view": "apps.registrar.journal_actions.coursework_save"
+  },
+  {
+    "route": "jurnal/<uuid:offering_id>/",
+    "name": "registrar:journal_detail",
+    "view": "apps.registrar.views.journal_detail"
+  },
+  {
+    "route": "^exmas/?$",
+    "name": "legacy_exmas_redirect",
+    "view": "config.urls.legacy_exmas_redirect"
+  },
+  {
+    "route": "^exmas/(?P<path>.*)$",
+    "name": "legacy_exmas_path_redirect",
+    "view": "config.urls.legacy_exmas_redirect"
+  },
+  {
+    "route": "exams/available/",
+    "name": "exams:student_exam_list",
+    "view": "apps.exams.views.student.lists.student_exam_list"
+  },
+  {
+    "route": "exams/final/",
+    "name": "exams:final_exam_entry",
+    "view": "apps.exams.views.student.final_center.final_exam_entry"
+  },
+  {
+    "route": "exams/final/waiting/<int:ticket_id>/",
+    "name": "exams:final_exam_waiting",
+    "view": "apps.exams.views.student.final_center.final_exam_waiting"
+  },
+  {
+    "route": "exams/final/waiting/<int:ticket_id>/cancel/",
+    "name": "exams:final_exam_cancel",
+    "view": "apps.exams.views.student.final_center.final_exam_cancel"
+  },
+  {
+    "route": "exams/final/waiting/<int:ticket_id>/begin/",
+    "name": "exams:final_exam_begin",
+    "view": "apps.exams.views.student.final_center.final_exam_begin"
+  },
+  {
+    "route": "exams/final/waiting/<int:ticket_id>/state/",
+    "name": "exams:final_ticket_state",
+    "view": "apps.exams.views.student.final_center.final_ticket_state"
+  },
+  {
+    "route": "exams/assigned/",
+    "name": "exams:assigned_exam_list",
+    "view": "apps.exams.views.student.lists.assigned_student_exam_list"
+  },
+  {
+    "route": "exams/my-history/",
+    "name": "exams:student_exam_history",
+    "view": "apps.exams.views.student.results.student_exam_history"
+  },
+  {
+    "route": "exams/code-check/",
+    "name": "exams:exam_code_check",
+    "view": "apps.exams.views.shared.access.exam_code_check"
+  },
+  {
+    "route": "exams/center/rooms/",
+    "name": "exams:exam_center_room_list",
+    "view": "apps.exams.views.exam_center.rooms.exam_center_room_list"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/monitor/",
+    "name": "exams:exam_center_room_monitor",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_monitor"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/invigilators/",
+    "name": "exams:exam_center_room_assign_invigilators",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_assign_invigilators"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/api/snapshot/",
+    "name": "exams:exam_center_room_snapshot",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_snapshot"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/api/attempts/<int:attempt_id>/violations/",
+    "name": "exams:exam_center_attempt_violations",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_attempt_violations"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/start-all/",
+    "name": "exams:exam_center_room_start_all",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_start_all"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/end-all/",
+    "name": "exams:exam_center_room_end_all",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_end_all"
+  },
+  {
+    "route": "exams/center/rooms/<int:room_id>/open-all/",
+    "name": "exams:exam_center_room_open_all",
+    "view": "apps.exams.views.exam_center.room_monitor.exam_center_room_open_all"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/",
+    "name": "exams:exam_center_session_detail",
+    "view": "apps.exams.views.exam_center.sessions.exam_center_session_detail"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/history/",
+    "name": "exams:exam_center_session_history",
+    "view": "apps.exams.views.exam_center.sessions.exam_center_session_history"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/monitor/",
+    "name": "exams:exam_center_session_monitor",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_monitor"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/api/snapshot/",
+    "name": "exams:exam_center_session_snapshot",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_snapshot"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/snapshot/",
+    "name": "exams:exam_center_ticket_snapshot",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_ticket_snapshot"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/resume/",
+    "name": "exams:exam_center_ticket_resume",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_ticket_resume"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/reentry/",
+    "name": "exams:exam_center_ticket_reentry",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_ticket_reentry"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/open-entry/",
+    "name": "exams:exam_center_session_open_entry",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_open_entry"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/start/",
+    "name": "exams:exam_center_session_start",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_start"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/end/",
+    "name": "exams:exam_center_session_end",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_end"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/cancel/",
+    "name": "exams:exam_center_session_cancel",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_session_cancel"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/remove/",
+    "name": "exams:exam_center_ticket_remove",
+    "view": "apps.exams.views.exam_center.monitor.exam_center_ticket_remove"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/seat/",
+    "name": "exams:exam_center_ticket_seat",
+    "view": "apps.exams.views.exam_center.sessions.exam_center_ticket_seat"
+  },
+  {
+    "route": "exams/center/sessions/<int:session_id>/tickets/<int:ticket_id>/readmit/",
+    "name": "exams:exam_center_ticket_readmit",
+    "view": "apps.exams.views.exam_center.sessions.exam_center_ticket_readmit"
+  },
+  {
+    "route": "exams/center/reports/",
+    "name": "exams:exam_center_reports",
+    "view": "apps.exams.views.exam_center.reports.exam_center_reports"
+  },
+  {
+    "route": "exams/center/stats/data/",
+    "name": "exams:exam_center_stats_data",
+    "view": "apps.exams.views.exam_center.statistics.exam_center_stats_data"
+  },
+  {
+    "route": "exams/center/stats/export/",
+    "name": "exams:exam_center_stats_export",
+    "view": "apps.exams.views.exam_center.statistics.exam_center_stats_export"
+  },
+  {
+    "route": "exams/center/stats/filters/",
+    "name": "exams:exam_center_stats_filters",
+    "view": "apps.exams.views.exam_center.statistics.exam_center_stats_filters"
+  },
+  {
+    "route": "exams/center/stats/charts/",
+    "name": "exams:exam_center_stats_charts",
+    "view": "apps.exams.views.exam_center.statistics_charts.exam_center_stats_charts"
+  },
+  {
+    "route": "exams/center/stats/ai/",
+    "name": "exams:exam_center_stats_ai",
+    "view": "apps.exams.views.exam_center.statistics_charts.exam_center_stats_ai"
+  },
+  {
+    "route": "exams/center/pin-lookup/",
+    "name": "exams:exam_center_pin_lookup",
+    "view": "apps.exams.views.exam_center.pin_lookup.exam_center_pin_lookup"
+  },
+  {
+    "route": "exams/center/pin-lookup/search/",
+    "name": "exams:exam_center_pin_search",
+    "view": "apps.exams.views.exam_center.pin_lookup.exam_center_pin_search"
+  },
+  {
+    "route": "exams/center/pin-lookup/student/<int:student_id>/",
+    "name": "exams:exam_center_student_pins",
+    "view": "apps.exams.views.exam_center.pin_lookup.exam_center_student_pins"
+  },
+  {
+    "route": "exams/",
+    "name": "exams:teacher_exam_list",
+    "view": "apps.exams.views.teacher.exams.list_detail.teacher_exam_list"
+  },
+  {
+    "route": "exams/create/",
+    "name": "exams:create_exam",
+    "view": "apps.exams.views.teacher.exams.list_detail.createAndEditExamView"
+  },
+  {
+    "route": "exams/lookups/subjects/",
+    "name": "exams:subject_search",
+    "view": "apps.exams.views.teacher.exams.lookups.subject_search"
+  },
+  {
+    "route": "exams/lookups/bank-teachers/",
+    "name": "exams:bank_teacher_search",
+    "view": "apps.exams.views.teacher.exams.lookups.bank_teacher_search"
+  },
+  {
+    "route": "exams/lookups/groups/",
+    "name": "exams:group_search",
+    "view": "apps.exams.views.teacher.exams.lookups.group_search"
+  },
+  {
+    "route": "exams/lookups/faculties/",
+    "name": "exams:stats_faculty_search",
+    "view": "apps.exams.views.exam_center.statistics.stats_faculty_search"
+  },
+  {
+    "route": "exams/lookups/departments/",
+    "name": "exams:stats_department_search",
+    "view": "apps.exams.views.exam_center.statistics.stats_department_search"
+  },
+  {
+    "route": "exams/lookups/teachers/",
+    "name": "exams:stats_teacher_search",
+    "view": "apps.exams.views.exam_center.statistics.stats_teacher_search"
+  },
+  {
+    "route": "exams/lookups/users/",
+    "name": "exams:user_search",
+    "view": "apps.exams.views.teacher.exams.lookups.user_search"
+  },
+  {
+    "route": "exams/lookups/invigilators/",
+    "name": "exams:invigilator_search",
+    "view": "apps.exams.views.teacher.exams.lookups.invigilator_search"
+  },
+  {
+    "route": "exams/lookups/assigned-count/",
+    "name": "exams:assigned_student_count",
+    "view": "apps.exams.views.teacher.exams.lookups.assigned_student_count"
+  },
+  {
+    "route": "exams/<slug:slug>/available-question-count/",
+    "name": "exams:exam_available_question_count",
+    "view": "apps.exams.views.teacher.exams.lookups.exam_available_question_count"
+  },
+  {
+    "route": "exams/<slug:slug>/grant-extra-attempt/",
+    "name": "exams:grant_extra_attempt",
+    "view": "apps.exams.views.teacher.exams.attempt_grants.grant_extra_attempt"
+  },
+  {
+    "route": "exams/<slug:slug>/grant-extra-attempt-group/",
+    "name": "exams:grant_extra_attempt_group",
+    "view": "apps.exams.views.teacher.exams.attempt_grants.grant_extra_attempt_group"
+  },
+  {
+    "route": "exams/pending-work/",
+    "name": "exams:teacher_pending_attempts",
+    "view": "apps.exams.views.teacher.results._attempt_views.teacher_pending_attempts"
+  },
+  {
+    "route": "exams/import/extract-jobs/",
+    "name": "exams:start_text_extraction",
+    "view": "apps.exams.views.teacher.extract_jobs.start_text_extraction"
+  },
+  {
+    "route": "exams/import/extract-jobs/<uuid:job_id>/",
+    "name": "exams:text_extraction_status",
+    "view": "apps.exams.views.teacher.extract_jobs.text_extraction_status"
+  },
+  {
+    "route": "exams/question-imports/<str:token>/visual/<int:source_index>.png",
+    "name": "exams:question_import_visual_preview",
+    "view": "apps.exams.views.teacher.submission_media.question_import_visual_preview"
+  },
+  {
+    "route": "exams/export-jobs/<uuid:job_id>/waiting/",
+    "name": "exams:export_job_waiting",
+    "view": "apps.exams.views.teacher.extract_jobs.export_job_waiting"
+  },
+  {
+    "route": "exams/export-jobs/<uuid:job_id>/download/",
+    "name": "exams:export_job_download",
+    "view": "apps.exams.views.teacher.extract_jobs.export_job_download"
+  },
+  {
+    "route": "exams/question-submissions/new/",
+    "name": "exams:question_submission_create",
+    "view": "apps.exams.views.teacher.submission_inbox.question_submission_create"
+  },
+  {
+    "route": "exams/question-submissions/ai-generate/",
+    "name": "exams:ai_generate_submission_questions",
+    "view": "apps.exams.views.teacher.submission_inbox.ai_generate_submission_questions"
+  },
+  {
+    "route": "exams/question-submissions/inbox/",
+    "name": "exams:question_submission_inbox",
+    "view": "apps.exams.views.teacher.submission_review.question_submission_inbox"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/",
+    "name": "exams:question_submission_detail",
+    "view": "apps.exams.views.teacher.submission_inbox.question_submission_detail"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/delete/",
+    "name": "exams:question_submission_delete",
+    "view": "apps.exams.views.teacher.submission_inbox.question_submission_delete"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/review/",
+    "name": "exams:question_submission_review",
+    "view": "apps.exams.views.teacher.submission_review.question_submission_review"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/questions/",
+    "name": "exams:question_submission_questions",
+    "view": "apps.exams.views.teacher.submission_review.question_submission_questions"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/visual/<int:source_index>.png",
+    "name": "exams:question_submission_visual_preview",
+    "view": "apps.exams.views.teacher.submission_media.question_submission_visual_preview"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/decide/",
+    "name": "exams:question_submission_decide",
+    "view": "apps.exams.views.teacher.submission_review.question_submission_decide"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/chair-review/",
+    "name": "exams:question_submission_chair_review",
+    "view": "apps.exams.views.teacher.submission_chair.question_submission_chair_review"
+  },
+  {
+    "route": "exams/question-submissions/<int:submission_id>/chair-decide/",
+    "name": "exams:question_submission_chair_decide",
+    "view": "apps.exams.views.teacher.submission_chair.question_submission_chair_decide"
+  },
+  {
+    "route": "exams/question-bank/",
+    "name": "exams:question_bank_list",
+    "view": "apps.exams.views.teacher.question_library.crud.question_bank_list"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/",
+    "name": "exams:question_bank_detail",
+    "view": "apps.exams.views.teacher.question_library.crud.question_bank_detail"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/update/",
+    "name": "exams:question_bank_update",
+    "view": "apps.exams.views.teacher.question_library.crud.question_bank_update"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/delete/",
+    "name": "exams:question_bank_delete",
+    "view": "apps.exams.views.teacher.question_library.crud.question_bank_delete"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/bulk-add/",
+    "name": "exams:question_bank_bulk_add",
+    "view": "apps.exams.views.teacher.question_library.questions.question_bank_bulk_add"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/bulk-add/template-download/",
+    "name": "exams:question_bank_template_download",
+    "view": "apps.exams.views.teacher.question_library.export.question_bank_template_download"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/ai-generate/",
+    "name": "exams:ai_generate_bank_questions",
+    "view": "apps.exams.views.teacher.question_library.questions.ai_generate_bank_questions"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/export.docx",
+    "name": "exams:question_bank_word_export",
+    "view": "apps.exams.views.teacher.question_library.export.question_bank_word_export"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/questions/add/",
+    "name": "exams:bank_question_add",
+    "view": "apps.exams.views.teacher.question_library.questions.bank_question_add"
+  },
+  {
+    "route": "exams/question-bank/<int:bank_id>/questions/<int:question_id>/edit/",
+    "name": "exams:bank_question_edit",
+    "view": "apps.exams.views.teacher.question_library.questions.bank_question_edit"
+  },
+  {
+    "route": "exams/groups/",
+    "name": "exams:teacher_group_list",
+    "view": "apps.exams.views.teacher.groups.teacher_group_list"
+  },
+  {
+    "route": "exams/groups/create/form/",
+    "name": "exams:create_student_group",
+    "view": "apps.exams.views.teacher.groups.create_student_group"
+  },
+  {
+    "route": "exams/groups/create/",
+    "name": "exams:teacher_create_group",
+    "view": "apps.exams.views.teacher.groups.teacher_create_group"
+  },
+  {
+    "route": "exams/groups/namizedler/",
+    "name": "exams:teacher_group_candidates",
+    "view": "apps.exams.views.teacher.groups.teacher_group_candidates"
+  },
+  {
+    "route": "exams/groups/<int:group_id>/update/",
+    "name": "exams:teacher_update_group",
+    "view": "apps.exams.views.teacher.groups.teacher_update_group"
+  },
+  {
+    "route": "exams/groups/<int:group_id>/delete/",
+    "name": "exams:teacher_delete_group",
+    "view": "apps.exams.views.teacher.groups.teacher_delete_group"
+  },
+  {
+    "route": "exams/groups/<int:group_id>/students/<int:student_id>/remove/",
+    "name": "exams:teacher_remove_student_from_group",
+    "view": "apps.exams.views.teacher.groups.teacher_remove_student_from_group"
+  },
+  {
+    "route": "exams/groups/<int:group_id>/students/<int:student_id>/add/",
+    "name": "exams:teacher_add_student_to_group",
+    "view": "apps.exams.views.teacher.groups.teacher_add_student_to_group"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/check/",
+    "name": "exams:teacher_check_attempt",
+    "view": "apps.exams.views.teacher.results._attempt_views.teacher_check_attempt"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/ai-grade/",
+    "name": "exams:ai_grade_answer",
+    "view": "apps.exams.views.teacher.results._attempt_views.ai_grade_answer"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/view/",
+    "name": "exams:teacher_view_attempt",
+    "view": "apps.exams.views.teacher.results._attempt_views.teacher_view_attempt"
+  },
+  {
+    "route": "exams/<slug:slug>/start/",
+    "name": "exams:start_exam",
+    "view": "apps.exams.views.student.attempts.start_exam"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/result/",
+    "name": "exams:exam_result",
+    "view": "apps.exams.views.student.results.exam_result"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/coding/autosave/",
+    "name": "exams:coding_autosave",
+    "view": "apps.exams.views.student.coding.coding_autosave"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/coding/run/",
+    "name": "exams:coding_run",
+    "view": "apps.exams.views.student.coding.coding_run"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/coding/submit/",
+    "name": "exams:coding_submit",
+    "view": "apps.exams.views.student.coding.coding_submit"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/coding/submissions/<int:submission_id>/download/",
+    "name": "exams:coding_submission_download",
+    "view": "apps.exams.views.student.coding.coding_submission_download"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/",
+    "name": "exams:take_exam",
+    "view": "apps.exams.views.student.attempts.take_exam"
+  },
+  {
+    "route": "exams/<slug:slug>/attempt/<int:attempt_id>/question-seen/",
+    "name": "exams:question_seen",
+    "view": "apps.exams.views.student.question_timer.question_seen"
+  },
+  {
+    "route": "exams/<slug:slug>/question-bank/ai-generate/",
+    "name": "exams:ai_generate_question_bank",
+    "view": "apps.exams.views.teacher.question_bank._views_create.ai_generate_question_bank"
+  },
+  {
+    "route": "exams/<slug:slug>/test-bank/",
+    "name": "exams:test_question_bank",
+    "view": "apps.exams.views.teacher.question_bank._views_misc.test_question_bank"
+  },
+  {
+    "route": "exams/<slug:slug>/questions/export.docx",
+    "name": "exams:exam_questions_word_export",
+    "view": "apps.exams.views.teacher.question_bank._views_misc.exam_questions_word_export"
+  },
+  {
+    "route": "exams/<slug:slug>/test-bank/template-download/",
+    "name": "exams:test_question_bank_template_download",
+    "view": "apps.exams.views.teacher.question_bank._views_misc.test_question_bank_template_download"
+  },
+  {
+    "route": "exams/<slug:slug>/create-bank/",
+    "name": "exams:create_question_bank",
+    "view": "apps.exams.views.teacher.question_bank._views_create.create_question_bank"
+  },
+  {
+    "route": "exams/<slug:slug>/process-bank/",
+    "name": "exams:process_question_bank",
+    "view": "apps.exams.views.teacher.question_bank._views_create.process_question_bank"
+  },
+  {
+    "route": "exams/<slug:slug>/add-question/",
+    "name": "exams:add_exam_question",
+    "view": "apps.exams.views.teacher.questions.crud.add_exam_question"
+  },
+  {
+    "route": "exams/<slug:slug>/questions-bank/",
+    "name": "exams:teacher_questions_bank",
+    "view": "apps.exams.views.teacher.questions.bank.teacher_questions_bank"
+  },
+  {
+    "route": "exams/<slug:slug>/questions/<int:question_id>/edit/",
+    "name": "exams:edit_exam_question",
+    "view": "apps.exams.views.teacher.questions.crud.edit_exam_question"
+  },
+  {
+    "route": "exams/<slug:slug>/questions/<int:question_id>/delete/",
+    "name": "exams:delete_exam_question",
+    "view": "apps.exams.views.teacher.questions.crud.delete_exam_question"
+  },
+  {
+    "route": "exams/<slug:slug>/questions/page/",
+    "name": "exams:teacher_exam_detail_questions_page",
+    "view": "apps.exams.views.teacher.exams.list_detail.teacher_exam_detail_questions_page"
+  },
+  {
+    "route": "exams/<slug:slug>/results/",
+    "name": "exams:teacher_exam_results",
+    "view": "apps.exams.views.teacher.results._results_views.teacher_exam_results"
+  },
+  {
+    "route": "exams/<slug:slug>/statistics/",
+    "name": "exams:teacher_exam_statistics",
+    "view": "apps.exams.views.teacher.statistics.teacher_exam_statistics"
+  },
+  {
+    "route": "exams/<slug:slug>/languages/",
+    "name": "exams:exam_language_manager",
+    "view": "apps.exams.views.teacher.languages.exam_language_manager"
+  },
+  {
+    "route": "exams/<slug:slug>/bank-picker/",
+    "name": "exams:exam_bank_picker",
+    "view": "apps.exams.views.teacher.question_library.picker.exam_bank_picker"
+  },
+  {
+    "route": "exams/<slug:slug>/results/delete-attempts/",
+    "name": "exams:delete_exam_attempts",
+    "view": "apps.exams.views.teacher.results._attempt_views.delete_exam_attempts"
+  },
+  {
+    "route": "exams/<slug:slug>/results/export.xlsx",
+    "name": "exams:export_exam_results_xlsx",
+    "view": "apps.exams.views.teacher.results._results_views.export_exam_results_xlsx"
+  },
+  {
+    "route": "exams/<slug:slug>/toggle-active/",
+    "name": "exams:toggle_exam_active",
+    "view": "apps.exams.views.teacher.exams.actions.toggle_exam_active"
+  },
+  {
+    "route": "exams/<slug:slug>/toggle-results-visibility/",
+    "name": "exams:toggle_exam_results_visibility",
+    "view": "apps.exams.views.teacher.exams.actions.toggle_exam_results_visibility"
+  },
+  {
+    "route": "exams/<slug:slug>/edit/",
+    "name": "exams:edit_exam",
+    "view": "apps.exams.views.teacher.exams.list_detail.createAndEditExamView"
+  },
+  {
+    "route": "exams/<slug:slug>/delete/",
+    "name": "exams:delete_exam",
+    "view": "apps.exams.views.teacher.exams.actions.delete_exam"
+  },
+  {
+    "route": "exams/deleted/",
+    "name": "exams:deleted_exams_list",
+    "view": "apps.exams.views.teacher.exams.actions.deleted_exams_list"
+  },
+  {
+    "route": "exams/<slug:slug>/restore/",
+    "name": "exams:restore_exam",
+    "view": "apps.exams.views.teacher.exams.actions.restore_exam"
+  },
+  {
+    "route": "exams/<slug:slug>/permanent-delete/",
+    "name": "exams:permanent_delete_exam",
+    "view": "apps.exams.views.teacher.exams.actions.permanent_delete_exam"
+  },
+  {
+    "route": "exams/<slug:slug>/archive/",
+    "name": "exams:toggle_exam_archive",
+    "view": "apps.exams.views.teacher.exams.actions.toggle_exam_archive"
+  },
+  {
+    "route": "exams/<slug:slug>/duplicate/",
+    "name": "exams:duplicate_exam",
+    "view": "apps.exams.views.teacher.exams.actions.duplicate_exam"
+  },
+  {
+    "route": "exams/supervision/api/log/<int:attempt_id>/",
+    "name": "exams:supervision_log_incident",
+    "view": "apps.exams.views.teacher.supervision.monitor.log_incident_api"
+  },
+  {
+    "route": "exams/supervision/api/status/<int:attempt_id>/",
+    "name": "exams:supervision_status_api",
+    "view": "apps.exams.views.teacher.supervision.monitor.supervision_status_api"
+  },
+  {
+    "route": "exams/<slug:slug>/",
+    "name": "exams:teacher_exam_detail",
+    "view": "apps.exams.views.teacher.exams.list_detail.teacher_exam_detail"
+  },
+  {
+    "route": "ders-yuku/setirler/",
+    "name": "workload:rows",
+    "view": "apps.workload.views.distribution_api.rows"
+  },
+  {
+    "route": "ders-yuku/kafedralar/",
+    "name": "workload:chairs",
+    "view": "apps.workload.views.distribution_api.chairs"
+  },
+  {
+    "route": "ders-yuku/muellimler/",
+    "name": "workload:teachers",
+    "view": "apps.workload.views.distribution_api.teachers"
+  },
+  {
+    "route": "ders-yuku/secimler/",
+    "name": "workload:options",
+    "view": "apps.workload.views.distribution_api.options"
+  },
+  {
+    "route": "ders-yuku/tedris-plani/",
+    "name": "workload:curriculum",
+    "view": "apps.workload.views.distribution_api.curriculum"
+  },
+  {
+    "route": "ders-yuku/tapsiriq/",
+    "name": "workload:task",
+    "view": "apps.workload.views.distribution_api.task"
+  },
+  {
+    "route": "ders-yuku/setir/yadda-saxla/",
+    "name": "workload:row_save",
+    "view": "apps.workload.views.distribution_api.row_save"
+  },
+  {
+    "route": "ders-yuku/setir/sil/",
+    "name": "workload:row_delete",
+    "view": "apps.workload.views.distribution_api.row_delete"
+  },
+  {
+    "route": "ders-yuku/bolgu/",
+    "name": "workload:assign",
+    "view": "apps.workload.views.distribution_api.assign"
+  },
+  {
+    "route": "ders-yuku/bolgu/sil/",
+    "name": "workload:unassign",
+    "view": "apps.workload.views.distribution_api.unassign_view"
+  },
+  {
+    "route": "ders-yuku/bolgu/tesdiq/",
+    "name": "workload:confirm",
+    "view": "apps.workload.views.distribution_api.confirm"
+  },
+  {
+    "route": "ders-yuku/duzelis/",
+    "name": "workload:amend",
+    "view": "apps.workload.views.distribution_api.amend"
+  },
+  {
+    "route": "ders-yuku/emel/",
+    "name": "workload:action",
+    "view": "apps.workload.actions.workload_action"
+  },
+  {
+    "route": "ders-yuku/mene/setirler/",
+    "name": "workload:my_rows",
+    "view": "apps.workload.views.teacher_api.my_rows"
+  },
+  {
+    "route": "ders-yuku/mene/ixrac/",
+    "name": "workload:my_export",
+    "view": "apps.workload.views.teacher_api.my_export"
+  },
+  {
+    "route": "appeals/my/",
+    "name": "appeals:my_appeals",
+    "view": "apps.appeals.views.student.endpoints.my_appeals"
+  },
+  {
+    "route": "appeals/create/<int:attempt_id>/",
+    "name": "appeals:appeal_create",
+    "view": "apps.appeals.views.student.endpoints.appeal_create"
+  },
+  {
+    "route": "appeals/manage/",
+    "name": "appeals:manage_appeals",
+    "view": "apps.appeals.views.teacher.endpoints.manage_appeals"
+  },
+  {
+    "route": "appeals/manage/<int:appeal_id>/",
+    "name": "appeals:review_appeal",
+    "view": "apps.appeals.views.teacher.endpoints.review_appeal"
+  },
+  {
+    "route": "appeals/stats/data/",
+    "name": "appeals:appeal_stats_data",
+    "view": "apps.appeals.views.teacher.statistics.appeal_stats_data"
+  },
+  {
+    "route": "appeals/stats/charts/",
+    "name": "appeals:appeal_stats_charts",
+    "view": "apps.appeals.views.teacher.statistics.appeal_stats_charts"
+  },
+  {
+    "route": "appeals/stats/filters/",
+    "name": "appeals:appeal_stats_filters",
+    "view": "apps.appeals.views.teacher.statistics.appeal_stats_filters"
+  },
+  {
+    "route": "appeals/stats/ai/",
+    "name": "appeals:appeal_stats_ai",
+    "view": "apps.appeals.views.teacher.statistics.appeal_stats_ai"
+  },
+  {
+    "route": "appeals/<int:appeal_id>/",
+    "name": "appeals:appeal_detail",
+    "view": "apps.appeals.views.shared.detail.appeal_detail"
+  },
+  {
+    "route": "muracietler/api/list/",
+    "name": "applications:list",
+    "view": "apps.applications.views.endpoints.application_list"
+  },
+  {
+    "route": "muracietler/api/catalog/",
+    "name": "applications:catalog",
+    "view": "apps.applications.views.endpoints.application_catalog"
+  },
+  {
+    "route": "muracietler/api/kpis/",
+    "name": "applications:kpis",
+    "view": "apps.applications.views.endpoints.application_kpis"
+  },
+  {
+    "route": "muracietler/api/create/",
+    "name": "applications:create",
+    "view": "apps.applications.views.endpoints.application_create"
+  },
+  {
+    "route": "muracietler/api/<uuid:application_id>/",
+    "name": "applications:detail",
+    "view": "apps.applications.views.endpoints.application_detail"
+  },
+  {
+    "route": "muracietler/api/<uuid:application_id>/action/",
+    "name": "applications:action",
+    "view": "apps.applications.views.endpoints.application_action"
+  },
+  {
+    "route": "muracietler/api/<uuid:application_id>/attachments/<uuid:attachment_id>/download/",
+    "name": "applications:attachment_download",
+    "view": "apps.applications.views.downloads.attachment_download"
+  },
+  {
+    "route": "organizations/select/",
+    "name": "organizations:select",
+    "view": "apps.organizations.views.member.selection.select_organization"
+  },
+  {
+    "route": "organizations/switch/<slug:slug>/",
+    "name": "organizations:switch",
+    "view": "apps.organizations.views.member.selection.switch_organization"
+  },
+  {
+    "route": "organizations/<slug:slug>/",
+    "name": "organizations:dashboard",
+    "view": "apps.organizations.views.org_admin.endpoints.organization_dashboard"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/",
+    "name": "organizations:structure",
+    "view": "apps.organizations.views.org_admin.endpoints.organization_structure"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/faculties/",
+    "name": "organizations:structure_faculties",
+    "view": "apps.organizations.structure_views.endpoints.organization_faculties"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/kafedras/",
+    "name": "organizations:structure_kafedras",
+    "view": "apps.organizations.structure_views.endpoints.organization_kafedras"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/units/<uuid:unit_id>/",
+    "name": "organizations:structure_unit_detail",
+    "view": "apps.organizations.structure_views.endpoints.organization_unit_detail"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/tree/action/",
+    "name": "organizations:structure_tree_action",
+    "view": "apps.organizations.structure_actions.structure_tree_action"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/registry/action/",
+    "name": "organizations:structure_unit_action",
+    "view": "apps.organizations.structure_registry_actions.structure_unit_action"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/registry/candidates/",
+    "name": "organizations:structure_role_candidates",
+    "view": "apps.organizations.structure_registry_actions.structure_role_candidates"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/registry/units/<uuid:unit_id>/staff/",
+    "name": "organizations:structure_unit_staff",
+    "view": "apps.organizations.structure_registry_actions.structure_unit_staff"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/registry/members/<int:user_id>/",
+    "name": "organizations:structure_member_detail",
+    "view": "apps.organizations.members_registry_actions.structure_member_detail"
+  },
+  {
+    "route": "organizations/<slug:slug>/structure/tree/head-candidates/",
+    "name": "organizations:structure_head_candidates",
+    "view": "apps.organizations.structure_views.head_lookup.structure_head_candidates"
+  },
+  {
+    "route": "organizations/<slug:slug>/groups/action/",
+    "name": "organizations:group_action",
+    "view": "apps.organizations.group_actions.group_action"
+  },
+  {
+    "route": "organizations/<slug:slug>/groups/<uuid:unit_id>/students/",
+    "name": "organizations:group_students",
+    "view": "apps.organizations.group_students.group_students"
+  },
+  {
+    "route": "organizations/<slug:slug>/groups/<uuid:unit_id>/students/candidates/",
+    "name": "organizations:group_student_candidates",
+    "view": "apps.organizations.group_students.group_student_candidates"
+  },
+  {
+    "route": "organizations/<slug:slug>/members/",
+    "name": "organizations:members",
+    "view": "apps.organizations.views.org_admin.endpoints.organization_members"
+  },
+  {
+    "route": "organizations/<slug:slug>/roles/",
+    "name": "organizations:roles",
+    "view": "apps.organizations.views.org_admin.endpoints.organization_roles"
+  },
+  {
+    "route": "organizations/<slug:slug>/settings/",
+    "name": "organizations:settings",
+    "view": "apps.organizations.views.org_admin.endpoints.organization_settings"
+  },
+  {
+    "route": "audit/",
+    "name": "audit:list",
+    "view": "apps.audit.views.audit_log_list"
+  },
+  {
+    "route": "audit/export.csv",
+    "name": "audit:export",
+    "view": "apps.audit.views.audit_log_export"
+  },
+  {
+    "route": "audit/<uuid:pk>/detail.json",
+    "name": "audit:detail",
+    "view": "apps.audit.views.audit_log_detail"
+  },
+  {
+    "route": "notifications/",
+    "name": "notifications:notification_list",
+    "view": "apps.notifications.views.notification_list"
+  },
+  {
+    "route": "notifications/<int:pk>/",
+    "name": "notifications:notification_detail",
+    "view": "apps.notifications.views.notification_detail"
+  },
+  {
+    "route": "notifications/<int:pk>/read/",
+    "name": "notifications:notification_mark_read",
+    "view": "apps.notifications.views.notification_mark_read"
+  },
+  {
+    "route": "notifications/<int:pk>/unread/",
+    "name": "notifications:notification_mark_unread",
+    "view": "apps.notifications.views.notification_mark_unread"
+  },
+  {
+    "route": "notifications/read-all/",
+    "name": "notifications:notification_mark_all_read",
+    "view": "apps.notifications.views.notification_mark_all_read"
+  },
+  {
+    "route": "notifications/<int:pk>/delete/",
+    "name": "notifications:notification_delete",
+    "view": "apps.notifications.views.notification_delete"
+  },
+  {
+    "route": "notifications/bulk-delete/",
+    "name": "notifications:notification_bulk_delete",
+    "view": "apps.notifications.views.notification_bulk_delete"
+  },
+  {
+    "route": "notifications/unread-count/",
+    "name": "notifications:unread_count",
+    "view": "apps.notifications.views.unread_count"
+  },
+  {
+    "route": "api/ai-assistant/quota/",
+    "name": "ai_assistant:quota",
+    "view": "apps.ai_assistant.views.quota_view"
+  },
+  {
+    "route": "api/ai-assistant/chat/",
+    "name": "ai_assistant:chat",
+    "view": "apps.ai_assistant.views.chat_view"
+  },
+  {
+    "route": "api/superadmin/monitoring/overview/",
+    "name": "monitoring:overview",
+    "view": "apps.monitoring.views.overview_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/server/",
+    "name": "monitoring:server",
+    "view": "apps.monitoring.views.server_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/containers/",
+    "name": "monitoring:containers",
+    "view": "apps.monitoring.views.containers_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/application/",
+    "name": "monitoring:application",
+    "view": "apps.monitoring.views.application_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/database/",
+    "name": "monitoring:database",
+    "view": "apps.monitoring.views.database_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/redis-celery/",
+    "name": "monitoring:redis_celery",
+    "view": "apps.monitoring.views.redis_celery_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/exams/",
+    "name": "monitoring:exams",
+    "view": "apps.monitoring.views.exams_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/alerts/",
+    "name": "monitoring:alerts",
+    "view": "apps.monitoring.views.alerts_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/logs/",
+    "name": "monitoring:logs",
+    "view": "apps.monitoring.views.logs_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/incidents/",
+    "name": "monitoring:incidents",
+    "view": "apps.monitoring.views.incidents_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/incidents/<int:incident_id>/action/",
+    "name": "monitoring:incident_action",
+    "view": "apps.monitoring.views.incident_action_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/security-events/",
+    "name": "monitoring:security_events",
+    "view": "apps.monitoring.views.security_events_api"
+  },
+  {
+    "route": "api/superadmin/monitoring/alertmanager-webhook/",
+    "name": "monitoring:alertmanager_webhook",
+    "view": "apps.monitoring.views.alertmanager_webhook"
+  },
+  {
+    "route": "api/v1/live/<str:pin>/state/",
+    "name": "live_exam_api_v1:state_json",
+    "view": "apps.live_exam.api.v1.views.live_state_json_v1"
+  },
+  {
+    "route": "health/",
+    "name": "health_check",
+    "view": "core.views.health_check"
+  },
+  {
+    "route": "ping/",
+    "name": "ping",
+    "view": "core.views.ping"
+  },
+  {
+    "route": "metrics/",
+    "name": "metrics",
+    "view": "core.views.metrics_view"
+  },
+  {
+    "route": "test-error/",
+    "name": "test_error",
+    "view": "core.views.test_error"
+  },
+  {
+    "route": "^media/(?P<path>.*)$",
+    "name": "protected_media",
+    "view": "core.media_views.protected_media"
+  }
+]

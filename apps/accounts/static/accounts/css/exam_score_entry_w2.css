@@ -1,0 +1,308 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   exam_score_entry_w2.css — İmtahan Mərkəzi: 2026-09-14 (W2 `w2paper`) əlavələri —
+   görünüş açarı, vəziyyət / imtahan növü çipləri, S1..Sn sual sütunları və canlı
+   cəm, «Dəyişən nəticələr» cədvəli. `exam_score_entry.css`-in QARDAŞIDIR (modul
+   ölçü büdcəsi, SOFT_CAP=600); tokenlər `--ems-*`, inline stil yoxdur (CSP).
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* ── Sual sütunları (S1..Sn) + canlı cəm — 2026-09-14 ─────────────────────── */
+.ese-qscore {
+    width: 3.6rem;
+}
+
+.ese-th--q {
+    white-space: nowrap;
+}
+
+.ese-score.is-readonly {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    cursor: default;
+}
+
+.ese-score.is-readonly.is-dirty {
+    background: var(--ems-warning-bg);
+}
+
+.ese-qmax {
+    width: 6rem;
+}
+
+.ese-history__q {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Görünüş açarı + vəziyyət çipləri — 2026-09-14 ────────────────────────── */
+.ese-view {
+    margin-bottom: var(--ems-sp-3);
+}
+
+.ese-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-4) 18px 0;
+}
+
+.ese-chip {
+    text-decoration: none;
+}
+
+.ese-chip__count {
+    min-width: 1.4em;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ese-chip[aria-pressed="true"] .ese-chip__count {
+    background: var(--ems-primary-600);
+    color: #fff;
+}
+
+.ese-chips__note {
+    margin-left: auto;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── «Dəyişən nəticələr» cədvəli — 2026-09-14 ─────────────────────────────── */
+.ese-changes__table th[scope="row"] {
+    white-space: nowrap;
+}
+
+.ese-changes__row.is-appeal th[scope="row"] {
+    border-left: 3px solid var(--ems-primary-500);
+}
+
+.ese-changes .pagination-wrapper {
+    padding: var(--ems-sp-4) 18px;
+}
+
+
+@media (max-width: 768px) {
+    .ese-chips__note {
+        margin-left: 0;
+        flex-basis: 100%;
+    }
+}
+
+/* ── Sahibin rəyi (2026-09-14, 2-ci dövrə): sual SEÇİMİ (yığcam komponent),
+   hərf sütunu, təsdiq dialoqu, iki sütunlu vərəq kartı, çip rəngləri ──────── */
+
+/* Sual seçimi — yığcam variant (menyu axtarışsız, 0..max). */
+.ese-qsel {
+    width: 4.6rem;
+    margin: 0 auto;
+}
+
+.ese-qsel .bootstrap-single-select__toggle,
+.bootstrap-single-select--compact .bootstrap-single-select__toggle {
+    min-height: 32px;
+    padding: 3px 8px 3px 10px;
+    gap: 4px;
+    border-radius: var(--ems-r-md, 8px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    justify-content: space-between;
+}
+
+.ese-qsel .bootstrap-single-select__toggle.is-placeholder {
+    color: var(--ems-neutral-500); /* mətn rəngi ≥ neutral-500 (kontrast qoruyucusu, audit F-frontend) */
+    font-weight: 500;
+}
+
+.ese-qsel .bootstrap-single-select__caret {
+    font-size: 10px;
+    color: var(--ems-neutral-400);
+}
+
+.ese-qsel .bootstrap-single-select__menu {
+    min-width: 6rem;
+}
+
+.ese-qsel .bootstrap-single-select__option {
+    padding: 0.35rem 0.6rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.ese-row.is-dirty .ese-qsel .bootstrap-single-select__toggle:not(.is-placeholder) {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.ese-row.is-invalid .ese-qsel .bootstrap-single-select__toggle,
+.ese-row.is-invalid .ese-total {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+/* Yekun sahəsi (yalnız-oxunan cəm) — rəqəm kimi oxunsun. */
+.ese-total.is-readonly {
+    border-color: transparent;
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-md, 15px);
+}
+
+/* Hərf qiyməti nişanı. */
+.ese-letter-badge {
+    min-width: 2.2em;
+    justify-content: center;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+/* Yığcam sticky başlıq. */
+.ese-table thead th {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: var(--ems-fs-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: inset 0 -1px 0 var(--ems-border);
+}
+
+.ese-table td,
+.ese-table th[scope="row"] {
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* Çiplər — rəng + mətn. */
+.ese-chip__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ems-neutral-400);
+}
+
+.ese-chip--empty .ese-chip__dot {
+    background: var(--ems-neutral-400);
+}
+
+.ese-chip--recorded .ese-chip__dot {
+    background: var(--ems-success);
+}
+
+.ese-chip--changed .ese-chip__dot {
+    background: var(--ems-warning);
+}
+
+.ese-chip--all .ese-chip__dot {
+    background: var(--ems-primary-600);
+}
+
+/* Vərəq kartı — iki sütun. */
+.ese-meta__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-4) var(--ems-sp-6);
+}
+
+/* 2026-09-14 (sahibin brauzer rəyi): 1000 px-də cüt sütun 137 px-ə sıxılır, etiket
+   iki sətrə keçir və seçici ilə rəqəm xanası bir-birinə nisbətən sürüşürdü —
+   cüt tam eni tutur, xanalar etiketdən asılı olmayaraq aşağı kənara düzülür. */
+.ese-meta__grid-pair {
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) minmax(9rem, 14rem);
+    gap: var(--ems-sp-3) var(--ems-sp-4);
+    align-items: end;
+    grid-column: 1 / -1;
+}
+
+.ese-meta__grid-pair .ese-qmax {
+    width: 100%;
+}
+
+.ese-meta__grid-pair-hint {
+    grid-column: 1 / -1;
+}
+
+.ese-meta__chip--kind b {
+    color: var(--ems-primary-800);
+}
+
+/* Təsdiq dialoqu — başlıq metadatası + tələbə cədvəli (F qırmızı). */
+.ese-confirm__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-4);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.ese-confirm__meta-item i {
+    margin-right: 4px;
+}
+
+.ese-confirm__failed {
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong, var(--ems-danger));
+    font-weight: 700;
+}
+
+.ese-confirm__wrap {
+    margin: var(--ems-sp-4) 0;
+}
+
+.ese-confirm__table {
+    min-width: 0;
+}
+
+.ese-confirm__table td,
+.ese-confirm__table th {
+    padding: 6px 10px;
+}
+
+/* Dialoqdakı icmal — bir sətirdə yığcam çiplər (cədvəl görünən qalsın). */
+#eseSaveDialog .ese-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin: 0 0 var(--ems-sp-3);
+}
+
+#eseSaveDialog .ese-summary li {
+    margin: 0;
+    padding: 4px 10px;
+    font-size: var(--ems-fs-sm);
+}
+
+.ese-confirm__scroll {
+    max-height: 42vh;
+    overflow: auto;
+}
+
+.ese-confirm__table th[scope="row"] {
+    font-weight: 600;
+}
+
+.ese-confirm__table tr.is-failed td,
+.ese-confirm__table tr.is-failed th {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong, var(--ems-danger));
+}
+
+.ese-just__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ems-sp-4);
+}
+
+@media (max-width: 768px) {
+    .ese-meta__grid,
+    .ese-just__grid {
+        grid-template-columns: 1fr;
+    }
+}

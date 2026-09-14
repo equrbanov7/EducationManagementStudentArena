@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}«RİM mərkəzi» başlıq əməli — «Yeni hesab / bölmə» axını
+(`rimc-chooser` overlay-i, `js/rim_center/create.js`).
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.
+
+Yaratma səlahiyyətləri AYRICA açarlardır: axtarış/parol səlahiyyəti olan
+hər operator yeni kimlik yarada bilməz (`user.import`), inzibati bölmə
+isə struktur ağacının açarındandır (`unit.tree_manage`). Düymənin
+görünməsi UI rahatlığıdır — FAKTİKİ qapı serverdədir
+(services/rim/create.py::require_create,
+organizations/structure_actions.py::structure_tree_action).{% endcomment %}
+{% if rim_center_section.can_create or rim_center_section.can_create_unit %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-ems-overlay-open="rimc-chooser">
+  <i class="fas fa-plus" aria-hidden="true"></i>
+  {% if rim_center_section.can_create and rim_center_section.can_create_unit %}
+    {% trans "Yeni yarat" context "profile.rim" %}
+  {% elif rim_center_section.can_create %}
+    {% trans "Yeni hesab" context "profile.rim" %}
+  {% else %}
+    {% trans "Yeni bölmə" context "profile.rim" %}
+  {% endif %}
+</button>
+{% endif %}

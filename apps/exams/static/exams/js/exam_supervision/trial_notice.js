@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260716-intervention";
+import { ExamSupervision } from "./state.js?v=20260914-w4r3";
 
 // Sınaq (trial) cəhdi: pozuntu limiti aşılsa da imtahan DAYANDIRILMIR — müəllim
 // yalnız real imtahanda nə olacağını görür. Kilid overlay-i əvəzinə bağlana

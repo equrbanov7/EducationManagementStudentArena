@@ -19,7 +19,17 @@ from .events import notify_org_owner_pending_approval
 from .helpers import get_membership_request_role_label
 
 
-def build_profile_notification_state(*, user, profile):
+def build_profile_notification_state(*, user, profile, active_org_memberships=None):
+    """Profil səhifəsinin bildiriş bloku (dəvətlər, gözləyən müraciətlər, orqdan
+    çıxma hüququ, oxunmamış say).
+
+    ``active_org_memberships`` — 2026-09-13 (Codex audit §14/§21): çağıran
+    ``OrganizationMiddleware``-in artıq yüklədiyi ``request.org_memberships``
+    siyahısını YALNIZ ``profile.organization`` aktiv təşkilatla eyni olduqda
+    ötürür; siyahı middleware ilə eyni sıra ilə (``-is_primary, -role__level``)
+    gəlir, ona görə ``[0]`` aşağıdakı ``.first()`` ilə eynidir və ayrıca
+    ``Membership`` SELECT-i düşür. ``None`` → köhnə davranış (canlı sorğu).
+    """
     if (
         profile.organization is not None
         and getattr(profile.organization, "owner_id", None) == getattr(user, "id", None)
@@ -85,16 +95,21 @@ def build_profile_notification_state(*, user, profile):
     active_membership = None
     membership_profile_role = None
     if profile.organization:
-        active_membership = (
-            Membership.objects.filter(
-                user=user,
-                organization=profile.organization,
-                is_active=True,
+        if active_org_memberships is not None and all(
+            getattr(m, "organization_id", None) == profile.organization_id for m in active_org_memberships
+        ):
+            active_membership = active_org_memberships[0] if active_org_memberships else None
+        else:
+            active_membership = (
+                Membership.objects.filter(
+                    user=user,
+                    organization=profile.organization,
+                    is_active=True,
+                )
+                .select_related("role")
+                .order_by("-is_primary", "-role__level")
+                .first()
             )
-            .select_related("role")
-            .order_by("-is_primary", "-role__level")
-            .first()
-        )
         membership_profile_role = map_org_role_to_profile_role(getattr(active_membership, "role", None))
 
     student_can_leave_org = bool(

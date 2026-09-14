@@ -64,6 +64,29 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
 
+      # Audit 2026-09-13 F-T6 (düzəliş 2026-09-14): 3 OCR testi
+      # (`exams/tests/test_services.py::test_ocr_extracts_questions_from_scanned_pdf`,
+      # `test_pdf_layout.py::test_image_only_pdf_*`) tesseract olmadığı üçün HEÇ BİR
+      # mühitdə işləmirdi (`parsing/extraction/ocr.py` 37 %). apt ~20-30 s çəkir;
+      # PyMuPDF (`fitz`) OCR-ı yalnız tessdata qovluğuna ehtiyac duyur —
+      # `ocr.py._ensure_tessdata_prefix` onu özü tapır, amma dəqiqlik üçün
+      # `TESSDATA_PREFIX` də ixrac olunur. `aze` + `eng` dilləri testlərin tələbidir.
+      - name: 🔤 Install Tesseract OCR (aze + eng)
+        run: |
+          echo "::group::🔤 Tesseract OCR"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends tesseract-ocr tesseract-ocr-aze tesseract-ocr-eng
+          # Pipe-da `head`/`grep -q` yox: GH Actions `bash -eo pipefail` — erkən
+          # bağlanan pipe SIGPIPE ilə addımı sındıra bilər; əvvəl dəyişənə oxu.
+          tesseract --version 2>&1 | sed -n 1p
+          langs="$(tesseract --list-langs 2>&1)"
+          grep -qx aze <<<"$langs" && grep -qx eng <<<"$langs"
+          eng_data="$(find /usr/share/tesseract-ocr -name eng.traineddata -print -quit)"
+          test -n "$eng_data"
+          echo "TESSDATA_PREFIX=$(dirname "$eng_data")" >> "$GITHUB_ENV"
+          echo "TESSDATA_PREFIX=$(dirname "$eng_data")"
+          echo "::endgroup::"
+
       - name: 📦 Cache pip dependencies
         uses: actions/cache@v5
         with:

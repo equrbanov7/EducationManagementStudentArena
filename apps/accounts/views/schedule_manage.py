@@ -22,9 +22,9 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import schedule_manage as schedule_read
-from apps.registrar import schedule_manage_actions as schedule_write
 from apps.registrar.models import CourseOffering, ScheduleSlot
+from apps.registrar.public import schedule_manage as schedule_read
+from apps.registrar.public import schedule_manage_actions as schedule_write
 
 _CTX = "accounts.schedule_manage"
 

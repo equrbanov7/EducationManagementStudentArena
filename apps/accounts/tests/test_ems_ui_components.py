@@ -241,6 +241,25 @@ class ComponentPartialRenderTest(SimpleTestCase):
         self.assertIn("ems-table--zebra", html)
         self.assertIn("Baxışdadır", html)  # badge kataloqdan gəldi
 
+    def test_data_table_sr_only_column_renders_a_hidden_label_not_an_empty_th(self):
+        """P2-8 (2026-09-12): əməllər sütunu boş `<th>` vermir — etiket `.sr-only` ilə gizlidir."""
+        html = render_to_string(
+            "partials/ems_ui/_data_table.html",
+            {
+                "table_state": "ready",
+                "table_columns": [
+                    {"key": "member", "label": "Üzv"},
+                    {"key": "actions", "label": "Əməllər", "sr_only": True},
+                ],
+                "table_rows": [{"row_head": "Aygün", "cells": []}],
+            },
+        )
+        self.assertRegex(html, r'<th scope="col">\s*<span class="sr-only">Əməllər</span>\s*</th>')
+        # Etiket yalnız `.sr-only` sarğısı içindədir — çılpaq mətn kimi təkrarlanmır.
+        self.assertEqual(html.count("Əməllər"), 1)
+        # `sr_only` verilməyən sütun əvvəlki kimi görünən mətnlə render olunur.
+        self.assertRegex(html, r'<th scope="col">\s*Üzv\s*</th>')
+
     def test_data_table_empty_and_error_states(self):
         empty = render_to_string(
             "partials/ems_ui/_data_table.html",

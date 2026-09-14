@@ -189,7 +189,8 @@ class NotificationEventFlowTests(TestCase):
             title__icontains="Yeni müəllim müraciəti",
         )
         self.assertIn("Ad soyad: Nigar Məmmədova", owner_notification.message)
-        self.assertIn("Username: @teacher_candidate", owner_notification.message)
+        # 2026-09-13 (Codex audit P2-06): AZ kataloqunda ingilis msgid «Username:» tərcümə olundu.
+        self.assertIn("İstifadəçi adı: @teacher_candidate", owner_notification.message)
         self.assertIn("Kafedra / Departament: Kompüter elmləri kafedrası", owner_notification.message)
         self.assertIn(
             "Müraciət mesajı: Riyaziyyat və proqramlaşdırma fənlərini tədris edirəm.", owner_notification.message

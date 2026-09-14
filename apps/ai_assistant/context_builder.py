@@ -106,9 +106,9 @@ _PAGE_CONTEXT_MAP = [
     (
         r"/exams/groups/?$",
         {
-            "name": "İmtahan Qrupları / Exam Groups",
-            "description": "Manage exam groups for organizing and assigning exams.",
-            "hints": "Teachers can create exam groups, add students, assign exams to groups, and track group performance.",
+            "name": "İmtahan Qrupları / Exam Groups (köhnə kohortlar)",
+            "description": "Legacy exam cohorts; exams are now assigned to registry groups (Qruplar reyestri) in the exam wizard.",
+            "hints": "Point users to the exam wizard's registry-group picker; this page only matters for organisations that still keep legacy cohorts.",
         },
     ),
     (
@@ -201,13 +201,29 @@ def _current_page_section(current_page: str, organization, memberships, permissi
     return "\n".join(lines)
 
 
+def mask_email(email: str) -> str:
+    """E-poçtu `***@domain` şəklinə salır — provayderə yalnız domen gedir.
+
+    2026-09-14 (audit F-08, §27 «AI PII/retention»): əvvəl hər sorğuda tam
+    e-poçt Gemini-yə göndərilirdi. Persona üçün domen (universitet/şəxsi) kifayət
+    edir; lokal hissə üçüncü tərəfə lazım deyil.
+    """
+    email = (email or "").strip()
+    if "@" not in email:
+        return ""
+    domain = email.rsplit("@", 1)[1]
+    return f"***@{domain}" if domain else ""
+
+
 def _user_identity_section(user, organization, memberships) -> str:
     lines = [
         "[User Identity]",
         f"Name: {user.get_full_name() or user.username}",
         f"Username: {user.username}",
-        f"Email: {user.email}",
     ]
+    masked_email = mask_email(getattr(user, "email", ""))
+    if masked_email:
+        lines.append(f"Email: {masked_email}")
 
     if is_superadmin_user(user):
         lines.append("Role: Platform Superadmin")
@@ -277,7 +293,9 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
     is_teacher = _has_teacher_role(memberships)
     if is_teacher:
         lines.append("- Pending exam reviews: /exams/pending-work/")
-        lines.append("- Exam groups: /exams/groups/")
+        # 2026-09-14: imtahanlar reyestr qruplarına təyin olunur; köhnə kohort səhifəsi
+        # yalnız kohortu olan tenantlar üçündür — köməkçi reyestrə yönləndirir.
+        lines.append("- Groups registry (exam assignment via wizard): /accounts/profile/?section=groups-registry")
 
     # Superadmin
     if is_superadmin_user(user):
@@ -322,8 +340,7 @@ def _courses_section(user, organization, memberships, permissions) -> str:
 
 def _exams_section(user, organization, memberships, permissions) -> str:
     """Summarise the user's exam data (results for students, created exams for teachers)."""
-    from apps.exams.domain.attempts import ExamAttempt
-    from apps.exams.domain.exam_definition import Exam
+    from apps.exams.models import Exam, ExamAttempt
 
     lines = ["[My Exams]"]
 
@@ -380,6 +397,6 @@ def request_has_permission_from_list(permissions: list, permission: str) -> bool
 
     Supports wildcard matching consistent with the RBAC permission system.
     """
-    from apps.organizations.permissions import has_permission
+    from core.permissions import has_permission
 
     return has_permission(permissions, permission)

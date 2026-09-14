@@ -49,7 +49,7 @@ def send_journal_events(*, offering, events) -> int:
 
     ``events``: list of ``{"enrollment", "kind", ...payload}``. Eyni tələbənin
     bütün hadisələri bir bildirişdə birləşdirilir."""
-    from apps.notifications.services.crud import create_notification
+    from apps.notifications.public import create_notification
 
     by_student: dict = {}
     for event in events or []:

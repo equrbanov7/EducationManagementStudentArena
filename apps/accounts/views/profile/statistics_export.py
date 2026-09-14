@@ -12,12 +12,25 @@ from django.utils.translation import pgettext_lazy
 
 from ...models import UserProfile
 from .._helpers import _get_active_organization, _role_capabilities
+from ._sections.statistics import statistics_scope
+
+
+def _require_own_analytics(request, org):
+    """Şəxsi (müəllim/tələbə) statistika ixracı — dashboard ilə eyni qapı
+    (`analytics.view_own`, F-06 2026-09-14); açar yoxdursa 403."""
+    if org is None:
+        return
+    from django.core.exceptions import PermissionDenied
+
+    from core.permissions import request_has_permission
+
+    if not request_has_permission(request, "analytics.view_own"):
+        raise PermissionDenied
 
 
 @login_required
 def statistics_export_csv(request):
     """Export current statistics data as CSV."""
-    import csv
     import io
 
     from apps.accounts.services.statistics_selectors import (
@@ -26,6 +39,7 @@ def statistics_export_csv(request):
         get_superadmin_statistics,
         get_teacher_statistics,
     )
+    from core.export_safety import safe_csv_writer
 
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
     capabilities = _role_capabilities(request.user, profile)
@@ -61,15 +75,21 @@ def statistics_export_csv(request):
     elif capabilities["is_org_admin"] and org:
         # Unit scoping (Faza 2): dekan/kafedra müdürü export-da da yalnız öz
         # alt-ağacının datasını görür — dashboard ilə eyni cache açarı işlədilir.
+        # Əhatə dashboard ilə EYNİ resolverdən (`statistics_scope`, P1-11):
+        # `analytics.view_all` → org-wide, `analytics.view_unit` → alt-ağac,
+        # heç biri → BOŞ alt-ağac (fail-closed; köhnə kod org-wide verirdi).
         from apps.organizations.models import OrgUnit
-        from apps.organizations.public import get_unit_scope
 
-        unit_scope = get_unit_scope(request.user, org, request=request)
-        if unit_scope.is_unit_scoped:
-            scoped_unit_ids = list(
-                OrgUnit.objects.filter(organization=org)
-                .filter(unit_scope.unit_subtree_q())
-                .values_list("pk", flat=True)
+        unit_scope = statistics_scope(request, org)
+        if not unit_scope.is_org_wide:
+            scoped_unit_ids = (
+                list(
+                    OrgUnit.objects.filter(organization=org)
+                    .filter(unit_scope.unit_subtree_q())
+                    .values_list("pk", flat=True)
+                )
+                if unit_scope.is_unit_scoped
+                else []
             )
             stats = get_or_set_cached_statistics(
                 role="unit_manager",
@@ -87,6 +107,7 @@ def statistics_export_csv(request):
                 compute=lambda: get_org_admin_statistics(organization=org, filters=filters),
             )
     elif capabilities["is_teacher"]:
+        _require_own_analytics(request, org)
         stats = get_or_set_cached_statistics(
             role="teacher",
             scope_id=request.user.pk,
@@ -98,9 +119,8 @@ def statistics_export_csv(request):
         tutor_scoped_ids = None
         if capabilities.get("is_tutor") and org:
             from apps.organizations.models import OrgUnit
-            from apps.organizations.public import get_unit_scope
 
-            unit_scope = get_unit_scope(request.user, org, request=request)
+            unit_scope = statistics_scope(request, org)
             if unit_scope.is_unit_scoped:
                 tutor_scoped_ids = list(
                     OrgUnit.objects.filter(organization=org)
@@ -118,6 +138,7 @@ def statistics_export_csv(request):
                 ),
             )
         else:
+            _require_own_analytics(request, org)
             stats = get_or_set_cached_statistics(
                 role="student",
                 scope_id=request.user.pk,
@@ -126,7 +147,8 @@ def statistics_export_csv(request):
             )
 
     output = io.StringIO()
-    writer = csv.writer(output)
+    # 2026-09-14 (audit F-07): xülasə dəyərləri mətn ola bilər → formula neytrallaşdırması.
+    writer = safe_csv_writer(output)
     summary = stats.get("summary", {})
     writer.writerow(
         [

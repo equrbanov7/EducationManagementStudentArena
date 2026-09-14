@@ -389,6 +389,7 @@ def test_batch_chain_verifies_and_finish_run_is_fail_closed(rehearsal_target):
     assert exc_info.value.code == "legacy_success_count_mismatch"
 
 
+@pytest.mark.requires_rehearsal_guc
 def test_target_guard_reads_real_disposable_marker():
     """SPEC §15.2/53 — check 7 needs a deliberate ALTER DATABASE on this DB."""
 

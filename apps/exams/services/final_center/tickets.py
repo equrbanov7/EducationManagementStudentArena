@@ -267,6 +267,24 @@ def student_cancel_waiting(ticket, *, request=None) -> bool:
     return ok
 
 
+def _ensure_exam_start_policy(ticket):
+    """Audit 2026-09-13 EX-04 (P2): bilet yolu `can_user_start` siyasətini
+    tamamilə keçirdi — deaktiv/arxiv/silinmiş imtahana, istisna siyahısındakı
+    tələbəyə və cəhd limiti dolmuş tələbəyə YENİ cəhd yaradırdı. Vaxt pəncərəsi
+    burada yoxlanmır — biletli finalda onu zal oturumu təyin edir (oturum
+    ACTIVE olmalıdır, yuxarıda yoxlanır)."""
+    exam, student = ticket.exam, ticket.student
+    if not exam.is_active or exam.is_archived or getattr(exam, "is_deleted", False):
+        raise TicketStateError(pgettext("exams.model.access", "exam_not_active"))
+    if student != exam.author and exam._user_is_excluded(student):
+        raise TicketStateError(pgettext("exams.model.access", "no_exam_access"))
+    if exam._user_has_active_attempt(student):
+        return
+    left = exam.attempts_left_for(student)
+    if left is not None and left <= 0:
+        raise TicketStateError(pgettext("exams.model.access", "attempt_limit_reached"))
+
+
 def begin_attempt_for_ticket(ticket):
     """
     Oturum AKTİV olduqdan sonra tələbənin attempt-ini yaradır/qaytarır.
@@ -291,6 +309,7 @@ def begin_attempt_for_ticket(ticket):
         raise TicketStateError(
             pgettext("exams.final_center.error", "İmtahana başlamaq üçün əvvəlcə gözləmə otağına daxil olun.")
         )
+    _ensure_exam_start_policy(ticket)
 
     with transaction.atomic():
         attempt, _created = _create_attempt_or_get_active(

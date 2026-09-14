@@ -40,7 +40,8 @@ def _admin_membership_for_viewer(request, profile_user):
     if viewer_org is None:
         return None
 
-    from apps.organizations.views.shared._helpers import _can_manage_organization, _has_org_permission
+    from apps.organizations.public import can_manage_organization as _can_manage_organization
+    from apps.organizations.public import has_org_permission as _has_org_permission
 
     can_view_members = (
         is_superadmin_user(request.user)

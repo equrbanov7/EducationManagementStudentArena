@@ -277,7 +277,7 @@ body {
 
 .widget-badge.pending {
     background: var(--ems-warning-100);
-    color: var(--ems-warning-600);
+    color: var(--ems-warning-700);
 }
 
 .widget-badge.info {

@@ -22,7 +22,6 @@ sahəsi dəyişəndə filtr paneli select-i avtomatik `custom`-a keçirir.
 
 from __future__ import annotations
 
-import csv
 import json
 import uuid
 from datetime import date, datetime, time, timedelta
@@ -43,6 +42,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from core.constants import AuditAction
+from core.export_safety import safe_csv_writer
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import get_request_organization
 from core.ui import status_catalog
@@ -112,22 +112,27 @@ def can_view_audit(request) -> bool:
     return request_has_permission(request, "audit.view")
 
 
+def can_export_audit(request) -> bool:
+    """CSV ixracı: baxış qapısı + `audit.export` (audit 2026-09-13 F-06, 2026-09-14; superadmin/sahib azad)."""
+    if not can_view_audit(request):
+        return False
+    user = request.user
+    if is_superadmin_user(user) or getattr(get_request_organization(request), "owner_id", None) == user.id:
+        return True
+    return request_has_permission(request, "audit.export")
+
+
 def scoped_queryset(*, is_superadmin: bool, organization):
     """Aktorun görə biləcəyi qeydlər — superadmin hamısı, digərləri öz təşkilatı."""
     queryset = AuditLog.objects.select_related("user", "organization", "content_type")
     if is_superadmin:
         return queryset
-    if organization is None:
-        return queryset.none()
-    return queryset.filter(organization=organization)
+    return queryset.none() if organization is None else queryset.filter(organization=organization)
 
 
 def _run_scoped(is_superadmin: bool, func):
-    """Superadmin üçün `bypass_rls()` daxilində, digərləri üçün adi çağırış.
-
-    Şablon render-i kontekstdən kənarda baş verdiyi üçün nəticələr `func`
-    içində MATERİALLAŞDIRILMALIDIR (lazy queryset kifayət etmir).
-    """
+    """Superadmin üçün `bypass_rls()` daxilində, digərləri üçün adi çağırış. Şablon render-i
+    kontekstdən kənarda baş verdiyi üçün nəticələr `func` içində MATERİALLAŞDIRILMALIDIR."""
     if not is_superadmin:
         return func()
     from core.rls import bypass_rls
@@ -144,10 +149,8 @@ def _param(request, name: str, default: str = "") -> str:
 
 
 def _parse_date(raw: str):
-    if not raw:
-        return None
     try:
-        return date.fromisoformat(raw[:10])
+        return date.fromisoformat(raw[:10]) if raw else None
     except ValueError:
         return None
 
@@ -178,13 +181,10 @@ def resolve_range(range_key: str, start_raw: str, end_raw: str, *, today=None):
             if start and end and start > end:
                 start, end = end, start
             return key, start, end
-    if key == RANGE_TODAY:
-        return key, today, today
-    if key == RANGE_7D:
-        return key, today - timedelta(days=6), today
-    if key == RANGE_30D:
-        return key, today - timedelta(days=29), today
-    return RANGE_ALL, None, None
+    days = {RANGE_TODAY: 0, RANGE_7D: 6, RANGE_30D: 29}.get(key)
+    if days is None:
+        return RANGE_ALL, None, None
+    return key, today - timedelta(days=days), today
 
 
 def _day_start(value: date):
@@ -673,7 +673,7 @@ def build_audit_log_context(request) -> dict:
     ]
     if is_superadmin:
         columns.append({"key": "org", "label": pgettext(_CTX, "Təşkilat")})
-    columns.append({"key": "actions", "label": ""})
+    columns.append({"key": "actions", "label": pgettext("accounts.people", "Əməllər"), "sr_only": True})  # P2-8 a11y
 
     cell_dir = "audit/partials/"
     table_rows = []
@@ -826,7 +826,11 @@ def build_audit_log_context(request) -> dict:
         "filter_fields": filter_fields,
         "filter_applied": applied,
         "filter_count_label": pgettext(_CTX, "Nəticə: %(n)d hadisə") % {"n": total},
-        "export_url": "%s?%s" % (reverse("audit:export"), urlencode(params)) if params else reverse("audit:export"),
+        "export_url": (
+            ("%s?%s" % (reverse("audit:export"), urlencode(params)) if params else reverse("audit:export"))
+            if can_export_audit(request)
+            else ""
+        ),
         "list_url": list_url,
         "range_note": range_note,
         "state_title": (
@@ -881,18 +885,13 @@ def _sort_url(filters: dict, is_superadmin: bool) -> str:
 # ─── Görünüşlər ─────────────────────────────────────────────────────────────
 
 
-def _raise_permission_denied():
-    """Müstəqil səhifə üçün `PermissionDenied` (JSON/CSV giriş nöqtələri 403 qaytarır)."""
-    raise PermissionDenied(
-        pgettext("audit.view.permission", "required_permission_missing").format(permission="audit.view")
-    )
-
-
 @login_required
 def audit_log_list(request):
-    """Müstəqil (qabıqsız) audit jurnalı səhifəsi — eyni kontekst qurucusu."""
+    """Müstəqil (qabıqsız) audit jurnalı səhifəsi — eyni kontekst qurucusu (JSON/CSV nöqtələri 403 qaytarır)."""
     if not can_view_audit(request):
-        _raise_permission_denied()
+        raise PermissionDenied(
+            pgettext("audit.view.permission", "required_permission_missing").format(permission="audit.view")
+        )
     context = build_audit_log_context(request)
     return render(
         request,
@@ -921,7 +920,7 @@ def audit_log_detail(request, pk):
 
 
 class _Echo:
-    """`csv.writer` üçün yazılanı olduğu kimi qaytaran bufer (Django sənəd naxışı)."""
+    """CSV yazıcısı üçün olduğu kimi qaytaran bufer; `reason` istifadəçi mətnidir → F-07 (2026-09-13) neytrallaşdırma."""
 
     def write(self, value):
         return value
@@ -977,7 +976,7 @@ def audit_log_export(request):
     SONRA oxunur və tenant/RLS konteksti o vaxt artıq sıfırlanmış ola bilər.
     İxracın özü də auditə düşür («auditçini audit et»).
     """
-    if not can_view_audit(request):
+    if not can_export_audit(request):
         return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
     is_superadmin = is_superadmin_user(request.user)
     organization = get_request_organization(request)
@@ -1003,7 +1002,7 @@ def audit_log_export(request):
         return rows, truncated
 
     rows, truncated = _run_scoped(is_superadmin, _materialize)
-    writer = csv.writer(_Echo())
+    writer = safe_csv_writer(_Echo())
 
     def _stream():
         yield "\ufeff"  # BOM — Excel UTF-8 Azərbaycan hərflərini düzgün oxusun

@@ -1,0 +1,31 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-9.1.1, pluggy-1.6.0
+django: version: 5.2.17, settings: config.settings.test (from ini)
+rootdir: /Users/elvin/Developer/EMSArena
+configfile: pyproject.toml (WARNING: ignoring pytest config in setup.cfg!)
+plugins: locust-2.43.3, xdist-3.8.0, asyncio-1.3.0, django-4.12.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 244 items
+
+apps/registrar/tests/test_journal_syllabus_bridge.py ..................  [  7%]
+apps/syllabus/tests/test_chair_approval_authority.py .............       [ 12%]
+apps/syllabus/tests/test_chair_unit_resolution.py .........              [ 16%]
+apps/syllabus/tests/test_copy_scope.py ....                              [ 18%]
+apps/syllabus/tests/test_editor_add_outcome.py .....                     [ 20%]
+apps/syllabus/tests/test_editor_carryover.py ..................          [ 27%]
+apps/syllabus/tests/test_editor_shipped_js.py ............               [ 32%]
+apps/syllabus/tests/test_notifications.py ........                       [ 35%]
+apps/syllabus/tests/test_offering_lookup.py ..........                   [ 39%]
+apps/syllabus/tests/test_policy_and_versioning.py ..................     [ 47%]
+apps/syllabus/tests/test_review_scope.py ................                [ 53%]
+apps/syllabus/tests/test_rls.py ssss                                     [ 55%]
+apps/syllabus/tests/test_search_by_program_code.py .........             [ 59%]
+apps/syllabus/tests/test_workflow.py ................................    [ 72%]
+apps/syllabus/tests/test_completion.py ............                      [ 77%]
+apps/syllabus/tests/test_completion_plan_hours.py ......                 [ 79%]
+apps/syllabus/tests/test_document.py ................                    [ 86%]
+apps/syllabus/tests/test_permission_catalog.py ..........                [ 90%]
+apps/syllabus/tests/test_section_shape.py ..........                     [ 94%]
+apps/syllabus/tests/test_state_machine.py ..............                 [100%]
+
+======================== 240 passed, 4 skipped in 7.26s ========================

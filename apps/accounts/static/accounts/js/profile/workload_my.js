@@ -21,6 +21,10 @@
         return q("[data-wlm-root]");
     }
 
+    // 2026-09-13 frontend auditi F7: AZ literallar `gettext()`-ə keçirildi
+    // (JavaScriptCatalog `base.html`-dədir; fallback msgid-in özüdür).
+    var gettext = window.gettext || function (value) { return value; };
+
     function esc(value) {
         var node = document.createElement("span");
         node.textContent = value == null ? "" : String(value);
@@ -51,7 +55,7 @@
         body.innerHTML = (rows || [])
             .map(function (row) {
                 var journal = row.offering_id
-                    ? '<a href="' + esc(base + row.offering_id) + '/">Aç</a>'
+                    ? '<a href="' + esc(base + row.offering_id) + '/">' + esc(gettext("Aç")) + "</a>"
                     : "";
                 return (
                     "<tr>" +

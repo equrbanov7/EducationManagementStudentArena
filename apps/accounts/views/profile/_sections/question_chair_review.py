@@ -91,9 +91,8 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
     from django.core.paginator import Paginator
     from django.db.models import Count, Q
 
-    from apps.exams.constants import QUESTION_EXAM_KIND_CHOICES, QUESTION_EXAM_KIND_VALUES
     from apps.exams.models import QuestionSubmission
-    from apps.exams.services.question_chair_review import chair_queue_queryset
+    from apps.exams.public import QUESTION_EXAM_KIND_CHOICES, QUESTION_EXAM_KIND_VALUES, chair_queue_queryset
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)

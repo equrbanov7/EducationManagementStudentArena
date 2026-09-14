@@ -72,7 +72,7 @@
 .pn-block__num {
     font-family: var(--ems-ff-mono);
     font-weight: 700;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     letter-spacing: 0;
 }
 
@@ -87,14 +87,14 @@
     font-weight: 600;
     letter-spacing: 0;
     text-transform: none;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 /* Sayğac: mətnlə verilir («12 / 120»), rəng yalnız köməkçidir. */
 .pn-counter {
     font-size: var(--ems-fs-sm);
     font-variant-numeric: tabular-nums;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     white-space: nowrap;
 }
 
@@ -570,7 +570,7 @@
 .pn-preview__time {
     flex: none;
     font-size: var(--ems-fs-xs);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     white-space: nowrap;
 }
 
@@ -589,7 +589,7 @@
 
 .pn-preview__title.is-placeholder,
 .pn-preview__message.is-placeholder {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-weight: 500;
     font-style: italic;
 }

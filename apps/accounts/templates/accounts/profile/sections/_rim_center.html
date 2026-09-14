@@ -35,47 +35,24 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       </div>
     {% else %}
 
-    <div class="rim-head">
-      <div class="rim-head__bar">
-        <h2 class="rim-title">
-          <i class="fas fa-id-card-alt"></i>
-          {% trans "RİM mərkəzi" context "profile.rim" %}
-        </h2>
-        {% comment %}
-          Yaratma səlahiyyətləri AYRICA açarlardır: axtarış/parol səlahiyyəti olan
-          hər operator yeni kimlik yarada bilməz (`user.import`), inzibati bölmə
-          isə struktur ağacının açarındandır (`unit.tree_manage`). Düymənin
-          görünməsi UI rahatlığıdır — FAKTİKİ qapı serverdədir
-          (services/rim/create.py::require_create,
-          organizations/structure_actions.py::structure_tree_action).
-        {% endcomment %}
-        {% if rim_center_section.can_create or rim_center_section.can_create_unit %}
-        <button type="button" class="ems-btn ems-btn--primary rim-head__cta"
-                data-ems-overlay-open="rimc-chooser">
-          <i class="fas fa-plus" aria-hidden="true"></i>
-          {% if rim_center_section.can_create and rim_center_section.can_create_unit %}
-            {% trans "Yeni yarat" context "profile.rim" %}
-          {% elif rim_center_section.can_create %}
-            {% trans "Yeni hesab" context "profile.rim" %}
-          {% else %}
-            {% trans "Yeni bölmə" context "profile.rim" %}
-          {% endif %}
-        </button>
-        {% endif %}
-      </div>
-      <p class="rim-lead">
-        {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" %}
-      </p>
+    {% comment %}2026-09-12 (audit P2-1): «RİM mərkəzi» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `<h2>` kart başlığı onu
+    təkrarlayırdı. İzah `ems_ui/_content_header.html` altbaşlığı, «Yeni …»
+    düyməsi isə onun əməl yuvasıdır (`partials/_rim_header_actions.html`).
+    Səlahiyyət çipləri ayrıca kartda qalır.{% endcomment %}
+    {% trans "İstifadəçini ad, soyad və ata adı ilə tapın — istifadəçi adını bilməyə ehtiyac yoxdur. Email, FİN və ya istifadəçi adı ilə də axtara bilərsiniz. Bütün əməliyyatlar audit jurnalına düşür." context "profile.rim" as rim_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rim_subtitle header_actions_include="accounts/profile/sections/partials/_rim_header_actions.html" %}
 
-      {% if rim_center_section.granted_permissions %}
+    {% if rim_center_section.granted_permissions %}
+    <div class="rim-head">
       <div class="rim-perms" aria-label="{% trans 'Sizin səlahiyyətləriniz' context 'profile.rim' %}">
         <span class="rim-perms-label">{% trans "Səlahiyyətləriniz:" context "profile.rim" %}</span>
         {% for perm in rim_center_section.granted_permissions %}
         <span class="rim-perm-chip" title="{{ perm.key }}">{{ perm.label }}</span>
         {% endfor %}
       </div>
-      {% endif %}
     </div>
+    {% endif %}
 
     <div class="rim-search">
       <div class="rim-search-field">
