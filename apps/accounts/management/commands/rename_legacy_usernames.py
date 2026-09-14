@@ -10,7 +10,6 @@ Hesabat CSV: `user_id,old,new,source` (sirr yoxdur — yalnız istifadəçi adla
 
 from __future__ import annotations
 
-import csv
 from collections import Counter
 from pathlib import Path
 
@@ -18,6 +17,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.accounts.services import username_repair
+from core.export_safety import safe_csv_writer
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
             if options["report"]:
                 path = Path(options["report"])
                 with path.open("w", newline="", encoding="utf-8") as handle:
-                    writer = csv.writer(handle)
+                    writer = safe_csv_writer(handle)
                     writer.writerow(["user_id", "old", "new", "source"])
                     writer.writerows(username_repair.iter_report_rows(rows))
                 self.stdout.write(f"Hesabat: {path}")
