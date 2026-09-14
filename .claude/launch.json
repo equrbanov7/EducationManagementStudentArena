@@ -46,6 +46,15 @@
         "set -a && . .claude/dev-clone.env && set +a && EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 8011 --noreload"
       ],
       "port": 8011
+    },
+    {
+      "name": "emsarena-dev-clone-8012",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "set -a && . .claude/dev-clone.env && set +a && EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 8012 --noreload"
+      ],
+      "port": 8012
     }
   ]
 }

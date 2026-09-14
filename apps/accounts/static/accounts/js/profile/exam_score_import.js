@@ -5,6 +5,29 @@
     if (!delegate) return;
     var previews = new WeakMap();
 
+    // W6 `w6paper` (2026-09-14): şablon vərəq kartının şəbəkəsi ilə endirilir —
+    // sual sayı / bir sualın maksimumu / imtahan növü klik anında URL-ə yazılır
+    // (server parametr olmayanda sonuncu vərəqin şəbəkəsinə düşür).
+    var GRID_FIELDS = {
+        question_count: "[data-ese-question-count]",
+        question_max: "[data-ese-question-max]",
+        exam_kind: "[data-ese-exam-kind]"
+    };
+    function templateHref(link) {
+        var url = new URL(link.getAttribute("href"), window.location.href);
+        Object.keys(GRID_FIELDS).forEach(function (name) {
+            var field = document.querySelector(GRID_FIELDS[name]);
+            if (field && field.value !== "") url.searchParams.set(name, field.value);
+        });
+        return url.toString();
+    }
+    function scoreText(item) {
+        if (item.score == null) return "—";
+        var parts = item.question_scores;
+        if (!parts || !parts.length) return String(item.score);
+        return item.score + " (" + parts.join(" + ") + ")";
+    }
+
     function t(key) {
         var labels = document.getElementById("eseI18n");
         return labels ? labels.getAttribute("data-" + key) || "" : "";
@@ -41,7 +64,7 @@
         (data.rows || []).forEach(function (item) {
             var row = document.createElement("tr");
             [item.row, item.written ? t("status-written") : t("import-" + item.status), item.student || item.full_name || item.key,
-                item.current == null ? "—" : item.current, item.score == null ? "—" : item.score,
+                item.current == null ? "—" : item.current, scoreText(item),
                 [item.message, item.warning].filter(Boolean).join(" · ")].forEach(function (value) {
                 var cell = document.createElement("td");
                 cell.textContent = String(value == null ? "" : value);
@@ -122,5 +145,19 @@
     });
     delegate.on("click", "[data-esi-reload]", function (event) {
         event.preventDefault(); window.location.reload();
+    });
+    delegate.on("click", "[data-esi-template]", function (event, link) {
+        // Kartdakı yanlış şəbəkə (məs. köhnə vərəqdən qalan max 20) endirməni
+        // dayandırır — brauzerin öz validasiya mesajı (yeni mətn yoxdur).
+        var invalid = Object.keys(GRID_FIELDS).map(function (name) {
+            return document.querySelector(GRID_FIELDS[name]);
+        }).filter(function (field) { return field && !field.checkValidity(); })[0];
+        if (invalid) {
+            event.preventDefault();
+            invalid.reportValidity();
+            return;
+        }
+        // href klik anında yenilənir — brauzer naviqasiyanı YENİ dəyərlə edir.
+        link.setAttribute("href", templateHref(link));
     });
 })(window, document);

@@ -5,7 +5,10 @@ Axın (student-intake ilə eyni naxış): doldurulmuş şablonu endir → «Bal�
 sütununu doldur → yüklə → QURU İCRA (heç nə yazılmır, sətir-sətir vəziyyət) →
 «Tətbiq et» → nəticə. Tətbiq EYNİ faylı yenidən göndərir (server saxlamır).
 Vərəq məlumatları (`data-ese-meta` kartı) və dəyişikliklər üçün səbəb/qeyd
-FormData-ya JS-də əlavə olunur (`exam_score_import.js`).{% endcomment %}
+FormData-ya JS-də əlavə olunur (`exam_score_import.js`).
+W6 `w6paper` (2026-09-14): şablon keçidləri (`data-esi-template`) klik anında
+vərəq kartının sual sayı / bir sualın maksimumu / imtahan növü dəyərlərini
+sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə gəlir.{% endcomment %}
 <section class="ems-card ese-card ese-import"
          data-esi-root
          data-preview-url="{{ s.import_preview_url }}"
@@ -28,10 +31,10 @@ FormData-ya JS-də əlavə olunur (`exam_score_import.js`).{% endcomment %}
       <div class="ese-import__content">
         <h3 class="ese-import__title">{% trans "Doldurulmuş şablonu endirin" context "registrar.exam_score_entry" %}</h3>
         <div class="ese-import__actions">
-          <a class="ems-btn" href="{{ s.import_template_url }}" download>
+          <a class="ems-btn" href="{{ s.import_template_url }}" download data-esi-template>
             <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "XLSX şablon" context "registrar.exam_score_entry" %}
           </a>
-          <a class="ems-btn ems-btn--ghost" href="{{ s.import_template_csv_url }}" download>
+          <a class="ems-btn ems-btn--ghost" href="{{ s.import_template_csv_url }}" download data-esi-template>
             <i class="fas fa-file-csv" aria-hidden="true"></i> {% trans "CSV şablon" context "registrar.exam_score_entry" %}
           </a>
         </div>
@@ -40,6 +43,7 @@ FormData-ya JS-də əlavə olunur (`exam_score_import.js`).{% endcomment %}
           {% for column in s.import_columns %}<code class="ese-import__col">{{ column }}</code>{% endfor %}
           — {% trans "tələbə «Tələbə №» (istifadəçi adı), FİN və ya Ad Soyad ilə tanınır." context "registrar.exam_score_entry" %}
           {% trans "S1..Sn sütunları doludursa bal onların cəmidir. İmtahan növü (yazılı / praktiki) və sual şəbəkəsi vərəq məlumatları kartından götürülür — bütün fayla aiddir." context "registrar.exam_score_entry" %}
+          {% trans "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir." context "registrar.exam_score_entry" %}
         </p>
       </div>
     </div>

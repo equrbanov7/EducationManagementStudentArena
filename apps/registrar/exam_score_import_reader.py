@@ -51,6 +51,10 @@ _HEADER_ALIASES = {
     "fin": {"fin", "fin kod", "fin kodu"},
     "full_name": {"ad soyad", "adsoyad", "ad soyad ata adi", "telebe adi", "full name", "name", "ad"},
     "score": {"bal", "imtahan bali", "score", "exam score", "netice", "yeni bal", "imtahan"},
+    # W6 `w6paper` (2026-09-14): şablondakı «İmtahan növü» sütunu — vərəq səviyyəli
+    # növün faylda görünən İZİDİR (yazılı / praktiki); plan qurucusu seçilmiş növlə
+    # uyğunsuzluğu sətir xətası kimi göstərir (səssiz ötürülmür).
+    "exam_kind": {"imtahan novu", "exam kind", "exam type", "nov", "kind"},
 }
 
 #: Sual sütunu başlığı — «S1», «S 1», «Sual 1», «Q1», «Question 1» (normallaşdırılmış).
@@ -144,7 +148,15 @@ def _rows_from_values(source, *, mapping, max_rows=MAX_ROWS) -> list:
         values = list(raw)
         if _blank(values):
             continue
-        record = {"key": "", "fin": "", "full_name": "", "score": "", "_row": number, "questions": {}}
+        record = {
+            "key": "",
+            "fin": "",
+            "full_name": "",
+            "score": "",
+            "exam_kind": "",
+            "_row": number,
+            "questions": {},
+        }
         for position, key in mapping.items():
             if position >= len(values):
                 continue

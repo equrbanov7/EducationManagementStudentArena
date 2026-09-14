@@ -68837,3 +68837,11 @@ msgstr "В исходном экзамене не было вопросов — 
 msgctxt "exams.view.exams.error"
 msgid "allowed_units_invalid"
 msgstr "Выбранные группы не найдены в этой организации или вне вашей области."
+
+msgctxt "registrar.exam_score_import"
+msgid "Sətirdəki imtahan növü («%(cell)s») vərəqin növü (%(kind)s) ilə uyğun gəlmir."
+msgstr "Вид экзамена в строке («%(cell)s») не совпадает с видом ведомости (%(kind)s)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
+msgstr "Шаблон скачивается с числом вопросов, максимумом за вопрос и видом экзамена из карточки ведомости; проверка использует ту же сетку."
