@@ -144,8 +144,15 @@ yekun vəziyyət `w5left` hesabatında)
     qalmır; `exam-center-stats` filtrləri boot skriptinin öz JSON çağırışlarıdır
     (`data-ems-filters` qəsdən yoxdur). Problem yoxdur.
 11. ~~Sual idxalı: pano ilə şəkil yapışdırma; DOCX brauzer QA~~ — dalğa 8-də bağlandı (pano/sürüklə-burax yapışdırma bank toplu əlavədə; DOCX yükləməsi brauzerdə uçdan-uca yoxlanıldı).
-12. Audit P3 maddələri P3-4 / P3-5 / P3-6 / P3-10 / P3-11 / P3-17 / P3-18 heç bir briefdə
-    olmayıb — toxunulmayıb (`w2infra`).
+12. Audit P3 maddələri (`w2infra` briefində olmayanlar) — 2026-09-14 səhər:
+    **bağlandı** P3-10 (host ölçüsü cədvəli, `deployment.md` §2), P3-17 (nginx access
+    log `$request` → `$request_method $uri $server_protocol`, PII sorğu sətri yazılmır),
+    P3-18 (`PGBOUNCER_MAX_DB_CONNECTIONS` ümumi backend tavanı — app + owner pool cütü
+    `max_connections`-i keçə bilmir); **qərarla saxlanıldı** P3-4 ikinci yarısı
+    (`/metrics/` 10/8 + 192.168/16 icazəsi — LAN monitorinqi üçün, `/health/` ilə eyni),
+    P3-11 HSTS statikdə (HSTS Django/edge-də idarə olunur; nosniff artıq var);
+    **sahibə** P3-5 (image digest pin — Renovate/Dependabot `docker`), P3-6 (nginx 1.28 /
+    Alloy / Loki 3.5 — stack sınağı ilə ayrıca).
 
 ### Sahib əməliyyatları (kodla bağlanmır) — bax `deployment.md` §5.2
 13. NOBYPASSRLS DB rolu rollout-u; yeni image deploy; prod `.env` TLS / `ALLOWED_HOSTS` /

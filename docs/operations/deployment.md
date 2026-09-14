@@ -64,6 +64,31 @@ Internet
 No Python, PostgreSQL, or Redis installation is needed on the host — all
 services run inside Docker containers.
 
+### Host sizing (infra audit 2026-09-14, P3-10)
+
+Compose `deploy.resources.limits.memory` defaults add up to **≈ 33.5 GB for one
+replica of everything**; with the deploy script defaults `APP_REPLICAS=8`
+(2 GB each) and `CELERY_REPLICAS=2` (1 GB each) the ceiling is **≈ 48.5 GB**.
+Limits are ceilings, not reservations, but the host must be able to honour the
+steady-state sum of the big ones or the kernel OOM-kills the wrong container.
+
+| Service (env knob) | Default limit | Note |
+|---|---|---|
+| `postgres` (`POSTGRES_MEM_LIMIT`) | 16 GB | `shared_buffers` 2 GB + `effective_cache_size` 6 GB defaults assume ≥ 8 GB really available |
+| `app` × `APP_REPLICAS` (`APP_MEM_LIMIT`) | 2 GB × 8 | Daphne + `ASGI_THREADS`; 2 replicas per vCPU is plenty |
+| `piston` (`PISTON_MEM_LIMIT`) | 4 GB | code-runner sandbox; drop to 1 GB if lab tasks are off |
+| `redis` (`REDIS_MEM_LIMIT`) | 4 GB | must stay above `REDIS_MAXMEMORY` (default 3 GB) |
+| `celery_worker_heavy` / `celery_worker` × `CELERY_REPLICAS` | 2 GB / 1 GB × 2 | exports, imports, AI |
+| observability (prometheus, loki, grafana, cadvisor, exporters, alertmanager, promtail) | ≈ 2 GB | |
+| nginx, pgbouncer, backup, beat, arp-agent | ≈ 1.6 GB | |
+
+Rule of thumb for a **32 GB** host: `POSTGRES_MEM_LIMIT=10G`,
+`POSTGRES_SHARED_BUFFERS=2GB`, `POSTGRES_EFFECTIVE_CACHE_SIZE=5GB`,
+`APP_REPLICAS=4`, `PISTON_MEM_LIMIT=1G`, `REDIS_MAXMEMORY=2gb`,
+`REDIS_MEM_LIMIT=2560M` → ≈ 26 GB ceiling. For a **64 GB** host the defaults are
+fine. Check the running picture with `docker stats --no-stream` after the first
+exam session and tighten from there.
+
 ---
 
 ## 3. Environment Variables Reference
@@ -419,6 +444,10 @@ w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, so
    klonunda final-mərkəz WS + `-m postgres` test dəsti ilə yoxlayın —
    2026-09-14 məşqi (28 rol × bütün bölmələr, 0 xəta):
    [rls_role_rehearsal_2026-09-14.md](./rls_role_rehearsal_2026-09-14.md).
+   PgBouncer pool-ları rol × baza cütü üçündür — app rolu ayrılanda owner cütü
+   ilə birlikdə iki pool olur; `PGBOUNCER_MAX_DB_CONNECTIONS` (audit P3-18)
+   ümumi backend tavanıdır və **`POSTGRES_MAX_CONNECTIONS − 20`** saxlanmalıdır
+   (compose defoltu 230/250, `.env.production.example` 180/200).
 2. **TLS bayraqları**: `INSECURE_TRANSPORT_OK` prod `.env`-də **olmamalıdır**
    (varsa `check --deploy` dayandırır); `SECURE_SSL_REDIRECT` / HSTS dəyərləri
    §3 cədvəlindəki kimi.
