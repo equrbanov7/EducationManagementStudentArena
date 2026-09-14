@@ -238,6 +238,37 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // 2026-09-14 (audit FE-F19): eyni formda bir neçə submit düyməsi olanda
+    // (məs. superadmin təşkilatlar — «Təsdiqlə» / «Rədd et») təsdiq YALNIZ
+    // `data-ems-confirm` daşıyan düyməyə aiddir; form səviyyəli
+    // `data-confirm-message` bütün göndərişləri əhatə edir. Təsdiqdən sonra
+    // `requestSubmit(btn)` düymənin name/value-sunu saxlayır; ləğv = sorğu yoxdur.
+    document.addEventListener('click', function (event) {
+        var btn = event.target.closest ? event.target.closest('[data-ems-confirm]') : null;
+        if (!btn || !btn.form || btn.disabled) {
+            return;
+        }
+        var form = btn.form;
+        var message = btn.getAttribute('data-ems-confirm');
+        if (!message) {
+            return;
+        }
+        event.preventDefault();
+        window.EMSConfirm.open({ body: message, danger: btn.getAttribute('data-ems-confirm-danger') !== 'false' }).then(function (ok) {
+            if (!ok) {
+                return;
+            }
+            if (form.hasAttribute('data-confirm-message')) {
+                form.dataset.emsConfirmed = '1'; // form səviyyəli təsdiq təkrarlanmasın
+            }
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(btn);
+            } else {
+                form.submit();
+            }
+        });
+    });
+
     document.addEventListener('submit', function (event) {
         var form = event.target;
         if (!(form instanceof HTMLFormElement)) {
@@ -259,9 +290,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         var confirmMessage = form.getAttribute('data-confirm-message');
-        if (confirmMessage && !window.confirm(confirmMessage)) {
-            event.preventDefault();
+        if (!confirmMessage) {
+            return;
         }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        // Təsdiqdən sonra form `data-ems-confirmed` bayrağı ilə yenidən göndərilir.
+        if (form.dataset.emsConfirmed === '1') {
+            delete form.dataset.emsConfirmed;
+            return;
+        }
+        event.preventDefault();
+        var submitter = event.submitter || null;
+        window.EMSConfirm.open({ body: confirmMessage, danger: true }).then(function (ok) {
+            if (!ok) {
+                return;
+            }
+            form.dataset.emsConfirmed = '1';
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(submitter && submitter.form === form ? submitter : undefined);
+            } else {
+                form.submit();
+            }
+        });
     });
 
     document.addEventListener('dragover', function (event) {

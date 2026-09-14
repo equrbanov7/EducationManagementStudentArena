@@ -353,15 +353,18 @@
         EMSDelegate.on("click", "[data-wl-row-remove]", function (event, btn) {
             var host = root();
             if (!host || !STATE.task) return;
-            if (!window.confirm(gettext("Sətir silinsin?"))) return;
-            window.EMSCore.fetchJSON(host.dataset.deleteRowUrl, {
-                method: "POST",
-                data: { task_id: STATE.task.id, row_id: btn.dataset.rowId },
-            })
-                .then(loadRows)
-                .catch(function (err) {
-                    window.alert(messageFor(err && err.payload));
-                });
+            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+            window.EMSConfirm.open({ body: gettext("Sətir silinsin?"), danger: true }).then(function (ok) {
+                if (!ok) return;
+                window.EMSCore.fetchJSON(host.dataset.deleteRowUrl, {
+                    method: "POST",
+                    data: { task_id: STATE.task.id, row_id: btn.dataset.rowId },
+                })
+                    .then(loadRows)
+                    .catch(function (err) {
+                        window.alert(messageFor(err && err.payload));
+                    });
+            });
         });
 
         // ── Bölgü modalı ───────────────────────────────────────────────────
@@ -414,15 +417,17 @@
         EMSDelegate.on("click", "[data-wl-assign-remove]", function (event, btn) {
             var host = root();
             if (!host) return;
-            if (!window.confirm(gettext("Bölgü silinsin?"))) return;
-            window.EMSCore.fetchJSON(host.dataset.unassignUrl, {
-                method: "POST",
-                data: { assignment_id: btn.dataset.assignmentId },
-            })
-                .then(loadRows)
-                .catch(function (err) {
-                    window.alert(messageFor(err && err.payload));
-                });
+            window.EMSConfirm.open({ body: gettext("Bölgü silinsin?"), danger: true }).then(function (ok) {
+                if (!ok) return;
+                window.EMSCore.fetchJSON(host.dataset.unassignUrl, {
+                    method: "POST",
+                    data: { assignment_id: btn.dataset.assignmentId },
+                })
+                    .then(loadRows)
+                    .catch(function (err) {
+                        window.alert(messageFor(err && err.payload));
+                    });
+            });
         });
 
         // ── Təsdiq ─────────────────────────────────────────────────────────

@@ -68614,3 +68614,34 @@ msgstr "Exam kind"
 msgctxt "registrar.exam_score_entry"
 msgid "İmtahan növü yazılı və ya praktiki olmalıdır."
 msgstr "The exam kind must be written or practical."
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı redaktə et"
+msgstr "Edit assignment"
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı sil"
+msgstr "Delete assignment"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu redaktə et"
+msgstr "Edit group"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu sil"
+msgstr "Delete group"
+
+msgctxt "assignment.detail"
+msgid "Seçilmiş faylı sil"
+msgstr "Remove selected file"
+
+msgctxt "courses.members_page"
+msgid "Üzvü kursdan sil"
+msgstr "Remove member from course"
+
+msgctxt "courses.partial.member_accordion"
+msgid "Üzvü kursdan sil"
+msgstr "Remove member from course"
+
+msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
+msgstr "Reject this organization's registration request? This cannot be undone."

@@ -16,8 +16,8 @@ Yazma axını dəyişməyib: `add` / `remove` / `bulk_add` / `bulk_remove` /
 <section class="profile-section-panel profile-section--permission-editor {% if active_section == 'permission-editor' %}is-active{% endif %}"
          data-profile-section-panel="permission-editor"
          data-source-url="{% url 'accounts:permission_editor' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/permission_editor_ui.css' %}?v=20260909-2">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/permission_editor_ui.css' %}?v=20260914-a11y">
 
     {% if sec.access_denied_message %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}

@@ -359,8 +359,10 @@
             return;
         }
 
-        if(!confirm(I18N.confirmDelete)) return;
-        executeDelete();
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: I18N.confirmDelete, danger: true }).then(function (ok) {
+            if (ok) executeDelete();
+        });
     });
 
 })();

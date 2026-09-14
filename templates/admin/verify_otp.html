@@ -29,7 +29,7 @@
       {% endif %}
 
       {% if form.non_field_errors %}
-        <ul class="admin-otp-errors" aria-label="{% trans "errors_label" context "admin.verify_otp" %}">
+        <ul class="admin-otp-errors" role="alert" aria-label="{% trans "errors_label" context "admin.verify_otp" %}">
           {% for error in form.non_field_errors %}
             <li>{{ error }}</li>
           {% endfor %}
@@ -41,7 +41,7 @@
         <label class="admin-otp-label" for="{{ form.code.id_for_label }}">{{ form.code.label }}</label>
         {{ form.code }}
         {% if form.code.errors %}
-          <ul class="admin-otp-errors admin-otp-errors--field" aria-label="{% trans "otp_errors_label" context "admin.verify_otp" %}">
+          <ul class="admin-otp-errors admin-otp-errors--field" id="{{ form.code.auto_id }}_error" role="alert" aria-label="{% trans "otp_errors_label" context "admin.verify_otp" %}">
             {% for error in form.code.errors %}
               <li>{{ error }}</li>
             {% endfor %}

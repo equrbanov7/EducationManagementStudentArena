@@ -27,7 +27,7 @@ qapısından keçir), dinamik dəyərlər yalnız `data-*` atributları ilə öt
 <section class="profile-section-panel profile-section--handover {% if active_section == 'teaching-handover' %}is-active{% endif %}"
          data-profile-section-panel="teaching-handover"
          data-source-url="{{ profile_base_url }}?section=teaching-handover">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260909-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_handover.css' %}?v=20260914-a11y">
 
 {% if not sec.has_access %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=sec.access_denied_message %}

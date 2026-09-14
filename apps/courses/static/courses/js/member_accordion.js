@@ -23,7 +23,9 @@
             var url = btn.dataset.url;
             var memberId = btn.dataset.memberId;
 
-            if (!confirm(cfg.dataset.i18nConfirmDeleteUser)) { return; }
+            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+            var confirmed = await window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteUser, danger: true });
+            if (!confirmed) { return; }
 
             btn.disabled = true;
 

@@ -20,29 +20,32 @@
   }
 
   function deleteCourse(courseId) {
-    if (!confirm(d("i18nCourseDelete"))) return;
+    // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+    window.EMSConfirm.open({ body: d("i18nCourseDelete"), danger: true }).then(function (ok) {
+      if (!ok) return;
 
-    var form = document.createElement("form");
-    form.method = "POST";
-    form.action = "/courses/" + courseId + "/delete/";
+      var form = document.createElement("form");
+      form.method = "POST";
+      form.action = "/courses/" + courseId + "/delete/";
 
-    var csrfInput = document.createElement("input");
-    csrfInput.type = "hidden";
-    csrfInput.name = "csrfmiddlewaretoken";
-    csrfInput.value = csrf();
-    form.appendChild(csrfInput);
+      var csrfInput = document.createElement("input");
+      csrfInput.type = "hidden";
+      csrfInput.name = "csrfmiddlewaretoken";
+      csrfInput.value = csrf();
+      form.appendChild(csrfInput);
 
-    var profileReturnUrl = d("profileReturnUrl");
-    if (profileReturnUrl) {
-      var returnToInput = document.createElement("input");
-      returnToInput.type = "hidden";
-      returnToInput.name = "return_to";
-      returnToInput.value = profileReturnUrl;
-      form.appendChild(returnToInput);
-    }
+      var profileReturnUrl = d("profileReturnUrl");
+      if (profileReturnUrl) {
+        var returnToInput = document.createElement("input");
+        returnToInput.type = "hidden";
+        returnToInput.name = "return_to";
+        returnToInput.value = profileReturnUrl;
+        form.appendChild(returnToInput);
+      }
 
-    document.body.appendChild(form);
-    form.submit();
+      document.body.appendChild(form);
+      form.submit();
+    });
   }
 
   if (window.EMSDelegate) {
@@ -53,13 +56,15 @@
   }
 
   window.deleteMember = function (memberId, userName) {
-    if (!confirm(userName + d("i18nMemberDeleteSuffix"))) return;
-    fetch(d("deleteMemberUrlTpl").replace("0", memberId), {
-      method: "POST",
-      headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrf() }
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (data) { return data.success ? location.reload() : alert(data.error); })
-      .catch(function () { alert(d("i18nGenericError")); });
+    window.EMSConfirm.open({ body: userName + d("i18nMemberDeleteSuffix"), danger: true }).then(function (ok) {
+      if (!ok) return;
+      fetch(d("deleteMemberUrlTpl").replace("0", memberId), {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrf() }
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { return data.success ? location.reload() : alert(data.error); })
+        .catch(function () { alert(d("i18nGenericError")); });
+    });
   };
 })();

@@ -189,26 +189,32 @@
   root.addEventListener("click", function (ev) {
     var del = ev.target.closest("[data-corr-del]");
     if (!del || !root.dataset.deleteUrl) return;
-    if (!window.confirm(gettext("Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."))) return;
-    del.disabled = true;
-    var fd = new FormData();
-    fd.append("type", histCtx.type || "grade");
-    if (del.dataset.corrId) fd.append("correction_id", del.dataset.corrId);
-    if (histCtx.markId) fd.append("mark_id", histCtx.markId);
-    if (histCtx.topicId) fd.append("topic_id", histCtx.topicId);
-    if (histCtx.componentId) fd.append("component_id", histCtx.componentId);
-    if (histCtx.enrollmentId) fd.append("enrollment_id", histCtx.enrollmentId);
-    var token = form.querySelector("[name=csrfmiddlewaretoken]");
-    if (token) fd.append("csrfmiddlewaretoken", token.value);
-    fetch(root.dataset.deleteUrl, {
-      method: "POST",
-      body: fd,
-      headers: { "X-Requested-With": "XMLHttpRequest" },
-      credentials: "same-origin",
-    })
-      .then(function (r) { return r.json(); })
-      .then(function (j) { if (j.ok) { window.location.reload(); } else { del.disabled = false; } })
-      .catch(function () { del.disabled = false; });
+    // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+    window.EMSConfirm.open({
+      body: gettext("Bu düzəlişi geri almaq istəyirsiniz? Xana əvvəlki dəyərinə qayıdacaq."),
+      danger: true,
+    }).then(function (ok) {
+      if (!ok) return;
+      del.disabled = true;
+      var fd = new FormData();
+      fd.append("type", histCtx.type || "grade");
+      if (del.dataset.corrId) fd.append("correction_id", del.dataset.corrId);
+      if (histCtx.markId) fd.append("mark_id", histCtx.markId);
+      if (histCtx.topicId) fd.append("topic_id", histCtx.topicId);
+      if (histCtx.componentId) fd.append("component_id", histCtx.componentId);
+      if (histCtx.enrollmentId) fd.append("enrollment_id", histCtx.enrollmentId);
+      var token = form.querySelector("[name=csrfmiddlewaretoken]");
+      if (token) fd.append("csrfmiddlewaretoken", token.value);
+      fetch(root.dataset.deleteUrl, {
+        method: "POST",
+        body: fd,
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j.ok) { window.location.reload(); } else { del.disabled = false; } })
+        .catch(function () { del.disabled = false; });
+    });
   });
 
   function esc(s) {

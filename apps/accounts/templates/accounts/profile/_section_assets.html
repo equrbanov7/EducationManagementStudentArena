@@ -84,7 +84,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260910-1">
     {% endif %}
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260908-page">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
     {% endif %}
     {% if 'people-students' in allowed_sections %}
@@ -145,7 +145,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'my-journal' in allowed_sections or 'journal-close' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260721-jgrid">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% comment %}Tələbənin «Sillabusa bax» paneli — jurnalın tam səhifə variantı
     ilə EYNİ stil faylı (apps/registrar/static/registrar/css/syllabus_view.css).{% endcomment %}
@@ -194,7 +194,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
     {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260907-howto">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20260908-move">
     {% endif %}
     {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm

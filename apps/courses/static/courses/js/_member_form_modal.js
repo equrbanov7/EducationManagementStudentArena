@@ -512,27 +512,30 @@
             return;
         }
         window.deleteMember = function (memberId, name) {
-            if (!window.confirm(name + (d.i18nDeleteMemberConfirmSuffix || ""))) {
-                return;
-            }
-            // Şablon URL-i `/members/0/delete/` ilə bitir; sadə `.replace("0", …)`
-            // kurs id-sindəki ilk «0»-ı əvəz edirdi (məs. /courses/10/…) — sonluğu hədəfləyirik.
-            var url = d.deleteMemberUrl.replace(/\/0\/delete\/?$/, "/" + memberId + "/delete/");
-            window.EMSCore
-                .fetchJSON(url, { method: "POST" })
-                .then(function (data) {
-                    if (data && data.success) {
-                        window.location.reload();
-                    } else {
-                        window.alert((d.i18nDeleteFailedPrefix || "") + ((data && data.error) || d.i18nError || ""));
-                    }
-                })
-                .catch(function (error) {
-                    if (window.console && window.console.error) {
-                        window.console.error("Error:", error);
-                    }
-                    window.alert(d.i18nServerError || "");
-                });
+            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+            window.EMSConfirm.open({ body: name + (d.i18nDeleteMemberConfirmSuffix || ""), danger: true }).then(function (ok) {
+                if (!ok) {
+                    return;
+                }
+                // Şablon URL-i `/members/0/delete/` ilə bitir; sadə `.replace("0", …)`
+                // kurs id-sindəki ilk «0»-ı əvəz edirdi (məs. /courses/10/…) — sonluğu hədəfləyirik.
+                var url = d.deleteMemberUrl.replace(/\/0\/delete\/?$/, "/" + memberId + "/delete/");
+                window.EMSCore
+                    .fetchJSON(url, { method: "POST" })
+                    .then(function (data) {
+                        if (data && data.success) {
+                            window.location.reload();
+                        } else {
+                            window.alert((d.i18nDeleteFailedPrefix || "") + ((data && data.error) || d.i18nError || ""));
+                        }
+                    })
+                    .catch(function (error) {
+                        if (window.console && window.console.error) {
+                            window.console.error("Error:", error);
+                        }
+                        window.alert(d.i18nServerError || "");
+                    });
+            });
         };
     });
 })(window, document);
