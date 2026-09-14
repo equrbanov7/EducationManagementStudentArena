@@ -273,16 +273,16 @@ class QuestionScoreServiceTest(fixtures.ExamScoreEntryServiceTest):
 
     def test_sheet_metadata_carries_grid_and_defaults_from_last_sheet(self):
         meta = sheets.sheet_metadata_from_post(
-            {"question_count": "3", "question_max": "20"}, {}, offering=self.offering_a
+            {"question_count": "3", "question_max": "8"}, {}, offering=self.offering_a
         )
-        self.assertEqual((meta["question_count"], meta["question_max"]), (3, 20))
+        self.assertEqual((meta["question_count"], meta["question_max"]), (3, 8))
         with self.assertRaises(ValidationError):
             sheets.sheet_metadata_from_post({"question_count": "11"}, {}, offering=self.offering_a)
         self.assertEqual(sheets.latest_sheet_defaults([])["question_count"], 5)
-        self._sheet(question_count=4, question_max=12, protocol_number="P-1", evidence=_pdf())
+        self._sheet(question_count=4, question_max=9, protocol_number="P-1", evidence=_pdf())
         with bypass_rls():
             defaults = sheets.latest_sheet_defaults(sheets.sheets_for_offering(offering=self.offering_a))
-        self.assertEqual((defaults["question_count"], defaults["question_max"]), (4, 12))
+        self.assertEqual((defaults["question_count"], defaults["question_max"]), (4, 9))
 
     # ── idxal ────────────────────────────────────────────────────────────────
     def _roster(self):
@@ -501,3 +501,17 @@ class QuestionScoreServiceTest(fixtures.ExamScoreEntryServiceTest):
         if _name.startswith("test_"):
             locals()[_name] = None
     del _name
+
+
+class QuestionMaxCeilingTest(QuestionScoreServiceTest):
+    """Sahibin qaydası (2026-09-14): bir sualın maksimumu 10-dan yuxarı ola bilməz."""
+
+    def test_question_max_above_ten_is_rejected(self):
+        from django.core.exceptions import ValidationError
+
+        from apps.registrar import exam_score_questions as q
+
+        with self.assertRaises(ValidationError):
+            q.clean_question_grid("5", "11")
+        self.assertEqual(q.clean_question_grid("5", "10"), (5, 10))
+        self.assertEqual(q.clean_question_grid("10", "5"), (10, 5))

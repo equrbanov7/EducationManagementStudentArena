@@ -35,6 +35,8 @@ from .models.exam_score_entry import (
 )
 
 _CTX = "registrar.exam_score_entry"
+#: Sahibin qaydası (2026-09-14): bir sualın maksimumu 10-dan yuxarı qaldırıla bilməz.
+QUESTION_MAX_CEILING = 10
 
 #: Formada / idxalda sual sütunlarının etiketi («S1», «S2», …).
 QUESTION_LABEL_PREFIX = "S"
@@ -82,8 +84,12 @@ def clean_question_grid(count_raw, max_raw) -> tuple:
     question_max = _int_or_none(max_raw)
     if question_max is None:
         question_max = QUESTION_MAX_DEFAULT
-    if question_max < 1 or question_max > 100:
-        raise ValidationError(pgettext(_CTX, "Bir sualın maksimum balı 1 ilə 100 arasında olmalıdır."))
+    # Sahibin qaydası (2026-09-14): «hər sualdan max bal 10» — tavan 10-dan yuxarı
+    # qaldırıla bilməz (aşağı ola bilər: məs. 5 sual × 10 = 50, 10 sual × 5 = 50).
+    if question_max < 1 or question_max > QUESTION_MAX_CEILING:
+        raise ValidationError(
+            pgettext(_CTX, "Bir sualın maksimum balı 1 ilə %(max)s arasında olmalıdır.") % {"max": QUESTION_MAX_CEILING}
+        )
     return count, question_max
 
 

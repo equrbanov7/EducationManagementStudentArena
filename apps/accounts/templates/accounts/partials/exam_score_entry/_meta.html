@@ -92,7 +92,7 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
       <div class="ems-field">
         <label class="ems-field__label" for="ese-question-max">{% trans "Bir sualın maksimumu" context "registrar.exam_score_entry" %}</label>
         <input type="number" id="ese-question-max" name="question_max" form="ese-roster-form" class="ems-input ese-qmax"
-               min="1" max="100" step="1" inputmode="numeric" value="{{ s.question_max }}" data-ese-meta-field data-ese-question-max>
+               min="1" max="10" step="1" inputmode="numeric" value="{{ s.question_max }}" data-ese-meta-field data-ese-question-max>
       </div>
       <span class="ems-field__hint ese-meta__grid-pair-hint">{% trans "0 seçilsə yalnız yekun imtahan balı yazılır (köhnə vərəqlər)." context "registrar.exam_score_entry" %} {% trans "Sualların cəmi imtahan balının tavanını aşa bilməz." context "registrar.exam_score_entry" %} (<b>{{ s.exam_score_max }}</b>)</span>
     </div>

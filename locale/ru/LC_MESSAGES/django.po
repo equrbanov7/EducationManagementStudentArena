@@ -68514,8 +68514,8 @@ msgid "0 — yalnız yekun bal"
 msgstr "0 — только итоговый балл"
 
 msgctxt "registrar.exam_score_entry"
-msgid "Bir sualın maksimum balı 1 ilə 100 arasında olmalıdır."
-msgstr "Максимальный балл за вопрос должен быть от 1 до 100."
+msgid "Bir sualın maksimum balı 1 ilə %(max)s arasında olmalıdır."
+msgstr "Максимальный балл за вопрос должен быть от 1 до %(max)s."
 
 msgctxt "registrar.exam_score_entry"
 msgid "Bir sualın maksimumu"
