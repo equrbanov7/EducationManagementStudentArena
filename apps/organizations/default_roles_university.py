@@ -5,11 +5,7 @@ from core.constants import RoleScopeType
 
 from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_rim import RIM_STAFF_ROLES
-from .default_roles_shared import (
-    PEOPLE_DIRECTORY_FULL,
-    PEOPLE_DIRECTORY_READ,
-    RIM_ACCOUNT_PERMISSIONS,
-)
+from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
 from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
@@ -146,60 +142,14 @@ UNIVERSITY_ROLES = [
         # (əvvəl yalnız `unit.view` açarına görə həll olunurdu).
         "level": 95,
         "scope_type": RoleScopeType.ORGANIZATION,
-        "permissions": [
-            "org.view",
-            "org.edit",
-            "unit.*",
-            "member.*",
-            "course.*",
-            "exam.*",
-            "final_score.entry",  # sahibin qərarı 2026-09-14: kağız bal köçürməsi RİM-də də (miqr. 0052)
-            "grade.*",
-            # org_admin-alias davranış qorunması (level 95 >= 80).
-            "group.view",
-            "group.manage",
-            "journal.correct",
-            # Semestr sonu jurnal bağlama/açma (sahibin qərarı, 2026-08) —
-            # təsdiq zəncirini əvəz edən yeganə açar. Başqa rola lazım olsa
-            # permission-editordan verilir.
-            "journal.close",
-            # Jurnal siyahısının idarəsi (alt qrupdan əlavə/geri götürmə) —
-            # RİM org-wide operatordur, əməl audit olunur.
-            "journal.roster",
-            # Fənnin başqa müəllimə TƏHVİLİ (`journal.reassign`) — «müəllim işdən
-            # çıxdı, jurnal artıq başqasının olsun». Əhatə struktur scope-una
-            # tabedir; müəllimin özündə bu açar YOXDUR (öz jurnalını ata bilməz).
-            "journal.reassign",
-            # Dərs cədvəli (U4): RİM org-wide cədvəl operatorudur — slot əlavə/sil.
-            "schedule.view",
-            "schedule.manage",
-            # Sillabus axınının tam səlahiyyəti (idarə + qərar) — RİM sistemin
-            # akademik operatorudur; hər əməl audit olunur.
-            "syllabus.*",
-            # Dərs yükü də RİM-in operator səthidir (bütün kafedralar).
-            "workload.*",
-            # Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir.
-            "role.*",
-            # `user.grant_privileged` YOXDUR: yeni admin yaratmaq ayrıca açardır.
-            *RIM_ACCOUNT_PERMISSIONS,
-            # Tələbə idxalı (2026-09) — RİM cutover operatorudur: qəbul siyahısını
-            # yükləyib hesab + üzvlük + akademik qeyd yaradır (hər sətir audit olunur).
-            "user.import",
-            # Sahibin qərarı: «RİM mərkəzinin hər şeyə səlahiyyəti olsun» —
-            # kataloqun tam dəsti (oxu + hesab dayandırma + müəllim statusu).
-            *PEOPLE_DIRECTORY_FULL,
-            # RİM akademik operatordur: köçürmə/status əməllərini o da apara bilir
-            # (hər əməl audit olunur, rəsmi sübut zənciri dəyişmir).
-            "people.manage_academic",
-            "appeal.respond",
-            "appeal.decide",
-            "analytics.view_all",
-            "audit.view",
-            # F-06 (2026-09-14): `audit.export` = CSV ixracı (hər `audit.view` şablonuna cüt), `org.settings` =
-            # ayarlar səhifəsi (səviyyə ≥90 + açar); miqrasiya 0051 mövcud rollara əkir.
-            "audit.export",
-            "org.settings",
-        ],
+        # SAHİBİN QƏRARI (2026-09-14, səhər): «RİM rəhbərinə hər şeyin icazəsini
+        # ver» — başqa müəllimin jurnalına baxsın, dərs əlavə etsin, sillabusa
+        # baxsın və s. Rektor kimi tam wildcard (`*`); köhnə tək-tək siyahı
+        # `organizations/migrations/0053_rim_full_permissions.py`-də (geri alma
+        # üçün) saxlanılır. `user.grant_privileged` də daxildir (əvvəl əsasnamə 5.5
+        # ilə qəsdən kənarda idi — sahib «hər şey» dedi). Jurnalda birbaşa
+        # redaktə `registrar/journal_access.is_direct_editor`-də eyni qərarla açıldı.
+        "permissions": ["*"],
         "description": "ICT manager — documented journal-correction override (bypasses edit-window & closed semesters), full exam-centre + structure access; every action audited",
     },
     {

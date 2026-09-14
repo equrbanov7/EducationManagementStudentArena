@@ -59,7 +59,8 @@ class CatalogAndTemplatesTest(SimpleTestCase):
                 if "audit.view" in role["permissions"]:
                     seen += 1
                     self.assertIn("audit.export", role["permissions"], role["name"])
-        self.assertGreaterEqual(seen, 8)
+        # 2026-09-14: RİM `*`-a keçdi (7 açıq şablon + rektor/RİM wildcard).
+        self.assertGreaterEqual(seen, 7)
 
     def test_level_90_templates_carry_settings_keys(self):
         for roles in DEFAULT_ROLES.values():

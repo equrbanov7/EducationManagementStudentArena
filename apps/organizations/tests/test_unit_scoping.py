@@ -88,7 +88,8 @@ class UniversityDefaultRolesTest(TestCase):
     def test_rim_role_carries_journal_close_permission(self):
         """Jurnalı semestr sonunda RİM bağlayır (`journal.close`)."""
         role = self.org.roles.get(name="ikt_rehber")
-        self.assertIn("journal.close", role.permissions)
+        # 2026-09-14: RİM tam wildcard daşıyır — `*` açarı əhatə edir.
+        self.assertTrue("journal.close" in role.permissions or "*" in role.permissions)
 
 
 class UnitScopingTest(TestCase):

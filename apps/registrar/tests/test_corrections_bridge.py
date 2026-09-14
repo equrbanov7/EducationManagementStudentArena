@@ -882,19 +882,19 @@ class ItemCorrectionTest(_BaseJournalSetup):
 
 
 class JournalAccessTest(_BaseJournalSetup):
-    """Korrektor (İKT) düzəliş rejimi olmadan HEÇ NƏ dəyişə bilməz — birbaşa
-    redaktə yalnız müəllim/sahib/superuser üçündür."""
+    """Birbaşa redaktə: müəllim / sahib / superuser / RİM rəhbəri (sahibin qərarı
+    2026-09-14 — əvvəl RİM yalnız korrektor idi)."""
 
-    def test_direct_editor_excludes_corrector(self):
+    def test_direct_editor_includes_rim_head_since_2026_09_14(self):
         from types import SimpleNamespace
 
         from apps.registrar.journal_access import can_edit_journal, is_direct_editor
 
         with bypass_rls():
-            # İKT: jurnalı AÇA bilər (korrektor), amma birbaşa redaktor DEYİL.
+            # RİM rəhbəri: jurnalı açır VƏ birbaşa redaktə edir (dərs əlavə, bal).
             ikt = SimpleNamespace(is_authenticated=True, is_superuser=False, is_ikt_rehber=True, id=987654)
             self.assertTrue(can_edit_journal(ikt, self.offering))
-            self.assertFalse(is_direct_editor(ikt, self.offering))
+            self.assertTrue(is_direct_editor(ikt, self.offering))
             # Müəllim (offering instructor): hər ikisi.
             self.assertTrue(is_direct_editor(self.teacher, self.offering))
             self.assertTrue(can_edit_journal(self.teacher, self.offering))
