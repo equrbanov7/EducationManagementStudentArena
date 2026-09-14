@@ -357,7 +357,7 @@ msgstr "Выбранная организация не соответствуе�
 #: apps/accounts/forms/auth/register.py:421
 msgctxt "accounts.form.register.error"
 msgid "specialization_required"
-msgstr "Специализация / Факультет"
+msgstr "Для студентов обязательно указать специальность / факультет."
 
 #: apps/accounts/forms/auth/register.py:426 apps/accounts/templates/accounts/register.html:284
 msgctxt "accounts.form.register.error"
@@ -614,27 +614,27 @@ msgstr "Можно добавить не более %(limit)s записей э�
 #: apps/accounts/templates/accounts/assigned_courses.html:3
 msgctxt "accounts.assigned_courses_page"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Мои назначенные курсы"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:13
 msgctxt "accounts.assigned_courses_page"
 msgid "category_missing"
-msgstr "No category"
+msgstr "Без категории"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:18
 msgctxt "accounts.assigned_courses_page"
 msgid "heading"
-msgstr "My assigned courses"
+msgstr "Мои назначенные курсы"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:21
 msgctxt "accounts.assigned_courses_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Вернуться в профиль"
 
 #: apps/accounts/templates/accounts/assigned_courses.html:27
 msgctxt "accounts.assigned_courses_page"
 msgid "search_placeholder"
-msgstr "Search course..."
+msgstr "Поиск курса..."
 
 #: apps/accounts/templates/accounts/assigned_courses.html:49
 msgctxt "accounts.assigned_courses_page"
@@ -644,22 +644,22 @@ msgstr "No courses assigned yet."
 #: apps/accounts/templates/accounts/assigned_exams.html:3
 msgctxt "accounts.assigned_exams_page"
 msgid "title"
-msgstr "My assigned exams"
+msgstr "Мои назначенные экзамены"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:18
 msgctxt "accounts.assigned_exams_page"
 msgid "heading"
-msgstr "My assigned exams"
+msgstr "Мои назначенные экзамены"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:21
 msgctxt "accounts.assigned_exams_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Вернуться в профиль"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:27
 msgctxt "accounts.assigned_exams_page"
 msgid "search_placeholder"
-msgstr "Search exam..."
+msgstr "Поиск экзамена..."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:54
 msgctxt "accounts.assigned_exams_page"
@@ -709,7 +709,7 @@ msgstr "• • • • • •"
 #: apps/accounts/templates/accounts/assigned_exams.html:105
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_cancel"
-msgstr "Cancel"
+msgstr "Отмена"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:106
 msgctxt "accounts.assigned_exams_page"
@@ -781,7 +781,7 @@ msgstr "Адрес электронной почты"
 #: apps/accounts/templates/accounts/first_login_set_password.html:51
 msgctxt "accounts.first_login"
 msgid "ad.soyad@qku.edu.az"
-msgstr "ad.soyad@qku.edu.az"
+msgstr "имя.фамилия@qku.edu.az"
 
 #: apps/accounts/templates/accounts/first_login_set_password.html:54
 msgctxt "accounts.first_login"
@@ -969,12 +969,12 @@ msgstr "Feedback (optional)"
 #: apps/accounts/templates/accounts/grading_queue.html:176
 msgctxt "accounts.grading_queue_page"
 msgid "submit_grade"
-msgstr "Submit grade"
+msgstr "Отправить балл"
 
 #: apps/accounts/templates/accounts/grading_queue.html:179
 msgctxt "accounts.grading_queue_page"
 msgid "next_grade"
-msgstr "Next grade"
+msgstr "Следующая оценка"
 
 #: apps/accounts/templates/accounts/grading_queue.html:192
 msgctxt "accounts.grading_queue_page"
@@ -1189,7 +1189,7 @@ msgstr "My Results"
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
 msgid "back_to_profile"
-msgstr "Back to profile"
+msgstr "Вернуться в профиль"
 
 #: apps/accounts/templates/accounts/my_results.html:26
 msgctxt "accounts.my_results_page"
@@ -1226,7 +1226,7 @@ msgstr "Курсовые работы"
 #: apps/accounts/templates/accounts/my_results.html:57
 msgctxt "accounts.my_results_page"
 msgid "search_placeholder"
-msgstr "Search course..."
+msgstr "Поиск курса..."
 
 #: apps/accounts/templates/accounts/my_results.html:59
 msgctxt "accounts.my_results_page"
@@ -1773,7 +1773,7 @@ msgstr "Создать новую группу"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:37
 msgctxt "profile.groups"
 msgid "search_placeholder_groups"
-msgstr "Search course..."
+msgstr "Поиск по названию группы, преподавателю или студенту"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:39 apps/accounts/templates/accounts/partials/_groups_overview_content.html:200
 msgctxt "profile.groups"
@@ -1789,13 +1789,13 @@ msgstr "Очистить поиск"
 #, python-format
 msgctxt "profile.groups"
 msgid "filtered_group_count %(filtered_count)s %(total_count)s"
-msgstr "filtered_group_count %(filtered_count)s %(total_count)s"
+msgstr "%(filtered_count)s результатов · %(total_count)s групп всего"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:53
 #, python-format
 msgctxt "profile.groups"
 msgid "total_group_count %(count)s"
-msgstr "total_group_count %(count)s"
+msgstr "%(count)s групп"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:68 apps/accounts/templates/accounts/partials/_groups_overview_content.html:160
 msgctxt "profile.groups"
@@ -3015,12 +3015,12 @@ msgstr "сек. до открытия."
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:19 apps/accounts/templates/accounts/partials/_review_results_content.html:21
 msgctxt "profile.pending_review"
 msgid "search_placeholder"
-msgstr "Поиск студентов, курсов, экзаменов..."
+msgstr "Поиск студента, курса, экзамена..."
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:27 apps/accounts/templates/accounts/partials/_review_results_content.html:29
 msgctxt "profile.pending_review"
 msgid "type_all"
-msgstr "Все они"
+msgstr "Все"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:28 apps/accounts/templates/accounts/partials/_review_results_content.html:30 apps/accounts/templates/accounts/partials/_review_results_content.html:96
 msgctxt "profile.pending_review"
@@ -3030,7 +3030,7 @@ msgstr "Экзамен"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:29 apps/accounts/templates/accounts/partials/_review_results_content.html:31 apps/accounts/templates/accounts/partials/_review_results_content.html:98
 msgctxt "profile.pending_review"
 msgid "type_assignment"
-msgstr "Задача"
+msgstr "Задание"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:30 apps/accounts/templates/accounts/partials/_review_results_content.html:32 apps/accounts/templates/accounts/partials/_review_results_content.html:100
 msgctxt "profile.pending_review"
@@ -3050,22 +3050,22 @@ msgstr "Все статусы"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:40 apps/accounts/templates/accounts/partials/_pending_review_content.html:133
 msgctxt "profile.pending_review"
 msgid "status_submitted"
-msgstr "Поданный"
+msgstr "Отправлено"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:41 apps/accounts/templates/accounts/partials/_pending_review_content.html:135
 msgctxt "profile.pending_review"
 msgid "status_expired"
-msgstr "Истекший"
+msgstr "Истёк"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:42 apps/accounts/templates/accounts/partials/_pending_review_content.html:137
 msgctxt "profile.pending_review"
 msgid "status_pending"
-msgstr "На удерживании"
+msgstr "В ожидании"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:43 apps/accounts/templates/accounts/partials/_pending_review_content.html:139
 msgctxt "profile.pending_review"
 msgid "status_late"
-msgstr "Уже поздно"
+msgstr "С опозданием"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:51 apps/accounts/templates/accounts/partials/_review_results_content.html:41 apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:54 apps/exams/templates/exams/teacher/teacher_exam_results.html:134
 msgid "Bütün qruplar"
@@ -3087,7 +3087,7 @@ msgstr "Фильтр"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:82
 msgctxt "profile.pending_review"
 msgid "list_title"
-msgstr "Контрольный список"
+msgstr "Список на проверку"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:97
 msgid "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
@@ -3141,7 +3141,7 @@ msgstr "Нет ожидающих проверок"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:181
 msgctxt "profile.pending_review"
 msgid "empty_not_found"
-msgstr "Вакансий для проверки не найдено."
+msgstr "Работ для проверки не найдено."
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:186
 msgid "Vaxt bitdi."
@@ -4741,7 +4741,7 @@ msgstr "Пример: Лаборатория 1"
 #: apps/accounts/templates/accounts/partials/register_steps/_step2.html:51
 msgctxt "accounts.register"
 msgid "role_owner_description"
-msgstr "Краткая информация об этом ресурсе"
+msgstr "Зарегистрируйте своё учреждение и управляйте им как владелец."
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step2.html:56
 msgctxt "accounts.register"
@@ -4751,7 +4751,7 @@ msgstr "Преподаватель"
 #: apps/accounts/templates/accounts/partials/register_steps/_step2.html:57
 msgctxt "accounts.register"
 msgid "role_teacher_description"
-msgstr "Краткая информация об этом ресурсе"
+msgstr "Присоединяйтесь как преподаватель и управляйте курсами и студентами."
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step2.html:62
 msgctxt "accounts.register"
@@ -4844,12 +4844,12 @@ msgstr "Обязательно"
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:91
 msgctxt "accounts.register"
 msgid "teacher_fields_title"
-msgstr "Teacher feedback"
+msgstr "Данные преподавателя"
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:96
 msgctxt "accounts.register"
 msgid "staff_fields_title"
-msgstr "Title"
+msgstr "Данные сотрудника"
 
 # Added for updated register searchable select and org-role copy
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:125 apps/accounts/templates/accounts/register.html:246
@@ -5843,7 +5843,7 @@ msgstr "Your account security has been restored. You can now log in with your ne
 #: apps/accounts/templates/accounts/password_reset_complete.html:29
 msgctxt "accounts.password_reset_complete_page"
 msgid "login_now"
-msgstr "Login now"
+msgstr "Войти сейчас"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:4
 msgctxt "accounts.password_reset_confirm_page"
@@ -7652,7 +7652,7 @@ msgstr "Управление категориями"
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:14
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Создайте новую публикацию и выберите, кто её увидит.Используйте кнопку ниже, чтобы создать новую публикацию в редакторе по умолчанию."
+msgstr "Создайте новую публикацию и выберите, кто её увидит. Используйте кнопку ниже, чтобы создать публикацию в стандартном редакторе."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:30 apps/blog/templates/post_form.html:20
 msgid "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
@@ -7671,7 +7671,7 @@ msgstr "Категория"
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:55 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:54
 msgctxt "profile.posts"
 msgid "label_excerpt"
-msgstr "Короткий контент"
+msgstr "Краткое содержание"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:60 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:59
 msgctxt "profile.posts"
@@ -7792,7 +7792,7 @@ msgstr "Учебное заведение"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:122
 msgctxt "profile.edit"
 msgid "placeholder_institution"
-msgstr "Войти в учебное заведение"
+msgstr "Укажите учебное заведение"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:125
 msgctxt "profile.edit"
@@ -8243,7 +8243,7 @@ msgstr "Создайте первый тест"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:24
 msgctxt "profile.results"
 msgid "tab_all"
-msgstr "Все они"
+msgstr "Все"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:32
 msgctxt "profile.results"
@@ -9085,7 +9085,7 @@ msgstr "GPA за семестр — кредитно-взвешенное сре
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:162
 msgctxt "profile.overall_academic"
 msgid "ÜOMG"
-msgstr "GPA"
+msgstr "Ср. балл"
 
 #: apps/accounts/templates/accounts/profile/sections/_overall_academic.html:171
 msgctxt "profile.overall_academic"
@@ -9924,7 +9924,7 @@ msgstr "Загрузка…"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:15
 msgctxt "profile.posts"
 msgid "modal_edit_title"
-msgstr "Редактировать сообщение"
+msgstr "Редактировать публикацию"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:22
 msgctxt "profile.posts"
@@ -9948,7 +9948,7 @@ msgstr "После сохранения этот пост снова будет 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:64
 msgctxt "profile.posts"
 msgid "label_current_image"
-msgstr "Существующее изображение"
+msgstr "Текущее изображение"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:67
 msgctxt "profile.posts"
@@ -9963,7 +9963,7 @@ msgstr "Изображение не назначено"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:73
 msgctxt "profile.posts"
 msgid "label_upload_new_image"
-msgstr "Загрузите новое изображение"
+msgstr "Загрузить новое изображение"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:79
 msgctxt "profile.posts"
@@ -9988,12 +9988,12 @@ msgstr "Подтвердить удаление"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:101
 msgctxt "profile.posts"
 msgid "confirm_delete_prefix"
-msgstr "Вы уверены?"
+msgstr "Вы уверены, что хотите удалить публикацию"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:101
 msgctxt "profile.posts"
 msgid "confirm_delete_suffix"
-msgstr "Вы хотите удалить сообщение под названием?"
+msgstr "?"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:104
 msgctxt "profile.posts"
@@ -10008,7 +10008,7 @@ msgstr "Несохраненные изменения"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:112
 msgctxt "profile.posts"
 msgid "unsaved_message"
-msgstr "Изменения не сохраняются. Вы хотите выйти из хранилища?"
+msgstr "Изменения не сохранены. Выйти без сохранения?"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:114
 msgctxt "profile.posts"
@@ -13902,7 +13902,7 @@ msgstr "Welcome"
 #: apps/accounts/templates/accounts/student_dashboard.html:19
 msgctxt "accounts.student_dashboard"
 msgid "btn_profile"
-msgstr "Profile"
+msgstr "Профиль"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:22
 msgctxt "accounts.student_dashboard"
@@ -13932,7 +13932,7 @@ msgstr "View all"
 #: apps/accounts/templates/accounts/student_dashboard.html:64
 msgctxt "accounts.student_dashboard"
 msgid "empty_courses"
-msgstr "Empty courses"
+msgstr "Курсов пока нет."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:76
 msgctxt "accounts.student_dashboard"
@@ -13947,7 +13947,7 @@ msgstr "Pending unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
 msgid "empty_assignments"
-msgstr "Empty assignments"
+msgstr "Заданий пока нет."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:115
 msgctxt "accounts.student_dashboard"
@@ -13967,7 +13967,7 @@ msgstr "Start exam"
 #: apps/accounts/templates/accounts/student_dashboard.html:139
 msgctxt "accounts.student_dashboard"
 msgid "empty_upcoming_exams"
-msgstr "Empty upcoming exams"
+msgstr "Предстоящих экзаменов нет."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:151
 msgctxt "accounts.student_dashboard"
@@ -13982,7 +13982,7 @@ msgstr "Answer unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
 msgid "empty_recent_grades"
-msgstr "Empty recent grades"
+msgstr "Недавних оценок нет."
 
 #: apps/accounts/templates/accounts/syllabus/detail.html:82
 msgctxt "accounts.syllabus"
@@ -14321,7 +14321,7 @@ msgstr "Новый код подтверждения отправлен."
 #: apps/accounts/views/auth/register.py:161
 msgctxt "accounts.auth.message"
 msgid "verification_email_not_found_register_again"
-msgstr "Письмо для подтверждения не найдено, зарегистрируйтесь снова.Электронная почта для подтверждения не найдена. Зарегистрируйтесь еще раз."
+msgstr "Письмо для подтверждения не найдено. Зарегистрируйтесь заново."
 
 #: apps/accounts/views/auth/register.py:171 apps/accounts/views/auth/register.py:297
 msgctxt "accounts.auth.message"
@@ -14362,7 +14362,7 @@ msgstr "Подождите {seconds} секунд для нового OTP-код
 #: apps/accounts/views/auth/register.py:378
 msgctxt "accounts.auth.message"
 msgid "logout_success"
-msgstr "Вы успешно выступили."
+msgstr "Вы успешно вышли из системы."
 
 #: apps/accounts/views/dashboard/results.py:38 apps/accounts/views/dashboard/student.py:83 apps/accounts/views/dashboard/student.py:116 apps/accounts/views/dashboard/student.py:139 apps/accounts/views/dashboard/student.py:183
 msgctxt "accounts.student_assignments.message"
@@ -14842,7 +14842,7 @@ msgstr "Этот адрес электронной почты уже испол�
 #: apps/accounts/views/profile/post_handler.py:232
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr "Для студента требуется указать университет или школу.Для роли Студента требуется название университета или идентификатор школы."
+msgstr "Для студента требуется указать университет или школу."
 
 #: apps/accounts/views/profile/post_handler.py:252
 msgctxt "accounts.profile_edit.message"
@@ -14882,7 +14882,7 @@ msgstr "Вы вернулись в свой профиль."
 #: apps/accounts/views/roles/_assignment_flow/_resolvers.py:254
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "Пользователь не выбрал эту организацию при регистрации.Этот пользователь не дал согласия при регистрации и не может присоединиться к вашей организации."
+msgstr "Пользователь не выбрал эту организацию при регистрации и не может присоединиться к вашей организации."
 
 #: apps/accounts/views/roles/_assignment_flow/flow.py:97
 msgctxt "accounts.role_assignment.message"
@@ -14929,7 +14929,7 @@ msgstr "Вы можете управлять пользователями тол
 #: apps/accounts/views/roles/manage.py:96
 msgctxt "accounts.manage_roles.message"
 msgid "insufficient_level_for_target_user"
-msgstr "Вашего уровня недостаточно для этого пользователя.Ваш уровень недостаточно высок, чтобы управлять ролью этого пользователя."
+msgstr "Вашего уровня недостаточно, чтобы управлять ролью этого пользователя."
 
 #: apps/accounts/views/roles/manage.py:112
 msgctxt "accounts.manage_roles.message"
@@ -15581,7 +15581,7 @@ msgstr "Вопрос"
 #: apps/appeals/models.py:215
 msgctxt "appeals.model.adjustment.field"
 msgid "delta_points"
-msgstr "Context"
+msgstr "Баллы"
 
 #: apps/appeals/models.py:230
 msgctxt "appeals.model.adjustment.field"
@@ -15632,7 +15632,7 @@ msgstr "Пожалуйста, введите корректный email."
 #: apps/appeals/services/creation.py:63
 msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
-msgstr "Комментарии"
+msgstr "Комментарий к апелляции слишком короткий (не менее {min_length} символов)."
 
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
@@ -16282,7 +16282,7 @@ msgstr "Эта апелляция больше не существует — с�
 #: apps/appeals/views/student/endpoints.py:179
 msgctxt "appeals.view.message"
 msgid "Apellyasiyanız qeydə alındı."
-msgstr "Детали апелляции"
+msgstr "Ваша апелляция зарегистрирована."
 
 #: apps/appeals/views/teacher/endpoints.py:234
 msgctxt "appeals.view.message"
@@ -16302,7 +16302,7 @@ msgstr "Напишите пояснение для каждого решения
 #: apps/appeals/views/teacher/endpoints.py:322
 msgctxt "appeals.view.message"
 msgid "Qərarlar yadda saxlanıldı."
-msgstr "Сохранить решения"
+msgstr "Решения сохранены."
 
 #: apps/appeals/views/teacher/endpoints.py:328
 #, python-brace-format
@@ -16723,7 +16723,7 @@ msgstr "Поставки"
 #: apps/assignments/models.py:385
 msgctxt "assignment.notification.choice.type"
 msgid "deadline"
-msgstr "Deadline"
+msgstr "Напоминание о сроке"
 
 #: apps/assignments/models.py:386
 msgctxt "assignment.notification.choice.type"
@@ -16807,7 +16807,7 @@ msgstr "Попробуйте остальное"
 #: apps/assignments/templates/assignments/assignment_detail.html:71
 msgctxt "assignment.detail"
 msgid "status_deadline_passed"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:75
 msgctxt "assignment.detail"
@@ -16847,12 +16847,12 @@ msgstr "Оценка"
 #: apps/assignments/templates/assignments/assignment_detail.html:127
 msgctxt "assignment.detail"
 msgid "status_pending"
-msgstr "Он ждет"
+msgstr "Ожидает"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:129
 msgctxt "assignment.detail"
 msgid "status_graded"
-msgstr "оценено"
+msgstr "Оценено"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:159
 msgctxt "assignment.detail"
@@ -16916,7 +16916,7 @@ msgstr "Доступ ограничен"
 #: apps/assignments/templates/assignments/assignment_detail.html:219
 msgctxt "assignment.detail"
 msgid "cannot_submit_deadline"
-msgstr "Тайм-аут – ответ не принят."
+msgstr "Срок истёк — ответы больше не принимаются."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:221
 msgctxt "assignment.detail"
@@ -16991,7 +16991,7 @@ msgstr "Удалить"
 #: apps/assignments/templates/assignments/assignment_section.html:95
 msgctxt "assignment.section"
 msgid "empty_teacher"
-msgstr "Вакансий для фрилансеров пока нет"
+msgstr "Самостоятельных работ пока нет"
 
 #: apps/assignments/templates/assignments/assignment_section.html:97
 msgctxt "assignment.section"
@@ -17030,12 +17030,12 @@ msgstr "Время прошло"
 #: apps/assignments/templates/assignments/assignment_section.html:180
 msgctxt "assignment.section"
 msgid "empty_student"
-msgstr "Вам не назначена внештатная работа"
+msgstr "Вам не назначено ни одной самостоятельной работы"
 
 #: apps/assignments/templates/assignments/assignment_section.html:187
 msgctxt "assignment.section"
 msgid "empty_generic"
-msgstr "Никакой фрилансерской работы"
+msgstr "Самостоятельных работ нет"
 
 #: apps/assignments/templates/assignments/detail.html:25
 msgctxt "assignment.legacy.detail"
@@ -17266,7 +17266,7 @@ msgstr "Попробуйте остальное"
 #: apps/assignments/templates/assignments/my_submissions.html:62 apps/labs/templates/labs/my_lab_answers.html:57
 msgctxt "assignment.my_submissions"
 msgid "status_deadline_passed"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/my_submissions.html:64
 msgctxt "assignment.my_submissions"
@@ -17306,12 +17306,12 @@ msgstr "Операция"
 #: apps/assignments/templates/assignments/my_submissions.html:103
 msgctxt "assignment.my_submissions"
 msgid "status_pending"
-msgstr "Он ждет"
+msgstr "Ожидает"
 
 #: apps/assignments/templates/assignments/my_submissions.html:105
 msgctxt "assignment.my_submissions"
 msgid "status_graded"
-msgstr "оценено"
+msgstr "Оценено"
 
 #: apps/assignments/templates/assignments/my_submissions.html:126 apps/labs/templates/labs/my_lab_answers.html:126
 msgctxt "assignment.my_submissions"
@@ -17493,7 +17493,7 @@ msgstr "Вы уверены, что хотите удалить?"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:23
 msgctxt "assignment.modals"
 msgid "modal_add_title"
-msgstr "Новая работа фрилансера"
+msgstr "Новая самостоятельная работа"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:31 apps/assignments/templates/assignments/partials/_assignment_modals.html:105
 msgctxt "assignment.modals"
@@ -17538,17 +17538,17 @@ msgstr "Крайний срок"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:59 apps/assignments/templates/assignments/partials/_assignment_modals.html:133
 msgctxt "assignment.modals"
 msgid "label_max_attempts"
-msgstr "Макс. пытаться"
+msgstr "Макс. попыток"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:68 apps/assignments/templates/assignments/partials/_assignment_modals.html:142
 msgctxt "assignment.modals"
 msgid "label_allowed_groups"
-msgstr "Авторизованные группы"
+msgstr "Допущенные группы"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:69 apps/assignments/templates/assignments/partials/_assignment_modals.html:143
 msgctxt "assignment.modals"
 msgid "placeholder_group_search"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы..."
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:71 apps/assignments/templates/assignments/partials/_assignment_modals.html:79 apps/assignments/templates/assignments/partials/_assignment_modals.html:145 apps/assignments/templates/assignments/partials/_assignment_modals.html:153
 msgctxt "assignment.modals"
@@ -17558,7 +17558,7 @@ msgstr "Выбрано"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:74 apps/assignments/templates/assignments/partials/_assignment_modals.html:148
 msgctxt "assignment.modals"
 msgid "label_allowed_students"
-msgstr "Приемлемые студенты"
+msgstr "Допущенные студенты"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:75 apps/assignments/templates/assignments/partials/_assignment_modals.html:149
 msgctxt "assignment.modals"
@@ -18027,7 +18027,7 @@ msgstr "Записей аудита пока нет."
 #: apps/audit/views.py:44
 msgctxt "audit.view.permission"
 msgid "required_permission_missing"
-msgstr "Поля имени, фамилии и электронной почты нельзя оставлять пустыми."
+msgstr "У вас нет необходимого разрешения: {permission}."
 
 #: apps/blog/forms.py:21
 msgctxt "blog.form.subscription"
@@ -19486,7 +19486,7 @@ msgstr "Re: [%(brand)s] %(subject)s"
 
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:13 apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:13
 msgid "Home"
-msgstr "Home"
+msgstr "Главная"
 
 #: apps/contact/templates/admin/contact/contactmessage/reply.html:17 apps/trial_exams/templates/admin/trial_exams/trialexamrequest/reply.html:17
 msgid "Cavablandır"
@@ -20924,7 +20924,7 @@ msgstr "Посмотреть ответы"
 #: apps/courses/views/shared/_helpers.py:52
 msgctxt "courses.view.permission"
 msgid "required_permission_missing"
-msgstr "Поля имени, фамилии и электронной почты нельзя оставлять пустыми."
+msgstr "У вас нет необходимого разрешения: {permission}."
 
 #: apps/courses/views/shared/_helpers.py:86
 msgctxt "courses.view.permission"
@@ -21529,7 +21529,7 @@ msgstr "Язык"
 #: apps/exams/domain/coding.py:45
 msgctxt "exams.model.coding_question.field"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Название"
 
 #: apps/exams/domain/coding.py:48
 msgctxt "exams.model.coding_question.field"
@@ -21574,7 +21574,7 @@ msgstr "Максимальный балл"
 #: apps/exams/domain/coding.py:80
 msgctxt "exams.model.coding_question.field"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Начальный код"
 
 #: apps/exams/domain/coding.py:84
 msgctxt "exams.model.coding_question.field"
@@ -21894,7 +21894,7 @@ msgstr "Автор"
 #: apps/exams/domain/exam_definition.py:54
 msgctxt "exams.model.exam.field"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Название"
 
 #: apps/exams/domain/exam_definition.py:58
 msgctxt "exams.model.exam.field"
@@ -22049,12 +22049,12 @@ msgstr "Уровень прокторинга"
 #: apps/exams/domain/exam_definition.py:174
 msgctxt "exams.model.exam.field"
 msgid "settings"
-msgstr "Settings"
+msgstr "Параметры"
 
 #: apps/exams/domain/exam_definition.py:175
 msgctxt "exams.model.exam.help"
 msgid "settings"
-msgstr "Settings"
+msgstr "Параметры"
 
 #: apps/exams/domain/exam_definition.py:178
 msgctxt "exams.model.exam.field"
@@ -22754,7 +22754,7 @@ msgstr "Код школы"
 #: apps/exams/domain/question_bank/exam_question.py:29
 msgctxt "exams.model.question_bank.choice.organization_type"
 msgid "course_center"
-msgstr "Hint course center"
+msgstr "Учебный центр"
 
 #: apps/exams/domain/question_bank/exam_question.py:30
 msgctxt "exams.model.question_bank.choice.organization_type"
@@ -23379,12 +23379,12 @@ msgstr "Требовать полноэкранный режим"
 #: apps/exams/domain/supervision.py:71
 msgctxt "supervision.config.field"
 msgid "grace_period_seconds"
-msgstr "Льготный период истёк"
+msgstr "Льготный период (сек.)"
 
 #: apps/exams/domain/supervision.py:72
 msgctxt "supervision.config.help"
 msgid "grace_period_seconds"
-msgstr "Льготный период истёк"
+msgstr "Сколько секунд даётся студенту на возврат, прежде чем попытка будет заблокирована."
 
 #: apps/exams/domain/supervision.py:79
 msgctxt "supervision.config.field"
@@ -23564,7 +23564,7 @@ msgstr "Автоматическая отправка"
 #: apps/exams/domain/supervision.py:216
 msgctxt "supervision.incident.choice.event"
 msgid "resume_window_expired"
-msgstr "Код недействителен или срок его действия истек."
+msgstr "Окно возобновления истекло"
 
 #: apps/exams/domain/supervision.py:218
 msgctxt "supervision.incident.choice.event"
@@ -23809,7 +23809,7 @@ msgstr "Язык"
 #: apps/exams/forms/coding.py:148 apps/exams/forms/exam_coding_fields.py:20
 msgctxt "exams.form.coding.label"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Название"
 
 #: apps/exams/forms/coding.py:149 apps/exams/forms/exam_coding_fields.py:25
 msgctxt "exams.form.coding.label"
@@ -23854,7 +23854,7 @@ msgstr "Максимальный балл"
 #: apps/exams/forms/coding.py:157 apps/exams/forms/exam_coding_fields.py:71
 msgctxt "exams.form.coding.label"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Начальный код"
 
 #: apps/exams/forms/coding.py:158 apps/exams/forms/exam_coding_fields.py:100
 msgctxt "exams.form.coding.label"
@@ -24719,12 +24719,12 @@ msgstr "Отмеченный правильным вариант {option} отс
 #: apps/exams/services/parsing/_core.py:407
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
-msgstr "Верно"
+msgstr "Правильный ответ заметно длиннее остальных вариантов — это даёт студенту явную подсказку."
 
 #: apps/exams/services/parsing/_core.py:415
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_short"
-msgstr "Исправлено по апелляции"
+msgstr "Правильный ответ заметно короче остальных вариантов — это даёт студенту явную подсказку."
 
 #: apps/exams/services/parsing/extraction/pipeline.py:86
 msgctxt "exams.service.parsing.error"
@@ -24754,7 +24754,7 @@ msgstr "Для чтения PDF не установлен 'pypdf'. Выполн�
 #: apps/exams/services/parsing/extraction/pipeline.py:136 apps/exams/services/parsing/extraction/safety.py:71 apps/exams/services/parsing/extraction/safety.py:78
 msgctxt "exams.service.parsing.error"
 msgid "file_corrupt"
-msgstr "Правильных"
+msgstr "Файл повреждён или не распознан."
 
 #: apps/exams/services/parsing/extraction/pipeline.py:140 apps/exams/services/parsing/extraction/safety.py:73
 msgctxt "exams.service.parsing.error"
@@ -24774,7 +24774,7 @@ msgstr "Файл слишком большой (максимум 45MB)."
 #: apps/exams/services/parsing/extraction/safety.py:63 apps/exams/services/parsing/extraction/safety.py:80
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_active_content"
-msgstr "Content"
+msgstr "В PDF обнаружен JavaScript или активное содержимое. Файл отклонён по соображениям безопасности."
 
 #: apps/exams/services/question_invariants.py:11
 msgctxt "exams.service.lifecycle"
@@ -26074,17 +26074,17 @@ msgstr "Текстовый ответ"
 #: apps/exams/templates/exams/student/exam_result.html:477
 msgctxt "exams.template.student_exam_result"
 msgid "teacher_feedback_title"
-msgstr "Teacher feedback"
+msgstr "Отзыв преподавателя"
 
 #: apps/exams/templates/exams/student/exam_result.html:484
 msgctxt "exams.template.student_exam_result"
 msgid "teacher_feedback_empty"
-msgstr "Отзывы учителей"
+msgstr "Отзыва преподавателя нет."
 
 #: apps/exams/templates/exams/student/exam_result.html:493
 msgctxt "exams.template.student_exam_result"
 msgid "label_ideal_answer_example"
-msgstr "Identifier default"
+msgstr "Пример идеального ответа"
 
 #: apps/exams/templates/exams/student/exam_result.html:516
 msgctxt "exams.template.student_exam_result"
@@ -27335,7 +27335,7 @@ msgstr "Если преподаватель не возобновит экзам
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
 msgid "title_exam"
-msgstr "Пример: Условные операторы - Тест 1"
+msgstr "Экзамен"
 
 #: apps/exams/templates/exams/student/take_exam.html:132 apps/exams/views/student/script_data.py:23
 msgctxt "exams.template.take_exam"
@@ -27631,7 +27631,7 @@ msgstr "Создать новую группу"
 #: apps/exams/templates/exams/teacher/create_student_group.html:54
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_primary_teacher"
-msgstr "Ищем старшего преподавателя..."
+msgstr "Поиск основного преподавателя..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:59
 msgctxt "exams.template.create_student_group"
@@ -27641,12 +27641,12 @@ msgstr "Главный преподаватель"
 #: apps/exams/templates/exams/teacher/create_student_group.html:63
 msgctxt "exams.template.create_student_group"
 msgid "warning_no_teacher_in_tenant"
-msgstr "В этом tenant не найдено преподавателей"
+msgstr "Все назначенные преподаватели должны быть преподавателями в одном и том же tenant."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:69
 msgctxt "exams.template.create_student_group"
 msgid "single_primary_teacher_only"
-msgstr "Главный преподаватель"
+msgstr "Можно выбрать только одного основного преподавателя."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
@@ -27676,7 +27676,7 @@ msgstr "Назначенные преподаватели"
 #: apps/exams/templates/exams/teacher/create_student_group.html:119
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_teacher"
-msgstr "Ищу учителя..."
+msgstr "Поиск преподавателя..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:122
 #, python-format
@@ -27988,7 +27988,7 @@ msgstr "Заполните форму, чтобы начать новую поп
 #: apps/exams/templates/exams/teacher/exam_section.html:290
 msgctxt "exams.partial.exam_section"
 msgid "empty_no_exam_assigned_to_student"
-msgstr "Студенты без групп"
+msgstr "Вам не назначено ни одного экзамена."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:297
 msgctxt "exams.partial.exam_section"
@@ -28045,7 +28045,7 @@ msgstr "Крайний срок"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:94 apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:103
 msgctxt "exams.template.test_question_bank"
 msgid "stat_total_questions"
-msgstr "Total students"
+msgstr "Всего вопросов"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:109
 msgctxt "exams.template.test_question_bank"
@@ -28065,7 +28065,7 @@ msgstr "Показать только вопросы с предупрежден
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:120
 msgctxt "exams.template.test_question_bank"
 msgid "stat_warnings"
-msgstr "Pending"
+msgstr "Предупреждения"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:125
 msgctxt "exams.template.test_question_bank"
@@ -28163,7 +28163,7 @@ msgstr "Правила"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:323
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_default_a"
-msgstr "Identifier default"
+msgstr "По умолчанию правильный ответ — A"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:324
 msgctxt "exams.template.test_question_bank"
@@ -28173,12 +28173,12 @@ msgstr "По умолчанию"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:327
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_star_prefix"
-msgstr "Мои ответы"
+msgstr "Ответ, отмеченный *, — правильный"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:328 apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:340
 msgctxt "exams.template.test_question_bank"
 msgid "label_correct"
-msgstr "Score"
+msgstr "правильный"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:331
 msgctxt "exams.template.test_question_bank"
@@ -28198,7 +28198,7 @@ msgstr "Для множественного выбора"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:336
 msgctxt "exams.template.test_question_bank"
 msgid "label_or"
-msgstr "Score"
+msgstr "или"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:336
 msgctxt "exams.template.test_question_bank"
@@ -28316,7 +28316,7 @@ msgstr "Поиск по тексту вопроса..."
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:485
 msgctxt "exams.template.test_question_bank"
 msgid "label_points"
-msgstr "Context"
+msgstr "Балл"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:496
 msgctxt "exams.template.test_question_bank"
@@ -31491,7 +31491,7 @@ msgstr "Группа не найдена."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:117
 msgctxt "exams.template.teacher_group_list"
 msgid "empty_no_group_yet_title"
-msgstr "Пользователь не найден"
+msgstr "Групп пока нет"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:118
 msgctxt "exams.template.teacher_group_list"
@@ -31516,12 +31516,12 @@ msgstr "Название/номер группы"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:167 apps/exams/templates/exams/teacher/teacher_group_list.html:226
 msgctxt "exams.template.teacher_group_list"
 msgid "placeholder_search_teacher"
-msgstr "Ищу учителя..."
+msgstr "Поиск преподавателя..."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:170
 msgctxt "exams.template.teacher_group_list"
 msgid "help_only_one_primary_teacher"
-msgstr "Главный преподаватель"
+msgstr "Можно выбрать только одного основного преподавателя."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:179
 msgctxt "exams.template.teacher_group_list"
@@ -31536,7 +31536,7 @@ msgstr "Поиск студента, имени пользователя или 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:187 apps/exams/templates/exams/teacher/teacher_group_list.html:230
 msgctxt "exams.template.teacher_group_list"
 msgid "label_loading"
-msgstr "Загрузить изображение"
+msgstr "Загрузка"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:191 apps/exams/templates/exams/teacher/teacher_group_list.html:234
 msgctxt "exams.template.teacher_group_list"
@@ -31551,7 +31551,7 @@ msgstr "Студенты"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:222
 msgctxt "exams.template.teacher_group_list"
 msgid "label_additional_teachers_multi"
-msgstr "Назначенные преподаватели"
+msgstr "Дополнительные преподаватели"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:234
 msgctxt "exams.template.teacher_group_list"
@@ -31591,7 +31591,7 @@ msgstr "Выберите изображение"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:290
 msgctxt "exams.template.teacher_group_list"
 msgid "empty_no_data_found"
-msgstr "Вакансий для проверки не найдено."
+msgstr "Работ для проверки не найдено."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31660,7 +31660,7 @@ msgstr "назад"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:108
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_expired"
-msgstr "Истекший"
+msgstr "Истёк"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31716,17 +31716,17 @@ msgstr "Детали попытки"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:19
 msgctxt "exams.template.teacher_view_attempt"
 msgid "heading_student_answers"
-msgstr "No text answer"
+msgstr "Ответы участника"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:38
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_exam"
-msgstr "Exams"
+msgstr "Экзамен"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:45
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_type"
-msgstr "Type"
+msgstr "Тип"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:52
 msgid "Yoxlayan müəllim:"
@@ -31828,7 +31828,7 @@ msgstr "Этот ответ полностью правильный."
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:256
 msgctxt "exams.template.teacher_view_attempt"
 msgid "message_answer_wrong"
-msgstr "If this email exists in our system, we sent password reset instructions."
+msgstr "Этот ответ неверный."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:264
 msgctxt "exams.template.teacher_view_attempt"
@@ -31838,7 +31838,7 @@ msgstr "Студенты"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:291 apps/exams/templates/exams/teacher/teacher_view_attempt.html:304
 msgctxt "exams.template.teacher_view_attempt"
 msgid "empty_student_text_answer"
-msgstr "Вам не назначена внештатная работа"
+msgstr "Студент не отправил текстовый ответ."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:297 apps/exams/templates/exams/teacher/teacher_view_attempt.html:311
 msgctxt "exams.template.teacher_view_attempt"
@@ -31873,17 +31873,17 @@ msgstr "Отзывы учителей"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:365
 msgctxt "exams.template.teacher_view_attempt"
 msgid "empty_feedback_not_written"
-msgstr "Teacher feedback"
+msgstr "Отзыв преподавателя не написан."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:370
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_given_score"
-msgstr "Score"
+msgstr "Выставленный балл"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:374
 msgctxt "exams.template.teacher_view_attempt"
 msgid "status_not_graded"
-msgstr "Graded"
+msgstr "Не оценено"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:384
 msgid "Axtarışa uyğun sual tapılmadı."
@@ -32356,7 +32356,7 @@ msgstr "Все"
 #: apps/exams/views/student/lists.py:202
 msgctxt "exams.type.label"
 msgid "live"
-msgstr "Live"
+msgstr "В реальном времени"
 
 #: apps/exams/views/student/lists.py:203
 msgctxt "exams.type.label"
@@ -32776,7 +32776,7 @@ msgstr "Название банка не может быть пустым."
 #: apps/exams/views/teacher/question_library/crud.py:120
 msgctxt "exams.view.bank.message"
 msgid "Sual bankı yaradıldı."
-msgstr "Удалить банк вопросов"
+msgstr "Банк вопросов создан."
 
 #: apps/exams/views/teacher/question_library/crud.py:141
 msgctxt "exams.view.bank.message"
@@ -32796,7 +32796,7 @@ msgstr "Удалить может только владелец банка."
 #: apps/exams/views/teacher/question_library/crud.py:195
 msgctxt "exams.view.bank.message"
 msgid "Sual bankı silindi."
-msgstr "Удалить банк вопросов"
+msgstr "Банк вопросов удалён."
 
 #: apps/exams/views/teacher/question_library/crud.py:219
 msgctxt "exams.view.bank.message"
@@ -32854,7 +32854,7 @@ msgstr "Текстовое поле не найдено."
 #: apps/exams/views/teacher/question_library/picker.py:52 apps/exams/views/teacher/question_library/picker.py:55
 msgctxt "exams.view.bank.message"
 msgid "Əvvəlcə bank seçin."
-msgstr "Выберите причину"
+msgstr "Сначала выберите банк вопросов."
 
 #: apps/exams/views/teacher/question_library/picker.py:82
 #, python-brace-format
@@ -32995,7 +32995,7 @@ msgstr "Нельзя изменить этот ответ спустя 5 мин�
 #: apps/exams/views/teacher/results/_attempt_views.py:272 apps/exams/views/teacher/results/_results_views.py:78
 msgctxt "exams.view.results.message"
 msgid "grading_permission_required"
-msgstr "Для управления разрешениями необходимы полномочия `role.assign`."
+msgstr "Для выставления оценок необходимо разрешение `grade.input`."
 
 #: apps/exams/views/teacher/results/_attempt_views.py:308
 msgctxt "exams.view.results.message"
@@ -34818,7 +34818,7 @@ msgstr "Аврора"
 #: apps/live_exam/templates/liveExam/_host_settings_drawer.html:53
 msgctxt "live_exam.host_settings"
 msgid "theme_sweet"
-msgstr "Sweet"
+msgstr "Сладкий"
 
 #: apps/live_exam/templates/liveExam/_host_settings_drawer.html:59 apps/live_exam/templates/liveExam/_host_settings_drawer.html:66
 msgctxt "live_exam.host_settings"
@@ -35726,7 +35726,7 @@ msgstr "Статистика вопросов"
 #: apps/live_exam/views/host/game.py:357
 msgctxt "live_exam.view.message"
 msgid "session_already_finished"
-msgstr "Этот адрес электронной почты уже используется."
+msgstr "Эта сессия уже завершена."
 
 #: apps/live_exam/views/host/game.py:415
 msgctxt "live_exam.view.message"
@@ -42286,7 +42286,7 @@ msgstr "Индивидуальный"
 #: core/context_processors.py:33
 msgctxt "brand"
 msgid "Qərbi Kaspi Universiteti"
-msgstr "Western Caspian University"
+msgstr "Западно-Каспийский университет"
 
 #: core/middleware.py:342
 msgctxt "core.middleware.request_queue.message"
@@ -42301,7 +42301,7 @@ msgstr "Выбор организации обязателен."
 #: core/permissions.py:207
 msgctxt "core.permission.error"
 msgid "required_permission_missing"
-msgstr "Поля имени, фамилии и электронной почты нельзя оставлять пустыми."
+msgstr "У вас нет необходимого разрешения: {permission}."
 
 #: core/roles.py:44
 msgctxt "roles.display_name"
@@ -61698,7 +61698,7 @@ msgstr "Измените поиск или вернитесь ко всему с
 
 msgctxt "accounts.profile.question_bank"
 msgid "Bank"
-msgstr "Банк"
+msgstr "Банк вопросов"
 
 msgctxt "accounts.profile.question_bank"
 msgid "Bank adı, fənn və ya müəllim"
