@@ -3070,3 +3070,6 @@ msgstr "Incomplete rows"
 
 msgid "Aç"
 msgstr "Open"
+
+msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+msgstr "This file type is not accepted for security reasons. Upload only .pdf / .docx / .txt / .png / .jpg."

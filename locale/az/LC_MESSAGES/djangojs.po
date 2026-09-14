@@ -3055,3 +3055,6 @@ msgstr "Yarımçıq sətir"
 
 msgid "Aç"
 msgstr "Aç"
+
+msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+msgstr "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."

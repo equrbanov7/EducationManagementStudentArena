@@ -11,6 +11,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.forms import BankQuestionCreateForm
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     analyze_written_bulk,
@@ -19,7 +20,7 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
-from apps.exams.services.import_media import bind_import_manifest, clear_stash
+from apps.exams.services.import_media import bind_import_manifest, clear_stash, stash_level_warnings
 from apps.exams.services.question_bank_attach import _question_fingerprint, accessible_banks
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from core.tenancy import get_request_organization
@@ -94,6 +95,16 @@ def question_bank_bulk_add(request, bank_id):
                         owner_id=request.user.pk,
                         organization_id=bank.organization_id,
                     )
+                    # W3 2026-09-14: DOCX bağlaması sual xəbərdarlıqları (naməlum
+                    # şəkil istinadı, düstur fallback) əlavə edir — meta/sayğaclar
+                    # yenilənir; bundle səviyyəli qeydlər test-səviyyəli siyahıya düşür.
+                    bundle_warnings = [
+                        {"type": "import_source", "severity": "warning", "msg": text}
+                        for text in stash_level_warnings(
+                            math_token, owner_id=request.user.pk, organization_id=bank.organization_id
+                        )
+                    ]
+                    analysis = finalize_analysis(parsed, analysis["test_level_warnings"] + bundle_warnings)
                 except (OSError, ValueError) as exc:
                     messages.error(request, str(exc))
                     if action == "save":

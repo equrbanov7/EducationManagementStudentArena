@@ -11,11 +11,14 @@ from apps.exams.services.import_media import (
     get_stashed_import_text,
     stash_math_images,
 )
+from apps.exams.services.import_media_docx import stash_docx_bundle
 from apps.exams.services.parsing import extract_text_from_upload
 
 logger = logging.getLogger(__name__)
 
-_VISUAL_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg")
+# W3 2026-09-14: `.docx` də «vizual» sayılır — mətn-first bundle (şəkillər
+# stash-a, düsturlar LaTeX kimi mətnə). Bax `import_media_docx`.
+_VISUAL_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg", ".docx")
 
 
 def _clear_scoped_stash(token, *, owner_id, organization_id):
@@ -50,6 +53,11 @@ def try_visual_import(uploaded_file, *, owner_id, organization_id):
     """
 
     _rewind(uploaded_file)
+    filename = str(getattr(uploaded_file, "name", "") or "").lower()
+    if filename.endswith(".docx"):
+        # DOCX: oxuma xətaları (imza, makro, pozuq zip) lokallaşdırılmış
+        # ValueError-dur — mətn axınına düşməsin, istifadəçi səbəbi görsün.
+        return stash_docx_bundle(uploaded_file, owner_id=owner_id, organization_id=organization_id)
     try:
         new_token = stash_math_images(
             uploaded_file,
@@ -98,7 +106,8 @@ def prepare_question_upload(
     """
 
     filename = str(getattr(uploaded_file, "name", "") or "").lower()
-    if preserve_visual and filename.endswith(_VISUAL_EXTENSIONS):
+    # DOCX mətn-first olduğu üçün yazılı (written) formatda da şəkilləri saxlayır.
+    if (preserve_visual or filename.endswith(".docx")) and filename.endswith(_VISUAL_EXTENSIONS):
         visual = try_visual_import(
             uploaded_file,
             owner_id=owner_id,

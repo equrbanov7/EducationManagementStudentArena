@@ -68627,3 +68627,75 @@ msgstr "silinmiş imtahan"
 msgctxt "profile.my_exams.trash"
 msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
 msgstr "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur"
+msgstr "Düstur"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil"
+msgstr "Şəkil"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sual"
+msgstr "Sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "şəkil bağlı"
+msgstr "şəkil bağlı"
+
+msgctxt "exams.template.test_question_bank"
+msgid "LaTeX düstur tanındı"
+msgstr "LaTeX düstur tanındı"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur tam çevrilmədi — mətni yoxlayın"
+msgstr "Düstur tam çevrilmədi — mətni yoxlayın"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən şəkil bağlanacaq"
+msgstr "Sənəddən şəkil bağlanacaq"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil istinadı var, mənbə tapılmadı"
+msgstr "Şəkil istinadı var, mənbə tapılmadı"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən çıxarılan şəkil — yadda saxlayanda bağlanır:"
+msgstr "Sənəddən çıxarılan şəkil — yadda saxlayanda bağlanır:"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir."
+msgstr "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_partial"
+msgstr "Düstur tam çevrilmədi ({nodes}) — mətn kimi saxlanıldı: «{preview}»"
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_fallback"
+msgstr "Bu sualdakı düstur Word-dən tam çevrilmədi — render nəticəsini yoxlayın."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "image_ref_unknown"
+msgstr "Şəkil istinadı tapılmadı: [[img:{refs}]] — sənəddəki şəkil nömrələri ilə uyğun deyil."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_external_skipped"
+msgstr "{count} şəkil xarici linkdir — təhlükəsizlik səbəbi ilə yüklənmədi."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_unsupported_skipped"
+msgstr "{count} şəkil dəstəklənmir və ya limitdən böyükdür — atıldı (EMF/WMF/SVG dəstəklənmir)."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_corrupt"
+msgstr "Word (.docx) faylı oxunmadı — zip strukturu pozuqdur və ya sənəd deyil."
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_denied"
+msgstr "Düsturda icazə verilməyən əmr var ({command}) — düstur mətn kimi saxlanıldı: «{preview}»"
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_too_long"
+msgstr "Düstur çox uzundur (limit 2000 simvol) — mətn kimi saxlanıldı: «{preview}»"

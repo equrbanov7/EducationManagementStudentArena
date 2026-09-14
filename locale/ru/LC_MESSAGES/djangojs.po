@@ -3071,3 +3071,6 @@ msgstr "Незавершённых строк"
 
 msgid "Aç"
 msgstr "Открыть"
+
+msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+msgstr "Этот тип файла не принимается по соображениям безопасности. Загружайте только .pdf / .docx / .txt / .png / .jpg."

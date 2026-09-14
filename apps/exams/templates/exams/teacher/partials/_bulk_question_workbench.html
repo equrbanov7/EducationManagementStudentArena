@@ -1,6 +1,9 @@
 {% load static i18n %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/bulk_question_workbench.css' %}">
+{% comment %}W3 2026-09-14: preview-da LaTeX düsturlar KaTeX ilə (data-ems-math); DOCX şəkil/düstur inam nişanları.{% endcomment %}
+<link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-1">
+{% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
 ================================================================================
@@ -264,7 +267,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
                 <div class="upload-zone-wrapper">
                     <input class="file-input-hidden" type="file" name="upload_file" id="fileInput"
-                           accept=".pdf,.txt,.png,.jpg,.jpeg" data-file-selected-callback="fileSelected">
+                           accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" data-file-selected-callback="fileSelected">
                     <label for="fileInput" class="upload-zone" id="dropZone">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <strong>{% trans "upload_choose_file" context "exams.template.test_question_bank" %}</strong>
@@ -275,11 +278,12 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
                 <div class="format-tags" id="formatTags">
                     <span class="format-tag" data-ext="pdf">PDF</span>
+                    <span class="format-tag" data-ext="docx">DOCX</span>
                     <span class="format-tag" data-ext="txt">TXT</span>
                     <span class="format-tag" data-ext="png">PNG</span>
                     <span class="format-tag" data-ext="jpg">JPG</span>
                 </div>
-                <p class="format-tags-hint">{% trans "Word (.docx) faylları təhlükəsizlik səbəbi ilə qəbul edilmir — PDF və ya TXT istifadə edin." %}</p>
+                <p class="format-tags-hint">{% trans "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir." context "exams.template.test_question_bank" %}</p>
 
                 {% if wb_templates %}
                 <div class="template-download">
@@ -439,6 +443,14 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         <span class="filter-chip__count">{{ category_counts.balance|default:0 }}</span>
                     </button>
                     {% endif %}
+                    <button type="button" class="filter-chip filter-chip--formula" data-filter="has-formula" {% if not category_counts.formula %}disabled{% endif %}>
+                        <i class="fas fa-square-root-variable"></i> {% trans "Düstur" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.formula|default:0 }}</span>
+                    </button>
+                    <button type="button" class="filter-chip filter-chip--image" data-filter="has-image" {% if not category_counts.image %}disabled{% endif %}>
+                        <i class="fas fa-image"></i> {% trans "Şəkil" context "exams.template.test_question_bank" %}
+                        <span class="filter-chip__count">{{ category_counts.image|default:0 }}</span>
+                    </button>
                     <button type="button" class="filter-chip filter-chip--clean" data-filter="is-clean" {% if not category_counts.clean %}disabled{% endif %}>
                         <i class="fas fa-check-circle"></i> {% trans "Təmiz" context "exams.template.test_question_bank" %}
                         <span class="filter-chip__count">{{ category_counts.clean|default:0 }}</span>
@@ -474,102 +486,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
             <div class="question-list" id="questionList">
                 {% for q in parsed %}
-                <div class="q-card{% if forloop.counter in selected %} is-selected{% endif %} q-card--sev-{{ q.meta.top_severity|default:'none' }} {{ q.meta.flags }}"
-                     id="qcard-{{ forloop.counter }}" data-q-index="{{ forloop.counter }}" data-q-flags="{{ q.meta.flags }}" data-toggle-row-card>
-                    <div class="q-checkbox-wrapper">
-                        <input class="custom-checkbox qcheck" type="checkbox" name="selected" value="{{ forloop.counter }}"
-                               aria-label="#{{ forloop.counter }} — {{ q.text|striptags|truncatechars:60 }}"
-                               {% if forloop.counter in selected %}checked{% endif %}>
-                    </div>
-
-                    <div class="points-mini">
-                        <label for="points-input-{{ forloop.counter }}">{% trans "label_points" context "exams.template.test_question_bank" %}:</label>
-                        <input type="number" id="points-input-{{ forloop.counter }}" name="points_{{ forloop.counter }}" min="1" value="{% if q.points %}{{ q.points }}{% else %}{{ dp_value|default:1 }}{% endif %}" class="bulk-question-workbench-1">
-                    </div>
-
-                    <div class="q-content">
-                        <div class="q-header">
-                            <span class="q-num">#{{ forloop.counter }}</span>
-                            <span class="q-text{% if math_token and q.has_visual_source %} sr-only{% endif %}">{{ q.text }}</span>
-
-                            {% if q.meta.total_count %}
-                            <span class="q-badges">
-                                {% if q.meta.error_count %}<span class="q-badge q-badge--error" title="{% trans 'Xəta' context 'exams.template.test_question_bank' %}"><i class="fas fa-circle-xmark"></i> {{ q.meta.error_count }}</span>{% endif %}
-                                {% if q.meta.warning_count %}<span class="q-badge q-badge--warning" title="{% trans 'Xəbərdarlıq' context 'exams.template.test_question_bank' %}"><i class="fas fa-triangle-exclamation"></i> {{ q.meta.warning_count }}</span>{% endif %}
-                                {% if q.meta.info_count %}<span class="q-badge q-badge--info" title="{% trans 'Qeyd' context 'exams.template.test_question_bank' %}"><i class="fas fa-circle-info"></i> {{ q.meta.info_count }}</span>{% endif %}
-                                {% if q.meta.has_duplicate %}<span class="q-badge q-badge--duplicate" title="{% trans 'Dublikat' context 'exams.template.test_question_bank' %}"><i class="fas fa-clone"></i></span>{% endif %}
-                            </span>
-                            {% else %}
-                            <span class="q-badges">
-                                <span class="q-badge q-badge--clean" title="{% trans 'Təmiz' context 'exams.template.test_question_bank' %}"><i class="fas fa-check"></i></span>
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        {% if math_token and q.has_visual_source %}
-                        <img class="q-source-preview"
-                             src="{% url 'exams:question_import_visual_preview' math_token q.source_index %}"
-                             alt=""
-                             aria-hidden="true"
-                             loading="lazy">
-                        {% endif %}
-
-                        {% if q.options %}
-                        {% if math_token and q.has_visual_source %}
-                        <div class="q-visual-answer">
-                            <span class="q-visual-answer__label">{% trans "Düzgün cavab" context "exams.template.test_question_bank" %}:</span>
-                            {% for lab in q.correct %}
-                            <span class="q-visual-answer__choice">{{ lab }}</span>
-                            {% endfor %}
-                            <span class="sr-only">
-                                {% for lab, txt in q.options.items %}{{ lab }}: {{ txt }}. {% endfor %}
-                            </span>
-                        </div>
-                        {% else %}
-                        <div class="options-grid">
-                            {% for lab, txt in q.options.items %}
-                            <div class="opt-box {% if lab in q.correct %}correct{% endif %}">
-                                <span class="opt-label">{{ lab }}</span>
-                                <span class="opt-text">{{ txt }}</span>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% endif %}
-
-                        {% if q.warnings %}
-                        <details class="warning-box warning-box--{{ q.meta.top_severity|default:'warning' }}" {% if q.meta.error_count or q.meta.has_duplicate %}open{% endif %}>
-                            <summary class="warning-box__summary">
-                                <span class="warning-box__summary-label"><i class="fas fa-list-check"></i> {% trans "Xəbərdarlıqları göstər" context "exams.template.test_question_bank" %}</span>
-                                <span class="warning-box__tags">
-                                    {% if q.meta.has_duplicate %}<span class="warning-box__tag warning-box__tag--dup"><i class="fas fa-clone"></i> {% trans "Dublikat" context "exams.template.test_question_bank" %}</span>{% endif %}
-                                    {% if q.meta.has_structure_issue %}<span class="warning-box__tag warning-box__tag--struct"><i class="fas fa-list-ol"></i> {% trans "Variant" context "exams.template.test_question_bank" %}</span>{% endif %}
-                                    {% if q.meta.has_balance_issue %}<span class="warning-box__tag warning-box__tag--bal"><i class="fas fa-scale-unbalanced"></i> {% trans "Balans" context "exams.template.test_question_bank" %}</span>{% endif %}
-                                </span>
-                                <span class="warning-box__summary-count">{{ q.meta.total_count }}</span>
-                                <i class="fas fa-chevron-down warning-box__chevron"></i>
-                            </summary>
-                            <div class="warning-box__body">
-                                {% for w in q.warnings %}
-                                <div class="warning-msg warning-msg--{{ w.severity|default:'warning' }}" data-severity="{{ w.severity|default:'warning' }}">
-                                    <span class="warning-msg__badge">
-                                        {% if w.severity == 'error' %}<i class="fas fa-circle-xmark"></i>{% elif w.severity == 'info' %}<i class="fas fa-circle-info"></i>{% else %}<i class="fas fa-triangle-exclamation"></i>{% endif %}
-                                    </span>
-                                    <span class="warning-msg__text">
-                                        {{ w.msg }}
-                                        {% if w.type == 'duplicate_in_import' and w.ref %}
-                                        <a href="#qcard-{{ w.ref }}" class="warning-msg__jump" data-jump-to="qcard-{{ w.ref }}">
-                                            <i class="fas fa-arrow-right-long"></i> {% trans "Aç" context "exams.template.test_question_bank" %} #{{ w.ref }}
-                                        </a>
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </details>
-                        {% endif %}
-                    </div>
-                </div>
+                {% include "exams/teacher/partials/_bulk_question_card.html" with q=q q_index=forloop.counter %}
                 {% endfor %}
 
                 <div class="filter-empty-state" id="filterEmptyState" hidden>

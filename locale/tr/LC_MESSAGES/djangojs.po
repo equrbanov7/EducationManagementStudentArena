@@ -3066,3 +3066,6 @@ msgstr "Eksik satır"
 
 msgid "Aç"
 msgstr "Görüntüle"
+
+msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmiyor. Yalnızca .pdf / .docx / .txt / .png / .jpg yükleyin."
