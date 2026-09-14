@@ -11,12 +11,14 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from apps.exams.domain.unit_assignment import unit_student_record_filter
+from apps.exams.domain.unit_scope_filters import parse_unit_value, unit_filter_value
 from apps.exams.models import StudentExamAttemptGrant, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.organizations.models import Membership
+from apps.organizations.models import Membership, OrgUnit
 from core.audit import log_action
 from core.cache import invalidate_profile_badge_counts_cache
-from core.constants import AuditAction
+from core.constants import AuditAction, OrgUnitType
 
 from ._shared import (
     _get_editable_exam_or_404,
@@ -184,15 +186,30 @@ def grant_extra_attempt_group(request, slug):
         return redirect(_back_url())
 
     raw_group_id = (request.POST.get("group_id") or request.POST.get("group") or "").strip()
-    if not raw_group_id.isdigit():
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): nəticələr səhifəsinin qrup seçicisi
+    # reyestr qrupunu `unit:<uuid>` kimi göndərir — o da kohort kimi qəbul olunur
+    # (üzvlük: cari aktiv `StudentAcademicRecord.group`, tenant-scoped).
+    unit_id = parse_unit_value(raw_group_id) if not raw_group_id.isdigit() else None
+    if not raw_group_id.isdigit() and unit_id is None:
         return _fail("invalid_group", 400)
 
-    group = StudentGroup.objects.filter(id=int(raw_group_id), organization=organization).first()
+    if unit_id is not None:
+        group = OrgUnit.objects.filter(pk=unit_id, organization=organization, unit_type=OrgUnitType.GROUP).first()
+    else:
+        group = StudentGroup.objects.filter(id=int(raw_group_id), organization=organization).first()
     if group is None:
         return _fail("group_not_found", 404)
 
     extra = _grant_amount(request)
-    students = list(group.students.filter(is_active=True))
+    if unit_id is not None:
+        record_path = "academic_records__"
+        students = list(
+            User.objects.filter(
+                is_active=True, **{f"{record_path}group_id": group.pk}, **unit_student_record_filter(record_path)
+            ).distinct()
+        )
+    else:
+        students = list(group.students.filter(is_active=True))
 
     with transaction.atomic():
         for student in students:
@@ -210,7 +227,7 @@ def grant_extra_attempt_group(request, slug):
         return JsonResponse(
             {
                 "success": True,
-                "group_id": group.id,
+                "group_id": unit_filter_value(group.pk) if unit_id is not None else group.id,
                 "granted_count": granted_count,
                 "extra_attempts": extra,
             }

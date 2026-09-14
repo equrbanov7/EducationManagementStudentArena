@@ -20,6 +20,7 @@ from apps.registrar.reference_identity import (
     begin_authorized_group_transfer,
     finalize_authorized_group_transfer,
 )
+from apps.registrar.signals import student_group_changed
 from core import audit as audit_service
 from core.constants import AuditAction, OrgUnitType
 
@@ -148,5 +149,15 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
     finalize_authorized_group_transfer(
         evidence_id=evidence_id,
         audit_id=audit.pk,
+    )
+    # 2026-09-14 (W5 `w5left`, tapşırıq 3): qrup yazısı DB funksiyası ilə gedir
+    # (`post_save` yoxdur) → törəmə artefaktlar (imtahan PIN-ləri, `exams`)
+    # bu siqnalla xəbər tutur; abunəçi `on_commit`-də işləyir.
+    student_group_changed.send(
+        sender=StudentAcademicRecord,
+        record=record,
+        old_group=old_group,
+        new_group=new_group,
+        organization=record.organization,
     )
     return {"moved": moved, "created": created, "record": record}

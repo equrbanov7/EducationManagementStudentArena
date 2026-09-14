@@ -86,20 +86,14 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     #  • iştirakçı qruplarının id-ləri — bir dəfə (əvvəl hər attempt-də təkrar).
     #  • hər user üçün üzv olduğu qrup adları — TƏK sorğu ilə dict (əvvəl hər
     #    attempt üçün ayrıca sorğu = N+1).
-    available_group_ids = list(_available_groups_for_exam(exam).values_list("id", flat=True))
+    #  • W5 `w5left` (2026-09-14): reyestr qrupları (`allowed_units`) da «Qruplar»
+    #    sütununa düşür — `group_names_by_user` kohort + reyestr üçün 2 sorğu.
+    from ._group_options import group_names_by_user
+
     _attempt_user_ids = {att.user_id for att in attempts_list}
     # Apellyasiya bonusları (tək sorğu) — export-dakı Bal/Faiz effektiv olsun.
     appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_list) if is_test else {}
-    groups_by_user: dict[int, list[str]] = {}
-    if available_group_ids and _attempt_user_ids:
-        from apps.exams.models import StudentGroup
-
-        for _uid, _gname in (
-            StudentGroup.objects.filter(id__in=available_group_ids, students__id__in=_attempt_user_ids)
-            .values_list("students__id", "name")
-            .order_by("name")
-        ):
-            groups_by_user.setdefault(_uid, []).append(_gname)
+    groups_by_user = group_names_by_user(_available_groups_for_exam(exam), _attempt_user_ids)
     for row_idx, att in enumerate(attempts_list, start=2):
         effective_finish, _ = _attempt_effective_finish(att, now=now)
         effective_duration = _attempt_effective_duration(att, effective_finish)
