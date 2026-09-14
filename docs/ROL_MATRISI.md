@@ -162,6 +162,12 @@ heç bir rol üzvlüyünə bağlı deyil. Bu, gözlənilən haldır — nasazlı
   kabinet xəbərdarlığı (`accounts/profile/_messages.html`) onu oxuyur; yazı
   onsuz da mümkün deyil, çünki `pending` təşkilat heç vaxt
   `request.organization` (aktiv tenant konteksti) olmur.
+* **2026-09-14 (sahibin qərarı): `ikt_rehber` şablonu tam wildcard `["*"]`-dır**
+  (rektor kimi; səviyyə 95 qalır) və jurnalda BİRBAŞA redaktordur (başqa müəllimin
+  jurnalına dərs əlavə edir, bal yazır — `registrar/journal_access.is_direct_editor`).
+  Miqrasiya `organizations 0053` mövcud tenantların `ikt_rehber` rolunu `*`-a keçirir.
+  Klonda ölçmə: RİM kabineti 63 bölmə, hamısı 200. Aşağıdakı 2026-09-03 cədvəli
+  (46 bölmə) bu qərardan ƏVVƏLKİ vəziyyətdir — yenidən ölçmə lazımdır.
 * **`ikt_rehber` (46) rektordan (40) çox bölmə görür.**  Bu qəsdəndir: rol
   full-override texniki rəhbərdir (bax `project_ikt_rehber_role`), `rector` isə
   təsdiq/idarəetmə səthlərinə baxır — `superadmin-exam-rooms`,
