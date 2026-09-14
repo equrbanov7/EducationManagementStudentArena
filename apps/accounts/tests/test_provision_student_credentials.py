@@ -122,9 +122,9 @@ class ProvisionCommandTests(TestCase):
                 rows = list(csv.DictReader(fh))
 
         self.assertEqual(len(rows), 2)
-        passwords = {row["password"] for row in rows}
+        passwords = {row["ilkin_parol"] for row in rows}
         self.assertEqual(len(passwords), 2)  # hər tələbəyə fərqli parol
-        by_username = {row["username"]: row["password"] for row in rows}
+        by_username = {row["username"]: row["ilkin_parol"] for row in rows}
         self.student1.refresh_from_db()
         self.assertTrue(self.student1.check_password(by_username["pv_student1"]))
 
@@ -161,8 +161,37 @@ class ProvisionCommandTests(TestCase):
                 rows = list(csv.DictReader(fh))
 
         self.assertEqual([row["username"] for row in rows], ["pv_student1"])
+        # 2026-09-15: CSV paylama sütunları — qrup / proqram / ad-soyad.
+        self.assertEqual((rows[0]["qrup"], rows[0]["proqram"]), ("PV-101", "Proqram"))
         self.student2.refresh_from_db()
         self.assertTrue(self.student2.check_password(PASSWORD))  # qrupdan kənar tələbəyə toxunulmayıb
+
+    def test_teachers_audience_targets_teacher_roles_with_chair_and_faculty(self):
+        """2026-09-15 (sahibin qərarı): müəllimlər üçün də ilkin parol + ilk-giriş axını."""
+        from apps.organizations.models import Membership, OrgUnit
+        from core.constants import OrgUnitType
+
+        faculty = OrgUnit.objects.create(
+            organization=self.org, name="Mühəndislik", slug="muh", unit_type=OrgUnitType.FACULTY
+        )
+        chair = OrgUnit.objects.create(
+            organization=self.org, name="İnformatika", slug="inf", unit_type=OrgUnitType.CHAIR, parent=faculty
+        )
+        Membership.objects.filter(user=self.teacher, organization=self.org).update(scope_unit=chair)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = str(Path(tmp) / "teachers.csv")
+            self._run("--org", self.org.slug, "--audience", "teachers", "--generate", "--csv", csv_path)
+            with open(csv_path, encoding="utf-8") as fh:
+                rows = list(csv.DictReader(fh))
+
+        self.assertEqual([row["username"] for row in rows], ["pv_teacher"])
+        self.assertEqual((rows[0]["fakulte"], rows[0]["kafedra"]), ("Mühəndislik", "İnformatika"))
+        self.teacher.refresh_from_db()
+        self.assertTrue(self.teacher.check_password(rows[0]["ilkin_parol"]))
+        self.assertTrue(self.teacher.profile.password_change_required)
+        self.student1.refresh_from_db()
+        self.assertTrue(self.student1.check_password(PASSWORD))  # tələbələrə toxunulmayıb
 
     def test_unknown_group_rejected(self):
         with self.assertRaises(CommandError):
