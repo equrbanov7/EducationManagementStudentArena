@@ -483,7 +483,15 @@ işlətmək lazım deyil (idempotentdir — işlədilsə «dəyişəcək: 0» ve
 daxili `myedu` açarları (`OrgUnit.slug myedu-dep-N`, `Program.code MYEDU-N`,
 legacy ledger `source_system`) UI-da görünmür, idxal açarıdır — toxunulmur.
 
-**A3. Real məlumatın serverə yüklənməsi (ilk deploy BOŞ bazaya getdi)**
+**A3. Real məlumatın serverə yüklənməsi — 2026-09-14 21:03 UTC EDİLDİ**
+
+Nəticə: `🌱 Seed production database` workflow-u (`34896144922`) serverdə
+`scripts/deploy/seed_database.sh` ilə keçdi — ehtiyat dump → `pg_restore` (2 dəq)
+→ `emsarena_app` NOBYPASSRLS rolu → `release.sh` (`exams 0069`, `organizations 0053`,
+`registrar 0078`) → `auth_user=8443 · Qərbi Kaspi Universiteti / qku · myedu qalıq=0`.
+Şifrəli release asset-i və `SEED_DUMP_KEY` sirri bərpadan sonra silindi. Gələcək
+bərpa üçün eyni workflow işlədilir (yeni dump → şifrələ → release → sirr → dispatch
+`confirm=SEED`). Aşağıdakı əl proseduru tarixi istinad kimi qalır.
 
 2026-09-14 20:34 UTC: `main` (`89275d84`) push-u `wcuserver` self-hosted runner-i ilə
 serverə deploy olundu — `.env` preflight, `check --deploy` (xəbərdarlıqsız),
@@ -511,6 +519,13 @@ curl -k https://127.0.0.1/health/ ; docker exec emsarena-postgres psql -U "$POST
 Dump lokal bazanın miqrasiya vəziyyətindədir (`exams 0067` və s.); `release.sh`
 onu başa (`exams 0069`, `organizations 0053`, `registrar 0078`) gətirir — RİM `*`
 icazəsi (0053) məhz bu addımda mövcud rola yazılır.
+
+**A4. Admin OTP (2026-09-15, sahibin qərarı)** — e-poçt çatdırılması (Brevo) hələ
+qurulmadığı üçün `/manage/` OTP kodu gəlmir. Söndürmək üçün prod `.env`:
+`ADMIN_2FA_REQUIRED=False` + `ADMIN_2FA_DISABLE_ACK=I_UNDERSTAND` (ACK olmadan
+`production.py` qalxmır). Brevo qurulanda `ADMIN_2FA_REQUIRED=True`-ya qaytarın.
+Superadmin hesabı: bazada `staging_admin` (məşqdən qalıb, parolu bilinmir — silin) və
+serverdə yaradılan `superadmin` (`createsuperuser`, 2026-09-15).
 
 **B. Deploy-dan ƏVVƏL (server)**
 
