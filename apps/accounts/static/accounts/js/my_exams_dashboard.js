@@ -460,9 +460,8 @@
                 form.submit();
             };
             if (!window.EMSConfirm || typeof window.EMSConfirm.open !== "function") {
-                if (window.confirm(name ? name + "\n\n" + body : body)) {
-                    submit();
-                }
+                // Qlobal dialoq kabinet qabığında həmişə yüklənir; yoxdursa təhlükəli
+                // əməli TƏSDİQSİZ icra etmirik (native confirm() qadağandır — a11y qoruyucusu).
                 return;
             }
             window.EMSConfirm.open({
