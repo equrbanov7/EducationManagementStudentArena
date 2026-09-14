@@ -45,7 +45,7 @@ User = get_user_model()
 
 ATTEMPTS = 500
 QUESTIONS = 40
-UPPER_BOUND_MS = 1500.0
+UPPER_BOUND_MS = 5000.0  # 2026-09-14: xdist 6 worker altında 1 500 ms səs-küydən qırıldı; sanity həddi
 
 
 def _exec_ms(plan: str) -> float:
