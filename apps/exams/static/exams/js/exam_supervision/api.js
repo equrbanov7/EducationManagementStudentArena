@@ -1,15 +1,46 @@
-import { ExamSupervision } from "./state.js?v=20260716-intervention";
+import { ExamSupervision } from "./state.js?v=20260914-w4r3";
 
 Object.assign(ExamSupervision, {
-        _checkSupervisionStatus: function (callback) {
-            if (!this.statusEndpoint) return;
+        // W4 2026-09-14 (w3sweep R3): status sorğusu ETag daşıyır — dəyişməyibsə
+        // server 304 qaytarır və son yük təkrar istifadə olunur; 429 gələndə
+        // Retry-After qədər bütün pollerlər susur. `onDone` cavabdan (uğur və ya
+        // xəta) SONRA çağırılır ki, növbəti sorğu üst-üstə düşməsin.
+        _statusEtag: "",
+        _statusLastData: null,
+        _checkSupervisionStatus: function (callback, onDone) {
+            var finish = function () {
+                if (onDone) onDone();
+            };
+            if (!this.statusEndpoint) {
+                finish();
+                return;
+            }
+            var self = this;
+            var headers = { "X-Requested-With": "XMLHttpRequest" };
+            if (this._statusEtag) headers["If-None-Match"] = this._statusEtag;
             fetch(this.statusEndpoint, {
                 method: "GET",
                 cache: "no-store",
-                headers: { "X-Requested-With": "XMLHttpRequest" },
+                headers: headers,
             })
                 .then(function (r) {
-                    return r.json();
+                    if (r.status === 304) {
+                        return self._statusLastData;
+                    }
+                    if (r.status === 429) {
+                        if (self._noteStatusRetryAfter) {
+                            self._noteStatusRetryAfter(r.headers.get("Retry-After"));
+                        }
+                        return null;
+                    }
+                    var etag = r.headers.get("ETag") || "";
+                    return r.json().then(function (data) {
+                        if (r.ok && etag) {
+                            self._statusEtag = etag;
+                            self._statusLastData = data;
+                        }
+                        return data;
+                    });
                 })
                 .then(function (data) {
                     if (data && data.entry_session_valid === false) {
@@ -19,7 +50,8 @@ Object.assign(ExamSupervision, {
                     }
                     if (callback) callback(data);
                 })
-                .catch(function () {});
+                .catch(function () {})
+                .then(finish, finish);
         },
 
         // Tokeni hər sorğuda cookie-dən təzə oxu: uzun imtahanda token
@@ -84,14 +116,8 @@ Object.assign(ExamSupervision, {
                 clearInterval(this._lockCountdownTimer);
                 this._lockCountdownTimer = null;
             }
-            if (this._teacherLockPoll) {
-                clearInterval(this._teacherLockPoll);
-                this._teacherLockPoll = null;
-            }
-            if (this._bgStatusWatch) {
-                clearInterval(this._bgStatusWatch);
-                this._bgStatusWatch = null;
-            }
+            if (this._stopLockStatusPolling) this._stopLockStatusPolling();
+            if (this._stopBackgroundStatusWatch) this._stopBackgroundStatusWatch();
             this._closeWebSocket();
         },
 });

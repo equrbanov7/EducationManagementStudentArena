@@ -4,12 +4,13 @@ Köhnə müəllim nəzarət UI-ı 2026-07-29-da silindi (bax paket __init__).
 Burada yalnız imtahan səhifəsinin çağırdığı iki endpoint qalır.
 """
 
+import hashlib
 import json
 
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import RequestDataTooBig
-from django.http import JsonResponse
+from django.http import HttpResponseNotModified, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
@@ -31,6 +32,14 @@ _SUPERVISION_METADATA_MAX_KEYS = 20
 _SUPERVISION_METADATA_MAX_VALUE_LEN = 500
 _SUPERVISION_BODY_MAX_BYTES = 16 * 1024
 _SUPERVISION_BODY_KEYS = {"event_type", "metadata"}
+
+# W4 2026-09-14 (w3sweep R3): tələbə səhifəsi status endpoint-ini WS bağlı
+# olanda da hər 1 s sorğulayırdı (300 tələbə = 300 sorğu/s). Klient indi
+# WS-first işləyir (15 s heartbeat / WS yoxdursa 2→10 s backoff); server
+# tərəfində isə cəhd başına «sağlamlıq» limiti — 10 s pəncərədə 15 sorğu
+# (davamlı ~1 req/s + görünürlük/online partlayışları keçir, qaçaq dövrə
+# 429 + Retry-After alır). Açar (istifadəçi, cəhd) — başqası büdcəni yeyə bilməz.
+_SUPERVISION_STATUS_RATE = "15/10s"
 
 
 def _sanitize_incident_metadata(metadata):
@@ -144,6 +153,24 @@ def log_incident_api(request, attempt_id):
     )
 
 
+def _status_etag(payload):
+    """Status yükünün zəif ETag-i — klient `If-None-Match` ilə 304 alır."""
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    return f'W/"{digest[:32]}"'
+
+
+def _status_json_response(request, payload):
+    """W4 R3: dəyişməyən status üçün ucuz 304 (`no-store` qalır — brauzer keşi yox,
+    yalnız klientin özü saxladığı ETag müqayisə olunur)."""
+    etag = _status_etag(payload)
+    if request.META.get("HTTP_IF_NONE_MATCH", "").strip() == etag:
+        response = HttpResponseNotModified()
+    else:
+        response = JsonResponse(payload)
+    response["ETag"] = etag
+    return response
+
+
 @login_required
 @require_GET
 @never_cache
@@ -152,8 +179,18 @@ def supervision_status_api(request, attempt_id):
     Get current supervision status for an attempt.
     Used by student to check if they can continue.
     """
+    # W4 R3: limit DB-dən ƏVVƏL yoxlanır — qaçaq klient bazaya toxunmur.
+    exceeded, retry_after = record_rate_limit_hit(
+        "supervision_status", _SUPERVISION_STATUS_RATE, request.user.id, attempt_id
+    )
+    if exceeded:
+        response = JsonResponse({"error": "Too many status requests."}, status=429)
+        response["Retry-After"] = str(retry_after or 1)
+        return response
+
+    # W4 R3: cəhd → imtahan → nəzarət konfiqi tək sorğuda (3 → 1).
     attempt = get_object_or_404(
-        ExamAttempt,
+        ExamAttempt.objects.select_related("exam", "exam__supervision_config"),
         id=attempt_id,
         user=request.user,
     )
@@ -170,7 +207,7 @@ def supervision_status_api(request, attempt_id):
             status=403,
         )
     if not exam_supervision_enabled():
-        return JsonResponse(disabled_supervision_status(attempt))
+        return _status_json_response(request, disabled_supervision_status(attempt))
 
     is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
     if not is_manual_lock:
@@ -179,4 +216,4 @@ def supervision_status_api(request, attempt_id):
     status = get_attempt_supervision_status(attempt)
     status["is_finished"] = attempt.is_finished
     status["attempt_status"] = attempt.status
-    return JsonResponse(status)
+    return _status_json_response(request, status)

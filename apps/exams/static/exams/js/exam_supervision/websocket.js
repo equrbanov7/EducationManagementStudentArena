@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260716-intervention";
+import { ExamSupervision } from "./state.js?v=20260914-w4r3";
 
 Object.assign(ExamSupervision, {
         /* ---------- WebSocket for real-time teacher actions ---------- */
@@ -19,6 +19,11 @@ Object.assign(ExamSupervision, {
                 return;
             }
 
+            // W4 R3: WS açılanda ehtiyat poll heartbeat rejiminə keçir (backoff sıfırlanır).
+            this._wsSocket.onopen = function () {
+                if (self._onTransportStateChange) self._onTransportStateChange(false);
+            };
+
             this._wsSocket.onmessage = function (event) {
                 try {
                     var data = JSON.parse(event.data);
@@ -30,6 +35,8 @@ Object.assign(ExamSupervision, {
                 self._wsSocket = null;
                 // Reconnect after delay unless destroyed
                 if (self._initialized) {
+                    // W4 R3: WS qırıldı → ehtiyat poll dərhal bir dəfə yoxlayır, sonra backoff.
+                    if (self._onTransportStateChange) self._onTransportStateChange(true);
                     self._wsReconnectTimer = setTimeout(function () {
                         self._connectWebSocket();
                     }, self._wsReconnectDelay);
