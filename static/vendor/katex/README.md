@@ -11,7 +11,7 @@ Files copied from the tarball (unchanged) — SHA256:
 
 ```
 a29d2961d3146de5949d78ac7c1a9d93ae54955bad22a6db4fbe836e88e8bf48  katex.min.js
-0289a02cf451a44dd73add683a09644252363871ac11713a647b732cee8b1ee3  katex.min.css
+c9eac1c75c95f7dcbb6db0210cf0a49a150d07aaf599292e5f9ca099c596a119  katex.min.css
 e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4  contrib/auto-render.min.js
 766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3  LICENSE
 0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308  fonts/KaTeX_AMS-Regular.woff2
@@ -63,3 +63,8 @@ fallbacks are never requested.
 Download the release tarball for the new tag, verify its SHA256 against the
 GitHub release, copy the same file set into `static/vendor/katex/<version>/`,
 update the version in `_math_assets.html` and this README.
+
+**Qeyd (2026-09-14):** `katex.min.css`-dən `.woff`/`.ttf` fallback `src` girişləri
+silinib — yalnız `fonts/*.woff2` vendorlanır (bütün dəstəklənən brauzerlər
+woff2 oxuyur). Əks halda `CompressedManifestStaticFilesStorage` çatışmayan
+fayl istinadına görə `collectstatic`-i qırır (CI docker-build 2026-09-14).
