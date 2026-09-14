@@ -204,9 +204,10 @@ Tab «Fayldan yüklə»: **Şablon → Yoxla (quru icra) → Tətbiq et**. Fayl 
 (tətbiq eyni faylı yenidən göndərir).
 
 - **Şablon** (XLSX və ya CSV) siyahı ilə doldurulmuş gəlir: Tələbə № · FİN · Ad Soyad · Qrup ·
-  Cari bal · Bal (0–50) · S1 (0–10) … S5 (0–10). XLSX-də hüceyrə validasiyası var.
-  *Məlum məhdudiyyət:* şablon endirmə view-u hazırda həmişə S1…S5 verir — vərəqin sual
-  sayını ötürmür (bax §10).
+  Cari bal · İmtahan növü · Bal (0–50) · S1 … Sn (0–max). XLSX-də hüceyrə validasiyası var.
+  Şablon vərəq kartındakı sual sayı / bir sualın maksimumu / növü ilə endirilir
+  (`?question_count=&question_max=&exam_kind=`; parametrsiz — sonuncu vərəqin şəbəkəsi) —
+  2026-09-14 dalğa 6 (`1ffa623b`).
 - **Fayl limitləri**: `.xlsx .xlsm .csv`, ≤ 5 MB, ≤ 1 000 sətir, ≤ 64 sütun; sütun sırası
   sərbəstdir, başlıqlar tanınır («Tələbə №/username/login», «FİN», «Ad Soyad»,
   «Bal/İmtahan balı», «S1 / S 1 / Sual 1 / Q1 / Question 1» …). XLSX-də `Ballar` vərəqi,
@@ -221,7 +222,7 @@ Tab «Fayldan yüklə»: **Şablon → Yoxla (quru icra) → Tətbiq et**. Fayl 
   Dəyişən sətir varsa tətbiqdə **səbəb + qeyd + skan** üçü də tələb olunur, əks halda bütün
   tətbiq 400 ilə dayanır («Yazılmış balı dəyişən sətirlər var — səbəb, qeyd və skan edilmiş
   sənəd tələb olunur.») — yarımçıq partiya yaranmır.
-- Quru icra planı vərəq şəbəkəsi olmadan qurulur (S sütunlarının sayı fayldan, tavan 10);
+- Quru icra planı vərəq kartındakı şəbəkə ilə qurulur — ön baxış və tətbiq eyni yoxlamadan keçir (2026-09-14, `1ffa623b`).
   tətbiqdə servis vərəqin öz şəbəkəsi ilə yenidən yoxlayır — uyğunsuzluq sətir xətası kimi
   görünür (bax §10).
 - Tətbiq endpoint-i istifadəçi başına rate-limitlidir (`SCORE_WRITE_RATE_LIMIT`, defolt
@@ -244,9 +245,8 @@ Tab «Fayldan yüklə»: **Şablon → Yoxla (quru icra) → Tətbiq et**. Fayl 
 - **İmtahan Mərkəzi statistikası** bölməsində kağız imtahan KPI-ları növ üzrə (vərəq sayı,
   daxiletmə, dəyişiklik, tələbə sayı, orta imtahan balı — hər qeydiyyatın sonuncu daxiletməsi).
 
-**Məlum açıq məqamlar (2026-09-14):** şablon endirmə view-u vərəqin sual sayını ötürmür
-(həmişə S1…S5); quru icra planı vərəq şəbəkəsini bilmir (tətbiqdə server yenidən yoxlayır).
-Hər ikisi `apps/accounts/views/exam_score_import.py`-da bir sətirlik dəyişiklikdir.
+**Məlum açıq məqamlar:** yoxdur — şablon endirmə və quru icra boşluqları 2026-09-14 dalğa 6-da
+bağlandı (`1ffa623b`).
 
 ---
 
