@@ -520,6 +520,13 @@ Dump lokal bazanın miqrasiya vəziyyətindədir (`exams 0067` və s.); `release
 onu başa (`exams 0069`, `organizations 0053`, `registrar 0078`) gətirir — RİM `*`
 icazəsi (0053) məhz bu addımda mövcud rola yazılır.
 
+**A4. Admin OTP (2026-09-15, sahibin qərarı)** — e-poçt çatdırılması (Brevo) hələ
+qurulmadığı üçün `/manage/` OTP kodu gəlmir. Söndürmək üçün prod `.env`:
+`ADMIN_2FA_REQUIRED=False` + `ADMIN_2FA_DISABLE_ACK=I_UNDERSTAND` (ACK olmadan
+`production.py` qalxmır). Brevo qurulanda `ADMIN_2FA_REQUIRED=True`-ya qaytarın.
+Superadmin hesabı: bazada `staging_admin` (məşqdən qalıb, parolu bilinmir — silin) və
+serverdə yaradılan `superadmin` (`createsuperuser`, 2026-09-15).
+
 **B. Deploy-dan ƏVVƏL (server)**
 
 8. `docker network inspect emsarena_emsarena-network` → subnet **172.18.0.0/16**,

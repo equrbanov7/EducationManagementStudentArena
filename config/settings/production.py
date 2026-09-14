@@ -297,8 +297,16 @@ ADMIN_ALLOWED_IPS = [ip.strip() for ip in _raw_admin_ips.split(",") if ip.strip(
 
 ADMIN_LOGIN_RATE_LIMIT = os.getenv("ADMIN_LOGIN_RATE_LIMIT", "3/15m")
 ADMIN_2FA_REQUIRED = _env_bool("ADMIN_2FA_REQUIRED", True)
-if not ADMIN_2FA_REQUIRED:
-    raise ImproperlyConfigured("ADMIN_2FA_REQUIRED must remain enabled in production.")
+# Sahibin qərarı (2026-09-15): admin OTP-si söndürülə bilər — amma yalnız ŞÜURLU
+# təsdiqlə (`ADMIN_2FA_DISABLE_ACK=I_UNDERSTAND`), əks halda əvvəlki kimi
+# istehsal konfiqurasiyası qəbul edilmir. Söndürüləndə admin panel yalnız parol
+# (+ `ADMIN_ALLOWED_IPS`, giriş rate-limit) ilə qorunur — LAN daxili yerləşdirmə
+# üçün qəbul edilib; e-poçt çatdırılması (Brevo) qurulanda geri açmaq tövsiyədir.
+if not ADMIN_2FA_REQUIRED and os.getenv("ADMIN_2FA_DISABLE_ACK", "").strip() != "I_UNDERSTAND":
+    raise ImproperlyConfigured(
+        "ADMIN_2FA_REQUIRED must remain enabled in production "
+        "(set ADMIN_2FA_DISABLE_ACK=I_UNDERSTAND to switch admin OTP off deliberately)."
+    )
 ADMIN_OTP_VERIFY_RATE_LIMIT = os.getenv("ADMIN_OTP_VERIFY_RATE_LIMIT", "5/10m")
 ADMIN_OTP_RESEND_RATE_LIMIT = os.getenv("ADMIN_OTP_RESEND_RATE_LIMIT", "3/10m")
 
