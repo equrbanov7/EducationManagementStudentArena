@@ -416,7 +416,9 @@ w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, so
 1. **DB tətbiq rolu** (Codex P0-01): `scripts/provision-app-db-role.sh` →
    `APP_DATABASE_USER=emsarena_app` + `EMS_DB_ROLE_ENFORCE=error` — addımlar
    [PROD_DB_ROLE_CHECKLIST.md](./PROD_DB_ROLE_CHECKLIST.md). Əvvəlcə staging
-   klonunda final-mərkəz WS + `-m postgres` test dəsti ilə yoxlayın.
+   klonunda final-mərkəz WS + `-m postgres` test dəsti ilə yoxlayın —
+   2026-09-14 məşqi (28 rol × bütün bölmələr, 0 xəta):
+   [rls_role_rehearsal_2026-09-14.md](./rls_role_rehearsal_2026-09-14.md).
 2. **TLS bayraqları**: `INSECURE_TRANSPORT_OK` prod `.env`-də **olmamalıdır**
    (varsa `check --deploy` dayandırır); `SECURE_SSL_REDIRECT` / HSTS dəyərləri
    §3 cədvəlindəki kimi.
