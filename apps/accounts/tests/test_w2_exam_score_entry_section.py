@@ -357,7 +357,9 @@ class W2ExamScoreEntrySectionTest(fixtures.ExamScoreEntrySectionTest):
         with bypass_rls():
             rim = User.objects.create_user("w2_rim_head", "w2_rim_head@qku.edu.az", "pw")
             role = self.org.roles.get(name="ikt_rehber")
-            self.assertIn("final_score.entry", list(role.permissions or []))
+            permissions = list(role.permissions or [])
+            # 2026-09-14: RİM tam wildcard (`*`) daşıyır.
+            self.assertTrue("final_score.entry" in permissions or "*" in permissions)
             Membership.objects.create(user=rim, organization=self.org, role=role, is_primary=True, is_active=True)
         client = self._client(rim)
         resp = client.get(reverse(PROFILE), {"section": SECTION})

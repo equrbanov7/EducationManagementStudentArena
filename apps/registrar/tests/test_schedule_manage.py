@@ -180,7 +180,8 @@ class SchedulePermissionGateTest(ScheduleManageBase):
     def test_default_roles_carry_the_permission(self):
         for role_name in ("program_coordinator", "ikt_rehber", "dean", "chair_head"):
             role = self.org.roles.get(name=role_name)
-            self.assertIn("schedule.manage", role.permissions, role_name)
+            # 2026-09-14: RİM tam wildcard (`*`) daşıyır.
+            self.assertTrue("schedule.manage" in role.permissions or "*" in role.permissions, role_name)
         self.assertNotIn("schedule.manage", self.org.roles.get(name="teacher").permissions)
 
     def test_coordinator_in_scope_can_add(self):
