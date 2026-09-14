@@ -22,15 +22,20 @@ Nə edir:
 
 Default qorunma: artıq setup-u tamamlamış (email təsdiqli, parolunu özü
 qoymuş) tələbələrə TOXUNMUR — onları da sıfırlamaq üçün ``--force`` verin.
-"""
 
-import csv
+2026-09-15 (sahibin qərarı, deploy hazırlığı): ``--audience teachers`` müəllim
+hesabları üçün (rollar: teacher, assistant); CSV artıq PAYLAMA siyahısıdır —
+fakültə / kafedra / proqram / qrup / tələbə kodu / ad-soyad sütunları ilə,
+fakültə → qrup → ad sırasında (kurator öz qrupunu, kafedra öz müəllimlərini
+kəsib paylayır). İlk girişdə e-poçt + OTP + yeni parol məcburidir (dəyişməyib).
+"""
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.crypto import get_random_string
 
+from core.export_safety import safe_csv_writer
 from core.management.command_safety import ProductionCommandSafetyMixin
 
 User = get_user_model()
@@ -64,6 +69,19 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             help="Setup-u artıq tamamlamış tələbələri də sıfırla (email təsdiqi + parol yenidən tələb olunacaq)",
         )
         parser.add_argument("--dry-run", action="store_true", help="Heç nə yazma — yalnız kimlərə dəyəcəyini göstər")
+        parser.add_argument(
+            "--username",
+            action="append",
+            dest="usernames",
+            default=[],
+            help="Yalnız bu istifadəçi adları (təkrarlana bilər) — məs. iki RİM rəhbəri üçün",
+        )
+        parser.add_argument(
+            "--audience",
+            choices=("students", "teachers"),
+            default="students",
+            help="students (defolt: student/lead_student rolları) və ya teachers (teacher/assistant rolları)",
+        )
 
     def handle(self, *args, **options):
         # Request-xarici (management command) DB işi RLS transaction-pooling
@@ -91,11 +109,13 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
         if generate and not options.get("csv_path") and not options.get("dry_run"):
             raise CommandError("--generate rejimində parollar bir daha görünməyəcək — --csv ilə fayla yazın.")
 
+        audience = options.get("audience") or "students"
+        role_names = ("teacher", "assistant") if audience == "teachers" else ("student", "lead_student")
         student_user_ids = (
             Membership.objects.filter(
                 organization=organization,
                 is_active=True,
-                role__name__in=("student", "lead_student"),
+                role__name__in=role_names,
             )
             .values_list("user_id", flat=True)
             .distinct()
@@ -123,6 +143,12 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             .select_related("profile")
             .order_by("username")
         )
+        wanted = [name.strip() for name in (options.get("usernames") or []) if name.strip()]
+        if wanted:
+            users = users.filter(username__in=wanted)
+            missing = sorted(set(wanted) - set(users.values_list("username", flat=True)))
+            if missing:
+                raise CommandError(f"İstifadəçi tapılmadı / hədəf rolda deyil: {missing}")
 
         targets = []
         skipped_configured = 0
@@ -147,6 +173,7 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
             )
             return
 
+        placement = _placement_index(organization, [u.pk for u in targets], audience)
         rows = []
         with transaction.atomic():
             for user in targets:
@@ -158,12 +185,28 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
                 profile.password_change_required = True
                 profile.email_verified = False
                 profile.save(update_fields=["password_change_required", "email_verified", "updated_at"])
-                rows.append((user.username, password))
+                info = placement.get(user.pk, {})
+                full_name = (f"{user.last_name} {user.first_name}").strip() or user.username
+                rows.append(
+                    (
+                        info.get("faculty", ""),
+                        info.get("unit", ""),
+                        info.get("program", ""),
+                        info.get("group", ""),
+                        info.get("code", ""),
+                        full_name,
+                        user.username,
+                        password,
+                    )
+                )
+        rows.sort(key=lambda r: (r[0], r[1], r[3], r[5]))
 
         if options.get("csv_path"):
             with open(options["csv_path"], "w", newline="", encoding="utf-8") as fh:
-                writer = csv.writer(fh)
-                writer.writerow(["username", "password"])
+                writer = safe_csv_writer(fh)
+                writer.writerow(
+                    ["fakulte", "kafedra", "proqram", "qrup", "telebe_kodu", "ad_soyad", "username", "ilkin_parol"]
+                )
                 writer.writerows(rows)
             self.stdout.write(f"CSV yazıldı: {options['csv_path']}")
 
@@ -174,3 +217,57 @@ class Command(ProductionCommandSafetyMixin, BaseCommand):
                 "İlk girişdə: yeni email + OTP təsdiqi + yeni parol tələb olunacaq."
             )
         )
+
+
+def _ancestor_names(unit):
+    """OrgUnit → {unit_type: name} özü + valideynləri (ən çox 4 səviyyə)."""
+    names = {}
+    current = unit
+    depth = 0
+    while current is not None and depth < 5:
+        names.setdefault(current.unit_type, current.name)
+        current = current.parent
+        depth += 1
+    return names
+
+
+def _placement_index(organization, user_ids, audience):
+    """user_id → {faculty, unit(kafedra), program, group, code} — CSV paylama sütunları."""
+    from apps.organizations.models import Membership
+    from core.constants import OrgUnitType
+
+    index = {}
+    if audience == "teachers":
+        memberships = Membership.objects.filter(
+            organization=organization, user_id__in=user_ids, is_active=True
+        ).select_related("scope_unit__parent__parent", "role")
+        for membership in memberships:
+            names = _ancestor_names(membership.scope_unit) if membership.scope_unit_id else {}
+            entry = index.setdefault(membership.user_id, {})
+            entry.setdefault("faculty", names.get(OrgUnitType.FACULTY, ""))
+            entry.setdefault("unit", names.get(OrgUnitType.CHAIR, ""))
+        return index
+
+    from apps.accounts.models import UserProfile
+    from apps.registrar.models import StudentAcademicRecord
+
+    codes = dict(UserProfile.objects.filter(user_id__in=user_ids).values_list("user_id", "institutional_identifier"))
+    records = (
+        StudentAcademicRecord.objects.filter(organization=organization, student_id__in=user_ids)
+        .select_related("program", "group__parent__parent__parent")
+        .order_by("student_id", "-created_at")
+    )
+    for record in records:
+        if record.student_id in index:
+            continue  # ən son qeyd
+        names = _ancestor_names(record.group) if record.group_id else {}
+        index[record.student_id] = {
+            "faculty": names.get(OrgUnitType.FACULTY, ""),
+            "unit": names.get(OrgUnitType.CHAIR, ""),
+            "program": getattr(record.program, "name", "") or "",
+            "group": names.get(OrgUnitType.GROUP, ""),
+            "code": codes.get(record.student_id) or "",
+        }
+    for user_id in user_ids:
+        index.setdefault(user_id, {"code": codes.get(user_id) or ""})
+    return index

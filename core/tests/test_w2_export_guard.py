@@ -37,7 +37,6 @@ ALLOWED: dict[str, dict[str, int]] = {
     # İdarəetmə əmrləri — yalnız operator işlədir, çıxış diskə/konsola gedir.
     "apps/accounts/management/commands/import_users_from_excel.py": {"csv_writer": 1},
     "apps/accounts/management/commands/make_user_import_template.py": {"cell_value": 8},
-    "apps/accounts/management/commands/provision_student_credentials.py": {"csv_writer": 1},
     "apps/accounts/management/commands/seed_staff_roster.py": {"csv_writer": 1},
     # İdxal şablonları — başlıq/ipucu sabitləri (istifadəçi mətni yoxdur).
     "apps/accounts/services/intake/spec.py": {"csv_writer": 1, "sheet_append": 2},
