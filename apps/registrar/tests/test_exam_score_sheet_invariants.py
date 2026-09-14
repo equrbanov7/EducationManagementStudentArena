@@ -20,6 +20,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import connection
@@ -293,8 +294,12 @@ class SheetGuardQueryBudgetTest(_TwoTenantCase):
 
     def test_record_exam_score_with_sheet_costs_no_extra_queries(self):
         sheet = sheets.create_sheet(offering=self.a.offerings[1], by_user=self.a.center)
+        # 2026-09-14: hər iki ölçü eyni (soyuq) keş vəziyyətindən başlasın — test sırasından
+        # asılı olaraq hərf-şkalası/sxem keşi bir tərəfi isidib 3 sorğu fərqi verirdi.
+        cache.clear()
         with CaptureQueriesContext(connection) as without_sheet:
             service.record_exam_score(enrollment=self.a.enrollments[0], score="40", by_user=self.a.center)
+        cache.clear()
         with CaptureQueriesContext(connection) as with_sheet:
             service.record_exam_score(enrollment=self.a.enrollments[1], score="40", by_user=self.a.center, sheet=sheet)
         self.assertEqual(len(with_sheet), len(without_sheet))
