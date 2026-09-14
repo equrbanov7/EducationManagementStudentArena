@@ -21,8 +21,8 @@ tələbələrin balları sistemə yüklənsin»):
 kimi render edir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur); dinamik
 dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel İÇİNDƏ və
 `defer` ilədir (AJAX swap qaydası).{% endcomment %}
-<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-1">
-<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260914-1">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-3">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260914-3">
 
 {% trans "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin." context "registrar.exam_score_entry" as ese_subtitle %}
 {% trans "Köçürmə addımları" context "registrar.exam_score_entry" as ese_steps_label %}
@@ -148,6 +148,10 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
      data-import-written="{% trans 'yazıldı' context 'registrar.exam_score_entry' %}"
      data-import-missing="{% trans 'faylda olmayan tələbə' context 'registrar.exam_score_entry' %}"
      data-import-total="{% trans 'sətir' context 'registrar.exam_score_entry' %}"
-     data-question-invalid="{% trans 'Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"></div>
-<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260914-1"></script>
-<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260914-1"></script>
+     data-question-invalid="{% trans 'Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"
+     data-dialog-title="{% trans 'Balları sistemə yaz' context 'registrar.exam_score_entry' %}"
+     data-question-sum="{% trans 'Sualların cəmi imtahan balının tavanını aşa bilməz.' context 'registrar.exam_score_entry' %}"></div>
+<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260914-3"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20260914-3"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20260914-3"></script>
+<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260914-3"></script>

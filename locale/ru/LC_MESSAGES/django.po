@@ -68699,3 +68699,15 @@ msgstr "Удалить участника из курса"
 
 msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
 msgstr "Отклонить заявку организации на регистрацию? Это действие нельзя отменить."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hərf"
+msgstr "Буква"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiq et — sistemə yaz"
+msgstr "Подтвердить — записать в систему"
+
+msgctxt "registrar.exam_score_entry"
+msgid "tələbə kəsilir (F)"
+msgstr "студент(ов) не сдают (F)"

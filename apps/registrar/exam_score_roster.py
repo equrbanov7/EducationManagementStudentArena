@@ -84,6 +84,36 @@ def instructors_for_period(*, organization, period, group_ids=None):
     return result
 
 
+def teachers_for_organization(*, organization) -> list:
+    """Təşkilatın müəllimləri (bal yazma icazəli aktiv üzvlər) — yoxlayan / nəzarətçi seçicisi üçün.
+
+    Mənbə ``integrity.eligible_instructor_user_ids`` (açılış müəllimi ilə eyni
+    meyar); ad sırası ilə, ``{id, name}``. İki sorğu, siyahı ölçüsündən asılı deyil.
+    """
+    if organization is None:
+        return []
+    from django.contrib.auth import get_user_model
+
+    from .integrity import eligible_instructor_user_ids
+
+    ids = eligible_instructor_user_ids(organization=organization)
+    if not ids:
+        return []
+    rows = (
+        get_user_model()
+        .objects.filter(pk__in=ids)
+        .order_by("last_name", "first_name", "username")
+        .values("id", "first_name", "last_name", "username")
+    )
+    return [
+        {
+            "id": str(row["id"]),
+            "name": (f"{row['first_name'] or ''} {row['last_name'] or ''}".strip() or row["username"]),
+        }
+        for row in rows
+    ]
+
+
 def group_ids_for_instructor(*, organization, period, instructor_id) -> set:
     """Bu müəllimin dövrdə açılışı olan qrup id-ləri (str) — qrup seçicisini daraltmaq üçün, BİR sorğu."""
     if organization is None or period is None or not instructor_id:
@@ -133,8 +163,8 @@ def entry_row(entry) -> dict:
         "is_correction": entry.kind == ExamScoreEntryKind.CORRECTION,
         "is_appeal": entry.kind == ExamScoreEntryKind.APPEAL,
         "is_change": entry.kind != ExamScoreEntryKind.INITIAL,
-        "old": entry.old_score if entry.old_score is not None else "—",
-        "new": entry.new_score if entry.new_score is not None else "—",
+        "old": str(int(entry.old_score)) if entry.old_score is not None else "—",
+        "new": str(int(entry.new_score)) if entry.new_score is not None else "—",
         "question_scores": list(entry.question_scores) if entry.question_scores else [],
         "reason": entry.get_reason_display() if entry.reason else "",
         "note": entry.note,
@@ -206,11 +236,27 @@ def roster_for_offering(*, offering):
                 "total": result["total"],
                 "letter": result["letter"],
                 "graded": result["graded"],
+                "passed": result["passed"],
+                "failed": result["failed"],
+                "barred": result["barred"],
+                "bonus": result["bonus"],
                 "entries": [entry_row(entry) for entry in history],
                 "attempts": attempts_by_student.get(enrollment.student_id, []),
             }
         )
-    return {"offering": offering, "scheme": scheme, "rows": rows, "exam_score_max": finals.exam_score_max(scheme)}
+    from .grading_scale import bands_for
+
+    return {
+        "offering": offering,
+        "scheme": scheme,
+        "rows": rows,
+        "exam_score_max": finals.exam_score_max(scheme),
+        # Təsdiq dialoqu hərf qiymətini SERVER şkalası ilə canlı hesablayır
+        # (sahibin rəyi 2026-09-14: hədd uydurulmur — `grading_scale.bands_for`).
+        "letter_bands": [[int(t), letter, str(gpa)] for t, letter, gpa in bands_for(offering.organization)],
+        "pass_threshold": int(scheme.pass_threshold),
+        "min_final_exam_score": int(scheme.min_final_exam_score),
+    }
 
 
 def _row_matches_search(row, needle: str) -> bool:
@@ -284,4 +330,5 @@ __all__ = [
     "roster_for_offering",
     "status_counts",
     "subjects_for_period",
+    "teachers_for_organization",
 ]

@@ -224,9 +224,10 @@ def _handle_save(request, organization, next_url):
     for student_name, problem in result["errors"]:
         messages.error(request, f"{student_name}: {problem}")
 
+    # `next` onsuz da açılışı daşıyırsa parametr təkrarlanmasın (URL təmizliyi).
     return _append_query_params(
         next_url,
-        ese_offering=str(offering.pk),
+        ese_offering="" if f"ese_offering={offering.pk}" in next_url else str(offering.pk),
         ese_saved="1" if result["written"] else "",
     )
 

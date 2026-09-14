@@ -297,6 +297,12 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # filtr paneli və səhifələmə işləmir (`section_loader.js` bölməni
         # tanımır və heç nə etmir).
         "superadmin-exam-rooms",
+        # «İmtahan balının daxil edilməsi» (2026-09-14, W2 `w2paper`, sahibin rəyi):
+        # panel server-render, yazı `accounts:exam_score_entry` POST-una gedir və
+        # `next` ilə qabığa qayıdır; idxal ayrıca JSON endpoint-lərdir. Bu qeydiyyat
+        # olmadan avto filtr paneli (qrup → fənn, müəllim, axtarış), vəziyyət /
+        # növ çipləri, görünüş açarı və səhifələmə brauzerdə SƏSSİZ işləmirdi.
+        "exam-score-entry",
     }
 )
 

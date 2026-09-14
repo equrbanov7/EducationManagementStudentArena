@@ -246,7 +246,17 @@ class ExamScoreSheet(UUIDModel, TimeStampedModel):
         help_text="Vərəqi yoxlayan müəllim (default: açılışın müəllimi).",
     )
     examiner_name = models.CharField(max_length=200, blank=True, help_text="Yoxlayan müəllimin adı (snapshot).")
-    invigilator_name = models.CharField(max_length=200, blank=True, help_text="Nəzarətçi (sərbəst mətn).")
+    # 2026-09-14 (sahibin rəyi): nəzarətçi də təşkilatın müəllimlərindən SEÇİLİR —
+    # FK + ad snapshot-u (müəllim sonradan çıxsa vərəq tarixi qalır).
+    invigilator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="invigilated_score_sheets",
+        help_text="Nəzarətçi (təşkilatın müəllimi) — opsional.",
+    )
+    invigilator_name = models.CharField(max_length=200, blank=True, help_text="Nəzarətçinin adı (snapshot).")
     protocol_number = models.CharField(max_length=64, blank=True, help_text="Protokol / vərəq nömrəsi.")
     note = models.TextField(blank=True, help_text="Partiya qeydi (opsional).")
     evidence = models.FileField(

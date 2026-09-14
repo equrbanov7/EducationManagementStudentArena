@@ -415,6 +415,96 @@ class W2ExamScoreEntrySectionTest(fixtures.ExamScoreEntrySectionTest):
             {row["kind"]: row["entries"] for row in resp.json()["summary"]["paper"]}, {"written": 9, "practical": 2}
         )
 
+    # ── Sahibin rəyi (2026-09-14, 2-ci dövrə): seçimlər, təsdiq dialoqu, nəzarətçi FK ──
+    def test_roster_uses_project_selects_and_confirm_dialog_markup(self):
+        resp = self._get(self._client(self.center))
+        html = resp.content.decode()
+        # Yoxlayan / nəzarətçi — axtarışlı project select, defolt yoxlayan = açılışın müəllimi.
+        self.assertIn('name="examiner"', html)
+        self.assertIn('name="invigilator"', html)
+        self.assertIn(f'<option value="{self.teacher.id}" selected>', html)
+        self.assertNotIn('name="examiner_name"', html)
+        self.assertIn("data-ese-examiner", html)
+        self.assertIn('data-live-search="true"', html)
+        # Sual balı — SEÇİM (native number input yoxdur), hazır toggle + tənbəl gücləndirmə.
+        self.assertIn(f'name="q__{self.enrollment.id}__1"', html)
+        self.assertIn("data-ese-qtoggle", html)
+        self.assertIn("bootstrap-single-select--compact", html)
+        self.assertNotIn(
+            f'type="number" class="ems-input ese-score ese-qscore" name="q__{self.enrollment.id}__1"', html
+        )
+        # Yekun sahəsi yalnız-oxunan, hərf sütunu, təsdiq dialoqu + şkala.
+        self.assertIn("readonly", html)
+        self.assertIn("data-ese-letter", html)
+        self.assertIn('id="ese-confirm-config"', html)
+        self.assertIn("data-ese-confirm-rows", html)
+        self.assertIn("data-ese-confirm-failed-count", html)
+        self.assertIn("data-ese-confirm", html)
+        # İmtahan növü — seçilmiş etiket server tərəfdən (JS-dən əvvəl) + `required`.
+        self.assertIn("data-ese-exam-kind-chip", html)
+        self.assertIn('data-ese-exam-kind-label="', html)
+        self.assertIn(
+            'name="exam_kind" form="ese-roster-form" class="ems-select bootstrap-single-select__native" required', html
+        )
+
+    def test_confirm_config_uses_organisation_scale(self):
+        resp = self._get(self._client(self.center))
+        self.assertContains(resp, '"letter_bands"')
+        self.assertContains(resp, '"pass_threshold"')
+        self.assertContains(resp, '"min_final_exam_score"')
+        self.assertContains(resp, '[91, "A", "4.00"]')
+
+    def test_save_stores_examiner_and_invigilator_fk_and_persists_defaults(self):
+        with bypass_rls():
+            other = User.objects.create_user("w2_invig", "w2_invig@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=other,
+                organization=self.org,
+                role=self.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+        client = self._client(self.center)
+        resp = self._save(
+            client,
+            questions=["8", "7"],
+            examiner=str(self.teacher.id),
+            invigilator=str(other.id),
+            exam_kind="practical",
+        )
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            sheet = self.offering.exam_score_sheets.get()
+            self.assertEqual(sheet.examiner_id, self.teacher.id)
+            self.assertEqual(sheet.invigilator_id, other.id)
+            self.assertEqual(sheet.invigilator_name, other.get_full_name() or other.username)
+        resp = self._get(client)
+        html = resp.content.decode()
+        self.assertIn(f'<option value="{other.id}" selected>', html)  # nəzarətçi yenidən seçili
+        self.assertIn('value="practical" selected', html)
+        self.assertIn("ems-badge--", html)
+        # Yad istifadəçi → vərəq yaranmır, bal yazılmır.
+        with bypass_rls():
+            stranger = User.objects.create_user("w2_stranger", "w2_stranger@qku.edu.az", "pw")
+        resp = self._save(client, questions=["9", "9"], invigilator=str(stranger.id))
+        self.assertEqual(resp.status_code, 302)
+        with bypass_rls():
+            self.assertEqual(self.offering.exam_score_sheets.count(), 1)
+        self.assertEqual(self._exam_score(), Decimal(15))
+
+    def test_section_is_ajax_safe_fragment(self):
+        """Filtr paneli / çiplər / görünüş açarı SPA ilə işləsin — fraqment endpoint-i 200."""
+        client = self._client(self.center)
+        resp = client.get(
+            reverse("accounts:profile_section_fragment", kwargs={"section": SECTION}),
+            {"ese_offering": str(self.offering.id), "ese_status": "empty"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(resp.status_code, 200)
+        payload = resp.json()
+        self.assertTrue(payload.get("ok"))
+        self.assertIn(f"score__{self.enrollment.id}", payload["html"])
+
     # Mövcud fixture sinfinin testləri bu modulda təkrar işləməsin.
     for _name in list(vars(fixtures.ExamScoreEntrySectionTest)):
         if _name.startswith("test_"):
