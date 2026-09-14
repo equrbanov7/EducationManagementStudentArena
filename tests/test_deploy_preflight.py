@@ -20,7 +20,14 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/deploy/remote_deploy.sh"
-FUNCTIONS = ("dotenv_value", "resolve_build_git_sha", "preflight_django_deploy_check", "verify_running_build_sha")
+FUNCTIONS = (
+    "dotenv_value",
+    "resolve_build_git_sha",
+    "preflight_django_deploy_check",
+    "preflight_env_consistency",
+    "_to_mb",
+    "verify_running_build_sha",
+)
 
 
 def _script() -> str:
@@ -217,3 +224,84 @@ def test_running_build_sha_check_is_skipped_when_source_commit_is_unknown(tmp_pa
     result = _run_bash("verify_running_build_sha", {"BUILD_GIT_SHA": "unknown"}, tmp_path, health)
     assert result.returncode == 0
     assert "skipping image drift verification" in result.stderr
+
+
+# ── 2026-09-14: .env invariantları (deployment.md §5.2 A-1/A-3/A-5, audit P3-18) ──
+
+_GOOD_ENV = (
+    "APP_DATABASE_USER=emsarena_app\nEMS_DB_ROLE_ENFORCE=error\nPOSTGRES_MAX_CONNECTIONS=200\n"
+    "PGBOUNCER_MAX_DB_CONNECTIONS=180\nPGBOUNCER_DEFAULT_POOL_SIZE=40\nPGBOUNCER_RESERVE_POOL_SIZE=50\n"
+    "ALLOWED_HOSTS=10.0.2.42,localhost,127.0.0.1\nREDIS_MAXMEMORY=3gb\nREDIS_MEM_LIMIT=4096M\n"
+)
+
+
+def _env_run(tmp_path, env_text):
+    (tmp_path / ".env").write_text(env_text, encoding="utf-8")
+    return _run_bash("preflight_env_consistency", {}, tmp_path)
+
+
+def test_env_preflight_runs_before_any_container_is_touched():
+    body = _function_body("docker_deploy")
+    assert body.index("preflight_env_consistency") < body.index("preflight_direct_dns")
+    assert body.index("preflight_env_consistency") < body.index('docker compose -f "$COMPOSE_FILE" build')
+
+
+def test_env_preflight_passes_on_consistent_env(tmp_path):
+    result = _env_run(tmp_path, _GOOD_ENV)
+    assert result.returncode == 0, result.stderr
+    assert "Environment preflight passed" in result.stdout
+
+
+def test_env_preflight_refuses_missing_app_db_role(tmp_path):
+    result = _env_run(tmp_path, _GOOD_ENV.replace("APP_DATABASE_USER=emsarena_app", "APP_DATABASE_USER="))
+    assert result.returncode == 1
+    assert "APP_DATABASE_USER is empty" in result.stderr
+
+
+def test_env_preflight_warns_but_continues_when_enforce_is_not_error(tmp_path):
+    result = _env_run(tmp_path, _GOOD_ENV.replace("EMS_DB_ROLE_ENFORCE=error", "EMS_DB_ROLE_ENFORCE=warn"))
+    assert result.returncode == 0, result.stderr
+    assert "EMS_DB_ROLE_ENFORCE=warn" in result.stderr
+
+
+def test_env_preflight_refuses_pgbouncer_cap_above_postgres_limit(tmp_path):
+    result = _env_run(
+        tmp_path, _GOOD_ENV.replace("PGBOUNCER_MAX_DB_CONNECTIONS=180", "PGBOUNCER_MAX_DB_CONNECTIONS=190")
+    )
+    assert result.returncode == 1
+    assert "PGBOUNCER_MAX_DB_CONNECTIONS=190 must be <= POSTGRES_MAX_CONNECTIONS-20" in result.stderr
+
+
+def test_env_preflight_refuses_pool_larger_than_cap(tmp_path):
+    result = _env_run(tmp_path, _GOOD_ENV.replace("PGBOUNCER_DEFAULT_POOL_SIZE=40", "PGBOUNCER_DEFAULT_POOL_SIZE=150"))
+    assert result.returncode == 1
+    assert "exceeds PGBOUNCER_MAX_DB_CONNECTIONS=180" in result.stderr
+
+
+def test_env_preflight_uses_compose_defaults_when_keys_are_absent(tmp_path):
+    # Compose defoltları: 250 / 230 / 150 / 50 / 3gb / 4096M — ardıcıldır.
+    result = _env_run(tmp_path, "APP_DATABASE_USER=emsarena_app\nEMS_DB_ROLE_ENFORCE=error\nALLOWED_HOSTS=localhost\n")
+    assert result.returncode == 0, result.stderr
+
+
+def test_env_preflight_requires_localhost_in_allowed_hosts(tmp_path):
+    result = _env_run(
+        tmp_path, _GOOD_ENV.replace("ALLOWED_HOSTS=10.0.2.42,localhost,127.0.0.1", "ALLOWED_HOSTS=10.0.2.42")
+    )
+    assert result.returncode == 1
+    assert "ALLOWED_HOSTS must include 'localhost'" in result.stderr
+
+
+def test_env_preflight_refuses_redis_maxmemory_at_or_above_container_limit(tmp_path):
+    result = _env_run(tmp_path, _GOOD_ENV.replace("REDIS_MAXMEMORY=3gb", "REDIS_MAXMEMORY=4G"))
+    assert result.returncode == 1
+    assert "REDIS_MAXMEMORY (4G) must be below REDIS_MEM_LIMIT (4096M)" in result.stderr
+
+
+def test_env_preflight_reports_every_failure_at_once(tmp_path):
+    broken = _GOOD_ENV.replace("APP_DATABASE_USER=emsarena_app", "APP_DATABASE_USER=").replace(
+        "ALLOWED_HOSTS=10.0.2.42,localhost,127.0.0.1", "ALLOWED_HOSTS=10.0.2.42"
+    )
+    result = _env_run(tmp_path, broken)
+    assert result.returncode == 1
+    assert "2 problem(s)" in result.stderr

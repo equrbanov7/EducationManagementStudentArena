@@ -94,6 +94,7 @@ def test_check_deploy_fail_level_defaults_to_warning_like_ci():
 
 _HARNESS_STUBS = r"""
 preflight_direct_dns() { :; }
+preflight_env_consistency() { :; }
 validate_origin_cert() { :; }
 remove_legacy_edge_firewall() { :; }
 preflight_django_deploy_check() { echo "stub: preflight" ; }
