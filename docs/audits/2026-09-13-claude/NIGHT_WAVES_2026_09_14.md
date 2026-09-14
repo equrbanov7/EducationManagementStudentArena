@@ -126,8 +126,9 @@ yekun vəziyyət `w5left` hesabatında)
    yenilənmir (registrar tərəfində siqnal lazımdır).
 
 ### Kod — kiçik, sahibsiz qalanlar
-4. Kağız bal idxalı: şablon endirmə view-u həmişə S1…S5 verir; quru icra planı vərəqin
-   sual şəbəkəsini bilmir — dalğa 6 `w6paper` işində (bax commit tarixçəsi).
+4. ~~Kağız bal idxalı: şablon endirmə view-u həmişə S1…S5 verir; quru icra planı vərəqin
+   sual şəbəkəsini bilmir~~ — dalğa 6-da bağlandı (`views/exam_score_import.py` şablonu və
+   quru icranı `sheet_defaults` şəbəkəsi ilə çağırır: `question_count` / `question_max`).
 5. ~~`ExamScoreSheetKind` ixracı~~ — `48599f40`.
 6. ~~`_searchable_multi_select.html`~~ — dalğa 6-da silindi (`1ffa623b`).
 7. `ensure_can_manage_final_center` / `ensure_can_supervise_session` / `ensure_ticket_owner`
@@ -136,9 +137,12 @@ yekun vəziyyət `w5left` hesabatında)
 8. `journal.view` açarı heç bir defolt rol şablonuna verilməyib (əlavə oxu yolu; sahib
    istəsə icazə redaktorundan verir) (`w2rbac`).
 9. Kohort (`exams.StudentGroup`) səthi: dalğa 7-də (`4be82229`) kohortsuz tenantda əvəzlənmə kartı + köhnəlmə qeydi; model/data qalır (tam silmə — ayrıca miqrasiya qərarı).
-10. Kabinet SPA-da `journal-close` / `kollokvium-windows` / `exam-center-stats` filtr
-    panelləri də səssiz qala bilər (eyni kök səbəb, `8e7aa995` yalnız reyestr skaneri ilə
-    örtür) — ayrıca yoxlama (`w2paper` 3-cü dövrə).
+10. ~~Kabinet SPA-da `journal-close` / `kollokvium-windows` / `exam-center-stats` filtr
+    panelləri də səssiz qala bilər~~ — yoxlanıldı (2026-09-14 səhər): `journal-close` və
+    `kollokvium-windows` filtrləri `data-profile-ajax-form`-suz adi GET formlardır
+    (`ajax.js` yalnız həmin atributlu formları tutur) → tam səhifə yenilənir, səssiz
+    qalmır; `exam-center-stats` filtrləri boot skriptinin öz JSON çağırışlarıdır
+    (`data-ems-filters` qəsdən yoxdur). Problem yoxdur.
 11. ~~Sual idxalı: pano ilə şəkil yapışdırma; DOCX brauzer QA~~ — dalğa 8-də bağlandı (pano/sürüklə-burax yapışdırma bank toplu əlavədə; DOCX yükləməsi brauzerdə uçdan-uca yoxlanıldı).
 12. Audit P3 maddələri P3-4 / P3-5 / P3-6 / P3-10 / P3-11 / P3-17 / P3-18 heç bir briefdə
     olmayıb — toxunulmayıb (`w2infra`).
