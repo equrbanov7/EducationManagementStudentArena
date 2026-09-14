@@ -439,6 +439,45 @@
             form.submit();
         });
 
+        // 2026-09-14 (W3 `w3myexams`): «Zibil qutusu» alt-görünüşü — birdəfəlik
+        // silmə qlobal `EMSConfirm` (danger) ilə təsdiqlənir, sonra mövcud
+        // `exams:permanent_delete_exam` endpoint-inə gizli CSRF formu ilə POST.
+        // Mətnlər düymənin data-atributlarından gəlir (i18n şablondadır).
+        D.on("click", ".js-tx-purge", function (event, btn) {
+            var root = btn.closest("[data-my-exams-root]");
+            if (!root) {
+                return;
+            }
+            var form = root.querySelector("[data-tx-action-form]");
+            var url = btn.getAttribute("data-purge-url");
+            if (!form || !url) {
+                return;
+            }
+            var name = btn.getAttribute("data-exam-name") || "";
+            var body = btn.getAttribute("data-confirm-body") || "";
+            var submit = function () {
+                form.setAttribute("action", url);
+                form.submit();
+            };
+            if (!window.EMSConfirm || typeof window.EMSConfirm.open !== "function") {
+                if (window.confirm(name ? name + "\n\n" + body : body)) {
+                    submit();
+                }
+                return;
+            }
+            window.EMSConfirm.open({
+                title: btn.getAttribute("data-confirm-title") || "",
+                body: name ? name + "\n\n" + body : body,
+                confirmLabel: btn.getAttribute("data-confirm-ok") || "",
+                cancelLabel: btn.getAttribute("data-confirm-cancel") || "",
+                danger: true
+            }).then(function (ok) {
+                if (ok) {
+                    submit();
+                }
+            });
+        });
+
         D.on("click", ".js-tx-delete", function (event, btn) {
             closeAllMenus();
             var root = btn.closest("[data-my-exams-root]");

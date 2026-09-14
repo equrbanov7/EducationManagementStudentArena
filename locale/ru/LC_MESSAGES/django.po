@@ -68711,3 +68711,11 @@ msgstr "Подтвердить — записать в систему"
 msgctxt "registrar.exam_score_entry"
 msgid "tələbə kəsilir (F)"
 msgstr "студент(ов) не сдают (F)"
+
+msgctxt "profile.my_exams.trash"
+msgid "silinmiş imtahan"
+msgstr "удалённых экзаменов"
+
+msgctxt "profile.my_exams.trash"
+msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
+msgstr "Удалённые экзамены хранятся здесь: их результаты не теряются, и вы можете восстановить их в любой момент."

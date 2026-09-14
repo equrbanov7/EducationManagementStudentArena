@@ -30,11 +30,21 @@
         </p>
       </div>
       <div class="tx-head-actions ems-header__actions">
-        <a href="{% url 'exams:deleted_exams_list' %}"
-           class="ems-btn ems-btn--ghost"
-           title="{% trans 'trash_link' context 'profile.my_exams' %}">
-          <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "trash_link" context "profile.my_exams" %}
+        {% comment %}2026-09-14 (W3 `w3myexams`, sahib: «zibil qutusu yerini düzəlt,
+        daha yaxşı formada»): mətn linki → sayğaclı ikon düyməsi; hədəf ayrıca səhifə
+        deyil, bölmənin öz alt-görünüşüdür (`?exam_view=trash`, AJAX-safe link).{% endcomment %}
+        {% with trash=my_exams_dashboard.trash %}
+        <a href="{{ trash.url }}"
+           class="ems-btn ems-btn--ghost tx-trashbtn{% if trash.is_open %} is-on{% endif %}"
+           data-tx-trash-link
+           title="{% trans 'trash_link' context 'profile.my_exams' %}"
+           {% if trash.is_open %}aria-current="page"{% endif %}>
+          <i class="fas fa-trash-can" aria-hidden="true"></i>
+          <span class="sr-only">{% trans "trash_link" context "profile.my_exams" %}:</span>
+          <span class="tx-trashbtn-n{% if trash.count %} has-items{% endif %}" data-tx-trash-count>{{ trash.count }}</span>
+          <span class="sr-only">{% trans "silinmiş imtahan" context "profile.my_exams.trash" %}</span>
         </a>
+        {% endwith %}
         <button type="button"
                 class="ems-btn ems-btn--primary js-open-exam-form-modal"
                 data-exam-modal-mode="create"
@@ -44,6 +54,11 @@
       </div>
     </header>
 
+    {% include "accounts/profile/sections/partials/_my_exams_tabs.html" %}
+
+    {% if my_exams_dashboard.trash.is_open %}
+      {% include "accounts/profile/sections/partials/_my_exams_trash.html" with trash=my_exams_dashboard.trash %}
+    {% else %}
     {% include "accounts/profile/sections/partials/_my_exams_kpis.html" %}
     {% include "accounts/profile/sections/partials/_my_exams_toolbar.html" %}
 
@@ -114,6 +129,7 @@
         {% endif %}
       </div>
     {% endif %}
+    {% endif %}{# /trash alt-görünüşü #}
   </div>
 
   {% comment %}
@@ -121,7 +137,7 @@
     SQL aqreqatı ilə hesablanır (bax `_sections/exams.py`), siyahı isə səhifə-
     səhifə gəlir — yəni «Aktiv: 150» yazılır, ekranda 12 kart olsa da.
   {% endcomment %}
-  {% if my_exams_page_obj %}
+  {% if my_exams_page_obj and not my_exams_dashboard.trash.is_open %}
     {% include "partials/_pagination.html" with page_obj=my_exams_page_obj extra_query=my_exams_pagination_query page_param="exam_page" %}
   {% endif %}
 
