@@ -228,6 +228,15 @@ class AdminOTPGateMiddleware:
                 from django.shortcuts import redirect
                 from django.urls import reverse
 
+                # 2026-09-15 (sahibin rəyi): əsas sayt login-i ilə gələn superadmin
+                # OTP-dən sonra Django admin-ə deyil, GƏLDİYİ səhifəyə (kabinet)
+                # qayıtsın. Yalnız GET və yerli yol yadda saxlanır; verify-otp
+                # bootstrap-ı bu dəyəri `next` kimi götürür.
+                if request.method == "GET" and not admin_2fa_pending_for_request(request):
+                    remembered = request.get_full_path()
+                    if remembered.startswith("/") and not remembered.startswith("//"):
+                        request.session[ADMIN_2FA_NEXT_URL_SESSION_KEY] = remembered
+                        request.session.modified = True
                 return redirect(reverse("admin:verify-otp"))
         return self.get_response(request)
 

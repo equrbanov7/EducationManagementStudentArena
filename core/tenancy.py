@@ -113,6 +113,13 @@ def _resolve_profile_fallback_org(user, resolved_profile):
                 status="active",
             ).values_list("id", flat=True)
         )
+        # 4) Sahibin qərarı (2026-09-15): üzvlüyü olmayan superadmin üçün sistemdə
+        #    YEGANƏ aktiv təşkilat defolt seçilir (tək-tenant yerləşdirmə — QKU);
+        #    bir neçə təşkilat varsa yenə seçim istifadəçinindir.
+        if not candidate_ids and (getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False)):
+            all_orgs = list(Organization.objects.order_by("created_at")[:2])
+            if len(all_orgs) == 1 and all_orgs[0].is_active and all_orgs[0].status == "active":
+                candidate_ids = {all_orgs[0].id}
         # Yalnız tək, qeyri-müəyyənliksiz org bərpa olunur.
         if len(candidate_ids) != 1:
             return None
