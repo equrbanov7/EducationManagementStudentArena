@@ -68692,3 +68692,11 @@ msgstr "Kaynak sınavda soru yoktu — kopya boş bir taslaktır; soru ekleyin."
 msgctxt "exams.view.exams.error"
 msgid "allowed_units_invalid"
 msgstr "Seçilen grup(lar) bu kurumda bulunamadı veya kapsamınızın dışında."
+
+msgctxt "registrar.exam_score_import"
+msgid "Sətirdəki imtahan növü («%(cell)s») vərəqin növü (%(kind)s) ilə uyğun gəlmir."
+msgstr "Satırdaki sınav türü («%(cell)s») çizelgenin türüyle (%(kind)s) uyuşmuyor."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
+msgstr "Şablon, çizelge kartındaki soru sayısı, soru başına en yüksek puan ve sınav türüyle indirilir; kontrol de aynı ızgarayla yapılır."

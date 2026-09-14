@@ -13,6 +13,13 @@ Sahib (2026-09-12): «tələbələrin balları sistemə yüklənsin». Üç mar�
 Hər üçü FAIL-CLOSED: ``final_score.entry`` (+ superadmin) və açılışın struktur
 əhatəsi olmayan aktor 403 alır. Ön baxış və tətbiq EYNİ plan qurucusundan
 keçir («gördüyün nəticə = alacağın nəticə»); fayl serverdə saxlanılmır.
+
+2026-09-14 (W6 `w6paper`, məlum açıq məqamlar — `docs/features/kagiz_imtahan_bali.md` §10):
+* şablon vərəqin sual şəbəkəsi və imtahan növü ilə gəlir (``?question_count=``
+  / ``?question_max=`` / ``?exam_kind=``; parametr yoxdursa sonuncu vərəqin
+  dəyərləri — vərəq məlumatları kartının göstərdiyi ilə eyni);
+* quru icra da tətbiqlə EYNİ POST şəbəkəsini alır — ön baxışda 3 sual seçilibsə
+  S4 dəyəri tətbiqdəki kimi rədd olunur (əvvəl ön baxış defolt şəbəkə ilə gedirdi).
 """
 
 from __future__ import annotations
@@ -35,6 +42,10 @@ from ._helpers import _is_superadmin_user
 from .exam_score_entry import ExamScoreEntryError, _can_manage, _offering_or_error, _resolve_target_org
 
 _CTX = "accounts.exam_score_entry"
+#: Sual şəbəkəsinin təmiz validasiyası (``clean_question_grid``) — `exam_score_entry`
+#: fasadı onu ``service.exam_score_questions`` kimi daşıyır (accounts registrar-ın
+#: privat modulunu birbaşa import etmir).
+questions = service.exam_score_questions
 
 
 def _denied(message=""):
@@ -71,17 +82,63 @@ def _gate(request):
     return organization, offering, None
 
 
+def _clamp(value, low, high):
+    """Sonuncu vərəqin şəbəkə dəyərini cari hədlərə sıx (``None`` / yad mətn → ``None`` = defolt)."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return max(low, min(high, number))
+
+
+def _grid_from_params(params, *, defaults=None) -> dict:
+    """``{"question_count", "question_max", "exam_kind"}`` — sorğu parametrlərindən, təmizlənmiş.
+
+    Boş parametr ``defaults``-a (sonuncu vərəq) düşür; o da yoxdursa
+    ``clean_question_grid`` defoltu (5 × 10, yazılı). Yanlış dəyər →
+    ``ValidationError`` (çağıran 400 qaytarır). Sonuncu vərəqdən gələn dəyər
+    cari tavana SIXILIR (tavan 10 qaydasından ƏVVƏLKİ vərəqlərdə 20 var —
+    parametrsiz endirmə 400 verməməlidir); açıq parametr sıxılmır, rədd olunur.
+    """
+    defaults = defaults or {}
+    count_raw = params.get("question_count")
+    max_raw = params.get("question_max")
+    kind_raw = params.get("exam_kind")
+    if count_raw is None or count_raw == "":
+        count_raw = _clamp(defaults.get("question_count"), 0, questions.QUESTION_COUNT_MAX)
+    if max_raw is None or max_raw == "":
+        max_raw = _clamp(defaults.get("question_max"), 1, questions.QUESTION_MAX_CEILING)
+    if not kind_raw:
+        kind_raw = defaults.get("exam_kind")
+    question_count, question_max = questions.clean_question_grid(count_raw, max_raw)
+    return {
+        "question_count": question_count,
+        "question_max": question_max,
+        "exam_kind": sheets_service.clean_exam_kind(kind_raw),
+    }
+
+
 @never_cache
 @login_required
 @require_GET
 def exam_score_import_template(request):
-    """Siyahı ilə doldurulmuş şablon faylı (Tələbə № · FİN · Ad Soyad · Qrup · Cari bal · Bal)."""
+    """Siyahı ilə doldurulmuş şablon (Tələbə № · FİN · Ad Soyad · Qrup · İmtahan növü · Cari bal · Bal · S1..Sn).
+
+    W6 (2026-09-14): S sütunlarının sayı və tavanı ``?question_count`` /
+    ``?question_max``-dan (JS vərəq kartından ötürür); parametr yoxdursa sonuncu
+    vərəqin şəbəkəsi — kartın ilkin dəyərləri ilə eyni mənbə (``latest_sheet_defaults``).
+    """
     _organization, offering, error = _gate(request)
     if error is not None:
         return error
     fmt = "csv" if (request.GET.get("format") or "").strip().lower() == "csv" else "xlsx"
+    defaults = sheets_service.latest_sheet_defaults(sheets_service.sheets_for_offering(offering=offering, limit=1))
+    try:
+        grid = _grid_from_params(request.GET, defaults=defaults)
+    except ValidationError as exc:
+        return _bad("validation_error", " ".join(exc.messages))
     roster = service.roster_for_offering(offering=offering)
-    payload, content_type, filename = importer.build_template(roster=roster, fmt=fmt)
+    payload, content_type, filename = importer.build_template(roster=roster, fmt=fmt, **grid)
     response = HttpResponse(payload, content_type=content_type)
     response["Content-Disposition"] = 'attachment; filename="%s"' % filename
     response["X-Content-Type-Options"] = "nosniff"
@@ -89,13 +146,23 @@ def exam_score_import_template(request):
 
 
 def _plan_from_request(request, offering):
-    """``(roster, plan, error_response)`` — faylı oxuyub planı qurur (ön baxış = tətbiq)."""
+    """``(roster, plan, error_response)`` — faylı oxuyub planı qurur (ön baxış = tətbiq).
+
+    W6 (2026-09-14): plan POST-dakı vərəq şəbəkəsi (``question_count`` /
+    ``question_max`` / ``exam_kind``) ilə qurulur — ``sheet_metadata_from_post``
+    tətbiqdə EYNİ sahələri eyni funksiyalarla təmizləyir, ona görə ön baxışın
+    rədd etdiyi sətri tətbiq də rədd edir (və əksinə). Boş sahə = defolt 5 × 10.
+    """
     try:
         rows = importer.read_rows(request.FILES.get("file"))
     except importer.ImportFileError as exc:
         return None, None, _bad(exc.code, exc.message)
+    try:
+        grid = _grid_from_params(request.POST)
+    except ValidationError as exc:
+        return None, None, _bad("validation_error", " ".join(exc.messages))
     roster = service.roster_for_offering(offering=offering)
-    return roster, importer.build_plan(roster=roster, rows=rows), None
+    return roster, importer.build_plan(roster=roster, rows=rows, **grid), None
 
 
 def _payload(plan, roster, *, applied=False, result=None, sheet=None):

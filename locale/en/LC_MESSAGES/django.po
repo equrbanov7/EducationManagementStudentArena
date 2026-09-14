@@ -68783,3 +68783,11 @@ msgstr "The source exam had no questions — the copy is an empty draft; add que
 msgctxt "exams.view.exams.error"
 msgid "allowed_units_invalid"
 msgstr "The selected group(s) were not found in this organization or are outside your scope."
+
+msgctxt "registrar.exam_score_import"
+msgid "Sətirdəki imtahan növü («%(cell)s») vərəqin növü (%(kind)s) ilə uyğun gəlmir."
+msgstr "The exam kind in this row (“%(cell)s”) does not match the sheet's kind (%(kind)s)."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
+msgstr "The template is downloaded with the question count, per-question maximum and exam kind from the sheet card; the dry run uses the same grid."

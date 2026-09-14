@@ -23,6 +23,12 @@ MODUL SƏRHƏDİ: ``apps.accounts.services.intake`` oxuyucusu TƏKRAR YAZILMIR,
 (re-eksport); «S1..Sn» sual sütunları dəstəklənir — sətirdə S xanası doludursa
 bal onların cəmidir (``question_scores`` plana və servisə ötürülür). Şablona
 S1..S<n> sütunları da əlavə olunur (``question_count``).
+
+2026-09-14 (W6 `w6paper`): şablon vərəqin ÖZ şəbəkəsi (``question_count`` /
+``question_max``) və imtahan növü ilə gəlir — «İmtahan növü» sütunu (XLSX-də
+siyahı seçimi) vərəq səviyyəli növün fayldakı izidir; ``build_plan`` seçilmiş
+növlə uyğunsuzluğu sətir xətası kimi göstərir. Quru icra və tətbiq EYNİ
+şəbəkəni alır (view POST-dan ötürür) — «gördüyün nəticə = alacağın nəticə».
 """
 
 from __future__ import annotations
@@ -50,8 +56,17 @@ from .exam_score_import_reader import (  # noqa: F401 — re-eksport (çağıran
     question_count_in,
 )
 from .exam_score_import_safety import export_text
+from .models.exam_score_entry import ExamScoreSheetKind
 
 _CTX = "registrar.exam_score_import"
+#: Vərəq / bölmə mətnləri (mövcud msgid-lər: «İmtahan növü», növ xətası) — kataloq təkrarlanmır.
+_CTX_ENTRY = "registrar.exam_score_entry"
+
+#: Şablonun sabit (S-dən əvvəlki) sütun sayı: Tələbə № · FİN · Ad Soyad · Qrup ·
+#: İmtahan növü · Cari bal · Bal. «Bal» 7-ci (G), S1 8-ci (H) sütundur.
+_FIXED_COLUMN_COUNT = 7
+_KIND_COLUMN_INDEX = 5
+_SCORE_COLUMN_INDEX = 7
 
 #: Sətir vəziyyətləri (quru icra + tətbiq eyni açarları işlədir).
 STATUS_NEW = "new"  # cari bal yoxdur → sərbəst yazılacaq
@@ -77,17 +92,63 @@ def template_columns(exam_score_max, question_count=None, question_max=None) -> 
     """
     count = questions.QUESTION_COUNT_DEFAULT if question_count is None else int(question_count)
     per_question = questions.QUESTION_MAX_DEFAULT if question_max is None else int(question_max)
+    # W6 (2026-09-14): «İmtahan növü» sütunu «Qrup»dan sonra — oxuyucu onu
+    # ``exam_kind`` açarı ilə tanıyır (başlıq sətri parser ilə uyğundur).
     return [
         pgettext(_CTX, "Tələbə №"),
         pgettext(_CTX, "FİN"),
         pgettext(_CTX, "Ad Soyad"),
         pgettext(_CTX, "Qrup"),
+        pgettext(_CTX_ENTRY, "İmtahan növü"),
         pgettext(_CTX, "Cari bal"),
         "%s (0–%s)" % (pgettext(_CTX, "Bal"), int(exam_score_max)),
     ] + ["%s (0–%s)" % (label, per_question) for label in questions.question_labels(count)]
 
 
-def _template_rows(roster, question_count) -> list:
+def exam_kind_label(exam_kind) -> str:
+    """``written`` → «Yazılı» (cari dildə); boş / yad dəyər → yazılı (vərəq defoltu)."""
+    value = (exam_kind or "").strip() if isinstance(exam_kind, str) else exam_kind
+    if value not in ExamScoreSheetKind.values:
+        value = ExamScoreSheetKind.WRITTEN
+    return str(ExamScoreSheetKind(value).label)
+
+
+def _kind_aliases() -> dict:
+    """``{normallaşdırılmış mətn: növ dəyəri}`` — fayl xanası dəyər, AZ/EN etiket və ya cari dil etiketi ola bilər."""
+    fixed = {
+        ExamScoreSheetKind.WRITTEN: ("written", "yazili", "yazılı"),
+        ExamScoreSheetKind.PRACTICAL: ("practical", "praktiki", "praktik"),
+    }
+    aliases = {}
+    for kind in ExamScoreSheetKind:
+        for text in fixed[kind] + (kind.value, str(kind.label)):
+            aliases[normalize_header(text)] = kind.value
+            aliases[str(text).strip().casefold()] = kind.value
+    aliases.pop("", None)
+    return aliases
+
+
+def _kind_mismatch_message(cell_text, exam_kind):
+    """Sətrin «İmtahan növü» xanası seçilmiş növə uyğun deyilsə mesaj, əks halda ``None``.
+
+    Boş xana = «vərəqin növü» (köhnə şablonlar, əl ilə hazırlanmış fayl) — xəta
+    deyil. Uyğunsuzluq səssiz ötürülmür: operator ya vərəq məlumatlarında növü
+    dəyişir, ya xananı düzəldir (bir protokol = bir növ).
+    """
+    text = str(cell_text or "").strip()
+    if not text or not exam_kind:
+        return None
+    aliases = _kind_aliases()
+    resolved = aliases.get(normalize_header(text)) or aliases.get(text.casefold())
+    if resolved == exam_kind:
+        return None
+    return pgettext(_CTX, "Sətirdəki imtahan növü («%(cell)s») vərəqin növü (%(kind)s) ilə uyğun gəlmir.") % {
+        "cell": text[:40],
+        "kind": exam_kind_label(exam_kind),
+    }
+
+
+def _template_rows(roster, question_count, kind_label="") -> list:
     rows = []
     for row in roster["rows"]:
         student = row["student"]
@@ -97,6 +158,7 @@ def _template_rows(roster, question_count) -> list:
                 getattr(student.profile, "fin", "") or "",
                 student.get_full_name() or student.username,
                 service.offering_label(roster["offering"]),
+                kind_label,
                 _score_text(row.get("exam_score")),
                 "",
             ]
@@ -111,13 +173,18 @@ def _score_text(value) -> str:
     return str(int(Decimal(value)))
 
 
-def build_template(*, roster, fmt="xlsx", question_count=None, question_max=None):
-    """``(bytes, content_type, filename)`` — siyahı ilə doldurulmuş şablon (S1..Sn sütunları ilə)."""
+def build_template(*, roster, fmt="xlsx", question_count=None, question_max=None, exam_kind=None):
+    """``(bytes, content_type, filename)`` — siyahı ilə doldurulmuş şablon (S1..Sn sütunları ilə).
+
+    W6 (2026-09-14): ``exam_kind`` (``written`` / ``practical``) «İmtahan növü»
+    sütununa cari dildə etiket kimi yazılır; XLSX-də həmin sütun siyahı seçimidir.
+    """
     offering = roster["offering"]
     count = questions.QUESTION_COUNT_DEFAULT if question_count is None else int(question_count)
     per_question = questions.QUESTION_MAX_DEFAULT if question_max is None else int(question_max)
+    kind_label = exam_kind_label(exam_kind)
     headers = template_columns(roster["exam_score_max"], count, per_question)
-    rows = [[export_text(value) for value in row] for row in _template_rows(roster, count)]
+    rows = [[export_text(value) for value in row] for row in _template_rows(roster, count, kind_label)]
     stem = "imtahan_ballari_%s_%s" % (offering.subject.code or "fenn", service.offering_label(offering))
     stem = re.sub(r"[^A-Za-z0-9_-]+", "_", stem.translate(AZ_TRANSLIT)).strip("_") or "imtahan_ballari"
     if fmt == "csv":
@@ -131,7 +198,11 @@ def build_template(*, roster, fmt="xlsx", question_count=None, question_max=None
         from openpyxl.styles import Font
         from openpyxl.worksheet.datavalidation import DataValidation
     except Exception:  # pragma: no cover — paket olmayan mühit
-        return build_template(roster=roster, fmt="csv", question_count=count, question_max=per_question)
+        return build_template(
+            roster=roster, fmt="csv", question_count=count, question_max=per_question, exam_kind=exam_kind
+        )
+    from openpyxl.utils import get_column_letter
+
     workbook = Workbook()
     sheet = workbook.active
     sheet.title = SHEET_NAME
@@ -140,10 +211,20 @@ def build_template(*, roster, fmt="xlsx", question_count=None, question_max=None
         cell.font = Font(bold=True)
     for row in rows:
         sheet.append(row)
-    for column, width in zip("ABCDEF", (16, 12, 32, 14, 10, 12)):
+    for column, width in zip("ABCDEFG", (16, 12, 32, 14, 14, 10, 12)):
         sheet.column_dimensions[column].width = width
     sheet.freeze_panes = "A2"
+    kind_column, score_column = get_column_letter(_KIND_COLUMN_INDEX), get_column_letter(_SCORE_COLUMN_INDEX)
     if rows:
+        # «İmtahan növü» — seçim siyahısı (sahibin növləri: yazılı / praktiki).
+        kind_validation = DataValidation(
+            type="list",
+            formula1='"%s"' % ",".join(str(kind.label) for kind in ExamScoreSheetKind),
+            allow_blank=True,
+        )
+        kind_validation.error = pgettext(_CTX_ENTRY, "İmtahan növü yazılı və ya praktiki olmalıdır.")
+        sheet.add_data_validation(kind_validation)
+        kind_validation.add(f"{kind_column}2:{kind_column}{len(rows) + 1}")
         validation = DataValidation(
             type="whole",
             operator="between",
@@ -153,17 +234,16 @@ def build_template(*, roster, fmt="xlsx", question_count=None, question_max=None
         )
         validation.error = pgettext(_CTX, "Bal 0 ilə maksimum arasında tam ədəd olmalıdır.")
         sheet.add_data_validation(validation)
-        validation.add(f"F2:F{len(rows) + 1}")
+        validation.add(f"{score_column}2:{score_column}{len(rows) + 1}")
         if count:
             # S1..Sn — hər sual 0..question_max (sahib: «hər sualdan max 10»).
-            from openpyxl.utils import get_column_letter
-
             per_question_validation = DataValidation(
                 type="whole", operator="between", formula1="0", formula2=str(per_question), allow_blank=True
             )
             per_question_validation.error = pgettext(_CTX, "Bal 0 ilə maksimum arasında tam ədəd olmalıdır.")
             sheet.add_data_validation(per_question_validation)
-            first, last = get_column_letter(7), get_column_letter(6 + count)
+            first = get_column_letter(_FIXED_COLUMN_COUNT + 1)
+            last = get_column_letter(_FIXED_COLUMN_COUNT + count)
             per_question_validation.add(f"{first}2:{last}{len(rows) + 1}")
     output = io.BytesIO()
     workbook.save(output)
@@ -242,7 +322,7 @@ def _question_list(record) -> list:
     return [cells.get(number, "") for number in range(1, max(cells) + 1)]
 
 
-def build_plan(*, roster, rows, question_count=None, question_max=None) -> list:
+def build_plan(*, roster, rows, question_count=None, question_max=None, exam_kind=None) -> list:
     """Quru icra: hər fayl sətri üçün vəziyyət + mesaj. HEÇ NƏ YAZMIR.
 
     ``roster`` — ``exam_score_entry.roster_for_offering`` nəticəsi (cari ballar
@@ -252,6 +332,10 @@ def build_plan(*, roster, rows, question_count=None, question_max=None) -> list:
     CƏMİDİR (``question_scores`` plana düşür); şəbəkə verilməsə fayldakı S
     sütunlarının sayı və defolt tavan (10) götürülür — tətbiqdə servis vərəqin
     öz şəbəkəsi ilə yenidən yoxlayır (uyğunsuzluq sətir xətası kimi görünür).
+
+    2026-09-14 (W6 `w6paper`): view quru icraya da POST şəbəkəsini ötürür — ön
+    baxış = tətbiq. ``exam_kind`` verilərsə sətrin «İmtahan növü» xanası onunla
+    tutuşdurulur (boş xana sərbəstdir; fərqli növ → sətir xətası).
     """
     index = _roster_index(roster)
     cap = roster["exam_score_max"]
@@ -296,6 +380,10 @@ def build_plan(*, roster, rows, question_count=None, question_max=None) -> list:
             item["message"] = _ERROR_MESSAGES["duplicate"]()
             continue
         seen.add(item["enrollment_id"])
+        kind_problem = _kind_mismatch_message(record.get("exam_kind"), exam_kind)
+        if kind_problem:
+            item["message"] = kind_problem
+            continue
         raw = str(record.get("score") or "").strip().replace(",", ".")
         question_list = _question_list(record)
         try:
@@ -410,6 +498,7 @@ __all__ = [
     "apply_plan",
     "build_plan",
     "build_template",
+    "exam_kind_label",
     "needs_justification",
     "question_count_in",
     "read_rows",
