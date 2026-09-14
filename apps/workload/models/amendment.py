@@ -27,8 +27,20 @@ _CTX = "workload.model"
 
 
 def amendment_document_path(instance, filename):
-    """Org-scoped yol: ``workload_amendments/<org_id>/<task_id>/<fayl>``."""
-    return f"workload_amendments/{instance.organization_id}/{instance.task_id}/{filename}"
+    """Org-scoped yol: ``workload_amendments/<org_id>/<task_id>/<uuid>.<ext>``.
+
+    2026-09-14 (tests auditi qeydi): prefiks ~62 simvoldur, sahə `max_length=100`
+    — istifadəçinin uzun fayl adı `DataError` (500) verirdi. Ad təsadüfiləşdirilir,
+    yalnız uzantı saxlanılır (digər sübut sahələri ilə eyni naxış).
+    """
+    from core.upload_security import randomize_uploaded_filename
+
+    class _Named:
+        def __init__(self, name):
+            self.name = name
+
+    safe = randomize_uploaded_filename(_Named(filename)).name
+    return f"workload_amendments/{instance.organization_id}/{instance.task_id}/{safe}"
 
 
 class WorkloadAmendment(UUIDModel, TimeStampedModel):
