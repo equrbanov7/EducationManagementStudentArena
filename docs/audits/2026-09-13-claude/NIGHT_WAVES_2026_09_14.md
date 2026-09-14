@@ -143,7 +143,7 @@ yekun vəziyyət `w5left` hesabatında)
     (`ajax.js` yalnız həmin atributlu formları tutur) → tam səhifə yenilənir, səssiz
     qalmır; `exam-center-stats` filtrləri boot skriptinin öz JSON çağırışlarıdır
     (`data-ems-filters` qəsdən yoxdur). Problem yoxdur.
-11. ~~Sual idxalı: pano ilə şəkil yapışdırma; DOCX brauzer QA~~ — dalğa 8-də bağlandı (pano/sürüklə-burax yapışdırma bank toplu əlavədə; DOCX yükləməsi brauzerdə uçdan-uca yoxlanıldı).
+11. ~~Sual idxalı: pano ilə şəkil yapışdırma; DOCX brauzer QA~~ — dalğa 8-də bağlandı (pano/sürüklə-burax yapışdırma bank toplu əlavədə; DOCX yükləməsi brauzerdə uçdan-uca yoxlanıldı). 2026-09-14 səhər: eyni qol imtahan dil meneceri + kafedra göndərişi yarat/redaktə səhifələrinə açıldı (`workbench_paste.py`, 6 test, göndəriş səhifəsində brauzerdə yoxlanıldı).
 12. Audit P3 maddələri (`w2infra` briefində olmayanlar) — 2026-09-14 səhər:
     **bağlandı** P3-10 (host ölçüsü cədvəli, `deployment.md` §2), P3-17 (nginx access
     log `$request` → `$request_method $uri $server_protocol`, PII sorğu sətri yazılmır),

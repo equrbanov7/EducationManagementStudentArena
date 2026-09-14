@@ -25,8 +25,10 @@ aiQuestionBank.js dəyişiksiz işləsin.
   wb_templates [{url,label,kind}] (şablon endirmə düymələri),
   wb_show_report (Excel hesabat düyməsi),
   wb_save_label, wb_workbench_key (localStorage namespace),
-  wb_paste_url (W8 2026-09-14: pano/sürükləmə şəkil yapışdırma JSON qolu — yalnız
-  bank toplu əlavə; boşdursa yapışdırma söndürülür), wb_paste_images [{index,marker,thumb}].
+  wb_paste_url (W8 2026-09-14: pano/sürükləmə şəkil yapışdırma JSON qolu — view-un öz
+  `request.path`-i; bank toplu əlavə, imtahan dil meneceri, kafedra göndərişi yarat/redaktə
+  (`views/teacher/workbench_paste.py`); boşdursa yapışdırma söndürülür),
+  wb_paste_images [{index,marker,thumb}].
 
 Preview/validasiya kontekst dəyişənləri (view-dən):
   parsed, selected, category_counts, warning_count, duplicate_count,
