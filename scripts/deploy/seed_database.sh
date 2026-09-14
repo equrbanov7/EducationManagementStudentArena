@@ -93,7 +93,10 @@ docker compose -f "$COMPOSE_FILE" up -d pgbouncer
 docker compose -f "$COMPOSE_FILE" run --rm -T -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
 
 echo "→ 7/7 Tətbiq qaldırılır və yoxlanılır…"
-docker compose -f "$COMPOSE_FILE" up -d "${WRITERS[@]}"
+# Replika sayı deploy ilə eynidir (`up -d app` --scale-siz 1-ə endirirdi — 2026-09-15 düzəlişi).
+APP_REPLICAS="${APP_REPLICAS:-$(dotenv_value APP_REPLICAS)}"; APP_REPLICAS="${APP_REPLICAS:-8}"
+CELERY_REPLICAS="${CELERY_REPLICAS:-$(dotenv_value CELERY_REPLICAS)}"; CELERY_REPLICAS="${CELERY_REPLICAS:-2}"
+docker compose -f "$COMPOSE_FILE" up -d --scale app="$APP_REPLICAS" --scale celery_worker="$CELERY_REPLICAS" "${WRITERS[@]}"
 docker compose -f "$COMPOSE_FILE" up -d nginx
 users="$(docker exec -i "$PG_CONTAINER" sh -c 'psql -At -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "select count(*) from auth_user;"')"
 org="$(docker exec -i "$PG_CONTAINER" sh -c 'psql -At -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "select name || '"'"' / '"'"' || slug from organizations_organization order by created_at limit 1;"')"
