@@ -34,9 +34,10 @@ def _current_period(organization):
     )
 
 
-# Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə
-# `_can_edit_journal` / `_is_direct_editor` adları geriyə-uyğunluq üçün saxlanılır
-# (journal_actions + pdf_views bunları views-dan idxal edir).
+from .handover import is_handover_observer as _is_handover_observer  # noqa: E402
+
+# Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə `_can_edit_journal` /
+# `_is_direct_editor` adları geriyə-uyğunluq üçün (journal_actions + pdf_views buradan idxal edir).
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
@@ -76,22 +77,23 @@ def journal_detail(request, offering_id):
 
     journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
-    # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
+    # Birbaşa redaktə (müəllim/sahib/superuser/RİM rəhbəri — sahibin qərarı 2026-09-14).
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/
-    # dekanlıq. Onlar müəllim deyil: jurnalı OXU rejimində açırlar, xanaya
-    # toxuna bilmirlər (POST aşağıda `is_direct_editor` ilə kəsilir).
-    # İCAZƏ (səhifəni aça bilirmi) ilə ƏMƏL (siyahını dəyişə bilirmi) AYRIDIR:
-    # bağlanmış jurnal / keçmiş dövr koordinatoru səhifədən qovmur (tarixçəni
-    # oxuya bilir), amma «alt qrupdan əlavə et» səthini tamamilə gizlədir.
+    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/dekanlıq:
+    # jurnalı OXU rejimində açır, xanaya toxunmur (POST `is_direct_editor` ilə kəsilir).
+    # İCAZƏ (səhifəni açmaq) ilə ƏMƏL (siyahını dəyişmək) AYRIDIR: bağlı jurnal /
+    # keçmiş dövr səhifədən qovmur, amma «alt qrupdan əlavə et» səthini gizlədir.
     roster_scope = guest_roster.can_manage_offering_roster(request.user, offering)
     can_manage_roster = roster_scope and guest_roster.roster_is_open(offering)
-    # Təhvil verən köhnə müəllim: AÇIR, yazmır (bax journal_access şərhi).
-    handover_observer = _can_observe_journal(request.user, offering)
-    # Səhifəni yalnız redaktor / korrektor / siyahı idarəçisi / köhnə müəllim açır.
-    if not can_edit_perm and not can_correct and not roster_scope and not handover_observer:
+    # Yalnız-oxu müşahidəçi: təhvil verən köhnə müəllim VƏ YA əhatəli `journal.view`
+    # daşıyıcısı (bax journal_access) — səhifəni AÇIR, yazmır.
+    observer = _can_observe_journal(request.user, offering)
+    if not can_edit_perm and not can_correct and not roster_scope and not observer:
         raise Http404
+    # «Təhvil verilib» bannerı YALNIZ köhnə müəllimə (2026-09-14: `journal.view`
+    # daşıyıcısına — məs. RİM `*` — bu mətn yanlış çıxırdı).
+    handover_observer = observer and not is_direct_editor and _is_handover_observer(request.user, offering)
     # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
     correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
 
