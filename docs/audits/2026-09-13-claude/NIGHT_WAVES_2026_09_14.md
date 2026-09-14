@@ -159,6 +159,11 @@ yekun vəziyyət `w5left` hesabatında)
     Redis; `docker network inspect`; Brevo IP ağ siyahısı + Watchdog sübutu; parol
     rotasiyası; real ölçülü restore məşqi; 349 `exam_score > 50` sətri üçün İmtahan Mərkəzi
     qərarı (audit §27 «MÜTLƏQ» 1–7).
+    2026-09-14 səhər kod tərəfindən dəstək: (a) NOBYPASSRLS rolu klonda məşq edildi —
+    `docs/operations/rls_role_rehearsal_2026-09-14.md` (28 rol × bütün bölmələr, 0 xəta);
+    (b) `remote_deploy.sh` `.env` preflight-ı A-1 / A-3 / A-5 / P3-18 invariantlarını
+    deploy-dan əvvəl fail-closed yoxlayır (`11b88faa`) — sahib `.env`-i səhv doldursa
+    deploy konteynerə toxunmadan dayanır.
 
 ### Sənədlər (dalğa 5 `w5docs`)
 - `docs/features/kagiz_imtahan_bali.md`, `imtahan_sehrbazi_reyestr_qruplari.md`,

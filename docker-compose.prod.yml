@@ -272,6 +272,14 @@ services:
       MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
       RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-50}
       RESERVE_POOL_TIMEOUT: ${PGBOUNCER_RESERVE_POOL_TIMEOUT:-3}
+      # Audit P3-18 (2026-09-14): pool-lar (istifadəçi × baza) CÜTÜ üçündür —
+      # APP_DATABASE_USER ≠ owner olanda app cütü + owner cütü (miqrasiya /
+      # release.sh) hər biri DEFAULT+RESERVE qədər backend aça bilər və cəmi
+      # Postgres `max_connections`-i keçə bilər. `max_db_connections` bazaya
+      # gedən backend-lərin ÜMUMİ tavanıdır (bütün istifadəçilər üzrə) — defolt
+      # `POSTGRES_MAX_CONNECTIONS − 20` (superuser_reserved_connections + exporter
+      # + psql üçün yer). Dəyişəndə ikisini birlikdə dəyişin.
+      MAX_DB_CONNECTIONS: ${PGBOUNCER_MAX_DB_CONNECTIONS:-230}
       SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
       SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
       AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
