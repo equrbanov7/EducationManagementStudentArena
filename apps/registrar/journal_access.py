@@ -8,11 +8,13 @@
   VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14).
   Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
   is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
-* :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: YALNIZ müəllim,
-  org sahibi, superuser. Korrektor (İKT) buraya DAXİL DEYİL — o, dəyişikliyi yalnız
-  «Jurnal düzəlişi» rejimində sənədli (audited, PDF) yolla edir; normal görünüşdə
-  hər şey read-only-dir. views.py + journal_actions.py hər ikisi buradan idxal edir
-  (modul-ölçü limiti üçün ayrıca kiçik modul).
+* :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: müəllim, org
+  sahibi, superuser və — SAHİBİN QƏRARI (2026-09-14) — RİM rəhbəri (İKT). Əvvəl
+  İKT yalnız korrektor idi (normal görünüş read-only, dəyişiklik ancaq «Jurnal
+  düzəlişi» rejimində sənədli); indi başqa müəllimin jurnalında dərs əlavə edir,
+  bal yazır. Kilidli (2 saat / bağlı semestr) hallarda düzəliş rejimi yenə qalır.
+  views.py + journal_actions.py hər ikisi buradan idxal edir (modul-ölçü limiti
+  üçün ayrıca kiçik modul).
 
 Həmçinin :func:`offering_or_404` — offering-in TENANT-SCOPE-lu yüklənməsi.
 """
@@ -130,13 +132,14 @@ def can_observe_journal(user, offering) -> bool:
 
 
 def is_direct_editor(user, offering) -> bool:
-    """Birbaşa (audit-siz) redaktə — YALNIZ müəllim / org sahibi / superuser.
+    """Birbaşa (audit-siz) redaktə — müəllim / org sahibi / superuser / RİM rəhbəri.
 
-    Korrektor (İKT Rəhbəri) buraya daxil deyil: jurnalı yalnız düzəliş rejimində
-    sənədli dəyişir, normal görünüşdə read-only."""
+    Sahibin qərarı (2026-09-14): RİM rəhbəri («hər şeyin icazəsi») başqa müəllimin
+    jurnalında da birbaşa dərs əlavə edir və bal yazır; əvvəl yalnız korrektor idi.
+    Tenant sərhədi `can_edit_journal`-dakı kimi fetch mərhələsində (`offering_or_404`)."""
     if not getattr(user, "is_authenticated", False):
         return False
-    if getattr(user, "is_superuser", False):
+    if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
     if _is_live_assigned_instructor(user, offering):
         return True
