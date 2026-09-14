@@ -203,6 +203,24 @@ class AdminTwoFactorFlowTest(TestCase):
         profile = self.client.get(reverse("accounts:profile"))
         self.assertEqual(profile.status_code, 200)
 
+    def test_otp_returns_to_the_page_the_main_login_was_heading_to(self):
+        # 2026-09-15 (sahibin rəyi): əsas saytdan gələn superadmin OTP-dən sonra
+        # Django admin-ə deyil, gəldiyi kabinet səhifəsinə qayıtmalıdır.
+        self.client.force_login(self.superuser)
+        target = reverse("accounts:profile") + "?section=dashboard"
+        self.client.get(target)  # gate → verify-otp (yol yadda saxlanır)
+        self.client.get(reverse("admin:verify-otp"))
+        response = self.client.post(reverse("admin:verify-otp"), {"code": self._latest_otp_code()})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], target)
+
+    def test_direct_admin_login_still_lands_in_admin_index(self):
+        self.client.force_login(self.superuser)
+        self.client.get(reverse("admin:verify-otp"))
+        response = self.client.post(reverse("admin:verify-otp"), {"code": self._latest_otp_code()})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("admin:index"))
+
 
 class SystemReplyToTests(SimpleTestCase):
     """Sahibin qərarı 2026-09-15: From təsdiqlənmiş domen, Reply-To universitet ünvanı."""

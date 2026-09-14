@@ -19,6 +19,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 
 from core.admin_auth import (
+    ADMIN_2FA_NEXT_URL_SESSION_KEY,
     AdminOTPForm,
     admin_2fa_pending_for_request,
     admin_2fa_required_for_user,
@@ -157,7 +158,10 @@ class EMSArenaAdminSite(admin.AdminSite):
             return redirect(pop_admin_2fa_next_url(request, reverse("admin:index", current_app=self.name)))
 
         if not admin_2fa_pending_for_request(request):
-            mark_admin_2fa_pending(request, next_url=reverse("admin:index", current_app=self.name))
+            # Middleware əsas saytdan gələn yolu yadda saxlayıbsa ora qayıdırıq (2026-09-15).
+            remembered = str(request.session.get(ADMIN_2FA_NEXT_URL_SESSION_KEY, "") or "")
+            next_url = remembered if remembered.startswith("/") else reverse("admin:index", current_app=self.name)
+            mark_admin_2fa_pending(request, next_url=next_url)
             try:
                 send_admin_otp_email(user, request=request)
             except Exception:
