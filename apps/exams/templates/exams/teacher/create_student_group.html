@@ -6,10 +6,22 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/create_student_group.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/_searchable_multi_select.css' %}">
+    {% if not legacy_cohorts_exist %}
+    <link rel="stylesheet" href="{% static 'exams/css/legacy_cohort_notice.css' %}?v=20260914-1">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container create-group-page">
+<div class="container create-group-page"{% if not legacy_cohorts_exist %} data-legacy-cohort-page="create"{% endif %}>
+    {% comment %}2026-09-14 (W7 `w7cohort`): kohortu OLMAYAN təşkilatda əvəzlənmə kartı
+       əsas məzmundur; köhnə forma yığılmış <details> içində qalır (yaratma
+       icazəsi qapısı dəyişmir — bura yalnız `group.manage` ilə gəlinir).
+       Kohortu olan tenant-da (`legacy_cohorts_exist`) səhifə əvvəlki kimidir.{% endcomment %}
+    {% if not legacy_cohorts_exist %}
+    {% include "exams/teacher/partials/_legacy_cohort_notice.html" %}
+    <details class="legacy-cohort-details" data-legacy-cohort-form-details>
+        <summary class="legacy-cohort-details__summary">{% trans "summary_show_legacy_form" context "exams.template.legacy_cohort_notice" %}</summary>
+    {% endif %}
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
             <div class="create-group-card">
@@ -194,6 +206,9 @@
             </div>
         </div>
     </div>
+    {% if not legacy_cohorts_exist %}
+    </details>
+    {% endif %}
 </div>
 {% endblock %}
 

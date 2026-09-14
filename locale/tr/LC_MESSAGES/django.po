@@ -31440,7 +31440,7 @@ msgstr "AI özetini oluşturmak için yukarıdaki butona tıklayın. Analiz mevc
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
-msgstr "Yeni Kurs Oluştur"
+msgstr "Sınav grupları"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:17
 msgctxt "exams.template.teacher_group_list"
@@ -68700,3 +68700,31 @@ msgstr "Satırdaki sınav türü («%(cell)s») çizelgenin türüyle (%(kind)s)
 msgctxt "registrar.exam_score_entry"
 msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
 msgstr "Şablon, çizelge kartındaki soru sayısı, soru başına en yüksek puan ve sınav türüyle indirilir; kontrol de aynı ızgarayla yapılır."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_title"
+msgstr "Bu sayfa kayıt gruplarıyla değiştirildi"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_body"
+msgstr "Sınav erişim grupları artık grup kayıt defterinden (akademik gruplar) seçilir: sihirbazın «Gruplar (kayıt)» seçicisi, erişim politikası, PIN ve istatistikler kayıt defteriyle çalışır. Bu kurumda eski sınav kohortu yok — yenisini oluşturmaya gerek yok."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_registry"
+msgstr "Grup kayıt defterini aç"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_exam_wizard"
+msgstr "Sınav sihirbazını aç"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "secondary_still_need_cohort"
+msgstr "Eski kohorta hâlâ ihtiyacınız varsa:"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_create_legacy_cohort"
+msgstr "eski kohort oluştur (önerilmez)"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "summary_show_legacy_form"
+msgstr "Eski kohort formunu göster (önerilmez)"

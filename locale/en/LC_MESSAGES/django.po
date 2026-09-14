@@ -31436,7 +31436,7 @@ msgstr "Click the button above to generate an AI-powered summary. The analysis w
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
-msgstr "Create a New Course"
+msgstr "Exam groups"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:17
 msgctxt "exams.template.teacher_group_list"
@@ -68791,3 +68791,31 @@ msgstr "The exam kind in this row (“%(cell)s”) does not match the sheet's ki
 msgctxt "registrar.exam_score_entry"
 msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
 msgstr "The template is downloaded with the question count, per-question maximum and exam kind from the sheet card; the dry run uses the same grid."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_title"
+msgstr "This page has been replaced by registry groups"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_body"
+msgstr "Exam access groups are now picked from the groups registry (academic groups): the wizard's “Groups (registry)” selector, the access policy, PIN and statistics all work with the registry. This organization has no legacy exam cohorts — there is no need to create one."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_registry"
+msgstr "Open the groups registry"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_exam_wizard"
+msgstr "Open the exam wizard"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "secondary_still_need_cohort"
+msgstr "If you still need a legacy cohort:"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_create_legacy_cohort"
+msgstr "create a legacy cohort (not recommended)"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "summary_show_legacy_form"
+msgstr "Show the legacy cohort form (not recommended)"

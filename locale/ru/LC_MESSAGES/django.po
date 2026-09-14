@@ -31446,7 +31446,7 @@ msgstr "Нажмите кнопку выше для создания AI-свод
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
-msgstr "Создать новый курс"
+msgstr "Экзаменационные группы"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:17
 msgctxt "exams.template.teacher_group_list"
@@ -68845,3 +68845,31 @@ msgstr "Вид экзамена в строке («%(cell)s») не совпад
 msgctxt "registrar.exam_score_entry"
 msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
 msgstr "Шаблон скачивается с числом вопросов, максимумом за вопрос и видом экзамена из карточки ведомости; проверка использует ту же сетку."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_title"
+msgstr "Этот раздел заменён группами реестра"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_body"
+msgstr "Группы допуска к экзамену теперь выбираются из реестра групп (академические группы): селектор мастера «Группы (реестр)», политика доступа, PIN и статистика работают с реестром. В этой организации нет старых экзаменационных когорт — создавать их не нужно."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_registry"
+msgstr "Открыть реестр групп"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_exam_wizard"
+msgstr "Открыть мастер экзамена"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "secondary_still_need_cohort"
+msgstr "Если старая когорта всё же нужна:"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_create_legacy_cohort"
+msgstr "создать старую когорту (не рекомендуется)"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "summary_show_legacy_form"
+msgstr "Показать форму старой когорты (не рекомендуется)"

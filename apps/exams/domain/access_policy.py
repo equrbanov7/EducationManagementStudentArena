@@ -23,6 +23,13 @@ class StudentGroup(models.Model):
     """
     Müəllimin yaratdığı tələbə qrupu.
     Məs: 875i, 842A1 və s.
+
+    KÖHNƏLMİŞ (2026-09-14, W7 `w7cohort`; sahibin 2026-09-07 qərarı): imtahan
+    girişi üçün əsas seçici QRUP REYESTRİDİR (`Exam.allowed_units` → OrgUnit
+    GROUP). Bu model yalnız kohortu hələ olan tenant-lar üçün saxlanılır;
+    kohortsuz təşkilatda `/exams/groups/` səthi əvəzlənmə kartı göstərir
+    (bax `apps/exams/domain/student_group_deprecation.py`). Yeni kod bu
+    modelə istinad ETMƏMƏLİDİR; məlumat silinmir, cədvəl atılmır.
     """
 
     teacher = models.ForeignKey(
