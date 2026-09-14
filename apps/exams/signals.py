@@ -37,6 +37,9 @@ def sync_student_pins_when_group_students_change(sender, instance, action, rever
         _sync_pin_assignments_for_group_ids(group_ids)
 
 
+# 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (`allowed_units`) dəyişəndə də
+# PIN-lər yenidən provizion olunur (final/midterm — hər tələbəyə fərdi PIN).
+@receiver(m2m_changed, sender=Exam.allowed_units.through)
 @receiver(m2m_changed, sender=Exam.allowed_groups.through)
 @receiver(m2m_changed, sender=Exam.allowed_users.through)
 @receiver(m2m_changed, sender=Exam.excluded_users.through)

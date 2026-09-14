@@ -5,6 +5,8 @@ from .constants import ATTEMPT_FINISHED_STATUSES  # noqa: F401
 from .constants import EXAM_LANGUAGE_CHOICES  # noqa: F401
 from .constants import QUESTION_EXAM_KIND_CHOICES  # noqa: F401
 from .constants import QUESTION_EXAM_KIND_VALUES  # noqa: F401
+from .domain.unit_assignment import unit_assigned_exams_q  # noqa: F401
+from .domain.unit_assignment import unit_assigned_student_ids  # noqa: F401
 from .forms import ExamRoomForm  # noqa: F401
 from .navigation import append_query_params  # noqa: F401
 from .navigation import current_return_to  # noqa: F401
@@ -38,4 +40,6 @@ __all__ = [
     "score_adjustments",
     "student_visible_pin",
     "supervisor_org_or_403",
+    "unit_assigned_exams_q",
+    "unit_assigned_student_ids",
 ]

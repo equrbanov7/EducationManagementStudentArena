@@ -29,6 +29,16 @@
             window.EMSBootstrapSelect.init(form);
         }
 
+        // 2026-09-14 (W4 `w4wizard`, R2): əsas seçici qrup REYESTRİDİR (OrgUnit
+        // GROUP → `allowed_units`); köhnə kohortlar (`allowed_groups`) yalnız
+        // şablon onları render edəndə (təşkilatda kohort varsa) mövcuddur → null-safe.
+        var unitSelector = ns.searchableSelect.initSearchableSelect(form, {
+            selectName: "allowed_units",
+            listSelector: "#createExamUnitsList",
+            searchSelector: "#createExamUnitsSearch",
+            counterSelector: "#createExamUnitsCount"
+        });
+
         var groupSelector = ns.searchableSelect.initSearchableSelect(form, {
             selectName: "allowed_groups",
             listSelector: "#createExamGroupsList",
@@ -43,8 +53,8 @@
             counterSelector: "#createExamUsersCount"
         });
 
-        if (groupSelector && userSelector) {
-            ns.searchableSelect.initGroupUserSync(form, groupSelector, userSelector);
+        if (userSelector && (groupSelector || unitSelector)) {
+            ns.searchableSelect.initGroupUserSync(form, groupSelector, userSelector, unitSelector);
         }
 
         // 4-addımlı sehrbaz: naviqasiya + addım validasiyası + (server 400-dan
@@ -112,15 +122,19 @@
                 rows.push([t("rowRecipients", gettext("Alıcılar")), t("publicAll", gettext("Hamıya açıq"))]);
                 return rows;
             }
+            var unitItems = unitSelector ? unitSelector.getSelectedItems() : [];
             var groupItems = groupSelector ? groupSelector.getSelectedItems() : [];
             var userCount = userSelector ? userSelector.getSelectedValues().length : 0;
+            if (unitItems.length) {
+                rows.push([t("rowGroups", gettext("Qruplar")), unitItems.map(function (i) { return i.text; }).join(", ")]);
+            }
             if (groupItems.length) {
-                rows.push([t("rowGroups", gettext("Qruplar")), groupItems.map(function (i) { return i.text; }).join(", ")]);
+                rows.push([t("rowLegacyGroups", gettext("Köhnə kohortlar")), groupItems.map(function (i) { return i.text; }).join(", ")]);
             }
             if (userCount) {
                 rows.push([t("rowStudents", gettext("Fərdi tələbələr")), String(userCount)]);
             }
-            if (!groupItems.length && !userCount) {
+            if (!unitItems.length && !groupItems.length && !userCount) {
                 rows.push([t("rowRecipients", gettext("Alıcılar")), t("notSelected", gettext("Seçilməyib"))]);
             }
             rows.push([t("rowTotal", gettext("Tələbə sayı (ümumi)")), totalText]);
@@ -149,16 +163,18 @@
                 return;
             }
             var url = form.getAttribute("data-assigned-count-url");
+            var units = unitSelector ? unitSelector.getSelectedValues() : [];
             var groups = groupSelector ? groupSelector.getSelectedValues() : [];
             var users = userSelector ? userSelector.getSelectedValues() : [];
             var excluded = userSelector && typeof userSelector.getExcludedValues === "function" ?
                 userSelector.getExcludedValues() : [];
-            if (!url || (!groups.length && !users.length)) {
+            if (!url || (!units.length && !groups.length && !users.length)) {
                 renderConfirmSummary(overlay, "0");
                 return;
             }
             var q = url + (url.indexOf("?") === -1 ? "?" : "&") +
                 "groups=" + encodeURIComponent(groups.join(",")) +
+                "&units=" + encodeURIComponent(units.join(",")) +
                 "&users=" + encodeURIComponent(users.join(",")) +
                 "&excluded=" + encodeURIComponent(excluded.join(","));
             fetch(q, { headers: { "X-Requested-With": "XMLHttpRequest" } })

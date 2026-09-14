@@ -3074,3 +3074,18 @@ msgstr "Открыть"
 
 msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
 msgstr "Этот тип файла не принимается по соображениям безопасности. Загружайте только .pdf / .docx / .txt / .png / .jpg."
+
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Время окончания должно быть позже времени начала."
+
+msgid "Müddət 0-dan böyük olmalıdır."
+msgstr "Длительность должна быть больше 0."
+
+msgid "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+msgstr "Длительность не может превышать окно экзамена ({n} мин)."
+
+msgid "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+msgstr "Количество вопросов не может быть отрицательным (0 = все вопросы)."
+
+msgid "Köhnə kohortlar"
+msgstr "Старые когорты"

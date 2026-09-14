@@ -105,6 +105,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
 
     allowed_users_through = Exam.allowed_users.through
     allowed_groups_through = Exam.allowed_groups.through
+    # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı da
+    # «Qruplara açıq» nişanına daxildir — ayrı korrelyasiyalı sayğac (sorğu sayı dəyişmir).
+    allowed_units_through = Exam.allowed_units.through
 
     display_qs = my_exams_qs.annotate(
         card_question_count=_related_count(
@@ -113,6 +116,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         card_appeal_count=_related_count(Appeal.objects.filter(exam=OuterRef("pk")), group_by="exam"),
         card_allowed_group_count=_related_count(
             allowed_groups_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+        ),
+        card_allowed_unit_count=_related_count(
+            allowed_units_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
         ),
         card_allowed_user_count=_related_count(
             allowed_users_through.objects.filter(exam=OuterRef("pk")), group_by="exam"

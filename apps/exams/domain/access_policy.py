@@ -203,8 +203,19 @@ class ExamAccessPolicyMixin:
 
         return False, None
 
+    def _user_in_allowed_units(self, user: User) -> bool:
+        """Reyestr qrupu (OrgUnit GROUP) üzvlüyü — cari aktiv akademik qeyd üzrə."""
+        from .unit_assignment import user_in_allowed_units
+
+        return user_in_allowed_units(self, user)
+
     def _user_in_allowed_groups(self, user: User) -> bool:
-        return self.allowed_groups.filter(students=user).exists()
+        # 2026-09-14 (W4 `w4wizard`, R2): köhnə kohort (`StudentGroup`) VƏ YA
+        # reyestr qrupu (`allowed_units`) — hər iki təyinat yolu eyni qapıdan
+        # keçir ki, `can_user_see` / `can_user_start` çağıranları dəyişməsin.
+        if self.allowed_groups.filter(students=user).exists():
+            return True
+        return self._user_in_allowed_units(user)
 
     def _user_is_excluded(self, user: User) -> bool:
         return self.excluded_users.filter(id=user.id).exists()

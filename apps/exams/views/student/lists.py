@@ -12,6 +12,7 @@ from apps.exams.constants import (
     get_live_active_states,
     get_live_session_model,
 )
+from apps.exams.domain.unit_assignment import unit_assigned_exams_q
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -439,6 +440,8 @@ def assigned_student_exam_list(request):
         .filter(
             Q(allowed_users=user)
             | Q(allowed_groups__students=user)
+            # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı.
+            | unit_assigned_exams_q(user)
             | Q(
                 course__memberships__user=user,
                 course__memberships__role="student",
@@ -479,6 +482,8 @@ def student_exam_list(request):
             Q(is_public=True)
             | Q(allowed_users=user)
             | Q(allowed_groups__students=user)
+            # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı.
+            | unit_assigned_exams_q(user)
             | Q(
                 course__memberships__user=user,
                 course__memberships__role="student",

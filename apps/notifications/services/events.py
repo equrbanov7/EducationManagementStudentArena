@@ -385,6 +385,20 @@ def get_exam_assigned_user_ids(exam) -> set[int]:
     assigned_user_ids = set(exam.allowed_users.values_list("id", flat=True))
     group_student_ids = exam.allowed_groups.values_list("students__id", flat=True)
     assigned_user_ids.update(student_id for student_id in group_student_ids if student_id)
+    # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (`Exam.allowed_units`, OrgUnit
+    # GROUP) ilə təyin olunan tələbələr — cari aktiv, qeydiyyatlı akademik qeyd
+    # üzrə. Bu funksiya PIN provizionu + bildiriş alıcıları üçün yeganə
+    # sayğacdır; şərt `apps.exams.domain.unit_assignment` ilə eynidir (ORM
+    # əlaqəsi ilə yazılıb — notifications exams/registrar-ı import etmir).
+    assigned_user_ids.update(
+        get_user_model()
+        .objects.filter(
+            academic_records__group__in=exam.allowed_units.values("pk"),
+            academic_records__is_active=True,
+            academic_records__status="enrolled",
+        )
+        .values_list("id", flat=True)
+    )
     if exam.course_id:
         assigned_user_ids.update(exam.course.memberships.filter(role="student").values_list("user_id", flat=True))
     assigned_user_ids.difference_update(exam.excluded_users.values_list("id", flat=True))

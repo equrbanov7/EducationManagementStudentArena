@@ -3058,3 +3058,18 @@ msgstr "Aç"
 
 msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
 msgstr "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
+
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+
+msgid "Müddət 0-dan böyük olmalıdır."
+msgstr "Müddət 0-dan böyük olmalıdır."
+
+msgid "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+msgstr "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+
+msgid "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+msgstr "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+
+msgid "Köhnə kohortlar"
+msgstr "Köhnə kohortlar"

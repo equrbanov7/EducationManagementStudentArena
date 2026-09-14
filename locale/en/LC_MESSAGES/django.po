@@ -68751,3 +68751,35 @@ msgstr "with the personal exam PIN"
 
 msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
 msgstr "personal exam PIN (shown in the student cabinet)"
+
+msgctxt "exams.model.exam.field"
+msgid "allowed_units"
+msgstr "Registry groups"
+
+msgctxt "exams.model.exam.help"
+msgid "allowed_units"
+msgstr "Academic groups from the groups registry that are admitted to the exam."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "allowed_units"
+msgstr "Groups (registry)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "search_unit_group"
+msgstr "Search a group (e.g. 634 ing)..."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "legacy_cohorts"
+msgstr "Legacy cohorts"
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_questions_not_copied"
+msgstr "Questions were not copied — the copy is an empty draft ({count} questions stayed in the source). Add questions from the bank."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_source_empty"
+msgstr "The source exam had no questions — the copy is an empty draft; add questions."
+
+msgctxt "exams.view.exams.error"
+msgid "allowed_units_invalid"
+msgstr "The selected group(s) were not found in this organization or are outside your scope."

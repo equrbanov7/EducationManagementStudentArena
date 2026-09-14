@@ -17,6 +17,7 @@ from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
 
+from . import unit_assignment as _units
 from ._shared import _resolve_required_organization
 
 User = get_user_model()
@@ -113,16 +114,66 @@ def _org_user_queryset(request, organization):
     return qs.distinct()
 
 
+def _unit_ids_param(request, name="units"):
+    """`?units=<uuid>,<uuid>` → yalnız etibarlı UUID-lər (siyahı)."""
+    from uuid import UUID
+
+    ids = []
+    for piece in (request.GET.get(name) or "").split(","):
+        piece = piece.strip()
+        if not piece:
+            continue
+        try:
+            ids.append(str(UUID(piece)))
+        except (TypeError, ValueError):
+            continue
+    return ids
+
+
+def _unit_member_ids(request, organization, unit_ids):
+    """Seçilmiş reyestr qruplarının cari tələbə id-ləri (əhatə ilə skoplanmış)."""
+    if not unit_ids:
+        return set()
+    from apps.exams.domain.unit_assignment import unit_student_record_filter
+
+    units = _units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids)
+    record_path = "academic_records__"
+    return set(
+        User.objects.filter(
+            **{f"{record_path}group__in": units.values("pk")},
+            **unit_student_record_filter(record_path),
+        ).values_list("id", flat=True)
+    )
+
+
 @login_required
 @require_GET
 def group_search(request):
-    """İcazəli qrup axtarışı — təşkilata görə, ad üzrə (səhifələnən)."""
+    """İcazəli qrup axtarışı — təşkilata görə, ad üzrə (səhifələnən).
+
+    2026-09-14 (W4 `w4wizard`, R2): `?kind=units` → qrup REYESTRİ (OrgUnit GROUP)
+    namizədləri (təşkilat + istifadəçinin `exam.create` əhatəsi); parametrsiz →
+    köhnə imtahan kohortları (`StudentGroup`, ikinci dərəcəli bölmə).
+    """
     _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
         return JsonResponse({"results": [], "has_more": False})
 
     query = (request.GET.get("q") or "").strip()
+    if (request.GET.get("kind") or "").strip() == "units":
+        unit_qs = _units.exam_unit_candidates(request, organization)
+        if query:
+            unit_qs = unit_qs.filter(Q(name__icontains=query) | Q(code__icontains=query))
+        offset, limit = _page_bounds(request)
+        results, has_more = _paginate(
+            unit_qs,
+            offset,
+            limit,
+            lambda u: {"id": str(u.pk), "text": _units.unit_display_label(u)},
+        )
+        return JsonResponse({"results": results, "has_more": has_more})
+
     qs = StudentGroup.objects.filter(organization=organization)
     if query:
         qs = qs.filter(name__icontains=query)
@@ -156,6 +207,9 @@ def user_search(request):
             .values_list("students__id", flat=True)
             .distinct()
         )
+    # R2: seçilmiş reyestr qruplarının (`units`) tələbələri də «qrupla daxildir»
+    # kimi işarələnir — müəllim onları ayrı-ayrı istisna edə bilsin.
+    group_member_ids |= _unit_member_ids(request, organization, _unit_ids_param(request))
 
     if query:
         qs = qs.filter(
@@ -260,14 +314,24 @@ def assigned_student_count(request):
         return JsonResponse({"total": 0})
 
     group_ids = [int(g) for g in (request.GET.get("groups") or "").split(",") if g.strip().isdigit()]
+    unit_ids = _unit_ids_param(request)
     user_ids = [int(u) for u in (request.GET.get("users") or "").split(",") if u.strip().isdigit()]
     excluded_user_ids = [int(u) for u in (request.GET.get("excluded") or "").split(",") if u.strip().isdigit()]
-    if not group_ids and not user_ids:
+    if not group_ids and not unit_ids and not user_ids:
         return JsonResponse({"total": 0})
 
     cond = Q()
     if group_ids:
         cond |= Q(student_groups_as_student__id__in=group_ids)
+    if unit_ids:
+        # R2: reyestr qrupu tələbələri — `unit_assigned_exams_q` ilə eyni şərt.
+        from apps.exams.domain.unit_assignment import unit_student_record_filter
+
+        record_path = "academic_records__"
+        cond |= Q(
+            **{f"{record_path}group__in": _units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids)},
+            **unit_student_record_filter(record_path),
+        )
     if user_ids:
         cond |= Q(id__in=user_ids)
     qs = _org_user_queryset(request, organization).filter(cond)

@@ -3069,3 +3069,18 @@ msgstr "Görüntüle"
 
 msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
 msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmiyor. Yalnızca .pdf / .docx / .txt / .png / .jpg yükleyin."
+
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "Bitiş zamanı başlangıç zamanından sonra olmalıdır."
+
+msgid "Müddət 0-dan böyük olmalıdır."
+msgstr "Süre 0'dan büyük olmalıdır."
+
+msgid "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+msgstr "Süre sınav penceresinden ({n} dk) uzun olamaz."
+
+msgid "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+msgstr "Soru sayısı negatif olamaz (0 = tüm sorular)."
+
+msgid "Köhnə kohortlar"
+msgstr "Eski kohortlar"
