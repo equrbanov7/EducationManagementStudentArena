@@ -21,6 +21,7 @@ from apps.exams.services.bulk_workbench import (
     parse_selected_indices,
 )
 from apps.exams.services.import_media import bind_import_manifest, clear_stash, stash_level_warnings
+from apps.exams.services.import_media_paste import pasted_image_chips, remove_pasted_image, stash_pasted_image
 from apps.exams.services.question_bank_attach import _question_fingerprint, accessible_banks
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from core.tenancy import get_request_organization
@@ -33,6 +34,55 @@ from ._shared import (
     _render_bank_question_form_html,
     _save_bank_questions,
 )
+
+_PASTE_ACTIONS = ("paste_image", "paste_image_remove")
+
+
+def _paste_image_response(request, bank, action, math_token):
+    """W8 2026-09-14: iş masasında pano/sürükləmə ilə şəkil → stash (JSON qolu).
+
+    Ayrı URL yoxdur (`urls.py` bu dalğada sahiblikdən kənardır) — `bank_question_add`
+    modal JSON presedenti ilə eyni view-un `action` qolu. Şəkil DOCX-formatlı
+    bundle-a düşür; `[[img:N]]` markerini JS caret-ə yazır, preview/save mövcud
+    bağlama kodu ilə işləyir.
+    """
+
+    scope = {"owner_id": request.user.pk, "organization_id": bank.organization_id}
+    try:
+        if action == "paste_image":
+            uploaded = request.FILES.get("image")
+            if not uploaded:
+                return JsonResponse(
+                    {"ok": False, "error": pgettext("exams.view.bank.paste", "Şəkil göndərilməyib.")}, status=400
+                )
+            pasted = stash_pasted_image(uploaded, token=math_token, **scope)
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "token": pasted.token,
+                    "index": pasted.index,
+                    "marker": pasted.marker,
+                    "thumb": pasted.thumb,
+                    "width": pasted.width,
+                    "height": pasted.height,
+                }
+            )
+        try:
+            index = int(request.POST.get("index") or "")
+        except ValueError:
+            return JsonResponse(
+                {"ok": False, "error": pgettext("exams.view.bank.paste", "Şəkil nömrəsi yanlışdır.")}, status=400
+            )
+        token = remove_pasted_image(math_token, index, **scope)
+        return JsonResponse({"ok": True, "token": token, "index": index})
+    except ValueError as exc:
+        return JsonResponse({"ok": False, "error": str(exc)}, status=400)
+    except OSError:
+        # Storage xətası — yol/backend detalı istifadəçiyə sızmasın.
+        return JsonResponse(
+            {"ok": False, "error": pgettext("exams.view.bank.paste", "Şəkil müvəqqəti yığına yazılmadı.")},
+            status=400,
+        )
 
 
 @login_required
@@ -56,6 +106,8 @@ def question_bank_bulk_add(request, bank_id):
     selected_language = (request.POST.get("language") or bank.language or DEFAULT_EXAM_LANGUAGE).strip().lower()
 
     math_token = (request.POST.get("math_token") or "").strip()
+    if request.method == "POST" and (request.POST.get("action") or "").strip() in _PASTE_ACTIONS:
+        return _paste_image_response(request, bank, (request.POST.get("action") or "").strip(), math_token)
     if request.method == "POST":
         action = (request.POST.get("action") or "preview").strip()
         upload_failed = False
@@ -177,6 +229,12 @@ def question_bank_bulk_add(request, bank_id):
         "wb_save_label": pgettext("exams.template.question_bank_detail", "Seçilmişləri banka əlavə et"),
         # Düstur/şəkil yığını üçün token — gizli sahə kimi save addımına ötürülür.
         "math_token": math_token,
+        # W8 2026-09-14: pano/sürükləmə ilə şəkil yapışdırma (yalnız bu iş masasında);
+        # preview POST-dan sonra çiplər manifestdəki thumbnail-lərdən bərpa olunur.
+        "wb_paste_url": request.path,
+        "wb_paste_images": pasted_image_chips(
+            math_token, owner_id=request.user.pk, organization_id=bank.organization_id
+        ),
     }
     return render(request, "exams/teacher/question_bank_bulk_add.html", context)
 

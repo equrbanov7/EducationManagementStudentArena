@@ -181,7 +181,7 @@ sual» yapışırdı); sonluq `*` markeri (`B) iki*`, `B) iki *`) `*B)` ilə ekv
 
 ## 7. Məlum məhdudiyyətlər (2026-09-14)
 
-- Pano (clipboard) ilə şəkil yapışdırma iş masasında **yoxdur** — yalnız fayl yükləmə.
+- Pano (clipboard) ilə şəkil yapışdırma iş masasında **yoxdur** — yalnız fayl yükləmə. — **2026-09-14 dalğa 8-də əlavə edildi:** bank toplu əlavədə panodan (Ctrl/Cmd+V) və sürüklə-burax ilə şəkil yapışdırma `[[img:N]]` markeri ilə (eyni validasiya, ≤ 12 MB, ≤ 2000 px, EXIF silinir).
 - PDF-də çox sütunlu səhifə fərz edilmir (bölgə qaydası tək sütunludur).
 - OMML-dən LaTeX-ə çevirmə tam deyil — naməlum qovşaqlar mətn kimi qalır və nişanla
   göstərilir; müəllim yadda saxlamazdan əvvəl yoxlamalıdır.

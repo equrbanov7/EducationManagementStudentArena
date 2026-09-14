@@ -2,7 +2,7 @@
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/bulk_question_workbench.css' %}">
 {% comment %}W3 2026-09-14: preview-da LaTeX düsturlar KaTeX ilə (data-ems-math); DOCX şəkil/düstur inam nişanları.{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-1">
+<link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-2">
 {% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
@@ -24,7 +24,9 @@ aiQuestionBank.js dəyişiksiz işləsin.
   wb_show_format, wb_format ("test"/"written"),
   wb_templates [{url,label,kind}] (şablon endirmə düymələri),
   wb_show_report (Excel hesabat düyməsi),
-  wb_save_label, wb_workbench_key (localStorage namespace).
+  wb_save_label, wb_workbench_key (localStorage namespace),
+  wb_paste_url (W8 2026-09-14: pano/sürükləmə şəkil yapışdırma JSON qolu — yalnız
+  bank toplu əlavə; boşdursa yapışdırma söndürülür), wb_paste_images [{index,marker,thumb}].
 
 Preview/validasiya kontekst dəyişənləri (view-dən):
   parsed, selected, category_counts, warning_count, duplicate_count,
@@ -39,6 +41,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
 <div class="bulk-page-wrapper"
      data-workbench-key="{{ wb_workbench_key|default:'workbench' }}"
+     {% if wb_paste_url %}data-paste-url="{{ wb_paste_url }}"{% endif %}
      {% if parsed and request.method == 'POST' %}data-auto-scroll-preview="true"{% endif %}>
 
     {% if wb_section_title %}
@@ -361,6 +364,25 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         data-placeholder-test="{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (Sonda cavab yaz):&#10;3. HTML nədir?&#10;A) Proqramlaşdırma dili&#10;B) İşarələmə dili&#10;C) Əməliyyat sistemi&#10;D) Antivirüs&#10;Cavab: B&#10;&#10;Nümunə 4 (PDF/bullet formatı — √ düz cavabdır):&#10;4. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini' %}"
                         data-placeholder-written="{% trans '1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.&#10;3. Binary axtarış alqoritmini addım-addım təsvir edin.' %}"
                         placeholder="{% if wb_format == 'written' %}{% trans '1. Verilənlər strukturu nədir? İzah edin.&#10;2. Stack və Queue arasındakı fərqi yazın.' %}{% else %}{% trans 'Nümunə 1 (Standart - A düzgündür):&#10;1. Data Science əsasən nə ilə məşğul olur?&#10;A) Məlumatların analizi və qərar vermə&#10;B) Kompüter təmiri&#10;C) Oyun hazırlamaq&#10;D) İnternet qurmaq&#10;&#10;Nümunə 2 (* ilə işarələ):&#10;2. Python əsasən harada istifadə olunur?&#10;A) Avtomobil təmiri&#10;*B) Veb və backend inkişafı&#10;C) Musiqi ifası&#10;D) Printer yığılması&#10;&#10;Nümunə 3 (PDF/bullet formatı — √ düz cavabdır):&#10;3. CI/CD nəyi avtomatlaşdırır?&#10;• Sənəd yazılışını&#10;√ Build və yerləşdirmə prosesini&#10;• Müştəri dəstəyini&#10;• Dizayn prosesini' %}{% endif %}">{{ raw_text }}</textarea>
+
+                    {% if wb_paste_url %}
+                    {# W8 2026-09-14: pano (Ctrl+V) / sürükləmə ilə şəkil → [[img:N]] markeri + çip; JS: bulk_workbench_paste.js #}
+                    <div class="wb-paste-strip" id="wbPasteStrip"
+                         data-msg-uploading="{% trans 'Şəkil yüklənir…' context 'exams.template.test_question_bank' %}"
+                         data-msg-failed="{% trans 'Şəkil yüklənmədi.' context 'exams.template.test_question_bank' %}"
+                         data-msg-removed="{% trans 'Şəkil silindi — [[img:N]] işarəsi mətndən çıxarıldı.' context 'exams.template.test_question_bank' %}"
+                         data-msg-not-image="{% trans 'Yalnız şəkil faylı (PNG/JPG/GIF/WebP) yapışdırıla bilər.' context 'exams.template.test_question_bank' %}"
+                         data-label-remove="{% trans 'Şəkli sil' context 'exams.template.test_question_bank' %}">
+                        <span class="wb-paste-strip__hint">
+                            <i class="fas fa-paste"></i>
+                            {% trans "Şəkli panodan yapışdırın (Ctrl+V) və ya bura sürüşdürün — [[img:N]] işarəsi kursorun yerinə düşür; sual sətrində sual, variant sətrində həmin varianta bağlanır." context "exams.template.test_question_bank" %}
+                        </span>
+                        <div class="wb-paste-strip__chips" id="wbPasteChips" role="list" aria-live="polite"></div>
+                        <span class="wb-paste-strip__status" id="wbPasteStatus" role="status" aria-live="polite" hidden></span>
+                    </div>
+                    {{ wb_paste_images|json_script:"wb-paste-images" }}
+                    <script defer src="{% static 'exams/js/bulk_workbench_paste.js' %}?v=20260914-1"></script>
+                    {% endif %}
                 </div>
             </main>
         </form>
