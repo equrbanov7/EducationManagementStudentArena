@@ -467,6 +467,22 @@ w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, so
    tarixi `.env` sızmasındakı dəyərlər hər hansı real mühitdə işlədilirsə dəyişdirin
    (`ALTER ROLE …`).
 
+**A2. Məlumat hazırlığı — 2026-09-14 lokal real bazada (`emsarena_db`) ARTIQ EDİLİB**
+
+Sahibin qərarı: «my.edu» izi qalmasın, istifadəçi adları ad.soyad olsun. İki
+idempotent komanda (dry-run defolt) real bazada tətbiq olundu, ehtiyat nüsxələr
+`backups/pre_username_rename/` (gitignored) — serverə məhz bu bazanın dump-ı gedir:
+
+| Komanda | Nə etdi | Say |
+|---|---|---|
+| `rename_legacy_usernames --apply` | `myedu.student/worker.<id>` → `ad.soyad` (universitetin `…@wcu.edu.az` `ad.soyad` hesabı varsa o; təkrarda `2`,`3`…) | 8 431 |
+| `finalize_university_identity --apply` | Təşkilat «MyEdu Universiteti (rehearsal)»/`myedu-univ` → «Qərbi Kaspi Universiteti»/`qku`; tələbə nömrəsi `myedu-student-N` → `N`; fənn kodu `MYEDU-LN` → `QKU-N` | 1 / 7 716 / 2 501 |
+
+Plan CSV (köhnə → yeni istifadəçi adı) eyni qovluqdadır. Serverdə TƏKRAR
+işlətmək lazım deyil (idempotentdir — işlədilsə «dəyişəcək: 0» verir). Qalan
+daxili `myedu` açarları (`OrgUnit.slug myedu-dep-N`, `Program.code MYEDU-N`,
+legacy ledger `source_system`) UI-da görünmür, idxal açarıdır — toxunulmur.
+
 **B. Deploy-dan ƏVVƏL (server)**
 
 8. `docker network inspect emsarena_emsarena-network` → subnet **172.18.0.0/16**,
