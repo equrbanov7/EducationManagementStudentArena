@@ -2944,7 +2944,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             display_name="Ops Manager",
             level=85,
             scope_type=RoleScopeType.ORGANIZATION,
-            permissions=["role.assign", "exam.view"],
+            permissions=["role.assign", "role.edit", "exam.view"],  # role.edit: 2026-09-14 qapısı
             is_active=True,
         )
         role_target = Role.objects.create(
@@ -2996,7 +2996,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             display_name="Grant Manager",
             level=85,
             scope_type=RoleScopeType.ORGANIZATION,
-            permissions=["role.assign", "grant:member.invite"],
+            permissions=["role.assign", "role.edit", "grant:member.invite"],  # role.edit: 2026-09-14 qapısı
             is_active=True,
         )
         role_target = Role.objects.create(
@@ -3143,7 +3143,7 @@ class RoleAndPermissionTenantIsolationTest(TestCase):
             display_name="Bulk Limited Manager",
             level=85,
             scope_type=RoleScopeType.ORGANIZATION,
-            permissions=["role.assign", "exam.view"],
+            permissions=["role.assign", "role.edit", "exam.view"],  # role.edit: 2026-09-14 qapısı
             is_active=True,
         )
         role_target = Role.objects.create(

@@ -1,8 +1,5 @@
 {
-  "cycles": [
-    "exams<->registrar",
-    "organizations<->registrar"
-  ],
+  "cycles": [],
   "core_to_apps": [],
   "edges": {
     "accounts": [
@@ -86,8 +83,7 @@
       "organizations"
     ],
     "organizations": [
-      "audit",
-      "registrar"
+      "audit"
     ],
     "projects": [
       "courses",
@@ -95,7 +91,6 @@
       "task_submission_core"
     ],
     "registrar": [
-      "exams",
       "notifications",
       "organizations",
       "syllabus"

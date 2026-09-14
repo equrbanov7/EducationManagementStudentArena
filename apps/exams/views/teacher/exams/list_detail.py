@@ -19,6 +19,7 @@ from apps.exams.views.shared.tenant import get_active_organization, get_teacher_
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
+from . import unit_assignment as _units
 from ._shared import (
     _bind_selected_organization,
     _ensure_exam_permission,
@@ -110,6 +111,8 @@ def createAndEditExamView(request, slug=None):
         form_kwargs["organization_queryset"] = _organization_selection_queryset()
         form_kwargs["initial_organization"] = selected_organization
 
+    allowed_units = []
+    allowed_units_error = None
     if request.method == "POST":
         previous_is_active = exam.is_active if is_editing else False
         previous_recipient_ids = set()
@@ -143,6 +146,13 @@ def createAndEditExamView(request, slug=None):
                 _ensure_exam_permission(request, required_permission)
                 permission_verified = True
 
+            # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupları (OrgUnit GROUP) forma
+            # sahəsi deyil — burada tenant/əhatə ilə yoxlanılır; yanlış id → 400.
+            allowed_units, allowed_units_error = _units.resolve_requested_units(
+                request, organization, request.POST, permission=required_permission
+            )
+
+        if form.is_valid() and not allowed_units_error:
             if not is_editing and linked_course is None:
                 linked_course = _get_requested_course_for_exam(request)
 
@@ -157,6 +167,9 @@ def createAndEditExamView(request, slug=None):
 
             exam_instance.save()
             form.save_m2m()  # ManyToMany field-ləri saxla
+            _units.apply_allowed_units(
+                request, organization, exam_instance, allowed_units, permission=required_permission
+            )
 
             # Save supervision config from POST data
             from apps.exams.services.supervision import save_supervision_config_from_form
@@ -245,6 +258,8 @@ def createAndEditExamView(request, slug=None):
             )
             return JsonResponse({"success": True, "slug": exam_instance.slug, "notice": publish_notice})
         selected_groups, selected_users, selected_excluded_users = _selected_access_entities(form)
+        # R1: xətanın OLDUĞU addım/sahə — sehrbaz həmin addıma keçib sahəni fokuslayır.
+        error_step, error_field = _units.first_error_target(form, allowed_units_error=allowed_units_error)
         html = render_to_string(
             "exams/teacher/partials/_create_exam_modal_form.html",
             {
@@ -253,13 +268,23 @@ def createAndEditExamView(request, slug=None):
                 "exam": exam,
                 "linked_course": linked_course,
                 "selected_allowed_groups": selected_groups,
+                "legacy_groups_available": _units.legacy_groups_available(form, selected_groups),
                 "selected_allowed_users": selected_users,
                 "selected_excluded_users": selected_excluded_users,
+                "selected_allowed_units": _units.selected_units_for_form(
+                    request, form_organization, form, exam, permission=required_permission
+                ),
+                "allowed_units_error": allowed_units_error or "",
+                "wizard_error_step": error_step,
+                "wizard_error_field": error_field,
                 "supervision_config": supervision_config,
             },
             request=request,
         )
-        return JsonResponse({"success": False, "html": html}, status=400)
+        return JsonResponse(
+            {"success": False, "html": html, "step": error_step, "field": error_field},
+            status=400,
+        )
     else:
         # GET request
         if is_editing:
@@ -277,8 +302,12 @@ def createAndEditExamView(request, slug=None):
             "is_editing": is_editing,
             "linked_course": linked_course,
             "selected_allowed_groups": selected_groups,
+            "legacy_groups_available": _units.legacy_groups_available(form, selected_groups),
             "selected_allowed_users": selected_users,
             "selected_excluded_users": selected_excluded_users,
+            "selected_allowed_units": _units.selected_units_for_form(
+                request, form_organization, form, exam, permission=required_permission
+            ),
             "supervision_config": supervision_config,
         },
     )
@@ -335,6 +364,8 @@ def teacher_exam_detail(request, slug):
             "active_live_continue_url": active_live_continue_url,
             "active_live_new_url": active_live_new_url,
             "can_manage_exam_questions": can_manage_exam_questions(request.user, exam),
+            # R2 (W4 `w4wizard`): təyin olunmuş reyestr qrupları — tək sorğu, ad siyahısı.
+            "assigned_unit_names": list(exam.allowed_units.order_by("name").values_list("name", flat=True)),
         },
     )
 

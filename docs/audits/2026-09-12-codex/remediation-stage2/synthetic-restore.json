@@ -1,0 +1,15 @@
+{
+  "source": "codex_audit (synthetic only)",
+  "target": "codex_restore (same disposable test container)",
+  "elapsed_seconds": 1.84,
+  "codex_audit": [
+    "282",
+    "173",
+    "2"
+  ],
+  "codex_restore": [
+    "282",
+    "173",
+    "2"
+  ]
+}

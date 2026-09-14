@@ -55,9 +55,8 @@ class CourseTopic(models.Model):
         verbose_name_plural = "Kurs Mövzuları"
         ordering = ["course", "order"]
         unique_together = ("course", "order")
-        indexes = [
-            models.Index(fields=["course", "order"]),
-        ]
+        # `(course, order)` Meta indeksi silindi (2026-09-14): `unique_together`
+        # eyni açarla unikal indeks yaradır (data auditi 2026-09-13 §6.2, miqrasiya 0002).
 
     def __str__(self):
         return f"{self.course.title} → {self.title}"

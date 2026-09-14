@@ -6,19 +6,13 @@ organizations.scoping ilə məhdudlaşdırılır; bu template yalnız göstərir
 {% endcomment %}
 <section class="profile-section-panel profile-section--unit-exams {% if active_section == 'unit-exams' %}is-active{% endif %}"
          data-profile-section-panel="unit-exams">
+    {% comment %}2026-09-12 (audit P2-1): «Bölmə imtahanları» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `.section-title` onu təkrarlayırdı.
+    İzah altbaşlıqdır; ümumi say (sol menyuda nişanı yoxdur) başlığın əməl
+    yuvasında neytral badge kimi qalır.{% endcomment %}
+    {% trans 'Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).' as ue_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ue_subtitle header_actions_include="accounts/profile/sections/_unit_exams_header_actions.html" %}
     <div class="section-card">
-        <div class="section-title">
-            <i class="fas fa-university"></i> {% trans 'Bölmə imtahanları' %}
-            {% if unit_exams_total_count %}
-            <span class="sidebar-menu-badge">{{ unit_exams_total_count }}</span>
-            {% endif %}
-        </div>
-
-        <p class="settings-note">
-            <i class="fas fa-circle-info"></i>
-            {% trans 'Bu siyahı yalnız sizin fakültə/kafedra alt-ağacınıza aid imtahanları göstərir (oxu-only baxış).' %}
-        </p>
-
         <form method="get" action="{{ profile_base_url }}" class="d-flex gap-2 mb-3">
             <input type="hidden" name="section" value="unit-exams">
             <input type="search"

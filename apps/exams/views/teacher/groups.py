@@ -4,14 +4,16 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
+from apps.exams.domain.student_group_deprecation import organization_has_legacy_cohorts
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
-from apps.organizations.public import get_unit_scope
+from apps.organizations.public import get_permission_scope
 from core.permissions import request_has_permission
 from core.roles import ProfileRole
 from core.tenancy import request_has_active_organization_context
@@ -110,6 +112,24 @@ def _get_required_organization(request):
     return organization
 
 
+def _actor_group_scope(request, organization):
+    """Qrup səthinin struktur əhatəsi — `group.manage`, olmasa `group.view` açarına görə.
+
+    2026-09-12 (P1-11): köhnə ümumi `get_unit_scope` HƏR aktiv üzvlüyün
+    `scope_unit`-ini toplayırdı — dekanın başqa fakültənin kafedrasına müəllim
+    təyinatı həmin kafedranın qruplarını da onun siyahısına (və redaktəsinə)
+    salırdı. İndi əhatə yalnız qrup açarını DAŞIYAN üzvlükdən çıxır. Səhifə
+    qapısı (`_ensure_group_manager`) `group.view` VƏ YA `group.manage` tanıyır;
+    dəyişmə qapısı (`_ensure_group_creator`) yalnız `group.manage`. Ona görə
+    əvvəl `group.manage` (tyutor/koordinator/dekan), o əhatə verməsə `group.view`
+    (dekan müavini — yalnız oxu) yoxlanır; ikisi də yoxdursa `EMPTY_SCOPE`.
+    """
+    scope = get_permission_scope(request.user, organization, "group.manage", request=request)
+    if scope.has_structure_access:
+        return scope
+    return get_permission_scope(request.user, organization, "group.view", request=request)
+
+
 def _group_queryset_for_actor(request, organization):
     queryset = (
         StudentGroup.objects.filter(organization=organization)
@@ -121,7 +141,7 @@ def _group_queryset_for_actor(request, organization):
     #   org-geniş rol (rektor/prorektor/org-admin/owner/superadmin) → bütün qruplar;
     #   unit-scoped (dekan/kafedra müdiri) → öz alt-ağacındakı qruplar (+ öz qrupları);
     #   qalan (adi müəllim) → yalnız öz qrupları (teacher / teachers).
-    scope = get_unit_scope(request.user, organization, request)
+    scope = _actor_group_scope(request, organization)
     if scope.is_org_wide:
         return queryset
     own_q = Q(teacher=request.user) | Q(teachers=request.user)
@@ -131,7 +151,7 @@ def _group_queryset_for_actor(request, organization):
     return queryset.filter(own_q).distinct()
 
 
-def _group_form_for_request(request, organization, data=None, instance=None):
+def _group_form_for_request(request, organization, data=None, instance=None, *, defer_choices=False):
     return StudentGroupForm(
         data,
         instance=instance,
@@ -139,19 +159,62 @@ def _group_form_for_request(request, organization, data=None, instance=None):
         organization=organization,
         can_multi_assign_teachers=_can_multi_assign_teachers(request.user),
         is_superadmin=_is_superadmin(request.user),
+        defer_choices=defer_choices,
     )
 
 
-def _create_group_template_context(request, organization, form):
+def _candidates_url_for(form):
+    """Lazy namizəd endpoint-i — yalnız variantlar həqiqətən TƏXİRƏ SALINANDA.
+
+    2026-09-14 (perf auditi 2026-09-13, F-10): `/exams/groups/` və
+    `create_student_group` tam səhifələri formanı `defer_choices`-siz qururdu →
+    təşkilatın BÜTÜN tələbə/müəllim `<option>`-ları hər açılışda render olunurdu
+    (klonda 2 008 ms / 2,5 MB). İndi GET-də forma boş widget-lə gəlir, JS isə
+    modal/səhifə açılanda variantları `exams:teacher_group_candidates`-dən
+    (kabinet bölməsinin 2026-09-02 F4 nümunəsi) çəkir. Bound (POST xətası)
+    re-render-də forma variantları özü render edir (seçim qorunur) → URL boş,
+    JS mövcud `<option>`-larla işləyir.
+    """
+    if getattr(form, "choices_deferred", False):
+        return reverse("exams:teacher_group_candidates")
+    return ""
+
+
+def _legacy_notice_context(*, can_create: bool) -> dict:
+    """Kohortu OLMAYAN təşkilat üçün əvəzlənmə kartının keçidləri.
+
+    2026-09-14 (W7 `w7cohort`; sahibin 2026-09-07 qərarı): qrup reyestri
+    (`?section=groups-registry`) və imtahan sehrbazı (`?section=my-exams` —
+    tam səhifə `exams:create_exam` onsuz da bura yönləndirir) əsas keçidlərdir;
+    köhnə yaratma səhifəsinə keçid yalnız `group.manage` olanda, ikinci dərəcəli.
+    """
+    profile_url = reverse("accounts:profile")
     return {
+        "legacy_cohorts_exist": False,
+        "legacy_notice_registry_url": f"{profile_url}?section=groups-registry",
+        "legacy_notice_wizard_url": f"{profile_url}?section=my-exams",
+        "legacy_notice_create_url": reverse("exams:create_student_group") if can_create else "",
+    }
+
+
+def _create_group_template_context(request, organization, form):
+    context = {
         "form": form,
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
         "max_multi_teachers": getattr(form, "MAX_MULTI_TEACHERS", 3),
+        # `.count()` — sətir sayından asılı olmayan 2 COUNT sorğusu (variantlar deyil).
         "student_count": form.fields["students"].queryset.count(),
         "teacher_count": form.fields["primary_teacher"].queryset.count(),
+        "candidates_url": _candidates_url_for(form),
         "is_editing": False,
+        "legacy_cohorts_exist": True,
     }
+    # W7: kohortsuz təşkilatda forma yığılmış <details> içinə düşür, üstdə
+    # əvəzlənmə kartı çıxır (şablon `legacy_cohorts_exist`-ə baxır).
+    if not organization_has_legacy_cohorts(organization):
+        context.update(_legacy_notice_context(can_create=False))
+    return context
 
 
 @login_required
@@ -161,8 +224,18 @@ def teacher_group_list(request):
     if organization is None:
         return redirect("accounts:profile")
 
+    # W7 `w7cohort` (2026-09-14): təşkilatda heç bir kohort yoxdursa boş siyahı,
+    # modal və JS əvəzinə yalnız əvəzlənmə kartı (icazə qapısı yuxarıda, dəyişmir).
+    if not organization_has_legacy_cohorts(organization):
+        return render(
+            request,
+            "exams/teacher/teacher_group_list_deprecated.html",
+            _legacy_notice_context(can_create=_user_can_create_group(request)),
+        )
+
     groups = _group_queryset_for_actor(request, organization)
-    form = _group_form_for_request(request, organization)
+    # F-10 (2026-09-14): variantlar lazy — bax `_candidates_url_for`.
+    form = _group_form_for_request(request, organization, defer_choices=True)
 
     context = {
         "groups": groups,
@@ -170,6 +243,7 @@ def teacher_group_list(request):
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
         "can_create_group": _user_can_create_group(request),
+        "candidates_url": _candidates_url_for(form),
     }
     return render(request, "exams/teacher/teacher_group_list.html", context)
 
@@ -301,7 +375,9 @@ def teacher_update_group(request, group_id):
             "form": form,
             "organization": organization,
             "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
+            "can_create_group": True,
             "edit_group_id": group.id,
+            "candidates_url": _candidates_url_for(form),
         },
         status=400,
     )
@@ -413,7 +489,8 @@ def create_student_group(request):
     if organization is None:
         return redirect("accounts:profile")
 
-    form = _group_form_for_request(request, organization)
+    # F-10 (2026-09-14): variantlar lazy — bax `_candidates_url_for`.
+    form = _group_form_for_request(request, organization, defer_choices=True)
     return render(
         request,
         "exams/teacher/create_student_group.html",

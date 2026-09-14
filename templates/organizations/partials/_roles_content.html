@@ -1,47 +1,45 @@
-{% load i18n org_tags %}
-{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
-kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
-mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
-dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
-dəyişmir).{% endcomment %}
-{% with s=org_roles_section %}
-<div class="org-management org-management--roles">
-    {% if not s.organization %}
-        <div class="org-management__empty">{% trans 'Aktiv təşkilat tapılmadı.' %}</div>
+{% load i18n static %}
+{% comment %}«Təşkilat rolları» — rol KATALOQU reyestri.
+
+2026-09-09 (sahib: «qaydasına sal yenidən») kart torundan `ems_ui` reyestrinə
+keçdi: KPI → süzgəc → cədvəl → çekmecə. Əvvəl kartlarda xam icazə açarları
+(`journal.correct` …) çip kimi düzülürdü, üzv sayı və axtarış yox idi.
+
+Bu partial İKİ yerdə göstərilir:
+  * kabinet qabığında (`accounts/.../_org_roles.html`, `embedded_in_shell=True`)
+    — başlığı qabıq verir, burada `<h1>` YAZILMIR;
+  * müstəqil səhifədə (`organizations/roles.html`) — orada başlıq lazımdır.
+
+CSP: inline `<style>`/`<script>` bloku yoxdur; CSS/JS xarici fayldadır və
+partial-ın öz içindədir ki, AJAX swap-dan sonra da yüklənsin
+(bax `docs/frontend/AJAX_SAFE_JS_PATTERN.md`).{% endcomment %}
+{% with s=org_roles_section ui=org_roles_section.ui %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_registry.css' %}?v=20260909-1">
+{% if not s.organization %}
+    {% trans "Aktiv təşkilat tapılmadı." context "organizations.roles_registry" as rolreg_no_org %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=rolreg_no_org %}
+{% else %}
+<div class="rolreg" data-rolreg-root>
+
+    {% if embedded_in_shell %}
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=ui.header_subtitle header_actions_include="organizations/partials/roles/_header_actions.html" %}
     {% else %}
-    <div class="org-management__header">
-        <div>
-            <p class="org-management__eyebrow">{% trans 'Universitet idarəetməsi' %}</p>
-            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="org-management__title">{% trans 'Təşkilat rolları' %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
-            <p class="org-management__subtitle">{% trans 'Rollar və icazələr aktiv təşkilat çərçivəsində göstərilir.' %}</p>
-        </div>
+        {% trans "Təşkilat rolları" context "organizations.roles_registry" as rolreg_title %}
+        {% include "partials/ems_ui/_content_header.html" with header_title=rolreg_title header_subtitle=ui.header_subtitle %}
+    {% endif %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ui.kpi_tiles kpi_variant="5" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-roles" filter_prefix=ui.prefix filter_fields=ui.filter_fields filter_count_label=ui.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+
+    <div data-ems-filter-target>
+        {% include "partials/ems_ui/_data_table.html" with table_columns=ui.columns table_rows=ui.table_rows table_state=ui.table_state table_zebra=True table_wide=True state_kind="empty" state_icon="fa-user-shield" state_title=ui.state_title state_body=ui.state_body %}
     </div>
 
-    <div class="org-management__role-grid">
-        {% for role in s.roles %}
-            <article class="org-management__role-card">
-                <div class="org-management__role-head">
-                    <div>
-                        <h2>{{ role|localized_role_label }}</h2>
-                        {% if role.description %}<p>{{ role.description }}</p>{% endif %}
-                    </div>
-                    <span class="org-management__level">{% trans "level_prefix" context "organizations.roles" %} {{ role.level }}</span>
-                </div>
-                {% if role.is_system %}
-                    <span class="org-management__system-badge">{% trans "system_role" context "organizations.roles" %}</span>
-                {% endif %}
-                <div class="org-management__permissions">
-                    {% for perm in role.permissions %}
-                        <span>{{ perm }}</span>
-                    {% empty %}
-                        <span class="org-management__muted">{% trans "no_permissions" context "organizations.roles" %}</span>
-                    {% endfor %}
-                </div>
-            </article>
-        {% empty %}
-            <div class="org-management__empty">{% trans "no_roles_found" context "organizations.roles" %}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
+    {{ ui.entries|json_script:"rolreg-data" }}
+
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="rolregDetail" drawer_title=ui.drawer_title drawer_subtitle=ui.drawer_subtitle drawer_body_include="organizations/partials/roles/_drawer_body.html" %}
 </div>
+<script defer src="{% static 'accounts/js/profile/roles_registry.js' %}?v=20260909-1"></script>
+{% endif %}
 {% endwith %}

@@ -32,7 +32,7 @@ from django.db.models import Max, Q
 
 from core.rls import bypass_rls
 
-from ..identity import user_access_is_login_blocked
+from ..identity import request_user_login_blocked, user_access_is_login_blocked
 from ..models import ProfileRole
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
@@ -123,14 +123,25 @@ def _is_superadmin(user) -> bool:
 
 
 def _active_memberships(user, organization):
-    """Aktorun org daxilindəki aktiv üzvlükləri (role ilə birgə)."""
+    """Aktorun org daxilindəki aktiv üzvlükləri (role ilə birgə).
+
+    ``bypass_rls`` ŞƏRTDİR (2026-09-12, sahib: «1-2 iş görən kimi məni öz
+    səhifəmə atır»). Bu funksiya ``ViewAsMiddleware``-dən — yəni
+    ``OrganizationMiddleware``-dən ƏVVƏL, tenant konteksti hələ boş ikən —
+    çağırılır (60 saniyəlik yenidən yoxlama və LIMITED yazma siyahısı).
+    ``organizations_membership`` RLS ilə qorunur: kontekst boşdursa sorğu
+    SIFIR sətir qaytarırdı → aktor «icazəsiz» sayılıb view-as sessiyası
+    ``view_as_permission_revoked`` ilə bitirilirdi. Sorğu ``user`` + ``organization``
+    ilə açıq süzülür, ona görə bypass kirayəçi sızması yaratmır.
+    """
     from apps.organizations.models import Membership
 
-    return list(
-        Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
-            "role", "scope_unit"
+    with bypass_rls():
+        return list(
+            Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
+                "role", "scope_unit"
+            )
         )
-    )
 
 
 def _normalized_role_names(memberships):
@@ -150,7 +161,7 @@ def resolve_actor_access(user, organization, *, memberships=None):
         user is None
         or organization is None
         or not getattr(user, "is_authenticated", False)
-        or user_access_is_login_blocked(user)
+        or request_user_login_blocked(user)
     ):
         return None, 0, []
 
@@ -197,7 +208,7 @@ def actor_limited_write_url_names(user, organization) -> frozenset:
 
 def actor_can_use_view_as(user, organization) -> bool:
     """Panelin görünürlüyü üçün ucuz yoxlama (superadmin org-suz da görür)."""
-    if user is None or not getattr(user, "is_authenticated", False) or user_access_is_login_blocked(user):
+    if user is None or not getattr(user, "is_authenticated", False) or request_user_login_blocked(user):
         return False
     if _is_superadmin(user):
         return True
@@ -208,15 +219,24 @@ def actor_can_use_view_as(user, organization) -> bool:
 
 
 def _unit_scope_user_ids(user, organization, memberships):
-    """Unit-scoped rollar üçün icazəli hədəf user id-ləri (yoxdursa None)."""
+    """Unit-scoped rollar üçün icazəli hədəf user id-ləri (yoxdursa None).
+
+    Əhatə `member.view` açarını DAŞIYAN üzvlükdən çıxır (P1-11, 2026-09-12):
+    tyutor / dekan / dekan müavini / kafedra müdiri kataloqda məhz bu açarla
+    UNIT rolundadır → öz alt-ağacındakı üzvlər; ORGANIZATION daşıyıcısı (HR,
+    prorektor) → məhdudiyyət yoxdur (`None`); `scope_unit`-siz unit-rolu →
+    `EMPTY_SCOPE` → `scope_memberships_by_unit` boş qaytarır (fail-closed).
+    Köhnə `get_unit_scope` HƏR üzvlüyün unitini toplayırdı — dekanın əlaqəsiz
+    müəllim təyinatı başqa kafedranın tələbələrini «view-as» hədəfi edirdi.
+    """
     role_names = _normalized_role_names(memberships)
     if not (role_names & UNIT_SCOPED_ROLE_NAMES):
         return None
 
     from apps.organizations.models import Membership
-    from apps.organizations.public import get_unit_scope, scope_memberships_by_unit
+    from apps.organizations.public import get_permission_scope, scope_memberships_by_unit
 
-    scope = get_unit_scope(user, organization)
+    scope = get_permission_scope(user, organization, "member.view")
     if scope.is_org_wide:
         return None
     scoped = scope_memberships_by_unit(
@@ -348,18 +368,18 @@ def validate_target(actor, organization, target_user_id):
         return None, None
 
     try:
-        qs = build_target_queryset(
-            actor,
-            organization,
-            mode=mode,
-            actor_level=actor_level,
-            memberships=memberships,
-        ).filter(pk=target_user_id)
-
-        if actor_level >= 999:
-            with bypass_rls():
-                target = qs.first()
-        else:
+        # Bütün hədəf sorğusu `organization` ilə açıq süzülür (üzvlük, səviyyə,
+        # unit-scope, admin-ekvivalent istisnası) — ona görə RLS bypass-ı kirayəçi
+        # sızması vermir. Bypass MÜTLƏQDİR: yenidən yoxlama middleware-də,
+        # tenant konteksti qurulmamış işləyir (bax `_active_memberships`).
+        with bypass_rls():
+            qs = build_target_queryset(
+                actor,
+                organization,
+                mode=mode,
+                actor_level=actor_level,
+                memberships=memberships,
+            ).filter(pk=target_user_id)
             target = qs.first()
     except (TypeError, ValueError):
         # Yanlış formatlı pk (məs. int pk üçün qeyri-rəqəm) → icazə yoxdur.

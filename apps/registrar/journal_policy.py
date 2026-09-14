@@ -99,7 +99,7 @@ def offering_has_approved_syllabus(offering) -> bool:
     SAYILMIR, yalnız ``approved_version`` — yəni müəllim yeni versiya
     göndərəndə cari semestrin jurnalı bağlanmır.
     """
-    from apps.syllabus import services as syllabus_services
+    from apps.syllabus import public as syllabus_services
 
     syllabus = syllabus_services.syllabus_for_offering(
         organization=offering.organization,

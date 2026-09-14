@@ -17,6 +17,14 @@ idarə olunur (asılılıqlar: bax base.py).
 # feature degrades gracefully (shows a "not configured" message).
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
+# 2026-09-14 (audit F-08, §27 «AI PII/retention»): AI köməkçisi jurnalı
+# (`AIAssistantLog`) istifadəçi prompt-unu saxlayır. Saxlanan mətn
+# AI_ASSISTANT_LOG_MAX_CHARS ilə kəsilir; AI_ASSISTANT_LOG_RETENTION_DAYS-dən
+# köhnə sətirlər `ai_assistant.purge_logs` beat işi ilə silinir (0 → silinmə
+# söndürülür). Tam e-poçt provayderə artıq göndərilmir (`***@domain`).
+AI_ASSISTANT_LOG_RETENTION_DAYS = _env_int_setting("AI_ASSISTANT_LOG_RETENTION_DAYS", 90, minimum=0)
+AI_ASSISTANT_LOG_MAX_CHARS = _env_int_setting("AI_ASSISTANT_LOG_MAX_CHARS", 8000, minimum=0)
+
 # ---------------------------------------------------------------------------
 # Practical coding exam — sandbox execution backend
 # ---------------------------------------------------------------------------
@@ -49,6 +57,14 @@ CODING_RUN_MAX_CONCURRENT_PER_USER = os.getenv("CODING_RUN_MAX_CONCURRENT_PER_US
 # Microsoft Clarity analytics. The project id is public by design; keep it
 # overridable so staging/production can use different Clarity projects.
 MICROSOFT_CLARITY_PROJECT_ID = os.getenv("MICROSOFT_CLARITY_PROJECT_ID", "x2xrg3vw2i").strip()
+
+# 2026-09-13 (Codex audit §11): Clarity session-replay AUTENTİFİKASİYALI
+# səhifələrdə (kabinet: tələbə PII, qiymətlər, sənədlər) susmaya görə
+# YÜKLƏNMİR — məxfilik üzrə standart təcrübə. Yalnız açıq (anonim) səhifələr
+# izlənir. Bu bayraq açıq şəkildə `true` olanda kabinet də izlənir (deployment
+# qərarı; saxlanma siyasəti və maskalama Clarity layihəsində ayrıca yoxlanmalıdır).
+# Şablon `microsoft_clarity_enabled` bayrağına baxır (`core.context_processors`).
+MICROSOFT_CLARITY_AUTHENTICATED = _env_bool_setting("MICROSOFT_CLARITY_AUTHENTICATED", False)
 
 MICROSOFT_CLARITY_SCRIPT_SRC = (
     "https://www.clarity.ms",

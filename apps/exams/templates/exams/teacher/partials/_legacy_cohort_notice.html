@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}2026-09-14 (W7 `w7cohort`): kohortu OLMAYAN təşkilatda `/exams/groups/` və
+   `/exams/groups/create/form/` üçün əvəzlənmə kartı (sahibin 2026-09-07 qərarı:
+   qrup reyestri əsasdır, köhnə kohort səthi silinməyə gedir). Kontekst:
+   `legacy_notice_registry_url`, `legacy_notice_wizard_url`,
+   `legacy_notice_create_url` (yalnız yaratma icazəsi olanda, ikinci dərəcəli).{% endcomment %}
+<section class="legacy-cohort-notice" data-legacy-cohort-notice role="status" aria-labelledby="legacyCohortNoticeTitle">
+    <div class="legacy-cohort-notice__icon" aria-hidden="true"><i class="fas fa-exchange-alt"></i></div>
+    <div class="legacy-cohort-notice__body">
+        <h2 class="legacy-cohort-notice__title" id="legacyCohortNoticeTitle">{% trans "notice_title" context "exams.template.legacy_cohort_notice" %}</h2>
+        <p class="legacy-cohort-notice__text">{% trans "notice_body" context "exams.template.legacy_cohort_notice" %}</p>
+        <div class="legacy-cohort-notice__actions">
+            <a class="btn btn-primary" href="{{ legacy_notice_registry_url }}" data-legacy-cohort-registry-link>
+                <i class="fas fa-layer-group me-1" aria-hidden="true"></i>{% trans "action_open_registry" context "exams.template.legacy_cohort_notice" %}
+            </a>
+            <a class="btn btn-outline-primary" href="{{ legacy_notice_wizard_url }}" data-legacy-cohort-wizard-link>
+                <i class="fas fa-magic me-1" aria-hidden="true"></i>{% trans "action_open_exam_wizard" context "exams.template.legacy_cohort_notice" %}
+            </a>
+        </div>
+        {% if legacy_notice_create_url %}
+        <p class="legacy-cohort-notice__secondary">
+            {% trans "secondary_still_need_cohort" context "exams.template.legacy_cohort_notice" %}
+            <a href="{{ legacy_notice_create_url }}" data-legacy-cohort-create-link>{% trans "action_create_legacy_cohort" context "exams.template.legacy_cohort_notice" %}</a>
+        </p>
+        {% endif %}
+    </div>
+</section>

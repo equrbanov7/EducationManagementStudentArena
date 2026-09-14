@@ -74,16 +74,19 @@
         var modalCancel = document.getElementById("postActionConfirmCancel");
         var pendingCallback = null;
 
+        // 2026-09-12 (audit P2-9): açıq/bağlı vəziyyət inline `style.display` ilə
+        // deyil, `.modal-overlay.active` sinfi ilə (posts/_part1.css) idarə olunur —
+        // şablonda `style="display:none"` qalmasın (CSP hədəfi: sıfır inline style).
         function openModal(title, msg, onConfirm) {
             modalTitle.textContent = title;
             modalMsg.textContent = msg;
             pendingCallback = onConfirm;
-            modal.style.display = "flex";
+            modal.classList.add("active");
             modalOk.focus();
         }
 
         function closeModal() {
-            modal.style.display = "none";
+            modal.classList.remove("active");
             pendingCallback = null;
         }
 
@@ -108,7 +111,7 @@
             document.addEventListener("keydown", function (e) {
                 if (e.key !== "Escape") { return; }
                 var m = document.getElementById("postActionConfirmModal");
-                if (m && m.style.display === "flex") { m.style.display = "none"; }
+                if (m && m.classList.contains("active")) { m.classList.remove("active"); }
             });
         }
 

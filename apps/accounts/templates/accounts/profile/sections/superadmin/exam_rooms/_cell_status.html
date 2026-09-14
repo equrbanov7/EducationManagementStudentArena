@@ -1,0 +1,13 @@
+{% load i18n ems_ui %}
+{% comment %}Status xanası — zalın aktiv/deaktiv badge-i (`exam_room` ailəsi) + hazırda
+gedən imtahan oturumu varsa «N canlı» (danger, pulsasiyalı nöqtə).
+Kontekst: `row.room`.{% endcomment %}
+<div class="sar-status">
+    {% ems_status_badge "exam_room" row.room.status_key dot=True %}
+    {% if row.room.live_session_count %}
+    <span class="ems-badge ems-badge--danger sar-live">
+        <span class="ems-badge__dot sar-live__dot" aria-hidden="true"></span>
+        {{ row.room.live_session_count }} {% trans "canlı" context "accounts.superadmin_exam_rooms" %}
+    </span>
+    {% endif %}
+</div>

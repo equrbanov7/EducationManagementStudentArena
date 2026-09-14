@@ -8,8 +8,6 @@ nəzarətçiyə açıqdır — adi müəllim başqasının müəllim id-si ilə 
 
 from __future__ import annotations
 
-import csv
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import timezone
@@ -18,6 +16,7 @@ from django.views.decorators.http import require_GET
 
 from apps.registrar import lessons_log as service
 from apps.registrar import schedule as schedule_service
+from core.export_safety import safe_csv_writer
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
 _CTX = "registrar.lessons_log"
@@ -85,7 +84,8 @@ def lessons_log_csv(request):
     response["Content-Disposition"] = 'attachment; filename="%s"' % filename
     # BOM — Excel UTF-8 Azərbaycan hərflərini düzgün oxusun.
     response.write("﻿")
-    writer = csv.writer(response)
+    # 2026-09-13 audit F-07: mövzu/qeyd sütunları müəllim mətnidir → formula neytrallaşdırması.
+    writer = safe_csv_writer(response)
     for line in service.csv_rows(rows):
         writer.writerow(line)
     response.write(

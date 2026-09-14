@@ -6,7 +6,7 @@
 
 {% comment %}
     Global header / navbar.
-    - Logo is the project's own brand asset (static/brand/logo-horizontal.png).
+    - Brend kilidi: nişan + universitet adı (bax `static/css/navbar_brand.css`).
     - Top-level links are kept lean; teacher "create" actions live in the
       "+ Yarat" quick-create dropdown so the bar stays clean on every role.
     - Link/visibility logic is role-aware (RBAC): teachers see the create menu,
@@ -17,16 +17,31 @@
     <div class="blog-header__container">
         <nav class="blog-header__nav" aria-label="{% trans 'main_nav_aria' context 'nav' %}">
 
-            {# --- Logo (brand asset; white-labelled per deployment) --- #}
+            {% comment %}
+                Brend kilidi (nişan + ad).
+
+                Universitet rejimində `wcu-logo-horizontal.svg`-nin YALNIZ emblem
+                hissəsi göstərilir: nişan sabit ölçülü «pəncərə»dir, SVG isə onun
+                içində şəkilləndirilir (bax navbar_brand.css). Səbəb — SVG-nin öz
+                söz-nişanı `<text>` ilə çəkilib, ona görə hər sistemdə fərqli
+                şriftlə/aralıqla düşür və başlıqda əyri görünürdü.
+
+                Universitetin adı isə HTML mətnidir: hər ekran sıxlığında kəskin,
+                tərcümə oluna bilən və TƏK nüsxə (söz-nişanla təkrarlanmır).
+                Adın bir sətirdə qalması və kiçik ekranda gizlənməsi CSS-dədir.
+            {% endcomment %}
             <a href="{% if university_mode and request.user.is_authenticated %}{% url 'accounts:profile' %}{% else %}{{ home_url }}{% endif %}"
                class="blog-header__logo" aria-label="{{ site_brand_name }}">
                 {% if university_mode %}
-                <img src="{% static 'brand/wcu-logo-horizontal.svg' %}"
-                     alt="{{ site_brand_name }}"
-                     class="blog-header__logo-img"
-                     width="220" height="44"
-                     loading="eager"
-                     decoding="async">
+                <span class="blog-header__logo-mark" aria-hidden="true">
+                    <img src="{% static 'brand/wcu-logo-horizontal.svg' %}"
+                         alt=""
+                         class="blog-header__logo-mark-img"
+                         width="290" height="52"
+                         loading="eager"
+                         decoding="async">
+                </span>
+                <span class="blog-header__logo-text">{{ site_brand_name }}</span>
                 {% else %}
                 <img src="{% static 'brand/logo-horizontal.png' %}"
                      alt="{{ site_brand_name }}"
@@ -94,12 +109,17 @@
             {# --- Right-side actions --- #}
             <div class="blog-header__auth">
 
+                {% comment %}
+                    Qlobal ⌘K axtarışının açarı. Geniş ekranda axtarış sahəsi kimi
+                    görünür (ikon + etiket + qısayol nişanı), planşet/mobilde isə
+                    yalnız ikona yığılır — üst panelin ritmi pozulmasın.
+                {% endcomment %}
                 {% if request.user.is_authenticated %}
-                {# Global ⌘K search trigger — opens the command palette overlay. #}
                 <button type="button" class="blog-header__search" data-global-search-open
                         aria-label="{% trans 'Axtar' context 'search' %}" title="{% trans 'Axtar (⌘K)' context 'search' %}">
-                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-                    <span class="blog-header__search-hint"><kbd>⌘</kbd><kbd>K</kbd></span>
+                    <i class="fas fa-magnifying-glass blog-header__search-icon" aria-hidden="true"></i>
+                    <span class="blog-header__search-text">{% trans 'Axtar' context 'search' %}</span>
+                    <span class="blog-header__search-hint" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd></span>
                 </button>
                 {% endif %}
 
@@ -277,7 +297,9 @@
                     </div>
                 {% endif %}
 
-                <button class="blog-header__toggle" type="button" aria-label="{% trans 'menu_toggle' context 'nav' %}">
+                <button class="blog-header__toggle" type="button"
+                        aria-controls="mobile-nav-panel" aria-expanded="false"
+                        aria-label="{% trans 'menu_toggle' context 'nav' %}">
                     <span class="blog-header__toggle-line"></span>
                     <span class="blog-header__toggle-line"></span>
                     <span class="blog-header__toggle-line"></span>
@@ -289,7 +311,13 @@
 
 {# --- Mobile drawer --- #}
 <div class="mobile-nav-overlay"></div>
-<nav class="mobile-nav-panel" aria-label="{% trans 'mobile_nav_aria' context 'nav' %}">
+<nav class="mobile-nav-panel" id="mobile-nav-panel" aria-label="{% trans 'mobile_nav_aria' context 'nav' %}">
+
+    {# Panelin öz bağlama düyməsi — barmaq burger düyməsinə qayıtmasın. #}
+    <button type="button" class="mobile-nav-panel__close" data-mobile-nav-close
+            aria-label="{% trans 'menu_toggle' context 'nav' %}">
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+    </button>
 
     {% if request.user.is_authenticated %}
     <div class="mobile-nav-panel__head">
@@ -311,6 +339,13 @@
     {% endif %}
 
     <ul class="mobile-nav-panel__list">
+        {% comment %}
+            UNIVERSITY_MODE-da masaüstü naviqasiya marketinq səhifələrini
+            (ana səhifə / haqqımızda / əlaqə / imtahanlar) gizlədir — şkaf da
+            eyni cür davranmalıdır, əks halda mobil istifadəçi başlığın masaüstü
+            variantında olmayan (və ana səhifədə kabinetə yönlənən) linkləri görür.
+        {% endcomment %}
+        {% if not university_mode %}
         <li class="blog-header__nav-item">
             <a href="{{ home_url }}"
                {% if request.resolver_match.url_name == 'home' and not active_blog_nav_slug %}aria-current="page"{% endif %}
@@ -345,6 +380,7 @@
             </a>
         </li>
         {% endif %}
+        {% endif %}{# /not university_mode #}
 
         {% if request.user.is_teacher_or_above %}
         <li class="blog-header__nav-item blog-header__nav-item--divider"></li>

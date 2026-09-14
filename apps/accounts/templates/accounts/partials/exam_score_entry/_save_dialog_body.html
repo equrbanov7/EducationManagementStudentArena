@@ -1,0 +1,69 @@
+{% load i18n %}
+{% comment %}Yadda saxlama TƏSDİQ dialoqu (sahibin rəyi 2026-09-14): yazılacaq hər tələbə
+sətir-sətir — ad soyad, giriş balı, imtahan balı, yekun, hərf qiyməti (təşkilatın
+şkalası `ese-confirm-config` json_script-dən; kəsilən F qırmızı, sayı başlıqda);
+imtahan növü + vərəq tarixi + yoxlayan başlıqda. Dəyişən sətirlər üçün növ / səbəb /
+qeyd burada, skan vərəq kartındadır (`sheet_evidence`). `_dialog.html` gövdəsi —
+siyahı formasının İÇİNDƏ render olunur, yalnız «Təsdiq et» POST edir.{% endcomment %}
+<p class="ems-msg ems-msg--error" data-ese-dialog-error role="alert" hidden></p>
+
+<div class="ese-confirm__meta" data-ese-confirm-meta>
+  <span class="ems-badge ems-badge--primary" data-ese-confirm-kind></span>
+  <span class="ese-confirm__meta-item"><i class="fas fa-calendar" aria-hidden="true"></i> <span data-ese-confirm-date>—</span></span>
+  <span class="ese-confirm__meta-item"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> <span data-ese-confirm-examiner>—</span></span>
+  <span class="ese-confirm__meta-item ese-confirm__failed" data-ese-confirm-failed hidden><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> <b data-ese-confirm-failed-count>0</b> {% trans "tələbə kəsilir (F)" context "registrar.exam_score_entry" %}</span>
+</div>
+
+<ul class="ese-summary" data-ese-dialog-summary aria-live="polite"></ul>
+
+<div class="ems-tablewrap ese-confirm__wrap">
+  <div class="ems-tablescroll ese-confirm__scroll">
+    <table class="ems-table ems-table--zebra ese-confirm__table">
+      <thead>
+        <tr>
+          <th scope="col">{% trans "Tələbə" context "registrar.exam_score_entry" %}</th>
+          <th scope="col" class="ese-th--num">{% trans "Giriş balı" context "registrar.exam_score_entry" %}</th>
+          <th scope="col" class="ese-th--num">{% trans "İmtahan balı" context "registrar.exam_score_entry" %}</th>
+          <th scope="col" class="ese-th--num">{% trans "Yekun" context "registrar.exam_score_entry" %}</th>
+          <th scope="col" class="ese-th--num">{% trans "Hərf" context "registrar.exam_score_entry" %}</th>
+        </tr>
+      </thead>
+      <tbody data-ese-confirm-rows></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="ese-just" data-ese-just hidden>
+  <p class="ems-msg ems-msg--warning ese-just__note">
+    <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
+    <span>{% trans "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur." context "registrar.exam_score_entry" %}</span>
+  </p>
+  <div class="ese-just__grid">
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-kind">{% trans "Dəyişikliyin növü" context "registrar.exam_score_entry" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+        <select id="ese-kind" name="kind" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-ese-kind>
+          {% for kind in s.change_kinds %}
+          <option value="{{ kind.value }}">{{ kind.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="ese-reason">{% trans "Səbəb" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
+        <select id="ese-reason" name="reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-ese-reason>
+          <option value="">—</option>
+          {% for reason in s.reasons %}
+          <option value="{{ reason.value }}">{{ reason.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <textarea id="ese-note" name="note" class="ems-textarea" rows="3" maxlength="500" data-ese-note></textarea>
+  </div>
+  <p class="ese-just__scan" data-ese-scan-status></p>
+</div>

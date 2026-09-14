@@ -6,11 +6,9 @@ Data backend-də yalnız aktiv tab üçün qurulur (superadmin_inspector.py).
 {% endcomment %}
 <section class="profile-section-panel profile-section--superadmin-org-inspector {% if active_section == 'superadmin-org-inspector' %}is-active{% endif %}"
          data-profile-section-panel="superadmin-org-inspector">
+    {% comment %}2026-09-12 (audit P2-1): «Təşkilat məlumatları» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `.section-title` onu təkrarlayırdı.{% endcomment %}
     <div class="section-card">
-        <div class="section-title">
-            <i class="fas fa-search"></i> {% trans 'Təşkilat məlumatları' %}
-        </div>
-
         {% if not superadmin_org_inspector_section.is_allowed %}
         <p class="settings-note"><i class="fas fa-circle-info"></i> {% trans 'Bu bölmə yalnız superadmin üçündür.' %}</p>
         {% else %}

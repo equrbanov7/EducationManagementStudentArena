@@ -58,6 +58,7 @@ from .org_sections import (
     _build_student_org_management_section,
     _build_student_org_request_section,
 )
+from .profile_load import _load_user_profile
 from .rbac import (
     _assignable_profile_roles_for_user,
     _collect_actor_permissions,
@@ -147,6 +148,8 @@ __all__ = [
     "_build_user_organization_access_rows",
     "_build_student_org_management_section",
     "_build_student_org_request_section",
+    # profile load (2026-09-13, audit §14/§21)
+    "_load_user_profile",
     # rbac
     "_assignable_profile_roles_for_user",
     "_collect_actor_permissions",

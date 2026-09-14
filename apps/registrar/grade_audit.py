@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from apps.registrar.models import AttendanceStatus
+
 # resource_type prefix — all grade-change kinds share it for a single-filter fetch.
 _RESOURCE_PREFIX = "registrar.grade"
 
@@ -185,3 +187,17 @@ def get_grade_history(*, offering, limit=20):
             }
         )
     return history
+
+
+def mark_repr(status, score) -> str:
+    """Compact attendance+score label for the audit trail (e.g. ``qb`` / ``iə 8``).
+
+    2026-09-13: `gradebook._mark_repr`-dən köçürülüb (modul 600-sətir tavanında idi).
+    """
+    if status == AttendanceStatus.ABSENT:
+        att = "qb"
+    elif status == AttendanceStatus.EXCUSED:
+        att = "üq"  # üzrlü qayıb (rəsmi düzəliş yolu ilə)
+    else:
+        att = "iə"
+    return f"{att} {score_repr(score)}" if score is not None else att

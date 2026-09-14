@@ -2,9 +2,10 @@
 """Bölmə-bölmə SQL sorğu sayı + müddət profili (in-process, Django test Client, force_login).
 
 Serverə deyil, birbaşa klon bazaya qoşulur — ona görə canlı süpürgə ilə yarışmır.
-ROL_MATRISI.md-dəki env dəsti ilə işlədilir:
+ROL_MATRISI.md-dəki env dəsti ilə işlədilir (``QA_CLONE_DATABASE_URL`` — klon DSN-i
+``.claude/staging.env``-dən; parol repoya YAZILMIR, audit 2026-09-13 F-03):
 
-    EMS_STAGING_INSPECT=1 DATABASE_URL="postgres://emsarena_staging:emsarena_staging_password@127.0.0.1:55433/emsarena_rehearsal_a0d170000901" \\
+    EMS_STAGING_INSPECT=1 DATABASE_URL="$QA_CLONE_DATABASE_URL" \\
     EMS_STAGING_DB_NAME=emsarena_rehearsal_a0d170000901 EMS_STAGING_DB_PORT=55433 EMS_DB_ROLE_ENFORCE=off DEBUG=True \\
     USE_REDIS=False ENABLE_NGROK=False ALLOWED_HOSTS="localhost,127.0.0.1" \\
     venv/bin/python -m scripts.qa_live.query_profile --settings config.settings.staging_inspect --users qa.teacher --out q.json

@@ -116,7 +116,10 @@
     align-items: center;
     gap: var(--ems-sp-2);
     border: 0;
-    padding: 0;
+    /* 2026-09-14 (audit FE-F11, WCAG 2.5.8): sıralama linki 18 px hündür idi —
+       toxunma hədəfi ən azı 24 px olsun; şaquli padding görünüşü dəyişmir. */
+    min-height: 24px;
+    padding: 3px 0;
     background: none;
     color: inherit;
     font: inherit;

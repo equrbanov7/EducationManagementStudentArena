@@ -390,6 +390,9 @@ class _Stage2Mixin:
         }
         # Müəllim idxalı — eyni çərçivə (2026-09-08).
         self.teacher_intake_section = dict(self.student_intake_section)
+        # «Registrar (kataloq)» — akademik kataloq konsolu kabinet bölməsi kimi
+        # (2026-09-09). Boş çərçivə: icazə yoxdursa şablon `has_access`-ə baxır.
+        self.registrar_catalog_section = {"has_access": False, "access_denied_message": ""}
         # «Müraciətlərim» (apps.applications) — panel SPA-dır: burada YALNIZ
         # çərçivə (bayraqlar + endpoint URL-ləri + kontekst zolağının mətnləri)
         # saxlanılır; sətirlər/detal/KPI-lar JSON API-dən gəlir.

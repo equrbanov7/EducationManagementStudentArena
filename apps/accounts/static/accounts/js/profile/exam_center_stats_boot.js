@@ -130,7 +130,28 @@
   [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){
     if (s) { s.addEventListener("change", reload); }
   });
-  root.querySelector(".js-ecs-export").addEventListener("click", function(e){ e.preventDefault(); window.location.href = U.export + "?" + params().toString(); });
+  // «Excel yüklə» və «Sıfırla» başlıq əməlləridir (ems_ui content header) —
+  // .ecs kökünün DIŞINDA render olunurlar, ona görə document üzərindən tapılır.
+  var scope = root.closest("[data-profile-section-panel]") || document;
+  var exportBtn = scope.querySelector(".js-ecs-export");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", function(e){ e.preventDefault(); window.location.href = U.export + "?" + params().toString(); });
+  }
+  var resetBtn = scope.querySelector(".js-ecs-reset");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function(){
+      q.value = "";
+      subjectMS.clear(); groupMS.clear();
+      facultyPick.reset(); deptPick.reset(); teacherPick.reset();
+      [typeSel, yearSel, formatSel, statusSel, semesterSel].forEach(function(s){
+        if (!s) { return; }
+        s.value = "";
+        if (typeof s._refreshBootstrapSelect === "function") { s._refreshBootstrapSelect(); }
+      });
+      sort = "-date";
+      reload();
+    });
+  }
 
   // Fakültə/kafedra/müəllim artıq lazy axtarışlı seçicilərdir → filters yalnız
   // sabit qısa siyahıları (il, tip) doldurur.

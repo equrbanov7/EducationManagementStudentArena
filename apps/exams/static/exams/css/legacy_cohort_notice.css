@@ -1,0 +1,108 @@
+/* Köhnə imtahan-kohort səthinin əvəzlənmə kartı — 2026-09-14 (W7 `w7cohort`).
+   Kohortu olmayan təşkilatda /exams/groups/ və yaratma səhifəsində göstərilir.
+   Ton NEYTRAL/məlumat (primary-50 fon) — sarı ton registrar-dakı auditli
+   düzəlişə ayrılıb (bax static/css/legacy_mark.css şərhi). */
+
+.legacy-cohort-notice {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    max-width: 760px;
+    margin: 32px auto;
+    padding: 22px 24px;
+    background: linear-gradient(120deg, var(--ems-neutral-0), var(--ems-primary-50));
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.legacy-cohort-notice__icon {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: 1.3rem;
+}
+
+.legacy-cohort-notice__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.legacy-cohort-notice__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--ems-neutral-900);
+}
+
+.legacy-cohort-notice__text {
+    margin: 0 0 14px;
+    color: var(--ems-neutral-600);
+    font-size: 0.95rem;
+}
+
+.legacy-cohort-notice__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.legacy-cohort-notice__secondary {
+    margin: 14px 0 0;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-500);
+}
+
+.legacy-cohort-notice__secondary a {
+    color: var(--ems-neutral-600);
+    text-decoration: underline;
+}
+
+/* Yaratma səhifəsində köhnə forma kartı yığılmış <details> içindədir. */
+.legacy-cohort-details {
+    max-width: 760px;
+    margin: 0 auto 32px;
+}
+
+.legacy-cohort-details__summary {
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--ems-neutral-600);
+    font-size: 0.9rem;
+    list-style: none;
+}
+
+.legacy-cohort-details__summary::-webkit-details-marker {
+    display: none;
+}
+
+.legacy-cohort-details__summary::before {
+    content: "\25B8";
+    display: inline-block;
+    margin-inline-end: 8px;
+    transition: transform 0.15s ease;
+}
+
+.legacy-cohort-details[open] > .legacy-cohort-details__summary::before {
+    transform: rotate(90deg);
+}
+
+.legacy-cohort-details__summary:focus-visible {
+    outline: 2px solid var(--ems-primary-500);
+    outline-offset: 2px;
+}
+
+@media (max-width: 575.98px) {
+    .legacy-cohort-notice {
+        flex-direction: column;
+        margin: 16px 12px;
+        padding: 18px;
+    }
+}

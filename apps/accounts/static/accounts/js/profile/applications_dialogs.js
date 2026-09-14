@@ -156,6 +156,17 @@
             return;
         }
         var kinds = (NS.catalog && NS.catalog.kinds) || [];
+        // Kataloq boşdursa SƏBƏBİ yazılır. Əvvəl sahə sadəcə boş qalırdı və
+        // istifadəçi «növ seçimi itdi» kimi görürdü (sahib, 2026-09-09) —
+        // halbuki `ApplicationKind` sətirləri ümumiyyətlə mövcud deyildi.
+        if (!kinds.length) {
+            host.textContent = "";
+            var empty = document.createElement("p");
+            empty.className = "apx-options__empty";
+            empty.textContent = NS.t("kindsEmpty");
+            host.appendChild(empty);
+            return;
+        }
         host.innerHTML = kinds
             .map(function (kind) {
                 return (

@@ -388,8 +388,13 @@ class DistributionGateTest(ChainBase):
         self.assertEqual(task.status, TaskStatus.DISTRIBUTING)
 
     def test_legacy_chair_created_draft_still_distributes(self):
-        """F1-dən ƏVVƏLKİ sənəd (heç vaxt göndərilməyib) işləməyə davam edir."""
-        task = self.fresh_task()
+        """F1-dən ƏVVƏLKİ sənəd (heç vaxt göndərilməyib) işləməyə davam edir.
+
+        Audit 2026-09-13 F-T1: istisna yalnız KAFEDRANIN ÖZÜ yaratdığı qaralama
+        üçündür — tədris şöbəsinin göndərilməmiş qaralaması artıq bölünmür
+        (`test_audit_2026_09_13_draft_distribution_gate`)."""
+        task = make_task(self.org, self.stack["chair"], created_by=self.chair_head)
+        make_row(task, self.stack)
         row = task.rows.first()
         assign_teacher(
             row=row, actor=self.actor(self.chair_head), activity="lecture", teacher_id=self.teacher.pk, hours=10

@@ -21,6 +21,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import pgettext, pgettext_lazy
@@ -60,18 +62,21 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
-        members = course.memberships.all().order_by("joined_at")
+        # Audit 2026-09-10 P1-4 (düzəliş 2026-09-12): şablon hər üzv üçün
+        # `student.user.get_full_name` / `.username` oxuyur — `select_related`
+        # olmadan üzvlük başına bir `SELECT auth_user` gedirdi (N+1). Şablon
+        # yalnız `user` sütunlarını oxuyur, profil oxumur — ona görə yalnız `user`.
+        members = course.memberships.select_related("user").order_by("joined_at")
         teacher = members.filter(role="teacher").first()
         assistants = members.filter(role="assistant")
         students = members.filter(role="student").order_by("group_name", "user__username")
 
-        course_user_ids = course.memberships.values_list("user_id", flat=True)
-
+        # P1-4: «Tələbə əlavə et» modalı üçün tenant-ın BÜTÜN tələbə istifadəçiləri
+        # (real bazada auth_user = 8 443 sətir) səhifələməsiz kontekstə verilib
+        # şablonda ~8 min checkbox sətri kimi render olunurdu. İndi modal
+        # siyahını `courses:available_students` JSON endpoint-indən axtarışla,
+        # səhifə-səhifə (max 50) çəkir — `all_users` kontekstdən çıxarıldı.
         user_org = get_request_organization(request)
-        all_users = User.objects.exclude(id__in=course_user_ids)
-        if user_org is not None:
-            all_users = all_users.filter(profile__organization=user_org)
-        all_users = _student_users_queryset(all_users).order_by("username")
 
         try:
             all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
@@ -87,9 +92,9 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
             "teacher": teacher,
             "assistants": assistants,
             "students": students,
-            "all_users": all_users,
             "all_groups": all_groups,
-            "is_owner": course.owner == request.user,
+            # `course.owner == request.user` owner sətrini ayrıca SELECT edirdi — id müqayisəsi kifayətdir.
+            "is_owner": course.owner_id == request.user.id,
         }
 
         return render(request, "courses/course_members.html", context)
@@ -100,24 +105,84 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 # ════════════════════════════════════════════════════════════════════════════
 
 
+# P1-4 (2026-09-12): modal picker-in səhifə ölçüsü. Sorğu başına heç vaxt
+# 50-dən çox sətir getmir — `limit` parametri bu tavana sıxılır.
+AVAILABLE_STUDENTS_DEFAULT_LIMIT = 20
+AVAILABLE_STUDENTS_MAX_LIMIT = 50
+AVAILABLE_STUDENTS_MAX_PAGE = 500
+AVAILABLE_STUDENTS_MAX_TERMS = 5
+
+
+def _clamp_int(raw, *, default, low, high):
+    """GET parametrini tam ədədə çevirib [low, high] aralığına sıxır."""
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        return default
+    return max(low, min(value, high))
+
+
+def _available_students_queryset(request, course):
+    """Kursda olmayan, aktiv tenant-ın tələbə istifadəçiləri.
+
+    Səhifənin köhnə `all_users` məntiqi ilə EYNİ əhatə (P1-4): cari üzvlər
+    istisna, `profile__organization=user_org`, `_student_users_queryset`.
+    """
+    course_user_ids = course.memberships.values_list("user_id", flat=True)
+    user_org = get_request_organization(request)
+
+    qs = User.objects.exclude(id__in=course_user_ids)
+    if user_org is not None:
+        qs = qs.filter(profile__organization=user_org)
+    return _student_users_queryset(qs).order_by("username")
+
+
 class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """Kursda olmayan tələbələri JSON kimi qaytarır."""
+    """Kursda olmayan tələbələri JSON kimi qaytarır (modal picker mənbəyi).
+
+    GET parametrləri (hamısı istəyə bağlı — köhnə çağırış forması işləyir):
+    - ``q``     — axtarış; boşluqla ayrılmış hər söz username / ad / soyad
+                  sahələrinin BİRİNDƏ olmalıdır (``icontains``).
+    - ``limit`` — səhifə ölçüsü, susmaya görə 20, tavan 50.
+    - ``page``  — 1-dən başlayan səhifə nömrəsi.
+
+    Cavab: ``{"success": true, "users": [{"id", "username", "full_name"}],
+    "q", "page", "limit", "has_more"}``. ``has_more`` — növbəti səhifənin
+    olub-olmadığını bildirir (limit+1 sətir çəkilib kəsilir; ayrıca COUNT yoxdur).
+    """
 
     def test_func(self):
         course_id = self.kwargs.get("course_id")
         return _owner_courses_queryset(self.request).filter(id=course_id).exists()
 
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        return JsonResponse(
+            {"success": False, "error": pgettext("courses.view.message", "no_permission_action")},
+            status=403,
+        )
+
     def get(self, request, *args, **kwargs):
         course_id = kwargs.get("course_id")
         course = _get_owner_course_or_404(request, course_id)
 
-        course_user_ids = course.memberships.values_list("user_id", flat=True)
-        user_org = get_request_organization(request)
+        q = (request.GET.get("q") or "").strip()
+        limit = _clamp_int(
+            request.GET.get("limit"),
+            default=AVAILABLE_STUDENTS_DEFAULT_LIMIT,
+            low=1,
+            high=AVAILABLE_STUDENTS_MAX_LIMIT,
+        )
+        page = _clamp_int(request.GET.get("page"), default=1, low=1, high=AVAILABLE_STUDENTS_MAX_PAGE)
 
-        qs = User.objects.exclude(id__in=course_user_ids)
-        if user_org is not None:
-            qs = qs.filter(profile__organization=user_org)
-        qs = _student_users_queryset(qs).order_by("username")
+        qs = _available_students_queryset(request, course)
+        for term in q.split()[:AVAILABLE_STUDENTS_MAX_TERMS]:
+            qs = qs.filter(Q(username__icontains=term) | Q(first_name__icontains=term) | Q(last_name__icontains=term))
+
+        offset = (page - 1) * limit
+        rows = list(qs.only("id", "username", "first_name", "last_name")[offset : offset + limit + 1])
+        has_more = len(rows) > limit
 
         data = [
             {
@@ -125,10 +190,19 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
                 "username": u.username,
                 "full_name": u.get_full_name() or u.username,
             }
-            for u in qs
+            for u in rows[:limit]
         ]
 
-        return JsonResponse({"success": True, "users": data})
+        return JsonResponse(
+            {
+                "success": True,
+                "users": data,
+                "q": q,
+                "page": page,
+                "limit": limit,
+                "has_more": has_more,
+            }
+        )
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -173,12 +247,17 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
         added_count = 0
 
         owner_org = get_request_organization(request)
-        for uid in user_ids:
-            try:
-                user_qs = User.objects.filter(id=uid)
-                if owner_org is not None:
-                    user_qs = user_qs.filter(profile__organization=owner_org)
-                user = user_qs.get()
+        # Audit 2026-09-13 backend F-07 (2026-09-14): toplu üzvlük + bildirişlər bir
+        # tranzaksiyada — ortada sınsa yarım siyahı qalmasın (hamısı və ya heç biri).
+        with transaction.atomic():
+            for uid in user_ids:
+                try:
+                    user_qs = User.objects.filter(id=uid)
+                    if owner_org is not None:
+                        user_qs = user_qs.filter(profile__organization=owner_org)
+                    user = user_qs.get()
+                except User.DoesNotExist:
+                    continue
                 membership, created = CourseMembership.objects.get_or_create(
                     course=course,
                     user=user,
@@ -194,8 +273,6 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                     created=created,
                     previous_group_name=previous_group_name,
                 )
-            except User.DoesNotExist:
-                continue
 
         return JsonResponse(
             {
@@ -247,25 +324,25 @@ class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
 
             added_count = 0
 
-            for group in groups:
-                students = group.students.all()
-
-                for student in students:
-                    membership, created = CourseMembership.objects.get_or_create(
-                        course=course,
-                        user=student,
-                        defaults={"role": "student", "group_name": group.name},
-                    )
-                    previous_group_name = membership.group_name or ""
-                    if created:
-                        added_count += 1
-                        notify_course_membership_assigned(
-                            membership=membership,
-                            created=True,
-                            previous_group_name=previous_group_name,
+            # Audit 2026-09-13 backend F-07 (2026-09-14): qrupların toplu əlavəsi bir
+            # tranzaksiyada — ortada sınsa yarım qrup qalmasın (istisna `except`-ə çıxır → 500).
+            with transaction.atomic():
+                for group in groups:
+                    for student in group.students.all():
+                        membership, created = CourseMembership.objects.get_or_create(
+                            course=course,
+                            user=student,
+                            defaults={"role": "student", "group_name": group.name},
                         )
-                    else:
-                        if not (membership.group_name or "").strip():
+                        previous_group_name = membership.group_name or ""
+                        if created:
+                            added_count += 1
+                            notify_course_membership_assigned(
+                                membership=membership,
+                                created=True,
+                                previous_group_name=previous_group_name,
+                            )
+                        elif not (membership.group_name or "").strip():
                             membership.group_name = group.name
                             membership.save(update_fields=["group_name"])
                             notify_course_membership_assigned(

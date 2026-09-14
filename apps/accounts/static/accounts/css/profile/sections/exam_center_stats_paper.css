@@ -1,0 +1,32 @@
+/* exam_center_stats_paper.css — İmtahan statistikaları: kağız imtahan KPI bloku
+   (2026-09-14, W2 `w2paper`). Baza `exam_center_stats.css` (`ecs-card`) + ems_ui
+   (`ems-chip`, `ems-kpis`); burada yalnız blokun sarğısı. CSP: inline yoxdur. */
+.ecs-paper {
+    margin: var(--ems-sp-5) 0;
+    padding: var(--ems-sp-5) 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.ecs-paper__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-4);
+}
+
+.ecs-paper__head h3 {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ecs-paper__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}

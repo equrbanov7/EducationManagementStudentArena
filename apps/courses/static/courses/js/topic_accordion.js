@@ -17,28 +17,31 @@
         return token ? token.cloneNode(true) : null;
     }
 
-    function deleteTopic(courseId, topicId) {
-        var cfg = getCfg();
-        if (!cfg || !confirm(cfg.dataset.i18nConfirmDeleteTopic)) { return; }
+    // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+    function postDeleteForm(action) {
         var form = document.createElement("form");
         form.method = "POST";
-        form.action = "/courses/" + courseId + "/topic/" + topicId + "/delete/";
+        form.action = action;
         var c = csrfInputClone();
         if (c) { form.appendChild(c); }
         document.body.appendChild(form);
         form.submit();
     }
 
+    function deleteTopic(courseId, topicId) {
+        var cfg = getCfg();
+        if (!cfg) { return; }
+        window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteTopic, danger: true }).then(function (ok) {
+            if (ok) { postDeleteForm("/courses/" + courseId + "/topic/" + topicId + "/delete/"); }
+        });
+    }
+
     function deleteResource(courseId, resourceId) {
         var cfg = getCfg();
-        if (!cfg || !confirm(cfg.dataset.i18nConfirmDeleteResource)) { return; }
-        var form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/courses/" + courseId + "/resource/" + resourceId + "/delete/";
-        var c = csrfInputClone();
-        if (c) { form.appendChild(c); }
-        document.body.appendChild(form);
-        form.submit();
+        if (!cfg) { return; }
+        window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteResource, danger: true }).then(function (ok) {
+            if (ok) { postDeleteForm("/courses/" + courseId + "/resource/" + resourceId + "/delete/"); }
+        });
     }
 
     function openResourceModal(topicId, topicTitle) {

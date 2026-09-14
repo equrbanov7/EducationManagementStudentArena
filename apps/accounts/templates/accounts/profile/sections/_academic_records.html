@@ -3,8 +3,30 @@
 Staff HİERARXİK akademik-qeyd icmalı ("Akademik qeydlər") — dekan / kafedra
 müdiri / rektor / registrator öz görünüş sahəsindəki (unit scope) tələbələrin
 nəticələrini fakültə → kafedra → ixtisas → qrup → tələbə süzgəci ilə görür.
-Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllardadır
-(profile.html-də yüklənir). Bax: apps/registrar/records_views.py + records_lookups.py.
+
+2026-09-10 YENİDƏN DİZAYN (sahib: «çox oxunaqlı və yaxşı olsun»). Nə dəyişdi:
+
+  * başlıq TƏKRARLANMIR — qabıq (`#profileSectionTitle`) bölmə adını onsuz da
+    yazır, ona görə burada YALNIZ `_content_header.html`-in altyazısı verilir;
+  * qutular, cədvəl, boş vəziyyət və çekməcə ORTAQ `ems_ui` qatının sinifləri
+    ilədir (`ems-kpi*`, `ems-table*`, `ems-state*`, `ems-overlay--drawer`) —
+    yəni bölmə artıq öz «ada» üslubunu daşımır;
+  * 11 sütun → 9: sıra nömrəsi və qrup tələbə xanasının içinə yığıldı, ona görə
+    `th scope="row"` (sıra başlığı) ƏN ƏVVƏLdə, «Bax» sütunu ƏN SONDA gəlir —
+    `_data_table.html` müqaviləsi ilə eyni sıra (əks halda başlıqlar sürüşür);
+  * SIFIR rəqəmlər tire kimi soluq göstərilir → gözə yalnız ƏSL siqnal dəyir;
+  * kəsri olan sətir bütünlüklə qırmızıya boyanmır (real universitetdə cədvəlin
+    yarısı qırmızı olurdu) — sol kənarda 3 px relsi var, rəng yalnız xanadadır;
+  * tələbə detalı mərkəzi modal əvəzinə `ems_ui` ÇEKMƏCƏSİDİR: fokus tələsi,
+    Escape, fon kilidi və fokusun geri qayıtması `ems_ui/overlay.js`-dən gəlir.
+
+CSP: bu partial-da inline `<style>`/`<script>` GÖVDƏSİ yoxdur. CSS/JS xarici
+fayldadır və qabıqda yüklənir (`profile.html` + `profile/_section_assets.html`);
+`ems_ui` asset-ləri isə `partials/ems_ui/_assets.html`-dən bir dəfə gəlir.
+
+Data JS ilə gəlir (bax: apps/accounts/views/academic_records.py +
+apps/accounts/academic_records.py). Cədvəl DƏRHAL, qutular AYRICA (gecikmiş)
+sorğu ilə dolur — qutular bütün süzgəc sahəsi üzrə aqreqatdır və bahalıdır.
 {% endcomment %}
 {% if 'academic-records' in allowed_sections %}
 <section class="profile-section-panel profile-section--academic-records {% if active_section == 'academic-records' %}is-active{% endif %}"
@@ -19,43 +41,59 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
        data-program-url="{% url 'accounts:records_program_search' %}"
        data-group-url="{% url 'accounts:records_group_search' %}"
        data-student-url="{% url 'accounts:records_student_search' %}">
-    <div class="acr-head">
-      <p>{% trans "Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, ixtisas, qrup üzrə süzün və ya tələbə axtarın. Aşağıdakı box-lar seçilmiş süzgəc üzrə ümumi mənzərəni göstərir. Hər kəs yalnız öz strukturunun altını görür." context "registrar.records" %}</p>
-    </div>
 
-    <div class="acr-filters">
-      <div class="acr-field" role="group" aria-labelledby="acr-faculty-label">
-        <label id="acr-faculty-label">{% trans "Fakültə" context "registrar.records" %}</label>
+    {% comment %}⚠️ `header_title` VERİLMİR — qabıq başlığı təkrarlamasın deyə.{% endcomment %}
+    {% trans "Öz strukturunuzdakı tələbələrin akademik nəticələri — fakültə, kafedra, ixtisas, qrup üzrə süzün və ya tələbə axtarın. Qutular seçilmiş süzgəcin TAMI üzrə, cədvəl isə yalnız görünən səhifə üzrədir." context "registrar.records" as acr_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=acr_subtitle %}
+
+    {% comment %}Qutular gecikmiş sorğu ilə dolur — yerini skeleton saxlayır ki,
+    süzgəc dəyişəndə tərtibat sıçramasın.{% endcomment %}
+    <div class="ems-kpis ems-kpis--5 acr-kpis js-acr-cards"
+         role="group" aria-live="polite"
+         aria-label="{% trans 'Süzgəc üzrə ümumi mənzərə' context 'registrar.records' %}"></div>
+
+    {% comment %}Süzgəc paneli — `<form>` DEYİL: axtarış sahəsində «Enter» tam
+    səhifə POST-u etməsin (nəticələr AJAX ilə gəlir).{% endcomment %}
+    <div class="acr-filters" role="search" aria-label="{% trans 'Akademik qeyd süzgəcləri' context 'registrar.records' %}">
+      <div class="ems-field acr-field" role="group" aria-labelledby="acr-faculty-label">
+        <span class="ems-field__label" id="acr-faculty-label">{% trans "Fakültə" context "registrar.records" %}</span>
         {% trans "fakültə axtar…" as acr_faculty_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-faculty" placeholder=acr_faculty_ph %}
       </div>
-      <div class="acr-field" role="group" aria-labelledby="acr-department-label">
-        <label id="acr-department-label">{% trans "Kafedra" context "registrar.records" %}</label>
+      <div class="ems-field acr-field" role="group" aria-labelledby="acr-department-label">
+        <span class="ems-field__label" id="acr-department-label">{% trans "Kafedra" context "registrar.records" %}</span>
         {% trans "kafedra axtar…" as acr_dept_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-department" placeholder=acr_dept_ph %}
       </div>
-      <div class="acr-field" role="group" aria-labelledby="acr-program-label">
-        <label id="acr-program-label">{% trans "İxtisas" context "registrar.records" %}</label>
+      <div class="ems-field acr-field" role="group" aria-labelledby="acr-program-label">
+        <span class="ems-field__label" id="acr-program-label">{% trans "İxtisas" context "registrar.records" %}</span>
         {% trans "ixtisas axtar…" as acr_program_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-program" placeholder=acr_program_ph %}
       </div>
-      <div class="acr-field" role="group" aria-labelledby="acr-group-label">
-        <label id="acr-group-label">{% trans "Qrup" context "registrar.records" %}</label>
+      <div class="ems-field acr-field" role="group" aria-labelledby="acr-group-label">
+        <span class="ems-field__label" id="acr-group-label">{% trans "Qrup" context "registrar.records" %}</span>
         {% trans "qrup axtar…" as acr_group_ph %}
         {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-group" placeholder=acr_group_ph %}
       </div>
-      <div class="acr-field">
-        <label for="acr-year">{% trans "Tədris ili" context "registrar.records" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="acr-year" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-year" data-bootstrap-select>
+      <div class="ems-field acr-field acr-field--student" role="group" aria-labelledby="acr-student-label">
+        <span class="ems-field__label" id="acr-student-label">{% trans "Tələbə" context "registrar.records" %}</span>
+        {% trans "tələbə axtar…" as acr_student_ph %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-student" placeholder=acr_student_ph %}
+      </div>
+      {% comment %}Native `<select>` işlədilmir — layihənin bootstrap-select
+      komponenti (`js-bootstrap-select`) hər yerdə eyni görünüşü verir.{% endcomment %}
+      <div class="ems-field acr-field">
+        <label class="ems-field__label" for="acr-year">{% trans "Tədris ili" context "registrar.records" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="acr-year" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-acr-year" data-bootstrap-select>
             <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
           </select>
         </div>
       </div>
-      <div class="acr-field">
-        <label for="acr-season">{% trans "Semestr" context "registrar.records" %}</label>
-        <div class="bootstrap-single-select">
-          <select id="acr-season" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-acr-season" data-bootstrap-select>
+      <div class="ems-field acr-field">
+        <label class="ems-field__label" for="acr-season">{% trans "Semestr" context "registrar.records" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="acr-season" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-acr-season" data-bootstrap-select>
             <option value="">{% trans "Hamısı" context "registrar.records" %}</option>
             <option value="Payız">{% trans "Payız" context "registrar.records" %}</option>
             <option value="Yaz">{% trans "Yaz" context "registrar.records" %}</option>
@@ -63,54 +101,72 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
           </select>
         </div>
       </div>
-      <div class="acr-field acr-field--student" role="group" aria-labelledby="acr-student-label">
-        <label id="acr-student-label">{% trans "Tələbə" context "registrar.records" %}</label>
-        {% trans "tələbə axtar…" as acr_student_ph %}
-        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="acr" hook="acr-student" placeholder=acr_student_ph %}
-      </div>
-      <div class="acr-field acr-field--reset">
-        {% comment %}Yalnız düymənin şaquli düzülüşü üçün boş yer saxlayıcı — mətn
-        daşımır, ona görə ekran oxuyucudan gizlədilir.{% endcomment %}
-        <label aria-hidden="true">&nbsp;</label>
-        <button type="button" class="acr-reset js-acr-reset"><i class="fas fa-rotate-left"></i> {% trans "Sıfırla" context "registrar.records" %}</button>
-      </div>
-    </div>
-
-    <div class="acr-cards js-acr-cards"></div>
-
-    <div class="acr-tablewrap">
-      <table class="acr-table">
-        <thead>
-          <tr>
-            <th class="acr-th-no">№</th>
-            <th>{% trans "Tələbə" context "registrar.records" %}</th>
-            <th>{% trans "İxtisas" context "registrar.records" %}</th>
-            <th>{% trans "Qrup" context "registrar.records" %}</th>
-            <th class="acr-num">{% trans "Toplanmış kredit" context "registrar.records" %}</th>
-            <th class="acr-num">{% trans "Kəsr" context "registrar.records" %}</th>
-            <th class="acr-num" title="{% trans 'Q/b-dan — imtahana buraxılmayıb' context 'registrar.records' %}">{% trans "Q/b" context "registrar.records" %}</th>
-            <th class="acr-num" title="{% trans 'İmtahandan kəsilib — 25% təkrar imtahan' context 'registrar.records' %}">{% trans "25%" context "registrar.records" %}</th>
-            <th class="acr-num" title="{% trans 'İmtahan çıxış balı yoxdur — nə keçib, nə kəsilib' context 'registrar.records' %}">{% trans "Qiymətləndirilməyib" context "registrar.records" %}</th>
-            <th class="acr-num">{% trans "ÜOMG" context "registrar.records" %}</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody class="js-acr-rows">
-          <tr><td colspan="11"><div class="acr-state"><i class="fas fa-spinner fa-spin"></i> {% trans "Yüklənir…" context "registrar.records" %}</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="acr-pager js-acr-pager"></div>
-
-    {# Tələbə detalı modalı (drill-down) — semestr üzrə fənn nəticələri #}
-    <div class="acr-modal js-acr-modal" hidden>
-      <div class="acr-modal__backdrop js-acr-modal-close"></div>
-      <div class="acr-modal__box" role="dialog" aria-modal="true">
-        <div class="acr-modal__head">
-          <h3 class="js-acr-modal-title"></h3>
-          <button type="button" class="acr-modal__x js-acr-modal-close" aria-label="{% trans 'Bağla' context 'registrar.records' %}">&times;</button>
+      {% comment %}Səhifə ölçüsü — server tərəfdə `MAX_PAGE_SIZE = 100` ilə
+      məhdudlaşır; daha böyük dəyər qəsdən verilmir (bir səhifə = bir toplu
+      qiymətləndirmə).{% endcomment %}
+      <div class="ems-field acr-field acr-field--size">
+        <label class="ems-field__label" for="acr-size">{% trans "Səhifədə" context "registrar.records" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="acr-size" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-acr-size" data-bootstrap-select>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
         </div>
-        <div class="acr-modal__body js-acr-modal-body"></div>
+      </div>
+      <div class="acr-filters__actions">
+        <button type="button" class="ems-btn js-acr-reset">
+          <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" context "registrar.records" %}
+        </button>
+      </div>
+    </div>
+
+    <div class="ems-tablewrap acr-tablewrap">
+      <div class="ems-tablescroll">
+        {% comment %}⚠️ SÜTUN SIRASI: sıra başlığı (`th scope="row"` → Tələbə) ƏN
+        ƏVVƏL, əməliyyat sütunu ƏN SONDA. JS sətirləri məhz bu sıra ilə qurur —
+        pozulsa bütün başlıqlar bir xana sürüşür.{% endcomment %}
+        <table class="ems-table ems-table--zebra ems-table--sticky acr-table">
+          <thead>
+            <tr>
+              <th scope="col">{% trans "Tələbə" context "registrar.records" %}</th>
+              <th scope="col">{% trans "İxtisas" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num">{% trans "Toplanmış kredit" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num">{% trans "ÜOMG" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num">{% trans "Kəsr" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num" title="{% trans 'Q/b-dan — imtahana buraxılmayıb' context 'registrar.records' %}">{% trans "Q/b" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num" title="{% trans 'İmtahandan kəsilib — 25% təkrar imtahan' context 'registrar.records' %}">{% trans "25%" context "registrar.records" %}</th>
+              <th scope="col" class="ems-table__num" title="{% trans 'İmtahan çıxış balı yoxdur — nə keçib, nə kəsilib' context 'registrar.records' %}">{% trans "Qiymətləndirilməyib" context "registrar.records" %}</th>
+              <th scope="col" class="acr-th-act"><span class="sr-only">{% trans "Əməliyyat" context "registrar.records" %}</span></th>
+            </tr>
+          </thead>
+          <tbody class="js-acr-rows">
+            <tr><td colspan="9"><div class="ems-state" role="status"><i class="fas fa-spinner fa-spin ems-state__icon" aria-hidden="true"></i><p class="ems-state__title">{% trans "Yüklənir…" context "registrar.records" %}</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ems-tablefoot acr-foot">
+        <div class="acr-foot__count js-acr-count" aria-live="polite"></div>
+        <div class="acr-pager js-acr-pager"></div>
+      </div>
+    </div>
+
+    {% comment %}Tələbə detalı — `ems_ui` ÇEKMƏCƏSİ (drill-down: semestr üzrə
+    fənn nəticələri). Davranış (fokus tələsi / Escape / fon klikı / fokusun
+    qayıtması) `static/js/ems_ui/overlay.js`-dədir; burada yalnız markup var.
+    `_drawer.html` daxil EDİLMİR, çünki gövdə server şablonu deyil — JSON-dan
+    JS ilə qurulur; sinif müqaviləsi isə eynidir.{% endcomment %}
+    <div class="ems-overlay ems-overlay--drawer" id="acrStudentDrawer" hidden>
+      <div class="ems-drawer ems-drawer--xl" role="dialog" aria-modal="true" aria-labelledby="acrStudentDrawer-title">
+        <div class="ems-drawer__head">
+          <div>
+            <h2 class="ems-drawer__title js-acr-drawer-title" id="acrStudentDrawer-title"></h2>
+            <p class="ems-drawer__sub js-acr-drawer-sub"></p>
+          </div>
+          <button type="button" class="ems-drawer__x" data-ems-overlay-close
+                  aria-label="{% trans 'Bağla' context 'registrar.records' %}">&times;</button>
+        </div>
+        <div class="ems-drawer__body js-acr-drawer-body"></div>
       </div>
     </div>
 
@@ -131,10 +187,18 @@ Data JS ilə gəlir (registrar hesabatlar endpoint-ləri); CSS/JS ayrı fayllard
       "avg_gpa": "{% trans 'Orta ÜOMG'|escapejs context 'registrar.records' %}",
       "gpa_na": "{% trans 'Hesablana bilmir'|escapejs context 'registrar.eligibility' %}",
       "none": "{% trans 'Nəticə tapılmadı.'|escapejs context 'registrar.records' %}",
+      "none_body": "{% trans 'Süzgəci genişləndirin və ya «Sıfırla» düyməsini basın.'|escapejs context 'registrar.records' %}",
       "no_access": "{% trans 'Bu bölmə üçün struktur icazəniz yoxdur.'|escapejs context 'registrar.records' %}",
+      "no_access_body": "{% trans 'Akademik qeydlər yalnız öz strukturunuz üzrə görünür — icazə üçün idarəetməyə müraciət edin.'|escapejs context 'registrar.records' %}",
+      "load_error": "{% trans 'Siyahı yüklənmədi.'|escapejs context 'registrar.records' %}",
+      "load_error_body": "{% trans 'Şəbəkə və ya server xətası — bir azdan yenidən cəhd edin.'|escapejs context 'registrar.records' %}",
       "prev": "{% trans 'Əvvəlki'|escapejs context 'registrar.records' %}",
       "next": "{% trans 'Sonrakı'|escapejs context 'registrar.records' %}",
+      "range": "{% trans 'Göstərilir'|escapejs context 'registrar.records' %}",
+      "of_total": "{% trans 'tələbədən'|escapejs context 'registrar.records' %}",
       "view": "{% trans 'Bax'|escapejs context 'registrar.records' %}",
+      "view_full": "{% trans 'Tələbənin semestr üzrə nəticələrinə bax'|escapejs context 'registrar.records' %}",
+      "zero": "{% trans 'Yoxdur'|escapejs context 'registrar.records' %}",
       "credit": "{% trans 'Kredit'|escapejs context 'registrar.records' %}",
       "subject": "{% trans 'Fənn'|escapejs context 'registrar.records' %}",
       "teacher": "{% trans 'Müəllim'|escapejs context 'registrar.records' %}",

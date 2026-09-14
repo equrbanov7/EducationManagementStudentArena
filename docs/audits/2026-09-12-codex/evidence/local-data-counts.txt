@@ -1,0 +1,27 @@
+      entity      | count  
+------------------+--------
+ organizations    |      1
+ migrations       |    280
+ attempts         |      0
+ academic_records |   7703
+ users            |   8443
+ final_grades     | 114021
+ enrollments      | 148020
+ legacy_maps      | 777901
+(8 rows)
+
+ enrollment_cross_tenant 
+-------------------------
+                       0
+(1 row)
+
+ grade_cross_tenant 
+--------------------
+                  0
+(1 row)
+
+ membership_role_cross_tenant 
+------------------------------
+                            0
+(1 row)
+

@@ -88,6 +88,7 @@ class FinalsBatch:
         "hours_map",
         "exempt_student_ids",
         "limit_percent_by_group",
+        "limit_percent_by_student",
         "with_finals",
     )
 
@@ -124,8 +125,13 @@ class FinalsBatch:
         return enrollment.student_id in self.exempt_student_ids
 
     def limit_percent_for(self, offering) -> int:
+        """Açılış-səviyyəli (qrupun ilk qeydi) hədd — yalnız başlıq/etiket üçün qalır."""
         key = (offering.organization_id, getattr(offering, "group_id", None))
         return self.limit_percent_by_group.get(key, DEFAULT_ABSENCE_LIMIT)
+
+    def limit_percent_for_enrollment(self, enrollment) -> int:
+        """TƏLƏBƏNİN ÖZ həddi (F-06, 2026-09-14) — ``compute_final_result`` bunu işlədir."""
+        return self.limit_percent_by_student.get(enrollment.student_id, DEFAULT_ABSENCE_LIMIT)
 
 
 def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsBatch:
@@ -193,6 +199,7 @@ def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsB
         "hours_map": {},
         "exempt_student_ids": frozenset(),
         "limit_percent_by_group": {},
+        "limit_percent_by_student": {},
     }
 
     if with_finals and enr_ids:
@@ -201,6 +208,19 @@ def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsB
         data["frozen_ids"] = exam_eligibility.frozen_offering_ids(offering_ids)
         data["hours_map"] = exam_eligibility.lesson_hours_map(offering_ids)
         data["limit_percent_by_group"] = absence_limit_percent_map(offerings.values())
+        # Tələbə üzrə hədd (təşkilat başına tək sorğu, tək mənbə — `absence_limit`).
+        from apps.registrar import absence_limit
+
+        students_by_org: dict = defaultdict(set)
+        for enrollment in enrollments:
+            students_by_org[enrollment.organization_id].add(enrollment.student_id)
+        data["limit_percent_by_student"] = {
+            sid: pct
+            for org_id, sids in students_by_org.items()
+            for sid, pct in absence_limit.limit_percent_map_for_students(
+                organization_id=org_id, student_ids=sids
+            ).items()
+        }
         exempt: set = set()
         by_org: dict = defaultdict(list)
         for enrollment in enrollments:

@@ -1,0 +1,162 @@
+/* EMSArena — kurs «Tələbə əlavə et» modalı: asinxron tələbə picker-i
+ * (audit 2026-09-10 P1-4, düzəliş 2026-09-12).
+ *
+ * Bazanı `member_form_modal.css` verir (.custom-selector-wrapper, .list-item-row,
+ * .custom-item-checkbox …). Bu fayl yalnız picker-in yeni hissələrini stilləyir:
+ * status sətri (yüklənir / tapılmadı / xəta), seçilmişlər çip sətri, «Daha çox
+ * göstər» düyməsi. Partial özü yüklədiyi üçün həm üzvlər səhifəsində, həm də
+ * kurs panelində eyni görünüş alınır.
+ */
+
+/* ── Status sətri (siyahı konteynerinin içində) ─────────────────────────── */
+.picker-status {
+    padding: 14px 12px;
+    text-align: center;
+    color: var(--ems-neutral-500, #6c757d);
+    font-size: 0.9rem;
+}
+
+.picker-status--error {
+    color: var(--ems-danger-700, #b02a37);
+}
+
+.custom-list-container[aria-busy="true"] .list-item-row {
+    opacity: 0.55;
+}
+
+/* `hidden` atributu: `.list-item-row`/`.picker-*` display dəyəri UA qaydasını
+ * üstələdiyi üçün gizlətməni burada açıq yazırıq (inline style YOX — CSP). */
+.list-item-row.is-hidden,
+.picker-selected-row[hidden],
+.picker-more-btn[hidden] {
+    display: none;
+}
+
+/* ── Seçilmişlər çip sətri ──────────────────────────────────────────────── */
+.picker-selected-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--ems-primary-200, #b6c8f5);
+    border-radius: 6px;
+    background: var(--ems-primary-50, #eef3ff);
+}
+
+.picker-selected-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ems-primary-800, #2e4a9e);
+}
+
+.picker-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.picker-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 2px 6px 2px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-primary-200, #b6c8f5);
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-neutral-700, #333);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.picker-chip__text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+}
+
+.picker-chip__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ems-neutral-500, #6c757d);
+    font-size: 0.85rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.picker-chip__remove:hover,
+.picker-chip__remove:focus-visible {
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-700, #b02a37);
+    outline: none;
+}
+
+.picker-clear-btn {
+    margin-left: auto;
+    padding: 2px 8px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--ems-neutral-500, #6c757d);
+    font-size: 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.picker-clear-btn:hover,
+.picker-clear-btn:focus-visible {
+    color: var(--ems-danger-700, #b02a37);
+    text-decoration: underline;
+    outline: none;
+}
+
+/* ── Siyahı altı: «Daha çox göstər» + sayğac ────────────────────────────── */
+.picker-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.picker-footer .selection-counter {
+    margin-top: 0;
+    margin-left: auto;
+}
+
+.picker-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--ems-primary-200, #b6c8f5);
+    border-radius: 6px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-primary-700, #2e59d9);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.picker-more-btn:hover,
+.picker-more-btn:focus-visible {
+    background: var(--ems-primary-50, #eef3ff);
+    outline: none;
+}
+
+.picker-more-btn[disabled] {
+    opacity: 0.6;
+    cursor: default;
+}

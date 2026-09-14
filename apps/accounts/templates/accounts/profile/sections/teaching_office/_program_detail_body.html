@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}«Ətraflı» çekmecəsinin gövdəsi — məzmun JS ilə doldurulur
+(`programs_detail.js`), serverdən `registrar:program_detail` JSON-u ilə gəlir.
+Sabit mətnlər burada tərcümə olunub `data-t-*` atributları ilə ötürülür, çünki
+xarici JS Django şablon mühərrikindən keçmir.{% endcomment %}
+<div class="pgd" data-pgd-body
+     data-t-groups="{% trans 'Aktiv qruplar' context 'accounts.catalog' %}"
+     data-t-students="{% trans 'Tələbələr' context 'accounts.catalog' %}"
+     data-t-statuses="{% trans 'Status paylanması' context 'accounts.catalog' %}"
+     data-t-plan="{% trans 'Tədris planı sətri' context 'accounts.catalog' %}"
+     data-t-offerings="{% trans 'Cari semestr açılışı' context 'accounts.catalog' %}"
+     data-t-total="{% trans 'Tələbə (cəmi)' context 'accounts.catalog' %}"
+     data-t-ungrouped="{% trans 'Qrupsuz' context 'accounts.catalog' %}"
+     data-t-nogroups="{% trans 'Bu ixtisasda aktiv qrup yoxdur.' context 'accounts.catalog' %}"
+     data-t-nostudents="{% trans 'Bu ixtisasda tələbə qeydi yoxdur.' context 'accounts.catalog' %}"
+     data-t-more="{% trans 'və daha %s tələbə — tam siyahı «Tələbə reyestri»ndədir' context 'accounts.catalog' %}"
+     data-t-error="{% trans 'Məlumat yüklənmədi.' context 'accounts.catalog' %}"
+     data-t-loading="{% trans 'Yüklənir…' context 'accounts.catalog' %}">
+</div>

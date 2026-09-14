@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}«Müraciətlərim» başlıq əməli — «Yeni müraciət» dialoqu
+(`applications_dialogs.js` `[data-apx-open-create]` çəngəlini dinləyir; atribut
+SAXLANILIR). `partials/ems_ui/_content_header.html` bunu `header_actions_include`
+ilə gətirir.{% endcomment %}
+{% if applications_section.can_create %}
+<button type="button" class="apx-btn apx-btn--primary" data-apx-open-create>
+  <i class="fas fa-plus" aria-hidden="true"></i>
+  {% trans "Yeni müraciət" context "applications" %}
+</button>
+{% endif %}

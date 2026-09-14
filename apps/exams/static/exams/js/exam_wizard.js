@@ -37,6 +37,12 @@
             return;
         }
         formGroup.classList.add("is-invalid");
+        // Keçici mesaj təzələnir (R1: «bitmə < başlama» → «müddət pəncərədən uzun»
+        // kimi dəyişə bilər); server xətası (transient olmayan) olduğu kimi qalır.
+        var stale = formGroup.querySelector(".field-error[data-ew-transient]");
+        if (stale && message && stale.textContent !== message) {
+            stale.parentNode.removeChild(stale);
+        }
         if (message && !formGroup.querySelector(".field-error")) {
             var div = document.createElement("div");
             div.className = "field-error";
@@ -88,6 +94,12 @@
             steps.forEach(function (step, i) {
                 step.classList.toggle("is-active", i === current);
                 step.classList.toggle("is-done", i < current);
+                // Ekran oxuyucu üçün cari addım (ems_ui stepnav dili).
+                if (i === current) {
+                    step.setAttribute("aria-current", "step");
+                } else {
+                    step.removeAttribute("aria-current");
+                }
             });
             dots.forEach(function (dot, i) {
                 dot.classList.toggle("is-on", i === current);
@@ -136,6 +148,8 @@
             var subjectOpt = subjectSel ? subjectSel.querySelector("option[value]") : null;
             var subjectText = subjectOpt ? (subjectOpt.textContent || "").trim() : "";
             var isPublic = form.querySelector('[name="is_public"]');
+            // 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupları + (varsa) köhnə kohortlar.
+            var unitsCount = form.querySelector("#createExamUnitsCount");
             var groupsCount = form.querySelector("#createExamGroupsCount");
             var usersCount = form.querySelector("#createExamUsersCount");
             var supervision = form.querySelector('[name="supervision_enabled"]');
@@ -146,7 +160,8 @@
             if (isPublic && isPublic.checked) {
                 recipients = i18n("reviewPublic", gettext("Hamıya açıq"));
             } else {
-                var g = groupsCount ? groupsCount.textContent : "0";
+                var g = String((unitsCount ? parseInt(unitsCount.textContent, 10) || 0 : 0) +
+                    (groupsCount ? parseInt(groupsCount.textContent, 10) || 0 : 0));
                 var u = usersCount ? usersCount.textContent : "0";
                 recipients = i18n("reviewGroups", gettext("Qruplar")) + ": " + g + " · " +
                     i18n("reviewStudents", gettext("Tələbələr")) + ": " + u;
@@ -215,6 +230,55 @@
             }
         }
 
+        /* ── vaxt / say əlaqəli qaydalar (R1) — yalnız hər iki dəyər dolu olanda ── */
+        function parseLocalDateTime(input) {
+            var value = input ? (input.value || "").trim() : "";
+            var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+            if (!m) {
+                return null;
+            }
+            return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0, 0);
+        }
+
+        function validateTimingRelations(startInput, endInput, durationInput, countInput) {
+            var errors = [];
+            var start = parseLocalDateTime(startInput);
+            var end = parseLocalDateTime(endInput);
+            var windowMinutes = null;
+            if (start && end) {
+                if (end.getTime() <= start.getTime()) {
+                    errors.push({
+                        input: endInput,
+                        message: i18n("endAfterStart", gettext("Bitmə vaxtı başlama vaxtından sonra olmalıdır."))
+                    });
+                } else {
+                    windowMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
+                }
+            }
+            var duration = durationInput && (durationInput.value || "").trim() !== "" ?
+                Number(durationInput.value) : NaN;
+            if (!isNaN(duration) && duration <= 0) {
+                errors.push({
+                    input: durationInput,
+                    message: i18n("durationPositive", gettext("Müddət 0-dan böyük olmalıdır."))
+                });
+            } else if (!isNaN(duration) && windowMinutes !== null && duration > windowMinutes) {
+                errors.push({
+                    input: durationInput,
+                    message: i18n("durationWithinWindow", gettext("Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."))
+                        .replace("{n}", String(windowMinutes))
+                });
+            }
+            var count = countInput && (countInput.value || "").trim() !== "" ? Number(countInput.value) : NaN;
+            if (!isNaN(count) && (count < 0 || Math.floor(count) !== count)) {
+                errors.push({
+                    input: countInput,
+                    message: i18n("questionCountInvalid", gettext("Sual sayı mənfi ola bilməz (0 = bütün suallar)."))
+                });
+            }
+            return errors;
+        }
+
         /* ── addım-əsaslı məcburi sahələr ──
            Addım 1 (əsaslar): ad, imtahan növü (kateqoriya), fənn.
            Addım 2 (vaxt): başlama və son təhvil vaxtı.
@@ -244,7 +308,7 @@
                 );
                 requireField(
                     form.querySelector('[name="exam_type_extended"]'),
-                    i18n("categoryRequired", gettext("İmtahan növünü seçin."))
+                    i18n("categoryRequired", gettext("Kateqoriyanı seçin."))
                 );
                 requireField(
                     form.querySelector("[data-exam-subject-native]"),
@@ -252,18 +316,25 @@
                     form.querySelector("#createExamSubjectSearch")
                 );
             } else if (index === 1) {
-                requireField(
-                    form.querySelector('[name="start_datetime"]'),
-                    i18n("startRequired", gettext("Başlama vaxtını seçin."))
-                );
-                requireField(
-                    form.querySelector('[name="end_datetime"]'),
-                    i18n("endRequired", gettext("Son təhvil vaxtını seçin."))
-                );
-                requireField(
-                    form.querySelector('[name="total_duration_minutes"]'),
-                    i18n("durationRequired", gettext("İmtahanın ümumi müddətini yazın."))
-                );
+                var startInput = form.querySelector('[name="start_datetime"]');
+                var endInput = form.querySelector('[name="end_datetime"]');
+                var durationInput = form.querySelector('[name="total_duration_minutes"]');
+                var countInput = form.querySelector('[name="random_question_count"]');
+                requireField(startInput, i18n("startRequired", gettext("Başlama vaxtını seçin.")));
+                requireField(endInput, i18n("endRequired", gettext("Bitmə vaxtını seçin.")));
+                requireField(durationInput, i18n("durationRequired", gettext("İmtahanın ümumi müddətini yazın.")));
+                /* 2026-09-14 (W4 `w4wizard`, R1): əlaqəli qaydalar da KLİENTDƏ tutulur —
+                   əvvəl «bitmə < başlama» server 400-ü ilə gəlib sehrbazı 1-ci addıma
+                   qaytarırdı (xəta 2-ci addımındır). Qaydalar: bitmə > başlama;
+                   müddət pəncərədən uzun olmasın; sual sayı mənfi olmasın (0 = bütün
+                   suallar — server semantikası). */
+                var relErrors = validateTimingRelations(startInput, endInput, durationInput, countInput);
+                relErrors.forEach(function (item) {
+                    markInvalid(item.input, item.message);
+                    if (!firstInvalid) {
+                        firstInvalid = item.input;
+                    }
+                });
             }
 
             if (firstInvalid) {
@@ -284,6 +355,30 @@
                 }
             });
         }
+
+        /* ── sahə düzəldilən kimi keçici xəta silinir (növbəti klikini gözləmir);
+           serverdən gələn (transient olmayan) xəta isə qalır. Fənn/kateqoriya
+           dəyəri gizli select-ə yazılıb `change` ilə bildirilir — o da tutulur. */
+        function clearOnFix(event) {
+            var field = event.target;
+            if (!field || !field.closest) {
+                return;
+            }
+            var group = field.closest(".form-group.is-invalid");
+            if (!group) {
+                return;
+            }
+            if (group.querySelector(".field-error:not([data-ew-transient])")) {
+                return; // server xətası — yalnız yenidən göndərəndə təsdiqlənir
+            }
+            var control = group.querySelector("input:not([type=hidden]), select, textarea");
+            var native = group.querySelector("[data-exam-subject-native]") || control;
+            if (native && (native.value || "").trim()) {
+                clearTransientError(group);
+            }
+        }
+        form.addEventListener("input", clearOnFix);
+        form.addEventListener("change", clearOnFix);
         if (backBtn) {
             backBtn.addEventListener("click", function () {
                 goTo(current - 1);
@@ -366,9 +461,32 @@
         }
 
         var errors = collectErrors();
+        /* R1: server 400 cavabı xətanın OLDUĞU addımı/sahəni bildirir
+           (`data-ew-error-step` / `data-ew-error-field`, JSON-da `step`/`field`).
+           Qeyri-sahə xətası (məs. «bitmə başlamadan sonra olmalıdır») əvvəl
+           həmişə 1-ci addıma aparırdı — indi 2-ci addıma keçib bitmə sahəsini
+           fokuslayır. */
+        var serverStep = parseInt(form.getAttribute("data-ew-error-step"), 10);
+        var serverField = form.getAttribute("data-ew-error-field") || "";
         if (errors.length) {
             showErrorSummary(errors);
-            goTo(errors[0].panel);
+            if (!isNaN(serverStep) && serverStep >= 0 && serverStep < total) {
+                goTo(serverStep);
+                var serverInput = serverField ? form.querySelector('[name="' + serverField + '"]') : null;
+                if (serverInput) {
+                    var serverGroup = serverInput.closest(".form-group");
+                    if (serverGroup) {
+                        serverGroup.classList.add("is-invalid");
+                    }
+                    try {
+                        serverInput.focus();
+                    } catch (err) {
+                        /* gizli sahə (məs. çoxseçimli select) fokuslana bilməz */
+                    }
+                }
+            } else {
+                goTo(errors[0].panel);
+            }
         } else {
             if (errBox) {
                 errBox.hidden = true;

@@ -26,7 +26,7 @@ Ekran 17 «Rektor — Ümumi baxış» — YALNIZ OXU.
     {% trans "Ümumi baxışın görünüşləri" context "accounts.workload_overview" as wo_tabs_label %}
     {% include "partials/ems_ui/_tabs.html" with tabs=workload_overview_section.view_tabs tabs_label=wo_tabs_label %}
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=workload_overview_section.kpi_tiles %}
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-overview" filter_prefix="wo_" filter_fields=workload_overview_section.filter_fields filter_count_label=workload_overview_section.filter_count_label %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="workload-overview" filter_prefix="wo_" filter_fields=workload_overview_section.filter_fields filter_count_label=workload_overview_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
     {% if workload_overview_section.view == "rep" %}
         {% trans "Bu bölmədə hələ məlumat yoxdur" context "accounts.workload_overview" as wo_empty %}

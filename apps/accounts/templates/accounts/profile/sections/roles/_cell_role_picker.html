@@ -29,4 +29,20 @@
             {% if not role_assignment_section.can_assign_roles %}disabled{% endif %}>
         {% trans "Rolu yenilə" context "accounts.role_assignment" %}
     </button>
+    {% comment %}⚠️ Yuxarıdakı düymə ƏSAS rolu ƏVƏZ edir. İKİNCİ/ÜÇÜNCÜ rol vermək
+    ayrı əməldir (mövcud rollar toxunulmur) və «Rolları idarə et» ekranındadır —
+    burada həmin şəxs üçün birbaşa keçid var (sahib, 2026-09-09: «2-ci ya da 3-cü
+    rol vermək üçün yer yaxşı deyil»). Keçid SPA-dır: sidebar yerində qalır və
+    hədəf ekranda «Rol ver» dialoqu bu şəxslə ÖZÜ açılır.{% endcomment %}
+    {% if 'manage-roles' in allowed_sections %}
+    <a class="ems-btn ems-btn--sm js-profile-section-link rls-picker__add"
+       href="{{ profile_base_url }}?section=manage-roles&mr_grant={{ row.data.user_id }}"
+       data-section="manage-roles"
+       data-source-url="{{ profile_base_url }}?section=manage-roles&mr_grant={{ row.data.user_id }}"
+       data-title="{% trans 'Rolları idarə et' context 'profile.sidebar' %}"
+       title="{% trans 'Mövcud rollara toxunmadan ikinci/üçüncü rol verir' context 'accounts.role_assignment' %}">
+        <i class="fas fa-user-plus" aria-hidden="true"></i>
+        {% trans "Əlavə rol ver" context "accounts.role_assignment" %}
+    </a>
+    {% endif %}
 </div>

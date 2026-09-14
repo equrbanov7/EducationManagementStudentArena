@@ -68,7 +68,9 @@ def columns():
         {"key": "position", "label": pgettext(CTX, "Vəzifə")},
         {"key": "unit", "label": pgettext(CTX, "Bölmə")},
         {"key": "joined", "label": pgettext(CTX, "Qoşulma")},
-        {"key": "actions", "label": ""},
+        # P2-8 (2026-09-12): boş `<th>` a11y pozuntusudur — etiket ekran oxuyucu
+        # üçün gizli (`sr_only`) yazılır; msgid mövcud `accounts.people`-dəndir.
+        {"key": "actions", "label": pgettext("accounts.people", "Əməllər"), "sr_only": True},
     ]
 
 

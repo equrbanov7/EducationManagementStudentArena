@@ -41,8 +41,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import RULE_SECTIONS, SectionKey, SyllabusStatus
-from apps.syllabus.services import section_data_map, version_timeline
+from apps.syllabus.public import RULE_SECTIONS, SectionKey, SyllabusStatus, section_data_map, version_timeline
 
 from .labels import STATUS_TONES
 from .preview import BANNERS

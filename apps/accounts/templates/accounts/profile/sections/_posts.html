@@ -1,13 +1,11 @@
 {% load i18n %}
 {% if can_manage_blog %}
 <section class="profile-section-panel profile-section--posts {% if active_section == 'posts' %}is-active{% endif %}" data-profile-section-panel="posts">
+    {% comment %}2026-09-12 (audit P2-1): «Postlarım» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir, say isə sol menyunun nişanındadır
+    (`data-badge-key="posts_count"`) — köhnə `.section-title` hər ikisini
+    təkrarlayırdı.{% endcomment %}
     <div class="section-card profile-posts-card">
-        <div class="section-title">
-            <i class="fas fa-newspaper"></i>
-            {% trans "title" context "profile.posts" %} ({{ posts_count }})
-
-        </div>
-
         <section class="profile-posts-section">
             {% if user_posts %}
                 <div class="blog-grid-container">

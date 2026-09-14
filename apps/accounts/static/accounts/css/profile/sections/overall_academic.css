@@ -311,7 +311,7 @@
 }
 .oa-status.is-pass {
     background: var(--ems-success-100);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
 }
 .oa-status.is-fail,
 .oa-status.is-barred {

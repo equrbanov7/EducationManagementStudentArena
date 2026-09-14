@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.organizations.unit_heads import members_covering_unit
+from apps.organizations.public import members_covering_unit
 from core.upload_security import validate_zip_archive
 
 from ..constants import (

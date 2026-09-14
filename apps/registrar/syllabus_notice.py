@@ -21,8 +21,8 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus import services as syllabus_services
-from apps.syllabus.services.offerings import (
+from apps.syllabus import public as syllabus_services
+from apps.syllabus.public import (
     STATE_APPROVED,
     STATE_ARCHIVED,
     STATE_DRAFT,

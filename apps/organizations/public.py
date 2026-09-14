@@ -5,6 +5,12 @@ Permission-string uyğunlaşdırması core.permissions-dadır (has_permission);
 burada yalnız org-domain xidmətləri təqdim olunur.
 """
 
+from apps.organizations.groups_registry import (  # noqa: F401
+    can_view_groups,
+    group_meta,
+    group_scope,
+    visible_group,
+)
 from apps.organizations.permissions import (  # noqa: F401
     PERMISSION_CATEGORIES,
     PERMISSION_LABELS,
@@ -15,7 +21,6 @@ from apps.organizations.permissions import (  # noqa: F401
 )
 from apps.organizations.scoping import (  # noqa: F401
     get_permission_scope,
-    get_unit_scope,
     invalidate_permission_scope_cache,
     scope_memberships_by_unit,
 )
@@ -36,6 +41,7 @@ from apps.organizations.structure_views import (  # noqa: F401
     build_organization_faculties_context,
     build_organization_kafedras_context,
 )
+from apps.organizations.student_transfer import register_student_transfer  # noqa: F401
 from apps.organizations.unit_heads import (  # noqa: F401
     ancestor_paths,
     chair_head_memberships_for_unit,
@@ -51,6 +57,11 @@ from apps.organizations.views import (  # noqa: F401
 )
 
 __all__ = [
+    "register_student_transfer",
+    "can_view_groups",
+    "group_meta",
+    "group_scope",
+    "visible_group",
     "PERMISSION_CATEGORIES",
     "PERMISSION_LABELS",
     "ancestor_paths",
@@ -71,7 +82,6 @@ __all__ = [
     "get_all_permissions",
     "get_permission_label",
     "get_permission_scope",
-    "get_unit_scope",
     "get_user_org_role_level",
     "invalidate_permission_scope_cache",
     "is_grant_entry",
@@ -84,3 +94,10 @@ __all__ = [
     "strip_grant_prefix",
     "user_has_org_role",
 ]
+
+
+# Explicit exports keep external callers out of implementation modules.
+from .public_exports import *  # noqa: E402,F401,F403
+from .public_exports import __all__ as _api_exports  # noqa: E402
+
+__all__ += [name for name in _api_exports if name not in __all__]

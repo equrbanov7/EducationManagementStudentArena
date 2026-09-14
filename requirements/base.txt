@@ -9,6 +9,12 @@
 # CORE DJANGO
 # ═══════════════════════════════════════════════════════════════════════════
 Django==5.2.17  # security: PYSEC-2026-3717 (+ əvvəlki 2090/2091/2092)
+# P2-10 (Codex audit, 2026-09-13): setuptools yalnız build-time deyil, image-də
+# runtime paketi kimi də qalır (pkg_resources istifadə edən asılılıqlar) —
+# CVE-2025-47273 (<78.1.1) və CVE-2024-6345 (<70.0) üçün alt hədd. Dəqiq pin
+# deyil, floor: Dockerfile.prod `pip install --upgrade setuptools` ilə ən
+# yenisini qurur, floor isə lokal venv/CI-də köhnə versiyanı keçirmir.
+setuptools>=78.1.1
 sqlparse==0.6.0  # security: PYSEC-2026-3696..3699
 asgiref==3.11.0
 tzdata==2025.2

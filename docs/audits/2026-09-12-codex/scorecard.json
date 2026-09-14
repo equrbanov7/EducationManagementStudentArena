@@ -1,0 +1,212 @@
+[
+  [
+    "Architecture",
+    76,
+    79,
+    "Modullar ayrılıb; yeni dövr yoxdur, iki tarixi dövr qalır."
+  ],
+  [
+    "Backend",
+    71,
+    80,
+    "Import validasiyası, idempotentlik və rəqabətli yazı qorunması gücləndi."
+  ],
+  [
+    "Frontend",
+    48,
+    73,
+    "Çatışmayan statistika və import axınları tamamlandı; brauzer sınağı var."
+  ],
+  [
+    "Database Design",
+    78,
+    78,
+    "PK/FK, Decimal, indeks və migrasiya quruluşu var; əsas sxem dəyişdirilmədi."
+  ],
+  [
+    "Database Integrity",
+    68,
+    76,
+    "Bal importu və identifikasiya düzəldi; üç real tenant yoxlaması sıfır uyğunsuzluq verdi."
+  ],
+  [
+    "Legacy Data Migration",
+    56,
+    56,
+    "Geniş rehearsal testləri var; real mənbə–hədəf tam tutuşdurması yoxdur."
+  ],
+  [
+    "Security",
+    53,
+    64,
+    "Upload və media əhatəsi düzəldi; işləyən DB hesabı hələ superuser-dir."
+  ],
+  [
+    "Authentication",
+    75,
+    75,
+    "OTP və sessiya testləri mövcuddur; real SMTP çatdırılması yoxlanmadı."
+  ],
+  [
+    "Authorization / RBAC",
+    65,
+    76,
+    "Scope regresiyaları və yeni media giriş testi; rol adından üstün icazə modeli."
+  ],
+  [
+    "Multi-Tenancy Isolation",
+    64,
+    75,
+    "RLS testləri və scope keş açarı; işləyən mühitdə RLS bypass maneəsi qalır."
+  ],
+  [
+    "Exam System",
+    76,
+    84,
+    "Import, bal tarixçəsi və paralel yazı yoxlanıb; böyük zal yükü ölçülməyib."
+  ],
+  [
+    "Electronic Journal",
+    78,
+    82,
+    "Bal əməliyyatları və tələbə sorğu büdcəsi yoxlanıb; model yenidən yazılmayıb."
+  ],
+  [
+    "Teaching Workload",
+    72,
+    72,
+    "Bölgü və vəziyyət testləri; PostgreSQL trigger davranışı əsasdır."
+  ],
+  [
+    "Schedule System",
+    70,
+    70,
+    "Mövcud servis/view testləri keçid meyarıdır; bütün əl ilə CRUD kombinasiyaları yoxlanmayıb."
+  ],
+  [
+    "Syllabus Workflow",
+    77,
+    77,
+    "Vəziyyət maşını və təsdiq axını testləri; bütün dillərdə insan baxışı yoxdur."
+  ],
+  [
+    "Student Management",
+    74,
+    78,
+    "Şəxsi kabinet və akademik məlumat axını yoxlandı; real qeydlər dəyişdirilmədi."
+  ],
+  [
+    "API Design",
+    70,
+    77,
+    "945 route inventarı, 403/404 və səhv UUID/CSV cavabları; tam OpenAPI yoxdur."
+  ],
+  [
+    "Performance",
+    64,
+    70,
+    "N+1 artımı üçün regresiya və məhdud HTTP ölçüsü; mütləq sorğu sayı yüksəkdir."
+  ],
+  [
+    "Scalability",
+    55,
+    55,
+    "5000 istifadəçi, çox worker və reconnect yükü ilə attestasiya aparılmadı."
+  ],
+  [
+    "Reliability",
+    62,
+    66,
+    "Geniş regresiya və migrasiya rehearsal; real failover sübutu yoxdur."
+  ],
+  [
+    "Celery / Background Jobs",
+    68,
+    68,
+    "49 xarici DB giriş nöqtəsinin atomic gate-i keçir; real broker failover yoxlanmayıb."
+  ],
+  [
+    "Redis / Caching",
+    60,
+    60,
+    "PING/AOF yoxlandı; işləyən Redis maxmemory=0, limit drift-i qalır."
+  ],
+  [
+    "WebSocket / Realtime",
+    62,
+    62,
+    "ASGI origin/auth qapısı və mövcud testlər; geniş socket yükü yoxlanmayıb."
+  ],
+  [
+    "DevOps",
+    58,
+    58,
+    "CI qapıları və konteyner limitləri var; lokal işləyən image mənbədən geridir."
+  ],
+  [
+    "Deployment",
+    42,
+    42,
+    "Bu audit deploy etmədi; təhlükəsiz cookie/HTTPS və DB rol konfiqurasiyası uyğunlaşdırılmalıdır."
+  ],
+  [
+    "Monitoring / Observability",
+    66,
+    66,
+    "Health və resurs sübutu var; xarici alert çatdırılması yoxlanmayıb."
+  ],
+  [
+    "Logging",
+    72,
+    74,
+    "Bal partiyası/jurnal audit izi; bütün hadisələr üzrə tamlıq attestasiya edilməyib."
+  ],
+  [
+    "Automated Tests",
+    76,
+    85,
+    "Yeni mənalı regresiyalar və tam PostgreSQL dəsti; SQLite məhdudiyyətləri açıq saxlanılıb."
+  ],
+  [
+    "Code Quality",
+    71,
+    80,
+    "Black/isort/flake8 və ölçü qapıları düzəldi."
+  ],
+  [
+    "Maintainability",
+    72,
+    79,
+    "CSS bölündü, yeni servis istehlakı fasada keçdi, domain sərhədi qorundu."
+  ],
+  [
+    "UX/UI",
+    60,
+    74,
+    "Boş vəziyyətlər, import ön baxışı, səhv və nəticə axını işləyir."
+  ],
+  [
+    "Accessibility",
+    62,
+    70,
+    "Progress, aria-live, fokus və mobil baxış; screen-reader attestasiya yoxdur."
+  ],
+  [
+    "Localization",
+    52,
+    52,
+    "Kataloq qapısı keçir; yeni EN/RU mətnlərində AZ fallback görünür."
+  ],
+  [
+    "Documentation",
+    69,
+    78,
+    "Sübut inventarı, məhdudiyyətlər və rollout planı əlavə edildi."
+  ],
+  [
+    "Production Readiness",
+    40,
+    40,
+    "İşləyən mühit dəyişməyib; açıq P0/P1 maneələri var."
+  ]
+]

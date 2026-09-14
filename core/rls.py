@@ -64,15 +64,84 @@ def _should_use_local(local: bool | None) -> bool:
     return bool(getattr(connection, "in_atomic_block", False))
 
 
+# ---------------------------------------------------------------------------
+# Sessiya-səviyyəli GUC dəyərlərinin Python tərəfində yadda saxlanması
+# (perf auditi 2026-09-13 F-07 → 2026-09-14 düzəlişi)
+#
+# Hər kabinet səhifəsi orta hesabla 10 `set_config` + 5 `current_setting`
+# round-trip edirdi — əsasən `bypass_rls()`-in hər çağırışında «əvvəlki dəyəri
+# oxu → on → əvvəlkini bərpa et» üçlüyü. Sessiya-səviyyəli (`set_config(..,
+# false)`) dəyər eyni DB sessiyasında biz dəyişənə qədər sabit qaldığı üçün
+# onu Django bağlantısının üstündə yadda saxlayırıq və eyni dəyərin təkrar
+# yazılmasını / oxunmasını atlayırıq.
+#
+# Təhlükəsizlik sərhədləri (yaddaş yalnız bu şərtlərdə işlədilir):
+#   * `RLS_TRANSACTION_SCOPED` SÖNÜLÜ olmalıdır — transaction-pooling-də
+#     server sessiyası tranzaksiyalar arasında dəyişə bilər, yaddaş yalan olar;
+#   * `connection.in_atomic_block` YOX — atomic blokda `SET LOCAL` işlədilir və
+#     `current_setting` lokal dəyəri qaytarır; yaddaş yalnız sessiya
+#     dəyərini bilir, ona görə blok içində nə oxu, nə yazı atlanmır;
+#   * yaddaş alt psycopg bağlantısının OBYEKTİNƏ bağlıdır — bağlantı
+#     bağlanıb yenidən açılanda (CONN_MAX_AGE, xəta) avtomatik sıfırlanır.
+# Sessiya-səviyyəli yazı atomic blok içində olsa belə (`local=False` açıq
+# verilib) yaddaş yenilənir ki, köhnəlmiş dəyər qalmasın.
+# ---------------------------------------------------------------------------
+_KNOWN_STATE_ATTR = "_ems_rls_known_session_state"
+
+
+def _session_state_cache() -> dict | None:
+    """Cari DB bağlantısı üçün sessiya-səviyyəli GUC yaddaşı (və ya None)."""
+    from django.conf import settings
+
+    if getattr(settings, "RLS_TRANSACTION_SCOPED", False):
+        return None
+    raw_conn = getattr(connection, "connection", None)
+    if raw_conn is None:
+        return None
+    state = getattr(connection, _KNOWN_STATE_ATTR, None)
+    if state is None or state.get("__conn__") is not raw_conn:
+        state = {"__conn__": raw_conn}
+        setattr(connection, _KNOWN_STATE_ATTR, state)
+    return state
+
+
+def _remember_session_values(items, *, is_local: bool) -> None:
+    if is_local:
+        return
+    state = _session_state_cache()
+    if state is None:
+        return
+    if getattr(connection, "in_atomic_block", False):
+        # Tranzaksiya içindəki sessiya-səviyyəli SET rollback-də geri qayıdır
+        # (PostgreSQL semantikası) — dəyəri yadda saxlamaq əvəzinə unut ki,
+        # növbəti oxu/yazı DB-yə getsin.
+        for name, _value in items:
+            state.pop(name, None)
+        return
+    for name, value in items:
+        state[name] = value
+
+
+def _can_skip_session_write(name: str, value: str, *, is_local: bool) -> bool:
+    if is_local or getattr(connection, "in_atomic_block", False):
+        return False
+    state = _session_state_cache()
+    return state is not None and state.get(name) == value
+
+
 def _set_rls_setting(name: str, value: str, *, local: bool | None = None) -> None:
     """Persist one RLS setting at session scope or transaction scope."""
     if not _is_postgresql():
         return
+    is_local = _should_use_local(local)
+    if _can_skip_session_write(name, value, is_local=is_local):
+        return
     with connection.cursor() as cursor:
         cursor.execute(
             "SELECT set_config(%s, %s, %s)",
-            [name, value, _should_use_local(local)],
+            [name, value, is_local],
         )
+    _remember_session_values([(name, value)], is_local=is_local)
 
 
 def _set_rls_settings(items: list[tuple[str, str]], *, local: bool | None = None) -> None:
@@ -92,22 +161,36 @@ def _set_rls_settings(items: list[tuple[str, str]], *, local: bool | None = None
     if not _is_postgresql() or not items:
         return
     is_local = _should_use_local(local)
-    select_list = ", ".join(["set_config(%s, %s, %s)"] * len(items))
+    pending = [(n, v) for n, v in items if not _can_skip_session_write(n, v, is_local=is_local)]
+    if not pending:
+        return
+    select_list = ", ".join(["set_config(%s, %s, %s)"] * len(pending))
     params: list[Any] = []
-    for name, value in items:
+    for name, value in pending:
         params.extend([name, value, is_local])
     with connection.cursor() as cursor:
         cursor.execute(f"SELECT {select_list}", params)
+    _remember_session_values(pending, is_local=is_local)
 
 
 def _get_rls_setting(name: str, *, default: str = "") -> str:
     """Read the current RLS setting value, falling back to *default* when unset."""
     if not _is_postgresql():
         return default
+    if not getattr(connection, "in_atomic_block", False):
+        state = _session_state_cache()
+        if state is not None and name in state:
+            cached = state[name]
+            return default if cached in (None, "") else str(cached)
     with connection.cursor() as cursor:
         cursor.execute("SELECT current_setting(%s, true)", [name])
         row = cursor.fetchone()
     value = row[0] if row else None
+    if not getattr(connection, "in_atomic_block", False):
+        # Oxunan sessiya dəyərini yadda saxla — növbəti `bypass_rls()` oxumur.
+        state = _session_state_cache()
+        if state is not None:
+            state[name] = "" if value is None else str(value)
     if value in (None, ""):
         return default
     return str(value)

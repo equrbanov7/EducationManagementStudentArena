@@ -1,7 +1,7 @@
 /* Profil redaktəsi — yadda saxlanmamış dəyişiklik qoruyucusu.
  *
  * Forma ilk vəziyyətlə müqayisə olunur (dirty-check). Dəyişiklik varkən:
- *  - sticky paneldə status nişanı görünür;
+ *  - formanın sonundakı əməliyyat panelində status nişanı görünür;
  *  - səhifədaxili keçidlər (sidebar, bölmə linkləri) capture fazasında tutulub
  *    #editProfileLeaveModal təsdiqi göstərilir (Yadda saxla / Saxlamadan çıx /
  *    Ləğv et);
@@ -46,9 +46,16 @@
     }
 
     function syncStatus() {
+        var dirty = isDirty();
         var status = document.getElementById("editProfileDirtyStatus");
         if (status) {
-            status.hidden = !isDirty();
+            status.hidden = !dirty;
+        }
+        // Panelin özü də vəziyyəti daşıyır: CSS ondan həm «saxlanılıb» nişanını,
+        // həm də panelin xəbərdarlıq konturunu idarə edir.
+        var bar = document.getElementById("editProfileSavebar");
+        if (bar) {
+            bar.setAttribute("data-dirty", dirty ? "1" : "0");
         }
     }
 

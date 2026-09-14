@@ -274,9 +274,36 @@ def claim_ticket_pin_entry(ticket, room, computer=None):
         return locked
 
 
+# W4 2026-09-14 (w3sweep R7): fərdi ExamStudentPin girişi biletə YALNIZ daxili
+# vəziyyət yazırdı (entry_validated_at) — audit hadisəsi yox idi, ona görə oturum
+# tarixçəsinin «Girişlər» KPI-ı bu axında həmişə 0 göstərirdi. Reason kodu
+# `final_entry_validated` prefiksini daşıyır ki, tarixçə/KPI onu bilet-PIN girişi
+# ilə eyni sırada saysın; `changes.entry` isə axının növünü saxlayır.
+STUDENT_PIN_ENTRY_REASON = "final_entry_validated_student_pin"
+
+
+def log_student_pin_entry(ticket, request=None):
+    """Fərdi PIN girişini bilet audit jurnalına yazır (xam PIN YAZILMIR)."""
+    log_action(
+        AuditAction.VERIFY,
+        user=ticket.student,
+        organization=ticket.organization,
+        obj=ticket,
+        changes={"entry": "student_pin", "seat": ticket.seat_number},
+        reason=STUDENT_PIN_ENTRY_REASON,
+        request=request,
+        resource_type="final_exam_ticket",
+        resource_id=str(ticket.pk),
+    )
+
+
 @transaction.atomic
-def claim_student_pin_entry(ticket):
-    """ExamStudentPin girişi üçün yalnız ən son brauzer sessiyasını aktiv saxla."""
+def claim_student_pin_entry(ticket, request=None):
+    """ExamStudentPin girişi üçün yalnız ən son brauzer sessiyasını aktiv saxla.
+
+    W4 R7: uğurlu claim eyni tranzaksiyada `final_entry_validated_student_pin`
+    audit hadisəsi yazır (oturum tarixçəsi «Girişlər» KPI-ı üçün).
+    """
     with bypass_rls():
         locked = (
             FinalExamTicket.objects.select_for_update(of=("self",))
@@ -288,6 +315,7 @@ def claim_student_pin_entry(ticket):
             return None
         locked.entry_validated_at = timezone.now()
         locked.save(update_fields=["entry_validated_at", "updated_at"])
+        log_student_pin_entry(locked, request=request)
         return locked
 
 
@@ -464,6 +492,7 @@ __all__ = [
     "ERROR_LOCKED",
     "ERROR_NO_ACTIVE_SESSION",
     "ERROR_RATE_LIMITED",
+    "STUDENT_PIN_ENTRY_REASON",
     "claim_student_pin_entry",
     "claim_ticket_pin_entry",
     "attach_ticket_to_room_sitting",
@@ -474,6 +503,7 @@ __all__ = [
     "entry_session_values_match",
     "entry_ticket_id",
     "final_attempt_entry_session_valid",
+    "log_student_pin_entry",
     "store_entry_session",
     "validate_entry",
 ]

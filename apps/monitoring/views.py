@@ -339,6 +339,15 @@ def security_events_api(request):
     return JsonResponse({"status": "ok", "data": data})
 
 
+def _bearer_token(request) -> str:
+    """``Authorization: Bearer <token>`` başlığından tokeni çıxarır; yoxdursa boş sətir."""
+    header = request.headers.get("Authorization", "")
+    scheme, _, credentials = header.partition(" ")
+    if scheme.lower() != "bearer":
+        return ""
+    return credentials.strip()
+
+
 @csrf_exempt
 @require_POST
 def alertmanager_webhook(request):
@@ -347,11 +356,24 @@ def alertmanager_webhook(request):
     CSRF-exempt-dir çünki maşın-maşın sorğusudur; giriş nəzarəti paylaşılan
     token-lədir (ALERTMANAGER_WEBHOOK_TOKEN) və nginx bu path-i publik marşruta
     çıxarmır (app konteynerinə yalnız daxili şəbəkədən çatmaq olar).
+
+    Token YALNIZ ``Authorization: Bearer <token>`` başlığından oxunur
+    (2026-09-12, audit P2-6). Əvvəl ``?token=`` sorğu sətrində gəlirdi — sirr
+    nginx/proxy access log-larına və ``Referer``-ə düşürdü. Sorğu sətrindəki
+    token artıq QƏBUL EDİLMİR ki, köhnə konfiqurasiya səssizcə sızmağa davam
+    etməsin; belə cəhd ayrıca log sətri ilə görünən olur.
     """
     expected = getattr(settings, "ALERTMANAGER_WEBHOOK_TOKEN", "") or ""
-    provided = request.GET.get("token", "")
+    provided = _bearer_token(request)
     if not expected or not hmac.compare_digest(expected, provided):
-        logger.warning("Alertmanager webhook: yanlış token (uzaq=%s)", request.META.get("REMOTE_ADDR"))
+        if "token" in request.GET:
+            logger.warning(
+                "Alertmanager webhook: token sorğu sətrində gəlib — artıq qəbul edilmir, "
+                "`Authorization: Bearer` başlığına keçin (uzaq=%s)",
+                request.META.get("REMOTE_ADDR"),
+            )
+        else:
+            logger.warning("Alertmanager webhook: yanlış token (uzaq=%s)", request.META.get("REMOTE_ADDR"))
         return HttpResponseForbidden("forbidden")
 
     try:

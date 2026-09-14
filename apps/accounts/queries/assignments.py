@@ -6,6 +6,7 @@ from django.db.models import Q
 
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
+from apps.exams.public import unit_assigned_exams_q
 
 
 def get_assigned_courses_for_user(user, organization=None):
@@ -33,6 +34,9 @@ def get_assigned_exams_for_user(user, organization=None, active_only=True, inclu
     assignment_filter = (
         Q(allowed_users=user)
         | Q(allowed_groups__students=user)
+        # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) ilə təyin
+        # olunan imtahanlar da «Təyin olunmuş tapşırıqlar»a və sayğaclara düşür.
+        | unit_assigned_exams_q(user)
         | Q(
             course__memberships__user=user,
             course__memberships__role="student",

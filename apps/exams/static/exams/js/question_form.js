@@ -222,6 +222,22 @@
             renumberOptionCards();
         }
 
+        /* 2026-09-14 (W3 `w3sweep`): «cavab rejimi» artıq layihənin
+           `bootstrap-single-select` komponentidir — native `<select>` vizual
+           gizlidir (`is-enhanced`), fokus onun görünən toggle düyməsinə getməlidir. */
+        function focusAnswerMode() {
+            if (!answerModeSelect) {
+                return;
+            }
+            var wrap = answerModeSelect.closest(".bootstrap-single-select");
+            var toggle = wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
+            if (answerModeSelect.classList.contains("is-enhanced") && toggle) {
+                toggle.focus();
+                return;
+            }
+            answerModeSelect.focus();
+        }
+
         function handleCorrectOptionChange(event) {
             if (!answerModeSelect || !isSingleAnswerMode()) {
                 hideSingleAnswerWarning();
@@ -236,7 +252,7 @@
             if (getCheckedCorrectCount() > 1) {
                 event.target.checked = false;
                 showSingleAnswerWarning();
-                answerModeSelect.focus();
+                focusAnswerMode();
                 return;
             }
 
@@ -250,7 +266,7 @@
 
             event.preventDefault();
             showSingleAnswerWarning();
-            answerModeSelect.focus();
+            focusAnswerMode();
         }
 
         function showFileName(labelElement, file) {
@@ -335,48 +351,51 @@
             setCurrentPreviewOpacity(currentVideoPreview, true);
         }
 
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
         function clearImage() {
             var confirmMessage = root.dataset.confirmDeleteImage || "Delete image?";
             var alertMessage = root.dataset.alertImageWillBeDeleted || "";
-            if (!window.confirm(confirmMessage)) {
-                return;
-            }
-
-            if (imageClearInput) {
-                imageClearInput.checked = true;
-            }
-            if (imageInput) {
-                imageInput.value = "";
-            }
-            if (currentImagePreview) {
-                currentImagePreview.style.display = "none";
-            }
-            clearImageSelectionState();
-            if (alertMessage) {
-                window.alert(alertMessage);
-            }
+            window.EMSConfirm.open({ body: confirmMessage, danger: true }).then(function (ok) {
+                if (!ok) {
+                    return;
+                }
+                if (imageClearInput) {
+                    imageClearInput.checked = true;
+                }
+                if (imageInput) {
+                    imageInput.value = "";
+                }
+                if (currentImagePreview) {
+                    currentImagePreview.style.display = "none";
+                }
+                clearImageSelectionState();
+                if (alertMessage) {
+                    window.alert(alertMessage);
+                }
+            });
         }
 
         function clearVideo() {
             var confirmMessage = root.dataset.confirmDeleteVideo || "Delete video?";
             var alertMessage = root.dataset.alertVideoWillBeDeleted || "";
-            if (!window.confirm(confirmMessage)) {
-                return;
-            }
-
-            if (videoClearInput) {
-                videoClearInput.checked = true;
-            }
-            if (videoInput) {
-                videoInput.value = "";
-            }
-            if (currentVideoPreview) {
-                currentVideoPreview.style.display = "none";
-            }
-            clearVideoSelectionState();
-            if (alertMessage) {
-                window.alert(alertMessage);
-            }
+            window.EMSConfirm.open({ body: confirmMessage, danger: true }).then(function (ok) {
+                if (!ok) {
+                    return;
+                }
+                if (videoClearInput) {
+                    videoClearInput.checked = true;
+                }
+                if (videoInput) {
+                    videoInput.value = "";
+                }
+                if (currentVideoPreview) {
+                    currentVideoPreview.style.display = "none";
+                }
+                clearVideoSelectionState();
+                if (alertMessage) {
+                    window.alert(alertMessage);
+                }
+            });
         }
 
         if (imageInput) {

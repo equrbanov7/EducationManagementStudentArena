@@ -5,7 +5,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -71,9 +71,15 @@ def add_exam_question(request, slug):
                 if exam.exam_type == "written":
                     question.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
-            question.save()
-            if exam.exam_type == "coding":
-                ensure_coding_question_for_exam_question(question, sync_existing=True)
+            # Audit 2026-09-13 backend F-07 (2026-09-14): sual + kodlaşdırma alt-qeydi +
+            # variantlar BİR tranzaksiyada — variant yazısı sınsa variantsız sual qalmasın.
+            with transaction.atomic():
+                question.save()
+                if exam.exam_type == "coding":
+                    ensure_coding_question_for_exam_question(question, sync_existing=True)
+                # Əgər exam tipi testdirsə → variantları yarat
+                if exam.exam_type == "test":
+                    form.create_options(question)
 
             # Invalidate the cached question ID list so live sessions see the change.
             try:
@@ -88,10 +94,6 @@ def add_exam_question(request, slug):
                     exam.pk,
                     exc_info=True,
                 )
-
-            # Əgər exam tipi testdirsə → variantları yarat
-            if exam.exam_type == "test":
-                form.create_options(question)
 
             from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
 
@@ -194,12 +196,12 @@ def edit_exam_question(request, slug, question_id):
                 if exam.exam_type == "written":
                     q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
-            q.save()
-            if exam.exam_type == "coding":
-                ensure_coding_question_for_exam_question(q, sync_existing=True)
-
-            if exam.exam_type == "test":
-                form.save_options(q)
+            with transaction.atomic():  # F-07 (2026-09-14) — bax `add_exam_question`
+                q.save()
+                if exam.exam_type == "coding":
+                    ensure_coding_question_for_exam_question(q, sync_existing=True)
+                if exam.exam_type == "test":
+                    form.save_options(q)
 
             from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
 

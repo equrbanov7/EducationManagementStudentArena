@@ -39,6 +39,13 @@ yoxdur); dinamik dəyərlər `data-*` atributları ilə ötürülür.
 
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.intro header_actions_include="accounts/profile/sections/bulk_intake/_scope.html" %}
 
+  {% comment %}TƏK hesab dialoqu — başlıqdakı «Tək müəllim/tələbə əlavə et»
+  düyməsi bunu açır. Kataloqdakı «Yeni müəllim/tələbə» ilə EYNİ şablon və eyni
+  servisdir; ikinci forma qurulmur (sahib, 2026-09-09).{% endcomment %}
+  {% if sec.single_create.can_create %}
+    {% include "accounts/profile/sections/partials/_rim_create.html" with rim_center_section=sec.single_create.rim_create %}
+  {% endif %}
+
   {% include "partials/ems_ui/_stepper.html" with steps=sec.steps steps_label=sec.steps_label %}
 
   {# ── 1. Şablon ────────────────────────────────────────────────────────── #}

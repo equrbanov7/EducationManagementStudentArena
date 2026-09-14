@@ -1,0 +1,1 @@
+Wrote JSON report to docs/audits/2026-09-12-codex/evidence/coverage-final.json

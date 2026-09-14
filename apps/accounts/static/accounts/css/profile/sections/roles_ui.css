@@ -127,8 +127,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    /* 2026-09-14 (audit FE-F11, WCAG 2.5.8): 18 → 24 px hədəf. */
+    width: 24px;
+    height: 24px;
     padding: 0;
     border: 0;
     border-radius: 50%;
@@ -188,6 +189,12 @@
     align-items: center;
     gap: 8px;
     min-width: 200px;
+}
+
+/* «Əlavə rol ver» — əsas rolu ƏVƏZ edən düymədən vizual olaraq ayrılır
+   (ikincil üslub), sətir daralanda alta düşür. */
+.rls-picker__add {
+    white-space: nowrap;
 }
 
 .rls-picker .bootstrap-single-select {

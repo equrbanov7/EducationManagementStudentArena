@@ -21,9 +21,16 @@ from django.utils import timezone
 from django.utils.translation import get_language, pgettext
 from django.views.decorators.http import require_GET
 
-from apps.exams.public import is_exam_center_user
-from apps.exams.services.ai_summary import generate_appeal_statistics_summary
-from apps.exams.views.exam_center._shared import supervisor_org_or_403
+from apps.exams.public import (
+    allowed_units_prefetch,
+    allowed_units_q,
+    allowed_units_under_q,
+    generate_appeal_statistics_summary,
+    is_exam_center_user,
+    split_group_filter_values,
+    supervisor_org_or_403,
+    unit_row_labels,
+)
 
 from ...constants import APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES
 from ...models import Appeal
@@ -119,23 +126,40 @@ def _filtered_appeals(request, organization):
     if subject_ids:
         qs = qs.filter(exam__subject_id__in=subject_ids)
 
-    group_ids = _csv_ints(request.GET.get("groups"))
-    if group_ids:
-        qs = qs.filter(exam__allowed_groups__id__in=group_ids)
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): qrup/fakültə/kafedra filtrləri kohort
+    # (`allowed_groups`) VƏ YA reyestr qrupu (`allowed_units`) ilə uyğun gəlir —
+    # imtahan statistikası ilə eyni sxem (`apps.exams.domain.unit_scope_filters`).
+    cohort_ids, unit_group_ids = split_group_filter_values(request.GET.get("groups"))
+    if cohort_ids or unit_group_ids:
+        condition = Q()
+        if cohort_ids:
+            condition |= Q(exam__allowed_groups__id__in=cohort_ids)
+        if unit_group_ids:
+            condition |= allowed_units_q(unit_group_ids)
+        qs = qs.filter(condition)
 
     unit_ids = _csv_uuids(request.GET.get("units"))
     if unit_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+            | allowed_units_under_q(organization, unit_ids)
+        )
 
     # Ayrı fakültə/kafedra/müəllim filtrləri (imtahan statistikası ilə eyni sxem;
     # fakültə seçiləndə onun kafedraları göstərilir — kaskad).
     faculty_ids = _csv_uuids(request.GET.get("faculties"))
     if faculty_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+            | allowed_units_under_q(organization, faculty_ids)
+        )
 
     department_ids = _csv_uuids(request.GET.get("departments"))
     if department_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit_id__in=department_ids)
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit_id__in=department_ids)
+            | allowed_units_under_q(organization, department_ids)
+        )
 
     teacher_ids = _csv_ints(request.GET.get("teachers"))
     if teacher_ids:
@@ -194,6 +218,10 @@ def _row(appeal):
     exam = appeal.exam
     subject = getattr(exam, "subject", None)
     groups = list(exam.allowed_groups.all())
+    # W5 `w5left`: reyestr qrupları da «Qrup» sütununa düşür (prefetch olunub).
+    group_names = _dedup([g.name for g in groups] + unit_row_labels(exam.allowed_units.all())["groups"])
+    # F-06: səhifələnən sorğuda annotasiya var; başqa çağıran üçün geri-düşmə.
+    item_count = getattr(appeal, "item_count", None)
     teacher = ""
     if exam.author_id:
         teacher = exam.author.get_full_name() or exam.author.username
@@ -201,12 +229,12 @@ def _row(appeal):
         "appeal_id": appeal.id,
         "student": appeal.student.get_full_name() or appeal.student.username,
         "username": appeal.student.username,
-        "group": ", ".join(_dedup(g.name for g in groups)),
+        "group": ", ".join(group_names),
         "teacher": teacher,
         "exam": exam.title,
         "subject": (f"{subject.code} — {subject.name}" if subject else ""),
         "type": exam.get_exam_type_extended_display() if exam.exam_type_extended else "",
-        "items": appeal.items.count(),
+        "items": appeal.items.count() if item_count is None else int(item_count),
         "status": appeal.get_status_display(),
         "status_code": appeal.status,
         "date": timezone.localtime(appeal.created_at).strftime("%d.%m.%Y %H:%M"),
@@ -234,7 +262,17 @@ def _summary(qs):
 def appeal_stats_data(request):
     organization = _stats_org(request)
     appeals = _filtered_appeals(request, organization)
-    page_obj = Paginator(_sorted(appeals, request), _PAGE_SIZE).get_page(request.GET.get("page"))
+    # Perf auditi 2026-09-13 F-06: `_row` hər apellyasiya üçün
+    # `exam.allowed_groups.all()` + `items.count()` atırdı (səhifədə 15 sətir →
+    # +30 sorğu). Qruplar prefetch, bənd sayı annotasiya ilə gəlir — YALNIZ
+    # səhifələnən sorğuda (`_summary` öz GROUP BY-larını `appeals` üzərində
+    # qurur; annotasiya ora düşsə qruplaşmanı pozardı).
+    listed = (
+        _sorted(appeals, request)
+        .prefetch_related("exam__allowed_groups", allowed_units_prefetch())
+        .annotate(item_count=Count("items", distinct=True))
+    )
+    page_obj = Paginator(listed, _PAGE_SIZE).get_page(request.GET.get("page"))
     return JsonResponse(
         {
             "results": [_row(a) for a in page_obj.object_list],

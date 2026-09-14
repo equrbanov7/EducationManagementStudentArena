@@ -203,7 +203,9 @@ class IntakePermissionGateTest(StudentIntakeBase):
 
     def test_default_roles_carry_the_permission(self):
         for role_name in ("ikt_rehber", "hr"):
-            self.assertIn("user.import", self.org.roles.get(name=role_name).permissions, role_name)
+            permissions = self.org.roles.get(name=role_name).permissions
+            # 2026-09-14: RİM tam wildcard (`*`) daşıyır.
+            self.assertTrue("user.import" in permissions or "*" in permissions, role_name)
         for role_name in ("teacher", "student", "exam_center_head"):
             self.assertNotIn("user.import", self.org.roles.get(name=role_name).permissions, role_name)
 

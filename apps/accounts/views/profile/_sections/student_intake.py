@@ -68,5 +68,14 @@ def build_student_intake_section(request, section, *, active_organization, allow
         {"label": pgettext(_CTX, "Nəticə"), "note": pgettext(_CTX, "Hesabları əlavə edin"), "state": "todo"},
     ]
 
+    # Tək hesab əlavəsi (sahib, 2026-09-09: «toplu əlavəsində button qoy,
+    # tək müəllim ya da tələbə əlavə etmək də olsun»). Kataloqdakı «Yeni
+    # müəllim/tələbə» axını ilə EYNİ dialoq və EYNİ servis işlədilir —
+    # ikinci forma qurulmur (`accounts/views/people/section.py::_create_block`).
+    from apps.accounts.views.people.section import _create_block
+
+    section["single_create"] = _create_block(request, "students")
+    section["single_create_kind"] = "student"
+
 
 __all__ = ["build_student_intake_section"]

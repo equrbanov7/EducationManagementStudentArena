@@ -133,7 +133,9 @@ class ExamScoreEntrySectionTest(TestCase):
         resp = self._client(self.center).get(reverse("accounts:profile"), {"section": "exam-score-entry"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'data-profile-section-panel="exam-score-entry"')
-        self.assertContains(resp, "ese-toolbar")
+        self.assertContains(resp, "data-ese-root")
+        self.assertContains(resp, "data-esi-preview")
+        self.assertContains(resp, "data-esi-apply")
 
     def test_teacher_has_no_section(self):
         resp = self._client(self.teacher).get(reverse("accounts:profile"), {"section": "exam-score-entry"})
@@ -312,5 +314,5 @@ class ExamScoreEntrySectionTest(TestCase):
 
         resp = self._client(self.student).get(reverse("accounts:profile"), {"section": "my-subjects"})
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "subject-attempt is-superseded")
-        self.assertContains(resp, "subject-attempt is-official")
+        self.assertContains(resp, "msx-chip--superseded")
+        self.assertContains(resp, "msx-chip--official")

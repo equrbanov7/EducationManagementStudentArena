@@ -1,0 +1,32 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   2026-09-10 sakit redizayn — canlı nəzarət səthlərinin süzgəc sıraları
+   ems_ui `ems-filters` komponentindədir (görünən etiketlərlə). Burada yalnız
+   yerləşdirmə düzəlişləri var; JS çəngəlləri (`#fxc-filter`, `#fxc-status-filter`,
+   `#fxc-exam-filter`, `#fxc-hist-filter`, `.fxc-viewtoggle-btn`) DƏYİŞMƏYİB.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.fxc-monitorfilters {
+    margin: 14px 0;
+    align-items: flex-end;
+}
+
+.fxc-monitorfilters .ems-field {
+    min-width: 180px;
+    flex: 1 1 200px;
+}
+
+.fxc-monitorfilters .ems-field--wide {
+    flex: 1 1 280px;
+}
+
+.fxc-monitorfilters .bootstrap-single-select {
+    width: 100%;
+}
+
+.fxc-monitorfilters .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+.fxc-monitorfilters .fxc-viewtoggle {
+    flex: 0 0 auto;
+}

@@ -3,10 +3,15 @@
 #
 # Bu fayl git-də saxlanır və SİRR DAŞIMIR. __PLACEHOLDER__ dəyərləri konteyner
 # start olarkən docker-compose.prod.yml-dəki alertmanager servisi tərəfindən
-# .env dəyişənlərindən (BREVO_SMTP_LOGIN/BREVO_SMTP_KEY/ALERT_EMAIL_TO...)
-# sed ilə doldurulur və nəticə /tmp/alertmanager.yml kimi istifadə olunur.
+# .env dəyişənlərindən (BREVO_SMTP_LOGIN/BREVO_SMTP_KEY/ALERT_EMAIL_TO/
+# WATCHDOG_REPEAT_INTERVAL...) docker/render-template.sh ilə doldurulur və
+# nəticə /tmp/alertmanager.yml kimi istifadə olunur.
 #
-# QEYD: dəyərlərdə '|' və '&' simvolları olmamalıdır (sed əvəzləmə qaydası).
+# 2026-09-14 infra auditi P3-8: əvvəlki `sed` renderi dəyərdəki `|`/`&`/`\`
+# ilə pozulurdu. İndi əvəzləmə hərfidir; ikiqat dırnaq içindəki placeholder
+# üçün `"` və `\` avtomatik qaçırılır — dəyərlərə simvol məhdudiyyəti YOXDUR.
+# Yeni placeholder əlavə edəndə onu compose `command`-dakı dəyişən siyahısına
+# da yazın (tests/test_infra_compose_config.py bunu yoxlayır).
 # ═══════════════════════════════════════════════════════════════════════════
 global:
   smtp_smarthost: "__SMTP_HOST__:__SMTP_PORT__"
@@ -23,6 +28,18 @@ route:
   # Həll olunmamış alert 4 saatdan bir təkrar xatırladılır.
   repeat_interval: 4h
   routes:
+    # 2026-09-13 infra auditi P1-3 (deadman): `Watchdog` qaydası həmişə yanır
+    # (alerts.yml `emsarena-meta`). Bu marşrut onu ümumi ops axınından və
+    # in-app webhook-dan AYIRIR — yalnız dövri «hələ sağam» e-poçtu gedir.
+    # E-poçt kəsilibsə Prometheus→Alertmanager→SMTP zəncirinin harasısa
+    # ölüb. Təkrar intervalı .env `WATCHDOG_REPEAT_INTERVAL` (defolt 24h).
+    # Marşrut siyahının ƏVVƏLİNDƏ olmalıdır (ilk uyğunluq qalib gəlir).
+    - receiver: heartbeat
+      matchers:
+        - alertname = "Watchdog"
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: __WATCHDOG_REPEAT__
     # Kritik alertlər daha tez-tez təkrarlanır.
     - receiver: ops-all
       matchers:
@@ -32,15 +49,40 @@ route:
 receivers:
   # E-poçt + EMSArena in-app insident axını (Sistem Monitorinqi mərkəzi).
   # Webhook Django-nun daxili endpoint-inə gedir; token .env-dən gəlir və
-  # start zamanı compose sed-i ilə doldurulur (sirr git-ə düşmür).
+  # start zamanı render-template.sh ilə doldurulur (sirr git-ə düşmür).
+  # Token `Authorization: Bearer` başlığı ilə göndərilir (2026-09-12, audit
+  # P2-6) — URL-də olsa nginx/proxy access log-una düşürdü. Django tərəfi
+  # `?token=` formasını artıq qəbul etmir; bu şablon dəyişəndə konteyner
+  # yenidən yaradılmalıdır (render start zamanı işləyir — bax remote_deploy.sh).
   - name: ops-all
     email_configs:
       - to: "__ALERT_TO__"
         send_resolved: true
+    # 2026-09-13 infra auditi P2-1: URL birbaşa `app:8000` DEYİL, nginx
+    # üzərindəndir. Birbaşa çağırışda Django `Host: app:8000` görür
+    # (ALLOWED_HOSTS-da yoxdur → 400) və ya `X-Forwarded-Proto` olmadığı üçün
+    # SECURE_SSL_REDIRECT 301 qaytarır (Alertmanager 3xx-i izləmir → uğursuz).
+    # nginx-in daxili `location = /api/.../alertmanager-webhook/` bloku
+    # (yalnız docker şəbəkəsinə açıq) `Host localhost` + XFP https ötürür.
     webhook_configs:
-      - url: "http://app:8000/api/superadmin/monitoring/alertmanager-webhook/?token=__WEBHOOK_TOKEN__"
+      - url: "http://nginx/api/superadmin/monitoring/alertmanager-webhook/"
         send_resolved: true
         max_alerts: 20
+        http_config:
+          authorization:
+            type: Bearer
+            credentials: "__WEBHOOK_TOKEN__"
+
+  # 2026-09-13 infra auditi P1-3: Watchdog heartbeat — YALNIZ e-poçt (in-app
+  # webhook-a getmir ki, daimi «yanan» insident yaranmasın). Xarici deadman
+  # xidməti (healthchecks.io və s.) istənərsə buraya `webhook_configs` əlavə
+  # edin — bax docs/operations/SISTEM_MONITORINQI.md §8.1.
+  - name: heartbeat
+    email_configs:
+      - to: "__ALERT_TO__"
+        send_resolved: false
+        headers:
+          Subject: "[EMSArena] Watchdog heartbeat — monitorinq zənciri işləyir"
 
 inhibit_rules:
   # Hədəf tamamilə əlçatmaz olanda (TargetDown) həmin job-un digər

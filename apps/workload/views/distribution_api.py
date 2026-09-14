@@ -11,6 +11,9 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
+from core.http_ids import parse_uuid
+from core.write_rate_limit import score_write_rate_limited
+
 from ..constants import TaskStatus
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from ..public import STATUS_LABELS
@@ -37,6 +40,11 @@ from ..services import (
 )
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 
+# Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
+# ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
+# verirdi (sandbox: ``workload:assign``, ``workload:row_save``). İndi pk-lar
+# ortaq ``core.http_ids.parse_uuid`` ilə süzülür; pozuq dəyər = «tapılmadı».
+
 
 def _task_payload(task) -> dict:
     return {
@@ -53,8 +61,13 @@ def _task_payload(task) -> dict:
 
 def _resolve_task(request, actor, *, task_id=None, chair_id=None, year=""):
     organization = active_organization(request)
+    task_pk = parse_uuid(task_id) if task_id else None
     if task_id:
-        task = TeachingTask.objects.filter(organization=organization, pk=task_id).select_related("chair").first()
+        task = (
+            TeachingTask.objects.filter(organization=organization, pk=task_pk).select_related("chair").first()
+            if task_pk is not None
+            else None
+        )
     else:
         task = find_task(organization=organization, chair_id=chair_id, academic_year=year) if chair_id else None
     if task is None:
@@ -77,8 +90,17 @@ def rows(request) -> JsonResponse:
     actor = actor_for(request)
     chair_id = request.GET.get("chair") or ""
     year = request.GET.get("year") or ""
+    task_id = request.GET.get("task") or None
     try:
-        task = _resolve_task(request, actor, task_id=request.GET.get("task") or None, chair_id=chair_id, year=year)
+        # Audit `access` F-13 (2026-09-13): `?chair=<yad tenantın kafedrası>`
+        # `teachers`/`options`-da `chair_not_found` 403 verirdi, burada isə
+        # `find_task` boş qaytarıb 200 «tapşırıq yoxdur» qabığı gedirdi — sızma
+        # yox, amma üç qardaş endpoint fərqli cavab verirdi. Kafedra əvvəlcə eyni
+        # resolver ilə aktiv təşkilata bağlanır; öz kafedrası üçün tapşırıq
+        # olmayanda boş 200 (UI-nin «hələ yaradılmayıb» halı) dəyişmir.
+        if chair_id and not task_id:
+            resolve_chair(organization, chair_id)
+        task = _resolve_task(request, actor, task_id=task_id, chair_id=chair_id, year=year)
     except WorkloadDenied as exc:
         if exc.code == "workload.task_not_found":
             return JsonResponse({"ok": True, "task": None, "rows": [], "teachers": [], "readiness": None})
@@ -252,7 +274,8 @@ def row_save(request) -> JsonResponse:
         instance = _resolve_task(request, actor, task_id=payload.get("task_id"))
         row = None
         if payload.get("row_id"):
-            row = TeachingTaskRow.objects.filter(pk=payload["row_id"], task=instance).first()
+            row_pk = parse_uuid(payload["row_id"])
+            row = TeachingTaskRow.objects.filter(pk=row_pk, task=instance).first() if row_pk is not None else None
             if row is None:
                 return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
         saved = save_row(task=instance, actor=actor, data=payload, row=row, request=request)
@@ -274,7 +297,8 @@ def row_delete(request) -> JsonResponse:
     actor = actor_for(request)
     try:
         instance = _resolve_task(request, actor, task_id=payload.get("task_id"))
-        row = TeachingTaskRow.objects.filter(pk=payload.get("row_id"), task=instance).first()
+        row_pk = parse_uuid(payload.get("row_id"))
+        row = TeachingTaskRow.objects.filter(pk=row_pk, task=instance).first() if row_pk is not None else None
         if row is None:
             return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
         delete_row(task=instance, row=row, actor=actor, request=request)
@@ -286,22 +310,29 @@ def row_delete(request) -> JsonResponse:
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("workload_assign")  # F-15 (2026-09-14): istifadəçi başına yazı vedrəsi
 def assign(request) -> JsonResponse:
     organization = active_organization(request)
     if organization is None:
         return no_org()
     payload = json_body(request)
     actor = actor_for(request)
+    row_pk = parse_uuid(payload.get("row_id"))
     row = (
-        TeachingTaskRow.objects.filter(organization=organization, pk=payload.get("row_id"))
+        TeachingTaskRow.objects.filter(organization=organization, pk=row_pk)
         .select_related("task", "task__chair")
         .first()
+        if row_pk is not None
+        else None
     )
     if row is None:
         return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
     assignment = None
     if payload.get("assignment_id"):
-        assignment = TeacherAssignment.objects.filter(pk=payload["assignment_id"], row=row).first()
+        assignment_pk = parse_uuid(payload["assignment_id"])
+        assignment = (
+            TeacherAssignment.objects.filter(pk=assignment_pk, row=row).first() if assignment_pk is not None else None
+        )
         if assignment is None:
             return error("workload.assignment_not_found", "Bölgü tapılmadı.", status=404)
     try:
@@ -331,10 +362,13 @@ def unassign_view(request) -> JsonResponse:
         return no_org()
     payload = json_body(request)
     actor = actor_for(request)
+    assignment_pk = parse_uuid(payload.get("assignment_id"))
     assignment = (
-        TeacherAssignment.objects.filter(organization=organization, pk=payload.get("assignment_id"))
+        TeacherAssignment.objects.filter(organization=organization, pk=assignment_pk)
         .select_related("row", "row__task", "row__task__chair")
         .first()
+        if assignment_pk is not None
+        else None
     )
     if assignment is None:
         return error("workload.assignment_not_found", "Bölgü tapılmadı.", status=404)

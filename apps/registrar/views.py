@@ -12,9 +12,11 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from . import finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
@@ -32,9 +34,10 @@ def _current_period(organization):
     )
 
 
-# Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə
-# `_can_edit_journal` / `_is_direct_editor` adları geriyə-uyğunluq üçün saxlanılır
-# (journal_actions + pdf_views bunları views-dan idxal edir).
+from .handover import is_handover_observer as _is_handover_observer  # noqa: E402
+
+# Redaktə/giriş hüquq köməkçiləri ayrıca modulda (modul-ölçü limiti). Köhnə `_can_edit_journal` /
+# `_is_direct_editor` adları geriyə-uyğunluq üçün (journal_actions + pdf_views buradan idxal edir).
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
@@ -43,14 +46,14 @@ from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
 
 @login_required
 def journal_list(request):
-    """The teacher's own offerings — entry points into each journal."""
-    from apps.registrar import corrections as corrections_service
-    from apps.registrar import page_contexts
+    """Müəllimin öz offering-ləri; tələbə ailəsi öz kabinet jurnalına yönlənir (2026-09-12)."""
+    from apps.registrar import corrections, page_contexts
 
+    if page_contexts.is_student_family_user(getattr(request, "organization", None), request.user):
+        return redirect(f"{reverse('accounts:profile')}?section=my-journal")
     context = page_contexts.journal_list_context(request.user, request=request)
     context["active_main_nav"] = "journal"
-    # Korrektorlara (superadmin / journal.correct) düzəliş interfeysinə keçid göstər.
-    context["can_correct_journal"] = corrections_service.can_correct_journal(request)
+    context["can_correct_journal"] = corrections.can_correct_journal(request)  # korrektor keçidi
     return render(request, "registrar/journal_list.html", context)
 
 
@@ -74,22 +77,23 @@ def journal_detail(request, offering_id):
 
     journal_locked = gradebook.journal_is_locked(offering)
     can_edit_perm = _can_edit_journal(request.user, offering)
-    # Birbaşa redaktə (müəllim/sahib/superuser) — korrektor (İKT) DAXİL DEYİL.
+    # Birbaşa redaktə (müəllim/sahib/superuser/RİM rəhbəri — sahibin qərarı 2026-09-14).
     is_direct_editor = _is_direct_editor(request.user, offering)
     can_correct = corrections_service.can_correct_journal(request)
-    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/
-    # dekanlıq. Onlar müəllim deyil: jurnalı OXU rejimində açırlar, xanaya
-    # toxuna bilmirlər (POST aşağıda `is_direct_editor` ilə kəsilir).
-    # İCAZƏ (səhifəni aça bilirmi) ilə ƏMƏL (siyahını dəyişə bilirmi) AYRIDIR:
-    # bağlanmış jurnal / keçmiş dövr koordinatoru səhifədən qovmur (tarixçəni
-    # oxuya bilir), amma «alt qrupdan əlavə et» səthini tamamilə gizlədir.
+    # Jurnal SİYAHISININ idarəsi (alt qrupdan əlavə/geri götürmə) — koordinator/dekanlıq:
+    # jurnalı OXU rejimində açır, xanaya toxunmur (POST `is_direct_editor` ilə kəsilir).
+    # İCAZƏ (səhifəni açmaq) ilə ƏMƏL (siyahını dəyişmək) AYRIDIR: bağlı jurnal /
+    # keçmiş dövr səhifədən qovmur, amma «alt qrupdan əlavə et» səthini gizlədir.
     roster_scope = guest_roster.can_manage_offering_roster(request.user, offering)
     can_manage_roster = roster_scope and guest_roster.roster_is_open(offering)
-    # Təhvil verən köhnə müəllim: AÇIR, yazmır (bax journal_access şərhi).
-    handover_observer = _can_observe_journal(request.user, offering)
-    # Səhifəni yalnız redaktor / korrektor / siyahı idarəçisi / köhnə müəllim açır.
-    if not can_edit_perm and not can_correct and not roster_scope and not handover_observer:
+    # Yalnız-oxu müşahidəçi: təhvil verən köhnə müəllim VƏ YA əhatəli `journal.view`
+    # daşıyıcısı (bax journal_access) — səhifəni AÇIR, yazmır.
+    observer = _can_observe_journal(request.user, offering)
+    if not can_edit_perm and not can_correct and not roster_scope and not observer:
         raise Http404
+    # «Təhvil verilib» bannerı YALNIZ köhnə müəllimə (2026-09-14: `journal.view`
+    # daşıyıcısına — məs. RİM `*` — bu mətn yanlış çıxırdı).
+    handover_observer = observer and not is_direct_editor and _is_handover_observer(request.user, offering)
     # Yerində düzəliş rejimi (kilid-aç toggle) — yalnız korrektor + ?correct=1.
     correction_mode = request.method == "GET" and request.GET.get("correct") == "1" and can_correct
 
@@ -113,8 +117,6 @@ def journal_detail(request, offering_id):
         return _handle_save_marks(request, offering)
 
     import datetime as _dt
-
-    from django.utils import timezone as _tz
 
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
@@ -146,8 +148,7 @@ def journal_detail(request, offering_id):
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
-    needs_coursework = active_tab in {"kurs-isi", "yekun"}
-    needs_finals = active_tab == "yekun"
+    needs_coursework, needs_finals = active_tab in {"kurs-isi", "yekun"}, active_tab == "yekun"
     coursework_rows = journal_extras.get_course_work_rows(offering) if needs_coursework else []
     finals_data = finals.get_offering_results(offering=offering) if needs_finals else {"rows": []}
     work_by_enrollment = {row["enrollment"].id: row["work"] for row in coursework_rows}
@@ -169,7 +170,7 @@ def journal_detail(request, offering_id):
         row["coursework"] = work_by_enrollment.get(row["enrollment"].id)
         row["attempts"] = attempts_map.get(row["enrollment"].id, [])
 
-    today = _tz.localdate()
+    today = timezone.localdate()
     today_parity = schedule.week_parity(offering.period, today - _dt.timedelta(days=today.weekday()))
     rooms = lesson_rooms.lesson_room_choices(offering)
     syllabus_gate = journal_policy.syllabus_gate(offering)
@@ -299,10 +300,8 @@ def rubric_grade_view(request, offering_id, component_id):
             if not key.startswith("rpoints__"):
                 continue
             parts = key.split("__")
-            if len(parts) != 3:
-                continue
-            _prefix, criterion_id, enrollment_id = parts
-            entries.append({"criterion_id": criterion_id, "enrollment_id": enrollment_id, "points": raw})
+            if len(parts) == 3:
+                entries.append({"criterion_id": parts[1], "enrollment_id": parts[2], "points": raw})
         try:
             written = rubrics_service.save_criterion_scores(component=component, entries=entries, by_user=request.user)
         except ValidationError as exc:
@@ -374,6 +373,7 @@ def _can_write_finals(user, offering) -> bool:
     return scope.has_structure_access
 
 
+@transaction.atomic  # F-07 (2026-09-14): sətir-sətir servis çağırışları BİR tranzaksiyada — yarımçıq toplu yazı olmasın
 def _handle_save_finals(request, offering):
     """Yekun imtahan/təkrar balı (exam__/resit__) + bonus-rəy (bonus__/fcomment__).
 
@@ -592,7 +592,9 @@ def _handle_save_marks(request, offering):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
-# The registrar console (K3) views live in ``apps.registrar.console_views`` to
-# keep this module focused (journal + gradebook) and under the size budget;
-# the weekly timetable (U4) and the academic calendar (U11) live in
-# ``apps.registrar.schedule_views`` for the same reason.
+# Akademik kataloqun idarəetməsi ARTIQ registrar səhifəsi DEYİL: köhnə
+# «Registrar idarəetməsi» konsolu (`console_views.py`) 2026-09-10-da silindi,
+# yerini kabinet bölməsi tutdu — məntiq ``apps.registrar.catalog_console``-da,
+# səth isə ``accounts:profile?section=registrar-catalog``-dadır.
+# Həftəlik cədvəl (U4) və akademik təqvim (U11) modul ölçü büdcəsinə görə
+# ``apps.registrar.schedule_views``-dadır.

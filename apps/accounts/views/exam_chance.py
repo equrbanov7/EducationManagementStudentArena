@@ -17,8 +17,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, StudentGroup
-from apps.exams.public import SecondChanceError, grant_second_chance, is_exam_center_user
-from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
+from apps.exams.public import SECURE_EXAM_CATEGORIES, SecondChanceError, grant_second_chance, is_exam_center_user
 from apps.organizations.public import organization_user_queryset
 
 from ._helpers import _append_query_params, _get_active_organization, _render_profile_section, _resolve_next_url

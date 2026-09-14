@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}
+  2026-09-14 (W3 `w3myexams`): bölmənin alt-görünüş naviqasiyası — «İmtahanlarım»
+  (aktiv siyahı) / «Zibil qutusu» (yumşaq silinmişlər). `ems-tabs` dilində, amma
+  server-render LİNKLƏR: panel içindəki `?section=my-exams…` linkləri profil
+  qabığı (profile/ajax.js) AJAX ilə yükləyir və URL-i yeniləyir — deep-link,
+  «geri» düyməsi və JS-siz düşmə işləyir. Aktiv tab `aria-current="page"`.
+{% endcomment %}
+{% with trash=my_exams_dashboard.trash %}
+<nav class="ems-tabs tx-tabs" data-tx-tabs aria-label="{% trans 'my_exams' context 'profile.section' %}">
+  <a class="ems-tabs__btn" href="{{ profile_base_url }}?section=my-exams"
+     {% if not trash.is_open %}aria-current="page"{% endif %}>
+    <i class="fas fa-file-lines" aria-hidden="true"></i>
+    {% trans "my_exams" context "profile.section" %}
+    <span class="ems-tabs__count">{{ my_exams_count }}</span>
+  </a>
+  <a class="ems-tabs__btn" href="{{ trash.url }}"
+     {% if trash.is_open %}aria-current="page"{% endif %}>
+    <i class="fas fa-trash-can" aria-hidden="true"></i>
+    {% trans "trash_link" context "profile.my_exams" %}
+    <span class="ems-tabs__count">{{ trash.count }}</span>
+  </a>
+</nav>
+{% endwith %}

@@ -21,7 +21,7 @@ def posts_enabled_for(request) -> bool:
     organization = getattr(request, "organization", None)
     if organization is None:
         return not getattr(settings, "UNIVERSITY_MODE", True)
-    from apps.organizations.cabinet_modules import is_module_enabled
+    from apps.organizations.public import is_module_enabled
 
     return is_module_enabled(organization, "posts")
 

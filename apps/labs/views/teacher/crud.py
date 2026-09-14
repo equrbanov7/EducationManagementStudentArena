@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -54,34 +55,12 @@ def create_lab(request, course_id):
         group_names = request.POST.getlist("group_names[]")
         student_ids = request.POST.getlist("student_ids[]")
 
-        lab = Lab.objects.create(
-            course=course,
-            title=request.POST.get("title"),
-            description=request.POST.get("description", ""),
-            start_datetime=request.POST.get("start_datetime"),
-            end_datetime=request.POST.get("end_datetime"),
-            max_score=request.POST.get("max_score", 100),
-            max_attempts=request.POST.get("max_attempts", 1),  # Cəhd sayı
-            status="draft",
-            questions_per_student=request.POST.get("questions_per_student", 0),
-            allow_late_submission=request.POST.get("allow_late_submission") == "on",
-            late_penalty_percent=request.POST.get("late_penalty_percent", 0),
-            allow_file_upload=request.POST.get("allow_file_upload") == "on",
-            allow_link_submission=request.POST.get("allow_link_submission") == "on",
-            max_file_size_mb=max_file_size_mb,
-            allowed_extensions=",".join(ext.lstrip(".") for ext in sorted(allowed_extensions)),
-            teacher_instructions=request.POST.get("teacher_instructions", ""),
-            allowed_groups=",".join(group_names) if group_names else "",
-            created_by=request.user,
-        )
-
-        if student_ids:
-            valid_ids = [int(sid) for sid in student_ids if str(sid).isdigit()]
-            lab.allowed_students.set(User.objects.filter(pk__in=valid_ids))
-
-        if teacher_file is not None:
-            lab.teacher_files = teacher_file
-            lab.save()
+        # Audit 2026-09-13 backend F-07 (2026-09-14): lab + icazəli tələbələr (M2M) + fayl
+        # birlikdə — istisna `except`-ə çıxır (500), yarımçıq lab qalmır.
+        with transaction.atomic():
+            lab = _create_lab_with_students(
+                request, course, group_names, student_ids, allowed_extensions, max_file_size_mb, teacher_file
+            )
 
         return JsonResponse({"success": True, "lab_id": lab.id})
 
@@ -90,6 +69,42 @@ def create_lab(request, course_id):
     except Exception:
         logger.exception("Unexpected error in create_lab")
         return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
+
+
+def _create_lab_with_students(
+    request, course, group_names, student_ids, allowed_extensions, max_file_size_mb, teacher_file
+):
+    """`create_lab`-ın yazı hissəsi (çağıran ``transaction.atomic`` içindədir)."""
+    lab = Lab.objects.create(
+        course=course,
+        title=request.POST.get("title"),
+        description=request.POST.get("description", ""),
+        start_datetime=request.POST.get("start_datetime"),
+        end_datetime=request.POST.get("end_datetime"),
+        max_score=request.POST.get("max_score", 100),
+        max_attempts=request.POST.get("max_attempts", 1),  # Cəhd sayı
+        status="draft",
+        questions_per_student=request.POST.get("questions_per_student", 0),
+        allow_late_submission=request.POST.get("allow_late_submission") == "on",
+        late_penalty_percent=request.POST.get("late_penalty_percent", 0),
+        allow_file_upload=request.POST.get("allow_file_upload") == "on",
+        allow_link_submission=request.POST.get("allow_link_submission") == "on",
+        max_file_size_mb=max_file_size_mb,
+        allowed_extensions=",".join(ext.lstrip(".") for ext in sorted(allowed_extensions)),
+        teacher_instructions=request.POST.get("teacher_instructions", ""),
+        allowed_groups=",".join(group_names) if group_names else "",
+        created_by=request.user,
+    )
+
+    if student_ids:
+        valid_ids = [int(sid) for sid in student_ids if str(sid).isdigit()]
+        lab.allowed_students.set(User.objects.filter(pk__in=valid_ids))
+
+    if teacher_file is not None:
+        lab.teacher_files = teacher_file
+        lab.save()
+
+    return lab
 
 
 @login_required

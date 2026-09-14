@@ -4,6 +4,10 @@
 {% block title %}{{ room.name }} — {% trans "Zal nəzarəti" %}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur
+    (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor_filters.css' %}?v=20260910-1">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
@@ -169,18 +173,26 @@
 
   <section class="fxc-stats" id="fxc-stats" aria-label="{% trans 'Zal statistikası' %}"></section>
 
-  <div class="fxc-toolbar">
-    <input type="search" id="fxc-filter" class="fxc-input"
-           placeholder="{% trans 'Tələbə / fənn üzrə süz…' %}" aria-label="{% trans 'Axtarış' %}">
-    <div class="bootstrap-single-select fxc-toolbar-select">
-      <select id="fxc-exam-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-              data-bootstrap-select aria-label="{% trans 'İmtahan filtri' %}">
+  <div class="ems-filters fxc-monitorfilters" role="search">
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="fxc-filter">{% trans "Axtarış" %}</label>
+      <input type="search" id="fxc-filter" class="ems-input"
+             placeholder="{% trans 'Tələbə / fənn üzrə süz…' %}" autocomplete="off">
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="fxc-exam-filter">{% trans "İmtahan" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems fxc-toolbar-select">
+      <select id="fxc-exam-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select"
+              data-bootstrap-select>
         <option value="">{% trans "Bütün imtahanlar" %}</option>
       </select>
+      </div>
     </div>
-    <div class="bootstrap-single-select fxc-toolbar-select">
-      <select id="fxc-status-filter" class="form-select bootstrap-single-select__native js-bootstrap-single-select"
-              data-bootstrap-select aria-label="{% trans 'Status filtri' %}">
+    <div class="ems-field">
+      <label class="ems-field__label" for="fxc-status-filter">{% trans "Status" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems fxc-toolbar-select">
+      <select id="fxc-status-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select"
+              data-bootstrap-select>
         <option value="">{% trans "Bütün statuslar" %}</option>
         {# "waiting" filtri ready-ni də tutur (JS): operator üçün ikisi də "Gözləyir"dir. #}
         <option value="waiting">{% trans "Gözləyir" %}</option>
@@ -188,6 +200,7 @@
         <option value="completed">{% trans "Bitirib" %}</option>
         <option value="removed">{% trans "Çıxarılıb" %}</option>
       </select>
+      </div>
     </div>
   </div>
 

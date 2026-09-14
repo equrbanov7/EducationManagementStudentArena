@@ -1,0 +1,91 @@
+{% load i18n %}
+{% comment %}
+«Tələbə və heyət» sidebar qrupu — universitetin İNSAN reyestrləri: tələbə
+qəbulu/reyestri, tələbə və müəllim kataloqu, akademik qeydlər.
+
+2026-09-10-da köhnə «Tələbə Xidmətləri» qrupu (2 bənd) genişləndi: «Tələbələr»,
+«Müəllimlər» və «Akademik qeydlər» köhnə 19 bəndlik «Universitet» divarından
+bura köçdü — hamısı eyni sual cavablandırır: «kim var və onun izi nədir».
+
+Bölmə açarları icazə-əsaslıdır (`user.import` / `student.registry_view` /
+`people.view` …, bax `rbac_sections.py`) — rol adı yoxlanılmır.
+
+⚠️ Köhnə «Tələbə idxalı» girişi (`student-intake`) RİM qrupunda OLDUĞU KİMİ
+qalır — link və testlər qırılmasın deyə. Bu qrup onun genişlənmiş görünüşünü
+(`student-admission`) göstərir.
+
+Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALIR.
+{% endcomment %}
+{% if "student-admission" in allowed_sections or "student-registry" in allowed_sections or "people-students" in allowed_sections or "people-teachers" in allowed_sections or "academic-records" in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="people">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|student-admission|student-registry|people-students|people-teachers|academic-records|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "Tələbə və heyət" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% if "student-admission" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=student-admission"
+                   data-section="student-admission"
+                   data-title="{% trans 'Tələbə qəbulu' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-admission' %}active{% endif %}">
+                    <i class="fas fa-user-plus sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Tələbə qəbulu" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "student-registry" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=student-registry"
+                   data-section="student-registry"
+                   data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-registry' %}active{% endif %}">
+                    <i class="fas fa-address-book sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Tələbə reyestri" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "people-students" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=people-students"
+                   data-section="people-students"
+                   data-title="{% trans 'Tələbələr' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-students' %}active{% endif %}">
+                    <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Tələbələr" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "people-teachers" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=people-teachers"
+                   data-section="people-teachers"
+                   data-title="{% trans 'Müəllimlər' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-teachers' %}active{% endif %}">
+                    <i class="fas fa-chalkboard-user sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Müəllimlər" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "academic-records" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=academic-records"
+                   data-section="academic-records"
+                   data-title="{% trans 'Akademik qeydlər' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

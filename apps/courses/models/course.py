@@ -144,7 +144,8 @@ class Course(models.Model):
         indexes = [
             models.Index(fields=["owner", "-created_at"]),
             models.Index(fields=["status"]),
-            models.Index(fields=["slug"]),
+            # `slug` Meta indeksi silindi (2026-09-14): sahənin `unique=True`
+            # indeksi eyni sütunu örtür (data auditi 2026-09-13 §6.2, miqrasiya 0002).
         ]
 
     def __str__(self):

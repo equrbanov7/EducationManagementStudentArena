@@ -1,0 +1,6 @@
+{
+  "set_owner": "42501",
+  "create_table": "42501",
+  "activation_ledger_insert": "42501",
+  "transfer_ledger_insert": "42501"
+}

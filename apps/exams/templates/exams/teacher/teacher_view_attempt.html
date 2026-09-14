@@ -160,7 +160,7 @@
         </div>
     </div>
 
-    <div class="questions-list">
+    <div class="questions-list" data-ems-math>
         {% if qa_list %}
         {% for item in qa_list %}
             <div class="question-card card shadow-sm mb-4">
@@ -392,5 +392,6 @@
 {% endblock %}
 
 {% block extraJs %}
+    {% include "partials/ems_ui/_math_assets.html" %}
 <script src="{% static 'exams/js/teacher_view_attempt.js' %}"></script>
 {% endblock %}

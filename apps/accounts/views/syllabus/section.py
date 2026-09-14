@@ -25,15 +25,22 @@ CONTEXT MÜQAVİLƏSİ — ``syllabus_list_section`` (dict)
 
 from __future__ import annotations
 
+import datetime as _dt
+import uuid
+
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import QUEUE_STATUSES, STATUS_SORT_INDEX, SyllabusStatus
-from apps.syllabus.policy import sla_days
-from apps.syllabus.public import build_syllabus_list_context
+from apps.syllabus.public import (
+    QUEUE_STATUSES,
+    STATUS_SORT_INDEX,
+    SyllabusStatus,
+    build_syllabus_list_context,
+    sla_days,
+)
 
 from .labels import STATUS_TONES
 from .rows import build_missing_row, build_row
@@ -77,11 +84,15 @@ def _text(request, key: str, default: str = "") -> str:
 
 
 def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: str, search: str, copyable):
-    """Müəllimin sillabusu OLMAYAN açılışları — «Sillabus yarat» sətirləri."""
-    from apps.registrar.models import CourseOffering
+    """Müəllimin sillabusu OLMAYAN açılışları — «Sillabus yarat» sətirləri.
 
-    covered_offerings = {row.offering_id for row in syllabi if row.offering_id}
-    covered_pairs = {(row.subject_id, row.period_id) for row in syllabi}
+    ``syllabi`` — görünən dəstin QUERYSET-i. Perf auditi 2026-09-13 F-12:
+    əvvəl bütün dəst ikinci dəfə ``list()`` ilə Python-a çəkilirdi (rektorda
+    4 926 sətir, 66 ms təkrar sorğu + disk sort); indi yalnız müəllimin
+    açılışlarına dəyən ``(offering, subject, period)`` üçlükləri
+    ``values_list`` ilə oxunur, açılış yoxdursa heç sorğu getmir.
+    """
+    from apps.registrar.models import CourseOffering
 
     queryset = (
         CourseOffering.objects.filter(organization=organization, is_active=True, instructor=user)
@@ -94,9 +105,26 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
         queryset = queryset.filter(period__name=semester)
     if search:
         queryset = queryset.filter(Q(subject__name__icontains=search) | Q(subject__code__icontains=search))
+    offerings = list(queryset)
+    if not offerings:
+        return []
+
+    covered = (
+        syllabi.order_by()
+        .filter(
+            Q(offering_id__in=[offering.pk for offering in offerings])
+            | Q(subject_id__in={offering.subject_id for offering in offerings})
+        )
+        .values_list("offering_id", "subject_id", "period_id")
+    )
+    covered_offerings, covered_pairs = set(), set()
+    for offering_id, subject_id, period_id in covered:
+        if offering_id:
+            covered_offerings.add(offering_id)
+        covered_pairs.add((subject_id, period_id))
 
     rows = []
-    for offering in queryset:
+    for offering in offerings:
         if offering.pk in covered_offerings:
             continue
         if (offering.subject_id, offering.period_id) in covered_pairs:
@@ -106,25 +134,85 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
 
 
 def _copyable_subjects(syllabi) -> set:
-    """Keçmiş (təsdiqlənmiş/arxivlənmiş) versiyası olan fənlər — «köçür» mənbəyi."""
-    done = {SyllabusStatus.APPROVED.value, SyllabusStatus.ARCHIVED.value}
-    return {
-        row.subject_id
-        for row in syllabi
-        if row.approved_version_id or (row.current_version is not None and row.current_version.status in done)
-    }
+    """Keçmiş (təsdiqlənmiş/arxivlənmiş) versiyası olan fənlər — «köçür» mənbəyi.
+
+    F-12: dəst QUERYSET-dir — yalnız uyğun ``subject_id``-lər oxunur
+    (``values_list``), sətirlərin özü yox.
+    """
+    done = [SyllabusStatus.APPROVED.value, SyllabusStatus.ARCHIVED.value]
+    return set(
+        syllabi.order_by()
+        .filter(Q(approved_version__isnull=False) | Q(current_version__status__in=done))
+        .values_list("subject_id", flat=True)
+        .distinct()
+    )
 
 
 def _chair_units(syllabi):
-    """Görünən sillabusların kafedraları — filtr açılışı üçün (təkrarsız)."""
-    seen, rows = set(), []
-    for row in syllabi:
-        unit = row.chair_unit if row.chair_unit_id else None
-        if unit is None or unit.pk in seen:
-            continue
-        seen.add(unit.pk)
-        rows.append({"key": str(unit.pk), "label": unit.name})
+    """Görünən sillabusların kafedraları — filtr açılışı üçün (təkrarsız).
+
+    F-12: ``values_list(..).distinct()`` — dəst Python-a gəlmir.
+    """
+    rows = [
+        {"key": str(unit_id), "label": name}
+        for unit_id, name in syllabi.order_by()
+        .filter(chair_unit__isnull=False)
+        .values_list("chair_unit_id", "chair_unit__name")
+        .distinct()
+    ]
     return sorted(rows, key=lambda item: item["label"])
+
+
+def _overdue_filter(*, now, sla: int) -> Q:
+    """`overdue_syllabus_ids` ilə EYNİ qayda, SQL-də.
+
+    Python: ``(now - submitted_at).days > sla`` — ``timedelta.days`` aşağı
+    yuvarlaqlaşdırır, yəni fərq ≥ (sla + 1) tam gün ⇔
+    ``submitted_at <= now - (sla + 1) gün``.
+    """
+    cutoff = now - _dt.timedelta(days=sla + 1)
+    return Q(current_version__status__in=sorted(QUEUE_STATUSES), current_version__submitted_at__lte=cutoff)
+
+
+class _MissingThenSyllabi:
+    """«Sillabussuz» sətirlər + sillabus QUERYSET-i — ``Paginator`` üçün tək ardıcıllıq.
+
+    Perf auditi 2026-09-13 F-12: əvvəl bütün dəst (rektorda 4 926 sillabus)
+    Python-a yüklənib HAMISI üçün ``build_row`` qurulur, sonra
+    ``Paginator(rows)`` ilə 10-u seçilirdi (1 244 ms). İndi ``Paginator``
+    uzunluğu ``len(missing) + queryset.count()`` kimi alır, dilimi isə
+    ``missing[…] + queryset[LIMIT/OFFSET]`` kimi — ``build_row`` yalnız
+    səhifənin sətirləri üçün çağırılır. Sıra əvvəlki kimi: əvvəl
+    «sillabussuz» sətirlər, sonra sıralanmış sillabuslar.
+    """
+
+    def __init__(self, missing, queryset, *, now, copyable):
+        self._missing = list(missing)
+        self._queryset = queryset
+        self._now = now
+        self._copyable = copyable
+        self._count = None
+
+    def __len__(self):
+        if self._count is None:
+            self._count = len(self._missing) + self._queryset.count()
+        return self._count
+
+    def __getitem__(self, item):
+        if not isinstance(item, slice):
+            raise TypeError("yalnız dilim dəstəklənir")
+        start, stop = item.start or 0, item.stop if item.stop is not None else len(self)
+        head = self._missing[start:stop]
+        offset = max(0, start - len(self._missing))
+        limit = max(0, stop - len(self._missing)) - offset
+        if limit <= 0:
+            return head
+        page_syllabi = list(
+            self._queryset.select_related("current_version__approved_by", "current_version__reviewer")[
+                offset : offset + limit
+            ]
+        )
+        return head + [build_row(row, now=self._now, can_copy=row.subject_id in self._copyable) for row in page_syllabi]
 
 
 def academic_filter_options(organization):
@@ -235,36 +323,43 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         request,
         organization=organization,
         academic_year=academic_year or None,
-        # «sla» REAL status deyil — sorğuya ötürülsə heç nə uyğun gəlməzdi;
-        # süzgəc aşağıda, gözləmə müddəti hesablandıqdan sonra tətbiq olunur.
-        statuses=[status] if status and status != "sla" else None,
+        # «sla»/«missing» REAL status deyil — sorğuya ötürülsə heç nə uyğun
+        # gəlməzdi; süzgəc aşağıda tətbiq olunur. Audit 2026-09-13 (perf F-12
+        # yan tapıntısı): «missing» ötürüləndə dəst boşalır və sillabusu OLAN
+        # açılışlar da «sillabussuz» görünürdü, KPI-lar sıfırlanırdı.
+        statuses=[status] if status and status not in VIRTUAL_STATUS_KEYS else None,
         search=search,
         sort=sort if sort in SORT_LABELS else "recent",
     )
-    # `chair_unit` domen sorğusunun `select_related`-ında yoxdur (siyahı ona görə
-    # ehtiyac duymur) — kafedra filtri üçün burada əlavə olunur ki, N+1 olmasın.
-    syllabi = list(context["syllabi"].select_related("chair_unit"))
+    # Perf auditi 2026-09-13 F-12: dəst DAHA Python-a yüklənmir — semestr/kafedra
+    # süzgəcləri, SLA seçimi, «köçür» mənbəyi və kafedra siyahısı SQL-dədir;
+    # `build_row` yalnız səhifənin sətirləri üçün (`_MissingThenSyllabi`).
+    visible = context["syllabi"]
     # Kafedra siyahısı GÖRÜNƏN dəstdən çıxarılır — ayrıca struktur sorğusu
     # açmırıq ki, əhatəsiz istifadəçiyə bütün org-un kafedraları sızmasın.
-    units = _chair_units(syllabi)
+    units = _chair_units(visible)
+    syllabi = visible
     if semester:
-        syllabi = [row for row in syllabi if row.period_id and row.period.name == semester]
+        syllabi = syllabi.filter(period__name=semester)
     if unit:
-        syllabi = [row for row in syllabi if str(row.chair_unit_id) == unit]
+        try:
+            syllabi = syllabi.filter(chair_unit_id=uuid.UUID(unit))
+        except ValueError:
+            syllabi = syllabi.none()
 
     now = timezone.now()
     sla = sla_days(organization)
-    overdue = overdue_syllabus_ids(syllabi, now=now, sla=sla)
+    overdue_q = _overdue_filter(now=now, sla=sla)
+    overdue_count = syllabi.filter(overdue_q).count()
     if status == "sla":
-        syllabi = [row for row in syllabi if row.pk in overdue]
+        syllabi = syllabi.filter(overdue_q)
     copyable = _copyable_subjects(syllabi)
-    rows = [build_row(row, now=now, can_copy=row.subject_id in copyable) for row in syllabi]
 
     missing = (
         _missing_rows(
             organization=organization,
             user=request.user,
-            syllabi=list(context["syllabi"]),
+            syllabi=visible,
             academic_year=academic_year,
             semester=semester,
             search=search,
@@ -274,11 +369,11 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         else []
     )
     if status == "missing":
-        rows = missing
+        sequence = _MissingThenSyllabi(missing, syllabi.none(), now=now, copyable=copyable)
     else:
-        rows = missing + rows
+        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable)
 
-    paginator = Paginator(rows, PAGE_SIZE)
+    paginator = Paginator(sequence, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
     years, seasons = academic_filter_options(organization)
 
@@ -287,7 +382,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
             "has_access": True,
             "access_denied_message": "",
             "can_create": context["can_create"],
-            "kpis": _kpis(context["counts"], len(missing), status, overdue_count=len(overdue), sla=sla),
+            "kpis": _kpis(context["counts"], len(missing), status, overdue_count=overdue_count, sla=sla),
             "chips": _chips(context["counts"], len(missing), status),
             "rows": list(page.object_list),
             "filters": {
@@ -320,7 +415,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
                 # Şablon URL-i: JS «0…0» UUID-ini konkret dosye id-si ilə əvəzləyir.
                 "preview": reverse("accounts:syllabus_preview", kwargs={"syllabus_id": _URL_PLACEHOLDER_UUID}),
             },
-            "empty": not rows,
+            "empty": paginator.count == 0,
         }
     }
 

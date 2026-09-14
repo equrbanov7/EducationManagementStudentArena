@@ -66,6 +66,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_student_intake.html" %}
             {% elif active_section == "teacher-intake" and 'teacher-intake' in allowed_sections %}
                 {% include "accounts/profile/sections/_teacher_intake.html" %}
+            {% elif active_section == "registrar-catalog" and 'registrar-catalog' in allowed_sections %}
+                {% include "accounts/profile/sections/_registrar_catalog.html" %}
             {% elif active_section == "applications" and 'applications' in allowed_sections %}
                 {% include "accounts/profile/sections/_applications.html" %}
             {% elif active_section == "academic-calendar" %}

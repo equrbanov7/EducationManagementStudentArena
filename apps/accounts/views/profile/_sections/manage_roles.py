@@ -259,6 +259,17 @@ def build_manage_roles_section(request, section, *, capabilities):
     columns, table_rows = _table(rows)
     filtered = bool(search or role_filter or unit_filter or shape != "all")
 
+    # «Rol təyin et» ekranından dərin keçid: `?mr_grant=<user_id>` — «Rol ver»
+    # dialoqu həmin şəxs üçün ÖZÜ açılır (sahib, 2026-09-09: «2-ci və ya 3-cü rol
+    # vermək üçün yer yaxşı deyil»). Şəxs cari səhifədə yoxdursa keçid səssizcə
+    # nəzərə alınmır — axtarışla tapmaq mümkündür.
+    grant_user = (request.GET.get("mr_grant") or "").strip()
+    grant_prefill = None
+    if grant_user:
+        match = next((row for row in rows if str(row["user_id"]) == grant_user), None)
+        if match is not None and match.get("can_edit"):
+            grant_prefill = {"user_id": grant_user, "name": match["name"]}
+
     section.update(
         {
             "subtitle": pgettext(
@@ -266,6 +277,7 @@ def build_manage_roles_section(request, section, *, capabilities):
                 "Bir şəxsin bütün təşkilat rolları — məsələn həm «Proqram koordinatoru», həm «Müəllim». "
                 "Rol vermək və geri almaq buradan aparılır; hər əməl audit jurnalına yazılır.",
             ),
+            "grant_prefill": grant_prefill,
             "kpi_tiles": _kpi_tiles(
                 members,
                 organization=organization,

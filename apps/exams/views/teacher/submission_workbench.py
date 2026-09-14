@@ -19,6 +19,7 @@ from apps.exams.services.bulk_workbench import (
 )
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.teacher.submission_meta import _teacher_subjects
+from apps.exams.views.teacher.workbench_paste import paste_context
 
 
 def process_workbench_post(request, organization, form_state):
@@ -188,6 +189,9 @@ def build_workbench_context(
         "wb_show_report": False,
         "wb_templates": [],
         "wb_save_label": save_label,
+        # 2026-09-14: pano/sürükləmə ilə şəkil (bank toplu əlavə ilə eyni qol) —
+        # view POST-da `requested_paste_action` ilə JSON cavabı qaytarır.
+        **paste_context(request, organization_id=organization.pk, math_token=math_token),
     }
 
 

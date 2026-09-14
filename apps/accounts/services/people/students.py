@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef, Q, Subquery, Value
+from django.db.models import Exists, OuterRef, Q, Subquery, UUIDField, Value
 from django.db.models.functions import Coalesce, NullIf
 
 from core.program_codes import program_code_search_q, program_display_label
@@ -105,7 +105,7 @@ def visible_students_qs(actor, *, request=None, filters=None, records=_UNSET):
             # Akademik QEYD id-si — sətirdən birbaşa qrup köçürməsi (toplu əməl)
             # üçün: `transfer_group` hədəfi user deyil, record-dur.
             record_id=Subquery(picked.values("id")[:1]),
-            group_id=Subquery(picked.values("group_id")[:1]),
+            group_id=Subquery(picked.values("group_id")[:1], output_field=UUIDField()),
             group_name=Subquery(picked.values("group__name")[:1]),
             program_name=Subquery(picked.values("program__name")[:1]),
             # Rəsmi şifr: cari (NK 503) varsa cari, yoxsa ƏVVƏLKİ nəsil şifr —

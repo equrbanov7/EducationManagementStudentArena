@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Sətrin birinci sütunu (th scope="row") — ad + kod + «deaktiv» nişanı.
+Ada klik redaktə dialoqunu açır (kataloq səhifədən çıxmır).{% endcomment %}
+{% with d=row.data %}
+<div class="rcat-cell">
+  <button type="button" class="rcat-cell__name" data-rcat-edit="{{ d.id }}">{{ d.title }}</button>
+  <div class="rcat-cell__meta">
+    {% if d.code %}<code class="rcat-cell__code">{{ d.code }}</code>{% endif %}
+    {% if not d.is_active %}<span class="rcat-tag rcat-tag--off">{% trans "Deaktiv" context "registrar.catalog" %}</span>{% endif %}
+  </div>
+  {% if d.description %}<p class="rcat-cell__desc">{{ d.description|truncatechars:90 }}</p>{% endif %}
+</div>
+{% endwith %}

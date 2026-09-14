@@ -123,6 +123,25 @@ def user_access_is_login_blocked(user) -> bool:
     return _access_state_in(user, login_blocked_access_states())
 
 
+#: Autentifikasiya backend-i `get_user`-də yoxlamadan keçən istifadəçi obyektinə
+#: qoyulan işarə — həmin sorğu daxilində eyni obyekt üçün təkrar DB oxusu lazım
+#: deyil (perf auditi 2026-09-13 F-08: hər səhifədə 3 eyni SELECT).
+REQUEST_USER_LOGIN_CHECKED_ATTR = "_ems_login_block_checked"
+
+
+def request_user_login_blocked(user) -> bool:
+    """`request.user` üçün giriş-bağlılığı — backend artıq yoxlayıbsa DB-yə getmir.
+
+    Yalnız SORĞU İSTİFADƏÇİSİ (backend-in `get_user`-i ilə yüklənmiş obyekt) üçün
+    işlədilir: obyekt sorğu-ömürlüdür, `access_state` dəyişiklikləri növbəti
+    sorğuda təzə obyektlə yenidən oxunur. Servislərdə (arxiv, silinmə, view-as
+    hədəfi) həmişə `user_access_is_login_blocked` çağırılır — o, keşə baxmır.
+    """
+    if getattr(user, REQUEST_USER_LOGIN_CHECKED_ATTR, False):
+        return False
+    return user_access_is_login_blocked(user)
+
+
 def assert_account_access_allowed(user) -> None:
     if user_access_is_login_blocked(user):
         raise StagedAccountAccessError()
@@ -159,7 +178,9 @@ __all__ = [
     "canonical_identity",
     "canonical_identity_queryset",
     "email_is_placeholder",
+    "REQUEST_USER_LOGIN_CHECKED_ATTR",
     "login_blocked_access_states",
+    "request_user_login_blocked",
     "staged_user_for_email",
     "user_access_is_login_blocked",
     "user_access_is_staged",

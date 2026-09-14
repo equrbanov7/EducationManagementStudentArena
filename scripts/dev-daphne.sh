@@ -82,10 +82,20 @@ export DJANGO_SETTINGS_MODULE="${DJANGO_SETTINGS_MODULE:-config.settings.local}"
 #
 # Klon bağlantısı `staging_inspect.sh` ilə EYNİ rol və portdan gedir: tətbiq
 # rolu (superuser YOX) — RLS qapıları prod-dakı kimi işləsin.
+# Audit 2026-09-13 (security F-03): parollar tracked skriptdə saxlanmır —
+# gitignore-lanmış `.claude/staging.env` faylından oxunur (STAGING_OWNER_PASSWORD,
+# STAGING_APP_PASSWORD, REH_PASSWORD). Fayl yoxdursa env-dən gəlməlidir.
+_STAGING_ENV_FILE="${STAGING_ENV_FILE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.claude/staging.env}"
+if [ -f "$_STAGING_ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$_STAGING_ENV_FILE"
+    set +a
+fi
 CLONE_DB="${CLONE_DB:-emsarena_rehearsal_a0d170000901}"
 CLONE_PORT="${STAGING_DB_PORT:-55433}"
 CLONE_USER="${STAGING_APP_USER:-emsarena_app}"
-CLONE_PASSWORD="${STAGING_APP_PASSWORD:-emsarena_staging_app_password}"
+CLONE_PASSWORD="${STAGING_APP_PASSWORD:?STAGING_APP_PASSWORD təyin edilməyib (.claude/staging.env)}"
 
 if [ "${REAL:-}" = "1" ]; then
     DB_LABEL="REAL lokal baza (.env)"

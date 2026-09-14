@@ -179,7 +179,7 @@
 
 /* Forma sahəsinin xətası */
 .post-form-field-error {
-    color: var(--ems-danger-500);
+    color: var(--ems-danger-600);
     font-size: 0.85rem;
     margin-top: 5px;
 }

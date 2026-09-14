@@ -1,0 +1,2 @@
+✅ Bütün 49 request-external DB entry-point-i düzgün sarınıb
+   (aktiv istisna: 6).

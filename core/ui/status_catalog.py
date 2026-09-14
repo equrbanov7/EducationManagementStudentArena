@@ -373,6 +373,53 @@ AUDIT_ACTION: tuple[Status, ...] = (
     _s("challenge", _t("Yoxlama sorğusu"), "warning", order=9),
 )
 
+# --------------------------------------------------------------------------- #
+# 8. İmtahan zalları (kabinet → «Sistem idarəetməsi → İmtahan zalları»)
+#    Zal `is_active` bayrağıdır — SAXLANILMIR, açar viewda hesablanır.
+#    Kompüterin söndürülməsi ayrıca ailədir: etiketi «Söndürülüb»dür (IP
+#    yoxlamasında nəzərə alınmır), «Deaktiv» deyil.
+# --------------------------------------------------------------------------- #
+EXAM_ROOM: tuple[Status, ...] = (
+    _s("active", _t("Aktiv"), "success", order=0),
+    _s("inactive", _t("Deaktiv"), "muted", order=1),
+)
+
+EXAM_ROOM_COMPUTER: tuple[Status, ...] = (
+    _s("active", _t("Aktiv"), "success", order=0),
+    _s("off", _t("Söndürülüb"), "muted", order=1),
+)
+
+# --------------------------------------------------------------------------- #
+# 10. Tələbə kabineti (2026-09-12 redizayn — «Fənlərim», «Elektron jurnal»).
+#     İmtahana buraxılış vəziyyəti — `apps.registrar.exam_eligibility.resolve`
+#     nəticəsindən çıxarılır (açar viewda hesablanır, SAXLANILMIR):
+#       ok      — qayıb icazəli həddin altındadır;
+#       near    — icazəli qayıbın 75%-i keçilib (jurnal xəbərdarlığı ilə eyni hədd);
+#       barred  — hədd keçilib, yekun imtahana giriş yoxdur;
+#       frozen  — köhnə sistemdən köçürülmüş, bağlı semestr — status yenidən
+#                 hesablanmır, köhnə sistemin faktiki nəticəsi göstərilir;
+#       unknown — fənnin auditoriya saatı yoxdur, hədd hesablana bilmir.
+#     Handoff §7: status yalnız rənglə deyil, MƏTNlə verilir — ona görə «near»
+#     etiketi «buraxılır» sözünü də daşıyır (sarı = xəbərdarlıq, qadağa deyil).
+# --------------------------------------------------------------------------- #
+EXAM_ELIGIBILITY: tuple[Status, ...] = (
+    _s("ok", _t("İmtahana buraxılır"), "success", order=0),
+    _s("near", _t("Limitə yaxın — buraxılır"), "warning", order=1),
+    _s("barred", _t("İmtahana buraxılmır"), "danger", order=2),
+    _s("frozen", _t("Köhnə sistemdən"), "muted", order=3),
+    _s("unknown", _t("Status hesablanmır"), "neutral", order=4),
+)
+
+#     «Gözləmədə olan cavablar» — təhvil verilmiş işin yoxlanma vəziyyəti
+#     (`_collect_pending_answer_items` → `status_class`):
+#       pending   — müəllim hələ yoxlamayıb;
+#       reviewing — qiymət yazılıb, müəllimin düzəliş pəncərəsi bağlanana qədər
+#                   nəticə tələbəyə açılmır (geri sayım göstərilir).
+PENDING_ANSWER: tuple[Status, ...] = (
+    _s("pending", _t("Gözləmədə"), "warning", order=0),
+    _s("reviewing", _t("Yoxlanır"), "info", order=1),
+)
+
 
 #: Ailə adı → statuslar. Şablon tag-i yalnız bu xəritədən oxuyur.
 FAMILIES: dict[str, tuple[Status, ...]] = {
@@ -399,6 +446,10 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "save_state": SAVE_STATE,
     "archive_mode": ARCHIVE_MODE,
     "audit_action": AUDIT_ACTION,
+    "exam_room": EXAM_ROOM,
+    "exam_room_computer": EXAM_ROOM_COMPUTER,
+    "exam_eligibility": EXAM_ELIGIBILITY,
+    "pending_answer": PENDING_ANSWER,
 }
 
 

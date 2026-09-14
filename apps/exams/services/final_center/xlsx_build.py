@@ -15,6 +15,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from core.export_safety import neutralise_cell
+
 from .xlsx_report import (
     INCIDENT_COLUMNS,
     ROOM_COLUMNS,
@@ -65,13 +67,13 @@ def _write_summary(sheet, *, organization, meta, totals):
 
     sheet["A1"] = pgettext("exams.final_center.report", "Final imtahan hesabatı")
     sheet["A1"].font = TITLE_FONT
-    sheet["A2"] = organization.name if organization else ""
+    sheet["A2"] = neutralise_cell(organization.name if organization else "")
     sheet["A2"].font = Font(size=11, color="475569")
 
     row = 4
     for label, value in meta:
         sheet.cell(row=row, column=1, value=label).font = LABEL_FONT
-        sheet.cell(row=row, column=2, value=value)
+        sheet.cell(row=row, column=2, value=neutralise_cell(value))
         row += 1
 
     row += 1
@@ -79,7 +81,7 @@ def _write_summary(sheet, *, organization, meta, totals):
     row += 1
     for label, value in totals:
         sheet.cell(row=row, column=1, value=label).font = LABEL_FONT
-        cell = sheet.cell(row=row, column=2, value=value)
+        cell = sheet.cell(row=row, column=2, value=neutralise_cell(value))
         cell.font = Font(bold=True, size=11)
         row += 1
 
@@ -90,8 +92,9 @@ def _write_room_sheet(sheet, rows):
         values = list(row["values"])
         values[0] = order
         fill = STATUS_FILLS.get(row["ticket"].status)
+        # 2026-09-13 audit F-07: tələbə adı / qrup / qeyd sütunları istifadəçi mətnidir.
         for index, value in enumerate(values, start=1):
-            cell = sheet.cell(row=order + 1, column=index, value=value)
+            cell = sheet.cell(row=order + 1, column=index, value=neutralise_cell(value))
             cell.border = CELL_BORDER
             cell.alignment = Alignment(vertical="top", wrap_text=index in (3, 4, 6, 32, 36))
             if fill:
@@ -128,7 +131,7 @@ def _write_incident_sheet(sheet, incident_rows):
         ]
         fill = SEVERITY_FILLS.get(incident.severity)
         for index, value in enumerate(values, start=1):
-            cell = sheet.cell(row=order + 1, column=index, value=value)
+            cell = sheet.cell(row=order + 1, column=index, value=neutralise_cell(value))
             cell.border = CELL_BORDER
             cell.alignment = Alignment(vertical="top", wrap_text=index == 12)
             if fill:

@@ -282,8 +282,8 @@ def apply_expel(
     if decision.action != "expel":
         return False
 
-    from apps.registrar import movements
     from apps.registrar.models import MovementKind, StudentAcademicRecord
+    from apps.registrar.public import movements
 
     record = StudentAcademicRecord.objects.select_related("organization", "student", "group").get(
         pk=decision.record_id, organization_id=organization.pk

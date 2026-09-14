@@ -95,7 +95,7 @@ def build_workload_center_section(request, section, *, active_organization, allo
         section["has_access"] = False
         return
 
-    from apps.workload.center_registry import build_center
+    from apps.workload.public import build_center
 
     payload = build_center(request, active_organization)
     section.update(payload)
@@ -165,6 +165,7 @@ def build_workload_center_section(request, section, *, active_organization, allo
         },
         {
             "name": "wc_faculty",
+            "searchable": True,
             "label": pgettext(_CTX, "Fakültə"),
             "kind": "select",
             "value": payload["filters"]["faculty"],

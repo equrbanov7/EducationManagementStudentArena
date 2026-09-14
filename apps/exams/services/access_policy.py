@@ -35,6 +35,11 @@ def can_user_access_exam(exam, user):
     if exam.allowed_groups.filter(students=user).exists():
         return True
 
+    # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı —
+    # model mixin-dəki `_user_in_allowed_groups` ilə eyni qapı.
+    if exam._user_in_allowed_units(user):
+        return True
+
     if exam.course:
         # M2 (2026-07-02): lazy lookup — exams→courses import kənarını kəsir.
         from django.apps import apps as django_apps

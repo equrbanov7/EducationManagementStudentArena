@@ -10,8 +10,8 @@ nəticəni QA klonu ilə müqayisə etmək.
 | | |
 |---|---|
 | Hədəf baza | `emsarena_rehearsal_d44526b97cbc` (127.0.0.1:**55433**, konteyner `emsarena-staging-pg`) |
-| Owner DSN | `postgres://emsarena_staging:emsarena_staging_password@127.0.0.1:55433/emsarena_rehearsal_d44526b97cbc` |
-| App DSN (run bununla işləyir) | `postgres://emsarena_app:emsarena_staging_app_password@127.0.0.1:55433/emsarena_rehearsal_d44526b97cbc` |
+| Owner DSN | `postgres://emsarena_staging:<parol .claude/staging.env>@127.0.0.1:55433/emsarena_rehearsal_d44526b97cbc` |
+| App DSN (run bununla işləyir) | `postgres://emsarena_app:<parol .claude/staging.env>@127.0.0.1:55433/emsarena_rehearsal_d44526b97cbc` |
 | Superadmin | `staging_admin` — parol **repoya yazılmır**, yalnız `scratchpad/rehearsal_fresh.env` (chmod 600) |
 | Org | slug `myedu-univ`, `org_type=university`, owner `staging_admin`, id `b3499430-e3f1-4acb-a651-a6aad986d26e`, 18 default rol siqnalla yaradıldı |
 | Run id | `8a476c8c-2a1e-4d72-9aee-f5d68b336e8c` |

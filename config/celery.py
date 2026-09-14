@@ -39,3 +39,27 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 # Auto-discover tasks in each installed Django app (looks for tasks.py).
 app.autodiscover_tasks()
+
+
+@app.on_after_configure.connect
+def _register_retention_beat(sender, **kwargs):
+    """AI köməkçisi jurnalının saxlama süpürgəsi (2026-09-14, audit F-08).
+
+    Beat cədvəli ``CELERY_BEAT_SCHEDULE`` (settings) ilə gəlir; bu giriş konfiq
+    yükləndikdən sonra ona əlavə olunur ki, iş adı ilə (import-suz) qeyd olunsun.
+    Hər gecə 03:20 (``CELERY_TIMEZONE`` = Asia/Baku) — pik saatlardan kənar.
+    """
+    from celery.schedules import crontab
+
+    # Celery `Settings` prefiksli açarı (`CELERY_BEAT_SCHEDULE`) `changes`
+    # qatından ÖNCƏ tapır — yeni dict təyin etmək settings-dəki cədvəli əvəz
+    # etmir. Ona görə mövcud lüğət YERİNDƏ dəyişdirilir; settings-də açar
+    # yoxdursa (test) boş lüğət təyin olunur.
+    schedule = sender.conf.beat_schedule
+    if not isinstance(schedule, dict):
+        schedule = {}
+        sender.conf.beat_schedule = schedule
+    schedule.setdefault(
+        "ai-assistant-purge-logs",
+        {"task": "ai_assistant.purge_logs", "schedule": crontab(hour=3, minute=20)},
+    )

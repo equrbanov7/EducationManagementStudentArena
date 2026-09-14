@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 import logging
-import posixpath
-import re
 import unicodedata
 import uuid
 import warnings
@@ -16,22 +13,36 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Any
 
-from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import transaction
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from apps.exams.services.import_media_docx import (
+    attach_docx_media_batch,
+    bind_docx_manifest,
+    is_docx_manifest,
+)
+from apps.exams.services.import_media_store import IMPORT_SUBDIR as _IMPORT_SUBDIR  # noqa: F401
+from apps.exams.services.import_media_store import MANIFEST_NAME as _MANIFEST_NAME
+from apps.exams.services.import_media_store import SOURCE_NAME as _SOURCE_NAME
+from apps.exams.services.import_media_store import assert_manifest_scope as _assert_manifest_scope
+from apps.exams.services.import_media_store import bundle_name as _bundle_name
+from apps.exams.services.import_media_store import clear_stash  # noqa: F401 — re-export (çağıranlar)
+from apps.exams.services.import_media_store import delete_name as _delete_name
+from apps.exams.services.import_media_store import delete_tree as _delete_tree
+from apps.exams.services.import_media_store import load_raw_manifest
+from apps.exams.services.import_media_store import metadata_id as _metadata_id
+from apps.exams.services.import_media_store import prefix as _prefix
+from apps.exams.services.import_media_store import read_storage as _read_storage
+from apps.exams.services.import_media_store import read_upload as _read_upload
+from apps.exams.services.import_media_store import valid_token as _valid_token
 from apps.exams.services.pdf_layout import extract_pdf_layout
 from apps.exams.services.visual_import_security import validate_visual_upload
 
 logger = logging.getLogger(__name__)
-_IMPORT_SUBDIR = "question_imports"
 _MANIFEST_VERSION = 2
-_SOURCE_NAME = "source.pdf"
-_MANIFEST_NAME = "manifest.json"
-_TOKEN_RE = re.compile(r"^[0-9a-f]{32}$")
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 _VISUAL_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg")
 _IMAGE_PDF_DPI = 300
@@ -51,51 +62,6 @@ class _Snapshot:
     instance: Any
     image_name: str
     replaces_text: bool
-
-
-def _valid_token(token: object) -> bool:
-    return isinstance(token, str) and bool(_TOKEN_RE.fullmatch(token))
-
-
-def _prefix(token: str) -> str:
-    if not _valid_token(token):
-        raise ValueError("İdxal token-i yanlışdır")
-    return posixpath.join(_IMPORT_SUBDIR, token)
-
-
-def _bundle_name(token: str, filename: str) -> str:
-    return posixpath.join(_prefix(token), filename)
-
-
-def _read_upload(uploaded_file) -> bytes:
-    try:
-        original_position = uploaded_file.tell()
-    except (AttributeError, OSError):
-        original_position = None
-    try:
-        try:
-            uploaded_file.seek(0)
-        except (AttributeError, OSError):
-            pass
-        data = uploaded_file.read()
-    finally:
-        if original_position is not None:
-            try:
-                uploaded_file.seek(original_position)
-            except (AttributeError, OSError):
-                pass
-    if not isinstance(data, bytes) or not data:
-        raise ValueError("Vizual mənbə məlumatı boşdur")
-    return data
-
-
-def _metadata_id(value: object) -> int | str | None:
-    if value is None:
-        return None
-    value = getattr(value, "pk", value)
-    if isinstance(value, (int, str)):
-        return value
-    return str(value)
 
 
 def _image_to_pdf(data: bytes) -> bytes:
@@ -198,26 +164,6 @@ def _validate_manifest(manifest: object) -> dict[str, object]:
     return manifest
 
 
-def _assert_manifest_scope(
-    manifest: Mapping[str, object],
-    *,
-    owner_id: object = None,
-    organization_id: object = None,
-) -> None:
-    source = manifest.get("source")
-    if not isinstance(source, Mapping):
-        raise ValueError("İdxal source metadata-sı yanlışdır")
-    for key, expected in (
-        ("owner_id", _metadata_id(owner_id)),
-        ("organization_id", _metadata_id(organization_id)),
-    ):
-        if expected is None:
-            continue
-        actual = source.get(key)
-        if actual is None or not hmac.compare_digest(str(actual), str(expected)):
-            raise PermissionDenied(f"İdxal manifestinin {key} scope-u uyğun deyil")
-
-
 def stash_math_images(
     uploaded_file,
     *,
@@ -272,21 +218,19 @@ def stash_math_images(
     return token
 
 
-def _read_storage(name: str) -> bytes:
-    with default_storage.open(name, "rb") as handle:
-        data = handle.read()
-    if not isinstance(data, bytes):
-        raise ValueError(f"Storage binary məlumat qaytarmadı: {name}")
-    return data
-
-
 def _load_manifest(token: str) -> dict[str, object]:
-    raw = _read_storage(_bundle_name(token, _MANIFEST_NAME))
+    return _validate_manifest(load_raw_manifest(token))
+
+
+def _docx_manifest_or_none(token: str) -> dict[str, object] | None:
+    """W3 2026-09-14: bundle DOCX-dirsə xam manifesti qaytar (dispatch üçün)."""
+
     try:
-        manifest = json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ValueError("İdxal manifesti oxunmur") from exc
-    return _validate_manifest(manifest)
+        manifest = load_raw_manifest(token)
+    except (OSError, ValueError):
+        # Manifest oxunmursa PDF yolu öz (mövcud) xətasını versin.
+        return None
+    return manifest if is_docx_manifest(manifest) else None
 
 
 def _normalized_content(value: object) -> str:
@@ -332,7 +276,7 @@ def get_stashed_import_text(
 ) -> str:
     """Scope yoxlamasından sonra stash manifestinin canonical mətnini qaytar."""
 
-    manifest = _load_manifest(token)
+    manifest = _docx_manifest_or_none(token) or _load_manifest(token)
     _assert_manifest_scope(
         manifest,
         owner_id=owner_id,
@@ -344,6 +288,21 @@ def get_stashed_import_text(
     return canonical_text
 
 
+def stash_level_warnings(
+    token: str,
+    *,
+    owner_id: object = None,
+    organization_id: object = None,
+) -> list[str]:
+    """W3 2026-09-14: bundle səviyyəli xəbərdarlıqlar (DOCX: atılan şəkil, natamam düstur)."""
+
+    manifest = _docx_manifest_or_none(token)
+    if manifest is None:
+        return []
+    _assert_manifest_scope(manifest, owner_id=owner_id, organization_id=organization_id)
+    return [text for text in manifest.get("warnings") or () if isinstance(text, str) and text]
+
+
 def bind_import_manifest(
     token: str,
     parsed: Sequence[MutableMapping[str, object]],
@@ -353,6 +312,9 @@ def bind_import_manifest(
 ) -> Sequence[MutableMapping[str, object]]:
     """Parsed məzmunu yoxla və hər item-ə 0-based source index bağla."""
 
+    if _docx_manifest_or_none(token) is not None:
+        # DOCX bundle: bağlama parse olunmuş `media_refs`-dən qurulur.
+        return bind_docx_manifest(token, parsed, owner_id=owner_id, organization_id=organization_id)
     manifest = _load_manifest(token)
     _assert_manifest_scope(
         manifest,
@@ -493,6 +455,8 @@ def attach_import_media_batch(
     batch = list(bindings)
     if not batch:
         return 0
+    if _docx_manifest_or_none(token) is not None:
+        return attach_docx_media_batch(token, batch, owner_id=owner_id, organization_id=organization_id)
     manifest = _load_manifest(token)
     _assert_manifest_scope(
         manifest,
@@ -564,37 +528,3 @@ def attach_math_images(token: str, q_no: str, question) -> None:
     if len(matches) != 1:
         raise ValueError(f"Manifestdə unikal sual nömrəsi tapılmadı: {q_no!r}")
     attach_import_media_batch(token, [(matches[0], question)])
-
-
-def _delete_name(name: str) -> None:
-    try:
-        default_storage.delete(name)
-    except Exception as exc:  # pragma: no cover - backend outage
-        logger.warning("İdxal stash obyekti silinmədi (%s): %s", name, exc)
-
-
-def _delete_tree(prefix: str, *, suppress_errors: bool) -> None:
-    try:
-        directories, files = default_storage.listdir(prefix)
-    except (FileNotFoundError, NotImplementedError):
-        directories, files = (), ()
-    except Exception:
-        if not suppress_errors:
-            raise
-        directories, files = (), ()
-
-    for filename in files:
-        _delete_name(posixpath.join(prefix, filename))
-    for directory in directories:
-        _delete_tree(posixpath.join(prefix, directory), suppress_errors=suppress_errors)
-    _delete_name(prefix)
-
-
-def clear_stash(token: str) -> None:
-    """İdxal bundle-ını storage backend-dən asılı olmadan rekursiv təmizlə."""
-
-    if not _valid_token(token):
-        return
-    _delete_name(_bundle_name(token, _SOURCE_NAME))
-    _delete_name(_bundle_name(token, _MANIFEST_NAME))
-    _delete_tree(_prefix(token), suppress_errors=True)

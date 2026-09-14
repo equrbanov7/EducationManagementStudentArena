@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Başlıq keçidləri — reyestr OXU səthidir; rolun verilməsi/geri alınması
+«Rolları idarə et», açar redaktəsi isə «İcazələr» ekranındadır. Keçid SPA yolu
+ilə açılır (`js-profile-section-link`) — sol sidebar yerində qalır.{% endcomment %}
+{% if 'manage-roles' in allowed_sections %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=manage-roles"
+   data-section="manage-roles" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Rolları idarə et' context 'profile.sidebar' %}">
+    <i class="fas fa-user-gear" aria-hidden="true"></i>
+    {% trans "Rolları idarə et" context "organizations.roles_registry" %}
+</a>
+{% endif %}
+{% if 'permission-editor' in allowed_sections %}
+<a class="ems-btn ems-btn--primary js-profile-section-link" href="{{ profile_base_url }}?section=permission-editor"
+   data-section="permission-editor" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'İcazələr' context 'profile.sidebar' %}">
+    <i class="fas fa-key" aria-hidden="true"></i>
+    {% trans "İcazələri redaktə et" context "organizations.roles_registry" %}
+</a>
+{% endif %}

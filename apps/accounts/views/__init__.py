@@ -133,6 +133,9 @@ from .profile import (
     view_as_start,
     view_as_stop,
 )
+
+# Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
+from .registrar_catalog import registrar_catalog_action
 from .rim import rim_action, rim_create_account, rim_create_catalog, rim_user_detail, rim_user_search
 
 # Role management views
@@ -141,8 +144,6 @@ from .roles import (
     permission_editor,
     role_assignment,
 )
-
-# Cədvəl idarəetməsi (`schedule.manage`) JSON səthi
 from .schedule_editor import schedule_editor_action
 from .schedule_manage import schedule_manage_action, schedule_manage_check
 
@@ -261,6 +262,7 @@ __all__ = [
     "applications_assignees",
     "schedule_manage_check",
     "schedule_manage_action",
+    "registrar_catalog_action",
     "schedule_editor_action",
     "student_intake_template",
     "teacher_intake_apply",

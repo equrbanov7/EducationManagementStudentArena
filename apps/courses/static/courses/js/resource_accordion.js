@@ -15,18 +15,21 @@
 
     window.deleteResource = function (courseId, resourceId) {
         var cfg = getCfg();
-        if (!cfg || !confirm(cfg.dataset.i18nConfirmDeleteResource)) { return; }
+        if (!cfg) { return; }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteResource, danger: true }).then(function (ok) {
+            if (!ok) { return; }
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "/courses/" + courseId + "/resource/" + resourceId + "/delete/";
 
-        var form = document.createElement("form");
-        form.method = "POST";
-        form.action = "/courses/" + courseId + "/resource/" + resourceId + "/delete/";
+            var csrfToken = document.querySelector("[name=csrfmiddlewaretoken]");
+            if (csrfToken) {
+                form.appendChild(csrfToken.cloneNode(true));
+            }
 
-        var csrfToken = document.querySelector("[name=csrfmiddlewaretoken]");
-        if (csrfToken) {
-            form.appendChild(csrfToken.cloneNode(true));
-        }
-
-        document.body.appendChild(form);
-        form.submit();
+            document.body.appendChild(form);
+            form.submit();
+        });
     };
 })();

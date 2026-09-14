@@ -1,4 +1,12 @@
-{% if microsoft_clarity_project_id %}
+{% comment %}Microsoft Clarity session-replay.
+2026-09-13 (Codex audit §11): teq YALNIZ `microsoft_clarity_enabled` bayrağı ilə
+yüklənir — anonim səhifələr (və MICROSOFT_CLARITY_AUTHENTICATED=true olduqda
+kabinet). Bayraq `core.context_processors.feature_flags`-də hesablanır:
+layihə id-si var VƏ (istifadəçi anonimdir VƏ YA kabinet izləməsi açıqdır).
+Şəxsi məlumat daşıyan açıq formalar `data-clarity-mask="True"` ilə maskalanır;
+maskanı açan (unmask) atribut HEÇ YERDƏ işlədilmir. CSP mənbələri dəyişmir
+(`config/settings/components/csp.py`).{% endcomment %}
+{% if microsoft_clarity_enabled %}
 <script nonce="{{ request.csp_nonce }}">
     (function (c, l, a, r, i, t, y) {
         c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };

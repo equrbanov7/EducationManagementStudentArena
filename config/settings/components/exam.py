@@ -18,6 +18,12 @@ idarə olunur (asılılıqlar: bax base.py).
 EXAM_AUTOSAVE_INTERVAL_MS = _env_int_setting("EXAM_AUTOSAVE_INTERVAL_MS", 30_000, minimum=10_000)
 EXAM_AUTOSAVE_JITTER_MS = _env_int_setting("EXAM_AUTOSAVE_JITTER_MS", 10_000, minimum=0)
 EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED = _env_bool_setting("EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED", False)
+# Audit 2026-09-13 EX-05: taymer 0-a düşəndə client 1,5 s sonra «finish»
+# göndərir; server isə POST-u oxumadan cəhdi «expired» edirdi — son cavab(lar)
+# itirdi. Deadline-dan sonra bu qədər saniyə ərzində gələn yazı kilid altında
+# saxlanılır və cəhd «expired» statusu ilə bağlanır (şəbəkə/saat sürüşməsi
+# payı); pəncərədən kənarda köhnə davranış qalır.
+EXAM_SUBMIT_GRACE_SECONDS = _env_int_setting("EXAM_SUBMIT_GRACE_SECONDS", 15, minimum=0)
 
 # Written-answer uploads are accepted on explicit save/submit, but kept tight
 # so a single student cannot push large multipart or canvas payloads repeatedly.

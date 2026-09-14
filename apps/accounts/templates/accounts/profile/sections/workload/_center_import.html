@@ -35,26 +35,29 @@ tapılmayan ad SİLİNMİR — sətir `*_text` fallback-ı ilə qalır.{% endcom
     <div class="ems-kpi ems-kpi--warning"><div class="ems-kpi__label">{% trans "MƏTN KİMİ QALAN" context "accounts.workload_center" %}</div><div class="ems-kpi__value">{{ preview.unmatched }}</div></div>
 </div>
 
-<table class="ems-table ems-table--zebra">
-    <thead>
-        <tr>
-            <th scope="col">{% trans "Fayldakı ad" context "accounts.workload_center" %}</th>
-            <th scope="col">{% trans "Növ" context "accounts.workload_center" %}</th>
-            <th scope="col">{% trans "Kataloq uyğunluğu" context "accounts.workload_center" %}</th>
-            <th scope="col">{% trans "Status" context "accounts.workload_center" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entry in preview.entries|slice:":100" %}
-        <tr>
-            <th scope="row">{{ entry.source }}</th>
-            <td>{{ entry.kind }}</td>
-            <td>{{ entry.target|default:"—" }}</td>
-            <td>{% if entry.matched %}{% trans "Uyğunlaşdı" context "accounts.workload_center" %}{% else %}{% trans "Mətn kimi qalacaq" context "accounts.workload_center" %}{% endif %}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% comment %}2026-09-12 (audit P2-3): əl ilə yazılmış cədvəl `.ems-tablescroll` sarğısındadır — `.ems-table` min-eni (900px) mobil ekranda səhifə gövdəsini deyil, yalnız bu sarğını üfüqi sürüşdürür (`_data_table.html` ilə eyni qayda).{% endcomment %}
+<div class="ems-tablescroll">
+    <table class="ems-table ems-table--zebra">
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Fayldakı ad" context "accounts.workload_center" %}</th>
+                <th scope="col">{% trans "Növ" context "accounts.workload_center" %}</th>
+                <th scope="col">{% trans "Kataloq uyğunluğu" context "accounts.workload_center" %}</th>
+                <th scope="col">{% trans "Status" context "accounts.workload_center" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in preview.entries|slice:":100" %}
+            <tr>
+                <th scope="row">{{ entry.source }}</th>
+                <td>{{ entry.kind }}</td>
+                <td>{{ entry.target|default:"—" }}</td>
+                <td>{% if entry.matched %}{% trans "Uyğunlaşdı" context "accounts.workload_center" %}{% else %}{% trans "Mətn kimi qalacaq" context "accounts.workload_center" %}{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <div class="wl-actions">
     <button type="button" class="ems-btn" data-tof-submit='{"action": "import_cancel"}'>{% trans "Ləğv et" context "accounts.workload_center" %}</button>

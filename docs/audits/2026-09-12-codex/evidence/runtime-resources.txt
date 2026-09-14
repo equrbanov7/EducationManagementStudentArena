@@ -1,0 +1,15 @@
+CODEX_TEST_emsarena_pg_20260912 CPU=20.35% MEM=310MiB / 1GiB PIDS=8
+emsarena-staging-pg CPU=0.00% MEM=361.9MiB / 7.653GiB PIDS=6
+emsarena-agent-postgres CPU=0.72% MEM=580.4MiB / 7.653GiB PIDS=6
+emsarena-celery-beat CPU=0.00% MEM=118.4MiB / 256MiB PIDS=1
+emsarena-app-4 CPU=0.01% MEM=129.2MiB / 1.5GiB PIDS=1
+emsarena-celery_worker-2 CPU=0.02% MEM=224.6MiB / 1GiB PIDS=3
+emsarena-node-exporter CPU=0.00% MEM=8.129MiB / 64MiB PIDS=5
+emsarena-grafana CPU=0.11% MEM=139.1MiB / 256MiB PIDS=13
+emsarena-postgres-exporter CPU=0.00% MEM=19.85MiB / 128MiB PIDS=14
+emsarena-postgres-backup CPU=0.00% MEM=21.66MiB / 256MiB PIDS=16
+emsarena-pgbouncer CPU=0.01% MEM=2.328MiB / 256MiB PIDS=1
+emsarena-postgres CPU=0.00% MEM=195MiB / 2GiB PIDS=9
+emsarena-redis CPU=0.32% MEM=12.04MiB / 512MiB PIDS=6
+emsarena-redis-host-proxy CPU=0.00% MEM=12.11MiB / 7.653GiB PIDS=11
+emsarena-postgres-host-proxy CPU=0.00% MEM=10.55MiB / 7.653GiB PIDS=1

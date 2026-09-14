@@ -4,11 +4,20 @@
     button ([data-global-search-open]). Role/tenant-aware results come from
     accounts:global_search. Behaviour + a11y in static/js/global_search.js.
     No inline JS/CSS (CSP-safe).
+
+    Panelin qatları:
+      · sorğu sətri — ikon, input, «təmizlə», «esc»;
+      · gövdə — nəticələr (listbox) / yüklənmə skeleti / boş vəziyyət;
+      · ekran oxuyucusu üçün canlı status (`role="status"`);
+      · altlıq — klaviatura ipucları.
+    Panelin görünən başlığı YOXDUR: dialoqun adı `aria-label`-dədir, ekranda isə
+    placeholder onsuz da nəyin axtarıldığını deyir (başlıq təkrarı olmasın).
 {% endcomment %}
 <div class="gsearch" data-global-search data-search-url="{% url 'accounts:global_search' %}" hidden>
     <div class="gsearch__backdrop" data-global-search-close></div>
     <div class="gsearch__panel" role="dialog" aria-modal="true"
          aria-label="{% trans 'Qlobal axtarış' context 'search' %}">
+
         <div class="gsearch__input-wrap">
             <i class="fas fa-magnifying-glass gsearch__input-icon" aria-hidden="true"></i>
             <input type="text" class="gsearch__input" data-global-search-input
@@ -16,18 +25,41 @@
                    autocomplete="off" spellcheck="false" role="combobox"
                    aria-expanded="true" aria-controls="gsearch-results" aria-autocomplete="list"
                    aria-label="{% trans 'Axtarış sorğusu' context 'search' %}">
-            <kbd class="gsearch__esc">esc</kbd>
+            <button type="button" class="gsearch__clear" data-global-search-clear hidden
+                    aria-label="{% trans 'Təmizlə' %}" title="{% trans 'Təmizlə' %}">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="gsearch__esc" data-global-search-close
+                    aria-label="{% trans 'bağla' context 'search' %}">esc</button>
         </div>
-        <div class="gsearch__results" id="gsearch-results" data-global-search-results role="listbox"
-             aria-label="{% trans 'Axtarış nəticələri' context 'search' %}"></div>
-        <div class="gsearch__empty" data-global-search-empty hidden>
-            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
-            <p>{% trans 'Nəticə tapılmadı' context 'search' %}</p>
+
+        <div class="gsearch__body">
+            <div class="gsearch__results" id="gsearch-results" data-global-search-results role="listbox"
+                 aria-label="{% trans 'Axtarış nəticələri' context 'search' %}"></div>
+
+            {# Yüklənmə skeleti — şəbəkə gecikəndə panel boş görünməsin. #}
+            <div class="gsearch__loading" data-global-search-loading hidden aria-hidden="true">
+                <span class="gsearch__skeleton-row"></span>
+                <span class="gsearch__skeleton-row"></span>
+                <span class="gsearch__skeleton-row"></span>
+            </div>
+
+            <div class="gsearch__empty" data-global-search-empty hidden>
+                <span class="gsearch__empty-icon" aria-hidden="true">
+                    <i class="fas fa-magnifying-glass"></i>
+                </span>
+                <p class="gsearch__empty-title">{% trans 'Nəticə tapılmadı' context 'search' %}</p>
+                <p class="gsearch__empty-hint">{% trans 'Başqa açar söz yoxlayın: ad, soyad, fənn adı və ya kod.' context 'search' %}</p>
+            </div>
         </div>
+
+        {# Ekran oxuyucusu üçün nəticə sayı — vizual olaraq gizli. #}
+        <p class="gsearch__status sr-only" data-global-search-status role="status" aria-live="polite"></p>
+
         <div class="gsearch__footer">
-            <span><kbd>↑</kbd><kbd>↓</kbd> {% trans 'naviqasiya' context 'search' %}</span>
-            <span><kbd>↵</kbd> {% trans 'seç' context 'search' %}</span>
-            <span><kbd>esc</kbd> {% trans 'bağla' context 'search' %}</span>
+            <span class="gsearch__hint"><kbd>↑</kbd><kbd>↓</kbd> {% trans 'naviqasiya' context 'search' %}</span>
+            <span class="gsearch__hint"><kbd>↵</kbd> {% trans 'seç' context 'search' %}</span>
+            <span class="gsearch__hint"><kbd>esc</kbd> {% trans 'bağla' context 'search' %}</span>
         </div>
     </div>
 </div>

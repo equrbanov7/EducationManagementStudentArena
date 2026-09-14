@@ -1,0 +1,119 @@
+{% load i18n %}
+{% comment %}«Tədrisim» qrupu — TƏLƏBƏNİN (və məzunun) öz akademik səthi.
+
+2026-09-10: «Ümumi tədris məlumatı» (`overall-academic`) bura köçürüldü —
+əvvəllər «Universitet» qrupunda idi, halbuki onu YALNIZ tələbə/məzun görür
+(bax `rbac.py`: `is_student` bloku + `alumni_sections()`).
+
+Bəndlərin ÖZ şərtləri dəyişməyib; `can_view_student_assignments` bloku olduğu
+kimi saxlanılıb (məzun onun içindəkiləri GÖRMÜR — mövcud davranış).{% endcomment %}
+{% if can_view_student_assignments or 'my-subjects' in allowed_sections or 'my-transcript' in allowed_sections or 'overall-academic' in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="my-studies">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-subjects|my-transcript|overall-academic|assigned-exams|assigned-courses|my-results|my-appeals|pending-answers|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "group_my_studies" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% if "my-subjects" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-subjects"
+                   data-section="my-subjects"
+                   data-title="{% trans 'my_subjects' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-subjects' %}active{% endif %}">
+                    <i class="fas fa-book-open sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "my_subjects" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if "overall-academic" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=overall-academic"
+                   data-section="overall-academic"
+                   data-title="{% trans 'Ümumi tədris məlumatı' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'overall-academic' %}active{% endif %}">
+                    <i class="fas fa-chart-simple sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Ümumi tədris məlumatı" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if "my-transcript" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-transcript"
+                   data-section="my-transcript"
+                   data-title="{% trans 'my_transcript' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-transcript' %}active{% endif %}">
+                    <i class="fas fa-scroll sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "my_transcript" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if can_view_student_assignments %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=assigned-exams"
+                   data-section="assigned-exams"
+                   data-title="{% trans 'assigned_tasks' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
+                    <i class="fas fa-tasks sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "assigned_tasks" context "profile.sidebar" %}</span>
+                    {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_tasks_count">{{ assigned_tasks_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=assigned-courses"
+                   data-section="assigned-courses"
+                   data-title="{% trans 'assigned_courses' context 'profile.section' %}"
+                   data-source-url="{% url 'accounts:assigned_courses' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-courses' %}active{% endif %}">
+                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% if role_capabilities.is_student %}{% trans "my_courses" context "profile.sidebar" %}{% else %}{% trans "assigned_courses" context "profile.sidebar" %}{% endif %}</span>
+                    {% if assigned_courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_courses_count">{{ assigned_courses_count }}</span>{% endif %}
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-results"
+                   data-section="my-results"
+                   data-title="{% trans 'my_results' context 'profile.section' %}"
+                   data-source-url="{% url 'accounts:my_results' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-results' %}active{% endif %}">
+                    <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "my_results" context "profile.sidebar" %}</span>
+                    {% if my_results_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_results_count">{{ my_results_count }}</span>{% endif %}
+                </a>
+            </li>
+            {% if role_capabilities.can_view_my_appeals %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=my-appeals"
+                   data-section="my-appeals"
+                   data-title="{% trans 'Apellyasiyalarım' context 'appeals.template' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-appeals' %}active{% endif %}">
+                    <i class="fas fa-gavel sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Apellyasiyalarım" context "appeals.template" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=pending-answers"
+                   data-section="pending-answers"
+                   data-title="{% trans 'section_title' context 'accounts.pending_answers' %}"
+                   data-source-url="{% url 'accounts:pending_answers' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-answers' %}active{% endif %}">
+                    <i class="fas fa-hourglass-half sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "section_title" context "accounts.pending_answers" %}</span>
+                    {% if pending_answers_count > 0 %}<span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="pending_answers_count">{{ pending_answers_count }}</span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

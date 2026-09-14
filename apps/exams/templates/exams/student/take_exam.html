@@ -193,7 +193,7 @@
                        cavabını SİLMİR (əvvəlki: absent field = boş cavab = itki). {% endcomment %} 
                     <input type="hidden" name="q_present_{{ q.id }}" value="1">
 
-                    <div class="question-content">
+                    <div class="question-content" data-ems-math>
                         <div class="question-card-header">
                             <div class="question-kicker">
                                 <span class="q-number">Q{{ forloop.counter }}</span>
@@ -391,6 +391,8 @@
 {% include "exams/student/partials/_take_exam_scripts.html" %}
  
 {% block extraJs %}
+    {# W3 2026-09-14: LaTeX düsturlar (KaTeX, CSP-safe) — bax static/vendor/katex/README.md #}
+    {% include "partials/ems_ui/_math_assets.html" %}
     <script src="{% static 'js/review_countdown.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
@@ -447,7 +449,7 @@
         supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
     };
     </script>
-    <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260716-intervention"></script>
+    <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260914-w4r3"></script>
     {% endif %}
 {% endblock %}
 

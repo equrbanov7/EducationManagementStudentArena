@@ -246,7 +246,7 @@ def _reviewer_sources(organization, filters, scoped):
     from django.contrib.auth import get_user_model
 
     from apps.organizations.models import AcademicPeriod, OrgUnit
-    from apps.organizations.structure_views.constants import KAFEDRA_UNIT_TYPES
+    from apps.organizations.public import KAFEDRA_UNIT_TYPES
     from core.constants import OrgUnitType
 
     faculties = list(OrgUnit.active.filter(organization=organization, unit_type=OrgUnitType.FACULTY).order_by("name"))
@@ -311,9 +311,8 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     from django.core.paginator import Paginator
     from django.db.models import Count, Q
 
-    from apps.exams.constants import EXAM_LANGUAGE_CHOICES
     from apps.exams.models import QuestionSubmission
-    from apps.exams.public import is_exam_center_user
+    from apps.exams.public import EXAM_LANGUAGE_CHOICES, is_exam_center_user
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)

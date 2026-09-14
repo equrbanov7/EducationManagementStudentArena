@@ -192,7 +192,7 @@
     padding: 5px 12px;
     border-radius: 8px;
     border: 1px solid var(--ems-success-600);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
     text-decoration: none;
 }
 .jd-export-link:hover { background: var(--ems-success-100); color: var(--ems-success-strong); }

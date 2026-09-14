@@ -8,11 +8,15 @@
    theme only). Grade colour chips (.grade-A … .grade-F) are shared with
    my_subjects.css. Print-friendly (@media print at the bottom). */
 
+/* 2026-09-12 (audit P2-1): ixtisas/qrup zolağı köhnə `.section-header-flex`
+   başlıq sətrindən (o, bölmə adını təkrarlayırdı) kartın ilk sətrinə köçüb —
+   alt boşluğu artıq özü verir. */
 .profile-section--transcript .transcript-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
     align-items: center;
+    margin-bottom: 1rem;
 }
 
 .profile-section--transcript .transcript-meta-item {

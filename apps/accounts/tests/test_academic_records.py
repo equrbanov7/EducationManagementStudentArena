@@ -11,6 +11,7 @@ tələbələr. Yoxlanılır:
 """
 
 import datetime
+import re
 
 from django.contrib.auth import get_user_model
 from django.db import connection
@@ -20,7 +21,7 @@ from django.urls import reverse
 
 from apps.accounts import academic_records as records_overview
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.organizations.scoping import ORG_WIDE_SCOPE, get_unit_scope
+from apps.organizations.scoping import ORG_WIDE_SCOPE, get_permission_scope
 from apps.registrar import finals, gradebook, services, transcript
 from apps.registrar.models import (
     Curriculum,
@@ -242,6 +243,51 @@ class RecordsAggregationTest(_RecordsBase):
         # hər şey bulk map-lardan gəlir.
         self.assertEqual(len(one.captured_queries), len(many.captured_queries))
 
+    def test_page_flip_drops_the_student_count_query(self):
+        """PERFORMANS MÜQAVİLƏSİ (2026-09-10): səhifə çevrilişində
+        ``COUNT(DISTINCT student_id)`` GETMİR.
+
+        Süzgəc dəyişməyibsə yekun say da dəyişmir — UI onu ilk səhifədən
+        saxlayır, ona görə view ikinci səhifəni ``with_total=False`` istəyir.
+        ``has_more`` isə sayğacdan ASILI DEYİL: ``limit + 1`` zondundan çıxır."""
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as counted:
+                first = records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=0, limit=2
+                )
+            with CaptureQueriesContext(connection) as uncounted:
+                second = records_overview.build_records_page(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={}, offset=2, limit=2, with_total=False
+                )
+
+        # ⚠️ Sadəcə "COUNT" axtarmaq olmaz — bulk map-larda da aqreqatlar var
+        # (məs. sərbəst iş sayğacı). Yalnız TƏKRARSIZ TƏLƏBƏ sayğacı sayılır.
+        def is_student_count(query):
+            return "COUNT(*) FROM (SELECT DISTINCT" in query["sql"]
+
+        self.assertEqual(len(uncounted.captured_queries), len(counted.captured_queries) - 1)
+        self.assertEqual(len([q for q in counted.captured_queries if is_student_count(q)]), 1)
+        self.assertEqual(len([q for q in uncounted.captured_queries if is_student_count(q)]), 0)
+        # Say atılsa da səhifələmə mənası pozulmur.
+        self.assertEqual(first["total"], 5)
+        self.assertIsNone(second["total"])
+        self.assertTrue(first["has_more"])
+        self.assertTrue(second["has_more"])
+
+    def test_summary_reads_the_period_table_once(self):
+        """Tədris ili seçimləri və dövr süzgəci EYNİ oxumadan çıxır.
+
+        Əvvəl ``_period_ids_for`` və ``_year_options`` ``AcademicPeriod``-u
+        ayrı-ayrı sorğulayırdı — süzgəc seçiləndə eyni cədvələ iki eyni SELECT."""
+        with bypass_rls():
+            with CaptureQueriesContext(connection) as ctx:
+                payload = records_overview.build_records_summary(
+                    organization=self.org, scope=ORG_WIDE_SCOPE, filters={"year": "2024/2025", "season": "Payız"}
+                )
+        period_reads = [q for q in ctx.captured_queries if "organizations_academicperiod" in q["sql"]]
+        self.assertEqual(len(period_reads), 1)
+        self.assertEqual(payload["year_options"], ["2024/2025"])
+
     def test_student_with_two_programs_appears_once(self):
         """Unikallıq ``(org, student, program)`` üzrədir — ikinci ixtisası olan
         tələbə cədvəldə İKİ dəfə görünməməlidir (sayım da təkrarsızdır)."""
@@ -323,9 +369,11 @@ class RecordsAggregationTest(_RecordsBase):
 
 
 class RecordsScopingTest(_RecordsBase):
+    # 2026-09-12 (P1-11): endpoint əhatəsi `grade.view` açarına görə çıxarılır
+    # (`academic_records.RECORDS_SCOPE_PERMISSION`); köhnə `get_unit_scope` silinib.
     def test_dean_sees_only_own_faculty(self):
         with bypass_rls():
-            scope = get_unit_scope(self.dean, self.org)
+            scope = get_permission_scope(self.dean, self.org, "grade.view")
             data = records_overview.build_records_overview(
                 organization=self.org, scope=scope, filters={}, offset=0, limit=100
             )
@@ -335,7 +383,7 @@ class RecordsScopingTest(_RecordsBase):
 
     def test_teacher_has_no_structure_access(self):
         with bypass_rls():
-            scope = get_unit_scope(self.teacher, self.org)
+            scope = get_permission_scope(self.teacher, self.org, "grade.view")
             data = records_overview.build_records_overview(
                 organization=self.org, scope=scope, filters={}, offset=0, limit=100
             )
@@ -345,7 +393,7 @@ class RecordsScopingTest(_RecordsBase):
 
     def test_student_in_scope_respects_boundary(self):
         with bypass_rls():
-            scope = get_unit_scope(self.dean, self.org)
+            scope = get_permission_scope(self.dean, self.org, "grade.view")
             in_a = records_overview.student_is_in_scope(
                 organization=self.org, scope=scope, student_id=self.students_a[0].id
             )
@@ -496,6 +544,35 @@ class RecordsEndpointTest(_RecordsBase):
         self.assertIn("data-data-url", html)
         self.assertIn("js-acr-cards", html)
 
+    def test_section_uses_the_shared_ems_ui_layer(self):
+        """2026-09-10 redizaynı: bölmə ORTAQ komponent qatı ilədir.
+
+        Qutu/cədvəl/çekməcə sinifləri `ems_ui`-dən gəlir; sütun sırası isə
+        `_data_table.html` müqaviləsi ilə eynidir — sıra başlığı (`th
+        scope="row"` üçün ayrılan sütun) ƏN ƏVVƏL, əməliyyat sütunu ƏN SONDA."""
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "academic-records"})
+        html = resp.content.decode()
+        panel = html[html.index("profile-section--academic-records") :]
+        panel = panel[: panel.index("</section>")]
+        for marker in ("ems-kpis", "ems-tablewrap", "ems-table", "ems-overlay--drawer", "ems-tablefoot"):
+            self.assertIn(marker, panel, f"{marker} yoxdur — ortaq komponent qatı tətbiq olunmayıb")
+        headers = re.findall(r'<th scope="col"[^>]*>(.*?)</th>', panel, re.S)
+        self.assertEqual(len(headers), 9)
+        self.assertIn("Tələbə", headers[0])
+        self.assertIn("sr-only", headers[-1])
+
+    def test_section_does_not_repeat_the_shell_title(self):
+        """Sahib qaydası: «titlelər 2 dəfə təkrarlanmasın».
+
+        Bölmə adını qabıq (`#profileSectionTitle`) yazır, ona görə panel
+        `ems-header__title` (ikinci `<h1>`) render ETMƏMƏLİDİR — yalnız altyazı."""
+        resp = self._client(self.dean).get(reverse("accounts:profile"), {"section": "academic-records"})
+        html = resp.content.decode()
+        panel = html[html.index("profile-section--academic-records") :]
+        panel = panel[: panel.index("</section>")]
+        self.assertIn("ems-header__subtitle", panel)
+        self.assertNotIn("ems-header__title", panel)
+
     def test_teacher_profile_page_hides_section(self):
         """Adi müəllim academic-records bölməsini görməməlidir (menyu + məzmun)."""
         resp = self._client(self.teacher).get(reverse("accounts:profile"), {"section": "academic-records"})
@@ -508,11 +585,11 @@ class RecordsRoleGateTest(_RecordsBase):
     """Endpoint-lər rol qapısından keçməlidir — scope tək başına hüquq deyil.
 
     2026-07-31 auditi: `_scope()` yalnız `scope.has_structure_access` yoxlayırdı,
-    `_resolve_unit_scope` isə rolun adına baxmadan HƏR üzvlüyün `scope_unit`-ini
-    scope-a əlavə edir. «Müəllimi kafedraya təyin et» əməliyyatı məhz onu
-    doldurur — yəni adi müəllim öz kafedra alt-ağacındakı bütün tələbələrin GPA
-    və transkriptini oxuya bilirdi. Sidebar ona bu bölməni vermir, yəni endpoint
-    UI-dan geniş idi.
+    köhnə ümumi resolver (`get_unit_scope`, 2026-09-12 P1-11 ilə silinib) isə
+    rolun adına baxmadan HƏR üzvlüyün `scope_unit`-ini scope-a əlavə edirdi.
+    «Müəllimi kafedraya təyin et» əməliyyatı məhz onu doldurur — yəni adi
+    müəllim öz kafedra alt-ağacındakı bütün tələbələrin GPA və transkriptini
+    oxuya bilirdi. Sidebar ona bu bölməni vermir, yəni endpoint UI-dan geniş idi.
     """
 
     def _client(self, user):

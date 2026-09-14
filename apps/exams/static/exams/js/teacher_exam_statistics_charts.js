@@ -181,13 +181,13 @@
                             quotaHtml = '<div class="sd-ai-quota sd-ai-quota-box">'
                                 + '<i class="fas fa-info-circle"></i> '
                                 + (T.aiQuotaInfo || "") + ': '
-                                + '<strong>' + data.remaining + '/' + data.limit + '</strong> (' + data.window + ')'
+                                + '<strong>' + escapeHtml(data.remaining) + '/' + escapeHtml(data.limit) + '</strong> (' + escapeHtml(data.window) + ')'
                                 + (data.cached ? ' &middot; <span><i class="fas fa-bolt sd-ai-cached-bolt"></i> ' + (T.aiCached || "") + '</span>' : '')
                                 + '</div>';
                         }
                         aiContent.innerHTML = formatMarkdown(data.summary) + quotaHtml;
                     } else {
-                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || (T.aiError || "")) + '</div>';
+                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + escapeHtml(data.error || (T.aiError || "")) + '</div>';
                     }
                     aiBtn.disabled = false;
                 })
@@ -198,9 +198,19 @@
         });
     }
 
+    /* 2026-09-13 təhlükəsizlik auditi, F-01 (P2): AI xülasəsi LLM çıxışıdır —
+       prompt-a sual mətnləri və qrup adları daxil olduğundan dolayı prompt-
+       injection ilə HTML gələ bilər. Sibling fayl (exam_center_stats_charts.js)
+       kimi ƏVVƏLCƏ escape, sonra markdown → HTML. */
+    function escapeHtml(s) {
+        var d = document.createElement("div");
+        d.textContent = (s == null ? "" : s);
+        return d.innerHTML;
+    }
+
     function formatMarkdown(text) {
-        /* Simple markdown to HTML conversion */
-        var html = text
+        /* Simple markdown to HTML conversion — giriş əvvəlcə HTML-escape olunur */
+        var html = escapeHtml(text)
             .replace(/### (.*)/g, '<h3>$1</h3>')
             .replace(/## (.*)/g, '<h2>$1</h2>')
             .replace(/# (.*)/g, '<h1>$1</h1>')

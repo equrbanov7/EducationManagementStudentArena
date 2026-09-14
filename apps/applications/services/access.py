@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from apps.organizations.unit_heads import ancestor_unit_ids
+from apps.organizations.public import ancestor_unit_ids
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 

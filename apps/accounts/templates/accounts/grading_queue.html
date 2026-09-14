@@ -185,6 +185,8 @@
                 </tbody>
             </table>
         </div>
+        {% comment %}P1-10 (2026-09-12): 25-lik səhifələmə — paylaşılan partial, süzgəclər `pagination_query` ilə saxlanılır.{% endcomment %}
+        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
         {% else %}
         <div class="empty-state">
             <i class="fas fa-check-double"></i>

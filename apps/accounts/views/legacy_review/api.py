@@ -19,9 +19,9 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.registrar import legacy_grade_review as review_read
-from apps.registrar import legacy_grade_review_counts as counts_read
-from apps.registrar import legacy_grade_review_rows as rows_read
+from apps.registrar.public import legacy_grade_review as review_read
+from apps.registrar.public import legacy_grade_review_counts as counts_read
+from apps.registrar.public import legacy_grade_review_rows as rows_read
 
 from .policy import resolve_actor
 

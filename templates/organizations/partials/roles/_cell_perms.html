@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}İcazə sütunu — XAM açar siyahısı DEYİL, kateqoriya paylanması.
+Sahib rəyi (2026-09-09): «journal.correct» kimi açarlar heç nə izah etmirdi.
+Tam siyahı çekmecədədir.{% endcomment %}
+{% with e=row.entry %}
+{% if e.wildcard %}
+  <span class="rolreg-perm rolreg-perm--all">{% trans "Bütün icazələr (*)" context "organizations.roles_registry" %}</span>
+{% elif e.groups %}
+  <div class="rolreg-perm">
+    <span class="rolreg-perm__total">{% blocktrans context "organizations.roles_registry" count n=e.permission_count %}{{ n }} açar{% plural %}{{ n }} açar{% endblocktrans %}</span>
+    <span class="rolreg-perm__cats">
+      {% for g in e.groups|slice:":3" %}<span class="rolreg-chip">{{ g.label }} · {{ g.count }}</span>{% endfor %}
+      {% if e.groups|length > 3 %}<span class="rolreg-chip rolreg-chip--more">+{{ e.groups|length|add:"-3" }}</span>{% endif %}
+    </span>
+  </div>
+{% else %}
+  <span class="rolreg-perm rolreg-perm--none">{% trans "İcazə verilməyib" context "organizations.roles_registry" %}</span>
+{% endif %}
+{% endwith %}

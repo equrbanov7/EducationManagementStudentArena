@@ -128,8 +128,10 @@
                                     </button>
                                     <div class="input-group input-group-sm">
                                         <input type="text" class="form-control" name="reason" placeholder="{% trans 'Rədd etmə səbəbi (opsional)' %}" aria-label="{% trans 'Rədd etmə səbəbi (opsional)' %}">
-                                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-times"></i> {% trans 'Rədd et' %}
+                                        {# 2026-09-14 (audit FE-F19): «Rədd et» təsdiqsiz submit idi — EMSConfirm (csp_event_handlers.js `data-ems-confirm`) #}
+                                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm"
+                                                data-ems-confirm="{% trans 'Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz.' %}">
+                                            <i class="fas fa-times" aria-hidden="true"></i> {% trans 'Rədd et' %}
                                         </button>
                                     </div>
                                 </div>

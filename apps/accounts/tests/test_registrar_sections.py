@@ -83,7 +83,12 @@ class RegistrarProfileSectionsTest(TestCase):
         resp = self._client(self.student).get(reverse("accounts:profile"), {"section": "academic-calendar"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'data-profile-section-panel="academic-calendar"')
-        self.assertContains(resp, "acal-timeline")
+        # 2026-09-09 redizayn: düz `acal-timeline` siyahısı TƏDRİS İLİ üzrə
+        # qruplaşdırılmış kartlara (`acal-group` → `acal-grid`) çevrildi.
+        self.assertContains(resp, "acal-grid")
+        self.assertContains(resp, "acal-card")
+        # Başlıq YALNIZ qabıqdadır — panel öz `<h1>`-ini render etmir.
+        self.assertNotContains(resp, "journal-title")
 
     def test_teacher_journal_section_renders(self):
         resp = self._client(self.teacher).get(reverse("accounts:profile"), {"section": "my-journal"})

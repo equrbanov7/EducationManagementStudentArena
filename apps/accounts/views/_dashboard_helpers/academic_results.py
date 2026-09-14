@@ -31,7 +31,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar import exam_eligibility
+from apps.registrar.public import eligibility_rules as exam_eligibility
 
 from .._helpers import _get_active_organization
 from .formatters import _format_score_display

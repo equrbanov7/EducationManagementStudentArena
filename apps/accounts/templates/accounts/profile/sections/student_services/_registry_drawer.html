@@ -31,6 +31,18 @@ QƏSDƏN yoxdur (§8/13, sətir başına aqreqat qadağandır).
         <div><dt>{% trans "Toplanmış kredit" context "accounts.student_registry" %}</dt><dd data-sr-field="credits_earned"></dd></div>
     </dl>
 
+    {% if student_registry_section.can_transcript %}
+    {% comment %}Rəsmi sənəd: `href` JS-dən (kartın `record_id`-si ilə) qurulur,
+    ona qədər gizlidir. Fayl endirməsi olduğu üçün SPA yükləyicisinin sinfi
+    (`js-profile-section-link`) QOYULMUR.{% endcomment %}
+    <div class="stsvc-card__docs">
+        <a class="ems-btn ems-btn--sm" data-sr-transcript target="_blank" rel="noopener" href="#" hidden>
+            <i class="fas fa-file-pdf" aria-hidden="true"></i>
+            {% trans "Transkript yüklə" context "accounts.student_registry" %}
+        </a>
+    </div>
+    {% endif %}
+
     <h3 class="stsvc-card__title">{% trans "Hərəkət tarixçəsi" context "accounts.student_registry" %}</h3>
     <p class="stsvc-card__empty" data-sr-history-empty hidden>
         {% trans "Bu tələbə üzrə hərəkət əmri yoxdur." context "accounts.student_registry" %}

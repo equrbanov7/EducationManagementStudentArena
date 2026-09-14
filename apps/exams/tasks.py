@@ -207,8 +207,9 @@ def run_text_extraction_job(job_id):
         # branch-də generic extraction-u əvvəlcədən işlətmirik: böyük/OCR PDF
         # iki dəfə parse olunmur.
         visual_name = (job.source_name or "").lower()
+        # 2026-09-14: .docx də bura düşür — şəkillər/OMML `import_media_docx` ilə bağlanır.
         visual_import = (job.payload or {}).get("stash_math") and visual_name.endswith(
-            (".pdf", ".png", ".jpg", ".jpeg")
+            (".pdf", ".png", ".jpg", ".jpeg", ".docx")
         )
         if visual_import:
             from apps.exams.services.visual_import_upload import try_visual_import

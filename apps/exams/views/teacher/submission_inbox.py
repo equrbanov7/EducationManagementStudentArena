@@ -34,6 +34,7 @@ from apps.exams.views.teacher.submission_workbench import (
     initial_workbench_state,
     process_workbench_post,
 )
+from apps.exams.views.teacher.workbench_paste import paste_image_response, requested_paste_action
 from core.tenancy import get_request_organization
 
 
@@ -85,6 +86,10 @@ def question_submission_create(request):
         "language": "",
         "raw_text": "",
     }
+
+    if requested_paste_action(request):
+        # 2026-09-14: pano/sürükləmə ilə şəkil — preview/save emalından əvvəl JSON qolu.
+        return paste_image_response(request, organization_id=organization.pk)
 
     if request.method == "POST":
         form_state = _form_state(request)
@@ -212,6 +217,9 @@ def question_submission_detail(request, submission_id):
             raise PermissionDenied(
                 pgettext("exams.view.question_submission.permission", "Bu göndəriş dəyişdirilə bilməz.")
             )
+        if requested_paste_action(request):
+            # 2026-09-14: pano/sürükləmə ilə şəkil — yalnız redaktə hüququ olanda (yuxarıdakı qapı).
+            return paste_image_response(request, organization_id=organization.pk)
         form_state = _form_state(request)
         _groups = list(_teacher_groups(request, organization))
         state = process_workbench_post(request, organization, form_state)

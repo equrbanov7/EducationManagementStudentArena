@@ -418,7 +418,9 @@ class PeopleAnalyticsEndpointTest(TestCase):
     def test_ai_endpoint_never_500s_without_access(self):
         self.client.force_login(self.fx.teacher_a)
         response = self.client.get("/accounts/people/teachers/analytics/ai/")
-        self.assertEqual(response.status_code, 200)
+        # Backend auditi 2026-09-13, F-10: icazəsizlik artıq 200 deyil, 403 —
+        # zərf (`ok: false`) qalır, JS hər iki halda bloku gizlədir.
+        self.assertEqual(response.status_code, 403)
         self.assertFalse(response.json()["ok"])
 
     def test_section_fragment_carries_the_analytics_hooks(self):

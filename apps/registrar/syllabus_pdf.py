@@ -164,7 +164,7 @@ def _draw_validity_note(sheet, document):
     da yükləyə bilir — belə fayl əlbəyaxa paylanarsa yanlış anlaşılmasın deyə
     vəziyyət açıq yazılır.
     """
-    from apps.syllabus.constants import SyllabusStatus
+    from apps.syllabus.public import SyllabusStatus
 
     sheet.ensure(40)
     sheet.y += 6

@@ -5,6 +5,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import include, path, re_path, reverse_lazy
+from django.views.decorators.cache import cache_control
+from django.views.decorators.vary import vary_on_headers
 from django.views.i18n import JavaScriptCatalog
 
 from core.media_views import protected_media
@@ -59,7 +61,20 @@ _seo_urlpatterns = [
 urlpatterns = [
     path(_admin_prefix, admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
-    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+    # Perf auditi 2026-09-13 F-11: `/jsi18n/` hər səhifədə dinamik render
+    # olunurdu (83 KB, `Cache-Control` yox → brauzer hər dəfə yenidən yükləyir).
+    # Kataloq YALNIZ aktiv dildən asılıdır (dil cookie-si + `Accept-Language`),
+    # ona görə brauzer keşi `private, max-age=1h` + `Vary: Cookie,
+    # Accept-Language`. Server tərəfi `cache_page` QƏSDƏN yoxdur: `Vary:
+    # Cookie` ilə açar hər sessiya üçün ayrı olardı → Redis DB1 (`noeviction`,
+    # sessiyalarla paylaşılır) 5 000 × 83 KB ilə dolardı.
+    path(
+        "jsi18n/",
+        cache_control(private=True, max_age=60 * 60)(
+            vary_on_headers("Cookie", "Accept-Language")(JavaScriptCatalog.as_view())
+        ),
+        name="javascript-catalog",
+    ),
     *_seo_urlpatterns,
     path("blog/", include("apps.blog.legacy_urls")),
     # Public contact page (registered before catch-all blog urls so /contact/ resolves first)
