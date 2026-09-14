@@ -14,6 +14,7 @@
    - [Build-time vs. Runtime Variables](#build-time-vs-runtime-variables)
 4. [First-Time Deployment](#4-first-time-deployment)
 5. [Update / Re-deploy](#5-update--re-deploy)
+   - [5.2 2026-09-14 dəyişikliklər — ilk deploy yoxlama siyahısı](#52-2026-09-14-dəyişikliklər--sahibin-ilk-deploy-u-üçün-yoxlama-siyahısı)
 6. [Static & Private Media Handling](#6-static--private-media-handling)
 7. [Health Check & Smoke Test Verification](#7-health-check--smoke-test-verification)
 8. [Rollback Plan](#8-rollback-plan)
@@ -132,6 +133,7 @@ before running any `docker compose` command.  Never commit this file.
 | `DEPLOY_ROLLBACK_ON_FAILURE` | `true` | Infra audit P2-5: on a failed health/HTTP gate, recreate `app`/`celery_*` from the previously running image tag (captured before the rollout). `false` leaves the failed release running for inspection |
 | `DEPLOY_KEEP_RELEASE_IMAGES` | `3` | Infra audit P2-5: how many older `emsarena-prod:<sha>` tags to keep besides the current and the rollback target; older ones are removed after a successful deploy |
 | `HEALTHCHECK_HOST` | `127.0.0.1` (deploy) / `10.0.2.42` (blackbox) | Host header the deploy health-gate and the blackbox probes send to nginx (must be in `ALLOWED_HOSTS`). Infra audit 2026-09-14 P3-9: the blackbox config is rendered from this variable at container start instead of a hard-coded IP |
+| `POSTGRES_JIT` | `off` | Perf measurement EX-12 (2026-09-14): passed to `postgres` as `-c jit=…`. RLS policies inflate plan cost past `jit_above_cost` (100 000) and JIT compilation turned a 2.7 ms OLTP query into 158 ms. Keep `off` for this OLTP profile; only set `on` for an explicit analytics experiment |
 
 ### Build-time vs. Runtime variables
 
@@ -354,6 +356,18 @@ instead of SIGKILL-ing them after Docker's default 10 s. Expect
 `docker compose up -d` / `stop` to take up to 15 min when a heavy task is
 mid-flight — that is intended; do not shorten it on exam days.
 
+### Postgres JIT off (perf measurement EX-12, 2026-09-14)
+
+`docker-compose.prod.yml` starts `postgres` with `-c jit=${POSTGRES_JIT:-off}`.
+With row-level security every policy subplan is added to the planner's cost
+estimate; once that estimate crosses `jit_above_cost` (100 000) PostgreSQL
+JIT-compiles the query, and on the 20 000-row `exams_examanswer` sandbox a
+2.7 ms prefetch became **158 ms** (103 ms of it JIT emission). The ORM's real
+queries sit below the threshold today, but a larger `IN (...)` list or more
+options per question can cross it, so JIT is disabled for the OLTP profile.
+The setting is applied on the next `postgres` container recreate (it is a
+server start parameter, not a reload) — see the 2026-09-14 checklist in §5.2.
+
 ### Daphne proxy headers (infra audit 2026-09-14, P3-12)
 
 `docker/prod-entrypoint.sh` starts Daphne with `--proxy-headers`, so the ASGI
@@ -387,6 +401,82 @@ in Django; the flag only aligns the raw ASGI scope with that trust model.
   double-quoted YAML scalars — SMTP keys or webhook tokens may contain `|`,
   `&`, `/`, `\` (the old `sed` render broke on them). A template change still
   needs a container recreate (`remote_deploy.sh` does it for alertmanager).
+
+---
+
+## 5.2 2026-09-14 dəyişikliklər — sahibin ilk deploy-u üçün yoxlama siyahısı
+
+2026-09-13 auditinin düzəlişləri və 2026-09-14 gecə dalğaları (2–5) ilk dəfə
+istehsala çıxanda aşağıdakılar **bir dəfə** edilməlidir. Mənbə: audit hesabatı
+`docs/audits/2026-09-13-claude/FINAL_REPORT_AZ.md` §27 «MÜTLƏQ» siyahısı və
+w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, sonra deploy.
+
+**A. Deploy-dan ƏVVƏL (prod `.env`)**
+
+1. **DB tətbiq rolu** (Codex P0-01): `scripts/provision-app-db-role.sh` →
+   `APP_DATABASE_USER=emsarena_app` + `EMS_DB_ROLE_ENFORCE=error` — addımlar
+   [PROD_DB_ROLE_CHECKLIST.md](./PROD_DB_ROLE_CHECKLIST.md). Əvvəlcə staging
+   klonunda final-mərkəz WS + `-m postgres` test dəsti ilə yoxlayın.
+2. **TLS bayraqları**: `INSECURE_TRANSPORT_OK` prod `.env`-də **olmamalıdır**
+   (varsa `check --deploy` dayandırır); `SECURE_SSL_REDIRECT` / HSTS dəyərləri
+   §3 cədvəlindəki kimi.
+3. **`ALLOWED_HOSTS`** mütləq `localhost` və `127.0.0.1`-i ehtiva etməlidir
+   (app healthcheck, nginx `/metrics/` scrape, Alertmanager webhook və
+   `HEALTHCHECK_HOST` hamısı ona söykənir): `ALLOWED_HOSTS=10.0.2.42,localhost,127.0.0.1`.
+4. **`DEPLOY_CHECK_FAIL_LEVEL`** defoltu artıq `WARNING`-dir (CI ilə eyni). Prod
+   `.env`-də `manage.py check --deploy` xəbərdarlığı varsa **ilk deploy dayanacaq** —
+   ya xəbərdarlığı düzəldin, ya müvəqqəti və sənədləşdirilmiş şəkildə
+   `DEPLOY_CHECK_FAIL_LEVEL=ERROR` yazın (sonra geri qaytarın).
+5. **Redis**: `REDIS_PASSWORD` artıq argv-dən deyil, `docker/redis/redis.conf.tmpl`
+   şablonundan oxunur; `REDIS_MAXMEMORY` (defolt `3gb`, `noeviction`) `.env`-də
+   istənilən dəyərlə üst-üstə düşməlidir (drift yoxlayın: `redis-cli CONFIG GET maxmemory`).
+6. **`ALERTMANAGER_WEBHOOK_TOKEN`** (app və Alertmanager eyni dəyər) və
+   `GRAFANA_ADMIN_PASSWORD`, `ALERT_EMAIL_TO` mövcud olmalıdır.
+7. **Parol rotasiyası**: klon/staging DB parolları və `b09cb19d` commit-indəki
+   tarixi `.env` sızmasındakı dəyərlər hər hansı real mühitdə işlədilirsə dəyişdirin
+   (`ALTER ROLE …`).
+
+**B. Deploy-dan ƏVVƏL (server)**
+
+8. `docker network inspect emsarena_emsarena-network` → subnet **172.18.0.0/16**,
+   gateway **172.18.0.1** (`ARP_AGENT_BIND` ilə eyni) — bax §5 «Network IPAM pin».
+9. Backup: son dump-ın mövcudluğu (`./backups/postgres/last/`) və off-site nüsxə;
+   deploy skripti onsuz da release-dən əvvəl dump alır (uğursuz dump = deploy dayanır).
+10. **İmtahan saatından kənar** vaxt seçin: bu deploy **redis, nginx, alertmanager,
+    blackbox və postgres konteynerlərini yenidən yaradır** (command / volume /
+    healthcheck / `jit=off` dəyişib) — Redis restart (AOF var, data itmir, amma
+    WS/sessiya/broker qısa kəsilir), nginx bir neçə saniyəlik edge kəsilməsi,
+    Postgres 60 s-ə qədər graceful stop.
+
+**C. Deploy**
+
+11. `bash scripts/deploy/remote_deploy.sh` (və ya `main`-ə push). Gözlənilən
+    axın: `emsarena-prod:<sha>` build → `check --deploy` → dump → migrate/collectstatic →
+    `up -d` → health gate → `latest` teqi. **İlk** deploy-da rollback hədəfi
+    `emsarena-prod:latest`-dir (köhnə konteynerlər ondan yaradılıb) — keçərlidir.
+12. Miqrasiyalar bu dalğada: `organizations 0051–0052`, `registrar 0076–0078`,
+    `exams 0067–0069`, `accounts 0023`, `appeals 0004`, `courses 0002` (dublikat
+    indekslər `CONCURRENTLY` silinir, `registrar_lesson (org, date)` indeksi əlavə olunur).
+    Geri alınmır — rollback yalnız konteynerləri əvvəlki image-ə qaytarır (§8).
+
+**D. Deploy-dan SONRA**
+
+13. `/ping/` 200, `/health/` 200/207, `build.sha` = deploy olunan SHA.
+14. `docker exec emsarena-postgres psql -U … -c 'SHOW jit'` → `off`.
+15. Redis: `docker exec emsarena-redis sh -c 'cat /proc/1/cmdline | tr "\0" " "'` —
+    parol görünməməlidir; `redis-cli ping` → PONG.
+16. **Brevo «Authorised IPs»**: serverin çıxış IP-sini Brevo panelində ağ siyahıya
+    əlavə edin, sonra Watchdog heartbeat e-poçtunun (`WATCHDOG_REPEAT_INTERVAL`, 24 h)
+    və bir test alertinin **xarici tərəfdə** çatdığını sübut edin — bax
+    [SISTEM_MONITORINQI.md](./SISTEM_MONITORINQI.md) «Brevo».
+17. Real ölçülü **restore məşqi** (§12 «Restore procedure») + off-site nüsxənin
+    yoxlanması; RPO qərarı.
+18. İmtahan Mərkəzi / TŞ qərarı: 349 `exam_score > 50` sətri (SQL `registrar 0075`
+    docstring-də) → təmizləndikdən sonra `VALIDATE CONSTRAINT`; 1 ehtimal ikiqat tələbə.
+19. Yeni funksiyaların ilk istifadəsi: RİM rəhbərinə «İmtahan balının daxil edilməsi»
+    bölməsinin göründüyünü (`final_score.entry`, miqrasiya `organizations 0052`), sehrbazda
+    reyestr qrupu seçicisinin işlədiyini, sual idxalında KaTeX aktivlərinin (CSP) 200
+    qaytardığını bir dəfə brauzerdə yoxlayın — sənədlər `docs/features/`.
 
 ---
 
