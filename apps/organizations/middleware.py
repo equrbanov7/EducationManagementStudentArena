@@ -84,6 +84,20 @@ class OrganizationMiddleware:
             )
 
     @staticmethod
+    def _sole_active_organization():
+        """Sistemdə ÜMUMİYYƏTLƏ yeganə təşkilat (aktivdirsə) — üzvlüksüz superadmin defoltu.
+
+        İkinci təşkilat (pending də olsa) varsa seçim superadminin öz işidir —
+        superadmin idarəetmə səhifələri o halda təşkilat siyahısını göstərir."""
+        from .models import Organization
+
+        with bypass_rls():
+            orgs = list(Organization.objects.order_by("created_at")[:2])
+        if len(orgs) == 1 and orgs[0].is_active and orgs[0].status == "active":
+            return orgs[0]
+        return None
+
+    @staticmethod
     def _fetch_blocked_organization(user):
         """İstifadəçinin aktiv üzvlüyü olan, amma statusu ``active`` OLMAYAN təşkilat.
 
@@ -239,9 +253,16 @@ class OrganizationMiddleware:
                     request.session["active_organization"] = owner_fallback_org.slug
                     request.org_memberships = [owner_membership] if owner_membership is not None else []
                     setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, owner_membership is None)
-                elif not (
-                    getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
-                ):
+                elif getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False):
+                    # Sahibin qərarı (2026-09-15): üzvlüksüz superadmin üçün sistemdə
+                    # YEGANƏ aktiv təşkilat defolt seçilir (tək-tenant QKU yerləşdirməsi);
+                    # bir neçə təşkilat varsa seçim yenə superadminindir.
+                    sole_org = self._sole_active_organization()
+                    if sole_org is not None:
+                        request.organization = sole_org
+                        request.session["active_organization"] = sole_org.slug
+                        request.org_memberships = []
+                else:
                     # F-11 (2026-09-13): aktiv təşkilatı olmayan adi istifadəçi
                     # üçün dayandırılmış/pending üzvlük də oxunur ki, suspended
                     # → hard logout müqaviləsi login-dən sonra da tutsun.
