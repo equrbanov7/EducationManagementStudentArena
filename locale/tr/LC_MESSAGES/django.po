@@ -68566,3 +68566,11 @@ msgstr "Onayla — sisteme kaydet"
 msgctxt "registrar.exam_score_entry"
 msgid "tələbə kəsilir (F)"
 msgstr "öğrenci kalıyor (F)"
+
+msgctxt "profile.my_exams.trash"
+msgid "silinmiş imtahan"
+msgstr "silinmiş sınav"
+
+msgctxt "profile.my_exams.trash"
+msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
+msgstr "Sildiğiniz sınavlar burada saklanır: sonuçları kaybolmaz ve istediğiniz zaman geri yükleyebilirsiniz."

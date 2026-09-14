@@ -96,6 +96,48 @@
 .profile-section--my-exams .tx-btn--sm { min-height: var(--ems-h-xs); padding: 0 12px; font-size: var(--ems-fs-sm); }
 .profile-section--my-exams .tx-btn.tx-icon-only { width: var(--ems-h-field); padding: 0; flex-shrink: 0; }
 
+/* ─────────────────────────── zibil qutusu düyməsi + alt-görünüş tabları ─────────────────────────── */
+/* 2026-09-14 (W3 `w3myexams`, sahib: «zibil qutusu yerini düzəlt, daha yaxşı formada»):
+   başlıqda mətn linki əvəzinə ikon + sayğac (ghost, 40px); alt-görünüş açıq olanda
+   `is-on` (primary soft). Tablar `ems-tabs` dilində, server-render linklər. */
+.profile-section--my-exams .tx-trashbtn {
+  position: relative; gap: var(--ems-sp-2); padding: 0 12px; border-color: var(--ems-neutral-200);
+  color: var(--ems-neutral-600);
+}
+.profile-section--my-exams .tx-trashbtn i { font-size: 14px; }
+.profile-section--my-exams .tx-trashbtn:hover { border-color: var(--ems-neutral-300); color: var(--tx-ink); }
+.profile-section--my-exams .tx-trashbtn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-trashbtn.is-on { border-color: var(--ems-primary-200); background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.profile-section--my-exams .tx-trashbtn-n {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: var(--ems-r-pill); background: var(--ems-neutral-100); color: var(--ems-neutral-600);
+  font-size: var(--ems-fs-xs); font-weight: 800; line-height: 1;
+}
+.profile-section--my-exams .tx-trashbtn-n.has-items { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.profile-section--my-exams .tx-trashbtn.is-on .tx-trashbtn-n { background: var(--ems-primary-100); color: var(--ems-primary-800); }
+/* Dar ekranda (`header.css` ≤ 768: `.ems-header__actions > * { flex: 1 1 auto }`)
+   «Yeni imtahan» uzanır, zibil qutusu ikonu sabit enli qalır. */
+.profile-section--my-exams .tx-head-actions .tx-trashbtn { flex: 0 0 auto; }
+.profile-section--my-exams .tx-tabs { margin-bottom: var(--ems-sp-6); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn { text-decoration: none; }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn i { font-size: 12px; color: var(--ems-neutral-400); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn[aria-current] i { color: var(--ems-primary-600); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); border-radius: var(--ems-r-md); }
+
+/* ─────────────────────────── zibil qutusu paneli ─────────────────────────── */
+.profile-section--my-exams .tx-trash-head { display: flex; align-items: flex-start; gap: var(--ems-sp-4); margin-bottom: var(--ems-sp-5); }
+.profile-section--my-exams .tx-trash-ic {
+  display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--ems-r-lg);
+  background: var(--ems-warning-100); color: var(--ems-warning-800); font-size: 15px;
+}
+.profile-section--my-exams .tx-trash-title { margin: 0; font: inherit; font-size: var(--ems-fs-lg); font-weight: 800; color: var(--tx-ink); }
+.profile-section--my-exams .tx-trash-sub { margin: 3px 0 0; max-width: 64ch; font-size: var(--ems-fs-base); line-height: 1.55; color: var(--tx-muted); text-wrap: pretty; }
+.profile-section--my-exams .tx-trash-name { display: block; font-weight: 700; color: var(--tx-ink); }
+.profile-section--my-exams .tx-trash-type { display: block; margin-top: 2px; font-size: var(--ems-fs-sm); font-weight: 500; color: var(--tx-muted); }
+.profile-section--my-exams .tx-trash-form { margin: 0; }
+.profile-section--my-exams .tx-trash .ems-rowactions { flex-wrap: nowrap; }
+.profile-section--my-exams .tx-trash .ems-state { border: 1px dashed var(--tx-border); border-radius: var(--tx-radius); }
+
 /* ─────────────────────────── KPI zolağı (ems-kpi) ─────────────────────────── */
 /* 4 status kartı = KLİK EDİLƏ BİLƏN filtr (`aria-pressed`) — handoff §4 komponent 1,
    «accent» variantı: ağ fon + 4px sol kontur status rəngində. */
@@ -383,6 +425,8 @@
   .profile-section--my-exams .tx-viewtoggle { margin-left: 0; align-self: flex-start; }
   .profile-section--my-exams .tx-head-actions { width: 100%; }
   .profile-section--my-exams .tx-head-actions .tx-btn { flex: 1 1 auto; }
+  .profile-section--my-exams .tx-trash-head { align-items: center; }
+  .profile-section--my-exams .tx-trash .ems-rowactions { flex-wrap: wrap; justify-content: flex-start; }
   .profile-section--my-exams .tx-status-pill { position: static; margin-bottom: var(--ems-sp-3); align-self: flex-start; }
   .profile-section--my-exams .tx-card-foot { flex-wrap: wrap; }
   .profile-section--my-exams .tx-foot-actions { margin-left: 0; width: 100%; }

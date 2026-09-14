@@ -24,6 +24,21 @@
 .exam-wizard-modal.modal,
 html.ems-modal-open .exam-wizard-modal.modal { overflow-y: hidden; }
 
+/* 2026-09-14 (W3 `w3myexams`, sahib: «modalı aşağı sürüşdürəndə hər zaman getmir,
+   iç-içə nə isə var»). `exam_create_edit_modal.css`-in pre-wizard qaydası
+   `.modal-body { max-height: calc(100vh - 190px); overflow-y: auto }` sehrbazın
+   `height: min(680px, 86vh)`-i ilə TOQQUŞURDU: viewport ≤ ~870px olanda (adi
+   noutbuk 1280×800 daxil) sehrbaz modal-body-dən hündür olur və modal-body
+   İKİNCİ scroll konteyneri kimi işə düşürdü — rel/başlıq üzərində wheel onu
+   70px sürüşdürüb dayanırdı, forma isə `.ew-pane-body`-də ayrıca sürüşürdü.
+   Həll: sehrbaz modalında modal-body scroll konteyneri DEYİL (tək scroll qatı
+   `.ew-pane-body`-dir), sehrbazın hündürlüyü isə dialoqun şaquli kənarları
+   (`.modal-dialog` 1.75rem×2) çıxılmaqla viewport-a sığdırılır. */
+.exam-create-edit-modal.exam-wizard-modal .modal-body {
+  max-height: none;
+  overflow: hidden;
+}
+
 .exam-wizard-modal .modal-content {
   position: relative;
   border: none;
@@ -47,6 +62,8 @@ html.ems-modal-open .exam-wizard-modal.modal { overflow-y: hidden; }
   /* minmax(0, 1fr): sətir konteynerin hündürlüyünü aşmasın (scroll içəridə qalsın). */
   grid-template-rows: minmax(0, 1fr);
   height: min(680px, 86vh);
+  /* dvh: mobil brauzer çubuğu açılıb-bağlananda da modal kənara çıxmır. */
+  height: min(680px, 86vh, calc(100dvh - 3.5rem));
   width: 100%;
   background: var(--ems-bg);
   color: var(--ems-text);
@@ -397,7 +414,7 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 
 /* ── Responsiv: rel → üst proqres zolağı; telefonda tam ekran ─────────── */
 @media (max-width: 860px) {
-  .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); }
+  .exam-wizard { grid-template-columns: 1fr; height: min(760px, 92vh); height: min(760px, 92vh, calc(100dvh - 3.5rem)); }
   .exam-wizard .ew-rail { display: none; }
   .exam-wizard .ew-mstep { display: flex; align-items: center; gap: 6px; padding: 12px 18px 0; }
   .exam-wizard .ew-msdot { flex: 1; height: 5px; border-radius: var(--ems-r-pill); background: var(--ems-neutral-200); transition: background-color 0.2s ease; }

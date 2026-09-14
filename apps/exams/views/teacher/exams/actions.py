@@ -26,6 +26,16 @@ from ._shared import (
 logger = logging.getLogger(__name__)
 
 
+def _teacher_profile_trash_url():
+    """«Zibil qutusu» — 2026-09-14 (W3 `w3myexams`) kabinetdə alt-görünüşdür.
+
+    Bərpa / birdəfəlik silmədən sonra müəllim ayrıca `deleted_exams_list`
+    səhifəsinə deyil, «İmtahanlarım» bölməsinin zibil qutusu tabına qayıdır
+    (Django mesajı orada toast kimi görünür). Köhnə səhifə URL-i saxlanılır.
+    """
+    return f"{_teacher_profile_my_exams_url()}&exam_view=trash"
+
+
 @login_required
 def toggle_exam_active(request, slug):
     """
@@ -359,7 +369,7 @@ def restore_exam(request, slug):
         )
 
     messages.success(request, pgettext_lazy("exams.view.exams.message", "exam_restored"))
-    return redirect("exams:deleted_exams_list")
+    return redirect(_teacher_profile_trash_url())
 
 
 @login_required
@@ -387,7 +397,7 @@ def permanent_delete_exam(request, slug):
         )
     except AcademicHistoryProtected as exc:
         messages.error(request, exc.messages[0])
-        return redirect("exams:deleted_exams_list")
+        return redirect(_teacher_profile_trash_url())
     try:
         from core.cache import invalidate_exam_metadata_cache, invalidate_exam_question_ids_cache
 
@@ -401,4 +411,4 @@ def permanent_delete_exam(request, slug):
         )
 
     messages.success(request, pgettext_lazy("exams.view.exams.message", "exam_permanently_deleted"))
-    return redirect("exams:deleted_exams_list")
+    return redirect(_teacher_profile_trash_url())

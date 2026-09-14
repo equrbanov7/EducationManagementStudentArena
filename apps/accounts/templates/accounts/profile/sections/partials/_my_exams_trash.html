@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}
+  2026-09-14 (W3 `w3myexams`): «Zibil qutusu» alt-görünüşü. Kontekst: `trash`
+  (bax `_sections/my_exams_trash.py`) — `ems_ui/_data_table.html` müqaviləsi
+  (sıra başlığı birinci, əməllər sonuncu). Bərpa adi POST formudur (destruktiv
+  deyil); birdəfəlik silmə `.js-tx-purge` → `EMSConfirm` (danger) → gizli
+  `[data-tx-action-form]` POST (my_exams_dashboard.js). Uğur/xəta mesajı
+  yönləndirmədən sonra Django toast-u ilə göstərilir.
+{% endcomment %}
+<section class="tx-trash" data-tx-trash aria-labelledby="txTrashTitle">
+  <div class="tx-trash-head">
+    <div class="tx-trash-ic" aria-hidden="true"><i class="fas fa-trash-can"></i></div>
+    <div class="tx-trash-tx">
+      <h2 id="txTrashTitle" class="tx-trash-title">{% trans "trash_link" context "profile.my_exams" %}</h2>
+      <p class="tx-trash-sub">{% trans "page_subtitle" context "exams.template.deleted_exams" %}</p>
+    </div>
+  </div>
+
+  {% if trash.table_state == "empty" %}
+    {% trans "empty_state" context "exams.template.deleted_exams" as trash_empty_title %}
+    {% trans "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz." context "profile.my_exams.trash" as trash_empty_body %}
+    {% trans "back_to_my_exams" context "exams.template.deleted_exams" as trash_empty_action %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-trash-can" state_title=trash_empty_title state_body=trash_empty_body state_action_label=trash_empty_action state_action_url=profile_base_url|add:"?section=my-exams" %}
+  {% else %}
+    {% include "partials/ems_ui/_data_table.html" with table_columns=trash.table_columns table_rows=trash.table_rows table_state=trash.table_state table_zebra=True %}
+  {% endif %}
+</section>

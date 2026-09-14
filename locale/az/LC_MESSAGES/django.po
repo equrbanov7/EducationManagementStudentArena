@@ -68619,3 +68619,11 @@ msgstr "Təsdiq et — sistemə yaz"
 msgctxt "registrar.exam_score_entry"
 msgid "tələbə kəsilir (F)"
 msgstr "tələbə kəsilir (F)"
+
+msgctxt "profile.my_exams.trash"
+msgid "silinmiş imtahan"
+msgstr "silinmiş imtahan"
+
+msgctxt "profile.my_exams.trash"
+msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
+msgstr "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."

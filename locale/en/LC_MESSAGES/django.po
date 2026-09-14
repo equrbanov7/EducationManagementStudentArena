@@ -68657,3 +68657,11 @@ msgstr "Confirm — record in the system"
 msgctxt "registrar.exam_score_entry"
 msgid "tələbə kəsilir (F)"
 msgstr "student(s) failing (F)"
+
+msgctxt "profile.my_exams.trash"
+msgid "silinmiş imtahan"
+msgstr "deleted exams"
+
+msgctxt "profile.my_exams.trash"
+msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
+msgstr "Exams you delete are kept here: their results are not lost and you can restore them at any time."
