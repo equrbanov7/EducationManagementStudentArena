@@ -15,7 +15,6 @@ from .._helpers import _get_active_organization, _role_capabilities
 from ._sections.statistics import statistics_scope
 
 
-@login_required
 def _require_own_analytics(request, org):
     """Şəxsi (müəllim/tələbə) statistika ixracı — dashboard ilə eyni qapı
     (`analytics.view_own`, F-06 2026-09-14); açar yoxdursa 403."""
@@ -29,6 +28,7 @@ def _require_own_analytics(request, org):
         raise PermissionDenied
 
 
+@login_required
 def statistics_export_csv(request):
     """Export current statistics data as CSV."""
     import io
