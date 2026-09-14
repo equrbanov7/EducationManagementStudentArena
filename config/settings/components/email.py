@@ -18,6 +18,11 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() in {"1", "true", "ye
 EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.getenv("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@qku.edu.az"
+# Sahibin qərarı (2026-09-15): göndərici (From) Brevo-da təsdiqlənmiş domen qalır,
+# cavab ünvanı (Reply-To) isə universitetin ünvanı — domen təsdiqlənənə qədər.
+# Boşdursa Reply-To başlığı əlavə olunmur. Bütün sistem məktubları
+# (`core.mailing.system_email_headers`) bunu işlədir.
+EMAIL_REPLY_TO = (os.getenv("EMAIL_REPLY_TO") or "").strip()
 # SMTP socket timeout. Kept low so the request thread (or even background
 # threads) cannot stall on an unresponsive SMTP host. Override via env if
 # the upstream server is known-slow.
