@@ -31455,7 +31455,7 @@ msgstr "AI xülasəsi yaratmaq üçün yuxarıdakı düyməyə klikləyin. Anali
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:4
 msgctxt "exams.template.teacher_group_list"
 msgid "page_title"
-msgstr "Yeni Kurs Yaratma"
+msgstr "İmtahan qrupları"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:17
 msgctxt "exams.template.teacher_group_list"
@@ -68753,3 +68753,31 @@ msgstr "Sətirdəki imtahan növü («%(cell)s») vərəqin növü (%(kind)s) il
 msgctxt "registrar.exam_score_entry"
 msgid "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
 msgstr "Şablon kartdakı sual sayı, bir sualın maksimumu və imtahan növü ilə endirilir; yoxlama da eyni şəbəkə ilə gedir."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_title"
+msgstr "Bu səth reyestr qrupları ilə əvəz olunub"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "notice_body"
+msgstr "İmtahana giriş üçün qruplar artıq qrup reyestrindən (akademik qruplar) seçilir: sehrbazın «Qruplar (reyestr)» seçicisi, giriş siyasəti, PIN və statistika reyestrlə işləyir. Bu təşkilatda köhnə imtahan kohortu yoxdur — yenisini yaratmağa ehtiyac yoxdur."
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_registry"
+msgstr "Qrup reyestrinə keç"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_open_exam_wizard"
+msgstr "İmtahan sehrbazına keç"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "secondary_still_need_cohort"
+msgstr "Köhnə kohort hələ də lazımdırsa:"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "action_create_legacy_cohort"
+msgstr "köhnə kohort yarat (tövsiyə olunmur)"
+
+msgctxt "exams.template.legacy_cohort_notice"
+msgid "summary_show_legacy_form"
+msgstr "Köhnə kohort formasını göstər (tövsiyə olunmur)"

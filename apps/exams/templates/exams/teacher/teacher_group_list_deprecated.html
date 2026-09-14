@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}2026-09-14 (W7 `w7cohort`): kohortu OLMAYAN təşkilat üçün `/exams/groups/`.
+   Boş siyahı + modal + JS əvəzinə yalnız əvəzlənmə kartı render olunur
+   (sahibin 2026-09-07 qərarı). Kohortu olan tenant köhnə
+   `teacher_group_list.html`-i görür — bax `views/teacher/groups.py`.{% endcomment %}
+
+{% block title %}{% trans "page_title" context "exams.template.teacher_group_list" %}{% endblock %}
+
+{% block extraCss %}
+  <link rel="stylesheet" href="{% static 'exams/css/legacy_cohort_notice.css' %}?v=20260914-1">
+{% endblock %}
+
+{% block content %}
+<div class="container group-page" data-legacy-cohort-page="list">
+  {% include "exams/teacher/partials/_legacy_cohort_notice.html" %}
+</div>
+{% endblock %}

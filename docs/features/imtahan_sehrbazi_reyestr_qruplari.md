@@ -116,6 +116,26 @@ təşkilatda / kohortsuz bazada blok ümumiyyətlə render olunmur (test: redakt
 `name="allowed_groups"` yoxdur). Kohort üzvlüyü giriş siyasətində hələ də tanınır (geri
 uyğunluq); yeni təyinat üçün reyestr qrupunu işlədin.
 
+**Səthin yığışdırılması (2026-09-14, W7 `w7cohort`).** Sahibin 2026-09-07 qərarı ilə
+köhnə kohort səthi silinməyə gedir; bu dalğada məlumat silinmir, model və cədvəl qalır,
+yalnız səth gizlədilir. Meyar bir yerdədir — `apps/exams/domain/student_group_deprecation.py`
+→ `organization_has_legacy_cohorts(organization)` (bir EXISTS sorğusu, təşkilat
+səviyyəsində, aktorun əhatəsindən asılı deyil):
+
+| Səth | Kohortu OLMAYAN təşkilat | Kohortu olan tenant |
+|------|--------------------------|---------------------|
+| `/exams/groups/` (`exams:teacher_group_list`) | boş siyahı + modal + JS əvəzinə əvəzlənmə kartı (`teacher_group_list_deprecated.html`): «Bu səth reyestr qrupları ilə əvəz olunub», keçidlər `?section=groups-registry` və `?section=my-exams` (sehrbaz); `group.manage` olanda ikinci dərəcəli «köhnə kohort yarat» keçidi | dəyişmir |
+| `/exams/groups/create/form/` (`exams:create_student_group`) | eyni kart üstdə, köhnə forma yığılmış `<details>` içində (icazə qapısı dəyişmir — yalnız `group.manage`) | dəyişmir |
+| Sehrbazın «Köhnə kohortlar» bloku | render olunmur (`legacy_groups_available`) | göstərilir |
+| İmtahan detal «Qruplar» kartı | yalnız reyestr qrupları (`assigned_unit_names`) | eyni |
+| Nəticələr qrup filtri (`results/_group_options.py`) | yalnız `unit:<uuid>` variantları | kohort + reyestr birgə |
+| İmtahan mərkəzi statistikası qrup filtri | `group_search?kind=units` — kohortsuz | eyni |
+
+Sidebar/dashboard-da kohort səthinə keçid 2026-09-08-dən yoxdur (kabinet «Qruplar»
+bölməsi çıxarılıb); qalan yeganə istinadlar kohort təyinatı bildirişi
+(`notifications/services/events.py`) və AI köməkçi kontekstidir. Test:
+`apps/exams/tests/test_w7_cohort_deprecation.py`.
+
 ---
 
 ## 6. Validasiya qaydaları

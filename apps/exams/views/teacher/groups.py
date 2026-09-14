@@ -9,6 +9,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_POST
 
+from apps.exams.domain.student_group_deprecation import organization_has_legacy_cohorts
 from apps.exams.forms import StudentGroupForm
 from apps.exams.models import StudentGroup
 from apps.exams.views.shared.tenant import get_active_organization
@@ -179,8 +180,25 @@ def _candidates_url_for(form):
     return ""
 
 
-def _create_group_template_context(request, organization, form):
+def _legacy_notice_context(*, can_create: bool) -> dict:
+    """Kohortu OLMAYAN təşkilat üçün əvəzlənmə kartının keçidləri.
+
+    2026-09-14 (W7 `w7cohort`; sahibin 2026-09-07 qərarı): qrup reyestri
+    (`?section=groups-registry`) və imtahan sehrbazı (`?section=my-exams` —
+    tam səhifə `exams:create_exam` onsuz da bura yönləndirir) əsas keçidlərdir;
+    köhnə yaratma səhifəsinə keçid yalnız `group.manage` olanda, ikinci dərəcəli.
+    """
+    profile_url = reverse("accounts:profile")
     return {
+        "legacy_cohorts_exist": False,
+        "legacy_notice_registry_url": f"{profile_url}?section=groups-registry",
+        "legacy_notice_wizard_url": f"{profile_url}?section=my-exams",
+        "legacy_notice_create_url": reverse("exams:create_student_group") if can_create else "",
+    }
+
+
+def _create_group_template_context(request, organization, form):
+    context = {
         "form": form,
         "organization": organization,
         "can_multi_assign_teachers": _can_multi_assign_teachers(request.user),
@@ -190,7 +208,13 @@ def _create_group_template_context(request, organization, form):
         "teacher_count": form.fields["primary_teacher"].queryset.count(),
         "candidates_url": _candidates_url_for(form),
         "is_editing": False,
+        "legacy_cohorts_exist": True,
     }
+    # W7: kohortsuz təşkilatda forma yığılmış <details> içinə düşür, üstdə
+    # əvəzlənmə kartı çıxır (şablon `legacy_cohorts_exist`-ə baxır).
+    if not organization_has_legacy_cohorts(organization):
+        context.update(_legacy_notice_context(can_create=False))
+    return context
 
 
 @login_required
@@ -199,6 +223,15 @@ def teacher_group_list(request):
     organization = _get_required_organization(request)
     if organization is None:
         return redirect("accounts:profile")
+
+    # W7 `w7cohort` (2026-09-14): təşkilatda heç bir kohort yoxdursa boş siyahı,
+    # modal və JS əvəzinə yalnız əvəzlənmə kartı (icazə qapısı yuxarıda, dəyişmir).
+    if not organization_has_legacy_cohorts(organization):
+        return render(
+            request,
+            "exams/teacher/teacher_group_list_deprecated.html",
+            _legacy_notice_context(can_create=_user_can_create_group(request)),
+        )
 
     groups = _group_queryset_for_actor(request, organization)
     # F-10 (2026-09-14): variantlar lazy — bax `_candidates_url_for`.

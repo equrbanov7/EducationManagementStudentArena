@@ -358,3 +358,74 @@ def test_prod_smoke_posts_to_the_webhook_through_nginx_and_checks_redis_argv():
 
     redis_step = next(step for name, step in steps.items() if "Redis password" in name)
     assert "/proc/1/cmdline" in redis_step["run"] and "requirepass" in redis_step["run"]
+
+
+# ── W7 `w7cohort` (2026-09-14) infra P3 — nginx nosniff + /health/ daxili ──
+
+
+def _nginx_conf() -> str:
+    return NGINX_CONF_PATH.read_text(encoding="utf-8")
+
+
+def test_nginx_direct_file_locations_send_nosniff_always():
+    """Birbaşa nginx-dən verilən fayllar Django SecurityMiddleware-dən keçmir —
+    `X-Content-Type-Options: nosniff` (`always`) hər belə blokda açıq yazılmalıdır.
+    `add_header` blokda olanda yuxarıdan miras gəlmir, ona görə hər biri ayrı yoxlanır."""
+    for prefix in (
+        "location /static/",
+        "location /media/post_images/",
+        "location /media/course_covers/",
+        "location /internal_media/",
+    ):
+        block = _nginx_location_block(prefix)
+        assert "add_header X-Content-Type-Options nosniff always;" in block, prefix
+        # Mövcud Cache-Control başlığı itməməlidir (eyni blokda yan-yana).
+        assert "add_header Cache-Control" in block, prefix
+
+
+def test_nginx_proxied_media_block_does_not_duplicate_django_nosniff():
+    """Proxied /media/ cavabı Django-dan keçir — nosniff-i Django qoyur; nginx-də
+    təkrar `add_header` iki eyni başlıq yaradardı."""
+    block = _nginx_location_block("location /media/ {")
+    assert "proxy_pass" in block
+    assert "X-Content-Type-Options" not in block.replace("# nosniff burada ƏLAVƏ EDİLMİR", "")
+
+
+def test_nginx_health_is_internal_only_and_ping_stays_public():
+    """/health/ `build.sha` + komponent statusları publik olmamalıdır; allow siyahısı
+    `/metrics/` ilə eynidir (loopback + docker bridge + LAN monitorinq). /ping/ isə
+    app healthcheck və deploy-un ilk qapısıdır — ayrıca bloku YOXDUR, `location /`
+    ilə publik qalır."""
+    conf = _nginx_conf()
+    health = _nginx_location_block("location = /health/")
+    metrics = _nginx_location_block("location /metrics/")
+    allow_re = re.compile(r"^\s*(allow|deny)\s+[^;]+;", flags=re.MULTILINE)
+    assert [m.group(0).strip() for m in allow_re.finditer(health)] == [
+        m.group(0).strip() for m in allow_re.finditer(metrics)
+    ], "/health/ allow/deny siyahısı /metrics/ ilə eyni olmalıdır"
+    assert "deny all;" in health
+    assert "allow 172.16.0.0/12;" in health, "docker bridge (deploy host curl-u, blackbox probe)"
+    assert "allow 127.0.0.1;" in health
+    # Deploy qapısı `Host: $HEALTHCHECK_HOST` + https ilə gəlir — başlıqlar `location /` kimi.
+    assert "proxy_set_header Host              $host;" in health
+    assert "proxy_set_header X-Forwarded-Proto $scheme;" in health
+    assert "proxy_set_header X-Forwarded-For   $remote_addr;" in health
+    assert "location = /ping/" not in conf and "location /ping/" not in conf
+
+
+def test_deploy_and_smoke_health_probes_come_from_allowed_sources():
+    """remote_deploy.sh loopback-dan (`https://127.0.0.1` → bridge gateway), CI
+    prod-smoke `http://localhost` → eyni; blackbox `https://nginx/health/` konteynerdən.
+    Hamısı 172.16.0.0/12 / loopback allow-una düşür — /ping/ isə ilk qapı olaraq qalır."""
+    deploy = (ROOT / "scripts/deploy/remote_deploy.sh").read_text(encoding="utf-8")
+    assert 'APP_BASE_URL="https://127.0.0.1"' in deploy
+    assert 'PING_PATH="${PING_PATH:-/ping/}"' in deploy and 'HEALTH_PATH="${HEALTH_PATH:-/health/}"' in deploy
+    smoke = PROD_SMOKE_PATH.read_text(encoding="utf-8")
+    assert "http://localhost/health/" in smoke and "http://localhost/ping/" in smoke
+    prometheus = yaml.safe_load(PROMETHEUS_PATH.read_text(encoding="utf-8"))
+    blackbox = next(job for job in prometheus["scrape_configs"] if job["job_name"] == "emsarena-blackbox")
+    targets = blackbox["static_configs"][0]["targets"]
+    assert "https://nginx/health/" in targets and "https://nginx/ping/" in targets
+    compose = yaml.safe_load((ROOT / "docker-compose.prod.yml").read_text(encoding="utf-8"))
+    subnet = compose["networks"]["emsarena-network"]["ipam"]["config"][0]["subnet"]
+    assert subnet.endswith("172.18.0.0/16}") or subnet == "172.18.0.0/16", subnet
