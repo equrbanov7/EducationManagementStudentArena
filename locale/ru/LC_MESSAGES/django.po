@@ -31596,12 +31596,12 @@ msgstr "Работ для проверки не найдено."
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "page_title"
-msgstr "Создать новый курс"
+msgstr "Работы на проверку"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:16
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "label_task"
-msgstr "Status"
+msgstr "работ"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31665,12 +31665,12 @@ msgstr "Истёк"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_reviewing"
-msgstr "Pending"
+msgstr "На проверке"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:116
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Отправлено"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:123
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31680,12 +31680,12 @@ msgstr "Проверить"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:135
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_title"
-msgstr "Great work!"
+msgstr "Отличная работа!"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:136
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "Очередь на проверку пуста."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:138
 msgctxt "exams.template.teacher_pending_attempts"
@@ -68791,3 +68791,7 @@ msgstr "В формуле недопустимая команда ({command}) �
 msgctxt "exams.service.parsing.warning"
 msgid "formula_too_long"
 msgstr "Формула слишком длинная (лимит 2000 символов) — сохранена как обычный текст: «{preview}»"
+
+msgctxt "exams.question_bank.empty"
+msgid "Bu bankda hələ sual yoxdur."
+msgstr "В этом банке пока нет вопросов."

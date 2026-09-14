@@ -453,13 +453,43 @@
         ctx.replaceSectionHtml = replaceSectionHtml;
         ctx.focusSectionTitle = focusSectionTitle;
 
+        /* 2026-09-14 (W3 `w3sweep` brauzer süpürgəsi): ictimai yükləyicinin
+           çağıranları (`pagination.js`, `ems_ui/filter_bar.js`, bölmə skriptləri)
+           nəticəni YOXLAMIR — bölmə `AJAX_SAFE_SECTIONS`-da deyilsə (məs. səhifələmə
+           olan `superadmin-users`, `category-management`, `student-organization-request`)
+           `tryAjaxLoadSection` sadəcə `false` qaytarırdı və klik SƏSSİZ udulurdu:
+           nə panel dəyişirdi, nə də səhifə. İndi AJAX yolu alınmayanda (safe deyil,
+           HTTP xətası, fraqment cavabda yoxdur) eyni-mənşəli mənbə URL-inə TAM
+           naviqasiya edilir — `ajax.js`-in daxili çağıranları ilə eyni davranış.
+           `options.fallbackNavigation === false` ilə söndürülə bilər (çağıran özü
+           `false`-u emal edəcəksə). */
+        function fallbackNavigate(section, sourceUrl) {
+            var target;
+            try {
+                target = new URL(sourceUrl || ctx.profileBaseUrl, window.location.origin);
+            } catch (e) {
+                return false;
+            }
+            if (target.origin !== window.location.origin) {
+                return false;
+            }
+            target.searchParams.set("section", section);
+            window.location.assign(target.pathname + target.search + target.hash);
+            return true;
+        }
+
         window.EMSProfileLoadSection = function (section, sourceUrl, options) {
             options = options || {};
             options.sourceUrl = sourceUrl || options.sourceUrl || "";
             if (typeof options.updateUrl === "undefined") {
                 options.updateUrl = true;
             }
-            return tryAjaxLoadSection(section, options);
+            return tryAjaxLoadSection(section, options).then(function (ok) {
+                if (ok || options.fallbackNavigation === false) {
+                    return ok;
+                }
+                return fallbackNavigate(section, options.sourceUrl);
+            });
         };
     });
 })(window.EMSProfile = window.EMSProfile || {});

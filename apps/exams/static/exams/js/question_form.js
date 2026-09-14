@@ -222,6 +222,22 @@
             renumberOptionCards();
         }
 
+        /* 2026-09-14 (W3 `w3sweep`): «cavab rejimi» artıq layihənin
+           `bootstrap-single-select` komponentidir — native `<select>` vizual
+           gizlidir (`is-enhanced`), fokus onun görünən toggle düyməsinə getməlidir. */
+        function focusAnswerMode() {
+            if (!answerModeSelect) {
+                return;
+            }
+            var wrap = answerModeSelect.closest(".bootstrap-single-select");
+            var toggle = wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
+            if (answerModeSelect.classList.contains("is-enhanced") && toggle) {
+                toggle.focus();
+                return;
+            }
+            answerModeSelect.focus();
+        }
+
         function handleCorrectOptionChange(event) {
             if (!answerModeSelect || !isSingleAnswerMode()) {
                 hideSingleAnswerWarning();
@@ -236,7 +252,7 @@
             if (getCheckedCorrectCount() > 1) {
                 event.target.checked = false;
                 showSingleAnswerWarning();
-                answerModeSelect.focus();
+                focusAnswerMode();
                 return;
             }
 
@@ -250,7 +266,7 @@
 
             event.preventDefault();
             showSingleAnswerWarning();
-            answerModeSelect.focus();
+            focusAnswerMode();
         }
 
         function showFileName(labelElement, file) {
