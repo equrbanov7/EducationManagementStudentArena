@@ -68728,3 +68728,59 @@ msgstr "eski kohort oluştur (önerilmez)"
 msgctxt "exams.template.legacy_cohort_notice"
 msgid "summary_show_legacy_form"
 msgstr "Eski kohort formunu göster (önerilmez)"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil yüklənir…"
+msgstr "Görsel yükleniyor…"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil yüklənmədi."
+msgstr "Görsel yüklenemedi."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil silindi — [[img:N]] işarəsi mətndən çıxarıldı."
+msgstr "Görsel silindi — [[img:N]] işareti metinden çıkarıldı."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Yalnız şəkil faylı (PNG/JPG/GIF/WebP) yapışdırıla bilər."
+msgstr "Buraya yalnızca görsel dosyası (PNG/JPG/GIF/WebP) yapıştırılabilir."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkli sil"
+msgstr "Görseli sil"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkli panodan yapışdırın (Ctrl+V) və ya bura sürüşdürün — [[img:N]] işarəsi kursorun yerinə düşür; sual sətrində sual, variant sətrində həmin varianta bağlanır."
+msgstr "Görseli panodan yapıştırın (Ctrl+V) veya buraya sürükleyin — [[img:N]] işareti imlecin yerine düşer; soru satırında soruya, seçenek satırında o seçeneğe bağlanır."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil göndərilməyib."
+msgstr "Görsel gönderilmedi."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil nömrəsi yanlışdır."
+msgstr "Görsel numarası geçersiz."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil müvəqqəti yığına yazılmadı."
+msgstr "Görsel geçici depoya yazılamadı."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_token_invalid"
+msgstr "İçe aktarma belirteci geçersiz — sayfayı yenileyip yeniden deneyin."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_into_visual_bundle"
+msgstr "Bu içe aktarma kaynağı görsel bir PDF — içine görsel yapıştırılamaz; «Temizle» ile yeniden başlayın."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_unsupported"
+msgstr "Görsel tanınmadı veya sınırı aşıyor (PNG/JPG/GIF/BMP/TIFF/WebP, ≤12 MB, ≤50 MP)."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_limit"
+msgstr "Bir içe aktarmada en fazla {limit} görsel olabilir."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_not_found"
+msgstr "Bu numaralı yapıştırılmış görsel bulunamadı."

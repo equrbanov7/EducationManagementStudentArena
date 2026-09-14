@@ -128,21 +128,18 @@ yekun vəziyyət `w5left` hesabatında)
 ### Kod — kiçik, sahibsiz qalanlar
 4. Kağız bal idxalı: şablon endirmə view-u həmişə S1…S5 verir; quru icra planı vərəqin
    sual şəbəkəsini bilmir — dalğa 6 `w6paper` işində (bax commit tarixçəsi).
-5. `apps/registrar/models/__init__.py` `ExamScoreSheetKind`-ı eksport etmir (`w2paper`).
-6. `templates/partials/_searchable_multi_select.html` artıq heç bir şablon işlətmir —
-   silinməyib (`w2perf`).
+5. ~~`ExamScoreSheetKind` ixracı~~ — `48599f40`.
+6. ~~`_searchable_multi_select.html`~~ — dalğa 6-da silindi (`1ffa623b`).
 7. `ensure_can_manage_final_center` / `ensure_can_supervise_session` / `ensure_ticket_owner`
    / `ensure_can_manage_exam_rooms` / `actor_can_use_view_as` ixrac olunur, heç bir view
    çağırmır (`w2tests`).
 8. `journal.view` açarı heç bir defolt rol şablonuna verilməyib (əlavə oxu yolu; sahib
    istəsə icazə redaktorundan verir) (`w2rbac`).
-9. Sahibin 2026-09-07 qərarına uyğun növbəti addım: kohort (`exams.StudentGroup`)
-   səthinin tam çıxarılması — dalğa 4-də yalnız ikinci dərəcəli edildi (`w4wizard`).
+9. Kohort (`exams.StudentGroup`) səthi: dalğa 7-də (`4be82229`) kohortsuz tenantda əvəzlənmə kartı + köhnəlmə qeydi; model/data qalır (tam silmə — ayrıca miqrasiya qərarı).
 10. Kabinet SPA-da `journal-close` / `kollokvium-windows` / `exam-center-stats` filtr
     panelləri də səssiz qala bilər (eyni kök səbəb, `8e7aa995` yalnız reyestr skaneri ilə
     örtür) — ayrıca yoxlama (`w2paper` 3-cü dövrə).
-11. Sual idxalı: pano (clipboard) ilə şəkil yapışdırma yoxdur; brauzer QA DOCX yükləməsini
-    əhatə etmir (Django test client ilə uçdan-uca yoxlanıb) (`w3import`).
+11. ~~Sual idxalı: pano ilə şəkil yapışdırma; DOCX brauzer QA~~ — dalğa 8-də bağlandı (pano/sürüklə-burax yapışdırma bank toplu əlavədə; DOCX yükləməsi brauzerdə uçdan-uca yoxlanıldı).
 12. Audit P3 maddələri P3-4 / P3-5 / P3-6 / P3-10 / P3-11 / P3-17 / P3-18 heç bir briefdə
     olmayıb — toxunulmayıb (`w2infra`).
 

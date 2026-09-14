@@ -68819,3 +68819,59 @@ msgstr "create a legacy cohort (not recommended)"
 msgctxt "exams.template.legacy_cohort_notice"
 msgid "summary_show_legacy_form"
 msgstr "Show the legacy cohort form (not recommended)"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil yüklənir…"
+msgstr "Uploading image…"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil yüklənmədi."
+msgstr "The image could not be uploaded."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil silindi — [[img:N]] işarəsi mətndən çıxarıldı."
+msgstr "Image removed — the [[img:N]] marker was taken out of the text."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Yalnız şəkil faylı (PNG/JPG/GIF/WebP) yapışdırıla bilər."
+msgstr "Only image files (PNG/JPG/GIF/WebP) can be pasted here."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkli sil"
+msgstr "Remove image"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkli panodan yapışdırın (Ctrl+V) və ya bura sürüşdürün — [[img:N]] işarəsi kursorun yerinə düşür; sual sətrində sual, variant sətrində həmin varianta bağlanır."
+msgstr "Paste an image from the clipboard (Ctrl+V) or drop it here — the [[img:N]] marker lands at the cursor; on a question line it attaches to the question, on an option line to that option."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil göndərilməyib."
+msgstr "No image was sent."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil nömrəsi yanlışdır."
+msgstr "The image number is invalid."
+
+msgctxt "exams.view.bank.paste"
+msgid "Şəkil müvəqqəti yığına yazılmadı."
+msgstr "The image could not be written to the temporary stash."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_token_invalid"
+msgstr "The import token is invalid — reload the page and try again."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_into_visual_bundle"
+msgstr "This import source is a visual PDF — images cannot be pasted into it; start over with “Clear”."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_unsupported"
+msgstr "The image was not recognised or exceeds the limit (PNG/JPG/GIF/BMP/TIFF/WebP, ≤12 MB, ≤50 MP)."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_limit"
+msgstr "An import can hold at most {limit} images."
+
+msgctxt "exams.service.import.paste.error"
+msgid "paste_image_not_found"
+msgstr "No pasted image with this number was found."
