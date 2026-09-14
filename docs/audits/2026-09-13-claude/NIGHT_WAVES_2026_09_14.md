@@ -111,7 +111,7 @@ Mənbə: agent hesabatlarının «Edilməyən / yarımçıq / orkestrator üçü
 `stub_status` → `docker/nginx/nginx.ci.conf`; dərs yükü fayl adı → `cad42d84`;
 PDF raster şəkillər → `36b32754`; `jit=off` → `8206abdb`).
 
-### Dalğa 5 `w5left` işində — bu sənəd yazılarkən işçi ağacda, commit edilməmiş
+### Dalğa 5 `w5left` — BAĞLANDI (`b6285e1f`): 1–3 aşağıda tarixi qeyd kimi qalır
 (yeni fayllar: `apps/exams/domain/unit_scope_filters.py`, `apps/exams/forms/exam_exclusions.py`,
 `apps/exams/services/unit_pin_sync.py`, `apps/registrar/signals.py`; testlər
 `apps/exams/tests/test_w5_unit_leftovers.py`, `apps/registrar/tests/test_w5_group_transfer_pins.py`;
@@ -127,8 +127,7 @@ yekun vəziyyət `w5left` hesabatında)
 
 ### Kod — kiçik, sahibsiz qalanlar
 4. Kağız bal idxalı: şablon endirmə view-u həmişə S1…S5 verir; quru icra planı vərəqin
-   sual şəbəkəsini bilmir (tətbiqdə server yenidən yoxlayır) — hər ikisi
-   `apps/accounts/views/exam_score_import.py`-da bir sətir (`w2paper`).
+   sual şəbəkəsini bilmir — dalğa 6 `w6paper` işində (bax commit tarixçəsi).
 5. `apps/registrar/models/__init__.py` `ExamScoreSheetKind`-ı eksport etmir (`w2paper`).
 6. `templates/partials/_searchable_multi_select.html` artıq heç bir şablon işlətmir —
    silinməyib (`w2perf`).

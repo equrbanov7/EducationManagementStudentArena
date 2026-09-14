@@ -398,3 +398,15 @@ Niyə bu, daha yuxarısı deyil: imtahan bütövlüyü (P0 açar sızması, fina
 11. Çərçivə sorğuları (RLS `set_config` dedup, `access_state`/membership request-keşi); statistika/analitika keşi + stampede qorunması.
 12. A11y: hədəf ölçüləri, ikon-only düymələr, native `confirm()` → `EMSConfirm`; 5 BEM sisteminin `ems_ui`-yə köçürülməsi.
 13. Test gigiyenası: `pytest-cov/timeout` venv-də, migrasiya testlərinin sürəti, `freezegun`, migrasiya tək-yarpaq testi; coverage boşluqları (`duplication.py`, `domain/grading.py`, media checker-ləri).
+
+---
+
+## Əlavə (2026-09-14, gecə dalğaları)
+
+Hesabatdan sonra sahibin tapşırığı ilə («server hazır olana qədər qalan işləri görün») kod tərəfində 6 dalğa icra olundu — tam siyahı `NIGHT_WAVES_2026_09_14.md`-dədir. Qısa:
+
+* **§27 «sonra düzəldilə bilər» siyahısından bağlananlar:** `/exams/groups/` lazy namizədlər (2,5 MB → 56 KB), dublikat/eksik indekslər, `exams_examanswer` RLS ölçməsi (denormalizasiya lazım deyil) + Postgres `jit=off`; 13 qapısız reyestr açarı (6 silindi, 5 real qapıya bağlandı, RİM-ə `final_score.entry`), 11 atomic-siz view, 5 qeyri-UUID pk yeri, davamiyyət həddi 6 səthdə tək mənbə, bal/idxal endpoint-lərinə rate-limit; qalan 6 ixracda formula neytrallaşdırma, upload MIME/imza yoxlaması, AI PII maskası + log retention, `.env.production.example` təhlükəsizlik parametrləri; deploy SHA teqi + avtomatik rollback + deploy-öncəsi dump, Redis parolu konfiq şablonunda, Alertmanager/Blackbox render, nginx stub_status, Daphne `--proxy-headers`; a11y (hədəf ölçüləri, `role=alert`, 33 native `confirm()` → `EMSConfirm`), EN/RU/TR-də 447 məna düzəlişi + AZ-da 22, 80+ coverage testi, RLS GUC yaddaşı və `access_state` memoizasiyası (−5…−8 sorğu/səhifə).
+* **Sahibin yeni tələbləri:** kağız (yazılı/praktiki) imtahan balı köçürməsi — sual-sual ballar (≤ 10, cəm ≤ 50, giriş + imtahan ≤ 100), növ, yoxlayan/nəzarətçi seçiciləri, təsdiq modalı (hərf A–E/F), «Dəyişən nəticələr», idxal; «İmtahanlarım» modal scroll bağı + zibil qutusu alt-görünüşü; sual idxalında DOCX (OMML → LaTeX, şəkillər) + KaTeX render + PDF şəkillər; imtahan sehrbazında reyestr qrupları (`allowed_units`) uçdan-uca (giriş siyasəti, siyahılar, PIN, statistika, istisnalar, qrup dəyişəndə PIN).
+* **Brauzer süpürgəsi** (müəllim / tələbə / imtahan mərkəzi / RİM): 8 defekt düzəldildi (o cümlədən AJAX-safe olmayan bölmələrdə səssiz udulan klikləri, sınaq cəhdində apellyasiya, PIN axtarışı pəncərəsi), nəzarət rejimi status sorğusu WS-first (1 s → 15 s).
+* **Reqressiya:** hər dalğadan sonra izolə worktree-də tam PostgreSQL dəsti (sonuncu: 9 267 keçdi) və CI; yeni testlər ≈ 400+.
+* **Hələ açıq:** `NIGHT_WAVES_2026_09_14.md` §5 (kohort səthinin tam çıxarılması, `accounts_userprofile` RLS, pano ilə şəkil yapışdırma, bəzi infra P3-lər) və §27 «MÜTLƏQ» sahib əməliyyatları (dəyişməyib).
