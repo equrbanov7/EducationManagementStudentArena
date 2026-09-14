@@ -56,6 +56,20 @@ def _assign_user_to_org(user, organization, profile_role, *, membership_role_nam
     )
 
 
+def _second_organization(owner, slug):
+    """2026-09-15: sistemdə YEGANƏ təşkilat olanda üzvlüksüz superadmin ona defolt düşür
+    (sahibin qərarı, tək-tenant QKU). «Aktiv təşkilatsız superadmin» ssenarisi üçün ikinci
+    təşkilat yaradılır ki, seçim açıq qalsın."""
+    return Organization.objects.create(
+        name=f"İkinci {slug}",
+        slug=slug,
+        org_type=OrganizationType.UNIVERSITY,
+        owner=owner,
+        status="pending",
+        is_active=True,
+    )
+
+
 def _login_with_org(client, user, organization):
     client.force_login(user)
     session = client.session
@@ -86,6 +100,7 @@ class ManageRolesViewTest(TestCase):
 
     def test_admin_without_active_org_redirected_to_profile(self):
         admin = User.objects.create_superuser(username="mr_superadmin", email="mrs@example.com", password="pw12345678")
+        _second_organization(admin, "ikinci-mr")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:manage_roles"))
         self.assertEqual(resp.status_code, 302)
@@ -117,6 +132,7 @@ class RoleAssignmentViewTest(TestCase):
 
     def test_no_active_org_redirects_to_profile(self):
         admin = User.objects.create_superuser(username="ra_superadmin", email="ras@example.com", password="pw12345678")
+        _second_organization(admin, "ikinci-ra")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:role_assignment"))
         self.assertEqual(resp.status_code, 302)
@@ -156,6 +172,7 @@ class PermissionEditorViewTest(TestCase):
 
     def test_no_active_org_redirects_to_profile(self):
         admin = User.objects.create_superuser(username="pe_superadmin", email="pes@example.com", password="pw12345678")
+        _second_organization(admin, "ikinci-pe")
         self.client.force_login(admin)
         resp = self.client.get(reverse("accounts:permission_editor"))
         self.assertEqual(resp.status_code, 302)
