@@ -88,9 +88,12 @@ def group_students(request, slug, unit_id):
         return _error(pgettext(_CTX, "Qrup tapılmadı."), status=404, code="not_found")
 
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    # Perf auditi 2026-09-13 F-01: `_row()` `record.group.name` oxuyur — `group`
+    # `select_related`-də olmayanda hər tələbə üçün ayrıca `orgunit` SELECT-i
+    # atılırdı (25 tələbə → 16→39 sorğu). Qrup sətri ilə birlikdə JOIN-lənir.
     records = (
         StudentAcademicRecord.objects.filter(organization=organization, group=unit, is_active=True)
-        .select_related("student", "program")
+        .select_related("student", "program", "group")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
     return JsonResponse(

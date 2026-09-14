@@ -6,8 +6,11 @@ Data cədvəli — handoff §4 komponent 5 · §7 a11y · §8 qayda 14.
 * boş / xəta / skeleton vəziyyətləri `table_state` ilə seçilir
 
 KONTEKST MÜQAVİLƏSİ
-  table_columns  — [{key, label, align, sortable, sort_url, sort_dir}]
+  table_columns  — [{key, label, align, sortable, sort_url, sort_dir, sr_only}]
                    `sort_dir` ∈ "ascending"|"descending"|None
+                   `sr_only` — etiket yalnız ekran oxuyucu üçün (`.sr-only`);
+                   əməllər sütunu üçün: boş `<th>` a11y pozuntusudur (P2-8),
+                   vizual başlıq isə dizaynda yoxdur.
   table_rows     — [{cells: [{text, mono, muted, num, badge_family, badge_key,
                     include}], actions_include, row_head, head_include}]
                    `row_head` birinci sütunun məzmunudur (th scope="row");
@@ -34,7 +37,9 @@ KONTEKST MÜQAVİLƏSİ
                     <tr>
                         {% for col in table_columns %}
                             <th scope="col"{% if col.sort_dir %} aria-sort="{{ col.sort_dir }}"{% endif %}>
-                                {% if col.sortable and col.sort_url %}
+                                {% if col.sr_only %}
+                                    <span class="sr-only">{{ col.label }}</span>
+                                {% elif col.sortable and col.sort_url %}
                                     <a class="ems-sort" href="{{ col.sort_url }}">
                                         {{ col.label }}
                                         <span class="ems-sort__arrow" aria-hidden="true">{% if col.sort_dir == "ascending" %}▲{% elif col.sort_dir == "descending" %}▼{% else %}↕{% endif %}</span>

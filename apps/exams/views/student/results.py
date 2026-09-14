@@ -139,6 +139,13 @@ def exam_result(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
     exam = get_object_or_404(tenant_scoped_exams(request), slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
+    # Audit 2026-09-13 EX-01 (P0): status yoxlanmadığından tələbə imtahan
+    # GEDƏRKƏN ikinci tabda nəticə URL-ini açıb düzgün variantları görür,
+    # sonra `take_exam`-a qayıdıb cavabları düzəldirdi. Vaxtı bitmiş cəhd
+    # burada da bağlanır; hələ açıq cəhd nəticə görmür — imtahana qaytarılır.
+    attempt.expire_if_time_limit_reached()
+    if not attempt.is_finished:
+        return redirect("exams:take_exam", slug=exam.slug, attempt_id=attempt.id)
     return_to = current_return_to(request)
     back_url, history_url = _resolve_result_navigation(request, exam, return_to)
     is_profile_results = _is_profile_results_request(request, return_to)

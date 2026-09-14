@@ -1,0 +1,4 @@
+
+✅ Yaxşılaşma (baseline-i sıxmaq üçün --update):
+   django/az: source_missing 373 → 169 ✓
+✅ i18n kataloq qapısı: yeni borc yoxdur.

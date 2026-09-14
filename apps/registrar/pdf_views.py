@@ -1,11 +1,14 @@
-"""Transkript PDF ixracı (U9) — student self-service + registrar console.
+"""Transkript PDF ixracı (U9) — tələbənin özü + registrar səlahiyyətli işçi.
 
 Two thin views over :func:`transcript_pdf.render_transcript_pdf`:
 
 * ``my_transcript_pdf`` — the requesting student downloads their **own**
   transcript (tenant scoping from the active org / RLS).
-* ``student_transcript_pdf`` — registrar-capable staff download any student's
-  transcript from the console (same RBAC as the rest of the console).
+* ``student_transcript_pdf`` — registrar səlahiyyətli işçi İSTƏNİLƏN tələbənin
+  transkriptini yükləyir. Qapı akademik kataloqun qapısı ilə EYNİDİR
+  (``catalog_console.can_manage`` — org-wide ``course.edit``); köhnə
+  «Registrar idarəetməsi» konsolu 2026-09-10-da silinəndə bu səth toxunulmaz
+  qaldı, yalnız icazə köməkçisinin YERİ dəyişdi.
 
 The PDF is generated on the fly and never stored; each issuance is written to
 the audit log (official-document trail).
@@ -13,13 +16,16 @@ the audit log (official-document trail).
 
 from __future__ import annotations
 
+import re
+from urllib.parse import quote
+
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 
 from apps.registrar import transcript as transcript_service
 from apps.registrar import transcript_pdf
-from apps.registrar.console_views import _can_manage_registrar
+from apps.registrar.catalog_console import can_manage as _can_manage_registrar
 from apps.registrar.models import StudentAcademicRecord
 
 
@@ -45,16 +51,56 @@ def _audit_issue(organization, record, by_user):
         pass
 
 
+#: AZ hərflərinin ASCII qarşılığı — `Content-Disposition`-un ASCII geri dönüşü
+#: oxunaqlı qalsın («Əli Şıxlınski» → `Eli_Sixlinski`, `li_xlnski` YOX). UTF-8
+#: adı (RFC 5987) onsuz da tam gedir; bu yalnız köhnə müştəri üçündür.
+_ASCII_FOLD = str.maketrans(
+    {
+        "ə": "e",
+        "Ə": "E",
+        "ö": "o",
+        "Ö": "O",
+        "ü": "u",
+        "Ü": "U",
+        "ğ": "g",
+        "Ğ": "G",
+        "ı": "i",
+        "İ": "I",
+        "ç": "c",
+        "Ç": "C",
+        "ş": "s",
+        "Ş": "S",
+    }
+)
+
+
+def _transcript_filename(student) -> str:
+    """`Transkript_Ad_Soyad_2026-09-10.pdf` — arxivə düşəndə oxunan ad.
+
+    Rəsmi sənəddir: fayl adı da tələbənin adını daşımalıdır ki, onlarla
+    yüklənmiş transkript bir qovluqda qarışmasın."""
+    from django.utils import timezone
+
+    full_name = (student.get_full_name() or student.username).strip()
+    safe_name = re.sub(r"[^\w\-]+", "_", full_name, flags=re.U).strip("_") or str(student.username)
+    return f"Transkript_{safe_name}_{timezone.localdate():%Y-%m-%d}.pdf"
+
+
+def _attachment(payload: bytes, filename: str) -> HttpResponse:
+    """`Content-Disposition: attachment` — ASCII geri dönüşü + RFC 5987 UTF-8 adı."""
+    response = HttpResponse(payload, content_type="application/pdf")
+    ascii_name = filename.translate(_ASCII_FOLD).encode("ascii", "ignore").decode("ascii") or "transkript.pdf"
+    response["Content-Disposition"] = f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+    return response
+
+
 def _render_response(*, organization, student, record) -> HttpResponse:
     program = record.program if record and record.program_id else None
     data = transcript_service.build_student_transcript(student=student, organization=organization, program=program)
     if not data["has_record"]:
         raise Http404  # nothing to certify yet
     payload = transcript_pdf.render_transcript_pdf(organization=organization, student=student, record=record, data=data)
-    filename = f"transkript-{student.username}.pdf"
-    response = HttpResponse(payload, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
+    return _attachment(payload, _transcript_filename(student))
 
 
 @login_required

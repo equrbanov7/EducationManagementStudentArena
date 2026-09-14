@@ -1,0 +1,7 @@
+{% load i18n %}
+{% comment %}«Bölmə imtahanları» başlıq yuvası — alt-ağacdakı imtahanların ümumi
+sayı (əməl deyil, sayğacdır: bu bölmənin sol menyuda say nişanı yoxdur).
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir.{% endcomment %}
+{% if unit_exams_total_count %}
+<span class="ems-badge ems-badge--neutral" title="{% trans 'Bölmə imtahanları' %}">{{ unit_exams_total_count }}</span>
+{% endif %}

@@ -56,7 +56,18 @@ def _activate_verified_student_membership(user):
     return activate_verified_student_membership(user)
 
 
-def _sync_user_role_memberships(user, organization, desired_role_names, *, actor=None, editable_role_names=None):
+def _sync_user_role_memberships(
+    user, organization, desired_role_names, *, actor=None, editable_role_names=None, request=None, reason=""
+):
+    """İstifadəçinin təşkilatdakı rol üzvlüklərini istənilən dəstə gətirir və AUDİT yazır.
+
+    Backend auditi 2026-09-13, F-02 (P1): rol təyinatı/silinməsi (legacy
+    ``assign``/``remove`` axını) nə ``log_action``, nə tarixçə yazırdı — yalnız
+    ``messages.success``. Rol dəyişikliyi icazə səthini dəyişir; kimin kimə nə
+    vaxt hansı rolu verdiyi bərpa edilə bilmirdi. İndi aktiv rol dəsti
+    dəyişəndə ``AuditLog`` sətri yazılır (köhnə → yeni, aktor, IP/request-id).
+    ``request`` ötürülməsə də qeyd yazılır (aktor ``actor``-dan gəlir).
+    """
     from apps.organizations.models import Membership
 
     if organization is None:
@@ -114,6 +125,16 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
         primary_membership.save(update_fields=["is_primary"])
         final_memberships[0] = primary_membership
 
+    _audit_role_sync(
+        user,
+        organization,
+        actor=actor,
+        request=request,
+        reason=reason,
+        before=current_memberships,
+        after=final_memberships,
+    )
+
     _bind_active_role_context(user, organization, memberships=final_memberships)
     # QA 2026-09 — bu funksiya `user`-in üzvlüklərini MUTASİYA edir (deaktivasiya/
     # yaratma/is_primary). Eyni request daxilində sonradan `get_permission_scope`/
@@ -124,6 +145,39 @@ def _sync_user_role_memberships(user, organization, desired_role_names, *, actor
 
     invalidate_permission_scope_cache(user)
     return final_memberships
+
+
+def _audit_role_sync(user, organization, *, actor, request, reason, before, after):
+    """Aktiv rol dəsti dəyişibsə ``AuditLog`` yaz (F-02); dəyişməyibsə səssiz.
+
+    Rol adları ``organizations.Role.name`` üzrədir (profil xəritəsi deyil) ki,
+    kataloqdakı fərdi rollar (dekan, koordinator) da izdə görünsün.
+    """
+    old_roles = sorted({m.role.name for m in before if m.is_active and m.role_id})
+    new_roles = sorted({m.role.name for m in after if m.role_id})
+    if old_roles == new_roles:
+        return
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    log_action(
+        AuditAction.UPDATE,
+        user=actor if getattr(actor, "pk", None) else None,
+        organization=organization,
+        obj=user,
+        request=request,
+        resource_type="Membership",
+        resource_id=str(user.pk),
+        resource_repr=getattr(user, "username", "") or str(user.pk),
+        old_values={"roles": old_roles},
+        new_values={"roles": new_roles},
+        changes={
+            "action": "role_sync",
+            "added": sorted(set(new_roles) - set(old_roles)),
+            "removed": sorted(set(old_roles) - set(new_roles)),
+        },
+        reason=reason or "",
+    )
 
 
 def _ensure_profile_admin_membership(user, organization):

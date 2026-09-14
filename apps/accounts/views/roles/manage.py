@@ -185,12 +185,16 @@ def manage_roles(request):
         target_profile, _ = UserProfile.objects.get_or_create(user=target_user)
 
         with transaction.atomic():
+            # F-02 (2026-09-13): audit izi köməkçinin içindədir — `request`
+            # IP/request-id/impersonasiya damğası üçün ötürülür.
             final_memberships = _sync_user_role_memberships(
                 target_user,
                 user_org,
                 effective_roles,
                 actor=request.user,
                 editable_role_names=assignable_role_names,
+                request=request,
+                reason=(request.POST.get("reason") or "").strip()[:500],
             )
             _bind_active_role_context(target_user, user_org, memberships=final_memberships)
             refreshed_roles = _extract_profile_roles_for_user(target_user)

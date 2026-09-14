@@ -102,9 +102,12 @@
             return;
         }
 
-        if (!confirm(options.message || I18N.confirmDeleteLab)) return;
-        Promise.resolve(options.onConfirm && options.onConfirm()).catch(function() {
-            alert(I18N.errorServer);
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: options.message || I18N.confirmDeleteLab, danger: true }).then(function (ok) {
+            if (!ok) return;
+            Promise.resolve(options.onConfirm && options.onConfirm()).catch(function() {
+                alert(I18N.errorServer);
+            });
         });
     }
 

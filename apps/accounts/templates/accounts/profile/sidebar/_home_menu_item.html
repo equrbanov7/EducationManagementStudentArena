@@ -4,7 +4,8 @@
 vidjetlərini yığır, ona görə bənd hər aktiv üzvdə görünür.
 
 Ayrıca fayldadır ki, `_sidebar.html` 600 sətirlik modul-ölçü qapısını keçməsin
-(qonşu `_org_menu_group.html` ilə eyni konvensiya).{% endcomment %}
+(qonşu `_group_*.html` faylları ilə eyni konvensiya). «Ümumi» qrupunun içindən
+çağırılır — bax `sidebar/_group_general.html`.{% endcomment %}
 {% if 'dashboard' in allowed_sections %}
 <li class="sidebar-menu-item">
     <a href="{{ profile_base_url }}?section=dashboard"

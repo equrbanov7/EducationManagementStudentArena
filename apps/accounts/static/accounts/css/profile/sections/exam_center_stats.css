@@ -1,82 +1,443 @@
-/* Extracted from accounts/profile/sections/_exam_center_stats.html (CSP: inline <style> → external).
-   Tətbiqin öz açıq (ağ + göy) dizayn token-ləri ilə — TÜND yox. */
-.ecs { color: var(--ems-neutral-900); }
-.ecs-head { display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap; }
-.ecs-head h2 { margin:0; font-size:1.35rem; font-weight:800; display:flex; align-items:center; gap:.55rem; color:var(--ems-primary-700); }
-.ecs-head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.92rem; }
-.ecs-btn { display:inline-flex; align-items:center; gap:.45rem; padding:.6rem 1rem; border-radius:10px; border:0; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.88rem; cursor:pointer; text-decoration:none; box-shadow:0 1px 2px rgba(37,99,235,.25); }
-.ecs-btn:hover { background:var(--ems-primary-700); }
-.ecs-filters { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:.75rem; margin:1.15rem 0; }
-.ecs-field label { display:block; font-size:.74rem; font-weight:700; color:var(--ems-neutral-500); margin-bottom:.32rem; text-transform:uppercase; letter-spacing:.02em; }
-/* Bütün filtr elementləri eyni hündürlükdə (axtarış-seçici, dropdown, input). */
-.ecs-field input, .ecs-field select { width:100%; min-height:2.7rem; box-sizing:border-box; padding:.5rem .8rem; border:1px solid var(--ems-neutral-300); border-radius:10px; background:#fff; color:var(--ems-neutral-900); font-size:.9rem; }
-.ecs-field input:focus, .ecs-field select:focus { outline:none; border-color:var(--ems-primary-500); box-shadow:0 0 0 3px var(--ems-primary-100); }
-.ecs-field input::placeholder { color: var(--ems-neutral-500); }
-/* Filtrlərdəki Bootstrap select-lər — kompakt (nəhəng default toggle yox) */
-.ecs-filters .bootstrap-single-select__toggle { min-height:2.7rem; box-sizing:border-box; display:flex; align-items:center; padding:.5rem .8rem; border-radius:10px; font-size:.9rem; font-weight:500; background:#fff; border-color:var(--ems-neutral-300); box-shadow:none; color:var(--ems-neutral-900); }
-.ecs-filters .bootstrap-single-select__toggle:hover { border-color:var(--ems-primary-300); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   accounts/profile/sections/exam_center_stats.css — «İmtahan statistikaları»
+   (2026-09-10 sakit redizayn). Filtr `ems-filters`, KPI `ems-kpis`, cədvəl
+   `ems-table` üstündə YALNIZ bu bölməyə xas düzəlişlər.
 
-/* Skeleton yükləmə sətirləri */
-.ecs-skel { height:.95rem; border-radius:6px; background:linear-gradient(90deg,var(--ems-neutral-100) 25%,var(--ems-neutral-200) 37%,var(--ems-neutral-100) 63%); background-size:400% 100%; animation:ecs-shimmer 1.3s ease infinite; }
-@keyframes ecs-shimmer { 0%{background-position:100% 0;} 100%{background-position:0 0;} }
-/* Kartlar */
-.ecs-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:.75rem; margin-bottom:1rem; }
-.ecs-card { border:1px solid var(--ems-neutral-200); border-left:4px solid var(--ems-primary-600); border-radius:12px; background:#fff; padding:.9rem 1.05rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
-.ecs-card__n { font-size:1.7rem; font-weight:800; color:var(--ems-primary-700); line-height:1.05; }
-.ecs-card__l { color:var(--ems-neutral-500); font-size:.74rem; text-transform:uppercase; letter-spacing:.04em; font-weight:700; margin-top:.1rem; }
-/* Cədvəl — açıq göy başlıq, zebra, tünd mətn */
-.ecs-tablewrap { border:1px solid var(--ems-neutral-200); border-radius:12px; overflow-x:auto; box-shadow:0 1px 2px rgba(15,23,42,.04); }
-.ecs-table { width:100%; border-collapse:collapse; font-size:.86rem; min-width:1160px; }
-.ecs-table th, .ecs-table td { padding:.7rem .85rem; text-align:left; border-bottom:1px solid var(--ems-neutral-200); white-space:nowrap; }
-.ecs-table thead th { background:var(--ems-primary-50); color:var(--ems-primary-800); font-weight:800; font-size:.72rem; text-transform:uppercase; letter-spacing:.03em; border-bottom:2px solid var(--ems-primary-200); position:sticky; top:0; }
-.ecs-table thead th.is-sortable { cursor:pointer; user-select:none; }
-.ecs-table thead th.is-sortable:hover { background:var(--ems-primary-100); }
-.ecs-table thead th.is-active { background:var(--ems-primary-100); color:var(--ems-primary-800); }
-.ecs-arrow { font-size:.95rem; margin-left:.35rem; vertical-align:-1px; color: var(--ems-neutral-500); }
-.ecs-table thead th.is-active .ecs-arrow { color:var(--ems-primary-600); }
-.ecs-table tbody td { color:var(--ems-neutral-900); }
-.ecs-clip { max-width:220px; overflow:hidden; text-overflow:ellipsis; }
-.ecs-table tbody tr:nth-child(even) { background:var(--ems-neutral-50); }
-.ecs-table tbody tr:hover { background:var(--ems-primary-50); }
-.ecs-table tr:last-child td { border-bottom:0; }
-.ecs-uname { color:var(--ems-neutral-500); font-size:.76rem; }
-.ecs-pct { font-weight:800; color:var(--ems-primary-700); }
-.ecs-view { display:inline-flex; align-items:center; gap:.35rem; padding:.32rem .7rem; border-radius:8px; background:var(--ems-primary-600); color:#fff; font-weight:700; font-size:.78rem; text-decoration:none; }
-.ecs-row--removed { background:#FEF2F2; }
-.ecs-status-removed { color:#B91C1C; font-weight:700; }
-.ecs-removed-reason { font-weight:400; font-size:.72rem; color:#B91C1C; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.ecs-view:hover { background:var(--ems-primary-700); color:#fff; }
-.ecs-state { padding:2.6rem 1rem; text-align:center; color:var(--ems-neutral-500); }
-.ecs-state i { font-size:1.9rem; display:block; margin-bottom:.5rem; opacity:.55; }
-.ecs-pager { display:flex; align-items:center; justify-content:center; gap:1rem; margin-top:1rem; color:var(--ems-neutral-500); font-size:.88rem; }
-.ecs-pager button { padding:.48rem .95rem; border-radius:8px; border:1px solid var(--ems-neutral-300); background:#fff; color:var(--ems-primary-700); font-weight:700; cursor:pointer; }
-.ecs-pager button:hover:not(:disabled) { background:var(--ems-primary-50); border-color:var(--ems-primary-300); }
-.ecs-pager button:disabled { opacity:.45; cursor:default; }
-/* Qrafiklər — cədvəlin altında, açıq (ağ + göy) tokenlərlə */
-.ecs-charts { margin-top:1.5rem; }
-.ecs-charts__head h3 { margin:0; font-size:1.08rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
-.ecs-charts__head p { margin:.25rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; }
-.ecs-charts__grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:1rem; margin-top:1rem; }
-.ecs-chartbox { border:1px solid var(--ems-neutral-200); border-radius:12px; background:#fff; padding:1rem 1.1rem; box-shadow:0 1px 2px rgba(15,23,42,.04); }
-.ecs-chartbox--wide { grid-column:1 / -1; }
-.ecs-chartbox__title { font-size:.86rem; font-weight:800; color:var(--ems-neutral-700); display:flex; align-items:center; gap:.45rem; margin-bottom:.7rem; }
-.ecs-chartbox__title i { color:var(--ems-primary-600); }
-.ecs-chartbox__title span { font-weight:600; color: var(--ems-neutral-500); font-size:.76rem; }
-.ecs-chartbox__wrap { position:relative; height:250px; }
-.ecs-chartbox--wide .ecs-chartbox__wrap { height:280px; }
-.ecs-chartbox__empty { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color: var(--ems-neutral-500); font-size:.88rem; }
-/* AI analiz paneli */
-.ecs-ai { margin-top:1.25rem; border:1px solid var(--ems-primary-100); border-radius:12px; background:linear-gradient(180deg, var(--ems-primary-50), #fff 55%); padding:1.1rem 1.2rem; }
-.ecs-ai__head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap; }
-.ecs-ai__head h3 { margin:0; font-size:1.05rem; font-weight:800; color:var(--ems-primary-700); display:flex; align-items:center; gap:.5rem; }
-.ecs-ai__head p { margin:.3rem 0 0; color:var(--ems-neutral-500); font-size:.86rem; max-width:46rem; }
-.ecs-ai__out { margin-top:.9rem; }
-.ecs-ai__hint { color: var(--ems-neutral-500); font-size:.86rem; }
-.ecs-ai__loading { color:var(--ems-primary-700); font-weight:700; font-size:.9rem; display:flex; align-items:center; gap:.5rem; }
-.ecs-ai__error { color:#b91c1c; background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:.7rem .9rem; font-size:.88rem; }
-.ecs-ai__text { background:#fff; border:1px solid var(--ems-neutral-200); border-radius:10px; padding:1rem 1.15rem; color:var(--ems-neutral-800); font-size:.92rem; line-height:1.6; }
-.ecs-ai__text h3, .ecs-ai__text h4 { color:var(--ems-primary-700); margin:.9rem 0 .35rem; font-size:1rem; }
-.ecs-ai__text h3:first-child, .ecs-ai__text h4:first-child, .ecs-ai__text p:first-child { margin-top:0; }
-.ecs-ai__text ul { margin:.4rem 0 .6rem 1.2rem; padding:0; }
-.ecs-ai__quota { margin-top:.7rem; padding:.55rem .8rem; background:var(--ems-primary-50); border-radius:8px; font-size:.82rem; color:var(--ems-primary-800); }
-.ecs-ai__cached i { color:var(--ems-success-600, #059669); }
+   JS (accounts/js/profile/exam_center_stats_boot.js + exams/js/
+   exam_center_stats_charts.js) BU sinifləri özü render edir və onlar
+   SAXLANILIR: .ecs-card/.ecs-card__n/.ecs-card__l, .ecs-state, .ecs-skel,
+   .ecs-clip, .ecs-uname, .ecs-pct, .ecs-view, .ecs-arrow, .ecs-row--removed,
+   .ecs-status-removed, .ecs-removed-reason, .ecs-pager > button,
+   .ecs-ai__{loading,error,text,quota,cached}, .ecs-chartbox__empty.
+   Yalnız `--ems-*` tokenlər — hardcode rəng yoxdur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ecs {
+    color: var(--ems-text);
+}
+
+/* ── Filtr — axtarış-seçici (ems-ss) sahələri ems-input hündürlüyündə ─────── */
+.ecs-filters .ems-field {
+    min-width: 170px;
+    flex: 1 1 170px;
+}
+
+.ecs-filters .ems-field--wide {
+    flex: 1 1 240px;
+}
+
+.ecs-filters .ems-ss,
+.ecs-filters .bootstrap-single-select {
+    width: 100%;
+}
+
+.ecs-filters .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* ── KPI kartları (JS render edir) ────────────────────────────────────────── */
+.ecs-cards.ems-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.ecs-cards:empty {
+    display: none;
+}
+
+.ecs-card {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.ecs-card__n {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.ecs-card__l {
+    margin-top: 4px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Cədvəl ───────────────────────────────────────────────────────────────── */
+.ecs-tablewrap.ems-tablewrap {
+    margin-bottom: var(--ems-sp-4);
+}
+
+.ecs-table {
+    min-width: 1160px;
+}
+
+.ecs-table thead th {
+    white-space: nowrap;
+}
+
+.ecs-table thead th.is-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.ecs-table thead th.is-sortable:hover {
+    color: var(--ems-text);
+}
+
+.ecs-table thead th.is-active {
+    color: var(--ems-primary-700);
+}
+
+.ecs-arrow {
+    margin-left: 5px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-300);
+}
+
+.ecs-table thead th.is-active .ecs-arrow {
+    color: var(--ems-primary-600);
+}
+
+.ecs-table tbody td {
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.ecs-table tbody td b {
+    font-weight: 600;
+}
+
+.ecs-clip {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ecs-uname {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.ecs-pct {
+    font-weight: 700;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* İmtahandan uzaqlaşdırılmış sətir — sakit qırmızı fon (token) */
+.ecs-row--removed,
+.ems-table--zebra tbody tr.ecs-row--removed:nth-child(odd) {
+    background: var(--ems-danger-bg);
+}
+
+.ecs-status-removed {
+    color: var(--ems-danger-strong);
+    font-weight: 700;
+}
+
+.ecs-removed-reason {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--ems-fs-xs);
+    font-weight: 400;
+    color: var(--ems-danger-strong);
+}
+
+/* «Bax» — ems-btn--sm görünüşü */
+.ecs-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.ecs-view:hover,
+.ecs-view:focus-visible {
+    background: var(--ems-bg-subtle);
+    border-color: var(--ems-neutral-500);
+    color: var(--ems-text);
+    outline: none;
+}
+
+/* Boş / yüklənir vəziyyəti — ems-state ilə eyni görünüş (JS sinif adı fərqlidir) */
+.ecs-state {
+    padding: 36px 16px;
+    text-align: center;
+    color: var(--ems-text-muted);
+    white-space: normal;
+}
+
+.ecs-state i {
+    display: block;
+    margin-bottom: 8px;
+    font-size: var(--ems-fs-3xl);
+    color: var(--ems-neutral-300);
+}
+
+.ecs-skel {
+    height: 14px;
+    border-radius: var(--ems-r-sm);
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: ecs-shimmer 1.3s ease infinite;
+}
+
+@keyframes ecs-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}
+
+/* ── Səhifələmə (JS render edir: button.js-ecs-prev / span / button.js-ecs-next) */
+.ecs-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-5);
+    margin: var(--ems-sp-4) 0 var(--ems-sp-8);
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.ecs-pager:empty {
+    display: none;
+}
+
+.ecs-pager button {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ecs-pager button:hover:not(:disabled) {
+    background: var(--ems-bg-subtle);
+}
+
+.ecs-pager button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+/* ── Qrafiklər ────────────────────────────────────────────────────────────── */
+.ecs-charts {
+    margin-top: var(--ems-sp-6);
+}
+
+.ecs-charts__head h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.ecs-charts__head h3 i,
+.ecs-ai__head h3 i,
+.ecs-chartbox__title i {
+    color: var(--ems-text-muted);
+}
+
+.ecs-charts__head p {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.ecs-charts__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--ems-sp-5);
+    margin-top: var(--ems-sp-5);
+}
+
+.ecs-chartbox {
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.ecs-chartbox--wide {
+    grid-column: 1 / -1;
+}
+
+.ecs-chartbox__title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-4);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.ecs-chartbox__title span {
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.ecs-chartbox__wrap {
+    position: relative;
+    height: 250px;
+}
+
+.ecs-chartbox--wide .ecs-chartbox__wrap {
+    height: 280px;
+}
+
+.ecs-chartbox__empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+/* ── AI analizi ───────────────────────────────────────────────────────────── */
+.ecs-ai {
+    margin-top: var(--ems-sp-6);
+    padding: 16px 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.ecs-ai__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-5);
+}
+
+.ecs-ai__head h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.ecs-ai__head p {
+    max-width: 46rem;
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.ecs-ai__out {
+    margin-top: var(--ems-sp-5);
+}
+
+.ecs-ai__hint {
+    font-size: var(--ems-fs-base);
+    color: var(--ems-text-muted);
+}
+
+.ecs-ai__loading {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    color: var(--ems-primary-700);
+}
+
+.ecs-ai__error {
+    padding: 10px 12px;
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+    font-size: var(--ems-fs-base);
+}
+
+.ecs-ai__text {
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+}
+
+.ecs-ai__text h1,
+.ecs-ai__text h2,
+.ecs-ai__text h3,
+.ecs-ai__text h4 {
+    margin: 12px 0 4px;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.ecs-ai__text h3:first-child,
+.ecs-ai__text h4:first-child,
+.ecs-ai__text p:first-child {
+    margin-top: 0;
+}
+
+.ecs-ai__text ul {
+    margin: 4px 0 8px 18px;
+    padding: 0;
+}
+
+.ecs-ai__quota {
+    margin-top: var(--ems-sp-4);
+    padding: 6px 10px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-100);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
+}
+
+.ecs-ai__cached i {
+    color: var(--ems-success-700);
+}
+
+@media (max-width: 768px) {
+    .ecs-cards.ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ecs-chartbox__wrap,
+    .ecs-chartbox--wide .ecs-chartbox__wrap {
+        height: 220px;
+    }
+}

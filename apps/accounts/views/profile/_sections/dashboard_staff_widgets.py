@@ -144,7 +144,7 @@ def schedule_scope(*, request, organization, allowed_sections) -> dict | None:
     """«Cədvəl idarəetməsi» — səlahiyyət sahəsindəki qrupların sayı."""
     if "schedule-manage" not in allowed_sections:
         return None
-    from apps.registrar import schedule_manage
+    from apps.registrar.public import schedule_manage
 
     groups = list(schedule_manage.scoped_groups(request.user, organization).values_list("name", flat=True)[:50])
     return widget(

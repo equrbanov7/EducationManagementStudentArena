@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
 # EMS ARENA — Reusable: Security Scan
 # ═══════════════════════════════════════════════════════════════════════════
-# Runs Safety / pip-audit, Bandit, and Django deployment security checks.
+# Runs pip-audit, Bandit, and Django deployment security checks.
 # Called by ci.yml via workflow_call.
 # ═══════════════════════════════════════════════════════════════════════════
 
@@ -62,12 +62,13 @@ jobs:
             ${{ runner.os }}-pip-
 
       # ── Dependency vulnerability scanner ──────────────────────────────
+      # 2026-09-13 infra auditi P3-15: `safety check ... || true` addımı
+      # silindi — nəticəsi heç vaxt bloklamırdı (yanıltıcı yaşıl), `safety`
+      # CLI-ı isə hesab/limit tələb etməyə başlayıb. pip-audit tək, bloklayan
+      # asılılıq skaneri olaraq qalır.
       - name: 🛡️ Check dependencies for vulnerabilities
         run: |
-          pip install safety pip-audit
-          echo "::group::🛡️ Safety Check"
-          safety check -r requirements/base.txt --full-report || true
-          echo "::endgroup::"
+          pip install pip-audit
           echo "::group::🔐 Pip Audit (known vulnerable dependencies — blocks merge)"
           pip-audit -r requirements/base.txt --desc on || {
             echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."

@@ -19,7 +19,7 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from apps.registrar import handover_actions as handover_write
+from apps.registrar.public import handover_actions as handover_write
 
 from .labels import error_message
 from .policy import resolve_actor

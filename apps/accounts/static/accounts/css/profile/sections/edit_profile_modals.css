@@ -1,0 +1,77 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   edit_profile_modals.css — «Profili redaktə et» bölməsinin üç modalı
+   (qeyd əlavə/redaktə · qeydi sil · saxlanmamış dəyişikliklə çıxış).
+   `edit_profile_v2.css` ölçü büdcəsinə (600 sətir) çatdığı üçün ayrıca fayl.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Modallar (2026-09-11) — «əsasən açılan modalın dizaynını təkmilləşdir» ──
+   Bootstrap modalının skeleti qalır (JS `bootstrap.Modal`-a bağlıdır), üslub
+   isə `ems_ui` dialoq dilinə gətirilir: 16px künc, incə kontur, dərin kölgə,
+   başlıq/gövdə/altlıq ritmi, düymələr `ems-btn` dəstində. */
+.edit-profile-modal {
+    border: 1px solid var(--ems-border, #e2e8f0);
+    border-radius: 16px;
+    box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
+}
+
+.edit-profile-modal .modal-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--ems-border, #e2e8f0);
+    background: var(--ems-bg-subtle, #f8fafc);
+}
+
+.edit-profile-modal .modal-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--ems-fg, #0f172a);
+    letter-spacing: -0.01em;
+}
+
+.edit-profile-modal .btn-close {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    margin: -4px -6px -4px auto;
+    border-radius: 10px;
+    background-size: 12px;
+    opacity: 0.6;
+}
+
+.edit-profile-modal .btn-close:hover {
+    background-color: var(--ems-neutral-100, #f1f5f9);
+    opacity: 1;
+}
+
+.edit-profile-modal .modal-body {
+    padding: 20px 22px;
+}
+
+.edit-profile-modal .modal-body .form-control {
+    min-height: 44px;
+    border-radius: 10px;
+}
+
+.edit-profile-modal .modal-footer {
+    padding: 14px 22px 18px;
+    gap: 8px;
+    border-top: 1px solid var(--ems-border, #e2e8f0);
+    background: var(--ems-bg, #fff);
+}
+
+.edit-profile-modal .modal-footer > * {
+    margin: 0;
+}
+
+/* «Saxlamadan çıx» — təhlükəli, amma əsas əməl deyil: kontur variantı. */
+.ems-btn--danger-ghost {
+    border-color: var(--ems-danger-200, #fecaca);
+    background: var(--ems-bg, #fff);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.ems-btn--danger-ghost:hover:not(:disabled) {
+    border-color: var(--ems-danger, #dc2626);
+    background: var(--ems-danger-100, #fee2e2);
+    color: var(--ems-danger-700, #b91c1c);
+}

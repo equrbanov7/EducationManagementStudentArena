@@ -7,7 +7,8 @@
 }
 
 /* Xüsusi Rəng Klassları */
-.text-emerald { color: var(--emerald-primary) !important; }
+/* 2026-09-12 (audit P2-1): `.text-emerald` yalnız kartdakı təkrar başlığın
+   ikonunda işlənirdi — başlıq çıxarıldı, qayda ölü idi. */
 .icon-emerald-light { background: var(--emerald-light) !important; color: var(--emerald-primary) !important; }
 
 .assigned-courses-search-form {

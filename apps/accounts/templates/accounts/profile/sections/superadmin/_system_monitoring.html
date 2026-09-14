@@ -2,46 +2,20 @@
 <section class="profile-section-panel profile-section--system-monitoring {% if active_section == 'system-monitoring' %}is-active{% endif %}"
          data-profile-section-panel="system-monitoring">
   <link rel="stylesheet"
-        href="{% static 'accounts/css/profile/sections/system_monitoring.css' %}?v=20260716-3">
+        href="{% static 'accounts/css/profile/sections/system_monitoring.css' %}?v=20260912-1">
 
   <div class="smx" id="smx-root"
        data-api-base="/api/superadmin/monitoring/"
        data-csrf="{{ csrf_token }}">
-    <div class="smx-head">
-      <div>
-        <h2 class="smx-title">
-          <i class="fas fa-heartbeat"></i>
-          {% trans "Sistem Monitorinqi" context "monitoring" %}
-        </h2>
-        <p class="smx-sub">
-          {% trans "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət" context "monitoring" %}
-        </p>
-      </div>
-      <div class="smx-controls">
-        <div class="bootstrap-single-select">
-          <select id="smx-range" class="smx-select bootstrap-single-select__native js-bootstrap-single-select"
-                  data-bootstrap-select
-                  aria-label="{% trans 'Vaxt aralığı' context 'monitoring' %}">
-            <option value="300">5 dəq</option>
-            <option value="900">15 dəq</option>
-            <option value="3600" selected>1 saat</option>
-            <option value="21600">6 saat</option>
-            <option value="86400">24 saat</option>
-            <option value="604800">7 gün</option>
-            <option value="2592000">30 gün</option>
-          </select>
-        </div>
-        <button type="button" id="smx-refresh" class="smx-btn"
-                title="{% trans 'Yenilə' context 'monitoring' %}">
-          <i class="fas fa-rotate"></i>
-        </button>
-        <label class="smx-auto">
-          <input type="checkbox" id="smx-auto" checked>
-          {% trans "Avto" context "monitoring" %}
-        </label>
-        <span class="smx-updated" id="smx-updated">—</span>
-      </div>
-    </div>
+    {% comment %}2026-09-12 (audit P2-1): «Sistem Monitorinqi» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir — köhnə `<h2>` onu təkrarlayırdı. İzah
+    `ems_ui/_content_header.html` altbaşlığı, idarə paneli (aralıq / yenilə /
+    avto / vaxt) isə onun əməl yuvasıdır. ⚠️ Yuva `#smx-root` İÇİNDƏ qalmalıdır:
+    `system_monitoring.js` idarə elementlərini `scope.querySelector("#smx-…")`
+    ilə yalnız kökün altında axtarır.{% endcomment %}
+    {% trans "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət" context "monitoring" as smx_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=smx_subtitle header_actions_include="accounts/profile/sections/superadmin/_system_monitoring_header_actions.html" %}
+
 
     <div class="smx-tabs" role="tablist">
       <button class="smx-tab active" data-tab="overview">{% trans "İcmal" context "monitoring" %}</button>
@@ -66,7 +40,7 @@
         {% for i in "12345678" %}
         <div class="smx-card">
           <span class="skeleton skeleton-line skeleton-line--sm"></span>
-          <span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span>
+          <span class="skeleton skeleton-line skeleton-line--lg mt-2"></span>
         </div>
         {% endfor %}
       </div>

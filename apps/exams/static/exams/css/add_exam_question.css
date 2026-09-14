@@ -361,7 +361,7 @@ textarea {
    Javascriptsiz ən sadə yol vizual olaraq mətnin rəngini dəyişməkdir. */
 
 .custom-checkbox-container input:checked ~ .label-text {
-    color: var(--ems-success-600); /* Tünd yaşıl mətn */
+    color: var(--ems-success-700); /* Tünd yaşıl mətn */
     font-weight: 700;
     content: "Düzgün cavab";
 }
@@ -430,7 +430,7 @@ button:active {
 
 .btn-save-add {
     background-color: var(--ems-primary-50);
-    color: var(--ems-primary-500);
+    color: var(--ems-primary-600);
     border: 1px solid var(--ems-primary-200);
     flex: 1;
 }

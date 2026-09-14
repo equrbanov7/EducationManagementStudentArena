@@ -19,20 +19,28 @@
   var i18nEl = document.getElementById("pl2-i18n");
   var T = i18nEl ? JSON.parse(i18nEl.textContent) : {};
   function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  // KPI kartına dəyər yaz (`ems-kpi[data-ems-kpi-key]`) — kart yoxdursa keç.
+  function setKpi(key, value){
+    var host = root.querySelector('[data-ems-kpi-key="'+key+'"] .ems-kpi__value');
+    if (host) { host.textContent = String(value); }
+  }
   function initials(n){ var p=(n||"").trim().split(/\s+/); return ((p[0]||"?")[0]+((p[1]||"")[0]||"")).toUpperCase(); }
   function state(box, icon, text){ box.innerHTML='<div class="pl2-state"><i class="fas '+icon+'"></i>'+esc(text)+'</div>'; }
   function skeletonRows(box, n){
-    var row='<div class="pl2-row" aria-hidden="true"><span class="skeleton skeleton-circle" style="width:2.3rem;height:2.3rem"></span>'+
-      '<span class="pl2-who" style="flex:1 1 auto"><span class="skeleton skeleton-line" style="width:60%;margin-bottom:.35rem"></span>'+
-      '<span class="skeleton skeleton-line skeleton-line--sm" style="width:35%"></span></span></div>';
+    var row='<div class="pl2-row pl2-row--skel" aria-hidden="true"><span class="skeleton skeleton-circle pl2-skel__avatar"></span>'+
+      '<span class="pl2-who pl2-skel__who"><span class="skeleton skeleton-line pl2-skel__l1"></span>'+
+      '<span class="skeleton skeleton-line skeleton-line--sm pl2-skel__l2"></span></span></div>';
     box.innerHTML = new Array(n+1).join(row);
   }
   function skeletonDetail(box){
-    box.innerHTML='<div class="pl2-exam" aria-hidden="true"><span class="skeleton skeleton-line" style="width:45%;margin-bottom:.6rem"></span>'+
-      '<span class="skeleton skeleton-block" style="height:56px"></span></div>';
+    box.innerHTML='<div class="pl2-exam" aria-hidden="true"><span class="skeleton skeleton-line pl2-skel__l3"></span>'+
+      '<span class="skeleton skeleton-block pl2-skel__block"></span></div>';
   }
 
+  var foundCount = 0;
   function renderResults(items, append){
+    foundCount = append ? (foundCount + items.length) : items.length;
+    setKpi("found", foundCount + (hasMore ? "+" : ""));
     if (!append && !items.length){ state(results,"fa-user-slash",T.noResults); return; }
     if (!append) { results.innerHTML=""; }
     items.forEach(function(u){
@@ -88,11 +96,13 @@
     if (window.matchMedia && window.matchMedia("(max-width: 900px)").matches){ detail.scrollIntoView({behavior:"smooth", block:"start"}); }
   }
   function renderDetail(d, fallbackName){
-    if (!d){ state(detail,"fa-triangle-exclamation","—"); return; }
+    if (!d){ setKpi("tickets","—"); setKpi("withpin","—"); setKpi("nopin","—"); state(detail,"fa-triangle-exclamation","—"); return; }
     var s=d.student||{name:fallbackName, username:""};
     var t=d.tickets||[];
     var head='<div class="pl2-detail__head"><span class="pl2-avatar">'+esc(initials(s.name))+'</span>'+
       '<div><div class="pl2-detail__name">'+esc(s.name)+'</div><div class="pl2-detail__user">@'+esc(s.username)+'</div></div></div>';
+    var withPin = t.filter(function(x){ return x.pin_available; }).length;
+    setKpi("tickets", t.length); setKpi("withpin", withPin); setKpi("nopin", t.length - withPin);
     if (!t.length){ detail.innerHTML=head+'<div class="pl2-state"><i class="fas fa-inbox"></i>'+T.noTickets+'</div>'; return; }
     var body="";
     t.forEach(function(x){

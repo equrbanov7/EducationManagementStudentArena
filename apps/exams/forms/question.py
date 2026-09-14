@@ -98,9 +98,13 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     "data-bootstrap-select": "",
                 }
             ),
+            # 2026-09-14 (W3 `w3sweep`, sahibin qaydası 2026-09-09): «cavab rejimi»
+            # test sual formunda YEGANƏ çılpaq native `<select>` idi — `block` /
+            # `difficulty` / `language` kimi layihə komponentinə keçirildi.
             "answer_mode": forms.Select(
                 attrs={
-                    "class": "form-control",
+                    "class": "form-select bootstrap-single-select__native js-bootstrap-single-select",
+                    "data-bootstrap-select": "",
                 }
             ),
             "time_limit_seconds": forms.NumberInput(

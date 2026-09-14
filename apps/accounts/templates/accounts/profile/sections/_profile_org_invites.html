@@ -1,10 +1,12 @@
 {% load i18n %}
 {% if student_org_request_section.has_pending_invites %}
 <div class="section-card mb-4">
-    <div class="section-title">
+    {% comment %}2026-09-12 (audit P2-1): kart alt-başlığıdır (bölmə adı deyil) —
+    `.section-card__title` + həqiqi başlıq elementi.{% endcomment %}
+    <h2 class="section-card__title">
         <i class="fas fa-envelope-open-text"></i>
         {% trans 'Təşkilat dəvətləri' %}
-    </div>
+    </h2>
     <p class="text-muted mb-3">
         {% trans 'Sizə göndərilmiş təşkilat dəvətlərini buradan birbaşa qəbul və ya rədd edə bilərsiniz.' %}
     </p>

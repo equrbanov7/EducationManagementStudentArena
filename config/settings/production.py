@@ -26,6 +26,8 @@ from .base import (
     ADMIN_OTP_RESEND_RATE_LIMIT,
     ADMIN_OTP_VERIFY_RATE_LIMIT,
     ADMIN_URL_PREFIX,
+    AI_ASSISTANT_LOG_MAX_CHARS,
+    AI_ASSISTANT_LOG_RETENTION_DAYS,
     ALERTMANAGER_WEBHOOK_TOKEN,
     ASGI_APPLICATION,
     AUTH_OTP_EXPIRY_SECONDS,
@@ -93,6 +95,7 @@ from .base import (
     EXAM_START_POLL_INTERVAL_SECONDS,
     EXAM_START_RETRY_AFTER_SECONDS,
     EXAM_START_WAIT_TIMEOUT_SECONDS,
+    EXAM_SUBMIT_GRACE_SECONDS,
     FILE_UPLOAD_SECURITY_MAX_SIZE_MB,
     FINAL_EXAM_ALLOWED_IPS,
     HEALTH_CHECK_CACHE_SECONDS,
@@ -111,17 +114,21 @@ from .base import (
     LOGIN_IP_RATE_LIMIT,
     LOGIN_RATE_LIMIT,
     LOGIN_REDIRECT_URL,
+    LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT,
     LOGIN_URL,
     LOGOUT_REDIRECT_URL,
     MEDIA_ROOT,
     MEDIA_URL,
     MESSAGE_TAGS,
     METRICS_ALLOW_ANONYMOUS,
+    MICROSOFT_CLARITY_AUTHENTICATED,
     MICROSOFT_CLARITY_CONNECT_SRC,
     MICROSOFT_CLARITY_PROJECT_ID,
     MIDDLEWARE,
     OBJECT_STORAGE_ENABLED,
     OTP_RESEND_RATE_LIMIT,
+    OTP_SEND_IP_RATE_LIMIT,
+    OTP_VERIFY_IP_RATE_LIMIT,
     OTP_VERIFY_RATE_LIMIT,
     PASSWORD_RESET_TIMEOUT,
     POST_DELETE_RATE_LIMIT,
@@ -141,6 +148,7 @@ from .base import (
     REQUEST_QUEUE_UNSAFE_METHODS,
     REQUEST_QUEUE_WAIT_TIMEOUT_SECONDS,
     ROOT_URLCONF,
+    SCORE_WRITE_RATE_LIMIT,
     SECURE_CONTENT_TYPE_NOSNIFF,
     SECURE_REFERRER_POLICY,
     SECURITY_RESPONSE_HEADERS,
@@ -335,6 +343,29 @@ SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", True)
 SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
 X_FRAME_OPTIONS = "DENY"
+
+# ⚠️ 2026-09-10 auditi: kod default-ları DOĞRU idi (hamısı `True`), amma
+# `production.py` `BASE_DIR/.env`-i yükləyir və repodakı iş faylı
+# `SECURE_SSL_REDIRECT=False`, `SESSION_COOKIE_SECURE=False`,
+# `CSRF_COOKIE_SECURE=False`, `SECURE_HSTS_SECONDS=0` qoyur. Yəni prod hostda
+# unudulmuş bir `.env` sükutla TLS məcburiyyətini SÖNDÜRÜR: sessiya və CSRF
+# kukiləri şifrələnməmiş kanalla gedir.
+#
+# Qapı `ADMIN_2FA_REQUIRED` ilə EYNİ naxışdadır (yuxarıda): prod-da açıq
+# qalmalı olan parametr bağlanırsa, tətbiq SÜKUTLA zəifləmir — açılmır.
+# Kuki bayraqlarının prod-da söndürülməsi üçün qanuni səbəb yoxdur, ona görə
+# onlarda çıxış yolu da yoxdur.
+# Çıxış yolu TƏKDİR və adı özünü izah edir. Onu prod `.env`-ə yazan adam nə
+# etdiyini bilir; unudulmuş bayraq isə tətbiqi qaldırmır. CI-nin `prod-smoke`
+# işi prod yığınını DÜZ HTTP üzərində qaldırdığı üçün məhz bunu qoyur.
+INSECURE_TRANSPORT_OK = _env_bool("INSECURE_TRANSPORT_OK", False)
+if not INSECURE_TRANSPORT_OK and not (SESSION_COOKIE_SECURE and CSRF_COOKIE_SECURE and SECURE_SSL_REDIRECT):
+    raise ImproperlyConfigured(
+        "TLS enforcement is disabled in production "
+        "(SECURE_SSL_REDIRECT / SESSION_COOKIE_SECURE / CSRF_COOKIE_SECURE). "
+        "Check the .env on this host. If this is a plain-HTTP test stack, set "
+        "INSECURE_TRANSPORT_OK=1 explicitly."
+    )
 
 # Session timeout — tighter values in production for security.
 # Absolute cookie lifetime: 1 day (overrides base.py default of 7 days).

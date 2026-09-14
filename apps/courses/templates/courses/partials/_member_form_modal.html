@@ -2,6 +2,20 @@
 {% load custom_filters %}
 {% load i18n %}
 
+{% comment %}
+Audit 2026-09-10 P1-4 (düzəliş 2026-09-12): «Tələbə əlavə et» modalı əvvəl
+kontekstdəki `all_users` ilə tenant-ın BÜTÜN tələbə istifadəçilərini (real bazada
+auth_user = 8 443 sətir) checkbox sətri kimi render edirdi. İndi siyahı asinxron
+picker-dir: modal açılanda ilk səhifə, yazdıqca axtarış, «Daha çox göstər» ilə
+növbəti səhifə — hamısı `courses:available_students` JSON endpoint-indən (max
+50 sətir/sorğu). POST müqaviləsi dəyişməyib: seçilmiş hər id üçün formada gizli
+`<input name="user_ids">` saxlanılır (+ `group_name`); nəticə sətirlərinin
+checkbox-larında `name` YOXDUR ki, ikiqat göndərilməsin. Bu partial həm
+`course_members.html`, həm də `course_dashboard.html` tərəfindən include olunur —
+ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_order).
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'courses/css/member_picker.css' %}?v=20260912-1">
+
 <div id="memberFormModalConfig" hidden
      data-delete-member-url="{% url 'courses:delete_member' course.id 0 %}"
      data-i18n-min-one-student="{% trans 'msg_min_one_student' context 'courses.partial.member_modal' %}"
@@ -12,7 +26,10 @@
      data-i18n-server-error="{% trans 'msg_server_error' context 'courses.partial.member_modal' %}"
      data-i18n-delete-member-confirm-suffix="{% trans 'msg_delete_member_confirm_suffix' context 'courses.partial.member_modal' %}"
      data-i18n-delete-failed-prefix="{% trans 'msg_delete_failed_prefix' context 'courses.partial.member_modal' %}"
-     data-i18n-error="{% trans 'msg_error' context 'courses.partial.member_modal' %}"></div>
+     data-i18n-error="{% trans 'msg_error' context 'courses.partial.member_modal' %}"
+     data-i18n-loading="{% trans 'loading' context 'courses.partial.member_modal' %}"
+     data-i18n-empty="{% trans 'empty_user_not_found' context 'courses.partial.member_modal' %}"
+     data-i18n-remove="{% trans 'Çıxar' context 'registrar.guest_roster' %}"></div>
 
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -41,39 +58,39 @@
                                placeholder="{% trans 'placeholder_group_name' context 'courses.partial.member_modal' %}">
                     </div>
 
-                    <div class="custom-selector-wrapper" role="group" aria-labelledby="student-selector-label">
-                        <label class="form-label fw-bold mb-2" id="student-selector-label">{% trans "label_students" context "courses.partial.member_modal" %}</label>
+                    <div class="custom-selector-wrapper" role="group" aria-labelledby="student-selector-label"
+                         id="studentPicker"
+                         data-available-url="{% url 'courses:available_students' course.id %}"
+                         data-page-size="20">
+                        <label class="form-label fw-bold mb-2" id="student-selector-label" for="student_search_input">{% trans "label_students" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
                             <i class="fas fa-search"></i>
                             <input type="text" id="student_search_input" class="custom-search-input"
+                                   autocomplete="off"
+                                   aria-controls="student_list_container"
                                    placeholder="{% trans 'placeholder_search_students' context 'courses.partial.member_modal' %}">
                         </div>
 
-                        <div id="student_list_container" class="custom-list-container">
-                            {% if all_users %}
-                                {% for user in all_users %}
-                                <div class="list-item-row" data-search="{{ user.username|lower }} {{ user.get_full_name|lower }}">
-                                    <input type="checkbox"
-                                           id="user_{{ user.id }}"
-                                           name="user_ids"
-                                           value="{{ user.id }}"
-                                           class="custom-item-checkbox">
-                                    <label for="user_{{ user.id }}" class="custom-item-label">
-                                        {{ user.username }}
-                                        {% if user.get_full_name %}
-                                            <span class="text-muted">({{ user.get_full_name }})</span>
-                                        {% endif %}
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="p-3 text-center text-muted">{% trans "empty_user_not_found" context "courses.partial.member_modal" %}</div>
-                            {% endif %}
+                        <div id="student_selected_row" class="picker-selected-row" hidden>
+                            <span class="picker-selected-label">{% trans "selected_items" context "assignment.legacy.modals" %}:</span>
+                            <div id="student_selected_chips" class="picker-chips"></div>
+                            <button type="button" class="picker-clear-btn" data-student-picker-clear>
+                                {% trans "action_clear_selection" context "exams.template.teacher_questions_bank" %}
+                            </button>
                         </div>
 
-                        <div class="selection-counter">
-                            {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="student_counter">0</span>
+                        <div id="student_list_container" class="custom-list-container" aria-live="polite" aria-busy="false">
+                            <div class="picker-status" data-student-picker-status>{% trans "loading" context "courses.partial.member_modal" %}</div>
+                        </div>
+
+                        <div class="picker-footer">
+                            <button type="button" class="picker-more-btn" data-student-picker-more hidden>
+                                <i class="fas fa-angle-down"></i> {% trans "show_more" context "exams.dashboard" %}
+                            </button>
+                            <div class="selection-counter">
+                                {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="student_counter">0</span>
+                            </div>
                         </div>
                     </div>
 
@@ -173,4 +190,4 @@
     </div>
 </div>
 
-<script src="{% static 'courses/js/_member_form_modal.js' %}"></script>
+<script src="{% static 'courses/js/_member_form_modal.js' %}?v=20260912-1" defer></script>

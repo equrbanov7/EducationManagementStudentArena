@@ -97,6 +97,77 @@ class EnrollmentFlowTest(TestCase):
                 )
                 self.students.append(rec)
 
+    # ── Kataloq konsolunun tələbə təyinatı (köhnə səhifədən köçürülüb) ──────
+    def _assign_via_catalog(self, **overrides):
+        """Kabinetin «Registrar (kataloq)» yazı qapısı — köhnə konsol formasının varisi."""
+        from apps.registrar import catalog_console
+
+        data = {
+            "student": str(self.new_student.id),
+            "program": str(self.program.id),
+            "curriculum": str(self.curriculum.id),
+            "group": str(self.group.id),
+            "admission_year": "2024",
+            "status": "enrolled",
+        }
+        data.update(overrides)
+        with bypass_rls():
+            return catalog_console.save(self.org, tab="students", pk=None, data=data, actor=self.owner)
+
+    def _make_unassigned_student(self):
+        with bypass_rls():
+            user = User.objects.create_user("svc_new", "svc_new@qku.edu.az", "pw")
+            Membership.objects.create(
+                organization=self.org, user=user, role=self.org.roles.get(name="student"), is_active=True
+            )
+        self.new_student = user
+
+    def test_catalog_save_auto_enrolls_into_the_mandatory_subjects(self):
+        """`auto_enroll` köhnə konsol səhifəsində idi; səhifə silinəndə əməl
+        İTMƏSİN deyə kataloq yazı qapısına köçürülüb (eyni xidmət çağırılır)."""
+        self._make_unassigned_student()
+        record, errors = self._assign_via_catalog(auto_enroll="on", enroll_semester="1")
+        self.assertEqual(errors, {})
+        with bypass_rls():
+            subjects = set(
+                Enrollment.objects.filter(organization=self.org, student=self.new_student).values_list(
+                    "offering__subject__code", flat=True
+                )
+            )
+        self.assertEqual(subjects, {"MATH101", "CS101"})
+
+    def test_catalog_save_without_the_flag_does_not_enroll(self):
+        self._make_unassigned_student()
+        record, errors = self._assign_via_catalog()
+        self.assertEqual(errors, {})
+        self.assertTrue(record.is_active)
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(organization=self.org, student=self.new_student).exists())
+
+    def test_catalog_save_keeps_is_active_in_step_with_the_status(self):
+        """«Xaric» sətir akademik cəhətdən aktiv qala bilməz (köhnə konsolun qaydası)."""
+        from apps.registrar import catalog_console
+
+        record = self.students[0]
+        with bypass_rls():
+            updated, errors = catalog_console.save(
+                self.org,
+                tab="students",
+                pk=str(record.pk),
+                data={
+                    "student": str(record.student_id),
+                    "program": str(self.program.id),
+                    "curriculum": str(self.curriculum.id),
+                    "group": str(self.group.id),
+                    "admission_year": "2024",
+                    "status": "expelled",
+                },
+                actor=self.owner,
+            )
+        self.assertEqual(errors, {})
+        self.assertEqual(updated.status, "expelled")
+        self.assertFalse(updated.is_active)
+
     def test_enroll_mandatory_subjects(self):
         with bypass_rls():
             created = services.enroll_mandatory_subjects(record=self.students[0], period=self.period, semester_number=1)

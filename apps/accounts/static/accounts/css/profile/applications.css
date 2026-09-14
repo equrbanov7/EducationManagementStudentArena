@@ -88,30 +88,9 @@
 }
 
 /* ── Başlıq sətri (§4.2) ─────────────────────────────────────────────────── */
-.apx-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
-}
+/* 2026-09-12 (audit P2-1): `.apx-head*` ləğv edildi — bölmə adını qabıq verir,
+   izah və «Yeni müraciət» düyməsi `ems_ui/_content_header.html` içindədir. */
 
-.apx-head__title {
-    margin: 0;
-    font-size: 1.55rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--ems-neutral-900);
-}
-
-.apx-head__intro {
-    margin: 6px 0 0;
-    max-width: 700px;
-    font-size: 0.86rem;
-    color: var(--ems-neutral-500);
-    text-wrap: pretty;
-}
 
 .apx-btn {
     display: inline-flex;

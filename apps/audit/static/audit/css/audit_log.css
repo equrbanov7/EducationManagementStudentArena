@@ -544,7 +544,7 @@ a.al-actor__name:hover {
 }
 
 .al-val--empty {
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-style: italic;
 }
 

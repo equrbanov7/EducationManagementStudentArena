@@ -2,30 +2,46 @@
 
 SAHİBİN QƏRARI (2026-08): yazılı və praktiki imtahan kağız üzərində (praktikidə
 kodda) keçir — sistemdən getmir. Balları sonradan İmtahan Mərkəzi köçürür:
-dövr (tədris ili + semestr) → fənn → QRUP (açılış) → tələbə siyahısı → formada
+dövr (tədris ili + semestr) → QRUP → fənn (açılış) → tələbə siyahısı → formada
 bir-bir bal + (opsional) imtahan vərəqinin şəkli/PDF-i və mətn qeydi.
 
+2026-09-12 (sahib: «qrup seçilsin, müəllim, tarix və s. lazımlı nə info varsa»):
+hər yadda saxlama bir KÖÇÜRMƏ VƏRƏQİ (``ExamScoreSheet`` partiyası) yaradır —
+imtahan tarixi, yoxlayan müəllim, nəzarətçi, protokol №, skan (opsional).
+Dəyişdirilən ballar üçün səbəb + qeyd bir dəfə (dialoqda) verilir; sənəd
+partiyanın skanıdır (sətir-səviyyə fayl da qəbul olunur — köhnə forma).
+
 POST bölməyə redirect edir; GET ``_render_profile_section`` ilə profil bölməsini
-render edir (``journal_close`` / ``kollokvium_windows`` pattern-i).
+render edir (``journal_close`` / ``kollokvium_windows`` pattern-i). Fayl idxalı
+(şablon / quru icra / tətbiq) qardaş modul ``exam_score_import``-dadır.
 
 İcazə qapısı: ``final_score.entry`` (bax ``apps/registrar/exam_score_entry.py``).
 Sətir-sətir yazı servis qatındadır — orada ilk daxiletmə sərbəst, SONRAKI
 dəyişiklik isə səbəb + qeyd + sənəd tələb edir.
+
+2026-09-14 (W2 `w2paper`): sətirdə sual-sual ballar ``q__<enr>__<n>``
+(n = 1..sual sayı) — hər hansı biri doludursa imtahan balı onların CƏMİDİR
+(server hesablayır, ``score__<enr>`` nəzərə alınmır); vərəqin sual şəbəkəsi
+``question_count`` / ``question_max``; dəyişiklik növü ``kind``
+(``correction`` | ``appeal``) dialoqdan bir dəfə gəlir.
 """
 
 import logging
+from uuid import UUID
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
-from apps.registrar import exam_score_entry as service
-from apps.registrar.models import CourseOffering
+from apps.registrar.models import CourseOffering, ExamScoreSheetSource
+from apps.registrar.public import exam_score_entry as service
+from apps.registrar.public import exam_score_sheets as sheets_service
 
 from ._helpers import (
     _append_query_params,
@@ -64,6 +80,10 @@ def _resolve_target_org(request):
     if _is_superadmin_user(request.user):
         org_id = (request.POST.get("organization_id") or request.GET.get("ese_org") or "").strip()
         if org_id:
+            try:
+                UUID(org_id)
+            except (ValueError, TypeError, AttributeError):
+                return None
             return Organization.objects.filter(pk=org_id).first()
         return Organization.objects.filter(is_active=True).order_by("name").first()
     return _get_active_organization(request)
@@ -104,11 +124,15 @@ def exam_score_entry(request):
     return _render_profile_section(request, SECTION)
 
 
-def _offering_or_error(request, organization):
-    offering_id = (request.POST.get("offering_id") or "").strip()
+def _offering_or_error(request, organization, offering_id=None):
+    offering_id = (offering_id if offering_id is not None else request.POST.get("offering_id") or "").strip()
+    try:
+        UUID(offering_id)
+    except (ValueError, TypeError, AttributeError):
+        raise ExamScoreEntryError(pgettext(_CTX, "Fənn açılışı tapılmadı.")) from None
     offering = (
         CourseOffering.objects.filter(organization=organization, pk=offering_id)
-        .select_related("subject", "period", "group")
+        .select_related("subject", "period", "group", "instructor")
         .first()
         if offering_id
         else None
@@ -119,7 +143,17 @@ def _offering_or_error(request, organization):
 
 
 def _collect_rows(request):
-    """POST açarlarından sətir siyahısı: ``score__<enr>`` + eyni sonluqlu köməkçilər."""
+    """POST açarlarından sətir siyahısı: ``score__<enr>`` + eyni sonluqlu köməkçilər.
+
+    2026-09-12: səbəb/qeyd artıq BİR DƏFƏ (dialoqda, ``reason`` / ``note``)
+    verilir və hər dəyişən sətrə tətbiq olunur; köhnə sətir-səviyyə
+    ``reason__<enr>`` / ``note__<enr>`` / ``evidence__<enr>`` sahələri də
+    oxunur (üstünlük sətir-səviyyəyə).
+    """
+    batch_reason = (request.POST.get("reason") or "").strip()
+    batch_note = (request.POST.get("note") or "").strip()
+    batch_kind = (request.POST.get("kind") or "").strip()
+    question_count = service.exam_score_questions.QUESTION_COUNT_MAX
     rows = []
     for key, raw in request.POST.items():
         if not key.startswith("score__"):
@@ -129,16 +163,32 @@ def _collect_rows(request):
             {
                 "enrollment_id": enrollment_id,
                 "score": raw,
-                "reason": request.POST.get(f"reason__{enrollment_id}", ""),
-                "note": request.POST.get(f"note__{enrollment_id}", ""),
+                "question_scores": _question_fields(request, enrollment_id, question_count),
+                "kind": batch_kind,
+                "reason": (request.POST.get(f"reason__{enrollment_id}") or "").strip() or batch_reason,
+                "note": (request.POST.get(f"note__{enrollment_id}") or "").strip() or batch_note,
                 "evidence": request.FILES.get(f"evidence__{enrollment_id}"),
             }
         )
     return rows
 
 
+def _question_fields(request, enrollment_id, question_count):
+    """``q__<enr>__1..n`` sahələri → xam siyahı (sonuncu dolu sahəyə qədər); heç biri yoxdursa ``None``.
+
+    Sual sayından artıq (JS-in söndürdüyü) sahələr brauzerdən gəlmir; gəlsə
+    belə servis vərəqin ``question_count``-u ilə rədd edir (fail-closed).
+    """
+    values = [request.POST.get(f"q__{enrollment_id}__{index}") for index in range(1, question_count + 1)]
+    if all(value is None for value in values):
+        return None
+    while values and (values[-1] is None or not str(values[-1]).strip()):
+        values.pop()
+    return [value if value is not None else "" for value in values]
+
+
 def _handle_save(request, organization, next_url):
-    """Toplu yadda saxlama — sətirlər servis qatında bir-bir yazılır."""
+    """Toplu yadda saxlama — partiya yaradılır, sətirlər servis qatında bir-bir yazılır."""
     action = (request.POST.get("action") or "").strip()
     if action != "save_scores":
         raise ExamScoreEntryError(pgettext(_CTX, "Naməlum əməliyyat."))
@@ -148,12 +198,24 @@ def _handle_save(request, organization, next_url):
     # yaza bilər — servis qatında fail-closed yoxlanır.
     if not _is_superadmin_user(request.user):
         service.assert_offering_in_actor_scope(request.user, organization, offering)
-    result = service.save_roster_scores(
-        offering=offering,
-        rows=_collect_rows(request),
-        by_user=request.user,
-        request=request,
-    )
+
+    metadata = sheets_service.sheet_metadata_from_post(request.POST, request.FILES, offering=offering)
+    with transaction.atomic():
+        sheet = sheets_service.create_sheet(
+            offering=offering,
+            by_user=request.user,
+            source=ExamScoreSheetSource.MANUAL,
+            request=request,
+            **metadata,
+        )
+        result = service.save_roster_scores(
+            offering=offering,
+            rows=_collect_rows(request),
+            by_user=request.user,
+            request=request,
+            sheet=sheet,
+        )
+        sheet = sheets_service.finalize_sheet(sheet, result, by_user=request.user, request=request)
 
     if result["written"]:
         messages.success(request, _written_message(result["written"], result["skipped"]))
@@ -162,9 +224,11 @@ def _handle_save(request, organization, next_url):
     for student_name, problem in result["errors"]:
         messages.error(request, f"{student_name}: {problem}")
 
+    # `next` onsuz da açılışı daşıyırsa parametr təkrarlanmasın (URL təmizliyi).
     return _append_query_params(
         next_url,
-        ese_offering=str(offering.pk),
+        ese_offering="" if f"ese_offering={offering.pk}" in next_url else str(offering.pk),
+        ese_saved="1" if result["written"] else "",
     )
 
 
@@ -177,4 +241,4 @@ def _written_message(written, skipped):
     return f"{written} {head} · {skipped} {tail}."
 
 
-__all__ = ["exam_score_entry"]
+__all__ = ["exam_score_entry", "ExamScoreEntryError", "_can_manage", "_resolve_target_org", "_offering_or_error"]

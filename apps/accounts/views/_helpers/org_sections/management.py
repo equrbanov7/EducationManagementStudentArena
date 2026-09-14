@@ -19,9 +19,13 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from apps.organizations.public import get_permission_scope
+from core.permissions import has_permission
+
 from ....models import ProfileRole
 from ..constants import STUDENT_ORG_MANAGEMENT_MIN_LEVEL
 from ..formatting import _append_query_params, _query_string
+from ..rbac import _collect_actor_permissions
 from . import _members_ui as ui
 from ._members_registry import PAGE_SIZE, build_members_registry
 
@@ -93,6 +97,16 @@ def _table_rows(rows):
     ]
 
 
+def _actor_can_remove_members(request, organization, *, is_superadmin):
+    actor = request.user
+    if is_superadmin or getattr(organization, "owner_id", None) == actor.id:
+        return True
+    if get_permission_scope(actor, organization, "member.remove", request=request).has_structure_access:
+        return True
+    actor_perms, _ = _collect_actor_permissions(actor, organization, request=request)
+    return has_permission(list(actor_perms), "member.student_manage")
+
+
 def _build_student_org_management_section(
     *,
     request,
@@ -157,13 +171,20 @@ def _build_student_org_management_section(
     superadmin_user_ids = list(
         User.objects.filter(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN)).values_list("id", flat=True)
     )
+    # Audit 2026-09-13 (access F-03/F-04 davamı): «Çıxar» düyməsi POST qapısı
+    # ilə eyni qaydaya bağlanır — superadmin/sahib, `member.remove` əhatəsi
+    # və ya tələbələr üçün `member.student_manage`. Əks halda düymə göstərilib
+    # sonra rədd mesajı alınırdı.
+    can_remove_members = bool(can_manage_students) and _actor_can_remove_members(
+        request, organization, is_superadmin=is_superadmin
+    )
     registry = build_members_registry(
         request=request,
         organization=organization,
         is_superadmin=is_superadmin,
         actor_level=user_level,
         superadmin_user_ids=superadmin_user_ids,
-        can_remove_members=bool(can_manage_students),
+        can_remove_members=can_remove_members,
     )
     filters = registry["filters"]
     totals = registry["totals"]
@@ -212,7 +233,7 @@ def _build_student_org_management_section(
             "leader_total_count": totals["leaders"],
             "unit_scope_active": registry["scope_active"],
             "can_manage_students": bool(can_manage_students),
-            "can_remove_members": bool(can_manage_students),
+            "can_remove_members": can_remove_members,
             "page_size": PAGE_SIZE,
             "post_next_url": post_next_url,
             "remove_hidden": [

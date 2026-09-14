@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Sum
+from django.db.models import Count, Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,6 +14,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.attempt_budget import attempts_left_map
 from apps.exams.services.manual_grading import (
     ManualGradingWindowClosed,
     apply_attempt_grade,
@@ -147,15 +148,25 @@ def teacher_exam_results(request, slug):
     sort_dir = filter_state["sort_dir"]
 
     max_score = 100 if exam.exam_type == "test" else exam.questions.aggregate(total=Sum("points")).get("total") or 0
-    pending_count = 0 if exam.exam_type == "test" else attempts.filter(checked_by_teacher=False).count()
-    graded_count = attempts.count() if exam.exam_type == "test" else attempts.filter(checked_by_teacher=True).count()
+    # Eyni filtrlənmiş çoxluq üzərində əvvəllər 4 ayrı COUNT (+ Paginator-un
+    # özününkü) gedirdi — indi tək şərti aqreqat; test imtahanında hamısı
+    # «yoxlanılıb» sayılır, gözləyən yoxdur (audit P1-9, 2026-09-12).
+    attempt_stats = attempts.aggregate(
+        total=Count("id"),
+        graded=Count("id", filter=Q(checked_by_teacher=True)),
+    )
+    total_count = attempt_stats["total"] or 0
+    graded_count = total_count if exam.exam_type == "test" else (attempt_stats["graded"] or 0)
     review_stats = {
-        "total": attempts.count(),
-        "pending": pending_count,
+        "total": total_count,
+        "pending": 0 if exam.exam_type == "test" else total_count - graded_count,
         "graded": graded_count,
         "max_score": max_score,
     }
     paginator = Paginator(attempts, 12)
+    # Paginator-un sayı elə həmin çoxluğun ölçüsüdür — ikinci dəfə saymırıq
+    # (legacy_review._paginator ilə eyni üsul).
+    paginator.count = total_count
     page_obj = paginator.get_page(request.GET.get("page"))
     attempts_page = list(page_obj.object_list)
     can_delete_attempts = bool(
@@ -193,6 +204,11 @@ def teacher_exam_results(request, slug):
     # İmtahandan uzaqlaşdırılmış tələbələr cədvəldə qırmızı görünsün + səbəb
     # (N+1-siz). `att.exam_intervention` = {action, reason, is_terminal}.
     attach_attempt_interventions(attempts_page)
+
+    # Qalan cəhd sayı: əvvəllər hər sətirdə ``exam.attempts_left_for(att.user)``
+    # (cəhd başına 3 sorğu, 12-lik səhifədə ~36) — indi səhifənin bütün
+    # tələbələri üçün 3 sabit sorğu, eyni məntiqlə (audit P1-9, 2026-09-12).
+    attempts_left_by_user = attempts_left_map(exam, [att.user_id for att in attempts_page])
 
     for att in attempts_page:
         anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=exam.id)
@@ -232,7 +248,7 @@ def teacher_exam_results(request, slug):
                 "anonymous_name": anonymous_name,
                 "real_name": real_name,
                 "student_id": att.user_id,
-                "attempts_left": exam.attempts_left_for(att.user),
+                "attempts_left": attempts_left_by_user.get(att.user_id),
                 "can_view_name": can_view_name,
                 "seconds_remaining": review_window_seconds or identity_window_seconds or 0,
                 "action_code": action_state["code"],

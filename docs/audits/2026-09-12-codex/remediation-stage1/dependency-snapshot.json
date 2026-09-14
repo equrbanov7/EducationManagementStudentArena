@@ -1,0 +1,164 @@
+{
+  "cycles": [
+    "exams<->registrar",
+    "organizations<->registrar"
+  ],
+  "core_to_apps": [],
+  "edges": {
+    "accounts": [
+      "appeals",
+      "applications",
+      "assignments",
+      "audit",
+      "contact",
+      "courses",
+      "exams",
+      "labs",
+      "notifications",
+      "organizations",
+      "projects",
+      "registrar",
+      "syllabus",
+      "task_submission_core",
+      "trial_exams",
+      "workload"
+    ],
+    "ai_assistant": [
+      "courses",
+      "exams",
+      "organizations"
+    ],
+    "appeals": [
+      "audit",
+      "exams",
+      "notifications",
+      "organizations"
+    ],
+    "applications": [
+      "notifications",
+      "organizations"
+    ],
+    "assignments": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "blog": [
+      "accounts",
+      "audit",
+      "exams",
+      "notifications",
+      "organizations"
+    ],
+    "courses": [
+      "exams",
+      "notifications",
+      "organizations"
+    ],
+    "exams": [
+      "audit",
+      "notifications",
+      "organizations",
+      "registrar"
+    ],
+    "labs": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "legacy_import": [
+      "accounts",
+      "audit",
+      "organizations",
+      "registrar",
+      "syllabus"
+    ],
+    "live_exam": [
+      "accounts",
+      "audit",
+      "exams"
+    ],
+    "monitoring": [
+      "exams",
+      "notifications"
+    ],
+    "notifications": [
+      "organizations"
+    ],
+    "organizations": [
+      "audit",
+      "registrar"
+    ],
+    "projects": [
+      "courses",
+      "notifications",
+      "task_submission_core"
+    ],
+    "registrar": [
+      "exams",
+      "notifications",
+      "organizations",
+      "syllabus"
+    ],
+    "syllabus": [
+      "notifications",
+      "organizations"
+    ],
+    "task_submission_core": [
+      "courses"
+    ],
+    "trial_exams": [
+      "notifications"
+    ],
+    "workload": [
+      "notifications",
+      "organizations"
+    ]
+  },
+  "all_cyclic_edges": [
+    [
+      "exams",
+      "notifications"
+    ],
+    [
+      "exams",
+      "organizations"
+    ],
+    [
+      "exams",
+      "registrar"
+    ],
+    [
+      "notifications",
+      "organizations"
+    ],
+    [
+      "organizations",
+      "registrar"
+    ],
+    [
+      "registrar",
+      "exams"
+    ],
+    [
+      "registrar",
+      "notifications"
+    ],
+    [
+      "registrar",
+      "organizations"
+    ],
+    [
+      "registrar",
+      "syllabus"
+    ],
+    [
+      "syllabus",
+      "notifications"
+    ],
+    [
+      "syllabus",
+      "organizations"
+    ]
+  ]
+}

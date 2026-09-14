@@ -4,9 +4,12 @@
 {% block title %}{% trans "İmtahan zalları" %} — {% trans "İmtahan Nəzarət Sistemi" %}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — kabinet qabığı burada YOXDUR, ona görə
+    asset-lər səhifənin özündə yüklənir (KPI, filtr paneli, boş vəziyyət).{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260730-live-panel">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260910-1">
 {% endblock %}
 
 {% block content %}
@@ -28,25 +31,55 @@
         "Oturumlar" keçidi silindi (2026-07-29): istifadəçi üçün texniki və
         çaşdırıcı idi. Yerində aşağıdakı "Hazırda gedən imtahanlar" bölməsi var.
       {% endcomment %}
-      <a href="{% url 'exams:exam_center_reports' %}" class="fxc-btn fxc-btn-ghost">
-        <i class="fas fa-chart-column"></i> {% trans "Hesabatlar" %}
+      <a href="{% url 'exams:exam_center_reports' %}" class="ems-btn">
+        <i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Hesabatlar" %}
       </a>
       {% endif %}
       {% if can_manage_rooms %}
       {# Zal/kompüter/MAC idarəetmə yalnız superadmin bölməsindədir. #}
-      <a href="{% url 'accounts:profile' %}?section=superadmin-exam-rooms" class="fxc-btn fxc-btn-primary">
-        <i class="fas fa-screwdriver-wrench"></i> {% trans "Zal idarəetmə" %}
+      <a href="{% url 'accounts:profile' %}?section=superadmin-exam-rooms" class="ems-btn ems-btn--primary">
+        <i class="fas fa-screwdriver-wrench" aria-hidden="true"></i> {% trans "Zal idarəetmə" %}
       </a>
       {% endif %}
     </div>
   </header>
 
-  <form method="get" class="fxc-toolbar" role="search">
+  {% comment %}KPI — canlı mənzərə (süzgəcdən asılı deyil, `live_scope` əhatəsi).{% endcomment %}
+  <div class="ems-kpis ems-kpis--4 fxc-kpis">
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Zal" %}</div>
+      <div class="ems-kpi__value">{{ kpi_rooms }}</div>
+      <div class="ems-kpi__note">{% trans "sizə görünən" %}</div>
+    </div>
+    <div class="ems-kpi{% if kpi_live_rooms %} ems-kpi--accent-success{% endif %}">
+      <div class="ems-kpi__label">{% trans "Canlı zal" %}</div>
+      <div class="ems-kpi__value">{{ kpi_live_rooms }}</div>
+      <div class="ems-kpi__note">{% trans "oturum gedir" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Gedən imtahan" %}</div>
+      <div class="ems-kpi__value">{{ kpi_live_exams }}</div>
+      <div class="ems-kpi__note">{% trans "fənn · zal cütü" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "İmtahanda tələbə" %}</div>
+      <div class="ems-kpi__value">{{ kpi_live_students }}</div>
+      <div class="ems-kpi__note">{% trans "hazırda aktiv" %}</div>
+    </div>
+  </div>
+
+  <form method="get" class="ems-filters fxc-roomfilters" role="search">
     {% trans "Zal adı, kodu və ya bina üzrə axtar…" as room_search_ph %}
     {% trans "Zal axtarışı" as room_search_aria %}
-    {% include "partials/_search_input.html" with name="q" value=search_query wrapper_class="fxc-search-grow" placeholder=room_search_ph aria_label=room_search_aria %}
-    <div class="bootstrap-single-select fxc-toolbar-select">
-      <select name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select js-fxc-autosubmit" data-bootstrap-select
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="fxc-room-q">{{ room_search_aria }}</label>
+      <input type="search" id="fxc-room-q" name="q" class="ems-input" value="{{ search_query }}"
+             placeholder="{{ room_search_ph }}" autocomplete="off">
+    </div>
+    <div class="ems-field">
+      <label class="ems-field__label" for="fxc-room-status">{% trans "Status" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems fxc-toolbar-select">
+      <select name="status" id="fxc-room-status" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-fxc-autosubmit" data-bootstrap-select
               aria-label="{% trans 'Status filtri' %}">
         <option value="">{% trans "Bütün zallar" %}</option>
         <option value="live" {% if active_status == 'live' %}selected{% endif %}>{% trans "Canlı zallar" %}</option>
@@ -55,6 +88,11 @@
         <option value="inactive" {% if active_status == 'inactive' %}selected{% endif %}>{% trans "Deaktiv zallar" %}</option>
         {% endif %}
       </select>
+      </div>
+    </div>
+    <div class="ems-filters__actions">
+      <button type="submit" class="ems-btn">{% trans "Axtar" %}</button>
+      <a class="ems-btn" href="{% url 'exams:exam_center_room_list' %}">{% trans "Sıfırla" context "ui.filters" %}</a>
     </div>
   </form>
 
@@ -156,22 +194,26 @@
   </div>
   {% include "partials/_pagination.html" with page_obj=page_obj %}
   {% else %}
-  <div class="fxc-empty">
-    <i class="far fa-folder-open"></i>
-    {% if search_query %}
-    <p>{% trans "Axtarışa uyğun zal tapılmadı." %}</p>
-    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost"><i class="fas fa-xmark"></i> {% trans "Axtarışı təmizlə" %}</a>
-    {% elif can_manage_rooms %}
-    <p>{% trans "Hələ zal yaradılmayıb. Zallar superadmin bölməsində idarə olunur." %}</p>
-    <a href="{% url 'accounts:profile' %}?section=superadmin-exam-rooms" class="fxc-btn fxc-btn-primary">
-      <i class="fas fa-screwdriver-wrench"></i> {% trans "Zal idarəetməsinə keç" %}
-    </a>
-    {% elif can_manage %}
-    <p>{% trans "Hələ zal yaradılmayıb. Zallar superadmin tərəfindən yaradılır." %}</p>
-    {% else %}
-    <p>{% trans "Sizə hələ zal təyin edilməyib." %}</p>
-    {% endif %}
-  </div>
+  {% if search_query %}
+    {% trans "Axtarışa uyğun zal tapılmadı." as fxc_e1 %}
+    {% trans "Axtarışı təmizlə" as fxc_e1a %}
+    {% url 'exams:exam_center_room_list' as fxc_e1u %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=fxc_e1 state_body="" state_action_label=fxc_e1a state_action_url=fxc_e1u %}
+  {% elif can_manage_rooms %}
+    {% trans "Hələ zal yaradılmayıb." as fxc_e2 %}
+    {% trans "Zallar superadmin bölməsində idarə olunur." as fxc_e2b %}
+    {% trans "Zal idarəetməsinə keç" as fxc_e2a %}
+    {% url 'accounts:profile' as fxc_profile_url %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e2 state_body=fxc_e2b state_action_label=fxc_e2a state_action_url=fxc_profile_url|add:"?section=superadmin-exam-rooms" %}
+  {% elif can_manage %}
+    {% trans "Hələ zal yaradılmayıb." as fxc_e3 %}
+    {% trans "Zallar superadmin tərəfindən yaradılır." as fxc_e3b %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e3 state_body=fxc_e3b %}
+  {% else %}
+    {% trans "Sizə hələ zal təyin edilməyib." as fxc_e4 %}
+    {% trans "Zal təyinatı imtahan mərkəzi tərəfindən verilir." as fxc_e4b %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e4 state_body=fxc_e4b %}
+  {% endif %}
   {% endif %}
 </div>
 {% endblock %}

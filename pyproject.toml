@@ -46,6 +46,24 @@ markers = [
     #   Skip these:      pytest -m "not postgres"
     "postgres: test requires a PostgreSQL database (RLS / DB-engine specific)",
     "mariadb: test requires a disposable MariaDB instance on loopback",
+    # §7 (Codex audit, 2026-09-13): `@pytest.mark.timeout(...)` işarəsini
+    # pytest-timeout plugin-i qeydə alır (requirements/test.txt, CI onu
+    # quraşdırır). Plugin olmayan mühitdə (məs. lokal venv) işarə qeydsiz
+    # qalır və PytestUnknownMarkWarning çıxırdı; burada da qeyd edilir ki,
+    # xəbərdarlıq itsin — plugin varsa eyni ad təkrar qeydə alınır, ziyansız.
+    "timeout(seconds): per-test time limit (enforced only when pytest-timeout is installed)",
+    # Audit 2026-09-13 F-T6 (2026-09-14): «heç bir mühitdə işləməyən» testlər üçün
+    # AÇIQ markerlər — özü-skip səbəbi `-rs`-də görünsə də, seçilə bilən olsun:
+    #   pytest -m requires_tesseract        # OCR testləri (CI artıq tesseract quraşdırır)
+    #   pytest -m requires_rehearsal_guc    # yalnız `emsarena_rehearsal_<12hex>` klonunda
+    # `requires_rehearsal_guc`: `test_target_guard_reads_real_disposable_marker`
+    # GUC-dan əlavə DB adı şəkli, qeyri-5432 port, superuser OLMAYAN rol və RLS
+    # bypass-sız sessiya tələb edir — CI-nin `test_test_db_gw*` + superuser
+    # `test_user` bazasında `ALTER DATABASE … SET` tək başına onu işlətmir
+    # (GUC yeni yaradılan test DB-yə keçmir də). Ona görə CI-də açılmır; klon
+    # QA mühitində (`docs/DEV_RUN.md`) əl ilə seçilir.
+    "requires_tesseract: needs the tesseract-ocr runtime (+ aze/eng tessdata); self-skips otherwise",
+    "requires_rehearsal_guc: needs a disposable rehearsal clone DB carrying the emsarena.rehearsal_target GUC",
 ]
 
 # ── Coverage measurement (FAZA 11) ─────────────────────────────────────────

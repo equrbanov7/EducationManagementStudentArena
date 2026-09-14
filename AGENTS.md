@@ -177,8 +177,12 @@ Cross-modul asılılıqlar `scripts/module_deps.py` ilə qorunur (CI: `_lint.yml
 → "Module boundary gate"). Qayda:
 
 - **YENİ dövri (qarşılıqlı) modul cütü yaratmaq QADAĞANDIR.** M2 (2026-07-02)
-  ilə bütün 18 tarixi cüt əridilib — baseline
-  (`scripts/module_deps_baseline.json`) SIFIRDIR və sıfır qalmalıdır.
+  ilə tarixi cütlər əridilmişdi. 2026-09-12 auditində baseline-da
+  `exams↔registrar` və `organizations↔registrar` yenidən müşahidə edildi;
+  həmin gün mərhələli düzəlişlə hər ikisi aradan qaldırıldı. Cari baseline
+  SIFIRDIR və böyüdülməməlidir. Model registry əlaqələri və registrar-ın
+  qeyd etdiyi transfer hook-u dizayn review-da ayrıca nəzərə alınır.
+  Gate AST importlarını və istənilən uzunluqda dövrə daxil olan yeni kənarları yoxlayır.
 - **`core/` HEÇ BİR app modulunu import edə bilməz** (shared-kernel təmizliyi).
   M3 (2026-07-02) ilə bütün core→apps kənarları əridilib (baseline: 0). App
   datası lazımdırsa `django_apps.get_model()` və ya hook registry işlədin
@@ -248,3 +252,7 @@ Qaydalar:
 4. Templates/static güzgü prinsipi: `templates/<modul>/{student,teacher,...}`.
 5. Hər modul ayrıca PR: `manage.py check` + modul testləri + bu faylın §4
    yoxlama siyahısı MÜTLƏQ.
+
+Public API borcu `python scripts/public_api_boundaries.py --check` ilə ayrıca qorunur.
+Yeni private cross-app import qadağandır; `--update` yalnız mövcud inventarı
+kiçildir. Baseline-da olması importun yaxşı arxitektura sayıldığı demək deyil.

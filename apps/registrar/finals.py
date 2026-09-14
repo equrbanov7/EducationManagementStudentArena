@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
-from apps.registrar import grade_audit, gradebook, grading_scale, services
+from apps.registrar import absence_limit, grade_audit, gradebook, grading_scale, services
 from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
 from apps.registrar.exam_eligibility import status_code as eligibility_status
 from apps.registrar.exam_eligibility import status_label as eligibility_label
@@ -118,11 +118,12 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
         final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
         resit = ResitRecord.objects.filter(enrollment=enrollment).first()
-        limit_percent = gradebook.absence_limit_percent_for(enrollment.offering)
+        # F-06 (2026-09-14): hədd TƏLƏBƏNİN ÖZ proqramından — kabinet/imtahan qapısı ilə eyni mənbə.
+        limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
     else:
         final_grade = batch.final_grade_for(enrollment)
         resit = batch.resit_for(enrollment)
-        limit_percent = batch.limit_percent_for(enrollment.offering)
+        limit_percent = batch.limit_percent_for_enrollment(enrollment)
         frozen = batch.frozen_for(enrollment.offering)
         if exempt is None:
             exempt = batch.exempt_for(enrollment)
@@ -236,6 +237,19 @@ def evaluate_resit(*, enrollment, by_user=None):
     return existing
 
 
+def _lock_enrollment(enrollment):
+    """Qeydiyyat sətrini `FOR UPDATE` ilə kilidlə (Codex audit §14, 2026-09-13).
+
+    `set_exam_score` / `set_resit_score` / `set_final_extras` «oxu → yaz»
+    naxışlıdır və sonda `evaluate_resit` `ResitRecord`-u `first()` ilə yoxlayıb
+    yaradır. İki paralel çağırış eyni qeydiyyat üçün `uniq_resit_per_enrollment`
+    IntegrityError-u və ya itmiş yeniləmə verirdi. `exam_score_entry` ilə eyni
+    kilid obyekti (qeydiyyat sətri) — iki yol bir-birinə qarşı da ardıcıllaşır.
+    Kilid sırası layihə boyu eynidir: açılış → qeydiyyat → xana/bal sətri.
+    """
+    Enrollment.objects.select_for_update().filter(pk=enrollment.pk).exists()
+
+
 @transaction.atomic
 def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     """Record the final-exam score (teacher/exam centre), then re-evaluate resit.
@@ -259,6 +273,7 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
     (məsələn "imtahan mərkəzi · avtomatik"): aktoru olmayan sistem yazılarının
     tarixçədə boş "kim?" xanası ilə qalmaması üçün (2026-08 auditi, G7).
     İDEMPOTENT: ``get_or_create`` + yalnız real dəyişiklikdə audit."""
+    _lock_enrollment(enrollment)
     if not _is_current_enrollment(enrollment):
         return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
@@ -291,6 +306,7 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
 @transaction.atomic
 def set_resit_score(*, enrollment, score, by_user=None):
     """Record a resit exam score → mark the resit completed + recompute."""
+    _lock_enrollment(enrollment)
     if not _is_current_enrollment(enrollment):
         return None
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
@@ -330,6 +346,7 @@ def set_final_extras(*, enrollment, bonus=None, comment=None, by_user=None):
 
     Bonus bal düzəlişidir → dəyişikliyi qiymət audit izinə yazılır; rəy bal
     deyil, audit olunmur. Jurnal kilidlidirsə heç nə yazılmır.""" % {"limit": _BONUS_LIMIT}
+    _lock_enrollment(enrollment)
     if not _is_current_enrollment(enrollment) or gradebook.journal_is_locked(enrollment.offering):
         return None
     final_grade, _created = FinalGrade.objects.get_or_create(

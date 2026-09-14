@@ -50,8 +50,8 @@ def approved_syllabus_offerings(organization, offerings) -> set:
     """
     from django.db.models import Q
 
-    from apps.syllabus.constants import SyllabusStatus
     from apps.syllabus.models import Syllabus
+    from apps.syllabus.public import SyllabusStatus
 
     offerings = [offering for offering in offerings if offering is not None]
     if organization is None or not offerings:
@@ -141,7 +141,7 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
 
 def assessment_weights_view(organization) -> dict:
     """Qiymətləndirmə çəkiləri (10/10/30/50) — ekran 10-un «struktur» zolağı."""
-    from apps.syllabus.policy import assessment_weights
+    from apps.syllabus.public import assessment_weights
 
     weights = assessment_weights(organization)
     return {

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from apps.organizations.scoping import get_permission_scope, user_scope_covers_unit
+from apps.organizations.public import get_permission_scope, user_scope_covers_unit
 
 from ..constants import PERM_DISTRIBUTE, PERM_MANAGE, PERM_REPORT, PERM_VIEW
 
@@ -55,7 +55,7 @@ class WorkloadActor:
 
     def scope_for(self, permission: str):
         if self.is_superadmin:
-            from apps.organizations.scoping import ORG_WIDE_SCOPE
+            from apps.organizations.public import ORG_WIDE_SCOPE
 
             return ORG_WIDE_SCOPE
         return get_permission_scope(self.user, self.organization, permission)
@@ -69,7 +69,7 @@ def resolve_actor(user, organization, *, request=None) -> WorkloadActor:
     if request is not None and getattr(request, "org_permissions", None):
         permissions = list(request.org_permissions)
     elif user is not None and getattr(user, "is_authenticated", False) and organization is not None:
-        from apps.organizations.services import get_active_memberships
+        from apps.organizations.public import get_active_memberships
 
         for membership in get_active_memberships(user, organization):
             role = membership.role

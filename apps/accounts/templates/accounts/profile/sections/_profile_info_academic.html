@@ -8,10 +8,12 @@ dolu qrupları saxlayır (bax context_builder._stage1).
 {# CSS həmişə yüklənir: .user-academic-title nişanı qeydlər olmayanda da görünür. #}
 <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info_academic.css' %}?v=20260815-1">
 {% if academic_item_display_groups %}
-<div class="section-title profile-section-title--academic">
+{% comment %}2026-09-12 (audit P2-1): kart alt-başlığıdır (bölmə adı deyil) —
+`.section-card__title` + qonşu `.pfx-card__title`-lar kimi `<h3>`.{% endcomment %}
+<h3 class="section-card__title">
     <i class="fas fa-award"></i>
     <span>{% trans 'Akademik fəaliyyət' context 'profile.edit_v2' %}</span>
-</div>
+</h3>
 <div class="profile-academic-groups">
     {% for group in academic_item_display_groups %}
     <div class="profile-academic-group">

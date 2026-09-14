@@ -1,0 +1,25 @@
+rector 55
+ikt_rehber 61
+vice_rector 46
+exam_center_head 32
+teaching_office_head 25
+dean 42
+trustee 20
+vice_dean 34
+chair_head 42
+admin_unit_head 18
+hr 27
+exam_center_staff 28
+rim_staff 34
+student_services 21
+teaching_office_staff 23
+teacher 20
+program_coordinator 25
+assistant 19
+lab_assistant 19
+tutor 18
+lead_student 17
+member 13
+student 17
+alumni 9
+roles 24 requests 665 failures 0

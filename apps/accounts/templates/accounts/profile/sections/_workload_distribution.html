@@ -53,8 +53,13 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   {% endif %}
 
   {% comment %}Kataloqlar (fəaliyyət/fəsil/forma/səviyyə/səbəb) JSON blokla
-  ötürülür — xarici JS Django template engine-dən keçmir (bax CLAUDE.md).{% endcomment %}
-  <script id="wl-catalog" type="application/json">{{ workload_distribution_section.catalog_json|safe }}</script>
+  ötürülür — xarici JS Django template engine-dən keçmir (bax CLAUDE.md).
+  2026-09-12 (audit P2-4): əvvəl `catalog_json|safe` ilə xam script gövdəsinə
+  yazılırdı — `|safe` bağlayıcı script teqini / `<!--` ardıcıllığını qaçırmır.
+  `json_script` Django-nun standart, XSS-təhlükəsiz yoludur; çıxışı eyni `id`-li
+  `type="application/json"` script blokudur, `workload_distribution.js`
+  `JSON.parse(node.textContent)` ilə oxumağa davam edir.{% endcomment %}
+  {{ workload_distribution_section.catalog|json_script:"wl-catalog" }}
 
   <header class="wl__head">
     <div>

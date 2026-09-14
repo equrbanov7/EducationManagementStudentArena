@@ -1,18 +1,11 @@
 {% load i18n %}
 {% if 'courses' in allowed_sections %}
 <section class="profile-section-panel profile-section--courses {% if active_section == 'courses' %}is-active{% endif %}" data-profile-section-panel="courses">
+    {% comment %}2026-09-12 (audit P2-1): «Kurslarım» başlığı qabıqdan
+    (`#profileSectionTitle`) gəlir, say sol menyunun nişanındadır
+    (`data-badge-key="courses_count"`) — köhnə `.section-header-flex > .section-title`
+    hər ikisini təkrarlayırdı.{% endcomment %}
     <div class="section-card">
-        
-        <div class="section-header-flex">
-            <div class="section-title mb-0">
-                <div class="title-left">
-                    <i class="fas fa-graduation-cap text-orange"></i>
-                    <span>{% trans "title" context "profile.courses" %}</span>
-                    <span class="count-badge badge-orange">{{ courses_count }}</span>
-                </div>
-            </div>
-        </div>
-
         {% if my_courses %}
         {% trans "uncategorized" context "profile.courses" as uncategorized_label %}
         <div class="course-cards-grid">

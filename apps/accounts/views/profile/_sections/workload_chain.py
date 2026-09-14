@@ -66,7 +66,7 @@ def build_workload_visa_section(request, section, *, active_organization, allowe
         section["has_access"] = False
         return
 
-    from apps.workload.review_registry import build_visa
+    from apps.workload.public import build_visa
 
     payload = build_visa(request, active_organization)
     section.update(payload)
@@ -194,7 +194,7 @@ def build_workload_approval_section(request, section, *, active_organization, al
         section["has_access"] = False
         return
 
-    from apps.workload.approval_registry import build_approval
+    from apps.workload.public import build_approval
 
     payload = build_approval(request, active_organization)
     section.update(payload)
@@ -322,7 +322,7 @@ def build_workload_overview_section(request, section, *, active_organization, al
         section["has_access"] = False
         return
 
-    from apps.workload.overview_registry import build_overview_section
+    from apps.workload.public import build_overview_section
 
     payload = build_overview_section(request, active_organization)
     section.update(payload)

@@ -351,7 +351,7 @@
 
 .pfx-muted {
     font-weight: 500;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .pfx-code {
@@ -396,7 +396,7 @@
 .pfx-tag small {
     font-size: 0.72rem;
     font-weight: 500;
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 
 .pfx-bio {

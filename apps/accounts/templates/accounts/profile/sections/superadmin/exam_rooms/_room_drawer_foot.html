@@ -1,0 +1,39 @@
+{% load i18n %}
+{% comment %}Zal çekmecəsinin altlığı — ZAL əməlləri: sil (solda, təsdiqli), deaktiv/aktiv
+et, redaktə (ortaq dialoq, prefill), bağla. Silmə/status adi POST-dur və
+`next` ilə eyni filtr/səhifəyə qayıdır. Kontekst: `room`, `s`.{% endcomment %}
+<form method="post" action="{{ s.action_url }}" class="sar-inline-form sar-foot__danger">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="delete_room">
+    <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+    <input type="hidden" name="room_id" value="{{ room.id }}">
+    <input type="hidden" name="next" value="{{ s.post_next_url }}">
+    <button type="submit" class="ems-btn ems-btn--danger js-sar-confirm"
+            data-confirm="{% blocktrans with name=room.name count_c=room.computer_registered context 'accounts.superadmin_exam_rooms' %}«{{ name }}» zalı və {{ count_c }} kompüter qeydi həmişəlik silinəcək. Davam edilsin?{% endblocktrans %}">
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
+        {% trans "Zalı sil" context "accounts.superadmin_exam_rooms" %}
+    </button>
+</form>
+<form method="post" action="{{ s.action_url }}" class="sar-inline-form">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="toggle_room_active">
+    <input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">
+    <input type="hidden" name="room_id" value="{{ room.id }}">
+    <input type="hidden" name="next" value="{{ s.post_next_url }}">
+    <button type="submit" class="ems-btn">
+        {% if room.is_active %}
+            <i class="fas fa-toggle-off" aria-hidden="true"></i> {% trans "Deaktiv et" context "accounts.superadmin_exam_rooms" %}
+        {% else %}
+            <i class="fas fa-toggle-on" aria-hidden="true"></i> {% trans "Aktiv et" context "accounts.superadmin_exam_rooms" %}
+        {% endif %}
+    </button>
+</form>
+<button type="button" class="ems-btn"
+        data-tof-open="sarRoomDialog"
+        data-tof-title="{% trans 'Zalı redaktə et' context 'accounts.superadmin_exam_rooms' %}"
+        data-tof-prefill='{{ room.edit_prefill }}'
+        data-sar-subtitle="{{ room.name }} · {{ room.code }}">
+    <i class="fas fa-pen" aria-hidden="true"></i>
+    {% trans "Zalı redaktə et" context "accounts.superadmin_exam_rooms" %}
+</button>
+<button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>

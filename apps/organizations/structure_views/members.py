@@ -16,9 +16,12 @@ GİRİŞ QAYDASI köhnə `build_organization_members_context` ilə EYNİDİR:
     (`_can_manage_organization`), VƏ YA
   * `member.view` + (bölmə əhatəsi VƏ YA rol səviyyəsi ≥ 65).
 
-ƏHATƏ: bölməyə bağlı aktor (dekan, kafedra müdiri) yalnız öz alt-ağacına
-təyin olunmuş üzvlükləri görür; ORGANIZATION rolu (HR, RİM, prorektor…)
-hamısını; `scope_unit`-i TƏYİN EDİLMƏMİŞ unit-rolu HEÇ NƏ (fail-closed, QA B-2).
+ƏHATƏ `member.view` açarını DAŞIYAN üzvlükdən çıxır (`get_permission_scope`,
+2026-09-12 P1-11): bölməyə bağlı aktor (dekan, kafedra müdiri) yalnız öz
+alt-ağacını; `member.view`-lu ORGANIZATION rolu (HR, RİM, prorektor…) hamısını;
+`scope_unit`-i TƏYİN EDİLMƏMİŞ unit-rolu HEÇ NƏ (fail-closed, QA B-2). Köhnə
+`get_unit_scope` HƏR üzvlüyün unitini toplayırdı — dekanın əlaqəsiz müəllim
+təyinatı başqa kafedranın üzvlərini siyahıya salırdı; o resolver silinib.
 
 RƏHBƏRLİK iki mənbədən çıxarılır və cədvəldə tac nişanı + mətn ilə seçilir:
   1. `OrgUnit.head` — fakültə → «Dekan · <fakültə>», kafedra → «Kafedra
@@ -48,9 +51,10 @@ from core.constants import OrgUnitType, RoleScopeType
 from core.staff_position import visible_role_label
 
 from ..models import Membership, OrgUnit
-from ..scoping import get_unit_scope, scope_memberships_by_unit
-from ..services import get_active_memberships, get_user_org_role_level
+from ..scoping import get_permission_scope, scope_memberships_by_unit
+from ..services import get_user_org_role_level
 from ..views import _can_manage_organization, _has_org_permission, _visible_units_queryset
+from ..views.org_admin.context import _has_org_wide_membership
 from .constants import KAFEDRA_UNIT_TYPES, TEACHER_ROLE_NAMES
 from .registry import ROLE_LABELS, _display_name, _initials, unit_type_label
 
@@ -187,17 +191,9 @@ class MembersAccess:
     units: object
 
 
-def _has_org_wide_membership(user, organization) -> bool:
-    """ORGANIZATION əhatəli aktiv rol (HR, RİM, imtahan mərkəzi…) bütün təşkilatı görür."""
-    return any(
-        membership.role.scope_type == RoleScopeType.ORGANIZATION
-        for membership in get_active_memberships(user, organization)
-    )
-
-
 def resolve_members_access(request, organization) -> MembersAccess:
     """Köhnə `build_organization_members_context` ilə EYNİ qapı + əhatə (fail-closed)."""
-    scope = get_unit_scope(request.user, organization, request=request)
+    scope = get_permission_scope(request.user, organization, "member.view", request=request)
     can_manage = _can_manage_organization(request.user, organization)
     has_access = bool(
         can_manage
@@ -486,7 +482,9 @@ def build_members_section(request, organization) -> dict:
         {"key": "title", "label": pgettext(_CTX, "Vəzifə")},
         {"key": "unit", "label": pgettext(_CTX, "Bölmə")},
         {"key": "joined", "label": pgettext(_CTX, "Qoşulma")},
-        {"key": "actions", "label": ""},
+        # P2-8 (2026-09-12): boş `<th>` a11y pozuntusudur — etiket ekran oxuyucu üçün
+        # gizli (`sr_only`) yazılır; msgid mövcud `organizations.roles_registry`-dəndir.
+        {"key": "actions", "label": pgettext("organizations.roles_registry", "Əməllər"), "sr_only": True},
     ]
     table_rows = [
         {

@@ -1,8 +1,9 @@
 """
 Faza 2 / bənd 3 — rol-skoplu qrup görünüşü.
 
-`_group_queryset_for_actor` mərkəzi unit-scoping servisini (`get_unit_scope`)
-işlədir:
+`_group_queryset_for_actor` mərkəzi unit-scoping servisini (`get_permission_scope`,
+açar `group.manage` → olmasa `group.view`; köhnə `get_unit_scope` 2026-09-12 P1-11
+ilə silinib) işlədir:
 * org-geniş rol (owner/rektor/superadmin) → bütün qruplar;
 * unit-scoped rol (dekan, scope_unit=fakültə) → yalnız öz alt-ağacındakı qruplar
   (+ öz müəllim olduğu qruplar);

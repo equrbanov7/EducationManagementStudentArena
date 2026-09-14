@@ -38,6 +38,9 @@ DEFAULT_ROLES = {
                 "exam.*",
                 *RIM_ACCOUNT_PERMISSIONS,
                 "analytics.view_all",
+                # Audit 2026-09-13 F-06 (2026-09-14): ayarlar səhifəsi səviyyə (≥90)
+                # əvəzinə `org.settings` açarı ilə qapılanır — bu rol (90) əvvəl də girirdi.
+                "org.settings",
             ],
             "description": "Deputy director with broad permissions",
         },
@@ -75,6 +78,8 @@ DEFAULT_ROLES = {
                 "exam.edit",
                 "exam.host",
                 "exam.delete",
+                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
+                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
@@ -156,6 +161,8 @@ DEFAULT_ROLES = {
                 "grade.view",
                 "grade.input",
                 "exam.*",
+                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
+                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
@@ -206,6 +213,8 @@ DEFAULT_ROLES = {
                 "course.*",
                 "grade.*",
                 "exam.*",
+                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
+                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",

@@ -123,14 +123,26 @@
     border-top: 1px solid var(--ems-neutral-200);
 }
 
+/* `display:inline-flex` Chrome/Firefox-da brauzerin defolt üçbucağını onsuz da
+   gizlədir; Safari üçün `::-webkit-details-marker` ayrıca söndürülür — əks
+   halda ikonun yanında İKİNCİ (çılpaq) üçbucaq çıxır (2026-09-11 ekran 08). */
 .six-columns__summary {
     display: inline-flex;
     align-items: center;
     gap: var(--ems-sp-2);
+    list-style: none;
     cursor: pointer;
     font-size: var(--ems-fs-sm);
     font-weight: 700;
     color: var(--ems-primary-700);
+}
+
+.six-columns__summary::-webkit-details-marker {
+    display: none;
+}
+
+.six-columns__summary:hover {
+    color: var(--ems-primary-800);
 }
 
 .six-columns__summary:focus-visible {
@@ -139,8 +151,43 @@
     border-radius: var(--ems-r-xs);
 }
 
+/* Açılış istiqaməti — sondakı şevron; açılanda 180° çevrilir. */
+.six-columns__chev {
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-neutral-600);
+    transition: transform 0.15s ease;
+}
+
 .six-columns[open] > .six-columns__summary {
     margin-bottom: var(--ems-sp-4);
+}
+
+.six-columns[open] > .six-columns__summary .six-columns__chev {
+    transform: rotate(180deg);
+}
+
+/* Sütun kataloqu 2 sütunludur — ortaq `ems-table`-in 900px minimumu burada
+   lazımsız üfüqi sürüşmə yaradır. */
+.six-columns .ems-table {
+    min-width: 560px;
+}
+
+/* Qrup başlıq sətri («Əsas sütunlar» / «ATİS sütunları») — zebra fonunu
+   ÜSTƏLƏYİR: `.ems-table--zebra tbody tr:nth-child(odd)` 0-2-2-dir və `ems_ui`
+   bu fayldan SONRA yüklənir, ona görə burada 0-3-2 yazılır. */
+.six-columns .ems-table tbody tr.six-colgroup,
+.six-columns .ems-table tbody tr.six-colgroup:hover {
+    background: var(--ems-primary-50);
+    border-bottom-color: var(--ems-primary-100);
+}
+
+.six-columns .ems-table tr.six-colgroup th {
+    padding: 7px 14px;
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-primary-800);
 }
 
 .ems-table td.six-muted {

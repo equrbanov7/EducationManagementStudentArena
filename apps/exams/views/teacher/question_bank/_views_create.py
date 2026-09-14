@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -14,6 +15,7 @@ from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage
 from apps.exams.services.coding_definition import sync_coding_questions_for_exam
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from core.http_ids import parse_int
 
 from ._helpers import (
     _append_navigation_query,
@@ -124,111 +126,17 @@ def process_question_bank(request, slug):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
-        # 1. Silinməli olan blokları silirik
-        deleted_ids = request.POST.get("deleted_block_ids", "").split(",")
-        for d_id in deleted_ids:
-            if d_id.strip():
-                QuestionBlock.objects.filter(id=d_id, exam=exam).delete()
-
-        # 2. Ümumi sual sayını yenilə
-        random_count = _optional_non_negative_int(request.POST.get("random_question_count"))
-        if random_count is not None:
-            exam.random_question_count = random_count
-            exam.save()
-
-        # Seçilmiş dil — bütün yazılı suallar bu dil variantına bağlanacaq.
-        selected_language = _normalize_exam_language(request.POST.get("language"), exam)
-        selected_variant = ensure_default_variant(exam, selected_language)
-
-        # Adların təkrar olub-olmadığını yoxlamaq üçün set
-        used_names = set()
-
-        # ✅ Order hesablamaq üçün counter
-        current_order = 1
-
-        # 3. Blokları emal edirik
-        for key, value in request.POST.items():
-            if key.startswith("block_name_"):
-                ui_id = key.split("_")[-1]
-                block_name = value.strip()
-
-                # Validation: Eyni sorğuda dublikat ad varmı?
-                if block_name.lower() in used_names:
-                    messages.error(
-                        request,
-                        pgettext("exams.view.question_bank.message", "duplicate_block_name_request").format(
-                            block_name=block_name
-                        ),
-                    )
-                    return redirect(
-                        _append_navigation_query(
-                            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
-                            navigation_query,
-                        )
-                    )
-                used_names.add(block_name.lower())
-
-                content_key = f"block_content_{ui_id}"
-                content_text = request.POST.get(content_key, "")
-                time_key = f"block_time_{ui_id}"
-                time_val = _optional_non_negative_int(request.POST.get(time_key))
-                block_paint_enabled = request.POST.get(f"block_enable_paint_{ui_id}") == "on"
-                db_id_key = f"block_db_id_{ui_id}"
-                db_id = request.POST.get(db_id_key)
-
-                # Validation: Bazada başqa blok eyni adda varmı? (özü xaric)
-                existing_check = QuestionBlock.objects.filter(exam=exam, name__iexact=block_name)
-                if db_id:
-                    existing_check = existing_check.exclude(id=db_id)
-
-                if existing_check.exists():
-                    messages.error(
-                        request,
-                        pgettext("exams.view.question_bank.message", "block_name_exists_db").format(
-                            block_name=block_name
-                        ),
-                    )
-                    return redirect(
-                        _append_navigation_query(
-                            reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
-                            navigation_query,
-                        )
-                    )
-
-                if block_name:
-                    # Blok Yaradılması/Yenilənməsi
-                    if db_id:
-                        # Bazada yoxlayırıq ki, silinməyibsə (concurrency üçün)
-                        block_qs = QuestionBlock.objects.filter(id=db_id, exam=exam)
-                        if block_qs.exists():
-                            block = block_qs.first()
-                            block.name = block_name
-                            block.time_limit_minutes = time_val
-                            block.enable_paint = block_paint_enabled
-                            block.order = current_order  # ✅ Düzgün order
-                            block.save()
-                        else:
-                            continue  # Blok tapılmadısa keçirik
-                    else:
-                        block = QuestionBlock.objects.create(
-                            exam=exam,
-                            name=block_name,
-                            time_limit_minutes=time_val,
-                            enable_paint=block_paint_enabled,
-                            order=current_order,  # ✅ Düzgün order (ui_id deyil)
-                        )
-
-                    # ✅ Növbəti blok üçün order artır
-                    current_order += 1
-
-                    # Sualların Parse edilməsi
-                    questions = _parse_written_questions(content_text) if content_text.strip() else []
-                    _sync_written_block_questions(
-                        block, questions, language=selected_language, language_variant=selected_variant
-                    )
-
-        if exam.exam_type == "coding":
-            sync_coding_questions_for_exam(exam)
+        # Backend auditi 2026-09-13, F-07: blok silmə + imtahan + blok/sual
+        # yazıları döngüdədir və dublikat ad xətası DÖNGÜNÜN ORTASINDA qayıdır —
+        # əvvəlki bloklar artıq yazılmış qalırdı. İndi bütün yazı bir
+        # tranzaksiyadadır; xəta budağı ``set_rollback`` ilə hamısını geri alır.
+        # AI çətinlik warmup-u (arxa plan thread-i) QƏSDƏN blokdan KƏNARDADIR —
+        # commit-dən əvvəl sualları görməzdi.
+        with transaction.atomic():
+            error_response = _apply_question_bank_post(request, exam, navigation_query)
+            if error_response is not None:
+                transaction.set_rollback(True)
+                return error_response
 
         from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
 
@@ -248,3 +156,116 @@ def process_question_bank(request, slug):
             navigation_query,
         )
     )
+
+
+def _apply_question_bank_post(request, exam, navigation_query):
+    """POST gövdəsini bazaya tətbiq edir; validasiya xətasında redirect, uğurda ``None``.
+
+    Çağıran (``process_question_bank``) bunu ``transaction.atomic()`` içində
+    işlədir və xəta cavabında geri alır (F-07).
+    """
+    # 1. Silinməli olan blokları silirik
+    # F-01 (2026-09-14): pozuq id («abc») sadəcə ötürülür (əvvəl `ValueError` → 500, atomic geri alırdı).
+    deleted_ids = [parse_int(d_id) for d_id in request.POST.get("deleted_block_ids", "").split(",")]
+    if any(d_id is not None for d_id in deleted_ids):
+        QuestionBlock.objects.filter(id__in=[d_id for d_id in deleted_ids if d_id is not None], exam=exam).delete()
+
+    # 2. Ümumi sual sayını yenilə
+    random_count = _optional_non_negative_int(request.POST.get("random_question_count"))
+    if random_count is not None:
+        exam.random_question_count = random_count
+        exam.save()
+
+    # Seçilmiş dil — bütün yazılı suallar bu dil variantına bağlanacaq.
+    selected_language = _normalize_exam_language(request.POST.get("language"), exam)
+    selected_variant = ensure_default_variant(exam, selected_language)
+
+    # Adların təkrar olub-olmadığını yoxlamaq üçün set
+    used_names = set()
+
+    # ✅ Order hesablamaq üçün counter
+    current_order = 1
+
+    # 3. Blokları emal edirik
+    for key, value in request.POST.items():
+        if key.startswith("block_name_"):
+            ui_id = key.split("_")[-1]
+            block_name = value.strip()
+
+            # Validation: Eyni sorğuda dublikat ad varmı?
+            if block_name.lower() in used_names:
+                messages.error(
+                    request,
+                    pgettext("exams.view.question_bank.message", "duplicate_block_name_request").format(
+                        block_name=block_name
+                    ),
+                )
+                return redirect(
+                    _append_navigation_query(
+                        reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
+                        navigation_query,
+                    )
+                )
+            used_names.add(block_name.lower())
+
+            content_key = f"block_content_{ui_id}"
+            content_text = request.POST.get(content_key, "")
+            time_key = f"block_time_{ui_id}"
+            time_val = _optional_non_negative_int(request.POST.get(time_key))
+            block_paint_enabled = request.POST.get(f"block_enable_paint_{ui_id}") == "on"
+            db_id_key = f"block_db_id_{ui_id}"
+            db_id = request.POST.get(db_id_key)
+
+            # Validation: Bazada başqa blok eyni adda varmı? (özü xaric)
+            existing_check = QuestionBlock.objects.filter(exam=exam, name__iexact=block_name)
+            if db_id:
+                existing_check = existing_check.exclude(id=db_id)
+
+            if existing_check.exists():
+                messages.error(
+                    request,
+                    pgettext("exams.view.question_bank.message", "block_name_exists_db").format(block_name=block_name),
+                )
+                return redirect(
+                    _append_navigation_query(
+                        reverse("exams:create_question_bank", kwargs={"slug": exam.slug}),
+                        navigation_query,
+                    )
+                )
+
+            if block_name:
+                # Blok Yaradılması/Yenilənməsi
+                if db_id:
+                    # Bazada yoxlayırıq ki, silinməyibsə (concurrency üçün)
+                    block_qs = QuestionBlock.objects.filter(id=db_id, exam=exam)
+                    if block_qs.exists():
+                        block = block_qs.first()
+                        block.name = block_name
+                        block.time_limit_minutes = time_val
+                        block.enable_paint = block_paint_enabled
+                        block.order = current_order  # ✅ Düzgün order
+                        block.save()
+                    else:
+                        continue  # Blok tapılmadısa keçirik
+                else:
+                    block = QuestionBlock.objects.create(
+                        exam=exam,
+                        name=block_name,
+                        time_limit_minutes=time_val,
+                        enable_paint=block_paint_enabled,
+                        order=current_order,  # ✅ Düzgün order (ui_id deyil)
+                    )
+
+                # ✅ Növbəti blok üçün order artır
+                current_order += 1
+
+                # Sualların Parse edilməsi
+                questions = _parse_written_questions(content_text) if content_text.strip() else []
+                _sync_written_block_questions(
+                    block, questions, language=selected_language, language_variant=selected_variant
+                )
+
+    if exam.exam_type == "coding":
+        sync_coding_questions_for_exam(exam)
+
+    return None

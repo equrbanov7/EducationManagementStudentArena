@@ -1,0 +1,141 @@
+{% load i18n ems_ui %}
+{% comment %}«Fənlərim» — bir fənn kartı (kontekst: `row`, bax
+`apps.registrar.student_subjects_context.enrich_subject_rows`).
+
+Oxu sırası — tələbənin ilk sualından sonuncusuna: hansı fənn (kod · növ · ad ·
+ECTS · müəllim) → nə qədər bal toplamışam (giriş balı, ƏSAS metrika) → qayıb
+vəziyyətim (saat / icazəli hədd, limit %) → komponentlər / cəhdlər / yekun →
+imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillabus / kurs.
+
+`subject-card--barred` sinfi mövcud inteqrasiya testi üçün saxlanılır
+(`test_cabinet_ui.py::test_absence_barred_student_shows_block_badge`).{% endcomment %}
+<article class="msx-card msx-card--{{ row.ui.status }}{% if row.ui.status == 'barred' %} subject-card--barred{% endif %}"
+         aria-labelledby="msx-subject-{{ row.enrollment.id }}">
+    <header class="msx-card__head">
+        <span class="ems-mono msx-card__code">{{ row.subject.code }}</span>
+        {% if row.kind == "elective" %}
+        <span class="msx-kind msx-kind--elective">{% trans "Seçmə" context "profile.subjects" %}</span>
+        {% elif row.kind == "retake" %}
+        <span class="msx-kind msx-kind--retake">{% trans "Təkrar" context "profile.subjects" %}</span>
+        {% else %}
+        <span class="msx-kind msx-kind--mandatory">{% trans "Məcburi" context "profile.subjects" %}</span>
+        {% endif %}
+        {% if row.enrollment.offering.period_id != student_subjects_section.period.id %}
+        <span class="msx-kind msx-kind--period" title="{% trans 'Başqa dövrün aktiv qeydiyyatı' context 'profile.subjects' %}">{{ row.enrollment.offering.period.name }}</span>
+        {% endif %}
+    </header>
+    <h3 class="msx-card__title" id="msx-subject-{{ row.enrollment.id }}">{{ row.subject.name }}</h3>
+    <ul class="msx-card__meta">
+        <li><i class="fas fa-coins" aria-hidden="true"></i> {{ row.ects }} {% trans "ECTS" context "profile.subjects" %}</li>
+        {% if row.teacher %}
+        <li><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {{ row.teacher.get_full_name|default:row.teacher.username }}</li>
+        {% endif %}
+    </ul>
+
+    {% if row.journal %}
+    {% with j=row.journal %}
+    {# ── Əsas metrika: giriş balı (imtahana qədər toplanan) ─────────────────── #}
+    <div class="msx-metric msx-metric--score">
+        <div class="msx-metric__head">
+            <span class="msx-metric__label">{% trans "Giriş balı" context "profile.subjects" %}</span>
+            <span class="msx-metric__value"><strong>{{ j.entry_score|floatformat:"-2" }}</strong> / {{ j.entry_score_max }}</span>
+        </div>
+        <progress class="msx-bar msx-bar--score" value="{{ j.entry_score }}" max="{{ j.entry_score_max|default:1 }}"
+                  aria-label="{% trans 'Giriş balı' context 'profile.subjects' %}"></progress>
+    </div>
+    {# ── Davamiyyət: qayıb saatı / icazəli hədd ─────────────────────────────── #}
+    <div class="msx-metric msx-metric--absence">
+        <div class="msx-metric__head">
+            <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
+            <span class="msx-metric__value">
+                <strong>{{ j.absence_hours|floatformat:"-1" }}</strong> / {{ j.allowed_absence|floatformat:0 }} {% trans "saat" context "profile.subjects" %}
+                {% if row.eligibility.limit_percent %}<span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>{% endif %}
+            </span>
+        </div>
+        {% if j.allowed_absence %}
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ j.absence_hours|default:0 }}" max="{{ j.allowed_absence }}"
+                  aria-label="{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}"></progress>
+        {% endif %}
+        <p class="msx-metric__foot">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ j.lessons_held }}</strong></p>
+    </div>
+    {% endwith %}
+
+    {% if row.components %}
+    <ul class="msx-chips" aria-label="{% trans 'Qiymətləndirmə komponentləri' context 'profile.subjects' %}">
+        {% for comp in row.components %}
+        <li class="msx-chip">{{ comp.name }}: <strong>{% if comp.score is not None %}{{ comp.score|floatformat:"-2" }}{% else %}—{% endif %}</strong>/{{ comp.max }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if row.attempts %}
+    {% comment %}Çox cəhd — rəsmi SONUNCU cəhddir, əvvəlkilər ləğv olunub, amma balı
+    itmir və burada açıq görünür (sahibin qərarı M2).{% endcomment %}
+    <ul class="msx-chips msx-chips--attempts" aria-label="{% trans 'İmtahan cəhdləri' context 'profile.subjects' %}">
+        {% for attempt in row.attempts %}
+        <li class="msx-chip {% if attempt.is_official %}msx-chip--official{% else %}msx-chip--superseded{% endif %}">
+            {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}:
+            <strong>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</strong>
+            · {% if attempt.is_official %}{% trans "rəsmi" context "profile.subjects" %}{% else %}{% trans "ləğv olundu" context "profile.subjects" %}{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if row.final.graded or row.final.resit %}
+    <div class="msx-final">
+        {% if row.final.graded %}
+        <span class="msx-final__total">{% trans "Yekun" context "profile.subjects" %}: <strong>{{ row.final.total|floatformat:"-2" }}</strong>/100</span>
+        <span class="msx-letter msx-letter--{{ row.final.letter }}">{{ row.final.letter }}</span>
+        {% if row.final.passed %}<span class="ems-badge ems-badge--success">{% trans "Keçdi" context "profile.subjects" %}</span>
+        {% elif row.final.failed %}<span class="ems-badge ems-badge--danger">{% trans "Kəsildi" context "profile.subjects" %}</span>{% endif %}
+        {% endif %}
+        {% if row.final.resit %}
+        <span class="ems-badge ems-badge--warning"><i class="fas fa-redo" aria-hidden="true"></i> {% trans "Təkrar imtahan hüququ" context "profile.subjects" %}{% if row.final.resit.resit_score is not None %}: {{ row.final.resit.resit_score|floatformat:"-2" }}{% endif %}</span>
+        {% endif %}
+        {% if row.final.bonus %}
+        <span class="ems-badge {% if row.final.bonus < 0 %}ems-badge--danger{% else %}ems-badge--success{% endif %}"><i class="fas fa-plus-minus" aria-hidden="true"></i> {% trans "Bonus" context "profile.subjects" %}: {{ row.final.bonus|floatformat:"-2" }}</span>
+        {% endif %}
+        {% if row.final.comment %}
+        <p class="msx-final__comment"><i class="fas fa-comment-dots" aria-hidden="true"></i> {{ row.final.comment }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% elif row.eligibility.lesson_hours %}
+    {% comment %}Cari dövrə aid olmayan qeydiyyat — jurnal xülasəsi yoxdur, yalnız
+    buraxılış resolver-inin saat rəqəmləri (əvvəlki səthlə eyni məlumat).{% endcomment %}
+    <div class="msx-metric msx-metric--absence">
+        <div class="msx-metric__head">
+            <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
+            <span class="msx-metric__value">
+                <strong>{{ row.eligibility.absence_hours|floatformat:"-1" }}</strong> / {{ row.eligibility.allowed_hours|floatformat:0 }} {% trans "saat" context "profile.subjects" %}
+                <span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>
+            </span>
+        </div>
+        {% if row.eligibility.allowed_hours %}
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ row.eligibility.absence_hours|default:0 }}" max="{{ row.eligibility.allowed_hours }}"
+                  aria-label="{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}"></progress>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <footer class="msx-card__foot">
+        <span class="msx-card__status"{% if row.eligibility.notice %} title="{{ row.eligibility.notice }}"{% endif %}>
+            {% ems_status_badge "exam_eligibility" row.ui.status dot=True %}
+        </span>
+        <span class="msx-card__links">
+            {% comment %}«Sillabusa bax» — YALNIZ təsdiqlənmiş versiya (README §8/9); endpoint
+            eyni qaydanı fail-closed təkrar yoxlayır.{% endcomment %}
+            {% if row.syllabus_available %}
+            <a class="msx-link" href="{{ row.syllabus_pdf_url }}" target="_blank" rel="noopener">
+                <i class="fas fa-file-lines" aria-hidden="true"></i> {% trans "Sillabus (təsdiqlənmiş)" context "profile.subjects" %}
+            </a>
+            {% endif %}
+            {% if row.course %}
+            <a class="msx-link" href="{% url 'courses:course_dashboard' row.course.id %}">
+                <i class="fas fa-arrow-right" aria-hidden="true"></i> {% trans "Kurs materialı" context "profile.subjects" %}
+            </a>
+            {% endif %}
+        </span>
+    </footer>
+</article>

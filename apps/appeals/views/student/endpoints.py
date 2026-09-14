@@ -9,10 +9,14 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt
-from apps.exams.navigation import append_query_params, current_return_to
-from apps.exams.public import exam_answers_release_locked, tenant_scoped_exams
-from apps.exams.services.question_snapshot import delivered_question_render
-from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
+from apps.exams.public import (
+    append_query_params,
+    current_return_to,
+    delivered_question_render,
+    ensure_student_exam_tenant_context,
+    exam_answers_release_locked,
+    tenant_scoped_exams,
+)
 
 from ...constants import (
     APPEAL_MIN_COMMENT_LENGTH,
@@ -185,7 +189,7 @@ def appeal_create(request, attempt_id):
                 # (bilet artıq COMPLETED, amma zal oturumu hələ açıq ola bilər).
                 from django.contrib.auth import logout
 
-                from apps.exams.services.final_center import clear_entry_session
+                from apps.exams.public import clear_entry_session
 
                 clear_entry_session(request)
                 logout(request)
@@ -239,7 +243,7 @@ def _appeal_eligible_attempts(request):
     hər biri üçün müraciət səhifəsinə keçid. Adi test/quiz cəhdləri apellyasiya
     axışına daxil deyil (yalnız final/midterm).
     """
-    from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+    from apps.exams.public import ATTEMPT_FINISHED_STATUSES
 
     attempts = (
         ExamAttempt.objects.filter(

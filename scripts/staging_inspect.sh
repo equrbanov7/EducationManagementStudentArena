@@ -48,9 +48,19 @@ STAGING_BOOTSTRAP_DB="${STAGING_BOOTSTRAP_DB:-emsarena_staging}"
 STAGING_DB_NAME="${STAGING_DB_NAME:-${STAGING_POSTGRES_DB:-$STAGING_BOOTSTRAP_DB}}"
 STAGING_DB_PORT="${STAGING_DB_PORT:-55433}"
 STAGING_OWNER_USER="${STAGING_OWNER_USER:-emsarena_staging}"
-STAGING_OWNER_PASSWORD="${STAGING_OWNER_PASSWORD:-emsarena_staging_password}"
+# Audit 2026-09-13 (security F-03): parollar tracked skriptdə saxlanmır —
+# gitignore-lanmış `.claude/staging.env` faylından oxunur (STAGING_OWNER_PASSWORD,
+# STAGING_APP_PASSWORD, REH_PASSWORD). Fayl yoxdursa env-dən gəlməlidir.
+_STAGING_ENV_FILE="${STAGING_ENV_FILE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.claude/staging.env}"
+if [ -f "$_STAGING_ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$_STAGING_ENV_FILE"
+    set +a
+fi
+STAGING_OWNER_PASSWORD="${STAGING_OWNER_PASSWORD:?STAGING_OWNER_PASSWORD təyin edilməyib (.claude/staging.env)}"
 STAGING_APP_USER="${STAGING_APP_USER:-emsarena_app}"
-STAGING_APP_PASSWORD="${STAGING_APP_PASSWORD:-emsarena_staging_app_password}"
+STAGING_APP_PASSWORD="${STAGING_APP_PASSWORD:?STAGING_APP_PASSWORD təyin edilməyib (.claude/staging.env)}"
 INSPECT_PORT="${EMS_INSPECT_PORT:-8100}"
 STAGING_SUPERUSER_USERNAME="${STAGING_SUPERUSER_USERNAME:-staging_admin}"
 STAGING_SUPERUSER_EMAIL="${STAGING_SUPERUSER_EMAIL:-staging-admin@emsarena.local}"
@@ -102,9 +112,9 @@ Environment overrides:
   STAGING_POSTGRES_DB / STAGING_DB_NAME   (hədəf baza; default emsarena_staging)
   STAGING_DB_PORT=55433
   STAGING_OWNER_USER=emsarena_staging
-  STAGING_OWNER_PASSWORD=emsarena_staging_password
+  STAGING_OWNER_PASSWORD=<.claude/staging.env>
   STAGING_APP_USER=emsarena_app
-  STAGING_APP_PASSWORD=emsarena_staging_app_password
+  STAGING_APP_PASSWORD=<.claude/staging.env>
   EMS_INSPECT_PORT=8100
   EMS_INSPECT_PYTHON=<python yolu>   (default: .venv/bin/python, sonra venv/bin/python)
   STAGING_SUPERUSER_USERNAME / STAGING_SUPERUSER_EMAIL

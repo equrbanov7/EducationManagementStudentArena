@@ -15,7 +15,7 @@ from django.urls import NoReverseMatch, reverse
 
 from apps.notifications.models import NotificationType
 from apps.notifications.public import create_notification, create_notification_for_users
-from apps.organizations.unit_heads import members_covering_unit
+from apps.organizations.public import members_covering_unit
 from core.audit import log_action
 from core.cache import invalidate_profile_badge_counts_cache
 from core.constants import AuditAction

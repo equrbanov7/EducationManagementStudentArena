@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 from apps.accounts.models import EmailOTP
 from core.helpers import _safe_same_origin_redirect_path
-from core.rate_limit import clear_rate_limit, normalize_rate_identity
+from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_client_ip
 
 from .constants import (
@@ -23,6 +23,8 @@ from .constants import (
     AUTH_REDIRECT_MAX_LENGTH,
     LOGIN_LIMIT_SCOPE_DEVICE,
     LOGIN_LIMIT_SCOPE_IDENTITY,
+    LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE,
+    LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT_DEFAULT,
 )
 
 
@@ -132,6 +134,11 @@ def _clear_login_rate_limits_after_password_reset(request, user):
             clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized)
 
 
+def _client_ip_key(request):
+    client_ip = (get_client_ip(request) or "unknown").strip().lower()
+    return f"ip:{client_ip}"
+
+
 def _authenticate_superadmin_for_rate_limit_reset(request, username, password):
     if not username or not password:
         return None
@@ -143,6 +150,54 @@ def _authenticate_superadmin_for_rate_limit_reset(request, username, password):
     if user.is_superuser or getattr(user, "is_superadmin", False):
         return user
     return None
+
+
+def _superadmin_escape_under_login_limit(request, username, password, limit_keys):
+    """Login limiti DOLANDA superadmin qaçış yolu — dar, ayrıca vedrə ilə.
+
+    2026-09-13 access auditi, F-01 (P1). Qaçış yolu NİYƏ var: hücumçu superadmin
+    adına səhv cəhdlərlə normal vedrəni doldurub yeganə bərpa hesabını
+    kilidləyə bilməməlidir (kilid = DoS; superadmin üçün «parolu sıfırla»
+    yolu da yoxdur). NİYƏ təhlükəli idi: limit dolandan sonra hər cəhd yenə
+    ``authenticate()``-dən keçirdi və heç yerdə sayılmırdı — superadmin (ən
+    dəyərli hesab) üçün brute-force faktiki sərhədsiz idi (auditor zondu
+    ``A3-superadmin-correct-under-limit`` → 302 + sessiya).
+
+    İndi:
+    * hər parol yoxlaması ``accounts.login.superadmin_escape`` vedrəsindən
+      (İP + istifadəçi adı, default 3/1h) bir token xərcləyir — vedrə dolubsa
+      parol HEÇ yoxlanmır;
+    * uğursuz cəhd normal login vedrələrində də sayılır (əvvəl sayılmırdı);
+    * yalnız superadmin hesabı üçün düzgün parol qaçışa icazə verir.
+    """
+    escape_rate = getattr(settings, "LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT", LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT_DEFAULT)
+    escape_key = (_client_ip_key(request), normalize_rate_identity(username))
+    escape_limited, _retry_after = is_rate_limited(LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE, escape_rate, *escape_key)
+    if escape_limited:
+        return None
+
+    record_rate_limit_hit(LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE, escape_rate, *escape_key)
+    user = _authenticate_superadmin_for_rate_limit_reset(request, username, password)
+    if user is None:
+        for rate_spec, scope, *key_parts in limit_keys:
+            record_rate_limit_hit(scope, rate_spec, *key_parts)
+    return user
+
+
+def _ip_rate_limited_and_recorded(request, scope, rate):
+    """İP vedrəsini yoxla; dolmayıbsa cəhdi say. ``(limited, retry_after)`` qaytarır.
+
+    2026-09-13 access auditi, F-09: OTP JSON endpoint-ləri və parol-bərpa
+    formaları üçün e-poçtdan ASILI OLMAYAN İP qapısı. Hər POST — nəticəsindən
+    asılı olmayaraq — sayılır, çünki məqsəd fərqli e-poçtlara «spray»-i
+    dayandırmaqdır; e-poçt üzrə hədlər (saatlıq 5, OTP başına 5 cəhd) qalır.
+    """
+    ip_key = _client_ip_key(request)
+    limited, retry_after = is_rate_limited(scope, rate, ip_key)
+    if limited:
+        return True, retry_after
+    record_rate_limit_hit(scope, rate, ip_key)
+    return False, None
 
 
 def _otp_limit_key(request, email):

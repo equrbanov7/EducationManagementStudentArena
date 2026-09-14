@@ -10,7 +10,7 @@ müvəqqəti söndürür, ona görə qorunan bazaya qarşı ASLA işlədilməmə
 
 ```bash
 EMS_STAGING_INSPECT=1 \
-DATABASE_URL="postgres://emsarena_staging:emsarena_staging_password@127.0.0.1:55433/emsarena_rehearsal_a0d170000901" \
+DATABASE_URL="${QA_CLONE_DATABASE_URL:?QA_CLONE_DATABASE_URL təyin edilməyib — klon DSN-i .claude/staging.env-dən (parol repoya yazılmır, audit 2026-09-13 F-03)}" \
 EMS_STAGING_DB_NAME=emsarena_rehearsal_a0d170000901 \
 EMS_STAGING_DB_PORT=55433 \
 EMS_DB_ROLE_ENFORCE=off DEBUG=True USE_REDIS=False ENABLE_NGROK=False \
@@ -69,7 +69,7 @@ menyuda görünmür, ya da açılanda 500 verir.  Süpürgə həmin fərqi bir k
 | `exam-center-pins` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
 | `exam-center-stats` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
 | `exam-chance` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `exam-score-entry` | · | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
+| `exam-score-entry` | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
 | `groups` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | ✅ | · | · |
 | `journal-close` | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · |
 | `kollokvium-windows` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
@@ -150,6 +150,24 @@ heç bir rol üzvlüyünə bağlı deyil. Bu, gözlənilən haldır — nasazlı
   Sahibin qərarı: `docs/migration/STATUS.md:261` — «hesab girişə bağlı qalsın,
   akademik qeydləri köçsün».  Müqaviləni `apps/accounts/tests/test_account_archive.py`
   (16 test) kilidləyir.
+* **Dayandırılmış (`suspended`) təşkilat → sərt çıxış; `pending` → yalnız
+  bayraq.**  Aktiv üzvlüyü olan təşkilat `status='active'` deyilsə
+  `OrganizationMiddleware` onu `request.blocked_organization` kimi verir
+  (sessiyadakı seçilmiş org VƏ — 2026-09-13 access auditi F-11-dən sonra —
+  yeganə/bütün təşkilatları dayandırılmış istifadəçi üçün də); sonra
+  `SuspendedOrganizationMiddleware` `suspended` (və hər digər qeyri-`pending`)
+  statusda sessiyanı bağlayıb login-ə yönləndirir («Təşkilatınız
+  dayandırılıb»), `pending` statusda isə yalnız `request.org_pending_approval`
+  bayrağını qaldırır.  Bu bayraq **heç bir view-da yazı qapısı deyil** — yalnız
+  kabinet xəbərdarlığı (`accounts/profile/_messages.html`) onu oxuyur; yazı
+  onsuz da mümkün deyil, çünki `pending` təşkilat heç vaxt
+  `request.organization` (aktiv tenant konteksti) olmur.
+* **2026-09-14 (sahibin qərarı): `ikt_rehber` şablonu tam wildcard `["*"]`-dır**
+  (rektor kimi; səviyyə 95 qalır) və jurnalda BİRBAŞA redaktordur (başqa müəllimin
+  jurnalına dərs əlavə edir, bal yazır — `registrar/journal_access.is_direct_editor`).
+  Miqrasiya `organizations 0053` mövcud tenantların `ikt_rehber` rolunu `*`-a keçirir.
+  Klonda ölçmə: RİM kabineti 63 bölmə, hamısı 200. Aşağıdakı 2026-09-03 cədvəli
+  (46 bölmə) bu qərardan ƏVVƏLKİ vəziyyətdir — yenidən ölçmə lazımdır.
 * **`ikt_rehber` (46) rektordan (40) çox bölmə görür.**  Bu qəsdəndir: rol
   full-override texniki rəhbərdir (bax `project_ikt_rehber_role`), `rector` isə
   təsdiq/idarəetmə səthlərinə baxır — `superadmin-exam-rooms`,
@@ -179,6 +197,31 @@ heç bir rol üzvlüyünə bağlı deyil. Bu, gözlənilən haldır — nasazlı
   `workload-distribution` / `my-workload`** — bu ölçmədə bütün müvafiq
   rollarda gözlənilən şəkildə görünür (bax cədvəl); bunlar sabit, öncədən
   mövcud bölmələrdir.
+
+## Açar-qapı dəyişiklikləri — 2026-09-14 (audit 2026-09-13 `access` F-06)
+
+Cədvəl bölmə GÖRÜNÜRLÜYÜNÜ ölçür; aşağıdakı dəyişikliklər bölmə siyahısını
+dəyişmir, bölmənin İÇİNDƏKİ əməlləri açarla qapıya bağlayır (əvvəl bu açarlar
+icazə redaktorunda «yalançı düymə» idi — verib/almaq heç nəyi dəyişmirdi):
+
+* **`permission-editor`** (`ikt_rehber`, `rector`, `chair_head`, `dean` görür) —
+  rolun icazə dəstini DƏYİŞMƏK (POST) üçün artıq `role.edit` lazımdır (`role.*`
+  və `*` əhatə edir); baxış `role.assign`-da qalır. `hr` bölməni onsuz da
+  görmürdü; URL ilə POST-u indi rədd olunur.
+* **`audit-log`** — «CSV ixrac» düyməsi və `audit:export` üçün `audit.export`
+  lazımdır; `audit.view` daşıyan bütün şablonlara (prorektor, imtahan mərkəzi
+  rəhbəri/işçisi, RİM rəhbəri/əməkdaşı, HR, Tədris şöbəsi rəhbəri, qəyyum) cüt
+  verilib, mövcud rollara miqrasiya 0051 əkir.
+* **Təşkilat ayarları** (`organizations:settings`, kabinet bölməsi deyil) —
+  səviyyə (≥90) + `org.settings`; POST üçün əlavə `org.edit`.
+* **`my-journal` / jurnal detalı** — `journal.view` daşıyan rol əhatəsindəki
+  jurnalları YALNIZ-OXU açır və siyahıda görür (heç bir şablona default verilmir).
+* **`statistics`** — müəllim/tələbə şəxsi profili `analytics.view_own` tələb edir
+  (bütün şablonlarda var); alınarsa `restricted` boş vəziyyət.
+* Kataloqdan ÇIXARILDI (funksiya yoxdur): `org.delete`, `role.create`,
+  `role.delete`, `grade.override` (= `journal.correct`), `qa.view/review/flag`.
+  RİM əməkdaşı, imtahan mərkəzi rəhbəri/işçisi və RİM rəhbəri şablonlarından
+  `qa.*` silindi — bu rolların gördüyü bölmələr dəyişmir (QA bölməsi yox idi).
 
 ## Tələlər (skriptdə həll olunub — silməyin)
 

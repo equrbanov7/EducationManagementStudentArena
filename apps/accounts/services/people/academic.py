@@ -283,7 +283,7 @@ def _ancestors_for(records, *, organization):
 
 
 def _limit_percent(record) -> int:
-    from apps.registrar.attendance import DEFAULT_ABSENCE_LIMIT_PERCENT
+    from apps.registrar.public import DEFAULT_ABSENCE_LIMIT_PERCENT
 
     program = record.program if record.program_id else None
     return int(getattr(program, "absence_limit_percent", None) or DEFAULT_ABSENCE_LIMIT_PERCENT)
@@ -342,7 +342,7 @@ def preview_group_transfer(*, actor, record_id, new_group_id, request=None) -> d
     hədəf qrupda açılışı OLMAYAN fənnlər hansılardır. ``blocking`` doludursa
     əməl ümumiyyətlə aparıla bilməz.
     """
-    from apps.registrar.attendance import attendance_score
+    from apps.registrar.public import attendance_score
 
     record = load_record(actor, record_id, request=request)
     new_group = scoped_groups_qs(actor, request=request).filter(pk=new_group_id).first() if new_group_id else None

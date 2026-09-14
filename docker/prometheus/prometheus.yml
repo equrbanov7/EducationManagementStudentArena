@@ -13,11 +13,35 @@ alerting:
             - alertmanager:9093
 
 scrape_configs:
+  # 2026-09-13 infra auditi P2-2: əvvəl tək hədəf `nginx:80` idi — nginx hər
+  # scrape-i round-robin ilə BAŞQA app replikasına ötürürdü (APP_REPLICAS=8),
+  # hər replikanın isə öz multiproc registry-si var → eyni seriya altında 8
+  # müstəqil sayğac qarışırdı (`rate()` counter-reset görür, High5xxRate /
+  # HighLatencyP95 / ExamAttemptServerErrors yanlış hesablanırdı). İndi Compose
+  # DNS-i (`app` adı bütün replika IP-lərini qaytarır — nginx də eyni
+  # mexanizmi işlədir) ilə hər replika ayrıca `instance` olur; qaydalardakı
+  # `sum(rate(...))` replikalar üzrə düzgün cəmlənir.
+  #
+  # Birbaşa scrape-də Django `Host: <ip>:8000` görür (ALLOWED_HOSTS-da yox →
+  # 400) və XFP olmadan SECURE_SSL_REDIRECT 301 qaytarır. Django production-da
+  # USE_X_FORWARDED_HOST=True olduğundan nginx `/metrics/` blokunun etdiyini
+  # başlıqlarla təkrarlayırıq: X-Forwarded-Host=localhost (ALLOWED_HOSTS
+  # `localhost` daxil etməlidir — app healthcheck də bunu tələb edir) və
+  # X-Forwarded-Proto=https. `Host` başlığı Prometheus-da rezervdir, ona görə
+  # X-Forwarded-Host işlədilir; Django settings dəyişməyib (`check --deploy`
+  # təmiz qalır). nginx `/metrics/` bloku əl ilə yoxlama üçün qalır.
   - job_name: emsarena-app
     metrics_path: /metrics/
-    static_configs:
-      - targets:
-          - nginx:80
+    dns_sd_configs:
+      - names: ["app"]
+        type: A
+        port: 8000
+        refresh_interval: 15s
+    http_headers:
+      X-Forwarded-Host:
+        values: ["localhost"]
+      X-Forwarded-Proto:
+        values: ["https"]
 
   - job_name: emsarena-postgres
     static_configs:

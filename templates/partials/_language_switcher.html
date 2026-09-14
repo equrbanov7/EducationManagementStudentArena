@@ -1,7 +1,12 @@
 {% load i18n %}
 {% get_current_language as CURRENT_LANGUAGE %}
 {% with current_lang=CURRENT_LANGUAGE|slice:":2"|lower switcher_kind=switcher_variant|default:'navbar' %}
-<div class="dropdown language-switcher language-switcher--{{ switcher_kind }}">
+{% comment %}Sidebar variantı `dropup`-dur (2026-09-11): alt blok sürüşən
+sidebar-ın dibinə yapışıb, menyu AŞAĞI açılanda `overflow` onu kəsirdi —
+sahib: «altda dil itir, kəsilir». Yuxarı açılanda menyu sürüşmə qutusunun
+içində qalır. `data-bs-display="static"` ilə Bootstrap-ın `.dropup`
+qaydası (`bottom: 100%`) birbaşa işləyir — Popper lazım deyil.{% endcomment %}
+<div class="dropdown language-switcher language-switcher--{{ switcher_kind }}{% if switcher_kind == 'sidebar' %} dropup{% endif %}">
     <button type="button"
             class="language-switcher__trigger dropdown-toggle"
             data-bs-toggle="dropdown"

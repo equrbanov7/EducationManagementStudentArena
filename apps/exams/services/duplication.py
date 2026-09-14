@@ -87,6 +87,8 @@ def duplicate_exam(*, exam: Exam, user, title_suffix: str = " (kopya)") -> Exam:
 
     # Giriş icazələri (M2M) — eyni qrup və fərdi tələbələr.
     copy.allowed_groups.set(exam.allowed_groups.all())
+    # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu təyinatı da kopyalanır.
+    copy.allowed_units.set(exam.allowed_units.all())
     copy.allowed_users.set(exam.allowed_users.all())
     copy.excluded_users.set(exam.excluded_users.all())
 

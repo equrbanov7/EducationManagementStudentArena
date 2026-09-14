@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from apps.exams.public import calculate_test_attempt_result
+from core.export_safety import sheet_cell
 
 from ._helpers import (
     _appeal_bonus_map_for,
@@ -41,7 +42,10 @@ def build_exam_results_xlsx_export(exam, attempts_list):
 
     wb = Workbook()
     ws = wb.active
-    ws.title = (exam.title[:28] + "…") if len(exam.title) > 30 else exam.title
+    # 2026-09-14 (w2sec qeydi): vərəq adında `/ \ ? * [ ] :` olanda openpyxl
+    # `ValueError` (500) atırdı — qadağan simvollar boşluqla əvəzlənir.
+    safe_title = "".join(" " if ch in "/\\?*[]:" else ch for ch in exam.title).strip("'").strip()
+    ws.title = ((safe_title[:28] + "…") if len(safe_title) > 30 else safe_title) or "Results"
 
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill("solid", fgColor="2563EB")
@@ -71,7 +75,7 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         headers += ["Düzgün", "Səhv", "Verilmiş sual"]
 
     for col_idx, title in enumerate(headers, start=1):
-        cell = ws.cell(row=1, column=col_idx, value=title)
+        cell = sheet_cell(ws, row=1, column=col_idx, value=title)
         cell.font = header_font
         cell.fill = header_fill
         cell.alignment = center
@@ -82,20 +86,14 @@ def build_exam_results_xlsx_export(exam, attempts_list):
     #  • iştirakçı qruplarının id-ləri — bir dəfə (əvvəl hər attempt-də təkrar).
     #  • hər user üçün üzv olduğu qrup adları — TƏK sorğu ilə dict (əvvəl hər
     #    attempt üçün ayrıca sorğu = N+1).
-    available_group_ids = list(_available_groups_for_exam(exam).values_list("id", flat=True))
+    #  • W5 `w5left` (2026-09-14): reyestr qrupları (`allowed_units`) da «Qruplar»
+    #    sütununa düşür — `group_names_by_user` kohort + reyestr üçün 2 sorğu.
+    from ._group_options import group_names_by_user
+
     _attempt_user_ids = {att.user_id for att in attempts_list}
     # Apellyasiya bonusları (tək sorğu) — export-dakı Bal/Faiz effektiv olsun.
     appeal_bonus_by_attempt = _appeal_bonus_map_for(attempts_list) if is_test else {}
-    groups_by_user: dict[int, list[str]] = {}
-    if available_group_ids and _attempt_user_ids:
-        from apps.exams.models import StudentGroup
-
-        for _uid, _gname in (
-            StudentGroup.objects.filter(id__in=available_group_ids, students__id__in=_attempt_user_ids)
-            .values_list("students__id", "name")
-            .order_by("name")
-        ):
-            groups_by_user.setdefault(_uid, []).append(_gname)
+    groups_by_user = group_names_by_user(_available_groups_for_exam(exam), _attempt_user_ids)
     for row_idx, att in enumerate(attempts_list, start=2):
         effective_finish, _ = _attempt_effective_finish(att, now=now)
         effective_duration = _attempt_effective_duration(att, effective_finish)
@@ -159,8 +157,11 @@ def build_exam_results_xlsx_export(exam, attempts_list):
         # Sola düzlənən sütunlar: Qruplar (2), Ad Soyad (3), İstifadəçi adı (4),
         # E-poçt (5), Uzaqlaşdırma səbəbi (7), Başlama (8), Bitmə (9).
         left_columns = {2, 3, 4, 5, 7, 8, 9}
+        # 2026-09-14 (audit F-07): ad/qrup/uzaqlaşdırma səbəbi kimi mətn xanaları
+        # formula kimi şərh olunmasın — `sheet_cell` `'` prefiksi qoyur, ədədlər
+        # və tarixlər dəyişmir.
         for col_idx, value in enumerate(row, start=1):
-            cell = ws.cell(row=row_idx, column=col_idx, value=value)
+            cell = sheet_cell(ws, row=row_idx, column=col_idx, value=value)
             cell.alignment = left if col_idx in left_columns else center
             if isinstance(value, datetime):
                 cell.number_format = "DD.MM.YYYY HH:MM"

@@ -1,0 +1,8 @@
+{% load i18n %}
+<section id="statistics-ai-panel" class="ems-card" data-stx-ai-panel hidden>
+  <div class="ems-card__body">
+    <p>{% trans "Göstərilən göstəricilər üzrə xülasə yaradın." context "profile.statistics" %}</p>
+    <button type="button" class="ems-btn" data-stx-ai-load>{% trans "Xülasə yarat" context "profile.statistics" %}</button>
+    <p data-stx-ai-result aria-live="polite" data-error="{% trans 'Xülasə alınmadı. Yenidən cəhd edin.' context 'profile.statistics' %}"></p>
+  </div>
+</section>

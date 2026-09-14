@@ -433,9 +433,15 @@
     if (endAllBtn) {
         endAllBtn.addEventListener("click", function () {
             if (!window.FXCConfirm) {
-                if (!window.confirm(t("confirmEndAll", gettext("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz.")))) return;
-                endAllBtn.disabled = true;
-                post(endAllUrl).then(function () { fetchSnapshot(); }).finally(function () { endAllBtn.disabled = false; });
+                // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+                window.EMSConfirm.open({
+                    body: t("confirmEndAll", gettext("Zaldakı bütün aktiv imtahanlar bitirilsin? Bu əməliyyat geri qaytarıla bilməz.")),
+                    danger: true
+                }).then(function (ok) {
+                    if (!ok) return;
+                    endAllBtn.disabled = true;
+                    post(endAllUrl).then(function () { fetchSnapshot(); }).finally(function () { endAllBtn.disabled = false; });
+                });
                 return;
             }
             window.FXCConfirm.open({
@@ -477,11 +483,15 @@
             if (act === "detail") {
                 openViolationsModal(btn.dataset.attempt);
             } else if (act === "grant") {
-                if (!window.confirm(t("violations.confirmGrant", gettext("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?")))) return;
-                btn.disabled = true;
-                post(fillUrl(resumeTpl, sid, tid), "grant_extra_chance=1")
-                    .then(function () { fetchSnapshot(); })
-                    .catch(function () { btn.disabled = false; });
+                window.EMSConfirm.open({
+                    body: t("violations.confirmGrant", gettext("Tələbəyə əlavə şans verilib imtahan bərpa edilsin?"))
+                }).then(function (ok) {
+                    if (!ok) return;
+                    btn.disabled = true;
+                    post(fillUrl(resumeTpl, sid, tid), "grant_extra_chance=1")
+                        .then(function () { fetchSnapshot(); })
+                        .catch(function () { btn.disabled = false; });
+                });
             } else if (act === "block") {
                 var reason = window.prompt(t("violations.blockReason", gettext("Bloklama səbəbi:")));
                 if (!reason) return;

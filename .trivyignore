@@ -25,6 +25,18 @@
 # Bu, həm bu tapıntıları, həm də gələcək pip-vendor CVE-lərini birdəfəlik
 # aradan qaldırır. İmtahan günündə runtime image-ini dəyişməmək üçün təxirə salınıb.
 #
-# Yenidən baxış: 2026-08-15
+# 2026-09-13 infra auditi P3-7 baxışı: auditor `CVE-2025-47273` (setuptools
+# <78.1.1) girişini «köhnəlib» saydı — YANLIŞ. Real setuptools image-də
+# ≥78.1.1-dir (Dockerfile `--upgrade setuptools`, `requirements/base.txt`
+# floor, test tests/test_infra_compose_config.py), amma Trivy CVE-ni məhz
+# yuxarıdakı FANTOM `pip/_vendor/vendor.txt` → `setuptools==70.3.0` qeydinə
+# görə verir; pip 26.2 wheel-i yoxlanıldı (2026-09-13) — vendor.txt hələ də
+# `setuptools==70.3.0` elan edir. Giriş silinsə container-scan (`exit-code 1`,
+# HIGH fixable) qırmızı olar. Hər iki giriş eyni səbəbdəndir və pip image-dən
+# çıxarılanda birlikdə silinəcək.
+#
+# Yenidən baxış: 2026-12-15 (imtahan mövsümündən sonra — pip-i son image-dən
+# çıxarma planı ilə birlikdə; o vaxta qədər hər Trivy hesabatında yalnız bu
+# iki ID-nin göründüyünü təsdiqləyin)
 GHSA-6v7p-g79w-8964
 CVE-2025-47273

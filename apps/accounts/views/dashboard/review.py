@@ -8,6 +8,7 @@ from pathlib import PurePosixPath
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -321,46 +322,53 @@ def pending_review_detail(request, item_type, item_id):
             return redirect(redirect_url)
 
         feedback = (request.POST.get("feedback") or "").strip()
-        try:
-            auto_total = Decimal("0")
-            has_posted_answer_scores = False
-            for answer in lab_answers:
-                raw_answer_score = (request.POST.get(f"answer_score_{answer.id}") or "").strip()
-                if not raw_answer_score:
-                    answer.score = None
-                else:
-                    has_posted_answer_scores = True
-                    answer_score = _parse_decimal_score(raw_answer_score)
-                    if answer_score < 0:
-                        answer_score = Decimal("0")
-                    question_max = Decimal(str(answer.question.points or 0))
-                    if question_max > 0 and answer_score > question_max:
-                        answer_score = question_max
-                    answer.score = answer_score
-                    auto_total += answer_score
-                answer.save(update_fields=["score", "submitted_at"])
+        # Backend auditi 2026-09-13, F-07: sual balları döngüdə YAZILIR, sonra
+        # yekun bal yoxlanılır — validasiya səhvində sual balları artıq bazada
+        # qalırdı (yarımçıq yazı). İndi bütün lab POST-u bir tranzaksiyadadır;
+        # səhv budaqlarında ``set_rollback`` ilə hər şey geri alınır.
+        with transaction.atomic():
+            try:
+                auto_total = Decimal("0")
+                has_posted_answer_scores = False
+                for answer in lab_answers:
+                    raw_answer_score = (request.POST.get(f"answer_score_{answer.id}") or "").strip()
+                    if not raw_answer_score:
+                        answer.score = None
+                    else:
+                        has_posted_answer_scores = True
+                        answer_score = _parse_decimal_score(raw_answer_score)
+                        if answer_score < 0:
+                            answer_score = Decimal("0")
+                        question_max = Decimal(str(answer.question.points or 0))
+                        if question_max > 0 and answer_score > question_max:
+                            answer_score = question_max
+                        answer.score = answer_score
+                        auto_total += answer_score
+                    answer.save(update_fields=["score", "submitted_at"])
 
-            entered_total = _parse_decimal_score(request.POST.get("score"))
-        except InvalidOperation:
-            messages.error(request, pgettext("accounts.review.message", "Bal düzgün rəqəm formatında olmalıdır."))
-            return redirect(redirect_url)
+                entered_total = _parse_decimal_score(request.POST.get("score"))
+            except InvalidOperation:
+                transaction.set_rollback(True)
+                messages.error(request, pgettext("accounts.review.message", "Bal düzgün rəqəm formatında olmalıdır."))
+                return redirect(redirect_url)
 
-        score = entered_total if (not has_posted_answer_scores or entered_total != auto_total) else auto_total
+            score = entered_total if (not has_posted_answer_scores or entered_total != auto_total) else auto_total
 
-        if score < 0 or score > max_score:
-            messages.error(
-                request,
-                pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
-            )
-            return redirect(redirect_url)
+            if score < 0 or score > max_score:
+                transaction.set_rollback(True)
+                messages.error(
+                    request,
+                    pgettext("accounts.review.message", "Bal 0 və {max} aralığında olmalıdır.").format(max=max_score),
+                )
+                return redirect(redirect_url)
 
-        submission.score = score
-        submission.feedback = feedback
-        submission.status = "graded"
-        submission.graded_by = request.user
-        if not submission.graded_at:
-            submission.graded_at = timezone.now()
-        submission.save(update_fields=["score", "feedback", "status", "graded_by", "graded_at"])
+            submission.score = score
+            submission.feedback = feedback
+            submission.status = "graded"
+            submission.graded_by = request.user
+            if not submission.graded_at:
+                submission.graded_at = timezone.now()
+            submission.save(update_fields=["score", "feedback", "status", "graded_by", "graded_at"])
         messages.success(
             request,
             f"Qiymət saxlanıldı. {REVIEW_EDIT_WINDOW_MINUTES} dəqiqə ərzində yenidən yoxlaya bilərsiniz.",

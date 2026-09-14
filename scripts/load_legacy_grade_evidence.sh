@@ -60,11 +60,21 @@ DEV_CONTAINER="${DEV_CONTAINER:-emsarena-postgres}"
 DEV_USER="${DEV_USER:-emsarena_user}"
 DEV_DB="${DEV_DB:-emsarena_db}"
 
+# Audit 2026-09-13 (security F-03): parollar tracked skriptdə saxlanmır —
+# gitignore-lanmış `.claude/staging.env` faylından oxunur (STAGING_OWNER_PASSWORD,
+# STAGING_APP_PASSWORD, REH_PASSWORD). Fayl yoxdursa env-dən gəlməlidir.
+_STAGING_ENV_FILE="${STAGING_ENV_FILE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.claude/staging.env}"
+if [ -f "$_STAGING_ENV_FILE" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$_STAGING_ENV_FILE"
+    set +a
+fi
 REH_HOST="${REH_HOST:-127.0.0.1}"
 REH_PORT="${REH_PORT:-55433}"
 REH_USER="${REH_USER:-emsarena_app}"
 REH_DB="${REH_DB:-emsarena_rehearsal_52ea0301808c}"
-REH_PASSWORD="${REH_PASSWORD:-emsarena_staging_app_password}"
+REH_PASSWORD="${REH_PASSWORD:?REH_PASSWORD təyin edilməyib (.claude/staging.env)}"
 
 WORKDIR="${WORKDIR:-$(mktemp -d -t legacy_grade_xfer)}"
 

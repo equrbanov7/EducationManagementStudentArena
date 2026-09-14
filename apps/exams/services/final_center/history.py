@@ -6,8 +6,11 @@ verilib), tələbənin PIN ilə girişi, kompüter/yer dəyişmələri, yenidən
 anındakı irəliləyiş (nə qədər yazmışdı), zal, oturum həyat dövrü və nəzarət
 (pozuntu/dayandırma) hadisələri.
 
-Mənbələr: `AuditLog` (final_exam_ticket + exam_room_session resursları) və
-`SupervisionIncident`. Yeni məlumat SAXLANMIR — mövcud audit birləşdirilir.
+Mənbələr: `AuditLog` (final_exam_ticket + exam_room_session resursları),
+`SupervisionIncident` və — W4 2026-09-14 (w3sweep R7) — `ExamStudentPin`
+(fərdi PIN-in yaradılması signal ilə, audit yazısız olur; tarixçə onu
+`final_tickets_assigned` kodu ilə sintez edir ki, «PIN əməliyyatı» KPI-ı
+fərdi-PIN axınında da 0 göstərməsin). Yeni məlumat SAXLANMIR.
 """
 
 from django.db.models import Q
@@ -70,9 +73,51 @@ def _detail(code, log, extra):
         if seat is not None:
             parts.append(_("kompüter %(seat)s") % {"seat": seat})
         return "; ".join(parts)
+    if code == "final_entry_validated" and changes.get("entry") == "student_pin":
+        # W4 R7: fərdi ExamStudentPin girişi — bilet-PIN girişindən fərqləndirilir.
+        parts = [_("fərdi imtahan PIN-i ilə")]
+        seat = changes.get("seat")
+        if seat is not None:
+            parts.append(_("kompüter %(seat)s") % {"seat": seat})
+        return "; ".join(parts)
     if extra:
         return extra
     return ""
+
+
+def _student_pin_events(tickets):
+    """W4 R7: oturum biletlərinin (imtahan, tələbə) cütləri üçün fərdi PIN yaradılması hadisələri."""
+    from django.utils.translation import gettext as _
+
+    from apps.exams.models import ExamStudentPin
+
+    if not tickets:
+        return []
+    pairs = {(t.exam_id, t.student_id): t for t in tickets}
+    pins = ExamStudentPin.objects.filter(
+        exam_id__in={exam_id for exam_id, _student_id in pairs},
+        student_id__in={student_id for _exam_id, student_id in pairs},
+    ).only("exam", "student", "created_at")
+    title, icon, tone = _TICKET_EVENTS["final_tickets_assigned"]
+    events = []
+    for pin in pins:
+        ticket = pairs.get((pin.exam_id, pin.student_id))
+        if ticket is None:
+            continue
+        events.append(
+            {
+                "code": "final_tickets_assigned",
+                "time": pin.created_at,
+                "actor": "Sistem",
+                "student": ticket.student.get_full_name() or ticket.student.username,
+                "seat": ticket.seat_number,
+                "title": title,
+                "detail": _("fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"),
+                "icon": icon,
+                "tone": tone,
+            }
+        )
+    return events
 
 
 def session_history(session):
@@ -84,7 +129,7 @@ def session_history(session):
     ticket_map = {str(t.pk): t for t in tickets}
     attempt_ids = [t.attempt_id for t in tickets if t.attempt_id]
 
-    events = []
+    events = _student_pin_events(tickets)
 
     logs = (
         AuditLog.objects.filter(

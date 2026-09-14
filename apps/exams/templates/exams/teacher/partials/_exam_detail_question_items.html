@@ -2,7 +2,8 @@
 
 {% for q in questions %}
 <li class="question-item">
-    <div class="question-content">
+    {# W3 2026-09-14: düsturlar KaTeX ilə (data-ems-math) — AJAX ilə əlavə olunan kartlar da render olunur #}
+    <div class="question-content" data-ems-math>
         <span class="question-order">{{ q.order }}.</span>
         {% if not q.image_replaces_text or not q.image %}<p class="question-text">{{ q.text }}</p>{% endif %}
         {% if q.image %}<img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" class="question-source-image" loading="lazy">{% endif %}

@@ -33,6 +33,12 @@ def can_create_appeal(request, attempt, *, at_time=None):
         return False
     if attempt.user_id != getattr(user, "id", None):
         return False
+    # 2026-09-14 (W3 `w3sweep` brauzer süpürgəsi): müəllimin «Sınaq keç» cəhdi
+    # (`is_trial`) heç bir nəticəyə yazılmır, amma nəticə səhifəsində
+    # «Apellyasiya et» düyməsi çıxırdı və real apellyasiya yaradıla bilirdi
+    # (statistikanı çirkləndirir). Sınaq cəhdi apellyasiya olunmur.
+    if getattr(attempt, "is_trial", False):
+        return False
     if not is_within_appeal_window(attempt, at_time=at_time):
         return False
     return request_has_permission(request, PERM_APPEAL_CREATE)

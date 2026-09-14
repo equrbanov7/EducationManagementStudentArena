@@ -48,7 +48,7 @@ _UNIT_TYPE_LABELS = None
 
 
 def _unit_type_label(unit_type: str) -> str:
-    from apps.organizations.structure_views.registry import unit_type_label
+    from apps.organizations.public import unit_type_label
 
     return unit_type_label(unit_type)
 
@@ -241,7 +241,7 @@ def _record_rows(records, organization, *, period):
 
 
 def _transcript_block(target, organization) -> dict:
-    from apps.registrar import transcript as transcript_service
+    from apps.registrar.public import transcript as transcript_service
 
     data = transcript_service.build_student_overall_record(student=target, organization=organization)
     semesters = []

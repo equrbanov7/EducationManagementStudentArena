@@ -15,9 +15,9 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef, Subquery
+from django.db.models import Exists, OuterRef, Subquery, UUIDField
 
-from apps.organizations.scoping import scope_memberships_by_unit
+from apps.organizations.public import scope_memberships_by_unit
 from core.staff_position import resolve_position_label
 
 from . import filters as people_filters
@@ -92,7 +92,7 @@ def visible_teachers_qs(actor, *, request=None, filters=None):
         .exclude(is_superuser=True)
         .select_related("profile")
         .annotate(
-            unit_id=Subquery(picked.values("scope_unit_id")[:1]),
+            unit_id=Subquery(picked.values("scope_unit_id")[:1], output_field=UUIDField()),
             unit_name=Subquery(picked.values("scope_unit__name")[:1]),
             role_name=Subquery(picked.values("role__name")[:1]),
             role_label=Subquery(picked.values("role__display_name")[:1]),

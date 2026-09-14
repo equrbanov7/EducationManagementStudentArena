@@ -17,23 +17,36 @@
          data-tx-status="{{ my_exams_filter_status|default:'' }}">
 
   <div class="tx-shell">
-    <header class="tx-head tx-head--compact">
-      <div class="tx-head-main">
-        <p class="tx-sub">
+    {% comment %}2026-09-13 redizayn: başlıq `ems-header` ritmində — qabıq h1-i
+    (`#profileSectionTitle`) artıq verir, burada yalnız alt sətir + əməllər.
+    Əməl iyerarxiyası: «Yeni imtahan» tək primary, «Zibil qutusu» ghost.{% endcomment %}
+    <header class="tx-head ems-header">
+      <div class="ems-header__main">
+        <p class="tx-sub ems-header__subtitle">
           <b>{{ my_exams_count }}</b> {% trans "subtitle_exams" context "exams.dashboard" %}
           {% if my_exams_dashboard %}
             · <b>{{ my_exams_dashboard.status_counts.active }}</b> {% trans "subtitle_active" context "exams.dashboard" %}
           {% endif %}
         </p>
       </div>
-      <div class="tx-head-actions">
-        <a href="{% url 'exams:deleted_exams_list' %}"
-           class="tx-btn tx-btn--ghost"
-           title="{% trans 'trash_link' context 'profile.my_exams' %}">
-          <i class="fas fa-trash-can" aria-hidden="true"></i> {% trans "trash_link" context "profile.my_exams" %}
+      <div class="tx-head-actions ems-header__actions">
+        {% comment %}2026-09-14 (W3 `w3myexams`, sahib: «zibil qutusu yerini düzəlt,
+        daha yaxşı formada»): mətn linki → sayğaclı ikon düyməsi; hədəf ayrıca səhifə
+        deyil, bölmənin öz alt-görünüşüdür (`?exam_view=trash`, AJAX-safe link).{% endcomment %}
+        {% with trash=my_exams_dashboard.trash %}
+        <a href="{{ trash.url }}"
+           class="ems-btn ems-btn--ghost tx-trashbtn{% if trash.is_open %} is-on{% endif %}"
+           data-tx-trash-link
+           title="{% trans 'trash_link' context 'profile.my_exams' %}"
+           {% if trash.is_open %}aria-current="page"{% endif %}>
+          <i class="fas fa-trash-can" aria-hidden="true"></i>
+          <span class="sr-only">{% trans "trash_link" context "profile.my_exams" %}:</span>
+          <span class="tx-trashbtn-n{% if trash.count %} has-items{% endif %}" data-tx-trash-count>{{ trash.count }}</span>
+          <span class="sr-only">{% trans "silinmiş imtahan" context "profile.my_exams.trash" %}</span>
         </a>
+        {% endwith %}
         <button type="button"
-                class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                class="ems-btn ems-btn--primary js-open-exam-form-modal"
                 data-exam-modal-mode="create"
                 data-exam-modal-url="{% url 'exams:create_exam' %}">
           <i class="fas fa-plus" aria-hidden="true"></i> {% trans "new_exam" context "profile.my_exams" %}
@@ -41,6 +54,11 @@
       </div>
     </header>
 
+    {% include "accounts/profile/sections/partials/_my_exams_tabs.html" %}
+
+    {% if my_exams_dashboard.trash.is_open %}
+      {% include "accounts/profile/sections/partials/_my_exams_trash.html" with trash=my_exams_dashboard.trash %}
+    {% else %}
     {% include "accounts/profile/sections/partials/_my_exams_kpis.html" %}
     {% include "accounts/profile/sections/partials/_my_exams_toolbar.html" %}
 
@@ -52,10 +70,11 @@
           {% trans "filter_all" context "exams.dashboard" %}
           <span class="tx-cat-n">{{ my_exams_count }}</span>
         </button>
+        {% comment %}2026-09-12 (audit P2-9): kateqoriya rəngi inline `style` ilə deyil,
+        `is-cat-<key>` modifikatoru ilə (my_exams.css palitrası = EXAM_CATEGORY_META).{% endcomment %}
         {% for cat in my_exams_dashboard.category_filters %}
-        <button type="button" class="tx-cat-chip" data-cat="{{ cat.key }}"
-                style="--cat-color:{{ cat.color }};--cat-soft:{{ cat.soft }};--cat-deep:{{ cat.deep }};">
-          <span class="tx-cat-dot" style="background:{{ cat.color }};"></span>
+        <button type="button" class="tx-cat-chip is-cat-{{ cat.key }}" data-cat="{{ cat.key }}">
+          <span class="tx-cat-dot"></span>
           {{ cat.label }}
           <span class="tx-cat-n">{{ cat.count }}</span>
         </button>
@@ -95,14 +114,14 @@
         {% if my_exams_search_query or my_exams_filter_type %}
           <h3>{% trans "search_empty_title" context "profile.my_exams" %}</h3>
           <p>{% trans "search_empty_description" context "profile.my_exams" %}</p>
-          <a href="{{ profile_base_url }}?section=my-exams" class="tx-btn tx-btn--ghost">
+          <a href="{{ profile_base_url }}?section=my-exams" class="ems-btn">
             <i class="fas fa-times" aria-hidden="true"></i> {% trans "clear_filters" context "profile.my_exams" %}
           </a>
         {% else %}
           <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
           <p>{% trans "empty_description" context "profile.my_exams" %}</p>
           <button type="button"
-                  class="tx-btn tx-btn--primary js-open-exam-form-modal"
+                  class="ems-btn ems-btn--primary js-open-exam-form-modal"
                   data-exam-modal-mode="create"
                   data-exam-modal-url="{% url 'exams:create_exam' %}">
             <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_exam" context "profile.my_exams" %}
@@ -110,6 +129,7 @@
         {% endif %}
       </div>
     {% endif %}
+    {% endif %}{# /trash alt-görünüşü #}
   </div>
 
   {% comment %}
@@ -117,7 +137,7 @@
     SQL aqreqatı ilə hesablanır (bax `_sections/exams.py`), siyahı isə səhifə-
     səhifə gəlir — yəni «Aktiv: 150» yazılır, ekranda 12 kart olsa da.
   {% endcomment %}
-  {% if my_exams_page_obj %}
+  {% if my_exams_page_obj and not my_exams_dashboard.trash.is_open %}
     {% include "partials/_pagination.html" with page_obj=my_exams_page_obj extra_query=my_exams_pagination_query page_param="exam_page" %}
   {% endif %}
 

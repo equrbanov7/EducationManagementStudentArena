@@ -88,6 +88,16 @@ class RegistrarCatalogSectionTest(_OrgUnitsBase):
                     # +1 sətir başlığı (`th scope="row"`), +1 əməllər xanası.
                     self.assertEqual(len(section["columns"]), len(row["cells"]) + 2)
 
+    def test_search_on_a_tab_stays_on_that_tab(self):
+        """Sahib (2026-09-10): «Tələbə təyinatları»nda ad yazanda ekran birinci
+        taba atırdı. Server tərəfdə tab + axtarış BİRLİKDƏ oxunmalıdır (JS
+        tərəfdəki qapı: `test_filter_bar_state_params`)."""
+        section = self._section(rc_tab="students", rc_q="Aysel").context["registrar_catalog_section"]
+        self.assertEqual(section["tab"], "students")
+        self.assertTrue(next(tab for tab in section["tabs"] if tab["key"] == "students")["current"])
+        search_field = next(field for field in section["filter_fields"] if field["name"] == "q")
+        self.assertEqual(search_field["value"], "Aysel")
+
     def test_student_tab_is_read_only_and_points_at_the_registry(self):
         section = self._section(rc_tab="students").context["registrar_catalog_section"]
         self.assertTrue(section["readonly_tab"])

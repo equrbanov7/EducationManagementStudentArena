@@ -313,3 +313,52 @@ def test_resolver_keeps_the_given_unit_when_nothing_maps(world):
     resolved = resolve_syllabus_chair_unit(unit=world["tree"]["faculty"], author=stranger, organization=world["org"])
 
     assert resolved == world["tree"]["faculty"]
+
+
+def test_repair_command_fills_a_null_chair_from_the_author_membership(flat_world):
+    """Köçürülmüş dosyenin `chair_unit`-i BOŞDUR (2026-09-11 halı).
+
+    Klonda 4 926 sillabusun hamısı belə idi — nə ixtisasa, nə kafedraya bağlı —
+    ona görə kafedra süzgəci boş qalır, müdirin növbəsinə heç nə düşmürdü.
+    Əmr əvvəl BOŞ sətri seçmirdi (`exclude(chair_unit=None)`); indi müəllifin
+    kafedra üzvlüyü ilə doldurur, kafedrasız müəllifi isə boş saxlayır.
+    """
+    from io import StringIO
+
+    from django.core.management import call_command
+
+    org = flat_world["org"]
+    offering = make_offering(org, flat_world["stack"], flat_world["teacher"])
+    actor = services.resolve_actor(flat_world["teacher"], org)
+    syllabus, _version = services.create_draft(
+        organization=org,
+        subject=flat_world["stack"]["subject"],
+        period=flat_world["stack"]["period"],
+        actor=actor,
+        offering=offering,
+        program=flat_world["stack"]["program"],
+        chair_unit=offering.group.parent,
+        author=flat_world["teacher"],
+        plan_hours=dict(PLAN_HOURS),
+    )
+    # Köçürmənin buraxdığı vəziyyət: bağ ümumiyyətlə yoxdur.
+    type(syllabus).objects.filter(pk=syllabus.pk).update(chair_unit=None)
+
+    dry = StringIO()
+    call_command("syllabus_repair_chair_units", stdout=dry)
+    syllabus.refresh_from_db()
+    assert syllabus.chair_unit_id is None, "quru icra yazmamalıdır"
+    assert "— boş —" in dry.getvalue()
+
+    call_command("syllabus_repair_chair_units", "--apply", stdout=StringIO())
+    syllabus.refresh_from_db()
+    assert syllabus.chair_unit_id == flat_world["chair"].pk
+
+    # Kafedrasız müəllif → uydurma bağ YOX.
+    orphan = User.objects.create_user("flat_orphan", "flat_orphan@x.test", "pw")
+    type(syllabus).objects.filter(pk=syllabus.pk).update(chair_unit=None, author=orphan)
+    out = StringIO()
+    call_command("syllabus_repair_chair_units", "--apply", stdout=out)
+    syllabus.refresh_from_db()
+    assert syllabus.chair_unit_id is None
+    assert "tapılmayan (toxunulmur): 1" in out.getvalue()

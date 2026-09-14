@@ -83,6 +83,9 @@ def _bare_selects():
             source = _strip_comments(path.read_text(encoding="utf-8"))
             for match in SELECT_TAG_RE.finditer(source):
                 tag = " ".join(match.group(0).split())
+                # `data-bootstrap-select-lazy` (2026-09-14): server hazır toggle
+                # render edir, komponent ilk fokus/klikdə qoşulur (kağız bal
+                # cədvəli — 200 seçici) — eyni komponent, tənbəl qoşulma.
                 if "data-bootstrap-select" in tag or _is_structurally_exempt(tag):
                     continue
                 relative = path.relative_to(BASE_DIR).as_posix()

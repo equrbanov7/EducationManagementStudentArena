@@ -24,6 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return cookieValue;
     }
 
+    // 2026-09-13 audit F-05: server/xəta mesajı innerHTML-ə deyil, textContent-ə yazılır
+    // (hazırda mesajlar sabit/i18n-dir — latent sink bağlanır).
+    function renderAlert(container, message) {
+      container.innerHTML = "";
+      const alert = document.createElement("div");
+      alert.className = "alert alert-danger";
+      alert.textContent = message;
+      container.appendChild(alert);
+    }
+
     function closeModal(modalId) {
       const el = document.getElementById(modalId);
       if (!el) return;
@@ -132,7 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (deleteInProgress) return;
 
-      if (!confirm(gettext("Bu sərbəst işi silmək istədiyinizə əminsiniz?"))) return;
+      // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+      const confirmed = await window.EMSConfirm.open({
+        body: gettext("Bu sərbəst işi silmək istədiyinizə əminsiniz?"),
+        danger: true,
+      });
+      if (!confirmed || deleteInProgress) return;
 
       deleteInProgress = true;
 
@@ -203,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
 
         if (!res.ok || !data.success) {
-          editBody.innerHTML = `<div class="alert alert-danger">${gettext("Xəta:")} ${data.error}</div>`;
+          renderAlert(editBody, `${gettext("Xəta:")} ${data.error}`);
           return;
         }
 
@@ -240,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
       } catch (err) {
-        editBody.innerHTML = `<div class="alert alert-danger">${gettext("Xəta:")} ${err.message}</div>`;
+        renderAlert(editBody, `${gettext("Xəta:")} ${err.message}`);
       }
     });
 

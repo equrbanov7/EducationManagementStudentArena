@@ -155,15 +155,16 @@
                                         {% if q.points > 0 %}{{ q.points }}{% else %}-{% endif %}
                                     </td>
                                     <td class="text-end operation-column">
-                                        <button class="btn btn-sm btn-light text-primary js-edit-question me-1 border rounded-3" 
+                                        {# 2026-09-14 (audit FE-F17): ikon-only düymələrə əlçatan ad #}
+                                        <button class="btn btn-sm btn-light text-primary js-edit-question me-1 border rounded-3" aria-label="{% trans 'action_edit' context 'labs.template.manage_blocks' %}" 
                                                 data-id="{{ q.id }}"
                                                 data-text="{{ q.question_text|escapejs }}"
                                                 data-points="{{ q.points }}"
                                                 data-attachment="{% if q.attachment %}{{ q.attachment.url }}{% endif %}">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit" aria-hidden="true"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-light text-danger js-delete-question border rounded-3" data-id="{{ q.id }}">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="btn btn-sm btn-light text-danger js-delete-question border rounded-3" data-id="{{ q.id }}" aria-label="{% trans 'action_delete' context 'labs.template.manage_blocks' %}">
+                                            <i class="fas fa-trash" aria-hidden="true"></i>
                                         </button>
                                     </td>
                                 </tr>

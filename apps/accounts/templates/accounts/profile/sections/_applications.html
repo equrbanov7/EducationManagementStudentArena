@@ -69,24 +69,17 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
     {% endif %}
   </div>
 
-  {# ── Başlıq + izah (dizayn §4.2 — mətn mənbədən eynilə) ───────────────── #}
-  <div class="apx-head">
-    <div>
-      {% comment %}QA dalğa 2: qabıq eyni başlığı `<h1>` ilə verir → burada `<h2>`.{% endcomment %}
-      <h2 class="apx-head__title">{% trans "Müraciətlər" context "applications" %}</h2>
-      {% if applications_section.is_handler %}
-      <p class="apx-head__intro">{% trans "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz." context "applications" %}</p>
-      {% else %}
-      <p class="apx-head__intro">{% trans "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən." context "applications" %}</p>
-      {% endif %}
-    </div>
-    {% if applications_section.can_create %}
-    <button type="button" class="apx-btn apx-btn--primary" data-apx-open-create>
-      <i class="fas fa-plus" aria-hidden="true"></i>
-      {% trans "Yeni müraciət" context "applications" %}
-    </button>
-    {% endif %}
-  </div>
+  {% comment %}── İzah + «Yeni müraciət» (dizayn §4.2 — mətn mənbədən eynilə) ──
+  2026-09-12 (audit P2-1): qabıq bölmə adını `<h1>` ilə verir; QA dalğa 2-dəki
+  «burada `<h2>`» kompromisi də təkrar idi («Müraciətlərim» + «Müraciətlər»).
+  Başlıq artıq YAZILMIR — izah `ems_ui/_content_header.html` altbaşlığı, düymə
+  isə onun əməl yuvasıdır (`_applications_header_actions.html`).{% endcomment %}
+  {% if applications_section.is_handler %}
+  {% trans "Şöbənizə gələn müraciətlər. Cavab verə, əlavə məlumat istəyə və ya səlahiyyətinizdə olmayan məsələni başqa şöbəyə yönləndirə bilərsiniz — yönləndirdikdən sonra da izləməkdə davam edirsiniz." context "applications" as apx_subtitle %}
+  {% else %}
+  {% trans "Transkript, arayış, qiymətə etiraz, şikayət — hamısı buradan göndərilir. Göndərdikdən sonra müraciətin harada olduğunu, kimin baxdığını və cavabı burada görürsən." context "applications" as apx_subtitle %}
+  {% endif %}
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=apx_subtitle header_actions_include="accounts/profile/sections/_applications_header_actions.html" %}
 
   {# ── KPI kartları (dizayn §4.3) — dəyər/ton JS ilə doldurulur ─────────── #}
   <div class="apx-kpis">

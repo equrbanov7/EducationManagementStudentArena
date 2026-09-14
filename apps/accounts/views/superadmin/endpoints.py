@@ -7,7 +7,8 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
+from django.db import transaction
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -17,6 +18,9 @@ from apps.notifications.models import NotificationType
 from apps.notifications.public import create_notification
 from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
 from apps.organizations.public import ensure_owner_membership
+from core.audit import log_action
+from core.constants import AuditAction
+from core.http_ids import parse_uuid
 
 from .._helpers import (
     _append_query_params,
@@ -88,6 +92,32 @@ def _notify_org_owner_of_approval(org, approved_by, *, approved: bool, reason: s
         )
 
 
+def _audit_org(request, organization, *, action, old_values, new_values, reason=""):
+    """Superadmin təşkilat əməlinin audit izi.
+
+    Backend auditi 2026-09-13, F-04: approve/reject/suspend/unsuspend
+    (``organization.status=`` ×4) və hərf/GPA şkalası (``set_bands`` /
+    ``reset_bands``) heç bir audit yazmırdı — tenant-səviyyəli, bütün
+    qiymətlərə təsir edən parametr «kim, nə vaxt, nəyi» izi olmadan dəyişirdi.
+    Layihə konvensiyası: ``action=AuditAction.UPDATE``, semantik əməl
+    ``changes["action"]``-da (bax ``registrar/handover_actions.py``).
+    """
+    log_action(
+        AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=organization,
+        request=request,
+        resource_type="Organization",
+        resource_id=str(organization.pk),
+        resource_repr=organization.name,
+        old_values=old_values,
+        new_values=new_values,
+        changes={"action": action},
+        reason=reason,
+    )
+
+
 def _notify_superadmins_of_pending_org(org):
     """Notify all superadmin users that a new organization is awaiting approval."""
     try:
@@ -128,7 +158,12 @@ def superadmin_organizations(request):
     fallback_next_url = reverse("accounts:superadmin_organizations")
 
     if request.method == "POST":
-        organization = get_object_or_404(Organization, id=request.POST.get("organization_id"))
+        # Backend auditi 2026-09-13, F-01: ``organization_id="abc"`` UUID pk-da
+        # ValidationError → 500 verirdi; pozuq id = «təşkilat tapılmadı» (404).
+        organization_pk = parse_uuid(request.POST.get("organization_id"))
+        if organization_pk is None:
+            raise Http404
+        organization = get_object_or_404(Organization, id=organization_pk)
         action = request.POST.get("action")
         reason = (request.POST.get("reason") or "").strip()
         next_url = _resolve_next_url(request, fallback_next_url)
@@ -141,10 +176,22 @@ def superadmin_organizations(request):
                     pgettext_lazy("accounts.superadmin_orgs.message", "Bu təşkilat artıq gözləmə vəziyyətində deyil."),
                 )
             else:
-                organization.status = "active"
-                organization.is_active = True
-                organization.save(update_fields=["status", "is_active", "updated_at"])
-                ensure_owner_membership(organization.owner, organization)
+                # F-07: status + sahib üzvlüyü + audit BİR tranzaksiyada
+                # (``ATOMIC_REQUESTS`` söndürülüdür — yarımçıq yazı olmasın).
+                with transaction.atomic():
+                    old_status, old_is_active = organization.status, organization.is_active
+                    organization.status = "active"
+                    organization.is_active = True
+                    organization.save(update_fields=["status", "is_active", "updated_at"])
+                    ensure_owner_membership(organization.owner, organization)
+                    _audit_org(
+                        request,
+                        organization,
+                        action="approve",
+                        old_values={"status": old_status, "is_active": old_is_active},
+                        new_values={"status": "active", "is_active": True},
+                        reason=reason,
+                    )
                 _notify_org_owner_of_approval(organization, request.user, approved=True)
                 messages.success(
                     request,
@@ -166,19 +213,29 @@ def superadmin_organizations(request):
                     ),
                 )
             else:
-                organization.status = "suspended"
-                organization.is_active = False
-                organization.suspended_at = timezone.now()
-                organization.suspension_reason = reason or "Superadmin tərəfindən rədd edildi."
-                organization.save(
-                    update_fields=[
-                        "status",
-                        "is_active",
-                        "suspended_at",
-                        "suspension_reason",
-                        "updated_at",
-                    ]
-                )
+                with transaction.atomic():
+                    old_status = organization.status
+                    organization.status = "suspended"
+                    organization.is_active = False
+                    organization.suspended_at = timezone.now()
+                    organization.suspension_reason = reason or "Superadmin tərəfindən rədd edildi."
+                    organization.save(
+                        update_fields=[
+                            "status",
+                            "is_active",
+                            "suspended_at",
+                            "suspension_reason",
+                            "updated_at",
+                        ]
+                    )
+                    _audit_org(
+                        request,
+                        organization,
+                        action="reject",
+                        old_values={"status": old_status},
+                        new_values={"status": "suspended", "suspension_reason": organization.suspension_reason},
+                        reason=reason,
+                    )
                 _notify_org_owner_of_approval(organization, request.user, approved=False, reason=reason)
                 messages.success(
                     request,
@@ -190,38 +247,58 @@ def superadmin_organizations(request):
                 )
 
         elif action == "suspend":
-            organization.status = "suspended"
-            organization.is_active = False
-            organization.suspended_at = timezone.now()
-            organization.suspension_reason = reason
-            organization.save(
-                update_fields=[
-                    "status",
-                    "is_active",
-                    "suspended_at",
-                    "suspension_reason",
-                    "updated_at",
-                ]
-            )
+            with transaction.atomic():
+                old_status = organization.status
+                organization.status = "suspended"
+                organization.is_active = False
+                organization.suspended_at = timezone.now()
+                organization.suspension_reason = reason
+                organization.save(
+                    update_fields=[
+                        "status",
+                        "is_active",
+                        "suspended_at",
+                        "suspension_reason",
+                        "updated_at",
+                    ]
+                )
+                _audit_org(
+                    request,
+                    organization,
+                    action="suspend",
+                    old_values={"status": old_status},
+                    new_values={"status": "suspended", "suspension_reason": reason},
+                    reason=reason,
+                )
             messages.success(
                 request,
                 pgettext_lazy("accounts.superadmin_orgs.message", "organization_suspended")
                 % {"organization_name": organization.name},
             )
         elif action == "unsuspend":
-            organization.status = "active"
-            organization.is_active = True
-            organization.suspended_at = None
-            organization.suspension_reason = ""
-            organization.save(
-                update_fields=[
-                    "status",
-                    "is_active",
-                    "suspended_at",
-                    "suspension_reason",
-                    "updated_at",
-                ]
-            )
+            with transaction.atomic():
+                old_status = organization.status
+                organization.status = "active"
+                organization.is_active = True
+                organization.suspended_at = None
+                organization.suspension_reason = ""
+                organization.save(
+                    update_fields=[
+                        "status",
+                        "is_active",
+                        "suspended_at",
+                        "suspension_reason",
+                        "updated_at",
+                    ]
+                )
+                _audit_org(
+                    request,
+                    organization,
+                    action="unsuspend",
+                    old_values={"status": old_status},
+                    new_values={"status": "active"},
+                    reason=reason,
+                )
             messages.success(
                 request,
                 pgettext_lazy("accounts.superadmin_orgs.message", "organization_unsuspended")
@@ -229,7 +306,7 @@ def superadmin_organizations(request):
             )
         elif action == "set_cabinet_module":
             # U16 — kabinet modul görünürlüyü (superadmin aç/bağla paneli).
-            from apps.organizations.cabinet_modules import CABINET_MODULES, set_module_enabled
+            from apps.organizations.public import CABINET_MODULES, set_module_enabled
 
             module_key = (request.POST.get("module_key") or "").strip()
             if module_key not in CABINET_MODULES:
@@ -254,11 +331,21 @@ def superadmin_organizations(request):
             messages.success(request, module_msg % {"organization_name": organization.name, "module": module_label})
         elif action == "set_letter_bands":
             # U17 — tenant hərf qiyməti şkalası (hədd:hərf:gpa siyahısı).
-            from apps.registrar import grading_scale
+            from apps.registrar.public import grading_scale
 
             try:
                 bands = grading_scale.parse_bands_text(request.POST.get("letter_bands") or "")
-                grading_scale.set_bands(organization, bands)
+                old_bands = grading_scale.bands_text(organization)
+                with transaction.atomic():
+                    grading_scale.set_bands(organization, bands)
+                    _audit_org(
+                        request,
+                        organization,
+                        action="set_letter_bands",
+                        old_values={"letter_bands": old_bands},
+                        new_values={"letter_bands": grading_scale.bands_text(organization)},
+                        reason=reason,
+                    )
             except ValueError as exc:
                 bands_err = pgettext_lazy("accounts.superadmin_orgs.message", "Hərf şkalası qəbul edilmədi: %(error)s")
                 messages.error(request, bands_err % {"error": exc})
@@ -270,9 +357,19 @@ def superadmin_organizations(request):
             messages.success(request, bands_ok % {"organization_name": organization.name})
         elif action == "reset_letter_bands":
             # U17 — şkalanı AZ Boloniya default-una qaytar.
-            from apps.registrar import grading_scale
+            from apps.registrar.public import grading_scale
 
-            grading_scale.reset_bands(organization)
+            old_bands = grading_scale.bands_text(organization)
+            with transaction.atomic():
+                grading_scale.reset_bands(organization)
+                _audit_org(
+                    request,
+                    organization,
+                    action="reset_letter_bands",
+                    old_values={"letter_bands": old_bands},
+                    new_values={"letter_bands": grading_scale.bands_text(organization)},
+                    reason=reason,
+                )
             bands_reset = pgettext_lazy(
                 "accounts.superadmin_orgs.message",
                 '"%(organization_name)s" üçün hərf qiyməti şkalası default-a qaytarıldı.',

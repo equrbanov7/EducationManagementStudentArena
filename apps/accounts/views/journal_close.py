@@ -26,9 +26,9 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import pgettext
 
 from apps.accounts.forms.journal_close import JournalCloseActionForm, JournalCloseNoticeForm
-from apps.registrar import journal_close as journal_close_service
-from apps.registrar import journal_scope
 from apps.registrar.models import JournalCloseNotice
+from apps.registrar.public import journal_close as journal_close_service
+from apps.registrar.public import journal_scope
 from core.audit import log_action
 from core.constants import AuditAction
 

@@ -38,6 +38,7 @@ from apps.accounts.services.rim import (
 )
 from apps.accounts.services.rim.profile_edit import EDITABLE_FIELDS
 from core.logging_utils import safe_log_value
+from core.write_rate_limit import score_write_rate_limited
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +114,7 @@ def _target_error(actor, user_id) -> JsonResponse:
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("rim_action")  # F-15 (2026-09-14)
 def rim_action(request):
     """RİM əməliyyatlarının vahid giriş nöqtəsi."""
     actor = resolve_actor(request)

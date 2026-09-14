@@ -24,7 +24,7 @@
         <div class="section-card">
             <form method="get" class="search-form">
                 <input type="text" name="search" value="{{ search_query }}" placeholder="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}" class="form-control" aria-label="{% trans 'search_placeholder' context 'accounts.assigned_exams_page' %}">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                <button type="submit" class="btn btn-primary" aria-label="{% trans 'Axtar' context 'search' %}"><i class="fas fa-search" aria-hidden="true"></i></button>
             </form>
         </div>
 
@@ -77,8 +77,8 @@
      data-i18n-code-required="{% trans 'access_code_required' context 'exams.model.access' %}"
      data-i18n-start-failed="{% trans 'exam_start_failed' context 'exams.view.access.message' %}">
     <div class="exam-code-modal">
-        <button type="button" class="exam-code-close-btn" data-close-exam-code-modal>
-            <i class="fas fa-times"></i>
+        <button type="button" class="exam-code-close-btn" data-close-exam-code-modal aria-label="{% trans 'Bağla' context 'ui.dialog' %}">
+            <i class="fas fa-times" aria-hidden="true"></i>
         </button>
 
         <div class="exam-code-icon"><i class="fas fa-lock"></i></div>

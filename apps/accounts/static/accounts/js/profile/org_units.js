@@ -375,25 +375,34 @@
             return;
         }
         var confirmText = fmt(t(host, "confirm"), [btn.getAttribute("data-name"), btn.getAttribute("data-role-label")]);
-        if (confirmText && !window.confirm(confirmText)) {
+        function proceed() {
+            btn.disabled = true;
+            window.EMSTeachingOffice
+                .post(section.getAttribute("data-tof-action-url"), {
+                    action: "remove_role",
+                    id: state.unitId,
+                    membership: btn.getAttribute("data-membership") || ""
+                }, null)
+                .then(function (payload) {
+                    state.dirty = true;
+                    toast(payload && payload.message, "success");
+                    load(host);
+                })
+                .catch(function (err) {
+                    btn.disabled = false;
+                    showError(host, (err && err.payload && err.payload.message) || t(host, "error"));
+                });
+        }
+        if (!confirmText) {
+            proceed();
             return;
         }
-        btn.disabled = true;
-        window.EMSTeachingOffice
-            .post(section.getAttribute("data-tof-action-url"), {
-                action: "remove_role",
-                id: state.unitId,
-                membership: btn.getAttribute("data-membership") || ""
-            }, null)
-            .then(function (payload) {
-                state.dirty = true;
-                toast(payload && payload.message, "success");
-                load(host);
-            })
-            .catch(function (err) {
-                btn.disabled = false;
-                showError(host, (err && err.payload && err.payload.message) || t(host, "error"));
-            });
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: confirmText, danger: true }).then(function (ok) {
+            if (ok) {
+                proceed();
+            }
+        });
     });
 
     // Çekmecə bağlananda təyinat dəyişibsə cədvəl/KPI yenilənir.

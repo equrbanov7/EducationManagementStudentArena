@@ -13,6 +13,10 @@
 
     var Render = (window.EMSWorkloadRender = window.EMSWorkloadRender || {});
 
+    // 2026-09-13 frontend auditi F7: AZ literallar `gettext()`-ə keçirildi
+    // (JavaScriptCatalog `base.html`-dədir; fallback msgid-in özüdür).
+    var gettext = window.gettext || function (value) { return value; };
+
     function esc(value) {
         var node = document.createElement("span");
         node.textContent = value == null ? "" : String(value);
@@ -28,7 +32,7 @@
     function activityBlock(row, labels) {
         var keys = Object.keys(row.activities || {});
         if (!keys.length) {
-            return '<p class="wl-act__numbers">Bu sətirdə bölünəcək saat yoxdur.</p>';
+            return '<p class="wl-act__numbers">' + esc(gettext("Bu sətirdə bölünəcək saat yoxdur.")) + "</p>";
         }
         return keys
             .map(function (key) {
@@ -53,7 +57,7 @@
                     esc(row.id) +
                     '" data-activity="' +
                     esc(key) +
-                    '">Bölüşdür</button>' +
+                    '">' + esc(gettext("Bölüşdür")) + "</button>" +
                     "</div>"
                 );
             })
@@ -76,7 +80,7 @@
                         " · " +
                         item.hours +
                         "s" +
-                        '<button type="button" class="wl-assign-chip__remove" aria-label="Bölgünü sil"' +
+                        '<button type="button" class="wl-assign-chip__remove" aria-label="' + esc(gettext("Bölgünü sil")) + '"' +
                         ' data-wl-assign-remove data-assignment-id="' +
                         esc(item.id) +
                         '">&times;</button>' +
@@ -107,7 +111,7 @@
                     '<div class="wl-row__actions">' +
                     '<button type="button" class="wl-btn wl-btn--ghost" data-wl-row-edit data-row-id="' +
                     esc(row.id) +
-                    '">Redaktə</button>' +
+                    '">' + esc(gettext("Redaktə")) + "</button>" +
                     '<button type="button" class="wl-btn wl-btn--danger" data-wl-row-remove data-row-id="' +
                     esc(row.id) +
                     '">Sil</button>' +
@@ -136,7 +140,7 @@
     Render.teachers = function renderTeachers(host, cards) {
         if (!host) return;
         if (!cards || !cards.length) {
-            host.innerHTML = '<p class="wl-teacher__numbers">Hələ bölgü yoxdur.</p>';
+            host.innerHTML = '<p class="wl-teacher__numbers">' + esc(gettext("Hələ bölgü yoxdur.")) + "</p>";
             return;
         }
         host.innerHTML = cards
@@ -172,16 +176,16 @@
             return;
         }
         host.innerHTML =
-            '<div class="wl-confirm__stat"><span>Sətir</span><b>' +
+            '<div class="wl-confirm__stat"><span>' + esc(gettext("Sətir")) + "</span><b>" +
             readiness.row_count +
             "</b></div>" +
-            '<div class="wl-confirm__stat"><span>Jurnal açılışı</span><b>' +
+            '<div class="wl-confirm__stat"><span>' + esc(gettext("Jurnal açılışı")) + "</span><b>" +
             readiness.sync_candidates +
             "</b></div>" +
             '<div class="wl-confirm__stat"><span>Vakant saat</span><b>' +
             readiness.vacant_hours +
             "</b></div>" +
-            '<div class="wl-confirm__stat"><span>Yarımçıq sətir</span><b>' +
+            '<div class="wl-confirm__stat"><span>' + esc(gettext("Yarımçıq sətir")) + "</span><b>" +
             (readiness.incomplete_rows || []).length +
             "</b></div>";
     };

@@ -3,17 +3,12 @@
 <section class="profile-section-panel profile-section--create-post {% if active_section == 'create-post' %}is-active{% endif %}"
          data-profile-section-panel="create-post"
          data-source-url="{% url 'create_post' %}">
+    {% comment %}2026-09-12 (audit P2-1): bölmə adı qabıqdan (`#profileSectionTitle`)
+    gəlir — köhnə `.section-title` eyni «Yeni post yarat» yazısını İKİNCİ dəfə göstərirdi.
+    İzah `ems_ui/_content_header.html` altbaşlığı ilə verilir.{% endcomment %}
+    {% trans "create_post_description" context "profile.shortcut" as cp_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=cp_subtitle %}
     <div class="section-card profile-posts-card profile-create-post-card" data-create-post-form-container>
-        <div class="section-title">
-            <i class="fas fa-plus-circle"></i>
-            {% trans "create_post" context "profile.section" %}
-        </div>
-
-        <p class="settings-note">
-            <i class="fas fa-circle-info"></i>
-            {% trans "create_post_description" context "profile.shortcut" %}
-        </p>
-
         <div id="createFormError" class="create-form-error" hidden></div>
 
         {% if posting_blocked %}

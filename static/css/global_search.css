@@ -1,4 +1,12 @@
-/* Global ⌘K search (U8) — command-palette overlay. WCU blue theme, tokens only. */
+/* ==========================================================================
+   global_search.css — qlobal ⌘K axtarışı (əmr paleti) + başlıqdakı açar düymə.
+   Rənglər yalnız `--ems-*` tokenlərindən (bax static/css/design-tokens.css).
+   Davranış: static/js/global_search.js. Şablon: templates/partials/_global_search.html
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   1. Örtük (overlay)
+   ────────────────────────────────────────────────────────────────────────── */
 
 .gsearch {
     position: fixed;
@@ -7,180 +15,556 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 10vh 1rem 1rem;
+    /* Panel gözün təbii baxdığı yüksəklikdə açılsın — ekranın ortasından yuxarı. */
+    padding: clamp(56px, 12vh, 140px) 16px 16px;
 }
-.gsearch[hidden] { display: none; }
+
+.gsearch[hidden] {
+    display: none;
+}
 
 .gsearch__backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.55);
-    backdrop-filter: blur(2px);
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    animation: gsearch-fade 0.16s ease-out;
 }
-body.gsearch-open { overflow: hidden; }
+
+body.gsearch-open {
+    overflow: hidden;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   2. Panel
+   ────────────────────────────────────────────────────────────────────────── */
 
 .gsearch__panel {
     position: relative;
-    width: 100%;
-    max-width: 620px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-    overflow: hidden;
     display: flex;
     flex-direction: column;
-    max-height: 70vh;
-    animation: gsearch-in 0.14s ease-out;
+    width: 100%;
+    max-width: 640px;
+    max-height: min(72vh, 620px);
+    overflow: hidden;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 18px;
+    box-shadow:
+        0 2px 6px rgba(15, 23, 42, 0.06),
+        0 28px 70px -20px rgba(15, 23, 42, 0.42);
+    animation: gsearch-in 0.16s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
+
 @keyframes gsearch-in {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-10px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+@keyframes gsearch-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   3. Sorğu sətri
+   ────────────────────────────────────────────────────────────────────────── */
 
 .gsearch__input-wrap {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.9rem 1.1rem;
+    gap: 12px;
+    flex: 0 0 auto;
+    height: 60px;
+    padding: 0 14px 0 18px;
     border-bottom: 1px solid var(--ems-neutral-200);
 }
-.gsearch__input-icon { color: var(--ems-primary-500); font-size: 1rem; }
+
+.gsearch__input-icon {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    color: var(--ems-neutral-400);
+    transition: color 0.15s ease;
+}
+
+.gsearch:not([hidden]) .gsearch__input-wrap:focus-within .gsearch__input-icon {
+    color: var(--ems-primary-600);
+}
+
 .gsearch__input {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
     border: none;
     outline: none;
-    font-size: 1.05rem;
-    color: var(--ems-neutral-900);
     background: transparent;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--ems-neutral-900);
 }
-.gsearch__input::placeholder { color: var(--ems-neutral-500); }
-.gsearch__esc {
-    font-size: 0.68rem;
-    color: var(--ems-neutral-500);
+
+.gsearch__input::placeholder {
+    color: var(--ems-neutral-400);
+    font-weight: 400;
+}
+
+/* Qlobal fokus halqası (ems_components.css) burada mavi «daxili çərçivə» kimi
+   görünürdü. Panel açılan kimi fokus onsuz da bu inputdadır — fokus əlaməti
+   sətrin ÖZÜNDƏ verilir (ikon + alt sərhəd rəngi), input-un içində deyil. */
+.gsearch__input:focus,
+.gsearch__input:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.gsearch__input-wrap:focus-within {
+    border-bottom-color: var(--ems-primary-200);
+}
+
+/* Təmizlə (×) — yalnız mətn olanda görünür (JS `hidden` atributu ilə). */
+.gsearch__clear {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
     background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.gsearch__clear:hover {
+    background: var(--ems-neutral-200);
+    color: var(--ems-neutral-800);
+}
+
+.gsearch__esc {
+    flex: 0 0 auto;
+    padding: 3px 8px;
     border: 1px solid var(--ems-neutral-200);
-    border-radius: 6px;
-    padding: 2px 7px;
+    border-radius: 7px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.gsearch__esc:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.gsearch__clear:focus-visible,
+.gsearch__esc:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4. Gövdə — nəticələr / skelet / boş vəziyyət
+   ────────────────────────────────────────────────────────────────────────── */
+
+.gsearch__body {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .gsearch__results {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
-    padding: 0.4rem 0.5rem;
+    overscroll-behavior: contain;
+    padding: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ems-neutral-300) transparent;
+    transition: opacity 0.15s ease;
 }
-.gsearch__group { margin-bottom: 0.35rem; }
+
+/* Yeni sorğu gedərkən köhnə nəticələr silinmir, sadəcə solur — panel
+   hər hərfdə «sıçramır», amma məlumatın köhnə olduğu bilinir. */
+.gsearch__results--busy {
+    opacity: 0.5;
+}
+
+.gsearch__results::-webkit-scrollbar {
+    width: 10px;
+}
+
+.gsearch__results::-webkit-scrollbar-thumb {
+    border: 3px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+    background-color: var(--ems-neutral-300);
+}
+
+.gsearch__group + .gsearch__group {
+    margin-top: 2px;
+}
+
+/* Qrup başlığı yapışqandır: uzun siyahıda sürüşdürəndə hansı bölmədə olduğun itmir. */
 .gsearch__group-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 10px 12px 6px;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-500);
-    padding: 0.5rem 0.7rem 0.25rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
 }
+
 .gsearch__item {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.55rem 0.7rem;
-    border-radius: 10px;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 12px;
     color: var(--ems-neutral-800);
     text-decoration: none;
     cursor: pointer;
+    scroll-margin: 44px 0 8px;
 }
+
 .gsearch__item.is-active {
     background: var(--ems-primary-50);
     color: var(--ems-primary-700);
 }
+
+/* Seçilmiş sətrin sol kənarında aydın vurğu zolağı. */
+.gsearch__item.is-active::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 0;
+    width: 3px;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+}
+
 .gsearch__item-icon {
-    width: 32px;
-    height: 32px;
-    flex: 0 0 32px;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--ems-neutral-100);
-    color: var(--ems-primary-600);
+    color: var(--ems-neutral-600);
     font-size: 0.85rem;
+    transition: background 0.12s ease, color 0.12s ease;
 }
+
 .gsearch__item.is-active .gsearch__item-icon {
     background: var(--ems-primary-100);
     color: var(--ems-primary-700);
 }
-.gsearch__item-body { display: flex; flex-direction: column; min-width: 0; }
+
+.gsearch__item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
 .gsearch__item-title {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     font-weight: 600;
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .gsearch__item-subtitle {
     font-size: 0.76rem;
+    line-height: 1.35;
     color: var(--ems-neutral-500);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.gsearch__item.is-active .gsearch__item-subtitle {
+    color: var(--ems-primary-700);
+    opacity: 0.85;
+}
+
+/* Sorğuya uyğun gələn hissə — fon yox, yalnız qalın rəng (sətir səliqəli qalsın). */
+.gsearch__mark {
+    background: none;
+    padding: 0;
+    color: var(--ems-primary-700);
+    font-weight: 700;
+}
+
+.gsearch__item.is-active .gsearch__mark {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Aktiv sətirdə «↵» nişanı — Enter-in nə edəcəyi göz önündə olsun. */
+.gsearch__item-enter {
+    flex: 0 0 auto;
+    display: none;
+    padding: 2px 7px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 6px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-primary-700);
+    font-size: 0.7rem;
+    line-height: 1.2;
+}
+
+.gsearch__item.is-active .gsearch__item-enter {
+    display: inline-block;
+}
+
+/* ── Yüklənmə skeleti ─────────────────────────────────────────────────────── */
+
+.gsearch__loading {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 18px 24px;
+}
+
+.gsearch__loading[hidden] {
+    display: none;
+}
+
+.gsearch__skeleton-row {
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(
+        90deg,
+        var(--ems-neutral-100) 25%,
+        var(--ems-neutral-200) 37%,
+        var(--ems-neutral-100) 63%
+    );
+    background-size: 400% 100%;
+    animation: gsearch-shimmer 1.2s ease-in-out infinite;
+}
+
+.gsearch__skeleton-row:nth-child(2) { width: 88%; }
+.gsearch__skeleton-row:nth-child(3) { width: 66%; }
+
+@keyframes gsearch-shimmer {
+    from { background-position: 100% 50%; }
+    to   { background-position: 0 50%; }
+}
+
+/* ── Boş vəziyyət ─────────────────────────────────────────────────────────── */
+
 .gsearch__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 40px 24px 46px;
     text-align: center;
-    padding: 2.2rem 1rem;
+}
+
+.gsearch__empty[hidden] {
+    display: none;
+}
+
+.gsearch__empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 6px;
+    border-radius: 50%;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-400);
+    font-size: 1.15rem;
+}
+
+.gsearch__empty-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.gsearch__empty-hint {
+    margin: 0;
+    max-width: 34ch;
+    font-size: 0.82rem;
+    line-height: 1.45;
     color: var(--ems-neutral-500);
 }
-.gsearch__empty i { font-size: 1.6rem; margin-bottom: 0.5rem; color: var(--ems-neutral-500); }
-.gsearch__empty p { margin: 0; font-size: 0.9rem; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   5. Altlıq — klaviatura ipucları
+   ────────────────────────────────────────────────────────────────────────── */
+
+.gsearch__status {
+    margin: 0;
+}
 
 .gsearch__footer {
     display: flex;
-    gap: 1.1rem;
-    padding: 0.6rem 1.1rem;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    flex: 0 0 auto;
+    padding: 10px 18px;
     border-top: 1px solid var(--ems-neutral-200);
     background: var(--ems-neutral-50);
     font-size: 0.74rem;
     color: var(--ems-neutral-500);
 }
-.gsearch__footer kbd {
-    font-size: 0.7rem;
-    background: #fff;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 5px;
-    padding: 1px 5px;
-    margin-right: 2px;
-    color: var(--ems-neutral-600);
+
+.gsearch__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
 }
 
-/* ── Navbar trigger button ────────────────────────────────────────────────── */
+.gsearch__footer kbd {
+    min-width: 18px;
+    padding: 1px 5px;
+    border: 1px solid var(--ems-neutral-300);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-600);
+    font-size: 0.7rem;
+    font-family: inherit;
+    line-height: 1.4;
+    text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   6. Başlıqdakı açar düymə
+   ────────────────────────────────────────────────────────────────────────── */
+
 .blog-header__search {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.7rem;
-    background: var(--ems-neutral-100);
+    gap: 10px;
+    padding: 0 10px;
     border: 1px solid var(--ems-neutral-200);
-    border-radius: 10px;
-    color: var(--ems-neutral-600);
+    border-radius: 12px;
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
+    font-size: 0.9rem;
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
+
 .blog-header__search:hover {
     border-color: var(--ems-primary-200);
     background: var(--ems-primary-50);
     color: var(--ems-primary-700);
 }
+
+.blog-header__search-icon {
+    flex: 0 0 auto;
+    font-size: 0.9rem;
+}
+
 .blog-header__search-hint {
+    flex: 0 0 auto;
     display: inline-flex;
-    gap: 2px;
+    gap: 3px;
 }
+
 .blog-header__search-hint kbd {
-    font-size: 0.68rem;
-    background: #fff;
+    min-width: 17px;
+    padding: 1px 4px;
     border: 1px solid var(--ems-neutral-300);
-    border-radius: 4px;
-    padding: 0 4px;
+    border-radius: 5px;
+    background: var(--ems-neutral-0);
     color: var(--ems-neutral-500);
+    font-size: 0.66rem;
+    font-family: inherit;
+    line-height: 1.4;
+    text-align: center;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   7. Adaptivlik və hərəkət tərcihi
+   ────────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
-    .blog-header__search-hint { display: none; }
-    .blog-header__search { padding: 0.4rem 0.55rem; }
+    .blog-header__search-hint {
+        display: none;
+    }
+    .blog-header__search {
+        width: 40px;
+        justify-content: center;
+        padding: 0;
+    }
+
+    /* Mobil: panel demək olar tam ekran — barmaqla rahat, sətirlər geniş. */
+    .gsearch {
+        padding: 8px 8px 0;
+        align-items: stretch;
+    }
+    .gsearch__panel {
+        max-width: none;
+        max-height: calc(100dvh - 16px);
+        border-radius: 16px;
+    }
+    .gsearch__input-wrap {
+        height: 54px;
+        padding-left: 14px;
+    }
+    .gsearch__input {
+        /* 16px-dən kiçik olsa iOS səhifəni yaxınlaşdırır. */
+        font-size: 1rem;
+    }
+    .gsearch__esc {
+        display: none;
+    }
+    .gsearch__item {
+        padding: 11px 12px;
+    }
+    /* Klaviatura ipuçları toxunma cihazında mənasızdır. */
+    .gsearch__footer {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gsearch__panel,
+    .gsearch__backdrop {
+        animation: none !important;
+    }
+    .gsearch__skeleton-row {
+        animation: none !important;
+        background: var(--ems-neutral-100);
+    }
+    .gsearch__item,
+    .gsearch__item-icon,
+    .gsearch__clear,
+    .gsearch__esc,
+    .blog-header__search {
+        transition: none !important;
+    }
 }

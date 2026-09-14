@@ -16,9 +16,8 @@ from django.http import Http404, HttpResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.exams.views.shared.tenant import get_active_organization
-from apps.organizations.group_actions import _visible_group
-from apps.organizations.groups_registry import can_view_groups, group_scope
+from apps.organizations.public import can_view_groups, group_scope, visible_group
+from core.tenancy import get_request_organization
 
 from . import individual_plan
 
@@ -27,13 +26,13 @@ from . import individual_plan
 @login_required
 @require_GET
 def group_individual_plan(request, group_id):
-    organization = get_active_organization(request)
+    organization = get_request_organization(request)
     if organization is None or not can_view_groups(request):
         raise Http404
     scope = group_scope(request, organization)
     if not scope.has_structure_access:
         raise Http404
-    group = _visible_group(organization, scope, str(group_id), include_archived=True)
+    group = visible_group(organization, scope, str(group_id), include_archived=True)
     if group is None:
         raise Http404
 

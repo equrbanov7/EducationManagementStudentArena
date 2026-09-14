@@ -78,7 +78,7 @@ def journal_list_context(user, request=None) -> dict:
     2026-09-05 P2-18 — bax :mod:`apps.registrar.journal_list_query`): əvvəllər
     BÜTÜN offering-lər (11 124-ə qədər) model instansiyası kimi yüklənib
     Python-da süzülürdü (İKT rəhbəri görünüşündə 1.96 s / 32 sorğu)."""
-    from django.db.models import Count, Q
+    from django.db.models import Q
 
     from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_list_query as jlq
@@ -97,25 +97,25 @@ def journal_list_context(user, request=None) -> dict:
     can_roster = bool(
         request is not None and organization is not None and guest_roster.can_manage_roster(user, organization)
     )
+    # `journal.view` (audit F-06, 2026-09-14): əhatəli YALNIZ-OXU jurnallar siyahıya da düşür.
+    view_q = journal_scope.journal_view_q(user, organization) if organization is not None else None
     if can_correct and organization is not None:
         base_qs = base_qs.filter(organization=organization)
         is_broad = True
-    elif can_roster:
+    elif can_roster or view_q is not None:
         # Əhatə üzrə görünən jurnallar YALNIZ aktiv cari dövrdən gəlir: köçürülmüş
         # tarixi semestrlərin jurnalı koordinatorun siyahısında ÇIXMAMALIDIR (əks
         # halda düymə oradadır və köhnə transkript dəyişər — bax guest_roster.
         # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
         # tarixçəsi dövr süzgəcindən keçmir.
-        scoped_groups = guest_roster.scoped_group_queryset(user, organization)
-        rosterable = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True)
-        base_qs = base_qs.filter(organization=organization).filter(Q(instructor=user) | rosterable)
+        scoped_groups = guest_roster.scoped_group_queryset(user, organization) if can_roster else []
+        visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | Q(instructor=user)
+        base_qs = base_qs.filter(organization=organization).filter(visible | (view_q or Q(pk__in=[])))
         is_broad = True
     else:
-        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir
-        # (bax apps/registrar/handover.is_handover_observer). Siyahıda sətir
-        # olmasaydı, ona gedən yeganə keçid itərdi və «bal yazan mən idim, indi
-        # görə bilmirəm» vəziyyəti yaranardı. Yazma hüququ onsuz da
-        # `is_direct_editor`-dədir və təhvildən sonra False-dur.
+        # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir (bax
+        # apps/registrar/handover.is_handover_observer) — siyahıda sətir olmasaydı, ona gedən
+        # yeganə keçid itərdi. Yazma hüququ `is_direct_editor`-dədir, təhvildən sonra False.
         from apps.registrar.handover import observer_offering_ids
 
         observed = observer_offering_ids(user, organization) if organization is not None else set()
@@ -220,9 +220,10 @@ def journal_list_context(user, request=None) -> dict:
     # səhifələnəndə (bu P2-18 düzəlişi) isə sorğu planı dəyişəndə fərqli ola
     # bilərdi (sətir təkrarı/itməsi riski). `pk` yalnız bu NİZAMSIZ hallarda
     # işə düşür — elan olunmuş iki açarın (dövr, fənn kodu) sırasını DƏYİŞMİR.
-    qs = qs.annotate(student_count=Count("enrollments", filter=Q(enrollments__status="enrolled"))).order_by(
-        "-period__start_date", "subject__code", "pk"
-    )
+    # Perf auditi 2026-09-13 F-14: `student_count` annotasiyası paginasiyadan
+    # ƏVVƏL idi (org-geniş: 150k enrollment JOIN + 11 115 GROUP BY, sonra LIMIT 20
+    # — 296 ms; COUNT da eyni JOIN ilə) → indi yalnız səhifənin açılışları üçün.
+    qs = qs.order_by("-period__start_date", "subject__code", "pk")
 
     def _sel_label(choices, val, *, kind=""):
         """Seçilmiş dəyərin ADI — əvvəl hazır siyahıdan, tapılmasa BAZADAN.
@@ -260,10 +261,14 @@ def journal_list_context(user, request=None) -> dict:
     paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
+    page_offerings = page_obj.object_list = list(page_obj.object_list)  # F-14: say yalnız səhifə üçün
+    counts_map = _offering_student_counts(page_offerings)
+    for offering in page_offerings:
+        offering.student_count = counts_map.get(offering.pk, 0)
     # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
-    attach_kind_labels(page_obj.object_list, selected_kind)
+    attach_kind_labels(page_offerings, selected_kind)
     querystring = ""
     if request is not None:
         params = request.GET.copy()
@@ -271,7 +276,7 @@ def journal_list_context(user, request=None) -> dict:
         querystring = params.urlencode()
 
     return {
-        "offerings": list(page_obj),
+        "offerings": page_offerings,
         "page_obj": page_obj,
         "is_paginated": page_obj.has_other_pages(),
         "row_offset": row_offset,
@@ -367,6 +372,26 @@ def _has_active_student_membership(organization, user) -> bool:
 
 
 STUDENT_FAMILY_ROLE_NAMES = ("student", "lead_student", "alumni")
+
+
+def is_student_family_user(organization, user) -> bool:
+    """Tələbə ailəsindəndirmi — bu orqda; org yoxdursa İSTƏNİLƏN aktiv orqda.
+
+    2026-09-12 (sahib: «tələbə ancaq özünə aid jurnalı görsün»): org konteksti
+    itəndə `_has_active_student_membership(None, user)` False verirdi və tələbə
+    MÜƏLLİM qrup siyahısına (`journal_list_context`) düşürdü. Üzvlük
+    `bypass_rls` ilə oxunur — tenant konteksti məhz itmiş ola bilər; sorğu
+    `user` ilə süzülür, kirayəçi sızması yoxdur.
+    """
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if organization is not None:
+        return _has_active_student_membership(organization, user)
+    from core.rls import bypass_rls
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    with bypass_rls():
+        return Membership.objects.filter(user=user, is_active=True, role__name__in=STUDENT_FAMILY_ROLE_NAMES).exists()
 
 
 def schedule_context(request, organization, *, embedded=False) -> dict:

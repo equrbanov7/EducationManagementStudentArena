@@ -172,7 +172,20 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         ordering = ["date", "created_at"]
         verbose_name = pgettext_lazy("registrar.model.lesson.meta", "lesson")
         verbose_name_plural = pgettext_lazy("registrar.model.lesson.meta", "lessons")
-        indexes = [models.Index(fields=["organization", "offering", "date"])]
+        indexes = [
+            models.Index(fields=["organization", "offering", "date"]),
+            # Perf auditi 2026-09-13 §6 Q3/Q5/Q8 (2026-09-14): dövr üzrə seçimlər
+            # (`lessons-log`, açılış/fənn DISTINCT-ləri) `(organization, date)`
+            # aralığı ilə gəlir — mövcud `(organization, offering, date)` bu
+            # şərti örtmür (klonda 305 k sətirdə Parallel Seq Scan, 141 ms).
+            # INCLUDE (offering, hours): siyahı/`SUM(hours)` sorğuları index-only.
+            # Miqrasiya 0076 `CREATE INDEX CONCURRENTLY` ilə qurur.
+            models.Index(
+                fields=["organization", "date"],
+                include=["offering", "hours"],
+                name="registrar_lesson_org_date_idx",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.offering_id} · {self.date} ({self.kind})"
@@ -505,10 +518,31 @@ class FinalGrade(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
 
     objects = models.Manager()
 
+    #: Yekun imtahan balının sxem tavanı — Boloniya 50/50 bölgüsü
+    #: (``finals.exam_score_max`` = 100 − ``entry_score_max``, bütün sxemlərdə 50).
+    EXAM_SCORE_MAX = 50
+
     class Meta:
         verbose_name = pgettext_lazy("registrar.model.final.meta", "final grade")
         verbose_name_plural = pgettext_lazy("registrar.model.final.meta", "final grades")
         indexes = [models.Index(fields=["organization", "enrollment"])]
+        constraints = [
+            # 2026-09-13 məlumat auditi, F1 (P1): klonda 349 sətir ``exam_score`` > 50
+            # (max 89) — legacy mənbədə «imtahan» sütununa yekun bal yazılıb; yeni
+            # daxil etmə ``finals.set_exam_score`` ``_clamp`` ilə qorunsa da DB-də
+            # CHECK yox idi. Miqrasiya 0075 bunu ``NOT VALID`` əlavə edir: köhnə
+            # sətirlər miqrasiyanı dayandırmır, YENİ yazı/yeniləmə isə rədd olunur.
+            # Orkestrator qərarı (2026-09-13): tavan 50 deyil 100-dür — legacy J-V2
+            # qaydası (`rehearsal_journal_finals_phase.write_exam_score`) >50 dəyəri
+            # OLDUĞU KİMİ yazıb `legacy_journal_exam_score_above_scheme` ilə
+            # işarələyir; 50-lik CHECK həmin fazanı və 349 legacy sətrin
+            # yenidən yazılmasını dayandırardı. Yeni yazı yolu onsuz da
+            # `_clamp` ilə 50-dədir; DB CHECK yalnız zibil (mənfi / >100) tutur.
+            models.CheckConstraint(
+                condition=models.Q(exam_score__isnull=True) | models.Q(exam_score__gte=0, exam_score__lte=100),
+                name="registrar_finalgrade_exam_score_range",
+            ),
+        ]
 
     def __str__(self):
         return f"final<{self.enrollment_id}> exam={self.exam_score}"
@@ -521,7 +555,10 @@ class ResitRecord(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel)
     result is recomputed with it in place of the original exam score."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="resits")
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="resit_records")
+    # `db_index=False`: `uniq_resit_per_enrollment` unikal indeksi eyni sütunu
+    # onsuz da örtür — FK-nın avtomatik indeksi dublikat idi (data auditi
+    # 2026-09-13 §6.2; miqrasiya 0076 `DROP INDEX CONCURRENTLY`).
+    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="resit_records", db_index=False)
     reason = models.CharField(max_length=12, choices=ResitReason.choices)
     status = models.CharField(max_length=12, choices=ResitStatus.choices, default=ResitStatus.ELIGIBLE)
     resit_score = models.DecimalField(

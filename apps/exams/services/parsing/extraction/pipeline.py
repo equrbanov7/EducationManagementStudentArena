@@ -58,9 +58,12 @@ def _geometry_mcq_text(uploaded_file) -> str:
 
 def extract_text_from_upload(uploaded_file) -> str:
     """
-    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .pdf, .png, .jpg.
-    DOCX/DOC qəsdən dəstəklənmir — makro/embed riski və qeyri-stabil parse
-    nəticələri səbəbindən sual importu üçün bağlıdır (ayrıca error mesajı verilir).
+    Yüklənmiş fayldan mətn çıxarır. Dəstəklənən formatlar: .txt, .pdf, .png, .jpg, .docx.
+    W3 2026-09-14: `.docx` (makrosuz Word) yenidən açıldı — ZIP/makro/xarici
+    əlaqə yoxlamaları ilə (`parsing/docx_reader.py`); düsturlar OMML→LaTeX
+    mətn kimi qalır. Bu funksiya YALNIZ mətn qaytarır — DOCX şəkilləri
+    `visual_import_upload.try_visual_import` (stash bundle) ilə bağlanır.
+    `.doc/.docm/.dotm/.rtf` hələ də rədd edilir (makro/OLE riski).
     Çoxsaylı təhlükəsizlik yoxlamaları ilə birlikdə:
       - Ölçü limiti (default 45MB, settings.EXAM_UPLOAD_MAX_BYTES)
       - Faktiki magic bytes (uzantı saxtalaşdırıla bilər)
@@ -81,9 +84,18 @@ def extract_text_from_upload(uploaded_file) -> str:
     # 1) Ölçü limiti
     _ensure_within_size_limit(uploaded_file, MAX_UPLOAD_BYTES)
 
-    # 2) Word sənədləri artıq qəbul edilmir — istifadəçiyə aydın mesaj.
-    if ext in (".docx", ".doc", ".docm", ".dotm", ".dotx", ".rtf"):
+    # 2) Makrolu/köhnə Word formatları qəbul edilmir — istifadəçiyə aydın mesaj.
+    if ext in (".doc", ".docm", ".dotm", ".dotx", ".rtf"):
         raise ValueError(pgettext("exams.service.parsing.error", "file_docx_not_allowed"))
+
+    if ext == ".docx":
+        from apps.exams.services.parsing.docx_reader import read_docx
+
+        uploaded_file.seek(0)
+        extracted = read_docx(uploaded_file.read() or b"")
+        # Şəkil markerləri burada lazımsızdır (stash yoxdur) — parser onları
+        # `media_refs`-ə çıxarıb atacaq; mətn və düsturlar tam qalır.
+        return extracted.text
 
     # 3) Digər təhlükəli uzantıları ilkin olaraq rədd edirik
     blocked_extensions = (".xlsm", ".pptm", ".bin", ".exe", ".scr", ".js", ".html", ".htm", ".zip")

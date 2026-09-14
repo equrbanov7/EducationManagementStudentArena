@@ -1,0 +1,8 @@
+{
+  "test_container": "CODEX_TEST_emsarena_pg_20260912",
+  "removed": true,
+  "persistent_mounts": false,
+  "browser_session": "CODEX_TEST_emsarena closed",
+  "test_server": "session 47252 stopped",
+  "real_containers": "not stopped or modified"
+}

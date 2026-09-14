@@ -1,5 +1,6 @@
 """U22 — qiymətləndirmə rubrikaları testləri."""
 
+import json
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -236,24 +237,33 @@ class RubricViewTest(RubricBaseTest):
         )
         self.assertEqual(resp.status_code, 404)
 
-    def test_console_rubric_crud(self):
+    def test_catalog_rubric_crud(self):
+        """Rubrik yaratma köhnə konsol SƏHİFƏSİNDƏN (2026-09-10-da silindi)
+        kabinetin «Registrar (kataloq)» JSON son nöqtəsinə keçib — validasiya
+        eyni `rubrics` xidmətidir, ona görə davranış dəyişmir."""
         client = self._client(self.owner)  # org sahibi registrar idarə edir
-        resp = client.post(
-            reverse("registrar:rubric_create"),
-            {"name": "Esse", "description": "Yazılı işlər", "criteria_text": "Struktur:5\nDil:5"},
-        )
-        self.assertEqual(resp.status_code, 302)
-        with bypass_rls():
-            rubric = Rubric.objects.get(organization=self.org, name="Esse")
-            self.assertEqual(rubric.criteria.count(), 2)
-        # Pozuq giriş → xəta mesajı, yadda saxlanmır
-        resp = client.post(
-            reverse("registrar:rubric_create"),
-            {"name": "Pozuq", "criteria_text": "meyar-bal-yox"},
+        resp = self._catalog_save(
+            client, {"name": "Esse", "description": "Yazılı işlər", "criteria_text": "Struktur:5\nDil:5"}
         )
         self.assertEqual(resp.status_code, 200)
         with bypass_rls():
+            rubric = Rubric.objects.get(organization=self.org, name="Esse")
+            self.assertEqual(rubric.criteria.count(), 2)
+        # Pozuq giriş → sahə xətası, yadda saxlanmır
+        resp = self._catalog_save(client, {"name": "Pozuq", "criteria_text": "meyar-bal-yox"})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("criteria_text", resp.json()["errors"])
+        with bypass_rls():
             self.assertFalse(Rubric.objects.filter(organization=self.org, name="Pozuq").exists())
+
+    def _catalog_save(self, client, values):
+        payload = {"action": "save", "tab": "rubrics"}
+        payload.update(values)
+        return client.post(
+            reverse("accounts:registrar_catalog_action"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
 
     def test_rubric_grade_page_still_reachable(self):
         """Mockup redizaynında Komponentlər tabı UI-dan çıxarılıb; rubrik

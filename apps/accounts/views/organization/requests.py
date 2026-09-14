@@ -10,6 +10,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -88,13 +89,15 @@ def student_organization_request(request):
                 messages.error(request, pgettext("accounts.org.message", "Ləğv ediləcək aktiv müraciət tapılmadı."))
                 return redirect(next_url)
 
-            _set_student_org_request_status(
-                request_obj=target_request,
-                status=StudentOrganizationRequestStatus.CANCELLED,
-                note="Müraciət istifadəçi tərəfindən ləğv edildi.",
-                responded_by=request.user,
-            )
-            _sync_profile_pending_request_snapshot(profile)
+            # Audit 2026-09-13 backend F-07 (2026-09-14): status + profil snapshot-u birlikdə.
+            with transaction.atomic():
+                _set_student_org_request_status(
+                    request_obj=target_request,
+                    status=StudentOrganizationRequestStatus.CANCELLED,
+                    note="Müraciət istifadəçi tərəfindən ləğv edildi.",
+                    responded_by=request.user,
+                )
+                _sync_profile_pending_request_snapshot(profile)
             messages.success(
                 request,
                 pgettext("accounts.org.message", "{org} üçün müraciət ləğv edildi.").format(
@@ -173,7 +176,10 @@ def student_organization_request(request):
                 )
                 return redirect(next_url)
 
-            with bypass_rls():
+            # Audit 2026-09-13 backend F-07 (2026-09-14): müraciət sətri + dublikatların
+            # bağlanması + profil sahələri BİR tranzaksiyada (əvvəl 5 ayrı autocommit yazı idi —
+            # yarımçıq halda profil «müraciət var» deyir, sətir isə yox idi və ya əksinə).
+            with transaction.atomic(), bypass_rls():
                 existing_pending = (
                     _pending_student_request_queryset(
                         user=request.user,
@@ -232,20 +238,20 @@ def student_organization_request(request):
                         updated_at=now,
                     )
 
-            profile.requested_organization = target_org
-            profile.requested_organization_name = target_org.name
-            profile.requested_organization_message = request_message
-            profile.organization_type = target_org.org_type
-            profile.save(
-                update_fields=[
-                    "requested_organization",
-                    "requested_organization_name",
-                    "requested_organization_message",
-                    "organization_type",
-                    "updated_at",
-                ]
-            )
-            _sync_profile_pending_request_snapshot(profile)
+                profile.requested_organization = target_org
+                profile.requested_organization_name = target_org.name
+                profile.requested_organization_message = request_message
+                profile.organization_type = target_org.org_type
+                profile.save(
+                    update_fields=[
+                        "requested_organization",
+                        "requested_organization_name",
+                        "requested_organization_message",
+                        "organization_type",
+                        "updated_at",
+                    ]
+                )
+                _sync_profile_pending_request_snapshot(profile)
 
             messages.success(
                 request,

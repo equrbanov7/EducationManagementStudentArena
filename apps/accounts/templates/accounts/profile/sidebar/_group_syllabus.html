@@ -1,0 +1,88 @@
+{% load i18n %}
+{% comment %}«Sillabus və sual» qrupu — fənnin MƏZMUN sənədləri və onların təsdiq
+növbələri: sillabus (yazan + təsdiqləyən) və sual dəstləri (bank, göndəriş,
+kafedra təsdiqi).
+
+Əvvəllər sillabuslar «Universitet», sual bankı isə «Tədris işi» qrupunda idi —
+eyni iş axını iki yerə düşürdü. 2026-09-10-da bir qrupa yığıldı; icazə şərtləri
+DƏYİŞMƏYİB.{% endcomment %}
+{% if "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections or "question-chair-review" in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="syllabus">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|syllabus-list|syllabus-editor|syllabus-review|question-bank|question-submissions|question-chair-review|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "Sillabus və sual" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% comment %}Sillabus: SİYAHI menyuda görünür; redaktor bölməsi siyahıdan açılır
+            (ayrıca menyu sətri yoxdur, amma o da profil shell-inin içindədir — sidebar itmir).{% endcomment %}
+            {% if "syllabus-list" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=syllabus-list"
+                   data-section="syllabus-list"
+                   data-title="{% trans 'Sillabuslar' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-list' or active_section == 'syllabus-editor' %}active{% endif %}">
+                    <i class="fas fa-file-lines sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Sillabuslar" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% comment %}Sillabus təsdiqi — AYRI icazə açarı (`syllabus.review`): kafedra
+            müdiri, dekan, RİM. Müəllim bu sətri görmür.{% endcomment %}
+            {% if "syllabus-review" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=syllabus-review"
+                   data-section="syllabus-review"
+                   data-title="{% trans 'Sillabus təsdiqi' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-review' %}active{% endif %}">
+                    <i class="fas fa-clipboard-check sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Sillabus təsdiqi" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'question-bank' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=question-bank"
+                   data-section="question-bank"
+                   data-title="{% trans 'Sual Bankı' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-bank' %}active{% endif %}">
+                    <i class="fas fa-layer-group sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Sual Bankı' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'question-submissions' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=question-submissions"
+                   data-section="question-submissions"
+                   data-title="{% trans 'Sual göndərişləri' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-submissions' %}active{% endif %}">
+                    <i class="fas fa-paper-plane sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Sual göndərişləri' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% comment %}Sual təsdiqi — kafedra müdirinin sual dəsti növbəsi
+            (`question.chair_review`). Müəllim və imtahan mərkəzi bu sətri GÖRMÜR.{% endcomment %}
+            {% if "question-chair-review" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=question-chair-review"
+                   data-section="question-chair-review"
+                   data-title="{% trans 'Sual təsdiqi' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-chair-review' %}active{% endif %}">
+                    <i class="fas fa-file-circle-check sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Sual təsdiqi" context "profile.sidebar" %}</span>
+                    <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="question_chair_pending_count">{% if question_chair_pending_count %}{{ question_chair_pending_count }}{% endif %}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

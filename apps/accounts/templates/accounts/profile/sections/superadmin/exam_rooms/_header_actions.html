@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}Başlıq sətrinin sağ tərəfi (`_content_header.html` → header_actions_include).
+Superadmin: təşkilat seçici (dəyişən kimi GET ilə yenidən yüklənir — JS) və
+«Zal idarəçiləri» çekmecəsi; hamı: «Yeni zal» (ortaq zal dialoqu, boş prefill).
+Kontekst: `s` (= exam_rooms_section).{% endcomment %}
+{% if s.is_superadmin and s.org_options %}
+<form method="get" action="{{ profile_base_url }}" class="sar-orgpick">
+    <input type="hidden" name="section" value="superadmin-exam-rooms">
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="sar-org-select" name="room_org"
+                class="ems-select bootstrap-single-select__native js-sar-orgselect"
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}"
+                data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"
+                aria-label="{% trans 'Təşkilat' context 'accounts.superadmin_exam_rooms' %}">
+            {% for org in s.org_options %}
+            <option value="{{ org.id }}" {% if s.selected_org and s.selected_org.id == org.id %}selected{% endif %}>{{ org.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</form>
+{% endif %}
+{% if s.is_superadmin and s.selected_org %}
+<button type="button" class="ems-btn" data-ems-overlay-open="sarManagersDrawer">
+    <i class="fas fa-user-gear" aria-hidden="true"></i>
+    {% trans "Zal idarəçiləri" context "accounts.superadmin_exam_rooms" %}
+    <span class="sar-count">{{ s.room_managers|length }}</span>
+</button>
+{% endif %}
+{% if s.selected_org %}
+<button type="button" class="ems-btn ems-btn--primary"
+        data-tof-open="sarRoomDialog"
+        data-tof-title="{% trans 'Yeni zal yarat' context 'accounts.superadmin_exam_rooms' %}"
+        data-tof-prefill='{{ s.new_room_prefill }}'
+        data-sar-subtitle="{{ s.selected_org.name }}"
+        data-sar-submit="{% trans 'Zalı yarat' context 'accounts.superadmin_exam_rooms' %}">
+    <i class="fas fa-plus" aria-hidden="true"></i>
+    {% trans "Yeni zal" context "accounts.superadmin_exam_rooms" %}
+</button>
+{% endif %}

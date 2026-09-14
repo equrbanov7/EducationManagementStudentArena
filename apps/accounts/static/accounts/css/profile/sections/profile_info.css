@@ -152,7 +152,9 @@
 .role-badge.role-success         { background: var(--ems-success-100); color: #166534;  border: 1px solid #bbf7d0; }
 
 /* --- Şəxsi Məlumatlar Bölməsi --- */
-.section-title {
+/* 2026-09-12 (audit P2-1): `.section-card__title` = kart alt-başlığı (bax layout.css). */
+.section-title,
+.section-card__title {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--profile-dark);
@@ -162,7 +164,8 @@
     gap: 10px;
 }
 
-.section-title i {
+.section-title i,
+.section-card__title i {
     color: var(--profile-primary);
 }
 

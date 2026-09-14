@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -236,12 +236,18 @@ def teacher_questions_bank(request, slug):
                 question.analysis_meta = None
                 question.analysis_warnings = []
 
-    all_questions_total = exam.questions.count()
-    scoped_questions = exam.questions.all()
-    if language_filter:
-        scoped_questions = scoped_questions.filter(language=language_filter)
-    total_questions = scoped_questions.count()
-    active_questions = scoped_questions.filter(is_active=True).count()
+    # Stat kartları: əvvəllər Paginator-un öz COUNT-undan ƏLAVƏ 3 ayrı ``.count()``
+    # gedirdi (bütün bank, dil daxilində, dil daxilində aktiv) — indi tək
+    # şərti aqreqat (audit P1-6, 2026-09-12).
+    scope_condition = Q(language=language_filter) if language_filter else Q()
+    question_stats = exam.questions.aggregate(
+        all_total=Count("id"),
+        scoped_total=Count("id", filter=scope_condition) if language_filter else Count("id"),
+        scoped_active=Count("id", filter=scope_condition & Q(is_active=True)),
+    )
+    all_questions_total = question_stats["all_total"] or 0
+    total_questions = question_stats["scoped_total"] or 0
+    active_questions = question_stats["scoped_active"] or 0
     inactive_questions = max(total_questions - active_questions, 0)
 
     base_query_params = {}

@@ -12,6 +12,8 @@ from django.utils.translation import pgettext
 
 import redis as redis_client
 
+from core.health_build_info import get_build_info
+
 logger = logging.getLogger(__name__)
 
 # Application start time – used to report uptime in the health endpoint.
@@ -78,6 +80,9 @@ def _build_health_payload():
         "status": "healthy",
         "checks": {},
         "version": os.getenv("APP_VERSION", "unknown"),
+        # P1-07 (Codex audit, 2026-09-13): image-in qurulduğu commit (SHA) —
+        # işləyən image mənbədən geri qalanda görünsün. Sirr yoxdur.
+        "build": get_build_info(),
         "uptime_seconds": round(time.monotonic() - _APP_START_TIME),
     }
 

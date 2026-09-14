@@ -33,6 +33,38 @@ LOGIN_LIMIT_SCOPE_DEVICE = "accounts.login.device"
 LOGIN_LIMIT_SCOPE_IDENTITY = "accounts.login.identity"
 
 
+# Superadmin qaçış yolunun ayrıca vedrəsi (2026-09-13 access auditi, F-01).
+LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE = "accounts.login.superadmin_escape"
+
+
+# İP-əsaslı OTP qapıları (2026-09-13 access auditi, F-09): göndəriş + yoxlama.
+OTP_SEND_IP_LIMIT_SCOPE = "accounts.otp.ip.send"
+
+
+OTP_VERIFY_IP_LIMIT_SCOPE = "accounts.otp.ip.verify"
+
+
+# Kod-səviyyəli defaultlar: `config/settings/test.py` base-dən adları AÇIQ
+# siyahı ilə idxal edir, ona görə yeni ayarlar orada görünməyə bilər —
+# `getattr(settings, …, default)` ilə limit heç vaxt «yox» olmur (fail-closed
+# ruhu, 2026-09-02 P2-5). Prod dəyəri `admin_ratelimit.py`-dədir.
+LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT_DEFAULT = "3/1h"
+
+
+OTP_SEND_IP_RATE_LIMIT_DEFAULT = "40/10m"
+
+
+OTP_VERIFY_IP_RATE_LIMIT_DEFAULT = "100/10m"
+
+
+def otp_send_ip_rate_limit():
+    return getattr(settings, "OTP_SEND_IP_RATE_LIMIT", OTP_SEND_IP_RATE_LIMIT_DEFAULT)
+
+
+def otp_verify_ip_rate_limit():
+    return getattr(settings, "OTP_VERIFY_IP_RATE_LIMIT", OTP_VERIFY_IP_RATE_LIMIT_DEFAULT)
+
+
 OTP_VERIFY_LIMIT_SCOPE = "accounts.otp.verify"
 
 

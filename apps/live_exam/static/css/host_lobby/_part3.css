@@ -61,7 +61,7 @@
 .pin-display {
     display: inline-block;
     background: var(--ems-neutral-0);
-    color: var(--ems-success-600);
+    color: var(--ems-success-700);
     font-size: 3rem;
     font-weight: 900;
     letter-spacing: 10px;

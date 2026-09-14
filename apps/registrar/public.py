@@ -10,29 +10,33 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 
-from apps.registrar import services
-from apps.registrar.cabinet_policy import (
-    TRANSCRIPT_APPLICATION_KIND,
-    approved_syllabus_offerings,
-    assessment_weights_view,
-    other_period_subject_rows,
-    transcript_policy,
-)
+from apps.registrar import absence_limit, analytics, exam_score_entry, exam_score_import, exam_score_sheets
+from apps.registrar.cabinet_policy import TRANSCRIPT_APPLICATION_KIND, transcript_policy
 from apps.registrar.exam_bridge import (
     exam_eligibility,
+    exam_eligibility_batch,
     exam_result_summary,
     record_exam_result,
 )
+from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.models import StudentAcademicRecord
+from apps.registrar.signals import student_group_changed
 
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
+    "eligible_instructor_user_ids",
+    "analytics",
+    "exam_score_entry",
+    "exam_score_import",
+    "exam_score_sheets",
     "STUDENT_TRANSCRIPT_SELF_SERVICE",
     "TRANSCRIPT_APPLICATION_KIND",
     "exam_eligibility",
+    "exam_eligibility_batch",
     "exam_result_summary",
     "record_exam_result",
+    "student_group_changed",
 ]
 
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
@@ -189,14 +193,14 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     if section == "academic-calendar":
         return calendar_ctx(organization, year=(request.GET.get("ac_year") or "").strip())
     if section == "my-journal":
-        # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu, bu günün dərsi gizli);
-        # müəllim/admin → qrup seçimi (iş sahəsi ayrıca URL-də olsa da fallback qalır).
+        # Rol-aware: tələbə → öz jurnal xülasəsi (yalnız-oxu); müəllim/admin → qrup
+        # seçimi. Tələbə ailəsi HEÇ VAXT müəllim siyahısına düşmür — org konteksti
+        # itəndə də (QA 2026-09-05 P2-31; sahib 2026-09-12: «tələbə ancaq özünə
+        # aid jurnalı görsün»). Boş-hal göstərilir, kimlik tələbə qalır.
         student_context = build_student_journal_context(request, organization=organization)
         if student_context is not None:
             return student_context
-        if page_contexts._has_active_student_membership(organization, request.user):
-            # Akademik qeydi olmayan tələbə/məzun — MÜƏLLİM siyahısına düşməsin
-            # (QA 2026-09-05 P2-31): boş-hal göstərilir, kimlik tələbə qalır.
+        if page_contexts.is_student_family_user(organization, request.user):
             return {"journal_student_missing": True}
         return page_contexts.journal_list_context(request.user, request=request)
     if section == "analytics":
@@ -220,6 +224,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     from django.utils import timezone as _tz
 
     from apps.registrar import exam_eligibility, gradebook, journal_extras
+    from apps.registrar import student_journal_context as _jsc
     from apps.registrar.models import ComponentKind, ComponentScore, Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
@@ -265,7 +270,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     section = {"is_student_journal": True, "record": record, "period": period, "subjects": [], "detail": None}
     if period is None:
-        return {"journal_student_section": section}
+        return {"journal_student_section": _jsc.decorate(section)}
 
     # Tədris ili seçimləri (RAW academic_year → label) + dövr seçimləri (season).
     year_label_map = {p.academic_year: p.year_display for p in all_periods}
@@ -285,30 +290,14 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         row["teacher"] = getattr(row["enrollment"].offering, "instructor", None)
     section["subjects"] = summary["subjects"]
     section["semester_number"] = semester_number
-    # Başqa fənlər üzrə limit xəbərdarlıqları (mockup: alt qırmızı çip).
-    # Donmuş (tarixi) fənlər xəbərdarlıq siyahısına DÜŞMÜR: «həddə yaxınlaşırsan»
-    # xəbəri yalnız hələ qərar verilə bilən semestrdə mənalıdır — bağlanmış
-    # semestrdə tələbənin edə biləcəyi heç nə yoxdur.  ``barred`` orada onsuz da
-    # susdurulub; 75% yaxınlıq zolağını da susdurmasaq, yalnız o səth
-    # digərləri ilə ziddiyyət yaradardı (bax exam_eligibility).
-    section["warnings"] = [
-        row
-        for row in summary["subjects"]
-        if not row["journal"]["eligibility"]["frozen"]
-        and (
-            row["journal"]["barred"]
-            or (
-                row["journal"]["allowed_absence"] > 0
-                and row["journal"]["absence_hours"] >= row["journal"]["allowed_absence"] * Decimal("0.75")
-            )
-        )
-    ]
+    # Limit xəbərdarlıqları, KPI, legend və status açarları `student_journal_context
+    # .decorate` ilə (sorğusuz) əlavə olunur — bax həmin modulun docstring-i.
 
     # FAZA B: ?subject yoxdursa FƏNN KARTLARI göstərilir (avtomatik açılış yox) —
     # müəllim jurnalı kimi: kartlar → klik → cədvəl.
     selected = (request.GET.get("subject") or "").strip()
     if not selected:
-        return {"journal_student_section": section}
+        return {"journal_student_section": _jsc.decorate(section)}
 
     enrollment = (
         Enrollment.objects.filter(pk=selected, student=request.user, organization=organization)
@@ -316,7 +305,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         .first()
     )
     if enrollment is None:
-        return {"journal_student_section": section}
+        return {"journal_student_section": _jsc.decorate(section)}
 
     offering = enrollment.offering
     today = _tz.localdate()
@@ -387,7 +376,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # işarəsi az olan tələbədə məxrəci kiçildib balı süni qaldırırdı və eyni
     # sətri müəllim ekranından ayırırdı (2026-08-31 düşmən baxışı, 2-ci bloker).
     dav_lesson_hours = exam_eligibility.lesson_hours_for(offering, offering.lessons.all())
-    dav_limit_percent = gradebook.absence_limit_percent_for(offering)
+    # F-06 (2026-09-13): hədd tələbənin ÖZ qeydindən (``record`` artıq əldədir,
+    # əlavə sorğu yoxdur) — imtahan qapısı ilə EYNİ mənbə (``absence_limit``).
+    dav_limit_percent = absence_limit.limit_percent_for_record(record)
     dav_eligibility = exam_eligibility.resolve(
         absence_hours=enrollment.absence_hours,
         lesson_hours=dav_lesson_hours,
@@ -441,7 +432,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "syllabus_available": _student_syllabus_available(offering),
     }
     section["corrections_map"] = _legacy_excuse.merge_into(corr_map, excuse_map)
-    return {"journal_student_section": section}
+    return {"journal_student_section": _jsc.decorate(section)}
 
 
 def _lesson_room_label(room) -> str | None:
@@ -468,7 +459,7 @@ def _student_syllabus_available(offering) -> bool:
     Endpoint (``registrar:offering_syllabus_json``) eyni qaydanı fail-closed
     təkrar yoxlayır — bu bayraq yalnız düyməni gizlətmək üçündür.
     """
-    from apps.syllabus import services as syllabus_services
+    from apps.syllabus import public as syllabus_services
 
     syllabus = syllabus_services.syllabus_for_offering(
         organization=offering.organization,
@@ -536,65 +527,26 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
     if semester_number is None:
         semester_number = _resolve_semester_number(request)
 
-    data = services.get_student_cabinet_data(record=record, period=period, semester_number=semester_number)
-    data["subjects"] += other_period_subject_rows(organization, record, period, semester_number, data["subjects"])
+    # 2026-09-12 (tələbə kabineti redizaynı): fənn sətirlərinin zənginləşdirilməsi
+    # (yekun nəticə, komponentlər, cəhdlər, sillabus keçidləri, KPI, legend)
+    # ayrıca modula çıxarıldı — həm bu fayl modul-ölçü büdcəsindədir, həm də köhnə
+    # döngü fənn başına ~13 sorğu edirdi (N+1). Bax `student_subjects_context`.
+    from apps.registrar import student_subjects_context
 
-    # Attach each subject's electronic-journal summary (giriş balı + davamiyyət),
-    # so "Fənlərim" doubles as the student's "Qiymətlərim" view.
-    from apps.registrar import gradebook
-
-    journal_summary = gradebook.get_student_journal_summary(
-        record=record, period=period, semester_number=semester_number
-    )
-    journal_by_enrollment = {row["enrollment"].id: row["journal"] for row in journal_summary["subjects"]}
-    # Çox cəhdli imtahan (sahibin qərarı M2): rəsmi olan SONUNCU cəhddir, amma
-    # əvvəlkilərin balı itmir — tələbə kabinetində açıq göstərilir.
-    from django.urls import reverse
-
-    from apps.registrar import exam_attempt_history, finals
-
-    # Ekran 10 — «Sillabusa bax» keçidi (YALNIZ APPROVED, §8/9) toplu həll olunur.
-    approved_ids = approved_syllabus_offerings(organization, [row["enrollment"].offering for row in data["subjects"]])
-    for subject_row in data["subjects"]:
-        offering = subject_row["enrollment"].offering
-        subject_row["syllabus_available"] = offering.id in approved_ids
-        subject_row["syllabus_url"] = (
-            reverse("registrar:offering_syllabus_json", args=[offering.id]) if offering.id in approved_ids else ""
-        )
-        subject_row["syllabus_pdf_url"] = (
-            reverse("registrar:offering_syllabus_pdf", args=[offering.id]) if offering.id in approved_ids else ""
-        )
-        subject_row["journal"] = journal_by_enrollment.get(subject_row["enrollment"].id)
-        subject_row["final"] = finals.compute_final_result(
-            enrollment=subject_row["enrollment"], organization=organization
-        )
-        subject_row["components"] = gradebook.get_component_breakdown(subject_row["enrollment"])
-        subject_row["attempts"] = exam_attempt_history.attempt_rows_for_enrollment(subject_row["enrollment"])
-
-    # Pre-join each elective block with the group's decision so the template
-    # renders without a dict-lookup filter (block name → chosen subject).
-    group_decisions = data["group_decisions"]
-    elective_blocks = [
-        {
-            "name": name,
-            "required_choices": block["required_choices"],
-            "options": block["options"],
-            "chosen": group_decisions.get(name),
-        }
-        for name, block in data["elective_blocks"].items()
-    ]
     section.update(
-        {
-            "period": period,
-            "semester_number": semester_number,
-            "subjects": data["subjects"],
-            "elective_blocks": elective_blocks,
-            "group_decisions": group_decisions,
-            "credit_summary": data["credit_summary"],
-            # Qiymətləndirmə çəkiləri — universitet SİYASƏTİ ilə kilidli
-            # (README §8/4: davamiyyət 10 · sərbəst iş 10 · cari 30 · yekun 50).
-            # Kodda hardcode YOX — `apps.syllabus.policy` org səviyyəsindən oxuyur.
-            "assessment_weights": assessment_weights_view(organization),
-        }
+        student_subjects_context.build_section(
+            request=request,
+            organization=organization,
+            record=record,
+            period=period,
+            semester_number=semester_number,
+        )
     )
     return {"student_subjects_section": section}
+
+
+# Cross-module callers use this explicit service surface.
+from .public_services import *  # noqa: E402,F401,F403
+from .public_services import __all__ as _service_exports  # noqa: E402
+
+__all__ += [name for name in _service_exports if name not in __all__]

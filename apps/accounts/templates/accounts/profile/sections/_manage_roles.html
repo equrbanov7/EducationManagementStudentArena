@@ -21,7 +21,7 @@ CSS xarici fayldadır, JS qabıqda (`roles_ui.js`) — CSP inline qadağandır.
 <section class="profile-section-panel profile-section--manage-roles {% if active_section == 'manage-roles' %}is-active{% endif %}"
          data-profile-section-panel="manage-roles"
          data-source-url="{% url 'accounts:manage_roles' %}">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260909-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_ui.css' %}?v=20260914-a11y">
 
     {% if not sec.has_access %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-lock" state_title=sec.access_denied_message %}

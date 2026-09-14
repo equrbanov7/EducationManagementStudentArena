@@ -1,0 +1,1 @@
+✅ Modul ölçü budcəsi: bütün fayllar limit daxilindədir (SOFT_CAP=600).

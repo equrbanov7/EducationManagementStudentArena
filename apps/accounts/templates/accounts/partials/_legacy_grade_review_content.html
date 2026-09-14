@@ -8,7 +8,7 @@ axtarışlı, DEBOUNCE-lu, LAZY səhifələnən, kaskadlı (fakültə → kafedr
 → qrup). Cədvəl və kartlar üçün SKELETON yükləyici var — «boş cədvəl» təəssüratı
 yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/legacy_grade_review.css' %}?v=20260909-fix">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/legacy_grade_review.css' %}?v=20260910-1">
 
 {% if not s.has_access %}
   <p class="lgr__denied" role="status">{{ s.access_denied_message }}</p>
@@ -29,25 +29,43 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
      data-max-note="{{ s.max_note_length }}"
      data-can-review="{% if s.can_review %}1{% else %}0{% endif %}">
 
-  <header class="lgr__head">
-    <div>
-      {% comment %}⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını
-      `#profileSectionTitle` kimi render edir; ikisi birlikdə səhifədə İKİ eyni
-      başlıq verirdi (sahib şikayəti, 2026-09-09).{% endcomment %}
-      <p class="lgr__intro">
-        {% trans "Köhnə sistemdən gətirilmiş imtahan nəticələri arasında yoxlanmalı olanlar burada toplanır. Siyahı hər dəfə sübut qatından yenidən hesablanır — dondurulmuş fayl deyil. Dəyər doğrudursa təsdiqləyin; səhvdirsə sənədli düzəliş yazın. Köhnə mənbə sətri heç bir halda üzərindən yazılmır." context "accounts.legacy_review" %}
-      </p>
+  {% comment %}⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını
+  `#profileSectionTitle` kimi render edir; ikisi birlikdə səhifədə İKİ eyni
+  başlıq verirdi (sahib şikayəti, 2026-09-09).{% endcomment %}
+  {% trans "Köhnə sistemdən gətirilmiş imtahan nəticələri arasında yoxlanmalı olanlar burada toplanır. Siyahı hər dəfə sübut qatından yenidən hesablanır — dondurulmuş fayl deyil. Dəyər doğrudursa təsdiqləyin; səhvdirsə sənədli düzəliş yazın. Köhnə mənbə sətri heç bir halda üzərindən yazılmır." context "accounts.legacy_review" as lgr_subtitle %}
+  {% include "partials/ems_ui/_content_header.html" with header_subtitle=lgr_subtitle header_actions_include="accounts/profile/sections/_legacy_grade_review_actions.html" %}
+
+  {% comment %}KPI — rəqəmləri `legacy_grade_review_render.js` `progress()`
+  funksiyası `[data-ems-kpi-key]` üzərindən doldurur (server bu sətirləri
+  bilmir: növbə hər sorğuda sübut qatından yenidən hesablanır).{% endcomment %}
+  <div class="ems-kpis ems-kpis--4 lgr-kpis" data-lgr-progress aria-live="polite">
+    <div class="ems-kpi" data-ems-kpi-key="total">
+      <div class="ems-kpi__label">{% trans "Növbədə" context "accounts.legacy_review" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "süzgəcə uyğun sətir" context "accounts.legacy_review" %}</div>
     </div>
-    <div class="lgr__progress" data-lgr-progress aria-live="polite">
-      <div class="lgr__progress-bar"><span class="lgr__progress-fill" data-lgr-progress-fill></span></div>
-      <p class="lgr__progress-text" data-lgr-progress-text>&nbsp;</p>
+    <div class="ems-kpi" data-ems-kpi-key="reviewed">
+      <div class="ems-kpi__label">{% trans "Baxılıb" context "accounts.legacy_review" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "qərar verilib" context "accounts.legacy_review" %}</div>
     </div>
-  </header>
+    <div class="ems-kpi" data-ems-kpi-key="pending">
+      <div class="ems-kpi__label">{% trans "Qalıb" context "accounts.legacy_review" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-kpi__note">{% trans "hələ baxılmayıb" context "accounts.legacy_review" %}</div>
+    </div>
+    <div class="ems-kpi lgr-kpi--progress" data-ems-kpi-key="percent">
+      <div class="ems-kpi__label">{% trans "İrəliləyiş" context "accounts.legacy_review" %}</div>
+      <div class="ems-kpi__value">—</div>
+      <div class="ems-bar ems-kpi__bar"><span class="ems-bar__fill lgr__progress-fill" data-lgr-progress-fill></span></div>
+      <p class="ems-kpi__note lgr__progress-text" data-lgr-progress-text>&nbsp;</p>
+    </div>
+  </div>
 
   {% if not s.can_review %}
-  <p class="lgr__notice lgr__notice--observer" role="status">
-    <i class="fas fa-eye" aria-hidden="true"></i> {{ s.observer_notice }}
-  </p>
+  <div class="ems-msg ems-msg--info lgr__notice" role="status">
+    <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i> <div>{{ s.observer_notice }}</div>
+  </div>
   {% endif %}
 
   {% comment %}Kateqoriya çipləri — SAYLAR da, ETİKETLƏR də serverdən gəlir,
@@ -56,96 +74,93 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
   <div class="lgr-cats" data-lgr-cats role="group"
        aria-label="{% trans 'Kateqoriya süzgəcləri' context 'accounts.legacy_review' %}"></div>
 
-  <div class="lgr-filters" data-lgr-filters>
-    <div class="lgr-field">
-      <label for="lgr-q">{% trans "Axtarış" context "accounts.legacy_review" %}</label>
-      <input type="search" id="lgr-q" name="q" class="lgr-input" autocomplete="off"
+  <div class="ems-filters ems-filters--auto lgr-filters" data-lgr-filters role="search">
+    <div class="ems-field ems-field--wide">
+      <label class="ems-field__label" for="lgr-q">{% trans "Axtarış" context "accounts.legacy_review" %}</label>
+      <input type="search" id="lgr-q" name="q" class="ems-input" autocomplete="off"
              placeholder="{% trans 'Tələbə, fənn, köhnə ID…' context 'accounts.legacy_review' %}">
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-faculty-label">
-      <label id="lgr-faculty-label">{% trans "Fakültə" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-faculty-label">
+      <label class="ems-field__label" id="lgr-faculty-label">{% trans "Fakültə" context "accounts.legacy_review" %}</label>
       {% trans "fakültə axtar…" context "accounts.legacy_review" as lgr_faculty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-faculty" placeholder=lgr_faculty_ph %}
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-kafedra-label">
-      <label id="lgr-kafedra-label">{% trans "Kafedra" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-kafedra-label">
+      <label class="ems-field__label" id="lgr-kafedra-label">{% trans "Kafedra" context "accounts.legacy_review" %}</label>
       {% trans "kafedra axtar…" context "accounts.legacy_review" as lgr_kafedra_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-kafedra" placeholder=lgr_kafedra_ph %}
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-specialty-label">
-      <label id="lgr-specialty-label">{% trans "İxtisas" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-specialty-label">
+      <label class="ems-field__label" id="lgr-specialty-label">{% trans "İxtisas" context "accounts.legacy_review" %}</label>
       {% trans "ixtisas axtar…" context "accounts.legacy_review" as lgr_specialty_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-specialty" placeholder=lgr_specialty_ph %}
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-group-label">
-      <label id="lgr-group-label">{% trans "Qrup" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-group-label">
+      <label class="ems-field__label" id="lgr-group-label">{% trans "Qrup" context "accounts.legacy_review" %}</label>
       {% trans "qrup axtar…" context "accounts.legacy_review" as lgr_group_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-group" placeholder=lgr_group_ph %}
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-subject-label">
-      <label id="lgr-subject-label">{% trans "Fənn" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-subject-label">
+      <label class="ems-field__label" id="lgr-subject-label">{% trans "Fənn" context "accounts.legacy_review" %}</label>
       {% trans "fənn axtar…" context "accounts.legacy_review" as lgr_subject_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-subject" placeholder=lgr_subject_ph %}
     </div>
-    <div class="lgr-field" role="group" aria-labelledby="lgr-teacher-label">
-      <label id="lgr-teacher-label">{% trans "Müəllim" context "accounts.legacy_review" %}</label>
+    <div class="ems-field" role="group" aria-labelledby="lgr-teacher-label">
+      <label class="ems-field__label" id="lgr-teacher-label">{% trans "Müəllim" context "accounts.legacy_review" %}</label>
       {% trans "müəllim axtar…" context "accounts.legacy_review" as lgr_teacher_ph %}
       {% include "accounts/profile/sections/_searchable_picker.html" with prefix="lgr" hook="lgr-teacher" placeholder=lgr_teacher_ph %}
     </div>
-    <div class="lgr-field">
-      <label for="lgr-year">{% trans "Tədris ili" context "accounts.legacy_review" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="lgr-year" name="year" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="lgr-year">{% trans "Tədris ili" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="lgr-year" name="year" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
         </select>
       </div>
     </div>
-    <div class="lgr-field">
-      <label for="lgr-period">{% trans "Semestr" context "accounts.legacy_review" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="lgr-period" name="period" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="lgr-period">{% trans "Semestr" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="lgr-period" name="period" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
         </select>
       </div>
     </div>
-    <div class="lgr-field">
-      <label for="lgr-severity">{% trans "Şiddət" context "accounts.legacy_review" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="lgr-severity" name="severity" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="lgr-severity">{% trans "Şiddət" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="lgr-severity" name="severity" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
         </select>
       </div>
     </div>
-    <div class="lgr-field">
-      <label for="lgr-status">{% trans "Baxış statusu" context "accounts.legacy_review" %}</label>
-      <div class="bootstrap-single-select">
-        <select id="lgr-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select lgr-input" data-bootstrap-select>
+    <div class="ems-field">
+      <label class="ems-field__label" for="lgr-status">{% trans "Baxış statusu" context "accounts.legacy_review" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="lgr-status" name="status" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" context "accounts.legacy_review" %}</option>
         </select>
       </div>
-    </div>
-    <div class="lgr-field lgr-field--action">
-      <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-reset>
-        <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Süzgəcləri sıfırla" context "accounts.legacy_review" %}
-      </button>
     </div>
   </div>
 
-  <div class="lgr-tablewrap">
-    <table class="lgr-table">
+  <div class="ems-tablewrap lgr-tablewrap">
+    <div class="ems-tablescroll">
+    <table class="ems-table ems-table--zebra lgr-table">
       <thead>
         <tr>
-          <th>{% trans "Tələbə" context "accounts.legacy_review" %}</th>
-          <th>{% trans "Fənn / qrup" context "accounts.legacy_review" %}</th>
-          <th>{% trans "Köhnə sistemdə (xam)" context "accounts.legacy_review" %}</th>
-          <th>{% trans "Canlı sistemdə" context "accounts.legacy_review" %}</th>
-          <th>{% trans "Niyə burada" context "accounts.legacy_review" %}</th>
-          <th>{% trans "Baxış" context "accounts.legacy_review" %}</th>
-          <th class="lgr-th--actions">{% trans "Əməl" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Tələbə" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Fənn / qrup" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Köhnə sistemdə (xam)" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Canlı sistemdə" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Niyə burada" context "accounts.legacy_review" %}</th>
+          <th scope="col">{% trans "Baxış" context "accounts.legacy_review" %}</th>
+          <th scope="col" class="lgr-th--actions">{% trans "Əməl" context "accounts.legacy_review" %}</th>
         </tr>
       </thead>
       <tbody data-lgr-rows></tbody>
     </table>
+    </div>
   </div>
   <div class="lgr-pager" data-lgr-pager></div>
 
@@ -162,13 +177,13 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
         {% trans "Düzəliş canlı imtahan balına yazılır və auditli daxiletmə jurnalına düşür. Köhnə mənbə sətri olduğu kimi qalır." context "accounts.legacy_review" %}
       </p>
       <label class="lgr-dialog__label" for="lgr-correct-score">{% trans "Yeni imtahan balı" context "accounts.legacy_review" %}</label>
-      <input type="number" id="lgr-correct-score" class="lgr-input" min="0" step="1" inputmode="numeric" required>
+      <input type="number" id="lgr-correct-score" class="ems-input" min="0" step="1" inputmode="numeric" required>
 
       <label class="lgr-dialog__label" for="lgr-correct-reason">{% trans "Səbəb" context "accounts.legacy_review" %}</label>
       {% comment %}Native select işlədilmir (sahib qaydası, 2026-09-09) — layihənin
       öz Bootstrap tərzli seçicisi; siyahı qısadır, daxili axtarış lazım deyil.{% endcomment %}
       <div class="bootstrap-single-select bootstrap-single-select--ems">
-        <select id="lgr-correct-reason" class="lgr-input bootstrap-single-select__native" data-bootstrap-select required>
+        <select id="lgr-correct-reason" class="ems-select bootstrap-single-select__native" data-bootstrap-select required>
           <option value="">—</option>
           {% for reason in s.reasons %}
           <option value="{{ reason.value }}">{{ reason.label }}</option>
@@ -177,17 +192,17 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
       </div>
 
       <label class="lgr-dialog__label" for="lgr-correct-note">{% trans "Qeyd" context "accounts.legacy_review" %}</label>
-      <textarea id="lgr-correct-note" class="lgr-input lgr-textarea" rows="3"
+      <textarea id="lgr-correct-note" class="ems-textarea lgr-textarea" rows="3"
                 maxlength="{{ s.max_note_length }}" required></textarea>
 
       <label class="lgr-dialog__label" for="lgr-correct-evidence">{% trans "Təsdiqedici sənəd (PDF / şəkil)" context "accounts.legacy_review" %}</label>
-      <input type="file" id="lgr-correct-evidence" class="lgr-input lgr-file"
+      <input type="file" id="lgr-correct-evidence" class="ems-input lgr-file"
              accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" required>
 
       <p class="lgr-dialog__error" data-lgr-correct-error role="alert"></p>
       <div class="lgr-dialog__actions">
-        <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
-        <button type="submit" class="lgr-btn lgr-btn--primary">{% trans "Düzəlişi yaz" context "accounts.legacy_review" %}</button>
+        <button type="button" class="ems-btn" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
+        <button type="submit" class="ems-btn ems-btn--primary">{% trans "Düzəlişi yaz" context "accounts.legacy_review" %}</button>
       </div>
     </form>
   </dialog>
@@ -204,12 +219,12 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
         {% trans "Sətir növbədə qalır, amma «baxılmayıb» statusundan çıxır — kağız jurnal yoxlandıqdan sonra qərar verilə bilər." context "accounts.legacy_review" %}
       </p>
       <label class="lgr-dialog__label" for="lgr-dispute-note">{% trans "Səbəb (məcburi)" context "accounts.legacy_review" %}</label>
-      <textarea id="lgr-dispute-note" class="lgr-input lgr-textarea" rows="3"
+      <textarea id="lgr-dispute-note" class="ems-textarea lgr-textarea" rows="3"
                 maxlength="{{ s.max_note_length }}" required></textarea>
       <p class="lgr-dialog__error" data-lgr-dispute-error role="alert"></p>
       <div class="lgr-dialog__actions">
-        <button type="button" class="lgr-btn lgr-btn--ghost" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
-        <button type="submit" class="lgr-btn lgr-btn--primary">{% trans "İşarələ" context "accounts.legacy_review" %}</button>
+        <button type="button" class="ems-btn" data-lgr-dialog-cancel>{% trans "İmtina" context "accounts.legacy_review" %}</button>
+        <button type="submit" class="ems-btn ems-btn--primary">{% trans "İşarələ" context "accounts.legacy_review" %}</button>
       </div>
     </form>
   </dialog>
@@ -237,6 +252,6 @@ yaranmır. Bütün input-lar eyni hündürlükdədir (--ems-* token, CSS-də).
 </div>
 {% endif %}
 
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review_render.js' %}?v=20260909-fix"></script>
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review_actions.js' %}?v=20260909-fix"></script>
-<script defer src="{% static 'accounts/js/profile/legacy_grade_review.js' %}?v=20260909-fix"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review_render.js' %}?v=20260910-1"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review_actions.js' %}?v=20260910-1"></script>
+<script defer src="{% static 'accounts/js/profile/legacy_grade_review.js' %}?v=20260910-1"></script>
