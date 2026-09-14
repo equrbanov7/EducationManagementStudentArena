@@ -255,20 +255,15 @@ def _build_anonymous_name(*, attempt_id: int, user_id: int, exam_id: int) -> str
 
 
 def _available_groups_for_exam(exam):
-    """İmtahanın iştirakçılarının üzv olduğu qruplar + allowed_groups (tenant-scoped).
+    """İmtahanın iştirakçılarının üzv olduğu qruplar + təyin olunmuş qruplar (tenant-scoped).
 
-    - allowed_groups-i daxil et (təyin olunmuş qruplar).
-    - Plus: imtahanın cəhdləri olan tələbələrin üzv olduqları qruplar.
-    - Tenant: yalnız bu imtahanın organization-na aid qrupları göstər (əgər varsa).
+    2026-09-14 (W5 `w5left`, tapşırıq 1): kohortlarla (`allowed_groups`) yanaşı
+    reyestr qrupları (`allowed_units` + cəhd edənlərin cari qrupu) da siyahıdadır —
+    `GroupOption` (`id` = `"<int>"` / `"unit:<uuid>"`, `name`). Bax `_group_options`.
     """
-    from apps.exams.models import StudentGroup
+    from ._group_options import available_group_options
 
-    attempt_user_ids = exam.attempts.values_list("user_id", flat=True)
-    qs = StudentGroup.objects.filter(Q(exams=exam) | Q(students__id__in=attempt_user_ids))
-    org_id = getattr(exam, "organization_id", None)
-    if org_id:
-        qs = qs.filter(organization_id=org_id)
-    return qs.distinct().order_by("name")
+    return available_group_options(exam)
 
 
 def _attempt_time_limit_seconds(attempt):
@@ -407,18 +402,16 @@ def _apply_results_filters_from_params(exam, params):
     if date_to:
         attempts = attempts.filter(started_at__date__lte=date_to)
 
-    # Group filter — imtahanın iştirakçılarının üzvü olduğu istənilən qrupdan
-    group_filter_raw = (params.get("group") or "").strip().lower()
+    # Group filter — imtahanın iştirakçılarının üzvü olduğu istənilən qrupdan.
+    # W5 `w5left`: `unit:<uuid>` (reyestr qrupu) dəyəri də qəbul olunur; cəhdlər
+    # tələbənin cari aktiv `StudentAcademicRecord.group`-una görə süzülür.
+    from ._group_options import attempts_in_group_q, resolve_group_option
+
+    group_option = resolve_group_option(exam, params.get("group"))
     group_id = None
-    if group_filter_raw and group_filter_raw != "all":
-        try:
-            group_id = int(group_filter_raw)
-        except ValueError:
-            group_id = None
-    if group_id is not None and _available_groups_for_exam(exam).filter(id=group_id).exists():
-        attempts = attempts.filter(user__student_groups_as_student__id=group_id).distinct()
-    else:
-        group_id = None
+    if group_option is not None:
+        attempts = attempts.filter(attempts_in_group_q(group_option)).distinct()
+        group_id = group_option.id
 
     sort_by = (params.get("sort_by") or "").strip()
     sort_dir = (params.get("sort_dir") or "").strip()

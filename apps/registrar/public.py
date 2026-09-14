@@ -20,6 +20,7 @@ from apps.registrar.exam_bridge import (
 )
 from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.models import StudentAcademicRecord
+from apps.registrar.signals import student_group_changed
 
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
@@ -35,6 +36,7 @@ __all__ = [
     "exam_eligibility_batch",
     "exam_result_summary",
     "record_exam_result",
+    "student_group_changed",
 ]
 
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.

@@ -43,9 +43,12 @@ def _search_students(organization, query):
     from django.contrib.auth import get_user_model
     from django.db.models import Q
 
+    from apps.exams.public import unit_student_record_filter
     from apps.organizations.public import organization_user_queryset
 
     User = get_user_model()
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): qrup adı ilə axtarış reyestr qrupunu da
+    # tapır (cari aktiv `StudentAcademicRecord.group` — `unit_assignment` ilə eyni şərt).
     condition = (
         Q(username__icontains=query)
         | Q(first_name__icontains=query)
@@ -53,6 +56,11 @@ def _search_students(organization, query):
         | Q(
             student_groups_as_student__organization=organization,
             student_groups_as_student__name__icontains=query,
+        )
+        | Q(
+            academic_records__organization=organization,
+            academic_records__group__name__icontains=query,
+            **unit_student_record_filter("academic_records__"),
         )
     )
     return list(
@@ -117,7 +125,12 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
         exams_qs = exams_qs.filter(title__icontains=filters["exam_q"])
     unit = kafedra or faculty
     if unit is not None:
-        exams_qs = exams_qs.filter(allowed_groups__org_unit__path__startswith=unit.path)
+        # 2026-09-14 (W5 `w5left`, tapşırıq 1): reyestr qrupuna (`allowed_units`,
+        # fakültə/kafedra alt-ağacı) təyin olunmuş imtahanlar da filtrə düşür —
+        # əvvəl yalnız kohortun `org_unit`-i yoxlanırdı. Tək `filter()` → tək JOIN dəsti.
+        exams_qs = exams_qs.filter(
+            Q(allowed_groups__org_unit__path__startswith=unit.path) | Q(allowed_units__path__startswith=f"{unit.path}/")
+        )
     if period is not None:
         exams_qs = exams_qs.filter(start_datetime__date__range=(period.start_date, period.end_date))
     elif filters["year"] and year_periods:

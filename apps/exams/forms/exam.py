@@ -22,6 +22,7 @@ from core.roles import ProfileRole
 
 from .coding import dump_test_cases, parse_test_cases
 from .exam_coding_fields import CodingExamFieldsMixin
+from .exam_exclusions import excluded_users_within_assignment, requested_unit_ids
 
 User = get_user_model()
 
@@ -231,6 +232,8 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         user = kwargs.pop("user", None)
         organization = kwargs.pop("organization", None)
         super().__init__(*args, **kwargs)
+        # W5 `w5left` (2026-09-14): `clean()`-də reyestr qrupu tələbələrini tenant-a görə süzmək üçün.
+        self._organization = organization
         self.practical_exams_enabled = practical_exams_enabled()
         self.exam_supervision_enabled = exam_supervision_enabled()
 
@@ -543,15 +546,18 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
                 pgettext_lazy("exams.form.exam.error", "subject_required_for_final_midterm"),
             )
 
+        # 2026-09-14 (W5 `w5left`, tapşırıq 2): istisna yalnız kohort üzvləri ilə
+        # süzülürdü → reyestr qrupu (`allowed_units`) tələbəsi istisna edilə bilmirdi.
         allowed_groups = cleaned_data.get("allowed_groups")
         excluded_users = cleaned_data.get("excluded_users")
         if excluded_users is not None:
-            if allowed_groups:
-                cleaned_data["excluded_users"] = excluded_users.filter(
-                    student_groups_as_student__in=allowed_groups
-                ).distinct()
-            else:
-                cleaned_data["excluded_users"] = excluded_users.none()
+            cleaned_data["excluded_users"] = excluded_users_within_assignment(
+                excluded_users,
+                allowed_groups=allowed_groups,
+                unit_ids=requested_unit_ids(self.data) if self.is_bound else [],
+                organization=self._organization or cleaned_data.get("organization"),
+                instance=self.instance,
+            )
 
         # Əgər hər ikisi doldurulubsa, bitmə başlamadan sonra olmalıdır
         if start_dt and end_dt:

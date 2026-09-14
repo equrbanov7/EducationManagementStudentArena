@@ -4,6 +4,7 @@ from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 
 from apps.exams.models import Exam, StudentGroup
+from apps.exams.services import unit_pin_sync  # noqa: F401  # W5 `w5left`: reyestr qrupu üzvlüyü → PIN sinxronu
 from apps.exams.services.student_pins import provision_exam_student_pins
 from core.rls_pooling import rls_worker_atomic
 

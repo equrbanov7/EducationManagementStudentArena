@@ -7,6 +7,12 @@ from .constants import QUESTION_EXAM_KIND_CHOICES  # noqa: F401
 from .constants import QUESTION_EXAM_KIND_VALUES  # noqa: F401
 from .domain.unit_assignment import unit_assigned_exams_q  # noqa: F401
 from .domain.unit_assignment import unit_assigned_student_ids  # noqa: F401
+from .domain.unit_assignment import unit_student_record_filter  # noqa: F401
+from .domain.unit_scope_filters import allowed_units_prefetch  # noqa: F401
+from .domain.unit_scope_filters import allowed_units_q  # noqa: F401
+from .domain.unit_scope_filters import allowed_units_under_q  # noqa: F401
+from .domain.unit_scope_filters import split_group_filter_values  # noqa: F401
+from .domain.unit_scope_filters import unit_row_labels  # noqa: F401
 from .forms import ExamRoomForm  # noqa: F401
 from .navigation import append_query_params  # noqa: F401
 from .navigation import current_return_to  # noqa: F401
@@ -28,6 +34,9 @@ __all__ = [
     "QUESTION_EXAM_KIND_CHOICES",
     "QUESTION_EXAM_KIND_VALUES",
     "SECURE_EXAM_CATEGORIES",
+    "allowed_units_prefetch",
+    "allowed_units_q",
+    "allowed_units_under_q",
     "append_query_params",
     "chair_queue_queryset",
     "clear_entry_session",
@@ -38,8 +47,11 @@ __all__ = [
     "is_exam_center_user",
     "pending_chair_review_count",
     "score_adjustments",
+    "split_group_filter_values",
     "student_visible_pin",
     "supervisor_org_or_403",
     "unit_assigned_exams_q",
     "unit_assigned_student_ids",
+    "unit_row_labels",
+    "unit_student_record_filter",
 ]
