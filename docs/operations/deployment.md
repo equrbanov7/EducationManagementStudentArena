@@ -482,7 +482,11 @@ w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, so
 **C. Deploy**
 
 11. `bash scripts/deploy/remote_deploy.sh` (və ya `main`-ə push). Gözlənilən
-    axın: `emsarena-prod:<sha>` build → `check --deploy` → dump → migrate/collectstatic →
+    axın: **`.env` preflight** (A-1 `APP_DATABASE_USER` boş deyil, `EMS_DB_ROLE_ENFORCE`
+    xəbərdarlığı; P3-18 `PGBOUNCER_MAX_DB_CONNECTIONS ≤ POSTGRES_MAX_CONNECTIONS−20` və
+    pool+reserve ≤ cap; A-3 `ALLOWED_HOSTS`-da `localhost`; A-5 `REDIS_MAXMEMORY <
+    REDIS_MEM_LIMIT` — hər hansı biri pozulubsa deploy heç bir konteynerə toxunmadan
+    dayanır) → `emsarena-prod:<sha>` build → `check --deploy` → dump → migrate/collectstatic →
     `up -d` → health gate → `latest` teqi. **İlk** deploy-da rollback hədəfi
     `emsarena-prod:latest`-dir (köhnə konteynerlər ondan yaradılıb) — keçərlidir.
 12. Miqrasiyalar bu dalğada: `organizations 0051–0052`, `registrar 0076–0078`,

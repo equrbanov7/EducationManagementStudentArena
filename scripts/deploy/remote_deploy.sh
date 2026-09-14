@@ -505,6 +505,90 @@ preflight_django_deploy_check() {
   fi
 }
 
+preflight_env_consistency() {
+  # 2026-09-14 (deployment.md §5.2 A-1/A-3/A-5, audit P3-18): `manage.py check
+  # --deploy` Django-nun görmədiyi .env invariantlarını yoxlayır. Hər sətir bir
+  # qayda; xəta → deploy dayanır (heç nə qurulmayıb/miqrasiya olunmayıb).
+  # Yalnız qeyri-sirr açarlar oxunur (dotenv_value); dəyərlər çap olunmur.
+  local failures=0
+  local app_user pg_max pgb_max_db pool reserve allowed_hosts redis_max redis_limit enforce
+  app_user="$(dotenv_value APP_DATABASE_USER)"
+  enforce="$(dotenv_value EMS_DB_ROLE_ENFORCE | tr '[:upper:]' '[:lower:]')"
+  pg_max="$(dotenv_value POSTGRES_MAX_CONNECTIONS)"; pg_max="${pg_max:-250}"
+  pgb_max_db="$(dotenv_value PGBOUNCER_MAX_DB_CONNECTIONS)"; pgb_max_db="${pgb_max_db:-230}"
+  pool="$(dotenv_value PGBOUNCER_DEFAULT_POOL_SIZE)"; pool="${pool:-150}"
+  reserve="$(dotenv_value PGBOUNCER_RESERVE_POOL_SIZE)"; reserve="${reserve:-50}"
+  allowed_hosts="$(dotenv_value ALLOWED_HOSTS)"
+  redis_max="$(dotenv_value REDIS_MAXMEMORY)"; redis_max="${redis_max:-3gb}"
+  redis_limit="$(dotenv_value REDIS_MEM_LIMIT)"; redis_limit="${redis_limit:-4096M}"
+
+  # A-1: tətbiq rolu ayrılmalıdır; `error` rejimi olmadan superuser-ə qayıdış səssiz keçər.
+  if [ -z "$app_user" ]; then
+    echo "ENV: APP_DATABASE_USER is empty — the app would run as the Postgres superuser and bypass RLS (deployment.md §5.2 A-1)." >&2
+    failures=$((failures + 1))
+  elif [ "$enforce" != "error" ]; then
+    echo "ENV: EMS_DB_ROLE_ENFORCE=${enforce:-<unset>} — set it to 'error' once APP_DATABASE_USER is provisioned so a superuser fallback blocks the deploy (A-1). Continuing (warn)." >&2
+  fi
+
+  # P3-18: bütün rollar üzrə backend tavanı Postgres limitindən aşağı olmalıdır.
+  for v in "$pg_max" "$pgb_max_db" "$pool" "$reserve"; do
+    if ! [[ "$v" =~ ^[0-9]+$ ]]; then
+      echo "ENV: POSTGRES_MAX_CONNECTIONS / PGBOUNCER_* must be integers (got '${v}')." >&2
+      failures=$((failures + 1)); break
+    fi
+  done
+  if [[ "$pg_max" =~ ^[0-9]+$ && "$pgb_max_db" =~ ^[0-9]+$ ]]; then
+    if [ "$pgb_max_db" -gt $((pg_max - 20)) ]; then
+      echo "ENV: PGBOUNCER_MAX_DB_CONNECTIONS=${pgb_max_db} must be <= POSTGRES_MAX_CONNECTIONS-20 (${pg_max}-20=$((pg_max - 20))): app + owner pools would exhaust Postgres (audit P3-18)." >&2
+      failures=$((failures + 1))
+    fi
+    if [[ "$pool" =~ ^[0-9]+$ && "$reserve" =~ ^[0-9]+$ ]] && [ $((pool + reserve)) -gt "$pgb_max_db" ]; then
+      echo "ENV: PGBOUNCER_DEFAULT_POOL_SIZE+RESERVE ($((pool + reserve))) exceeds PGBOUNCER_MAX_DB_CONNECTIONS=${pgb_max_db} — a single pool already hits the cap; lower the pool or raise the cap (with POSTGRES_MAX_CONNECTIONS)." >&2
+      failures=$((failures + 1))
+    fi
+  fi
+
+  # A-3: healthcheck / nginx scrape / Alertmanager webhook `Host: localhost` göndərir.
+  if [ -n "$allowed_hosts" ] && [ "$allowed_hosts" != "*" ]; then
+    case ",${allowed_hosts// /}," in
+      *,localhost,*) ;;
+      *)
+        echo "ENV: ALLOWED_HOSTS must include 'localhost' (app healthcheck, /metrics/ scrape, Alertmanager webhook) — deployment.md §5.2 A-3." >&2
+        failures=$((failures + 1))
+        ;;
+    esac
+  fi
+
+  # A-5: Redis maxmemory konteyner limitindən kiçik olmalıdır (əks halda OOM-kill, noeviction xətası deyil).
+  local max_mb limit_mb
+  max_mb="$(_to_mb "$redis_max")"; limit_mb="$(_to_mb "$redis_limit")"
+  if [ -n "$max_mb" ] && [ -n "$limit_mb" ] && [ "$max_mb" -ge "$limit_mb" ]; then
+    echo "ENV: REDIS_MAXMEMORY (${redis_max}) must be below REDIS_MEM_LIMIT (${redis_limit}) — leave ~25% headroom for AOF rewrite and client buffers (§5.2 A-5)." >&2
+    failures=$((failures + 1))
+  fi
+
+  if [ "$failures" -gt 0 ]; then
+    echo "Environment preflight FAILED (${failures} problem(s) in ${APP_DIR}/.env); nothing was built, migrated or restarted." >&2
+    exit 1
+  fi
+  echo "Environment preflight passed (DB role, PgBouncer cap, ALLOWED_HOSTS, Redis memory)."
+}
+
+_to_mb() {
+  # "3gb" / "512M" / "4096M" / "2G" / "1073741824" → MB (tam ədəd); tanınmayan → boş.
+  local raw="$1" num unit
+  raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]')"
+  num="${raw%%[a-z]*}"; unit="${raw#"$num"}"
+  [[ "$num" =~ ^[0-9]+$ ]] || { printf ''; return 0; }
+  case "$unit" in
+    g|gb) printf '%s' $((num * 1024)) ;;
+    m|mb) printf '%s' "$num" ;;
+    k|kb) printf '%s' $((num / 1024)) ;;
+    "") printf '%s' $((num / 1024 / 1024)) ;;
+    *) printf '' ;;
+  esac
+}
+
 verify_running_build_sha() {
   # P1-07 (Codex audit, 2026-09-13): /health/ `build.sha` bu deploy-un
   # qurduğu commit ilə eyni olmalıdır — fərq varsa nginx hələ köhnə image-in
@@ -700,6 +784,8 @@ docker_deploy() {
   fi
 
   docker compose version >/dev/null
+  # §5.2 .env invariantları — hər şeydən əvvəl (heç bir konteynerə toxunmadan).
+  preflight_env_consistency
   # lan rejimində publik DNS yoxdur — DNS preflight yalnız direct-edge üçündür.
   if [ "$EDGE_PROXY_MODE" = "direct" ]; then
     preflight_direct_dns
