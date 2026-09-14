@@ -436,6 +436,7 @@
 .people__cell-check input {
     width: 18px;
     height: 18px;
+    margin: 3px; /* 2026-09-14 (FE-F11): 24 px hədəf dairəsi boş — 2.5.8 aralıq istisnası; xana JS-də sarğısız */
     accent-color: var(--ems-primary-600, #2563eb);
     cursor: pointer;
 }
@@ -448,7 +449,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 0;
+    min-height: 24px; padding: 3px 0; /* 2026-09-14 (audit FE-F11, WCAG 2.5.8): 64×18 → ≥24 px hədəf */
     border: 0;
     background: transparent;
     font: inherit;
@@ -920,7 +921,6 @@ th[aria-sort="descending"] .people__th-sort-icon::after {
         grid-template-columns: minmax(0, 1fr);
     }
 }
-
 
 /* ── Çekmecə xülasəsi (2026-09-08) ───────────────────────────────────────── */
 .people-detail__facts--grid {

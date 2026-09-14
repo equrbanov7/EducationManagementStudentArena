@@ -68668,3 +68668,34 @@ msgstr "Вид экзамена"
 msgctxt "registrar.exam_score_entry"
 msgid "İmtahan növü yazılı və ya praktiki olmalıdır."
 msgstr "Вид экзамена должен быть письменным или практическим."
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı redaktə et"
+msgstr "Редактировать задание"
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı sil"
+msgstr "Удалить задание"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu redaktə et"
+msgstr "Редактировать группу"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu sil"
+msgstr "Удалить группу"
+
+msgctxt "assignment.detail"
+msgid "Seçilmiş faylı sil"
+msgstr "Убрать выбранный файл"
+
+msgctxt "courses.members_page"
+msgid "Üzvü kursdan sil"
+msgstr "Удалить участника из курса"
+
+msgctxt "courses.partial.member_accordion"
+msgid "Üzvü kursdan sil"
+msgstr "Удалить участника из курса"
+
+msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
+msgstr "Отклонить заявку организации на регистрацию? Это действие нельзя отменить."

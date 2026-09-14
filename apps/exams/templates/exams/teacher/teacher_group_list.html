@@ -72,8 +72,10 @@
                 data-teachers="[{% for t in group.teachers.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}]"
                 data-subjects='[{% for sub in group.subjects.all %}"{{ sub.id }}"{% if not forloop.last %},{% endif %}{% endfor %}]'
                 data-org-unit="{{ group.org_unit_id|default:'' }}"
+                aria-label="{% trans 'Qrupu redaktə et' context 'exams.template.teacher_group_list' %}"
               >
-                <i class="fas fa-pen"></i>
+                {# 2026-09-14 (audit FE-F17): ikon-only düymələrə əlçatan ad #}
+                <i class="fas fa-pen" aria-hidden="true"></i>
               </button>
 
               <form method="post" action="{% url 'exams:teacher_delete_group' group.id %}" class="d-inline">
@@ -82,8 +84,9 @@
                   type="submit"
                   class="btn btn-sm btn-outline-danger jsConfirmDeleteGroup"
                   data-confirm-message="{% trans 'confirm_delete_group' context 'exams.template.teacher_group_list' %}"
+                  aria-label="{% trans 'Qrupu sil' context 'exams.template.teacher_group_list' %}"
                 >
-                  <i class="fas fa-trash"></i>
+                  <i class="fas fa-trash" aria-hidden="true"></i>
                 </button>
               </form>
               {% endif %}
@@ -250,8 +253,9 @@
       </div>
 
       <div class="modal-footer-custom">
-        <button type="button" id="deleteBtn" class="btn-delete-custom">
-          <i class="fas fa-trash-alt"></i>
+        <button type="button" id="deleteBtn" class="btn-delete-custom"
+                aria-label="{% trans 'Qrupu sil' context 'exams.template.teacher_group_list' %}">
+          <i class="fas fa-trash-alt" aria-hidden="true"></i>
         </button>
 
         <div class="action-buttons">

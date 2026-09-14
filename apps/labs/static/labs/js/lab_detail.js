@@ -281,8 +281,10 @@
                     '\n\n' +
                     t('confirmUnanswered', '{count} questions are unanswered. Submit?').replace('{count}', unanswered);
             }
-            if (!confirm(confirmText)) return;
-            submitLabForm();
+            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+            window.EMSConfirm.open({ body: confirmText }).then(function (ok) {
+                if (ok) submitLabForm();
+            });
             return;
         }
 

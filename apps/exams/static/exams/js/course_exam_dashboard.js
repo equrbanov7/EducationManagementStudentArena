@@ -593,9 +593,8 @@
         return;
       }
 
-      if (window.confirm(config.unlinkConfirm || "")) {
-        performUnlink();
-      }
+      // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm; ləğv = sorğu yoxdur.
+      window.EMSConfirm.open({ body: config.unlinkConfirm || "", danger: true }).then(function (ok) { if (ok) performUnlink(); });
     }
 
     function linkExam(trigger) {

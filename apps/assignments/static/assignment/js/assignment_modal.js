@@ -142,7 +142,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (deleteInProgress) return;
 
-      if (!confirm(gettext("Bu sərbəst işi silmək istədiyinizə əminsiniz?"))) return;
+      // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+      const confirmed = await window.EMSConfirm.open({
+        body: gettext("Bu sərbəst işi silmək istədiyinizə əminsiniz?"),
+        danger: true,
+      });
+      if (!confirmed || deleteInProgress) return;
 
       deleteInProgress = true;
 

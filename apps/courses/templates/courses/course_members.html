@@ -108,10 +108,11 @@
                         </div>
                         <div class="member-actions">
                             {% if is_owner %}
-                            <button class="btn-icon-delete"
+                            <button type="button" class="btn-icon-delete"
                                     data-delete-member-id="{{ student.id }}"
-                                    data-delete-member-name="{{ student.user.username }}">
-                                <i class="fas fa-times-circle"></i>
+                                    data-delete-member-name="{{ student.user.username }}"
+                                    aria-label="{% trans 'Üzvü kursdan sil' context 'courses.members_page' %}">
+                                <i class="fas fa-times-circle" aria-hidden="true"></i>
                             </button>
                             {% endif %}
                         </div>

@@ -79,8 +79,9 @@
                                 <button type="button" 
                                     class="btn btn-sm btn-outline-danger js-delete-member"
                                     data-url="{% url 'courses:delete_member' course.id member.id %}"
-                                    data-member-id="{{ member.id }}">
-                                   <i class="fas fa-trash"></i>
+                                    data-member-id="{{ member.id }}"
+                                    aria-label="{% trans 'Üzvü kursdan sil' context 'courses.partial.member_accordion' %}">
+                                   <i class="fas fa-trash" aria-hidden="true"></i>
                                 </button>
                                 {% endif %}
                             </div>

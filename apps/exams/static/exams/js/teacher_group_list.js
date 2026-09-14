@@ -368,21 +368,35 @@
     });
   });
 
+  // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
   document.querySelectorAll(".jsConfirmDeleteGroup").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const msg = btn.dataset.confirmMessage || I18N_TEACHER_GROUP_LIST.confirmDeleteGroup;
-      if (!window.confirm(msg)) {
-        e.preventDefault();
+      const form = btn.form;
+      if (!form) return;
+      if (form.dataset.emsConfirmed === "1") {
+        delete form.dataset.emsConfirmed;
+        return;
       }
+      e.preventDefault();
+      window.EMSConfirm.open({ body: msg, danger: true }).then((ok) => {
+        if (!ok) return;
+        form.dataset.emsConfirmed = "1";
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit(btn);
+        } else {
+          form.submit();
+        }
+      });
     });
   });
 
   if (deleteBtn) {
     deleteBtn.addEventListener("click", function () {
       if (!groupDeleteForm?.action) return;
-      if (window.confirm(I18N_TEACHER_GROUP_LIST.confirmDeleteGroup)) {
-        groupDeleteForm.submit();
-      }
+      window.EMSConfirm.open({ body: I18N_TEACHER_GROUP_LIST.confirmDeleteGroup, danger: true }).then((ok) => {
+        if (ok) groupDeleteForm.submit();
+      });
     });
   }
 

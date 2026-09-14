@@ -122,7 +122,7 @@
                 <option value="course_center" {% if org_type_filter == 'course_center' %}selected{% endif %}>{% trans "course_center" context "organization.type" %}</option>
             </select>
         </div>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        <button type="submit" class="btn btn-primary" aria-label="{% trans 'Axtar' context 'search' %}"><i class="fas fa-search" aria-hidden="true"></i></button>
     </form>
 
     <form method="post" action="{% url 'accounts:student_organization_request' %}" class="d-grid gap-3">

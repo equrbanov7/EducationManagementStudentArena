@@ -69,12 +69,71 @@
                 return;
             }
             var persist = !(options && options.persist === false) && !isMobileViewport();
+            var wasCollapsed = ctx.sidebar.classList.contains("collapsed");
             ctx.sidebar.classList.toggle("collapsed", isCollapsed);
             if (persist) {
                 writePersistedSidebarCollapsed(isCollapsed);
             }
             applySidebarCollapsedGroups(isCollapsed);
             syncSidebarToggleState();
+            var manageFocus = !(options && options.focus === false);
+            if (manageFocus && isMobileViewport() && wasCollapsed !== !!isCollapsed) {
+                manageMobileSidebarFocus(isCollapsed);
+            }
+        }
+
+        /* 2026-09-14 (audit FE-F16, WCAG 2.4.3): mobil off-canvas sidebar bir
+           dialoq kimi davranır — açılanda fokus içəri (aktiv və ya ilk görünən
+           link) keçir, bağlananda (ESC, backdrop, bölmə seçimi) açan düyməyə
+           qayıdır. Bölmə keçidində `section_loader` əvvəlcə bölmə başlığına
+           fokus verir; fokus artıq sidebar-dan kənardadırsa toxunulmur ki,
+           FE-F5 düzəlişi (başlıq fokusu) əzilməsin. */
+        function isRenderedForFocus(el) {
+            if (!el || el.disabled || el.getAttribute("aria-hidden") === "true") {
+                return false;
+            }
+            var details = el.closest ? el.closest("details") : null;
+            while (details) {
+                if (!details.open && details.querySelector("summary") !== el) {
+                    return false;
+                }
+                details = details.parentElement ? details.parentElement.closest("details") : null;
+            }
+            return el.getClientRects().length > 0;
+        }
+
+        function focusFirstSidebarLink() {
+            var active = ctx.sidebar.querySelector('.sidebar-menu-link[aria-current="page"]');
+            if (isRenderedForFocus(active)) {
+                active.focus({ preventScroll: true });
+                return;
+            }
+            var candidates = ctx.sidebar.querySelectorAll(
+                '.sidebar-menu-link, summary, a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            for (var i = 0; i < candidates.length; i += 1) {
+                if (isRenderedForFocus(candidates[i])) {
+                    candidates[i].focus({ preventScroll: true });
+                    return;
+                }
+            }
+        }
+
+        function manageMobileSidebarFocus(isCollapsed) {
+            try {
+                if (!isCollapsed) {
+                    focusFirstSidebarLink();
+                    return;
+                }
+                var activeEl = document.activeElement;
+                var focusIsLoose = !activeEl || activeEl === document.body;
+                var trigger = ctx.mobileSidebarTrigger;
+                if (trigger && (focusIsLoose || ctx.sidebar.contains(activeEl)) && isRenderedForFocus(trigger)) {
+                    trigger.focus({ preventScroll: true });
+                }
+            } catch (e) {
+                /* fail-soft: fokus idarəsi UI-ı heç vaxt sındırmamalıdır */
+            }
         }
 
         /* Desktop ↔ mobil sərhədini keçəndə (matchMedia `change`):
@@ -88,11 +147,12 @@
             if (!ctx.sidebar) {
                 return;
             }
+            // Ölçü dəyişməsi istifadəçi əməli deyil — fokus daşınmır (FE-F16).
             if (isMobileViewport()) {
-                setSidebarCollapsed(true, { persist: false });
+                setSidebarCollapsed(true, { persist: false, focus: false });
                 return;
             }
-            setSidebarCollapsed(readPersistedSidebarCollapsed(), { persist: false });
+            setSidebarCollapsed(readPersistedSidebarCollapsed(), { persist: false, focus: false });
         }
 
         /* ── Sidebar qrupları (nativ <details>) ──────────────────────────────

@@ -364,9 +364,19 @@
         var isApply = mode === "apply";
         var button = host.querySelector(isApply ? "[data-six-apply]" : "[data-six-preview]");
         var url = host.getAttribute(isApply ? "data-apply-url" : "data-preview-url");
-        if (isApply && !window.confirm(t.tConfirm || "?")) {
+        if (!isApply) {
+            execute(host, t, button, url, file, false);
             return;
         }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: t.tConfirm || "?", danger: true }).then(function (ok) {
+            if (ok) {
+                execute(host, t, button, url, file, true);
+            }
+        });
+    }
+
+    function execute(host, t, button, url, file, isApply) {
         setBusy(button, true, t.tBusy);
         post(host, url, file)
             .then(function (payload) {

@@ -68576,3 +68576,34 @@ msgstr "İmtahan növü"
 msgctxt "registrar.exam_score_entry"
 msgid "İmtahan növü yazılı və ya praktiki olmalıdır."
 msgstr "İmtahan növü yazılı və ya praktiki olmalıdır."
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı redaktə et"
+msgstr "Tapşırığı redaktə et"
+
+msgctxt "assignment.legacy.review"
+msgid "Tapşırığı sil"
+msgstr "Tapşırığı sil"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu redaktə et"
+msgstr "Qrupu redaktə et"
+
+msgctxt "exams.template.teacher_group_list"
+msgid "Qrupu sil"
+msgstr "Qrupu sil"
+
+msgctxt "assignment.detail"
+msgid "Seçilmiş faylı sil"
+msgstr "Seçilmiş faylı sil"
+
+msgctxt "courses.members_page"
+msgid "Üzvü kursdan sil"
+msgstr "Üzvü kursdan sil"
+
+msgctxt "courses.partial.member_accordion"
+msgid "Üzvü kursdan sil"
+msgstr "Üzvü kursdan sil"
+
+msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
+msgstr "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."

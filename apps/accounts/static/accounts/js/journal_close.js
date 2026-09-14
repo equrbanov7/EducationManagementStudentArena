@@ -167,7 +167,25 @@
       var key = trigger ? trigger.getAttribute("data-jc-confirm-key") : "";
       var message =
         key === "close" ? t("data-confirm-close") : key === "reopen" ? t("data-confirm-reopen") : t("data-confirm-delete");
-      if (message && !window.confirm(message)) event.preventDefault();
+      if (!message) return;
+      // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+      // Təsdiqdən sonra form `data-ems-confirmed` bayrağı ilə yenidən göndərilir —
+      // ikinci submit hadisəsi bu yoxlamadan keçir, bayraq silinir.
+      if (form.dataset.emsConfirmed === "1") {
+        delete form.dataset.emsConfirmed;
+        return;
+      }
+      event.preventDefault();
+      var submitter = event.submitter || null;
+      window.EMSConfirm.open({ body: message, danger: true }).then(function (ok) {
+        if (!ok) return;
+        form.dataset.emsConfirmed = "1";
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit(submitter && submitter.form === form ? submitter : undefined);
+        } else {
+          form.submit();
+        }
+      });
     });
   });
 })();

@@ -269,9 +269,14 @@
             postAction(fillUrl(resumeTpl, current.sessionId, current.ticketId), "")
                 .then(afterAction).catch(netErr);
         } else if (action === "reentry") {
-            if (!window.confirm(gettext("Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam edəcək."))) return;
-            postAction(fillUrl(reentryTpl, current.sessionId, current.ticketId), "")
-                .then(afterReentry).catch(netErr);
+            // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+            window.EMSConfirm.open({
+                body: gettext("Bu tələbəyə yeni giriş PIN-i verilsin? O, imtahana olduğu yerdən davam edəcək.")
+            }).then(function (ok) {
+                if (!ok) return;
+                postAction(fillUrl(reentryTpl, current.sessionId, current.ticketId), "")
+                    .then(afterReentry).catch(netErr);
+            });
         } else if (action === "suspend") {
             var reason = window.prompt(gettext("Dayandırma səbəbi:"));
             if (!reason) return;
