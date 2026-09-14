@@ -206,10 +206,19 @@
     gap: var(--ems-sp-4) var(--ems-sp-6);
 }
 
+/* 2026-09-14 (sahibin brauzer rəyi): 1000 px-də cüt sütun 137 px-ə sıxılır, etiket
+   iki sətrə keçir və seçici ilə rəqəm xanası bir-birinə nisbətən sürüşürdü —
+   cüt tam eni tutur, xanalar etiketdən asılı olmayaraq aşağı kənara düzülür. */
 .ese-meta__grid-pair {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--ems-sp-3);
+    grid-template-columns: minmax(9rem, 14rem) minmax(9rem, 14rem);
+    gap: var(--ems-sp-3) var(--ems-sp-4);
+    align-items: end;
+    grid-column: 1 / -1;
+}
+
+.ese-meta__grid-pair .ese-qmax {
+    width: 100%;
 }
 
 .ese-meta__grid-pair-hint {
