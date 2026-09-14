@@ -124,6 +124,11 @@ def build_journal_close_section(
         unit = OrgUnit.objects.filter(organization=selected_org, pk=unit_id).first()
     section["selected_scope"] = scope
     section["selected_unit_id"] = str(unit.pk) if unit is not None else ""
+    # 2026-09-14 (W3 `w3sweep` brauzer süpürgəsi): fakültə/kafedra əhatəsində
+    # «bağla»/«aç»dan sonra `next` əhatəni itirirdi — RİM «Bütün universitet»
+    # görünüşünə qayıdır və etdiyi əməlin nəticəsini (Açıq/Bağlı sayğacı) görmürdü.
+    if unit is not None:
+        section["post_next_url"] = _append_query_params(section["post_next_url"], jc_scope=scope, jc_unit=str(unit.pk))
     section["preview"] = (
         journal_close_service.preview(organization=selected_org, period=period, unit=unit)
         if period is not None

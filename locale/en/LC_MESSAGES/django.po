@@ -31586,12 +31586,12 @@ msgstr "No work to review was found."
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "page_title"
-msgstr "Create a New Course"
+msgstr "Work awaiting review"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:16
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "label_task"
-msgstr "Status"
+msgstr "items"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31655,7 +31655,7 @@ msgstr "Expired"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_reviewing"
-msgstr "Pending"
+msgstr "Reviewing"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:116
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31675,7 +31675,7 @@ msgstr "Great work!"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:136
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "The grading queue is empty."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:138
 msgctxt "exams.template.teacher_pending_attempts"
@@ -68737,3 +68737,7 @@ msgstr "The formula contains a disallowed command ({command}) — kept as plain 
 msgctxt "exams.service.parsing.warning"
 msgid "formula_too_long"
 msgstr "The formula is too long (limit 2000 characters) — kept as plain text: “{preview}”"
+
+msgctxt "exams.question_bank.empty"
+msgid "Bu bankda hələ sual yoxdur."
+msgstr "There are no questions in this bank yet."

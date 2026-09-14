@@ -168,7 +168,9 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                         {% elif item.removed_from_exam %}
                         <span class="status-badge status-expired">{% trans "İmtahandan çıxarılıb" %}</span>
                         {% else %}
-                        <span class="status-badge status-{{ item.status|lower }}">{{ item.status }}</span>
+                        {% comment %}2026-09-14 (W3 `w3sweep`): nişan xam açarı («submitted») göstərirdi —
+                        tərcümə olunmuş etiket (mövcud msgid-lər).{% endcomment %}
+                        <span class="status-badge status-{{ item.status|lower }}">{% if item.status == "graded" %}{% trans "Qiymətləndirilib" %}{% elif item.status == "pending" %}{% trans "status_pending" context "profile.pending_review" %}{% else %}{% trans "status_submitted" context "profile.pending_review" %}{% endif %}</span>
                         {% endif %}
                     </div>
                 </div>

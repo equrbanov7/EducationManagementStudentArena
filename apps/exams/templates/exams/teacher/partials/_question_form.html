@@ -222,7 +222,9 @@
             <div class="form-row">
                 <div class="form-group half">
                     <label for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}:</label>
-                    {{ form.answer_mode }}
+                    <div class="bootstrap-single-select question-block-select-wrap">
+                        {{ form.answer_mode }}
+                    </div>
                     <div class="error-msg">{{ form.answer_mode.errors }}</div>
                     <div class="single-answer-mode-warning" data-single-answer-warning role="alert" aria-live="polite" hidden></div>
                 </div>

@@ -31605,12 +31605,12 @@ msgstr "Yoxlanılacaq iş tapılmadı."
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "page_title"
-msgstr "Yeni Kurs Yaratma"
+msgstr "Yoxlanılacaq işlər"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:16
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "label_task"
-msgstr "Status"
+msgstr "iş"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31674,12 +31674,12 @@ msgstr "Müddəti keçib"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_reviewing"
-msgstr "Pending"
+msgstr "Baxılır"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:116
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Təqdim edilib"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:123
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31689,12 +31689,12 @@ msgstr "Yoxla"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:135
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_title"
-msgstr "Great work!"
+msgstr "Əla iş!"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:136
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "Yoxlama növbəsi boşdur."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:138
 msgctxt "exams.template.teacher_pending_attempts"
@@ -68699,3 +68699,7 @@ msgstr "Düsturda icazə verilməyən əmr var ({command}) — düstur mətn kim
 msgctxt "exams.service.parsing.warning"
 msgid "formula_too_long"
 msgstr "Düstur çox uzundur (limit 2000 simvol) — mətn kimi saxlanıldı: «{preview}»"
+
+msgctxt "exams.question_bank.empty"
+msgid "Bu bankda hələ sual yoxdur."
+msgstr "Bu bankda hələ sual yoxdur."

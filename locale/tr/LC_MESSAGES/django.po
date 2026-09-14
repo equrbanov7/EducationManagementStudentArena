@@ -31590,12 +31590,12 @@ msgstr "Kontrol edilecek iş bulunamadı."
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "page_title"
-msgstr "Yeni Kurs Oluştur"
+msgstr "İncelenecek çalışmalar"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:16
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "label_task"
-msgstr "Status"
+msgstr "çalışma"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:23
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31659,12 +31659,12 @@ msgstr "Süresi dolmuş"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_reviewing"
-msgstr "Pending"
+msgstr "İnceleniyor"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:116
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Gönderildi"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:123
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31674,12 +31674,12 @@ msgstr "Kontrol et"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:135
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_title"
-msgstr "Great work!"
+msgstr "Harika iş!"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:136
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "İnceleme kuyruğu boş."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:138
 msgctxt "exams.template.teacher_pending_attempts"
@@ -68646,3 +68646,7 @@ msgstr "Formülde izin verilmeyen komut var ({command}) — düz metin olarak tu
 msgctxt "exams.service.parsing.warning"
 msgid "formula_too_long"
 msgstr "Formül çok uzun (sınır 2000 karakter) — düz metin olarak tutuldu: «{preview}»"
+
+msgctxt "exams.question_bank.empty"
+msgid "Bu bankda hələ sual yoxdur."
+msgstr "Bu bankada henüz soru yok."
