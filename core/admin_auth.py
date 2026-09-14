@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from core.mailing import system_reply_to
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 
@@ -146,6 +147,7 @@ def send_admin_otp_email(user, *, request=None) -> tuple[str, object]:
         body=text_body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[user.email],
+        reply_to=system_reply_to(),
     )
     message.attach_alternative(html_body, "text/html")
     message.send()
