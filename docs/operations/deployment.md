@@ -483,6 +483,35 @@ işlətmək lazım deyil (idempotentdir — işlədilsə «dəyişəcək: 0» ve
 daxili `myedu` açarları (`OrgUnit.slug myedu-dep-N`, `Program.code MYEDU-N`,
 legacy ledger `source_system`) UI-da görünmür, idxal açarıdır — toxunulmur.
 
+**A3. Real məlumatın serverə yüklənməsi (ilk deploy BOŞ bazaya getdi)**
+
+2026-09-14 20:34 UTC: `main` (`89275d84`) push-u `wcuserver` self-hosted runner-i ilə
+serverə deploy olundu — `.env` preflight, `check --deploy` (xəbərdarlıqsız),
+miqrasiyalar sıfırdan (`contenttypes.0001` → baş), `build.sha` təsdiqi keçdi. Serverin
+Postgres-i BOŞDUR. Lokal hazırlanmış real bazanın dump-ı (A2-dən sonra):
+`backups/server_seed/emsarena_db_<tarix>.dump` (pg_dump `-Fc --no-owner --no-privileges`,
+≈ 680 MB, 172 cədvəl). Serverdə (`/home/wcu/EducationManagementStudentArena`):
+
+```bash
+# 0. dump-ı serverə köçür (scp), sonra:
+docker compose -f docker-compose.prod.yml stop app celery_worker celery_worker_heavy celery_beat
+docker cp emsarena_db_<tarix>.dump emsarena-postgres:/tmp/seed.dump
+# 1. boş sxemi at, təmiz bazaya bərpa et (owner rolu ilə; dump-da owner/privilege yoxdur)
+docker exec emsarena-postgres psql -U "$POSTGRES_USER" -d postgres -c "DROP DATABASE \"$POSTGRES_DB\";" -c "CREATE DATABASE \"$POSTGRES_DB\" OWNER \"$POSTGRES_USER\";"
+docker exec emsarena-postgres pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner --no-privileges -j 4 /tmp/seed.dump
+docker exec emsarena-postgres rm /tmp/seed.dump
+# 2. tətbiq rolunu yenidən provision et (yeni bazada GRANT-lar yoxdur) və başa miqrasiya et
+APP_DATABASE_USER=… APP_DATABASE_PASSWORD='…' ./scripts/provision-app-db-role.sh
+docker compose -f docker-compose.prod.yml run --rm -e RUN_RELEASE_ON_START=false app /app/docker/release.sh
+# 3. tətbiqi qaldır və yoxla
+docker compose -f docker-compose.prod.yml up -d app celery_worker celery_worker_heavy celery_beat
+curl -k https://127.0.0.1/health/ ; docker exec emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "select count(*) from auth_user;"   # 8443 gözlənilir
+```
+
+Dump lokal bazanın miqrasiya vəziyyətindədir (`exams 0067` və s.); `release.sh`
+onu başa (`exams 0069`, `organizations 0053`, `registrar 0078`) gətirir — RİM `*`
+icazəsi (0053) məhz bu addımda mövcud rola yazılır.
+
 **B. Deploy-dan ƏVVƏL (server)**
 
 8. `docker network inspect emsarena_emsarena-network` → subnet **172.18.0.0/16**,
