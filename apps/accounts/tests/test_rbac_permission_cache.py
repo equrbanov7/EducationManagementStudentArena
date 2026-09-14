@@ -118,10 +118,11 @@ class RbacPermissionScopeQueryCacheTest(TestCase):
         # Cold path: 1 query resolving `_active_org_memberships` (roles.py) +
         # 1 memoized membership fetch for `get_permission_scope` (reused across
         # all 6 permission checks) + 1 unit-path resolution (reused across all
-        # UNIT-scoped checks) + 1 memoized `_collect_actor_permissions` fetch
-        # (reused across its 2 call sites in this build). Before the fix this
-        # was 1 + 6 + up to 6 + 2 = 15+ queries for the same build.
-        with self.assertNumQueries(4):
+        # UNIT-scoped checks). Before the fix this was 1 + 6 + up to 6 + 2 = 15+
+        # queries for the same build. 2026-09-13 (Codex audit §14/§21):
+        # `_collect_actor_permissions` artıq `user`-ə bağlanmış aktiv-org üzvlük
+        # siyahısını (roles.py / middleware) təzədən SELECT etmir → 4 → 3.
+        with self.assertNumQueries(3):
             capabilities = _role_capabilities(user, profile)
         # `can_manage_registrar` requires ORG-WIDE scope specifically (`is_org_wide`);
         # this actor is UNIT-scoped, so it stays False — the other gates below only

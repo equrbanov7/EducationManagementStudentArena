@@ -16,11 +16,7 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext
 
-from apps.organizations.structure_views import (
-    build_structure_tree_context,
-    chair_detail_context,
-    visible_chairs,
-)
+from apps.organizations.public import build_structure_tree_context, chair_detail_context, visible_chairs
 from apps.workload.public import chair_staff_load
 
 _CTX = "accounts.chair_profile"
@@ -162,6 +158,7 @@ def build_chair_profile_section(request, section, *, active_organization, allowe
     section["filter_fields"] = [
         {
             "name": "cp_chair",
+            "searchable": True,
             "label": pgettext(_CTX, "Kafedra"),
             "kind": "select",
             "value": str(chair.id),

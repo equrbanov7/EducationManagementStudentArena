@@ -1,0 +1,16 @@
+{% load i18n %}
+{% with sec=registrar_catalog_section %}
+{% if sec.readonly_tab %}
+<a class="ems-btn ems-btn--primary js-profile-section-link" href="{{ sec.registry_url }}"
+   data-section="student-registry" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}">
+  <i class="fas fa-user-graduate" aria-hidden="true"></i>
+  {% trans "Tələbə reyestrinə keç" context "registrar.catalog" %}
+</a>
+{% elif sec.can_create %}
+<button type="button" class="ems-btn ems-btn--primary" data-rcat-new>
+  <i class="fas fa-plus" aria-hidden="true"></i>
+  {{ sec.new_label }}
+</button>
+{% endif %}
+{% endwith %}

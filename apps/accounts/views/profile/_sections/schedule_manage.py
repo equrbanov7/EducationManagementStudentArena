@@ -30,10 +30,10 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.registrar import schedule as schedule_service
-from apps.registrar import schedule_conflicts, schedule_editor
-from apps.registrar import schedule_editor_actions as editor
-from apps.registrar import schedule_grid, schedule_manage
+from apps.registrar.public import schedule as schedule_service
+from apps.registrar.public import schedule_conflicts, schedule_editor
+from apps.registrar.public import schedule_editor_actions as editor
+from apps.registrar.public import schedule_grid, schedule_manage
 
 from .kollokvium_windows import _current_semester, _season_label
 

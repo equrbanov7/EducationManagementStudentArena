@@ -2,6 +2,7 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -10,6 +11,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.forms import BankQuestionCreateForm
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import (
     analyze_mcq_bulk,
     analyze_written_bulk,
@@ -18,13 +20,15 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
-from apps.exams.services.import_media import bind_import_manifest, clear_stash
+from apps.exams.services.import_media import bind_import_manifest, clear_stash, stash_level_warnings
 from apps.exams.services.question_bank_attach import _question_fingerprint, accessible_banks
 from apps.exams.services.visual_import_upload import prepare_question_upload
+from apps.exams.views.teacher.workbench_paste import paste_context, paste_image_response, requested_paste_action
 from core.tenancy import get_request_organization
 
 from ._shared import (
     _empty_analysis,
+    _ensure_bank_mutation_allowed,
     _is_modal_request,
     _normalize_format,
     _render_bank_question_form_html,
@@ -34,9 +38,14 @@ from ._shared import (
 
 @login_required
 def question_bank_bulk_add(request, bank_id):
+    # Audit 2026-09-13 EX-10 (P1): bank məzmununu YAZAN dörd view yalnız oxu
+    # görünürlüyü ilə işləyirdi — imtahan mərkəzi rəhbəri yad müəllimin
+    # paylaşılmamış bankının sualını, müəllim isə paylaşılan bankın sualını
+    # auditsiz dəyişə bilirdi. `question_bank_detail` POST ilə eyni qapı.
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "bulk_add")
 
     raw_text = ""
     parsed = []
@@ -48,6 +57,9 @@ def question_bank_bulk_add(request, bank_id):
     selected_language = (request.POST.get("language") or bank.language or DEFAULT_EXAM_LANGUAGE).strip().lower()
 
     math_token = (request.POST.get("math_token") or "").strip()
+    if requested_paste_action(request):
+        # W8: pano/sürükləmə şəkil qolu — ortaq helper (`workbench_paste.py`).
+        return paste_image_response(request, organization_id=bank.organization_id, math_token=math_token)
     if request.method == "POST":
         action = (request.POST.get("action") or "preview").strip()
         upload_failed = False
@@ -87,6 +99,16 @@ def question_bank_bulk_add(request, bank_id):
                         owner_id=request.user.pk,
                         organization_id=bank.organization_id,
                     )
+                    # W3 2026-09-14: DOCX bağlaması sual xəbərdarlıqları (naməlum
+                    # şəkil istinadı, düstur fallback) əlavə edir — meta/sayğaclar
+                    # yenilənir; bundle səviyyəli qeydlər test-səviyyəli siyahıya düşür.
+                    bundle_warnings = [
+                        {"type": "import_source", "severity": "warning", "msg": text}
+                        for text in stash_level_warnings(
+                            math_token, owner_id=request.user.pk, organization_id=bank.organization_id
+                        )
+                    ]
+                    analysis = finalize_analysis(parsed, analysis["test_level_warnings"] + bundle_warnings)
                 except (OSError, ValueError) as exc:
                     messages.error(request, str(exc))
                     if action == "save":
@@ -159,6 +181,9 @@ def question_bank_bulk_add(request, bank_id):
         "wb_save_label": pgettext("exams.template.question_bank_detail", "Seçilmişləri banka əlavə et"),
         # Düstur/şəkil yığını üçün token — gizli sahə kimi save addımına ötürülür.
         "math_token": math_token,
+        # W8 2026-09-14: pano/sürükləmə ilə şəkil yapışdırma; preview POST-dan sonra
+        # çiplər manifestdəki thumbnail-lərdən bərpa olunur.
+        **paste_context(request, organization_id=bank.organization_id, math_token=math_token),
     }
     return render(request, "exams/teacher/question_bank_bulk_add.html", context)
 
@@ -168,6 +193,7 @@ def ai_generate_bank_questions(request, bank_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "ai_generate")
 
     # Format: AI kartından (q_format) gəlir, yoxsa bankın default tipi.
     q_format = _normalize_format(request.POST.get("q_format") or bank.default_question_type)
@@ -202,6 +228,7 @@ def bank_question_add(request, bank_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "question_add")
     is_modal = _is_modal_request(request)
     q_format = _normalize_format(
         request.POST.get("q_format") or request.GET.get("format") or bank.default_question_type
@@ -219,9 +246,12 @@ def bank_question_add(request, bank_id):
             question.fingerprint = _question_fingerprint(question.text)
             if q_format == "test":
                 question.answer_mode = form.cleaned_data.get("answer_mode", "single")
-            question.save()
-            if q_format == "test":
-                form.create_options(question)
+            # Audit 2026-09-13 backend F-07 (2026-09-14): sual + variantları birlikdə
+            # (variant yazısı sınsa variantsız test sualı qalmasın).
+            with transaction.atomic():
+                question.save()
+                if q_format == "test":
+                    form.create_options(question)
             if is_modal:
                 return JsonResponse({"success": True, "question_id": question.id})
             return redirect("exams:question_bank_detail", bank_id=bank.id)
@@ -248,6 +278,7 @@ def bank_question_edit(request, bank_id, question_id):
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
     bank = get_object_or_404(accessible_banks(request.user, organization), id=bank_id)
+    _ensure_bank_mutation_allowed(request, bank, "question_edit")
     question = get_object_or_404(bank.library_questions, id=question_id)
     is_modal = _is_modal_request(request)
     q_format = question.question_type if question.question_type in ("test", "written") else "test"
@@ -261,9 +292,10 @@ def bank_question_edit(request, bank_id, question_id):
             updated.fingerprint = _question_fingerprint(updated.text)
             if q_format == "test":
                 updated.answer_mode = form.cleaned_data.get("answer_mode", "single")
-            updated.save()
-            if q_format == "test":
-                form.save_options(updated)
+            with transaction.atomic():  # F-07 (2026-09-14) — bax `bank_question_add`
+                updated.save()
+                if q_format == "test":
+                    form.save_options(updated)
             if is_modal:
                 return JsonResponse({"success": True, "question_id": updated.id})
             return redirect("exams:question_bank_detail", bank_id=bank.id)

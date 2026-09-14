@@ -13,8 +13,9 @@ səthini (üzv/rol/təşkilat ayarları) ALMAMALIDIR.
 Səlahiyyət ayrılığı (sahib qərarı, 2026-09-06 — «dəstək operatoru» dəsti):
 
 * **VAR** — bütün akademik səthlərin OXUSU (struktur, kataloq, fənn, qiymət,
-  cədvəl, sillabus, dərs yükü), imtahan əməlləri (`exam.*`), QA/nəzarət
-  (`qa.*`), analitika və audit izi, şəxs kataloqunun oxu dəsti (əlaqə daxil).
+  cədvəl, sillabus, dərs yükü), imtahan əməlləri (`exam.*`), analitika və audit
+  izi (ixrac daxil), şəxs kataloqunun oxu dəsti (əlaqə daxil). Köhnə `qa.*`
+  dəsti 2026-09-14-də kataloqdan çıxarıldı (audit F-06: keyfiyyət modulu yoxdur).
 * **YOXDUR** — `role.*` (rol vermə), `RIM_ACCOUNT_PERMISSIONS` (parol
   sıfırlama / blok / soft-delete), `user.import`, `journal.correct` /
   `journal.close` / `journal.roster` / `journal.reassign`, `member.*` əməlləri,
@@ -46,12 +47,11 @@ _RIM_STAFF_PERMISSIONS = [
     "exam.edit",
     "exam.manage",
     "exam.host",
-    # QA / nəzarət növbəsi + hesabatlar.
-    "qa.view",
-    "qa.flag",
-    "qa.review",
+    # Hesabatlar + audit izi (CSV ixracı `audit.export` ilə — bax F-06 şərhi,
+    # `default_roles_university.ikt_rehber`).
     "analytics.view_all",
     "audit.view",
+    "audit.export",
     # Şəxs kataloqu — YALNIZ OXU (əməl açarları `people.manage_*` qəsdən yoxdur).
     *PEOPLE_DIRECTORY_READ,
 ]
@@ -63,6 +63,6 @@ RIM_STAFF_ROLES = [
         "level": 60,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": list(_RIM_STAFF_PERMISSIONS),
-        "description": "RİM staff — read-only academic surfaces plus exam and QA operations (no account or role actions)",
+        "description": "RİM staff — read-only academic surfaces plus exam operations (no account or role actions)",
     },
 ]

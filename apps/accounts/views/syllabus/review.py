@@ -35,9 +35,15 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.syllabus.constants import PERM_REVIEW, QUEUE_STATUSES, SELFWORK_OPTIONS, SectionKey, SyllabusStatus
 from apps.syllabus.models import SyllabusSection
-from apps.syllabus.public import build_review_queue_context
+from apps.syllabus.public import (
+    PERM_REVIEW,
+    QUEUE_STATUSES,
+    SELFWORK_OPTIONS,
+    SectionKey,
+    SyllabusStatus,
+    build_review_queue_context,
+)
 
 from .labels import STATUS_TONES
 from .lookup import safe_uuid

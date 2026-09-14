@@ -19,6 +19,9 @@ from .extraction import (
     _merge_bare_question_numbers,
     _normalize_cyrillic_option_labels,
 )
+from .math_text import sanitize_math_text
+from .media_markers import extract_media_refs
+from .option_markers import _option_from_match
 
 logger = logging.getLogger(__name__)
 
@@ -235,9 +238,7 @@ def _parse_labeled_end_question_block(lines: list[str], fallback_no: int) -> dic
                 q_no, q_text = _strip_question_number(question_text, fallback_no)
                 current = _new_question(q_no, q_text)
 
-            star = bool(m_opt.group(1))
-            label = m_opt.group(2).upper()
-            text = m_opt.group(3).strip()
+            label, text, star = _option_from_match(m_opt)
             current["options"][label] = text
             current_opt_label = label
             if star and label not in current["correct"]:
@@ -321,8 +322,34 @@ def _add_warning(q: dict, w_type: str, msg: str, severity: str = SEVERITY_WARNIN
     q["warnings"].append(payload)
 
 
+def _normalize_rich_content(q: dict) -> None:
+    """W3 2026-09-14: şəkil markerləri → ``media_refs``; LaTeX düsturları sanitizasiya.
+
+    Uzun/qadağan makrolu düstur mətn olaraq qalır (render olunmur) və müəllim
+    preview-da xəbərdarlıq görür — heç nə səssiz atılmır.
+    """
+    extract_media_refs(q)
+    issues = []
+    q["text"], stem_issues = sanitize_math_text(q.get("text") or "")
+    issues.extend(stem_issues)
+    opts = q.get("options", {}) or {}
+    for label, option_text in list(opts.items()):
+        opts[label], option_issues = sanitize_math_text(option_text or "")
+        issues.extend(option_issues)
+    for issue in issues:
+        _add_warning(
+            q,
+            issue["type"],
+            pgettext("exams.service.parsing.warning", issue["type"]).format(
+                command=issue.get("command") or "", preview=issue.get("preview") or ""
+            ),
+            severity=SEVERITY_WARNING,
+        )
+
+
 def _validate_questions(questions: list[dict]) -> None:
     for q in questions:
+        _normalize_rich_content(q)
         opts = q.get("options", {}) or {}
 
         # missing A-D — bunlar minimum tələbdir, ERROR
@@ -473,11 +500,19 @@ def parse_bulk_mcq(raw_text: str):
         state = OUTSIDE
 
     questions = []
+    # W4 R5: boş sətir blok sərhədidir — `N.` ilə başlayan növbəti sətir, əvvəlki
+    # sualın son variantı markersiz olsa da (variant sayı < 4 olsa da) YENİ sualdır.
+    # Əvvəl «1. sual?\nA) bir\nB) iki*\nC) üç\n\n2. İkinci sual…» 2-ci sualı
+    # C variantının davamına yapışdırırdı.
+    after_blank = False
 
     for raw in lines:
         line = raw.rstrip("\n")
         if not line.strip():
+            after_blank = True
             continue
+        starts_block = after_blank
+        after_blank = False
 
         # Answer line (istənilən yerdə ola bilər)
         m_ans = ANSWERLINE_RE.match(line)
@@ -497,9 +532,7 @@ def parse_bulk_mcq(raw_text: str):
         # OPTION?
         m_opt = OPTION_RE.match(line)
         if m_opt and current:
-            star = bool(m_opt.group(1))
-            label = m_opt.group(2).upper()
-            text = m_opt.group(3).strip()
+            label, text, star = _option_from_match(m_opt)
 
             current["options"][label] = text
             current_opt_label = label
@@ -519,8 +552,13 @@ def parse_bulk_mcq(raw_text: str):
 
         # Əgər artıq sualın içindəyiksə:
         if current:
-            # Əgər option bitib və yeni sual başlayırsa
-            if state == IN_OPT and m_q and len(current["options"]) >= 4:
+            # Əgər option bitib və yeni sual başlayırsa (W4 R5: boş sətirdən
+            # sonrakı `N.` bloku ≥ 2 variantlı sualı da bağlayır)
+            if (
+                state == IN_OPT
+                and m_q
+                and (len(current["options"]) >= 4 or (starts_block and len(current["options"]) >= 2))
+            ):
                 # əvvəlki sualı bağla, yenisini başlat
                 close_question()
                 current = _new_question(m_q.group(1), m_q.group(2).strip())

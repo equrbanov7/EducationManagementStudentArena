@@ -8,6 +8,7 @@ from django.utils.translation import pgettext
 from ...models import Organization
 from ..shared._helpers import (
     _can_access_organization,
+    _can_manage_org_settings,
     _can_manage_organization,
     _can_view_role_matrix,
     _can_view_structure,
@@ -181,15 +182,11 @@ def organization_settings(request, slug):
     is_superadmin = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
     is_owner = organization.owner == request.user
 
-    if not is_superadmin and not is_owner:
-        # Check if user has admin role
-        has_admin = request.user.memberships.filter(
-            organization=organization, organization__status="active", role__level__gte=90, is_active=True
-        ).exists()
-
-        if not has_admin:
-            messages.error(request, pgettext("organizations.views.message", "no_settings_access"))
-            return redirect("organizations:dashboard", slug=slug)
+    # Səviyyə (≥90) + `org.settings`; POST üçün əlavə `org.edit` — bax
+    # `_can_manage_org_settings` (audit 2026-09-13 F-06, 2026-09-14).
+    if not _can_manage_org_settings(request.user, organization, write=request.method == "POST"):
+        messages.error(request, pgettext("organizations.views.message", "no_settings_access"))
+        return redirect("organizations:dashboard", slug=slug)
 
     if request.method == "POST":
         # Update organization settings

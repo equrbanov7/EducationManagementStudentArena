@@ -11,7 +11,6 @@ from apps.notifications.public import build_profile_notification_state, get_unre
 from core.cache import get_or_set_cached_profile_badge_counts
 
 from ....forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
-from ....models import UserProfile
 from ....services.profile_actions import validate_profile_avatar_upload
 from ..._dashboard_helpers import (
     _collect_assigned_tasks,
@@ -27,6 +26,7 @@ from ..._helpers import (
     _assigned_exams_queryset,
     _build_user_organization_access_rows,
     _get_active_organization,
+    _load_user_profile,
     _query_string,
     _role_capabilities,
     _tenant_scoped_courses,
@@ -51,6 +51,18 @@ from ._helpers import (
 
 
 class _Stage1Mixin:
+    #: `_profile_info_identity.html`-i render edən bölmələr (superadmin təşkilat
+    #: bölməsi də `organization_access_rows`-u göstərir).
+    _IDENTITY_PANEL_SECTIONS = frozenset({"profile-info", "superadmin-organizations"})
+
+    def _section_renders_identity_panel(self) -> bool:
+        """Aktiv bölmə kimlik panelini (təşkilat-giriş cədvəli, tələbə qrupları)
+        render edirmi? Qeydiyyatda OLMAYAN bölmə dispatch-də profile-info-ya
+        düşür — ona görə naməlum bölmə də «bəli» sayılır (fail-safe)."""
+        from ..sections_api import SECTION_PARTIALS
+
+        return self.active_section in self._IDENTITY_PANEL_SECTIONS or self.active_section not in SECTION_PARTIALS
+
     @staticmethod
     def _attach_course_group_summaries(courses):
         course_ids = [course.id for course in courses]
@@ -83,12 +95,24 @@ class _Stage1Mixin:
         Ensures profile exists before rendering.
         Now accessible to ALL users (not just teachers).
         """
-        self.profile, self._created = UserProfile.objects.get_or_create(user=self.request.user)
+        # 2026-09-13 (Codex audit §14/§21): profil middleware-in yüklədiyi instans
+        # keşindən (0 sorğu); yoxdursa əvvəlki kimi `get_or_create`.
+        self.profile, self._created = _load_user_profile(self.request.user)
         # FAZA 22 — parametrsiz açılış «Ana səhifə»yə gedir (əvvəl `profile-info`).
         self.requested_section = self.request.GET.get("section") or DEFAULT_PROFILE_SECTION
         _restore_profile_org_context(self.request, self.profile, self.requested_section)
+        # Profilin «ev» təşkilatı aktiv təşkilatla eynidirsə FK keşini middleware-in
+        # (select_related ilə) yüklədiyi obyektlə doldururuq — `profile.organization`
+        # oxunuşları (bildiriş vəziyyəti, müraciət bölməsi) ayrıca SELECT etməsin.
+        _active_org = getattr(self.request, "organization", None)
+        _active_org_memberships = None
+        if _active_org is not None and self.profile.organization_id == _active_org.pk:
+            self.profile.organization = _active_org
+            _active_org_memberships = list(getattr(self.request, "org_memberships", None) or []) or None
         self.capabilities = _role_capabilities(self.request.user, self.profile)
-        self.notification_state = build_profile_notification_state(user=self.request.user, profile=self.profile)
+        self.notification_state = build_profile_notification_state(
+            user=self.request.user, profile=self.profile, active_org_memberships=_active_org_memberships
+        )
         self.pending_student_invites = self.notification_state["pending_student_invites"]
         self.pending_student_join_requests = self.notification_state["pending_student_join_requests"]
         self.pending_student_join_org_name = self.notification_state["pending_student_join_org_name"]
@@ -139,12 +163,21 @@ class _Stage1Mixin:
         self.user_roles = _build_effective_user_roles(self.request.user, self.profile)
         self.primary_user_role_label = _build_primary_position_label(self.profile, self.user_roles)
         self.active_organization = _get_active_organization(self.request)
-        self.organization_access_rows = _build_user_organization_access_rows(
-            self.request.user,
-            active_organization=self.active_organization,
-            include_active_superadmin_org=self.capabilities["is_superadmin"],
-            profile_section="superadmin-organizations" if self.capabilities["is_superadmin"] else "profile-info",
-        )
+        # 2026-09-13 (Codex audit §14/§21): təşkilat-giriş cədvəli və tələbənin
+        # köhnə imtahan qrupları YALNIZ `_profile_info_identity.html` (profile-info
+        # və dispatch-in naməlum bölmə üçün profile-info fallback-ı) və superadmin
+        # təşkilat bölməsində render olunur; qalan bölmələrdə 5 sorğu boşa gedirdi.
+        # Kontekst açarları hər halda qalır (boş siyahı / 0) — şablon müqaviləsi
+        # (`test_profile_refactor_characterization`) dəyişmir.
+        self.renders_identity_panel = self._section_renders_identity_panel()
+        self.organization_access_rows = []
+        if self.renders_identity_panel:
+            self.organization_access_rows = _build_user_organization_access_rows(
+                self.request.user,
+                active_organization=self.active_organization,
+                include_active_superadmin_org=self.capabilities["is_superadmin"],
+                profile_section="superadmin-organizations" if self.capabilities["is_superadmin"] else "profile-info",
+            )
         self.teacher_courses = _tenant_scoped_courses(
             self.request,
             Course.objects.filter(
@@ -172,7 +205,12 @@ class _Stage1Mixin:
             self.visible_courses_qs = self.enrolled_courses_qs
         else:
             self.visible_courses_qs = self.created_courses_qs
+        # 2026-09-13 (audit §14/§21): eyni queryset-in COUNT-u aşağıda bir də
+        # (`my_created_courses_count` / `assigned_courses_count`) alınırdı — bir dəfə
+        # sayılıb paylaşılır; arada yazı yoxdur, dəyər eynidir.
         self.courses_count = self.visible_courses_qs.count()
+        _enrolled_count = self.courses_count if self.capabilities["is_student"] else None
+        _created_count = None if self.capabilities["is_student"] else self.courses_count
         self.my_courses = []
         if self.active_section == "courses":
             self.my_courses = list(self.visible_courses_qs[:10])
@@ -202,7 +240,9 @@ class _Stage1Mixin:
         self.question_bank_is_center = False
         self.question_bank_section = {}
         if self.capabilities["can_view_owned_learning"]:
-            self.my_created_courses_count = self.created_courses_qs.count()
+            self.my_created_courses_count = (
+                _created_count if _created_count is not None else self.created_courses_qs.count()
+            )
             if self.active_section == "my-courses":
                 self.my_created_courses = list(self.created_courses_qs[:10])
                 self._attach_course_group_summaries(self.my_created_courses)
@@ -301,7 +341,9 @@ class _Stage1Mixin:
                 self.request, self.request.user, active_only=True
             ).order_by("-start_datetime", "-created_at")
             self.assigned_exams_count = self.assigned_exams_qs.count()
-            self.assigned_courses_count = self.enrolled_courses_qs.count()
+            self.assigned_courses_count = (
+                _enrolled_count if _enrolled_count is not None else self.enrolled_courses_qs.count()
+            )
             if self.active_section == "assigned-exams":
                 self.assigned_task_items, self.assigned_task_counts, self.assigned_tasks_active_filter = (
                     _collect_assigned_tasks(
@@ -399,8 +441,17 @@ class _Stage1Mixin:
             .order_by("organization__name", "name")
             .distinct()
         )
-        self.student_member_groups_count = self.student_member_groups_qs.count()
-        self.student_member_groups = list(self.student_member_groups_qs[:STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT])
+        self.student_member_groups = []
+        self.student_member_groups_count = 0
+        if self.renders_identity_panel:
+            # Əvvəl COUNT + siyahı (2 sorğu); siyahı limitdən qısadırsa cəmi elə
+            # onun uzunluğudur — COUNT yalnız limit dolanda lazımdır.
+            self.student_member_groups = list(self.student_member_groups_qs[:STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT])
+            self.student_member_groups_count = (
+                self.student_member_groups_qs.count()
+                if len(self.student_member_groups) >= STUDENT_MEMBER_GROUPS_DISPLAY_LIMIT
+                else len(self.student_member_groups)
+            )
         self.student_member_groups_more_count = max(
             0, self.student_member_groups_count - len(self.student_member_groups)
         )
@@ -442,9 +493,17 @@ class _Stage1Mixin:
                 department_types = {OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT}
 
                 seen_units = set()
-                for membership in Membership.objects.filter(
-                    user=self.request.user, is_active=True, organization=self.active_organization
-                ).select_related("scope_unit"):
+                # 2026-09-13 (audit §14/§21): aktiv org üzvlükləri middleware-dən
+                # (`scope_unit` select_related ilə) — eyni süzgəc, ayrıca SELECT yox.
+                # Middleware siyahısı boşdursa (superadmin/sahib fallback) canlı sorğu.
+                _unit_memberships = None
+                if _active_org is not None and self.active_organization.pk == _active_org.pk:
+                    _unit_memberships = list(getattr(self.request, "org_memberships", None) or []) or None
+                if _unit_memberships is None:
+                    _unit_memberships = Membership.objects.filter(
+                        user=self.request.user, is_active=True, organization=self.active_organization
+                    ).select_related("scope_unit")
+                for membership in _unit_memberships:
                     unit = membership.scope_unit
                     if unit is None or unit.id in seen_units:
                         continue

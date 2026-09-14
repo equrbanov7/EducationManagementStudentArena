@@ -46,7 +46,6 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Count, DecimalField, F, Q, Sum, TextField
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import analytics, exam_eligibility
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -58,6 +57,8 @@ from apps.registrar.models import (
     SelfWorkMark,
     StudentAcademicRecord,
 )
+from apps.registrar.public import analytics
+from apps.registrar.public import eligibility_rules as exam_eligibility
 
 _ZERO = Decimal("0")
 _ONE = Decimal("1")

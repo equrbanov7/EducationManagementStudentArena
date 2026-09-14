@@ -1,0 +1,9 @@
+<ul class="stx-bars">
+  {% for bar in block.bars %}
+  <li>
+    <div class="stx-bar__label"><span>{{ bar.label }}</span><strong>{{ bar.value_label }}</strong></div>
+    <progress class="stx-bar" max="100" value="{{ bar.pct|default:0 }}" aria-label="{{ bar.label }}"></progress>
+    {% if bar.sub %}<p class="ems-field__hint">{{ bar.sub }}</p>{% endif %}
+  </li>
+  {% empty %}<li class="ems-field__hint">{{ block.empty }}</li>{% endfor %}
+</ul>

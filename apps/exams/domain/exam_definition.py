@@ -200,6 +200,22 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         verbose_name=pgettext_lazy("exams.model.exam.field", "allowed_groups"),
         help_text=pgettext_lazy("exams.model.exam.help", "allowed_groups"),
     )
+    # 2026-09-14 (W4 `w4wizard`, R2): sehrbazın «İcazəli qruplar» seçicisi yalnız
+    # köhnə imtahan kohortlarını (`exams.StudentGroup`) tanıyırdı — real akademik
+    # qruplar (qrup reyestri: `OrgUnit` tipi GROUP, məs. «634 ing») imtahana təyin
+    # oluna bilmirdi. Sahibin qərarı (2026-09-07): qrup reyestri əsasdır, kohort
+    # səthi silinməlidir. Bu M2M reyestr qrupunu birbaşa imtahana bağlayır; tələbə
+    # üzvlüyü cari aktiv `StudentAcademicRecord.group` ilə həll olunur (bax
+    # `apps.exams.domain.unit_assignment`). Tenant: yalnız imtahanın təşkilatının
+    # GROUP tipli vahidləri (view qatında yoxlanır; `limit_choices_to` admin üçündür).
+    allowed_units = models.ManyToManyField(
+        "organizations.OrgUnit",
+        related_name="assigned_exams",
+        blank=True,
+        limit_choices_to={"unit_type": "group"},
+        verbose_name=pgettext_lazy("exams.model.exam.field", "allowed_units"),
+        help_text=pgettext_lazy("exams.model.exam.help", "allowed_units"),
+    )
     # EXAM-P1-09: bazada Fernet-şifrli saxlanır (şəffaf) — Python-da xam görünür,
     # forma clean_access_code hələ 6-simvol xam qaydasını tətbiq edir. DB sütunu
     # şifr-mətn üçün genişdir (max_length=255).

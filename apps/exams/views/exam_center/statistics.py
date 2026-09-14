@@ -18,10 +18,18 @@ from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 from django.views.decorators.http import require_GET
 
+from apps.exams.domain.unit_scope_filters import (
+    allowed_units_prefetch,
+    allowed_units_q,
+    allowed_units_under_q,
+    split_group_filter_values,
+    unit_row_labels,
+)
 from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import is_exam_center_user
 from apps.exams.services.result_calculation import attach_test_result_summaries
 from apps.exams.services.supervision import attach_attempt_interventions
+from core.export_safety import sheet_cell
 
 from ._shared import supervisor_org_or_403
 
@@ -117,10 +125,13 @@ def _unit_ids_with_children(organization, unit_ids):
 
 def _filtered_attempts(request, organization):
     """GET filtrlərinə görə bitmiş (real) imtahan cəhdlərinin queryset-i."""
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): reyestr qrupları (`allowed_units`) da
+    # sətir sütunları üçün valideyn zənciri ilə prefetch olunur — kohortla eyni
+    # sorğu büdcəsi (səhifə başına +1 prefetch, sətir sayından asılı deyil).
     qs = (
         ExamAttempt.objects.filter(exam__organization=organization, is_trial=False, status__in=_FINISHED)
         .select_related("user", "exam", "exam__subject", "exam__author")
-        .prefetch_related("exam__allowed_groups__org_unit__parent")
+        .prefetch_related("exam__allowed_groups__org_unit__parent", allowed_units_prefetch())
     )
 
     q = (request.GET.get("q") or "").strip()
@@ -133,24 +144,45 @@ def _filtered_attempts(request, organization):
     if subject_ids:
         qs = qs.filter(exam__subject_id__in=subject_ids)
 
-    group_ids = _csv_ints(request.GET.get("groups"))
-    if group_ids:
-        qs = qs.filter(exam__allowed_groups__id__in=group_ids)
+    # 2026-09-14 (W5 `w5left`, tapşırıq 1): hər qrup/fakültə/kafedra filtri
+    # kohort (`allowed_groups`) VƏ YA reyestr qrupu (`allowed_units`) ilə
+    # uyğun gəlir — reyestr qrupuna təyin olunmuş imtahanlar əvvəl bu
+    # filtrlərdən düşürdü. `groups=` həm kohort int id-si, həm `unit:<uuid>`
+    # (və ya çılpaq UUID) qəbul edir.
+    cohort_ids, unit_group_ids = split_group_filter_values(request.GET.get("groups"))
+    if cohort_ids or unit_group_ids:
+        condition = Q()
+        if cohort_ids:
+            condition |= Q(exam__allowed_groups__id__in=cohort_ids)
+        if unit_group_ids:
+            condition |= allowed_units_q(unit_group_ids)
+        qs = qs.filter(condition)
 
     # Köhnə birləşmiş "units" filtri (geriyə-uyğunluq — bookmarked URL-lər).
     unit_ids = _csv_uuids(request.GET.get("units"))
     if unit_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
+            | allowed_units_under_q(organization, unit_ids)
+        )
 
-    # Ayrı FAKÜLTƏ filtri: qrupun org_unit-inin VALİDEYNİ fakültədir.
+    # Ayrı FAKÜLTƏ filtri: kohortda qrupun org_unit-inin VALİDEYNİ fakültədir;
+    # reyestr qrupu fakültənin alt-ağacındadır (Fakültə → Kafedra → İxtisas → Qrup).
     faculty_ids = _csv_uuids(request.GET.get("faculties"))
     if faculty_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
+            | allowed_units_under_q(organization, faculty_ids)
+        )
 
-    # Ayrı KAFEDRA filtri: qrupun org_unit-i birbaşa kafedradır.
+    # Ayrı KAFEDRA filtri: kohortda qrupun org_unit-i birbaşa kafedradır;
+    # reyestr qrupu kafedranın alt-ağacındadır.
     department_ids = _csv_uuids(request.GET.get("departments"))
     if department_ids:
-        qs = qs.filter(exam__allowed_groups__org_unit_id__in=department_ids)
+        qs = qs.filter(
+            Q(exam__allowed_groups__org_unit_id__in=department_ids)
+            | allowed_units_under_q(organization, department_ids)
+        )
 
     # MÜƏLLİM (imtahan müəllifi) filtri.
     teacher_ids = _csv_ints(request.GET.get("teachers"))
@@ -217,8 +249,13 @@ def _row(attempt):
     exam = attempt.exam
     subject = getattr(exam, "subject", None)
     groups = list(exam.allowed_groups.all())
-    kafedras = _dedup(g.org_unit.name for g in groups if g.org_unit_id)
-    faculties = _dedup(g.org_unit.parent.name for g in groups if g.org_unit_id and g.org_unit.parent_id)
+    # Reyestr qrupları kohortlarla eyni sütunlara düşür (prefetch olunmuş zəncir).
+    unit_labels = unit_row_labels(exam.allowed_units.all())
+    group_names = _dedup([g.name for g in groups] + unit_labels["groups"])
+    kafedras = _dedup([g.org_unit.name for g in groups if g.org_unit_id] + unit_labels["kafedras"])
+    faculties = _dedup(
+        [g.org_unit.parent.name for g in groups if g.org_unit_id and g.org_unit.parent_id] + unit_labels["faculties"]
+    )
     teacher = exam.author.get_full_name() or exam.author.username if exam.author_id else ""
     intervention = getattr(attempt, "exam_intervention", None)
     removed = bool(intervention and intervention.get("is_terminal"))
@@ -227,7 +264,7 @@ def _row(attempt):
         "exam_slug": exam.slug,
         "student": attempt.user.get_full_name() or attempt.user.username,
         "username": attempt.user.username,
-        "group": ", ".join(_dedup(g.name for g in groups)),
+        "group": ", ".join(group_names),
         "kafedra": ", ".join(kafedras),
         "faculty": ", ".join(faculties),
         "teacher": teacher,
@@ -246,9 +283,35 @@ def _row(attempt):
 
 @login_required
 @require_GET
+def _paper_kind_stats(request, organization):
+    """KAĞIZ (yazılı / praktiki) imtahan KPI-ları — növ üzrə (addendum 2026-09-14, W2 `w2paper`).
+
+    Rəqəmsal cəhd cədvəlindən AYRI mənbə: İmtahan Mərkəzinin sistemə köçürdüyü
+    ballar (``registrar.ExamScoreSheet`` / ``ExamScoreEntry``). Yalnız dövr
+    filtri (tədris ili + semestr) tətbiq olunur — fənn/qrup/müəllim filtrləri
+    rəqəmsal imtahana aiddir. ``paper_kind`` = ``written`` / ``practical`` / boş.
+    Sabit sayda sorğu (2) — ``registrar.public.exam_score_entry.exam_score_changes``.
+    """
+    from apps.registrar.public import exam_score_entry as paper_service
+
+    year = (request.GET.get("year") or "").strip()
+    semester = (request.GET.get("semester") or "").strip()
+    kind = (request.GET.get("paper_kind") or "").strip()
+    return paper_service.exam_score_changes.paper_kind_stats(
+        organization=organization,
+        year_start=int(year) if year.isdigit() else None,
+        months=_SEMESTERS.get(semester),
+        exam_kind=kind if kind in ("written", "practical") else "",
+    )
+
+
 def exam_center_stats_data(request):
     """Filtrlənmiş, səhifələnən nəticələr + sayğaclar (JSON)."""
     organization = _stats_org(request)
+    # ``?paper=1`` — yalnız kağız imtahan KPI-ları (növ çipi dəyişəndə cəhd
+    # cədvəli yenidən yüklənmir; `exam_center_stats_paper.js`).
+    if (request.GET.get("paper") or "").strip() == "1":
+        return JsonResponse({"paper": _paper_kind_stats(request, organization)})
     attempts = _filtered_attempts(request, organization)
 
     summary = {
@@ -260,6 +323,7 @@ def exam_center_stats_data(request):
             .order_by("exam__exam_type_extended")
             .annotate(n=Count("id", distinct=True))
         ),
+        "paper": _paper_kind_stats(request, organization),
     }
 
     page_obj = Paginator(_sorted(attempts, request), _PAGE_SIZE).get_page(request.GET.get("page"))
@@ -318,13 +382,15 @@ def exam_center_stats_export(request):
     ws = wb.active
     ws.title = "Statistika"
     for col, (title, _key) in enumerate(columns, start=1):
-        cell = ws.cell(row=1, column=col, value=title)
+        cell = sheet_cell(ws, row=1, column=col, value=title)
         cell.font = Font(bold=True, color="FFFFFF")
         cell.fill = PatternFill("solid", fgColor="2563EB")
+    # 2026-09-14 (audit F-07): tələbə/qrup/imtahan adı və uzaqlaşdırma səbəbi
+    # istifadəçi mətnidir → formula neytrallaşdırması (`sheet_cell`).
     for r, a in enumerate(attempts, start=2):
         row = _row(a)
         for c, (_title, key) in enumerate(columns, start=1):
-            ws.cell(row=r, column=c, value=row[key])
+            sheet_cell(ws, row=r, column=c, value=row[key])
     for col in range(1, len(columns) + 1):
         ws.column_dimensions[get_column_letter(col)].width = 22
 

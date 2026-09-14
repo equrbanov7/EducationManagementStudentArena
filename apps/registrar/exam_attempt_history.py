@@ -146,6 +146,39 @@ def attempt_rows_by_student(*, student_ids, subject_id, organization) -> dict:
     return {student_id: _rows_from_attempts(rows) for student_id, rows in by_student.items()}
 
 
+def attempt_rows_by_subject(*, student, subject_ids, organization) -> dict:
+    """``subject_id`` → cəhd sətirləri — BİR tələbənin bütün fənləri, **tək sorğu**.
+
+    2026-09-12 (tələbə kabineti redizaynı): «Fənlərim» hər fənn üçün
+    :func:`attempt_rows_for_enrollment` çağırırdı — fənn başına bir sorğu
+    (N+1); sorğu sayı fənn sayı ilə artırdı.  Bu, :func:`attempt_rows_by_student`-in
+    tələbə-mərkəzli güzgüsüdür: sıralama və «rəsmi = SONUNCU cəhd» qaydası eynidir,
+    yalnız qruplaşdırma açarı fərqlidir (burada fənn).
+    """
+    ids = [sid for sid in subject_ids if sid is not None]
+    if not ids or student is None or organization is None:
+        return {}
+    try:
+        attempt_model = _attempt_model()
+    except LookupError:  # exams modulu quraşdırılmayıb
+        return {}
+    attempts = (
+        attempt_model.objects.filter(
+            user=student,
+            exam__subject_id__in=ids,
+            exam__organization=organization,
+            is_trial=False,
+            status__in=_FINISHED_STATUSES,
+        )
+        .select_related("exam")
+        .order_by("started_at", "attempt_number")
+    )
+    by_subject: dict = {}
+    for attempt in attempts:
+        by_subject.setdefault(attempt.exam.subject_id, []).append(attempt)
+    return {subject_id: _rows_from_attempts(rows) for subject_id, rows in by_subject.items()}
+
+
 def attempt_rows_for_enrollment(enrollment):
     """``attempt_rows_for_subject`` — qeydiyyat sətrindən (offering → subject)."""
     offering = getattr(enrollment, "offering", None)

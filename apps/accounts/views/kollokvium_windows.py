@@ -23,9 +23,9 @@ from django.utils.translation import pgettext
 
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
 from apps.exams.public import is_exam_center_user
-from apps.registrar import kollokvium_notifications
-from apps.registrar import kollokvium_windows as kollokvium_window_rules
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
+from apps.registrar.public import kollokvium_notifications
+from apps.registrar.public import kollokvium_windows as kollokvium_window_rules
 from core.audit import log_action
 from core.constants import AuditAction
 

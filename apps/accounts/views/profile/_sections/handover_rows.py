@@ -16,7 +16,7 @@ from django.utils.translation import pgettext
 
 from apps.accounts.views.handover.labels import REVERT, blocker_labels
 from apps.accounts.views.handover.policy import period_label, person_name
-from apps.registrar import handover_query
+from apps.registrar.public import handover_query
 
 _CTX = "accounts.handover"
 
@@ -124,8 +124,8 @@ def history_rows(records, *, organization) -> list:
     """
     from django.utils import timezone
 
-    from apps.registrar import handover as handover_read
-    from apps.registrar.handover_actions import REVERT_BLOCKER_CODES
+    from apps.registrar.public import REVERT_BLOCKER_CODES
+    from apps.registrar.public import handover as handover_read
 
     records = list(records)
     if not records:

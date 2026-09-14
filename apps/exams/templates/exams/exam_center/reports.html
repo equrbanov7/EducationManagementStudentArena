@@ -4,9 +4,11 @@
 {% block title %}{% trans "Final hesabatları" %} — {% trans "İmtahan mərkəzi" %}{% endblock %}
 
 {% block extraCss %}
+    {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur.{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/reports.css' %}?v=20260730-xlsx">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/reports.css' %}?v=20260910-1">
 {% endblock %}
 
 {% block content %}
@@ -19,29 +21,52 @@
       <h1><i class="fas fa-chart-column"></i> {% trans "Final imtahan hesabatları" %}</h1>
       <p class="fxc-sub">{% trans "Oturum tarixçəsi, tələbə iştirakı və çıxarılma qeydləri" %}</p>
     </div>
-    <a href="{% url 'exams:exam_center_room_list' %}" class="fxc-btn fxc-btn-ghost">
-      <i class="fas fa-arrow-left"></i> {% trans "Zallar" %}
+    <a href="{% url 'exams:exam_center_room_list' %}" class="ems-btn">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Zallar" %}
     </a>
   </header>
 
-  <nav class="fxc-tabs" aria-label="{% trans 'Hesabat növü' %}">
-    <a href="?tab=sessions" class="fxc-tab {% if tab == 'sessions' %}is-active{% endif %}">{% trans "Oturumlar" %}</a>
-    <a href="?tab=tickets" class="fxc-tab {% if tab == 'tickets' %}is-active{% endif %}">{% trans "Tələbə iştirakı" %}</a>
+  <nav class="ems-tabs rpt-tabs" aria-label="{% trans 'Hesabat növü' %}">
+    <a href="?tab=sessions" class="ems-tabs__btn" {% if tab == 'sessions' %}aria-current="page"{% endif %}>{% trans "Oturumlar" %}</a>
+    <a href="?tab=tickets" class="ems-tabs__btn" {% if tab == 'tickets' %}aria-current="page"{% endif %}>{% trans "Tələbə iştirakı" %}</a>
   </nav>
+
+  {% comment %}KPI — cari süzgəc üzrə (tək aqreqat sorğu, `_report_kpis`).{% endcomment %}
+  <div class="ems-kpis ems-kpis--4 rpt-kpis">
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% if tab == 'sessions' %}{% trans "Oturum" %}{% else %}{% trans "Bilet" %}{% endif %}</div>
+      <div class="ems-kpi__value">{{ kpis.total }}</div>
+      <div class="ems-kpi__note">{% trans "süzgəcə uyğun" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Tələbə" %}</div>
+      <div class="ems-kpi__value">{{ kpis.students }}</div>
+      <div class="ems-kpi__note">{% trans "cəmi qeyd" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Bitirib" %}</div>
+      <div class="ems-kpi__value">{{ kpis.completed }}</div>
+      <div class="ems-kpi__note">{% trans "imtahanı tamamlayıb" %}</div>
+    </div>
+    <div class="ems-kpi{% if kpis.problem %} ems-kpi--accent-danger{% endif %}">
+      <div class="ems-kpi__label">{% trans "Çıxarılıb / gəlməyib" %}</div>
+      <div class="ems-kpi__value">{{ kpis.problem }}</div>
+      <div class="ems-kpi__note">{% trans "diqqət tələb edir" %}</div>
+    </div>
+  </div>
 
   {% comment %}
     Filtr avtomatikdir: seçim dəyişən kimi forma göndərilir (rpt_filter.js),
     ona görə "Filtrlə" düyməsi yoxdur. Göndəriş anında cədvəl skeleton-a
     çevrilir ki, boş ekran gözləmə hissi yaratmasın.
   {% endcomment %}
-  <form method="get" class="fxc-card fxc-filterbar" data-rpt-filter>
+  <form method="get" class="ems-filters rpt-filters" data-rpt-filter role="search">
     <input type="hidden" name="tab" value="{{ tab }}">
-    <div class="fxc-form-grid fxc-form-grid--filters">
       {% if tab == "sessions" %}
-      <div class="fxc-field">
-        <label for="fxc-f-state">{% trans "Vəziyyət" %}</label>
-        <div class="bootstrap-single-select">
-        <select id="fxc-f-state" name="state" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-state">{% trans "Vəziyyət" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="fxc-f-state" name="state" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           <option value="prepared" {% if params.state == "prepared" %}selected{% endif %}>{% trans "Hazırlanır" %}</option>
           <option value="entry_open" {% if params.state == "entry_open" %}selected{% endif %}>{% trans "Giriş açıq" %}</option>
@@ -52,10 +77,10 @@
         </div>
       </div>
       {% else %}
-      <div class="fxc-field">
-        <label for="fxc-f-status">{% trans "Bilet statusu" %}</label>
-        <div class="bootstrap-single-select">
-        <select id="fxc-f-status" name="status" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-status">{% trans "Bilet statusu" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="fxc-f-status" name="status" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           <option value="assigned" {% if params.status == "assigned" %}selected{% endif %}>{% trans "Təyin olunub" %}</option>
           <option value="waiting" {% if params.status == "waiting" %}selected{% endif %}>{% trans "Gözləyir" %}</option>
@@ -68,10 +93,10 @@
         </div>
       </div>
       {% endif %}
-      <div class="fxc-field">
-        <label for="fxc-f-room">{% trans "Zal" %}</label>
-        <div class="bootstrap-single-select">
-        <select id="fxc-f-room" name="room" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-room">{% trans "Zal" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="fxc-f-room" name="room" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           {% for room in rooms %}
           <option value="{{ room.pk }}" {% if params.room == room.pk|stringformat:"s" %}selected{% endif %}>{{ room.name }}</option>
@@ -79,10 +104,10 @@
         </select>
         </div>
       </div>
-      <div class="fxc-field">
-        <label for="fxc-f-exam">{% trans "İmtahan" %}</label>
-        <div class="bootstrap-single-select">
-        <select id="fxc-f-exam" name="exam" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-exam">{% trans "İmtahan" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select id="fxc-f-exam" name="exam" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
           <option value="">{% trans "Hamısı" %}</option>
           {% for exam in exams %}
           <option value="{{ exam.pk }}" {% if params.exam == exam.pk|stringformat:"s" %}selected{% endif %}>{{ exam.title }}</option>
@@ -90,32 +115,31 @@
         </select>
         </div>
       </div>
-      <div class="fxc-field">
-        <label for="fxc-f-from">{% trans "Tarixdən" %}</label>
-        <input type="date" id="fxc-f-from" name="date_from" value="{{ params.date_from }}" class="fxc-input">
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-from">{% trans "Tarixdən" %}</label>
+        <input type="date" id="fxc-f-from" name="date_from" value="{{ params.date_from }}" class="ems-input ems-input--date">
       </div>
-      <div class="fxc-field">
-        <label for="fxc-f-to">{% trans "Tarixə" %}</label>
-        <input type="date" id="fxc-f-to" name="date_to" value="{{ params.date_to }}" class="fxc-input">
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-to">{% trans "Tarixə" %}</label>
+        <input type="date" id="fxc-f-to" name="date_to" value="{{ params.date_to }}" class="ems-input ems-input--date">
       </div>
-      <div class="fxc-field">
-        <label for="fxc-f-q">{% trans "Axtarış" %}</label>
-        <input type="search" id="fxc-f-q" name="q" value="{{ params.q }}" class="fxc-input"
+      <div class="ems-field">
+        <label class="ems-field__label" for="fxc-f-q">{% trans "Axtarış" %}</label>
+        <input type="search" id="fxc-f-q" name="q" value="{{ params.q }}" class="ems-input"
                placeholder="{% if tab == 'sessions' %}{% trans 'imtahan / zal' %}{% else %}{% trans 'tələbə / imtahan / zal' %}{% endif %}">
       </div>
-    </div>
-    <div class="fxc-actions">
+    <div class="ems-filters__actions">
       {% if has_filters %}
-      <a href="?tab={{ tab }}" class="fxc-btn fxc-btn-ghost" data-rpt-reset>
-        <i class="fas fa-rotate-left"></i> {% trans "Sıfırla" %}
+      <a href="?tab={{ tab }}" class="ems-btn" data-rpt-reset>
+        <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" %}
       </a>
       {% endif %}
       {% comment %}
         Yuxarıdakı düymə: cari filtrə uyğun BÜTÜN nəticələri yükləyir.
         Sətirdəki düymə isə yalnız həmin günü — aşağıdakı cədvələ bax.
       {% endcomment %}
-      <button type="submit" name="export" value="xlsx" class="fxc-btn fxc-btn-primary">
-        <i class="fas fa-file-excel"></i> {% trans "Excel hesabatı yüklə" %}
+      <button type="submit" name="export" value="xlsx" class="ems-btn ems-btn--primary">
+        <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel hesabatı yüklə" %}
       </button>
     </div>
   </form>
@@ -131,41 +155,45 @@
 
   <div data-rpt-results>
   {% if page_obj.object_list %}
-  <div class="fxc-table-wrap">
+  <div class="ems-tablewrap rpt-tablewrap">
+    <div class="ems-tablescroll">
     {% if tab == "sessions" %}
-    <table class="fxc-table">
+    <table class="ems-table ems-table--zebra rpt-table">
       <thead>
         <tr>
-          <th>{% trans "İmtahan" %}</th>
-          <th>{% trans "Zal" %}</th>
-          <th>{% trans "Plan" %}</th>
-          <th>{% trans "Faktiki" %}</th>
-          <th>{% trans "Nəzarətçi" %}</th>
-          <th class="fxc-num">{% trans "Tələbə" %}</th>
-          <th class="fxc-num">{% trans "Bitirib" %}</th>
-          <th class="fxc-num">{% trans "Çıxarılıb" %}</th>
-          <th class="fxc-num">{% trans "Gəlməyib" %}</th>
-          <th>{% trans "Vəziyyət" %}</th>
-          <th class="fxc-col-action">{% trans "Hesabat" %}</th>
+          {% comment %}Oturum ZAL oturumudur (imtahandan asılı deyil) — birinci
+          sütun oturumun kimliyidir. Əvvəl başlıq «İmtahan» yazırdı, amma xanada
+          zal adı gəlirdi və ikinci sütun onu təkrarlayırdı (2026-09-10).{% endcomment %}
+          <th scope="col">{% trans "Oturum" %}</th>
+          <th scope="col">{% trans "Bina / mərtəbə" %}</th>
+          <th scope="col">{% trans "Plan" %}</th>
+          <th scope="col">{% trans "Faktiki" %}</th>
+          <th scope="col">{% trans "Nəzarətçi" %}</th>
+          <th scope="col" class="ems-table__num">{% trans "Tələbə" %}</th>
+          <th scope="col" class="ems-table__num">{% trans "Bitirib" %}</th>
+          <th scope="col" class="ems-table__num">{% trans "Çıxarılıb" %}</th>
+          <th scope="col" class="ems-table__num">{% trans "Gəlməyib" %}</th>
+          <th scope="col">{% trans "Vəziyyət" %}</th>
+          <th scope="col" class="fxc-col-action">{% trans "Hesabat" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for s in page_obj %}
         <tr>
-          <td class="fxc-strong">
+          <th scope="row" class="fxc-strong">
             <a href="{% url 'exams:exam_center_session_detail' session_id=s.pk %}">{{ s.room.name }} <code>{{ s.room.code }}</code></a>
-          </td>
-          <td>{{ s.room.name }}</td>
+          </th>
+          <td>{{ s.room.building|default:"—" }}{% if s.room.floor %} / {{ s.room.floor }}{% endif %}</td>
           <td>{{ s.scheduled_start|date:"d.m.Y H:i" }}</td>
           <td>
             {% if s.started_at %}{{ s.started_at|time:"H:i" }}{% else %}—{% endif %}
             – {% if s.ended_at %}{{ s.ended_at|time:"H:i" }}{% else %}—{% endif %}
           </td>
           <td>{% if s.invigilator %}{{ s.invigilator.get_full_name|default:s.invigilator.username }}{% else %}—{% endif %}</td>
-          <td class="fxc-num">{{ s.ticket_total }}</td>
-          <td class="fxc-num">{{ s.ticket_completed }}</td>
-          <td class="fxc-num">{{ s.ticket_removed }}</td>
-          <td class="fxc-num">{{ s.ticket_absent }}</td>
+          <td class="ems-table__num">{{ s.ticket_total }}</td>
+          <td class="ems-table__num">{{ s.ticket_completed }}</td>
+          <td class="ems-table__num">{{ s.ticket_removed }}</td>
+          <td class="ems-table__num">{{ s.ticket_absent }}</td>
           <td><span class="fxc-pill fxc-pill--state-{{ s.state }}">{{ s.get_state_display }}</span></td>
           <td class="fxc-col-action">
             {% comment %}
@@ -173,10 +201,10 @@
               edən tam hesabat (yalnız bu oturum yox) — "o gün nə baş verdi"
               sualının cavabı budur.
             {% endcomment %}
-            <a class="fxc-btn fxc-btn-sm fxc-btn-ghost"
+            <a class="ems-btn ems-btn--sm"
                href="?tab=tickets&amp;export=xlsx&amp;date_from={{ s.scheduled_start|date:'Y-m-d' }}&amp;date_to={{ s.scheduled_start|date:'Y-m-d' }}"
                title="{% blocktrans with day=s.scheduled_start|date:'d.m.Y' %}{{ day }} tarixli tam hesabatı yüklə{% endblocktrans %}">
-              <i class="fas fa-file-excel"></i> {% trans "Günü yüklə" %}
+              <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Günü yüklə" %}
             </a>
           </td>
         </tr>
@@ -184,25 +212,25 @@
       </tbody>
     </table>
     {% else %}
-    <table class="fxc-table">
+    <table class="ems-table ems-table--zebra rpt-table">
       <thead>
         <tr>
-          <th>{% trans "Tələbə" %}</th>
-          <th>{% trans "İmtahan" %}</th>
-          <th>{% trans "Zal" %}</th>
-          <th>{% trans "Status" %}</th>
-          <th>{% trans "Dil" %}</th>
-          <th>{% trans "Giriş" %}</th>
-          <th>{% trans "Başlayıb" %}</th>
-          <th>{% trans "Bitirib" %}</th>
-          <th>{% trans "Çıxarılma səbəbi" %}</th>
-          <th class="fxc-col-action">{% trans "Hesabat" %}</th>
+          <th scope="col">{% trans "Tələbə" %}</th>
+          <th scope="col">{% trans "İmtahan" %}</th>
+          <th scope="col">{% trans "Zal" %}</th>
+          <th scope="col">{% trans "Status" %}</th>
+          <th scope="col">{% trans "Dil" %}</th>
+          <th scope="col">{% trans "Giriş" %}</th>
+          <th scope="col">{% trans "Başlayıb" %}</th>
+          <th scope="col">{% trans "Bitirib" %}</th>
+          <th scope="col">{% trans "Çıxarılma səbəbi" %}</th>
+          <th scope="col" class="fxc-col-action">{% trans "Hesabat" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for t in page_obj %}
         <tr>
-          <td class="fxc-strong">{{ t.student.get_full_name|default:t.student.username }}
+          <th scope="row" class="fxc-strong">{{ t.student.get_full_name|default:t.student.username }}
             <span class="fxc-muted">({{ t.student.username }})</span></td>
           <td>{{ t.exam.title }}</td>
           <td>{{ t.session.room.name }}</td>
@@ -215,10 +243,10 @@
           <td class="fxc-col-action">
             {% with day=t.entry_validated_at|default:t.session.scheduled_start %}
             {% if day %}
-            <a class="fxc-btn fxc-btn-sm fxc-btn-ghost"
+            <a class="ems-btn ems-btn--sm"
                href="?tab=tickets&amp;export=xlsx&amp;date_from={{ day|date:'Y-m-d' }}&amp;date_to={{ day|date:'Y-m-d' }}"
                title="{% blocktrans with d=day|date:'d.m.Y' %}{{ d }} tarixli tam hesabatı yüklə{% endblocktrans %}">
-              <i class="fas fa-file-excel"></i> {% trans "Günü yüklə" %}
+              <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Günü yüklə" %}
             </a>
             {% else %}—{% endif %}
             {% endwith %}
@@ -228,16 +256,18 @@
       </tbody>
     </table>
     {% endif %}
+    </div>
   </div>
   {% include "partials/_pagination.html" with page_obj=page_obj %}
   {% else %}
-  <div class="fxc-empty">
-    <i class="far fa-chart-bar"></i>
-    <p>{% trans "Bu filtrlərə uyğun qeyd tapılmadı." %}</p>
-    {% if has_filters %}
-    <a href="?tab={{ tab }}" class="fxc-btn fxc-btn-ghost"><i class="fas fa-rotate-left"></i> {% trans "Filtrləri sıfırla" %}</a>
-    {% endif %}
-  </div>
+  {% trans "Bu filtrlərə uyğun qeyd tapılmadı." as rpt_empty %}
+  {% trans "Tarix aralığını genişləndirin və ya zal/imtahan seçimini götürün." as rpt_empty_body %}
+  {% if has_filters %}
+    {% trans "Filtrləri sıfırla" as rpt_empty_action %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-chart-column" state_title=rpt_empty state_body=rpt_empty_body state_action_label=rpt_empty_action state_action_url="?tab="|add:tab %}
+  {% else %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-chart-column" state_title=rpt_empty state_body=rpt_empty_body %}
+  {% endif %}
   {% endif %}
   </div>
 </div>

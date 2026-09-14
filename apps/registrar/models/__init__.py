@@ -36,7 +36,11 @@ from .exam_score_entry import (
     EVIDENCE_EXTENSIONS,
     ExamScoreEntry,
     ExamScoreEntryKind,
+    ExamScoreSheet,
+    ExamScoreSheetKind,
+    ExamScoreSheetSource,
     exam_score_evidence_path,
+    exam_score_sheet_path,
 )
 from .grading import (
     ApprovalStatus,
@@ -123,7 +127,11 @@ __all__ = [
     "EVIDENCE_EXTENSIONS",
     "ExamScoreEntry",
     "ExamScoreEntryKind",
+    "ExamScoreSheetKind",
+    "ExamScoreSheet",
+    "ExamScoreSheetSource",
     "exam_score_evidence_path",
+    "exam_score_sheet_path",
     "FinalGrade",
     "GroupElectiveChoice",
     "GroupTransferEvidence",

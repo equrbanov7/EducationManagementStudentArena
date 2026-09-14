@@ -20,8 +20,6 @@ məlumat sızmasın deyə 403 DEYİL).
 
 from __future__ import annotations
 
-import csv
-
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.utils.translation import pgettext
@@ -32,6 +30,8 @@ from apps.accounts.services import people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.accounts.services.rim.policy import RimAccessError
+from core.export_safety import safe_csv_writer
+from core.write_rate_limit import score_write_rate_limited
 
 _CTX = "accounts.student_registry"
 
@@ -64,7 +64,7 @@ def student_registry_card(request, record_id):
     except RimAccessError as exc:
         return _error(exc)
 
-    from apps.registrar import transcript as transcript_service
+    from apps.registrar.public import transcript as transcript_service
 
     # GPA YALNIZ burada hesablanır (bir tələbə) — siyahıda QƏSDƏN yoxdur.
     transcript = transcript_service.build_student_transcript(
@@ -139,6 +139,7 @@ def _name_contains(query: str):
 @never_cache
 @login_required
 @require_POST
+@score_write_rate_limited("student_registry_action")  # F-15 (2026-09-14)
 def student_registry_action(request):
     """Hərəkət əmri — səbəb ≥20 simvol, əmr nömrəsi + tarix məcburi."""
     actor = people.resolve_actor(request)
@@ -181,7 +182,9 @@ def student_registry_export(request):
     response["Cache-Control"] = "private, no-store"
     # BOM — Excel AZ hərflərini düzgün açsın deyə (şablon faylı ilə eyni qayda).
     response.write("﻿")
-    writer = csv.writer(response)
+    # 2026-09-14 (audit F-07, §27 «6 ixracda formula neytrallaşdırma»): ad/qrup
+    # kimi mətn xanaları `=`/`+`/`-`/`@` ilə başlaya bilər → Excel-də formula.
+    writer = safe_csv_writer(response)
     writer.writerow(
         [
             pgettext(_CTX, "Tələbə kodu"),

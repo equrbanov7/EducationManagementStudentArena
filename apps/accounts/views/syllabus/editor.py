@@ -29,7 +29,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import (
+from apps.syllabus.public import (
     MIN_DESCRIPTION_CHARS,
     MIN_GOAL_CHARS,
     MIN_OUTCOMES,
@@ -38,8 +38,8 @@ from apps.syllabus.constants import (
     WEEK_ROWS,
     SectionKey,
     SyllabusStatus,
+    build_syllabus_editor_context,
 )
-from apps.syllabus.public import build_syllabus_editor_context
 
 from . import editor_panels as panels_builder
 from .labels import STATUS_TONES, issue_text

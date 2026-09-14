@@ -456,23 +456,32 @@
             return;
         }
         var confirmText = btn.getAttribute("data-tof-confirm");
-        if (confirmText && !window.confirm(confirmText)) {
-            return;
-        }
         var section = host.getAttribute("data-tof-section");
         var url = host.getAttribute("data-tof-action-url");
-        btn.disabled = true;
-        post(url, payload, null)
-            .then(function () {
-                reload(section, sectionUrl(section, {}));
-            })
-            .catch(function (err) {
-                var message = (err && err.payload && err.payload.message) || "";
-                if (message) {
-                    toast(message, "error");
-                }
-                btn.disabled = false;
-            });
+        function proceed() {
+            btn.disabled = true;
+            post(url, payload, null)
+                .then(function () {
+                    reload(section, sectionUrl(section, {}));
+                })
+                .catch(function (err) {
+                    var message = (err && err.payload && err.payload.message) || "";
+                    if (message) {
+                        toast(message, "error");
+                    }
+                    btn.disabled = false;
+                });
+        }
+        if (!confirmText) {
+            proceed();
+            return;
+        }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: confirmText, danger: true }).then(function (ok) {
+            if (ok) {
+                proceed();
+            }
+        });
     });
 
     window.EMSTeachingOffice = { post: post, sectionUrl: sectionUrl, root: root, reload: reload };

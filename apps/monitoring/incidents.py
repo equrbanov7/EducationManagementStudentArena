@@ -45,7 +45,7 @@ def _monitoring_link() -> str:
 
 
 def _notify(incident: Incident, *, resolved: bool):
-    from apps.notifications.services.crud import create_notification
+    from apps.notifications.public import create_notification
 
     if resolved:
         minutes, seconds = divmod(incident.duration_seconds or 0, 60)

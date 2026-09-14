@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.6, pytest-9.1.1, pluggy-1.6.0
+django: version: 5.2.17, settings: config.settings.test (from env)
+rootdir: /Users/elvin/Developer/EMSArena
+configfile: pyproject.toml (WARNING: ignoring pytest config in setup.cfg!)
+plugins: locust-2.43.3, xdist-3.8.0, asyncio-1.3.0, django-4.12.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 91 items
+
+apps/accounts/tests/test_statistics_pending_grades.py F                  [  1%]
+apps/registrar/tests/test_exam_score_import.py .............             [ 15%]
+apps/organizations/tests/test_p1_11_permission_scope.py ................ [ 32%]
+........................                                                 [ 59%]
+apps/accounts/tests/test_student_cabinet_stage6.py .........             [ 69%]
+tests/integration/test_statistics.py .........................           [ 96%]
+apps/organizations/tests/test_p1_11_permission_scope.py ...              [100%]
+
+=================================== FAILURES ===================================
+_ PendingGradesTest.test_pending_written_attempt_is_excluded_from_result_denominator _
+apps/accounts/tests/test_statistics_pending_grades.py:10: in test_pending_written_attempt_is_excluded_from_result_denominator
+    exam = Exam.objects.create(title="CODEX_TEST_written", author=user, exam_type="written")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+venv/lib/python3.11/site-packages/django/db/models/manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+venv/lib/python3.11/site-packages/django/db/models/query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+apps/exams/domain/exam_definition.py:289: in save
+    raise ValidationError(pgettext_lazy("exams.model.exam.error", "organization_required"))
+E   django.core.exceptions.ValidationError: ['Təşkilat seçimi məcburidir.']
+=========================== short test summary info ============================
+FAILED apps/accounts/tests/test_statistics_pending_grades.py::PendingGradesTest::test_pending_written_attempt_is_excluded_from_result_denominator
+========================= 1 failed, 90 passed in 2.80s =========================

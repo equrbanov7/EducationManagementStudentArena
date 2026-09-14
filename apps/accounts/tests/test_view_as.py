@@ -30,14 +30,14 @@ User = get_user_model()
 PASSWORD = "StrongPass123!"
 
 
-def _make_role(organization, name, level, permissions=None):
+def _make_role(organization, name, level, permissions=None, scope_type=RoleScopeType.ORGANIZATION):
     role, _ = Role.objects.update_or_create(
         organization=organization,
         name=name,
         defaults={
             "display_name": name.replace("_", " ").title(),
             "level": level,
-            "scope_type": RoleScopeType.ORGANIZATION,
+            "scope_type": scope_type,
             "permissions": permissions or [],
             "is_system": False,
             "is_active": True,
@@ -78,7 +78,11 @@ class ViewAsTestBase(TestCase):
         self.admin_role = _make_role(self.org, ProfileRole.ORG_ADMIN, 80)
         self.teacher_role = _make_role(self.org, ProfileRole.TEACHER, 60)
         self.student_role = _make_role(self.org, ProfileRole.STUDENT, 10)
-        self.tutor_role = _make_role(self.org, "tutor", 40)
+        # Tyutor kataloqdakı kimi: UNIT əhatəli rol + `member.view`. 2026-09-12
+        # (P1-11) — «view-as» hədəf əhatəsi artıq `member.view` daşıyan
+        # üzvlükdən çıxır; açarsız ORGANIZATION rolu (köhnə fikstur) heç bir
+        # hədəf görməzdi (fail-closed).
+        self.tutor_role = _make_role(self.org, "tutor", 40, permissions=["member.view"], scope_type=RoleScopeType.UNIT)
 
         self.admin = User.objects.create_user("org_admin", "admin@example.com", PASSWORD)
         self.teacher = User.objects.create_user("teacher1", "teacher@example.com", PASSWORD)

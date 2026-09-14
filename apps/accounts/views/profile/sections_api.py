@@ -36,13 +36,12 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
-from apps.accounts.models import UserProfile
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
-from .._helpers import _get_active_organization, _role_capabilities
+from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
 
 logger = logging.getLogger(__name__)
 
@@ -128,6 +127,7 @@ SECTION_PARTIALS: dict[str, str] = {
     # AJAX swap təhlükəsizdir.
     "student-intake": "accounts/profile/sections/_student_intake.html",
     "teacher-intake": "accounts/profile/sections/_teacher_intake.html",
+    "registrar-catalog": "accounts/profile/sections/_registrar_catalog.html",
     # «Müraciətlərim» (apps.applications) — server yalnız çərçivəni verir,
     # bütün mutasiyalar ayrıca JSON endpoint-lərinə gedir → AJAX swap təhlükəsizdir.
     "applications": "accounts/profile/sections/_applications.html",
@@ -238,6 +238,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "schedule-manage",
         "student-intake",
         "teacher-intake",
+        "registrar-catalog",
         "applications",
         "academic-calendar",
         "my-journal",
@@ -289,6 +290,19 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "student-registry",
         # Ekran 21 — tam OXU-ONLY hesabat paneli (mutasiya yoxdur) → AJAX-safe.
         "lessons-log",
+        # «İmtahan zalları» (2026-09-11 yenidən qurulub) — panel OXU-ONLY render
+        # olunur; bütün mutasiyalar (zal/kompüter yarat-redaktə-sil, idarəçi
+        # icazəsi) `accounts:superadmin_exam_rooms` POST-una gedir və `next` ilə
+        # qabığa qayıdır → AJAX swap təhlükəsizdir. Bu qeydiyyat olmasa AVTO
+        # filtr paneli və səhifələmə işləmir (`section_loader.js` bölməni
+        # tanımır və heç nə etmir).
+        "superadmin-exam-rooms",
+        # «İmtahan balının daxil edilməsi» (2026-09-14, W2 `w2paper`, sahibin rəyi):
+        # panel server-render, yazı `accounts:exam_score_entry` POST-una gedir və
+        # `next` ilə qabığa qayıdır; idxal ayrıca JSON endpoint-lərdir. Bu qeydiyyat
+        # olmadan avto filtr paneli (qrup → fənn, müəllim, axtarış), vəziyyət /
+        # növ çipləri, görünüş açarı və səhifələmə brauzerdə SƏSSİZ işləmirdi.
+        "exam-score-entry",
     }
 )
 
@@ -312,7 +326,8 @@ def _ensure_section_allowed(request: HttpRequest, section: str):
         return None
     if section not in AJAX_SAFE_SECTIONS:
         return None
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    # 2026-09-13 (audit §14/§21): profil middleware keşindən (bax `_load_user_profile`).
+    profile, _ = _load_user_profile(request.user)
     capabilities = _role_capabilities(request.user, profile)
     if section not in capabilities["allowed_sections"]:
         return None
@@ -436,7 +451,7 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     P3-extra — `@never_cache` (HTTP) qalır; badge dəyərləri Redis-də ~45s
     eventual-consistent saxlanılır (öz datası, kiçik staleness məqbul).
     """
-    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+    profile, _created = _load_user_profile(request.user)
     capabilities = _role_capabilities(request.user, profile)
 
     payload: dict[str, int] = {}

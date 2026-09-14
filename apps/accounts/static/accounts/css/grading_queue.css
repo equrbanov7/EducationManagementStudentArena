@@ -223,7 +223,7 @@
 
 .time-badge.warning {
     background: var(--ems-warning-100);
-    color: var(--ems-warning-600);
+    color: var(--ems-warning-700);
 }
 
 .time-badge.normal {

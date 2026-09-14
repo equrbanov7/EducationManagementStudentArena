@@ -6,7 +6,10 @@ olunur ki, hər iki tərəf eyni mənzərəni görsün.
 Kontekst: questions (annotate_preview_flags ilə has_error/has_warning
 bayraqlı snapshot siyahısı), counts (opsional say xülasəsi).
 Stil: exams/css/question_submission.css (qsubp-* / qsubs-stats).
+W3 2026-09-14: düsturlar KaTeX ilə — aktivlər partial-ın özündə (`defer`),
+çünki bu görünüş həm tam səhifədə, həm AJAX fraqmentində gəlir.
 {% endcomment %}
+{% include "partials/ems_ui/_math_assets.html" %}
 
 {% if counts %}
 <div class="qsubs-stats">

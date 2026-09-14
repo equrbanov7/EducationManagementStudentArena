@@ -265,6 +265,9 @@ class MergeHttpTest(_MergeBase):
         self.assertEqual(refused.status_code, 400)
         self.assertIn("azad et", refused.json()["error"])
 
+        # 2026-09-14: upload validatoru artıq fayl başlığını oxuyur — ilk POST-da
+        # oxunmuş `SimpleUploadedFile` EOF-dadır, ikinci POST-a təzə fayl lazımdır.
+        payload["document"] = _doc()
         payload["release_source"] = "on"
         accepted = client.post(url, payload)
         self.assertEqual(accepted.status_code, 200)

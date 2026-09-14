@@ -23,8 +23,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.exams.models import StudentGroup
-from apps.organizations.default_roles import get_default_roles_for_org_type
 from apps.organizations.models import Membership, Organization, OrgUnit, Role
+from apps.organizations.public import get_default_roles_for_org_type
 from core.constants import OrganizationType
 from core.management.command_safety import ProductionCommandSafetyMixin
 from core.rls import bypass_rls

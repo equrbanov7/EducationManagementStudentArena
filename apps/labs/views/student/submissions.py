@@ -41,7 +41,8 @@ def auto_save_answer(request, pk):
         return _lab_student_access_denied_json()
 
     if not is_lab_open(lab):
-        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
+        # F-10 (2026-09-13): bağlı lab → 409 (`lab_detail.js` `r.json()` ilə oxuyur).
+        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")}, status=409)
 
     try:
         assignment = LabAssignment.objects.filter(lab=lab, student=request.user).first()
@@ -114,7 +115,7 @@ def submit_lab(request, pk):
         return _lab_student_access_denied_json()
 
     if not is_lab_open(lab) and not lab.allow_late_submission:
-        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")})
+        return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")}, status=409)
 
     try:
         assignment = get_lab_assignment_for_student(lab, request.user)
@@ -123,7 +124,9 @@ def submit_lab(request, pk):
         max_attempts = lab.max_attempts or 1
 
         if current_attempts >= max_attempts:
-            return JsonResponse({"success": False, "error": pgettext("labs.view.error", "attempts_exhausted")})
+            return JsonResponse(
+                {"success": False, "error": pgettext("labs.view.error", "attempts_exhausted")}, status=409
+            )
 
         submission = LabSubmission.objects.create(
             assignment=assignment,

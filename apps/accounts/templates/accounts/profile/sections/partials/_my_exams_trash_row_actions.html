@@ -1,0 +1,37 @@
+{% load i18n %}
+{% comment %}
+  Zibil qutusu cədvəli — sıra əməlləri. Kontekst: `row.exam` (`attempts_total` annotate).
+  Birdəfəlik silmə YALNIZ cəhdi olmayan imtahan üçün mümkündür — `permanently_delete_exam_without_history`
+  bir dənə də cəhd varsa `AcademicHistoryProtected` atır; qayda UI-da da görünür (kilidli düymə + ipucu).
+{% endcomment %}
+<a class="ems-iconbtn"
+   href="{% url 'exams:teacher_exam_results' row.exam.slug %}"
+   title="{% trans 'action_view_results' context 'exams.template.deleted_exams' %}"
+   aria-label="{% trans 'action_view_results' context 'exams.template.deleted_exams' %}">
+  <i class="fas fa-chart-bar" aria-hidden="true"></i>
+</a>
+<form method="post" action="{% url 'exams:restore_exam' row.exam.slug %}" class="tx-trash-form">
+  {% csrf_token %}
+  <button type="submit" class="ems-btn ems-btn--sm tx-trash-restore">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "action_restore" context "exams.template.deleted_exams" %}
+  </button>
+</form>
+{% if row.exam.attempts_total %}
+  <button type="button" class="ems-iconbtn" disabled
+          title="{% trans 'permanent_delete_blocked_hint' context 'exams.template.deleted_exams' %}"
+          aria-label="{% trans 'permanent_delete_blocked_hint' context 'exams.template.deleted_exams' %}">
+    <i class="fas fa-lock" aria-hidden="true"></i>
+  </button>
+{% else %}
+  <button type="button" class="ems-iconbtn ems-iconbtn--danger js-tx-purge"
+          data-purge-url="{% url 'exams:permanent_delete_exam' row.exam.slug %}"
+          data-exam-name="{{ row.exam.title }}"
+          data-confirm-title="{% trans 'action_permanent_delete' context 'exams.template.deleted_exams' %}"
+          data-confirm-body="{% trans 'confirm_permanent_delete' context 'exams.template.deleted_exams' %}"
+          data-confirm-ok="{% trans 'action_permanent_delete' context 'exams.template.deleted_exams' %}"
+          data-confirm-cancel="{% trans 'action_cancel' context 'exams.template.deleted_exams' %}"
+          title="{% trans 'action_permanent_delete' context 'exams.template.deleted_exams' %}"
+          aria-label="{% trans 'action_permanent_delete' context 'exams.template.deleted_exams' %}">
+    <i class="fas fa-trash" aria-hidden="true"></i>
+  </button>
+{% endif %}

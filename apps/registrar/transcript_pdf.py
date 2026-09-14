@@ -10,19 +10,26 @@ Layout mirrors the official "AKADEMİK TRANSKRİPT" format used by AZ public
 universities (UNEC reference): a ministry/university letterhead, a student
 info block, one block per academic year with its (up to two) semesters laid
 out side by side, a running "Semestrin sonu" / "İlin sonu" subtotal under each
-semester/year, and a final "Ümumi" (cumulative credit + ÜOMG) + signature line.
+semester/year, and a final "Ümumi" (cumulative credit + ÜOMG) + approval band.
 
-The document is generated on the fly (never stored) and carries a footer note
-that it is system-generated; issuance is written to the audit log by the view.
+Rəsmi sənəd rekvizitləri: unikal sənəd nömrəsi (``build_document_number``, həm
+tələbə blokunda, həm hər səhifənin altlığında), verilmə tarixi, dekan imzası,
+möhür yeri çərçivəsi və «Səhifə N / M». Sənəd anlıq qurulur (saxlanılmır) və
+sistem tərəfindən yaradıldığını özü yazır; buraxılışı görünüş audit-ə yazır.
 """
 
 from __future__ import annotations
+
+import hashlib
 
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.registrar import exam_eligibility
+
+# ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
+from apps.registrar.transcript_pdf_text import ROW_LINE_H, ROW_SIZE, line_height, row_height, wrap_lines
 from core.constants import OrgUnitType
 
 # Every label below is looked up under the "registrar.pdf" context: short words
@@ -33,7 +40,7 @@ from core.constants import OrgUnitType
 # context-free. Half of them therefore had no "registrar.pdf" catalog entry and
 # the EN/RU/TR transcript silently fell back to the Azerbaijani msgid.
 
-# ── Layout constants (A4 = 595 × 842 pt) ────────────────────────────────────
+
 _PAGE_W, _PAGE_H = 595, 842
 _MARGIN = 46
 _CONTENT_W = _PAGE_W - 2 * _MARGIN
@@ -58,6 +65,13 @@ _FONT_BOLD = "wcub"
 _BRAND_EN_NAMES = {
     "Qərbi Kaspi Universiteti": "Western Caspian University",
 }
+
+#: Rəsmi blankın loqosu — təşkilatın öz faylı yoxdursa `static/brand/`-dakı
+#: brend nişanı işlənir (yeni fayl yaradılmır, sayt loqosu ilə eynidir).
+_BRAND_LOGO_PARTS = ("static", "brand", "wcu-logo-circle.png")
+
+#: Rəsmi sənədin nömrə prefiksi — «AT» = Akademik Transkript.
+_DOC_PREFIX = "AT"
 
 
 def _font_path(bold=False) -> str:
@@ -136,22 +150,47 @@ class _Sheet:
 
         self.page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=None, fill=color)
 
-    def finish_footers(self, generated_at):
+    def stroke_rect(self, x0, y0, x1, y1, *, color=_MUTED, width=0.7, dashes=None):
+        """Doldurulmamış çərçivə — möhür yeri üçün (kağız nüsxədə boş qalır)."""
+        import fitz
+
+        self.page.draw_rect(fitz.Rect(x0, y0, x1, y1), color=color, fill=None, width=width, dashes=dashes)
+
+    def finish_footers(self, generated_at, document_number=None):
+        """Hər səhifənin altlığı: sənəd nömrəsi + vaxt · «Səhifə N / M» · izah qeydi.
+
+        Nömrə HƏR səhifədə təkrarlanır — çoxsəhifəli rəsmi sənədin ayrı düşən
+        vərəqi də hansı transkriptə aid olduğunu özü deməlidir.
+
+        ⚠️ `document_number` OPSİONALDIR: bu vərəq sinfini `syllabus_pdf.py` də
+        işlədir, sillabusun isə sənəd nömrəsi yoxdur. Arqument məcburi olanda
+        həmin çağırış `TypeError` verirdi (2026-09-10)."""
         note = pgettext("registrar.pdf", "Bu sənəd sistem tərəfindən yaradılıb və elektron formada etibarlıdır.")
+        doc_label = pgettext("registrar.pdf", "Sənəd №")
         stamp = generated_at.strftime("%d.%m.%Y %H:%M")
         total = len(self.doc)
         for index, page in enumerate(self.doc, start=1):
-            y = _PAGE_H - 40
-            page.draw_line((_MARGIN, y - 10), (_PAGE_W - _MARGIN, y - 10), color=_LINE, width=0.6)
-            page.insert_text((_MARGIN, y), f"{note}  ·  {stamp}", fontname=_FONT, fontsize=7, color=_MUTED)
-            label = f"{index} / {total}"
+            top = _PAGE_H - 54
+            page.draw_line((_MARGIN, top), (_PAGE_W - _MARGIN, top), color=_LINE, width=0.6)
+            head = f"{doc_label}: {document_number}  ·  {stamp}" if document_number else stamp
+            page.insert_text((_MARGIN, top + 12), head, fontname=_FONT_BOLD, fontsize=7, color=_MUTED)
+            label = pgettext("registrar.pdf", "Səhifə %(page)s / %(total)s") % {"page": index, "total": total}
             width = _text_width(label, size=7)
-            page.insert_text((_PAGE_W - _MARGIN - width, y), label, fontname=_FONT, fontsize=7, color=_MUTED)
+            page.insert_text((_PAGE_W - _MARGIN - width, top + 12), label, fontname=_FONT, fontsize=7, color=_MUTED)
+            page.insert_text((_MARGIN, top + 22), note, fontname=_FONT, fontsize=7, color=_MUTED)
 
 
-def _truncate(value: str, limit: int) -> str:
-    value = str(value)
-    return value if len(value) <= limit else value[: limit - 1] + "…"
+def build_document_number(*, record, student, issued_at) -> str:
+    """Bu buraxılışın unikal sənəd nömrəsi (rəsmi sənəd rekvizitidir).
+
+    Transkript SAXLANILMIR, ona görə nömrə ardıcıllıqdan deyil, «qeyd + buraxılış
+    anı» cütündən determinist hesablanır: eyni saniyədə eyni tələbəyə verilən
+    fayl eyni nömrəni alır, ayrı-ayrı buraxılışlar isə fərqli. Nömrə audit
+    izindəki (``registrar.transcript_pdf``) qeyd və vaxt ilə tutuşdurula bilir.
+    """
+    reference = getattr(record, "pk", None) or getattr(student, "pk", "")
+    digest = hashlib.sha256(f"{reference}|{issued_at.isoformat()}".encode()).hexdigest()
+    return f"{_DOC_PREFIX}-{issued_at:%Y%m%d}-{digest[:8].upper()}"
 
 
 def _fmt_score(value) -> str:
@@ -178,13 +217,31 @@ def _faculty_name(group) -> str:
     return ""
 
 
+def _brand_logo_bytes():
+    """`static/brand/` nişanının baytları — oxunmasa ``None`` (blank loqosuz qalır)."""
+    try:
+        return settings.BASE_DIR.joinpath(*_BRAND_LOGO_PARTS).read_bytes()
+    except OSError:  # fayl yoxdur/oxunmur — rəsmi blank onsuz da qurulur
+        return None
+
+
+def _logo_bytes(organization):
+    """Əvvəl təşkilatın öz loqosu, sonra brend faylı — rəsmi blank loqosuz qalmasın."""
+    logo = getattr(organization, "logo", None)
+    if logo:
+        try:
+            return logo.open("rb").read()
+        except Exception:  # noqa: BLE001 — storage problemi blankı dayandırmır
+            pass
+    return _brand_logo_bytes()
+
+
 def _draw_logo(sheet, organization, *, top, size):
     """Best-effort org logo at the top-left of the letterhead; never fatal."""
-    logo = getattr(organization, "logo", None)
-    if not logo:
+    data = _logo_bytes(organization)
+    if not data:
         return False
     try:
-        data = logo.open("rb").read()
         import fitz
 
         rect = fitz.Rect(_MARGIN, top - 2, _MARGIN + size, top - 2 + size)
@@ -197,7 +254,6 @@ def _draw_logo(sheet, organization, *, top, size):
 def _draw_letterhead(sheet, organization):
     """Ministry + university header — the official AZ transcript letterhead."""
     sheet.y += 4
-    top = sheet.y
     sheet.text(_MARGIN, pgettext("registrar.pdf", "Azərbaycan Respublikası Təhsil Nazirliyi"), size=7.8, color=_MUTED)
     sheet.text(
         0,
@@ -208,7 +264,8 @@ def _draw_letterhead(sheet, organization):
     )
     sheet.y += 13
 
-    logo_drawn = _draw_logo(sheet, organization, top=top, size=42)
+    logo_top = sheet.y - 8
+    logo_drawn = _draw_logo(sheet, organization, top=logo_top, size=42)
     name_x = _MARGIN + (52 if logo_drawn else 0)
 
     sheet.text(name_x, organization.name, size=14.5, bold=True, color=_BLUE)
@@ -229,7 +286,7 @@ def _draw_letterhead(sheet, organization):
         sheet.y += 11
 
     if logo_drawn:
-        sheet.y = max(sheet.y, top + 42 + 6)
+        sheet.y = max(sheet.y, logo_top + 42 + 6)
     sheet.y += 6
     sheet.rule(color=_BLUE, width=1.4)
     sheet.y += 20
@@ -237,7 +294,7 @@ def _draw_letterhead(sheet, organization):
     sheet.y += 22
 
 
-def _draw_student_info(sheet, record, student):
+def _draw_student_info(sheet, record, student, document_number):
     """Fakültə / Tələbə № / İxtisas / Soyadı-adı / Təhsil pilləsi … — two columns."""
     full_name = student.get_full_name() or student.username
     pairs = []
@@ -259,15 +316,27 @@ def _draw_student_info(sheet, record, student):
             pairs.append((pgettext("registrar.pdf", "Qrup"), record.group.name))
         pairs.append((pgettext("registrar.pdf", "Qəbul ili"), str(record.admission_year)))
         pairs.append((pgettext("registrar.pdf", "Status"), record.get_status_display()))
+    # Rəsmi rekvizit — sənədin unikal nömrəsi altlıqda da təkrarlanır.
+    pairs.append((pgettext("registrar.pdf", "Sənəd №"), document_number))
 
+    # Dəyər sığmırsa alt sətrə keçir — kəsilmir, qonşu sütuna minmir.
     col_w = _CONTENT_W / 2
+    label_w, size = 92, 8.7
+    value_w = col_w - label_w - 10
+    step = line_height(size)
     for i in range(0, len(pairs), 2):
-        sheet.ensure(16)
-        for col, (label, value) in enumerate(pairs[i : i + 2]):
+        cells = [
+            (label, wrap_lines(value, width=value_w, measure=lambda t, s_=size: _text_width(t, size=s_, bold=True)))
+            for label, value in pairs[i : i + 2]
+        ]
+        tallest = max(len(lines) for _label, lines in cells)
+        sheet.ensure(15 + (tallest - 1) * step)
+        for col, (label, lines) in enumerate(cells):
             x = _MARGIN + col * col_w
-            sheet.text_at(x, sheet.y, f"{label}:", size=8.7, color=_MUTED)
-            sheet.text_at(x + 92, sheet.y, _truncate(value, 40), size=8.7, bold=True)
-        sheet.y += 15
+            sheet.text_at(x, sheet.y, f"{label}:", size=size, color=_MUTED)
+            for offset, line in enumerate(lines):
+                sheet.text_at(x + label_w, sheet.y + offset * step, line, size=size, bold=True)
+        sheet.y += 15 + (tallest - 1) * step
 
     sheet.y += 6
     sheet.rule()
@@ -286,6 +355,27 @@ def _has_legacy_rows(data) -> bool:
                 if row.get("legacy"):
                     return True
     return False
+
+
+def _row_name_lines(row, *, width: float) -> list[str]:
+    """«ŞİFR  Ad [*]» — sütunun eninə ÖLÇÜLƏRƏK bölünmüş sətirlər (kəsilmir).
+
+    «*» köçürülmüş qiymət nişanıdır — ekrandakı ``_legacy_grade_mark.html``
+    qlifi ilə eyni ``row["legacy"]`` mənbəyindən çıxır, sürüşə bilməz.
+    """
+    code_name = f"{row['subject'].code}  {row['subject'].name}"
+    if row.get("legacy"):
+        code_name = f"{code_name} {_LEGACY_MARK}"
+    return wrap_lines(code_name, width=width, measure=lambda t: _text_width(t, size=ROW_SIZE))
+
+
+def _semester_height(semester, *, width: float) -> float:
+    """Semestr sütununun REAL hündürlüyü — səhifə keçidi bununla hesablanır."""
+    if semester is None:
+        return 0
+    name_w = _mini_cols(width)[0][3] - 6
+    rows = sum(row_height(len(_row_name_lines(row, width=name_w))) for row in semester["rows"])
+    return 13 + 11 + rows + 4 + 10 + 16
 
 
 def _mini_cols(width):
@@ -324,22 +414,18 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
             sheet.text_at(x + offset, y, label, size=6.6, bold=True, color=_MUTED)
     y += 11
 
-    name_limit = max(10, int(width / 4.4))
+    name_w = cols[0][3] - 6  # «Kredit» sütununa 6pt nəfəslik
     for index, row in enumerate(semester["rows"]):
         if y > _BOTTOM_LIMIT - 24:
             break  # safety valve — a real semester never has enough rows to hit this
+        lines = _row_name_lines(row, width=name_w)
+        row_h = row_height(len(lines))
         if index % 2 == 1:
-            sheet.fill_rect(x - 3, y - 9, x + width + 3, y - 9 + 12, _ROW_ALT)
+            sheet.fill_rect(x - 3, y - 9, x + width + 3, y - 9 + row_h, _ROW_ALT)
         result = row["result"]
         definite = result["passed"] or result["failed"]
-        code_name = f"{row['subject'].code}  {_truncate(row['subject'].name, name_limit)}"
-        # Köçürülmüş qiymət nişanı.  Rəsmi sənəddə bal-sütununa toxunmuruq —
-        # oxucu «*» görüb altdakı qeydə baxır.  Ekran versiyasında bunun
-        # qarşılığı ``_legacy_grade_mark.html`` qlifidir; hər ikisi eyni
-        # ``row["legacy"]`` mənbəyindən çıxır, ona görə sürüşə bilməz.
-        if row.get("legacy"):
-            code_name = f"{code_name} {_LEGACY_MARK}"
-        sheet.text_at(x, y, code_name, size=7.6)
+        for offset, line in enumerate(lines):  # rəqəm sütunları 1-ci xətdə qalır
+            sheet.text_at(x, y + offset * ROW_LINE_H, line, size=ROW_SIZE)
         values = {
             "credit": str(row["credit"]),
             "bal": _fmt_score(result["total"]) if definite else "—",
@@ -347,8 +433,8 @@ def _draw_semester_column(sheet, semester, *, x, width, top):
         }
         for key, _label, offset, colw, _right in cols[1:]:
             bold = key == "bal" and definite
-            sheet.text_at(0, y, values[key], size=7.6, bold=bold, right_edge=x + offset + colw)
-        y += 12
+            sheet.text_at(0, y, values[key], size=ROW_SIZE, bold=bold, right_edge=x + offset + colw)
+        y += row_h
 
     y += 4
     sheet.rule_at(x, x + width, y)
@@ -371,8 +457,10 @@ def _draw_year(sheet, year):
     right = semesters[1] if len(semesters) >= 2 else None
     extra = semesters[2:]
 
-    max_rows = max((len(s["rows"]) for s in (left, right) if s), default=0)
-    estimated = 34 + max_rows * 12 + 40
+    # Sətirlər çox-xəttli ola bildiyi üçün hündürlük təxminlə deyil, çəkmə
+    # ilə EYNİ funksiyadan ölçülür — sütunun sonu altlığın üstünə düşməsin.
+    col_w = (_CONTENT_W - _COL_GAP) / 2
+    estimated = 16 + max(_semester_height(left, width=col_w), _semester_height(right, width=col_w)) + 26
     sheet.ensure(min(estimated, _BOTTOM_LIMIT - _MARGIN - 10))
 
     sheet.text(
@@ -384,7 +472,6 @@ def _draw_year(sheet, year):
     )
     sheet.y += 16
     top = sheet.y
-    col_w = (_CONTENT_W - _COL_GAP) / 2
     left_bottom = _draw_semester_column(sheet, left, x=_MARGIN, width=col_w, top=top)
     right_bottom = _draw_semester_column(sheet, right, x=_MARGIN + col_w + _COL_GAP, width=col_w, top=top)
     sheet.y = max(left_bottom, right_bottom, top)
@@ -446,30 +533,52 @@ def _draw_footer(sheet, data, generated_at):
         sheet.text(_MARGIN, legacy_note, size=7.4, color=_MUTED)
         sheet.y += 14
 
+    sheet.ensure(96)
     sheet.y += 26
+    _draw_signature_block(sheet, generated_at)
+
+
+def _draw_signature_block(sheet, generated_at):
+    """Təsdiq zolağı: dekan imzası (solda) + möhür yeri (sağda) + rekvizitlər.
+
+    Möhür yeri QƏSDƏN boşdur — elektron nüsxə möhürsüz etibarlıdır, kağız
+    nüsxə isə bu çərçivənin içində möhürlənir."""
+    top = sheet.y
+    stamp_w, stamp_h = 108, 66
+    stamp_x = _PAGE_W - _MARGIN - stamp_w
+
     dean_label = pgettext("registrar.pdf", "Fakültə dekanı")
-    sheet.text(_MARGIN, f"{dean_label} " + "_" * 26, size=9.5)
+    sheet.text_at(_MARGIN, top, dean_label, size=9.5, bold=True)
+    sheet.rule_at(_MARGIN, _MARGIN + 200, top + 24, color=_MUTED)
+    sheet.text_at(_MARGIN, top + 34, pgettext("registrar.pdf", "(imza, soyad və ad)"), size=7, color=_MUTED)
+
     issued_label = pgettext("registrar.pdf", "Verilmə tarixi")
-    stamp = generated_at.strftime("%d.%m.%Y")
-    sheet.text(0, f"{issued_label}: {stamp}", size=9.5, right_edge=_PAGE_W - _MARGIN)
-    sheet.y += 20
+    sheet.text_at(_MARGIN, top + 54, f"{issued_label}: {generated_at:%d.%m.%Y}", size=8.6)
+
+    sheet.stroke_rect(stamp_x, top - 10, stamp_x + stamp_w, top - 10 + stamp_h, dashes="[3 3] 0")
+    seal_label = pgettext("registrar.pdf", "Möhür yeri")
+    width = _text_width(seal_label, size=7.4)
+    sheet.text_at(stamp_x + (stamp_w - width) / 2, top + 26, seal_label, size=7.4, color=_MUTED)
+    sheet.y = top + 68
 
 
 def render_transcript_pdf(*, organization, student, record, data) -> bytes:
     """Build the official transcript PDF → raw bytes (subset fonts, compressed)."""
     import fitz
 
+    generated_at = timezone.localtime()
+    document_number = build_document_number(record=record, student=student, issued_at=generated_at)
+
     doc = fitz.open()
     sheet = _Sheet(doc, pgettext("registrar.pdf", "AKADEMİK TRANSKRİPT"))
     _draw_letterhead(sheet, organization)
-    _draw_student_info(sheet, record, student)
+    _draw_student_info(sheet, record, student, document_number)
 
     for year in data["years"]:
         _draw_year(sheet, year)
 
-    generated_at = timezone.localtime()
     _draw_footer(sheet, data, generated_at)
-    sheet.finish_footers(generated_at)
+    sheet.finish_footers(generated_at, document_number)
 
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
     doc.set_metadata(

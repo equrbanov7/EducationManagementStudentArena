@@ -63,7 +63,7 @@ def _current_period(organization):
 def _period_label(period) -> str:
     if period is None:
         return ""
-    from apps.registrar.page_contexts import _season_label
+    from apps.registrar.public import season_label as _season_label
 
     return " · ".join(part for part in (str(period.year_display or ""), str(_season_label(period) or "")) if part)
 

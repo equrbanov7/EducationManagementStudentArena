@@ -1,0 +1,46 @@
+[
+  {
+    "name": "/emsarena-app-4",
+    "status": "running",
+    "health": "healthy",
+    "restart_count": 0,
+    "user": "appuser",
+    "memory_limit": 1610612736,
+    "nano_cpus": 1500000000,
+    "privileged": false,
+    "readonly_rootfs": false
+  },
+  {
+    "name": "/emsarena-celery_worker-2",
+    "status": "running",
+    "health": null,
+    "restart_count": 0,
+    "user": "appuser",
+    "memory_limit": 1073741824,
+    "nano_cpus": 1000000000,
+    "privileged": false,
+    "readonly_rootfs": false
+  },
+  {
+    "name": "/emsarena-postgres",
+    "status": "running",
+    "health": "healthy",
+    "restart_count": 0,
+    "user": "",
+    "memory_limit": 2147483648,
+    "nano_cpus": 2000000000,
+    "privileged": false,
+    "readonly_rootfs": false
+  },
+  {
+    "name": "/emsarena-redis",
+    "status": "running",
+    "health": "healthy",
+    "restart_count": 0,
+    "user": "",
+    "memory_limit": 536870912,
+    "nano_cpus": 500000000,
+    "privileged": false,
+    "readonly_rootfs": false
+  }
+]

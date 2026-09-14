@@ -17,6 +17,8 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from django.utils import timezone
 from django.utils.translation import override, pgettext
 
+import pytest
+
 from apps.accounts.models import ProfileRole
 from apps.exams import services
 from apps.exams.models import (
@@ -1703,6 +1705,7 @@ class ExamParsingServicesTest(TestCase):
         expected_message = pgettext("exams.service.parsing.error", "pdf_no_text_layer")
         self.assertEqual(str(exc.exception), expected_message)
 
+    @pytest.mark.requires_tesseract
     @override_settings(EXAM_PDF_OCR_ENABLED=True, EXAM_PDF_OCR_LANG="eng", EXAM_PDF_OCR_MAX_PAGES=2)
     def test_ocr_extracts_questions_from_scanned_pdf(self):
         if not self._ocr_available():

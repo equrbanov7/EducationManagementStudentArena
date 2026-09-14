@@ -1,0 +1,11 @@
+{
+  "ping": true,
+  "connected_clients": 20,
+  "used_memory": 2040176,
+  "maxmemory": 0,
+  "maxmemory_policy": "noeviction",
+  "evicted_keys": 0,
+  "rdb_last_bgsave_status": "ok",
+  "aof_enabled": 1,
+  "role": "master"
+}

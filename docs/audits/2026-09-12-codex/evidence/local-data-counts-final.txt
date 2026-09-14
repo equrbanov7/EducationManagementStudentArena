@@ -1,0 +1,14 @@
+BEGIN
+      entity      | count  
+------------------+--------
+ organizations    |      1
+ migrations       |    280
+ attempts         |      0
+ academic_records |   7703
+ users            |   8443
+ final_grades     | 114021
+ enrollments      | 148020
+ legacy_maps      | 777901
+(8 rows)
+
+COMMIT

@@ -81,15 +81,18 @@ def people_analytics(request, kind: str):
 def people_analytics_ai(request, kind: str):
     """AI xülasəsi — PII-siz aqreqat yük, data-hash keş, istifadəçi-başına limit.
 
-    Xəta halında bölmə səssizcə gizlənməlidir, ona görə cavab HƏMİŞƏ 200-dir və
-    uğursuzluq ``{"ok": false, …}`` ilə bildirilir; JS bloku gizlədir.
+    Xəta halında bölmə səssizcə gizlənir: JS (``people_analytics.js``) həm
+    ``payload.ok === false``, həm də ``fetchJSON`` reject-ini eyni cür emal
+    edir. Backend auditi 2026-09-13, F-10: əvvəl icazəsizlik və generasiya
+    xətası da HTTP 200 idi — indi düzgün status (403 / 502) qaytarılır;
+    ``{"ok": false, …}`` zərfi saxlanılır.
     """
     if kind not in _KINDS:
         return JsonResponse({"ok": False, "error": "unknown_catalog"}, status=404)
 
     filters, analytics = _build(request, kind)
     if not analytics.get("has_access"):
-        return JsonResponse({"ok": False, "error": "no_access"})
+        return JsonResponse({"ok": False, "error": "no_access"}, status=403)
 
     try:
         result = people.generate_analytics_summary(
@@ -100,7 +103,7 @@ def people_analytics_ai(request, kind: str):
         )
     except Exception:  # noqa: BLE001 — AI kanalı səhifəni SINDIRMAMALIDIR
         logger.exception("İnsanlar kataloqu AI xülasəsi alınmadı")
-        return JsonResponse({"ok": False, "error": "generation_failed"})
+        return JsonResponse({"ok": False, "error": "generation_failed"}, status=502)
     return JsonResponse(result)
 
 

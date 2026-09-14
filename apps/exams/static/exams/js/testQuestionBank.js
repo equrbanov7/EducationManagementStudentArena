@@ -34,10 +34,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const color = isPdf ? "#e74c3c" : (isImage ? "#0f9f8f" : "#4361ee");
   
       display.classList.add("show");
-      display.innerHTML = `
-      <i class="bi ${icon}" style="color:${color}"></i>
-      <span title="${String(fileName).replace(/"/g, "&quot;")}">${fileName}</span>
-    `;
+      // 2026-09-13 audit F-04: fayl adı istifadəçi girişidir — textContent ilə yazılır (self-XSS gigiyenası).
+      display.innerHTML = `<i class="bi ${icon}" style="color:${color}"></i> <span></span>`;
+      const nameEl = display.querySelector("span");
+      nameEl.title = nameEl.textContent = String(fileName);
       uploadZone.style.borderColor = color;
       uploadZone.style.background = "#f8faff";
     }
@@ -395,15 +395,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ====== Faylın client-side validation (UX cəhəti — server-side əsasdır) ======
-    // Word (.docx/.doc) və macro/executable uzantıları client-side bloklayırıq.
-    const FORBIDDEN_EXT = ["docx", "doc", "docm", "dotm", "dotx", "rtf", "xlsm", "pptm", "bin", "exe", "scr", "js", "html", "htm", "zip"];
+    // Köhnə Word (.doc) və macro/executable uzantılar bloklanır; .docx 2026-09-14-dən idxal edilir.
+    const FORBIDDEN_EXT = ["doc", "docm", "dotm", "dotx", "rtf", "xlsm", "pptm", "bin", "exe", "scr", "js", "html", "htm", "zip"];
     const MAX_FILE_BYTES = 45 * 1024 * 1024; // 45MB — server limiti ilə uyğun
     function validateFileClientSide(input) {
       if (!input || !input.files || !input.files[0]) return true;
       const f = input.files[0];
       const ext = (f.name.split(".").pop() || "").toLowerCase();
       if (FORBIDDEN_EXT.includes(ext)) {
-        showWorkbenchError(gettext("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .txt / .png / .jpg yükləyin."));
+        showWorkbenchError(gettext("Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."));
         input.value = "";
         clearFileState();
         return false;

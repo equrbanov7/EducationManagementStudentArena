@@ -84,6 +84,36 @@ class OrganizationMiddleware:
             )
 
     @staticmethod
+    def _fetch_blocked_organization(user):
+        """İstifadəçinin aktiv üzvlüyü olan, amma statusu ``active`` OLMAYAN təşkilat.
+
+        2026-09-13 access auditi, F-11: ``_fetch_active_memberships`` yalnız
+        ``status='active'`` təşkilatları oxuduğu üçün yeganə təşkilatı
+        dayandırılmış (suspended) istifadəçi login edib org-suz kabinetdə
+        qalırdı — ``SuspendedOrganizationMiddleware``-in sənədləşdirilmiş «hard
+        logout» müqaviləsi işə düşmürdü (auditor zondu
+        ``A7-suspended-login-follow`` → 200, auth=True). Burada belə təşkilat
+        ``request.blocked_organization`` kimi verilir; qərarı (suspended →
+        logout, pending → yalnız bayraq) həmin middleware verir. Suspended
+        (qeyri-pending) təşkilat pending-dən ÖNCƏ gəlir — sərt blok üstündür.
+        """
+        with bypass_rls():
+            memberships = (
+                user.memberships.filter(is_active=True, organization__is_active=True)
+                .exclude(organization__status="active")
+                .select_related("organization")
+                .order_by("-is_primary", "id")
+            )
+            blocked = None
+            for membership in memberships:
+                organization = membership.organization
+                if getattr(organization, "status", "") != "pending":
+                    return organization
+                if blocked is None:
+                    blocked = organization
+            return blocked
+
+    @staticmethod
     def _unique_orgs(memberships):
         """Return an ``{org_id: Organization}`` mapping from a membership list."""
         result = {}
@@ -209,6 +239,15 @@ class OrganizationMiddleware:
                     request.session["active_organization"] = owner_fallback_org.slug
                     request.org_memberships = [owner_membership] if owner_membership is not None else []
                     setattr(request, TRUSTED_OWNER_CONTEXT_ATTR, owner_membership is None)
+                elif not (
+                    getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+                ):
+                    # F-11 (2026-09-13): aktiv təşkilatı olmayan adi istifadəçi
+                    # üçün dayandırılmış/pending üzvlük də oxunur ki, suspended
+                    # → hard logout müqaviləsi login-dən sonra da tutsun.
+                    # Superadmin üçün sorğu edilmir — o, həmin middleware-dən
+                    # onsuz da azaddır.
+                    request.blocked_organization = self._fetch_blocked_organization(request.user)
 
             # len >= 2  → multi-org user; explicit selection required.
             # request.organization stays None; the org-picker view handles this.

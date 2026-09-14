@@ -6,8 +6,11 @@ filtrin CSV ixracı (`audit:export`, tavan 10 000 sətir, UTF-8 BOM).{% endcomme
     <i class="fas fa-rotate" aria-hidden="true"></i>
     {% trans "Yenilə" context "audit.section" %}
 </button>
+{% if audit_log_section.export_url %}
+{# `audit.export` açarı yoxdursa URL boşdur — düymə göstərilmir (audit 2026-09-13 F-06, 2026-09-14). #}
 <a class="ems-btn" href="{{ audit_log_section.export_url }}" data-al-export
    title="{% trans 'Cari filtrə uyğun qeydləri CSV kimi yüklə (ən çox 10 000 sətir)' context 'audit.section' %}">
     <i class="fas fa-file-csv" aria-hidden="true"></i>
     {% trans "CSV ixrac" context "audit.section" %}
 </a>
+{% endif %}

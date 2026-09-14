@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}«Transkript» başlıq əməli. Transkript siyasəti (dizayn README §10.1):
+DEFAULT `request`. Öz-özünə xidmət bağlıdırsa «PDF yüklə» GÖSTƏRİLMİR (endpoint
+404 verir) — əvəzinə «Transkript sorğusu» müraciəti öncədən seçilmiş halda açılır.
+`partials/ems_ui/_content_header.html` bunu `header_actions_include` ilə gətirir;
+`sec` = `student_transcript_section` (`_my_transcript.html`-dəki `with`).{% endcomment %}
+{% if sec.has_record %}
+  {% if sec.self_service %}
+  <a class="transcript-pdf-link" href="{% url 'registrar:my_transcript_pdf' %}"
+     title="{% trans 'Rəsmi transkripti PDF olaraq yüklə' context 'profile.transcript' %}">
+      <i class="fas fa-file-pdf"></i> {% trans "PDF yüklə" context "profile.transcript" %}
+  </a>
+  {% elif 'applications' in allowed_sections %}
+  <a class="transcript-pdf-link js-profile-section-link" href="{{ sec.request_url }}"
+     data-section="applications"
+     data-title="{% trans 'Müraciətlərim' context 'profile.sidebar' %}"
+     data-source-url="{{ profile_base_url }}"
+     title="{% trans 'Rəsmi transkript Tələbə Xidmətləri Mərkəzindən sorğu ilə verilir (3 iş günü).' context 'profile.transcript' %}">
+      <i class="fas fa-file-signature"></i> {% trans "Transkript sorğusu göndər" context "profile.transcript" %}
+  </a>
+  {% endif %}
+{% endif %}

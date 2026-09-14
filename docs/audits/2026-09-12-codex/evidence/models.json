@@ -1,0 +1,1502 @@
+[
+  {
+    "file": "apps/organizations/models.py",
+    "line": 29,
+    "name": "Country"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 45,
+    "name": "Institution"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 80,
+    "name": "Organization"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 214,
+    "name": "OrgUnit"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 367,
+    "name": "AcademicPeriod"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 489,
+    "name": "Role"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 521,
+    "name": "Membership"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 38,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 66,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 130,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 248,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 390,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 507,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/organizations/models.py",
+    "line": 555,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/contact/models.py",
+    "line": 20,
+    "name": "ContactMessage"
+  },
+  {
+    "file": "apps/contact/models.py",
+    "line": 94,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 13,
+    "name": "_SubmissionStoredFile"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 30,
+    "name": "Assignment"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 209,
+    "name": "Submission"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 381,
+    "name": "Notification"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 147,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 293,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/assignments/models.py",
+    "line": 416,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 29,
+    "name": "LegacyMigrationRun"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 128,
+    "name": "LegacyEntityMap"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 259,
+    "name": "LegacyEntityObservation"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 387,
+    "name": "LegacyMigrationIssue"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 32,
+    "name": "Mode"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 37,
+    "name": "Status"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 44,
+    "name": "Origin"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 48,
+    "name": "AccountingMode"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 81,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 131,
+    "name": "State"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 136,
+    "name": "ReconciliationStatus"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 172,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 298,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 390,
+    "name": "Severity"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 396,
+    "name": "ReviewStatus"
+  },
+  {
+    "file": "apps/legacy_import/models.py",
+    "line": 443,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/projects/models.py",
+    "line": 16,
+    "name": "Project"
+  },
+  {
+    "file": "apps/projects/models.py",
+    "line": 95,
+    "name": "ProjectSubmission"
+  },
+  {
+    "file": "apps/projects/models.py",
+    "line": 55,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/projects/models.py",
+    "line": 121,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 26,
+    "name": "LiveSession"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 126,
+    "name": "LivePlayer"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 150,
+    "name": "LiveAnswerQuerySet"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 169,
+    "name": "LiveAnswer"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 143,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/live_exam/models.py",
+    "line": 189,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 19,
+    "name": "Category"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 218,
+    "name": "Post"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 399,
+    "name": "PostApprovalLog"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 431,
+    "name": "Comment"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 461,
+    "name": "Subscriber"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 474,
+    "name": "Question"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 37,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 240,
+    "name": "ApprovalStatus"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 289,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 400,
+    "name": "Action"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 421,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 449,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/blog/models.py",
+    "line": 492,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/ai_assistant/models.py",
+    "line": 14,
+    "name": "AIAssistantLog"
+  },
+  {
+    "file": "apps/ai_assistant/models.py",
+    "line": 17,
+    "name": "Status"
+  },
+  {
+    "file": "apps/ai_assistant/models.py",
+    "line": 43,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/audit/models.py",
+    "line": 19,
+    "name": "AuditLogManager"
+  },
+  {
+    "file": "apps/audit/models.py",
+    "line": 104,
+    "name": "AuditLog"
+  },
+  {
+    "file": "apps/audit/models.py",
+    "line": 158,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 18,
+    "name": "UserProfile"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 26,
+    "name": "AccessState"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 108,
+    "name": "Gender"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 200,
+    "name": "AcademicTitle"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 209,
+    "name": "AcademicDegree"
+  },
+  {
+    "file": "apps/accounts/models.py",
+    "line": 382,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 28,
+    "name": "Appeal"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 106,
+    "name": "AppealItem"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 183,
+    "name": "ScoreAdjustment"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 92,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 167,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/appeals/models.py",
+    "line": 235,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 16,
+    "name": "IncidentStatus"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 25,
+    "name": "Severity"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 33,
+    "name": "Incident"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 107,
+    "name": "SecurityEventType"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 120,
+    "name": "SecurityEvent"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 84,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/monitoring/models.py",
+    "line": 157,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 9,
+    "name": "StudentOrganizationRequestStatus"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 17,
+    "name": "MembershipRequestRoleType"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 25,
+    "name": "StudentOrganizationRequest"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 85,
+    "name": "NotificationType"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 96,
+    "name": "InAppNotification"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 68,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/notifications/models.py",
+    "line": 142,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/trial_exams/models.py",
+    "line": 38,
+    "name": "TrialExamRequest"
+  },
+  {
+    "file": "apps/trial_exams/models.py",
+    "line": 131,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/task.py",
+    "line": 31,
+    "name": "TeachingTask"
+  },
+  {
+    "file": "apps/workload/models/task.py",
+    "line": 110,
+    "name": "TeachingTaskRow"
+  },
+  {
+    "file": "apps/workload/models/task.py",
+    "line": 79,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/task.py",
+    "line": 187,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/amendment.py",
+    "line": 34,
+    "name": "WorkloadAmendment"
+  },
+  {
+    "file": "apps/workload/models/amendment.py",
+    "line": 66,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 36,
+    "name": "TaskFacultySlice"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 91,
+    "name": "TaskRowReview"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 130,
+    "name": "LoadObjection"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 68,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 117,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/review.py",
+    "line": 166,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/assignment.py",
+    "line": 21,
+    "name": "TeacherAssignment"
+  },
+  {
+    "file": "apps/workload/models/assignment.py",
+    "line": 80,
+    "name": "TeacherWorkloadProfile"
+  },
+  {
+    "file": "apps/workload/models/assignment.py",
+    "line": 60,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/workload/models/assignment.py",
+    "line": 105,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 23,
+    "name": "ApplicationUnit"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 72,
+    "name": "ApplicationKind"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 136,
+    "name": "ApplicationCounter"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 55,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 109,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/catalog.py",
+    "line": 154,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 33,
+    "name": "ApplicationEvent"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 106,
+    "name": "ApplicationWatch"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 151,
+    "name": "ApplicationAttachment"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 86,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 138,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/events.py",
+    "line": 197,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/applications/models/application.py",
+    "line": 17,
+    "name": "Application"
+  },
+  {
+    "file": "apps/applications/models/application.py",
+    "line": 89,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/course.py",
+    "line": 15,
+    "name": "Course"
+  },
+  {
+    "file": "apps/courses/models/course.py",
+    "line": 140,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/content.py",
+    "line": 10,
+    "name": "CourseTopic"
+  },
+  {
+    "file": "apps/courses/models/content.py",
+    "line": 66,
+    "name": "CourseResource"
+  },
+  {
+    "file": "apps/courses/models/content.py",
+    "line": 53,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/content.py",
+    "line": 132,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 13,
+    "name": "CourseMembership"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 80,
+    "name": "CourseInstructor"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 144,
+    "name": "CourseGroup"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 67,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 132,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/courses/models/enrollment.py",
+    "line": 206,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 29,
+    "name": "ChangeKind"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 39,
+    "name": "ApprovalSource"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 52,
+    "name": "Syllabus"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 160,
+    "name": "SyllabusVersion"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 128,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/syllabus/models/syllabus.py",
+    "line": 255,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/syllabus/models/sections.py",
+    "line": 24,
+    "name": "SyllabusSection"
+  },
+  {
+    "file": "apps/syllabus/models/sections.py",
+    "line": 49,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/syllabus/models/review.py",
+    "line": 24,
+    "name": "ReviewDecision"
+  },
+  {
+    "file": "apps/syllabus/models/review.py",
+    "line": 43,
+    "name": "SyllabusReview"
+  },
+  {
+    "file": "apps/syllabus/models/review.py",
+    "line": 70,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/journal_close_notice.py",
+    "line": 21,
+    "name": "JournalCloseScope"
+  },
+  {
+    "file": "apps/registrar/models/journal_close_notice.py",
+    "line": 29,
+    "name": "JournalCloseNotice"
+  },
+  {
+    "file": "apps/registrar/models/journal_close_notice.py",
+    "line": 78,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/curriculum.py",
+    "line": 39,
+    "name": "Curriculum"
+  },
+  {
+    "file": "apps/registrar/models/curriculum.py",
+    "line": 83,
+    "name": "CurriculumSubject"
+  },
+  {
+    "file": "apps/registrar/models/curriculum.py",
+    "line": 66,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/curriculum.py",
+    "line": 117,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 44,
+    "name": "ExamScoreEntryKind"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 51,
+    "name": "ExamScoreEntry"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 123,
+    "name": "ExamScoreSheetSource"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 135,
+    "name": "ExamScoreSheet"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 96,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/exam_score_entry.py",
+    "line": 184,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 38,
+    "name": "AssessmentScheme"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 100,
+    "name": "Lesson"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 181,
+    "name": "LessonMark"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 224,
+    "name": "Rubric"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 251,
+    "name": "RubricCriterion"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 277,
+    "name": "AssessmentComponent"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 316,
+    "name": "ComponentScore"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 343,
+    "name": "CriterionScore"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 389,
+    "name": "SelfWorkTopic"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 410,
+    "name": "SelfWorkMark"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 445,
+    "name": "CourseWork"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 480,
+    "name": "FinalGrade"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 517,
+    "name": "ResitRecord"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 83,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 171,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 203,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 239,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 264,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 303,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 331,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 363,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 400,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 425,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 464,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 508,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/grading.py",
+    "line": 536,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/legacy_excuse.py",
+    "line": 63,
+    "name": "LegacyExcuseMappingStatus"
+  },
+  {
+    "file": "apps/registrar/models/legacy_excuse.py",
+    "line": 77,
+    "name": "_AppendOnlyQuerySet"
+  },
+  {
+    "file": "apps/registrar/models/legacy_excuse.py",
+    "line": 87,
+    "name": "_AppendOnlyManager"
+  },
+  {
+    "file": "apps/registrar/models/legacy_excuse.py",
+    "line": 91,
+    "name": "LegacyExcuseDocument"
+  },
+  {
+    "file": "apps/registrar/models/legacy_excuse.py",
+    "line": 152,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/handover.py",
+    "line": 45,
+    "name": "TeachingHandover"
+  },
+  {
+    "file": "apps/registrar/models/handover.py",
+    "line": 108,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/transfer_evidence.py",
+    "line": 9,
+    "name": "GroupTransferEvidence"
+  },
+  {
+    "file": "apps/registrar/models/transfer_evidence.py",
+    "line": 50,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 30,
+    "name": "_AppendOnlyQuerySet"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 40,
+    "name": "_AppendOnlyManager"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 44,
+    "name": "_ReviewQuerySet"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 51,
+    "name": "_ReviewManager"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 55,
+    "name": "LegacyGradeEvidenceKind"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 66,
+    "name": "LegacyGradeMappingStatus"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 74,
+    "name": "LegacyGradeReviewDecision"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 80,
+    "name": "LegacyGradeArtifactKind"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 87,
+    "name": "LegacyGradeFact"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 194,
+    "name": "LegacyGradeArtifact"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 257,
+    "name": "LegacyGradeReview"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 146,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 225,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/legacy_grade.py",
+    "line": 287,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/movement.py",
+    "line": 65,
+    "name": "MovementKind"
+  },
+  {
+    "file": "apps/registrar/models/movement.py",
+    "line": 80,
+    "name": "StudentMovement"
+  },
+  {
+    "file": "apps/registrar/models/movement.py",
+    "line": 130,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/guest_document.py",
+    "line": 37,
+    "name": "GuestRosterDocument"
+  },
+  {
+    "file": "apps/registrar/models/guest_document.py",
+    "line": 57,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/_program_codes.py",
+    "line": 92,
+    "name": "ProgramCodeLabelsMixin"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 13,
+    "name": "LessonKind"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 19,
+    "name": "AttendanceStatus"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 28,
+    "name": "ApprovalStatus"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 55,
+    "name": "ComponentKind"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 66,
+    "name": "ResitReason"
+  },
+  {
+    "file": "apps/registrar/models/grading_choices.py",
+    "line": 72,
+    "name": "ResitStatus"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 29,
+    "name": "ImmutableCorrectionEvidence"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 71,
+    "name": "CorrectionField"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 78,
+    "name": "CorrectionReason"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 88,
+    "name": "ReversalReason"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 97,
+    "name": "JournalCorrection"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 158,
+    "name": "LessonCorrection"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 218,
+    "name": "SelfWorkCorrection"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 260,
+    "name": "CourseWorkCorrection"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 303,
+    "name": "ComponentScoreCorrection"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 344,
+    "name": "CorrectionReversal"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 37,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 145,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 205,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 247,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 290,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 331,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/corrections.py",
+    "line": 410,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 33,
+    "name": "DegreeLevel"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 39,
+    "name": "Program"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 127,
+    "name": "Subject"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 159,
+    "name": "EnrollmentKind"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 165,
+    "name": "AcademicStatus"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 174,
+    "name": "StudentAcademicRecord"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 254,
+    "name": "CourseOffering"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 311,
+    "name": "Enrollment"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 429,
+    "name": "GroupElectiveChoice"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 477,
+    "name": "WeekType"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 483,
+    "name": "SlotKind"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 491,
+    "name": "ScheduleSlot"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 115,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 144,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 242,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 297,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 314,
+    "name": "Status"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 365,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 455,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/academic.py",
+    "line": 538,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/admission_meta.py",
+    "line": 30,
+    "name": "FundingType"
+  },
+  {
+    "file": "apps/registrar/models/admission_meta.py",
+    "line": 37,
+    "name": "AdmissionRecordFields"
+  },
+  {
+    "file": "apps/registrar/models/admission_meta.py",
+    "line": 89,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/curriculum_meta.py",
+    "line": 50,
+    "name": "PlanStatus"
+  },
+  {
+    "file": "apps/registrar/models/curriculum_meta.py",
+    "line": 66,
+    "name": "AssessmentForm"
+  },
+  {
+    "file": "apps/registrar/models/kollokvium_window.py",
+    "line": 23,
+    "name": "KollokviumWindow"
+  },
+  {
+    "file": "apps/registrar/models/kollokvium_window.py",
+    "line": 75,
+    "name": "KollokviumExtraGrant"
+  },
+  {
+    "file": "apps/registrar/models/kollokvium_window.py",
+    "line": 59,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/kollokvium_window.py",
+    "line": 83,
+    "name": "Scope"
+  },
+  {
+    "file": "apps/registrar/models/kollokvium_window.py",
+    "line": 115,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/registrar/models/catalog_meta.py",
+    "line": 33,
+    "name": "EducationForm"
+  },
+  {
+    "file": "apps/registrar/models/catalog_meta.py",
+    "line": 41,
+    "name": "SubjectKind"
+  },
+  {
+    "file": "apps/registrar/models/catalog_meta.py",
+    "line": 55,
+    "name": "ArchivableCatalogModel"
+  },
+  {
+    "file": "apps/registrar/models/catalog_meta.py",
+    "line": 73,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 18,
+    "name": "LabAssignment"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 134,
+    "name": "LabSubmission"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 230,
+    "name": "LabAnswer"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 39,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 193,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/assignment.py",
+    "line": 261,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 14,
+    "name": "Lab"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 236,
+    "name": "LabBlock"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 278,
+    "name": "LabQuestion"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 137,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 265,
+    "name": "Meta"
+  },
+  {
+    "file": "apps/labs/models/lab.py",
+    "line": 312,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 13,
+    "name": "TimeStampedModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 25,
+    "name": "UUIDModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 36,
+    "name": "SoftDeleteManager"
+  },
+  {
+    "file": "core/models.py",
+    "line": 45,
+    "name": "SoftDeleteModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 63,
+    "name": "TitleSlugModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 98,
+    "name": "ActiveManager"
+  },
+  {
+    "file": "core/models.py",
+    "line": 107,
+    "name": "ActiveModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 121,
+    "name": "OrderedModel"
+  },
+  {
+    "file": "core/models.py",
+    "line": 21,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 32,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 59,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 79,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 117,
+    "name": "Meta"
+  },
+  {
+    "file": "core/models.py",
+    "line": 128,
+    "name": "Meta"
+  }
+]

@@ -55,9 +55,8 @@ class ExamStudentPin(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["exam", "student"], name="uniq_exam_student_pin"),
         ]
-        indexes = [
-            models.Index(fields=["exam", "student"], name="exam_student_pin_idx"),
-        ]
+        # `exam_student_pin_idx` silindi (2026-09-14): `uniq_exam_student_pin` eyni
+        # `(exam, student)` açarını örtür (data auditi 2026-09-13 §6.2, miqrasiya 0067).
 
     def __str__(self):
         return f"PIN {self.student_id} → exam {self.exam_id}"

@@ -1,14 +1,9 @@
-.profile-section--posts .section-title i {
-    color: var(--primary-blue);
-}
-
+/* 2026-09-12 (audit P2-1): `.section-title i` qaydaları ləğv edildi — «Postlarım»
+   və «Yeni post yarat» kartları bölmə adını artıq təkrarlamır (qabıq verir). */
 .profile-posts-card {
     overflow: visible;
 }
 
-.profile-create-post-card .section-title i {
-    color: var(--primary-blue);
-}
 
 .profile-posts-section {
     margin-top: 0.5rem;
@@ -377,6 +372,14 @@
     display: block;
     margin: 0 auto;
     object-fit: cover;
+}
+
+/* 2026-09-12 (audit P2-9): redaktə modalındakı önizləmə `style="display:none"`
+   ilə başlayırdı (CSP hədəfi: sıfır inline style). Şəkil yoxdursa `src` boşdur —
+   gizlətmə həmin vəziyyətə bağlanır; `user_profile/edit.js` `src`-i doldurub
+   göstərir, təmizləyəndə yenidən gizlənir. */
+.image-preview[src=""] {
+    display: none;
 }
 
 .no-image-text {

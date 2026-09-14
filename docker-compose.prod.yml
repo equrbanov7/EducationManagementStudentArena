@@ -23,7 +23,7 @@
 # Faza 1 (audit 2026-07-02):
 #   - Hər serviste log rotasiyası (json-file 10m×3) və resurs limitləri
 #     (env ilə tənzimlənə bilər — deploy.resources.limits).
-#   - app healthcheck TCP əvəzinə real HTTP /health/ yoxlaması.
+#   - app healthcheck TCP əvəzinə real HTTP yoxlaması (indi /ping/ — bax app.healthcheck şərhi).
 #   - celery_beat servisi (CELERY_BEAT_SCHEDULE üçün) əlavə olundu.
 #   - node_exporter + alertmanager + Prometheus alert qaydaları əlavə olundu.
 #   - app/celery env dublikatı x-app-env anchor-una yığıldı.
@@ -45,6 +45,11 @@ x-app-build: &app-build
     APT_PRIMARY_SECURITY_MIRROR: ${APT_PRIMARY_SECURITY_MIRROR:-https://deb.debian.org/debian-security}
     APT_FALLBACK_MIRROR: ${APT_FALLBACK_MIRROR:-https://ftp.debian.org/debian}
     APT_FALLBACK_SECURITY_MIRROR: ${APT_FALLBACK_SECURITY_MIRROR:-https://security.debian.org/debian-security}
+    # P1-07 (Codex audit, 2026-09-13): image-ə qurulduğu commit-in SHA-sı
+    # yazılır (docker/build-info.sh → /app/build-info.json) və /health/
+    # `build.sha` kimi göstərir. remote_deploy.sh bunu GITHUB_SHA / git-dən
+    # doldurur; əl ilə build-də boş qalırsa "unknown" yazılır.
+    BUILD_GIT_SHA: ${BUILD_GIT_SHA:-unknown}
 
 # ─── app + celery_worker + celery_beat üçün ORTAQ mühit dəyişənləri ─────────
 # Servis-spesifik dəyişənlər (Daphne, admin, cookie, Piston client və s.)
@@ -53,6 +58,12 @@ x-app-env: &app-env
   DJANGO_SETTINGS_MODULE: config.settings.production
   APP_ENV: ${APP_ENV:-production}
   APP_VERSION: ${APP_VERSION:-unknown}
+  # `production.py` TLS məcburiyyəti söndürülübsə QALXMIR (2026-09-10
+  # təhlükəsizlik qapısı). Defolt `False`-dur — yəni prod yığını qorunur.
+  # Yalnız CI-nin düz-HTTP `prod-smoke` yığını bunu `1` ilə örtür; bayraq
+  # ANCHOR-dadır ki, prod settings-i yükləyən HƏR xidmət (app, celery, beat)
+  # eyni dəyəri alsın.
+  INSECURE_TRANSPORT_OK: ${INSECURE_TRANSPORT_OK:-False}
   # EXAM-P0-01: runtime ayrıca NOSUPERUSER NOBYPASSRLS rolu ilə qoşulur —
   # superuser FORCE RLS-i belə yan keçir. APP_DATABASE_USER verilməyibsə
   # köhnə davranışa (bootstrap user) düşür ki, mövcud deploy qırılmasın;
@@ -167,6 +178,11 @@ services:
       - effective_io_concurrency=200
       - -c
       - max_parallel_workers_per_gather=2
+      # 2026-09-14 (perf ölçməsi EX-12): RLS siyasətləri plan qiymətini şişirdir və
+      # `jit_above_cost` (100 000) keçiləndə JIT kompilyasiyası kiçik OLTP sorğusunu
+      # 2,7 ms → 158 ms edir (sandbox, 20 000 cavab). OLTP profili üçün JIT söndürülür.
+      - -c
+      - jit=${POSTGRES_JIT:-off}
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -178,6 +194,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: Docker defoltu 10 s sonra SIGKILL edir —
+    # Postgres üçün bu «crash» deməkdir (checkpoint tamamlanmır, restart-da
+    # WAL bərpası). 60 s smart/fast shutdown-un bitməsinə imkan verir.
+    stop_grace_period: 60s
     logging: *default-logging
     deploy:
       resources:
@@ -252,6 +272,14 @@ services:
       MIN_POOL_SIZE: ${PGBOUNCER_MIN_POOL_SIZE:-10}
       RESERVE_POOL_SIZE: ${PGBOUNCER_RESERVE_POOL_SIZE:-50}
       RESERVE_POOL_TIMEOUT: ${PGBOUNCER_RESERVE_POOL_TIMEOUT:-3}
+      # Audit P3-18 (2026-09-14): pool-lar (istifadəçi × baza) CÜTÜ üçündür —
+      # APP_DATABASE_USER ≠ owner olanda app cütü + owner cütü (miqrasiya /
+      # release.sh) hər biri DEFAULT+RESERVE qədər backend aça bilər və cəmi
+      # Postgres `max_connections`-i keçə bilər. `max_db_connections` bazaya
+      # gedən backend-lərin ÜMUMİ tavanıdır (bütün istifadəçilər üzrə) — defolt
+      # `POSTGRES_MAX_CONNECTIONS − 20` (superuser_reserved_connections + exporter
+      # + psql üçün yer). Dəyişəndə ikisini birlikdə dəyişin.
+      MAX_DB_CONNECTIONS: ${PGBOUNCER_MAX_DB_CONNECTIONS:-230}
       SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
       SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
       AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
@@ -286,35 +314,45 @@ services:
   # ─────────────────────────────────────────────────────────────────────────
   # Redis — channel layer (DB 0), cache (DB 1) and Celery broker (DB 2)
   # No external port binding; accessible only within emsarena-network.
-  # Password enforced via --requirepass; REDISCLI_AUTH is set so the
-  # health check can authenticate without passing the password on the
-  # command line (which would be visible in process listings).
-  # NOTE: maxmemory QƏSDƏN təyin edilməyib — Celery broker (DB 2) üçün
-  # eviction təhlükəlidir. Host yaddaşı HostMemoryHigh alerti ilə izlənir.
+  # 2026-09-14 infra auditi P3-3: parol ARTIQ argv-də deyil — əvvəl
+  # `--requirepass ${REDIS_PASSWORD}` konteyner `ps`/`docker inspect`-də
+  # görünürdü. İndi docker/redis/entrypoint.sh şablonu (redis.conf.tmpl)
+  # /tmp/redis.conf-a render edir (0400, redis istifadəçisi) və
+  # `redis-server /tmp/redis.conf` işlədir. REDISCLI_AUTH yenə verilir ki,
+  # healthcheck `redis-cli ping` parolu komanda sətrində göstərmədən
+  # autentifikasiya etsin.
+  # P2-08 (Codex audit, 2026-09-13): köhnə qeyd «maxmemory qəsdən təyin
+  # edilməyib» ilə aşağıdakı `--maxmemory ${REDIS_MAXMEMORY:-3gb}` bir-birinə
+  # zidd idi. Faktiki siyasət: maxmemory TƏYİN OLUNUR, amma `noeviction` ilə —
+  # Celery broker (DB 2) üçün eviction təhlükəlidir, ona görə limitə çatanda
+  # yazma XƏTA verir, data silinmir. REDIS_MAXMEMORY defoltu (3gb) həmişə
+  # REDIS_MEM_LIMIT defoltundan (4096M) kiçik saxlanmalıdır ki, konteyner
+  # OOM-kill olmasın (tests/test_infra_compose_config.py bunu yoxlayır).
+  # Host yaddaşı ayrıca HostMemoryHigh alerti ilə izlənir.
   # ─────────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: emsarena-redis
     environment:
       REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
-    volumes:
-      - redis_data:/data
-    command:
-      - redis-server
-      - --appendonly
-      - "yes"
+      # entrypoint.sh bunları şablona yazır; sirr yalnız faylda qalır.
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       # maxmemory + noeviction: broker/cache/WS layer must NOT be OOM-killed
       # (that would wipe sessions mid-exam). noeviction errors at the cap instead
       # of evicting broker data; keep the cap below REDIS_MEM_LIMIT. io-threads
       # offloads socket I/O for the 5000-connection WS fan-out (redis 7).
-      - --maxmemory
-      - ${REDIS_MAXMEMORY:-3gb}
-      - --maxmemory-policy
-      - noeviction
-      - --io-threads
-      - "4"
-      - --requirepass
-      - ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      # Statik seçimlər docker/redis/redis.conf.tmpl-dədir.
+      REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-3gb}
+    volumes:
+      - redis_data:/data
+      - ./docker/redis/redis.conf.tmpl:/etc/redis/redis.conf.tmpl:ro
+      - ./docker/redis/entrypoint.sh:/etc/redis/entrypoint.sh:ro
+      - ./docker/render-template.sh:/etc/redis/render-template.sh:ro
+    # Image entrypoint-i (docker-entrypoint.sh) ilk arqument `redis-server`
+    # olmadığı üçün skripti root ilə işlədir; skript özü image entrypoint-inə
+    # `redis-server /tmp/redis.conf` ilə qayıdır → gosu ilə `redis`
+    # istifadəçisinə düşmə əvvəlki kimi qalır.
+    command: ["sh", "/etc/redis/entrypoint.sh"]
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -337,6 +375,11 @@ services:
   # apps/exams/services/exam_center_gate.py (resolve_client_mac).
   # Build tələb etmir — stdlib skripti bind-mount ilə işləyir.
   # ─────────────────────────────────────────────────────────────────────────
+  # 2026-09-13 infra auditi P2-4: bind ünvanı 172.18.0.1 sabitdir — ona görə
+  # `networks.emsarena-network` IPAM-ı da həmin subnet/gateway-ə pin-lənib
+  # (faylın sonunda). Əvvəl anchor-suz log (limitsiz), limit-siz və
+  # healthcheck-siz idi; agent bind edə bilməsə `resolve_client_mac`
+  # fail-closed olur → imtahan mərkəzi qapısı bütün tələbələri rədd edir.
   arp-agent:
     image: python:3.12-alpine
     command: ["python", "/agent/arp_agent.py"]
@@ -347,6 +390,23 @@ services:
     environment:
       ARP_AGENT_BIND: ${ARP_AGENT_BIND:-172.18.0.1}
       ARP_AGENT_PORT: ${ARP_AGENT_PORT:-8953}
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "${ARP_AGENT_CPU_LIMIT:-0.1}"
+          # stdlib http.server ≈ 15 MB RSS; OOM-kill = imtahan qapısı bağlanır,
+          # ona görə 32M deyil, 2× ehtiyatla 64M.
+          memory: ${ARP_AGENT_MEM_LIMIT:-64M}
+    # Agentin yeganə endpoint-i `/mac?ip=` — loopback üçün `{"mac": null}` 200
+    # qaytarır; bind uğursuzdursa (subnet fərqli) bağlantı rədd olunur →
+    # unhealthy → ContainerDown/TargetDown yerinə birbaşa görünür.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- \"http://$${ARP_AGENT_BIND}:$${ARP_AGENT_PORT}/mac?ip=127.0.0.1\" >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   # ─────────────────────────────────────────────────────────────────────────
   # App — Daphne ASGI server (HTTP + WebSocket)
@@ -403,6 +463,13 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: Docker defoltu SIGTERM-dən 10 s sonra
+    # SIGKILL-dir — Daphne `--application-close-timeout`
+    # (DAPHNE_APPLICATION_CLOSE_TIMEOUT, 120 s) davam edən imtahan
+    # təqdimi/WS-i bağlamağa imkan tapmırdı. Grace ≥ close-timeout + 10 s.
+    # .env-də DAPHNE_APPLICATION_CLOSE_TIMEOUT artırılırsa bunu da artırın
+    # (tests/test_infra_compose_config.py invariantı defoltları yoxlayır).
+    stop_grace_period: ${APP_STOP_GRACE_PERIOD:-130s}
     logging: *default-logging
     deploy:
       resources:
@@ -412,8 +479,12 @@ services:
           # is exactly what throttled prod. Let the app use the box; memory stays
           # bounded. (Old APP_CPU_LIMIT env is intentionally no longer applied.)
           memory: ${APP_MEM_LIMIT:-2048M}
-    # Real HTTP yoxlaması: /health/ DB-ni yoxlayır (Redis problemi "degraded"
-    # 207 qaytarır və sağlam sayılır). X-Forwarded-Proto: https başlığı
+    # Real HTTP yoxlaması — /ping/ (2026-09-14 infra auditi P3-2: köhnə şərh
+    # «/health/ DB-ni yoxlayır, 207 sağlamdır» deyirdi, amma yoxlama /ping/-ə
+    # gedir). /ping/ QƏSDƏN seçilib: DB/Redis-siz «Daphne cavab verir» siqnalı;
+    # DB nasazlığında 8 replikanın hamısı unhealthy olub restart-a düşməsin.
+    # DB/Redis vəziyyəti /health/ (deploy health-gate + blackbox probe) və
+    # Prometheus alertləri ilə izlənir. X-Forwarded-Proto: https başlığı
     # SECURE_SSL_REDIRECT yönləndirməsinin qarşısını alır (nginx /metrics/
     # scrape-i ilə eyni pattern). ALLOWED_HOSTS "localhost" daxil etməlidir —
     # server .env-də ALLOWED_HOSTS siyahısına localhost,127.0.0.1 daxil edin.
@@ -455,12 +526,29 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: SIGTERM = warm shutdown — worker icradakı
+    # task-ı bitirib çıxır. Grace = CELERY_TASK_TIME_LIMIT (300 s); 10 s-də
+    # SIGKILL olsa acks_late ilə task yenidən çatdırılır (ikiqat e-poçt/sweep).
+    stop_grace_period: 300s
     logging: *default-logging
     deploy:
       resources:
         limits:
           cpus: "${CELERY_CPU_LIMIT:-1.0}"
           memory: ${CELERY_MEM_LIMIT:-1024M}
+    # §22 (Codex audit, 2026-09-13): worker-in «sağlam» olması PID-in
+    # yaşaması deyil — broker-ə qoşulub sorğuya cavab verməsidir. `inspect
+    # ping -d celery@$HOSTNAME` yalnız BU konteynerin node-una ünvanlanır
+    # (defolt node adı `celery@<konteyner-hostname>`); başqa replikanın cavabı
+    # sayılmır. Real prod image-də yoxlanıb: öz node → exit 0, cavabsız →
+    # exit 69. Hər yoxlama Django-nu yükləyən qısa Python prosesidir, ona görə
+    # interval 60s-dən aşağı salınmır; start_period broker qoşulması üçündür.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 10"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
     networks:
       - emsarena-network
 
@@ -484,11 +572,24 @@ services:
       redis:
         condition: service_healthy
     restart: unless-stopped
+    # 2026-09-13 infra auditi P2-3: heavy task-ların time_limit-i 900 s (OCR/
+    # AI/export, apps/exams/tasks.py) — deploy zamanı yarımçıq OCR 10 s-də
+    # SIGKILL olub 20 dəq sonra reaper ilə FAILED-ə düşürdü.
+    stop_grace_period: 900s
     logging: *default-logging
     deploy:
       resources:
         limits:
           memory: ${CELERY_HEAVY_MEM_LIMIT:-2048M}
+    # §22 (Codex audit, 2026-09-13): celery_worker ilə eyni məntiq — bax
+    # oradakı şərh. Ağır iş (OCR/AI) node-u bloklasa cavab gecikər; timeout
+    # 30s + 3 retry ilə keçici yüklənmə «unhealthy» sayılmır.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 10"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 120s
     networks:
       - emsarena-network
 
@@ -516,6 +617,20 @@ services:
         limits:
           cpus: "${CELERY_BEAT_CPU_LIMIT:-0.25}"
           memory: ${CELERY_BEAT_MEM_LIMIT:-256M}
+    # §22 (Codex audit, 2026-09-13): beat worker deyil — `inspect ping`-ə
+    # cavab vermir (yoxlanıb: exit 69). Yüngül yoxlama: PersistentScheduler
+    # `--schedule` faylını hər sync-də (defolt 3 dəq) yenidən yazır, deməli
+    # faylın 10 dəqiqədən təzə olması «döngü işləyir» deməkdir. Şəkilçi
+    # üçün glob: dbm backend-dən asılı olaraq `.db`/`.dat` əlavə oluna bilər
+    # (prod image-də dbm.gnu — şəkilçisiz). Proses özü PID 1-dir: ölərsə
+    # konteyner dayanır və restart siyasəti işə düşür; bu yoxlama «asılıb»
+    # halını tutur.
+    healthcheck:
+      test: ["CMD-SHELL", "find /tmp -maxdepth 1 -name 'celerybeat-schedule*' -mmin -10 | grep -q ."]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
     networks:
       - emsarena-network
 
@@ -589,21 +704,25 @@ services:
       ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
       WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
+      # 2026-09-13 infra auditi P1-3: Watchdog «hələ sağam» e-poçtunun
+      # təkrar intervalı (Alertmanager müddəti: 6h / 24h ...).
+      WATCHDOG_REPEAT: ${WATCHDOG_REPEAT_INTERVAL:-24h}
+    # 2026-09-14 infra auditi P3-8: şablon `sed` ilə deyil,
+    # docker/render-template.sh (POSIX sh, hərfi əvəzləmə + `"`/`\` qaçırma)
+    # ilə render olunur — SMTP açarında / tokendə `|`, `&`, `\` olsa da
+    # konfiq keçərli qalır. Image busybox-dur (envsubst yoxdur).
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
-        sed -e "s|__SMTP_HOST__|$${SMTP_HOST}|g"
-        -e "s|__SMTP_PORT__|$${SMTP_PORT}|g"
-        -e "s|__SMTP_USER__|$${SMTP_USER}|g"
-        -e "s|__SMTP_PASS__|$${SMTP_PASS}|g"
-        -e "s|__ALERT_FROM__|$${ALERT_FROM}|g"
-        -e "s|__ALERT_TO__|$${ALERT_TO}|g"
-        -e "s|__WEBHOOK_TOKEN__|$${WEBHOOK_TOKEN}|g"
-        /etc/alertmanager/alertmanager.tmpl.yml > /tmp/alertmanager.yml
+        /bin/sh /etc/alertmanager/render-template.sh
+        /etc/alertmanager/alertmanager.tmpl.yml /tmp/alertmanager.yml
+        SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS ALERT_FROM ALERT_TO
+        WEBHOOK_TOKEN WATCHDOG_REPEAT
         && exec /bin/alertmanager --config.file=/tmp/alertmanager.yml
         --storage.path=/alertmanager
     volumes:
       - ./docker/alertmanager/alertmanager.tmpl.yml:/etc/alertmanager/alertmanager.tmpl.yml:ro
+      - ./docker/render-template.sh:/etc/alertmanager/render-template.sh:ro
       - alertmanager_data:/alertmanager
     restart: unless-stopped
     logging: *default-logging
@@ -645,9 +764,10 @@ services:
       # filename on each open, so the reload step below actually picks up changes.
       - ./docker/prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
+    # 2026-09-13 infra auditi P2-9: `app: service_healthy` asılılığı SİLİNDİ —
+    # monitorinq izlədiyi sistemdən asılı olmamalıdır (app qalxmayanda məhz
+    # Prometheus/TargetDown bunu deməlidir). App hədəfləri dns_sd ilə tapılır.
     depends_on:
-      app:
-        condition: service_healthy
       postgres_exporter:
         condition: service_healthy
     restart: unless-stopped
@@ -796,8 +916,21 @@ services:
     # publik domen YOXDUR (LAN deploy), probe-lar nginx üzərindən gedir.
     image: prom/blackbox-exporter:v0.25.0
     container_name: emsarena-blackbox-exporter
+    # 2026-09-14 infra auditi P3-9: probe `Host` başlığı .env HEALTHCHECK_HOST-dan
+    # gəlir (remote_deploy.sh health-gate ilə eyni mənbə); şablon start-da
+    # docker/render-template.sh ilə /tmp/blackbox.yml-ə render olunur.
+    # Defolt köhnə sabit dəyərdir ki, mövcud host üçün davranış dəyişməsin.
+    environment:
+      HEALTHCHECK_HOST: ${HEALTHCHECK_HOST:-10.0.2.42}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >-
+        /bin/sh /etc/blackbox_exporter/render-template.sh
+        /etc/blackbox_exporter/config.tmpl.yml /tmp/blackbox.yml HEALTHCHECK_HOST
+        && exec /bin/blackbox_exporter --config.file=/tmp/blackbox.yml
     volumes:
-      - ./docker/blackbox/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+      - ./docker/blackbox/blackbox.tmpl.yml:/etc/blackbox_exporter/config.tmpl.yml:ro
+      - ./docker/render-template.sh:/etc/blackbox_exporter/render-template.sh:ro
     restart: unless-stopped
     logging: *default-logging
     deploy:
@@ -946,8 +1079,12 @@ services:
         limits:
           cpus: "${NGINX_CPU_LIMIT:-4.0}"
           memory: ${NGINX_MEM_LIMIT:-512M}
+    # 2026-09-14 infra auditi P3-1: `nginx -t` yalnız konfiqi parse edirdi —
+    # worker-lər ölsə/port dinlənməsə də «healthy» qalırdı. İndi daxili
+    # stub_status server-i (:8081, host-a publish olunmur, nginx_exporter də
+    # oradan oxuyur) real HTTP cavabı ilə yoxlanır; upstream app-a getmir.
     healthcheck:
-      test: ["CMD", "nginx", "-t"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8081/stub_status >/dev/null"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -957,6 +1094,17 @@ services:
 networks:
   emsarena-network:
     driver: bridge
+    # 2026-09-13 infra auditi P2-4: arp-agent host-da 172.18.0.1-ə bind olur və
+    # app EXAM_ARP_AGENT_URL ilə oraya gedir — subnet Docker-in «növbəti boş»
+    # seçiminə buraxılsa (başqa sıra ilə yaradılanda 172.19+), agent bind edə
+    # bilmir və imtahan mərkəzi qapısı fail-closed olur. Mövcud prod host artıq
+    # 172.18.0.0/16-dadır → recreate-də dəyişiklik yoxdur. Fərqli subnet-də
+    # olan hostda `docker compose down` + `up` (şəbəkə yenidən yaradılmalıdır)
+    # — bax docs/operations/deployment.md §1.
+    ipam:
+      config:
+        - subnet: ${EMSARENA_NETWORK_SUBNET:-172.18.0.0/16}
+          gateway: ${EMSARENA_NETWORK_GATEWAY:-172.18.0.1}
 
 volumes:
   postgres_data:

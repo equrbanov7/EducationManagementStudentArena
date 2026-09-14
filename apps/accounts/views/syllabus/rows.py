@@ -16,7 +16,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.constants import STATUS_NEXT_STEP, SyllabusStatus
+from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus
 
 from .labels import NEXT_STEP_TONES, STATUS_TONES
 

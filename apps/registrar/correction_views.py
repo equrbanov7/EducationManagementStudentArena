@@ -21,6 +21,8 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from core.http_ids import parse_uuid
+
 from . import corrections, gradebook
 from .models import (
     AssessmentComponent,
@@ -47,6 +49,15 @@ def _user_facing_validation_message(exc: ValidationError) -> str:
     `hasattr(...) else str(exc)` budağı onsuz da ölü kod idi.
     """
     return "; ".join(exc.messages)
+
+
+def _post_uuid(request, name):
+    """POST-dan gələn UUID pk — pozuq dəyər ``None`` → ``get_object_or_404`` 404 verir.
+
+    Audit 2026-09-13 backend F-01 (2026-09-14): ``pk="abc"`` birbaşa ORM filtrinə
+    düşəndə ``ValidationError`` → 500 idi (``core.http_ids`` ortaq köməkçisi).
+    """
+    return parse_uuid(request.POST.get(name))
 
 
 def _require_corrector(request):
@@ -135,8 +146,8 @@ def _apply_item_correction(request, offering):
         request=request,
     )
     if target == "selfwork":
-        topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        topic = get_object_or_404(SelfWorkTopic, pk=_post_uuid(request, "topic_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
         item_corrections.apply_selfwork_correction(
             offering=offering,
             topic=topic,
@@ -145,13 +156,13 @@ def _apply_item_correction(request, offering):
             **common,
         )
     elif target == "component":
-        component = get_object_or_404(AssessmentComponent, pk=request.POST.get("component_id"), offering=offering)
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        component = get_object_or_404(AssessmentComponent, pk=_post_uuid(request, "component_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
         item_corrections.apply_component_correction(
             component=component, enrollment=enrollment, new_score=request.POST.get("new_score_cm"), **common
         )
     else:  # coursework
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
         item_corrections.apply_coursework_correction(
             enrollment=enrollment,
             new_score=request.POST.get("new_score_cw"),
@@ -172,12 +183,12 @@ def _resolve_grade_mark(request, offering):
     if mark_id:
         mark = get_object_or_404(
             LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-            pk=mark_id,
+            pk=parse_uuid(mark_id),  # F-01 (2026-09-14): pozuq UUID → 404
             lesson__offering=offering,
         )
         return mark, False
-    lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
-    enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+    lesson = get_object_or_404(Lesson, pk=_post_uuid(request, "lesson_id"), offering=offering)
+    enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
     existing = LessonMark.objects.filter(lesson=lesson, enrollment=enrollment).select_related("lesson").first()
     if existing is not None:
         return existing, False
@@ -255,7 +266,8 @@ def correction_delete(request, offering_id):
 
 def _revert_requested_correction(request, offering):
     ctype = (request.POST.get("type") or "grade").strip()
-    correction_id = (request.POST.get("correction_id") or "").strip() or None
+    # F-01 (2026-09-14): pozuq UUID → «dəqiq düzəlişi seçin» validasiya xətası (500 deyil).
+    correction_id = parse_uuid(request.POST.get("correction_id"))
     if correction_id is None:
         raise ValidationError(
             pgettext(
@@ -265,14 +277,14 @@ def _revert_requested_correction(request, offering):
         )
     common = {"by_user": request.user, "request": request, "correction_id": correction_id}
     if ctype == "lesson":
-        lesson = get_object_or_404(Lesson, pk=request.POST.get("lesson_id"), offering=offering)
+        lesson = get_object_or_404(Lesson, pk=_post_uuid(request, "lesson_id"), offering=offering)
         return corrections.revert_last_lesson_correction(lesson=lesson, **common)
     if ctype in ("selfwork", "coursework", "component"):
         from . import item_corrections
 
-        enrollment = get_object_or_404(Enrollment, pk=request.POST.get("enrollment_id"), offering=offering)
+        enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
         if ctype == "selfwork":
-            topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+            topic = get_object_or_404(SelfWorkTopic, pk=_post_uuid(request, "topic_id"), offering=offering)
             return item_corrections.revert_last_selfwork_correction(
                 topic=topic,
                 enrollment=enrollment,
@@ -281,7 +293,7 @@ def _revert_requested_correction(request, offering):
         if ctype == "component":
             component = get_object_or_404(
                 AssessmentComponent,
-                pk=request.POST.get("component_id"),
+                pk=_post_uuid(request, "component_id"),
                 offering=offering,
             )
             return item_corrections.revert_last_component_correction(
@@ -305,7 +317,7 @@ def _revert_requested_correction(request, offering):
         )
     mark = get_object_or_404(
         LessonMark.objects.select_related("lesson", "enrollment", "organization"),
-        pk=request.POST.get("mark_id"),
+        pk=_post_uuid(request, "mark_id"),
         lesson__offering=offering,
     )
     return corrections.revert_last_grade_correction(mark=mark, offering=offering, **common)

@@ -114,6 +114,13 @@ def _dialogs() -> dict:
         "counterShort": pgettext(_CTX, "Ən azı {min} simvol — hazırda {n}"),
         "counterOk": pgettext(_CTX, "{n} simvol"),
         "routeEmpty": pgettext(_CTX, "Növü seçəndə müraciətin hansı şöbəyə gedəcəyi burada görünəcək."),
+        # Kataloq boş olanda (növ seeed edilməyib / rol üçün icazəli növ yoxdur)
+        # dialoq əvvəl SƏSSİZCƏ boş qalırdı — istifadəçi «sahə itdi» görürdü.
+        "kindsEmpty": pgettext(
+            _CTX,
+            "Sizin üçün açıq müraciət növü yoxdur. Müraciət kataloqu bu təşkilatda hələ "
+            "doldurulmayıb — administratordan «seed_application_catalog» əmrini icra etməyi xahiş edin.",
+        ),
         "noAssignee": pgettext(_CTX, "Bu şöbədə təyin ediləcək istifadəçi tapılmadı."),
         # Hədlər/uzantılar SERVER-dən gəlir (`rules_payload`) — mətnə bişirilmir.
         "fileTooBig": pgettext(_CTX, "«{name}» {mb} MB-dan böyükdür."),

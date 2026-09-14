@@ -26,7 +26,7 @@ from apps.accounts.services.rim.create import MAX_NOTE_LENGTH
 from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.rim.profile_edit import FIELD_LABELS
-from apps.organizations.permissions import get_permission_label as permission_label
+from apps.organizations.public import get_permission_label as permission_label
 
 #: Qəbul ili seçicisinin əhatəsi — cari ildən neçə il geriyə göstərilir.
 ADMISSION_YEAR_SPAN = 8

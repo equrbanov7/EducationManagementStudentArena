@@ -6,10 +6,22 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/create_student_group.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/_searchable_multi_select.css' %}">
+    {% if not legacy_cohorts_exist %}
+    <link rel="stylesheet" href="{% static 'exams/css/legacy_cohort_notice.css' %}?v=20260914-1">
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container create-group-page">
+<div class="container create-group-page"{% if not legacy_cohorts_exist %} data-legacy-cohort-page="create"{% endif %}>
+    {% comment %}2026-09-14 (W7 `w7cohort`): kohortu OLMAYAN təşkilatda əvəzlənmə kartı
+       əsas məzmundur; köhnə forma yığılmış <details> içində qalır (yaratma
+       icazəsi qapısı dəyişmir — bura yalnız `group.manage` ilə gəlinir).
+       Kohortu olan tenant-da (`legacy_cohorts_exist`) səhifə əvvəlki kimidir.{% endcomment %}
+    {% if not legacy_cohorts_exist %}
+    {% include "exams/teacher/partials/_legacy_cohort_notice.html" %}
+    <details class="legacy-cohort-details" data-legacy-cohort-form-details>
+        <summary class="legacy-cohort-details__summary">{% trans "summary_show_legacy_form" context "exams.template.legacy_cohort_notice" %}</summary>
+    {% endif %}
     <div class="row justify-content-center">
         <div class="col-lg-7 col-md-9">
             <div class="create-group-card">
@@ -21,7 +33,12 @@
                 </div>
 
                 <div class="card-body-custom">
-                    <form method="post" action="{% url 'exams:teacher_create_group' %}" novalidate>
+                    <form method="post" action="{% url 'exams:teacher_create_group' %}" novalidate
+                          id="createGroupForm"
+                          data-candidates-url="{{ candidates_url|default:'' }}"
+                          data-students-select-id="{{ form.students.id_for_label }}"
+                          data-primary-teacher-select-id="{{ form.primary_teacher.id_for_label }}"
+                          data-assigned-teachers-select-id="{{ form.assigned_teachers.id_for_label }}">
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -76,9 +93,31 @@
                         </div>
 
                         <div class="mb-3">
-                            {% trans "label_add_students" context "exams.template.create_student_group" as label_add_students %}
-                            {% trans "placeholder_search_student" context "exams.template.create_student_group" as placeholder_search_student %}
-                            {% include "partials/_searchable_multi_select.html" with field=form.students label=label_add_students search_placeholder=placeholder_search_student container_id="groupStudentsSelector" %}
+                            {% comment %}F-10 (2026-09-14): siyahı `partials/_searchable_multi_select.html`
+                            ilə deyil, `create_student_group.js` ilə qurulur — variantlar səhifə ilə
+                            render olunmur, `#createGroupForm[data-candidates-url]`-dən lazy gəlir.{% endcomment %}
+                            <div class="form-group custom-selector-group" role="group" aria-labelledby="groupStudentsSelector_label"
+                                 data-csg-checklist data-select-id="{{ form.students.id_for_label }}" data-student-meta="1">
+                                <div class="form-label-custom" id="groupStudentsSelector_label">{% trans "label_add_students" context "exams.template.create_student_group" %}</div>
+                                <div class="search-wrapper">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="groupStudentsSelector_search" class="custom-search-input" data-csg-search
+                                           placeholder="{% trans 'placeholder_search_student' context 'exams.template.create_student_group' %}"
+                                           aria-label="{% trans 'placeholder_search_student' context 'exams.template.create_student_group' %}">
+                                </div>
+                                <div id="groupStudentsSelector_list" class="custom-list-container" data-csg-list>
+                                    <div class="loading-text">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
+                                </div>
+                                <div class="selection-counter">
+                                    {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="groupStudentsSelector_count" data-csg-count>0</span>
+                                </div>
+                                <div class="csg-hidden">
+                                    {{ form.students }}
+                                </div>
+                                {% if form.students.errors %}
+                                    <div class="field-error">{{ form.students.errors.0 }}</div>
+                                {% endif %}
+                            </div>
                             {% if form.students.help_text %}
                                 <div class="form-text">{{ form.students.help_text }}</div>
                             {% endif %}
@@ -115,9 +154,28 @@
 
                         {% if can_multi_assign_teachers %}
                             <div class="mb-3">
-                                {% trans "label_assign_teachers_multi" context "exams.template.create_student_group" as label_assign_teachers %}
-                                {% trans "placeholder_search_teacher" context "exams.template.create_student_group" as placeholder_search_teacher %}
-                                {% include "partials/_searchable_multi_select.html" with field=form.assigned_teachers label=label_assign_teachers search_placeholder=placeholder_search_teacher container_id="groupTeachersSelector" %}
+                                <div class="form-group custom-selector-group" role="group" aria-labelledby="groupTeachersSelector_label"
+                                     data-csg-checklist data-select-id="{{ form.assigned_teachers.id_for_label }}">
+                                    <div class="form-label-custom" id="groupTeachersSelector_label">{% trans "label_assign_teachers_multi" context "exams.template.create_student_group" %}</div>
+                                    <div class="search-wrapper">
+                                        <i class="fas fa-search search-icon"></i>
+                                        <input type="text" id="groupTeachersSelector_search" class="custom-search-input" data-csg-search
+                                               placeholder="{% trans 'placeholder_search_teacher' context 'exams.template.create_student_group' %}"
+                                               aria-label="{% trans 'placeholder_search_teacher' context 'exams.template.create_student_group' %}">
+                                    </div>
+                                    <div id="groupTeachersSelector_list" class="custom-list-container" data-csg-list>
+                                        <div class="loading-text">{% trans "label_loading" context "exams.template.teacher_group_list" %}...</div>
+                                    </div>
+                                    <div class="selection-counter">
+                                        {% trans "label_selected" context "exams.template.teacher_group_list" %}: <span id="groupTeachersSelector_count" data-csg-count>0</span>
+                                    </div>
+                                    <div class="csg-hidden">
+                                        {{ form.assigned_teachers }}
+                                    </div>
+                                    {% if form.assigned_teachers.errors %}
+                                        <div class="field-error">{{ form.assigned_teachers.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
                                 <div class="form-text">
                                     {% blocktrans trimmed context "exams.template.create_student_group" with max_multi_teachers=max_multi_teachers %}
                                         help_multi_teacher_limit_with_count {{ max_multi_teachers }}
@@ -148,9 +206,18 @@
             </div>
         </div>
     </div>
+    {% if not legacy_cohorts_exist %}
+    </details>
+    {% endif %}
 </div>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'exams/js/create_student_group.js' %}"></script>
+<script id="csg-i18n" type="application/json">
+{
+  "noDataFound": "{% filter escapejs %}{% trans 'empty_no_data_found' context 'exams.template.teacher_group_list' %}{% endfilter %}",
+  "studentRegisteredGroupNumber": "{% filter escapejs %}{% trans 'student_registered_group_number' context 'profile.groups' %}{% endfilter %}"
+}
+</script>
+<script src="{% static 'exams/js/create_student_group.js' %}?v=20260914-1"></script>
 {% endblock %}

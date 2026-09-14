@@ -164,7 +164,7 @@
     }
     .filter-tab:hover {
         border-color: var(--ems-primary-500);
-        color: var(--ems-primary-500);
+        color: var(--ems-primary-600);
     }
     .filter-tab.active {
         background: var(--ems-primary-500);

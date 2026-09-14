@@ -19,9 +19,12 @@ Servis qatı: ``apps/registrar/exam_score_entry.py``.
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import pgettext_lazy
 
+from core.models import TimeStampedModel, UUIDModel
 from core.upload_security import FileUploadValidator
 
 from .corrections import CorrectionReason, ImmutableCorrectionEvidence
@@ -41,10 +44,33 @@ def exam_score_evidence_path(instance, filename: str) -> str:
 
 
 class ExamScoreEntryKind(models.TextChoices):
-    """Sətrin növü — ilkin köçürmə, yoxsa sonrakı sənədli düzəliş."""
+    """Sətrin növü — ilkin köçürmə, yoxsa sonrakı sənədli düzəliş / apellyasiya nəticəsi.
+
+    2026-09-14 (W2 `w2paper`, sahib: «apellyasiyadan və ya nədənsə sonra DƏYİŞƏN
+    nəticələrin izlənməsi lazımdır»): ``APPEAL`` — apellyasiya komissiyasının
+    qərarı ilə dəyişən bal. Təqdimat tələbi (səbəb + qeyd + sənəd) ``CORRECTION``
+    ilə EYNİDİR; fərq yalnız izləmə/filtr etiketindədir («Dəyişən nəticələr»
+    alt-görünüşü ``kind != initial`` sətirlərini göstərir).
+    """
 
     INITIAL = "initial", pgettext_lazy("registrar.exam_score_entry_kind", "Initial entry")
     CORRECTION = "correction", pgettext_lazy("registrar.exam_score_entry_kind", "Documented change")
+    APPEAL = "appeal", pgettext_lazy("registrar.exam_score_entry_kind", "Appeal result")
+
+    @classmethod
+    def change_kinds(cls) -> tuple:
+        """İlkin olmayan (dəyişiklik) növləri — dialoqda seçilə bilənlər."""
+        return (cls.CORRECTION, cls.APPEAL)
+
+
+#: Sual sayı üçün yuxarı hədd (sahib 2026-09-14: «hər sualdan max 10»; kağız
+#: imtahanda adətən 5 sual olur — defolt 5). ``0`` = tək yekun bal rejimi
+#: (köhnə vərəqlər / yalnız «Bal» sütunlu idxal).
+QUESTION_COUNT_DEFAULT = 5
+QUESTION_COUNT_MAX = 10
+#: Bir sualın maksimum balı (defolt 10). Cəmin tavanı SXEMDƏN gəlir
+#: (``finals.exam_score_max`` = 100 − giriş tavanı) — burada 50 yazılmır.
+QUESTION_MAX_DEFAULT = 10
 
 
 class ExamScoreEntry(ImmutableCorrectionEvidence):
@@ -77,6 +103,28 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
         settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="exam_score_entries"
     )
     entered_by_name = models.CharField(max_length=200, editable=False)
+    # 2026-09-12: sətir hansı köçürmə partiyasına (vərəqə) aiddir — opsional,
+    # köhnə sətirlər üçün NULL. Partiya sənədi (skan) ``sheet.evidence``-dədir;
+    # sətir-səviyyə ``evidence`` boş olsa da partiya sənədi düzəlişin sübutu
+    # sayılır (servis: ``_require_justification``).
+    sheet = models.ForeignKey(
+        "registrar.ExamScoreSheet",
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="entries",
+        help_text="Köçürmə partiyası (vərəq/protokol) — varsa.",
+    )
+    # 2026-09-14 (W2 `w2paper`): sual-sual ballar — ``[s1, s2, …]`` tam ədədlər
+    # (hər biri 0..``sheet.question_max``, cəmi = ``new_score``). ``NULL`` = tək
+    # yekun bal rejimi (köhnə sətirlər, yalnız «Bal» sütunlu idxal). Validasiya
+    # servis qatındadır (``exam_score_questions.clean_question_scores``); sətir
+    # append-only olduğu üçün burada yalnız forma saxlanılır.
+    question_scores = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Sual-sual ballar (siyahı) — tək yekun bal rejimində NULL.",
+    )
 
     objects = models.Manager()
 
@@ -91,3 +139,192 @@ class ExamScoreEntry(ImmutableCorrectionEvidence):
 
     def __str__(self):
         return f"exam-score-entry<{self.enrollment_id}> {self.old_score}→{self.new_score}"
+
+    def clean(self):
+        """Tenant/əlaqə invariantları Python-da; PostgreSQL eyni qaydanı trigger-də təkrarlayır.
+
+        2026-09-13, Codex audit P2-09: sətir ↔ qeydiyyat ↔ vərəq zənciri yalnız
+        servis qatında qorunurdu. İndi üç qat var — bu ``clean()`` (adi axında
+        xəta ``ValidationError`` kimi üzə çıxır), servis (``record_exam_score``)
+        və ``0073`` migrasiyasının ``registrar_exam_score_entry_sheet_guard``
+        trigger-i (xam SQL / ``QuerySet.update()`` üçün son sədd).
+        """
+        super().clean()
+        errors = {}
+        enrollment = self.enrollment if self.enrollment_id else None
+        if enrollment is not None and self.organization_id and enrollment.organization_id != self.organization_id:
+            errors["enrollment"] = "Qeydiyyat sətrin təşkilatına aid olmalıdır."
+        if self.sheet_id:
+            sheet = self.sheet
+            if self.organization_id and sheet.organization_id != self.organization_id:
+                errors["sheet"] = "Köçürmə vərəqi sətrin təşkilatına aid olmalıdır."
+            elif enrollment is not None and sheet.offering_id != enrollment.offering_id:
+                errors["sheet"] = "Köçürmə vərəqi qeydiyyatın açılışına aid olmalıdır."
+        if errors:
+            raise ValidationError(errors)
+
+
+# ── Köçürmə vərəqi (batch) — 2026-09-12, sahibin tələbi ──────────────────────
+#
+# Sahib (2026-09-12): «yazılı imtahan verən tələbələrin imtahan ballarını
+# sistemə köçürmək üçün panel olsun. Orada qrup seçilsin, müəllim, tarix və s.
+# lazımlı nə info varsa; tələbələrin balları sistemə yüklənsin.»
+#
+# Mövcud modellərin heç birində KAĞIZ imtahanın tarixi/nəzarətçisi/protokol
+# nömrəsi yoxdur (``CourseOffering``-də yalnız müəllim var; ``exams.Exam``
+# rəqəmsal imtahandır və registrar onu statik import etmir). Bu metadata
+# ``FinalGrade``-ə YOX, köçürmə PARTİYASINA aiddir: bir vərəq/protokol =
+# bir batch. Ona görə kiçik ``ExamScoreSheet`` modeli yaradılır; hər
+# ``ExamScoreEntry`` sətri (opsional) öz vərəqinə bağlanır.
+
+
+class ExamScoreSheetSource(models.TextChoices):
+    """Partiyanın mənbəyi — əl ilə siyahı forması, yoxsa fayl idxalı."""
+
+    MANUAL = "manual", pgettext_lazy("registrar.exam_score_sheet_source", "Manual roster entry")
+    IMPORT = "import", pgettext_lazy("registrar.exam_score_sheet_source", "File import (XLSX/CSV)")
+
+
+class ExamScoreSheetKind(models.TextChoices):
+    """Kağız imtahanın NÖVÜ (sahib 2026-09-14, addendum): yazılı, yoxsa praktiki.
+
+    Vərəq səviyyəsindədir — bir protokol bir növ imtahandır; sətir növü
+    vərəqdən oxunur (``entry.sheet.exam_kind``). Köhnə vərəqlər «yazılı» sayılır
+    (migrasiya defoltu).
+    """
+
+    WRITTEN = "written", pgettext_lazy("registrar.exam_score_sheet_kind", "Written")
+    PRACTICAL = "practical", pgettext_lazy("registrar.exam_score_sheet_kind", "Practical")
+
+
+#: Vərəq skanının media prefiksi. ``core.media_policies`` eyni prefiksi öz
+#: checker cədvəlində LİTERAL kimi saxlayır (core registrar-ı import etmir) —
+#: ikisi sinxron qalmalıdır. Org-prefiks invariantı (aşağıda ``clean()`` +
+#: ``0073`` trigger-i) bu sabitə söykənir.
+EXAM_SCORE_SHEET_MEDIA_PREFIX = "exam_score_sheets/"
+
+
+def exam_score_sheet_evidence_prefix(organization_id) -> str:
+    """``exam_score_sheets/<organization_id>/`` — vərəqin skanının icazəli kök yolu."""
+    return f"{EXAM_SCORE_SHEET_MEDIA_PREFIX}{organization_id}/"
+
+
+def exam_score_sheet_path(instance, filename: str) -> str:
+    """Skan edilmiş protokol/vərəq — qorunan media altında org-scoped yol."""
+    return f"{exam_score_sheet_evidence_prefix(instance.organization_id)}{filename}"
+
+
+class ExamScoreSheet(UUIDModel, TimeStampedModel):
+    """Bir köçürmə partiyası: açılış + imtahan metadatası + nəticə sayğacları.
+
+    Sətirlərin özü (köhnə → yeni bal, kim, nə vaxt) ``ExamScoreEntry``-dədir;
+    burada yalnız partiya-səviyyəli məlumat saxlanılır — imtahan tarixi,
+    yoxlayan müəllim, nəzarətçi, protokol nömrəsi, skan (opsional) və
+    «neçə sətir yazıldı / ötürüldü / rədd olundu» xülasəsi. Sayğaclar
+    partiya bitəndə YENİLƏNİR, ona görə model append-only deyil (sətirlər
+    isə append-only qalır).
+    """
+
+    organization = models.ForeignKey(
+        "organizations.Organization", on_delete=models.PROTECT, related_name="exam_score_sheets"
+    )
+    offering = models.ForeignKey("registrar.CourseOffering", on_delete=models.PROTECT, related_name="exam_score_sheets")
+    source = models.CharField(max_length=12, choices=ExamScoreSheetSource.choices, default=ExamScoreSheetSource.MANUAL)
+    exam_kind = models.CharField(
+        max_length=12,
+        choices=ExamScoreSheetKind.choices,
+        default=ExamScoreSheetKind.WRITTEN,
+        help_text="Kağız imtahanın növü — yazılı / praktiki (2026-09-14).",
+    )
+    exam_date = models.DateField(null=True, blank=True, help_text="Kağız imtahanın keçirildiyi tarix.")
+    examiner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="examined_score_sheets",
+        help_text="Vərəqi yoxlayan müəllim (default: açılışın müəllimi).",
+    )
+    examiner_name = models.CharField(max_length=200, blank=True, help_text="Yoxlayan müəllimin adı (snapshot).")
+    # 2026-09-14 (sahibin rəyi): nəzarətçi də təşkilatın müəllimlərindən SEÇİLİR —
+    # FK + ad snapshot-u (müəllim sonradan çıxsa vərəq tarixi qalır).
+    invigilator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="invigilated_score_sheets",
+        help_text="Nəzarətçi (təşkilatın müəllimi) — opsional.",
+    )
+    invigilator_name = models.CharField(max_length=200, blank=True, help_text="Nəzarətçinin adı (snapshot).")
+    protocol_number = models.CharField(max_length=64, blank=True, help_text="Protokol / vərəq nömrəsi.")
+    note = models.TextField(blank=True, help_text="Partiya qeydi (opsional).")
+    evidence = models.FileField(
+        upload_to=exam_score_sheet_path,
+        blank=True,
+        validators=[FileUploadValidator(allowed_extensions=EVIDENCE_EXTENSIONS, max_size_mb=_MAX_EVIDENCE_MB)],
+        help_text="Skan edilmiş protokol / vərəq (PDF və ya şəkil) — opsional.",
+    )
+    original_filename = models.CharField(max_length=255, blank=True, help_text="İdxal faylının adı (varsa).")
+    # 2026-09-14 (W2 `w2paper`, sahib: «hər sualdan max 10, imtahandan max 50»):
+    # vərəqin sual sayı və bir sualın tavanı. ``question_count = 0`` → tək yekun
+    # bal rejimi. Cəmin tavanı sxemdən gəlir (``finals.exam_score_max``).
+    question_count = models.PositiveSmallIntegerField(
+        default=QUESTION_COUNT_DEFAULT,
+        validators=[MaxValueValidator(QUESTION_COUNT_MAX)],
+        help_text="Vərəqdəki sual sayı (0 = tək yekun bal).",
+    )
+    question_max = models.PositiveSmallIntegerField(
+        default=QUESTION_MAX_DEFAULT,
+        validators=[MinValueValidator(1), MaxValueValidator(100)],
+        help_text="Bir sualın maksimum balı.",
+    )
+    rows_total = models.PositiveIntegerField(default=0)
+    rows_written = models.PositiveIntegerField(default=0)
+    rows_skipped = models.PositiveIntegerField(default=0)
+    rows_failed = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="exam_score_sheets"
+    )
+    created_by_name = models.CharField(max_length=200, editable=False)
+
+    objects = models.Manager()
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = pgettext_lazy("registrar.model.exam_score_sheet.meta", "exam score sheet")
+        verbose_name_plural = pgettext_lazy("registrar.model.exam_score_sheet.meta", "exam score sheets")
+        indexes = [
+            models.Index(fields=["organization", "offering", "-created_at"], name="reg_ess_org_off_created_idx"),
+            models.Index(fields=["organization", "-created_at"], name="reg_ess_org_created_idx"),
+        ]
+
+    def __str__(self):
+        return f"exam-score-sheet<{self.offering_id}> {self.source} {self.exam_date or '—'}"
+
+    def clean(self):
+        """Vərəq ↔ açılış tenant uyğunluğu və skanın org-prefiksi (Codex audit P2-09, 2026-09-13).
+
+        PostgreSQL eyni iki qaydanı ``0073`` migrasiyasının
+        ``registrar_exam_score_sheet_integrity_guard`` trigger-ində təkrarlayır;
+        burada məqsəd adi axında xətanın ``ValidationError`` kimi trigger-dən
+        ƏVVƏL görünməsidir. ``examiner``-in aktiv üzvlüyü QƏSDƏN burada deyil —
+        üzvlüklər dəyişir, vərəq isə tarixi snapshot-dur (servis:
+        ``exam_score_sheets.create_sheet``).
+        """
+        super().clean()
+        errors = {}
+        if self.offering_id and self.organization_id and self.offering.organization_id != self.organization_id:
+            errors["offering"] = "Açılış vərəqin təşkilatına aid olmalıdır."
+        # Yeni yüklənən fayl (``_committed`` = False) hələ ``upload_to``-dan
+        # keçməyib — adı prefikssizdir; yol yalnız ``save()``-də qurulur. Yoxlama
+        # artıq saxlanmış (və ya birbaşa sətir kimi verilmiş) ada aiddir.
+        if (
+            self.evidence
+            and self.organization_id
+            and getattr(self.evidence, "_committed", True)
+            and not str(self.evidence.name).startswith(exam_score_sheet_evidence_prefix(self.organization_id))
+        ):
+            errors["evidence"] = "Skan faylı vərəqin öz təşkilat prefiksi altında olmalıdır."
+        if errors:
+            raise ValidationError(errors)

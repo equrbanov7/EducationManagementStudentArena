@@ -368,41 +368,44 @@
         const btn = e.target.closest('.js-delete-block');
         if (!btn) return;
 
-        if (!confirm(t('confirmDeleteBlock', 'Delete this block and all questions inside it?'))) return;
-
-        fetch(`/labs/blocks/${btn.dataset.id}/delete/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-        })
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) {
-                    location.reload();
-                } else {
-                    showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                }
+        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
+        window.EMSConfirm.open({ body: t('confirmDeleteBlock', 'Delete this block and all questions inside it?'), danger: true }).then((ok) => {
+            if (!ok) return;
+            fetch(`/labs/blocks/${btn.dataset.id}/delete/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
             })
-            .catch(() => showError(t('errorServer', 'Server error')));
+                .then((r) => r.json())
+                .then((d) => {
+                    if (d.success) {
+                        location.reload();
+                    } else {
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                    }
+                })
+                .catch(() => showError(t('errorServer', 'Server error')));
+        });
     });
 
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('.js-delete-question');
         if (!btn) return;
 
-        if (!confirm(t('confirmDeleteQuestion', 'Delete this question?'))) return;
-
-        fetch(`/labs/questions/${btn.dataset.id}/delete/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
-        })
-            .then((r) => r.json())
-            .then((d) => {
-                if (d.success) {
-                    location.reload();
-                } else {
-                    showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
-                }
+        window.EMSConfirm.open({ body: t('confirmDeleteQuestion', 'Delete this question?'), danger: true }).then((ok) => {
+            if (!ok) return;
+            fetch(`/labs/questions/${btn.dataset.id}/delete/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
             })
-            .catch(() => showError(t('errorServer', 'Server error')));
+                .then((r) => r.json())
+                .then((d) => {
+                    if (d.success) {
+                        location.reload();
+                    } else {
+                        showError(t('errorPrefix', 'Error') + ': ' + (d.error || t('errorUnknown', 'Unknown error')));
+                    }
+                })
+                .catch(() => showError(t('errorServer', 'Server error')));
+        });
     });
 })();

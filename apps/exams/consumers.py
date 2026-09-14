@@ -10,6 +10,7 @@ WebSocket consumers for real-time exam flows.
 
 from __future__ import annotations
 
+import functools
 import logging
 import time
 
@@ -17,8 +18,27 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from apps.exams.features import exam_supervision_enabled
+from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 logger = logging.getLogger("exams.supervision.ws")
+
+
+def database_sync_to_async_rls(fn):
+    """Audit 2026-09-13 infra P1-1: final-mərkəz consumer-ləri `bypass_rls()`-siz
+    sorğu verirdi — WS scope-da tenant GUC yoxdur, NOBYPASSRLS tətbiq rolu
+    (Codex P0-01 rollout-u) altında bilet/oturum 0 sətir görünür və bütün
+    nəzarətçi/tələbə soketləri 4403 alırdı. `ExamSupervisionConsumer` və
+    `live_exam` naxışı: autorizasiya kodda (`student=user`,
+    `can_supervise_session_ws`) təmin olunur, RLS isə yan keçilir.
+    """
+
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs):
+        with rls_worker_atomic(), bypass_rls():
+            return fn(*args, **kwargs)
+
+    return database_sync_to_async(wrapper)
 
 
 class ExamSupervisionConsumer(AsyncJsonWebsocketConsumer):
@@ -131,7 +151,7 @@ class FinalExamRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_add(self.group_name, self.channel_name)
         await self.accept()
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _can_supervise(self, user, session_id) -> bool:
         from apps.exams.models import ExamRoomSession
         from apps.exams.services.final_center import can_supervise_session_ws
@@ -206,7 +226,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
         await self._mark_connected(info["reconnect"])
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _authorize(self, user, ticket_id, entry_ticket_id, entry_version):
         """
         Bilet sahibliyi + oturumun canlı olması. Çıxarılmış/bitmiş biletlər
@@ -236,7 +256,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         self._ticket_status = ticket.status
         return {"session_id": ticket.session_id, "reconnect": bool(ticket.last_seen_at)}
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _mark_connected_db(self, reconnect: bool):
         from django.db.models import F
         from django.utils import timezone
@@ -266,7 +286,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         if getattr(self, "session_id", None):
             await self._mark_disconnected()
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _mark_disconnected(self):
         from apps.exams.services.final_center import broadcast_to_staff, drop_presence
 
@@ -293,7 +313,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
             if not await self._set_ready(bool(content.get("value", True))):
                 await self.close(code=4403)
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _heartbeat(self):
         from apps.exams.models import FinalExamTicket
         from apps.exams.services.final_center import (
@@ -316,7 +336,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         touch_ticket_last_seen(ticket)
         return True
 
-    @database_sync_to_async
+    @database_sync_to_async_rls
     def _set_ready(self, value: bool):
         from apps.exams.models import FinalExamTicket
         from apps.exams.services.final_center import entry_session_values_match, set_ready

@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Codex audit §7 (2026-09-13): «Göndərişlər (CSV)» köhnə göndəriş
+xülasəsidir; «Göstəricilər (CSV)» ekranda görünən rol-aware kart/blokları eyni
+əhatə və filtrlərlə ixrac edir (`statistics_export_metrics.py`).{% endcomment %}
+<a class="ems-btn" href="{% url 'accounts:statistics_export_csv' %}?{{ statistics_data.query_string }}">
+  <i class="fas fa-download" aria-hidden="true"></i> {% trans "Göndərişlər (CSV)" context "profile.statistics" %}
+</a>
+<a class="ems-btn" href="{% url 'accounts:statistics_export_metrics_csv' %}?{{ statistics_data.query_string }}" download>
+  <i class="fas fa-table" aria-hidden="true"></i> {% trans "Göstəricilər (CSV)" context "profile.statistics" %}
+</a>
+<button type="button" class="ems-btn" data-stx-ai-toggle aria-expanded="false" aria-controls="statistics-ai-panel">
+  {% trans "AI xülasəsi" context "profile.statistics" %}
+</button>

@@ -1,0 +1,92 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   registrar_catalog.css — «Registrar (kataloq)» bölməsi
+
+   Yalnız `--ems-*` tokenləri. Cədvəlin üfüqi scroll-u `ems_ui/_data_table.html`
+   içindədir (`.ems-tablescroll`) — burada ikinci scroller qurulmur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.rcat-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+/* Sətrin adı link deyil, DÜYMƏDİR: naviqasiya etmir, redaktə dialoqunu açır. */
+.rcat-cell__name {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--ems-fg);
+    text-align: start;
+    cursor: pointer;
+}
+
+.rcat-cell__name:hover,
+.rcat-cell__name:focus-visible {
+    color: var(--ems-primary);
+    text-decoration: underline;
+}
+
+.rcat-cell__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.rcat-cell__code {
+    font-family: var(--ems-font-mono, ui-monospace, monospace);
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-fg-muted);
+}
+
+.rcat-cell__desc {
+    margin: 0;
+    max-width: 46ch;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+}
+
+.rcat-tag--off {
+    padding: 1px 8px;
+    border: 1px solid var(--ems-border);
+    border-radius: 999px;
+    background: var(--ems-bg-subtle);
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+/* ── Dialoq ─────────────────────────────────────────────────────────────── */
+.rcat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--ems-sp-4, 12px);
+}
+
+.rcat-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: var(--ems-sp-4, 12px);
+    color: var(--ems-fg);
+    font-size: var(--ems-fs-sm);
+}
+
+.rcat-criteria {
+    font-family: var(--ems-font-mono, ui-monospace, monospace);
+    line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+    .rcat-cell__desc {
+        max-width: none;
+    }
+
+    .rcat-grid {
+        grid-template-columns: 1fr;
+    }
+}

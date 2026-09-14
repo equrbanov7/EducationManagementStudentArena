@@ -1,287 +1,447 @@
 /* ===========================================================================
-   EMSArena — Müəllim paneli ("İmtahanlarım") redizayn.
-   Dizayn mənbəyi: Claude Design "EMSArena Müəllim Paneli" (Arena Tiers brendi).
-   Bütün seçicilər `.profile-section--my-exams` altına scope olunub ki, profil
-   səhifəsinin qalan bölmələrinə sızmasın. `tx-` prefiksi = teacher-exams.
+   EMSArena — Müəllim paneli «İmtahanlarım» — ems_ui dilində redizayn (2026-09-13).
+
+   Sahib: «Bu səhifəni də yenidən redesign et — modern UX/UI, best practice».
+   Nə dəyişdi: Arena Tiers tərzi (serif başlıq, tünd «ink» seqmentlər, ad-hoc
+   hex palitrası, 18px radius) → kabinetin ortaq `ems_ui` dili: design-tokens
+   (SIFIR xam hex), `ems-header` / `ems-kpi` / `ems-btn` / `ems-chip` ölçü və
+   radius ritmi, `ems-state` boş vəziyyəti, WCAG AA kontrast (mətn ≥ neutral-500
+   üzərində ağ). Seçicilər (`tx-*`, `data-tx-*`, `is-*`) OLDUĞU KİMİ qalır —
+   `my_exams_dashboard.js` onlara bağlıdır; dəyişən yalnız vizual qatdır.
+   Hamısı `.profile-section--my-exams` altına scope olunub.
    =========================================================================== */
 
 .profile-section--my-exams {
-  --tx-ink:#0B1437; --tx-blue:#2C5BFF; --tx-blue-deep:var(--ems-primary-800); --tx-blue-soft:#EEF2FF;
-  --tx-amber:var(--ems-warning-500); --tx-teal:#14B8A6;
-  --tx-paper:#F6F7FB; --tx-surface:var(--ems-neutral-0); --tx-border:#E5E8F0; --tx-border-soft:#EFF1F5;
-  --tx-text:var(--ems-neutral-800); --tx-muted:var(--ems-gray-500); --tx-subtle:#9CA3AF;
-  --tx-danger:var(--ems-danger); --tx-danger-soft:#FEECEC; --tx-green:#16A34A; --tx-green-soft:var(--ems-success-100);
-  --tx-accent:#2C5BFF; --tx-accent-deep:var(--ems-primary-800); --tx-accent-soft:#EEF2FF;
-  --tx-radius:18px; --tx-card-pad:22px; --tx-grid-min:300px;
-  --tx-serif:'Fraunces','Iowan Old Style',Georgia,serif;
-  --tx-sans:inherit;
-  --tx-sh-sm:0 1px 2px rgba(11,20,55,.05);
-  --tx-sh-md:0 10px 26px rgba(11,20,55,.08);
-  --tx-sh-lg:0 24px 60px rgba(11,20,55,.18);
+  --tx-ink: var(--ems-neutral-900);
+  --tx-text: var(--ems-neutral-800);
+  --tx-muted: var(--ems-text-muted);
+  --tx-subtle: var(--ems-neutral-400);
+  --tx-accent: var(--ems-primary-600);
+  --tx-accent-deep: var(--ems-primary-700);
+  --tx-accent-soft: var(--ems-primary-50);
+  --tx-paper: var(--ems-bg-subtle);
+  --tx-surface: var(--ems-bg);
+  --tx-border: var(--ems-border);
+  --tx-border-soft: var(--ems-neutral-100);
+  --tx-danger: var(--ems-danger);
+  --tx-danger-soft: var(--ems-danger-100);
+  --tx-radius: var(--ems-r-2xl);
+  --tx-radius-sm: var(--ems-r-lg);
+  --tx-card-pad: var(--ems-sp-7);
+  --tx-grid-min: 300px;
+  --tx-sh-sm: var(--ems-sh-card);
+  --tx-sh-md: var(--ems-sh-raised);
+  --tx-sh-lg: var(--ems-sh-dialog);
 }
 
-/* reset within scope */
-.profile-section--my-exams.section,
-.profile-section--my-exams .tx-shell { box-sizing: border-box; }
+.profile-section--my-exams .tx-shell,
 .profile-section--my-exams .tx-shell * { box-sizing: border-box; }
 .profile-section--my-exams .tx-shell { color: var(--tx-text); }
 
-/* ─────────────────────────── header ─────────────────────────── */
+/* ─────────────────── status / növ / kateqoriya palitrası ─────────────────── */
+/* Açarlar sabit enum-dur (`apps/exams/constants.py` EXAM_*_META); rəng
+   modifikator sinfə köçürülüb (CSP: sıfır inline style). Dəyərlər tokenlərdən —
+   hər `is-*` sinfi `--st-*` / `--type-*` / `--cat-*` üçlüyünü (rəng, yumşaq fon,
+   tünd mətn) təyin edir, istehlakçı qaydalar `var(…, fallback)` ilə oxuyur. */
+.profile-section--my-exams .is-status-active    { --st-color: var(--ems-success-600); --st-soft: var(--ems-success-100); --st-deep: var(--ems-success-700); }
+.profile-section--my-exams .is-status-scheduled { --st-color: var(--ems-primary-600); --st-soft: var(--ems-primary-50);  --st-deep: var(--ems-primary-800); }
+.profile-section--my-exams .is-status-draft     { --st-color: var(--ems-neutral-500); --st-soft: var(--ems-neutral-100); --st-deep: var(--ems-neutral-700); }
+.profile-section--my-exams .is-status-archived  { --st-color: var(--ems-warning-700); --st-soft: var(--ems-warning-100); --st-deep: var(--ems-warning-800); }
+.profile-section--my-exams .is-type-test    { --type-color: var(--ems-sky-600);    --type-soft: var(--ems-sky-100);    --type-deep: var(--ems-sky-900); }
+.profile-section--my-exams .is-type-written { --type-color: var(--ems-rose-600);   --type-soft: var(--ems-rose-100);   --type-deep: var(--ems-rose-800); }
+.profile-section--my-exams .is-type-coding  { --type-color: var(--ems-violet-600); --type-soft: var(--ems-violet-100); --type-deep: var(--ems-violet-800); }
+.profile-section--my-exams .is-cat-final     { --cat-color: var(--ems-rose-600);    --cat-soft: var(--ems-rose-100);    --cat-deep: var(--ems-rose-800); }
+.profile-section--my-exams .is-cat-midterm   { --cat-color: var(--ems-primary-600); --cat-soft: var(--ems-primary-50);  --cat-deep: var(--ems-primary-800); }
+.profile-section--my-exams .is-cat-quiz      { --cat-color: var(--ems-teal-500);    --cat-soft: var(--ems-emerald-50);  --cat-deep: var(--ems-success-700); }
+.profile-section--my-exams .is-cat-placement { --cat-color: var(--ems-warning-700); --cat-soft: var(--ems-warning-100); --cat-deep: var(--ems-warning-800); }
+.profile-section--my-exams .is-cat-practice  { --cat-color: var(--ems-sky-500);     --cat-soft: var(--ems-sky-100);     --cat-deep: var(--ems-sky-800); }
+
+/* ─────────────────────────── başlıq (ems-header) ─────────────────────────── */
+/* Qabıq h1-i verir; burada yalnız alt sətir + əməllər (handoff §3). */
 .profile-section--my-exams .tx-head {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 22px; margin-bottom: 22px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--ems-sp-6); margin-bottom: var(--ems-sp-6); flex-wrap: wrap;
 }
-.profile-section--my-exams .tx-title {
-  font-family: var(--tx-serif); font-weight: 600;
-  font-size: clamp(26px, 3.4vw, 40px); letter-spacing: -.025em; line-height: 1.05;
-  color: var(--tx-ink); margin: 0;
-}
-.profile-section--my-exams .tx-sub { margin: 11px 0 0; font-size: 14px; color: var(--tx-muted); }
+.profile-section--my-exams .tx-sub { margin: 0; font-size: var(--ems-fs-md); color: var(--tx-muted); }
 .profile-section--my-exams .tx-sub b { color: var(--tx-ink); font-weight: 700; }
-.profile-section--my-exams .tx-head-actions { display: flex; gap: 10px; flex-shrink: 0; }
-.profile-section--my-exams .tx-head--compact { align-items: center; margin-top: -4px; }
-.profile-section--my-exams .tx-head--compact .tx-sub { margin-top: 0; }
+.profile-section--my-exams .tx-head-actions { display: flex; gap: var(--ems-sp-3); flex-shrink: 0; flex-wrap: wrap; }
 
-/* ─────────────────────────── buttons ─────────────────────────── */
-.profile-section--my-exams .tx-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  height: 44px; padding: 0 18px; border: 1px solid transparent; border-radius: 13px;
-  font-size: 14px; font-weight: 600; cursor: pointer; transition: .15s; white-space: nowrap;
-  font-family: inherit;
+/* ─────────────────────────── düymələr (ems-btn resepti) ─────────────────────────── */
+/* `tx-btn` — JS və köhnə testlər üçün alias; ölçü/radius `ems-btn` ilə eynidir. */
+.profile-section--my-exams .tx-btn,
+.tx-confirm-modal .tx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ems-sp-2);
+  min-height: var(--ems-h-field); padding: 0 16px; border: 1px solid var(--ems-neutral-300);
+  border-radius: var(--ems-r-lg); background: var(--ems-bg); color: var(--ems-neutral-800);
+  font: inherit; font-size: var(--ems-fs-base); font-weight: 600; line-height: 1.2;
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
 }
-.profile-section--my-exams .tx-btn--primary { background: var(--tx-accent); color: var(--ems-neutral-0); box-shadow: 0 8px 18px rgba(44,91,255,.24); }
-.profile-section--my-exams .tx-btn--primary:hover { background: var(--tx-accent-deep); transform: translateY(-1px); box-shadow: 0 12px 24px rgba(44,91,255,.30); }
-.profile-section--my-exams .tx-btn--ghost { background: var(--tx-surface); color: var(--tx-ink); border-color: var(--tx-border); }
-.profile-section--my-exams .tx-btn--ghost:hover { border-color: var(--tx-subtle); background: var(--tx-paper); }
-.profile-section--my-exams .tx-btn--danger { background: var(--tx-danger); color: var(--ems-neutral-0); }
-.profile-section--my-exams .tx-btn--danger:hover { background: var(--ems-danger-strong); }
-.profile-section--my-exams .tx-btn--sm { height: 38px; padding: 0 13px; font-size: 13px; border-radius: 11px; }
-.profile-section--my-exams .tx-btn.tx-icon-only { width: 44px; padding: 0; flex-shrink: 0; }
+.profile-section--my-exams .tx-btn:hover,
+.tx-confirm-modal .tx-btn:hover { background: var(--ems-neutral-50); border-color: var(--ems-neutral-400); color: var(--ems-neutral-900); }
+.profile-section--my-exams .tx-btn:focus-visible,
+.tx-confirm-modal .tx-btn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-btn--primary,
+.tx-confirm-modal .tx-btn--primary { min-height: var(--ems-h-action); border-color: var(--ems-primary-600); background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-btn--primary:hover,
+.tx-confirm-modal .tx-btn--primary:hover { border-color: var(--ems-primary-700); background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-btn--ghost,
+.tx-confirm-modal .tx-btn--ghost { border-color: transparent; background: transparent; color: var(--ems-neutral-700); }
+.profile-section--my-exams .tx-btn--ghost:hover,
+.tx-confirm-modal .tx-btn--ghost:hover { border-color: var(--ems-neutral-200); background: var(--ems-neutral-50); }
+.profile-section--my-exams .tx-btn--danger,
+.tx-confirm-modal .tx-btn--danger { border-color: var(--ems-danger-600); background: var(--ems-danger-600); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-btn--danger:hover,
+.tx-confirm-modal .tx-btn--danger:hover { border-color: var(--ems-danger-700); background: var(--ems-danger-700); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-btn--sm { min-height: var(--ems-h-xs); padding: 0 12px; font-size: var(--ems-fs-sm); }
+.profile-section--my-exams .tx-btn.tx-icon-only { width: var(--ems-h-field); padding: 0; flex-shrink: 0; }
 
-/* ─────────────────────────── KPI strip ─────────────────────────── */
-.profile-section--my-exams .tx-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+/* ─────────────────────────── zibil qutusu düyməsi + alt-görünüş tabları ─────────────────────────── */
+/* 2026-09-14 (W3 `w3myexams`, sahib: «zibil qutusu yerini düzəlt, daha yaxşı formada»):
+   başlıqda mətn linki əvəzinə ikon + sayğac (ghost, 40px); alt-görünüş açıq olanda
+   `is-on` (primary soft). Tablar `ems-tabs` dilində, server-render linklər. */
+.profile-section--my-exams .tx-trashbtn {
+  position: relative; gap: var(--ems-sp-2); padding: 0 12px; border-color: var(--ems-neutral-200);
+  color: var(--ems-neutral-600);
+}
+.profile-section--my-exams .tx-trashbtn i { font-size: 14px; }
+.profile-section--my-exams .tx-trashbtn:hover { border-color: var(--ems-neutral-300); color: var(--tx-ink); }
+.profile-section--my-exams .tx-trashbtn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-trashbtn.is-on { border-color: var(--ems-primary-200); background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.profile-section--my-exams .tx-trashbtn-n {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: var(--ems-r-pill); background: var(--ems-neutral-100); color: var(--ems-neutral-600);
+  font-size: var(--ems-fs-xs); font-weight: 800; line-height: 1;
+}
+.profile-section--my-exams .tx-trashbtn-n.has-items { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.profile-section--my-exams .tx-trashbtn.is-on .tx-trashbtn-n { background: var(--ems-primary-100); color: var(--ems-primary-800); }
+/* Dar ekranda (`header.css` ≤ 768: `.ems-header__actions > * { flex: 1 1 auto }`)
+   «Yeni imtahan» uzanır, zibil qutusu ikonu sabit enli qalır. */
+.profile-section--my-exams .tx-head-actions .tx-trashbtn { flex: 0 0 auto; }
+.profile-section--my-exams .tx-tabs { margin-bottom: var(--ems-sp-6); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn { text-decoration: none; }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn i { font-size: 12px; color: var(--ems-neutral-400); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn[aria-current] i { color: var(--ems-primary-600); }
+.profile-section--my-exams .tx-tabs .ems-tabs__btn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); border-radius: var(--ems-r-md); }
+
+/* ─────────────────────────── zibil qutusu paneli ─────────────────────────── */
+.profile-section--my-exams .tx-trash-head { display: flex; align-items: flex-start; gap: var(--ems-sp-4); margin-bottom: var(--ems-sp-5); }
+.profile-section--my-exams .tx-trash-ic {
+  display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--ems-r-lg);
+  background: var(--ems-warning-100); color: var(--ems-warning-800); font-size: 15px;
+}
+.profile-section--my-exams .tx-trash-title { margin: 0; font: inherit; font-size: var(--ems-fs-lg); font-weight: 800; color: var(--tx-ink); }
+.profile-section--my-exams .tx-trash-sub { margin: 3px 0 0; max-width: 64ch; font-size: var(--ems-fs-base); line-height: 1.55; color: var(--tx-muted); text-wrap: pretty; }
+.profile-section--my-exams .tx-trash-name { display: block; font-weight: 700; color: var(--tx-ink); }
+.profile-section--my-exams .tx-trash-type { display: block; margin-top: 2px; font-size: var(--ems-fs-sm); font-weight: 500; color: var(--tx-muted); }
+.profile-section--my-exams .tx-trash-form { margin: 0; }
+.profile-section--my-exams .tx-trash .ems-rowactions { flex-wrap: nowrap; }
+.profile-section--my-exams .tx-trash .ems-state { border: 1px dashed var(--tx-border); border-radius: var(--tx-radius); }
+
+/* ─────────────────────────── KPI zolağı (ems-kpi) ─────────────────────────── */
+/* 4 status kartı = KLİK EDİLƏ BİLƏN filtr (`aria-pressed`) — handoff §4 komponent 1,
+   «accent» variantı: ağ fon + 4px sol kontur status rəngində. */
+.profile-section--my-exams .tx-kpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--ems-sp-5); margin-bottom: var(--ems-sp-6);
+}
 .profile-section--my-exams .tx-kpi {
-  position: relative; text-align: left; background: var(--tx-surface); border: 1px solid var(--tx-border);
-  border-radius: 16px; padding: 16px 18px; cursor: pointer; overflow: hidden;
-  transition: .16s cubic-bezier(.2,.7,.3,1); font-family: inherit;
+  position: relative; display: block; width: 100%; text-align: left; overflow: hidden;
+  padding: 15px 18px 15px 22px; border: 1px solid var(--tx-border); border-radius: var(--ems-r-xl);
+  background: var(--tx-surface); box-shadow: var(--tx-sh-sm); color: inherit; font: inherit; cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
 }
-.profile-section--my-exams .tx-kpi:hover { border-color: #D4D9E6; box-shadow: var(--tx-sh-md); transform: translateY(-2px); }
-.profile-section--my-exams .tx-kpi.is-on { border-color: transparent; box-shadow: 0 0 0 2px var(--kpi-color, var(--tx-accent)), 0 10px 26px rgba(11,20,55,.14); }
-.profile-section--my-exams .tx-kpi-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 0 4px 4px 0; background: var(--kpi-color); }
-.profile-section--my-exams .tx-kpi-num { display: block; font-size: 28px; font-weight: 750; letter-spacing: -.03em; color: var(--tx-ink); line-height: 1; }
-.profile-section--my-exams .tx-kpi-label { display: flex; align-items: center; gap: 8px; margin-top: 9px; font-size: 13px; font-weight: 600; color: var(--tx-muted); }
-.profile-section--my-exams .tx-kpi.is-on .tx-kpi-label { color: var(--tx-ink); }
-.profile-section--my-exams .tx-kpi-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--kpi-color); flex-shrink: 0; }
-.profile-section--my-exams .tx-kpi-hint { display: block; margin-top: 3px; font-size: 11.5px; color: var(--tx-subtle); }
+.profile-section--my-exams .tx-kpi:hover { border-color: var(--ems-neutral-300); box-shadow: var(--tx-sh-md); transform: translateY(-1px); }
+.profile-section--my-exams .tx-kpi:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-kpi.is-on,
+.profile-section--my-exams .tx-kpi[aria-pressed="true"] {
+  border-color: var(--st-color, var(--tx-accent));
+  box-shadow: 0 0 0 1px var(--st-color, var(--tx-accent)), var(--tx-sh-md);
+  background: var(--st-soft, var(--tx-accent-soft));
+}
+.profile-section--my-exams .tx-kpi-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--st-color, var(--ems-neutral-500)); }
+.profile-section--my-exams .tx-kpi-num { display: block; font-size: var(--ems-fs-3xl); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; color: var(--tx-ink); }
+.profile-section--my-exams .tx-kpi-label {
+  display: flex; align-items: center; gap: var(--ems-sp-2); margin-top: 6px;
+  font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ems-neutral-500);
+}
+.profile-section--my-exams .tx-kpi.is-on .tx-kpi-label,
+.profile-section--my-exams .tx-kpi[aria-pressed="true"] .tx-kpi-label { color: var(--st-deep, var(--tx-ink)); }
+.profile-section--my-exams .tx-kpi-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--st-color, var(--ems-neutral-500)); flex-shrink: 0; }
+.profile-section--my-exams .tx-kpi-hint { display: block; margin-top: 4px; font-size: var(--ems-fs-sm); color: var(--tx-muted); }
 
-/* ─────────────────────────── toolbar ─────────────────────────── */
-.profile-section--my-exams .tx-toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
-.profile-section--my-exams .tx-search { position: relative; flex: 1; min-width: 220px; }
-.profile-section--my-exams .tx-search-ic { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--tx-subtle); pointer-events: none; }
-.profile-section--my-exams .tx-search-input {
-  width: 100%; height: 46px; padding: 0 16px 0 42px; border-radius: 13px;
-  border: 1px solid var(--tx-border); background: var(--tx-surface); font-size: 14px;
-  color: var(--tx-text); outline: none; transition: .15s; box-shadow: var(--tx-sh-sm); font-family: inherit;
+/* ─────────────────────────── filtr paneli (ems-filters ritmi) ─────────────────────────── */
+/* Bir panel: axtarış · növ seqmenti · görünüş; altında kateqoriya çipləri. */
+.profile-section--my-exams .tx-toolbar {
+  display: flex; gap: var(--ems-sp-4); align-items: center; flex-wrap: wrap;
+  padding: var(--ems-sp-4); margin-bottom: var(--ems-sp-4);
+  border: 1px solid var(--tx-border); border-radius: var(--tx-radius); background: var(--tx-surface); box-shadow: var(--tx-sh-sm);
 }
-.profile-section--my-exams .tx-search-input:focus { border-color: var(--tx-accent); box-shadow: 0 0 0 4px var(--tx-accent-soft); }
-/* segmented type filter (design) */
+.profile-section--my-exams .tx-search { position: relative; flex: 1 1 240px; min-width: 200px; }
+.profile-section--my-exams .tx-search-ic { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--tx-subtle); pointer-events: none; font-size: var(--ems-fs-base); }
+.profile-section--my-exams .tx-search-input {
+  width: 100%; height: var(--ems-h-field); padding: 0 14px 0 38px; border-radius: var(--ems-r-lg);
+  border: 1px solid var(--ems-neutral-300); background: var(--tx-surface); font: inherit; font-size: var(--ems-fs-base);
+  color: var(--tx-text); transition: border-color .15s, box-shadow .15s;
+}
+.profile-section--my-exams .tx-search-input::placeholder { color: var(--ems-neutral-400); }
+.profile-section--my-exams .tx-search-input:focus,
+.profile-section--my-exams .tx-search-input:focus-visible { outline: none; border-color: var(--tx-accent); box-shadow: var(--ems-sh-focus); }
+
+/* seqment (növ) — pill qrupu; aktiv = brend rəngi (tünd «ink» deyil) */
 .profile-section--my-exams .tx-typeseg {
-  display: inline-flex; align-items: center; gap: 2px; background: var(--tx-surface);
-  border: 1px solid var(--tx-border); border-radius: 13px; padding: 4px; box-shadow: var(--tx-sh-sm);
+  display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+  background: var(--tx-paper); border: 1px solid var(--tx-border); border-radius: var(--ems-r-pill);
 }
 .profile-section--my-exams .tx-typeseg-btn {
-  display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 14px; border: none;
-  background: none; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--tx-muted);
-  cursor: pointer; transition: .14s; white-space: nowrap; font-family: inherit;
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 13px; border: 0;
+  background: transparent; border-radius: var(--ems-r-pill); font: inherit; font-size: var(--ems-fs-base); font-weight: 600;
+  color: var(--ems-neutral-600); cursor: pointer; white-space: nowrap; transition: background-color .14s, color .14s, box-shadow .14s;
 }
-.profile-section--my-exams .tx-typeseg-btn:hover { color: var(--tx-ink); }
-.profile-section--my-exams .tx-typeseg-btn.is-on { background: var(--tx-ink); color: var(--ems-neutral-0); }
-.profile-section--my-exams .tx-tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.profile-section--my-exams .tx-typeseg-btn.is-on .tx-tdot { box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+.profile-section--my-exams .tx-typeseg-btn:hover { color: var(--tx-ink); background: var(--tx-surface); }
+.profile-section--my-exams .tx-typeseg-btn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-typeseg-btn.is-on { background: var(--tx-surface); color: var(--tx-accent-deep); box-shadow: var(--ems-sh-card), inset 0 0 0 1px var(--ems-primary-200); }
+.profile-section--my-exams .tx-tdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--type-color, var(--ems-neutral-500)); }
 
 .profile-section--my-exams .tx-viewtoggle {
-  display: inline-flex; background: var(--tx-surface); border: 1px solid var(--tx-border);
-  border-radius: 13px; padding: 4px; gap: 2px; box-shadow: var(--tx-sh-sm);
+  display: inline-flex; gap: 2px; padding: 3px; margin-left: auto;
+  background: var(--tx-paper); border: 1px solid var(--tx-border); border-radius: var(--ems-r-lg);
 }
-.profile-section--my-exams .tx-viewtoggle button { width: 40px; height: 38px; border: none; background: none; border-radius: 10px; display: grid; place-items: center; color: var(--tx-subtle); cursor: pointer; transition: .15s; }
-.profile-section--my-exams .tx-viewtoggle button:hover { color: var(--tx-ink); }
-.profile-section--my-exams .tx-viewtoggle button.is-on { background: var(--tx-ink); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-viewtoggle button {
+  width: 34px; height: 32px; border: 0; background: transparent; border-radius: var(--ems-r-md);
+  display: grid; place-items: center; color: var(--ems-neutral-500); cursor: pointer; transition: background-color .14s, color .14s;
+}
+.profile-section--my-exams .tx-viewtoggle button:hover { color: var(--tx-ink); background: var(--tx-surface); }
+.profile-section--my-exams .tx-viewtoggle button:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-viewtoggle button.is-on { background: var(--tx-surface); color: var(--tx-accent-deep); box-shadow: var(--ems-sh-card), inset 0 0 0 1px var(--ems-primary-200); }
 
-/* ─────────────────────────── category chips ─────────────────────────── */
-.profile-section--my-exams .tx-catfilter { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; flex-wrap: wrap; }
-.profile-section--my-exams .tx-cat-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-subtle); flex-shrink: 0; }
-.profile-section--my-exams .tx-cat-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+/* ─────────────────────────── kateqoriya çipləri (ems-chip) ─────────────────────────── */
+.profile-section--my-exams .tx-catfilter { display: flex; align-items: center; gap: var(--ems-sp-4); margin: 0 0 var(--ems-sp-7); flex-wrap: wrap; }
+.profile-section--my-exams .tx-cat-label { font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ems-neutral-500); flex-shrink: 0; }
+.profile-section--my-exams .tx-cat-chips { display: flex; gap: var(--ems-sp-3); flex-wrap: wrap; }
 .profile-section--my-exams .tx-cat-chip {
-  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 13px;
-  border-radius: 999px; border: 1.5px solid var(--tx-border); background: var(--tx-surface);
-  font-size: 13px; font-weight: 600; color: var(--tx-muted); cursor: pointer; transition: .14s; font-family: inherit;
+  display: inline-flex; align-items: center; gap: var(--ems-sp-2); min-height: var(--ems-h-xs); padding: 0 12px;
+  border-radius: var(--ems-r-pill); border: 1px solid var(--tx-border); background: var(--tx-surface);
+  font: inherit; font-size: var(--ems-fs-base); font-weight: 600; color: var(--ems-neutral-700); cursor: pointer;
+  transition: background-color .14s, border-color .14s, color .14s;
 }
-.profile-section--my-exams .tx-cat-chip:hover { color: var(--tx-ink); border-color: var(--cat-color, var(--tx-subtle)); }
-.profile-section--my-exams .tx-cat-chip.is-on { font-weight: 700; border-color: var(--cat-color); background: var(--cat-soft); color: var(--cat-deep); }
-.profile-section--my-exams .tx-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.profile-section--my-exams .tx-cat-n { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--tx-paper); color: var(--tx-muted); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
-.profile-section--my-exams .tx-cat-chip.is-on .tx-cat-n { background: var(--cat-color); color: var(--ems-neutral-0); }
-.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on { border-color: var(--tx-ink); background: var(--tx-ink); color: var(--ems-neutral-0); }
-.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on .tx-cat-n { background: rgba(255,255,255,.2); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-cat-chip:hover { border-color: var(--cat-color, var(--ems-neutral-400)); color: var(--tx-ink); }
+.profile-section--my-exams .tx-cat-chip:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-cat-chip.is-on { border-color: var(--cat-color, var(--tx-accent)); background: var(--cat-soft, var(--tx-accent-soft)); color: var(--cat-deep, var(--tx-accent-deep)); font-weight: 700; }
+.profile-section--my-exams .tx-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--cat-color, var(--ems-neutral-500)); }
+.profile-section--my-exams .tx-cat-n {
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--ems-r-pill);
+  background: var(--tx-paper); color: var(--ems-neutral-600); font-size: var(--ems-fs-xs); font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.profile-section--my-exams .tx-cat-chip.is-on .tx-cat-n { background: var(--cat-color, var(--tx-accent)); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on { border-color: var(--tx-accent); background: var(--tx-accent); color: var(--ems-neutral-0); }
+.profile-section--my-exams .tx-cat-chip[data-cat="all"].is-on .tx-cat-n { background: var(--ems-primary-800); color: var(--ems-neutral-0); }
 
-/* ─────────────────────────── status section ─────────────────────────── */
-.profile-section--my-exams .tx-section { margin-bottom: 28px; }
-.profile-section--my-exams .tx-section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; cursor: pointer; user-select: none; }
-.profile-section--my-exams .tx-section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.profile-section--my-exams .tx-section-title { font-size: 16px; font-weight: 700; letter-spacing: -.01em; color: var(--tx-ink); margin: 0; }
-.profile-section--my-exams .tx-section-count { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
-.profile-section--my-exams .tx-section-hint { font-size: 12px; color: var(--tx-subtle); font-weight: 500; }
+/* ─────────────────────────── status bölməsi ─────────────────────────── */
+.profile-section--my-exams .tx-section { margin-bottom: var(--ems-sp-8); }
+.profile-section--my-exams .tx-section-head {
+  display: flex; align-items: center; gap: var(--ems-sp-4); margin-bottom: var(--ems-sp-5);
+  cursor: pointer; user-select: none; border-radius: var(--ems-r-md);
+}
+.profile-section--my-exams .tx-section-head:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-section-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--st-color, var(--ems-neutral-500)); }
+.profile-section--my-exams .tx-section-title { font-size: var(--ems-fs-lg); font-weight: 800; letter-spacing: -.01em; color: var(--tx-ink); margin: 0; }
+.profile-section--my-exams .tx-section-count {
+  display: inline-flex; align-items: center; min-height: var(--ems-h-chip); padding: 0 9px; border-radius: var(--ems-r-pill);
+  background: var(--st-soft, var(--ems-neutral-100)); color: var(--st-deep, var(--ems-neutral-700)); font-size: var(--ems-fs-xs); font-weight: 700;
+}
+.profile-section--my-exams .tx-section-hint { font-size: var(--ems-fs-sm); color: var(--tx-muted); font-weight: 500; }
 .profile-section--my-exams .tx-section-rule { flex: 1; height: 1px; background: var(--tx-border); }
-.profile-section--my-exams .tx-section-chev { color: var(--tx-subtle); transition: .2s; }
+.profile-section--my-exams .tx-section-chev { color: var(--tx-subtle); transition: transform .2s; }
 .profile-section--my-exams .tx-section.is-collapsed .tx-section-chev { transform: rotate(-90deg); }
 .profile-section--my-exams .tx-section.is-collapsed .tx-cards { display: none; }
 
-.profile-section--my-exams .tx-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tx-grid-min), 1fr)); gap: 16px; }
+.profile-section--my-exams .tx-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tx-grid-min), 1fr)); gap: var(--ems-sp-6); }
 
-/* ─────────────────────────── exam card ─────────────────────────── */
+/* ─────────────────────────── imtahan kartı ─────────────────────────── */
 .profile-section--my-exams .tx-card {
-  position: relative; background: var(--tx-surface); border: 1px solid var(--tx-border);
-  border-radius: var(--tx-radius); padding: var(--tx-card-pad); display: flex; flex-direction: column;
-  transition: .18s cubic-bezier(.2,.7,.3,1);
+  position: relative; display: flex; flex-direction: column;
+  padding: var(--tx-card-pad); background: var(--tx-surface); border: 1px solid var(--tx-border);
+  border-radius: var(--tx-radius); box-shadow: var(--tx-sh-sm);
+  transition: border-color .18s, box-shadow .18s, transform .18s;
 }
-.profile-section--my-exams .tx-card:hover { border-color: #D4D9E6; box-shadow: var(--tx-sh-md); transform: translateY(-2px); }
-.profile-section--my-exams .tx-card::before { content: ''; position: absolute; left: 0; top: 18px; bottom: 18px; width: 3px; border-radius: 0 3px 3px 0; background: var(--type-color, var(--tx-accent)); opacity: 0; transition: .18s; }
+.profile-section--my-exams .tx-card:hover { border-color: var(--ems-neutral-300); box-shadow: var(--tx-sh-md); transform: translateY(-2px); }
+.profile-section--my-exams .tx-card:focus-within { border-color: var(--ems-primary-300); }
+.profile-section--my-exams .tx-card::before { content: ''; position: absolute; left: 0; top: 16px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0; background: var(--type-color, var(--tx-accent)); opacity: 0; transition: opacity .18s; }
 .profile-section--my-exams .tx-card:hover::before { opacity: 1; }
-.profile-section--my-exams .tx-card.is-hidden { display: none; }
+.profile-section--my-exams .tx-card.is-hidden,
 .profile-section--my-exams .tx-card.is-clamped { display: none; }
 
-/* "Daha çox göstər" düyməsi (bölmə başına 6+) */
 .profile-section--my-exams .tx-showmore {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; height: 40px; padding: 0 18px;
-  border: 1px solid var(--tx-border); background: var(--tx-surface); border-radius: 11px;
-  font-size: 13.5px; font-weight: 600; color: var(--tx-muted); cursor: pointer; transition: .14s;
+  display: inline-flex; align-items: center; gap: var(--ems-sp-2); margin-top: var(--ems-sp-5); min-height: var(--ems-h-xs); padding: 0 14px;
+  border: 1px solid var(--tx-border); background: var(--tx-surface); border-radius: var(--ems-r-lg);
+  font: inherit; font-size: var(--ems-fs-base); font-weight: 600; color: var(--ems-neutral-700); cursor: pointer; transition: background-color .14s, border-color .14s;
 }
-.profile-section--my-exams .tx-showmore:hover { color: var(--tx-ink); border-color: var(--tx-subtle); background: var(--tx-paper); }
+.profile-section--my-exams .tx-showmore:hover { color: var(--tx-ink); border-color: var(--ems-neutral-400); background: var(--tx-paper); }
 
-/* grid mode: tile in flow (top-left), status pill absolute (top-right) */
-.profile-section--my-exams .tx-type-tile { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; font-size: 17px; margin-bottom: 14px; }
-.profile-section--my-exams .tx-status-pill { position: absolute; top: var(--tx-card-pad); right: var(--tx-card-pad); display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
-.profile-section--my-exams .tx-pd { width: 7px; height: 7px; border-radius: 50%; }
+.profile-section--my-exams .tx-type-tile {
+  width: 40px; height: 40px; border-radius: var(--ems-r-lg); display: grid; place-items: center; flex-shrink: 0;
+  margin-bottom: var(--ems-sp-5); font-size: 16px; background: var(--type-soft, var(--ems-neutral-100)); color: var(--type-deep, var(--ems-neutral-700));
+}
+/* status — badge resepti (mətn + nöqtə; yalnız rənglə deyil) */
+.profile-section--my-exams .tx-status-pill {
+  position: absolute; top: var(--tx-card-pad); right: var(--tx-card-pad);
+  display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); padding: 0 10px; border-radius: var(--ems-r-pill);
+  font-size: var(--ems-fs-xs); font-weight: 700; letter-spacing: .02em; white-space: nowrap;
+  background: var(--st-soft, var(--ems-neutral-100)); color: var(--st-deep, var(--ems-neutral-700));
+}
+.profile-section--my-exams .tx-pd { width: 7px; height: 7px; border-radius: 50%; background: var(--st-color, var(--ems-neutral-500)); }
 
 .profile-section--my-exams .tx-card-link { display: block; color: inherit; text-decoration: none; }
-.profile-section--my-exams .tx-card-title { font-size: 17px; font-weight: 700; letter-spacing: -.015em; color: var(--tx-ink); margin: 0; line-height: 1.3; }
-.profile-section--my-exams .tx-card-link:hover .tx-card-title { color: var(--tx-accent); }
-.profile-section--my-exams .tx-card-desc { font-size: 13px; color: var(--tx-muted); margin: 6px 0 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.profile-section--my-exams .tx-card-link:focus-visible { outline: none; border-radius: var(--ems-r-sm); box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-card-title { font-size: var(--ems-fs-lg); font-weight: 700; letter-spacing: -.01em; color: var(--tx-ink); margin: 0; line-height: 1.35; }
+.profile-section--my-exams .tx-card-link:hover .tx-card-title { color: var(--tx-accent-deep); }
+.profile-section--my-exams .tx-card-desc { font-size: var(--ems-fs-base); color: var(--tx-muted); margin: 6px 0 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-.profile-section--my-exams .tx-card-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 13px; }
-.profile-section--my-exams .tx-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 8px; background: var(--tx-paper); font-size: 12px; font-weight: 600; color: var(--tx-muted); }
-.profile-section--my-exams .tx-tag--lang { background: #F2ECFE; color: #5B21B6; letter-spacing: .04em; }
+.profile-section--my-exams .tx-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--ems-sp-5); }
+.profile-section--my-exams .tx-tag {
+  display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); padding: 0 8px; border-radius: var(--ems-r-md);
+  background: var(--tx-paper); font-size: var(--ems-fs-sm); font-weight: 600; color: var(--ems-neutral-600);
+}
+.profile-section--my-exams .tx-tag--type { background: var(--type-soft, var(--ems-neutral-100)); color: var(--type-deep, var(--ems-neutral-700)); }
+.profile-section--my-exams .tx-tag--lang { background: var(--ems-violet-100); color: var(--ems-violet-800); letter-spacing: .04em; }
 
-.profile-section--my-exams .tx-card-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 13px; font-size: 12.5px; color: var(--tx-muted); }
+.profile-section--my-exams .tx-card-meta { display: flex; flex-wrap: wrap; gap: var(--ems-sp-4) var(--ems-sp-5); margin-top: var(--ems-sp-5); font-size: var(--ems-fs-sm); color: var(--tx-muted); }
 .profile-section--my-exams .tx-m { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.profile-section--my-exams .tx-m i { color: var(--ems-neutral-400); }
 .profile-section--my-exams .tx-m b { color: var(--tx-text); font-weight: 700; }
 .profile-section--my-exams .tx-m--warn { color: var(--ems-warning-800); }
+.profile-section--my-exams .tx-m--warn i { color: var(--ems-warning-700); }
 
-.profile-section--my-exams .tx-card-foot { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px; }
-.profile-section--my-exams .tx-codechip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 11px; background: var(--tx-paper); border: 1px dashed var(--tx-border); font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--tx-ink); }
-.profile-section--my-exams .tx-codechip--open { letter-spacing: 0; font-weight: 600; color: var(--tx-muted); border-style: solid; }
-.profile-section--my-exams .tx-foot-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.profile-section--my-exams .tx-card-foot { display: flex; align-items: center; gap: var(--ems-sp-3); margin-top: auto; padding-top: var(--ems-sp-6); flex-wrap: wrap; }
+/* icazə növü etiketi (adi mətn) · giriş kodu (`--code`: mono, dashed) · hamıya açıq (`--open`) */
+.profile-section--my-exams .tx-codechip {
+  display: inline-flex; align-items: center; gap: 7px; min-height: var(--ems-h-xs); padding: 0 10px; border-radius: var(--ems-r-lg);
+  background: var(--tx-paper); border: 1px solid var(--tx-border);
+  font-size: var(--ems-fs-sm); font-weight: 600; color: var(--ems-neutral-600); white-space: nowrap; min-width: 0;
+}
+.profile-section--my-exams .tx-codechip i { color: var(--ems-neutral-500); font-size: var(--ems-fs-xs); flex-shrink: 0; }
+.profile-section--my-exams .tx-codechip--code { font-family: var(--ems-ff-mono); font-weight: 700; letter-spacing: .1em; color: var(--tx-ink); border-style: dashed; border-color: var(--ems-neutral-300); }
+.profile-section--my-exams .tx-codechip--open { color: var(--ems-success-700); background: var(--ems-success-100); border-color: var(--ems-success-bd); }
+.profile-section--my-exams .tx-foot-actions { display: flex; align-items: center; gap: var(--ems-sp-2); margin-left: auto; }
 
-.profile-section--my-exams .tx-iconbtn { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--tx-border); background: var(--tx-surface); display: grid; place-items: center; color: var(--tx-muted); cursor: pointer; transition: .14s; flex-shrink: 0; }
-.profile-section--my-exams .tx-iconbtn:hover { color: var(--tx-ink); border-color: var(--tx-subtle); background: var(--tx-paper); }
+.profile-section--my-exams .tx-iconbtn {
+  width: var(--ems-h-xs); height: var(--ems-h-xs); flex: none; border-radius: var(--ems-r-lg);
+  border: 1px solid var(--tx-border); background: var(--tx-surface); display: grid; place-items: center;
+  color: var(--ems-neutral-600); cursor: pointer; text-decoration: none; transition: background-color .14s, border-color .14s, color .14s;
+}
+.profile-section--my-exams .tx-iconbtn:hover { color: var(--tx-ink); border-color: var(--ems-neutral-400); background: var(--tx-paper); }
+.profile-section--my-exams .tx-iconbtn:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
 
-/* ─────────────────────────── kebab menu ─────────────────────────── */
+/* ─────────────────────────── kebab menyu ─────────────────────────── */
 .profile-section--my-exams .tx-menu-wrap { position: relative; }
 .profile-section--my-exams .tx-menu {
-  position: absolute; right: 0; top: calc(100% + 8px); z-index: 5000; min-width: 210px;
-  background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: 14px;
-  box-shadow: var(--tx-sh-lg); padding: 7px; display: none;
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 5000; min-width: 220px; display: none;
+  padding: 6px; background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: var(--ems-r-xl); box-shadow: var(--tx-sh-lg);
 }
 .profile-section--my-exams .tx-menu-wrap.is-open .tx-menu { display: block; animation: txpop .14s ease; }
 @keyframes txpop { from { opacity: 0; transform: translateY(-6px) scale(.97); } to { opacity: 1; transform: none; } }
-.profile-section--my-exams .tx-menu-item { display: flex; align-items: center; gap: 11px; width: 100%; padding: 9px 11px; border: none; background: none; border-radius: 9px; font-size: 13.5px; font-weight: 500; color: var(--tx-text); text-align: left; cursor: pointer; transition: .12s; text-decoration: none; font-family: inherit; }
-.profile-section--my-exams .tx-menu-item i { color: var(--tx-subtle); width: 16px; text-align: center; flex-shrink: 0; }
-.profile-section--my-exams .tx-menu-item:hover { background: var(--tx-paper); }
+.profile-section--my-exams .tx-menu-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--ems-h-xs); padding: 0 10px; border: 0; background: none;
+  border-radius: var(--ems-r-md); font: inherit; font-size: var(--ems-fs-base); font-weight: 500; color: var(--tx-text); text-align: left; cursor: pointer; text-decoration: none;
+  transition: background-color .12s;
+}
+.profile-section--my-exams .tx-menu-item i { color: var(--ems-neutral-400); width: 16px; text-align: center; flex-shrink: 0; }
+.profile-section--my-exams .tx-menu-item:hover { background: var(--tx-paper); color: var(--tx-ink); }
 .profile-section--my-exams .tx-menu-item:hover i { color: var(--tx-ink); }
-.profile-section--my-exams .tx-menu-item--danger { color: var(--tx-danger); }
-.profile-section--my-exams .tx-menu-item--danger i { color: var(--tx-danger); }
-.profile-section--my-exams .tx-menu-item--danger:hover { background: var(--tx-danger-soft); }
+.profile-section--my-exams .tx-menu-item:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.profile-section--my-exams .tx-menu-item--danger,
+.profile-section--my-exams .tx-menu-item--danger i { color: var(--ems-danger-700); }
+.profile-section--my-exams .tx-menu-item--danger:hover { background: var(--ems-danger-100); color: var(--ems-danger-700); }
 .profile-section--my-exams .tx-menu-sep { height: 1px; background: var(--tx-border-soft); margin: 6px 8px; }
-.profile-section--my-exams .tx-menu-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tx-subtle); padding: 8px 11px 4px; }
+.profile-section--my-exams .tx-menu-label { padding: 8px 10px 4px; font-size: var(--ems-fs-2xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ems-neutral-500); }
 
-/* açıq kebab menyu olan kartı/footerin üst qatına qaldır */
+/* açıq kebab menyu olan kartı qabığın üst qatına qaldır */
 .profile-page:has(.profile-section--my-exams .tx-menu-wrap.is-open) { position: relative; z-index: 4000; }
 .profile-page:has(.profile-section--my-exams .tx-menu-wrap.is-open) .profile-main { overflow: visible; }
 .profile-section--my-exams:has(.tx-menu-wrap.is-open) { position: relative; z-index: 4100; }
 .profile-section--my-exams .tx-card:has(.tx-menu-wrap.is-open) { z-index: 4200; }
 .profile-section--my-exams .tx-menu-wrap.is-open { z-index: 5000; }
-
-/* bütün karta klik → detal səhifəsi */
 .profile-section--my-exams .tx-card[data-card-href] { cursor: pointer; }
 
 /* ─────────────────────────── skeleton (axtarış) ─────────────────────────── */
-.profile-section--my-exams .tx-skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tx-grid-min), 1fr)); gap: 16px; }
-.profile-section--my-exams .tx-skel-card { position: relative; overflow: hidden; background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: var(--tx-radius); padding: var(--tx-card-pad); min-height: 210px; }
-.profile-section--my-exams .tx-skel-card::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation: txShimmer 1.2s infinite; }
+.profile-section--my-exams .tx-skeleton { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tx-grid-min), 1fr)); gap: var(--ems-sp-6); }
+.profile-section--my-exams .tx-skel-card { position: relative; overflow: hidden; min-height: 200px; padding: var(--tx-card-pad); background: var(--tx-surface); border: 1px solid var(--tx-border); border-radius: var(--tx-radius); }
+.profile-section--my-exams .tx-skel-card::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, var(--ems-neutral-50), transparent); animation: txShimmer 1.2s infinite; }
 @keyframes txShimmer { 100% { transform: translateX(100%); } }
-.profile-section--my-exams .tx-skel-tile { width: 42px; height: 42px; border-radius: 12px; background: var(--tx-border-soft); margin-bottom: 18px; }
-.profile-section--my-exams .tx-skel-line { height: 13px; border-radius: 6px; background: var(--tx-border-soft); margin-bottom: 11px; }
+.profile-section--my-exams .tx-skel-tile { width: 40px; height: 40px; border-radius: var(--ems-r-lg); background: var(--ems-neutral-100); margin-bottom: 18px; }
+.profile-section--my-exams .tx-skel-line { height: 12px; border-radius: var(--ems-r-sm); background: var(--ems-neutral-100); margin-bottom: 10px; }
 .profile-section--my-exams .tx-skel-line.tx-w80 { width: 80%; }
 .profile-section--my-exams .tx-skel-line.tx-w60 { width: 60%; }
 .profile-section--my-exams .tx-skel-line.tx-w40 { width: 40%; }
 
-/* ─────────────────────────── list mode ─────────────────────────── */
-.profile-section--my-exams.is-list .tx-cards { grid-template-columns: 1fr; gap: 12px; }
-.profile-section--my-exams.is-list .tx-card { flex-direction: row; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; }
-.profile-section--my-exams.is-list .tx-card::before { top: 12px; bottom: 12px; }
-.profile-section--my-exams.is-list .tx-type-tile { order: 0; width: 38px; height: 38px; margin: 0; font-size: 15px; }
+/* ─────────────────────────── siyahı rejimi ─────────────────────────── */
+.profile-section--my-exams.is-list .tx-cards { grid-template-columns: 1fr; gap: var(--ems-sp-3); }
+.profile-section--my-exams.is-list .tx-card { flex-direction: row; align-items: center; gap: var(--ems-sp-5); flex-wrap: wrap; padding: var(--ems-sp-4) var(--ems-sp-6); }
+.profile-section--my-exams.is-list .tx-card::before { top: 10px; bottom: 10px; }
+.profile-section--my-exams.is-list .tx-type-tile { order: 0; width: 36px; height: 36px; margin: 0; font-size: 14px; }
 .profile-section--my-exams.is-list .tx-card-link { order: 1; flex: 0 1 auto; min-width: 0; }
-.profile-section--my-exams.is-list .tx-card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-section--my-exams.is-list .tx-card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--ems-fs-md); }
 .profile-section--my-exams.is-list .tx-status-pill { position: static; order: 2; }
-.profile-section--my-exams.is-list .tx-card-desc { display: none; }
+.profile-section--my-exams.is-list .tx-card-desc,
 .profile-section--my-exams.is-list .tx-card-tags { display: none; }
 .profile-section--my-exams.is-list .tx-card-meta { order: 3; margin: 0; flex: 1 1 auto; }
 .profile-section--my-exams.is-list .tx-card-foot { order: 4; margin: 0; padding: 0; width: auto; flex: 0 0 auto; }
 
-/* ─────────────────────────── empty state ─────────────────────────── */
-.profile-section--my-exams .tx-empty { text-align: center; padding: 64px 20px; color: var(--tx-muted); }
-.profile-section--my-exams .tx-empty-ic { width: 60px; height: 60px; border-radius: 17px; background: var(--tx-surface); border: 1px solid var(--tx-border); display: grid; place-items: center; margin: 0 auto 16px; color: var(--tx-subtle); font-size: 22px; }
-.profile-section--my-exams .tx-empty h3 { font-family: var(--tx-serif); font-size: 21px; font-weight: 600; color: var(--tx-ink); margin: 0 0 7px; }
-.profile-section--my-exams .tx-empty p { margin: 0 auto 16px; max-width: 420px; font-size: 14px; }
+/* ─────────────────────────── boş vəziyyət (ems-state ritmi) ─────────────────────────── */
+.profile-section--my-exams .tx-empty {
+  display: flex; flex-direction: column; align-items: center; gap: var(--ems-sp-4);
+  padding: 46px 24px; text-align: center; color: var(--tx-muted);
+  border: 1px dashed var(--tx-border); border-radius: var(--tx-radius); background: var(--tx-surface);
+}
+.profile-section--my-exams .tx-empty-ic { width: 56px; height: 56px; border-radius: var(--ems-r-xl); background: var(--tx-paper); display: grid; place-items: center; color: var(--ems-neutral-400); font-size: 22px; }
+.profile-section--my-exams .tx-empty h3 { margin: 0; font: inherit; font-size: var(--ems-fs-lg); font-weight: 800; color: var(--tx-ink); }
+.profile-section--my-exams .tx-empty p { margin: 0; max-width: 46ch; font-size: var(--ems-fs-md); line-height: 1.6; text-wrap: pretty; }
 
-/* ─────────────────────────── delete confirm modal ─────────────────────────── */
-.tx-confirm-modal .modal-content { border: none; border-radius: 20px; overflow: hidden; }
-.tx-confirm-modal .modal-header { border: none; padding: 22px 24px 8px; }
-.tx-confirm-modal .modal-title { display: flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 700; color: #0B1437; }
-.tx-confirm-modal .tx-confirm-ic { width: 38px; height: 38px; border-radius: 11px; background: #FEECEC; color: var(--ems-danger); display: grid; place-items: center; font-size: 16px; }
-.tx-confirm-modal .modal-body { padding: 6px 24px 18px; color: var(--ems-gray-500); font-size: 14px; line-height: 1.55; }
-.tx-confirm-modal .tx-confirm-name { font-weight: 700; color: #0B1437; margin: 8px 0; font-size: 15px; }
-.tx-confirm-modal .tx-confirm-warn { display: flex; gap: 9px; background: #FEF6E7; border: 1px solid #FCE9C2; color: var(--ems-warning-800); border-radius: 12px; padding: 11px 14px; font-size: 12.5px; line-height: 1.5; }
-.tx-confirm-modal .modal-footer { border: none; padding: 0 24px 22px; gap: 10px; }
+/* ─────────────────────────── silmə təsdiq dialoqu ─────────────────────────── */
+.tx-confirm-modal .modal-content { border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); overflow: hidden; box-shadow: var(--ems-sh-dialog); }
+.tx-confirm-modal .modal-header { border: 0; padding: 20px 22px 6px; }
+.tx-confirm-modal .modal-title { display: flex; align-items: center; gap: 10px; font-size: var(--ems-fs-xl); font-weight: 800; color: var(--ems-neutral-900); }
+.tx-confirm-modal .tx-confirm-ic { width: 36px; height: 36px; border-radius: var(--ems-r-lg); background: var(--ems-danger-100); color: var(--ems-danger-700); display: grid; place-items: center; font-size: 15px; }
+.tx-confirm-modal .modal-body { padding: 6px 22px 16px; color: var(--ems-text-muted); font-size: var(--ems-fs-md); line-height: 1.55; }
+.tx-confirm-modal .tx-confirm-name { margin: 8px 0; font-size: var(--ems-fs-lg); font-weight: 700; color: var(--ems-neutral-900); }
+.tx-confirm-modal .tx-confirm-warn { display: flex; gap: 9px; padding: 10px 12px; border-radius: var(--ems-r-lg); background: var(--ems-warning-bg); border: 1px solid var(--ems-warning-bd); color: var(--ems-warning-800); font-size: var(--ems-fs-sm); line-height: 1.5; }
+.tx-confirm-modal .modal-footer { border: 0; padding: 0 22px 20px; gap: var(--ems-sp-3); }
 .tx-confirm-modal .modal-footer form { margin: 0; }
-.tx-confirm-modal .tx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 18px; border: 1px solid transparent; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.tx-confirm-modal .tx-btn--ghost { background: var(--ems-neutral-0); color: #0B1437; border-color: #E5E8F0; }
-.tx-confirm-modal .tx-btn--ghost:hover { background: #F6F7FB; }
-.tx-confirm-modal .tx-btn--danger { background: var(--ems-danger); color: var(--ems-neutral-0); }
-.tx-confirm-modal .tx-btn--danger:hover { background: var(--ems-danger-strong); }
 
-/* ─────────────────────────── responsive ─────────────────────────── */
-@media (max-width: 1040px) { .profile-section--my-exams .tx-kpis { grid-template-columns: repeat(2, 1fr); } }
+/* ─────────────────────────── responsiv ─────────────────────────── */
 @media (max-width: 640px) {
-  .profile-section--my-exams .tx-kpis { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .profile-section--my-exams { --tx-card-pad: var(--ems-sp-6); --tx-grid-min: 100%; }
+  .profile-section--my-exams .tx-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ems-sp-3); }
+  .profile-section--my-exams .tx-kpi { padding: 12px 12px 12px 16px; }
+  .profile-section--my-exams .tx-kpi-num { font-size: var(--ems-fs-2xl); }
   .profile-section--my-exams .tx-toolbar { flex-direction: column; align-items: stretch; }
+  /* Sütun düzülüşündə `flex-basis` şaquli oxa düşür — axtarış qutusu 240px hündür
+     olurdu (ikon aşağıda «asılı» qalırdı); sabit hündürlük, tam en. */
+  .profile-section--my-exams .tx-search { flex: 0 0 auto; min-width: 0; width: 100%; }
+  .profile-section--my-exams .tx-typeseg { width: 100%; flex-wrap: wrap; }
+  .profile-section--my-exams .tx-typeseg-btn { flex: 1 1 auto; justify-content: center; }
   .profile-section--my-exams .tx-viewtoggle { margin-left: 0; align-self: flex-start; }
   .profile-section--my-exams .tx-head-actions { width: 100%; }
-  .profile-section--my-exams .tx-head-actions .tx-btn { flex: 1; }
-  .profile-section--my-exams.is-list .tx-card { grid-template-columns: 1fr; }
+  .profile-section--my-exams .tx-head-actions .tx-btn { flex: 1 1 auto; }
+  .profile-section--my-exams .tx-trash-head { align-items: center; }
+  .profile-section--my-exams .tx-trash .ems-rowactions { flex-wrap: wrap; justify-content: flex-start; }
+  .profile-section--my-exams .tx-status-pill { position: static; margin-bottom: var(--ems-sp-3); align-self: flex-start; }
+  .profile-section--my-exams .tx-card-foot { flex-wrap: wrap; }
+  .profile-section--my-exams .tx-foot-actions { margin-left: 0; width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   .profile-section--my-exams * { animation: none !important; transition: none !important; }
 }
 
-/* ─────────────────────────── toast (body-level) ─────────────────────────── */
+/* ─────────────────────────── toast (body səviyyəsi) ─────────────────────────── */
 .tx-toast {
   position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 1090;
-  background: #0B1437; color: var(--ems-neutral-0); padding: 12px 20px; border-radius: 13px;
-  font-size: 14px; font-weight: 500; box-shadow: 0 24px 60px rgba(11,20,55,.30);
-  display: flex; align-items: center; gap: 11px; max-width: 90vw;
-  animation: txToastIn .2s ease;
+  display: flex; align-items: center; gap: 10px; max-width: 90vw; padding: 11px 18px;
+  background: var(--ems-neutral-900); color: var(--ems-neutral-0); border-radius: var(--ems-r-xl);
+  font-size: var(--ems-fs-md); font-weight: 500; box-shadow: var(--ems-sh-toast); animation: txToastIn .2s ease;
 }
-.tx-toast.is-out { opacity: 0; transform: translate(-50%, 8px); transition: .25s; }
-.tx-toast-ck { width: 22px; height: 22px; border-radius: 50%; background: #14B8A6; display: grid; place-items: center; flex-shrink: 0; font-size: 11px; }
+.tx-toast.is-out { opacity: 0; transform: translate(-50%, 8px); transition: opacity .25s, transform .25s; }
+.tx-toast-ck { width: 22px; height: 22px; border-radius: 50%; background: var(--ems-success-600); display: grid; place-items: center; flex-shrink: 0; font-size: 11px; }
 @keyframes txToastIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }

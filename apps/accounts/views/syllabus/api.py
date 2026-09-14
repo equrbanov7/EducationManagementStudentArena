@@ -19,10 +19,8 @@ from django.http import JsonResponse
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_GET, require_POST
 
-from apps.syllabus import services
-from apps.syllabus.constants import PERM_EDIT, SECTION_ORDER, SyllabusStatus
 from apps.syllabus.models import Syllabus, SyllabusVersion
-from apps.syllabus.state_machine import TransitionDenied
+from apps.syllabus.public import PERM_EDIT, SECTION_ORDER, SyllabusStatus, TransitionDenied, services
 
 from .._helpers import _get_active_organization
 from .labels import transition_text
@@ -179,7 +177,7 @@ class _DuplicateSyllabus(Exception):
 
 
 def _create_draft(request, organization, actor, offering):
-    from apps.registrar.plan_hours import plan_hours_for_offering, program_for_offering
+    from apps.registrar.public import plan_hours_for_offering, program_for_offering
 
     return services.create_draft(
         organization=organization,

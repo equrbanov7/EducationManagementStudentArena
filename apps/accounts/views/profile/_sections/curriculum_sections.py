@@ -86,7 +86,7 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
         section["has_access"] = False
         return
 
-    from apps.registrar.curriculum_registry import build_curriculum_editor
+    from apps.registrar.public import build_curriculum_editor
 
     payload = build_curriculum_editor(request, active_organization)
     section.update(payload)
@@ -156,6 +156,7 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
     section["filter_fields"] = [
         {
             "name": "cu_program",
+            "searchable": True,
             "label": pgettext(_CTX_PLAN, "İxtisas"),
             "kind": "select",
             "value": payload["filters"]["program"],
@@ -164,6 +165,7 @@ def build_curriculum_section(request, section, *, active_organization, allowed_s
         },
         {
             "name": "cu_plan",
+            "searchable": True,
             "label": pgettext(_CTX_PLAN, "Plan"),
             "kind": "select",
             "value": plan["id"] if plan else "",
@@ -214,7 +216,7 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         section["has_access"] = False
         return
 
-    from apps.organizations.groups_registry import build_groups_registry
+    from apps.organizations.public import build_groups_registry
 
     payload = build_groups_registry(request, active_organization)
     section.update(payload)
@@ -286,6 +288,7 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
         },
         {
             "name": "gr_faculty",
+            "searchable": True,
             "label": pgettext(_CTX_GROUPS, "Fakültə"),
             "kind": "select",
             "value": filters["faculty"],
@@ -394,7 +397,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         section["has_access"] = False
         return
 
-    from apps.registrar.semester_open import build_semester_opening, offering_counts_by_chair
+    from apps.registrar.public import build_semester_opening, offering_counts_by_chair
 
     payload = build_semester_opening(request, active_organization)
     section.update(payload)
@@ -455,6 +458,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
     section["filter_fields"] = [
         {
             "name": "sm_period",
+            "searchable": True,
             "label": pgettext(_CTX_SEM, "Tədris dövrü"),
             "kind": "select",
             "value": payload["filters"]["period"],
@@ -463,6 +467,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         },
         {
             "name": "sm_chair",
+            "searchable": True,
             "label": pgettext(_CTX_SEM, "Kafedra"),
             "kind": "select",
             "value": payload["filters"]["chair"],

@@ -18,6 +18,8 @@ from django.utils.dateparse import parse_date
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from core.http_ids import parse_uuid
+
 from . import gradebook, journal_extras
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .models import Lesson, SelfWorkTopic
@@ -309,7 +311,8 @@ def selfwork_action(request, offering_id):
         return _back(offering, "serbest")
 
     if action == "delete_topic":
-        topic = get_object_or_404(SelfWorkTopic, pk=request.POST.get("topic_id"), offering=offering)
+        # F-01 (2026-09-14): pozuq UUID → 404 (əvvəl `ValidationError` → 500).
+        topic = get_object_or_404(SelfWorkTopic, pk=parse_uuid(request.POST.get("topic_id")), offering=offering)
         if journal_extras.delete_selfwork_topic(topic=topic, by_user=request.user):
             messages.success(request, _("Mövzu (və üzrə balları) silindi."))
         else:

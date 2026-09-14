@@ -79,6 +79,13 @@ document.addEventListener("DOMContentLoaded", function () {
         nicknameInput.style.boxShadow = message ? "0 0 0 4px rgba(220, 38, 38, 0.12)" : "";
     }
 
+    /* 2026-09-13 audit F-04: ləqəb istifadəçi girişidir — self-XSS gigiyenası. */
+    function escapeHtml(value) {
+        const div = document.createElement("div");
+        div.textContent = value == null ? "" : String(value);
+        return div.innerHTML;
+    }
+
     function renderPreview() {
         const nickname = normalizeNickname(nicknameInput.value) || "Player";
         preview.innerHTML = `
@@ -94,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
             </div>
             <div class="join-preview__player">
                 <span class="join-preview__player-label">Player</span>
-                <strong class="join-preview__player-name">${nickname}</strong>
+                <strong class="join-preview__player-name">${escapeHtml(nickname)}</strong>
             </div>
         `;
     }

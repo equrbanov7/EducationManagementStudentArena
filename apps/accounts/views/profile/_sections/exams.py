@@ -70,8 +70,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         }
 
     from apps.exams.models import ExamLanguageVariant
-    from apps.exams.public import build_teacher_exam_dashboard
-    from apps.exams.services.access_policy import is_exam_center_user
+    from apps.exams.public import build_teacher_exam_dashboard, is_exam_center_user
+
+    from .my_exams_trash import build_my_exams_trash_context, is_trash_view
 
     # --- Search ---
     search_query = (request.GET.get("exam_q", "") or "").strip()
@@ -104,6 +105,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
 
     allowed_users_through = Exam.allowed_users.through
     allowed_groups_through = Exam.allowed_groups.through
+    # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı da
+    # «Qruplara açıq» nişanına daxildir — ayrı korrelyasiyalı sayğac (sorğu sayı dəyişmir).
+    allowed_units_through = Exam.allowed_units.through
 
     display_qs = my_exams_qs.annotate(
         card_question_count=_related_count(
@@ -112,6 +116,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         card_appeal_count=_related_count(Appeal.objects.filter(exam=OuterRef("pk")), group_by="exam"),
         card_allowed_group_count=_related_count(
             allowed_groups_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
+        ),
+        card_allowed_unit_count=_related_count(
+            allowed_units_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
         ),
         card_allowed_user_count=_related_count(
             allowed_users_through.objects.filter(exam=OuterRef("pk")), group_by="exam"
@@ -153,16 +160,24 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
         pagination_params["exam_status"] = filter_status
     pagination_params["section"] = "my-exams"
 
+    dashboard = build_teacher_exam_dashboard(
+        exams_list,
+        include_empty_categories=is_exam_center_user(request.user),
+        status_counts=status_counts,
+        category_counts_override=category_counts,
+        total=status_counts["all"],
+    )
+    # 2026-09-14 (W3 `w3myexams`): «Zibil qutusu» bölmənin alt-görünüşüdür
+    # (`?exam_view=trash`). Context qabığa `my_exams_dashboard` dict-i ilə çatır
+    # (`_stage1` → `_stage4` açar-açar köçürür); yeni üst-səviyyə açar əvəzinə
+    # dashboard-a `trash` alt-dict-i qoşulur ki, paylaşılan builder faylları
+    # dəyişməsin.
+    dashboard["trash"] = build_my_exams_trash_context(request, is_open=is_trash_view(request))
+
     return {
         "my_exams_count": status_counts["all"],
         "my_exams_list": exams_list,
-        "my_exams_dashboard": build_teacher_exam_dashboard(
-            exams_list,
-            include_empty_categories=is_exam_center_user(request.user),
-            status_counts=status_counts,
-            category_counts_override=category_counts,
-            total=status_counts["all"],
-        ),
+        "my_exams_dashboard": dashboard,
         "my_exams_search_query": search_query,
         "my_exams_filter_type": filter_type,
         "my_exams_filter_status": filter_status,

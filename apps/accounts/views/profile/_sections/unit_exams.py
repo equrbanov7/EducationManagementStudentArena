@@ -29,12 +29,17 @@ def build_unit_exams_context(request, *, allowed_sections, active_section) -> di
 
     from apps.exams.models import Exam
     from apps.organizations.models import Membership, OrgUnit
-    from apps.organizations.public import get_unit_scope
+    from apps.organizations.public import get_permission_scope
 
     org = _get_active_organization(request)
     if org is None:
         return _defaults()
-    scope = get_unit_scope(request.user, org, request=request)
+    # Bölmə qapısı `is_unit_manager`-dir (dekan / dekan müavini / kafedra
+    # müdiri — bax rbac_university_sections.py); əhatə isə `exam.view` açarını
+    # DAŞIYAN üzvlüyün alt-ağacıdır (P1-11, 2026-09-12). Köhnə `get_unit_scope`
+    # dekanın əlaqəsiz müəllim təyinatının kafedrasını da bura qatırdı; sərt
+    # resolverdə `scope_unit`-siz dekan `EMPTY_SCOPE` alır → bölmə boş qalır.
+    scope = get_permission_scope(request.user, org, "exam.view", request=request)
     if not scope.is_unit_scoped:
         return _defaults()
 

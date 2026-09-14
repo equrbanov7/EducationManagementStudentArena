@@ -1,0 +1,115 @@
+{% load i18n %}
+{% comment %}
+«Universitet idarəetməsi» qrupu — struktur vahidləri, üzvlük/rol siyahıları,
+bölmə imtahanları, audit izi və vahid üzrə akademik analitika.
+
+Rektor/prorektor/org admin bütün təşkilatı, dekan/kafedra müdiri yalnız öz
+alt-ağacını görür (unit scoping BACKEND-də tətbiq olunur — burada yalnız menyu).
+
+⚠️ Görünürlük şərtləri DƏYİŞMƏYİB:
+* `org-*` bəndləri URL-lərini `current_organization.slug`-dan qurur, ona görə
+  onlar (əvvəlki kimi) `current_organization` qapısı altındadır;
+* «Akademik analitika» köhnə «Universitet» qrupunda bu qapı OLMADAN idi —
+  eyni şəkildə saxlanılıb;
+* qrup başlığı yalnız içində ən azı bir bənd olanda render olunur (2026-07-31
+  auditi: tələbə boş «Universitet idarəetməsi» başlığı görürdü).
+{% endcomment %}
+{% if 'analytics' in allowed_sections or current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="university-admin">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|analytics|org-faculties|org-kafedras|org-members|unit-exams|org-roles|audit-log|" %} open{% endif %}>
+        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+            <span class="sidebar-menu-group-title">{% trans "group_university_management" context "profile.sidebar" %}</span>
+            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+        </summary>
+        <ul class="sidebar-menu-group-items">
+            {% if 'analytics' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=analytics"
+                   data-section="analytics"
+                   data-title="{% trans 'Akademik analitika' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-line sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans "Akademik analitika" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if current_organization %}
+            {% if 'org-faculties' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=org-faculties"
+                   data-section="org-faculties"
+                   data-title="{% trans 'Fakültələr' %}"
+                   data-source-url="{% url 'organizations:structure_faculties' current_organization.slug %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-faculties' %}active{% endif %}">
+                    <i class="fas fa-university sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Fakültələr' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'org-kafedras' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=org-kafedras"
+                   data-section="org-kafedras"
+                   data-title="Kafedralar"
+                   data-source-url="{% url 'organizations:structure_kafedras' current_organization.slug %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-kafedras' %}active{% endif %}">
+                    <i class="fas fa-sitemap sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">Kafedralar</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'org-members' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=org-members"
+                   data-section="org-members"
+                   data-title="{% trans 'Struktur üzvləri' %}"
+                   data-source-url="{% url 'organizations:members' current_organization.slug %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-members' %}active{% endif %}">
+                    <i class="fas fa-id-badge sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Struktur üzvləri' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'unit-exams' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=unit-exams"
+                   data-section="unit-exams"
+                   data-title="{% trans 'Bölmə imtahanları' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'unit-exams' %}active{% endif %}">
+                    <i class="fas fa-university sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Bölmə imtahanları' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'org-roles' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=org-roles"
+                   data-section="org-roles"
+                   data-title="{% trans 'Təşkilat rolları' %}"
+                   data-source-url="{% url 'organizations:roles' current_organization.slug %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'org-roles' %}active{% endif %}">
+                    <i class="fas fa-layer-group sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Təşkilat rolları' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if 'audit-log' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=audit-log"
+                   data-section="audit-log"
+                   data-title="{% trans 'Audit jurnalı' %}"
+                   data-source-url="{% url 'audit:list' %}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'audit-log' %}active{% endif %}">
+                    <i class="fas fa-clipboard-list sidebar-menu-icon"></i>
+                    <span class="sidebar-menu-text">{% trans 'Audit jurnalı' %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

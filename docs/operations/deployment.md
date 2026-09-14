@@ -14,6 +14,7 @@
    - [Build-time vs. Runtime Variables](#build-time-vs-runtime-variables)
 4. [First-Time Deployment](#4-first-time-deployment)
 5. [Update / Re-deploy](#5-update--re-deploy)
+   - [5.2 2026-09-14 dəyişikliklər — ilk deploy yoxlama siyahısı](#52-2026-09-14-dəyişikliklər--sahibin-ilk-deploy-u-üçün-yoxlama-siyahısı)
 6. [Static & Private Media Handling](#6-static--private-media-handling)
 7. [Health Check & Smoke Test Verification](#7-health-check--smoke-test-verification)
 8. [Rollback Plan](#8-rollback-plan)
@@ -63,6 +64,31 @@ Internet
 No Python, PostgreSQL, or Redis installation is needed on the host — all
 services run inside Docker containers.
 
+### Host sizing (infra audit 2026-09-14, P3-10)
+
+Compose `deploy.resources.limits.memory` defaults add up to **≈ 33.5 GB for one
+replica of everything**; with the deploy script defaults `APP_REPLICAS=8`
+(2 GB each) and `CELERY_REPLICAS=2` (1 GB each) the ceiling is **≈ 48.5 GB**.
+Limits are ceilings, not reservations, but the host must be able to honour the
+steady-state sum of the big ones or the kernel OOM-kills the wrong container.
+
+| Service (env knob) | Default limit | Note |
+|---|---|---|
+| `postgres` (`POSTGRES_MEM_LIMIT`) | 16 GB | `shared_buffers` 2 GB + `effective_cache_size` 6 GB defaults assume ≥ 8 GB really available |
+| `app` × `APP_REPLICAS` (`APP_MEM_LIMIT`) | 2 GB × 8 | Daphne + `ASGI_THREADS`; 2 replicas per vCPU is plenty |
+| `piston` (`PISTON_MEM_LIMIT`) | 4 GB | code-runner sandbox; drop to 1 GB if lab tasks are off |
+| `redis` (`REDIS_MEM_LIMIT`) | 4 GB | must stay above `REDIS_MAXMEMORY` (default 3 GB) |
+| `celery_worker_heavy` / `celery_worker` × `CELERY_REPLICAS` | 2 GB / 1 GB × 2 | exports, imports, AI |
+| observability (prometheus, loki, grafana, cadvisor, exporters, alertmanager, promtail) | ≈ 2 GB | |
+| nginx, pgbouncer, backup, beat, arp-agent | ≈ 1.6 GB | |
+
+Rule of thumb for a **32 GB** host: `POSTGRES_MEM_LIMIT=10G`,
+`POSTGRES_SHARED_BUFFERS=2GB`, `POSTGRES_EFFECTIVE_CACHE_SIZE=5GB`,
+`APP_REPLICAS=4`, `PISTON_MEM_LIMIT=1G`, `REDIS_MAXMEMORY=2gb`,
+`REDIS_MEM_LIMIT=2560M` → ≈ 26 GB ceiling. For a **64 GB** host the defaults are
+fine. Check the running picture with `docker stats --no-stream` after the first
+exam session and tighten from there.
+
 ---
 
 ## 3. Environment Variables Reference
@@ -96,7 +122,7 @@ before running any `docker compose` command.  Never commit this file.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag. Set to `emsarena-prod:ci` during CI runs |
+| `APP_IMAGE` | `emsarena-prod:latest` | Docker image tag used by `app`/`celery_*`. `remote_deploy.sh` exports `emsarena-prod:<git sha>` for the rollout and re-tags `latest` only after the health gate passes (§8); CI uses `emsarena-prod:ci` |
 | `EMAIL_BACKEND` | `django.core.mail.backends.smtp.EmailBackend` | Email backend class. Override with `anymail` backend for SendGrid/SES |
 | `EMAIL_HOST` | `smtp-relay.brevo.com` | SMTP server hostname |
 | `EMAIL_PORT` | `587` | SMTP server port |
@@ -123,6 +149,16 @@ before running any `docker compose` command.  Never commit this file.
 | `ADMIN_2FA_REQUIRED` | `True` | Keep admin OTP-based 2FA enabled in production |
 | `ADMIN_OTP_VERIFY_RATE_LIMIT` | `5/10m` | Rate limit for admin OTP verification attempts |
 | `ADMIN_OTP_RESEND_RATE_LIMIT` | `3/10m` | Rate limit for resending admin OTP codes |
+| `APP_STOP_GRACE_PERIOD` | `130s` | Infra audit 2026-09-13 P2-3: SIGTERM→SIGKILL window for `app`. Must stay ≥ `DAPHNE_APPLICATION_CLOSE_TIMEOUT` + 10 s (Daphne drains in-flight exam submits/WebSockets). Workers use fixed 300 s / 900 s (task hard limits), Postgres 60 s |
+| `EMSARENA_NETWORK_SUBNET` / `EMSARENA_NETWORK_GATEWAY` | `172.18.0.0/16` / `172.18.0.1` | Infra audit P2-4: bridge network IPAM pin. The gateway **must equal** `ARP_AGENT_BIND` (arp-agent binds there with `network_mode: host`) and `EXAM_ARP_AGENT_URL` — otherwise the exam-centre gate fails closed. See §5 note before changing |
+| `ARP_AGENT_CPU_LIMIT` / `ARP_AGENT_MEM_LIMIT` | `0.1` / `64M` | Infra audit P2-4: arp-agent sidecar limits (stdlib http.server ≈ 15 MB RSS) |
+| `WATCHDOG_REPEAT_INTERVAL` | `24h` | Infra audit P1-3: how often the always-firing `Watchdog` alert re-sends its "monitoring chain alive" heartbeat e-mail (`heartbeat` receiver). If the mail stops arriving, Prometheus→Alertmanager→SMTP is broken |
+| `DEPLOY_CHECK_FAIL_LEVEL` | `WARNING` | Infra audit 2026-09-14 P3-16: level at which the in-image `manage.py check --deploy` preflight aborts the deploy. `WARNING` matches CI (`_security.yml`); set `ERROR` in `.env` only as a documented, temporary relaxation (warnings are still printed loudly) |
+| `SKIP_PREDEPLOY_BACKUP` | `0` | Infra audit 2026-09-14 P2-5: `1` skips the pre-migration `postgres-backup /backup.sh` dump. A failing dump otherwise aborts the deploy before `release.sh` (fail-closed) |
+| `DEPLOY_ROLLBACK_ON_FAILURE` | `true` | Infra audit P2-5: on a failed health/HTTP gate, recreate `app`/`celery_*` from the previously running image tag (captured before the rollout). `false` leaves the failed release running for inspection |
+| `DEPLOY_KEEP_RELEASE_IMAGES` | `3` | Infra audit P2-5: how many older `emsarena-prod:<sha>` tags to keep besides the current and the rollback target; older ones are removed after a successful deploy |
+| `HEALTHCHECK_HOST` | `127.0.0.1` (deploy) / `10.0.2.42` (blackbox) | Host header the deploy health-gate and the blackbox probes send to nginx (must be in `ALLOWED_HOSTS`). Infra audit 2026-09-14 P3-9: the blackbox config is rendered from this variable at container start instead of a hard-coded IP |
+| `POSTGRES_JIT` | `off` | Perf measurement EX-12 (2026-09-14): passed to `postgres` as `-c jit=…`. RLS policies inflate plan cost past `jit_above_cost` (100 000) and JIT compilation turned a 2.7 ms OLTP query into 158 ms. Keep `off` for this OLTP profile; only set `on` for an explicit analytics experiment |
 
 ### Build-time vs. Runtime variables
 
@@ -262,8 +298,11 @@ The job:
 2. `rsync -a --delete --exclude-from scripts/deploy/rsync-excludes.txt ./ "$APP_DIR/"`
    — mirrors the code into `APP_DIR` (`/home/wcu/EducationManagementStudentArena`)
    while preserving runtime data (`.env`, `media/`, `docker/nginx/certs/`);
-3. `bash scripts/deploy/remote_deploy.sh` — docker-compose build + release
-   (migrate/collectstatic) + `up -d` + health gate.
+3. `bash scripts/deploy/remote_deploy.sh` — docker-compose build (tagged
+   `emsarena-prod:<sha>`) + `check --deploy` preflight + pre-deploy DB dump +
+   release (migrate/collectstatic) + `up -d` + health gate; on a failed gate
+   it rolls the app/worker containers back to the previous tag, on success it
+   promotes the tag to `latest` (§8).
 
 Prerequisites on the server: the self-hosted runner service must be active, its
 run-as user must be in the `docker` group and own `APP_DIR`, and `APP_DIR/.env`
@@ -310,6 +349,169 @@ the production host.
 3. `docker compose -f docker-compose.prod.yml up -d --build`
 4. Wait for `emsarena-app` to become healthy
 5. Verify `/ping/` and `/health/` before considering the rollout complete.
+
+### Network IPAM pin (infra audit 2026-09-13, P2-4) — one-time check
+
+`docker-compose.prod.yml` now pins `emsarena-network` to `172.18.0.0/16`
+(gateway `172.18.0.1`), because `arp-agent` binds to that gateway address and
+`app` calls it at `EXAM_ARP_AGENT_URL`. Before the first deploy that carries
+this change, confirm the existing network already uses that subnet:
+
+```bash
+docker network inspect emsarena_emsarena-network \
+  --format '{{range .IPAM.Config}}{{.Subnet}} gw={{.Gateway}}{{end}}'
+# expected: 172.18.0.0/16 gw=172.18.0.1
+```
+
+- Same subnet → nothing changes on `up -d` (Compose keeps the network).
+- Different subnet → Compose never modifies an existing network in place
+  (the pinned range only applies when the network is created). Outside exam
+  hours run `docker compose -f docker-compose.prod.yml down` (volumes are
+  kept) and `up -d` so the network is recreated with the pinned range, **or**
+  set `EMSARENA_NETWORK_SUBNET` / `EMSARENA_NETWORK_GATEWAY` / `ARP_AGENT_BIND`
+  / `EXAM_ARP_AGENT_URL` in `.env` to the range the host already uses. All
+  four must agree (`tests/test_infra_compose_config.py` checks the defaults).
+
+### Graceful stop windows (infra audit 2026-09-13, P2-3)
+
+`stop_grace_period` is now set per service (`app` 130 s, `celery_worker`
+300 s, `celery_worker_heavy` 900 s, `postgres` 60 s). A redeploy therefore
+waits for in-flight exam submits / WebSockets and running OCR/export tasks
+instead of SIGKILL-ing them after Docker's default 10 s. Expect
+`docker compose up -d` / `stop` to take up to 15 min when a heavy task is
+mid-flight — that is intended; do not shorten it on exam days.
+
+### Postgres JIT off (perf measurement EX-12, 2026-09-14)
+
+`docker-compose.prod.yml` starts `postgres` with `-c jit=${POSTGRES_JIT:-off}`.
+With row-level security every policy subplan is added to the planner's cost
+estimate; once that estimate crosses `jit_above_cost` (100 000) PostgreSQL
+JIT-compiles the query, and on the 20 000-row `exams_examanswer` sandbox a
+2.7 ms prefetch became **158 ms** (103 ms of it JIT emission). The ORM's real
+queries sit below the threshold today, but a larger `IN (...)` list or more
+options per question can cross it, so JIT is disabled for the OLTP profile.
+The setting is applied on the next `postgres` container recreate (it is a
+server start parameter, not a reload) — see the 2026-09-14 checklist in §5.2.
+
+### Daphne proxy headers (infra audit 2026-09-14, P3-12)
+
+`docker/prod-entrypoint.sh` starts Daphne with `--proxy-headers`, so the ASGI
+`scope["client"]` (used by WebSocket consumers, e.g. the live-exam connect
+rate limit in `apps/live_exam/consumers.py:_get_scope_ip`) and
+`scope["scheme"]` are taken from `X-Forwarded-For` / `X-Forwarded-Proto`
+instead of nginx's container IP. This is safe only because:
+
+- nginx **overwrites** `X-Forwarded-For` with `$remote_addr` (never
+  `$proxy_add_x_forwarded_for`; guarded by
+  `tests/test_proxy_trust_configuration.py`) — Daphne takes the *first*
+  element of a comma-separated list, so an appended client value would win;
+- port 8000 is reachable only from the compose network (nginx, Prometheus
+  scrapes, healthcheck). Anything that talks to `app:8000` directly can set
+  those headers — keep it that way and never publish 8000 on the host.
+
+HTTP requests already used `SECURE_PROXY_SSL_HEADER` / `USE_X_FORWARDED_HOST`
+in Django; the flag only aligns the raw ASGI scope with that trust model.
+
+### Secrets off the process command line (infra audit 2026-09-14, P3-3 / P3-8 / P3-9)
+
+- **Redis** no longer receives `--requirepass` on argv (visible in `ps` /
+  `docker inspect`). `docker/redis/entrypoint.sh` renders
+  `docker/redis/redis.conf.tmpl` to `/tmp/redis.conf` (0400, owned by `redis`)
+  and hands off to the image's own `docker-entrypoint.sh redis-server
+  /tmp/redis.conf`, so the `gosu redis` privilege drop is unchanged. The
+  healthcheck still authenticates through `REDISCLI_AUTH`.
+- **Alertmanager** and **blackbox** templates are rendered by
+  `docker/render-template.sh` (POSIX sh; the prom/* busybox images have no
+  `envsubst`). Substitution is literal and `"`/`\` are escaped for
+  double-quoted YAML scalars — SMTP keys or webhook tokens may contain `|`,
+  `&`, `/`, `\` (the old `sed` render broke on them). A template change still
+  needs a container recreate (`remote_deploy.sh` does it for alertmanager).
+
+---
+
+## 5.2 2026-09-14 dəyişikliklər — sahibin ilk deploy-u üçün yoxlama siyahısı
+
+2026-09-13 auditinin düzəlişləri və 2026-09-14 gecə dalğaları (2–5) ilk dəfə
+istehsala çıxanda aşağıdakılar **bir dəfə** edilməlidir. Mənbə: audit hesabatı
+`docs/audits/2026-09-13-claude/FINAL_REPORT_AZ.md` §27 «MÜTLƏQ» siyahısı və
+w2 infra agentinin xəbərdarlıqları. Sıra vacibdir — əvvəlcə `.env`, sonra deploy.
+
+**A. Deploy-dan ƏVVƏL (prod `.env`)**
+
+1. **DB tətbiq rolu** (Codex P0-01): `scripts/provision-app-db-role.sh` →
+   `APP_DATABASE_USER=emsarena_app` + `EMS_DB_ROLE_ENFORCE=error` — addımlar
+   [PROD_DB_ROLE_CHECKLIST.md](./PROD_DB_ROLE_CHECKLIST.md). Əvvəlcə staging
+   klonunda final-mərkəz WS + `-m postgres` test dəsti ilə yoxlayın —
+   2026-09-14 məşqi (28 rol × bütün bölmələr, 0 xəta):
+   [rls_role_rehearsal_2026-09-14.md](./rls_role_rehearsal_2026-09-14.md).
+   PgBouncer pool-ları rol × baza cütü üçündür — app rolu ayrılanda owner cütü
+   ilə birlikdə iki pool olur; `PGBOUNCER_MAX_DB_CONNECTIONS` (audit P3-18)
+   ümumi backend tavanıdır və **`POSTGRES_MAX_CONNECTIONS − 20`** saxlanmalıdır
+   (compose defoltu 230/250, `.env.production.example` 180/200).
+2. **TLS bayraqları**: `INSECURE_TRANSPORT_OK` prod `.env`-də **olmamalıdır**
+   (varsa `check --deploy` dayandırır); `SECURE_SSL_REDIRECT` / HSTS dəyərləri
+   §3 cədvəlindəki kimi.
+3. **`ALLOWED_HOSTS`** mütləq `localhost` və `127.0.0.1`-i ehtiva etməlidir
+   (app healthcheck, nginx `/metrics/` scrape, Alertmanager webhook və
+   `HEALTHCHECK_HOST` hamısı ona söykənir): `ALLOWED_HOSTS=10.0.2.42,localhost,127.0.0.1`.
+4. **`DEPLOY_CHECK_FAIL_LEVEL`** defoltu artıq `WARNING`-dir (CI ilə eyni). Prod
+   `.env`-də `manage.py check --deploy` xəbərdarlığı varsa **ilk deploy dayanacaq** —
+   ya xəbərdarlığı düzəldin, ya müvəqqəti və sənədləşdirilmiş şəkildə
+   `DEPLOY_CHECK_FAIL_LEVEL=ERROR` yazın (sonra geri qaytarın).
+5. **Redis**: `REDIS_PASSWORD` artıq argv-dən deyil, `docker/redis/redis.conf.tmpl`
+   şablonundan oxunur; `REDIS_MAXMEMORY` (defolt `3gb`, `noeviction`) `.env`-də
+   istənilən dəyərlə üst-üstə düşməlidir (drift yoxlayın: `redis-cli CONFIG GET maxmemory`).
+6. **`ALERTMANAGER_WEBHOOK_TOKEN`** (app və Alertmanager eyni dəyər) və
+   `GRAFANA_ADMIN_PASSWORD`, `ALERT_EMAIL_TO` mövcud olmalıdır.
+7. **Parol rotasiyası**: klon/staging DB parolları və `b09cb19d` commit-indəki
+   tarixi `.env` sızmasındakı dəyərlər hər hansı real mühitdə işlədilirsə dəyişdirin
+   (`ALTER ROLE …`).
+
+**B. Deploy-dan ƏVVƏL (server)**
+
+8. `docker network inspect emsarena_emsarena-network` → subnet **172.18.0.0/16**,
+   gateway **172.18.0.1** (`ARP_AGENT_BIND` ilə eyni) — bax §5 «Network IPAM pin».
+9. Backup: son dump-ın mövcudluğu (`./backups/postgres/last/`) və off-site nüsxə;
+   deploy skripti onsuz da release-dən əvvəl dump alır (uğursuz dump = deploy dayanır).
+10. **İmtahan saatından kənar** vaxt seçin: bu deploy **redis, nginx, alertmanager,
+    blackbox və postgres konteynerlərini yenidən yaradır** (command / volume /
+    healthcheck / `jit=off` dəyişib) — Redis restart (AOF var, data itmir, amma
+    WS/sessiya/broker qısa kəsilir), nginx bir neçə saniyəlik edge kəsilməsi,
+    Postgres 60 s-ə qədər graceful stop.
+
+**C. Deploy**
+
+11. `bash scripts/deploy/remote_deploy.sh` (və ya `main`-ə push). Gözlənilən
+    axın: **`.env` preflight** (A-1 `APP_DATABASE_USER` boş deyil, `EMS_DB_ROLE_ENFORCE`
+    xəbərdarlığı; P3-18 `PGBOUNCER_MAX_DB_CONNECTIONS ≤ POSTGRES_MAX_CONNECTIONS−20` və
+    pool+reserve ≤ cap; A-3 `ALLOWED_HOSTS`-da `localhost`; A-5 `REDIS_MAXMEMORY <
+    REDIS_MEM_LIMIT` — hər hansı biri pozulubsa deploy heç bir konteynerə toxunmadan
+    dayanır) → `emsarena-prod:<sha>` build → `check --deploy` → dump → migrate/collectstatic →
+    `up -d` → health gate → `latest` teqi. **İlk** deploy-da rollback hədəfi
+    `emsarena-prod:latest`-dir (köhnə konteynerlər ondan yaradılıb) — keçərlidir.
+12. Miqrasiyalar bu dalğada: `organizations 0051–0052`, `registrar 0076–0078`,
+    `exams 0067–0069`, `accounts 0023`, `appeals 0004`, `courses 0002` (dublikat
+    indekslər `CONCURRENTLY` silinir, `registrar_lesson (org, date)` indeksi əlavə olunur).
+    Geri alınmır — rollback yalnız konteynerləri əvvəlki image-ə qaytarır (§8).
+
+**D. Deploy-dan SONRA**
+
+13. `/ping/` 200, `/health/` 200/207, `build.sha` = deploy olunan SHA.
+14. `docker exec emsarena-postgres psql -U … -c 'SHOW jit'` → `off`.
+15. Redis: `docker exec emsarena-redis sh -c 'cat /proc/1/cmdline | tr "\0" " "'` —
+    parol görünməməlidir; `redis-cli ping` → PONG.
+16. **Brevo «Authorised IPs»**: serverin çıxış IP-sini Brevo panelində ağ siyahıya
+    əlavə edin, sonra Watchdog heartbeat e-poçtunun (`WATCHDOG_REPEAT_INTERVAL`, 24 h)
+    və bir test alertinin **xarici tərəfdə** çatdığını sübut edin — bax
+    [SISTEM_MONITORINQI.md](./SISTEM_MONITORINQI.md) «Brevo».
+17. Real ölçülü **restore məşqi** (§12 «Restore procedure») + off-site nüsxənin
+    yoxlanması; RPO qərarı.
+18. İmtahan Mərkəzi / TŞ qərarı: 349 `exam_score > 50` sətri (SQL `registrar 0075`
+    docstring-də) → təmizləndikdən sonra `VALIDATE CONSTRAINT`; 1 ehtimal ikiqat tələbə.
+19. Yeni funksiyaların ilk istifadəsi: RİM rəhbərinə «İmtahan balının daxil edilməsi»
+    bölməsinin göründüyünü (`final_score.entry`, miqrasiya `organizations 0052`), sehrbazda
+    reyestr qrupu seçicisinin işlədiyini, sual idxalında KaTeX aktivlərinin (CSP) 200
+    qaytardığını bir dəfə brauzerdə yoxlayın — sənədlər `docs/features/`.
 
 ---
 
@@ -422,70 +624,95 @@ E2E_PASSWORD=<your-test-password> \
 
 ## 8. Rollback Plan
 
+> Infra audit 2026-09-14 (P2-5): rollback is now built into
+> `scripts/deploy/remote_deploy.sh`. The steps below describe what the script
+> does and how to do the same by hand.
+
+### How a deploy is tagged and gated
+
+1. `resolve_build_git_sha` → `resolve_release_image` exports
+   `APP_IMAGE=emsarena-prod:<sha>` (`manual-<UTC timestamp>` when no SHA is
+   known). `docker compose build` writes **only** that tag — `latest` is
+   untouched until the end.
+2. `capture_previous_app_image` records the image tag of the currently running
+   `app` container (`docker inspect --format '{{.Config.Image}}'`) as the
+   rollback target, provided that tag still exists locally.
+3. `postgres-backup /backup.sh` takes a pre-migration dump into
+   `./backups/postgres/` (skip with `SKIP_PREDEPLOY_BACKUP=1`; a failing dump
+   aborts the deploy before `release.sh`).
+4. `release.sh` (migrate + collectstatic) runs from the new tag, then
+   `app`/`celery_*` are recreated with it.
+5. Health gate (container healthchecks → `/ping/` → `/health/` → `build.sha`
+   drift check). **Any failure** → `rollback_to_previous_image` (unless
+   `DEPLOY_ROLLBACK_ON_FAILURE=false`), then the deploy exits 1.
+6. Success → `docker tag emsarena-prod:<sha> emsarena-prod:latest` and older
+   release tags beyond `DEPLOY_KEEP_RELEASE_IMAGES` are removed (current tag
+   and rollback target are always kept).
+
 ### Identify the previous working image
 
 ```bash
-# List recent Docker images
+# Release tags, newest first (latest always points at the last HEALTHY release)
 docker images emsarena-prod --format "table {{.Tag}}\t{{.CreatedAt}}\t{{.ID}}"
+
+# What is running right now
+docker inspect --format '{{.Config.Image}}' \
+    "$(docker compose -f docker-compose.prod.yml ps -q app | head -n1)"
 ```
 
-Tag your images with the Git commit SHA when building for production:
+### Roll back the application containers (what the script does)
 
 ```bash
-docker compose -f docker-compose.prod.yml build
-docker tag emsarena-prod:latest emsarena-prod:$(git rev-parse --short HEAD)
+# Recreate only the image-bearing services from the previous tag; no migrate.
+APP_IMAGE=emsarena-prod:<previous-sha> RUN_RELEASE_ON_START=false \
+    docker compose -f docker-compose.prod.yml up -d --no-build \
+    --scale app="${APP_REPLICAS:-8}" --scale celery_worker="${CELERY_REPLICAS:-2}" \
+    app celery_worker celery_worker_heavy celery_beat
+
+# nginx resolves upstream IPs at config load — refresh it after the recreate.
+docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
+
+# Verify
+curl -sk -H "Host: ${HEALTHCHECK_HOST}" https://127.0.0.1/health/
 ```
 
-### Roll back the application container
+`RUN_RELEASE_ON_START=false` matters: the entrypoint would otherwise re-run
+migrations from the old code. The automatic rollback **does not revert
+migrations** — the old image runs against the new schema. Additive
+migrations are normally harmless; for a destructive migration restore the
+pre-deploy dump (below) or run the reverse migration first:
 
 ```bash
-# Replace the app container with the previous image tag
-# (substitute <previous-sha> with the tag from the list above)
-APP_IMAGE=emsarena-prod:<previous-sha> \
-    docker compose -f docker-compose.prod.yml up -d --no-deps app
-```
-
-The entrypoint will re-run migrations on startup.  If the rollback involves
-reverting a migration, run the reverse migration first:
-
-```bash
-# Check current migration state
-docker compose -f docker-compose.prod.yml exec app \
-    python manage.py showmigrations
-
-# Revert to a specific migration (example)
-docker compose -f docker-compose.prod.yml exec app \
-    python manage.py migrate <app_label> <migration_name>
+docker compose -f docker-compose.prod.yml exec app python manage.py showmigrations
+docker compose -f docker-compose.prod.yml exec app python manage.py migrate <app_label> <migration_name>
 ```
 
 ### Roll back with git + full rebuild
 
+Only needed when no release tag is available (first deploy after enabling
+tagging, or tags pruned):
+
 ```bash
-# Find the last known-good commit
-git log --oneline -20
-
-# Check out that commit
 git checkout <good-commit-sha>
-
-# Rebuild and redeploy
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
+BUILD_GIT_SHA=<good-commit-sha> bash scripts/deploy/remote_deploy.sh
 ```
 
 ### Database rollback
 
-> ⚠️ **Always back up the database before deploying a migration-heavy release.**
+The deploy script already dumps before every migration via the
+`postgres-backup` sidecar (`./backups/postgres/last/`, plus the rotated
+`daily/weekly/monthly` sets — see §12). Manual equivalent and restore:
 
 ```bash
-# Back up (run before every deployment)
-docker compose -f docker-compose.prod.yml exec postgres \
-    pg_dump -U ${POSTGRES_USER} ${POSTGRES_DB} \
-    > backup-$(date +%Y%m%d-%H%M).sql
+# Manual pre-deploy dump (what remote_deploy.sh runs before release.sh)
+docker compose -f docker-compose.prod.yml exec -T postgres-backup /backup.sh
 
-# Restore
-docker compose -f docker-compose.prod.yml exec -T postgres \
-    psql -U ${POSTGRES_USER} ${POSTGRES_DB} \
-    < backup-<timestamp>.sql
+# Restore the last dump (stops writers first; see §12 "Restore procedure")
+docker compose -f docker-compose.prod.yml stop app celery_worker celery_worker_heavy celery_beat
+gunzip -c backups/postgres/last/<dump-file>.sql.gz | \
+    docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+APP_IMAGE=emsarena-prod:<previous-sha> RUN_RELEASE_ON_START=false \
+    docker compose -f docker-compose.prod.yml up -d --no-build app celery_worker celery_worker_heavy celery_beat
 ```
 
 ---

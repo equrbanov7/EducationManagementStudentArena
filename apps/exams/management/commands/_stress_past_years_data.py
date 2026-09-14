@@ -78,9 +78,8 @@ BASELINE_EXAM_PERCENT = 70
 
 def _seed_offering(*, org, teacher, offering, target, outcome_key):
     """Bir keçmiş-il offering-i: 5 seminar dərsi + qeydlər + imtahan balı."""
-    from apps.registrar.gradebook import recompute_absence_hours
     from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
-    from apps.registrar.public import record_exam_result
+    from apps.registrar.public import recompute_absence_hours, record_exam_result
 
     plan = OUTCOME_PLAN[outcome_key]
     enrollments = list(offering.enrollments.select_related("student"))
@@ -133,7 +132,6 @@ def seed_past_years(*, org, teacher, students) -> dict:
     kodlarını (A-E/barred/qb/exam) əhatə edir. Qaytarır ``{subject_code:
     CourseOffering}`` (boş dict → proqram/kurikulum/qrup tapılmadı; STR-i bu
     faylın ``_seed_journal``-ı artıq yaratmışdır)."""
-    from apps.registrar import services
     from apps.registrar.models import (
         CourseOffering,
         Curriculum,
@@ -142,6 +140,7 @@ def seed_past_years(*, org, teacher, students) -> dict:
         StudentAcademicRecord,
         Subject,
     )
+    from apps.registrar.public import services
 
     program = Program.objects.filter(organization=org, code="STR").first()
     curriculum = Curriculum.objects.filter(organization=org, program=program).first() if program else None

@@ -21,6 +21,10 @@
         isPublicCheckbox.addEventListener("change", syncAccessBlock);
     }
 
+    // Şablon izahı paneli: görünürlük `hidden`, sol zolağın rəngi sinif
+    // modifikatoru ilə (CSP: inline style yazılmır — bax exam_wizard.css).
+    var TEMPLATE_INFO_MODIFIERS = ["light", "medium", "strict"];
+
     function showModalTemplateInfo(form, templateSelect) {
         var infoPanel = form.querySelector("#modalSupervisionTemplateInfo");
         var infoTitle = form.querySelector("#modalSupervisionTemplateInfoTitle");
@@ -35,15 +39,12 @@
             typeof window.MODAL_SUPERVISION_TPL_INFO === "object"
                 ? window.MODAL_SUPERVISION_TPL_INFO
                 : {};
-        var borderColors = {
-            custom: "#6c757d",
-            light: "#28a745",
-            medium: "#ffc107",
-            strict: "#dc3545",
-        };
         var tpl = templates[val];
+        TEMPLATE_INFO_MODIFIERS.forEach(function (name) {
+            infoPanel.classList.toggle("supervision-template-info--" + name, name === val);
+        });
         if (!tpl || val === "custom") {
-            infoPanel.style.display = "none";
+            infoPanel.hidden = true;
             return;
         }
         infoTitle.textContent = tpl.title || "";
@@ -54,8 +55,7 @@
             li.textContent = f;
             infoFeatures.appendChild(li);
         });
-        infoPanel.style.borderLeftColor = borderColors[val] || "#007bff";
-        infoPanel.style.display = "block";
+        infoPanel.hidden = false;
     }
 
     function initSupervisionToggle(form) {
@@ -73,19 +73,14 @@
         }
 
         function syncSupervisionSettings() {
-            if (enabledCheckbox.checked) {
-                settingsBlock.style.display = "block";
-                settingsBlock.removeAttribute("hidden");
-            } else {
-                settingsBlock.style.display = "none";
-            }
+            settingsBlock.hidden = !enabledCheckbox.checked;
         }
 
         function syncSupervisionCustom() {
             if (!templateSelect || !customBlock) {
                 return;
             }
-            customBlock.style.display = templateSelect.value === "custom" ? "block" : "none";
+            customBlock.hidden = templateSelect.value !== "custom";
         }
 
         syncSupervisionSettings();

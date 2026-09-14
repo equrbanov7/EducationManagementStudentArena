@@ -107,10 +107,16 @@ class TranscriptTemplateContractTest(TestCase):
 
         from django.conf import settings
 
-        path = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/sections/_my_transcript.html"
-        body = path.read_text(encoding="utf-8")
+        sections = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/sections"
+        body = (sections / "_my_transcript.html").read_text(encoding="utf-8")
         self.assertIn("sec.self_service", body)
-        self.assertIn("sec.request_url", body)
+        # 2026-09-12 (audit P2-1): «PDF yüklə» / «Transkript sorğusu» keçidi başlığın
+        # əməl yuvasına (`_my_transcript_header_actions.html`) köçüb — siyasət
+        # şaxələnməsi indi orada oxunur; əsas şablon yalnız partial-ı gətirir.
+        self.assertIn("_my_transcript_header_actions.html", body)
+        actions = (sections / "_my_transcript_header_actions.html").read_text(encoding="utf-8")
+        self.assertIn("sec.self_service", actions)
+        self.assertIn("sec.request_url", actions)
 
     def test_subjects_template_uses_approved_only_syllabus_flag(self):
         from pathlib import Path
@@ -119,6 +125,8 @@ class TranscriptTemplateContractTest(TestCase):
 
         path = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/sections/_my_subjects.html"
         body = path.read_text(encoding="utf-8")
-        self.assertIn("row.syllabus_available", body)
-        self.assertIn("sec.assessment_weights", body)
-        self.assertIn("row.teacher", body)
+        self.assertIn("_my_subjects_card.html", body)
+        card = (path.parent / "_my_subjects_card.html").read_text(encoding="utf-8")
+        self.assertIn("row.syllabus_available", card)
+        self.assertIn("sec.assessment_weights", body + card)
+        self.assertIn("row.teacher", card)

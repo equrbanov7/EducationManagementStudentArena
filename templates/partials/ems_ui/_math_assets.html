@@ -1,0 +1,13 @@
+{% load static %}
+{% comment %}
+W3 2026-09-14 — KaTeX düstur render aktivləri (yalnız sual mətni göstərən səhifələr).
+Vendor: static/vendor/katex/0.16.47 (bax static/vendor/katex/README.md). Hamısı
+same-origin + `defer` — CSP (`script-src 'self'`, `style-src 'self'`) pozulmur,
+inline kod yoxdur. Render `static/js/ems_math.js` ilə `[data-ems-math]` içində.
+Partial AJAX ilə də gələ bilər — brauzer eyni src-i ikinci dəfə icra etsə də
+`ems_math.js` idempotentdir (`window.EMSMath.__loaded`).
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'vendor/katex/0.16.47/katex.min.css' %}">
+<script defer src="{% static 'vendor/katex/0.16.47/katex.min.js' %}"></script>
+<script defer src="{% static 'vendor/katex/0.16.47/contrib/auto-render.min.js' %}"></script>
+<script defer src="{% static 'js/ems_math.js' %}?v=20260914-1"></script>

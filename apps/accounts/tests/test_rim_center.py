@@ -779,19 +779,17 @@ class RimSectionGateTests(RimCenterTestBase):
 
 
 class RimPrivilegedGrantTests(TestCase):
-    """Əsasnamə 5.5 — «yeni administrator səlahiyyəti» ayrıca açar tələb edir."""
+    """Sahibin qərarı (2026-09-14): RİM rəhbəri tam wildcard (`*`) daşıyır —
+    əvvəlki əsasnamə 5.5 istisnası (`user.grant_privileged` ayrıca) ləğv olundu;
+    kataloq açarının özü qalır (redaktordan başqa rola verilə bilər)."""
 
-    def test_default_rim_role_has_no_privileged_grant_key(self):
+    def test_default_rim_role_is_full_wildcard(self):
         from apps.organizations.default_roles import DEFAULT_ROLES
 
         university_roles = DEFAULT_ROLES[OrganizationType.UNIVERSITY]
         rim_role = next(role for role in university_roles if role["name"] == "ikt_rehber")
-        self.assertNotIn("user.grant_privileged", rim_role["permissions"])
-        # Wildcard da işlədilməməlidir — o, açarı gizlicə əhatə edərdi.
-        self.assertNotIn("user.*", rim_role["permissions"])
-        # Gündəlik əməliyyat açarları isə yerindədir.
-        for permission in RIM_OPERATIONAL:
-            self.assertIn(permission, rim_role["permissions"])
+        self.assertEqual(rim_role["permissions"], ["*"])
+        self.assertEqual(rim_role["level"], 95)
 
     def test_rim_role_can_manage_roles_and_permissions(self):
         """Əsasnamə 4.2 — «rol və səlahiyyət idarəetməsi» RİM-dədir."""
@@ -799,7 +797,8 @@ class RimPrivilegedGrantTests(TestCase):
 
         university_roles = DEFAULT_ROLES[OrganizationType.UNIVERSITY]
         rim_role = next(role for role in university_roles if role["name"] == "ikt_rehber")
-        self.assertIn("role.*", rim_role["permissions"])
+        # 2026-09-14: `*` hər şeyi (o cümlədən `role.*`) əhatə edir.
+        self.assertTrue("role.*" in rim_role["permissions"] or "*" in rim_role["permissions"])
 
     def test_privileged_key_is_registered_and_labeled(self):
         from apps.organizations.permissions import (

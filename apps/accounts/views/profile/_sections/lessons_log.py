@@ -30,7 +30,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.registrar import lessons_log as service
+from apps.registrar.public import lessons_log as service
 
 _CTX = "accounts.lessons_log"
 
@@ -86,7 +86,7 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         )
         return section
 
-    from apps.registrar import schedule as schedule_service
+    from apps.registrar.public import schedule as schedule_service
 
     supervisor = service.is_supervisor(request.user, active_organization)
     section["has_access"] = True

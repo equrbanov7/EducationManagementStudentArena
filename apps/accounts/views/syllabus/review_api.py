@@ -23,10 +23,8 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
-from apps.syllabus import services
-from apps.syllabus.constants import RULE_SECTIONS, SyllabusStatus
 from apps.syllabus.models import SyllabusVersion
-from apps.syllabus.state_machine import Transition, TransitionDenied
+from apps.syllabus.public import RULE_SECTIONS, SyllabusStatus, Transition, TransitionDenied, services
 
 from .._helpers import _get_active_organization
 from .labels import transition_text
