@@ -84,7 +84,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
               {% for cell in row.question_cells %}
               <td class="ese-td--num ese-td--q" data-ese-qcell="{{ cell.index }}"{% if cell.index > s.question_count %} hidden{% endif %}>
                 <div class="bootstrap-single-select bootstrap-single-select--ems bootstrap-single-select--compact ese-qsel" data-ese-qwrap>
-                  <select class="ems-select bootstrap-single-select__native is-enhanced" name="q__{{ row.enrollment.id }}__{{ cell.index }}"
+                  <select class="ems-select bootstrap-single-select__native is-enhanced" data-bootstrap-select-lazy name="q__{{ row.enrollment.id }}__{{ cell.index }}"
                           aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}"
                           {% if cell.index > s.question_count %}disabled{% endif %}
                           data-ese-q="{{ cell.index }}" data-initial="{{ cell.value }}" data-max="{{ s.question_max }}" tabindex="-1">
