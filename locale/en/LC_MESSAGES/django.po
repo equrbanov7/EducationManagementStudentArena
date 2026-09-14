@@ -68665,3 +68665,75 @@ msgstr "deleted exams"
 msgctxt "profile.my_exams.trash"
 msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
 msgstr "Exams you delete are kept here: their results are not lost and you can restore them at any time."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur"
+msgstr "Formula"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil"
+msgstr "Image"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sual"
+msgstr "Question"
+
+msgctxt "exams.template.test_question_bank"
+msgid "şəkil bağlı"
+msgstr "image attached"
+
+msgctxt "exams.template.test_question_bank"
+msgid "LaTeX düstur tanındı"
+msgstr "LaTeX formula recognised"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur tam çevrilmədi — mətni yoxlayın"
+msgstr "The formula was not fully converted — check the text"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən şəkil bağlanacaq"
+msgstr "An image from the document will be attached"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil istinadı var, mənbə tapılmadı"
+msgstr "Image reference present, source not found"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən çıxarılan şəkil — yadda saxlayanda bağlanır:"
+msgstr "Image extracted from the document — attached on save:"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir."
+msgstr "Images and formulas (LaTeX) in Word (.docx) files are recognised automatically; .doc/.docm are not accepted."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_partial"
+msgstr "Formula was only partially converted ({nodes}) — kept as text: “{preview}”"
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_fallback"
+msgstr "The formula in this question was not fully converted from Word — check how it renders."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "image_ref_unknown"
+msgstr "Image reference not found: [[img:{refs}]] — it does not match the image numbers in the document."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_external_skipped"
+msgstr "{count} image(s) are external links — not downloaded for security reasons."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_unsupported_skipped"
+msgstr "{count} image(s) are unsupported or too large — skipped (EMF/WMF/SVG are not supported)."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_corrupt"
+msgstr "The Word (.docx) file could not be read — the zip structure is broken or it is not a document."
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_denied"
+msgstr "The formula contains a disallowed command ({command}) — kept as plain text: “{preview}”"
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_too_long"
+msgstr "The formula is too long (limit 2000 characters) — kept as plain text: “{preview}”"

@@ -68719,3 +68719,75 @@ msgstr "удалённых экзаменов"
 msgctxt "profile.my_exams.trash"
 msgid "Sildiyiniz imtahanlar burada saxlanılır: nəticələri itmir və istənilən vaxt bərpa edə bilərsiniz."
 msgstr "Удалённые экзамены хранятся здесь: их результаты не теряются, и вы можете восстановить их в любой момент."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur"
+msgstr "Формула"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil"
+msgstr "Изображение"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sual"
+msgstr "Вопрос"
+
+msgctxt "exams.template.test_question_bank"
+msgid "şəkil bağlı"
+msgstr "изображение прикреплено"
+
+msgctxt "exams.template.test_question_bank"
+msgid "LaTeX düstur tanındı"
+msgstr "Формула LaTeX распознана"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Düstur tam çevrilmədi — mətni yoxlayın"
+msgstr "Формула преобразована не полностью — проверьте текст"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən şəkil bağlanacaq"
+msgstr "Изображение из документа будет прикреплено"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Şəkil istinadı var, mənbə tapılmadı"
+msgstr "Есть ссылка на изображение, источник не найден"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Sənəddən çıxarılan şəkil — yadda saxlayanda bağlanır:"
+msgstr "Изображение из документа — прикрепляется при сохранении:"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir."
+msgstr "Изображения и формулы (LaTeX) из файлов Word (.docx) распознаются автоматически; .doc/.docm не принимаются."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_partial"
+msgstr "Формула преобразована частично ({nodes}) — сохранена как текст: «{preview}»"
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "formula_fallback"
+msgstr "Формула в этом вопросе преобразована из Word не полностью — проверьте отображение."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "image_ref_unknown"
+msgstr "Ссылка на изображение не найдена: [[img:{refs}]] — не совпадает с номерами изображений в документе."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_external_skipped"
+msgstr "{count} изображений — внешние ссылки; из соображений безопасности не загружены."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "images_unsupported_skipped"
+msgstr "{count} изображений не поддерживаются или слишком велики — пропущены (EMF/WMF/SVG не поддерживаются)."
+
+msgctxt "exams.service.parsing.error"
+msgid "file_docx_corrupt"
+msgstr "Файл Word (.docx) не удалось прочитать — структура zip повреждена или это не документ."
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_denied"
+msgstr "В формуле недопустимая команда ({command}) — сохранена как обычный текст: «{preview}»"
+
+msgctxt "exams.service.parsing.warning"
+msgid "formula_too_long"
+msgstr "Формула слишком длинная (лимит 2000 символов) — сохранена как обычный текст: «{preview}»"

@@ -19,6 +19,8 @@ from .extraction import (
     _merge_bare_question_numbers,
     _normalize_cyrillic_option_labels,
 )
+from .math_text import sanitize_math_text
+from .media_markers import extract_media_refs
 
 logger = logging.getLogger(__name__)
 
@@ -321,8 +323,34 @@ def _add_warning(q: dict, w_type: str, msg: str, severity: str = SEVERITY_WARNIN
     q["warnings"].append(payload)
 
 
+def _normalize_rich_content(q: dict) -> None:
+    """W3 2026-09-14: şəkil markerləri → ``media_refs``; LaTeX düsturları sanitizasiya.
+
+    Uzun/qadağan makrolu düstur mətn olaraq qalır (render olunmur) və müəllim
+    preview-da xəbərdarlıq görür — heç nə səssiz atılmır.
+    """
+    extract_media_refs(q)
+    issues = []
+    q["text"], stem_issues = sanitize_math_text(q.get("text") or "")
+    issues.extend(stem_issues)
+    opts = q.get("options", {}) or {}
+    for label, option_text in list(opts.items()):
+        opts[label], option_issues = sanitize_math_text(option_text or "")
+        issues.extend(option_issues)
+    for issue in issues:
+        _add_warning(
+            q,
+            issue["type"],
+            pgettext("exams.service.parsing.warning", issue["type"]).format(
+                command=issue.get("command") or "", preview=issue.get("preview") or ""
+            ),
+            severity=SEVERITY_WARNING,
+        )
+
+
 def _validate_questions(questions: list[dict]) -> None:
     for q in questions:
+        _normalize_rich_content(q)
         opts = q.get("options", {}) or {}
 
         # missing A-D — bunlar minimum tələbdir, ERROR

@@ -1,0 +1,58 @@
+/* W3 2026-09-14 — toplu sual workbench: düstur/şəkil «inam» nişanları, DOCX
+   şəkil önizləməsi və KaTeX düstur miqyası. Baza stillər test_question_bank/_part2.css. */
+
+.q-confidence {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.q-badge--formula          { background: #ecfeff; color: #155e75; border-color: #a5f3fc; }
+.q-badge--formula-fallback { background: var(--ems-warning-100); color: var(--ems-warning-800); border-color: #fde68a; }
+.q-badge--image            { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+.q-badge--image-pending    { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border-color: var(--ems-neutral-300); }
+
+.filter-chip--formula.is-active { background: #0e7490; border-color: #0e7490; box-shadow: 0 6px 14px rgba(14, 116, 144, 0.25); }
+.filter-chip--image.is-active   { background: #4338ca; border-color: #4338ca; box-shadow: 0 6px 14px rgba(67, 56, 202, 0.25); }
+.filter-chip--formula.is-active:hover:not([disabled]) { background: #155e75; border-color: #155e75; }
+.filter-chip--image.is-active:hover:not([disabled])   { background: #3730a3; border-color: #3730a3; }
+.filter-chip--formula:not(.is-active) i { color: #0e7490; }
+.filter-chip--image:not(.is-active) i   { color: #4338ca; }
+
+/* DOCX: mətn qalır, sənəddən çıxarılan şəkil(lər) kartın altında göstərilir */
+.q-media-preview {
+    margin: 10px 0 4px;
+    padding: 8px;
+    border: 1px dashed #c7d2fe;
+    border-radius: 10px;
+    background: #f8faff;
+}
+.q-media-preview__img {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    height: auto;
+    border-radius: 6px;
+    background: #fff;
+}
+.q-media-preview__caption {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: #3730a3;
+    font-weight: 700;
+}
+.q-media-preview__slot {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    font-weight: 800;
+}
+
+/* KaTeX: sual kartlarında bir qədər yığcam, sətir hündürlüyünü pozmasın */
+.q-content .katex { font-size: 1.05em; }
+.q-content .katex-display { margin: 0.35em 0; overflow-x: auto; overflow-y: hidden; }
