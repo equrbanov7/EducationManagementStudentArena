@@ -723,6 +723,16 @@ class CourseOrganizationRequiredTest(TestCase):
             email="course_superadmin_modal@example.com",
             password="StrongPass123!",
         )
+        # 2026-09-15: yeganə təşkilat olanda superadmin ona defolt düşür — seçim
+        # ssenarisi üçün ikinci təşkilat.
+        Organization.objects.create(
+            name="Second Modal Org",
+            slug="second-modal-org",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=superadmin,
+            status="pending",
+            is_active=True,
+        )
 
         self.client.force_login(superadmin)
         session = self.client.session
