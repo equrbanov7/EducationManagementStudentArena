@@ -1,0 +1,69 @@
+name: 🌱 Seed production database
+
+# Əl ilə (workflow_dispatch) — ilk deploy BOŞ bazaya getdiyi üçün hazır real dump-ı
+# serverə yükləyir (deployment.md §5.2 A3). Dump şifrələnmiş GitHub release
+# asset-idir (AES-256, açar `SEED_DUMP_KEY` sirri); runner endirir, açır,
+# `scripts/deploy/seed_database.sh` ilə bərpa edir. Mövcud bazanı SİLİR — `confirm`
+# sahəsinə `SEED` yazılmalıdır.
+on:
+  workflow_dispatch:
+    inputs:
+      asset_id:
+        description: "Release asset id (şifrələnmiş .dump.enc)"
+        required: true
+      expected_users:
+        description: "Bərpadan sonra gözlənilən auth_user sayı"
+        required: true
+        default: "8443"
+      confirm:
+        description: "Mövcud bazanı silib dump-dan doldurmaq üçün SEED yazın"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    if: github.event.inputs.confirm == 'SEED'
+    runs-on: [self-hosted]
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔽 Download + decrypt dump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEED_DUMP_KEY: ${{ secrets.SEED_DUMP_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SEED_DUMP_KEY" || { echo "SEED_DUMP_KEY sirri yoxdur" >&2; exit 1; }
+          mkdir -p "$RUNNER_TEMP/seed"
+          curl -sSfL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/${{ github.event.inputs.asset_id }}" \
+            -o "$RUNNER_TEMP/seed/seed.dump.enc"
+          openssl enc -d -aes-256-cbc -pbkdf2 -pass env:SEED_DUMP_KEY \
+            -in "$RUNNER_TEMP/seed/seed.dump.enc" -out "$RUNNER_TEMP/seed/seed.dump"
+          rm -f "$RUNNER_TEMP/seed/seed.dump.enc"
+          ls -la "$RUNNER_TEMP/seed/seed.dump"
+          pg_restore_ok=$(docker exec emsarena-postgres sh -c 'command -v pg_restore' || true)
+          test -n "$pg_restore_ok" || { echo "pg_restore konteynerdə yoxdur" >&2; exit 1; }
+
+      - name: 🌱 Restore into production Postgres
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          # Skriptin ən son versiyası checkout-dan (APP_DIR deploy ilə sinxrondur, amma zəmanət üçün).
+          cp "$GITHUB_WORKSPACE/scripts/deploy/seed_database.sh" scripts/deploy/seed_database.sh
+          SEED_CONFIRM=SEED SEED_DUMP="$RUNNER_TEMP/seed/seed.dump" \
+            EXPECTED_USERS="${{ github.event.inputs.expected_users }}" \
+            bash scripts/deploy/seed_database.sh
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/seed"
