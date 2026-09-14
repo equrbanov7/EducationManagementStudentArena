@@ -251,7 +251,7 @@ jobs:
       DEPLOY_TIMEOUT_SECONDS: "300"
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 🚢 Deploy (docker-compose, in place)
         run: |
