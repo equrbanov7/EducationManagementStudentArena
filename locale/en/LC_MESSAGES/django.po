@@ -781,7 +781,7 @@ msgstr "Email address"
 #: apps/accounts/templates/accounts/first_login_set_password.html:51
 msgctxt "accounts.first_login"
 msgid "ad.soyad@qku.edu.az"
-msgstr "ad.soyad@qku.edu.az"
+msgstr "name.surname@qku.edu.az"
 
 #: apps/accounts/templates/accounts/first_login_set_password.html:54
 msgctxt "accounts.first_login"
@@ -1317,7 +1317,7 @@ msgstr "Clear selected"
 #: apps/accounts/templates/accounts/partials/_checkbox_multi_select.html:25
 msgctxt "profile.checkbox_select"
 msgid "selected_count"
-msgstr "Selected count"
+msgstr "Selected"
 
 #: apps/accounts/templates/accounts/partials/_exam_chance_content.html:14
 msgctxt "accounts.exam_chance"
@@ -3015,57 +3015,57 @@ msgstr "s until it opens."
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:19 apps/accounts/templates/accounts/partials/_review_results_content.html:21
 msgctxt "profile.pending_review"
 msgid "search_placeholder"
-msgstr "Search placeholder"
+msgstr "Search student, course, exam..."
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:27 apps/accounts/templates/accounts/partials/_review_results_content.html:29
 msgctxt "profile.pending_review"
 msgid "type_all"
-msgstr "Type all"
+msgstr "All"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:28 apps/accounts/templates/accounts/partials/_review_results_content.html:30 apps/accounts/templates/accounts/partials/_review_results_content.html:96
 msgctxt "profile.pending_review"
 msgid "type_exam"
-msgstr "Type exam"
+msgstr "Exam"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:29 apps/accounts/templates/accounts/partials/_review_results_content.html:31 apps/accounts/templates/accounts/partials/_review_results_content.html:98
 msgctxt "profile.pending_review"
 msgid "type_assignment"
-msgstr "Type assignment"
+msgstr "Assignment"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:30 apps/accounts/templates/accounts/partials/_review_results_content.html:32 apps/accounts/templates/accounts/partials/_review_results_content.html:100
 msgctxt "profile.pending_review"
 msgid "type_project"
-msgstr "Type project"
+msgstr "Project"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:31 apps/accounts/templates/accounts/partials/_review_results_content.html:33 apps/accounts/templates/accounts/partials/_review_results_content.html:102
 msgctxt "profile.pending_review"
 msgid "type_lab"
-msgstr "Type lab"
+msgstr "Lab"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:39
 msgctxt "profile.pending_review"
 msgid "status_all"
-msgstr "Status all"
+msgstr "All statuses"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:40 apps/accounts/templates/accounts/partials/_pending_review_content.html:133
 msgctxt "profile.pending_review"
 msgid "status_submitted"
-msgstr "Status submitted"
+msgstr "Submitted"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:41 apps/accounts/templates/accounts/partials/_pending_review_content.html:135
 msgctxt "profile.pending_review"
 msgid "status_expired"
-msgstr "Status expired"
+msgstr "Expired"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:42 apps/accounts/templates/accounts/partials/_pending_review_content.html:137
 msgctxt "profile.pending_review"
 msgid "status_pending"
-msgstr "Status pending"
+msgstr "Pending"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:43 apps/accounts/templates/accounts/partials/_pending_review_content.html:139
 msgctxt "profile.pending_review"
 msgid "status_late"
-msgstr "Status late"
+msgstr "Late"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:51 apps/accounts/templates/accounts/partials/_review_results_content.html:41 apps/accounts/templates/accounts/profile/sections/_pending_post_approvals.html:54 apps/exams/templates/exams/teacher/teacher_exam_results.html:134
 msgid "Bütün qruplar"
@@ -3082,12 +3082,12 @@ msgstr "Most recently sent"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:71 apps/accounts/templates/accounts/partials/_review_results_content.html:62
 msgctxt "profile.pending_review"
 msgid "filter_button"
-msgstr "Filter button"
+msgstr "Filter"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:82
 msgctxt "profile.pending_review"
 msgid "list_title"
-msgstr "List title"
+msgstr "Review list"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:97
 msgid "Bu cəhd imtahan nəzarəti (proktorinq) tərəfindən pozuntuya görə dayandırılıb"
@@ -3116,7 +3116,7 @@ msgstr "Teacher:"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:122
 msgctxt "profile.pending_review"
 msgid "group_prefix"
-msgstr "Group prefix"
+msgstr "Group"
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:127
 msgid "Göndərilib:"
@@ -3141,7 +3141,7 @@ msgstr "No pending reviews"
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:181
 msgctxt "profile.pending_review"
 msgid "empty_not_found"
-msgstr "Empty not found"
+msgstr "No work to review was found."
 
 #: apps/accounts/templates/accounts/partials/_pending_review_content.html:186
 msgid "Vaxt bitdi."
@@ -3864,7 +3864,7 @@ msgstr "You can write a short note to the organization..."
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:169
 msgctxt "profile.join_org"
 msgid "confirm_request"
-msgstr "Confirm request"
+msgstr "Confirm the request"
 
 #: apps/accounts/templates/accounts/partials/_student_org_request_content.html:179
 msgctxt "profile.join_org"
@@ -4434,7 +4434,7 @@ msgstr "No organizations found."
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:4
 msgctxt "profile.superadmin_orgs"
 msgid "all_modules_title"
-msgstr "All modules title"
+msgstr "All system modules"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:16
 msgid "Mənim təşkilat girişlərim"
@@ -4459,7 +4459,7 @@ msgstr "Active organization"
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:71
 msgctxt "profile.superadmin_orgs"
 msgid "all_organizations_title"
-msgstr "All organizations title"
+msgstr "All organizations / tenants"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:77
 msgctxt "profile.superadmin_orgs"
@@ -4499,7 +4499,7 @@ msgstr "Table manage"
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:94
 msgctxt "profile.superadmin_orgs"
 msgid "status_suspended"
-msgstr "Status suspended"
+msgstr "Suspended"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:96 apps/blog/templates/blog/org_post_management.html:97 apps/blog/templates/blog/superadmin_post_management.html:108 apps/exams/templates/exams/exam_center/reports.html:62 apps/exams/templates/exams/exam_center/room_monitor.html:188 apps/exams/templates/exams/exam_center/room_monitor.html:200 apps/exams/templates/exams/exam_center/session_monitor.html:86 apps/exams/templates/exams/exam_center/session_monitor.html:99 apps/exams/templates/exams/student/student_exam_history.html:219 apps/exams/templates/exams/teacher/teacher_exam_results.html:81 apps/exams/views/exam_center/room_monitor.py:72 apps/exams/views/exam_center/room_monitor.py:82 apps/projects/templates/projects/review_submissions.html:64 apps/trial_exams/admin.py:119 apps/trial_exams/models.py:45
 msgid "Gözləyir"
@@ -4508,12 +4508,12 @@ msgstr "Pending"
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:98
 msgctxt "profile.superadmin_orgs"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:100
 msgctxt "profile.superadmin_orgs"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:105
 msgctxt "profile.superadmin_orgs"
@@ -4546,7 +4546,7 @@ msgstr "Unsuspend"
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:132
 msgctxt "profile.superadmin_orgs"
 msgid "suspend_reason_placeholder"
-msgstr "Suspend reason placeholder"
+msgstr "Suspension reason (optional)"
 
 #: apps/accounts/templates/accounts/partials/_superadmin_organizations_content.html:133
 msgctxt "profile.superadmin_orgs"
@@ -7280,12 +7280,12 @@ msgstr "Enter course"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:58
 msgctxt "profile.assigned_courses"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No courses found"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:59
 msgctxt "profile.assigned_courses"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "There are currently no courses assigned to you."
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:10
 msgctxt "profile.assigned_tasks"
@@ -7320,7 +7320,7 @@ msgstr "Search tasks..."
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:61
 msgctxt "profile.assigned_tasks"
 msgid "deadline_prefix"
-msgstr "Deadline prefix"
+msgstr "Deadline"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:87 apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:88
 msgid "Məhdudiyyət yoxdur (daimi)"
@@ -7343,12 +7343,12 @@ msgstr "Open task"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:119
 msgctxt "profile.assigned_tasks"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No tasks found"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:120
 msgctxt "profile.assigned_tasks"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "There are currently no tasks assigned to you."
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:136
 msgid "İmtahan məlumatı"
@@ -7630,12 +7630,12 @@ msgstr "Uncategorized"
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:42
 msgctxt "profile.courses"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No courses found"
 
 #: apps/accounts/templates/accounts/profile/sections/_courses.html:43
 msgctxt "profile.courses"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "There are currently no courses assigned to you."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_category.html:13
 msgid "Yeni kateqoriya və ya alt kateqoriya yarat"
@@ -7652,7 +7652,7 @@ msgstr "Manage categories"
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:14
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Create post description"
+msgstr "Create a new post and choose who can see it. Use the button below to create the post in the standard editor."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:30 apps/blog/templates/post_form.html:20
 msgid "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
@@ -7661,32 +7661,32 @@ msgstr "This post will first be sent for approval and will not be published unti
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:35 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:34
 msgctxt "profile.posts"
 msgid "label_title"
-msgstr "Label title"
+msgstr "Title"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:40 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:39
 msgctxt "profile.posts"
 msgid "label_category"
-msgstr "Label category"
+msgstr "Category"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:55 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:54
 msgctxt "profile.posts"
 msgid "label_excerpt"
-msgstr "Label excerpt"
+msgstr "Excerpt"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:60 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:59
 msgctxt "profile.posts"
 msgid "label_content"
-msgstr "Label content"
+msgstr "Content"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:65
 msgctxt "profile.posts"
 msgid "label_image_url"
-msgstr "Label image url"
+msgstr "Image URL"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:70
 msgctxt "profile.posts"
 msgid "label_upload_image"
-msgstr "Label upload image"
+msgstr "Upload image"
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:72 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:75
 msgid "Yalnız JPG, JPEG, JFIF, PNG, GIF və WEBP formatları (maksimum 25 MB)."
@@ -7738,7 +7738,7 @@ msgstr "Phone"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:48 apps/accounts/templates/accounts/profile/sections/_edit_profile.html:58
 msgctxt "profile.edit"
 msgid "placeholder_phone"
-msgstr "Placeholder phone"
+msgstr "Enter your phone number"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:51
 msgctxt "profile.edit_v2"
@@ -7758,7 +7758,7 @@ msgstr "Location"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:64
 msgctxt "profile.edit"
 msgid "placeholder_location"
-msgstr "Placeholder location"
+msgstr "Enter your location"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:67
 msgctxt "profile.edit"
@@ -7792,7 +7792,7 @@ msgstr "Institution name"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:122
 msgctxt "profile.edit"
 msgid "placeholder_institution"
-msgstr "Placeholder institution"
+msgstr "Enter your educational institution"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:125
 msgctxt "profile.edit"
@@ -7827,7 +7827,7 @@ msgstr "About"
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:170
 msgctxt "profile.edit"
 msgid "placeholder_about"
-msgstr "Placeholder about"
+msgstr "Write a short note about yourself"
 
 #: apps/accounts/templates/accounts/profile/sections/_edit_profile.html:180 apps/accounts/templates/accounts/profile/sections/_profile_info_academic.html:13 apps/accounts/templates/accounts/public_profile.html:152
 msgctxt "profile.edit_v2"
@@ -8168,12 +8168,12 @@ msgstr "New course"
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:55
 msgctxt "profile.my_courses"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No courses found"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:56
 msgctxt "profile.my_courses"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "You have not created any courses yet."
 
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:61
 msgctxt "profile.my_courses"
@@ -8228,12 +8228,12 @@ msgstr "Clear filters"
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:102
 msgctxt "profile.my_exams"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No exams found"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:103
 msgctxt "profile.my_exams"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "You have not created any exams yet."
 
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:108
 msgctxt "profile.my_exams"
@@ -8243,12 +8243,12 @@ msgstr "Create first exam"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:24
 msgctxt "profile.results"
 msgid "tab_all"
-msgstr "Tab all"
+msgstr "All"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:32
 msgctxt "profile.results"
 msgid "tab_exams"
-msgstr "Tab exams"
+msgstr "Exams"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:36
 msgctxt "profile.results"
@@ -8258,7 +8258,7 @@ msgstr "Free work"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:40
 msgctxt "profile.results"
 msgid "tab_labs"
-msgstr "Tab labs"
+msgstr "Labs"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:44
 msgctxt "profile.results"
@@ -8389,7 +8389,7 @@ msgstr "Reason"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:263
 msgctxt "profile.results"
 msgid "score_label"
-msgstr "Score label"
+msgstr "Score"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:284
 msgctxt "profile.results"
@@ -8426,12 +8426,12 @@ msgstr "Change the search term or the year/semester selection and try again."
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:323
 msgctxt "profile.results"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "No results found"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:324
 msgctxt "profile.results"
 msgid "empty_description"
-msgstr "Empty description"
+msgstr "There are no results to show right now."
 
 #: apps/accounts/templates/accounts/profile/sections/_my_subjects.html:11
 msgctxt "profile.subjects"
@@ -9924,7 +9924,7 @@ msgstr "Loading…"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:15
 msgctxt "profile.posts"
 msgid "modal_edit_title"
-msgstr "Modal edit title"
+msgstr "Edit post"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:22
 msgctxt "profile.posts"
@@ -9948,7 +9948,7 @@ msgstr "When saved, this post will await teacher approval again."
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:64
 msgctxt "profile.posts"
 msgid "label_current_image"
-msgstr "Label current image"
+msgstr "Current image"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:67
 msgctxt "profile.posts"
@@ -9963,12 +9963,12 @@ msgstr "No image"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:73
 msgctxt "profile.posts"
 msgid "label_upload_new_image"
-msgstr "Label upload new image"
+msgstr "Upload new image"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:79
 msgctxt "profile.posts"
 msgid "label_image_url_if_no_file"
-msgstr "Label image url if no file"
+msgstr "Image URL (if no file)"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:91 apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:103
 msgctxt "profile.posts"
@@ -9983,17 +9983,17 @@ msgstr "Save"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:100
 msgctxt "profile.posts"
 msgid "confirm_delete_title"
-msgstr "Confirm delete title"
+msgstr "Confirm deletion"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:101
 msgctxt "profile.posts"
 msgid "confirm_delete_prefix"
-msgstr "Confirm delete prefix"
+msgstr "Are you sure you want to delete the post titled"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:101
 msgctxt "profile.posts"
 msgid "confirm_delete_suffix"
-msgstr "Confirm delete suffix"
+msgstr "?"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:104
 msgctxt "profile.posts"
@@ -10003,12 +10003,12 @@ msgstr "Delete"
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:111
 msgctxt "profile.posts"
 msgid "unsaved_title"
-msgstr "Unsaved title"
+msgstr "Unsaved changes"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:112
 msgctxt "profile.posts"
 msgid "unsaved_message"
-msgstr "Unsaved message"
+msgstr "Your changes are not saved. Do you want to leave without saving?"
 
 #: apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html:114
 msgctxt "profile.posts"
@@ -10046,12 +10046,12 @@ msgstr "Draft"
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:47
 msgctxt "profile.posts"
 msgid "edit_title"
-msgstr "Edit title"
+msgstr "Edit"
 
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:55
 msgctxt "profile.posts"
 msgid "delete_title"
-msgstr "Delete title"
+msgstr "Delete"
 
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:70
 msgid "Müəllim baxışı gözlənilir."
@@ -10084,7 +10084,7 @@ msgstr "No feedback has been shared for this post yet."
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:117
 msgctxt "profile.posts"
 msgid "empty_message"
-msgstr "Empty message"
+msgstr "No posts yet."
 
 #: apps/accounts/templates/accounts/profile/sections/_posts.html:125
 msgctxt "profile.posts"
@@ -13922,7 +13922,7 @@ msgstr "View all"
 #: apps/accounts/templates/accounts/student_dashboard.html:64
 msgctxt "accounts.student_dashboard"
 msgid "empty_courses"
-msgstr "Empty courses"
+msgstr "No courses yet."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:76
 msgctxt "accounts.student_dashboard"
@@ -13937,7 +13937,7 @@ msgstr "Pending unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
 msgid "empty_assignments"
-msgstr "Empty assignments"
+msgstr "No assignments yet."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:115
 msgctxt "accounts.student_dashboard"
@@ -13957,7 +13957,7 @@ msgstr "Start exam"
 #: apps/accounts/templates/accounts/student_dashboard.html:139
 msgctxt "accounts.student_dashboard"
 msgid "empty_upcoming_exams"
-msgstr "Empty upcoming exams"
+msgstr "No upcoming exams."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:151
 msgctxt "accounts.student_dashboard"
@@ -13972,7 +13972,7 @@ msgstr "Answer unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
 msgid "empty_recent_grades"
-msgstr "Empty recent grades"
+msgstr "No recent grades."
 
 #: apps/accounts/templates/accounts/syllabus/detail.html:82
 msgctxt "accounts.syllabus"
@@ -14311,7 +14311,7 @@ msgstr "A new verification code has been sent."
 #: apps/accounts/views/auth/register.py:161
 msgctxt "accounts.auth.message"
 msgid "verification_email_not_found_register_again"
-msgstr "Verification email not found register again"
+msgstr "No verification email was found. Please register again."
 
 #: apps/accounts/views/auth/register.py:171 apps/accounts/views/auth/register.py:297
 msgctxt "accounts.auth.message"
@@ -14321,7 +14321,7 @@ msgstr "User not found"
 #: apps/accounts/views/auth/register.py:203
 msgctxt "accounts.auth.message"
 msgid "code_invalid_or_expired"
-msgstr "Code invalid or expired"
+msgstr "The code is invalid or has expired."
 
 #: apps/accounts/views/auth/register.py:224
 msgctxt "accounts.auth.message"
@@ -14331,12 +14331,12 @@ msgstr "OTP verified, but an error occurred while creating the account. Please t
 #: apps/accounts/views/auth/register.py:237 apps/accounts/views/auth/register.py:273 apps/accounts/views/auth/register.py:300
 msgctxt "accounts.auth.message"
 msgid "email_verified_you_can_login_now"
-msgstr "Email verified you can login now"
+msgstr "Email verified. You can sign in now."
 
 #: apps/accounts/views/auth/register.py:282
 msgctxt "accounts.auth.message"
 msgid "link_invalid_or_expired"
-msgstr "Link invalid or expired"
+msgstr "The link is invalid or has expired."
 
 #: apps/accounts/views/auth/register.py:291
 msgctxt "accounts.auth.message"
@@ -14352,12 +14352,12 @@ msgstr "Wait {seconds} seconds for a new OTP code."
 #: apps/accounts/views/auth/register.py:378
 msgctxt "accounts.auth.message"
 msgid "logout_success"
-msgstr "Logout success"
+msgstr "You have signed out successfully."
 
 #: apps/accounts/views/dashboard/results.py:38 apps/accounts/views/dashboard/student.py:83 apps/accounts/views/dashboard/student.py:116 apps/accounts/views/dashboard/student.py:139 apps/accounts/views/dashboard/student.py:183
 msgctxt "accounts.student_assignments.message"
 msgid "student_or_member_only"
-msgstr "Student or member only"
+msgstr "This page is only for student/member roles."
 
 #: apps/accounts/views/dashboard/results.py:74
 msgctxt "accounts.my_results.message"
@@ -14388,12 +14388,12 @@ msgstr "Independent work"
 #: apps/accounts/views/dashboard/results.py:242
 msgctxt "accounts.my_results.message"
 msgid "unknown_result_type"
-msgstr "Unknown result type"
+msgstr "Unknown result type."
 
 #: apps/accounts/views/dashboard/review.py:64 apps/accounts/views/dashboard/review.py:76 apps/accounts/views/dashboard/review.py:429 apps/accounts/views/dashboard/review.py:441
 msgctxt "accounts.pending_review.message"
 msgid "teacher_only"
-msgstr "Teacher only"
+msgstr "Only teachers can access this page."
 
 #: apps/accounts/views/dashboard/review.py:127 apps/accounts/views/dashboard/review.py:212 apps/accounts/views/dashboard/review.py:318
 msgctxt "accounts.review.message"
@@ -14420,7 +14420,7 @@ msgstr "The grade has been saved. You can review it again within {minutes} minut
 #: apps/accounts/views/dashboard/teacher.py:34
 msgctxt "accounts.grading_queue.message"
 msgid "teacher_only"
-msgstr "Teacher only"
+msgstr "Only teachers can access this page."
 
 #: apps/accounts/views/exam_chance.py:70
 msgctxt "accounts.exam_chance"
@@ -14822,17 +14822,17 @@ msgstr "You do not have permission to perform this operation."
 #: apps/accounts/views/profile/post_handler.py:168
 msgctxt "accounts.profile_edit.message"
 msgid "required_fields_missing"
-msgstr "Required fields missing"
+msgstr "First name, last name and email cannot be left empty."
 
 #: apps/accounts/views/profile/post_handler.py:172
 msgctxt "accounts.profile_edit.message"
 msgid "email_already_in_use"
-msgstr "Email already in use"
+msgstr "This email is already in use."
 
 #: apps/accounts/views/profile/post_handler.py:232
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr "Student university or school required"
+msgstr "A university or school is required for a student."
 
 #: apps/accounts/views/profile/post_handler.py:252
 msgctxt "accounts.profile_edit.message"
@@ -14872,17 +14872,17 @@ msgstr "You are back on your own profile."
 #: apps/accounts/views/roles/_assignment_flow/_resolvers.py:254
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "User did not select this org on signup"
+msgstr "The user did not select this organization at signup and cannot be added to your organization."
 
 #: apps/accounts/views/roles/_assignment_flow/flow.py:97
 msgctxt "accounts.role_assignment.message"
 msgid "active_organization_not_found"
-msgstr "Active organization not found"
+msgstr "No active organization found."
 
 #: apps/accounts/views/roles/_assignment_flow/flow.py:101
 msgctxt "accounts.role_assignment.message"
 msgid "teacher_or_higher_only"
-msgstr "Teacher or higher only"
+msgstr "Only teachers and higher levels can access this page."
 
 #: apps/accounts/views/roles/_assignment_flow/flow.py:268
 #, python-brace-format
@@ -14899,12 +14899,12 @@ msgstr "Successfully updated: {user} → {role}."
 #: apps/accounts/views/roles/manage.py:47
 msgctxt "accounts.manage_roles.message"
 msgid "admin_only"
-msgstr "Admin only"
+msgstr "Only administrators can access this page."
 
 #: apps/accounts/views/roles/manage.py:52
 msgctxt "accounts.manage_roles.message"
 msgid "active_organization_not_found"
-msgstr "Active organization not found"
+msgstr "No active organization found for role management."
 
 #: apps/accounts/views/roles/manage.py:72
 msgctxt "accounts.manage_roles.message"
@@ -14914,22 +14914,22 @@ msgstr "User not selected"
 #: apps/accounts/views/roles/manage.py:84
 msgctxt "accounts.manage_roles.message"
 msgid "manage_only_own_org_users"
-msgstr "Manage only own org users"
+msgstr "You can only manage users of your own organization."
 
 #: apps/accounts/views/roles/manage.py:96
 msgctxt "accounts.manage_roles.message"
 msgid "insufficient_level_for_target_user"
-msgstr "Insufficient level for target user"
+msgstr "Your level is not sufficient to manage this user's role."
 
 #: apps/accounts/views/roles/manage.py:112
 msgctxt "accounts.manage_roles.message"
 msgid "invalid_roles_selected"
-msgstr "Invalid roles selected"
+msgstr "The selected roles are not valid."
 
 #: apps/accounts/views/roles/manage.py:117
 msgctxt "accounts.manage_roles.message"
 msgid "not_allowed_to_assign_some_roles"
-msgstr "Not allowed to assign some roles"
+msgstr "You are not allowed to assign some of the selected roles."
 
 #: apps/accounts/views/roles/manage.py:165
 msgctxt "accounts.manage_roles.message"
@@ -14939,22 +14939,22 @@ msgstr "Roles updated for %(username)s: %(roles)s."
 #: apps/accounts/views/roles/permissions.py:37
 msgctxt "accounts.permission_editor.message"
 msgid "active_organization_not_found"
-msgstr "Active organization not found"
+msgstr "No active organization found."
 
 #: apps/accounts/views/roles/permissions.py:48
 msgctxt "accounts.permission_editor.message"
 msgid "role_assign_permission_required"
-msgstr "Role assign permission required"
+msgstr "The `role.assign` permission is required to manage permissions."
 
 #: apps/accounts/views/roles/permissions.py:65
 msgctxt "accounts.permission_editor.message"
 msgid "manage_lower_role_permissions_only"
-msgstr "Manage lower role permissions only"
+msgstr "You can only manage the permissions of roles below your own."
 
 #: apps/accounts/views/roles/permissions.py:89 apps/accounts/views/roles/permissions.py:166
 msgctxt "accounts.permission_editor.message"
 msgid "invalid_permission_selection"
-msgstr "Invalid permission selection"
+msgstr "Invalid permission selection."
 
 #: apps/accounts/views/roles/permissions.py:103 apps/accounts/views/roles/permissions.py:131 apps/accounts/views/roles/permissions.py:181
 msgctxt "accounts.permission_editor.message"
@@ -15571,7 +15571,7 @@ msgstr "Question"
 #: apps/appeals/models.py:215
 msgctxt "appeals.model.adjustment.field"
 msgid "delta_points"
-msgstr "Context"
+msgstr "Points"
 
 #: apps/appeals/models.py:230
 msgctxt "appeals.model.adjustment.field"
@@ -15622,7 +15622,7 @@ msgstr "Please enter a valid email address."
 #: apps/appeals/services/creation.py:63
 msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
-msgstr "Comments"
+msgstr "The appeal comment is too short (at least {min_length} characters)."
 
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
@@ -16272,7 +16272,7 @@ msgstr "This appeal no longer exists — it was most likely deleted. The link in
 #: apps/appeals/views/student/endpoints.py:179
 msgctxt "appeals.view.message"
 msgid "Apellyasiyanız qeydə alındı."
-msgstr "Appeal detail"
+msgstr "Your appeal has been registered."
 
 #: apps/appeals/views/teacher/endpoints.py:234
 msgctxt "appeals.view.message"
@@ -16292,7 +16292,7 @@ msgstr "Write an explanation for each decision."
 #: apps/appeals/views/teacher/endpoints.py:322
 msgctxt "appeals.view.message"
 msgid "Qərarlar yadda saxlanıldı."
-msgstr "Save decisions"
+msgstr "Decisions saved."
 
 #: apps/appeals/views/teacher/endpoints.py:328
 #, python-brace-format
@@ -16578,7 +16578,7 @@ msgstr "Late penalty per day"
 #: apps/assignments/models.py:105
 msgctxt "assignment.model.help"
 msgid "late_penalty_description"
-msgstr "Late penalty description"
+msgstr "Percentage of points deducted per day (e.g. 10.00 = 10%)"
 
 #: apps/assignments/models.py:109
 msgctxt "assignment.model.field"
@@ -16713,7 +16713,7 @@ msgstr "Verbose name plural"
 #: apps/assignments/models.py:385
 msgctxt "assignment.notification.choice.type"
 msgid "deadline"
-msgstr "Deadline"
+msgstr "Deadline reminder"
 
 #: apps/assignments/models.py:386
 msgctxt "assignment.notification.choice.type"
@@ -16797,17 +16797,17 @@ msgstr "Attempts left"
 #: apps/assignments/templates/assignments/assignment_detail.html:71
 msgctxt "assignment.detail"
 msgid "status_deadline_passed"
-msgstr "Status deadline passed"
+msgstr "Deadline passed"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:75
 msgctxt "assignment.detail"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:79
 msgctxt "assignment.detail"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:91
 msgctxt "assignment.detail"
@@ -16837,12 +16837,12 @@ msgstr "Table grade"
 #: apps/assignments/templates/assignments/assignment_detail.html:127
 msgctxt "assignment.detail"
 msgid "status_pending"
-msgstr "Status pending"
+msgstr "Pending"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:129
 msgctxt "assignment.detail"
 msgid "status_graded"
-msgstr "Status graded"
+msgstr "Graded"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:159
 msgctxt "assignment.detail"
@@ -16857,7 +16857,7 @@ msgstr "Submitting"
 #: apps/assignments/templates/assignments/assignment_detail.html:166
 msgctxt "assignment.detail"
 msgid "error_prefix"
-msgstr "Error prefix"
+msgstr "Error"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:167
 msgctxt "assignment.detail"
@@ -16892,7 +16892,7 @@ msgstr "Text answer"
 #: apps/assignments/templates/assignments/assignment_detail.html:178
 msgctxt "assignment.detail"
 msgid "placeholder_answer"
-msgstr "Placeholder answer"
+msgstr "Write your answer..."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:182
 msgctxt "assignment.detail"
@@ -16906,22 +16906,22 @@ msgstr "Access restricted"
 #: apps/assignments/templates/assignments/assignment_detail.html:219
 msgctxt "assignment.detail"
 msgid "cannot_submit_deadline"
-msgstr "Cannot submit deadline"
+msgstr "The deadline has passed — submissions are no longer accepted."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:221
 msgctxt "assignment.detail"
 msgid "cannot_submit_attempts_finished"
-msgstr "Cannot submit attempts finished"
+msgstr "You have used all your attempts."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:223
 msgctxt "assignment.detail"
 msgid "cannot_submit_inactive"
-msgstr "Cannot submit inactive"
+msgstr "This assignment is currently inactive."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:225
 msgctxt "assignment.detail"
 msgid "cannot_submit_generic"
-msgstr "Cannot submit generic"
+msgstr "Submitting an answer is not possible right now."
 
 #: apps/assignments/templates/assignments/assignment_section.html:12
 msgctxt "assignment.section"
@@ -16951,12 +16951,12 @@ msgstr "Deadline passed"
 #: apps/assignments/templates/assignments/assignment_section.html:64 apps/assignments/templates/assignments/assignment_section.html:127
 msgctxt "assignment.section"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/assignments/templates/assignments/assignment_section.html:67 apps/assignments/templates/assignments/assignment_section.html:130 apps/assignments/templates/assignments/assignment_section.html:168
 msgctxt "assignment.section"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/assignments/templates/assignments/assignment_section.html:71
 msgctxt "assignment.section"
@@ -16981,7 +16981,7 @@ msgstr "Delete"
 #: apps/assignments/templates/assignments/assignment_section.html:95
 msgctxt "assignment.section"
 msgid "empty_teacher"
-msgstr "Empty teacher"
+msgstr "No assignments yet"
 
 #: apps/assignments/templates/assignments/assignment_section.html:97
 msgctxt "assignment.section"
@@ -17020,12 +17020,12 @@ msgstr "Deadline passed locked"
 #: apps/assignments/templates/assignments/assignment_section.html:180
 msgctxt "assignment.section"
 msgid "empty_student"
-msgstr "Empty student"
+msgstr "No assignments have been assigned to you"
 
 #: apps/assignments/templates/assignments/assignment_section.html:187
 msgctxt "assignment.section"
 msgid "empty_generic"
-msgstr "Empty generic"
+msgstr "No assignments"
 
 #: apps/assignments/templates/assignments/detail.html:25
 msgctxt "assignment.legacy.detail"
@@ -17226,7 +17226,7 @@ msgstr "Save"
 #: apps/assignments/templates/assignments/my_submissions.html:3
 msgctxt "assignment.my_submissions"
 msgid "page_title_suffix"
-msgstr "Page title suffix"
+msgstr "My answers"
 
 #: apps/assignments/templates/assignments/my_submissions.html:28
 msgctxt "assignment.my_submissions"
@@ -17256,17 +17256,17 @@ msgstr "Attempts left"
 #: apps/assignments/templates/assignments/my_submissions.html:62 apps/labs/templates/labs/my_lab_answers.html:57
 msgctxt "assignment.my_submissions"
 msgid "status_deadline_passed"
-msgstr "Status deadline passed"
+msgstr "Deadline passed"
 
 #: apps/assignments/templates/assignments/my_submissions.html:64
 msgctxt "assignment.my_submissions"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/assignments/templates/assignments/my_submissions.html:66 apps/labs/templates/labs/my_lab_answers.html:53
 msgctxt "assignment.my_submissions"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/assignments/templates/assignments/my_submissions.html:77 apps/labs/templates/labs/my_lab_answers.html:68
 msgctxt "assignment.my_submissions"
@@ -17296,12 +17296,12 @@ msgstr "Table action"
 #: apps/assignments/templates/assignments/my_submissions.html:103
 msgctxt "assignment.my_submissions"
 msgid "status_pending"
-msgstr "Status pending"
+msgstr "Pending"
 
 #: apps/assignments/templates/assignments/my_submissions.html:105
 msgctxt "assignment.my_submissions"
 msgid "status_graded"
-msgstr "Status graded"
+msgstr "Graded"
 
 #: apps/assignments/templates/assignments/my_submissions.html:126 apps/labs/templates/labs/my_lab_answers.html:126
 msgctxt "assignment.my_submissions"
@@ -17354,7 +17354,7 @@ msgstr "Close"
 #: apps/assignments/templates/assignments/my_submissions.html:218
 msgctxt "assignment.my_submissions"
 msgid "empty_title"
-msgstr "Empty title"
+msgstr "You have not submitted any answers yet"
 
 #: apps/assignments/templates/assignments/my_submissions.html:219
 msgid "Hələ heç bir tapşırıq cavabı göndərməmisiniz."
@@ -17463,7 +17463,7 @@ msgstr "Server error"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:14
 msgctxt "assignment.modals"
 msgid "error_prefix"
-msgstr "Error prefix"
+msgstr "Error"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:15 apps/assignments/templates/assignments/partials/_assignment_modals.html:85
 msgctxt "assignment.modals"
@@ -17478,82 +17478,82 @@ msgstr "Save"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:17
 msgctxt "assignment.modals"
 msgid "confirm_delete"
-msgstr "Confirm delete"
+msgstr "Are you sure you want to delete?"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:23
 msgctxt "assignment.modals"
 msgid "modal_add_title"
-msgstr "Modal add title"
+msgstr "New assignment"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:31 apps/assignments/templates/assignments/partials/_assignment_modals.html:105
 msgctxt "assignment.modals"
 msgid "label_title"
-msgstr "Label title"
+msgstr "Title"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:35 apps/assignments/templates/assignments/partials/_assignment_modals.html:109
 msgctxt "assignment.modals"
 msgid "label_status"
-msgstr "Label status"
+msgstr "Status"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:38 apps/assignments/templates/assignments/partials/_assignment_modals.html:112
 msgctxt "assignment.modals"
 msgid "status_active"
-msgstr "Status active"
+msgstr "Active"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:39 apps/assignments/templates/assignments/partials/_assignment_modals.html:113
 msgctxt "assignment.modals"
 msgid "status_inactive"
-msgstr "Status inactive"
+msgstr "Inactive"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:40 apps/assignments/templates/assignments/partials/_assignment_modals.html:114
 msgctxt "assignment.modals"
 msgid "status_archived"
-msgstr "Status archived"
+msgstr "Archived"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:46 apps/assignments/templates/assignments/partials/_assignment_modals.html:120
 msgctxt "assignment.modals"
 msgid "label_description"
-msgstr "Label description"
+msgstr "Description"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:51 apps/assignments/templates/assignments/partials/_assignment_modals.html:125
 msgctxt "assignment.modals"
 msgid "label_start"
-msgstr "Label start"
+msgstr "Start"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:55 apps/assignments/templates/assignments/partials/_assignment_modals.html:129
 msgctxt "assignment.modals"
 msgid "label_deadline"
-msgstr "Label deadline"
+msgstr "Deadline"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:59 apps/assignments/templates/assignments/partials/_assignment_modals.html:133
 msgctxt "assignment.modals"
 msgid "label_max_attempts"
-msgstr "Label max attempts"
+msgstr "Max. attempts"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:68 apps/assignments/templates/assignments/partials/_assignment_modals.html:142
 msgctxt "assignment.modals"
 msgid "label_allowed_groups"
-msgstr "Label allowed groups"
+msgstr "Allowed groups"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:69 apps/assignments/templates/assignments/partials/_assignment_modals.html:143
 msgctxt "assignment.modals"
 msgid "placeholder_group_search"
-msgstr "Placeholder group search"
+msgstr "Search groups..."
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:71 apps/assignments/templates/assignments/partials/_assignment_modals.html:79 apps/assignments/templates/assignments/partials/_assignment_modals.html:145 apps/assignments/templates/assignments/partials/_assignment_modals.html:153
 msgctxt "assignment.modals"
 msgid "selected_count"
-msgstr "Selected count"
+msgstr "Selected"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:74 apps/assignments/templates/assignments/partials/_assignment_modals.html:148
 msgctxt "assignment.modals"
 msgid "label_allowed_students"
-msgstr "Label allowed students"
+msgstr "Allowed students"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:75 apps/assignments/templates/assignments/partials/_assignment_modals.html:149
 msgctxt "assignment.modals"
 msgid "placeholder_student_search"
-msgstr "Placeholder student search"
+msgstr "Search students..."
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:84 apps/assignments/templates/assignments/partials/_assignment_modals.html:158
 msgctxt "assignment.modals"
@@ -17563,7 +17563,7 @@ msgstr "Close"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:96
 msgctxt "assignment.modals"
 msgid "modal_edit_title"
-msgstr "Modal edit title"
+msgstr "Edit"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:20
 msgctxt "assignment.legacy.edit_form"
@@ -18017,7 +18017,7 @@ msgstr "No audit records yet."
 #: apps/audit/views.py:44
 msgctxt "audit.view.permission"
 msgid "required_permission_missing"
-msgstr "Required fields missing"
+msgstr "You do not have the required permission: {permission}."
 
 #: apps/blog/forms.py:21
 msgctxt "blog.form.subscription"
@@ -20914,7 +20914,7 @@ msgstr "View answers"
 #: apps/courses/views/shared/_helpers.py:52
 msgctxt "courses.view.permission"
 msgid "required_permission_missing"
-msgstr "Required fields missing"
+msgstr "You do not have the required permission: {permission}."
 
 #: apps/courses/views/shared/_helpers.py:86
 msgctxt "courses.view.permission"
@@ -21519,7 +21519,7 @@ msgstr "Language"
 #: apps/exams/domain/coding.py:45
 msgctxt "exams.model.coding_question.field"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Title"
 
 #: apps/exams/domain/coding.py:48
 msgctxt "exams.model.coding_question.field"
@@ -21564,7 +21564,7 @@ msgstr "Max score"
 #: apps/exams/domain/coding.py:80
 msgctxt "exams.model.coding_question.field"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Starter code"
 
 #: apps/exams/domain/coding.py:84
 msgctxt "exams.model.coding_question.field"
@@ -21884,7 +21884,7 @@ msgstr "Author"
 #: apps/exams/domain/exam_definition.py:54
 msgctxt "exams.model.exam.field"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Title"
 
 #: apps/exams/domain/exam_definition.py:58
 msgctxt "exams.model.exam.field"
@@ -22744,7 +22744,7 @@ msgstr "School code"
 #: apps/exams/domain/question_bank/exam_question.py:29
 msgctxt "exams.model.question_bank.choice.organization_type"
 msgid "course_center"
-msgstr "Hint course center"
+msgstr "Course center"
 
 #: apps/exams/domain/question_bank/exam_question.py:30
 msgctxt "exams.model.question_bank.choice.organization_type"
@@ -23369,12 +23369,12 @@ msgstr "Require fullscreen mode"
 #: apps/exams/domain/supervision.py:71
 msgctxt "supervision.config.field"
 msgid "grace_period_seconds"
-msgstr "Grace period expired"
+msgstr "Grace period (seconds)"
 
 #: apps/exams/domain/supervision.py:72
 msgctxt "supervision.config.help"
 msgid "grace_period_seconds"
-msgstr "Grace period expired"
+msgstr "Seconds the student has to return before the attempt is locked."
 
 #: apps/exams/domain/supervision.py:79
 msgctxt "supervision.config.field"
@@ -23554,7 +23554,7 @@ msgstr "Auto-submitted"
 #: apps/exams/domain/supervision.py:216
 msgctxt "supervision.incident.choice.event"
 msgid "resume_window_expired"
-msgstr "Code invalid or expired"
+msgstr "Resume window expired"
 
 #: apps/exams/domain/supervision.py:218
 msgctxt "supervision.incident.choice.event"
@@ -23799,7 +23799,7 @@ msgstr "Language"
 #: apps/exams/forms/coding.py:148 apps/exams/forms/exam_coding_fields.py:20
 msgctxt "exams.form.coding.label"
 msgid "title"
-msgstr "My assigned courses"
+msgstr "Title"
 
 #: apps/exams/forms/coding.py:149 apps/exams/forms/exam_coding_fields.py:25
 msgctxt "exams.form.coding.label"
@@ -23844,7 +23844,7 @@ msgstr "Max score"
 #: apps/exams/forms/coding.py:157 apps/exams/forms/exam_coding_fields.py:71
 msgctxt "exams.form.coding.label"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Starter code"
 
 #: apps/exams/forms/coding.py:158 apps/exams/forms/exam_coding_fields.py:100
 msgctxt "exams.form.coding.label"
@@ -24709,12 +24709,12 @@ msgstr "Marked correct option {option} does not exist."
 #: apps/exams/services/parsing/_core.py:407
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_long"
-msgstr "Correct"
+msgstr "The correct answer is much longer than the other options — it gives students a visible hint."
 
 #: apps/exams/services/parsing/_core.py:415
 msgctxt "exams.service.parsing.warning"
 msgid "correct_too_short"
-msgstr "Appeal-corrected"
+msgstr "The correct answer is much shorter than the other options — it gives students a visible hint."
 
 #: apps/exams/services/parsing/extraction/pipeline.py:86
 msgctxt "exams.service.parsing.error"
@@ -24744,7 +24744,7 @@ msgstr "'pypdf' is not installed for PDF reading. Run `pip install pypdf`."
 #: apps/exams/services/parsing/extraction/pipeline.py:136 apps/exams/services/parsing/extraction/safety.py:71 apps/exams/services/parsing/extraction/safety.py:78
 msgctxt "exams.service.parsing.error"
 msgid "file_corrupt"
-msgstr "Correct"
+msgstr "The file is corrupt or not recognized."
 
 #: apps/exams/services/parsing/extraction/pipeline.py:140 apps/exams/services/parsing/extraction/safety.py:73
 msgctxt "exams.service.parsing.error"
@@ -24764,7 +24764,7 @@ msgstr "File is too large (max 45MB)."
 #: apps/exams/services/parsing/extraction/safety.py:63 apps/exams/services/parsing/extraction/safety.py:80
 msgctxt "exams.service.parsing.error"
 msgid "file_pdf_active_content"
-msgstr "Content"
+msgstr "JavaScript or active content was detected in the PDF. The file is rejected for security reasons."
 
 #: apps/exams/services/question_invariants.py:11
 msgctxt "exams.service.lifecycle"
@@ -26069,12 +26069,12 @@ msgstr "Teacher feedback"
 #: apps/exams/templates/exams/student/exam_result.html:484
 msgctxt "exams.template.student_exam_result"
 msgid "teacher_feedback_empty"
-msgstr "Teacher feedback"
+msgstr "No teacher feedback."
 
 #: apps/exams/templates/exams/student/exam_result.html:493
 msgctxt "exams.template.student_exam_result"
 msgid "label_ideal_answer_example"
-msgstr "Identifier default"
+msgstr "Sample ideal answer"
 
 #: apps/exams/templates/exams/student/exam_result.html:516
 msgctxt "exams.template.student_exam_result"
@@ -27325,7 +27325,7 @@ msgstr "If the teacher does not resume it, the exam will end automatically"
 #: apps/exams/templates/exams/student/take_exam.html:5
 msgctxt "exams.template.take_exam"
 msgid "title_exam"
-msgstr "Example: Conditionals - Test 1"
+msgstr "Exam"
 
 #: apps/exams/templates/exams/student/take_exam.html:132 apps/exams/views/student/script_data.py:23
 msgctxt "exams.template.take_exam"
@@ -27621,7 +27621,7 @@ msgstr "Create group"
 #: apps/exams/templates/exams/teacher/create_student_group.html:54
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_primary_teacher"
-msgstr "Placeholder search primary teacher"
+msgstr "Search primary teacher..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:59
 msgctxt "exams.template.create_student_group"
@@ -27636,7 +27636,7 @@ msgstr "All assigned teachers must be teachers in the same tenant."
 #: apps/exams/templates/exams/teacher/create_student_group.html:69
 msgctxt "exams.template.create_student_group"
 msgid "single_primary_teacher_only"
-msgstr "Label primary teacher"
+msgstr "Only one primary teacher can be selected."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
@@ -27661,12 +27661,12 @@ msgstr "No students were found in this tenant"
 #: apps/exams/templates/exams/teacher/create_student_group.html:118
 msgctxt "exams.template.create_student_group"
 msgid "label_assign_teachers_multi"
-msgstr "Label assigned teachers"
+msgstr "Assigned teachers"
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:119
 msgctxt "exams.template.create_student_group"
 msgid "placeholder_search_teacher"
-msgstr "Placeholder search teacher"
+msgstr "Search teacher..."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:122
 #, python-format
@@ -28055,7 +28055,7 @@ msgstr "Show only questions with warnings"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:120
 msgctxt "exams.template.test_question_bank"
 msgid "stat_warnings"
-msgstr "Pending"
+msgstr "Warnings"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:125
 msgctxt "exams.template.test_question_bank"
@@ -28153,7 +28153,7 @@ msgstr "Rules"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:323
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_default_a"
-msgstr "Identifier default"
+msgstr "Answer A is correct by default"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:324
 msgctxt "exams.template.test_question_bank"
@@ -28163,12 +28163,12 @@ msgstr "Default"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:327
 msgctxt "exams.template.test_question_bank"
 msgid "rule_title_star_prefix"
-msgstr "Page title suffix"
+msgstr "The answer marked with * is correct"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:328 apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:340
 msgctxt "exams.template.test_question_bank"
 msgid "label_correct"
-msgstr "Score"
+msgstr "correct"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:331
 msgctxt "exams.template.test_question_bank"
@@ -28188,7 +28188,7 @@ msgstr "For multiple choice"
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:336
 msgctxt "exams.template.test_question_bank"
 msgid "label_or"
-msgstr "Score"
+msgstr "or"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:336
 msgctxt "exams.template.test_question_bank"
@@ -28306,7 +28306,7 @@ msgstr "Search in question text..."
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:485
 msgctxt "exams.template.test_question_bank"
 msgid "label_points"
-msgstr "Context"
+msgstr "Points"
 
 #: apps/exams/templates/exams/teacher/partials/_bulk_question_workbench.html:496
 msgctxt "exams.template.test_question_bank"
@@ -28602,7 +28602,7 @@ msgstr "Search group..."
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:315 apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:337
 msgctxt "exams.template.create_exam_modal_form"
 msgid "selected_count"
-msgstr "Selected count"
+msgstr "Selected"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:330
 msgctxt "exams.template.create_exam_modal_form"
@@ -30361,7 +30361,7 @@ msgstr "Label category"
 #: apps/exams/templates/exams/teacher/questions_i_can_see.html:26
 msgctxt "exams.template.questions_i_can_see"
 msgid "empty_no_visible_question"
-msgstr "Empty visible groups"
+msgstr "There is no visible group for this section."
 
 #: apps/exams/templates/exams/teacher/teacher_check_attempt.html:4
 msgctxt "exams.template.teacher_check_attempt"
@@ -31461,7 +31461,7 @@ msgstr "Create Course"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:46 apps/exams/templates/exams/teacher/teacher_group_list.html:163
 msgctxt "exams.template.teacher_group_list"
 msgid "label_primary_teacher"
-msgstr "Label primary teacher"
+msgstr "Primary teacher"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:84 apps/exams/templates/exams/teacher/teacher_group_list.html:292
 msgctxt "exams.template.teacher_group_list"
@@ -31471,7 +31471,7 @@ msgstr "Are you sure you want to delete this group?"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:94
 msgctxt "exams.template.teacher_group_list"
 msgid "heading_group_students"
-msgstr "Label group students"
+msgstr "Students in the group"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:111
 msgctxt "exams.template.teacher_group_list"
@@ -31481,7 +31481,7 @@ msgstr "Group not found."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:117
 msgctxt "exams.template.teacher_group_list"
 msgid "empty_no_group_yet_title"
-msgstr "Empty users title"
+msgstr "No groups yet"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:118
 msgctxt "exams.template.teacher_group_list"
@@ -31501,17 +31501,17 @@ msgstr "Edit Topic"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:155
 msgctxt "exams.template.teacher_group_list"
 msgid "label_group_name"
-msgstr "Label group name"
+msgstr "Group name / number"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:167 apps/exams/templates/exams/teacher/teacher_group_list.html:226
 msgctxt "exams.template.teacher_group_list"
 msgid "placeholder_search_teacher"
-msgstr "Placeholder search teacher"
+msgstr "Search teacher..."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:170
 msgctxt "exams.template.teacher_group_list"
 msgid "help_only_one_primary_teacher"
-msgstr "Label primary teacher"
+msgstr "Only one primary teacher can be selected."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:179
 msgctxt "exams.template.teacher_group_list"
@@ -31526,7 +31526,7 @@ msgstr "Search student, username, or group number..."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:187 apps/exams/templates/exams/teacher/teacher_group_list.html:230
 msgctxt "exams.template.teacher_group_list"
 msgid "label_loading"
-msgstr "Label upload image"
+msgstr "Loading"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:191 apps/exams/templates/exams/teacher/teacher_group_list.html:234
 msgctxt "exams.template.teacher_group_list"
@@ -31541,7 +31541,7 @@ msgstr "Students"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:222
 msgctxt "exams.template.teacher_group_list"
 msgid "label_additional_teachers_multi"
-msgstr "Label assigned teachers"
+msgstr "Additional teachers"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:234
 msgctxt "exams.template.teacher_group_list"
@@ -31581,7 +31581,7 @@ msgstr "Select Image"
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:290
 msgctxt "exams.template.teacher_group_list"
 msgid "empty_no_data_found"
-msgstr "Empty not found"
+msgstr "No work to review was found."
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:5 apps/exams/templates/exams/teacher/teacher_pending_attempts.html:15
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31650,7 +31650,7 @@ msgstr "ago"
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:108
 msgctxt "exams.template.teacher_pending_attempts"
 msgid "status_expired"
-msgstr "Status expired"
+msgstr "Expired"
 
 #: apps/exams/templates/exams/teacher/teacher_pending_attempts.html:112
 msgctxt "exams.template.teacher_pending_attempts"
@@ -31818,7 +31818,7 @@ msgstr "This answer is fully correct."
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:256
 msgctxt "exams.template.teacher_view_attempt"
 msgid "message_answer_wrong"
-msgstr "If this email exists in our system, we sent password reset instructions."
+msgstr "This answer is wrong."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:264
 msgctxt "exams.template.teacher_view_attempt"
@@ -31828,7 +31828,7 @@ msgstr "Students"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:291 apps/exams/templates/exams/teacher/teacher_view_attempt.html:304
 msgctxt "exams.template.teacher_view_attempt"
 msgid "empty_student_text_answer"
-msgstr "Empty student"
+msgstr "The student did not submit a text answer."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:297 apps/exams/templates/exams/teacher/teacher_view_attempt.html:311
 msgctxt "exams.template.teacher_view_attempt"
@@ -31863,17 +31863,17 @@ msgstr "Teacher feedback"
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:365
 msgctxt "exams.template.teacher_view_attempt"
 msgid "empty_feedback_not_written"
-msgstr "Teacher feedback"
+msgstr "Teacher feedback has not been written."
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:370
 msgctxt "exams.template.teacher_view_attempt"
 msgid "label_given_score"
-msgstr "Score"
+msgstr "Given score"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:374
 msgctxt "exams.template.teacher_view_attempt"
 msgid "status_not_graded"
-msgstr "Graded"
+msgstr "Not graded"
 
 #: apps/exams/templates/exams/teacher/teacher_view_attempt.html:384
 msgid "Axtarışa uyğun sual tapılmadı."
@@ -32766,7 +32766,7 @@ msgstr "Bank name cannot be empty."
 #: apps/exams/views/teacher/question_library/crud.py:120
 msgctxt "exams.view.bank.message"
 msgid "Sual bankı yaradıldı."
-msgstr "Delete question bank"
+msgstr "Question bank created."
 
 #: apps/exams/views/teacher/question_library/crud.py:141
 msgctxt "exams.view.bank.message"
@@ -32786,7 +32786,7 @@ msgstr "Only the bank owner can delete."
 #: apps/exams/views/teacher/question_library/crud.py:195
 msgctxt "exams.view.bank.message"
 msgid "Sual bankı silindi."
-msgstr "Delete question bank"
+msgstr "Question bank deleted."
 
 #: apps/exams/views/teacher/question_library/crud.py:219
 msgctxt "exams.view.bank.message"
@@ -32844,7 +32844,7 @@ msgstr "Text field was not found."
 #: apps/exams/views/teacher/question_library/picker.py:52 apps/exams/views/teacher/question_library/picker.py:55
 msgctxt "exams.view.bank.message"
 msgid "Əvvəlcə bank seçin."
-msgstr "Select a reason"
+msgstr "Select a question bank first."
 
 #: apps/exams/views/teacher/question_library/picker.py:82
 #, python-brace-format
@@ -32985,7 +32985,7 @@ msgstr "You cannot change this answer after 5 minutes."
 #: apps/exams/views/teacher/results/_attempt_views.py:272 apps/exams/views/teacher/results/_results_views.py:78
 msgctxt "exams.view.results.message"
 msgid "grading_permission_required"
-msgstr "Role assign permission required"
+msgstr "The `grade.input` permission is required to grade."
 
 #: apps/exams/views/teacher/results/_attempt_views.py:308
 msgctxt "exams.view.results.message"
@@ -34538,7 +34538,7 @@ msgstr "Lab published!"
 #: apps/labs/views/teacher/questions.py:138
 msgctxt "labs.view.error"
 msgid "empty_text_submitted"
-msgstr "Empty text submitted"
+msgstr "Empty text was submitted"
 
 #: apps/labs/views/teacher/questions.py:175
 msgctxt "labs.view.error"
@@ -35716,7 +35716,7 @@ msgstr "Question Statistics"
 #: apps/live_exam/views/host/game.py:357
 msgctxt "live_exam.view.message"
 msgid "session_already_finished"
-msgstr "Email already in use"
+msgstr "This session has already finished."
 
 #: apps/live_exam/views/host/game.py:415
 msgctxt "live_exam.view.message"
@@ -42291,7 +42291,7 @@ msgstr "Organization selection is required."
 #: core/permissions.py:207
 msgctxt "core.permission.error"
 msgid "required_permission_missing"
-msgstr "Required fields missing"
+msgstr "You do not have the required permission: {permission}."
 
 #: core/roles.py:44
 msgctxt "roles.display_name"

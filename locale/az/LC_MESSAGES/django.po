@@ -7668,7 +7668,7 @@ msgstr "Kateqoriyaları idarə et"
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:14
 msgctxt "profile.shortcut"
 msgid "create_post_description"
-msgstr "Yeni paylaşım yaradın və kimlərin görə biləcəyini seçin.Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin."
+msgstr "Yeni paylaşım yaradın və kimlərin görə biləcəyini seçin. Yeni postu standart redaktorda yaratmaq üçün aşağıdakı düymədən istifadə edin."
 
 #: apps/accounts/templates/accounts/profile/sections/_create_post.html:30 apps/blog/templates/post_form.html:20
 msgid "Bu post əvvəlcə təsdiqə göndəriləcək və təsdiqlənənə qədər paylaşılmayacaq."
@@ -13941,7 +13941,7 @@ msgstr "View all"
 #: apps/accounts/templates/accounts/student_dashboard.html:64
 msgctxt "accounts.student_dashboard"
 msgid "empty_courses"
-msgstr "Empty courses"
+msgstr "Hələ kurs yoxdur."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:76
 msgctxt "accounts.student_dashboard"
@@ -13956,7 +13956,7 @@ msgstr "Pending unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
 msgid "empty_assignments"
-msgstr "Empty assignments"
+msgstr "Hələ tapşırıq yoxdur."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:115
 msgctxt "accounts.student_dashboard"
@@ -13976,7 +13976,7 @@ msgstr "Start exam"
 #: apps/accounts/templates/accounts/student_dashboard.html:139
 msgctxt "accounts.student_dashboard"
 msgid "empty_upcoming_exams"
-msgstr "Empty upcoming exams"
+msgstr "Yaxınlaşan imtahan yoxdur."
 
 #: apps/accounts/templates/accounts/student_dashboard.html:151
 msgctxt "accounts.student_dashboard"
@@ -13991,7 +13991,7 @@ msgstr "Answer unit"
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
 msgid "empty_recent_grades"
-msgstr "Empty recent grades"
+msgstr "Son qiymət yoxdur."
 
 #: apps/accounts/templates/accounts/syllabus/detail.html:82
 msgctxt "accounts.syllabus"
@@ -14851,7 +14851,7 @@ msgstr "Bu email artıq istifadə olunur."
 #: apps/accounts/views/profile/post_handler.py:232
 msgctxt "accounts.profile_edit.message"
 msgid "student_university_or_school_required"
-msgstr "Tələbə üçün universitet və ya məktəb tələb olunur.Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir."
+msgstr "Tələbə üçün universitet və ya məktəb tələb olunur. Student rolu üçün universitet adı və ya məktəb identifikatoru mütləqdir."
 
 #: apps/accounts/views/profile/post_handler.py:252
 msgctxt "accounts.profile_edit.message"
@@ -14891,7 +14891,7 @@ msgstr "Öz profilinizə qayıtdınız."
 #: apps/accounts/views/roles/_assignment_flow/_resolvers.py:254
 msgctxt "accounts.role_assignment.message"
 msgid "user_did_not_select_this_org_on_signup"
-msgstr "İstifadəçi qeydiyyat zamanı bu təşkilatı seçməyib.Bu istifadəçi signup zamanı seçməyib və sizin təşkilatınıza qoşula bilməz."
+msgstr "İstifadəçi qeydiyyat zamanı bu təşkilatı seçməyib. Bu istifadəçi signup zamanı seçməyib və sizin təşkilatınıza qoşula bilməz."
 
 #: apps/accounts/views/roles/_assignment_flow/flow.py:97
 msgctxt "accounts.role_assignment.message"
@@ -14968,7 +14968,7 @@ msgstr "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olu
 #: apps/accounts/views/roles/permissions.py:65
 msgctxt "accounts.permission_editor.message"
 msgid "manage_lower_role_permissions_only"
-msgstr "Yalnız özünüzdən aşağı rolların icazələrini idarə edə bilərsiniz.Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə bilərsiniz."
+msgstr "Yalnız özünüzdən aşağı rolların icazələrini idarə edə bilərsiniz. Yalnız sizdən aşağı səviyyəli rolların permission-larını idarə edə bilərsiniz."
 
 #: apps/accounts/views/roles/permissions.py:89 apps/accounts/views/roles/permissions.py:166
 msgctxt "accounts.permission_editor.message"
@@ -15641,7 +15641,7 @@ msgstr "Zəhmət olmasa düzgün email ünvanı daxil edin."
 #: apps/appeals/services/creation.py:63
 msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
-msgstr "Düz cavab digər variantlardan xeyli qısadır — tələbə üçün gözəgörünən ipucu yaranır."
+msgstr "Apellyasiya şərhi çox qısadır (ən azı {min_length} simvol)."
 
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
@@ -18036,7 +18036,7 @@ msgstr "Hələ audit qeydi yoxdur."
 #: apps/audit/views.py:44
 msgctxt "audit.view.permission"
 msgid "required_permission_missing"
-msgstr "Ad, soyad və email sahələri boş buraxıla bilməz."
+msgstr "Tələb olunan icazəniz yoxdur: {permission}."
 
 #: apps/blog/forms.py:21
 msgctxt "blog.form.subscription"
@@ -20932,7 +20932,7 @@ msgstr "Cavabları gör"
 #: apps/courses/views/shared/_helpers.py:52
 msgctxt "courses.view.permission"
 msgid "required_permission_missing"
-msgstr "Ad, soyad və email sahələri boş buraxıla bilməz."
+msgstr "Tələb olunan icazəniz yoxdur: {permission}."
 
 #: apps/courses/views/shared/_helpers.py:86
 msgctxt "courses.view.permission"
@@ -21537,7 +21537,7 @@ msgstr "Dil"
 #: apps/exams/domain/coding.py:45
 msgctxt "exams.model.coding_question.field"
 msgid "title"
-msgstr "Təyin olunmuş kurslarım"
+msgstr "Başlıq"
 
 #: apps/exams/domain/coding.py:48
 msgctxt "exams.model.coding_question.field"
@@ -21582,7 +21582,7 @@ msgstr "Maksimum bal"
 #: apps/exams/domain/coding.py:80
 msgctxt "exams.model.coding_question.field"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Başlanğıc kodu"
 
 #: apps/exams/domain/coding.py:84
 msgctxt "exams.model.coding_question.field"
@@ -21902,7 +21902,7 @@ msgstr "Müəllif"
 #: apps/exams/domain/exam_definition.py:54
 msgctxt "exams.model.exam.field"
 msgid "title"
-msgstr "Təyin olunmuş kurslarım"
+msgstr "Başlıq"
 
 #: apps/exams/domain/exam_definition.py:58
 msgctxt "exams.model.exam.field"
@@ -22762,7 +22762,7 @@ msgstr "Məktəb kodu"
 #: apps/exams/domain/question_bank/exam_question.py:29
 msgctxt "exams.model.question_bank.choice.organization_type"
 msgid "course_center"
-msgstr "Hint course center"
+msgstr "Kurs mərkəzi"
 
 #: apps/exams/domain/question_bank/exam_question.py:30
 msgctxt "exams.model.question_bank.choice.organization_type"
@@ -23387,7 +23387,7 @@ msgstr "Tam ekran rejimi tələb et"
 #: apps/exams/domain/supervision.py:71
 msgctxt "supervision.config.field"
 msgid "grace_period_seconds"
-msgstr "Güzəşt müddəti bitdi"
+msgstr "Güzəşt müddəti (saniyə)"
 
 #: apps/exams/domain/supervision.py:72
 msgctxt "supervision.config.help"
@@ -23572,7 +23572,7 @@ msgstr "Avtomatik təslim edildi"
 #: apps/exams/domain/supervision.py:216
 msgctxt "supervision.incident.choice.event"
 msgid "resume_window_expired"
-msgstr "Kod yanlışdır və ya vaxtı bitib."
+msgstr "Davam pəncərəsi bitdi"
 
 #: apps/exams/domain/supervision.py:218
 msgctxt "supervision.incident.choice.event"
@@ -23816,7 +23816,7 @@ msgstr "Dil"
 #: apps/exams/forms/coding.py:148 apps/exams/forms/exam_coding_fields.py:20
 msgctxt "exams.form.coding.label"
 msgid "title"
-msgstr "Təyin olunmuş kurslarım"
+msgstr "Başlıq"
 
 #: apps/exams/forms/coding.py:149 apps/exams/forms/exam_coding_fields.py:25
 msgctxt "exams.form.coding.label"
@@ -23861,7 +23861,7 @@ msgstr "Maksimum bal"
 #: apps/exams/forms/coding.py:157 apps/exams/forms/exam_coding_fields.py:71
 msgctxt "exams.form.coding.label"
 msgid "starter_code"
-msgstr "Start with code"
+msgstr "Başlanğıc kodu"
 
 #: apps/exams/forms/coding.py:158 apps/exams/forms/exam_coding_fields.py:100
 msgctxt "exams.form.coding.label"
@@ -27655,7 +27655,7 @@ msgstr "Təyin olunan müəllimlərin hamısı eyni tenant-da teacher olmalıdı
 #: apps/exams/templates/exams/teacher/create_student_group.html:69
 msgctxt "exams.template.create_student_group"
 msgid "single_primary_teacher_only"
-msgstr "Əsas müəllim"
+msgstr "Yalnız bir əsas müəllim seçilə bilər."
 
 #: apps/exams/templates/exams/teacher/create_student_group.html:79
 msgctxt "exams.template.create_student_group"
@@ -31500,7 +31500,7 @@ msgstr "Qrup tapılmadı."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:117
 msgctxt "exams.template.teacher_group_list"
 msgid "empty_no_group_yet_title"
-msgstr "İstifadəçi tapılmadı"
+msgstr "Hələ qrup yoxdur"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:118
 msgctxt "exams.template.teacher_group_list"
@@ -31530,7 +31530,7 @@ msgstr "Müəllim axtar..."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:170
 msgctxt "exams.template.teacher_group_list"
 msgid "help_only_one_primary_teacher"
-msgstr "Əsas müəllim"
+msgstr "Yalnız bir əsas müəllim seçilə bilər."
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:179
 msgctxt "exams.template.teacher_group_list"
@@ -31545,7 +31545,7 @@ msgstr "Tələbə adı, istifadəçi adı və ya qrup nömrəsi axtar..."
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:187 apps/exams/templates/exams/teacher/teacher_group_list.html:230
 msgctxt "exams.template.teacher_group_list"
 msgid "label_loading"
-msgstr "Şəkil yüklə"
+msgstr "Yüklənir"
 
 #: apps/exams/templates/exams/teacher/teacher_group_list.html:191 apps/exams/templates/exams/teacher/teacher_group_list.html:234
 msgctxt "exams.template.teacher_group_list"
@@ -33021,7 +33021,7 @@ msgstr "5 dəqiqə keçdiyindən bu cavabı artıq dəyişə bilməzsiniz."
 #: apps/exams/views/teacher/results/_attempt_views.py:272 apps/exams/views/teacher/results/_results_views.py:78
 msgctxt "exams.view.results.message"
 msgid "grading_permission_required"
-msgstr "Permission idarəetməsi üçün `role.assign` səlahiyyəti tələb olunur."
+msgstr "Qiymətləndirmək üçün `grade.input` icazəsi tələb olunur."
 
 #: apps/exams/views/teacher/results/_attempt_views.py:308
 msgctxt "exams.view.results.message"
@@ -35752,7 +35752,7 @@ msgstr "Sual statistikası"
 #: apps/live_exam/views/host/game.py:357
 msgctxt "live_exam.view.message"
 msgid "session_already_finished"
-msgstr "Bu email artıq istifadə olunur."
+msgstr "Bu sessiya artıq bitib."
 
 #: apps/live_exam/views/host/game.py:415
 msgctxt "live_exam.view.message"
@@ -42327,7 +42327,7 @@ msgstr "Təşkilat seçimi məcburidir."
 #: core/permissions.py:207
 msgctxt "core.permission.error"
 msgid "required_permission_missing"
-msgstr "Ad, soyad və email sahələri boş buraxıla bilməz."
+msgstr "Tələb olunan icazəniz yoxdur: {permission}."
 
 #: core/roles.py:44
 msgctxt "roles.display_name"
