@@ -362,7 +362,8 @@ def _handle_student_pin_login(request, username, raw_pin):
         pin_ticket, ticket_error = ensure_pin_ticket(exam, student, entry_room, entry_computer)
         if pin_ticket is None:
             return _render_login(request, error=ticket_error, username=(username or "").strip())
-        pin_ticket = claim_student_pin_entry(pin_ticket)
+        # W4 R7: claim + giriş audit hadisəsi (tarixçə «Girişlər» KPI-ı).
+        pin_ticket = claim_student_pin_entry(pin_ticket, request=request)
         if pin_ticket is None:
             return _render_login(request, error=_entry_error_message(None), username=(username or "").strip())
 

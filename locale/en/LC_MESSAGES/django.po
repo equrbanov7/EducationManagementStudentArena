@@ -68741,3 +68741,13 @@ msgstr "The formula is too long (limit 2000 characters) — kept as plain text: 
 msgctxt "exams.question_bank.empty"
 msgid "Bu bankda hələ sual yoxdur."
 msgstr "There are no questions in this bank yet."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "pdf_images_unanchored_skipped"
+msgstr "{count} image(s) could not be tied to a question (before the first question or no matching question line in the text) — skipped."
+
+msgid "fərdi imtahan PIN-i ilə"
+msgstr "with the personal exam PIN"
+
+msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
+msgstr "personal exam PIN (shown in the student cabinet)"

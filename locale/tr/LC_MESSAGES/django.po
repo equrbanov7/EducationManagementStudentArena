@@ -68650,3 +68650,13 @@ msgstr "Formül çok uzun (sınır 2000 karakter) — düz metin olarak tutuldu:
 msgctxt "exams.question_bank.empty"
 msgid "Bu bankda hələ sual yoxdur."
 msgstr "Bu bankada henüz soru yok."
+
+msgctxt "exams.service.parsing.docx.warning"
+msgid "pdf_images_unanchored_skipped"
+msgstr "{count} görsel hiçbir soruya bağlanamadı (ilk sorudan önce veya metinde soru satırı bulunamadı) — atlandı."
+
+msgid "fərdi imtahan PIN-i ilə"
+msgstr "kişisel sınav PIN'i ile"
+
+msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
+msgstr "kişisel sınav PIN'i (öğrenci panelinde gösterilir)"

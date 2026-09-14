@@ -21,6 +21,7 @@ from .extraction import (
 )
 from .math_text import sanitize_math_text
 from .media_markers import extract_media_refs
+from .option_markers import _option_from_match
 
 logger = logging.getLogger(__name__)
 
@@ -237,9 +238,7 @@ def _parse_labeled_end_question_block(lines: list[str], fallback_no: int) -> dic
                 q_no, q_text = _strip_question_number(question_text, fallback_no)
                 current = _new_question(q_no, q_text)
 
-            star = bool(m_opt.group(1))
-            label = m_opt.group(2).upper()
-            text = m_opt.group(3).strip()
+            label, text, star = _option_from_match(m_opt)
             current["options"][label] = text
             current_opt_label = label
             if star and label not in current["correct"]:
@@ -501,11 +500,19 @@ def parse_bulk_mcq(raw_text: str):
         state = OUTSIDE
 
     questions = []
+    # W4 R5: boş sətir blok sərhədidir — `N.` ilə başlayan növbəti sətir, əvvəlki
+    # sualın son variantı markersiz olsa da (variant sayı < 4 olsa da) YENİ sualdır.
+    # Əvvəl «1. sual?\nA) bir\nB) iki*\nC) üç\n\n2. İkinci sual…» 2-ci sualı
+    # C variantının davamına yapışdırırdı.
+    after_blank = False
 
     for raw in lines:
         line = raw.rstrip("\n")
         if not line.strip():
+            after_blank = True
             continue
+        starts_block = after_blank
+        after_blank = False
 
         # Answer line (istənilən yerdə ola bilər)
         m_ans = ANSWERLINE_RE.match(line)
@@ -525,9 +532,7 @@ def parse_bulk_mcq(raw_text: str):
         # OPTION?
         m_opt = OPTION_RE.match(line)
         if m_opt and current:
-            star = bool(m_opt.group(1))
-            label = m_opt.group(2).upper()
-            text = m_opt.group(3).strip()
+            label, text, star = _option_from_match(m_opt)
 
             current["options"][label] = text
             current_opt_label = label
@@ -547,8 +552,13 @@ def parse_bulk_mcq(raw_text: str):
 
         # Əgər artıq sualın içindəyiksə:
         if current:
-            # Əgər option bitib və yeni sual başlayırsa
-            if state == IN_OPT and m_q and len(current["options"]) >= 4:
+            # Əgər option bitib və yeni sual başlayırsa (W4 R5: boş sətirdən
+            # sonrakı `N.` bloku ≥ 2 variantlı sualı da bağlayır)
+            if (
+                state == IN_OPT
+                and m_q
+                and (len(current["options"]) >= 4 or (starts_block and len(current["options"]) >= 2))
+            ):
                 # əvvəlki sualı bağla, yenisini başlat
                 close_question()
                 current = _new_question(m_q.group(1), m_q.group(2).strip())

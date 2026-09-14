@@ -1,4 +1,4 @@
-import { ExamSupervision } from "./state.js?v=20260716-intervention";
+import { ExamSupervision } from "./state.js?v=20260914-w4r3";
 
 function normalizedReason(value) {
     return String(value || "").trim();
