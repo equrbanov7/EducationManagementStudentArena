@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import EmailOTP
+from core.mailing import system_reply_to
 from core.utils import (
     build_absolute_url,
     generate_otp,
@@ -161,6 +162,7 @@ def _send_otp_message(*, email: str, purpose: str, context: dict) -> None:
         body=text_body,
         from_email=context.get("from_email"),
         to=[email],
+        reply_to=system_reply_to(),
     )
     message.attach_alternative(html_body, "text/html")
     message.send()

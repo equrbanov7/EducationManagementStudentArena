@@ -2,7 +2,7 @@ import re
 
 from django.core import mail
 from django.core.cache import cache
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from apps.audit.models import AuditLog
@@ -202,3 +202,15 @@ class AdminTwoFactorFlowTest(TestCase):
         self.client.post(reverse("admin:verify-otp"), {"code": self._latest_otp_code()})
         profile = self.client.get(reverse("accounts:profile"))
         self.assertEqual(profile.status_code, 200)
+
+
+class SystemReplyToTests(SimpleTestCase):
+    """Sahibin qərarı 2026-09-15: From təsdiqlənmiş domen, Reply-To universitet ünvanı."""
+
+    def test_reply_to_follows_setting(self):
+        from core.mailing import system_reply_to
+
+        with override_settings(EMAIL_REPLY_TO="no-reply@wcu.edu.az"):
+            self.assertEqual(system_reply_to(), ["no-reply@wcu.edu.az"])
+        with override_settings(EMAIL_REPLY_TO=""):
+            self.assertEqual(system_reply_to(), [])

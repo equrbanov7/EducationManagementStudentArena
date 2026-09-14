@@ -38,6 +38,16 @@ _HTTP_TIMEOUT_SECONDS = 10
 _BREVO_API_ENDPOINT = "https://api.brevo.com/v3/smtp/email"
 
 
+def system_reply_to() -> list[str]:
+    """`settings.EMAIL_REPLY_TO` doludursa `[ünvan]`, yoxsa `[]` — `EmailMultiAlternatives(reply_to=…)` üçün.
+
+    Sahibin qərarı (2026-09-15): From Brevo-da təsdiqlənmiş `emsarena.com`-da qalır,
+    Reply-To `no-reply@wcu.edu.az` — universitet domeni Brevo-da təsdiqlənənə qədər.
+    """
+    value = (getattr(settings, "EMAIL_REPLY_TO", "") or "").strip()
+    return [value] if value else []
+
+
 def _brevo_api_key() -> str:
     """Return the configured Brevo HTTP API key, or an empty string."""
     return getattr(settings, "BREVO_API_KEY", "") or os.environ.get("BREVO_API_KEY", "")

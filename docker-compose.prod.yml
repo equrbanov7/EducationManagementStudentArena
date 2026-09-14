@@ -91,6 +91,8 @@ x-app-env: &app-env
   BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
   BREVO_API_KEY: ${BREVO_API_KEY:-}
   DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-no-reply@emsarena.com}
+  # 2026-09-15: Reply-To — From təsdiqlənmiş domen qalır, cavab ünvanı universitetin (boş = başlıq yoxdur).
+  EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GEMINI_MODEL: ${GEMINI_MODEL:-}
   GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
