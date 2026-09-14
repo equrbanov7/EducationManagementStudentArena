@@ -61,7 +61,7 @@ palitrası = EXAM_TYPE_META / EXAM_STATUS_META); `exam_type_meta` yalnız ikon �
       <span class="tx-codechip tx-codechip--code"><i class="fas fa-key" aria-hidden="true"></i> {{ exam.access_code }}</span>
     {% elif exam.is_public %}
       <span class="tx-codechip tx-codechip--open"><i class="fas fa-globe" aria-hidden="true"></i> {% trans "Hamı üçün açıq" %}</span>
-    {% elif exam.card_allowed_group_count %}
+    {% elif exam.card_allowed_group_count or exam.card_allowed_unit_count %}
       <span class="tx-codechip"><i class="fas fa-users" aria-hidden="true"></i> {% trans "Qruplara açıq" %}</span>
     {% elif exam.card_allowed_user_count %}
       <span class="tx-codechip"><i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Fərdi tələbələrə açıq" %}</span>

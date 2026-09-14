@@ -15,7 +15,9 @@
 {% endcomment %}
 <form id="createExamModalForm" method="post" action="{{ request.get_full_path }}" novalidate data-exam-wizard
       data-editing="{% if is_editing %}1{% else %}0{% endif %}"
-      data-assigned-count-url="{% url 'exams:assigned_student_count' %}">
+      data-assigned-count-url="{% url 'exams:assigned_student_count' %}"
+      {% if wizard_error_step is not None and wizard_error_step != "" %}data-ew-error-step="{{ wizard_error_step }}"{% endif %}
+      {% if wizard_error_field %}data-ew-error-field="{{ wizard_error_field }}"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="modal" value="1">
     {% if linked_course %}
@@ -333,26 +335,30 @@
 
                         <div id="createExamAccessRestrictions" class="form-group form-group-full create-exam-access-block">
                             <div class="create-exam-access-grid">
-                                <div class="create-exam-searchable-select" data-target-select-name="allowed_groups"
-                                     data-search-url="{% url 'exams:group_search' %}">
-                                    <label class="ew-label create-exam-searchable-label" for="createExamGroupsSearch">{% trans "allowed_groups" context "exams.template.create_exam_modal_form" %}</label>
+                                {% comment %}2026-09-14 (W4 `w4wizard`, R2): əsas seçici qrup REYESTRİDİR
+                                   (OrgUnit GROUP, məs. «634 ing»). Köhnə imtahan kohortları (`StudentGroup`)
+                                   yalnız təşkilatda belə qrup varsa «Köhnə kohortlar» kimi aşağıda göstərilir
+                                   (sahibin 2026-09-07 qərarı: kohort səthi silinməyə gedir).{% endcomment %}
+                                <div class="create-exam-searchable-select form-group" data-target-select-name="allowed_units"
+                                     data-search-url="{% url 'exams:group_search' %}?kind=units">
+                                    <label class="ew-label create-exam-searchable-label" for="createExamUnitsSearch">{% trans "allowed_units" context "exams.template.create_exam_modal_form" %}</label>
                                     <div class="create-exam-search-wrap">
                                         <i class="fas fa-search" aria-hidden="true"></i>
-                                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
+                                        <input type="text" id="createExamUnitsSearch" class="create-exam-search-input" placeholder="{% trans 'search_unit_group' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
                                     </div>
-                                    <div id="createExamGroupsList" class="create-exam-search-list"></div>
+                                    <div id="createExamUnitsList" class="create-exam-search-list"></div>
                                     <div class="create-exam-selection-counter">
-                                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
+                                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamUnitsCount">0</span>
                                     </div>
-                                    {# Lazy: yalnız seçili qruplar render olunur; qalanı group_search ilə gəlir. #}
+                                    {# Lazy: yalnız seçili reyestr qrupları render olunur; qalanı group_search?kind=units ilə gəlir. #}
                                     <div class="d-none">
-                                        <select name="allowed_groups" multiple>
-                                            {% for group in selected_allowed_groups %}
-                                                <option value="{{ group.pk }}" selected>{{ group }}</option>
+                                        <select name="allowed_units" multiple>
+                                            {% for unit in selected_allowed_units %}
+                                                <option value="{{ unit.pk }}" selected>{{ unit.name }}{% if unit.parent %} — {{ unit.parent.name }}{% endif %}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
+                                    {% if allowed_units_error %}<div class="field-error">{{ allowed_units_error }}</div>{% endif %}
                                 </div>
 
                                 <div class="create-exam-searchable-select" data-target-select-name="allowed_users"
@@ -382,6 +388,30 @@
                                     {% if form.allowed_users.errors %}<div class="field-error">{{ form.allowed_users.errors.0 }}</div>{% endif %}
                                     {% if form.excluded_users.errors %}<div class="field-error">{{ form.excluded_users.errors.0 }}</div>{% endif %}
                                 </div>
+
+                                {% if legacy_groups_available %}
+                                <div class="create-exam-searchable-select form-group create-exam-legacy-groups" data-target-select-name="allowed_groups"
+                                     data-search-url="{% url 'exams:group_search' %}">
+                                    <label class="ew-label create-exam-searchable-label" for="createExamGroupsSearch">{% trans "legacy_cohorts" context "exams.template.create_exam_modal_form" %}</label>
+                                    <div class="create-exam-search-wrap">
+                                        <i class="fas fa-search" aria-hidden="true"></i>
+                                        <input type="text" id="createExamGroupsSearch" class="create-exam-search-input" placeholder="{% trans 'search_group' context 'exams.template.create_exam_modal_form' %}" autocomplete="off">
+                                    </div>
+                                    <div id="createExamGroupsList" class="create-exam-search-list"></div>
+                                    <div class="create-exam-selection-counter">
+                                        {% trans "selected_count" context "exams.template.create_exam_modal_form" %}: <span id="createExamGroupsCount">0</span>
+                                    </div>
+                                    {# Lazy: yalnız seçili kohortlar render olunur; qalanı group_search ilə gəlir. #}
+                                    <div class="d-none">
+                                        <select name="allowed_groups" multiple>
+                                            {% for group in selected_allowed_groups %}
+                                                <option value="{{ group.pk }}" selected>{{ group }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% if form.allowed_groups.errors %}<div class="field-error">{{ form.allowed_groups.errors.0 }}</div>{% endif %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

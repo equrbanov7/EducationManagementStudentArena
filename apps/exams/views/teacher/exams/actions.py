@@ -53,6 +53,15 @@ def toggle_exam_active(request, slug):
     _ensure_exam_permission(request, "exam.edit")
     exam = get_teacher_exam_or_404(request, slug=slug)
 
+    # 2026-09-14 (W4 `w4wizard`, R4): POST-dan sonra yönləndirmə `from_section` /
+    # `return_to` kimi naviqasiya parametrlərini itirirdi — «Geri» kabinetə yox,
+    # ümumi siyahıya aparırdı. Forma `action`-ı sorğu sətrini daşıyır (bax
+    # `teacher_exam_detail.html`), o olduğu kimi geri qaytarılır.
+    detail_url = reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+    query_string = request.GET.urlencode()
+    if query_string:
+        detail_url = f"{detail_url}?{query_string}"
+
     if request.method == "POST":
         from apps.exams.services.lifecycle import publish_exam, unpublish_exam
 
@@ -62,7 +71,7 @@ def toggle_exam_active(request, slug):
             changed, error = publish_exam(exam, by_user=request.user, request=request)
             if error:
                 messages.error(request, error)
-                return redirect("exams:teacher_exam_detail", slug=exam.slug)
+                return redirect(detail_url)
             if changed:
                 from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
                 from apps.notifications.public import get_exam_assigned_user_ids, notify_task_assignment
@@ -75,7 +84,7 @@ def toggle_exam_active(request, slug):
                 )
         else:
             unpublish_exam(exam, by_user=request.user, request=request)
-    return redirect("exams:teacher_exam_detail", slug=exam.slug)
+    return redirect(detail_url)
 
 
 @login_required
@@ -288,6 +297,20 @@ def duplicate_exam(request, slug):
         request=request,
     )
     messages.success(request, pgettext_lazy("exams.view.exams.message", "exam_duplicated"))
+    # 2026-09-14 (W4 `w4wizard`, R6): dublikat DİZAYN üzrə sualsız yaranır
+    # (`services.duplication` docstring-i), amma UI bunu demirdi — müəllim
+    # kopyanı dolu sanırdı. Uğur toast-una xəbərdarlıq əlavə olunur: mənbədə
+    # neçə sual qaldı / kopya boş qaralamadır.
+    source_question_count = exam.questions.count()
+    if source_question_count:
+        messages.warning(
+            request,
+            pgettext("exams.view.exams.message", "exam_duplicated_questions_not_copied").format(
+                count=source_question_count
+            ),
+        )
+    else:
+        messages.warning(request, pgettext("exams.view.exams.message", "exam_duplicated_source_empty"))
     return redirect(_teacher_profile_my_exams_url())
 
 

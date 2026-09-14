@@ -25,11 +25,12 @@ yazı/metrik/jurnal sinxronu yaranmır) və yeni expire olunmuş cəhdlər
 
 from __future__ import annotations
 
-from django.db.models import Count, Sum
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+from apps.exams.domain.unit_assignment import unit_assigned_exams_q
 from apps.exams.models import Exam, ExamAttempt, ExamQuestion, StudentExamAttemptGrant
 from apps.exams.services.journal_sync import registrar_block_reasons
 from apps.exams.services.language_variants import (
@@ -83,7 +84,13 @@ class StudentExamListBatch:
         # M2M üzvlükləri — hər biri tək sorğu (model: hər imtahan üçün ayrıca .exists()).
         self._allowed_ids = frozenset(page.filter(allowed_users=user).values_list("id", flat=True))
         self._excluded_ids = frozenset(page.filter(excluded_users=user).values_list("id", flat=True))
-        self._group_ids = frozenset(page.filter(allowed_groups__students=user).values_list("id", flat=True).distinct())
+        # 2026-09-14 (W4 `w4wizard`, R2): köhnə kohort VƏ YA reyestr qrupu — hər
+        # ikisi eyni «qrupla təyin olunub» dəstinə düşür (tək sorğu, sətir sayından asılı deyil).
+        self._group_ids = frozenset(
+            page.filter(Q(allowed_groups__students=user) | unit_assigned_exams_q(user))
+            .values_list("id", flat=True)
+            .distinct()
+        )
         self._course_member_ids = frozenset(
             page.filter(course__memberships__user=user, course__memberships__role="student")
             .values_list("id", flat=True)

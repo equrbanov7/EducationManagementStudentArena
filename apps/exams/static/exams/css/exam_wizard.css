@@ -388,6 +388,12 @@ html.exam-modal-open, html.exam-modal-open body { overflow: hidden !important; }
 .exam-wizard .ew-panel .create-exam-search-empty { padding: 10px 12px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
 .exam-wizard .ew-panel .create-exam-selection-counter { margin-top: 5px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
 .exam-wizard .ew-panel .create-exam-access-grid { gap: 14px 16px; }
+/* 2026-09-14 (W4 `w4wizard`, R2): seçicilər `.form-group`-dur ki, sehrbazın
+   `is-invalid` işıqlandırması / fokusu reyestr qrupu xətasına da tətbiq olunsun;
+   grid boşluğu onsuz da var — marjin sıfırlanır. Köhnə kohortlar tam en, solğun. */
+.exam-wizard .ew-panel .create-exam-access-grid > .form-group { margin-bottom: 0; }
+.exam-wizard .ew-panel .create-exam-legacy-groups { grid-column: 1 / -1; padding-top: 10px; border-top: 1px dashed var(--ems-border); }
+.exam-wizard .ew-panel .create-exam-legacy-groups .create-exam-searchable-label { color: var(--ems-text-muted); }
 .exam-wizard .ew-panel .create-exam-access-block.is-hidden { margin: 0; }
 
 /* Saxlanılır spinner (submit düyməsi) */

@@ -68805,3 +68805,35 @@ msgstr "по персональному PIN-коду экзамена"
 
 msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
 msgstr "персональный PIN-код экзамена (показывается в кабинете студента)"
+
+msgctxt "exams.model.exam.field"
+msgid "allowed_units"
+msgstr "Группы реестра"
+
+msgctxt "exams.model.exam.help"
+msgid "allowed_units"
+msgstr "Академические группы из реестра групп, допущенные к экзамену."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "allowed_units"
+msgstr "Группы (реестр)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "search_unit_group"
+msgstr "Поиск группы (напр. 634 ing)..."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "legacy_cohorts"
+msgstr "Старые когорты"
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_questions_not_copied"
+msgstr "Вопросы не скопированы — копия является пустым черновиком (в источнике осталось {count} вопросов). Добавьте вопросы из банка."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_source_empty"
+msgstr "В исходном экзамене не было вопросов — копия является пустым черновиком; добавьте вопросы."
+
+msgctxt "exams.view.exams.error"
+msgid "allowed_units_invalid"
+msgstr "Выбранные группы не найдены в этой организации или вне вашей области."

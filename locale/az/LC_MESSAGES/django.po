@@ -68713,3 +68713,35 @@ msgstr "fərdi imtahan PIN-i ilə"
 
 msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
 msgstr "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
+
+msgctxt "exams.model.exam.field"
+msgid "allowed_units"
+msgstr "Reyestr qrupları"
+
+msgctxt "exams.model.exam.help"
+msgid "allowed_units"
+msgstr "Qrup reyestrindən (akademik qruplar) imtahana buraxılan qruplar."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "allowed_units"
+msgstr "Qruplar (reyestr)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "search_unit_group"
+msgstr "Qrup axtar (məs. 634 ing)..."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "legacy_cohorts"
+msgstr "Köhnə kohortlar"
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_questions_not_copied"
+msgstr "Suallar kopyalanmadı — kopya boş qaralamadır (mənbədə {count} sual qaldı). Bankdan sual əlavə edin."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_source_empty"
+msgstr "Mənbə imtahanda sual yox idi — kopya boş qaralamadır, sual əlavə edin."
+
+msgctxt "exams.view.exams.error"
+msgid "allowed_units_invalid"
+msgstr "Seçilmiş qrup(lar) bu təşkilatda tapılmadı və ya əhatənizdən kənardır."

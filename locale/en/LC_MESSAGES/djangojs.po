@@ -3073,3 +3073,18 @@ msgstr "Open"
 
 msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
 msgstr "This file type is not accepted for security reasons. Upload only .pdf / .docx / .txt / .png / .jpg."
+
+msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
+msgstr "The end time must be after the start time."
+
+msgid "Müddət 0-dan böyük olmalıdır."
+msgstr "The duration must be greater than 0."
+
+msgid "Müddət imtahan pəncərəsindən ({n} dəq) uzun ola bilməz."
+msgstr "The duration cannot exceed the exam window ({n} min)."
+
+msgid "Sual sayı mənfi ola bilməz (0 = bütün suallar)."
+msgstr "The question count cannot be negative (0 = all questions)."
+
+msgid "Köhnə kohortlar"
+msgstr "Legacy cohorts"

@@ -68660,3 +68660,35 @@ msgstr "kişisel sınav PIN'i ile"
 
 msgid "fərdi imtahan PIN-i (tələbə kabinetində göstərilir)"
 msgstr "kişisel sınav PIN'i (öğrenci panelinde gösterilir)"
+
+msgctxt "exams.model.exam.field"
+msgid "allowed_units"
+msgstr "Kayıt grupları"
+
+msgctxt "exams.model.exam.help"
+msgid "allowed_units"
+msgstr "Grup kayıt defterinden sınava kabul edilen akademik gruplar."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "allowed_units"
+msgstr "Gruplar (kayıt)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "search_unit_group"
+msgstr "Grup ara (örn. 634 ing)..."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "legacy_cohorts"
+msgstr "Eski kohortlar"
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_questions_not_copied"
+msgstr "Sorular kopyalanmadı — kopya boş bir taslaktır (kaynakta {count} soru kaldı). Bankadan soru ekleyin."
+
+msgctxt "exams.view.exams.message"
+msgid "exam_duplicated_source_empty"
+msgstr "Kaynak sınavda soru yoktu — kopya boş bir taslaktır; soru ekleyin."
+
+msgctxt "exams.view.exams.error"
+msgid "allowed_units_invalid"
+msgstr "Seçilen grup(lar) bu kurumda bulunamadı veya kapsamınızın dışında."
