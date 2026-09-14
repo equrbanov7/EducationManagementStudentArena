@@ -296,10 +296,20 @@ class SheetGuardQueryBudgetTest(_TwoTenantCase):
         sheet = sheets.create_sheet(offering=self.a.offerings[1], by_user=self.a.center)
         # 2026-09-14: hər iki ölçü eyni (soyuq) keş vəziyyətindən başlasın — test sırasından
         # asılı olaraq hərf-şkalası/sxem keşi bir tərəfi isidib 3 sorğu fərqi verirdi.
+        from django.contrib.contenttypes.models import ContentType
+
+        from apps.audit.models import AuditLog
+
+        # 2026-09-14: `AuditLog` manager-i prosesdə BİR dəfə sxem introspeksiyası edir
+        # (2 sorğu) — hansı ölçü əvvəl gəlirsə onu ödəyirdi (xdist-də sıra dəyişir).
+        # Hər iki ölçüdən əvvəl isidilir; keşlər isə hər ikisi üçün soyuq edilir.
+        AuditLog.objects._missing_field_names(AuditLog.objects.db)
         cache.clear()
+        ContentType.objects.clear_cache()
         with CaptureQueriesContext(connection) as without_sheet:
             service.record_exam_score(enrollment=self.a.enrollments[0], score="40", by_user=self.a.center)
         cache.clear()
+        ContentType.objects.clear_cache()
         with CaptureQueriesContext(connection) as with_sheet:
             service.record_exam_score(enrollment=self.a.enrollments[1], score="40", by_user=self.a.center, sheet=sheet)
         self.assertEqual(len(with_sheet), len(without_sheet))

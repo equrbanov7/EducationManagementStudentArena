@@ -26,9 +26,12 @@ KATEX_DIR = ROOT / "static" / "vendor" / "katex" / "0.16.47"
 EMS_MATH = ROOT / "static" / "js" / "ems_math.js"
 PARTIAL = ROOT / "templates" / "partials" / "ems_ui" / "_math_assets.html"
 
+# `katex.min.css` yuxarı axından fərqlənir: .woff/.ttf fallback `src` girişləri
+# silinib (yalnız woff2 vendorlanır; manifest storage çatışmayan istinada görə
+# collectstatic-i qırırdı — 2026-09-14). SHA bu düzəldilmiş faylındır.
 PINNED_SHA256 = {
     "katex.min.js": "a29d2961d3146de5949d78ac7c1a9d93ae54955bad22a6db4fbe836e88e8bf48",
-    "katex.min.css": "0289a02cf451a44dd73add683a09644252363871ac11713a647b732cee8b1ee3",
+    "katex.min.css": "c9eac1c75c95f7dcbb6db0210cf0a49a150d07aaf599292e5f9ca099c596a119",
     "contrib/auto-render.min.js": "e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4",
     "fonts/KaTeX_Main-Regular.woff2": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866",
     "fonts/KaTeX_Math-Italic.woff2": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264",
