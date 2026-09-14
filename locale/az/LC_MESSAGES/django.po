@@ -68607,3 +68607,15 @@ msgstr "Üzvü kursdan sil"
 
 msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
 msgstr "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hərf"
+msgstr "Hərf"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiq et — sistemə yaz"
+msgstr "Təsdiq et — sistemə yaz"
+
+msgctxt "registrar.exam_score_entry"
+msgid "tələbə kəsilir (F)"
+msgstr "tələbə kəsilir (F)"

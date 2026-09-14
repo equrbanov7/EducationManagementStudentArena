@@ -457,6 +457,45 @@ class QuestionScoreServiceTest(fixtures.ExamScoreEntryServiceTest):
             none = changes.paper_kind_stats(organization=self.org, year_start=1999)
         self.assertEqual(sum(row["entries"] for row in none), 0)
 
+    # ── Sahibin rəyi (2026-09-14, 2-ci dövrə): yoxlayan / nəzarətçi seçimi ─────
+    def test_staff_selects_resolve_users_and_snapshot_names(self):
+        teachers = service.teachers_for_organization(organization=self.org)
+        self.assertIn(str(self.teacher.id), {row["id"] for row in teachers})
+        self.assertNotIn(str(self.students["a1"].id), {row["id"] for row in teachers})
+        meta = sheets.sheet_metadata_from_post(
+            {"examiner": str(self.teacher.id), "invigilator": str(self.center.id)}, {}, offering=self.offering_a
+        )
+        self.assertEqual(meta["examiner"], self.teacher)
+        self.assertEqual(meta["invigilator"], self.center)
+        self.assertEqual(meta["invigilator_name"], self.center.get_full_name() or self.center.username)
+        # Boş yoxlayan → açılışın müəllimi; köhnə sərbəst-mətn nəzarətçi fallback.
+        meta = sheets.sheet_metadata_from_post({"invigilator_name": "Kənar nəzarətçi"}, {}, offering=self.offering_a)
+        self.assertEqual(meta["examiner"], self.teacher)
+        self.assertIsNone(meta["invigilator"])
+        self.assertEqual(meta["invigilator_name"], "Kənar nəzarətçi")
+        with bypass_rls():
+            stranger = fixtures.User.objects.create_user("w2_stranger_reg", "w2_stranger_reg@qku.edu.az", "pw")
+        for raw in (str(stranger.id), "abc", "999999999"):
+            with self.assertRaises(ValidationError, msg=raw):
+                sheets.sheet_metadata_from_post({"invigilator": raw}, {}, offering=self.offering_a)
+        with bypass_rls():
+            sheet = sheets.create_sheet(offering=self.offering_a, by_user=self.center, invigilator=self.center)
+            self.assertEqual(sheet.invigilator_id, self.center.id)
+            self.assertTrue(sheet.invigilator_name)
+            row = sheets.sheet_row(sheet)
+            self.assertEqual((row["examiner_id"], row["invigilator_id"]), (str(self.teacher.id), str(self.center.id)))
+            defaults = sheets.latest_sheet_defaults([row])
+            self.assertEqual(defaults["invigilator_id"], str(self.center.id))
+
+    def test_roster_exposes_scale_and_pass_rules(self):
+        roster = self._roster()
+        self.assertEqual(roster["letter_bands"][0][:2], [91, "A"])
+        self.assertEqual(roster["letter_bands"][-1][:2], [0, "F"])
+        self.assertIn("pass_threshold", roster)
+        self.assertIn("min_final_exam_score", roster)
+        self.assertIn("failed", roster["rows"][0])
+        self.assertIn("barred", roster["rows"][0])
+
     # Mövcud fixture sinfinin testləri bu modulda təkrar işləməsin.
     for _name in list(vars(fixtures.ExamScoreEntryServiceTest)):
         if _name.startswith("test_"):

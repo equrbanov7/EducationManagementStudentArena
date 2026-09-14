@@ -1,33 +1,36 @@
 /*
- * exam_score_entry.js — İmtahan Mərkəzi: yazılı imtahan ballarının köçürülməsi
- * (siyahı forması, 2026-09-12 yenidən yazıldı).
+ * exam_score_entry.js — İmtahan Mərkəzi: kağız (yazılı / praktiki) imtahan
+ * ballarının köçürülməsi (siyahı forması; 2026-09-12 yazıldı, 2026-09-14 W2
+ * `w2paper` + sahibin rəyi ilə yenidən quruldu).
  *
  * CSP: bu bölmədə inline <script> YOXDUR — bütün davranış buradadır. Dinamik
- * dəyərlər DOM-dan oxunur: i18n sətirləri `#eseI18n` data-atributlarından,
- * sətrin vəziyyəti `[data-ese-row]`-un data-has-score / data-initial-indən.
+ * dəyərlər DOM-dan oxunur: i18n `#eseI18n` data-atributları, sətrin vəziyyəti
+ * `[data-ese-row]` data-* atributları, hərf şkalası `#ese-confirm-config`
+ * (json_script — server `grading_scale.bands_for` + sxem hədləri).
  *
  * Nə edir:
- *   1. hər sətrin VƏZİYYƏT nişanını canlı saxlayır (boş / yazılıb /
- *      dəyişdirilib / dəyişiklik·səbəb / xəta) + «Dəyişdirilib» KPI kartı;
- *   2. klaviatura: Enter / ↓ növbəti sətrin balına, ↑ əvvəlkinə keçir
- *      (Enter formanı GÖNDƏRMİR);
- *   3. «Balları yadda saxla» → təsdiq dialoqu: «N tələbə · M bal yazılacaq ·
- *      K dəyişiklik səbəb tələb edir»; K>0 olduqda səbəb + qeyd + skan
- *      (vərəq kartındakı fayl) tələb olunur — server qatı eyni qaydanı yenidən
- *      tətbiq edir, bu yalnız erkən UX;
- *   4. sətrin «tarixçə» düyməsi → `<template>` klonu çekmecəyə (əlavə sorğu yox);
- *   5. «Qrup → Fənn» / «Fənn → Qrup» açarı, görünüş açarı («Köçürmə» /
- *      «Dəyişən nəticələr») və vəziyyət çipləri paneli SPA ilə yenidən yükləyir;
- *   6. (2026-09-14, W2 `w2paper`) SUAL-SUAL ballar: hər sətirdə S1..S10 sahəsi;
- *      «Sual sayı» seçimi artıq sütunları gizlədib `disabled` edir (POST-a
- *      düşmür), «Bir sualın maksimumu» hər S sahəsinin `max`-ını yeniləyir;
- *      «İmtahan balı» sual rejimində yalnız-oxunan CANLI CƏMDİR, «Yekun» =
- *      giriş + cəm (server hər ikisini yenidən hesablayır — bu yalnız UX).
+ *   1. SUAL BALLARI seçimdir (S1..S10, hər biri 0..question_max) — project
+ *      select komponenti, yığcam variant. Tənbəl gücləndirmə: server hazır
+ *      toggle render edir (`data-ese-qtoggle`), ilk klik/fokusda
+ *      `EMSBootstrapSelect.enhance` çağırılır və menyu açılır (60 × 10 seçimdə
+ *      ilk render ağırlaşmır; native görünüş heç vaxt yoxdur). Rəqəm düyməsi
+ *      dəyəri birbaşa yazır («1» + «0» = 10), Enter/↓/↑ sütun üzrə sətir dəyişir;
+ *   2. «İmtahan balı» sual rejimində yalnız-oxunan CANLI CƏMDİR, «Yekun» =
+ *      giriş + cəm (+ bonus), «Hərf» server şkalası ilə (F qırmızı) — server
+ *      hamısını yenidən hesablayır, bu yalnız UX;
+ *   3. «Sual sayı» sütunları açıb-bağlayır (artıq sahələr `disabled` → POST-a
+ *      düşmür), «Bir sualın maksimumu» seçim variantlarını yenidən qurur;
+ *   4. hər sətrin VƏZİYYƏT nişanı (boş / yazılıb / dəyişdirilib / dəyişiklik ·
+ *      səbəb / xəta) + «Dəyişdirilib» KPI kartı;
+ *   5. «Balları yadda saxla» → TƏSDİQ dialoqu — qardaş faylda
+ *      (`exam_score_entry_confirm.js`, `window.EMSExamScoreEntry` API-si ilə;
+ *      modul-ölçü büdcəsi SOFT_CAP=600);
+ *   6. tarixçə çekmecəsi, görünüş / sıra / çip linkləri (SPA), «İmtahan növü»
+ *      çipi və «Sıfırla» — qardaş faylda (`exam_score_entry_nav.js`).
  *
  * Qaydalar (CLAUDE.md + docs/frontend/AJAX_SAFE_JS_PATTERN.md): `EMSDelegate.on`
- * (swap-safe, document səviyyəsində), `EMSReady` (idempotent), null-safe.
- * ⚠️ DELEQAT AÇARLARI (`evt|selector`) qlobaldır — `data-ese-*` seçiciləri
- * YALNIZ bu faylda qeyd olunur (bax test_static_js_delegate_keys.py).
+ * (swap-safe), `EMSReady` (idempotent), null-safe. ⚠️ DELEQAT AÇARLARI
+ * (`evt|selector`) qlobaldır — `data-ese-*` seçiciləri YALNIZ bu faylda.
  */
 (function (window, document) {
     "use strict";
@@ -54,6 +57,18 @@
         return row.querySelector("[data-ese-score]");
     }
 
+    function config() {
+        var el = document.getElementById("ese-confirm-config");
+        if (!el) {
+            return null;
+        }
+        try {
+            return JSON.parse(el.textContent || "{}");
+        } catch (err) {
+            return null;
+        }
+    }
+
     /* ---- Sual şəbəkəsi (S1..Sn) --------------------------------------------- */
 
     function questionCount(host) {
@@ -67,12 +82,12 @@
         var input = host.querySelector("[data-ese-question-max]");
         var raw = input ? input.value : host.getAttribute("data-question-max");
         var n = parseInt(raw || "10", 10);
-        return isNaN(n) || n < 1 ? 10 : n;
+        return isNaN(n) || n < 1 ? 10 : Math.min(100, n);
     }
 
-    function questionInputs(row) {
-        return Array.prototype.slice.call(row.querySelectorAll("[data-ese-q]")).filter(function (input) {
-            return !input.disabled;
+    function questionSelects(row) {
+        return Array.prototype.slice.call(row.querySelectorAll("[data-ese-q]")).filter(function (select) {
+            return !select.disabled;
         });
     }
 
@@ -81,14 +96,77 @@
         return value !== "" && !isNaN(num) && Math.floor(num) === num;
     }
 
+    /* Hazır (server) toggle-un etiketi seçimlə sinxron — gücləndirilməmiş xanalar üçün. */
+    function syncPlaceholderToggle(select) {
+        var wrap = select.closest("[data-ese-qwrap]");
+        var toggle = wrap ? wrap.querySelector("[data-ese-qtoggle]") : null;
+        if (!toggle) {
+            return;
+        }
+        var label = toggle.querySelector(".bootstrap-single-select__label-text");
+        if (label) {
+            label.textContent = select.value === "" ? "—" : select.value;
+        }
+        toggle.classList.toggle("is-placeholder", select.value === "");
+    }
+
+    /* Seçim variantlarını 0..max yenidən qur (maksimum dəyişəndə); dəyər max-dan böyükdürsə boşalır. */
+    function rebuildOptions(select, max) {
+        var current = select.value;
+        var keep = current !== "" && Number(current) <= max ? current : "";
+        select.textContent = "";
+        var blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "—";
+        select.appendChild(blank);
+        for (var i = 0; i <= max; i += 1) {
+            var option = document.createElement("option");
+            option.value = String(i);
+            option.textContent = String(i);
+            select.appendChild(option);
+        }
+        select.value = keep;
+        select.setAttribute("data-max", String(max));
+        if (select.dataset.bootstrapSelectReady === "true" && window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.refresh(select);
+        }
+        syncPlaceholderToggle(select);
+    }
+
+    /* Tənbəl gücləndirmə: hazır toggle → komponent (`EMSBootstrapSelect.enhance`) → menyu açılır. */
+    function enhanceQuestionSelect(select, open) {
+        var wrap = select.closest("[data-ese-qwrap]");
+        if (!wrap) {
+            return null;
+        }
+        var placeholder = wrap.querySelector("[data-ese-qtoggle]");
+        var hadFocus = !!placeholder && document.activeElement === placeholder;
+        var api = window.EMSBootstrapSelect ? window.EMSBootstrapSelect.enhance(select) : null;
+        var toggle = wrap.querySelector(".bootstrap-single-select__dropdown .bootstrap-single-select__toggle");
+        if (!api || !toggle) {
+            return null; // komponent yoxdursa hazır toggle qalır (native görünüş yoxdur)
+        }
+        if (placeholder) {
+            placeholder.remove();
+        }
+        toggle.setAttribute("aria-label", select.getAttribute("aria-label") || "");
+        if (open || hadFocus) {
+            toggle.focus(); // Tab ilə gələn fokus itməsin (hazır toggle silinir)
+            if (window.bootstrap && window.bootstrap.Dropdown) {
+                window.bootstrap.Dropdown.getOrCreateInstance(toggle).show();
+            }
+        }
+        return toggle;
+    }
+
     /* Sual balları → {sum, filled, invalid, dirty}. Boş sual = 0 (server ilə eyni). */
     function questionState(row, host) {
-        var inputs = questionInputs(row);
-        var state = { count: inputs.length, sum: 0, filled: 0, invalid: false, dirty: false };
+        var selects = questionSelects(row);
+        var state = { count: selects.length, sum: 0, filled: 0, invalid: false, dirty: false };
         var max = questionMax(host);
-        inputs.forEach(function (input) {
-            var value = (input.value || "").trim();
-            var initial = (input.getAttribute("data-initial") || "").trim();
+        selects.forEach(function (select) {
+            var value = (select.value || "").trim();
+            var initial = (select.getAttribute("data-initial") || "").trim();
             if (value !== initial) {
                 state.dirty = true;
             }
@@ -98,19 +176,14 @@
             state.filled += 1;
             if (!isInt(value) || Number(value) < 0 || Number(value) > max) {
                 state.invalid = true;
-                input.classList.add("is-invalid");
-                input.setAttribute("aria-invalid", "true");
                 return;
             }
-            input.classList.remove("is-invalid");
-            input.setAttribute("aria-invalid", "false");
             state.sum += Number(value);
         });
         return state;
     }
 
-    /* Sual sayı dəyişəndə: sütunlar açılıb-bağlanır, artıq sahələr `disabled`
-       (brauzer onları göndərmir), yekun sahəsi rejimə görə yalnız-oxunan olur. */
+    /* Sual sayı / maksimumu dəyişəndə: sütunlar, `disabled`, variantlar, yekun sahəsinin rejimi. */
     function applyQuestionGrid(host) {
         var count = questionCount(host);
         var max = questionMax(host);
@@ -123,23 +196,77 @@
         host.querySelectorAll("[data-ese-qcell]").forEach(function (td) {
             var off = Number(td.getAttribute("data-ese-qcell")) > count;
             td.hidden = off;
-            var input = td.querySelector("[data-ese-q]");
-            if (input) {
-                input.disabled = off;
-                input.setAttribute("max", String(max));
+            var select = td.querySelector("[data-ese-q]");
+            if (select) {
+                select.disabled = off;
+                if (String(select.getAttribute("data-max") || "") !== String(max)) {
+                    rebuildOptions(select, max);
+                }
             }
         });
         rows(host).forEach(function (row) {
             var total = scoreInput(row);
             if (total) {
                 total.readOnly = count > 0;
+                total.tabIndex = count > 0 ? -1 : 0;
                 total.classList.toggle("is-readonly", count > 0);
             }
         });
     }
 
-    /* Sual rejimində yekun sahəsinə canlı cəm yazılır (hamısı boşdursa sahə də
-       boş qalır — server «toxunma» kimi oxuyur). */
+    /* ---- Hərf qiyməti (server şkalası) --------------------------------------- */
+
+    function roundHalfUp(value) {
+        return Math.floor(value + 0.5);
+    }
+
+    /* {total, letter, failed} — `finals.compute_final_result` ilə eyni qayda (UX üçün). */
+    function grade(row, examScore, cfg) {
+        var entry = Number(row.querySelector("[data-ese-entry]") ? row.querySelector("[data-ese-entry]").getAttribute("data-ese-entry") : 0) || 0;
+        var bonus = Number(row.getAttribute("data-bonus") || 0) || 0;
+        var total = roundHalfUp(Math.max(0, Math.min(100, entry + examScore + bonus)));
+        var bands = (cfg && cfg.letter_bands) || [];
+        var letter = "";
+        for (var i = 0; i < bands.length; i += 1) {
+            if (total >= Number(bands[i][0])) {
+                letter = bands[i][1];
+                break;
+            }
+        }
+        var failLetter = bands.length ? bands[bands.length - 1][1] : "F";
+        var barred = row.getAttribute("data-barred") === "1";
+        var examOk = examScore >= Number(cfg ? cfg.min_final_exam_score : 0);
+        var passed = !barred && examOk && total >= Number(cfg ? cfg.pass_threshold : 0);
+        return { entry: entry, total: total, letter: passed ? letter || failLetter : failLetter, failed: !passed };
+    }
+
+    function syncLetter(row, examValue, cfg) {
+        var badge = row.querySelector("[data-ese-letter]");
+        var totalCell = row.querySelector("[data-ese-total]");
+        if (!badge) {
+            return;
+        }
+        if (examValue === "" || examValue === null) {
+            var initial = badge.getAttribute("data-initial") || "";
+            badge.textContent = initial || "—";
+            badge.className = "ems-badge ese-letter-badge " + (badge.getAttribute("data-initial-tone") || "ems-badge--muted");
+            if (totalCell) {
+                totalCell.textContent = totalCell.getAttribute("data-initial") || "—";
+            }
+            return;
+        }
+        var result = grade(row, Number(examValue), cfg);
+        badge.textContent = result.letter;
+        badge.className = "ems-badge ese-letter-badge " + (result.failed ? "ems-badge--danger" : "ems-badge--success");
+        if (totalCell) {
+            totalCell.textContent = String(result.total);
+        }
+    }
+
+    /* ---- Sətir vəziyyəti ------------------------------------------------------ */
+
+    /* Sual rejimində yekun sahəsinə canlı cəm yazılır (hamısı boşdursa sahə də boş
+       qalır — server «toxunma» kimi oxuyur). */
     function syncQuestionTotal(row, host) {
         var total = scoreInput(row);
         if (!total || questionCount(host) === 0) {
@@ -149,17 +276,9 @@
         if (state.filled === 0 && !state.dirty) {
             return state;
         }
-        total.value = state.filled === 0 ? (total.getAttribute("data-initial") || "") : String(state.sum);
-        var entryCell = row.querySelector("[data-ese-entry]");
-        var totalCell = row.querySelector("[data-ese-total]");
-        if (totalCell && state.filled > 0) {
-            var entry = Number(entryCell ? entryCell.getAttribute("data-ese-entry") : 0) || 0;
-            totalCell.textContent = String(Math.min(100, entry + state.sum));
-        }
+        total.value = state.filled === 0 ? total.getAttribute("data-initial") || "" : String(state.sum);
         return state;
     }
-
-    /* ---- Sətir vəziyyəti ------------------------------------------------- */
 
     function rowState(row) {
         var input = scoreInput(row);
@@ -174,14 +293,16 @@
         var max = Number(input.getAttribute("max") || 0);
         var num = value === "" ? null : Number(value);
         var invalid = value !== "" && (isNaN(num) || num < 0 || num > max || Math.floor(num) !== num);
+        var overCap = false;
         if (q) {
             // Sual bölgüsü dəyişibsə cəm eyni qalsa da DƏYİŞİKLİKDİR (server eyni qaydanı tətbiq edir).
             dirty = dirty || (q.filled > 0 && q.dirty);
-            invalid = invalid || q.invalid || (q.filled > 0 && q.sum > max);
+            overCap = q.filled > 0 && q.sum > max;
+            invalid = invalid || q.invalid || overCap;
         }
         // Sonrakı dəyişiklik = təqdimatlı (sahibin qaydası E7).
         var change = dirty && row.getAttribute("data-has-score") === "1";
-        return { dirty: dirty, invalid: invalid, change: change, value: value, questions: q };
+        return { dirty: dirty, invalid: invalid, overCap: overCap, change: change, value: value, questions: q };
     }
 
     var BADGE = "ems-badge";
@@ -191,7 +312,7 @@
         badge.textContent = text;
     }
 
-    function syncRow(row) {
+    function syncRow(row, cfg) {
         var input = scoreInput(row);
         var badge = row.querySelector("[data-ese-status]");
         var state = rowState(row);
@@ -201,6 +322,12 @@
             input.setAttribute("aria-invalid", state.invalid ? "true" : "false");
         }
         row.classList.toggle("is-dirty", state.dirty);
+        row.classList.toggle("is-invalid", state.invalid);
+        if (state.dirty && !state.invalid) {
+            syncLetter(row, state.value, cfg || config());
+        } else {
+            syncLetter(row, "", cfg || config()); // toxunulmamış və ya xətalı sətir: server dəyəri / «—»
+        }
         if (!badge) {
             return state;
         }
@@ -209,6 +336,8 @@
         } else if (state.change) {
             setBadge(badge, "warning", t("status-change"));
         } else if (state.dirty) {
+            setBadge(badge, "warning", t("status-dirty"));
+        } else if (row.getAttribute("data-is-changed") === "1") {
             setBadge(badge, "warning", t("status-dirty"));
         } else if (row.getAttribute("data-has-score") === "1") {
             setBadge(badge, "success", t("status-recorded"));
@@ -220,11 +349,12 @@
 
     function summarize(host) {
         var all = rows(host);
-        var total = { students: all.length, writes: 0, changes: 0, invalid: 0 };
+        var total = { students: all.length, writes: 0, changes: 0, invalid: 0, overCap: false };
         all.forEach(function (row) {
             var state = rowState(row);
             if (state.invalid) {
                 total.invalid += 1;
+                total.overCap = total.overCap || !!state.overCap;
             } else if (state.dirty) {
                 total.writes += 1;
                 if (state.change) {
@@ -260,44 +390,15 @@
     }
 
     function syncAll(host) {
-        rows(host).forEach(syncRow);
+        var cfg = config();
+        rows(host).forEach(function (row) {
+            syncRow(row, cfg);
+        });
         return syncSummary(host);
     }
 
-    /* ---- Klaviatura naviqasiyası ----------------------------------------- */
-
-    function moveFocus(current, delta) {
-        var column = current.getAttribute("data-ese-q");
-        var all = rows(root()).map(function (row) {
-            return column ? row.querySelector('[data-ese-q="' + column + '"]') : scoreInput(row);
-        }).filter(function (input) {
-            return input && !input.disabled;
-        });
-        var index = all.indexOf(current);
-        if (index < 0) {
-            return;
-        }
-        var target = all[index + delta];
-        if (target) {
-            target.focus();
-            if (typeof target.select === "function") {
-                target.select();
-            }
-        }
-    }
-
-    function onScoreKey(event, input) {
-        if (event.key === "Enter" || event.key === "ArrowDown") {
-            event.preventDefault(); // Enter formanı göndərməsin; ↓ dəyəri azaltmasın.
-            moveFocus(input, 1);
-        } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveFocus(input, -1);
-        }
-    }
-
-    function onScoreInput(event, input) {
-        var row = input.closest("[data-ese-row]");
+    function onRowInput(target) {
+        var row = target.closest("[data-ese-row]");
         var host = root();
         if (row) {
             syncRow(row);
@@ -307,10 +408,129 @@
         }
     }
 
-    DELEGATE.on("keydown", "[data-ese-score]", onScoreKey);
-    DELEGATE.on("keydown", "[data-ese-q]", onScoreKey);
-    DELEGATE.on("input", "[data-ese-score]", onScoreInput);
-    DELEGATE.on("input", "[data-ese-q]", onScoreInput);
+    /* ---- Klaviatura: sütun üzrə sətir keçidi + rəqəmlə yazma ----------------- */
+
+    function focusTargetOf(row, column) {
+        if (column) {
+            var select = row.querySelector('[data-ese-q="' + column + '"]');
+            if (!select || select.disabled) {
+                return null;
+            }
+            var wrap = select.closest("[data-ese-qwrap]");
+            return wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
+        }
+        var total = scoreInput(row);
+        return total && !total.readOnly ? total : null;
+    }
+
+    function moveFocus(current, column, delta) {
+        var all = rows(root()).map(function (row) {
+            return focusTargetOf(row, column);
+        }).filter(Boolean);
+        var index = all.indexOf(current);
+        if (index < 0) {
+            return;
+        }
+        var target = all[index + delta];
+        if (target) {
+            target.focus();
+            if (typeof target.select === "function" && target.tagName === "INPUT") {
+                target.select();
+            }
+        }
+    }
+
+    function columnOf(element) {
+        var wrap = element.closest("[data-ese-qwrap]");
+        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        return select ? select.getAttribute("data-ese-q") : "";
+    }
+
+    function handleRowKey(event, element) {
+        if (event.key === "Enter" || event.key === "ArrowDown") {
+            event.preventDefault(); // Enter formanı göndərməsin; ↓ dəyəri azaltmasın.
+            moveFocus(element, columnOf(element), 1);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            moveFocus(element, columnOf(element), -1);
+        }
+    }
+
+    var digitBuffer = { select: null, text: "", at: 0 };
+
+    /* Rəqəm düyməsi seçimi birbaşa yazır: «7» → 7; «1» + «0» (400 ms) → 10. */
+    function typeDigit(select, key, host) {
+        var now = Date.now();
+        var text = digitBuffer.select === select && now - digitBuffer.at < 400 ? digitBuffer.text + key : key;
+        var max = questionMax(host);
+        var value = Number(text);
+        if (value > max) {
+            text = key;
+            value = Number(key);
+        }
+        if (value > max) {
+            return;
+        }
+        digitBuffer = { select: select, text: text, at: now };
+        select.value = String(value);
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    DELEGATE.on("keydown", "[data-ese-qwrap] .bootstrap-single-select__toggle", function (event, toggle) {
+        var host = root();
+        var wrap = toggle.closest("[data-ese-qwrap]");
+        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        if (!host || !select) {
+            return;
+        }
+        if (/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+            typeDigit(select, event.key, host);
+            return;
+        }
+        if (event.key === "Backspace" || event.key === "Delete") {
+            event.preventDefault();
+            select.value = "";
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+            return;
+        }
+        handleRowKey(event, toggle);
+    });
+
+    DELEGATE.on("keydown", "[data-ese-score]", function (event, input) {
+        handleRowKey(event, input);
+    });
+
+    /* Tənbəl gücləndirmə — hazır toggle-a ilk klik (mousedown: fokus hadisəsindən
+       ƏVVƏL, əks halda focusin hazır toggle-u silir və click boşa gedir) / fokus (Tab). */
+    DELEGATE.on("mousedown", "[data-ese-qtoggle]", function (event, toggle) {
+        if (event.button !== 0) {
+            return;
+        }
+        event.preventDefault();
+        var wrap = toggle.closest("[data-ese-qwrap]");
+        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        if (select) {
+            enhanceQuestionSelect(select, true);
+        }
+    });
+
+    DELEGATE.on("focusin", "[data-ese-qtoggle]", function (event, toggle) {
+        var wrap = toggle.closest("[data-ese-qwrap]");
+        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        if (select) {
+            enhanceQuestionSelect(select, false);
+        }
+    });
+
+    DELEGATE.on("change", "[data-ese-q]", function (event, select) {
+        syncPlaceholderToggle(select);
+        onRowInput(select);
+    });
+
+    DELEGATE.on("input", "[data-ese-score]", function (event, input) {
+        onRowInput(input);
+    });
 
     DELEGATE.on("change", "[data-ese-question-count]", function () {
         var host = root();
@@ -328,197 +548,23 @@
         }
     });
 
-    /* ---- Sıfırla ---------------------------------------------------------- */
+    /* ---- Qardaş modul üçün ortaq API (`exam_score_entry_confirm.js`) ---------- */
 
-    DELEGATE.on("click", "[data-ese-reset]", function (event) {
-        event.preventDefault();
-        var host = root();
-        if (!host) {
-            return;
-        }
-        rows(host).forEach(function (row) {
-            var input = scoreInput(row);
-            if (input) {
-                input.value = input.getAttribute("data-initial") || "";
-            }
-            row.querySelectorAll("[data-ese-q]").forEach(function (q) {
-                q.value = q.getAttribute("data-initial") || "";
-                q.classList.remove("is-invalid");
-            });
-        });
-        syncAll(host);
-    });
+    window.EMSExamScoreEntry = {
+        root: root,
+        t: t,
+        rows: rows,
+        scoreInput: scoreInput,
+        rowState: rowState,
+        summarize: summarize,
+        syncAll: syncAll,
+        syncPlaceholderToggle: syncPlaceholderToggle,
+        questionCount: questionCount,
+        grade: grade,
+        config: config,
+    };
 
-    /* ---- Təsdiq dialoqu --------------------------------------------------- */
-
-    function scanSelected(host) {
-        var file = host.querySelector("[data-ese-meta-file]");
-        return !!(file && file.files && file.files.length);
-    }
-
-    function syncScanStatus(host) {
-        var status = host.querySelector("[data-ese-scan-status]");
-        if (!status) {
-            return;
-        }
-        var ok = scanSelected(host);
-        status.textContent = ok ? "✓ " + t("scan-ok") : "✗ " + t("scan-missing");
-        status.classList.toggle("is-ok", ok);
-        status.classList.toggle("is-missing", !ok);
-    }
-
-    function justificationComplete(host) {
-        var reason = host.querySelector("[data-ese-reason]");
-        var note = host.querySelector("[data-ese-note]");
-        return !!(reason && reason.value && note && (note.value || "").trim() && scanSelected(host));
-    }
-
-    function summaryItem(list, count, label, warning) {
-        var item = document.createElement("li");
-        if (warning) {
-            item.className = "is-warning";
-        }
-        var num = document.createElement("b");
-        num.textContent = String(count);
-        item.appendChild(num);
-        item.appendChild(document.createTextNode(label));
-        list.appendChild(item);
-    }
-
-    function showDialogError(host, message) {
-        var box = host.querySelector("[data-ese-dialog-error]");
-        if (box) {
-            box.textContent = message || "";
-            box.hidden = !message;
-        }
-    }
-
-    DELEGATE.on("click", "[data-ese-save]", function (event) {
-        event.preventDefault();
-        var host = root();
-        if (!host) {
-            return;
-        }
-        var summary = syncAll(host);
-        var line = host.querySelector("[data-ese-summary]");
-        if (summary.invalid) {
-            if (line) {
-                line.textContent = questionCount(host) > 0 ? t("question-invalid") : t("invalid");
-                line.classList.add("is-dirty");
-            }
-            var bad = host.querySelector("[data-ese-q].is-invalid, [data-ese-score].is-invalid");
-            if (bad) {
-                bad.focus();
-            }
-            return;
-        }
-        if (!summary.writes) {
-            if (line) {
-                line.textContent = t("nothing");
-            }
-            return;
-        }
-        var list = host.querySelector("[data-ese-dialog-summary]");
-        if (list) {
-            list.textContent = "";
-            summaryItem(list, summary.students, t("summary-students"));
-            summaryItem(list, summary.writes, t("summary-writes"));
-            if (summary.changes) {
-                summaryItem(list, summary.changes, t("summary-changes"), true);
-            }
-            summaryItem(list, summary.untouched, t("summary-untouched"));
-        }
-        var just = host.querySelector("[data-ese-just]");
-        if (just) {
-            just.hidden = !summary.changes;
-        }
-        showDialogError(host, "");
-        syncScanStatus(host);
-        var confirm = host.querySelector("[data-ese-confirm]");
-        if (confirm) {
-            confirm.disabled = false;
-        }
-        if (window.EMSOverlay) {
-            window.EMSOverlay.open("eseSaveDialog");
-        }
-    });
-
-    DELEGATE.on("change", "[data-ese-meta-file]", function () {
-        var host = root();
-        if (host) {
-            syncScanStatus(host);
-        }
-    });
-
-    DELEGATE.on("submit", "form[data-ese-form]", function (event, form) {
-        var host = root();
-        if (!host) {
-            return;
-        }
-        var summary = summarize(host);
-        if (summary.invalid) {
-            event.preventDefault();
-            showDialogError(host, t("invalid"));
-            return;
-        }
-        if (summary.changes && !justificationComplete(host)) {
-            event.preventDefault();
-            showDialogError(host, t("need-justification"));
-            syncScanStatus(host);
-            var reason = host.querySelector("[data-ese-reason]");
-            if (reason && !reason.value) {
-                var toggle = form.querySelector(".ese-just .bootstrap-single-select__toggle");
-                (toggle || reason).focus();
-            }
-            return;
-        }
-        // İkiqat göndərişin qarşısı: təsdiq düyməsi kilidlənir.
-        var confirm = form.querySelector("[data-ese-confirm]");
-        if (confirm) {
-            confirm.disabled = true;
-        }
-    });
-
-    /* ---- Tarixçə çekmecəsi ----------------------------------------------- */
-
-    DELEGATE.on("click", "[data-ese-history]", function (event, btn) {
-        event.preventDefault();
-        var host = root();
-        if (!host) {
-            return;
-        }
-        var id = btn.getAttribute("data-ese-history");
-        var template = host.querySelector('[data-ese-history-tpl="' + id + '"]');
-        var body = host.querySelector("[data-ese-drawer-body]");
-        if (!template || !body) {
-            return;
-        }
-        body.textContent = "";
-        body.appendChild(template.content.cloneNode(true));
-        if (window.EMSOverlay) {
-            window.EMSOverlay.open("eseHistoryDrawer");
-        }
-    });
-
-    /* ---- Seçim sırası açarı (Qrup → Fənn / Fənn → Qrup) ------------------- */
-
-    DELEGATE.on("click", "[data-ese-nav]", function (event, link) {
-        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-            return;
-        }
-        var href = link.getAttribute("href") || "";
-        var panel = link.closest("[data-profile-section-panel]");
-        var section = panel ? panel.getAttribute("data-profile-section-panel") : "";
-        if (!href || !section || typeof window.EMSProfileLoadSection !== "function") {
-            return; // kabinetdən kənar: linkin öz davranışı
-        }
-        event.preventDefault();
-        var url = new URL(href, window.location.href);
-        url.searchParams.set("section", section);
-        window.EMSProfileLoadSection(section, url.pathname + url.search);
-    });
-
-    /* ---- İlk render + hər swap -------------------------------------------- */
+    /* ---- İlk render + hər swap ------------------------------------------------ */
 
     window.EMSReady(function () {
         var host = root();
@@ -527,6 +573,5 @@
         }
         applyQuestionGrid(host);
         syncAll(host);
-        syncScanStatus(host);
     });
 })(window, document);

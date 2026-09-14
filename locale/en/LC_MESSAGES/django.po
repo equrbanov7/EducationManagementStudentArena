@@ -68645,3 +68645,15 @@ msgstr "Remove member from course"
 
 msgid "Təşkilatın qeydiyyat sorğusu rədd edilsin? Bu əməliyyat geri qaytarıla bilməz."
 msgstr "Reject this organization's registration request? This cannot be undone."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Hərf"
+msgstr "Letter"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Təsdiq et — sistemə yaz"
+msgstr "Confirm — record in the system"
+
+msgctxt "registrar.exam_score_entry"
+msgid "tələbə kəsilir (F)"
+msgstr "student(s) failing (F)"

@@ -46,9 +46,24 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
     section["sheets"] = [row for row in sheets if not sheet_kind or row["exam_kind"] == sheet_kind]
     section["sheet_kind"] = sheet_kind
     section["exam_kind_options"] = service.exam_score_changes.exam_kind_options(with_all=False)
-    section["sheet_defaults"]["examiner_name"] = section["sheet_defaults"][
-        "examiner_name"
-    ] or sheets_service.instructor_label(offering)
+    defaults = section["sheet_defaults"]
+    defaults["examiner_name"] = defaults["examiner_name"] or sheets_service.instructor_label(offering)
+    # 2026-09-14 (sahibin rəyi): yoxlayan / nəzarətçi təşkilatın müəllimlərindən
+    # SEÇİLİR; defolt yoxlayan = açılışın müəllimi (əvvəlcədən seçili).
+    teachers = service.teachers_for_organization(organization=selected_org)
+    teacher_ids = {row["id"] for row in teachers}
+    instructor_id = str(offering.instructor_id) if offering.instructor_id else ""
+    if instructor_id and instructor_id not in teacher_ids:
+        teachers.insert(0, {"id": instructor_id, "name": sheets_service.instructor_label(offering)})
+        teacher_ids.add(instructor_id)
+    defaults["examiner_id"] = (
+        defaults.get("examiner_id") if defaults.get("examiner_id") in teacher_ids else instructor_id
+    )
+    defaults["invigilator_id"] = defaults.get("invigilator_id") if defaults.get("invigilator_id") in teacher_ids else ""
+    section["teachers"] = teachers
+    section["exam_kind_label"] = next(
+        (o["label"] for o in section["exam_kind_options"] if o["value"] == defaults["exam_kind"]), ""
+    )
     section["steps"] = _steps(offering=offering, saved=section["saved_flag"])
     grid = section["sheet_defaults"]
     section["question_count"] = int(grid.get("question_count") or 0)
@@ -57,6 +72,15 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
         {"value": str(n), "label": str(n) if n else pgettext(_CTX, "0 — yalnız yekun bal")}
         for n in range(0, service.exam_score_questions.QUESTION_COUNT_MAX + 1)
     ]
+    section["question_score_options"] = list(range(0, section["question_max"] + 1))
+    _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX)
+    # Təsdiq dialoqu üçün server şkalası (json_script) — hərf/keçid JS-də eyni qayda ilə.
+    section["confirm_config"] = {
+        "letter_bands": roster["letter_bands"],
+        "pass_threshold": roster["pass_threshold"],
+        "min_final_exam_score": roster["min_final_exam_score"],
+        "exam_score_max": int(roster["exam_score_max"]),
+    }
     section["import_columns"] = importer.template_columns(
         roster["exam_score_max"], section["question_count"], section["question_max"]
     )
@@ -71,6 +95,20 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
     )
     section["import_preview_url"] = reverse("accounts:exam_score_import_preview")
     section["import_apply_url"] = reverse("accounts:exam_score_import_apply")
+
+
+def _attach_question_cells(rows, question_count_max) -> None:
+    """Hər sətrə S1..S10 xanaları (`index`, `label`, `value`) — şablonda iç-içə döngü əvəzinə hazır siyahı.
+
+    Sual sayından artıq xanalar şablonda `hidden` + `disabled` render olunur; JS
+    «Sual sayı» dəyişəndə açıb-bağlayır. Sonuncu daxiletmənin bölgüsü dəyər kimi.
+    """
+    for row in rows:
+        values = [str(v) for v in (row.get("question_scores") or [])]
+        row["question_cells"] = [
+            {"index": index, "label": f"S{index}", "value": values[index - 1] if index <= len(values) else ""}
+            for index in range(1, question_count_max + 1)
+        ]
 
 
 def _steps(*, offering, saved) -> list:

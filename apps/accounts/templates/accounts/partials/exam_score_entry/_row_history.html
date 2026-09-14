@@ -26,8 +26,8 @@ Kontekst: `row` (siyahı sətri).{% endcomment %}
       {% if entry.sheet_id %}
       <span class="ese-history__sheet">
         <i class="fas fa-file-lines" aria-hidden="true"></i>
-        {% if entry.sheet_exam_kind_label %}{{ entry.sheet_exam_kind_label }} ·{% endif %}
-        {% if entry.sheet_exam_date %}{% trans "imtahan" context "registrar.exam_score_entry" %} {{ entry.sheet_exam_date }}{% endif %}
+        {{ entry.sheet_exam_kind_label }}
+        {% if entry.sheet_exam_date %}· {% trans "imtahan" context "registrar.exam_score_entry" %} {{ entry.sheet_exam_date }}{% endif %}
         {% if entry.sheet_protocol %}· № {{ entry.sheet_protocol }}{% endif %}
         {% if entry.sheet_examiner %}· {{ entry.sheet_examiner }}{% endif %}
         {% if entry.sheet_source == "import" %}· {% trans "fayldan" context "registrar.exam_score_entry" %}{% endif %}

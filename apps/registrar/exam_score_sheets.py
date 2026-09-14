@@ -135,18 +135,49 @@ def sheet_metadata_from_post(post, files, *, offering):
     """
     examiner_name = (post.get("examiner_name") or "").strip()
     question_count, question_max = questions.clean_question_grid(post.get("question_count"), post.get("question_max"))
+    # 2026-09-14 (sahibin rəyi): yoxlayan / nəzarətçi SEÇİLİR (istifadəçi id-si);
+    # boş yoxlayan = açılışın müəllimi; köhnə sərbəst-mətn sahələri fallback kimi oxunur.
+    examiner = resolve_staff_user(post.get("examiner"), offering=offering) or getattr(offering, "instructor", None)
+    invigilator = resolve_staff_user(post.get("invigilator"), offering=offering)
     return {
         "exam_date": parse_exam_date(post.get("exam_date")),
         "exam_kind": clean_exam_kind(post.get("exam_kind")),
         "question_count": question_count,
         "question_max": question_max,
-        "examiner": getattr(offering, "instructor", None),
-        "examiner_name": examiner_name or instructor_label(offering),
-        "invigilator_name": (post.get("invigilator_name") or "").strip()[:200],
+        "examiner": examiner,
+        "examiner_name": _person_label(examiner) or examiner_name or instructor_label(offering),
+        "invigilator": invigilator,
+        "invigilator_name": _person_label(invigilator) or (post.get("invigilator_name") or "").strip()[:200],
         "protocol_number": (post.get("protocol_number") or "").strip()[:64],
         "note": (post.get("sheet_note") or "").strip(),
         "evidence": files.get("sheet_evidence") if files is not None else None,
     }
+
+
+def _person_label(user) -> str:
+    if user is None:
+        return ""
+    return user.get_full_name() or user.username
+
+
+def resolve_staff_user(raw_id, *, offering):
+    """Formadan gələn istifadəçi id-si → təşkilatın AKTİV üzvü olan istifadəçi; boş → ``None``.
+
+    Yad / naməlum id fail-closed ``ValidationError`` verir (mesaj mövcud kataloq cütüdür).
+    """
+    from django.contrib.auth import get_user_model
+
+    raw = (raw_id or "").strip() if isinstance(raw_id, str) else raw_id
+    if not raw:
+        return None
+    try:
+        user = get_user_model().objects.filter(pk=int(raw)).first()
+    except (TypeError, ValueError):
+        user = None
+    if user is None:
+        raise ValidationError(pgettext("accounts.groups", "Seçilmiş şəxs bu təşkilatın aktiv üzvü deyil."))
+    _assert_examiner_in_organization(user, offering)
+    return user
 
 
 def _assert_examiner_in_organization(examiner, offering):
@@ -178,6 +209,7 @@ def create_sheet(
     exam_date=None,
     examiner=None,
     examiner_name="",
+    invigilator=None,
     invigilator_name="",
     protocol_number="",
     note="",
@@ -198,6 +230,9 @@ def create_sheet(
     """
     examiner = examiner if examiner is not None else getattr(offering, "instructor", None)
     _assert_examiner_in_organization(examiner, offering)
+    if invigilator is not None:
+        _assert_examiner_in_organization(invigilator, offering)
+        invigilator_name = invigilator_name or _person_label(invigilator)
     grid = questions.question_defaults()
     if question_count is not None:
         grid["question_count"] = int(question_count)
@@ -210,7 +245,8 @@ def create_sheet(
         exam_kind=clean_exam_kind(exam_kind),
         exam_date=exam_date,
         examiner=examiner,
-        examiner_name=(examiner_name or instructor_label(offering))[:200],
+        examiner_name=(examiner_name or _person_label(examiner) or instructor_label(offering))[:200],
+        invigilator=invigilator,
         invigilator_name=(invigilator_name or "")[:200],
         protocol_number=(protocol_number or "")[:64],
         note=note or "",
@@ -221,7 +257,7 @@ def create_sheet(
         created_by=by_user,
         created_by_name=correction_author_name(by_user, request),
     )
-    sheet.full_clean(exclude=["created_by", "examiner"])
+    sheet.full_clean(exclude=["created_by", "examiner", "invigilator"])
     sheet.save()
     return sheet
 
@@ -287,7 +323,9 @@ def sheet_row(sheet) -> dict:
         "is_practical": sheet.exam_kind == ExamScoreSheetKind.PRACTICAL,
         "exam_date": sheet.exam_date.strftime("%d.%m.%Y") if sheet.exam_date else "",
         "exam_date_iso": sheet.exam_date.isoformat() if sheet.exam_date else "",
+        "examiner_id": str(sheet.examiner_id) if sheet.examiner_id else "",
         "examiner_name": sheet.examiner_name,
+        "invigilator_id": str(sheet.invigilator_id) if sheet.invigilator_id else "",
         "invigilator_name": sheet.invigilator_name,
         "protocol_number": sheet.protocol_number,
         "note": sheet.note,
@@ -325,7 +363,9 @@ def latest_sheet_defaults(sheets) -> dict:
         return {
             "exam_date": "",
             "exam_kind": ExamScoreSheetKind.WRITTEN,
+            "examiner_id": "",
             "examiner_name": "",
+            "invigilator_id": "",
             "invigilator_name": "",
             "protocol_number": "",
             **grid,
@@ -334,7 +374,9 @@ def latest_sheet_defaults(sheets) -> dict:
     return {
         "exam_date": last["exam_date_iso"],
         "exam_kind": last.get("exam_kind", ExamScoreSheetKind.WRITTEN),
+        "examiner_id": last.get("examiner_id", ""),
         "examiner_name": last["examiner_name"],
+        "invigilator_id": last.get("invigilator_id", ""),
         "invigilator_name": last["invigilator_name"],
         "protocol_number": last["protocol_number"],
         "question_count": last.get("question_count", grid["question_count"]),
@@ -352,6 +394,7 @@ __all__ = [
     "latest_sheet_defaults",
     "offerings_for_group",
     "parse_exam_date",
+    "resolve_staff_user",
     "sheet_metadata_from_post",
     "sheet_row",
     "sheets_for_offering",

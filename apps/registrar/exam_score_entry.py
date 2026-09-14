@@ -71,6 +71,7 @@ from .exam_score_roster import (  # noqa: F401 — re-eksport (public fasad `exa
     roster_for_offering,
     status_counts,
     subjects_for_period,
+    teachers_for_organization,
 )
 from .models import (
     CorrectionReason,
