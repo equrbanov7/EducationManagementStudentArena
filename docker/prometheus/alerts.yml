@@ -193,12 +193,17 @@ groups:
           summary: "OOM: {{ $labels.name }}"
           description: "{{ $labels.name }} yaddaş limitinə görə öldürülüb."
 
+      # 2026-09-15 istehsal tapıntısı: `container_memory_usage_bytes` səhifə keşini
+      # (page cache) də sayır — postgres-backup dump yazanda keş limitə «yaxınlaşır»,
+      # amma real RSS kiçikdir; alert hər 4 saatdan bir təkrarlanıb Brevo-ya gedirdi
+      # (bounce/blocked statistikası → OTP məktubları növbəyə düşürdü). cgroup-un
+      # OOM qərarı `working_set` (usage − inactive_file) üzərindəndir; onu ölçürük.
       - alert: ContainerMemoryNearLimit
         expr: >
-          (container_memory_usage_bytes{name=~"emsarena-.+|educationmanagementstudentarena-.+"}
+          (container_memory_working_set_bytes{name=~"emsarena-.+|educationmanagementstudentarena-.+"}
            / container_spec_memory_limit_bytes{name=~"emsarena-.+|educationmanagementstudentarena-.+"} > 0.90)
           and (container_spec_memory_limit_bytes > 0)
-        for: 5m
+        for: 10m
         labels:
           severity: warning
         annotations:
