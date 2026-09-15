@@ -573,6 +573,39 @@ serverdə yaradılan `superadmin` (`createsuperuser`, 2026-09-15).
     reyestr qrupu seçicisinin işlədiyini, sual idxalında KaTeX aktivlərinin (CSP) 200
     qaytardığını bir dəfə brauzerdə yoxlayın — sənədlər `docs/features/`.
 
+## 5.3 2026-09-15/16 istehsal tapıntıları — OTP gecikməsi, alert, backup, ilkin parollar
+
+- **OTP məktubları 25–70 dəq gec gəlirdi — səbəb Brevo tərəfində idi.** Gmail `Received:`
+  başlığı və Brevo mesaj tarixçəsi (Sent 16:08 → Delivered 17:17, *Deferred* yoxdur)
+  göstərdi ki, məktubu Brevo özü növbədə saxlayıb. Hesab statistikası pis idi
+  (7 gün: 34 məktub, 52.9 % Blocked, 5.9 % Hard bounce) — Alertmanager
+  `ContainerMemoryNearLimit`-i hər 4 saatdan bir mövcud olmayan `ops@wcu.edu.az`-a
+  göndərirdi, Brevo ünvanı bloklamışdı («blocked: due to blacklist user») və hesabı
+  avtomatik yavaşlatmışdı. Tətbiq OTP-ni sinxron SMTP ilə anında verir (`EMAIL_TIMEOUT`).
+  Diaqnostika qaydası: əvvəlcə Brevo *Statistics* və mesajın *History*-si, sonra
+  Gmail «Show original» `Received:` zənciri.
+- Düzəlişlər: qayda `container_memory_working_set_bytes` ilə (əvvəlki `usage_bytes`
+  backup-ın page cache-ini sayırdı — saxta alert); `BACKUP_MEM_LIMIT` defolt 512M;
+  serverdə `ALERT_EMAIL_TO=equrbanov724@gmail.com` (yeganə real qutu). Sonrakı test
+  məktubu Brevo→Gmail 1 s-də çatdı.
+- **Backup:** `POSTGRES_BACKUP_SCHEDULE="0 1 * * *"` + `POSTGRES_BACKUP_TZ=Asia/Baku`
+  (go-cron, 5 sahə, TZ ilə) — hər gecə 01:00 Bakı tam dump (`backups/postgres/daily`,
+  ~700 MB), saxlama 7 gün / 4 həftə / 3 ay. Konteynerin cron-u dəyişəndə deploy
+  `up -d postgres-backup` ilə yenidən yaradır.
+- **İlkin parollar (müəllim/tələbə):** `provision_student_credentials` istehsalda
+  yalnız icra-başına açıq ACK ilə işləyir (`core/management/command_safety.py`
+  allowlist); seed/demo komandaları üçün istehsal icazəsi yoxdur:
+
+  ```bash
+  docker exec -e MANAGEMENT_COMMAND_PRODUCTION_ACK=provision_student_credentials \
+    educationmanagementstudentarena-app-1 python manage.py provision_student_credentials \
+    --org qku --audience teachers --generate --csv /tmp/muellimler.csv
+  docker cp educationmanagementstudentarena-app-1:/tmp/muellimler.csv /home/wcu/creds/
+  ```
+
+  Artıq qurulmuş hesablar (e-poçt təsdiqli + parol dəyişmə tələbi yox) ötürülür
+  (`--force` olmadan); CSV-də parol var — serverdən kənara yalnız şifrəli kanalla.
+
 ---
 
 ## 6. Static & Private Media Handling
