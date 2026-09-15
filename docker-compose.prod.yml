@@ -245,7 +245,7 @@ services:
       resources:
         limits:
           cpus: "${BACKUP_CPU_LIMIT:-0.5}"
-          memory: ${BACKUP_MEM_LIMIT:-256M}
+          memory: ${BACKUP_MEM_LIMIT:-512M}
     # Son backup uğursuzdursa 200 qaytarmır → konteyner unhealthy görünür və
     # TargetDown/monitorinq üzərindən görünən siqnal yaranır.
     healthcheck:
