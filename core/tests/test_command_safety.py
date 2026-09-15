@@ -2,12 +2,16 @@
 
 import importlib
 from io import StringIO
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from django.core.management.base import CommandError
 from django.test import SimpleTestCase
 
-from core.management.command_safety import ProductionCommandSafetyMixin, require_safe_management_command
+from core.management.command_safety import (
+    PRODUCTION_ACK_ENV,
+    ProductionCommandSafetyMixin,
+    require_safe_management_command,
+)
 
 _PROTECTED_COMMAND_MODULES = (
     "apps.accounts.management.commands.provision_student_credentials",
@@ -54,6 +58,20 @@ class ManagementCommandSafetyTests(SimpleTestCase):
                         command.execute(password=_SENSITIVE_VALUE, **_base_execute_options())
 
                     command.handle.assert_not_called()
+
+    def test_production_ack_opens_only_the_allowlisted_command(self):
+        # Sahibin qərarı 2026-09-16: ilkin parol paylanması istehsalda açıq ACK ilə.
+        with self.settings(MANAGEMENT_COMMAND_ENVIRONMENT="production"):
+            with patch.dict("os.environ", {PRODUCTION_ACK_ENV: "provision_student_credentials"}):
+                require_safe_management_command("provision_student_credentials")
+                for denied in ("seed_demo_hierarchy", "import_users_from_excel", "create_sample_orgs"):
+                    with self.subTest(command=denied), self.assertRaises(CommandError):
+                        require_safe_management_command(denied)
+            # ACK dəyəri dəqiq komanda adı olmalıdır; başqa ad / boş dəyər açmır.
+            for wrong in ("1", "true", "seed_demo_hierarchy", " provision_student_credentials_x"):
+                with self.subTest(ack=wrong), patch.dict("os.environ", {PRODUCTION_ACK_ENV: wrong}):
+                    with self.assertRaises(CommandError):
+                        require_safe_management_command("provision_student_credentials")
 
     def test_unknown_environment_fails_closed(self):
         with self.settings(MANAGEMENT_COMMAND_ENVIRONMENT="prodution"):
