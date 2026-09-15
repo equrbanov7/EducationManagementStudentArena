@@ -233,6 +233,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_EXTRA_OPTS: "-Z6 --blobs"
       SCHEDULE: ${POSTGRES_BACKUP_SCHEDULE:-@daily}
+      # Cron ifadəsi bu saat qurşağında hesablanır (sahibin qərarı 2026-09-15: hər gecə 01:00 Bakı).
+      TZ: ${POSTGRES_BACKUP_TZ:-Asia/Baku}
       BACKUP_KEEP_DAYS: ${POSTGRES_BACKUP_KEEP_DAYS:-7}
       BACKUP_KEEP_WEEKS: ${POSTGRES_BACKUP_KEEP_WEEKS:-4}
       BACKUP_KEEP_MONTHS: ${POSTGRES_BACKUP_KEEP_MONTHS:-3}
