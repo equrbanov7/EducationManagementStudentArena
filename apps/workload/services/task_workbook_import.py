@@ -39,6 +39,7 @@ from apps.workload.services.task_workbook_parsing import (
     _title_az,
     block_chosen_subject,
     clean_subject_name,
+    group_year_from_name,
     is_block,
     slug_name,
     split_tokens,
@@ -223,12 +224,14 @@ class Importer:
         sector = (
             "en" if re.search(r"\b(ing|ING|İNG)\b", token) else "ru" if re.search(r"\b(rus|RUS)\b", token) else "az"
         )
+        if sector == "az" and "ingilis" in slug_name(getattr(self, "_current_spec_text", "")):
+            sector = "en"
         unit = OrgUnit(
             organization=self.org,
             parent=specialty,
             unit_type=OrgUnitType.GROUP,
             name=token,
-            settings={"language_sector": sector, "admission_year": int(self.year[:4])},
+            settings={"language_sector": sector, "admission_year": group_year_from_name(token, int(self.year[:4]))},
         )
         if self.apply:
             try:
@@ -398,10 +401,16 @@ class Importer:
             spec_tokens = [t for t in _SPLIT_RE.split(record["specialty_text"]) if t.strip()]
             groups, group_actions = [], []
             for position, token in enumerate(tokens):
-                spec_text = (
-                    spec_tokens[position] if position < len(spec_tokens) else (spec_tokens[0] if spec_tokens else "")
-                )
+                # İxtisas sütunu qrup sayından azdırsa artıq qruplar üçün ƏVVƏLCƏ qrup
+                # kodunun hərfləri («236 M» → Meşəçilik), sonra ilk ixtisas mətni.
+                if position < len(spec_tokens):
+                    spec_text = spec_tokens[position]
+                elif self.resolve_specialty("", token, None) is not None:
+                    spec_text = ""
+                else:
+                    spec_text = spec_tokens[0] if spec_tokens else ""
                 specialty = self.resolve_specialty(spec_text, token, chair)
+                self._current_spec_text = spec_text
                 for unit, action in self.resolve_group(token, specialty):
                     group_actions.append(f"{unit.name if unit is not None else token}:{action}")
                     if unit is not None and unit.pk:

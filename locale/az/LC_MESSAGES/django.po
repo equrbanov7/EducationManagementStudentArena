@@ -75269,3 +75269,7 @@ msgstr "İllik, AZN — məs. 3900"
 msgctxt "student_intake"
 msgid "İxtisaslaşma"
 msgstr "İxtisaslaşma"
+
+msgctxt "student_intake"
+msgid "Qrup tutumu dolub — kafedra sonradan bölə bilər."
+msgstr "Qrup tutumu dolub — kafedra sonradan bölə bilər."
