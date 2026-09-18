@@ -74,6 +74,7 @@ STRINGS = {
     ("student_intake", "qəbul edildi / möhlətlə / güzəştli / TTK"): ("admitted / deferred / concession / TTK", "зачислен / с отсрочкой / льготный / TTK", "kabul edildi / ertelemeli / indirimli / TTK"),
     ("student_intake", "İllik, AZN — məs. 3900"): ("Per year, AZN — e.g. 3900", "В год, AZN — напр. 3900", "Yıllık, AZN — örn. 3900"),
     ("student_intake", "İxtisaslaşma"): ("Specialisation", "Специализация", "Uzmanlık"),
+    ("student_intake", "Qrup tutumu dolub — kafedra sonradan bölə bilər."): ("Group is at capacity — the chair can split it later.", "Группа заполнена — кафедра сможет разделить её позже.", "Grup kapasitesi dolu — bölüm daha sonra ayırabilir."),
 }  # fmt: skip
 
 
