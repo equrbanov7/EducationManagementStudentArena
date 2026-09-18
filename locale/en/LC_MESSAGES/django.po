@@ -75595,3 +75595,7 @@ msgstr "Per year, AZN — e.g. 3900"
 msgctxt "student_intake"
 msgid "İxtisaslaşma"
 msgstr "Specialisation"
+
+msgctxt "student_intake"
+msgid "Qrup tutumu dolub — kafedra sonradan bölə bilər."
+msgstr "Group is at capacity — the chair can split it later."

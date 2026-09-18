@@ -257,7 +257,9 @@ def specialty_unit_of(program):
     return getattr(program, "specialty_unit", None)
 
 
-def propose_group_for(organization, program, *, sector: str, taken: dict, admission_year=None):
+def propose_group_for(
+    organization, program, *, sector: str, taken: dict, admission_year=None, allow_full=False, degree_level=""
+):
     """Sətir üçün qrup təklifi.
 
     ``taken`` — BU FAYLDA artıq təyin edilmiş qrupların sayğacı: eyni qrupa
@@ -270,14 +272,18 @@ def propose_group_for(organization, program, *, sector: str, taken: dict, admiss
     if specialty is None:
         return None, []
     rows = group_options(
-        organization, specialty, sector=parse_language(sector) or sector, admission_year=admission_year
+        organization,
+        specialty,
+        sector=parse_language(sector) or sector,
+        admission_year=admission_year,
+        degree_level=str(getattr(program, "degree_level", "") or degree_level or ""),
     )
     for row in rows:
         extra = taken.get(row["id"], 0)
         row["taken"] += extra
         row["free"] = max(row["capacity"] - row["taken"], 0)
         row["is_full"] = row["taken"] >= row["capacity"]
-    return propose_group(rows), rows
+    return propose_group(rows, allow_full=allow_full), rows
 
 
 def enrich(plan, row: dict, context) -> None:
@@ -391,6 +397,8 @@ def resolve_atis_targets(plan, row: dict, context) -> bool:
         sector=sector,
         taken=context.group_usage,
         admission_year=_text(row.get("admission_year")),
+        allow_full=bool(getattr(context, "allow_full_groups", False)),
+        degree_level=_text(row.get("degree_level")),
     )
     specialty = specialty_unit_of(program)
     plan.targets["program"] = program
@@ -416,6 +424,8 @@ def resolve_atis_targets(plan, row: dict, context) -> bool:
         plan.warnings.append(
             pgettext(_CTX, "Qrup avtomatik təklif olundu: %s — tətbiqdən əvvəl dəyişə bilərsiniz.") % proposal["name"]
         )
+        if proposal.get("free", 1) <= 0:
+            plan.warnings.append(pgettext(_CTX, "Qrup tutumu dolub — kafedra sonradan bölə bilər."))
     else:
         plan.warnings.append(
             pgettext(_CTX, "Uyğun boş qrup tapılmadı — tətbiqdən əvvəl qrup seçin və ya yeni qrup yaradın.")
