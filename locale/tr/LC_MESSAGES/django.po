@@ -75167,3 +75167,7 @@ msgstr "Yıllık, AZN — örn. 3900"
 msgctxt "student_intake"
 msgid "İxtisaslaşma"
 msgstr "Uzmanlık"
+
+msgctxt "student_intake"
+msgid "Qrup tutumu dolub — kafedra sonradan bölə bilər."
+msgstr "Grup kapasitesi dolu — bölüm daha sonra ayırabilir."
