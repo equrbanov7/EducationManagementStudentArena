@@ -23,10 +23,9 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from apps.accounts.services.username_repair import slug_name
 from apps.organizations.models import Organization
 from apps.workload.services.task_workbook_import import Importer
-from apps.workload.services.task_workbook_parsing import parse_sheet
+from apps.workload.services.task_workbook_parsing import parse_sheet, slug_name
 from core.export_safety import safe_csv_writer
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
