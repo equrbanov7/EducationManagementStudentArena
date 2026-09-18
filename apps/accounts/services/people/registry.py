@@ -67,6 +67,10 @@ FILTER_DEFAULTS = {
     "form": "",
     "funding": "",
     "status": "",
+    # ATİS qəbul sütunları (2026-09-19): qəbul növü, qəbul xətti, tədris dili.
+    "admission_status": "",
+    "channel": "",
+    "language": "",
     "sort": "name",
     "page": 1,
 }
@@ -102,6 +106,9 @@ def parse_registry_filters(request) -> dict:
         "form": _get("form"),
         "funding": _get("funding"),
         "status": _get("status"),
+        "admission_status": _get("admission_status"),
+        "channel": _get("channel"),
+        "language": _get("language"),
         "sort": sort if sort in REGISTRY_SORT_OPTIONS else "name",
         "page": page,
     }
@@ -114,6 +121,7 @@ def _apply_filters(records, values, *, organization):
             search
             | Q(student__profile__institutional_identifier__icontains=values["search"])
             | Q(atis_id__icontains=values["search"])
+            | Q(student__profile__id_document_number__icontains=values["search"])
         )
     if values["program"]:
         records = records.filter(program_id=values["program"])
@@ -137,6 +145,12 @@ def _apply_filters(records, values, *, organization):
         records = records.filter(funding_type=values["funding"])
     if values["status"]:
         records = records.filter(status=values["status"])
+    if values.get("admission_status"):
+        records = records.filter(admission_status=values["admission_status"])
+    if values.get("channel"):
+        records = records.filter(admission_channel=values["channel"])
+    if values.get("language"):
+        records = records.filter(instruction_language=values["language"])
     if values["sector"]:
         # Sektor `OrgUnit.settings` JSON-undadır (tenant-konfiqurasiya olunan) —
         # DB-də indeks yoxdur, ona görə uyğun qrup id-ləri BİR sorğu ilə
@@ -188,6 +202,13 @@ def _row(record, *, ancestors, period, movement_counts) -> dict:
         "status_tone": STATUS_TONES.get(record.status, "info"),
         "movement_count": movement_counts.get(str(record.pk), 0),
         "admission_score": str(record.admission_score) if record.admission_score is not None else "",
+        # ATİS qəbul sütunları (2026-09-19).
+        "admission_status": record.admission_status,
+        "admission_status_label": str(record.get_admission_status_display()),
+        "channel_label": str(record.get_admission_channel_display()) if record.admission_channel else "",
+        "tour_label": str(record.get_admission_tour_display()) if record.admission_tour else "",
+        "language_label": str(record.get_instruction_language_display()) if record.instruction_language else "",
+        "tuition_fee": str(record.tuition_fee) if record.tuition_fee is not None else "",
     }
 
 

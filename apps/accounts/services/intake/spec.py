@@ -72,7 +72,21 @@ def columns() -> tuple[Column, ...]:
             pgettext(_CTX, "Təhsil haqqı"),
             pgettext(_CTX, "dövlət sifarişi / ödənişli"),
         ),
-    )
+        # ── ATİS «Bakalavr» ixracının qalan sütunları (sahibin qərarı 2026-09-19) ──
+        # Hamısı opsionaldır; başlıqlar ATİS-in öz yazılışı ilə də tanınır.
+        Column("admission_status", pgettext(_CTX, "Qəbul statusu"), pgettext(_CTX, "qəbul edildi / möhlətlə / güzəştli / TTK")),
+        Column("admission_channel", pgettext(_CTX, "Qəbul xətti"), pgettext(_CTX, "DİM vasitəsilə / imtahansız")),
+        Column("tour", pgettext(_CTX, "Tur"), pgettext(_CTX, "FirstTour / SecondTour")),
+        Column("tuition_fee", pgettext(_CTX, "Təhsil haqqı məbləği"), pgettext(_CTX, "İllik, AZN — məs. 3900")),
+        Column("specialization", pgettext(_CTX, "İxtisaslaşma"), pgettext(_CTX, "Boş qala bilər")),
+        Column("citizenship", pgettext(_CTX, "Vətəndaşlıq"), pgettext(_CTX, "Boş qala bilər")),
+        Column("id_series", pgettext(_CTX, "Vəsiqə seriyası"), pgettext(_CTX, "AA / AB / AZE")),
+        Column("id_number", pgettext(_CTX, "Vəsiqə nömrəsi"), pgettext(_CTX, "Boş qala bilər")),
+        Column("address", pgettext(_CTX, "Qeydiyyat ünvanı"), pgettext(_CTX, "Boş qala bilər")),
+        Column("applied_at", pgettext(_CTX, "Müraciət tarixi"), pgettext(_CTX, "iiii-aa-gg ss:dd")),
+        Column("admitted_at", pgettext(_CTX, "Qəbul tarixi"), pgettext(_CTX, "iiii-aa-gg ss:dd")),
+        Column("note", pgettext(_CTX, "Qeyd"), pgettext(_CTX, "Boş qala bilər")),
+    )  # fmt: skip
 
 
 def header_row() -> list:
@@ -126,7 +140,66 @@ def header_index() -> dict:
     index[normalize_header("forma")] = "education_form"
     index[normalize_header("tehsil haqqi")] = "funding"
     index[normalize_header("maliyyelesme")] = "funding"
+    # ATİS «Bakalavr» ixracının (MÜRACİƏTLƏR vərəqi) başlıqları — 2026-09-19.
+    # ⚠️ Həm «İXTİSAS KODU» (ATİS daxili id), həm «İXTİSAS ŞİFRƏSİ» (rəsmi NK 503
+    # şifri) var; yalnız ŞİFRƏ proqram açarıdır — «kodu» ATİS id kimi saxlanır.
+    for header, key in (
+        ("MÜRACİƏT İD", "atis_id"),
+        ("SOYAD", "last_name"),
+        ("AD", "first_name"),
+        ("ATA ADI", "patronymic"),
+        ("DOĞUM TARİXİ", "birth_date"),
+        ("SERİYA", "id_series"),
+        ("NÖMRƏ", "id_number"),
+        ("ƏLAQƏ NÖMRƏSİ", "phone"),
+        ("ELEKTRON POÇT", "email"),
+        ("QEYDİYYAT ÜNVANI", "address"),
+        ("CİNSİ", "gender"),
+        ("TƏDRİS DİLİ", "language_sector"),
+        ("QƏBUL İLİ", "admission_year"),
+        ("VƏTƏNDAŞLIQ", "citizenship"),
+        ("MÜRACİƏT TARİXİ", "applied_at"),
+        ("BAL", "admission_score"),
+        ("ÖDƏNİŞ FORMASI", "funding"),
+        ("TƏHSİLALMA FORMASI", "education_form"),
+        ("İXTİSAS", "speciality"),
+        ("İXTİSAS ŞİFRƏSİ", "program_code"),
+        ("İXTİSASLAŞMA", "specialization"),
+        ("STATUS", "admission_status"),
+        ("TƏHSİL SƏVİYYƏSİ", "degree_level"),
+        ("QƏBUL EDİLDİ", "admitted_at"),
+        ("MÖHLƏTLƏ QƏBUL EDİLDİ", "admitted_at_2"),
+        ("GÜZƏŞTLİ QƏBUL EDİLDİ", "admitted_at_3"),
+        ("SOSİAL TTK İLƏ QƏBUL EDİLDİ", "admitted_at_4"),
+        ("STANDART TTK İLƏ QƏBUL EDİLDİ", "admitted_at_5"),
+        ("QƏBUL XƏTTİ", "admission_channel"),
+        ("TUR", "tour"),
+        ("QEYD", "note"),
+        # Nadir sütunlar → `admission_extra` JSON-u (açar → dəyər).
+        ("İŞ NÖMRƏSİ", "work_number"),
+        ("MÜƏSSİSƏ ATİS İD", "institution_atis_id"),
+        ("İXTİSAS ATİS İD", "specialty_atis_id"),
+        ("TƏHSİL BAZASI", "education_base"),
+        ("GLOBAL ID", "global_id"),
+        ("IELTS", "ielts"),
+        ("Xarici dil (imtahan)", "foreign_language_exam"),
+        ("Təhsil növü", "education_kind"),
+        ("Əlavə təhsil növü", "extra_education_kind"),
+        ("Hazırlıq", "preparation"),
+        ("Semestr", "semester"),
+    ):
+        index[normalize_header(header)] = key
     return index
+
+
+#: ATİS ixracında «TƏHSİL HAQQI» MƏBLƏĞDİR (maliyyələşmə «ÖDƏNİŞ FORMASI»-dadır);
+#: şablonda isə «Təhsil haqqı» maliyyələşmə sütunudur. Eyni başlıq — fərqli məna:
+#: fayl ATİS rejimindədirsə (bu başlıq varsa) «Təhsil haqqı» məbləğ kimi oxunur.
+ATIS_MODE_HEADER = normalize_header("ÖDƏNİŞ FORMASI")
+ATIS_FEE_HEADER = normalize_header("TƏHSİL HAQQI")
+#: ATİS-də «İXTİSAS KODU» daxili id-dir (rəsmi şifr «İXTİSAS ŞİFRƏSİ»-dədir); şablonda
+#: «İxtisas kodu» rəsmi şifrdir. ATİS rejimində daxili id `admission_extra`-ya gedir.
+ATIS_INTERNAL_CODE_HEADER = normalize_header("İXTİSAS KODU")
 
 
 def build_template() -> tuple[bytes, str, str]:

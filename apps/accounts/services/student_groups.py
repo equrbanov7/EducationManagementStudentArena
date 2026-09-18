@@ -19,6 +19,7 @@ normallaşdırılmış şəkildə aparılır (``az``/``AZ``/``Azərbaycan`` → 
 
 from __future__ import annotations
 
+import re
 import unicodedata
 
 from core.constants import OrgUnitType
@@ -40,7 +41,16 @@ _SECTOR_ALIASES = {
     "ing": "en",
     "ingilis": "en",
     "english": "en",
+    "azərbaycan dili": "az",
+    "azerbaycan dili": "az",
+    "ingilis dili": "en",
+    "i̇ngilis dili": "en",
+    "de": "de",
+    "alman": "de",
+    "alman dili": "de",
+    "german": "de",
     "ru": "ru",
+    "rus dili": "ru",
     "rus": "ru",
     "русский": "ru",
 }
@@ -112,13 +122,51 @@ def occupancy_map(organization, group_ids) -> dict:
     return {str(row["group_id"]): row["total"] for row in rows}
 
 
-def group_options(organization, specialty_unit, *, sector: str = "") -> list:
+_GROUP_YEAR_RE = re.compile(r"^(?:\d/)?(\d{3,4})")
+
+
+def group_admission_year(unit) -> int | None:
+    """Qrupun qəbul ili: `settings.admission_year`, yoxdursa ad şablonundan.
+
+    QKU şablonu: «236 K» / «536 Bİ» / «2236 M» / «3/336 F» — rəqəm blokunun SON
+    rəqəmi ilin son rəqəmidir (233 → 2023 … 236 → 2026). Onilliyi cari ildən
+    götürürük (on ildən köhnə qruplar reyestrdə qalmır).
+    """
+    raw = (getattr(unit, "settings", None) or {}).get("admission_year")
+    try:
+        if raw:
+            return int(raw)
+    except (TypeError, ValueError):
+        pass
+    match = _GROUP_YEAR_RE.match(str(getattr(unit, "name", "") or "").strip())
+    if not match:
+        return None
+    digit = int(match.group(1)[-1])
+    from datetime import date
+
+    decade = date.today().year // 10 * 10
+    year = decade + digit
+    return year if year <= date.today().year + 1 else year - 10
+
+
+def group_options(organization, specialty_unit, *, sector: str = "", admission_year=None) -> list:
     """Qrup seçicisinin sətirləri: ad, tutum, doluluq, boş yer, sektor.
 
     Sektor verilibsə UYĞUN gələnlər ƏVVƏLƏ çıxır (süzülmür — operator qarışıq
     sektorlu qrupa da təyin edə bilməlidir, amma default təklif düzgün olsun).
+    ``admission_year`` verilibsə ili məlum olub FƏRQLİ olan qruplar atılır (2026-09-19:
+    ATİS idxalı 2026 tələbəsini boş yeri olan 2025 qrupuna yığmasın); ili ad
+    şablonundan/ayardan bilinməyən qrup qalır.
     """
     units = list(groups_under(organization, specialty_unit).only("id", "name", "code", "settings", "path"))
+    if admission_year:
+        try:
+            wanted_year = int(str(admission_year).strip().split(".")[0])
+        except (TypeError, ValueError):
+            wanted_year = None
+        if wanted_year:
+            # İli məlum olan və FƏRQLİ olan qruplar atılır; ili bilinməyən ad şablonu qalır.
+            units = [unit for unit in units if group_admission_year(unit) in (None, wanted_year)]
     occupancy = occupancy_map(organization, [unit.pk for unit in units])
     wanted = normalize_sector(sector)
 

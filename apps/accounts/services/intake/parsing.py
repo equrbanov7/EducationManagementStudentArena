@@ -15,6 +15,7 @@ import io
 
 from django.utils.translation import pgettext
 
+from . import spec
 from .spec import SHEET_NAME, columns, header_index, normalize_header
 
 _CTX = "student_intake"
@@ -57,9 +58,15 @@ def _map_headers(raw_headers, *, index=None, required=None) -> dict:
     # (`teachers.py`) öz indeksini və məcburi sütunlarını ötürür.
 
     index = index if index is not None else header_index()
+    normalized = [normalize_header(raw) for raw in raw_headers]
+    atis_mode = spec.ATIS_MODE_HEADER in normalized
     mapping: dict = {}
-    for position, raw in enumerate(raw_headers):
-        key = index.get(normalize_header(raw))
+    for position, header in enumerate(normalized):
+        key = index.get(header)
+        if atis_mode and header == spec.ATIS_FEE_HEADER:
+            key = "tuition_fee"
+        if atis_mode and header == spec.ATIS_INTERNAL_CODE_HEADER:
+            key = "atis_program_id"
         if key and key not in mapping.values():
             mapping[position] = key
     present = set(mapping.values())
