@@ -6,11 +6,43 @@ qaydaları burada; kataloqla tutuşdurma `task_workbook_import`-dadır.
 
 from __future__ import annotations
 
+import html
 import re
+import unicodedata
 from datetime import date
 
-from apps.accounts.services.username_repair import slug_name
 from apps.workload.constants import RowKind
+
+_AZ_MAP = str.maketrans(
+    {
+        "ə": "e",
+        "Ə": "e",
+        "ö": "o",
+        "Ö": "o",
+        "ü": "u",
+        "Ü": "u",
+        "ğ": "g",
+        "Ğ": "g",
+        "ş": "s",
+        "Ş": "s",
+        "ç": "c",
+        "Ç": "c",
+        "ı": "i",
+        "I": "i",
+        "İ": "i",
+    }
+)
+
+
+def slug_name(value) -> str:
+    """«Rüstəm Əli» → `rustemeli` — AZ hərfləri ASCII, yalnız [a-z0-9] (modul dövrü olmasın deyə
+    `accounts.username_repair.slug_name`-in yerli surəti)."""
+    text = html.unescape(str(value or ""))
+    text = unicodedata.normalize("NFKC", text).translate(_AZ_MAP)
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
+    return re.sub(r"[^a-z0-9]", "", text)
+
 
 #: Vərəq adı (prefiks) → kafedra adı (OrgUnit chair). Kitabça vərəq adlarını qısaldır.
 SHEET_TO_CHAIR = {
