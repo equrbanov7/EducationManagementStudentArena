@@ -15,7 +15,6 @@ from collections import Counter
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 
-from apps.accounts.services.username_repair import slug_name
 from apps.organizations.models import AcademicPeriod, Membership, OrgUnit, Role
 from apps.registrar.models import CourseOffering, StudentAcademicRecord, Subject
 from apps.registrar.services import enroll_student_in_subject
@@ -41,6 +40,7 @@ from apps.workload.services.task_workbook_parsing import (
     block_chosen_subject,
     clean_subject_name,
     is_block,
+    slug_name,
     split_tokens,
 )
 from apps.workload.services.tasks import resolve_specialty_and_faculty
