@@ -93,15 +93,106 @@ def parse_form(raw) -> str:
 
 
 def parse_funding(raw) -> str:
-    """Maliyyələşmə → ``state`` / ``paid``; tanınmasa boş sətir."""
+    """Maliyyələşmə → ``state`` / ``paid``; tanınmasa boş sətir.
+
+    ATİS ixracı sərbəst mətn verir («Ödənişli: Öz vəsaiti hesabına») — prefiks
+    müqayisəsi ilə tanınır.
+    """
     key = _key(raw)
     if not key:
         return ""
-    if key in _STATE_WORDS:
+    if key in _STATE_WORDS or key.startswith("dovletsifarisi"):
         return "state"
-    if key in _PAID_WORDS:
+    if key in _PAID_WORDS or key.startswith("odenisli"):
         return "paid"
     return ""
+
+
+def parse_form_atis(raw) -> str:
+    """«Əyani (FULLTIME)» kimi qarışıq yazılış — ilk sözə görə."""
+    form = parse_form(raw)
+    if form:
+        return form
+    head = _key(raw)
+    for alias, value in _FORM_ALIASES.items():
+        if head.startswith(alias):
+            return value
+    return ""
+
+
+def parse_admission_status(raw) -> str:
+    key = _key(raw)
+    if not key:
+        return ""
+    if key.startswith("mohletle"):
+        return "deferred"
+    if key.startswith("guzestli"):
+        return "privileged"
+    if key.startswith("sosialttk"):
+        return "social_ttk"
+    if key.startswith("standartttk"):
+        return "standard_ttk"
+    if key.startswith("qebuledildi") or key in {"admitted", "qebul"}:
+        return "admitted"
+    return ""
+
+
+def parse_admission_channel(raw) -> str:
+    key = _key(raw)
+    if not key:
+        return ""
+    if key.startswith("dim"):
+        return "dim"
+    if "imtahansiz" in key or key.startswith("imtahandaistiraketmeden"):
+        return "exam_free"
+    return ""
+
+
+def parse_tour(raw) -> str:
+    key = _key(raw)
+    if key in {"firsttour", "1", "i", "itur", "birinci", "first"}:
+        return "first"
+    if key in {"secondtour", "2", "ii", "iitur", "ikinci", "second"}:
+        return "second"
+    return ""
+
+
+def parse_language(raw) -> str:
+    """Tədris dili → ``az/en/ru/de`` (`student_groups.normalize_sector` sinonimləri)."""
+    from ..student_groups import normalize_sector
+
+    value = normalize_sector(raw)
+    return value if value in {"az", "en", "ru", "de"} else ""
+
+
+def parse_money(raw):
+    text = _text(raw).replace(",", ".").replace(" ", "")
+    if not text:
+        return None, True
+    try:
+        value = Decimal(text)
+    except (InvalidOperation, ValueError):
+        return None, False
+    return (value, True) if Decimal("0") <= value <= Decimal("1000000") else (None, False)
+
+
+def parse_datetime(raw):
+    """«2026-09-08 17:11:20» / «2026-09-08 16:28:42.663000» / «08.09.2026» → aware datetime."""
+    from datetime import datetime
+
+    from django.utils import timezone
+
+    if isinstance(raw, datetime):
+        return raw if timezone.is_aware(raw) else timezone.make_aware(raw)
+    text = _text(raw)
+    if not text:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M:%S.%f", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d", "%d.%m.%Y %H:%M", "%d.%m.%Y"):
+        try:
+            return timezone.make_aware(datetime.strptime(text, fmt))
+        except ValueError:
+            continue
+    return None
 
 
 def program_by_code(organization, code: str):
@@ -126,11 +217,47 @@ def program_by_code(organization, code: str):
     return matches[0], ""
 
 
+def disambiguate_program(organization, code: str, *, name: str = "", sector: str = "", specialization: str = ""):
+    """Eyni rəsmi şifrli bir neçə proqram (məs. «Tarix» / «Tarix (Tədris İngilis Dilində)»,
+    «Dizayn (Qrafik)» / «Dizayn (İnteryer)») — ATİS sətrindəki ixtisas adı, tədris
+    dili və ixtisaslaşma ilə seçilir. Seçilə bilməsə ``None`` (operator dəqiqləşdirir).
+    """
+    from apps.registrar.models import Program
+    from core.program_codes import program_code_search_q
+
+    text = _text(code)
+    if not text:
+        return None
+    candidates = list(
+        Program.objects.filter(organization=organization, is_active=True).filter(program_code_search_q(text))
+    )
+    if len(candidates) < 2:
+        return candidates[0] if candidates else None
+    lang = parse_language(sector)
+    english = [p for p in candidates if "ingilis" in _key(p.name) or "english" in _key(p.name)]
+    if lang == "en" and len(english) == 1:
+        return english[0]
+    non_english = [p for p in candidates if p not in english]
+    if lang and lang != "en" and len(non_english) == 1:
+        return non_english[0]
+    spec_key = _key(specialization)
+    if spec_key:
+        by_spec = [p for p in candidates if spec_key in _key(p.name) or _key(p.name) in spec_key]
+        if len(by_spec) == 1:
+            return by_spec[0]
+    name_key = _key(name)
+    if name_key:
+        exact = [p for p in candidates if _key(p.name) == name_key]
+        if len(exact) == 1:
+            return exact[0]
+    return None
+
+
 def specialty_unit_of(program):
     return getattr(program, "specialty_unit", None)
 
 
-def propose_group_for(organization, program, *, sector: str, taken: dict):
+def propose_group_for(organization, program, *, sector: str, taken: dict, admission_year=None):
     """Sətir üçün qrup təklifi.
 
     ``taken`` — BU FAYLDA artıq təyin edilmiş qrupların sayğacı: eyni qrupa
@@ -142,7 +269,9 @@ def propose_group_for(organization, program, *, sector: str, taken: dict):
     specialty = specialty_unit_of(program)
     if specialty is None:
         return None, []
-    rows = group_options(organization, specialty, sector=sector)
+    rows = group_options(
+        organization, specialty, sector=parse_language(sector) or sector, admission_year=admission_year
+    )
     for row in rows:
         extra = taken.get(row["id"], 0)
         row["taken"] += extra
@@ -174,6 +303,59 @@ def enrich(plan, row: dict, context) -> None:
     if row.get("funding") and not funding:
         plan.warnings.append(pgettext(_CTX, "Təhsil haqqı sütunu tanınmadı — «ödənişli» tətbiq olunur."))
     plan.values["funding_type"] = funding or "paid"
+    if not form and row.get("education_form"):
+        plan.values["education_form"] = parse_form_atis(row.get("education_form")) or "full_time"
+
+    # ATİS «Bakalavr» ixracının qalan sütunları (sahibin qərarı 2026-09-19).
+    plan.values["admission_status"] = parse_admission_status(row.get("admission_status")) or "admitted"
+    if (
+        row.get("admission_status")
+        and plan.values["admission_status"] == "admitted"
+        and not parse_admission_status(row.get("admission_status"))
+    ):
+        plan.warnings.append(pgettext(_CTX, "Qəbul statusu tanınmadı — «qəbul edildi» tətbiq olunur."))
+    plan.values["admission_channel"] = parse_admission_channel(row.get("admission_channel"))
+    plan.values["admission_tour"] = parse_tour(row.get("tour"))
+    plan.values["instruction_language"] = parse_language(row.get("language_sector"))
+    fee, ok = parse_money(row.get("tuition_fee"))
+    plan.values["tuition_fee"] = fee
+    if not ok:
+        plan.warnings.append(pgettext(_CTX, "Təhsil haqqı məbləği tanınmadı — boş saxlanılır."))
+    plan.values["applied_at"] = parse_datetime(row.get("applied_at"))
+    plan.values["admitted_at"] = next(
+        (
+            parsed
+            for key in ("admitted_at", "admitted_at_2", "admitted_at_3", "admitted_at_4", "admitted_at_5")
+            for parsed in [parse_datetime(row.get(key))]
+            if parsed is not None
+        ),
+        None,
+    )
+    plan.values["admission_note"] = _text(row.get("note"))[:2000]
+    plan.values["specialization"] = _text(row.get("specialization"))[:255]
+    plan.values["citizenship"] = _text(row.get("citizenship"))[:64]
+    plan.values["id_series"] = _text(row.get("id_series"))[:8]
+    plan.values["id_number"] = _text(row.get("id_number"))[:32]
+    plan.values["address"] = _text(row.get("address"))[:255] or plan.values.get("address", "")
+    extra = {
+        key: _text(row.get(key))
+        for key in (
+            "atis_program_id",
+            "work_number",
+            "global_id",
+            "education_base",
+            "ielts",
+            "foreign_language_exam",
+            "education_kind",
+            "extra_education_kind",
+            "preparation",
+            "semester",
+            "institution_atis_id",
+            "specialty_atis_id",
+        )
+        if _text(row.get(key))
+    }
+    plan.values["admission_extra"] = extra
 
 
 def resolve_atis_targets(plan, row: dict, context) -> bool:
@@ -188,14 +370,28 @@ def resolve_atis_targets(plan, row: dict, context) -> bool:
         plan.fail("unknown_program", pgettext(_CTX, "İxtisas kodu universitetdə tapılmadı"))
         return False
     if code == "ambiguous":
-        plan.fail(
-            "program_code_ambiguous",
-            pgettext(_CTX, "Bu şifrlə birdən çox ixtisas var — dəqiqləşdirin: %s") % _text(row.get("program_code")),
+        program = disambiguate_program(
+            context.organization,
+            row.get("program_code"),
+            name=_text(row.get("speciality")),
+            sector=_text(row.get("language_sector")),
+            specialization=_text(row.get("specialization")),
         )
-        return False
+        if program is None:
+            plan.fail(
+                "program_code_ambiguous",
+                pgettext(_CTX, "Bu şifrlə birdən çox ixtisas var — dəqiqləşdirin: %s") % _text(row.get("program_code")),
+            )
+            return False
 
     sector = _text(row.get("language_sector"))
-    proposal, options = propose_group_for(context.organization, program, sector=sector, taken=context.group_usage)
+    proposal, options = propose_group_for(
+        context.organization,
+        program,
+        sector=sector,
+        taken=context.group_usage,
+        admission_year=_text(row.get("admission_year")),
+    )
     specialty = specialty_unit_of(program)
     plan.targets["program"] = program
     plan.targets["group"] = None
@@ -228,8 +424,16 @@ def resolve_atis_targets(plan, row: dict, context) -> bool:
 
 
 __all__ = [
+    "disambiguate_program",
     "enrich",
+    "parse_admission_channel",
+    "parse_admission_status",
+    "parse_datetime",
     "parse_form",
+    "parse_form_atis",
+    "parse_language",
+    "parse_money",
+    "parse_tour",
     "parse_funding",
     "parse_score",
     "program_by_code",

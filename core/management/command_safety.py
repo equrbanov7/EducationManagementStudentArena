@@ -17,7 +17,7 @@ _DENIED_PREFIX = "management_command_safety_denied"
 #: verilən açıq ACK ilə işləyir (`MANAGEMENT_COMMAND_PRODUCTION_ACK=<komanda adı>`,
 #: məs. `docker exec -e ... app manage.py provision_student_credentials …`). Seed/demo
 #: komandaları siyahıda DEYİL — onlar üçün istehsal icazəsi yenə mövcud deyil.
-_PRODUCTION_ACK_ALLOWED = frozenset({"provision_student_credentials"})
+_PRODUCTION_ACK_ALLOWED = frozenset({"provision_student_credentials", "import_students_atis"})
 PRODUCTION_ACK_ENV = "MANAGEMENT_COMMAND_PRODUCTION_ACK"
 
 

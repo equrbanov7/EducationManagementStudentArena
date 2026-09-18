@@ -252,6 +252,71 @@ Django şablon mühərrikindən keçmir).
                 </div>
                 <p class="ems-msg ems-msg--error" data-rimc-error="funding_type" role="alert" hidden></p>
               </div>
+              {# ATİS qəbul sahələri (sahibin qərarı 2026-09-19) — «Bakalavr» ixracının sütunları. #}
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-admission-status">{% trans "Qəbul növü" context "profile.rim" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-admission-status" name="admission_status" data-rimc-field="admission_status">
+                    {% for option in rim_center_section.admission_statuses %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class="ems-msg ems-msg--error" data-rimc-error="admission_status" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-admission-channel">{% trans "Qəbul xətti" context "profile.rim" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-admission-channel" name="admission_channel" data-rimc-field="admission_channel">
+                    <option value="">{% trans "Seçilməyib" context "profile.rim" %}</option>
+                    {% for option in rim_center_section.admission_channels %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class="ems-msg ems-msg--error" data-rimc-error="admission_channel" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-instruction-language">{% trans "Tədris dili" context "profile.rim" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-instruction-language" name="instruction_language" data-rimc-field="instruction_language">
+                    <option value="">{% trans "Seçilməyib" context "profile.rim" %}</option>
+                    {% for option in rim_center_section.instruction_languages %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class="ems-msg ems-msg--error" data-rimc-error="instruction_language" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-admission-tour">{% trans "Tur" context "profile.rim" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-admission-tour" name="admission_tour" data-rimc-field="admission_tour">
+                    <option value="">{% trans "Seçilməyib" context "profile.rim" %}</option>
+                    {% for option in rim_center_section.admission_tours %}
+                      <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class="ems-msg ems-msg--error" data-rimc-error="admission_tour" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-tuition-fee">{% trans "Təhsil haqqı məbləği (AZN)" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-tuition-fee" type="number" min="0" step="1" name="tuition_fee" data-rimc-field="tuition_fee">
+                <p class="ems-msg ems-msg--error" data-rimc-error="tuition_fee" role="alert" hidden></p>
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-citizenship">{% trans "Vətəndaşlıq" context "profile.rim" %}</label>
+                <input class="ems-input" id="rimc-citizenship" type="text" name="citizenship" maxlength="64" data-rimc-field="citizenship">
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-id-series">{% trans "Vəsiqə seriyası" context "profile.rim" %}</label>
+                <input class="ems-input rimc-mono" id="rimc-id-series" type="text" name="id_series" maxlength="8" data-rimc-field="id_series">
+              </div>
+              <div class="ems-field" data-rimc-only="student">
+                <label class="ems-field__label" for="rimc-id-number">{% trans "Vəsiqə nömrəsi" context "profile.rim" %}</label>
+                <input class="ems-input rimc-mono" id="rimc-id-number" type="text" name="id_number" maxlength="32" data-rimc-field="id_number">
+              </div>
 
               <div class="ems-field rimc-combo" data-rimc-only="teacher" data-rimc-combo="unit">
                 <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra" context "profile.rim" %}</label>

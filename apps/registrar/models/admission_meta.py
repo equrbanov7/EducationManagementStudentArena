@@ -34,6 +34,37 @@ class FundingType(models.TextChoices):
     PAID = "paid", pgettext_lazy("registrar.funding_type", "Ödənişli")
 
 
+class AdmissionStatus(models.TextChoices):
+    """ATİS «STATUS» sütunu — qəbulun növü (sahibin qərarı 2026-09-19, «Bakalavr 08.09.26» ixracı)."""
+
+    ADMITTED = "admitted", pgettext_lazy("registrar.admission_status", "Qəbul edildi")
+    DEFERRED = "deferred", pgettext_lazy("registrar.admission_status", "Möhlətlə qəbul edildi")
+    PRIVILEGED = "privileged", pgettext_lazy("registrar.admission_status", "Güzəştli qəbul edildi")
+    SOCIAL_TTK = "social_ttk", pgettext_lazy("registrar.admission_status", "Sosial TTK ilə qəbul edildi")
+    STANDARD_TTK = "standard_ttk", pgettext_lazy("registrar.admission_status", "Standart TTK ilə qəbul edildi")
+
+
+class AdmissionChannel(models.TextChoices):
+    """ATİS «QƏBUL XƏTTİ» — DİM imtahanı ilə, yoxsa imtahansız."""
+
+    DIM = "dim", pgettext_lazy("registrar.admission_channel", "DİM vasitəsilə")
+    EXAM_FREE = "exam_free", pgettext_lazy("registrar.admission_channel", "İmtahansız qəbul")
+
+
+class AdmissionTour(models.TextChoices):
+    FIRST = "first", pgettext_lazy("registrar.admission_tour", "I tur")
+    SECOND = "second", pgettext_lazy("registrar.admission_tour", "II tur")
+
+
+class InstructionLanguage(models.TextChoices):
+    """ATİS «TƏDRİS DİLİ» — tələbənin qəbul olunduğu dil bölməsi (qrupsuz da süzülsün)."""
+
+    AZ = "az", pgettext_lazy("registrar.instruction_language", "Azərbaycan dili")
+    EN = "en", pgettext_lazy("registrar.instruction_language", "İngilis dili")
+    RU = "ru", pgettext_lazy("registrar.instruction_language", "Rus dili")
+    DE = "de", pgettext_lazy("registrar.instruction_language", "Alman dili")
+
+
 class AdmissionRecordFields(models.Model):
     """Akademik qeydin qəbul (ATİS) atributları — abstrakt, öz cədvəli yoxdur."""
 
@@ -86,8 +117,55 @@ class AdmissionRecordFields(models.Model):
         help_text="Maliyyələşmə mənbəyi (dövlət sifarişi / ödənişli).",
     )
 
+    # ── ATİS «Bakalavr» ixracının qalan sütunları (sahibin qərarı 2026-09-19) ──
+    admission_status = models.CharField(
+        max_length=16,
+        choices=AdmissionStatus.choices,
+        default=AdmissionStatus.ADMITTED,
+        db_default=AdmissionStatus.ADMITTED,
+        db_index=True,
+        help_text="Qəbulun növü (ATİS STATUS): adi / möhlətlə / güzəştli / TTK.",
+    )
+    admission_channel = models.CharField(
+        max_length=16,
+        choices=AdmissionChannel.choices,
+        blank=True,
+        default="",
+        db_default="",
+        db_index=True,
+        help_text="Qəbul xətti (ATİS): DİM imtahanı ilə / imtahansız.",
+    )
+    admission_tour = models.CharField(
+        max_length=8, choices=AdmissionTour.choices, blank=True, default="", db_default="", help_text="Qəbul turu."
+    )
+    instruction_language = models.CharField(
+        max_length=8,
+        choices=InstructionLanguage.choices,
+        blank=True,
+        default="",
+        db_default="",
+        db_index=True,
+        help_text="Tədris dili (ATİS) — qrup təyin olunmamış tələbə də süzülsün.",
+    )
+    tuition_fee = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True, help_text="İllik təhsil haqqı (AZN), ATİS."
+    )
+    applied_at = models.DateTimeField(null=True, blank=True, help_text="Müraciət tarixi (ATİS).")
+    admitted_at = models.DateTimeField(null=True, blank=True, help_text="Qəbul tarixi (ATİS).")
+    admission_note = models.TextField(blank=True, default="", db_default="", help_text="ATİS «QEYD».")
+    #: Nadir istifadə olunan ATİS sütunları (iş nömrəsi, global id, müəssisə/ixtisas
+    #: ATİS id-ləri, təhsil bazası, IELTS, xarici dil, təhsil növü, hazırlıq, semestr…).
+    admission_extra = models.JSONField(default=dict, blank=True, help_text="ATİS-in digər sütunları (açar → dəyər).")
+
     class Meta:
         abstract = True
 
 
-__all__ = ["AdmissionRecordFields", "FundingType"]
+__all__ = [
+    "AdmissionChannel",
+    "AdmissionRecordFields",
+    "AdmissionStatus",
+    "AdmissionTour",
+    "FundingType",
+    "InstructionLanguage",
+]
