@@ -64,6 +64,11 @@ def _create_context(actor) -> dict:
         # Tələbə forması: təhsil forması / maliyyələşmə seçimləri (2026-09-08).
         "education_forms": _choices("catalog_meta", "EducationForm"),
         "funding_types": _choices("admission_meta", "FundingType"),
+        # ATİS qəbul seçimləri (sahibin qərarı 2026-09-19).
+        "admission_statuses": _choices("admission_meta", "AdmissionStatus"),
+        "admission_channels": _choices("admission_meta", "AdmissionChannel"),
+        "admission_tours": _choices("admission_meta", "AdmissionTour"),
+        "instruction_languages": _choices("admission_meta", "InstructionLanguage"),
     }
 
 

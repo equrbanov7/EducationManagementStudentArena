@@ -87,6 +87,22 @@ def student_registry_card(request, record_id):
             "atis_id": record.atis_id,
             "form_label": str(record.get_education_form_display()),
             "funding_label": str(record.get_funding_type_display()),
+            # ATİS qəbul sütunları (2026-09-19); vəsiqə/ünvan yalnız əlaqə icazəsi ilə.
+            "admission_status_label": str(record.get_admission_status_display()),
+            "channel_label": str(record.get_admission_channel_display()) if record.admission_channel else "",
+            "tour_label": str(record.get_admission_tour_display()) if record.admission_tour else "",
+            "language_label": str(record.get_instruction_language_display()) if record.instruction_language else "",
+            "tuition_fee": str(record.tuition_fee) if record.tuition_fee is not None else "",
+            "applied_at": record.applied_at.strftime("%d.%m.%Y %H:%M") if record.applied_at else "",
+            "admitted_at": record.admitted_at.strftime("%d.%m.%Y %H:%M") if record.admitted_at else "",
+            "admission_note": record.admission_note,
+            "citizenship": str(getattr(profile, "citizenship", "") or ""),
+            "id_document": (
+                f"{getattr(profile, 'id_document_series', '')} {getattr(profile, 'id_document_number', '')}".strip()
+                if actor.can_view_contacts
+                else ""
+            ),
+            "address": str(getattr(profile, "location", "") or "") if actor.can_view_contacts else "",
             "status": record.status,
             "gpa": str(transcript.get("cumulative_gpa") or ""),
             "gpa_available": bool(transcript.get("cumulative_gpa_available")),
@@ -196,6 +212,10 @@ def student_registry_export(request):
             pgettext(_CTX, "Forma"),
             pgettext(_CTX, "Təhsil haqqı"),
             pgettext(_CTX, "Status"),
+            pgettext(_CTX, "Qəbul növü"),
+            pgettext(_CTX, "Qəbul xətti"),
+            pgettext(_CTX, "Tədris dili"),
+            pgettext(_CTX, "Təhsil haqqı məbləği"),
         ]
     )
     for row in rows:
@@ -210,6 +230,10 @@ def student_registry_export(request):
                 row["form_label"],
                 row["funding_label"],
                 row["status_label"],
+                row["admission_status_label"],
+                row["channel_label"],
+                row["language_label"],
+                row["tuition_fee"],
             ]
         )
     return response

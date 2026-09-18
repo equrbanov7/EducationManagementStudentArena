@@ -214,7 +214,11 @@ def _write_profile(user, *, organization, kind, values, group_name, specializati
     profile.email_verified = False
     # Əlavə sahələr (2026-09-08, sahib istəyi: «bizə sonra lazım olan datalar»):
     # ünvan hər iki növdə; vəzifə / elmi dərəcə / elmi ad / kafedra adı müəllimdə.
-    profile.location = str(values.get("address") or "")[:255]
+    profile.location = str(values.get("address") or "")[:100]
+    # ATİS şəxsi sütunları (2026-09-19): vətəndaşlıq, vəsiqə seriyası/nömrəsi.
+    profile.citizenship = str(values.get("citizenship") or "")[:64]
+    profile.id_document_series = str(values.get("id_series") or "")[:8]
+    profile.id_document_number = str(values.get("id_number") or "")[:32]
     if kind == KIND_TEACHER:
         profile.staff_position = str(values.get("title") or "")[:150]
         profile.academic_degree = str(values.get("academic_degree") or "")[:150]
@@ -223,6 +227,9 @@ def _write_profile(user, *, organization, kind, values, group_name, specializati
     profile.save(
         update_fields=[
             "location",
+            "citizenship",
+            "id_document_series",
+            "id_document_number",
             "staff_position",
             "academic_degree",
             "academic_title",
@@ -274,6 +281,16 @@ def _write_academic_record(user, *, organization, values, targets):
             "admission_exam_type": values.get("admission_exam_type", ""),
             "education_form": values.get("education_form", "full_time"),
             "funding_type": values.get("funding_type", "paid"),
+            # ATİS «Bakalavr» ixracının qalan sütunları (2026-09-19).
+            "admission_status": values.get("admission_status") or "admitted",
+            "admission_channel": values.get("admission_channel") or "",
+            "admission_tour": values.get("admission_tour") or "",
+            "instruction_language": values.get("instruction_language") or "",
+            "tuition_fee": values.get("tuition_fee"),
+            "applied_at": values.get("applied_at"),
+            "admitted_at": values.get("admitted_at"),
+            "admission_note": values.get("admission_note") or "",
+            "admission_extra": dict(values.get("admission_extra") or {}),
         },
     )
 

@@ -55,7 +55,8 @@ def _create_user(plan, *, organization, role, actor, request):
         request=request,
         student_targets=plan.targets,
         group_name=plan.group_name,
-        specialization=getattr(plan.targets["program"], "name", "") or "",
+        # ATİS «İXTİSASLAŞMA» varsa o, yoxsa proqramın adı.
+        specialization=plan.values.get("specialization") or getattr(plan.targets["program"], "name", "") or "",
         audit_reason="student_intake_created",
     )
 
