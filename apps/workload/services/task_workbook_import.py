@@ -17,7 +17,7 @@ from django.db import IntegrityError, transaction
 
 from apps.organizations.models import AcademicPeriod, Membership, OrgUnit, Role
 from apps.registrar.models import CourseOffering, StudentAcademicRecord, Subject
-from apps.registrar.services import enroll_student_in_subject
+from apps.registrar.public import enroll_student_in_subject
 from apps.workload.constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, RowKind, TaskStatus
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from apps.workload.services.assignments import assign_teacher, remaining_hours
