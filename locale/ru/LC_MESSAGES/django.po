@@ -75747,3 +75747,7 @@ msgstr "В год, AZN — напр. 3900"
 msgctxt "student_intake"
 msgid "İxtisaslaşma"
 msgstr "Специализация"
+
+msgctxt "student_intake"
+msgid "Qrup tutumu dolub — kafedra sonradan bölə bilər."
+msgstr "Группа заполнена — кафедра сможет разделить её позже."

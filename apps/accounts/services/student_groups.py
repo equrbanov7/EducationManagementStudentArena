@@ -126,21 +126,22 @@ _GROUP_YEAR_RE = re.compile(r"^(?:\d/)?(\d{3,4})")
 
 
 def group_admission_year(unit) -> int | None:
-    """Qrupun qəbul ili: `settings.admission_year`, yoxdursa ad şablonundan.
+    """Qrupun qəbul ili: ad şablonundan; şablonsuz addan yalnız etibarlı ayar.
 
     QKU şablonu: «236 K» / «536 Bİ» / «2236 M» / «3/336 F» — rəqəm blokunun SON
     rəqəmi ilin son rəqəmidir (233 → 2023 … 236 → 2026). Onilliyi cari ildən
     götürürük (on ildən köhnə qruplar reyestrdə qalmır).
     """
-    raw = (getattr(unit, "settings", None) or {}).get("admission_year")
-    try:
-        if raw:
-            return int(raw)
-    except (TypeError, ValueError):
-        pass
+    settings = getattr(unit, "settings", None) or {}
     match = _GROUP_YEAR_RE.match(str(getattr(unit, "name", "") or "").strip())
     if not match:
-        return None
+        # Ad şablonsuz qrup: ayar YALNIZ köçürmə («legacy») damğası yoxdursa etibarlıdır —
+        # köçürülmüş qruplarda `admission_year` idxal ili ilə doldurulub (2026-09-19 tapıntısı).
+        raw = settings.get("admission_year") if "legacy" not in settings else None
+        try:
+            return int(raw) if raw else None
+        except (TypeError, ValueError):
+            return None
     digit = int(match.group(1)[-1])
     from datetime import date
 
@@ -149,7 +150,30 @@ def group_admission_year(unit) -> int | None:
     return year if year <= date.today().year + 1 else year - 10
 
 
-def group_options(organization, specialty_unit, *, sector: str = "", admission_year=None) -> list:
+_MASTER_NAME_RE = re.compile(r"^(?:\d{4}\b|\d{3}/\d)")
+
+
+def group_degree_level(unit) -> str:
+    """Qrupun səviyyəsi: `settings.degree_level`, yoxdursa QKU ad şablonu.
+
+    Magistr qrupları 4 rəqəmlə («2236 M», «2536 MRK») və ya «NNN/N» («631/6 K»,
+    «510/6 E») yazılır; bakalavr 3 rəqəmlə («236 K») və ya «N/NNN» («3/336 F»).
+    Tanınmasa boş sətir (süzülmür).
+    """
+    settings = getattr(unit, "settings", None) or {}
+    name = str(getattr(unit, "name", "") or "").strip()
+    if _MASTER_NAME_RE.match(name):
+        return "master"
+    if re.match(r"^(?:\d/)?\d{3}\b", name):
+        return "bachelor"
+    # Şablonsuz ad: ayar yalnız köçürmə damğası yoxdursa (köçürülmüş qruplarda hamısı «bachelor»).
+    raw = str(settings.get("degree_level") or "").strip().lower() if "legacy" not in settings else ""
+    return raw
+
+
+def group_options(
+    organization, specialty_unit, *, sector: str = "", admission_year=None, degree_level: str = ""
+) -> list:
     """Qrup seçicisinin sətirləri: ad, tutum, doluluq, boş yer, sektor.
 
     Sektor verilibsə UYĞUN gələnlər ƏVVƏLƏ çıxır (süzülmür — operator qarışıq
@@ -165,8 +189,15 @@ def group_options(organization, specialty_unit, *, sector: str = "", admission_y
         except (TypeError, ValueError):
             wanted_year = None
         if wanted_year:
-            # İli məlum olan və FƏRQLİ olan qruplar atılır; ili bilinməyən ad şablonu qalır.
-            units = [unit for unit in units if group_admission_year(unit) in (None, wanted_year)]
+            # İli məlum olan və FƏRQLİ olan qruplar atılır. İxtisasda ili məlum qrup
+            # VARSA yalnız həmin ilinkilər qalır («Xaric olunanlar» kimi xidməti/ilsiz
+            # adlar təklif olunmur); heç birinin ili bilinmirsə hamısı qalır.
+            years = {unit.pk: group_admission_year(unit) for unit in units}
+            if any(year is not None for year in years.values()):
+                units = [unit for unit in units if years[unit.pk] == wanted_year]
+    if degree_level:
+        wanted_level = "master" if str(degree_level).lower().startswith("m") else "bachelor"
+        units = [unit for unit in units if group_degree_level(unit) in ("", wanted_level)]
     occupancy = occupancy_map(organization, [unit.pk for unit in units])
     wanted = normalize_sector(sector)
 
@@ -192,14 +223,21 @@ def group_options(organization, specialty_unit, *, sector: str = "", admission_y
     return rows
 
 
-def propose_group(rows, *, needed: int = 1) -> dict | None:
+def propose_group(rows, *, needed: int = 1, allow_full: bool = False) -> dict | None:
     """Avtomatik təklif: sektoru uyğun, BOŞ YERİ ÇATAN ilk qrup.
 
     ``None`` — uyğun qrup yoxdur (UI «Yeni qrup yarat» addımını göstərir).
+    ``allow_full`` (ATİS toplu idxalı, 2026-09-19): sektoru uyğun qrupların hamısı
+    doludursa ən az dolu olan təklif olunur — tutum yumşaq həddir, kafedra sonra
+    bölür; tələbə qrupsuz qalmır.
     """
     for row in rows:
         if row["free"] >= needed:
             return row
+    if allow_full:
+        matching = [row for row in rows if row["sector_match"]] or list(rows)
+        if matching:
+            return min(matching, key=lambda row: (row["taken"] - row["capacity"], row["name"]))
     return None
 
 

@@ -230,10 +230,10 @@ def student_registry_export(request):
                 row["form_label"],
                 row["funding_label"],
                 row["status_label"],
-                row["admission_status_label"],
-                row["channel_label"],
-                row["language_label"],
-                row["tuition_fee"],
+                row.get("admission_status_label", ""),
+                row.get("channel_label", ""),
+                row.get("language_label", ""),
+                row.get("tuition_fee", ""),
             ]
         )
     return response

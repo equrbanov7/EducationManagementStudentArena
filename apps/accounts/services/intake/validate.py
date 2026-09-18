@@ -492,7 +492,7 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
     return True
 
 
-def build_plans(organization, rows, *, group_overrides=None) -> list:
+def build_plans(organization, rows, *, group_overrides=None, allow_full_groups: bool = False) -> list:
     """Fayl sətirlərini plan siyahısına çevirir — HEÇ NƏ YAZMIR.
 
     ``group_overrides`` — ``{sətir nömrəsi: qrup id}``: ekran 08-in «Qrup
@@ -501,6 +501,8 @@ def build_plans(organization, rows, *, group_overrides=None) -> list:
     """
 
     context = IntakeContext(organization, rows)
+    # ATİS toplu idxalı (2026-09-19): dolu qrupa da təklif (kafedra sonra bölür).
+    context.allow_full_groups = bool(allow_full_groups)
     if group_overrides:
         context.group_overrides = _resolve_overrides(organization, group_overrides)
     plans: list = []
