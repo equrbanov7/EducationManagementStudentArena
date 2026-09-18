@@ -20,12 +20,14 @@ from apps.registrar.exam_bridge import (
 )
 from apps.registrar.integrity import eligible_instructor_user_ids
 from apps.registrar.models import StudentAcademicRecord
+from apps.registrar.services import enroll_student_in_subject
 from apps.registrar.signals import student_group_changed
 
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
     "eligible_instructor_user_ids",
+    "enroll_student_in_subject",
     "analytics",
     "exam_score_entry",
     "exam_score_import",
