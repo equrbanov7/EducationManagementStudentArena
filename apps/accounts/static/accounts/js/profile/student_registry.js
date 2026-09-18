@@ -89,6 +89,17 @@
             "atis_id",
             "form_label",
             "funding_label",
+            "admission_status_label",
+            "channel_label",
+            "tour_label",
+            "language_label",
+            "tuition_fee",
+            "applied_at",
+            "admitted_at",
+            "citizenship",
+            "id_document",
+            "address",
+            "admission_note",
             "credits_earned"
         ].forEach(function (key) {
             setText(body, key, payload[key]);

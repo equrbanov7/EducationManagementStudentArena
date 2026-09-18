@@ -204,7 +204,7 @@ def _filter_fields(values, options) -> list:
             "label": pgettext(_CTX, "Axtarış"),
             "kind": "search",
             "value": values["search"],
-            "placeholder": pgettext(_CTX, "Ad, FİN və ya tələbə kodu"),
+            "placeholder": pgettext(_CTX, "Ad, FİN, vəsiqə № və ya tələbə kodu"),
             "wide": True,
         },
         {
@@ -266,7 +266,35 @@ def _filter_fields(values, options) -> list:
             "value": values["status"],
             "options": everything + _status_options(),
         },
+        # ATİS qəbul sütunları (sahibin qərarı 2026-09-19).
+        {
+            "name": "sr_admission_status",
+            "label": pgettext(_CTX, "Qəbul növü"),
+            "kind": "select",
+            "value": values.get("admission_status", ""),
+            "options": everything + _enum_options("AdmissionStatus"),
+        },
+        {
+            "name": "sr_channel",
+            "label": pgettext(_CTX, "Qəbul xətti"),
+            "kind": "select",
+            "value": values.get("channel", ""),
+            "options": everything + _enum_options("AdmissionChannel"),
+        },
+        {
+            "name": "sr_language",
+            "label": pgettext(_CTX, "Tədris dili"),
+            "kind": "select",
+            "value": values.get("language", ""),
+            "options": everything + _enum_options("InstructionLanguage"),
+        },
     ]
+
+
+def _enum_options(name: str) -> list:
+    from apps.registrar.models import admission_meta
+
+    return [{"value": key, "label": str(label)} for key, label in getattr(admission_meta, name).choices]
 
 
 def _form_options() -> list:

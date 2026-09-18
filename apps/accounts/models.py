@@ -290,6 +290,12 @@ class UserProfile(models.Model):
     )
 
     location = models.CharField(max_length=100, blank=True, verbose_name="Yer", help_text="Şəhər və ya ünvan")
+    # ATİS qəbul ixracının şəxsi sütunları (sahibin qərarı 2026-09-19): vətəndaşlıq və
+    # şəxsiyyət vəsiqəsi (seriya/nömrə). Həssas məlumatdır — yalnız `people.view_contacts`
+    # daşıyan aktora göstərilir (bax registry card).
+    citizenship = models.CharField(max_length=64, blank=True, default="", verbose_name="Vətəndaşlıq")
+    id_document_series = models.CharField(max_length=8, blank=True, default="", verbose_name="Vəsiqə seriyası")
+    id_document_number = models.CharField(max_length=32, blank=True, default="", verbose_name="Vəsiqə nömrəsi")
 
     # ── E-university provisioning: first-login flow ─────────────────────────
     # When the administration provisions an account (no public self-signup),
