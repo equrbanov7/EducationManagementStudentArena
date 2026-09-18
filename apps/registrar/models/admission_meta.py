@@ -155,7 +155,12 @@ class AdmissionRecordFields(models.Model):
     admission_note = models.TextField(blank=True, default="", db_default="", help_text="ATİS «QEYD».")
     #: Nadir istifadə olunan ATİS sütunları (iş nömrəsi, global id, müəssisə/ixtisas
     #: ATİS id-ləri, təhsil bazası, IELTS, xarici dil, təhsil növü, hazırlıq, semestr…).
-    admission_extra = models.JSONField(default=dict, blank=True, help_text="ATİS-in digər sütunları (açar → dəyər).")
+    admission_extra = models.JSONField(
+        default=dict,
+        db_default=models.Value("{}", output_field=models.JSONField()),
+        blank=True,
+        help_text="ATİS-in digər sütunları (açar → dəyər).",
+    )
 
     class Meta:
         abstract = True

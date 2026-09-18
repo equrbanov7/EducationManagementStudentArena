@@ -161,6 +161,21 @@ def _title_az(word: str) -> str:
     return word[0] + lower
 
 
+_GROUP_YEAR_RE = re.compile(r"^(?:\d/)?(\d{3,4})")
+
+
+def group_year_from_name(token: str, default_year: int) -> int:
+    """QKU qrup adı → qəbul ili: rəqəm blokunun son rəqəmi ilin son rəqəmidir
+    («235 K» → 2025, «2236 M» → 2026, «3/336 F» → 2026); tanınmasa default."""
+    match = _GROUP_YEAR_RE.match(str(token or "").strip())
+    if not match:
+        return default_year
+    digit = int(match.group(1)[-1])
+    decade = default_year // 10 * 10
+    year = decade + digit
+    return year if year <= default_year else year - 10
+
+
 def _text(value) -> str:
     return str(value).strip() if value is not None else ""
 
