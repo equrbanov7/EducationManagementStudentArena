@@ -15,12 +15,12 @@ from openpyxl import Workbook
 
 from apps.organizations.models import AcademicPeriod, Membership, OrgUnit
 from apps.registrar.models import CourseOffering, Curriculum, Enrollment, Program, StudentAcademicRecord, Subject
-from apps.workload.management.commands.import_teaching_task_workbook import (
+from apps.workload.models import TeacherAssignment, TeachingTask
+from apps.workload.services.task_workbook_parsing import (
     block_chosen_subject,
     is_block,
     split_tokens,
 )
-from apps.workload.models import TeacherAssignment, TeachingTask
 from core.constants import OrgUnitType, RoleScopeType
 
 from .factories import TEACHER_PERMS, activate_member, make_org
