@@ -75359,3 +75359,239 @@ msgstr "An import can hold at most {limit} images."
 msgctxt "exams.service.import.paste.error"
 msgid "paste_image_not_found"
 msgstr "No pasted image with this number was found."
+
+msgctxt "accounts.student_registry"
+msgid "Ad, FİN, vəsiqə № və ya tələbə kodu"
+msgstr "Name, FIN, ID number or student code"
+
+msgctxt "accounts.student_registry"
+msgid "Müraciət tarixi"
+msgstr "Application date"
+
+msgctxt "accounts.student_registry"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "accounts.student_registry"
+msgid "Qeydiyyat ünvanı"
+msgstr "Registered address"
+
+msgctxt "accounts.student_registry"
+msgid "Qəbul növü"
+msgstr "Admission type"
+
+msgctxt "accounts.student_registry"
+msgid "Qəbul tarixi"
+msgstr "Admission date"
+
+msgctxt "accounts.student_registry"
+msgid "Qəbul xətti"
+msgstr "Admission channel"
+
+msgctxt "accounts.student_registry"
+msgid "Tur"
+msgstr "Round"
+
+msgctxt "accounts.student_registry"
+msgid "Tədris dili"
+msgstr "Language of instruction"
+
+msgctxt "accounts.student_registry"
+msgid "Təhsil haqqı məbləği"
+msgstr "Tuition fee amount"
+
+msgctxt "accounts.student_registry"
+msgid "Vətəndaşlıq"
+msgstr "Citizenship"
+
+msgctxt "accounts.student_registry"
+msgid "Şəxsiyyət vəsiqəsi"
+msgstr "ID document"
+
+msgctxt "profile.rim"
+msgid "Qəbul növü"
+msgstr "Admission type"
+
+msgctxt "profile.rim"
+msgid "Qəbul növü tanınmadı."
+msgstr "Admission type not recognised."
+
+msgctxt "profile.rim"
+msgid "Qəbul xətti"
+msgstr "Admission channel"
+
+msgctxt "profile.rim"
+msgid "Qəbul xətti tanınmadı."
+msgstr "Admission channel not recognised."
+
+msgctxt "profile.rim"
+msgid "Seçilməyib"
+msgstr "Not selected"
+
+msgctxt "profile.rim"
+msgid "Tur"
+msgstr "Round"
+
+msgctxt "profile.rim"
+msgid "Tur tanınmadı."
+msgstr "Round not recognised."
+
+msgctxt "profile.rim"
+msgid "Tədris dili"
+msgstr "Language of instruction"
+
+msgctxt "profile.rim"
+msgid "Tədris dili tanınmadı."
+msgstr "Language of instruction not recognised."
+
+msgctxt "profile.rim"
+msgid "Təhsil haqqı məbləği (AZN)"
+msgstr "Tuition fee amount (AZN)"
+
+msgctxt "profile.rim"
+msgid "Təhsil haqqı məbləği rəqəm olmalıdır."
+msgstr "Tuition fee amount must be a number."
+
+msgctxt "profile.rim"
+msgid "Vəsiqə nömrəsi"
+msgstr "ID number"
+
+msgctxt "profile.rim"
+msgid "Vəsiqə seriyası"
+msgstr "ID series"
+
+msgctxt "profile.rim"
+msgid "Vətəndaşlıq"
+msgstr "Citizenship"
+
+msgctxt "registrar.admission_channel"
+msgid "DİM vasitəsilə"
+msgstr "Via DİM exam"
+
+msgctxt "registrar.admission_channel"
+msgid "İmtahansız qəbul"
+msgstr "Exam-free admission"
+
+msgctxt "registrar.admission_status"
+msgid "Güzəştli qəbul edildi"
+msgstr "Admitted with concession"
+
+msgctxt "registrar.admission_status"
+msgid "Möhlətlə qəbul edildi"
+msgstr "Admitted with deferral"
+
+msgctxt "registrar.admission_status"
+msgid "Qəbul edildi"
+msgstr "Admitted"
+
+msgctxt "registrar.admission_status"
+msgid "Sosial TTK ilə qəbul edildi"
+msgstr "Admitted via social TTK"
+
+msgctxt "registrar.admission_status"
+msgid "Standart TTK ilə qəbul edildi"
+msgstr "Admitted via standard TTK"
+
+msgctxt "registrar.admission_tour"
+msgid "I tur"
+msgstr "Round I"
+
+msgctxt "registrar.admission_tour"
+msgid "II tur"
+msgstr "Round II"
+
+msgctxt "registrar.instruction_language"
+msgid "Alman dili"
+msgstr "German"
+
+msgctxt "registrar.instruction_language"
+msgid "Azərbaycan dili"
+msgstr "Azerbaijani"
+
+msgctxt "registrar.instruction_language"
+msgid "Rus dili"
+msgstr "Russian"
+
+msgctxt "registrar.instruction_language"
+msgid "İngilis dili"
+msgstr "English"
+
+msgctxt "student_intake"
+msgid "AA / AB / AZE"
+msgstr "Series: AA / AB / AZE"
+
+msgctxt "student_intake"
+msgid "DİM vasitəsilə / imtahansız"
+msgstr "via DİM / exam-free"
+
+msgctxt "student_intake"
+msgid "FirstTour / SecondTour"
+msgstr "FirstTour or SecondTour"
+
+msgctxt "student_intake"
+msgid "Müraciət tarixi"
+msgstr "Application date"
+
+msgctxt "student_intake"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "student_intake"
+msgid "Qeydiyyat ünvanı"
+msgstr "Registered address"
+
+msgctxt "student_intake"
+msgid "Qəbul statusu"
+msgstr "Admission status"
+
+msgctxt "student_intake"
+msgid "Qəbul statusu tanınmadı — «qəbul edildi» tətbiq olunur."
+msgstr "Admission status not recognised — “admitted” is applied."
+
+msgctxt "student_intake"
+msgid "Qəbul tarixi"
+msgstr "Admission date"
+
+msgctxt "student_intake"
+msgid "Qəbul xətti"
+msgstr "Admission channel"
+
+msgctxt "student_intake"
+msgid "Tur"
+msgstr "Round"
+
+msgctxt "student_intake"
+msgid "Təhsil haqqı məbləği"
+msgstr "Tuition fee amount"
+
+msgctxt "student_intake"
+msgid "Təhsil haqqı məbləği tanınmadı — boş saxlanılır."
+msgstr "Tuition fee amount not recognised — left empty."
+
+msgctxt "student_intake"
+msgid "Vəsiqə nömrəsi"
+msgstr "ID number"
+
+msgctxt "student_intake"
+msgid "Vəsiqə seriyası"
+msgstr "ID series"
+
+msgctxt "student_intake"
+msgid "Vətəndaşlıq"
+msgstr "Citizenship"
+
+msgctxt "student_intake"
+msgid "iiii-aa-gg ss:dd"
+msgstr "yyyy-mm-dd hh:mm"
+
+msgctxt "student_intake"
+msgid "qəbul edildi / möhlətlə / güzəştli / TTK"
+msgstr "admitted / deferred / concession / TTK"
+
+msgctxt "student_intake"
+msgid "İllik, AZN — məs. 3900"
+msgstr "Per year, AZN — e.g. 3900"
+
+msgctxt "student_intake"
+msgid "İxtisaslaşma"
+msgstr "Specialisation"

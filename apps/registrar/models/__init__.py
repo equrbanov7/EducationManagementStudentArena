@@ -19,7 +19,14 @@ from .academic import (
     Subject,
     WeekType,
 )
-from .admission_meta import AdmissionRecordFields, FundingType
+from .admission_meta import (
+    AdmissionChannel,
+    AdmissionRecordFields,
+    AdmissionStatus,
+    AdmissionTour,
+    FundingType,
+    InstructionLanguage,
+)
 from .corrections import (
     ComponentScoreCorrection,
     CorrectionField,
@@ -153,6 +160,10 @@ __all__ = [
     "LegacyGradeReviewDecision",
     "AdmissionRecordFields",
     "FundingType",
+    "AdmissionChannel",
+    "AdmissionStatus",
+    "AdmissionTour",
+    "InstructionLanguage",
     "MOVEMENT_DOCUMENT_EXTENSIONS",
     "GUEST_DOCUMENT_EXTENSIONS",
     "GuestRosterDocument",

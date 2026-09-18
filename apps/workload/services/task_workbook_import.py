@@ -219,7 +219,17 @@ class Importer:
             self.counters["group_created"] += 1
             self.created_groups.append(token)
             return [(None, "created")]
-        unit = OrgUnit(organization=self.org, parent=specialty, unit_type=OrgUnitType.GROUP, name=token)
+        # Tələbə idxalı (ATİS) qrupu qəbul ili + dil bölməsi ilə seçir — ayarlar buradan.
+        sector = (
+            "en" if re.search(r"\b(ing|ING|İNG)\b", token) else "ru" if re.search(r"\b(rus|RUS)\b", token) else "az"
+        )
+        unit = OrgUnit(
+            organization=self.org,
+            parent=specialty,
+            unit_type=OrgUnitType.GROUP,
+            name=token,
+            settings={"language_sector": sector, "admission_year": int(self.year[:4])},
+        )
         if self.apply:
             try:
                 with transaction.atomic():
