@@ -16,6 +16,7 @@ from core.management.command_safety import (
 _PROTECTED_COMMAND_MODULES = (
     "apps.accounts.management.commands.provision_student_credentials",
     "apps.accounts.management.commands.import_users_from_excel",
+    "apps.accounts.management.commands.import_students_atis",
     "apps.exams.management.commands.seed_demo_hierarchy",
     "apps.exams.management.commands.seed_final_exam_demo",
     "apps.exams.management.commands.seed_group_demo_data",

@@ -57,7 +57,21 @@ COMMON_FIELDS = (
     # Sahib istəyi (2026-09-08): ünvan hər iki növdə; sonra lazım olan datalar.
     "address",
 )
-STUDENT_FIELDS = ("group", "admission_year", "education_form", "funding_type")
+STUDENT_FIELDS = (
+    "group",
+    "admission_year",
+    "education_form",
+    "funding_type",
+    # ATİS qəbul sütunları (sahibin qərarı 2026-09-19) — seçimli + məbləğ/vəsiqə.
+    "admission_status",
+    "admission_channel",
+    "admission_tour",
+    "instruction_language",
+    "tuition_fee",
+    "citizenship",
+    "id_series",
+    "id_number",
+)
 TEACHER_FIELDS = ("unit", "title", "academic_degree", "academic_title")
 
 #: Müəllim üzvlüyünün scope bölməsi kimi qəbul edilən tiplər.
@@ -241,6 +255,37 @@ def _validate_student_structure(draft: AccountDraft, data: dict, context: Intake
             "funding_type": funding or FundingType.PAID,
         }
     )
+    _student_admission_fields(draft, data)
+
+
+def _student_admission_fields(draft: AccountDraft, data: dict) -> None:
+    """ATİS qəbul seçimləri (2026-09-19) — boş → default, yanlış açar → sahə xətası."""
+    from apps.registrar.models.admission_meta import (
+        AdmissionChannel,
+        AdmissionStatus,
+        AdmissionTour,
+        InstructionLanguage,
+    )
+
+    from ..intake.admission import parse_money
+
+    for key, enum, default, label in (
+        ("admission_status", AdmissionStatus, AdmissionStatus.ADMITTED, pgettext(_CTX, "Qəbul növü tanınmadı.")),
+        ("admission_channel", AdmissionChannel, "", pgettext(_CTX, "Qəbul xətti tanınmadı.")),
+        ("admission_tour", AdmissionTour, "", pgettext(_CTX, "Tur tanınmadı.")),
+        ("instruction_language", InstructionLanguage, "", pgettext(_CTX, "Tədris dili tanınmadı.")),
+    ):
+        value = normalize_text(data.get(key))
+        if value and value not in enum.values:
+            _fail(draft, key, label)
+        draft.values[key] = value or default
+    fee, ok = parse_money(data.get("tuition_fee"))
+    if not ok:
+        _fail(draft, "tuition_fee", pgettext(_CTX, "Təhsil haqqı məbləği rəqəm olmalıdır."))
+    draft.values["tuition_fee"] = fee
+    draft.values["citizenship"] = normalize_text(data.get("citizenship"))[:64]
+    draft.values["id_series"] = normalize_text(data.get("id_series"))[:8]
+    draft.values["id_number"] = normalize_text(data.get("id_number"))[:32]
 
 
 def _validate_admission_year(draft: AccountDraft, data: dict):
