@@ -8,13 +8,24 @@ varsa dərs tipi kilidlidir.{% endcomment %}
      data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
      data-default-building="{{ lesson_default_building }}" hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
-    <div class="jd-modal-card" role="dialog" aria-modal="true" aria-labelledby="jd-lesson-modal-title">
+    {% comment %}2026-09-20 (sahib): başlıq (✕ ilə) və alt panel («Tətbiq et») modal
+    scroll olanda da GÖRÜNÜR — kart flex sütundur, yalnız gövdə sürüşür
+    (jd2_theme.css `.jd-modal-card--sheet`). Yadda saxlanılmamış dəyişikliklə
+    bağlananda təsdiq soruşulur (journal_grid.js `requestClose`, mətn aşağıda).{% endcomment %}
+    <div class="jd-modal-card jd-modal-card--sheet" role="dialog" aria-modal="true" aria-labelledby="jd-lesson-modal-title">
+        <span data-jd-modal-unsaved hidden
+              data-confirm-title="{% trans 'Dəyişikliklər yadda saxlanmayıb' context 'registrar.journal' %}"
+              data-confirm-body="{% trans 'Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək.' context 'registrar.journal' %}"
+              data-confirm-ok="{% trans 'Bağla, itsin' context 'registrar.journal' %}"></span>
         <div class="jd-modal-head jd2-modal-head">
-            <h3 id="jd-lesson-modal-title" data-jd-modal-title-add>{% trans "Yeni dərs əlavə et" context "registrar.journal" %}</h3>
-            <h3 id="jd-lesson-modal-title-edit" data-jd-modal-title-edit hidden>{% trans "Dərsi redaktə et" context "registrar.journal" %}</h3>
-            <button type="button" class="jd-modal-close jd2-modal-close" data-jd-modal-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}">✕</button>
+            <div class="jd2-modal-head__text">
+                <h3 id="jd-lesson-modal-title" data-jd-modal-title-add>{% trans "Yeni dərs əlavə et" context "registrar.journal" %}</h3>
+                <h3 id="jd-lesson-modal-title-edit" data-jd-modal-title-edit hidden>{% trans "Dərsi redaktə et" context "registrar.journal" %}</h3>
+                <span class="jd2-modal-head__sub">{% if offering.group %}{{ offering.group.name }} · {% endif %}{{ offering.subject.name }}</span>
+            </div>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jd-modal-close aria-label="{% trans 'Bağla' context 'registrar.journal' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
         </div>
-        <form method="post" enctype="multipart/form-data" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
+        <form method="post" enctype="multipart/form-data" class="jd-modal-form" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_lesson" data-jd-lesson-action>
             <div class="jd-modal-body">
@@ -36,8 +47,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "MÖVZU — TƏQVİM PLANINDAN" context "registrar.journal" %}</span>
                     {% if topic_choices_meta %}
-                    <div class="bootstrap-single-select">
-                        <select name="lesson_topic" class="bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="lesson_topic" class="ems-select bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
                             {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.covered %} class="jd-topic-covered"{% endif %}>{{ t.title }}{% if t.kinds %} · {% for k in t.kinds %}{% if k == 'lecture' %}{% trans "mühazirə" context "registrar.journal" %}{% elif k == 'seminar' %}{% trans "seminar" context "registrar.journal" %}{% else %}{% trans "laboratoriya" context "registrar.journal" %}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if t.covered %} — ✓ {% trans "keçirilib" context "registrar.journal" %}{% if t.date %} ({{ t.date|date:"d.m" }}){% endif %}{% endif %}</option>{% endfor %}
                         </select>
@@ -60,8 +71,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                             <i class="fas fa-lock"></i>
                         </span>
                         {% else %}
-                        <div class="bootstrap-single-select">
-                            <select name="lesson_kind" class="bootstrap-single-select__native" data-jd-lesson-kind data-bootstrap-select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select name="lesson_kind" class="ems-select bootstrap-single-select__native" data-jd-lesson-kind data-bootstrap-select>
                                 {% for value, label in lesson_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
                             </select>
                         </div>
@@ -69,8 +80,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     </div>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "SAAT" context "registrar.journal" %}</span>
-                        <div class="bootstrap-single-select">
-                            <select name="lesson_hours" class="bootstrap-single-select__native" data-jd-lesson-hours data-bootstrap-select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select name="lesson_hours" class="ems-select bootstrap-single-select__native" data-jd-lesson-hours data-bootstrap-select>
                                 <option value="1">1</option>
                                 <option value="2" selected>2</option>
                             </select>
@@ -79,8 +90,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 </div>
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRS SAATI" context "registrar.journal" %}</span>
-                    <div class="bootstrap-single-select">
-                        <select name="lesson_time" class="bootstrap-single-select__native" data-jd-lesson-time data-bootstrap-select>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="lesson_time" class="ems-select bootstrap-single-select__native" data-jd-lesson-time data-bootstrap-select>
                             <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
                             {% for start, end in standard_times %}
                             <option value="{{ start }}|{{ end }}">{{ start }}–{{ end }}</option>
@@ -101,8 +112,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field-pair">
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "KORPUS" context "registrar.journal" %}</span>
-                        <div class="bootstrap-single-select">
-                            <select name="lesson_building" class="bootstrap-single-select__native" data-jd-lesson-building data-bootstrap-select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select name="lesson_building" class="ems-select bootstrap-single-select__native" data-jd-lesson-building data-bootstrap-select>
                                 <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
                                 {% for building in lesson_buildings %}
                                 <option value="{{ building }}">{{ building }}</option>
@@ -112,8 +123,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     </div>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "OTAQ" context "registrar.journal" %}</span>
-                        <div class="bootstrap-single-select">
-                            <select name="lesson_room" class="bootstrap-single-select__native" data-jd-lesson-room data-bootstrap-select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select name="lesson_room" class="ems-select bootstrap-single-select__native" data-jd-lesson-room data-bootstrap-select>
                                 <option value="">{% trans "Seçilməyib" context "registrar.journal" %}</option>
                             </select>
                         </div>
@@ -152,8 +163,8 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     </p>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "DÜZƏLİŞ SƏBƏBİ" context "registrar.journal" %}</span>
-                        <div class="bootstrap-single-select">
-                            <select name="correction_reason" class="bootstrap-single-select__native" data-jd-corr-reason data-bootstrap-select>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select name="correction_reason" class="ems-select bootstrap-single-select__native" data-jd-corr-reason data-bootstrap-select>
                                 {% for value, label in correction_reasons %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
                             </select>
                         </div>
@@ -184,7 +195,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <i class="fas fa-trash-can"></i> {% trans "Dərsi sil" context "registrar.journal" %}
                 </button>
                 <button type="button" class="jd2-cancel-btn" data-jd-modal-close>{% trans "İmtina et" context "registrar.journal" %}</button>
-                <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
+                <button type="submit" class="jd2-apply-btn"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Tətbiq et" context "registrar.journal" %}</button>
             </div>
         </form>
     </div>
