@@ -64,6 +64,15 @@
         "set -a && . .claude/dev-clone.env && set +a && EMS_DB_ROLE_ENFORCE=error USE_REDIS=False ADMIN_2FA_REQUIRED=True EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend exec venv/bin/python manage.py runserver 8013 --noreload"
       ],
       "port": 8013
+    },
+    {
+      "name": "emsarena-prodcopy",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/elvin/Developer/EMSArena && set -a && . .claude/prodcopy.env && set +a && EMS_DB_ROLE_ENFORCE=warn USE_REDIS=False exec venv/bin/python manage.py runserver 8014 --noreload"
+      ],
+      "port": 8014
     }
   ]
 }

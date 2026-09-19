@@ -1,35 +1,38 @@
 {% load static i18n %}
-{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
-kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
-mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
-dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
-dəyişmir).{% endcomment %}
-{% comment %}Elektron jurnal — Addım 1: Qrup seçimi (mockup ilə birə-bir).
-Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏLLİM (öz adı)
-· dərs tipi pilləri (?kind= — cədvəl slotlarından).{% endcomment %}
+{% comment %}Elektron jurnal — Addım 1: Qrup seçimi.
+
+2026-09-20 redizayn (sahib tələbi): token-əsaslı təmiz görünüş (journal_list.css),
+layihənin öz select komponenti (`bootstrap-single-select--ems`, fokusda ikinci
+göy halqa YOX), dərs tipi seqmenti, cədvəldə qrup çipi + fənn adı əsas sətir.
+Filtrlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?season=) — hər ikisi CARİ
+semestrə avto-seçilir (page_contexts) · korrektor üçün fakültə/kafedra/qrup/
+müəllim axtarışlı seçicilər · dərs tipi (?kind=). JS: journal_list.js (+ pickers).
+
+Bu partial həm müstəqil səhifədə, həm də kabinet qabığında göstərilir; qabıq
+başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment %}
 <div class="journal-page jl-page jd2">
     <div class="jd2-pagehead">
-        <div class="jd2-mark">EU</div>
+        <div class="jd2-mark" aria-hidden="true"><i class="fas fa-book-open"></i></div>
         <div>
             <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
-            <div class="jd2-pagesub">{% if journal_selected_year or journal_selected_season %}{{ journal_selected_year }}{% if journal_selected_year and journal_selected_season %} — {% endif %}{{ journal_selected_season }}{% else %}{% trans "Bütün semestrlər" context "registrar.journal" %}{% endif %}</div>
+            <div class="jd2-pagesub"><i class="far fa-calendar" aria-hidden="true"></i> {% if journal_selected_year or journal_selected_season %}{{ journal_selected_year }}{% if journal_selected_year and journal_selected_season %} · {% endif %}{{ journal_selected_season }}{% else %}{% trans "Bütün semestrlər" context "registrar.journal" %}{% endif %}</div>
         </div>
-        {% comment %}Ayrı "Jurnal düzəlişi" səhifəsi ləğv edildi — korrektor (İKT rəhbəri/admin)
-        istənilən jurnalı normal formatda açır və detal səhifəsindəki yerində "Jurnal düzəlişi"
-        toggle-ı ilə kilidi açıb audited düzəliş edir.{% endcomment %}
+        <div class="jl-head-meta">
+            <span class="jl-count">{% blocktrans context "registrar.journal" with count=page_obj.paginator.count %}<b>{{ count }}</b> jurnal{% endblocktrans %}</span>
+        </div>
     </div>
 
     {% include "registrar/partials/_jd_stepper.html" with stepper_step=1 stepper_detail=False %}
 
-    <form method="get" class="jd2-filters" data-jd-filterform
+    <form method="get" class="jl-filters" data-jd-filterform
           data-faculty-url="{% url 'accounts:records_faculty_search' %}"
           data-department-url="{% url 'accounts:records_department_search' %}"
           data-group-url="{% url 'accounts:records_group_search' %}"
           data-teacher-url="{% url 'accounts:journal_teacher_search' %}">
-        <label class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="year" class="bootstrap-single-select__native" data-jl-autosubmit data-bootstrap-select>
+        <label class="jl-f jl-f--xs {% if journal_selected_year %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "TƏDRİS İLİ" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="year" class="ems-select bootstrap-single-select__native" data-jl-autosubmit data-bootstrap-select>
                     <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
                     {% for y in journal_years %}
                     <option value="{{ y.value }}" {% if journal_selected_year == y.value %}selected{% endif %}>{{ y.label }}</option>
@@ -37,10 +40,10 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
                 </select>
             </div>
         </label>
-        <label class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "YARIM İL" context "registrar.journal" %}</span>
-            <div class="bootstrap-single-select">
-                <select name="season" class="bootstrap-single-select__native" data-jl-autosubmit data-bootstrap-select>
+        <label class="jl-f jl-f--xs {% if journal_selected_season %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "YARIM İL" context "registrar.journal" %}</span>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="season" class="ems-select bootstrap-single-select__native" data-jl-autosubmit data-bootstrap-select>
                     <option value="">{% trans "Hamısı" context "registrar.journal" %}</option>
                     {% for s in journal_seasons %}
                     <option value="{{ s }}" {% if journal_selected_season == s %}selected{% endif %}>{{ s }}</option>
@@ -49,29 +52,29 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             </div>
         </label>
         {% if journal_is_broad %}
-        {% comment %}Korrektor (İKT rəhbəri/admin) — bütün jurnallar üçün axtarışlı
-        seçicilər (imtahan statistikası formatı: type-ahead + lazy + kaskad). Seçim GET
-        forma gizli inputa yazılır və səhifə yenilənir; cari seçim setValue ilə göstərilir.{% endcomment %}
-        <div class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "FAKÜLTƏ" context "registrar.journal" %}</span>
+        {% comment %}Korrektor / koordinator — bütün jurnallar üçün axtarışlı seçicilər
+        (type-ahead + lazy + kaskad). Seçim gizli inputa yazılır və səhifə yenilənir;
+        cari seçim setValue ilə göstərilir (journal_list_pickers.js).{% endcomment %}
+        <div class="jl-f {% if journal_selected_faculty %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "FAKÜLTƏ" context "registrar.journal" %}</span>
             <input type="hidden" name="faculty" value="{{ journal_selected_faculty }}" data-jl-hidden="faculty">
             {% trans "fakültə axtar…" as jl_faculty_ph %}
             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-faculty" placeholder=jl_faculty_ph %}
         </div>
-        <div class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "KAFEDRA" context "registrar.journal" %}</span>
+        <div class="jl-f {% if journal_selected_department %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "KAFEDRA" context "registrar.journal" %}</span>
             <input type="hidden" name="department" value="{{ journal_selected_department }}" data-jl-hidden="department">
             {% trans "kafedra axtar…" as jl_dept_ph %}
             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-department" placeholder=jl_dept_ph %}
         </div>
-        <div class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "QRUP" context "registrar.journal" %}</span>
+        <div class="jl-f {% if journal_selected_group %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "QRUP" context "registrar.journal" %}</span>
             <input type="hidden" name="group" value="{{ journal_selected_group }}" data-jl-hidden="group">
             {% trans "qrup axtar…" as jl_group_ph %}
             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-group" placeholder=jl_group_ph %}
         </div>
-        <div class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
+        <div class="jl-f {% if journal_selected_teacher %}is-set{% endif %}">
+            <span class="jl-f__label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
             <input type="hidden" name="teacher" value="{{ journal_selected_teacher }}" data-jl-hidden="teacher">
             {% trans "müəllim axtar…" as jl_teacher_ph %}
             {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jl" hook="jl-teacher" placeholder=jl_teacher_ph %}
@@ -82,25 +85,31 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             "group": {"id": "{{ journal_selected_group|escapejs }}", "label": "{{ journal_selected_group_label|escapejs }}"},
             "teacher": {"id": "{{ journal_selected_teacher|escapejs }}", "label": "{{ journal_selected_teacher_label|escapejs }}"}
         }</script>
-        <label class="jd2-filter jd2-filter--search">
-            <span class="jd2-filter-label">{% trans "AXTARIŞ" context "registrar.journal" %}</span>
-            <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search" data-jl-search-debounce
-                   placeholder="{% trans 'fənn və ya müəllim…' context 'registrar.journal' %}" autocomplete="off">
+        <label class="jl-f jl-f--grow">
+            <span class="jl-f__label">{% trans "AXTARIŞ" context "registrar.journal" %}</span>
+            <span class="jl-search">
+                <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" name="q" value="{{ journal_query }}" class="jd2-filter-search" data-jl-search-debounce
+                       placeholder="{% trans 'fənn və ya müəllim…' context 'registrar.journal' %}" autocomplete="off">
+            </span>
         </label>
         {% else %}
-        <span class="jd2-filter">
-            <span class="jd2-filter-label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
-            <b class="jd2-filter-value">{{ teacher_label }}</b>
+        <span class="jl-f">
+            <span class="jl-f__label">{% trans "MÜƏLLİM" context "registrar.journal" %}</span>
+            <span class="jl-f__static"><i class="fas fa-user-tie" aria-hidden="true"></i>{{ teacher_label }}</span>
         </span>
         {% endif %}
-        <span class="jd2-kindpills">
-            <button type="submit" name="kind" value=""
-                    class="jd2-kindpill {% if not journal_selected_kind %}is-active{% endif %}">{% trans "Hamısı" context "registrar.journal" %}</button>
-            {% for value, label in journal_kinds %}
-            <button type="submit" name="kind" value="{{ value }}"
-                    class="jd2-kindpill {% if journal_selected_kind == value %}is-active{% endif %}">{{ label }}</button>
-            {% endfor %}
-        </span>
+        <div class="jl-f">
+            <span class="jl-f__label">{% trans "DƏRS TİPİ" context "registrar.journal" %}</span>
+            <span class="jl-seg jd2-kindpills" role="group">
+                <button type="submit" name="kind" value=""
+                        class="jd2-kindpill {% if not journal_selected_kind %}is-active{% endif %}">{% trans "Hamısı" context "registrar.journal" %}</button>
+                {% for value, label in journal_kinds %}
+                <button type="submit" name="kind" value="{{ value }}"
+                        class="jd2-kindpill {% if journal_selected_kind == value %}is-active{% endif %}">{{ label }}</button>
+                {% endfor %}
+            </span>
+        </div>
         {% if journal_has_filters %}
         <a class="jd2-filter-reset" href="{% url 'registrar:journal_list' %}" title="{% trans 'Bütün filtrləri sıfırla' context 'registrar.journal' %}">
             <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Sıfırla" context "registrar.journal" %}
@@ -108,14 +117,9 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
         {% endif %}
     </form>
 
-    {% comment %}Filtr yüklənmə vəziyyəti (sahib tələbi 2026-09-06: «search edəndə,
-    seçəndə dizaynı pozmuyan rahat formada olan bir hissə olsun»).
-
-    Filtr/axtarış dəyişəndə JS `.jl-page`-ə `is-loading` verir; nəticə cədvəli
-    gizlənir və YERİNƏ eyni kartda, eyni sütun düzümündə skeleton qalır — başlıq
-    sətri olduğu kimi görünür, ona görə səhifə sıçramır və istifadəçi hansı
-    sütunun gələcəyini itirmir. Qlobal `skeleton.css` şimmer animasiyası təkrar
-    yazılmır, yalnız sütun ölçüləri verilir (journal.css `.jl-skel-*`).{% endcomment %}
+    {% comment %}Filtr yüklənmə vəziyyəti (sahib tələbi 2026-09-06): JS `.jl-page`-ə
+    `is-loading` verir; real cədvəl gizlənir, yerində eyni sütun düzümlü skeleton
+    qalır — səhifə sıçramır. Şimmer qlobal `skeleton.css`-dəndir.{% endcomment %}
     <p class="jl-skel-note" data-jl-skel-note role="status">
         <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
         {% trans "Nəticələr yüklənir…" context "registrar.journal" %}
@@ -131,9 +135,6 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
                     <th class="jl-col-action"></th>
                 </tr>
             </thead>
-            {% comment %}Sətir sayı CARİ nəticə sayı qədərdir (`offerings|default`) —
-            skeleton eyni hündürlüyü tutur, ona görə yüklənərkən səhifə qısalıb
-            sıçramır. Nəticə boşdursa 6 sətir göstərilir.{% endcomment %}
             <tbody>
                 {% for _ in offerings|default:"123456" %}
                 <tr class="jl-skel-row">
@@ -166,22 +167,27 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
             <tbody>
                 {% for offering in offerings %}
                 {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
-                2026-09-06): siyahıda «Seminar» seçib jurnalı açanda mühazirə sütunları
-                qarışmamalıdır.{% endcomment %}
+                2026-09-06).{% endcomment %}
                 <tr class="jl-row" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
                             <span class="jl-group">{% if offering.group %}{{ offering.group.name }}{% else %}{% trans "Bütün ixtisas" context "registrar.journal" %}{% endif %}</span>
+                            <span class="jl-subject">{{ offering.subject.name }}</span>
                             {% if offering.is_evening %}<span class="jl-badge jl-badge--master">{% trans "MAGİSTRATURA" context "registrar.journal" %}</span>{% endif %}
                         </div>
-                        <div class="jl-subject-sub">{{ offering.subject.code }} — {{ offering.subject.name }}{% if offering.is_evening %} · {% trans "axşam (21:30-dək)" context "registrar.journal" %}{% endif %}</div>
+                        <div class="jl-subject-sub">
+                            <span class="jl-code">{{ offering.subject.code }}</span>
+                            {% if journal_is_broad %}<span aria-hidden="true">·</span>
+                            <span class="jl-teacher">{% if offering.instructor %}{{ offering.instructor.get_full_name|default:offering.instructor.username }}{% else %}{% trans "Vakant" context "registrar.journal" %}{% endif %}</span>{% endif %}
+                            {% if offering.is_evening %}<span aria-hidden="true">·</span> <span>{% trans "axşam (21:30-dək)" context "registrar.journal" %}</span>{% endif %}
+                        </div>
                     </td>
-                    <td class="jl-col-kind">{{ offering.kind_label|default:"—" }}</td>
-                    <td class="jl-col-count"><b>{{ offering.student_count }}</b></td>
+                    <td class="jl-col-kind">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
+                    <td class="jl-col-count"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
                     <td class="jl-col-action">
                         <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
-                            {% trans "Jurnalı aç" context "registrar.journal" %} →
+                            {% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </a>
                     </td>
                 </tr>
@@ -197,13 +203,14 @@ Filterlər işləkdir: TƏDRİS İLİ (?year=) · YARIM İL (?period=) · MÜƏL
     {% include "partials/_pagination.html" with page_obj=page_obj extra_query=journal_querystring %}
     {% else %}
     <div class="journal-empty">
-        <i class="fas fa-folder-open"></i>
-        <p>{% trans "Bu filtrlərlə tədris fənni (offering) tapılmadı." context "registrar.journal" %}</p>
+        {% trans "Bu filtrlərlə tədris fənni (offering) tapılmadı." context "registrar.journal" as jl_empty_title %}
+        {% trans "Bütün filtrləri sıfırla" context "registrar.journal" as jl_empty_hint %}
+        {% include "partials/_empty_state.html" with empty_icon="fa-book-open" empty_title=jl_empty_title empty_hint=jl_empty_hint %}
     </div>
     {% endif %}
 </div>
 
-<script src="{% static 'registrar/js/journal_list.js' %}"></script>
+<script src="{% static 'registrar/js/journal_list.js' %}?v=20260920-redesign"></script>
 {% if journal_is_broad %}
-<script src="{% static 'registrar/js/journal_list_pickers.js' %}"></script>
+<script src="{% static 'registrar/js/journal_list_pickers.js' %}?v=20260920-redesign"></script>
 {% endif %}
