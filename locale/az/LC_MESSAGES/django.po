@@ -75289,3 +75289,15 @@ msgid ""
 msgstr ""
 "Korpus qrupun ixtisasına görə «%(building)s» seçilib — dəyişə bilərsiniz; "
 "otaqlar korpusa görə süzülür. Otaq məcburi deyil."
+
+msgctxt "registrar.journal"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Dəyişikliklər yadda saxlanmayıb"
+
+msgctxt "registrar.journal"
+msgid "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."
+msgstr "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."
+
+msgctxt "registrar.journal"
+msgid "Bağla, itsin"
+msgstr "Bağla, itsin"
