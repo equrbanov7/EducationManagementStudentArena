@@ -14,6 +14,9 @@ from __future__ import annotations
 
 from django.core.exceptions import ValidationError
 
+#: legacy_rooms fazası / seed_qku_campuses_rooms.py ilə eyni prefiks.
+LEGACY_ROOM_CODE_PREFIX = "myedu-room-"
+
 #
 # Otaq reyestri təşkilata məxsusdur: ``organizations.Organization.exam_rooms``
 # (yəni ``exams.ExamRoom``). Buradan REVERSE accessor ilə oxunur — beləcə
@@ -33,7 +36,8 @@ def lesson_room_choices(offering):
     for room in rooms:
         label = (room.name or "").strip() or (room.code or "").strip() or str(room.pk)
         code = (room.code or "").strip()
-        if code and code != label:
+        # Legacy açar («myedu-room-<id>») texniki kimlikdir, müəllimə göstərilmir.
+        if code and code != label and not code.startswith(LEGACY_ROOM_CODE_PREFIX):
             label = f"{label} ({code})"
         out.append(
             {

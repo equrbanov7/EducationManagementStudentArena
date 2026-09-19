@@ -5,7 +5,8 @@ sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
 kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
 varsa dərs tipi kilidlidir.{% endcomment %}
 <div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
-     data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}" hidden>
+     data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
+     data-default-building="{{ lesson_default_building }}" hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
     <div class="jd-modal-card" role="dialog" aria-modal="true" aria-labelledby="jd-lesson-modal-title">
         <div class="jd-modal-head jd2-modal-head">
@@ -120,7 +121,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 </div>
                 <div class="jd2-field">
                     {% if lesson_rooms %}
-                    <small class="jd-field-hint" data-jd-room-hint>{% trans "Əvvəlcə korpus seçin — otaqlar həmin korpusa görə süzülür. Otaq məcburi deyil." context "registrar.journal" %}</small>
+                    <small class="jd-field-hint" data-jd-room-hint>{% if lesson_default_building %}{% blocktrans context "registrar.journal" with building=lesson_default_building %}Korpus qrupun ixtisasına görə «{{ building }}» seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür. Otaq məcburi deyil.{% endblocktrans %}{% else %}{% trans "Əvvəlcə korpus seçin — otaqlar həmin korpusa görə süzülür. Otaq məcburi deyil." context "registrar.journal" %}{% endif %}</small>
                     {% else %}
                     <small class="jd-field-hint" data-jd-room-hint>{% trans "Təşkilat üçün hələ otaq qeyd olunmayıb — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "registrar.journal" %}</small>
                     {% endif %}

@@ -1,0 +1,180 @@
+/* ═══ Elektron jurnal — qrup seçimi (Addım 1) — 2026-09-20 redizayn ════════
+   Sahib tələbi: «dizaynı yenidən düzəlt, rəngləri; daha modern, səliqəli;
+   input/button içində ikinci göy borderi yığışdır».
+
+   Yalnız `design-tokens.css` rəngləri (hex icad edilmir). Struktur:
+     .jl-head      — başlıq + semestr çipi + say
+     .jl-filters   — süzgəc paneli (`ems-field` bazası, ems select variantı)
+     .jl-seg       — dərs tipi seqmenti (pillər)
+     .jl-card      — cədvəl kartı; .jl-table sətirləri
+   JS qarmaqları dəyişməyib: .jl-page / [data-jd-filterform] / [data-jl-*] /
+   .jl-skel / .jl-table-wrap / .journal-empty / .jd2-pager-count / .pagination-wrapper.
+   Bu fayl jd2.css-dən SONRA yüklənir və siyahıya aid köhnə çip qaydalarını
+   (jd2-filter fokus halqası, navy başlıq) əvəz edir. */
+
+.jl-page { --jl-mono: var(--ems-ff-mono); }
+
+/* ── Başlıq ─────────────────────────────────────────────────────────────── */
+.jl-page .jd2-pagehead { display: flex; align-items: center; gap: var(--ems-sp-5); margin-bottom: var(--ems-sp-6); }
+.jl-page .jd2-mark {
+    width: 42px; height: 42px; border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-nav-active); font-size: var(--ems-fs-xl);
+}
+.jl-page .jd2-pagetitle { font-size: var(--ems-fs-2xl); font-weight: 800; letter-spacing: -0.2px; color: var(--ems-text); }
+.jl-page .jd2-pagesub { display: inline-flex; align-items: center; gap: var(--ems-sp-2); margin-top: 2px; font-size: var(--ems-fs-base); color: var(--ems-text-muted); font-weight: 600; }
+.jl-head-meta { margin-left: auto; display: flex; align-items: center; gap: var(--ems-sp-3); }
+.jl-count {
+    display: inline-flex; align-items: baseline; gap: 5px;
+    padding: 6px 12px; border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50); color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm); font-weight: 700; white-space: nowrap;
+}
+.jl-count b { font-size: var(--ems-fs-md); font-weight: 800; }
+
+/* Stepper — daha yüngül (kölgəsiz, tokenli) */
+.jl-page .jd2-stepper { border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-card); border-color: var(--ems-border); padding: 12px 16px; }
+.jl-page .jd2-step-no.is-active { background: var(--ems-primary-600); border-color: var(--ems-primary-600); box-shadow: none; }
+
+/* ── Süzgəc paneli ──────────────────────────────────────────────────────── */
+.jl-filters {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--ems-sp-4) var(--ems-sp-5);
+    padding: 14px 16px; margin-bottom: var(--ems-sp-6);
+    background: var(--ems-bg); border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-card);
+}
+.jl-f { display: flex; flex-direction: column; gap: 5px; min-width: 150px; flex: 0 1 auto; }
+.jl-f--xs { min-width: 128px; }
+.jl-f--grow { flex: 1 1 200px; min-width: 200px; }
+.jl-f__label {
+    font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+.jl-f__static {
+    display: inline-flex; align-items: center; min-height: var(--ems-h-field);
+    padding: 0 12px; border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle); border: 1px solid var(--ems-border);
+    font-size: var(--ems-fs-base); font-weight: 700; color: var(--ems-text);
+}
+.jl-f__static i { margin-right: 8px; color: var(--ems-neutral-400); }
+/* Axtarış inputu — ikon + nazik kontur, fokusda İKİNCİ (göy) halqa YOX. */
+.jl-search { position: relative; }
+.jl-search i {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--ems-neutral-400); font-size: var(--ems-fs-sm); pointer-events: none;
+}
+.jl-search .jd2-filter-search {
+    width: 100%; min-height: var(--ems-h-field); padding: 8px 12px 8px 34px;
+    border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg);
+    background: var(--ems-bg); color: var(--ems-text); font: inherit;
+    font-size: var(--ems-fs-base); font-weight: 500; min-width: 0;
+}
+.jl-search .jd2-filter-search::placeholder { color: var(--ems-neutral-400); font-weight: 500; }
+.jl-search .jd2-filter-search:hover { border-color: var(--ems-primary-300); }
+.jl-search .jd2-filter-search:focus,
+.jl-search .jd2-filter-search:focus-visible { outline: none; border-color: var(--ems-neutral-500); box-shadow: none; border-radius: var(--ems-r-lg); }
+/* Axtarışlı seçicilər (fakültə/kafedra/qrup/müəllim) — eyni hündürlük, eyni kontur. */
+.jl-filters .ems-ss { min-height: var(--ems-h-field); }
+.jl-filters .jl-ms { min-height: var(--ems-h-field); }
+/* Seçilmiş dəyər — rəng vurğusu ilə (hansı süzgəc aktivdir, dərhal görünsün). */
+.jl-f.is-set .bootstrap-single-select__toggle,
+.jl-f.is-set .ems-ss { border-color: var(--ems-primary-300); background: var(--ems-primary-50); }
+
+/* Dərs tipi seqmenti */
+.jl-seg {
+    display: inline-flex; align-items: center; gap: 2px; padding: 3px;
+    min-height: var(--ems-h-field); box-sizing: border-box;
+    background: var(--ems-neutral-100); border-radius: var(--ems-r-lg);
+}
+.jl-seg .jd2-kindpill {
+    border: none; background: transparent; cursor: pointer; font-family: inherit;
+    padding: 0 12px; height: calc(var(--ems-h-field) - 6px); border-radius: var(--ems-r-md);
+    font-size: var(--ems-fs-base); font-weight: 700; color: var(--ems-neutral-600);
+    transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+.jl-seg .jd2-kindpill:hover { color: var(--ems-text); }
+.jl-seg .jd2-kindpill.is-active { background: var(--ems-bg); color: var(--ems-primary-700); box-shadow: var(--ems-sh-card); }
+.jl-seg .jd2-kindpill:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: -2px; }
+
+.jl-filters .jd2-filter-reset {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-field);
+    padding: 0 12px; border-radius: var(--ems-r-lg); text-decoration: none;
+    font-size: var(--ems-fs-base); font-weight: 700; color: var(--ems-neutral-600);
+    border: 1px dashed var(--ems-neutral-300); background: transparent;
+}
+.jl-filters .jd2-filter-reset:hover { color: var(--ems-danger-700); border-color: var(--ems-danger-200); background: var(--ems-danger-100); }
+
+/* ── Cədvəl kartı ───────────────────────────────────────────────────────── */
+.jl-page .jl-table-wrap {
+    overflow-x: auto; border-radius: var(--ems-r-2xl);
+    border: 1px solid var(--ems-border); background: var(--ems-bg); box-shadow: var(--ems-sh-card);
+}
+.jl-page .jl-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 720px; }
+.jl-page .jl-table thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: var(--ems-bg-subtle); color: var(--ems-neutral-500);
+    text-align: left; padding: 11px 14px;
+    font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+    border-bottom: 1px solid var(--ems-border);
+}
+.jl-page .jl-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--ems-neutral-100); vertical-align: middle; }
+.jl-page .jl-table tbody tr:last-child td { border-bottom: none; }
+.jl-page .jl-table tbody tr.jl-row { transition: background-color 0.12s ease; }
+.jl-page .jl-table tbody tr.jl-row:hover { background: var(--ems-primary-50); }
+.jl-page .jl-col-no { width: 52px; color: var(--ems-neutral-400); font-weight: 700; font-size: var(--ems-fs-sm); }
+.jl-page .jl-group-line { display: flex; align-items: center; gap: var(--ems-sp-3); flex-wrap: wrap; }
+.jl-page .jl-group {
+    display: inline-flex; align-items: center; min-height: var(--ems-h-chip); padding: 0 9px;
+    border-radius: var(--ems-r-sm); background: var(--ems-primary-50); color: var(--ems-primary-700);
+    font-family: var(--jl-mono); font-size: var(--ems-fs-sm); font-weight: 700; letter-spacing: 0.01em;
+}
+.jl-page .jl-row:hover .jl-group { background: var(--ems-primary-100); color: var(--ems-primary-800); }
+.jl-subject { font-size: var(--ems-fs-md); font-weight: 700; color: var(--ems-text); }
+.jl-page .jl-subject-sub { display: flex; align-items: center; gap: var(--ems-sp-2); margin-top: 3px; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); font-weight: 600; }
+.jl-code { font-family: var(--jl-mono); color: var(--ems-neutral-500); font-weight: 600; }
+.jl-teacher { color: var(--ems-neutral-500); }
+.jl-page .jl-col-kind { width: 170px; }
+.jl-kind {
+    display: inline-flex; align-items: center; min-height: var(--ems-h-chip); padding: 0 9px;
+    border-radius: var(--ems-r-pill); background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm); font-weight: 700; white-space: nowrap;
+}
+.jl-kind--none { color: var(--ems-neutral-400); background: transparent; padding: 0; }
+.jl-page .jl-col-count { width: 120px; text-align: center; }
+.jl-students {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); padding: 0 10px;
+    border-radius: var(--ems-r-pill); background: var(--ems-emerald-50); color: var(--ems-success-700);
+    font-size: var(--ems-fs-base); font-weight: 800;
+}
+.jl-students i { font-size: var(--ems-fs-2xs); }
+.jl-students--zero { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.jl-page .jl-col-action { width: 150px; text-align: right; }
+.jl-page .jl-open-btn {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-xs);
+    padding: 0 14px; border-radius: var(--ems-r-lg); text-decoration: none; white-space: nowrap;
+    border: 1px solid var(--ems-neutral-300); background: var(--ems-bg); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base); font-weight: 700;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.jl-page .jl-row:hover .jl-open-btn,
+.jl-page .jl-open-btn:hover { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.jl-page .jl-open-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+.jl-page .jl-badge--master { background: var(--ems-sky-100); color: var(--ems-sky-800); }
+
+.jl-page .jd2-list-hint { margin: var(--ems-sp-4) 2px 0; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); font-weight: 600; }
+.jl-page .jd2-pager-count { color: var(--ems-text-muted); }
+.jl-page .journal-empty { padding: 0; }
+
+/* Skeleton — real sətirlə eyni hündürlük (jd2 qaydaları qorunur, rəng tokenlidir) */
+.jl-page .jl-skel-note { color: var(--ems-text-muted); }
+.jl-page .jl-skel-note i { color: var(--ems-primary-600); }
+
+/* ── Kiçik ekran ────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+    .jl-filters { padding: 12px; }
+    .jl-f, .jl-f--grow, .jl-f--xs { flex: 1 1 100%; min-width: 0; }
+    .jl-seg { width: 100%; }
+    .jl-seg .jd2-kindpill { flex: 1; padding: 0 6px; }
+    .jl-head-meta { margin-left: 0; }
+    .jl-page .jd2-pagehead { flex-wrap: wrap; }
+}
