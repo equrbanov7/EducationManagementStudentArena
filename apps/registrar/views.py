@@ -19,7 +19,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
+from . import campus, finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
@@ -236,10 +236,10 @@ def journal_detail(request, offering_id):
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
         "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),
-        # Dərs otağı: korpus (bina) → otaq kaskadı. Korpus ayrıca model deyil,
-        # otağın öz sahəsidir; siyahı kiçik olduğu üçün modala JSON kimi düşür.
+        # Dərs otağı: korpus → otaq kaskadı (korpus = otağın sahəsi); defolt korpus — campus.py.
         "lesson_rooms": rooms,
         "lesson_buildings": lesson_rooms.lesson_building_choices(rooms),
+        "lesson_default_building": campus.default_building_for_offering(offering),
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst

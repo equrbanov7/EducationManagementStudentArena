@@ -163,9 +163,9 @@ def journal_list_context(user, request=None) -> dict:
         if selected_kind not in dict(SlotKind.choices):
             selected_kind = ""
 
-    # Avto-seçim YALNIZ müəllim görünüşü üçün: cari semestr (il + fəsil). Korrektor
-    # (geniş) görünüşdə avto-seçim YOX — İKT/admin DEFAULT bütün jurnalları görsün.
-    if not is_broad and not explicit_filter and periods:
+    # Avto-seçim: cari semestr — HƏR görünüşdə (sahib 2026-09-20); əvvəl geniş
+    # görünüş default «Hamısı» açırdı. Boş `?year=` açıq seçimdir (explicit_filter).
+    if not explicit_filter and periods:
         current = _current_semester(periods)
         if current is not None:
             selected_year = current.academic_year
@@ -238,11 +238,10 @@ def journal_list_context(user, request=None) -> dict:
             return label
         return jlq.label_for_selection(kind, val)
 
-    # "Sıfırla" düyməsi yalnız bir filtr aktivdirsə göstərilir.
+    # "Sıfırla" yalnız istifadəçi filtri varsa (avto-seçilmiş cari semestr default-dur).
     has_filters = any(
         [
-            selected_year,
-            selected_season,
+            explicit_filter,
             selected_kind,
             selected_teacher,
             selected_group,

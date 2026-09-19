@@ -122,11 +122,25 @@
         });
     }
 
-    /** Redaktədə: otağın korpusunu tapıb əvvəlcə onu, sonra otağı seç. */
+    /** Korpus seçimində mövcud olan defolt (yoxdursa boş). */
+    function defaultBuilding(modal) {
+        var wanted = (modal.dataset.defaultBuilding || "").trim();
+        var sel = buildingSelect(modal);
+        if (!wanted || !sel) return "";
+        for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === wanted) return wanted;
+        }
+        return "";
+    }
+
+    /** Redaktədə: otağın korpusunu tapıb əvvəlcə onu, sonra otağı seç.
+     *  Əlavə rejimində (otaq yoxdur): qrupun ixtisasına görə korpus defoltu
+     *  (`data-default-building`, sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
     function apply(modal, roomId) {
         var room = roomById(roomId || "");
-        setSelectValue(buildingSelect(modal), room ? room.building : "");
-        renderOptions(modal, room ? room.building : "", roomId || "", setSelectValue);
+        var building = room ? room.building : defaultBuilding(modal);
+        setSelectValue(buildingSelect(modal), building);
+        renderOptions(modal, building, roomId || "", setSelectValue);
     }
 
     document.addEventListener("jd:lesson-modal-open", function (event) {
