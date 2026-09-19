@@ -103,7 +103,17 @@
             sel.appendChild(opt);
             if (room.id === keepId) found = true;
         });
+        // ⚠️ Native <option>-lar dəyişdi — `data-bootstrap-select` vidceti menyunu
+        // YALNIZ ilkin qurulanda oxuyur; `refresh` olmasa müəllim korpus seçəndə
+        // otaq siyahısı boş qalırdı (sahib şikayəti 2026-09-20).
+        refreshWidget(sel);
         setSelectValue(sel, found ? keepId : "");
+    }
+
+    function refreshWidget(select) {
+        if (select && window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
+            window.EMSBootstrapSelect.refresh(select);
+        }
     }
 
     /** Dəyəri qoy + `data-bootstrap-select` vidcetini sinxronla. */
