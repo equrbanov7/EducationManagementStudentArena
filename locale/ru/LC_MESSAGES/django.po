@@ -75767,3 +75767,16 @@ msgid ""
 msgstr ""
 "Корпус «%(building)s» выбран по специальности группы — его можно изменить; "
 "аудитории фильтруются по корпусу. Аудитория необязательна."
+
+msgctxt "registrar.journal"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Изменения не сохранены"
+
+msgctxt "registrar.journal"
+msgid "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."
+msgstr ""
+"В форме есть неприменённые изменения. Если закрыть, они будут потеряны."
+
+msgctxt "registrar.journal"
+msgid "Bağla, itsin"
+msgstr "Закрыть и отменить"
